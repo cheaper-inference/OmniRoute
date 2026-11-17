@@ -53,6 +53,10 @@ interface PromoteComboDeps {
   warn?: (tag: string, msg: string) => void;
 }
 
+function isOperatorOrderedCombo(combo: { strategy?: unknown }): boolean {
+  return typeof combo.strategy === "string" && combo.strategy.trim().toLowerCase() === "jev";
+}
+
 /**
  * Persist the auto-promotion of a successful combo model to position #1.
  *
@@ -62,12 +66,14 @@ interface PromoteComboDeps {
  * / absent. `updateCombo` is injected so this stays unit-testable without a DB.
  */
 export async function promoteSuccessfulComboModel(
-  combo: { id?: unknown; name?: unknown; models?: unknown } | null | undefined,
+  combo: { id?: unknown; name?: unknown; models?: unknown; strategy?: unknown } | null | undefined,
   winningModel: string | null | undefined,
   settings: Record<string, unknown> | null | undefined,
   deps: PromoteComboDeps
 ): Promise<boolean> {
   if (!combo || !settings || !settings.comboAutoPromoteEnabled) return false;
+  // #15276: jev preference order is authored by the operator — never rewrite it.
+  if (isOperatorOrderedCombo(combo)) return false;
   const comboId = typeof combo.id === "string" ? combo.id : null;
   if (!comboId) return false;
   const reordered = promoteModelToFront(

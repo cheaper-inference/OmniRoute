@@ -83,3 +83,79 @@ test("PUT with overrideAllowedProviders on a combo with an EXISTING restriction 
   const stored = (await combosDb.getComboById(combo.id)) as { allowedProviders?: string[] };
   assert.deepEqual([...(stored.allowedProviders ?? [])].sort(), ["claude", "openai"]);
 });
+
+test("PUT persists capability routes and widens an existing provider restriction from their targets", async () => {
+  const combo = await combosDb.createCombo({
+    name: "restricted-capability-combo",
+    strategy: "priority",
+    allowedProviders: ["claude"],
+    models: [{ provider: "claude", model: "claude-sonnet-5" }],
+  });
+  assert.ok(combo?.id);
+
+  const response = await comboRoute.PUT(
+    put(combo.id, {
+      routes: {
+        search: {
+          strategy: "round-robin",
+          models: [{ providerId: "tavily-search", model: "web" }],
+        },
+      },
+      overrideAllowedProviders: true,
+    }),
+    { params: Promise.resolve({ id: combo.id }) }
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+
+  const stored = (await combosDb.getComboById(combo.id)) as {
+    allowedProviders?: string[];
+    routes?: { search?: { strategy?: string; models?: Array<{ providerId?: string }> } };
+  };
+  assert.deepEqual([...(stored.allowedProviders ?? [])].sort(), ["claude", "tavily-search"]);
+  assert.equal(stored.routes?.search?.strategy, "round-robin");
+  assert.equal(stored.routes?.search?.models?.[0]?.providerId, "tavily-search");
+});
+
+test("PUT keeps an existing routes.chat mirror synchronized with top-level Chat updates", async () => {
+  const combo = await combosDb.createCombo({
+    name: "chat-sync-combo",
+    strategy: "priority",
+    config: { maxRetries: 1 },
+    models: [{ provider: "openai", model: "gpt-4o" }],
+    routes: {
+      chat: {
+        strategy: "priority",
+        config: { maxRetries: 1 },
+        models: [{ provider: "openai", model: "gpt-4o" }],
+      },
+      music: {
+        strategy: "priority",
+        models: [{ provider: "elevenlabs", model: "music_v1" }],
+      },
+    },
+  });
+  assert.ok(combo?.id);
+
+  const response = await comboRoute.PUT(
+    put(combo.id, {
+      strategy: "round-robin",
+      config: { maxRetries: 2 },
+      models: [{ provider: "openai", model: "gpt-4o-mini" }],
+    }),
+    { params: Promise.resolve({ id: combo.id }) }
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+
+  const stored = (await combosDb.getComboById(combo.id)) as {
+    models?: Array<{ model?: string }>;
+    routes?: Record<
+      string,
+      { strategy?: string; config?: { maxRetries?: number }; models?: Array<{ model?: string }> }
+    >;
+  };
+  assert.equal(stored.models?.[0]?.model, "openai/gpt-4o-mini");
+  assert.equal(stored.routes?.chat?.models?.[0]?.model, "openai/gpt-4o-mini");
+  assert.equal(stored.routes?.chat?.strategy, "round-robin");
+  assert.equal(stored.routes?.chat?.config?.maxRetries, 2);
+  assert.equal(stored.routes?.music?.models?.[0]?.model, "music_v1");
+});

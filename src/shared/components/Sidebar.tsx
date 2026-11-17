@@ -21,6 +21,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -523,10 +524,8 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         )}
       </>
     );
-    const linkClassName = cn(showPin && "pe-8");
-
     return (
-      <SidebarMenuItem key={itemKey} className="group/nav-item relative">
+      <SidebarMenuItem key={itemKey}>
         <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
           {item.external ? (
             <a
@@ -535,28 +534,20 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
               rel="noopener noreferrer"
               aria-label={item.label}
               title={title}
-              className={linkClassName}
             >
               {content}
             </a>
           ) : (
-            <Link
-              href={item.href}
-              prefetch={false}
-              aria-label={item.label}
-              title={title}
-              className={linkClassName}
-            >
+            <Link href={item.href} prefetch={false} aria-label={item.label} title={title}>
               {content}
             </Link>
           )}
         </SidebarMenuButton>
         {showPin && (
-          // kit-exception: Native button on kit tokens (track F): the pin overlays the kit SidebarMenuButton
-          // (absolute, hover-revealed). The kit SidebarMenuAction pins itself with a physical `right`
-          // while padding the row with `padding-inline-end`, so in RTL it lands on the wrong side.
-          <button
-            type="button"
+          // The kit action places itself at the row's inline end (RTL-safe), pads the row for it
+          // and takes the active row's ink. A pin that is off shows on row hover or focus only.
+          <SidebarMenuAction
+            showOnHover={!isItemPinned}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -564,18 +555,9 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
             }}
             title={isItemPinned ? t("unpinItem") : t("pinItem")}
             aria-label={isItemPinned ? t("unpinItem") : t("pinItem")}
-            className={cn(
-              "absolute end-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-control transition-opacity focus-visible:opacity-100",
-              active
-                ? "text-accent-foreground"
-                : isItemPinned
-                  ? "text-text-main"
-                  : "text-text-muted",
-              !isItemPinned && "opacity-0 group-hover/nav-item:opacity-100"
-            )}
           >
             <Icon name="push_pin" size={13} fill={isItemPinned} />
-          </button>
+          </SidebarMenuAction>
         )}
       </SidebarMenuItem>
     );
@@ -829,7 +811,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
           is that edge in LTR; under dir=rtl globals.css mirrors it to `inset-inline-end: 0` (the
           aside's left = content edge, the aside itself kept on the right by DashboardShell's
           `rtl:order-none`). */}
-      <SidebarRail className="right-0" />
+      <SidebarRail className="right-0" aria-label={t("toggleSidebar")} title={t("toggleSidebar")} />
 
       <ConfirmModal
         isOpen={showShutdownModal}

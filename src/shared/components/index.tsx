@@ -1,5 +1,6 @@
 // Shared Components - Export all
 export { default as Button } from "./Button";
+export { default as GuardedAction } from "./GuardedAction";
 export { default as Icon } from "./Icon";
 export { default as Input } from "./Input";
 export { default as Select } from "./Select";
@@ -33,7 +34,7 @@ export { default as KiroOAuthWrapper } from "./KiroOAuthWrapper";
 export { default as KiroSocialOAuthModal } from "./KiroSocialOAuthModal";
 export { default as CursorAuthModal } from "./CursorAuthModal";
 export { default as TraeAuthModal } from "./TraeAuthModal";
-export { default as SegmentedControl } from "./SegmentedControl";
+export { default as SegmentedControl, SegmentedPanel, SegmentedTabs } from "./SegmentedControl";
 export { default as FilterPills } from "./FilterPills";
 export { default as ActionBar } from "./ActionBar";
 export { default as ReorderControl } from "./ReorderControl";

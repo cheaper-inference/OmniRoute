@@ -2,11 +2,12 @@
 // docs/diagrams/ is committed and byte-compared by tests/unit/docs/readme-<name>-svg.test.ts,
 // so a stale picture fails `test-unit`; after touching a generator, a shared module
 // (readme-fonts.mjs, readme-outline.mjs, readme-diagram-theme.mjs) or the data a generator reads (the free-tier
-// catalog, provider display names), run this and commit the SVGs it rewrites.
+// catalog, provider display names), run this and commit the SVGs it rewrites. The derived numbers
+// (and the free-tier card's rows) come from the facts snapshot docs/reference/derived-facts.json,
+// which only `npm run release:refresh-derived` rewrites — that script also re-runs this list.
 //
 //   npm run docs:readme-diagrams
-//   (node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs — tsx because
-//    gen-readme-free-tier-budget.mjs imports open-sse/config/freeModelCatalog.ts)
+//   (no generator imports TypeScript any more; tsx in that npm script is harmless)
 //
 // Output paths are resolved from the repository root, so the command works from any cwd.
 // A generator that throws stops the run with a non-zero exit; the files already written stay

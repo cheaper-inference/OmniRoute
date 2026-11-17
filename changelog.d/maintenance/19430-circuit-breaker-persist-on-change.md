@@ -1,0 +1,1 @@
+- **perf(circuit-breaker):** the circuit breaker row is written to SQLite only when its content changes, not on every request, so healthy traffic no longer does three synchronous writes per request. ([#19430](https://github.com/cheaper-inference/OmniRoute/pull/19430))

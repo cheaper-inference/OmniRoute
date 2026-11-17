@@ -1,0 +1,1 @@
+- **fix(logs):** Call log details are no longer written when the data volume has less than 512 MB free (`CALL_LOG_MIN_FREE_DISK_MB`, `0` turns the check off). The row shows `missing` detail, so artifacts cannot take the last bytes that the usage ledger and call log rows need. ([#19463](https://github.com/cheaper-inference/OmniRoute/pull/19463))

@@ -963,7 +963,7 @@ export default function EditConnectionModal({
               onChange={(e) => setFormData({ ...formData, cloudCodeProjectId: e.target.value })}
               placeholder={t("antigravityProjectIdPlaceholder")}
               hint={t("antigravityProjectIdHint")}
-              className="font-mono text-xs"
+              inputClassName="text-xs"
             />
           </div>
         )}
@@ -1140,7 +1140,7 @@ export default function EditConnectionModal({
                       </div>
                     )}
                     {doctorStatus.lastError && (
-                      <div className="col-span-2 break-words text-danger">
+                      <div className="col-span-2 break-words text-error">
                         Letzter Fehler: {String(doctorStatus.lastError)}
                       </div>
                     )}
@@ -1542,12 +1542,7 @@ export default function EditConnectionModal({
                 </span>
               </p>
               {extraApiKeys.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setExtraApiKeys([])}
-                  className="text-error hover:text-error"
-                >
+                <Button variant="destructive-ghost" size="sm" onClick={() => setExtraApiKeys([])}>
                   {t("deleteAllExtraApiKeys")}
                 </Button>
               )}
@@ -1602,11 +1597,10 @@ export default function EditConnectionModal({
                           </span>
                         )}
                         <Button
-                          variant="ghost"
+                          variant="destructive-ghost"
                           size="icon-sm"
                           icon="close"
                           onClick={() => setExtraApiKeys(extraApiKeys.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error"
                           title={t("removeThisKey")}
                           aria-label={t("removeThisKey")}
                         />
