@@ -1,0 +1,1 @@
+- Run request-blocking plugin hooks on every call, so a hook that denies or rewrites a request still applies above the per-plugin rate limit, which now covers fire-and-forget hooks only.

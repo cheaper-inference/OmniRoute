@@ -2,7 +2,7 @@
 /**
  * Issue #11459 / PR #11460 — the costs dashboard opts into flat-rate estimate
  * mode (`includeFlatRateEstimates=true`) while every cost label on the page
- * still asserts actual billed money ("Spend Today", "Total Cost," in the CSV,
+ * still asserts actual billed money ("Spend 1D", "Total Cost," in the CSV,
  * the month-end projection). A flat-rate subscription that renders $0 in
  * billed-cost mode renders a token-price estimate here, with no disclosure.
  *
@@ -171,7 +171,7 @@ describe("costs dashboard — flat-rate estimate disclosure (#11459)", () => {
     await renderWith(buildPayload({ includesFlatRateEstimates: true }));
 
     const text = container.textContent || "";
-    expect(text).toMatch(/Spend Today/);
+    expect(text).toMatch(/Spend 1D/);
     expect(
       DISCLOSURE_RE.test(text),
       "costs page must disclose that displayed cost includes flat-rate estimates"
@@ -207,7 +207,7 @@ describe("costs dashboard — flat-rate estimate disclosure (#11459)", () => {
     await renderWith(buildPayload());
 
     const text = container.textContent || "";
-    expect(text).toMatch(/Spend Today/);
+    expect(text).toMatch(/Spend 1D/);
     expect(
       DISCLOSURE_RE.test(text),
       "billed-cost mode must not claim the numbers are estimates"
@@ -251,9 +251,7 @@ describe("costs dashboard — spend headlines on the kit MetricCard (#19066)", (
     );
     expect(container.querySelectorAll(".ci-metric-card").length).toBeGreaterThanOrEqual(4);
     // formatCurrencyCost precision: 6 digits under $0.01, 4 under $1, 2 above.
-    expect(spendCard("Spend Today").querySelector(".ci-stat__value")?.textContent).toBe(
-      "$0.004200"
-    );
+    expect(spendCard("Spend 1D").querySelector(".ci-stat__value")?.textContent).toBe("$0.004200");
     expect(spendCard("Spend 7D").querySelector(".ci-stat__value")?.textContent).toBe("$0.5000");
     expect(spendCard("Spend 30D").querySelector(".ci-stat__value")?.textContent).toBe("$30.00");
     const selected = spendCard("Selected Window");
@@ -263,7 +261,7 @@ describe("costs dashboard — spend headlines on the kit MetricCard (#19066)", (
 
   it("keeps each headline's chart colour through the text-safe -ink token", async () => {
     await renderWith(buildPayload());
-    const inks = ["Spend Today", "Spend 7D", "Spend 30D", "Selected Window"].map(
+    const inks = ["Spend 1D", "Spend 7D", "Spend 30D", "Selected Window"].map(
       (label) => spendCard(label).querySelector(".ci-stat")?.className ?? ""
     );
     expect(inks[0]).toContain("text-chart-4-ink");

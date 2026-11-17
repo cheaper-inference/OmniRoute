@@ -86,7 +86,7 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
             <Icon name="key" size={20} />
           </div>
           <div>
-            <h3 className="font-medium text-sm">{t("apiKey")}</h3>
+            <h3 className="text-sm">{t("apiKey")}</h3>
             <p className="text-xs text-text-muted">{t("apiKeyDescription", { name: label })}</p>
           </div>
         </div>
@@ -138,7 +138,7 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
           </Button>
         </div>
 
-        {plainKey && <p className="mt-2 text-[11px] text-text-muted">{t("keyAutoHide")}</p>}
+        {plainKey && <p className="mt-2 text-xs text-text-muted">{t("keyAutoHide")}</p>}
       </Card>
 
       {showReveal && (

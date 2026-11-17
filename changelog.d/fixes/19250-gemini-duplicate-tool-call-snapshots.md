@@ -1,0 +1,1 @@
+- **fix(sse):** repeated Gemini/Antigravity function-call snapshots are emitted once instead of as extra `tool_calls` entries, so clients that concatenate per-index arguments no longer reassemble a duplicated JSON prefix and receive a corrupted tool call ([#19250](https://github.com/cheaper-inference/OmniRoute/pull/19250)) — thanks @trespassmk

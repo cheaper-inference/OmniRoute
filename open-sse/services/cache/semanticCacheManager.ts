@@ -92,6 +92,54 @@ function getHeader(headers: unknown, name: string): string | null {
   return null;
 }
 
+type ToolCallCarrier = {
+  choices?: Array<{ message?: Record<string, unknown>; delta?: Record<string, unknown> } | null>;
+  content?: Array<{ type?: unknown } | null>;
+  output?: Array<{ type?: unknown } | null>;
+  candidates?: Array<{
+    content?: { parts?: Array<{ functionCall?: unknown } | null> } | null;
+  } | null>;
+  type?: unknown;
+  content_block?: { type?: unknown } | null;
+  item?: { type?: unknown } | null;
+};
+
+function isToolItem(item: { type?: unknown } | null | undefined): boolean {
+  return item?.type === "function_call" || item?.type === "custom_tool_call";
+}
+
+/** Gemini `functionCall` parts, Claude `tool_use` start event, Responses item events. */
+function carriesStreamOrGeminiToolCall(r: ToolCallCarrier): boolean {
+  const fromCandidates = (Array.isArray(r.candidates) ? r.candidates : []).some((c) =>
+    (Array.isArray(c?.content?.parts) ? c.content.parts : []).some((p) => !!p?.functionCall)
+  );
+  const fromClaudeEvent = r.type === "content_block_start" && r.content_block?.type === "tool_use";
+  const fromResponsesEvent =
+    (r.type === "response.output_item.added" || r.type === "response.output_item.done") &&
+    isToolItem(r.item);
+  return fromCandidates || fromClaudeEvent || fromResponsesEvent;
+}
+
+/**
+ * True when a response (or one stream chunk) carries client-visible tool calls: OpenAI
+ * `tool_calls` / `function_call`, Claude `tool_use` (block or stream start event), Gemini
+ * `functionCall` parts, Responses `function_call` items (body or stream item event).
+ * Replaying one from cache would hand back a stale argument list.
+ */
+function carriesToolCalls(response: unknown): boolean {
+  const r = response as ToolCallCarrier | null;
+  if (!r || typeof r !== "object") return false;
+  const fromChoices = (Array.isArray(r.choices) ? r.choices : []).some((c) => {
+    const m = c?.message ?? c?.delta;
+    return (Array.isArray(m?.tool_calls) && m.tool_calls.length > 0) || !!m?.function_call;
+  });
+  const fromBlocks = (Array.isArray(r.content) ? r.content : []).some(
+    (b) => b?.type === "tool_use"
+  );
+  const fromOutput = (Array.isArray(r.output) ? r.output : []).some(isToolItem);
+  return fromChoices || fromBlocks || fromOutput || carriesStreamOrGeminiToolCall(r);
+}
+
 function stringifyValue(val: unknown): string {
   if (typeof val === "string") return val;
   try {
@@ -254,11 +302,13 @@ export class SemanticCacheManager {
       getHeader(params.headers, "x-omniroute-cache-type") || "both"
     ).toLowerCase() as SemanticCacheType;
 
+    // The header may only tighten matching: a lower value would let any caller probe the
+    // nearest cached entry, so the configured threshold is a floor.
     const thresholdHeader = getHeader(params.headers, "x-omniroute-cache-threshold");
-    const threshold =
-      thresholdHeader !== null && Number.isFinite(Number(thresholdHeader))
-        ? Math.max(0, Math.min(1, Number(thresholdHeader)))
-        : this.config.similarityThreshold;
+    const requested = thresholdHeader !== null ? Number(thresholdHeader) : NaN;
+    const threshold = Number.isFinite(requested)
+      ? Math.max(this.config.similarityThreshold, Math.min(1, requested))
+      : this.config.similarityThreshold;
 
     const conv = params.body.messages ?? params.body.input;
     const temp = typeof params.body.temperature === "number" ? params.body.temperature : 0;
@@ -376,6 +426,8 @@ export class SemanticCacheManager {
     if (noStore && noStore.toLowerCase() === "true") return;
 
     if (this.isBypassed(params.headers, params.body)) return;
+
+    if (carriesToolCalls(params.response) || params.streamChunks?.some(carriesToolCalls)) return;
 
     const cacheKey = getHeader(params.headers, "x-omniroute-cache-key");
     const conv = params.body.messages ?? params.body.input;

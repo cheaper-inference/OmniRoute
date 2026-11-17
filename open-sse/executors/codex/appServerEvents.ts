@@ -165,6 +165,26 @@ function translateFailure(
 ): boolean {
   // Codex retries transient errors itself; output and turn/completed follow.
   if (method === CODEX_APPSERVER_METHODS.error && params.willRetry === true) return false;
+
+  const errObj =
+    params.error && typeof params.error === "object"
+      ? (params.error as Record<string, unknown>)
+      : undefined;
+  const isUsageLimit =
+    errObj?.codexErrorInfo === "usageLimitExceeded" ||
+    params.codexErrorInfo === "usageLimitExceeded";
+
+  if (isUsageLimit) {
+    push({
+      type: "error",
+      message: sanitizeErrorMessage(errorMessage(params)),
+      status: 429,
+      errorType: "rate_limit_error",
+      code: "codex_app_server_usage_limit",
+    });
+    return true;
+  }
+
   push({
     type: "error",
     message: sanitizeErrorMessage(

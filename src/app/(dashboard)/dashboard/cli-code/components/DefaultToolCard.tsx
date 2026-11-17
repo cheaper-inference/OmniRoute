@@ -716,7 +716,7 @@ export default function DefaultToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="text-sm">{tool.name}</h3>
               {(() => {
                 // Use runtime status if available (after expanding), otherwise use batch status
                 const rs = runtimeStatus;
