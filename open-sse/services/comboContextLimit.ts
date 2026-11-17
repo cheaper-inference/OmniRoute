@@ -3,7 +3,8 @@
 // home; contextManager re-exports it for existing importers.
 import { resolveTokenLimit } from "./contextManager.ts";
 
-export type ComboContextLimitSource = "combo-explicit" | "target" | "combo-min" | "fallback";
+export type ComboContextLimitSource =
+  "combo-explicit" | "combo-explicit-capped" | "target" | "combo-min" | "fallback";
 
 /**
  * Resolve the context limit to use for a COMBO request.
@@ -11,13 +12,19 @@ export type ComboContextLimitSource = "combo-explicit" | "target" | "combo-min" 
  * Precedence:
  * 1. `comboContextLength` — an operator-set `context_length` on the combo
  *    record (Agent Features → Context length). It is an explicit declaration of
- *    the window this combo runs at, so it outranks every inferred value,
- *    including a target's own registry/catalog window. The combo editor
+ *    the window this combo runs at, so it outranks every inferred value
+ *    (provider defaults, name heuristics, sibling minimums). The combo editor
  *    persisted this field and `/v1/models` advertised it, but nothing consulted
  *    it at request time — so a combo whose members carry no per-model window
  *    fell through to the provider's generic `defaultContextLength` (openrouter
  *    128000, command-code 200000) and rejected large requests the operator had
  *    explicitly sized for.
+ *    It is capped at `targetContextWindow`, the executing model's own catalog or
+ *    `model_context_overrides` window, when that window is known and smaller: a
+ *    combo cannot give a request more room than the model that serves it. The
+ *    input gate already stopped at that window; without the cap the output room
+ *    was still sized against the combo's larger value, so `max_tokens` was not
+ *    trimmed and input plus `max_tokens` could exceed the model's window.
  * 2. The executing target's own specific window. chatCore always executes with
  *    the CONCRETE target's provider/model (handleSingleModel resolves the target
  *    before delegating), so that window is authoritative. An unconditional
@@ -34,9 +41,20 @@ export function resolveComboContextLimit(options: {
   model: string | null;
   comboTargetLimits: number[];
   comboContextLength?: number | null;
+  /** The executing model's own window (catalog or context override); null when unknown. */
+  targetContextWindow?: number | null;
 }): { limit: number; source: ComboContextLimitSource } {
   const explicit = options.comboContextLength;
   if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) {
+    const modelWindow = options.targetContextWindow;
+    if (
+      typeof modelWindow === "number" &&
+      Number.isFinite(modelWindow) &&
+      modelWindow > 0 &&
+      modelWindow < explicit
+    ) {
+      return { limit: modelWindow, source: "combo-explicit-capped" };
+    }
     return { limit: explicit, source: "combo-explicit" };
   }
   const own = resolveTokenLimit(options.provider, options.model ?? null);

@@ -13,9 +13,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { resolveComboContextLimit } = await import(
-  "../../open-sse/services/contextManager.ts"
-);
+const { resolveComboContextLimit } = await import("../../open-sse/services/contextManager.ts");
 
 test("explicit combo context_length wins over an unknown provider/model fallback", () => {
   // openrouter/<custom alias> has no per-model window → resolveTokenLimit()
@@ -90,5 +88,48 @@ for (const value of INVALID_EXPLICIT_VALUES) {
 
     assert.notEqual(resolved.source, "combo-explicit");
     assert.equal(resolved.limit, 640000);
+  });
+}
+
+test("explicit combo context_length is capped at the executing target's smaller window", () => {
+  // The combo declares 1M, but codex/gpt-6.1-sol has 872k. A combo cannot give a
+  // request more room than the model it routes to.
+  const resolved = resolveComboContextLimit({
+    provider: "codex",
+    model: "gpt-6.1-sol",
+    comboTargetLimits: [872000, 1000000],
+    comboContextLength: 1_000_000,
+    targetContextWindow: 872_000,
+  });
+
+  assert.equal(resolved.limit, 872_000);
+  assert.equal(resolved.source, "combo-explicit-capped");
+});
+
+test("explicit combo context_length below the target window still wins", () => {
+  const resolved = resolveComboContextLimit({
+    provider: "kiro",
+    model: "claude-opus-5.5",
+    comboTargetLimits: [1_000_000],
+    comboContextLength: 200_000,
+    targetContextWindow: 1_000_000,
+  });
+
+  assert.equal(resolved.limit, 200_000);
+  assert.equal(resolved.source, "combo-explicit");
+});
+
+for (const value of [null, undefined, 0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+  test(`unknown target window (${String(value)}) keeps the explicit combo context_length`, () => {
+    const resolved = resolveComboContextLimit({
+      provider: "openrouter",
+      model: "zdr-glm-5.3-flash-max",
+      comboTargetLimits: [],
+      comboContextLength: 960_000,
+      targetContextWindow: value as number | null,
+    });
+
+    assert.equal(resolved.limit, 960_000);
+    assert.equal(resolved.source, "combo-explicit");
   });
 }
