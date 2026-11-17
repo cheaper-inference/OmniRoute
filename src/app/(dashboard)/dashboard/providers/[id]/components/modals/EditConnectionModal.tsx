@@ -963,7 +963,7 @@ export default function EditConnectionModal({
               onChange={(e) => setFormData({ ...formData, cloudCodeProjectId: e.target.value })}
               placeholder={t("antigravityProjectIdPlaceholder")}
               hint={t("antigravityProjectIdHint")}
-              className="font-mono text-xs"
+              inputClassName="text-xs"
             />
           </div>
         )}
@@ -1140,7 +1140,7 @@ export default function EditConnectionModal({
                       </div>
                     )}
                     {doctorStatus.lastError && (
-                      <div className="col-span-2 break-words text-danger">
+                      <div className="col-span-2 break-words text-error">
                         Letzter Fehler: {String(doctorStatus.lastError)}
                       </div>
                     )}

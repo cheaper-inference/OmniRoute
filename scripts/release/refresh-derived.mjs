@@ -29,6 +29,10 @@
 //   skills             skills/*/SKILL.md (scripts/skills/generate-agent-skills.mjs)
 //   ui-keys            missing UI + CLI locale keys (scripts/i18n/sync-ui-keys.mjs)
 //   llm-mirrors        docs/i18n/*/llm.txt copies of llm.txt (scripts/i18n/sync-llm-mirrors.mjs)
+//   verify-generated   after a write, every generated artifact must equal its generator:
+//                      check:generated-artifacts (README SVGs, e2e-timings.json) and
+//                      check:agent-skills-sync (generated SKILL.md), both --mode=release.
+//                      Skipped in --check (nothing was written) and when --only leaves it out.
 //
 // --check writes nothing: every step computes its result against an in-memory overlay, so a
 // later step sees what an earlier one would have written. --profile=nightly never touches the
@@ -40,7 +44,8 @@
 //
 // Exit codes: 0 done / nothing to refresh · 1 (--check) something would change, or a managed
 // value needs a manual edit · 2 infrastructure (facts could not be collected, a generator
-// crashed, the gate exposes no planDerivedRewrites) or a usage error.
+// crashed, the gate exposes no planDerivedRewrites, a generated file still differs from its
+// generator after the write) or a usage error.
 
 import fs from "node:fs";
 import os from "node:os";
@@ -69,6 +74,7 @@ export const STEP_IDS = [
   "e2e-timings",
   "ui-keys",
   "llm-mirrors",
+  "verify-generated",
 ];
 export const PROFILES = ["release", "nightly"];
 const PROVIDER_REFERENCE = "docs/reference/PROVIDER_REFERENCE.md";
@@ -754,6 +760,42 @@ async function stepLlmMirrors(ctx) {
   }
 }
 
+// Final check (plan 2026-11-13, phases 4/5): after the write, the generated artifacts must equal
+// their generators, judged by the same gates CI runs in release mode. In --check nothing reached
+// the disk, so the files there are still the old ones and the step is skipped.
+const VERIFY_GENERATED = [
+  { label: "check:generated-artifacts", script: "scripts/check/check-generated-artifacts.mjs" },
+  { label: "check:agent-skills-sync", script: "scripts/skills/generate-agent-skills.mjs" },
+];
+
+async function stepVerifyGenerated(ctx) {
+  if (ctx.check) {
+    return { status: "skipped", detail: "runs after a write (--check leaves the tree unchanged)" };
+  }
+  const checks = VERIFY_GENERATED.filter((c) => fs.existsSync(path.join(ctx.root, c.script)));
+  if (!checks.length)
+    return { status: "skipped", detail: "no generated-artifact gate on this tree" };
+  const run = ctx.runNode ?? runNode;
+  const failed = [];
+  for (const c of checks) {
+    const r = run(["--import", "tsx/esm", c.script, "--mode=release"], { cwd: ctx.root });
+    if (r.failure || r.status !== 0) {
+      failed.push(
+        `${c.label} (${r.failure || `exit ${r.status}`}): ${tailOf(r.stderr || r.stdout)}`
+      );
+    }
+  }
+  if (failed.length) {
+    throw new StepFailure(
+      `a generated file still differs from its generator after the refresh — ${failed.join("; ")}`
+    );
+  }
+  return {
+    status: "clean",
+    detail: `${checks.map((c) => c.label).join(" + ")} pass (release mode)`,
+  };
+}
+
 const STEP_IMPL = {
   changelog: stepChangelog,
   "provider-reference": stepProviderReference,
@@ -764,6 +806,7 @@ const STEP_IMPL = {
   "e2e-timings": stepE2eTimings,
   "ui-keys": stepUiKeys,
   "llm-mirrors": stepLlmMirrors,
+  "verify-generated": stepVerifyGenerated,
 };
 
 /**
@@ -775,6 +818,7 @@ const STEP_IMPL = {
  *   collectFacts?: Function,             // replace the collector (tests)
  *   planDerivedRewrites?: Function,      // inject instead of the gate's export (tests)
  *   steps?: Record<string, Function>,    // replace a step implementation (tests)
+ *   runNode?: Function,                  // replace the child-process runner (tests)
  *   log?: (line: string) => void,
  * }} [opts]
  * @returns {Promise<{ changedFiles: string[], manual: Array<{path:string,label:string,detail:string}>,
@@ -801,6 +845,7 @@ export async function refreshDerived(opts = {}) {
     factsError: null,
     collect: opts.collectFacts ?? collectFacts,
     planDerivedRewrites: opts.planDerivedRewrites ?? null,
+    runNode: opts.runNode ?? null,
   };
   const log = opts.log ?? (() => {});
   const only = opts.only ? new Set(opts.only) : null;
