@@ -39,136 +39,136 @@ function lastDataPayload(body: string): Record<string, unknown> {
   return JSON.parse(dataLines[dataLines.length - 1]);
 }
 
-test("Responses route: post-keepalive JSON error body must carry a `type` field (#13431)", async () => {
-  // Shape actually produced by combo failure (Chat-Completions-shaped: top-level
-  // `error` key, no `type` discriminator) — this is the real body from the issue.
-  const upstreamErrorBody = JSON.stringify({
-    error: {
-      message: 'Unknown name "encrypted" ... Cannot find field.',
-      type: "invalid_request_error",
-      code: "bad_request",
-    },
-    diagnostics: { attempted: 9, terminalReason: "[400]: ..." },
-  });
+test(
+  "Responses route: post-keepalive JSON error body must carry a `type` field (#13431)",
+  { timeout: 5_000 },
+  async () => {
+    // Shape actually produced by combo failure (Chat-Completions-shaped: top-level
+    // `error` key, no `type` discriminator) — this is the real body from the issue.
+    const upstreamErrorBody = JSON.stringify({
+      error: {
+        message: 'Unknown name "encrypted" ... Cannot find field.',
+        type: "invalid_request_error",
+        code: "bad_request",
+      },
+      diagnostics: { attempted: 9, terminalReason: "[400]: ..." },
+    });
 
-  const slowFail = new Promise<Response>((resolve) => {
-    setTimeout(
-      () =>
-        resolve(
-          new Response(upstreamErrorBody, {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          })
-        ),
-      80
+    // Resolve the upstream only after the real keepalive threshold commits SSE.
+    const { promise: slowFail, resolve: resolveFailure } = Promise.withResolvers<Response>();
+
+    const result = await withEarlyStreamKeepalive(slowFail, {
+      thresholdMs: 20,
+      intervalMs: 20,
+      errorFrame: OPENAI_RESPONSES_ERROR_FRAME, // exactly what src/app/api/v1/responses/route.ts passes
+    });
+    resolveFailure(
+      new Response(upstreamErrorBody, {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      })
     );
-  });
 
-  const result = await withEarlyStreamKeepalive(slowFail, {
-    thresholdMs: 20,
-    intervalMs: 20,
-    errorFrame: OPENAI_RESPONSES_ERROR_FRAME, // exactly what src/app/api/v1/responses/route.ts passes
-  });
+    assert.equal(result.status, 200, "already committed to 200 SSE before the error surfaced");
 
-  assert.equal(result.status, 200, "already committed to 200 SSE before the error surfaced");
+    const lastPayload = lastDataPayload(await readAll(result));
 
-  const lastPayload = lastDataPayload(await readAll(result));
-
-  assert.ok(
-    typeof lastPayload.type === "string" && lastPayload.type.length > 0,
-    `Responses API events must be discriminated by a top-level \`type\` field; ` +
-      `got ${JSON.stringify(lastPayload)} — a Responses client (Codex) drops any ` +
-      `frame without \`type\` and reports "stream disconnected before completion" ` +
-      `instead of surfacing the real upstream error.`
-  );
-  assert.equal(lastPayload.type, "error");
-  assert.equal(typeof lastPayload.sequence_number, "number");
-  assert.equal(lastPayload.message, 'Unknown name "encrypted" ... Cannot find field.');
-  assert.equal(lastPayload.code, "bad_request");
-});
-
-test("Responses route: non-JSON/empty post-keepalive error body falls back to a safe `type:error` frame (#13431)", async () => {
-  const slowFail = new Promise<Response>((resolve) => {
-    setTimeout(
-      () =>
-        resolve(
-          new Response("not json at all", {
-            status: 502,
-            headers: { "Content-Type": "text/plain" },
-          })
-        ),
-      80
+    assert.ok(
+      typeof lastPayload.type === "string" && lastPayload.type.length > 0,
+      `Responses API events must be discriminated by a top-level \`type\` field; ` +
+        `got ${JSON.stringify(lastPayload)} — a Responses client (Codex) drops any ` +
+        `frame without \`type\` and reports "stream disconnected before completion" ` +
+        `instead of surfacing the real upstream error.`
     );
-  });
+    assert.equal(lastPayload.type, "error");
+    assert.equal(typeof lastPayload.sequence_number, "number");
+    assert.equal(lastPayload.message, 'Unknown name "encrypted" ... Cannot find field.');
+    assert.equal(lastPayload.code, "bad_request");
+  }
+);
 
-  const result = await withEarlyStreamKeepalive(slowFail, {
-    thresholdMs: 20,
-    intervalMs: 20,
-    errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
-  });
+test(
+  "Responses route: non-JSON/empty post-keepalive error body falls back to a safe `type:error` frame (#13431)",
+  { timeout: 5_000 },
+  async () => {
+    // Resolve the upstream only after the real keepalive threshold commits SSE.
+    const { promise: slowFail, resolve: resolveFailure } = Promise.withResolvers<Response>();
 
-  const lastPayload = lastDataPayload(await readAll(result));
-
-  assert.equal(lastPayload.type, "error");
-  assert.equal(typeof lastPayload.sequence_number, "number");
-  assert.ok(
-    typeof lastPayload.message === "string" && lastPayload.message.length > 0,
-    `fallback frame must never be opaque/empty; got ${JSON.stringify(lastPayload)}`
-  );
-});
-
-test("Chat Completions route: post-keepalive JSON error body stays verbatim pass-through (regression guard) (#13431)", async () => {
-  const upstreamErrorBody = JSON.stringify({
-    error: { message: "boom", type: "invalid_request_error", code: "bad_request" },
-  });
-
-  const slowFail = new Promise<Response>((resolve) => {
-    setTimeout(
-      () =>
-        resolve(
-          new Response(upstreamErrorBody, {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          })
-        ),
-      80
+    const result = await withEarlyStreamKeepalive(slowFail, {
+      thresholdMs: 20,
+      intervalMs: 20,
+      errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
+    });
+    resolveFailure(
+      new Response("not json at all", {
+        status: 502,
+        headers: { "Content-Type": "text/plain" },
+      })
     );
-  });
 
-  const result = await withEarlyStreamKeepalive(slowFail, {
-    thresholdMs: 20,
-    intervalMs: 20,
-    errorFrame: OPENAI_CHAT_ERROR_FRAME,
-  });
+    const lastPayload = lastDataPayload(await readAll(result));
 
-  const lastPayload = lastDataPayload(await readAll(result));
-
-  // Unchanged: verbatim pass-through, top-level `error` key, no reshaping.
-  assert.equal(lastPayload.type, undefined);
-  assert.equal((lastPayload as { error: { message: string } }).error.message, "boom");
-});
-
-test("Anthropic /v1/messages route: post-keepalive named event: error framing stays unaffected (regression guard) (#13431)", async () => {
-  const slowFail = new Promise<Response>((resolve) => {
-    setTimeout(
-      () =>
-        resolve(
-          new Response(JSON.stringify({ type: "error", error: { message: "boom" } }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          })
-        ),
-      80
+    assert.equal(lastPayload.type, "error");
+    assert.equal(typeof lastPayload.sequence_number, "number");
+    assert.ok(
+      typeof lastPayload.message === "string" && lastPayload.message.length > 0,
+      `fallback frame must never be opaque/empty; got ${JSON.stringify(lastPayload)}`
     );
-  });
+  }
+);
 
-  const result = await withEarlyStreamKeepalive(slowFail, {
-    thresholdMs: 20,
-    intervalMs: 20,
-    keepaliveFrame: ANTHROPIC_PING_FRAME,
-    // default errorFrame (Anthropic `event: error`) is used when omitted.
-  });
+test(
+  "Chat Completions route: post-keepalive JSON error body stays verbatim pass-through (regression guard) (#13431)",
+  { timeout: 5_000 },
+  async () => {
+    const upstreamErrorBody = JSON.stringify({
+      error: { message: "boom", type: "invalid_request_error", code: "bad_request" },
+    });
 
-  const body = await readAll(result);
-  assert.match(body, /^event: error\n/m, "Anthropic path must keep its named SSE event line");
-});
+    // Resolve the upstream only after the real keepalive threshold commits SSE.
+    const { promise: slowFail, resolve: resolveFailure } = Promise.withResolvers<Response>();
+
+    const result = await withEarlyStreamKeepalive(slowFail, {
+      thresholdMs: 20,
+      intervalMs: 20,
+      errorFrame: OPENAI_CHAT_ERROR_FRAME,
+    });
+    resolveFailure(
+      new Response(upstreamErrorBody, {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+
+    const lastPayload = lastDataPayload(await readAll(result));
+
+    // Unchanged: verbatim pass-through, top-level `error` key, no reshaping.
+    assert.equal(lastPayload.type, undefined);
+    assert.equal((lastPayload as { error: { message: string } }).error.message, "boom");
+  }
+);
+
+test(
+  "Anthropic /v1/messages route: post-keepalive named event: error framing stays unaffected (regression guard) (#13431)",
+  { timeout: 5_000 },
+  async () => {
+    // Resolve the upstream only after the real keepalive threshold commits SSE.
+    const { promise: slowFail, resolve: resolveFailure } = Promise.withResolvers<Response>();
+
+    const result = await withEarlyStreamKeepalive(slowFail, {
+      thresholdMs: 20,
+      intervalMs: 20,
+      keepaliveFrame: ANTHROPIC_PING_FRAME,
+      // default errorFrame (Anthropic `event: error`) is used when omitted.
+    });
+    resolveFailure(
+      new Response(JSON.stringify({ type: "error", error: { message: "boom" } }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+
+    const body = await readAll(result);
+    assert.match(body, /^event: error\n/m, "Anthropic path must keep its named SSE event line");
+  }
+);

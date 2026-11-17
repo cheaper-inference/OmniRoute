@@ -4,7 +4,8 @@ import Icon from "@/shared/components/Icon";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Card, SegmentedControl } from "@/shared/components";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Badge, Card, SegmentedControl, SegmentedPanel, SegmentedTabs } from "@/shared/components";
 // Imported from its module (not the barrel) so the page's barrel stubs in tests stay as they were.
 import KitButton from "@/shared/components/Button";
 import TranslatorConceptCard from "./components/TranslatorConceptCard";
@@ -36,6 +37,8 @@ function TranslatorLoading() {
 
 function TranslatorPageClientInner() {
   const t = useTranslations("translator");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [sharedInputContent, setSharedInputContent] = useState("");
   const { state, setTab, setAdvanced } = useTranslateDeepLink();
 
@@ -164,35 +167,44 @@ function TranslatorPageClientInner() {
   ];
 
   return (
-    <div className="space-y-6 min-w-0">
+    <SegmentedTabs
+      value={state.tab}
+      onChange={(v) => setTab(v as TranslatorTab)}
+      className="min-w-0 gap-6"
+    >
+      <PageHeader
+        compact
+        title={tSidebar("translator")}
+        description={tHeader("translatorDescription")}
+      />
       <TranslatorConceptCard />
 
       <AutoFeaturesCard />
 
       <div className="flex justify-end min-w-0 overflow-x-auto">
         <SegmentedControl
+          semantics="tabs"
           options={tabOptions}
-          value={state.tab}
-          onChange={(v) => setTab(v as TranslatorTab)}
           size="md"
           aria-label={t("tabTranslateAriaLabel")}
           className="min-w-max"
         />
       </div>
 
-      {state.tab === "translate" && (
+      <SegmentedPanel value="translate" className="space-y-6">
         <TranslateTab
           forceOpenAdvancedSlug={state.advanced}
           onAdvancedSlugChange={(slug) => setAdvanced(slug)}
           session={session}
           onInputChange={setSharedInputContent}
         />
-      )}
+        {advancedSlot}
+      </SegmentedPanel>
 
-      {state.tab === "translate" && advancedSlot}
-
-      {state.tab === "monitor" && <MonitorTab onGoToTranslate={() => setTab("translate")} />}
-    </div>
+      <SegmentedPanel value="monitor">
+        <MonitorTab onGoToTranslate={() => setTab("translate")} />
+      </SegmentedPanel>
+    </SegmentedTabs>
   );
 }
 
@@ -211,7 +223,7 @@ function AutoFeaturesCard() {
       >
         <div className="flex items-center gap-2">
           <Icon name="auto_fix_high" size={20} className="text-primary" />
-          <h3 className="text-sm font-semibold text-text-main">{t("autoFeaturesTitle")}</h3>
+          <h3 className="text-sm text-text-main">{t("autoFeaturesTitle")}</h3>
           <Badge variant="primary" size="sm">
             {t("autoFeaturesCount")}
           </Badge>

@@ -1,0 +1,1 @@
+- **fix(compliance):** When the startup log cleanup keeps expired usage history because the pre-delete rollup failed, its `compliance.cleanup` audit entry is now recorded as `partial` with `usageRollupFailed: true` instead of `success`. ([#19566](https://github.com/cheaper-inference/OmniRoute/pull/19566))

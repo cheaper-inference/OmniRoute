@@ -72,8 +72,11 @@ export const CREDENTIAL_PATTERNS: CredentialPattern[] = [
   { name: "mailgun", regex: /key-[a-f0-9]{32}/g, replacement: "[REDACTED:mailgun]" },
   {
     name: "private_key",
+    // The body may not contain "-----", so a scan from one BEGIN stops at the next
+    // marker instead of running to the end of the text: linear even for a body of
+    // repeated BEGIN headers with no END. A real PEM body never contains "-----".
     regex:
-      /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g,
+      /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----(?:[^-]|-(?!----))*-----END (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g,
     replacement: "[REDACTED:private_key]",
   },
   {

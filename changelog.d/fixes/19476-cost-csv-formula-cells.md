@@ -1,0 +1,1 @@
+- **fix(costs):** The cost report CSV export prefixes model, provider, account and API key names that start with `=`, `+`, `-` or `@` with a single quote, so a client-chosen name cannot run as a spreadsheet formula. ([#19476](https://github.com/cheaper-inference/OmniRoute/pull/19476))

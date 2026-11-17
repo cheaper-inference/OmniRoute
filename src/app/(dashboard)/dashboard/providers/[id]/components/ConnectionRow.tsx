@@ -3,6 +3,11 @@
 import Icon from "@/shared/components/Icon";
 
 import { buttonVariants } from "@omniroute/ui-kit/button";
+import {
+  ChatGptManageUsageButton,
+  ChatGptUsageLimitNotice,
+} from "@/shared/components/ChatGptPlanUi";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
 import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 
 // Phase 1d extraction — Issue #3501
@@ -16,6 +21,7 @@ import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/share
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
+import { getCodexServiceTierBadge } from "./codexServiceTierBadge";
 import { shouldShowConnectionLastError, formatRelativeAge } from "./connectionRowHelpers";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
@@ -144,6 +150,8 @@ export default function ConnectionRow({
   onRefreshQuota,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
+  const isChatGpt = connection.provider === "chatgpt";
+  const chatGptRenewsAutomatically = isChatGpt && connection.testStatus === "active";
   const locale = useLocale();
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const displayName = isOAuth
@@ -231,42 +239,11 @@ export default function ConnectionRow({
     : "default";
   const codexServiceTierIsGlobal =
     isCodex && codexGlobalServiceMode !== undefined && codexGlobalServiceMode !== "none";
-  const codexServiceTierBadge =
-    codexServiceTier === "priority"
-      ? {
-          label: providerText(t, "codexTierFastLabel", "Fast"),
-          icon: "bolt",
-          className: "bg-info/15 text-info",
-          title: codexServiceTierIsGlobal
-            ? providerText(
-                t,
-                "providerDetailGlobalPriorityActive",
-                "Global Codex priority service tier is active"
-              )
-            : providerText(
-                t,
-                "providerDetailConnectionPriorityActive",
-                "Codex priority service tier is active for this connection"
-              ),
-        }
-      : codexServiceTier === "flex"
-        ? {
-            label: providerText(t, "codexTierFlexLabel", "Flex"),
-            icon: "speed",
-            className: "bg-chart-2/15 text-chart-2",
-            title: codexServiceTierIsGlobal
-              ? providerText(
-                  t,
-                  "providerDetailGlobalFlexActive",
-                  "Global Codex flex service tier is active"
-                )
-              : providerText(
-                  t,
-                  "providerDetailConnectionFlexActive",
-                  "Codex flex service tier is active for this connection"
-                ),
-          }
-        : null;
+  const codexServiceTierBadge = getCodexServiceTierBadge(
+    t,
+    codexServiceTier,
+    codexServiceTierIsGlobal
+  );
   const claudeBlockExtraUsageEnabled = isClaude
     ? isClaudeExtraUsageBlockEnabled("claude", connection.providerSpecificData)
     : false;
@@ -406,10 +383,16 @@ export default function ConnectionRow({
                 ) : null
               ) : tokenMinsLeft < 30 ? (
                 <Badge
-                  variant="warning"
+                  variant={chatGptRenewsAutomatically ? "info" : "warning"}
                   size="sm"
-                  icon={<Icon name="warning" size={11} />}
-                  title={t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })}
+                  icon={
+                    <Icon name={chatGptRenewsAutomatically ? "autorenew" : "warning"} size={11} />
+                  }
+                  title={
+                    chatGptRenewsAutomatically
+                      ? t("chatgptTokenRenewsTitle", { minutes: tokenMinsLeft })
+                      : t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })
+                  }
                 >
                   {`~${tokenMinsLeft}m`}
                 </Badge>
@@ -462,7 +445,7 @@ export default function ConnectionRow({
               size="sm"
               icon="shield"
               onClick={() => onToggleRateLimit(!rateLimitEnabled)}
-              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                 rateLimitShielded
                   ? "bg-success/15 text-success hover:bg-success/25"
                   : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -495,7 +478,7 @@ export default function ConnectionRow({
                   icon="sync"
                   onClick={() => onToggleAutoSync?.(!autoSyncEnabled)}
                   disabled={connection.isActive === false}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
                     autoSyncEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -540,7 +523,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleClaudeExtraUsage?.(!claudeBlockExtraUsageEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     !claudeBlockExtraUsageEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -560,7 +543,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleCodexPaidCredits(!codexPaidCreditsEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexPaidCreditsEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -637,7 +620,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="timer"
                   onClick={() => onToggleCodex5h?.(!codex5hEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codex5hEnabled
                       ? "bg-info/15 text-info hover:bg-info/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -651,9 +634,9 @@ export default function ConnectionRow({
                   size="sm"
                   icon="date_range"
                   onClick={() => onToggleCodexWeekly?.(!codexWeeklyEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexWeeklyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={t("codexWeeklyToggleTitle")}
@@ -671,7 +654,7 @@ export default function ConnectionRow({
                   icon="vpn_lock"
                   onClick={() => onToggleProxyEnabled(!proxyEnabled)}
                   aria-label={proxyEnabled ? t("proxyEnabledTitle") : t("proxyDisabledTitle")}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     proxyEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -695,9 +678,9 @@ export default function ConnectionRow({
                       ? t("perKeyProxyEnabledTitle")
                       : t("perKeyProxyDisabledTitle")
                   }
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     perKeyProxyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={
@@ -737,7 +720,7 @@ export default function ConnectionRow({
                       icon="vpn_lock"
                       onClick={onProxy}
                       disabled={!onProxy}
-                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium ${colorClass}`}
+                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs ${colorClass}`}
                       title={t("proxyConfiguredBySource", {
                         source: label,
                         host: proxyHost || t("configured"),
@@ -770,6 +753,7 @@ export default function ConnectionRow({
           >
             <span className="hidden sm:inline">{t("retest")}</span>
           </Button>
+          {isChatGpt && <ChatGptManageUsageButton />}
           {/* T12: Manual token refresh for OAuth accounts */}
           {onRefreshToken && (
             <Button
@@ -780,10 +764,14 @@ export default function ConnectionRow({
               disabled={connection.isActive === false || isRefreshing}
               onClick={onRefreshToken}
               className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-warning hover:text-warning"
-              aria-label={t("tokenShort")}
-              title={t("refreshOauthTokenTitle")}
+              aria-label={isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
+              title={isChatGpt ? t("chatgptRefreshTokenTitle") : t("refreshOauthTokenTitle")}
             >
-              <span className="hidden sm:inline">{t("tokenShort")}</span>
+              {isChatGpt ? (
+                <span className="hidden sm:inline">{t("chatgptRefreshToken")}</span>
+              ) : (
+                <span className="hidden sm:inline">{t("tokenShort")}</span>
+              )}
             </Button>
           )}
           {isCodex && isOAuth && connection.provider === "codex" && (
@@ -865,6 +853,7 @@ export default function ConnectionRow({
                 size="icon-sm"
                 icon="passkey"
                 onClick={onReauth}
+                aria-haspopup="dialog"
                 className="size-7 min-h-7 rounded hover:bg-warning/10 text-warning"
                 title={t("reauthenticateConnection")}
                 aria-label={t("reauthenticateConnection")}
@@ -906,17 +895,22 @@ export default function ConnectionRow({
               aria-label={t("proxyConfig")}
             />
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon-sm"
               icon="delete"
               onClick={onDelete}
-              className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
+              className="size-7 min-h-7 rounded"
               title={t("delete")}
               aria-label={t("delete")}
             />
           </div>
         </div>
       </div>
+      {hasChatGptUsageLimit(connection) && (
+        <div className="w-full pt-3">
+          <ChatGptUsageLimitNotice />
+        </div>
+      )}
       {isCodex && connection.codexAccountPool ? (
         <div className="basis-full min-w-0">
           <CodexAccountDetails pool={connection.codexAccountPool} />
