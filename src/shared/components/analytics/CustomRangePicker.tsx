@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useCallback, type ReactElement } from "react";
 import { useTranslations } from "next-intl";
+import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 
 interface CustomRangePickerProps {
+  /** The control that opens the picker; the panel is anchored to it. */
+  children: ReactElement;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   start: string;
   end: string;
   onApply: (start: string, end: string) => void;
-  onClose: () => void;
 }
 
 function toLocalDatetime(iso: string): string {
@@ -62,36 +66,44 @@ function getPresetRange(preset: string): { start: string; end: string } {
   return { start: toLocalDatetime(s.toISOString()), end };
 }
 
+/**
+ * Custom date-range panel on the kit Popover: body portal, collision-aware placement, Escape and
+ * outside press to close, focus back on the trigger. The form mounts with the panel, so each
+ * opening starts from the applied range.
+ */
 export default function CustomRangePicker({
+  children,
+  open,
+  onOpenChange,
+  start,
+  end,
+  onApply,
+}: CustomRangePickerProps) {
+  const t = useTranslations("analytics");
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent align="end" aria-label={t("customRange")} className="w-[340px]">
+        <RangeForm start={start} end={end} onApply={onApply} onClose={() => onOpenChange(false)} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function RangeForm({
   start,
   end,
   onApply,
   onClose,
-}: CustomRangePickerProps) {
+}: {
+  start: string;
+  end: string;
+  onApply: (start: string, end: string) => void;
+  onClose: () => void;
+}) {
   const t = useTranslations("analytics");
   const [localStart, setLocalStart] = useState(toLocalDatetime(start) || "");
   const [localEnd, setLocalEnd] = useState(toLocalDatetime(end) || "");
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Close on click outside
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onClose();
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [onClose]);
-
-  // Close on Escape
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
 
   const handleApply = useCallback(() => {
     if (localStart && localEnd) {
@@ -117,10 +129,7 @@ export default function CustomRangePicker({
   ];
 
   return (
-    <div
-      ref={ref}
-      className="absolute right-0 top-full z-50 mt-2 w-[340px] rounded-xl border border-border/50 bg-surface p-4 shadow-xl"
-    >
+    <>
       {/* Quick presets */}
       <div className="mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">
@@ -161,7 +170,7 @@ export default function CustomRangePicker({
 
       {/* Validation hint */}
       {localStart && localEnd && !isValid && (
-        <p className="mt-1.5 text-[11px] text-error">{t("rangeErrorInvalid")}</p>
+        <p className="mt-1.5 text-xs text-error">{t("rangeErrorInvalid")}</p>
       )}
 
       {/* Actions */}
@@ -173,6 +182,6 @@ export default function CustomRangePicker({
           {t("rangeApply")}
         </Button>
       </div>
-    </div>
+    </>
   );
 }

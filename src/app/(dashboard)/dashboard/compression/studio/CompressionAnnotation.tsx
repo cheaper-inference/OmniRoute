@@ -26,7 +26,7 @@ export function CompressionAnnotation({ stats }: CompressionAnnotationProps) {
       {sorted.map(([name, n]) => (
         <span
           key={name}
-          className="px-1.5 py-0.5 rounded text-[10px] bg-chart-3/10 text-chart-3 border border-chart-3/20"
+          className="px-1.5 py-0.5 rounded text-[10px] bg-chart-3/10 text-chart-3-ink border border-chart-3/20"
         >
           {name}×{n}
         </span>

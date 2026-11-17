@@ -59,7 +59,7 @@ export function OAuthDeviceCodePanel({
         <div className="bg-primary/10 p-4 rounded-lg">
           <p className="text-xs text-text-muted mb-1">{t("deviceCodeYourCode")}</p>
           <div className="flex items-center justify-center gap-2">
-            <p className="text-2xl font-mono font-bold text-primary">{deviceData.user_code}</p>
+            <p className="text-2xl font-mono font-semibold text-primary">{deviceData.user_code}</p>
             <Button
               size="sm"
               variant="ghost"
@@ -149,7 +149,7 @@ export function OAuthLoopbackMismatchPanel({
             <Icon name="lan" size={20} className="text-warning" />
           </div>
           <div>
-            <h3 className="text-base font-semibold">{t("loopbackMismatchTitle")}</h3>
+            <h3 className="text-base">{t("loopbackMismatchTitle")}</h3>
             <p className="text-xs text-text-muted mt-0.5 font-mono">
               {hint.dashboardHost}:{hint.dashboardPort}
             </p>
@@ -181,7 +181,12 @@ export function OAuthLoopbackMismatchPanel({
                   <p className="text-sm">{step.body}</p>
                   {step.value && (
                     <div className="flex gap-2 mt-1.5">
-                      <Input value={step.value} readOnly className="flex-1 font-mono text-xs" />
+                      <Input
+                        value={step.value}
+                        readOnly
+                        className="flex-1"
+                        inputClassName="text-xs"
+                      />
                       <Button
                         variant="secondary"
                         icon={copied === step.copyId ? "check" : "content_copy"}
@@ -226,7 +231,7 @@ function OAuthGoogleLoopbackNotice({ hint }: { hint: GoogleLoopbackHint }) {
 
   const command = (value: string, id: string) => (
     <div className="flex gap-2 mt-1.5">
-      <Input value={value} readOnly className="flex-1 font-mono text-xs" />
+      <Input value={value} readOnly className="flex-1" inputClassName="text-xs" />
       <Button
         size="sm"
         variant="secondary"
@@ -357,7 +362,7 @@ export function OAuthManualInputPanel({
         <div>
           <p className="text-sm font-medium mb-2">{t("step1OpenUrl")}</p>
           <div className="flex gap-2">
-            <Input value={authUrl} readOnly className="flex-1 font-mono text-xs" />
+            <Input value={authUrl} readOnly className="flex-1" inputClassName="text-xs" />
             <Button
               variant="secondary"
               icon={copied === "auth_url" ? "check" : "content_copy"}
@@ -392,7 +397,7 @@ export function OAuthManualInputPanel({
                   ? "http://127.0.0.1:<port>/?user_id=...&access_token=..."
                   : placeholderUrl
             }
-            className="font-mono text-xs"
+            inputClassName="text-xs"
           />
         </div>
       </div>

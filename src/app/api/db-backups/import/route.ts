@@ -6,7 +6,7 @@ import { getDbInstance, resetDbInstance, SQLITE_FILE } from "@/lib/db/core";
 import { openDatabaseAsync } from "@/lib/db/adapters/driverFactory";
 import type { SqliteAdapter } from "@/lib/db/adapters/types";
 import {
-  backupDbFile,
+  backupDbFileAwaited,
   getTableNamesFromAdapter,
   countImportedRows,
   summarizeImportCandidate,
@@ -134,8 +134,10 @@ async function inspectCandidate(tmpPath: string): Promise<CandidateSummary | Res
 
 /** Swap the validated upload in for the live database and report what is now loaded. */
 async function replaceLiveDatabase(tmpPath: string, fileName: string): Promise<Response> {
-  // Create pre-import backup
-  backupDbFile("pre-import");
+  // Take the pre-import snapshot and wait for it to finish. It is mandatory (routine
+  // backup switches and the hourly throttle do not apply), and a failure aborts the
+  // import before any live data is touched.
+  await backupDbFileAwaited("pre-import", { mandatory: true });
 
   // Close and reset current DB connection
   resetDbInstance();

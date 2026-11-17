@@ -415,6 +415,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     const body: typeof validation.data & { password?: string } = { ...validation.data };
+    // The schema strips keys it does not know. Name them in the 200 body so a typo or a stale
+    // client never looks like a saved setting.
+    const ignoredKeys = Object.keys(rawBody).filter((key) => !Object.hasOwn(validation.data, key));
 
     const operatorOnly = await rejectMachineSecurityPolicyWrite(
       request,
@@ -520,6 +523,23 @@ export async function PATCH(request: Request) {
             { status: 400 }
           );
         }
+      }
+    }
+
+    // The opencode server URL is checked BEFORE the write: the saved value reaches
+    // the executor through applyRuntimeSettings() (run by updateSettings), so a
+    // rejected URL must never be persisted, nor any other key of the same request.
+    // Clearing it back to the default applies at once. Only the URL is a setting;
+    // the CLI binary is env-only (see services/opencodeServerSettings.ts).
+    const ocsUrl = rawBody.opencode_server_url as string | undefined;
+    if (typeof ocsUrl === "string" && ocsUrl.trim() !== "") {
+      const urlValidation = validateProxyUrl(ocsUrl.trim());
+      if (urlValidation.valid === false) {
+        emitSettingsFailureAudit(request, actor, "OPENCODE_SERVER_URL_INVALID", attemptedKeys);
+        return NextResponse.json(
+          { error: `Invalid opencode server URL: ${urlValidation.error}` },
+          { status: 400 }
+        );
       }
     }
 
@@ -648,11 +668,14 @@ export async function PATCH(request: Request) {
       password,
       [SESSIONS_VALID_AFTER_SETTING]: _sessionsValidAfter,
       [REVOKED_SESSIONS_SETTING]: _revokedSessions,
+      // A JSON import can store an unknown setting named `ignoredKeys`. Only this request's
+      // dropped keys may fill the response field.
+      ignoredKeys: _storedIgnoredKeys,
       ...safeSettings
     } = settings;
     const settingsRevision = await getSettingsRevision();
     const response = NextResponse.json(
-      { ...safeSettings, settingsRevision },
+      { ...safeSettings, settingsRevision, ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}) },
       { headers: settingsResponseHeaders(settingsRevision) }
     );
     // The browser that changed the password keeps its own session: swap its cookie for one issued

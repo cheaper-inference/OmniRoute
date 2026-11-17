@@ -11,13 +11,11 @@
  * Same WeakMap-side-table pattern as `registerStreamTiming` (streamTiming.ts): the stream object
  * is not monkey-patched and the entry dies with it.
  */
-import {
-  estimateInputTokens,
-  estimateOutputTokens,
-  hasValidUsage,
-  normalizeUsage,
-} from "./usageTracking.ts";
+import { canonicalStreamingUsage } from "./streamAccountingUsage.ts";
+import { normalizeUsage, hasValidUsage, type UsageLike } from "./usageTracking.ts";
 import { cacheCreationFields } from "./cacheWriteUsage.ts";
+import { carryUsageEvidence, type UsageEvidence } from "./usageEvidence.ts";
+import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
 
 export type PartialStreamUsage = {
   prompt_tokens: number;
@@ -28,6 +26,7 @@ export type PartialStreamUsage = {
   reasoning_tokens?: number;
   /** Set when any side of the count is a local estimate rather than provider-reported. */
   estimated?: true;
+  usage_evidence?: UsageEvidence;
 };
 
 type PartialUsageReader = () => PartialStreamUsage | null;
@@ -75,21 +74,6 @@ export function trackStreamPartialUsage<T extends object>(
   });
 }
 
-function positive(value: unknown): number {
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
-}
-
-function appendUsageDetails(usage: PartialStreamUsage, normalized: Record<string, unknown>): void {
-  const cacheRead =
-    positive(normalized.cache_read_input_tokens) || positive(normalized.cached_tokens);
-  if (cacheRead) usage.cache_read_input_tokens = cacheRead;
-  const cacheCreation = positive(normalized.cache_creation_input_tokens);
-  if (cacheCreation) usage.cache_creation_input_tokens = cacheCreation;
-  const reasoning = positive(normalized.reasoning_tokens);
-  if (reasoning) usage.reasoning_tokens = reasoning;
-}
-
 /**
  * Resolve the usage to record for a stream that ended before its terminal event.
  *
@@ -108,43 +92,22 @@ export function resolvePartialStreamUsage({
   contentLength: number;
   body: unknown;
 }): PartialStreamUsage | null {
-  const streamedChars = positive(contentLength);
-  const record =
-    reported && typeof reported === "object" && hasValidUsage(reported as Record<string, number>)
-      ? (reported as Record<string, unknown>)
-      : null;
-  if (!record && streamedChars === 0) return null;
-
-  const normalized = record ? (normalizeUsage(record) ?? {}) : {};
-  let prompt =
-    positive(normalized.prompt_tokens) ||
-    positive(normalized.input_tokens) ||
-    positive(record?.promptTokenCount);
-  let completion =
-    positive(normalized.completion_tokens) ||
-    positive(normalized.output_tokens) ||
-    positive(record?.candidatesTokenCount);
-
-  let estimated = record?.estimated === true;
-  if (streamedChars > 0) {
-    if (completion === 0) {
-      completion = estimateOutputTokens(streamedChars);
-      estimated = true;
-    }
-    if (prompt === 0) {
-      prompt = estimateInputTokens(body);
-      estimated = true;
-    }
-  }
-  if (prompt === 0 && completion === 0) return null;
-
-  const usage: PartialStreamUsage = {
-    ...cacheCreationFields(normalized),
-    prompt_tokens: prompt,
-    completion_tokens: completion,
-    total_tokens: prompt + completion,
+  const record = reported && typeof reported === "object" ? (reported as UsageLike) : null;
+  if (!hasValidUsage(record) && !(contentLength > 0)) return null;
+  const normalized = normalizeUsage(canonicalStreamingUsage(record));
+  const result = finalizeStreamingUsage(normalized, body, contentLength);
+  if (!(Number(result.prompt_tokens) > 0 || Number(result.completion_tokens) > 0)) return null;
+  const partial: PartialStreamUsage = {
+    ...cacheCreationFields(result),
+    prompt_tokens: result.prompt_tokens,
+    completion_tokens: result.completion_tokens,
+    total_tokens: result.total_tokens,
   };
-  appendUsageDetails(usage, normalized);
-  if (estimated) usage.estimated = true;
-  return usage;
+  for (const key of ["cache_read_input_tokens", "cache_creation_input_tokens"] as const) {
+    const value =
+      result[key] ?? (key === "cache_read_input_tokens" ? result.cached_tokens : undefined);
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0) partial[key] = value;
+  }
+  if (result.reasoning_tokens > 0) partial.reasoning_tokens = result.reasoning_tokens;
+  return carryUsageEvidence(result, partial);
 }

@@ -1,74 +1,95 @@
 import { FORMATS } from "../translator/formats.ts";
 import { sanitizeProviderUsageForRequest, type UsageLike } from "./usageTracking.ts";
-import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
-
+import { mergeCacheCreationFields, readCacheWriteUsage } from "./cacheWriteUsage.ts";
+import { deriveUsageEvidence, usableTokenCounter } from "./usageEvidence.ts";
+import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
 const COUNTERS = [
   "input_tokens",
   "output_tokens",
   "cache_read_input_tokens",
   "cache_creation_input_tokens",
 ] as const;
-
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
 }
-
-/** Native receipt, independent of client translation and payload retention limits. */
+function eventUsage(event: Record<string, unknown>): Record<string, unknown> | null {
+  if (event.type === "message_start") return asRecord(asRecord(event.message)?.usage);
+  if (event.type === "message_delta") return asRecord(event.usage);
+  return null;
+}
+function copyCounters(counters: UsageLike, usage: Record<string, unknown>): boolean {
+  let observed = false;
+  for (const key of COUNTERS) {
+    if (!usableTokenCounter(usage[key])) continue;
+    counters[key] = usage[key];
+    observed = true;
+  }
+  return observed;
+}
+function copyDiagnostics(counters: UsageLike, usage: Record<string, unknown>): void {
+  if (usage.output_tokens_details)
+    counters.output_tokens_details =
+      usage.output_tokens_details as UsageLike["output_tokens_details"];
+  const thinking = asRecord(usage.output_tokens_details)?.thinking_tokens;
+  if (usableTokenCounter(thinking)) counters.reasoning_tokens = thinking;
+  if (usableTokenCounter(usage.reasoning_tokens))
+    counters.reasoning_tokens = usage.reasoning_tokens;
+  if (usableTokenCounter(usage.no_cache_tokens)) counters.no_cache_tokens = usage.no_cache_tokens;
+}
+function normalizedReceipt(raw: UsageLike, body: unknown, finalOutput: boolean): UsageLike {
+  const sanitized = sanitizeProviderUsageForRequest(raw, body, FORMATS.CLAUDE)!;
+  const evidence = deriveUsageEvidence(sanitized);
+  if (!finalOutput && !((sanitized.output_tokens ?? 0) > 0))
+    evidence.output = { source: "unknown" };
+  const cacheRead = sanitized.cache_read_input_tokens,
+    cacheCreation = sanitized.cache_creation_input_tokens;
+  const prompt = (sanitized.input_tokens ?? 0) + (cacheRead ?? 0) + (cacheCreation ?? 0);
+  const completion = sanitized.output_tokens ?? 0;
+  const { input_tokens: _input, output_tokens: _output, ...rest } = sanitized;
+  return {
+    ...rest,
+    prompt_tokens: prompt,
+    completion_tokens: completion,
+    usage_evidence: evidence,
+    prompt_tokens_details: {
+      cache_creation_in_prompt: true,
+      ...(cacheRead !== undefined ? { cached_tokens: cacheRead } : {}),
+      ...(cacheCreation !== undefined ? { cache_creation_tokens: cacheCreation } : {}),
+    },
+  };
+}
+/** Request-local cumulative receipt, independent of translation and payload retention. */
 export function createNativeClaudeUsageTracker(body: unknown) {
   const counters: UsageLike = {};
-  // Provider-reported 5m/1h cache-write tiers travel beside the counters so
-  // accounting keeps the same receipt the translate path would have merged.
-  let cacheWrite: Record<string, unknown> = {};
-  let observed = false;
+  let cacheWrite: Record<string, unknown> = {},
+    observed = false,
+    finalOutput = false;
   return {
     observe(payload: unknown): void {
       const event = asRecord(payload);
-      const usage = asRecord(
-        event?.type === "message_start"
-          ? asRecord(event.message)?.usage
-          : event?.type === "message_delta"
-            ? event.usage
-            : null
-      );
+      if (!event) return;
+      const usage = eventUsage(event);
       if (!usage || usage.estimated === true) return;
       cacheWrite = mergeCacheCreationFields(cacheWrite, usage);
-      for (const key of COUNTERS) {
-        const value = usage[key];
-        if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
-          // Anthropic usage is cumulative; presence (including zero), not
-          // truthiness, determines whether a previous counter is replaced.
-          counters[key] = value;
-          observed = true;
-        }
-      }
+      if (event.type === "message_delta" && usableTokenCounter(usage.output_tokens))
+        finalOutput = true;
+      const countersObserved = copyCounters(counters, usage);
+      observed = observed || countersObserved || readCacheWriteUsage(cacheWrite).total !== null;
+      copyDiagnostics(counters, usage);
     },
-    getUsage(): UsageLike | null {
-      if (!observed) return null;
-      // Keep the existing implausible-input defense, but do not mistake a
-      // locally repaired counter for an unchanged provider receipt.
-      const sanitized = sanitizeProviderUsageForRequest(counters, body, FORMATS.CLAUDE)!;
-      const cacheRead = sanitized.cache_read_input_tokens ?? 0;
-      const cacheCreation = sanitized.cache_creation_input_tokens ?? 0;
-      const prompt = (sanitized.input_tokens ?? 0) + cacheRead + cacheCreation;
-      const completion = sanitized.output_tokens ?? 0;
-      const { cache_creation, cache_creation_tier_status } = cacheWrite;
-      return {
-        prompt_tokens: prompt,
-        completion_tokens: completion,
-        total_tokens: prompt + completion,
-        cache_read_input_tokens: cacheRead,
-        cache_creation_input_tokens: cacheCreation,
-        ...(cache_creation !== undefined ? { cache_creation } : {}),
-        ...(cache_creation_tier_status !== undefined ? { cache_creation_tier_status } : {}),
-        prompt_tokens_details: {
-          cached_tokens: cacheRead,
-          cache_creation_tokens: cacheCreation,
-          cache_creation_in_prompt: true,
-        },
-        ...(sanitized !== counters ? { estimated: true } : {}),
-      };
+    hasFinalUsage(): boolean {
+      return finalOutput;
+    },
+    getUsage(contentLength = 0): UsageLike | null {
+      if (!observed)
+        return contentLength > 0 ? finalizeStreamingUsage(null, body, contentLength) : null;
+      return finalizeStreamingUsage(
+        normalizedReceipt({ ...counters, ...cacheWrite }, body, finalOutput),
+        body,
+        contentLength
+      );
     },
   };
 }
