@@ -56,4 +56,3 @@ test("rejects unknown explicit thinking levels without forwarding them", () => {
   assert.equal(config.thinkingLevel, "high");
   assert.equal(config.thinkingBudget, undefined);
 });
-
