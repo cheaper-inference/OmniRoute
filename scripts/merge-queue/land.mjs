@@ -4,10 +4,18 @@
 // fast-forward check is the compare-and-swap. squash-api merges each PR through the REST API
 // and then verifies that the resulting tree is exactly the tested candidate tree.
 
-import { CANDIDATE_PREFIX, STATE_BRANCH, isSha, parseQueueTrailers } from "./contracts.mjs";
 import {
+  CANDIDATE_PREFIX,
+  STATE_BRANCH,
+  TRAILERS,
+  isSha,
+  parseQueueTrailers,
+} from "./contracts.mjs";
+import {
+  haveCommonAncestor,
   isAncestor,
   isValidBranchName,
+  mergeTree,
   pushDetail,
   remoteBranchSha,
   scratchGit,
@@ -53,28 +61,206 @@ function ensureCommit(git, sha) {
   if (!has()) throw new Error(`land: commit ${sha} is not available from origin`);
 }
 
+/** Lines of `message` whose key is Omni-Queue-Base, in any paragraph and with any value. */
+function countBaseTrailers(message) {
+  let count = 0;
+  for (const line of String(message).replace(/\r\n/g, "\n").split("\n")) {
+    const m = /^([A-Za-z-]+):/.exec(line);
+    if (m && m[1] === TRAILERS.base) count += 1;
+  }
+  return count;
+}
+
 /**
- * PR numbers carried by the queue merge commits on the first-parent chain
- * expectedBaseSha..candidateSha, oldest first. A commit counts only when its trailers name a PR
- * AND its second parent is the head the trailers claim.
+ * The commits of the first-parent chain expectedBaseSha..candidateSha, oldest first: SHA,
+ * parents, queue trailers and the number of Omni-Queue-Base lines of the message.
+ *
+ * Every field is NUL-terminated: a commit message cannot hold a NUL, so each commit's message is
+ * read whole, exactly as candidate-base.mjs reads it (any other separator can be written inside a
+ * message and would hide its end from this reader). Output that does not split into
+ * SHA/parents/message triples is not skipped: `malformed` describes it, `commits` holds the
+ * commits read before it, and verifyComposition refuses the candidate.
+ *
+ * @returns {{commits: {sha: string, parents: string[], trailers: object, baseTrailers: number}[],
+ *            malformed: string|null}}
  */
-export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
+function firstParentChain(git, expectedBaseSha, candidateSha) {
   const out = scratchGit(git).out([
     "log",
     "--first-parent",
     "--reverse",
-    "--format=%P%x00%B%x1e",
+    "--format=%H%x00%P%x00%B%x00",
     `${expectedBaseSha}..${candidateSha}`,
   ]);
+  const fields = out.split("\x00");
+  // `out` is trimmed: after the last commit's final NUL nothing is left.
+  const tail = fields.pop();
+  const commits = [];
+  if (tail !== "" || fields.length % 3 !== 0) {
+    return { commits, malformed: "the first-parent chain cannot be read as whole commits" };
+  }
+  for (let i = 0; i < fields.length; i += 3) {
+    // Every commit after the first starts on the newline git writes between log entries.
+    const sha = i === 0 ? fields[i] : fields[i].replace(/^\n/, "");
+    const parents = fields[i + 1] === "" ? [] : fields[i + 1].split(" ");
+    const message = fields[i + 2];
+    if (!isSha(sha) || !parents.every(isSha)) {
+      return {
+        commits,
+        malformed: `the first-parent chain cannot be read past commit ${commits.length + 1}`,
+      };
+    }
+    commits.push({
+      sha,
+      parents,
+      trailers: parseQueueTrailers(message),
+      baseTrailers: countBaseTrailers(message),
+    });
+  }
+  return { commits, malformed: null };
+}
+
+/** A queue merge commit: its trailers name a PR and its second parent is the head they claim. */
+const isQueueMerge = (commit) =>
+  Boolean(commit.trailers.pr && commit.trailers.head) && commit.parents[1] === commit.trailers.head;
+
+/**
+ * PR numbers carried by the queue merge commits on the first-parent chain
+ * expectedBaseSha..candidateSha, oldest first. A commit counts only when its trailers name a PR
+ * AND its second parent is the head the trailers claim. A chain that cannot be read whole
+ * contributes the commits read before the break (verifyComposition refuses such a candidate).
+ */
+export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
   const merged = [];
-  for (const record of out.split("\x1e")) {
-    const [parents, message] = record.replace(/^\n/, "").split("\x00");
-    if (message === undefined) continue;
-    const t = parseQueueTrailers(message);
-    const second = parents.trim().split(" ")[1];
-    if (t.pr && t.head && second === t.head && !merged.includes(t.pr)) merged.push(t.pr);
+  for (const commit of firstParentChain(git, expectedBaseSha, candidateSha).commits) {
+    const n = commit.trailers.pr;
+    if (isQueueMerge(commit) && !merged.includes(n)) merged.push(n);
   }
   return merged;
+}
+
+/**
+ * Is candidateSha exactly what compose.composeCandidate builds from `prs` on expectedBaseSha?
+ * The tick asks before it blesses a candidate (and before a shadow would-land): a stored
+ * in-flight record is only as trustworthy as the state branch, and the App's land status on a
+ * planted candidate would let it into the base.
+ *
+ * Accepted only when `prs` is a non-empty list without repeats, expectedBaseSha is an ancestor
+ * of the candidate, every commit of the first-parent chain expectedBaseSha..candidateSha is a
+ * queue merge commit (two parents, trailers naming a PR, second parent = the head the trailers
+ * claim), and walking `prs` in order consumes that chain exactly:
+ *  - a PR with a merge commit of its own is the next merge commit of the chain, at the same head;
+ *  - a PR without one is a stacked PR (ComposeResult.alreadyContained): composeCandidate includes
+ *    it without a commit when its head is already reachable from the candidate so far (the last
+ *    merge commit walked) and not from the base, and only then.
+ * `treeSha` (optional): the stored tree, which must be the candidate's tree.
+ * `trees` (optional, the tick sets it): each merge commit of the chain must also carry exactly the
+ * tree composeCandidate would write for it, the merge of its two parents (the commit before it on
+ * the chain and the PR head) recomposed with compose.mergeTree. Without it, a merge commit with
+ * the right parents and trailers could carry any tree: shape alone does not tell what lands.
+ * A recomposition that conflicts (or parents without common history, which composeCandidate
+ * never merges) fails too. A git error while recomposing (an object the scratch store cannot
+ * fetch) is thrown, not reported as a mismatch.
+ * Last, every merge commit of the chain must carry exactly one Omni-Queue-Base, equal to
+ * expectedBaseSha (the candidate's CI reads its base from that trailer; a second line with that
+ * key, in any paragraph, is refused rather than resolved). The chain is read with each commit's
+ * whole message, as the CI reads it; output that cannot be split into whole commits is a
+ * mismatch. The subject, the author trailer and the commit identity are not checked.
+ *
+ * @param {{git: Git, expectedBaseSha: string, candidateSha: string, prs: PrRef[],
+ *          treeSha?: string|null, trees?: boolean}} input   the commits must be in the scratch
+ *          store already
+ * @returns {{ok: true} | {ok: false, detail: string}}
+ */
+export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha, trees }) {
+  const fail = (detail) => ({ ok: false, detail });
+  const short = (sha) => String(sha ?? "").slice(0, 12);
+  if (!Array.isArray(prs) || !prs.length) return fail("the batch names no pull request");
+  const numbers = prs.map((pr) => pr?.n);
+  const twice = numbers.find((n, i) => numbers.indexOf(n) !== i);
+  if (twice !== undefined) return fail(`#${twice} is named twice`);
+  if (!isSha(expectedBaseSha) || !isSha(candidateSha)) return fail("invalid base or candidate SHA");
+  for (const sha of [candidateSha, expectedBaseSha]) {
+    if (!hasCommit(git, sha)) return fail(`commit ${short(sha)} is not in the scratch repository`);
+  }
+  if (!isAncestor(git, expectedBaseSha, candidateSha)) {
+    return fail(`base ${short(expectedBaseSha)} is not an ancestor of the candidate`);
+  }
+  if (treeSha !== undefined) {
+    const tree = scratchGit(git).out(["rev-parse", `${candidateSha}^{tree}`]);
+    if (tree !== treeSha)
+      return fail(`candidate tree ${short(tree)}, the batch says ${short(treeSha)}`);
+  }
+  const { commits: chain, malformed } = firstParentChain(git, expectedBaseSha, candidateSha);
+  if (malformed) return fail(malformed);
+  const odd = chain.find((commit) => commit.parents.length !== 2 || !isQueueMerge(commit));
+  if (odd)
+    return fail(`commit ${short(odd.sha)} on the first-parent chain is not a queue merge commit`);
+  let current = expectedBaseSha;
+  let next = 0;
+  for (const pr of prs) {
+    const merge = chain[next];
+    if (merge && merge.trailers.pr === pr?.n) {
+      if (merge.trailers.head !== pr.head) {
+        return fail(
+          `the merge commit of #${pr.n} merges head ${short(merge.trailers.head)}, the batch says ` +
+            short(pr.head)
+        );
+      }
+      current = merge.sha;
+      next += 1;
+      continue;
+    }
+    const stacked =
+      isSha(pr?.head) &&
+      hasCommit(git, pr.head) &&
+      isAncestor(git, pr.head, current) &&
+      !isAncestor(git, pr.head, expectedBaseSha);
+    if (!stacked) {
+      return fail(
+        `#${pr?.n} has no merge commit at its place on the candidate and is not contained in ` +
+          "the pull requests before it"
+      );
+    }
+  }
+  if (next !== chain.length) {
+    return fail(`the candidate merges #${chain[next].trailers.pr}, which the batch does not name`);
+  }
+  if (trees) {
+    for (const commit of chain) {
+      // The same call composeCandidate makes for this PR: ours = the candidate so far, theirs =
+      // the PR head (every commit of the chain has exactly these two parents, checked above).
+      const [ours, theirs] = commit.parents;
+      const tree = scratchGit(git).out(["rev-parse", `${commit.sha}^{tree}`]);
+      const merged = haveCommonAncestor(git, ours, theirs)
+        ? mergeTree(git, ours, theirs)
+        : { clean: false };
+      if (!merged.clean || merged.tree !== tree) {
+        return fail(
+          `merge commit ${short(commit.sha)} of #${commit.trailers.pr}: tree ${short(tree)}, ` +
+            `recomposing gives ${merged.clean ? short(merged.tree) : "conflict"}`
+        );
+      }
+    }
+  }
+  // The candidate's CI takes its base from the top commit's Omni-Queue-Base trailer
+  // (candidate-base.mjs), constrained only to be an ancestor: a trailer naming a PR head would
+  // make every base-relative gate compare nothing. composeCandidate writes the same base on every
+  // merge commit of the batch.
+  for (const commit of chain) {
+    const named = commit.trailers.base;
+    const prefix = `merge commit ${short(commit.sha)} of #${commit.trailers.pr} carries`;
+    // composeCandidate writes one; with two, which one counts depends on the reader.
+    if (commit.baseTrailers > 1)
+      return fail(`${prefix} ${commit.baseTrailers} Omni-Queue-Base trailers`);
+    if (named === expectedBaseSha) continue;
+    return fail(
+      named
+        ? `${prefix} Omni-Queue-Base ${short(named)}, the batch's base is ${short(expectedBaseSha)}`
+        : `${prefix} no Omni-Queue-Base trailer`
+    );
+  }
+  return { ok: true };
 }
 
 /**
@@ -117,6 +303,9 @@ function porcelainStatus(stdout, dstRef) {
  *     push, ok:true, idempotent), or
  *   - a commit between them (expectedBaseSha ⊑ tip ⊑ candidateSha, e.g. someone fast-forwarded
  *     the base to one of the batch's PR heads): the push still lands the exact tested tree.
+ *     Not an ordinary case for the live tick: it blesses only when its own tip read equals
+ *     expectedBaseSha (tick landOrWouldLand), so it reaches this branch only when the base moved
+ *     in the race between that read and this one.
  * Anything else is {ok:false, reason:"base-moved"} WITHOUT pushing — including a base that was
  * REWOUND to an ancestor of expectedBaseSha (an admin removing a bad commit): a push without
  * force would be a valid fast-forward there and would silently bring the removed commits back.
@@ -168,6 +357,9 @@ export function landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
       detail: `base ${branch} already at the candidate (landed earlier)`,
     };
   }
+  // The live tick already required its own tip read to equal expectedBaseSha before blessing, so
+  // a tip other than expectedBaseSha here (in between, or anywhere else) means the base moved in
+  // the race between that read and this one.
   if (before !== expectedBaseSha) {
     const between =
       hasCommit(git, before) &&

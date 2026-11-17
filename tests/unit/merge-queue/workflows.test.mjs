@@ -13,6 +13,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { load } from "js-yaml";
 import { botIdentity, candidateRef } from "../../../scripts/merge-queue/contracts.mjs";
+import { TICK_ACTIONS } from "../../../scripts/merge-queue/tick.mjs";
 import { evaluateAdmission } from "../../../scripts/quality/admission-verdict.mjs";
 
 const ROOT = new URL("../../../", import.meta.url);
@@ -605,11 +606,20 @@ const queueConfig = JSON.parse(readText("config/merge-queue/config.json"));
  * Context of one omni-queue.yml trigger. A pull_request_target event is, by default, one the
  * queue cares about: the pull request carries the queue label, and a labeled / unlabeled action
  * names that label. `label` (the event's label), `prLabels` (the labels the pull request carries
- * when the event fires) and `merged` model every other pull request event.
+ * when the event fires), `merged` and `baseRef` (the pull request's base branch) model every
+ * other pull request event.
  */
 function queueContext(
   eventName,
-  { enabled = "true", action = "", approval, label, prLabels, merged = false } = {}
+  {
+    enabled = "true",
+    action = "",
+    approval,
+    label,
+    prLabels,
+    merged = false,
+    baseRef = "release/v3.8.54",
+  } = {}
 ) {
   const event = { action, repository: { default_branch: "release/v3.8.54" } };
   if (eventName === "pull_request_target") {
@@ -621,6 +631,7 @@ function queueContext(
       number: 7,
       merged,
       labels: (prLabels ?? [queueConfig.label]).map((name) => ({ name })),
+      base: { ref: baseRef },
     };
   }
   return {
@@ -648,14 +659,18 @@ test("omni-queue.yml triggers: cron, dispatch, candidate CI completion, PR label
   ]);
   assert.deepEqual(on.schedule, [{ cron: "*/5 * * * *" }]);
   const inputs = on.workflow_dispatch.inputs;
-  assert.deepEqual(Object.keys(inputs).sort(), ["action", "base", "reason"]);
+  assert.deepEqual(Object.keys(inputs).sort(), ["action", "base", "reason", "sha"]);
   assert.equal(inputs.base.type, "string");
   assert.equal(inputs.base.required, false);
   assert.equal(inputs.reason.type, "string");
   assert.equal(inputs.reason.required, false);
+  assert.equal(inputs.sha.type, "string");
+  assert.equal(inputs.sha.required, false);
   assert.equal(inputs.action.type, "choice");
   assert.equal(inputs.action.default, "tick");
-  assert.deepEqual(inputs.action.options, ["tick", "pause", "resume", "dry-run"]);
+  assert.deepEqual(inputs.action.options, ["tick", "pause", "resume", "dry-run", "bless"]);
+  // Every action the workflow offers is one the tick accepts, and the other way round.
+  assert.deepEqual(inputs.action.options, [...TICK_ACTIONS]);
   assert.deepEqual(on.workflow_run, {
     workflows: ["CI", "Quality Gates"],
     types: ["completed"],
@@ -947,7 +962,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     );
   for (const id of ["approval", "tick"]) {
     const w = appStep(id);
-    assert.equal(w["app-id"], "${{ secrets.OMNI_QUEUE_APP_ID }}");
+    assert.equal(w["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}");
     assert.equal(w["private-key"], "${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}");
     assert.equal(w.owner, undefined);
     assert.equal(w.repositories, undefined, "token limited to this repository");
@@ -964,37 +979,135 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     workflows: "write",
     "pull-requests": "write",
     issues: "write",
-    statuses: "read",
+    // The land status (config.landing.statusContext) on a candidate, a PR head or a bless.
+    statuses: "write",
     checks: "read",
     actions: "read",
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [
-    "OMNI_QUEUE_APP_ID",
+    "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
+    "OMNI_QUEUE_LAND_TOKEN",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
+});
+
+test("omni-queue.yml: both jobs mint the token with client-id from OMNI_QUEUE_APP_CLIENT_ID, never app-id", () => {
+  // actions/create-github-app-token deprecates its `app-id` input: `client-id` (the App's
+  // Client ID, `Iv…`) is the supported one. The numeric App id stays an operator-side value of
+  // scripts/merge-queue/apply-ruleset.mjs, never a secret of this workflow.
+  const rawText = readText(".github/workflows/omni-queue.yml");
+  assert.doesNotMatch(rawText, /^\s*app-id\s*:/m, "no step passes the deprecated app-id input");
+  assert.doesNotMatch(queueText, /"app-id":/, "no mapping carries an app-id key");
+  assert.doesNotMatch(
+    queueText,
+    /OMNI_QUEUE_APP_ID\b/,
+    "the numeric App id is not a workflow secret"
+  );
+  for (const id of ["approval", "tick"]) {
+    const steps = queue.jobs[id].steps.filter((s) =>
+      String(s.uses ?? "").startsWith("actions/create-github-app-token@")
+    );
+    assert.equal(steps.length, 1, `${id} mints exactly one App token`);
+    assert.equal(steps[0].with["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}", id);
+    assert.equal(steps[0].with["app-id"], undefined, id);
+  }
+});
+
+test("omni-queue.yml: both jobs run in the omni-queue environment", () => {
+  // The App's private key (and the owner's land token) live in the environment: a workflow on a
+  // candidate branch, or on any ref the environment does not admit, cannot read them.
+  // `deployment: false`: the environment's secrets and branch policy apply, but no deployment
+  // record is created for every run (pull_request_target alone starts many).
+  for (const [id, job] of Object.entries(queue.jobs)) {
+    assert.deepEqual(job.environment, { name: "omni-queue", deployment: false }, id);
+  }
+});
+
+test("omni-queue.yml: approval and tick skip pull requests whose base is not release/v*", () => {
+  // The jobs concern only pull requests whose base is a release branch (the queue's bases):
+  // filtering here avoids minting an App token for every other pull request.
+  const { label: queueLabel, blockLabels } = queueConfig;
+  const neither = { approval: false, tick: false };
+  const pr = (action, opts) =>
+    scheduledJobs(queue, queueContext("pull_request_target", { action, ...opts }));
+  for (const baseRef of ["main", "feature/x", "release-v3.8.54", "omni-queue/release-v3.8.54"]) {
+    for (const action of ["labeled", "unlabeled"]) {
+      for (const label of [queueLabel, queueConfig.protectedApprovalLabel, blockLabels[0]]) {
+        assert.deepEqual(
+          pr(action, { label, baseRef }),
+          neither,
+          `${action} ${label} on ${baseRef}`
+        );
+      }
+    }
+    assert.deepEqual(pr("synchronize", { baseRef }), neither, `synchronize on ${baseRef}`);
+    assert.deepEqual(pr("closed", { baseRef, merged: true }), neither, `merge into ${baseRef}`);
+  }
+  // A release base keeps today's behavior.
+  assert.deepEqual(pr("labeled", { label: queueLabel }), { approval: true, tick: true });
+  assert.deepEqual(pr("synchronize", {}), { approval: false, tick: true });
+  assert.deepEqual(pr("closed", { prLabels: [], merged: true }), { approval: false, tick: true });
+  // The other triggers carry no pull request: the base filter does not apply to them.
+  for (const [event, action] of [
+    ["schedule", ""],
+    ["workflow_run", "completed"],
+    ["workflow_dispatch", ""],
+  ]) {
+    assert.deepEqual(
+      scheduledJobs(queue, queueContext(event, { action })),
+      { approval: false, tick: true },
+      event
+    );
+  }
+});
+
+test("omni-queue.yml: the tick may write statuses and receives the land token", () => {
+  const scopes = queue.jobs.tick.steps.find((s) => s.id === "app-token").with;
+  assert.equal(scopes["permission-statuses"], "write");
+  // The owner's land token reaches the tick step only: no other step, no other job.
+  const holders = Object.entries(queue.jobs).flatMap(([id, job]) =>
+    job.steps
+      .filter((s) => JSON.stringify(s).includes("OMNI_QUEUE_LAND_TOKEN"))
+      .map((s) => `${id}: ${s.name}`)
+  );
+  assert.deepEqual(holders, ["tick: Run one queue tick"]);
+  const step = stepNamed("tick", "Run one queue tick");
+  assert.equal(step.env.OMNI_QUEUE_LAND_TOKEN, "${{ secrets.OMNI_QUEUE_LAND_TOKEN }}");
+  // A bless is honoured only when both the original dispatcher (github.actor) and whoever
+  // triggered this run (github.triggering_actor, the re-runner of a re-run) are approvers.
+  assert.equal(step.env.GITHUB_ACTOR, "${{ github.actor }}");
+  assert.equal(step.env.GITHUB_TRIGGERING_ACTOR, "${{ github.triggering_actor }}");
 });
 
 test("the tick's test/sandbox overrides are never set by the real workflow", () => {
   // tick.createTickDeps honours them so the end-to-end test can point the queue at a local bare
   // repository, an alternative config and a fake API; production must use the real remote, the
   // config of the default branch and the API root that Actions provides.
-  for (const name of ["OMNI_QUEUE_REMOTE_URL", "OMNI_QUEUE_CONFIG", "GITHUB_API_URL"]) {
+  // OMNI_QUEUE_GIT_NAME / OMNI_QUEUE_GIT_EMAIL override every other identity (landing.identity
+  // included): the workflow hands the bot identity over as OMNI_QUEUE_BOT_NAME / _EMAIL instead.
+  for (const name of [
+    "OMNI_QUEUE_REMOTE_URL",
+    "OMNI_QUEUE_CONFIG",
+    "GITHUB_API_URL",
+    "OMNI_QUEUE_GIT_NAME",
+    "OMNI_QUEUE_GIT_EMAIL",
+  ]) {
     assert.ok(!queueText.includes(name), `omni-queue.yml must not set ${name}`);
   }
 });
 
 test("the queue never checks out or runs PR code", () => {
-  // Nothing PR-controlled is read anywhere in the file (refs, repos, titles, heads). The one
-  // read of the pull request payload is the tick's trigger filter: the labels the PR carries
-  // (applied by people with triage rights, never by a fork author) and `merged`, compared
-  // inside the job's `if:` and never handed to a step.
-  const tickIf = String(queue.jobs.tick.if);
-  const filterReads = /github\.event\.pull_request\.(labels\.\*\.name|merged)(?![\w.[])/g;
+  // Nothing PR-controlled is read anywhere in the file (repos, titles, heads). The reads of the
+  // pull request payload are the jobs' trigger filters: the labels the PR carries (applied by
+  // people with triage rights, never by a fork author), `merged` and the base branch (one of
+  // this repository's own branches), compared inside a job's `if:` and never handed to a step.
+  const filterReads = /github\.event\.pull_request\.(labels\.\*\.name|merged|base\.ref)(?![\w.[])/g;
+  const unfiltered = (job) => ({ ...job, if: String(job.if).replace(filterReads, "") });
   const withoutFilter = JSON.stringify({
     ...queue,
-    jobs: { ...queue.jobs, tick: { ...queue.jobs.tick, if: tickIf.replace(filterReads, "") } },
+    jobs: { approval: unfiltered(queue.jobs.approval), tick: unfiltered(queue.jobs.tick) },
   });
   assert.doesNotMatch(
     withoutFilter,
@@ -1164,12 +1277,16 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
   const step = stepNamed("tick", "Run one queue tick");
   assert.deepEqual(step.env, {
     OMNI_QUEUE_TOKEN: "${{ steps.app-token.outputs.token }}",
-    OMNI_QUEUE_GIT_NAME: "${{ steps.identity.outputs.name }}",
-    OMNI_QUEUE_GIT_EMAIL: "${{ steps.identity.outputs.email }}",
+    OMNI_QUEUE_LAND_TOKEN: "${{ secrets.OMNI_QUEUE_LAND_TOKEN }}",
+    OMNI_QUEUE_BOT_NAME: "${{ steps.identity.outputs.name }}",
+    OMNI_QUEUE_BOT_EMAIL: "${{ steps.identity.outputs.email }}",
+    GITHUB_ACTOR: "${{ github.actor }}",
+    GITHUB_TRIGGERING_ACTOR: "${{ github.triggering_actor }}",
     EVENT_NAME: "${{ github.event_name }}",
     INPUT_BASE: "${{ inputs.base }}",
     INPUT_ACTION: "${{ inputs.action }}",
     INPUT_REASON: "${{ inputs.reason }}",
+    INPUT_SHA: "${{ inputs.sha }}",
   });
   const hostile = 'flaky runner; $(touch pwned) `touch pwned2` "quoted"';
   const dispatch = runStep(t, step, {
@@ -1192,6 +1309,26 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
     readdirSync(dispatch.dir).filter((f) => f.startsWith("pwned")),
     []
   );
+  const sha = "0123456789abcdef0123456789abcdef01234567";
+  const bless = runStep(t, step, {
+    EVENT_NAME: "workflow_dispatch",
+    INPUT_BASE: "release/v3.8.54",
+    INPUT_ACTION: "bless",
+    INPUT_REASON: hostile,
+    INPUT_SHA: sha,
+  });
+  assert.equal(bless.code, 0, bless.stderr);
+  assert.deepEqual(bless.args, [
+    "scripts/merge-queue/tick.mjs",
+    "--base",
+    "release/v3.8.54",
+    "--action",
+    "bless",
+    "--reason",
+    hostile,
+    "--sha",
+    sha,
+  ]);
   const bare = runStep(t, step, {
     EVENT_NAME: "workflow_dispatch",
     INPUT_BASE: "",
@@ -1203,7 +1340,8 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
     const res = runStep(t, step, {
       EVENT_NAME: event,
       INPUT_BASE: "release/v9.9.9",
-      INPUT_ACTION: "pause",
+      INPUT_ACTION: "bless",
+      INPUT_SHA: sha,
     });
     assert.equal(res.code, 0, res.stderr);
     assert.deepEqual(res.args, ["scripts/merge-queue/tick.mjs"], event);

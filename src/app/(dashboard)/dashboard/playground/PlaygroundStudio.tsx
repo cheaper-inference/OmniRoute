@@ -4,7 +4,9 @@
 
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import type { StreamMetrics } from "@/shared/schemas/playground";
 import { SegmentedPanel, SegmentedTabs } from "@/shared/components/SegmentedControl";
 import StudioTopBar, { type StudioTab } from "./components/StudioTopBar";
@@ -52,6 +54,8 @@ function resolveTab(value: string | null): StudioTab {
  * - SLOT_IMPROVE: F7 will replace the comment in StudioConfigPane with ImprovePromptButton
  */
 export function PlaygroundStudio() {
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const searchParams = useSearchParams();
   // Derive active tab from URL — no effect needed, avoids setState-in-effect lint violation.
   // When URL changes (client nav), searchParams updates, component re-renders with new tab.
@@ -76,6 +80,13 @@ export function PlaygroundStudio() {
       onChange={(tab) => handleTabChange(tab as StudioTab)}
       className="h-[calc(100vh-4rem)] gap-0 overflow-hidden"
     >
+      {/* Inside the fixed-height column: the studio below keeps what the title leaves. */}
+      <PageHeader
+        compact
+        className="shrink-0 pb-4"
+        title={tSidebar("playground")}
+        description={tHeader("playgroundDescription")}
+      />
       {/* Top bar with tabs + token/cost counter + export button */}
       <StudioTopBar
         metrics={metrics}

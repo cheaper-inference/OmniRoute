@@ -31,6 +31,11 @@ export const FREEZE_LABEL = "release-freeze";
 export const HISTORY_LIMIT = 200;
 /** Base-check results kept in the state document (most recent first). */
 export const BASE_CHECK_LIMIT = 10;
+/**
+ * Land-status withdrawals GitHub refused, kept for the next ticks to retry (state.landWithdrawals,
+ * one per SHA). When full, the oldest entry is dropped (the tick records an `error` event).
+ */
+export const LAND_WITHDRAWALS_LIMIT = 20;
 
 /**
  * Commit-status contexts that bind an approval to the EXACT head SHA. `approve.mjs` writes them
@@ -75,6 +80,10 @@ export const EVENT_TYPES = Object.freeze([
   "checks-green",
   "checks-red",
   "checks-timeout",
+  "land-blessed", // the App wrote the land status (landing.statusContext) on the commits about to
+  // land: the candidate (merge-ff) or each PR head (squash-api); detail = how many, the context
+  "manual-bless", // a maintainer's `bless` dispatch: the App wrote the land status on `sha` for a
+  // hotfix / sync-back / base repair the maintainer lands himself; detail = "by @<login>: <why>"
   "landed", // merge-ff push or squash-api sequence succeeded
   "would-land", // shadow mode: green candidate that was NOT landed
   "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
@@ -84,6 +93,8 @@ export const EVENT_TYPES = Object.freeze([
   "culprit-found",
   "base-check-started",
   "base-red-paused",
+  "hang-suspected", // a job timed out on every attempt (or inside a hang bisection): treated as
+  // a hanging test (base check, then bisection) instead of an infra pause; detail = the job(s)
   "infra-retry",
   "infra-paused",
   "paused",
@@ -144,6 +155,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} culprits     PRs isolated as culprits (already dequeued)
  * @property {number[]} landed      PR numbers landed (or would-land in shadow) during this bisection
  * @property {number} steps         candidate runs spent on this bisection
+ * @property {boolean} [hang]       started for a job timeout repeated on every attempt (suspected
+ *                                  hanging test): a segment whose job times out is not retried
  */
 
 /**
@@ -159,6 +172,14 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {"testing"|"landing"} stage
  * @property {string} startedAt      ISO
  * @property {number} attempts       infra retries already spent on this candidate
+ * @property {number} [timedOutRuns] runs of this candidate so far whose failures were all job
+ *                                   timeouts, set only while that holds for EVERY run (=
+ *                                   attempts); absent otherwise, and in documents written before
+ *                                   it existed (= first run not known to be a timeout)
+ * @property {number} [landAttempts] stage "landing" only: ticks that blessed this batch for
+ *                                   landing, counted (and saved) before each blessing; absent at
+ *                                   stage "testing", and in documents written before it existed
+ *                                   (= 1 at the landing stage). See tick LANDING_ATTEMPTS_LIMIT
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
@@ -173,6 +194,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} prs
  * @property {FailureSignature[]} signatures
  * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
+ * @property {number} [timedOutRuns]     a parked hang only: how many runs of it timed out (the
+ *                                       culprit comment states that number)
  */
 
 /**
@@ -189,6 +212,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} check   check-run name (e.g. "Unit Tests (3/8)")
  * @property {string} key     normalized failing test/gate identifier, "" when unknown
  * @property {boolean} infra  positive evidence of an infrastructure failure
+ * @property {boolean} [hang] the job hit its time limit on every attempt (classify.hangSignatures):
+ *                            key "", infra false, so it matches the base by check name only
  */
 
 /**
@@ -226,7 +251,22 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {{batchSeq: number, ciRuns: number, landedPrs: number, landedBatches: number,
  *             redBatches: number, bisections: number, culprits: number}} counters
  * @property {HistoryEvent[]} history    oldest first, at most HISTORY_LIMIT
+ * @property {LandWithdrawal[]} [landWithdrawals]  oldest first, at most LAND_WITHDRAWALS_LIMIT,
+ *                                       one per SHA; absent when there is none (and in documents
+ *                                       written before it existed)
  * @property {string} updatedAt          ISO
+ */
+
+/**
+ * @typedef {object} LandWithdrawal  A `failure` land status GitHub refused to write: the commit
+ *   may still carry the queue's `success`, so later ticks retry (tick retryWithdrawals).
+ * @property {string} sha           the commit whose land status could not be withdrawn
+ * @property {string} batchId       the batch that blessed it
+ * @property {string} candidateSha  that batch's candidate (the status links to its checks)
+ * @property {string} why           why the landing was withdrawn (the status description says it)
+ * @property {string} since         ISO time of the first refusal
+ * @property {number} attempts      failed attempts so far (a read that failed or a write that was
+ *                                  refused; >= 1)
  */
 
 /**
@@ -327,6 +367,12 @@ export function validateState(state) {
       if (!STAGES.includes(f.stage)) errors.push("inFlight.stage");
       if (!isIso(f.startedAt)) errors.push("inFlight.startedAt");
       if (!isCount(f.attempts)) errors.push("inFlight.attempts");
+      if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
+        errors.push("inFlight.timedOutRuns");
+      }
+      if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
+        errors.push("inFlight.landAttempts");
+      }
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {
@@ -360,7 +406,28 @@ export function validateState(state) {
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
   else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
+  if (state.landWithdrawals !== undefined) errors.push(...landWithdrawalsErrors(state));
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
+  return errors;
+}
+
+/** Optional state.landWithdrawals: a bounded list of LandWithdrawal, one per SHA. */
+function landWithdrawalsErrors({ landWithdrawals: list }) {
+  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return ["landWithdrawals"];
+  const errors = [];
+  const seen = new Set();
+  list.forEach((w, i) => {
+    const where = `landWithdrawals[${i}]`;
+    if (!isRecord(w)) return errors.push(where);
+    if (!SHA_RE.test(w.sha ?? "") || seen.has(w.sha)) errors.push(`${where}.sha`);
+    seen.add(w.sha);
+    if (typeof w.batchId !== "string" || !SAFE_SEGMENT_RE.test(w.batchId))
+      errors.push(`${where}.batchId`);
+    if (!SHA_RE.test(w.candidateSha ?? "")) errors.push(`${where}.candidateSha`);
+    if (typeof w.why !== "string") errors.push(`${where}.why`);
+    if (!isIso(w.since)) errors.push(`${where}.since`);
+    if (!Number.isSafeInteger(w.attempts) || w.attempts < 1) errors.push(`${where}.attempts`);
+  });
   return errors;
 }
 

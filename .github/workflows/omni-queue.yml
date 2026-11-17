@@ -19,6 +19,14 @@ name: omni-queue
 #     blocked approval job fails closed: no approval status, so nothing becomes eligible.
 #   • Writes use a GitHub App installation token minted per job with the minimum permissions
 #     (the GITHUB_TOKEN cannot be used: refs it pushes do not trigger the candidate's CI).
+#   • Both jobs run in the `omni-queue` environment, which holds the App's credentials and the
+#     owner's OMNI_QUEUE_LAND_TOKEN and admits the default branch only, by its exact name: a
+#     workflow on a candidate branch cannot read them. The App writes omni-queue/land, the status release rulesets
+#     require, so its private key is the root of trust. The land token reaches the tick only.
+#   • action=bless (the explicit emergency exit): the tick writes omni-queue/land on ONE commit
+#     for a hotfix, sync-back or base repair, after checking that both the dispatcher
+#     (github.actor) and whoever triggered the run (github.triggering_actor, the re-runner of a
+#     re-run) are in config.approvers; the maintainer then lands it himself.
 #   • Kill switch: every job is inert unless the repository variable OMNI_QUEUE_ENABLED is
 #     'true'. Forks never inherit repository variables.
 
@@ -32,7 +40,7 @@ on:
         required: false
         type: string
       action:
-        description: "tick = one normal tick; pause/resume = toggle a base; dry-run = decide and print, write nothing"
+        description: "tick = one normal tick; pause/resume = toggle a base; dry-run = decide and print, write nothing; bless = write omni-queue/land on one commit (needs base, sha, reason)"
         required: false
         default: tick
         type: choice
@@ -41,8 +49,13 @@ on:
           - pause
           - resume
           - dry-run
+          - bless
       reason:
-        description: "Free-text reason recorded with pause/resume"
+        description: "Free-text reason recorded with pause/resume/bless (required for bless)"
+        required: false
+        type: string
+      sha:
+        description: "bless only: full 40-hex SHA of the commit that receives omni-queue/land"
         required: false
         type: string
   # A candidate's CI finished: tick right away instead of waiting for the next cron slot.
@@ -72,15 +85,22 @@ jobs:
   # Only the two approval labels start it (`label` and `protectedApprovalLabel` of
   # config/merge-queue/config.json). An `if:` cannot read that file, so the names are repeated
   # here: rename a label in BOTH places (tests/unit/merge-queue/workflows.test.mjs compares them).
+  # Only pull requests into a release/v* branch: the queue manages release bases only, and the
+  # filter keeps the job from minting an App token for every other pull request.
   approval:
     name: Approval
     if: >-
       vars.OMNI_QUEUE_ENABLED == 'true'
       && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
       && github.event_name == 'pull_request_target'
+      && startsWith(github.event.pull_request.base.ref, 'release/v')
       && (github.event.action == 'labeled' || github.event.action == 'unlabeled')
       && (github.event.label.name == 'omni-queue' || github.event.label.name == 'protected-approved')
     runs-on: ubuntu-latest
+    # Secrets and branch policy of the environment, without a deployment record per run.
+    environment:
+      name: omni-queue
+      deployment: false
     timeout-minutes: 5
     concurrency:
       group: omni-queue-approval-${{ github.event.number }}-${{ github.event.label.name }}
@@ -92,7 +112,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.OMNI_QUEUE_APP_ID }}
+          client-id: ${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}
           private-key: ${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}
           permission-contents: read
           permission-pull-requests: read
@@ -125,22 +145,29 @@ jobs:
     # event's label is an approval label or one of config.json's `blockLabels`, the pull request
     # carries the queue label, or a merge moved a base. Anything else (a label on, or a push to,
     # a pull request that is not queued) starts nothing; the 5-minute cron stays the safety net.
-    # Same label literals as config/merge-queue/config.json: rename in BOTH places.
+    # Same label literals as config/merge-queue/config.json: rename in BOTH places. And only a
+    # pull request into a release/v* branch, like the approval job: the queue manages release
+    # bases only, and no App token is minted for any other pull request.
     if: >-
       !cancelled()
       && vars.OMNI_QUEUE_ENABLED == 'true'
       && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
       && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
       && (github.event_name != 'pull_request_target'
-        || github.event.label.name == 'omni-queue'
-        || github.event.label.name == 'protected-approved'
-        || github.event.label.name == 'hold'
-        || github.event.label.name == 'hold-vps'
-        || github.event.label.name == 'do-not-merge'
-        || github.event.label.name == 'wip'
-        || contains(github.event.pull_request.labels.*.name, 'omni-queue')
-        || (github.event.action == 'closed' && github.event.pull_request.merged == true))
+        || (startsWith(github.event.pull_request.base.ref, 'release/v')
+          && (github.event.label.name == 'omni-queue'
+            || github.event.label.name == 'protected-approved'
+            || github.event.label.name == 'hold'
+            || github.event.label.name == 'hold-vps'
+            || github.event.label.name == 'do-not-merge'
+            || github.event.label.name == 'wip'
+            || contains(github.event.pull_request.labels.*.name, 'omni-queue')
+            || (github.event.action == 'closed' && github.event.pull_request.merged == true))))
     runs-on: ubuntu-latest
+    # Secrets and branch policy of the environment, without a deployment record per run.
+    environment:
+      name: omni-queue
+      deployment: false
     timeout-minutes: 30
     # ONE writer of queue state at a time, across every base and every trigger. Never cancel a
     # running tick (it may be between a push and the state save that records it); GitHub keeps
@@ -155,7 +182,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.OMNI_QUEUE_APP_ID }}
+          client-id: ${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}
           private-key: ${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}
           permission-contents: write
           # GitHub refuses a push by an App token that creates or updates a file under
@@ -165,7 +192,9 @@ jobs:
           permission-workflows: write
           permission-pull-requests: write
           permission-issues: write
-          permission-statuses: read
+          # omni-queue/land: on a candidate or the PR heads before a landing, on one commit for a
+          # bless, and withdrawn (failure) when a landing does not complete.
+          permission-statuses: write
           permission-checks: read
           permission-actions: read
       # The default branch's orchestrator, never the PR's code.
@@ -180,7 +209,8 @@ jobs:
         with:
           package-manager-cache: false
           node-version: "24"
-      # Queue merge commits are authored by the App's bot user (<id>+<slug>[bot] noreply).
+      # The App's bot user (<id>+<slug>[bot] noreply). It authors queue merge commits unless
+      # config.landing.actor is "owner" (then landing.identity does: tick.createTickDeps).
       - name: Resolve the bot identity
         id: identity
         env:
@@ -202,16 +232,24 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       # Inputs travel through env and are assembled into an argv array: no expression is ever
       # expanded inside the script body. Scheduled, workflow_run and pull_request_target ticks
-      # pass no base (the tick discovers the bases with work).
+      # pass no base (the tick discovers the bases with work). The owner's land token is used
+      # only by the landing itself when config.landing.actor is "owner" (never printed).
+      # GITHUB_ACTOR and GITHUB_TRIGGERING_ACTOR are the runner's own default variables, named
+      # here because a bless is checked against both: the original dispatcher, whose inputs a
+      # re-run keeps, and whoever triggered this run (the re-runner of a re-run).
       - name: Run one queue tick
         env:
           OMNI_QUEUE_TOKEN: ${{ steps.app-token.outputs.token }}
-          OMNI_QUEUE_GIT_NAME: ${{ steps.identity.outputs.name }}
-          OMNI_QUEUE_GIT_EMAIL: ${{ steps.identity.outputs.email }}
+          OMNI_QUEUE_LAND_TOKEN: ${{ secrets.OMNI_QUEUE_LAND_TOKEN }}
+          OMNI_QUEUE_BOT_NAME: ${{ steps.identity.outputs.name }}
+          OMNI_QUEUE_BOT_EMAIL: ${{ steps.identity.outputs.email }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_BASE: ${{ inputs.base }}
           INPUT_ACTION: ${{ inputs.action }}
           INPUT_REASON: ${{ inputs.reason }}
+          INPUT_SHA: ${{ inputs.sha }}
         run: |
           set -euo pipefail
           args=()
@@ -219,5 +257,6 @@ jobs:
             if [ -n "${INPUT_BASE:-}" ]; then args+=(--base "$INPUT_BASE"); fi
             args+=(--action "${INPUT_ACTION:-tick}")
             if [ -n "${INPUT_REASON:-}" ]; then args+=(--reason "$INPUT_REASON"); fi
+            if [ -n "${INPUT_SHA:-}" ]; then args+=(--sha "$INPUT_SHA"); fi
           fi
           node scripts/merge-queue/tick.mjs "${args[@]}"

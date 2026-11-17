@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                   |               v3.8.50                | **v3.8.51** |      `v3.8.54+`       |
+|                                   |               v3.8.50                | **v3.8.51** |      `v3.8.55+`       |
 | --------------------------------- | :----------------------------------: | :---------: | :-------------------: |
 | 🌐 Մատակարարներ                   |                 352                  |   **358**   |          389          |
 | 🧠 Զրույցի եզակի մոդելների ID-ներ |                 1320                 |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar-ի օգտագործումը կամընտիր է, և այն աշխատու�
 
 </div>
 
-> Վերջին կարևոր փոփոխությունները՝ **v3.8.20 → v3.8.54**։ Ամբողջ պատմությունը՝ [`CHANGELOG.md`](CHANGELOG.md)։
+> Վերջին կարևոր փոփոխությունները՝ **v3.8.20 → v3.8.55**։ Ամբողջ պատմությունը՝ [`CHANGELOG.md`](CHANGELOG.md)։
 
 - **⚖️ `quota-weighted` երթուղավորում** — 20-րդ կոմբո ռազմավարությունը բաց է թողնում սպառված հաշիվները, ապա մնացածներից ընտրում է՝ ազատ քվոտա ÷ ընթացիկ բեռնվածությանը համամասնորեն՝ պահպանելով առկա խոսակցությունների ամրակցումը։ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless ռեժիմ** — `omniroute serve --headless` (կամ `OMNIROUTE_HEADLESS=1`) գործարկում է միայն `/v1/*` պրոքսի շարժիչը՝ անջատելով վահանակը և միայն վահանակին վերաբերող ենթահամակարգերը։ → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Տեսնո՞ւմ եք `npm warn ERESOLVE` կամ peer-dep նախազգուշացումներ։ [Դրանք անվնաս են](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)։
-> **Օգտագործո՞ւմ եք npm 11 կամ ավելի ուշ տարբերակ։** npm-ը կարող է արգելափակել package lifecycle scripts-ը, եթե դրանք թույլատրված չեն։ OmniRoute-ի `postinstall`-ը (`node scripts/build/postinstall.mjs`) անհրաժեշտ է native runtime ֆայլերը պատրաստելու համար։ Globally տեղադրելիս թույլատրեք npm-ի նախազգուշացման մեջ նշված փաթեթները։ OmniRoute 3.8.54-ի հաղորդած փաթեթների հավաքածուի համար՝
+> **Օգտագործո՞ւմ եք npm 11 կամ ավելի ուշ տարբերակ։** npm-ը կարող է արգելափակել package lifecycle scripts-ը, եթե դրանք թույլատրված չեն։ OmniRoute-ի `postinstall`-ը (`node scripts/build/postinstall.mjs`) անհրաժեշտ է native runtime ֆայլերը պատրաստելու համար։ Globally տեղադրելիս թույլատրեք npm-ի նախազգուշացման մեջ նշված փաթեթները։ OmniRoute 3.8.55-ի հաղորդած փաթեթների հավաքածուի համար՝
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
   <tr><td nowrap><b>Կատարման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> և <code>open-sse/</code> պանակներում (v2.0-ից ի վեր core-ում զրո <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ֆրեյմվորք</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — տիրույթի 147 մոդուլ, 238 միգրացիա</td></tr>
+  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — տիրույթի 147 մոդուլ, 240 միգրացիա</td></tr>
   <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստի որոնում + int8-քվանտավորված վեկտորային ներդրումներ, տիպավորված մարում</td></tr>
   <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների I/O վավերացում + API պայմանագրեր</td></tr>
   <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ MIT լիցենզիա - մանրամասների համար տես [LICENSE](LICE
 
 **[⬆ Վերադառնալ վերև](#-omniroute)** · Ստեղծված է ❤️-ով՝ բաց կոդով AI համայնքի համար։
 
-<sub>Ստեղծող՝ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT լիցենզիա · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ստեղծող՝ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT լիցենզիա · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions-ը միացված է համայնքի հարցուպատասխանի համար -->

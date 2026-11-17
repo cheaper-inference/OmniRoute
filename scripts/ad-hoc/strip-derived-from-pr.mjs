@@ -52,6 +52,8 @@ export function classifyFile(file, { claimFiles, instructionFiles }) {
 /**
  * Each managed value the head changed goes back to the base value of the same claim (same check,
  * same position). A check whose claim count differs between base and head is left to a human.
+ * The replacement is the base's own text for that claim, not the parsed value: a mirror that
+ * writes "۲۳۳" must get "۲۳۳" back, or the line still differs from the base and keeps conflicting.
  */
 export function restoreClaims(base, head, checks) {
   const edits = [];
@@ -72,6 +74,7 @@ export function restoreClaims(base, head, checks) {
           label: check.label,
           from: hv[i],
           to: bv[i],
+          text: b[i].start >= 0 ? (base ?? "").slice(b[i].start, b[i].end) : bv[i],
           start: claim.start,
           end: claim.end,
         });
@@ -84,7 +87,7 @@ export function restoreClaims(base, head, checks) {
     const key = `${e.start}:${e.end}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    content = content.slice(0, e.start) + e.to + content.slice(e.end);
+    content = content.slice(0, e.start) + e.text + content.slice(e.end);
   }
   for (const check of checks) {
     if (!edits.some((e) => e.label === check.label)) continue;
@@ -279,6 +282,24 @@ function tryGit(args, opts) {
   }
 }
 
+/**
+ * A file's exact bytes at `ref` (null when the path does not exist there). Never trimmed: the
+ * restore must reproduce the merge-base blob byte for byte — a trimmed read drops the final
+ * newline, leaves the file "modified" and the PR still conflicting.
+ */
+export function readBlob(ref, file, { cwd = ROOT } = {}) {
+  try {
+    return execFileSync("git", ["show", `${ref}:${file}`], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      maxBuffer: 256 << 20,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export const RESTORE_MESSAGE = [
   "chore: drop derived values the release refresh now owns",
   "",
@@ -363,8 +384,8 @@ async function main() {
     const changed = git(["diff", "--name-only", mb, ref]).split("\n").filter(Boolean);
     const plan = planPrRestore({
       changed,
-      readBase: (f) => tryGit(["show", `${mb}:${f}`]),
-      readHead: (f) => tryGit(["show", `${ref}:${f}`]),
+      readBase: (f) => readBlob(mb, f),
+      readHead: (f) => readBlob(ref, f),
       ctx,
     });
     const entry = {

@@ -20,6 +20,13 @@ import {
   trackStreamPartialUsage,
 } from "../../open-sse/utils/streamPartialUsage.ts";
 
+const reportedEvidence = {
+  input: { source: "reported" },
+  output: { source: "reported" },
+  cacheRead: { source: "unknown" },
+  cacheCreation: { source: "unknown" },
+};
+
 const encoder = new TextEncoder();
 
 const REQUEST_BODY = {
@@ -205,6 +212,11 @@ test("resolvePartialStreamUsage: preserves positive detail counters and omits em
       cache_read_input_tokens: 30,
       cache_creation_input_tokens: 10,
       reasoning_tokens: 5,
+      usage_evidence: {
+        ...reportedEvidence,
+        cacheRead: { source: "reported" },
+        cacheCreation: { source: "reported" },
+      },
     }
   );
   assert.deepEqual(
@@ -218,9 +230,15 @@ test("resolvePartialStreamUsage: preserves positive detail counters and omits em
       contentLength: 0,
       body: REQUEST_BODY,
     }),
-    // Empty/negative counters are still omitted; the negative cache-write total is kept only
+    // Explicit zero stays reported; the negative cache-write total is kept only
     // as its diagnostic tier status (#17307), never as a counter.
-    { ...base, total_tokens: 120, cache_creation_tier_status: "invalid" }
+    {
+      ...base,
+      total_tokens: 120,
+      cache_read_input_tokens: 0,
+      cache_creation_tier_status: "invalid",
+      usage_evidence: { ...reportedEvidence, cacheRead: { source: "reported" } },
+    }
   );
 });
 
@@ -230,7 +248,12 @@ test("resolvePartialStreamUsage: reported usage is returned verbatim, not estima
     contentLength: 5000,
     body: REQUEST_BODY,
   });
-  assert.deepEqual(usage, { prompt_tokens: 100, completion_tokens: 42, total_tokens: 142 });
+  assert.deepEqual(usage, {
+    prompt_tokens: 100,
+    completion_tokens: 42,
+    total_tokens: 142,
+    usage_evidence: reportedEvidence,
+  });
 });
 
 test("resolvePartialStreamUsage: no reported usage + emitted output → flagged estimate", () => {
@@ -278,7 +301,12 @@ test("resolvePartialStreamUsage: input_tokens/output_tokens shape is normalized"
     contentLength: 0,
     body: REQUEST_BODY,
   });
-  assert.deepEqual(usage, { prompt_tokens: 30, completion_tokens: 9, total_tokens: 39 });
+  assert.deepEqual(usage, {
+    prompt_tokens: 30,
+    completion_tokens: 9,
+    total_tokens: 39,
+    usage_evidence: reportedEvidence,
+  });
 });
 
 // ── real SSE transform: the snapshot reflects what was streamed so far ─────────────────────

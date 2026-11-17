@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  LAND_WITHDRAWALS_LIMIT,
   STATE_BRANCH,
   appendEvent,
   initialState,
@@ -65,6 +66,47 @@ test("first save creates the orphan state branch with the file; reload round-tri
   const reloaded = await store.load(BASE);
   assert.equal(reloaded.version, saved.version);
   assert.deepEqual(reloaded.state, saved.state);
+});
+
+test("hang flags of base signatures and the in-flight timed-out run count survive a round trip", async () => {
+  const { store } = setup();
+  const { state, version } = await store.load(BASE);
+  const sha = (c) => c.repeat(40);
+  const hang = { check: "Unit Tests", key: "", infra: false, hang: true };
+  const next = {
+    ...state,
+    baseChecks: [
+      {
+        baseSha: sha("a"),
+        ref: `omni-queue/release-v3.8.54/basecheck-${sha("a").slice(0, 12)}`,
+        status: "red",
+        startedAt: "2026-11-13T12:00:00.000Z",
+        signatures: [{ check: "Gate / CI", key: "x", infra: false }, hang],
+      },
+    ],
+    inFlight: {
+      batchId: "b1-r1",
+      kind: "batch",
+      candidateRef: `omni-queue/release-v3.8.54/b1-r1-${sha("b").slice(0, 12)}`,
+      candidateSha: sha("b"),
+      baseSha: sha("a"),
+      treeSha: null,
+      prs: [],
+      stage: "testing",
+      startedAt: "2026-11-13T12:00:00.000Z",
+      attempts: 1,
+      timedOutRuns: 1,
+      bisect: null,
+    },
+  };
+  const saved = await store.save(BASE, next, version, "hang");
+  assert.equal(saved.ok, true);
+  const reloaded = (await store.load(BASE)).state;
+  assert.deepEqual(reloaded.baseChecks[0].signatures, [
+    { check: "Gate / CI", key: "x", infra: false },
+    hang,
+  ]);
+  assert.equal(reloaded.inFlight.timedOutRuns, 1);
 });
 
 test("save with the version read updates in place; a stale version is a conflict", async () => {
@@ -194,6 +236,133 @@ test("load: tolerates a client that returns the raw base64 payload", async () =>
   const { state, version } = await store.load(BASE);
   assert.equal(state.base, BASE);
   assert.equal(version, "s1");
+});
+
+/** A stored document with a batch at the landing stage; `extra` is merged into the batch. */
+function landingDocument(extra) {
+  const sha = (c) => c.repeat(40);
+  return {
+    ...initialState(BASE),
+    inFlight: {
+      batchId: "b1",
+      kind: "batch",
+      candidateRef: `omni-queue/release-v3.8.54/b1-${sha("b").slice(0, 12)}`,
+      candidateSha: sha("b"),
+      baseSha: sha("a"),
+      treeSha: null,
+      prs: [],
+      stage: "landing",
+      startedAt: "2026-11-13T12:00:00.000Z",
+      attempts: 0,
+      bisect: null,
+      ...extra,
+    },
+  };
+}
+
+test("load: inFlight.landAttempts is accepted when absent (a document of the older code)", async () => {
+  const { gh, store } = setup();
+  gh.contents.set(KEY, { content: JSON.stringify(landingDocument({})), sha: "s1" });
+  const { state } = await store.load(BASE);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal("landAttempts" in state.inFlight, false);
+});
+
+test("load: inFlight.landAttempts is accepted as a non-negative integer", async () => {
+  for (const landAttempts of [0, 1, 3]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(landingDocument({ landAttempts })), sha: "s1" });
+    assert.equal((await store.load(BASE)).state.inFlight.landAttempts, landAttempts);
+  }
+});
+
+test("load: inFlight.landAttempts as a string, a negative or a fraction is refused", async () => {
+  for (const landAttempts of ["2", -1, 1.5]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(landingDocument({ landAttempts })), sha: "s1" });
+    await assert.rejects(
+      store.load(BASE),
+      /invalid state \(inFlight\.landAttempts\)/,
+      JSON.stringify(landAttempts)
+    );
+    const invalid = landingDocument({ landAttempts });
+    await assert.rejects(store.save(BASE, invalid, null, "bad"), StateError);
+  }
+});
+
+/** One stored land withdrawal (a `failure` write GitHub refused); `extra` overrides fields. */
+function withdrawalEntry(i, extra = {}) {
+  const sha = (c) => c.repeat(40);
+  return {
+    sha: String(i % 10).repeat(39) + "c",
+    batchId: `b${i}`,
+    candidateSha: sha("d"),
+    why: "batch abandoned",
+    since: "2026-11-13T12:00:00.000Z",
+    attempts: 1,
+    ...extra,
+  };
+}
+
+const withWithdrawals = (landWithdrawals) => ({ ...initialState(BASE), landWithdrawals });
+
+test("load: a state without landWithdrawals loads (a document of the older code)", async () => {
+  const { gh, store } = setup();
+  gh.contents.set(KEY, { content: JSON.stringify(initialState(BASE)), sha: "s1" });
+  const { state } = await store.load(BASE);
+  assert.equal("landWithdrawals" in state, false);
+});
+
+test("load: landWithdrawals is accepted up to LAND_WITHDRAWALS_LIMIT entries, one per SHA", async () => {
+  assert.equal(LAND_WITHDRAWALS_LIMIT, 20);
+  const full = Array.from({ length: 20 }, (_, i) =>
+    withdrawalEntry(i, { sha: i.toString(16).padStart(40, "0") })
+  );
+  for (const landWithdrawals of [[], [withdrawalEntry(1, { attempts: 7 })], full]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(withWithdrawals(landWithdrawals)), sha: "s1" });
+    assert.deepEqual((await store.load(BASE)).state.landWithdrawals, landWithdrawals);
+  }
+});
+
+test("load: a malformed landWithdrawals is refused, and never saved", async () => {
+  const sha = (n) => n.toString(16).padStart(40, "0");
+  const cases = [
+    ["not an array", { sha: sha(1) }, /\(landWithdrawals\)/],
+    [
+      "more than 20",
+      Array.from({ length: 21 }, (_, i) => withdrawalEntry(i, { sha: sha(i) })),
+      /\(landWithdrawals\)/,
+    ],
+    [
+      "a repeated SHA",
+      [withdrawalEntry(1), withdrawalEntry(2, { sha: withdrawalEntry(1).sha })],
+      /landWithdrawals\[1\]\.sha/,
+    ],
+    ["an entry that is not an object", ["x"], /landWithdrawals\[0\]/],
+    ["a short sha", [withdrawalEntry(1, { sha: "abc" })], /landWithdrawals\[0\]\.sha/],
+    ["no batchId", [withdrawalEntry(1, { batchId: "" })], /landWithdrawals\[0\]\.batchId/],
+    [
+      "a bad candidateSha",
+      [withdrawalEntry(1, { candidateSha: null })],
+      /landWithdrawals\[0\]\.candidateSha/,
+    ],
+    ["a why that is not text", [withdrawalEntry(1, { why: 3 })], /landWithdrawals\[0\]\.why/],
+    ["a since that is not a date", [withdrawalEntry(1, { since: "soon" })], /\.since/],
+    ["zero attempts", [withdrawalEntry(1, { attempts: 0 })], /landWithdrawals\[0\]\.attempts/],
+    ["fractional attempts", [withdrawalEntry(1, { attempts: 1.5 })], /\.attempts/],
+    ["attempts as text", [withdrawalEntry(1, { attempts: "2" })], /\.attempts/],
+  ];
+  for (const [what, landWithdrawals, pattern] of cases) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(withWithdrawals(landWithdrawals)), sha: "s1" });
+    await assert.rejects(store.load(BASE), pattern, what);
+    await assert.rejects(
+      store.save(BASE, withWithdrawals(landWithdrawals), null, "bad"),
+      StateError
+    );
+    assert.deepEqual(gh.writes, [], what);
+  }
 });
 
 test("save refuses an invalid state or a base mismatch without writing", async () => {

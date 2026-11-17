@@ -1,8 +1,11 @@
-// omni-queue ruleset (plan §3.9): config/merge-queue/ruleset.release.json and
+// omni-queue rulesets (plan §3.9): config/merge-queue/ruleset.release.json (the status door of a
+// release branch), ruleset.queue-refs.json (the queue's own refs) and
 // scripts/merge-queue/apply-ruleset.mjs. The GitHub client is a recording fake: no network.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
   BASE_PLACEHOLDER,
@@ -19,8 +22,25 @@ import {
 } from "../../../scripts/merge-queue/apply-ruleset.mjs";
 
 const template = JSON.parse(readFileSync(DEFAULT_TEMPLATE_PATH, "utf8"));
+const QUEUE_REFS_TEMPLATE_PATH = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "..",
+  "config",
+  "merge-queue",
+  "ruleset.queue-refs.json"
+);
+/** Read lazily so a missing file fails the tests that need it, not the whole file. */
+const queueRefsTemplate = () => JSON.parse(readFileSync(QUEUE_REFS_TEMPLATE_PATH, "utf8"));
 const BASE = "release/v3.8.55";
 const APP_ID = 123456;
+const STATUS_CONTEXT = "omni-queue/land";
+
+/** buildRuleset for the release template with the usual inputs; `extra` overrides any of them. */
+const build = (extra = {}, tpl = template) =>
+  buildRuleset(tpl, { base: BASE, appId: APP_ID, statusContext: STATUS_CONTEXT, ...extra });
+const statusRule = (body) => body.rules.find((r) => r.type === "required_status_checks");
 
 /**
  * Recording fake of the github.mjs ruleset methods plus the two GETs apply-ruleset issues: the
@@ -117,13 +137,31 @@ const LIVE_PULL_REQUEST_PARAMETERS = Object.freeze({
   allowed_merge_methods: ["merge", "squash", "rebase"],
 });
 
-/** asServer() plus the extra parameters GitHub adds to a pull_request rule on read. */
+/**
+ * required_status_checks parameters as GET echoes them: every flag spelled out, the check as
+ * {context, integration_id}. (Shape of the rehearsal ruleset, 2026-11-15.)
+ */
+const liveStatusParameters = (integrationId = APP_ID, context = STATUS_CONTEXT) => ({
+  strict_required_status_checks_policy: false,
+  do_not_enforce_on_create: false,
+  required_status_checks: [{ context, integration_id: integrationId }],
+});
+
+/** asServer() plus the extra parameters GitHub adds to the rules on read. */
 function liveEcho(body, id = 42) {
   const server = asServer(body, id);
-  server.rules.find((r) => r.type === "pull_request").parameters = structuredClone(
-    LIVE_PULL_REQUEST_PARAMETERS
-  );
+  server.rules.find((r) => r.type === "required_status_checks").parameters = liveStatusParameters();
   return server;
+}
+
+/** A release ruleset body that also carries a pull_request rule (a legacy / drifted shape). */
+function withPullRequestRule(body) {
+  const copy = structuredClone(body);
+  copy.rules.push({
+    type: "pull_request",
+    parameters: structuredClone(LIVE_PULL_REQUEST_PARAMETERS),
+  });
+  return copy;
 }
 
 /** The live foreign ruleset that also covers the active release (the default branch). */
@@ -177,8 +215,12 @@ const capture = () => {
   };
 };
 
-// ───────────────────────────── the template ─────────────────────────────
+// ───────────────────────────── the templates ─────────────────────────────
 
+const RuleSchema = z.object({
+  type: z.string(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
+});
 const RulesetTemplateSchema = z.strictObject({
   _comment: z.string(),
   name: z.string().min(1),
@@ -186,13 +228,11 @@ const RulesetTemplateSchema = z.strictObject({
   enforcement: z.literal("active"),
   conditions: z.strictObject({
     ref_name: z.strictObject({
-      include: z.array(z.string()).length(1),
+      include: z.array(z.string()).min(1),
       exclude: z.array(z.string()).length(0),
     }),
   }),
-  rules: z.array(
-    z.object({ type: z.string(), parameters: z.record(z.string(), z.unknown()).optional() })
-  ),
+  rules: z.array(RuleSchema),
   bypass_actors: z.array(
     z.strictObject({
       actor_id: z.number().int().positive().nullable(),
@@ -202,50 +242,93 @@ const RulesetTemplateSchema = z.strictObject({
   ),
 });
 
-test("template: valid REST shape with the base placeholder", () => {
+test("release template: valid REST shape with the base placeholder", () => {
   const parsed = RulesetTemplateSchema.safeParse(template);
   assert.equal(parsed.success, true, JSON.stringify(parsed.error?.issues));
   assert.deepEqual(template.conditions.ref_name.include, [`refs/heads/${BASE_PLACEHOLDER}`]);
 });
 
-test("template: exactly deletion, non_fast_forward and pull_request — no check requirement", () => {
-  const types = template.rules.map((r) => r.type).sort();
-  assert.deepEqual(types, ["deletion", "non_fast_forward", "pull_request"]);
+test("release template: deletion, non_fast_forward and one status check — no pull_request", () => {
+  assert.deepEqual(
+    template.rules.map((r) => r.type),
+    ["deletion", "non_fast_forward", "required_status_checks"]
+  );
+  assert.ok(!template.rules.some((r) => r.type === "pull_request"), "no pull_request rule");
   for (const type of CHECK_REQUIRING_RULE_TYPES) {
-    assert.ok(!types.includes(type), `${type} must not be in the release ruleset`);
+    if (type === "required_status_checks") continue;
+    assert.ok(
+      !template.rules.some((r) => r.type === type),
+      `${type} must not be in the release ruleset`
+    );
   }
-  const pr = template.rules.find((r) => r.type === "pull_request");
-  assert.equal(pr.parameters.required_approving_review_count, 0);
-  for (const flag of [
-    "dismiss_stale_reviews_on_push",
-    "require_code_owner_review",
-    "require_last_push_approval",
-    "required_review_thread_resolution",
-    // GitHub stores true when absent (live GET); pinned so the noop comparison is stable
-    "require_extra_approval_for_unattributed_changes",
-  ]) {
-    assert.equal(pr.parameters[flag], false, flag);
-  }
+  assert.deepEqual(statusRule(template).parameters, {
+    strict_required_status_checks_policy: false,
+    do_not_enforce_on_create: false,
+    required_status_checks: [{ context: "{{statusContext}}", integration_id: null }],
+  });
 });
 
-test("template: App bypass slot (filled from --app-id) and the admin role (id 5)", () => {
-  const app = template.bypass_actors.find((a) => a.actor_type === "Integration");
-  const admin = template.bypass_actors.find((a) => a.actor_type === "RepositoryRole");
-  assert.deepEqual(app, { actor_id: null, actor_type: "Integration", bypass_mode: "always" });
-  assert.deepEqual(admin, { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" });
-  assert.equal(template.bypass_actors.length, 2);
+test("release template: no bypass actor at all (the status is the only door)", () => {
+  assert.deepEqual(template.bypass_actors, []);
+});
+
+test("queue-refs template: valid REST shape, the queue's refs, App-only bypass slot", () => {
+  const qr = queueRefsTemplate();
+  const parsed = RulesetTemplateSchema.safeParse(qr);
+  assert.equal(parsed.success, true, JSON.stringify(parsed.error?.issues));
+  assert.deepEqual(qr.conditions.ref_name.include, [
+    "refs/heads/omni-queue-state",
+    "refs/heads/omni-queue/**/*",
+  ]);
+  assert.deepEqual(qr.rules.map((r) => r.type).sort(), [
+    "creation",
+    "deletion",
+    "non_fast_forward",
+    "update",
+  ]);
+  assert.deepEqual(qr.bypass_actors, [
+    { actor_id: null, actor_type: "Integration", bypass_mode: "always" },
+  ]);
+  assert.ok(!JSON.stringify(qr).includes(BASE_PLACEHOLDER), "no base placeholder");
+});
+
+test("queue-refs template: no include pattern ends in a trailing double star", () => {
+  // In GitHub's ruleset patterns a trailing `**` matches ONE path segment only (measured against
+  // GitHub on 2026-11-15): `omni-queue/**` covered `omni-queue/x` but not the two-segment
+  // candidate refs `omni-queue/<base>/<batchId>-<sha12>`, so a user token could plant them.
+  // `omni-queue/**/*` covers every depth.
+  for (const pattern of queueRefsTemplate().conditions.ref_name.include) {
+    assert.ok(!pattern.endsWith("/**"), `${pattern} ends in a trailing double star`);
+  }
 });
 
 // ───────────────────────────── buildRuleset ─────────────────────────────
 
-test("buildRuleset fills the branch, the name suffix and the App id; keeps the admin", () => {
-  const body = buildRuleset(template, { base: BASE, appId: APP_ID });
+test("release ruleset: one required status pinned to the App and no bypass actor", () => {
+  const rs = buildRuleset(template, {
+    base: "release/v9.9.9",
+    appId: 123,
+    statusContext: "omni-queue/land",
+  });
+  assert.deepEqual(rs.bypass_actors, []);
+  assert.deepEqual(
+    rs.rules.map((r) => r.type),
+    ["deletion", "non_fast_forward", "required_status_checks"]
+  );
+  assert.deepEqual(rs.rules[2].parameters.required_status_checks, [
+    { context: "omni-queue/land", integration_id: 123 },
+  ]);
+  assert.equal(rs.rules[2].parameters.strict_required_status_checks_policy, false);
+  assert.equal(rs.rules[2].parameters.do_not_enforce_on_create, false);
+});
+
+test("buildRuleset fills the branch, the name suffix, the status context and the App id", () => {
+  const body = build({ statusContext: "omni-queue/land-x" });
   assert.equal(body.name, `${template.name}: ${BASE}`);
   assert.deepEqual(body.conditions.ref_name.include, [`refs/heads/${BASE}`]);
   assert.deepEqual(body.conditions.ref_name.exclude, []);
-  assert.deepEqual(body.bypass_actors, [
-    { actor_id: APP_ID, actor_type: "Integration", bypass_mode: "always" },
-    { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
+  assert.deepEqual(statusRule(body).parameters.required_status_checks, [
+    { context: "omni-queue/land-x", integration_id: APP_ID },
   ]);
   assert.equal(body._comment, undefined, "private keys are stripped from the REST body");
   assert.ok(!JSON.stringify(body).includes("{{"));
@@ -257,15 +340,16 @@ test("buildRuleset fills the branch, the name suffix and the App id; keeps the a
 
 test("buildRuleset does not mutate the template", () => {
   const before = JSON.stringify(template);
-  buildRuleset(template, { base: BASE, appId: APP_ID });
+  build();
   assert.equal(JSON.stringify(template), before);
 });
 
-test("buildRuleset without an App id leaves the Integration actor out, admin stays", () => {
-  const body = buildRuleset(template, { base: BASE, appId: null });
-  assert.deepEqual(body.bypass_actors, [
-    { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
+test("buildRuleset without an App id leaves integration_id out (preview only)", () => {
+  const body = build({ appId: null });
+  assert.deepEqual(statusRule(body).parameters.required_status_checks, [
+    { context: STATUS_CONTEXT },
   ]);
+  assert.deepEqual(body.bypass_actors, []);
 });
 
 test("buildRuleset rejects unsafe branches, bad App ids and templates without a placeholder", () => {
@@ -282,56 +366,236 @@ test("buildRuleset rejects unsafe branches, bad App ids and templates without a 
     "release/v1.lock",
     "release v1",
   ]) {
-    assert.throws(() => buildRuleset(template, { base, appId: APP_ID }), /invalid base/, base);
+    assert.throws(() => build({ base }), /invalid base/, base);
   }
   for (const appId of [0, -1, 1.5, "123"]) {
-    assert.throws(() => buildRuleset(template, { base: BASE, appId }), /invalid app id/);
+    assert.throws(() => build({ appId }), /invalid app id/);
   }
   const noPlaceholder = structuredClone(template);
   noPlaceholder.conditions.ref_name.include = ["refs/heads/release/*"];
-  assert.throws(() => buildRuleset(noPlaceholder, { base: BASE, appId: APP_ID }), /\{\{base\}\}/);
-  assert.throws(() => buildRuleset({ ...template, rules: [] }, { base: BASE, appId: 1 }), /rules/);
+  assert.throws(() => build({}, noPlaceholder), /\{\{base\}\}/);
+  assert.throws(() => build({ appId: 1 }, { ...template, rules: [] }), /rules/);
+  assert.throws(
+    () => buildRuleset(template, { appId: APP_ID, statusContext: STATUS_CONTEXT }),
+    /invalid base/,
+    "a template with the base placeholder needs a base"
+  );
+});
+
+test("buildRuleset: the status context must be a valid context", () => {
+  for (const statusContext of [undefined, null, "", "has space", "x".repeat(101), 7]) {
+    assert.throws(() => build({ statusContext }), /status context/, String(statusContext));
+  }
+});
+
+test("release ruleset: any other required check in the template is refused", () => {
+  const withRule = (mutate) => {
+    const tpl = structuredClone(template);
+    mutate(statusRule(tpl).parameters, tpl);
+    return tpl;
+  };
+  // a second check next to the land status
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) =>
+          p.required_status_checks.push({ context: "Gate / CI", integration_id: null })
+        )
+      ),
+    /exactly one/
+  );
+  // a different context
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.required_status_checks[0].context = "Gate / CI"))
+      ),
+    /omni-queue\/land/
+  );
+  // no check at all
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.required_status_checks = []))
+      ),
+    /exactly one/
+  );
+  // strict policy would make the candidate re-validate against a moving base
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.strict_required_status_checks_policy = true))
+      ),
+    /strict_required_status_checks_policy/
+  );
+  // both flags must be exactly false: enforcing nothing on creation would let a new branch in
+  // without the land status, and a non-boolean must not pass the strict check
+  for (const [flag, value] of [
+    ["do_not_enforce_on_create", true],
+    ["do_not_enforce_on_create", "false"],
+    ["do_not_enforce_on_create", undefined],
+    ["strict_required_status_checks_policy", "true"],
+    ["strict_required_status_checks_policy", 1],
+    ["strict_required_status_checks_policy", undefined],
+  ]) {
+    assert.throws(
+      () =>
+        build(
+          {},
+          withRule((p) => {
+            if (value === undefined) delete p[flag];
+            else p[flag] = value;
+          })
+        ),
+      new RegExp(`${flag} must be false`),
+      `${flag}: ${JSON.stringify(value)}`
+    );
+  }
+  // the status rule without parameters
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((_p, tpl) => delete statusRule(tpl).parameters)
+      ),
+    /required_status_checks needs parameters/
+  );
+  // an unexpected parameter of the status rule
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.extra_selector = true))
+      ),
+    /required_status_checks has an unexpected key: extra_selector/
+  );
+  // a template that pins an App itself: the id comes from --app-id only
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.required_status_checks[0].integration_id = 42))
+      ),
+    /integration_id of the required status check is filled from --app-id/
+  );
+  // an unknown key on the check (a pinned app other than ours, an extra selector)
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.required_status_checks[0].extra = 1))
+      ),
+    /unexpected key/
+  );
+  // the other check-requiring rule types stay forbidden
+  for (const type of CHECK_REQUIRING_RULE_TYPES.filter((t) => t !== "required_status_checks")) {
+    assert.throws(
+      () =>
+        build(
+          {},
+          withRule((_p, tpl) => tpl.rules.push({ type, parameters: {} }))
+        ),
+      new RegExp(type),
+      type
+    );
+  }
+  // the status rule twice is a duplicate rule type
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((_p, tpl) => tpl.rules.push(structuredClone(statusRule(tpl))))
+      ),
+    /duplicate rule types: required_status_checks/
+  );
+});
+
+test("queue-refs ruleset: only the App may create, update or delete", () => {
+  const rs = buildRuleset(queueRefsTemplate(), { appId: APP_ID });
+  assert.equal(rs.name, queueRefsTemplate().name, "fixed name, no branch suffix");
+  assert.deepEqual(rs.conditions.ref_name.include, [
+    "refs/heads/omni-queue-state",
+    "refs/heads/omni-queue/**/*",
+  ]);
+  assert.deepEqual(rs.conditions.ref_name.exclude, []);
+  assert.deepEqual(rs.rules.map((r) => r.type).sort(), [
+    "creation",
+    "deletion",
+    "non_fast_forward",
+    "update",
+  ]);
+  assert.deepEqual(rs.bypass_actors, [
+    { actor_id: APP_ID, actor_type: "Integration", bypass_mode: "always" },
+  ]);
+  assert.equal(rs.enforcement, "active");
+  assert.equal(rs._comment, undefined);
+  assert.ok(!JSON.stringify(rs).includes("{{"));
+
+  const preview = buildRuleset(queueRefsTemplate(), { appId: null });
+  assert.deepEqual(preview.bypass_actors, [], "no App id: the slot is left out (preview)");
+  assert.throws(
+    () => buildRuleset(queueRefsTemplate(), { base: BASE, appId: APP_ID }),
+    /\{\{base\}\}/,
+    "a template without the placeholder takes no base"
+  );
 });
 
 // ───────────────────────────── normalize / diff ─────────────────────────────
 
 test("normalizeRuleset ignores server-only fields, ordering and off-by-default params", () => {
-  const body = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const body = build();
   const server = asServer(body);
   server.rules = [...server.rules].reverse();
-  const pr = server.rules.find((r) => r.type === "pull_request");
+  const status = statusRule(server);
+  status.parameters = {
+    ...liveStatusParameters(),
+    required_status_checks: [{ integration_id: APP_ID, context: STATUS_CONTEXT }],
+    some_future_flag: false,
+  };
+  assert.deepEqual(normalizeRuleset(server), normalizeRuleset(body));
+  assert.deepEqual(diffRulesets(server, body), []);
+
+  // list ordering is also ignored inside a pull_request rule (kept: the same canonicalization)
+  const legacy = withPullRequestRule(body);
+  const legacyServer = asServer(legacy);
+  const pr = legacyServer.rules.find((r) => r.type === "pull_request");
   pr.parameters = {
     ...pr.parameters,
     allowed_merge_methods: ["squash", "rebase", "merge"],
     required_reviewers: [],
     automatic_copilot_code_review_enabled: false,
   };
-  assert.deepEqual(normalizeRuleset(server), normalizeRuleset(body));
-  assert.deepEqual(diffRulesets(server, body), []);
+  assert.deepEqual(diffRulesets(legacyServer, legacy), []);
 });
 
 test("diffRulesets lists a creation, field changes, added/removed rules and actors", () => {
-  const body = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const body = build();
   const created = diffRulesets(null, body);
   assert.ok(created.includes(`+ name: ${JSON.stringify(body.name)}`));
   assert.ok(created.includes("+ rule deletion"));
   assert.ok(created.includes("+ rule non_fast_forward"));
-  assert.ok(created.some((l) => l.startsWith("+ rule pull_request {")));
-  assert.ok(created.includes(`+ bypass Integration:${APP_ID} (always)`));
-  assert.ok(created.includes("+ bypass RepositoryRole:5 (always)"));
+  assert.ok(
+    created.includes(
+      `+ rule required_status_checks ${JSON.stringify({
+        required_status_checks: [{ context: STATUS_CONTEXT, integration_id: APP_ID }],
+      })}`
+    )
+  );
+  assert.ok(!created.some((l) => l.startsWith("+ bypass")), "no bypass actor is created");
 
   const drifted = asServer(body);
   drifted.enforcement = "evaluate";
   drifted.rules = drifted.rules
     .filter((r) => r.type !== "deletion")
-    .concat([
-      {
-        type: "required_status_checks",
-        parameters: { strict_required_status_checks_policy: true },
-      },
-    ]);
-  drifted.rules.find((r) => r.type === "pull_request").parameters.required_approving_review_count =
-    1;
+    .concat([{ type: "pull_request", parameters: { required_approving_review_count: 1 } }]);
+  statusRule(drifted).parameters = {
+    ...liveStatusParameters(777),
+    strict_required_status_checks_policy: true,
+  };
   drifted.bypass_actors = [
     { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "pull_request" },
     { actor_id: 777, actor_type: "Integration", bypass_mode: "always" },
@@ -340,18 +604,42 @@ test("diffRulesets lists a creation, field changes, added/removed rules and acto
   assert.deepEqual(diff, [
     '~ enforcement: "evaluate" → "active"',
     "+ rule deletion",
-    "~ rule pull_request.required_approving_review_count: 1 → (unset)",
-    '- rule required_status_checks {"strict_required_status_checks_policy":true}',
-    `+ bypass Integration:${APP_ID} (always)`,
-    "~ bypass RepositoryRole:5: pull_request → always",
+    `~ rule required_status_checks.required_status_checks: [{"context":"${STATUS_CONTEXT}","integration_id":777}] → [{"context":"${STATUS_CONTEXT}","integration_id":${APP_ID}}]`,
+    "~ rule required_status_checks.strict_required_status_checks_policy: true → (unset)",
+    '- rule pull_request {"required_approving_review_count":1}',
     "- bypass Integration:777 (always)",
+    "- bypass RepositoryRole:5 (pull_request)",
   ]);
+});
+
+test("diffRulesets reports a missing or drifted App bypass on the queue-refs ruleset", () => {
+  const body = buildRuleset(queueRefsTemplate(), { appId: APP_ID });
+
+  // creation lists the App bypass actor
+  assert.ok(diffRulesets(null, body).includes(`+ bypass Integration:${APP_ID} (always)`));
+
+  // a live ruleset without the App actor: the addition is reported (never a noop)
+  const missing = asServer(body, 11);
+  missing.bypass_actors = [];
+  assert.deepEqual(diffRulesets(missing, body), [`+ bypass Integration:${APP_ID} (always)`]);
+
+  // the App present only in pull_request mode: the mode change is reported
+  const prOnly = asServer(body, 11);
+  prOnly.bypass_actors = [
+    { actor_id: APP_ID, actor_type: "Integration", bypass_mode: "pull_request" },
+  ];
+  assert.deepEqual(diffRulesets(prOnly, body), [
+    `~ bypass Integration:${APP_ID}: pull_request → always`,
+  ]);
+
+  // a live ruleset identical to the desired one is still a noop
+  assert.deepEqual(diffRulesets(asServer(body, 11), body), []);
 });
 
 // ───────────────────────────── applyRuleset ─────────────────────────────
 
 test("applyRuleset creates the ruleset when no ruleset has its name", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const gh = fakeGh([{ id: 7, name: "Protect release branches", target: "branch", rules: [] }]);
   const result = await applyRuleset({ gh, base: BASE, desired, dryRun: false });
   assert.equal(result.action, "create");
@@ -366,15 +654,16 @@ test("applyRuleset creates the ruleset when no ruleset has its name", async () =
 });
 
 test("applyRuleset updates a same-named ruleset that drifted", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const drifted = asServer(desired, 42);
-  drifted.bypass_actors = drifted.bypass_actors.filter((a) => a.actor_type !== "Integration");
+  // the old design's admin bypass is still on the live ruleset: applying removes it
+  drifted.bypass_actors = [{ actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" }];
   const gh = fakeGh([drifted]);
   const result = await applyRuleset({ gh, base: BASE, desired, dryRun: false });
   assert.deepEqual(result, {
     action: "update",
     id: 42,
-    diff: [`+ bypass Integration:${APP_ID} (always)`],
+    diff: ["- bypass RepositoryRole:5 (always)"],
   });
   const update = gh.calls.find(([m]) => m === "updateRuleset");
   assert.equal(update[1], 42);
@@ -383,7 +672,7 @@ test("applyRuleset updates a same-named ruleset that drifted", async () => {
 });
 
 test("applyRuleset is a noop when the live ruleset already matches", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const gh = fakeGh([asServer(desired, 42)]);
   const result = await applyRuleset({ gh, base: BASE, desired, dryRun: false });
   assert.deepEqual(result, { action: "noop", id: 42, diff: [] });
@@ -391,7 +680,7 @@ test("applyRuleset is a noop when the live ruleset already matches", async () =>
 });
 
 test("applyRuleset --dry-run reports create/update but never calls a write method", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const empty = fakeGh([]);
   const create = await applyRuleset({ gh: empty, base: BASE, desired, dryRun: true });
   assert.equal(create.action, "create");
@@ -408,7 +697,7 @@ test("applyRuleset --dry-run reports create/update but never calls a write metho
 });
 
 test("applyRuleset refuses duplicates and a body that targets another branch", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const dup = fakeGh([asServer(desired, 1), asServer(desired, 2)]);
   await assert.rejects(
     applyRuleset({ gh: dup, base: BASE, desired, dryRun: false }),
@@ -422,7 +711,7 @@ test("applyRuleset refuses duplicates and a body that targets another branch", a
 });
 
 test("applyRuleset ignores an organization ruleset with the same name", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const org = { ...asServer(desired, 5), source_type: "Organization" };
   const gh = fakeGh([org]);
   const result = await applyRuleset({ gh, base: BASE, desired, dryRun: false });
@@ -502,12 +791,132 @@ test("main applies on a sandbox repo, reading repo and App id from the environme
   );
   assert.equal(code, 0);
   const created = gh.calls.find(([m]) => m === "createRuleset")[1];
-  assert.deepEqual(created.bypass_actors[0], {
-    actor_id: 4242,
-    actor_type: "Integration",
-    bypass_mode: "always",
-  });
+  assert.deepEqual(created.bypass_actors, []);
+  assert.deepEqual(statusRule(created).parameters.required_status_checks, [
+    { context: STATUS_CONTEXT, integration_id: 4242 },
+  ]);
   assert.deepEqual(io.lines.err, []);
+});
+
+test("main takes the status context and the landing actor from the queue config", async () => {
+  const config = { landing: { mode: "merge-ff", actor: "app", statusContext: "omni-queue/other" } };
+  const gh = fakeGh([]);
+  const io = capture();
+  const code = await main(
+    ["--base", BASE, "--app-id", "7"],
+    { GITHUB_REPOSITORY: "acme/sandbox" },
+    { gh, config, ...io }
+  );
+  assert.equal(code, 0);
+  const created = gh.calls.find(([m]) => m === "createRuleset")[1];
+  assert.deepEqual(statusRule(created).parameters.required_status_checks, [
+    { context: "omni-queue/other", integration_id: 7 },
+  ]);
+});
+
+test("main --kind queue-refs applies the queue refs ruleset: no --base, App id required", async () => {
+  const sandbox = { GITHUB_REPOSITORY: "acme/sandbox" };
+  const gh = fakeGh([]);
+  const io = capture();
+  const code = await main(["--kind", "queue-refs", "--app-id", "4242"], sandbox, { gh, ...io });
+  assert.equal(code, 0, io.lines.err.join("\n"));
+  const created = gh.calls.find(([m]) => m === "createRuleset")[1];
+  assert.equal(created.name, queueRefsTemplate().name);
+  assert.deepEqual(created.conditions.ref_name.include, [
+    "refs/heads/omni-queue-state",
+    "refs/heads/omni-queue/**/*",
+  ]);
+  assert.deepEqual(created.bypass_actors, [
+    { actor_id: 4242, actor_type: "Integration", bypass_mode: "always" },
+  ]);
+  assert.ok(
+    !gh.calls.some(([m, , path]) => m === "paginate" || /rules\/branches/.test(path ?? "")),
+    "no landing-path read: there is no release branch to land on"
+  );
+  assert.deepEqual(io.lines.err, []);
+
+  // a second run on the same live ruleset is a noop
+  const again = fakeGh([asServer(created, 11)]);
+  const io2 = capture();
+  assert.equal(
+    await main(["--kind", "queue-refs", "--app-id", "4242"], sandbox, { gh: again, ...io2 }),
+    0
+  );
+  assert.deepEqual(writes(again), []);
+  assert.match(io2.lines.out.join("\n"), /apply-ruleset: noop /);
+
+  // dry-run without an App id previews without the bypass actor and says so
+  const dry = capture();
+  assert.equal(
+    await main(["--kind", "queue-refs", "--dry-run"], sandbox, { gh: fakeGh([]), ...dry }),
+    0
+  );
+  assert.match(dry.lines.err.join("\n"), /leaves out the omni-queue App bypass actor/);
+});
+
+test("main: --kind queue-refs takes no --base; release still requires it; unknown kind refused", async () => {
+  const sandbox = { GITHUB_REPOSITORY: "acme/sandbox" };
+  const silent = { out: () => {}, err: () => {} };
+  const withBase = fakeGh([]);
+  const io = capture();
+  assert.equal(
+    await main(["--kind", "queue-refs", "--base", BASE, "--app-id", "1"], sandbox, {
+      gh: withBase,
+      ...io,
+    }),
+    2
+  );
+  assert.match(io.lines.err.join("\n"), /queue-refs takes no --base/);
+  assert.deepEqual(withBase.calls, []);
+
+  const noBase = capture();
+  assert.equal(
+    await main(["--kind", "release", "--app-id", "1"], sandbox, { gh: fakeGh(), ...noBase }),
+    2
+  );
+  assert.match(noBase.lines.err.join("\n"), /--base is required/);
+  assert.equal(
+    await main(["--kind", "bogus", "--app-id", "1"], sandbox, { gh: fakeGh(), ...silent }),
+    2
+  );
+});
+
+test("a real apply without --app-id is refused for both kinds", async () => {
+  const sandbox = { GITHUB_REPOSITORY: "acme/sandbox" };
+  for (const argv of [
+    ["--base", BASE],
+    ["--kind", "queue-refs"],
+  ]) {
+    const gh = fakeGh([]);
+    const io = capture();
+    assert.equal(await main(argv, sandbox, { gh, ...io }), 2, argv.join(" "));
+    assert.match(io.lines.err.join("\n"), /needs --app-id/, argv.join(" "));
+    assert.deepEqual(gh.calls, [], "refused before any API call");
+  }
+});
+
+test("the production lock covers --kind queue-refs too", async () => {
+  const gh = fakeGh([]);
+  const io = capture();
+  const code = await main(
+    ["--kind", "queue-refs", "--repo", "cheaper-inference/OmniRoute", "--app-id", "1"],
+    {},
+    { gh, ...io }
+  );
+  assert.equal(code, 2);
+  assert.deepEqual(gh.calls, []);
+  assert.match(io.lines.err.join("\n"), /refusing to write a ruleset on cheaper-inference/);
+
+  const live = fakeGh([]);
+  assert.equal(
+    await main(
+      ["--kind", "queue-refs", "--repo", "cheaper-inference/OmniRoute", "--app-id", "1"],
+      { OMNI_QUEUE_ALLOW_PRODUCTION_RULESET: "1" },
+      { gh: live, out: () => {}, err: () => {} }
+    ),
+    0
+  );
+  assert.deepEqual(writes(live), ["createRuleset"]);
 });
 
 test("main: usage errors, a real apply without App id, and API failures", async () => {
@@ -532,7 +941,7 @@ test("main: usage errors, a real apply without App id, and API failures", async 
     await main(["--base", BASE, "--dry-run"], sandbox, { gh: fakeGh([]), ...preview }),
     0
   );
-  assert.match(preview.lines.err.join("\n"), /leaves out the omni-queue App bypass actor/);
+  assert.match(preview.lines.err.join("\n"), /leaves integration_id unpinned/);
 
   const failing = {
     ...fakeGh([]),
@@ -563,8 +972,8 @@ test("main prints usage with --help", async () => {
 
 // ───────────────────────────── review round 2 ─────────────────────────────
 
-test("noop against the real GET payload (dismissal_restriction, required_reviewers, flags)", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+test("noop against the real GET payload (every flag spelled out, check as echoed)", async () => {
+  const desired = build();
   const echo = liveEcho(desired, 42);
   assert.deepEqual(diffRulesets(echo, desired), []);
   const gh = fakeGh([echo]);
@@ -573,9 +982,29 @@ test("noop against the real GET payload (dismissal_restriction, required_reviewe
   assert.deepEqual(writes(gh), [], "a second run must not PUT again");
 });
 
-test("a server-side flag or dismissal restriction that is really on is still drift", () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
-  const flagOn = liveEcho(desired);
+test("a status check that drifted on the server is still drift (strict, context, app pin)", () => {
+  const desired = build();
+  const strictOn = liveEcho(desired);
+  statusRule(strictOn).parameters.strict_required_status_checks_policy = true;
+  assert.deepEqual(diffRulesets(strictOn, desired), [
+    "~ rule required_status_checks.strict_required_status_checks_policy: true → (unset)",
+  ]);
+
+  const otherApp = liveEcho(desired);
+  statusRule(otherApp).parameters = liveStatusParameters(777);
+  const appDiff = diffRulesets(otherApp, desired);
+  assert.equal(appDiff.length, 1);
+  assert.match(appDiff[0], /^~ rule required_status_checks\.required_status_checks: .*777.* → /);
+
+  const noPin = liveEcho(desired);
+  statusRule(noPin).parameters.required_status_checks = [{ context: STATUS_CONTEXT }];
+  assert.equal(diffRulesets(noPin, desired).length, 1, "an unpinned check is not the same check");
+});
+
+test("a pull_request flag or dismissal restriction that is really on is still drift", () => {
+  // normalizeRuleset still canonicalizes every rule type, a legacy pull_request rule included
+  const desired = withPullRequestRule(build());
+  const flagOn = asServer(desired);
   flagOn.rules.find(
     (r) => r.type === "pull_request"
   ).parameters.require_extra_approval_for_unattributed_changes = true;
@@ -583,7 +1012,7 @@ test("a server-side flag or dismissal restriction that is really on is still dri
     "~ rule pull_request.require_extra_approval_for_unattributed_changes: true → (unset)",
   ]);
 
-  const restricted = liveEcho(desired);
+  const restricted = asServer(desired);
   restricted.rules.find((r) => r.type === "pull_request").parameters.dismissal_restriction = {
     enabled: true,
     allowed_actors: [{ actor_id: 9, actor_type: "Team" }],
@@ -597,7 +1026,7 @@ test("a server-side flag or dismissal restriction that is really on is still dri
 });
 
 test("duplicate rule types: reported as drift in the live ruleset, refused in the template", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const dup = liveEcho(desired, 42);
   dup.rules.push({ type: "deletion" });
   assert.deepEqual(diffRulesets(dup, desired), [
@@ -610,18 +1039,19 @@ test("duplicate rule types: reported as drift in the live ruleset, refused in th
 
   const badTemplate = structuredClone(template);
   badTemplate.rules.push({ type: "deletion" });
+  assert.throws(() => build({}, badTemplate), /duplicate rule types: deletion/);
   assert.throws(
-    () => buildRuleset(badTemplate, { base: BASE, appId: APP_ID }),
-    /duplicate rule types: deletion/
-  );
-  assert.throws(
-    () => diffRulesets(null, { ...desired, rules: [...desired.rules, { type: "pull_request" }] }),
-    /duplicate rule types: pull_request/
+    () =>
+      diffRulesets(null, {
+        ...desired,
+        rules: [...desired.rules, { type: "required_status_checks" }],
+      }),
+    /duplicate rule types: required_status_checks/
   );
 });
 
 test("applyRuleset refuses a same-named repository ruleset with another target", async () => {
-  const desired = buildRuleset(template, { base: BASE, appId: APP_ID });
+  const desired = build();
   const gh = fakeGh([{ ...liveEcho(desired, 8), target: "tag" }]);
   await assert.rejects(
     applyRuleset({ gh, base: BASE, desired, dryRun: false }),
@@ -655,6 +1085,73 @@ test("checkLandingPath flags a foreign pull_request rule the App does not bypass
   );
   assert.ok(!gh.calls.some(([m, id]) => m === "getRuleset" && id === 15605329), "safe rules skip");
   assert.ok(LANDING_BLOCKING_RULE_TYPES.includes("pull_request"));
+});
+
+test("landing path, actor owner: a pull_request rule of another ruleset blocks unless admins bypass it", async () => {
+  const check = async (bypass_actors, opts = {}) => {
+    const foreign = { ...structuredClone(REQUIRE_PR_ON_DEFAULT), bypass_actors };
+    const gh = fakeGh([foreign], { branchRules: branchRulesWithForeignPullRequest(42) });
+    return checkLandingPath({
+      gh,
+      repo: "acme/sandbox",
+      base: BASE,
+      ownRulesetId: 42,
+      appId: null, // the owner lands: the App id is not needed to tell
+      actor: "owner",
+      ...opts,
+    });
+  };
+  const blocked = await check([]);
+  assert.equal(blocked.blockers.length, 1, JSON.stringify(blocked));
+  assert.match(
+    blocked.blockers[0],
+    /^rule pull_request from ruleset 21899981 \(Repository cheaper-inference\/OmniRoute\) on release\/v3\.8\.55: the repository owner is not an "always" bypass actor/
+  );
+  assert.deepEqual(blocked.warnings, []);
+
+  const always = (actor_type, actor_id) => [{ actor_type, actor_id, bypass_mode: "always" }];
+  assert.deepEqual(await check(always("RepositoryRole", 5)), { blockers: [], warnings: [] });
+  assert.deepEqual(await check(always("OrganizationAdmin", 1)), { blockers: [], warnings: [] });
+  // the App bypassing is irrelevant when the owner lands
+  assert.equal((await check(always("Integration", APP_ID), { appId: APP_ID })).blockers.length, 1);
+  // other roles, and bypass modes that do not cover a direct push
+  assert.equal((await check(always("RepositoryRole", 4))).blockers.length, 1, "write role");
+  assert.equal(
+    (await check([{ actor_type: "RepositoryRole", actor_id: 5, bypass_mode: "pull_request" }]))
+      .blockers.length,
+    1,
+    "a PR-only bypass misses the owner's direct push"
+  );
+  // the same ruleset, judged for the App: the admin role is not the App
+  assert.equal(
+    (await check(always("RepositoryRole", 5), { actor: "app", appId: APP_ID })).blockers.length,
+    1
+  );
+  await assert.rejects(check([], { actor: "root" }), /invalid landing actor/);
+});
+
+test("landing path, actor owner: an unreadable bypass list blocks; own ruleset is skipped", async () => {
+  const rules = [
+    {
+      type: "pull_request",
+      ruleset_id: 555,
+      ruleset_source_type: "Organization",
+      ruleset_source: "acme",
+    },
+    // our own status rule must not block our own landing
+    { type: "required_status_checks", ruleset_id: 42, ruleset_source_type: "Repository" },
+  ];
+  const gh = fakeGh([], { branchRules: rules });
+  const report = await checkLandingPath({
+    gh,
+    repo: "acme/sandbox",
+    base: BASE,
+    ownRulesetId: 42,
+    appId: null,
+    actor: "owner",
+  });
+  assert.equal(report.blockers.length, 1);
+  assert.match(report.blockers[0], /ruleset 555 \(Organization acme\).*not readable/);
 });
 
 test("checkLandingPath reads every page of the branch rules, not only the first 100", async () => {
@@ -728,7 +1225,12 @@ test("main: a real apply exits 1 when another ruleset would reject the landing p
     branchRules: branchRulesWithForeignPullRequest(999),
   });
   const io = capture();
-  const code = await main(["--base", BASE, "--app-id", String(APP_ID)], sandbox, { gh, ...io });
+  const config = { landing: { mode: "merge-ff", actor: "app", statusContext: STATUS_CONTEXT } };
+  const code = await main(["--base", BASE, "--app-id", String(APP_ID)], sandbox, {
+    gh,
+    config,
+    ...io,
+  });
   assert.equal(code, 1);
   assert.deepEqual(writes(gh), ["createRuleset"], "our ruleset is still written");
   const errors = io.lines.err.join("\n");
@@ -736,7 +1238,24 @@ test("main: a real apply exits 1 when another ruleset would reject the landing p
     errors,
     /error: landing push would be rejected: rule pull_request from ruleset 21899981/
   );
-  assert.match(errors, /add the omni-queue App as an always bypass actor/);
+  // the hint says what the runbook says: the status door replaces the other ruleset
+  assert.match(errors, /remove those rulesets \(the status door replaces them\)/);
+  assert.doesNotMatch(errors, /bypass actor of those rulesets/);
+
+  // the repository config lands as the owner: the blocker names the owner, the hint is the same
+  const owned = fakeGh([REQUIRE_PR_ON_DEFAULT], {
+    branchRules: branchRulesWithForeignPullRequest(999),
+  });
+  const ownedIo = capture();
+  assert.equal(
+    await main(["--base", BASE, "--app-id", String(APP_ID)], sandbox, { gh: owned, ...ownedIo }),
+    1
+  );
+  const ownedErrors = ownedIo.lines.err.join("\n");
+  assert.match(ownedErrors, /the repository owner is not an "always" bypass actor/);
+  assert.match(ownedErrors, /remove those rulesets \(the status door replaces them\)/);
+  assert.doesNotMatch(ownedErrors, /add the repository admin role/);
+  assert.doesNotMatch(ownedErrors, /omni-queue App/);
 
   const dry = fakeGh([REQUIRE_PR_ON_DEFAULT], {
     branchRules: branchRulesWithForeignPullRequest(1),

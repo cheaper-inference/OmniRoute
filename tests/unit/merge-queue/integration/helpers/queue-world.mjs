@@ -9,6 +9,8 @@
 // over the API disappears from the bare repository. PR heads are published by the sandbox as
 // refs/pull/<n>/head and mirrored into the fake pull (head.sha). Only the state branch
 // (omni-queue-state) lives in the fake's own object store, written through the Contents API.
+// The queue refs are protected by default (fake.branchRules: the queue-refs ruleset's rules on
+// omni-queue-state and every omni-queue/… name); world.unprotect(ref, rule) drops one.
 //
 // Ticks are built the way main() builds them (createTickDeps from the environment), with the clock
 // injected and git isolated from the user's configuration.
@@ -21,7 +23,9 @@ import { loadConfig } from "../../../../../scripts/merge-queue/config.mjs";
 import {
   CANDIDATE_PREFIX,
   STATE_BRANCH,
+  candidateRef,
   commentMarker,
+  initialState,
   stateFilePath,
 } from "../../../../../scripts/merge-queue/contracts.mjs";
 import { createGitHubClient } from "../../../../../scripts/merge-queue/github.mjs";
@@ -33,7 +37,40 @@ export const QBASE = "release/v1.0.0";
 export const APPROVER = "diegosouzapw";
 export const BOT_LOGIN = "omni-queue[bot]";
 const TOKEN = "ghs_e2eInstallationToken";
+/** The repository owner's token (OMNI_QUEUE_LAND_TOKEN): only the landing uses it. */
+export const LAND_TOKEN = "ghp_e2eOwnerLandToken";
 const ZERO = "0".repeat(40);
+
+const EMPTY_OUTPUT = Object.freeze({ title: null, summary: null, text: null });
+/** Output of a failing required check in the shape scenarios 1–10 were written against. */
+const REPORTER_OUTPUT = Object.freeze({
+  title: "1 failing test",
+  summary: "tests/unit/widget.test.ts",
+  text: null,
+});
+/**
+ * The only annotation GitHub Actions writes on a job whose step exits non-zero. It names no test
+ * (node:test / vitest emit no failure annotation in this repository), so the classifier can match
+ * such a failure by check name only.
+ */
+const EXIT_CODE_ANNOTATION = Object.freeze({
+  path: ".github",
+  start_line: 1,
+  end_line: 1,
+  annotation_level: "failure",
+  title: null,
+  message: "Process completed with exit code 1.",
+});
+/** What GitHub writes on a job it cancels at its `timeout-minutes` (conclusion `cancelled`). */
+const MAX_EXECUTION_TIME_ANNOTATION = Object.freeze({
+  path: ".github",
+  start_line: 1,
+  end_line: 1,
+  annotation_level: "failure",
+  title: null,
+  message:
+    "The job running on runner GitHub Actions 7 has exceeded the maximum execution time of 30 minutes.",
+});
 
 /** fake-github `externalRefs` backend over the bare repository (keys "heads/<branch>"). */
 export function gitRefsBackend(sb) {
@@ -71,10 +108,17 @@ export function gitRefsBackend(sb) {
 
 /**
  * @param {import("node:test").TestContext} t
- * @param {{mode?: "live"|"shadow", start?: string, config?: object}} [options]
+ * @param {{mode?: "live"|"shadow", start?: string, config?: object, landToken?: string|null}}
+ *   [options]  landToken: OMNI_QUEUE_LAND_TOKEN of the ticks (null = not set); the fake GitHub
+ *   accepts it as the owner (APPROVER)
  */
 export async function createQueueWorld(t, options = {}) {
-  const { mode = "live", start = "2026-11-13T12:00:00.000Z", config: overrides = {} } = options;
+  const {
+    mode = "live",
+    start = "2026-11-13T12:00:00.000Z",
+    config: overrides = {},
+    landToken = LAND_TOKEN,
+  } = options;
   let clockMs = Date.parse(start);
   const clock = {
     now: () => new Date(clockMs).toISOString(),
@@ -99,6 +143,7 @@ export async function createQueueWorld(t, options = {}) {
   });
   t.after(() => fake.close());
   fake.externalRefs = gitRefsBackend(sb);
+  fake.tokenActors.set(LAND_TOKEN, APPROVER);
 
   const config = { ...loadConfig(), mode, ...overrides };
   const configPath = join(sb.root, "omni-queue.config.json");
@@ -111,6 +156,7 @@ export async function createQueueWorld(t, options = {}) {
     OMNI_QUEUE_CONFIG: configPath,
     OMNI_QUEUE_REMOTE_URL: sb.originDir,
     GITHUB_RUN_ID: "4242",
+    ...(landToken ? { OMNI_QUEUE_LAND_TOKEN: landToken } : {}),
   };
   const gitEnv = { ...inheritedGitEnvCleared({ keepAuth: true }), ...sb.isolationEnv };
   // approve.main builds the same client: App token, markers of the App only.
@@ -243,6 +289,29 @@ export async function createQueueWorld(t, options = {}) {
       return text === null ? null : JSON.parse(text);
     },
 
+    /**
+     * Store a green base verdict for `sha` (default: the base tip) on the state branch, the state
+     * after the queue landed that tip itself: a red batch on it is blamed on its PRs at once.
+     */
+    seedGreenBase(sha = world.baseTip()) {
+      const state = world.state() ?? initialState(QBASE, clock.now());
+      state.baseChecks = [
+        {
+          baseSha: sha,
+          ref: candidateRef(QBASE, "b0", sha),
+          status: "green",
+          startedAt: clock.now(),
+          signatures: [],
+        },
+        ...state.baseChecks.filter((b) => b.baseSha !== sha),
+      ];
+      fake.commitFiles({
+        branch: STATE_BRANCH,
+        files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+        message: "seed: base green",
+      });
+    },
+
     /** True when commit `a` is an ancestor of (or equal to) `b` in origin. */
     isAncestor(a, b) {
       return sb.origin(["merge-base", "--is-ancestor", a, b], { allowFail: true }).code === 0;
@@ -274,13 +343,49 @@ export async function createQueueWorld(t, options = {}) {
     /**
      * Report the three required checks of the in-flight candidate as GitHub Actions does on a
      * push of its ref: one push workflow run on the candidate ref and its check suite (whose
-     * head_branch is that ref). `red` decides whether "Gate / CI" fails; by default a candidate
-     * is red when it contains the head of one of `world.culprits`.
+     * head_branch is that ref). `red` = a test fails; by default a candidate is red when it
+     * contains the head of one of `world.culprits`. `hang` = a job hangs until GitHub cancels it
+     * at its time limit; by default when the candidate contains the head of one of `world.hangs`.
+     *
+     * Green, or red with `world.failingJob` unset: the shape scenarios 1–10 use, "Gate / CI"
+     * alone fails, with a reporter title. Otherwise the failing jobs are reported the way GitHub
+     * Actions reports them in this repository: the test job `world.failingJob` concludes
+     * `failure` with only the step's exit-code annotation, the hanging job `world.hangJob`
+     * concludes `cancelled` with GitHub's "exceeded the maximum execution time" annotation, and
+     * the aggregate "Gate / CI" fails with them (its own exit-code annotation, no title).
      */
-    runCi(sha, ref, { red = world.containsCulprit(sha) } = {}) {
+    runCi(sha, ref, { red = world.containsCulprit(sha), hang = world.containsHang(sha) } = {}) {
+      if (!hang && (!red || world.failingJob === null)) {
+        world.reportChecks(sha, {
+          headBranch: ref,
+          conclusions: { "Gate / CI": red ? "failure" : "success" },
+        });
+        return;
+      }
+      const extraRuns = [];
+      if (red) {
+        if (world.failingJob === null) {
+          throw new Error("runCi: a red candidate that also hangs needs world.failingJob");
+        }
+        extraRuns.push({
+          name: world.failingJob,
+          conclusion: "failure",
+          annotations: [EXIT_CODE_ANNOTATION],
+        });
+      }
+      if (hang) {
+        extraRuns.push({
+          name: world.hangJob,
+          conclusion: "cancelled",
+          annotations: [MAX_EXECUTION_TIME_ANNOTATION],
+        });
+      }
       world.reportChecks(sha, {
         headBranch: ref,
-        conclusions: { "Gate / CI": red ? "failure" : "success" },
+        conclusions: { "Gate / CI": "failure" },
+        failureOutput: EMPTY_OUTPUT,
+        annotations: { "Gate / CI": [EXIT_CODE_ANNOTATION] },
+        extraRuns,
       });
     },
 
@@ -288,7 +393,11 @@ export async function createQueueWorld(t, options = {}) {
      * One workflow run on `sha` with the three required checks in a check suite of its own.
      * `event` "pull_request" = the CI of a PR whose head is that commit; `suiteBranch` is the
      * head_branch GitHub reports for the suite (null for a fork PR). `conclusion` applies to
-     * every check unless `conclusions` names one.
+     * every check unless `conclusions` names one. A failing required check carries
+     * `failureOutput` (default: a reporter title); `annotations` maps a required check name to
+     * the raw annotations GitHub serves for its run. `extraRuns` are more jobs of the same
+     * workflow run (same check suite), after the required ones: [{name, conclusion,
+     * annotations?, output?}].
      */
     reportChecks(sha, options = {}) {
       const {
@@ -297,21 +406,38 @@ export async function createQueueWorld(t, options = {}) {
         event = "push",
         conclusion = "success",
         conclusions = {},
+        failureOutput = REPORTER_OUTPUT,
+        annotations = {},
+        extraRuns = [],
       } = options;
       clock.advance(1);
       let suiteId;
-      for (const name of config.requiredChecks) {
-        const result = conclusions[name] ?? conclusion;
+      const jobs = [
+        ...config.requiredChecks.map((name) => {
+          const result = conclusions[name] ?? conclusion;
+          return {
+            name,
+            conclusion: result,
+            output: result === "failure" ? failureOutput : EMPTY_OUTPUT,
+            annotations: annotations[name] ?? [],
+          };
+        }),
+        ...extraRuns.map((job) => ({ output: EMPTY_OUTPUT, annotations: [], ...job })),
+      ];
+      for (const job of jobs) {
         const run = fake.addCheckRun(sha, {
-          name,
-          conclusion: result,
+          name: job.name,
+          conclusion: job.conclusion,
           headBranch: suiteBranch,
           suiteId,
-          output:
-            result === "failure"
-              ? { title: "1 failing test", summary: "tests/unit/widget.test.ts", text: null }
-              : { title: null, summary: null, text: null },
+          output: { ...job.output },
         });
+        if (job.annotations.length) {
+          fake.annotations.set(
+            run.id,
+            job.annotations.map((a) => ({ ...a }))
+          );
+        }
         suiteId = run.check_suite.id;
       }
       fake.addWorkflowRun({ headSha: sha, headBranch, event, checkSuiteId: suiteId });
@@ -321,14 +447,54 @@ export async function createQueueWorld(t, options = {}) {
     /** PR numbers whose head makes a candidate red (CI fails when the candidate contains it). */
     culprits: new Set(),
 
+    /**
+     * PR numbers whose head makes a job hang (GitHub cancels `world.hangJob` at its time limit
+     * on every candidate that contains it).
+     */
+    hangs: new Set(),
+
+    /**
+     * Base SHAs that fail `world.failingJob` themselves: a base check of that exact SHA is red,
+     * and so is every batch composed on it. A commit pushed on top (a repair) is not broken.
+     */
+    brokenBases: new Set(),
+
+    /**
+     * The job a test failure fails ("Unit Tests (2/8)", say). null keeps the shape of scenarios
+     * 1–10: "Gate / CI" fails alone, with a reporter title (see runCi).
+     */
+    failingJob: null,
+
+    /** The job a PR of `world.hangs` makes hang. */
+    hangJob: "Unit Tests (3/8)",
+
     containsCulprit(sha) {
       return [...world.culprits].some((n) => world.isAncestor(world.headOf(n), sha));
     },
 
-    /** CI on whatever is in flight (no-op when idle); returns the in-flight record. */
+    containsHang(sha) {
+      return [...world.hangs].some((n) => world.isAncestor(world.headOf(n), sha));
+    },
+
+    /**
+     * CI on whatever is in flight (no-op when idle); returns the in-flight record. A base check
+     * (f.kind "base-check") runs on the bare base: red only when that SHA is in
+     * `world.brokenBases`. A batch is red when it contains a culprit or is composed on a broken
+     * base, and hangs when it contains a PR of `world.hangs`.
+     */
     ciInFlight() {
       const f = world.state()?.inFlight ?? null;
-      if (f) world.runCi(f.candidateSha, f.candidateRef);
+      if (!f) return f;
+      if (f.kind === "base-check") {
+        world.runCi(f.candidateSha, f.candidateRef, {
+          red: world.brokenBases.has(f.candidateSha),
+          hang: false,
+        });
+      } else {
+        world.runCi(f.candidateSha, f.candidateRef, {
+          red: world.containsCulprit(f.candidateSha) || world.brokenBases.has(f.baseSha),
+        });
+      }
       return f;
     },
 
@@ -343,6 +509,11 @@ export async function createQueueWorld(t, options = {}) {
 
     events(type) {
       return (world.state()?.history ?? []).filter((e) => e.type === type);
+    },
+
+    /** GitHub no longer enforces rule type `rule` (creation, update, deletion) on `ref`. */
+    unprotect(ref, rule) {
+      fake.unprotect(ref, rule);
     },
   };
   return world;

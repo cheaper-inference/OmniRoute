@@ -40,7 +40,7 @@ export function getCodexServiceTierBadge(
     return {
       label: providerText(t, "codexTierFlexLabel", "Flex"),
       icon: "speed",
-      className: "bg-chart-2/15 text-chart-2",
+      className: "bg-chart-2/15 text-chart-2-ink",
       title: global
         ? providerText(
             t,
