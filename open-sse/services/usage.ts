@@ -45,12 +45,14 @@ import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
-import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
+import { getKiroUsage } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
 import { getOpenrouterUsage } from "./usage/openrouter.ts";
 import { getOpenAiCompatibleUsage } from "./usage/openaiCompatible.ts";
+import { getSensenovaUsage } from "./sensenovaQuotaFetcher.ts";
+import { isSensenovaQuotaConnection } from "./usage/sensenovaTokenPlan.ts";
 import { getLlmgatewayUsage } from "./usage/llmgateway.ts";
 import { getLyceumUsage } from "./usage/lyceum.ts";
 import { getOllamaCloudUsage } from "./opencodeOllamaUsage.ts";
@@ -135,7 +137,7 @@ export async function getUsageForProvider(
   connection: UsageProviderConnection,
   options: { forceRefresh?: boolean; includePlan?: boolean } = {}
 ) {
-  const { id, provider, accessToken, apiKey, providerSpecificData, projectId, email } = connection;
+  const { id, provider, accessToken, apiKey, providerSpecificData, projectId } = connection;
 
   if (isKimiCodingConnection(connection)) {
     return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
@@ -150,6 +152,20 @@ export async function getUsageForProvider(
   // itself declares where its quota lives (#13616); without that declaration
   // this returns a message and the sync treats it as "nothing to show", exactly
   // as it did before.
+  // A SenseNova custom node keeps a console session instead of a declared
+  // endpoint, so it is read by its own fetcher before the generic path below.
+  if (
+    typeof provider === "string" &&
+    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-")) &&
+    isSensenovaQuotaConnection({ provider, providerSpecificData })
+  ) {
+    return await getSensenovaUsage({
+      id,
+      provider,
+      providerSpecificData,
+    });
+  }
+
   if (
     typeof provider === "string" &&
     (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))

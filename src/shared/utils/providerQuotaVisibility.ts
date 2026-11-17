@@ -4,6 +4,7 @@ import {
   USAGE_SUPPORTED_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isMoonshotOpenPlatformConnection } from "@omniroute/open-sse/services/usage/moonshotOpenPlatform.ts";
+import { isSensenovaQuotaConnection } from "@omniroute/open-sse/services/usage/sensenovaTokenPlan.ts";
 
 export interface ProviderQuotaVisibilityConnection {
   quotaVisible?: boolean;
@@ -25,6 +26,16 @@ export function supportsProviderQuota(
   // declares where its quota lives (#13616) — the capability is a property of
   // the connection, not of the provider id.
   if (hasCompatibleQuotaEndpoint(providerId, connection?.providerSpecificData)) return true;
+  // SenseNova's allowance is read from the console session, not from a
+  // caller-declared endpoint, so it carries no quotaEndpoint to match above.
+  if (
+    isSensenovaQuotaConnection({
+      provider: providerId,
+      providerSpecificData: connection?.providerSpecificData,
+    })
+  ) {
+    return true;
+  }
   return isMoonshotOpenPlatformConnection({
     provider: providerId,
     providerSpecificData: connection?.providerSpecificData,

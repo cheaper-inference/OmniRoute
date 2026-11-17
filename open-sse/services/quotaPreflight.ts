@@ -63,6 +63,9 @@ export interface QuotaCutoffScope {
 export interface QuotaWindowInfo {
   percentUsed: number;
   resetAt?: string | null;
+  /** Raw counters, when the provider reports them per window. */
+  used?: number;
+  total?: number;
 }
 
 export interface QuotaInfo {

@@ -26,6 +26,7 @@ import { setQuotaCache } from "@/domain/quotaCache";
 import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
+import { isSensenovaQuotaConnection } from "../../../open-sse/services/usage/sensenovaTokenPlan.ts";
 import {
   clearModelLock,
   getAllModelLockouts,
@@ -244,6 +245,11 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   }
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
+  // A custom node registers its own fetcher at startup, but its provider id is
+  // minted per connection and can never appear in a static list.
+  // A custom node gets its provider id per connection; the base URL is the only
+  // stable thing the sync can match on.
+  if (isSensenovaQuotaConnection(connection)) return true;
   return supportsProviderQuota(connection.provider, connection);
 }
 

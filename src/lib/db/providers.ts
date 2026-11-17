@@ -1003,6 +1003,13 @@ export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
   expectedCodexFence?: CodexConnectionFence;
+  /**
+   * Apply the write only while providerSpecificData still holds this exact
+   * (decrypted) value. The comparison runs inside the same transaction as the
+   * write, so a rotation that finishes after the caller read the row cannot
+   * overwrite a credential an operator replaced in the meantime.
+   */
+  expectedProviderSpecificData?: Record<string, unknown>;
   /** Internal token rotation: the exact version committed by this write, never a later reread. */
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
 };
@@ -1115,6 +1122,17 @@ export async function updateProviderConnection(
 
     if (!canApplyCodexConnectionUpdate(id, merged, existingCamel, opts?.expectedCodexFence)) {
       return null;
+    }
+    if (opts?.expectedProviderSpecificData) {
+      const currentProviderSpecificData = toRecord(
+        decryptConnectionFields({ ...existingCamel }).providerSpecificData
+      );
+      if (
+        JSON.stringify(currentProviderSpecificData) !==
+        JSON.stringify(opts.expectedProviderSpecificData)
+      ) {
+        return null;
+      }
     }
     reconcileCodexUsageHistory(db, {
       connectionId: id,

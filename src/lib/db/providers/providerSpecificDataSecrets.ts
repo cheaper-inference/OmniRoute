@@ -34,6 +34,11 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   "ollamaCloudUsageCookie",
   "ollamaCloudCookie",
   "usageCookie",
+  // SenseNova's quota endpoint only accepts a console session, so the rotating
+  // refresh token and its short-lived access token ride on the connection. They
+  // are account credentials exactly like the console cookies above.
+  "sensenovaRefreshToken",
+  "sensenovaAccessToken",
   // Some connectors store a second credential or session token inside the
   // metadata object. These fields are already redacted from dashboard/audit
   // responses, but without declaring them here their SQLite values leak in
