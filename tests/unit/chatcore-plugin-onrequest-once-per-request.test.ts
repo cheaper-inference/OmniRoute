@@ -8,6 +8,8 @@ import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.t
 // account ran the plugin twice. A plugin that counts requests then counts a failover twice.
 const harness = await createChatPipelineHarness("plugin-onrequest-once");
 const { registerHook, unregisterHook } = await import("../../src/lib/plugins/hooks.ts");
+const { runPluginRequestGate } =
+  await import("../../open-sse/handlers/chatCore/pluginRequestGate.ts");
 
 const PLUGIN = "onrequest-once-counter";
 
@@ -97,9 +99,6 @@ test("a body rewritten by the onRequest hook reaches the account that serves the
 
 // The memo is narrow on purpose: a retry that changes the provider or the model, a block, or a
 // rewrite still reaches the plugin.
-const { runPluginRequestGate } =
-  await import("../../open-sse/handlers/chatCore/pluginRequestGate.ts");
-
 function gateArgs(
   headers: Record<string, string> | undefined,
   overrides: Record<string, unknown> = {}
