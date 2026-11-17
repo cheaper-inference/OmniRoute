@@ -296,6 +296,43 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   return false;
 }
 
+// Metadata strings get their own window, keyed by the path they arrived on. They must never
+// share the answer buffers: the generic flush drains leftover answer buffers back into the
+// reply, which is exactly what spliced usage provenance into the client's text. A separate
+// store keeps the sliding window (so a credential split across frames still redacts) while
+// letting each tail go back to its own field.
+export type MetadataBufferStore = {
+  get: (path: string) => string;
+  set: (path: string, value: string) => void;
+  takeAll: () => Array<[string, string]>;
+  hasRemaining: () => boolean;
+  // Drain every held tail and clear it, so the caller can emit them once.
+  drainAll: () => Array<[string, string]>;
+};
+
+export function createMetadataBufferStore(maxPaths: number): MetadataBufferStore {
+  const buffers = new Map<string, string>();
+  return {
+    get: (path) => buffers.get(path) ?? "",
+    set: (path, value) => {
+      if (!value) {
+        buffers.delete(path);
+        return;
+      }
+      if (!buffers.has(path) && buffers.size >= maxPaths)
+        throw new Error("[PII] Credential stream choice limit exceeded");
+      buffers.set(path, value);
+    },
+    takeAll: () => Array.from(buffers.entries()),
+    hasRemaining: () => Array.from(buffers.values()).some((value) => value.length > 0),
+    drainAll: () => {
+      const held = Array.from(buffers.entries()).filter(([, value]) => value.length > 0);
+      for (const [path] of held) buffers.set(path, "");
+      return held;
+    },
+  };
+}
+
 // Held-back tails of one Claude content block, each as the delta type the block actually
 // streams (text_delta / thinking_delta / input_json_delta). A single `text_delta` carrying
 // `thinking` or `partial_json` fields is ignored by Anthropic SDK accumulators, so the end
@@ -635,6 +672,7 @@ export function createCredentialSseTransform(
     bufferedBytes += after.length - before.length;
   };
   const store = createChoiceBufferStore(maxBufferedChoices);
+  const metadataStore = createMetadataBufferStore(4096);
   const state: DrainState = {
     overflow: new CredentialOverflow(),
     windowSize,
@@ -676,6 +714,7 @@ export function createCredentialSseTransform(
     for (const buffers of store.buffers.values()) {
       for (const value of Object.values(buffers)) bufferedBytes += value.length;
     }
+    for (const [, value] of metadataStore.takeAll()) bufferedBytes += value.length;
     return flushed;
   };
 
@@ -692,10 +731,57 @@ export function createCredentialSseTransform(
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
+  // Same window as the answer path, but the tail stays with the metadata field instead of
+  // joining the reply. The path is the buffer identity, so two fields never share a window.
+  const metadataProcessor = (text: string, path: string, isStopSignal = false): string => {
+    const before = metadataStore.get(path);
+    const raw = before + text;
+    // A short value with no credential prefix is ordinary metadata (inference_geo, speed).
+    // Holding it back would drop it from the frame it belongs to, so emit it as it stands.
+    const looksLikeCredential =
+      PARTIAL_PREFIXES.some(({ prefix }) => raw.includes(prefix)) ||
+      findCredentialPartialTailIndex(raw) !== undefined;
+    if (!isStopSignal && !looksLikeCredential && raw.length <= windowSize) {
+      track(before, "");
+      metadataStore.set(path, "");
+      return redactOutsideDataUrls(raw);
+    }
+    if (isStopSignal) {
+      track(before, "");
+      if (bufferedBytes + text.length > maxBufferedBytes)
+        throw new Error("[PII] Credential stream buffer limit exceeded");
+      metadataStore.set(path, "");
+      return markUnclosedBeginHead(redactOutsideDataUrls(raw));
+    }
+    let emitLength = credentialSafeCut(raw, Math.max(0, raw.length - windowSize));
+    const partial = findCredentialPartialTailIndex(raw);
+    if (partial !== undefined && emitLength > partial) emitLength = partial;
+    const unclosedBegin = findUnclosedBeginIndex(raw);
+    if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
+    emitLength = backOffSurrogate(raw, emitLength);
+    const rest = raw.slice(emitLength);
+    track(before, rest);
+    if (bufferedBytes > maxBufferedBytes)
+      throw new Error("[PII] Credential stream buffer limit exceeded");
+    metadataStore.set(path, rest);
+    return redactOutsideDataUrls(raw.slice(0, emitLength));
+  };
+
   return createSseTextTransform(processor, onFlush, undefined, {
     processToolArgs: true,
     // Only after a Responses lane is drained: dropping the buffer also drops its
     // WeakMap-backed overflow continuation state without recycling identities.
     releaseResponsesLane: (index) => store.buffers.delete(index),
+    metadataProcessor,
+    metadataTailFrame: () => {
+      const held = metadataStore.drainAll();
+      if (!held.length) return null;
+      const frame: Record<string, string> = {};
+      for (const [path, raw] of held) {
+        track(raw, "");
+        frame[path] = markUnclosedBeginHead(redactOutsideDataUrls(raw));
+      }
+      return frame;
+    },
   });
 }

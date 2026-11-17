@@ -1,4 +1,5 @@
 import type { FieldCategory } from "./sseTextTransform";
+import { IN_PLACE_METADATA_KEYS } from "./sseTextTransform";
 
 type JsonObject = Record<string, unknown>;
 type Processor = (
@@ -21,6 +22,11 @@ export interface ResponsesSseTextOptions {
    * Without it, non-payload strings are not redacted.
    */
   classify?: (key: string) => FieldCategory | null;
+  /**
+   * Windowed redaction for the metadata keys that can carry a credential, keyed by path, so a
+   * value split across frames still redacts. Absent, those keys are masked per frame.
+   */
+  metadata?: (text: string, path: string) => string;
 }
 
 const DELTA_FIELDS: Record<string, [string, FieldCategory]> = {
@@ -219,15 +225,19 @@ class ResponsesLaneRouter {
    * results, annotations, instructions…), as a standalone value. A metadata key skips a
    * string value only; any object or array under it is still walked.
    */
-  private redactMetadata(value: unknown): void {
+  private redactMetadata(value: unknown, path = "", inMetadata = false): void {
     const classify = this.options.classify;
     if (!classify || !value || typeof value !== "object") return;
     const obj = value as JsonObject;
     for (const key of Object.keys(obj)) {
       if (RESPONSES_OPAQUE_KEYS.has(key) || this.isPayload(obj, key)) continue;
       const field = obj[key];
-      if (typeof field !== "string") this.redactMetadata(field);
-      else if (classify(key) !== null) {
+      const childPath = path ? `${path}/${key}` : key;
+      const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
+      if (typeof field !== "string") this.redactMetadata(field, childPath, metadata);
+      else if (metadata && this.options.metadata) {
+        obj[key] = this.options.metadata(field, childPath);
+      } else if (classify(key) !== null || metadata) {
         obj[key] = this.processor(field, "content", false, "responses:snapshot", true);
       }
     }

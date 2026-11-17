@@ -35,6 +35,12 @@ export const METADATA_KEYS = new Set([
   "system_fingerprint",
   "service_tier",
   "usage",
+  // Usage provenance (#20271) rides next to `usage`. Its string fields ("unknown",
+  // "estimated", "observed_characters") are metadata, not answer text: buffering them
+  // spliced them into the flushed tail of the reply.
+  "usage_evidence",
+  "tokens_per_second",
+  "cost_in_usd_ticks",
   "prompt_tokens",
   "completion_tokens",
   "total_tokens",
@@ -113,6 +119,15 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 // `redacted_thinking` block are opaque blobs the client sends back verbatim).
 const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 
+// Metadata keys that still carry values worth masking: the usage provenance body and the cost
+// figures can hold a credential-shaped string, and skipping them outright emitted it verbatim.
+// They are redacted where they stand, never buffered.
+export const IN_PLACE_METADATA_KEYS = new Set([
+  "usage_evidence",
+  "tokens_per_second",
+  "cost_in_usd_ticks",
+]);
+
 // Redact every other string of a Claude frame in place (search results, citations, tool
 // input), without touching the buffers. The coverage matches the generic walker: a metadata
 // key skips a string value only, and any object or array under it is still walked, because
@@ -120,14 +135,22 @@ const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 function redactClaudeFrameStrings(
   obj: any,
   streamed: ClaudeStreamedPath[],
-  redact: (text: string) => string
+  redact: (text: string, path: string, metadata: boolean) => string,
+  path = "",
+  inMetadata = false
 ): void {
   if (!obj || typeof obj !== "object" || obj.type === "redacted_thinking") return;
   for (const key of Object.keys(obj)) {
     if (CLAUDE_OPAQUE_KEYS.has(key)) continue;
-    if (streamed.some((path) => path.holder === obj && path.field === key)) continue;
-    if (typeof obj[key] !== "string") redactClaudeFrameStrings(obj[key], streamed, redact);
-    else if (classifyField(key) !== null) obj[key] = redact(obj[key]);
+    if (streamed.some((entry) => entry.holder === obj && entry.field === key)) continue;
+    const childPath = path ? `${path}/${key}` : key;
+    // Only the keys that can carry a credential take the window. Other metadata (id, signature,
+    // request_id) passes through verbatim: holding it would delay a protocol field.
+    const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
+    if (typeof obj[key] !== "string")
+      redactClaudeFrameStrings(obj[key], streamed, redact, childPath, metadata);
+    else if (metadata) obj[key] = redact(obj[key], childPath, true);
+    else if (classifyField(key) !== null) obj[key] = redact(obj[key], childPath, false);
   }
 }
 
@@ -224,7 +247,15 @@ export function createSseTextTransform(
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
-  opts?: { processToolArgs?: boolean; releaseResponsesLane?: (index: string) => void }
+  opts?: {
+    processToolArgs?: boolean;
+    releaseResponsesLane?: (index: string) => void;
+    // Metadata strings carry their own sliding window, keyed by path, so a credential split
+    // across frames still redacts without ever entering the answer buffers. The held tail is
+    // emitted once, as its own frame, at the end of the stream.
+    metadataProcessor?: (text: string, path: string, isStopSignal?: boolean) => string;
+    metadataTailFrame?: () => Record<string, unknown> | null;
+  }
 ): TransformStream {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
@@ -242,6 +273,9 @@ export function createSseTextTransform(
     processToolArgs: opts?.processToolArgs,
     release: opts?.releaseResponsesLane,
     classify: classifyField,
+    metadata: opts?.metadataProcessor
+      ? (text, path) => opts.metadataProcessor!(text, path, false)
+      : undefined,
   });
   let responsesStream = false;
   const emitResponses = (
@@ -280,6 +314,15 @@ export function createSseTextTransform(
     }
   };
 
+  // A metadata tail held back past the window belongs to its own field, not to the answer.
+  // Emit it once, as its own frame, after the answer flush: the live frames already carry the
+  // part sent earlier, and rewriting them would land the tail on the wrong frame.
+  const emitMetadataTailFrame = (controller: TransformStreamDefaultController) => {
+    const frame = opts?.metadataTailFrame?.();
+    if (!frame) return;
+    controller.enqueue(encoder.encode((lastPrefix || "data: ") + JSON.stringify(frame) + "\n\n"));
+  };
+
   const handleLine = (line: string, controller: TransformStreamDefaultController) => {
     const trimmed = line.trim();
     if (trimmed === "" || line.startsWith(":")) {
@@ -308,7 +351,10 @@ export function createSseTextTransform(
             isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
             isClaudeStreamEvent(lastJson)
           );
+          emitMetadataTailFrame(controller);
           flushed = true;
+        } else {
+          emitMetadataTailFrame(controller);
         }
         if (pendingEventLine) {
           controller.enqueue(encoder.encode(pendingEventLine + "\n"));
@@ -325,6 +371,7 @@ export function createSseTextTransform(
           isJsonStream = true;
 
           let matched = false;
+          let metadataTouched = false;
 
           const isStopSignal = checkIfStopSignal(json);
           const isSnapshot = checkIfSnapshot(json);
@@ -335,11 +382,18 @@ export function createSseTextTransform(
           // key of the enclosing object (unchanged across array-index recursion) so
           // `classifyField` can tell `reasoning_details[].text` apart from ordinary content
           // text. See issue #13488.
+          // Mask credential-shaped strings inside a metadata subtree through their own window,
+          // keyed by path. Sharing the answer buffers is what spliced usage provenance into
+          // replies; snapshotting them in place is what let a credential split across frames
+          // through. The window keeps the split covered, and the path keeps the tail out of
+          // the reply.
           const sanitizeObject = (
             obj: any,
             currentChoiceIdx = 0,
             currentToolIdx = 0,
-            parentKey = ""
+            parentKey = "",
+            inMetadata = false,
+            path = ""
           ) => {
             if (!obj || typeof obj !== "object") return;
 
@@ -353,6 +407,18 @@ export function createSseTextTransform(
             const isArray = Array.isArray(obj);
 
             for (const key of Object.keys(obj)) {
+              if (inMetadata) {
+                const childPath = path ? `${path}/${key}` : key;
+                if (typeof obj[key] === "string") {
+                  obj[key] = opts?.metadataProcessor
+                    ? opts.metadataProcessor(obj[key], childPath, isStopSignal)
+                    : processor(obj[key], "content", false, "0_0", true);
+                  metadataTouched = true;
+                } else if (typeof obj[key] === "object") {
+                  sanitizeObject(obj[key], choiceIdx, toolIdx, key, true, childPath);
+                }
+                continue;
+              }
               if (typeof obj[key] === "string") {
                 const val = obj[key];
                 // Preserve Chat Completions aliases without changing native-format routing.
@@ -362,6 +428,16 @@ export function createSseTextTransform(
                     ? "toolArgs"
                     : classifyField(key, parentKey);
                 if (field === null) {
+                  // A metadata key normally passes through untouched, but the usage provenance
+                  // and cost keys can carry a credential. They take their own window, keyed by
+                  // path, so a value split across frames still redacts without joining the reply.
+                  if (IN_PLACE_METADATA_KEYS.has(key)) {
+                    const childPath = path ? `${path}/${key}` : key;
+                    obj[key] = opts?.metadataProcessor
+                      ? opts.metadataProcessor(val, childPath, isStopSignal)
+                      : processor(val, "content", false, compositeKey, true);
+                    metadataTouched = true;
+                  }
                   continue;
                 }
                 if (field === "toolArgs" || field === "partialJson") {
@@ -383,7 +459,27 @@ export function createSseTextTransform(
                 obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
                 matched = true;
               } else if (typeof obj[key] === "object") {
-                sanitizeObject(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
+                // A metadata subtree (usage, usage_evidence, provider bookkeeping) holds no
+                // answer text. Descending into it with the answer buffers classified its string
+                // fields as content and flushed them into the reply, so it gets its own window
+                // keyed by path: still masked, including across frames, but never joined to the
+                // answer.
+                // reasoning_details[].data is an opaque encrypted payload the client sends back
+                // verbatim, so null there means "leave it alone", not "redact it".
+                const opaque = key === "data" && parentKey === "reasoning_details";
+                if (!opaque && IN_PLACE_METADATA_KEYS.has(key)) {
+                  const childPath = path ? `${path}/${key}` : key;
+                  sanitizeObject(obj[key], choiceIdx, toolIdx, key, true, childPath);
+                  continue;
+                }
+                sanitizeObject(
+                  obj[key],
+                  choiceIdx,
+                  toolIdx,
+                  isArray ? parentKey : key,
+                  false,
+                  path
+                );
               }
             }
           };
@@ -410,8 +506,10 @@ export function createSseTextTransform(
                 isSnapshot
               );
             }
-            redactClaudeFrameStrings(json, streamed, (text) =>
-              processor(text, "content", false, compositeKey, true)
+            redactClaudeFrameStrings(json, streamed, (text, childPath, metadata) =>
+              opts?.metadataProcessor && metadata
+                ? opts.metadataProcessor(text, childPath, isStopSignal)
+                : processor(text, "content", false, compositeKey, true)
             );
             return touched;
           };
@@ -428,7 +526,7 @@ export function createSseTextTransform(
             sanitizeObject(json, 0, 0);
           }
 
-          if (!matched) {
+          if (!matched && !metadataTouched) {
             // Normal state for control-only chunks (closing frame, usage-only frame): not a
             // sanitizer fault, so keep it out of the warn level (#18047).
             console.debug(
@@ -568,6 +666,9 @@ export function createSseTextTransform(
             isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
             isClaudeStreamEvent(lastJson)
           );
+          emitMetadataTailFrame(controller);
+        } else {
+          emitMetadataTailFrame(controller);
         }
       } catch (err) {
         console.error("[SSE-TRANSFORM] Error in flush:", err);
