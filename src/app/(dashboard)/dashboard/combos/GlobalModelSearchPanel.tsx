@@ -58,8 +58,10 @@ export default function GlobalModelSearchPanel({
   return (
     <>
       <SegmentedControl
+        semantics="radio"
+        aria-label={getI18nOrFallback(t, "builderModel", "Model")}
         size="sm"
-        className="mt-2.5 mb-2 w-full [&_[role=tablist]]:w-full [&_[role=tab]]:flex-1"
+        className="mt-2.5 mb-2 w-full [&_[role=radiogroup]]:w-full [&_[role=radio]]:flex-1"
         value={builderSelectionMode}
         onChange={(mode) => onSelectionModeChange(mode as "step" | "global")}
         options={[

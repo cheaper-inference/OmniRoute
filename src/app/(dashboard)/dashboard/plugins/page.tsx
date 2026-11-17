@@ -120,7 +120,7 @@ export default function PluginsPage() {
             <Card key={plugin.name} padding="sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold">{plugin.name}</h3>
+                  <h3>{plugin.name}</h3>
                   <p className="text-sm text-text-muted">
                     v{plugin.version}
                     {plugin.author ? ` by ${plugin.author}` : ""}

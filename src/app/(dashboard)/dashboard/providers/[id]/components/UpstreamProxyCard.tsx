@@ -18,7 +18,7 @@ export default function UpstreamProxyCard({ t }: UpstreamProxyCardProps) {
     <Card>
       <div className="flex flex-col gap-3">
         <div>
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-lg">
             {providerText(t, "upstreamProxyManagedTitle", "Managed via Upstream Proxy Settings")}
           </h2>
           <p className="text-sm text-text-muted mt-1">

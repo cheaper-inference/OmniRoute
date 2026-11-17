@@ -1,0 +1,1 @@
+- **fix(cache):** one very long answer no longer evicts every other entry from the in-memory response cache; answers over 256 KB stay in the SQLite tier only, and `SEMANTIC_CACHE_MAX_ENTRY_BYTES` sets the limit. ([#19460](https://github.com/cheaper-inference/OmniRoute/pull/19460))
