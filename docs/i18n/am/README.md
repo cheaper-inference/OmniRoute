@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                       |      v3.8.50       | **v3.8.51** |      `v3.8.54+`       |
+|                       |      v3.8.50       | **v3.8.51** |      `v3.8.55+`       |
 | --------------------- | :----------------: | :---------: | :-------------------: |
 | 🌐 አቅራቢዎች             |        352         |   **358**   |          389          |
 | 🧠 ልዩ የውይይት ሞዴል መለያዎች |        1320        |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar በምርጫ የሚነቃ ሲሆን GET ጥያቄዎችን ብቻ ይጠ�
 
 </div>
 
-> ከ **v3.8.20 → v3.8.54** ያሉ የቅርብ ጊዜ ዋና ማሻሻያዎች። ሙሉ ታሪክ በ [`CHANGELOG.md`](CHANGELOG.md) ይገኛል።
+> ከ **v3.8.20 → v3.8.55** ያሉ የቅርብ ጊዜ ዋና ማሻሻያዎች። ሙሉ ታሪክ በ [`CHANGELOG.md`](CHANGELOG.md) ይገኛል።
 
 - **⚖️ `quota-weighted` ራውቲንግ** — 20ኛው የኮምቦ ስትራቴጂ ኮታቸውን የጨረሱ መለያዎችን ያልፋል፤ ከዚያም በቀሩት መካከል በቀሪ ኮታ ÷ በሂደት ላይ ባለ ጭነት መጠን መሠረት ይመርጣል፣ ነባር ውይይቶችንም በተመሳሳይ መለያ ላይ ያቆያል። → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 ራስ-አልባ ሁነታ** — `omniroute serve --headless` (ወይም `OMNIROUTE_HEADLESS=1`) የ`/v1/*` ፕሮክሲ ሞተሩን ብቻ ያስኬዳል፤ ዳሽቦርዱና ለዳሽቦርዱ ብቻ የሚያገለግሉ ንዑስ ስርዓቶች ይጠፋሉ። → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` ወይም peer-dep ማስጠንቀቂያዎችን አይተሃል? [ምንም አደጋ የላቸውም](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)።
-> **npm 11 ወይም ከዚያ በኋላ እየተጠቀምክ ነው?** npm እንዲፈቀዱ ካልተደረጉ የpackage lifecycle scripts እንዳይሰሩ ሊከለክል ይችላል። የOmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) የnative runtime files ለማዘጋጀት ያስፈልጋል። በglobal ሲጭኑ በnpm ማስጠንቀቂያ ውስጥ የተጠቀሱትን packages ይፍቀዱ። በOmniRoute 3.8.54 የተመዘገበው የpackage ስብስብ፦
+> **npm 11 ወይም ከዚያ በኋላ እየተጠቀምክ ነው?** npm እንዲፈቀዱ ካልተደረጉ የpackage lifecycle scripts እንዳይሰሩ ሊከለክል ይችላል። የOmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) የnative runtime files ለማዘጋጀት ያስፈልጋል። በglobal ሲጭኑ በnpm ማስጠንቀቂያ ውስጥ የተጠቀሱትን packages ይፍቀዱ። በOmniRoute 3.8.55 የተመዘገበው የpackage ስብስብ፦
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
   <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ኮድ ውስጥ ዜሮ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ፍሬምወርክ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL ጆርናሊንግ) + LowDB (የJSON ውርስ) — 147 የዶሜይን ሞጁሎች፣ 238 ማይግሬሽኖች</td></tr>
+  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL ጆርናሊንግ) + LowDB (የJSON ውርስ) — 147 የዶሜይን ሞጁሎች፣ 240 ማይግሬሽኖች</td></tr>
   <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>የSQLite FTS5 ሙሉ-ጽሑፍ + int8-quantized የቬክተር ኢምቤዲንጎች፣ የተየበ መቀነስ</td></tr>
   <tr><td nowrap><b>ስኪማዎች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ OmniRoute በታላላቅ ፕሮጀክቶች መሠረት ላይ ቆሟል። �
 
 **[⬆ ወደ ላይ ተመለስ](#-omniroute)** · ለክፍት-ምንጭ AI ማህበረሰብ በ❤️ የተሰራ።
 
-<sub>በ<a href="https://github.com/diegosouzapw">Diego Souza</a> የተፈጠረ · OmniRoute v3.8.54 · Node ≥22.22.2 · የMIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>በ<a href="https://github.com/diegosouzapw">Diego Souza</a> የተፈጠረ · OmniRoute v3.8.55 · Node ≥22.22.2 · የMIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- የGitHub ውይይቶች ለማህበረሰብ ጥያቄና መልስ ነቅተዋል -->

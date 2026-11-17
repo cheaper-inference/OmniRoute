@@ -28,7 +28,7 @@ function ProfileFields({
   const t = useTranslations("resilienceCooldowns");
   return (
     <div className="flex flex-col gap-3">
-      <h4 className="text-sm font-semibold text-text-main">{title}</h4>
+      <h4 className="text-sm text-text-main">{title}</h4>
       <Input
         type="number"
         min={0}
