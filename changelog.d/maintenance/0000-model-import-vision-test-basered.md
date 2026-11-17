@@ -1,0 +1,1 @@
+- **test(dashboard):** move the #19337 "forwards supportsVision and max_output_tokens" case to the no-connection import block. Since #19254 a provider with a connection imports through the model sync, so the case never reached `POST /api/provider-models` and kept `release/v3.8.54` red (#19329).

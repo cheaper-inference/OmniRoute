@@ -1,0 +1,1 @@
+- **fix(quota):** Successful GLM/Z.AI reset-card redemption releases the unchanged cooldown for the exhausted window after fresh quota recovery, while preserving newer errors and ordinary polling safeguards ([#18864](https://github.com/cheaper-inference/OmniRoute/pull/18864)) — thanks @insoln

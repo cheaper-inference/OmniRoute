@@ -1,0 +1,1 @@
+- **fix(sse):** a client that disconnects while a stream waits for its first event is now recorded as a client disconnect (499) instead of an upstream readiness timeout (504), so upstream timeout metrics and retries stay accurate. ([#19448](https://github.com/cheaper-inference/OmniRoute/pull/19448))

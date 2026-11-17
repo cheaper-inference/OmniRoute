@@ -23,10 +23,7 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
-import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
-import { recordModalCallCost } from "@/domain/costRules";
-import { MODAL_LEDGER_SERVICE_TIER } from "@/lib/db/costLedger";
+import { accountSpeechResponse } from "@/lib/usage/speechRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
 
@@ -82,15 +79,16 @@ async function postHandler(request, context) {
     const combo = await getComboByName(body.model);
     if (combo) {
       const { executeSpeechCombo } = await import("@omniroute/open-sse/services/speechCombo");
-      return executeSpeechCombo(body.model, body, startTime, {
-        allowedConnections,
-        isTargetAllowed: createComboTargetKeyGate(policy, body.model),
-        onPricedCall: (call) =>
-          recordModalCallCost(policy.apiKeyInfo?.id, {
-            ...call,
-            serviceTier: MODAL_LEDGER_SERVICE_TIER,
-          }),
-      });
+      return executeSpeechCombo(
+        body.model,
+        body,
+        startTime,
+        {
+          allowedConnections,
+          isTargetAllowed: createComboTargetKeyGate(policy, body.model),
+        },
+        policy.apiKeyInfo
+      );
     }
   }
 
@@ -153,36 +151,17 @@ async function postHandler(request, context) {
 
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
-    // TTS is billed per input character; attach cost telemetry without
-    // touching the audio Content-Type / body (ADD-only headers).
-    const characters = typeof body.input === "string" ? body.input.length : 0;
-    const costUsd = await calculateModalCost("audio", provider, resolvedModel || body.model, {
-      characters,
-    });
-    recordModalCallCost(apiKeyId, {
+    response = await accountSpeechResponse(response, {
       provider,
       model: resolvedModel || body.model,
-      costUsd,
-      serviceTier: MODAL_LEDGER_SERVICE_TIER,
-    });
-    response = attachOmniRouteMetaToResponse(response, {
-      provider,
-      model: resolvedModel || body.model,
-      costUsd,
-      latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
-    });
-    saveCallLog({
-      method: "POST",
-      path: "/v1/audio/speech",
-      status: 200,
-      model: logModel,
-      provider,
       connectionId,
-      duration: Date.now() - startTime,
       apiKeyId,
       apiKeyName,
-    }).catch(() => {});
+      startTime,
+      requestId: generateRequestId(),
+      endpoint: "/v1/audio/speech",
+      characters: typeof body.input === "string" ? [...body.input].length : 0,
+    });
   } else if (response) {
     const errorText = await response
       .clone()

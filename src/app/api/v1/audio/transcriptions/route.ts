@@ -35,10 +35,12 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
-import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
-import { recordModalCallCost } from "@/domain/costRules";
-import { MODAL_LEDGER_SERVICE_TIER } from "@/lib/db/costLedger";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
+import {
+  attachMediaResponseMeta,
+  normalizeMediaUsage,
+  priceMediaRequest,
+  recordMediaRequest,
+} from "@/lib/usage/mediaRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
@@ -68,6 +70,16 @@ export async function peekDurationUsage(
     // Best-effort only — the transcription response itself already succeeded.
   }
   return undefined;
+}
+
+async function peekBillingUsage(response: Response): Promise<Record<string, unknown>> {
+  try {
+    if (!response.headers.get("content-type")?.includes("application/json")) return {};
+    const parsed = await response.clone().json();
+    return normalizeMediaUsage(parsed?.usage ?? { seconds: parsed?.duration });
+  } catch {
+    return {};
+  }
 }
 
 /**
@@ -221,27 +233,39 @@ async function transcribeWithModel(
 
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
+    const usage = await peekBillingUsage(response);
     const durationUsage = await peekDurationUsage(response);
-    // Priced per second from the duration the upstream reports; 0 when it reports none
-    // (ADD-only headers, body intact). The upstream usage is also persisted on the
-    // call_logs row below.
-    const costUsd = await calculateModalCost("audio", provider, resolvedModel, {
-      seconds: durationUsage?.seconds,
-    });
-    recordModalCallCost(apiKeyId, {
+    const requestId = generateRequestId();
+    const bill = await priceMediaRequest({
       provider,
       model: resolvedModel,
-      costUsd,
-      serviceTier: MODAL_LEDGER_SERVICE_TIER,
+      unit: "second",
+      quantity: typeof usage.seconds === "number" ? usage.seconds : null,
+      usage,
     });
-    response = attachOmniRouteMetaToResponse(response, {
+    await recordMediaRequest(
+      {
+        provider,
+        model: resolvedModel,
+        connectionId,
+        apiKeyId,
+        apiKeyName,
+        startTime,
+        requestId,
+        endpoint: "/v1/audio/transcriptions",
+      },
+      bill
+    );
+    response = attachMediaResponseMeta(response, {
       provider,
       model: resolvedModel,
-      costUsd,
+      costUsd: bill.costUsd,
+      usage,
       latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      requestId,
     });
     saveCallLog({
+      id: requestId,
       method: "POST",
       path: "/v1/audio/transcriptions",
       status: 200,
@@ -249,7 +273,9 @@ async function transcribeWithModel(
       provider,
       connectionId,
       duration: Date.now() - startTime,
-      responseBody: durationUsage ? { usage: durationUsage } : undefined,
+      responseBody: Object.keys(usage).length
+        ? { usage: { ...durationUsage, ...usage } }
+        : undefined,
       apiKeyId: apiKeyId || undefined,
       apiKeyName: apiKeyName || undefined,
     }).catch(() => {});
@@ -370,6 +396,7 @@ export async function POST(request) {
         } catch {}
 
         return handleComboChat({
+          endpointCapability: "audio-transcriptions",
           body: { model: modelStr } as any,
           combo: combo as any,
           handleSingleModel: async (_reqBody: any, targetModelStr: string) =>

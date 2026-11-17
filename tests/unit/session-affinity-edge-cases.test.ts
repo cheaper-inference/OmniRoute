@@ -172,6 +172,36 @@ test("extractSessionAffinityKey prefers header session ID over body content", ()
   assert.equal(result, "header:my-session-123");
 });
 
+test("extractSessionAffinityKey keys Claude Code requests by X-Claude-Code-Session-Id", () => {
+  // Claude Code opens every session with the same CLAUDE.md / system-reminder preamble,
+  // so two concurrent sessions of one project share the first-user-message hash.
+  const preamble = "<system-reminder>project CLAUDE.md</system-reminder>".repeat(200);
+  const body = { messages: [{ role: "user", content: [{ type: "text", text: preamble }] }] };
+  const a = extractSessionAffinityKey(
+    body,
+    new Headers({ "X-Claude-Code-Session-Id": "0b5e3c1a-0000-4000-8000-00000000000a" })
+  );
+  const b = extractSessionAffinityKey(
+    body,
+    new Headers({ "X-Claude-Code-Session-Id": "0b5e3c1a-0000-4000-8000-00000000000b" })
+  );
+  assert.equal(a, "header:0b5e3c1a-0000-4000-8000-00000000000a");
+  assert.equal(b, "header:0b5e3c1a-0000-4000-8000-00000000000b");
+  assert.notEqual(a, b, "distinct Claude Code sessions must not share an affinity key");
+  assert.equal(
+    extractSessionAffinityKey(body),
+    `input:sha256:${sha256hex(preamble.slice(0, 4096))}`
+  );
+});
+
+test("extractSessionAffinityKey keeps explicit OmniRoute session headers ahead of Claude Code's", () => {
+  const headers = new Headers({
+    "x-session-id": "explicit-session",
+    "x-claude-code-session-id": "0b5e3c1a-0000-4000-8000-00000000000a",
+  });
+  assert.equal(extractSessionAffinityKey({ input: "x" }, headers), "header:explicit-session");
+});
+
 test("extractSessionAffinityKey prefers metadata.session_id over input hashing", () => {
   const body = {
     metadata: { session_id: "meta-sess-42" },

@@ -146,7 +146,7 @@ export default function ApiKeyFilterDropdown({
               aria-pressed={isAllSelected}
               onClick={selectAll}
               className={`h-auto min-h-0 w-full justify-start gap-2.5 px-2.5 py-2 text-left text-xs ${
-                isAllSelected ? "bg-accent-light font-semibold text-text-main" : "text-text-muted"
+                isAllSelected ? "bg-accent-light text-text-main" : "text-text-muted"
               }`}
             >
               <span
@@ -198,7 +198,7 @@ export default function ApiKeyFilterDropdown({
             })}
 
             {filtered.length === 0 && (
-              <p className="px-2.5 py-3 text-center text-[11px] text-text-muted">
+              <p className="px-2.5 py-3 text-center text-xs text-text-muted">
                 {t("filterNoKeysMatch")}
               </p>
             )}

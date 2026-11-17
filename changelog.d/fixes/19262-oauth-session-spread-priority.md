@@ -1,0 +1,1 @@
+- **auth**: Respect connection priority during OAuth session spreading under `fill-first`, `priority`, and `cost-optimized` strategies (#19262).
