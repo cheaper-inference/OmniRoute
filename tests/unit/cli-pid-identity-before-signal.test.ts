@@ -84,6 +84,105 @@ test("classifyPidIdentity: an OmniRoute mention in an unrelated argument is fore
   );
 });
 
+// macOS ps and Windows CommandLine lose argument boundaries. Re-joining unquoted tokens into one
+// path is a guess: an argument after an extensionless script or executable must not be glued
+// onto it to make an OmniRoute path. A re-join counts only when exactly one candidate path is a
+// real file; anything else cannot be proven and fails closed.
+test("classifyPidIdentity: an ambiguous re-join of unquoted tokens never proves OmniRoute", () => {
+  const files =
+    (...paths: string[]) =>
+    (p: string) =>
+      paths.includes(p);
+  const darwin = (stdout: string, isFile = files()) => ({
+    platform: "darwin",
+    execFileSync: () => `${stdout}\n`,
+    isFile,
+  });
+  const win32 = (stdout: string, isFile = files()) => ({
+    platform: "win32",
+    execFileSync: () => `${stdout}\r\n`,
+    isFile,
+  });
+  const cases: Array<[string, ReturnType<typeof darwin>]> = [
+    // Extensionless script followed by an OmniRoute-named argument.
+    [
+      "macOS, script exists",
+      darwin("node /srv/other/server omniroute.js", files("/srv/other/server")),
+    ],
+    ["macOS, nothing exists", darwin("node /srv/other/server omniroute.js")],
+    [
+      "macOS, both candidates exist",
+      darwin(
+        "node /srv/other/server omniroute.js",
+        files("/srv/other/server", "/srv/other/server omniroute.js")
+      ),
+    ],
+    [
+      "windows, script exists",
+      win32(
+        '"C:\\Program Files\\nodejs\\node.exe" C:\\srv\\other\\server omniroute.js',
+        files("C:\\srv\\other\\server")
+      ),
+    ],
+    ["windows, nothing exists", win32("C:\\nodejs\\node.exe C:\\srv\\other\\server omniroute.js")],
+    // Extensionless executable followed by an argument that ends like a runtime or an .exe.
+    [
+      "macOS executable",
+      darwin("/srv/other/tool omniroute/node /x/y.js", files("/srv/other/tool")),
+    ],
+    [
+      "windows executable",
+      win32("C:\\tools\\foo omniroute\\x.exe --flag", files("C:\\tools\\foo")),
+    ],
+    ["windows executable, nothing exists", win32("C:\\tools\\foo omniroute\\x.exe --flag")],
+  ];
+  for (const [name, deps] of cases) {
+    assert.equal(classifyPidIdentity(1, deps), "unknown", name);
+  }
+});
+
+// The same guess hides in runtime options: Node accepts `--option value` for string options, so
+// after a bare option the runtime does not know as a flag, the next token may be its value
+// rather than the script. Even with an exact argv that cannot be proven either way.
+test("classifyPidIdentity: a token after an unrecognised bare runtime option is not the script", () => {
+  for (const cmdline of [
+    "node --watch-path /home/me/omniroute /srv/other/server.js",
+    "node --report-dir /var/omniroute /srv/other/server.js",
+  ]) {
+    assert.equal(classifyPidIdentity(1, linux(cmdline)), "unknown", cmdline);
+  }
+  for (const cmdline of [
+    "node --no-warnings /opt/omniroute/app/server.js",
+    "node --inspect --enable-source-maps /opt/omniroute/app/server.js",
+    "node --experimental-vm-modules /opt/omniroute/app/server.js",
+  ]) {
+    assert.equal(classifyPidIdentity(1, linux(cmdline)), "ours", cmdline);
+  }
+});
+
+test("classifyPidIdentity: a re-join proven by exactly one real file still identifies OmniRoute", () => {
+  const files =
+    (...paths: string[]) =>
+    (p: string) =>
+      paths.includes(p);
+  assert.equal(
+    classifyPidIdentity(1, {
+      platform: "darwin",
+      execFileSync: () => "node /Users/Jo Do/omniroute/server.js\n",
+      isFile: files("/Users/Jo Do/omniroute/server.js"),
+    }),
+    "ours"
+  );
+  assert.equal(
+    classifyPidIdentity(1, {
+      platform: "win32",
+      execFileSync: () => "C:\\Program Files\\nodejs\\node.exe C:\\omniroute\\dist\\server.js\r\n",
+      isFile: files("C:\\Program Files\\nodejs\\node.exe"),
+    }),
+    "ours"
+  );
+});
+
 test("classifyPidIdentity: the executable, the runtime's script or the process title prove identity", () => {
   const ours = [
     "node --max-old-space-size=512 --dns-result-order=ipv4first /opt/omniroute/app/server.js",
@@ -96,9 +195,13 @@ test("classifyPidIdentity: the executable, the runtime's script or the process t
   for (const cmdline of ours) {
     assert.equal(classifyPidIdentity(1, linux(cmdline)), "ours", cmdline);
   }
-  const darwin = (stdout: string) => ({ platform: "darwin", execFileSync: () => `${stdout}\n` });
+  // An unquoted executable path with a space is re-joined only when the real file proves it.
   assert.equal(
-    classifyPidIdentity(1, darwin("/Users/me/Application Support/node /Users/me/omniroute/a.js")),
+    classifyPidIdentity(1, {
+      platform: "darwin",
+      execFileSync: () => "/Users/me/Application Support/node /Users/me/omniroute/a.js\n",
+      isFile: (p: string) => p === "/Users/me/Application Support/node",
+    }),
     "ours",
     "unquoted executable path with a space"
   );
@@ -141,6 +244,8 @@ test("classifyPidIdentity (windows): fixed-path PowerShell, pid passed by env", 
       seen = { command, args, env: options.env };
       return "C:\\Program Files\\nodejs\\node.exe C:\\omniroute\\dist\\server.js\r\n";
     },
+    // The unquoted "Program Files" path is re-joined only when the real file proves it.
+    isFile: (p: string) => p === "C:\\Program Files\\nodejs\\node.exe",
   });
   assert.equal(result, "ours");
   assert.ok(seen);

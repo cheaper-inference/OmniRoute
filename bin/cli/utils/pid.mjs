@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { resolveDataDir } from "../data-dir.mjs";
 
@@ -82,13 +82,22 @@ export function classifyPidIdentity(pid, deps = {}) {
       // NUL-separated argv; process.title rewrites it in place and pads it with NUL bytes.
       argv = commandLine.split("\0").filter(Boolean);
     }
-    return commandIdentity(argv ?? splitCommandLine(String(commandLine)), argv === null);
+    const isFile = deps.isFile || isRegularFile;
+    return commandIdentity(argv ?? splitCommandLine(String(commandLine)), argv === null, isFile);
   } catch (err) {
     // No /proc/<pid> entry while procfs is mounted: the process is gone, so
     // there is nothing to signal. Without procfs, "gone" cannot be told from
     // "cannot look", so it stays unknown.
     const procMounted = (deps.existsSync || existsSync)("/proc/self");
     return platform === "linux" && err?.code === "ENOENT" && procMounted ? "gone" : "unknown";
+  }
+}
+
+function isRegularFile(file) {
+  try {
+    return statSync(file).isFile();
+  } catch {
+    return false;
   }
 }
 
@@ -114,6 +123,28 @@ const RUNTIME_VALUE_OPTIONS = new Set([
   "--title",
   "--input-type",
 ]);
+// Bare runtime options known to take no value. Any other bare option may take the next token as
+// its value (`--watch-path /x`), so what follows it cannot be proven to be the script.
+const RUNTIME_FLAG_PREFIXES = ["--no-", "--experimental-", "--enable-", "--expose-", "--trace-"];
+const RUNTIME_FLAGS = new Set([
+  "--inspect",
+  "--inspect-brk",
+  "--inspect-wait",
+  "--watch",
+  "--throw-deprecation",
+  "--pending-deprecation",
+  "--preserve-symlinks",
+  "--preserve-symlinks-main",
+  "--abort-on-uncaught-exception",
+  "--frozen-intrinsics",
+  "--zero-fill-buffers",
+  "--use-openssl-ca",
+  "--use-bundled-ca",
+  "--permission",
+  "--smol",
+]);
+const isRuntimeFlag = (arg) =>
+  RUNTIME_FLAGS.has(arg) || RUNTIME_FLAG_PREFIXES.some((prefix) => arg.startsWith(prefix));
 const RUNTIME_INLINE_CODE = /^(?:-e|-p|-pe|-ep|--eval|--print)(?:=|$)/;
 
 // macOS ps and Windows CommandLine give one string. Double quotes group an argument.
@@ -126,28 +157,36 @@ function splitCommandLine(commandLine) {
 }
 
 // An unquoted path with a space ("C:\Program Files\nodejs\node.exe", "/Users/me/Application
-// Support/node") arrives as several tokens. Join continuation tokens only while that reaches a
-// recognised end (`isEnd`); otherwise the first token stands alone.
-function joinPathTokens(tokens, start, isEnd, joinable) {
+// Support/node") arrives as several tokens, but so does a path followed by an argument
+// ("/srv/other/server omniroute.js"). Joining is a guess, so it fails closed: a joined path counts
+// only when it is a real file and no shorter candidate (the first token alone included) is one.
+// Anything else is `ambiguous`. When no join reaches a recognised end (`isEnd`), the first token
+// stands alone: it is a prefix of the real path, so a match in it is still sound.
+function joinPathTokens(tokens, start, isEnd, joinable, isFile) {
   const first = tokens[start];
-  if (!joinable || first.quoted) return { value: first.value, next: start + 1 };
+  const single = { value: first.value, next: start + 1, ambiguous: false };
+  if (!joinable || first.quoted || isEnd(first.value)) return single;
+  const shorter = [first.value];
   let value = first.value;
-  for (let k = start; k < tokens.length; k++) {
-    if (k > start) {
-      const token = tokens[k];
-      if (token.quoted || /^(?:[-/\\]|[A-Za-z]:)/.test(token.value)) break;
-      value += ` ${token.value}`;
+  for (let k = start + 1; k < tokens.length; k++) {
+    const token = tokens[k];
+    if (token.quoted || /^(?:[-/\\]|[A-Za-z]:)/.test(token.value)) break;
+    value += ` ${token.value}`;
+    if (isEnd(value)) {
+      const proven = isFile(value) && !shorter.some((candidate) => isFile(candidate));
+      return { value, next: k + 1, ambiguous: !proven };
     }
-    if (isEnd(value)) return { value, next: k + 1 };
+    shorter.push(value);
   }
-  return { value: first.value, next: start + 1 };
+  return single;
 }
 
 // `joinable`: the tokens came from a space-joined string, not an exact argv.
-function commandIdentity(rawTokens, joinable) {
+function commandIdentity(rawTokens, joinable, isFile) {
   const tokens = rawTokens.map((t) => (typeof t === "string" ? { value: t, quoted: false } : t));
   if (tokens.length === 0) return "foreign";
-  const exe = joinPathTokens(tokens, 0, (v) => EXECUTABLE_END.test(v), joinable);
+  const exe = joinPathTokens(tokens, 0, (v) => EXECUTABLE_END.test(v), joinable, isFile);
+  if (exe.ambiguous) return "unknown";
   if (OMNIROUTE_COMMAND.test(exe.value)) return "ours";
   if (!JS_RUNTIME.test(exe.value)) return "foreign";
   for (let i = exe.next; i < tokens.length; i++) {
@@ -159,9 +198,11 @@ function commandIdentity(rawTokens, joinable) {
       i++;
     } else if (arg.startsWith("-")) {
       if (RUNTIME_VALUE_OPTIONS.has(arg)) i++;
+      else if (!arg.includes("=") && !isRuntimeFlag(arg)) return "unknown";
       continue;
     }
-    const script = joinPathTokens(tokens, i, (v) => SCRIPT_END.test(v), joinable);
+    const script = joinPathTokens(tokens, i, (v) => SCRIPT_END.test(v), joinable, isFile);
+    if (script.ambiguous) return "unknown";
     return OMNIROUTE_COMMAND.test(script.value) ? "ours" : "foreign";
   }
   return "foreign";
