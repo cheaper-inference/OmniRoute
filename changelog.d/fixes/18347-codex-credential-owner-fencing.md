@@ -1,0 +1,1 @@
+- **fix(codex):** prevent stale credential, quota and catalog results from mutating replacement accounts or clearing newer failures while preserving valid token rotations and independent quota scopes. ([#18347](https://github.com/cheaper-inference/OmniRoute/pull/18347)) — thanks @shevar0

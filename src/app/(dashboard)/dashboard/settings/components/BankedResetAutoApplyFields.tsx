@@ -16,7 +16,7 @@ export function BankedResetSection({
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-4 first:border-t-0 first:pt-0">
       <div>
-        <h4 className="text-sm font-semibold text-text-main">{title}</h4>
+        <h4 className="text-sm text-text-main">{title}</h4>
         {description ? <p className="mt-0.5 text-xs text-text-muted">{description}</p> : null}
       </div>
       {children}

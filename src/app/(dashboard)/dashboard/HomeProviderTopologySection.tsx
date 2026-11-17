@@ -39,7 +39,7 @@ export function HomeProviderTopologySection({
     <Card>
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-base font-semibold">{t("providerTopology")}</h2>
+          <h2 className="text-base">{t("providerTopology")}</h2>
           <p className="text-xs text-text-muted">
             {t("activeError", { active: activeProviderCount, errors: errorProvider ? 1 : 0 })}
           </p>
