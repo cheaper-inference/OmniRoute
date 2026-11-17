@@ -458,7 +458,10 @@ export function disambiguateDisplayNames(
   for (const entry of entries) {
     let name = renamed.get(entry.id) ?? entry.name;
     if (globalSeen.has(name)) {
-      name = `${entry.name} (${entry.id})`;
+      // The key suffix can itself be a name already kept: count up until free.
+      const base = `${entry.name} (${entry.id})`;
+      name = base;
+      for (let n = 2; globalSeen.has(name); n++) name = `${base} (${n})`;
       renamed.set(entry.id, name);
     }
     globalSeen.add(name);
