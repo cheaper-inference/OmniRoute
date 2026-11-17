@@ -47,7 +47,14 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
           {Math.round(usedPct)}%
         </span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-sm bg-border/60" aria-hidden="true">
+      <div
+        role="progressbar"
+        aria-label={`${dimension.unit} / ${dimension.window}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(usedPct)}
+        className="h-1.5 overflow-hidden rounded-sm bg-border/60"
+      >
         <div
           className={`h-full rounded-sm transition-all ${barColor}`}
           style={{ width: `${usedPct}%` }}
