@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 const { killByPort } = await import("../../bin/cli/commands/stop.mjs");
 
@@ -10,12 +13,27 @@ const { killByPort } = await import("../../bin/cli/commands/stop.mjs");
 
 type Kill = [number, string | number];
 
-async function startChild(...extraArgs: string[]) {
-  const child = spawn(
-    process.execPath,
-    ["-e", "console.log('up');setTimeout(()=>{},60000)", ...extraArgs],
-    { stdio: ["ignore", "pipe", "ignore"] }
-  );
+const KEEP_ALIVE = "console.log('up');setTimeout(()=>{},60000)";
+
+// An OmniRoute child is proven by its entrypoint, so it runs a script file whose path names
+// OmniRoute; a stranger runs inline code.
+const fixtureDirs: string[] = [];
+test.after(() => {
+  for (const dir of fixtureDirs) fs.rmSync(dir, { recursive: true, force: true });
+});
+
+function omnirouteEntrypoint() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fixture-"));
+  fixtureDirs.push(dir);
+  fs.mkdirSync(path.join(dir, "omniroute"));
+  const file = path.join(dir, "omniroute", "server.js");
+  fs.writeFileSync(file, KEEP_ALIVE);
+  return file;
+}
+
+async function startChild(kind: "stranger" | "omniroute" = "stranger") {
+  const args = kind === "omniroute" ? [omnirouteEntrypoint()] : ["-e", KEEP_ALIVE];
+  const child = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "ignore"] });
   await new Promise((resolve) => child.stdout.once("data", resolve));
   return child;
 }
@@ -65,7 +83,7 @@ test("killByPort does not signal a listener that does not run OmniRoute", async 
 });
 
 test("killByPort still stops a listener whose command line names OmniRoute", async () => {
-  const ours = await startChild("/fixture/omniroute/server.js");
+  const ours = await startChild("omniroute");
   try {
     const { deps, kills } = portDeps([ours.pid!]);
     assert.equal(await killByPort(20128, deps), true);
@@ -76,7 +94,7 @@ test("killByPort still stops a listener whose command line names OmniRoute", asy
 });
 
 test("killByPort signals only the OmniRoute listener when a stranger shares the port", async () => {
-  const ours = await startChild("/fixture/omniroute/server.js");
+  const ours = await startChild("omniroute");
   const stranger = await startChild();
   try {
     const { deps, kills } = portDeps([stranger.pid!, ours.pid!]);

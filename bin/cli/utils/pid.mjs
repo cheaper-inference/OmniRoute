@@ -45,6 +45,7 @@ export function classifyPidIdentity(pid, deps = {}) {
   const run = deps.execFileSync || execFileSync;
   try {
     let commandLine;
+    let argv = null;
     if (platform === "win32") {
       // Pid goes in by env, never into the script (Hard Rule #13). One retry:
       // a cold PowerShell start can time out once.
@@ -78,9 +79,10 @@ export function classifyPidIdentity(pid, deps = {}) {
     } else {
       const read = deps.readFileSync || ((file) => readFileSync(file, "utf8"));
       commandLine = String(read(`/proc/${pid}/cmdline`));
+      // NUL-separated argv; process.title rewrites it in place and pads it with NUL bytes.
+      argv = commandLine.split("\0").filter(Boolean);
     }
-    // process.title rewrites cmdline in place and pads it with NUL bytes.
-    return OMNIROUTE_COMMAND.test(String(commandLine).replaceAll("\0", " ")) ? "ours" : "foreign";
+    return commandIdentity(argv ?? splitCommandLine(String(commandLine)), argv === null);
   } catch (err) {
     // No /proc/<pid> entry while procfs is mounted: the process is gone, so
     // there is nothing to signal. Without procfs, "gone" cannot be told from
@@ -90,8 +92,80 @@ export function classifyPidIdentity(pid, deps = {}) {
   }
 }
 
-// Install dirs like "omniroute-main" or "my-omniroute" are legitimate, so match the substring.
+// Install dirs like "omniroute-main" or "my-omniroute" are legitimate, so match the substring,
+// but only in the executable, the script a JS runtime runs, or the process title ("omniroute
+// (v16.2.9)" is argv[0] after the rename). An argument such as --log=/tmp/omniroute.log proves
+// nothing about the process.
 const OMNIROUTE_COMMAND = /omniroute/i;
+const JS_RUNTIME = /(?:^|[\\/])(?:node|nodejs|bun)(?:\d+(?:\.\d+)*)?(?:\.exe)?$/i;
+const EXECUTABLE_END = /(?:^|[\\/])(?:(?:node|nodejs|bun)(?:\d+(?:\.\d+)*)?|[^\\/]+\.exe)$/i;
+const SCRIPT_END = /\.[cm]?[jt]s$/i;
+// Runtime options that take their value as the next argument.
+const RUNTIME_VALUE_OPTIONS = new Set([
+  "-r",
+  "--require",
+  "--import",
+  "--loader",
+  "--experimental-loader",
+  "--preload",
+  "-C",
+  "--conditions",
+  "--env-file",
+  "--title",
+  "--input-type",
+]);
+const RUNTIME_INLINE_CODE = /^(?:-e|-p|-pe|-ep|--eval|--print)(?:=|$)/;
+
+// macOS ps and Windows CommandLine give one string. Double quotes group an argument.
+function splitCommandLine(commandLine) {
+  const tokens = [];
+  for (const match of commandLine.trim().matchAll(/"([^"]*)"?|(\S+)/g)) {
+    tokens.push({ value: match[1] ?? match[2], quoted: match[1] !== undefined });
+  }
+  return tokens;
+}
+
+// An unquoted path with a space ("C:\Program Files\nodejs\node.exe", "/Users/me/Application
+// Support/node") arrives as several tokens. Join continuation tokens only while that reaches a
+// recognised end (`isEnd`); otherwise the first token stands alone.
+function joinPathTokens(tokens, start, isEnd, joinable) {
+  const first = tokens[start];
+  if (!joinable || first.quoted) return { value: first.value, next: start + 1 };
+  let value = first.value;
+  for (let k = start; k < tokens.length; k++) {
+    if (k > start) {
+      const token = tokens[k];
+      if (token.quoted || /^(?:[-/\\]|[A-Za-z]:)/.test(token.value)) break;
+      value += ` ${token.value}`;
+    }
+    if (isEnd(value)) return { value, next: k + 1 };
+  }
+  return { value: first.value, next: start + 1 };
+}
+
+// `joinable`: the tokens came from a space-joined string, not an exact argv.
+function commandIdentity(rawTokens, joinable) {
+  const tokens = rawTokens.map((t) => (typeof t === "string" ? { value: t, quoted: false } : t));
+  if (tokens.length === 0) return "foreign";
+  const exe = joinPathTokens(tokens, 0, (v) => EXECUTABLE_END.test(v), joinable);
+  if (OMNIROUTE_COMMAND.test(exe.value)) return "ours";
+  if (!JS_RUNTIME.test(exe.value)) return "foreign";
+  for (let i = exe.next; i < tokens.length; i++) {
+    const arg = tokens[i].value;
+    // Inline code (-e/-p) has no script file to prove anything.
+    if (RUNTIME_INLINE_CODE.test(arg)) return "foreign";
+    if (arg === "--") {
+      if (i + 1 >= tokens.length) return "foreign";
+      i++;
+    } else if (arg.startsWith("-")) {
+      if (RUNTIME_VALUE_OPTIONS.has(arg)) i++;
+      continue;
+    }
+    const script = joinPathTokens(tokens, i, (v) => SCRIPT_END.test(v), joinable);
+    return OMNIROUTE_COMMAND.test(script.value) ? "ours" : "foreign";
+  }
+  return "foreign";
+}
 
 // The pid in a pid file, or null when none can be signalled safely. A dead pid
 // is still returned so callers keep their stale-file handling; a live pid that
