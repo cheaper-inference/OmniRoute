@@ -54,16 +54,24 @@ traffic is never affected by it.
    `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
 3. Pick the participants and defaults (persisted per instance via the settings store):
 
-   | Field               | Meaning                                                             | Default / limits                        |
-   | ------------------- | ------------------------------------------------------------------- | --------------------------------------- |
-   | `enabled`           | Master switch                                                       | `false`                                 |
-   | `defaultMode`       | `parallel` or `collaborative` (see below)                           | `parallel`                              |
+   | Field               | Meaning                                                                  | Default / limits                       |
+   | ------------------- | ------------------------------------------------------------------------ | -------------------------------------- |
+   | `enabled`           | Master switch                                                            | `false`                                |
+   | `defaultMode`       | `parallel` or `collaborative` (see below)                                | `parallel`                             |
    | `providerOverrides` | Per-provider participation (`providerId`, optional `modelId`, `enabled`) | empty = every active provider, max 200 |
-   | `systemPrompt`      | Override for the built-in Chaos system prompt                       | optional, max 10 000 chars              |
-   | `timeoutMs`         | Max time per model call                                             | `120000` (5 000–600 000)                |
-   | `maxTokens`         | `max_tokens` per model call                                         | `4096` (256–128 000)                    |
+   | `systemPrompt`      | Override for the built-in Chaos system prompt                            | optional, max 10 000 chars             |
+   | `timeoutMs`         | Max time per model call                                                  | `120000` (5 000–600 000)               |
+   | `maxTokens`         | `max_tokens` per model call                                              | `4096` (256–128 000)                   |
 
-4. Run a **test from the page itself** — the results panel shows each provider's answer,
+4. Give every participating provider a **model**. A provider's model is the `modelId` of its
+   enabled override on the Chaos Mode page (it wins), otherwise the **default model** of its
+   connection. A provider id is never used as a model name. A provider with neither is **not
+   called**: it shows up in the results as `status: "error"` with the message _"No model set for
+   this provider. Set a model for it on the Chaos Mode page or a default model on the
+   connection."_ and an empty `modelId`, while the other providers run normally. If no selected
+   provider has a model, the run fails before any upstream request with _"No provider has a
+   model set. …"_ (HTTP 500 on both endpoints).
+5. Run a **test from the page itself** — the results panel shows each provider's answer,
    status and duration.
 
 ## Execution modes
@@ -84,11 +92,11 @@ Cookie-authenticated (the management session — see
 ```jsonc
 // body
 {
-  "task": "Compare approaches to X",   // required
-  "providers": ["glm", "kimi"],         // optional filter
-  "mode": "parallel",                   // optional — overrides defaultMode
-  "systemPrompt": "…",                  // optional override
-  "maxTokens": 4096                      // optional override
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
@@ -115,10 +123,16 @@ Both endpoints return the same shape:
   "totalProviders": 3,
   "totalResults": 3,
   "models": [
-    { "providerId": "glm", "providerName": "GLM", "modelId": "glm-4.7",
-      "status": "success", "content": "…", "durationMs": 3210 }
+    {
+      "providerId": "glm",
+      "providerName": "GLM",
+      "modelId": "glm-4.7",
+      "status": "success",
+      "content": "…",
+      "durationMs": 3210,
+    },
   ],
-  "summary": "…" // collaborative mode only
+  "summary": "…", // collaborative mode only
 }
 ```
 
@@ -127,6 +141,8 @@ Both endpoints return the same shape:
 - **`400 Chaos Mode is not enabled`** — step 2 above: the global switch is off.
 - **API key gets rejected on `/api/skills/collect/chaos`** — the key lacks the per-key
   `chaosModeEnabled` permission (off by default; this is a setting, not an error).
+- **A provider shows `No model set for this provider`** — set its model on the Chaos Mode page
+  or a default model on its connection (see Setup, step 4).
 - **A provider you expected is missing from the results** — check `providerOverrides` on the
   Chaos Mode page (a disabled override excludes it) and whether the provider connection is
   active.

@@ -1,0 +1,1 @@
+- **fix(db):** a failed call log offload at startup no longer loses the old request and response bodies; the next start retries the failed rows before it drops the legacy table. ([#19435](https://github.com/cheaper-inference/OmniRoute/pull/19435))

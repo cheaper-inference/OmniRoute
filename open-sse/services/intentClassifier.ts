@@ -587,6 +587,42 @@ export const SIMPLE_KEYWORDS: readonly string[] = [
   "ملخص",
 ];
 
+type KeywordMatcher = { pattern: RegExp } | { substring: string };
+
+function compileKeywordMatcher(keyword: string): KeywordMatcher {
+  const normalized = keyword.toLowerCase();
+  if (normalized === "```" || !/\p{Script=Latin}/u.test(normalized)) {
+    return { substring: normalized };
+  }
+
+  const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = escape(normalized);
+  const alternatives = [`${escaped}(?:s|es|ed|ing)?`];
+  if (normalized.endsWith("e")) alternatives.push(`${escape(normalized.slice(0, -1))}ing`);
+  const last = normalized.at(-1) ?? "";
+  if (/^[b-df-hj-np-tv-z]$/.test(last)) {
+    alternatives.push(`${escaped}${last}(?:ed|ing)`);
+  }
+  return {
+    pattern: new RegExp(
+      `(?<![\\p{L}\\p{N}_])(?:${alternatives.join("|")})(?![\\p{L}\\p{N}_])`,
+      "iu"
+    ),
+  };
+}
+
+function hasKeyword(text: string, matchers: readonly KeywordMatcher[]): boolean {
+  return matchers.some((matcher) =>
+    "pattern" in matcher ? matcher.pattern.test(text) : text.includes(matcher.substring)
+  );
+}
+
+const CODE_MATCHERS = CODE_KEYWORDS.map(compileKeywordMatcher);
+const MATH_MATCHERS = MATH_KEYWORDS.map(compileKeywordMatcher);
+const REASONING_MATCHERS = REASONING_KEYWORDS.map(compileKeywordMatcher);
+const CREATIVE_MATCHERS = CREATIVE_KEYWORDS.map(compileKeywordMatcher);
+const SIMPLE_MATCHERS = SIMPLE_KEYWORDS.map(compileKeywordMatcher);
+
 /**
  * Classify a prompt's intent using multilingual keyword matching.
  * Priority: code > math > reasoning > creative > simple > medium (default)
@@ -595,23 +631,11 @@ export function classifyPromptIntent(prompt: string, systemPrompt?: string): Int
   const fullText = `${systemPrompt ?? ""} ${prompt}`.toLowerCase();
   const wordCount = prompt.trim().split(/\s+/).length;
 
-  for (const kw of CODE_KEYWORDS) {
-    if (fullText.includes(kw.toLowerCase())) return "code";
-  }
-  for (const kw of MATH_KEYWORDS) {
-    if (fullText.includes(kw.toLowerCase())) return "math";
-  }
-  for (const kw of REASONING_KEYWORDS) {
-    if (fullText.includes(kw.toLowerCase())) return "reasoning";
-  }
-  for (const kw of CREATIVE_KEYWORDS) {
-    if (fullText.includes(kw.toLowerCase())) return "creative";
-  }
-  if (wordCount < 60) {
-    for (const kw of SIMPLE_KEYWORDS) {
-      if (fullText.includes(kw.toLowerCase())) return "simple";
-    }
-  }
+  if (hasKeyword(fullText, CODE_MATCHERS)) return "code";
+  if (hasKeyword(fullText, MATH_MATCHERS)) return "math";
+  if (hasKeyword(fullText, REASONING_MATCHERS)) return "reasoning";
+  if (hasKeyword(fullText, CREATIVE_MATCHERS)) return "creative";
+  if (wordCount < 60 && hasKeyword(fullText, SIMPLE_MATCHERS)) return "simple";
   return "medium";
 }
 
@@ -639,27 +663,25 @@ export function classifyWithConfig(
   const fullText = `${systemPrompt ?? ""} ${prompt}`.toLowerCase();
   const wordCount = prompt.trim().split(/\s+/).length;
   const maxSimpleWords = config.simpleMaxWords ?? 60;
-  const codeKws = [...CODE_KEYWORDS, ...(config.extraCodeKeywords ?? [])];
-  const mathKws = [...MATH_KEYWORDS, ...(config.extraMathKeywords ?? [])];
-  const reasoningKws = [...REASONING_KEYWORDS, ...(config.extraReasoningKeywords ?? [])];
-  const creativeKws = [...CREATIVE_KEYWORDS, ...(config.extraCreativeKeywords ?? [])];
-  const simpleKws = [...SIMPLE_KEYWORDS, ...(config.extraSimpleKeywords ?? [])];
-  for (const kw of codeKws) {
-    if (fullText.includes(kw.toLowerCase())) return "code";
-  }
-  for (const kw of mathKws) {
-    if (fullText.includes(kw.toLowerCase())) return "math";
-  }
-  for (const kw of reasoningKws) {
-    if (fullText.includes(kw.toLowerCase())) return "reasoning";
-  }
-  for (const kw of creativeKws) {
-    if (fullText.includes(kw.toLowerCase())) return "creative";
-  }
-  if (wordCount < maxSimpleWords) {
-    for (const kw of simpleKws) {
-      if (fullText.includes(kw.toLowerCase())) return "simple";
-    }
-  }
+  const codeKws = config.extraCodeKeywords?.length
+    ? [...CODE_MATCHERS, ...config.extraCodeKeywords.map(compileKeywordMatcher)]
+    : CODE_MATCHERS;
+  const mathKws = config.extraMathKeywords?.length
+    ? [...MATH_MATCHERS, ...config.extraMathKeywords.map(compileKeywordMatcher)]
+    : MATH_MATCHERS;
+  const reasoningKws = config.extraReasoningKeywords?.length
+    ? [...REASONING_MATCHERS, ...config.extraReasoningKeywords.map(compileKeywordMatcher)]
+    : REASONING_MATCHERS;
+  const creativeKws = config.extraCreativeKeywords?.length
+    ? [...CREATIVE_MATCHERS, ...config.extraCreativeKeywords.map(compileKeywordMatcher)]
+    : CREATIVE_MATCHERS;
+  const simpleKws = config.extraSimpleKeywords?.length
+    ? [...SIMPLE_MATCHERS, ...config.extraSimpleKeywords.map(compileKeywordMatcher)]
+    : SIMPLE_MATCHERS;
+  if (hasKeyword(fullText, codeKws)) return "code";
+  if (hasKeyword(fullText, mathKws)) return "math";
+  if (hasKeyword(fullText, reasoningKws)) return "reasoning";
+  if (hasKeyword(fullText, creativeKws)) return "creative";
+  if (wordCount < maxSimpleWords && hasKeyword(fullText, simpleKws)) return "simple";
   return "medium";
 }

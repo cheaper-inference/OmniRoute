@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
-import { Button, Checkbox, Input, Modal, SegmentedControl, Textarea } from "@/shared/components";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Modal,
+  SegmentedControl,
+  SegmentedPanel,
+  SegmentedTabs,
+  Textarea,
+} from "@/shared/components";
 
 interface ImportAgyAuthModalProps {
   onClose: () => void;
@@ -354,22 +363,11 @@ function LocalTab({ onClose, onSuccess }: ImportAgyAuthModalProps) {
   );
 }
 
-function InputModeToggle({
-  value,
-  onChange,
-  uploadLabel,
-  pasteLabel,
-}: {
-  value: AgyInputMode;
-  onChange: (next: AgyInputMode) => void;
-  uploadLabel: string;
-  pasteLabel: string;
-}) {
+function InputModeToggle({ uploadLabel, pasteLabel }: { uploadLabel: string; pasteLabel: string }) {
   return (
     <SegmentedControl
+      semantics="tabs"
       size="sm"
-      value={value}
-      onChange={(next) => onChange(next as AgyInputMode)}
       options={[
         { value: "upload", label: uploadLabel },
         { value: "paste", label: pasteLabel },
@@ -382,25 +380,26 @@ function SingleSourceInput({ single }: { single: ReturnType<typeof useSingleImpo
   const t = useTranslations("providers");
   const [mode, setMode] = useState<AgyInputMode>("upload");
   return (
-    <>
+    <SegmentedTabs
+      value={mode}
+      onChange={(next) => setMode(next as AgyInputMode)}
+      className="gap-4"
+    >
       <InputModeToggle
-        value={mode}
-        onChange={setMode}
         uploadLabel={t("agyImportUploadFile")}
         pasteLabel={t("agyImportPasteJson")}
       />
-      {mode === "upload" ? (
-        <div className="space-y-1">
-          <Input
-            type="file"
-            accept=".json"
-            aria-label={t("agyImportUploadFile")}
-            onChange={single.onFile}
-            inputClassName={FILE_INPUT_CLASS}
-          />
-          <p className="text-xs text-text-muted">{t("agyImportFileHint")}</p>
-        </div>
-      ) : (
+      <SegmentedPanel value="upload" className="space-y-1">
+        <Input
+          type="file"
+          accept=".json"
+          aria-label={t("agyImportUploadFile")}
+          onChange={single.onFile}
+          inputClassName={FILE_INPUT_CLASS}
+        />
+        <p className="text-xs text-text-muted">{t("agyImportFileHint")}</p>
+      </SegmentedPanel>
+      <SegmentedPanel value="paste">
         <Textarea
           rows={5}
           aria-label={t("agyImportPasteJson")}
@@ -409,8 +408,8 @@ function SingleSourceInput({ single }: { single: ReturnType<typeof useSingleImpo
           placeholder={SINGLE_PLACEHOLDER}
           className="font-mono text-xs"
         />
-      )}
-    </>
+      </SegmentedPanel>
+    </SegmentedTabs>
   );
 }
 
@@ -461,26 +460,27 @@ function BulkSourceInput({ bulk }: { bulk: ReturnType<typeof useBulkImport> }) {
   const t = useTranslations("providers");
   const [mode, setMode] = useState<AgyInputMode>("upload");
   return (
-    <>
+    <SegmentedTabs
+      value={mode}
+      onChange={(next) => setMode(next as AgyInputMode)}
+      className="gap-4"
+    >
       <InputModeToggle
-        value={mode}
-        onChange={setMode}
         uploadLabel={t("agyImportUploadFiles")}
         pasteLabel={t("agyImportPasteJsonArray")}
       />
-      {mode === "upload" ? (
-        <div className="space-y-1">
-          <Input
-            type="file"
-            accept=".json"
-            multiple
-            aria-label={t("agyImportUploadFiles")}
-            onChange={bulk.onFiles}
-            inputClassName={FILE_INPUT_CLASS}
-          />
-          <p className="text-xs text-text-muted">{t("agyImportBulkFileHint")}</p>
-        </div>
-      ) : (
+      <SegmentedPanel value="upload" className="space-y-1">
+        <Input
+          type="file"
+          accept=".json"
+          multiple
+          aria-label={t("agyImportUploadFiles")}
+          onChange={bulk.onFiles}
+          inputClassName={FILE_INPUT_CLASS}
+        />
+        <p className="text-xs text-text-muted">{t("agyImportBulkFileHint")}</p>
+      </SegmentedPanel>
+      <SegmentedPanel value="paste">
         <Textarea
           rows={5}
           aria-label={t("agyImportPasteJsonArray")}
@@ -489,8 +489,8 @@ function BulkSourceInput({ bulk }: { bulk: ReturnType<typeof useBulkImport> }) {
           placeholder={BULK_PLACEHOLDER}
           className="font-mono text-xs"
         />
-      )}
-    </>
+      </SegmentedPanel>
+    </SegmentedTabs>
   );
 }
 
@@ -565,19 +565,30 @@ export function ImportAgyAuthModal({ onClose, onSuccess }: ImportAgyAuthModalPro
   return (
     <Modal isOpen onClose={onClose} title={t("agyImportTitle")} size="lg">
       <div className="space-y-4">
-        <SegmentedControl
-          size="sm"
+        <SegmentedTabs
           value={topTab}
           onChange={(next) => setTopTab(next as AgyImportTopTab)}
-          options={[
-            { value: "local", label: t("agyImportTabLocal") },
-            { value: "single", label: t("agyImportTabSingle") },
-            { value: "bulk", label: t("agyImportTabBulk") },
-          ]}
-        />
-        {topTab === "local" && <LocalTab onClose={onClose} onSuccess={onSuccess} />}
-        {topTab === "single" && <SingleTab onClose={onClose} onSuccess={onSuccess} />}
-        {topTab === "bulk" && <BulkTab onClose={onClose} onSuccess={onSuccess} />}
+          className="gap-4"
+        >
+          <SegmentedControl
+            semantics="tabs"
+            size="sm"
+            options={[
+              { value: "local", label: t("agyImportTabLocal") },
+              { value: "single", label: t("agyImportTabSingle") },
+              { value: "bulk", label: t("agyImportTabBulk") },
+            ]}
+          />
+          <SegmentedPanel value="local">
+            <LocalTab onClose={onClose} onSuccess={onSuccess} />
+          </SegmentedPanel>
+          <SegmentedPanel value="single">
+            <SingleTab onClose={onClose} onSuccess={onSuccess} />
+          </SegmentedPanel>
+          <SegmentedPanel value="bulk">
+            <BulkTab onClose={onClose} onSuccess={onSuccess} />
+          </SegmentedPanel>
+        </SegmentedTabs>
       </div>
     </Modal>
   );

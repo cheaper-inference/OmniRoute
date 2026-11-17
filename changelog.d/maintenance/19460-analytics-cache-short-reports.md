@@ -1,0 +1,1 @@
+- **perf(usage):** the usage analytics cache now keeps reports that take 100 ms or more to build (was 1 s). Repeated dashboard reads of a mid-size report no longer re-run all the history queries for 60 seconds. Small instances still read live data. ([#19460](https://github.com/cheaper-inference/OmniRoute/pull/19460))
