@@ -1129,6 +1129,27 @@ async function validateFalReceiptPolicy(context: PolicyContext) {
   );
 }
 
+/**
+ * Final token/rate validators, run while the key-quota reservation is held:
+ * a deny or a throw releases the slot here; success leaves it with the caller.
+ */
+async function validateLimitsWithReservation(
+  context: PolicyContext,
+  reservation: KeyQuotaReservation | undefined
+): Promise<Response | null> {
+  try {
+    const rejection = validateTokenLimit(context) ?? (await validateRateLimitAndThrottle(context));
+    if (rejection) {
+      reservation?.release();
+      return rejection;
+    }
+    return null;
+  } catch (error) {
+    reservation?.release();
+    throw error;
+  }
+}
+
 export async function enforceApiKeyPolicy(
   request: Request,
   modelStr: string | null,
@@ -1184,18 +1205,8 @@ export async function enforceApiKeyPolicy(
   const keyQuota = validateKeyQuota(context, options?.reserveKeyQuota === true);
   if (keyQuota.rejection) return { apiKey, apiKeyInfo, rejection: keyQuota.rejection };
   // The quota gate may now hold an rpm slot. A later deny or throw ends the call here.
-  const { reservation } = keyQuota;
-  let limitRejection: Response | null;
-  try {
-    limitRejection = validateTokenLimit(context) ?? (await validateRateLimitAndThrottle(context));
-  } catch (error) {
-    reservation?.release();
-    throw error;
-  }
-  if (limitRejection) {
-    reservation?.release();
-    return { apiKey, apiKeyInfo, rejection: limitRejection };
-  }
+  const limitRejection = await validateLimitsWithReservation(context, keyQuota.reservation);
+  if (limitRejection) return { apiKey, apiKeyInfo, rejection: limitRejection };
 
-  return { apiKey, apiKeyInfo, rejection: null, keyQuotaReservation: reservation };
+  return { apiKey, apiKeyInfo, rejection: null, keyQuotaReservation: keyQuota.reservation };
 }
