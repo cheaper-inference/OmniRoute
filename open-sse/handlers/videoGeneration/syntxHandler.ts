@@ -103,11 +103,9 @@ async function runSyntxVideoJob(options: {
   const wantsBase64 = String(options.body.response_format || "").toLowerCase() === "b64_json";
   const item = wantsBase64
     ? {
-        b64_json: (
-          await fetchSyntxMediaBytes(url, options.fetchImpl, {
-            signal: options.signal,
-          })
-        ).bytes.toString("base64"),
+        b64_json: (await fetchSyntxMediaBytes(url, { signal: options.signal })).bytes.toString(
+          "base64"
+        ),
         format: "mp4",
       }
     : { url, format: "mp4" };

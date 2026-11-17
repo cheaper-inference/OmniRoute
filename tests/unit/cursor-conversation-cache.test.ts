@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import {
+  CursorExecutor,
   newStreamCtx,
   processFrame,
   buildCursorUsage,
@@ -8,6 +10,10 @@ import {
 } from "../../open-sse/executors/cursor";
 import { decodeAgentServerMessage } from "../../open-sse/utils/cursorAgentProtobuf.ts";
 import { resolveCursorWireConversationId } from "../../open-sse/executors/cursor/conversationId.ts";
+import {
+  cursorSessionManager,
+  type CursorSession,
+} from "../../open-sse/services/cursorSessionManager.ts";
 
 // ─── Wire-format helpers ───────────────────────────────────────────────────
 
@@ -256,6 +262,219 @@ test("buildCursorUsage records the estimate it reported for the next segment", (
     cached: 0,
   });
 });
+
+test("an intermediate tool-resumed segment without turn_ended attributes the prior segment prompt as cached", () => {
+  const seg1Body = {
+    messages: [
+      { role: "user" as const, content: " inspect the repository structure and run tests" },
+    ],
+  };
+  const ctx1 = newStreamCtx("claude-opus-5-5-high", () => {});
+  processFrame(buildTextDeltaPayload("calling first tool"), ctx1, new Set());
+  const seg1Usage = buildCursorUsage(ctx1, seg1Body) as Record<string, number>;
+  assert.ok(seg1Usage.prompt_tokens > 0);
+  assert.equal(ctx1.reportedUsage?.cached, 0);
+
+  const seg2Body = {
+    messages: [
+      ...seg1Body.messages,
+      { role: "assistant" as const, content: "calling first tool" },
+      { role: "user" as const, content: "tool output: 42 passing tests in 3 suites" },
+    ],
+  };
+  const ctx2 = newStreamCtx("claude-opus-5-5-high", () => {});
+  ctx2.priorReportedUsage = {
+    prompt: ctx1.reportedUsage!.prompt,
+    completion: ctx1.reportedUsage!.completion,
+    cached: ctx1.reportedUsage!.cached,
+    lastPrompt: ctx1.reportedUsage!.prompt,
+  };
+  processFrame(buildTextDeltaPayload("calling second tool"), ctx2, new Set());
+
+  const usage2 = buildCursorUsage(ctx2, seg2Body) as Record<string, unknown>;
+  assert.equal(usage2.estimated, true);
+  assert.ok((usage2.prompt_tokens as number) > seg1Usage.prompt_tokens);
+  assert.deepEqual(usage2.prompt_tokens_details, {
+    cached_tokens: ctx1.reportedUsage!.prompt,
+  });
+  assert.equal(ctx2.reportedUsage?.cached, ctx1.reportedUsage!.prompt);
+});
+
+test("turn_ended subtracts the cached tokens earlier segments already reported", () => {
+  const ctx = newStreamCtx("claude-opus-5-5-high", () => {});
+  ctx.priorReportedUsage = { prompt: 2200, completion: 40, cached: 1000, lastPrompt: 1200 };
+  processFrame(
+    buildTurnEndedWithUsage({ input: 3500, output: 90, cacheRead: 2000 }),
+    ctx,
+    new Set()
+  );
+  const usage = buildCursorUsage(ctx, SAMPLE_BODY) as Record<string, unknown>;
+  assert.equal(usage.prompt_tokens, 1300);
+  assert.equal(usage.completion_tokens, 50);
+  assert.deepEqual(usage.prompt_tokens_details, { cached_tokens: 1000 });
+  assert.deepEqual(ctx.reportedUsage, { prompt: 1300, completion: 50, cached: 1000 });
+});
+
+// ─── Tool-resumed runs through the real execute() lifecycle ────────────────
+
+function connectFrame(payload: Buffer): Buffer {
+  const head = Buffer.alloc(5);
+  head.writeUInt32BE(payload.length, 1);
+  return Buffer.concat([head, payload]);
+}
+
+// ASM { exec_server_message (2): { id (1), mcp_args (11): { tool_name (5), tool_call_id (3) } } }
+function buildExecMcp(toolCallId: string, execMsgId: number): Buffer {
+  const mcpArgs = Buffer.concat([
+    lenPrefixed(5, Buffer.from("read_file")),
+    lenPrefixed(3, Buffer.from(toolCallId)),
+  ]);
+  return lenPrefixed(2, Buffer.concat([varintField(1, execMsgId), lenPrefixed(11, mcpArgs)]));
+}
+
+/** One h2 stream that releases the next segment each time the driver attaches. */
+function scriptedCursorStream(segments: Buffer[]) {
+  const req = Object.assign(new EventEmitter(), {
+    close() {},
+    pause() {},
+    write: () => true,
+    resume() {
+      const wire = segments.shift();
+      if (wire) setImmediate(() => req.emit("data", wire));
+    },
+  });
+  const client = Object.assign(new EventEmitter(), { close() {} });
+  return { status: 200, req, client, initialBytes: Buffer.alloc(0) };
+}
+
+type SegmentResult = { toolCallId?: string; usage: Record<string, unknown> };
+
+async function readSegment(response: Response, stream: boolean): Promise<SegmentResult> {
+  if (!stream) {
+    const json = await response.json();
+    return { toolCallId: json.choices[0].message.tool_calls?.[0]?.id, usage: json.usage };
+  }
+  const chunks = (await response.text())
+    .split("\n")
+    .filter((line) => line.startsWith("data: {"))
+    .map((line) => JSON.parse(line.slice(6)));
+  return {
+    toolCallId: chunks.find((c) => c.choices?.[0]?.delta?.tool_calls)?.choices[0].delta
+      .tool_calls[0].id,
+    usage: chunks.find((c) => c.usage).usage,
+  };
+}
+
+for (const stream of [false, true]) {
+  test(`a retained session hands each segment's own prompt to the next one (${stream ? "SSE" : "JSON"})`, async () => {
+    const conversationId = `conv-19241-${stream}`;
+    const toolWire = (id: string, execMsgId: number) =>
+      Buffer.concat([
+        connectFrame(buildTextDeltaPayload(`calling ${id}`)),
+        connectFrame(buildExecMcp(id, execMsgId)),
+      ]);
+    // The last segment is scripted below, once the estimates of the first three are known.
+    const segments = [toolWire("call_1", 1), toolWire("call_2", 2), toolWire("call_3", 3)];
+    const executor = new CursorExecutor("cursor");
+    const internals = executor as unknown as {
+      buildRequest: () => Promise<{ body: Buffer; blobStore: Map<string, Buffer> }>;
+      openH2: () => Promise<ReturnType<typeof scriptedCursorStream>>;
+    };
+    let opens = 0;
+    internals.buildRequest = async () => ({ body: Buffer.alloc(0), blobStore: new Map() });
+    internals.openH2 = async () => {
+      opens++;
+      return scriptedCursorStream(segments);
+    };
+    const realFetch = globalThis.fetch;
+    const agentUrl = Buffer.from("https://api5.cursor.sh");
+    globalThis.fetch = async () =>
+      new Response(
+        Uint8Array.from(
+          lenPrefixed(27, Buffer.concat([lenPrefixed(1, agentUrl), lenPrefixed(2, agentUrl)]))
+        ).buffer
+      );
+
+    const firstPrompt = Array.from({ length: 400 }, (_, i) => `word${i}`).join(" ");
+    const messages: Record<string, unknown>[] = [{ role: "user", content: firstPrompt }];
+    const runSegment = async () => {
+      const { response } = await executor.execute({
+        model: "claude-opus-5-5-high",
+        body: { messages, conversation_id: conversationId },
+        stream,
+        credentials: { accessToken: `synthetic-token-${stream}` },
+        signal: undefined,
+        upstreamExtraHeaders: undefined,
+        clientHeaders: undefined,
+      });
+      return readSegment(response, stream);
+    };
+    const answerTool = (toolCallId: string | undefined) => {
+      assert.ok(toolCallId, "the segment must pause on a tool call");
+      messages.push(
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            { id: toolCallId, type: "function", function: { name: "read_file", arguments: "{}" } },
+          ],
+        },
+        { role: "tool", tool_call_id: toolCallId, content: "y".repeat(800) }
+      );
+    };
+    const retained = () =>
+      (cursorSessionManager as unknown as { sessions: Map<string, CursorSession> }).sessions.get(
+        conversationId
+      )?.reportedUsage;
+
+    try {
+      const seg1 = await runSegment();
+      const prompt1 = seg1.usage.prompt_tokens as number;
+      assert.equal(seg1.usage.prompt_tokens_details, undefined);
+      assert.equal(retained()?.lastPrompt, prompt1);
+      assert.equal(retained()?.cached, 0);
+
+      answerTool(seg1.toolCallId);
+      const seg2 = await runSegment();
+      const prompt2 = seg2.usage.prompt_tokens as number;
+      assert.ok(prompt2 > prompt1);
+      assert.deepEqual(seg2.usage.prompt_tokens_details, { cached_tokens: prompt1 });
+      assert.equal(retained()?.prompt, prompt1 + prompt2);
+      assert.equal(retained()?.lastPrompt, prompt2);
+
+      // The cumulative prompt is larger than this segment's, so reading it instead
+      // of lastPrompt would report 100% of the prompt as cached.
+      answerTool(seg2.toolCallId);
+      const seg3 = await runSegment();
+      const prompt3 = seg3.usage.prompt_tokens as number;
+      assert.ok(prompt3 > prompt2 && prompt3 < prompt1 + prompt2);
+      assert.deepEqual(seg3.usage.prompt_tokens_details, { cached_tokens: prompt2 });
+      assert.equal(retained()?.cached, prompt1 + prompt2);
+      assert.equal(retained()?.lastPrompt, prompt3);
+
+      // turn_ended totals the run: the segments must sum to Cursor's metering.
+      const reportedPrompt = prompt1 + prompt2 + prompt3;
+      const reportedCached = prompt1 + prompt2;
+      const cacheRead = reportedCached + 400;
+      segments.push(
+        Buffer.concat([
+          connectFrame(buildTextDeltaPayload("all done")),
+          connectFrame(
+            buildTurnEndedWithUsage({ input: reportedPrompt + 500, output: 9000, cacheRead })
+          ),
+        ])
+      );
+      answerTool(seg3.toolCallId);
+      const seg4 = await runSegment();
+      assert.equal(seg4.usage.prompt_tokens, 500);
+      assert.deepEqual(seg4.usage.prompt_tokens_details, { cached_tokens: 400 });
+      assert.equal(opens, 1, "every segment must resume the same h2 stream");
+      assert.equal(retained(), undefined, "turn_ended closes the session");
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  });
+}
 
 test("a malformed or input-less TurnEndedUpdate still ends the turn", () => {
   // Truncated length-delimited field inside turn_ended.

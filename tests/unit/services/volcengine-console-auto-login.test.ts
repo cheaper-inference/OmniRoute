@@ -700,7 +700,9 @@ test("resendCode respects the cooldown window", async () => {
   assert.equal(clicksAfter, clicksBefore, "resend must not click during cooldown");
 });
 
-test("resendCode clicks again once the cooldown passed", async () => {
+test("resendCode clicks again once the cooldown passed", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const fake = makeFakePlaywright();
   happyPathVisible(fake);
   const service = fastService(fake); // resendCooldownMs: 20ms
@@ -715,7 +717,7 @@ test("resendCode clicks again once the cooldown passed", async () => {
   assert.equal(clicks, 1, "resend must not click during cooldown");
 
   // Cooldown elapsed → click fires and phase resets to waiting_code
-  await new Promise((resolve) => setTimeout(resolve, 30));
+  now += 30;
   const session = await service.resendCode(started.session.sessionId);
   clicks = fake.__state.clicks.filter((c) => c === SEND_CODE_BTN).length;
   assert.equal(clicks, 2, "resend clicks the send-code button after cooldown");

@@ -24,19 +24,21 @@ Lakin tipik müştərilər (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_cont
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Çəkmə `open-sse/handlers/chatCore.ts` -da baş verir (iki sayt, iki `cacheReasoningFromAssistantMessage` zəng saytında). Təkrarlama `open-sse/translator/index.ts` də sxem məcburiyyətindən sonra, lakin göndərilmədən əvvəl baş verir.
+
+Alət-zəng qeydləri `buildToolCallCacheKey()` altında saxlanılır, sorğunun əhatə dairəsi və alət çağırışı id-si, ona görə də başqa API açarı və ya sessiyası tərəfindən istifadə edilən eyni id girişi seçmir. Əhatə dairəsi `buildReasoningCacheScope()` dən gəlir: API açar identifikatoru, üstəgəl sorğuda bir seans açarı. Buna görə də `tool_call_id` sütunu və tablosunda həmin qeydlər üçün bu həzm göstərilir.
 
 Sadə (alətdən istifadə etməyən) köməkçi növbələri fərqli şəkildə düymələnir: `buildAssistantMessageCacheKey()` sessiyanın əhatə dairəsini üstəgəl bu növbəyə qədər normallaşdırılmış OpenAI formatlı transkripti həzm edir, çünki DeepSeek mövcud olduqdan sonra `tools` əvvəlki _her_ növbənin əsaslandırılmasını tələb edir. Responses-API hədəfləri üçün (məsələn, `opencode-go/deepseek-v4-flash`, `/responses`-yə yönləndirilmiş) yuxarı orqan `messages` deyil, `input` daşıyır, ona görə də `translateRequest()` (`open-sse/translator/index.ts`) geri çağırış seçimi vasitəsilə həzm etdiyi pivot transkriptini bildirir və tutma saytları həmin transkripti həzm edir. Cavabları təkrar oxutma keçidi hər mənbə formatı üçün OpenAI pivotu üzərində işləyir, ona görə də Anthropic Mesaj müştəriləri (Claude → OpenAI → Cavabları) da təkrar oxunur.
 

@@ -81,6 +81,18 @@ Anche al di fuori delle regioni soggette a blocchi, i proxy sono utili per:
 
 ---
 
+## Stato proxy predefinito per i nuovi account
+
+In** Impostazioni → Proxy → Configurazione globale** , utilizzo** Abilita il proxy per impostazione predefinita per le nuove connessioni** per scegliere lo stato proxy iniziale degli account fornitore appena aggiunti.
+
+La nuova impostazione controlla lo stato proxy iniziale degli account provider appena aggiunti. Non modifica gli account esistenti né sostituisce il passaggio proxy globale. Il suo valore iniziale preserva il comportamento precedente. Disattivalo una volta per creare account futuri con proxy disabilitato per impostazione predefinita.
+
+La preferenza viene memorizzata come `defaultNewConnectionProxyEnabled` tramite le Impostazioni API esistenti. Il valore predefinito è `true` quando non viene mai salvato. Il salvataggio `false` ha effetto per i nuovi account successivi senza riavvio. `POST /api/providers` accetta un booleano rigoroso opzionale `proxyEnabled`; uno `true` o `false` esplicito ha la precedenza sull'impostazione predefinita di creazione. L'omissione su un account duplicato o la riconnessione OAuth preserva lo stato memorizzato dell'account. I singoli account possono comunque essere abilitati o disabilitati in seguito.
+
+I trasferimenti selettivi del provider utilizzano l'impostazione predefinita dell'installazione di destinazione per i nuovi account e preservano i criteri di destinazione quando si sostituiscono gli account esistenti. I commutatori proxy non sono campi di trasferimento portatili. Il ripristino completo del backup e la migrazione storica JSON/SQL mantengono la semantica di ripristino esistente, inclusi i valori dell'account salvati e le impostazioni predefinite dello schema legacy; anche un ripristino completo delle impostazioni può ripristinare questa preferenza.
+
+Questa preferenza non assegna una delega né stabilisce che uno sia sano o in uso. Il routing effettivo dipende ancora dallo switch proxy globale e dalla configurazione proxy applicabile. I provider sintetici senza un account persistente, il traffico OAuth prima della creazione dell'account, i proxy environment/system e la rete di backend esterni non rientrano nel suo ambito.
+
 ## Sistema proxy a 4 livelli
 
 OmniRoute supporta la configurazione dei proxy in **quattro ambiti indipendenti**, risolti in ordine di priorità:

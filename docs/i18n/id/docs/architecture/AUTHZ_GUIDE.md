@@ -155,15 +155,15 @@ mengaktifkannya (`src/server/auth/dashboardMfa.ts`).
 
 ## Kelas Rute
 
-`src/server/authz/types.ts` mendefinisikan tiga kelas; rute apa pun yang tidak dapat diklasifikasikan secara deterministik akan jatuh kembali ke `MANAGEMENT`.
+`src/server/authz/types.ts` mendefinisikan tiga kelas; rute apa pun yang tidak dapat diklasifikasikan secara deterministik akan dikembalikan ke `MANAGEMENT`.
 
-| Kelas        | Deskripsi                                                                                                                                           | Autentikasi yang diperlukan                                                |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `PUBLIC`     | Rute yang secara eksplisit aman — login, logout, status, inisialisasi, health, dan bootstrap onboarding.                                            | Tidak ada                                                                  |
-| `CLIENT_API` | Endpoint penyajian model — `/api/v1/*`, `/api/v1beta/*`, plus alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci Bearer ketika feature flag `REQUIRE_API_KEY` yang efektif diaktifkan |
-| `MANAGEMENT` | Halaman dashboard, pengaturan, provider, kunci, dan endpoint admin serta diagnostik.                                                                | Sesi dashboard ATAU Bearer dengan cakupan `manage`                         |
+| Kelas        | Keterangan                                                                                                                                             | Diperlukan autentikasi                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `PUBLIC`     | Rute yang aman secara eksplisit — login, logout, status, kesehatan, bootstrap orientasi.                                                               | Tidak ada                                                             |
+| `CLIENT_API` | Titik akhir penyajian model — `/api/v1/*`, `/api/v1beta/*`, plus alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci pembawa ketika tanda fitur `REQUIRE_API_KEY` efektif diaktifkan |
+| `MANAGEMENT` | Halaman dasbor, pengaturan, penyedia, kunci, admin, dan titik akhir diagnostik.                                                                        | Sesi dasbor OR Bearer dengan cakupan `manage`                         |
 
-Beberapa aksi `MANAGEMENT` bersifat **khusus operator**: kunci `manage` tidak cukup. Mengekspor kredensial tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan cadangan di atas data aktif (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan berdasarkan id, `POST /api/settings/import-json`), dan menghancurkan titik pemulihan (`DELETE /api/db-backups` untuk pembersihan, dan `PATCH /api/db-backups` karena retensi yang disimpannya menggerakkan pemangkasan otomatis setelah setiap cadangan) memerlukan sesi dashboard, subjek CLI lokal, atau login yang dinonaktifkan. Menerbitkan token sinkronisasi (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi dashboard atau subjek CLI lokal di setiap mode login. Kunci API dengan cakupan apa pun dan token akses `oma_` bukan kredensial operator: mereka mendapat `403` setiap kali salah satunya diperlukan. Pemeriksaannya ada di `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mengubah pengaturan login juga khusus operator: `POST /api/settings/require-login` (mengatur kata sandi manajemen / mengaktifkan-menonaktifkan `requireLogin`) hanya menerima kredensial tersebut setelah kata sandi ada — jendela bootstrap pertama kali (belum ada kata sandi) tidak berubah — dan sesi dashboard harus mengirim `currentPassword` untuk mengganti kata sandi (`403` jika tidak ada atau salah, dicatat sebagai `settings.update_failed`). CLI lokal dan instans dengan login dinonaktifkan mempertahankan jalur pemulihan dan dapat mengatur kata sandi tanpanya, karena keduanya terikat pada host yang memiliki direktori data.
+Beberapa tindakan `MANAGEMENT` adalah** khusus operator** : kunci `manage` tidak cukup. Mengekspor kredensial yang disimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan cadangan melalui data langsung (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pulihkan berdasarkan id, `POST /api/settings/import-json`), menghancurkan titik pemulihan (`DELETE /api/db-backups` cleanup, dan `PATCH /api/db-backups` karena retensinya tetap mendorong pemangkasan otomatis setelah setiap pencadangan) memerlukan sesi dasbor, subjek CLI lokal, atau login dinonaktifkan. Menerbitkan token sinkronisasi (`POST /api/sync/tokens`) dan membuat token akses `admin` CLI (`POST /api/cli/tokens`) memerlukan sesi dasbor atau subjek CLI lokal di setiap mode login. kunci API dari cakupan apa pun dan token akses `oma_` bukanlah kredensial operator: kunci tersebut mendapatkan `403` kapan pun diperlukan. Ceknya ada di `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mengubah pengaturan login juga hanya untuk operator: `POST /api/settings/require-login` (setel kata sandi manajemen / aktifkan `requireLogin`) hanya menerima kredensial tersebut setelah kata sandi ada — jendela bootstrap yang dijalankan pertama kali (belum ada kata sandi) tidak berubah — dan sesi dasbor harus mengirimkan `currentPassword` untuk mengganti kata sandi (`403` jika hilang atau salah, diaudit sebagai `settings.update_failed`). CLI lokal dan sebuah instance dengan login dinonaktifkan mempertahankan jalur pemulihan dan dapat menetapkan kata sandi tanpa itu, karena keduanya terikat pada host yang memiliki direktori data.
 
 ## Saluran pipa
 
@@ -194,53 +194,49 @@ Setiap kelas rute memiliki kebijakan di `src/server/authz/policies/`:
 
 Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Penangan hilir dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` alih-alih menjalankan kembali logika autentikasi.
 
-## Daftar Rute Publik
+## Daftar Rute Umum
 
-`src/shared/constants/publicApiRoutes.ts` adalah daftar izin eksplisit:
+`src/shared/constants/publicApiRoutes.ts` adalah daftar yang diizinkan secara eksplisit:
 
-Daftar ini dibagi berdasarkan **bentuk**, dan pembagian ini sangat penting (GHSA-74g9-q8f6-793h): sebuah prefiks
-dicocokkan dengan `startsWith()`, sehingga juga mencocokkan setiap jalur berdekatan yang memiliki karakter awal yang sama.
-`/api/usage/om-usage` sebagai prefiks menandai `/api/usage/om-usage<anything>` sebagai PUBLIC, dan Next me-resolve
-jalur tersebut ke `/api/usage/[connectionId]` — sebuah handler yang tidak memiliki autentikasi sendiri.
+Daftar ini dibagi berdasarkan** membentuk** , dan pemisahannya bersifat menahan beban (GHSA-74g9-q8f6-793h): awalan dicocokkan dengan `startsWith()`, sehingga juga cocok dengan setiap jalur berdekatan yang berbagi karakter utamanya. `/api/usage/om-usage` sebagai awalan bertanda `/api/usage/om-usage<anything>` PUBLIC, dan Next menyelesaikannya menjadi `/api/usage/[connectionId]` — penangan tanpa autentikasinya sendiri.
 
 ```ts
-// Subpohon yang sebenarnya. Setiap entri WAJIB diakhiri dengan "/" (dipastikan oleh pengujian unit).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // diperlakukan sebagai CLIENT_API dalam classify, bukan sebagai "publik tanpa autentikasi"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Rute tunggal, dicocokkan SECARA TEPAT (dengan atau tanpa garis miring di akhir).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // langkah login 2 untuk TOTP opsional; memerlukan cookie MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Rute tunggal hanya-baca yang juga mendapatkan relaksasi origin CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Rute tunggal hanya-baca TANPA relaksasi CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Rute hanya-baca bersifat publik **hanya** untuk metode yang aman. Catatan: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` dari fall-through PUBLIC — rute tersebut selalu menjadi `CLIENT_API`, sehingga kebijakan kunci Bearer tetap berlaku.
+Rute hanya-baca bersifat publik** hanya** untuk metode yang aman. Catatan: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` dari PUBLIC fall-through — yang selalu `CLIENT_API` sehingga kebijakan Bearer-key tetap berlaku.
 
 ## Menambahkan Rute Baru
 
@@ -310,15 +306,15 @@ Ini tetap mati kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 `read` / `write` / `admin` pada token `oma_live_…`, diberi peringkat oleh `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya berlaku untuk kredensial token akses. Lihat [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
 
-## Sakelar Autentikasi Wajib
+## Pengalih Diperlukan Otentikasi
 
-`isAuthRequired()` di `src/shared/utils/apiAuth.ts` memutuskan apakah **autentikasi apa pun** diterapkan untuk sebuah permintaan:
+`isAuthRequired()` di `src/shared/utils/apiAuth.ts` memutuskan apakah** setiap** auth diberlakukan untuk permintaan:
 
-- `settings.requireLogin === false` → autentikasi dinonaktifkan secara global, kecuali untuk tingkat yang selalu dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang menyerahkan kredensial yang diterimanya, yang memerlukan kredensial yang sama seperti ketika login aktif: menerbitkan token sinkronisasi, mencetak token akses CLI pada cakupan apa pun, dan membuat kunci API dengan cakupan `manage`/`admin`, memberikan cakupan tersebut ke sebuah kunci, atau meregenerasi atau menampilkan kunci seperti itu (`requireCredentialForManagementScopedKey()` di `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferensi tetap terbuka.
-- Belum ada kata sandi yang dikonfigurasi **dan** tidak ada env var `INITIAL_PASSWORD` → mode bootstrap: wizard onboarding dan permintaan loopback diizinkan, tetapi permintaan jaringan eksternal tetap memerlukan kredensial.
-- Kesalahan DB apa pun → gagal tertutup (aman secara default).
+- `settings.requireLogin === false` → auth dinonaktifkan secara global, kecuali untuk tingkat yang selalu dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) dan panggilan yang membagikan kredensial yang diterimanya, yang memerlukan kredensial yang sama seperti saat login aktif: mengeluarkan token sinkronisasi, mencetak token akses CLI pada cakupan apa pun, dan membuat kunci API dengan cakupan `manage`/`admin`, memberikan cakupan tersebut ke kunci, atau membuat ulang atau mengungkapkan kunci tersebut (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferensi tetap terbuka. Menulis tanda fitur yang dilindungi (`REQUIRE_API_KEY`, tanda Keamanan lainnya, dan tanda SSRF / TLS / MCP-scope / sandbox yang tercantum dalam [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) dan menyimpan pengaturan penyembunyian PII (`PUT /api/settings/pii`) juga tetap memerlukan kredensial.
+- Tidak ada kata sandi yang dikonfigurasi** Dan** no `INITIAL_PASSWORD` env var → bootstrap mode memungkinkan wizard orientasi dan permintaan loopback, tetapi permintaan jaringan yang terbuka masih memerlukan kredensial. Pengecualian: menulis tanda fitur yang dilindungi dan menyimpan pengaturan penyembunyian PII (`PUT /api/settings/pii`) memerlukan kredensial bahkan dari loopback, jadi loopback saja tidak cukup di sana.
+- Kesalahan DB apa pun → gagal ditutup (aman secara default).
 
-Penegakan kunci API klien menggunakan `isRequireApiKeyEnabled()` di `src/shared/utils/featureFlags.ts`, bukan pembacaan langsung `process.env.REQUIRE_API_KEY`. Ini penting untuk instans yang di-deploy: mengubah `REQUIRE_API_KEY` di Dashboard → Feature Flags menyimpan override DB dan langsung memengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, dan pemeriksaan autentikasi API klien lainnya yang memakai helper ini. Jika penyimpanan feature flag tidak dapat dibaca, autentikasi API klien gagal tertutup dan mewajibkan kunci.
+Penegakan kunci API klien menggunakan `isRequireApiKeyEnabled()` di `src/shared/utils/featureFlags.ts`, bukan pembacaan `process.env.REQUIRE_API_KEY` langsung. Hal ini penting untuk instance yang diterapkan: mengaktifkan `REQUIRE_API_KEY` di Dashboard → Feature Flags menyimpan penggantian DB dan langsung memengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, dan pemeriksaan autentikasi API klien lainnya yang menggunakan helper ini. Jika penyimpanan tanda fitur tidak dapat dibaca, autentikasi API klien gagal ditutup dan memerlukan kunci.
 
 ## Perubahan yang Tidak Kompatibel — v3.8.0
 

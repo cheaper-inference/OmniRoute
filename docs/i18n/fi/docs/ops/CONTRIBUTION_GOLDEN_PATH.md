@@ -29,70 +29,61 @@ muutostyypin sen sopimuksiin, kohdennettuihin tarkistuksiin ja CI-kattavuuteen.
 6. **Kirjaa todisteet.** Luettele PR-mallipohjassa suoritetut komennot, kaikki lisätyt tai muutetut testitiedostot,
    migraatiot tai ominaisuusliput sekä kaikki vielä odottavat, vain CI:ssä tehtävät tarkistukset.
 
-## Vakiopolut muutostyypeittäin
+## Kultaiset polut muutostyypin mukaan
 
-Alla olevat komennot ovat kohdennettujen tarkistusten vähimmäisvaatimuksia, eivät lupa ohittaa testiä, joka kattaa suoraan
-muuttamasi toiminnan.
+Alla olevat komennot ovat vähimmäistarkastuksia, eivät lupaa ohittaa testiä, joka kattaa suoraan muuttamasi käyttäytymisen.
 
 ### Palveluntarjoaja
 
 **Sopimukset**
 
-- Palveluntarjoajan määrittely hakemistossa `src/shared/constants/providers/` ja sen koostaminen tiedostossa
-  `src/shared/constants/providers.ts`.
-- Mallit ja ominaisuudet tiedostossa `open-sse/config/providerRegistry.ts` tai siitä erotetuissa rekisteritiedostoissa.
-- Suorittimen/kääntäjän valinta, OAuth- tai API-avainmääritykset, hallintapaneelin resurssit ja generoitu
-  palveluntarjoajaviite soveltuvin osin.
-- Julkisten tunnistetietojen on käytettävä `resolvePublicCred()`-funktiota; virhevastauksissa on käytettävä jaettuja puhdistettuja
-  virheapufunktioita. Katso `docs/security/PUBLIC_CREDS.md` (gitissä; ei käännetä `/docs`-hakemistoon) ja
-  [Virheiden puhdistus](../security/ERROR_SANITIZATION.md).
+- Tarjoajan määritelmä `src/shared/constants/providers/` ssa ja sen koostumus `src/shared/constants/providers.ts` ssä.
+- Mallit ja ominaisuudet `open-sse/config/providerRegistry.ts` tai sen puretuissa rekisteritiedostoissa.
+- Executor/translator -valinta, OAuth tai API-avaimen määritykset ja kojelaudan resurssit. Älä sitoa uudelleen luotuja `docs/reference/PROVIDER_REFERENCE.md` tai README -kaavioita: julkaisun päivitys kirjoittaa ne uudelleen (`check:pr-derived-paths` epäonnistuu niitä kuljettavassa PR ominaisuudessa).
+- Julkisissa tunnistetiedoissa on käytettävä `resolvePublicCred()`; virhevastauksissa on käytettävä jaettuja desinfioituja virheapuohjelmia. Katso `docs/security/PUBLIC_CREDS.md` (git; ei ole käännetty `/docs` ksi) ja [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Kohdennettu silmukka**
+**Tarkennettu silmukka**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kun katalogi muuttuu; commitoi generoitu diff
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Testaa myös jokainen muutoksen kohteena oleva pyyntöperhe: chat, Responses, kuvat, upotukset, ääni tai video.
-Käsittele generoituja katalogi- ja golden-diffejä sopimusmuutoksina; älä hyväksy niitä sokeasti.
+Testaa myös jokainen pyyntöperhe, jota tämä koskee: chat, vastaukset, kuvat, upotukset, ääni tai video. Tarkista luotu luettelo ja kultaiset erot sopimusmuutoksissa; älä hyväksy niitä sokeasti.
 
 ### Reititys
 
 **Sopimukset**
 
-- Julkiset strategiavaihtoehdot ja käyttöliittymän metadata tiedostossa `src/shared/constants/routingStrategies.ts`.
-- Välitys ja järjestys tiedoston `open-sse/services/combo.ts` sekä hakemiston `open-sse/services/combo/` alla.
-- Combo-skeemat, pysyvyys, vikasietoisuuden tila, mallien ominaisuudet sekä API- ja käyttöliittymäohjaimet.
-- [Auto-Combo-moottori](../routing/AUTO-COMBO.md) ja vikasietoisuusdokumentaatio, kun toiminta muuttuu.
+- Julkiset strategia-arvot ja UI -metatiedot `src/shared/constants/routingStrategies.ts` ssä.
+- Lähetys ja tilaus `open-sse/services/combo.ts` ja `open-sse/services/combo/` alla.
+- Yhdistelmäskeemat, pysyvyys, joustavuustila, mallin ominaisuudet ja API/UI -ohjaimet.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) ja joustavuusdokumentaatio, kun käyttäytyminen muuttuu.
 
-**Kohdennettu silmukka**
+**Tarkennettu silmukka**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategian tai välityksen muutokset
-npm run check:known-symbols      # strategian rekisteröinnin muutokset
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Käytä paikallisesti deterministisiä testejä, joissa upstream on mockattu. Reaaliaikaiset combon savutestit edellyttävät tunnistetietoja ja ovat
-manuaalisia, eivät CI:n korvikkeita.
+Käytä deterministisiä pilkattuja alkupään testejä paikallisesti. Live-yhdistelmätupakointi vaatii kirjautumistiedot ja ovat manuaalisia, eivät CI -korvikkeita.
 
-### Käyttöliittymä / käyttökokemus
+### UI / UX
 
 **Sopimukset**
 
-- Next.js-reitin/sivun ja jaettujen komponenttien rajat hakemistoissa `src/app/` ja
-  `src/shared/components/`.
-- API-vastausten muodot, lataus-/tyhjä-/virhetilat, näppäimistö- ja ruudunlukijakäyttäytyminen,
-  responsiivinen asettelu, teemat ja lokaalien laajentaminen.
-- Englanninkieliset käyttöliittymän lähdemerkkijonot tiedostossa `src/i18n/messages/en.json`; älä kovakoodaa uutta käyttäjälle näkyvää tekstiä.
+- Next.js route/page ja jaetut komponenttirajat `src/app/` n ja `src/shared/components/` alla.
+- API -vastausmuodot, loading/empty/error tilat, näppäimistön ja näytönlukijan käyttäytyminen, reagoiva asettelu, teema ja aluelaajennus.
+- Englannin UI -lähdemerkkijonot `src/i18n/messages/en.json`:ssä ; älä koodaa uutta käyttäjälle tarkoitettua kopiota.
 
-**Kohdennettu silmukka**
+**Tarkennettu silmukka**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,67 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Käynnistä sovellus vuorovaikutukseen tai ulkoasuun vaikuttavia muutoksia varten ja tarkista sekä kapeat että leveät näkymät. CI suorittaa
-tuotantokoontiversion ja laajemmat testikokonaisuudet; visuaalinen toiminta tarvitsee silti muutokseen sopivan kohdennetun komponentti- tai Playwright-
-testin tai dokumentoidun manuaalisen tarkistuksen.
+Suorita sovellus vuorovaikutusta tai visuaalisia muutoksia varten ja tarkista sekä kapeat että leveät kuvaportit. CI pyörittää tuotantorakennetta ja laajempia sviittejä; visuaalinen käyttäytyminen vaatii edelleen kohdistetun komponentin, Playwright, tai dokumentoidun manuaalisen tarkistuksen muutokseen vastaavasti.
 
-### Kansainvälistäminen
+### i18n
 
 **Sopimukset**
 
-- `src/i18n/messages/en.json` on käyttöliittymän lähde; `config/i18n.json` on lokaalien lähde.
-- CLI-katalogit sijaitsevat erikseen hakemistossa `bin/cli/locales/`.
-- Säilytä ICU-paikkamerkit ja tagit täsmälleen ennallaan. Älä käännä tuote-, palveluntarjoaja- tai mallinimiä,
-  protokollien ja otsakkeiden nimiä, komentoja, koodi-/JSON-tunnisteita, URL-osoitteita, ympäristömuuttujia tai
-  suojattuja termejä, kuten `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Nykyinen lähdeluettelo on
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` on UI lähde; `config/i18n.json` on kielilähde.
+- CLI -luettelot ovat erikseen `bin/cli/locales/` alla.
+- Säilytä ICU -paikkamerkit ja -tunnisteet tarkasti. Älä käännä product/provider/model -nimiä, protokollien ja otsikoiden nimiä, komentoja, code/JSON -tunnisteita, URLs, ympäristömuuttujia tai suojattuja termejä, kuten `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Nykyinen lähdeluettelo on `scripts/i18n/glossary/protected-terms.json`.
 
-**Kohdennettu silmukka**
+Ominaisuus PR muokkaa vain `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); muut alueet täydennetään kerran julkaisua kohti julkaisun päivityksellä tai käännösaalolla (`docs/guides/I18N.md` → "Vain PRs touch `en.json` "). `npm run check:pr-derived-paths` epäonnistuu ominaisuus PR, joka muokkaa toista alueluetteloa.
+
+**Tarkennettu silmukka**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kun CLI-merkkijonot tai -katalogit muuttuvat
 npm run lint
 ```
 
-Tämä on olemassa olevan järjestelmän ohjeistus, ei kehotus laajentaa sen työkaluja tai avainmallia.
-Pidä kansainvälistämiseen liittyvät korjaukset tarkkarajaisina korvaavan järjestelmän suunnittelun aikana. Älä suorita käännös-
-komentoja, jotka kutsuvat ulkoisia palveluita, ellei tehtävä nimenomaisesti edellytä generoituja käännöksiä ja
-ellet ole tarkistanut tuloksena syntyvää diffiä.
+Ilman `--mode=pr` nämä portit toimivat vapautustilassa paikallisesti ja raportoivat jokaisen lisätyn tai uudelleenkirjoitetun avaimen `en.json`:ssä; se on julkaisun päivityksen työ, ei sinun PR:si.
+
+Tämä on ohje olemassa olevalle järjestelmälle, ei kehotus laajentaa sen työkaluja tai avainmallia. Pidä i18n-laastarit kirurgisina korvaavan järjestelmän suunnittelun aikana. Älä suorita käännöskomentoja, jotka kutsuvat ulkoisia palveluita, ellei tehtävä nimenomaisesti edellytä luotuja käännöksiä ja olet tarkistanut tuloksena olevan eron.
 
 ### CLI
 
 **Sopimukset**
 
-- Julkiset komennot ja valitsimet hakemistossa `bin/cli/`, generoidut API-komennot, poistumiskoodit, stdout/stderr ja
-  JSON-tulosteiden rakenteet, määritysten/ympäristön toiminta sekä paketoidut tiedostot.
-- CLI:n käyttäjälle näkyvien merkkijonojen on käytettävä CLI:n i18n-kerrosta, ja `en`/`pt-BR`-luettelot on pidettävä yhdenmukaisina.
-- Säilytä Node tuettuna suoritusympäristönä ja julkaistun binääritiedoston sopimus muuttumattomana.
+- Julkiset komennot ja liput `bin/cli/`:ssa, luodut API -komennot, poistumiskoodit, stdout/stderr ja JSON -tulostusmuodot, config/environment käyttäytyminen ja pakatut tiedostot.
+- CLI -käyttäjälle suunnattujen merkkijonojen on käytettävä CLI i18n -tasoa ( `bin/cli/locales/en.json`:ssä olevat `t()` -avaimet). Ominaisuus PR muokkaa vain `en.json`; `pt-BR` ja muut alueet valmistuvat julkaisun yhteydessä.
+- Säilytä Node tuettuna ajonaikana ja julkaistuna binaarisopimuksena.
 
-**Kohdennettu kehityssilmukka**
+**Tarkennettu silmukka**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # generoidun/paketoidun CLI:n muutokset
-npm run check:pack-policy     # paketin julkisen pinnan muutokset
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Käytä täsmällistä komentoa väliaikaisessa datahakemistossa, kun toiminta riippuu jäsentämisestä, tiedostoista tai poistumistilasta. CI suorittaa laajemmat pakettiartefaktien ja ekosysteemin tarkistukset.
+Käytä tarkkaa komentoa väliaikaisessa tietohakemistossa, kun käyttäytyminen riippuu jäsentämisestä, tiedostoista tai poistumistilasta. CI suorittaa laajemman paketin artefaktien ja ekosysteemien tarkistukset.
 
 ### Tietokanta
 
 **Sopimukset**
 
-- Toimialuemoduulit ovat hakemistossa `src/lib/db/`; tuo yksittäiset moduulit suoraan (vanha `localDb.ts`-uudelleenvientikerros on poistettu).
-- Numeroiduista, idempotenteista SQL-migraatioista hakemistossa `src/lib/db/migrations/`, transaktioturvallisuudesta, päivitystoiminnasta, indekseistä ja jokaisesta skeeman muutoksen vaikutuspiirissä olevasta kutsujasta on huolehdittava.
-- Reitit ja käsittelijät eivät koskaan suorita raakaa SQL:ää suoraan.
+- Verkkotunnusmoduulit `src/lib/db/` n alla ; tuoda tietyt moduulit suoraan (vanha `localDb.ts` -re-export -taso poistettiin).
+- Numeroidut, idempotentit SQL -siirrot `src/lib/db/migrations/`:ssä, tapahtumaturvallisuus, päivityskäyttäytyminen, indeksit ja jokainen soittaja, johon skeema vaikuttaa.
+- Reitit ja käsittelijät eivät koskaan anna raakaa SQL suoraan.
 
-**Kohdennettu kehityssilmukka**
+**Tarkennettu silmukka**
 
 ```bash
 npm run check:migration-numbering
@@ -171,27 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Kun lisäät migraation, testaa sekä uusi tietokanta että päivitys edellisestä skeemasta. Tietokantatestien on suljettava kahvat ja kutsuttava `resetDbInstance()`-funktiota siivouksen aikana. Suorita `npm run test:bun:db` vain, kun parhaaseen yritykseen perustuva Bun-sovitinpolku muuttuu; Node on edelleen ensisijainen.
+Testaa sekä tuoretta tietokantaa että päivitystä aiemmasta skeemasta, kun lisäät siirtoa. Tietokantatestien on suljettava kahvat ja kutsuttava `resetDbInstance()` puhdistuksen aikana. Suorita `npm run test:bun:db` vain, kun parhaan mahdollisen Bun sovittimen polku muuttuu; Node pysyy arvovaltaisena.
 
-### Koonti / käyttöönotto
+### Rakenna / ota käyttöön
 
 **Sopimukset**
 
-- Juuren ja työtilojen manifestit/lukkotiedosto, `scripts/build/`, Next.js:n itsenäisen version kokoaminen, `dist/`-paketin sisältö, Electron-alustojen metatiedot, CI-työnkulut ja käyttöönoton tarkistuspisteet.
-- Tuettujen Node-versioiden vaihteluvälit ja `CLAUDE.md`-tiedostossa sallittujen Bun-käyttötapojen luettelo on säilytettävä ennallaan.
-- Koontiartefakteja ei seurata versionhallinnassa; riippuvuus-, lisenssi-, työnkulku- ja pakettikäytäntöjä sovelletaan.
+- Pää- ja työtila manifests/lockfile, `scripts/build/`, Next.js erillinen kokoonpano, `dist/` paketin sisältö, Electron alustan metatiedot, CI -työnkulut ja käyttöönottovartijat.
+- Tuettujen solmualueiden ja sallittujen Bun -käytön `CLAUDE.md` :ssä on säilyttävä ennallaan.
+- Rakennusesineet jäävät jäljittämättä; riippuvuus-, lisenssi-, työnkulku- ja pakettikäytännöt ovat voimassa.
 
-**Kohdennettu kehityssilmukka**
+**Tarkennettu silmukka**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # riippuvuuden tai lukkotiedoston muutokset
-npm run check:pack-policy      # julkaistun paketin pinnan muutokset
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Käytä komentoa `npm run build` paikallisesti vain, kun muutos vaikuttaa kääntämiseen, itsenäisen version kokoamiseen, resursseihin tai suorituksenaikaiseen paketointiin. Käytä komentoa `npm run build:release` vain julkaisun tai käyttöönoton validointiin. CI:n koonti on lopullinen alustariippumaton signaali; alustakohtaiset Electron-muutokset edellyttävät vastaavaa kohdennettua koontia tai smoke-testinäyttöä.
+Käytä `npm run build` paikallisesti vain, kun muutos vaikuttaa kääntämiseen, itsenäiseen kokoonpanoon, resursseihin tai ajonaikaiseen niputtamiseen. Käytä `npm run build:release` tä vain release/deploy vahvistukseen. CI:n koontiversio on lopullinen alustojen välinen signaali; alustakohtaiset Electron -muutokset vaativat vastaavan kohdistetun rakentamisen tai savutodisteen.
 
 ## Kehittäjäskriptit jaetulle koneelle
 

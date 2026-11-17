@@ -105,7 +105,11 @@ export function TrafficInspectorPageClient({
     <div className="flex flex-col h-full overflow-hidden">
       {title && (
         <div className="shrink-0 px-4 pt-4 pb-2">
-          <PageHeader compact title={title} description={subtitle && <span>{subtitle}</span>} />
+          <PageHeader
+            compact
+            title={title}
+            description={subtitle ? <span>{subtitle}</span> : undefined}
+          />
           {purpose && <p className="text-xs text-text-muted mt-2 max-w-2xl italic">{purpose}</p>}
         </div>
       )}

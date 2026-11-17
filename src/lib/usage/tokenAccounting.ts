@@ -1,3 +1,4 @@
+import { readUsageEvidence, usableTokenCounter } from "./usageEvidence";
 type JsonRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): JsonRecord {
@@ -130,17 +131,28 @@ export function getReasoningTokens(tokens: unknown): number {
   );
 }
 
-// Non-greedy, single-capture, no nested variable-length quantifiers → ReDoS-safe.
-const THINK_BLOCK_RE = /<think>([\s\S]*?)<\/think>/gi;
+const THINK_OPEN_RE = /<think>/gi;
+const THINK_CLOSE_RE = /<\/think>/gi;
 
 type ObservedReasoning = { source: "content" | "think" | null; chars: number };
 
+// Two literal searches that only move forward, stopping at the first unclosed tag.
+// One lazy `<think>([\s\S]*?)</think>` retries from every unclosed `<think>`, which
+// is quadratic, and no-log attempts scan the untruncated response on the request path.
 function countThinkTagChars(text: string): number {
   let chars = 0;
-  for (const match of text.matchAll(THINK_BLOCK_RE)) {
-    chars += (match[1] ?? "").length;
+  let cursor = 0;
+  while (true) {
+    THINK_OPEN_RE.lastIndex = cursor;
+    const open = THINK_OPEN_RE.exec(text);
+    if (!open) return chars;
+    const contentStart = open.index + open[0].length;
+    THINK_CLOSE_RE.lastIndex = contentStart;
+    const close = THINK_CLOSE_RE.exec(text);
+    if (!close) return chars;
+    chars += close.index - contentStart;
+    cursor = close.index + close[0].length;
   }
-  return chars;
 }
 
 // #13965: Claude-format content arrays — native Claude bodies, or the same blocks
@@ -206,7 +218,11 @@ export function getObservedReasoning(message: unknown): ObservedReasoning {
 // vs `0` when the provider explicitly reported zero.
 
 function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
-  return keys.some((k) => record[k] !== undefined && record[k] !== null);
+  return keys.some((k) => {
+    const value = record[k];
+    const normalized = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+    return usableTokenCounter(normalized);
+  });
 }
 
 /**
@@ -214,6 +230,7 @@ function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
  * report any cache-read field at all.
  */
 export function getPromptCacheReadTokensOrNull(tokens: unknown): number | null {
+  if (readUsageEvidence(tokens)?.cacheRead.source === "unknown") return null;
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
   if (
@@ -230,6 +247,7 @@ export function getPromptCacheReadTokensOrNull(tokens: unknown): number | null {
  * provider didn't report any cache-creation field at all.
  */
 export function getPromptCacheCreationTokensOrNull(tokens: unknown): number | null {
+  if (readUsageEvidence(tokens)?.cacheCreation.source === "unknown") return null;
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
   if (

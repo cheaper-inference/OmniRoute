@@ -291,6 +291,22 @@ test("Codex metadata capture does not mutate input credentials or request", () =
   assert.deepEqual(requestBody, originalRequest);
 });
 
+test("uncatalogued Codex model still carries the Claude effort without catalog fields (#18947)", () => {
+  const out = resolveExecutionCredentials({
+    ...codexBase,
+    modelInfo: null,
+    requestBody: { output_config: { effort: "medium" }, reasoning_effort: "low" },
+  });
+  assert.deepEqual(out.providerSpecificData._omnirouteCodexThinking, {
+    requestedThinkingEffort: "medium",
+  });
+});
+
+test("uncatalogued Codex model without any effort omits the metadata (#18947)", () => {
+  const out = resolveExecutionCredentials({ ...codexBase, modelInfo: null, requestBody: {} });
+  assert.equal(Object.hasOwn(out.providerSpecificData, "_omnirouteCodexThinking"), false);
+});
+
 test("non-Codex credentials never capture Codex effort metadata", () => {
   const out = resolveExecutionCredentials({
     ...codexBase,

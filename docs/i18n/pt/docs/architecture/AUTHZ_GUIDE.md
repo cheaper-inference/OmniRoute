@@ -154,17 +154,17 @@ ativar (`src/server/auth/dashboardMfa.ts`).
      `auth.mfa.disabled` com `secondFactor: "recovery_switch"`.
   4. Remova a definição de `OMNIROUTE_DISABLE_MFA`, reinicie e volte a inscrever-se, se necessário.
 
-## Classes de rotas
+## Classes de percurso
 
-`src/server/authz/types.ts` define três classes; qualquer rota que não possa ser classificada de forma determinística recorre a `MANAGEMENT`.
+`src/server/authz/types.ts` define três classes; qualquer rota que não possa ser classificada deterministicamente volta a `MANAGEMENT`.
 
-| Classe       | Descrição                                                                                                                                                                  | Autenticação necessária                                                   |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `PUBLIC`     | Rotas explicitamente seguras: início de sessão, fim de sessão, estado, inicialização, verificação de funcionamento e bootstrap do onboarding.                              | Nenhuma                                                                   |
-| `CLIENT_API` | Pontos finais de disponibilização de modelos: `/api/v1/*`, `/api/v1beta/*`, além dos alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chave Bearer quando a funcionalidade `REQUIRE_API_KEY` efetiva está ativa |
-| `MANAGEMENT` | Páginas do painel, definições, fornecedores, chaves, pontos finais de administração e diagnóstico.                                                                         | Sessão do painel OU Bearer com âmbito `manage`                            |
+| Classe       | Descrição                                                                                                                                                      | Autenticação necessária                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Rotas explicitamente seguras — login, logout, estado, integridade, inicialização de integração.                                                                | Nenhum                                                                                   |
+| `CLIENT_API` | Terminais de atendimento de modelos — `/api/v1/*`, `/api/v1beta/*`, mais alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chave do portador quando o sinalizador de recurso `REQUIRE_API_KEY` efetivo está ativado |
+| `MANAGEMENT` | Páginas do painel, definições, fornecedores, chaves, endpoints de administração e diagnóstico.                                                                 | Sessão do painel OR Bearer com mira `manage`                                             |
 
-Algumas ações de `MANAGEMENT` são **exclusivas do operador**: uma chave `manage` não basta. Exportar credenciais guardadas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurar uma cópia de segurança sobre os dados ativos (`POST /api/db-backups/import`, incluindo `dryRun=true`, `POST /api/db-backups` com restauro por id, `POST /api/settings/import-json`), e eliminar pontos de restauro (a limpeza com `DELETE /api/db-backups` e `PATCH /api/db-backups`, porque a retenção que este guarda controla a poda automática após cada cópia de segurança) exigem uma sessão do painel, a identidade da CLI local ou o início de sessão desativado. Emitir um token de sincronização (`POST /api/sync/tokens`) e criar um token de acesso da CLI com âmbito `admin` (`POST /api/cli/tokens`) exigem, em todos os modos de início de sessão, uma sessão do painel ou a identidade da CLI local. As chaves de API de qualquer âmbito e os tokens de acesso `oma_` não são credenciais de operador: recebem `403` sempre que alguma destas for exigida. A verificação está em `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Alterar as definições de início de sessão também é exclusivo do operador: `POST /api/settings/require-login` (definir a palavra-passe de gestão / ativar ou desativar `requireLogin`) aceita apenas estas credenciais depois de existir uma palavra-passe. A janela de bootstrap da primeira execução (ainda sem palavra-passe) mantém-se inalterada, e uma sessão do painel tem de enviar `currentPassword` para substituir a palavra-passe (`403` se faltar ou estiver errada, auditado como `settings.update_failed`). A CLI local e uma instância com o início de sessão desativado mantêm o caminho de recuperação e podem definir uma palavra-passe sem esse passo, pois ambos estão vinculados ao anfitrião que detém o diretório de dados.
+Algumas ações `MANAGEMENT` são** somente operador** : uma chave `manage` não é suficiente. Exportar credenciais armazenadas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurar um backup dos dados ativos (`POST /api/db-backups/import` incluindo `dryRun=true`, `POST /api/db-backups` restaurar por id, `POST /api/settings/import-json`), destruir pontos de restauro (`DELETE /api/db-backups` cleanup e `PATCH /api/db-backups` porque a retenção que persiste desencadeia a remoção automática após cada backup) requer uma sessão do painel, o assunto CLI local ou login desativado. A emissão de um token de sincronização (`POST /api/sync/tokens`) e a criação de um token de acesso `admin` CLI `POST /api/cli/tokens`) requerem uma sessão de painel ou o assunto CLI local em cada modo de início de sessão. As chaves API de qualquer âmbito e os tokens de acesso `oma_` não são credenciais de operador: obtêm `403` sempre que necessário. O cheque reside em `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). A alteração das definições de login é também exclusiva do operador: `POST /api/settings/require-login` (definir a palavra-passe de gestão/alternar `requireLogin`) apenas aceita estas credenciais quando existe uma palavra-passe — a janela de bootstrap da primeira execução (sem palavra-passe ainda) permanece inalterada — e uma sessão do painel deve enviar `currentPassword` para substituir a palavra-passe (`403` quando esta está em falta ou errada, auditada como `settings.update_failed`). O CLI local e uma instância com o login desativado mantêm o caminho de recuperação e podem definir uma palavra-passe sem ele, uma vez que ambos estão ligados ao host proprietário do diretório de dados.
 
 ## Gasoduto
 
@@ -199,49 +199,45 @@ Uma política bem-sucedida retorna `AuthSubject` com `kind ∈ { client_api_key,
 
 `src/shared/constants/publicApiRoutes.ts` é a lista de permissões explícita:
 
-A lista está dividida por **forma**, e essa divisão é essencial (GHSA-74g9-q8f6-793h): um prefixo é
-correspondido com `startsWith()`, pelo que também corresponde a todos os caminhos adjacentes que partilhem os seus caracteres iniciais.
-`/api/usage/om-usage` como prefixo marca `/api/usage/om-usage<anything>` como PUBLIC, e o Next resolve
-isso para `/api/usage/[connectionId]` — um handler sem autenticação própria.
+A lista está dividida por** forma** , e a divisão é de suporte de carga (GHSA-74g9-q8f6-793h): um prefixo é combinado com `startsWith()`, pelo que corresponde também a todos os caminhos adjacentes que partilham os seus caracteres iniciais. `/api/usage/om-usage` como um prefixo marcado `/api/usage/om-usage<anything>` PUBLIC e Next resolve isto para `/api/usage/[connectionId]` — um manipulador sem autenticação própria.
 
 ```ts
-// Subárvores genuínas. Cada entrada DEVE terminar em "/" (validado por um teste unitário).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // tratado como CLIENT_API em classify, não como "público sem autenticação"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Rotas individuais, correspondidas EXATAMENTE (com ou sem uma barra final).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // passo 2 do início de sessão para TOTP opcional; precisa do cookie MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Rotas individuais só de leitura que também usam a relaxação da origem CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Rota individual só de leitura SEM a relaxação CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-As rotas só de leitura são públicas **apenas** para métodos seguros. Nota: `classifyRoute()` exclui `/api/v1/*` e `/api/v1beta/*` do fallback PUBLIC — essas rotas são sempre `CLIENT_API`, pelo que a política de chaves Bearer continua a aplicar-se.
+As rotas somente leitura são públicas** apenas** para métodos seguros. Nota: `classifyRoute()` exclui `/api/v1/*` e `/api/v1beta/*` do PUBLIC fall-through — estes são sempre `CLIENT_API` pelo que a política da chave do portador ainda se aplica.
 
 ## Adicionar uma Nova Rota
 
@@ -319,15 +315,15 @@ Permanece desativado a menos que `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Esta classificação aplica-se apenas à credencial
 do token de acesso. Veja [Autenticação de Gestão](../guides/MANAGEMENT-AUTH.md).
 
-## Alternador de autenticação obrigatória
+## Alternar autenticação necessária
 
-`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se **qualquer** autenticação é imposta a um pedido:
+`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se** qualquer** auth é aplicado para um pedido:
 
-- `settings.requireLogin === false` → a autenticação fica desativada globalmente, exceto para o nível sempre protegido (ver [Níveis do Route Guard](../security/ROUTE_GUARD_TIERS.md)) e para as chamadas que entregam uma credencial que este aceita. Estas exigem a mesma credencial que com o início de sessão ativo: emitir tokens de sincronização, criar tokens de acesso da CLI de qualquer âmbito, criar uma chave de API com âmbito `manage`/`admin`, conceder esse âmbito a uma chave, ou regenerar ou revelar uma chave assim (`requireCredentialForManagementScopedKey()` em `src/lib/api/requireManagementAuth.ts`). As chaves apenas de inferência continuam abertas.
-- Nenhuma palavra-passe configurada **e** nenhuma variável de ambiente `INITIAL_PASSWORD` → o modo de bootstrap permite o assistente de onboarding e os pedidos de loopback, mas os pedidos de rede expostos continuam a exigir credenciais.
-- Qualquer erro da base de dados → falha em modo fechado (seguro por omissão).
+- `settings.requireLogin === false` → auth está desativado globalmente, exceto a camada sempre protegida (ver [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) e as chamadas que distribuem uma credencial que aceita, que necessitam da mesma credencial do login: emissão de tokens de sincronização, criação de tokens de acesso CLI em qualquer âmbito e criação de uma chave API com o âmbito `manage`/`admin`, concessão desse âmbito a uma chave ou regeneração ou revelação de tal chave (`requireCredentialForManagementScopedKey()` em `src/lib/api/requireManagementAuth.ts`). As chaves apenas de inferência permanecem abertas. Escrever um sinalizador de recurso protegido (`REQUIRE_API_KEY`, os outros sinalizadores de segurança e os sinalizadores SSRF / TLS /MCP-scope/sandbox listados em [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) e guardar as definições de mascaramento PII (`PUT /api/settings/pii`) também continuam a necessitar de uma credencial.
+- Nenhuma palavra-passe configurada** e** no `INITIAL_PASSWORD` env var → bootstrap mode permite o assistente de integração e pedidos de loopback, mas os pedidos de rede expostos ainda precisam de credenciais. Exceção: escrever um sinalizador de recurso protegido e guardar as definições de mascaramento PII (`PUT /api/settings/pii`) necessita de uma credencial mesmo no loopback, pelo que o loopback por si só não é suficiente.
+- Qualquer erro DB → falha no fecho (seguro por defeito).
 
-A aplicação das chaves de API de cliente usa `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, e não uma leitura direta de `process.env.REQUIRE_API_KEY`. Isto importa para instâncias implementadas: alterar `REQUIRE_API_KEY` em Dashboard → Feature Flags guarda uma substituição na base de dados e afeta de imediato `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e as restantes verificações de autenticação da API de cliente que partilham este auxiliar. Se o armazenamento das feature flags não puder ser lido, a autenticação da API de cliente falha em modo fechado e exige uma chave.
+A aplicação da chave API do cliente utiliza `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, e não uma leitura direta `process.env.REQUIRE_API_KEY`. Isto é importante para instâncias implantadas: alternar `REQUIRE_API_KEY` no Dashboard → Feature Flags armazena uma substituição DB e afeta imediatamente `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e outras verificações de autenticação da API do cliente que partilham este auxiliar. Se o armazenamento do sinalizador de recurso não puder ser lido, o cliente API auth falhará o fecho e exigirá uma chave.
 
 ## Alteração incompatível — v3.8.0
 

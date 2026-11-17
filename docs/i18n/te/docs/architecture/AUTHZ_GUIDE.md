@@ -129,17 +129,17 @@ Settings → Security నుంచి నమోదు చేయబడుతు�
   3. Settings → Security → Disableలో పాస్వర్డ్ను నమోదు చేసి, కోడ్ను ఖాళీగా ఉంచండి. `POST /api/auth/mfa/disable` వేరియబుల్ సెట్ చేయబడి, అభ్యర్థన హోస్ట్ నుంచి వచ్చినప్పుడు మాత్రమే `code` లేకుండా బాడీని అంగీకరిస్తుంది; దీనికి ఇప్పటికీ డ్యాష్బోర్డ్ సెషన్ మరియు ప్రస్తుత పాస్వర్డ్ అవసరం, అలాగే ఇది `auth.mfa.disabled`గా `secondFactor: "recovery_switch"`తో ఆడిట్ చేయబడుతుంది.
   4. `OMNIROUTE_DISABLE_MFA`ను అన్సెట్ చేసి, పునఃప్రారంభించండి; అవసరమైతే మళ్లీ నమోదు చేయండి.
 
-## రూట్ తరగతులు
+## రూట్ క్లాసులు
 
-`src/server/authz/types.ts` మూడు తరగతులను నిర్వచిస్తుంది; నిర్ణయాత్మకంగా వర్గీకరించలేని ఏ route అయినా `MANAGEMENT`కు తిరిగి వెళ్తుంది.
+`src/server/authz/types.ts` మూడు తరగతులను నిర్వచిస్తుంది; నిర్ణయాత్మకంగా వర్గీకరించలేని ఏదైనా మార్గం తిరిగి `MANAGEMENT` కి వస్తుంది.
 
-| Class        | Description                                                                                                                                           | Auth required                                                            |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `PUBLIC`     | స్పష్టంగా సురక్షితమైన routes — login, logout, status, init, health, onboarding bootstrap.                                                             | ఏదీ అవసరం లేదు                                                           |
-| `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, మరియు aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | `REQUIRE_API_KEY` feature flag ప్రభావవంతంగా ఆన్‌లో ఉన్నప్పుడు Bearer key |
-| `MANAGEMENT` | Dashboard పేజీలు, settings, providers, keys, admin మరియు diagnostics endpoints.                                                                       | Dashboard session లేదా `manage` scope ఉన్న Bearer                        |
+| తరగతి        | వివరణ                                                                                                                                                             | ప్రమాణీకరణ అవసరం                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | స్పష్టంగా సురక్షితమైన మార్గాలు — లాగిన్, లాగ్అవుట్, స్థితి, ఆరోగ్యం, ఆన్బోర్డింగ్ బూట్స్ట్రాప్.                                                                   | ఏదీ లేదు                                                                 |
+| `CLIENT_API` | మోడల్-సర్వింగ్ ముగింపు పాయింట్లు — `/api/v1/*`, `/api/v1beta/*`, ప్లస్ మారుపేర్లు `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | సమర్థవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ ప్రారంభించబడినప్పుడు బేరర్ కీ |
+| `MANAGEMENT` | డాష్బోర్డ్ పేజీలు, సెట్టింగ్లు, ప్రొవైడర్లు, కీలు, అడ్మిన్ మరియు డయాగ్నస్టిక్స్ ఎండ్ పాయింట్లు.                                                                   | `manage` స్కోప్తో డాష్బోర్డ్ సెషన్ OR బేరర్                              |
 
-కొన్ని `MANAGEMENT` చర్యలు **operator-only**: `manage` key సరిపోదు. నిల్వ చేసిన credentials ఎగుమతి (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data పై backup ను పునరుద్ధరించడం (`dryRun=true` తో సహా `POST /api/db-backups/import`, id ద్వారా `POST /api/db-backups` restore, `POST /api/settings/import-json`), restore points ను నాశనం చేయడం (`DELETE /api/db-backups` cleanup, మరియు `PATCH /api/db-backups` ఎందుకంటే అది నిల్వ చేసే retention ప్రతి backup తర్వాత స్వయంచాలక తొలగింపును నడుపుతుంది) వంటి వాటికి dashboard session, స్థానిక CLI subject, లేదా login నిలిపివేయబడి ఉండటం అవసరం. Sync token జారీ (`POST /api/sync/tokens`) మరియు `admin` CLI access token తయారు చేయడం (`POST /api/cli/tokens`) ప్రతి login mode లో dashboard session లేదా స్థానిక CLI subject అవసరం. ఏ scope అయినా API keys మరియు `oma_` access tokens operator credentials కావు: అవసరమైనప్పుడెల్లా వాటికి `403` వస్తుంది. ఈ తనిఖీ `src/lib/api/operatorCredential.ts`లో ఉంది (`resolveOperatorCredential()` / `requireOperatorCredential()`). Login settings మార్చడం కూడా operator-only: పాస్‌వర్డ్ ఇప్పటికే ఉంటే `POST /api/settings/require-login` (మేనేజ్‌మెంట్ పాస్‌వర్డ్ సెట్ చేయడం / `requireLogin` టోగుల్ చేయడం) ఆ credentials నే అంగీకరిస్తుంది — పాస్‌వర్డ్ లేని మొదటి-రన్ bootstrap విండో మారదు — మరియు పాస్‌వర్డ్‌ను మార్చడానికి dashboard session `currentPassword` పంపాలి (అది లేకపోయినా లేదా తప్పుగా ఉన్నా `403`, `settings.update_failed` గా ఆడిట్ చేయబడుతుంది). స్థానిక CLI మరియు login నిలిపివేయబడిన instance రికవరీ మార్గాన్ని ఉంచుతాయి; అవి data directory ను కలిగి ఉన్న host కు బంధించబడి ఉన్నాయి కాబట్టి, అది లేకుండానే పాస్‌వర్డ్ సెట్ చేయవచ్చు.
+కొన్ని `MANAGEMENT` చర్యలు** ఆపరేటర్-మాత్రమే** : `manage` కీ సరిపోదు. నిల్వ చేయబడిన ఆధారాలను ఎగుమతి చేయడం (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ప్రత్యక్ష డేటాపై బ్యాకప్ను పునరుద్ధరించడం (`POST /api/db-backups/import` సహా `dryRun=true`, `POST /api/settings/import-json` ద్వారా `POST /api/db-backups` పునరుద్ధరణ ), పునరుద్ధరణ పాయింట్లను నాశనం చేయడం (`DELETE /api/db-backups` క్లీనప్ మరియు `PATCH /api/db-backups`, ఎందుకంటే ప్రతి సెషన్ని నిలుపుదల చేయడం, ప్రతి స్వయంచాలక CLI రన్ తర్వాత డాష్బోర్డ్ని నడపడం అవసరం) విషయం, లేదా లాగిన్ నిలిపివేయబడింది. సమకాలీకరణ టోకెన్ (`POST /api/sync/tokens`) జారీ చేయడం మరియు `admin` CLI యాక్సెస్ టోకెన్ (`POST /api/cli/tokens`)ని ముద్రించడం కోసం డాష్బోర్డ్ సెషన్ లేదా ప్రతి లాగిన్ మోడ్లో స్థానిక CLI సబ్జెక్ట్ అవసరం. ఏదైనా స్కోప్ యొక్క API కీలు మరియు `oma_` యాక్సెస్ టోకెన్లు ఆపరేటర్ ఆధారాలు కావు: అవి అవసరమైనప్పుడు `403` పొందుతాయి. చెక్ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)లో నివసిస్తుంది. లాగిన్ సెట్టింగులను మార్చడం ఆపరేటర్-మాత్రమే కూడా: `POST /api/settings/require-login` (నిర్వహణ పాస్వర్డ్ను సెట్ చేయండి / `requireLogin` టోగుల్ చేయండి) పాస్వర్డ్ ఉన్న తర్వాత ఆ ఆధారాలను మాత్రమే అంగీకరిస్తుంది — మొదటి-రన్ బూట్స్ట్రాప్ విండో (ఇంకా పాస్వర్డ్ లేదు) మారదు — మరియు డాష్బోర్డ్ సెషన్ తప్పక `currentPassword` పంపాలి, పాస్వర్డ్ను భర్తీ చేయడానికి లేదా `settings.update_failed` `403`. స్థానిక CLI మరియు లాగిన్ డిసేబుల్తో ఉన్న ఉదాహరణ రికవరీ మార్గాన్ని ఉంచుతుంది మరియు అది లేకుండా పాస్వర్డ్ను సెట్ చేయవచ్చు, ఎందుకంటే రెండూ డేటా డైరెక్టరీని కలిగి ఉన్న హోస్ట్కు కట్టుబడి ఉంటాయి.
 
 ## పైప్లైన్
 
@@ -172,51 +172,47 @@ Incoming request → src/proxy.ts
 
 ## పబ్లిక్ రూట్ల జాబితా
 
-`src/shared/constants/publicApiRoutes.ts` స్పష్టమైన అనుమతి జాబితా:
+`src/shared/constants/publicApiRoutes.ts` అనేది స్పష్టమైన అనుమతి జాబితా:
 
-ఈ జాబితా **ఆకృతి** ఆధారంగా విభజించబడింది, మరియు ఈ విభజన అత్యంత ముఖ్యమైనది (GHSA-74g9-q8f6-793h): ఒక ప్రీఫిక్స్ను
-`startsWith()` తో సరిపోల్చడం వల్ల, అదే ప్రారంభ అక్షరాలను పంచుకునే ప్రతి పక్కనున్న పాత్కూ అది సరిపోతుంది.
-`/api/usage/om-usage` ను `/api/usage/om-usage<anything>` ప్రీఫిక్స్గా గుర్తించి PUBLIC గా మార్క్ చేస్తుంది, మరియు Next దాన్ని
-`/api/usage/[connectionId]` కు పరిష్కరిస్తుంది — స్వంతంగా ఎటువంటి ఆథ్ లేని హ్యాండ్లర్.
+జాబితా విభజించబడింది** ఆకారం** , మరియు స్ప్లిట్ లోడ్-బేరింగ్ (GHSA-74g9-q8f6-793h): ఒక ఉపసర్గ `startsWith()` తో సరిపోలుతుంది, కాబట్టి ఇది దాని ప్రముఖ పాత్రలను పంచుకునే ప్రతి ప్రక్కనే ఉన్న మార్గానికి కూడా సరిపోతుంది. `/api/usage/om-usage` ఉపసర్గగా `/api/usage/om-usage<anything>` PUBLIC గా గుర్తించబడింది మరియు తదుపరిది `/api/usage/[connectionId]` — హ్యాండ్లర్ని దాని స్వంత ప్రమాణీకరణ లేకుండా పరిష్కరిస్తుంది.
 
 ```ts
-// నిజమైన సబ్ట్రీలు. ప్రతి ఎంట్రీ తప్పనిసరిగా "/" తో ముగియాలి (యూనిట్ టెస్ట్ ద్వారా నిర్ధారించబడుతుంది).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify లో CLIENT_API గా పరిగణించబడుతుంది, "no-auth public" గా కాదు
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ఒకే రూట్లు, ట్రైలింగ్ స్లాష్ ఉన్నా లేకపోయినా ఖచ్చితంగా సరిపోల్చబడతాయి.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // ఆప్ట్-ఇన్ TOTP కోసం లాగిన్ దశ 2; MFA-pending కుకీ అవసరం
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin సడలింపును కూడా పొందే, చదవడానికి మాత్రమే ఉన్న ఒకే రూట్లు.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS సడలింపు లేని, చదవడానికి మాత్రమే ఉన్న ఒకే రూట్.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-చదవడానికి మాత్రమే ఉన్న రూట్లు సురక్షితమైన మెథడ్ల కోసం మాత్రమే పబ్లిక్గా ఉంటాయి. గమనిక: `classifyRoute()` `/api/v1/*` మరియు `/api/v1beta/*`లను PUBLIC fall-through నుండి మినహాయిస్తుంది — అవి ఎల్లప్పుడూ `CLIENT_API`, కాబట్టి Bearer-key విధానం వర్తిస్తుంది.
+చదవడానికి మాత్రమే మార్గాలు పబ్లిక్** మాత్రమే** సురక్షితమైన పద్ధతుల కోసం. గమనిక: `classifyRoute()` PUBLIC ఫాల్-త్రూ — నుండి `/api/v1/*` మరియు `/api/v1beta/*` మినహాయించింది, అవి ఎల్లప్పుడూ `CLIENT_API` కాబట్టి బేరర్-కీ విధానం ఇప్పటికీ వర్తిస్తుంది.
 
 ## కొత్త రూట్ను జోడించడం
 
@@ -291,15 +287,15 @@ API కీలు `scopes` శ్రేణిని కలిగి ఉంటా�
 (`src/lib/accessTokens/scopes.ts`) ద్వారా ర్యాంక్ చేయబడతాయి. ఈ ర్యాంక్
 యాక్సెస్-టోకెన్ క్రెడెన్షియల్కు మాత్రమే వర్తిస్తుంది. [మేనేజ్మెంట్ ప్రామాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి.
 
-## Auth Required టోగుల్
+## ప్రమాణీకరణ టోగుల్ అవసరం
 
-`src/shared/utils/apiAuth.ts`లోని `isAuthRequired()` ఒక request కు **ఏదైనా** auth అమలు చేయాలా వద్దా అని నిర్ణయిస్తుంది:
+అని `src/shared/utils/apiAuth.ts` లో`isAuthRequired()` నిర్ణయిస్తుంది** ఏదైనా** అభ్యర్థన కోసం auth అమలు చేయబడుతుంది:
 
-- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడుతుంది, కానీ ఎల్లప్పుడూ-రక్షిత శ్రేణి ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) మినహా, మరియు అంగీకరించే credential ను జారీ చేసే calls మినహా — login ఆన్‌లో ఉన్నప్పుడు అవసరమయ్యే అదే credential కావాలి: sync tokens జారీ చేయడం, ఏ scope లోనైనా CLI access tokens తయారు చేయడం, మరియు `manage`/`admin` scope ఉన్న API key ను సృష్టించడం, ఒక key కు ఆ scope ఇవ్వడం, లేదా అలాంటి key ను రీజెనరేట్ చేయడం లేదా బహిర్గతం చేయడం (`src/lib/api/requireManagementAuth.ts`లోని `requireCredentialForManagementScopedKey()`). Inference-only keys తెరిచే ఉంటాయి.
-- పాస్‌వర్డ్ కాన్ఫిగర్ కాలేదు **మరియు** `INITIAL_PASSWORD` env var లేదు → bootstrap mode onboarding wizard ను మరియు loopback requests ను అనుమతిస్తుంది, కానీ బహిర్గతమైన network requests కు ఇంకా credentials అవసరం.
-- ఏదైనా DB error → fail closed (secure-by-default).
+- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడింది, ఎల్లప్పుడూ-రక్షిత శ్రేణి ( [రూట్ గార్డ్ టైర్లను](../security/ROUTE_GUARD_TIERS.md) చూడండి) మరియు అది అంగీకరించే క్రెడెన్షియల్ను అందజేసే కాల్లు తప్ప, లాగిన్పై ఉన్న అదే క్రెడెన్షియల్ అవసరం: సింక్ టోకెన్లను జారీ చేయడం, `manage` API CLI టోకెన్లను రూపొందించడం, /`admin` స్కోప్తో సృష్టించడం ఒక కీకి ఆ పరిధిని మంజూరు చేయడం లేదా అటువంటి కీని పునరుత్పత్తి చేయడం లేదా బహిర్గతం చేయడం ( `src/lib/api/requireManagementAuth.ts` లో`requireCredentialForManagementScopedKey()` ). అనుమితి-మాత్రమే కీలు తెరిచి ఉంటాయి. రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం (`REQUIRE_API_KEY`, ఇతర భద్రతా ఫ్లాగ్లు మరియు [ఫీచర్ ఫ్లాగ్లలో](../reference/FEATURE_FLAGS.md#rest-api) జాబితా చేయబడిన SSRF / TLS / MCP-స్కోప్ / శాండ్బాక్స్ ఫ్లాగ్లు) మరియు PII మాస్కింగ్ సెట్టింగ్లను (`PUT /api/settings/pii`) సేవ్ చేయడం కూడా క్రెడెన్షియల్ అవసరం.
+- పాస్వర్డ్ కాన్ఫిగర్ చేయబడలేదు** మరియు** `INITIAL_PASSWORD` env var → బూట్స్ట్రాప్ మోడ్ ఆన్బోర్డింగ్ విజార్డ్ మరియు లూప్బ్యాక్ అభ్యర్థనలను అనుమతిస్తుంది, అయితే బహిర్గతమైన నెట్వర్క్ అభ్యర్థనలకు ఇప్పటికీ ఆధారాలు అవసరం. మినహాయింపు: రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం మరియు PII మాస్కింగ్ సెట్టింగ్లను సేవ్ చేయడం (`PUT /api/settings/pii`) లూప్బ్యాక్ నుండి కూడా క్రెడెన్షియల్ అవసరం, కాబట్టి అక్కడ లూప్బ్యాక్ సరిపోదు.
+- ఏదైనా DB లోపం → మూసివేయబడితే విఫలమవుతుంది (సెక్యూర్-బై-డిఫాల్ట్).
 
-Client API key అమలు, నేరుగా `process.env.REQUIRE_API_KEY`ని చదవకుండా, `src/shared/utils/featureFlags.ts`లోని `isRequireApiKeyEnabled()`ను ఉపయోగిస్తుంది. ఇది deployed instances కు ముఖ్యం: Dashboard → Feature Flags లో `REQUIRE_API_KEY`ను టోగుల్ చేస్తే DB override నిల్వ అవుతుంది మరియు `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ఈ helper ను పంచుకునే ఇతర client-API auth తనిఖీలు వెంటనే ప్రభావితమవుతాయి. Feature flag store చదవలేకపోతే, client API auth fail closed అవుతుంది మరియు key ను కోరుతుంది.
+క్లయింట్ API కీ ఎన్ఫోర్స్మెంట్ `src/shared/utils/featureFlags.ts` లో `isRequireApiKeyEnabled()` ఉపయోగిస్తుంది, డైరెక్ట్ `process.env.REQUIRE_API_KEY` రీడ్ కాదు. అమలు చేయబడిన ఉదాహరణలకు ఇది ముఖ్యమైనది: డాష్బోర్డ్ → ఫీచర్ ఫ్లాగ్లలో `REQUIRE_API_KEY` టోగుల్ చేయడం DB ఓవర్రైడ్ను నిల్వ చేస్తుంది మరియు వెంటనే `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, మరియు ఈ సహాయ తనిఖీలను భాగస్వామ్యం చేసే ఇతర క్లయింట్-API ప్రమాణీకరణ తనిఖీలను ప్రభావితం చేస్తుంది. ఫీచర్ ఫ్లాగ్ స్టోర్ని చదవలేకపోతే, క్లయింట్ API auth మూసివేయబడితే విఫలమవుతుంది మరియు కీ అవసరం.
 
 ## బ్రేకింగ్ మార్పు — v3.8.0
 

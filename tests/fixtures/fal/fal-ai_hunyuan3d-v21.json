@@ -1,0 +1,378 @@
+{
+  "endpoint_id": "fal-ai/hunyuan3d-v21",
+  "metadata": {
+    "display_name": "Hunyuan 3D 2.1",
+    "category": "image-to-3d",
+    "description": "Hunyuan3D-2.1 is a scalable 3D asset creation system that advances state-of-the-art 3D generation through Physically-Based Rendering (PBR).",
+    "status": "deprecated",
+    "tags": ["image-to-3d"],
+    "updated_at": "2026-04-21T17:48:28.175Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://storage.googleapis.com/fal_cdn/fal/Upscale-5.jpeg",
+    "model_url": "https://fal.run/fal-ai/hunyuan3d-v21",
+    "license_type": "commercial",
+    "date": "2025-06-14T01:28:55.661Z",
+    "highlighted": false,
+    "kind": "inference",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/hunyuan3d-v21",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/hunyuan3d-v21 queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/hunyuan3d-v21",
+        "category": "image-to-3d",
+        "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Upscale-5.jpeg",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/hunyuan3d-v21",
+        "documentationUrl": "https://fal.ai/models/fal-ai/hunyuan3d-v21/api",
+        "about": "Process 3D Model"
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "Hunyuan3dV21Input": {
+          "x-fal-order-properties": [
+            "input_image_url",
+            "seed",
+            "num_inference_steps",
+            "guidance_scale",
+            "octree_resolution",
+            "textured_mesh"
+          ],
+          "type": "object",
+          "required": ["input_image_url"],
+          "title": "Hunyuan3DInput",
+          "properties": {
+            "octree_resolution": {
+              "maximum": 1024,
+              "type": "integer",
+              "default": 256,
+              "title": "Octree Resolution",
+              "minimum": 1,
+              "description": "Octree resolution for the model."
+            },
+            "textured_mesh": {
+              "type": "boolean",
+              "default": false,
+              "title": "Textured Mesh",
+              "description": "If set true, textured mesh will be generated and the price charged would be 3 times that of white mesh."
+            },
+            "seed": {
+              "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same image every time.\n        ",
+              "title": "Seed",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "guidance_scale": {
+              "maximum": 20,
+              "type": "number",
+              "default": 7.5,
+              "title": "Guidance Scale",
+              "minimum": 0,
+              "description": "Guidance scale for the model."
+            },
+            "num_inference_steps": {
+              "maximum": 50,
+              "type": "integer",
+              "default": 50,
+              "title": "Num Inference Steps",
+              "minimum": 1,
+              "description": "Number of inference steps to perform."
+            },
+            "input_image_url": {
+              "examples": [
+                "https://storage.googleapis.com/falserverless/model_tests/video_models/robot.png"
+              ],
+              "type": "string",
+              "description": "URL of image to use while generating the 3D model.",
+              "title": "Input Image Url"
+            }
+          }
+        },
+        "Hunyuan3dV21Output": {
+          "x-fal-order-properties": ["model_glb", "model_glb_pbr", "model_mesh", "seed"],
+          "type": "object",
+          "required": ["model_glb", "model_mesh", "seed"],
+          "title": "ObjectOutput",
+          "properties": {
+            "model_glb_pbr": {
+              "description": "Generated 3D object with PBR materials.",
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "seed": {
+              "type": "integer",
+              "description": "Seed value used for generation.",
+              "title": "Seed"
+            },
+            "model_mesh": {
+              "$ref": "#/components/schemas/File",
+              "description": "Generated 3D object assets zip."
+            },
+            "model_glb": {
+              "examples": [
+                {
+                  "content_type": "model/gltf-binary",
+                  "url": "https://v3.fal.media/files/rabbit/WpMHqYy5chA5lsTNoilj__hun3d_v21.glb",
+                  "file_name": "textured_mesh.glb",
+                  "file_size": 1348528
+                }
+              ],
+              "$ref": "#/components/schemas/File",
+              "description": "Generated 3D object."
+            }
+          }
+        },
+        "File": {
+          "x-fal-order-properties": ["url", "content_type", "file_name", "file_size"],
+          "type": "object",
+          "required": ["url"],
+          "title": "File",
+          "properties": {
+            "content_type": {
+              "examples": ["image/png"],
+              "description": "The mime type of the file.",
+              "title": "Content Type",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "type": "string",
+              "description": "The URL where the file can be downloaded from.",
+              "title": "Url"
+            },
+            "file_name": {
+              "examples": ["z9RV14K95DvU.png"],
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "title": "File Name",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_size": {
+              "examples": [4404019],
+              "description": "The size of the file in bytes.",
+              "title": "File Size",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/hunyuan3d-v21/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/hunyuan3d-v21/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/hunyuan3d-v21": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hunyuan3dV21Input"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/hunyuan3d-v21/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Hunyuan3dV21Output"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

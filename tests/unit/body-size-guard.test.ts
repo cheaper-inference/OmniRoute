@@ -37,6 +37,7 @@ test("body size guard keeps dedicated upload limits as lower bounds", () => {
     getBodySizeLimit("/api/v1/chat/completions", { maxBodySizeMb: 10 }),
     MAX_BODY_BYTES_LLM_API
   );
+  assert.equal(getBodySizeLimit("/api/v1/messages", { maxBodySizeMb: 10 }), MAX_BODY_BYTES_LLM_API);
   assert.equal(
     getBodySizeLimit("/api/v1/audio/transcriptions", { maxBodySizeMb: 1 }),
     MAX_BODY_BYTES_AUDIO

@@ -145,15 +145,33 @@ selle sisse lülitab (`src/server/auth/dashboardMfa.ts`).
 
 ## Marsruudiklassid
 
-`src/server/authz/types.ts` määratleb kolm klassi. Iga marsruut, mida ei saa deterministlikult klassifitseerida, langeb vaikimisi klassi `MANAGEMENT`.
+`src/server/authz/types.ts` määratleb kolm klassi; iga marsruut, mida ei saa deterministlikult klassifitseerida, liigitatakse vaikimisi klassi `MANAGEMENT`.
 
-| Klass        | Kirjeldus                                                                                                                                             | Nõutav autentimine                                            |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `PUBLIC`     | Selgesõnaliselt ohutud marsruudid: sisselogimine, väljalogimine, olek, lähtestamine, tervisekontroll ja onboarding-bootstrap.                         | Puudub                                                        |
-| `CLIENT_API` | Mudeliteenuse lõpp-punktid: `/api/v1/*`, `/api/v1beta/*` ning aliased `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-võti, kui funktsioonilipp `REQUIRE_API_KEY` on lubatud |
-| `MANAGEMENT` | Armatuurlaua lehed, seaded, pakkujad, võtmed, admin- ja diagnostikalõpp-punktid.                                                                      | Armatuurlaua seanss VÕI Bearer `manage`-ulatusega             |
+| Klass        | Kirjeldus                                                                                                                                                      | Nõutav autentimine                                                     |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `PUBLIC`     | Selgesõnaliselt turvalised marsruudid — sisselogimine, väljalogimine, olek, tervisekontroll, esmase seadistuse alglaadimine.                                   | Puudub                                                                 |
+| `CLIENT_API` | Mudelite teenindamise lõpp-punktid — `/api/v1/*`, `/api/v1beta/*` ning aliased `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Beareri võti, kui jõustuv `REQUIRE_API_KEY` funktsioonilipp on lubatud |
+| `MANAGEMENT` | Juhtpaneeli lehed, sätted, teenusepakkujad, võtmed, administraatori- ja diagnostika-lõpp-punktid.                                                              | Juhtpaneeli seanss VÕI Bearer võtmega `manage` ulatus                  |
 
-Mõned `MANAGEMENT` toimingud on **ainult operaatorile**: `manage`-võti ei ole piisav. Salvestatud mandaatide eksportimine (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varukoopia taastamine praegusete andmete peale (`POST /api/db-backups/import`, sh `dryRun=true`, `POST /api/db-backups` taastamine ID järgi, `POST /api/settings/import-json`) ning taastepunktide hävitamine (`DELETE /api/db-backups` puhastus ja `PATCH /api/db-backups`, sest salvestatud säilitusaeg juhib automaatset puhastamist iga varukoopia järel) nõuavad armatuurlaua seanssi, kohalikku CLI-identiteeti või seda, et sisselogimine on keelatud. Sünkroonimistokeni väljastamine (`POST /api/sync/tokens`) ja `admin`-ulatusega CLI juurdepääsutokeni loomine (`POST /api/cli/tokens`) nõuavad armatuurlaua seanssi või kohalikku CLI-identiteeti igas sisselogimisrežiimis. API-võtmed igas ulatuses ja `oma_` juurdepääsutokenid ei ole operaatori mandaadid: need saavad vastuseks `403`, kui see on nõutav. Kontroll asub failis `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Sisselogimisseadete muutmine on samuti ainult operaatorile: `POST /api/settings/require-login` (haldusparooli määramine / `requireLogin` lülitamine) aktsepteerib neid mandaate pärast seda, kui parool on olemas. Esmase käivituse bootstrap-aken (parooli veel pole) on muutumatu ning armatuurlaua seanss peab parooli asendamiseks saatma `currentPassword`-i (`403`, kui see puudub või on vale, logitud kui `settings.update_failed`). Kohalik CLI ja instants, kus sisselogimine on keelatud, säilitavad taastamistee ning võivad parooli seada ilma selleta, sest mõlemad on seotud andmekataloogi omava hostiga.
+Mõned `MANAGEMENT`-i toimingud on **ainult operaatorile**: `manage`-võtmest ei piisa. Salvestatud
+mandaatide eksportimine (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), varukoopia taastamine aktiivsete andmete peale
+(`POST /api/db-backups/import`, sealhulgas `dryRun=true`, `POST /api/db-backups` taastamine ID järgi,
+`POST /api/settings/import-json`), taastepunktide kustutamine (`DELETE /api/db-backups` puhastus
+ja `PATCH /api/db-backups`, sest selle salvestatav säilitusperiood juhib automaatset kärpimist
+pärast iga varukoopiat) nõuavad juhtpaneeli seanssi, kohaliku CLI subjekti või sisselogimise keelamist.
+Sünkroonimislubamärgi väljastamine (`POST /api/sync/tokens`) ja `admin` CLI-pääsutokeni vermimine
+(`POST /api/cli/tokens`) nõuavad igas sisselogimisrežiimis juhtpaneeli seanssi või kohalikku CLI subjekti.
+Mis tahes ulatusega API-võtmed ja `oma_`-pääsutokenid ei ole operaatori mandaadid: need saavad
+oleku `403` alati, kui operaatori mandaati nõutakse. Kontroll asub failis
+`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Sisselogimisseadete muutmine on samuti ainult operaatori õigus:
+`POST /api/settings/require-login` (haldussalasõna määramine / `requireLogin` lülitamine) lubab
+pärast salasõna olemasolu ainult neid mandaate — esmase käivituse aken (salasõna puudub)
+jääb muutmata — ning salasõna asendamiseks peab juhtpaneeli seanss saatma `currentPassword`-i
+(`403`, kui see puudub või on vale; auditeeritakse sündmusena `settings.update_failed`). Kohalik CLI
+ja sisselogimisega keelatud eksemplar säilitavad taastetee ning võivad määrata salasõna ka ilma selleta,
+sest mõlemad on seotud hostiga, millele andmekataloog kuulub.
 
 ## Konveier
 
@@ -189,17 +207,16 @@ Edukalt lõpetanud poliitika tagastab `AuthSubject`-i, mille `kind ∈ { client_
 
 `src/shared/constants/publicApiRoutes.ts` on selgesõnaline lubatud loend:
 
-Loend on jagatud **kuju** järgi ja see jaotus on kriitilise tähtsusega (GHSA-74g9-q8f6-793h): eesliidet
-võrreldakse funktsiooniga `startsWith()`, mistõttu vastab see ka igale külgnevale teele, mille algus
-on sama.
-`/api/usage/om-usage` eesliitena märgib `/api/usage/om-usage<anything>` PUBLIC-iks ning Next lahendab
-selle marsruudiks `/api/usage/[connectionId]` — töötleja, millel puudub oma autentimine.
+Loend on jaotatud **kuju** järgi ning jaotus on kriitilise tähtsusega (GHSA-74g9-q8f6-793h): prefiksit
+võrreldakse funktsiooniga `startsWith()`, seega vastab see ka kõigile külgnevatele teedele, mille algusmärgid on samad.
+`/api/usage/om-usage` prefiksina märgib `/api/usage/om-usage<anything>` PUBLIC-iks ning Next lahendab
+selle marsruudiks `/api/usage/[connectionId]` — töötlejaks, millel puudub oma autentimine.
 
 ```ts
-// Tõelised alampuud. Iga kirje PEAB lõppema märgiga "/" (kontrollitakse ühiktestiga).
+// Tegelikud alampuud. IGA kirje PEAB lõppema märgiga "/" (üksuse test kontrollib seda).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify käsitleb seda CLIENT_API-na, mitte "autentimiseta avalikuna"
+  "/api/v1/", // käsitletakse classify-funktsioonis kui CLIENT_API-d, mitte kui "autentimiseta avalikku"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
@@ -211,28 +228,27 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // sisselogimise 2. samm valikuliselt lubatud TOTP korral; vajab MFA-pending küpsist
-  "/api/init",
+  "/api/auth/mfa/verify", // sisselogimise 2. samm valikulise TOTP jaoks; vajab MFA-pending-küpsist
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Ainult lugemiseks mõeldud üksikud marsruudid, millele rakendub ka CORS-i päritolu leevendus.
+// Kirjutuskaitstud üksikud marsruudid, millele rakendatakse samuti CORS-i päritolu leevendust.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Ainult lugemiseks mõeldud üksik marsruut, millele CORS-i leevendust EI rakendata.
+// Kirjutuskaitstud üksik marsruut, millele CORS-i leevendust EI rakendata.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Ainult turvaliste meetodite korral on kirjutuskaitstud marsruudid avalikud. Märkus: `classifyRoute()` jätab `/api/v1/*` ja `/api/v1beta/*` PUBLIC-i varuläbimise alt välja — need on alati `CLIENT_API`, mistõttu rakendub Bearer-võtme poliitika endiselt.
+Kirjutuskaitstud marsruudid on avalikud **ainult** turvaliste meetodite korral. Märkus: `classifyRoute()` jätab `/api/v1/*` ja `/api/v1beta/*` avalikust varuvariandist välja — need on alati `CLIENT_API`, seega kehtib nende puhul endiselt Bearer-võtme poliitika.
 
 ## Uue marsruudi lisamine
 
@@ -310,15 +326,32 @@ See jääb välja lülitatuks, välja arvatud juhul, kui `OMNIROUTE_MCP_ENFORCE_
 järgi (`src/lib/accessTokens/scopes.ts`). See järjestus kehtib ainult
 ligipääsutokeni mandaadile. Vt [Halduse autentimine](../guides/MANAGEMENT-AUTH.md).
 
-## Autentimise nõudmise lüliti
+## Autentimise nõude lüliti
 
-`isAuthRequired()` failis `src/shared/utils/apiAuth.ts` otsustab, kas päringu puhul rakendatakse **üldse** mingit autentimist:
+`isAuthRequired()` failis `src/shared/utils/apiAuth.ts` otsustab, kas päringule rakendatakse **mis tahes** autentimist:
 
-- `settings.requireLogin === false` → autentimine on globaalselt välja lülitatud, välja arvatud alati kaitstud tase (vt [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja kutsed, mis väljastavad mandaadi, mida see aktsepteerib. Need nõuavad sama mandaati, mis sisselogimise sisselülitamisel: sünkroonimistokenite väljastamine, CLI juurdepääsutokenite väljastamine mis tahes ulatuses ning `manage`/`admin`-ulatusega API-võtme loomine, selle ulatuse andmine võtmele või sellise võtme taasgenereerimine või kuvamine (`requireCredentialForManagementScopedKey()` failis `src/lib/api/requireManagementAuth.ts`). Ainult järeldamise võtmed jäävad avatuks.
-- Parooli pole seadistatud **ja** keskkonnamuutujat `INITIAL_PASSWORD` pole → bootstrap-režiim lubab seadistusviisardi ja loopback-päringud, kuid avalikud võrgupäringud nõuavad endiselt mandaate.
-- Mis tahes andmebaasi viga → keeldub ligipääsust (vaikimisi turvaline).
+- `settings.requireLogin === false` → autentimine on globaalselt keelatud, välja arvatud alati kaitstud
+  taseme puhul (vt [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja nende päringute puhul, mis väljastavad
+  aktsepteeritava mandaadi ning vajavad sama mandaati nagu sisselogimise korral: sünkroonimislubade väljastamine,
+  CLI juurdepääsutõendite loomine mis tahes ulatuses ja API-võtme loomine ulatusega `manage`/`admin`,
+  selle ulatuse andmine võtmele või sellise võtme uuesti genereerimine või kuvamine
+  (`requireCredentialForManagementScopedKey()` failis `src/lib/api/requireManagementAuth.ts`).
+  Ainult järeldamiseks mõeldud võtmed jäävad avatuks. Kaitstud funktsioonilipu kirjutamiseks
+  (`REQUIRE_API_KEY`, muud Security-lipud ning [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) loetletud
+  SSRF-i / TLS-i / MCP ulatuse / liivakasti lipud) ja PII maskeerimise sätete salvestamiseks
+  (`PUT /api/settings/pii`) on samuti endiselt vaja mandaati.
+- Parooli pole konfigureeritud **ja** keskkonnamuutujat `INITIAL_PASSWORD` pole → alglaadimisrežiim lubab
+  onboarding-viisardi ja loopback-päringud, kuid väljastpoolt pärinevad võrgupäringud vajavad endiselt mandaati.
+  Erand: kaitstud funktsioonilipu kirjutamiseks ja PII maskeerimise sätete salvestamiseks
+  (`PUT /api/settings/pii`) on mandaat vajalik isegi loopback-päringute korral, seega loopbackist üksi ei piisa.
+- Mis tahes andmebaasiviga → päring lükatakse tagasi (turvalisus vaikimisi).
 
-Kliendi API-võtme jõustamine kasutab funktsiooni `isRequireApiKeyEnabled()` failis `src/shared/utils/featureFlags.ts`, mitte otsest lugemist `process.env.REQUIRE_API_KEY`-st. See on juurutatud instantsside puhul oluline: `REQUIRE_API_KEY` lülitamine menüüs Dashboard → Feature Flags salvestab andmebaasi alistuse ning mõjutab kohe marsruute `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja teisi kliendi API autentimiskontrolle, mis jagavad seda abifunktsiooni. Kui funktsioonilippude salvestust ei saa lugeda, keeldub kliendi API autentimine ligipääsust ja nõuab võtit.
+Kliendi API-võtme jõustamine kasutab funktsiooni `isRequireApiKeyEnabled()` failis `src/shared/utils/featureFlags.ts`,
+mitte otsest `process.env.REQUIRE_API_KEY` lugemist. See on juurutatud eksemplaride puhul oluline:
+`REQUIRE_API_KEY` muutmine jaotises Juhtpaneel → Funktsioonilipud salvestab andmebaasi alistuse ja mõjutab kohe
+marsruute `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ning muid kliendi API
+autentimiskontrolle, mis kasutavad seda abifunktsiooni. Kui funktsioonilippude hoidlast ei saa lugeda, siis kliendi
+API autentimine ebaõnnestub turvaliselt ja nõuab võtit.
 
 ## Ühilduvust katkestav muudatus — v3.8.0
 

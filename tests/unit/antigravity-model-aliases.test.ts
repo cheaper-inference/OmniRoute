@@ -38,6 +38,7 @@ const RETIRED_FLASH_IDS = [
   "gemini-3.5-flash-medium",
   "gemini-3.5-flash-high",
   "gemini-3.5-flash-preview",
+  "gemini-3.1-flash-lite-preview",
 ] as const;
 
 test("toClientAntigravityQuotaModelId preserves upstream Gemini Flash bucket IDs", () => {
@@ -119,6 +120,10 @@ test("isDiscoverableAntigravityModelId accepts new live chat models without a st
   assert.equal(isDiscoverableAntigravityModelId("gemini-3.8-flash-high"), true);
   assert.equal(isDiscoverableAntigravityModelId("claude-sonnet-5"), true);
   assert.equal(isDiscoverableAntigravityModelId("gemini-new-live-tier"), true);
+  // GA and currently served legacy ids must not be confused with a retired preview.
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3.1-flash-lite"), true);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3.5-flash-lite"), true);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3-flash"), true);
 
   for (const retiredId of RETIRED_FLASH_IDS) {
     assert.equal(isDiscoverableAntigravityModelId(retiredId), false);

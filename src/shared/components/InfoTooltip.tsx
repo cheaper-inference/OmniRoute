@@ -1,27 +1,29 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
-import Icon from "./Icon";
-import Tooltip from "./Tooltip";
+import { useTranslations } from "next-intl";
+import { InfoTooltip as KitInfoTooltip } from "@omniroute/ui-kit/info-tooltip";
+import type { TooltipSide } from "@omniroute/ui-kit/tooltip";
 
 interface InfoTooltipProps {
-  text: string;
+  /** The help shown in the tooltip. */
+  text: React.ReactNode;
+  /** Accessible name of the trigger; defaults to the translated "More information". */
+  label?: string;
+  side?: TooltipSide;
   className?: string;
 }
 
-// The trigger is a real button: reachable by keyboard, named by `text`, and the
-// tooltip (kit/Radix) opens on its hover and focus.
-export default function InfoTooltip({ text, className }: InfoTooltipProps) {
+// The kit InfoTooltip: a real button (24 px target, 16 px icon), reachable by keyboard, whose
+// tooltip (Radix) opens on hover and focus. The trigger has a short name and the help text is
+// its description, so a screen reader does not hear the whole help text twice.
+export default function InfoTooltip({ text, label, side, className }: InfoTooltipProps) {
+  const t = useTranslations("common");
   return (
-    <Tooltip content={text} multiline delayMs={100}>
-      {/* kit-exception: an inline 16 px info trigger; the kit icon Button is a 32 px control */}
-      <button
-        type="button"
-        aria-label={text}
-        className={cn("inline-flex cursor-help items-center text-text-muted", className)}
-      >
-        <Icon name="info" size={16} />
-      </button>
-    </Tooltip>
+    <KitInfoTooltip
+      content={text}
+      label={label ?? t("moreInformation")}
+      side={side}
+      className={className}
+    />
   );
 }

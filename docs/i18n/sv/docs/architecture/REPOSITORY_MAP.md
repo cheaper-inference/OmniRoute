@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Rotfiler
 
-| Fil                                         | Syfte                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **README.md**                               | Marknadsföringssida + snabbstart + funktionsmatris (se även `llm.txt`)                       |
-| **CHANGELOG.md**                            | Ändringslogg per utgåva (automatiskt genererad av färdigheten `/version-bump-cc`)            |
-| **LICENSE**                                 | MIT-licenstext                                                                               |
-| **CLAUDE.md**                               | Projektregler för Claude Code-agenter (strikta regler, konventioner, scenarier)              |
-| **AGENTS.md**                               | Samma som CLAUDE.md, men för AI-agenter som inte är Claude (Codex, Cursor osv.)              |
-| **GEMINI.md**                               | Kortfattade regler för Gemini-baserade agenter (delmängd av CLAUDE.md)                       |
-| **CONTRIBUTING.md**                         | Bidragsguide: konfiguration, conventional commits, testning, PR-flöde                        |
-| **SECURITY.md**                             | Policy för rapportering av sårbarheter, versioner som stöds, hotmodell                       |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — förväntningar på beteende i gemenskapen                               |
-| **llm.txt**                                 | Landningssida i klartext, optimerad för LLM-crawlare (SEO för AI-assistenter)                |
-| **package.json**                            | npm-manifest, skript, beroenden, motorer, c8-täckningsgrind                                  |
-| **package-lock.json**                       | Låst beroendeträd                                                                            |
-| **tsconfig.json**                           | TypeScript-konfiguration på rotnivå                                                          |
-| **tsconfig.typecheck-core.json**            | Typkontrollskonfiguration för kärnan i `src/`                                                |
-| **tsconfig.typecheck-noimplicit-core.json** | Strikt typkontroll (`noImplicitAny`)                                                         |
-| **tsconfig.tsbuildinfo**                    | Cache för inkrementella TS-byggen (ignoreras av git)                                         |
-| **next.config.mjs**                         | Byggkonfiguration för Next.js 16 (fristående utdata)                                         |
-| **next-env.d.ts**                           | Automatiskt genererade miljötyper för Next.js                                                |
-| **eslint.config.mjs**                       | Platt ESLint-konfiguration (regler per projektområde)                                        |
-| **prettier.config.mjs**                     | Formateringsregler för Prettier                                                              |
-| **postcss.config.mjs**                      | PostCSS-konfiguration för Tailwind-/CSS-pipeline                                             |
-| **playwright.config.ts**                    | Konfiguration för Playwright E2E-tester                                                      |
-| **vitest.config.ts**                        | Vitest-konfiguration (standardsvit)                                                          |
-| **vitest.mcp.config.ts**                    | Vitest-konfiguration för MCP-server-/autoCombo-/cachesviter                                  |
-| **sonar-project.properties**                | SonarQube-/SonarCloud-konfiguration (kodkvalitet)                                            |
-| **Dockerfile**                              | Docker-bygge i flera steg (builder → runner-base → runner-cli)                               |
-| **docker-compose.yml**                      | Compose för utveckling med fyra profiler (base, cli, host, cliproxyapi) + redis-sidecar      |
-| **docker-compose.prod.yml**                 | Compose för produktion (port 20130, redis, namngivna volymer)                                |
-| **.dockerignore**                           | Filer som exkluderas från Docker-kontexten                                                   |
-| **fly.toml**                                | Distributionskonfiguration för Fly.io (region `sin`, port 20128, /data-volym)                |
-| **.env.example**                            | Mall för miljöfil (kopieras automatiskt till `.env` vid första installationen)               |
-| **.gitignore**                              | Ignoreringsmönster för Git                                                                   |
-| **.npmignore**                              | Exkluderingslista för npm-publicering                                                        |
-| **.npmrc**                                  | npm-konfiguration (register, policy för låsfil)                                              |
-| **.node-version**                           | Låst Node-version (används av nvm-kompatibla verktyg)                                        |
-| **.nvmrc**                                  | Låst Node-version för nvm                                                                    |
-| **eslint.complexity.config.mjs**            | ESLint-konfiguration för komplexitetsspärren (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ESLint-konfiguration för SonarJS-regler (kognitiv komplexitet/dubblering)                    |
-| **source.config.ts**                        | Fumadocs `defineDocs`-källkonfiguration (matar `.source/`)                                   |
-| **knip.json**                               | Knip-konfiguration — oanvända filer/exporter/beroenden (matar spärren för död kod)           |
-| **stryker.conf.json**                       | Konfiguration för mutationstestning med Stryker                                              |
-| **.size-limit.json**                        | Konfiguration av storleksgräns för paket                                                     |
-| **promptfooconfig.yaml**                    | Utvärderingskonfiguration för promptfoo                                                      |
-| **.gitleaks.toml**                          | Regeluppsättning för hemlighetsskanning med gitleaks                                         |
-| **.zizmor.yml**                             | Konfiguration för säkerhetslintning av GitHub Actions med zizmor                             |
-| **socket.yml**                              | Konfiguration för leveranskedjan med Socket.dev                                              |
-| **news.json**                               | Lokaliserat v2-meddelandeflöde; lanseringspost för Radar levereras inaktiv                   |
-| **flake.nix** / **flake.lock**              | Definition och låsfil för Nix-utvecklingsskal                                                |
-| **.env**                                    | Lokala hemligheter (ignoreras av git — genereras från `.env.example`)                        |
+| Fil                                         | Ändamål                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **README.md**                               | Marknadsföringsmålsida + snabbstart + funktionsmatris (se även `llm.txt`)             |
+| **CHANGELOG.md**                            | Ändringslogg per release (automatiskt genererad av `/version-bump-cc` färdigheten)    |
+| **LICENSE**                                 | MIT licenstext                                                                        |
+| **CLAUDE.md**                               | Projektregler för Claude Code-agenter (hårda regler, konventioner, scenarier)         |
+| **AGENTS.md**                               | Samma som CLAUDE.md men för icke-Claude AI agenter (Codex, Cursor, etc.)              |
+| **GEMINI.md**                               | Kortfattade regler för Gemini-baserade agenter (undermängd av CLAUDE.md)              |
+| **CONTRIBUTING.md**                         | Bidragsguide: installation, konventionella åtaganden, testning, PR -flöde             |
+| **SECURITY.md**                             | Sårbarhetsrapporteringspolicy, versioner som stöds, hotmodell                         |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — community beteendeförväntningar                                |
+| **llm.txt**                                 | Oformaterad landning optimerad för LLM sökrobotar (SEO för AI assistenter)            |
+| **package.json**                            | npm-manifest, skript, beroenden, motorer, c8 coverage gate                            |
+| **package-lock.json**                       | Låst beroendeträd                                                                     |
+| **tsconfig.json**                           | Root TypeScript config                                                                |
+| **tsconfig.typecheck-core.json**            | Typcheck config för `src/` core                                                       |
+| **tsconfig.typecheck-noimplicit-core.json** | Strikt (`noImplicitAny`) typkontroll                                                  |
+| **tsconfig.tsbuildinfo**                    | TS inkrementell build-cache (gitignored)                                              |
+| **nästa.config.mjs**                        | Next.js 16 build-konfiguration (fristående utgång)                                    |
+| **nästa-env.d.ts**                          | Next.js automatiskt genererade env-typer                                              |
+| **eslint.config.mjs**                       | ESLint flat config (regler per projektområde)                                         |
+| **sötare.config.mjs**                       | Prettier -formateringsregler                                                          |
+| **postcss.config.mjs**                      | PostCSS config för Tailwind/CSS pipeline                                              |
+| **dramatiker.config.ts**                    | Playwright E2E test konfiguration                                                     |
+| **vitest.config.ts**                        | Vitest config (standardsvit)                                                          |
+| **vitest.mcp.config.ts**                    | Vitest config för MCP server / autoCombo / cache-sviter                               |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (kodkvalitet)                                             |
+| **Dockerfil**                               | Flerstegs Docker build (byggare → runner-base → runner-cli)                           |
+| **docker-compose.yml**                      | Dev compose med 4 profiler (bas, cli, host, cliproxyapi) + redis sidvagn              |
+| **docker-komponera.prod.yml**               | Produktionskomponering (port 20130, redis, namngivna volymer)                         |
+| **.dockerignore**                           | Filer uteslutna från Docker kontext                                                   |
+| **fly.toml**                                | Fly.io-distributionskonfiguration (region `sin`, port 20128, /datavolym)              |
+| **.env.example**                            | Env-mallsfil (kopierades automatiskt till `.env` vid första installationen)           |
+| **.gitignore**                              | Git ignorera mönster                                                                  |
+| **.npmignore**                              | npm publicerar uteslutningslistan                                                     |
+| **.npmrc**                                  | npm config (register, låsfilspolicy)                                                  |
+| **.node-version**                           | Nodversionsstift (används av nvm-kompatibla verktyg)                                  |
+| **.nvmrc**                                  | Nodversionsstift för nvm                                                              |
+| **eslint.komplexitet.config.mjs**           | ESLint config för komplexitetsspärren (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint config för SonarJS -regler (kognitiv komplexitet / duplicering)                |
+| **källa.config.ts**                         | Fumadocs `defineDocs` källkonfiguration (feeds `.source/`)                            |
+| **knip.json**                               | Knip config — oanvänd files/exports/deps (matar dödkodsgrinden)                       |
+| **stryker.conf.mjs**                        | Stryker mutationstestningskonfiguration (beräknar `tap.testFiles` från `mutate`)      |
+| **.size-limit.json**                        | storleksbegränsning paketbudgetkonfiguration                                          |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                 |
+| **.gitleaks.toml**                          | gitleaks regeluppsättning för hemlig skanning                                         |
+| **.zizmor.yml**                             | zizmor GitHub-Actions säkerhetslint-konfiguration                                     |
+| **socket.yml**                              | Socket.dev supply-chain-konfiguration                                                 |
+| **news.json**                               | Lokaliserat v2-meddelandeflöde; Radarlanseringsobjekt skickas inaktivt                |
+| **flake.nix** /** flake.lock**              | Nix dev-shell definition + lås                                                        |
+| **.env**                                    | Lokala hemligheter (gitignored — genererad från `.env.example`)                       |
 
-> **Flyttat från roten i v3.8.26 (rensning):**
+> **Flyttade ut från roten i v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` och den genererade `quality-metrics.json` (ignoreras av git). Se [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` och den genererade `quality-metrics.json` (gitignored). Se [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Instrumentpanelskomponent API: adaptrar över `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnamn som används av skärmarna → Lucide-komponenter (`<Icon>`)                            |
-| `constants/providers.ts`         | **380 leverantörer** med Zod -validering (källa till sanning)                                            |
+| `constants/providers.ts`         | **394 leverantörer** med Zod -validering (källa till sanning)                                            |
 | `constants/cliTools.ts`          | Externt CLI -verktygsregister                                                                            |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteringar                                                              |
+| `constants/routingStrategies.ts` | **22 routingstrategier** med prioriteringar                                                              |
 | `constants/publicApiRoutes.ts`   | Rutter som kräver bärare (mot hantering) autentisering                                                   |
 | `constants/upstreamHeaders.ts`   | Header denylist för uppströmsförfrågningar                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod scheman (enda källa till sanning för API kontrakt)                                              |
@@ -265,7 +265,7 @@ Separat npm-arbetsyta (`@omniroute/open-sse`). Hanterar bearbetning av förfråg
 ```
 open-sse/
 ├── handlers/            # 16 filer (12 hanterare + 4 hjälpfunktioner): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 exekveringsmoduler (klasser som utökar BaseExecutor + hjälpfunktioner per leverantör)
+├── executors/           # 163 exekveringsmoduler (klasser som utökar BaseExecutor + hjälpfunktioner per leverantör)
 ├── translator/          # Formatkonverterare (9 för förfrågningar, 9 för svar, 9 hjälpfunktioner)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ tjänstemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM osv.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externa CLI -integreringar + Intern OmniRoute CLI                                        |
 | `I18N.md`                   | i18n-arkitektur, lägga till ett språk, 67 språk                                          |
 | `UNINSTALL.md`              | Rengör avinstallationsstegen                                                             |
-| `PROVIDER_REFERENCE.md`     | **Autogenererad** katalog med 380 leverantörer (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenererad** katalog med 394 leverantörer (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem djupdykning
 
@@ -429,7 +429,7 @@ open-sse/
 | `GUARDRAILS.md`                               | PII masker, snabb injektion, synbro                                        |
 | `COMPLIANCE.md`                               | Granskningslogg, retention, noLog opt-out                                  |
 | `WEBHOOKS.md`                                 | HMAC-signerad webhook leverans                                             |
-| `REASONING_REPLAY.md`                         | Hybrid memory/SQLite -cache för `reasoning_content`                        |
+| `REASONING_REPLAY.md`                         | Hybrid memory/SQLite cache för `reasoning_content`                         |
 | `AUTHZ_GUIDE.md`                              | Auktoriseringspipeline (`classify` → `policies` → `enforce`)               |
 | `RESILIENCE_GUIDE.md`                         | Strömbrytare + cooldown + modell lockout                                   |
 | `docs/security/STEALTH_GUIDE.md` (endast git) | TLS fingeravtryck (JA3/JA4), Claude Code CCH, MITM cert                    |
@@ -447,16 +447,16 @@ open-sse/
 
 ### Spridning
 
-| Dok                          | Ändamål                                                            |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Docker build, profiler (base/cli/host/cliproxyapi), Redis sidovagn |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS distribution (Ubuntu/Debian + nginx + systemd)     |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-distribution (för närvarande endast kinesiska)              |
-| `TERMUX_GUIDE.md`            | Android headless via Termux                                        |
-| `PWA_GUIDE.md`               | Progressiv webbapp installera + service worker                     |
-| `ELECTRON_GUIDE.md`          | Skrivbordsapp bygga + sign + distribuera                           |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale tratt                              |
-| `PROXY_GUIDE.md`             | 4-nivå utgående proxy + 1proxy marknadsplats                       |
+| Dok                          | Ändamål                                                           |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, profiler (base/cli/host/cliproxyapi), Redis sidvagn |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS distribution (Ubuntu/Debian + nginx + systemd)    |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-distribution (för närvarande endast kinesiska)             |
+| `TERMUX_GUIDE.md`            | Android headless via Termux                                       |
+| `PWA_GUIDE.md`               | Progressive Web App installation + service worker                 |
+| `ELECTRON_GUIDE.md`          | Skrivbordsapp bygga + sign + distribuera                          |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale tratt                             |
+| `PROXY_GUIDE.md`             | 4-nivå utgående proxy + 1proxy marknadsplats                      |
 
 ### Underkataloger
 

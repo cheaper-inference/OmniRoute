@@ -354,28 +354,28 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Nasazení
+## Nasazení 🚀
 
-### Globální instalace přes npm (doporučeno)
+### Globální instalace npm (doporučeno)
 
 ```bash
 npm install -g omniroute
 
-# Vytvoření konfiguračního adresáře
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Vytvoření souboru .env (viz .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Spuštění serveru
+# Start server
 omniroute
-# Nebo s vlastním portem:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automaticky načítá `.env` z `~/.omniroute/.env` nebo `./.env`.
+CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (`REQUIRE_API_KEY`, locale, časové pásmo a nastavení barev, nikoli porty); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Režim systémové lišty
+### Režim zásobníku
 
 Spusťte OmniRoute v systémové liště:
 
@@ -383,53 +383,53 @@ Spusťte OmniRoute v systémové liště:
 omniroute serve --tray
 ```
 
-Příkaz skončí, jakmile jsou server a systémová lišta připraveny.
+Příkaz se vrátí poté, co jsou server a zásobník připraveny.
 
-Server pokračuje v provozu bez terminálu.
+Server pokračuje bez terminálu.
 
-Režim systémové lišty podporuje macOS, Windows a grafická linuxová prostředí. Řídicí panel se v tomto režimu neotevírá automaticky.
+Režim zásobníku podporuje relace macOS, Windows a grafické Linux. Režim zásobníku neotevře palubní desku automaticky.
 
-Pomocí nabídky v systémové liště můžete provádět následující akce:
+Použijte nabídku zásobníku pro tyto akce:
 
-- Otevřít řídicí panel.
-- Otevřít `/dashboard/logs`.
-- Změnit automatické spouštění.
-- Zastavit OmniRoute.
+- Otevřete palubní desku.
+- Otevřete `/dashboard/logs`.
+- Změňte automatické spouštění.
+- Stop OmniRoute.
 
-Nekombinujte `--tray` s následujícími možnostmi:
+Nekombinujte `--tray` s těmito možnostmi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Tyto režimy vyžadují odlišnou správu procesů.
+Tyto režimy vyžadují různé vlastnictví procesu.
 
-Povolte spuštění při příštím přihlášení k počítači:
+Povolit spuštění při příštím přihlášení počítače:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatické spouštění používá režim systémové lišty v macOS, Windows a grafických linuxových prostředích. Bezobslužný Linux používá stávající uživatelskou službu systemd.
+Automatické spuštění používá režim zásobníku u relací macOS, Windows a grafického Linux. Headless Linux využívá stávající uživatelskou službu systemd.
 
-Zakažte spouštění při přihlášení:
+Zakázat spouštění při přihlášení:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Odinstalace
+### Odinstalování
 
-Pokud už OmniRoute nepotřebujete, nabízíme dva rychlé skripty pro čisté odebrání:
+Když již nepotřebujete OmniRoute, nabízíme dva rychlé skripty pro čisté odstranění:
 
 | Příkaz                   | Akce                                                                                  |
 | ------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Odebere systémovou aplikaci, ale **ponechá databázi a konfigurace** v `~/.omniroute`. |
-| `npm run uninstall:full` | Odebere aplikaci A zároveň trvale **vymaže všechny konfigurace, klíče a databáze**.   |
+| `npm run uninstall`      | Odebere systémovou aplikaci, ale** uchovává vaše DB a konfigurace** v `~/.omniroute`. |
+| `npm run uninstall:full` | Trvale odstraní aplikaci AND** vymaže všechny konfigurace, klíče a databáze** .       |
 
-> Poznámka: Chcete-li tyto příkazy spustit, přejděte do složky projektu OmniRoute (pokud jste jej naklonovali) a spusťte je. Pokud jste jej nainstalovali globálně, můžete jednoduše spustit `npm uninstall -g omniroute`.
+> Poznámka: Chcete-li tyto příkazy spustit, přejděte do složky projektu OmniRoute (pokud jste ji naklonovali) a spusťte je. Případně, pokud je globálně nainstalován, můžete jednoduše spustit `npm uninstall -g omniroute`.
 
-### Nasazení na VPS
+### Nasazení VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,25 +445,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Nebo: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Nasazení pomocí PM2 (nízká spotřeba paměti)
+### Nasazení PM2 (málo paměti)
 
-U serverů s omezenou pamětí RAM použijte možnost omezení paměti:
+Pro servery s omezeným RAM použijte možnost limit paměti:
 
 ```bash
-# S limitem 512 MB (výchozí)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Nebo s vlastním limitem paměti
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Nebo pomocí ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Vytvořte `ecosystem.config.js`:
+Vytvořit `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -488,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Sestavení obrazu (výchozí = runner-cli s předinstalovanými codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Přenosný režim (doporučeno)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Informace o režimu integrovaném s hostitelem a binárními soubory CLI naleznete v části o Dockeru v hlavní dokumentaci.
+Informace o režimu integrovaném do hostitele s binárními soubory CLI naleznete v části Docker v hlavních dokumentech.
 
 ### Void Linux (xbps-src)
 
-Uživatelé Void Linuxu mohou OmniRoute sestavit do balíčku a nativně nainstalovat pomocí frameworku `xbps-src` pro křížovou kompilaci. Ten automatizuje samostatné sestavení Node.js společně s požadovanými nativními vazbami `better-sqlite3`.
+Uživatelé Void Linux mohou zabalit a nainstalovat OmniRoute nativně pomocí rámce křížové kompilace `xbps-src`. To automatizuje samostatné sestavení Node.js spolu s požadovanými nativními vazbami `better-sqlite3`.
 
 <details>
 <summary><b>Zobrazit šablonu xbps-src</b></summary>
 
 ```bash
-# Soubor šablony pro „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Určení cílové architektury CPU pro node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instalace všech závislostí – bez spouštění skriptů
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Sestavení samostatného balíčku Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Zkopírování statických prostředků do samostatného balíčku
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilace nativní vazby better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Umístění zkompilované vazby do samostatného balíčku
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Odstranění balíčků sharp specifických pro jednotlivé architektury
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Zkopírování běhových závislostí pino vynechaných statickou analýzou Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Zabránění odstranění prázdných adresářů směrovače aplikace Next.js hookem po instalaci
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Proměnné prostředí
 
-| Proměnná                                | Výchozí hodnota                      | Popis                                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Tajný klíč pro podepisování JWT (**v produkčním prostředí změňte**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Heslo pro první přihlášení                                                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datový adresář (databáze, využití, protokoly)                                                                                                                |
-| `PORT`                                  | výchozí hodnota frameworku           | Port služby (`20128` v příkladech)                                                                                                                           |
-| `HOSTNAME`                              | výchozí hodnota frameworku           | Hostitel, na kterého se služba naváže (Docker ve výchozím nastavení používá `0.0.0.0`)                                                                       |
-| `NODE_ENV`                              | výchozí hodnota běhového prostředí   | Pro nasazení nastavte `production`                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Veřejná základní adresa URL zpřístupněná řídicímu panelu a serveru (nahrazuje zastaralou proměnnou `BASE_URL`)                                               |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Základní adresa URL koncového bodu cloudové synchronizace (nahrazuje zastaralou proměnnou `CLOUD_URL`)                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Tajný klíč HMAC pro generované klíče API                                                                                                                     |
-| `REQUIRE_API_KEY`                       | `false`                              | Vynutí klíč API typu Bearer pro `/v1/*`                                                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Umožní ověřeným uživatelům řídicího panelu na vyžádání zobrazit úplné hodnoty uložených klíčů API                                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Interval obnovování dat limitů poskytovatelů uložených v mezipaměti na straně serveru; tlačítka v uživatelském rozhraní nadále spouštějí ruční synchronizaci |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Zakáže automatické snímky SQLite před zápisem, importem či obnovením; ruční zálohování zůstane funkční                                                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | Povolí ukládání výstupu aplikačních a auditních protokolů na disk                                                                                            |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Vynutí atribut `Secure` u ověřovacího cookie (za reverzním proxy HTTPS)                                                                                      |
-| `CLOUDFLARED_BIN`                       | nenastaveno                          | Použije existující binární soubor `cloudflared` namísto spravovaného stahování                                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport pro spravované rychlé tunely (`http2`, `quic` nebo `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limit haldy Node.js v MB                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maximální počet položek v mezipaměti promptů                                                                                                                 |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maximální počet položek v sémantické mezipaměti                                                                                                              |
+| Variabilní                              | Výchozí                      | Popis                                                                                                                                                       |
+| --------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaticky vygenerováno)_ | tajné podepisování JWT — automaticky vygenerováno při prvním spuštění a přetrvává do `server.env`; nastavte jej explicitně, když je datový adresář pomíjivý |
+| `INITIAL_PASSWORD`                      | _(nenastaveno)_              | První přihlašovací heslo. instalace npm/source začínají na `CHANGEME`: nahraďte jej. Nenastaveno: průvodce pro přihlášení                                   |
+| `DATA_DIR`                              | `~/.omniroute`               | Datový adresář (db, využití, protokoly)                                                                                                                     |
+| `PORT`                                  | výchozí nastavení rámce      | Port služby (v příkladech `20128` )                                                                                                                         |
+| `HOSTNAME`                              | výchozí nastavení rámce      | Svázat hostitele (Docker výchozí `0.0.0.0`)                                                                                                                 |
+| `NODE_ENV`                              | výchozí runtime              | Nastavte `production` pro nasazení                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Veřejná základna URL se objevila na řídicím panelu a byla vystavena serveru (nahrazuje starší `BASE_URL`)                                                   |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Cloud synchronizace koncového bodu základní URL (nahrazuje starší `CLOUD_URL`)                                                                              |
+| `API_KEY_SECRET`                        | _(automaticky vygenerováno)_ | HMAC secret pro vygenerované klíče API — se automaticky vygenerovalo při prvním spuštění a zůstalo zachováno do `server.env`                                |
+| `REQUIRE_API_KEY`                       | `false`                      | Vynutit Bearer API klíč na `/v1/*`                                                                                                                          |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Umožněte ověřeným uživatelům řídicích panelů na vyžádání odhalit úplné uložené hodnoty klíče API                                                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Obnovovací kadence na straně serveru pro data o limitech poskytovatelů uložená v mezipaměti; Tlačítka UI refresh stále spouštějí manuální synchronizaci     |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Zakázat automatické snímky SQLite před writes/import/restore; ruční zálohování stále funguje                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                       | Umožňuje výstup protokolu aplikace a auditu na disk                                                                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Vynutit `Secure` auth cookie (za HTTPS reverzní proxy)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | odstaveno                    | Místo řízeného stahování použijte existující binární soubor `cloudflared`                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Přeprava pro spravované rychlé tunely (`http2`, `quic` nebo `auto`)                                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | limit haldy Node.js v MB                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Maximální počet položek mezipaměti                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Maximální počet položek sémantické mezipaměti                                                                                                               |
 
-Úplný přehled proměnných prostředí naleznete v souboru [README](../README.md).
+Úplný odkaz na proměnné prostředí naleznete v souboru [README](../README.md).
 
 ---
 
@@ -705,7 +705,7 @@ Nebo použijte Dashboard:** Poskytovatelé → [Poskytovatel] → Vlastní model
 
 Poznámky:
 
-- Poskytovatelé OpenRouter a OpenAI/Anthropic-compatible jsou spravováni z** Dostupné modely** pouze. Ručně přidávejte, importujte a automaticky synchronizujte všechny pozemky ve stejném seznamu dostupných modelů, takže pro tyto poskytovatele neexistuje žádná samostatná sekce Vlastní modely.
+- Poskytovatelé OpenRouter a OpenAI/Anthropic-compatible jsou spravováni z** Dostupné modely** pouze. Ručně přidávejte, importujte a automaticky synchronizujte všechny pozemky ve stejném seznamu dostupných modelů, takže pro tyto poskytovatele neexistuje samostatná sekce Vlastní modely.
 - The** Vlastní modely** je určena pro poskytovatele, kteří nevystavují importy spravovaných dostupných modelů.
 
 ### Vlastní poskytovatelé kompatibilní s OpenAI
@@ -735,8 +735,8 @@ Vyberte odlišnou předponu (`mygw`, `acme-proxy`). Pokud požadavky na vlastní
 
 Tyto klíče jdou do `providerSpecificData` připojení (například přes `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi.
-- `quotaEndpoint` — koncový bod quota/credits brány, čtení pro pás kvót řídicího panelu a směrování s ohledem na kvóty. Funguje na připojení kompatibilních s OpenAI i Anthropic; plný tvar je doložen v `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code již aliasové názvy delší než 64 znaků bez nastavení. Hodnota připojení nahrazuje výchozí nastavení Azure OpenAI / Azure AI Foundry (připojení Azure za přísnější bránou) a nastavuje limit pro vlastní kompatibilní uzel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code zachovávají svůj limit registru a ignorují ho.
+- `quotaEndpoint` — koncový bod quota/credits brány, přečtěte si pás kvót řídicího panelu a směrování s ohledem na kvóty. Funguje na připojení kompatibilních s OpenAI i Anthropic; plný tvar je dokumentován v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -771,7 +771,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Záhlaví `X-OmniRoute-Peer-Trace` obdrží pouze požadavky odeslané přímo na seznamu povolených peer URL. Brána odmítá opakovanou instanci ID nebo vyčerpaný skokový rozpočet pomocí HTTP `508 Loop Detected`; běžní upstream poskytovatelé neobdrží žádná peer metadata.
+Záhlaví `X-OmniRoute-Peer-Trace` obdrží pouze požadavky odeslané přímo uvedenému peer URL. Brána odmítne opakovanou instanci ID nebo vyčerpaný skokový rozpočet pomocí HTTP `508 Loop Detected`; běžní upstream poskytovatelé neobdrží žádná peer metadata.
 
 Zřetězení rovnocenných partnerů není replikace databáze nebo převzetí služeb při selhání hostitele. Každá brána udržuje nezávislý stav SQLite, mezipaměti, čítače rychlosti a relace. Pro dostupnost active/passive nebo active/active použijte reverzní proxy nebo klient s kontrolou stavu při selhání a nikdy nepřipojujte jednu databázi SQLite do více spuštěných instancí OmniRoute.
 
@@ -822,7 +822,7 @@ Vrátí modely seskupené podle poskytovatele s typy (`chat`, `embedding`, `imag
 ### Cloudflare Rychlý tunel
 
 - Dostupné v** Dashboard → Endpoints** pro Docker a další samostatně hostovaná nasazení
-- Vytvoří dočasný `https://*.trycloudflare.com` URL, který bude přesměrován na váš aktuální koncový bod `/v1` kompatibilní s OpenAI
+- Vytvoří dočasné `https://*.trycloudflare.com` URL, které přesměruje na váš aktuální koncový bod `/v1` kompatibilní s OpenAI
 - Nejprve povolte instalaci `cloudflared` pouze v případě potřeby; pozdější restartování znovu použije stejný spravovaný binární soubor
 - Rychlé tunely se po restartu OmniRoute nebo kontejneru automaticky neobnoví; v případě potřeby je znovu povolte z palubní desky
 - Tunelové URLs jsou pomíjivé a mění se pokaždé, když stop/start tunelem
@@ -833,7 +833,7 @@ Vrátí modely seskupené podle poskytovatele s typy (`chat`, `embedding`, `imag
 
 ### LLM Gateway Intelligence (Fáze 9)
 
-- **Sémantická mezipaměť** — Automatické ukládání do mezipaměti bez streamování, odezvy teploty = 0 (obejít pomocí `X-OmniRoute-No-Cache: true`)
+- **Sémantická mezipaměť** — Automatické ukládání do mezipaměti bez streamování, teplota = 0 odpovědí (obejít pomocí `X-OmniRoute-No-Cache: true`)
 - **Žádost o idempotenci** — Deduplikuje požadavky do 5 s prostřednictvím hlavičky `Idempotency-Key` nebo `X-Request-Id`
 - **Sledování pokroku** — Přihlaste se k událostem SSE `event: progress` prostřednictvím záhlaví `X-OmniRoute-Progress: true`
 
@@ -860,20 +860,20 @@ Přístup přes** Překladač palubní desky →** . Laďte a vizualizujte, jak 
 
 ### Strategie směrování
 
-Konfigurovat přes** Ovládací panel → Nastavení → Směrování** . Na palubní desce je zobrazeno šest nejpoužívanějších strategií; komba a auto-router interně podporují širší sadu.
+Konfigurovat přes** Ovládací panel → Nastavení → Směrování** . Přístrojová deska odhaluje šest nejpoužívanějších strategií; komba a auto-router interně podporují širší sadu.
 
 **Strategie viditelné na panelu (směrování na úrovni účtu):**
 
-| Strategie                    | Popis                                                                                            |
-| ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| **Nejprve vyplnit**          | Používá účty v pořadí priority – primární účet zpracovává všechny požadavky, dokud není dostupný |
-| **Round Robin**              | Prochází všechny účty s nastavitelným limitem (výchozí: 3 volání na účet)                        |
-| **P2C (síla dvou možností)** | Vybere 2 náhodné účty a cesty ke zdravějšímu — vyrovnává zátěž s vědomím zdraví                  |
-| **Náhodný**                  | Náhodně vybere účet pro každý požadavek pomocí Fisher-Yates shuffle                              |
-| **Nejméně používané**        | Směruje na účet s nejstarším časovým razítkem `lastUsedAt`, distribuuje provoz rovnoměrně        |
-| **Optimalizace nákladů**     | Směruje na účet s nejnižší prioritou, optimalizuje se pro poskytovatele s nejnižšími náklady     |
+| Strategie                    | Popis                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Nejprve vyplnit**          | Používá účty v pořadí priority — primární účet zpracovává všechny požadavky, dokud není k dispozici  |
+| **Round Robin**              | Prochází všechny účty s nastavitelným limitem (výchozí: 3 volání na účet)                            |
+| **P2C (síla dvou možností)** | Vybere 2 náhodné účty a cesty ke zdravějšímu — vyrovnává zátěž s vědomím zdraví                      |
+| **Náhodný**                  | Náhodně vybere účet pro každý požadavek pomocí Fisher-Yates shuffle                                  |
+| **Nejméně používané**        | Směruje na účet s nejstarším časovým razítkem `lastUsedAt`, distribuuje provoz rovnoměrně            |
+| **Optimalizace nákladů**     | Směruje na účet s nejnižší hodnotou priority, optimalizuje se pro poskytovatele s nejnižšími náklady |
 
-**Pokročilé kombinované a automatické strategie** (lze konfigurovat pomocí kombinace nebo pomocí předpon `auto/*` – viz [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Pokročilé kombinované a automatické strategie** (lze konfigurovat pomocí kombinace nebo pomocí předpon `auto/*` — viz [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — přísný řád, nikdy kulaté
 - `weighted` — proporcionální provoz rozdělený podle vah jednotlivých modelů
@@ -884,7 +884,7 @@ Konfigurovat přes** Ovládací panel → Nastavení → Směrování** . Na pal
 - `auto` — řízené skóre u všech kandidátů
 - `lkgp` (Last Known Good Provider) — připne k poslednímu úspěšnému poskytovateli a poté se vrátí k pravidlům
 - `context-optimized` — vybere model s největším volným kontextovým oknem
-- `context-relay` — řetězí modely s dlouhým kontextem pro následné obraty
+- `context-relay` — řetězy modely s dlouhým kontextem pro následné zatáčky
 
 #### Externí Sticky Session Header
 
@@ -996,18 +996,18 @@ OmniRoute implementuje odolnost na úrovni poskytovatele s pěti komponentami:
    - **Minimální doba mezi požadavky** — Minimální mezera v milisekundách mezi požadavky
    - **Maximální počet souběžných požadavků** — Maximální počet souběžných požadavků na účet
 
-2. **Ochlazování připojení** — Konfigurace typu per-auth pro jedno připojení po opakovaných selháních:
+2. **Ochlazování připojení** — Konfigurace typu Per-auth pro jedno připojení po opakovaných selháních:
    - **Base Cooldown** — Výchozí ochlazovací okno pro opakovatelné selhání upstreamu
-   - **Použijte Upstream Retry Hints** — Ctí autoritativní `Retry-After` nebo resetovací rady, pokud jsou poskytovány
-   - **Maximální kroky při ústupu** — Maximální exponenciální úroveň ústupu pro opakované selhání
+   - **Použijte Upstream Retry Hints** — Oceňuje autoritativní `Retry-After` nebo resetovací rady, pokud jsou poskytovány
+   - **Maximální kroky při ústupu** — Maximální exponenciální úroveň backoff pro opakované selhání
 
-3. **Jistič poskytovatele** — Sleduje selhání end-to-end poskytovatele, označí poskytovatele za degradovaného na nakonfigurované prahové hodnotě varování a otevře jistič, když je dosaženo nakonfigurované prahové hodnoty selhání:
+3. **Jistič poskytovatele** — Sleduje selhání end-to-end poskytovatele, označí poskytovatele za degradovaného na nakonfigurovaném prahu varování a otevře jistič, když je dosaženo nakonfigurovaného prahu selhání:
    - **Prah degradace** — Po sobě jdoucí selhání poskytovatele před zadáním `DEGRADED`
    - **Práh selhání** — Po sobě jdoucí selhání poskytovatele před zadáním `OPEN`
-   - **Resetovat časový limit** — Časové okno, než bude poskytovatel znovu testován
-   - **CLOSED** (Zdravé) — Požadavky probíhají normálně
-   - **DEGRADED** — Požadavky stále proudí, zatímco jsou sledována zvýšená selhání
-   - **OPEN** — Poskytovatel je dočasně zablokován po opakovaných poruchách
+   - **Resetovat časový limit** — Časové okno před dalším testováním poskytovatele
+   - **CLOSED** (Zdravé) — Požadavky plynou normálně
+   - **DEGRADED** Požadavky — stále proudí, zatímco jsou sledována zvýšená selhání
+   - **OPEN** Poskytovatel — je po opakovaných selháních dočasně zablokován
    - **HALF_OPEN** — Testování, zda se poskytovatel zotavil
 
    Limity rychlosti `429` v rozsahu připojení zůstávají v platnosti** Ochlazování připojení** a nezapočítávají se do poskytovatele jističe.
@@ -1026,11 +1026,11 @@ OmniRoute implementuje odolnost na úrovni poskytovatele s pěti komponentami:
 
 Spravujte zálohy databáze v** Ovládací panel → Nastavení → Systém a úložiště** .
 
-| Akce                         | Popis                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Export databáze**          | Stáhne aktuální databázi SQLite jako soubor `.sqlite`                                                                                                 |
-| **Exportovat vše (.tar.gz)** | Stáhne úplný záložní archiv včetně: databáze, nastavení, kombinací, připojení poskytovatele (bez přihlašovacích údajů), metadat klíče API             |
-| **Importovat databázi**      | Nahrajte soubor `.sqlite`, který nahradí aktuální databázi. Automaticky se vytvoří záloha před importem, pokud není `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Akce                         | Popis                                                                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Export databáze**          | Stáhne aktuální databázi SQLite jako soubor `.sqlite`                                                                                                |
+| **Exportovat vše (.tar.gz)** | Stáhne úplný záložní archiv včetně: databáze, nastavení, komba, připojení poskytovatele (bez přihlašovacích údajů), metadat klíče API                |
+| **Importovat databázi**      | Nahrajte soubor `.sqlite`, který nahradí aktuální databázi. Předimportní záloha se vytvoří automaticky, pokud není `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
 # API: Export database
@@ -1058,15 +1058,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Stránka nastavení je uspořádána do** 7 karet** pro snadnou navigaci:
 
-| Tab             | Obsah                                                                                                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generál**     | Nástroje systémového úložiště, výchozí chování, viditelnost tunelu koncového bodu                                                                                          |
-| **Vzhled**      | Ovládání motivu (light/dark/system), viditelnost postranního panelu, přepínání panelů pro karty tunelu Cloudflare/Tailscale/ngrok                                          |
-| **AI**          | Thinking budget (passthrough / auto-strip / custom / adaptive — viz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globální systémová výzva, promptní statistiky mezipaměti |
-| **Zabezpečení** | Login/Password nastavení, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                             |
-| **Směrování**   | Globální strategie směrování (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), zástupné aliasy modelu, záložní řetězce, výchozí kombinace           |
-| **Odolnost**    | Fronta požadavků, ochlazení připojení, konfigurace přerušovače poskytovatele a chování při čekání na ochlazení                                                             |
-| **Moderní**     | Globální konfigurace proxy (HTTP/SOCKS5), přepsání proxy podle poskytovatele                                                                                               |
+| Tab             | Obsah                                                                                                                                                                       |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generál**     | Nástroje systémového úložiště, výchozí chování, viditelnost tunelu koncového bodu                                                                                           |
+| **Vzhled**      | Ovládání motivu (light/dark/system), viditelnost postranního panelu, přepínání panelů pro karty tunelu Cloudflare/Tailscale/ngrok                                           |
+| **AI**          | Rozpočet myšlení (passthrough / auto-strip / custom / adaptive — viz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globální systémová výzva, promptní statistiky mezipaměti |
+| **Zabezpečení** | Login/Password nastavení, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                              |
+| **Směrování**   | Globální strategie směrování (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), zástupné aliasy modelu, záložní řetězce, výchozí kombinace            |
+| **Odolnost**    | Fronta požadavků, ochlazení připojení, konfigurace přerušovače poskytovatele a chování při čekání na ochlazení                                                              |
+| **Moderní**     | Globální konfigurace proxy (HTTP/SOCKS5), přepsání proxy podle poskytovatele                                                                                                |
 
 Obecné již neduplikuje protokolování pouze pro čtení a poznámky mezipaměti. Nastavení uchovávání databáze a optimalizace jsou zachována prostřednictvím `/api/settings/database`; ruční vymazání mezipaměti používá `DELETE /api/cache`. Omezení řádků protokolu požadavků a proxy jsou řízena `CALL_LOGS_TABLE_MAX_ROWS` a `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1079,7 +1079,7 @@ Přístup přes** Dashboard → Náklady** .
 | Tab          | Účel                                                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------- |
 | **Rozpočet** | Nastavte limity výdajů na klíč API s rozpočty daily/weekly/monthly a sledováním v reálném čase |
-| **Ceny**     | Zobrazení a úprava položek cen modelu – cena za 1 000 tokenů input/output na poskytovatele     |
+| **Ceny**     | Zobrazte a upravte položky cen modelu — cena za 1 000 tokenů input/output na poskytovatele     |
 
 ```bash
 # API: Set a budget
@@ -1091,7 +1091,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Sledování nákladů:** Každý požadavek zaznamenává využití tokenu a vypočítává náklady pomocí cenové tabulky. Zobrazit rozdělení v** Dashboard → Použití** podle poskytovatele, modelu a klíče API.
+**Sledování nákladů:** Každý požadavek zaznamenává použití tokenu a vypočítává náklady pomocí cenové tabulky. Zobrazit rozdělení v** Dashboard → Použití** podle poskytovatele, modelu a klíče API.
 
 ---
 
@@ -1111,7 +1111,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` je nativní trasa Deepgramu a potřebuje klíč Deepgram API. Pokud je nakonfigurováno pouze OpenRouter, použijte `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` je nativní cesta Deepgramu a potřebuje klíč Deepgram API. Pokud je nakonfigurováno pouze OpenRouter, použijte `openrouter/deepgram/nova-3`.
 
 **Převod řeči na text (přepis)** poskytovatelé:
 
@@ -1159,7 +1159,7 @@ Nakonfigurujte vyvažování podle kombinace v** Dashboard → Combos → Create
 
 Lze nastavit globální výchozí hodnoty komba** Dashboard → Settings → Routing → Combo Defaults** . Časové limity kombinovaného cíle ve výchozím nastavení dědí aktuální časový limit požadavku. Použití** Cílový časový limit (v sekundách)** na výchozí hodnoty komba nebo jednotlivá komba pouze v případě, že by kratší limit na cíl měl spustit rychlejší návrat.
 
-Kombinovaná optimalizace s nulovou latencí je volitelná. Dovolená** Optimalizace s nulovou latencí** deaktivováno, aby se zabránilo těmto funkcím latence v závodění se záložními cíli, přeskakování cílů na základě historie TTFT nebo komprese záložních požadavků; umožňuje nakonfigurované hedging, prediktivní přeskakování TTFT a proaktivní záložní kompresi pro výměnu věrnosti routing/request za nižší latenci ocasu.
+Kombinovaná optimalizace s nulovou latencí je volitelná. Dovolená** Optimalizace s nulovou latencí** deaktivováno, aby se zabránilo těmto funkcím latence předhánět záložní cíle, přeskakovat cíle na základě historie TTFT nebo komprimovat záložní požadavky; umožňuje nakonfigurované hedging, prediktivní přeskakování TTFT a proaktivní záložní kompresi pro výměnu věrnosti routing/request za nižší latenci ocasu.
 
 Zakázat** Vyrovnávací paměť důvodového tokenu** když upstream poskytovatelé vyžadují přísné limity `max_tokens` / `maxOutputTokens`. Je-li povoleno, kombinované směrování pouze přidává prostor pro model uvažování pro modely se známým limitem výstupu a ponechává limit klientského tokenu beze změny, pokud by bezpečná hodnota ve vyrovnávací paměti tento limit překročila. Pokud je klientský limit již nad známým limitem, OmniRoute ho před odesláním upstream požadavku upevní na tento limit.
 

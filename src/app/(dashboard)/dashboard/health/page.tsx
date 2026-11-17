@@ -13,6 +13,7 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { compareTr } from "@/shared/utils/turkishText";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
@@ -139,20 +140,13 @@ function HealthSnapshot() {
   }, []);
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => {
-      void fetchHealth();
-      void fetchExtras();
-      void fetchDbHealth();
-    }, 0);
-    const interval = setInterval(() => {
+    // Skips ticks while the tab is hidden and catches up on return: these
+    // three endpoints hit the same process that serves the LLM proxy.
+    return startVisiblePolling(() => {
       void fetchHealth();
       void fetchExtras();
       void fetchDbHealth();
     }, 15000);
-    return () => {
-      clearTimeout(initialFetch);
-      clearInterval(interval);
-    };
   }, [fetchHealth, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {
@@ -361,7 +355,7 @@ function HealthSnapshot() {
                 <Icon name="database" size={18} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-text-main">{t("databaseHealth")}</h2>
+                <h2 className="text-lg text-text-main">{t("databaseHealth")}</h2>
                 <p className="text-sm text-text-muted">{t("databaseHealthDescription")}</p>
               </div>
             </div>
@@ -501,7 +495,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="groups" size={20} className="text-primary" />
               {t("sessionActivity")}
             </h2>
@@ -555,7 +549,7 @@ function HealthSnapshot() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="radar" size={20} className="text-primary" />
               {t("quotaMonitors")}
             </h2>
@@ -639,7 +633,7 @@ function HealthSnapshot() {
       {degradation && degradation.features && degradation.features.length > 0 && (
         <Card className="p-5" role="region" aria-label={t("gracefulDegradationStatus")}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
@@ -686,7 +680,7 @@ function HealthSnapshot() {
                       <span className={`w-2 h-2 rounded-full ${dot}`}></span>
                       {feat.feature}
                     </span>
-                    <span className="text-xs uppercase tracking-wider font-bold opacity-70">
+                    <span className="text-xs uppercase tracking-wider font-semibold opacity-70">
                       {feat.level}
                     </span>
                   </div>
@@ -715,7 +709,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Prompt Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="cached" size={18} />
             {t("promptCache")}
           </h3>
@@ -745,7 +739,7 @@ function HealthSnapshot() {
 
         {/* Signature Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="database" size={18} />
             {t("signatureCache")}
           </h3>
@@ -765,7 +759,7 @@ function HealthSnapshot() {
                 {
                   label: t("signatureFamily"),
                   value: `${signatureCache.family.entries}/${signatureCache.family.patterns}`,
-                  color: "text-chart-3",
+                  color: "text-chart-3-ink",
                 },
                 {
                   label: t("signatureSession"),
@@ -777,7 +771,7 @@ function HealthSnapshot() {
                   key={label}
                   className="text-center p-2 rounded-lg bg-surface/30 border border-border/30"
                 >
-                  <p className={`text-lg font-bold tabular-nums ${color}`}>{value}</p>
+                  <p className={`text-lg font-semibold tabular-nums ${color}`}>{value}</p>
                   <p className="text-xs text-text-muted mt-0.5">{label}</p>
                 </div>
               ))}
@@ -791,7 +785,7 @@ function HealthSnapshot() {
       {/* Provider Health */}
       <Card className="p-5" role="region" aria-label={t("providerHealthStatusAria")}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+          <h2 className="text-lg text-text-main flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
             {t("providerHealth")}
           </h2>
@@ -851,7 +845,7 @@ function HealthSnapshot() {
                           className={`rounded-lg p-3 ${style.bg} border border-border flex items-center gap-3`}
                         >
                           <div
-                            className="size-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
+                            className="size-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-semibold"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
                               color: providerInfo?.color || "var(--color-text-muted)",
@@ -968,7 +962,7 @@ function HealthSnapshot() {
           return (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+                <h2 className="text-lg text-text-main flex items-center gap-2">
                   <Icon name="speed" size={20} className="text-warning" />
                   {t("rateLimitStatus")}
                 </h2>
@@ -1021,7 +1015,7 @@ function HealthSnapshot() {
                       >
                         <div className="flex items-center gap-2.5 mb-2">
                           <div
-                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold"
+                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-semibold"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
                               color: providerInfo?.color || "var(--color-text-muted)",
@@ -1075,23 +1069,17 @@ function HealthSnapshot() {
                                 })}
                               </span>
                             </div>
-                            {/* Kit Progress, decorative: the kit spreads aria-* onto its outer div and
-                                never names the inner role="progressbar" (no label forwarding), so the
-                                bar is hidden from assistive tech — the remaining/limit text above
-                                carries the value. No tone prop either: status colour on the indicator. */}
-                            <div aria-hidden="true" data-testid="health-pool-bar">
-                              <Progress
-                                value={quotaProgress}
-                                animate={false}
-                                className={
-                                  exhausted
-                                    ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-error"
-                                    : lowRemaining
-                                      ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-warning"
-                                      : "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
-                                }
-                              />
-                            </div>
+                            <Progress
+                              data-testid="health-pool-bar"
+                              aria-label={t("learnedFromHeaders")}
+                              aria-valuetext={t("remainingOfLimit", {
+                                remaining: learnedRemaining,
+                                limit: learnedLimit,
+                              })}
+                              value={quotaProgress}
+                              tone={exhausted ? "danger" : lowRemaining ? "warning" : "success"}
+                              animate={false}
+                            />
                           </div>
                         )}
                         <div className="flex items-center gap-3 text-[11px] text-text-muted">
@@ -1131,7 +1119,7 @@ function HealthSnapshot() {
       {lockoutEntries.length > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="lock" size={20} className="text-error" />
               {t("activeLockouts")}
             </h2>

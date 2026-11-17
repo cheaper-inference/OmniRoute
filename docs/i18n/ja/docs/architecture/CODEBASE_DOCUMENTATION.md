@@ -75,53 +75,53 @@ OmniRoute/
 
 ```
 src/
-├── app/                  App Router ページ + API ルート
+├── app/                  App Router のページ + API ルート
 ├── lib/                  コアライブラリ（DB、認証、OAuth、スキル、メモリ、…）
-├── domain/               純粋なドメインレイヤー（ポリシー、フォールバック、コスト、ロックアウト、…）
+├── domain/               純粋なドメイン層（ポリシー、フォールバック、コスト、ロックアウト、…）
 ├── server/               サーバー専用モジュール（認可、CORS、認証）
-├── shared/               型、定数、検証、コントラクト、ユーティリティ（境界をまたいで安全）
+├── shared/               型、定数、バリデーション、コントラクト、ユーティリティ（境界をまたいで安全）
 ├── mitm/                 CLI 統合用の中間者プロキシヘルパー
 ├── models/               ローカルモデルのメタデータ / エイリアス
-├── sse/                  src/ 配下に残っているレガシー SSE ハンドラー（open-sse/ ではない）
+├── sse/                  src/ 配下に残るレガシー SSE ハンドラー（open-sse/ ではない）
 ├── store/                クライアント側の状態ストア
 ├── middleware/           ルートレベルのミドルウェアユーティリティ（Next.js のグローバルミドルウェアではない）
 ├── scripts/              アプリコードからインポート可能なツリー内スクリプト
-├── types/                アンビエントおよび共有 TS 型
+├── types/                Ambient および共有 TS 型
 ├── i18n/                 ロケールバンドル
-├── instrumentation.ts    Next.js インストルメンテーションフック
+├── instrumentation.ts    Next.js のインストルメンテーションフック
 ├── instrumentation-node.ts
 └── proxy.ts              トップレベルのプロキシブートストラップヘルパー
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router は、ダッシュボード UI と公開/管理 HTTP API の両方を提供します。
+App Router は、ダッシュボード UI とパブリック / 管理用 HTTP API の両方を公開します。  
 **グローバルミドルウェアはありません** — インターセプトはルートごとに行われます。
 
 `src/app/` 配下のトップレベルセグメント：
 
 | パス                                                                          | 目的                                                        |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `api/`                                                                        | すべての HTTP API ルート（内訳は以下を参照）                |
+| `api/`                                                                        | すべての HTTP API ルート（以下の詳細を参照）                |
 | `a2a/`                                                                        | A2A JSON-RPC 2.0 エンドポイント（`POST /a2a`）              |
-| `.well-known/agent.json/`                                                     | A2A Agent Card 検出ドキュメント                             |
-| `(dashboard)/`                                                                | ダッシュボード UI（ルートグループ、URL プレフィックスなし） |
+| `.well-known/agent.json/`                                                     | A2A Agent Card のディスカバリードキュメント                 |
+| `(dashboard)/`                                                                | ダッシュボード UI（URL プレフィックスなしのルートグループ） |
 | `auth/`, `login/`, `forgot-password/`, `callback/`                            | 認証フロー                                                  |
-| `landing/`                                                                    | マーケティング/ランディングページ                           |
-| `docs/`                                                                       | 組み込み API ドキュメントビューアー                         |
+| `landing/`                                                                    | マーケティング / ランディングページ                         |
+| `docs/`                                                                       | 埋め込み API ドキュメントビューア                           |
 | `status/`, `maintenance/`, `offline/`                                         | 運用ページ                                                  |
-| `privacy/`, `terms/`                                                          | 法的情報ページ                                              |
+| `privacy/`, `terms/`                                                          | 法務ページ                                                  |
 | `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | 静的エラーページ                                            |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | フレームワークのエラー/ローディング境界                     |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | フレームワークのエラー / ローディング境界                   |
 | `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | ルートシェル                                                |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI ページ
 
-`agents`、`analytics`、`api-manager`、`audit`、`auto-combo`、`batch`、`cache`、
-`changelog`、`cli-tools`、`cloud-agents`、`combos`、`compression`、`context`、
-`costs`、`endpoint`、`health`、`limits`、`logs`、`memory`、`onboarding`、
-`playground`、`providers`、`search-tools`、`settings`、`skills`、`system`、
-`translator`、`usage`、`webhooks`、およびルートの `page.tsx`、`HomePageClient.tsx`、
+`agents`、`analytics`、`api-manager`、`audit`、`auto-combo`、`batch`、`cache`、  
+`changelog`、`cli-tools`、`cloud-agents`、`combos`、`compression`、`context`、  
+`costs`、`endpoint`、`health`、`limits`、`logs`、`memory`、`onboarding`、  
+`playground`、`providers`、`search-tools`、`settings`、`skills`、`system`、  
+`translator`、`usage`、`webhooks`、およびルートの `page.tsx`、`HomePageClient.tsx`、  
 `BootstrapBanner.tsx`。
 
 #### 3.1.2 `src/app/api/` — トップレベル API グループ
@@ -177,19 +177,19 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   組み込みサービス管理（9router、cliproxy）— LOCAL_ONLY
+├── services/   埋め込みサービス管理（9router、cliproxy） — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI 互換の公開 API
-├── v1beta/     Gemini スタイル互換
+├── v1/         OpenAI 互換パブリック API
+├── v1beta/     Gemini 形式の互換 API
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — 組み込みサービス管理
+#### 3.1.2a `src/app/api/services/` — 埋め込みサービス管理
 
-9Router および CLIProxyAPI をインストール、起動、停止、監視するためのルートです。
-これらは `npm install` を実行して子プロセスを生成できるため、すべてのパスは
+9Router と CLIProxyAPI のインストール、起動、停止、監視を行うルートです。  
+すべてのパスは、子プロセスを起動して `npm install` を実行できるため、  
 **LOCAL_ONLY**（ループバックのみ、厳格なルール #17）に分類されます。
 
 ```
@@ -200,9 +200,9 @@ src/app/api/services/
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install で新しいバージョンをインストール
+│   ├── update/route.ts     POST — 新しいバージョンを npm install
 │   ├── rotate-key/route.ts POST — 新しい API キーを生成して再起動
-│   ├── status/route.ts     GET  — ライブ状態 + DB 状態 + バージョンメタデータ
+│   ├── status/route.ts     GET  — 稼働状態 + DB の状態 + バージョンメタデータ
 │   └── auto-start/route.ts POST — auto_start フラグを切り替え
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() ヘルパー
@@ -210,21 +210,21 @@ src/app/api/services/
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install で新しいバージョンをインストール
-│   ├── status/route.ts     GET  — ライブ状態 + DB 状態 + バージョンメタデータ
+│   ├── update/route.ts     POST — 新しいバージョンを npm install
+│   ├── status/route.ts     GET  — 稼働状態 + DB の状態 + バージョンメタデータ
 │   └── auto-start/route.ts POST — auto_start フラグを切り替え
 └── [name]/
-    └── logs/route.ts       GET  — SSE ログ末尾（すべてのサービスで共有）
+    └── logs/route.ts       GET  — SSE ログの末尾取得（すべてのサービスで共有）
 ```
 
-対応するダッシュボード UI：
-`src/app/(dashboard)/dashboard/providers/services/` — 2 タブのページ（CLIProxyAPI + 9Router）。
-9Router 組み込み UI 用のリバースプロキシ：
+対応するダッシュボード UI:
+`src/app/(dashboard)/dashboard/providers/services/` — 2 タブ構成のページ（CLIProxyAPI + 9Router）。
+9Router の組み込み UI 用リバースプロキシ:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-詳細：`docs/frameworks/EMBEDDED-SERVICES.md`
+詳しい説明: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — OpenAI 互換のパブリック API
+#### 3.1.3 `src/app/api/v1/` — OpenAI 互換パブリック API
 
 ```
 v1/
@@ -234,19 +234,19 @@ v1/
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
 ├── chat/completions/                    Chat Completions（メインエンドポイント）
-├── completions/                         レガシーなテキスト補完
-├── embeddings/                          埋め込み
+├── completions/                         レガシーのテキスト補完
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            共有ルートヘルパー（公開 URL なし）
+├── _helpers/                            共有ルートヘルパー（パブリック URL なし）
 ├── images/{edits, generations}/         画像生成 + 編集
 ├── issues/                              トリアージ用ヘルパーエンドポイント
-├── management/{proxies}/                v1 内の管理スコープ付きルート
+├── management/{proxies}/                v1 内の管理スコープルート
 ├── messages/{count_tokens}/             Anthropic 形式のメッセージ互換
-├── models/                              モデル一覧（`route.ts`、`catalog.ts`）
+├── models/                              モデル一覧（`route.ts`, `catalog.ts`）
 ├── moderations/                         モデレーション
 ├── music/                               音楽生成
 ├── providers/[provider]/                プロバイダーごとの操作
-├── quotas/{check}                       クォータプローブ
+├── quotas/{check}                       クォータ確認
 ├── registered-keys/                     登録済みキーの管理
 ├── rerank/                              再ランキング
 ├── responses/[...path]/                 OpenAI Responses API（キャッチオール）
@@ -256,199 +256,210 @@ v1/
 └── route.ts                             インデックスハンドラー
 ```
 
-すべてのルートファイルは同じパターンに従います：
+すべてのルートファイルは同じパターンに従います。
 
 ```
-ルート → CORS プリフライト → Zod によるリクエストボディ検証 → 任意の認証
-       → API キーポリシーの適用 → ハンドラーへの委譲（open-sse）
+Route → CORS プリフライト → Zod ボディ検証 → オプションの認証
+      → API キーポリシーの適用 → ハンドラーへの委譲（open-sse）
 ```
 
-`v1beta/` は Gemini 形式の互換インターフェースです（同じ
-`open-sse/handlers/` パイプラインに変換する薄いラッパー）。
+`v1beta/` は Gemini 形式の互換サーフェスです（同じ
+`open-sse/handlers/` パイプラインへ変換する薄いラッパー）。
 
 ### 3.2 `src/lib/` — コアライブラリ
 
-データ、同期、OAuth、スキル、メモリなどは、必ずこれらのモジュールを介してインポートしてください。次の
-表では、実際のディレクトリと主要なトップレベルファイルをグループ化しています。
+データ、同期、OAuth、スキル、メモリなどは、必ずこれらのモジュール経由でインポートしてください。
+この表では、実際のディレクトリと、注目すべきトップレベルファイルをまとめています。
 
-| Module            | 目的                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A プロトコルサーバー: `taskManager.ts`、`streaming.ts`、`taskExecution.ts`、`routingLogger.ts`、`skills/`（6つのスキル: コスト分析、ヘルスレポート、プロバイダー検出、クォータ管理、スマートルーティング、機能一覧）                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `acp/`            | Agent-Control-Protocol: `index.ts`、`manager.ts`、`registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `api/`            | 内部 API ヘルパー: `requireManagementAuth.ts`、`requireCliToolsAuth.ts`、`errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `auth/`           | `managementPassword.ts`（パスワードのリセット / ハッシュ化）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `batches/`        | OpenAI Batches API サービス（`service.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `catalog/`        | OpenRouter カタログ同期（`openrouterCatalog.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `cloudAgent/`     | クラウドエージェントレジストリ: `api.ts`、`baseAgent.ts`、`db.ts`、`index.ts`、`registry.ts`、`types.ts`、`agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `combos/`         | コンボ解決ヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `compliance/`     | 監査 + プロバイダー監査: `index.ts`、`providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `config/`         | ランタイム設定の連携処理                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `db/`             | SQLiteドメインモジュール（§3.2.1を参照）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `display/`        | APIレスポンスで使用されるUI・表示ヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `embeddings/`     | 埋め込みサービスレジストリ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `env/`            | 環境変数の読み込み + イントロスペクション                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `evals/`          | Evalランタイム                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `jobs/`           | バックグラウンドジョブ（`autoUpdate.ts`、…）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `memory/`         | 永続メモリ：`store.ts`、`cache.ts`、`retrieval.ts`、`summarization.ts`、`extraction.ts`、`injection.ts`、`qdrant.ts`、`settings.ts`、`verify.ts`、`schemas.ts`、`types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `oauth/`          | OAuth/インポートプロバイダーモジュール（22個）：`agy`、`antigravity`、`claude`、`cline`、`codebuddy-cn`、`codex`、`cursor`、`devin-desktop`、`ghe-copilot`、`github`、`gitlab-duo`、`grok-cli-oauth`、`grok-cli`、`kilocode`、`kimi-coding`、`kiro`、`openference`、`qoder`、`trae`、`xai-oauth`、`zed-hosted`、`zed`、および `services/`、`utils/`、`constants/oauth.ts`                                                                                                                                                                                                                                                                                                                   |
-| `plugins/`        | プラグインローダー（`index.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `providerModels/` | 管理対象モデルのライフサイクル: `modelDiscovery.ts`、`managedModelImport.ts`、`managedAvailableModels.ts`、`cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `providers/`      | プロバイダーヘルパー: `catalog.ts`、`validation.ts`、`imageValidation.ts`、`claudeExtraUsage.ts`、`codexConnectionDefaults.ts`、`codexFastTier.ts`、`webCookieAuth.ts`、`managedAvailableModels.ts`、`requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `resilience/`     | `settings.ts` — サーキットブレーカー、クールダウン、ロックアウトの設定                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `runtime/`        | ランタイム機能の検出                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `services/`       | 組み込みサービスフレームワーク: `ServiceSupervisor.ts`（操作ロック、リングバッファ、ヘルスチェッカーを備えた汎用子プロセススーパーバイザー）、`bootstrap.ts`（プロセスレベルの登録と自動起動）、`registry.ts`（ツール → スーパーバイザーのマップ）、`apiKey.ts`（AES-256-GCMキーストア）、`modelSync.ts`（定期的なモデル同期）、`ringBuffer.ts`（5 MBの循環ログバッファ）、`healthCheck.ts`（HTTPヘルスプローブ）、`types.ts`、`embedWsProxy.ts`（WebSocketプロキシ）、`installers/{ninerouter,cliproxy}.ts`。`docs/frameworks/EMBEDDED-SERVICES.md`を参照                                                                                                                                  |
-| `agentSkills/`    | Agent Skillsのカタログとジェネレーター: `catalog.ts`（getCatalog/getSkillById/filterCatalog/computeCoverage）、`generator.ts`（generateAgentSkills → `skills/{id}/SKILL.md`に書き込み）、`openapiParser.ts`（OpenAPI仕様からRESTエンドポイントを抽出）、`cliRegistryParser.ts`（bin/cli-registryからCLIサブコマンドを抽出）、`schemas.ts`（Zod: AgentSkillSchema、SkillCoverageSchema、ListQuerySchema、GenerateBodySchema）、`types.ts`（AgentSkill、SkillCoverage、SkillMarkdown、GeneratorReport）。RESTルート（`/api/agent-skills/*`）、MCPツール（`omniroute_agent_skills_*`）、A2Aスキル`list-capabilities`から使用されます。[AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)を参照。 |
-| `skills/`         | スキルフレームワーク: `registry.ts`、`executor.ts`、`interception.ts`、`injection.ts`、`sandbox.ts`、`custom.ts`、`hybrid.ts`、`builtins.ts`、`a2a.ts`、`providerSettings.ts`、`schemas.ts`、`skillssh.ts`、`types.ts`、および`builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `spend/`          | `batchWriter.ts`（ライトビハインドバッファ）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `sync/`           | `bundle.ts`、`tokens.ts`（Cloud Sync）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `system/`         | システムレベルのヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `translator/`     | トップレベルのトランスレーター連携部分（`open-sse/translator/` に処理を委譲）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `usage/`          | 使用量の計算・管理: `costCalculator.ts`、`tokenAccounting.ts`、`usageHistory.ts`、`aggregateHistory.ts`、`usageStats.ts`、`callLogs.ts`、`callLogArtifacts.ts`、`fetcher.ts`、`providerLimits.ts`、`migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `versionManager/` | 自動更新 + バージョンマニフェスト                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `ws/`             | WebSocket ブリッジ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `zed-oauth/`      | Zed エディターの OAuth フロー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| モジュール        | 目的                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A プロトコルサーバー: `taskManager.ts`、`streaming.ts`、`taskExecution.ts`、`routingLogger.ts`、`skills/`（6 つのスキル: コスト分析、ヘルスレポート、プロバイダー検出、クォータ管理、スマートルーティング、機能一覧）                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `acp/`            | Agent-Control-Protocol: `index.ts`、`manager.ts`、`registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `api/`            | 内部 API ヘルパー: `requireManagementAuth.ts`、`requireCliToolsAuth.ts`、`errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `auth/`           | `managementPassword.ts`（パスワードのリセット / ハッシュ化）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `batches/`        | OpenAI Batches API サービス（`service.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `catalog/`        | OpenRouter カタログの同期（`openrouterCatalog.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `cloudAgent/`     | クラウドエージェントレジストリ: `api.ts`、`baseAgent.ts`、`db.ts`、`index.ts`、`registry.ts`、`types.ts`、`agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `combos/`         | コンボ解決ヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `compliance/`     | 監査 + プロバイダー監査: `index.ts`、`providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `config/`         | ランタイム設定の連携                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `db/`             | SQLite ドメインモジュール（§3.2.1 を参照）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `display/`        | API レスポンスで使用される UI/表示ヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `embeddings/`     | 埋め込みサービスレジストリ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `env/`            | 環境変数の読み込み + 内省                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `evals/`          | Evalランタイム                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `guardrails/`     | `piiMasker.ts`、`promptInjection.ts`、`visionBridge.ts`、`visionBridgeHelpers.ts`、`registry.ts`、`base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `jobs/`           | バックグラウンドジョブ（`autoUpdate.ts`、…）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `memory/`         | 永続メモリ：`store.ts`、`cache.ts`、`retrieval.ts`、`summarization.ts`、`extraction.ts`、`injection.ts`、`qdrant.ts`、`settings.ts`、`verify.ts`、`schemas.ts`、`types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `oauth/`          | OAuth／インポートプロバイダーモジュール（22個）：`agy`、`antigravity`、`claude`、`cline`、`codebuddy-cn`、`codex`、`cursor`、`devin-desktop`、`ghe-copilot`、`github`、`gitlab-duo`、`grok-cli-oauth`、`grok-cli`、`kilocode`、`kimi-coding`、`kiro`、`openference`、`qoder`、`trae`、`xai-oauth`、`zed-hosted`、`zed`、および`services/`、`utils/`、`constants/oauth.ts`                                                                                                                                                                                                                                                                                                                             |
+| `plugins/`        | プラグインローダー（`index.ts`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `promptCache/`    | `prefixAnalyzer.ts`、`index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `providerModels/` | 管理対象モデルのライフサイクル: `modelDiscovery.ts`、`managedModelImport.ts`、`managedAvailableModels.ts`、`cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `providers/`      | プロバイダー用ヘルパー: `catalog.ts`、`validation.ts`、`imageValidation.ts`、`claudeExtraUsage.ts`、`codexConnectionDefaults.ts`、`codexFastTier.ts`、`webCookieAuth.ts`、`managedAvailableModels.ts`、`requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `resilience/`     | `settings.ts` — サーキットブレーカー、クールダウン、ロックアウトの設定                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `runtime/`        | ランタイム機能の検出                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `services/`       | 組み込みサービスフレームワーク: `ServiceSupervisor.ts`（操作ロック、リングバッファ、ヘルスチェッカーを備えた汎用子プロセススーパーバイザー）、`bootstrap.ts`（プロセスレベルの登録と自動起動）、`registry.ts`（ツール → スーパーバイザーのマップ）、`apiKey.ts`（AES-256-GCM キーストア）、`modelSync.ts`（モデルの定期同期）、`ringBuffer.ts`（5 MB の循環ログバッファー）、`healthCheck.ts`（HTTP ヘルスプローブ）、`types.ts`、`embedWsProxy.ts`（WebSocket プロキシ）、`installers/{ninerouter,cliproxy}.ts`。`docs/frameworks/EMBEDDED-SERVICES.md`を参照                                                                                                                                        |
+| `agentSkills/`    | Agent Skills のカタログとジェネレーター: `catalog.ts`（getCatalog/getSkillById/filterCatalog/computeCoverage）、`generator.ts`（generateAgentSkills → `skills/{id}/SKILL.md`を書き込み）、`openapiParser.ts`（OpenAPI 仕様から REST エンドポイントを抽出）、`cliRegistryParser.ts`（bin/cli-registry から CLI サブコマンドを抽出）、`schemas.ts`（Zod: AgentSkillSchema、SkillCoverageSchema、ListQuerySchema、GenerateBodySchema）、`types.ts`（AgentSkill、SkillCoverage、SkillMarkdown、GeneratorReport）。REST ルート（`/api/agent-skills/*`）、MCP ツール（`omniroute_agent_skills_*`）、A2A スキル `list-capabilities` で使用されます。[AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)を参照。 |
+| `skills/`         | スキルフレームワーク: `registry.ts`、`executor.ts`、`interception.ts`、`injection.ts`、`sandbox.ts`、`custom.ts`、`hybrid.ts`、`builtins.ts`、`a2a.ts`、`providerSettings.ts`、`schemas.ts`、`skillssh.ts`、`types.ts`、および `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `spend/`          | `batchWriter.ts`（書き込み後バッファ）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `sync/`           | `bundle.ts`、`tokens.ts`（クラウド同期）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `system/`         | システムレベルのヘルパー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `translator/`     | トップレベルのトランスレーター接続処理（`open-sse/translator/` に委譲）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `usage/`          | 使用量の集計：`costCalculator.ts`、`tokenAccounting.ts`、`usageHistory.ts`、`aggregateHistory.ts`、`usageStats.ts`、`callLogs.ts`、`callLogArtifacts.ts`、`fetcher.ts`、`providerLimits.ts`、`migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `versionManager/` | 自動更新 + バージョンマニフェスト                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ws/`             | WebSocket ブリッジ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `zed-oauth/`      | Zed エディターの OAuth フロー                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-`src/lib/` のトップレベルファイル:
+`src/lib/` のトップレベルファイル：
 
-- 旧 `localDb.ts` バレルファイルは削除されました — 利用側は特定の `src/lib/db/*` モジュールを直接インポートします。
-- `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
-- `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
-- `cloudSync.ts`, `initCloudSync.ts`
-- `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts`
-- `consoleInterceptor.ts`, `container.ts`, `gracefulShutdown.ts`, `idempotencyLayer.ts`
-- `ipUtils.ts`, `logEnv.ts`, `logPayloads.ts`, `logRotation.ts`
-- `modelAliasSeed.ts`, `modelCapabilities.ts`, `modelMetadataRegistry.ts`, `modelsDevSync.ts`
-- `piiSanitizer.ts`, `pricingSync.ts`
-- `apiKeyExposure.ts`, `cacheControlSettings.ts`, `dataPaths.ts`, `toolPolicy.ts`
-- `translatorEvents.ts`, `usageDb.ts`, `usageAnalytics.ts`, `webhookDispatcher.ts`
+- 古い `localDb.ts` バレルは削除されました — 利用側では `src/lib/db/*` モジュールを直接インポートします。
+- `proxyHealth.ts`、`proxyLogger.ts`、`tokenHealthCheck.ts`、`localHealthCheck.ts`
+- `apiBridgeServer.ts`、`cacheLayer.ts`、`semanticCache.ts`、`settingsCache.ts`
+- `cloudSync.ts`、`initCloudSync.ts`
+- `cloudflaredTunnel.ts`、`ngrokTunnel.ts`、`tailscaleTunnel.ts`
+- `consoleInterceptor.ts`、`container.ts`、`gracefulShutdown.ts`、`idempotencyLayer.ts`
+- `ipUtils.ts`、`logEnv.ts`、`logPayloads.ts`、`logRotation.ts`
+- `modelAliasSeed.ts`、`modelCapabilities.ts`、`modelMetadataRegistry.ts`、`modelsDevSync.ts`
+- `piiSanitizer.ts`、`pricingSync.ts`
+- `apiKeyExposure.ts`、`cacheControlSettings.ts`、`dataPaths.ts`、`toolPolicy.ts`
+- `translatorEvents.ts`、`usageDb.ts`、`usageAnalytics.ts`、`webhookDispatcher.ts`
 
 #### 3.2.1 `src/lib/db/`
 
-シングルトンSQLiteデータベース（`core.ts` 内の `getDbInstance()`、WALジャーナリング）。
-**ルートやハンドラー内には決して生のSQLを書かず**、必ずこれらのモジュールを介してください。
+シングルトン SQLite データベース（`core.ts` の `getDbInstance()`、WAL ジャーナリング）。
+**ルートやハンドラーで raw SQL を直接記述しないでください** — 必ずこれらのモジュールを経由します。
 
-![データベーススキーマの概要（主要テーブルの一部）](../diagrams/exported/db-schema-overview.svg)
+![データベーススキーマの概要（主要なコアテーブル）](../diagrams/exported/db-schema-overview.svg)
 
-> ソース: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
+> 出典: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-ドメインモジュール（各モジュールが1つ以上のテーブルを所有）: `apiKeys.ts`, `backup.ts`,
-`batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
-`commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
-`compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
-`contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`,
-`detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`,
-`healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`,
-`modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`,
-`providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`,
-`readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
-`sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
-`syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
+ドメインモジュール（各モジュールが 1 つ以上のテーブルを管理）: `apiKeys.ts`、`backup.ts`、
+`batches.ts`、`cleanup.ts`、`cliToolState.ts`、`combos.ts`、
+`commandCodeAuth.ts`、`compression.ts`、`compressionAnalytics.ts`、
+`compressionCacheStats.ts`、`compressionCombos.ts`、`compressionScheduler.ts`、
+`contextHandoffs.ts`、`core.ts`、`creditBalance.ts`、`databaseSettings.ts`、
+`detailedLogs.ts`、`domainState.ts`、`encryption.ts`、`evals.ts`、`files.ts`、
+`healthCheck.ts`、`jsonMigration.ts`、`migrationRunner.ts`、
+`modelComboMappings.ts`、`models.ts`、`oneproxy.ts`、`prompts.ts`、
+`providers.ts`、`providerLimits.ts`、`proxies.ts`、`quotaSnapshots.ts`、
+`readCache.ts`、`reasoningCache.ts`、`registeredKeys.ts`、`secrets.ts`、
+`sessionAccountAffinity.ts`、`settings.ts`、`stateReset.ts`、`stats.ts`、
+`syncTokens.ts`、`tierConfig.ts`、`upstreamProxy.ts`、`versionManager.ts`、
 `webhooks.ts`。
 
-`migrations/` には、バージョン管理された168個の `.sql` ファイル（冪等かつトランザクショナル）が格納されており、
+`migrations/` にはバージョン管理された `.sql` ファイルが 168 個（冪等かつトランザクション対応）格納されており、
 起動時に `migrationRunner.ts` によって実行されます。
 
-マイグレーション全体で作成されるテーブル（合計123個）:
+マイグレーション全体で作成されるテーブル（合計 123 個）:
 
-`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
-`combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
-`compression_analytics`, `compression_cache_stats`,
-`compression_combo_assignments`, `compression_combos`, `context_handoffs`,
-`daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`,
-`domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`,
-`eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`,
-`key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`,
-`provider_connections`, `provider_key_limits`, `provider_nodes`,
-`proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`,
-`reasoning_cache`, `registered_keys`, `request_detail_logs`,
-`routing_decisions`, `semantic_cache`, `session_account_affinity`,
-`skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
-`tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks`（およびメモリ検索用のFTS5仮想テーブル）。
+`a`、`account_key_limits`、`api_keys`、`batches`、`call_logs`、
+`combo_adaptation_state`、`combos`、`command_code_auth_sessions`、
+`compression_analytics`、`compression_cache_stats`、
+`compression_combo_assignments`、`compression_combos`、`context_handoffs`、
+`daily_usage_summary`、`db_meta`、`domain_budgets`、`domain_circuit_breakers`、
+`domain_cost_history`、`domain_fallback_chains`、`domain_lockout_state`、
+`eval_cases`、`eval_runs`、`eval_suites`、`files`、`hourly_usage_summary`、
+`key_value`、`mcp_tool_audit`、`memories`、`model_combo_mappings`、
+`provider_connections`、`provider_key_limits`、`provider_nodes`、
+`proxy_assignments`、`proxy_logs`、`proxy_registry`、`quota_snapshots`、
+`reasoning_cache`、`registered_keys`、`request_detail_logs`、
+`routing_decisions`、`semantic_cache`、`session_account_affinity`、
+`skill_executions`、`skills`、`sync_tokens`、`tier_assignments`、
+`tier_config`、`upstream_proxy_config`、`usage_history`、`version_manager`、
+`webhooks`（メモリ検索用の FTS5 仮想テーブルも含む）。
 
 ### 3.3 `src/domain/` — ドメイン層
 
-I/Oを行わない純粋なビジネスロジック。ルートおよびハンドラーからインポートされます。
+ドメインサービスと評価コントラクト。一部のモジュールは実行中のリクエストパスから呼び出されますが、
+その他はスタンドアロンのコントラクトとして残っています。このディレクトリ全体に I/O が存在しない、
+またはすべてのモジュールの変更が本番のルーティングに影響すると想定しないでください。
+
+実行中のポリシーサーフェスは `src/shared/utils/apiKeyPolicy.ts` と
+`src/sse/handlers/chat/resolvedModelPolicy.ts` です。実行中のコンボ処理とターゲット解決では
+`open-sse/services/combo.ts` を使用します。テスト対象の `policyEngine.ts` と
+`comboResolver.ts` のコントラクト、および `src/lib/container.ts` は、調査対象のチャットリクエストパスを
+配線するものではありません。ルーティング変更を計画する際は、これらをアクティブなサーフェスとは分けて扱ってください。
 
 | ファイル                                   | 目的                                         |
 | ------------------------------------------ | -------------------------------------------- |
-| `policyEngine.ts`                          | 最上位のポリシーリゾルバー                   |
-| `fallbackPolicy.ts`                        | フォールバックのデシジョンツリー             |
+| `policyEngine.ts`                          | 予約済みのポリシー評価コントラクト           |
+| `fallbackPolicy.ts`                        | フォールバック判定ツリー                     |
 | `costRules.ts`                             | コスト計算ルール                             |
-| `lockoutPolicy.ts`                         | モデルのロックアウト判定                     |
+| `lockoutPolicy.ts`                         | モデルロックアウトの判定                     |
 | `tagRouter.ts`                             | タグベースのルーティング                     |
-| `comboResolver.ts`                         | リクエストからターゲットリストへのコンボ解決 |
+| `comboResolver.ts`                         | 予約済みのコンボ選択コントラクト             |
 | `connectionModelRules.ts`                  | 接続ごとのモデルフィルター                   |
-| `modelAvailability.ts`                     | モデルの可用性チェック                       |
-| `degradation.ts`                           | 縮退モードへの移行                           |
+| `modelAvailability.ts`                     | モデルの利用可能性チェック                   |
+| `degradation.ts`                           | 劣化モードの遷移                             |
 | `providerExpiration.ts`                    | 期限切れアカウント／キーの検出               |
 | `quotaCache.ts`                            | キャッシュされたクォータ判定                 |
-| `responses.ts`, `omnirouteResponseMeta.ts` | レスポンス形式のヘルパー                     |
+| `responses.ts`、`omnirouteResponseMeta.ts` | レスポンス形式のヘルパー                     |
 | `configAudit.ts`                           | 設定変更の監査                               |
-| `assessment/`                              | モデル評価（RFC準拠、一部実装済み）          |
+| `assessment/`                              | モデル評価（RFC に基づく、部分的に実装済み） |
 | `types.ts`                                 | 共有ドメイン型                               |
 
 ### 3.4 `src/server/` — サーバー専用
 
-クライアントコンポーネントからインポートすることはできません。
+クライアントコンポーネントからインポートできません。
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        ルートを公開用または管理用に分類
+│   ├── classify.ts        ルートをパブリックと管理用に分類
 │   ├── assertAuth.ts      アサーションヘルパー
 │   ├── context.ts         リクエストごとの認可コンテキスト
 │   ├── headers.ts
 │   ├── pipeline.ts        認可パイプライン
 │   ├── policies/          具体的なポリシー
 │   └── types.ts
-└── cors/origins.ts        CORSオリジン許可リスト
+└── cors/origins.ts        CORS オリジン許可リスト
 ```
 
-### 3.5 `src/shared/` — 安全に共有可能
+### 3.5 `src/shared/` — 共有しても安全
 
-目的別のサブディレクトリに分割されています:
+目的ごとにサブディレクトリへ分割します。
 
-- `constants/` — `providers.ts`（Zod で検証されるプロバイダーカタログ）、`models.ts`、
+- `constants/` — `providers.ts`（Zod で検証されたプロバイダーカタログ）、`models.ts`、
   `modelSpecs.ts`、`modelCompat.ts`、`pricing.ts`、`cliTools.ts`、
   `cliCompatProviders.ts`、`routingStrategies.ts`、`comboConfigMode.ts`、
   `headers.ts`、`upstreamHeaders.ts`（拒否リスト）、`mcpScopes.ts`、
   `errorCodes.ts`、`publicApiRoutes.ts`、`batch.ts`、`batchEndpoints.ts`、
   `bodySize.ts`、`colors.ts`、`appConfig.ts`、`config.ts`、
   `sidebarVisibility.ts`、`visionBridgeDefaults.ts`。
-- `validation/` — `schemas.ts`（約80個の Zod スキーマ）、`compressionConfigSchemas.ts`、
-  `providerSchema.ts`、`settingsSchemas.ts`、`helpers.ts`。
-- `contracts/` — npm に公開されるパブリック API コントラクト。
+- `validation/` — `schemas.ts`（約 80 個の Zod スキーマ）、
+  `compressionConfigSchemas.ts`、`providerSchema.ts`、`settingsSchemas.ts`、
+  `helpers.ts`。
+- `contracts/` — npm に同梱されるパブリック API コントラクト。
 - `types/` — 共有 TS 型。
 - `utils/` — `circuitBreaker.ts`、`apiAuth.ts`、`apiKey.ts`、`apiKeyPolicy.ts`、
   `api.ts`、`classify429.ts`、`cliCompat.ts`、`clipboard.ts`、`cloud.ts`、`cn.ts`、
-  `cors.ts`、`featureFlags.ts`、
-  `fetchTimeout.ts`、`formatting.ts`、`inputSanitizer.ts`、`logger.ts`、
-  `machine.ts`、`machineId.ts`、`maskEmail.ts`、`modelCatalogSearch.ts`、
-  `nodeRuntimeSupport.ts`、`parseApiKeys.ts`、`providerHints.ts`、
-  `providerModelAliases.ts`、`rateLimiter.ts`、`releaseNotes.ts`、
-  `a11yAudit.ts`、および `services/`、`network/`、`middleware/`、`schemas/`、
-  `hooks/`、`components/` 配下のダッシュボード用フック／コンポーネント。
-- `components/` — ダッシュボードのコンポーネント API（`index.tsx` バレル：`Button`、`Input`、
-  `Select`、`Modal`、`Card`、`DataTable`、…）。プリミティブはベンダー提供キット
-  （`packages/ui-kit`、`@omniroute/ui-kit/button` のようなコンポーネントサブパスから
-  インポート）のアダプターであるため、画面側は既存のインポートを維持しつつ、
-  マークアップにはキットのものが使用されます。シェルは `layouts/DashboardLayout.tsx` →
-  `layouts/DashboardShell.tsx`（キットの `SidebarProvider`/`SidebarInset`）で、
-  `Sidebar.tsx` と `Header.tsx` を使用します。アイコンは `Icon.tsx` と
-  `constants/iconMap.ts` を経由します。`docs/architecture/DESIGN_SYSTEM.md` を参照してください。
+  `cors.ts`、`featureFlags.ts`、`fetchTimeout.ts`、`formatting.ts`、
+  `inputSanitizer.ts`、`logger.ts`、`machine.ts`、`machineId.ts`、`maskEmail.ts`、
+  `modelCatalogSearch.ts`、`nodeRuntimeSupport.ts`、`parseApiKeys.ts`、
+  `providerHints.ts`、`providerModelAliases.ts`、`rateLimiter.ts`、
+  `releaseNotes.ts`、`a11yAudit.ts`、および `services/`、`network/`、
+  `middleware/`、`schemas/`、`hooks/`、`components/` 配下のダッシュボード用
+  フック／コンポーネント。
+- `components/` — ダッシュボードコンポーネント API（`index.tsx` のバレル：
+  `Button`、`Input`、`Select`、`Modal`、`Card`、`DataTable`、…）。プリミティブは
+  ベンダー提供のキット（`packages/ui-kit`。`@omniroute/ui-kit/button` のように
+  コンポーネントのサブパスからインポート）に対するアダプターであるため、画面側では
+  インポートを維持しつつ、マークアップはキットのものになります。シェルは
+  `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  （キットの `SidebarProvider`／`SidebarInset`）で、`Sidebar.tsx` と `Header.tsx` を
+  使用します。アイコンは `Icon.tsx` と `constants/iconMap.ts` を経由します。
+  `docs/architecture/DESIGN_SYSTEM.md` を参照してください。
 
 ---
 
 ## 4. `open-sse/` — ストリーミングエンジンのワークスペース
 
 `@omniroute/open-sse` として公開される独立した npm ワークスペースです。リクエスト処理、
-executor、translator、サービス、transformer、MCP サーバーを担当します。
+エグゼキューター、トランスレーター、サービス、トランスフォーマー、MCP サーバーを
+管理します。
 
 ```
 open-sse/
@@ -456,63 +467,65 @@ open-sse/
 ├── package.json            ワークスペースマニフェスト
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 プロバイダーレジストリ、ヘッダープロファイル、識別情報、…
+├── config/                 プロバイダーレジストリ、ヘッダープロファイル、ID、…
 ├── handlers/               リクエストハンドラー（チャット、埋め込み、音声、画像、…）
-├── executors/              159 個のプロバイダー executor モジュール（executor クラス + プロバイダーごとのヘルパー）
+├── executors/              170 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
 ├── translator/             フォーマット変換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
-├── transformer/            Responses API ↔ Chat Completions ストリーム変換
-├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、識別情報、…）
-├── utils/                  ストリーミングヘルパー、TLS クライアント、AWS SigV4、プロキシ fetch、…
-└── mcp-server/             MCP サーバー（3 トランスポート、33 スコープ、110 ツール）
+├── transformer/            Responses API ↔ Chat Completions ストリームトランスフォーマー
+├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、ID、…）
+├── utils/                  ストリーミングヘルパー、TLS クライアント、AWS SigV4、プロキシーフェッチ、…
+└── mcp-server/             MCP サーバー（3 種類のトランスポート、33 個のスコープ、110 個のツール）
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ハンドラー              | 目的                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | メインチャットパイプライン（キャッシュ、レート制限、コンボルーティング、executor のディスパッチ） |
-| `responsesHandler.ts`   | OpenAI Responses API のエントリーポイント                                                         |
-| `embeddings.ts`         | 埋め込み                                                                                          |
-| `imageGeneration.ts`    | 画像生成                                                                                          |
-| `audioSpeech.ts`        | テキスト読み上げ                                                                                  |
-| `audioTranscription.ts` | 音声からテキストへの変換                                                                          |
-| `videoGeneration.ts`    | 動画生成                                                                                          |
-| `musicGeneration.ts`    | 音楽生成                                                                                          |
-| `rerank.ts`             | 再ランキング                                                                                      |
-| `moderations.ts`        | モデレーション                                                                                    |
-| `search.ts`             | Web 検索                                                                                          |
-| `sseParser.ts`          | SSE イベントパーサー                                                                              |
-| `usageExtractor.ts`     | 上流ストリームからトークン数を抽出                                                                |
-| `responseSanitizer.ts`  | プロバイダー固有の不要な情報を除去                                                                |
-| `responseTranslator.ts` | プロバイダーのレスポンスと translator レイヤー間の連携                                            |
+| Handler                 | Purpose                                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | メインチャットパイプライン（キャッシュ、レート制限、コンボルーティング、エグゼキューターのディスパッチ） |
+| `responsesHandler.ts`   | OpenAI Responses API のエントリーポイント                                                                |
+| `embeddings.ts`         | 埋め込み                                                                                                 |
+| `imageGeneration.ts`    | 画像生成                                                                                                 |
+| `audioSpeech.ts`        | テキスト読み上げ                                                                                         |
+| `audioTranscription.ts` | 音声テキスト変換                                                                                         |
+| `videoGeneration.ts`    | 動画生成                                                                                                 |
+| `musicGeneration.ts`    | 音楽生成                                                                                                 |
+| `rerank.ts`             | 再ランキング                                                                                             |
+| `moderations.ts`        | モデレーション                                                                                           |
+| `search.ts`             | Web 検索                                                                                                 |
+| `sseParser.ts`          | SSE イベントパーサー                                                                                     |
+| `usageExtractor.ts`     | 上流ストリームからトークン数を抽出                                                                       |
+| `responseSanitizer.ts`  | プロバイダー固有のノイズを除去                                                                           |
+| `responseTranslator.ts` | プロバイダーのレスポンスとトランスレーター層をつなぐ                                                     |
 
 ### 4.2 `open-sse/executors/`
 
-トップレベルの executor モジュールは 159 個あります（`base.ts`、`index.ts`、テストを除く `*.ts`。この数は
-`npm run check:docs-counts` で測定されます）。すべての executor クラスは、`base.ts` の `BaseExecutor` を、
-直接または `DefaultExecutor` あるいは別の executor を介して継承します。残りのモジュールはプロバイダーごとの
-ヘルパー（ツールスキーマ、fetch/TTS アダプター、特殊動作のハンドラー）です。executor には次のものが含まれます。
+トップレベルのエグゼキューターモジュールが 170 個あります（`base.ts`、`index.ts`、テストを除く `*.ts` — この数は
+`npm run check:docs-counts` が計測します）。すべてのエグゼキュータークラスは、`base.ts` の
+`BaseExecutor` を直接、または `DefaultExecutor` か別のエグゼキューターを介して継承します。残りのモジュールはプロバイダーごとの
+ヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊処理ハンドラー）です。エグゼキューターには次のものが含まれます。
 
 `antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
 `chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
 `muse-spark-web`、`nlpcloud`、`opencode`、`perplexity-web`、`petals`、
 `pollinations`、`qoder`、`vertex`、`devin-desktop`、さらに
-`claudeIdentity.ts`（共有識別情報ヘルパー）と `index.ts`（レジストリ）があります。
+`claudeIdentity.ts`（共有 ID ヘルパー）と `index.ts`（レジストリ）があります。
 
-> 注: ここに記載されていないプロバイダーは、汎用の OpenAI 互換 executor を使用する `default.ts` によって処理されます。完全なプロバイダーカタログ（380 プロバイダー）は
+> 注: ここに記載されていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用する
+> `default.ts` によって処理されます。完全なプロバイダーカタログ（394 プロバイダー）は
 > `src/shared/constants/providers.ts` にあります。
 
 ### 4.3 `open-sse/translator/`
 
 ハブアンドスポーク型の変換（OpenAI がハブ）です。
 
-- **9 個のリクエスト translator**（`translator/request/`）:
+- **9 個のリクエストトランスレーター**（`translator/request/`）:
   `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、
   `gemini-to-openai`、`openai-responses`、`openai-to-claude`、
   `openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`。
-- **9 個のレスポンス translator**（`translator/response/`）:
+- **9 個のレスポンストランスレーター**（`translator/response/`）:
   `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、
-  `kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、`openai-to-claude`。
+  `kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、
+  `openai-to-claude`。
 - **9 個のヘルパー**（`translator/helpers/`）:
   `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、
   `openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`、および
@@ -523,7 +536,7 @@ open-sse/
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream` ベースの Responses API ↔ Chat
-  Completions 変換器（`responses/` ルートの catch-all で使用）。
+  Completions コンバーター（`responses/` ルートのキャッチオールで使用）。
 
 ### 4.5 `open-sse/services/`
 
@@ -531,28 +544,28 @@ open-sse/
 
 | 懸念事項                     | ファイル                                                                                                                                                                                                                                                 |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| コンボルーティング           | `combo.ts`（20 strategies）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                   |
-| Auto Combo エンジン          | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
-| 耐障害性                     | `accountFallback.ts`（クールダウン + ロックアウト）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                               |
-| クォータ                     | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
-| キャッシュ                   | `reasoningCache.ts`、`searchCache.ts`、`signatureCache.ts`、`requestDedup.ts`                                                                                                                                                                            |
-| ルーティングインテリジェンス | `intentClassifier.ts`、`taskAwareRouter.ts`、`backgroundTaskDetector.ts`、`volumeDetector.ts`、`wildcardRouter.ts`、`workflowFSM.ts`、`specificityDetector.ts`、`specificityRules.ts`、`specificityTypes.ts`                                             |
-| モデル処理                   | `modelCapabilities.ts`、`modelDeprecation.ts`、`modelFamilyFallback.ts`、`modelStrip.ts`、`model.ts`、`provider.ts`、`providerRequestDefaults.ts`、`providerCostData.ts`、`payloadRules.ts`                                                              |
+| コンボルーティング           | `combo.ts` (22 strategies), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Auto Combo エンジン          | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| レジリエンス                 | `accountFallback.ts` (クールダウン + ロックアウト), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                |
+| クォータ                     | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| キャッシュ                   | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ルーティングインテリジェンス | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| モデル処理                   | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | 圧縮                         | `compression/` — 圧縮エンジン全体の配線                                                                                                                                                                                                                  |
-| トークン + セッション        | `tokenRefresh.ts`、`sessionManager.ts`、`apiKeyRotator.ts`、`contextManager.ts`、`contextHandoff.ts`、`systemPrompt.ts`、`roleNormalizer.ts`、`responsesInputSanitizer.ts`、`toolSchemaSanitizer.ts`、`toolLimitDetector.ts`、`thinkingBudget.ts`        |
-| ティア / マニフェスト        | `tierResolver.ts`、`tierConfig.ts`、`tierDefaults.json`、`tierTypes.ts`、`manifestAdapter.ts`                                                                                                                                                            |
-| IP / ネットワーク            | `ipFilter.ts`、`webSearchFallback.ts`                                                                                                                                                                                                                    |
+| トークン + セッション        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ティア / マニフェスト        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / ネットワーク            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | バッチ                       | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| 使用状況                     | `usage.ts`                                                                                                                                                                                                                                               |
+| 使用量                       | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` に接続された**110個の一意なツール**（`schemas/tools.ts` の45個の正規ツールに加え、
+- `server.ts` に **110 個の一意なツール** が組み込まれています（`schemas/tools.ts` の標準 45 個 +
   memory、skills、GitHub-skills、pool、gamification、plugin、Notion、Obsidian、
-  local-corpus、compression モジュール — `countUniqueMcpTools` によるユニオンとして集計）。
-- **3つのトランスポート**: stdio、HTTP Streamable、SSE。
-- 実行時に適用される**33個のスコープ** — 基本リストは `src/shared/constants/mcpScopes.ts` にあり、完全なセットは各ツールモジュールで宣言されたスコープのユニオン。
-- 監査テーブル: `mcp_tool_audit`（`audit.ts` によって登録）。
+  local-corpus、compression モジュール — `countUniqueMcpTools` によるユニオンとしてカウント）。
+- **3 つのトランスポート**: stdio、HTTP Streamable、SSE。
+- 実行時に適用される **33 個のスコープ** — 基本リストは `src/shared/constants/mcpScopes.ts` にあり、完全なセットは各ツールモジュールで宣言されたスコープのユニオンです。
+- 監査テーブル: `mcp_tool_audit`（`audit.ts` によって投入）。
 - ファイル: `server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、
   `runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`、
@@ -565,7 +578,7 @@ open-sse/
 `providerHeaderProfiles.ts`）、形式ごとのモデルレジストリ（`audioRegistry.ts`、
 `embeddingRegistry.ts`、`imageRegistry.ts`、`moderationRegistry.ts`、
 `musicRegistry.ts`、`rerankRegistry.ts`、`searchRegistry.ts`、`videoRegistry.ts`）、
-アイデンティティヘルパー（`codexIdentity.ts`、`codexInstructions.ts`、
+ID ヘルパー（`codexIdentity.ts`、`codexInstructions.ts`、
 `anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、
 `cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、
 認証情報ヘルパー（`credentialLoader.ts`、`codexClient.ts`）、およびクラウド
@@ -575,7 +588,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-ストリーミングのプリミティブとプロバイダーヘルパー: `stream.ts`、`streamHandler.ts`、
+ストリーミングの基本機能とプロバイダー用ヘルパー: `stream.ts`、`streamHandler.ts`、
 `streamHelpers.ts`、`streamPayloadCollector.ts`、`streamReadiness.ts`、
 `sseHeartbeat.ts`、`proxyFetch.ts`、`proxyDispatcher.ts`、`tlsClient.ts`、
 `networkProxy.ts`、`awsSigV4.ts`、`cacheControlPolicy.ts`、
@@ -704,90 +717,93 @@ bin/
 
 ![リクエストパイプライン（/v1/chat/completions）](../diagrams/exported/request-pipeline.svg)
 
-> ソース: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
+> 出典: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
 クライアントリクエスト
   → /v1/chat/completions (route.ts)
      CORSプリフライトチェック
-     Zodバリデーション（shared/validation/schemas.tsのchatCompletionsSchema）
-     認証（extractApiKey + isValidApiKey、またはrequireManagementAuth）
-     ポリシーエンジン（src/server/authz/pipeline.ts）
-     ガードレール（PIIマスカー、プロンプトインジェクション、ビジョンブリッジ）
+     Zodバリデーション (shared/validation/schemas.ts の chatCompletionsSchema)
+     認証 (extractApiKey + isValidApiKey または requireManagementAuth)
+     ルート認可 (src/server/authz/pipeline.ts)
+     APIキーのポリシー (src/shared/utils/apiKeyPolicy.ts; 選択されたパスで適用)
+     ガードレール (PIIマスカー、プロンプトインジェクション、ビジョンブリッジ)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     キャッシュチェック（セマンティックキャッシュ + 読み取りキャッシュ）
-     レート制限（rateLimitManager、accountSemaphore）
-     コンボルーティング（モデルがコンボとして解決される場合）
-       comboResolver → ターゲットごとのループ → handleSingleModel()
+     キャッシュチェック (セマンティックキャッシュ + 読み取りキャッシュ)
+     レート制限 (rateLimitManager、accountSemaphore)
+     コンボルーティング (モデルがコンボに解決される場合)
+       resolveComboTargets (open-sse/services/combo.ts) → ターゲットごとのディスパッチ
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       アップストリームをfetch → accountFallbackによる再試行／バックオフ
+       アップストリームをフェッチ → accountFallback 経由でリトライ／バックオフ
      translateResponse() (open-sse/translator/response/*)
      SSEストリームまたはJSONレスポンス
-     Responses APIの場合: open-sse/transformer/responsesTransformer.tsを介したTransformStream
-  → コンプライアンス監査（src/lib/compliance/）
+     Responses APIの場合: open-sse/transformer/responsesTransformer.ts 経由のTransformStream
+  → コンプライアンス監査 (src/lib/compliance/)
   → クライアントへのレスポンス
 ```
 
 ### レジリエンスのランタイム状態（3つのメカニズム）
 
-| メカニズム                       | スコープ                     | 場所                                                                                                 |
-| -------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| プロバイダーサーキットブレーカー | プロバイダー全体             | `src/shared/utils/circuitBreaker.ts`、`domain_circuit_breakers`に永続化                              |
-| 接続クールダウン                 | 1つのアカウント／キー        | `src/sse/services/auth.ts`の`markAccountUnavailable()`。`accountFallback.checkFallbackError()`が使用 |
-| モデルロックアウト               | プロバイダー + 接続 + モデル | `open-sse/services/accountFallback.ts`、`domain_lockout_state`に永続化                               |
+| メカニズム                       | スコープ                     | 場所                                                                                                          |
+| -------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| プロバイダーサーキットブレーカー | プロバイダー全体             | `src/shared/utils/circuitBreaker.ts`、`domain_circuit_breakers` に永続化                                      |
+| 接続クールダウン                 | 1つのアカウント／キー        | `src/sse/services/auth.ts` の `markAccountUnavailable()`；`accountFallback.checkFallbackError()` によって使用 |
+| モデルロックアウト               | プロバイダー + 接続 + モデル | `open-sse/services/accountFallback.ts`、`domain_lockout_state` に永続化                                       |
 
-[RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md)および
-[CLAUDE.md](../../CLAUDE.md)の専用セクションを参照してください。
+[RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) および
+[CLAUDE.md](../../CLAUDE.md) の専用セクションを参照してください。
 
 ---
 
-## 10. コントリビューション方法
+## 10. 貢献方法
 
 ### 新しいプロバイダーを追加する
 
 1. `src/shared/constants/providers.ts` に登録します（読み込み時に Zod で検証されます）。
-2. カスタムロジックが必要な場合は、`open-sse/executors/` に executor を追加します
-   （`BaseExecutor` を継承します）。
-3. OpenAI 形式に対応していない場合は、`open-sse/translator/` に translator を追加します。
-4. OAuth ベースの場合は、`src/lib/oauth/providers/` および
-   `src/lib/oauth/services/` 配下に設定を追加します。
+2. カスタムロジックが必要な場合は、`open-sse/executors/` にエグゼキューターを追加します
+   （`BaseExecutor` を拡張します）。
+3. OpenAI 形式に対応していない場合は、`open-sse/translator/` にトランスレーターを追加します。
+4. OAuth ベースの場合は、`src/lib/oauth/providers/` と
+   `src/lib/oauth/services/` に設定を追加します。
 5. `open-sse/config/providerRegistry.ts`（または `open-sse/config/` 配下の形式固有の
-   registry）にモデルを登録します。
-6. `tests/unit/` 配下にテストを作成します。
+   レジストリ）にモデルを登録します。
+6. `tests/unit/` にテストを作成します。
 
 ### 新しい API ルートを追加する
 
 1. `src/app/api/your-route/route.ts` を作成します。
-2. CORS → Zod によるリクエストボディの検証 → 認証 → handler への委譲、というパターンに従います。
-3. 新しいリクエスト形式の場合は、Zod スキーマを `src/shared/validation/schemas.ts` に追加します。
-4. 管理専用の場合は、パスを `src/shared/constants/publicApiRoutes.ts`
-   （公開 API サーフェス用の denylist）に追加します。
-5. `tests/unit/` 配下にテストを追加します。
+2. 次のパターンに従います：CORS → Zod によるボディ検証 → 認証 → ハンドラーへの委譲。
+3. 新しいリクエスト形式の場合は、`src/shared/validation/schemas.ts` に Zod スキーマを追加します。
+4. 管理専用の場合は、パスを `src/shared/constants/publicApiRoutes.ts` に追加します
+   （パブリック API サーフェスの denylist）。
+5. `tests/unit/` にテストを追加します。
 6. `docs/reference/API_REFERENCE.md` と `docs/openapi.yaml` を更新します。
 
 ### 新しい DB モジュールを追加する
 
 1. `src/lib/db/yourModule.ts` を作成し、`./core.ts` から `getDbInstance()` をインポートします。
 2. 対象ドメインの CRUD 関数をエクスポートします。
-3. 新しいテーブルを追加する場合は、`src/lib/db/migrations/` 配下に、連番で、
-   冪等かつトランザクショナルな migration を追加します。
-4. インポート側では `@/lib/db/yourModule` から直接インポートします（barrel は使用しません。旧 `localDb.ts` の再エクスポート層は削除されています）。
-5. `tests/unit/` 配下にテストを追加します。
+3. 新しいテーブルがある場合は、`npm run db:new-migration -- <description>` でマイグレーションを追加します（
+   `src/lib/db/migrations/YYYYMMDDHHMMSS_<description>.sql` に書き込まれます。UTC。詳細は
+   `docs/ops/DATABASE_GUIDE.md` を参照）。冪等かつトランザクション対応にします。
+4. インポーターでは `@/lib/db/yourModule` から直接インポートします（バレルは使用しません — 以前の
+   `localDb.ts` 再エクスポート層は削除されています）。
+5. `tests/unit/` にテストを追加します。
 
 ### 新しい MCP ツールを追加する
 
-1. `open-sse/mcp-server/tools/` 配下にツール定義を追加します（または
+1. `open-sse/mcp-server/tools/` にツール定義を追加します（または
    `open-sse/mcp-server/schemas/tools.ts` を拡張します）。
-2. `src/shared/constants/mcpScopes.ts` で適切な scope を割り当てます。
+2. `src/shared/constants/mcpScopes.ts` で適切なスコープを割り当てます。
 3. `open-sse/mcp-server/server.ts` にツールを登録します。
-4. `open-sse/mcp-server/__tests__/` 配下にテストを追加します。
+4. `open-sse/mcp-server/__tests__/` にテストを追加します。
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) を更新します。
 
 ### 新しい A2A スキルを追加する
 
-[A2A-SERVER.md § 新しいスキルの追加](../frameworks/A2A-SERVER.md)を参照してください。スキルは
-`src/lib/a2a/skills/` に配置し、A2A タスクマネージャーを通じて登録します。
+[A2A-SERVER.md § 新しいスキルの追加](../frameworks/A2A-SERVER.md) を参照してください。スキルは
+`src/lib/a2a/skills/` に配置され、A2A タスクマネージャーを通じて登録されます。
 
 ---
 

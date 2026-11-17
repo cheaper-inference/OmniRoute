@@ -42,6 +42,8 @@ const STATIC_SALT = "omniroute-field-encryption-v1";
 
 let _staticKey: Buffer | null = null;
 let _legacyDynamicKey: Buffer | null = null;
+let _staticKeyBeforeFirstEqualsFix: Buffer | null = null;
+let _legacyDynamicKeyBeforeFirstEqualsFix: Buffer | null = null;
 /** Connection object with potentially encrypted credential fields. */
 export interface ConnectionFields {
   apiKey?: string | null;
@@ -84,39 +86,185 @@ import os from "os";
 import { isTestContext, resolveDataDir } from "../dataPaths.ts";
 import { mapProviderSpecificDataSecrets } from "./providers/providerSpecificDataSecrets";
 
-function ensureSecretLoaded(): string | undefined {
-  if (isTestContext()) {
-    return process.env.STORAGE_ENCRYPTION_KEY;
-  }
-  if (process.env.STORAGE_ENCRYPTION_KEY) {
-    return process.env.STORAGE_ENCRYPTION_KEY;
-  }
+// Same as bin/cli/utils/parseEnvValue.mjs: quoted values are verbatim, and an
+// unquoted `#` preceded by whitespace starts a comment. The copy in
+// scripts/build/bootstrap-env.mjs differs in one case: it reads a value that
+// starts with `#` (`KEY=  # set me`) as empty. Here, as in the CLI and in the
+// reader before this change, that text is the key.
+function parseEnvValue(raw: string): string {
+  const value = raw.trim();
+  const quoted = value.match(/^(['"])([\s\S]*)\1\s*(?:#.*)?$/);
+  if (quoted) return quoted[2];
+  const commentIdx = value.search(/\s#/);
+  return (commentIdx === -1 ? value : value.slice(0, commentIdx)).trim();
+}
+
+/**
+ * What the .env reader before the first-"=" fix took from a trimmed line. It
+ * cut the value at a second "=", kept a leading quote when the closing one was
+ * cut off, and kept inline comments. Data encrypted under that value must stay
+ * readable after the upgrade, so decrypt() also tries a key derived from it.
+ */
+function readValueBeforeFirstEqualsFix(trimmed: string): string | undefined {
+  if (!trimmed.startsWith("STORAGE_ENCRYPTION_KEY=")) return undefined;
+  const val = trimmed
+    .split("=", 2)[1]
+    ?.trim()
+    .replace(/^["'](.*)["']$/, "$1");
+  return val || undefined;
+}
+
+/**
+ * Set by the first module instance in a process that resolves the key from
+ * .env. Kept on globalThis because Next.js evaluates this module once per
+ * bundle (instrumentation, route handlers): later instances find
+ * STORAGE_ENCRYPTION_KEY already in process.env and never read the .env file.
+ * Non-enumerable, and read only as an own property.
+ */
+const BEFORE_FIX_STATE = Symbol.for("omniroute.storageKeyBeforeFirstEqualsFix");
+type BeforeFixState = { secret: string; beforeFix?: string };
+
+/**
+ * Set in process.env when the old reading differs, so a process that inherits
+ * the environment (child process, worker thread, `pm2 restart --update-env`)
+ * reads the .env file again to find it. Holds no key material.
+ */
+const OLD_READING_ENV_FLAG = "OMNIROUTE_DOTENV_KEY_OLD_READING";
+
+function getBeforeFixState(): BeforeFixState | undefined {
+  if (!Object.prototype.hasOwnProperty.call(globalThis, BEFORE_FIX_STATE)) return undefined;
+  const state = (globalThis as unknown as Record<symbol, unknown>)[BEFORE_FIX_STATE];
+  if (!state || typeof (state as BeforeFixState).secret !== "string") return undefined;
+  return state as BeforeFixState;
+}
+
+function setBeforeFixState(state: BeforeFixState): void {
+  Object.defineProperty(globalThis, BEFORE_FIX_STATE, {
+    value: state,
+    enumerable: false,
+    configurable: true,
+    writable: true,
+  });
+}
+
+/** Key text the old reader would have used, when it differs from the active key. */
+function secretBeforeFirstEqualsFix(): string | undefined {
+  const state = getBeforeFixState();
+  if (!state || state.secret !== process.env.STORAGE_ENCRYPTION_KEY) return undefined;
+  return typeof state.beforeFix === "string" ? state.beforeFix : undefined;
+}
+
+/**
+ * The old reading, when it differs from the active key and could derive a key.
+ * The old reader also stopped at a blank value (`KEY="  "`), but a blank key
+ * stored plaintext, so there is no data under it to recover.
+ */
+function distinctOldReading(beforeFix: string | undefined, secret: string): string | undefined {
+  return beforeFix?.trim() && beforeFix !== secret ? beforeFix : undefined;
+}
+
+/** Both readings of the first STORAGE_ENCRYPTION_KEY lines in the .env files. */
+function readDotEnvKey(): { current?: string; beforeFix?: string } {
   const candidates = [
     path.join(resolveDataDir(), ".env"),
     path.join(process.cwd(), ".env"),
     path.join(os.homedir(), ".hermes", ".env"),
   ];
+  let current: string | undefined;
+  let beforeFix: string | undefined;
+  let found = false;
   for (const envPath of candidates) {
     try {
       if (fs.existsSync(envPath)) {
         const content = fs.readFileSync(envPath, "utf8");
         for (const line of content.split("\n")) {
           const trimmed = line.trim();
-          if (trimmed.startsWith("STORAGE_ENCRYPTION_KEY=")) {
-            const val = trimmed
-              .split("=", 2)[1]
-              ?.trim()
-              .replace(/^["'](.*)["']$/, "$1");
-            if (val) {
-              process.env.STORAGE_ENCRYPTION_KEY = val;
-              return val;
-            }
-          }
+          beforeFix ??= readValueBeforeFirstEqualsFix(trimmed);
+          if (found) continue;
+          // Split on the first "=" only, like bin/omniroute.mjs and
+          // scripts/build/bootstrap-env.mjs. `split("=", 2)` dropped everything
+          // after a second "=", so a base64 key lost its padding.
+          const eqIdx = trimmed.indexOf("=");
+          if (eqIdx < 1 || trimmed.slice(0, eqIdx).trim() !== "STORAGE_ENCRYPTION_KEY") continue;
+          const val = parseEnvValue(trimmed.slice(eqIdx + 1));
+          // As in bin/omniroute.mjs, the first non-empty value wins, even a
+          // blank one (`KEY="  "`). The CLI puts that value in process.env and
+          // never gets here, so a later line would give a key the CLI does not
+          // use. The CLI's empty value does lead here, so skip empty values.
+          if (!val) continue;
+          found = true;
+          // A blank value cannot derive a key; leave it unset so the old
+          // reading below keeps encryption on where it was on before.
+          if (val.trim()) current = val;
         }
       }
     } catch {}
   }
-  return undefined;
+  return { current, beforeFix };
+}
+
+function warnOldReading(oldReading: string, secret: string): void {
+  console.warn(
+    "[Encryption] STORAGE_ENCRYPTION_KEY was read from a .env file, and versions " +
+      "before the first-'=' parsing fix read a different value from it " +
+      `(${oldReading.length} chars, now ${secret.length}). Data stored under either ` +
+      "value still decrypts while this .env line stays as it is. Only provider " +
+      "connection tokens are re-encrypted at startup; every other encrypted value " +
+      "(for example settings, providerSpecificData, webhooks, proxy credentials, " +
+      "API key and JWT secrets) keeps the old encryption. Keep this .env line " +
+      "unchanged. If it was edited, restore it; setting the old value in the process " +
+      "environment instead breaks the re-encrypted tokens."
+  );
+}
+
+/**
+ * The key came from the environment, but the process that put it there read
+ * it from .env and found a different old reading. Read the .env file again;
+ * the old reading counts only if the file still yields the inherited key.
+ */
+function inheritOldReading(secret: string): void {
+  if (process.env[OLD_READING_ENV_FLAG] !== "1" || getBeforeFixState()) return;
+  const { current, beforeFix } = readDotEnvKey();
+  const fromFile = current ?? beforeFix;
+  const oldReading = fromFile === secret ? distinctOldReading(beforeFix, secret) : undefined;
+  setBeforeFixState(oldReading ? { secret, beforeFix: oldReading } : { secret });
+  if (oldReading) warnOldReading(oldReading, secret);
+}
+
+function ensureSecretLoaded(): string | undefined {
+  if (isTestContext()) {
+    return process.env.STORAGE_ENCRYPTION_KEY;
+  }
+  if (process.env.STORAGE_ENCRYPTION_KEY) {
+    inheritOldReading(process.env.STORAGE_ENCRYPTION_KEY);
+    return process.env.STORAGE_ENCRYPTION_KEY;
+  }
+  const { current, beforeFix } = readDotEnvKey();
+  // Never turn encryption off where the old reader turned it on.
+  const secret = current ?? beforeFix;
+  if (!secret) return undefined;
+  const oldReading = distinctOldReading(beforeFix, secret);
+  setBeforeFixState(oldReading ? { secret, beforeFix: oldReading } : { secret });
+  if (oldReading !== undefined) {
+    warnOldReading(oldReading, secret);
+  } else if (current === undefined && secret.trim()) {
+    console.warn(
+      "[Encryption] STORAGE_ENCRYPTION_KEY in .env is read as empty by the current " +
+        "parser; using the value earlier versions read so stored credentials stay " +
+        "encrypted and readable."
+    );
+  }
+  if (secret.startsWith("#")) {
+    console.warn(
+      "[Encryption] STORAGE_ENCRYPTION_KEY in .env starts with '#'. It is used as the " +
+        "key text, as the CLI does, not treated as a comment. Credentials already stored " +
+        "are encrypted under it, so do not delete it without re-entering them."
+    );
+  }
+  if (oldReading !== undefined) process.env[OLD_READING_ENV_FLAG] = "1";
+  else delete process.env[OLD_READING_ENV_FLAG];
+  process.env.STORAGE_ENCRYPTION_KEY = secret;
+  return secret;
 }
 
 /**
@@ -163,6 +311,45 @@ function getLegacyDynamicKey(): Buffer | null {
     return null;
   }
   return _legacyDynamicKey;
+}
+
+/**
+ * Static-salt key derived from the value the .env reader used before the
+ * first-"=" fix, when that value differs from the current one. Only set when
+ * the active key came from the .env fallback in this process, in any module
+ * instance. AES-GCM rejects a wrong key through the auth tag, so trying it
+ * after the primary key cannot return wrong plaintext.
+ */
+function getStaticKeyBeforeFirstEqualsFix(): Buffer | null {
+  if (_staticKeyBeforeFirstEqualsFix !== null) return _staticKeyBeforeFirstEqualsFix;
+  ensureSecretLoaded();
+  const secret = secretBeforeFirstEqualsFix();
+  if (!secret || secret.trim().length === 0) return null;
+  try {
+    _staticKeyBeforeFirstEqualsFix = scryptSync(secret, STATIC_SALT, KEY_LENGTH);
+  } catch {
+    return null;
+  }
+  return _staticKeyBeforeFirstEqualsFix;
+}
+
+/**
+ * Dynamic-salt key (before v3.7.9) derived from the same old reading. Data
+ * written before v3.7.9 under that reading needs it. Only the startup migration
+ * tries it, as it does for the legacy key of the active secret.
+ */
+function getLegacyDynamicKeyBeforeFirstEqualsFix(): Buffer | null {
+  if (_legacyDynamicKeyBeforeFirstEqualsFix !== null) return _legacyDynamicKeyBeforeFirstEqualsFix;
+  ensureSecretLoaded();
+  const secret = secretBeforeFirstEqualsFix();
+  if (!secret || secret.trim().length === 0) return null;
+  const dynamicSalt = createHash("sha256").update(secret).digest().slice(0, 16);
+  try {
+    _legacyDynamicKeyBeforeFirstEqualsFix = scryptSync(secret, dynamicSalt, KEY_LENGTH);
+  } catch {
+    return null;
+  }
+  return _legacyDynamicKeyBeforeFirstEqualsFix;
 }
 
 /** Check if encryption is enabled. */
@@ -310,6 +497,13 @@ export function decrypt(
       return decrypted;
     }
 
+    // Written under the value the .env reader took before the first-"=" fix.
+    const keyBeforeFix = getStaticKeyBeforeFirstEqualsFix();
+    if (keyBeforeFix) {
+      const decryptedBeforeFix = tryDecryptWithKey(keyBeforeFix);
+      if (decryptedBeforeFix !== null) return decryptedBeforeFix;
+    }
+
     // #9927 — the low-level generic log is suppressed when called through the
     // connection-decryption path (quiet:true); decryptConnectionFields emits a
     // single enriched message naming the credential + recovery path instead.
@@ -359,6 +553,62 @@ export function decryptQuiet(
   return result;
 }
 
+let keyStoreDecryptable: boolean | null = null;
+
+/** Result of the last probeStoredSecrets() run: null until it runs, or when it cannot tell. */
+export function getKeyStoreDecryptable(): boolean | null {
+  return keyStoreDecryptable;
+}
+
+const PROBE_SAMPLE_SQL = `SELECT v FROM (
+  SELECT api_key AS v FROM provider_connections WHERE api_key LIKE 'enc:v1:%'
+  UNION ALL SELECT access_token FROM provider_connections WHERE access_token LIKE 'enc:v1:%'
+  UNION ALL SELECT key FROM api_keys WHERE key LIKE 'enc:v1:%'
+) LIMIT 6`; // one more than the five we decrypt: tells a complete sample from a partial one
+
+/**
+ * Decrypt a few stored secrets once, at boot, to tell a wrong STORAGE_ENCRYPTION_KEY from a
+ * single bad row. Returns true when any sample decrypts, false when every stored secret was
+ * sampled and none decrypt (logged once), null when the answer is unknown: encryption is off,
+ * no secret is stored, the tables cannot be read, or the five sampled secrets are unreadable
+ * and more were left unchecked (logged once).
+ * `db` is passed in because core.ts imports this module.
+ */
+export function probeStoredSecrets(db: {
+  prepare: (sql: string) => { all: () => unknown[] };
+}): boolean | null {
+  keyStoreDecryptable = null;
+  if (!isEncryptionEnabled()) return null;
+
+  let samples: Array<{ v?: unknown }>;
+  try {
+    samples = db.prepare(PROBE_SAMPLE_SQL).all() as Array<{ v?: unknown }>;
+  } catch {
+    return null;
+  }
+  if (samples.length === 0) return null;
+
+  keyStoreDecryptable = samples.slice(0, 5).some((row) => {
+    return typeof row.v === "string" && decrypt(row.v, { quiet: true }) !== null;
+  });
+  if (!keyStoreDecryptable && samples.length > 5) {
+    keyStoreDecryptable = null;
+    console.error(
+      "[Encryption] None of the sampled stored credentials could be decrypted, and other " +
+        "credentials were not checked. Verify STORAGE_ENCRYPTION_KEY and the sampled credentials."
+    );
+    return null;
+  }
+  if (!keyStoreDecryptable) {
+    console.error(
+      "[Encryption] STORAGE_ENCRYPTION_KEY cannot decrypt the stored credentials. The database " +
+        "and the key are probably from different installs. Restore the original key, or " +
+        "re-enter the provider credentials."
+    );
+  }
+  return keyStoreDecryptable;
+}
+
 /**
  * Encrypt sensitive fields in a connection object (mutates in-place).
  * After decryption that required legacy key, re-encrypt with static key
@@ -373,9 +623,8 @@ export function encryptConnectionFields<T extends ConnectionFields | null | unde
   if (conn.refreshToken) conn.refreshToken = encrypt(conn.refreshToken);
   if (conn.idToken) conn.idToken = encrypt(conn.idToken);
   if (conn.providerSpecificData) {
-    conn.providerSpecificData = mapProviderSpecificDataSecrets(
-      conn.providerSpecificData,
-      (value) => encrypt(value)
+    conn.providerSpecificData = mapProviderSpecificDataSecrets(conn.providerSpecificData, (value) =>
+      encrypt(value)
     );
   }
   return conn;
@@ -506,9 +755,17 @@ export function migrateLegacyEncryptedString(ciphertext: string | null | undefin
     return { updated: false, value: ciphertext };
   }
 
-  // 2. If it decrypts with the legacy key, it needs migration!
-  if (legacyKey) {
-    const legacyDecrypted = tryDecryptWithKey(legacyKey);
+  // 2. If it decrypts with the legacy key, or with a key (static or legacy salt)
+  // from the value the .env reader took before the first-"=" fix, it needs
+  // migration!
+  const oldKeys = [
+    legacyKey,
+    getStaticKeyBeforeFirstEqualsFix(),
+    getLegacyDynamicKeyBeforeFirstEqualsFix(),
+  ];
+  for (const oldKey of oldKeys) {
+    if (!oldKey) continue;
+    const legacyDecrypted = tryDecryptWithKey(oldKey);
     if (legacyDecrypted !== null) {
       // Re-encrypt using the canonical static key and return updated
       return { updated: true, value: encrypt(legacyDecrypted) };

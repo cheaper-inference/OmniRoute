@@ -1,5 +1,7 @@
 // OpenAI helper functions for translator
 
+import { geminiFunctionParameters } from "./geminiFunctionParameters.ts";
+
 // Valid OpenAI content block types
 // `input_audio` / `audio_url` ported from upstream decolua/9router#913 so audio
 // parts survive `filterToOpenAIFormat()` on OpenAI-target passthrough routes.
@@ -321,6 +323,11 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // Codex clients send a top-level `client_metadata` object; OpenAI rejects it
   // with 400 "Unknown parameter: 'client_metadata'" (9router#1157).
   delete body.client_metadata;
+  // OmniRoute's canonical top-level `effort` (#6241) is already folded onto
+  // `reasoning_effort` / `reasoning.effort` by normalizeReasoningRequest; OpenAI
+  // Chat Completions rejects the original key with 400 "Unknown parameter: 'effort'"
+  // (#18912).
+  delete body.effort;
 
   // Map max_output_tokens (from Vercel AI SDK) to max_tokens logic
   if (body.max_output_tokens !== undefined) {
@@ -351,14 +358,14 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           };
         }
 
-        // Gemini format: {functionDeclarations: [{name, description, parameters}]}
+        // Gemini format: {functionDeclarations: [{name, description, parameters | parametersJsonSchema}]}
         if (tool.functionDeclarations && Array.isArray(tool.functionDeclarations)) {
           return tool.functionDeclarations.map((fn) => ({
             type: "function",
             function: {
               name: fn.name,
               description: String(fn.description ?? ""),
-              parameters: fn.parameters || { type: "object", properties: {} },
+              parameters: geminiFunctionParameters(fn) || { type: "object", properties: {} },
             },
           }));
         }

@@ -153,15 +153,15 @@ Settings → Security ਤੋਂ enroll ਕੀਤਾ ਜਾਂਦਾ ਹੈ; oper
 
 ## ਰੂਟ ਕਲਾਸਾਂ
 
-`src/server/authz/types.ts` ਤਿੰਨ ਕਲਾਸਾਂ ਪਰਿਭਾਸ਼ਿਤ ਕਰਦਾ ਹੈ; ਕੋਈ ਵੀ ਰੂਟ ਜਿਸਨੂੰ ਨਿਰਣਾਇਕ ਤੌਰ 'ਤੇ ਵਰਗੀਕ੍ਰਿਤ ਨਾ ਕੀਤਾ ਜਾ ਸਕੇ, `MANAGEMENT` 'ਤੇ ਡਿੱਗ ਜਾਂਦਾ ਹੈ।
+`src/server/authz/types.ts` ਤਿੰਨ ਸ਼੍ਰੇਣੀਆਂ ਨੂੰ ਪਰਿਭਾਸ਼ਿਤ ਕਰਦਾ ਹੈ; ਕੋਈ ਵੀ ਰੂਟ ਜਿਸ ਨੂੰ ਨਿਰਧਾਰਿਤ ਤੌਰ 'ਤੇ ਵਰਗੀਕ੍ਰਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਵਾਪਸ `MANAGEMENT`'ਤੇ ਆਉਂਦਾ ਹੈ।
 
-| ਕਲਾਸ         | ਵੇਰਵਾ                                                                                                                                        | ਲੋੜੀਂਦਾ ਪ੍ਰਮਾਣੀਕਰਨ                                              |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | ਸਪੱਸ਼ਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ ਰੂਟ — ਲੌਗਇਨ, ਲੌਗਆਉਟ, ਸਥਿਤੀ, ਸ਼ੁਰੂਆਤ, ਹੈਲਥ, ਔਨਬੋਰਡਿੰਗ ਬੂਟਸਟ੍ਰੈਪ।                                                      | ਕੋਈ ਨਹੀਂ                                                        |
-| `CLIENT_API` | ਮਾਡਲ-ਸੇਵਾ ਐਂਡਪੌਇੰਟ — `/api/v1/*`, `/api/v1beta/*`, ਅਤੇ ਉਪਨਾਮ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | Bearer ਕੁੰਜੀ ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਫੀਚਰ ਫਲੈਗ ਚਾਲੂ ਹੋਵੇ |
-| `MANAGEMENT` | ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ, ਸੈਟਿੰਗਾਂ, ਪ੍ਰਦਾਤਾ, ਕੁੰਜੀਆਂ, ਐਡਮਿਨ ਅਤੇ ਡਾਇਗਨੌਸਟਿਕ ਐਂਡਪੌਇੰਟ।                                                                    | ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ `manage` ਸਕੋਪ ਵਾਲਾ Bearer                    |
+| ਕਲਾਸ         | ਵਰਣਨ                                                                                                                                             | ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੋੜ ਹੈ                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `PUBLIC`     | ਸਪੱਸ਼ਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ ਰਸਤੇ — ਲੌਗਇਨ, ਲੌਗਆਉਟ, ਸਥਿਤੀ, ਸਿਹਤ, ਆਨਬੋਰਡਿੰਗ ਬੂਟਸਟਰੈਪ।                                                                   | ਕੋਈ ਨਹੀਂ                                                                  |
+| `CLIENT_API` | ਮਾਡਲ-ਸਰਵਿੰਗ ਐਂਡਪੁਆਇੰਟ — `/api/v1/*`, `/api/v1beta/*`, ਪਲੱਸ ਉਪਨਾਮ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | ਬੇਅਰਰ ਕੁੰਜੀ ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਵਿਸ਼ੇਸ਼ਤਾ ਫਲੈਗ ਸਮਰਥਿਤ ਹੁੰਦਾ ਹੈ |
+| `MANAGEMENT` | ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ, ਸੈਟਿੰਗਾਂ, ਪ੍ਰਦਾਤਾ, ਕੁੰਜੀਆਂ, ਐਡਮਿਨ ਅਤੇ ਡਾਇਗਨੌਸਟਿਕਸ ਐਂਡਪੁਆਇੰਟ।                                                                      | `manage` ਸਕੋਪ ਦੇ ਨਾਲ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ OR ਬੇਅਰਰ                              |
 
-ਕੁਝ `MANAGEMENT` ਕਾਰਵਾਈਆਂ **ਸਿਰਫ਼ ਓਪਰੇਟਰ** ਲਈ ਹਨ: `manage` ਕੁੰਜੀ ਕਾਫ਼ੀ ਨਹੀਂ। ਸਟੋਰ ਕੀਤੇ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਐਕਸਪੋਰਟ ਕਰਨਾ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ਲਾਈਵ ਡੇਟਾ ਉੱਤੇ ਬੈਕਅੱਪ ਰੀਸਟੋਰ ਕਰਨਾ (`dryRun=true` ਸਮੇਤ `POST /api/db-backups/import`, ਆਈਡੀ ਰਾਹੀਂ ਰੀਸਟੋਰ `POST /api/db-backups`, `POST /api/settings/import-json`), ਅਤੇ ਰੀਸਟੋਰ ਪੌਇੰਟ ਨਸ਼ਟ ਕਰਨਾ (`DELETE /api/db-backups` ਸਫਾਈ, ਅਤੇ `PATCH /api/db-backups` ਕਿਉਂਕਿ ਇਹ ਜੋ ਰੱਖ-ਰਖਾਵ ਸੰਭਾਲਦਾ ਹੈ ਉਹ ਹਰ ਬੈਕਅੱਪ ਤੋਂ ਬਾਅਦ ਆਟੋਮੈਟਿਕ ਛਾਂਟੀ ਚਲਾਉਂਦਾ ਹੈ) ਲਈ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਲੋਕਲ CLI ਸਬਜੈਕਟ, ਜਾਂ ਲੌਗਇਨ ਬੰਦ ਹੋਣਾ ਲੋੜੀਂਦਾ ਹੈ। ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ (`POST /api/sync/tokens`) ਅਤੇ `admin` CLI ਐਕਸੈੱਸ ਟੋਕਨ ਬਣਾਉਣਾ (`POST /api/cli/tokens`) ਹਰ ਲੌਗਇਨ ਮੋਡ ਵਿੱਚ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ ਲੋਕਲ CLI ਸਬਜੈਕਟ ਮੰਗਦੇ ਹਨ। ਕਿਸੇ ਵੀ ਸਕੋਪ ਦੀਆਂ API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਐਕਸੈੱਸ ਟੋਕਨ ਓਪਰੇਟਰ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਨਹੀਂ ਹਨ: ਜਦੋਂ ਵੀ ਇਹ ਲੋੜੀਂਦਾ ਹੋਵੇ, ਉਹਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਇਹ ਜਾਂਚ `src/lib/api/operatorCredential.ts` ਵਿੱਚ ਹੈ (`resolveOperatorCredential()` / `requireOperatorCredential()`)। ਲੌਗਇਨ ਸੈਟਿੰਗਾਂ ਬਦਲਣਾ ਵੀ ਸਿਰਫ਼ ਓਪਰੇਟਰ ਲਈ ਹੈ: `POST /api/settings/require-login` (ਪ੍ਰਬੰਧਨ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਨਾ / `requireLogin` ਟੌਗਲ ਕਰਨਾ) ਇੱਕ ਵਾਰ ਪਾਸਵਰਡ ਮੌਜੂਦ ਹੋਣ 'ਤੇ ਸਿਰਫ਼ ਉਹੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ — ਪਹਿਲੀ-ਵਾਰ ਬੂਟਸਟ੍ਰੈਪ ਵਿੰਡੋ (ਅਜੇ ਪਾਸਵਰਡ ਨਹੀਂ) ਨਹੀਂ ਬਦਲਦੀ — ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਨੂੰ ਪਾਸਵਰਡ ਬਦਲਣ ਲਈ `currentPassword` ਭੇਜਣਾ ਪੈਂਦਾ ਹੈ (ਗੈਰ-ਮੌਜੂਦ ਜਾਂ ਗਲਤ ਹੋਣ 'ਤੇ `403`, `settings.update_failed` ਵਜੋਂ ਆਡਿਟ ਹੁੰਦਾ ਹੈ)। ਲੋਕਲ CLI ਅਤੇ ਲੌਗਇਨ ਬੰਦ ਵਾਲਾ ਇੰਸਟੈਂਸ ਰਿਕਵਰੀ ਰਸਤਾ ਰੱਖਦੇ ਹਨ ਅਤੇ ਇਸ ਤੋਂ ਬਿਨਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹਨ, ਕਿਉਂਕਿ ਦੋਵੇਂ ਉਸ ਹੋਸਟ ਨਾਲ ਬੱਝੇ ਹਨ ਜੋ ਡੇਟਾ ਡਾਇਰੈਕਟਰੀ ਦਾ ਮਾਲਕ ਹੈ।
+ਕੁਝ `MANAGEMENT` ਕਿਰਿਆਵਾਂ ਹਨ** ਓਪਰੇਟਰ-ਸਿਰਫ਼** : ਇੱਕ `manage` ਕੁੰਜੀ ਕਾਫ਼ੀ ਨਹੀਂ ਹੈ। ਸਟੋਰ ਕੀਤੇ ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਨੂੰ ਨਿਰਯਾਤ ਕਰਨਾ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ਲਾਈਵ ਡੇਟਾ ਉੱਤੇ ਇੱਕ ਬੈਕਅਪ ਰੀਸਟੋਰ ਕਰਨਾ (`POST /api/db-backups/import` ਸਮੇਤ `dryRun=true`, `POST /api/db-backups` ਰੀਸਟੋਰ id ਦੁਆਰਾ , `POST /api/settings/import-json`), ਰੀਸਟੋਰ ਪੁਆਇੰਟਾਂ ਨੂੰ ਨਸ਼ਟ ਕਰਨਾ (`DELETE /api/db-backups` ਕਲੀਨਅੱਪ, ਅਤੇ `PATCH /api/db-backups` ਕਿਉਂਕਿ ਇਸ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਣਾ ਹਰ ਇੱਕ ਸੈਸ਼ਨ ਦੇ ਬਾਅਦ ਇੱਕ ਆਟੋਮੈਟਿਕ ਡ੍ਰਾਈਵ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ) CLI ਵਿਸ਼ਾ, ਜਾਂ ਲੌਗਇਨ ਅਯੋਗ ਹੈ। ਇੱਕ ਸਿੰਕ ਟੋਕਨ (`POST /api/sync/tokens`) ਜਾਰੀ ਕਰਨ ਅਤੇ ਇੱਕ `admin` CLI ਐਕਸੈਸ ਟੋਕਨ (`POST /api/cli/tokens`) ਨੂੰ ਮਿੰਟਿੰਗ ਕਰਨ ਲਈ ਹਰੇਕ ਲੌਗਇਨ ਮੋਡ ਵਿੱਚ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ ਸਥਾਨਕ CLI ਵਿਸ਼ੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਕਿਸੇ ਵੀ ਸਕੋਪ ਦੀਆਂ API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਐਕਸੈਸ ਟੋਕਨ ਆਪਰੇਟਰ ਪ੍ਰਮਾਣ ਪੱਤਰ ਨਹੀਂ ਹਨ: ਜਦੋਂ ਵੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ਤਾਂ ਉਹ `403` ਪ੍ਰਾਪਤ ਕਰਦੇ ਹਨ। ਚੈੱਕ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) ਵਿੱਚ ਰਹਿੰਦਾ ਹੈ। ਲੌਗਇਨ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲਣਾ ਸਿਰਫ ਓਪਰੇਟਰ ਲਈ ਵੀ ਹੈ: `POST /api/settings/require-login` (ਪ੍ਰਬੰਧਨ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰੋ / `requireLogin` ਟੌਗਲ ਕਰੋ) ਸਿਰਫ ਉਹਨਾਂ ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਜਦੋਂ ਇੱਕ ਪਾਸਵਰਡ ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ — ਪਹਿਲੀ-ਚਾਲਿਤ ਬੂਟਸਟਰੈਪ ਵਿੰਡੋ (ਅਜੇ ਕੋਈ ਪਾਸਵਰਡ ਨਹੀਂ) — ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ ਅਤੇ ਇੱਕ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਨੂੰ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਲਈ `currentPassword` ਭੇਜਣਾ ਚਾਹੀਦਾ ਹੈ (`403` ਗਲਤ ਜਾਂ ਗਲਤ `settings.update_failed`'ਤੇ)। ਲੋਕਲ CLI ਅਤੇ ਲੌਗਇਨ ਅਯੋਗ ਹੋਣ ਵਾਲੀ ਇੱਕ ਉਦਾਹਰਣ ਰਿਕਵਰੀ ਮਾਰਗ ਨੂੰ ਰੱਖਦੀ ਹੈ ਅਤੇ ਇਸ ਤੋਂ ਬਿਨਾਂ ਇੱਕ ਪਾਸਵਰਡ ਸੈਟ ਕਰ ਸਕਦੀ ਹੈ, ਕਿਉਂਕਿ ਦੋਵੇਂ ਹੋਸਟ ਨਾਲ ਬੰਨ੍ਹੇ ਹੋਏ ਹਨ ਜੋ ਡੇਟਾ ਡਾਇਰੈਕਟਰੀ ਦਾ ਮਾਲਕ ਹੈ।
 
 ## ਪਾਈਪਲਾਈਨ
 
@@ -194,51 +194,47 @@ Incoming request → src/proxy.ts
 
 ## ਜਨਤਕ ਰੂਟਾਂ ਦੀ ਸੂਚੀ
 
-`src/shared/constants/publicApiRoutes.ts` ਸਪਸ਼ਟ allowlist ਹੈ:
+`src/shared/constants/publicApiRoutes.ts` ਸਪਸ਼ਟ ਅਨੁਮਤੀ ਸੂਚੀ ਹੈ:
 
-ਸੂਚੀ ਨੂੰ **ਆਕਾਰ** ਅਨੁਸਾਰ ਵੰਡਿਆ ਗਿਆ ਹੈ, ਅਤੇ ਇਹ ਵੰਡ ਬਹੁਤ ਮਹੱਤਵਪੂਰਨ ਹੈ (GHSA-74g9-q8f6-793h): ਇੱਕ prefix ਨੂੰ
-`startsWith()` ਨਾਲ ਮਿਲਾਇਆ ਜਾਂਦਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਉਸੇ ਸ਼ੁਰੂਆਤੀ ਅੱਖਰਾਂ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਹਰ ਨਾਲ ਲੱਗਦੇ path ਨਾਲ ਵੀ ਮਿਲਦਾ ਹੈ।
-`/api/usage/om-usage` ਨੂੰ prefix ਵਜੋਂ `/api/usage/om-usage<anything>` PUBLIC ਚਿੰਨ੍ਹਿਤ ਕਰਦਾ ਹੈ, ਅਤੇ Next ਇਸਨੂੰ
-`/api/usage/[connectionId]` ਵਜੋਂ resolve ਕਰਦਾ ਹੈ — ਇੱਕ ਅਜਿਹਾ handler ਜਿਸਦੀ ਆਪਣੀ ਕੋਈ auth ਨਹੀਂ ਹੈ।
+ਸੂਚੀ ਨੂੰ ਵੰਡਿਆ ਗਿਆ ਹੈ** ਸ਼ਕਲ** , ਅਤੇ ਸਪਲਿਟ ਲੋਡ-ਬੇਅਰਿੰਗ ਹੈ (GHSA-74g9-q8f6-793h): ਇੱਕ ਅਗੇਤਰ `startsWith()` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ, ਇਸਲਈ ਇਹ ਇਸਦੇ ਪ੍ਰਮੁੱਖ ਅੱਖਰਾਂ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਹਰੇਕ ਨਾਲ ਲੱਗਦੇ ਮਾਰਗ ਨਾਲ ਵੀ ਮੇਲ ਖਾਂਦਾ ਹੈ। `/api/usage/om-usage` ਇੱਕ ਅਗੇਤਰ ਵਜੋਂ `/api/usage/om-usage<anything>` PUBLIC ਮਾਰਕ ਕੀਤਾ ਗਿਆ ਹੈ, ਅਤੇ ਅਗਲਾ ਨਿਪਟਾਰਾ ਕਰਦਾ ਹੈ ਕਿ ਇੱਕ ਹੈਂਡਲਰ ਨੂੰ `/api/usage/[connectionId]` — ਕਰਨਾ ਹੈ ਜਿਸਦਾ ਕੋਈ ਪ੍ਰਮਾਣਿਕਤਾ ਨਹੀਂ ਹੈ।
 
 ```ts
-// ਅਸਲ subtrees। ਹਰ entry ਦਾ ਅੰਤ "/" ਨਾਲ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ (ਇੱਕ unit test ਦੁਆਰਾ assert ਕੀਤਾ ਜਾਂਦਾ ਹੈ)।
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify ਵਿੱਚ CLIENT_API ਵਜੋਂ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ, "no-auth public" ਵਜੋਂ ਨਹੀਂ
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ਇਕੱਲੇ routes, ਜਿਨ੍ਹਾਂ ਦਾ ਮਿਲਾਨ EXACTLY ਹੁੰਦਾ ਹੈ (trailing slash ਦੇ ਨਾਲ ਜਾਂ ਬਿਨਾਂ)।
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP ਲਈ login ਪੜਾਅ 2; MFA-pending cookie ਦੀ ਲੋੜ ਹੈ
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// ਸਿਰਫ਼ ਪੜ੍ਹਨ ਲਈ ਇਕੱਲੇ routes, ਜਿਨ੍ਹਾਂ ਨੂੰ CORS origin relaxation ਵੀ ਮਿਲਦੀ ਹੈ।
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// ਸਿਰਫ਼ ਪੜ੍ਹਨ ਲਈ ਇਕੱਲਾ route, ਜਿਸਨੂੰ CORS relaxation ਨਹੀਂ ਮਿਲਦੀ।
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-ਸਿਰਫ਼ safe methods ਲਈ read-only routes ਜਨਤਕ ਹਨ। ਧਿਆਨ ਦਿਓ: `classifyRoute()` PUBLIC fall-through ਵਿੱਚੋਂ `/api/v1/*` ਅਤੇ `/api/v1beta/*` ਨੂੰ ਬਾਹਰ ਰੱਖਦਾ ਹੈ — ਇਹ ਹਮੇਸ਼ਾਂ `CLIENT_API` ਹੁੰਦੇ ਹਨ, ਇਸ ਲਈ Bearer-key policy ਲਾਗੂ ਰਹਿੰਦੀ ਹੈ।
+ਸਿਰਫ਼ ਪੜ੍ਹਨ ਲਈ ਰੂਟ ਜਨਤਕ ਹਨ** ਸਿਰਫ਼** ਸੁਰੱਖਿਅਤ ਢੰਗਾਂ ਲਈ. ਨੋਟ: `classifyRoute()` PUBLIC -ਥਰੂ — ਤੋਂ `/api/v1/*` ਅਤੇ `/api/v1beta/*` ਵੱਖ ਕਰਦਾ ਹੈ ਜੋ ਹਮੇਸ਼ਾ `CLIENT_API` ਹੁੰਦੇ ਹਨ ਇਸਲਈ ਬੇਅਰਰ-ਕੁੰਜੀ ਨੀਤੀ ਅਜੇ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।
 
 ## ਨਵਾਂ ਰੂਟ ਜੋੜਨਾ
 
@@ -313,15 +309,15 @@ MCP ਪ੍ਰਮਾਣਿਕਤਾ ਜਾਣਕਾਰੀ, ਬੇਨਤੀ ਮੈ
 (`src/lib/accessTokens/scopes.ts`) ਦੁਆਰਾ ਦਰਜਾਬੰਦੀ ਕੀਤੀ ਗਈ। ਇਹ ਰੈਂਕ ਸਿਰਫ਼ ਐਕਸੈਸ-ਟੋਕਨ
 ਪ੍ਰਮਾਣ ਪੱਤਰ 'ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। ਦੇਖੋ [ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ](../guides/MANAGEMENT-AUTH.md)।
 
-## ਔਥ ਲੋੜੀਂਦਾ ਟੌਗਲ
+## ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਟੌਗਲ
 
-`src/shared/utils/apiAuth.ts` ਵਿੱਚ `isAuthRequired()` ਫੈਸਲਾ ਕਰਦਾ ਹੈ ਕਿ ਕਿਸੇ ਬੇਨਤੀ ਲਈ **ਕੋਈ ਵੀ** ਪ੍ਰਮਾਣੀਕਰਨ ਲਾਗੂ ਹੋਵੇਗਾ ਜਾਂ ਨਹੀਂ:
+`src/shared/utils/apiAuth.ts` ਵਿੱਚ `isAuthRequired()` ਫੈਸਲਾ ਕਰਦਾ ਹੈ ਕਿ ਕੀ** ਕੋਈ ਵੀ** auth ਨੂੰ ਇੱਕ ਬੇਨਤੀ ਲਈ ਲਾਗੂ ਕੀਤਾ ਗਿਆ ਹੈ:
 
-- `settings.requireLogin === false` → ਪ੍ਰਮਾਣੀਕਰਨ ਵਿਸ਼ਵ-ਪੱਧਰ 'ਤੇ ਬੰਦ ਹੈ, ਸਿਵਾਏ ਹਮੇਸ਼ਾ-ਸੁਰੱਖਿਅਤ ਟੀਅਰ (ਵੇਖੋ [ਰੂਟ ਗਾਰਡ ਟੀਅਰ](../security/ROUTE_GUARD_TIERS.md)) ਅਤੇ ਉਹਨਾਂ ਕਾਲਾਂ ਦੇ ਜੋ ਉਹ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਦਿੰਦੀਆਂ ਹਨ ਜੋ ਇਹ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ — ਇਹਨਾਂ ਨੂੰ ਉਹੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਚਾਹੀਦਾ ਹੈ ਜਿਵੇਂ ਲੌਗਇਨ ਚਾਲੂ ਹੋਣ 'ਤੇ: ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ, ਕਿਸੇ ਵੀ ਸਕੋਪ 'ਤੇ CLI ਐਕਸੈੱਸ ਟੋਕਨ ਬਣਾਉਣਾ, ਅਤੇ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਬਣਾਉਣਾ, ਉਸ ਸਕੋਪ ਨੂੰ ਕਿਸੇ ਕੁੰਜੀ ਨੂੰ ਦੇਣਾ, ਜਾਂ ਅਜਿਹੀ ਕੁੰਜੀ ਨੂੰ ਮੁੜ-ਬਣਾਉਣਾ ਜਾਂ ਦਿਖਾਉਣਾ (`src/lib/api/requireManagementAuth.ts` ਵਿੱਚ `requireCredentialForManagementScopedKey()`)। ਇਨਫਰੈਂਸ-ਸਿਰਫ਼ ਕੁੰਜੀਆਂ ਖੁੱਲ੍ਹੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ।
-- ਕੋਈ ਪਾਸਵਰਡ ਸੰਰਚਿਤ ਨਹੀਂ **ਅਤੇ** ਕੋਈ `INITIAL_PASSWORD` ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਨਹੀਂ → ਬੂਟਸਟ੍ਰੈਪ ਮੋਡ ਔਨਬੋਰਡਿੰਗ ਵਿਜ਼ਾਰਡ ਅਤੇ ਲੋਕਲ ਬੇਨਤੀਆਂ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ, ਪਰ ਬਾਹਰੀ ਨੈੱਟਵਰਕ ਬੇਨਤੀਆਂ ਨੂੰ ਅਜੇ ਵੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਚਾਹੀਦੇ ਹਨ।
-- ਕੋਈ ਵੀ DB ਗਲਤੀ → ਬੰਦ ਹੋ ਕੇ ਫੇਲ੍ਹ ਹੁੰਦਾ ਹੈ (ਡਿਫਾਲਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ)।
+- `settings.requireLogin === false` → auth ਵਿਸ਼ਵ ਪੱਧਰ 'ਤੇ ਅਸਮਰੱਥ ਹੈ, ਹਮੇਸ਼ਾ-ਸੁਰੱਖਿਅਤ ਟੀਅਰ ( [ਰੂਟ ਗਾਰਡ ਟੀਅਰਜ਼](../security/ROUTE_GUARD_TIERS.md) ਦੇਖੋ) ਅਤੇ ਕਾਲਾਂ ਨੂੰ ਛੱਡ ਕੇ ਜੋ ਇਹ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ`admin` ਇੱਕ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, ਜਿਸ ਲਈ ਲੌਗਇਨ ਆਨ ਦੇ ਨਾਲ ਸਮਾਨ ਪ੍ਰਮਾਣ ਪੱਤਰ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ: ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ, ਕਿਸੇ ਵੀ ਸਕੋਪ 'ਤੇ CLI ਐਕਸੈਸ ਟੋਕਨਾਂ ਨੂੰ ਮਿਨਟ ਕਰਨਾ, ਅਤੇ API ਸਕੋਪ ਬਣਾਉਣਾ, ਇੱਕ ਕੁੰਜੀ ਨੂੰ ਉਹ ਸਕੋਪ ਦੇਣਾ, ਜਾਂ ਅਜਿਹੀ ਕੁੰਜੀ `manage` ਦੁਬਾਰਾ ਬਣਾਉਣਾ ਜਾਂ ਪ੍ਰਗਟ ਕਰਨਾ ( `src/lib/api/requireManagementAuth.ts` ਵਿੱਚ `requireCredentialForManagementScopedKey()` )। ਸਿਰਫ਼-ਅੰਦਾਜ਼ਾ ਕੁੰਜੀਆਂ ਖੁੱਲ੍ਹੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ। ਇੱਕ ਸੁਰੱਖਿਅਤ ਫੀਚਰ ਫਲੈਗ (`REQUIRE_API_KEY`, ਹੋਰ ਸੁਰੱਖਿਆ ਫਲੈਗ, ਅਤੇ [ਫੀਚਰ ਫਲੈਗ](../reference/FEATURE_FLAGS.md#rest-api) ਵਿੱਚ ਸੂਚੀਬੱਧ SSRF / TLS / MCP-ਸਕੋਪ / ਸੈਂਡਬੌਕਸ ਫਲੈਗ) ਲਿਖਣਾ ਅਤੇ PII ਮਾਸਕਿੰਗ ਸੈਟਿੰਗਜ਼ (`PUT /api/settings/pii`) ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਵੀ ਇੱਕ ਪ੍ਰਮਾਣ ਪੱਤਰ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
+- ਕੋਈ ਪਾਸਵਰਡ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਗਿਆ** ਅਤੇ** no `INITIAL_PASSWORD` env var → ਬੂਟਸਟਰੈਪ ਮੋਡ ਆਨਬੋਰਡਿੰਗ ਵਿਜ਼ਾਰਡ ਅਤੇ ਲੂਪਬੈਕ ਬੇਨਤੀਆਂ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਪਰ ਐਕਸਪੋਜ਼ਡ ਨੈਟਵਰਕ ਬੇਨਤੀਆਂ ਨੂੰ ਅਜੇ ਵੀ ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਅਪਵਾਦ: ਇੱਕ ਸੁਰੱਖਿਅਤ ਵਿਸ਼ੇਸ਼ਤਾ ਫਲੈਗ ਲਿਖਣਾ ਅਤੇ PII ਮਾਸਕਿੰਗ ਸੈਟਿੰਗਜ਼ (`PUT /api/settings/pii`) ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਲੂਪਬੈਕ ਤੋਂ ਵੀ ਇੱਕ ਪ੍ਰਮਾਣ ਪੱਤਰ ਦੀ ਜ਼ਰੂਰਤ ਹੈ, ਇਸਲਈ ਲੂਪਬੈਕ ਆਪਣੇ ਆਪ ਹੀ ਕਾਫ਼ੀ ਨਹੀਂ ਹੈ।
+- ਕੋਈ ਵੀ DB ਗਲਤੀ → ਬੰਦ ਹੋ ਜਾਂਦੀ ਹੈ (ਸੁਰੱਖਿਅਤ-ਬਾਈ-ਫੌਲਟ)।
 
-ਕਲਾਇੰਟ API ਕੁੰਜੀ ਲਾਗੂਕਰਨ `src/shared/utils/featureFlags.ts` ਵਿੱਚ `isRequireApiKeyEnabled()` ਵਰਤਦਾ ਹੈ, ਨਾ ਕਿ ਸਿੱਧਾ `process.env.REQUIRE_API_KEY` ਪੜ੍ਹਨਾ। ਇਹ ਤਾਇਨਾਤ ਇੰਸਟੈਂਸਾਂ ਲਈ ਮਾਇਨੇ ਰੱਖਦਾ ਹੈ: ਡੈਸ਼ਬੋਰਡ → Feature Flags ਵਿੱਚ `REQUIRE_API_KEY` ਬਦਲਣ ਨਾਲ DB ਓਵਰਰਾਈਡ ਸਟੋਰ ਹੁੰਦਾ ਹੈ ਅਤੇ ਤੁਰੰਤ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ਅਤੇ ਹੋਰ ਕਲਾਇੰਟ-API ਪ੍ਰਮਾਣੀਕਰਨ ਜਾਂਚਾਂ 'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ, ਜੋ ਇਸ ਹੈਲਪਰ ਨੂੰ ਸਾਂਝਾ ਕਰਦੀਆਂ ਹਨ। ਜੇ ਫੀਚਰ ਫਲੈਗ ਸਟੋਰ ਪੜ੍ਹਿਆ ਨਾ ਜਾ ਸਕੇ, ਤਾਂ ਕਲਾਇੰਟ API ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਹੋ ਕੇ ਫੇਲ੍ਹ ਹੁੰਦਾ ਹੈ ਅਤੇ ਕੁੰਜੀ ਲਾਜ਼ਮੀ ਕਰਦਾ ਹੈ।
+ਕਲਾਇੰਟ API ਕੁੰਜੀ ਲਾਗੂਕਰਨ `src/shared/utils/featureFlags.ts` ਵਿੱਚ `isRequireApiKeyEnabled()` ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ, ਇੱਕ ਸਿੱਧਾ `process.env.REQUIRE_API_KEY` ਰੀਡ ਨਹੀਂ। ਇਹ ਤੈਨਾਤ ਮੌਕਿਆਂ ਲਈ ਮਹੱਤਵਪੂਰਨ ਹੈ: ਡੈਸ਼ਬੋਰਡ → ਵਿਸ਼ੇਸ਼ਤਾ ਫਲੈਗ ਵਿੱਚ `REQUIRE_API_KEY` ਟੌਗਲ ਕਰਨਾ ਇੱਕ DB ਓਵਰਰਾਈਡ ਸਟੋਰ ਕਰਦਾ ਹੈ ਅਤੇ ਤੁਰੰਤ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ਅਤੇ ਹੋਰ ਕਲਾਇੰਟ-API ਪ੍ਰਮਾਣਿਤ ਜਾਂਚਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰਦਾ ਹੈ ਜੋ ਇਸ ਸਹਾਇਕ ਨੂੰ ਸਾਂਝਾ ਕਰਦੇ ਹਨ। ਜੇਕਰ ਵਿਸ਼ੇਸ਼ਤਾ ਫਲੈਗ ਸਟੋਰ ਨੂੰ ਪੜ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ ਹੈ, ਤਾਂ ਕਲਾਇੰਟ API ਪ੍ਰਮਾਣਿਕਤਾ ਬੰਦ ਹੋ ਜਾਂਦੀ ਹੈ ਅਤੇ ਇੱਕ ਕੁੰਜੀ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
 
 ## ਅਸੰਗਤ ਤਬਦੀਲੀ — v3.8.0
 

@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## קובצי שורש
+## קבצי שורש
 
-| File                                        | Purpose                                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **README.md**                               | דף נחיתה שיווקי + התחלה מהירה + מטריצת תכונות (ראו גם `llm.txt`)                           |
-| **CHANGELOG.md**                            | יומן שינויים לכל גרסה (נוצר אוטומטית באמצעות המיומנות `/version-bump-cc`)                  |
-| **LICENSE**                                 | נוסח רישיון MIT                                                                            |
-| **CLAUDE.md**                               | כללי הפרויקט לסוכני Claude Code (כללים מחייבים, מוסכמות, תרחישים)                          |
-| **AGENTS.md**                               | זהה ל-CLAUDE.md אך מיועד לסוכני AI שאינם Claude ‏(Codex, Cursor וכו׳)                      |
-| **GEMINI.md**                               | כללים תמציתיים לסוכנים מבוססי Gemini (תת-קבוצה של CLAUDE.md)                               |
-| **CONTRIBUTING.md**                         | מדריך לתורמים: הגדרה, commits מוסכמים, בדיקות, תהליך PR                                    |
-| **SECURITY.md**                             | מדיניות דיווח על פגיעויות, גרסאות נתמכות, מודל איומים                                      |
-| **CODE_OF_CONDUCT.md**                      | אמנת התורמים — ציפיות להתנהגות בקהילה                                                      |
-| **llm.txt**                                 | דף נחיתה בטקסט פשוט המותאם לסורקי LLM ‏(SEO לעוזרי AI)                                     |
-| **package.json**                            | מניפסט npm, סקריפטים, תלויות, מנועים, סף כיסוי c8                                          |
-| **package-lock.json**                       | עץ תלויות נעול                                                                             |
-| **tsconfig.json**                           | תצורת TypeScript ראשית                                                                     |
-| **tsconfig.typecheck-core.json**            | תצורת בדיקת טיפוסים לליבת `src/`                                                           |
-| **tsconfig.typecheck-noimplicit-core.json** | בדיקת טיפוסים מחמירה (`noImplicitAny`)                                                     |
-| **tsconfig.tsbuildinfo**                    | מטמון build מצטבר של TS (מוחרג מ-Git)                                                      |
-| **next.config.mjs**                         | תצורת build של Next.js 16 (פלט עצמאי)                                                      |
-| **next-env.d.ts**                           | טיפוסי סביבה שנוצרים אוטומטית על ידי Next.js                                               |
-| **eslint.config.mjs**                       | תצורה שטוחה של ESLint (כללים לפי אזור בפרויקט)                                             |
-| **prettier.config.mjs**                     | כללי עיצוב של Prettier                                                                     |
-| **postcss.config.mjs**                      | תצורת PostCSS עבור צינור העיבוד של Tailwind/CSS                                            |
-| **playwright.config.ts**                    | תצורת בדיקות E2E של Playwright                                                             |
-| **vitest.config.ts**                        | תצורת Vitest (חבילת בדיקות ברירת המחדל)                                                    |
-| **vitest.mcp.config.ts**                    | תצורת Vitest עבור שרת MCP / חבילות autoCombo / מטמון                                       |
-| **sonar-project.properties**                | תצורת SonarQube/SonarCloud (איכות קוד)                                                     |
-| **Dockerfile**                              | build רב-שלבי של Docker ‏(builder → runner-base → runner-cli)                              |
-| **docker-compose.yml**                      | תצורת compose לפיתוח עם 4 פרופילים (base, cli, host, cliproxyapi) + שירות צדדי של redis    |
-| **docker-compose.prod.yml**                 | תצורת compose לייצור (פורט 20130, redis, אמצעי אחסון בעלי שם)                              |
-| **.dockerignore**                           | קבצים שמוחרגים מהקשר Docker                                                                |
-| **fly.toml**                                | תצורת פריסה של Fly.io (אזור `sin`, פורט 20128, אמצעי אחסון /data)                          |
-| **.env.example**                            | תבנית קובץ סביבה (מועתקת אוטומטית אל `.env` בהתקנה הראשונה)                                |
-| **.gitignore**                              | תבניות התעלמות של Git                                                                      |
-| **.npmignore**                              | רשימת החרגות לפרסום ב-npm                                                                  |
-| **.npmrc**                                  | תצורת npm (מאגר, מדיניות קובץ נעילה)                                                       |
-| **.node-version**                           | גרסת Node מקובעת (בשימוש כלים התואמים ל-nvm)                                               |
-| **.nvmrc**                                  | גרסת Node מקובעת עבור nvm                                                                  |
-| **eslint.complexity.config.mjs**            | תצורת ESLint עבור מנגנון העלאת סף המורכבות (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | תצורת ESLint עבור כללי SonarJS (מורכבות קוגניטיבית / שכפול)                                |
-| **source.config.ts**                        | תצורת מקור `defineDocs` של Fumadocs (מזינה את `.source/`)                                  |
-| **knip.json**                               | תצורת Knip — קבצים/ייצואים/תלויות שאינם בשימוש (מזינה את שער הקוד המת)                     |
-| **stryker.conf.json**                       | תצורת בדיקות מוטציה של Stryker                                                             |
-| **.size-limit.json**                        | תצורת תקציב לחבילת size-limit                                                              |
-| **promptfooconfig.yaml**                    | תצורת הערכה של promptfoo                                                                   |
-| **.gitleaks.toml**                          | מערכת כללים לסריקת סודות של gitleaks                                                       |
-| **.zizmor.yml**                             | תצורת בדיקת אבטחה של GitHub Actions באמצעות zizmor                                         |
-| **socket.yml**                              | תצורת שרשרת אספקה של Socket.dev                                                            |
-| **news.json**                               | פיד הכרזות מקומי של v2; פריט ההשקה של Radar מסופק כלא פעיל                                 |
-| **flake.nix** / **flake.lock**              | הגדרת מעטפת פיתוח של Nix וקובץ נעילה                                                       |
-| **.env**                                    | סודות מקומיים (נכללים ב-gitignore — נוצרים מתוך `.env.example`)                            |
+| קוֹבֶץ                                      | מַטָרָה                                                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| **README.md**                               | דף נחיתה שיווקי + quick start + מטריצת תכונות (ראה גם `llm.txt`)                |
+| **CHANGELOG.md**                            | יומן שינויים לכל מהדורה (נוצר אוטומטית על ידי מיומנות `/version-bump-cc` )      |
+| **LICENSE**                                 | טקסט רישיון MIT                                                                 |
+| **CLAUDE.md**                               | כללי פרויקט עבור סוכני קוד Claude (כללים קשיחים, מוסכמות, תרחישים)              |
+| **AGENTS.md**                               | זהה ל- CLAUDE.md אבל עבור סוכנים שאינם קלוד AI (Codex, Cursor וכו')             |
+| **GEMINI.md**                               | כללים תמציתיים עבור סוכנים מבוססי מזל תאומים (תת-קבוצה של CLAUDE.md)            |
+| **CONTRIBUTING.md**                         | מדריך לתורמים: הגדרה, התחייבויות קונבנציונליות, בדיקות, זרימת PR                |
+| **SECURITY.md**                             | מדיניות דיווח על פגיעות, גרסאות נתמכות, מודל איומים                             |
+| **CODE_OF_CONDUCT.md**                      | ציפיות התנהגות קהילתית — אמנת התורמים                                           |
+| **llm.txt**                                 | נחיתה בטקסט רגיל מותאמת לסורקי LLM (SEO עבור עוזרי AI )                         |
+| **package.json**                            | מניפסט npm, סקריפטים, תלות, מנועים, שער כיסוי c8                                |
+| **package-lock.json**                       | עץ תלות נעול                                                                    |
+| **tsconfig.json**                           | תצורת שורש TypeScript                                                           |
+| **tsconfig.typecheck-core.json**            | Typecheck config עבור ליבת `src/`                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | בדיקת סוג קפדנית (`noImplicitAny`).                                             |
+| **tsconfig.tsbuildinfo**                    | מטמון בנייה מצטבר של TS (מצורף ב-gitignored)                                    |
+| **הַבָּא.config.mjs**                       | תצורת Next.js 16 build (פלט עצמאי)                                              |
+| **next-env.d.ts**                           | סוגי env שנוצרו אוטומטית Next.js                                                |
+| **eslint.config.mjs**                       | ESLint flat config (כללים לכל אזור פרויקט)                                      |
+| **יפה יותר.config.mjs**                     | כללי עיצוב Prettier                                                             |
+| **postcss.config.mjs**                      | PostCSS config עבור צינור Tailwind/CSS                                          |
+| **מַחֲזַאִי.config.ts**                     | תצורת בדיקת E2E Playwright                                                      |
+| **vitest.config.ts**                        | Vitest config (חבילת ברירת מחדל)                                                |
+| **vitest.mcp.config.ts**                    | Vitest config עבור חבילות שרת MCP / autoCombo / cache                           |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (איכות קוד)                                         |
+| **Dockerfile**                              | בניית Docker רב-שלבית (בונה → runner-base → runner-cli)                         |
+| **docker-compose.yml**                      | Dev compose עם 4 פרופילים (בסיס, cli, host, cliproxyapi) + redis sidecar        |
+| **docker-compose.prod.yml**                 | חיבור הפקה (פורט 20130, redis, כרכים בשמות)                                     |
+| **.docerignore**                            | קבצים לא נכללו בהקשר Docker                                                     |
+| **fly.toml**                                | תצורת פריסת Fly.io (אזור `sin`, יציאה 20128, /נפח נתונים)                       |
+| **.env.example**                            | קובץ env של תבנית (הועתק אוטומטית ל- `.env` בהתקנה הראשונה)                     |
+| **.gitignore**                              | Git התעלם מדפוסים                                                               |
+| **.npmignore**                              | npm פרסם רשימת אי הכללה                                                         |
+| **.npmrc**                                  | npm config (רישום, מדיניות קבצי נעילה)                                          |
+| **‎.node-version**                          | פין גרסת צומת (בשימוש על ידי כלים תואמי nvm)                                    |
+| **.nvmrc**                                  | פין גרסת צומת עבור nvm                                                          |
+| **eslint.complexity.config.mjs**            | תצורת ESLint עבור מחגר המורכבות (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint config עבור כללי SonarJS (מורכבות קוגניטיבית / כפילות)                   |
+| **מָקוֹר.config.ts**                        | תצורת המקור של Fumadocs `defineDocs` (הזנות `.source/`)                         |
+| **knip.json**                               | Knip config — unused files/exports/deps (מזין את שער הקוד המת)                  |
+| **מייצר.conf.mjs**                          | תצורת בדיקת מוטציות של סטרייקר (מחשב `tap.testFiles` מ- `mutate`)               |
+| **.size-limit.json**                        | תצורת תקציב חבילה להגבלת גודל                                                   |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                           |
+| **.gitleaks.toml**                          | ערכת חוקים לסריקה סודית של gitleaks                                             |
+| **.zizmor.yml**                             | zizmor GitHub-Actions Security-lint config                                      |
+| **socket.yml**                              | תצורת שרשרת האספקה של Socket.dev                                                |
+| **news.json**                               | עדכון הודעות v2 מקומי; פריט שיגור מכ"ם נשלח לא פעיל                             |
+| **flake.nix** /** פתית.נעול**               | Nix dev-shell definition + lock                                                 |
+| **.env**                                    | סודות מקומיים (gitignored — שנוצר מ- `.env.example`)                            |
 
-> **הועברו מתיקיית השורש ב-v3.8.26 (לצמצום העומס):**
+> **הוצא מהשורש בגרסה 3.8.26 (דעקלטר):**
 >
-> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (נכלל ב-gitignore). ראו [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` וה- `quality-metrics.json` שנוצר (gitignored). ראה [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -183,7 +183,7 @@ src/
 | `quota/`                                 | מנוע שיתוף מכסות: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — see `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | לקוח קטלוג דגם חופשי של מכ"ם: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — see `docs/frameworks/RADAR.md`                                                                                                                                           |
 | `display/`                               | עוזרי עיצוב UI (עלות, חביון וכו')                                                                                                                                                                                                                                                                                   |
-| `embeddings/`                            | עוזרי שירותי הטבעה                                                                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | עוזרי שירות ההטבעות                                                                                                                                                                                                                                                                                                 |
 | `env/`                                   | ניתוח משתנה Env אימות +                                                                                                                                                                                                                                                                                             |
 | `evals/`                                 | Eval framework (סוויטות, ראנר, ריצה) — see `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                               |
 | `guardrails/`                            | PII masker, הזרקה מהירה, גשר ראייה — ראה `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
@@ -221,7 +221,7 @@ src/
 | ---------------------- | ------------------------------------------- |
 | `policy.ts`            | מנוע מדיניות                                |
 | `fallbackPolicy.ts`    | עץ החלטות נפילה                             |
-| `costRules.ts`         | כללי חישוב עלות                             |
+| `costRules.ts`         | כללי חישוב עלויות                           |
 | `lockoutPolicy.ts`     | מדיניות נעילה Model/connection              |
 | `tagRouter.ts`         | ניתוב מבוסס תגים                            |
 | `comboResolver.ts`     | רזולוציית משולבת (בשימוש על ידי מנוע משולב) |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` — ראה `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **380 ספקים** עם אימות Zod (מקור האמת)                                                         |
+| `constants/providers.ts`         | **394 ספקים** עם אימות Zod (מקור האמת)                                                         |
 | `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
-| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
+| `constants/routingStrategies.ts` | **22 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
 | `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
 | `constants/upstreamHeaders.ts`   | רשימת דחיית כותרות לבקשות במעלה הזרם                                                           |
 | `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת לחוזי API )                                                  |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 קבצים (12 מטפלים + 4 כלי עזר): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search וכו'
-├── executors/           # 150 מודולי ביצוע (מחלקות המרחיבות את BaseExecutor + כלי עזר ייעודיים לכל ספק)
+├── executors/           # 163 מודולי ביצוע (מחלקות המרחיבות את BaseExecutor + כלי עזר ייעודיים לכל ספק)
 ├── translator/          # ממירי פורמטים (9 לבקשות, 9 לתגובות, 9 כלי עזר)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # כ־80+ מודולי שירות (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM וכו')
@@ -412,28 +412,28 @@ open-sse/
 | `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
 | `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
 | `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
-| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 380 ספקים (Regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 394 ספקים (Regen: `npm run gen:provider-reference`) |
 
 ### צלילות עמוקות של תת-מערכת
 
-| דוק                                         | מַטָרָה                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                   |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                    |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                                |
-| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )               |
-| `RADAR.md`                                  | שכבת-על של קטלוג דגמים חופשיים של מכ"ם (`RADAR_ENABLED`, כבוי כברירת מחדל) |
-| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                        |
-| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                  |
-| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                           |
-| `COMPLIANCE.md`                             | יומן ביקורת, שימור, ביטול הסכמה noLog                                      |
-| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                            |
-| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                       |
-| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                        |
-| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                       |
-| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי)  |
+| דוק                                         | מַטָרָה                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                  |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                     |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                   |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                               |
+| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )              |
+| `RADAR.md`                                  | שכבת-על של קטלוג דגם רדאר (`RADAR_ENABLED`, כבוי כברירת מחדל)             |
+| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                 |
+| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                          |
+| `COMPLIANCE.md`                             | יומן ביקורת, שימור, ביטול הסכמה noLog                                     |
+| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                           |
+| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                      |
+| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                       |
+| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                      |
+| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי) |
 
 ### דְחִיסָה
 

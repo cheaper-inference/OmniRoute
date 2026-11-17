@@ -4,10 +4,20 @@
 
 ---
 
-Kļūmes tiek klasificētas pirms atkārtotu mēģinājumu lēmumu pieņemšanas.
+Neveiksmes tiek klasificētas, pirms tiek pieņemti lēmumi par atkārtotu mēģinājumu.
 
-Pārejošu kļūmju, piemēram, taimautu, tīkla kļūdu, ātruma ierobežojumu un pakalpojumu sniedzēja 5xx atbilžu, gadījumā var notikt pārslēgšanās uz citu pakalpojumu sniedzēju. Autentifikācijas kļūdu, atļauju kļūdu, nederīgu pieprasījumu, nepieejamu modeļu un nezināmu kļūmju gadījumā atkārtoti mēģinājumi netiek veikti akli.
+Pārejošas kļūmes, piemēram, taimauta, tīkla kļūdas, ātruma ierobežojumi un nodrošinātāja 5xx atbildes, var neizdoties. Izsmelta kvota vai kredīts (nepieciešams kvota 429 vai 402 maksājums) nekad netiek mēģināts atkārtoti izmantot to pašu pakalpojumu sniedzēju, bet pāriet uz citu pakalpojumu sniedzēju, kura kvota ir atsevišķa. Autentifikācijas kļūdas, atļauju kļūdas, nederīgi pieprasījumi, nepieejami modeļi un nezināmas kļūmes netiek akli mēģinātas atkārtoti.
 
-Noklusējuma starppakalpojumu sniedzēju politika atļauj līdz trim mēģinājumiem pie dažādiem pakalpojumu sniedzējiem, atkārtoti mēģina ātruma ierobežojumu un taimautu gadījumā un administratīvu atspējošanu nodala no īslaicīga ķēdes stāvokļa.
+Noklusējuma starpnodrošinātāju politika pieļauj ne vairāk kā trīs pakalpojumu sniedzēja mēģinājumus, atkārtotu mēģinājumu ātruma ierobežojumus un taimautus, kļūmju pārsniegšanu, ja kvota ir izsmelta, un administratīvā atspējošana tiek nošķirta no pagaidu ķēdes stāvokļa.
 
-Ķēdes stāvokļi ir `closed`, `open` un `half_open`. Nogaidīšanas periods ieplāno ierobežotu pārbaudes mēģinājumu; veiksmīgs pārbaudes mēģinājums aizver ķēdi, bet neveiksmīgs — to atkal atver.
+## Kur tas attiecas
+
+- **Kombinācijas** pāriet starp saviem mērķiem saskaņā ar pašas kombinācijas stratēģiju un iestatījumiem.
+- **Neapstrādāta modeļa ID** (bez `provider/` prefiksa), ko apkalpo vairāki aktīvi pakalpojumu sniedzēji, bez šī precīzā nosaukuma kombinācijas, vispirms tiek nosūtīts pakalpojumu sniedzēja secinājumiem. Ja šis mēģinājums neizdodas tādā veidā, kā politika neizdodas, tas pats pieprasījums tiek nosūtīts nākamajam aktīvajam nodrošinātājam, kas apkalpo ID. Atbildē ir norādīts `x-omniroute-fallback-attempts` ar to pakalpojumu sniedzēju skaitu, kurus mēģināja izmēģināt pirms atbildētāja.
+  - Katrs aizstājējs ir pilnvarots tieši tā, it kā tas būtu izdarīts ar secinājumu. Mērķis, ko API atslēga bloķē vai neatzīst, tiek izlaists bez augšupejoša zvana, un klients saņem patieso augšupvērsto kļūdu, nevis politikas noraidīšanu mērķim, kuru tas nekad nav nosaucis.
+  - Tikai neveiksmīga atbilde virzās tālāk: nekas neizdodas pēc pirmā straumētā baita.
+  - Ārkārtas atkāpšanās modeļa mijmaiņa tiek izmantota tikai pēc tam, kad katrs pieprasītā modeļa nodrošinātājs ir izgāzies.
+  - Savienojumam piespraustais pieprasījums (`x-omniroute-connection`) paliek tajā.
+  - Prefikss ID (`provider/model`) nekad netiek novirzīts citam pakalpojumu sniedzējam.
+
+Ķēdes stāvokļi ir `closed`, `open` un `half_open`. Atdzesēšana ieplāno ierobežotu zondi; veiksmīga zonde aizver ķēdi, un neveiksmīga zonde to atkal atver.

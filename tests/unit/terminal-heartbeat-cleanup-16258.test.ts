@@ -244,6 +244,7 @@ for (const highWaterMark of [0, 16384]) {
     `#16258 terminal -> inbound abort -> trailing DONE disposes heartbeat (buffer ${highWaterMark})`,
     { timeout: 3000 },
     async (t) => {
+      t.mock.timers.enable({ apis: ["setTimeout"] });
       const f = fixture(t, highWaterMark);
       f.send(content);
       await f.receive("Hello");
@@ -257,6 +258,9 @@ for (const highWaterMark of [0, 16384]) {
         f.send("data: [DONE]\n\n");
         f.source.close();
       }
+      await settle();
+      // EOF must release the grace timer before its original 50 ms deadline.
+      t.mock.timers.tick(50);
       await settle();
       f.disposed();
       assert.ok(

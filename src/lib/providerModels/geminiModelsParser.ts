@@ -97,8 +97,8 @@ export function parseGeminiModelsList(data: any): GeminiDiscoveryModel[] {
       }
 
       // Lyria generates music, not chat responses, even when advertised via
-      // generateContent. A matching Vertex music adapter exists, but AI Studio
-      // must remain visibly unsupported until it has its own adapter.
+      // generateContent. AI Studio serves it through its own music adapter
+      // (open-sse/handlers/mediaGeneration/geminiMusic.ts).
       if (lowerId.startsWith("lyria-") && methods.includes("generateContent")) {
         inferredById = true;
         endpoints.delete("chat");

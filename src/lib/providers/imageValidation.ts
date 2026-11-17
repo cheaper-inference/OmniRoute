@@ -20,6 +20,10 @@ const IMAGE_PROVIDER_VALIDATION_ENDPOINTS: Record<
   "stability-ai": {
     path: "/v1/user/account",
   },
+  // Balance in dollars and credits: a free authenticated read on renderhour.com.
+  renderhour: {
+    path: "/v1/balance",
+  },
   "black-forest-labs": {
     path: "/v1/credits",
   },

@@ -5,6 +5,8 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
+import { dropInjectedToolCalls } from "./opencodeInjectedToolFilter.ts";
+import { applyRelayHeaders, freeTierDispatchBase, relayEgressUrl } from "./opencodeRelay.ts";
 import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
@@ -33,6 +35,7 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
+import { applyOpencodeClaudeBeta } from "./opencodeClaudeBeta.ts";
 import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
 import { applyOpencodeToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
@@ -60,11 +63,13 @@ import {
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
-  FREE_TIER_INFERENCE_BASE_URL,
+  applyZenResponsesAuth,
   attemptFor,
   isGatedFreeTierRequest,
+  isGoGeminiWire,
   isPremiumOpencodeModel,
   noteFreeTierOutcome,
+  opencodeEndpointUrl,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
@@ -563,12 +568,6 @@ export class OpencodeExecutor extends BaseExecutor {
   }
 
   /**
-   * Rewrite muse-spark's bogus `finish_reason:"length"` (see the
-   * normalizeMuseSparkFinishReason note) to `"stop"` on both streaming and
-   * non-streaming success responses. Non-muse-spark models pass through
-   * untouched.
-   */
-  /**
    * Hand a JSON caller a JSON body even though the free-tier contract forced the upstream
    * request to stream. A streaming caller, a refusal and an already-JSON body pass through.
    */
@@ -577,6 +576,7 @@ export class OpencodeExecutor extends BaseExecutor {
     result: ExecutorExecuteResult
   ): ExecutorExecuteResult {
     this.noteForcedStreamOutcome(input, result);
+    result = dropInjectedToolCalls(result, attemptFor(input.body)?.injectedToolNames);
     if (input.stream) return result;
     if (!(result instanceof Response)) {
       if (!("response" in result) || !result.response) return result;
@@ -868,7 +868,7 @@ export class OpencodeExecutor extends BaseExecutor {
         // Opt-in: a FreeTierError through a pool member probes one other member (never direct).
         const singleEgress = freeTierEgressProbeOn
           ? egressPacing.createAppliedEgressTracker(
-              this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+              relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
               resolveProxyForRequest
             )
           : null;
@@ -1010,7 +1010,7 @@ export class OpencodeExecutor extends BaseExecutor {
         return elapsed;
       };
       const appliedEgress = egressPacing.createAppliedEgressTracker(
-        this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+        relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
         resolveProxyForRequest,
         refusalModel
       );
@@ -1563,29 +1563,18 @@ export class OpencodeExecutor extends BaseExecutor {
     // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
-        ? FREE_TIER_INFERENCE_BASE_URL
+        ? freeTierDispatchBase()
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    switch (this._requestFormat) {
-      case "claude":
-        return `${base}/messages`;
-      case "openai-responses":
-        return `${base}/responses`;
-      case "gemini":
-        return `${base}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
-      default:
-        return `${base}/chat/completions`;
-    }
+    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
   }
 
   /**
-   * #12633: OpenCode Zen's `/v1/responses` endpoint (reached when
-   * `_requestFormat === "openai-responses"`, e.g. Muse Spark Contributor
-   * models) requires `x-api-key`, not `Authorization: Bearer` — unlike the
-   * default `/chat/completions` endpoint on the same host, which accepts
-   * Bearer. Scoped by baseUrl (not provider id/alias) so this only applies to
-   * the main Zen host (`opencode` / `opencode-zen`, both `https://opencode.ai/zen/v1`)
-   * and never to opencode-go, which serves Responses-format models from a
-   * different upstream (`https://opencode.ai/zen/go/v1`) that expects Bearer.
+   * #12633 / #19315: OpenCode Zen's `/v1/responses` endpoint (reached when
+   * `_requestFormat === "openai-responses"`, e.g. Muse Spark, GPT-5.6, Grok
+   * models) expects `x-api-key` for the gated public lane, while OpenCode
+   * Console keys require `Authorization: Bearer` (otherwise answering 401
+   * "Missing API key."). For keyed requests we send both headers so both
+   * console and gateway contracts are satisfied.
    */
   private usesZenApiKeyAuth(): boolean {
     return this._requestFormat === "openai-responses" && this.config?.baseUrl === ZEN_BASE_URL;
@@ -1614,8 +1603,12 @@ export class OpencodeExecutor extends BaseExecutor {
     );
 
     if (key) {
-      if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
+      if (this._requestFormat === "claude") {
         headers["x-api-key"] = key;
+      } else if (this.usesZenApiKeyAuth()) {
+        applyZenResponsesAuth(headers, key, gatedScope);
+      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
+        headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
       }
@@ -1623,6 +1616,7 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
+      applyOpencodeClaudeBeta(headers, clientHeaders, model, body);
     }
     // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
     // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
@@ -1658,6 +1652,8 @@ export class OpencodeExecutor extends BaseExecutor {
         forwardAllOpencodeHeaders: isOpencodePublishedCatalogRoutingEnabled(),
       });
     }
+
+    if (gatedScope) applyRelayHeaders(headers);
 
     // The Muse Responses workaround that forced a UUID session here is gone: the shape it
     // produced is exactly what the upstream now refuses, and the canonical session it used
@@ -1737,10 +1733,10 @@ export class OpencodeExecutor extends BaseExecutor {
 
   transformRequest(
     model: string,
-    body: any,
+    body: unknown,
     stream: boolean,
     credentials: ProviderCredentials
-  ): any {
+  ): unknown {
     let modifiedBody = super.transformRequest(model, body, stream, credentials);
     modifiedBody = this.applyDeepSeekJsonSchemaFallback(model, modifiedBody);
     // Free-tier request contract (see opencodeFreeTierContract.ts): streaming plus a
@@ -1753,7 +1749,7 @@ export class OpencodeExecutor extends BaseExecutor {
       this.provider,
       model,
       this._clientSession,
-      body,
+      body as object,
       isOpencodeV2ClientFingerprintEnabled()
     );
     modifiedBody = prepared.body;

@@ -110,10 +110,32 @@ function mergeSignalWindows(before: JsonRecord, after: JsonRecord, patch: JsonRe
   return { ...before, ...after, windows: [...windows.values()] };
 }
 
-/** Keep sparse observations, but do not let a delayed snapshot clear newer scoped state. */
+/** Remove a 5h/7d slot a complete reading no longer reports: the plan no longer has it. */
+function retireUnreportedSlots(merged: JsonRecord, safeNext: JsonRecord): void {
+  const times = { ...record(merged.observedAtByWindow) };
+  const signal = record(merged.quotaSignal);
+  const retained = new Map<WindowKey, unknown>();
+  addSignalWindows(retained, signal.windows);
+  for (const key of ["5h", "7d"] as const) {
+    if (safeNext[`limit${key}`] !== undefined) continue;
+    for (const prefix of ["usage", "limit", "resetAt"]) delete merged[`${prefix}${key}`];
+    delete times[key];
+    retained.delete(key);
+  }
+  merged.observedAtByWindow = times;
+  if (Array.isArray(signal.windows))
+    merged.quotaSignal = { ...signal, windows: [...retained.values()] };
+}
+
+/**
+ * Keep sparse observations, but do not let a delayed snapshot clear newer scoped state.
+ * `complete` marks a usage-API reading, which lists every window the plan has: a slot it does
+ * not report is retired instead of kept (OpenAI dropped the 5-hour window for some plans).
+ */
 export function mergeCodexQuotaObservation(
   previous: JsonRecord,
-  next: JsonRecord
+  next: JsonRecord,
+  options: { complete?: boolean } = {}
 ): JsonRecord | null {
   if (time(next.observedAt) < time(previous.observedAt)) return null;
   const safeNext = validNumericPatch(next);
@@ -127,6 +149,7 @@ export function mergeCodexQuotaObservation(
   if (Array.isArray(before.windows) || Array.isArray(after.windows)) {
     merged.quotaSignal = mergeSignalWindows(before, after, safeNext);
   }
+  if (options.complete) retireUnreportedSlots(merged, safeNext);
   return merged;
 }
 

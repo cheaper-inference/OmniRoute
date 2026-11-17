@@ -10,77 +10,76 @@ _पछिल्लो अद्यावधिक: 2026-06-28_
 
 ## कार्यकारी सारांश
 
-OmniRoute Next.js मा निर्मित स्थानीय AI रुटिङ गेटवे र ड्यासबोर्ड हो।
-यसले एउटै OpenAI-compatible endpoint (`/v1/*`) प्रदान गर्छ र अनुवाद, fallback, token refresh, तथा usage tracking सहित विभिन्न upstream प्रदायकहरूमा ट्राफिक रुट गर्छ।
+OmniRoute एक स्थानीय AI रूटिङ गेटवे र Next.js मा निर्मित ड्यासबोर्ड हो। यसले एकल ओपनएआई-कम्प्याटिबल एन्डपोइन्ट (`/v1/*`) प्रदान गर्दछ र अनुवाद, फलब्याक, टोकन रिफ्रेस, र प्रयोग ट्र्याकिङको साथ धेरै अपस्ट्रीम प्रदायकहरूमा ट्राफिकलाई मार्ग गर्दछ।
 
-मुख्य क्षमताहरू:
+मूल क्षमताहरू:
 
-- CLI/tools का लागि OpenAI-compatible API surface (380 प्रदायक, 159 executor modules)
-- प्रदायकका ढाँचाहरूबीच request/response अनुवाद
-- Model combo fallback (बहु-मोडल अनुक्रम)
-- Structured combo steps (`provider + model + connection`) र `compositeTiers` मार्फत runtime ordering
-- Account-level fallback (प्रति प्रदायक बहु-खाता)
-- मुख्य chat path मा quota preflight र quota-aware P2C account selection
-- OAuth + API-key प्रदायक connection management (27 OAuth provider modules)
-- `/v1/embeddings` मार्फत embedding generation (18 प्रदायक)
-- `/v1/images/generations` मार्फत image generation (10+ प्रदायक, 20+ मोडल)
-- `/v1/audio/transcriptions` मार्फत audio transcription (18 प्रदायक)
-- `/v1/audio/speech` मार्फत text-to-speech (24 built-in providers)
-- `/v1/videos/generations` मार्फत video generation (ComfyUI + SD WebUI)
-- `/v1/music/generations` मार्फत music generation (ComfyUI)
-- `/v1/search` मार्फत web search (20 प्रदायक)
-- `/v1/moderations` मार्फत moderations
-- `/v1/rerank` मार्फत reranking
-- Reasoning models का लागि think tag parsing (`<think>...</think>`)
-- Strict OpenAI SDK compatibility का लागि response sanitization
-- Cross-provider compatibility का लागि role normalization (developer→system, system→user)
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Providers, keys, aliases, combos, settings, pricing का लागि local persistence (122 DB modules)
-- Usage/cost tracking र request logging
-- Multi-device/state sync का लागि वैकल्पिक cloud sync
-- API access control का लागि IP allowlist/blocklist
-- Thinking budget management (passthrough/auto/custom/adaptive)
-- Global system prompt injection
-- Session tracking र fingerprinting
-- Provider-specific profiles सहित per-account enhanced rate limiting
-- Provider resilience का लागि circuit breaker pattern
-- Mutex locking सहित anti-thundering herd protection
-- Signature-based request deduplication cache
-- Domain layer: cost rules, fallback policy, lockout policy
-- Context Relay: account rotation continuity का लागि session handoff summaries
-- Domain state persistence (fallbacks, budgets, lockouts, circuit breakers का लागि SQLite write-through cache)
-- Centralized request evaluation का लागि policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency aggregation सहित request telemetry
-- `combo_execution_key` / `combo_step_id` मार्फत combo target telemetry र historical combo target health
-- End-to-end tracing का लागि Correlation ID (X-Request-Id)
-- प्रति API key opt-out सहित compliance audit logging
-- LLM quality assurance का लागि eval framework
-- Real-time provider circuit breaker status सहित health dashboard
-- 3 transports (stdio/SSE/Streamable HTTP) सहित MCP Server (110 tools)
-- Skills र task lifecycle सहित A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (extraction, injection, retrieval, summarization)
-- Skills system (registry, executor, sandbox, built-in skills)
-- Certificate management र DNS handling सहित MITM proxy
-- Prompt injection guard middleware
-- Caveman, RTK, stacked pipelines, compression combos, language packs, तथा analytics सहित prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (`src/lib/oauth/providers/` अन्तर्गत 22 individual modules)
-- Uninstall/full-uninstall scripts
-- OAuth environment repair action
-- OpenAI-compatible WS clients (`/v1/ws`) का लागि WebSocket bridge
-- Sync token management (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) first-class provider preset
-- Hybrid token counting (estimation fallback सहित provider-side `/messages/count_tokens`)
-- Model alias auto-seeding (startup मा 30+ cross-proxy dialect normalizations)
-- SSRF guard, private URL blocking, तथा configurable retry सहित safe outbound fetch
-- Configurable `requestRetry` र `maxRetryIntervalSec` सहित cooldown-aware chat retries
-- Startup मा Zod सहित runtime environment validation
-- Pagination, provider CRUD events, तथा SSRF-blocked validation logging सहित compliance audit v2
+- CLI/tools को लागि OpenAI- संगत API सतह (394 प्रदायक, 159 निर्वाहक मोड्युलहरू)
+- प्रदायक ढाँचाहरूमाRequest/response अनुवाद
+- मोडेल कम्बो फलब्याक (बहु मोडेल अनुक्रम)
+- `compositeTiers` द्वारा रनटाइम अर्डरको साथ संरचित कम्बो चरणहरू (`provider + model + connection`)
+- खाता-स्तर फलब्याक (बहु-खाता प्रति प्रदायक)
+- मुख्य च्याट मार्गमा कोटा प्रीफ्लाइट र कोटा-सचेत P2C खाता चयन
+- OAuth + API-कुञ्जी प्रदायक जडान व्यवस्थापन (27 OAuth प्रदायक मोड्युलहरू)
+- `/v1/embeddings` मार्फत एम्बेडिङ जेनेरेशन (१८ प्रदायकहरू)
+- `/v1/images/generations` मार्फत छवि उत्पादन (10 + प्रदायकहरू, 20 + मोडेलहरू)
+- `/v1/audio/transcriptions` मार्फत अडियो ट्रान्सक्रिप्शन (१८ प्रदायकहरू)
+- `/v1/audio/speech` मार्फत टेक्स्ट-टू-स्पीच (24 बिल्ट-इन प्रदायकहरू)
+- `/v1/videos/generations` मार्फत भिडियो उत्पादन (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) मार्फत संगीत पुस्ता
+- `/v1/search` मार्फत वेब खोज (20 प्रदायकहरू)
+- `/v1/moderations` मार्फत मध्यस्थता
+- `/v1/rerank` मार्फत पुन: श्रेणीकरण
+- तर्क मोडेलहरूको लागि ट्याग पार्सिङ (`<think>...</think>`) सोच्नुहोस्
+- कडा OpenAI SDK अनुकूलताको लागि प्रतिक्रिया सेनिटाइजेशन
+- क्रस-प्रदायक अनुकूलताको लागि भूमिका सामान्यीकरण (विकासकर्ता→ प्रणाली, प्रणाली→ प्रयोगकर्ता)
+- संरचित आउटपुट रूपान्तरण (json_schema → Gemini responseSchema)
+- प्रदायकहरू, कुञ्जीहरू, उपनामहरू, कम्बोहरू, सेटिङहरू, मूल्य निर्धारण (122 DB मोड्युलहरू) को लागि स्थानीय दृढता
+- Usage/cost ट्र्याकिङ र अनुरोध लगिङ
+- multi-device/state सिंकको लागि वैकल्पिक क्लाउड सिंक
+- API पहुँच नियन्त्रणको लागिIP allowlist/blocklist
+- सोच बजेट व्यवस्थापन (passthrough/auto/custom/adaptive)
+- ग्लोबल सिस्टम प्रम्प्ट इंजेक्शन
+- सत्र ट्र्याकिङ र फिंगरप्रिन्टिङ
+- प्रति-खाता विस्तारित दर प्रदायक-विशेष प्रोफाइलहरूको साथ सीमित
+- प्रदायक लचिलोपनको लागि सर्किट ब्रेकर ढाँचा
+- म्युटेक्स लकको साथ एन्टी-थन्डरिङ झुण्ड सुरक्षा
+- हस्ताक्षर-आधारित अनुरोध डुप्लिकेशन क्यास
+- डोमेन तह: लागत नियम, फलब्याक नीति, तालाबन्दी नीति
+- सन्दर्भ रिले: खाता रोटेशन निरन्तरताको लागि सत्र ह्यान्डअफ सारांश
+- डोमेन राज्य दृढता (फलब्याकहरू, बजेटहरू, लकआउटहरू, सर्किट ब्रेकरहरूको लागिSQLite लेखन-मार्फत क्यास)
+- केन्द्रीकृत अनुरोध मूल्याङ्कनको लागि नीति इन्जिन (लकआउट → बजेट → फलब्याक)
+- p50/p95/p99 विलम्बता एकत्रीकरणको साथ टेलिमेट्री अनुरोध गर्नुहोस्
+- कम्बो लक्ष्य टेलिमेट्री र ऐतिहासिक कम्बो लक्ष्य स्वास्थ्य `combo_execution_key` / `combo_step_id` मार्फत
+- अन्त-देखि-अन्त ट्रेसिङको लागि सहसंबंध ID (X-Request-Id)
+- अप्ट-आउट प्रति API कुञ्जीको साथ अनुपालन लेखापरीक्षण लगिङ
+- LLM गुणस्तर आश्वासनको लागि Eval फ्रेमवर्क
+- वास्तविक समय प्रदायक सर्किट ब्रेकर स्थिति संग स्वास्थ्य ड्यासबोर्ड
+- MCP सर्भर (110 उपकरणहरू) 3 ट्रान्सपोर्टहरू (stdio/SSE/Streamable HTTP)
+- A2A सर्भर (JSON-RPC 2.0 + SSE) कौशल र कार्य जीवनचक्रको साथ
+- मेमोरी प्रणाली (निकासी, इंजेक्शन, पुन: प्राप्ति, सारांश)
+- कौशल प्रणाली (रजिस्ट्री, कार्यकारी, स्यान्डबक्स, निर्मित कौशल)
+- प्रमाणपत्र व्यवस्थापन र DNS ह्यान्डलिंगको साथ MITM प्रोक्सी
+- प्रम्प्ट इन्जेक्शन गार्ड मिडलवेयर
+- Caveman, RTK, स्ट्याक्ड पाइपलाइनहरू, कम्प्रेसन कम्बोहरू, भाषा प्याकहरू, र एनालिटिक्सको साथ प्रम्प्ट कम्प्रेसन पाइपलाइन
+- ACP (एजेन्ट कम्युनिकेसन प्रोटोकल) रजिस्ट्री
+- मोड्युलर OAuth प्रदायकहरू ( `src/lib/oauth/providers/` अन्तर्गत 22 व्यक्तिगत मोड्युलहरू)
+- Uninstall/full-uninstall लिपिहरू
+- OAuth वातावरण मर्मत कार्य
+- ओपनएआई-कम्प्याटिबल WS ग्राहकहरूको लागिWebSocket ब्रिज (`/v1/ws`)
+- सिंक टोकन व्यवस्थापन (issue/revoke, ETag-संस्करण कन्फिग बन्डल डाउनलोड)
+- GLM सोच (`glmt`) प्रथम श्रेणी प्रदायक प्रिसेट
+- हाइब्रिड टोकन गणना (प्रदायक-साइड `/messages/count_tokens` अनुमान फलब्याक संग)
+- मोडेल उपनाम स्वत: सीडिङ (स्टार्टअपमा 30 + क्रस-प्रोक्सी बोली सामान्यीकरण)
+- SSRF गार्ड, निजी URL अवरुद्ध, र कन्फिगर योग्य पुन: प्रयासको साथ सुरक्षित आउटबाउन्ड फेच
+- कूलडाउन-सचेत च्याट कन्फिगर योग्य `requestRetry` र `maxRetryIntervalSec` सँग पुन: प्रयासहरू
+- स्टार्टअपमा Zod सँग रनटाइम वातावरण प्रमाणीकरण
+- पृष्ठांकन, प्रदायक CRUD घटनाहरू, र SSRF-ब्लक गरिएको प्रमाणीकरण लगिङको साथ अनुपालन अडिट v2
 
-प्राथमिक runtime model:
+प्राथमिक रनटाइम मोडेल:
 
-- `src/app/api/*` अन्तर्गतका Next.js app routes ले dashboard APIs र compatibility APIs दुवै कार्यान्वयन गर्छन्
-- `src/sse/*` + `open-sse/*` मा रहेको shared SSE/routing core ले provider execution, translation, streaming, fallback, तथा usage सम्हाल्छ
+- `src/app/api/*` अन्तर्गत Next.js एप मार्गहरूले ड्यासबोर्ड APIs र अनुकूलता APIs दुवै लागू गर्दछ
+- `src/sse/*` + `open-sse/*` मा साझा गरिएको SSE/routing कोरले प्रदायक कार्यान्वयन, अनुवाद, स्ट्रिमिङ, फलब्याक, र प्रयोग ह्यान्डल गर्छ
 
 ## सन्दर्भ आरेखहरू
 
@@ -269,71 +268,70 @@ flowchart LR
 
 ## 2) SSE + अनुवाद कोर
 
-मुख्य प्रवाह मोड्युलहरू:
+मुख्य प्रवाह मोड्युल:
 
-- प्रवेश: `src/sse/handlers/chat.ts`
-- मुख्य समन्वय: `open-sse/handlers/chatCore.ts`
-- प्रदायक कार्यान्वयन एडाप्टरहरू: `open-sse/executors/*`
-- ढाँचा पहिचान/प्रदायक कन्फिगरेसन: `open-sse/services/provider.ts`
-- मोडेल पार्स/रिजोल्भ: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- प्रविष्टि: `src/sse/handlers/chat.ts`
+- कोर आर्केस्ट्रा: `open-sse/handlers/chatCore.ts`
+- प्रदायक कार्यान्वयन एडेप्टर: `open-sse/executors/*`
+- ढाँचा detection/provider कन्फिगरेसन: `open-sse/services/provider.ts`
+- मोडेल parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - खाता फलब्याक तर्क: `open-sse/services/accountFallback.ts`
 - अनुवाद रजिस्ट्री: `open-sse/translator/index.ts`
 - स्ट्रिम रूपान्तरणहरू: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- प्रयोग निष्कर्षण/सामान्यीकरण: `open-sse/utils/usageTracking.ts`
-- Think ट्याग पार्सर: `open-sse/utils/thinkTagParser.ts`
-- एम्बेडिङ ह्यान्डलर: `open-sse/handlers/embeddings.ts`
-- एम्बेडिङ प्रदायक रजिस्ट्री: `open-sse/config/embeddingRegistry.ts`
+- प्रयोग extraction/normalization: `open-sse/utils/usageTracking.ts`
+- ट्याग पार्सर सोच्नुहोस्: `open-sse/utils/thinkTagParser.ts`
+- इम्बेडिङ ह्यान्डलर: `open-sse/handlers/embeddings.ts`
+- इम्बेडिङ प्रदायक रजिस्ट्री: `open-sse/config/embeddingRegistry.ts`
 - छवि उत्पादन ह्यान्डलर: `open-sse/handlers/imageGeneration.ts`
 - छवि प्रदायक रजिस्ट्री: `open-sse/config/imageRegistry.ts`
-- प्रतिक्रिया शुद्धीकरण: `open-sse/handlers/responseSanitizer.ts`
+- प्रतिक्रिया सेनिटाइजेशन: `open-sse/handlers/responseSanitizer.ts`
 - भूमिका सामान्यीकरण: `open-sse/services/roleNormalizer.ts`
 
-सेवाहरू (व्यावसायिक तर्क):
+सेवाहरू (व्यापार तर्क):
 
-- खाता चयन/स्कोरिङ: `open-sse/services/accountSelector.ts`
-- कन्टेक्स्ट जीवनचक्र व्यवस्थापन: `open-sse/services/contextManager.ts`
-- IP फिल्टर कार्यान्वयन: `open-sse/services/ipFilter.ts`
+- खाता selection/scoring: `open-sse/services/accountSelector.ts`
+- सन्दर्भ जीवनचक्र व्यवस्थापन: `open-sse/services/contextManager.ts`
+- IP फिल्टर प्रवर्तन: `open-sse/services/ipFilter.ts`
 - सत्र ट्र्याकिङ: `open-sse/services/sessionManager.ts`
-- अनुरोध डिडुप्लिकेसन: `open-sse/services/signatureCache.ts`
-- प्रणाली प्रम्प्ट इन्जेक्सन: `open-sse/services/systemPrompt.ts`
-- थिङ्किङ बजेट व्यवस्थापन: `open-sse/services/thinkingBudget.ts`
-- वाइल्डकार्ड मोडेल राउटिङ: `open-sse/services/wildcardRouter.ts`
+- डुप्लिकेशन अनुरोध गर्नुहोस्: `open-sse/services/signatureCache.ts`
+- प्रणाली प्रम्प्ट इंजेक्शन: `open-sse/services/systemPrompt.ts`
+- सोच्दै बजेट व्यवस्थापन: `open-sse/services/thinkingBudget.ts`
+- वाइल्डकार्ड मोडेल रूटिङ: `open-sse/services/wildcardRouter.ts`
 - दर सीमा व्यवस्थापन: `open-sse/services/rateLimitManager.ts`
 - सर्किट ब्रेकर: `src/shared/utils/circuitBreaker.ts`
-- कन्टेक्स्ट ह्यान्डअफ: `open-sse/services/contextHandoff.ts` — कन्टेक्स्ट-रिले रणनीतिका लागि ह्यान्डअफ सारांश उत्पादन र इन्जेक्सन
-- कम्प्रेसन: `open-sse/services/compression/*` — प्रदायक अनुवादअघि सक्रिय कम्प्रेसन;
-  यसमा Caveman नियमहरू, RTK फिल्टरहरू, स्ट्याक गरिएका पाइपलाइनहरू, कम्प्रेसन कम्बोहरू, तथ्याङ्क र प्रमाणीकरण समावेश छन्
-- Codex कोटा फेचर: `open-sse/services/codexQuotaFetcher.ts` — कन्टेक्स्ट-रिले ह्यान्डअफ निर्णयहरूका लागि Codex कोटा ल्याउँछ
-- कुलडाउन-सचेत पुनःप्रयास: `src/sse/services/cooldownAwareRetry.ts` — कन्फिगर गर्न मिल्ने `requestRetry` / `maxRetryIntervalSec` सहित प्रति-मोडेल कुलडाउन पुनःप्रयासहरू
-- सुरक्षित आउटबाउन्ड फेच: `src/shared/network/safeOutboundFetch.ts` — SSRF सुरक्षा, निजी-URL अवरोध, पुनःप्रयास र टाइमआउटसहित सुरक्षित गरिएको प्रदायक/मोडेल फेच
-- आउटबाउन्ड URL सुरक्षा: `src/shared/network/outboundUrlGuard.ts` — प्रदायक URL हरूमा होस्ट जाँच; `src/shared/network/outboundUrlGuardPolicy.ts` ले `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` र तिनका ड्यासबोर्ड टगलहरूबाट मोड चयन गर्छ (`docs/reference/ENVIRONMENT.md` हेर्नुहोस्)
-- प्रदायक अनुरोध पूर्वनिर्धारितहरू: `open-sse/services/providerRequestDefaults.ts` — प्रदायक-स्तरीय `maxTokens`, `temperature`, `thinkingBudgetTokens` पूर्वनिर्धारितहरू
-- GLM प्रदायक स्थिराङ्कहरू: `open-sse/config/glmProvider.ts` — साझा GLM मोडेलहरू, कोटा URL हरू, GLMT टाइमआउट/पूर्वनिर्धारितहरू
-- Antigravity अपस्ट्रिम: `open-sse/config/antigravityUpstream.ts` — आधार URL र डिस्कभरी पाथ स्थिराङ्कहरू
-- Codex क्लाइन्ट स्थिराङ्कहरू: `open-sse/config/codexClient.ts` — संस्करणयुक्त युजर-एजेन्ट र क्लाइन्ट-संस्करण मानहरू
-- मोडेल एलियास सिड: `src/lib/modelAliasSeed.ts` — स्टार्टअपमा 30+ क्रस-प्रोक्सी डायलेक्ट एलियासहरू सिड गर्छ
+- सन्दर्भ ह्यान्डअफ: `open-sse/services/contextHandoff.ts` — ह्यान्डअफ सारांश उत्पादन र सन्दर्भ-रिले रणनीतिको लागि इंजेक्शन
+- सङ्कुचन: प्रदायक अनुवाद अघि `open-sse/services/compression/*` — सक्रिय सङ्कुचन; Caveman नियमहरू, RTK फिल्टरहरू, स्ट्याक्ड पाइपलाइनहरू, कम्प्रेसन कम्बोहरू, तथ्याङ्कहरू, र प्रमाणीकरण समावेश गर्दछ।
+- Codex कोटा फेचर: `open-sse/services/codexQuotaFetcher.ts` — सन्दर्भ-रिले ह्यान्डअफ निर्णयहरूको लागि Codex कोटा ल्याउँछ
+- Cooldown-Aware पुन: प्रयास: `src/sse/services/cooldownAwareRetry.ts` — प्रति-मोडेल कूलडाउन पुन: प्रयासहरू कन्फिगर योग्य `requestRetry` / `maxRetryIntervalSec` सँग
+- सुरक्षित आउटबाउन्ड फेच: `src/shared/network/safeOutboundFetch.ts` — guarded provider/model SSRF गार्ड, निजी-URL अवरुद्ध, पुन: प्रयास, र टाइमआउटको साथ प्राप्त गर्नुहोस्
+- आउटबाउन्ड URL गार्ड: `src/shared/network/outboundUrlGuard.ts` — होस्ट प्रदायक URLs मा जाँच गर्दछ; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, र तिनीहरूको ड्यासबोर्ड टगलहरूबाट मोड छान्छ ( `docs/reference/ENVIRONMENT.md` हेर्नुहोस्)
+- प्रदायक अनुरोध पूर्वनिर्धारितहरू: `open-sse/services/providerRequestDefaults.ts` — प्रदायक-स्तर `maxTokens`, `temperature`, `thinkingBudgetTokens` पूर्वनिर्धारितहरू
+- GLM प्रदायक स्थिरांक: `open-sse/config/glmProvider.ts` — साझा GLM मोडेलहरू, कोटा URLs, GLMT timeout/defaults
+- Antigravity अपस्ट्रीम: `open-sse/config/antigravityUpstream.ts` — आधार URL र खोज पथ स्थिरांकहरू
+- Codex ग्राहक स्थिरांक: `open-sse/config/codexClient.ts` — संस्करण गरिएको प्रयोगकर्ता-एजेन्ट र ग्राहक-संस्करण मानहरू
+- मोडेल उपनाम बीज: `src/lib/modelAliasSeed.ts` — बीज 30 + क्रस-प्रोक्सी बोली उपनाम स्टार्टअपमा
 
-डोमेन तहका मोड्युलहरू:
+डोमेन तह मोड्युलहरू:
 
-- लागत नियमहरू/बजेटहरू: `src/domain/costRules.ts`
+- लागत rules/budgets: `src/domain/costRules.ts`
 - फलब्याक नीति: `src/domain/fallbackPolicy.ts`
-- कम्बो रिजोल्भर: `src/domain/comboResolver.ts`
-- लकआउट नीति: `src/domain/lockoutPolicy.ts`
-- नीति इन्जिन: `src/domain/policyEngine.ts` — केन्द्रीकृत लकआउट → बजेट → फलब्याक मूल्याङ्कन
+- आरक्षित कम्बो-रिजोल्युसन अनुबंध: `src/domain/comboResolver.ts`; प्रत्यक्ष मार्ग `open-sse/services/combo.ts` प्रयोग गर्दछ
+- तालाबन्दी नीति: `src/domain/lockoutPolicy.ts`
+- आरक्षित नीति-मूल्याङ्कन अनुबंध: `src/domain/policyEngine.ts`; अनुरोध पथले `src/shared/utils/apiKeyPolicy.ts` मार्फत API-कुञ्जी नीति लागू गर्दछ र `src/sse/handlers/chat/resolvedModelPolicy.ts` मार्फत समाधान-लक्ष्य प्राधिकरण
 - त्रुटि कोड सूची: `src/shared/constants/errorCodes.ts`
 - अनुरोध ID: `src/shared/utils/requestId.ts`
-- फेच टाइमआउट: `src/shared/utils/fetchTimeout.ts`
-- अनुरोध टेलिमेट्री: `src/shared/utils/requestTelemetry.ts`
-- अनुपालन/अडिट: `src/lib/compliance/index.ts`
-- मूल्याङ्कन रनर: `src/lib/evals/evalRunner.ts`
-- डोमेन स्थिति स्थायित्व: `src/lib/db/domainState.ts` — फलब्याक चेनहरू, बजेटहरू, लागत इतिहास, लकआउट स्थिति र सर्किट ब्रेकरहरूका लागि SQLite CRUD
+- टाइमआउट प्राप्त गर्नुहोस्: `src/shared/utils/fetchTimeout.ts`
+- टेलिमेट्री अनुरोध गर्नुहोस्: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval धावक: `src/lib/evals/evalRunner.ts`
+- डोमेन राज्य दृढता: `src/lib/db/domainState.ts` — SQLite CRUD फलब्याक चेनहरू, बजेटहरू, लागत इतिहास, लकआउट अवस्था, सर्किट ब्रेकरहरूका लागि
 
-OAuth प्रदायक मोड्युलहरू (`src/lib/oauth/providers/` अन्तर्गतका 27 वटा छुट्टाछुट्टै फाइल):
+OAuth प्रदायक मोड्युलहरू (27 व्यक्तिगत फाइलहरू `src/lib/oauth/providers/` अन्तर्गत ):
 
-- रजिस्ट्री इन्डेक्स: `src/lib/oauth/providers/index.ts`
-- छुट्टाछुट्टै प्रदायकहरू: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- साझा सहायकहरू: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl डिभाइस प्रवाह), `museCodeDeviceResponse.ts`
-- पातलो र्यापर: `src/lib/oauth/providers.ts` — छुट्टाछुट्टै मोड्युलहरूबाट पुनःनिर्यात गर्छ
+- रजिस्ट्री सूचकांक: `src/lib/oauth/providers/index.ts`
+- व्यक्तिगत प्रदायकहरू: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- साझा सहयोगीहरू: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl उपकरण प्रवाह), `museCodeDeviceResponse.ts`
+- पातलो र्यापर: `src/lib/oauth/providers.ts` — व्यक्तिगत मोड्युलहरूबाट पुन: निर्यात गर्दछ
 
 ## 5) एम्बेडेड सेवाहरू (v3.8.4)
 
@@ -365,13 +363,13 @@ OmniRoute ले स्थानीय रूपमा चलिरहेका 
 अटो कम्बोले स्थिर कम्बो परिभाषामा भर पर्नुको सट्टा अनुरोधको समयमा राउटिङ लक्ष्यहरूलाई गतिशील रूपमा स्कोर गर्छ र चयन गर्छ। यसले `auto/*` मोडेल उपसर्ग परिवारलाई शक्ति दिन्छ।
 
 - इन्जिन प्रविष्टि: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- समाधानकर्ता: `src/domain/comboResolver.ts` ( `auto/` उपसर्गको स्वत: पत्ता लगाउने)
+- प्रत्यक्ष कम्बो प्रविष्टि: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` द्वारा बोलाइएको
 - ड्यासबोर्ड: `/dashboard/auto-combo`
 - टेलिमेट्री: `auto_combo_decisions` SQLite तालिका
 
 प्रमुख क्षमताहरू:
 
-- **20 मार्ग रणनीतिहरू** (प्राथमिकता, भारित, फिल-फर्स्ट, राउन्ड-रोबिन, P2C, अनियमित, कम-प्रयोग गरिएको, लागत-अनुकूलित, रिसेट-अवेयर, रिसेट-विन्डो, हेडरूम, कोटा-भारित, कडा-यादृच्छिक,** अटो** , lkgp, सन्दर्भ-अनुकूलित, क्यास-अनुकूलित, सन्दर्भ-रिले,** फ्युजन** , पाइपलाइन) — auto v3.8.0 मा हेडलाइन थपिएको छ; `fusion` (प्यानल फ्यान-आउट + न्यायाधीश संश्लेषण, `open-sse/services/fusion.ts`) v3.8.36 मा नयाँ छ।
+- **22 मार्ग रणनीतिहरू** (प्राथमिकता, भारित, फिल-फर्स्ट, राउन्ड-रोबिन, P2C, अनियमित, कम-प्रयोग गरिएको, लागत-अनुकूलित, रिसेट-अवेयर, रिसेट-विन्डो, समाप्ति-पहिलो, हेडरूम, कोटा-भारित, कडा-अनियमित,** अटो** , lkgp, सन्दर्भ-अनुकूलित, क्यास-अनुकूलित, सन्दर्भ-रिले,** फ्युजन** , pipeline, jev) — auto v3.8.0 मा हेडलाइन थपिएको छ; `fusion` (प्यानल फ्यान-आउट + न्यायाधीश संश्लेषण, `open-sse/services/fusion.ts`) v3.8.36 मा नयाँ छ।
 - **१६-फ्याक्टर स्कोरिङ** : कोटा, स्वास्थ्य, उल्टो लागत, उल्टो विलम्बता, कार्य फिट र दस थप। कारकहरूको क्यानोनिकल तालिका र तिनीहरूको पूर्वनिर्धारित तौलहरू [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — मा रहन्छ यसलाई यहाँ पुन: राख्दा यसलाई बासी हुन दोस्रो स्थान दिनेछ।
 - **भर्चुअल कारखाना** स्वस्थ सक्रिय प्रदायक जडानहरूबाट उम्मेदवारहरू सोर्सिङ, नामको कुनै मिल्दो कम्बो अवस्थित नहुँदा क्षणिक कम्बोहरूलाई भौतिक बनाउँछ।
 - **स्वतः उपसर्गहरू** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — प्रत्येक ट्युन गरिएको वजन प्रोफाइल द्वारा समर्थित।
@@ -399,24 +397,28 @@ OmniRoute ले स्थानीय रूपमा चलिरहेका 
 - मोड्युल रूट: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - तातो पुन: लोड: रजिस्ट्रीले कन्फिगरेसन परिवर्तनहरूको लागि हेर्छ र ठाउँमा चेन पुन: निर्माण गर्दछ
 - तार-इन बिन्दुहरू: च्याट ह्यान्डलर प्रविष्टि, छवि उत्पादन ह्यान्डलर, प्रतिक्रिया सेनिटाइजर
-- HTTP अनुबंध: उल्लङ्घनहरू `503` को रूपमा `error.code = "GUARDRAIL_VIOLATION"` सँग
+- HTTP अनुबंध: उल्लङ्घनहरू `error.code = "GUARDRAIL_VIOLATION"` सँग `503` को रूपमा
 
 नियमावली संलेखन र थ्रेसहोल्ड ट्युनिङको लागि, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) हेर्नुहोस्।
 
 ### D. डोमेन तह
 
-`src/domain/` नेमस्पेसले नीतिगत निर्णयहरूलाई केन्द्रीकृत गर्दछ त्यसैले मार्ग ह्यान्डलरहरूले lockout/budget/fallback तर्क आफैंमा जम्मा गर्नुपर्दैन।
+`src/domain/` नेमस्पेसले डोमेन सेवाहरू र आरक्षित मूल्याङ्कन सम्झौताहरू समावेश गर्दछ। यो प्रत्येक अनुरोधको लागि अनिवार्य नीति प्रविष्टि बिन्दु होइन।
 
-- नीति इन्जिन: पूर्व कार्यान्वयन मूल्याङ्कनको लागि `src/domain/policyEngine.ts` — एकल प्रविष्टि बिन्दु (लकआउट → बजेट → फलब्याक अर्डरिङ)
+लाइभ च्याट पथले `src/shared/utils/apiKeyPolicy.ts` बाट `enforceApiKeyPolicy()` कल गर्दछ; समाधान गरिएको मोडेल र कम्बो सदस्यहरूको प्राधिकरण `src/sse/handlers/chat/resolvedModelPolicy.ts` मा लागू गरिएको छ। `src/app/api/v1/chat/completions/route.ts` मा स्व-होस्ट गरिएको प्रविष्टिले प्रेषण अघि API-कुञ्जी नीति लागू गर्दछ। कम्बो रिजोल्युसन `open-sse/services/combo.ts` मार्फत चल्छ।
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` र `src/lib/container.ts` परीक्षण गरिएको अनुबंध रहन्छ, त्यो अनुरोध मार्गको तार होइन। कन्टेनरले नीति इन्जिन दर्ता गर्दछ, तर निरीक्षण गरिएको उत्पादन अनुरोध मार्गले यसलाई समाधान गर्दैन। ती सम्झौताहरू एक्लै परिवर्तन गर्नाले लाइभ च्याट नीति वा कम्बो रूटिङ परिवर्तन हुँदैन; तिनीहरूलाई जडान वा हटाउन एक अलग डिजाइन निर्णय आवश्यक छ।
+
+- आरक्षित नीति इन्जिन: `src/domain/policyEngine.ts` — लकआउट → बजेट → फलब्याक मूल्याङ्कन
 - लागत नियम: `src/domain/costRules.ts`
 - फलब्याक नीति: `src/domain/fallbackPolicy.ts`
 - तालाबन्दी नीति: `src/domain/lockoutPolicy.ts`
 - ट्याग-आधारित मार्ग: `src/domain/tagRouter.ts`
-- कम्बो रिजोल्भर: `src/domain/comboResolver.ts` — ले ठोस कार्यान्वयन योजनाहरूमा कम्बो नामहरू, स्वतः/\* उपसर्गहरू, र वाइल्डकार्ड मोडेल लक्ष्यहरू समाधान गर्दछ।
+- आरक्षित कम्बो समाधानकर्ता: `src/domain/comboResolver.ts` — स्ट्यान्डअलोन चयन अनुबंध; प्रत्यक्ष कम्बो रूटिङ `open-sse/services/combo.ts` मा लागू गरिएको छ
 - Connection/model नियम जोड्ने: `src/domain/connectionModelRules.ts`
 - मोडेल उपलब्धता स्न्यापशटहरू: `src/domain/modelAvailability.ts`
 - प्रदायकको म्याद सकिने ट्र्याकिङ: `src/domain/providerExpiration.ts`
-- कोटा क्यास: `src/domain/quotaCache.ts`
+- कोटा क्यास: `src/domain/quotaCache.ts`। प्रदायकहरूले कोटा सञ्झ्यालहरू थप्छन् र हटाउँछन् (केही योजनाहरूको लागिOpenAI 5-घण्टा Codex विन्डो छोड्यो), त्यसैले प्रदायकको एडेप्टर पूर्ण रूपमा प्रमाणहरू पढ्ने प्रयोग (`quotasComplete`, `src/lib/usage/usageReading.ts` हेर्नुहोस् ) खाताको पूर्ण विन्डो सेट हो: पहिले थाहा भएको तर त्यहाँबाट अनुपस्थित भएको विन्डोलाई रिटायर गरिएको छ, क्यासमा, rehydraten a rehydrate, `quota_snapshots` मा। रेकर्ड), निरन्तर Codex कोटा स्थितिमा र Claude को संतृप्ति बकेटहरूमा। आंशिक प्रमाण (प्रतिक्रिया हेडरहरू, बासी प्रतिलिपिहरू) केवल यसले बोक्ने विन्डोहरू अद्यावधिक गर्दछ।
 - पतन अवस्था: `src/domain/degradation.ts`
 - कन्फिगरेसन अडिट: `src/domain/configAudit.ts`
 - OmniRoute प्रतिक्रिया मेटाडाटा बिल्डर: `src/domain/omnirouteResponseMeta.ts`
@@ -860,41 +862,47 @@ flowchart LR
 - `src/lib/db/*`: विशिष्ट मोड्युलहरू सिधै आयात गर्नुहोस् — ब्यारेल प्रयोग नगर्नुहोस् (पुरानो `localDb.ts` पुनः-निर्यात तह हटाइएको छ)
 - `src/lib/usageDb.ts`: SQLite तालिकाहरूमाथि प्रयोग इतिहास/कल लगहरूको फसाड
 
-## प्रदायक एक्जिक्युटर कभरेज (रणनीति ढाँचा)
+## प्रदायक कार्यकारी कभरेज (रणनीति ढाँचा)
 
-प्रत्येक प्रदायकसँग `BaseExecutor` (`open-sse/executors/base.ts` मा) विस्तार गर्ने विशेषीकृत एक्जिक्युटर हुन्छ, जसले URL निर्माण, हेडर निर्माण, एक्स्पोनेन्सियल ब्याकअफसहित पुनःप्रयास, क्रेडेन्सियल रिफ्रेस हुकहरू, र `execute()` अर्केस्ट्रेसन विधि प्रदान गर्छ।
+प्रत्येक प्रदायकसँग `BaseExecutor` विस्तार गर्ने एक विशेष कार्यकारी हुन्छ ( `open-sse/executors/base.ts` मा), जसले URL बिल्डिंग, हेडर निर्माण, एक्सपोनेन्शियल ब्याकअफको साथ पुन: प्रयास, क्रेडेन्सियल रिफ्रेस हुक, र `execute()` अर्केस्ट्रेशन विधि प्रदान गर्दछ।
 
-| कार्यान्वयनकर्ता          | प्रदायक(हरू)                                                                                                                                                | विशेष व्यवस्थापन                                                      |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, आदि। | प्रत्येक प्रदायकअनुसार गतिशील URL/हेडर कन्फिगरेसन                     |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | अनुकूलित परियोजना/सत्र ID, Retry-After पार्सिङ, 429 अस्पष्टीकरण       |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | डिप्लोयमेन्ट-आधारित राउटिङ, api-version क्वेरीको अनिवार्य कार्यान्वयन |
-| `BlackboxWebExecutor`     | Blackbox AI (वेब-मोड)                                                                                                                                       | TLS फिङ्गरप्रिन्ट अनुकरणसहित वेब-सत्र रिभर्स                          |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH पथ)                                                                                                                                          | अवरोध + उपकरण-पुनःम्यापिङ पाइपलाइनहरू, फिङ्गरप्रिन्ट आकार निर्धारण    |
-| `CliProxyApiExecutor`     | CLIProxyAPI-सङ्गत प्रदायकहरू                                                                                                                                | अनुकूलित प्रमाणीकरण र प्रोटोकल व्यवस्थापन                             |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | खाता ID समावेश, Neurons-आधारित प्रयोग ट्र्याकिङ                       |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | प्रणाली निर्देशनहरू समावेश गर्छ, तर्क प्रयासलाई अनिवार्य बनाउँछ       |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | थ्रेड/टर्न पिनिङसहित ब्राउजर-सत्र Responses API ब्रिज                 |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + प्रति-सत्र हेडर रोटेसन                                        |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | ConnectRPC प्रोटोकल, Protobuf इन्कोडिङ, चेकसममार्फत अनुरोध हस्ताक्षर  |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | क्लाउड एजेन्ट मोड्युलमार्फत Devin कार्य जीवनचक्र ब्रिजिङ              |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Copilot टोकन रिफ्रेस, VSCode-अनुकरण गर्ने हेडरहरू                     |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + परियोजना-स्कोपयुक्त राउटिङ                             |
-| `GlmExecutor`             | Z.AI GLM (`glmt` प्रिसेटसहित)                                                                                                                               | सोच-बजेटप्रति सचेत, GLMT प्रिसेट स्थिराङ्कहरू                         |
-| `GrokWebExecutor`         | xAI Grok वेब                                                                                                                                                | वेब-सत्र रिभर्स, मोड चयन (सोच/मानक)                                   |
-| `KieExecutor`             | KIE                                                                                                                                                         | घुम्ती सत्र एङ्करसहित अनुकूलित टोकन जारी गर्ने व्यवस्था               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | AWS EventStream बाइनरी ढाँचा → SSE रूपान्तरण                          |
-| `MuseSparkWebExecutor`    | Muse Spark (वेब)                                                                                                                                            | छवि-सन्देश ब्रिजिङसहित वेब-सत्र रिभर्स                                |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | प्रदायक-विशिष्ट अनुरोध बडी संरचना                                     |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | AI SDK-सङ्गत प्रदायक सेटअप                                            |
-| `PerplexityWebExecutor`   | Perplexity वेब                                                                                                                                              | च्याट निरन्तरताका लागि वेब-सत्र रिभर्स                                |
-| `PetalsExecutor`          | Petals वितरित इन्फरेन्स                                                                                                                                     | विकेन्द्रीकृत स्वार्म राउटिङ                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | API कुञ्जी आवश्यक छैन, दर-सीमित अनुरोधहरू                             |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | PAT र OAuth समर्थन, बहु-मोडेल निःशुल्क तह                             |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | सेवा खाता प्रमाणीकरण, क्षेत्र-आधारित एन्डपोइन्टहरू                    |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | आयात गरिएको API कुञ्जी + Connect-protobuf च्याट स्ट्रिमिङ             |
+| कार्यकारी                 | प्रदायक(हरू)                                                                                                                                              | विशेष ह्यान्डलिंग                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, अन्योलता , Together, Fireworks, Cerebras, Cohere, NVIDIA आदि। | प्रदायक प्रति गतिशील URL/header कन्फिगरेसन                                      |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                        | अनुकूलन project/session IDs, पुन: प्रयास गर्नुहोस् - पार्सिङ पछि, 429 अस्पष्टता |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                              | डिप्लोयमेन्ट-आधारित रूटिङ, एपीआई-संस्करण क्वेरी प्रवर्तन                        |
+| `BlackboxWebExecutor`     | ब्ल्याकबक्स AI (वेब-मोड)                                                                                                                                  | TLS फिंगरप्रिन्ट इमुलेशनको साथ वेब-सत्र उल्टो                                   |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH पथ)                                                                                                                                        | कन्स्ट्रेन्ट + उपकरण-रिम्याप पाइपलाइन, फिंगरप्रिन्ट आकार                        |
+| `CliProxyApiExecutor`     | CLIProxyAPI- संगत प्रदायकहरू                                                                                                                              | अनुकूलन प्रमाणीकरण र प्रोटोकल ह्यान्डलिंग                                       |
+| `CloudflareAiExecutor`    | Cloudflare कार्यकर्ता AI                                                                                                                                  | खाता ID इंजेक्शन, न्यूरोन्स-आधारित उपयोग ट्र्याकिङ                              |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                              | प्रणाली निर्देशनहरू इन्जेक्ट गर्दछ, तर्क प्रयासलाई बलियो बनाउँछ                 |
+| `ChatGptWebCodexExecutor` | ChatGPT वेब (Codex)                                                                                                                                       | ब्राउजर-सत्रले thread/turn पिनिङको साथ API bridge लाई जवाफ दिन्छ                |
+| `CommandCodeExecutor`     | आदेश कोड                                                                                                                                                  | OAuth + प्रति-सत्र हेडर रोटेशन                                                  |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                | ConnectRPC प्रोटोकल, प्रोटोबफ एन्कोडिङ, चेकसम मार्फत हस्ताक्षर अनुरोध           |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                 | क्लाउड एजेन्ट मोड्युल मार्फत Devin कार्य जीवनचक्र ब्रिजिङ                       |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                            | Copilot टोकन रिफ्रेस, VSCode-नक्कल हेडर                                         |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                | GitLab OAuth + परियोजना-स्कोप मार्ग                                             |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` प्रिसेट सहित)                                                                                                                           | सोच-बजेट सचेत, GLMT पूर्व निर्धारित स्थिरता                                     |
+| `GrokWebExecutor`         | xAI Grok वेब                                                                                                                                              | वेब-सत्र उल्टो, मोड चयन (think/standard)                                        |
+| `KieExecutor`             | KIE                                                                                                                                                       | घुम्ने सत्र एङ्करहरूसँग अनुकूलन टोकन जारी                                       |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                    | AWS EventStream बाइनरी ढाँचा → SSE रूपान्तरण                                    |
+| `MuseSparkWebExecutor`    | म्यूज स्पार्क (वेब)                                                                                                                                       | छवि-सन्देश ब्रिजिङको साथ वेब-सत्र उल्टो                                         |
+| `NlpCloudExecutor`        | NLP बादल                                                                                                                                                  | प्रदायक-विशेष अनुरोध शरीर आकार                                                  |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                  | AI SDK उपयुक्त प्रदायक सेटअप                                                    |
+| `PerplexityWebExecutor`   | अन्योलता वेब                                                                                                                                              | च्याट निरन्तरताको लागि वेब-सत्र उल्टो                                           |
+| `PetalsExecutor`          | पंखुडी वितरण अनुमान                                                                                                                                       | विकेन्द्रीकृत झुण्ड मार्ग                                                       |
+| `PollinationsExecutor`    | परागण AI                                                                                                                                                  | कुनै API कुञ्जी आवश्यक छैन, दर-सीमित अनुरोधहरू                                  |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                  | PAT र OAuth समर्थन, बहु-मोडेल फ्री टियर                                         |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                          | सेवा खाता प्रमाणीकरण, क्षेत्र-आधारित अन्तिम बिन्दुहरू                           |
+| `DevinDesktopExecutor`    | Devin डेस्कटप                                                                                                                                             | आयात गरिएको API कुञ्जी + जडान-प्रोटोबफ च्याट स्ट्रिमिङ                          |
 
-अन्य सबै प्रदायकहरू (कस्टम अनुकूल नोडहरूसहित) ले `DefaultExecutor` प्रयोग गर्छन्।
+अन्य सबै प्रदायकहरूले (अनुकूल अनुकूल नोडहरू सहित) `DefaultExecutor` प्रयोग गर्छन्।
+
+### स्वचालित जाँचहरू र वेब-सत्र खाताहरू
+
+मोडेल परीक्षणहरू, सबै परीक्षणहरू, कम्बो परीक्षणहरू र मूल्याङ्कनहरू वास्तविक च्याट अनुरोधहरू पठाउँछन्। वेब-सत्र प्रदायकले साइन-इन प्रयोगकर्ताको रूपमा कार्य गर्दछ, त्यसैले ती प्रत्येक अनुरोधहरूलाई उक्त खातामा कुराकानीको रूपमा बचत गरिनेछ; त्यस्ता कुराकानीहरू छोड्ने स्वचालित जाँचहरूले खाता निलम्बित गर्यो (#14780)। यसैले च्याट पाइपलाइनले प्रत्येक लक्ष्यलाई अस्वीकार गर्दछ स्वचालित प्रोब पुग्छ जसको प्रदायकले वेब-सत्र प्रमाण लिन्छ, एक पटक लक्ष्यको प्रदायकको समाधान भएपछि र प्रमाणहरू छनोट हुनु अघि (`src/lib/providers/chatProbePolicy.ts`)। अस्वीकार `error.code` `chat_probe_not_isolated` सँग `422` हो, र प्रोब धावकहरूले यसलाई स्किपको रूपमा रिपोर्ट गर्छन्, असफलता होइन।
+
+प्रदायकको आफ्नै नो-हिस्ट्री मोडमा प्रत्येक च्याट चलाउने एक कार्यकारीले यसलाई `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) सँग घोषणा गर्दछ। त्यस प्रदायकलाई सोधपुछ गर्न अनुमति दिइन्छ। ChatGPT वेबले `temporary-chat` घोषणा गर्दछ। परीक्षणको साथ यसको मेकानिज्ममा घोषणा पिन गर्नुहोस्, त्यसैले दावीले कोडलाई सत्य बनाइरहन सक्दैन।
 
 ## प्रदायक अनुकूलता म्याट्रिक्स
 
@@ -1060,9 +1068,9 @@ flowchart LR
 
 ## 6) SSRF / आउटबाउन्ड URL गार्ड
 
-- `src/shared/network/outboundUrlGuard.ts` ले प्रदायक एक्जिक्युटरहरूसम्म पुग्नुअघि सबै निजी/लुपब्याक/लिङ्क-लोकल लक्षित URL हरू रोक्छ
-- प्रदायक मोडेल खोज र प्रमाणीकरण रुटहरूले `src/shared/network/safeOutboundFetch.ts` प्रयोग गर्छन्, जसले प्रत्येक आउटबाउन्ड अनुरोधअघि गार्ड लागू गर्छ
-- गार्ड त्रुटिहरू HTTP 422 सहित `URL_GUARD_BLOCKED` का रूपमा देखिन्छन् र `providerAudit.ts` मार्फत अनुपालन अडिट ट्रेलमा लग गरिन्छन्
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ले `BaseExecutor.execute()` मार्फत पठाइएका च्याट अनुरोधहरूमा `src/shared/network/outboundUrlGuard.ts` लागू गर्छ। सार्वजनिक-मात्र मोडमा (निजी झण्डा बन्द भएको`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) यसले निजी र लुपब्याक होस्टहरू र 169.254.0.0/16 रोक्छ; प्रत्येक अन्य मोडमा यसले क्लाउड-मेटाडेटा होस्टहरूलाई रोक्छ। यसले कुनै पनि DNS लुकअप अघि लेखिएको रूपमा होस्टनाम वा IP शाब्दिक जाँच गर्दछ। बिल्ट-इन स्थानीय प्रदायकहरूले यसलाई छोड्छन्।
+- प्रदायक मोडेल खोज र प्रमाणीकरण मार्गहरूले `src/shared/network/safeOutboundFetch.ts` प्रयोग गर्दछ जसले प्रत्येक आउटबाउन्ड अनुरोध अघि गार्ड लागू गर्दछ।
+- HTTP 503 सँग `URL_GUARD_BLOCKED` को रूपमा गार्ड त्रुटिहरू सतह (`getSafeOutboundFetchErrorStatus`; मोडेल-खोज मार्ग 400 फर्काउँछ), र प्रमाणीकरणको क्रममा वास्तविक SSRF ब्लकहरू `provider.validation.ssrf_blocked` घटनाहरूको रूपमा अडिट ट्रेलमा लगइन हुन्छन्।
 
 ## अवलोकनयोग्यता र सञ्चालन सङ्केतहरू
 

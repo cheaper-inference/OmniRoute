@@ -337,82 +337,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Twaqqif
+## 🚀 Deployment
 
-### npm globali install (Rikomandat)
+### Installa npm globali (Rakkomandat)
 
 ```bash
 npm install -g omniroute
 
-# Oħloq direttorju tal-konfigurazzjoni
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Oħloq fajl .env (ara .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Beda s-server
+# Start server
 omniroute
-# Jew b'port abbinali:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-L-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`.
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. A `./.env` fid-direttorju tax-xogħol jista 'jiffissa biss lista qasira ta' ċwievet (`REQUIRE_API_KEY`, lokali, żona tal-ħin u settings tal-kulur, mhux il-portijiet); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Triq il-tray
+### Modalità trej
 
-Bedal OmniRoute fil-tray tas-sistema:
+Ibda OmniRoute fit-trej tas-sistema:
 
 ```bash
 omniroute serve --tray
 ```
 
-Il-kmand jirritorna wara li s-server u t-tray ikunu lesti.
+Il-kmand jirritorna wara li s-server u t-trej ikunu lesti.
 
-Is-server jibqa' mingħajr il-terminal.
+Is-server ikompli mingħajr it-terminal.
 
-It-tray mode jappoġġa macOS, Windows, u sessions Linux b'interfaċċi grafika. It-tray mode ma jiftaħx l-dashboard awtomatikament.
+Il-mod tat-trej jappoġġja sessjonijiet macOS, Windows, u Linux grafiċi. Il-mod tat-trej ma jiftaħx id-dashboard awtomatikament.
 
-Uża l-menu tal-tray għal dawn l-azzjonijiet:
+Uża l-menu tat-trej għal dawn l-azzjonijiet:
 
-- Ftaħ l-dashboard.
-- Ftaħ `/dashboard/logs`.
-- Biddel l-awto-bidu.
-- Waqqaf OmniRoute.
+- Iftaħ id-dashboard.
+- Open `/dashboard/logs`.
+- Ibdel l-awto-start.
+- Stop OmniRoute.
 
-Tagħmilx `--tray` ma' dawn l-għażliet:
+Tgħaqqadx `--tray` ma 'dawn l-għażliet:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Dawn il-mudelli jeħtieġu proprjetà differenti tal-proċess.
+Dawn il-modi jeħtieġu sjieda tal-proċess differenti.
 
-Ekwiżizzjoni ta' bidu fil-login li jmiss tal-magna:
+Ippermetti l-istartjar fil-login tal-magna li jmiss:
 
 ```bash
 omniroute autostart enable
 ```
 
-L-awto-bidu juża t-tray mode fuq macOS, Windows, u sessions Linux b'interfaċċi grafika. Linux Headless juża s-servizz attwali tal-systemd user.
+Auto-start juża l-mod trej fuq sessjonijiet macOS, Windows, u grafiċi Linux. Headless Linux juża s-servizz tal-utent systemd eżistenti.
 
-Tixħirx l-awto-bidu fil-login:
+Iddiżattiva l-istartjar waqt il-login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Tneħħija
+### Iddiżinstalla
 
-Meta m'għadekx teħtieġ OmniRoute, noffrulek żewġ scripts ħfief għat-tneħħija nadifa:
+Meta m'għadx għandek bżonn OmniRoute, aħna nipprovdu żewġ skripts ta' malajr għal tneħħija nadifa:
 
-| Kmand                    | Azzjoni                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Jneħħi l-app tal-sistema iżda **jżomm il-DB u l-konfigurazzjonijiet tiegħek** f'`~/.omniroute`. |
-| `npm run uninstall:full` | Jneħħi l-app U **jħassar permanentement il-konfigurazzjonijiet, ċavetti, u databases kollha**.  |
+| Kmand                    | Azzjoni                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** fi `~/.omniroute`.             |
+| `npm run uninstall:full` | Tneħħi l-app AND b'mod permanenti** iħassar il-konfigurazzjonijiet, iċ-ċwievet u d-databases kollha** . |
 
-> Nota: Biex tħaddem dawn il-kmandi, mur fil-folder tal-proġett OmniRoute (jekk klonjajtu) u ħaddemhom. Barra minn hekk, jekk installat globalment, tista' sempliċement tħaddem `npm uninstall -g omniroute`.
+> Nota: Biex tmexxi dawn il-kmandi, innaviga lejn il-folder tal-proġett OmniRoute (jekk ikklonjah) u mexxihom. Inkella, jekk installat globalment, tista 'sempliċement tħaddem `npm uninstall -g omniroute`.
 
-### Twaqqif VPS
+### VPS Deployment
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,21 +428,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Jew: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Twaqqif PM2 (RAM Baxxa)
+### Skjerament PM2 (Memorja Baxxa)
 
-Għal servers b'RAM limitata, uża l-għażla tal-limitu tal-memorja:
+Għal servers RAM limitat, uża l-għażla tal-limitu tal-memorja:
 
 ```bash
-# B'limitu ta' 512MB (default)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Jew b'limitu tal-memorja abbinali
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Jew uża ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -471,24 +471,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Bini ta' stampa (default = runner-cli b'codex/claude/droid installat minn qabel)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mod portable (rikomandat)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Għall-mod host-integrated b'binaries CLI, ara t-taqsima Docker fil-dokumentazzjoni ewlenija.
+Għall-modalità integrata mal-ospitanti b'binaries CLI, ara t-taqsima Docker fid-doks prinċipali.
 
 ### Void Linux (xbps-src)
 
-L-utenti tal-Void Linux jistgħu jippakkjaw u jinstallaw OmniRoute b'mod nattiv jużand il-framework tal-kross-kompilazzjoni `xbps-src`. Dan jawtomatizza l-bini standalone tal-Node/js flimkien mal-`better-sqlite3` native bindings meħtieġa.
+L-utenti ta’ Void Linux jistgħu jippakkjaw u jinstallaw OmniRoute b’mod nattiv billi jużaw il-qafas ta’ cross-compilation `xbps-src`. Dan awtomat il-bini Node.js standalone flimkien mal-irbit indiġeni `better-sqlite3` meħtieġa.
 
 <details>
 <summary><b>Ara l-mudell xbps-src</b></summary>
 
 ```bash
-# Fajl tal-mudell għal 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Iddetermina l-arqa CPU tal-mira għal node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installa d-dipendenzi kollha – omitti l-scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bni l-bundle standalone Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopja l-assetti statiċi fil-standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Ġabar il-binding nativ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Poġġi l-binding imġabar fil-bundle standalone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Neħħi l-bundles ta' @img speċifiċi għall-arqa
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopja d-dipendenzi runtime tal-pino li ġew omessi mill-analiżi statika Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevjeni t-tneħħija ta' direttorji vojta tal-app router Next.js mill-hook post-install
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,32 +580,34 @@ post_install() {
 
 </details>
 
-### Varjabbli tal-Ambjent
+### Varjabbli Ambjentali
 
-| Varjabbli                               | Default                              | Deskrizzjoni                                                                                                                                     |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Sigriet għat-tiffirma tal-JWT (**biddel fil-produzzjoni**)                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Password tal-ewwel login                                                                                                                         |
-| `DATA_DIR`                              | `~/.omniroute`                       | Direttorju tad-dejta (db, użu, logħob)                                                                                                           |
-| `PORT`                                  | default tal-frawwerk                 | Port tas-servizz (`20128` fil-eżempji)                                                                                                           |
-| `HOSTNAME`                              | default tal-frawwerk                 | Jorbot il-host (Docker default għal `0.0.0.0`)                                                                                                   |
-| `NODE_ENV`                              | default runtime                      | Waħħal `production` għat-twaqqif                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL pubbliku bażiċi murija lill-dashboard u esposta lis-sserver (tissostitwixxi l-`BASE_URL` antika)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL bażiċi tal-endpoint tal-sinkronizzazzjoni cloud (tissostitwixxi l-`CLOUD_URL` antika)                                                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Sigriet HMAC għall-API keys ġenerati                                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Infurza Bearer API key fuq `/v1/*`                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tippermetti lill-utenti tal-dashboard awtentikati jikxfu l-valuri kompluti tal-API key洢żżati meta jitolbuhom                                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Frekwenza tal-ġdid tas-server għad-dejta tal-Provider Limits maħżuna; il-buttuni tal-ġdid tal-UI għadhom jistimulaw is-sinkronizzazzjoni manwali |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Tixħirx il-prints awtomatiċi SQLite qabel il-kitbiet/importazzjoni/rkupru; il-backups manwali għadhom jaħdmu                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Jippermetti l-output tal-log tal-applikazzjoni u tal-awditjar fuq il-disk                                                                        |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Tifforza cookie `Secure` tal-awtentikazzjoni (wara reverse proxy HTTPS)                                                                          |
-| `CLOUDFLARED_BIN`                       | ma twarrabx                          | Uża binarju `cloudflared` eżistenti minflok l-downloads immaniġġjati                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Trasport għat-Quick Tunnels immaniġġjati (`http2`, `quic`, jew `auto`)                                                                           |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limitu tal-heap tal-Node.js f'MB                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Daqs massimu ta' dħul tal-cache tal-prompt                                                                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Daqs massimu ta' dħul tal-cache semantiku                                                                                                        |
+| Varjabbli                               | Default                    | Deskrizzjoni                                                                                                                                                        |
+| --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ġenerat awtomatikament)_ | JWT iffirmar sigriet — awto-ġenerat fl-ewwel ġirja u jippersisti għal `server.env`; issettjaha b'mod espliċitu meta d-direttorju tad-dejta jkun effimeru            |
+| `INITIAL_PASSWORD`                      | _(mitfi)_                  | L-ewwel password tal-login. npm/source installs tibda `CHANGEME`: ibdelha. Unset: Wizard tal-onboarding                                                             |
+| `DATA_DIR`                              | `~/.omniroute`             | Direttorju tad-dejta (db, użu, zkuk)                                                                                                                                |
+| `PORT`                                  | default tal-qafas          | Port tas-servizz (`20128` fl-eżempji)                                                                                                                               |
+| `HOSTNAME`                              | default tal-qafas          | Irbit l-ospitant (Docker default għal `0.0.0.0`)                                                                                                                    |
+| `NODE_ENV`                              | default runtime            | Set `production` for deploy                                                                                                                                         |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | Il-bażi pubblika URL ħarġet mad-dashboard u esposta għas-server (jissostitwixxi l-legacy `BASE_URL`)                                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | Cloud sync endpoint bażi URL (jissostitwixxi l-legacy `CLOUD_URL`)                                                                                                  |
+| `API_KEY_SECRET`                        | _(ġenerat awtomatikament)_ | HMAC sigriet għal ċwievet API iġġenerati — awto-ġenerati fl-ewwel ġirja u jippersistu għal `server.env`                                                             |
+| `REQUIRE_API_KEY`                       | `false`                    | Enforce Bearer API key fuq `/v1/*`                                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Ħalli l-utenti tad-dashboard awtentikati jiżvelaw valuri ewlenin API maħżuna sħaħ fuq talba                                                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Kadenza ta' aġġornament tan-naħa tas-server għad-dejta tal-Limiti tal-Fornitur fil-cache; Il-buttuni ta' aġġornament UI għadhom jibdew is-sinkronizzazzjoni manwali |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Iddiżattiva snapshots SQLite awtomatiċi qabel writes/import/restore; backups manwali għadhom jaħdmu                                                                 |
+| `APP_LOG_TO_FILE`                       | `true`                     | Jippermetti l-applikazzjoni u l-output tar-reġistru tal-verifika fuq id-diska                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | Forza `Secure` auth cookie (wara HTTPS reverse proxy)                                                                                                               |
+| `CLOUDFLARED_BIN`                       | mitfija                    | Uża binarju `cloudflared` eżistenti minflok download amministrat                                                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | Trasport għal Mini Quick ġestiti (`http2`, `quic`, jew `auto`)                                                                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Node.js heap limit in MB                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | Max entrati fil-cache fil-pront                                                                                                                                     |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | Max entrati semantiċi cache                                                                                                                                         |
 
-Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
+Għar-referenza sħiħa tal-varjabbli ambjentali, ara l- [README](../README.md).
+
+---
 
 ## 📊 Mudelli Disponibbli
 
@@ -691,7 +693,7 @@ Noti:
 
 ### Fornituri Kompatibbli mal-OpenAI tad-dwana
 
-Kwalunkwe portal li jitkellem iż- OpenAI API (proxy ospitat waħdu, vLLM, aggregatur ta’ parti terza) jista’ jiżdied bħala n-nodu tal-fornitur tiegħu stess:
+Kwalunkwe gateway li titkellem iż- OpenAI API (proxy ospitat waħdu, vLLM, aggregatur ta’ parti terza) jista’ jiżdied bħala n-nodu tal-fornitur tiegħu stess:
 
 1. **Fornituri → Żid OpenAI Kompatibbli** .
 2. **Isem** : tikketta tal-wiri għan-node.
@@ -716,8 +718,8 @@ Agħżel prefiss distint (`mygw`, `acme-proxy`). Jekk it-talbiet lil nodu person
 
 Dawn iċ-ċwievet imorru `providerSpecificData` ta' konnessjoni (per eżempju permezz ta `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — għal konnessjonijiet kompatibbli mal-format ta' chat OpenAI li l-gateway tagħhom jirrifjuta ismijiet twal ta' għodda. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u restawrati fit-tweġiba.
-- `quotaEndpoint` — l-endpoint quota/credits tal-gateway, aqra għall-istrixxa tal-kwota tad-dashboard u r-rotot konxju mill-kwota. Jaħdem kemm fuq konnessjonijiet kompatibbli mal-OpenAI kif ukoll mal-Antropiku; il-forma sħiħa hija dokumentata `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (numru sħiħ, 1–1024) — għal konnessjonijiet kompatibbli mal-format taċ-chat OpenAI li l-gateway tagħhom jirrifjuta ismijiet twal ta' għodda. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u restawrati fit-tweġiba. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go u Muse Code diġà psewdonimu ismijiet ta 'aktar minn 64 karattru mingħajr ebda setting. Valur ta 'konnessjoni jissostitwixxi l-inadempjenza ta' Azure OpenAI / Azure AI Foundry (konnessjoni Azure wara gateway aktar strett) u jistabbilixxi l-limitu għal node kompatibbli apposta; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go u Muse Code iżommu l-limitu tar-reġistru tagħhom u jinjorawh.
+- `quotaEndpoint` — l-endpoint quota/credits tal-gateway, aqra għall-istrixxa tal-kwota tad-dashboard u rotta konxja mill-kwota. Jaħdem kemm fuq konnessjonijiet kompatibbli mal-OpenAI kif ukoll mal-Antropiku; il-forma sħiħa hija dokumentata `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -752,7 +754,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-It-talbiet mibgħuta lil peer URL elenkat b'mod espliċitu biss jirċievu l-header `X-OmniRoute-Peer-Trace`. Gateway jirrifjuta istanza ripetuta ID jew baġit tal-ħops eżawrit `508 Loop Detected` HTTP fornituri ordinarji upstream ma jirċievu l-ebda metadata tal-pari.
+It-talbiet mibgħuta biss lil peer URL elenkat b'mod espliċitu jirċievu l-header `X-OmniRoute-Peer-Trace`. Gateway jirrifjuta istanza ripetuta ID jew baġit tal-ħops eżawrit `508 Loop Detected` HTTP fornituri ordinarji upstream ma jirċievu l-ebda metadata tal-pari.
 
 Peer chaining mhuwiex replikazzjoni tad-database jew failover tal-host. Kull gateway iżomm stat SQLite indipendenti, caches, counters tar-rata, u sessjonijiet. Uża reverse proxy ikkontrollat mis-saħħa jew failover tal-klijent għad-disponibbiltà active/passive jew active/active, u qatt mmonta database SQLite waħda f'istanzi multipli OmniRoute.
 
@@ -845,27 +847,27 @@ Ikkonfigurat permezz** Dashboard → Settings → Routing** . Id-daxxbord jespon
 
 **Strateġiji viżibbli mid-dashboard (rotot fil-livell tal-kont):**
 
-| Strateġija                     | Deskrizzjoni                                                                                                        |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| **Imla l-Ewwel**               | Juża l-kontijiet f'ordni ta' prijorità — il-kont primarju jieħu ħsieb it-talbiet kollha sakemm ma jkunx disponibbli |
-| **Round Robin**                | Jiċċirkola mill-kontijiet kollha b'limitu li jista' jwaħħal konfigurabbli (default: 3 sejħiet għal kull kont)       |
-| **P2C (Power of Two Choices)** | Jagħżel 2 kontijiet każwali u rotot għal wieħed aktar b'saħħtu — jibbilanċja t-tagħbija bl-għarfien tas-saħħa       |
-| **Bl-addoċċ**                  | B'mod każwali jagħżel kont għal kull talba billi juża Fisher-Yates shuffle                                          |
-| **L-Inqas Użat**               | Rotot lejn il-kont bl-eqdem `lastUsedAt` timestamp, iqassam it-traffiku b'mod uniformi                              |
-| **Spiża Ottimizzata**          | Rotot għall-kont bl-inqas valur ta 'prijorità, ottimizzat għal fornituri bl-inqas spejjeż                           |
+| Strateġija                     | Deskrizzjoni                                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **Imla l-Ewwel**               | Juża kontijiet f'ordni ta' prijorità — kont primarju jieħu ħsieb it-talbiet kollha sakemm ma jkunx disponibbli  |
+| **Round Robin**                | Jiċċirkola mill-kontijiet kollha b'limitu li jista' jwaħħal konfigurabbli (default: 3 sejħiet għal kull kont)   |
+| **P2C (Power of Two Choices)** | Jagħżel 2 kontijiet bl-addoċċ u rotot għal wieħed aktar b'saħħtu — jibbilanċja t-tagħbija bl-għarfien tas-saħħa |
+| **Bl-addoċċ**                  | B'mod każwali jagħżel kont għal kull talba billi juża Fisher-Yates shuffle                                      |
+| **L-Inqas Użat**               | Rotot lejn il-kont bl-eqdem `lastUsedAt` timestamp, iqassam it-traffiku b'mod uniformi                          |
+| **Spiża Ottimizzata**          | Rotot lejn il-kont bl-inqas valur ta' prijorità, ottimizzati għal fornituri bl-inqas spejjeż                    |
 
 **Combo avvanzati u strateġiji awtomatiċi** (konfigurabbli għal kull combo jew permezz ta' prefissi `auto/*` — ara [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — ordni stretta, qatt round-robins
-- `weighted` — traffiku proporzjonali maqsum b'piżijiet għal kull mudell
+- `weighted` — traffiku proporzjonali maqsum bil-piżijiet għal kull mudell
 - `fill-first` — ixxotta l-ewwel mudell sakemm jolqtu l-limiti
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` u `cost-optimized`
 - `auto` — score-driven fil-kandidati kollha
-- `lkgp` (L-Aħħar Fornitur Tajjeb Magħruf) — pins għall-aħħar fornitur ta’ suċċess, imbagħad jaqa’ lura għar-regoli
-- `context-optimized` — jagħżel il-mudell bl-akbar tieqa ta' kuntest ħieles
-- `context-relay` — ktajjen mudelli ta’ kuntest twil għal dawriet ta’ segwitu
+- `lkgp` (L-Aħħar Fornitur Tajjeb Magħruf) — jgħaqqad lill-aħħar fornitur ta' suċċess, imbagħad jaqa' lura għar-regoli
+- `context-optimized` — jagħżel il-mudell bl-akbar tieqa tal-kuntest ħieles
+- `context-relay` — ktajjen mudelli ta 'kuntest twil għal dawriet ta' segwitu
 
 #### Header Esterni tas-Sessjoni Twaħħal
 
@@ -885,7 +887,7 @@ underscores_in_headers on;
 
 #### Psewdoniji tal-Mudell Wildcard
 
-Oħloq mudelli ta’ wildcard biex terġa’ tikmappa l-ismijiet tal-mudelli:
+Oħloq mudelli ta’ wildcard biex tirrimappa l-ismijiet tal-mudelli:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -907,7 +909,7 @@ Chain: production-fallback
 
 ---
 
-### Kombinazzjonijiet ta' Fornituri Komuni u Disinji ta' Rotot
+### Kombinazzjonijiet ta' Fornitur Komuni u Disinji ta' Rotot
 
 Hawn huma mudelli ta' eżempju għall-kombinazzjoni ta' fornituri multipli u r-rotot bejniethom OmniRoute:
 
@@ -915,7 +917,7 @@ Hawn huma mudelli ta' eżempju għall-kombinazzjoni ta' fornituri multipli u r-r
 
 Ideali għall-aġenti tal-kodifikazzjoni (OpenCode, Claude Code, Cursor, Cline). Rotot inizjalment għal mudelli ta 'raġunament tal-fruntiera, li jaqgħu lura għal mudelli ta' kodifikazzjoni veloċi dwar l-eżawriment tal-kwota jew żbalji.
 
-- **Dashboard** : Combos → New Combo → Isem: `agent-coding` → Strateġija: `Priority`
+- **Daxxbord** : Combos → New Combo → Isem: `agent-coding` → Strateġija: `Priority`
 - **Mudelli** :
   1. `claude/claude-sonnet-4-6` (Aġent ta' kodifikazzjoni primarju)
   2. `openai/gpt-4o` (Backback sekondarju ta' kapaċità għolja)
@@ -972,32 +974,32 @@ Ikkonfigurat permezz** Dashboard → Settings → Reżiljenza** .
 
 OmniRoute timplimenta reżiljenza fil-livell tal-fornitur b'ħames komponenti:
 
-1. **Talba Kju & Pacing** — It-tiswir tat-talba fil-livell tas-sistema:
-   - **Talbiet Per Minuta (RPM)** — Talbiet massimi għal kull minuta għal kull kont
-   - **Ħin Min Bejn Talbiet** — Distanza minima f'millisekondi bejn it-talbiet
-   - **Max Talbiet Konkorrenti** — Talbiet massimi simultanji għal kull kont
+1. **Talba Kju & Pacing** — Tfassil ta' talba fil-livell tas-sistema:
+   - **Talbiet Per Minuta (RPM)** — Talbiet massimi kull minuta kull kont
+   - **Ħin Min Bejn Talbiet** — Distanza minima f'millisekondi bejn talbiet
+   - **Max Talbiet Konkorrenti** — Talbiet massimi simultanji kull kont
 
 2. **Tkessiħ tal-Konnessjoni** — Konfigurazzjoni tat-tip għal kull awtorizzazzjoni għal konnessjoni waħda wara fallimenti li jistgħu jerġgħu jippruvaw:
-   - **Tkessiħ tal-Bażi** — Tieqa default ta' cooldown għal fallimenti upstream li jistgħu jerġgħu jippruvaw
+   - **Tkessiħ tal-Bażi** — Tieqa ta' cooldown default għal fallimenti upstream li jistgħu jerġgħu jippruvaw
    - **Uża Ħjiel mill-ġdid Upstream** — Unuri `Retry-After` awtorevoli jew reset hints meta pprovduti
    - **Max Backoff Passi** — Livell massimu ta' backoff esponenzjali għal fallimenti ripetuti
 
-3. **Fornitur Circuit Breaker** — Issegwi l-fallimenti tal-fornitur minn tarf sa tarf, timmarka fornitur degradat fil-limitu ta’ twissija kkonfigurat, u tiftaħ l-interruttur meta jintlaħaq il-limitu ta’ falliment konfigurat:
-   - **Limitu ta' Degradazzjoni** — Fallimenti konsekuttivi tal-provditur qabel ma jid[lu `DEGRADED`
-   - **Limitu ta' Falliment** — Fallimenti konsekuttivi tal-provditur qabel ma jid[lu `OPEN`
+3. **Fornitur Circuit Breaker** — Jsegwi l-fallimenti tal-fornitur minn tarf sa tarf, jimmarka fornitur degradat fil-limitu ta' twissija kkonfigurat, u jiftaħ l-interruttur meta jintlaħaq il-limitu ta' falliment konfigurat:
+   - **Limitu ta' Degradazzjoni** — Fallimenti konsekuttivi tal-fornitur qabel ma jidħol `DEGRADED`
+   - **Limitu ta' Falliment** — Fallimenti konsekuttivi tal-fornitur qabel ma jidħol `OPEN`
    - **Reset Timeout** — Tieqa ta' żmien qabel ma l-fornitur jerġa' jiġi ttestjat
    - **CLOSED** (B'saħħithom) — It-talbiet jiċċirkolaw b'mod normali
-   - **DEGRADED** — It-talbiet għadhom jiċċirkolaw waqt li jiġu ssorveljati fallimenti elevati
-   - **OPEN** — Il-fornitur huwa temporanjament imblukkat wara fallimenti ripetuti
+   - **DEGRADED** — It-talbiet għadhom jiċċirkolaw filwaqt li l-fallimenti elevati jiġu ssorveljati
+   - **OPEN** — Provider huwa temporanjament imblukkat wara fallimenti ripetuti
    - **HALF_OPEN** — Ittestjar jekk il-fornitur ikun irkupra
 
    Limiti tar-rata `429` b'ambitu ta' konnessjoni jibqgħu ġewwa** Tkessiħ tal-Konnessjoni** u ma jgħoddux lejn il-fornitur breaker.
 
    L-istat tar-runtime tal-interruttur tal-fornitur huwa muri fuq** Dashboard → Health** biss.
 
-4. **Stenna Għal Cooldown** — Jekk kull konnessjoni kandidat tkun diġà qed tkessaħ, OmniRoute jista 'jistenna l-aktar cooldown bikri u jerġa' jipprova l-istess talba tal-klijent awtomatikament.
+4. **Stenna Għal Cooldown** — Jekk kull konnessjoni kandidat diġà qed tkessaħ, OmniRoute jista' jistenna l-aktar cooldown bikri u jerġa' jipprova l-istess talba tal-klijent awtomatikament.
 
-5. **Limitu tar-Rata Awto-Sejbien** — Meta l-fornituri upstream jirritornaw twieqi ta’ stennija espliċiti, dawk il-ħjiel jegħlbu t-tkessiħ tal-konnessjoni lokali meta l-issettjar ikun attivat.
+5. **Limitu tar-Rata Awto-Sejbien** — Meta l-fornituri upstream jirritornaw twieqi ta' stennija espliċiti, dawk il-ħjiel jegħlbu t-tkessiħ tal-konnessjoni lokali meta l-issettjar ikun attivat.
 
 **Tip Pro:** Uża l-** Saħħa** paġna biex tispezzjona u tirrisettja l-breakers tal-fornitur ħajjin wara qtugħ. Il-paġna Reżiljenza tbiddel biss il-konfigurazzjoni.
 
@@ -1039,15 +1041,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Il-paġna tas-settings hija organizzata fi** 7 tabs** għal navigazzjoni faċli:
 
-| Tab            | Kontenut                                                                                                                                                                         |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ġenerali**   | Għodod tal-ħażna tas-sistema, imġieba default, viżibilità tal-mina Endpoint                                                                                                      |
-| **Dehra**      | Kontrolli tat-temi (light/dark/system), viżibilità tal-sidebar, toggles tal-pannelli għall-karti tal-mini Cloudflare/Tailscale/ngrok                                             |
-| **AI**         | Baġit tal-ħsieb (passthrough / auto-strip / custom / adattivi — ara [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), sistema globali fil-pront, stats tal-cache fil-pront           |
-| **Sigurtà**    | Login/Password settings, IP Access Control, API auth for `/models`, Provider Blocking, pront-injection guard                                                                     |
-| **Rotot**      | Strateġija ta’ rotta globali (Imla l-Ewwel / Round Robin / P2C / Random / L-Inqas Użat / Spiża Ottimizzata), psewdonimi tal-mudell wildcard, ktajjen ta’ riżerva, defaults combo |
-| **Reżiljenza** | Kju talba, cooldown tal-konnessjoni, konfigurazzjoni tal-interruttur tal-fornitur, u mġiba ta 'stennija għat-tkessiħ                                                             |
-| **Avvanzat**   | Konfigurazzjoni tal-prokura globali (HTTP/SOCKS5), overrides tal-prokura għal kull fornitur                                                                                      |
+| Tab            | Kontenut                                                                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ġenerali**   | Għodod tal-ħażna tas-sistema, imġieba default, viżibilità tal-mina Endpoint                                                                                                             |
+| **Dehra**      | Kontrolli tat-temi (light/dark/system), viżibilità tal-sidebar, toggles tal-pannelli għall-karti tal-mini Cloudflare/Tailscale/ngrok                                                    |
+| **AI**         | Baġit tal-ħsieb (passthrough / auto-strip / custom / — adattivi ara [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), sistema globali fil-pront, stats tal-cache fil-pront                  |
+| **Sigurtà**    | Login/Password settings, IP Access Control, API auth for `/models`, Provider Blocking, pront-injection guard                                                                            |
+| **Rotot**      | Strateġija ta’ rotta globali (Imla l-Ewwel / Round Robin / P2C / Random / L-Inqas Użat / Ottimizzata tal-Ispejjeż), psewdonimi tal-mudell wildcard, ktajjen ta’ riżerva, defaults combo |
+| **Reżiljenza** | Kju talba, cooldown tal-konnessjoni, konfigurazzjoni tal-interruttur tal-fornitur, u mġiba ta’ stennija għat-tkessiħ                                                                    |
+| **Avvanzat**   | Konfigurazzjoni tal-prokura globali (HTTP/SOCKS5), overrides tal-prokura għal kull fornitur                                                                                             |
 
 Ġenerali m'għadux jidduplika noti tal-qtugħ u l-cache tal-qari biss. Is-settings taż-żamma u l-ottimizzazzjoni tad-database huma persistenti permezz ta `/api/settings/database`; l-ikklerjar manwali tal-cache juża `DELETE /api/cache`. Il-limiti tar-ringieli tar-rikjesti u tal-prokura huma kkontrollati minn `CALL_LOGS_TABLE_MAX_ROWS` u `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1057,10 +1059,10 @@ Il-paġna tas-settings hija organizzata fi** 7 tabs** għal navigazzjoni faċli:
 
 Aċċess permezz** Dashboard → Spejjez** .
 
-| Tab           | Għan                                                                                                                  |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Baġit**     | Issettja limiti ta' nfiq għal kull ċavetta API b'baġits daily/weekly/monthly u traċċar f'ħin reali                    |
-| **Ipprezzar** | Ara u editja l-iskrizzjonijiet tal-prezzijiet tal-mudell — ispiża għal kull 1K tokens input/output għal kull fornitur |
+| Tab           | Għan                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Baġit**     | Issettja limiti ta' nfiq għal kull ċavetta API b'baġits daily/weekly/monthly u traċċar f'ħin reali                  |
+| **Ipprezzar** | Ara u editja l-iskrizzjonijiet tal-prezzijiet tal-mudell — cost għal kull 1K input/output tokens għal kull fornitur |
 
 ```bash
 # API: Set a budget
@@ -1092,7 +1094,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` hija r-rotta indiġena ta' Deepgram u teħtieġ ċavetta Deepgram API. Jekk OpenRouter biss huwa kkonfigurat, uża `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` hija r-rotta Deepgram nattiva u teħtieġ ċavetta Deepgram API. Jekk OpenRouter biss huwa kkonfigurat, uża `openrouter/deepgram/nova-3`.
 
 **Diskors għal Test (traskrizzjoni)** fornituri:
 
@@ -1129,20 +1131,20 @@ Formati awdjo appoġġjati għat-traskrizzjoni: `mp3`, `wav`, `m4a`, `flac`, `og
 
 Ikkonfigura l-ibbilanċjar għal kull combo** Dashboard → Combos → Create/Edit → Strategy** .
 
-| Strateġija            | Deskrizzjoni                                                            |
-| --------------------- | ----------------------------------------------------------------------- |
-| **Round-Robin**       | Iddur minn mudelli sekwenzjali                                          |
-| **Prijorità**         | Dejjem jipprova l-ewwel mudell; jaqa' lura biss fuq żball               |
-| **Bl-addoċċ**         | Jagħżel mudell każwali mill-combo għal kull talba                       |
-| **Peżati**            | Rotot proporzjonalment ibbażati fuq piżijiet assenjati għal kull mudell |
-| **L-Inqas Użat**      | Rotot għall-mudell bl-inqas talbiet reċenti (uża metriċi kombinati)     |
-| **Spiża Ottimizzata** | Rotot għall-orħos mudell disponibbli (użi tabella tal-prezzijiet)       |
+| Strateġija                  | Deskrizzjoni                                                            |
+| --------------------------- | ----------------------------------------------------------------------- |
+| **Round-Robin**             | Iddur minn mudelli sekwenzjali                                          |
+| **Prijorità**               | Dejjem jipprova l-ewwel mudell; jaqa' lura biss fuq żball               |
+| **Bl-addoċċ**               | Jagħżel mudell każwali mill-combo għal kull talba                       |
+| **Peżati**                  | Rotot proporzjonalment ibbażati fuq piżijiet assenjati għal kull mudell |
+| **L-Inqas Użat**            | Rotot għall-mudell bl-inqas talbiet reċenti (uża metriċi kombinati)     |
+| **Ottimizzat għall-ispiża** | Rotot għall-orħos mudell disponibbli (użi tabella tal-prezzijiet)       |
 
 Defaults globali tal-combo jistgħu jiġu stabbiliti** Dashboard → Settings → Routing → Combo Defaults** . Il-timeouts fil-mira kombinati jirtu t-timeout tat-talba attwali b'mod awtomatiku. Użu** Timeout fil-mira (sekondi)** fuq inadempjenzi combo jew combo individwali biss meta limitu iqsar għal kull mira għandu jwassal għal fallback aktar mgħaġġel.
 
 L-ottimizzazzjonijiet tal-combo ta' latenza żero huma opt-in. Ħalli** Ottimizzazzjonijiet ta' latenza żero** diżattivati biex jipprevjenu dawn il-karatteristiċi ta 'latency milli jġegħlu l-miri fallback, jaqbżu miri bbażati fuq l-istorja TTFT, jew jikkompressaw talbiet fallback; li tippermetti li tippermetti hedging konfigurat, skips TTFT previttivi, u kompressjoni ta 'riżerva proattiva biex jinnegozjaw fedeltà routing/request għal latency ta' denb aktar baxx.
 
-Itfi** Raġunar token buffer** meta l-fornituri upstream jeħtieġu limiti stretti `max_tokens` / `maxOutputTokens`. Meta jkun attivat, ir-routing kombinat iżid biss headroom ta' mudell ta' raġunament għal mudelli b'limitu ta 'output magħruf u jħalli l-limitu tat-tokens tal-klijent mhux mibdul meta l-valur buffered sikur jaqbeż dak il-limitu. Jekk il-limitu tal-klijent huwa diġà 'l fuq minn limitu magħruf, OmniRoute jorbotha għal dak il-limitu qabel ma tibgħat it-talba upstream.
+Itfi** Raġunar token buffer** meta l-fornituri upstream jeħtieġu limiti stretti `max_tokens` / `maxOutputTokens`. Meta jkun attivat, ir-routing kombinat iżid biss headroom ta' mudell ta' raġunament għal mudelli b'limitu tal-output magħruf u jħalli l-limitu tat-token tal-klijent mhux mibdul meta l-valur buffered sikur jaqbeż dak il-limitu. Jekk il-limitu tal-klijent huwa diġà 'l fuq minn limitu magħruf, OmniRoute jorbotha għal dak il-limitu qabel ma tibgħat it-talba upstream.
 
 ---
 

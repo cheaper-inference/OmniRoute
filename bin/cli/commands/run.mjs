@@ -16,7 +16,7 @@ import os from "node:os";
 import { join } from "node:path";
 import { spawn, execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import {
@@ -30,7 +30,14 @@ function isBlank(value) {
   return value === undefined || value === null || String(value).trim() === "";
 }
 
-function toAuthSource(targetOpts) {
+/**
+ * Where the credential a plan launches with comes from. `authToken` is the
+ * credential the target's own resolver returned, so a variable that target
+ * never reads (Codex ignores ANTHROPIC_AUTH_TOKEN) is not reported as the
+ * source of a launch that actually gets the no-auth sentinel.
+ */
+function toAuthSource(targetOpts, baseUrl, authToken) {
+  if (isBlank(authToken)) return "none";
   const explicit =
     !isBlank(targetOpts.token) || !isBlank(targetOpts.apiKey) || !isBlank(targetOpts["api-key"]);
   if (explicit) return "option";
@@ -41,8 +48,10 @@ function toAuthSource(targetOpts) {
   }
 
   try {
+    // Same rule as the launch resolvers: the context token only goes to the
+    // context's own origin, so only then is it the source.
     const context = resolveActiveContext(targetOpts.context || process.env.OMNIROUTE_CONTEXT);
-    if (context && (context.accessToken || context.apiKey)) return "context";
+    if (contextCredentialFor(context, baseUrl)) return "context";
   } catch {
     // no active context
   }
@@ -142,7 +151,7 @@ async function buildClaudePlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
   };
 }
@@ -176,7 +185,7 @@ async function buildCodexPlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     providerArgs,
     profileArgs,
@@ -343,7 +352,7 @@ async function buildGenericPlan(target, rawOpts, args = []) {
     args: quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell),
     model: model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     modelArgs,
     configOverlay:

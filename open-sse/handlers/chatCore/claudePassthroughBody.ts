@@ -12,15 +12,22 @@
  */
 
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
+import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
-import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
+import {
+  acceptsInlineToolAdditions,
+  hoistDeferredToolsForTarget,
+} from "../../translator/helpers/claudeDeferredTools.ts";
 import {
   disableManualThinkingWithoutFinalBlock,
+  ensurePassthroughCacheBreakpoints,
   splitMisplacedToolResults,
   type ClaudeRequestBody,
 } from "../../translator/helpers/claudeHelper.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import type { ConnectionCacheOverride } from "../../utils/cacheControlPolicy.ts";
 import { sanitizeAnthropicPassthroughHistory } from "./anthropicPassthroughHistory.ts";
+import { normalizeAdvisorToolModels } from "./claudeAdvisorTool.ts";
 import {
   extractSystemRoleMessages,
   hoistLeadingTextSystemMessages,
@@ -30,7 +37,61 @@ import type { ClaudeMessage } from "./claudeMessageTypes.ts";
 import { stripOutputConfigFormatForCompat } from "./outputConfigFormatStrip.ts";
 import { stripClaudeRejectedTopLevelFields } from "./passthroughHelpers.ts";
 
+const BILLING_LINE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+// Claude Code's billing line rotates every turn. A non-Claude target cannot use it, and it breaks
+// that target's prompt-cache prefix. Replace the system value; never mutate the client's array.
+// shortcut: Anthropic-shape means provider claude/anthropic/anthropic-compatible-* or a "claude"
+// model name; a custom host that proxies real Claude under another name keeps losing the line.
+function dropBillingLine(body: Record<string, unknown>): void {
+  const { system } = body;
+  if (typeof system === "string") {
+    const text = system.replace(BILLING_LINE, "");
+    if (text) body.system = text;
+    else delete body.system;
+  } else if (Array.isArray(system)) {
+    body.system = system.flatMap((block) => {
+      const text = block?.text;
+      if (typeof text !== "string" || !BILLING_LINE.test(text)) return [block];
+      const rest = text.replace(BILLING_LINE, "");
+      return rest ? [{ ...block, text: rest }] : [];
+    });
+  }
+}
+
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
+
+type ClaudePassthroughBodyInput = {
+  body: Record<string, unknown>;
+  provider: string;
+  clientHeaders: Headers | Record<string, unknown> | null | undefined;
+  isClaudeCodeSemanticPassthrough: boolean;
+  effectiveModel: string;
+  targetFormat: string;
+  preserveCacheControl: boolean;
+  connectionCacheOverride?: ConnectionCacheOverride | null;
+  normalizeClaudeUpstreamMessages: (
+    payload: Record<string, unknown>,
+    options?: { preserveToolResultBlocks?: boolean }
+  ) => void;
+  applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
+  log?: LoggerLike;
+};
+
+/**
+ * Anthropic-native upstreams only: third-party Claude-shape providers have their own (or no)
+ * caching semantics. A connection's cache override is the operator's opt-out.
+ */
+function acceptsInjectedCacheBreakpoints(
+  provider: string,
+  connectionCacheOverride: ConnectionCacheOverride | null | undefined
+): boolean {
+  if (provider !== "claude" && !provider.startsWith("anthropic-compatible-")) return false;
+  return (
+    connectionCacheOverride?.supportsPromptCaching !== false &&
+    connectionCacheOverride?.cacheControlPassthrough !== "strip"
+  );
+}
 
 export function buildClaudePassthroughBody({
   body,
@@ -40,24 +101,11 @@ export function buildClaudePassthroughBody({
   effectiveModel,
   targetFormat,
   preserveCacheControl,
+  connectionCacheOverride,
   normalizeClaudeUpstreamMessages,
   applyReasoningRuleDirective,
   log,
-}: {
-  body: Record<string, unknown>;
-  provider: string;
-  clientHeaders: Headers | Record<string, unknown> | null | undefined;
-  isClaudeCodeSemanticPassthrough: boolean;
-  effectiveModel: string;
-  targetFormat: string;
-  preserveCacheControl: boolean;
-  normalizeClaudeUpstreamMessages: (
-    payload: Record<string, unknown>,
-    options?: { preserveToolResultBlocks?: boolean }
-  ) => void;
-  applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
-  log?: LoggerLike;
-}): Record<string, unknown> {
+}: ClaudePassthroughBodyInput): Record<string, unknown> {
   // applyReasoningRuleDirective returns unknown; the hoist helper requires a record.
   const claudePassthroughBody = applyReasoningRuleDirective({ ...body }, "claude");
   const translatedBody = hoistDeferredToolsForTarget(
@@ -70,10 +118,15 @@ export function buildClaudePassthroughBody({
   );
   translatedBody._disableToolPrefix = true;
 
-  // Sanitize historical thinking-block signatures for Anthropic-native Claude OAuth.
+  if (!acceptsInlineToolAdditions(provider) && !/claude/i.test(effectiveModel)) {
+    dropBillingLine(translatedBody);
+  }
+
+  const isFirstPartyAnthropic = provider === "claude" || provider === "anthropic";
+  // Sanitize historical thinking-block signatures for first-party Anthropic (OAuth + API key).
   // Only Anthropic's first-party API validates these signatures (token-bound); third-party
   // Claude-shape providers do not. See redactPassthroughThinkingSignatures + issue #2454.
-  if (provider === "claude") {
+  if (isFirstPartyAnthropic) {
     // Also drops foreign server_tool_use ids (z.ai `call_…`) that fail ^srvtoolu_ (9router#3685).
     translatedBody.messages = sanitizeAnthropicPassthroughHistory(
       translatedBody.messages
@@ -84,9 +137,15 @@ export function buildClaudePassthroughBody({
 
     stripClaudeRejectedTopLevelFields(translatedBody, clientHeaders);
   }
+  if (provider === "claude" || provider === "anthropic") {
+    // Claude Code names the advisor tool's model with the OmniRoute alias (claude-opus-5.5).
+    normalizeAdvisorToolModels(translatedBody);
+  }
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
+  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
+  // `anthropic` API-key dispatch does not, so it always hoists.
   if (isClaudeCodeSemanticPassthrough) {
     if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
       extractSystemRoleMessages(translatedBody);
@@ -106,8 +165,8 @@ export function buildClaudePassthroughBody({
         translatedBody.messages as ClaudeMessage[]
       ) as typeof translatedBody.messages;
     }
-    if (provider === "claude") {
-      ensureCacheControlOnLastUserMessage(translatedBody);
+    if (isFirstPartyAnthropic) {
+      ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {
     // Same guard as the CC-bridge path: only preserve tool_result blocks
@@ -119,6 +178,16 @@ export function buildClaudePassthroughBody({
     normalizeClaudeUpstreamMessages(translatedBody, {
       preserveToolResultBlocks: targetFormat === FORMATS.CLAUDE,
     });
+    // Marker-less Anthropic clients (e.g. Cursor) ship zero cache
+    // breakpoints through pure passthrough, re-billing the full prefix
+    // every turn (678M uncached prompt tokens/week observed). Inject the
+    // standard breakpoints ONLY when the body carries none anywhere —
+    // a client that manages its own markers stays byte-untouched. A combo
+    // replays the caller's body on its next step, so write into copies only.
+    if (acceptsInjectedCacheBreakpoints(provider, connectionCacheOverride)) {
+      detachClaudeCodeRewriteTargets(translatedBody);
+      ensurePassthroughCacheBreakpoints(translatedBody as ClaudeRequestBody, provider);
+    }
   }
 
   log?.debug?.("FORMAT", `claude passthrough (preserveCache=${preserveCacheControl})`);
@@ -127,9 +196,11 @@ export function buildClaudePassthroughBody({
   // Anthropic returns a 400 on the legacy field; some clients (e.g. ForgeCode)
   // still emit it. Preserves an existing output_config.format if present.
   if (translatedBody.output_format !== undefined) {
+    // Copy-on-write: output_config may be the caller's shared object (shallow
+    // body copy per combo leg); writing format into it leaks to the other legs.
     const oc =
       translatedBody.output_config && typeof translatedBody.output_config === "object"
-        ? (translatedBody.output_config as Record<string, unknown>)
+        ? { ...(translatedBody.output_config as Record<string, unknown>) }
         : {};
     if (oc.format === undefined) oc.format = translatedBody.output_format;
     translatedBody.output_config = oc;

@@ -95,15 +95,10 @@ test("fast-gates carries the deterministic ratchets and security scanners from t
     ),
     "oasdiff must receive the origin-prefixed base ref fetched by actions/checkout"
   );
-  for (const version of [
-    "GITLEAKS_VERSION=v",
-    "OSV_SCANNER_VERSION=v",
-    "ACTIONLINT_VERSION=v",
-    "ZIZMOR_VERSION=",
-    "OASDIFF_VERSION=v",
-  ]) {
+  for (const version of ["GITLEAKS_VERSION=v", "OSV_SCANNER_VERSION=v", "OASDIFF_VERSION=v"]) {
     assert.ok(block.includes(version), `fast-gates must pin ${version.split("=")[0]}`);
   }
+  assert.ok(block.includes("bash scripts/ci/install-workflow-scanners.sh"));
   assert.doesNotMatch(
     block,
     /download-actionlint\.bash\) latest/,
@@ -126,8 +121,8 @@ test("the TS7 shadow and zero-new-diagnostics ratchet use one pinned compiler an
   // ref arrives via that step's PR_BASE_SHA env binding.
   assert.match(
     block,
-    /PR_BASE_SHA:\s*\$\{\{ github\.event\.pull_request\.base\.sha \}\}/,
-    "the ratchet must compare against the exact pull-request base commit"
+    /PR_BASE_SHA:\s*\$\{\{ github\.event\.pull_request\.base\.sha \|\| needs\.changes\.outputs\.candidateBase \}\}/,
+    "the ratchet must compare against the exact pull-request (or omni-queue candidate) base commit"
   );
   assert.match(
     block,

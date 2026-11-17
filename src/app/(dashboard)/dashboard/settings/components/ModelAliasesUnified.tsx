@@ -183,7 +183,7 @@ export default function ModelAliasesUnified() {
           <Icon name="swap_horiz" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg">
             {translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           </h3>
           <p className="text-sm text-text-muted">
@@ -208,6 +208,8 @@ export default function ModelAliasesUnified() {
 
       <div className="mb-5 rounded-lg border border-border/30 bg-surface/20 p-4">
         <SegmentedControl
+          semantics="radio"
+          aria-label={translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           className="mb-3"
           size="sm"
           value={aliasMode}

@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Các tệp ở thư mục gốc
+## Tập tin gốc
 
-| Tệp                                         | Mục đích                                                                                            |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Trang đích tiếp thị + hướng dẫn bắt đầu nhanh + ma trận tính năng (xem thêm `llm.txt`)              |
-| **CHANGELOG.md**                            | Nhật ký thay đổi theo từng bản phát hành (được tự động tạo bởi skill `/version-bump-cc`)            |
-| **LICENSE**                                 | Nội dung giấy phép MIT                                                                              |
-| **CLAUDE.md**                               | Quy tắc dự án dành cho các agent Claude Code (quy tắc bắt buộc, quy ước, tình huống)                |
-| **AGENTS.md**                               | Giống CLAUDE.md nhưng dành cho các agent AI không phải Claude (Codex, Cursor, v.v.)                 |
-| **GEMINI.md**                               | Quy tắc súc tích dành cho các agent dựa trên Gemini (tập con của CLAUDE.md)                         |
-| **CONTRIBUTING.md**                         | Hướng dẫn đóng góp: thiết lập, conventional commits, kiểm thử, quy trình PR                         |
-| **SECURITY.md**                             | Chính sách báo cáo lỗ hổng, các phiên bản được hỗ trợ, mô hình mối đe dọa                           |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — các kỳ vọng về hành vi trong cộng đồng                                       |
-| **llm.txt**                                 | Trang đích dạng văn bản thuần được tối ưu cho trình thu thập dữ liệu LLM (SEO cho trợ lý AI)        |
-| **package.json**                            | Tệp manifest npm, script, phần phụ thuộc, engine, ngưỡng bao phủ c8                                 |
-| **package-lock.json**                       | Cây phần phụ thuộc đã khóa                                                                          |
-| **tsconfig.json**                           | Cấu hình TypeScript gốc                                                                             |
-| **tsconfig.typecheck-core.json**            | Cấu hình kiểm tra kiểu cho phần lõi `src/`                                                          |
-| **tsconfig.typecheck-noimplicit-core.json** | Kiểm tra kiểu nghiêm ngặt (`noImplicitAny`)                                                         |
-| **tsconfig.tsbuildinfo**                    | Bộ nhớ đệm bản dựng tăng dần của TS (bị git bỏ qua)                                                 |
-| **next.config.mjs**                         | Cấu hình bản dựng Next.js 16 (đầu ra độc lập)                                                       |
-| **next-env.d.ts**                           | Các kiểu môi trường do Next.js tự động tạo                                                          |
-| **eslint.config.mjs**                       | Cấu hình phẳng ESLint (quy tắc cho từng khu vực dự án)                                              |
-| **prettier.config.mjs**                     | Quy tắc định dạng Prettier                                                                          |
-| **postcss.config.mjs**                      | Cấu hình PostCSS cho pipeline Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Cấu hình kiểm thử E2E Playwright                                                                    |
-| **vitest.config.ts**                        | Cấu hình Vitest (bộ kiểm thử mặc định)                                                              |
-| **vitest.mcp.config.ts**                    | Cấu hình Vitest cho máy chủ MCP / các bộ autoCombo / bộ nhớ đệm                                     |
-| **sonar-project.properties**                | Cấu hình SonarQube/SonarCloud (chất lượng mã)                                                       |
-| **Dockerfile**                              | Bản dựng Docker nhiều giai đoạn (builder → runner-base → runner-cli)                                |
-| **docker-compose.yml**                      | Compose phát triển với 4 profile (base, cli, host, cliproxyapi) + sidecar redis                     |
-| **docker-compose.prod.yml**                 | Compose cho môi trường production (cổng 20130, redis, volume được đặt tên)                          |
-| **.dockerignore**                           | Các tệp bị loại khỏi ngữ cảnh Docker                                                                |
-| **fly.toml**                                | Cấu hình triển khai Fly.io (khu vực `sin`, cổng 20128, volume /data)                                |
-| **.env.example**                            | Tệp môi trường mẫu (được tự động sao chép thành `.env` trong lần cài đặt đầu tiên)                  |
-| **.gitignore**                              | Các mẫu bỏ qua của Git                                                                              |
-| **.npmignore**                              | Danh sách loại trừ khi xuất bản npm                                                                 |
-| **.npmrc**                                  | Cấu hình npm (registry, chính sách lockfile)                                                        |
-| **.node-version**                           | Phiên bản Node cố định (được các công cụ tương thích với nvm sử dụng)                               |
-| **.nvmrc**                                  | Phiên bản Node cố định cho nvm                                                                      |
-| **eslint.complexity.config.mjs**            | Cấu hình ESLint cho ngưỡng độ phức tạp (`scripts/check/check-complexity.mjs --config`)              |
-| **eslint.sonarjs.config.mjs**               | Cấu hình ESLint cho các quy tắc SonarJS (độ phức tạp nhận thức / trùng lặp)                         |
-| **source.config.ts**                        | Cấu hình nguồn `defineDocs` của Fumadocs (cung cấp dữ liệu cho `.source/`)                          |
-| **knip.json**                               | Cấu hình Knip — tệp/export/phần phụ thuộc không dùng đến (cung cấp dữ liệu cho ngưỡng mã chết)      |
-| **stryker.conf.json**                       | Cấu hình kiểm thử đột biến Stryker                                                                  |
-| **.size-limit.json**                        | Cấu hình ngân sách kích thước bundle của size-limit                                                 |
-| **promptfooconfig.yaml**                    | Cấu hình đánh giá promptfoo                                                                         |
-| **.gitleaks.toml**                          | Bộ quy tắc quét bí mật của gitleaks                                                                 |
-| **.zizmor.yml**                             | Cấu hình kiểm tra bảo mật GitHub Actions của zizmor                                                 |
-| **socket.yml**                              | Cấu hình chuỗi cung ứng của Socket.dev                                                              |
-| **news.json**                               | Nguồn cấp thông báo v2 đã bản địa hóa; mục ra mắt Radar được phát hành ở trạng thái không hoạt động |
-| **flake.nix** / **flake.lock**              | Định nghĩa dev-shell của Nix + tệp khóa                                                             |
-| **.env**                                    | Bí mật cục bộ (bị git bỏ qua — được tạo từ `.env.example`)                                          |
+| Tài liệu                                    | Mục đích                                                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Trang đích tiếp thị + ma trận tính năng + bắt đầu nhanh (xem thêm `llm.txt`)                                   |
+| **CHANGELOG.md**                            | Nhật ký thay đổi mỗi lần phát hành (được tạo tự động bởi kỹ năng `/version-bump-cc` )                          |
+| **LICENSE**                                 | văn bản giấy phép MIT                                                                                          |
+| **CLAUDE.md**                               | Quy tắc dự án dành cho đại lý Mã Claude (quy tắc cứng, quy ước, kịch bản)                                      |
+| **AGENTS.md**                               | Tương tự như CLAUDE.md nhưng dành cho các đại lý không phải Claude AI (Codex, Cursor, v.v.)                    |
+| **GEMINI.md**                               | Quy tắc ngắn gọn dành cho các đại lý dựa trên Gemini (tập hợp con của CLAUDE.md)                               |
+| **CONTRIBUTING.md**                         | Hướng dẫn dành cho người đóng góp: thiết lập, cam kết thông thường, thử nghiệm, luồng PR                       |
+| **SECURITY.md**                             | Chính sách báo cáo lỗ hổng bảo mật, phiên bản được hỗ trợ, mô hình mối đe dọa                                  |
+| **CODE_OF_CONDUCT.md**                      | Cộng tác viên Giao ước — kỳ vọng về hành vi của cộng đồng                                                      |
+| **llm.txt**                                 | Việc hạ cánh bằng văn bản thuần túy được tối ưu hóa cho trình thu thập thông tin LLM (SEO dành cho trợ lý AI ) |
+| **package.json**                            | bảng kê khai npm, tập lệnh, phần phụ thuộc, công cụ, cổng bảo hiểm c8                                          |
+| **package-lock.json**                       | Cây phụ thuộc bị khóa                                                                                          |
+| **tsconfig.json**                           | Cấu hình TypeScript gốc                                                                                        |
+| **tsconfig.typecheck-core.json**            | Cấu hình đánh máy cho lõi `src/`                                                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | Kiểm tra lỗi nghiêm ngặt (`noImplicitAny`)                                                                     |
+| **tsconfig.tsbuildinfo**                    | Bộ đệm xây dựng gia tăng TS (gitignored)                                                                       |
+| **Kế tiếp.config.mjs**                      | Cấu hình bản dựng Next.js 16 (đầu ra độc lập)                                                                  |
+| **env tiếp theo.d.ts**                      | các loại env được tạo tự động Next.js                                                                          |
+| **eslint.config.mjs**                       | cấu hình phẳng ESLint (quy tắc cho mỗi khu vực dự án)                                                          |
+| **đẹp hơn.config.mjs**                      | quy tắc định dạng Prettier                                                                                     |
+| **postcss.config.mjs**                      | cấu hình PostCSS cho đường ống Tailwind/CSS                                                                    |
+| **nhà viết kịch.config.ts**                 | cấu hình kiểm tra Playwright E2E                                                                               |
+| **vitest.config.ts**                        | cấu hình Vitest (bộ mặc định)                                                                                  |
+| **vitest.mcp.config.ts**                    | cấu hình Vitest cho bộ máy chủ MCP / autoCombo / bộ đệm                                                        |
+| **sonar-project.properties**                | cấu hình SonarQube/SonarCloud (chất lượng mã)                                                                  |
+| **Dockerfile**                              | Xây dựng Docker nhiều giai đoạn (builder → Runner-base → Runner-cli)                                           |
+| **docker-compose.yml**                      | Dev soạn thảo với 4 hồ sơ (base, cli, Host, cliproxyapi) + redis sidecar                                       |
+| **docker-compose.prod.yml**                 | Soạn sản xuất (cổng 20130, redis, tập được đặt tên)                                                            |
+| **.dockerignore**                           | Các tệp bị loại trừ khỏi ngữ cảnh Docker                                                                       |
+| **fly.toml**                                | Cấu hình triển khai Fly.io (vùng `sin`, cổng 20128,/khối lượng dữ liệu)                                        |
+| **.env.example**                            | Tệp env mẫu (tự động sao chép sang `.env` trong lần cài đặt đầu tiên)                                          |
+| **.gitignore**                              | Các mẫu bỏ qua Git                                                                                             |
+| **.npmignore**                              | npm xuất bản danh sách loại trừ                                                                                |
+| **.npmrc**                                  | cấu hình npm (đăng ký, chính sách lockfile)                                                                    |
+| **phiên bản .node**                         | Pin phiên bản nút (được sử dụng bởi các công cụ tương thích với nvm)                                           |
+| **.nvmrc**                                  | Pin phiên bản nút cho nvm                                                                                      |
+| **eslint.complexity.config.mjs**            | cấu hình ESLint cho bánh cóc phức tạp (`scripts/check/check-complexity.mjs --config`)                          |
+| **eslint.sonarjs.config.mjs**               | cấu hình ESLint cho các quy tắc SonarJS (độ phức tạp/sao chép nhận thức)                                       |
+| **nguồn.config.ts**                         | Cấu hình nguồn `defineDocs` Fumadocs (nguồn cấp dữ liệu `.source/`)                                            |
+| **knip.json**                               | Knip config — files/exports/deps chưa được sử dụng (cung cấp cổng mã chết)                                     |
+| **tiền đạo.conf.mjs**                       | Cấu hình thử nghiệm đột biến Stryker (tính `tap.testFiles` từ `mutate`)                                        |
+| **.size-limit.json**                        | cấu hình ngân sách gói giới hạn kích thước                                                                     |
+| **promptfooconfig.yaml**                    | cấu hình đánh giá nhắc nhở                                                                                     |
+| **.gitleaks.toml**                          | bộ quy tắc quét bí mật của gitleaks                                                                            |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                                     |
+| **socket.yml**                              | Cấu hình chuỗi cung ứng Socket.dev                                                                             |
+| **news.json**                               | Nguồn cấp dữ liệu thông báo v2 được bản địa hóa; Vật phẩm phóng radar không hoạt động                          |
+| **vảy.nix** /** vảy.lock**                  | Nix dev-shell định nghĩa khóa +                                                                                |
+| **.env**                                    | Bí mật cục bộ (gitignored — được tạo từ `.env.example`)                                                        |
 
-> **Đã được chuyển khỏi thư mục gốc trong v3.8.26 (dọn dẹp):**
+> **Đã di chuyển ra khỏi thư mục gốc trong v3.8.26 (khai báo):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` và `quality-metrics.json` được tạo tự động (bị git bỏ qua). Xem [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` và `quality-metrics.json` được tạo (gitignored). Xem [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Thành phần bảng điều khiển API: bộ điều hợp trên `packages/ui-kit` — xem `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: tên biểu tượng được sử dụng bởi màn hình → Các thành phần Lucide (`<Icon>`)                       |
-| `constants/providers.ts`         | **380 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
+| `constants/providers.ts`         | **394 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
 | `constants/cliTools.ts`          | Đăng ký công cụ CLI bên ngoài                                                                                 |
-| `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với những ưu tiên                                                                |
+| `constants/routingStrategies.ts` | **22 chiến lược định tuyến** với những ưu tiên                                                                |
 | `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (so với quản lý)                                                            |
 | `constants/upstreamHeaders.ts`   | Danh sách từ chối tiêu đề cho các yêu cầu ngược dòng                                                          |
 | `validation/schemas.ts`          | Lược đồ ~ 80 Zod (nguồn sự thật duy nhất cho các hợp đồng API )                                               |
@@ -265,7 +265,7 @@ Không gian làm việc npm riêng biệt (`@omniroute/open-sse`). Xử lý yêu
 ```
 open-sse/
 ├── handlers/            # 16 tệp (12 trình xử lý + 4 trình trợ giúp): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, v.v.
-├── executors/           # 150 mô-đun thực thi (các lớp mở rộng BaseExecutor + trình trợ giúp riêng cho từng nhà cung cấp)
+├── executors/           # 163 mô-đun thực thi (các lớp mở rộng BaseExecutor + trình trợ giúp riêng cho từng nhà cung cấp)
 ├── translator/          # Bộ chuyển đổi định dạng (9 yêu cầu, 9 phản hồi, 9 trình trợ giúp)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ mô-đun dịch vụ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, v.v.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLIOmniRoute bộ                                                     |
 | `I18N.md`                   | Kiến trúc i18n, thêm ngôn ngữ, 67 ngôn ngữ                                                   |
 | `UNINSTALL.md`              | Làm sạch các bước gỡ cài đặt                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 380 nhà cung cấp (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 394 nhà cung cấp (regen: `npm run gen:provider-reference`) |
 
 ### Tìm hiểu sâu về hệ thống con
 

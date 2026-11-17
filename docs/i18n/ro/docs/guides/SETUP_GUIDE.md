@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Panoul de control se deschide la `http://localhost:20128`, iar URL-ul de bază al API-ului este `http://localhost:20128/v1`.
+Tabloul de bord se deschide la `http://localhost:20128` și API de bază URL este `http://localhost:20128/v1`.
+
+> **utilizatori npm:** Dacă npm avertizează că scripturile de instalare au fost blocate (de exemplu, `omniroute`, `better-sqlite3`), consultați [Depanarea — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Pentru utilizatorii pnpm:** indicatorul `--allow-build` este necesar pentru a activa scripturile de compilare native pentru `better-sqlite3` și `@swc/core`. Comanda `pnpm approve-builds -g` nu este acceptată pentru instalările globale în pnpm v11.
+> **utilizatorii pnpm:** indicatorul `--allow-build` este necesar pentru a activa scripturile native de compilare pentru `better-sqlite3` și `@swc/core`. Comanda `pnpm approve-builds -g` nu este acceptată pentru instalări globale pe pnpm v11.
 
-### Arch Linux (AUR)
+### Arc Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Pachetul AUR](https://aur.archlinux.org/packages/omniroute-bin) instalează OmniRoute și oferă un serviciu systemd la nivel de utilizator.
+[Pachetul AUR](https://aur.archlinux.org/packages/omniroute-bin) instalează OmniRoute și oferă un serviciu de utilizator systemd.
 
-### Din sursă
+### De la Sursă
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Notă pentru Windows:** În mod implicit, OmniRoute utilizează `%APPDATA%\omniroute` atunci când directorul vechi `%USERPROFILE%\.omniroute` nu este prezent. Setați `DATA_DIR` pentru a alege o altă locație pentru directorul de date.
+> **Windows notă:** În mod implicit, OmniRoute folosește `%APPDATA%\omniroute` atunci când directorul `%USERPROFILE%\.omniroute` moștenit nu este prezent. Setați `DATA_DIR` să aleagă o locație diferită a directorului de date.
 
-> **Notă:** La prima rulare, `npm install` generează automat `.env` din `.env.example`. Instalările ulterioare nu vor suprascrie un fișier `.env` existent, astfel încât personalizările sunt păstrate. Pentru a-l genera din nou, ștergeți `.env` înainte de a rula din nou comanda.
+> **Nota:** `npm install` generează automat `.env` din `.env.example` la prima rulare. Instalările ulterioare nu vor suprascrie un `.env` existent, astfel încât personalizările sunt păstrate. Pentru a reînsămânța, ștergeți `.env` înainte de a relua.
 
 ### Docker
 
-Consultați [Ghidul Docker](./DOCKER_GUIDE.md) pentru configurarea completă a Docker, inclusiv profilurile Compose și Caddy HTTPS.
+Consultați [Ghidul Docker](./DOCKER_GUIDE.md) pentru configurarea completă Docker, inclusiv profilurile Compose și Caddy HTTPS.
 
-### Aplicația desktop (Electron)
+### Aplicație desktop (Electron)
 
-OmniRoute include un înveliș desktop construit pe Electron 41 + electron-builder 26.10. Scripturi disponibile (în rădăcina spațiului de lucru):
+OmniRoute livrează un înveliș pentru desktop construit pe Electron 41 + electron-builder 26.10. Scripturi disponibile (rădăcină spațiu de lucru):
 
 ```bash
-npm run electron:dev          # Rulează aplicația desktop cu reîncărcare automată
-npm run electron:build        # Compilează pentru sistemul de operare curent (detectat automat)
-npm run electron:build:win    # Program de instalare Windows (NSIS + portabil)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Test rapid pentru versiunea împachetată
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Versiunile programelor de instalare desktop sunt atașate la lansările GitHub. Pentru ghidul aprofundat complet despre Electron (semnare, punte IPC, distribuții), consultați [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(creat într-o etapă ulterioară)_.
+Versiunile programelor de instalare desktop sunt atașate versiunilor GitHub. Pentru deep-dive complet Electron (semnare, IPC bridge, distros), vezi [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Server fără interfață grafică (CI/automatizare)
+### Server fără cap (CI/automation)
 
-Pentru configurări nesupravegheate (Docker, Kubernetes, CI), utilizați:
+Pentru setările nesupravegheate (Docker, Kubernetes, CI), utilizați:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Împreună cu variabilele de mediu (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` etc.), acest lucru vă permite să porniți o instanță OmniRoute complet scriptabilă.
+Combinat cu env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, etc.), acest lucru vă permite să creați o instanță OmniRoute complet scriptabilă.
 
-### Opțiuni CLI
+### CLI Opțiuni
 
-| Comandă                 | Descriere                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `omniroute`             | Pornește serverul (`PORT=20128`, API-ul și panoul de control pe același port)                          |
-| `omniroute setup`       | Configurare CLI ghidată pentru parolă și primul furnizor                                               |
-| `omniroute doctor`      | Rulează verificări locale de stare fără a porni serverul                                               |
-| `omniroute providers`   | Descoperă, listează, validează și testează furnizorii din CLI                                          |
-| `omniroute config`      | Configurarea instrumentelor CLI — listează, obține, setează și validează configurații                  |
-| `omniroute status`      | Panou de stare offline — versiune, bază de date, instrumente, configurație                             |
-| `omniroute logs`        | Transmite în flux jurnalele de utilizare din API (acceptă `--follow`)                                  |
-| `omniroute update`      | Verifică sau aplică actualizările OmniRoute                                                            |
-| `omniroute provider`    | Gestionează conexiunile furnizorilor — adaugă, listează, elimină, testează, setează opțiunea implicită |
-| `omniroute --port 3000` | Setează portul canonic/API la 3000                                                                     |
-| `omniroute --mcp`       | Pornește serverul MCP (transport stdio)                                                                |
-| `omniroute --no-open`   | Nu deschide automat browserul                                                                          |
-| `omniroute --help`      | Afișează ajutorul                                                                                      |
+| Comanda                 | Descriere                                                               |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `omniroute`             | Porniți serverul (`PORT=20128`, API și tabloul de bord pe același port) |
+| `omniroute setup`       | Înregistrare CLI ghidată pentru parolă și primul furnizor               |
+| `omniroute doctor`      | Rulați verificări locale de sănătate fără a porni serverul              |
+| `omniroute providers`   | Descoperiți, enumerați, validați și testați furnizorii de la CLI        |
+| `omniroute config`      | CLI tool configuration — list, get, set, validate configs               |
+| `omniroute status`      | Tabloul de bord stare offline versiunea —, DB, instrumente, config      |
+| `omniroute logs`        | Transmiteți jurnalele de utilizare din API (suportă `--follow`)         |
+| `omniroute update`      | Verificați sau aplicați actualizările OmniRoute                         |
+| `omniroute provider`    | Gestionați conexiunile furnizorului — add, list, remove, test, default  |
+| `omniroute --port 3000` | Setați portul canonical/API la 3000                                     |
+| `omniroute --mcp`       | Porniți serverul MCP (transport stdio)                                  |
+| `omniroute --no-open`   | Nu deschideți automat browserul                                         |
+| `omniroute --help`      | Arată ajutor                                                            |
 
-Configurarea fără interfață grafică poate fi automatizată prin scripturi folosind opțiuni sau variabile de mediu:
+Configurarea fără cap poate fi scriptată cu steaguri sau variabile de mediu:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Rulați diagnosticarea locală fără a deschide panoul de control:
+Rulați diagnosticarea locală fără a deschide tabloul de bord:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Gestionați furnizorii prin SSH sau scripturi fără a deschide panoul de control:
+Gestionați furnizorii din SSH sau scripturi fără a deschide tabloul de bord:
 
 ```bash
 omniroute providers available
@@ -198,9 +200,9 @@ Pentru configurarea detaliată a fiecărui instrument (Claude Code, Codex CLI, C
 
 ---
 
-## Configurarea protocoalelor (MCP + A2A)
+## Configurare protocol (MCP + A2A)
 
-### Configurarea MCP (Model Context Protocol)
+### Configurare MCP (Protocol de context model)
 
 Porniți transportul MCP în modul stdio:
 
@@ -211,28 +213,32 @@ omniroute --mcp
 Flux de validare recomandat:
 
 ```bash
-# 1. Porniți serverul MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Din clientul MCP, apelați:
-omniroute_get_health        # Ar trebui să returneze starea sistemului
-omniroute_list_combos       # Ar trebui să returneze combinațiile active
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Sau rulați suita E2E completă:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Configurarea clientului MCP
+#### MCP Client Configuration
 
-**Claude Code:**
+**Cod Claude :**
+
+Codul Claude se conectează prin HTTP, care `omniroute --mcp` (stdio) nu pornește. Transportul HTTP este dezactivat în mod implicit: activați-l mai întâi pe serverul care rulează. Când autentificarea la tabloul de bord este activată, o solicitare fără acreditări primește `401`, deci transmiteți o cheie API care conține `mcp:connect` (sau `manage`); o cheie fără `manage`/`admin` are nevoie, de asemenea, de domeniul de aplicare al fiecărui instrument (consultați [MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Adăugați în setările MCP:
+Adăugați la setările dvs. MCP (stdio, cu cheia, astfel încât apelantul să aibă un principal):
 
 ```json
 {
@@ -240,17 +246,24 @@ Adăugați în setările MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Documentația MCP completă:** [README-ul serverului MCP](../../open-sse/mcp-server/README.md) — 110 instrumente, configurații IDE, clienți Python/TS/Go.
+Sau, când `mcpTransport` este `streamable-http` (setați-l pe `/dashboard/mcp` sau cu `omniroute mcp enable --transport streamable-http`), indicați intrarea serverului MCP de la distanță a clientului la `http://localhost:20128/api/mcp/stream`.
 
-### Configurarea A2A (Agent-to-Agent Protocol)
+Cheia se deplasează ca `Authorization: Bearer <api-key>` (vezi [MCP Server → Acces de la distanță](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) pentru gazde la distanță; o cheie de la distanță are nevoie `mcp:connect` plus domeniile sale read/write ).
 
-Verificați Agent Card:
+**Documentația completă MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients. Referință operator pentru instrumentele de compresie CCR/dedup (marcatori, cerințe preliminare, domenii per instrument, paginare de recuperare, diagnosticare): [Motoare de compresie → Cerințe preliminare / ghid operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (protocol de la agent la agent)
+
+Verificați cardul de agent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,10 +274,10 @@ Trimiteți o sarcină:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Oferă-mi un rezumat scurt al cotelor."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Documentația A2A completă:** [README-ul serverului A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, abilități, streaming, ciclul de viață al sarcinilor.
+**Documentația completă A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, abilități, streaming, ciclu de viață al sarcinilor.
 
 ---
 
@@ -323,12 +336,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Șablon pentru Void Linux (xbps-src)
+## Void Linux (xbps-src) Șablon
 
-Pentru utilizatorii Void Linux, puteți construi un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
+Pentru utilizatorii Void Linux, puteți crea un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
 
 ```bash
-# Fișier șablon pentru „omniroute”
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +352,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Regenerați suma de control pentru fiecare versiune cu:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

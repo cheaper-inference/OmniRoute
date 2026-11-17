@@ -118,4 +118,26 @@ describe("Toggle adapter → kit Switch", () => {
     expect(globals).not.toContain(".ci-switch--compact");
     expect(globals).not.toContain(".ci-switch__control > .ci-switch__input");
   });
+
+  // #18068: Toggle had no `side` and dropped data-testid, so screens used the kit Switch directly.
+  it("forwards side, id, name and data-testid to the kit switch", () => {
+    const { getByRole, container } = render(
+      <Toggle
+        onChange={() => {}}
+        label="Memory"
+        side="right"
+        id="memory-enabled"
+        name="memory"
+        data-testid="memory-enabled-switch"
+      />
+    );
+    const sw = getByRole("switch", { name: "Memory" });
+    expect(sw.getAttribute("data-testid")).toBe("memory-enabled-switch");
+    expect(sw.id).toBe("memory-enabled");
+    expect(sw.getAttribute("name")).toBe("memory");
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.getAttribute("data-side")).toBe("right");
+    // the text comes first, the control last
+    expect(root.lastElementChild?.className).toContain("ci-switch__control");
+  });
 });

@@ -13,6 +13,7 @@ import {
   saveQuotaSnapshot,
   getLatestQuotaSnapshotsForConnection,
   isUnreportedQuotaSnapshot,
+  RETIRED_QUOTA_WINDOW_RAW_DATA,
 } from "@/lib/db/quotaSnapshots";
 import { recordProviderQuotaResetEventIfChanged } from "@/lib/db/quotaResetEvents";
 import { ACTIVE_TTL_MS, parseDate, type QuotaCacheEntry, type QuotaInfo } from "./quotaCacheState";
@@ -102,6 +103,18 @@ function quotaWindowSnapshotIsCurrent(
   );
 }
 
+/** Interpretation-only snapshot metadata; the Codex owner epoch is opaque, never credentials. */
+function quotaSnapshotMetadata(
+  codexOwnerEpoch: string | null,
+  fractionReported: boolean
+): string | null {
+  if (!codexOwnerEpoch && fractionReported) return null;
+  return JSON.stringify({
+    ...(!fractionReported ? { fractionReported: false } : {}),
+    ...(codexOwnerEpoch ? { codexOwnerEpoch } : {}),
+  });
+}
+
 function persistOneQuotaWindow(
   connectionId: string,
   provider: string,
@@ -111,7 +124,8 @@ function persistOneQuotaWindow(
   quotas: Record<string, QuotaInfo>,
   prior: QuotaCacheEntry | null,
   retainedCodexWindows: Set<string>,
-  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
+  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> },
+  codexOwnerEpoch: string | null
 ): void {
   if (!quotaInfo || typeof quotaInfo !== "object") return;
   const normalized = quotas[windowKey];
@@ -164,7 +178,7 @@ function persistOneQuotaWindow(
       next_reset_at: normalized.resetAt,
       window_duration_ms: entry.windowDurationMs ?? null,
       // Persist only the interpretation, never the raw provider payload.
-      raw_data: fractionReported ? null : JSON.stringify({ fractionReported: false }),
+      raw_data: quotaSnapshotMetadata(codexOwnerEpoch, fractionReported),
     });
   } catch (error) {
     console.error("[quotaCache] Failed to save snapshot:", error);
@@ -178,7 +192,8 @@ export function persistQuotaWindowSnapshots(
   rawQuotas: Record<string, unknown>,
   quotas: Record<string, QuotaInfo>,
   prior: QuotaCacheEntry | null,
-  retainedCodexWindows: Set<string>
+  retainedCodexWindows: Set<string>,
+  codexOwnerEpoch: string | null = null
 ): void {
   const codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> } = {};
   for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
@@ -191,7 +206,51 @@ export function persistQuotaWindowSnapshots(
       quotas,
       prior,
       retainedCodexWindows,
-      codexSnapshots
+      codexSnapshots,
+      codexOwnerEpoch
     );
   }
+}
+
+/**
+ * Retire every window known for this connection (cached or persisted) that a complete usage
+ * reading no longer reports: providers add and remove windows, so its absence there means the
+ * window is gone. Appends one retirement record per window (history is kept) so a restart does
+ * not rehydrate it. Returns the retired window keys.
+ */
+export function retireUnreportedQuotaWindows(
+  connectionId: string,
+  provider: string,
+  reported: Record<string, QuotaInfo>,
+  prior: QuotaCacheEntry | null
+): string[] {
+  const reportedKeys = new Set(Object.keys(reported));
+  const known = new Set(Object.keys(prior?.quotas ?? {}));
+  try {
+    for (const row of getLatestQuotaSnapshotsForConnection(connectionId)) {
+      const saved = row as unknown as Record<string, unknown>;
+      const key = saved.windowKey ?? row.window_key;
+      if (typeof key === "string" && key) known.add(key);
+    }
+  } catch (error) {
+    console.error("[quotaCache] Failed to read snapshots for window retirement:", error);
+  }
+  const retired = [...known].filter((key) => !reportedKeys.has(key)).sort();
+  for (const windowKey of retired) {
+    try {
+      saveQuotaSnapshot({
+        provider,
+        connection_id: connectionId,
+        window_key: windowKey,
+        remaining_percentage: null,
+        is_exhausted: 0,
+        next_reset_at: null,
+        window_duration_ms: null,
+        raw_data: RETIRED_QUOTA_WINDOW_RAW_DATA,
+      });
+    } catch (error) {
+      console.error("[quotaCache] Failed to retire quota window:", error);
+    }
+  }
+  return retired;
 }

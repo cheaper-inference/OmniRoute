@@ -127,6 +127,27 @@ handleComboChat (నిల్వ చేయబడిన కాంబోల కో
 | `src/sse/handlers/chat.ts`                                | ఇంటిగ్రేషన్: ఆటో ప్రిఫిక్స్ షార్ట్-సర్క్యూట్          |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` సిస్టమ్ ఎంట్రీ                |
 
+## సేవ్ చేయబడిన ఆటో కాంబోల కోసం ఖాతా ప్రాధాన్యతలు
+
+ఇంటెలిజెంట్ ఆటో ఎడిటర్ ఐచ్ఛికాన్ని అందిస్తుంది** ఖాతా ప్రాధాన్యతలు** విభాగం. ప్రతి కనెక్షన్ ప్రాధాన్యమైనది, సాధారణం (డిఫాల్ట్), రిజర్వ్ లేదా మినహాయించబడింది. బహుళ కనెక్షన్లు ఒక శ్రేణిని పంచుకోగలవు. ఆటో మొదటి అర్హత కలిగిన శ్రేణిని ఎంచుకుంటుంది, దాని scoring/router ప్రవర్తనను అక్కడే ఉంచుతుంది; విఫలమైన ప్రయత్నాలు మిగిలిన కాంక్రీట్ ఖాతాలకు వస్తాయి, రిజర్వ్కు ముందు సాధారణం కంటే ముందు ప్రాధాన్యత ఇవ్వబడుతుంది. మినహాయించిన కనెక్షన్లు ఈ కాంబో ద్వారా ఎప్పుడూ ఉపయోగించబడవు.
+
+సెట్టింగ్ `config.accountPreferences` గా నిల్వ చేయబడుతుంది, ID కనెక్షన్ ద్వారా కీ చేయబడింది:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+విస్మరించబడిన లేదా ఖాళీ మ్యాప్ ఇప్పటికే ఉన్న రూటింగ్ను కలిగి ఉంటుంది. ప్రాధాన్యతలు నిలిపివేయబడిన కనెక్షన్లను ప్రారంభించవు, API-కీ యాక్సెస్ను మంజూరు చేయవు, కోటా-నిరోధించిన అభ్యర్థులను పునరుద్ధరించవు లేదా బడ్జెట్ తనిఖీలను దాటవేయవు. ప్రతి ప్రయత్నం దాని కాంక్రీట్ కనెక్షన్కు పరిమితం చేయబడింది, కాబట్టి ఖాతా ఫాల్బ్యాక్ కాంబో రౌటర్ వెనుక శ్రేణులను అధిగమించదు. ఇప్పటికే ఉన్న సెషన్ అనుబంధం అర్హత కలిగిన ఖాతాను కలిగి ఉండవచ్చు; స్థానిక మలుపుకు కట్టుబడి ఉన్న ఖాతాను మినహాయించి, నిశ్శబ్దంగా ఖాతాలను మార్చే బదులు ఆ మలుపులు తిరుగుతాయి.
+
+కాన్ఫిగర్ చేయబడిన ప్రాధాన్యతలు ఖాతా-అవేర్ ఆటో పాత్ను ఉపయోగిస్తాయి: అన్బౌండ్ కాంటెక్స్ట్-కాష్, స్మార్ట్-పైప్లైన్, గందరగోళం మరియు షాడో షార్ట్కట్లు పంపబడవు. ఈ అభ్యర్థనల కోసం స్పెక్యులేటివ్ హెడ్జింగ్ నిలిపివేయబడింది కాబట్టి రిజర్వ్ ఖాతాలు ప్రాధాన్యత కలిగిన వాటిని రేస్ చేయలేవు. ఇతర కాంబో వ్యూహాలు ఈ సెట్టింగ్ని అర్థం చేసుకోవు. స్వయంచాలకంగా కాంబోను మార్చడం వలన, తర్వాత స్విచ్ బ్యాక్ కోసం సేవ్ చేయబడిన ప్రాధాన్యతలు ఉంచబడతాయి.
+
 ## నిజమైన Model Idతో సరిపోలే Combo పేర్లు
 
 `name` ఒక bare model idకి సమానంగా ఉండే combo (ఉదా. `gpt-5.5` అనే పేరు గల combo) ఒక **ఉద్దేశపూర్వకమైన, మద్దతు ఉన్న నమూనా**, బగ్ కాదు: ఇది [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)లో డాక్యుమెంట్ చేయబడిన, ప్రతి model idకి provider fallbackను అందించే విధానం. Bare-model-id resolution కంటే ముందు combo resolution తనిఖీ చేయబడుతుంది కాబట్టి (`src/sse/services/model.ts`లోని `getComboForModel()`), bare id `gpt-5.5` కోసం వచ్చిన అభ్యర్థన నేరుగా ఒకే providerకు వెళ్లకుండా, combo లక్ష్యాల ద్వారా (ఉదా. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) route చేయబడుతుంది — ఇది [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) కోసం రూపొందించిన combo-before-rewrite ప్రాధాన్యతను తిరిగి ఉపయోగిస్తుంది మరియు `tests/unit/responses-combo-resolution-3227.test.ts`, `tests/unit/combo-name-codex-responses-rewrite.test.ts` ద్వారా regression పరీక్ష చేయబడుతుంది.
@@ -169,34 +190,46 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 ## ఇది ఎలా పనిచేస్తుంది (నిల్వ చేయబడిన Auto-Combos)
 
-Auto-Combo Engine ప్రతి అభ్యర్థనకు ఉత్తమ provider/modelను డైనమిక్గా ఎంచుకోవడానికి **16-కారకాల స్కోరింగ్ ఫంక్షన్**ను ఉపయోగిస్తుంది (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`లో నిర్వచించబడింది). డిఫాల్ట్ బరువుల మొత్తం `1.0`; అనుకూల బరువులు `normalizeScoringWeights()` ద్వారా తిరిగి సాధారణీకరించబడతాయి. పదహారు కారకాలలో రెండు — `cacheAffinity` మరియు `resetWindowAffinity` — డిఫాల్ట్గా `0` బరువును కలిగి ఉంటాయి; `reliability`కు `DEFAULT_WEIGHTS`లో `0`, సాధారణ packsలో `0.03`, అలాగే `reliability-first`లో `0.04` ఉంటుంది, మరియు `quality`కు packsలో `0.02` (`quality-first`లో `0.03`) ఉంటుంది: అయినప్పటికీ అవి ప్రతి అభ్యర్థి కోసం లెక్కించబడతాయి, మరియు `cacheAffinity` స్కోర్కు వెలుపల prompt-cache డీడూప్లికేషన్ను నియంత్రిస్తుంది, కాబట్టి packs ఓటు చేసినప్పటికీ సున్నా-డిఫాల్ట్ కారకాలు డిఫాల్ట్గా ఓటు చేయవు.
+Auto-Combo Engine ప్రతి అభ్యర్థనకు ఉత్తమ provider/modelను **16-కారకాల స్కోరింగ్ ఫంక్షన్**ను ఉపయోగించి డైనమిక్గా ఎంచుకుంటుంది (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`లో నిర్వచించబడింది). డిఫాల్ట్ weights మొత్తం `1.0`కి సమానం; అనుకూల weightsను `normalizeScoringWeights()` ద్వారా మళ్లీ సాధారణీకరిస్తారు. పదహారు కారకాలలో రెండు — `cacheAffinity` మరియు `resetWindowAffinity` — డిఫాల్ట్ weight `0`ను కలిగి ఉంటాయి; `reliability`కి `DEFAULT_WEIGHTS`లో `0`, generic packsలో `0.03`, `reliability-first`లో `0.04` ఉంటాయి; అలాగే packsలో `quality`కి `0.02` (`quality-first`లో `0.03`) ఉంటుంది: ప్రతి candidate కోసం ఇవన్నీ లెక్కించబడుతూనే ఉంటాయి, మరియు `cacheAffinity` స్కోర్కు వెలుపల prompt-cache deduplicationను నియంత్రిస్తుంది. అందువల్ల సున్నా-డిఫాల్ట్ కారకాలు డిఫాల్ట్గా ఓటు వేయవు, అయితే packs వాటిని ఉపయోగిస్తాయి.
 
 ![Auto-Combo 16-కారకాల స్కోరింగ్](../diagrams/exported/auto-combo-scoring.svg)
 
-> మూలం: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` ద్వారా మళ్లీ రూపొందించండి). ఫైల్ పేరు చారిత్రకమైనది; మూలం మరియు రెండర్ చేసిన రేఖాచిత్రం `DEFAULT_WEIGHTS`లో ప్రకటించిన మొత్తం 16 కారకాలను చూపుతాయి.
+> మూలం: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` ద్వారా మళ్లీ రూపొందించండి). ఫైల్ పేరు చారిత్రక కారణాల వల్ల అలాగే ఉంది; source మరియు rendered diagram రెండూ `DEFAULT_WEIGHTS`లో ప్రకటించిన మొత్తం 16 కారకాలను చూపిస్తాయి.
 
-| కారకం                 | డిఫాల్ట్ బరువు | వివరణ                                                                                                                                                                                                              |
-| :-------------------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429         | మిగిలిన కోటా / రేట్-లిమిట్ అదనపు సామర్థ్యం [0..1]                                                                                                                                                                  |
-| `health`              | 0.1605         | సర్క్యూట్ బ్రేకర్ నుండి ఆరోగ్య స్కోర్ (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                        |
-| `costInv`             | 0.1429         | **మిశ్రమ** ఖర్చు యొక్క విలోమం (60% ఇన్పుట్ + 40% అవుట్పుట్ టోకెన్ ధర, సాధారణీకరించబడింది) — తక్కువ ఖర్చు = అధిక స్కోర్                                                                                             |
-| `latencyInv`          | 0.1143         | poolకు సాధారణీకరించిన p95 latency యొక్క విలోమం — ఎక్కువ వేగం = అధిక స్కోర్                                                                                                                                         |
-| `taskFit`             | 0.0762         | టాస్క్-రకం అనుకూలత (కోడింగ్, సమీక్ష, ప్రణాళిక, విశ్లేషణ, డీబగ్గింగ్, డాక్యుమెంటేషన్)                                                                                                                               |
-| `stability`           | 0.0476         | latency ప్రామాణిక విచలనం నుండి వ్యత్యాస-ఆధారిత స్థిరత్వం — ప్రతిస్పందన సమయం హెచ్చుతగ్గులకు లోనయ్యే అభ్యర్థికి తక్కువ స్కోర్ లభిస్తుంది                                                                             |
-| `tierPriority`        | 0.0476         | ఖాతా-tier ప్రాధాన్యత — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                |
-| `tierAffinity`        | 0.0476         | అభ్యర్థి tier మరియు manifest సిఫార్సు చేసిన tier మధ్య అనుబంధం                                                                                                                                                      |
-| `specificityMatch`    | 0.0476         | అభ్యర్థన నిర్దిష్టత (manifest సూచన) మరియు model tier మధ్య సరిపోలిక                                                                                                                                                 |
-| `contextAffinity`     | 0.0476         | అభ్యర్థనకు అవసరమైన context-window మరియు model context window మధ్య అనుబంధం                                                                                                                                          |
-| `sessionAvailability` | 0.0476         | ఈ session కోసం అభ్యర్థి connection యొక్క OAuth session లభ్యత (`getOAuthSessionAvailability()`; OAuth కాని connectionsకు 1.0 స్కోర్ లభిస్తుంది)                                                                     |
-| `connectionDensity`   | 0.0476         | ఒకే providerకు చెందిన connections అంతటా లోడ్ను విస్తరిస్తుంది (కేంద్రీకరణ-వ్యతిరేకం)                                                                                                                               |
-| `cacheAffinity`       | 0.00           | ఈ అభ్యర్థన యొక్క prompt-cache prefixను ఇప్పటికే కలిగి ఉండే అత్యధిక అవకాశం ఉన్న connection వైపు Rendezvous-hash అనుబంధం (`open-sse/services/combo/promptCacheAffinity.ts`); డిఫాల్ట్గా నిలిపివేయబడింది (#8008)      |
-| `resetWindowAffinity` | 0.00           | అనుకూలమైన quota reset window ఉన్న connections వైపు మొగ్గు చూపుతుంది (డిఫాల్ట్గా నిలిపివేయబడింది)                                                                                                                   |
-| `quality`             | 0.03           | routing-event quality tracker నుండి feedback-ఆధారిత అవుట్పుట్-నాణ్యత సంకేతం; పరిశీలనలు లేని అభ్యర్థులకు తటస్థమైన 0.5 లభిస్తుంది                                                                                    |
-| `reliability`         | 0.00           | పది-sample కనీస పరిమితికి లోబడి ఉన్న 24h వినియోగ చరిత్ర నుండి గమనించిన విజయ వాటా, `1 - failureRate` (లేకపోతే real-time metrics); పరిశీలనలు లేని అభ్యర్థుల విలువ 1.0గా పరిగణించబడుతుంది. డిఫాల్ట్గా నిలిపివేయబడింది |
+| Factor                | Default Weight | Description                                                                                                                                                                                                  |
+| :-------------------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429         | మిగిలిన quota / rate-limit headroom [0..1]                                                                                                                                                                   |
+| `health`              | 0.1605         | circuit breaker నుండి లభించే health score (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                              |
+| `costInv`             | 0.1429         | విలోమ **blended** ఖర్చు (60% input + 40% output token ధర, normalized) — తక్కువ ఖర్చు = ఎక్కువ score                                                                                                          |
+| `latencyInv`          | 0.1143         | poolకు normalized చేసిన విలోమ p95 latency — వేగంగా ఉన్నది = ఎక్కువ score                                                                                                                                     |
+| `taskFit`             | 0.0762         | task-type fitness (coding, review, planning, analysis, debugging, docs)                                                                                                                                      |
+| `stability`           | 0.0476         | latency standard deviation ఆధారిత variance-based stability — response timeలో ఎక్కువ హెచ్చుతగ్గులు ఉన్న candidateకు తక్కువ score వస్తుంది                                                                     |
+| `tierPriority`        | 0.0476         | account-tier priority — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                         |
+| `tierAffinity`        | 0.0476         | candidate tier మరియు manifest సిఫారసు చేసిన tier మధ్య affinity                                                                                                                                               |
+| `specificityMatch`    | 0.0476         | request specificity (manifest hint) మరియు model tier మధ్య match                                                                                                                                              |
+| `contextAffinity`     | 0.0476         | request యొక్క context-window అవసరం మరియు model context window మధ్య affinity                                                                                                                                  |
+| `sessionAvailability` | 0.0476         | ఈ session కోసం candidate connection యొక్క OAuth session availability (`getOAuthSessionAvailability()`; non-OAuth connections score 1.0)                                                                      |
+| `connectionDensity`   | 0.0476         | ఒకే providerకు చెందిన connections మధ్య loadను పంచుతుంది (anti-concentration)                                                                                                                                 |
+| `cacheAffinity`       | 0.00           | ఈ request యొక్క prompt-cache prefix ఇప్పటికే కలిగి ఉండే అవకాశం ఎక్కువగా ఉన్న connection వైపు Rendezvous-hash affinity (`open-sse/services/combo/promptCacheAffinity.ts`); డిఫాల్ట్గా నిలిపివేయబడింది (#8008) |
+| `resetWindowAffinity` | 0.00           | quota reset window అనుకూలంగా ఉన్న connections వైపు bias (డిఫాల్ట్గా నిలిపివేయబడింది)                                                                                                                         |
+| `quality`             | 0.03           | routing-event quality tracker నుండి feedback ఆధారంగా లభించే output-quality signal; observations లేని candidatesకు neutral 0.5 కేటాయించబడుతుంది                                                               |
+| `reliability`         | 0.00           | పది-sample floor వెనుక 24 గంటల usage history నుండి గమనించిన success share, `1 - failureRate` (లేకపోతే real-time metrics); observations లేని candidatesకు 1.0గా పరిగణించబడుతుంది. డిఫాల్ట్గా నిలిపివేయబడింది  |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+in-memory `quality` tracker (`open-sse/services/routing/quality.ts`) cold restart తర్వాత ఖాళీగా ఉంటుంది; అందువల్ల మొదటి observations నమోదయ్యే వరకు ప్రతి candidateకు neutral `0.5` score వస్తుంది.
 
-**మొత్తం:** `DEFAULT_WEIGHTS`లో ప్రకటించినట్లుగా `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`; స్కోరింగ్కు ముందు వినియోగదారు కాన్ఫిగర్ చేసిన బరువులు `normalizeScoringWeights()` ద్వారా ఒక పంపిణీగా తిరిగి సాధారణీకరించబడతాయి.
+> **చదవలేని కోటా (#15347).** ప్రొవైడర్కు కోటా ఫెచర్ ఉన్నప్పటికీ, అది చదవదగినదేమీ తిరిగి ఇవ్వనప్పుడు
+> (ఫెచ్ విఫలమవడం, ఆధారాలు లేకపోవడం, మెసేజ్-మాత్రమే వినియోగం లేదా పార్స్ చేయగల
+> `windows` ఏవీ లేని మరియు పరిమిత `percentUsed` విలువ లేని తప్పుగా రూపొందిన స్నాప్షాట్,
+> ఇందులో `percentUsed: null` కూడా ఉంటుంది), అభ్యర్థి `quota` అక్షంపై `0` స్కోరు పొందుతుంది
+> మరియు దాని తుది స్కోరు `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0.5, `autoStrategy.ts`)తో
+> గుణించబడుతుంది; ఇది కనెక్షన్-స్థితి పెనాల్టీకి సమానమైన సాఫ్ట్-పెనాల్టీ విధానం. విఫలమైన వినియోగ
+> రీడ్ టెలిమెట్రీకి సంబంధించిన ఆధారం, ప్రొవైడర్కు సంబంధించినది కాదు; అందువల్ల ఇది నిజమైన రీడింగ్
+> ఉన్న ఏ అభ్యర్థికన్నా, 100% వినియోగం నిర్ధారించబడినదానికన్నా కూడా, కచ్చితంగా దిగువన ర్యాంక్ అవుతుంది,
+> అయితే దీనిపై ఎప్పుడూ హార్డ్-బ్లాక్ విధించబడదు లేదా తొలగించబడదు. పరిమితి లేని ప్రొవైడర్
+> `unlimited: true`ని నివేదించి పూర్తి కోటా స్కోరు పొందుతుంది; నమోదు చేయబడిన కోటా ఫెచర్ ఏదీ లేని
+> ప్రొవైడర్కు టెలిమెట్రీ మూలం అసలు ఉండదు మరియు డిఫాల్ట్ `100`ను కొనసాగిస్తుంది.
+
+**మొత్తం:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` అని `DEFAULT_WEIGHTS`లో ప్రకటించబడింది; స్కోరింగ్కు ముందు వినియోగదారు-కాన్ఫిగర్ చేసిన వెయిట్లు `normalizeScoringWeights()` ద్వారా ఒక పంపిణీగా మళ్లీ సాధారణీకరించబడతాయి.
 
 ## మోడ్ ప్యాక్లు
 
@@ -260,57 +293,104 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## అన్ని రూటింగ్ వ్యూహాలు
 
-OmniRoute యొక్క కాంబో ఇంజిన్ **20 రూటింగ్ వ్యూహాలకు** మద్దతు ఇస్తుంది (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`లో ప్రకటించబడ్డాయి). Auto Combo ఇంజిన్ స్వయంగా `auto` వ్యూహం కింద అందుబాటులో ఉంటుంది; మిగతావి నిల్వచేసిన కాంబోల కోసం అందుబాటులో ఉంటాయి.
+OmniRoute యొక్క combo engine **22 రూటింగ్ వ్యూహాలకు** మద్దతు ఇస్తుంది (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` లో ప్రకటించబడ్డాయి). Auto Combo engine స్వయంగా `auto` strategy కింద అందుబాటులో ఉంటుంది; మిగతావి persisted combos కోసం అందుబాటులో ఉంటాయి.
 
-| వ్యూహం              | వివరణ                                                                                                                                                                                                                                                |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | స్పష్టమైన ప్రాధాన్యతతో మొదటి-లక్ష్య క్రమబద్ధ జాబితా                                                                                                                                                                                                  |
-| `weighted`          | ఒక్కో లక్ష్యపు బరువు ఆధారంగా బరువుతో కూడిన యాదృచ్ఛిక ఎంపిక                                                                                                                                                                                           |
-| `round-robin`       | లక్ష్యాలను క్రమంలో చక్రీయంగా ఉపయోగించడం (బ్యాచ్లుగా; కింద చూడండి)                                                                                                                                                                                    |
-| `context-relay`     | లక్ష్యాల మధ్య కాంటెక్స్ట్ను బదిలీ చేయడం (సుదీర్ఘ సంభాషణలు)                                                                                                                                                                                           |
-| `fill-first`        | తదుపరి లక్ష్యానికి వెళ్లే ముందు ప్రతి లక్ష్యపు కోటాను పూర్తిగా వినియోగించడం                                                                                                                                                                          |
-| `p2c`               | పవర్-ఆఫ్-2-ఛాయిసెస్ యాదృచ్ఛిక లోడ్ బ్యాలెన్సింగ్                                                                                                                                                                                                     |
-| `random`            | సమవిభజిత యాదృచ్ఛిక ఎంపిక                                                                                                                                                                                                                             |
-| `least-used`        | ప్రస్తుతం అత్యల్ప లోడ్ ఉన్న లక్ష్యాన్ని ఎంచుకోవడం                                                                                                                                                                                                    |
-| `cost-optimized`    | కాటలాగ్ ధరల ప్రకారం ఒక్కో అభ్యర్థనకు అయ్యే $ ఖర్చును కనిష్ఠీకరించడం                                                                                                                                                                                  |
-| `reset-aware` ⭐    | కోటా రీసెట్ సమయం ఆధారంగా ప్రాధాన్యత ఇవ్వడం — తక్కువ రీసెట్ విండోలు ఉన్నవాటికి అధిక ర్యాంక్ ఇవ్వబడుతుంది                                                                                                                                              |
-| `reset-window`      | కోటా విండో అతి త్వరగా రీసెట్ అయ్యే లక్ష్యాలకు ప్రాధాన్యత ఇవ్వడం                                                                                                                                                                                      |
-| `headroom`          | అత్యధికంగా మిగిలి ఉన్న కోటా హెడ్రూమ్ గల లక్ష్యాన్ని ఎంచుకోవడం                                                                                                                                                                                        |
-| `quota-weighted`    | కోటా పూర్తయిన ఖాతాలను దాటవేసి, మిగిలిన కోటాను ప్రస్తుతం ప్రాసెస్లో ఉన్న లోడ్తో భాగించిన నిష్పత్తి ప్రకారం మిగతావాటి నుంచి ఎంచుకోవడం; ఇప్పటికే ఉన్న సంభాషణలు అదే లక్ష్యానికి పిన్ చేయబడి ఉంటాయి                                                       |
-| `strict-random`     | పునరావృతాల డీడూప్లికేషన్ లేకుండా యాదృచ్ఛిక ఎంపిక                                                                                                                                                                                                     |
-| `auto`              | Auto Combo స్కోరింగ్ను (16-కారకాలు) ఉపయోగించడం — **సిఫార్సు చేయబడింది**                                                                                                                                                                              |
-| `lkgp`              | చివరిగా విజయవంతమైన మార్గం (చివరిగా విజయవంతమైన ప్రొవైడర్కు పిన్ చేసి, ఆపై నియమాలకు ఫాల్బ్యాక్ అవుతుంది)                                                                                                                                               |
-| `context-optimized` | ప్రస్తుత కాంటెక్స్ట్ పరిమాణానికి అత్యుత్తమంగా సరిపోయే లక్ష్యాన్ని ఎంచుకోవడం                                                                                                                                                                          |
-| `cache-optimized`   | ప్రాంప్ట్-క్యాష్ అనుబంధం ఆధారంగా లక్ష్యాలను తిరిగి క్రమబద్ధీకరించడం — ఈ అభ్యర్థన యొక్క క్యాష్ చేసిన ప్రిఫిక్స్ను ఇప్పటికే కలిగి ఉండే అవకాశం అత్యధికంగా ఉన్న కనెక్షన్ను మొదట ప్రయత్నిస్తారు (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | మోడళ్ల ప్యానెల్కు సమాంతరంగా అభ్యర్థనలను పంపి, ఆపై జడ్జ్ ద్వారా ఒక సమాధానాన్ని సంశ్లేషించడం (కింద చూడండి)                                                                                                                                             |
-| `pipeline`          | లక్ష్యాలను వరుసగా అమలు చేసి, ప్రతి దశ అవుట్పుట్ను తదుపరి దశ ఇన్పుట్లోకి పంపించడం; తుది సమాధానం మాత్రమే తిరిగి ఇవ్వబడుతుంది (#6396)                                                                                                                   |
+| Strategy            | Description                                                                                                                                                                                                                                             |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `priority`          | స్పష్టమైన ప్రాధాన్యతతో మొదటి-టార్గెట్ క్రమబద్ధ జాబితా                                                                                                                                                                                                   |
+| `weighted`          | ప్రతి టార్గెట్ బరువు ఆధారంగా weighted random ఎంపిక                                                                                                                                                                                                      |
+| `round-robin`       | టార్గెట్లను క్రమంలో చక్రంలా ఎంచుకోవడం (బ్యాచ్లుగా; దిగువ చూడండి)                                                                                                                                                                                        |
+| `context-relay`     | టార్గెట్ల మధ్య contextను బదిలీ చేయడం (దీర్ఘ సంభాషణలు)                                                                                                                                                                                                   |
+| `fill-first`        | తదుపరి టార్గెట్కు వెళ్లే ముందు ప్రతి టార్గెట్ quotaను పూర్తిగా నింపడం                                                                                                                                                                                   |
+| `p2c`               | Power-of-2-choices random load balancing                                                                                                                                                                                                                |
+| `random`            | సమాన సంభావ్యతతో random ఎంపిక                                                                                                                                                                                                                            |
+| `least-used`        | ప్రస్తుత load అత్యల్పంగా ఉన్న టార్గెట్ను ఎంచుకోవడం                                                                                                                                                                                                      |
+| `cost-optimized`    | catalog pricing ఆధారంగా ప్రతి requestకు అయ్యే $ ఖర్చును కనిష్ఠం చేయడం                                                                                                                                                                                   |
+| `reset-aware` ⭐    | quota reset సమయానికి ప్రాధాన్యత — తక్కువ reset windowsకు ఎక్కువ ర్యాంక్                                                                                                                                                                                 |
+| `reset-window`      | quota window అత్యంత త్వరగా reset అయ్యే టార్గెట్లకు ప్రాధాన్యత ఇవ్వడం                                                                                                                                                                                    |
+| `expiry-first`      | ఉపయోగించకుండా మిగిలిపోయే quota ముందుగా expire అయ్యే accountను ముందుగా వినియోగించడం — అత్యంత సమీప reset deadline ఉన్న, అత్యధిక leftover కలిగిన account ముందుగా వెళ్తుంది                                                                                 |
+| `headroom`          | అత్యధికంగా మిగిలిన quota headroom ఉన్న టార్గెట్ను ఎంచుకోవడం                                                                                                                                                                                             |
+| `quota-weighted`    | exhausted accountsను దాటవేసి, మిగిలిన వాటిలో leftover quotaను in-flight loadతో భాగించిన నిష్పత్తి ప్రకారం ఎంచుకోవడం; ఇప్పటికే ఉన్న conversations pinnedగా ఉంటాయి                                                                                        |
+| `strict-random`     | repeatsను deduplication చేయకుండా random ఎంపిక                                                                                                                                                                                                           |
+| `auto`              | Auto Combo scoring (16-factor)ను ఉపయోగించడం — **సిఫార్సు చేయబడింది**                                                                                                                                                                                    |
+| `lkgp`              | Last-Known-Good Path (చివరిగా విజయవంతమైన providerకు pin చేసి, తరువాత rulesకు fallback అవుతుంది)                                                                                                                                                         |
+| `context-optimized` | ప్రస్తుత context sizeకు అత్యుత్తమంగా సరిపోయే టార్గెట్ను ఎంచుకోవడం                                                                                                                                                                                       |
+| `cache-optimized`   | prompt-cache affinity ఆధారంగా టార్గెట్ల క్రమాన్ని మార్చడం — ఈ request యొక్క cached prefixను ఇప్పటికే కలిగి ఉండే అవకాశం ఎక్కువగా ఉన్న connectionను ముందుగా ప్రయత్నిస్తుంది (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                     |
+| `fusion` 🧬         | మోడళ్ల panelకు parallelగా fan out చేసి, తరువాత judge ద్వారా ఒక సమాధానాన్ని synthesize చేయడం (దిగువ చూడండి)                                                                                                                                              |
+| `pipeline`          | టార్గెట్లను వరుసగా నడిపి, ప్రతి step outputను తదుపరి step inputలోకి అందించడం; చివరి సమాధానం మాత్రమే తిరిగి ఇవ్వబడుతుంది (#6396)                                                                                                                         |
+| `jev`               | వినియోగదారు ర్యాంక్ చేసిన preference list; ఈ request కోసం ఏ entries అమలు కావాలో TypeSafe Jev నిర్ణయిస్తుంది. ముందుగా Winner, మిగతా admitted targets వినియోగదారు క్రమాన్ని కొనసాగిస్తాయి. Jev అందుబాటులో లేకపోతే user orderకు fallback అవుతుంది (#15276) |
 
 ⭐ = v3.8.0లో కొత్తది · 🧬 = v3.8.36లో కొత్తది
 
-### `weighted` అర్థవివరణ
+### `weighted` semantics
 
-`weighted` అనేది **ప్రతి అభ్యర్థనకు నిష్పత్తి ఆధారిత యాదృచ్ఛిక డ్రా**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), సమానీకరణ విధానం కాదు:
+`weighted` అనేది **ప్రతి requestకు proportional random draw**
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), equalizer కాదు:
 
-- ప్రతి అభ్యర్థన `weight / totalWeight` సంభావ్యతతో **ఒక** దశను డ్రా చేస్తుంది; మిగిలిన దశలు
-  ఆ అభ్యర్థనకు ఫాల్బ్యాక్ చైన్గా బరువు అవరోహణ క్రమంలో అమర్చబడతాయి.
-- `0` బరువు ఉన్న (లేదా బరువు లేని) దశ, మరేదైనా దశకు
-  0 కంటే ఎక్కువ బరువు ఉన్నంతవరకు **ఎప్పటికీ డ్రా చేయబడదు** — డ్రా చేసిన దశ విఫలమైన తర్వాత మాత్రమే అది ఫాల్బ్యాక్గా ఉపయోగపడగలదు. **అన్ని**
-  బరువులు 0గా ఉన్నప్పుడు మాత్రమే ఎంపిక సమవిభజితంగా మారుతుంది.
-- లక్ష్యాలన్నీ అందుబాటులో లేని దశలు — ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ `OPEN`, కనెక్షన్
-  కూల్డౌన్, మోడల్ లాకౌట్ — డ్రా జరగడానికి ముందే దాని నుంచి తొలగించబడతాయి
-  (`open-sse/services/combo/targetResolution.ts`), కాబట్టి ఆరోగ్యకరంగా ఉన్న ఒకే దశ తాత్కాలికంగా
-  ప్రతి అభ్యర్థనలోనూ ఎంపిక కావచ్చు.
-- `stickyWeightedLimit` (కాంబో కాన్ఫిగ్, డిఫాల్ట్ `1` = ఆఫ్) మళ్లీ డ్రా చేయడానికి ముందు, డ్రా చేసిన దశను అంత సంఖ్యలో
-  వరుస విజయాల వరకు పిన్ చేస్తుంది.
+- ప్రతి అభ్యర్థన `weight / totalWeight` సంభావ్యతతో **ఒక** దశను ఎంచుకుంటుంది; మిగిలిన దశలు
+  బరువు అవరోహణ క్రమంలో ఆ అభ్యర్థనకు fallback chainగా అమర్చబడతాయి.
+- ఒక దశ బరువు `0` (లేదా అందుబాటులో లేకపోవడం) కాగా, మరే ఇతర దశకైనా
+  weight > 0 ఉంటే అది **ఎప్పటికీ ఎంచుకోబడదు** — ఎంచుకున్న దశ విఫలమైన తర్వాత మాత్రమే
+  fallbackగా సేవలందించగలదు. **అన్ని** బరువులు 0 అయినప్పుడే ఎంపిక uniform అవుతుంది.
+- అన్ని targetలు అందుబాటులో లేని దశలు — provider circuit breaker `OPEN`, connection
+  cooldown, model lockout — draw జరగడానికి ముందే తొలగించబడతాయి
+  (`open-sse/services/combo/targetResolution.ts`), కాబట్టి ఒకే ఆరోగ్యకరమైన దశ తాత్కాలికంగా
+  ప్రతి అభ్యర్థనలోనూ గెలవగలదు.
+- `stickyWeightedLimit` (combo config, default `1` = off) ఎంచుకున్న దశను మళ్లీ డ్రా చేయడానికి
+  ముందు వరుసగా జరిగే అంత స్థాయి విజయాల వరకు స్థిరంగా ఉంచుతుంది.
 
-కచ్చితమైన రొటేషన్ కోసం `round-robin` ఉపయోగించండి; `weighted`లో సమాన వెయిట్లు గణాంకపరమైన — కచ్చితమైనది కాని — సమతుల్యతను అందిస్తాయి.
+కఠినమైన rotation కోసం `round-robin` ఉపయోగించండి; `weighted`లో సమాన బరువులు
+గణాంకపరమైన — కఠినమైనది కాని — సమతుల్యతను ఇస్తాయి.
 
-### ఏజెంటిక్ పైప్లైన్ మోడ్
+### Agentic pipeline మోడ్
 
-కనీసం రెండు మోడల్లు ఉన్న `pipeline` కాంబో, `config.agenticOrchestration.enabled`తో ప్లానర్/ఎగ్జిక్యూటర్ రూటింగ్ను ప్రారంభించగలదు. మొదటి టార్గెట్ ప్లానింగ్ మరియు తుది సమాధానాలను నిర్వహిస్తుంది; రెండవ టార్గెట్ క్లయింట్-నేటివ్ టూల్ కాల్లను విడుదల చేస్తుంది. OmniRoute అభ్యర్థన ప్రోటోకాల్ నుండి టూల్-రిజల్ట్ కొనసాగింపులను గుర్తించి, మరొక టూల్ రౌండ్ అవసరమా అని ప్లానర్ను అడుగుతుంది, ఆపై ఎగ్జిక్యూటర్ లేదా ప్లానర్లో ఒకదాన్ని క్లయింట్కు ఎదురుగా ఉండే తుది దశగా డైనమిక్గా ఎంచుకుంటుంది.
+కనీసం రెండు models ఉన్న `pipeline` combo, `config.agenticOrchestration.enabled` ద్వారా
+planner/executor routingను ప్రారంభించవచ్చు. మొదటి target planning మరియు తుది సమాధానాలకు
+బాధ్యత వహిస్తుంది; రెండవ target client-native tool callsను ఉత్పత్తి చేస్తుంది. OmniRoute
+అభ్యర్థన protocol నుండి tool-result continuationsను గుర్తించి, మరో tool round అవసరమా అని
+plannerను అడుగుతుంది; ఆపై executor లేదా plannerను client-facing final stepగా
+డైనమిక్గా ఎంపిక చేస్తుంది.
 
-రెండవ టార్గెట్ తర్వాత ఉన్న అదనపు మోడల్లు క్రమబద్ధమైన ఎగ్జిక్యూటర్ బ్యాకప్లుగా పనిచేస్తాయి. విఫలమైన HTTP ప్రతిస్పందన లేదా ట్రాన్స్పోర్ట్ మినహాయింపు సంభవిస్తే, అదే ప్లానర్ నిర్ణయం మరియు నేటివ్ టూల్లను కొనసాగిస్తూ తదుపరి ఎగ్జిక్యూటర్కు వెళ్తుంది; అయితే ఆ ఎగ్జిక్యూటర్కు చెందిన స్వంత దశ ప్రాంప్ట్ మరియు పరిష్కరించబడిన కనెక్షన్ను ఉపయోగిస్తుంది. మొదటి విజయవంతమైన ప్రతిస్పందన SSE స్ట్రీమింగ్తో సహా ఎలాంటి మార్పులు లేకుండా తిరిగి ఇవ్వబడుతుంది; విజయవంతమైన స్ట్రీమ్ ప్రారంభమైన తర్వాత సంభవించే వైఫల్యాలను ఇక్కడ మళ్లీ ప్రయత్నించడం సాధ్యం కాదు. అన్ని ఎగ్జిక్యూటర్లు విఫలమైతే, చివరి వైఫల్యం తిరిగి ఇవ్వబడుతుంది. క్లయింట్ అబార్ట్లు డిస్పాచ్ను నిలిపివేస్తాయి.
+ఐచ్ఛికమైన `config.agenticOrchestration.contextCompaction`, ప్రతి planner లేదా executor
+dispatchకు ముందు వేరే payload budgetను వర్తింపజేస్తుంది. దీన్ని స్పష్టంగా ప్రారంభించండి:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+ఇవి operator ఎంచుకున్న serialized JSON character budgets; ఇవి token context windows లేదా
+హామీ ఇవ్వబడిన upstream limits కావు. ఖచ్చితమైన model IDs defaultను override చేస్తాయి.
+threshold కంటే ఎక్కువగా ఉన్నప్పుడు, compaction ఒకే రకమైన tool definitionsను తొలగిస్తుంది,
+పరిమాణం అధికంగా ఉన్న tool evidenceను digestతో కుదిస్తుంది, అలాగే పాత complete history
+groupsను target ratio వైపు తొలగిస్తుంది. ఇది system/developer instructions, తాజా user
+request, చివరి tool roundలోని parallel calls/results, మరియు Gemini యొక్క ప్రారంభ routing
+instructionను ఉంచుతుంది. Top-level instructions మరియు tool settings భద్రంగా ఉంచబడతాయి.
+తొలగించిన historyను omission marker నమోదు చేస్తుంది; ఇది semantic summary కాదు, deterministic
+trimming. పిన్ చేసిన context ఇప్పటికీ budgetను మించితే, modelను సంప్రదించకముందే request
+413ను తిరిగి ఇస్తుంది. Compaction నిలిపివేయబడితే లేదా threshold కంటే తక్కువగా ఉంటే request
+మార్పులేకుండా pass through అవుతుంది.
+
+Tool-result continuationsపై, వరుసగా పూర్తయిన రెండు roundsలో మార్పులేని resultsతో అదే
+tool calls పునరావృతమైతే, లేదా వరుసగా పూర్తయిన రెండు roundsలో స్పష్టంగా గుర్తించబడిన ప్రతి
+result విఫలమైతే, OmniRoute executionను కూడా ఆపుతుంది. మారిన results పునరావృత callsను
+అనుమతిస్తాయి (ఉదాహరణకు, polling). కొత్త user requestపై guard reset అవుతుంది, parallel
+callsను ఒక roundగా సమూహపరుస్తుంది, అలాగే Anthropic, Chat Completions, Responses మరియు
+Gemini historiesకు మద్దతు ఇస్తుంది. Planner కారణాన్ని స్వీకరిస్తుంది మరియు మరో tool round
+అడిగినా తుది సమాధానానికి బాధ్యత వహిస్తుంది.
+
+రెండవ target తర్వాతి అదనపు models executor backupsగా క్రమబద్ధీకరించబడతాయి. విఫలమైన
+HTTP response లేదా transport exception తదుపరి executorకు మారుతుంది; అదే planner decision
+మరియు native toolsతో పాటు ఆ executor యొక్క స్వంత step prompt మరియు resolved connection
+తీసుకెళ్తుంది. మొదటి విజయవంతమైన response మార్పులేకుండా తిరిగి ఇవ్వబడుతుంది, SSE streaming
+తో సహా; విజయవంతమైన stream ప్రారంభమైన తర్వాతి failuresను ఇక్కడ మళ్లీ ప్రయత్నించలేము.
+అన్ని executors విఫలమైతే, చివరి failure తిరిగి ఇవ్వబడుతుంది. Client aborts dispatchను
+ఆపుతాయి.
 
 ```json
 {
@@ -322,22 +402,38 @@ OmniRoute యొక్క కాంబో ఇంజిన్ **20 రూటి�
 }
 ```
 
-ఎగ్జిక్యూటర్ ఒకే ప్రతిస్పందనలో పరస్పరం స్వతంత్రమైన అనేక కాల్లను విడుదల చేయవచ్చు. ఆధారిత కాల్లు తదుపరి క్లయింట్ టూల్-రిజల్ట్ టర్న్లలో నిర్వహించబడతాయి, ప్లానర్ ప్రతి ఫలితాన్ని సమీక్షిస్తుంది. `maxToolRounds` డిఫాల్ట్గా `8` ఉంటుంది మరియు `1`–`32`ను అంగీకరిస్తుంది; పరిమితిని చేరుకున్న తర్వాత, ప్లానర్ అందుబాటులో ఉన్న అత్యుత్తమ తుది సమాధానాన్ని తప్పనిసరిగా రూపొందించాలి. అంతర్గత ప్లానర్ నిర్ణయాలు బఫర్ చేయబడతాయి, అయితే ఎంచుకున్న క్లయింట్-ఫేసింగ్ ప్రతిస్పందన అసలు స్ట్రీమింగ్ ప్రాధాన్యతను అలాగే ఉంచుతుంది.
+Executor ఒకే responseలో అనేక స్వతంత్ర callsను ఉత్పత్తి చేయవచ్చు. ఆధారపడిన callsను
+తర్వాతి client tool-result turnsలో నిర్వహిస్తారు; ప్రతి resultను planner సమీక్షిస్తుంది.
+`maxToolRounds` defaultగా `8` మరియు `1`–`32` పరిధిని అంగీకరిస్తుంది; పరిమితి చేరుకున్నాక,
+అందుబాటులో ఉన్న ఉత్తమ తుది సమాధానాన్ని planner తప్పనిసరిగా ఉత్పత్తి చేయాలి. Internal
+planner decisions buffer చేయబడతాయి, అయితే ఎంపికైన client-facing response అసలు streaming
+preferenceను కాపాడుతుంది.
 
-### `round-robin` స్టికీ బ్యాచ్ మరియు అకౌంట్ విస్తరణ
+### `round-robin` sticky batch మరియు account expansion
 
-రౌండ్-రాబిన్ బ్యాచ్లుగా పనిచేస్తుంది, ఒక్కో దశకు ఒక్కో అభ్యర్థనగా కాదు:
+Round-robin ఒక్క requestకు ఒక step చొప్పున కాకుండా batchలుగా పనిచేస్తుంది:
 
-- `stickyRoundRobinLimit` (మొదట కాంబో కాన్ఫిగ్, తర్వాత `comboStickyRoundRobinLimit`, తర్వాత
-  `settings.stickyRoundRobinLimit`, డిఫాల్ట్ **3**) రొటేట్ చేయడానికి ముందు, అన్ని వరుస విజయాల వరకు అదే టార్గెట్ను కొనసాగిస్తుంది. ప్రతి అభ్యర్థనకు రొటేషన్ కావాలంటే కాంబో ఓవర్రైడ్ను `1`కు సెట్ చేయండి. కాంబో ఎడిటర్ అమలులో ఉన్న విలువను మరియు అది ఏ లేయర్ నుండి వచ్చిందో చూపుతుంది.
-- `connectionAwareExpansion` (మొదట కాంబో కాన్ఫిగ్, తర్వాత సెట్టింగ్లు, డిఫాల్ట్ **false**) రొటేషన్కు ముందు ప్రతి ప్రొవైడర్-స్థాయి దశను ఒక్కో అకౌంట్ టార్గెట్లుగా విస్తరిస్తుంది. Group-B వ్యూహాలు
+- `stickyRoundRobinLimit` (combo config, తర్వాత `comboStickyRoundRobinLimit`, తర్వాత
+  `settings.stickyRoundRobinLimit`, default **3**) rotate చేయడానికి ముందు వరుసగా జరిగే
+  అంత స్థాయి విజయాల వరకు అదే targetను ఉంచుతుంది. ఒక్క-request rotation కోసం combo
+  overrideను `1`గా సెట్ చేయండి. Combo editor effective value మరియు అది ఏ layer నుండి
+  వచ్చిందో చూపిస్తుంది.
+- `connectionAwareExpansion` (combo config, తర్వాత settings, default **false**) rotationకు
+  ముందు ప్రతి provider-level stepను per-account targetsగా విస్తరిస్తుంది. Group-B strategies
   (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
   fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) ఇది ఆన్ అయ్యే వరకు ప్రొవైడర్-స్థాయి వీక్షణను కొనసాగిస్తాయి. కాంబో ఎడిటర్
-  inherit / on / off ఎంపికలను అందిస్తుంది; inherit గ్లోబల్ డిఫాల్ట్ను (off) ఉపయోగిస్తుంది.
-- ప్రాంప్ట్-క్యాష్ లోకాలిటీ రూటింగ్ (`promptCacheAffinityEnabled`, డిఫాల్ట్ **true**) సరిపోలే క్యాష్ కీలు ఒకే అకౌంట్లో ఉండేలా పిన్ చేసిన కనెక్షన్లను తిరిగి క్రమబద్ధీకరిస్తుంది. పిన్ చేసిన ఒక్కో అకౌంట్ దశలలో రౌండ్-రాబిన్ మరియు వెయిటెడ్ రొటేషన్ కంటే దీనికే ప్రాధాన్యం ఉంటుంది. మీకు కచ్చితమైన రొటేషన్ అవసరమైతే Settings → Combo defaults కింద దీన్ని ఆఫ్ చేయండి. ఒక్కో కాంబోకు ప్రత్యేక ఓవర్రైడ్ లేదు.
+  pipeline, jev) ఇది on అయ్యే వరకు provider-level viewను ఉంచుతాయి. Combo editor
+  inherit / on / off ఎంపికలను అందిస్తుంది; inherit global default (off)ను ఉపయోగిస్తుంది.
+- Prompt-cache locality routing (`promptCacheAffinityEnabled`, default **true**) సరిపోలే
+  cache keys ఒకే accountపై ఉండేలా pinned connectionsను మళ్లీ క్రమబద్ధీకరిస్తుంది.
+  Pinned per-account stepsపై round-robin మరియు weighted rotation కంటే దీనికి ప్రాధాన్యత
+  ఉంటుంది. కఠినమైన rotation అవసరమైతే Settings → Combo defaults కింద దీన్ని ఆపివేయండి.
+  Per-combo override లేదు.
 
-ఒకే మోడల్పై బహుళ అకౌంట్ రొటేషన్ కోసం, మూడు పిన్ చేసిన `connectionId`ల బదులు స్టికీ పరిమితి `1`తో **ఒక డైనమిక్-అకౌంట్ దశ**ను (ఖాళీ `connectionId`, మొత్తం పూల్) ఉపయోగించడం ఉత్తమం. RR కౌంటర్ ముందుకు సాగుతున్నప్పటికీ, పిన్ చేసిన దశలు మరియు అఫినిటీ ఒకే అకౌంట్పై కేంద్రీకృతమవుతాయి.
+ఒక modelపై multi-account rotation కోసం, మూడు pinned `connectionId`sకు బదులుగా sticky
+limit `1`తో **ఒక dynamic-account step** (ఖాళీ `connectionId`, మొత్తం pool)ను
+ఉపయోగించడం మంచిది. RR counter ముందుకు సాగుతున్నప్పటికీ pinned steps మరియు affinity
+ఒకే accountపై కేంద్రీకృతమవుతాయి.
 
 ## ఫ్యూజన్ వ్యూహం
 
@@ -805,46 +901,44 @@ Tier 1 (సబ్స్క్రిప్షన్)కు బలమైన ప్
 
 టియర్ నిర్వచనాలు మరియు ప్రొవైడర్ వర్గీకరణ కోసం [`docs/guides/TIERS.md`](../guides/TIERS.md)ను చూడండి.
 
-## పరీక్ష & కవరేజ్
+## పరీక్షలు & కవరేజ్
 
 ### నిర్ణయాత్మక రూటింగ్-నిర్ణయ మ్యాట్రిక్స్ (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` అనేది మాక్ చేసిన అప్స్ట్రీమ్తో వాస్తవ కాంబో పైప్లైన్ ద్వారా మొత్తం 19
-పబ్లిక్ వ్యూహాల రూటింగ్ **నిర్ణయాన్ని** ఎండ్-టు-ఎండ్గా నిరూపిస్తుంది.
+`tests/integration/combo-matrix/*.test.ts` నిజమైన కాంబో పైప్లైన్ ద్వారా, మాక్ చేసిన అప్స్ట్రీమ్తో, ఇది కవర్ చేసే పబ్లిక్ స్ట్రాటజీల రూటింగ్ **నిర్ణయాన్ని** ఎండ్-టు-ఎండ్గా నిరూపిస్తుంది.
 కవరేజ్లో ఇవి ఉన్నాయి:
 
-- మొత్తం 19 `ROUTING_STRATEGY_VALUES` వ్యూహాలు (ordered, weighted, cost, context, fusion, …).
-- `quota-share` (అంతర్గతం) ఎండ్-టు-ఎండ్: వాస్తవ `selectQuotaShareTarget` సీమ్ (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`) ద్వారా DRR న్యాయబద్ధత + సాచురేషన్ ప్రాధాన్యత తగ్గింపు.
-- ప్రతి టార్గెట్ సంఖ్యలో `context-relay` యూనివర్సల్-హ్యాండాఫ్ కవరేజ్.
+- మొత్తం 21 `ROUTING_STRATEGY_VALUES` స్ట్రాటజీలు (ఆర్డర్డ్, వెయిటెడ్, కాస్ట్, కాంటెక్స్ట్, ఫ్యూజన్, …).
+- `quota-share` (అంతర్గత) ఎండ్-టు-ఎండ్: నిజమైన `selectQuotaShareTarget` సీమ్ (`registerQuotaFetcher` / `setLKGP` /
+  `__setHeadroomSaturationFetcherForTests`) ద్వారా DRR ఫెయిర్నెస్ + స్యాచురేషన్ డీప్రయారిటైజేషన్.
+- ప్రతి టార్గెట్ సంఖ్య అంతటా `context-relay` యూనివర్సల్-హ్యాండ్ఆఫ్ కవరేజ్.
 
-ఈ సూట్ CIలో (`test:integration` జాబ్) `--test-concurrency=1` మరియు
-`--test-force-exit`తో అమలవుతుంది, అందువల్ల ఇది నిర్ణయాత్మకంగా ఉంటుంది మరియు ప్రత్యక్ష క్రెడెన్షియల్స్ అవసరం లేదు.
+ఈ సూట్ CI (`test:integration` జాబ్)లో `--test-concurrency=1` మరియు
+`--test-force-exit`తో నడుస్తుంది, కాబట్టి ఇది నిర్ణయాత్మకంగా ఉంటుంది మరియు లైవ్ క్రెడెన్షియల్స్ అవసరం లేదు.
 
-### గేట్ చేయబడిన లైవ్ స్మోక్ (CIలో లేదు — వాస్తవ ప్రొవైడర్లు)
+### నియంత్రిత లైవ్ స్మోక్ (CIలో కాదు — నిజమైన ప్రొవైడర్లు)
 
-| కమాండ్                                 | ఇది చేసే పని                                                                               |
-| :------------------------------------- | :----------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1`తో ఇన్-ప్రాసెస్ వాస్తవ రూటింగ్; లైవ్ OmniRoute DB స్నాప్షాట్ను తీస్తుంది |
-| `npm run test:combo:live:vps`          | లైవ్ OmniRoute సర్వర్కు HTTP కాల్స్ (`COMBO_LIVE_BASE_URL`ను సెట్ చేయండి)                  |
-| `npm run test:combo:live:vps:failover` | ఉద్దేశపూర్వక ఫెయిలోవర్ సందర్భాలతో ఇదే పని చేస్తుంది                                        |
+| కమాండ్                                 | ఇది చేసే పని                                                                                        |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1`తో ప్రాసెస్లోనే నిజమైన రూటింగ్; లైవ్ OmniRoute DB యొక్క స్నాప్షాట్ను తీసుకుంటుంది |
+| `npm run test:combo:live:vps`          | లైవ్ OmniRoute సర్వర్కు HTTP కాల్స్ (`COMBO_LIVE_BASE_URL` సెట్ చేయండి)                             |
+| `npm run test:combo:live:vps:failover` | ఇదే, ఉద్దేశపూర్వక ఫెయిల్ఓవర్ సందర్భాలతో                                                             |
 
-ఈ స్మోక్ పరీక్షలు వాస్తవ వైర్ మార్గాన్ని (కాంబో → ప్రొవైడర్ → కంప్లీషన్) పరీక్షిస్తాయి. వీటికి
-లైవ్ క్రెడెన్షియల్స్ మరియు VPS యాక్సెస్ అవసరం కాబట్టి, ఉద్దేశపూర్వకంగా CI నుంచి మినహాయించబడ్డాయి.
+ఈ స్మోక్ టెస్ట్లు నిజమైన వైర్ పాత్ను (కాంబో → ప్రొవైడర్ → కంప్లీషన్) పరీక్షిస్తాయి. లైవ్ క్రెడెన్షియల్స్ మరియు VPS యాక్సెస్ అవసరం కావడంతో వీటిని CI నుంచి ఉద్దేశపూర్వకంగా మినహాయించారు.
 
 ---
 
 ## ఫైళ్లు
 
-| ఫైల్                                                      | ఉద్దేశ్యం                                                                                                             |
-| :-------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `open-sse/services/autoCombo/scoring.ts`                  | 16-కారకాల స్కోరింగ్ ఫంక్షన్, `DEFAULT_WEIGHTS`, పూల్ నార్మ్                                                           |
-| `open-sse/services/autoCombo/taskFitness.ts`              | మోడల్ × టాస్క్ ఫిట్నెస్ లుకప్                                                                                         |
-| `open-sse/services/autoCombo/engine.ts`                   | ఎంపిక లాజిక్, బ్యాండిట్, బడ్జెట్ పరిమితి                                                                              |
-| `open-sse/services/autoCombo/selfHealing.ts`              | మినహాయింపు, ప్రోబ్లు, ఇన్సిడెంట్ మోడ్                                                                                 |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 వెయిట్ ప్రొఫైల్లు (వేగవంతమైన-షిప్పింగ్, ఖర్చు-పొదుపు, నాణ్యత-ముందు, ఆఫ్లైన్-అనుకూలం, విశ్వసనీయత-ముందు, కేయాస్-మోడ్) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` ప్రిఫిక్స్ పార్సర్ + 6 వేరియంట్లు                                                                             |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | లైవ్ కనెక్షన్ల నుండి ఇన్-మెమరీ `AutoComboConfig`ను నిర్మిస్తుంది                                                      |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | ప్రొవైడర్ రిజిస్ట్రీని మాక్ చేయడానికి టెస్ట్ హుక్                                                                     |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 వ్యూహాలు)                                                                               |
-| `src/sse/handlers/chat.ts`                                | ఇంటిగ్రేషన్: auto-prefix షార్ట్-సర్క్యూట్                                                                             |
+| ఫైల్                                                      | ప్రయోజనం                                                                                                    |
+| :-------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | 16-కారకాల స్కోరింగ్ ఫంక్షన్, `DEFAULT_WEIGHTS`, పూల్ నార్మ్                                                 |
+| `open-sse/services/autoCombo/taskFitness.ts`              | మోడల్ × టాస్క్ ఫిట్నెస్ లుకప్                                                                               |
+| `open-sse/services/autoCombo/engine.ts`                   | ఎంపిక లాజిక్, బ్యాండిట్, బడ్జెట్ పరిమితి                                                                    |
+| `open-sse/services/autoCombo/selfHealing.ts`              | మినహాయింపు, ప్రోబ్లు, ఇన్సిడెంట్ మోడ్                                                                       |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 వెయిట్ ప్రొఫైళ్లు (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` ప్రిఫిక్స్ పార్సర్ + 6 వేరియంట్లు                                                                   |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | లైవ్ కనెక్షన్ల నుంచి ఇన్-మెమరీ `AutoComboConfig` నిర్మిస్తుంది                                              |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | ప్రొవైడర్ రిజిస్ట్రీని మాక్ చేయడానికి టెస్ట్ హుక్                                                           |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 వ్యూహాలు)                                                                     |
+| `src/sse/handlers/chat.ts`                                | ఇంటిగ్రేషన్: ఆటో-ప్రిఫిక్స్ షార్ట్-సర్క్యూట్                                                                |

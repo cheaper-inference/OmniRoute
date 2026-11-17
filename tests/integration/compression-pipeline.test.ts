@@ -10,11 +10,11 @@ import {
   applyLiteCompression,
   replaceImageUrls,
 } from "../../open-sse/services/compression/lite.ts";
-import {
-  createCompressionStats,
-  estimateCompressionTokens,
-} from "../../open-sse/services/compression/stats.ts";
-import type { CompressionConfig } from "../../open-sse/services/compression/types.ts";
+import { estimateCompressionTokens } from "../../open-sse/services/compression/stats.ts";
+import type {
+  CompressionConfig,
+  CompressionPipelineStep,
+} from "../../open-sse/services/compression/types.ts";
 
 const baseConfig: CompressionConfig = {
   enabled: true,
@@ -24,6 +24,13 @@ const baseConfig: CompressionConfig = {
   preserveSystemPrompt: true,
   comboOverrides: {},
 };
+
+const safeLitePipeline: CompressionPipelineStep[] = [
+  {
+    engine: "lite",
+    config: { compressToolResults: false, preserveToolWhitespace: true },
+  },
+];
 
 describe("Full Compression Pipeline", () => {
   it("end-to-end: lite mode compresses whitespace and tracks stats", () => {
@@ -35,18 +42,19 @@ describe("Full Compression Pipeline", () => {
       ],
     };
 
-    // Step 1: Select strategy. Since #18818 a configured lite runs as a scoped one-step stacked
-    // pipeline, and the plan still names lite as the mode analytics reports.
+    // Without a lossy opt-in, Lite resolves to a safe stacked pipeline (#18818).
     const plan = selectCompressionPlan(baseConfig, null, 100);
     assert.equal(plan.mode, "stacked");
     assert.equal(plan.reportedMode, "lite");
-    assert.deepEqual(
-      plan.stackedPipeline.map((step) => step.engine),
-      ["lite"]
-    );
+    assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
 
-    // Step 2: Apply compression
-    const result = applyCompression(body, "lite");
+    // Step 2: Apply the resolved pipeline, including its safety options.
+    const result = applyCompression(body, "stacked", {
+      config: {
+        ...baseConfig,
+        stackedPipeline: plan.stackedPipeline as CompressionPipelineStep[],
+      },
+    });
     assert.equal(result.compressed, true);
     assert.ok(result.stats);
 
@@ -55,7 +63,11 @@ describe("Full Compression Pipeline", () => {
     assert.ok(result.stats!.compressedTokens > 0);
     assert.ok(result.stats!.compressedTokens <= result.stats!.originalTokens);
     assert.ok(result.stats!.savingsPercent >= 0);
-    assert.equal(result.stats!.mode, "lite");
+    assert.equal(result.stats!.mode, "stacked");
+    assert.deepEqual(
+      result.stats!.engineBreakdown?.map((step) => step.engine),
+      ["lite"]
+    );
   });
 
   it("end-to-end: off mode returns unchanged body", () => {
@@ -80,9 +92,20 @@ describe("Full Compression Pipeline", () => {
     const plan = selectCompressionPlan(config, "my-combo", 100);
     assert.equal(plan.mode, "stacked");
     assert.equal(plan.reportedMode, "lite");
+    assert.equal(plan.source, "routing-override");
+    assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
 
-    const result = applyCompression(body, "lite");
+    const result = applyCompression(body, "stacked", {
+      config: {
+        ...config,
+        stackedPipeline: plan.stackedPipeline as CompressionPipelineStep[],
+      },
+    });
     assert.equal(result.compressed, true);
+    assert.deepEqual(
+      result.stats?.engineBreakdown?.map((step) => step.engine),
+      ["lite"]
+    );
   });
 
   it("end-to-end: auto-trigger activates compression", () => {
@@ -91,16 +114,17 @@ describe("Full Compression Pipeline", () => {
       defaultMode: "off" as const,
       autoTriggerTokens: 50,
     };
-    const body = { messages: [{ role: "user", content: "x".repeat(1000) }] };
-
     // Below threshold → off
     const mode1 = getEffectiveMode(config, null, 10);
     assert.equal(mode1, "off");
 
-    // Above threshold → lite, dispatched as a scoped stacked step (#18818)
+    // Above threshold → safe stacked Lite, without a lossy opt-in.
     const mode2 = getEffectiveMode(config, null, 100);
     assert.equal(mode2, "stacked");
-    assert.equal(selectCompressionPlan(config, null, 100).reportedMode, "lite");
+    const plan = selectCompressionPlan(config, null, 100);
+    assert.equal(plan.source, "auto-trigger");
+    assert.equal(plan.reportedMode, "lite");
+    assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
   });
 
   it("lite compression + stats pipeline works together", () => {

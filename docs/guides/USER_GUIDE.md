@@ -374,7 +374,10 @@ omniroute
 omniroute --port 3000
 ```
 
-The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`.
+The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`. A `./.env` in the
+working directory may set only a short allowlist of keys (`REQUIRE_API_KEY`, locale, time zone
+and color settings, not the ports); put everything else in `~/.omniroute/.env`. See
+[CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 
@@ -753,7 +756,11 @@ These keys go in a connection's `providerSpecificData` (for example via
 
 - `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose
   gateway rejects long tool names. Longer names are sent as short aliases and restored in the
-  response.
+  response. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse
+  Code already alias names over 64 characters with no setting. A connection value replaces the
+  Azure OpenAI / Azure AI Foundry default (an Azure connection behind a stricter gateway) and
+  sets the limit for a custom compatible node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go and Muse
+  Code keep their registry limit and ignore it.
 - `quotaEndpoint` — the gateway's quota/credits endpoint, read for the dashboard quota strip and
   quota-aware routing. Works on both OpenAI- and Anthropic-compatible connections; the full shape
   is documented in `open-sse/services/usage/openaiCompatible.ts`.

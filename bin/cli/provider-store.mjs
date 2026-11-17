@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { decryptCredential, encryptCredential } from "./encryption.mjs";
+import { readNewConnectionProxyDefault } from "../../src/lib/db/newConnectionProxy.mjs";
+import { ensureSettingsSchema } from "./settings-store.mjs";
 
 const REQUIRED_PROVIDER_COLUMNS = [
   ["auth_type", "TEXT"],
@@ -37,6 +39,7 @@ const REQUIRED_PROVIDER_COLUMNS = [
   ["last_used_at", "TEXT"],
   ['"group"', "TEXT"],
   ["max_concurrent", "INTEGER"],
+  ["proxy_enabled", "INTEGER NOT NULL DEFAULT 1"],
   ["created_at", "TEXT"],
   ["updated_at", "TEXT"],
 ];
@@ -141,6 +144,7 @@ function rowToConnection(row) {
     email: row.email || null,
     priority: row.priority || 0,
     isActive: row.is_active !== 0,
+    proxyEnabled: row.proxy_enabled !== 0,
     apiKey: row.api_key || null,
     accessToken: row.access_token || null,
     refreshToken: row.refresh_token || null,
@@ -200,9 +204,13 @@ export function upsertApiKeyProviderConnection(db, input) {
   const now = new Date().toISOString();
   const existing = db
     .prepare(
-      "SELECT id, priority FROM provider_connections WHERE provider = ? AND auth_type = 'apikey' AND name = ?"
+      "SELECT id, priority, proxy_enabled FROM provider_connections WHERE provider = ? AND auth_type = 'apikey' AND name = ?"
     )
     .get(provider, name);
+
+  // The CLI's standalone schema can predate the server's first start.
+  if (!existing) ensureSettingsSchema(db);
+  const proxyEnabled = existing ? existing.proxy_enabled !== 0 : readNewConnectionProxyDefault(db);
 
   const connection = {
     id: existing?.id || randomUUID(),
@@ -211,6 +219,7 @@ export function upsertApiKeyProviderConnection(db, input) {
     name,
     priority: existing?.priority || nextPriority(db, provider),
     isActive: 1,
+    proxyEnabled,
     apiKey: encryptCredential(input.apiKey),
     testStatus: input.testStatus || "unknown",
     defaultModel: input.defaultModel || null,
@@ -224,10 +233,10 @@ export function upsertApiKeyProviderConnection(db, input) {
   db.prepare(
     `INSERT INTO provider_connections (
       id, provider, auth_type, name, priority, is_active, api_key, provider_specific_data,
-      test_status, default_model, created_at, updated_at
+      test_status, default_model, created_at, updated_at, proxy_enabled
     ) VALUES (
       @id, @provider, @authType, @name, @priority, @isActive, @apiKey, @providerSpecificData,
-      @testStatus, @defaultModel, @createdAt, @updatedAt
+      @testStatus, @defaultModel, @createdAt, @updatedAt, @proxyEnabledColumn
     )
     ON CONFLICT(id) DO UPDATE SET
       api_key = excluded.api_key,
@@ -236,7 +245,7 @@ export function upsertApiKeyProviderConnection(db, input) {
       default_model = excluded.default_model,
       is_active = excluded.is_active,
       updated_at = excluded.updated_at`
-  ).run(connection);
+  ).run({ ...connection, proxyEnabledColumn: proxyEnabled ? 1 : 0 });
 
   return connection;
 }

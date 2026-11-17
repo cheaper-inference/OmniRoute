@@ -70,46 +70,41 @@ Tí a kò bá ṣètò rẹ̀, `managementReadToken` yóò lo `apiKey` gẹ́g�
 ìmúkúrò àwọn alias canonical tó ṣe àdáwòkọ, kò ní iye owó, kò sì ní àwọn àkójọpọ̀. Plugin náà máa ń kìlọ̀ lẹ́ẹ̀kan fún endpoint kọ̀ọ̀kan nígbà tí èyí bá ṣẹlẹ̀,
 yóò sì dárúkọ endpoint náà àti ohun tí ó sọnù — nítorí náà olùyan tó dín agbára kù kì yóò jẹ́ àdììtú láé.
 
-## Àwọn Àṣàyàn
+## Awọn aṣayan
 
-| Kọ́kọ́rọ́                           | Àkọ́ṣe                                                | Àwọn Àkíyèsí                                                                                                                   |
-| -------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                        | ID olùpèsè, ID ìṣọ̀kan, àti ìpele ìṣáájú tí àwọn awoṣe yóò fara hàn lábẹ́ rẹ̀                                                     |
-| `baseURL`                        | ó pọndandan                                          | Gbòngbò ẹnubodè, `http(s)` nìkan; a máa fi ìfikún `/v1` kún un níbi tí ó bá yẹ                                                 |
-| `apiKey`                         | ẹ̀rí ìdánimọ̀ tí a sopọ̀, lẹ́yìn náà `OMNIROUTE_API_KEY` | Kọ́kọ́rọ́ ìfọ̀rọ̀wérọ̀ fún `/v1/*`                                                                                                   |
-| `managementReadToken`            | máa lo `apiKey` bí kò bá sí                          | Kọ́kọ́rọ́ fún `/api/*` — ní ọ̀pọ̀ ìgbà, ó **kì í ṣe** ọ̀kan náà                                                                      |
-| `displayName`                    | `"OmniRoute"`                                        | Orúkọ olùpèsè nínú ohun ìṣàyàn                                                                                                 |
-| `timeoutMs`                      | `10000`                                              | Àkókò ìdádúró tó pọ̀ jù fún ìgbà ìgbàlódé kọ̀ọ̀kan (àwọn àkópọ̀ aládàáṣiṣẹ́ máa ń lo 5s)                                            |
-| `modelCacheTtlMs`                | `300000`                                             | TTL kaṣe katalọ́ọ̀gù; àwòrán-ìpamọ́ lórí disiki máa ń mú ìbẹ̀rẹ̀ tútù yára                                                          |
-| `timeouts`                       | máa lo `timeoutMs` bí kò bá sí                       | Àwọn ààlà àkókò fún ibi ìpè kọ̀ọ̀kan ní ms: `models`, `combos`, `autoCombos`, `enrichment`                                       |
-| `enrichment`                     | `true`                                               | Gba àwọn orúkọ, iye owó àti àwọn ààlà ìpele ọ̀fẹ́                                                                                |
-| `providerTag`                    | `true`                                               | Fi olùpèsè òkè tí ó ń darí sí gẹ́gẹ́ bí ìpele ìṣáájú orúkọ àfihàn                                                                |
-| `usableOnly`                     | `false`                                              | Pa àwọn olùpèsè tí ẹnubodè sọ pé a ti pèsè sílẹ̀ nìkan mọ́                                                                       |
-| `combosSource`                   | `"api"`                                              | `"models"` máa fo `/api/combos` kọjá, yóò sì tẹ àwọn ìlà àkópọ̀ `/v1/models` jáde; àwọn àsẹ ipele ọmọ ẹgbẹ́ máa jẹ́ kí `"api"` wà |
-| `showcasePerOwner`               | `10`                                                 | Àwọn àkọsílẹ̀ ojú-ìwòye àkọ́kọ́ tí a pa mọ́ fún olùpèsè kọ̀ọ̀kan                                                                     |
-| `freshPerOwner`                  | `10`                                                 | Àwọn àkọsílẹ̀ tuntun ojú-ìwòye àkọ́kọ́ tí a pa mọ́ fún olùpèsè kọ̀ọ̀kan                                                              |
-| `freshWindowDays`                | `90`                                                 | Fèrèsé tuntun ní ọjọ́ fún ẹ̀ka tuntun                                                                                            |
-| `usageMemory`                    | `true`                                               | Dá àwọn àkọsílẹ̀ tí a yọ kúrò lọ́nà àìyípadà tí ìtúpalẹ̀ lílò ọjọ́ 30 dárúkọ padà (ó nílò àmì ìṣàkóso)                             |
-| `visibleModels` / `hiddenModels` | `[]`                                                 | Àwọn àtòjọ ìyọ̀nda tó bá mu gan-an tàbí nípa ìparí; ìkọ̀sílẹ̀ ló borí; `*` máa tẹ gbogbo katalọ́ọ̀gù jáde (àwọn àsẹ míì ṣì wúlò)    |
-| `geminiSanitization`             | `true`                                               | Yọ àwọn ọ̀rọ̀-kókó JSON-Schema tí Gemini kọ̀ láti inú àwọn àwòrán irinṣẹ́ (a máa rán àwọn irinṣẹ́ `$ref` lọ láìyípadà)              |
-| `apiFormat.allowAnthropic`       | `false`                                              | Darí àwọn ID inú àtòjọ ìyọ̀nda gba inú búlọ́ọ̀kù API Anthropic                                                                    |
-| `apiFormat.anthropicModels`      | `[]`                                                 | Gbogbo ID awoṣe tí a darí sí Anthropic                                                                                         |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                     | Bí àkọsílẹ̀ ìṣẹ̀lẹ̀ ṣe máa kún tó                                                                                                 |
+| Bọtini                           | Aiyipada                                      | Awọn akọsilẹ                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                 | ID olupese, id isọpọ, ati awọn awoṣe ìpele han labẹ                                                                                                                                                                                                                                                                           |
+| `baseURL`                        | beere                                         | Gbongbo Gateway, `http(s)` nikan; suffix `/v1` ti wa ni afikun si ibi ti o nilo                                                                                                                                                                                                                                               |
+| `apiKey`                         | ti a ti sopọ ẹrí, lẹhinna `OMNIROUTE_API_KEY` | Bọtini iwiregbe fun `/v1/*`                                                                                                                                                                                                                                                                                                   |
+| `managementReadToken`            | ṣubu pada si `apiKey`                         | Bọtini fun `/api/*` — nigbagbogbo** kii ṣe** kanna                                                                                                                                                                                                                                                                            |
+| `displayName`                    | `"OmniRoute"`                                 | Olupese orukọ ninu awọn picker                                                                                                                                                                                                                                                                                                |
+| `timeoutMs`                      | `10000`                                       | Akoko mimu-ipari-opin (afọwọṣe-combos lo 5s)                                                                                                                                                                                                                                                                                  |
+| `modelCacheTtlMs`                | `300000`                                      | Katalogi kaṣe TTL; aworan disiki kan gbona tutu bẹrẹ                                                                                                                                                                                                                                                                          |
+| `timeouts`                       | ṣubu pada si `timeoutMs`                      | Awọn isuna-ipari-opin ni ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                                                                                                                                                                                                   |
+| `enrichment`                     | `true`                                        | Mu awọn orukọ, idiyele ati awọn isuna-ipele ọfẹ                                                                                                                                                                                                                                                                               |
+| `providerTag`                    | `true`                                        | Yi akọmọ olootu itọpa: `Provider - Model (Editor)`. Olupese (ọna ti n ṣiṣẹ awoṣe) nigbagbogbo han; olootu (ti o ṣe awoṣe) han nikan ni akomo. Apeere: `Openrouter - MoonshotAI: Kimi K 3.1 Pro` -> `Openrouter - Kimi K 3.1 Pro (MoonshotAI)`. Ti yọkuro nigbati olootu ati olupese pin orukọ kan. Ṣeto `false` lati ju silẹ. |
+| `usableOnly`                     | `false`                                       | Jeki awọn olupese nikan ni awọn ijabọ ẹnu-ọna bi ipese                                                                                                                                                                                                                                                                        |
+| `combosSource`                   | `"api"`                                       | `"models"` fo `/api/combos` o si ṣe atẹjade awọn ila konbo `/v1/models` ; omo-ipele Ajọ pa `"api"`                                                                                                                                                                                                                            |
+| `showcasePerOwner`               | `10`                                          | Awọn titẹ sii wiwo-aiyipada tọju fun olupese                                                                                                                                                                                                                                                                                  |
+| `freshPerOwner`                  | `10`                                          | Wiwo aiyipada awọn titẹ sii tuntun ti a tọju fun olupese                                                                                                                                                                                                                                                                      |
+| `freshWindowDays`                | `90`                                          | Ferese tuntun ni awọn ọjọ fun ẹka tuntun                                                                                                                                                                                                                                                                                      |
+| `usageMemory`                    | `true`                                        | Mu pada awọn titẹ sii silẹ ni iṣiro ti a darukọ nipasẹ awọn atupale lilo ọjọ 30 (nilo ami iṣakoso kan)                                                                                                                                                                                                                        |
+| `visibleModels` / `hiddenModels` | `[]`                                          | Gangan-tabi-suffix allowlists; sẹ AamiEye; `*` ṣe atẹjade iwe akọọlẹ kikun (awọn asẹ miiran tun wa)                                                                                                                                                                                                                           |
+| `geminiSanitization`             | `true`                                        | Yọ awọn koko-ọrọ JSON-Schema Gemini kọ lati awọn eto irinṣẹ (awọn irinṣẹ `$ref` ni a firanṣẹ siwaju laifọwọkan)                                                                                                                                                                                                               |
+| `apiFormat.allowAnthropic`       | `false`                                       | Awọn ipa ọna ids ti a gba laaye nipasẹ bulọki Anthropic API                                                                                                                                                                                                                                                                   |
+| `apiFormat.anthropicModels`      | `[]`                                          | Awọn ids awoṣe ni kikun ti ipa si Anthropic                                                                                                                                                                                                                                                                                   |
+| `logLevel` / `startupDebug`      | `warn` / `false`                              | Logger verbosity                                                                                                                                                                                                                                                                                                              |
 
-Ìrántí lílò máa ń ṣiṣẹ́ láti ìbẹ̀rẹ̀. Láìsí àmì ìṣàkóso, kò ní ṣe ohunkóhun
-(a máa kọ ìfitónilétí ìbẹ̀rẹ̀ sínú àkọsílẹ̀ ìṣẹ̀lẹ̀), kò sì sí ohun tí a máa dá padà.
+Iranti lilo wa ni titan nipasẹ aiyipada. Laisi aami iṣakoso o duro inert (akiyesi ibẹrẹ kan ti wọle) ko si si ohun ti o tun pada.
 
-## Bí katalogi ṣe ń wà ní ìmúdójúìwọ̀n
+## Bawo ni katalogi duro alabapade
 
-A máa ń gba katalogi náà nígbà tí a bá nílò rẹ̀, a sì máa ń fi í pamọ́ fún `modelCacheTtlMs`; àwòrán-ìpamọ́ disiki kan sì ń jẹ́ kí katalogi tí a mọ̀ kẹ́yìn ṣì wà nígbà tí ẹnubodè kò bá ṣeé dé — ìdádúró iṣẹ́ kò ní ohun tí yóò ná ọ bí kò ṣe pé ìwífún náà kò ní jẹ́ tuntun. Àwọn àwòṣe àti àwọn àkójọpọ̀ ni a máa ń tẹ̀ jáde lẹ́sẹ̀kẹsẹ̀ tí wọ́n bá dé; àwọn àkójọpọ̀ aládàáṣe, àkójọ olùpèsè àti ìpele ìfikún-àlàyé yóò darapọ̀ mọ́ ọn nígbà tí wọ́n bá dé, nítorí náà endpoint kan tí ó lọra kò lè dá gbogbo olùyan dúró.
+Awọn katalogi ti wa ni mu ọlẹ ati ki o cache fun `modelCacheTtlMs`, ati ki o kan disk fọtoyiya ntọju awọn ti o kẹhin mọ katalogi wa nigba ti ẹnu-ọna ni unreachable — ohun outage owo ti o nkankan sugbon freshness. Awọn awoṣe ati awọn combos ti wa ni atẹjade ni kete ti wọn ba de; auto-combos, awọn olupese akojọ ati awọn afikun agbekọja agbo ni nigba ti won de, ki ọkan lọra endpoint ko le mu gbogbo picker idimu.
 
-Àwọn orúkọ ní ohun tí ẹnubodè mọ̀ nínú: olùpèsè òkè tí àwòṣe kan ń tọ́ sí, àmì `[Free]`
-àti ìnáwó tí ó bá a rìn — nítorí náà, ìsopọ̀ méjì tí ń ta àwòṣe kan náà ṣì ṣeé
-yà sọ́tọ̀. Pa ìṣáájú náà pẹ̀lú `"providerTag": false`.
+Awọn orukọ tẹle `Provider - Model[ (Editor)][ · budget][ (route)]`: Olupese yoo han nigbakugba ti id ba gbe ọkan (id slash-less is renders without prefix), `🆓` asiwaju kan samisi awọn titẹ sii ọfẹ ati pe eto isuna-ọfẹ wọn duro bi suffix `· 1M tokens/month`, olootu orukọ `Editor: Model` ti o fojuhan gbe lọ si itọpa itọpa (ko si olootu ti a gboju laisi awọn orukọ ọfẹ) ati `combo - <slug>` Awọn titẹ sii meji ti o pin orukọ kan gba suffix ipa ọna — `(no-think)` — ki wọn wa ni iyatọ. `providerTag` (aiyipada `true`) yi akọmọ olootu itọpa pada.
 
-Kò sí àṣẹ ìmúdójúìwọ̀n afọwọ́ṣe: àwọn àṣẹ OpenCode v2 jẹ́ àwọn àdàkọ prompt, kì í ṣe callbacks,
-nítorí náà plugin kò lè ṣí ọ̀kan síta. Àwọn ìmúdójúìwọ̀n ń tẹ̀lé TTL; a máa ń ní kí host tún kó nǹkan wọlé nígbà tí
-katalogi tàbí ìpele náà bá yí padà ní tòótọ́ nìkan, kì í ṣe lẹ́ẹ̀kan fún gbogbo ìmúdójúìwọ̀n.
+Ko si aṣẹ isọdọtun afọwọṣe: awọn aṣẹ OpenCode v2 jẹ awọn awoṣe kiakia, kii ṣe awọn ipe pada, nitorinaa ohun itanna ko le fi ọkan han. Awọn isọdọtun tẹle TTL; A beere lọwọ agbalejo lati tun gbejade nikan nigbati katalogi tabi agbekọja ba yipada nitootọ, kii ṣe lẹẹkan fun isọdọtun.
 
 ## Pípe irinṣẹ́ lórí Gemini
 
@@ -120,18 +115,16 @@ A máa ń fi irinṣẹ́ tí ó ní `$ref` ránṣẹ́ láìfọwọ́ kàn á
 ìtọ́kasí náà kúrò yóò mú kí schema náà gbòòrò sí “gba ohunkóhun”.
 Ṣètò `"geminiSanitization": false` láti pa á.
 
-## Ìṣàtúnṣe Àwọn Ìṣòro
+## Laasigbotitusita
 
-| Àmì Ìṣòro                                         | Ohun tó fà á                                                                                                   |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Olùyàn kò fi àwòṣe OmniRoute kankan hàn           | Kò sí kọ́kọ́rọ́ tí a rí (ṣàyẹ̀wò ìkìlọ̀ nígbà ìbẹ̀rẹ̀), tàbí a kò lè dé ẹnu-ọ̀nà                                       |
-| Àwọn id àwòṣe lásán, kò sí àkójọpọ̀, kò sí iye owó | Àwọn endpoint ìṣàkóso kọ token náà — ṣètò `managementReadToken`                                                |
-| Kátálọ́ọ̀gù `freeOnly` kúkúrú tàbí òfo              | Kò sí token ìṣàkóso tàbí a kọ token náà — ka ìlà àkótán ìsọdọtun (iye `unmatched-free`) nínú log olùgbàlejò    |
-| Àkókò ìṣiṣẹ́ kan tí a dì mọ́ `opencode-<id>/…`      | Plugin v1 ṣe àtẹ̀jáde `opencode-<id>`; v2 ń ṣe àtẹ̀jáde `<id>` lásán, nítorí náà tún yan àwòṣe náà lábẹ́ `<id>/…` |
+| Aisan                                                  | Nitori                                                                                                                |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Picker fihan ko si OmniRoute awoṣe                     | Ko si bọtini ti o yanju (ṣayẹwo ikilọ ibẹrẹ), tabi ẹnu-ọna ko ṣee de                                                  |
+| Awọn ids awoṣe aise, ko si awọn akojọpọ, ko si idiyele | Awọn aaye ipari iṣakoso kọ ami — ṣeto `managementReadToken`                                                           |
+| Kukuru tabi sofo `freeOnly` katalogi                   | Ko si ami iṣakoso tabi ami ti a kọ — ka laini akopọ isọdọtun ( kika `unmatched-free` ) ninu akọọlẹ agbalejo           |
+| A igba pin si `opencode-<id>/...`                      | Awọn ohun itanna v1 ti a tẹjade `opencode-<id>`; v2 ṣe atẹjade `<id>` igboro, nitorinaa tun yan awoṣe labẹ `<id>/...` |
 
-Àwọn variable àyíká gbọ́dọ̀ dé inú process server opencode: nígbà tí olùgbàlejò bá
-ń ṣiṣẹ́ gẹ́gẹ́ bí service, shell tí ń ṣiṣẹ́ `opencode models` àti àyíká server
-yàtọ̀ síra, nítorí náà export kọ́kọ́rọ́ náà sí ibi tí server ti ń kà á.
+Awọn oniyipada ayika gbọdọ de ilana olupin opencode: nigbati agbalejo ba ṣiṣẹ bi iṣẹ kan, ikarahun ti o nṣiṣẹ `opencode models` ati agbegbe olupin yatọ, nitorinaa okeere bọtini nibiti olupin ti ka rẹ.
 
 ## Tún wo
 

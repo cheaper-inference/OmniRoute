@@ -252,7 +252,11 @@ test("ci.yml lint job runs the blocking boundary ratchet (base-relative on PRs, 
   const step = steps[idx] as Step & { env?: Record<string, string>; if?: string };
   // Never skipped: the absolute ceiling must keep running on push → main.
   assert.equal(step.if, undefined, "the boundary ratchet step must run on every event");
-  assert.equal(step.env?.PR_BASE_SHA, "${{ github.event.pull_request.base.sha }}");
+  // The PR base on a pull request, the candidate base on an omni-queue/** candidate push.
+  assert.equal(
+    step.env?.PR_BASE_SHA,
+    "${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}"
+  );
   const script = runs[idx];
   assert.match(script, /if \[ -n "\$\{PR_BASE_SHA:-\}" \]/);
   assert.match(script, /npm run check:boundary:ratchet -- --base-ref "\$PR_BASE_SHA"/);
@@ -283,7 +287,11 @@ test("quality.yml fast-gates passes --base-ref $PR_BASE_SHA to boundary on PR ev
   })[];
   const step = steps.find((s) => (s.run ?? "").includes("ratchet_gates=("));
   assert.ok(step, "fast-gates must keep the ratchet_gates loop");
-  assert.equal(step.env?.PR_BASE_SHA, "${{ github.event.pull_request.base.sha }}");
+  // The PR base on a pull request, the candidate base on an omni-queue/** candidate push.
+  assert.equal(
+    step.env?.PR_BASE_SHA,
+    "${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}"
+  );
   const loop = (step.run ?? "").slice((step.run ?? "").indexOf('for g in "${ratchet_gates[@]}"'));
   assert.match(loop, /case "\$g" in boundary\) BASE_RELATIVE=1 ;; \*\) BASE_RELATIVE= ;; esac/);
   assert.match(

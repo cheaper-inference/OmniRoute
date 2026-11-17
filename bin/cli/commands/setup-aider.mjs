@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
 import { printHeading, printInfo, printSuccess, printError, createPrompt } from "../io.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 
 function stripToRoot(url) {
@@ -38,7 +38,7 @@ export function resolveAiderTarget(opts = {}) {
   if (!apiKey) {
     try {
       const c = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      apiKey = c?.accessToken || c?.apiKey;
+      apiKey = contextCredentialFor(c, root);
     } catch {
       /* none */
     }

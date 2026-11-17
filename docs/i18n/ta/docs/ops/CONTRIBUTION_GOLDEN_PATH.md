@@ -29,69 +29,61 @@
 6. **ஆதாரத்தைப் பதிவுசெய்யவும்.** PR template-இல் இயக்கப்பட்ட commands, சேர்க்கப்பட்ட அல்லது மாற்றப்பட்ட ஒவ்வொரு test file,
    migrations அல்லது feature flags மற்றும் இன்னும் நிலுவையில் உள்ள CI-only validation ஆகியவற்றைப் பட்டியலிடவும்.
 
-## மாற்ற வகை வாரியான Golden paths
+## மாற்ற வகையின்படி தங்கப் பாதைகள்
 
-கீழே உள்ள commands குறைந்தபட்ச focused checks மட்டுமே; நீங்கள் மாற்றிய நடத்தையை நேரடியாகச் சரிபார்க்கும் test ஒன்றைத்
-தவிர்ப்பதற்கான அனுமதி அல்ல.
+கீழே உள்ள கட்டளைகள் குறைந்தபட்ச கவனம் செலுத்தப்பட்ட சோதனைகள், நீங்கள் மாற்றிய நடத்தையை நேரடியாக உள்ளடக்கிய சோதனையைத் தவிர்ப்பதற்கான அனுமதி அல்ல.
 
-### Provider
+### வழங்குபவர்
 
-**Contracts**
+**ஒப்பந்தங்கள்**
 
-- `src/shared/constants/providers/`-இல் உள்ள Provider definition மற்றும்
-  `src/shared/constants/providers.ts`-இல் அதன் composition.
-- `open-sse/config/providerRegistry.ts` அல்லது அதிலிருந்து பிரிக்கப்பட்ட registry files-இல் உள்ள models மற்றும் capabilities.
-- பொருந்தும் இடங்களில் executor/translator தேர்வு, OAuth அல்லது API-key configuration, dashboard assets மற்றும் உருவாக்கப்பட்ட
-  provider reference.
-- Public credentials, `resolvePublicCred()`-ஐப் பயன்படுத்த வேண்டும்; error responses, பகிரப்பட்ட sanitized
-  error helpers-ஐப் பயன்படுத்த வேண்டும். `docs/security/PUBLIC_CREDS.md` (git; `/docs`-இல் compile செய்யப்படுவதில்லை) மற்றும்
-  [Error Sanitization](../security/ERROR_SANITIZATION.md)-ஐப் பார்க்கவும்.
+- `src/shared/constants/providers/` இல் வழங்குநர் வரையறை மற்றும் `src/shared/constants/providers.ts` இல் அதன் கலவை.
+- `open-sse/config/providerRegistry.ts` அல்லது அதன் பிரித்தெடுக்கப்பட்ட ரெஜிஸ்ட்ரி கோப்புகளில் மாதிரிகள் மற்றும் திறன்கள்.
+- Executor/translator தேர்வு, OAuth அல்லது API-விசை கட்டமைப்பு மற்றும் டாஷ்போர்டு சொத்துக்கள். மீளுருவாக்கம் செய்யப்பட்ட `docs/reference/PROVIDER_REFERENCE.md` அல்லது README வரைபடங்களைச் செய்ய வேண்டாம்: வெளியீடு புதுப்பிப்பு அவற்றை மீண்டும் எழுதுகிறது (`check:pr-derived-paths` அவற்றைக் கொண்டு செல்லும் அம்சம் PR இல் தோல்வியடைகிறது).
+- பொது நற்சான்றிதழ்கள் `resolvePublicCred()` பயன்படுத்த வேண்டும்; பிழை பதில்கள் பகிரப்பட்ட சுத்திகரிக்கப்பட்ட பிழை உதவியாளர்களைப் பயன்படுத்த வேண்டும். `docs/security/PUBLIC_CREDS.md` (git; `/docs` இல் தொகுக்கப்படவில்லை) மற்றும் [பிழை சுத்திகரிப்பு ஆகியவற்றைப்](../security/ERROR_SANITIZATION.md) பார்க்கவும்.
 
-**Focused loop**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # catalog மாறும்போது; உருவாக்கப்பட்ட diff-ஐ commit செய்யவும்
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-பாதிக்கப்பட்ட ஒவ்வொரு request family-யையும் சோதிக்கவும்: chat, Responses, images, embeddings, audio அல்லது video.
-உருவாக்கப்பட்ட catalog மற்றும் golden diffs-ஐ contract changes ஆக review செய்யவும்; அவற்றைக் கண்மூடித்தனமாக ஏற்க வேண்டாம்.
+பாதிக்கப்பட்ட ஒவ்வொரு கோரிக்கை குடும்பத்தையும் சோதிக்கவும்: அரட்டை, பதில்கள், படங்கள், உட்பொதிப்புகள், ஆடியோ அல்லது வீடியோ. ஒப்பந்த மாற்றங்களாக உருவாக்கப்பட்ட பட்டியல் மற்றும் கோல்டன் வேறுபாடுகளை மதிப்பாய்வு செய்யவும்; அவற்றை கண்மூடித்தனமாக ஏற்றுக்கொள்ளாதீர்கள்.
 
-### Routing
+### ரூட்டிங்
 
-**Contracts**
+**ஒப்பந்தங்கள்**
 
-- `src/shared/constants/routingStrategies.ts`-இல் உள்ள public strategy values மற்றும் UI metadata.
-- `open-sse/services/combo.ts` மற்றும் `open-sse/services/combo/`-இன் கீழ் உள்ள dispatch மற்றும் ordering.
-- Combo schemas, persistence, resilience state, model capabilities மற்றும் API/UI controls.
-- நடத்தை மாறும்போது [Auto-Combo Engine](../routing/AUTO-COMBO.md) மற்றும் resilience documentation.
+- `src/shared/constants/routingStrategies.ts` இல் பொது மூலோபாய மதிப்புகள் மற்றும் UI மெட்டாடேட்டா.
+- `open-sse/services/combo.ts` மற்றும் `open-sse/services/combo/` இன் கீழ் அனுப்புதல் மற்றும் ஆர்டர் செய்தல்.
+- காம்போ ஸ்கீமாக்கள், நிலைத்தன்மை, பின்னடைவு நிலை, மாதிரி திறன்கள் மற்றும் API/UI கட்டுப்பாடுகள்.
+- நடத்தை மாறும்போது [ஆட்டோ-காம்போ எஞ்சின்](../routing/AUTO-COMBO.md) மற்றும் பின்னடைவு ஆவணங்கள்.
 
-**Focused loop**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategy அல்லது dispatch மாற்றங்கள்
-npm run check:known-symbols      # strategy registration மாற்றங்கள்
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-உள்ளூரில் deterministic mocked-upstream tests-ஐப் பயன்படுத்தவும். Live combo smokes-க்கு credentials தேவைப்படுகின்றன; அவை
-manual சோதனைகள், CI-க்கான மாற்றுகள் அல்ல.
+உள்நாட்டில் உறுதியான கேலி-அப்ஸ்ட்ரீம் சோதனைகளைப் பயன்படுத்தவும். லைவ் காம்போ ஸ்மோக்களுக்கு நற்சான்றிதழ்கள் தேவை மற்றும் கைமுறையானவை, CI மாற்றீடுகள் அல்ல.
 
 ### UI / UX
 
-**Contracts**
+**ஒப்பந்தங்கள்**
 
-- `src/app/` மற்றும் `src/shared/components/`-இன் கீழ் உள்ள Next.js route/page மற்றும் shared component boundaries.
-- API response shapes, loading/empty/error states, keyboard மற்றும் screen-reader நடத்தை,
-  responsive layout, theming மற்றும் locale expansion.
-- `src/i18n/messages/en.json`-இல் உள்ள ஆங்கில UI source strings; பயனருக்குத் தெரியும் புதிய உரையை hard-code செய்ய வேண்டாம்.
+- Next.js route/page மற்றும் `src/app/` மற்றும் `src/shared/components/` இன் கீழ் பகிரப்பட்ட கூறு எல்லைகள்.
+- API மறுமொழி வடிவங்கள், loading/empty/error நிலைகள், விசைப்பலகை மற்றும் திரை-ரீடர் நடத்தை, பதிலளிக்கக்கூடிய தளவமைப்பு, தீமிங் மற்றும் மொழி விரிவாக்கம்.
+- `src/i18n/messages/en.json` இல் ஆங்கில UI மூல சரங்கள்; புதிய பயனர் எதிர்கொள்ளும் நகலை கடின குறியீடு செய்ய வேண்டாம்.
 
-**Focused loop**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -100,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interaction அல்லது visual மாற்றங்களுக்கு app-ஐ இயக்கி, குறுகிய மற்றும் அகலமான viewports இரண்டிலும் சரிபார்க்கவும். CI,
-production build மற்றும் பரந்த suites-ஐ இயக்குகிறது; visual நடத்தைக்கு இன்னும் மாற்றத்திற்கு ஏற்ற focused component, Playwright
-அல்லது ஆவணப்படுத்தப்பட்ட manual check தேவைப்படுகிறது.
+தொடர்பு அல்லது காட்சி மாற்றங்களுக்காக பயன்பாட்டை இயக்கவும் மற்றும் குறுகிய மற்றும் பரந்த காட்சிகள் இரண்டையும் சரிபார்க்கவும். CI உற்பத்தி உருவாக்கம் மற்றும் பரந்த தொகுப்புகளை இயக்குகிறது; காட்சி நடத்தைக்கு இன்னும் கவனம் செலுத்தப்பட்ட கூறு, Playwright அல்லது மாற்றத்திற்கு பொருத்தமான ஆவணப்படுத்தப்பட்ட கையேடு சரிபார்ப்பு தேவைப்படுகிறது.
 
 ### i18n
 
-**Contracts**
+**ஒப்பந்தங்கள்**
 
-- `src/i18n/messages/en.json` என்பது UI source; `config/i18n.json` என்பது locale source.
-- CLI catalogs, `bin/cli/locales/`-இன் கீழ் தனியாக உள்ளன.
-- ICU placeholders மற்றும் tags-ஐ அப்படியே பாதுகாக்கவும். product/provider/model பெயர்கள்,
-  protocol மற்றும் header பெயர்கள், commands, code/JSON identifiers, URLs, environment variables அல்லது
-  `OmniRoute`, `OAuth`, `MCP` மற்றும் `A2A` போன்ற பாதுகாக்கப்பட்ட சொற்களை மொழிபெயர்க்க வேண்டாம். தற்போதைய source list
-  `scripts/i18n/glossary/protected-terms.json` ஆகும்.
+- `src/i18n/messages/en.json` என்பது UI மூலமாகும்; `config/i18n.json` என்பது உள்ளூர் மூலமாகும்.
+- CLI பட்டியல்கள் `bin/cli/locales/` இன் கீழ் தனித்தனியாக வாழ்கின்றன.
+- ICU ஒதுக்கிடங்கள் மற்றும் குறிச்சொற்களை சரியாகப் பாதுகாக்கவும். product/provider/model பெயர்கள், நெறிமுறை மற்றும் தலைப்பு பெயர்கள், கட்டளைகள், code/JSON அடையாளங்காட்டிகள், URLs, சூழல் மாறிகள் அல்லது `OmniRoute`, `OAuth`, `MCP`, மற்றும் `A2A` போன்ற பாதுகாக்கப்பட்ட சொற்களை மொழிபெயர்க்க வேண்டாம். தற்போதைய மூலப் பட்டியல் `scripts/i18n/glossary/protected-terms.json` ஆகும்.
 
-**Focused loop**
+ஒரு அம்சம் PR `src/i18n/messages/en.json` மட்டுமே திருத்துகிறது (CLI: `bin/cli/locales/en.json`); மற்ற மொழிகள் ஒரு வெளியீட்டிற்கு ஒரு முறை ரிலீஸ் ரெஃப்ரெஷ் அல்லது மொழிபெயர்ப்பு அலை (`docs/guides/I18N.md` → "அம்சம் PRs டச் `en.json` மட்டும்") மூலம் முடிக்கப்படும். `npm run check:pr-derived-paths` மற்றொரு லோகேல் கேட்லாக்கைத் திருத்தும் அம்சமான PR தோல்வியடைகிறது.
+
+**ஃபோகஸ்டு லூப்**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI strings/catalogs மாறும்போது
 npm run lint
 ```
 
-இது ஏற்கனவே உள்ள system-க்கான வழிகாட்டுதல்; அதன் tooling அல்லது key model-ஐ விரிவுபடுத்துவதற்கான அழைப்பு அல்ல.
-மாற்று system வடிவமைக்கப்பட்டுக் கொண்டிருக்கும் போது i18n patches-ஐத் துல்லியமாகவும் குறுகியதாகவும் வைத்திருக்கவும். task-க்கு உருவாக்கப்பட்ட translations வெளிப்படையாகத் தேவைப்பட்டு,
-அதன் விளைவான diff-ஐ நீங்கள் review செய்திருந்தாலன்றி, external services-ஐ அழைக்கும் translation
-commands-ஐ இயக்க வேண்டாம்.
+`--mode=pr` இல்லாமல் இந்த வாயில்கள் உள்நாட்டில் வெளியீட்டு பயன்முறையில் இயங்குகின்றன மற்றும் சுழற்சியில் சேர்க்கப்பட்ட அல்லது `en.json` இல் மீண்டும் எழுதப்பட்ட ஒவ்வொரு விசையையும் தெரிவிக்கின்றன; இது ரிலீஸ் புதுப்பிப்பு வேலை, உங்கள் PR கள் அல்ல.
+
+இது தற்போதுள்ள அமைப்பிற்கான வழிகாட்டல், அதன் கருவி அல்லது முக்கிய மாதிரியை விரிவுபடுத்துவதற்கான அழைப்பு அல்ல. மாற்று அமைப்பு வடிவமைக்கப்படும் போது i18n இணைப்புகளை அறுவை சிகிச்சை செய்ய வேண்டும். பணிக்கு வெளிப்படையாக உருவாக்கப்பட்ட மொழிபெயர்ப்புகள் தேவைப்படும் வரை, அதன் விளைவாக வரும் வேறுபாட்டை நீங்கள் மதிப்பாய்வு செய்தாலன்றி, வெளிப்புற சேவைகளை அழைக்கும் மொழிபெயர்ப்பு கட்டளைகளை இயக்க வேண்டாம்.
 
 ### CLI
 
-**Contracts**
+**ஒப்பந்தங்கள்**
 
-- `bin/cli/`-இல் உள்ள பொது கட்டளைகள் மற்றும் கொடிகள், உருவாக்கப்பட்ட API கட்டளைகள், வெளியேற்றக் குறியீடுகள், stdout/stderr மற்றும்
-  JSON வெளியீட்டு வடிவங்கள், உள்ளமைவு/சூழல் நடத்தை மற்றும் தொகுக்கப்பட்ட கோப்புகள்.
-- CLI-யின் பயனர் எதிர்கொள்ளும் சரங்கள் CLI i18n அடுக்கைப் பயன்படுத்த வேண்டும்; மேலும் `en`/`pt-BR` பட்டியல்கள் ஒரே நிலையில் பராமரிக்கப்பட வேண்டும்.
-- ஆதரிக்கப்படும் இயக்கச் சூழலாக Node-ஐயும், வெளியிடப்பட்ட பைனரி ஒப்பந்தத்தையும் பாதுகாக்கவும்.
+- `bin/cli/` இல் உள்ள பொது கட்டளைகள் மற்றும் கொடிகள், உருவாக்கப்பட்ட API கட்டளைகள், வெளியேறும் குறியீடுகள், stdout/stderr மற்றும் JSON வெளியீட்டு வடிவங்கள், config/environment நடத்தை மற்றும் தொகுக்கப்பட்ட கோப்புகள்.
+- CLI பயனர் எதிர்கொள்ளும் சரங்கள் CLI i18n லேயரைப் பயன்படுத்த வேண்டும் ( `bin/cli/locales/en.json` இல் இருக்கும்`t()` விசைகள்). ஒரு அம்சம் PR `en.json` மட்டுமே திருத்துகிறது; `pt-BR` மற்றும் பிற இடங்கள் வெளியீட்டில் நிறைவடைகின்றன.
+- ஆதரிக்கப்படும் இயக்க நேரமாகவும் வெளியிடப்பட்ட பைனரி ஒப்பந்தமாகவும் முனையைப் பாதுகாக்கவும்.
 
-**கவனம் செலுத்திய சுழற்சி**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # உருவாக்கப்பட்ட/தொகுப்பாக்கப்பட்ட CLI மாற்றங்கள்
-npm run check:pack-policy     # தொகுப்பு இடைமுக மாற்றங்கள்
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-நடத்தை பகுப்பாய்வு, கோப்புகள் அல்லது வெளியேற்ற நிலையைச் சார்ந்திருக்கும்போது, சரியான கட்டளையை ஒரு தற்காலிக தரவுக் கோப்பகத்தில் பயன்படுத்தவும். CI விரிவான தொகுப்பு உருவாக்கப்பொருள் மற்றும் சூழலமைப்புச் சோதனைகளைச் செய்கிறது.
+நடத்தை பாகுபடுத்துதல், கோப்புகள் அல்லது வெளியேறும் நிலையைப் பொறுத்து தற்காலிக தரவு கோப்பகத்தில் சரியான கட்டளையைப் பயன்படுத்தவும். CI பரந்த தொகுப்பு கலைப்பொருள் மற்றும் சுற்றுச்சூழல் அமைப்பு சோதனைகளை செய்கிறது.
 
 ### தரவுத்தளம்
 
 **ஒப்பந்தங்கள்**
 
-- `src/lib/db/`-இன் கீழுள்ள களத் தொகுதிகள்; குறிப்பிட்ட தொகுதிகளை நேரடியாக இறக்குமதி செய்யவும் (பழைய `localDb.ts` மறு-ஏற்றுமதி அடுக்கு அகற்றப்பட்டது).
-- `src/lib/db/migrations/`-இன் கீழுள்ள எண்ணிடப்பட்ட, மீண்டும் செயல்படுத்தினாலும் ஒரே விளைவைத் தரும் SQL இடம்பெயர்வுகள், பரிவர்த்தனைப் பாதுகாப்பு, மேம்படுத்தல்
-  நடத்தை, சுட்டிகள் மற்றும் திட்டவடிவத்தால் பாதிக்கப்படும் ஒவ்வொரு அழைப்பாளரும்.
-- வழித்தடங்களும் கையாளிகளும் ஒருபோதும் மூல SQL-ஐ நேரடியாக இயக்கக்கூடாது.
+- `src/lib/db/` கீழ் டொமைன் தொகுதிகள்; குறிப்பிட்ட தொகுதிகளை நேரடியாக இறக்குமதி செய்யவும் (பழைய `localDb.ts` மறு ஏற்றுமதி அடுக்கு அகற்றப்பட்டது).
+- `src/lib/db/migrations/`, பரிவர்த்தனை பாதுகாப்பு, மேம்படுத்தல் நடத்தை, குறியீடுகள் மற்றும் திட்டத்தால் பாதிக்கப்படும் ஒவ்வொரு அழைப்பாளரின் கீழ் எண்ணிடப்பட்ட, வலிமையற்ற SQL இடம்பெயர்வுகள்.
+- வழிகள் மற்றும் கையாளுபவர்கள் ஒருபோதும் raw SQL நேரடியாக வழங்குவதில்லை.
 
-**கவனம் செலுத்திய சுழற்சி**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 npm run check:migration-numbering
@@ -171,30 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-இடம்பெயர்வைச் சேர்க்கும்போது, புதிய தரவுத்தளத்தையும் முந்தைய திட்டவடிவத்திலிருந்து செய்யப்படும் மேம்படுத்தலையும் சோதிக்கவும். தரவுத்தளச் சோதனைகள்
-கைப்பிடிகளை மூடி, சுத்தப்படுத்தலின்போது `resetDbInstance()`-ஐ அழைக்க வேண்டும். சிறந்த முயற்சி அடிப்படையிலான Bun ஏற்பி பாதை மாறும்போது மட்டுமே `npm run test:bun:db`-ஐ இயக்கவும்; Node தொடர்ந்து அதிகாரப்பூர்வமானதாக இருக்கும்.
+ஒரு புதிய தரவுத்தளத்தைச் சோதித்து, இடம்பெயர்வைச் சேர்க்கும்போது முந்தைய திட்டத்திலிருந்து மேம்படுத்தவும். தரவுத்தள சோதனைகள் கைப்பிடிகளை மூட வேண்டும் மற்றும் சுத்தம் செய்யும் போது `resetDbInstance()` அழைக்க வேண்டும். சிறந்த முயற்சி Bun அடாப்டர் பாதை மாறும் போது மட்டும் `npm run test:bun:db` இயக்கவும்; முனை அதிகாரப்பூர்வமாக உள்ளது.
 
-### உருவாக்கம் / பயன்பாட்டிற்கு வெளியிடுதல்
+### உருவாக்கவும் / வரிசைப்படுத்தவும்
 
 **ஒப்பந்தங்கள்**
 
-- மூல மற்றும் பணியிட அறிக்கைகள்/பூட்டுக் கோப்பு, `scripts/build/`, Next.js தனித்தியங்கும் ஒருங்கிணைப்பு, `dist/`
-  தொகுப்பு உள்ளடக்கங்கள், Electron தள மெட்டாதரவு, CI பணிப்பாய்வுகள் மற்றும் பயன்பாட்டிற்கு வெளியிடுதல் கண்காணிப்புகள்.
-- ஆதரிக்கப்படும் Node வரம்புகளும் `CLAUDE.md`-இல் அனுமதிப் பட்டியலில் சேர்க்கப்பட்டுள்ள Bun பயன்பாடும் மாற்றமின்றி இருக்க வேண்டும்.
-- உருவாக்கப்பொருட்கள் கண்காணிக்கப்படாமல் இருக்க வேண்டும்; சார்பு, உரிமம், பணிப்பாய்வு மற்றும் தொகுப்புக் கொள்கைகள் பொருந்தும்.
+- ரூட் மற்றும் பணியிடம் manifests/lockfile, `scripts/build/`, Next.js ஸ்டாண்டலோன் அசெம்பிளி, `dist/` தொகுப்பு உள்ளடக்கங்கள், Electron இயங்குதள மெட்டாடேட்டா, CI பணிப்பாய்வுகள் மற்றும் வரிசைப்படுத்தல் சென்டினல்கள்.
+- ஆதரிக்கப்படும் முனை வரம்புகள் மற்றும் `CLAUDE.md` இல் அனுமதிக்கப்படும்-பட்டியலிடப்பட்ட Bun பயன்பாடு அப்படியே இருக்க வேண்டும்.
+- கலைப்பொருட்கள் கட்டமைக்கப்படாமல் இருக்கும்; சார்பு, உரிமம், பணிப்பாய்வு மற்றும் தொகுப்பு கொள்கைகள் பொருந்தும்.
 
-**கவனம் செலுத்திய சுழற்சி**
+**ஃபோகஸ்டு லூப்**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # சார்பு அல்லது பூட்டுக் கோப்பு மாற்றங்கள்
-npm run check:pack-policy      # வெளியிடப்பட்ட தொகுப்பு இடைமுக மாற்றங்கள்
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-மாற்றம் தொகுத்தல், தனித்தியங்கும் ஒருங்கிணைப்பு, வளங்கள் அல்லது இயக்கநேரத் தொகுப்பாக்கத்தைப் பாதிக்கும்போது மட்டுமே உள்ளூரில் `npm run build`-ஐப் பயன்படுத்தவும். வெளியீடு/பயன்பாட்டிற்கு வெளியிடுதல் சரிபார்ப்புக்கு மட்டுமே `npm run build:release`-ஐப் பயன்படுத்தவும். CI-யின் உருவாக்கமே
-இறுதியான பன்முகத் தளச் சமிக்ஞையாகும்; தளம் சார்ந்த Electron மாற்றங்களுக்கு அதற்குப் பொருந்தும் கவனம் செலுத்திய உருவாக்கம் அல்லது புகைச் சோதனைச் சான்று தேவை.
+மாற்றம் தொகுத்தல், தனித்தனியான அசெம்பிளி, சொத்துக்கள் அல்லது இயக்க நேரத் தொகுத்தல் ஆகியவற்றைப் பாதிக்கும் போது மட்டுமே `npm run build` உள்நாட்டில் பயன்படுத்தவும். release/deploy சரிபார்ப்புக்கு மட்டும் `npm run build:release` பயன்படுத்தவும். CI இன் உருவாக்கம் என்பது இறுதி குறுக்கு-தளம் சமிக்ஞையாகும்; இயங்குதளம்-குறிப்பிட்ட Electron மாற்றங்களுக்குப் பொருந்தக்கூடிய மையப்படுத்தப்பட்ட உருவாக்கம் அல்லது புகை ஆதாரம் தேவை.
 
 ## பகிரப்பட்ட கணினிக்கான டெவலப்பர் ஸ்கிரிப்ட்கள்
 

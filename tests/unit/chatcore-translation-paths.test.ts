@@ -1394,6 +1394,54 @@ test("chatCore normalizes native Claude Code messages for native Claude OAuth pa
   // user msg[2] (was clientMessages[3]): tool_result preserved (preserveToolResultBlocks:true)
   assert.equal(call.body.messages[2].content[0].type, "tool_result");
 });
+test("chatCore dispatches a Claude Code agent body to anthropic with no in-place system turn", async () => {
+  const { call, result } = await invokeChatCore({
+    provider: "anthropic",
+    model: "claude-opus-5",
+    endpoint: "/v1/messages",
+    credentials: { apiKey: "anthropic-key", providerSpecificData: {} },
+    body: {
+      model: "claude-opus-5",
+      max_tokens: 64,
+      system: [{ type: "text", text: "top-level-system" }],
+      messages: [
+        { role: "user", content: [{ type: "text", text: "go" }] },
+        { role: "assistant", content: [{ type: "text", text: "ok" }] },
+        { role: "system", content: [{ type: "text", text: "environment update" }] },
+        { role: "user", content: [{ type: "text", text: "next" }] },
+      ],
+      tools: [
+        {
+          name: "Bash",
+          input_schema: { type: "object", properties: {} },
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+    },
+    userAgent: "claude-cli/2.1.137",
+    requestHeaders: { "anthropic-beta": "mid-conversation-system-2026-04-07" },
+    responseFormat: "claude",
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(
+    String(call.headers["Anthropic-Beta"] ?? call.headers["anthropic-beta"]).includes(
+      "mid-conversation-system-2026-04-07"
+    ),
+    false
+  );
+  assert.deepEqual(
+    call.body.messages.map((message: { role: string }) => message.role),
+    ["user", "assistant", "user"]
+  );
+  assert.equal(
+    call.body.system.some((block: { text?: string }) => block.text === "environment update"),
+    true
+  );
+  assert.deepEqual(call.body.messages[2].content[0].cache_control, { type: "ephemeral" });
+  assert.deepEqual(call.body.tools[0].cache_control, { type: "ephemeral" });
+});
+
 for (const model of ["claude-opus-5", "claude-fable-5", "claude-fable-5-1"]) {
   test(`chatCore preserves ${model} mid-conversation system cache breakpoints`, async () => {
     await settingsDb.updateSettings({ alwaysPreserveClientCache: "auto" });
@@ -1472,7 +1520,7 @@ test("chatCore keeps Claude normalization for non-Claude-Code Claude passthrough
             { type: "text", text: "" },
             { type: "text", text: "hello" },
             { type: "document", name: "README.md", content: "Read me" },
-            { type: "future_block", payload: { drop: true } },
+            { type: "future_block", payload: { keep: true } },
           ],
         },
       ],
@@ -1487,9 +1535,13 @@ test("chatCore keeps Claude normalization for non-Claude-Code Claude passthrough
     false
   );
   assert.equal(call.body.system.at(-1).text, "system role should move");
+  // #19030: the target speaks the Anthropic Messages format, so a block type
+  // outside the known set (search_result, container_upload, newer ones) is
+  // forwarded verbatim instead of being deleted with only a debug log (#4383).
   assert.deepEqual(call.body.messages[0].content, [
     { type: "text", text: "hello" },
     { type: "text", text: "[README.md]\nRead me" },
+    { type: "future_block", payload: { keep: true } },
   ]);
 });
 

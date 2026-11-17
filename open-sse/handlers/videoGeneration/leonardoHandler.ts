@@ -7,6 +7,12 @@
  */
 
 import { saveCallLog } from "@/lib/usageDb";
+import {
+  downloadUpstreamMedia,
+  UPSTREAM_MEDIA_LIMITS,
+  upstreamMediaErrorText,
+} from "../../utils/remoteMediaFetch.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 
 // Catalog id -> Leonardo `model` enum for POST /generations-text-to-video. `phoenix` was the
@@ -35,9 +41,36 @@ function parseVideoSize(size: unknown): [number, number] {
   return match ? [Number(match[1]), Number(match[2])] : [0, 0];
 }
 
-/** A `WxH` size with a short side <= 480 picks RESOLUTION_480, else RESOLUTION_720. */
+// Leonardo's 2:3 and 4:5 portrait sizes. Unlike 16:9, the 480p pair is also what selects the
+// aspect at RESOLUTION_720. Checked live (Motion 2.0 Fast, 2026-11-08): 512x768 at 720p came
+// back as a 768x1152 mp4, 576x720 as 832x1024.
+const LEONARDO_PORTRAIT_SHAPES = [
+  [512, 768],
+  [576, 720],
+] as const;
+
+/**
+ * The 2:3 or 4:5 shape a portrait size matches, or null. 6% tolerance: Leonardo's own 720p 4:5
+ * output (864x1024) is 5% off 4:5.
+ */
+function matchPortraitShape(width: number, height: number) {
+  if (!(width > 0 && height > width)) return null;
+  const aspect = width / height;
+  return LEONARDO_PORTRAIT_SHAPES.find(([w, h]) => Math.abs(aspect / (w / h) - 1) <= 0.06) ?? null;
+}
+
+/**
+ * A 2:3 or 4:5 portrait size keeps its shape: RESOLUTION_480 up to that shape's 480p width,
+ * else RESOLUTION_720. Any other `WxH` maps to 16:9 / 9:16: a short side <= 480 picks
+ * RESOLUTION_480, else RESOLUTION_720.
+ */
 export function resolveLeonardoVideoSize(size: unknown) {
   const [width, height] = parseVideoSize(size);
+  const shape = matchPortraitShape(width, height);
+  if (shape) {
+    const resolution = width <= shape[0] ? "RESOLUTION_480" : "RESOLUTION_720";
+    return { resolution, width: shape[0], height: shape[1] };
+  }
   const resolution =
     width > 0 && Math.min(width, height) <= 480 ? "RESOLUTION_480" : "RESOLUTION_720";
   const [long, short] = LEONARDO_VIDEO_SIZES[resolution];
@@ -65,18 +98,22 @@ async function downloadLeonardoVideo(
   signal: AbortSignal | null,
   timeoutMs = LEONARDO_VIDEO_DOWNLOAD_TIMEOUT_MS
 ): Promise<ArrayBuffer | typeof POLL_ABORTED | { status: number; error: string }> {
-  const timeout = AbortSignal.timeout(timeoutMs);
   try {
-    const res = await fetch(videoUrl, {
-      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    const { buffer } = await downloadUpstreamMedia(videoUrl, {
+      maxBytes: UPSTREAM_MEDIA_LIMITS.video.maxBytes,
+      timeoutMs,
+      signal,
     });
-    if (!res.ok)
-      return { status: 502, error: `Leonardo video download failed (HTTP ${res.status})` };
-    return await res.arrayBuffer();
+    return new Uint8Array(buffer).buffer;
   } catch (err) {
     if (signal?.aborted) return POLL_ABORTED;
-    if (timeout.aborted) return { status: 504, error: "Leonardo video download timed out" };
-    throw err;
+    if (err instanceof Error && err.name === "TimeoutError") {
+      return { status: 504, error: "Leonardo video download timed out" };
+    }
+    return {
+      status: 502,
+      error: `Leonardo video download failed: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
+    };
   }
 }
 

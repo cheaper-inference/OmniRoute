@@ -123,17 +123,17 @@ Dashboard 管理员登录还支持在默认密码登录之外选择性启用 OID
      `auth.mfa.disabled` 以及 `secondFactor: "recovery_switch"` 记录审计日志。
   4. 取消设置 `OMNIROUTE_DISABLE_MFA`，重启，并在需要时重新注册。
 
-## 路由类别
+## 航线等级
 
-`src/server/authz/types.ts` 定义了三种类别；任何无法被确定性分类的路由都会回退为 `MANAGEMENT`。
+`src/server/authz/types.ts`定义了三个类；任何无法确定性分类的路由都会回退到`MANAGEMENT`。
 
-| 类别         | 说明                                                                                                                                  | 所需认证                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `PUBLIC`     | 明确安全的路由：登录、登出、状态、初始化、健康检查、新手引导启动。                                                                    | 无                                                        |
-| `CLIENT_API` | 模型服务端点：`/api/v1/*`、`/api/v1beta/*`，以及别名 `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 当有效的 `REQUIRE_API_KEY` 功能开关启用时需要 Bearer 密钥 |
-| `MANAGEMENT` | 仪表板页面、设置、提供者、密钥、管理和诊断端点。                                                                                      | 仪表板会话，或具有 `manage` 范围的 Bearer                 |
+| 班级         | 描述                                                                                                                                       | 需要身份验证                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `PUBLIC`     | 明确安全的路由—登录、注销、状态、运行状况、入门引导。                                                                                      | 没有任何                                      |
+| `CLIENT_API` | 模型服务端点— `/api/v1/*`、 `/api/v1beta/*`，以及别名`/v1/*`、 `/v1beta/*`、 `/chat/completions`、 `/responses`、 `/models`、 `/codex/*`。 | 启用有效`REQUIRE_API_KEY`功能标志时的承载密钥 |
+| `MANAGEMENT` | 仪表板页面、设置、提供程序、密钥、管理和诊断端点。                                                                                         | 具有`manage`范围的仪表板会话OR Bearer         |
 
-部分 `MANAGEMENT` 操作是**仅限操作员**的：只有 `manage` 密钥是不够的。导出已存储的凭证（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、将备份还原到现有数据之上（`POST /api/db-backups/import`，包括 `dryRun=true`；按 id 进行的 `POST /api/db-backups` 还原；`POST /api/settings/import-json`）、销毁还原点（`DELETE /api/db-backups` 的清理，以及 `PATCH /api/db-backups`，因为它持久化的保留策略会驱动每次备份后的自动修剪）时，需要仪表板会话、本地 CLI 主体，或已禁用登录。签发同步令牌（`POST /api/sync/tokens`）以及签发 `admin` CLI 访问令牌（`POST /api/cli/tokens`）在所有登录模式下都需要仪表板会话或本地 CLI 主体。任何范围的 API 密钥和 `oma_` 访问令牌都不是操作员凭证：在需要操作员凭证的地方，它们会收到 `403`。检查逻辑位于 `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）。更改登录设置同样仅限操作员：一旦存在密码，`POST /api/settings/require-login`（设置管理密码 / 切换 `requireLogin`）只接受这些凭证。首次运行的引导窗口（尚无密码）保持不变；仪表板会话必须发送 `currentPassword` 才能替换密码（缺失或错误时返回 `403`，并记录为 `settings.update_failed`）。本地 CLI 以及已禁用登录的实例保留恢复路径，可以在不提供密码的情况下设置密码，因为二者都绑定到拥有数据目录的主机。
+`MANAGEMENT`一些操作是**仅限运营商**： `manage`密钥是不够的。导出存储的凭据（`GET /api/settings/export-json`、 `GET /api/db-backups/export`、 `GET /api/db-backups/exportAll`）、通过实时数据恢复备份（`POST /api/db-backups/import`包括`dryRun=true`、 `POST /api/db-backups`通过 id 恢复、 `POST /api/settings/import-json`）、销毁恢复点（`DELETE /api/db-backups`清理和`PATCH /api/db-backups`因为其保留的保留会在每次备份后驱动自动修剪）需要仪表板会话、本地CLI主题或禁用登录。发出同步令牌 (`POST /api/sync/tokens`) 和铸造`admin` CLI访问令牌 (`POST /api/cli/tokens`) 需要在每种登录模式下使用仪表板会话或本地CLI主题。任何范围的API密钥和`oma_`访问令牌都不是操作员凭证：只要需要，它们就会获取`403` 。支票位于`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)。更改登录设置也仅限操作员： `POST /api/settings/require-login` （设置管理密码/切换`requireLogin`）在密码存在后仅接受这些凭据—首次运行引导窗口（尚无密码）未更改—并且仪表板会话必须发送`currentPassword`来替换密码（当密码丢失或错误时为`403` ，审核为`settings.update_failed`）。本地CLI和禁用登录的实例保留恢复路径，并且可以在没有它的情况下设置密码，因为两者都绑定到拥有数据目录的主机。
 
 ## 管道
 
@@ -164,53 +164,49 @@ Incoming request → src/proxy.ts
 
 成功的策略会返回`AuthSubject`和`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游处理程序可以通过`src/server/authz/assertAuth.ts`中的`assertAuth(request, "CLIENT_API")`读取它，而不是重新运行身份验证逻辑。
 
-## 公共路由列表
+## 公共路线列表
 
-`src/shared/constants/publicApiRoutes.ts` 是明确的允许列表：
+`src/shared/constants/publicApiRoutes.ts`是显式允许列表：
 
-该列表按**形状**拆分，拆分方式会影响安全性（GHSA-74g9-q8f6-793h）：前缀使用
-`startsWith()` 进行匹配，因此也会匹配所有共享其开头字符的相邻路径。
-`/api/usage/om-usage` 作为前缀会将 `/api/usage/om-usage<anything>` 标记为 PUBLIC，而 Next 会将其解析为
-`/api/usage/[connectionId]` — 一个自身没有身份验证的处理程序。
+该列表分为**形状**，并且分割是承载的（GHSA-74g9-q8f6-793h）：前缀与`startsWith()`匹配，因此它也匹配共享其前导字符的每个相邻路径。 `/api/usage/om-usage`作为标记为`/api/usage/om-usage<anything>` PUBLIC前缀，Next 将其解析为`/api/usage/[connectionId]` —一个没有自己的身份验证的处理程序。
 
 ```ts
-// 真正的子树。每个条目都必须以 "/" 结尾（由单元测试断言）。
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // 在 classify 中视为 CLIENT_API，而不是“无身份验证的公共路由”
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// 单一路由，进行精确匹配（带或不带尾部斜杠均可）。
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 对选择启用 TOTP 的登录流程第 2 步；需要 MFA-pending cookie
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// 只读单一路由，也采用 CORS origin 放宽策略。
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// 不采用 CORS 放宽策略的只读单一路由。
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-只读路由仅对安全方法公开。注意：`classifyRoute()` 会将 `/api/v1/*` 和 `/api/v1beta/*` 排除在 PUBLIC 回退逻辑之外——它们始终是 `CLIENT_API`，因此仍会应用 Bearer-key 策略。
+只读路由是公开的**仅有的**以获得安全的方法。注意： `classifyRoute()`从PUBLIC失败的—中排除`/api/v1/*`和`/api/v1beta/*`它们始终是`CLIENT_API`因此承载密钥策略仍然适用。
 
 ## 添加新路由
 
@@ -274,15 +270,15 @@ API 密钥带有一个 `scopes` 数组（以 JSON 格式存储在 `api_keys.scop
 
 在 `oma_live_…` 令牌上的 `read` / `write` / `admin`，按 `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) 排名。此排名仅适用于访问令牌凭据。请参阅[管理认证](../guides/MANAGEMENT-AUTH.md)。
 
-## 认证要求开关
+## 需要身份验证 切换
 
-`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` 决定某个请求是否需要**任何**认证：
+`src/shared/utils/apiAuth.ts`中的`isAuthRequired()`决定是否**任何**对请求强制执行身份验证：
 
-- `settings.requireLogin === false` → 全局禁用认证，但以下情况除外：始终受保护的层级（参见 [路由守卫层级](../security/ROUTE_GUARD_TIERS.md)），以及发放其所接受凭证的调用。这些调用需要与开启登录时相同的凭证：签发同步令牌、以任意范围签发 CLI 访问令牌、创建具有 `manage`/`admin` 范围的 API 密钥、把该范围授予某个密钥，或重新生成、显示此类密钥（`src/lib/api/requireManagementAuth.ts` 中的 `requireCredentialForManagementScopedKey()`）。仅用于推理的密钥仍保持开放。
-- 未配置密码**并且**未设置 `INITIAL_PASSWORD` 环境变量 → 引导模式允许使用新手引导向导和回环请求，但暴露在网络上的请求仍需要凭证。
-- 任何数据库错误 → 失败时默认拒绝（fail closed，即默认安全）。
+- `settings.requireLogin === false` → auth 全局禁用，除了始终受保护的层（请参阅[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ）以及分发其接受的凭证的调用，这些调用需要与登录时相同的凭证：发出同步令牌、在任何范围内生成CLI访问令牌、使用`manage`/`admin`范围创建API密钥、将该范围授予密钥，或者重新生成或显示此类密钥（ `src/lib/api/requireManagementAuth.ts`中的`requireCredentialForManagementScopedKey()` ）。仅推理键保持打开状态。写入受保护的功能标志（`REQUIRE_API_KEY`、其他安全标志以及[功能标志](../reference/FEATURE_FLAGS.md#rest-api)中列出的SSRF / TLS / MCP-scope / 沙箱标志）并保存PII屏蔽设置 (`PUT /api/settings/pii`) 也仍然需要凭据。
+- 没有配置密码**和**no `INITIAL_PASSWORD` env var →引导模式允许加入向导和环回请求，但公开的网络请求仍然需要凭据。例外：写入受保护的功能标志并保存PII屏蔽设置（`PUT /api/settings/pii`）甚至需要来自环回的凭据，因此环回本身是不够的。
+- 任何DB错误→都会失败关闭（默认安全）。
 
-客户端 API 密钥的强制执行使用 `src/shared/utils/featureFlags.ts` 中的 `isRequireApiKeyEnabled()`，而不是直接读取 `process.env.REQUIRE_API_KEY`。这对已部署的实例很重要：在仪表板 → 功能开关中切换 `REQUIRE_API_KEY` 会存储一个数据库覆盖值，并立即影响 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` 以及其他共享此辅助函数的客户端 API 认证检查。如果无法读取功能开关存储，客户端 API 认证将失败时默认拒绝，并要求提供密钥。
+客户端API密钥强制执行使用`src/shared/utils/featureFlags.ts`中的`isRequireApiKeyEnabled()` ，而不是直接`process.env.REQUIRE_API_KEY`读取。这对于已部署的实例很重要：在仪表板→功能标志中切换`REQUIRE_API_KEY`会存储DB覆盖并立即影响`/v1/*`、 `/v1beta/*`、 `/models`、 `/responses`、 `/chat/completions`、 `/codex/*`和共享此帮助器的其他客户端 API 身份验证检查。如果无法读取功能标志存储，则客户端API auth 将无法关闭并需要密钥。
 
 ## 破坏性变更 — v3.8.0
 

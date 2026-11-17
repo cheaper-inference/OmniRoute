@@ -22,6 +22,7 @@ export interface UsageCommandApiKeyMetadata {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
 }
 
 interface ProviderConnectionLike {

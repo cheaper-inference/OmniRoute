@@ -45,14 +45,27 @@ afterEach(() => {
 });
 
 describe("ComboStepTestButton", () => {
-  it("is disabled with an explanation for combo-ref and wildcard steps", () => {
+  it("is blocked with an explanation for combo-ref and wildcard steps", () => {
     for (const entry of [
       { kind: "combo-ref", comboName: "child" },
       { kind: "provider-wildcard", providerId: "openai", modelPattern: "*" },
     ]) {
       const button = render(entry);
-      expect(button.disabled).toBe(true);
-      expect(button.title).toBe("Only single-model steps can be tested");
+      // GuardedAction (decision 4, 2026-11-14): inactive but reachable, so the explanation
+      // shows — a natively disabled button never shows its title under pointer-events: none.
+      expect(button.getAttribute("aria-disabled")).toBe("true");
+      expect(button.getAttribute("data-blocked")).toBe("true");
+      const describedBy = button.getAttribute("aria-describedby") ?? "";
+      expect(document.getElementById(describedBy)?.textContent).toBe(
+        "Only single-model steps can be tested"
+      );
+      expect(button.getAttribute("aria-label")).toBe("Only single-model steps can be tested");
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      act(() => {
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
     }
   });
 

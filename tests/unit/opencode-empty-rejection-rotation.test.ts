@@ -3,7 +3,7 @@ import assert from "node:assert";
 import net from "node:net";
 import { OpencodeExecutor } from "../../open-sse/executors/opencode.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../open-sse/executors/base.ts";
-import { resolveProxyForRequest } from "../../open-sse/utils/proxyFetch.ts";
+import { resolveProxyForRequest, runWithProxyContext } from "../../open-sse/utils/proxyFetch.ts";
 import {
   isEmptyUpstreamRejection,
   extractChatcmplId,
@@ -401,15 +401,17 @@ describe("OpencodeExecutor empty-rejection rotation", () => {
     const exec = new OpencodeExecutor("opencode-zen");
     installFetch([{ status: 400, body: EMPTY_BODY }, { status: 200 }]);
 
-    const result = await exec.execute({
-      model: "deepseek-v4-flash-free",
-      body: { messages: [{ role: "user", content: "hi" }], stream: false },
-      stream: false,
-      signal: null,
-      // A proxy-less, B proxied: B must still be tried and succeed.
-      credentials: credentialsFor([ACCOUNT_A, ACCOUNT_B], [ACCOUNT_B]),
-      log,
-    });
+    const result = await runWithProxyContext(`http://127.0.0.1:${portC}`, () =>
+      exec.execute({
+        model: "deepseek-v4-flash-free",
+        body: { messages: [{ role: "user", content: "hi" }], stream: false },
+        stream: false,
+        signal: null,
+        // A inherits the caller's egress; B has its own proxy and must succeed.
+        credentials: credentialsFor([ACCOUNT_A, ACCOUNT_B], [ACCOUNT_B]),
+        log,
+      })
+    );
 
     assert.strictEqual(
       (result as { response: { status: number } }).response.status,
@@ -417,13 +419,7 @@ describe("OpencodeExecutor empty-rejection rotation", () => {
       "the proxied account (B) must still be tried and must succeed"
     );
     assert.strictEqual(observed.length, 2, "exactly one empty rejection (A) then one success (B)");
-    assert.ok(
-      observed.some((o) => o.source === "direct"),
-      "first dispatch on the proxy-less account"
-    );
-    assert.ok(
-      observed.some((o) => o.port === String(portB)),
-      "rotated dispatch on the proxied account"
-    );
+    assert.strictEqual(observed[0].port, String(portC), "A must use the caller's shared egress");
+    assert.strictEqual(observed[1].port, String(portB), "B must use its dedicated proxy");
   });
 });

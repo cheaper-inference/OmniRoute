@@ -10,6 +10,7 @@ import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
 import HealthAccountTooltip from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
 import { buildHealthAccount } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview";
+import { displayAccount } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay";
 import { parseQuotaData } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing";
 vi.unmock("next-intl");
 afterEach(cleanup);
@@ -84,6 +85,23 @@ for (const locale of ["en", "zh-CN"])
       expect(screen.getByText(messages.usage[row.key])).toBeTruthy();
       expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("0");
       expect(screen.getAllByText(messages.usage.healthAvailable)).toHaveLength(2);
+      // The capsule must agree with the tooltip: a bypass permits the account to
+      // serve, it does not refill the plan window that the meter reports.
+      const view = displayAccount(account, now);
+      const expectedBypass =
+        row.key === "healthExtraUsageBypass"
+          ? "extraUsage"
+          : row.key === "healthPaidCreditsBypass"
+            ? "paidCredits"
+            : "filteringDisabled";
+      expect(view.kind).toBe("ok");
+      expect(
+        view.reasons.some(
+          (reason) => reason.type === "quotaBypass" && reason.bypass === expectedBypass
+        )
+      ).toBe(true);
+      expect(view.remainingPct).toBe(0);
+      expect(view.fill).toBe(0);
     });
 for (const row of cases) {
   it(`all 67 catalogs translate ${row.key} with the same empty ICU argument set`, () => {

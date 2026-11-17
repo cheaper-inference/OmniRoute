@@ -3,9 +3,14 @@
 /**
  * Per-account display reads the server's canonical cached snapshots. Polling is
  * local-only and visible-tab-only; only the explicit refresh button probes upstream.
+ * The probe's response only reports how the refresh went (providerQuotaRefresh.ts);
+ * the panels keep showing the canonical projection, which is re-read right afterwards.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { startVisibleCachePolling } from "@/shared/utils/visiblePolling";
+import { classifyQuotaObservation, type QuotaRefreshState } from "./providerQuotaRefresh";
+
+const LIVE_READ_TIMEOUT_MS = 15000;
 
 export interface ProviderQuotaCacheEntry {
   quotas?: Record<string, unknown> | null;
@@ -17,19 +22,66 @@ export interface ProviderQuotaCacheEntry {
   bankedResetCredits?: number;
 }
 
-export function useProviderQuota() {
+interface QuotaOptions {
+  providerId?: string;
+  connectionIds?: string[];
+  refreshConnections?: () => Promise<boolean>;
+}
+
+interface PendingRefresh {
+  controller: AbortController;
+  providerId?: string;
+  promise: Promise<void>;
+}
+
+async function readObservation(
+  id: string,
+  providerId: string | undefined,
+  signal: AbortSignal
+): Promise<QuotaRefreshState> {
+  if (signal.aborted) return { status: "error" };
+  // The deadline stays off `signal`, so a timed-out read is a failed observation and not an
+  // obsolete request: the button must report it and become available again.
+  const deadline = new AbortController();
+  const abort = () => deadline.abort();
+  signal.addEventListener("abort", abort, { once: true });
+  const timeout = setTimeout(abort, LIVE_READ_TIMEOUT_MS);
+  try {
+    const response = await fetch(`/api/usage/${encodeURIComponent(id)}`, {
+      cache: "no-store",
+      signal: deadline.signal,
+    });
+    if (!response.ok) throw new Error("Quota request failed");
+    return classifyQuotaObservation(await response.json(), providerId);
+  } catch {
+    return { status: "error" };
+  } finally {
+    clearTimeout(timeout);
+    signal.removeEventListener("abort", abort);
+  }
+}
+
+async function refreshProjection(refresh?: () => Promise<boolean>): Promise<boolean> {
+  if (!refresh) return true;
+  try {
+    return await refresh();
+  } catch {
+    return false;
+  }
+}
+
+function useQuotaCache() {
   const [quotaByConnectionId, setQuotaByConnectionId] = useState<
     Record<string, ProviderQuotaCacheEntry>
   >({});
   const [quotaLoading, setQuotaLoading] = useState(true);
-  const [refreshingIds, setRefreshingIds] = useState<ReadonlySet<string>>(new Set());
   const polling = useRef<ReturnType<typeof startVisibleCachePolling> | null>(null);
-  const manualReads = useRef(new Map<string, AbortController>());
+  const liveReads = useRef(0);
 
   useEffect(() => {
     let alive = true;
     const reader = startVisibleCachePolling(async (signal) => {
-      if (manualReads.current.size > 0) return;
+      if (liveReads.current > 0) return;
       try {
         const res = await fetch("/api/usage/provider-limits", { cache: "no-store", signal });
         if (!res.ok) return;
@@ -49,48 +101,118 @@ export function useProviderQuota() {
       }
     });
     polling.current = reader;
-    const controllers = manualReads.current;
     return () => {
       alive = false;
       polling.current = null;
       reader.dispose();
-      for (const controller of controllers.values()) controller.abort();
-      controllers.clear();
     };
   }, []);
 
-  const refreshConnection = useCallback(async (connectionId: string) => {
-    if (!connectionId || !polling.current || manualReads.current.has(connectionId)) return;
+  const beginLiveRead = useCallback(() => {
     // A pre-refresh cached GET must not arrive later and roll back the refreshed panel.
-    polling.current.cancel();
-    const controller = new AbortController();
-    manualReads.current.set(connectionId, controller);
-    setRefreshingIds((prev) => new Set(prev).add(connectionId));
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    try {
-      const response = await fetch(`/api/usage/${encodeURIComponent(connectionId)}`, {
-        cache: "no-store",
-        signal: controller.signal,
-      });
-      await response.body?.cancel();
-      // Ignore the live route's payload: newer inference evidence may have arrived meanwhile.
-      // Both manual and background reads must display the canonical server projection.
-    } catch {
-      // An explicit refresh can fail; keep the last observation and its original age.
-    } finally {
-      clearTimeout(timeout);
-      manualReads.current.delete(connectionId);
-      if (polling.current) {
-        // A timed-out request must not leave the refresh button disabled either.
-        setRefreshingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(connectionId);
-          return next;
-        });
-        if (!controller.signal.aborted) await polling.current.refresh(true);
-      }
-    }
+    polling.current?.cancel();
+    liveReads.current += 1;
+  }, []);
+  const endLiveRead = useCallback(() => {
+    liveReads.current -= 1;
+  }, []);
+  const rereadCache = useCallback(async () => {
+    await polling.current?.refresh(true);
   }, []);
 
-  return { quotaByConnectionId, quotaLoading, refreshingIds, refreshConnection };
+  return { quotaByConnectionId, quotaLoading, beginLiveRead, endLiveRead, rereadCache };
+}
+
+function usePendingQuotaRequests(options: QuotaOptions) {
+  const pending = useRef(new Map<string, PendingRefresh>());
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    const requests = pending.current;
+    return () => {
+      mounted.current = false;
+      for (const request of requests.values()) request.controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    for (const [id, request] of pending.current) {
+      if (
+        request.providerId !== options.providerId ||
+        (options.connectionIds && !options.connectionIds.includes(id))
+      ) {
+        request.controller.abort();
+      }
+    }
+  }, [options.providerId, options.connectionIds]);
+
+  return { pending, mounted };
+}
+
+export function useProviderQuota(options: QuotaOptions = {}) {
+  const { quotaByConnectionId, quotaLoading, beginLiveRead, endLiveRead, rereadCache } =
+    useQuotaCache();
+  const [refreshingIds, setRefreshingIds] = useState<ReadonlySet<string>>(new Set());
+  const [refreshStates, setRefreshStates] = useState<Record<string, QuotaRefreshState>>({});
+  const { pending, mounted } = usePendingQuotaRequests(options);
+
+  const refreshConnection = useCallback(
+    (connectionId: string): Promise<void> => {
+      if (!connectionId || !mounted.current) return Promise.resolve();
+      const existing = pending.current.get(connectionId);
+      if (existing && !existing.controller.signal.aborted) return existing.promise;
+      const request: PendingRefresh = {
+        controller: new AbortController(),
+        providerId: options.providerId,
+        promise: Promise.resolve(),
+      };
+      // Register before the first asynchronous operation, including calls in the same event tick.
+      pending.current.set(connectionId, request);
+      beginLiveRead();
+      setRefreshingIds((prev) => new Set(prev).add(connectionId));
+      setRefreshStates((prev) => ({ ...prev, [connectionId]: { status: "loading" } }));
+      request.promise = Promise.resolve().then(async () => {
+        try {
+          const state = await readObservation(
+            connectionId,
+            options.providerId,
+            request.controller.signal
+          ).finally(endLiveRead);
+          if (!mounted.current || request.controller.signal.aborted) return;
+          const [, refreshed] = await Promise.all([
+            rereadCache(),
+            refreshProjection(options.refreshConnections),
+          ]);
+          if (!mounted.current || request.controller.signal.aborted) return;
+          setRefreshStates((prev) => ({
+            ...prev,
+            [connectionId]: { ...state, ...(!refreshed ? { connectionsRefreshFailed: true } : {}) },
+          }));
+        } finally {
+          if (pending.current.get(connectionId) === request) {
+            pending.current.delete(connectionId);
+            if (mounted.current)
+              setRefreshingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(connectionId);
+                return next;
+              });
+          }
+        }
+      });
+      return request.promise;
+    },
+    [
+      options.providerId,
+      options.refreshConnections,
+      pending,
+      mounted,
+      beginLiveRead,
+      endLiveRead,
+      rereadCache,
+    ]
+  );
+
+  return { quotaByConnectionId, quotaLoading, refreshingIds, refreshConnection, refreshStates };
 }

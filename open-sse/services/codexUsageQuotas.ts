@@ -330,6 +330,37 @@ function parseRateLimitReachedType(data: JsonRecord): string | undefined {
   return typeof type === "string" && type.trim().length > 0 ? type.trim() : undefined;
 }
 
+/** The payload names this field explicitly (an object or `null`), not by omission. */
+function hasExplicitField(record: JsonRecord, snake: string, camel: string): boolean {
+  return Object.hasOwn(record, snake) || Object.hasOwn(record, camel);
+}
+
+/** Both rate-limit windows are named explicitly and every non-null one parses. */
+function rateLimitWindowsComplete(rateLimit: JsonRecord): boolean {
+  return (["primary", "secondary"] as const).every((id) => {
+    if (!hasExplicitField(rateLimit, `${id}_window`, `${id}Window`)) return false;
+    const raw = getFieldValue(rateLimit, `${id}_window`, `${id}Window`);
+    return raw === null || parseCodexQuotaWindow(raw, id) !== null;
+  });
+}
+
+/**
+ * Whether this /wham/usage payload lists every rate-limit window the plan has: the main
+ * `rate_limit` names both windows (a removed one as `null`, as for plans without the 5-hour
+ * session) and each parses, and `additional_rate_limits` is present (a `null` means none; a
+ * Spark entry's windows must parse too). Only then may a window it does not report be retired.
+ */
+export function codexUsageWindowsComplete(dataValue: unknown): boolean {
+  const data = toRecord(dataValue);
+  if (!hasExplicitField(data, "rate_limit", "rateLimit")) return false;
+  const rateLimit = getFieldValue(data, "rate_limit", "rateLimit");
+  if (!rateLimit || typeof rateLimit !== "object" || !rateLimitWindowsComplete(toRecord(rateLimit)))
+    return false;
+  if (!hasExplicitField(data, "additional_rate_limits", "additionalRateLimits")) return false;
+  const spark = findCodexSparkRateLimit(data).rateLimit;
+  return Object.keys(spark).length === 0 || rateLimitWindowsComplete(spark);
+}
+
 export function buildCodexUsageQuotas(dataValue: unknown): {
   paidCredits?: CodexPaidCredits;
   rateLimit: JsonRecord;
