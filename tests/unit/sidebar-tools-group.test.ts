@@ -27,7 +27,7 @@ function getToolsGroup() {
   };
 }
 
-test("TOOLS_GROUP items follow plan 14 order: cli-code → cli-agents → acp-agents → cloud-agents → conductor → orchestration → agent-bridge → traffic-inspector → discovery", () => {
+test("TOOLS_GROUP preserves existing order with Grok Bot after cloud agents", () => {
   const toolsGroup = getToolsGroup();
   const itemIds = toolsGroup.items.map((item) => item.id);
   // cli-code/cli-agents/acp-agents/cloud-agents from plan 14 (#2839); agent-bridge/traffic-inspector from plans 11/12 (#2858); discovery from #5939; conductor from the Conductor panel (PRD RF3, #8221).
@@ -38,13 +38,14 @@ test("TOOLS_GROUP items follow plan 14 order: cli-code → cli-agents → acp-ag
       "cli-agents",
       "acp-agents",
       "cloud-agents",
+      "grok-bot",
       "conductor",
       "orchestration", // +1: orchestration (PR-2 of the orchestration canvas)
       "agent-bridge",
       "traffic-inspector",
       "discovery",
     ],
-    "TOOLS_GROUP items order must be cli-code, cli-agents, acp-agents, cloud-agents, conductor, orchestration, agent-bridge, traffic-inspector, discovery"
+    "TOOLS_GROUP items order must be cli-code, cli-agents, acp-agents, cloud-agents, grok-bot, conductor, orchestration, agent-bridge, traffic-inspector, discovery"
   );
 });
 
@@ -82,4 +83,11 @@ test("TOOLS_GROUP does NOT contain legacy cli-tools or agents entries", () => {
     [],
     "TOOLS_GROUP must not contain legacy 'cli-tools' or 'agents' entries"
   );
+});
+
+test("TOOLS_GROUP Grok Bot item has its dashboard href and translation key", () => {
+  const grokBot = getToolsGroup().items.find((item) => item.id === "grok-bot");
+  assert.ok(grokBot, "expected Grok Bot in TOOLS_GROUP");
+  assert.equal(grokBot.href, "/dashboard/grok-bot");
+  assert.equal(grokBot.i18nKey, "grokBot");
 });

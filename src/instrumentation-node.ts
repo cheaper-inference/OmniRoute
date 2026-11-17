@@ -577,7 +577,6 @@ export async function registerNodejs(): Promise<void> {
   const { registerNoAuthAutoRoutingReadiness } =
     await import("@/lib/providers/noAuthAutoRoutingReadiness");
   registerNoAuthAutoRoutingReadiness();
-
   // Guarantee the SQLite singleton — including a sql.js WASM pre-init when
   // both synchronous drivers (better-sqlite3, node:sqlite) are unavailable —
   // is ready before ANY other startup step reaches getDbInstance(). This
@@ -694,6 +693,51 @@ export async function registerNodejs(): Promise<void> {
   registerClaudeSessionResetPolicy();
   console.log("[STARTUP] Claude session-reset policy gate registered");
   if (!isBackgroundServicesDisabled()) {
+    // Grok Bot remote-cleanup sweeper (spec step 14): drain the persistent
+    // retry queue once at boot, then every 60s -- independent of new requests
+    // arriving on the affected connection. Non-fatal: a sweeper failure must
+    // never block server readiness.
+    try {
+      const [
+        { startGrokBotCleanupSweeper },
+        { isConnectionUnavailableToAuxiliaryActivity },
+        { getTransport },
+        { getProviderConnectionById },
+        { getAccessToken, updateProviderCredentials },
+      ] = await Promise.all([
+        import("@omniroute/open-sse/executors/grok-bot-cleanup-sweeper.ts"),
+        import("@/lib/exclusiveLeaseIsolation"),
+        import("@omniroute/open-sse/executors/grok-bot.ts"),
+        import("@/lib/db/providers"),
+        import("@/sse/services/tokenRefresh"),
+      ]);
+      startGrokBotCleanupSweeper({
+        resolveConnection: async (connectionId: string) => {
+          // This queue belongs to a previous request, not the current lease
+          // owner. Throw to defer: null means a deleted row and drops the item.
+          if (await isConnectionUnavailableToAuxiliaryActivity(connectionId)) {
+            throw new Error("Grok Bot cleanup deferred for an active exclusive lease");
+          }
+          const connection = await getProviderConnectionById(connectionId);
+          if (!connection || connection.provider !== "grok-bot") return null;
+          const token = connection.refreshToken;
+          return typeof token === "string" ? { refreshToken: token } : null;
+        },
+        refresh: (credentials) =>
+          getAccessToken("grok-bot", credentials, async (result) => {
+            // Persist rotation inside the standard per-connection refresh mutex.
+            // A failed write must retain the cleanup item for retry.
+            if (!(await updateProviderCredentials(credentials.connectionId, result))) {
+              throw new Error("Grok Bot cleanup token persistence failed");
+            }
+          }),
+        transportFor: (accessToken: string) => getTransport(accessToken),
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[STARTUP] Grok Bot cleanup sweeper unavailable (non-fatal):", msg);
+    }
+
     startBackgroundRefresh();
     console.log("[STARTUP] Quota cache background refresh started");
     startProviderLimitsSyncScheduler();

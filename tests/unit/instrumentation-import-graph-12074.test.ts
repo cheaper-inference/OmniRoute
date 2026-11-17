@@ -114,3 +114,16 @@ test("Claude OAuth validation resolves the default executor without the chat reg
   assert.doesNotMatch(resolverSource, /\.\/index(?:\.ts)?/);
   assert.match(resolverSource, /export function getDefaultExecutor/);
 });
+
+test("Grok credential refresh resolves its specialized executor and reuses the cached instance", async () => {
+  const [{ getCredentialRefreshExecutor }, { GrokBotExecutor }] = await Promise.all([
+    import("../../open-sse/executors/credential.ts"),
+    import("../../open-sse/executors/grok-bot.ts"),
+  ]);
+  const executor = await getCredentialRefreshExecutor("grok-bot");
+  assert.ok(executor instanceof GrokBotExecutor);
+  assert.equal(executor.provider, "grok-bot");
+  assert.equal(executor.refreshCredentials, GrokBotExecutor.prototype.refreshCredentials);
+  assert.equal(await getCredentialRefreshExecutor("grok-bot"), executor);
+  assert.equal(await executor.refreshCredentials({}), null);
+});

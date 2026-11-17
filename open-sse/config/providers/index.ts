@@ -74,6 +74,7 @@ import { mistralProvider } from "./registry/mistral/index.ts";
 import { togetherProvider } from "./registry/together/index.ts";
 import { cohereProvider } from "./registry/cohere/index.ts";
 import { cursorProvider, cursor_apiProvider } from "./registry/cursor/index.ts";
+import { grokBotProvider } from "./registry/grok-bot/index.ts";
 import { volcengineProvider } from "./registry/volcengine/index.ts";
 import { volcengine_agent_planProvider } from "./registry/volcengine/agent-plan/index.ts";
 import { volcengine_coding_planProvider } from "./registry/volcengine/coding-plan/index.ts";
@@ -377,6 +378,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   cohere: cohereProvider,
   cursor: cursorProvider,
   "cursor-api": cursor_apiProvider,
+  "grok-bot": grokBotProvider,
   volcengine: volcengineProvider,
   "volcengine-agent-plan": volcengine_agent_planProvider,
   "volcengine-coding-plan": volcengine_coding_planProvider,

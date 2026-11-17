@@ -23,6 +23,7 @@ const specializedCredentialExecutors: Record<string, CredentialExecutorLoader> =
   gitlab: () => import("./gitlab.ts").then((m) => new m.GitlabExecutor()),
   "gitlab-duo": () => import("./gitlab.ts").then((m) => new m.GitlabExecutor("gitlab-duo")),
   "zed-hosted": () => import("./zed-hosted.ts").then((m) => new m.ZedHostedExecutor()),
+  "grok-bot": () => import("./grok-bot.ts").then((m) => new m.GrokBotExecutor()),
   "grok-cli": () => import("./grok-cli.ts").then((m) => new m.GrokCliExecutor()),
   gc: () => import("./grok-cli.ts").then((m) => new m.GrokCliExecutor()),
   auggie: () => import("./auggie.ts").then((m) => new m.AuggieExecutor()),

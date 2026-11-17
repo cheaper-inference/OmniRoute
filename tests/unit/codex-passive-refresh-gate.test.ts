@@ -615,3 +615,23 @@ test("other providers retain refresh behaviour while Codex is passive", async ()
   assert.equal(result.accessToken, "synthetic-google-access");
   assert.equal(calls, 1);
 });
+
+test("token refresh facade exports the passive Codex predicate", () => {
+  assert.equal(tokens.isPassiveCodex("codex"), true);
+  assert.equal(tokens.isPassiveCodex("cx"), true);
+  assert.equal(tokens.isPassiveCodex("grok-bot"), false);
+});
+
+test("passive entry points bypass refresh-token validation and never persist", async () => {
+  let persists = 0;
+  const credentials = { accessToken: "synthetic-passive-access" };
+  const result = await tokens.getAccessToken("codex", credentials, quiet, null, async () => {
+    persists++;
+  });
+  assert.deepEqual(result, { error: "refresh_disabled" });
+  assert.deepEqual(await tokens.refreshAccessToken("cx", undefined, credentials, quiet), {
+    error: "refresh_disabled",
+  });
+  assert.equal(tokenCalls, 0);
+  assert.equal(persists, 0);
+});

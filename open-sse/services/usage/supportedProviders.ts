@@ -72,6 +72,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "xao",
   // Grok Build subscription, billing credits, and auto top-up status
   "grok-cli",
+  "grok-bot",
   // Firecrawl team credits (GET /v2/team/credit-usage)
   "firecrawl",
   "context7",
