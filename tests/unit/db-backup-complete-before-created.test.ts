@@ -49,12 +49,16 @@ async function asProductionProcess<R>(fn: () => Promise<R> | R): Promise<R> {
   const saved = {
     nodeEnv: process.env.NODE_ENV,
     vitest: process.env.VITEST,
+    nodeTestContext: process.env.NODE_TEST_CONTEXT,
+    jestWorkerId: process.env.JEST_WORKER_ID,
     disable: process.env.DISABLE_SQLITE_AUTO_BACKUP,
     argv: [...process.argv],
     execArgv: [...process.execArgv],
   };
   delete process.env.NODE_ENV;
   delete process.env.VITEST;
+  delete process.env.NODE_TEST_CONTEXT;
+  delete process.env.JEST_WORKER_ID;
   delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
   process.argv = process.argv.filter((arg) => !arg.includes("test"));
   process.execArgv = process.execArgv.filter((arg) => !arg.includes("test"));
@@ -66,6 +70,8 @@ async function asProductionProcess<R>(fn: () => Promise<R> | R): Promise<R> {
     if (saved.nodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = saved.nodeEnv;
     if (saved.vitest !== undefined) process.env.VITEST = saved.vitest;
+    if (saved.nodeTestContext !== undefined) process.env.NODE_TEST_CONTEXT = saved.nodeTestContext;
+    if (saved.jestWorkerId !== undefined) process.env.JEST_WORKER_ID = saved.jestWorkerId;
     if (saved.disable === undefined) delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
     else process.env.DISABLE_SQLITE_AUTO_BACKUP = saved.disable;
   }
