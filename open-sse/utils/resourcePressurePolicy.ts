@@ -328,9 +328,13 @@ export function classifyAdaptiveResourcePressureWithHistory(
   // the old behavior).
   if (highRatio?.severity === "critical") {
     const proof = hasKernelThrottleProof(signals, previousEvents);
+    // memory.high can throttle briefly while reclaiming SQLite's clean page
+    // cache. A few high counter increments alone must not reject every AI
+    // request when the anonymous working set and cgroup PSI are both low.
+    const cacheOnly = isCacheDominatedHigh(signals, thresholds, previousEvents);
     best = maxLevel(
       best,
-      proof === false ? { severity: "high", reason: "cgroup_high" } : highRatio
+      proof === false || cacheOnly ? { severity: "high", reason: "cgroup_high" } : highRatio
     );
   } else {
     best = maxLevel(best, highRatio);
@@ -369,12 +373,72 @@ function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
   return cgroup.currentBytes - cgroup.fileBytes;
 }
 
-function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThresholds): boolean {
+type UsableCacheCgroup = ResourceSignals["cgroup"] & {
+  currentBytes: number;
+  highBytes: number;
+  fileBytes: number;
+  events: NonNullable<ResourceSignals["cgroup"]["events"]> & { max: number };
+};
+
+type CompleteCgroupPsi = NonNullable<ResourceSignals["psi"]> & {
+  someAvg10: number;
+  fullAvg10: number;
+};
+
+function hasUsableCacheCgroup(cgroup: ResourceSignals["cgroup"]): cgroup is UsableCacheCgroup {
+  const { currentBytes, highBytes, fileBytes, events } = cgroup;
+  if ([currentBytes, highBytes, fileBytes].some((value) => value == null || value <= 0)) {
+    return false;
+  }
+  return fileBytes! <= currentBytes! && events?.max != null;
+}
+
+function hasCompleteCgroupPsi(psi: ResourceSignals["psi"]): psi is CompleteCgroupPsi {
+  return psi?.psiSource === "cgroup" && psi.someAvg10 != null && psi.fullAvg10 != null;
+}
+
+/**
+ * memory.events.high can be a short clean-cache reclaim rather than exhaustion.
+ * Only downgrade when the working set and *local* PSI confirm cheap reclaim;
+ * missing metrics and new memory.max events preserve the critical guard.
+ */
+function isCacheDominatedHigh(
+  signals: ResourceSignals,
+  thresholds: ResourcePressureThresholds,
+  previousEvents: ThrottleCounters | null = null
+): boolean {
+  const cgroup = signals.cgroup;
+  const psi = signals.psi;
+  if (psiPressureDisabled() || !hasUsableCacheCgroup(cgroup) || !hasCompleteCgroupPsi(psi)) {
+    return false;
+  }
+  const { currentBytes, highBytes, fileBytes } = cgroup;
+  if (
+    fileBytes < currentBytes * 0.4 ||
+    currentBytes - fileBytes > highBytes * thresholds.recoveryRatio ||
+    psi.someAvg10 > 1 ||
+    psi.fullAvg10 > 1
+  ) {
+    return false;
+  }
+  return previousEvents?.max == null || cgroup.events.max <= previousEvents.max;
+}
+
+function isRecovered(
+  signals: ResourceSignals,
+  thresholds: ResourcePressureThresholds,
+  previousEvents: ThrottleCounters | null
+): boolean {
   const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   const ratios: Array<readonly [number | null, number | null]> = [
     [signals.v8.heapUsedBytes, signals.v8.heapLimitBytes],
     [cgroupWorkingSetBytes, signals.cgroup.maxBytes],
-    [signals.cgroup.currentBytes, signals.cgroup.highBytes],
+    [
+      isCacheDominatedHigh(signals, thresholds, previousEvents)
+        ? cgroupWorkingSetBytes
+        : signals.cgroup.currentBytes,
+      signals.cgroup.highBytes,
+    ],
   ];
   if (
     ratios.some(
@@ -456,6 +520,9 @@ export function createResourcePressureTracker(
         previousEvents = currentEvents;
       }
 
+      // Preserve the previous counters for both classification and recovery.
+      // A new memory.max event must not release a critical latch early.
+      const recoveryPreviousEvents = previousEvents;
       const raw = oomEvent
         ? ({ severity: "critical", reason: "oom_event" } as const)
         : classifyAdaptiveResourcePressureWithHistory(signals, thresholds, previousEvents);
@@ -509,7 +576,7 @@ export function createResourcePressureTracker(
         pending = null;
         elevatedStreak = 0;
         recoveryStreak = 0;
-      } else if (isRecovered(signals, thresholds)) {
+      } else if (isRecovered(signals, thresholds, recoveryPreviousEvents)) {
         pending = null;
         elevatedStreak = 0;
         recoveryStreak += 1;

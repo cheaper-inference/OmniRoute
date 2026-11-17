@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Sheet, SheetContent, SheetTitle } from "@omniroute/ui-kit/sheet";
 import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
 import { orchStateColor, type OrchNode, type OrchState } from "../model/orchestrationTypes";
 import { useDrawerDetail } from "./useDrawerDetail";
@@ -92,7 +93,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
     );
   }
   return (
-    <pre className="text-[10px] bg-surface-muted rounded p-2 overflow-x-auto">
+    <pre className="text-[10px] bg-muted rounded p-2 overflow-x-auto">
       {JSON.stringify(detail, null, 2)}
     </pre>
   );
@@ -262,7 +263,7 @@ function DrawerResult({
           <span className="text-xs break-words">{ca.result.prUrl}</span>
         ))}
       {a2a?.artifacts?.map((art, i) => (
-        <pre key={i} className="text-[10px] bg-surface-muted rounded p-2 mt-1 overflow-x-auto">
+        <pre key={i} className="text-[10px] bg-muted rounded p-2 mt-1 overflow-x-auto">
           {art.content}
         </pre>
       ))}
@@ -345,12 +346,13 @@ function useTwoClickConfirm(onConfirm: () => void) {
 }
 
 /**
- * Repeat button: two-click confirm, disabled + tooltip when the input isn't recoverable.
- * `canRepeat` already folds in `!busy` (so the button is disabled while a repeat POST is
- * in flight), but the tooltip must not claim the input is unrecoverable in that case — a
- * successful repeat is legitimately busy, not unavailable. `busy` is threaded through
- * separately so the title can tell the two apart: silent (no title) while busy, the real
- * `repeatUnavailable` message only when the input truly can't be recovered.
+ * Repeat button: two-click confirm, blocked with an explanation when the input isn't
+ * recoverable. `canRepeat` already folds in `!busy` (so the button is disabled while a repeat
+ * POST is in flight), but the explanation must not claim the input is unrecoverable in that
+ * case — a successful repeat is legitimately busy, not unavailable. `busy` is threaded through
+ * separately so the two stay apart: plainly disabled (no reason) while busy, the real
+ * `repeatUnavailable` reason (GuardedAction, visible on hover/focus — a disabled button's
+ * title never shows) only when the input truly can't be recovered.
  */
 function RepeatButton({
   canRepeat,
@@ -379,15 +381,15 @@ function RepeatButton({
     })();
   });
   return (
-    <Button
+    <GuardedAction
       variant="outline"
       size="sm"
       onClick={onClick}
-      disabled={!canRepeat}
-      title={canRepeat || busy ? undefined : t("repeatUnavailable")}
+      disabled={!canRepeat && busy}
+      reason={canRepeat || busy ? undefined : t("repeatUnavailable")}
     >
       {confirming ? t("repeatConfirm") : t("actionRepeat")}
-    </Button>
+    </GuardedAction>
   );
 }
 

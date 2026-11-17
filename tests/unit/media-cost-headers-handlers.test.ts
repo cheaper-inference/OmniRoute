@@ -61,21 +61,25 @@ test("v1 video generation failure preserves provider status and error payload", 
   });
 });
 
-// Shared assertions: every successful media Response must carry the
-// X-OmniRoute-* cost telemetry headers (parity with chat/embeddings).
-// Cost may legitimately be 0 (free / unpriced modality) — formatOmniRouteCost
-// still emits a fixed-10-decimal string ("0.0000000000"), so the format check
-// holds regardless.
-function assertCostTelemetryHeaders(response: Response) {
+// Unknown media charges omit the numeric header; explicitly free charges retain zero.
+function assertCostTelemetryHeaders(
+  response: Response,
+  expectedCost: "known" | "unknown" = "known"
+) {
   assert.equal(response.status, 200);
 
   const cost = response.headers.get(OMNIROUTE_RESPONSE_HEADERS.responseCost);
-  assert.ok(cost, "response cost header must be present");
-  assert.match(
-    cost as string,
-    /^\d+\.\d{10}$/,
-    `cost header must be a fixed-10-decimal number, got: ${cost}`
-  );
+  if (expectedCost === "unknown") {
+    assert.equal(cost, null, "missing usage or tariffs must not be reported as zero cost");
+    assert.equal(response.headers.get("X-OmniRoute-Cost-Status"), "unknown");
+  } else {
+    assert.ok(cost, "response cost header must be present");
+    assert.match(
+      cost as string,
+      /^\d+\.\d{10}$/,
+      `cost header must be a fixed-10-decimal number, got: ${cost}`
+    );
+  }
 
   const version = response.headers.get(OMNIROUTE_RESPONSE_HEADERS.version);
   assert.ok(version && version.trim().length > 0, "version header must be non-empty");
@@ -206,7 +210,7 @@ test("moderation handler success Response carries cost telemetry headers (cost 0
   );
 });
 
-test("v1 audio speech success Response carries cost telemetry headers", async () => {
+test("v1 unpriced speech preserves binary audio and metadata without reporting a zero cost", async () => {
   globalThis.fetch = (async (url: unknown) => {
     const stringUrl = String(url);
     if (stringUrl === "http://localhost:8000/v1/audio/speech") {
@@ -230,15 +234,16 @@ test("v1 audio speech success Response carries cost telemetry headers", async ()
     {}
   );
 
-  assertCostTelemetryHeaders(response);
+  assertCostTelemetryHeaders(response, "unknown");
   assert.equal(
     response.headers.get("Content-Type"),
     "audio/mpeg",
     "audio Content-Type must be preserved"
   );
+  assert.deepEqual(new Uint8Array(await response.arrayBuffer()), new Uint8Array([1, 2, 3, 4]));
 });
 
-test("v1 audio transcription success Response carries cost telemetry headers (cost 0)", async () => {
+test("v1 transcription with no measured usage preserves metadata and reports unknown cost", async () => {
   globalThis.fetch = (async (url: unknown) => {
     const stringUrl = String(url);
     if (stringUrl === "http://localhost:8000/v1/audio/transcriptions") {
@@ -261,10 +266,11 @@ test("v1 audio transcription success Response carries cost telemetry headers (co
     })
   );
 
-  assertCostTelemetryHeaders(response);
+  assertCostTelemetryHeaders(response, "unknown");
   assert.equal(
     response.headers.get(OMNIROUTE_RESPONSE_HEADERS.responseCost),
-    "0.0000000000",
-    "transcription duration unavailable → cost must be 0"
+    null,
+    "transcription usage unavailable must not be reported as zero cost"
   );
+  assert.deepEqual(await response.json(), { text: "transcribed telemetry" });
 });

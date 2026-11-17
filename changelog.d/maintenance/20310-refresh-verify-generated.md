@@ -1,0 +1,1 @@
+- **chore(release):** `release:refresh-derived` ends with a `verify-generated` step: after it writes, `check:generated-artifacts` (README SVGs, `e2e-timings.json`) and `check:agent-skills-sync` (generated `SKILL.md`) must pass in release mode, so a refresh never leaves a generated file that differs from its generator. Skipped in `--check` and in a partial `--only` run.
