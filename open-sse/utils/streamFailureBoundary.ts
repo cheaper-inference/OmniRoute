@@ -91,3 +91,22 @@ export function createStreamFailureAborter(context: AborterContext) {
     }
   };
 }
+
+/**
+ * An exception thrown while translating errors both stream sides without running flush() or
+ * cancel(): clear the idle watchdog here, or its interval keeps the failed stream alive until
+ * the idle timeout.
+ */
+export function clearIdleTimerOnError(
+  clearIdleTimer: () => void,
+  transform: (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) => void
+) {
+  return (chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>): void => {
+    try {
+      transform(chunk, controller);
+    } catch (error) {
+      clearIdleTimer();
+      throw error;
+    }
+  };
+}

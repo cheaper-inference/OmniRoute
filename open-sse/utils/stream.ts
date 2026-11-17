@@ -74,7 +74,7 @@ import {
   projectStreamFailureEvent,
   type StreamFailurePayload,
 } from "./streamErrorFormat.ts";
-import { createStreamFailureAborter } from "./streamFailureBoundary.ts";
+import { createStreamFailureAborter, clearIdleTimerOnError } from "./streamFailureBoundary.ts";
 import { buildStreamFailureSnapshot } from "./streamFailureSnapshot.ts";
 import { nativeFinishFailure, readPassthroughChatId } from "./streamPassthroughFinish.ts";
 import { createReasoningStreamObserver } from "./responsesReasoningObservation.ts";
@@ -1669,19 +1669,7 @@ export function createSSEStream(options: StreamOptions = {}) {
         }
       },
 
-      // An exception thrown while translating errors both stream sides without running
-      // flush() or cancel(): clear the idle watchdog here, or its interval keeps the failed
-      // stream alive until the idle timeout.
-      transform(chunk, controller) {
-        try {
-          this.transformChunk(chunk, controller);
-        } catch (error) {
-          clearIdleTimer();
-          throw error;
-        }
-      },
-
-      transformChunk(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
+      transform: clearIdleTimerOnError(clearIdleTimer, (chunk, controller) => {
         if (streamTimedOut) return;
         const now = Date.now();
         timing.markByte();
@@ -2963,7 +2951,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             deferredCompletionTimer.unref?.();
           }
         }
-      },
+      }),
 
       async flush(controller) {
         flushing = true;
