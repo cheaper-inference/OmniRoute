@@ -1,0 +1,1 @@
+- **fix(embeddings):** preserve `nvidia/` upstream namespace on uncurated NVIDIA NIM embedding and rerank model IDs instead of stripping the provider prefix twice ([#20387](https://github.com/cheaper-inference/OmniRoute/issues/20387))

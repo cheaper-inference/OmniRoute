@@ -120,4 +120,18 @@ test("nvidia embedding and rerank parsing preserves provider-prefixed upstream m
   const parsedDoublePrefixedRerank = parseRerankModel("nvidia/nvidia/nv-rerankqa-mistral-4b-v3");
   assert.equal(parsedDoublePrefixedRerank.provider, "nvidia");
   assert.equal(parsedDoublePrefixedRerank.model, "nvidia/nv-rerankqa-mistral-4b-v3");
+
+  // #20387: Unlisted NVIDIA NIM models whose upstream ID starts with `nvidia/`
+  // (e.g. nvidia/nemotron-3.5-embed-8b) must not have `nvidia/` stripped twice.
+  const parsedUncuratedEmbedding = parseEmbeddingModel("nvidia/nvidia/nemotron-3.5-embed-8b");
+  assert.equal(parsedUncuratedEmbedding.provider, "nvidia");
+  assert.equal(parsedUncuratedEmbedding.model, "nvidia/nemotron-3.5-embed-8b");
+
+  const parsedUncuratedEmbedding1b = parseEmbeddingModel("nvidia/nvidia/nemotron-3.5-embed-1b");
+  assert.equal(parsedUncuratedEmbedding1b.provider, "nvidia");
+  assert.equal(parsedUncuratedEmbedding1b.model, "nvidia/nemotron-3.5-embed-1b");
+
+  const parsedUncuratedRerank = parseRerankModel("nvidia/nvidia/llama-3.2-nv-rerankqa-1b-v2");
+  assert.equal(parsedUncuratedRerank.provider, "nvidia");
+  assert.equal(parsedUncuratedRerank.model, "nvidia/llama-3.2-nv-rerankqa-1b-v2");
 });
