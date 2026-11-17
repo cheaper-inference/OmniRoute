@@ -273,6 +273,12 @@ test("registerBuiltinSkills registers every builtin handler with the executor", 
 
   registerBuiltinSkills(executor);
 
+  // The disabled browser skill is gone, so no handler can answer a browser call with a fake success.
+  assert.equal("browser" in builtinSkills, false);
+  assert.equal(
+    registered.some((entry) => entry.name === "browser"),
+    false
+  );
   assert.equal(registered.length, Object.keys(builtinSkills).length);
   assert.deepEqual(registered.map((entry) => entry.name).sort(), Object.keys(builtinSkills).sort());
 });
