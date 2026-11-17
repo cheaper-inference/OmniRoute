@@ -15,417 +15,623 @@ replikatsiooniplaani leiate dokumendist
 
 ---
 
-## Väravate loend ja käivitusprofiilid
+## Väravate inventar ja täitmisprofiilid
 
-### Kandidaadi vastuvõtmine
+### Kandidaadi vastuvõtt
 
-CI ja Quality Gates töövood annavad kumbki stabiilse otsuse: `Gate / CI` ja
-`Gate / Quality`. Nende versioonitud vastuvõtureeglid loetlevad iga eelneva töö
-kohustusliku või soovituslikuna. Kohaldatav kohustuslik töö peab õnnestuma: puuduv,
-tühistatud, vahele jäetud, ootel või tundmatu tulemus ei saa kinnitada tulemust PASS. Kehtiv
-ainult dokumentatsiooni või ainult kataloogi klassifikatsioon võib muuta koodiraja mittekohaldatavaks;
-mustand-PR ei ole aktsepteeritud kandidaat. Silt `hotfix` ei vabasta tõendite esitamisest.
+CI ja Quality Gates töövood väljastavad kumbki stabiilse otsuse: `Gate / CI` ja
+`Gate / Quality`. Nende versioonitud vastuvõtupoliitika loetleb iga ülesvoolu töö nõutuna või
+soovituslikuna. Rakendatav nõutud töö peab õnnestuma: puuduvad, tühistatud, vahele jäetud,
+ootel ja tundmatud tulemused ei saa olekut PASS kehtestada. Kehtiv ainult dokumente või ainult
+kataloogi hõlmav klassifikatsioon võib muuta koodiraja mitterakendatavaks;
+mustand-PR ei ole vastuvõetav kandidaat. `hotfix`-silt ei vabasta tõendite esitamisest.
 
 Mõlemad töövood hõlmavad PR-e main/release-harudesse, tõukeid harusse `main`, käsitsi käivitamist
-ja liitmisrühma sündmusi. Tõuke, käsitsi käivitamise ja liitmisrühma korral käivitatakse täielik valik. Tõuked harudesse
-`release/**` neid ei käivita (2026-10-18): iga muudatus on maatriksi juba oma PR-is läbinud
-ning liidetud kombinatsiooni kontrollimine on Release-Greeni ülesanne (`docs/ops/RUNNER_BOX.md` → hostitud rada). Forkid
-ja liitmisrühmad kasutavad hostitud käitajaid tööde jaoks, mis muidu valiksid ise hostitud
-käitajad; enne kasutuselevõttu tuleb kontrollida piisava hostitud mahu olemasolu.
+ja merge-group sündmusi. Push, dispatch ja merge-group käivitavad täieliku valiku. Tõuked harudesse
+`release/**` ei käivita neid (2026-10-18): iga muudatus käivitas maatriksi juba oma PR-is
+ning liidetud kombinatsioon on Release-Greeni ülesanne (`docs/ops/RUNNER_BOX.md` → Hostitud rada).
+Forkid ja merge-grupid kasutavad hostitud runner'eid tööde jaoks, mis muidu valiksid isehostitud
+runner'id; enne juurutamist tuleb piisav hostitud võimsus kontrollida.
 
-Tavaline PR käivitab kiire valiku. Vastuvõtureeglite rajad `full-code` ja `full-code-e2e`
-(E2E, integratsioon, paketiartefakt, Electroni suitsutest, Bun SQLite, ökosüsteem
-ja protokollikliendid) käivitatakse ainult Mergify järjekorra mustandis või täielikul käivitusel:
+Tavaline PR käivitab kiire valiku. Vastuvõtupoliitika rajad `full-code` ja `full-code-e2e`
+(E2E, integratsioon, paketiartefakt, Electroni smoke-test, Bun SQLite, ökosüsteemi- ja
+protokollikliendid) käivitatakse ainult Mergify järjekorra mustandil või täielikul käivitamisel:
 `gh workflow run ci.yml --ref <branch>`.
 
-Iga JSON-kviitung tuvastab väljavõetud SHA, töövoo käivituse ja katse.
-CLI lükkab väljavõtte/sündmuse SHA mittevastavuse korral tagasi. Töövootestid seovad reeglistikku kuulumise
-otsusetöö loendiga `needs`, et uus või eemaldatud rada ei saaks märkamatult kaduda.
-Kviitungid hõlmavad oma töövoogu, mitte avaldamist, juurutamist ega olemasoleva
-soovitusliku skanneri sisemisi toiminguid. Mõlema kontrollinime aktiveerimine harureeglites on
-eraldi haldusmuudatus; nende tööde lisamine ei kaitse haru iseenesest.
+Iga JSON-i kviitung identifitseerib välja kontrollitud SHA, töövoo käivituse ja katse.
+CLI lükkab välja checkout'i/sündmuse SHA ebakõla. Töövootestid seovad poliitika liikmelisuse
+otsusetöö `needs`-loendiga, et uus või eemaldatud rada ei saaks vaikselt kaduda.
+Kviitungid hõlmavad oma töövoogu, mitte avaldamist, juurutamist ega olemasoleva soovitusliku
+skanneri sisemust. Mõlema kontrollinime aktiveerimine harureeglites on eraldi haldusmuudatus;
+nende tööde lisamine ei kaitse haru iseenesest.
 
 ### Liitmisjärjekord
 
-Silt `queue` saadab PR-i Mergify järjekorda (`.mergify.yml`). Mergify avab mustand-PR-i
-harus `mergify/merge-queue/`, CI käivitab seal täieliku valiku ja algne PR liidetakse,
-kui `Gate / CI`, `Gate / Quality` ja `Merge integrity (changelog + generated skills)` õnnestuvad.
+`queue`-silt saadab PR-i Mergify järjekorda (`.mergify.yml`). Mergify avab harul
+`mergify/merge-queue/` mustand-PR-i, CI käivitab seal täieliku valiku ning algne PR liidetakse,
+kui `Gate / CI`, `Gate / Quality` ja `Merge integrity (changelog + generated skills)` läbivad.
 
-Mergify kirjutab oma järjekorra kokkuvõtte mustandi kirjeldusse ning ka teised rakendused võivad seda muuta.
-Sellise mustandi sündmus `pull_request` `edited` saab oma samaaegsusrühma
-(`-queue-edit-<run_id>`), mistõttu ei saa see mustandi tegelikku käivitust tühistada, ning jätab värava ja
-maatriksi vahele. Ainult `Merge integrity` käivitatakse endiselt. Vahele jäetud väravatöö kasutab teistsugust kontrollinime,
-sest Mergify tõlgendab vahele jäetud kontrolli `Gate / CI` nurjunud kontrollina ja eemaldab PR-i järjekorrast.
+Mergify kirjutab oma järjekorra kokkuvõtte mustandi kirjeldusse ning ka teised rakendused võivad seda
+muuta. Sellisel mustandil toimuv `pull_request`-i sündmus `edited` saab oma konkurentsirühma
+(`-queue-edit-<run_id>`), mistõttu see ei saa mustandi tegelikku käivitust tühistada, ning see jätab
+värava ja maatriksi vahele. Käivitatakse endiselt ainult `Merge integrity`. Vahele jäetud väravatöö
+kannab teistsugust kontrollinime, sest Mergify käsitleb vahele jäetud `Gate / CI`-d ebaõnnestunud
+kontrollina ja eemaldab PR-i järjekorrast.
 
-Pärast järjekorrast eemaldamist ei lisa tõuge PR-i alati uuesti järjekorda. Kommenteerige sellele `@mergifyio queue`.
+Pärast järjekorrast eemaldamist ei lisa tõuge PR-i alati uuesti järjekorda. Kommenteeri sellele
+`@mergifyio queue`.
 
-### Staatilise skannimise loend
+### Vastuvõtureduktoris säilitatavad tõendid
 
-Versioonitud npm-aliaste loend ja staatilise skannimise liikmesus asuvad failis
-`config/quality/gate-manifest.json`. Käivitage `npm run check:gate-manifest`, et valideerida
-skriptinimed ja täpsed käsud faili `package.json` suhtes; lisamised, eemaldamised ja
-käskude muutumine nurjavad nii kohaliku konksu kui ka CI muudatuste klassifitseerimise tööd.
-Alias ei ole töövootöö, maatriksi eksemplar ega testjuhtum: neid arve ei tohi
-esitada omavahel asendatavatena.
+`scripts/quality/validate-release-acceptance.mjs` vähendab etteantud plaani ja selle manifeste;
+see ei tuvasta, et plaan hõlmaks kogu väljalaskeprotsessi. Selle aruanded määravad sõnaselgelt
+`releaseAcceptance: false`, isegi siis, kui see plaan on `VERIFIED`. Töövoog
+`release-acceptance.yml` kasutab endiselt varjatud testandmeid, mitte tegeliku järgu, pakendi,
+käivituse või edutamise kviitungeid.
 
-Valitud aliaste kontrollimiseks ilma neid käivitamata kasutage käsku `npm run quality:scan -- --list` või
-`npm run quality:scan:fast -- --list`.
-Käitaja kutsub välja npm-i sisenemispunkti, seega säilib selle käituskeskkond
-(sh seadistatud juhtudel Bun). Manifest märgib nendest profiilidest väljapoole jäävad aliased
-eraldi käivitatavatena ning hoolduskäsud on kirjutuskaitstud skannimisprofiilides keelatud.
+CLI nõuab säilitatud tõendite kontrollimiseks suvandit `--evidence-root`. Failid lahendatakse kujule
+`<evidence-root>/<artifact_id>/<member>` ja räsitakse SHA-256-ga. Tõendita PASS-kirje, puuduv või
+muudetud fail, ebaturvaline tee või sümboolne link takistab kontrollimist. Puuduvad failid ei ole
+samaväärsed tühjade edukate logidega. Olemasolevad SHA-/käivituse-/katse kontrollid jäävad
+sõltumatuks: sobivad baidid ei saa aegunud kviitungit päästa. Faili terviklus ei tõenda täitmise
+autentsust ega artefakti edutamist.
 
-Need profiilid hõlmavad ainult staatilist skannimist. Need ei tõenda tootetestide,
-katvuse, pakendamise, väliste kontrollide ega kandidaadi täieliku väljalaskevastuvõtu läbimist.
-Töövoo vastuvõtt kasutab lingitud faili `config/quality/admission-policy.json` ja
-skripti `scripts/quality/admission-verdict.mjs`. Väljalaskevaatleja profiilid jäävad eraldiseisvaks;
-kontrollige nende kohaldatavaid kontrolle ja kviitungeid eraldi. Allolev tekstiline
-loend on viitematerjal, mitte tõend värava tegeliku käivitamise kohta.
+### Staatilise skannimise inventar
 
-Skriptid asuvad kataloogides `scripts/check/` (reegliväravad) ja `scripts/quality/` (põrkmehhanism).
-CI tõeallikas on `.github/workflows/ci.yml`.
+Versioonitud npm-aliaste inventar ja staatilise skannimise liikmelisus asuvad failis
+`config/quality/gate-manifest.json`. Käivita `npm run check:gate-manifest`, et valideerida
+skriptinimed ja täpsed käsud `package.json`-i suhtes; lisamised, eemaldamised ja käsudrift
+ebaõnnestuvad nii kohalikus hook'is kui ka CI muudatuste klassifitseerimise töödes.
+Alias ei ole töövootöö, maatriksieksemplar ega testjuht: neid loendusi ei tohi esitada
+üksteisega asendatavatena.
 
-### Väljalaske-PR-i kiirtee (`quality.yml`)
+Kasuta `npm run quality:scan -- --list` või `npm run quality:scan:fast -- --list`, et kontrollida
+valitud aliaseid neid käivitamata. Runner kutsub välja npm sisenemispunkti, seega säilib selle
+käitusaeg (sealhulgas konfigureeritud Buni kasutamine). Manifest registreerib nendest profiilidest
+väljapoole jäävad aliased eraldi käivitatavatena ning hoolduskäsud on kirjutuskaitstud
+skannimisprofiilides keelatud.
 
-`.github/workflows/quality.yml` täiendab CI-d main/release-PR-ide, harusse `main` tehtud tõugete,
-käsitsi käivitamise ja liitmisrühmade korral. PR-id kasutavad teede järgi filtreeritud kiirkontrolle. Püsivalt
-keelatud dubleeriv koostamine eemaldati; tegelikud koostamise, pakendamise ja käivitamise kontrollid jäävad CI-sse.
-Üksustestide komplekt ja vitest käivitatakse ainult CI-s (`Unit Tests (N/8)` ja `Vitest`).
+Need profiilid hõlmavad ainult staatilist skannimist. Need ei sertifitseeri toote teste, katvust,
+pakendamist, väliseid kontrolle ega kandidaadi täielikku väljalaske vastuvõttu. Töövoo vastuvõtt
+kasutab seotud faile `config/quality/admission-policy.json` ja
+`scripts/quality/admission-verdict.mjs`. Release-observeri profiilid jäävad eraldi;
+kontrolli nende rakendatavaid kontrolle ja kviitungeid sõltumatult. Täieliku observer'i staatilised
+käsud on deklareeritud failis `config/quality/release-green-static-profile.json`, sealhulgas
+`audit:deps`, mutatsioonitestide valik ja tõlkekontrollid. Laadur valideerib npm-käsud
+`package.json`-i suhtes ja modelleeritud CI/Quality deklaratsioonid; see lükkab drifti tagasi,
+selle asemel et käivitada shell'i märke argumentidena. Nõutud skanneri SKIP/INCOMPLETE-väljund
+ei saa olekut PASS kehtestada. Profiil registreerib oma välised välistused ega asenda hostitud
+katvust, testimaatrikseid, paketi- ega juurutamistõendeid. Allolev proosainventar on viide, mitte
+tõend selle kohta, et värav tegelikult käivitati.
 
-| Töö                                              | Ulatus                                                                                                                                | Blokeeriv                |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `Docs Gates (fast-path)`                         | Dokumentatsiooni-/koodi-PR-id; API dokumentatsiooni viited ja docs-all                                                                | Jah                      |
-| `Fast Quality Gates`                             | Koodi-PR-id; staatilised kontrollid, tüübikontroll, töölaua tüübikontroll, mõjutatud üksustestid, unustatud sõsartestid (soovituslik) |
-| `No new ESLint warnings`                         | Koodi-PR-id; eranditest teadlik lintimise kaitse                                                                                      | Jah, sealhulgas forkides |
-| `Merge integrity (changelog + generated skills)` | Mittemustand-PR-id; muudatuste logi ja genereeritud oskuste sünkroonimine                                                             | Jah, sealhulgas forkides |
+Skriptid asuvad kataloogides `scripts/check/` (poliitikaväravad) ja `scripts/quality/`
+(tagasilöögimootor). CI tõeallikas on `.github/workflows/ci.yml`.
+
+### Release PR-i kiirtee (`quality.yml`)
+
+`.github/workflows/quality.yml` täiendab CI-d main/release PR-ide, tõugete harusse `main`,
+dispatch'i ja merge-gruppide puhul. PR-id kasutavad teefiltreeritud kiirkontrolle. Püsivalt
+keelatud duplikaatjärk eemaldati; tegelikud järgu-/pakendi-/käivituskontrollid jäävad CI-sse.
+Ühiktestide komplekt ja vitest käivitatakse ainult CI-s (`Unit Tests (N/8)` ja `Vitest`).
+
+| Töö                                              | Ulatus                                                                                                                                    | Blokeeriv              |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `Docs Gates (fast-path)`                         | Dokumentatsiooni/koodi PR-id; API dokumentatsiooni viited ja docs-all                                                                     | Jah                    |
+| `Fast Quality Gates`                             | Koodi PR-id; staatilised kontrollid, tüübikontroll, juhtpaneeli tüübikontroll, mõjutatud ühikutestid, unustatud sõsartestid (soovituslik) |
+| `No new ESLint warnings`                         | Koodi PR-id; mahasurumisi arvestav lintimise kaitse                                                                                       | Jah, sealhulgas forkid |
+| `Merge integrity (changelog + generated skills)` | Mitte mustandina PR-id; muudatuste logi ja genereeritud oskuste sünkroonimine                                                             | Jah, sealhulgas forkid |
 
 #### Unustatud sõsartestide aruanne
 
-`npm run check:forgotten-sibling-tests` käivitatakse `Fast Quality Gates` nõuandva etapina ja see taaskasutab testimõju kaardi aluseks olevat impordilahendajat.
+`npm run check:forgotten-sibling-tests` käivitub `Fast Quality Gates` soovitusliku sammuna ja kasutab uuesti
+testide mõju kaardi taga olevat impordi lahendajat.
 Iga muudetud tootmismooduli kohta esitab see deterministlikud
-`changed module/symbol -> static consumer -> candidate sibling test` ahelad, kui kandidaattest
-puudub tõmbetaotluse muudatuste hulgast. Markdowni kokkuvõte ja JSON-tulemus säilitatakse
-`forgotten-sibling-tests` töövoo artefaktina kalibreerimiseks enne mis tahes blokeerivat kasutuselevõttu.
+`changed module/symbol -> static consumer -> candidate sibling test` ahelad, kui kandidaat-test puudub pull-request’i difis. Markdowni kokkuvõte ja JSON-i tulemus säilitatakse
+kalibreerimiseks `forgotten-sibling-tests` töövoo artefaktina enne mis tahes blokeerivat juurutamist.
 
-Barrel-tüüpi re-eksportimised ja dünaamilised impordid on ainult lahendamisdiagnostika; need ei tekita kunagi
-blokeerivat leidu. Ülevaadatud erandid asuvad failis
-`config/quality/forgotten-sibling-allowlist.json`. Iga kirje peab nimetama tarbija ja kandidaattesti,
-esitama konkreetse põhjenduse ning viitama GitHubi probleemile või tõmbetaotlusele. Vigase vorminguga kirjete korral
-kontroll nurjub. Erandid ei saa eirata kustutatud kandidaattesti ega muudatust, mis lisab `.skip`/`.todo`;
-väidete nõrgendamine ja muu varjamine jäävad sõltumatult blokeeriva
-`check:test-masking` kontrollvärava vastutusalasse.
+Tünniekspordid ja dünaamilised impordid on ainult lahenduse diagnostika; need ei tekita kunagi
+blokeerivat leidu. Läbivaadatud erandid asuvad failis
+`config/quality/forgotten-sibling-allowlist.json`. Iga kirje peab nimetama tarbija ja kandidaat-testi,
+esitama konkreetse põhjenduse ning viitama GitHubi issue’ile või pull request’ile. Vigase vorminguga kirjed lõpetavad kontrolli vaikimisi tõrkeolekus. Eranditega ei saa summutada kustutatud kandidaat-testi ega difi, mis lisab `.skip`/`.todo`;
+väidete nõrgendamine ja muu varjamine kuuluvad sõltumatult blokeeriva
+`check:test-masking` kontrolli vastutusalasse.
 
 ### Töö: `lint`
 
-Käivitatakse iga `main`-harusse tehtava PR-i puhul. Tõrke korral blokeerib ühendamise.
+Käivitub igal PR-il harusse `main`. Tõrke korral blokeerib ühendamise.
 
-| Skript (`npm run ...`)            | Kontrollib                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Blokeeriv                                |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `check:node-runtime`              | Node.js-i versioon jääb toetatud vahemikku                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Jah                                      |
-| `check:cycles`                    | Tsüklilised impordid kogu `src/` + `open-sse/` ulatuses (AST-põhine, tsconfig-i `paths` lahendatud). Ilma lisavalikuteta lõpetab olekukoodiga 1 alati, kui leidub mõni tsükkel (alates #15281 tõrkekindlalt suletud), ja loetleb SCC-d. `check:cycles:ratchet` (mida CI käitab) blokeerib, kui arv ületab faili `quality-baseline.json` ülempiiri `metrics.cycles` — praegu 14, `direction: down`, seega saab see ainult väheneda (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Jah (põrkmehhanism)                      |
-| `check:boundary`                  | `open-sse → src` sidestus: unikaalsed failidevahelised impordid mootorist rakendusse (`scripts/quality/measure-boundary.mjs`; servade loend on v4 tuuma/mooduliteks jagamise parandustööde järjekord). Ilma lisavalikuteta = nõuandev aruanne (sama mis `quality:boundary`). `check:boundary:ratchet` (mida CI käitab ja mis on ka faili `quality.yml` kiirkontrollide põrkmehhanismi tsüklis) blokeerib, kui arv ületab faili `quality-baseline.json` ülempiiri `metrics.boundaryOpenSseToSrc` — algväärtuseks määratud mõõdetud 771, `direction: down`; `--update` ainult vähendab seda; PR-ides baasi suhtes (`--base-ref`, vt allpool)                                                                                                                                                                                                                                                                                                                                                                                                                                         | Jah (põrkmehhanism)                      |
-| `check:route-validation:t06`      | Zodi skeemide olemasolu kõigil marsruutidel (6. taseme poliitika)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jah                                      |
-| `check:any-budget:t11`            | `@ts-expect-error // any` arv ei ületa eelarvet (11. tase, catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                      |
-| `check:provider-consistency`      | Igal failis `providers.ts` oleval teenusepakkujal on vastav kirje failis `providerRegistry.ts` (ja vastupidi, lubatud loendi piires)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Jah                                      |
-| `check:model-lifecycle`           | Kolm käsitsi hooldatavat marsruutimistabelit püsivad kooskõlas hoidlasse talletatud elutsükli hetktõmmisega (#11503): `FITNESS_TABLE` (`taskFitness.ts`) ei anna hinnet ühelegi kasutuselt kõrvaldatud ID-le, millele `REGISTRY` saab marsruutida; iga `BUILT_IN_ALIASES` sihtmärk on olemas registris `REGISTRY` ja puudub kasutuselt kõrvaldatud ID-de hetktõmmisest; iga kasutuselt kõrvaldatud ID, mis on endiselt registris `REGISTRY`, suunatakse edasi või on loetletud loendis `allowedRetiredInCatalog`; ning ükski `DEFAULT_DEGRADATION_MAP` lähte- ega sihtväärtus ei ole selles hetktõmmises märgitud kasutuselt kõrvaldatuks. See ei tõesta, et mudelit teenindab praegu aktiivne ülesvooluteenus. Võrguühenduseta — võrdleb failiga `config/quality/model-lifecycle.json`, mida värskendatakse käsitsi käsuga `npm run quality:refresh-model-lifecycle` (vajab võrku; pole CI-ga ühendatud). `allowedRetiredInCatalog` on järkjärgulise vähendamise põrkmehhanism: lisa kirje ainult koos jälgimisprobleemiga.                                                       | Jah                                      |
-| `check:fetch-targets`             | Iga kliendipoolse kataloogi `src/` kutse `fetch("/api/...")` viitab tegelikule failile `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jah                                      |
-| `check:deps`                      | Kõik hoidla iga faili `package.json` sõltuvused, mida saab installida käsuga `npm install`, on failis `dependency-allowlist.json`; uued fikseerimata versiooniga või slopsquatting'u suhtes kahtlased paketid märgistatakse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Jah                                      |
-| `audit:deps`                      | `npm audit` (juurkataloog + electron) — kõrge ega kriitilise tasemega turvanõuandeid pole (kattub OSV kontrolliga `check:vuln-ratchet`; vt ratsionaliseerimise tööjärge)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Jah                                      |
-| `check:lockfile`                  | Faili `package-lock.json` terviklus — https-register, terviklusräsid, hosti ülekirjutuste puudumine                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                      |
-| `check:licenses`                  | Tootmissõltuvuste SPDX-litsentside lubatud loend                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                      |
-| `check:tracked-artifacts`         | Ehituse artefaktide / hoidlasse lisatud `node_modules` sümbollinkide puudumine (käivitatakse ka husky pre-commit-haagis; pre-push on tahtlikult kerge — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Jah                                      |
-| `check:ai-attribution`            | PR-i commit'ides, pealkirjas ega sisus ei tohi olla AI-/boti `Co-Authored-By` järelkirjet ega AI-ga genereerimise jalust — range reegel #16 (`quality.yml` kiirete kontrollide tsüklis PR→`release/**` jaoks — loeb sündmuse andmeid, ei tee väljaspool PR-e midagi — ning ainult PR-idele mõeldud samm `ci.yml` lint-kontrollis PR→`main` jaoks; samuti husky `commit-msg` haak; inimestest kaasautorid on lubatud; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `check:vitest-exclusions`         | Iga Vitesti välistus nimetab jälgimisülesande ja sisaldub failis `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jah                                      |
-| `check:file-size`                 | Lähtefailid (`.ts`/`.tsx` kaustades `src/`, `open-sse/`, `electron/`, `bin/`) jäävad piirangu `cap` ja testifailid (`*.test.ts(x)`) piirangu `testCap` piiresse; failis `file-size-baseline.json` külmutatud failid (`frozen` / `testFrozen`) ei tohi kasvada üle nende salvestatud suuruse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Jah                                      |
-| `check:error-helper`              | Käivitajate/töötlejate veavastused kasutavad funktsioone `buildErrorBody()` / `sanitizeErrorMessage()` (range reegel #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jah                                      |
-| `check:migration-numbering`       | Migratsiooni SQL-failid on järjestikku nummerdatud, ilma lünkade või duplikaatideta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                      |
-| `check:public-creds`              | Väljaspool faili `publicCreds.ts` ei ole OAuthi `client_id`/`client_secret` literaale ega Firebase Webi võtmeid (range reegel #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jah                                      |
-| `check:db-rules`                  | Väljaspool mooduleid `src/lib/db/` ei ole töötlemata SQL-i; failist `localDb.ts` ei kasutata koondimporte (ranged reeglid #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                      |
-| `check:known-symbols`             | Teenusepakkujate käivitajad, marsruutimisstrateegiad ja tõlkijad, mis on registreeritud nende jaotustabelites, vastavad kettal olevatele failidele — puuduvad omanikuta või deklareerimata sümbolid                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                      |
-| `check:route-guard-membership`    | Iga alamprotsessi käivitav marsruut on klassifitseeritud funktsiooniga `isLocalOnlyPath()` (ranged reeglid #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                      |
-| `check:test-discovery`            | Iga hoidlas olev `*.test.ts` / `*.spec.ts` fail kogutakse vähemalt ühe testikäitaja poolt (fiksaator: orbude loend failis `test-discovery-baseline.json` saab ainult kahaneda)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Jah                                      |
-| `check:test-tla-order`            | Ükski kataloogis `tests/unit` olev `node:test` fail ei registreeri testi, jõua tipptaseme `await`-ini ja registreeri seejärel veel teste (#18045; fiksaator: faili `test-tla-order-allowlist.json` loend saab ainult kahaneda)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Jah                                      |
-| `check:agent-skills-sync`         | Genereeritud agendioskuste artefaktid vastavad nende lähtekataloogile (lahknevusi pole)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `check:provider-asset-provenance` | Teenusepakkujate logodel ja varadel on registreeritud päritolukirje                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `lint:json`                       | JSON-konfiguratsioonifailid sõelutakse edukalt ja vastavad hoidla lintimisreeglitele                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `typecheck:core`                  | TypeScripti kompileerimine vigadeta (ainult nõuandvad hoiatused)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                      |
-| `typecheck:noimplicit:core`       | Rangeet `noImplicitAny` — tulevikku suunatud; paljud olemasolevad väljakutsukohad vajavad endiselt annotatsioone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **Nõuandev** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | Kataloogiga `src/app/(dashboard)/**` piiratud `tsc` (#7033) — `typecheck:core`-i hoolikalt valitud 27 faili lubatud loend ei sisalda ühtegi töölaua TSX-faili ning ka `next build` ei tee neile kunagi tüübikontrolli (`next.config.mjs` määrab `ignoreBuildErrors: true`), mistõttu olid sealsed hüljatud identifikaatorite regressioonid (#6625/#6909) CI-le nähtamatud. Erinevusi võrreldakse külmutatud faili- ja TS-koodipõhise arvulise lähtetasemega (`config/quality/dashboard-typecheck-baseline.json`, sama aegunud kirjete jõustamise muster nagu `check:known-symbols`-is) — kontroll ebaõnnestub ainult UUTE vigade korral, mis ületavad lähtetaseme arvu; kui olemasolev viga parandatakse, vähendage lähtetaset käsuga `--update`.                                                                                                                                                                                                                                                                                                                                  | Jah                                      |
-| `check:build-typecheck`           | Kogu rakenduse produktsioonitüübikontroll `tsconfig.build.json`-i alusel (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`), hõlmates ala, mida `typecheck:core`-i 27 faili lubatud loend ega töölaua kontroll ei kata. Erinevusi võrreldakse failiga `config/quality/build-typecheck-baseline.json`; uus või suurenenud faili- ja koodipaari arv põhjustab ebaõnnestumise, väiksem arv palub lähtetaset vähendada. `--update` keeldub töötamast, kui käivitus sisaldab uut või suurenenud paari, välja arvatud juhul, kui edastatakse `--force-regressions`, ning keeldub äsja vaigistatud failist, välja arvatud juhul, kui edastatakse `--force-nocheck`; seega on lähtetaseme laiendamine eduka tulemuse saamiseks ja püsiva vaigistuse lubamine kaks eraldi teadlikku toimingut. Paljas `--force` lükatakse tagasi. Samuti otsitakse koostealast `@ts-nocheck`-i kasutust ja võrreldakse seda failiga `config/quality/ts-nocheck-baseline.json`, sest seda kasutav fail ei väljasta üldse diagnostikat ja jääks muidu kõigile kontrollidele nähtamatuks. | Jah                                      |
+| Skript (`npm run ...`)            | Valideerib                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Blokeeriv                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `check:node-runtime`              | Node.js-i versioon jääb toetatud vahemikku                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jah                                         |
+| `check:cycles`                    | Ringimpordid kõigis `src/` + `open-sse/` kataloogides (AST-põhine, tsconfig `paths` lahendatud). Baaskäsk lõpetab alati veakoodiga 1, kui leidub mis tahes tsükkel (alates versioonist #15281 kasutatakse tõrke korral sulgemist) ja loetleb tugevalt seotud komponendid. `check:cycles:ratchet` (mida CI käivitab) blokeerib, kui arv ületab faili `quality-baseline.json` jaotises `metrics.cycles` määratud ülempiiri — praegu 14, `direction: down`, seega saab see ainult väheneda (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jah (ratchet)                               |
+| `check:boundary`                  | `open-sse → src` sidusus: mootori ainulaadsed failidevahelised impordid rakendusse (`scripts/quality/measure-boundary.mjs`; servade loend on v4 tuuma/mooduliteks jagamise paranduste mahajäämus). Baaskäsk annab soovitusliku aruande (sama mis `quality:boundary`). `check:boundary:ratchet` (mida CI käivitab ja mis on samuti `quality.yml` kiirete kontrollide ratchet-tsüklis) blokeerib, kui arv ületab faili `quality-baseline.json` jaotises `metrics.boundaryOpenSseToSrc` määratud ülempiiri — algväärtuseks mõõdetud 771, `direction: down`; `--update` saab seda ainult vähendada; PR-ide puhul kasutatakse baasi suhtes võrdlemist (`--base-ref`, vt allpool)                                                                                                                                                                                                                                                                                                                                                                                         | Jah (ratchet)                               |
+| `check:route-validation:t06`      | Zod-i skeemid on kõigil marsruutidel olemas (6. taseme poliitika)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                         |
+| `check:any-budget:t11`            | `@ts-expect-error // any` arv ei ületa eelarvet (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                         |
+| `check:provider-consistency`      | Igal failis `providers.ts` oleval pakkujal on vastav kirje failis `providerRegistry.ts` (ja vastupidi, lubatud loendi piires)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jah                                         |
+| `check:model-lifecycle`           | Kolm käsitsi hallatavat marsruutimistabelit on sisse registreeritud elutsükli hetktõmmisega (#11503) kooskõlas: `FITNESS_TABLE` (`taskFitness.ts`) ei anna hinnangut ühelegi aegunud ID-le, mida `REGISTRY` suudab marsruutida; iga `BUILT_IN_ALIASES` sihtmärk on olemas `REGISTRY`-s ja puudub aegunud ID-de hetktõmmisest; iga `REGISTRY`-s endiselt olev aegunud ID suunatakse edasi või on loetletud jaotises `allowedRetiredInCatalog`; ning ükski `DEFAULT_DEGRADATION_MAP`-i allikas ega sihtmärk ei esine selles hetktõmmises aegununa. See ei tõesta, et mudelit teenindab praegu aktiivne ülesvooluserver. Võrguta — võrdleb faili `config/quality/model-lifecycle.json`, mida värskendatakse käsitsi käsuga `npm run quality:refresh-model-lifecycle` (võrk; CI-sse pole ühendatud). `allowedRetiredInCatalog` on kahanev astmik: lisage kirje ainult koos jälgimisülesandega.                                                                                                                                                                          | Jah                                         |
+| `check:fetch-targets`             | Iga kliendipoolses `src/`-is olev `fetch("/api/...")` lahendub tegelikuks failiks `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Jah                                         |
+| `check:deps`                      | Kõik hoidlas olevates `package.json`-ides leiduvad `npm install`-iga installitavad sõltuvused on failis `dependency-allowlist.json`; uued lukustamata või slopsquatitud paketid märgistatakse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jah                                         |
+| `audit:deps`                      | Kõigi viie sõltumatu lukufaili npm audit (juur, Electron, OpenCode’i pluginad v1/v2 ja pakkuja). Kriitilised teatised blokeerivad; kõrge taseme teatised jäävad nähtavateks hoiatusteks. Puuduvad või ebaõnnestunud auditid on PUUDULIKUD ja blokeerivad; ulatusepõhised lukuräsi väärtused ja aruanded säilitatakse.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Jah                                         |
+| `check:lockfile`                  | `package-lock.json` terviklus — https-i register, tervikluse räsid, hosti ülekirjutused puuduvad                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Jah                                         |
+| `check:licenses`                  | Tootmissõltuvuste SPDX-litsentside lubatud loend                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Jah                                         |
+| `check:tracked-artifacts`         | Järguartefaktid puuduvad / sissekandesse lisatud `node_modules`-i sümboolsed lingid puuduvad (käivitatakse ka husky pre-commit-hook'is; pre-push on sihilikult minimaalne — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jah                                         |
+| `check:ai-attribution`            | PR-i commit'ides, pealkirjas ega sisus puudub AI/boti `Co-Authored-By`-lõpurida või AI-genereerimise jalus — range reegel #16 (PR→`release/**` puhul `quality.yml` kiirete kontrollide tsüklis — loeb sündmuse kasulikku koormust, PR-idest väljaspool toimingut ei tee — ning PR-idele mõeldud sammuna `ci.yml` lint-kontrollis PR→`main`; samuti husky `commit-msg`-hook'is; inimkaasautorid on lubatud; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `check:vitest-exclusions`         | Iga Vitesti välistus nimetab jälgimisülesannet ja esineb failis `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Jah                                         |
+| `check:file-size`                 | Lähtefailid (`.ts`/`.tsx` kataloogides `src/`, `open-sse/`, `electron/`, `bin/`) jäävad `cap` piiresse ja testifailid (`*.test.ts(x)`) `testCap` piiresse; failid, mis on failis `file-size-baseline.json` külmutatud (`frozen` / `testFrozen`), ei tohi kasvada üle neile salvestatud suuruse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Jah                                         |
+| `check:error-helper`              | Täitjate/handler’ite veateadetes kasutatakse `buildErrorBody()` / `sanitizeErrorMessage()` (Hard Rule #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jah                                         |
+| `check:migration-numbering`       | Migratsiooni SQL-failid on järjestikku nummerdatud, ilma lünkade või duplikaatideta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jah                                         |
+| `check:public-creds`              | Väljaspool faili `publicCreds.ts` ei ole sõnasõnalisi OAuth-i `client_id`/`client_secret` väärtusi ega Firebase’i veebivõtmeid (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Jah                                         |
+| `check:db-rules`                  | Väljaspool mooduleid `src/lib/db/` ei ole toor-SQL-i; failist `localDb.ts` ei impordita barrel-importide kaudu (Hard Rules #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jah                                         |
+| `check:known-symbols`             | Dispatch-tabelitesse registreeritud pakkujate täitjad, marsruutimisstrateegiad ja tõlkijad vastavad kettal olevatele failidele — orb- ega deklareerimata sümboleid ei ole                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Jah                                         |
+| `check:route-guard-membership`    | Iga marsruut, mis käivitab alamprotsessi, liigitatakse funktsiooni `isLocalOnlyPath()` abil (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Jah                                         |
+| `check:test-discovery`            | Kõik hoidlas olevad `*.test.ts` / `*.spec.ts` failid kogub vähemalt üks testikäiviti (ratchet: orbfailide loend failis `test-discovery-baseline.json` saab ainult kahaneda)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Jah                                         |
+| `check:test-tla-order`            | Ükski `tests/unit` all olev `node:test`-fail ei registreeri testi, jõua tipptaseme `await`-ini ega registreeri seejärel veel teste (#18045; ratchet: `test-tla-order-allowlist.json` saab ainult kahaneda)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jah                                         |
+| `check:agent-skills-sync`         | Genereeritud agendioskuste artefaktid vastavad nende lähtekataloogile (erinevused puuduvad). Väljalaskežiim kontrollib kõiki oskusi; funktsiooni PR (`pr` mode) kontrollib ainult neid oskusi, mille genereeritud teksti see muudab — vt [Genereeritud failid ja tuletatud baasjooned](#generated-files-and-derived-baselines-written-at-release)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `check:provider-asset-provenance` | Teenusepakkujate logodelel/varadel on registreeritud päritolu kirje                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `lint:json`                       | JSON-i konfiguratsioonifailid parsitakse ja vastavad hoidla lintimisreeglitele                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `typecheck:core`                  | TypeScripti kompileerimine vigadeta (ainult soovituslikud hoiatused)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jah                                         |
+| `typecheck:noimplicit:core`       | Range `noImplicitAny` — tulevikku vaatav; paljud olemasolevad väljakutsujad vajavad endiselt annotatsioone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | **Soovituslik** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc`, mille ulatus on piiratud kaustaga `src/app/(dashboard)/**` (#7033) — `typecheck:core`'i kureeritud 27 failist koosnev lubatud loend ei sisalda ühtegi dashboardi TSX-faili ning `next build` ei kontrolli samuti kunagi selle tüüpe (`next.config.mjs` määrab `ignoreBuildErrors: true`), mistõttu seal esinevad orvuks jäänud identifikaatorite regressioonid (#6625/#6909) jäid CI-s nähtamatuks. Võrdleb muudatusi külmutatud failipõhise/TS-koodipõhise loenduse baasiga (`config/quality/dashboard-typecheck-baseline.json`, sama aegunud jõustamise muster nagu `check:known-symbols` puhul) — ainult baasloenduses mitte esinevad UUED vead ületavad värava; vähendage loendust käsuga `--update`, kui olemasolev viga on parandatud.                                                                                                                                                                                                                                                                                                                 | Jah                                         |
+| `check:build-typecheck`           | Kogu rakenduse tootmisjärgne tüübikontroll `tsconfig.build.json` kaudu (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`), mida `typecheck:core`'i 27 failist koosnev lubatud loend ja dashboardi värav ei kata. Võrdleb muudatusi failipõhise ja koodipõhise loenduse baasiga `config/quality/build-typecheck-baseline.json`; uus või suurenenud loendus põhjustab tõrke, väiksem loendus palub teil loendust vähendada. `--update` keeldub töötamast, kui käivituse käigus esineb uus või suurenenud paar, välja arvatud juhul, kui edastatakse `--force-regressions`, ning keeldub uuest vaigistatud failist, välja arvatud juhul, kui edastatakse `--force-nocheck`; seega on baasi laiendamine rohelise tulemuse saamiseks ja püsiva vaigistuse andmine kaks eraldi teadlikku tegevust. Tavaline `--force` lükatakse tagasi. Samuti otsib buildi ulatusest `@ts-nocheck`-i konfiguratsiooni `config/quality/ts-nocheck-baseline.json` suhtes, sest seda kasutav fail ei esita üldse diagnostikat ja oleks muidu igale väravale nähtamatu. | Jah                                         |
 
-#### Kaks tüübikontrolliprogrammi annavad erinevad vastused
+#### Kaks tüübikontrolli programmi annavad erinevaid vastuseid
 
 `typecheck:core` ja `check:build-typecheck` kompileerivad erinevaid programme erinevate
-suvanditega ning sama fail võib ühes olla vigadeta ja teises vigu täis.
+suvanditega ning sama fail võib ühes olla puhas ja teises vigu täis.
 
-`tsconfig.build.json` määrab `"strict": false`, seega on `noImplicitAny` välja lülitatud. Põhiosa
-konfiguratsioon kompileerib hoolikalt valitud 27 faili lubatud loendi rangemate suvanditega ja järgib iga
-kirje impordigraafi, mistõttu kontrollitakse seal ka faile, mida koosteprogrammis kunagi ei esine.
+`tsconfig.build.json` määrab `"strict": false`, seega on `noImplicitAny` välja lülitatud. Põhikonfiguratsioon
+kompileerib kureeritud 27 failist koosneva lubatud loendi rangemate suvanditega ja järgib iga
+kirje impordigraafikut, mistõttu kontrollitakse seal ka faile, mida buildi programmis kunagi ei esine.
 
-Sellel on tähtsus faili tüübistatud oleku hindamisel: **null diagnostikateadet
-`check:build-typecheck`-i all ei tähenda nulli**. `@ts-nocheck`-i eemaldamine 26
-failist näitas, et 23 neist olid koosteprogrammis vigadeta; kuueteistkümnes neist ilmnes
-ranges programmis umbes 120 kaudse `any` viga. Enne faili vigadeta olekuks kuulutamist kontrollige mõlemat.
+See tagajärg on oluline faili tüübistatuse hindamisel: **null diagnostikat
+`check:build-typecheck` all ei tähenda nulli**. `@ts-nocheck` eemaldamine 26
+failist näitas, et 23 neist olid buildi programmis puhtad; neist kuueteistkümnes
+ilmnes ranges programmis ligikaudu 120 implicit-any viga. Enne faili puhtaks tunnistamist
+kontrollige mõlemat.
 
 ### Töö: `quality-gate`
 
-Käivitatakse pärast `test-coverage`-it. Ebaõnnestumise korral blokeerib ühendamise.
+Käivitub pärast `test-coverage`. Tõrke korral blokeerib ühinemise.
 
-| Skript                       | Kontrollib                                                                                                                                                                                        | Blokeeriv                    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `quality:collect`            | Loob faili `quality-metrics.json` (ESLinti hoiatuste arv, liidetud jaotiste aruandest saadud koodikate)                                                                                           | Jah (ratchet’i eelnev etapp) |
-| `quality:ratchet`            | Ükski faili `quality-baseline.json` mõõdik pole halvenenud (ESLinti hoiatused ≤ lähtetase; koodikate ≥ lähtetase)                                                                                 | Jah                          |
-| `check:duplication`          | Koodi dubleerimine (jscpd@4) ei ületa failis `quality-baseline.json` määratud lähtetaset                                                                                                          | Jah                          |
-| `check:complexity`           | Failitaseme tsüklomaatiline keerukus ei ületa ülempiiri (ESLinti põhifunktsioonid `complexity` + `max-lines-per-function`)                                                                        | Jah                          |
-| `check:cognitive-complexity` | Kognitiivse keerukuse ratchet (`eslint-plugin-sonarjs`) — eraldi ESLinti läbim; CI käitab mõlemad liidetuna ühe sammuna `check:complexity-ratchets`                                               | Jah                          |
-| `check:dead-code`            | Kasutamata eksporditud üksuste / failide ratchet (knip) ei halvene võrreldes lähtetasemega                                                                                                        | Jah                          |
-| `check:compression-budget`   | Tihendamise jõudlustesti eelarve — mootoripõhised minimaalsed tokenisäästud ei tohi halveneda                                                                                                     | Jah                          |
-| `check:type-coverage`        | Tüübitud koodi protsendi ratchet (`type-coverage`) ei halvene; hõlmab suures osas kontrolli `typecheck:noimplicit:core`                                                                           | Jah                          |
-| `check:codeql-ratchet`       | Avatud CodeQL-i hoiatuste arv ei suurene (loeb käsuga `gh api`; jätab tokeni puudumisel veatult vahele) — värskendamissageduse ja käsitsi käivitamise kohta vt allpool jaotist „CodeQL-i ratchet” | Jah                          |
+| Skript                       | Valideerib                                                                                                                                                                                           | Blokeeriv                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `quality:collect`            | Väljastab faili `quality-metrics.json` (ESLint-i hoiatuste arv, ühendatud shard-aruande katvus)                                                                                                      | Jah (ratchetist ülesvoolu) |
+| `quality:ratchet`            | Iga `quality-baseline.json`-is olev mõõdik ei ole halvenenud (ESLint-i hoiatused ≤ baasväärtus; katvus ≥ baasväärtus)                                                                                | Jah                        |
+| `check:duplication`          | Koodi dubleerimine (jscpd@4) ei ületa faili `quality-baseline.json` baasväärtust                                                                                                                     | Jah                        |
+| `check:complexity`           | Failitaseme tsüklomaatiline keerukus ei ületa ülempiiri (ESLint-i põhifunktsioonid `complexity` + `max-lines-per-function`)                                                                          | Jah                        |
+| `check:cognitive-complexity` | Kognitiivse keerukuse ratchet (`eslint-plugin-sonarjs`) — eraldi ESLint-i läbimine; CI käivitab mõlemad ühendatud ühe sammuna `check:complexity-ratchets`                                            | Jah                        |
+| `check:dead-code`            | Kasutamata ekspordid / failid ei ole ratcheti järgi baasväärtusega võrreldes halvenenud (knip)                                                                                                       | Jah                        |
+| `check:compression-budget`   | Tihendamise võrdlusanalüüsi eelarve — mootoripõhised märgisäästu alampiirid ei tohi halveneda                                                                                                        | Jah                        |
+| `check:type-coverage`        | Tüübitud protsendi ratchet (`type-coverage`) ei ole halvenenud; hõlmab suures osas `typecheck:noimplicit:core` kontrolli                                                                             | Jah                        |
+| `check:codeql-ratchet`       | Avatud CodeQL-i hoiatuste arv ei ole halvenenud (loeb `gh api` kaudu; märgita jätab kontrolli sujuvalt vahele) — värskendamise sagedus ja käsitsi käivitamine: vt allpool jaotist „CodeQL-i ratchet“ | Jah                        |
 
 ### Töö: `quality-extended`
 
-Kogu töö on nõuandev (`continue-on-error: true`). npm-il põhinevad ratchet’id käivitatakse
-tegelikult; välised skannerid installitakse käsuga `gh release download` ja jätavad end ise vahele (väljumiskood 0),
-kui binaarfail endiselt puudub.
+Kogu töö on soovituslik (`continue-on-error: true`). npm-il põhinevad ratchetid käitatakse
+tegelikult; välised skannerid installitakse käsuga `gh release download` ja jätavad enda töö vahele (väljumiskood 0),
+kui binaarfail on endiselt puudu.
 
-| Skript                   | Kontrollib                                                                                                                                                                                                                              | Blokeeriv                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `check:circular-deps`    | Ring sõltuvusi pole (dpdm)                                                                                                                                                                                                              | **Nõuandev**                                           |
-| `check:bundle-size`      | Paketi suurus ei ületa ülempiiri                                                                                                                                                                                                        | **Nõuandev**                                           |
-| `check:secrets`          | Saladuste skannimine (gitleaks) — jäetakse binaarfaili puudumisel vahele                                                                                                                                                                | **Nõuandev**                                           |
-| `check:vuln-ratchet`     | Sõltuvuste haavatavused (osv-scanner) ei halvene — jäetakse binaarfaili puudumisel vahele                                                                                                                                               | **Nõuandev**                                           |
-| `check:workflows`        | Töövoogude lintimine (actionlint + zizmor); puuduvad või vigased skannerid, kehtetud aruanded või puuduv ratchet’i lähtetase põhjustavad oleku INCOMPLETE. Korrektsed leiud järgivad valitud ranget, nõuandvat või ratchet’i poliitikat | Käivitamine on nõutav; zizmor’i ratchet blokeerib CI-s |
-| `check:openapi-breaking` | Avaliku API lepingu (`openapi.yaml`) murrangulised muudatused võrreldes baasharuga (oasdiff) — väljastab `openapiBreaking=N`; jäetakse vahele, kui oasdiff puudub või baas-spetsifikatsiooni ei saa lahendada                           | **Nõuandev**                                           |
+| Skript                   | Valideerib                                                                                                                                                                                                                                | Blokeeriv                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `check:circular-deps`    | Ring sõltuvusi ei ole (dpdm)                                                                                                                                                                                                              | **Soovituslik**                                      |
+| `check:bundle-size`      | Paketi suurus ei ületa ülempiiri                                                                                                                                                                                                          | **Soovituslik**                                      |
+| `check:secrets`          | Saladuste skannimine (gitleaks) — jätab kontrolli vahele, kui binaarfail puudub                                                                                                                                                           | **Soovituslik**                                      |
+| `check:vuln-ratchet`     | Sõltuvuste haavatavused ei ole halvenenud (osv-scanner) — `--ratchet` nurjub mõõtmata jätmise korral olekus INCOMPLETE (väljumiskood 2)                                                                                                   | **Soovituslik**                                      |
+| `check:workflows`        | Töövoogude lintimine (actionlint + zizmor); puuduvad/rikkis skannerid, vigased aruanded või puuduv ratcheti baasväärtus nurjuvad olekus INCOMPLETE. Kehtivad leiud järgivad valitud range/soovituslikku/ratcheti poliitikat               | Käivitamine nõutud; zizmor-ratchet on CI-s blokeeriv |
+| `check:openapi-breaking` | Avalik API leping fikseeritud sündmuste commit'ide suhtes (PR-i merge-base, push-i eelnev commit, merge-group-i baas; ajastatud/käsitsi käivitamisel checkout'itakse esimene eelkäija); nõutud mõõtmine sulgeb kontrolli nurjumise korral | **Blokeeriv koos suvandiga --ratchet**               |
 
 ### Töö: `docs-sync-strict`
 
-Käivitub iga `main`-harule suunatud PR-i puhul. Tõrke korral blokeerib ühendamise.
+Käitatakse igal `main`-i PR-il. Tõrke korral blokeerib merge'i.
 
-| Skript                         | Kontrollib                                                                                                                                                                      | Blokeeriv                        |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `check:docs-all`               | Metavärav, mis käivitab alltoodud 6 alamväravat järjestikku                                                                                                                     | Jah                              |
-| ↳ `check:docs-sync`            | CHANGELOG-i / OpenAPI / llm.txt versioonide kooskõla                                                                                                                            | Jah                              |
-| ↳ `check:docs-counts`          | Proosas esitatud arvud (pakkujate arv, migratsioonide arv jne) jäävad tegelike arvude põhjal määratud rangeneva vahemiku sisse                                                  | Jah                              |
-| ↳ `check:env-doc-sync`         | Iga keskkonnamuutuja failis `.env.example` on dokumentatsiooni tabelis kirjeldatud ja vastupidi                                                                                 | Jah                              |
-| ↳ `check:deprecated-versions`  | Dokumentatsioonis pole aegunud versioonistringe                                                                                                                                 | Jah                              |
-| ↳ `check:doc-links`            | Dokumentatsiooni sisemised Markdowni lingid viitavad olemasolevatele failidele (`[text]`/`(path)` vormingus)                                                                    | Jah                              |
-| ↳ `check:fabricated-docs`      | Dokumentatsioonis viidatud marsruudid, keskkonnamuutujad, CLI-käsud, hook'ide nimed ja failiteed on koodibaasis olemas. Range värav lipuga `--strict`; ilma liputa pehme tõrge. | Jah (CI-s lipu `--strict` kaudu) |
-| `check:cli-i18n`               | CLI-käskude stringid on olemas kõigis i18n-i lokaadifailides                                                                                                                    | Jah                              |
-| `check:openapi-coverage`       | OpenAPI spetsifikatsioon katab vähemalt tegelike marsruutide põhjal määratud rangeneva alampiiri                                                                                | Jah                              |
-| `check:openapi-security-tiers` | Turbetasemete annotatsioonid failis `openapi.yaml` on kooskõlas faili `routeGuard.ts` klassifikatsioonidega                                                                     | **Soovituslik**                  |
-| `check:openapi-routes`         | Iga tee failis `openapi.yaml` vastab tegelikule failile `route.ts` (hallutsinatsioonivastane kontroll)                                                                          | Jah                              |
-| `check:docs-symbols`           | Iga `/api/...` viide failides `docs/**/*.md` vastab tegelikule failile `route.ts` (hallutsinatsioonivastane kontroll)                                                           | Jah                              |
-| `i18n translation drift`       | Tõlkimata võtmed i18n-i lokaadifailides — ainult hoiatus                                                                                                                        | **Soovituslik**                  |
+| Skript                         | Valideerib                                                                                                                                                                                        | Blokeeriv                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `check:docs-all`               | Meta-värav, mis käivitab järjestikku allpool loetletud 6 alamväravat                                                                                                                              | Jah                         |
+| ↳ `check:docs-sync`            | CHANGELOG-i / OpenAPI versiooni kooskõla; väljalaskerežiimis ka 66 `llm.txt` peeglit ja tõlgitud CHANGELOG-i jaotised (PR-režiimis peeglite kooskõla)                                             | Jah                         |
+| ↳ `check:docs-counts`          | Arvud proosas (pakkujate arv, migratsioonide arv jne). Kaks režiimi: `pr` funktsioonide PR-ides, `release` mujal — vt allpool jaotist „Tuletatud väärtused“                                       | Jah                         |
+| ↳ `check:env-doc-sync`         | Iga `.env.example`-is olev keskkonnamuutuja on dokumenteeritud dokumentatsiooni tabelis ja vastupidi                                                                                              | Jah                         |
+| ↳ `check:deprecated-versions`  | Dokumentatsioonis ei ole aegunud versioonistringe                                                                                                                                                 | Jah                         |
+| ↳ `check:doc-links`            | Dokumentatsiooni sisemised markdowni lingid viitavad olemasolevatele failidele (`[text]`/`(path)` vorm)                                                                                           | Jah                         |
+| ↳ `check:fabricated-docs`      | Dokumentatsioonis viidatud marsruudid, keskkonnamuutujad, CLI-käsud, hook'ide nimed ja failiteed on koodibaasis olemas. Range kontroll lipuga `--strict`; ilma liputa ebaõnnestumine ei blokeeri. | Jah (CI-s `--strict` kaudu) |
+| `check:cli-i18n`               | CLI `t()` võtmed on olemas failis `bin/cli/locales/en.json` (mõlemas režiimis); pt-BR / zh-CN / zh-TW kooskõla failiga `en.json` ainult väljalaskerežiimis                                        | Jah                         |
+| `check:openapi-coverage`       | OpenAPI spetsifikatsioon hõlmab vähemalt reaalsete marsruutide järk-järgult tõstetavat alampiiri                                                                                                  | Jah                         |
+| `check:openapi-security-tiers` | Failis `openapi.yaml` olevad turbetaseme annotatsioonid on kooskõlas faili `routeGuard.ts` klassifikatsioonidega                                                                                  | **Nõuandev**                |
+| `check:openapi-routes`         | Iga faili `openapi.yaml` tee viitab olemasolevale failile `route.ts` (hallutsinatsioonivastane kontroll)                                                                                          | Jah                         |
+| `check:docs-symbols`           | Iga viide kujul `/api/...` failides `docs/**/*.md` viitab olemasolevale failile `route.ts` (hallutsinatsioonivastane kontroll)                                                                    | Jah                         |
+| `i18n translation drift`       | `docs/i18n/**` peeglid võrrelduna failiga `.i18n-state.json` — PR-ides nõuandev (peegleid värskendatakse tõlkelaines), push'i ja öise käivituse korral range                                      | PR-ides **nõuandev**        |
 
-Kataloogis `docs/diagrams/` olevad kaksteist README SVG-d on genereeritud (`scripts/docs/gen-readme-<name>.mjs`;
-`npm run docs:readme-diagrams` genereerib need kõik uuesti). Igaühel on baidipõhise võrdlusega ühiktest
-(`tests/unit/docs/readme-*-svg.test.ts`, töö `test-unit`), mis nurjub, kui hoidlasse kinnitatud fail on
-aegunud, ning `check:docs-counts` loeb kanoonilised arvud nende `<text>` sõlmedest — seetõttu säilitab
-kontuuride loomise etapp iga kontuurideks teisendatud stringi failis nähtamatu elemendina `<text>`. SVG kanooniliste arvude kontroll loeb muutujas
-`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) loetletud faile: `docs/diagrams/readme-hero.svg`,
+#### Tõlkepeeglid on tuletatud failid (PR-režiim vs väljalaskerežiim)
+
+Funktsioonide PR muudab ainult ingliskeelseid lähtetekste. `docs/i18n/<locale>/**` peeglid (sealhulgas 66
+`llm.txt` koopiat ja tõlgitud faili `CHANGELOG.md`) ning `.i18n-state.json` kirjutatakse ühe sammuna ümber tõlkelaines (`docs/i18n-*` / `chore/i18n-*` harud, ajastatud
+`i18n-mirror-refresh.yml`) ja väljalaske käigus (`npm run release:sync-changelog-i18n`). Seetõttu
+käivituvad peegliväravad kahes režiimis, mille määrab `scripts/check/lib/gateMode.mjs` (`--mode=pr|release`,
+seejärel `OMNIROUTE_GATE_MODE`, seejärel Actionsi sündmus; lokaalne käivitus kasutab `release`-režiimi):
+
+- `check:docs-sync` — väljalaskerežiimis käivitatakse kõik kontrollid. PR-režiimis säilitatakse package.json/OpenAPI versioon,
+  juur-CHANGELOG-i pealkirjad ja aegunud dokumentide kaitse ning `llm.txt` peegelduskoopiate ja tõlgitud CHANGELOG-i jaotiste puhul väljastatakse
+  `SKIP reason=pr-mode` —
+  välja arvatud juhul, kui PR kirjutab peegelduskoopiaid: harus, mis on failis
+  `config/quality/derived-paths/*.json` määratud `docs/i18n/**` perekonna kirjutajaks,
+  käivitatakse mõlemad kontrollid rangelt ning kui diff-i alus lahendub, käivitatakse vastav kontroll rangelt ka siis, kui muudatus, mille enda diff
+  redigeerib faili `docs/i18n/<locale>/llm.txt` või `CHANGELOG.md`. Diff-i alus ei lahendu sügavusega 1 kloonis (`docs-sync-strict`
+  töö), seega käivitab PR-režiim ka ühe kontrolli, mis alust ei vaja: iga `llm.txt` peegelduskoopia peab olemas olema, säilitama
+  oma `---` eraldaja ning sisaldama kas juure sisu või sisu, mida enamik peegelduskoopiaid jagab. Alus, mida muudeti,
+  jätab kõik peegelduskoopiad võrdselt aegunuks ja kontroll läbitakse; ühe peegelduskoopia käsitsi muutmine põhjustab kontrolli ebaõnnestumise.
+  Tõlgitud `CHANGELOG.md` failidel sellist kontrolli sügavusega 1 PR-kloonis ei ole.
+- Eelkommiti konks käivitab `check-docs-sync.mjs --mode=pr`: kommiti hinnatakse selle põhjal, mida see muudab.
+  Ilma liputa on kohalik käivitamine väljalaskerežiimis ning üks ühendatud PR, mis muudab juure `llm.txt` faili,
+  blokeeriks kõik hilisemad kommid sellel alusel kuni laine käivitumiseni. Sama reegel kehtib iga režiimitundliku värava kohta, mida Husky konks käivitab:
+  konks edastab `--mode=pr` ning range otsus jääb väljalaskerežiimis tehtavatele käivitamistele
+  (väljalaske PR, tõuked harusse `main`, tavaline kohalik käivitamine).
+- Peegelduskoopia sisu ühiktestid (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
+  `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
+  `docs/*-locales`) — väljalaskerežiim kontrollib iga lok
+  aali. PR-režiim kontrollib ainult neid peegelduskoopiaid, mis on `.i18n-state.json` järgi ingliskeelse allikaga
+  ajakohased (kogu faili räsi või selle jaotise salvestatud jaotise räsi, millele test kinnitub), ning jätab aegunud koopiad põhjusega vahele.
+  `target_hash` päritolukontrolle käivitatakse mõlemas režiimis iga lokaadi puhul. Ajakohasus on iga `## `
+  jaotise põhine; ühik `run-translation.mjs` arvutab räsi. Pikk jaotis (selle faili väravate inventar moodustab
+  sellest umbes poole) tähendab, et mis tahes muudatus selles muudab need peegelduskoopiad aegunuks ning nende PR-režiimi
+  väited jäetakse järgmise laineni vahele. Ankur, mida ingliskeelne allikas enam ei sisalda, langeb tagasi kogu faili võrdlusele.
+- `i18n translation drift` — PR-ides soovituslik, tõukel, öisel käivitamisel ja väljalaske fikseerimisel range, et aegunud peegelduskoopia ei saaks väljalaskesse jõuda.
+
+`scripts/i18n/sync-llm-mirrors.mjs` (eksporditakse ka kujul `syncLlmMirrors()`, koos võtmega `--dry-run`)
+kirjutab `llm.txt` peegelduskoopiad ümber; väljalaske värskendus, tõlkelaine ja ajastatud
+`i18n-mirror-refresh.yml` käivitavad selle (värskendus tuvastab aegunud `llm.txt` peegelduskoopiad kuivkäivituse abil, kuna
+nihkearuanne neid ei loetle, ning sünkroonib need enne `check:docs-all` käivitamist).
+
+Kaksteist README SVG-d kataloogis `docs/diagrams/` genereeritakse (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` genereerib need kõik uuesti). Igal neist on baite võrdlev ühiktest
+(`tests/unit/docs/readme-*-svg.test.ts`, töö `test-unit`), mis ebaõnnestub, kui kommititud fail
+on väljalaskerežiimis aegunud; PR-is hindab `check:generated-artifacts` SVG-d, mida PR muudab, ning aluse
+nihe jäetakse väljalaske värskenduse lahendada (vt [Genereeritud failid ja tuletatud lähtejooned, mis kirjutatakse väljalaskel](#generated-files-and-derived-baselines-written-at-release)) — ja `check:docs-counts` loeb kanoonilised numbrid nende `<text>` sõlmedest — mistõttu
+kontuurimise samm jätab iga kontuuritud stringi failis nähtamatu `<text>` kujul. SVG kanooniliste numbrite kontroll loeb faile, mis on loetletud
+muutujas `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
-`tier-cascade.svg`, lisaks `public/images/tier-flow-dark.svg` ja `tier-flow-light.svg`; tasuta igavesti kasutamise, kataloogikirje, korduva ressursikogumi ja hindamistegurite väited loevad andmeid ka failidest
-`promise-pillars.svg`, `free-tier-budget.svg` ja `strategies-grid.svg`. `free-tier-budget.svg`
-saab oma arvud reaalajas kataloogilaadurist, mistõttu muudatus muutujas `FREE_MODEL_BUDGETS` või
-pakkuja kuvatavas nimes muudab CI punaseks, kuni see fail uuesti genereeritakse.
+`tier-cascade.svg`, lisaks `public/images/tier-flow-dark.svg` ja `tier-flow-light.svg`;
+väited free-forever, kataloogikirje, korduva kogumi ja hindamistegurite kohta loevad samuti
+faile `promise-pillars.svg`, `free-tier-budget.svg` ja `strategies-grid.svg`. Arvud, mida need
+generaatorid joonistavad (pakkujate koguarv, MCP tööriistad, marsruutimisstrateegiad, igaveseks tasuta pakkujad, …) pärinevad faktide hetktõmmisest
+`docs/reference/derived-facts.json` faili `scripts/docs/readmeFacts.mjs` kaudu, mitte literaalidest, seega taastoodab diagrammi
+mis tahes harus uuesti genereerimine kommititud faili. `free-tier-budget.svg` joonistab oma read samast hetktõmmisest
+(`code.freeTierBudget`, faktikontrolli salvestatud kataloogi kokkuvõte), seega jõuab muudatus
+`FREE_MODEL_BUDGETS` järgmise värskenduse ajal kaardile, selle asemel et CI punaseks muuta.
+
+### Tuletatud väärtused: väravate `pr` ja `release` režiimid
+
+Funktsiooni PR ei kirjuta kunagi väärtust, mis sõltub oma aluse olekust: pakkujate, migratsioonide,
+MCP tööriistade ja strateegiate arvud, README SVG-de numbrid, faktide hetktõmmis. Üks samm arvutab need kõik uuesti,
+`npm run release:refresh-derived`, mida käivitavad väljalase ja öine
+tuletatud väärtuste värskenduse PR. Seega **on alus väljalasete vahel kavandatult aktiivsest koodist maas**
+ning värav või test, mis võrdleks puud aktiivse koodiga, oleks punane igas PR-is pärast seda, kui sõsarharu lisas pakkuja.
+Tuletatud väärtusi hindavad väravad töötavad seetõttu ühes kahest režiimist,
+mille lahendab `scripts/check/lib/gateMode.mjs` (esimene sobiv tingimus võidab):
+
+1. käsurea `--mode=pr|release`;
+2. keskkonnamuutuja `OMNIROUTE_GATE_MODE` (`pr` või `release`);
+3. automaatselt GitHub Actionsi sündmuse põhjal: `pull_request`, mille lähteharu ei ole `release/v*`,
+   `merge_group` või tõuge harusse `omni-queue/**` → `pr`; kõik muu (tõuge, ajakava,
+   väljakutse, väljalaske PR `release/v* → main`, mis tahes kohalik käivitamine) → `release`.
+
+Mida `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) kummaski režiimis kontrollib ja millal ebaõnnestub:
+
+| Mode      | Ebaõnnestub                                                                                                                                                                                                                                                                                                                                                                                                                | Vajab jooksvaid fakte |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `release` | Iga kontroll, range võrdsus puust kogutud faktidega (värava senine käitumine): aegunud arv, versioon, katvuse alampiir või SVG-number on STRICT lahknevus                                                                                                                                                                                                                                                                  | Jah                   |
+| `pr`      | Ainult muudatuses tehtu, võrrelduna PR-i baasiga ja kasutades samu väiteekstraktoreid: (1) hallatav väärtus, mida selle kontrolli ja faili puhul baasis ei olnud („PR muutis hallatavat numbrit — taasta rida baastekstiks“); (2) nõutud väide, mis oli baasis olemas, kuid puudub harus. Fakte mittevajavad sisuinvariandid käituvad nagu väljalaskerežiimis; ainult väljalaske kontrollid loetletakse ja jäetakse vahele | Ei                    |
+
+Agendi juhiste failid ei sisalda üldse tuletatud arve: `AGENTS.md`, `llm.txt` (ja selle
+`docs/i18n/*/llm.txt` koopiad), bs-i `AGENTS.md` haru, `open-sse/services/AGENTS.md`,
+`src/shared/constants/agentSkills.ts`, `skills/README.md` ja kõik `skills/*/SKILL.md` viitavad
+selle asemel allikale (näiteks `ROUTING_STRATEGY_VALUES` failis
+`src/shared/constants/routingStrategies.ts`) ning käsule `npm run facts`. Invariant „Tuletatud arve
+ei ole (agendi juhiste fail …)“ ebaõnnestub seal mõne arvu (pakkujad, migratsioonid, MCP tööriistad
+ja skoobid, marsruutimisstrateegiad, hindamistegurid, režiimikomplektid) leidmisel mõlemas režiimis,
+seega ei pea väljalaske värskendus kunagi juhiste faili ümber kirjutama.
+
+Režiimis `pr` võivad kirjutaja harud hallatavaid väärtusi muuta: `chore/derived-*` (öine värskendus-
+PR), `release/v*` ning tõlkelained `docs/i18n-*` ja `chore/i18n-*`
+(`scripts/check/lib/derivedClaimsDiff.mjs`). Järjekorrapartiisid (`merge_group`, Mergify mustandid,
+`omni-queue/**`) uuesti ei hinnata: need summeerivad PR-id, mida värav juba ükshaaval hindas.
+
+Väljumiskoodid: `0` puhas · `1` STRICT lahknevus (või pehme lahknevus koos võtmega `--strict`) või
+hallatava väärtuse rikkumine · `2` taristu — koodifakte ei õnnestunud koguda (tsx-sond ebaõnnestus või
+aegus; ajalõppu määrab `OMNIROUTE_FACTS_TIMEOUT_MS`, vaikeväärtus 600000 ms) või CI-s ei õnnestunud
+PR-i diffi baasi lahendada. Väljumiskood 2 ei tähenda kunagi dokumentatsiooni lahknevust: käivitage
+töö uuesti või parandage keskkond.
+
+Kus iga režiim töötab:
+
+| Kus                                                                                                      | Režiim                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Funktsiooni-PR — `ci.yml` töö `docs-sync-strict`, `quality.yml` samm „Docs accuracy“                     | `pr` (automaatselt); töö edastab baasi kui `BASE_SHA` ja laadib välja sügavusega `fetch-depth: 2`                                                                                                         |
+| `merge_group`, `omni-queue/**` kandidaadid, ühendamisrongi täielik väravate loend                        | `pr`                                                                                                                                                                                                      |
+| Väljalaske-PR (`release/v* → main`), üleslükkamised, ajastatud ja käsitsi käivitamised                   | `release`                                                                                                                                                                                                 |
+| Release-Green (`scripts/quality/validate-release-green.mjs`)                                             | HARD-üksused töötavad koos `OMNIROUTE_GATE_MODE=pr` („kas baas läks katki?“); DRIFT-üksus `derived-refresh` käivitab `npm run release:refresh-derived -- --check` (range vaade, ei ava kunagi base-red-i) |
+| Release (`/generate-release` faasid 0a ja 1; oskuse ühendamine on eraldi omaniku heakskiidetud muudatus) | `npm run release:refresh-derived` kirjutab tuletatud failid; väljalaske-PR-i enda kontrollid käivituvad seejärel režiimis `release`                                                                       |
+| `nightly-derived-refresh.yml` (iga päev, kõrgeim `release/vX.Y.Z`, release-freeze'i ajal vahele jäetud)  | `npm run release:refresh-derived -- --profile=nightly`; erinevuse korral hoiab avatud ÜHE PR-i harust `chore/derived-refresh`; ei ühenda kunagi                                                           |
+
+Selle taga olevad käsud:
+
+- `npm run facts` prindib iga tuletatud arvu JSON-vormingus (`scripts/release/facts.mjs`).
+  `--key=code.mcpTools` prindib ühe väärtuse, `--snapshot` loeb aktiivse puu asemel
+  sisse kinnitatud hetktõmmise. Väljumiskood on 2, kui fakte ei saa koguda.
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) arvutab tuletatud
+  failid ühe läbimisega uuesti järgmises järjekorras (sammu ID-d suvandi `--only=` jaoks):
+  `provider-reference`
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (hetktõmmis), `numbers` (loenduste kontrolli
+  ümberkirjutusplaan rakendatakse dokumentatsioonile ja kantakse seejärel üle nende
+  `docs/i18n/` peeglitele), `readme-diagrams`,
+  `skills` (genereeritud `SKILL.md`), `e2e-timings` (jäetakse vahele, kuni puu sisaldab
+  `syncE2eTimings`-i), `ui-keys` (eemaldab võtmed, mille `en.json` kustutas, ja koos
+  suvandiga `--rewritten-since=<ref>` — vaikeväärtus `origin/main` — lisab uuesti järjekorda
+  ingliskeelsed väärtused, mis kirjutati ümber pärast viimast väljalaset), `llm-mirrors`
+  ja `verify-generated` (pärast kirjutamist peavad väljalaskerežiimis läbima
+  `check:generated-artifacts` ja `check:agent-skills-sync`; jäetakse vahele režiimis `--check`
+  ja siis, kui `--only` selle välja jätab; tõrke korral on väljumiskood 2). Samm
+  `changelog` on lubatud ainult eraldi (`--with-changelog`, ainult väljalaskeprofiilis).
+  `--profile=nightly` ei puuduta kunagi versiooniväidet. Koos käsuga `-- --check` ei kirjutata
+  midagi ning väljutakse koodiga 1, kui mõni fail muutuks või hallatav väärtus vajaks käsitsi
+  muutmist (mõlemad loetletakse); taristu tõrke korral on väljumiskood 2. `--json` prindib
+  tulemuse JSON-vormingus.
+- `docs/reference/derived-facts.json` on hetktõmmis faktidest, mida viimane värskendus kasutas. Seda
+  kirjutab ainult värskendus. README SVG-generaatorid loevad seda ning PR-i ajal võrdlevad
+  ühiktestid sissekinnitatud dokumentatsiooni ja genereeritud faile sellega — mitte aktiivse koodiga.
+  Testikomplekti ainus aktiivne võrdlus on „väljalaskevärskendus sulgeb tsükli”
+  failis `tests/unit/check-docs-counts-sync.test.ts`: aktiivsete faktide korral ei jäta värskenduse
+  mälus rakendatud ümberkirjutusplaan alles ühtki STRICT-i kõrvalekallet, millest see ei teata,
+  ning ümberplaneerimine ei muuda midagi.
+
+Kohalikuks taasesitamiseks (kohalik käivitamine kasutab vaikimisi `release`-i):
+
+```bash
+npm run check:docs-counts                                       # release: strict, live facts
+node scripts/check/check-docs-counts-sync.mjs --mode=pr          # what a feature PR is judged on
+OMNIROUTE_GATE_MODE=pr BASE_REF="origin/release/v$(node -p "require('./package.json').version")" npm run check:docs-counts
+npm run release:refresh-derived -- --check                       # what the release would rewrite
+```
+
+Kui lahendatavat baasi pole (puuduvad `BASE_SHA`/`BASE_REF` ja kohalikku
+`origin/release/v<version>`-i pole), prindib kohalik `pr`-käivitus hoiatuse ja jätab erinevuse
+vahele, selle asemel et ebaõnnestuda.
 
 ### Töö: `i18n-ui-coverage`
 
-| Skript                                  | Kontrollib                                                                                                                                                                                                                    | Blokeeriv       |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `check-ui-keys-coverage` (tekstisisene) | Kasutajaliidese i18n-võtmete kaetus on ≥ 65%                                                                                                                                                                                  | Jah             |
-| `check-ui-value-drift` (tekstisisene)   | Ümber kirjutatud ingliskeelne **väärtus** ei jäta endast maha aegunud tõlget                                                                                                                                                  | Jah             |
-| `check-new-key-coverage` (tekstisisene) | **Uus** ingliskeelne võti on tõlgitud igas lokaadis — marker `__MISSING__:` lükatakse tagasi                                                                                                                                  | Jah             |
-| `check-translation-ratio`               | Tegelike tõlgete suhtarv lokaadi kohta (ingliskeelsega identsed / kohatäitjad / puuduvad lehed väljaspool lubatud loendit) ei tohi ületada faili `config/quality/i18n-translation-baseline.json` väärtust koos lubatud varuga | **Soovituslik** |
+| Skript                            | Valideerib                                                                                                                                                                                            | Blokeeriv                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n-võtmete katvus on ≥ 65%                                                                                                                                                                       | Jah (mõlemas režiimis)          |
+| `check:ui-icu`                    | Iga UI kataloogi iga sõnum kompileerub funktsiooniga `IntlMessageFormat`                                                                                                                              | Jah (mõlemas režiimis)          |
+| `check-ui-value-drift` (inline)   | Ümberkirjutatud ingliskeelne **väärtus** ei jäta maha aegunud tõlget                                                                                                                                  | Jah (ainult väljalaskerežiimis) |
+| `check-new-key-coverage` (inline) | **Uus** ingliskeelne võti on tõlgitud igas lokaadis — marker `__MISSING__:` lükatakse tagasi                                                                                                          | Jah (ainult väljalaskerežiimis) |
+| `check-key-completeness` (inline) | Iga UI kataloog (ja suvandiga `--catalog=cli` iga CLI kataloog) sisaldab täpselt oma `en.json`-i võtmekomplekti; `pr`-režiimis iga kataloog, mida PR muutis, iseenda suhtes liitmisbaasis             | Jah (mõlemas režiimis)          |
+| `check-translation-ratio`         | Lokaadi tegeliku tõlke suhe (inglise keelega identsed / kohatäide / puuduvad kirjed väljaspool lubatud loendit) ei tohi ületada faili `config/quality/i18n-translation-baseline.json` + lõtk väärtust | Jah (ainult väljalaskerežiimis) |
 
-Vajab sätet `fetch-depth: 0` — väärtuste kõrvalekalde värav võrdleb faili `en.json` ühendamise lähtepunktiga.
+Vajab `fetch-depth: 0` — väärtuste erinevuse kontroll võrdleb faili `en.json` liitmisbaasiga.
 
-#### `check-ui-value-drift` — aegunud tõlgete värav
+**Kaks režiimi (alates 2026-11-13).** Funktsiooni-PR lisab või kirjutab võtmeid ümber failis
+`en.json` (ja failis `bin/cli/locales/en.json`) ega puuduta ühtki teist lokaati;
+`check:pr-derived-paths` (töö `pr-test-policy`, perekond
+`config/quality/derived-paths/translation.json`) ebaõnnestub funktsiooni-PR-i korral, mis seda
+teeb. Teised lokaadid viiakse lõpule üks kord väljalaske kohta funktsiooni
+`release:refresh-derived` abil, mis kutsub välja `syncUiKeys()` failis
+`scripts/i18n/sync-ui-keys.mjs` (lisab puuduvad võtmed, eemaldab kustutatud võtmed, märgib
+ümberkirjutatud inglise keele tõlked väärtusega `rewrittenSinceRef`, tõlgib), või tõlkelaine abil.
+Kontrollid loevad režiimi failist `scripts/check/lib/gateMode.mjs`: `pr`-režiimis
+(funktsiooni-PR-id, `merge_group`, `omni-queue/**`) prindivad ülaltoodud väljalaskerežiimi
+kontrollid `SKIP reason=pr-mode` ja väljuvad koodiga 0; `release`-režiimis (väljalaske-PR,
+tõuked harusse `main`, `workflow_dispatch`, kohalikud käivitamised) on need endiselt rangelt
+jõustatud ning väljalaske-PR-i korral saavad erinevusteadlikud kontrollid väärtuse
+`BASE_REF=origin/main`, nii et nad hindavad iga tsükli lisatud või ümber kirjutatud võtit.
+Funktsiooni-PR-i otsust saab kohapeal eelvaadata suvandiga `--mode=pr`.
 
-Tuvastab ühe i18n-regressiooni, mida teised kontrollid struktuurselt märgata ei saa: ingliskeelne väärtus
-kirjutatakse ümber, kuid _eelmisest_ ingliskeelsest tekstist tuletatud tõlked jäävad alles, mistõttu
-mitte-ingliskeelsed kasutajad loevad edasi enesekindlalt sõnastatud, kuid nüüdseks vale teksti.
+PR-i, mis `pr`-režiimis endiselt lokaadikatalooge muudab (tõlkelaine, väljalaskevärskendus või
+ainult tõlget puudutav parandus), ei jäeta vahele: `check-key-completeness` hindab iga muudetud kataloogi
+sama kataloogi suhtes ühendamise lähtepunktis (`scripts/i18n/lib/touched-catalogs.mjs`) ja ebaõnnestub,
+kui kataloogist on võti kadunud, failis `en.json` puudub võti, tegelik tõlge on muutunud markeriks `__MISSING__:`
+või ingliskeelseks tekstiks või väärtus ei interpoleeri enam sellise ingliskeelse stringi kohatäitjaid/silte,
+mida PR ei muutnud. PR-is lisatud uus kataloog peab sisaldama kogu faili `en.json` võtmekomplekti.
+See hõlmab PR-i muudetud kataloogide puhul kõike, mida suhte- ja CLI-pariteedi kontrollid näeksid.
+
+Lokaadipariteedi ühiktestid (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-completeness`,
+`i18n-placeholder-parity`) järgivad samu režiime faili `tests/_helpers/localeParityMode.ts` kaudu:
+`pr`-režiimis jätavad need võtmepariteedi väited vahele ja jätavad väljalaskevärskenduse hooleks nende
+võtmete kohatäitjate pariteedi, mille ingliskeelne tekst on pärast ühendamise lähtepunkti muutunud
+(kõik võtmed, kui ühiktestitöö pinnapealne väljavõte ei saa seda lugeda). See abifunktsioon on
+**ainus** lubatud režiimist sõltuv vahelejätmine: `check:test-masking` loendab `.skip(` ja
+`{ skip: true }`, kuid mitte selle tagastatavat arvutatud väärtust `{ skip: "<reason>" }`, seega
+fikseerib `tests/unit/locale-parity-mode.test.ts` seda kasutada tohivate testide loendi — uue testi
+lisamine on selle loendi läbivaatamist nõudev muudatus.
+
+#### `check-ui-value-drift` — aegunud tõlgete kontroll
+
+Tuvastab ühe i18n-regressiooni, mida teised kontrollid struktuurselt tuvastada ei saa: ingliskeelne
+väärtus kirjutatakse ümber, kuid _eelmisest_ ingliskeelsest tekstist tuletatud tõlked jäävad alles,
+mistõttu mitteingliskeelsed kasutajad loevad jätkuvalt enesekindlalt sõnastatud, kuid nüüd vale teksti.
 
 See jõudis päriselt väljalaskesse. `oauthModal.googleOAuthWarning` kirjutati ümber, kui lisati Antigravity
-sisselogimisabiline (#5203); **39 lokaati 43-st** säilitasid teksti, mis käskis operaatoritel „kopeerida
-täielik URL ja kleepida see allapoole“ — selle teenusepakkuja puhul ei saa seda voogu lõpule viia. See jäi
-märkamata kuni #8463-ni, sest:
+sisselogimisabifunktsioon (#5203); **39 lokaati 43-st** säilitasid teksti, mis käskis operaatoritel „kopeerida
+täieliku URL-i ja kleepida selle allapoole” — töövoog, mida selle teenusepakkuja puhul ei saa lõpule viia.
+See jäi kuni #8463 märkamata, sest:
 
-- `sync-ui-keys` lisab ainult **puuduvad** võtmed ega uuenda kunagi **aegunud** võtmeid;
-- `check-ui-keys-coverage` loendab võtme _olemasolu_, mistõttu aegunud tõlge arvestatakse kaetuks;
-- `check-translation-drift` jälgib dokumentatsiooni peegelkoopiaid asukohas `docs/i18n/<locale>/**.md` —
-  see ei loe kunagi faile `src/i18n/messages/*.json`. Blokeeriv töös `docs-sync-strict` alates
-  2026-09 uuesti sünkroonimisest: muuda põhidokumenti → `npm run i18n:run -- --files=<doc>` (jaotisepõhine, kiire).
+- `sync-ui-keys` lisab ainult **puuduvaid** võtmeid, mitte **aegunud** võtmeid;
+- `check-ui-keys-coverage` loendab võtme _olemasolu_, seega läheb aegunud tõlge arvesse kaetuna;
+- `check-translation-drift` jälgib dokumentatsiooni peegelkoopiaid `docs/i18n/<locale>/**.md` —
+  see ei loe kunagi faile `src/i18n/messages/*.json`. See töötab töös `docs-sync-strict`: PR-ide puhul
+  soovituslikult, push'i ja öiste käivituste puhul rangelt; tõlkelaine värskendab peegelkoopiaid, mitte funktsiooni-PR-i.
 
-**Diferentsiteadlik, mitte lähtejoonel põhinev.** See võrdleb liitmisbaasi faili `en.json`
-tööpuuga; iga võtme puhul, mille ingliskeelne väärtus muutus, loetakse aegunuks kõik lokaadid, kus on endiselt
-muutmata tõlge. See **külmutab tahtlikult olemasoleva võla** — diferents ei saa näidata, millisest vanast
-ingliskeelsest tekstist ammu olemas olnud tõlge pärineb, seega hindab kontroll ainult seda, mida praegune
-muudatus puudutab. Alternatiiv (võtmepõhine räsi-lähtejoon) nõuaks umbes 600 KB suurust genereeritud faili,
-mis oleks kolm korda suurem kui suurim olemasolev lähtejoon ja muutuks iga i18n-i PR-iga.
+**Diferentsiteadlik, mitte lähteolekul põhinev.** See võrdleb faili `en.json` ühendamise lähtepunktis
+tööpuuga; iga võtme puhul, mille ingliskeelne väärtus muutus, on iga veel puutumata tõlget sisaldav
+lokaat aegunud. See **külmutab olemasoleva võla** tahtlikult — diferents ei saa näidata, millisest
+vanast ingliskeelsest tekstist pärineb kaua muutmata püsinud tõlge, seega hindab kontroll ainult seda,
+mida praegune muudatus puudutab. Alternatiiv (võtmepõhine räsilähteolek) nõuaks ligikaudu 600 KB
+suurust genereeritud faili, mis oleks kolm korda suurem kui suurim olemasolev lähteolek ja muutuks iga i18n-PR-iga.
 
-Selle kontrolli saab läbida kahel viisil:
+Selle kontrolli läbimiseks on kaks võimalust:
 
-1. uuenda mõjutatud tõlkeid või
-2. määra nende väärtuseks `__MISSING__:<new english>` — käituskeskkond kuvab seejärel parandatud ingliskeelse
-   teksti (`src/i18n/request.ts::deepMergeFallback`, #7258) ja võti lisatakse tõlkejärjekorda.
+1. värskendada mõjutatud tõlkeid või
+2. määrata nende väärtuseks `__MISSING__:<new english>` — käituskeskkond esitab siis parandatud ingliskeelse teksti
+   (`src/i18n/request.ts::deepMergeFallback`, #7258) ja võti lisatakse tõlkejärjekorda.
 
-Kui stringi **tähendus** muutus, eelista **võtme ümbernimetamist**: uus võti ei saa aegunud
-tõlget pärida. Seda mustrit kasutati muudatuses #8463.
+Kui stringi **tähendus** muutus, eelista **võtme ümbernimetamist**: uus võti ei saa aegunud tõlget pärida.
+Seda mustrit kasutati muudatuses #8463.
 
 ```bash
-npm run i18n:check-value-drift          # range (mida CI käitab)
-npm run i18n:check-value-drift:warn     # ainult aruandlus
+npm run i18n:check-value-drift          # range (seda käitab CI)
+npm run i18n:check-value-drift:warn     # ainult aruanne
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Lõpetab koodiga 0 ja teatega `SKIP reason=base-unresolved`, kui baaskataloogi ei saa lugeda (pinnapealne
-kloon ilma baasviiteta), järgides `check-openapi-breaking` käitumist.
+Väljub koodiga 0 ja teatega `SKIP reason=base-unresolved`, kui lähtekataloogi ei saa lugeda (pinnapealne
+kloon ilma lähteviiteta), järgides kontrolli `check-openapi-breaking` käitumist. Ainult väljalaskerežiimis:
+funktsiooni-PR kirjutab ingliskeelse teksti ümber ja piirdub sellega; väljalaskevärskendus märgib maha jäänud tõlked
+(`node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref>`, sama `findStaleTranslations`).
 
 ### Töö: `i18n`
 
-Täielik i18n-i valideerimismaatriks (üks töö lokaadi kohta). Kogu töö on soovituslik.
+Täielik i18n-valideerimismaatriks (üks töö lokaadi kohta). Kogu töö on soovituslik.
 
-| Skript                          | Mida valideerib                | Blokeeriv                                             |
-| ------------------------------- | ------------------------------ | ----------------------------------------------------- |
-| `validate_translation.py quick` | Tõlke täielikkus lokaadi kaupa | **Soovituslik** (`continue-on-error: true` kogu tööl) |
+| Skript                          | Kontrollib                      | Blokeeriv                                                  |
+| ------------------------------- | ------------------------------- | ---------------------------------------------------------- |
+| `validate_translation.py quick` | Tõlke täielikkust lokaadi kaupa | **Soovituslik** (`continue-on-error: true` kogu töö puhul) |
 
 ### Töö: `pr-test-policy`
 
-Käivitatakse ainult tõmbetaotluste puhul.
+Käitatakse ainult pull request'ide puhul.
 
-| Skript                 | Mida valideerib                                                                                                                               | Blokeeriv |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `check:pr-test-policy` | PR-id, mis muudavad tootmiskoodi kataloogides `src/`, `open-sse/`, `electron/` või `bin/`, peavad lisama või uuendama teste (range reegel #8) | Jah       |
-| `check:test-masking`   | Muudetud testifailid ei vähenda väidete netoarvu ega lisa tautoloogiaid `assert.ok(true)`                                                     | Jah       |
-| `check:pr-evidence`    | PR-i kirjeldus viitab muudatuse testi-/VPS-tõenditele (automatiseerib range reegli #18, otsides PR-i tekstist — habras, vt tööjärge)          | Jah       |
+| Skript                 | Kontrollib                                                                                                                                       | Blokeeriv |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check:pr-test-policy` | PR-id, mis muudavad tootmiskoodi kataloogides `src/`, `open-sse/`, `electron/` või `bin/`, peavad lisama või värskendama teste (range reegel #8) | Jah       |
+| `check:test-masking`   | Muudetud testifailid ei vähenda väidete netoarvu ega lisa tautoloogiaid `assert.ok(true)`                                                        | Jah       |
+| `check:pr-evidence`    | PR-i kirjeldus viitab muudatuse testi-/VPS-tõenditele (automatiseerib range reegli #18, otsides vasteid PR-i tekstist — habras, vt mahajäämus)   | Jah       |
 
 ### Töö: `test-vitest`
 
-Käivitatakse pärast tööd `build`. Tõrke korral blokeerib liitmise.
+Käitatakse pärast tööd `build`. Ebaõnnestumise korral blokeerib ühendamise.
 
-| Komplekt         | Mida valideerib                                                 | Blokeeriv                                                                                                         |
-| ---------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP-server (110 tööriista), autoCombo, vahemälu — vitest-käitur | Jah                                                                                                               |
-| `test:vitest:ui` | Kasutajaliidese komponenditestid — vitest-käitur                | **Blokeeriv** — olemasolevad tõrked on failis `vitest.config.ts` sõnaselgelt välistatud; uued tõrked nurjavad töö |
+| Komplekt         | Valideerib                                                        | Blokeeriv                                                                                                             |
+| ---------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP-server (110 tööriista), autoCombo, vahemälu — vitesti käitaja | Jah                                                                                                                   |
+| `test:vitest:ui` | UI-komponentide testid — vitesti käitaja                          | **Blokeeriv** — olemasolevad tõrked on failis `vitest.config.ts` selgesõnaliselt välistatud; uued tõrked nurjavad töö |
 
 ### Öised töövood (ajastatud, soovituslikud)
 
-Need käivitatakse cron-ajastuse alusel (ja käsuga `workflow_dispatch`), mitte kunagi PR-ide puhul. Kõik on soovituslikud.
+Need käivitatakse cron-graafiku alusel (ja `workflow_dispatch` abil), mitte kunagi PR-ide korral. Kõik on soovituslikud.
 
-| Töövoog                | Kontrollib                                                                                                                                                                                  | Blokeeriv    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `nightly-property`     | fast-check’i omaduspõhised testid juhusliku algväärtuse ja suure käitamiste arvuga                                                                                                          | **Nõuandev** |
-| `nightly-resilience`   | mälukuhja kasvu kontroll, tõrgete kaootiline süstimine, k6 koormus-/kestustestimine                                                                                                         | **Nõuandev** |
-| `nightly-llm-security` | promptfoo sisestusrünnete kaitse (blokeerimisrežiim) + garaki sondid (teenusepakkuja saladuse puudumisel jäetakse vahele)                                                                   | **Nõuandev** |
-| `nightly-schemathesis` | OpenAPI lepingu hägustestimine (schemathesis) töötava OmniRoute’i suhtes, kasutades faili `docs/openapi.yaml` — toob esile spetsifikatsiooni rikkumised / töötlemata 500-vead (etapp 8 B.4) | **Nõuandev** |
-| `nightly-mutation`     | Strykeri mutatsioontestimise skoor kiirete ühiktestide rajal — ellujäänud mutandid toovad esile nõrgad kinnitused                                                                           | **Nõuandev** |
-| `nightly-compat`       | Node’i mootori ühilduvusmaatriks toetatud `engines.node` vahemikes                                                                                                                          | **Nõuandev** |
+| Töövoog                | Valideerib                                                                                                                                                                          | Blokeeriv       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `nightly-property`     | fast-check-i omadustestid juhusliku seemne ja suure käivituste arvuga                                                                                                               | **Soovituslik** |
+| `nightly-resilience`   | kuhja kasvu kontroll, kaosetõrgete süstimine, k6 koormus- ja kestustestid                                                                                                           | **Soovituslik** |
+| `nightly-llm-security` | promptfoo süstimise kaitse (blokeerimisrežiim) + garak-sondid (jäetakse vahele ilma teenusepakkuja saladuseta)                                                                      | **Soovituslik** |
+| `nightly-schemathesis` | OpenAPI lepingu fuzzimine (schemathesis) töötava OmniRoute'i vastu, kasutades faili `docs/openapi.yaml` — toob esile spetsifikatsiooni rikkumised / käsitlemata 500-d (etapp 8 B.4) | **Soovituslik** |
+| `nightly-mutation`     | Strykeri mutatsioonitestimise skoor kiirete ühikutestide rajal — säilinud mutandid toovad esile nõrgad kontrollid                                                                   | **Soovituslik** |
+| `nightly-compat`       | Node'i mootori ühilduvusmaatriks toetatud `engines.node` vahemike lõikes                                                                                                            | **Soovituslik** |
 
-Jõudluse lähteväärtused (mälukuhi, TTFB, koostamisaeg) salvestatakse, kuid neid ei kasutata tõkestamiseks: vt [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+Jõudluse lähteväärtused (kuhja suurus, TTFB, ehitusaeg) salvestatakse, kuid nende alusel ei blokeerita: vt [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
-## Kiirusefaas (2026-08-30 → v4.0 LTS): iga lähtetaset lõdvendati 20%
+## Velocity-faas (2026-08-30 → v4.0 LTS): iga baastaset leevendati 20%
 
-Omaniku otsus (2026-08-30): kuni v4.0 modulariseerimiseni on tarnimiskiirus olulisem
-kui tehnilise võla piiri hoidmine. Iga **numbrilist** astmelise kontrolli lähtetaset lõdvendati ühe
-auditeeritava toiminguga 20% ning faas on deklareeritud failis `config/quality/quality-baseline.json`:
+Omaniku otsus (2026-08-30): kuni v4.0 modulariseerimiseni on väljalaske kiirus olulisem
+kui võlataseme hoidmine. Iga **numbriline** lävend lähtestati auditeeritavas ühekordses
+etapis 20% võrra leebemaks ning faas on deklareeritud failis `config/quality/quality-baseline.json`:
 
 ```json
 "_policy": { "phase": "velocity", "since": "2026-08-30", "until": "4.0.0",
              "relaxPct": 20, "requireTighten": false }
 ```
 
-| Mis muutus                                                                                                                                                                                           | Kus                                                                                                    |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `metrics.*.value` — väiksem-on-parem arvud ×1.2, suurem-on-parem protsendid ÷1.2 (katvuse alampiiriks jäi 60, `eslintErrors` jääb väärtusele 0, `eslintWarnings` 0 → 20% külmutatud erandite arvust) | `quality-baseline.json` (märkus `_relax_velocity_2026_08_30` loetleb kõik enne → pärast väärtused)     |
-| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                                     | `complexity-baseline.json`, `duplication-baseline.json`                                                |
-| `cap`, `testCap`, iga `frozen[*]` / `testFrozen[*]` rea ülempiir ×1.2                                                                                                                                | `file-size-baseline.json`                                                                              |
-| failipõhised / TS-koodi põhised arvud ×1.2                                                                                                                                                           | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
-| `THRESHOLD` 36 → 30                                                                                                                                                                                  | `scripts/check/check-openapi-coverage.mjs`                                                             |
-| `--require-tighten` muutub soovituslikuks, kui `_policy.requireTighten === false`                                                                                                                    | `scripts/quality/check-quality-ratchet.mjs`                                                            |
-| igaöine `bank-ratchet-shrinks` peatatakse (see talletaks mõõdetud vähenemise ja tühistaks puhvri)                                                                                                    | `.github/workflows/nightly-release-green.yml`                                                          |
+| Muudatus                                                                                                                                                                                                                                    | Asukoht                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `metrics.*.value` — mida väiksem, seda parem loend korrutati 1,2-ga, mida suurem, seda parem protsent jagati 1,2-ga (katvuse alampiir 60 säilitati, `eslintErrors` jääb väärtusele 0, `eslintWarnings` 0 → fikseeritud summutuste arvu 20%) | `quality-baseline.json` (märkus `_relax_velocity_2026_08_30` loetleb kõik enne → pärast väärtused)     |
+| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                                                                            | `complexity-baseline.json`, `duplication-baseline.json`                                                |
+| `cap`, `testCap`, iga `frozen[*]` / `testFrozen[*]` rea lävend korrutati 1,2-ga                                                                                                                                                             | `file-size-baseline.json`                                                                              |
+| faili- / TS-koodi-põhised loendid korrutati 1,2-ga                                                                                                                                                                                          | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
+| `THRESHOLD` 36 → 30                                                                                                                                                                                                                         | `scripts/check/check-openapi-coverage.mjs`                                                             |
+| `--require-tighten` muutub soovituslikuks, kui `_policy.requireTighten === false`                                                                                                                                                           | `scripts/quality/check-quality-ratchet.mjs`                                                            |
+| igaöine `bank-ratchet-shrinks` peatub (see talletaks mõõdetud vähenemise ja tühistaks varuruumi)                                                                                                                                            | `.github/workflows/nightly-release-green.yml`                                                          |
 
 Lubatud loendid (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
-…) **ei ole** eelarved ja neid ei muudetud. Läbitud/nurjunud olekuga poliitikakontrollid (saladused, SQL-i reeglid,
-dokumentatsiooni/keskkonna leping, i18n-i vastavus, ühiktestid) ei muutu — nurjunud test on endiselt nurjunud test.
+…) **ei ole** eelarved ja neid ei muudetud. Läbimise/ebaõnnestumise poliitikaväravad (saladused, SQL-reeglid,
+dokumentatsiooni/keskkonna leping, i18n-i võrdsus, ühiktestid) on muutmata — ebaõnnestunud test on endiselt ebaõnnestunud test.
 
 **Tööriistad**
 
 - `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — ühekordne
-  lõdvendamine (`scripts/quality/relax-baselines.mjs`); keeldub sama märkusega teist korda käivitumast.
+  leevendus (`scripts/quality/relax-baselines.mjs`); keeldub sama märkmega teist korda käivitumast.
 - `npm run quality:headroom [-- --only deadExports,fileSize] [--json out.json --md out.md]` —
-  mõõdab iga numbrilist kontrolli samamoodi nagu CI ja väljastab iga kontrolli allesjäänud puhvri
-  (`scripts/quality/baseline-headroom.mjs`). Igaöine töö `baseline-headroom` avaldab
-  tabeli töövoo käivituse kokkuvõttes ja laadib selle JSON-/Markdown-aruande üles artefaktina
-  `baseline-headroom-<run_id>`, mida säilitatakse 90 päeva. Hoiatus- ja kriitilised read tähistavad kontrolle,
-  mis on oma ülempiirist kuni 10% kaugusel või on selle juba ületanud. Vaadake neid aruandeid
-  varajase hoiatusena eelarvete ammendumise kohta; kontrollige probleemi põhjustava kontrolli märkusi
-  `_rebaseline_*`. Töö ei loo ega värskenda enam püsivat probleemi; #12149 säilitab varasema
-  aruandeajaloo.
+  mõõdab iga numbrilist väravat CI-ga samal viisil ja kuvab iga värava allesjäänud varuruumi
+  (`scripts/quality/baseline-headroom.mjs`). Igaöine `baseline-headroom` töö avaldab
+  tabeli töövoo käivituse kokkuvõttes ning laadib oma JSON-i/Markdowni aruande üles nimega
+  `baseline-headroom-<run_id>`, säilitades seda 90 päeva. Hoiatus- ja kriitilised read tuvastavad
+  väravad, mis on oma ülempiirist 10% kaugusel või juba seda ületavad. Vaadake need aruanded üle kui
+  varajane hoiatus eelarvete kulutamise kohta; uurige rikkuva värava `_rebaseline_*` märkmeid. Töö ei
+  loo ega uuenda enam püsivat probleemi; #12149 säilitab varasemate aruannete ajaloo.
 
 **Uue koodi režiim (Clean-as-You-Code) — alates 2026-08-30, ainult PR-i kiirtee**
 
-Sündmuste `pull_request` korral edastab `quality.yml` argumendi `--base-ref <PR base SHA>` käskudele
-`check:file-size`, `check:complexity-ratchets` ja `check:dead-code`. Kontrollide
-`check:complexity-ratchets` ja `check:dead-code` puhul võrdleb kontroll HEAD-i ühendamisbaasiga,
-**piirdudes failidega, mida PR muutis** (`scripts/check/newCodeMode.mjs`: ühendamisbaas materialiseeritakse
-ajutises `git worktree`-s, ESLint/knip käivitatakse seal ja HEAD-is ning failipõhiste arvude erinevused leitakse):
+`pull_request` sündmuste korral edastab `quality.yml` lipu `--base-ref <PR base SHA>` kontrollidele
+`check:file-size`, `check:complexity-ratchets` ja `check:dead-code`. Kontrollide `check:complexity-ratchets` ja
+`check:dead-code` puhul võrdleb värav HEAD-i ühises lähtepunktis oleva versiooniga, **piiratuna PR-i muudetud failidele**
+(`scripts/check/newCodeMode.mjs`: ühine lähtepunkt materialiseeritakse ajutises
+`git worktree`-is, ESLint/knip käivitatakse seal ja HEAD-is ning failipõhised loendid võrreldakse):
 
-- **blokeeriv** — PR lisas muudetud failidesse tsüklomaatilise/kognitiivse keerukuse rikkumisi või surnud eksporte
+- **blokeeriv** — PR lisas muudetud failidesse tsüklomaatilisi/kognitiivseid rikkumisi või surnud eksporti
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` logis);
-- **soovituslik** — globaalne koguarv võrreldes külmutatud lähtetasemega. Päritud kõrvalekalle ei muuda
-  süütut PR-i kunagi nurjunuks; kõrvalekalle külmutatakse väljalaske kooskõlastamisel uuesti ja puhvrikontroll jälgib seda.
+- **soovituslik** — globaalne kogus võrreldes fikseeritud baasjoonega. Päritud kõrvalekalle ei muuda
+  süütut PR-i kunagi punaseks; kõrvalekalle fikseeritakse väljalaske kooskõlastamisel uuesti ning seda jälgib varuruumi töö.
 
-`check:file-size` kasutab baasviidet oma reeglite järgi (`scripts/check/check-file-size.mjs`, #8522):
-see kontrollib puus iga lähtekoodi- ja testifaili, loeb käsuga `git show` iga faili ridade arvu PR-i baasis
-ning märgib faili nurjunuks ainult siis, kui see kasvab suuremaks oma lähtetaseme ülempiirist
-(`frozen` / `testFrozen` või lähtetasemest puuduva faili puhul `cap` / `testCap`) ja baassuurusest.
-Seetõttu ei muuda juba baasis kõrvalekaldunud fail süütut PR-i kunagi nurjunuks.
+`check:file-size` kasutab baasviidet oma tingimustel (`scripts/check/check-file-size.mjs`, #8522):
+see kontrollib puus iga lähte- ja testifaili, loeb iga faili ridade arvu PR-i baasis käsuga `git show`
+ning ebaõnnestub faili puhul ainult siis, kui see kasvab suuremaks oma baasjoone ülemmäärast
+(`frozen` / `testFrozen` või `cap` / `testCap` baasjoonest välja jääva faili korral) ja baasversiooni
+suurusest suurema väärtuseni. Seega ei muuda fail, milles baasversioonis oli kõrvalekalle, süütut PR-i
+kunagi punaseks.
 
 `check:boundary:ratchet` rakendab sama reeglit oma ainsale arvule
-(`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): PR-i sündmuste korral edastavad nii
-`quality.yml`-i kiirkontrollid kui ka `ci.yml`-i lintimistöö PR-i baasi SHA, baaskommitit
-mõõdetakse `git archive`-i ekspordist ning PR ebaõnnestub ainult siis, kui selle `open-sse → src` servade
-arv ületab väärtustest `metrics.boundaryOpenSseToSrc` ja baasi servade arv suurema.
-Ülempiiri ületav baasi triiv raporteeritakse (`päritud baasi triiv`), kuid see ei muuda süütut PR-i
-kunagi punaseks; push → main säilitab absoluutse ülempiiri ning lahendamatu baasi SHA korral
-võetakse hoiatusega kasutusele absoluutne ülempiir.
+(`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): PR-sündmuste korral edastavad nii
+`quality.yml` kiirkontrollid kui ka `ci.yml` lint-töö PR-i baas-SHA, baas-commit mõõdetakse
+`git archive`-ekspordist ning PR ebaõnnestub ainult siis, kui selle
+`open-sse → src` servade arv ületab väärtustest `metrics.boundaryOpenSseToSrc` ja baasil loendatud arvust suuremat. Baasi ülempiiri ületav kõrvalekalle teatatakse (`base drift herdado`), kuid süütut PR-i ei märgita kunagi ebaõnnestunuks; `push → main` säilitab absoluutse ülempiiri ning lahendamatu baas-SHA korral kasutatakse hoiatusega seda ülempiiri.
 
-`workflow_dispatch`-i käivitustel, väljalaske rohelisuse kontrollil ja igaöisel varuruumi tööl puudub PR-i baas
-ning need kasutavad endiselt absoluutset (globaalset) võrdlust. Testikate, duplikaadid ja tüübikate jäävad
-praegu globaalseks (nende tööriistad ei võimalda failipõhist erinevust odavalt arvutada) — need on kandidaadid
-samaks käsitluseks.
+Omni-järjekorra kandidaat (push harusse `omni-queue/**`, vt [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md))
+saab sama käsitluse nagu pull request: mõlemad töövood edastavad kandidaadi baasi
+(`needs.changes.outputs.candidateBase`) argumendina `--base-ref` ning `check:ts7-diagnostics-ratchet` käivitatakse
+samuti selle vastu. Kahe uue koodi kontrolli puhul on võrdlusbaas see SHA ise, mitte ülemise
+merge-commiti esimene vanem, seega hinnatakse iga paketi pull request’i.
 
-**Faasi lõpetamine versioonis v4.0 (LTS = varasemast rangem, mitte „tagasi tavapäraseks“)**
+`workflow_dispatch`-käivitustel, release’i rohelise oleku kontrollil ja öisel varuruumi-tööl puudub PR-i baas
+ning need kasutavad absoluutset (globaalset) võrdlust. Katvus, dubleerimine ja tüübikatvus jäävad praegu globaalseks
+(nende tööriistad ei loo failipõhist diff’i odavalt) — kandidaadid sama käsitluse jaoks.
 
-1. Puhta `release/v4.0.0` tipu peal: dokumenteerimiseks `npm run quality:headroom --json`, seejärel
+**Etapi lõpetamine versioonis v4.0 (LTS = varasemast rangem, mitte „tagasi normaalsusse“)**
+
+1. Puhtal `release/v4.0.0` tipil: `npm run quality:headroom --json` dokumenteerimiseks, seejärel
    `npm run quality:ratchet -- --update`, `check:file-size --update`,
-   `check:complexity-ratchets --update`, `check:dead-code --update` ning iga tüübikontrolli värava
-   `--update` — kõik lähtetasemed langetatakse mõõdetud väärtuseni.
-2. Kustuta failist `quality-baseline.json` `_policy` (aktiveerib uuesti `--require-tighten`-i ja igaöise
-   varuruumi kogumise), taasta failis `check-openapi-coverage.mjs` `THRESHOLD = 36` (või suurem).
-3. Karmista piiranguid mõõdetust enam seal, kus modulariseerimine end ära tasus: failisuuruse `cap` tagasi väärtusele 1000
-   (või 800), testikatte alampiirid +5, surnud ekspordid modulariseeritud pakettides 0.
+   `check:complexity-ratchets --update`, `check:dead-code --update`, iga typecheck-kontrolli
+   `--update` — iga baasjoon langeb mõõdetud väärtuseni.
+2. Kustuta `quality-baseline.json`-ist `_policy` (aktiveerib uuesti `--require-tighten`-i ja öise
+   pangastamise), taasta `THRESHOLD = 36` (või suurem) failis `check-openapi-coverage.mjs`.
+3. Muuda piirangud mõõdetust rangemaks seal, kus modulariseerimine end ära tasus: faili suuruse `cap` tagasi väärtusele 1000
+   (või 800), katvuse alampiirid +5, modulariseeritud pakettide surnud ekspordid väärtusele 0.
 
-## Ratchet’i baastase (`quality-baseline.json`)
+## Ratchet-alus (`quality-baseline.json`)
 
-Ratchet’i mootor (`scripts/quality/check-quality-ratchet.mjs`) loeb faili `quality-baseline.json`
-ja võrdleb seda värskelt kogutud failiga `quality-metrics.json`. Iga mõõdik, mis halveneb
-rohkem kui selle epsilon lubab, põhjustab järgu nurjumise.
+Ratchet-mootor (`scripts/quality/check-quality-ratchet.mjs`) loeb faili `quality-baseline.json`
+ja võrdleb seda värskelt kogutud failiga `quality-metrics.json`. Kõik mõõdikud, mis halvenevad
+üle epsilon'i, põhjustavad järgu ebaõnnestumise.
 
 Praegu jälgitavad mõõdikud:
 
 | Mõõdik                | Suund  | Tähendus                                |
 | --------------------- | ------ | --------------------------------------- |
 | `eslintWarnings`      | `down` | ESLinti hoiatuste arv ei tohi suureneda |
-| `coverage.statements` | `up`   | Lausete katvus ei tohi väheneda         |
-| `coverage.lines`      | `up`   | Ridade katvus ei tohi väheneda          |
-| `coverage.functions`  | `up`   | Funktsioonide katvus ei tohi väheneda   |
-| `coverage.branches`   | `up`   | Harude katvus ei tohi väheneda          |
+| `coverage.statements` | `up`   | Lausete katvus ei tohi langeda          |
+| `coverage.lines`      | `up`   | Ridade katvus ei tohi langeda           |
+| `coverage.functions`  | `up`   | Funktsioonide katvus ei tohi langeda    |
+| `coverage.branches`   | `up`   | Harude katvus ei tohi langeda           |
 
-Baastaseme värskendamiseks pärast tegelikku paranemist tehke järgmist:
+Alusnäidu värskendamiseks pärast tegelikku paranemist:
 
 ```bash
 npm run quality:ratchet -- --update
@@ -433,39 +639,43 @@ git add quality-baseline.json
 ```
 
 Lipp `--update` kirjutab praegu mõõdetud väärtused faili `quality-baseline.json`.
-Kommiteerige see fail koos muudatusega, mis mõõdikut parandas. PR, mis parandab
-mõõdikut ilma baastaset värskendamata, tuvastatakse lipuga `--require-tighten` (etapp 6A.5,
-rakendamine on ootel).
+Paranemise talletamine on väljalaske-/öötöö, mitte funktsiooni-PR-i töö: `--require-tighten`
+(Faas 6A.5) põhjustab talletamata paranemise korral ebaõnnestumise ainult väljalaskerežiimis
+(push, ajastatud käivitus, väljalaske-PR, kohalikud käivitused). Funktsiooni-PR-is (`pr` väravarežiim)
+kuvab see paranemise teabena ja läbib; regressioon põhjustab mõlemas režiimis ebaõnnestumise.
+Kiirusefaasi ajal on see kõikjal soovituslik (`_policy.requireTighten: false`). Vt
+[Genereeritud failid ja tuletatud alusnäidud, mis kirjutatakse väljalaskel](#generated-files-and-derived-baselines-written-at-release).
 
-### CodeQL-i ratchet: värskendamissagedus ja käsitsi käivitamine
+### CodeQL-i ratchet: värskendamise sagedus ja käsitsi käivitamine
 
-`check:codeql-ratchet` loeb **hoidla olekut, mida värskendatakse ajakava alusel — mitte iga PR-i korral.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` annab tulemuseks
-`state: configured`, `schedule: weekly`: see on GitHubi vaikeseadistuse kontroll, mitte iga tõuke
-korral tehtav analüüs. Tagajärg: pärast hoiatusi PARANDAVA PR-i mestimist loeb ratchet
-endiselt vana, suuremat arvu kuni järgmise ajastatud kontrolli käivitumiseni — seega teatab see
-halvenemisest iga avatud PR-i puhul, sealhulgas parandava PR-i enda järelmuudatuste puhul, kuni kontroll järele jõuab.
+`check:codeql-ratchet` loeb **repositooriumi olekut, mida värskendatakse ajakava alusel — mitte iga PR-i puhul.**
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` tagastab
+`state: configured`, `schedule: weekly`: GitHubi vaikeseadistuse skannimine, mitte iga push'i puhul
+tehtav analüüs. Tagajärg: pärast PR-i, mis parandab hoiatused, liidetakse, jätkab ratchet
+vana, suurema arvu lugemist kuni järgmise ajastatud skannimise käivitumiseni — seega teatab see
+regressioonist igas avatud PR-is, sealhulgas parandava PR-i enda järelkäikudes, kuni skannimine
+järele jõuab.
 
-**Käsitsi värskendamine**: `gh workflow run codeql.yml --ref release/vX.Y.Z` käivitab
-analüüsi uuesti ja avaldab hoiatused mõne minuti jooksul uuesti. Lugege esmalt faili `.github/workflows/codeql.yml`
-— selle päis selgitab, et see on ainult `workflow_dispatch`-põhine, **sest see on vastuolus
+**Käsitsi värskendamine**: `gh workflow run codeql.yml --ref release/vX.Y.Z` käivitab analüüsi uuesti
+ja avaldab hoiatused mõne minuti jooksul. Lugege esmalt faili `.github/workflows/codeql.yml`
+— selle päis selgitab, et see on ainult `workflow_dispatch`-i jaoks, **sest see on vastuolus
 GitHubi „vaikeseadistusega“** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Käivitajate `push`/`pull_request`/
-`schedule` taastamine nõuab esmalt **omaniku toimingut**: Settings → Code security →
-CodeQL: Default → Advanced. Ärge lisage käivitajat `schedule:` ilma seda ümberlülitust tegemata — see
-tekitab ainult nurjunud käivitusi.
+processed when the default setup is enabled`). `push`/`pull_request`/
+`schedule`-i päästikute taastamine nõuab esmalt **omaniku toimingut**: Settings → Code security →
+CodeQL: Default → Advanced. Ärge lisage `schedule:`-i päästikut ilma selle lülitita —
+see tekitab ainult ebaõnnestuvaid käivitusi.
 
-**Pärast arvu vähenemist karmistage baastaset** — `node scripts/check/check-codeql-ratchet.mjs
+**Pinguldage alusnäitu pärast arvu vähenemist** — `node scripts/check/check-codeql-ratchet.mjs
 --update` kirjutab uue mõõdetud arvu faili `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, et ratchet ei lubaks vaikimisi halvenemist tagasi
-vana ülempiirini. Läbitöötatud näide (2026-09-02/03): PR #12502 parandas 7 tegelikku hoiatust
-(13 → 6 mõõdetud avatud hoiatust); PR #12530 karmistas fikseeritud baastaseme 11 → 6, et see vastaks tulemusele;
-ülejäänud 6 märgiti seejärel iga hoiatuse kohta esitatud põhjendusega lahendatuks, kuni avatuks jäi 0 hoiatust.
+`metrics.codeqlAlerts.value`, et ratchet ei lubaks vaikimisi regressiooni tagasi vana ülempiirini.
+Töötav näide (2026-09-02/03): PR #12502 parandas 7 tegelikku hoiatust
+(13 → 6 mõõdetud avatud hoiatust); PR #12530 pinguldas külmutatud alusnäidu 11 → 6-ni, et see
+sobiks; seejärel lükati ülejäänud 6 põhjendusega iga hoiatuse kohta tagasi kuni 0 avatud hoiatuseni.
 
-**Hoiatuste lahendatuks märkimise otsustab operaator (range reegel #14)** — ärge märkige CodeQL-i hoiatust
-kunagi lahendatuks ilma tehnilist põhjendust lahendatuks märkimise kommentaari lisamata: `won't fix`
-ülesvooluprotokolli nõude korral, `used in tests` testifixtuuri korral, `false positive`
-sellise puhastaja korral, mida CodeQL ei suuda tuvastada (pretsedent: `docs/security/ERROR_SANITIZATION.md`).
+**Tagasilükkamised on operaatori otsus (Hard Rule #14)** — ärge lükake CodeQL-i hoiatust
+kunagi tagasi, salvestamata tagasilükkamise kommentaari tehnilist põhjendust: `won't fix`
+ülesvooluprotokolli nõude korral, `used in tests` testi-fixtures'i korral, `false positive`
+puhul, kui CodeQL ei suuda desinfitseerijat tuvastada (pretsedent: `docs/security/ERROR_SANITIZATION.md`).
 
 ---
 
@@ -492,6 +702,60 @@ eelistada eraldamist/refaktoreerimist; lähtetaseme uuendamine on lubatud ainult
 põhjenduskirjega. Ära kunagi lükka kombinatsioonist tulenevat nihet kaastöötaja PR-i kanda ega
 uuenda lähtetaset iga PR-i kohta (see peidab tegelikud regressioonid). Esmalt erista põhjus:
 taasesita ebaõnnestumine puhta tipu põhjal prooviks loodud worktree-s, enne kui eeldad, et selle põhjustas sinu PR.
+
+## Genereeritud failid ja tuletatud lähteväärtused (kirjutatakse väljalaske ajal)
+
+Plaan 2026-11-13 („tuletatud arvud ja tekstid lahendatakse ainult väljalaskel”): funktsiooni PR muudab
+**lähteallikat** — `src/shared/constants/providers.ts`, `docs/openapi.yaml`, oskuste kataloogi,
+tasuta taseme kataloogi ja uue e2e spetsifikatsiooni. See ei genereeri sellest lähteallikast arvutatud faile
+uuesti ega kanna mõõdetud paranemist lähteväärtusse. Need failid kirjutatakse ümber üks kord
+väljalaske värskendusega (`release:refresh-derived`) või öise värskendus-PR-i käigus. Enne seda kandis iga
+sõsar-PR endas oma regenereeritud koopiat, mis läks järgmise ühendamisega konflikti (2026-11-13: 321 avatud
+PR-ist 30 kirjutas `PROVIDER_REFERENCE.md` ümber, 26–28 kirjutasid README diagrammid ümber).
+
+**Kontroll.** `check:pr-derived-paths` (`pr-test-policy` töö) nurjub funktsiooni PR-i korral, mis puudutab
+`config/quality/derived-paths/` failiperekonda:
+
+| Perekond    | Failid                                                                                                                                                                                        | Kirjutaja                                                                                                                 |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; kaksteist genereeritud README SVG-d; `skills/*/references/**`; `SKILL.md` failid, millel puudub kohandatud plokk | `release:refresh-derived` (faktid), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                             | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                      |
+
+Kirjutajad (`release/v*`, `chore/derived-*` ja lähteväärtuste puhul `chore/bank-ratchet-*`) on erand; samuti
+on erand PR, mis muudab ainult üht perekonda koos selle kaasnevate failidega (perekonna `generated` puhul:
+genereerimisskriptid, nende testid, agendi oskuste sisendid — `src/shared/constants/agentSkills.ts`, käsitsi
+kirjutatud `skills/**` dokumendid, `docs/openapi.yaml` — ja `changelog.d/**`), näiteks kangelase paigutuse
+muudatus koos regenereeritud SVG-ga või oskuse parandus, mille test loeb regenereeritud `SKILL.md` faile.
+Käsitsi kirjutatud plokiga `<!-- skill:custom-start -->` `SKILL.md` ei kuulu sellesse perekonda: selle
+kohandatud plokk jääb funktsiooni kõrval redigeeritavaks.
+
+**Kontrollid väravarežiimi kaupa** (`scripts/check/lib/gateMode.mjs`; abifail
+`scripts/check/lib/derivedArtifactScope.mjs`):
+
+| Kontroll                                                                            | `release` (push, ajakava, väljalaske-PR, lokaalne)                                   | `pr` (funktsiooni PR, järjekorra partii)                                                                                                                                                                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                           | iga oskus peab ühtima generaatori väljundiga                                         | ainult need oskused, mille genereeritud teksti (väljaspool kohandatud plokki) või `references/` kataloogi PR muudab; vastasel juhul `SKIP reason=pr-mode`                                                                          |
+| `check:generated-artifacts` (README SVG-d + e2e ajastused; vajab täielikku ajalugu) | iga SVG peab ühtima generaatoriga; igal spetsifikatsioonil peab olema ajastuse kirje | ainult need artefaktid, mida PR muudab; ülejäänud `SKIP reason=pr-mode`; erinevuse aluse puudumisel → hinnatakse iga artefakti (vaikimisi tagasilükkav)                                                                            |
+| README SVG-de baitide võrdluse testid (`tests/unit/docs/readme-*-svg.test.ts`)      | iga SVG                                                                              | ainult SVG, mida PR muudab, kui alus lahendub; `test-unit`i pinnapealses PR-i väljavõttes alus puudub, seega jäetakse test seal vahele teatega `SKIP reason=base-unresolved` ja võrdluse eest vastutab `check:generated-artifacts` |
+| e2e ajastuste täielikkus (`tests/unit/balance-e2e-shards.test.ts`)                  | igal spetsifikatsioonil peab olema kirje                                             | sama reegel nagu SVG-testide puhul (uus spetsifikatsioon käivitatakse mediaankaaluga)                                                                                                                                              |
+| `check-quality-ratchet.mjs --require-tighten`                                       | lähteväärtusse kandmata paranemine nurjub (välja arvatud `_policy`)                  | paranemisest teatatakse, kuid see ei põhjusta kunagi nurjumist; regressioon põhjustab endiselt nurjumise                                                                                                                           |
+
+Release-režiim säilitab nende kontrollide varasemad hinnangud, väljumiskoodid ja sõnumid; lisada võidakse kõige rohkem
+üks rida, mis nimetab lahendatud režiimi (`[agent-skills-sync] mode=release (auto: local run)`).
+Testid jäetakse `node:test`-i suvandi `{ skip: releaseOnlyUnlessTouched(...) }` kaudu vahele; `check:test-masking`
+loetleb selle ainult aruandluse plokis (see ei ole ei `.skip(` ega `{ skip: true }`, seega
+ei lähe see arvesse sunnitud vahelejätmisena). `check:generated-artifacts` käivitatakse seal, kus alus on lahendatav: töö
+`lint` (`fetch-depth: 0`) käivitab selle kohe pärast `check:agent-skills-sync`. Kohapeal
+näitab `npm run check:generated-artifacts -- --mode=pr`, mida see samm PR-i puhul hindab. `check:docs-counts`-i
+pakkujate koguarvu ristkontroll („Provider reference total (doc vs live modules)”) kuulub loenduste väravasse ja järgib
+selle värava enda režiime.
+
+Meelega ei kuulu ühtegi perekonda: inimeste otsustatud poliitikafailid (`gate-manifest.json`, lubatud loendid,
+`admission-policy.json`, `provider-assets-provenance.jsonl`, `model-lifecycle.json`) ning ülemmäärad, mida funktsiooni PR võib
+olla vaja koos koodiga muuta (`quality-baseline.json` mõõdikukirjed, tüübikontrolli-/failisuuruse-/keerukuse baasväärtused,
+`eslint-suppressions.json` — mida pre-commit-i ESLint-i käitamine kärbib, kui PR parandab külmutatud rikkumise).
+Ka `src/i18n/routeNamespaces.generated.json` on genereeritud, kuid jääb funktsiooni PR-idesse: rakendus impordib selle
+käitusajal, mistõttu ei saa see värskendust oodata.
 
 ## Põrkmehhanismi piirmäärade langetamise talletamine — allapoole liikumine (#8584)
 
@@ -542,37 +806,34 @@ ilma ülevaatuseta harusse jõuda.
 
 ## Lubatud loendi poliitika
 
-Iga kontroll, mis ei saa olemasolevate rikkumiste tõttu ebaõnnestuda, kasutab fikseeritud lubatud loendit
+Iga kontroll, mis ei saa varasemast olemasolevate rikkumiste tõttu ebaõnnestuda, kasutab fikseeritud lubatud loendit
 (nt `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Poliitika on järgmine:
 
-**Parandage algpõhjus; kasutage lubatud loendit ainult siis, kui rikkumine on juba olemas ja
+**Parandage algpõhjus; kasutage lubatud loendit ainult juhul, kui rikkumine on varasemast olemas ja
 seda ei saa samas PR-is parandada.**
 
-Kirje lisamisel lubatud loendisse:
+Kui lisate lubatud loendisse kirje:
 
-1. Lisage kommentaar koos põhjendusega.
-2. Viidake jälgimisülesandele (nt `// #3498 — 2. etapi funktsioon, pole veel rakendatud`).
-3. Eemaldage kirje samas PR-is, mis rikkumise parandab — aegunud kirje, mis enam
-   aktiivset rikkumist ei eira, on ise viga (pärast rakendamist nurjab 6A.3 aegunud jõustamise kontroll
-   üksiku lubatud loendi kirje korral kontrollvärava läbimise).
+1. Lisage koos põhjendusega kommentaar.
+2. Viidake jälgitavale ülesandele (nt `// #3498 — Phase 2 feature, not yet implemented`).
+3. Eemaldage kirje samas PR-is, millega rikkumine parandatakse — aegunud kirje, mis enam
+   aktiivset rikkumist ei varja, on ise defekt (6A.3 aegunud jõustamine
+   põhjustab pärast rakendamist orbunud lubatud loendi kirje tõttu kontrolli
+   ebaõnnestumise).
 
-**Ärge** lisage lubatud loendisse kirjeid selleks, et testid kiiremini läbiksid. Roheline kontrollvärav koos kasvava
+**Ärge lisage lubatud loendi kirjeid selleks, et testid kiiremini läbiksid.** Roheline kontroll koos kasvava
 lubatud loendiga loob petliku kvaliteeditunde.
 
-### Kui kontrollvärav teie PR-is ebaõnnestub
+### Kui kontroll teie PR-is ebaõnnestub
 
-1. **Lugege kontrollvärava väljundit hoolikalt** — see ütleb täpselt, milline fail või sümbol
-   reeglit rikkus.
-2. **Parandage rikkumine** — enamik kontrollväravaid on deterministlikud failisüsteemi kontrollid, mis läbivad testi kohe,
-   kui kood on korrektne.
-3. **Kui rikkumine on juba olemas** (st teie ei tekitanud seda, kuid kontrollvärav
-   nüüd hõlmab seda): lisage lubatud loendisse kirje koos põhjendava kommentaari ja jälgimisülesandega.
-4. **Kui kontrollvärav on põrkmehhanism** (koodikate, ESLinti hoiatused, dubleerimine, keerukus):
-   teie muudatus halvendas mõõdikut. Parandage algpõhjus või käivitage (harvadel juhtudel)
-   `npm run quality:ratchet -- --update`, kui muudatus on tahtlik ja mõõdiku
-   halvenemine vastuvõetav — kuid dokumenteerige PR-i kirjelduses põhjus.
-5. **Nõuandvad kontrollväravad** (`continue-on-error: true`) on informatiivsed — need ei blokeeri
-   liitmist, kuid kuvatakse CI kokkuvõttes. Parandage need sellegipoolest.
+1. **Lugege kontrolli väljund hoolikalt läbi** — see näitab täpselt, milline fail või sümbol reeglit rikkus.
+2. **Parandage rikkumine** — enamik kontrolle on deterministlikud failisüsteemi kontrollid, mis läbivad kohe, kui kood on korrektne.
+3. **Kui rikkumine on varasemast olemas** (st teie seda ei tekitanud, kuid kontroll hõlmab seda nüüd): lisage põhjendava kommentaari ja jälgitava ülesandega lubatud loendi kirje.
+4. **Kui tegemist on ratchet-kontrolliga** (katvus, ESLinti hoiatused, dubleerimine, keerukus):
+   teie muudatus halvendas mõõdikut. Parandage aluseks olev probleem või (harvadel juhtudel) käivitage
+   `npm run quality:ratchet -- --update`, kui muudatus on tahtlik ja mõõdiku halvenemine vastuvõetav — kuid dokumenteerige PR-i kirjelduses, miks seda tehti.
+5. **Teavitavad kontrollid** (`continue-on-error: true`) on informatiivsed — need ei blokeeri
+   liitmist, kuid kuvatakse CI kokkuvõttes. Parandage need siiski.
 
 ---
 
@@ -602,115 +863,119 @@ automaatselt (MCP↔LSP silla valite ja kontrollite teie); vigane kirje logib ai
 
 ---
 
-## Ratsionaliseerimise mahajäämus (ROI ülevaatus — 9. etapp, 3. laine)
+## Ratsionaliseerimise mahajäämus (ROI ülevaade — etapp 9, laine 3)
 
-See inventuur viidi 2026-06-17 vastavusse failiga `ci.yml` (eelmisest versioonist puudusid
+See inventuur viidi 2026-06-17 kooskõlla failiga `ci.yml` (eelmisest versioonist puudusid
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Kooskõlastatud kogumi ROI ülevaatus
-tuvastas järgmised ratsionaliseerimise kandidaadid. **Ühendamised on mehaanilised CI
-muudatused; ümberlülitamised/eemaldamised on käitaja otsustada olevad poliitikavalikud.** Midagi alltoodust
-pole veel rakendatud.
+`check:codeql-ratchet`, `check:pr-evidence`). Kooskõlastatud kogumi ROI ülevaates
+tuvastati järgmised ratsionaliseerimise kandidaadid. **Ühendamised on mehaanilised CI
+muudatused; ümberlülitamised/eemaldamised on operaatorile jäetud poliitikaotsused.** Mitte midagi allolevast pole veel rakendatud.
 
-**Ülalpool on dokumenteerimata ka** (soovituslik, madala signaaliga): töö `docs-lint`
-(markdownlint + Vale, kogu tööl `continue-on-error`) ja eraldiseisvad skanneri töövood
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` asub failis
-`quality-baseline.json`, kuid pole failis `ci.yml` ühendatud blokeeriva põrkmehhanismiga — mõõdik on
-praegu orvuks jäänud.
+**Samuti on ülal dokumenteerimata** (soovituslik, vähese signaaliga): töö
+`docs-lint` (markdownlint + Vale, kogu töö `continue-on-error`) ning eraldiseisvad skanneri töövood
+`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` on failis
+`quality-baseline.json`, kuid seda ei ole failis `ci.yml` ühendatud blokeeriva kasvupiiranguga — mõõdik on
+praegu orb.
 
-### Ühendamine / dubleerimise eemaldamine (mehaaniline, väiksem risk)
+### Ühendamine / duplikaatide eemaldamine (mehaaniline, väiksema riskiga)
 
-Iga kandidaati kontrolliti 2026-06-17 aktiivse kontrollvärava oleku suhtes (usalda, kuid kontrolli);
-mitu „ilmselget“ ühendamist osutusid varjatud võlga sisaldavaks ega ole **puhtad** asendused.
+Iga kandidaat valideeriti 2026-06-17 aktiivse värava oleku suhtes (usalda, kuid kontrolli);
+mitme „ilmse” ühendamise puhul ilmnes varjatud tehniline võlg ning need **ei ole**
+puhastatud otseasendused.
 
-- **`check:docs-sync` käivitub kaks korda** — eraldiseisvalt töös `lint` ning uuesti `check:docs-all` (`docs-sync-strict`) sees ja husky commit'i-eelses konksus. ✅ **TEHTUD** — eraldiseisev `lint`-käivitus eemaldatud.
-- **CVE-skannimine** — ❌ **EI OLE puhas ühendamine.** `audit:deps` nurjub kohe iga kõrge/kriitilise CVE korral; `check:vuln-ratchet` (osv) nurjub ainult baasjoonega võrreldes toimunud _regressiooni_ korral (praegu 1 MODERATE). Semantika on erinev — `audit:deps` eemaldamine kaotaks absoluutse kõrge/kriitilise taseme kontrollvärava. Säilitage mõlemad.
-- **Tsüklite tuvastamine** — ✅ **TEHTUD** (#15159 G-01/G-02). Siinne vana tekst nimetas `check:cycles` kontrolli „roheliseks, kureeritud“ kontrollväravaks ja põhjendas selle blokeerivana hoidmist sellega, et `check:circular-deps` (dpdm) tuvastas 91 tsüklit. See roheline tulemus oli **valepositiivne roheline**: `check:cycles` skannis 5 alamkataloogi (450 faili), sobitas ainult staatilisi `import|export … from` konstruktsioone ning jättis välja kõik `@/` ja `@omniroute/open-sse/` spetsifikaatorid, mistõttu ei suutnud see näha dünaamilise impordi ja aliase tsükleid, mis repositooriumis domineerisid. Parandatud: kontrollvärav läbib nüüd kataloogid `src` + `open-sse` (5023 faili), kogub spetsifikaatorid TypeScripti AST-st (seega läheb `import("…")` arvesse, kuid tüübipositsioonis `typeof import("…")` mitte) ning lahendab tsconfigi `paths`-väärtused. See leiab **14** tsüklit, mitte 0. Kuna 14 olemasolevat tsüklit ei saa kontrollvärava PR-is parandada, on `check:cycles` nüüd **põrkmehhanism** (`--ratchet`, ülempiir `metrics.cycles.value = 14` failis `quality-baseline.json`, `direction: down`) — see blokeerib iga _regressiooni_ ja arv saab ainult väheneda. CI käivitab `npm run check:cycles:ratchet`. Vähendamine toimub koos üksusega **A-01**. `check:circular-deps` (dpdm) jääb laiema teise arvamusena soovituslikuks.
-- **Keerukus** — ✅ **TEHTUD** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): üks ESLinti läbimine, loendamine `ruleId` järgi, et tsüklomaatilise keerukuse + maksimaalse ridade arvu ja kognitiivse keerukuse baasjooned püsiksid sõltumatuna; eraldiseisvad `check:complexity` / `check:cognitive-complexity` säilivad kohaliku `--update` jaoks.
-- **`/api` hallutsinatsioonivastane kontroll** — ✅ **TEHTUD** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): üks `src/app/api` failisüsteemi inventuur, openapi-routes + docs-symbols annavad endiselt aru sõltumatult; eraldiseisvad kontrollid säilivad kohalikeks käivitusteks.
-- **`check:node-runtime` käivitub 11 töös** — ⚠️ **madal ROI.** Igaüks kasutab eraldi käitajat ja kontroll võtab <1 s; kogusääst ~10 s, kuid selle hinnaks oleks odava tööpõhise kaitse kaotamine. Muudatuste vaeva ei väärt.
-- **`typecheck:noimplicit:core` CI lintimisel** — ✅ **lint-tööst eemaldatud** (oli soovituslik `continue-on-error`); blokeeriv tüübipind on `typecheck:core` + `check:type-coverage`. Kohalik skript säilitati.
+- **`check:docs-sync` käivitatakse kaks korda** — eraldiseisvana `lint` töös ja uuesti `check:docs-all` sees (`docs-sync-strict`) ning husky pre-commit-hook’is. ✅ **TEHTUD** — eraldiseisev `lint`-i väljakutse eemaldati.
+- **CVE-skannimine** — ❌ **EI OLE puhas ühendamine.** `audit:deps` blokeerib kriitilised teated ja kõigis viies lockfile’is puudulikud auditid, teatades samal ajal praeguse poliitika kohaselt kõrge taseme teadetest hoiatusena; `check:vuln-ratchet` (osv) ebaõnnestub ainult kontrollitud baastasemega võrreldes toimunud _regressiooni_ korral ning nõuab mõõtmiste puudumise korral nende olemasolu. Semantika on erinev — `audit:deps` eemaldamine kaotaks absoluutse kriitilise värava ja sõltumatu pakettide auditi tõendid. Hoida mõlemad.
+- **Tsüklite tuvastamine** — ✅ **TEHTUD** (#15159 G-01/G-02). Vana tekst nimetas siin `check:cycles`-it „roheliseks, kureeritud” väravaks ja põhjendas selle blokeerivana hoidmist, sest `check:circular-deps` (dpdm) teatas 91 tsüklist. See roheline olek oli **vale roheline**: `check:cycles` skannis 5 alamkataloogi (450 faili), leidis ainult staatilised `import|export … from` konstruktsioonid ning jättis kõrvale kõik `@/` ja `@omniroute/open-sse/` spetsifikaatorid, mistõttu ei suutnud see näha hoidlas domineerinud dünaamilise impordi ja aliase tsükleid. Parandus: värav läbib nüüd `src` + `open-sse` (5023 faili), kogub spetsifikaatorid TypeScripti AST-st (seega `import("…")` läheb arvesse, kuid tüübi positsioonis olev `typeof import("…")` mitte) ning lahendab tsconfig-i `paths`-id. See leiab 14 tsüklit, mitte 0. Kuna 14 olemasolevat tsüklit ei saa värava PR-is parandada, on `check:cycles` nüüd **kasvupiirang** (`--ratchet`, ülempiir `metrics.cycles.value = 14` failis `quality-baseline.json`, `direction: down`) — see blokeerib kõik _regressioonid_ ning arv saab ainult väheneda. CI käivitab `npm run check:cycles:ratchet`. Vähendamistöö toimub koos **A-01**-ga. `check:circular-deps` (dpdm) jääb laiema teise arvamusena soovituslikuks.
+- **Keerukus** — ✅ **TEHTUD** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): üks ESLinti läbimine, loendamine reegli ID järgi, nii et tsüklomaatilise keerukuse + max-lines-i ja kognitiivse keerukuse baastasemed jäävad sõltumatuks; individuaalsed `check:complexity` / `check:cognitive-complexity` jäävad kohalikuks `--update`-i kasutuseks.
+- **`/api` hallutsinatsioonivastane kontroll** — ✅ **TEHTUD** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): üks FS-i inventuur asukohas `src/app/api`, openapi-routes + docs-symbols annavad endiselt aru sõltumatult; individuaalsed kontrollid jäävad kohalikuks käivitamiseks.
+- **`check:node-runtime` käivitatakse 11 töös** — ⚠️ **väike ROI.** Igaüks kasutab eraldi käivitajat ja kontroll kestab alla 1 sekundi; koguvõit on umbes 10 sekundit, kuid selle arvelt kaoks odav tööpõhine kaitse. Muudatuste hulka arvestades ei ole see väärt.
+- **`typecheck:noimplicit:core` CI lint’is** — ✅ **eemaldatud lint-tööst** (oli soovituslik `continue-on-error`); blokeeriv tüübi pind on `typecheck:core` + `check:type-coverage`. Kohalik skript on alles.
 
-### Ümberlülitamine / otsustamine (käitaja poliitika)
+### Ümberlülitamine / otsustamine (operaatori poliitika)
 
-- `check:openapi-security-tiers` (soovituslik) — ❌ **EI OLE puhtalt ümberlülitatav.** See lõpetab koodiga 0, kuid hoiatab, et mitmel `traffic-inspector` marsruudil jaotises `LOCAL_ONLY_API_PREFIXES` puudub annotatsioon `x-loopback-only: true`. Selle jõustamiseks tuleb esmalt lisada need annotatsioonid faili `openapi.yaml`.
-- `typecheck:noimplicit:core` (soovituslik) — blokeeriv `check:type-coverage` põrkmehhanism katab seda suuresti. Muutke see põrkmehhanismiks või eemaldage üleliigne teine `tsc` läbimine.
-- `test:vitest:ui` (nüüd **blokeeriv**) — olemasolevad tõrked on failis `vitest.config.ts` selgesõnaliselt välistatud jälgimiskommentaaridega `// #8618`; uued tõrked nurjavad töö.
-- `check:secrets` (gitleaks, blokeeriv põrkmehhanism, mis on külmutatud 3 dokumenteeritud valepositiivse tulemuse juures) — lisage need 3 lubatud loendisse, et jõuda nullini, või alandage kontroll soovituslikuks. Kattub GitHubi sisseehitatud saladuste skannimisega + `check:public-creds`.
-- `check:pr-evidence` (blokeeriv, otsib PR-i kirjeldusest teksti) — suur valepositiivsete tulemuste risk; eemaldamine nõrgendaks range reegli nr 18 jõustamist, seega on see tõeline poliitikaotsus.
-- `semgrep` (soovituslik eraldiseisev kontroll) — kattub OWASP-i kategooriate puhul CodeQL-iga; ühendage selle baasjoon põrkmehhanismiga või eemaldage.
-
----
+- `check:openapi-security-tiers` (soovituslik) — ❌ **EI OLE puhtalt ümberlülitatav.** See lõpetab koodiga 0, kuid hoiatab, et mitmel `traffic-inspector`-i marsruudil `LOCAL_ONLY_API_PREFIXES` all puudub annotatsioon `x-loopback-only: true`. Selle jõustamiseks tuleb need annotatsioonid esmalt faili `openapi.yaml` lisada.
+- `typecheck:noimplicit:core` (soovituslik) — blokeeriv `check:type-coverage`-i kasvupiirang katab selle suuresti. Lülitada kasvupiiranguks või eemaldada üleliigne teine `tsc` läbimine.
+- `test:vitest:ui` (nüüd **blokeeriv**) — olemasolevad tõrked on failis `vitest.config.ts` sõnaselgelt välja jäetud kommentaaridega `// #8618`; uued tõrked põhjustavad töö ebaõnnestumise.
+- `check:secrets` (gitleaks, blokeeriv kasvupiirang, mis on külmutatud 3 dokumenteeritud valepositiivse tulemuse juures) — lubada need 3, et jõuda nullini, või muuta kontroll soovituslikuks. Kattub GitHubi loomuliku saladuste skannimise + `check:public-creds`-iga.
+- `check:pr-evidence` (blokeeriv, otsib PR-i keha tekstist) — suur valepositiivsete tulemuste risk; eemaldamise korral nõrgeneks Hard Rule #18 jõustamine, seega on see tõeline poliitikaotsus.
+- `semgrep` (eraldiseisev soovituslik) — kattub OWASP-i perekondade puhul CodeQL-iga; ühendada selle baasväärtus kasvupiiranguga või eemaldada.
 
 ## Seotud dokumentatsioon
 
-- Tarkvara tarneahel (päritolu, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Tarneahel (päritolu, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — võtmekogumite võrdsuse kontroll
+#### `check-key-completeness` — võtmekogumi võrdsuse värav
 
 `scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, töö `i18n-ui-coverage`).
-Võrdleb iga faili `src/i18n/messages/<locale>.json` lehtvõtmete kogumit failiga `en.json` ja nurjub
-mis tahes puuduva või üleliigse lehe korral, olenemata sellest, millal võti lisati. Kohatäited
-`__MISSING__:` loetakse olemasolevaks (nende sisu kuulub suhtarvukontrolli vastutusalasse). See on
-kahe erinevuspõhise/protsendipõhise kontrolli absoluutne täiendus: `check-ui-keys-coverage` nõuab iga
-lokaadi puhul vähemalt 80% katvust (43 puuduvat võtit umbes 13 000-st annavad endiselt tulemuseks
-99,7%) ja `check-new-key-coverage` hindab ainult võtmeid, mille PR lisab faili `en.json`. Lokaadipakk
-luuakse selle päeva failist `en.json`, mil selle haru luuakse, ning seda tõlgitakse mitu päeva, samal
-ajal kui baasharusse lisatakse jätkuvalt võtmeid; paki PR ise ei lisa ühtegi võtit, mistõttu ei
-reageerinud kumbki sõsarkontroll, kui pakk 1 (#13044) liideti nii, et üheksas lokaadis puudus 43
-võtit, ja pakk 2 (#13660) nii, et kaheksas lokaadis puudus 10 võtit (2026-09-15). Kõrvalda tõrge
-käsuga `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; `extra`-leht
-tähendab, et lähtefailist on see eemaldatud — kustuta see lokaadist. `--warn` raporteerib ilma
-nurjumiseta. `--catalog=cli` käitab sama võrdlust kataloogis `bin/cli/locales`
-(`npm run i18n:check-keys:cli`); mõlemad sammud asuvad töös `i18n-ui-coverage`.
+Võrdleb iga `src/i18n/messages/<locale>.json` lehtvõtmete kogumit failiga `en.json` ja ebaõnnestub
+iga puuduva või üleliigse lehtvõtme korral, sõltumata võtme lisamise ajast. `__MISSING__:` kohatäited
+loetakse olemasolevateks (nende sisu on suhtarvuvärava äriline vastutus). See on kahe
+erinevuspõhise/protsendipõhise värava absoluutne täiendus: `check-ui-keys-coverage` jõustab iga
+lokaliseerimise puhul 80% alampiiri (43 puuduvat võtit ligikaudu 13 000 hulgast tähendab endiselt
+99,7%) ja `check-new-key-coverage` hindab ainult võtmeid, mille PR lisab faili `en.json`. Lokalisatsiooni
+partii luuakse selle päeva `en.json` põhjal, mil haru luuakse, ning tõlgitakse päevi, samal ajal kui
+baas jätkab võtmete lisamist; partii PR ise võtmeid ei lisa, seega jäid mõlemad sõsarkontrollid
+vaikseks, kui partii 1 (#13044) jõudis üheksas lokaliseerimises kohale 43 võtme võrra puudulikuna ja
+partii 2 (#13660) kaheksas 10 võtme võrra puudulikuna (2026-09-15). Paranda punane tulemus käsuga
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; `extra`-leht tähendab,
+et lähtefail eemaldas selle — `sync-ui-keys` eemaldab selle (`--prune-extra`, vaikimisi). `--warn`
+annab teada ilma ebaõnnestumata.
+`--catalog=cli` käivitab sama võrdluse kataloogis `bin/cli/locales` (`npm run i18n:check-keys:cli`);
+mõlemad sammud asuvad töös `i18n-ui-coverage`. Absoluutne kontroll töötab ainult väljalaskerežiimis:
+funktsiooniharus näeb PR `SKIP reason=pr-mode` ja parandus käivitatakse väljalaske värskenduses
+või tõlkelaine ajal, mitte funktsiooni-PR-is; PR-i puhul, mis muudab lokaliseerimiskatalooge,
+hinnatakse iga kataloogi selle asemel ühinemise aluse suhtes (vt töö `i18n-ui-coverage` jaotist
+„Kaks režiimi“).
 
-#### `check-new-key-coverage` — uute võtmete i18n-kontroll
+#### `check-new-key-coverage` — uute võtmete i18n-värav
 
-Kontrolli `check-ui-value-drift` sõsarkontroll. Too tuvastab ingliskeelse väärtuse, mis **kirjutati
-ümber**, samal ajal kui selle tõlked jäid muutmata; see kontroll tuvastab ingliskeelse võtme, mis
-**lisati**, kuid mida mõni lokaat ei saanud.
+`check-ui-value-drift`-i sõsarkontroll. See tuvastab ingliskeelse väärtuse, mis **kirjutati ümber**,
+samal ajal kui selle tõlked jäid muutmata; see tuvastab ingliskeelse võtme, mis **lisati**, samal ajal
+kui mõni lokaliseerimine seda kunagi ei saanud.
 
-`check-ui-keys-coverage` ei suuda sellist olukorda tuvastada: see nõuab iga lokaadi puhul minimaalset
-katvusprotsenti ning üheteistkümne puuduva võtme korral umbes 13 000-st jääb katvuseks 99,9%.
-Keelepõhine protsent ei suuda väljendada olukorda „see funktsioon avaldati tõlkimata“ — terve
-funktsioon võib jõuda uude lokaati ilma igasuguse tekstita, ilma et number üldse muutuks.
+`check-ui-keys-coverage` ei näe seda juhtumit: see jõustab lokaliseerimise kohta protsendipõhist
+alampiiri ning üksteist puuduvat võtit ligikaudu 13 000 lehtvõtme hulgast jätab katvuseks 99,9%.
+Keelepõhine protsent ei suuda väljendada olukorda „see funktsioon tarniti tõlkimata“ — terve
+funktsioon võib jõuda uude lokaliseerimisse ilma tekstita ja number ei muutu kunagi.
 
-Juhtum, mille see fikseerib: Orchestration Canvase 3. etapis tõlgiti selle üksteist võtit kõigisse
-tol ajal olemas olnud 42 lokaati. Mõni tund hiljem suurendas EL-i keelte pakk (#13044) hoidla
-lokaadid 51-ni ning üheksa uut lokaati (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) ei
-saanud neid võtmeid kunagi. `deepMergeFallback` asendab puuduva võtme ingliskeelse tekstiga, mistõttu
-oli tõrke ilminguks tõlkimata, mitte tühi kasutajaliides — tegelik probleem, mis jäi oma ülesehituse
-tõttu märkamatuks.
+Sündmus, mida see kontroll modelleerib: Orchestration Canvase 3. faas tõlkis oma üksteist võtit
+tol ajal olemas olnud 42 lokaliseerimisse. Mõni tund hiljem viis EL-i keelte partii (#13044) hoidla
+51 lokaliseerimiseni ning üheksa uut (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) ei saanud
+neid kunagi. `deepMergeFallback` asendab puuduva võtme ingliskeelsega, seega oli rikkevormiks
+tõlkimata kasutajaliides, mitte tühi kasutajaliides — tõeline ja olemuslikult vaikne.
 
-Nagu sõsarkontrollgi, on see **erinevusteadlik**: see võrdleb liitmisbaasi ingliskeelset versiooni
-tööpuuga, mistõttu olemasolevad lüngad jäävad muutumatuks ja kontrolli sisselülitamiseks ei olnud
-migraati vaja.
+Nagu sõsarkontroll, on ka see **erinevusteadlik**, võrreldes ingliskeelset faili ühinemise aluses
+tööpuiduga, nii et olemasolevad puudujäägid jäävad muutmata ja värava sisselülitamiseks polnud
+migratsiooni vaja.
 
-**Marker `__MISSING__:<english>` ei rahulda seda kontrolli (alates 2026-09-17).** Varem oli see
-dokumenteeritud edasilükkamisviis — käitusaeg kasutab korrektset ingliskeelset varuvarianti —, kuni
-kaheksa funktsiooni-PR-i lisasid 2026-09-16 kokku 61 võtit ja lisasid tõlkimise asemel markeri kõigisse
-65 lokaati: see kontroll aktsepteeris neid kõiki, miski ei blokeerinud PR-e ning blokeeriv tegeliku
-tõlke suhtarvukontroll nurjus seejärel väljalaske viimase versiooni puhul kõigil (pt-BR 3,2% > 2,5%
+**`__MISSING__:<english>` marker ei rahulda seda alates 2026-09-17.** Varem oli see dokumenteeritud
+edasilükkamisviis — käitusaeg langeb tagasi korrektsele ingliskeelsele tekstile — kuni kaheksa
+funktsiooni-PR-i lisasid 2026-09-16 61 võtit ja märkisid need kõigis 65 lokaliseerimises markeri abil
+tõlkimise asemel: see värav aktsepteeris kõik võtmed, miski ei blokeerinud PR-e, ning blokeeriv
+tegeliku tõlke suhtarvuvärav ebaõnnestus seejärel väljalaske sihis kõigi jaoks (`pt-BR` 3,2% > 2,5%
 
-- 0,5). Marker loetakse nüüd puuduvaks tõlkeks. Kõrvalda tõrge käsuga
-  `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` või
-  kõigis lokaatides paralleelselt käsuga `npm run i18n:translate-new-keys`
-  (`scripts/i18n/translate-new-keys.sh`, toimib lahtiühendatult, keeldub käivitumast ilma
-  keskkonnamuutujateta `OMNIROUTE_TRANSLATION_*`). Võti, mis peab jääma ingliskeelseks (fikseeritud
-  toote-, mootori- või lipunimi), kuulub faili `scripts/i18n/untranslatable-keys.json`, mitte kunagi
-  markeri taha. `vi` keelab markerid täielikult (`tests/unit/i18n-vi-completeness.test.ts`).
+- 0,5). Markerit hinnatakse nüüd puuduva tõlkena. Ainult väljalaskerežiimis alates 2026-11-13:
+  funktsiooni-PR näeb `SKIP reason=pr-mode` ning väljalaske-PR-is (`BASE_REF=origin/main`) hindab
+  värav kõiki võtmeid, mille tsükkel lisas. Paranda punane tulemus väljalaske värskenduses või
+  tõlkelaine ajal käsuga `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`
+  või paralleelselt kõigis lokaliseerimistes käsuga `npm run i18n:translate-new-keys`
+  (`scripts/i18n/translate-new-keys.sh`, eraldatud käivituseks ohutu, keeldub käivitumast ilma
+  `OMNIROUTE_TRANSLATION_*` keskkonnata). Võti, mis peab jääma ingliskeelseks (fikseeritud toote-,
+  mootori- või lipunimi), kuulub faili `scripts/i18n/untranslatable-keys.json`, mitte kunagi markeri
+  taha. `vi` keelab markerid täielikult (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — ootele pandud testide kontroll
+#### `check-vitest-exclusions` — pargitud testi värav
 
-Fail, mis on faili `vitest.config.ts` loendis `exclude`, on test, mida ei käitata, kuid puu lugejale
-näib see katvusena. Kommentaari `// #8618 — pre-existing failure; remove this exclusion when fixed`
-taha kogunes kuuskümmend kaks faili. Probleem #8618 suleti 2026-08-11, samal ajal kui selle jälgitav
-loend kasvas 45 kirjelt 62-ni ning iga uus kirje päris kommentaari, mis viitas suletud probleemile.
-Kui loend lõpuks failhaaval üle mõõdeti (#13204), **läbis 62 failist 51 testi praeguse puu suhtes
-ilma lähtekoodi muutmata**.
+Fail `vitest.config.ts`-i `exclude`-loendis on test, mida ei käivitata, ja see näeb puu lugejale
+välja nagu katvus. Kommentaari
+`// #8618 — pre-existing failure; remove this exclusion when fixed` taha kogunes 62 faili. Probleem
+#8618 suleti 2026-08-11, samal ajal kui selle jälgitav loend kasvas 45 kirjelt 62-le, kusjuures iga
+uus kirje päris surnud probleemile viitava kommentaari. Kui loend lõpuks faili kaupa mõõdeti
+(#13204), läbisid **51 faili 62-st praeguse puu korral ilma lähtekoodi muutmata**.
 
-Kontroll nõuab, et iga välistus, mis osutab tegelikule failile, (a) nimetaks jälgimisprobleemi ja
-(b) esineks failis `config/quality/vitest-exclusions.json` koos mõõdetud olekuga, nii et välistuse
-lisamine oleks eraldi failis ülevaadatav erinevus, mitte lihtsalt järjekordne rida 60 kirjega massiivis.
-Kontroll ei käita välistatud teste tahtlikult uuesti — see võtab umbes 10 minutit ja kuulub
-perioodilisse töösse; register talletab iga testi viimase mõõtmise aja.
+Värav nõuab, et iga välistus, mis lahendub tegelikuks failiks, (a) nimetaks jälgitava probleemi ja
+(b) esineks failis `config/quality/vitest-exclusions.json` koos mõõdetud olekuga, nii et ühe lisamine
+on ülevaadatav erinevus spetsiaalses failis, mitte järjekordne rida 60-kirjelises massiivis. See ei
+käivita välistatud teste tahtlikult uuesti — selleks kulub ligikaudu 10 minutit ja see kuulub
+perioodilisse töösse; inventar salvestab, millal iga testi viimati mõõdeti.

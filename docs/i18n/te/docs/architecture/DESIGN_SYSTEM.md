@@ -16,151 +16,100 @@
 > సిరిలిక్, గ్రీక్ మరియు వియత్నామీస్ కోసం Inter, అలాగే `html[dir="rtl"]` కింద మాత్రమే అరబిక్ లిపి కోసం Vazirmatn ఉపయోగించబడతాయి.
 > ప్రతి ఐకాన్ ఒక Lucide గ్లిఫ్.
 
-## 1. అంశాలు ఎక్కడ ఉంటాయి
+## 1. విషయాలు ఎక్కడ ఉంటాయి
 
-- **కిట్.** `packages/ui-kit/src` అనేది
-  `packages/ui-kit/UPSTREAM.md`లో పిన్ చేసిన కమిట్ వద్ద ఉన్న అప్స్ట్రీమ్ `src/` యొక్క బైట్-ఫర్-బైట్ నకలు (ఇది లైసెన్స్ అనుమతిని కూడా నమోదు చేస్తుంది); స్థానిక ప్యాచ్లను `PATCHES.md` జాబితా చేస్తుంది
-  (ఏవీ లేవు). ఇది బిల్డ్ లేకుండా సోర్స్గా వినియోగించబడుతుంది: `next.config.mjs` దాన్ని ట్రాన్స్పైల్ చేస్తుంది, అలాగే
-  `tsconfig.json`లో `@omniroute/ui-kit` → `packages/ui-kit/src` మరియు `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*`గా మ్యాప్ చేయబడతాయి (`vitest.config.ts` మరియు `vitest.mcp.config.ts`లో కూడా అదే అలియాస్ ఉంటుంది). కిట్ కాంపోనెంట్ను
-  దాని సబ్పాత్ ద్వారా (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) ఇంపోర్ట్ చేయండి, ఎప్పుడూ
-  `@omniroute/ui-kit` బారెల్ ద్వారా చేయవద్దు: ఆ బారెల్ ప్రతి కాంపోనెంట్ను (డేట్ పికర్తో సహా)
-  ప్రతి ఇంపోర్టర్లోకి తీసుకువస్తుంది. కిట్ స్టైల్షీట్ `src/app/globals.css` ద్వారా ప్రవేశిస్తుంది
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, సంపూర్ణ షీట్: కోర్ `ci-ui.css`తో పాటు ప్రతి ప్యాటర్న్ ఫ్యామిలీ).
-- **టోకెన్లు.** `packages/ui-kit/src/ci-tokens.css`లో `--ci-*` టోకెన్లు ప్రకటించబడతాయి; `src/app/globals.css`
-  వాటిని పాత OmniRoute పేర్లతో (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) అనుసంధానిస్తుంది, అందువల్ల ఇప్పటికే ఉన్న `var(--color-*)` రీడ్లు మరియు Tailwind
-  యుటిలిటీలు పని చేస్తూనే ఉంటాయి. కొత్త కోడ్ Tailwind యుటిలిటీలను (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) లేదా కిట్ క్లాస్లను ఉపయోగిస్తుంది — హెక్స్ విలువను
-  ఎప్పుడూ ఉపయోగించదు (`tests/unit/design-kit-bridge.test.ts` ఈ అనుసంధానాన్ని అమలు చేయిస్తుంది). `text-primary` అనేది
-  `--text-color-primary` ద్వారా `--color-primary-ink`గా పరిష్కరించబడుతుంది, అందువల్ల ప్రధాన టెక్స్ట్ చదవగలిగేలా ఉంటూనే
-  `bg-primary`/`border-primary` యాక్సెంట్ ఉపరితలాన్ని నిలుపుకుంటాయి: Editionsలో ఇది కిట్కు చెందిన
-  `--ci-color-accent-active` (లైట్లో ముదురు రాగి రంగు `#99562f`, డార్క్లో రాగి యాక్సెంట్); Classicలో,
-  లైట్లో lime-800 మరియు డార్క్లో లైమ్ యాక్సెంట్. చార్ట్ సిరీస్లు
-  `--color-chart-1` … `--color-chart-8`ను ఉపయోగిస్తాయి; ప్రతి దానికీ టెక్స్ట్కు సురక్షితమైన `--color-chart-N-ink` మరియు అపారదర్శకమైన
-  `--color-chart-N-subtle` చిప్ టింట్ ఉంటాయి, ఇవి కిట్ సిరీస్ క్రమంలో (`ciChartSeriesOrder`) కేటాయించబడతాయి.
-- **థీమ్లు.** `<html className="ci-theme">` (`src/app/layout.tsx`) డాక్యుమెంట్ను కిట్ థీమ్లోకి చేర్చుతుంది.
-  ప్రాధాన్యత `light`, `dark` లేదా `system` (`src/shared/constants/appConfig.ts`లో
-  `THEME_CONFIG.defaultTheme = "system"`; `system` అనేది `prefers-color-scheme`ను అనుసరిస్తుంది). `src/store/themeStore.ts`లోని
-  `applyTheme()` (`src/app/layout.tsx`లో ఇన్లైన్ చేయబడిన, హైడ్రేషన్కు ముందు రన్ అయ్యే `THEME_BOOT_SCRIPT`లో కూడా ఇదే ప్రతిబింబించబడుతుంది)
-  `data-theme="dark"|"light"`ను సెట్ చేసి, అదే సమయంలో `<html>`పై `.dark` క్లాస్ను టాగుల్ చేస్తుంది.
-  కిట్ డార్క్ టోకెన్ సెట్ `data-theme="dark"` ఆధారంగా కీ చేయబడింది (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute సొంత డార్క్ ఓవర్రైడ్లు (`globals.css`లోని `.dark` బ్లాక్) మరియు పాత Tailwind `dark:`
-  యుటిలిటీలు `.dark` క్లాస్ ఆధారంగా కీ చేయబడతాయి. యాక్సెంట్ కలర్ ప్రీసెట్లు లేవు: యాక్సెంట్ ఎల్లప్పుడూ
-  కిట్ నుంచే వస్తుంది, అలాగే పాత బిల్డ్లో నిల్వ చేయబడిన ప్రీసెట్ స్టోర్ లోడ్ అయినప్పుడు తొలగించబడుతుంది.
-- **ప్యాలెట్లు.** రెండూ కిట్ నుంచే వస్తాయి (`src/shared/constants/appearancePalette.ts`): డిఫాల్ట్ అయిన `editions`, మరియు
-  `classic`. Editions అనేది `<html>`పై ఉండే కిట్ `data-ci-appearance="editions"` అట్రిబ్యూట్; దీనిని
-  `ci-editions.css` (`ci-ui.css` ద్వారా ఇంపోర్ట్ చేయబడింది) `data-theme`తో కలిపి ఉపయోగిస్తుంది; Classic అంటే ఆ అట్రిబ్యూట్
-  లేకపోవడం. రూట్ లేఅవుట్ ఆ అట్రిబ్యూట్ను సర్వర్లోనే రెండర్ చేస్తుంది, కాబట్టి ఏదీ నిల్వ చేయని సందర్శకుడికి (లేదా JS లేని వారికి)
-  ప్రతి ఉపరితలంపైనా Editions లభిస్తుంది — డ్యాష్బోర్డ్, లాగిన్, `/status`, ఎర్రర్ పేజీలు, `/docs` మరియు PWA. ఎంపిక
-  థీమ్ పక్కనే అదే `theme` స్టోర్లో (`src/store/themeStore.ts`లోని `palette`, `setPalette()`, `applyPalette()`)
-  నిల్వ చేయబడుతుంది మరియు పెయింట్కు ముందు `THEME_BOOT_SCRIPT` ద్వారా వర్తింపజేయబడుతుంది
-  (`src/shared/utils/themeBootScript.ts`, లేఅవుట్లోని `<head>`లో ఇన్లైన్ చేయబడింది); నిల్వ చేసిన ప్యాలెట్
-  `"classic"` అయినప్పుడు మాత్రమే ఇది అట్రిబ్యూట్ను తొలగిస్తుంది; రూట్ లేఅవుట్ వెలుపల ఉన్న `src/app/global-error.tsx`,
-  అదే స్టోర్ నుంచి దాన్ని వర్తింపజేస్తుంది. మరే ఇతర ఎలిమెంట్పైనా `data-ci-appearance`ను ఉంచవద్దు: కిట్ దాన్ని
-  `html:root:has([data-ci-appearance="editions"])`తో సరిపోలుస్తుంది, కాబట్టి ఒక డిసెండెంట్ మొత్తం డాక్యుమెంట్ను మార్చేస్తుంది.
-  Editions `data-ci-editions-variant="landing"` వేరియంట్ మార్కెటింగ్ పేజీల కోసం, డ్యాష్బోర్డ్ కోసం కాదు.
-  బ్రౌజర్ క్రోమ్: సర్వర్ డిఫాల్ట్ అయిన Editionsను `viewport.themeColor`లో (ప్రతి
-  `prefers-color-scheme`కు ఒక ట్యాగ్) మరియు వెబ్ మానిఫెస్ట్లో రెండర్ చేస్తుంది — `src/shared/constants/pwaThemeColors.ts`లోని
-  `PWA_THEME_COLORS`, Editions `--ci-color-background`కు ఉన్న ఏకైక ప్రతిబింబం
-  (`#f3f1e9` / `#11120f`), `tests/unit/pwa-theme-colors.test.ts` ద్వారా `ci-editions.css`కు పిన్ చేయబడింది. ఆపై లైవ్
-  `<meta name="theme-color">` నిల్వ చేసిన ప్యాలెట్ మరియు మోడ్ను అనుసరిస్తుంది: `THEME_BOOT_SCRIPT` పెయింట్కు ముందు
-  ట్యాగ్లను తిరిగి రాస్తుంది మరియు థీమ్ స్టోర్ చర్యలు ప్రతి మార్పు సమయంలో అదే పని చేస్తాయి (`src/shared/utils/themeColorMeta.ts`లోని
-  `resolveThemeColor()` / `applyThemeColor()`; కిట్ `ciTokens` నుంచి `CLASSIC_PAGE_BACKGROUND` చదవబడుతుంది).
-  స్పష్టంగా ఎంచుకున్న లైట్/డార్క్ థీమ్ ప్రతి ట్యాగ్ను ఆ మోడ్కు సెట్ చేస్తుంది; `system` ప్రతి స్కీమ్కు ఒక
-  రంగును ఉంచుతుంది. మానిఫెస్ట్ Editionsగానే ఉంటుంది: ప్రాధాన్యత లేకుండా, ప్రతి ఇన్స్టాల్కు ఒకసారి అది ఫెచ్ చేయబడుతుంది.
-  Monaco తన రంగులను ఒక ప్రోబ్ నుంచి చదువుతుంది (`monacoKitTheme.ts`);
-  Editionsలో కిట్ రూట్ నుంచే Editions లైట్/డార్క్ను పరిష్కరిస్తుంది కాబట్టి, ప్రోబ్ రీడ్ ఒక సింక్రోనస్ పాస్ కోసం రూట్ `data-theme`ను మారుస్తుంది.
-- **కాంపోనెంట్లు (అడాప్టర్లు).** `src/shared/components/index.tsx` OmniRoute కాంపోనెంట్ APIని (అదే
-  పేర్లు, డిఫాల్ట్ ఎక్స్పోర్ట్లు మరియు ప్రాప్స్) నిలుపుకుంటుంది, అలాగే దాని వెనుక ఉన్న ప్రిమిటివ్లు కిట్పై నిర్మించిన అడాప్టర్లు: ఫారమ్లు
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ఓవర్లేలు మరియు ఫీడ్బ్యాక్
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  నిర్మాణం (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) మరియు టేబుల్లు
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ఒక అడాప్టర్ కిట్
-  కాంపోనెంట్ను సబ్పాత్ ద్వారా ఇంపోర్ట్ చేసి, పాత ప్రాప్స్ను దానిపై మ్యాప్ చేస్తుంది — ఉదాహరణకు `Button variant="primary"` అనేది కిట్
-  `default` బటన్ (`--ci-button-primary-*`: లైట్లో ఇన్వర్స్ ఉపరితలం, డార్క్లో దాని
-  `--ci-color-accent-foreground` ఇంక్తో కూడిన యాక్సెంట్), `danger` అనేది `destructive`, మరియు `warning` అనేది కిట్ `warning`
-  బటన్. `Badge` స్టేటస్ వేరియంట్లు కిట్ టోన్లు, అలాగే `<option>` చిల్డ్రన్తో ఉన్న `Select` కిట్
-  `NativeSelect`ను రెండర్ చేస్తుంది.
-  `tests/unit/ui/adapters/*.test.tsx` ప్రతి అడాప్టర్ను పిన్ చేస్తాయి.
-- **షెల్.** `src/app/(dashboard)/layout.tsx` అనేది `DashboardLayout`ను రెండర్ చేస్తుంది, అది
-  `src/shared/components/layouts/DashboardShell.tsx`ను రెండర్ చేస్తుంది: కిట్లోని `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), అలాగే
-  `src/shared/components/Sidebar.tsx`లో OmniRoute నావిగేషన్ లాజిక్ ఉంటాయి. `#main-content`కు వెళ్లే "కంటెంట్కు దాటవేయి" లింక్ మొదట ఫోకస్ చేయగల
-  ఎలిమెంట్గా ఉంటుంది. `src/shared/components/Header.tsx`లో కిట్ `SidebarTrigger` (షెల్లోని ఏకైక సైడ్బార్
-  టాగుల్), Keak `ProductSwitcher`, కమాండ్-పాలెట్ ఓపెనర్ ఉంటాయి; `#main-content` లోపల కిట్ `PageHeader` (`.ci-page-header`) మౌంట్ కానప్పుడు మాత్రమే
-  ఇది రూట్ శీర్షికను చూపుతుంది, కాబట్టి సొంత
-  `PageHeader` ఉన్న పేజీలో ఒకే `h1` ఉంటుంది. `src/shared/components/CommandPalette.tsx` అనేది కిట్ `Dialog`.
-- **ఐకాన్లు.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) పేరును (స్క్రీన్లు ఉపయోగించే
-  Material Symbols పదజాలాన్ని) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ద్వారా
-  Lucide గ్లిఫ్గా పరిష్కరిస్తుంది. Material Symbols ఫాంట్ మరియు ప్యాకేజ్ తొలగించబడ్డాయి: మ్యాప్లో లేని పేరు తటస్థ
-  ప్లేస్హోల్డర్ గ్లిఫ్ను (`data-icon-missing="true"`) రెండర్ చేస్తుంది మరియు ప్రొడక్షన్ వెలుపల కన్సోల్ హెచ్చరికను లాగ్ చేస్తుంది.
-  `npm run gen:icon-map` ఉపయోగంలో ఉండి మ్యాప్లో లేని పేర్లను ప్రింట్ చేస్తుంది
-  (Lucide ఐకాన్ లేని ఏ పేరుపైనైనా `tests/unit/icon-map-coverage.test.ts` విఫలమవుతుంది;
-  లుకప్ ఆబ్జెక్ట్లలో నిల్వ చేసిన పేర్లను `tests/unit/icon-map-object-values.test.ts` కవర్ చేస్తుంది);
+- **కిట్.** `packages/ui-kit/src` అనేది `packages/ui-kit/UPSTREAM.md`లో పిన్ చేసిన commit వద్ద ఉన్న upstream `src/`కి byte-for-byte కాపీ (అదే ఫైల్ లైసెన్స్ అనుమతిని కూడా నమోదు చేస్తుంది); `PATCHES.md` స్థానిక ప్యాచ్లను (ఏవీ లేవు) జాబితా చేస్తుంది. ఇది sourceగా, ఎలాంటి build లేకుండా వినియోగించబడుతుంది: `next.config.mjs` దీన్ని transpile చేస్తుంది, అలాగే `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` మరియు `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`గా మ్యాప్ చేస్తుంది (`vitest.config.ts` మరియు `vitest.mcp.config.ts`లో కూడా ఇదే alias ఉంది). కిట్ componentను దాని subpath ద్వారా (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) import చేయండి; `@omniroute/ui-kit` barrel ద్వారా ఎప్పుడూ import చేయవద్దు: barrel ప్రతి importerలో ప్రతి componentను (date picker సహా) చేర్చుతుంది. కిట్ stylesheet `src/app/globals.css` ద్వారా ప్రవేశిస్తుంది (`@import "../../packages/ui-kit/src/ci-styles.css"`, ఇది పూర్తి stylesheet: core `ci-ui.css`తో పాటు ప్రతి pattern family).
+- **టోకెన్లు.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` టోకెన్లను ప్రకటిస్తుంది; `src/app/globals.css` వాటిని legacy OmniRoute పేర్లకు (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bridge చేస్తుంది, తద్వారా ఇప్పటికే ఉన్న `var(--color-*)` reads మరియు Tailwind utilities పనిచేస్తూనే ఉంటాయి. కొత్త code Tailwind utilities (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) లేదా kit classesను ఉపయోగిస్తుంది — ఎప్పుడూ hex valueను ఉపయోగించదు (`tests/unit/design-kit-bridge.test.ts` ఈ bridgeను అమలు చేయిస్తుంది). `text-primary` `--text-color-primary` ద్వారా `--color-primary-ink`కు resolve అవుతుంది, అందువల్ల primary text చదవదగినదిగా ఉంటుంది; అదే సమయంలో `bg-primary`/`border-primary` accent surfaceను కొనసాగిస్తాయి: Editionsలో ఇది కిట్కు చెందిన `--ci-color-accent-active` (lightలో deep copper `#99562f`, darkలో copper accent); Classicలో lightలో lime-800, darkలో lime accent. Chart series `--color-chart-1` … `--color-chart-8`ను ఉపయోగిస్తాయి; ప్రతి దానికి text-safe `--color-chart-N-ink` మరియు opaque `--color-chart-N-subtle` chip tint ఉంటాయి, ఇవి కిట్ series order (`ciChartSeriesOrder`)లో కేటాయించబడతాయి.
+- **థీమ్లు.** `<html className="ci-theme">` (`src/app/layout.tsx`) documentను kit themeలోకి opt చేస్తుంది. Preference `light`, `dark` లేదా `system` (`src/shared/constants/appConfig.ts`లో `THEME_CONFIG.defaultTheme = "system"`); `system`, `prefers-color-scheme`ను అనుసరిస్తుంది. `src/store/themeStore.ts`లోని `applyTheme()` (`src/app/layout.tsx`లో inline చేసిన `THEME_BOOT_SCRIPT` ద్వారా mirror చేయబడుతుంది, ఇది hydrationకు ముందు నడుస్తుంది) `data-theme="dark"|"light"`ను సెట్ చేసి, `<html>`పై `.dark` classను ఒకేసారి toggle చేస్తుంది. కిట్ యొక్క dark token set `data-theme="dark"`పై ఆధారపడుతుంది (`packages/ui-kit/src/ci-tokens.css`); OmniRoute స్వంత dark overrides (`globals.css`లోని `.dark` block) మరియు legacy Tailwind `dark:` utilities `.dark` classపై ఆధారపడతాయి. Accent color presets ఏవీ లేవు: accent ఎల్లప్పుడూ kit నుంచే వస్తుంది, అలాగే పాత build నుంచి persisted preset store load అయినప్పుడు తొలగించబడుతుంది.
+- **ప్యాలెట్లు.** రెండు ఉన్నాయి, రెండూ kit నుంచే (`src/shared/constants/appearancePalette.ts`): default అయిన `editions`, మరియు `classic`. `<html>`పై kitకు చెందిన `data-ci-appearance="editions"` attributeగా Editions ఉంటుంది; `ci-ui.css` import చేసే `ci-editions.css`, దీన్ని `data-theme`తో కలిపి ఉపయోగిస్తుంది; Classic అంటే ఈ attribute లేకపోవడం. Root layout ఈ attributeను server-render చేస్తుంది, కాబట్టి ఏదీ stored లేకపోయినా (లేదా JS లేకపోయినా) visitor ప్రతి surfaceలో — dashboard, login, `/status`, error pages, `/docs` మరియు PWAలో — Editionsను పొందుతారు. Choice అదే `theme` storeలో theme పక్కనే persisted అవుతుంది (`palette`, `setPalette()`, `applyPalette()` `src/store/themeStore.ts`లో), అలాగే paintకు ముందు `THEME_BOOT_SCRIPT` ద్వారా apply అవుతుంది (`src/shared/utils/themeBootScript.ts`, layout యొక్క `<head>`లో inline చేయబడుతుంది); stored palette `"classic"` అయినప్పుడు మాత్రమే ఇది attributeను తొలగిస్తుంది; root layout వెలుపల ఉన్న `src/app/global-error.tsx`, అదే store నుంచి దాన్ని apply చేస్తుంది. `data-ci-appearance`ను మరే ఇతర elementపై ఉంచవద్దు: kit దీన్ని `html:root:has([data-ci-appearance="editions"])`తో match చేస్తుంది, కాబట్టి ఒక్క descendant మొత్తం documentను మార్చేస్తుంది. Editions `data-ci-editions-variant="landing"` variant marketing pages కోసం, dashboard కోసం కాదు. Browser chrome: server default అయిన Editionsను `viewport.themeColor`లో (ప్రతి `prefers-color-scheme`కు ఒక్క tag) మరియు web manifestలో render చేస్తుంది — `src/shared/constants/pwaThemeColors.ts`లోని `PWA_THEME_COLORS`, Editions `--ci-color-background` (`#f3f1e9` / `#11120f`)కు ఉన్న ఏకైక mirror, `tests/unit/pwa-theme-colors.test.ts` ద్వారా `ci-editions.css`కు pin చేయబడింది. తరువాత live `<meta name="theme-color">` stored palette మరియు modeను అనుసరిస్తుంది: `THEME_BOOT_SCRIPT` paintకు ముందు tagsను rewrite చేస్తుంది, అలాగే theme store actions ప్రతి changeలో దీన్ని చేస్తాయి (`src/shared/utils/themeColorMeta.ts`లోని `resolveThemeColor()` / `applyThemeColor()`, kitలోని `ciTokens` నుంచి `CLASSIC_PAGE_BACKGROUND` read చేయబడుతుంది). Explicit light/dark theme ప్రతి tagను ఆ modeకు సెట్ చేస్తుంది; `system` ప్రతి schemeకు ఒక్కో colourను ఉంచుతుంది. Manifest Editionsగానే ఉంటుంది: ఇది ప్రతి installకు ఒక్కసారి fetch చేయబడుతుంది, preference లేకుండా. Monaco తన coloursను probe నుంచి read చేస్తుంది (`monacoKitTheme.ts`); Editionsలో probe read ఒక synchronous pass కోసం root `data-theme`ను flip చేస్తుంది, ఎందుకంటే kit Editions light/darkను root నుంచి resolve చేస్తుంది.
+- **Components (adapters).** `src/shared/components/index.tsx` OmniRoute component APIని (అదే names, default exports మరియు props) కొనసాగిస్తుంది; దాని వెనుక ఉన్న primitives kitపై adaptersగా ఉంటాయి: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays మరియు feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) మరియు tables (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ఒక adapter kit componentను subpath ద్వారా import చేసి, legacy propsను దానికి map చేస్తుంది — ఉదాహరణకు `Button variant="primary"` అనేది kit `default` button (`--ci-button-primary-*`: lightలో inverse surface, darkలో దాని `--ci-color-accent-foreground` inkతో accent); `danger` అనేది `destructive`, మరియు `warning` అనేది kit `warning` button. `Badge` status variants kit tones; `<option>` childrenతో ఉన్న `Select`, kit `NativeSelect`ను render చేస్తుంది.
+  రెండు adapters index నుంచి కాకుండా path ద్వారా import చేయబడతాయి: `InteractiveTableRow` (`src/shared/components/InteractiveTableRow.tsx`), `onActivate` మరియు `selected`ను స్వీకరించే kit `TableRow`, అలాగే Tab, Enter మరియు Spaceలకు స్పందిస్తుంది; మరియు `CodePreview` (`src/shared/components/CodePreview.tsx`), copy labels అనువదించబడిన kit code block. `tests/unit/ui/adapters/*.test.tsx` ప్రతి adapterను pin చేస్తుంది.
+- **షెల్.** `src/app/(dashboard)/layout.tsx` `DashboardLayout`ను రెండర్ చేస్తుంది; అది `src/shared/components/layouts/DashboardShell.tsx`ను రెండర్ చేస్తుంది: కిట్కు చెందిన `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), అలాగే `src/shared/components/Sidebar.tsx`లో OmniRoute నావిగేషన్ లాజిక్ ఉంటుంది. `#main-content`కు వెళ్లే "కంటెంట్కు దాటవేయి" లింక్ ఫోకస్ చేయగల మొదటి
+  ఎలిమెంట్. `src/shared/components/Header.tsx`లో కిట్కు చెందిన `SidebarTrigger` (షెల్లోని ఏకైక సైడ్బార్
+  టాగుల్), Keak `ProductSwitcher` మరియు కమాండ్-ప్యాలెట్ ఓపెనర్ ఉంటాయి; `#main-content`లో కిట్కు చెందిన
+  `PageHeader` (`.ci-page-header`) మౌంట్ కానప్పుడు మాత్రమే ఇది రూట్ టైటిల్ను చూపిస్తుంది, కాబట్టి స్వంత
+  `PageHeader` ఉన్న పేజీలో ఒకే `h1` ఉంటుంది. `src/shared/components/CommandPalette.tsx` ఒక కిట్ `Dialog`.
+- **చిహ్నాలు.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) పేరు (స్క్రీన్లు ఉపయోగించే
+  Material Symbols పదసంపద)ను `src/shared/constants/iconMap.ts`లోని `ICON_MAP` ద్వారా Lucide గ్లిఫ్కు పరిష్కరిస్తుంది. Material Symbols ఫాంట్ మరియు ప్యాకేజీ తొలగించబడ్డాయి: మ్యాప్లో లేని పేరు
+  తటస్థ ప్లేస్హోల్డర్ గ్లిఫ్ను (`data-icon-missing="true"`) రెండర్ చేస్తుంది మరియు ప్రొడక్షన్ వెలుపల
+  కన్సోల్ హెచ్చరికను లాగ్ చేస్తుంది. `npm run gen:icon-map` మ్యాప్లో లేని, ఉపయోగంలో ఉన్న పేర్లను ప్రింట్ చేస్తుంది
+  (`tests/unit/icon-map-coverage.test.ts` Lucide చిహ్నం లేని ఏ పేరుకైనా విఫలమవుతుంది;
+  `tests/unit/icon-map-object-values.test.ts` లుక్అప్ ఆబ్జెక్ట్లలో నిల్వ చేసిన పేర్లను కవర్ చేస్తుంది);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` లిటరల్
-  `<span className="material-symbols-outlined">` స్పాన్లను `<Icon>`గా తిరిగి రాస్తుంది.
-- **బ్రాండ్.** `src/shared/components/OmniRouteLogo.tsx` కిట్ను ర్యాప్ చేస్తుంది: డిఫాల్ట్ ఎక్స్పోర్ట్ `OmniRouteLogo`
-  అనేది `ProductIcon product="omniroute" variant="glyph"`ను రెండర్ చేస్తుంది (ఇన్లైన్ SVG, `basePath`-సురక్షితం), అలాగే
-  `OmniRouteLockup` అనేది `ProductLockup product="omniroute"`ను (యాక్సెసిబుల్ పేరు "Keak OmniRoute") లేదా వైట్-లేబుల్
-  ఆపరేటర్ల కోసం వారి స్వంత `name`/`logoSrc`ను రెండర్ చేస్తుంది. ప్రొడక్ట్-స్విచర్ గమ్యస్థానాలు
-  `src/shared/constants/keakProducts.ts`లో (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ఉంటాయి. స్వతంత్ర
+  `<span className="material-symbols-outlined">` స్పాన్లను `<Icon>`కు తిరిగి రాస్తుంది.
+- **బ్రాండ్.** `src/shared/components/OmniRouteLogo.tsx` కిట్ను చుట్టి ఉంచుతుంది: డిఫాల్ట్ ఎగుమతి `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"`ను (ఇన్లైన్ SVG, `basePath`-సురక్షితం) రెండర్ చేస్తుంది మరియు
+  `OmniRouteLockup` `ProductLockup product="omniroute"`ను (యాక్సెస్ చేయగల పేరు "Keak OmniRoute") లేదా, వైట్-లేబుల్ ఆపరేటర్ల కోసం, వారి స్వంత `name`/`logoSrc`ను రెండర్ చేస్తుంది. ప్రొడక్ట్-స్విచర్ గమ్యస్థానాలు
+  `src/shared/constants/keakProducts.ts`లో ఉంటాయి (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). స్వతంత్ర
   స్క్రీన్లు — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` మరియు `src/shared/components/ErrorPageScaffold.tsx`
-  — లాకప్ను చూపుతాయి; `tests/unit/brand-pages-static.test.ts` దాన్ని రక్షిస్తుంది.
+  — లాక్అప్ను చూపిస్తాయి; `tests/unit/brand-pages-static.test.ts` దీనిని నిర్ధారిస్తుంది.
 
 ## 2. నియమాలు
 
-1. లిటరల్స్ను కాకుండా టోకెన్లను ఉపయోగించాలి. ఉద్దేశపూర్వకంగా ఉంచిన మినహాయింపులు: ఎల్లప్పుడూ డార్క్గా ఉండే కన్సోల్ టెర్మినల్ మరియు
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`); ఇది లిటరల్ హెక్స్ అవసరమైన కాలర్ల కోసం కిట్ స్టేటస్
-   పాలెట్కు చెందిన పరిష్కరించబడిన హెక్స్ ప్రతిరూపం. కేటగిరికల్ పాలెట్లు ఇకపై మినహాయింపు కావు:
-   అవి కిట్ సిరీస్ క్రమంలో, కిట్కు చెందిన ఎనిమిది చార్ట్ టోకెన్లను (`--color-chart-1..8`, అదనంగా `-ink`/`-subtle`)
-   `src/shared/utils/categoricalPalette.ts` ద్వారా మరియు రూటింగ్ వ్యూహాల కోసం
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ద్వారా ఉపయోగిస్తాయి; ReactFlow ఎడ్జ్లు మరియు ఆర్కెస్ట్రేషన్
-   కాన్వాస్ థీమ్ను పరిగణించే `--orch-status-*` వేరియబుల్స్ను (`src/shared/components/flow/edgeStyles.ts`) చదువుతాయి.
-2. `packages/ui-kit/src`ను ఎప్పుడూ చేతితో ప్యాచ్ చేయవద్దు: `scripts/dev/sync-ui-kit.sh <commit>`తో సింక్ చేయండి;
-   పిన్ చేసిన అప్స్ట్రీమ్ కమిట్తో ఏ ఒక్క బైట్ భిన్నంగా ఉన్నా ప్రీ-కమిట్ గేట్
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) విఫలమవుతుంది (అప్స్ట్రీమ్ క్లోన్,
-   `UI_KIT_CLONE` లేదా `_references/cheaper-inference-ui-kit`, అందుబాటులో లేకపోతే హెచ్చరికతో దాటవేస్తుంది). కిట్లో ఏదైనా లేనప్పుడు,
-   అడాప్టర్ లేదా స్క్రీన్లో ప్రత్యామ్నాయ పరిష్కారాన్ని ఉపయోగించి, దానిని అప్స్ట్రీమ్లో చేర్చమని అభ్యర్థించండి.
-3. కిట్ టెక్స్ట్ డిఫాల్ట్లు ఇంగ్లీష్లో ఉంటాయి (`label = "Loading"`, `loadingLabel = "Loading table"`…) — కిట్ కాంపోనెంట్ టెక్స్ట్ను రెండర్ చేసినప్పుడల్లా
-   `useTranslations(...)` నుండి అనువదించిన స్ట్రింగ్లను పంపండి.
-4. కిట్ కాంపోనెంట్ క్లాస్ల కంటే Tailwind యుటిలిటీలు ప్రాధాన్యం పొందుతాయి (కిట్
-   `@layer theme, base, components, utilities`ను ప్రకటిస్తుంది మరియు దాని రూల్స్ `components`లో ఉంటాయి) — స్పేసింగ్ మరియు
-   లేఅవుట్ కోసం యుటిలిటీలను ఉపయోగించండి; కిట్ కాంపోనెంట్ల రంగులను మార్చడానికి కాదు.
-5. హెడ్డింగ్లు: పేజీ మరియు విభాగ శీర్షికలకు `.ci-heading`; ఎర్రర్ పేజీ స్టేటస్ కోడ్ వంటి పెద్దగా, విరళంగా
-   ఉండే డిస్ప్లే టెక్స్ట్కు మాత్రమే `.ci-dashboard-display`. రెండూ Switzerను ఉపయోగిస్తాయి.
-6. `tests/unit/dashboard-kit-sweep.test.ts` కిట్ స్వీకరణను పర్యవేక్షిస్తుంది: `src/app` లేదా
-   `src/shared/components` కింద Material లిగేచర్ span ఉండకూడదు; డ్యాష్బోర్డ్ ట్రీలో (`src/app/(dashboard)` మరియు
-   `src/shared/components`) రా `<select>`, `<textarea>` లేదా `<table>` ఉండకూడదు, అలాగే జాబితాలో పేర్కొన్న
-   మినహాయింపులకు (`Select` అడాప్టర్కు చెందిన నేటివ్ బ్రాంచ్, `RequestLoggerDetail`) వెలుపల చేతితో రూపొందించిన
-   `role="dialog"` ఉండకూడదు; అక్కడి ప్రతి రా `<button>` లేదా `<input>`కు, దానికి గరిష్ఠంగా 3 లైన్ల ముందు ముగిసేలా
-   కారణంతో కూడిన `kit-exception:` ఉన్న కామెంట్ అవసరం; పాలెట్ హ్యూలు మరియు `dark:` వేరియంట్లు
-   టెస్ట్ జాబితాలో పేర్కొన్న ఫైళ్లలో మాత్రమే ఉండాలి.
-7. PRకు ముందు రెండు థీమ్లను మరియు 390 px వ్యూపోర్ట్ను ధృవీకరించండి (స్క్రీన్షాట్లతో); `tests/e2e/a11y.spec.ts`
-   axeను అమలు చేస్తుంది.
+1. లిటరల్స్ కాకుండా టోకెన్లు ఉపయోగించండి. ఉద్దేశపూర్వకంగా ఉంచిన మినహాయింపులు: ఎల్లప్పుడూ డార్క్గా ఉండే కన్సోల్ టెర్మినల్ మరియు
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), లిటరల్ హెక్స్ అవసరమైన కాలర్ల కోసం కిట్ స్టేటస్
+   పాలెట్కు చెందిన resolved-hex మిర్రర్. కేటగిరికల్ పాలెట్లకు ఇక మినహాయింపు లేదు:
+   అవి కిట్లోని ఎనిమిది చార్ట్ టోకెన్లపై (`--color-chart-1..8`, అలాగే `-ink`/`-subtle`) ఆధారపడతాయి,
+   కిట్ సిరీస్ క్రమంలో, `src/shared/utils/categoricalPalette.ts` ద్వారా మరియు రూటింగ్ స్ట్రాటజీల కోసం
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ద్వారా; ReactFlow ఎడ్జ్లు మరియు ఆర్కెస్ట్రేషన్
+   క్యాన్వాస్ థీమ్కు అనుగుణమైన `--orch-status-*` వేరియబుల్స్ను చదువుతాయి
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` ను చేతితో ఎప్పుడూ ప్యాచ్ చేయకండి: `scripts/dev/sync-ui-kit.sh <commit>` తో సింక్ చేయండి;
+   upstream క్లోన్లో పిన్ చేసిన కమిట్తో ఏ ఒక్క బైట్ అయినా భిన్నంగా ఉంటే pre-commit గేట్
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) విఫలమవుతుంది (upstream క్లోన్,
+   `UI_KIT_CLONE` లేదా `_references/cheaper-inference-ui-kit` లేనప్పుడు హెచ్చరికతో స్కిప్ అవుతుంది). కిట్లో ఏదైనా
+   లేనప్పుడు, దాన్ని అడాప్టర్ లేదా స్క్రీన్లో workaround చేయండి మరియు upstream కోసం అభ్యర్థించండి.
+3. కిట్ టెక్స్ట్ డిఫాల్ట్లు ఇంగ్లీష్లో ఉంటాయి (`label = "Loading"`, `loadingLabel = "Loading table"`…) — కిట్ కాంపోనెంట్ టెక్స్ట్ను
+   రెండర్ చేసినప్పుడల్లా `useTranslations(...)` నుంచి అనువదించిన స్ట్రింగ్లను పాస్ చేయండి.
+4. Tailwind యుటిలిటీలు కిట్ కాంపోనెంట్ క్లాస్లపై ప్రాధాన్యం పొందుతాయి (కిట్
+   `@layer theme, base, components, utilities` ను డిక్లేర్ చేస్తుంది మరియు దాని నియమాలు `components` లో ఉంటాయి) — కిట్ కాంపోనెంట్లకు
+   రంగు మార్చడానికి కాకుండా స్పేసింగ్ మరియు లేఅవుట్ కోసం యుటిలిటీలను ఉపయోగించండి. టైపోగ్రఫీ మినహాయింపు:
+   `packages/ui-kit/src/ci-typography.css` ఏ లేయర్ వెలుపల దిగుమతి అవుతుంది, కాబట్టి దాని ట్యాగ్ నియమాలు
+   యుటిలిటీలను అధిగమిస్తాయి. `h1`–`h6` పై weight, `tracking-*` మరియు `leading-*` క్లాస్లకు ప్రభావం ఉండదు,
+   టేబుల్ సెల్లపై weight మరియు `tracking-*` కు ప్రభావం ఉండదు, బటన్లపై weight కు ప్రభావం ఉండదు
+   (`tests/unit/dead-typography-classes.test.ts` వీటిని తిరస్కరిస్తుంది); `th`, `td`, `button`, `input` మరియు `textarea` పై
+   `font-mono` కు ప్రభావం ఉండదు. Size, colour మరియు `uppercase` యుటిలిటీలు ఇప్పటికీ వర్తిస్తాయి.
+5. హెడ్డింగ్లు: పేజీ మరియు సెక్షన్ టైటిళ్ల కోసం `.ci-heading`; ఎర్రర్-పేజీ స్టేటస్ కోడ్ వంటి పెద్ద, తక్కువ సాంద్రత
+   కలిగిన డిస్ప్లే టెక్స్ట్ కోసం మాత్రమే `.ci-dashboard-display`. రెండూ Switzer ను ఉపయోగిస్తాయి.
+6. `tests/unit/dashboard-kit-sweep.test.ts` కిట్ స్వీకరణను కాపాడుతుంది: `src/app` లేదా `src/shared/components` కింద Material ligature span ఉండకూడదు;
+   డాష్బోర్డ్ ట్రీలో (`src/app/(dashboard)` మరియు `src/shared/components`) raw `<select>`, `<textarea>` లేదా `<table>` ఉండకూడదు మరియు
+   జాబితా చేసిన మినహాయింపుల వెలుపల చేతితో రూపొందించిన `role="dialog"` ఉండకూడదు (the `Select` adapter's native branch,
+   `RequestLoggerDetail`); అక్కడి ప్రతి raw `<button>` లేదా `<input>` కి, దాని పైన గరిష్ఠంగా 3 లైన్లలో ముగిసే
+   `kit-exception:` కలిగిన వ్యాఖ్య (కారణంతో) అవసరం; పాలెట్ రంగులు మరియు `dark:` వేరియంట్లు టెస్ట్ పేర్కొన్న ఫైళ్లలో మాత్రమే ఉండాలి.
+7. PR కు ముందు రెండు థీమ్లను మరియు 390 px viewport ను ధృవీకరించండి (స్క్రీన్షాట్లు); `tests/e2e/a11y.spec.ts` axe ను అమలు చేస్తుంది.
+8. ఒక colour యుటిలిటీ `src/app/globals.css` లోని `@theme` బ్లాక్లోని టోకెన్కు పేరు పెట్టాలి: అక్కడ లేని పేరు
+   (`text-text`, `bg-bg-muted`, `text-danger`…) CSS ను రూపొందించదు మరియు ఎలిమెంట్ inherited colour ను ఉంచుకుంటుంది
+   (`tests/unit/theme-color-classes.test.ts`). `card` క్లాస్ లేదు: `Card` అడాప్టర్ను ఉపయోగించండి
+   (`tests/unit/no-bare-card-class.test.ts`). చార్ట్ రంగులోని టెక్స్ట్ కోసం `text-chart-N-ink` ఉపయోగించండి;
+   ఐకాన్లు మరియు స్ట్రోక్ల కోసం `text-chart-N` ఉపయోగించాలి
+   (`tests/unit/chart-ink-for-text.test.ts`). `var()` అయ్యే విలువకు హెక్స్ ఆల్ఫాను జోడించడం ద్వారా కాకుండా,
+   అపారదర్శక రంగును `color-mix` తో నిర్మించాలి
+   (`tests/unit/color-alpha-concatenation.test.ts`).
+9. టేబుల్లు: ప్రతి కిట్ `Table` స్క్రోల్ ప్రాంతం పేరైన `scrollLabel` ను పాస్ చేయాలి మరియు persistent scrollbar
+   గీయబడినప్పుడు `scrollbarLabel` ను పాస్ చేయాలి
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). క్లిక్ చేయగల వరుస `onActivate` తో కూడిన
+   `InteractiveTableRow` అయి ఉండాలి; `<TableRow onClick>` ఎప్పుడూ ఉపయోగించకండి
+   (`tests/unit/table-row-click-needs-keyboard.test.ts`). కార్డ్లో లేదా ఏదైనా బోర్డర్ ఉన్న బాక్స్లో ఉన్న టేబుల్
+   తన స్వంత ఫ్రేమ్ను `containerClassName="rounded-none border-0"` తో తొలగించాలి
+   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. మొత్తాన్ని చూపించే బార్ కిట్ `Progress` అయి ఉండాలి, లేదా కిట్ బార్ దాన్ని గీయలేనప్పుడు పేరు మరియు విలువతో
+    `role="progressbar"` కలిగి ఉండాలి (`tests/unit/progress-bars-have-semantics.test.ts`). మెనూలు,
+    పాప్ఓవర్లు మరియు టూల్టిప్లు స్థానిక state తో తెరవబడే absolute-positioned panel నుంచి కాకుండా కిట్ నుంచే
+    (`Popover`, `SearchableSelect`, `Tooltip` adapter) రావాలి
+    (`tests/unit/hand-positioned-overlays.test.ts`).
+11. `Input` అడాప్టర్లో `className` ఫీల్డ్ wrapper కు స్టైల్ చేస్తుంది; కంట్రోల్ కోసం ఉద్దేశించిన క్లాస్ను
+    `inputClassName` లో పెట్టాలి (`tests/unit/input-adapter-classname-destination.test.ts`).
 
-## 3. స్క్రీన్ జోడించడం
+## 3. స్క్రీన్ను జోడించడం
 
-1. పేజీని కిట్ `PageHeader` (`@omniroute/ui-kit/page-header`, డ్యాష్బోర్డ్ లోపల `compact`) తో
-   ప్రారంభించండి — టైటిల్, డిస్క్రిప్షన్ మరియు `actions`. అప్పుడు షెల్ హెడర్ దాని స్వంత టైటిల్ను
-   వదిలివేస్తుంది.
-2. కంట్రోల్లను `@/shared/components` (అడాప్టర్లు) నుండి నిర్మించండి మరియు అడాప్టర్ లేని చోట
-   సబ్పాత్ ద్వారా కిట్ కాంపోనెంట్లను వాడండి (`Table`/`TableScrollArea`/`DataTableShell`,
-   `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
-3. ఐకాన్లు: `<Icon name="…" />`. కొత్త పేరు సెమాంటిక్గా సరిపోయే Lucide కాంపోనెంట్తో
-   `ICON_MAP` లోకి వెళ్తుంది; ఇంకా లేని పేర్లను `npm run gen:icon-map` జాబితా చేస్తుంది.
-4. రంగులు: సెమాంటిక్ యూటిలిటీలు (`text-success`, `bg-warning-bg`, `border-border`…) మరియు చార్ట్
-   సిరీస్ కోసం `var(--color-chart-N)`; హెక్స్ విలువలు వద్దు మరియు రంగును కేవలం పునరావృతం చేసే
-   `dark:` వేరియంట్లు వద్దు.
-5. టెక్స్ట్: కిట్ కాంపోనెంట్లకు మీరు పంపే లేబుళ్లతో సహా ప్రతి స్ట్రింగ్ `useTranslations` నుండి
-   వస్తుంది. కొత్త కీలు `src/i18n/messages/en.json`, `pt-BR.json` మరియు `vi.json` లోకి వెళ్తాయి
-   (వియత్నామీ పారిటీ టెస్ట్ ప్రతి ఇంగ్లీష్ కీని పిన్ చేస్తుంది); మిగిలిన లోకేల్లు i18n సింక్
-   ద్వారా నింపబడతాయి.
-6. PR కు ముందు గార్డ్లను రన్ చేయండి: `tests/unit/dashboard-kit-sweep.test.ts`,
-   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (`iconMap.ts` లో డూప్లికేట్ ఇంపోర్ట్ను పట్టుకునే ఏకైక
-   చెక్), `npm run check:ui-icu`, మరియు ఆ స్క్రీన్ యొక్క స్వంత టెస్ట్లు.
+1. kit `PageHeader` (`@omniroute/ui-kit/page-header`, డాష్బోర్డ్లో `compact`) ఉన్న పేజీని తెరవండి — శీర్షిక, వివరణ మరియు `actions`ను అందించండి. ఆ తర్వాత shell header తన స్వంత శీర్షికను తొలగిస్తుంది, అలాగే 1024 px కంటే తక్కువ వెడల్పులో అది దాచబడుతుంది. అందువల్ల `PageHeader` లేని routeలో ఫోన్లో శీర్షిక ఉండదు (`tests/unit/dashboard-page-header-coverage.test.ts`). స్వంత పేజీ లేని path segmentను `ROUTE_PREFIXES_WITHOUT_PAGE`లో `src/shared/utils/breadcrumbTrail.ts`లో చేర్చండి. అప్పుడు దాని breadcrumb textగా ఉంటుంది, పనిచేయని లింక్గా కాదు (`tests/unit/breadcrumb-trail-routes.test.ts`).
+2. `@/shared/components` (adapters) నుంచి controlsను నిర్మించండి. adapter లేని చోట kit componentsను subpath ద్వారా ఉపయోగించండి (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. చిహ్నాలు: `<Icon name="…" />`. కొత్త పేరును semantically సరిపోలే Lucide componentతో `ICON_MAP`లో చేర్చండి; ఇంకా లేని పేర్లను `npm run gen:icon-map` జాబితా చేస్తుంది.
+4. రంగులు: semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) మరియు chart series కోసం `var(--color-chart-N)` ఉపయోగించండి; hex విలువలు వద్దు, అలాగే కేవలం ఒకే రంగును మళ్లీ పునరావృతం చేసే `dark:` variantsను ఉపయోగించవద్దు.
+5. పాఠ్యం: kit componentsకు అందించే labelsతో సహా ప్రతి string `useTranslations` నుంచి రావాలి. కొత్త keysను `src/i18n/messages/en.json`లో మాత్రమే చేర్చండి; ఇతర localesను release refresh నింపుతుంది (`tests/_helpers/localeParityMode.ts` రెండు modesను వివరిస్తుంది). నిజమైన non-English catalogను mount చేసే test, runtime చేసే విధంగానే `src/i18n/request.ts`లోని `deepMergeFallback`తో messagesను నిర్మిస్తుంది. అందువల్ల ఇంకా English-onlyగా ఉన్న key విసరబడకుండా fallback అవుతుంది.
+6. PRకు ముందు guardsను అమలు చేయండి: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (`iconMap.ts`లో duplicate importను గుర్తించే ఏకైక check), `npm run check:ui-icu`, rules 4 మరియు 8–11లో పేర్కొన్న guards, అలాగే screenకు సంబంధించిన స్వంత tests.
 
 ## 4. అడాప్టర్ను జోడించడం లేదా మార్చడం
 
@@ -191,53 +140,19 @@ PR తెరవబడనప్పుడు (లక్ష్యం విడు�
 
 ## 6. README రేఖాచిత్రాలు
 
-రూట్ `README.md`లో పొందుపరిచిన పన్నెండు రేఖాచిత్రాలు (`docs/diagrams/*.svg`) స్థిర చిత్రానికి కిట్ను
-వర్తింపజేసినవి; అవి చేతితో గీసినవి కావు, జనరేట్ చేయబడినవి: `scripts/docs/gen-readme-*.mjs`లో 13 జనరేటర్ ఫైళ్లు
-(పన్నెండు రేఖాచిత్రాలతో పాటు `gen-readme-diagrams.mjs` డ్రైవర్) మరియు
-`tests/unit/docs/readme-*-svg.test.ts`లో 12 కాలదోష పరీక్షలు, ప్రతి రేఖాచిత్రానికి ఒకటి చొప్పున ఉంటాయి; ప్రతి పరీక్ష
-కమిట్ చేసిన ఫైల్ను దాని జనరేటర్ అవుట్పుట్తో బైట్ల వారీగా పోలుస్తుంది (జాబ్ `test-unit`).
+రూట్ `README.md` పొందుపరిచే పన్నెండు రేఖాచిత్రాలు (`docs/diagrams/*.svg`) స్థిర చిత్రానికి వర్తింపజేసే కిట్; వీటిని చేతితో గీయరు, జనరేట్ చేస్తారు: `scripts/docs/gen-readme-*.mjs` వద్ద ఉన్న 13 జనరేటర్ ఫైళ్లు (పన్నెండు రేఖాచిత్రాలు మరియు `gen-readme-diagrams.mjs` డ్రైవర్), అలాగే ఒక్కో రేఖాచిత్రానికి ఒకటిగా ఉన్న `tests/unit/docs/readme-*-svg.test.ts` వద్ద 12 తాజాదన పరీక్షలు, ప్రతి ఒక్కటి కమిట్ చేసిన ఫైల్ను దాని జనరేటర్ అవుట్పుట్తో బైట్-స్థాయిలో పోలుస్తాయి (`test-unit` జాబ్).
 
-- **టోకెన్లు.** `scripts/docs/readme-diagram-theme.mjs`, Editions పాలెట్ను (డిఫాల్ట్ రూపాన్ని)
-  `packages/ui-kit/src/ci-editions.css` నుంచి కాపీ చేస్తుంది (ఆ ఫైల్తో సరిపోలేలా
-  `tests/unit/docs/readme-diagram-theme.test.ts` ద్వారా స్థిరపరచబడింది; ఇది రెండు స్కీమ్లలోని ప్రతి ఉపరితలంపై
-  ప్రతి టెక్స్ట్ రంగుకు WCAG AAను కూడా తనిఖీ చేస్తుంది; దీనిలో ఒకే మినహాయింపు, లైట్ `warn`, కాన్వాస్పై కిట్
-  విలువ 4.46:1గా ఉన్నందున 10 % ముదురు చేసిన కిట్ హెచ్చరిక) మరియు కిట్ టైప్ స్కేల్పై (`ci-tokens.css`) టెక్స్ట్ పాత్రలను నిర్వచిస్తుంది: కిట్ వెయిట్లతో (400/500/600, డిస్ప్లే 500 వద్ద) Switzer మరియు
-  అన్నింటికీ ట్రాకింగ్, అయితే కోడ్ పాత్రలు (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`)
-  మినహాయింపు; అవి IBM Plex Monoను ఉపయోగిస్తాయి మరియు కమాండ్లు, URLలు, ఐడెంటిఫైయర్లు, టెర్మినల్ స్క్రీన్లకు
-  మాత్రమే ఉద్దేశించబడ్డాయి.
-  లైట్ విలువలు `:root`పై, డార్క్ విలువలు ఫైల్లోని `prefers-color-scheme: dark` వెనుక ఉంటాయి, కాబట్టి ప్రతి
-  చిత్రం GitHubలో వీక్షకుడి స్కీమ్ను అనుసరిస్తుంది.
-- **ఫాంట్లు.** GitHub Markdownలో CSS ఉండదు మరియు camo ప్రాక్సీ ప్రతి బాహ్య ఫెచ్ను నిరోధిస్తుంది, కాబట్టి కిట్ టైప్
-  ఫైల్లోనే ప్రయాణించాలి. ప్రతి జనరేటర్లో చివరి దశ అయిన `scripts/docs/readme-outline.mjs`,
-  HarfBuzzతో Switzer పాత్రలకు ఆకృతినిచ్చి, వాటిని వెక్టర్ అవుట్లైన్లుగా (`<defs>` పాత్లు మరియు `<use>`) గీస్తుంది;
-  Switzerలో లేని బాణాలు మరియు జ్యామితీయ చిహ్నాలు దాని స్వంత మెట్రిక్లపై గీయబడతాయి. ఎల్లప్పుడూ అవుట్లైన్లే,
-  ఎంబెడ్ చేసిన ఫాంట్ కాదు: Switzer లైసెన్స్ (`packages/ui-kit/src/fonts/FFL.txt`) లిఖితపూర్వక
-  సమ్మతి లేకుండా సబ్సెట్టింగ్ మరియు ఫార్మాట్ మార్పిడిని నిషేధిస్తుంది, కానీ వెక్టర్ డ్రాయింగ్లను అనుమతిస్తుంది;
-  కాబట్టి Switzer `@font-face` లేదా `data:` URIని తిరిగి ప్రవేశపెట్టవద్దు. ఫైల్లో మిగిలే ఏకైక
-  ఫాంట్, నిజమైన కోడ్ టెక్స్ట్గా మిగిలే వాటి కోసం ఉపయోగించే OFL IBM Plex Mono సబ్సెట్
-  (`scripts/docs/readme-fonts.mjs`); అది ఆ అక్షరాల నుంచి నిర్మించబడుతుంది, ఎంబెడ్ చేయలేని ఏ గ్లిఫ్ ఉన్నా లోపాన్ని విసురుతుంది.
-- **మళ్లీ జనరేట్ చేయడం.** `npm run docs:readme-diagrams` మొత్తం పన్నెండింటినీ README క్రమంలో తిరిగి రాసి, ప్రతి
-  ఫైల్కు దాని పరిమాణంతో ఒక లైన్ను ప్రింట్ చేస్తుంది. ఒక్క జనరేటర్ను కూడా స్వతంత్రంగా అమలు చేయవచ్చు
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`కు `node --import tsx/esm` అవసరం, ఎందుకంటే దాని గణాంకాలు
-  `open-sse/config/freeModelCatalog.ts`లోని లైవ్ కాటలాగ్ లోడర్ నుంచి వస్తాయి; కాటలాగ్ మార్పు వల్ల కలిగే CI పరిణామం
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`లో ఉంది). జనరేటర్ను మరియు SVGని కలిపి కమిట్ చేయండి.
-- **రుజువు.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ఫైల్ను GitHub సర్వ్ చేసే విధంగానే
-  (ఒక `<img>` ట్యాగ్, camo యొక్క `Content-Security-Policy`, `image/svg+xml`) రెండర్ చేసి, ఒక లైట్ మరియు ఒక డార్క్ ఫ్రేమ్ను
-  క్యాప్చర్ చేస్తుంది, అలాగే పేజీ చేసిన బాహ్య ఫాంట్ అభ్యర్థనలను నివేదిస్తుంది (అవి తప్పనిసరిగా 0 అయి ఉండాలి).
-- **పరిమాణ పరిమితి.** ప్రతి ఫైల్ 200 KB కంటే తక్కువగా ఉండాలి (ప్రతి కాలదోష పరీక్ష దీన్ని నిర్ధారిస్తుంది); ఏ README
-  చిత్రానికైనా 500 KB గరిష్ఠ పరిమితి (SVG studio వాలిడేటర్ నియమం).
-- **కాపీ మారదు, లెక్కలు గేట్ నుంచి వస్తాయి.** రీబ్రాండింగ్ టైప్ను మరియు పాలెట్ను మార్చింది, పదాలను కాదు: ప్రతి జనరేటర్
-  తన రేఖాచిత్రపు కాపీని ఒక `*_COPY` స్థిరాంకంలో ఉంచుతుంది (లేదా లైవ్ కాటలాగ్ నుంచి నిర్మిస్తుంది); అదే
-  గీసిన టెక్స్ట్గానూ, అవుట్లైనింగ్ దశ ఇన్పుట్గానూ ఉంటుంది. ప్రామాణిక గణాంకాలు `<text>` నోడ్లలోనే ఉంటాయి (అవుట్లైన్ చేసిన తర్వాత
-  కనిపించవు, `fill-opacity:0`), వాటిని `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) చదువుతుంది; ఆ గేట్ చదివే రేఖాచిత్రాల కాలదోష పరీక్షలు, జనరేట్ చేసిన ఫైల్పై
-  దాని వాలిడేటర్లను కూడా అమలు చేస్తాయి, కాబట్టి కోడ్కు భిన్నంగా మారిన గణాంకం పరీక్షను విఫలం చేస్తుంది — జనరేటర్లోని
-  సంఖ్యను ఎప్పుడూ మార్చవద్దు; గేట్ చదివే సోర్స్ను సరిచేయండి.
+- **టోకెన్లు.** `scripts/docs/readme-diagram-theme.mjs`, Editions ప్యాలెట్ను (డిఫాల్ట్ రూపాన్ని) `packages/ui-kit/src/ci-editions.css` నుంచి కాపీ చేస్తుంది. ఈ ఫైల్కు `tests/unit/docs/readme-diagram-theme.test.ts` పిన్ చేసి ఉంటుంది; అదే పరీక్ష రెండు స్కీమ్లలోని ప్రతి సర్ఫేస్పై ప్రతి టెక్స్ట్ రంగుకు WCAG AA ప్రమాణాన్ని కూడా తనిఖీ చేస్తుంది. ఒకే మినహాయింపు, లైట్ `warn`: కిట్ విలువ కాన్వాస్పై 4.46:1 కావడంతో కిట్ హెచ్చరిక రంగును 10% ముదురు చేశారు. ఇది కిట్ టైప్ స్కేల్ (`ci-tokens.css`)పై టెక్స్ట్ పాత్రలను నిర్వచిస్తుంది: ప్రతిదానికి Switzer, కిట్ బరువులు (400/500/600, display 500 వద్ద) మరియు ట్రాకింగ్ ఉపయోగిస్తుంది; అయితే కోడ్ పాత్రలు (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) IBM Plex Monoగా ఉంటాయి, ఇవి కమాండ్లు, URLలు, ఐడెంటిఫైయర్లు మరియు టెర్మినల్ స్క్రీన్ల కోసం మాత్రమే. లైట్ విలువలు `:root`లో ఉంటాయి; డార్క్ విలువలు ఫైల్లోనే `prefers-color-scheme: dark` వెనుక ఉంటాయి, అందువల్ల GitHubలో ప్రతి చిత్రం వీక్షకుడి స్కీమ్ను అనుసరిస్తుంది.
+- **ఫాంట్లు.** GitHub Markdown ఎటువంటి CSSను తీసుకురాదు, అలాగే camo proxy ప్రతి బాహ్య fetchను అడ్డుకుంటుంది; అందువల్ల కిట్ టైప్ ఫైల్లోనే ఉండాలి. ప్రతి జనరేటర్లో చివరి దశ అయిన `scripts/docs/readme-outline.mjs`, HarfBuzzతో Switzer పాత్రలను ఆకృతీకరించి, వాటిని వెక్టర్ అవుట్లైన్లుగా (`<defs>` paths మరియు `<use>`) గీస్తుంది. Switzerలో లేని బాణాలు మరియు జ్యామితీయ చిహ్నాలు వాటి స్వంత మెట్రిక్స్తో గీయబడతాయి. పొందుపరిచిన ఫాంట్లు కాదు, అవుట్లైన్లే: Switzer లైసెన్స్ (`packages/ui-kit/src/fonts/FFL.txt`) వ్రాతపూర్వక అనుమతి లేకుండా subsetting మరియు format conversionను నిషేధిస్తుంది, అయితే వెక్టర్ డ్రాయింగ్లను అనుమతిస్తుంది. కాబట్టి Switzer `@font-face` లేదా `data:` URIని మళ్లీ ప్రవేశపెట్టవద్దు. ఫైల్లో మిగిలి ఉన్న ఏకైక ఫాంట్, నిజమైన కోడ్ టెక్స్ట్గా మిగిలే భాగం కోసం OFL IBM Plex Mono subset (`scripts/docs/readme-fonts.mjs`); ఇది ఆ అక్షరాల నుంచే నిర్మించబడుతుంది. పొందుపరచలేని ఏ glyph అయినా లోపాన్ని విసురుతుంది.
+- **మళ్లీ జనరేట్ చేయడం.** `npm run docs:readme-diagrams`, README క్రమంలో మొత్తం పన్నెండింటినీ తిరిగి రాస్తుంది మరియు ప్రతి ఫైల్ పరిమాణంతో ఒక్కో పంక్తిని ముద్రిస్తుంది. ఒక్క జనరేటర్ను కూడా స్వతంత్రంగా నడపవచ్చు (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`కు `node --import tsx/esm` అవసరం, ఎందుకంటే దాని figures లైవ్ కాటలాగ్ లోడర్ `open-sse/config/freeModelCatalog.ts` నుంచి వస్తాయి; కాటలాగ్ మార్పు వల్ల CIపై ప్రభావం `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`లో ఉంది). జనరేటర్ మరియు SVGను కలిపి కమిట్ చేయండి. రీలీజ్ మోడ్లో పాతబడిన SVG విఫలమవుతుంది; feature PRలో, `npm run check:generated-artifacts` PR సవరించిన SVGను మాత్రమే పరిశీలిస్తుంది (`docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines").
+- **ధృవీకరణ.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`, GitHub అందించే విధంగానే ఒక ఫైల్ను రెండర్ చేస్తుంది (`<img>` ట్యాగ్, camo యొక్క `Content-Security-Policy`, `image/svg+xml`), లైట్ మరియు డార్క్ ఫ్రేమ్లను క్యాప్చర్ చేస్తుంది, అలాగే పేజీ చేసిన బాహ్య ఫాంట్ అభ్యర్థనలను నివేదిస్తుంది (అవి 0 అయి ఉండాలి).
+- **బడ్జెట్.** ఒక్కో ఫైల్కు 200 KB కంటే తక్కువ ఉండాలి (ప్రతి తాజాదన పరీక్ష దీనిని నిర్ధారిస్తుంది); ఏ README చిత్రానికైనా 500 KB కఠిన పరిమితి (SVG studio validator నియమం).
+- **మార్పుల్లేకుండా కాపీ, గేట్ నుంచి లెక్కలు.** Rebrand టైప్ మరియు ప్యాలెట్ను మార్చింది, పదాలను కాదు: ప్రతి జనరేటర్ తన రేఖాచిత్రానికి సంబంధించిన కాపీని `*_COPY` constantలో ఉంచుతుంది (లేదా లైవ్ కాటలాగ్ నుంచి నిర్మిస్తుంది); ఇదే కాపీ గీసిన టెక్స్ట్గా మరియు outlining దశకు ఇన్పుట్గా రెండింటిగానూ ఉపయోగించబడుతుంది. ప్రామాణిక figures `<text>` nodesలో ఉంటాయి (outline చేసిన తర్వాత కనిపించవు, `fill-opacity:0`), వీటిని `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) చదువుతుంది. గేట్ చదివే రేఖాచిత్రాల తాజాదన పరీక్షలు జనరేట్ చేసిన ఫైల్పై దాని validatorsను కూడా నడుపుతాయి; అందువల్ల కోడ్కు భిన్నంగా మారిన figure పరీక్షను విఫలపరుస్తుంది — జనరేటర్లోని సంఖ్యను ఎప్పుడూ సరిచేయకుండా, గేట్ చదివే sourceనే సరిచేయండి.
 
-## 7. సూచన సూచిక
+## 7. సూచిక సూచన
 
-- `src/app/globals.css` — టోకెన్ బ్రిడ్జ్, `.dark` ఓవర్రైడ్లు, OmniRoute `@layer components` పొడిగింపులు
-- `packages/ui-kit/UPSTREAM.md` — పిన్ చేసిన అప్స్ట్రీమ్ కమిట్ మరియు లైసెన్స్ అధీకరణ; `packages/ui-kit/PATCHES.md`
+- `src/app/globals.css` — టోకెన్ బ్రిడ్జ్, `.dark` ఓవర్రైడ్లు, OmniRoute `@layer components` ఎక్స్టెన్షన్లు
+- `packages/ui-kit/UPSTREAM.md` — పిన్ చేసిన అప్స్ట్రీమ్ కమిట్ మరియు లైసెన్స్ అనుమతి; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
   `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` మరియు దాని పక్కన ఉన్న అడాప్టర్లు; `src/shared/components/layouts/DashboardShell.tsx`,
