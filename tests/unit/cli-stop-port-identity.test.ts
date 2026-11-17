@@ -132,3 +132,62 @@ test("killByPort (win32) does not signal a listener with an unproven identity", 
     assert.equal(freed, false);
   }
 });
+
+// The pid can exit during the 1s grace wait and be reused by an unrelated process, which then
+// reads as running. The SIGKILL escalation must prove identity again instead of trusting the
+// first pass.
+test("killByPort re-proves identity before SIGKILL so a reused pid is not killed", async () => {
+  const kills: Kill[] = [];
+  const identities = ["ours", "foreign"];
+  const freed = await killByPort(20128, {
+    platform: "linux",
+    execFileAsync: async () => ({ stdout: "1000790\n", stderr: "" }),
+    classifyPidIdentity: () => identities.shift() ?? "foreign",
+    processKill: (pid: number, signal: string | number) => {
+      kills.push([pid, signal]);
+      return true;
+    },
+    // The OmniRoute process exited on SIGTERM; a stranger now holds the same pid.
+    isPidRunning: () => true,
+    sleep: async () => {},
+  });
+  assert.deepEqual(kills, [[1000790, "SIGTERM"]], "the reused pid must not get SIGKILL");
+  assert.equal(freed, true, "our process is gone, so the port is no longer held by it");
+});
+
+test("killByPort still escalates to SIGKILL when the survivor is still OmniRoute", async () => {
+  const kills: Kill[] = [];
+  const freed = await killByPort(20128, {
+    platform: "linux",
+    execFileAsync: async () => ({ stdout: "1000791\n", stderr: "" }),
+    classifyPidIdentity: () => "ours",
+    processKill: (pid: number, signal: string | number) => {
+      kills.push([pid, signal]);
+      return true;
+    },
+    isPidRunning: () => !kills.some(([, signal]) => signal === "SIGKILL"),
+    sleep: async () => {},
+  });
+  assert.deepEqual(kills, [
+    [1000791, "SIGTERM"],
+    [1000791, "SIGKILL"],
+  ]);
+  assert.equal(freed, true);
+});
+
+test("killByPort does not signal a pid that was already gone when classified", async () => {
+  const kills: Kill[] = [];
+  const freed = await killByPort(20128, {
+    platform: "linux",
+    execFileAsync: async () => ({ stdout: "1000792\n", stderr: "" }),
+    classifyPidIdentity: () => "gone",
+    processKill: (pid: number, signal: string | number) => {
+      kills.push([pid, signal]);
+      return true;
+    },
+    isPidRunning: () => false,
+    sleep: async () => {},
+  });
+  assert.deepEqual(kills, [], "a pid with no process behind it is not signalled");
+  assert.equal(freed, true);
+});
