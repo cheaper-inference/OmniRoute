@@ -1345,7 +1345,9 @@ December 2, 2026, `pull_request_target` is blocked by default in public reposito
 Actions policy explicitly allows it, with brownouts before that date
 ([changelog](https://github.blog/changelog/2026-11-02-pull_request_target-blocked-by-default-december-2),
 [docs](https://docs.github.com/en/actions/how-tos/administer/control-workflow-execution)). A blocked
-run fails with an error annotation and the workflow does not execute.
+run does not execute: it ends with the status `Startup failure`, no jobs and an error annotation.
+With no jobs it has no check run either, so it does not appear among the pull request's checks,
+only in the Actions tab.
 
 Blocked approvals fail closed: no status is written, so no labeled PR becomes eligible and the
 queue lands nothing. To run the queue in a public repository, the owner creates an Actions policy
@@ -2385,8 +2387,11 @@ What you see, from `npm run queue -- pause|resume|bless`:
 ### Labels with no effect
 
 If labeled PRs stay `approval-missing` and no `omni-queue/approval`
-status appears on their heads, the `approval` job is not running: look for failed
-`pull_request_target` runs with an "is not allowed to trigger Actions workflows" error (see
+status appears on their heads, the `approval` job is not running: look in the Actions tab for
+`pull_request_target` runs of the workflow with the status `Startup failure` and no jobs. Their
+annotation names the `pull_request_target` protection; during GitHub's brownout of 2026-11-16 it
+began "Workflows are being blocked due to a scheduled brownout of the default
+`pull_request_target` protection" (see
 [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)). An
 `Approval` job that runs and fails prints `omni-queue approval failed: <message>`.
 
