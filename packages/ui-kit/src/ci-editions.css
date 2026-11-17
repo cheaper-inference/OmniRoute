@@ -73,6 +73,8 @@
   --ci-color-danger: #ae4340;
   --ci-color-danger-bg: #f5e2dc;
   --ci-color-danger-foreground: #faf9f4;
+  /* Same hue, darker: 4.5:1 for the quiet destructive Button on every content surface, muted included. */
+  --ci-button-danger-ghost-fg: #a43e3b;
   --ci-color-info: #526b80;
   --ci-color-info-bg: #e4e9ed;
   --ci-chart-1: #99562f;
@@ -196,6 +198,7 @@
   --ci-color-danger: #edaaa1;
   --ci-color-danger-bg: #382421;
   --ci-color-danger-foreground: #241b15;
+  --ci-button-danger-ghost-fg: var(--ci-color-danger);
   --ci-color-info: #a6bfd0;
   --ci-color-info-bg: #212e37;
   --ci-chart-1: #e5ac82;
@@ -280,6 +283,7 @@
     --ci-color-danger: #edaaa1;
     --ci-color-danger-bg: #382421;
     --ci-color-danger-foreground: #241b15;
+    --ci-button-danger-ghost-fg: var(--ci-color-danger);
     --ci-color-info: #a6bfd0;
     --ci-color-info-bg: #212e37;
     --ci-chart-1: #e5ac82;

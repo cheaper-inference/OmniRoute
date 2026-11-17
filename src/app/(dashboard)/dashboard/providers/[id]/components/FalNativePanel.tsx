@@ -17,7 +17,7 @@ export default function FalNativePanel({ connectionId }: { connectionId: string 
   const c = useFalNativeController(connectionId);
   return (
     <Card className="space-y-4">
-      <h2 className="text-lg font-semibold">{c.t("title")}</h2>
+      <h2 className="text-lg">{c.t("title")}</h2>
       <p className="text-sm text-text-muted">{c.t("description")}</p>
       {!connectionId ? (
         <p>{c.t("connectionRequired")}</p>

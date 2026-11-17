@@ -1,0 +1,1 @@
+- **fix(strict-zero-cost):** read xKiro daily free-token quota (GET /v1/usage, `free_tokens` only) so strict mode no longer marks every xKiro connection UNKNOWN ([#19131](https://github.com/cheaper-inference/OmniRoute/issues/19131))

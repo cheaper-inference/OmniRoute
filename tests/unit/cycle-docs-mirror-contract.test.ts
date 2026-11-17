@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { announceMirrorPlan, planMirrorAssertions } from "../_helpers/mirrorFreshness.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const qualityDoc = "docs/architecture/QUALITY_GATES.md";
@@ -25,12 +26,30 @@ test("English cycle documentation distinguishes bare fail-closed from the CI rat
   assert(cycleCheckbox(read(checklistDoc))?.startsWith("- [ ] `npm run check:cycles:ratchet`"));
 });
 
-test("every published locale carries the reviewed bare-cycle contract and ratchet checklist", () => {
+// Release mode (push, schedule, local run) asserts every locale. PR mode asserts the mirrors whose
+// anchored English section is unchanged since their translation; a PR that rewrites the cycle row
+// or the checklist leaves its mirrors to the translation wave (tests/_helpers/mirrorFreshness.ts).
+test("every published locale carries the reviewed bare-cycle contract and ratchet checklist", (t) => {
+  const qualityPlan = planMirrorAssertions({
+    root,
+    source: qualityDoc,
+    locales,
+    anchors: [/^\|\s*`check:cycles`\s*\|/m],
+  });
+  const checklistPlan = planMirrorAssertions({
+    root,
+    source: checklistDoc,
+    locales,
+    anchors: [/^- \[ \] `npm run check:cycles/m],
+  });
+  announceMirrorPlan(t, qualityPlan, checklistPlan);
   const stale: string[] = [];
-  for (const locale of locales) {
+  for (const locale of qualityPlan.assert) {
     if (!cycleRow(read(`docs/i18n/${locale}/${qualityDoc}`))?.includes("#15281")) {
       stale.push(`${locale}: bare-cycle contract`);
     }
+  }
+  for (const locale of checklistPlan.assert) {
     if (
       !cycleCheckbox(read(`docs/i18n/${locale}/${checklistDoc}`))?.startsWith(
         "- [ ] `npm run check:cycles:ratchet`"
