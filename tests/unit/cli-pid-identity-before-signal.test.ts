@@ -145,16 +145,33 @@ test("classifyPidIdentity: an ambiguous re-join of unquoted tokens never proves 
 // after a bare option the runtime does not know as a flag, the next token may be its value
 // rather than the script. Even with an exact argv that cannot be proven either way.
 test("classifyPidIdentity: a token after an unrecognised bare runtime option is not the script", () => {
+  // No prefix makes an option valueless: --trace-*, --experimental-*, --no-* and --inspect-*
+  // all have members that take a separate value. Only an exact allowlist is trusted.
   for (const cmdline of [
     "node --watch-path /home/me/omniroute /srv/other/server.js",
     "node --report-dir /var/omniroute /srv/other/server.js",
+    "node --trace-event-file-pattern /tmp/omniroute /srv/other/server.js",
+    "node --trace-event-categories omniroute /srv/other/server.js",
+    "node --experimental-sea-config /tmp/omniroute.json /srv/other/server.js",
+    "node --inspect-port /tmp/omniroute /srv/other/server.js",
+    "node --no-warnings --trace-event-file-pattern /tmp/omniroute /srv/other/server.js",
+    "bun --smol --config /tmp/omniroute.toml /srv/other/server.js",
   ]) {
     assert.equal(classifyPidIdentity(1, linux(cmdline)), "unknown", cmdline);
   }
+  // A known value option still has its value skipped, so the foreign script is what is judged.
+  assert.equal(
+    classifyPidIdentity(1, linux("node --experimental-loader /tmp/omniroute.mjs /srv/x.js")),
+    "foreign"
+  );
   for (const cmdline of [
     "node --no-warnings /opt/omniroute/app/server.js",
-    "node --inspect --enable-source-maps /opt/omniroute/app/server.js",
-    "node --experimental-vm-modules /opt/omniroute/app/server.js",
+    "node --no-warnings --enable-source-maps /opt/omniroute/app/server.js",
+    // How OmniRoute spawns itself (scripts/build/runtime-env.mjs, serve.mjs, plugins/loader.ts).
+    "node --dns-result-order=ipv4first --max-old-space-size=512 /opt/omniroute/app/server.js",
+    "node --import tsx/esm /opt/omniroute/bin/omniroute.mjs serve",
+    "bun --preload /opt/omniroute/bin/polyfill.mjs /opt/omniroute/app/server.js",
+    "bun --smol /opt/omniroute/app/server.js",
   ]) {
     assert.equal(classifyPidIdentity(1, linux(cmdline)), "ours", cmdline);
   }

@@ -123,28 +123,23 @@ const RUNTIME_VALUE_OPTIONS = new Set([
   "--title",
   "--input-type",
 ]);
-// Bare runtime options known to take no value. Any other bare option may take the next token as
-// its value (`--watch-path /x`), so what follows it cannot be proven to be the script.
-const RUNTIME_FLAG_PREFIXES = ["--no-", "--experimental-", "--enable-", "--expose-", "--trace-"];
+// Bare runtime options known to take no separate value. Exact names only: no prefix is safe
+// (--trace-event-file-pattern, --experimental-sea-config and --inspect-port all take one), and
+// any other bare option may take the next token as its value, so what follows it cannot be
+// proven to be the script. `--opt=value` forms carry their value and are always skipped.
+// OmniRoute spawns itself with --dns-result-order=, --max-old-space-size= (both `=` forms),
+// --import / --preload <path> (RUNTIME_VALUE_OPTIONS) and --no-warnings (plugins/loader.ts).
 const RUNTIME_FLAGS = new Set([
-  "--inspect",
-  "--inspect-brk",
-  "--inspect-wait",
-  "--watch",
+  "--no-warnings",
+  "--enable-source-maps",
+  "--no-deprecation",
+  "--trace-warnings",
+  "--trace-deprecation",
+  "--trace-uncaught",
   "--throw-deprecation",
-  "--pending-deprecation",
-  "--preserve-symlinks",
-  "--preserve-symlinks-main",
-  "--abort-on-uncaught-exception",
-  "--frozen-intrinsics",
-  "--zero-fill-buffers",
-  "--use-openssl-ca",
-  "--use-bundled-ca",
-  "--permission",
+  "--expose-gc",
   "--smol",
 ]);
-const isRuntimeFlag = (arg) =>
-  RUNTIME_FLAGS.has(arg) || RUNTIME_FLAG_PREFIXES.some((prefix) => arg.startsWith(prefix));
 const RUNTIME_INLINE_CODE = /^(?:-e|-p|-pe|-ep|--eval|--print)(?:=|$)/;
 
 // macOS ps and Windows CommandLine give one string. Double quotes group an argument.
@@ -198,7 +193,7 @@ function commandIdentity(rawTokens, joinable, isFile) {
       i++;
     } else if (arg.startsWith("-")) {
       if (RUNTIME_VALUE_OPTIONS.has(arg)) i++;
-      else if (!arg.includes("=") && !isRuntimeFlag(arg)) return "unknown";
+      else if (!arg.includes("=") && !RUNTIME_FLAGS.has(arg)) return "unknown";
       continue;
     }
     const script = joinPathTokens(tokens, i, (v) => SCRIPT_END.test(v), joinable, isFile);
