@@ -45,7 +45,7 @@ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이
 
 </h3>
 
-[![별](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![별](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![별 기록 순위](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이
 
 **👋 메인테이너를 팔로우하세요 — 새로운 프로바이더, 릴리스 및 팁을 가장 먼저 받아보세요:**
 
-[![LinkedIn에서 Diego 팔로우](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHub에서 @diegosouzapw 팔로우](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![LinkedIn에서 Diego 팔로우](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![GitHub에서 @diegosouzapw 팔로우](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp 글로벌](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp 브라질](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![웹사이트](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp 글로벌](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp 브라질](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![웹사이트](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **질문, 프로바이더 팁, 로드맵 및 지원 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 글로벌](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 브라질](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -71,7 +71,7 @@ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이
 
 <div align="center">
 
-|                         |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                         |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ----------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 제공업체             |            352            |   **358**   |          389          |
 | 🧠 고유 채팅 모델 ID    |           1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar는 선택적으로 사용할 수 있으며 GET 전용입니다. OmniRoute 
 
 </div>
 
-> **v3.8.20 → v3.8.54**의 주요 변경 사항입니다. 전체 변경 이력은 [`CHANGELOG.md`](CHANGELOG.md)에서 확인할 수 있습니다.
+> **v3.8.20 → v3.8.55**의 주요 변경 사항입니다. 전체 변경 이력은 [`CHANGELOG.md`](CHANGELOG.md)에서 확인할 수 있습니다.
 
 - **⚖️ `quota-weighted` 라우팅** — 20번째 콤보 전략은 소진된 계정을 건너뛴 다음, 남은 할당량 ÷ 처리 중인 부하에 비례하여 나머지 계정 중에서 선택하므로 기존 대화는 계속 동일한 계정에 고정됩니다. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 헤드리스 모드** — `omniroute serve --headless` (또는 `OMNIROUTE_HEADLESS=1`)는 대시보드와 대시보드 전용 하위 시스템을 끄고 `/v1/*` 프록시 엔진만 실행합니다. → [헤드리스 모드](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` 또는 peer-dep 경고가 표시되나요? [무해한 경고입니다](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 이상을 사용하시나요?** npm은 허용되지 않은 패키지 라이프사이클 스크립트를 차단할 수 있습니다. OmniRoute의 `postinstall` (`node scripts/build/postinstall.mjs`)은 네이티브 런타임 파일을 준비하는 데 필요합니다. 전역 설치 시 npm 경고에 표시된 패키지 이름을 허용하세요. OmniRoute 3.8.54에서 보고된 패키지 집합은 다음과 같습니다.
+> **npm 11 이상을 사용하시나요?** npm은 허용되지 않은 패키지 라이프사이클 스크립트를 차단할 수 있습니다. OmniRoute의 `postinstall` (`node scripts/build/postinstall.mjs`)은 네이티브 런타임 파일을 준비하는 데 필요합니다. 전역 설치 시 npm 경고에 표시된 패키지 이름을 허용하세요. OmniRoute 3.8.55에서 보고된 패키지 집합은 다음과 같습니다.
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td nowrap><b>런타임</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>언어</b></td><td>TypeScript 6.0 — <code>src/</code> 및 <code>open-sse/</code> 전체에서 <b>100% TypeScript</b> 사용 (v2.0 이후 코어에 <code>any</code> 없음)</td></tr>
   <tr><td nowrap><b>프레임워크</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 도메인 모듈 147개, 마이그레이션 235개</td></tr>
+  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 도메인 모듈 147개, 마이그레이션 240개</td></tr>
   <tr><td nowrap><b>메모리</b></td><td>SQLite FTS5 전문 검색 + int8 양자화 벡터 임베딩, 타입 지정 감쇠</td></tr>
   <tr><td nowrap><b>스키마</b></td><td>Zod 4 — MCP 도구 I/O 검증 + API 계약</td></tr>
   <tr><td nowrap><b>프로토콜</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE)를 참조하세요.
 
 **[⬆ 맨 위로 돌아가기](#-omniroute)** · 오픈 소스 AI 커뮤니티를 위해 ❤️로 제작되었습니다.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> 제작 · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> 제작 · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- 커뮤니티 Q&A를 위한 GitHub Discussions 활성화됨 -->

@@ -57,7 +57,7 @@ export default function FreeProxyRow({
       <TableCell className="font-mono text-xs">{endpoint}</TableCell>
       <TableCell className="uppercase text-xs">{proxy.type}</TableCell>
       <TableCell className="text-xs">{proxy.countryCode || "—"}</TableCell>
-      <TableCell className={`text-xs font-semibold ${qualityColor}`}>
+      <TableCell className={`text-xs ${qualityColor}`}>
         {proxy.qualityScore != null ? proxy.qualityScore : "—"}
       </TableCell>
       <TableCell className="text-xs">

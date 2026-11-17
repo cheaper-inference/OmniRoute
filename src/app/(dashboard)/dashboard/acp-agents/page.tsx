@@ -204,7 +204,7 @@ export default function AgentsPage() {
             <div className="p-2 rounded-lg bg-info/10 text-info">
               <Icon name="support" size={20} />
             </div>
-            <h3 className="text-lg font-semibold">{t("setupGuideTitle")}</h3>
+            <h3 className="text-lg">{t("setupGuideTitle")}</h3>
           </div>
           <Link
             href="/dashboard/cli-code"
@@ -301,10 +301,10 @@ export default function AgentsPage() {
               </div>
               {agent.isCustom && (
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="sm"
                   onClick={() => handleRemoveAgent(agent.id)}
-                  className="gap-0.5 text-xs text-error hover:bg-error/10 hover:text-error"
+                  className="gap-0.5 text-xs"
                   title={t("remove")}
                 >
                   <Icon name="delete" size={14} />
@@ -324,7 +324,7 @@ export default function AgentsPage() {
               <Icon name="add_circle" size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{t("addCustomAgent")}</h3>
+              <h3 className="text-lg">{t("addCustomAgent")}</h3>
               <p className="text-sm text-text-muted">{t("addCustomAgentDesc")}</p>
             </div>
           </div>

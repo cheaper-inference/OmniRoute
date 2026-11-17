@@ -45,7 +45,7 @@
 
 </h3>
 
-[![Réaltaí](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Réaltaí](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Rang Stair na Réaltaí](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@
 
 **👋 Lean an cothaitheoir — faigh soláthraithe nua, eisiúintí agus leideanna ar dtús:**
 
-[![Lean Diego ar LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Lean @diegosouzapw ar GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Lean Diego ar LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![Lean @diegosouzapw ar GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Domhanda](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp na Brasaíle](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Suíomh Gréasáin](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp Domhanda](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp na Brasaíle](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Suíomh Gréasáin](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **Ceisteanna, leideanna faoi sholáthraithe, treochlár agus tacaíocht → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Domhanda](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 An Bhrasaíl](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Tairseach](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Soláthraithe                          |           352           |   **358**   |          389          |
 | 🧠 Aitheantóirí uathúla samhlacha comhrá |          1320           |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 
 </div>
 
-> Buaicphointí le déanaí ó **v3.8.20 → v3.8.54**. An stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
+> Buaicphointí le déanaí ó **v3.8.20 → v3.8.55**. An stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Ródú `quota-weighted`** — seachnaíonn an 20ú straitéis teaglaim cuntais ídithe, ansin roghnaíonn sí i measc na cinn eile i gcomhréir le cuóta fágtha ÷ ualach eitilte, agus coinníonn sí comhráite atá ann cheana ceangailte. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mód gan cheann** — ritheann `omniroute serve --headless` (nó `OMNIROUTE_HEADLESS=1`) inneall seachfhreastalaí `/v1/*` amháin, agus an painéal agus na fochórais atá teoranta don phainéal múchta. → [Mód gan Cheann](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 An bhfeiceann tú `npm warn ERESOLVE` nó rabhaidh faoi spleáchais chomhghleacaithe? [Tá siad neamhdhíobhálach](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **An bhfuil npm 11 nó níos nuaí á úsáid agat?** Féadfaidh npm scripteanna shaolré na bpacáistí a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dhúchasacha ama rite a ullmhú. Ceadaigh na pacáistí atá ainmnithe i rabhadh npm agus tú á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.54:
+> **An bhfuil npm 11 nó níos nuaí á úsáid agat?** Féadfaidh npm scripteanna shaolré na bpacáistí a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dhúchasacha ama rite a ullmhú. Ceadaigh na pacáistí atá ainmnithe i rabhadh npm agus tú á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1305,7 +1305,7 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ar fud <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroílár ó v2.0)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 235 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 240 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
   <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/A uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1818,7 +1818,7 @@ Ceadúnas MIT - féach ar [LICENSE](LICENSE) le haghaidh sonraí.
 
 **[⬆ Ar ais go dtí an barr](#-omniroute)** · Tógtha le ❤️ don phobal AI foinse oscailte.
 
-<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Tá GitHub Discussions cumasaithe le haghaidh Ceisteanna agus Freagraí an phobail -->

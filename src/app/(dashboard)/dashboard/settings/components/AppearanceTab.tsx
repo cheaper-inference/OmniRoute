@@ -474,7 +474,7 @@ export default function AppearanceTab() {
               <Icon name="badge" size={20} />
             </span>
             <div>
-              <h4 className="font-semibold">{t("whitelabeling")}</h4>
+              <h4>{t("whitelabeling")}</h4>
               <p className="text-sm text-text-muted">{t("whitelabelingDesc")}</p>
             </div>
           </div>

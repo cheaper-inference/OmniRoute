@@ -277,7 +277,7 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                       variant="ghost"
                       size="sm"
                       onClick={() => handleToggleExpand(provider)}
-                      className="h-auto min-h-0 px-1 text-xs font-semibold text-text-main truncate text-left"
+                      className="h-auto min-h-0 px-1 text-xs text-text-main truncate text-left"
                     >
                       {providerDisplayName}
                     </Button>
@@ -304,7 +304,7 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                           aria-pressed={isSelected}
                           onClick={() => handleToggleSingleConnection(conn.id)}
                           className={cn(
-                            "w-full justify-start gap-2 text-left text-xs font-normal",
+                            "w-full justify-start gap-2 text-left text-xs",
                             isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
                           )}
                         >
