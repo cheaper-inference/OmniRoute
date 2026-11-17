@@ -2222,11 +2222,11 @@ async function handleChatCoreInner({
   if (outputBudget.ok === false) {
     trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
     return createErrorResult(
-      HTTP_STATUS.BAD_REQUEST,
+      HTTP_STATUS.PAYLOAD_TOO_LARGE,
       outputBudget.message,
       null,
       "context_length_exceeded",
-      "invalid_request_error"
+      "payload_too_large"
     );
   }
   body = outputBudget.body;
