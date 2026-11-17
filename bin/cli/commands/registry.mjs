@@ -15,6 +15,7 @@ import { registerPricing } from "./pricing.mjs";
 import { registerResilience } from "./resilience.mjs";
 import { registerNodes } from "./nodes.mjs";
 import { registerSync } from "./sync.mjs";
+import { registerSyncRemote } from "./sync-remote.mjs";
 import { registerContextEng } from "./context-eng.mjs";
 import { registerSessions } from "./sessions.mjs";
 import { registerTags } from "./tags.mjs";
@@ -107,6 +108,7 @@ export function registerCommands(program) {
   registerResilience(program);
   registerNodes(program);
   registerSync(program);
+  registerSyncRemote(program);
   registerContextEng(program);
   registerSessions(program);
   registerTags(program);
