@@ -1,0 +1,1 @@
+- **fix(settings):** `PATCH /api/settings` now lists the keys it ignored in an `ignoredKeys` field of the 200 answer, so a typo or an unknown setting no longer looks like a saved change. ([#19428](https://github.com/cheaper-inference/OmniRoute/pull/19428))

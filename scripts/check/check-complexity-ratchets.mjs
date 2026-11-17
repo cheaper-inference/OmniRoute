@@ -46,7 +46,7 @@ const COGNITIVE_RULES = new Set(["sonarjs/cognitive-complexity"]);
  * and the nightly headroom job run the full walk). See newCodeMode.mjs.
  */
 function mainNewCode() {
-  const mergeBase = resolveMergeBase(BASE_REF);
+  const mergeBase = resolveMergeBase(BASE_REF, { ref: process.env.GITHUB_REF });
   const changed = listChangedFiles(mergeBase, NEW_CODE_SCOPE);
   console.log(
     `[complexity-ratchets] new-code mode: merge-base ${mergeBase.slice(0, 12)}, ${changed.length} changed file(s) in scope`

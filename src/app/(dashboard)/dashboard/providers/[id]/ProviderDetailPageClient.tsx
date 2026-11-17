@@ -63,6 +63,7 @@ import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
+import { ChatGptPlanNotice } from "@/shared/components/ChatGptPlanUi";
 import { ConnectionPinTip } from "./components/ConnectionIdChip";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
@@ -667,6 +668,13 @@ export default function ProviderDetailPageClient() {
             providerKey={providerId}
             connectionCount={connections.length}
           />
+          {providerId === "chatgpt" && (
+            <ChatGptPlanNotice
+              connected={connections.some(
+                (connection) => connection.isActive !== false && connection.testStatus === "active"
+              )}
+            />
+          )}
           <ConnectionsHeaderToolbar
             providerId={providerId}
             providerInfo={providerInfo}
@@ -836,7 +844,7 @@ export default function ProviderDetailPageClient() {
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (
         <Card>
-          <h2 className="text-lg font-semibold mb-4">{t("availableModels")}</h2>
+          <h2 className="text-lg mb-4">{t("availableModels")}</h2>
           <ProviderModelsSection
             providerId={providerId}
             providerAlias={providerAlias}

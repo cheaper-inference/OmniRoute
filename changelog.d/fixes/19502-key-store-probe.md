@@ -1,0 +1,1 @@
+- **fix(encryption):** A key and a database from different installs now give one clear error at boot, not one failure per provider. `GET /api/monitoring/health` (management callers) also reports `cryptography.keyStoreDecryptable` (`true`, `false`, or `null` when unknown). ([#19502](https://github.com/cheaper-inference/OmniRoute/pull/19502))
