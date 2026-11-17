@@ -119966,7 +119966,7 @@
         },
         "mt": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "2013c12d0e1497df4ba33310b9a8fc079b8138812853e4fda29991a1a258ccf0",
+          "target_hash": "37ca5334d834f987a3abf2e6a4a664cd458a923ea1e3bb3e188840e4fc5ab59b",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -119977,7 +119977,7 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:44:51.949Z"
+          "updated_at": "2026-11-17T01:50:38.726Z"
         },
         "ne": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
@@ -120101,7 +120101,7 @@
         },
         "ro": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "b4d59631324d86dad9340d6f0e8ed68f315aa6b127e043b9db0feceda1e80186",
+          "target_hash": "e3ca65bc8686a14f62540be0d763b1ab10b55836c12db501233e4f830b6ca366",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -120112,11 +120112,11 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:45:15.848Z"
+          "updated_at": "2026-11-17T01:53:12.174Z"
         },
         "or": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "8a0d995a028449174b1283ef51b5b68560925310f1d6c233d4b6fbd8965a425b",
+          "target_hash": "b1032efb62a8af0dbed330f8c4c3820acfc0ceac453eed75aced306f03b42d98",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -120127,7 +120127,7 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:45:06.265Z"
+          "updated_at": "2026-11-17T01:52:23.160Z"
         },
         "ru": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
@@ -120161,7 +120161,7 @@
         },
         "si": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "f182e37ee3437e386a0e4bdc4c9388115ea5fac907ecbe8920e409de54e09a21",
+          "target_hash": "4ec914c2750226f0087b12727cc717a143887843ba1cefc78aba6e1ddfd434ba",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -120172,7 +120172,7 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:45:16.737Z"
+          "updated_at": "2026-11-17T01:55:35.200Z"
         },
         "sl": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
@@ -120221,7 +120221,7 @@
         },
         "sw": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "f075f9255f7a3d56a5ebaa5b921150a58524a2cc9c9bf1ad5093413183e7b4b4",
+          "target_hash": "a54ebbe937e831cc113340737b3e77e1cf3db12782ed0898ea158c6fd1093f64",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -120232,7 +120232,7 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:45:21.462Z"
+          "updated_at": "2026-11-17T01:56:52.766Z"
         },
         "ta": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
@@ -120401,7 +120401,7 @@
         },
         "bs": {
           "source_hash": "e5f1702e342e484b91492ba0383c91834edd338346172f0c6816b3e97369dbb1",
-          "target_hash": "07377cad5186d821f35da936e2e3a018601f2510d8c796524ca1ddb63c480fb8",
+          "target_hash": "3b4ad412ac456ac453b9855358a9bddb834443f41933f6e9fa87ef8d96294d55",
           "section_hashes": [
             "a8a79ea6b80e",
             "23e93a15d1e5",
@@ -120412,7 +120412,7 @@
             "ba950787cd3a",
             "b737fdacfb1d"
           ],
-          "updated_at": "2026-11-16T22:44:05.040Z"
+          "updated_at": "2026-11-17T01:51:55.458Z"
         }
       }
     },
