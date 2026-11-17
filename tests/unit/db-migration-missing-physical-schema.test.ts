@@ -108,11 +108,15 @@ if (!isIsolatedChild) {
   function withNonTestEnvironment<T>(fn: () => T): T {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousVitest = process.env.VITEST;
+    const previousTestContext = process.env.NODE_TEST_CONTEXT;
+    const previousJestWorker = process.env.JEST_WORKER_ID;
     const previousArgv = [...process.argv];
     const previousExecArgv = [...process.execArgv];
 
     delete process.env.NODE_ENV;
     delete process.env.VITEST;
+    delete process.env.NODE_TEST_CONTEXT;
+    delete process.env.JEST_WORKER_ID;
     process.argv = process.argv.filter((arg) => !arg.includes("test"));
     process.execArgv = process.execArgv.filter((arg) => !arg.includes("test"));
 
@@ -125,6 +129,10 @@ if (!isIsolatedChild) {
       else process.env.NODE_ENV = previousNodeEnv;
       if (previousVitest === undefined) delete process.env.VITEST;
       else process.env.VITEST = previousVitest;
+      if (previousTestContext === undefined) delete process.env.NODE_TEST_CONTEXT;
+      else process.env.NODE_TEST_CONTEXT = previousTestContext;
+      if (previousJestWorker === undefined) delete process.env.JEST_WORKER_ID;
+      else process.env.JEST_WORKER_ID = previousJestWorker;
     }
   }
 

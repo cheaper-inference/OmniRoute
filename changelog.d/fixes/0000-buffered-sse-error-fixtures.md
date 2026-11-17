@@ -1,0 +1,1 @@
+- **test(sse):** Distinguish malformed SSE from valid upstream error frames in the non-streaming regression suites, and verify both initial and fallback errors retain their status, diagnostic and receipt.

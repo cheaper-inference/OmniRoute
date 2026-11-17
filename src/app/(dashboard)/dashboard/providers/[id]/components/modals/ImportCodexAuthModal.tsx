@@ -11,6 +11,8 @@ import {
   Input,
   Modal,
   SegmentedControl,
+  SegmentedPanel,
+  SegmentedTabs,
   Select,
   Textarea,
 } from "@/shared/components";
@@ -343,23 +345,25 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
     >
       <div className="flex flex-col gap-4">
         {/* Top-level Single / Bulk tabs */}
-        <SegmentedControl
-          size="sm"
+        <SegmentedTabs
           value={topTab}
           onChange={(next) => {
             setTopTab(next as typeof topTab);
             setBulkResult(null);
             setSingleError(null);
           }}
-          options={TOP_TABS.map(({ id, label }) => ({ value: id, label }))}
-        />
+          className="gap-4"
+        >
+          <SegmentedControl
+            semantics="tabs"
+            size="sm"
+            options={TOP_TABS.map(({ id, label }) => ({ value: id, label }))}
+          />
 
-        {/* ── Single tab ── */}
-        {topTab === "single" && (
-          <>
+          {/* ── Single tab ── */}
+          <SegmentedPanel value="single" className="flex flex-col gap-4">
             {/* Source sub-tabs */}
-            <SegmentedControl
-              size="sm"
+            <SegmentedTabs
               value={singleTab}
               onChange={(next) => {
                 setSingleTab(next as "upload" | "paste");
@@ -367,14 +371,18 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 setSingleParseError(null);
                 setSingleDetectedEmail(null);
               }}
-              options={[
-                { value: "upload", label: t("codexImportTabUpload") || "Upload file" },
-                { value: "paste", label: t("codexImportTabPaste") || "Paste JSON" },
-              ]}
-            />
+              className="gap-4"
+            >
+              <SegmentedControl
+                semantics="tabs"
+                size="sm"
+                options={[
+                  { value: "upload", label: t("codexImportTabUpload") || "Upload file" },
+                  { value: "paste", label: t("codexImportTabPaste") || "Paste JSON" },
+                ]}
+              />
 
-            {singleTab === "upload" && (
-              <div className="flex flex-col gap-2">
+              <SegmentedPanel value="upload" className="flex flex-col gap-2">
                 <Input
                   label={t("codexImportFileLabel") || "Choose auth.json"}
                   type="file"
@@ -386,11 +394,9 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                   {t("codexImportFileHint") ||
                     "Select the auth.json file exported from Codex or OmniRoute."}
                 </p>
-              </div>
-            )}
+              </SegmentedPanel>
 
-            {singleTab === "paste" && (
-              <div className="flex flex-col gap-2">
+              <SegmentedPanel value="paste" className="flex flex-col gap-2">
                 <Field
                   htmlFor="codex-import-single-paste"
                   label={t("codexImportPasteLabel") || "Paste the JSON content"}
@@ -404,8 +410,8 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                     className="resize-none font-mono text-xs"
                   />
                 </Field>
-              </div>
-            )}
+              </SegmentedPanel>
+            </SegmentedTabs>
 
             {singleParseError && <p className="text-sm text-error">{singleParseError}</p>}
             {singleDetectedEmail && !singleParseError && (
@@ -466,15 +472,12 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 {t("cancel")}
               </Button>
             </div>
-          </>
-        )}
+          </SegmentedPanel>
 
-        {/* ── Bulk tab ── */}
-        {topTab === "bulk" && (
-          <>
+          {/* ── Bulk tab ── */}
+          <SegmentedPanel value="bulk" className="flex flex-col gap-4">
             {/* Sub-mode selector */}
-            <SegmentedControl
-              size="sm"
+            <SegmentedTabs
               value={bulkMode}
               onChange={(next) => {
                 setBulkMode(next as typeof bulkMode);
@@ -483,12 +486,16 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 setBulkPasteText("");
                 setBulkResult(null);
               }}
-              options={BULK_MODES.map(({ id, label }) => ({ value: id, label }))}
-            />
+              className="gap-4"
+            >
+              <SegmentedControl
+                semantics="tabs"
+                size="sm"
+                options={BULK_MODES.map(({ id, label }) => ({ value: id, label }))}
+              />
 
-            {/* Upload mode */}
-            {bulkMode === "upload" && (
-              <div className="flex flex-col gap-2">
+              {/* Upload mode */}
+              <SegmentedPanel value="upload" className="flex flex-col gap-2">
                 <Input
                   type="file"
                   accept=".json"
@@ -500,12 +507,10 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 <p className="text-xs text-text-muted">
                   {t("codexImportBulkUploadHint") || "Select multiple .json files"}
                 </p>
-              </div>
-            )}
+              </SegmentedPanel>
 
-            {/* Paste mode */}
-            {bulkMode === "paste" && (
-              <div className="flex flex-col gap-2">
+              {/* Paste mode */}
+              <SegmentedPanel value="paste" className="flex flex-col gap-2">
                 <Textarea
                   value={bulkPasteText}
                   onChange={(e) => handleBulkPasteChange(e.target.value)}
@@ -517,12 +522,10 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 <p className="text-xs text-text-muted">
                   {t("codexImportBulkPasteHint") || "JSON array or multiple JSONs separated by ---"}
                 </p>
-              </div>
-            )}
+              </SegmentedPanel>
 
-            {/* ZIP mode */}
-            {bulkMode === "zip" && (
-              <div className="flex flex-col gap-2">
+              {/* ZIP mode */}
+              <SegmentedPanel value="zip" className="flex flex-col gap-2">
                 <Input
                   type="file"
                   accept=".zip"
@@ -541,8 +544,8 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                   {t("codexImportBulkZipHint") ||
                     "Upload a .zip containing auth.json files (max 50 files, 10 MB)"}
                 </p>
-              </div>
-            )}
+              </SegmentedPanel>
+            </SegmentedTabs>
 
             {/* Entry preview list */}
             {bulkEntries.length > 0 && !bulkResult && (
@@ -620,8 +623,8 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                 {t("cancel")}
               </Button>
             </div>
-          </>
-        )}
+          </SegmentedPanel>
+        </SegmentedTabs>
       </div>
     </Modal>
   );

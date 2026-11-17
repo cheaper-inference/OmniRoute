@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { SearchableSelect } from "@omniroute/ui-kit/searchable-select";
 import { Card, Button, Input, ModelSelectField, Select, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
-import { matchesSearch } from "@/shared/utils/turkishText";
+import { searchKeywordsFor } from "@/shared/utils/turkishText";
 import FusionDefaultsFields from "./FusionDefaultsFields";
 import {
   ROUTING_STRATEGIES,
@@ -109,10 +110,6 @@ export default function ComboDefaultsTab() {
   const [availableProviders, setAvailableProviders] = useState<{ id: string; provider: string }[]>(
     []
   );
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [highlightedIdx, setHighlightedIdx] = useState(0);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error" | ""; message: string }>({
     type: "",
@@ -189,17 +186,6 @@ export default function ComboDefaultsTab() {
       .catch((err) => console.error("Failed to fetch combo defaults:", err));
   }, []);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   // The banner timer outlives the component: without a handle to clear it, a save
   // that lands just before unmount fires a state update into a torn-down tree.
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -271,9 +257,6 @@ export default function ComboDefaultsTab() {
     const trimmed = name.trim().toLowerCase();
     if (!trimmed || providerOverrides[trimmed]) return;
     setProviderOverrides((prev) => ({ ...prev, [trimmed]: { maxRetries: 1 } }));
-    setDropdownOpen(false);
-    setSearchQuery("");
-    setHighlightedIdx(0);
   };
 
   const removeProviderOverride = (provider: string) => {
@@ -304,33 +287,8 @@ export default function ComboDefaultsTab() {
     });
   };
 
-  // Filtered provider list — excludes already-added ones, filtered by search query
-  const filteredProviders = availableProviders.filter(
-    (p) => !providerOverrides[p.provider] && matchesSearch(p.provider, searchQuery)
-  );
-
-  const handleDropdownKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setHighlightedIdx((prev) => Math.min(prev + 1, filteredProviders.length - 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setHighlightedIdx((prev) => Math.max(prev - 1, 0));
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (filteredProviders[highlightedIdx]) {
-          addProviderOverride(filteredProviders[highlightedIdx].provider);
-        }
-        break;
-      case "Escape":
-        e.preventDefault();
-        setDropdownOpen(false);
-        break;
-    }
-  };
+  // Providers still without an override: the options of the "add provider" picker.
+  const remainingProviders = availableProviders.filter((p) => !providerOverrides[p.provider]);
 
   return (
     <Card>
@@ -338,7 +296,7 @@ export default function ComboDefaultsTab() {
         <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
           <Icon name="tune" size={20} />
         </div>
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-lg">
           {translateOrFallback(t, "comboDefaultsTitle", "Default Routing & Combo Settings")}
         </h3>
         <span className="text-xs text-text-muted ml-auto">{t("globalComboConfig")}</span>
@@ -443,7 +401,6 @@ export default function ComboDefaultsTab() {
               onChange={(e) =>
                 setComboDefaults((prev) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))
               }
-              className="text-sm"
             />
           ))}
           <Input
@@ -460,7 +417,6 @@ export default function ComboDefaultsTab() {
                 targetTimeoutMs: secondsInputToOptionalMs(e.target.value),
               }))
             }
-            className="text-sm"
           />
           <Input
             label={translateOrFallback(t, "comboTimeout", "Combo timeout (seconds)")}
@@ -480,7 +436,6 @@ export default function ComboDefaultsTab() {
                 comboTimeoutMs: secondsInputToOptionalMs(e.target.value),
               }))
             }
-            className="text-sm"
           />
         </div>
         <p className="text-xs text-text-muted">
@@ -519,7 +474,6 @@ export default function ComboDefaultsTab() {
             step={60}
             value={msToSeconds(sessionAffinityTtlMs)}
             onChange={(e) => setSessionAffinityTtlMs(secondsInputToMs(e.target.value, 86400))}
-            className="text-sm"
           />
         </div>
 
@@ -549,7 +503,6 @@ export default function ComboDefaultsTab() {
                 resetAwareQuotaCacheTtlMs: secondsInputToMs(e.target.value, 300),
               }))
             }
-            className="text-sm"
           />
           <Input
             label={translateOrFallback(t, "resetAwareQuotaCacheMaxStale", "Max stale (seconds)")}
@@ -564,7 +517,6 @@ export default function ComboDefaultsTab() {
                 resetAwareQuotaCacheMaxStaleMs: secondsInputToMs(e.target.value, 3600),
               }))
             }
-            className="text-sm"
           />
         </div>
 
@@ -584,7 +536,6 @@ export default function ComboDefaultsTab() {
                   concurrencyPerModel: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={t("queueTimeout")}
@@ -600,7 +551,6 @@ export default function ComboDefaultsTab() {
                   queueTimeoutMs: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={t("queueDepth")}
@@ -615,7 +565,6 @@ export default function ComboDefaultsTab() {
                   queueDepth: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
           </div>
         )}
@@ -636,7 +585,6 @@ export default function ComboDefaultsTab() {
                   handoffThreshold: e.target.value ? Number(e.target.value) : undefined,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={translateOrFallback(t, "contextRelayMaxMessages", "Max Messages For Summary")}
@@ -651,7 +599,6 @@ export default function ComboDefaultsTab() {
                   maxMessagesForSummary: e.target.value ? Number(e.target.value) : undefined,
                 }))
               }
-              className="text-sm"
             />
             <ModelSelectField
               label={translateOrFallback(t, "contextRelaySummaryModel", "Summary Model")}
@@ -847,85 +794,47 @@ export default function ComboDefaultsTab() {
                       [provider]: { ...prev[provider], maxRetries: parseInt(e.target.value) || 0 },
                     }))
                   }
-                  className="text-xs w-16"
+                  className="w-16"
+                  inputClassName="text-xs"
                   aria-label={t("providerMaxRetriesAria", { provider })}
                 />
                 <span className="text-[10px] text-text-muted">{t("retries")}</span>
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="icon-sm"
                   icon="close"
                   onClick={() => removeProviderOverride(provider)}
-                  className="ml-auto text-error"
+                  className="ml-auto"
                   aria-label={t("removeProviderOverrideAria", { provider })}
                 />
               </div>
             )
           )}
 
-          <div className="relative" ref={dropdownRef}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              aria-expanded={dropdownOpen}
-              className="mt-2 w-full justify-between font-normal text-text-muted"
-            >
-              <span className="flex-1 text-left">
-                {t("selectProviderPlaceholder") || "Select provider..."}
-              </span>
-              <Icon
-                name="expand_more"
-                size={16}
-                className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-              />
-            </Button>
-
-            {dropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-surface shadow-lg overflow-hidden">
-                <div className="p-2 border-b border-border/50">
-                  <Input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setHighlightedIdx(0);
-                    }}
-                    placeholder={t("searchProviderPlaceholder") || "Search providers..."}
-                    aria-label={t("searchProviderAria") || "Search providers"}
-                    onKeyDown={handleDropdownKeyDown}
-                    autoFocus
-                  />
-                </div>
-                <ul role="listbox" className="max-h-48 overflow-auto py-1">
-                  {filteredProviders.length === 0 ? (
-                    <li className="px-3 py-2 text-xs text-text-muted text-center">
-                      {availableProviders.filter((p) => !providerOverrides[p.provider]).length === 0
-                        ? t("allProvidersAdded")
-                        : t("noProvidersFound")}
-                    </li>
-                  ) : (
-                    filteredProviders.map((p, idx) => (
-                      <li
-                        key={p.provider}
-                        role="option"
-                        aria-selected={idx === highlightedIdx}
-                        className={`px-3 py-2 text-xs cursor-pointer transition-colors ${
-                          idx === highlightedIdx
-                            ? "bg-bg-subtle font-medium"
-                            : "hover:bg-bg-subtle/60"
-                        }`}
-                        onClick={() => addProviderOverride(p.provider)}
-                        onMouseEnter={() => setHighlightedIdx(idx)}
-                      >
-                        {p.provider}
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
+          {/* "Add provider" picker on the kit SearchableSelect (Radix popover: body portal,
+              collision-aware placement, Escape, outside press, arrow keys with
+              aria-activedescendant). It never holds a value: a choice adds the override row. */}
+          <SearchableSelect
+            className="mt-2"
+            variant="field"
+            value=""
+            onValueChange={addProviderOverride}
+            label={t("selectProviderPlaceholder")}
+            placeholder={t("selectProviderPlaceholder")}
+            searchPlaceholder={t("searchProviderPlaceholder")}
+            emptyMessage={
+              remainingProviders.length === 0 ? t("allProvidersAdded") : t("noProvidersFound")
+            }
+            // The kit lowercases the query with the browser locale and matches it against label +
+            // keywords. The keywords carry the folded name and its dotless-ı spelling, so an
+            // upper-case query still matches in a Turkish-locale browser ("OPENAI" → "openaı").
+            // A query typed with accents no longer matches: the kit has no filter hook.
+            options={remainingProviders.map((p) => ({
+              value: p.provider,
+              label: p.provider,
+              keywords: searchKeywordsFor(p.provider),
+            }))}
+          />
         </div>
 
         {/* Save */}

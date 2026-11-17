@@ -29,7 +29,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 388 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, hundreds of LLM providers, auto-fallback.
 
 - API Routes — `src/app/api/v1/` (Next.js App Router entry points)
 - Handlers — `open-sse/handlers/` (request processing: chat, embeddings, etc)
@@ -37,13 +37,14 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 - Translators — `open-sse/translator/` (format conversion OpenAI↔Claude↔Gemini)
 - Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Services — `open-sse/services/` (combo routing, rate limits, caching, etc)
-- Database — `src/lib/db/` (SQLite domain modules, 234 migrations)
-- Domain/Policy — `src/domain/` (policy engine, cost rules, fallback logic)
-- MCP Server — `open-sse/mcp-server/` (110 tools: 45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; 33 scopes)
+- Database — `src/lib/db/` (SQLite domain modules, versioned migrations in `src/lib/db/migrations/`)
+- MCP Server — `open-sse/mcp-server/` (canonical tools + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; scope-based access)
 - A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agent protocol)
 - Skills — `src/lib/skills/` (extensible skill framework); Memory — `src/lib/memory/` (persistent conversational memory)
 
 Monorepo: `src/` (Next.js 16 app), `open-sse/` (streaming engine workspace), `electron/` (desktop app), `tests/`, `bin/` (CLI entry point).
+
+Counts (providers, migrations, MCP tools and scopes, routing strategies, scoring factors, mode packs) are derived values: read them with `npm run facts` (one value: `npm run facts -- --key=providers`), never from prose. Feature PRs do not write them; `npm run release:refresh-derived` rewrites the docs at release.
 
 ---
 
@@ -63,7 +64,7 @@ Client → /v1/chat/completions (Next.js route)
 
 API routes follow a consistent pattern: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. No global Next.js middleware — interception is route-specific.
 
-**Combo routing** (`open-sse/services/combo.ts`): 20 public strategies (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Each target calls `handleSingleModel()` (wraps `handleChatCore()` with per-target error handling + circuit breaker checks); the `fusion` strategy instead fans out to a panel of models in parallel and a judge model synthesizes one final answer (`open-sse/services/fusion.ts`). 16-factor Auto-Combo scoring + full strategy table: `docs/routing/AUTO-COMBO.md`; the 3 resilience layers: `docs/architecture/RESILIENCE_GUIDE.md`.
+**Combo routing** (`open-sse/services/combo.ts`): the public strategies are `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts` (`quota-share` is internal). Each target calls `handleSingleModel()` (wraps `handleChatCore()` with per-target error handling + circuit breaker checks); the `fusion` strategy instead fans out to a panel of models in parallel and a judge model synthesizes one final answer (`open-sse/services/fusion.ts`). Auto-Combo scoring (`DEFAULT_WEIGHTS` in `open-sse/services/autoCombo/scoring.ts`) + full strategy table: `docs/routing/AUTO-COMBO.md`; the 3 resilience layers: `docs/architecture/RESILIENCE_GUIDE.md`.
 
 ---
 
@@ -176,6 +177,9 @@ Documentation must describe verified behavior, not plausible behavior.
    `path/to/file.ts:line` to an invented signature.
 4. Run `npm run check:docs-all` for edits under `docs/`; it includes the fabricated-docs
    validation.
+5. Edit only the English source. Never commit `docs/i18n/**` mirrors, `llm.txt` mirrors or
+   `.i18n-state.json` in a feature PR: the translation wave (`/i18n-waves`, `docs/i18n-*`
+   branches) and the release rewrite them (`docs/guides/I18N.md`).
 
 ---
 
@@ -200,7 +204,7 @@ Full step-by-step recipes: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/
 For any non-trivial change, read the matching deep-dive first:
 
 - Repo navigation — `docs/architecture/REPOSITORY_MAP.md` · Architecture — `docs/architecture/ARCHITECTURE.md` · Engineering reference — `docs/architecture/CODEBASE_DOCUMENTATION.md`
-- Auto-Combo (16-factor scoring, 20 strategies) — `docs/routing/AUTO-COMBO.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md`
+- Auto-Combo (scoring factors, strategy table) — `docs/routing/AUTO-COMBO.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md`
 - Resilience (3 mechanisms + debugging) — `docs/architecture/RESILIENCE_GUIDE.md`
 - Modification recipes — `docs/architecture/MODIFICATION_SCENARIOS.md`
 - Skills framework — `docs/frameworks/SKILLS.md` · Radar (free-model catalog overlay) — `docs/frameworks/RADAR.md` · Memory system (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
@@ -360,8 +364,12 @@ OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/
 - Gates in jobs `lint` + `docs-sync-strict`: pass/fail policy gates —
   fix the violation or add an allowlist entry with a justification comment + tracking issue.
 - Gates in job `quality-gate`: ratchet — metrics (ESLint warnings, code coverage, duplication,
-  complexity) must not regress vs `quality-baseline.json`. Update via
-  `npm run quality:ratchet -- --update` when a metric genuinely improves.
+  complexity) must not regress vs `quality-baseline.json`. A feature PR never banks an
+  improvement (`--update` runs at release); a regression still fails.
+- Generated files and derived baselines (`docs/reference/PROVIDER_REFERENCE.md`, the README SVGs,
+  the generated `skills/*/SKILL.md` + `references/`, `config/quality/e2e-timings.json`) are written
+  by the release refresh, not by feature PRs — `check:pr-derived-paths` flags a PR that carries
+  them. See `docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines".
 - Job `test-vitest` runs `npm run test:vitest` (MCP tools, autoCombo, cache) — blocking.
   `test:vitest:ui` has been blocking since PR #7127.
 - **Velocity phase (2026-08-30 → v4.0)**: every numeric baseline is loosened by 20% and `--require-tighten` is advisory (`quality-baseline.json` → `_policy`); the nightly `baseline-headroom` job tracks how much of the budget is left in the issue "📈 Baseline headroom". See `docs/architecture/QUALITY_GATES.md` → "Velocity phase".
@@ -384,7 +392,7 @@ is a short form, its complete binding text, rationale and incident history are i
 6. Never silently swallow errors in SSE streams
 7. Always validate inputs with Zod schemas
 8. Always include tests when changing production code
-9. Coverage must not regress below the baseline frozen in `quality-baseline.json` (ratchet); absolute floor is 60% (statements/lines/functions/branches). Update the baseline via `npm run quality:ratchet -- --update` only when coverage genuinely improves. See `docs/architecture/QUALITY_GATES.md`.
+9. Coverage must not regress below the baseline frozen in `quality-baseline.json` (ratchet); absolute floor is 60% (statements/lines/functions/branches). The baseline is tightened with `npm run quality:ratchet -- --update` at release, never inside a feature PR. See `docs/architecture/QUALITY_GATES.md`.
 10. Never bypass Husky hooks (`--no-verify`, `--no-gpg-sign`) without explicit operator approval.
 11. Never embed public upstream OAuth client_id/secret or Firebase Web keys as string literals — always go through `resolvePublicCred()` (`open-sse/utils/publicCreds.ts`). See `docs/security/PUBLIC_CREDS.md`.
 12. Never return raw `err.stack` / `err.message` in HTTP / SSE / executor responses — always route through `buildErrorBody()` or `sanitizeErrorMessage()` (`open-sse/utils/error.ts`). See `docs/security/ERROR_SANITIZATION.md`.

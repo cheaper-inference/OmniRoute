@@ -19,7 +19,7 @@ export default function SettingsError({
       aria-live="assertive"
     >
       <div className="text-center space-y-4">
-        <h2 className="text-xl font-semibold text-error">{t("errorPage.title")}</h2>
+        <h2 className="text-xl text-error">{t("errorPage.title")}</h2>
         <p className="text-text-muted max-w-md">{t("errorPage.description")}</p>
         {_error?.digest && (
           <p className="text-xs text-text-muted font-mono">

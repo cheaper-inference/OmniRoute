@@ -7,7 +7,7 @@
  * The same chat access token authorizes the upload.
  */
 import { randomUUID } from "node:crypto";
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../../utils/remoteMediaFetch.ts";
 import { sniffCursorImageFormat } from "../../utils/cursorImages.ts";
 import { M365ExecutorError } from "../m365ExecutorOutput.ts";
 
