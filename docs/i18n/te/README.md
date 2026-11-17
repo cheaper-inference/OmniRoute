@@ -71,7 +71,7 @@ OMNIROUTE మీకు డబ్బు ఆదా చేసి, మీ పని�
 
 <div align="center">
 
-|                                |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------------ | :-----------------------: | :---------: | :-------------------: |
 | 🌐 ప్రొవైడర్లు                 |            352            |   **358**   |          389          |
 | 🧠 ప్రత్యేకమైన చాట్ మోడల్ IDలు |           1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ఐచ్ఛికం మరియు GET-మాత్రమే. OmniRoute
 
 </div>
 
-> **v3.8.20 → v3.8.54** మధ్యకాలంలోని తాజా ముఖ్యాంశాలు. పూర్తి చరిత్ర [`CHANGELOG.md`](CHANGELOG.md)లో ఉంది.
+> **v3.8.20 → v3.8.55** మధ్యకాలంలోని తాజా ముఖ్యాంశాలు. పూర్తి చరిత్ర [`CHANGELOG.md`](CHANGELOG.md)లో ఉంది.
 
 - **⚖️ `quota-weighted` రూటింగ్** — 20వ కాంబో వ్యూహం వినియోగం పూర్తయిన ఖాతాలను దాటవేసి, మిగిలిన వాటిలో మిగిలిన కోటా ÷ ప్రస్తుత లోడ్ నిష్పత్తి ప్రకారం ఎంపిక చేస్తుంది; ఇప్పటికే ఉన్న సంభాషణలు తమ ఖాతాలకు పిన్గానే ఉంటాయి. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 హెడ్లెస్ మోడ్** — `omniroute serve --headless` (లేదా `OMNIROUTE_HEADLESS=1`) డ్యాష్బోర్డ్ మరియు డ్యాష్బోర్డ్-మాత్రమే ఉపవ్యవస్థలను నిలిపివేసి, `/v1/*` ప్రాక్సీ ఇంజిన్ను మాత్రమే నడుపుతుంది. → [హెడ్లెస్ మోడ్](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` లేదా peer-dep హెచ్చరికలు కనిపిస్తున్నాయా? [అవి హానికరం కావు](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 లేదా తర్వాతి వెర్షన్ ఉపయోగిస్తున్నారా?** అనుమతించబడే వరకు npm ప్యాకేజ్ లైఫ్సైకిల్ స్క్రిప్ట్లను నిరోధించవచ్చు. OmniRoute యొక్క `postinstall` (`node scripts/build/postinstall.mjs`) దాని స్థానిక రన్టైమ్ ఫైళ్లను సిద్ధం చేయడానికి అవసరం. గ్లోబల్గా ఇన్స్టాల్ చేస్తున్నప్పుడు npm హెచ్చరికలో పేరున్న ప్యాకేజీలను అనుమతించండి. OmniRoute 3.8.54 నివేదించిన ప్యాకేజ్ సమితి కోసం:
+> **npm 11 లేదా తర్వాతి వెర్షన్ ఉపయోగిస్తున్నారా?** అనుమతించబడే వరకు npm ప్యాకేజ్ లైఫ్సైకిల్ స్క్రిప్ట్లను నిరోధించవచ్చు. OmniRoute యొక్క `postinstall` (`node scripts/build/postinstall.mjs`) దాని స్థానిక రన్టైమ్ ఫైళ్లను సిద్ధం చేయడానికి అవసరం. గ్లోబల్గా ఇన్స్టాల్ చేస్తున్నప్పుడు npm హెచ్చరికలో పేరున్న ప్యాకేజీలను అనుమతించండి. OmniRoute 3.8.55 నివేదించిన ప్యాకేజ్ సమితి కోసం:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 కూడా ద�
   <tr><td nowrap><b>రన్టైమ్</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>భాష</b></td><td>TypeScript 6.0 — <code>src/</code> మరియు <code>open-sse/</code> అంతటా <b>100% TypeScript</b> (v2.0 నుండి కోర్లో సున్నా <code>any</code>)</td></tr>
   <tr><td nowrap><b>ఫ్రేమ్వర్క్</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 238 మైగ్రేషన్లు</td></tr>
+  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 240 మైగ్రేషన్లు</td></tr>
   <tr><td nowrap><b>మెమరీ</b></td><td>SQLite FTS5 పూర్తి-పాఠ్య + int8-క్వాంటైజ్ చేసిన వెక్టర్ ఎంబెడ్డింగ్లు, టైప్ చేసిన డికే</td></tr>
   <tr><td nowrap><b>స్కీమాలు</b></td><td>Zod 4 — MCP టూల్ I/O ధృవీకరణ + API కాంట్రాక్ట్లు</td></tr>
   <tr><td nowrap><b>ప్రోటోకాల్లు</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ MIT లైసెన్స్ - వివరాలకు [LICENSE](LICENSE) చ�
 
 **[⬆ పైకి తిరిగి వెళ్లండి](#-omniroute)** · ఓపెన్-సోర్స్ AI కమ్యూనిటీ కోసం ❤️తో రూపొందించబడింది.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> రూపొందించారు · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> రూపొందించారు · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- కమ్యూనిటీ ప్రశ్నలు మరియు సమాధానాల కోసం GitHub Discussions ప్రారంభించబడింది -->

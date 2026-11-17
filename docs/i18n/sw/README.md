@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                                      |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                                      |         v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Watoa huduma                                      |           352            |   **358**   |          389          |
 | 🧠 Vitambulisho vya kipekee vya miundo ya mazungumzo |           1320           |  **1374**   |         1491          |
@@ -513,7 +513,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 
 </div>
 
-> Muhtasari wa hivi karibuni kutoka **v3.8.20 → v3.8.54**. Historia kamili katika [`CHANGELOG.md`](CHANGELOG.md).
+> Muhtasari wa hivi karibuni kutoka **v3.8.20 → v3.8.55**. Historia kamili katika [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Uelekezaji wa `quota-weighted`** — mkakati wa 20 wa mseto huruka akaunti zilizoishiwa, kisha huchagua kati ya zilizosalia kwa uwiano wa quota iliyobaki ÷ mzigo unaoendelea, huku mazungumzo yaliyopo yakiendelea kubaki kwenye akaunti zao. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Hali ya bila kiolesura** — `omniroute serve --headless` (au `OMNIROUTE_HEADLESS=1`) huendesha injini ya proksi ya `/v1/*` pekee, huku dashibodi na mifumo midogo inayohusu dashibodi pekee ikiwa imezimwa. → [Hali ya Bila Kiolesura](docs/guides/HEADLESS.md)
@@ -948,7 +948,7 @@ omniroute
 ```
 
 > 💡 Unaona `npm warn ERESOLVE` au maonyo ya utegemezi rika? [Hayana madhara](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Unatumia npm 11 au toleo la baadaye?** npm inaweza kuzuia hati za mzunguko wa maisha wa vifurushi isipokuwa ziruhusiwe. `postinstall` ya OmniRoute (`node scripts/build/postinstall.mjs`) inahitajika kuandaa faili zake za asili za wakati wa utekelezaji. Ruhusu vifurushi vilivyopewa majina kwenye onyo la npm unaposakinisha kimataifa. Kwa seti ya vifurushi iliyoripotiwa na OmniRoute 3.8.54:
+> **Unatumia npm 11 au toleo la baadaye?** npm inaweza kuzuia hati za mzunguko wa maisha wa vifurushi isipokuwa ziruhusiwe. `postinstall` ya OmniRoute (`node scripts/build/postinstall.mjs`) inahitajika kuandaa faili zake za asili za wakati wa utekelezaji. Ruhusu vifurushi vilivyopewa majina kwenye onyo la npm unaposakinisha kimataifa. Kwa seti ya vifurushi iliyoripotiwa na OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1228,7 +1228,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Muda wa uendeshaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo wa uundaji</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uwekaji kumbukumbu wa WAL) + LowDB (JSON ya zamani) — moduli 147 za kikoa, uhamishaji 238</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uwekaji kumbukumbu wa WAL) + LowDB (JSON ya zamani) — moduli 147 za kikoa, uhamishaji 240</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + vembeddings za vekta zilizopunguzwa kwa int8, uozo wenye aina</td></tr>
   <tr><td nowrap><b>Miundo</b></td><td>Zod 4 — uthibitishaji wa ingizo/tokeo la zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1741,7 +1741,7 @@ Leseni ya MIT - angalia [LICENSE](LICENSE) kwa maelezo zaidi.
 
 **[⬆ Rudi juu](#-omniroute)** · Imetengenezwa kwa ❤️ kwa ajili ya jumuiya ya AI ya chanzo huria.
 
-<sub>Imeundwa na <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Imeundwa na <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Majadiliano ya GitHub yamewezeshwa kwa Maswali na Majibu ya jumuiya -->

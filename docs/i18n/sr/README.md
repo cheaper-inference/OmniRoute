@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                    |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                    |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Provajderi                      |            352            |   **358**   |          389          |
 | 🧠 Jedinstveni ID-jevi chat modela |           1320            |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ Radar се користи по избору и подржава само GET. Om
 
 </div>
 
-> Најновије измене од **v3.8.20 → v3.8.54**. Комплетна историја је у [`CHANGELOG.md`](CHANGELOG.md).
+> Најновије измене од **v3.8.20 → v3.8.55**. Комплетна историја је у [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` рутирање** — 20. комбинована стратегија прескаче исцрпљене налоге, а затим бира међу преосталима сразмерно односу преостале квоте и оптерећења захтева у току, уз задржавање постојећих разговора на истом налогу. → [Аутоматске комбинације](docs/routing/AUTO-COMBO.md)
 - **🧰 Безглави режим** — `omniroute serve --headless` (или `OMNIROUTE_HEADLESS=1`) покреће само `/v1/*` прокси машину, док су контролна табла и подсистеми намењени само контролној табли искључени. → [Безглави режим](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Vidite `npm warn ERESOLVE` ili upozorenja o peer zavisnostima? [Bezopasna su](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Koristite npm 11 ili noviji?** npm može blokirati skripte životnog ciklusa paketa ako im nije dozvoljeno izvršavanje. OmniRoute-ov `postinstall` (`node scripts/build/postinstall.mjs`) neophodan je za pripremu izvornih datoteka za izvršavanje. Dozvolite pakete navedene u npm-ovom upozorenju prilikom globalne instalacije. Za skup paketa koji prijavljuje OmniRoute 3.8.54:
+> **Koristite npm 11 ili noviji?** npm može blokirati skripte životnog ciklusa paketa ako im nije dozvoljeno izvršavanje. OmniRoute-ov `postinstall` (`node scripts/build/postinstall.mjs`) neophodan je za pripremu izvornih datoteka za izvršavanje. Dozvolite pakete navedene u npm-ovom upozorenju prilikom globalne instalacije. Za skup paketa koji prijavljuje OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1305,7 +1305,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
   <tr><td nowrap><b>Окружење за извршавање</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у директоријумима <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од v2.0)</td></tr>
   <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 доменских модула, 238 миграција</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 доменских модула, 240 миграција</td></tr>
   <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претрага целог текста + векторски embedding-и квантизовани на int8, типизовано опадање</td></tr>
   <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација I/O MCP алата + API уговори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1818,7 +1818,7 @@ OmniRoute стоји на раменима великана. Започео је
 
 **[⬆ Назад на врх](#-omniroute)** · Направљено са ❤️ за AI заједницу отвореног кода.
 
-<sub>Аутор: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Лиценца MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Аутор: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Лиценца MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub дискусије су омогућене за питања и одговоре заједнице -->
