@@ -208,16 +208,19 @@ Runs after `test-coverage`. Blocks merge on failure.
 
 ### Job: `quality-extended`
 
-Entire job is advisory (`continue-on-error: true`). The npm-based ratchets run for
-real; the external scanners install via `gh release download` and self-skip (exit 0)
-when a binary is still absent.
+Mixed job, with no job-level `continue-on-error`: a step that passes `--ratchet` fails the job
+on a measured regression vs `quality-baseline.json`. Only `check:circular-deps` and the scanner
+install step are advisory (step-level `continue-on-error: true`). The external scanners install
+via `gh release download`; `check:secrets` self-skips (exit 0) when gitleaks is absent, while
+`check:vuln-ratchet`, `check:workflows` and `check:openapi-breaking` fail closed when their
+measurement is missing.
 
 | Script                   | Validates                                                                                                                                                                                       | Blocking                                          |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
-| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
-| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Advisory**                                      |
+| `check:bundle-size`      | Bundle size does not exceed the cap; an unmeasurable size fails too                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Blocking with --ratchet**                       |
 | `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
 | `check:openapi-breaking` | Public API contract against pinned event commits (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); required measurement fails closed                      | **Blocking with --ratchet**                       |
 
