@@ -1,1 +1,0 @@
-- **feat(routing):** Opt-in preferred-account response-start failover across providers; one eligible sibling hop, no shared-account cooldown. Default 20 s globally, 5 s for Antigravity and 12 s for Gemini 3.8 Flash, with provider/model override support.

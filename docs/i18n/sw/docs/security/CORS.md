@@ -117,32 +117,10 @@ Vyanzo hulinganishwa bila kujali herufi kubwa au ndogo huku alama ya mwisho ya s
 inaweza kuwekwa wakati wa utekelezaji katika **Dashboard → Security → CORS Allowed Origins** bila
 kuanzisha upya.
 
-## Funguo za API dhidi ya vipindi vya cookie
+## API keys dhidi ya vipindi vya session vya cookie
 
-- **Bearer / `x-api-key` (sehemu ya inference ya `/v1/*`):** vivinjari haviambatanishi
-  hivi kiotomatiki kamwe. CORS si kizuizi chenye maana hapa — ufunguo wa API ndio
-  kizuizi — na ndiyo sababu sehemu hiyo imeruhusiwa kimakusudi ili wateja wa kivinjari na
-  Electron waweze kusoma majibu ambayo tayari wana haki ya kuyapata.
-  Kurudisha asili kwa njia iliyolegezwa hufuata ufunguo uliothibitishwa, si kuwepo tu kwa
-  header: `REQUIRE_API_KEY=false` inapohudumia ombi bila utambulisho, jibu lake lililofaulu
-  hubaki chini ya orodha ya ruhusa inayozuia kila kitu kwa chaguo-msingi. Makataa ya
-  uthibitishaji (401) hubaki yanasomeka ili wateja waweze kuonyesha ufunguo uliobatilishwa au
-  ulioandikwa vibaya (#5242): 401 ya pipeline yenyewe huhifadhi urudishaji wa asili, na route
-  inayokataa ufunguo yenyewe baada ya pipeline kuhudumia ombi kama lisilo na utambulisho
-  (`/v1/models` na `/v1beta/models` wakati uthibitishaji wa usimamizi umesanidiwa, routes za
-  mmiliki pekee `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` na routes za
-  wagombea wa auto-combo) huongeza urudishaji wa asili kwenye 401 hiyo kupitia
-  `credentialRejectionHeaders()`. Urudishaji wa asili hutegemea kama ombi lina header ya
-  vitambulisho (`Authorization`, `x-api-key`, `x-goog-api-key` au cookie ya `auth_token`),
-  si ni ipi kati yake ambayo route iliikagua, na kamwe hauambatani na
-  `Access-Control-Allow-Credentials`; mwili wa jibu ni bahasha ya hitilafu isiyobadilika.
-  Routes za usimamizi chini ya `/api/v1/` zinazolindwa na `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) haziongezi urudishaji wa asili: kwa
-  `REQUIRE_API_KEY=false`, majibu yao ya 401/403 hayasomeki kutoka asili tofauti.
-- **Kipindi cha cookie (dashibodi):** hulindwa na chaguo-msingi linalokataa ufikiaji **na**
-  kwa kutokuwepo kwa `Access-Control-Allow-Credentials` kwenye njia inayoshirikiwa. Usiweke
-  vyanzo vya usimamizi/dashibodi katika usanidi wowote unaoruhusu kwa upana; ni lazima viendelee
-  kukataa ufikiaji kikamilifu.
+- **Bearer / `x-api-key` (sehemu ya inference ya `/v1/*`):** vivinjari haviongezi hivi kiotomatiki. CORS si kizuizi chenye maana hapa — API key ndiyo kizuizi — ndiyo maana sehemu hii inaruhusu ufikiaji kwa makusudi ili wateja wa kivinjari na Electron waweze kusoma majibu ambayo tayari wana ruhusa ya kuyapata. Echo iliyorahisishwa hufuata key iliyothibitishwa, si uwepo wa kichwa pekee: wakati `REQUIRE_API_KEY=false` inahudumia ombi bila utambulisho, jibu lake lililofanikiwa huhifadhi allowlist ya fail-closed. Kukataliwa kwa uthibitishaji (401) hubaki kusomeka ili wateja waweze kuonyesha key iliyobatilishwa au iliyoandikwa vibaya (#5242): 401 ya pipeline yenyewe huhifadhi echo, na route inayokataa key yenyewe baada ya pipeline kuihudumia bila utambulisho (`/v1/models` na `/v1beta/models` wakati management auth imesanidiwa, routes zenye upeo wa mmiliki `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` na routes za mgombea za auto-combo) huongeza echo kwenye 401 hiyo kupitia `credentialRejectionHeaders()`. Echo huamuliwa na ombi lililobeba kichwa cha credential (`Authorization`, `x-api-key`, `x-goog-api-key` au cookie ya `auth_token`), si kwa kutegemea ni kipi kati ya hivyo route ilikagua, na haiambatani kamwe na `Access-Control-Allow-Credentials`; mwili ni bahasha thabiti ya hitilafu. Routes za usimamizi zilizo chini ya `/api/v1/` zinazolindwa na `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) haziongezi echo: wakati `REQUIRE_API_KEY=false`, 401/403 yake haisomeki kutoka origin tofauti.
+- **Cookie session (dashibodi):** inalindwa na chaguo-msingi la fail-closed **na** kwa kutokuwepo kwa `Access-Control-Allow-Credentials` kwenye njia inayoshirikiwa. Weka origins za usimamizi/dashibodi nje ya usanidi wowote unaoruhusu kwa upana; lazima zibaki fail-closed kabisa.
 
 ## Mipeano ya mkono ya WebSocket (`/v1/responses`, `/v1/ws`)
 

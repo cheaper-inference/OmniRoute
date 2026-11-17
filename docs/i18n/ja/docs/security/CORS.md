@@ -84,28 +84,8 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 
 ## API キーと Cookie セッションの比較
 
-- **Bearer / `x-api-key`（`/v1/*` 推論サーフェス）：** ブラウザーがこれらを自動的に
-  付加することはありません。ここでは CORS は意味のある防壁ではなく、API キーが
-  防壁です。そのため、このサーフェスは意図的に寛容に設定されており、ブラウザーおよび
-  Electron クライアントは、すでにアクセス権を持つレスポンスを読み取れます。
-  緩和されたエコーは、ヘッダーが存在するかどうかではなく、検証済みのキーに従います。
-  `REQUIRE_API_KEY=false` によってリクエストが匿名で処理された場合、その成功レスポンスには
-  フェイルクローズの許可リストが維持されます。認証拒否（401）は読み取り可能なままであるため、
-  クライアントは失効したキーや入力ミスのあるキーをユーザーに示せます（#5242）。パイプライン自身が
-  返す 401 ではエコーが維持され、パイプラインが匿名として処理した後にルート自身がキーを拒否する場合
-  （管理認証が設定されている場合の `/v1/models` と `/v1beta/models`、所有者スコープの
-  `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases`、および auto-combo の候補ルート）は、
-  `credentialRejectionHeaders()` によってその 401 にエコーが追加されます。エコーの有無は、
-  ルートがそのうちどれを検査したかではなく、リクエストが認証情報ヘッダー（`Authorization`、
-  `x-api-key`、`x-goog-api-key`、または `auth_token` Cookie）を含んでいるかどうかで決まり、
-  `Access-Control-Allow-Credentials` と組み合わされることはありません。本文は固定のエラーエンベロープです。
-  `requireManagementAuth()` で保護された `/api/v1/` 配下の管理ルート（`/api/v1/management/*`、
-  `/api/v1/registered-keys`）はエコーを追加しません。`REQUIRE_API_KEY=false` の場合、
-  これらの 401/403 はクロスオリジンで読み取れません。
-- **Cookie セッション（ダッシュボード）：** フェイルクローズのデフォルト設定**と**
-  共有パスに `Access-Control-Allow-Credentials` が存在しないことによって保護されます。
-  管理／ダッシュボードのオリジンを寛容な設定に含めないでください。これらは厳密に
-  フェイルクローズのままにする必要があります。
+- **Bearer / `x-api-key`（`/v1/*` 推論サーフェス）：** ブラウザーがこれらを自動的に付加することはありません。ここでは CORS は意味のある防壁ではなく、API キーが防壁です。そのため、このサーフェスは、すでに応答を受け取る権限を持つブラウザーおよび Electron クライアントが応答を読み取れるよう、意図的に寛容な設定になっています。緩和されたエコーは、単にヘッダーが存在するかどうかではなく、検証済みのキーに従います。`REQUIRE_API_KEY=false` によってリクエストが匿名で処理される場合、成功したレスポンスでは fail-closed の許可リストが維持されます。認証による拒否（401）は、クライアントが失効したキーや入力ミスのあるキーを表示できるよう、引き続き読み取り可能です（#5242）。パイプライン自体による 401 ではエコーが維持され、パイプラインが匿名として処理した後に、ルート自体がキーを拒否する場合（管理認証が設定された場合の `/v1/models` と `/v1beta/models`、所有者スコープの `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases`、および自動コンボ候補ルート）には、その 401 に `credentialRejectionHeaders()` を介してエコーが追加されます。エコーの判定基準は、どの認証情報をルートが確認したかではなく、認証情報ヘッダー（`Authorization`、`x-api-key`、`x-goog-api-key`、または `auth_token` Cookie）を付けてリクエストが送信されたかどうかです。また、エコーが `Access-Control-Allow-Credentials` と組み合わされることはありません。本文は固定のエラーエンベロープです。`requireManagementAuth()`（`/api/v1/management/*`、`/api/v1/registered-keys`、`/api/v1/providers/[provider]/limits`、`/api/v1/accounts/[id]/limits`、`/api/v1/issues/report`）で保護される `/api/v1/` 配下の管理ルートでは、エコーは追加されません。`REQUIRE_API_KEY=false` の場合、これらの 401/403 はクロスオリジンで読み取れません。
+- **Cookie セッション（ダッシュボード）：** fail-closed のデフォルト **および** 共有パスに `Access-Control-Allow-Credentials` が存在しないことによって保護されています。管理用およびダッシュボード用のオリジンは、寛容な設定から除外してください。これらは厳密に fail-closed のままにする必要があります。
 
 ## WebSocket ハンドシェイク（`/v1/responses`、`/v1/ws`）
 

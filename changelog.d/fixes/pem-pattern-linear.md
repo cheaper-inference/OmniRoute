@@ -1,1 +1,0 @@
-- Keep the `private_key` credential pattern linear, so a body of repeated PEM BEGIN headers no longer blocks the event loop when credential redaction is on.

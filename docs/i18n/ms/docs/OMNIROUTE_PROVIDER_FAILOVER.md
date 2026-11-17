@@ -4,10 +4,20 @@
 
 ---
 
-Kegagalan diklasifikasikan sebelum keputusan percubaan semula dibuat.
+Kegagalan diklasifikasikan sebelum keputusan cuba semula dibuat.
 
-Kegagalan sementara seperti tamat masa, ralat rangkaian, had kadar dan respons 5xx daripada penyedia mungkin dialihkan kepada penyedia lain. Ralat pengesahan, ralat kebenaran, permintaan tidak sah, model yang tidak tersedia dan kegagalan yang tidak diketahui tidak dicuba semula secara membuta tuli.
+Kegagalan sementara seperti tamat masa, ralat rangkaian, had kadar dan respons 5xx pembekal mungkin gagal. Kuota atau kredit yang telah habis (kuota 429, atau 402 Pembayaran Diperlukan) tidak pernah dicuba semula pada pembekal yang sama tetapi gagal kepada penyedia lain, yang kuotanya berasingan. Ralat pengesahan, ralat kebenaran, permintaan tidak sah, model tidak tersedia dan kegagalan yang tidak diketahui tidak dicuba semula secara membuta tuli.
 
-Dasar rentas penyedia lalai membenarkan sehingga tiga percubaan penyedia, mencuba semula apabila berlaku had kadar dan tamat masa, serta mengasingkan penyahaktifan pentadbiran daripada keadaan litar sementara.
+Dasar rentas pembekal lalai membenarkan sehingga tiga percubaan penyedia, mencuba semula had kadar dan tamat masa, gagal melebihi kuota yang habis dan memastikan ketidakupayaan pentadbiran berasingan daripada keadaan litar sementara.
 
-Keadaan litar ialah `closed`, `open` dan `half_open`. Tempoh bertenang menjadualkan ujian yang terhad; ujian yang berjaya menutup litar, manakala ujian yang gagal membukanya semula.
+## Di mana ia terpakai
+
+- **Kombo** gagal di antara sasaran mereka mengikut strategi dan tetapan kombo itu sendiri.
+- **Id model kosong** (tiada awalan `provider/` ) yang disediakan oleh beberapa penyedia aktif, tanpa kombo nama tepat itu, mula-mula dihantar kepada pilihan inferens penyedia. Jika percubaan itu gagal dengan cara dasar gagal diteruskan, permintaan yang sama dihantar kepada penyedia aktif seterusnya yang menyediakan id. Tanggapan membawa `x-omniroute-fallback-attempts` dengan bilangan penyedia cuba sebelum yang menjawab.
+  - Setiap ganti diberi kuasa tepat seolah-olah inferens telah memilihnya. Sasaran yang disekat atau tidak diakui oleh kunci API dilangkau tanpa panggilan huluan, dan pelanggan mendapat ralat huluan sebenar, bukan penolakan dasar untuk sasaran yang tidak dinamakannya.
+  - Hanya respons yang gagal diteruskan: tiada yang gagal selepas bait pertama yang distrim.
+  - Pertukaran model sandaran kecemasan hanya digunakan selepas setiap pembekal model yang diminta telah gagal.
+  - Permintaan yang disematkan pada sambungan (`x-omniroute-connection`) kekal padanya.
+  - Id awalan (`provider/model`) tidak sekali-kali dihalakan semula ke pembekal lain.
+
+Keadaan litar ialah `closed`, `open` dan `half_open`. Cooldown menjadualkan probe terhad; probe yang berjaya menutup litar dan probe yang gagal membukanya semula.

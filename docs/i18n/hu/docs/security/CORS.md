@@ -127,34 +127,10 @@ Az eredetek összehasonlítása nem érzékeny a kis- és nagybetűkre, a záró
 `http://localhost:3000` és a `http://localhost:3000/` egyenértékű. Ugyanez a CSV
 újraindítás nélkül, futásidőben is beállítható az **Irányítópult → Biztonság → Engedélyezett CORS-eredetek** alatt.
 
-## API-kulcsok és sütialapú munkamenetek
+## API kulcsok és cookie-munkamenetek
 
-- **Bearer / `x-api-key` (a `/v1/*` következtetési felület):** a böngészők ezeket soha nem csatolják
-  automatikusan. A CORS itt nem jelent érdemi akadályt — az API-kulcs jelenti
-  az akadályt —, ezért ez a felület szándékosan megengedő, hogy a böngészős és
-  Electron-kliensek elolvashassák azokat a válaszokat, amelyekhez már egyébként is jogosultságuk van.
-  A megengedő visszatükrözés az érvényesített kulcshoz igazodik, nem pusztán a fejléc
-  meglétéhez: ha a `REQUIRE_API_KEY=false` névtelenül szolgál ki egy kérést, annak
-  sikeres válaszára továbbra is az alapértelmezés szerint tiltó engedélyezési lista
-  vonatkozik. A hitelesítési elutasítások (401) olvashatók maradnak, hogy a kliensek
-  jelezni tudják a visszavont vagy elgépelt kulcsot (#5242): a folyamat saját 401-es
-  válasza megtartja a visszatükrözést, és az az útvonal, amely maga utasítja el a
-  kulcsot, miután a folyamat névtelenként szolgálta ki a kérést (`/v1/models` és
-  `/v1beta/models` beállított felügyeleti hitelesítéssel, a tulajdonoshoz kötött
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` és az auto-combo
-  jelölt-útvonalak), a `credentialRejectionHeaders()` segítségével hozzáadja a
-  visszatükrözést ehhez a 401-es válaszhoz. A visszatükrözés attól függ, hogy a kérés
-  tartalmaz-e hitelesítőadat-fejlécet (`Authorization`, `x-api-key`, `x-goog-api-key`
-  vagy az `auth_token` süti), nem attól, hogy ezek közül melyiket ellenőrizte az
-  útvonal, és soha nem párosul `Access-Control-Allow-Credentials` fejléccel; a törzs
-  egy rögzített hibaboríték. A `/api/v1/` alatti, `requireManagementAuth()` által
-  védett felügyeleti útvonalak (`/api/v1/management/*`, `/api/v1/registered-keys`) nem
-  adják hozzá a visszatükrözést: `REQUIRE_API_KEY=false` esetén a 401/403-as válaszaik
-  más eredetből nem olvashatók.
-- **Sütialapú munkamenet (az irányítópult):** a hiba esetén tiltó alapértelmezés **és**
-  az `Access-Control-Allow-Credentials` hiánya védi a megosztott útvonalon. A
-  felügyeleti/irányítópulti eredeteket ne vegye fel semmilyen megengedő konfigurációba; ezeknek továbbra is
-  szigorúan hiba esetén tiltó módon kell működniük.
+- **Tartó / `x-api-key` (a `/v1/*` következtetési felület):** a böngészők soha nem csatolják ezeket automatikusan. CORS itt nem jelent értelmes akadályt — a API kulcs a — akadály, ezért ez a felület szándékosan megengedő, így a böngésző és Electron kliensek elolvashatják azokat a válaszokat, amelyekre már jogosultak. A laza visszhang az érvényesített kulcsot követi, nem a fejléc puszta jelenlétét: amikor `REQUIRE_API_KEY=false` névtelenül szolgál ki egy kérést, a sikeres válasz megtartja a sikertelenül zárt engedélyezési listát. A hitelesítési elutasítások (401) olvashatóak maradnak, így a kliensek felbukkanhatnak egy visszavont vagy hibásan begépelt kulcsot (#5242): a folyamat saját 401-je megtartja a visszhangot, és egy olyan útvonal, amely magát a kulcsot visszautasítja, miután a folyamat anonimként szolgálta ki (`/v1/models` és `/v1beta/models` konfigurált felügyeleti hitelesítéssel, a tulajdonos-scoped `/v1/files`, `/v1/batches` `/v1/media` és auto-combo jelölt útvonalak) hozzáadja a visszhangot a 401-hez `/v1/session-leases` `credentialRejectionHeaders()` segítségével. A visszhangot a hitelesítő adatok fejlécet (`Authorization`, `x-api-key`, `x-goog-api-key` vagy a `auth_token` cookie-t) tartalmazó kérelemre kell beírni, nem pedig arra, hogy az útvonal melyiket ellenőrizte, és soha nem párosul `Access-Control-Allow-Credentials` val; a test egy rögzített hibaburok. `requireManagementAuth()` által őrzött `/api/v1/` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) kezelési útvonalak nem adják hozzá a visszhangot: `REQUIRE_API_KEY=false` -vel 401/403 jük nem olvasható kereszteredetű.
+- **Cookie-munkamenet (a műszerfal):** a hibazárás alapértelmezés által védett** és** `Access-Control-Allow-Credentials` hiányával a megosztott úton. Tartsa távol management/dashboard eredetét minden megengedő konfigurációtól; pontosan zárva kell maradniuk.
 
 ## WebSocket-kézfogások (`/v1/responses`, `/v1/ws`)
 

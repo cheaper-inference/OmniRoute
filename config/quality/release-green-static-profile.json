@@ -261,6 +261,13 @@
       "command": "bun scripts/check/check-compression-budget.ts"
     },
     {
+      "id": "check:type-scale-ratchet",
+      "job": "quality-gate",
+      "args": ["run", "check:type-scale-ratchet", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-type-scale-ratchet.mjs"
+    },
+    {
       "id": "check:circular-deps",
       "job": "quality-extended",
       "args": ["run", "check:circular-deps"],
