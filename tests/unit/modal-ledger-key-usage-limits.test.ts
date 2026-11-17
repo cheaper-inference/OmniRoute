@@ -1,8 +1,9 @@
 // Per-key USD limits (daily / weekly / 5 h) re-price usage_history and add the
-// search ledger tier. Speech, transcription and rerank calls write no
-// usage_history row, so their spend never moved a limit. They now write a
-// request_cost_ledger row tagged with the "modal" tier, and the limit readers
-// add that tier next to "search".
+// search ledger tier. Rerank calls write no usage_history row, so their spend
+// never moved a limit. They now write a request_cost_ledger row tagged with the
+// "modal" tier, and the limit readers add that tier next to "search". Speech and
+// transcription already write a usage_history row; their ledger row keeps its
+// own tier, so each call is counted exactly once.
 //
 // Every route test drives the public handler with a real key and a mocked
 // upstream, then reads the result through getApiKeyUsageLimitStatus, the code
@@ -155,7 +156,11 @@ test("a $2 TTS call flips weeklyExceeded on a $1 weekly limit, and the next call
   const status = await statusOf(key.key);
   assert.ok(Math.abs(status.weeklySpentUsd - 2) < 1e-9, `weekly spend ${status.weeklySpentUsd}`);
   assert.equal(status.weeklyExceeded, true);
-  assert.deepEqual(ledgerTiers(key.id), ["modal"]);
+  assert.deepEqual(
+    ledgerTiers(key.id),
+    ["standard"],
+    "speech counts from usage_history, not twice"
+  );
 
   const blocked = await speak();
   assert.equal(blocked.status, 429);
@@ -254,7 +259,7 @@ test("a transcription call priced per second flips weeklyExceeded on a $1 weekly
   assert.equal(status.weeklyExceeded, true);
 });
 
-test("a transcription whose upstream reports no duration charges nothing", async () => {
+test("a transcription whose upstream reports no duration adds no spend", async () => {
   saveSyncedPricing({
     openai: { "whisper-1": { input: 0, output: 0, input_cost_per_second: 0.02 } },
   });
@@ -276,7 +281,8 @@ test("a transcription whose upstream reports no duration charges nothing", async
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   assert.deepEqual(ledgerTiers(key.id), []);
-  assert.equal((await statusOf(key.key)).weeklyExceeded, false);
+  // The call is unpriced, so `weeklyExceeded` follows the unpriced-usage policy (fail closed by default).
+  assert.equal((await statusOf(key.key)).weeklySpentUsd, 0);
 });
 
 test("modal ledger spend counts in the daily, weekly and 5h windows; the 5h reset follows its timestamp", async () => {

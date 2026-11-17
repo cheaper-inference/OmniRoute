@@ -1,1 +1,1 @@
-- **fix(usage):** text-to-speech, speech-to-text and rerank spend now counts toward a key's daily, weekly and 5-hour USD limits. Transcription is priced per second from the duration the provider reports. ([#19754](https://github.com/cheaper-inference/OmniRoute/pull/19754))
+- **fix(usage):** rerank spend now counts toward a key's daily, weekly and 5-hour USD limits. Speech and transcription already count through their usage history rows and are counted once. ([#19754](https://github.com/cheaper-inference/OmniRoute/pull/19754))
