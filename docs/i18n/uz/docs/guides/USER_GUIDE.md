@@ -357,49 +357,52 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 joylashtirish
+## 🚀 Joylashtirish
 
-### Global npm o'rnatish (Tavsiya etiladi)
+### Global npm o‘rnatish (Tavsiya etiladi)
 
 ```bash
 npm install -g omniroute
 
-# Create config directory
+# Konfiguratsiya katalogini yaratish
 mkdir -p ~/.omniroute
 
-# Create .env file (see .env.example)
+# .env faylini yaratish (.env.example fayliga qarang)
 cp .env.example ~/.omniroute/.env
 
-# Start server
+# Serverni ishga tushirish
 omniroute
-# Or with custom port:
+# Yoki maxsus port bilan:
 omniroute --port 3000
 ```
 
-CLI avtomatik ravishda `.env` `~/.omniroute/.env` yoki `./.env` dan yuklaydi. Ishchi katalogdagi `./.env` faqat kalitlarning qisqa ruxsat etilgan ro'yxatini o'rnatishi mumkin (portlar, `REQUIRE_API_KEY`, mahalliy va rang sozlamalari); qolgan hamma narsani `~/.omniroute/.env` ga qo'ying. [CLI ishga tushirish shartnomalariga](CLI-LAUNCH-CONTRACTS.md#working-directory-env) qarang.
+CLI `.env` faylini avtomatik ravishda `~/.omniroute/.env` yoki `./.env` manzilidan yuklaydi. Ishchi
+katalogdagi `./.env` faylida faqat kalitlarning qisqa ruxsat etilgan ro‘yxati (`REQUIRE_API_KEY`, locale, vaqt zonasi
+va rang sozlamalari, portlar bundan mustasno) bo‘lishi mumkin; qolgan barcha ma’lumotlarni
+`~/.omniroute/.env` fayliga joylashtiring. [CLI ishga tushirish shartlari](CLI-LAUNCH-CONTRACTS.md#working-directory-env) sahifasiga qarang.
 
-### Tovoqlar rejimi
+### Tray rejimi
 
-Tizim tepsisida OmniRoute ishga tushiring:
+OmniRoute’ni tizim trayida ishga tushiring:
 
 ```bash
 omniroute serve --tray
 ```
 
-Buyruq server va laganda tayyor bo'lgandan keyin qaytadi.
+Server va tray tayyor bo‘lgach, buyruq ishini yakunlaydi.
 
-Server terminalsiz davom etadi.
+Server terminal oynasisiz ishlashda davom etadi.
 
-Tovoqlar rejimi macOS, Windows va grafik Linux seanslarini qo'llab-quvvatlaydi. Tovoqlar rejimi asboblar panelini avtomatik ravishda ochmaydi.
+Tray rejimi macOS, Windows va grafik Linux sessiyalarini qo‘llab-quvvatlaydi. Tray rejimi boshqaruv panelini avtomatik ravishda ochmaydi.
 
-Ushbu amallar uchun laganda menyusidan foydalaning:
+Quyidagi amallar uchun tray menyusidan foydalaning:
 
-- Boshqaruv panelini oching.
-- `/dashboard/logs` ni oching.
-- Avtomatik ishga tushirishni o'zgartiring.
-- OmniRoute to'xtating.
+- Boshqaruv panelini ochish.
+- `/dashboard/logs` manzilini ochish.
+- Avtomatik ishga tushirishni o‘zgartirish.
+- OmniRoute’ni to‘xtatish.
 
-`--tray` quyidagi variantlar bilan birlashtirmang:
+`--tray` opsiyasini quyidagi opsiyalar bilan birga ishlatmang:
 
 - `--daemon`
 - `--log`
@@ -407,32 +410,32 @@ Ushbu amallar uchun laganda menyusidan foydalaning:
 
 Bu rejimlar turli jarayon egaligini talab qiladi.
 
-Keyingi tizimga kirishda ishga tushirishni yoqing:
+Keyingi kompyuterga kirishda ishga tushirishni yoqing:
 
 ```bash
 omniroute autostart enable
 ```
 
-Avtomatik ishga tushirish macOS, Windows va grafik Linux seanslarida laganda rejimidan foydalanadi. Headless Linux mavjud systemd foydalanuvchi xizmatidan foydalanadi.
+Avtomatik ishga tushirish macOS, Windows va grafik Linux sessiyalarida tray rejimidan foydalanadi. Boshsiz Linux esa mavjud systemd foydalanuvchi xizmatidan foydalanadi.
 
-Kirish paytida ishga tushirishni o'chirib qo'ying:
+Tizimga kirishda avtomatik ishga tushirishni o‘chiring:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Oʻchirish
+### O‘chirish
 
-Sizga OmniRoute kerak bo'lmaganda, toza o'chirish uchun ikkita tezkor skriptni taqdim etamiz:
+OmniRoute endi kerak bo‘lmaganda, uni toza tarzda olib tashlash uchun ikkita tezkor skriptni taqdim etamiz:
 
-| Buyruq                   | Harakat                                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Tizim ilovasini olib tashlaydi, lekin** DB va konfiguratsiyalaringizni saqlaydi** `~/.omniroute` ichida.               |
-| `npm run uninstall:full` | AND ilovasini butunlay oʻchirib tashlaydi** barcha konfiguratsiyalar, kalitlar va ma'lumotlar bazalarini o'chiradi** . |
+| Buyruq                   | Amal                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Tizim ilovasini olib tashlaydi, ammo `~/.omniroute` ichidagi **ma’lumotlar bazasi va konfiguratsiyalaringizni saqlab qoladi**. |
+| `npm run uninstall:full` | Ilovani olib tashlaydi VA **barcha konfiguratsiyalar, kalitlar va ma’lumotlar bazalarini butunlay o‘chiradi**.                 |
 
-> Eslatma: Ushbu buyruqlarni bajarish uchun OmniRoute loyiha jildiga o'ting (agar siz uni klonlagan bo'lsangiz) va ularni ishga tushiring. Shu bilan bir qatorda, agar global o'rnatilgan bo'lsa, siz oddiygina `npm uninstall -g omniroute` ishga tushirishingiz mumkin.
+> Eslatma: Bu buyruqlarni ishga tushirish uchun OmniRoute loyihasi papkasiga (agar uni klonlagan bo‘lsangiz) o‘ting va ularni ishga tushiring. Muqobil ravishda, agar global tarzda o‘rnatilgan bo‘lsa, shunchaki `npm uninstall -g omniroute` buyrug‘ini ishga tushirishingiz mumkin.
 
-### VPS joylashtirish
+### VPS’ga joylashtirish
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -448,25 +451,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Or: pm2 start npm --name omniroute -- start
+# Yoki: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 Deployment (past xotira)
+### PM2 orqali joylashtirish (kam xotira sarfi)
 
-Cheklangan RAM bo'lgan serverlar uchun xotira chegarasi opsiyasidan foydalaning:
+RAM hajmi cheklangan serverlar uchun xotira chegarasi opsiyasidan foydalaning:
 
 ```bash
-# With 512MB limit (default)
+# 512MB chegarasi bilan (standart)
 pm2 start npm --name omniroute -- start
 
-# Or with custom memory limit
+# Yoki maxsus xotira chegarasi bilan
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Or using ecosystem.config.js
+# Yoki ecosystem.config.js faylidan foydalanib
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` yaratish:
+`ecosystem.config.js` faylini yarating:
 
 ```javascript
 module.exports = {
@@ -491,30 +494,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Build image (default = runner-cli with codex/claude/droid preinstalled)
+# Image yaratish (standart = codex/claude/droid oldindan o‘rnatilgan runner-cli)
 docker build -t omniroute:cli .
 
-# Portable mode (recommended)
+# Portativ rejim (tavsiya etiladi)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ikkiliklari bilan xost bilan birlashtirilgan rejim uchun asosiy hujjatlardagi Docker bo'limiga qarang.
+CLI binarlari bilan host-integratsiyalangan rejim uchun asosiy hujjatlardagi Docker bo‘limiga qarang.
 
 ### Void Linux (xbps-src)
 
-Void Linux foydalanuvchilari `xbps-src` o'zaro kompilyatsiya tizimidan foydalangan holda OmniRoute mahalliy ravishda paketlashi va o'rnatishi mumkin. Bu Node.js mustaqil tuzilishini zarur `better-sqlite3` mahalliy ulanishlari bilan avtomatlashtiradi.
+Void Linux foydalanuvchilari `xbps-src` kross-kompilyatsiya freymvorkidan foydalanib, OmniRoute’ni tabiiy tarzda paketlashi va o‘rnatishi mumkin. Bu talab qilinadigan `better-sqlite3` mahalliy bog‘lamalari bilan birga Node.js standalone yig‘ilishini avtomatlashtiradi.
 
 <details>
-<summary><b>xbps-src shablonini ko'rish</b></summary>
+<summary><b>xbps-src shablonini ko‘rish</b></summary>
 
 ```bash
-# Template file for 'omniroute'
+# 'omniroute' uchun shablon fayl
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Bir nechta LLM provayderlari uchun aqlli marshrutlashga ega universal AI shlyuzi"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -529,7 +532,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determine target CPU arch for node-gyp
+	# node-gyp uchun maqsadli CPU arxitekturasini aniqlash
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -538,29 +541,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Install all deps – skip scripts
+	# 1) Barcha bog‘liqliklarni o‘rnatish – skriptlarni o‘tkazib yuborish
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Build the Next.js standalone bundle
+	# 2) Next.js standalone to‘plamini yaratish
 	npm run build
 
-	# 3) Copy static assets into standalone
+	# 3) Statik resurslarni standalone ichiga nusxalash
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compile better-sqlite3 native binding
+	# 4) better-sqlite3 native binding'ini kompilyatsiya qilish
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Place the compiled binding into the standalone bundle
+	# 5) Kompilyatsiya qilingan binding'ni standalone to‘plamiga joylashtirish
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Remove arch-specific sharp bundles
+	# 6) Arxitekturaga xos sharp to‘plamlarini olib tashlash
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copy pino runtime deps omitted by Next.js static analysis:
+	# 7) Next.js statik tahlili o‘tkazib yuborgan pino ish vaqti bog‘liqliklarini nusxalash:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -574,7 +577,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevent removal of empty Next.js app router dirs by the post-install hook
+	# O‘rnatishdan keyingi hook bo‘sh Next.js app router kataloglarini olib tashlashining oldini olish
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -600,32 +603,32 @@ post_install() {
 
 </details>
 
-### Atrof-muhit o'zgaruvchilari
+### Muhit o‘zgaruvchilari
 
-| O'zgaruvchan                            | Standart                 | Tavsif                                                                                                                                                                        |
-| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(avtomatik yaratilgan)_ | JWT imzolash siri — birinchi ishga tushirishda avtomatik tarzda yaratiladi va `server.env` ga qadar davom etadi; ma'lumotlar katalogi vaqtinchalik bo'lsa, uni aniq belgilang |
-| `INITIAL_PASSWORD`                      | _(o'rnatilmagan)_        | Birinchi kirish paroli. npm/source o'rnatish `CHANGEME` bilan boshlanadi: uni almashtiring. Sozlanmagan: ishga tushirish ustasi                                               |
-| `DATA_DIR`                              | `~/.omniroute`           | Ma'lumotlar katalogi (db, foydalanish, jurnallar)                                                                                                                             |
-| `PORT`                                  | standart ramka           | Xizmat porti (misollarda `20128` )                                                                                                                                            |
-| `HOSTNAME`                              | standart ramka           | Xostni bog'lash (Docker standarti `0.0.0.0`)                                                                                                                                  |
-| `NODE_ENV`                              | standart ish vaqti       | O'rnatish uchun `production` o'rnating                                                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Umumiy URL bazasi asboblar panelida paydo bo'ldi va serverga ochildi (eski `BASE_URL` o'rnini bosadi)                                                                         |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Bulutli sinxronlash so‘nggi nuqtasi URL bazasi (eski `CLOUD_URL` o‘rnini bosadi)                                                                                              |
-| `API_KEY_SECRET`                        | _(avtomatik yaratilgan)_ | yaratilgan API kalitlari uchun HMAC siri — birinchi ishga tushirishda avtomatik tarzda yaratilgan va `server.env` davom etgan                                                 |
-| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*`-da Bearer API kalitini majburlash                                                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Autentifikatsiya qilingan asboblar paneli foydalanuvchilariga so'ralganda to'liq saqlangan API kalit qiymatlarini ochishga ruxsat bering                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Keshlangan Provayder chegaralari ma'lumotlari uchun server tomonidagi yangilash kadensi; UI yangilash tugmalari hali ham qo'lda sinxronlashni ishga tushiradi                 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore dan oldin avtomatik SQLite snapshotlarini o'chirib qo'ying; qo'lda zaxiralash hali ham ishlaydi                                                         |
-| `APP_LOG_TO_FILE`                       | `true`                   | Ilova va audit jurnalini diskka chiqarish imkonini beradi                                                                                                                     |
-| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth cookie-faylini majburlash ( HTTPS teskari proksi-server ortida)                                                                                                 |
-| `CLOUDFLARED_BIN`                       | sozlanmagan              | Boshqariladigan yuklab olish oʻrniga mavjud `cloudflared` ikkilik faylidan foydalaning                                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Boshqariladigan tezkor tunnellar uchun transport (`http2`, `quic` yoki `auto`)                                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js to'p chegarasi MB                                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maksimal tezkor kesh yozuvlari                                                                                                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantik kesh yozuvlari                                                                                                                                              |
+| Variable                                | Default                  | Description                                                                                                                                                                    |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(auto-generated)_       | JWT imzolash maxfiy kaliti — birinchi ishga tushirishda avtomatik yaratiladi va `server.env` faylida saqlanadi; maʼlumotlar katalogi vaqtinchalik boʻlganda uni aniq belgilang |
+| `INITIAL_PASSWORD`                      | _(unset)_                | Birinchi kirish paroli. npm/source oʻrnatishlari `CHANGEME` bilan boshlanadi: uni almashtiring. Belgilanmagan boʻlsa: dastlabki sozlash ustasi                                 |
+| `DATA_DIR`                              | `~/.omniroute`           | Maʼlumotlar katalogi (db, foydalanish maʼlumotlari, jurnallar)                                                                                                                 |
+| `PORT`                                  | framework default        | Xizmat porti (misollarda `20128`)                                                                                                                                              |
+| `HOSTNAME`                              | framework default        | Bogʻlanish xosti (Docker uchun standart qiymat `0.0.0.0`)                                                                                                                      |
+| `NODE_ENV`                              | runtime default          | Joylashtirish uchun `production` qiymatini belgilang                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Boshqaruv panelida koʻrsatiladigan va serverga uzatiladigan umumiy asosiy URL (eski `BASE_URL` oʻrnini bosadi)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Bulut bilan sinxronlash uchun asosiy endpoint URL (eski `CLOUD_URL` oʻrnini bosadi)                                                                                            |
+| `API_KEY_SECRET`                        | _(auto-generated)_       | Yaratilgan API kalitlari uchun HMAC maxfiy kaliti — birinchi ishga tushirishda avtomatik yaratiladi va `server.env` faylida saqlanadi                                          |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` uchun Bearer API kalitini majburiy qilish                                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Autentifikatsiyadan oʻtgan boshqaruv paneli foydalanuvchilariga saqlangan API kalitlarining toʻliq qiymatlarini talabga koʻra koʻrishga ruxsat berish                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Keshlangan Provider Limits maʼlumotlarini server tomonida yangilash davriyligi; UIʼdagi yangilash tugmalari hali ham qoʻlda sinxronlashni ishga tushiradi                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Yozish/import/tiklashdan oldin SQLite snapshotlarini avtomatik yaratishni oʻchirish; qoʻlda zaxiralash hali ham ishlaydi                                                       |
+| `APP_LOG_TO_FILE`                       | `true`                   | Ilova va audit jurnallarini diskka chiqarishni yoqadi                                                                                                                          |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` autentifikatsiya cookieʼsini majburan yoqish (HTTPS reverse proxy ortida)                                                                                             |
+| `CLOUDFLARED_BIN`                       | unset                    | Boshqariladigan yuklab olish oʻrniga mavjud `cloudflared` ikkilik faylidan foydalanish                                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Boshqariladigan Quick Tunnelʼlar uchun transport (`http2`, `quic` yoki `auto`)                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MBʼdagi Node.js heap limiti                                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Prompt keshi yozuvlarining maksimal soni                                                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Semantik kesh yozuvlarining maksimal soni                                                                                                                                      |
 
-To'liq muhit o'zgaruvchisi ma'lumoti uchun [README](../README.md) qarang.
+Atrof-muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md)ga qarang.
 
 ---
 
