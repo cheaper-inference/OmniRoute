@@ -1,1 +1,0 @@
-- **feat(antigravity):** Expose physical-send timing diagnostics as a saved Settings → Resilience toggle. New sends use updated values through the settings cache without server restart.

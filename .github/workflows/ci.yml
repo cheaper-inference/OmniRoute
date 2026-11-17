@@ -160,8 +160,11 @@ jobs:
       # so an advisory published during the batch's CI cannot throw the batch out.
       - run: npm run audit:deps
         continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
+      # The cache, the JSON report and its upload run even when a step above failed:
+      # quality-gate still runs on a failed lint job and its ESLint download is strict, so a
+      # missing artifact would skip the complexity / duplication / dead-code ratchets too.
       - name: Restore ESLint file cache
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && !cancelled()
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
@@ -176,6 +179,7 @@ jobs:
       # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
       # a second cold full-tree pass for eslintWarnings ratchet counts.
       - name: ESLint (JSON report)
+        if: ${{ !cancelled() }}
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
@@ -395,6 +399,10 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
+      # Kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down. The
+      # pre-commit hook runs it too, but `git commit --no-verify` skips the hook.
+      - name: Type scale ratchet
+        run: npm run check:type-scale-ratchet -- --ratchet
       # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
       # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
       # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)

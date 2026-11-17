@@ -18,16 +18,18 @@
 
 ---
 
-## Asennustavat
+## Asennusmenetelmät
 
-### npm (suositeltu)
+### npm (suositus)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Hallintapaneeli avautuu osoitteessa `http://localhost:20128`, ja API:n perus-URL on `http://localhost:20128/v1`.
+Kojelauta avautuu kohdassa `http://localhost:20128` ja API base URL on `http://localhost:20128/v1`.
+
+> **npm käyttäjät:** Jos npm varoittaa, että asennuskomentosarjat on estetty (esim. `omniroute`, `better-sqlite3`), katso [Vianmääritys — npm asennuskomentosarjat estetty](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-käyttäjät:** `--allow-build`-lippu vaaditaan `better-sqlite3`- ja `@swc/core`-pakettien natiivien koontikomentosarjojen käyttöön. `pnpm approve-builds -g` -komentoa ei tueta globaaleissa asennuksissa pnpm v11:ssä.
+> **pnpm käyttäjät:** `--allow-build` lippu vaaditaan, jotta `better-sqlite3` ja `@swc/core` alkuperäiset koontiskriptit voidaan ottaa käyttöön. `pnpm approve-builds -g` -komentoa ei tueta globaaleissa asennuksissa pnpm v11:ssä.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR-paketti](https://aur.archlinux.org/packages/omniroute-bin) asentaa OmniRouten ja tarjoaa systemd-käyttäjäpalvelun.
+[AUR -paketti](https://aur.archlinux.org/packages/omniroute-bin) asentaa OmniRoute ja tarjoaa järjestelmällisen käyttäjäpalvelun.
 
-### Lähdekoodista
+### Lähteestä
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows-huomautus:** OmniRoute käyttää oletusarvoisesti `%APPDATA%\omniroute`-hakemistoa, jos vanhaa `%USERPROFILE%\.omniroute`-hakemistoa ei ole olemassa. Valitse toinen datahakemiston sijainti asettamalla `DATA_DIR`.
+> **Windows huomautus:** Oletusarvoisesti OmniRoute käyttää `%APPDATA%\omniroute`, kun vanhaa `%USERPROFILE%\.omniroute` -hakemistoa ei ole. Aseta `DATA_DIR` valitaksesi eri tietohakemiston sijainnin.
 
-> **Huomautus:** `npm install` luo `.env`-tiedoston automaattisesti `.env.example`-tiedostosta ensimmäisellä suorituskerralla. Myöhemmät asennukset eivät korvaa olemassa olevaa `.env`-tiedostoa, joten mukautukset säilyvät. Luo tiedosto uudelleen poistamalla `.env` ennen komennon suorittamista uudelleen.
+> **Huomautus:** `npm install` luo automaattisesti `.env` n `.env.example` ensimmäisellä kerralla. Myöhemmät asennukset eivät korvaa olemassa olevaa `.env`-tiedostoa, joten mukautukset säilyvät. Jos haluat kylvää uudelleen, poista `.env` ennen uudelleen suorittamista.
 
 ### Docker
 
-Katso täydelliset Docker-asennusohjeet, mukaan lukien Compose-profiilit ja Caddy HTTPS, [Docker-oppaasta](./DOCKER_GUIDE.md).
+Katso [Docker oppaasta](./DOCKER_GUIDE.md) täydelliset Docker asetukset, mukaan lukien Compose-profiilit ja Caddy HTTPS.
 
 ### Työpöytäsovellus (Electron)
 
-OmniRoute sisältää Electron 41:n ja electron-builder 26.10:n avulla rakennetun työpöytäkääreen. Käytettävissä olevat komentosarjat (työtilan juuressa):
+OmniRoute toimittaa pöytätietokoneen kääreen, joka on rakennettu Electron 41 + elektronirakentajalle 26.10. Käytettävissä olevat komentosarjat (työtilan juuri):
 
 ```bash
-npm run electron:dev          # Suorita työpöytäsovellus automaattisella uudelleenlatauksella
-npm run electron:build        # Koosta nykyiselle käyttöjärjestelmälle (tunnistetaan automaattisesti)
-npm run electron:build:win    # Windows-asennusohjelma (NSIS + siirrettävä versio)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Savutestaa pakattu koontiversio
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Työpöytäsovelluksen asennusohjelmien julkaisut liitetään GitHub Releases -julkaisuihin. Kattava Electron-opas (allekirjoitus, IPC-silta, jakelut) löytyy tiedostosta [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(luotu myöhemmässä vaiheessa)_.
+Työpöytäasennusohjelmien julkaisut on liitetty GitHub julkaisuihin. Katso täydellinen Electron -syväsukellus (allekirjoitus, IPC silta, distrot) [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Käyttöliittymätön palvelin (CI/automaatio)
+### Päätön palvelin (CI/automation)
 
-Käytä valvomattomissa asennuksissa (Docker, Kubernetes, CI):
+Käytä valvomattomissa asetuksissa (Docker, Kubernetes, CI):
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Yhdessä ympäristömuuttujien (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` jne.) kanssa tämä mahdollistaa täysin komentosarjoilla hallittavan OmniRoute-instanssin käynnistämisen.
+Yhdessä env varsin kanssa (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` jne.) tämä mahdollistaa OmniRoute ilmentymän, joka on täysin komentosarjakelpoinen.
 
-### CLI-valinnat
+### CLI Vaihtoehdot
 
-| Komento                 | Kuvaus                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| `omniroute`             | Käynnistä palvelin (`PORT=20128`, API ja hallintapaneeli samassa portissa)           |
-| `omniroute setup`       | Ohjattu CLI-käyttöönotto salasanalle ja ensimmäiselle palveluntarjoajalle            |
-| `omniroute doctor`      | Suorita paikalliset kuntotarkistukset käynnistämättä palvelinta                      |
-| `omniroute providers`   | Etsi, luettele, validoi ja testaa palveluntarjoajia CLI:stä                          |
-| `omniroute config`      | CLI-työkalun määritys — luettele, nouda, aseta ja validoi määrityksiä                |
-| `omniroute status`      | Offline-tilapaneeli — versio, tietokanta, työkalut ja määritykset                    |
-| `omniroute logs`        | Suoratoista käyttölokeja API:sta (tukee `--follow`-lippua)                           |
-| `omniroute update`      | Tarkista tai asenna OmniRoute-päivityksiä                                            |
-| `omniroute provider`    | Hallitse palveluntarjoajayhteyksiä — lisää, luettele, poista, testaa ja aseta oletus |
-| `omniroute --port 3000` | Aseta ensisijaiseksi/API-portiksi 3000                                               |
-| `omniroute --mcp`       | Käynnistä MCP-palvelin (stdio-siirtotapa)                                            |
-| `omniroute --no-open`   | Älä avaa selainta automaattisesti                                                    |
-| `omniroute --help`      | Näytä ohje                                                                           |
+| Komento                 | Kuvaus                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `omniroute`             | Käynnistä palvelin (`PORT=20128`, API ja kojelauta samassa portissa)                  |
+| `omniroute setup`       | Ohjattu CLI -aloitus salasanalle ja ensimmäiselle tarjoajalle                         |
+| `omniroute doctor`      | Suorita paikalliset kuntotarkastukset käynnistämättä palvelinta                       |
+| `omniroute providers`   | Löydä, luetteloi, vahvista ja testaa CLI tarjoajia                                    |
+| `omniroute config`      | CLI -työkalun konfigurointi — luettelo, hanki, aseta, tarkista asetukset              |
+| `omniroute status`      | Offline-tilan kojelauta — versio, DB, työkalut, konfigurointi                         |
+| `omniroute logs`        | Suoratoista käyttölokeja API (tukee `--follow`)                                       |
+| `omniroute update`      | Tarkista OmniRoute päivitykset tai ota ne käyttöön                                    |
+| `omniroute provider`    | Hallinnoi palveluntarjoajan yhteyksiä — lisätä, luetteloida, poistaa, testata, oletus |
+| `omniroute --port 3000` | Aseta canonical/API -portiksi 3000                                                    |
+| `omniroute --mcp`       | Käynnistä MCP -palvelin (stdio-siirto)                                                |
+| `omniroute --no-open`   | Älä avaa selainta automaattisesti                                                     |
+| `omniroute --help`      | Näytä apua                                                                            |
 
-Käyttöliittymätön asennus voidaan automatisoida lipuilla tai ympäristömuuttujilla:
+Päättömät asetukset voidaan komentoida lippujen tai ympäristömuuttujien avulla:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Suorita paikallinen diagnostiikka avaamatta hallintapaneelia:
+Suorita paikallinen diagnostiikka avaamatta kojelautaa:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Hallitse palveluntarjoajia SSH:n tai komentosarjojen kautta avaamatta hallintapaneelia:
+Hallinnoi palveluntarjoajia SSH tai skripteistä avaamatta kojelautaa:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude koodi:**
 
+Claude Code yhdistää HTTP kautta, jota `omniroute --mcp` (stdio) ei käynnisty. HTTP -siirto on oletuksena pois päältä: ota se käyttöön ensin käynnissä olevassa palvelimessa. Kun kojelautaan kirjautuminen on käytössä, pyyntö ilman valtuustietoja saa `401`, joten välitä API -avain, jossa on `mcp:connect` (tai `manage`); avain ilman `manage`/`admin` tarvitsee myös kunkin työkalun laajuuden (katso [MCP Server → MCP tool Scops](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

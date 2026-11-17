@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 ക്യാപ്ചർ സംഭവിക്കുന്നത് `open-sse/handlers/chatCore.ts` ലാണ് (രണ്ട് സൈറ്റുകൾ, രണ്ട് `cacheReasoningFromAssistantMessage` കോൾ സൈറ്റുകളിൽ). സ്കീമ നിർബന്ധത്തിന് ശേഷം `open-sse/translator/index.ts` ൽ റീപ്ലേ സംഭവിക്കുന്നു, പക്ഷേ അയയ്ക്കുന്നതിന് മുമ്പ്.
+
+ടൂൾ-കോൾ എൻട്രികൾ അഭ്യർത്ഥന സ്കോപ്പിൻ്റെയും ടൂൾ കോൾ ഐഡിയുടെയും ഡൈജസ്റ്റായ `buildToolCallCacheKey()` കീഴിൽ സംഭരിച്ചിരിക്കുന്നു, അതിനാൽ മറ്റൊരു API കീ അല്ലെങ്കിൽ സെഷൻ ഉപയോഗിക്കുന്ന അതേ ഐഡി എൻട്രി തിരഞ്ഞെടുക്കില്ല. `buildReasoningCacheScope()` യിൽ നിന്നാണ് സ്കോപ്പ് വരുന്നത് : API കീ ഐഡിയും അഭ്യർത്ഥനയ്ക്ക് ഒന്ന് ഉള്ളപ്പോൾ സെഷൻ കീയും. അതിനാൽ `tool_call_id` കോളവും ഡാഷ്ബോർഡും ആ എൻട്രികൾക്കായി ഈ ഡൈജസ്റ്റ് കാണിക്കുന്നു.
 
 പ്ലെയിൻ (നോൺ-ടൂൾ-കോൾ) അസിസ്റ്റൻ്റ് ടേണുകൾ വ്യത്യസ്തമായി കീ ചെയ്തിരിക്കുന്നു: `buildAssistantMessageCacheKey()` സെഷൻ സ്കോപ്പും നോർമലൈസ് ചെയ്ത OpenAI- ഫോർമാറ്റ് ട്രാൻസ്ക്രിപ്റ്റും ആ ടേൺ വരെ ദഹിപ്പിക്കുന്നു, കാരണം DeepSeek _every_ മുൻ ടേണിൻ്റെ ന്യായവാദം ആവശ്യമാണ് `tools` ഉണ്ടെങ്കിൽ. പ്രതികരണങ്ങൾ-API ടാർഗെറ്റുകൾക്ക് (ഉദാഹരണത്തിന് `opencode-go/deepseek-v4-flash`, `/responses` ലേക്ക് റൂട്ട് ചെയ്തത്) അപ്സ്ട്രീം ബോഡി `input` അല്ല, `messages` ആണ് വഹിക്കുന്നത്, അതിനാൽ `translateRequest()` (`open-sse/translator/index.ts`) അത് ഒരു കോൾബാക്ക് ഓപ്ഷനിലൂടെ ദഹിപ്പിച്ച പിവറ്റ് ട്രാൻസ്ക്രിപ്റ്റ് റിപ്പോർട്ടുചെയ്യുകയും ക്യാപ്ചർ സൈറ്റുകൾ അതേ ട്രാൻസ്ക്രിപ്റ്റ് ഡൈജസ്റ്റ് ചെയ്യുകയും ചെയ്യുന്നു. എല്ലാ സോഴ്സ് ഫോർമാറ്റുകൾക്കുമായി പ്രതികരണങ്ങൾ റീപ്ലേ പാസ് OpenAI പിവറ്റിൽ പ്രവർത്തിക്കുന്നു, അതിനാൽ Anthropic സന്ദേശ ക്ലയൻ്റുകളും (Claude → OpenAI → പ്രതികരണങ്ങൾ) വീണ്ടും പ്ലേ ചെയ്യുന്നു.
 
