@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-ה- CLI טוען אוטומטית `.env` מ- `~/.omniroute/.env` או `./.env`. `./.env` בספריית העבודה עשויה להגדיר רק רשימת הרשאות קצרה של מפתחות (יציאות, `REQUIRE_API_KEY`, מיקום והגדרות צבע); שים את כל השאר ב- `~/.omniroute/.env`. ראה [חוזי השקה של CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+ה- CLI טוען אוטומטית `.env` מ- `~/.omniroute/.env` או `./.env`. `./.env` בספריית העבודה עשויה להגדיר רק רשימת הרשאות קצרה של מפתחות (`REQUIRE_API_KEY`, מיקום, אזור זמן והגדרות צבע, לא היציאות); שים את כל השאר ב- `~/.omniroute/.env`. ראה [חוזי השקה של CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### מצב מגש
 

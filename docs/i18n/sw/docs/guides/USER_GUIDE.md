@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (bandari, `REQUIRE_API_KEY`, eneo na mipangilio ya rangi); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (`REQUIRE_API_KEY`, eneo, eneo la saa na mipangilio ya rangi, sio bandari); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Hali ya trei
 

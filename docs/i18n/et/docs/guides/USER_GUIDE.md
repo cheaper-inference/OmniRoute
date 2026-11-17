@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (pordid, `REQUIRE_API_KEY`, lokaadi ja värvi sätted); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (`REQUIRE_API_KEY`, lokaat, ajavööndi ja värvi seaded, mitte pordid); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Salve režiim
 

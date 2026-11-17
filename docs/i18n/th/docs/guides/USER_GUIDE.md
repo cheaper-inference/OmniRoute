@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ เท่านั้น (การตั้งค่าพอร์ต, `REQUIRE_API_KEY`, ภาษา และสี) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
+CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ (`REQUIRE_API_KEY` การตั้งค่าสถานที่ โซนเวลา และสี ไม่ใช่พอร์ต) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
 
 ### โหมดถาด
 

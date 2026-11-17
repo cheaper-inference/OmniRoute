@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (poorten, `REQUIRE_API_KEY`, landinstelling en kleurinstellingen); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (`REQUIRE_API_KEY`, landinstelling, tijdzone en kleurinstellingen, niet de poorten); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Lademodus
 

@@ -364,7 +364,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Der CLI lädt `.env` automatisch von `~/.omniroute/.env` oder `./.env`. Ein `./.env` im Arbeitsverzeichnis darf nur eine kurze Zulassungsliste von Schlüsseln festlegen (Ports, `REQUIRE_API_KEY`, Gebietsschema und Farbeinstellungen); füge alles andere in `~/.omniroute/.env`. Siehe [CLI Startverträge](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Der CLI lädt `.env` automatisch von `~/.omniroute/.env` oder `./.env`. Ein `./.env` im Arbeitsverzeichnis darf nur eine kurze Zulassungsliste von Schlüsseln festlegen (`REQUIRE_API_KEY`, Gebietsschema, Zeitzone und Farbeinstellungen, nicht die Ports); füge alles andere in `~/.omniroute/.env`. Siehe [CLI Startverträge](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Fachmodus
 
@@ -598,9 +598,9 @@ post_install() {
 | `PORT`                                  | Framework-Standard        | Service-Port (`20128` in Beispielen)                                                                                                                                                |
 | `HOSTNAME`                              | Framework-Standard        | Host binden (Docker ist standardmäßig `0.0.0.0`)                                                                                                                                    |
 | `NODE_ENV`                              | Laufzeitstandard          | Legen Sie `production` für die Bereitstellung fest                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Die öffentliche Basis URL wird im Dashboard angezeigt und dem Server zugänglich gemacht (ersetzt das alte `BASE_URL`).                                                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Basis URL für den Cloud-Synchronisierungsendpunkt (ersetzt Legacy- `CLOUD_URL`)                                                                                                     |
-| `API_KEY_SECRET`                        | _(automatisch generiert)_ | HMAC -Geheimnis für generierte API Schlüssel — wird beim ersten Start automatisch generiert und auf `server.env` gespeichert                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Die öffentliche Basis- URL wird im Dashboard angezeigt und dem Server zugänglich gemacht (ersetzt die alte `BASE_URL`).                                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud-Synchronisierungsendpunkt-Basis URL (ersetzt Legacy- `CLOUD_URL`)                                                                                                             |
+| `API_KEY_SECRET`                        | _(automatisch generiert)_ | HMAC -Geheimnis für generierte API Schlüssel — wird bei der ersten Ausführung automatisch generiert und auf `server.env` gespeichert                                                |
 | `REQUIRE_API_KEY`                       | `false`                   | Erzwingen Sie den Bearer- API -Schlüssel auf `/v1/*`                                                                                                                                |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                   | Ermöglichen Sie authentifizierten Dashboard-Benutzern, bei Bedarf vollständig gespeicherte API -Schlüsselwerte anzuzeigen                                                           |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Serverseitige Aktualisierungsfrequenz für zwischengespeicherte Provider-Limit-Daten; UI Aktualisierungsschaltflächen lösen weiterhin eine manuelle Synchronisierung aus             |

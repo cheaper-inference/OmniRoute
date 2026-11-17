@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (porter, `REQUIRE_API_KEY`, lokalitet og fargeinnstillinger); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laster automatisk inn `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (`REQUIRE_API_KEY`, locale, tidssone og fargeinnstillinger, ikke portene); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Skuffmodus
 

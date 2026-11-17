@@ -360,7 +360,7 @@ omniroute
 omniroute --port 3000
 ```
 
-يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (المنافذ، و `REQUIRE_API_KEY`، والإعدادات المحلية والألوان)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (`REQUIRE_API_KEY`، والإعدادات المحلية، والمنطقة الزمنية، وإعدادات الألوان، وليس المنافذ)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### وضع الدرج
 

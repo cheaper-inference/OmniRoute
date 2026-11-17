@@ -365,7 +365,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Lódálann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`. Ní féidir le `./.env` san eolaire oibre ach liosta ceadaithe gearr eochracha a shocrú (socruithe poirt, `REQUIRE_API_KEY`, locale agus dath); cuir gach rud eile i `~/.omniroute/.env`. Féach [conarthaí seolta CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Lódálann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`. Ní féidir le `./.env` san eolaire oibre ach liosta gairid d'eochracha a shocrú (`REQUIRE_API_KEY`, locale, crios ama agus socruithe datha, ní na poirt); cuir gach rud eile i `~/.omniroute/.env`. Féach [conarthaí seolta CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mód tráidire
 
@@ -598,7 +598,7 @@ post_install() {
 | `DATA_DIR`                              | `~/.omniroute`           | Eolaire sonraí (db, úsáid, logaí)                                                                                                                               |
 | `PORT`                                  | réamhshocraithe creata   | Port seirbhíse (`20128` i samplaí)                                                                                                                              |
 | `HOSTNAME`                              | réamhshocraithe creata   | Ceangail óstach (Docker réamhshocraithe le `0.0.0.0`)                                                                                                           |
-| `NODE_ENV`                              | réamhshocraithe am rite  | Socraigh `production` le haghaidh imscaradh                                                                                                                     |
+| `NODE_ENV`                              | réamhshocraithe ama rite | Socraigh `production` le haghaidh imscaradh                                                                                                                     |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Dromchla poiblí URL ar an deais agus nochtaithe don fhreastalaí (a ionadaíonn oidhreacht `BASE_URL`)                                                            |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | bonn críochphointe scamall sioncronaithe URL (a ionadaíonn oidhreacht `CLOUD_URL`)                                                                              |
 | `API_KEY_SECRET`                        | _(uathghinte)_           | rún HMAC le haghaidh eochracha API ginte — uathghinte ar an gcéad rith agus lean sé go `server.env`                                                             |
@@ -608,7 +608,7 @@ post_install() {
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Díchumasaigh seatanna uathoibríocha SQLite roimh writes/import/restore; cúltacaí láimhe fós ag obair                                                            |
 | `APP_LOG_TO_FILE`                       | `true`                   | Cumasaíonn sé aschur logála feidhmchláir agus iniúchta chuig diosca                                                                                             |
 | `AUTH_COOKIE_SECURE`                    | `false`                  | Force `Secure` auth fianán (ar chúl seachfhreastalaí HTTPS )                                                                                                    |
-| `CLOUDFLARED_BIN`                       | neamhshuite              | Bain úsáid as dénártha `cloudflared` atá ann cheana féin in ionad íoslódáil bainistithe                                                                         |
+| `CLOUDFLARED_BIN`                       | neamhshonraithe          | Bain úsáid as dénártha `cloudflared` atá ann cheana féin in ionad íoslódáil bainistithe                                                                         |
 | `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Iompar do Tholláin Mhearbhainistithe (`http2`, `quic`, nó `auto`)                                                                                               |
 | `OMNIROUTE_MEMORY_MB`                   | `512`                    | teorainn carn Node.js i MB                                                                                                                                      |
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Uasmhéid iontrálacha taisce pras                                                                                                                                |

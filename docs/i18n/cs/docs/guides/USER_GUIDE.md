@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (porty, `REQUIRE_API_KEY`, národní prostředí a nastavení barev); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (`REQUIRE_API_KEY`, locale, časové pásmo a nastavení barev, nikoli porty); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Režim zásobníku
 
@@ -604,7 +604,7 @@ post_install() {
 | `JWT_SECRET`                            | _(automaticky vygenerováno)_ | tajné podepisování JWT — automaticky vygenerováno při prvním spuštění a přetrvává do `server.env`; nastavte jej explicitně, když je datový adresář pomíjivý |
 | `INITIAL_PASSWORD`                      | _(nenastaveno)_              | První přihlašovací heslo. instalace npm/source začínají na `CHANGEME`: nahraďte jej. Nenastaveno: průvodce pro přihlášení                                   |
 | `DATA_DIR`                              | `~/.omniroute`               | Datový adresář (db, využití, protokoly)                                                                                                                     |
-| `PORT`                                  | výchozí nastavení rámce      | Servisní port (v příkladech `20128` )                                                                                                                       |
+| `PORT`                                  | výchozí nastavení rámce      | Port služby (v příkladech `20128` )                                                                                                                         |
 | `HOSTNAME`                              | výchozí nastavení rámce      | Svázat hostitele (Docker výchozí `0.0.0.0`)                                                                                                                 |
 | `NODE_ENV`                              | výchozí runtime              | Nastavte `production` pro nasazení                                                                                                                          |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Veřejná základna URL se objevila na řídicím panelu a byla vystavena serveru (nahrazuje starší `BASE_URL`)                                                   |

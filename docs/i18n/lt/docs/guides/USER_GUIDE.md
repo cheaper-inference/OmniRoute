@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (prievadai, `REQUIRE_API_KEY`, lokalės ir spalvų parametrai); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (`REQUIRE_API_KEY`, lokalę, laiko juostos ir spalvų parametrus, o ne prievadus); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Dėklo režimas
 
@@ -600,7 +600,7 @@ post_install() {
 
 | Kintamasis                              | Numatytoji                      | Aprašymas                                                                                                                                                      |
 | --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiškai sugeneruotas)_   | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
+| `JWT_SECRET`                            | _(automatiškai sugeneruota)_    | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
 | `INITIAL_PASSWORD`                      | _(nustatyta)_                   | Pirmasis prisijungimo slaptažodis. npm/source diegimas prasideda `CHANGEME`: pakeiskite jį. Atšaukta: priėmimo vedlys                                          |
 | `DATA_DIR`                              | `~/.omniroute`                  | Duomenų katalogas (db, naudojimas, žurnalai)                                                                                                                   |
 | `PORT`                                  | numatytosios sistemos           | Aptarnavimo prievadas (`20128` pavyzdžiuose)                                                                                                                   |
@@ -608,7 +608,7 @@ post_install() {
 | `NODE_ENV`                              | vykdymo laikas pagal nutylėjimą | Nustatyti `production` diegimui                                                                                                                                |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Viešas bazinis URL pateiktas prietaisų skydelyje ir rodomas serveryje (pakeičia seną `BASE_URL`)                                                               |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Debesų sinchronizavimo pabaigos taško bazė URL (pakeičia seną `CLOUD_URL`)                                                                                     |
-| `API_KEY_SECRET`                        | _(automatiškai sugeneruotas)_   | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
+| `API_KEY_SECRET`                        | _(automatiškai sugeneruota)_    | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
 | `REQUIRE_API_KEY`                       | `false`                         | Įgalinkite nešiklio API klavišą `/v1/*`                                                                                                                        |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                         | Leiskite autentifikuotiems prietaisų skydelio naudotojams pareikalavus atskleisti visas išsaugotas API raktų reikšmes                                          |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Talpykloje saugomų teikėjo apribojimų duomenų atnaujinimo dažnis serverio pusėje; UI atnaujinimo mygtukai vis tiek suaktyvina rankinį sinchronizavimą          |

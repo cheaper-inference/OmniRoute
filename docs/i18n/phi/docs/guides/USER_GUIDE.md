@@ -375,7 +375,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Ang CLI ay awtomatikong naglo-load `.env` mula sa `~/.omniroute/.env` o `./.env`. Ang isang `./.env` sa gumaganang direktoryo ay maaari lamang magtakda ng isang maikling allowlist ng mga susi (mga port, `REQUIRE_API_KEY`, lokal at mga setting ng kulay); ilagay ang lahat ng iba pa sa `~/.omniroute/.env`. Tingnan [ang mga kontrata sa paglulunsad CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Ang CLI ay awtomatikong naglo-load `.env` mula sa `~/.omniroute/.env` o `./.env`. Ang isang `./.env` sa gumaganang direktoryo ay maaaring magtakda lamang ng isang maikling allowlist ng mga susi (`REQUIRE_API_KEY`, locale, time zone at mga setting ng kulay, hindi ang mga port); ilagay ang lahat ng iba pa sa `~/.omniroute/.env`. Tingnan [ang mga kontrata sa paglulunsad CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 
@@ -604,13 +604,13 @@ post_install() {
 | Variable                                | Default                  | Paglalarawan                                                                                                                                                 |
 | --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `JWT_SECRET`                            | _(auto-generated)_       | JWT signing secret — awtomatikong nabuo sa unang pagtakbo at nagpatuloy sa `server.env`; itakda ito nang tahasan kapag ang direktoryo ng data ay panandalian |
-| `INITIAL_PASSWORD`                      | _(unset)_                | Unang password sa pag-login. Ang mga pag-install ng npm/source ay nagsisimula sa `CHANGEME`: palitan ito. Hindi nakatakda: onboarding wizard                 |
+| `INITIAL_PASSWORD`                      | _(unset)_                | Unang login password. Ang mga pag-install ng npm/source ay nagsisimula sa `CHANGEME`: palitan ito. Hindi nakatakda: onboarding wizard                        |
 | `DATA_DIR`                              | `~/.omniroute`           | Direktoryo ng data (db, paggamit, mga log)                                                                                                                   |
 | `PORT`                                  | default na framework     | Port ng serbisyo (`20128` sa mga halimbawa)                                                                                                                  |
 | `HOSTNAME`                              | default na framework     | Bind host (Docker defaults to `0.0.0.0`)                                                                                                                     |
 | `NODE_ENV`                              | default na runtime       | Itakda ang `production` para sa pag-deploy                                                                                                                   |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Ang pampublikong base URL ay lumabas sa dashboard at nakalantad sa server (pinapalitan ang legacy `BASE_URL`)                                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (pinapalitan ang legacy `CLOUD_URL`)                                                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (pinapalitan ang legacy na `CLOUD_URL`)                                                                                         |
 | `API_KEY_SECRET`                        | _(auto-generated)_       | HMAC secret para sa mga nabuong API key na awtomatikong nabuo ang — sa unang pagtakbo at nagpatuloy sa `server.env`                                          |
 | `REQUIRE_API_KEY`                       | `false`                  | Ipatupad ang Bearer API key sa `/v1/*`                                                                                                                       |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | Pahintulutan ang mga na-authenticate na user ng dashboard na ipakita ang buong nakaimbak na API key value on demand                                          |

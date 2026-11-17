@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI carica automaticamente `.env` da `~/.omniroute/.env` o `./.env`. Uno `./.env` nella directory di lavoro può impostare solo una breve lista consentita di chiavi (porte, `REQUIRE_API_KEY`, impostazioni locali e colore); metti tutto il resto in `~/.omniroute/.env`. Vedi [i contratti di lancio CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI carica automaticamente `.env` da `~/.omniroute/.env` o `./.env`. Uno `./.env` nella directory di lavoro può impostare solo una breve lista consentita di chiavi (`REQUIRE_API_KEY`, impostazioni locali, fuso orario e colore, non le porte); metti tutto il resto in `~/.omniroute/.env`. Vedi [i contratti di lancio CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modalità vassoio
 

@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI loda `.env` ta atomatik daga `~/.omniroute/.env` ko `./.env`. `./.env` a cikin kundin aiki na iya saita ɗan gajeren jerin izini na maɓallai (mashigai, `REQUIRE_API_KEY`, saitunan gida da launi); sanya komai a `~/.omniroute/.env`. Duba [kwangilolin ƙaddamar da CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI loda `.env` ta atomatik daga `~/.omniroute/.env` ko `./.env`. `./.env` a cikin kundin aiki yana iya saita ɗan gajeren jerin izini na maɓallai (`REQUIRE_API_KEY`, yanki, yankin lokaci da saitunan launi, ba tashar jiragen ruwa ba); sanya komai a `~/.omniroute/.env`. Duba [kwangilolin ƙaddamar da CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Yanayin tire
 
@@ -597,7 +597,7 @@ post_install() {
 
 ### Canje-canjen Muhalli
 
-| Mai canzawa                             | Default                    | Bayani                                                                                                                                                    |
+| Mai canzawa                             | Tsohuwar                   | Bayani                                                                                                                                                    |
 | --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`                            | _(an ƙirƙira ta atomatik)_ | JWT sa hannu a sirrin — mai sarrafa kansa a farkon gudu kuma ya dage zuwa `server.env`; saita shi a sarari lokacin da kundin bayanan ya kasance mara kyau |
 | `INITIAL_PASSWORD`                      | _(Ba a saita ba)_          | Kalmar shiga ta farko. shigar npm/source farawa da `CHANGEME`: maye gurbin shi. Unset: mayen hawan jirgi                                                  |
@@ -606,10 +606,10 @@ post_install() {
 | `HOSTNAME`                              | tsoho tsarin               | Daure mai watsa shiri (Docker tsoho zuwa `0.0.0.0`)                                                                                                       |
 | `NODE_ENV`                              | tsoho lokacin aiki         | Saita `production` don turawa                                                                                                                             |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | Tushen URL na jama'a ya fito zuwa gaban dashboard kuma an fallasa shi ga uwar garken (ya maye gurbin `BASE_URL` na gado)                                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | URL ƙarshen sync Cloud (yana maye gurbin `CLOUD_URL`)                                                                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | Ƙarshen madaidaicin Cloud sync URL (mai maye gurbin `CLOUD_URL`)                                                                                          |
 | `API_KEY_SECRET`                        | _(an ƙirƙira ta atomatik)_ | sirrin HMAC don maɓallan API da aka ƙirƙira — ta atomatik a farkon gudu kuma ya dage zuwa `server.env`                                                    |
 | `REQUIRE_API_KEY`                       | `false`                    | Ƙaddamar da maɓallin API mai ɗaukar nauyi akan `/v1/*`                                                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Bada ingantattun masu amfani da dashboard don bayyana cikakkun ƙimar maɓalli API akan buƙata                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Bada ingantattun masu amfani da dashboard don bayyana cikakkun ƙimar maɓalli API da aka adana akan buƙata                                                 |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Ƙaddamar da wartsakewar gefen uwar garken don bayanan iyakantaccen mai bayarwa; UI refresh buttons har yanzu yana haifar da aiki tare                     |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Kashe hotunan SQLite ta atomatik kafin writes/import/restore; kayan aikin hannu har yanzu suna aiki                                                       |
 | `APP_LOG_TO_FILE`                       | `true`                     | Yana ba da damar aikace-aikace da fitar da bayanan rajista zuwa faifai                                                                                    |

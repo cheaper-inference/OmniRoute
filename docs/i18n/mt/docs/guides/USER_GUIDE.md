@@ -356,7 +356,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. `./.env` fid-direttorju tax-xogħol jista' jistabbilixxi biss lista qasira ta' ċwievet (portijiet, `REQUIRE_API_KEY`, settings tal-lokal u tal-kulur); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. A `./.env` fid-direttorju tax-xogħol jista 'jiffissa biss lista qasira ta' ċwievet (`REQUIRE_API_KEY`, lokali, żona tal-ħin u settings tal-kulur, mhux il-portijiet); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modalità trej
 
@@ -407,7 +407,7 @@ Meta m'għadx għandek bżonn OmniRoute, aħna nipprovdu żewġ skripts ta' mala
 
 | Kmand                    | Azzjoni                                                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** `~/.omniroute`.                |
+| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** fi `~/.omniroute`.             |
 | `npm run uninstall:full` | Tneħħi l-app AND b'mod permanenti** iħassar il-konfigurazzjonijiet, iċ-ċwievet u d-databases kollha** . |
 
 > Nota: Biex tmexxi dawn il-kmandi, innaviga lejn il-folder tal-proġett OmniRoute (jekk ikklonjah) u mexxihom. Inkella, jekk installat globalment, tista 'sempliċement tħaddem `npm uninstall -g omniroute`.

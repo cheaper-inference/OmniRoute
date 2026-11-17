@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, definições de localidade e cores); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (`REQUIRE_API_KEY`, localização, fuso horário e definições de cor, e não as portas); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -411,7 +411,7 @@ Ative a inicialização no próximo login da máquina:
 omniroute autostart enable
 ```
 
-A inicialização automática utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
+O arranque automático utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
 
 Desative a inicialização no login:
 

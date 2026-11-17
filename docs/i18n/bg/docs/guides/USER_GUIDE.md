@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`. `./.env` в работната директория може да задава само кратък списък с разрешени ключове (портове, `REQUIRE_API_KEY`, настройки за локал и цвят); поставете всичко останало в `~/.omniroute/.env`. Вижте [договорите за стартиране CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`. `./.env` в работната директория може да зададе само кратък списък с разрешени ключове (`REQUIRE_API_KEY`, локал, часова зона и цветови настройки, а не портовете); поставете всичко останало в `~/.omniroute/.env`. Вижте [договорите за стартиране CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Режим на тава
 
@@ -616,7 +616,7 @@ post_install() {
 | `AUTH_COOKIE_SECURE`                    | `false`                                | Принудителна бисквитка за удостоверяване на `Secure` (зад HTTPS обратен прокси)                                                                                  |
 | `CLOUDFLARED_BIN`                       | ненастроен                             | Използвайте съществуващ `cloudflared` двоичен файл вместо управлявано изтегляне                                                                                  |
 | `CLOUDFLARED_PROTOCOL`                  | `http2`                                | Транспорт за управлявани бързи тунели (`http2`, `quic` или `auto`)                                                                                               |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                  | Node.js ограничение на купчина в MB                                                                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                                  | Node.js куп лимит в MB                                                                                                                                           |
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                                   | Максимални записи в кеша за подкани                                                                                                                              |
 | `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                  | Максимални семантични записи в кеша                                                                                                                              |
 

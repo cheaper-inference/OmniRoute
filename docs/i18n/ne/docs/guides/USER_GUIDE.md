@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। काम गर्ने डाइरेक्टरीमा रहेको `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (पोर्टहरू, `REQUIRE_API_KEY`, लोकेल र रङ सेटिङहरू); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्छ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 
@@ -410,7 +410,7 @@ omniroute serve --tray
 omniroute autostart enable
 ```
 
-macOS, Windows, र ग्राफिकल Linux सत्रहरूमा स्वतः-सुरुले ट्रे मोड प्रयोग गर्दछ। हेडलेस Linux ले अवस्थित systemd प्रयोगकर्ता सेवा प्रयोग गर्दछ।
+macOS, Windows, र ग्राफिकल Linux सत्रहरूमा स्वत: सुरुले ट्रे मोड प्रयोग गर्दछ। हेडलेस Linux ले अवस्थित systemd प्रयोगकर्ता सेवा प्रयोग गर्दछ।
 
 लगइनमा स्टार्टअप असक्षम गर्नुहोस्:
 

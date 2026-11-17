@@ -369,7 +369,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI secara automatik memuatkan `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` dalam direktori kerja hanya boleh menetapkan senarai kekunci yang dibenarkan (port, `REQUIRE_API_KEY`, tempat dan tetapan warna); letak semua yang lain dalam `~/.omniroute/.env`. Lihat [kontrak pelancaran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI secara automatik memuatkan `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` dalam direktori kerja boleh menetapkan hanya senarai pendek kekunci yang dibenarkan (`REQUIRE_API_KEY`, tempat, zon masa dan tetapan warna, bukan port); letak semua yang lain dalam `~/.omniroute/.env`. Lihat [kontrak pelancaran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mod dulang
 

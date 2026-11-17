@@ -368,7 +368,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dopuštenih ključeva (portovi, `REQUIRE_API_KEY`, lokalne postavke i postavke boja); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratki popis dopuštenih ključeva (`REQUIRE_API_KEY`, lokalizacija, vremenska zona i postavke boja, ne portovi); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način ladice
 

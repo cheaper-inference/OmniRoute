@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (portit, `REQUIRE_API_KEY`, alue- ja väriasetukset); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (`REQUIRE_API_KEY`, locale, aikavyöhyke ja väriasetukset, ei portit); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Lokerotila
 

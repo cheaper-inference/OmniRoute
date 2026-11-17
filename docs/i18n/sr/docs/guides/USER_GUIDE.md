@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI аутоматски учитава `.env` из `~/.omniroute/.env` или `./.env`. `./.env` у радном директоријуму може да постави само кратку листу дозвољених кључева (портови, `REQUIRE_API_KEY`, подешавања локализације и боје); све остало стави у `~/.omniroute/.env`. Погледајте [уговоре о покретању CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI аутоматски учитава `.env` из `~/.omniroute/.env` или `./.env`. `./.env` у радном директоријуму може да постави само кратку листу дозвољених кључева (`REQUIRE_API_KEY`, локал, временска зона и подешавања боја, не и портови); све остало стави у `~/.omniroute/.env`. Погледајте [уговоре о покретању CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Траи моде
 

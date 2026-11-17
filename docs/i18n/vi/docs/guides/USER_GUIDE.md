@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`. Một `./.env` trong thư mục làm việc chỉ có thể đặt một danh sách ngắn các khóa được phép (cài đặt cổng, `REQUIRE_API_KEY`, ngôn ngữ và màu sắc); đặt mọi thứ khác vào `~/.omniroute/.env`. Xem [hợp đồng ra mắt CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`. Một `./.env` trong thư mục làm việc chỉ có thể đặt một danh sách ngắn các khóa được phép (`REQUIRE_API_KEY`, cài đặt ngôn ngữ, múi giờ và màu sắc, không phải cổng); đặt mọi thứ khác vào `~/.omniroute/.env`. Xem [hợp đồng ra mắt CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Chế độ khay
 

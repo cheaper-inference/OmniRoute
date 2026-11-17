@@ -360,7 +360,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (vrata, `REQUIRE_API_KEY`, področne in barvne nastavitve); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (`REQUIRE_API_KEY`, področne nastavitve, časovni pas in barvne nastavitve, ne pa vrat); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način pladnja
 

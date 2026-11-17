@@ -370,7 +370,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (ọdụ ụgbọ mmiri, `REQUIRE_API_KEY`, ntọala mpaghara na agba); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (`REQUIRE_API_KEY`, mpaghara, mpaghara oge na ntọala agba, ọ bụghị ọdụ ụgbọ mmiri); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ụdị tray
 
@@ -496,7 +496,7 @@ Maka ụdị agbakwunyere ndị ọbịa nwere ọnụọgụ abụọ CLI, lee 
 
 ### Ihe efu Linux (xbps-src)
 
-Ndị ọrụ Linux na-abaghị uru nwere ike wụnye OmniRoute site na iji usoro mkpokọta `xbps-src`. Nke a na-eme ka ụlọ Node.js kwụ ọtọ yana njide `better-sqlite3` achọrọ.
+Ndị ọrụ Linux efu nwere ike wụnye OmniRoute na ala site na iji usoro mkpokọta `xbps-src`. Nke a na-eme ka ụlọ Node.js kwụ ọtọ yana njigide `better-sqlite3` achọrọ.
 
 <details>
 <summary><b>Lelee ndebiri xbps-src</b></summary>
@@ -594,7 +594,7 @@ post_install() {
 
 </details>
 
-### Mgbanwe gburugburu
+### Ngbanwe gburugburu
 
 | Na-agbanwe agbanwe                      | Ọdabara                  | Nkọwa                                                                                                                                      |
 | --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |

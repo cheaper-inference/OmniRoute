@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, configurações de localidade e cores); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (`REQUIRE_API_KEY`, localidade, fuso horário e configurações de cores, não as portas); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -610,7 +610,7 @@ post_install() {
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Base de endpoint de sincronização em nuvem URL (substitui `CLOUD_URL` herdado)                                                                                        |
 | `API_KEY_SECRET`                        | _(gerado automaticamente)_  | segredo HMAC para chaves API geradas — gerado automaticamente na primeira execução e persistido no `server.env`                                                       |
 | `REQUIRE_API_KEY`                       | `false`                     | Aplicar chave API do portador no `/v1/*`                                                                                                                              |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Permitir que usuários autenticados do painel revelem valores-chave API completos armazenados sob demanda                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Permitir que usuários autenticados do painel revelem valores-chave API armazenados completos sob demanda                                                              |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Cadência de atualização do lado do servidor para dados armazenados em cache do Provider Limits; Os botões de atualização UI ainda acionam a sincronização manual      |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Desative os snapshots automáticos SQLite antes writes/import/restore; backups manuais ainda funcionam                                                                 |
 | `APP_LOG_TO_FILE`                       | `true`                      | Ativa a saída de aplicativos e logs de auditoria para disco                                                                                                           |

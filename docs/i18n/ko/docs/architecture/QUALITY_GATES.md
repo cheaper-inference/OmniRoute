@@ -128,17 +128,18 @@ CLI 보유된 증거를 확인하기 위해 `--evidence-root` 요구합니다. �
 | `check:compression-budget`   | 압축 벤치마크 예산 — 엔진당 토큰 절감 하한선은 회귀해서는 안 됩니다.                                                                                  | 예            |
 | `check:type-coverage`        | 백분율 유형의 래칫(`type-coverage`)은 회귀하지 않습니다. 주로 `typecheck:noimplicit:core` 포함합니다.                                                 | 예            |
 | `check:codeql-ratchet`       | 개방형 CodeQL 경고 횟수가 회귀되지 않습니다( `gh api` 통해 읽음, 토큰 없이 우아한 건너뛰기). — 새로 고침 주기 및 수동 트리거: 아래 "CodeQL 래칫" 참조 | 예            |
+| `check:type-scale-ratchet`   | 키트 유형 스케일: 12px 미만의 크기와 `src/` 의 `font-bold` 만 감소합니다(`typeScaleSubFloorSizes`, `typeScaleFontBold`). 또한 사전 커밋 후크에서도    | 예            |
 
 ### 직업 : `quality-extended`
 
-전체 작업은 자문입니다(`continue-on-error: true`). npm 기반 래칫은 실제로 실행됩니다. 외부 스캐너는 바이너리가 아직 없을 때 `gh release download` 및 자체 건너뛰기(종료 0)를 통해 설치됩니다.
+작업 수준 `continue-on-error` 없는 혼합 작업: `--ratchet` 통과하는 단계는 `quality-baseline.json` 에 대한 측정된 회귀에서 작업에 실패합니다. `check:circular-deps` 및 스캐너 설치 단계만 권고 사항입니다(단계 수준 `continue-on-error: true`). 외부 스캐너는 `gh release download` 통해 설치됩니다. `check:secrets` gitleaks가 없으면 자체 건너뛰고(종료 0), `check:vuln-ratchet`, `check:workflows` 및 `check:openapi-breaking` 는 측정이 누락되면 실패하여 닫힙니다.
 
 | 스크립트                 | 검증                                                                                                                                                                                         | 블로킹                                        |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
 | `check:circular-deps`    | 순환 종속성 없음(dpdm)                                                                                                                                                                       | **자문**                                      |
-| `check:bundle-size`      | 번들 크기는 한도를 초과하지 않습니다.                                                                                                                                                        | **자문**                                      |
-| `check:secrets`          | 바이너리가 없으면 비밀 스캐닝(gitleaks) — 건너뜁니다.                                                                                                                                        | **자문**                                      |
-| `check:vuln-ratchet`     | 종속성 취약성(osv-scanner)은 — 회귀하지 않습니다. 측정되지 않은 경우 `--ratchet` INCOMPLETE (종료 2)로 실패합니다.                                                                           | **자문**                                      |
+| `check:bundle-size`      | 번들 크기는 한도를 초과하지 않습니다. 측정할 수 없는 크기도 실패                                                                                                                             | **--ratchet 로 차단**                         |
+| `check:secrets`          | 바이너리가 없으면 비밀 스캐닝(gitleaks) — 건너뜁니다.                                                                                                                                        | **--ratchet 로 차단**                         |
+| `check:vuln-ratchet`     | 종속성 취약성(osv-scanner)은 — 회귀하지 않습니다. 측정되지 않은 경우 `--ratchet` INCOMPLETE (종료 2)로 실패합니다.                                                                           | **--ratchet 로 차단**                         |
 | `check:workflows`        | 워크플로 린트(actionlint + zizmor) missing/broken 스캐너, 유효하지 않은 보고서 또는 래칫 기준 누락이 INCOMPLETE 로 실패합니다. 유효한 결과는 선택한 strict/advisory/ratchet 정책을 따릅니다. | 실행이 필요합니다. CI 의 지즈모어 래칫 블로킹 |
 | `check:openapi-breaking` | 고정된 이벤트 커밋에 대한 공개 API 계약(PR merge-base, push before, merge-group base; scheduled/manual checkout 첫 번째 상위) 필수 측정 실패 종료                                            | **--ratchet 로 차단**                         |
 

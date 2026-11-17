@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar pendek kunci yang diizinkan (port, `REQUIRE_API_KEY`, pengaturan lokal dan warna); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar kunci pendek yang diizinkan (`REQUIRE_API_KEY`, pengaturan lokal, zona waktu dan warna, bukan port); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modus baki
 
@@ -423,7 +423,7 @@ Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untu
 
 | Memerintah               | Tindakan                                                                                      |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Menghapus aplikasi sistem tapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.       |
+| `npm run uninstall`      | Menghapus aplikasi sistem tetapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.     |
 | `npm run uninstall:full` | Menghapus aplikasi AND secara permanen** menghapus semua konfigurasi, kunci, dan database** . |
 
 > Catatan: Untuk menjalankan perintah ini, navigasikan ke folder proyek OmniRoute (jika Anda mengkloningnya) dan jalankan. Alternatifnya, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.

@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei permise (porturi, `REQUIRE_API_KEY`, setări locale și de culoare); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei (`REQUIRE_API_KEY`, locale, fus orar și setări de culoare, nu porturile); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modul tavă
 
@@ -616,7 +616,7 @@ post_install() {
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Dezactivați instantaneele automate SQLite înainte de writes/import/restore; backup-urile manuale încă funcționează                                                                 |
 | `APP_LOG_TO_FILE`                       | `true`                   | Activează înregistrarea aplicației și a jurnalului de audit pe disc                                                                                                                |
 | `AUTH_COOKIE_SECURE`                    | `false`                  | Forțați cookie-ul de autentificare `Secure` (în spatele proxy-ului invers HTTPS )                                                                                                  |
-| `CLOUDFLARED_BIN`                       | dezinstalat              | Utilizați un binar `cloudflared` existent în loc de descărcare gestionată                                                                                                          |
+| `CLOUDFLARED_BIN`                       | neasezat                 | Utilizați un binar `cloudflared` existent în loc de descărcare gestionată                                                                                                          |
 | `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport pentru tuneluri rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                           |
 | `OMNIROUTE_MEMORY_MB`                   | `512`                    | limita heap Node.js în MB                                                                                                                                                          |
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Numărul maxim de intrări în cache prompte                                                                                                                                          |

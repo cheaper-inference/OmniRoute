@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`. `./.env` darba direktorijā var iestatīt tikai īsu atslēgu sarakstu (porti, `REQUIRE_API_KEY`, lokalizācijas un krāsu iestatījumi); visu pārējo ieliec `~/.omniroute/.env`. Skatiet [CLI palaišanas līgumus](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`. `./.env` darba direktorijā var iestatīt tikai īsu atslēgu sarakstu (`REQUIRE_API_KEY`, lokalizācija, laika joslas un krāsu iestatījumi, nevis porti); visu pārējo ieliec `~/.omniroute/.env`. Skatiet [CLI palaišanas līgumus](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Paplātes režīms
 
@@ -421,10 +421,10 @@ omniroute autostart disable
 
 Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skriptus tīrai noņemšanai:
 
-| Pavēli                   | Darbība                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Noņem sistēmas lietotni, bet** saglabā jūsu DB un konfigurācijas** `~/.omniroute`.                |
-| `npm run uninstall:full` | Tiek neatgriezeniski noņemta lietotne AND** dzēš visas konfigurācijas, atslēgas un datu bāzes** . |
+| Komanda                  | Darbība                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Noņem sistēmas lietotni, bet** saglabā jūsu DB un konfigurācijas** `~/.omniroute`.                 |
+| `npm run uninstall:full` | Programma AND tiek neatgriezeniski noņemta** dzēš visas konfigurācijas, atslēgas un datu bāzes** . |
 
 > Piezīme. Lai palaistu šīs komandas, dodieties uz OmniRoute projekta mapi (ja to klonējāt) un palaidiet tās. Alternatīvi, ja tā ir instalēta globāli, varat vienkārši palaist `npm uninstall -g omniroute`.
 

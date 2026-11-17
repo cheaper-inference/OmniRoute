@@ -359,7 +359,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다. 작업 디렉터리의 `./.env` 짧은 키 허용 목록(포트, `REQUIRE_API_KEY`, 로케일 및 색상 설정)만 설정할 수 있습니다. 다른 모든 것을 `~/.omniroute/.env` 에 넣으십시오. [CLI 출시 계약을](CLI-LAUNCH-CONTRACTS.md#working-directory-env) 참조하세요.
+CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다. 작업 디렉터리의 `./.env` 짧은 키 허용 목록( 포트가 아닌 `REQUIRE_API_KEY`, 로케일, 시간대 및 색상 설정)만 설정할 수 있습니다. 다른 모든 것을 `~/.omniroute/.env` 에 넣으십시오. [CLI 출시 계약을](CLI-LAUNCH-CONTRACTS.md#working-directory-env) 참조하세요.
 
 ### 트레이 모드
 
@@ -406,7 +406,7 @@ omniroute autostart disable
 
 ### 제거 중
 
-OmniRoute 더 이상 필요하지 않은 경우 완전히 제거할 수 있는 두 가지 빠른 스크립트를 제공합니다.
+OmniRoute 더 이상 필요하지 않은 경우 깔끔하게 제거할 수 있는 두 가지 빠른 스크립트를 제공합니다.
 
 | 명령                     | 행동                                                                          |
 | ------------------------ | ----------------------------------------------------------------------------- |

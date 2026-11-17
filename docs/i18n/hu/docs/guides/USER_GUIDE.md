@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban található `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (portok, `REQUIRE_API_KEY`, területi és színbeállítások); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban lévő `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (`REQUIRE_API_KEY`, locale, időzóna és színbeállítások, nem a portok); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tálca mód
 

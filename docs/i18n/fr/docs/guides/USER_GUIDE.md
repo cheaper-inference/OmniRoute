@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Le CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`. Un `./.env` dans le répertoire de travail ne peut définir qu'une courte liste autorisée de clés (ports, `REQUIRE_API_KEY`, paramètres régionaux et paramètres de couleur) ; mettez tout le reste dans `~/.omniroute/.env`. Voir [les contrats de lancement CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Le CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`. Un `./.env` dans le répertoire de travail ne peut définir qu'une courte liste d'autorisation de clés (paramètres `REQUIRE_API_KEY`, paramètres régionaux, fuseau horaire et couleur, pas les ports) ; mettez tout le reste dans `~/.omniroute/.env`. Voir [les contrats de lancement CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mode bac
 

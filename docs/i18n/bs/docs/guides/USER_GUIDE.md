@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dozvoljenih ključeva (portovi, `REQUIRE_API_KEY`, postavke lokalizacije i boje); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dozvoljenih ključeva (`REQUIRE_API_KEY`, lokalizacija, vremenska zona i postavke boja, ne i portovi); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 
@@ -423,7 +423,7 @@ omniroute autostart disable
 
 Kada vam više ne treba OmniRoute, nudimo dvije brze skripte za čisto uklanjanje:
 
-| Zapovjedi                | Akcija                                                                                |
+| Command                  | Akcija                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------------- |
 | `npm run uninstall`      | Uklanja sistemsku aplikaciju ali** čuva vaše DB i konfiguracije** u `~/.omniroute`.   |
 | `npm run uninstall:full` | Trajno uklanja aplikaciju AND** briše sve konfiguracije, ključeve i baze podataka** . |

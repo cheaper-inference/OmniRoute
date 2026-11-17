@@ -359,7 +359,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (ポート、 `REQUIRE_API_KEY`、ロケール、および色の設定) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
+CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (`REQUIRE_API_KEY`、ロケール、タイム ゾーン、およびカラー設定、ポートではない) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
 
 ### トレイモード
 

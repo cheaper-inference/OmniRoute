@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-El CLI carga automáticamente `.env` desde `~/.omniroute/.env` o `./.env`. Un `./.env` en el directorio de trabajo puede establecer solo una breve lista de claves permitidas (puertos, `REQUIRE_API_KEY`, configuración regional y de color); Pon todo lo demás en `~/.omniroute/.env`. Ver [contratos de lanzamiento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+El CLI carga automáticamente `.env` desde `~/.omniroute/.env` o `./.env`. Un `./.env` en el directorio de trabajo puede establecer solo una breve lista de claves permitidas (`REQUIRE_API_KEY`, configuración regional, zona horaria y color, no los puertos); Pon todo lo demás en `~/.omniroute/.env`. Ver [contratos de lanzamiento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -610,7 +610,7 @@ post_install() {
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`            | Base de punto final de sincronización en la nube URL (reemplaza `CLOUD_URL` heredado)                                                                                         |
 | `API_KEY_SECRET`                        | _(generado automáticamente)_       | Secreto HMAC para las claves API generadas. — se genera automáticamente en la primera ejecución y persiste en `server.env`                                                    |
 | `REQUIRE_API_KEY`                       | `false`                            | Aplicar la clave Bearer API en `/v1/*`                                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores clave API almacenados completos a pedido                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores completos de las claves API almacenadas a pedido                                                         |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                               | Cadencia de actualización del lado del servidor para datos de límites de proveedor almacenados en caché; Los botones de actualización UI aún activan la sincronización manual |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                            | Deshabilite las instantáneas automáticas SQLite antes de writes/import/restore; las copias de seguridad manuales todavía funcionan                                            |
 | `APP_LOG_TO_FILE`                       | `true`                             | Permite la salida de registros de auditoría y aplicaciones al disco                                                                                                           |

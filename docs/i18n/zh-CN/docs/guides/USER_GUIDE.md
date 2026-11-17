@@ -360,7 +360,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI自动从`~/.omniroute/.env`或`./.env`加载`.env` 。工作目录中的`./.env`只能设置一个简短的键允许列表（端口、 `REQUIRE_API_KEY`、区域设置和颜色设置）；将其他所有内容放入`~/.omniroute/.env`中。参见[CLI启动合约](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
+CLI自动从`~/.omniroute/.env`或`./.env`加载`.env` 。工作目录中的`./.env`只能设置一个简短的键允许列表（`REQUIRE_API_KEY`、区域设置、时区和颜色设置，而不是端口）；将其他所有内容放入`~/.omniroute/.env`中。参见[CLI启动合约](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
 ### 托盘模式
 

@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI avtomatik olaraq `.env` `~/.omniroute/.env` və ya `./.env` dən yükləyir. İş qovluğundakı `./.env` açarların yalnız qısa icazəli siyahısını təyin edə bilər (portlar, `REQUIRE_API_KEY`, yerli və rəng parametrləri); qalan hər şeyi `~/.omniroute/.env` a qoyun. [CLI işə salma müqavilələrinə](CLI-LAUNCH-CONTRACTS.md#working-directory-env) baxın.
+CLI avtomatik olaraq `.env` `~/.omniroute/.env` və ya `./.env` dən yükləyir. İş qovluğundakı `./.env` açarların yalnız qısa icazəli siyahısını təyin edə bilər (`REQUIRE_API_KEY`, yerli, saat qurşağı və rəng parametrləri, portlar deyil); qalan hər şeyi `~/.omniroute/.env` a qoyun. [CLI işə salma müqavilələrinə](CLI-LAUNCH-CONTRACTS.md#working-directory-env) baxın.
 
 ### Tabla rejimi
 
