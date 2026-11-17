@@ -16,8 +16,16 @@ import {
   resolveDelayMs,
   requestScopedReplayKey,
   isLocalProcessPressureResponse,
+  classifyQualityFailure,
 } from "./comboPredicates.ts";
 import { readAttemptFailure } from "./attemptFailure.ts";
+import {
+  createRuntimeUnitOutcomes,
+  markSkippedUnitResponse,
+  recordRuntimeUnitFailure,
+  withRuntimeUnitOutcomes,
+} from "./runtimeUnitOutcomes.ts";
+import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
 import {
   isProviderSafetyStreamFailure,
   qualityValidationFailure,
@@ -103,7 +111,11 @@ async function executeModelUnit(args: {
 }): Promise<Response> {
   if (args.isModelAvailable) {
     const available = await args.isModelAvailable(args.unit.modelStr, args.unit);
-    if (available !== true) return errorResponse(503, `Model ${args.unit.modelStr} is unavailable`);
+    if (available !== true) {
+      return markSkippedUnitResponse(
+        errorResponse(503, `Model ${args.unit.modelStr} is unavailable`)
+      );
+    }
   }
   return args.handleSingleModel(args.body, args.unit.modelStr, {
     ...args.unit,
@@ -262,6 +274,8 @@ export async function executeRuntimeUnitCombo(args: {
   };
   const finalFailure = (response: Response): Response =>
     withQuotaExhaustionClassification(response, observedFailure ? allObservedFailuresQuota : null);
+  // Every failed unit's reason, so the all-units-failed message is not only the last unit's.
+  const unitOutcomes = createRuntimeUnitOutcomes();
   // #11462: attempts already made this loop, tracked for the attempt-budget-exceeded
   // diagnostics trace below (mirrors the poolSize/attemptOrder shape combo.ts already
   // attaches for the priority/round-robin strategies).
@@ -298,8 +312,17 @@ export async function executeRuntimeUnitCombo(args: {
         "COMBO",
         `Skipping ${unit.kind} ${unitDisplayName(unit)} — concurrency cap reached`
       );
-      lastResponse = errorResponse(503, `${unitDisplayName(unit)} is at concurrency capacity`);
+      lastResponse = markSkippedUnitResponse(
+        errorResponse(503, `${unitDisplayName(unit)} is at concurrency capacity`)
+      );
       await observeFailure(lastResponse, unit);
+      await recordRuntimeUnitFailure(
+        unitOutcomes,
+        unit.executionKey,
+        unitDisplayName(unit),
+        lastResponse,
+        null
+      );
       if (protectedPriorityUnit) return { response: finalFailure(lastResponse), unit };
       fallbackCount += 1;
       continue;
@@ -339,6 +362,7 @@ export async function executeRuntimeUnitCombo(args: {
         `Trying ${unit.kind} ${unitDisplayName(unit)}${retry > 0 ? ` (retry ${retry})` : ""}`
       );
       let qualityRetryable: boolean | null = null;
+      let qualityOutcome: ComboErrorEntry | null = null;
       const response = await executeRuntimeUnit({
         body: args.body,
         unit,
@@ -431,9 +455,23 @@ export async function executeRuntimeUnitCombo(args: {
         if (quality.upstreamFailure?.requestScoped)
           rejectedModelKeys.add(requestScopedReplayKey(unit.modelStr));
         lastResponse = qualityValidationFailure(quality).response;
+        const qualityFailure = classifyQualityFailure(quality);
+        qualityOutcome = {
+          model: unitDisplayName(unit),
+          status: qualityFailure.status,
+          error: quality.reason || "upstream response failed quality validation",
+          kind: qualityFailure.kind,
+        };
       }
       if (lastResponse) {
         const quotaExhausted = await observeFailure(lastResponse, unit);
+        await recordRuntimeUnitFailure(
+          unitOutcomes,
+          unit.executionKey,
+          unitDisplayName(unit),
+          lastResponse,
+          qualityOutcome
+        );
         if (protectedPriorityUnit) {
           const trust = targetFailureTrust.get(unit.executionKey) ?? {
             observedFailure: false,
@@ -470,7 +508,10 @@ export async function executeRuntimeUnitCombo(args: {
   });
   return {
     response: finalFailure(
-      lastResponse || errorResponse(503, "All nested combo units unavailable")
+      await withRuntimeUnitOutcomes(
+        lastResponse || errorResponse(503, "All nested combo units unavailable"),
+        unitOutcomes
+      )
     ),
     unit: null,
   };

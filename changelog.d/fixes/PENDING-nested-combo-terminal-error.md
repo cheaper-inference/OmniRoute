@@ -1,0 +1,1 @@
+- **fix(combo):** when every unit of a nested combo fails, the error message now lists each unit's reason (an empty reply rejected by quality validation, an HTTP 500, a pre-dispatch skip) instead of only the last unit's, which was often just "Model X is unavailable". Status code, headers, quota classification and diagnostics are unchanged.
