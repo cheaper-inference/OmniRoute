@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                          |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                          |        v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------ | :--------------------: | :---------: | :-------------------: |
 | 🌐 প্রোভাইডার            |          352           |   **358**   |          389          |
 | 🧠 অনন্য চ্যাট মডেল আইডি |          1320          |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 
 </div>
 
-> **v3.8.20 → v3.8.54**-এর সাম্প্রতিক উল্লেখযোগ্য পরিবর্তন। সম্পূর্ণ ইতিহাস [`CHANGELOG.md`](CHANGELOG.md)-এ।
+> **v3.8.20 → v3.8.55**-এর সাম্প্রতিক উল্লেখযোগ্য পরিবর্তন। সম্পূর্ণ ইতিহাস [`CHANGELOG.md`](CHANGELOG.md)-এ।
 
 - **⚖️ `quota-weighted` রাউটিং** — 20তম কম্বো কৌশলটি শেষ হয়ে যাওয়া অ্যাকাউন্টগুলো বাদ দেয়, তারপর অবশিষ্ট অ্যাকাউন্টগুলোর মধ্যে অবশিষ্ট কোটা ÷ ইন-ফ্লাইট লোডের অনুপাতে নির্বাচন করে; বিদ্যমান কথোপকথনগুলো একই অ্যাকাউন্টে পিন করা থাকে। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 হেডলেস মোড** — `omniroute serve --headless` (অথবা `OMNIROUTE_HEADLESS=1`) শুধু `/v1/*` প্রক্সি ইঞ্জিন চালায়, ড্যাশবোর্ড এবং শুধু-ড্যাশবোর্ডের সাবসিস্টেমগুলো বন্ধ রাখে। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` বা peer-dep সংক্রান্ত সতর্কতা দেখছেন? [এগুলো ক্ষতিকর নয়](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 বা পরবর্তী সংস্করণ ব্যবহার করছেন?** অনুমতি না দেওয়া থাকলে npm প্যাকেজের lifecycle script আটকে দিতে পারে। OmniRoute-এর `postinstall` (`node scripts/build/postinstall.mjs`) তার native runtime ফাইল প্রস্তুত করার জন্য প্রয়োজনীয়। গ্লোবালি ইনস্টল করার সময় npm-এর সতর্কবার্তায় উল্লেখ করা প্যাকেজগুলোর অনুমতি দিন। OmniRoute 3.8.54 দ্বারা রিপোর্ট করা প্যাকেজ সেটের জন্য:
+> **npm 11 বা পরবর্তী সংস্করণ ব্যবহার করছেন?** অনুমতি না দেওয়া থাকলে npm প্যাকেজের lifecycle script আটকে দিতে পারে। OmniRoute-এর `postinstall` (`node scripts/build/postinstall.mjs`) তার native runtime ফাইল প্রস্তুত করার জন্য প্রয়োজনীয়। গ্লোবালি ইনস্টল করার সময় npm-এর সতর্কবার্তায় উল্লেখ করা প্যাকেজগুলোর অনুমতি দিন। OmniRoute 3.8.55 দ্বারা রিপোর্ট করা প্যাকেজ সেটের জন্য:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
   <tr><td nowrap><b>রানটাইম</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ভাষা</b></td><td>TypeScript 6.0 — <code>src/</code> এবং <code>open-sse/</code> জুড়ে <b>100% TypeScript</b> (v2.0 থেকে কোরে শূন্য <code>any</code>)</td></tr>
   <tr><td nowrap><b>ফ্রেমওয়ার্ক</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 238টি মাইগ্রেশন</td></tr>
+  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 240টি মাইগ্রেশন</td></tr>
   <tr><td nowrap><b>মেমরি</b></td><td>SQLite FTS5 পূর্ণ-পাঠ্য অনুসন্ধান + int8-কোয়ান্টাইজড ভেক্টর এমবেডিং, টাইপযুক্ত ক্ষয়</td></tr>
   <tr><td nowrap><b>স্কিমা</b></td><td>Zod 4 — MCP টুল I/O ভ্যালিডেশন + API কনট্র্যাক্ট</td></tr>
   <tr><td nowrap><b>প্রোটোকল</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ OmniRoute মহান পূর্বসূরিদের কাঁধের �
 
 **[⬆ শীর্ষে ফিরে যান](#-omniroute)** · ওপেন-সোর্স AI কমিউনিটির জন্য ❤️ দিয়ে তৈরি।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>-এর তৈরি · OmniRoute v3.8.54 · Node ≥22.22.2 · এমআইটি লাইসেন্স · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>-এর তৈরি · OmniRoute v3.8.55 · Node ≥22.22.2 · এমআইটি লাইসেন্স · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- কমিউনিটির প্রশ্নোত্তরের জন্য GitHub Discussions সক্রিয় করা হয়েছে -->

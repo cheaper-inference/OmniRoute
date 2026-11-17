@@ -1077,3 +1077,46 @@ test("rulesets CRUD", async (t) => {
     [created.id]
   );
 });
+
+test("getBranchRules: path, pagination, normalization", async (t) => {
+  const { fake, gh } = await setup(t, { maxPerPage: 2 });
+  const branch = "omni-queue/release-v3.8.54/b1-0123456789ab";
+  const raw = (type, id) => ({
+    type,
+    ruleset_source_type: "Repository",
+    ruleset_source: "acme/widget",
+    ruleset_id: id,
+    parameters: {},
+  });
+  fake.branchRules.set(branch, [
+    raw("creation", 11),
+    raw("update", 11),
+    raw("deletion", 11),
+    raw("non_fast_forward", 11),
+    raw("pull_request", 12),
+  ]);
+  assert.deepEqual(await gh.getBranchRules(branch), [
+    { type: "creation", rulesetId: 11 },
+    { type: "update", rulesetId: 11 },
+    { type: "deletion", rulesetId: 11 },
+    { type: "non_fast_forward", rulesetId: 11 },
+    { type: "pull_request", rulesetId: 12 },
+  ]);
+  const pages = fake.requests.filter((r) => r.path.startsWith("/rules/branches/"));
+  assert.equal(pages.length, 3, "every page is read");
+  assert.ok(pages.every((r) => r.method === "GET"));
+  // The branch name is encoded segment by segment: its slashes stay path separators.
+  assert.ok(pages.every((r) => r.path === `/rules/branches/${branch}`));
+  assert.deepEqual(
+    pages.map((r) => r.query.page ?? "1"),
+    ["1", "2", "3"]
+  );
+
+  // A segment with a character that needs escaping is escaped, the separators are not.
+  fake.requests.length = 0;
+  await gh.getBranchRules("omni-queue/odd name");
+  assert.equal(fake.requests[0].path, "/rules/branches/omni-queue/odd%20name");
+
+  // No rule applies to a name: an empty list, not an error.
+  assert.deepEqual(await gh.getBranchRules("feature/x"), []);
+});

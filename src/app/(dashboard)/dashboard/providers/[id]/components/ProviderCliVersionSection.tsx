@@ -237,7 +237,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
   if (!status) {
     return (
       <Card padding="sm" className="p-5">
-        <h2 className="text-base font-semibold text-text-main mb-1">
+        <h2 className="text-base text-text-main mb-1">
           {providerText(t, "cliVersionSectionTitle", "Advertised CLI client version")}
         </h2>
         <p className="text-xs text-text-muted leading-relaxed">
@@ -257,7 +257,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
 
   return (
     <Card padding="sm" className="p-5">
-      <h2 className="text-base font-semibold text-text-main mb-1">
+      <h2 className="text-base text-text-main mb-1">
         {providerText(t, "cliVersionSectionTitle", "Advertised CLI client version")}
       </h2>
       <p className="text-xs text-text-muted mb-4 leading-relaxed">

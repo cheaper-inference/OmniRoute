@@ -55,6 +55,12 @@
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
 //   fake.rulesets    Map<id, ruleset>
+//   fake.branchRules Map<branch, rawRule[]>   GET /rules/branches/<branch> (the ACTIVE rules that
+//                       apply to that name, paginated). A branch without an entry gets the default:
+//                       the queue-refs ruleset's creation/update/deletion/non_fast_forward (ruleset
+//                       QUEUE_REFS_RULESET_ID) for omni-queue-state and any omni-queue/… name, as
+//                       GitHub matches rules by name pattern (the branch need not exist); nothing
+//                       for other names. fake.unprotect(branch, type) drops one rule from one name.
 //   Git object store (real git blob hashing; tree/commit ids are fake but deterministic):
 //   fake.blobs Map<sha, Buffer>, fake.trees Map<sha, entry[]>, fake.commits Map<sha, commit>,
 //   fake.refs Map<"heads/<branch>", sha>
@@ -81,6 +87,12 @@
 
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
+
+import { CANDIDATE_PREFIX, STATE_BRANCH } from "../../../../scripts/merge-queue/contracts.mjs";
+
+/** Ruleset id of the queue-refs rules every queue ref carries by default (fake.branchRules). */
+export const QUEUE_REFS_RULESET_ID = 4242;
+const QUEUE_REFS_RULE_TYPES = Object.freeze(["creation", "update", "deletion", "non_fast_forward"]);
 
 const json = (status, body, headers = {}) => ({ status, body, headers });
 const notFound = () => json(404, { message: "Not Found" });
@@ -131,6 +143,7 @@ export async function startFakeGitHub(options = {}) {
     merges: [],
     mergeResponses: new Map(),
     rulesets: new Map(),
+    branchRules: new Map(),
     blobs: new Map(),
     trees: new Map(),
     commits: new Map(),
@@ -150,6 +163,24 @@ export async function startFakeGitHub(options = {}) {
     delayMs = 0,
   }) => {
     fake.injections.push({ method, path, status, body, headers, times, apply, delayMs });
+  };
+
+  /** Default active rules of `branch`: the queue-refs ruleset on the queue's own refs. */
+  const defaultBranchRules = (branch) =>
+    branch === STATE_BRANCH || branch.startsWith(CANDIDATE_PREFIX)
+      ? QUEUE_REFS_RULE_TYPES.map((type) => ({
+          type,
+          ruleset_source_type: "Repository",
+          ruleset_source: `${owner}/${repo}`,
+          ruleset_id: QUEUE_REFS_RULESET_ID,
+        }))
+      : [];
+  const branchRulesOf = (branch) => fake.branchRules.get(branch) ?? defaultBranchRules(branch);
+  fake.unprotect = (branch, type) => {
+    fake.branchRules.set(
+      branch,
+      branchRulesOf(branch).filter((rule) => rule.type !== type)
+    );
   };
 
   fake.addPull = (input) => {
@@ -798,6 +829,11 @@ export async function startFakeGitHub(options = {}) {
       },
     ],
 
+    [
+      "GET",
+      /^\/rules\/branches\/(.+)$/,
+      (req, [raw]) => paginated(req, branchRulesOf(decodeURIComponent(raw))),
+    ],
     ["GET", /^\/rulesets$/, (req) => paginated(req, [...fake.rulesets.values()])],
     [
       "GET",

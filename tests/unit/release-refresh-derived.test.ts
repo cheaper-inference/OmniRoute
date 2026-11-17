@@ -20,7 +20,7 @@ import {
   refreshI18nStateEntry,
   sha256,
 } from "../../scripts/release/lib/derived-mirrors.mjs";
-import { serializeFacts } from "../../scripts/release/facts.mjs";
+import { loadFactsSnapshot, serializeFacts } from "../../scripts/release/facts.mjs";
 
 const roots: string[] = [];
 afterEach(() => {
@@ -448,10 +448,34 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
   const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
   const LOCALES = ["pt-BR", "fa"];
 
+  // The README database row (better-sqlite3 + LowDB, untranslated in every mirror) carries the
+  // migrations claim the gate rewrites; fa writes the count in Persian digits. Any OTHER line that
+  // happens to show the same number makes the mirror carry ambiguous, and the refresh then
+  // correctly asks for a manual edit (v3.8.55 cut, 2026-11-16: "240 migrations" next to
+  // "240 by Dependabot" in the PR census). Those coincidental lines are left out, so the outcome
+  // depends on the carry logic, not on what else the live docs happen to say.
+  const isDatabaseRow = (l: string) =>
+    l.includes("<td nowrap><b>") && l.includes("better-sqlite3") && l.includes("LowDB");
+  const toDigits = (n: number, zero: number) =>
+    String(n).replace(/\d/g, (d) => String.fromCodePoint(zero + Number(d)));
+  function withoutCoincidences(text: string, count: number) {
+    const forms = [String(count), toDigits(count, 0x6f0), toDigits(count, 0x660)];
+    const same = new RegExp(`(?<![\\d۰-۹٠-٩])(?:${forms.join("|")})(?![\\d۰-۹٠-٩])`);
+    return text
+      .split("\n")
+      .filter((l) => isDatabaseRow(l) || !same.test(l))
+      .join("\n");
+  }
+
   function realFixture(opts: { staleLocale?: string } = {}) {
-    const files: Record<string, string> = { "README.md": realFile("README.md") };
-    for (const l of LOCALES)
-      files[`docs/i18n/${l}/README.md`] = realFile(`docs/i18n/${l}/README.md`);
+    const count = Number((loadFactsSnapshot(REPO) as Record<string, unknown>).migrations);
+    const doc = (rel: string) => {
+      const text = realFile(rel);
+      assert.ok(text.split("\n").some(isDatabaseRow), `${rel}: the database row is missing`);
+      return withoutCoincidences(text, count);
+    };
+    const files: Record<string, string> = { "README.md": doc("README.md") };
+    for (const l of LOCALES) files[`docs/i18n/${l}/README.md`] = doc(`docs/i18n/${l}/README.md`);
     const src = sha256(files["README.md"]);
     const locales: Record<string, object> = {};
     for (const l of LOCALES) {
@@ -487,7 +511,13 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
     assert.ok(!readme.includes(`${before} migrations`), "README lost the old count");
     for (const l of LOCALES) {
       const mirror = read(root, `docs/i18n/${l}/README.md`)!;
-      assert.notEqual(mirror, realFile(`docs/i18n/${l}/README.md`), `${l} mirror rewritten`);
+      const input = withoutCoincidences(realFile(`docs/i18n/${l}/README.md`), before);
+      assert.notEqual(mirror, input, `${l} mirror rewritten`);
+      assert.match(
+        mirror,
+        new RegExp(`${before + 1}|${toDigits(before + 1, 0x6f0)}`),
+        `${l} mirror carries the new count`
+      );
     }
     const state = JSON.parse(read(root, ".i18n-state.json")!);
     const entry = state.sources["README.md"];
@@ -627,5 +657,62 @@ describe("phase-4/5 steps", () => {
     assert.equal(r.steps.find((s) => s.id === "e2e-timings")?.status, "changed");
     assert.ok(r.changedFiles.includes("config/quality/e2e-timings.json"));
     assert.equal(refreshExitCode(r, { check: true }), 1);
+  });
+
+  it("verify-generated: skipped in --check; after a write both gates run in release mode", async () => {
+    const root = tree({
+      "scripts/check/check-generated-artifacts.mjs": "// stub\n",
+      "scripts/skills/generate-agent-skills.mjs": "// stub\n",
+    });
+    const calls: string[][] = [];
+    const ok = (args: string[]) => {
+      calls.push(args);
+      return { status: 0, stdout: "", stderr: "", failure: null };
+    };
+
+    const checked = await refreshDerived({
+      root,
+      check: true,
+      only: ["verify-generated"],
+      runNode: ok,
+    });
+    assert.equal(checked.steps.find((s) => s.id === "verify-generated")?.status, "skipped");
+    assert.equal(calls.length, 0, "--check writes nothing, so nothing is verified");
+
+    const written = await refreshDerived({ root, only: ["verify-generated"], runNode: ok });
+    assert.equal(written.steps.find((s) => s.id === "verify-generated")?.status, "clean");
+    assert.deepEqual(calls, [
+      ["--import", "tsx/esm", "scripts/check/check-generated-artifacts.mjs", "--mode=release"],
+      ["--import", "tsx/esm", "scripts/skills/generate-agent-skills.mjs", "--mode=release"],
+    ]);
+    assert.equal(refreshExitCode(written, { check: false }), 0);
+
+    const stale = await refreshDerived({
+      root,
+      only: ["verify-generated"],
+      runNode: (args: string[]) =>
+        args[2].includes("generated-artifacts")
+          ? {
+              status: 1,
+              stdout: "",
+              stderr: "docs/diagrams/readme-hero.svg is stale",
+              failure: null,
+            }
+          : { status: 0, stdout: "", stderr: "", failure: null },
+    });
+    const step = stale.steps.find((s) => s.id === "verify-generated")!;
+    assert.equal(step.status, "failed");
+    assert.match(
+      step.detail,
+      /check:generated-artifacts \(exit 1\): docs\/diagrams\/readme-hero\.svg is stale/
+    );
+    assert.equal(refreshExitCode(stale, { check: false }), 2);
+
+    const partial = await refreshDerived({ root, only: ["readme-diagrams"], runNode: ok });
+    assert.equal(
+      partial.steps.find((s) => s.id === "verify-generated")?.status,
+      "skipped",
+      "a partial refresh (--only) leaves the other artifacts alone, so it is not verified"
+    );
   });
 });
