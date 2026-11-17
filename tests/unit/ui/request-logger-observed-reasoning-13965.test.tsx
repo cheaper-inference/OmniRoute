@@ -39,7 +39,8 @@ vi.mock("@/store/emailPrivacyStore", () => ({
   default: () => ({ emailsVisible: true }),
 }));
 
-const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail")).default;
+const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail"))
+  .RequestLoggerDetailPanel;
 const { formatReasoningStat } = await import("@/shared/utils/formatting");
 
 let container: HTMLElement;

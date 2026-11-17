@@ -1,0 +1,1 @@
+- **fix(search):** When automatic search selection fails over from a rate-limited chat key to another search provider, later searches no longer call the rate-limited key again for two minutes. Chat keeps using the key. ([#19541](https://github.com/cheaper-inference/OmniRoute/pull/19541))

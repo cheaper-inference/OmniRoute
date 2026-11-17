@@ -15,7 +15,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const RequestLoggerDetail = (await import("../../../src/shared/components/RequestLoggerDetail.tsx"))
-  .default;
+  .RequestLoggerDetailPanel;
 
 let container: HTMLElement;
 let root: Root;
@@ -55,6 +55,7 @@ async function renderDetail(detail: Record<string, unknown>) {
         detail={{ ...log, requestBody: REQUEST_BODY_WITH_A_TURN, ...detail }}
         loading={false}
         debugEnabled={false}
+        initialTab="conversation"
         onClose={noop}
         onCopy={async () => true}
       />

@@ -85,7 +85,7 @@ function StatCard({
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold">
         {label}
       </div>
-      <div className={`text-2xl font-bold tabular-nums leading-tight ${color}`}>{value}</div>
+      <div className={`text-2xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
     </div>
   );
 }
@@ -545,11 +545,10 @@ export default function QuotaSharePageClient() {
         )}
         {selectedGroupId !== "all" && selectedGroupId !== "group-demo" && (
           <Button
-            variant="ghost"
+            variant="destructive-ghost"
             size="sm"
             icon="delete"
             onClick={() => void handleDeleteGroup()}
-            className="hover:text-error"
           >
             {t("deleteGroup")}
           </Button>
