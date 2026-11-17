@@ -1,0 +1,1 @@
+- Return the shared provider accounts in the usage command JSON (`?format=json`) only to keys with `self:account-quota` or a management scope, the same rule `/v1/me/status` uses; other keys get their personal quota only (thanks @Witroch4).
