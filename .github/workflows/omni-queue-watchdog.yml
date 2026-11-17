@@ -2,11 +2,14 @@ name: omni-queue watchdog
 
 # The queue's dead-man switch (docs/ops/OMNI_QUEUE.md). Every 30 minutes it reads each base's
 # state file on the omni-queue-state branch and keeps ONE issue,
-# "omni-queue: the queue is not making progress", open while a base that ticks should be visiting
-# has saved no state for more than 90 minutes, a stalled episode's dashboard comment has not been
-# posted 30 minutes after it opened, or a state file cannot be read (not JSON, fails
-# validateState, or its document is for a base the queue does not manage or for a base stored in
-# another file); it keeps the body up to date, closes the issue once nothing holds, and reopens it
+# "omni-queue: the queue is not making progress", open while one of its signals holds: a base that
+# ticks should be visiting (work: in flight, a pause, a stored land-status withdrawal, a labeled
+# PR) has saved no state for more than 90 minutes; a managed base that labeled PRs target has no
+# state file, and the newest update of those PRs is more than 90 minutes old; a stalled episode's
+# dashboard comment has not been posted 30 minutes after it opened; a state file cannot be read
+# (not JSON, fails validateState, or its document is for a base the queue does not manage or for a
+# base stored in another file); or the queue's config does not load or validate (then nothing else
+# is judged, the issue is never closed by that run, and the run fails); it keeps the body up to date, closes the issue once nothing holds, and reopens it
 # if something holds again within 24 hours (scripts/merge-queue/watchdog.mjs). A failed read of
 # the open labeled PRs or of a state file is not a signal: the run is partial. A partial run may
 # still open or reopen the issue for what it did establish, never closes it or rewrites its body,

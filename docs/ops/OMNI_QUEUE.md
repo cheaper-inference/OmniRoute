@@ -310,14 +310,16 @@ In live mode:
   checks the limit (it blesses nothing), so a count carried from live mode never pauses a shadow
   tick.
 - **A per-PR merge call of `squash-api` that fails** is a verdict, `merge-failed`, and the base is
-  paused with reason `error`, except for a rate limit. The GitHub client retries a rate-limited
-  call within its own limits (4 retries, waits of at most 120 seconds); when they run out,
-  `landSquashApi` keeps the client's mark on its result, and the tick handles it as a landing
-  without a verdict (the item above): the status is withdrawn, the tick fails with
-  `landing <batchId> hit a rate limit (<detail>)`, nothing is paused, no token hint is added, and
-  the attempt counts. The PRs merged before the limit are on the base; the next tick finds the base
-  moved and recomposes the others. For any other refused merge, the token hint is decided on the
-  text of the pause detail: with `actor: "owner"` a detail that says `rate limit` never gets
+  paused with reason `error`, except for a rate limit on the first merge call. The GitHub client
+  retries a rate-limited call within its own limits (4 retries, waits of at most 120 seconds); when
+  they run out, `landSquashApi` keeps the client's mark on its result. When nothing was merged yet,
+  the tick handles it as a landing without a verdict (the item above): the status is withdrawn, the
+  tick fails with `landing <batchId> hit a rate limit (<detail>)`, nothing is paused, no token hint
+  is added, and the attempt counts. When a PR of the batch was merged before the limit, the base
+  holds part of the batch: the base is paused with reason `error`, the `merge-failed` detail and the
+  `error` event name the merged PRs, and no token hint is added (the mark says it is a rate limit).
+  For any other refused merge, the token hint is decided on the text of the pause detail: with
+  `actor: "owner"` a detail that says `rate limit` never gets
   `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`; any other 401 or 403 gets it.
 
 The land token is fine-grained and valid for 90 days: write the date it expires next to the secret
@@ -400,9 +402,13 @@ What it means: a PR enters a batch only when each check in `prChecksRequired` (`
 `Gate / Quality` and `API Route Typecheck` in the shipped config) is green on its current head.
 `API Route Typecheck` (`.github/workflows/api-route-typecheck.yml`) runs on every pull request to
 `main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened` and
-`ready_for_review`: a head on which it never ran (a draft, or a head pushed before the workflow
-existed) reads `API Route Typecheck missing` and waits like any other gate that is not green; a new
-push or marking the draft ready runs it. Nothing is done about it: the
+`ready_for_review` (a draft pull request runs it too). A head on which it never ran reads
+`API Route Typecheck missing` and waits like any other gate that is not green. It stays missing for
+good in three cases: the pull request's base was changed from a branch outside `main` and
+`release/**` (a base change, `edited`, is not one of the workflow's event types), a fork's run that
+waits for a maintainer's approval, and a head with merge conflicts (GitHub runs no `pull_request`
+workflow then). What to do: push a commit (or close and reopen the pull request), approve the
+fork's run, or resolve the conflict. Nothing is done about it by the queue: the
 label stays, no comment is posted, and the PR becomes eligible by itself once its gates turn green.
 The reason is computed by every tick and shown on the dashboard only; it is never stored in the
 state. `npm run queue -- why <PR>` reads the PR gates the same way and prints each gate's state, so
@@ -502,7 +508,11 @@ lanes.
   is dropped and the `base-red` pause stays as it was, with one `error` event
   (`<batchId>: base repair #<n> failed for infrastructure after <k> retry(ies) (<detail>): dropped; the base-red pause stays`);
   the PR keeps its labels, so the lane composes it again, as a new candidate, in the same tick or
-  a later one.
+  a later one, until that head has been dropped `infraRetries` + 1 times on the base tip the pause
+  names (`repairInfraDrops` in the state). Then the lane stops composing it until the PR's head
+  changes or the base moves; removing and re-adding the base-repair label does not retry it. The PR
+  gets one comment (key `repair-infra:<head12>:<base12>`; not in shadow mode), and the dashboard
+  shows `Base repair #<n> stopped: its CI failed for infrastructure <d> times on base <sha12> (head <sha12>); the lane tries it again when its head or the base moves.`
 - **A repair that does not repair.** A repair candidate that fails like the base (classified
   base-red) is recorded in the state field `repairTried` (PR number → head SHA), and that head is
   never composed again. A base that was not paused yet is paused as `base-red`. In live mode the PR
@@ -843,6 +853,7 @@ it is needed:
 | `landWithdrawalsOverflow`               | the same, for refusals that found `landWithdrawals` full                                                                              | below                                                                |
 | `batchWindow`                           | the adaptive batch size                                                                                                               | [Batch selection](#batch-selection)                                  |
 | `repairTried`                           | base-repair heads that failed like the base (PR number → head SHA)                                                                    | [Batch selection](#batch-selection)                                  |
+| `repairInfraDrops`                      | infrastructure drops of a base-repair head under a base-red pause (PR number → `head`, `baseSha`, `drops`)                            | [The two lanes](#the-two-lanes-lanes)                                |
 | `failedTicks`, `failedSince`, `stalled` | the count of failed ticks in a row, and the open stalled episode (with `stalled.quietTicks` while an episode of failed ticks is held) | [Health](#health)                                                    |
 | `landingsWithoutVerdict`                | the base's run of landings that ended without a verdict (`count`, `since`)                                                            | [Health](#health)                                                    |
 
@@ -924,6 +935,8 @@ the body changed (the `Last change` footer line aside). From top to bottom:
   with entries in `landWithdrawalsOverflow` (a tick replaces it with the full-list pause). While
   `landWithdrawalsOverflow` holds entries, the banner says a resume is refused and how many
   entries remain;
+- under a `base-red` pause, one line per base repair its lane stopped composing (see [The two
+  lanes](#the-two-lanes-lanes));
 - the stored land-status withdrawals, when either list holds entries:
   `Stored land-status withdrawals (retried on every tick): <n> in landWithdrawals, <m> in landWithdrawalsOverflow.`;
 - **In flight**: the batch or base check, its lane, stage, start and infra retries, the candidate
@@ -975,8 +988,12 @@ refused withdrawal) do not count.
 (`since`, `reasons`, `openedAt`), one `queue-stalled` event whose detail lists the reasons, and one
 comment on the dashboard issue that mentions the approvers. Until that comment is posted
 (`notified` in `stalled`), every tick, completed or failed, tries again; a failed tick creates the
-dashboard issue when there is none. While the episode lasts nothing more is raised, even if its
-reasons change. A completed tick whose verdict is not stalled ends it (the field goes), except an
+dashboard issue when there is none. While the episode lasts, a reason that only changes its words or
+numbers raises nothing. A cause of another kind (the rule that fired: a pause of a given reason, a
+candidate in flight, eligible PRs waiting, failed ticks, a stored withdrawal, landings without a
+verdict; `kinds` in `stalled`) that begins after the episode opened opens a new episode: its own
+`queue-stalled` event and comment, keyed by that cause's start (an error pause during an episode of
+failed ticks, a withdrawal refused for an hour during a long pause). A completed tick whose verdict is not stalled ends it (the field goes), except an
 episode that failed ticks opened (its reasons name `ticks in a row failed`): that one ends only after
 two completed ticks in a row found no stall (`STALL_CLEAR_COMPLETED_TICKS` in
 `scripts/merge-queue/tick.mjs`; `quietTicks` in `stalled` counts them, and a failed tick or a
@@ -1149,7 +1166,9 @@ wait, with the number of overflow entries, instead of how to resume. A `base-red
 by itself, never stands together with overflow entries: the queue never writes both, and a tick that
 loads both (a hand-edited state) replaces the `base-red` pause with the full-list pause before
 anything could lift it or bless its repair lane; that pause lifts only through a resume, under the
-rule above.
+rule above. A repair that a tick finds already landed at its start (its landing save was lost) is
+recorded before that replacement, and does not lift the `base-red` pause while the overflow holds
+entries either.
 
 The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
 file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
@@ -1865,9 +1884,13 @@ What you see, in live mode, on the repair PR: a comment that starts "🔴 omni-q
 base-repair lane of `<base>`, but its candidate failed with the same failures as the base". The two
 ways out are in [The two lanes](#the-two-lanes-lanes). A repair whose CI fails for infrastructure
 after its retries is dropped and the `base-red` pause stays (an `error` event that ends
-`dropped; the base-red pause stays`); the lane composes the repair again, a new candidate, so an
-Actions outage costs one candidate per `infraRetries` + 1 runs until it ends or the base moves, and
-after 120 minutes the `base-red` pause is a stalled queue. An `error` pause reached while a repair is
+`dropped; the base-red pause stays`); the lane composes the repair again, a new candidate, at most
+`infraRetries` + 1 times for the same head on the same base tip (two candidates of two runs each with
+the shipped `infraRetries: 1`). Then it stops, says so once on the PR ("the CI of this base repair
+failed for infrastructure <d> times …") and on the dashboard, and the `base-red` pause, which
+becomes a stalled queue after 120 minutes, stays. What to do: check the Actions status and the
+repair's runs; once the outage is over, push a commit to the repair PR (a new head is tried again)
+or land the fix by hand (bless its head, then merge it), which moves the base. An `error` pause reached while a repair is
 in flight (a landing that cannot go on, a full withdrawal list) replaces the `base-red` pause, as for
 any batch. After the resume the repair is
 taken again; if it lands there is no `resumed` event `base repaired by #<n>`, because no `base-red`
@@ -2021,6 +2044,9 @@ more than an hour, and three landings in a row without a verdict. What the watch
 whose ticks stopped saving, a base with labeled PRs and no state file, an undelivered alert, an
 unreadable state file and an invalid config.
 
+One comment per episode, and a new episode for each new kind of cause that begins while one is open
+(see [Health](#health)): a pause for an error during a run of failed ticks is told on its own.
+
 What still tells nobody (each shows on the dashboard or in the history only):
 
 - a labeled PR that waits on `pr-checks-not-green`, `approval-missing`, `label-not-by-approver` or
@@ -2032,7 +2058,12 @@ What still tells nobody (each shows on the dashboard or in the history only):
 - the watchdog's own workflow failing before its script runs (a broken workflow file, a lost
   runner): only its red scheduled runs show it;
 - a person closing a dashboard issue: nothing is told until the base's state stops moving, then the
-  watchdog reports it after 90 minutes.
+  watchdog reports it after 90 minutes;
+- a cause of a kind the open episode already carries, or one that began before that episode
+  opened (it is in the episode's comment only when it held when the episode opened);
+- a base repair the lane stopped composing after its infrastructure drops: one comment on its PR
+  (not in shadow mode) and the dashboard line; the `base-red` pause itself is a stall after 120
+  minutes.
 
 ### The queue stalled
 
@@ -2152,8 +2183,9 @@ that is not a success, a moved base or a tree divergence: `rejected` (the push w
 ruleset, a protected-branch hook or another server-side rule, or the base was missing at the
 landing's own read), `not-descendant` (a local check before any push: the stored base is not an
 ancestor of the candidate) or, with `squash-api`, `merge-failed` (GitHub refused one PR's merge; the
-PRs merged before it are on the base and named on the `error` event; a rate limit is not a refusal:
-it is retried, see [Who lands](#who-lands-landingactor)). The status written for the
+PRs merged before it are on the base and named on the `error` event; a rate limit on the first merge
+call is not a refusal: it is retried, see [Who lands](#who-lands-landingactor); one after a PR of the
+batch merged pauses here, without the token hint). The status written for the
 landing was withdrawn. Read the detail: for `rejected`, check the rules GitHub enforces on the base
 (the landing-path check of `apply-ruleset.mjs --kind release` lists the rules of other rulesets that
 block the landing actor, see [Ruleset](#ruleset)); for `merge-failed`, look at the PR GitHub
@@ -2344,8 +2376,8 @@ What you see, from `npm run queue -- pause|resume|bless`:
   withdrawals GitHub refused during that tick are not stored. Check the land status of the commits
   that tick blessed (its log names them) and withdraw by hand where needed (the last resort of
   [Paused: landWithdrawals is full](#paused-landwithdrawals-is-full)).
-- `state of <base> changed during the tick` as a failed tick's error: three ticks in a row lost the
-  compare-and-swap of the state save (the log shows
+- `state of <base> changed during the tick` as a failed tick's error: one run redid its tick three
+  times, and each attempt lost the compare-and-swap of the state save (the log shows
   `omni-queue <base>: state changed during the tick, redoing it (<n>/3)` before); `main()` records
   the error. Something else writes `omni-queue-state` (a second writer, an edit by hand while the
   queue is enabled): find it.
@@ -2484,8 +2516,10 @@ In this order; each step works in the state the step before it leaves:
    (the rulesets have no bypass actor), so those release branches accept no merge and no push at
    all. Either delete the `omni-queue release protection: <base>` rulesets now (Settings → Rules →
    Rulesets) and restore "Require PR on default branch" if it was removed, or set
-   OMNI_QUEUE_ENABLED back to `true` so that the rolled-back queue runs and blesses again. Do one
-   of the two before anything else has to reach a release branch.
+   OMNI_QUEUE_ENABLED back to `true`: the rolled-back config is in `shadow` mode, where no batch is
+   blessed, so each change that has to reach a release branch then needs its head blessed by an
+   approver (`npm run queue -- bless <base> --sha <head> --reason "<text>"`) before it is merged.
+   Do one of the two before anything else has to reach a release branch.
 
 Rolling forward again goes the same way: the release rulesets absent (re-apply them afterwards,
 [Cut-over and rollback](#cut-over-and-rollback), step 6) or the head blessed while a queue runs,
@@ -2508,7 +2542,8 @@ the state, and what the code before them does with each:
 | `inFlight.freezeHold`                                                  | carries it along unchanged                                                                        | nothing                                                                                                                                                                                                                                                | nothing: the first tick that does not hold the batch closes it                                                                                                                |
 | `repairTried`                                                          | ignores it, never prunes it, never composes a repair alone                                        | nothing                                                                                                                                                                                                                                                | nothing: the first tick prunes it                                                                                                                                             |
 | `landingsWithoutVerdict`                                               | ignores it, carries it along and never deletes it                                                 | nothing                                                                                                                                                                                                                                                | remove it: the first new tick would count on from the old run (a stall at 3)                                                                                                  |
-| `stalled.quietTicks`                                                   | ignores it                                                                                        | nothing                                                                                                                                                                                                                                                | nothing (the row of `stalled` applies)                                                                                                                                        |
+| `stalled.quietTicks`, `stalled.kinds`                                  | ignores them                                                                                      | nothing                                                                                                                                                                                                                                                | nothing (the row of `stalled` applies)                                                                                                                                        |
+| `repairInfraDrops`                                                     | ignores it: a repair dropped for infrastructure pauses the base (`infra`) as any batch            | nothing                                                                                                                                                                                                                                                | nothing: the first tick prunes the entries of closed PRs and changed heads                                                                                                    |
 | stored withdrawals as work                                             | does not visit a base whose only work is a stored withdrawal, nor does its watchdog judge it      | nothing more than step 1, which empties both lists                                                                                                                                                                                                     | nothing                                                                                                                                                                       |
 
 `pr-checks-not-green` is never stored, so it needs nothing.
