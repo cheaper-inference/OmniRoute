@@ -44,7 +44,7 @@ import {
   extractComfyOutputFiles,
   resolveComfyUiBaseUrl,
 } from "../utils/comfyuiClient.ts";
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../utils/remoteMediaFetch.ts";
 import {
   FetchTimeoutError,
   fetchWithTimeout,
@@ -852,6 +852,7 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+      signal,
     });
   }
 

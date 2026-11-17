@@ -133,9 +133,33 @@ describe("ApiKeyFilterDropdown", () => {
 });
 
 describe("CustomRangePicker", () => {
+  // The picker is a kit Popover around its trigger (UI review 2026-11-15, defect 16).
+  const picker = (props: Partial<React.ComponentProps<typeof CustomRangePicker>> = {}) => (
+    <CustomRangePicker open onOpenChange={() => {}} start="" end="" onApply={() => {}} {...props}>
+      <button type="button">Custom</button>
+    </CustomRangePicker>
+  );
+
+  it("is closed until opened, and opens in a portaled kit Popover anchored to its trigger", () => {
+    wrap(picker({ open: false }));
+    const trigger = screen.getByRole("button", { name: "Custom" });
+    expect(screen.queryByText("Quick Select")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    cleanup();
+
+    const opened = wrap(picker());
+    const panel = document.querySelector<HTMLElement>('[data-slot="popover-content"]')!;
+    expect(panel).not.toBeNull();
+    expect(panel.classList.contains("ci-popover")).toBe(true);
+    expect(opened.container.contains(panel)).toBe(false);
+    expect(screen.getByRole("button", { name: "Custom" }).getAttribute("aria-expanded")).toBe(
+      "true"
+    );
+  });
+
   it("renders presets and labelled kit fields; apply stays disabled until the range is valid", () => {
     const onApply = vi.fn();
-    wrap(<CustomRangePicker start="" end="" onApply={onApply} onClose={() => {}} />);
+    wrap(picker({ onApply }));
     expect(screen.getByText("Quick Select")).toBeTruthy();
     const start = screen.getByLabelText("Start") as HTMLInputElement;
     const end = screen.getByLabelText("End") as HTMLInputElement;
@@ -157,7 +181,7 @@ describe("CustomRangePicker", () => {
   });
 
   it("fills both fields from a preset", () => {
-    wrap(<CustomRangePicker start="" end="" onApply={() => {}} onClose={() => {}} />);
+    wrap(picker());
     fireEvent.click(screen.getByRole("button", { name: "Today" }));
     expect((screen.getByLabelText("Start") as HTMLInputElement).value).not.toBe("");
     expect((screen.getByLabelText("End") as HTMLInputElement).value).not.toBe("");
@@ -166,13 +190,19 @@ describe("CustomRangePicker", () => {
     );
   });
 
-  it("closes through Cancel, Escape and an outside click", () => {
-    const onClose = vi.fn();
-    wrap(<CustomRangePicker start="" end="" onApply={() => {}} onClose={onClose} />);
+  it("closes through Cancel, Escape and an outside press", async () => {
+    const onOpenChange = vi.fn();
+    wrap(picker({ onOpenChange }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     fireEvent.keyDown(document, { key: "Escape" });
-    fireEvent.mouseDown(document.body);
-    expect(onClose).toHaveBeenCalledTimes(3);
+    // Radix arms its outside-press listener one tick after the panel mounts.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    // A whole press: Radix dismisses on the click that follows an outside pointerdown.
+    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
+    expect(onOpenChange.mock.calls).toEqual([[false], [false], [false]]);
   });
 });
 

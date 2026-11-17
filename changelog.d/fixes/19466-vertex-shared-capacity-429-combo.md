@@ -1,0 +1,1 @@
+- **fix(vertex):** a Vertex shared-capacity "Resource exhausted. Please try again later." 429 no longer locks the model inside a combo, so a regional spike does not take healthy targets out of rotation. ([#19466](https://github.com/cheaper-inference/OmniRoute/pull/19466))
