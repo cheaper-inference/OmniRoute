@@ -20,6 +20,8 @@ interface ModelGate {
   max: number;
   queue: QueueItem[];
   rateLimitedUntil: number | null;
+  /** Pending cooldown drain timeouts, tracked so resetAll() can clear them. */
+  cooldownTimers?: ReturnType<typeof setTimeout>[];
 }
 
 interface AcquireOptions {
@@ -58,6 +60,7 @@ function getGate(modelStr: string, maxConcurrency = 3): ModelGate {
       max: maxConcurrency,
       queue: [],
       rateLimitedUntil: null,
+      cooldownTimers: [],
     });
   }
   const gate = gates.get(modelStr)!;
@@ -197,13 +200,21 @@ export function markRateLimited(modelStr: string, cooldownMs: number): void {
   // A shorter cooldown must not shorten an active limit — keep the later expiry.
   gate.rateLimitedUntil = Math.max(gate.rateLimitedUntil ?? 0, Date.now() + cooldownMs);
 
-  // Schedule drain after cooldown expires
-  setTimeout(() => {
+  // Schedule drain after cooldown expires and track timer for cleanup
+  const timer = setTimeout(() => {
     if (gate.rateLimitedUntil && Date.now() >= gate.rateLimitedUntil) {
       gate.rateLimitedUntil = null;
       drainQueue(modelStr);
     }
+    // Remove from tracking after execution
+    if (gate.cooldownTimers) {
+      const idx = gate.cooldownTimers.indexOf(timer);
+      if (idx >= 0) gate.cooldownTimers.splice(idx, 1);
+    }
   }, cooldownMs + 50); // +50ms buffer
+  // A long cooldown must not keep the process alive on its own.
+  timer.unref?.();
+  gate.cooldownTimers?.push(timer);
 }
 
 /**
@@ -235,6 +246,12 @@ export function resetAll(): void {
     for (const item of gate.queue) {
       clearTimeout(item.timer);
       item.reject(new Error("Semaphore reset"));
+    }
+    // Clear all cooldown timers
+    if (gate.cooldownTimers) {
+      for (const timer of gate.cooldownTimers) {
+        clearTimeout(timer);
+      }
     }
   }
   gates.clear();

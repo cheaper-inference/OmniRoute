@@ -1,0 +1,1 @@
+- **fix(providers):** replacing a connection's API key in the dashboard now clears the old key's quota pause, in the running server and after a restart, so the new key is not skipped as exhausted. ([#19426](https://github.com/cheaper-inference/OmniRoute/pull/19426))

@@ -12,10 +12,10 @@ const { default: ErrorPageScaffold } = await import("@/shared/components/ErrorPa
 afterEach(() => cleanup());
 
 // #18068: the two CTAs were hand-styled links (`px-6 py-3 rounded-lg bg-primary …`); they are
-// kit buttons now, rendered as links through `buttonVariants`.
+// kit buttons now, rendered as links through the client Button boundary.
 describe("ErrorPageScaffold CTAs", () => {
   it("renders the primary and secondary actions as kit button links", () => {
-    const { getByRole } = render(
+    const { getByRole, getAllByRole, queryByRole } = render(
       <ErrorPageScaffold
         code="404"
         title="Not found"
@@ -24,6 +24,9 @@ describe("ErrorPageScaffold CTAs", () => {
         secondaryAction={{ href: "/status", label: "Status" }}
       />
     );
+    expect(getByRole("main", { name: "Not found" })).toBeTruthy();
+    expect(getAllByRole("link")).toHaveLength(2);
+    expect(queryByRole("button")).toBeNull();
     const primary = getByRole("link", { name: "Dashboard" });
     const secondary = getByRole("link", { name: "Status" });
     expect(primary.getAttribute("href")).toBe("/dashboard");

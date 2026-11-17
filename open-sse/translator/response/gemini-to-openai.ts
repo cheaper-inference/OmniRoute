@@ -25,6 +25,7 @@ type GeminiToOpenAIState = {
   hasEmittedContent?: boolean;
   messageId: string;
   model: string;
+  emittedCallIndexes?: Map<string, number>;
   pendingThoughtSignature?: string | null;
   signatureNamespace?: string | null;
   toolCalls: Map<number, unknown>;
@@ -271,7 +272,24 @@ function emitFunctionCallPart(
     normalizeToolCallArgs(part.functionCall.args || {}),
     state.clientTools
   );
+  // Some providers re-send a growing snapshot of the same function call on
+  // later chunks (id stays stable, args carry the full history so far).
+  // Emitting each snapshot as a fresh tool call duplicates the delta stream:
+  // clients concatenate per-index arguments and reassemble corrupted JSON
+  // (#19183). The first occurrence carries the complete call, and a serialized
+  // snapshot can never prefix-extend a complete JSON object (the closing
+  // brace shifts), so there is no valid incremental-delta representation for
+  // a repeat: it is dropped (same rule as the CLOVA translator's
+  // terminal-frame dedup). Each provider call therefore surfaces exactly once.
+  const providerCallId = part.functionCall.id;
+  const hasProviderCallId = typeof providerCallId === "string" && providerCallId.length > 0;
+  if (hasProviderCallId && (state.emittedCallIndexes ??= new Map()).has(providerCallId)) {
+    return;
+  }
   const toolCallIndex = state.functionIndex++;
+  if (hasProviderCallId) {
+    state.emittedCallIndexes!.set(providerCallId, toolCallIndex);
+  }
   const toolCall = {
     id: buildToolCallId(part.functionCall, fcName, toolCallIndex),
     index: toolCallIndex,
