@@ -152,7 +152,7 @@ function ModelNode({ data }: { data: ModelNodeData }) {
       className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-bg font-mono text-[10px] transition-all duration-300 cursor-pointer max-w-[136px] motion-reduce:[&_.animate-ping]:hidden"
       style={{
         borderColor: active ? color : "var(--color-border)",
-        boxShadow: active ? `0 0 10px ${color}40` : "none",
+        boxShadow: active ? `0 0 10px ${flowColorAlpha(color, 25)}` : "none",
         color: active ? color : "var(--color-text-muted)",
       }}
       title={label}
@@ -449,7 +449,7 @@ function ModelModeToolbar({
             aria-pressed={selected}
             title={t(hintKey)}
             onClick={() => onChange(mode)}
-            className={`px-2 py-0.5 rounded font-semibold transition-colors ${
+            className={`px-2 py-0.5 rounded transition-colors ${
               selected ? "bg-primary text-accent-foreground" : "text-text-muted hover:bg-bg-subtle"
             }`}
           >

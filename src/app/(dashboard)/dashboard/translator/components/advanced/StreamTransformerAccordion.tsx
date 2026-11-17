@@ -328,7 +328,7 @@ export default function StreamTransformerAccordion({
                   {/* Raw SSE input */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-text-main">
+                      <h3 className="text-sm text-text-main">
                         {translateOrFallback("rawChatSseInput", "Raw chat completions SSE")}
                       </h3>
                       <Button
@@ -356,7 +356,7 @@ export default function StreamTransformerAccordion({
                   {/* Transformed SSE output */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-text-main">
+                      <h3 className="text-sm text-text-main">
                         {translateOrFallback(
                           "transformedResponsesSse",
                           "Transformed Responses API SSE"
@@ -409,7 +409,7 @@ export default function StreamTransformerAccordion({
             {/* Event timeline */}
             <Card>
               <div className="p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-text-main">
+                <h3 className="text-sm text-text-main">
                   {translateOrFallback("transformedEventTimeline", "Transformed event timeline")}
                 </h3>
 
@@ -423,6 +423,7 @@ export default function StreamTransformerAccordion({
                 ) : (
                   <Table
                     scrollbarLabel={translateOrFallback("eventType", "Event type")}
+                    scrollLabel={translateOrFallback("eventType", "Event type")}
                     className="text-sm"
                     containerClassName="rounded-none border-0"
                   >
