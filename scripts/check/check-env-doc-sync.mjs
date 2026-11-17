@@ -99,6 +99,8 @@ const IGNORE_FROM_CODE = new Set([
   "ELECTRON_RUN_AS_NODE",
   "NODE_TEST_CONTEXT",
   "VITEST",
+  // Jest worker id: a test-runner signal read by the test-process check, like the two above.
+  "JEST_WORKER_ID",
   // Instruction snippet shown to users (Traffic Inspector HttpProxySnippetCard) — not OmniRoute config.
   "NODE_TLS_REJECT_UNAUTHORIZED",
   // Claude Code's own auth env var — read from the CLI environment to detect
