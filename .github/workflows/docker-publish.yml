@@ -897,6 +897,30 @@ jobs:
           short-description: "OmniRoute — Unified AI proxy. Route any LLM through one endpoint."
           readme-filepath: ./README.md
 
+  # Second Docker Hub repository, owned by the Cheaper Inference organization. Docker Hub cannot
+  # move a repository between namespaces, so diegosouzapw/omniroute (and its pull history) keeps
+  # receiving every image above and the release is copied here from GHCR, same manifests.
+  # Released versions only (not main/next). Without the DOCKERHUB_ORG_* secrets the called job
+  # skips with a warning and stays green, so a missing org credential never blocks a release;
+  # republish later with a workflow_dispatch of docker-org-mirror.yml (copy only, no rebuild).
+  mirror-org-dockerhub:
+    name: Mirror to the Docker Hub org
+    needs: [prepare, merge]
+    if: >-
+      !cancelled() && github.event_name != 'schedule' &&
+      needs.merge.result == 'success' &&
+      needs.prepare.outputs.version != 'main' && needs.prepare.outputs.version != 'next' &&
+      (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+    permissions:
+      contents: read
+    uses: ./.github/workflows/docker-org-mirror.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      promote_latest: ${{ needs.prepare.outputs.promote_latest == 'true' }}
+    secrets:
+      DOCKERHUB_ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
+      DOCKERHUB_ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+
   # #14560: alert when the only omni-build runner goes offline. Mirrors the
   # nightly-release-green issue loop: open a deduplicated tracking issue when
   # no online runner carries the label, comment with fresh evidence while it

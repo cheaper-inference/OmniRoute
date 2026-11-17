@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Field } from "@omniroute/ui-kit/field";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
@@ -428,6 +429,8 @@ function ImageResults({ data }: { data: any }) {
 export default function MediaPageClient() {
   const t = useTranslations("media");
   const tc = useTranslations("common");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [activeTab, setActiveTab] = useState<Modality>("image");
   const [prompt, setPrompt] = useState("");
 
@@ -705,6 +708,7 @@ export default function MediaPageClient() {
       onChange={(next) => switchTab(next as Modality)}
       className="gap-6"
     >
+      <PageHeader compact title={tSidebar("media")} description={tHeader("mediaDescription")} />
       {/* Modality Tabs */}
       <SegmentedControl
         semantics="tabs"
@@ -934,7 +938,7 @@ export default function MediaPageClient() {
           <Card padding="md">
             <div className="flex items-center gap-2 mb-4">
               <Icon name={config.icon} size={20} className="text-primary" />
-              <h3 className="text-sm font-medium text-text-main">{t("result")}</h3>
+              <h3 className="text-sm text-text-main">{t("result")}</h3>
               <span className="text-xs text-text-muted ml-auto">
                 {new Date(result.timestamp).toLocaleTimeString()}
               </span>

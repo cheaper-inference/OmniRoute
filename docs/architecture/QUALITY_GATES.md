@@ -366,7 +366,9 @@ The commands behind it:
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
-  the last release) and `llm-mirrors`. The
+  the last release), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
+  and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only`
+  leaves it out; a failure is exit 2). The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
   never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
   would change or a managed value needs a manual edit (listing both); exit 2 on an
@@ -709,14 +711,16 @@ PRs rewrote `PROVIDER_REFERENCE.md`, 26–28 rewrote the README diagrams).
 **The guard.** `check:pr-derived-paths` (job `pr-test-policy`) fails a feature PR that touches a
 file of a family in `config/quality/derived-paths/`:
 
-| Family      | Files                                                                                                                                              | Rewritten by                                                                          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `generated` | `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
-| `baselines` | `config/quality/e2e-timings.json`                                                                                                                  | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                  |
+| Family      | Files                                                                                                                                                                                   | Rewritten by                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                       | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
 
 Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is
 a PR that changes only one family plus its companions (for `generated`: the generator scripts, their
-tests and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG. A `SKILL.md` with a
+tests, the agent-skill inputs — `src/shared/constants/agentSkills.ts`, the hand-written `skills/**`
+docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG,
+or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a
 hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
 editable next to a feature.
 

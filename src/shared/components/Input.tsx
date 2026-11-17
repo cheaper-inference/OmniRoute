@@ -19,6 +19,13 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
   suffix?: React.ReactNode;
   /** Kit control height: `default` or the compact `sm`. */
   size?: InputSize;
+  /**
+   * Classes for the kit `Field` wrapper around the label, the control and the message: its place
+   * in the layout (`flex-1`, `w-40`, `md:col-span-2`). Text or box classes written here do not
+   * reach the control — use `inputClassName` (tests/unit/input-adapter-classname-destination.test.ts).
+   */
+  className?: string;
+  /** Classes for the `<input>` itself (`text-xs`, `text-right`, a fixed height…). */
   inputClassName?: string;
 }
 

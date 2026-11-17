@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                     |          v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
+|                                     |          v3.8.50          | **v3.8.51** |       `v3.8.55+`       |
 | ----------------------------------- | :-----------------------: | :---------: | :--------------------: |
 | 🌐 Mga provider                     |            352            |   **358**   |          389           |
 | 🧠 Mga natatanging ID ng chat model |           1320            |  **1374**   |          1491          |
@@ -580,7 +580,7 @@ Ang Radar ay opt-in at GET-only. Hindi nag-a-upload ang OmniRoute client ng mga 
 
 </div>
 
-> Mga kamakailang tampok mula **v3.8.20 → v3.8.54**. Makikita ang buong kasaysayan sa [`CHANGELOG.md`](CHANGELOG.md).
+> Mga kamakailang tampok mula **v3.8.20 → v3.8.55**. Makikita ang buong kasaysayan sa [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` na routing** — nilalaktawan ng ika-20 combo strategy ang mga account na ubos na, pagkatapos ay pumipili sa natitira ayon sa proporsyon ng natitirang quota ÷ kasalukuyang load, habang nananatiling naka-pin ang mga kasalukuyang conversation. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — pinapatakbo ng `omniroute serve --headless` (o `OMNIROUTE_HEADLESS=1`) ang `/v1/*` proxy engine lamang, habang naka-off ang dashboard at mga subsystem na para lamang sa dashboard. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Nakakakita ng `npm warn ERESOLVE` o mga babala tungkol sa peer dependency? [Hindi nakapipinsala ang mga ito](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Gumagamit ng npm 11 o mas bago?** Maaaring harangan ng npm ang mga package lifecycle script maliban kung pinahintulutan ang mga ito. Kinakailangan ang `postinstall` ng OmniRoute (`node scripts/build/postinstall.mjs`) upang ihanda ang mga native runtime file nito. Pahintulutan ang mga package na nakasaad sa babala ng npm kapag nag-i-install nang global. Para sa package set na iniulat ng OmniRoute 3.8.54:
+> **Gumagamit ng npm 11 o mas bago?** Maaaring harangan ng npm ang mga package lifecycle script maliban kung pinahintulutan ang mga ito. Kinakailangan ang `postinstall` ng OmniRoute (`node scripts/build/postinstall.mjs`) upang ihanda ang mga native runtime file nito. Pahintulutan ang mga package na nakasaad sa babala ng npm kapag nag-i-install nang global. Para sa package set na iniulat ng OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula noong v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 domain module, 238 migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 domain module, 240 migration</td></tr>
   <tr><td nowrap><b>Memorya</b></td><td>Full-text ng SQLite FTS5 + mga vector embedding na naka-quantize sa int8, may type na pagkabulok</td></tr>
   <tr><td nowrap><b>Mga Schema</b></td><td>Zod 4 — pagpapatunay ng I/O ng MCP tool + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ Lisensya ng MIT - tingnan ang [LICENSE](LICENSE) para sa mga detalye.
 
 **[⬆ Bumalik sa itaas](#-omniroute)** · Binuo nang may ❤️ para sa open-source na komunidad ng AI.
 
-<sub>Ginawa ni <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Lisensya ng MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ginawa ni <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Lisensya ng MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Pinagana ang GitHub Discussions para sa mga tanong at sagot ng komunidad -->

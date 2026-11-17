@@ -104,7 +104,7 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
                 <Checkbox checked={selected.has(idx)} onChange={() => onToggleRow(idx)} />
               </TableCell>
               <TableCell className="font-mono text-text-muted">{entry.provider}</TableCell>
-              <TableCell className="font-medium text-text-main">{entry.name}</TableCell>
+              <TableCell className="text-text-main">{entry.name}</TableCell>
               <TableCell className="text-text-muted">{entry.baseUrl || "—"}</TableCell>
             </TableRow>
           ))}
