@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                                          |         v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Soláthraithe                          |           352           |   **358**   |          389          |
 | 🧠 Aitheantóirí uathúla samhlacha comhrá |          1320           |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 
 </div>
 
-> Buaicphointí le déanaí ó **v3.8.20 → v3.8.54**. An stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
+> Buaicphointí le déanaí ó **v3.8.20 → v3.8.55**. An stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Ródú `quota-weighted`** — seachnaíonn an 20ú straitéis teaglaim cuntais ídithe, ansin roghnaíonn sí i measc na cinn eile i gcomhréir le cuóta fágtha ÷ ualach eitilte, agus coinníonn sí comhráite atá ann cheana ceangailte. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mód gan cheann** — ritheann `omniroute serve --headless` (nó `OMNIROUTE_HEADLESS=1`) inneall seachfhreastalaí `/v1/*` amháin, agus an painéal agus na fochórais atá teoranta don phainéal múchta. → [Mód gan Cheann](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 An bhfeiceann tú `npm warn ERESOLVE` nó rabhaidh faoi spleáchais chomhghleacaithe? [Tá siad neamhdhíobhálach](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **An bhfuil npm 11 nó níos nuaí á úsáid agat?** Féadfaidh npm scripteanna shaolré na bpacáistí a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dhúchasacha ama rite a ullmhú. Ceadaigh na pacáistí atá ainmnithe i rabhadh npm agus tú á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.54:
+> **An bhfuil npm 11 nó níos nuaí á úsáid agat?** Féadfaidh npm scripteanna shaolré na bpacáistí a bhlocáil mura gceadaítear iad. Tá `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) riachtanach chun a chomhaid dhúchasacha ama rite a ullmhú. Ceadaigh na pacáistí atá ainmnithe i rabhadh npm agus tú á suiteáil go domhanda. Maidir leis an tacar pacáistí a thuairiscigh OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1305,7 +1305,7 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ar fud <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroílár ó v2.0)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 238 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 240 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
   <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/A uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1818,7 +1818,7 @@ Ceadúnas MIT - féach ar [LICENSE](LICENSE) le haghaidh sonraí.
 
 **[⬆ Ar ais go dtí an barr](#-omniroute)** · Tógtha le ❤️ don phobal AI foinse oscailte.
 
-<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Tá GitHub Discussions cumasaithe le haghaidh Ceisteanna agus Freagraí an phobail -->

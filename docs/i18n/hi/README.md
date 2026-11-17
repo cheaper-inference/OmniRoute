@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                           |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                           |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 प्रदाता                |            352            |   **358**   |          389          |
 | 🧠 अद्वितीय चैट मॉडल IDs  |           1320            |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ Radar ऑप्ट-इन और केवल-GET है। OmniRoute क्ल�
 
 </div>
 
-> **v3.8.20 → v3.8.54** के हालिया मुख्य आकर्षण। पूरा इतिहास [`CHANGELOG.md`](CHANGELOG.md) में।
+> **v3.8.20 → v3.8.55** के हालिया मुख्य आकर्षण। पूरा इतिहास [`CHANGELOG.md`](CHANGELOG.md) में।
 
 - **⚖️ `quota-weighted` routing** — 20वीं कॉम्बो रणनीति समाप्त हो चुके खातों को छोड़ देती है, फिर शेष खातों में बचे हुए कोटा ÷ सक्रिय लोड के अनुपात में चयन करती है और मौजूदा वार्तालापों को उसी खाते से जोड़े रखती है। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (या `OMNIROUTE_HEADLESS=1`) केवल `/v1/*` प्रॉक्सी इंजन चलाता है और डैशबोर्ड तथा केवल-डैशबोर्ड सबसिस्टम बंद रखता है। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` या peer-dep चेतावनियाँ दिख रही हैं? [वे हानिरहित हैं](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 या उसके बाद का संस्करण इस्तेमाल कर रहे हैं?** npm पैकेज lifecycle scripts को तब तक रोक सकता है, जब तक उन्हें अनुमति न दी जाए। OmniRoute का `postinstall` (`node scripts/build/postinstall.mjs`) इसकी native runtime files तैयार करने के लिए आवश्यक है। globally इंस्टॉल करते समय npm की चेतावनी में बताए गए पैकेजों को अनुमति दें। OmniRoute 3.8.54 द्वारा रिपोर्ट किए गए पैकेज सेट के लिए:
+> **npm 11 या उसके बाद का संस्करण इस्तेमाल कर रहे हैं?** npm पैकेज lifecycle scripts को तब तक रोक सकता है, जब तक उन्हें अनुमति न दी जाए। OmniRoute का `postinstall` (`node scripts/build/postinstall.mjs`) इसकी native runtime files तैयार करने के लिए आवश्यक है। globally इंस्टॉल करते समय npm की चेतावनी में बताए गए पैकेजों को अनुमति दें। OmniRoute 3.8.55 द्वारा रिपोर्ट किए गए पैकेज सेट के लिए:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1303,7 +1303,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 भी इसे 
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> और <code>open-sse/</code> में <b>100% TypeScript</b> (v2.0 से कोर में शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ़्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगेसी) — 147 डोमेन मॉड्यूल, 238 माइग्रेशन</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगेसी) — 147 डोमेन मॉड्यूल, 240 माइग्रेशन</td></tr>
   <tr><td nowrap><b>मेमोरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वांटाइज़्ड वेक्टर एम्बेडिंग, टाइपित क्षय</td></tr>
   <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O सत्यापन + API अनुबंध</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1816,7 +1816,7 @@ MIT License - विवरण के लिए [LICENSE](LICENSE) देखे�
 
 **[⬆ शीर्ष पर वापस जाएँ](#-omniroute)** · ओपन-सोर्स AI समुदाय के लिए ❤️ से निर्मित।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारा निर्मित · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारा निर्मित · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- समुदाय के प्रश्नोत्तर के लिए GitHub Discussions सक्षम हैं -->

@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                             |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                                             |        v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------------------------- | :--------------------: | :---------: | :-------------------: |
 | 🌐 Palveluntarjoajat                        |          352           |   **358**   |          389          |
 | 🧠 Yksilölliset keskustelumallien tunnukset |          1320          |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 
 </div>
 
-> Viimeaikaiset kohokohdat versiosta **v3.8.20 → v3.8.54**. Täydellinen historia tiedostossa [`CHANGELOG.md`](CHANGELOG.md).
+> Viimeaikaiset kohokohdat versiosta **v3.8.20 → v3.8.55**. Täydellinen historia tiedostossa [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` -reititys** — 20. yhdistelmästrategia ohittaa loppuun käytetyt tilit ja arpoo jäljelle jääneiden joukosta suhteessa jäljellä olevaan kiintiöön ÷ käynnissä olevaan kuormaan, pitäen olemassa olevat keskustelut kiinnitettyinä. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Pääteetön tila** — `omniroute serve --headless` (tai `OMNIROUTE_HEADLESS=1`) suorittaa vain `/v1/*`-välityspalvelinkoneiston ja poistaa käytöstä hallintapaneelin sekä vain hallintapaneelissa käytettävät alijärjestelmät. → [Pääteetön tila](docs/guides/HEADLESS.md)
@@ -1024,7 +1024,7 @@ omniroute
 ```
 
 > 💡 Näetkö `npm warn ERESOLVE`- tai peer-riippuvuuksien varoituksia? [Ne ovat harmittomia](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Käytätkö versiota npm 11 tai uudempaa?** npm saattaa estää pakettien elinkaarikomentosarjat, ellei niitä sallita. OmniRouten `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan sen natiivien runtime-tiedostojen valmistelemiseen. Salli npm:n varoituksessa nimetyt paketit asentaessasi paketteja globaalisti. OmniRoute 3.8.54:n ilmoittamalle pakettijoukolle:
+> **Käytätkö versiota npm 11 tai uudempaa?** npm saattaa estää pakettien elinkaarikomentosarjat, ellei niitä sallita. OmniRouten `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan sen natiivien runtime-tiedostojen valmistelemiseen. Salli npm:n varoituksessa nimetyt paketit asentaessasi paketteja globaalisti. OmniRoute 3.8.55:n ilmoittamalle pakettijoukolle:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1304,7 +1304,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Ajoympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ytimessä ei yhtään <code>any</code>-tyyppiä versiosta v2.0 alkaen)</td></tr>
   <tr><td nowrap><b>Kehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-legacy) — 147 toimialamoduulia, 238 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-legacy) — 147 toimialamoduulia, 240 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisointia käyttävät vektoriupotukset, tyypitetty vanheneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1817,7 +1817,7 @@ MIT-lisenssi – katso lisätietoja tiedostosta [LICENSE](LICENSE).
 
 **[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️:lla avoimen lähdekoodin tekoäly-yhteisöä varten.
 
-<sub>Tekijä: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Tekijä: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub-keskustelut käytössä yhteisön kysymyksiä ja vastauksia varten -->
