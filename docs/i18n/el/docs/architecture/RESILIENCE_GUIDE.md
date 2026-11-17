@@ -558,13 +558,13 @@ concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, προε
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-όλοι οι στόχοι παραλείφθηκαν + προσωρινό κλείδωμα μοντέλου:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → αναμονή → εκ νέου αποστολή
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← παλαιότερη λήξη προσωρινού κλειδώματος
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  χωρίς προσωρινή υπόδειξη → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

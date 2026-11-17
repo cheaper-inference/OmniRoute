@@ -512,13 +512,13 @@ Gemini (حدود ۶۰ ثانیه retry-after) را در ترکیبهای چند�
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-همه هدفها رد شدند + قفل موقت مدل:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → انتظار → dispatch مجدد
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← زودترین زمان انقضای قفل موقت
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  بدون hint موقت → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

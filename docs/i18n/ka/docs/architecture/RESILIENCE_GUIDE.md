@@ -531,13 +531,13 @@ auth და not-found lock-ები კვლავ ტოვებს მი�
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-ყველა target გამოტოვებულია + transient model lockout:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → ლოდინი → ხელახალი dispatch
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ყველაზე ადრე ამოწურვადი transient lock-ის დრო
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  transient hint-ის გარეშე → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---
