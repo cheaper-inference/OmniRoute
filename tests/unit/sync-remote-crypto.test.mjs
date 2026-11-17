@@ -9,7 +9,7 @@ import { join } from "node:path";
 // does not protect a standalone `node --test` invocation.
 const dataDir = mkdtempSync(join(tmpdir(), "omniroute-sync-data-"));
 process.env.DATA_DIR = dataDir;
-process.env.OMNIROUTE_DISABLE_KEYCHAIN = "1";
+process.env.OMNIROUTE_CONTEXT_KEYCHAIN_DISABLED = "1";
 
 const { decryptFile, encryptFile } = await import("../../bin/cli/commands/sync-remote.mjs");
 

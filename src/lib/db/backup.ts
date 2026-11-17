@@ -27,6 +27,21 @@ import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 
 type CountRow = { cnt?: number };
 
+/**
+ * Issue #20418: strip high-volume, non-portable tables from a copied SQLite
+ * database so a portable export stays small. This lives in the db layer because
+ * routes must not execute raw SQL (Hard Rule #5).
+ */
+export async function stripPortableHistory(dbPath: string): Promise<void> {
+  const { default: BetterSqlite3 } = await import("better-sqlite3");
+  const db = new BetterSqlite3(dbPath);
+  try {
+    db.exec("DELETE FROM usage_history; DELETE FROM call_logs; VACUUM;");
+  } finally {
+    db.close();
+  }
+}
+
 // ──────────────── Backup Config ────────────────
 
 let _lastBackupAt = 0;

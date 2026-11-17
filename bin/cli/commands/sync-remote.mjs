@@ -65,6 +65,7 @@ async function promptHidden(question) {
       const text = chunk.toString("utf8");
       if (text === "\u0003") {
         cleanup();
+        process.stdout.write("\n");
         reject(new Error("cancelled"));
         return;
       }
@@ -150,6 +151,15 @@ export function decryptFile(srcPath, destPath, passphrase) {
 
 function fileHash(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
+}
+
+/** Refuse to encrypt/upload anything that is not a real SQLite database. */
+function assertSqlite(path) {
+  const buf = readFileSync(path);
+  const header = buf.subarray(0, 16).toString("latin1");
+  if (buf.length < 100 || header !== "SQLite format 3\u0000") {
+    throw new Error("export is not a SQLite database; refusing to upload");
+  }
 }
 
 function run(cmd, args, maxBuffer) {
@@ -266,6 +276,7 @@ export async function runSyncRemotePush(options = {}) {
     const sqlite = join(staging, "storage.sqlite");
     const exportCode = await runSyncExportSqlite(sqlite, opts);
     if (exportCode !== 0) return exportCode;
+    assertSqlite(sqlite);
     const { envelopePath, version } = buildEnvelope(sqlite, passphrase, staging);
     upload(envelopePath, config);
     writeState({ ...readState(), lastPushedVersion: version });
@@ -296,9 +307,13 @@ export async function runSyncRemotePull(options = {}) {
     if (envelope.version && envelope.version !== version) {
       throw new Error("bundle checksum mismatch; refusing to import");
     }
-    // Snapshot the current database before the import overwrites it.
-    const snapshot = join(staging, "pre-remote-restore.sqlite");
-    await runSyncExportSqlite(snapshot, opts);
+    // Snapshot the current database to a persistent path before the import overwrites it.
+    const backupsDir = join(resolveDataDir(), "backups");
+    mkdirSync(backupsDir, { recursive: true });
+    const snapshot = join(backupsDir, `pre-remote-restore-${Date.now()}.sqlite`);
+    const snapshotCode = await runSyncExportSqlite(snapshot, opts);
+    if (snapshotCode !== 0) throw new Error("pre-restore snapshot failed; aborting pull");
+    console.log(`Pre-restore snapshot: ${snapshot}`);
     const code = await runSyncImport(sqlite, {}, opts);
     if (code === 0) {
       writeState({ ...readState(), lastPushedVersion: version });
