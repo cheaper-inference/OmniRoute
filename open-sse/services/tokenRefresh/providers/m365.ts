@@ -6,7 +6,25 @@ import {
 } from "../../../executors/copilot-m365-connection.ts";
 import type { ProviderCredentials } from "../../../executors/base.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import {
+  isProviderBlocked,
+  recordRefreshFailure,
+  recordRefreshSuccess,
+} from "../circuitBreaker.ts";
 import { extractOAuthErrorCode, type RefreshLogger } from "../shared.ts";
+
+/**
+ * #19433: `unauthorized_client` means the tenant rejects the client, not that the refresh
+ * token is dead, so it no longer deactivates the account. Without a bound, every chat request
+ * on an expiring connection would redeem the grant again. The shared token-refresh breaker
+ * caps it per connection: after this many consecutive rejections, no token-endpoint call
+ * until the cooldown ends.
+ */
+export const M365_CLIENT_CONFIG_REFRESH_MAX_ATTEMPTS = 3;
+export const M365_CLIENT_CONFIG_REFRESH_COOLDOWN_MS = 30 * 60 * 1000;
+const M365_CLIENT_CONFIG_ERROR = "unauthorized_client";
+// Own breaker key: chatCore's reactive breaker for this provider counts other failures.
+const M365_CLIENT_CONFIG_BREAKER = "copilot-m365-web:client-config";
 
 function invalidM365RoutingPath(psd: Record<string, unknown>, path: string): boolean {
   const hasPath =
@@ -66,9 +84,24 @@ export async function refreshM365Token(
   if (routingTenant === null) {
     return { error: "unrecoverable_refresh_error", code: "invalid_tenant" };
   }
+  const breaker = {
+    connectionId: typeof credentials?.connectionId === "string" ? credentials.connectionId : "",
+    scope: "connection" as const,
+    failureThreshold: M365_CLIENT_CONFIG_REFRESH_MAX_ATTEMPTS,
+    cooldownMs: M365_CLIENT_CONFIG_REFRESH_COOLDOWN_MS,
+  };
+  if (isProviderBlocked(M365_CLIENT_CONFIG_BREAKER, breaker)) {
+    return { error: M365_CLIENT_CONFIG_ERROR };
+  }
   const result = await runWithProxyContext(proxyConfig, () =>
     refreshM365AccessToken(refreshToken, routingTenant, log ?? undefined)
   );
+  // Only a client rejection counts toward the cap; any other answer ends the streak.
+  if ("error" in result && result.error === M365_CLIENT_CONFIG_ERROR) {
+    recordRefreshFailure(M365_CLIENT_CONFIG_BREAKER, breaker, log);
+  } else {
+    recordRefreshSuccess(M365_CLIENT_CONFIG_BREAKER, breaker);
+  }
   if ("error" in result) {
     const code = extractOAuthErrorCode(result);
     if (code || result.error === "invalid_tenant") {

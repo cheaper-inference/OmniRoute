@@ -33,6 +33,7 @@
 
 import { getDbInstance } from "./core";
 import { readCallArtifact } from "../usage/callLogArtifacts";
+import { isEncryptedReasoningOmissionMarker } from "../logPayloads";
 
 export type ResponsesContinuationState = {
   input: unknown[];
@@ -156,9 +157,28 @@ function extractContinuationState(
   // response OmniRoute had just served and cost the client a full resend.
   const status = clientResponse?.summary?.status ?? clientResponse?.status;
   if (clientResponse?._truncated === true && status !== "completed") return null;
-  if (output.length === 0) return null;
+  const replayableOutput = withoutOmittedEncryptedReasoning(output);
+  if (replayableOutput.length === 0) return null;
 
-  return { input, output };
+  return { input: withoutOmittedEncryptedReasoning(input), output: replayableOutput };
+}
+
+/**
+ * The stored copy holds a marker instead of encrypted reasoning (the ciphertext is not kept
+ * on disk). Replaying it would send the marker upstream as `encrypted_content`, so the marker
+ * is removed. A reasoning item left with no plaintext and no summary has nothing to replay and
+ * is dropped.
+ */
+function withoutOmittedEncryptedReasoning(items: unknown[]): unknown[] {
+  return items.flatMap((item) => {
+    if (!isPlainRecord(item) || !isEncryptedReasoningOmissionMarker(item.encrypted_content)) {
+      return [item];
+    }
+    const { encrypted_content: _marker, ...rest } = item;
+    const hasContent = Array.isArray(rest.content) && rest.content.length > 0;
+    const hasSummary = Array.isArray(rest.summary) && rest.summary.length > 0;
+    return hasContent || hasSummary ? [rest] : [];
+  });
 }
 
 type PendingContinuationEntry = {

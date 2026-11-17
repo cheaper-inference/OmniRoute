@@ -1,0 +1,1 @@
+- Resolve the MCP compression-store principal from the key the transport authenticated, and stop falling back to the environment key for HTTP callers.
