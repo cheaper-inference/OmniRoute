@@ -49,6 +49,28 @@ test("static media registry models are selectable for a configured provider with
   assert.ok(transcription, "a configured provider's static audio model must be selectable");
 });
 
+test("native sound and music models expose their capability tags in the builder", async () => {
+  await providersDb.createProviderConnection({
+    provider: "elevenlabs",
+    authType: "apikey",
+    name: "elevenlabs-combo-media",
+    apiKey: "elevenlabs-key-combo-media",
+    isActive: true,
+    testStatus: "active",
+  });
+
+  const payload = await getComboBuilderOptions();
+  const provider = payload.providers.find((entry) => entry.providerId === "elevenlabs");
+  assert.ok(provider, "configured ElevenLabs must appear in the combo builder");
+  assert.deepEqual(
+    provider.models.find((model) => model.id === "eleven_text_to_sound_v2")?.supportedEndpoints,
+    ["audio-generation"]
+  );
+  assert.deepEqual(provider.models.find((model) => model.id === "music_v1")?.supportedEndpoints, [
+    "music",
+  ]);
+});
+
 test("default chat metadata on a legacy custom row does not erase static image metadata", async () => {
   await modelsDb.addCustomModel(
     "openrouter",

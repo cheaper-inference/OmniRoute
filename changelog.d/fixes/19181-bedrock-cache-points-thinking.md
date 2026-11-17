@@ -1,0 +1,1 @@
+- **fix(bedrock):** Bedrock Converse requests now carry `cachePoint` blocks for client `cache_control` markers (system, user, assistant and tool turns; at most 4, latest kept), so Claude and Nova prompt caching works through `bedrock/*`, and `reasoning_effort` / Claude `thinking` map to `additionalModelRequestFields` with the same rules as the Claude translator

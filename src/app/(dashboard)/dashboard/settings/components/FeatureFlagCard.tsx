@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Badge, Button, Card, Select, Spinner, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import Tooltip from "@/shared/components/Tooltip";
 
 interface FeatureFlagCardProps {
   flag: {
@@ -157,21 +158,13 @@ export default function FeatureFlagCard({
           {flag.description}
         </p>
       ) : (
-        <div className="group/desc relative">
-          <p
-            aria-describedby={`desc-tooltip-${flag.key}`}
-            className="mb-3 cursor-help line-clamp-2 text-xs text-text-muted"
-          >
+        // `contents` keeps the kit wrapper out of the layout; the paragraph is focusable so the
+        // full text also opens from the keyboard.
+        <Tooltip content={flag.description} position="bottom" multiline className="contents">
+          <p tabIndex={0} className="mb-3 cursor-help line-clamp-2 text-xs text-text-muted">
             {flag.description}
           </p>
-          <div
-            id={`desc-tooltip-${flag.key}`}
-            role="tooltip"
-            className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-3rem)] rounded-lg border border-border bg-surface p-3 text-xs leading-relaxed text-text-main opacity-0 shadow-lg transition-opacity duration-150 group-hover/desc:visible group-hover/desc:opacity-100"
-          >
-            {flag.description}
-          </div>
-        </div>
+        </Tooltip>
       )}
 
       <EnvPrecedenceWarning flag={flag} text={t("ccDiscoveryAliasesEnvWarning")} />

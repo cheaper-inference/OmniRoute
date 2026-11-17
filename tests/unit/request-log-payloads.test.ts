@@ -547,7 +547,11 @@ test("structured SSE collector preserves event order and marks truncation", () =
   // Each collected event now also carries an ISO `timestamp` field (#5834 observability),
   // which enlarges per-event bytes. Give the byte budget enough headroom so truncation
   // here is driven by maxEvents (drop 1 of 3), which is what this test verifies.
-  const collector = createStructuredSSECollector({ maxEvents: 2, maxBytes: 2000 });
+  const collector = createStructuredSSECollector({
+    maxEvents: 2,
+    maxBytes: 2000,
+    retainEvents: true,
+  });
 
   collector.push({ type: "response.created", id: "r1" });
   collector.push({ type: "response.output_text.delta", delta: "hi" });
@@ -566,7 +570,10 @@ test("structured SSE collector preserves event order and marks truncation", () =
 });
 
 test("builds compact OpenAI stream summary for detailed logs", () => {
-  const collector = createStructuredSSECollector({ stage: "provider_response" });
+  const collector = createStructuredSSECollector({
+    stage: "provider_response",
+    retainEvents: true,
+  });
 
   collector.push({
     id: "chatcmpl_1",
@@ -609,7 +616,10 @@ test("builds compact OpenAI stream summary for detailed logs", () => {
 });
 
 test("builds compact Claude stream summary for detailed logs", () => {
-  const collector = createStructuredSSECollector({ stage: "provider_response" });
+  const collector = createStructuredSSECollector({
+    stage: "provider_response",
+    retainEvents: true,
+  });
 
   collector.push({
     type: "message_start",
@@ -654,7 +664,10 @@ test("builds compact Claude stream summary for detailed logs", () => {
 });
 
 test("builds compact OpenAI summary with reasoning alias (delta.reasoning)", () => {
-  const collector = createStructuredSSECollector({ stage: "provider_response" });
+  const collector = createStructuredSSECollector({
+    stage: "provider_response",
+    retainEvents: true,
+  });
 
   collector.push({
     id: "chatcmpl_r1",

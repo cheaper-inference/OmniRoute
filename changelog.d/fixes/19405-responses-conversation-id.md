@@ -1,0 +1,1 @@
+- **fix(translator):** Responses requests sent to a strict non-OpenAI Chat Completions upstream no longer carry the unknown `conversation_id` key, which such upstreams rejected with a 400. OpenAI and Codex upstreams still get it. ([#19405](https://github.com/cheaper-inference/OmniRoute/pull/19405))

@@ -89,7 +89,14 @@ export default function RetrievePreview({ result }: Props) {
           {totalTokensUsed.toLocaleString()} / {budgetMaxTokens.toLocaleString()}{" "}
           {t("playground.tokensUsed")}
         </span>
-        <div className="h-1.5 w-24 rounded-full bg-border overflow-hidden">
+        <div
+          role="progressbar"
+          aria-label={t("playground.tokensUsed")}
+          aria-valuemin={0}
+          aria-valuemax={Math.max(1, budgetMaxTokens)}
+          aria-valuenow={Math.min(totalTokensUsed, Math.max(1, budgetMaxTokens))}
+          className="h-1.5 w-24 rounded-full bg-border overflow-hidden"
+        >
           <div
             className="h-full rounded-full bg-primary"
             style={{
