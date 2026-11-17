@@ -88,6 +88,20 @@ export function oidcIdentityForApiKeyId(apiKeyId: string): string | null {
 }
 
 /**
+ * Reverse lookup for internal consumers that must resolve a shadow key's
+ * credential by id (e.g. the batch worker) without bypassing the public
+ * secret redaction (`redactSsoSecret`). Deliberately prefix-free so Entra
+ * shadow keys (raw GUID oids) resolve too. Never expose the secret over HTTP.
+ */
+export function ssoOidForApiKeyId(apiKeyId: string): string | null {
+  const db = getDbInstance();
+  const row = db
+    .prepare("SELECT oid FROM sso_identities WHERE api_key_id = ? LIMIT 1")
+    .get(apiKeyId) as { oid?: unknown } | undefined;
+  return typeof row?.oid === "string" ? row.oid : null;
+}
+
+/**
  * Returns null once the shadow key is deactivated, which is the instant
  * kill-switch for an SSO user: revoking them in Entra only stops new tokens,
  * while an already-issued one stays valid until it expires.

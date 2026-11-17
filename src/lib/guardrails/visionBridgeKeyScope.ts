@@ -61,6 +61,11 @@ function carriesGroupModelRestrictions(apiKeyId: string): boolean {
   }
 }
 
+/** Per-key lists OR any group membership — group rules live outside the key row. */
+function isModelRestrictedKey(apiKeyInfo: Record<string, unknown>, apiKeyId: string): boolean {
+  return hasApiKeyModelRestrictions(apiKeyInfo) || carriesGroupModelRestrictions(apiKeyId);
+}
+
 /**
  * Resolve the Vision Bridge scope for the caller's key metadata
  * (`GuardrailContext.apiKeyInfo`). Returns null when there is no key or the key
@@ -75,8 +80,7 @@ export async function resolveVisionBridgeKeyScope(
 
   const allowedConnections = intersectAllowedConnectionIds(apiKeyInfo.allowedConnections, null);
   const allowedQuotas = stringList(apiKeyInfo.allowedQuotas);
-  const modelRestricted =
-    hasApiKeyModelRestrictions(apiKeyInfo) || carriesGroupModelRestrictions(apiKeyId);
+  const modelRestricted = isModelRestrictedKey(apiKeyInfo, apiKeyId);
   if (!allowedConnections && allowedQuotas.length === 0 && !modelRestricted) return null;
 
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
