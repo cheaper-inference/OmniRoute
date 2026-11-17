@@ -216,6 +216,30 @@ export function isIntentionalComboAbort(err) {
   return typeof cause === "string" && reasons.has(cause);
 }
 
+/** Immediate-cause codes that prove a `TypeError: terminated` is a transport failure. */
+const TERMINATED_TRANSPORT_CAUSE_CODES = new Set([
+  "ECONNRESET",
+  "EPIPE",
+  "UND_ERR_SOCKET",
+  "UND_ERR_BODY_TIMEOUT",
+]);
+
+/**
+ * undici's two fixed `TypeError` wrappers for a transport failure: `fetch failed`
+ * before headers, and `terminated` after them, the latter only with a known
+ * transport code on the immediate cause.
+ *
+ * @param {NodeJS.ErrnoException} e
+ * @returns {boolean}
+ */
+function isUndiciTransportWrapperError(e) {
+  if (e.name !== "TypeError") return false;
+  if (e.message === "fetch failed") return true;
+  if (e.message !== "terminated") return false;
+  const cause = /** @type {{ code?: unknown } | undefined} */ (e.cause);
+  return !!cause && typeof cause === "object" && TERMINATED_TRANSPORT_CAUSE_CODES.has(cause.code);
+}
+
 /**
  * A network/IO failure against an upstream or its proxy — undici surfaces it
  * as `TypeError: fetch failed` (fixed message; the syscall code rides on
@@ -226,7 +250,10 @@ export function isIntentionalComboAbort(err) {
  * error path; the stray copy delivered to nobody must not be process-fatal.
  *
  * The "fetch failed" message match is exact on purpose: it is undici's fixed
- * wrapping message, so arbitrary TypeErrors still crash loudly.
+ * wrapping message, so arbitrary TypeErrors still crash loudly. After headers,
+ * undici instead wraps body transport failures as `TypeError: terminated`.
+ * That shape requires a known transport code on the immediate cause; neither
+ * the message alone nor an arbitrary/nested cause proves a network failure.
  *
  * @param {unknown} err
  * @returns {boolean}
@@ -234,7 +261,7 @@ export function isIntentionalComboAbort(err) {
 export function isUpstreamNetworkError(err) {
   if (!err || typeof err !== "object") return false;
   const e = /** @type {NodeJS.ErrnoException} */ (err);
-  if (e.name === "TypeError" && e.message === "fetch failed") return true;
+  if (isUndiciTransportWrapperError(e)) return true;
   switch (e.code) {
     case "PROXY_UNREACHABLE":
     case "PROXY_REQUEST_FAILED":

@@ -42,6 +42,7 @@ import { stripUnsupportedParams } from "./unsupportedParamsStrip.ts";
 import {
   stripGpt5SamplingWhenReasoning,
   stripGpt5ReasoningWhenTools,
+  foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
 
@@ -516,6 +517,8 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
       throw error;
     }
   }
+  // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
+  bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
   bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
   // Relevance selection runs before the provider cap so the cap keeps the useful tools.
   const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {

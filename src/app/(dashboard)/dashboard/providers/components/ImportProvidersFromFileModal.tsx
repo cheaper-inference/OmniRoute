@@ -80,10 +80,11 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
       </div>
       <Table
         className="text-xs"
-        containerClassName="max-h-64 overflow-y-auto"
+        maxHeight="16rem"
+        scrollLabel={t("importFromFileTitle")}
         scrollbarLabel={t("importFromFileTitle")}
       >
-        <TableHeader className="sticky top-0">
+        <TableHeader>
           <TableRow>
             <TableHead>
               <Checkbox
@@ -103,7 +104,7 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
                 <Checkbox checked={selected.has(idx)} onChange={() => onToggleRow(idx)} />
               </TableCell>
               <TableCell className="font-mono text-text-muted">{entry.provider}</TableCell>
-              <TableCell className="font-medium text-text-main">{entry.name}</TableCell>
+              <TableCell className="text-text-main">{entry.name}</TableCell>
               <TableCell className="text-text-muted">{entry.baseUrl || "—"}</TableCell>
             </TableRow>
           ))}

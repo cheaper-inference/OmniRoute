@@ -1,0 +1,1 @@
+- **fix(cache):** the semantic cache now ignores a request threshold header that is below the configured similarity threshold, and the semantic cache manager no longer stores responses that contain tool calls, so a manager cache hit cannot replay stale tool-call arguments. ([#19484](https://github.com/cheaper-inference/OmniRoute/pull/19484))

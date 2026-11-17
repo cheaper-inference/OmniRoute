@@ -1,0 +1,1 @@
+- **fix(mitm):** The AgentBridge status in `/api/settings/mitm` now includes `stats.ingestFailures`, the number of Traffic Inspector posts that failed, so a broken capture path no longer looks like an empty one. ([#19426](https://github.com/cheaper-inference/OmniRoute/pull/19426))

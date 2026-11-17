@@ -1,0 +1,1 @@
+- Preserve the caller X-Correlation-Id on `/v1/messages` non-streaming responses and on the synthetic slow-stream keepalive response, matching `/v1/chat/completions` (#19035).
