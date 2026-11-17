@@ -209,3 +209,48 @@ test("a connection that opts out of prompt caching gets no injected breakpoints"
   assert.ok(upstreamBody, "upstream fetch captured the passthrough body");
   assert.equal(countCacheControls(upstreamBody), 0);
 });
+
+test("Claude Code passthrough keeps the client's own breakpoints untouched", async () => {
+  let upstreamBody = null;
+  globalThis.fetch = async (_url, init = {}) => {
+    upstreamBody = JSON.parse(String(init.body || "{}"));
+    return createSseResponse([
+      `event: message_start\ndata: {"type":"message_start","message":{"id":"msg_x","model":"claude-sonnet-5"}}`,
+      `event: message_stop\ndata: {"type":"message_stop"}`,
+    ]);
+  };
+
+  const body = markerlessClaudeBody();
+  // Exactly what Claude Code sends: two system breakpoints and one on the
+  // conversation tail, all with the implicit 5m TTL (no ttl field).
+  body.system[0].cache_control = { type: "ephemeral" };
+  body.system[1].cache_control = { type: "ephemeral" };
+  body.messages[4].content[0].cache_control = { type: "ephemeral" };
+
+  await handleChatCore({
+    body,
+    modelInfo: { provider: "claude", model: "claude-sonnet-5", extendedContext: false },
+    credentials: { apiKey: "test-key", providerSpecificData: {} },
+    log: noopLog(),
+    clientRawRequest: {
+      endpoint: "/v1/messages",
+      body: structuredClone(body),
+      headers: new Headers({ "content-type": "application/json", "x-app": "cli" }),
+    },
+    userAgent: "claude-cli/2.1.323 (external, cli)",
+  });
+
+  assert.ok(upstreamBody, "upstream fetch captured the passthrough body");
+  // Adding a breakpoint on the working set (the last user turn) moves the
+  // cached edge every turn onto content the next request never re-reads.
+  assert.equal(
+    countCacheControls(upstreamBody),
+    3,
+    "client-managed breakpoints must not be supplemented"
+  );
+  // Implicit 5m must stay implicit: a rewritten marker set is a byte-level
+  // divergence from the prefix the client's own markers cached.
+  for (const block of upstreamBody.system) {
+    if (block.cache_control) assert.deepEqual(block.cache_control, { type: "ephemeral" });
+  }
+});

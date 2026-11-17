@@ -7,7 +7,7 @@
  * 2. Disable thinking when tool_choice forces a specific tool
  * 3. Enforce max 4 cache_control breakpoints
  * 4. Normalize cache_control TTL ordering
- * 5. Default missing cache_control.ttl to "1h" on the native Claude OAuth path
+ * 5. Never rewrite a client-managed cache_control marker set on the native Claude OAuth path
  */
 
 /**
@@ -323,20 +323,25 @@ export function ensureCacheControlOnLastUserMessage(
   }
 }
 
-/** Defaults missing TTLs and keeps earlier breakpoints at 1h before a later 1h breakpoint. */
+/**
+ * Raises earlier breakpoints to "1h" when a later breakpoint states it.
+ *
+ * A missing `ttl` is left missing: `{type:"ephemeral"}` already means Anthropic's
+ * 5-minute default, and Claude Code sends exactly that — it never states `ttl:"5m"`.
+ * Materialising `"5m"` would send a marker set the client never wrote, which is a
+ * byte-level prefix divergence and a prompt-cache miss.
+ *
+ * The only rewrite Anthropic requires is ordering: longer TTLs must come first, so
+ * a `1h` marker forces every earlier (implicit-5m) marker up to `1h` or the request
+ * is rejected. Markers after the last explicit `1h` are never touched.
+ */
 export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
-  let hasFiveMinuteCacheControl = false;
   const ephemeralCacheControls: Array<Record<string, unknown>> = [];
 
   const defaultMissingTtl = (block: Record<string, unknown> | null | undefined) => {
     const cc = block?.cache_control as Record<string, unknown> | undefined;
     if (!cc || cc.type !== "ephemeral") return;
 
-    if (cc.ttl === "5m") {
-      hasFiveMinuteCacheControl = true;
-    } else if (cc.ttl === undefined) {
-      cc.ttl = hasFiveMinuteCacheControl ? "5m" : "1h";
-    }
     if (cc.ttl === "1h") {
       for (const earlier of ephemeralCacheControls) earlier.ttl = "1h";
     }
@@ -362,4 +367,33 @@ export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
       }
     }
   }
+}
+
+/**
+ * True when at least one cache_control block already states a `ttl`.
+ *
+ * `normalizeCacheControlTtl` exists to stop a 1h marker being followed by a 5m
+ * one (Anthropic needs non-increasing TTLs). A caching-aware client that omits
+ * `ttl` entirely means Anthropic's 5m default, so normalizing it only rewrites
+ * markers for no gain — and a rewritten marker set is exactly the byte-level
+ * divergence that breaks a client-managed prompt cache.
+ */
+export function hasExplicitCacheTtl(body: Record<string, unknown>): boolean {
+  const hasTtl = (block: Record<string, unknown> | null | undefined): boolean => {
+    const cc = block?.cache_control as Record<string, unknown> | undefined;
+    return cc?.type === "ephemeral" && typeof cc.ttl === "string";
+  };
+
+  const tools = body.tools as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(tools) && tools.some(hasTtl)) return true;
+  const system = body.system as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(system) && system.some(hasTtl)) return true;
+  const messages = body.messages as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(messages)) {
+    for (const message of messages) {
+      const content = message.content as Array<Record<string, unknown>> | undefined;
+      if (Array.isArray(content) && content.some(hasTtl)) return true;
+    }
+  }
+  return false;
 }

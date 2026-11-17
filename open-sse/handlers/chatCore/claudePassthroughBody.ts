@@ -14,6 +14,7 @@
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
+import { bodyHasAnyCacheControl } from "../../translator/helpers/claudeHelper.ts";
 import {
   acceptsInlineToolAdditions,
   hoistDeferredToolsForTarget,
@@ -165,7 +166,11 @@ export function buildClaudePassthroughBody({
         translatedBody.messages as ClaudeMessage[]
       ) as typeof translatedBody.messages;
     }
-    if (isFirstPartyAnthropic) {
+    // A client that supplies its own breakpoints (Claude Code) already placed the
+    // boundary it wants; adding one on the working set moves the cached edge every
+    // turn onto content the next request never re-reads. A marker-less body still
+    // gets the rescue.
+    if (isFirstPartyAnthropic && !bodyHasAnyCacheControl(translatedBody as ClaudeRequestBody)) {
       ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {

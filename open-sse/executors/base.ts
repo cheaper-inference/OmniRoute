@@ -68,7 +68,10 @@ import {
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
-import { normalizeCacheControlTtl } from "../services/claudeCodeConstraints.ts";
+import {
+  hasExplicitCacheTtl,
+  normalizeCacheControlTtl,
+} from "../services/claudeCodeConstraints.ts";
 import {
   appendAnthropicBetaHeader,
   CLAUDE_CODE_COMPATIBLE_REDACT_THINKING_BETA,
@@ -1302,7 +1305,10 @@ export class BaseExecutor {
           stripClaudeSystemPrefixBlocks(sysBlocks, SENTINEL);
           sysBlocks.unshift({ type: "text", text: billingLine }, { type: "text", text: SENTINEL });
           tb.system = sysBlocks;
-          normalizeCacheControlTtl(tb);
+          // Only when the body states a ttl somewhere (the 1h propagation case).
+          // A client that omits ttl means Anthropic's 5m default, so normalizing
+          // rewrites client-managed markers without changing their meaning.
+          if (hasExplicitCacheTtl(tb)) normalizeCacheControlTtl(tb);
 
           // Run the configurable system-transforms pipeline for the native
           // `claude` provider (issue #2260 / comment 4459544580). The default
