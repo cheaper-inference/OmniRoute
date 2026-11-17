@@ -84,7 +84,14 @@ test("estimateInputTokens accounts for tool definitions separately", () => {
   };
 
   const tokens = estimateInputTokens(bodyWithTools);
-  assert.ok(tokens > 10, "must count both messages and tools");
+  const messagesOnly = estimateInputTokens({ messages: bodyWithTools.messages });
+  // Tool schemas are estimated at ~6 characters per token (CHARS_PER_TOKEN_SCHEMA).
+  const schemaTokens = Math.ceil(JSON.stringify(bodyWithTools.tools).length / 6);
+  assert.equal(
+    tokens,
+    messagesOnly + schemaTokens,
+    "tools must be counted with the schema estimate"
+  );
 });
 
 test("estimateOutputTokens returns proportional count", () => {
