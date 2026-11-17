@@ -227,7 +227,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="sync" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
+            <h3 className="text-lg">{t("modelsDevTitle")}</h3>
             <p className="text-sm text-text-muted">{t("modelsDevDesc")}</p>
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="database" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
+            <h3 className="text-lg">{t("modelsDevTitle")}</h3>
             <p className="text-sm text-text-muted">{t("modelsDevDesc")}</p>
           </div>
           {feedback && (
@@ -337,32 +337,32 @@ export default function ModelsDevSyncTab() {
               <Icon name="bar_chart" size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{t("modelsDevStats")}</h3>
+              <h3 className="text-lg">{t("modelsDevStats")}</h3>
               <p className="text-sm text-text-muted">{t("modelsDevStatsDesc")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-info">
+              <p className="text-2xl font-semibold text-info">
                 {status.providerCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("providers")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-success">
+              <p className="text-2xl font-semibold text-success">
                 {status.modelCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelsWithPricing")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-2xl font-semibold text-primary">
                 {status.capabilityCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("capabilities")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-warning">
+              <p className="text-2xl font-semibold text-warning">
                 {status.lastSyncModelCount > 0 ? status.lastSyncModelCount.toLocaleString() : "—"}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("lastSyncCount")}</p>
@@ -384,7 +384,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="info" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevInfo")}</h3>
+            <h3 className="text-lg">{t("modelsDevInfo")}</h3>
           </div>
         </div>
         <div className="text-sm text-text-muted space-y-2">

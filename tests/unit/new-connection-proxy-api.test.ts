@@ -5,6 +5,9 @@ import path from "node:path";
 import net from "node:net";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const fixtureRoot = path.resolve("_artifacts/new-connection-proxy-api");
 fs.mkdirSync(fixtureRoot, { recursive: true });
