@@ -156,8 +156,11 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
       - run: npm run audit:deps
+      # The cache, the JSON report and its upload run even when a step above failed:
+      # quality-gate still runs on a failed lint job and its ESLint download is strict, so a
+      # missing artifact would skip the complexity / duplication / dead-code ratchets too.
       - name: Restore ESLint file cache
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && !cancelled()
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
@@ -172,6 +175,7 @@ jobs:
       # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
       # a second cold full-tree pass for eslintWarnings ratchet counts.
       - name: ESLint (JSON report)
+        if: ${{ !cancelled() }}
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
