@@ -71,6 +71,33 @@ function digest(value: unknown): string | null {
   }
 }
 
+/**
+ * Anthropic clients move the cache_control breakpoint to the newest message each
+ * turn, so the same sent item arrives with and without the marker. Ignore it when
+ * matching history by digest; the stored prefix still carries the current bytes.
+ *
+ * The marker is recursive because Claude Code places it on a content block
+ * (`messages[i].content[j].cache_control`), never on the message itself. A
+ * top-level-only strip missed every real request: the digest changed each turn,
+ * the live zone never hit, and the whole history was recompressed — which wiped
+ * the provider's prefix cache on every turn.
+ */
+function stripCacheControl(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripCacheControl);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+      if (key !== "cache_control") out[key] = stripCacheControl(child);
+    }
+    return out;
+  }
+  return value;
+}
+
+function digestForPrefixMatch(value: unknown): string | null {
+  return digest(stripCacheControl(value));
+}
+
 function cloneItems(items: unknown[]): unknown[] | null {
   try {
     return structuredClone(items);
@@ -223,7 +250,7 @@ function storeSparseRawPrefix(ctx: LiveZoneContext, result: CompressionResult): 
   if (!Array.isArray(items) || items.length !== ctx.rawItemDigests.length) return false;
   const patches: Array<{ index: number; value: unknown }> = [];
   for (let index = 0; index < items.length; index++) {
-    const itemDigest = digest(items[index]);
+    const itemDigest = digestForPrefixMatch(items[index]);
     if (!itemDigest) return false;
     if (itemDigest === ctx.rawItemDigests[index]) continue;
     const value = cloneValue(items[index]);
@@ -334,7 +361,7 @@ function resolveLiveZoneContext(
   if (!field || !key) return null;
 
   const rawItems = body[field] as unknown[];
-  const rawItemDigests = rawItems.map(digest);
+  const rawItemDigests = rawItems.map(digestForPrefixMatch);
   if (rawItemDigests.some((value) => value === null)) return null;
   const rawStableFieldsDigest = digest(pickStableFields(body));
   if (!rawStableFieldsDigest) return null;
@@ -499,7 +526,27 @@ function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unkn
     if (value === null) return null;
     frozenPrefix[patch.index] = value;
   }
-  return frozenPrefix;
+  // Stored items keep the breakpoint they had on their own turn; the client moves it every turn.
+  // Replaying stale markers piles them up past Anthropic's 4-block limit (HTTP 400).
+  return frozenPrefix.map((item, index) => withClientCacheControl(item, rawItems[index]));
+}
+
+/** `transformed` with every cache_control removed, then re-placed where `raw` has one. */
+function withClientCacheControl(transformed: unknown, raw: unknown): unknown {
+  const stripped = stripCacheControl(transformed);
+  copyCacheControl(stripped, raw);
+  return stripped;
+}
+
+function copyCacheControl(target: unknown, raw: unknown): void {
+  if (!target || typeof target !== "object" || !raw || typeof raw !== "object") return;
+  if (Array.isArray(target) !== Array.isArray(raw)) return;
+  const source = raw as Record<string, unknown>;
+  const dest = target as Record<string, unknown>;
+  for (const key of Object.keys(source)) {
+    if (key === "cache_control") dest.cache_control = cloneValue(source.cache_control);
+    else if (key in dest) copyCacheControl(dest[key], source[key]);
+  }
 }
 
 /** Keep the last assistant turn as read-only context for new tool outputs. */
