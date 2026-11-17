@@ -4,6 +4,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "./auth";
 import { isCredentialDiagnosticSentinel } from "./credentialSentinel";
 import { checkAndRefreshToken } from "./tokenRefresh";
+import { imageQuotaPreflightOptions } from "./imageQuotaSelectionPolicy";
 import * as log from "../utils/logger";
 
 interface ImageGenerationResult {
@@ -52,10 +53,39 @@ function connectionIdOf(credentials: any): string | null {
     : null;
 }
 
+function isOutsideImageKeyScope(credentials: any, allowedConnections: string[] | null): boolean {
+  if (!Array.isArray(allowedConnections)) return false;
+  const connectionId = connectionIdOf(credentials);
+  return !connectionId || !allowedConnections.includes(connectionId);
+}
+
 function isCredentialSentinel(credentials: any): boolean {
   // Includes the key-scope sentinel (blockedByKeyPolicy): it carries no secret
   // and must never be dispatched.
   return isCredentialDiagnosticSentinel(credentials);
+}
+
+function finalImageRetryFailure(
+  currentCredentials: any,
+  lastResult: ImageGenerationResult | null
+): ImageGenerationResult {
+  // The selector can deny a scoped key with a sentinel instead of credentials.
+  // Preserve that denial after the fallback loop, even if an earlier account
+  // returned an authentication error.
+  if (currentCredentials?.blockedByKeyPolicy === true) {
+    return {
+      success: false,
+      status: 403,
+      error: "No image-provider connection is allowed for this API key",
+    };
+  }
+  return (
+    lastResult || {
+      success: false,
+      status: 401,
+      error: "Authentication failed for all eligible image-provider accounts",
+    }
+  );
 }
 
 /**
@@ -94,8 +124,38 @@ async function defaultSelectNextCredentials(
     requestedModel,
     {
       excludeConnectionIds: Array.from(excludedConnectionIds),
+      ...imageQuotaPreflightOptions(provider),
     }
   );
+}
+
+async function executeWithoutImageCredentials(
+  credentials: ImageCredentialRetryOptions["credentials"],
+  execute: ImageCredentialRetryOptions["execute"],
+  allowedConnections: string[] | null
+): Promise<ImageCredentialRetryResult> {
+  // A scoped key may use a keyless provider only when it admits the
+  // synthetic noauth connection explicitly.
+  if (Array.isArray(allowedConnections) && !allowedConnections.includes("noauth")) {
+    return {
+      credentials,
+      result: {
+        success: false,
+        status: 403,
+        error: "No image-provider connection is allowed for this API key",
+      },
+    };
+  }
+  return { credentials, result: await execute(credentials) };
+}
+
+function outOfScopeImageCredential(
+  credentials: ImageCredentialRetryOptions["credentials"],
+  allowedConnections: string[] | null,
+  error: string
+): ImageCredentialRetryResult | null {
+  if (!isOutsideImageKeyScope(credentials, allowedConnections)) return null;
+  return { credentials, result: { success: false, status: 403, error } };
 }
 
 /**
@@ -113,12 +173,8 @@ export async function executeImageWithCredentialFallback({
   allowedConnections = null,
   selectNextCredentials = defaultSelectNextCredentials,
 }: ImageCredentialRetryOptions): Promise<ImageCredentialRetryResult> {
-  // Local/no-auth image providers intentionally have no credential row. They
-  // still need one direct attempt, but there is no account identity to refresh
-  // or rotate after a 401.
-  if (!credentials) {
-    return { credentials, result: await execute(credentials) };
-  }
+  // Preserve direct dispatch for local/no-auth providers, but never for a scoped key.
+  if (!credentials) return executeWithoutImageCredentials(credentials, execute, allowedConnections);
 
   const excludedConnectionIds = new Set<string>();
   let currentCredentials = credentials;
@@ -127,6 +183,14 @@ export async function executeImageWithCredentialFallback({
 
   while (currentCredentials && !isCredentialSentinel(currentCredentials)) {
     const connectionId = connectionIdOf(currentCredentials);
+    // Defense in depth: selectors and test hooks must never bypass the caller
+    // API key's connection allowlist, even during image credential rotation.
+    const scopedDenial = outOfScopeImageCredential(
+      currentCredentials,
+      allowedConnections,
+      "Image credential is outside the API key's allowed connections"
+    );
+    if (scopedDenial) return scopedDenial;
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 
@@ -148,6 +212,13 @@ export async function executeImageWithCredentialFallback({
       continue;
     }
 
+    // A refresh must not silently substitute a different or unscoped account.
+    const refreshedScopeDenial = outOfScopeImageCredential(
+      currentCredentials,
+      allowedConnections,
+      "Refreshed image credential is outside the API key's allowed connections"
+    );
+    if (refreshedScopeDenial) return refreshedScopeDenial;
     lastCredentials = currentCredentials;
     lastResult = await execute(currentCredentials);
     const shouldTryAnotherAccount =
@@ -172,10 +243,6 @@ export async function executeImageWithCredentialFallback({
 
   return {
     credentials: lastCredentials,
-    result: lastResult || {
-      success: false,
-      status: 401,
-      error: "Authentication failed for all eligible image-provider accounts",
-    },
+    result: finalImageRetryFailure(currentCredentials, lastResult),
   };
 }
