@@ -1,11 +1,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { createRequire } from "node:module";
 
-import { config } from "../../../src/proxy.ts";
-import { classifyRoute } from "../../../src/server/authz/classify.ts";
-import { clientApiPolicy } from "../../../src/server/authz/policies/clientApi.ts";
-import { authenticateA2ARequest } from "../../../src/lib/a2a/authenticate.ts";
+// The A2A/clientApi auth paths read feature flags and API keys from SQLite: point them at a
+// throwaway DATA_DIR before those modules load, so an inherited DATA_DIR is never touched.
+const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omr-a2a-connect-19832-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../../src/lib/db/core.ts");
+const { config } = await import("../../../src/proxy.ts");
+const { classifyRoute } = await import("../../../src/server/authz/classify.ts");
+const { clientApiPolicy } = await import("../../../src/server/authz/policies/clientApi.ts");
+const { authenticateA2ARequest } = await import("../../../src/lib/a2a/authenticate.ts");
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
+});
 
 const require = createRequire(import.meta.url);
 const { tryToParsePath } = require("next/dist/lib/try-to-parse-path.js");
