@@ -4,6 +4,9 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { forwardRef } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "./lib/utils";
+import { TooltipRoot } from "./lib/tooltip-root";
+
+export { TooltipProvider, type TooltipProviderProps } from "./lib/tooltip-root";
 
 export type TooltipSide = NonNullable<ComponentProps<typeof TooltipPrimitive.Content>["side"]>;
 export type TooltipAlign = NonNullable<ComponentProps<typeof TooltipPrimitive.Content>["align"]>;
@@ -12,6 +15,7 @@ export interface TooltipProps extends ComponentProps<"span"> {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Delay before opening, in ms. Defaults to 300, or to the TooltipProvider's delay under one. */
   delayDuration?: number;
   disableHoverableContent?: boolean;
   children?: ReactNode;
@@ -22,24 +26,22 @@ export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Toolti
   open,
   defaultOpen,
   onOpenChange,
-  delayDuration = 300,
+  delayDuration,
   disableHoverableContent,
   children,
   ...props
 }, ref) {
   return (
     <span ref={ref} className={cn("ci-tooltip", className)} {...props}>
-      <TooltipPrimitive.Provider delayDuration={delayDuration}>
-        <TooltipPrimitive.Root
-          open={open}
-          defaultOpen={defaultOpen}
-          onOpenChange={onOpenChange}
-          delayDuration={delayDuration}
-          disableHoverableContent={disableHoverableContent}
-        >
-          {children}
-        </TooltipPrimitive.Root>
-      </TooltipPrimitive.Provider>
+      <TooltipRoot
+        open={open}
+        defaultOpen={defaultOpen}
+        onOpenChange={onOpenChange}
+        delayDuration={delayDuration}
+        disableHoverableContent={disableHoverableContent}
+      >
+        {children}
+      </TooltipRoot>
     </span>
   );
 });
