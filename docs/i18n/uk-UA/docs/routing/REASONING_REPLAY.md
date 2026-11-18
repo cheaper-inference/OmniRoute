@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Захоплення відбувається в `open-sse/handlers/chatCore.ts` (два сайти, на двох сайтах виклику `cacheReasoningFromAssistantMessage` ). Повторне відтворення відбувається в `open-sse/translator/index.ts` після примусу схеми, але перед відправленням.
+
+Записи виклику інструменту зберігаються в `buildToolCallCacheKey()`, дайджесті обсягу запиту та ідентифікатора виклику інструменту, тому той самий ідентифікатор, який використовується іншим ключем або сеансом API не вибирає запис. Область походить від `buildReasoningCacheScope()`: ідентифікатор ключа API плюс ключ сеансу, якщо він є в запиті. Таким чином, стовпець `tool_call_id` і інформаційна панель показують дайджест для цих записів.
 
 Звичайні ходи помічника (не виклику інструментів) ключаються по-іншому: `buildAssistantMessageCacheKey()` переварює область сеансу плюс нормалізовану стенограму у форматі OpenAI до цього ходу, оскільки DeepSeek вимагає обґрунтування _кожного_ попереднього ходу, коли `tools` присутній. Для цілей Responses-API (наприклад, `opencode-go/deepseek-v4-flash`, спрямованих на `/responses`) вихідне тіло містить `input`, а не `messages`, тому `translateRequest()` (`open-sse/translator/index.ts`) повідомляє зведену транскрипцію, яку він перетравлює через опцію зворотного виклику, а сайти захоплення переробляють ту саму транскрипт. Прохід повторного відтворення відповідей виконується на стержні OpenAI для кожного вихідного формату, тому клієнти повідомлень Anthropic (відповіді Claude → OpenAI → ) також відтворюються.
 

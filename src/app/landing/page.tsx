@@ -68,22 +68,20 @@ export default function LandingPage() {
           <section className="py-24 sm:py-32 px-4 sm:px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-linear-to-t from-primary/5 to-transparent pointer-events-none"></div>
             <div className="max-w-4xl mx-auto text-center relative z-10">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 break-words">
-                {t("ctaTitle")}
-              </h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl mb-6 break-words">{t("ctaTitle")}</h2>
               <p className="text-lg sm:text-xl text-text-muted mb-10 max-w-2xl mx-auto break-words">
                 {t("ctaDescription")}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-lg font-semibold transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-lg transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
                 >
                   {t("startFree")}
                 </button>
                 <button
                   onClick={() => router.push("/docs")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-border hover:bg-surface text-text-main text-lg font-semibold transition-all"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-border hover:bg-surface text-text-main text-lg transition-all"
                 >
                   {t("readDocumentation")}
                 </button>

@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,7 +145,7 @@ Claude डेस्कटॉप, Cursor, Cline आणि सुसंगत MCP 
 | `omniroute_rtk_discover`            | `read:compression`  | RTK आउटपुट नमुन्यांमध्ये आवर्ती आवाज शोधा                                                                                   |
 | `omniroute_rtk_learn`               | `read:compression`  | निवडलेल्या नमुन्यांमधून पुनरावलोकन करण्यायोग्य RTK फिल्टर मसुदा तयार करा                                                    |
 
-CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR नोंदी द्वि-स्तरीय स्टोअर वापरतात: एक हॉट इन-मेमरी टियर समर्थित, स्थानिक नॉन-क्लाउड रनटाइमवर, टिकाऊ SQLite टियरद्वारे (`ccr_blocks`, ऑन बाय डीफॉल्ट) त्यामुळे ब्लॉक TTL संपेपर्यंत — संपत नाही तोपर्यंत टिकून राहतो किंवा रीस्टार्ट होतो, 512 पेक्षा जास्त ब्लॉक्स वगळता, जे क्लाउड रनटाईम KB आणि `COMPRESSION_CCR_DURABLE_STORE=false` पेक्षा जास्त क्लाउड चालू असतात फक्त स्मृती. टिकाऊ लेखन हा सर्वोत्तम प्रयत्न आहे: 1,000 लेखन आधीच प्रलंबित असताना ते वगळले जाते, आणि अयशस्वी SQLite लेखन लॉग केले जाते, पुन्हा प्रयत्न केले जात नाही, त्यामुळे तो ब्लॉक रीस्टार्ट झाल्यावर गमावला जातो. प्रत्येक ब्लॉक 2 MiB, प्रत्येक प्रिन्सिपल 16 MiB, आणि जागतिक स्टोअर 64 MiB पर्यंत मर्यादित आहे . नोंदी 24-तास TTL (जास्तीत जास्त सात दिवस) वर डीफॉल्ट असतात. पूर्ण MCP पुनर्प्राप्ती 256 KiB पर्यंत मर्यादित आहे; मोठे ब्लॉक रेंज्ड आणि ग्रेप मोडद्वारे उपलब्ध राहतात. स्टोरेज, पुनर्प्राप्ती, सूची, तपासणी, हटवणे आणि आकडेवारी प्रमाणीकृत API-की प्रिन्सिपलद्वारे विलग केली जाते. ऑडिट रेकॉर्डमध्ये हॅश आणि आकाराचा मेटाडेटा असतो, कधीही सामग्री नसते. ऑपरेटर-फेसिंग तपशील (दोन मार्कर, क्लायंट पूर्वतयारी, `codemode:false`, प्रति-टूल स्कोप, पृष्ठांकन आणि डायग्नोस्टिक मॅट्रिक्स) [कॉम्प्रेशन इंजिन → पूर्वतयारी / ऑपरेटर मार्गदर्शकामध्ये](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) राहतात.
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` अंतर्गत स्वतंत्रपणे MCP वर्णन कॉम्प्रेशनचा अहवाल देतो. ती मूल्ये MCP सूचीबद्ध करण्यायोग्य वर्णनांसाठी मेटाडेटा-आकार अंदाज आहेत (`tools`, `prompts`, `resources`, आणि `resourceTemplates`); त्या प्रदाता वापराच्या पावत्या नाहीत आणि `source: "mcp_metadata_estimate"` ने चिन्हांकित केल्या आहेत.
 

@@ -29,70 +29,61 @@
 6. **ማስረጃውን ይመዝግቡ።** በPR template ውስጥ ያስኬዷቸውን commands፣ የታከለ ወይም የተለወጠ እያንዳንዱን test file፣
    migrations ወይም feature flags እና አሁንም በመጠባበቅ ላይ ያለ CI-only validation ይዘርዝሩ።
 
-## በለውጥ ዓይነት የተከፋፈሉ Golden paths
+## ወርቃማ መንገዶች በለውጥ ዓይነት
 
-ከዚህ በታች ያሉት commands ዝቅተኛዎቹ የተኮሩ ፍተሻዎች ናቸው፤ እርስዎ የለወጡትን ባህሪ በቀጥታ የሚሸፍን test
-ለመዝለል ፈቃድ አይደሉም።
+ከታች ያሉት ትዕዛዞች በትንሹ የተተኮሩ ቼኮች ናቸው፣ የቀየሩትን ባህሪ በቀጥታ የሚሸፍን ፈተናን ለመዝለል ፍቃድ አይደሉም።
 
-### Provider
+### አቅራቢ
 
-**ውሎች**
+**ኮንትራቶች**
 
-- በ`src/shared/constants/providers/` ውስጥ ያለው የProvider ትርጉም እና በ
-  `src/shared/constants/providers.ts` ውስጥ ያለው composition።
-- በ`open-sse/config/providerRegistry.ts` ወይም ከእሱ በተወጡ registry files ውስጥ ያሉ Models እና capabilities።
-- Executor/translator selection፣ OAuth ወይም API-key configuration፣ dashboard assets እና በሚመለከተው ጊዜ generated
-  provider reference።
-- Public credentials `resolvePublicCred()`ን መጠቀም አለባቸው፤ error responses ደግሞ የጋራ sanitized
-  error helpersን መጠቀም አለባቸው። `docs/security/PUBLIC_CREDS.md`ን (git፤ ወደ `/docs` አይጠናቀርም) እና
-  [Error Sanitization](../security/ERROR_SANITIZATION.md)ን ይመልከቱ።
+- የአቅራቢዎች ፍቺ በ `src/shared/constants/providers/` እና በ `src/shared/constants/providers.ts` ውስጥ ያለው አፃፃፍ።
+- በ `open-sse/config/providerRegistry.ts` ውስጥ ያሉ ሞዴሎች እና ችሎታዎች ወይም የተወጡት የመመዝገቢያ ፋይሎች።
+- Executor/translator ምርጫ፣ OAuth ወይም API-key ውቅር እና ዳሽቦርድ ንብረቶች። የታደሰውን `docs/reference/PROVIDER_REFERENCE.md` ወይም README ንድፎችን አታድርጉ፡ የተለቀቀው ማደስ እንደገና ይፅፋቸዋል (`check:pr-derived-paths` የተሸከመውን PR ባህሪ ወድቋል)።
+- የህዝብ ምስክርነቶች `resolvePublicCred()` መጠቀም አለባቸው; የስህተት ምላሾች የጋራ የጸዳ የስህተት አጋሮችን መጠቀም አለባቸው። `docs/security/PUBLIC_CREDS.md` (git; ወደ `/docs` ያልተጠናቀረ) እና [የንፅህና አጠባበቅ ስህተትን](../security/ERROR_SANITIZATION.md) ይመልከቱ።
 
-**የተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # catalog ሲለወጥ፤ generated diffን commit ያድርጉ
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-እንዲሁም የተነካውን እያንዳንዱን request family ይፈትሹ፦ chat፣ Responses፣ images፣ embeddings፣ audio ወይም video።
-የተፈጠሩ catalog እና golden diffsን እንደ contract changes ይገምግሙ፤ በጭፍን አይቀበሏቸው።
+እንዲሁም እያንዳንዱን የተጎዳ ጥያቄ ቤተሰብ ይሞክሩ፡ ውይይት፣ ምላሾች፣ ምስሎች፣ መክተት፣ ኦዲዮ ወይም ቪዲዮ። የተፈጠረ ካታሎግ እና ወርቃማ ልዩነቶች እንደ ኮንትራት ለውጦች ይገምግሙ; በጭፍን አትቀበሏቸው።
 
-### Routing
+### ማዘዋወር
 
-**ውሎች**
+**ኮንትራቶች**
 
-- በ`src/shared/constants/routingStrategies.ts` ውስጥ ያሉ Public strategy values እና UI metadata።
-- በ`open-sse/services/combo.ts` እና `open-sse/services/combo/` ስር ያሉ Dispatch እና ordering።
-- Combo schemas፣ persistence፣ resilience state፣ model capabilities እና API/UI controls።
-- ባህሪው ሲለወጥ [Auto-Combo Engine](../routing/AUTO-COMBO.md) እና resilience documentation።
+- የህዝብ ስትራቴጂ እሴቶች እና UI ሜታዳታ በ `src/shared/constants/routingStrategies.ts` ውስጥ።
+- በ `open-sse/services/combo.ts` እና `open-sse/services/combo/` ስር መላክ እና ማዘዝ።
+- ጥምር ንድፎች፣ ጽናት፣ የመቋቋም አቅም፣ የሞዴል ችሎታዎች እና API/UI መቆጣጠሪያዎች።
+- ባህሪ ሲቀየር [ራስ-ኮምቦ ሞተር](../routing/AUTO-COMBO.md) እና የመቋቋም ችሎታ ሰነዶች።
 
-**የተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # የstrategy ወይም dispatch ለውጦች
-npm run check:known-symbols      # የstrategy registration ለውጦች
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Deterministic mocked-upstream testsን locally ይጠቀሙ። Live combo smokes credentials ያስፈልጋቸዋል እና
-manual ናቸው፤ የCI ምትክ አይደሉም።
+ቆራጥ የሆኑ የተሳለቁ የላይ ዥረት ሙከራዎችን በአገር ውስጥ ተጠቀም። የቀጥታ ጥምር ጭስ ምስክርነቶችን ይጠይቃሉ እና በእጅ እንጂ CI ምትክ አይደሉም።
 
 ### UI / UX
 
-**ውሎች**
+**ኮንትራቶች**
 
-- በ`src/app/` እና
-  `src/shared/components/` ስር ያሉ Next.js route/page እና shared component boundaries።
-- API response shapes፣ loading/empty/error states፣ የkeyboard እና screen-reader ባህሪ፣
-  responsive layout፣ theming እና locale expansion።
-- በ`src/i18n/messages/en.json` ውስጥ ያሉ English UI source strings፤ አዲስ user-facing copyን hard-code አያድርጉ።
+- Next.js route/page እና የተጋሩ አካላት ድንበሮች በ `src/app/` እና `src/shared/components/` ስር።
+- API ምላሽ ቅርጾች፣ loading/empty/error ግዛቶች፣ የቁልፍ ሰሌዳ እና የስክሪን አንባቢ ባህሪ፣ ምላሽ ሰጪ አቀማመጥ፣ ጭብጥ እና የአካባቢ መስፋፋት።
+- እንግሊዝኛ UI ምንጭ ሕብረቁምፊዎች `src/i18n/messages/en.json` ውስጥ; አዲስ ተጠቃሚን የሚመለከት ኮፒ አታድርጉ።
 
-**የተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-ለinteraction ወይም visual changes appን ያስኪዱ እና ጠባብም ሆነ ሰፊ viewportsን ይፈትሹ። CI
-production buildን እና ሰፋ ያሉ suitesን ያስኬዳል፤ visual behavior ግን አሁንም ለለውጡ ተስማሚ የሆነ የተኮረ component፣ Playwright
-ወይም በሰነድ የተመዘገበ manual check ያስፈልገዋል።
+ለግንኙነት ወይም ለእይታ ለውጦች መተግበሪያውን ያሂዱ እና ሁለቱንም ጠባብ እና ሰፊ የእይታ ቦታዎችን ያረጋግጡ። CI የምርት ግንባታ እና ሰፊ ስብስቦችን ያካሂዳል; የእይታ ባህሪ አሁንም ለለውጡ ተስማሚ የሆነ የተተኮረ አካል፣ Playwright ወይም በሰነድ የተቀመጠ የእጅ ፍተሻ ያስፈልገዋል።
 
 ### i18n
 
-**ውሎች**
+**ኮንትራቶች**
 
-- `src/i18n/messages/en.json` የUI source ነው፤ `config/i18n.json` ደግሞ የlocale source ነው።
-- CLI catalogs በ`bin/cli/locales/` ስር ተለይተው ይገኛሉ።
-- ICU placeholders እና tagsን በትክክል እንዳሉ ያቆዩ። የproduct/provider/model ስሞችን፣
-  protocol እና header ስሞችን፣ commandsን፣ code/JSON identifiersን፣ URLsን፣ environment variablesን ወይም
-  እንደ `OmniRoute`፣ `OAuth`፣ `MCP` እና `A2A` ያሉ protected termsን አይተርጉሙ። የአሁኑ source list
-  `scripts/i18n/glossary/protected-terms.json` ነው።
+- `src/i18n/messages/en.json` የ UI ምንጭ ነው; `config/i18n.json` የአካባቢ ምንጭ ነው።
+- CLI ካታሎጎች በ `bin/cli/locales/` ስር ተለይተው ይኖራሉ።
+- ICU ቦታ ያዥዎችን እና መለያዎችን በትክክል ያቆዩ። product/provider/model ስሞችን፣ ፕሮቶኮልን እና ራስጌ ስሞችን፣ ትዕዛዞችን፣ code/JSON መለያዎችን፣ URLs፣ የአካባቢ ተለዋዋጮችን፣ ወይም እንደ `OmniRoute`፣ `OAuth`፣ `MCP` እና `A2A` ያሉ የተጠበቁ ቃላትን አትተርጉም። የአሁኑ ምንጭ ዝርዝር `scripts/i18n/glossary/protected-terms.json` ነው።
 
-**የተኮረ ዑደት**
+አንድ ባህሪ PR የሚያስተካክለው `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`) ብቻ ነው፤ ሌሎቹ አከባቢዎች በተለቀቀው ማደስ ወይም በትርጉም ሞገድ አንድ ጊዜ ይጠናቀቃሉ (`docs/guides/I18N.md` → "ባህሪ PRs ንክኪ `en.json` ብቻ")። `npm run check:pr-derived-paths` ሌላ የአካባቢ ካታሎግ የሚያስተካክል ባህሪ PR ወድቋል።
+
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # የCLI strings/catalogs ሲለወጡ
 npm run lint
 ```
 
-ይህ ለነባሩ system መመሪያ ነው፤ tooling ወይም key modelን ለማስፋት ግብዣ አይደለም።
-ተተኪው system እየተነደፈ ባለበት ጊዜ i18n patchesን ጥቃቅንና የተወሰኑ ያድርጉ። ተግባሩ generated translationsን በግልጽ ካልጠየቀ እና
-የተገኘውን diff ካልገመገሙ፣ external servicesን የሚጠሩ translation
-commandsን አያስኪዱ።
+ያለ `--mode=pr` እነዚህ በሮች በአካባቢያዊ መልቀቂያ ሁነታ ይሰራሉ እና እያንዳንዱን ቁልፍ ሪፖርት ያድርጉ ዑደቱ በ `en.json` ውስጥ ተጨምሯል ወይም እንደገና ይፃፋል; ያ የመልቀቂያ ማደስ ስራ እንጂ የአንተ PR አይደለም።
+
+ይህ አሁን ላለው ስርዓት መመሪያ ነው, የመሳሪያውን ወይም የቁልፍ ሞዴሉን ለማስፋት ግብዣ አይደለም. የመተኪያ ስርዓቱ እየተነደፈ ባለበት ጊዜ i18n patches በቀዶ ጥገና ያስቀምጡ። ተግባሩ በግልጽ የመነጩ ትርጉሞችን ካልፈለገ እና የተፈጠረውን ልዩነት ካልገመገሙ በስተቀር የውጭ አገልግሎቶችን የሚጠሩ የትርጉም ትዕዛዞችን አያሂዱ።
 
 ### CLI
 
-**ውሎች**
+**ኮንትራቶች**
 
-- በ`bin/cli/` ውስጥ ያሉ ይፋዊ ትዕዛዞችና flags፣ የሚመነጩ API ትዕዛዞች፣ exit codes፣ stdout/stderr እና
-  የJSON ውጤት ቅርጾች፣ የconfig/environment ባህሪ እና በpackage ውስጥ የተካተቱ ፋይሎች።
-- ለCLI ተጠቃሚ የሚታዩ ጽሑፎች የCLI i18n layerን መጠቀም እና የ`en`/`pt-BR` catalogsን የተመሳሰሉ አድርገው መጠበቅ አለባቸው።
-- Nodeን እንደሚደገፍ runtime እና ይፋ የወጣውን binary contract ይጠብቁ።
+- የህዝብ ትዕዛዞች እና ባንዲራዎች በ `bin/cli/`፣ የመነጩ API ትዕዛዞች፣ መውጫ ኮዶች፣ stdout/stderr እና JSON የውጤት ቅርጾች፣ config/environment ባህሪ እና የታሸጉ ፋይሎች።
+- CLI ተጠቃሚን የሚመለከቱ ሕብረቁምፊዎች CLI i18n ንብርብር (በ `bin/cli/locales/en.json` ውስጥ ያሉ `t()` ቁልፎች) መጠቀም አለባቸው። አንድ ባህሪ PR ያስተካክላል `en.json`; `pt-BR` እና ሌሎች አከባቢዎች በሚለቀቁበት ጊዜ ይጠናቀቃሉ።
+- መስቀለኛ መንገድን እንደ የሚደገፈው የሩጫ ጊዜ እና የታተመውን ሁለትዮሽ ውል ያቆዩት።
 
-**ያተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # የተመነጩ/የተጠቀለሉ CLI ለውጦች
-npm run check:pack-policy     # የpackage surface ለውጦች
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-ባህሪው በparsing፣ በፋይሎች ወይም በexit status ላይ ሲመረኮዝ፣ ትክክለኛውን ትዕዛዝ በጊዜያዊ data directory ውስጥ ይጠቀሙ። CI ሰፋ ያሉትን የpackage artifact እና ecosystem ፍተሻዎች ያከናውናል።
+ባህሪው በመተንተን፣ በፋይሎች ወይም በመውጣት ሁኔታ ላይ የሚወሰን ከሆነ በጊዜያዊ የውሂብ ማውጫ ውስጥ ትክክለኛውን ትዕዛዝ ይጠቀሙ። CI ሰፊውን የጥቅል ቅርስ እና የስነ-ምህዳር ፍተሻዎችን ያከናውናል።
 
-### Database
+### የውሂብ ጎታ
 
-**ውሎች**
+**ኮንትራቶች**
 
-- በ`src/lib/db/` ስር ያሉ domain modules፤ የተወሰኑ modulesን በቀጥታ import ያድርጉ (የቀድሞው `localDb.ts` re-export layer ተወግዷል)።
-- በ`src/lib/db/migrations/` ስር ያሉ ቁጥር የተሰጣቸው፣ idempotent የSQL migrations፣ transaction safety፣ upgrade
-  behavior፣ indexes እና በschemaው የሚነካ እያንዳንዱ caller።
-- Routes እና handlers በቀጥታ raw SQL ፈጽሞ አያስኬዱም።
+- በ `src/lib/db/` ስር ያሉ የጎራ ሞጁሎች; የተወሰኑ ሞጁሎችን በቀጥታ አስመጣ (የድሮው `localDb.ts` ዳግም ወደ ውጪ መላክ ንብርብር ተወግዷል)።
+- የተቆጠሩ፣ በ `src/lib/db/migrations/` ስር ያሉ ጠንካራ SQL ፍልሰቶች፣ የግብይት ደህንነት፣ የማሻሻል ባህሪ፣ ኢንዴክሶች እና በእቅዱ የተጎዳ እያንዳንዱ ደዋይ።
+- መንገዶች እና ተቆጣጣሪዎች ጥሬ SQL በቀጥታ አያወጡም።
 
-**ያተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 npm run check:migration-numbering
@@ -172,28 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migration ሲጨምሩ አዲስ databaseን እና ከቀድሞው schema የሚደረግ upgradeን ሁለቱንም ይፈትሹ። የDatabase tests በcleanup ጊዜ handlesን መዝጋት እና `resetDbInstance()`ን መጥራት አለባቸው። የbest-effort Bun adapter path ሲቀየር ብቻ `npm run test:bun:db`ን ያስኪዱ፤ Node ዋነኛው የታመነ መለኪያ ሆኖ ይቆያል።
+ሁለቱንም ትኩስ ዳታቤዝ ይሞክሩ እና ፍልሰትን በሚያክሉበት ጊዜ ከቀደመው እቅድ ያሻሽሉ። የውሂብ ጎታ ሙከራዎች በጽዳት ጊዜ እጀታዎችን መዝጋት እና `resetDbInstance()` መደወል አለባቸው። ምርጥ ጥረት Bun አስማሚ መንገድ ሲቀየር ብቻ `npm run test:bun:db` አሂድ፤ መስቀለኛ መንገድ ሥልጣናዊ ሆኖ ይቆያል።
 
-### Build / deploy
+### ይገንቡ / ያሰማሩ
 
-**ውሎች**
+**ኮንትራቶች**
 
-- Root እና workspace manifests/lockfile፣ `scripts/build/`፣ Next.js standalone assembly፣ የ`dist/`
-  package ይዘቶች፣ የElectron platform metadata፣ CI workflows እና deployment sentinels።
-- የሚደገፉ የNode ranges እና በ`CLAUDE.md` ውስጥ ያለው allow-listed የBun አጠቃቀም ሳይለወጡ መቆየት አለባቸው።
-- Build artifacts በversion control ያልተከታተሉ ሆነው ይቆያሉ፤ የdependency፣ license፣ workflow እና package policies ተፈጻሚ ናቸው።
+- ስርወ እና የስራ ቦታ manifests/lockfile፣ `scripts/build/`፣ Next.js ራሱን የቻለ ስብሰባ፣ `dist/` ጥቅል ይዘቶች፣ Electron የመሳሪያ ስርዓት ሜታዳታ፣ CI የስራ ፍሰቶች እና የማሰማራት ተላላኪዎች።
+- የሚደገፉ የመስቀለኛ ክልሎች እና በ `CLAUDE.md` ውስጥ የተፈቀደው የተዘረዘረው Bun አጠቃቀም ሳይበላሹ መቆየት አለባቸው።
+- የግንባታ እቃዎች ክትትል ሳይደረግባቸው ይቆያሉ; ጥገኝነት፣ ፍቃድ፣ የስራ ሂደት እና የጥቅል ፖሊሲዎች ይተገበራሉ።
 
-**ያተኮረ ዑደት**
+**ትኩረት የተደረገበት ዑደት**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # የdependency ወይም lockfile ለውጦች
-npm run check:pack-policy      # ይፋ የሚወጣው የpackage surface ለውጦች
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-ለውጡ compilationን፣ standalone assemblyን፣ assetsን ወይም runtime bundlingን ሲነካ ብቻ `npm run build`ን በአካባቢዎ ያስኪዱ። `npm run build:release`ን ለrelease/deploy validation ብቻ ይጠቀሙ። የCI build የመጨረሻው cross-platform signal ነው፤ platform-specific የElectron ለውጦች ተመሳሳዩን ያተኮረ build ወይም smoke evidence ያስፈልጋቸዋል።
+ለውጡ ማጠናቀርን፣ ራሱን የቻለ መገጣጠሚያን፣ ንብረቶችን ወይም የሩጫ ጊዜን መጠቅለል ላይ ተጽእኖ ሲፈጥር ብቻ `npm run build` በአካባቢው ይጠቀሙ። `npm run build:release` ለ release/deploy ማረጋገጫ ብቻ ይጠቀሙ። CI's ግንባታ የመጨረሻው መስቀል-መድረክ ምልክት ነው; በመድረክ ላይ የተመሰረቱ Electron ለውጦች የሚዛመደው የትኩረት ግንባታ ወይም የጭስ ማስረጃ ያስፈልጋቸዋል።
 
 ## ለጋራ ማሽን የገንቢ ስክሪፕቶች
 

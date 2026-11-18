@@ -1,6 +1,7 @@
 import { GithubExecutor } from "./github.ts";
 import type { ProviderCredentials, ExecuteInput, ExecutorLog } from "./base.ts";
 import { getModelTargetFormat } from "../config/providerModels.ts";
+import { dispatchGuarded } from "./dispatchPin.ts";
 
 /** Result of a successful GHE Copilot internal token exchange. */
 type CopilotTokenResult = {
@@ -193,12 +194,13 @@ export class GheCopilotExecutor extends GithubExecutor {
       const baseUrl = gheUrl.replace(/\/chat\/completions\/?$/, "").replace(/\/responses\/?$/, "");
       const tokenUrl = `${baseUrl}/api/v3/copilot_internal/v2/token`;
 
-      const response = await fetch(tokenUrl, {
-        headers: {
-          Authorization: `Bearer ${githubAccessToken}`,
-          Accept: "application/json",
-        },
-      });
+      this.assertOutboundUrlAllowed(tokenUrl);
+      const response = await dispatchGuarded(
+        this.provider,
+        tokenUrl,
+        { headers: { Authorization: `Bearer ${githubAccessToken}`, Accept: "application/json" } },
+        credentials
+      );
 
       if (!response.ok) return null;
       const data = await response.json();
@@ -246,14 +248,20 @@ export class GheCopilotExecutor extends GithubExecutor {
         params.set("client_secret", this.config.clientSecret);
       }
 
-      const response = await fetch(tokenUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
+      this.assertOutboundUrlAllowed(tokenUrl);
+      const response = await dispatchGuarded(
+        this.provider,
+        tokenUrl,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+          },
+          body: params,
         },
-        body: params,
-      });
+        credentials
+      );
 
       if (!response.ok) return null;
       const tokens = await response.json();
