@@ -110,6 +110,7 @@ test("surface: event catalogue (values ↔ descriptions)", () => {
       "proxy.set_aside",
       "proxy.pool.exhausted",
       "provider.reset_redeemed",
+      "provider.exhausted",
       "test.ping",
     ]
   );

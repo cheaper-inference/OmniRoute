@@ -323,9 +323,10 @@ export function ensureCacheControlOnLastUserMessage(
   }
 }
 
-/** Defaults missing TTLs to 1h until a 5m breakpoint; later defaults stay at 5m. */
+/** Defaults missing TTLs and keeps earlier breakpoints at 1h before a later 1h breakpoint. */
 export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
   let hasFiveMinuteCacheControl = false;
+  const ephemeralCacheControls: Array<Record<string, unknown>> = [];
 
   const defaultMissingTtl = (block: Record<string, unknown> | null | undefined) => {
     const cc = block?.cache_control as Record<string, unknown> | undefined;
@@ -336,6 +337,10 @@ export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
     } else if (cc.ttl === undefined) {
       cc.ttl = hasFiveMinuteCacheControl ? "5m" : "1h";
     }
+    if (cc.ttl === "1h") {
+      for (const earlier of ephemeralCacheControls) earlier.ttl = "1h";
+    }
+    ephemeralCacheControls.push(cc);
   };
 
   const tools = body.tools as Array<Record<string, unknown>> | undefined;

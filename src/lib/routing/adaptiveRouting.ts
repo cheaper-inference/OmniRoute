@@ -133,6 +133,8 @@ export interface FailoverPolicy {
   allowCrossProviderFallback: boolean;
   retryRateLimited: boolean;
   retryTimeouts: boolean;
+  /** Exhausted quota or credit ends that provider's attempt, not another provider's. */
+  failoverOnQuotaExhausted: boolean;
 }
 
 export const DEFAULT_FAILOVER_POLICY: FailoverPolicy = {
@@ -140,13 +142,18 @@ export const DEFAULT_FAILOVER_POLICY: FailoverPolicy = {
   allowCrossProviderFallback: true,
   retryRateLimited: true,
   retryTimeouts: true,
+  failoverOnQuotaExhausted: true,
 };
 
 export function shouldFailover(
   failure: ProviderFailure,
   policy = DEFAULT_FAILOVER_POLICY
 ): boolean {
-  if (!policy.allowCrossProviderFallback || !failure.retryable) return false;
+  if (!policy.allowCrossProviderFallback) return false;
+  // `retryable` answers "retry the same provider"; exhausted quota never is,
+  // which is exactly when another provider's separate quota helps.
+  if (failure.type === "quota_exhausted") return policy.failoverOnQuotaExhausted;
+  if (!failure.retryable) return false;
   if (failure.type === "rate_limit") return policy.retryRateLimited;
   if (failure.type === "timeout") return policy.retryTimeouts;
   return failure.type === "network_error" || failure.type === "provider_5xx";

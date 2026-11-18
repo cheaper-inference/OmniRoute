@@ -131,8 +131,8 @@ async function exerciseChain(tag: string) {
   const deltas = events.flatMap((e) => e.choices ?? []).map((c) => c.delta ?? {});
   assert.equal(
     deltas.map((d) => d.reasoning ?? "").join(""),
-    // PII runs first and owns this generic API-key match.
-    `request ${tag} key [API_KEY_REDACTED] end`
+    // The credential transform runs before PII and owns this API-key match.
+    `request ${tag} key [REDACTED:openai] end`
   );
   assert.equal(
     deltas.map((d) => d.reasoning_content ?? "").join(""),

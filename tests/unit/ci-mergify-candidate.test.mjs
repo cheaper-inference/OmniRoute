@@ -20,6 +20,7 @@ const ready = {
   "github.event.repository.id": 1157102282,
   "github.event.pull_request.head.repo.id": 1157102282,
   "github.event.pull_request.base.repo.id": 1157102282,
+  "needs.changes.result": "success",
   "needs.changes.outputs.code": "true",
   "needs.changes.outputs.docs": "true",
   "needs.changes.outputs.i18n": "true",
@@ -30,7 +31,9 @@ const ready = {
 // The one event that skips the matrix: a description edit on a Mergify queue draft.
 const QUEUE_DRAFT_EDIT =
   "github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id";
-const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) }}`;
+const ADMISSION_REQUESTED =
+  "github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success'";
+const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) && (${ADMISSION_REQUESTED}) }}`;
 
 const queue = {
   ...ready,
@@ -157,6 +160,49 @@ test("ordinary drafts, forged prefixes, forks and missing app authority stay ski
   }
 });
 
+// omni-queue (2026-11-13): the omni-queue merge queue pushes each candidate (base + the batch's
+// merge commits) to a fresh omni-queue/** branch. That push runs the full profile, exactly
+// like merge_group: every required lane except the pull-request-only ones.
+const omniQueuePush = {
+  ...Object.fromEntries(Object.keys(ready).map((key) => [key, null])),
+  "github.event_name": "push",
+  "github.event.action": null,
+  "github.head_ref": "",
+  "github.ref": "refs/heads/omni-queue/release-v3.8.54/b1-0123456789ab",
+  "github.event.repository.id": 1157102282,
+  "needs.changes.outputs.code": "true",
+  "needs.changes.outputs.docs": "true",
+  "needs.changes.outputs.i18n": "true",
+  "needs.changes.outputs.testsOnly": "false",
+  "needs.lint.result": "success",
+  "needs.test-unit.result": "success",
+};
+
+test("an omni-queue candidate push enables every applicable required CI lane", () => {
+  const values = jobValues(omniQueuePush);
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "false", "not a Mergify draft");
+  for (const id of required) {
+    const prOnly = policy.profiles.ci.jobs[id].when === "pr";
+    assert.equal(scheduled(id, values), !prOnly, id);
+  }
+  assert.equal(condition(workflow.jobs["admission-verdict"].if, values), true);
+});
+
+test("a pull request whose head is named omni-queue/* is an ordinary pull request", () => {
+  // Only a push of the ref itself is a candidate; a contributor branch name grants nothing.
+  const values = jobValues({
+    ...queue,
+    "github.event.pull_request.user.id": 1,
+    "github.event.pull_request.user.login": "contributor",
+    "github.event.pull_request.user.type": "User",
+    "github.head_ref": "omni-queue/release-v3.8.54/b1-0123456789ab",
+  });
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
+  for (const id of required.filter((id) => id !== "changes")) {
+    assert.equal(scheduled(id, values), false, `${id} stays skipped on a draft`);
+  }
+});
+
 const fullLane = new Set(
   Object.entries(policy.profiles.ci.jobs)
     .filter(([, rule]) => rule.when.startsWith("full-"))
@@ -233,13 +279,13 @@ for (const name of ["ci.yml", "quality.yml"]) {
     }
   });
 
-  test(`${name}: only an edit run renames the gate check`, () => {
+  test(`${name}: queue edits and unrequested drafts keep distinct check names`, () => {
     // 2026-11-04: the edit run's skipped "Gate / CI" was the latest check of that name on draft
     // #18962, and Mergify dequeued #18961 on it before the real run reported.
     const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
     assert.equal(
       wf.jobs["admission-verdict"].name,
-      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || '${checkName}' }}`
+      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || (${ADMISSION_REQUESTED}) && '${checkName}' || 'Admission not requested / ${name === "ci.yml" ? "CI" : "Quality"}' }}`
     );
   });
 
@@ -250,7 +296,7 @@ for (const name of ["ci.yml", "quality.yml"]) {
       { ...ready, "github.event.action": "edited" },
       { ...queue, "github.event.action": "synchronize" },
     ]) {
-      const v = { ...editRunValues(""), ...values };
+      const v = jobValues({ ...editRunValues(""), ...values });
       assert.equal(condition(wf.jobs.changes.if, v), true);
       assert.equal(condition(wf.jobs["admission-verdict"].if, v), true);
     }
