@@ -210,7 +210,7 @@ test("applyToolNameLengthAliases accepts a custom normalizer and ignores invalid
 
 test("applyRegistryToolNameLengthAliases is a no-op for providers without a limit", () => {
   const body: Record<string, unknown> = chatBody([LONG_A]);
-  assert.equal(applyRegistryToolNameLengthAliases("openai", body).size, 0);
+  assert.equal(applyRegistryToolNameLengthAliases("groq", body).size, 0);
   assert.equal((body as unknown as ChatBody).tools[0].function.name, LONG_A);
   assert.equal(body._toolNameMap, undefined);
   assert.equal(applyRegistryToolNameLengthAliases("nvidia", body).size, 1);

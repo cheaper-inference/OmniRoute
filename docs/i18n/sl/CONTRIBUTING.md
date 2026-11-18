@@ -304,68 +304,68 @@ Za uporabljene primere glejte `open-sse/utils/stream.ts` in `open-sse/utils/stre
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Usmerjevalnik aplikacije Next.js 16
-│   ├── (dashboard)/        # Strani nadzorne plošče (23 razdelkov)
-│   ├── api/                # API-poti (51 imenikov)
-│   └── login/              # Strani za preverjanje pristnosti (.tsx)
-├── domain/                 # Mehanizem pravilnikov (policyEngine, comboResolver, costRules itd.)
-├── lib/                    # Osrednja poslovna logika (.ts)
-│   ├── a2a/                # Strežnik protokola Agent-to-Agent v0.3
-│   ├── acp/                # Register protokola Agent Communication Protocol
-│   ├── compliance/         # Mehanizem pravilnikov skladnosti
-│   ├── db/                 # Domenski moduli SQLite + 130 migracij
-│   ├── memory/             # Trajni pomnilnik pogovorov
-│   ├── oauth/              # Ponudniki, storitve in pripomočki OAuth
-│   ├── skills/             # Razširljivo ogrodje veščin
-│   ├── usage/              # Spremljanje uporabe in izračun stroškov
-│   └── localDb.ts          # Samo plast za ponovni izvoz — sem nikoli ne dodajajte logike
-├── middleware/              # Vmesna programska oprema zahtev (promptInjectionGuard)
-├── mitm/                   # Posredniški strežnik MITM (potrdilo, DNS, usmerjanje ciljev)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponente React (.tsx)
-│   ├── constants/          # Definicije ponudnikov (329), obsegi MCP, 20 strategij usmerjanja
-│   ├── utils/              # Odklopnik, čistilnik in pomočniki za preverjanje pristnosti
-│   └── validation/         # Sheme Zod v4
-└── sse/                    # Posredniški cevovod SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Delovni prostor @omniroute/open-sse
-├── executors/              # 150 izvajalnih modulov (izvajalni razredi + pomočniki za posamezne ponudnike)
-├── handlers/               # 11 obdelovalnikov zahtev (klepet, odzivi, vdelave, slike itd.)
-├── mcp-server/             # Strežnik MCP (110 edinstvenih orodij, 3 prenosi, 33 obsegov)
-├── services/               # 178 vrhnjih storitev (combo, autoCombo, rateLimitManager itd.)
-├── translator/             # Pretvorniki formatov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Pretvornik API-ja Responses
-└── utils/                  # 22 pomožnih modulov (tok, TLS, posredniški strežnik, beleženje)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Namizna aplikacija Electron (za več platform)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Izvajalnik testov Node.js (1.574 testnih datotek)
-├── integration/            # Integracijski testi
-├── e2e/                    # Testi Playwright
-├── security/               # Varnostni testi
-├── translator/             # Testi, specifični za pretvornik
-└── load/                   # Obremenitveni testi
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Zapisi arhitekturnih odločitev
-├── architecture/            # Arhitektura in odpornost sistema
-├── comparison/              # OmniRoute v primerjavi z alternativami
-├── compression/             # Vodniki in pravila za stiskanje
-├── dev/                     # Razvojni vodniki
-├── diagrams/                # Arhitekturni diagrami
-├── frameworks/              # MCP, A2A, OpenCode, pomnilnik, veščine
-├── guides/                  # Uporabniški vodnik, Docker, nastavitev, odpravljanje težav
-├── i18n/                    # Internacionalizirani prevodi datoteke README
-├── marketing/               # Trženjska gradiva
-├── ops/                     # Uvajanje, posredniški strežnik, pokritost, izdaje
-├── providers/               # Dokumentacija za posamezne ponudnike
-├── reference/               # Referenca API-ja, okoljske spremenljivke, orodja CLI, brezplačne ravni
-├── releases/                # Opombe ob izdajah
-├── routing/                 # Mehanizem samodejnih kombinacij, ponovno predvajanje sklepanja
-├── screenshots/             # Posnetki zaslona nadzorne plošče
-├── security/                # Varnostne omejitve, skladnost, prikritost, žetoni
-└── specs/                   # Specifikacije zasnove
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -406,22 +406,22 @@ Napišite teste enot v `tests/unit/`, ki zajemajo najmanj:
 
 ---
 
-## Kontrolni seznam za zahtevo za združitev
+## Kontrolni seznam zahtev za vleko
 
-- [ ] Testi so uspešni (`npm test`)
-- [ ] Preverjanje sloga kode je uspešno (`npm run lint`)
-- [ ] Gradnja je uspešna (`npm run build`)
-- [ ] Za nove javne funkcije in vmesnike so dodani tipi TypeScript
-- [ ] Ni trdo kodiranih skrivnosti ali nadomestnih vrednosti
-- [ ] Javne poverilnice nadrejenega projekta so vdelane prek `resolvePublicCred()` (glejte [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), nikoli kot literali
-- [ ] Odgovori z napakami se obdelajo prek `buildErrorBody()` / `sanitizeErrorMessage()` — brez neobdelanih sledov sklada v telesih odgovorov (glejte [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Lupinski ukazi (`exec` / `spawn`) posredujejo vrednosti med izvajanjem prek `env`, ne prek interpolacije nizov
-- [ ] Vsi vnosi so preverjeni s shemami Zod
-- [ ] Za spremembe, vidne uporabnikom, je dodan **fragment** dnevnika sprememb v `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (glejte [`changelog.d/README.md`](./changelog.d/README.md)) — datoteke `CHANGELOG.md` **ne** urejajte neposredno; fragmenti se združijo ob izdaji in nikoli ne povzročajo sporov med zahtevami za združitev
-- [ ] Dokumentacija je posodobljena (če je ustrezno)
-- [ ] Ni novih opozoril CodeQL / Secret-Scanning oziroma je vsako zavrnjeno s tehnično utemeljitvijo, ki se sklicuje na ustrezen dokument v `docs/security/`
-- [ ] Poti, ki zaženejo podrejene procese (`/api/mcp/`, `/api/cli-tools/runtime/`), so v `src/server/authz/routeGuard.ts` razvrščene kot `isLocalOnlyPath()` — glejte [Strogo pravilo št. 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] V sporočilih potrditev ni zaključnih vrstic `Co-authored-by` za UI/bote (Strogo pravilo št. 16) — človeški sodelavci, katerih delo je ponovno uporabljeno, so navedeni s standardnimi zaključnimi vrsticami `Co-authored-by: Name <email>`
+- [ ] Testi opravljeni (`npm test`)
+- [ ] Prepustnice za linting (`npm run lint`)
+- [ ] Gradnja uspe (`npm run build`)
+- [ ] dodani tipi TypeScript za nove javne funkcije in vmesnike
+- [ ] Brez trdo kodiranih skrivnosti ali nadomestnih vrednosti
+- [ ] Javne poverilnice navzgor, vdelane prek `resolvePublicCred()` (glejte [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), nikoli kot literali
+- [ ] Odzivi na napake potekajo skozi `buildErrorBody()` / `sanitizeErrorMessage()` — v telesih odgovorov ni neobdelanih sledi sklada (glejte [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Ukazi lupine (`exec` / `spawn`) posredujejo vrednosti izvajalnega časa prek `env`, ne prek interpolacije nizov
+- [ ] Vsi vnosi potrjeni s shemami Zod
+- [ ] Dnevnik sprememb** fragment** dodano pod `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` za spremembe, usmerjene v uporabnike (glejte [`changelog.d/README.md`](./changelog.d/README.md) ) — do** ne** neposredno uredi `CHANGELOG.md` ; fragmenti se združijo ob času izdaje in nikoli niso v konfliktu med PRs
+- [ ] Posodobljena dokumentacija (če je na voljo)
+- [ ] Odprto ni bilo nobeno novo opozorilo CodeQL /skrivnega skeniranja ali pa je bilo vsako od njih opuščeno s tehnično utemeljitvijo, ki se nanaša na ustrezni `docs/security/`
+- [ ] Poti, ki ustvarjajo podrejene procese (`/api/mcp/`, `/api/cli-tools/runtime/`), razvrščene kot `isLocalOnlyPath()` v `src/server/authz/routeGuard.ts` — glejte [Hard Rule #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Brez napovednikov AI/bot `Co-authored-by` v sporočilih za potrditev (Hard Rule #16) Človeškim sodelavcem —, katerih delo je ponovno uporabljeno, se pripišejo standardni napovedniki `Co-authored-by: Name <email>`
 
 ---
 

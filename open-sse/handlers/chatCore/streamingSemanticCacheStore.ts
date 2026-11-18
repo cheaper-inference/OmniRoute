@@ -58,6 +58,8 @@ interface StreamingCacheArgs {
   streamUsage?: Record<string, unknown> | null;
   log?: LoggerLike;
   videoTranscriptSensitive?: boolean;
+  /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
+  piiTokensMinted?: boolean;
 }
 
 function streamTokensSaved(streamUsage: Record<string, unknown> | null | undefined): number {
@@ -70,7 +72,19 @@ function writeStreamingCacheEntry(
   deps: StreamingSemanticCacheStoreDeps
 ): void {
   try {
-    const cleanBody = { ...(args.streamResponseBody as Record<string, unknown>) };
+    // The assembled stream body is a bare `{ choices, usage }`. Store it as a complete
+    // chat.completion so a later non-stream HIT serves a valid body.
+    const streamed = args.streamResponseBody as Record<string, unknown>;
+    const cleanBody: Record<string, unknown> = {
+      id: `chatcmpl-${Date.now()}`,
+      object: "chat.completion",
+      created: Math.floor(Date.now() / 1000),
+      model: args.model,
+      ...streamed,
+    };
+    if (Array.isArray(streamed.choices)) {
+      cleanBody.choices = streamed.choices.map((choice, index) => ({ index, ...choice }));
+    }
     delete cleanBody._streamed;
     if (!deps.isSmallEnoughForSemanticCache(cleanBody)) return;
     const sig = deps.generateSignature(
@@ -112,6 +126,7 @@ export function storeStreamingSemanticCacheResponse(
   if (
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
+    args.piiTokensMinted ||
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||

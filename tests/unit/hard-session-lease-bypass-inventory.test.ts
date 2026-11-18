@@ -33,13 +33,25 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // emptyTurnRetryLoop.ts — still dispatched through executeProviderRequest(), still
     // fenced centrally (class A).
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
-    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
+    // #18425: the codex 429 rotation now prefers the injected quota-preflight selector
+    // (`connection.getProviderCredentialsWithQuotaPreflight`) and falls back to the plain
+    // `connection.getProviderCredentials` when the leg does not wire it — two call
+    // expressions for the same rotation site, 2->3. Same gate as before
+    // (`policy.allowAccountRotation`, derived from !managedLease), so still class B.
+    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 3,
     "open-sse/services/imageCombo.ts": 1,
+    // #15279: the jev combo strategy reads the scoped `typesafe` credential for its
+    // opt-in System One choice call (COMBO_JEV_STRATEGY_ENABLED). The call never
+    // dispatches chat; the chosen targets still go through the normal path (class B).
+    "open-sse/services/combo/jevAsk.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "open-sse/services/speechCombo.ts": 2,
     "open-sse/services/videoCombo.ts": 2,
+    // #15279: the combo test summary only checks whether a TypeSafe key exists so it
+    // can say "Jev is not configured"; no request is made with it (class B).
+    "src/app/api/combos/test/route.ts": 1,
     "src/app/api/compression/compare/verify/route.ts": 1,
     "src/app/api/internal/codex-responses-ws/route.ts": 1,
     // PR #11390: rerank listing endpoint probes configured credentials so the
@@ -225,7 +237,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // call site landed here without a golden-inventory update at the time.
     // +1: bulk PATCH reads the row to carry the operator-disable marker in
     // providerSpecificData next to isActive — a state read, not dispatch.
-    "src/app/api/providers/route.ts": 4,
+    // +1: creating a key on a compatible node reads its sibling rows to copy the
+    // node's "Quota check" preset — a state read, not dispatch (class C).
+    "src/app/api/providers/route.ts": 5,
     "src/app/api/providers/test-batch/route.ts": 2,
     "src/app/api/rate-limits/route.ts": 1,
     "src/app/api/services/dario/admin/import-from-omniroute/route.ts": 2,
@@ -277,7 +291,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #11698/#11720 retirement PRs' combined getProviderConnectionById
     // fallback in the three write-path functions): not introduced by this PR.
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
-    "src/lib/db/providers.ts": 4,
+    // #18347: after an owner-fenced Codex update, re-read the durable row instead of returning
+    // the pre-write snapshot. State lookup only; it does not select or dispatch (class C).
+    "src/lib/db/providers.ts": 5,
     "src/lib/db/readCache.ts": 2,
     // #16472: guarded session-affinity eviction resolves the failed connection's shared
     // account identity before a compare-and-delete on the optional Redis store. Read-only
@@ -374,8 +390,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
     // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
-    // owner's connection id — so this is a state read (class C).
-    "src/sse/handlers/chat/museOwnership.ts": 1,
+    // owner's connection id — so this is a state read (class C). Two reads: the claim, and
+    // `museSessionIsOwned` deciding whether provider failover may change provider.
+    "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },

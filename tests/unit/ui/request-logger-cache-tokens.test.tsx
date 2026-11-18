@@ -32,11 +32,21 @@ vi.mock("next-intl", () => {
   return {
     useLocale: () => "en",
     useTranslations: (namespace?: string) => (key: string, params?: Record<string, string>) =>
-      namespace === "cache"
-        ? interpolate(cacheLabels[key] ?? key, params)
-        : namespace === "requestLogger.detail"
-          ? interpolate(detailLabels[key] ?? key, params)
-          : interpolate(key, params),
+      namespace === "common.usageEvidence"
+        ? interpolate(
+            {
+              reported: "reported",
+              estimated: "estimated",
+              unknown: "N/A",
+              unknownSource: "source unknown",
+            }[key] ?? key,
+            params
+          )
+        : namespace === "cache"
+          ? interpolate(cacheLabels[key] ?? key, params)
+          : namespace === "requestLogger.detail"
+            ? interpolate(detailLabels[key] ?? key, params)
+            : interpolate(key, params),
   };
 });
 
@@ -64,6 +74,12 @@ const populatedLog = {
   provider: "openai",
   timestamp: "2026-08-10T12:00:00.000Z",
   duration: 1_000,
+  usageEvidence: {
+    input: { source: "reported" },
+    output: { source: "estimated", method: "chars/4" },
+    cacheRead: { source: "unknown" },
+    cacheCreation: { source: "reported" },
+  },
   tokens: {
     in: 1_000,
     out: 250,
@@ -126,9 +142,10 @@ describe("request log cache token metrics (#9620)", () => {
     const row = Array.from(container.querySelectorAll("tbody tr")).find((candidate) =>
       candidate.textContent?.includes("gpt-cache")
     );
-    expect(row?.textContent).toContain("TI: 1,000");
+    expect(row?.textContent).toContain("TI: 1,000 (reported)");
+    expect(row?.textContent).toContain("TO: 250 (estimated: chars/4)");
     expect(row?.textContent).toContain("TO: 250");
-    expect(row?.textContent).toContain("CR: 800");
+    expect(row?.textContent).toContain("CR: N/A");
     expect(row?.textContent).toContain("CW: 120");
     expect(row?.textContent).toContain("↓20");
 
@@ -137,8 +154,8 @@ describe("request log cache token metrics (#9620)", () => {
     );
     expect(emptyRow?.textContent).toContain("TI: 1,000");
     expect(emptyRow?.textContent).toContain("TO: 250");
-    expect(emptyRow?.textContent).not.toContain("CR:");
-    expect(emptyRow?.textContent).not.toContain("CW:");
+    expect(emptyRow?.textContent).toContain("CR: N/A");
+    expect(emptyRow?.textContent).toContain("CW: 0");
   });
 
   it("distinguishes cache read from cache write in the detail view", async () => {
@@ -156,7 +173,7 @@ describe("request log cache token metrics (#9620)", () => {
     const inputGroup = container.querySelector('[data-testid="token-group-input"]');
     const outputGroup = container.querySelector('[data-testid="token-group-output"]');
     expect(inputGroup?.textContent).toContain("Total In: 1,000");
-    expect(inputGroup?.textContent).toContain("Cache Read: 800");
+    expect(inputGroup?.textContent).toContain("Cache Read: N/A");
     expect(inputGroup?.textContent).toContain("Cache Write: 120");
     expect(inputGroup?.textContent).toContain("Compressed:");
     expect(outputGroup?.textContent).toContain("Total Out: 250");
@@ -185,5 +202,38 @@ describe("request log cache token metrics (#9620)", () => {
     expect(inputGroup?.textContent).toContain("Cache Read: N/A");
     expect(inputGroup?.textContent).toContain("Cache Write: 0");
     expect(inputGroup?.textContent).toContain("Total In: 1,000");
+  });
+});
+
+describe("truthful log reader states", () => {
+  it("shows loading while the real log fetch is pending", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) =>
+        String(input).startsWith("/api/usage/call-logs")
+          ? new Promise(() => {})
+          : Promise.resolve(Response.json({}))
+      )
+    );
+    await render(<RequestLoggerV2 />);
+    expect(container.textContent).toContain("loadingLogs");
+    expect(container.textContent).not.toContain("CR: 0");
+  });
+  it("shows an empty state instead of invented counters", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json([]))
+    );
+    await render(<RequestLoggerV2 />);
+    expect(container.textContent).toContain("noLogs");
+    expect(container.querySelector("tbody tr")).toBeNull();
+  });
+  it("announces load failure instead of silently presenting it as zero usage", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("unavailable", { status: 503 }))
+    );
+    await render(<RequestLoggerV2 />);
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain("loadError");
   });
 });

@@ -1,1 +1,0 @@
-- **fix(usage):** Preserve the provider-supplied GLM reset-card grant type during redemption and retries so available cards can be activated ([#18840](https://github.com/cheaper-inference/OmniRoute/pull/18840)) — thanks @insoln.

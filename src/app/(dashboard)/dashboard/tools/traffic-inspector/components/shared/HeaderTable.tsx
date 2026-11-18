@@ -35,7 +35,11 @@ export function HeaderTable({ headers }: HeaderTableProps) {
           {masked ? t("show") : t("hide")}
         </Button>
       </div>
-      <Table className="min-w-0 font-mono text-xs" scrollbarLabel={t("headersTable")}>
+      <Table
+        className="min-w-0 font-mono text-xs"
+        scrollbarLabel={t("headersTable")}
+        scrollLabel={t("headersTable")}
+      >
         <TableHeader>
           <TableRow>
             <TableHead>{t("name")}</TableHead>

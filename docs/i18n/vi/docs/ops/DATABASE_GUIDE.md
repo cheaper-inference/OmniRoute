@@ -184,31 +184,94 @@ Danh sách đầy đủ gồm hơn 30 bảng nằm trong `src/lib/db/migrations/
 
 ---
 
-## Di chuyển cơ sở dữ liệu
+## Di chuyển
 
-OmniRoute sử dụng **các migration có phiên bản và có tính lũy đẳng** trong `src/lib/db/migrations/`. Mỗi migration là một tệp SQL duy nhất có tên theo định dạng `NNN_description.sql`.
+công dụng OmniRoute** di chuyển bình thường, được phiên bản** trong `src/lib/db/migrations/`. Mỗi lần di chuyển là một tệp SQL duy nhất. Hai định dạng đặt tên cùng tồn tại; phiên bản được ghi trong `_omniroute_migrations` là tiền tố số.
 
-### Quy tắc đặt tên migration
+### Đặt tên di chuyển
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Định dạng                                         | Ví dụ                                | Dùng cho                                                                                                                                                         |
+| ------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (chính xác là 3 chữ số)     | `241_seen_models.sql`                | Dòng cũ `001`–`241`. Bị đóng băng khi định dạng dấu thời gian hạ cánh (`240` và `241` đã được hợp nhất ngay trước nó): không có tệp mới nào nhận được số thứ tự. |
+| `YYYYMMDDHHMMSS_description.sql` (14 chữ số, UTC) | `20261113120000_add_usage_index.sql` | Mọi hoạt động di chuyển được tạo từ ngày 13 tháng 11 năm 2026 trở đi.                                                                                            |
 
-### Cách migration được chạy
+Tại sao lại thay đổi: với các số liên tiếp, PRs song song đã chọn cùng một số tiếp theo và tất cả trừ một số phải đánh số lại trước khi hợp nhất. Dấu thời gian UTC cung cấp cho mỗi PR phiên bản riêng.
+
+Quy tắc về định dạng dấu thời gian (được thực thi bởi `npm run check:migration-numbering`, được chia sẻ với trình tạo trong `scripts/check/lib/migrationNaming.mjs`):
+
+- Dấu thời gian là ngày và giờ UTC thực, không sớm hơn `20261113000000` và không quá 10 phút trong tương lai.
+- Mô tả là chữ thường `snake_case` bắt đầu bằng một chữ cái (`a-z`, `0-9`, `_` đơn giữa các từ), tối đa 80 ký tự.
+- Hai tệp có cùng dấu thời gian là trùng lặp.
+- Quy tắc không có khoảng cách chỉ áp dụng cho chuỗi cũ: mọi số từ `001` đến `241` phải tồn tại, ngoại trừ các khoảng trống đã biết `026`, `055` và `121`. Xóa `241` (hoặc bất kỳ tệp cũ nào) sẽ không thành công. `001` và `241` không bao giờ có thể được thêm vào danh sách cho phép `KNOWN_GAPS`. Các tập tin được đánh dấu thời gian không bao giờ tạo ra khoảng trống.
+- Mỗi mục trong `src/lib/db/migrations/` phải là một tệp thông thường có tên `.sql` viết thường hợp lệ. Một thư mục, một liên kết tượng trưng, một tệp `.SQL` hoặc `.sql.bak`, một tệp ẩn hoặc một tên có khoảng trắng sẽ không thực hiện được cổng vì người chạy sẽ bỏ qua nó một cách im lặng hoặc gặp sự cố khi khởi động.
+
+**Áp dụng đơn đặt hàng.** Trình chạy sắp xếp theo giá trị số của tiền tố, không phải theo văn bản: trước tiên là các tệp `001`–`241` cũ, sau đó là các tệp được đánh dấu thời gian theo thứ tự dấu thời gian, sau đó là bất kỳ thư mục được đặt tên nào đã đăng ký với `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (các phiên bản như `ee-001`). Di chuyển đang chờ xử lý là bất kỳ tệp nào có phiên bản không có trong `_omniroute_migrations`, do đó, việc di chuyển từ nhánh cũ hợp nhất sau nhánh mới hơn vẫn áp dụng trên cơ sở dữ liệu hiện có.
+
+**Dấu thời gian là thứ tự tạo chứ không phải thứ tự hợp nhất.** Nếu quá trình di chuyển của bạn phụ thuộc vào một bảng hoặc cột được tạo bởi quá trình di chuyển có** mới hơn** dấu thời gian (ví dụ: một dấu thời gian từ một PR khác được hợp nhất trước), cơ sở dữ liệu mới sẽ chạy cơ sở dữ liệu của bạn trước và không thành công. Trong khi PR của bạn vẫn mở, hãy tạo lại tên tệp bằng `npm run db:new-migration` để nó có dấu thời gian mới hơn hoặc làm cho nó độc lập. `npm run test:migrations:fresh` áp dụng mọi di chuyển vào cơ sở dữ liệu trống và nắm bắt điều này.
+
+### Di chuyển đã hợp nhất không bao giờ bị xóa hoặc đổi tên
+
+Khi tệp di chuyển nằm trên nhánh phát hành hoặc `main`, nó đã chạy trên cơ sở dữ liệu tương đồng và nhà phát triển, trên các bản cài đặt VPS và trong đồng bộ hóa Doanh nghiệp. Từ đó trở đi:
+
+- **Không bao giờ xóa nó.** Các lượt cài đặt mới sẽ mất lược đồ trong khi cơ sở dữ liệu được nâng cấp sẽ giữ lại lược đồ đó.
+- **Không bao giờ đổi tên nó.** Phiên bản trong `_omniroute_migrations` sẽ không còn khớp với một tệp nữa, vì vậy mọi cơ sở dữ liệu đã áp dụng nó sẽ chạy lại. SQL không bình thường sẽ sao chép dữ liệu hoặc dừng khởi động.
+- **Cần một lược đồ khác?** Tạo một di chuyển mới với `npm run db:new-migration`.
+
+Việc đổi tên chỉ an toàn đối với tệp chưa được hợp nhất, đó là trường hợp mà gợi ý của cổng đề cập đến. Thẻ phát hành không thay đổi gì ở đây: mỗi lần đẩy tới nhánh `release/v*` sẽ xuất bản hình ảnh Docker `:next` và chạy trên các bản cài đặt tương đồng, VPS và đồng bộ hóa doanh nghiệp, do đó quá trình di chuyển đã hợp nhất đã chạy trên cơ sở dữ liệu thực trước khi có bất kỳ thẻ `vX.Y.Z` nào tồn tại. Cổng không thành công trong mỗi lần xóa tệp cơ sở, được gắn thẻ hay không.
+
+- **Hoàn nguyên quá trình di chuyển đã hợp nhất.** Một `git revert` xóa tập tin không thành công. Giữ tệp và hoàn tác lược đồ của nó trong một lần di chuyển mới: `npm run db:new-migration -- <description>`, với `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS`, v.v. Cơ sở dữ liệu mới và được nâng cấp sau đó kết thúc với cùng một lược đồ.
+- **Đổi tên được chấp nhận: mục nhập tương thích và nội dung giống hệt nhau.** Nếu một tệp đã hợp nhất phải di chuyển (ví dụ: hai tệp đã hợp nhất chia sẻ dấu thời gian và trình chạy dừng do xung đột phiên bản), hãy đổi tên tệp sau mà không chạm vào SQL của nó và thêm `{ fromVersion, fromName, toVersion, toName }` vào `RENAMED_MIGRATION_COMPATIBILITY` trong `src/lib/db/migrationRunner/constants.ts`. Cơ sở dữ liệu áp dụng phiên bản cũ sẽ di chuyển hàng `_omniroute_migrations` thay vì chạy lại tệp. Cổng cảnh báo về việc đổi tên như vậy và luôn chạy kiểm tra giao hoán trên đó, bất kể dấu thời gian mới: các bản cài đặt mới áp dụng tệp ở vị trí mới, cơ sở dữ liệu đã nâng cấp thì không, vì vậy hãy chọn dấu thời gian mới gần dấu thời gian cũ. Cổng không đổi tên được nếu nội dung đã thay đổi (thay đổi lược đồ vẫn diễn ra trong quá trình di chuyển mới) hoặc nếu tệp mục tiêu của mục nhập không có trên đĩa.
+- **Không bao giờ đổi tên trong cùng một dấu thời gian.** Việc đổi tên giữ dấu thời gian và chỉ thay đổi mô tả không thành công, có hoặc không có mục nhập. Với một mục có `toVersion` bằng `fromVersion` của nó, trình chạy sẽ xóa hàng `_omniroute_migrations` cũ và áp dụng lại tệp trên mọi cơ sở dữ liệu đã chạy nó. Nếu không có mục nhập, trình chạy chỉ theo dõi phiên bản: nó bỏ qua tệp trên các cơ sở dữ liệu đó (nội dung mới không bao giờ chạy ở đó) và ghi lại lỗi đánh số lại trong mỗi lần khởi động. Sử dụng dấu thời gian khác cùng với mục nhập tương thích hoặc giữ nguyên tên.
+- **Cổng kiểm tra xem tệp đã đổi tên có chạy lại không.** Đối với mỗi lần đổi tên được bảo hiểm, cổng sẽ chuyển tên tệp mới để kiểm tra giao hoán với `--must-not-apply`. Việc kiểm tra khởi động cơ sở dữ liệu đã nâng cấp với trình chạy thực và nếu trình chạy áp dụng lại tệp đó (ví dụ: do mục nhập có phiên bản hoặc tên sai hoặc do trình phân tích cú pháp văn bản của cổng đọc `constants.ts` khác với TypeScript), cổng không thành công với `migration renomeada rodaria de novo` và yêu cầu bạn kiểm tra tên và phiên bản cũ và mới của mục nhập.
+
+### Cổng kiểm tra những gì so với cơ sở
+
+Khi yêu cầu kéo và chạy hàng đợi hợp nhất, `npm run check:migration-numbering` so sánh `src/lib/db/migrations/` trên đĩa với cùng thư mục trên nhánh cơ sở. Cơ sở, theo thứ tự này: `--base-latest-tag`, `--base <ref>`, biến `MIGRATION_BASE_REF` hoặc khi `GITHUB_EVENT_NAME` là `pull_request`, `pull_request_target` hoặc `merge_group`, cha mẹ đầu tiên của cam kết hợp nhất, `merge_group.base_sha` của tải trọng sự kiện hoặc `git merge-base HEAD origin/$GITHUB_BASE_REF`. Trong một yêu cầu kéo hoặc chạy hàng đợi hợp nhất mà không có cơ sở có thể phân giải được, cổng không thành công. Bên ngoài CI không có `--base`, nó in `comparação com a base: pulada (sem --base)` và bỏ qua các quy tắc này.
+
+`--base-latest-tag` so sánh với thẻ phát hành mới nhất (`vX.Y.Z` theo thứ tự semver; các thẻ hậu tố như nightlies không được tính) có trong lịch sử của `HEAD`, với các quy tắc tương tự như `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) chạy cổng theo cách này, vì các lần chạy đẩy và chạy theo lịch trình không có cơ sở yêu cầu kéo và việc hợp nhất có thể hạ cánh mà không cần chạy CI mới. Không có thẻ phát hành trong lịch sử nên cổng không thành công; chạy `git fetch --tags` (trong CI, `actions/checkout` với `fetch-depth: 0` mang theo các thẻ).
+
+| Thay đổi theo yêu cầu kéo                                                                                            | Kết quả                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Một tệp tồn tại trên cơ sở được đổi tên, với mục nhập `RENAMED_MIGRATION_COMPATIBILITY`                              | **Cảnh báo** nếu nội dung giống hệt nhau và kiểm tra giao hoán sẽ chạy bất kể dấu thời gian mới; nó không thành công nếu vị trí mới thay đổi lược đồ cuối cùng (hoàn tác việc đổi tên hoặc chọn một dấu thời gian mới khác nơi nó di chuyển) hoặc nếu người chạy áp dụng lại tệp đã đổi tên trên cơ sở dữ liệu đã nâng cấp.** Thất bại** nếu nội dung thay đổi. |
+| Một tệp tồn tại trên cơ sở được đổi tên theo dấu thời gian của nó (chỉ thay đổi mô tả)                               | **Thất bại** , có hoặc không có mục nhập: người chạy sẽ áp dụng lại (có mục nhập) hoặc bỏ qua theo phiên bản (không có mục nhập). Sử dụng dấu thời gian khác cùng với mục nhập tương thích hoặc giữ nguyên tên.                                                                                                                                                 |
+| Một tập tin tồn tại trên cơ sở sẽ bị xóa hoặc đổi tên mà không có mục nhập                                           | **Thất bại** , cho dù tệp có nằm trong thẻ phát hành hay không. Để hoàn tác, hãy khôi phục tệp bằng `git checkout <base> -- src/lib/db/migrations/<file>`; để hoàn nguyên lược đồ của nó, hãy thêm một di chuyển mới với `DROP ... IF EXISTS`.                                                                                                                  |
+| Một tập tin tồn tại trên cơ sở có nội dung khác nhau                                                                 | **Cảnh báo** (chú thích `::warning` trong Hành động GitHub ) và quá trình kiểm tra giao hoán sẽ diễn ra. Sẽ không thành công nếu chỉnh sửa thay đổi lược đồ cuối cùng, vì cơ sở dữ liệu được nâng cấp không áp dụng lại tệp đã chỉnh sửa: đưa thay đổi vào một lần di chuyển mới. Một chỉnh sửa vô hại (một bình luận, `IF NOT EXISTS`) chỉ cảnh báo.           |
+| Tệp có dấu thời gian được thêm vào với dấu thời gian không mới hơn tệp mới nhất của cơ sở                            | Chạy kiểm tra chuyển mạch, được mô tả dưới đây.                                                                                                                                                                                                                                                                                                                 |
+| Tệp `NNN_` định dạng cũ được thêm vào với một số bên dưới tệp định dạng cũ mới nhất của cơ sở                        | **Thất bại** , ngay cả khi `KNOWN_GAPS` được chỉnh sửa trong cùng một yêu cầu kéo: chuỗi cũ bị đóng băng, hãy tạo di chuyển bằng `npm run db:new-migration`. Các tệp định dạng cũ phía trên tệp mới nhất của cơ sở (yêu cầu kéo `release/v*` sang `main` ) được chấp nhận.                                                                                      |
+| Một tệp không đúng thứ tự, được chỉnh sửa hoặc đổi tên chứa các câu lệnh `INSERT`, `UPDATE`, `DELETE` hoặc `REPLACE` | **Cảnh báo** : kiểm tra giao hoán không so sánh dữ liệu, vì vậy hãy xem lại xem thứ tự áp dụng cơ sở dữ liệu mới và nâng cấp có làm thay đổi kết quả hay không.                                                                                                                                                                                                 |
+
+Một lần kiểm tra giao hoán bao gồm các tệp không đúng thứ tự, các tệp đã chỉnh sửa và các tệp được đổi tên cùng nhau.
+
+Kiểm tra giao hoán (`scripts/check/migration-commutation.ts`) xây dựng hai cơ sở dữ liệu tạm thời với đường dẫn cài đặt thực: một** nâng cấp** một (khởi động bằng các lần di chuyển cơ sở, sau đó khởi động lại trên cùng một tệp với các lần di chuyển của yêu cầu kéo) và một** tươi** một (một lần khởi động với quá trình di chuyển của yêu cầu kéo). Nó so sánh các lược đồ kết quả: bảng và cột (bỏ qua thứ tự cột), ràng buộc UNIQUE / PRIMARY KEY và FOREIGN KEY, văn bản `CREATE TABLE` chuẩn hóa của mỗi bảng (bao gồm các ràng buộc CHECK, đối chiếu, cột được tạo và tùy chọn bảng), chỉ mục, trình kích hoạt và dạng xem. Dữ liệu hàng không được so sánh. Nếu chúng khớp nhau, cổng sẽ in ra rằng tệp không đúng thứ tự nhưng vẫn hoạt động và được chuyển. Nếu chúng khác nhau, cổng không thành công với sự khác biệt và gợi ý cho trường hợp: đối với một tệp không đúng thứ tự, hãy tạo lại tên của nó bằng `npm run db:new-migration`, điều này an toàn vì tệp chưa được hợp nhất; đối với tệp cơ sở đã chỉnh sửa, hãy khôi phục nội dung cơ sở và thực hiện thay đổi trong quá trình di chuyển mới; đối với một tệp đã được đổi tên, hãy hoàn tác việc đổi tên hoặc chọn một dấu thời gian mới khác nơi nó di chuyển, không bao giờ đặt cùng một dấu thời gian với một tên khác. Nếu bản thân việc kiểm tra không thể chạy, cổng sẽ bị lỗi ở CI và chỉ cảnh báo cục bộ. Đối với tệp cơ sở đã chỉnh sửa, cơ sở dữ liệu đã nâng cấp được xây dựng bằng nội dung cơ sở của tệp đó và lần khởi động thứ hai sẽ bỏ qua cơ sở dữ liệu đó vì phiên bản của nó đã được ghi lại. Đối với một tệp đã được đổi tên, cơ sở dữ liệu đã nâng cấp được xây dựng với tệp dưới tên cũ của nó và lần khởi động thứ hai sẽ di chuyển hàng `_omniroute_migrations` của nó qua mục nhập tương thích thay vì chạy lại; cổng chuyển tên mới bằng `--must-not-apply`, do đó việc kiểm tra không thành công nếu lần khởi động thứ hai áp dụng nó. Nếu quá trình di chuyển yêu cầu kéo không áp dụng được trên đường dẫn đã nâng cấp, tức là sau mỗi lần di chuyển cơ sở (dù có thất bại trong lần cài đặt mới hay không), cổng sẽ báo cáo `migration do PR não aplica` và yêu cầu bạn sửa SQL theo lược đồ hiện tại của cơ sở; nếu tệp phụ thuộc vào quá trình di chuyển yêu cầu kéo khác có dấu thời gian muộn hơn, hãy tạo lại tên của nó bằng `npm run db:new-migration`.
+
+Để chạy cùng một so sánh cục bộ, hãy chuyển cơ sở một cách rõ ràng, ví dụ `npm run check:migration-numbering -- --base origin/<base-branch>` hoặc `npm run check:migration-numbering -- --base-latest-tag` để so sánh với bản phát hành mới nhất.
+
+### Chuyển đổi di chuyển `NNN` của PR mở
+
+Yêu cầu kéo được mở trước khi chuyển đổi vẫn có thể mang tệp tuần tự như `242_add_widgets.sql`. Các số cũ trên `241` bị từ chối, vì vậy hãy chuyển đổi nó trước khi hợp nhất:
+
+1. **Đổi tên tệp bằng trình tạo, giữ nguyên mô tả.** Chạy `npm run db:new-migration -- <same description>` để lấy tên mới, di chuyển SQL vào đó và xóa tệp `NNN_` cũ. Mô tả phải giống hệt nhau: mục tương thích bên dưới khớp với mô tả đó.
+2. **Thêm mục nhập tương thích nếu cơ sở dữ liệu liên tục chạy số cũ.** Nếu bất kỳ cơ sở dữ liệu nào được lưu giữ (tương đồng, a VPS, bản cài đặt của chính người đóng góp) chạy bản dựng PR với tệp `NNN_`, hãy thêm `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` vào `RENAMED_MIGRATION_COMPATIBILITY` trong `src/lib/db/migrationRunner/constants.ts`. Đây là** cần thiết cho `237` đến `241`** : các vị trí đó hiện chứa `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` và `241_seen_models.sql` và không có mục nhập, cơ sở dữ liệu như vậy sẽ bỏ qua quá trình di chuyển chính tắc mãi mãi và chạy lại chuyển đổi. Nó cũng hoạt động cho một vị trí trống, chẳng hạn như `242`, khi đích đến là dấu thời gian. Khi nghi ngờ, hãy thêm mục nhập. Vị trí bạn thêm nó vào mảng không quan trọng: khi vị trí mục tiêu của mục nhập vẫn giữ một hàng mà mục nhập khác sẽ di chuyển đi (ví dụ: `237` giữ một hàng PR trong khi một hàng `usage_history_calculated_cost` cũ hơn chờ di chuyển vào `237`), người chạy sẽ cho phép mục nhập đó đợi cho đến khi vị trí còn trống. Chỉ có xung đột thực sự, chẳng hạn như một vị trí được giữ bởi một hàng không có mục nào di chuyển hoặc hai mục nhập hoán đổi vị trí, sẽ dừng khởi động bằng `Cannot reconcile ...`.
+3. **Giữ SQL bình thường** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), vì quá trình di chuyển được chuyển đổi có thể gặp cơ sở dữ liệu đã tồn tại lược đồ của nó.
+4. **Di chuyển các trường hợp đặc biệt có khóa phiên bản.** Nếu PR đã thêm một trường hợp cho số cũ của nó bằng `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) hoặc `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), hãy thay đổi khóa thành dấu thời gian mới.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` là một ví dụ hoạt động về thử nghiệm di chuyển được đổi tên.
+
+### Chuyển ngược lại các nhánh trước khi chuyển đổi
+
+Không bao giờ chọn anh đào hoặc chuyển ngược tệp `YYYYMMDDHHMMSS_` sang một nhánh có trước nút chuyển (ví dụ: nhánh `release/v*` cũ hơn). Trình chạy ở đó sắp xếp tên tệp dưới dạng văn bản, do đó, tệp có dấu thời gian sẽ chạy giữa `201_` và `202_` trên cơ sở dữ liệu mới và cổng cũ ở đó không hiểu tiền tố 14 chữ số. Trên nhánh như vậy, hãy viết thay đổi dưới dạng tệp `NNN_` tiếp theo của chính nhánh đó, idempotent, do đó, sẽ không hoạt động khi phiên bản có dấu thời gian đến sau.
+
+### Quá trình di chuyển diễn ra như thế nào
 
 Khi khởi động, `migrationRunner.ts`:
 
-1. Tạo bảng `_omniroute_migrations` nếu bảng chưa tồn tại
-2. Truy vấn các migration đã được áp dụng
-3. Áp dụng mọi migration mới theo thứ tự, mỗi migration trong một giao dịch
-4. Ghi lại từng migration đã áp dụng cùng dấu thời gian
+1. Tạo bảng `_omniroute_migrations` nếu chưa tồn tại
+2. Truy vấn về các lần di chuyển đã được áp dụng
+3. Áp dụng mọi di chuyển mới theo thứ tự, mỗi lần di chuyển trong một giao dịch
+4. Ghi lại từng lần di chuyển được áp dụng bằng dấu thời gian
 
 ```ts
-// src/lib/db/migrationRunner.ts (đã đơn giản hóa)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Tính lũy đẳng
+### sự bình thường
 
-Các migration phải **có tính lũy đẳng** — chạy chúng hai lần sẽ không tạo ra thay đổi nào:
+Việc di cư phải được** bình thường** — chạy chúng hai lần sẽ không hoạt động:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Nên sử dụng rộng rãi các mệnh đề `IF NOT EXISTS`, `IF EXISTS` và `OR IGNORE` / `OR REPLACE`.
+Sử dụng các mệnh đề `IF NOT EXISTS`, `IF EXISTS` và `OR IGNORE` / `OR REPLACE` một cách tùy ý.
 
-### Thêm migration mới
+### Thêm một di chuyển mới
 
-1. **Xác định số tiếp theo**: `ls src/lib/db/migrations/ | tail -1`
-2. **Tạo tệp**: `NNN_my_change.sql`
-3. **Sử dụng DDL an toàn**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Điền dữ liệu bổ sung một cách cẩn thận**: sử dụng `UPDATE ... WHERE ...` để xử lý các hàng hiện có
-5. **Kiểm thử trên một bản sao**: tuyệt đối không chạy các migration chưa được kiểm thử trên môi trường production
+1. **Tạo tập tin với trình tạo** : `npm run db:new-migration -- <description>` (ví dụ `npm run db:new-migration -- add combo priority`). Nó ghi `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` với thời gian UTC hiện tại và tiêu đề nhận xét, tiến về phía trước một giây nếu dấu thời gian đó được lấy và không bao giờ ghi đè lên tệp. Đừng chọn số bằng tay.
+2. **Sử dụng DDL an toàn** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Chèn lấp dữ liệu cẩn thận** : sử dụng `UPDATE ... WHERE ...` để xử lý các hàng hiện có
+4. **Kiểm tra thứ tự và đặt tên** : `npm run test:migrations:fresh` (tất cả các lần di chuyển trên cơ sở dữ liệu trống) và `npm run check:migration-numbering`
+5. **Kiểm tra trên một bản sao** : không bao giờ chạy các di chuyển chưa được kiểm tra trên sản xuất
 
 Ví dụ:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Các thay đổi không tương thích ngược** (ví dụ: xóa cột) rất phức tạp. OmniRoute KHÔNG hỗ trợ hạ cấp — sau khi một migration được áp dụng, thay đổi schema sẽ tồn tại vĩnh viễn. Hãy lập kế hoạch phù hợp.
+> **Những thay đổi không tương thích ngược** (ví dụ: thả cột) rất phức tạp. OmniRoute không NOT hỗ trợ hạ cấp — sau khi áp dụng di chuyển, thay đổi lược đồ là vĩnh viễn. Lập kế hoạch cho phù hợp.
 
 ---
 
@@ -403,52 +466,53 @@ Lệnh này sử dụng API sao lưu trực tuyến của SQLite — có thể c
 
 ---
 
-## Tinh chỉnh hiệu năng
+## Điều chỉnh hiệu suất
 
 ### Chế độ WAL
 
-WAL được bật theo mặc định. Đối với khối lượng công việc có nhiều thao tác ghi, hãy cân nhắc:
+WAL được bật theo mặc định. Đối với khối lượng công việc ghi cao, hãy cân nhắc:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Tạo checkpoint sau mỗi 1000 trang
-PRAGMA journal_size_limit = 67108864;  -- Giới hạn WAL ở mức 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute không đặt `journal_size_limit`. Điểm kiểm tra di chuyển các khung WAL vào tệp chính, nhưng tệp WAL vẫn giữ kích thước được phân bổ lớn nhất. Người bảo vệ `OMNIROUTE_WAL_GUARD_MAX_MB` chỉ cảnh báo và chạy `wal_checkpoint(RESTART)`; nó không phải là giới hạn kích thước đĩa.
 
 ### Chỉ mục
 
-Các chỉ mục quan trọng đối với hiệu năng (được migration tự động tạo):
+Các chỉ mục chính cho hiệu suất (được tạo tự động bằng cách di chuyển):
 
-- `idx_models_provider` — tra cứu mô hình theo nhà cung cấp
-- `idx_combo_targets_combo_id` — mở rộng mục tiêu combo
-- `idx_usage_history_api_key_timestamp` — phân tích mức sử dụng
-- `idx_quota_snapshots_api_key_window` — theo dõi hạn ngạch
-- `idx_call_logs_timestamp` — truy vấn nhật ký cuộc gọi
+- tra cứu mô hình `idx_models_provider` — theo nhà cung cấp
+- mở rộng mục tiêu kết hợp `idx_combo_targets_combo_id` —
+- phân tích sử dụng `idx_usage_history_api_key_timestamp` —
+- theo dõi hạn ngạch `idx_quota_snapshots_api_key_window` —
+- truy vấn nhật ký cuộc gọi `idx_call_logs_timestamp` —
 
-Để thêm một chỉ mục mới, hãy tạo một migration:
+Để thêm chỉ mục mới, hãy tạo di chuyển:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ánh xạ bộ nhớ
+### I/O được ánh xạ bộ nhớ
 
-Đối với cơ sở dữ liệu rất lớn (>10GB), có thể điều chỉnh ánh xạ bộ nhớ thông qua pragma của SQLite:
+Đối với cơ sở dữ liệu rất lớn (> 10GB), ánh xạ bộ nhớ có thể được điều chỉnh thông qua SQLite pragma:
 
 ```sql
--- Thiết lập thông qua pragma của SQLite (điều chỉnh trong core.ts hoặc khi chạy)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Thu gọn
+### nén chặt
 
-Các phiên bản OmniRoute chạy lâu dài sẽ được hưởng lợi từ việc thỉnh thoảng chạy `VACUUM`:
+Các phiên bản OmniRoute chạy dài được hưởng lợi từ `VACUUM` không thường xuyên:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Chạy hằng tháng trong các khoảng thời gian có lưu lượng thấp. (Chế độ WAL làm giảm nhu cầu này nhưng không loại bỏ hoàn toàn.)
+Chạy hàng tháng trong thời gian có lưu lượng truy cập thấp. (chế độ WAL làm giảm nhu cầu nhưng không loại bỏ nó.)
 
 ---
 

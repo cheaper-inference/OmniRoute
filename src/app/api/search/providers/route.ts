@@ -76,6 +76,13 @@ const FETCH_PROVIDERS: FetchProviderDef[] = [
     fetchFormats: ["markdown"],
   },
   {
+    id: "keenable-search",
+    name: "Keenable Fetch",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0,
+    fetchFormats: ["markdown"],
+  },
+  {
     id: "deepseek-search",
     name: "DeepSeek Fetch",
     costPerQuery: 0.0007,

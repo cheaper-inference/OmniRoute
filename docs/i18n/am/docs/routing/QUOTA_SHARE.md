@@ -329,17 +329,16 @@ if (candidate.quotaSoftPenalty) {
 
 ---
 
-## የፈተና ሽፋን
+## የሙከራ ሽፋን
 
-ከ quota-share engine ጋር ሁለት የራስ-ሰር ፈተና ሽፋን ደረጃዎች ተካትተዋል፦
+ከኮታ-ማጋራት ሞተር ጋር ሁለት ንብርብሮች ራስ-ሰር ሽፋን ይጓዛሉ፡
 
-| ስብስብ               | ትዕዛዝ                                                                   | የሚሸፍነው                                                                                                                                                                                            |
-| :----------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit (29 ፈተናዎች)    | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR scheduler፣ saturation gating፣ concurrency caps፣ የfairShare ስሌት፣ backlog queueing                                                                                                              |
-| Integration matrix | `npm run test:combo:matrix`                                            | በእውነተኛው combo pipeline በኩል የሚያልፍ ከጫፍ እስከ ጫፍ የማስተላለፊያ ውሳኔ፤ በቀጥታ ማገናኛዎች (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) በኩል የDRR ፍትሃዊነት + በsaturation ምክንያት ቅድሚያ መቀነስ |
+| ስዊት            | ትዕዛዝ                                                                   | የሚሸፍነው                                                                                                                                                      |
+| :------------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ክፍል (29 ሙከራዎች) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR መርሐግብር አዘጋጅ፣ ሙሌት ጌቲንግ፣ ኮንፈረንስ ካፕ፣ fairShare ሂሳብ፣ የኋላ ሎግ ወረፋ                                                                                             |
+| የውህደት ማትሪክስ    | `npm run test:combo:matrix`                                            | ከጫፍ እስከ ጫፍ የማዞሪያ ውሳኔ በእውነተኛው ጥምር ቧንቧ; DRR ፍትሃዊነት + ሙሌት በቀጥታ ስፌት በኩል ቅድሚያ መስጠት (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integration matrix ከሁሉም 19 ይፋዊ ስትራቴጂዎች ጋር በCI ውስጥ ይሰራል። Unit suite
-በተናጠል ማስኬድ ይቻላል።
+የውህደት ማትሪክስ ከ22 ህዝባዊ ስልቶች ጎን ለጎን በ CI ይሰራል። የክፍሉ ስብስብ በተናጥል ሊሠራ ይችላል።
 
 ---
 
