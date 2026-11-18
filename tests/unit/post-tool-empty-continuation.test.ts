@@ -187,6 +187,115 @@ test("requestFollowsToolCalls detects tool results across client formats", () =>
   );
 });
 
+test("requestFollowsToolCalls only counts tool results after the latest assistant turn", () => {
+  // A completed tool exchange followed by the assistant's answer and a new user
+  // turn is an ordinary follow-up: it must keep incremental streaming.
+  assert.equal(
+    requestFollowsToolCalls({
+      messages: [
+        { role: "user", content: "weather?" },
+        { role: "assistant", content: null, tool_calls: [{ id: "c1" }] },
+        { role: "tool", tool_call_id: "c1", content: "sunny" },
+        { role: "assistant", content: "It is sunny." },
+        { role: "user", content: "thanks, and tomorrow?" },
+      ],
+    }),
+    false,
+    "OpenAI: an earlier tool exchange must not arm a later turn"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      messages: [
+        { role: "user", content: "weather?" },
+        { role: "assistant", content: [{ type: "tool_use", id: "u1", name: "w", input: {} }] },
+        { role: "user", content: [{ type: "tool_result", tool_use_id: "u1", content: "sunny" }] },
+        { role: "assistant", content: [{ type: "text", text: "It is sunny." }] },
+        { role: "user", content: "and tomorrow?" },
+      ],
+    }),
+    false,
+    "Claude: an earlier tool exchange must not arm a later turn"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      input: [
+        { role: "user", content: "weather?" },
+        { type: "function_call", call_id: "c1", name: "w", arguments: "{}" },
+        { type: "function_call_output", call_id: "c1", output: "sunny" },
+        { type: "message", role: "assistant", content: [{ type: "output_text", text: "Sunny." }] },
+        { role: "user", content: "and tomorrow?" },
+      ],
+    }),
+    false,
+    "Responses: an earlier tool exchange must not arm a later turn"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      contents: [
+        { role: "user", parts: [{ text: "weather?" }] },
+        { role: "model", parts: [{ functionCall: { name: "w", args: {} } }] },
+        { role: "user", parts: [{ functionResponse: { name: "w", response: {} } }] },
+        { role: "model", parts: [{ text: "Sunny." }] },
+        { role: "user", parts: [{ text: "and tomorrow?" }] },
+      ],
+    }),
+    false,
+    "Gemini: an earlier tool exchange must not arm a later turn"
+  );
+  // A continuation may append a user/system message after the tool results; it
+  // is still a post-tool turn.
+  assert.equal(
+    requestFollowsToolCalls({
+      messages: [
+        { role: "user", content: "weather?" },
+        { role: "assistant", content: null, tool_calls: [{ id: "c1" }] },
+        { role: "tool", tool_call_id: "c1", content: "sunny" },
+        { role: "user", content: "keep going" },
+      ],
+    }),
+    true,
+    "OpenAI: tool results followed by an appended message still arm the retry"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      messages: [
+        { role: "assistant", content: [{ type: "tool_use", id: "u1", name: "w", input: {} }] },
+        {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: "u1", content: "sunny" },
+            { type: "text", text: "keep going" },
+          ],
+        },
+      ],
+    }),
+    true,
+    "Claude: a tool_result after the latest assistant turn arms the retry"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      input: [
+        { type: "function_call", call_id: "c1", name: "w", arguments: "{}" },
+        { type: "function_call_output", call_id: "c1", output: "sunny" },
+        { role: "system", content: "be brief" },
+      ],
+    }),
+    true,
+    "Responses: tool output followed by an appended message still arms the retry"
+  );
+  assert.equal(
+    requestFollowsToolCalls({
+      contents: [
+        { role: "model", parts: [{ functionCall: { name: "w", args: {} } }] },
+        { role: "user", parts: [{ functionResponse: { name: "w", response: {} } }] },
+        { role: "user", parts: [{ text: "keep going" }] },
+      ],
+    }),
+    true,
+    "Gemini: functionResponse after the latest model turn arms the retry"
+  );
+});
+
 test("flag off: a post-tool continuation still retries a mute turn", async () => {
   await seedGroq("post-tool-a", "sk-post-tool-a");
   await seedGroq("post-tool-b", "sk-post-tool-b");
