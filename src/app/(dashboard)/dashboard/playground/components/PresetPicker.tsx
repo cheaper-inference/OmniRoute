@@ -112,7 +112,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
             }}
             defaultValue=""
             className="flex-1"
-            selectClassName="text-xs"
+            nativeSize="xs"
             aria-label={t("loadPreset")}
           >
             <option value="" disabled>

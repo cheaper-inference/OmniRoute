@@ -53,7 +53,7 @@ export default function ReasoningControls({ spec, params, setParams }: Reasoning
         label={t("effort")}
         value={params.effort}
         onChange={(e) => update("effort", e.target.value)}
-        selectClassName="text-xs"
+        nativeSize="xs"
       >
         <option value="">{t("effortDefault")}</option>
         {spec.effortOptions.map((opt) => (

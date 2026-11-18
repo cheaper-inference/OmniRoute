@@ -145,7 +145,8 @@ export default function ScrapeResult({ result, latencyMs }: ScrapeResultProps) {
         <Textarea
           readOnly
           value={displayContent}
-          className="h-64 font-mono text-xs resize-none"
+          mono
+          className="h-64 resize-none"
           data-testid="raw-content"
           aria-label={t("rawScrapedContent")}
         />
@@ -164,7 +165,8 @@ export default function ScrapeResult({ result, latencyMs }: ScrapeResultProps) {
             readOnly
             value={result.content}
             aria-label={t("rawScrapedContent")}
-            className="flex-1 font-mono text-xs resize-none"
+            mono
+            className="flex-1 resize-none"
             data-testid="raw-modal-content"
           />
           <div className="flex justify-end">

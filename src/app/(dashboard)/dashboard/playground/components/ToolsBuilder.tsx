@@ -169,7 +169,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })}
                       placeholder={t("toolNamePlaceholder")}
                       aria-label={t("toolNamePlaceholder")}
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Input
                       type="text"
@@ -177,7 +177,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       onChange={(e) => setEditDraft({ ...editDraft, description: e.target.value })}
                       placeholder={t("toolDescPlaceholder")}
                       aria-label={t("toolDescPlaceholder")}
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Textarea
                       value={editDraft.parametersRaw}
@@ -186,7 +186,8 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       }
                       rows={6}
                       aria-label={t("toolParamsJsonSchema")}
-                      className="text-xs font-mono resize-y"
+                      mono
+                      className="resize-y"
                     />
                     {toolError && <p className="text-xs text-error">{toolError}</p>}
                     <div className="flex items-center gap-2">
@@ -217,7 +218,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder={t("toolNameRequiredPlaceholder")}
           aria-label={t("toolNameRequiredPlaceholder")}
-          inputClassName="text-xs"
+          size="xs"
         />
 
         <Input
@@ -226,7 +227,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           placeholder={t("toolDescPlaceholder")}
           aria-label={t("toolDescPlaceholder")}
-          inputClassName="text-xs"
+          size="xs"
         />
 
         <div className="flex flex-col gap-1">
@@ -238,7 +239,8 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
             onChange={(e) => setForm({ ...form, parametersRaw: e.target.value })}
             rows={6}
             aria-label={t("toolParamsJsonSchema")}
-            className="text-xs font-mono resize-y"
+            mono
+            className="resize-y"
           />
         </div>
 

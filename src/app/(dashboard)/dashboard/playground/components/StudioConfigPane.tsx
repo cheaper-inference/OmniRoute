@@ -196,7 +196,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
           label={tp("endpointLabel")}
           value={configState.endpoint}
           onChange={(e) => update("endpoint", e.target.value as PlaygroundEndpoint)}
-          selectClassName="text-xs"
+          nativeSize="xs"
         >
           {ENDPOINT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -219,7 +219,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
             }));
           }}
           disabled={loadingProviders}
-          selectClassName="text-xs"
+          nativeSize="xs"
         >
           <option value="">{tp("autoProvider")}</option>
           {providerOptions.map((opt) => (
@@ -245,7 +245,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
                   placeholder={t("search")}
                   aria-label={t("search")}
                   icon="search"
-                  inputClassName="text-xs"
+                  size="xs"
                 />
               )}
               <Select
@@ -253,7 +253,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
                 value={configState.model}
                 onChange={(e) => update("model", e.target.value)}
                 disabled={loadingModels}
-                selectClassName="text-xs"
+                nativeSize="xs"
               >
                 {filteredModels.map((m) => (
                   <option key={m} value={m}>
@@ -269,7 +269,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
               value={configState.model}
               onChange={(e) => update("model", e.target.value)}
               placeholder={tp("modelPlaceholder")}
-              inputClassName="text-xs"
+              size="xs"
             />
           )}
         </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { Card, Button, Input, Select } from "@/shared/components";
+import NumberInput from "@/shared/components/NumberInput";
 import RetrievePreview from "../RetrievePreview";
 import type { RetrievePreviewResult } from "@/shared/schemas/memory";
 
@@ -88,15 +89,14 @@ export default function PlaygroundTab() {
               <option value="hybrid">{t("playground.strategyHybrid")}</option>
             </Select>
 
-            <Input
+            <NumberInput
               label={t("playground.budgetLabel")}
               data-testid="playground-budget-input"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              type="number"
-              min="100"
-              max="16000"
-              step="100"
+              value={budget === "" ? null : Number(budget)}
+              onValueChange={(tokens) => setBudget(tokens === null ? "" : String(tokens))}
+              min={100}
+              max={16000}
+              step={100}
               className="w-full"
             />
 

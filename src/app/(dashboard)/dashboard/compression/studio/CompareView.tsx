@@ -12,6 +12,7 @@ import {
 import Button from "@/shared/components/Button";
 import GuardedAction from "@/shared/components/GuardedAction";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 
 interface Row {
   engine: string;
@@ -99,7 +100,7 @@ function VerifyControls({
       <Input
         label={t("provider")}
         className="w-28"
-        inputClassName="h-8 min-h-8 text-xs"
+        size="xs"
         value={provider}
         onChange={(e) => onProvider(e.target.value)}
       />
@@ -107,20 +108,19 @@ function VerifyControls({
         label={t("judgeModel")}
         data-testid="verify-model"
         className="w-40"
-        inputClassName="h-8 min-h-8 text-xs"
+        size="xs"
         value={judgeModel}
         onChange={(e) => onJudgeModel(e.target.value)}
         placeholder={t("judgeModelPlaceholder")}
       />
-      <Input
-        type="number"
+      <NumberInput
         label={t("maxCostUsd")}
-        step="0.01"
-        min="0"
+        size="xs"
+        step={0.01}
+        min={0}
         className="w-24"
-        inputClassName="h-8 min-h-8 text-xs"
         value={capUsd}
-        onChange={(e) => onCapUsd(Number(e.target.value))}
+        onValueChange={(cap) => onCapUsd(cap ?? 0)}
       />
       <GuardedAction
         variant="secondary"

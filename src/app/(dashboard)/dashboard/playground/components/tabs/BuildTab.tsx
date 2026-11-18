@@ -275,7 +275,8 @@ export default function BuildTab({ configState }: BuildTabProps) {
                     rows={3}
                     placeholder={t("enterToolResult")}
                     aria-label={t("enterToolResult")}
-                    className="text-xs font-mono resize-y"
+                    mono
+                    className="resize-y"
                   />
                   <Button
                     size="sm"

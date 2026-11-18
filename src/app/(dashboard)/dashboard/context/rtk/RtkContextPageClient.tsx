@@ -562,7 +562,8 @@ export default function RtkContextPageClient() {
               onChange={(event) => setSample(event.target.value)}
               placeholder={t("pasteOutput")}
               aria-label={t("filterTesting")}
-              className="h-72 w-full font-mono text-xs"
+              mono
+              className="h-72 w-full"
             />
           </Card>
           <Card padding="sm">

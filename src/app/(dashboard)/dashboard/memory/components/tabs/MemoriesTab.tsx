@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import {
   Table,
@@ -14,6 +14,7 @@ import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
 import EmptyState from "@/shared/components/EmptyState";
+import { FileTrigger } from "@/shared/components/FileInput";
 import InfoTooltip from "@/shared/components/InfoTooltip";
 import EditMemoryModal from "../EditMemoryModal";
 
@@ -90,7 +91,6 @@ export default function MemoriesTab() {
   const [summarizeCandidates, setSummarizeCandidates] = useState<string[]>([]);
   const [summarizeDryRunLoading, setSummarizeDryRunLoading] = useState(false);
   const [summarizeRunLoading, setSummarizeRunLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<string>("");
 
   const fetchMemories = useCallback(async () => {
@@ -155,14 +155,7 @@ export default function MemoriesTab() {
     }
   };
 
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImportFile = async (file: File) => {
     setIsSubmitting(true);
     setImportStatus("");
     let skipped = 0;
@@ -207,7 +200,6 @@ export default function MemoriesTab() {
       setImportStatus(t("importError"));
     } finally {
       setIsSubmitting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -342,21 +334,16 @@ export default function MemoriesTab() {
           </Button>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* kit-exception: Hidden picker behind the toolbar Import button, which also shows the import's
-              loading state; the pick imports at once, so a kit FileInput status line has no role here. */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept=".json"
-            className="hidden"
-          />
           <Button variant="outline" size="sm" onClick={handleExport}>
             {t("export")}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleImportClick} loading={isSubmitting}>
-            {t("import")}
-          </Button>
+          {/* The pick imports at once: the kit FileTrigger opens the picker from the button, which
+              also shows the import's loading state. */}
+          <FileTrigger accept=".json" onFilesChange={(files) => void handleImportFile(files[0])}>
+            <Button variant="outline" size="sm" loading={isSubmitting}>
+              {t("import")}
+            </Button>
+          </FileTrigger>
           <Button
             variant="outline"
             size="sm"

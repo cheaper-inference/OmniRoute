@@ -159,7 +159,8 @@ export default function EditMemoryModal({ memory, isOpen, onClose, onSaved }: Pr
             rows={4}
             spellCheck={false}
             error={Boolean(metadataError)}
-            className="resize-y font-mono text-xs"
+            mono
+            className="resize-y"
           />
         </Field>
       </div>

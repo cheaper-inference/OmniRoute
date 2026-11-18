@@ -221,7 +221,8 @@ function AutoTriggerInput({
     <Input
       type="number"
       aria-label={ariaLabel}
-      inputClassName="h-8 min-h-8 w-24"
+      size="xs"
+      inputClassName="w-24"
       min={AUTO_TRIGGER_MIN}
       max={AUTO_TRIGGER_MAX}
       value={draft ?? String(value)}

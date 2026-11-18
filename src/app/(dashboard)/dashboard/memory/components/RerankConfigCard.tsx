@@ -116,7 +116,7 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
                     aria-label={t("rerank.providerModelLabel")}
                     data-testid="rerank-provider-model-input"
                     className="mt-2"
-                    inputClassName="font-mono"
+                    mono
                   />
                 </>
               )}

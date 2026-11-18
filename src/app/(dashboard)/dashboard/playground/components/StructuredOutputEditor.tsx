@@ -88,7 +88,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
             value={nameField}
             onChange={(e) => setNameField(e.target.value)}
             placeholder="my_schema"
-            inputClassName="text-xs"
+            size="xs"
           />
 
           {/* Schema JSON textarea */}
@@ -101,7 +101,8 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
               onChange={(e) => setSchemaRaw(e.target.value)}
               rows={8}
               aria-label={t("jsonSchemaEditor")}
-              className="text-xs font-mono resize-y"
+              mono
+              className="resize-y"
             />
           </div>
 

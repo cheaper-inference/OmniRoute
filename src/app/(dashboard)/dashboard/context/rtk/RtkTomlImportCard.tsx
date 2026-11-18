@@ -86,7 +86,8 @@ function RtkTomlEditor({
           placeholder={t("tomlImportPlaceholder")}
           aria-label={t("tomlImportTitle")}
           data-testid="rtk-toml-content"
-          className="h-56 w-full font-mono text-xs"
+          mono
+          className="h-56 w-full"
         />
       </div>
 

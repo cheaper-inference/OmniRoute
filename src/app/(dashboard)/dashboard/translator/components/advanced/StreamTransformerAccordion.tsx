@@ -346,7 +346,8 @@ export default function StreamTransformerAccordion({
                       value={rawSse}
                       onChange={(e) => setRawSse(e.target.value)}
                       data-testid="raw-sse-input"
-                      className="min-h-[360px] w-full font-mono text-xs"
+                      mono
+                      className="min-h-[360px] w-full"
                       spellCheck={false}
                       aria-label={translateOrFallback(
                         "rawChatSseInput",

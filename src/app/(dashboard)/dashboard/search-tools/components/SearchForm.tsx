@@ -10,6 +10,7 @@ import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
 // imported from their own modules.
 import { Button, Select } from "@/shared/components";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 import Textarea from "@/shared/components/Textarea";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 
@@ -204,11 +205,11 @@ export default function SearchForm({
           </div>
         </div>
         <div className="w-20">
-          <Input
+          <NumberInput
             label={t("maxResults")}
-            type="number"
+            precision={0}
             value={maxResults}
-            onChange={(e) => setMaxResults(parseInt(e.target.value) || 5)}
+            onValueChange={(count) => setMaxResults(count || 5)}
             min={1}
             max={100}
           />

@@ -9,6 +9,7 @@ import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import NumberInput from "@/shared/components/NumberInput";
 import Select from "@/shared/components/Select";
 
 interface QdrantSettings {
@@ -392,22 +393,24 @@ export default function QdrantConfigCard() {
             value={qdrant.host}
             onChange={(e) => setQdrant((s) => ({ ...s, host: e.target.value }))}
             placeholder="http://127.0.0.1"
-            inputClassName="font-mono"
+            mono
           />
         </Card.Section>
         <Card.Section>
-          <Input
+          <NumberInput
             label={t("qdrant.portLabel")}
             value={qdrant.port}
-            type="number"
-            onChange={(e) =>
+            precision={0}
+            min={1}
+            max={65535}
+            onValueChange={(port) =>
               setQdrant((s) => ({
                 ...s,
-                port: Math.max(1, Math.min(65535, Number(e.target.value) || 1)),
+                port: Math.max(1, Math.min(65535, port || 1)),
               }))
             }
             placeholder="6333"
-            inputClassName="font-mono"
+            mono
           />
         </Card.Section>
         <Card.Section>
@@ -417,7 +420,7 @@ export default function QdrantConfigCard() {
             value={qdrant.collection}
             onChange={(e) => setQdrant((s) => ({ ...s, collection: e.target.value }))}
             placeholder="omniroute_memory"
-            inputClassName="font-mono"
+            mono
           />
         </Card.Section>
         <Card.Section>
@@ -445,7 +448,7 @@ export default function QdrantConfigCard() {
               value={qdrant.embeddingModel}
               onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
               placeholder="openai/text-embedding-3-small"
-              inputClassName="font-mono"
+              mono
             />
           </Field>
         </Card.Section>
@@ -471,7 +474,7 @@ export default function QdrantConfigCard() {
                   qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
                 }
                 className="flex-1"
-                inputClassName="font-mono"
+                mono
               />
               {qdrant.hasApiKey && (
                 <Button variant="outline" onClick={() => save({ apiKey: "" })} disabled={saving}>

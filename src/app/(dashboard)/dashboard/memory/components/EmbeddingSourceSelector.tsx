@@ -138,7 +138,7 @@ export default function EmbeddingSourceSelector({ settings, providers, onSave, s
                   aria-label={t("embedding.providerModelLabel")}
                   data-testid="embedding-provider-model-input"
                   className="mt-2"
-                  inputClassName="font-mono"
+                  mono
                 />
               </>
             )}

@@ -409,7 +409,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             placeholder={t("modelPlaceholderCompare")}
             disabled={atColumnLimit}
             aria-label={t("newColumnModelName")}
-            inputClassName="text-xs"
+            size="xs"
             className="w-40 min-w-0"
           />
           <GuardedAction

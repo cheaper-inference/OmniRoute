@@ -380,3 +380,54 @@ test("C: a neutral panel nested in a card is Card.Section, not a hand-made box",
   ];
   assertOnlyKept(hits, kept, "use <Card.Section>");
 });
+
+// ── D: fields ────────────────────────────────────────────────────────────────────────────
+
+const FIELDS = "Input|Textarea|NumberInput";
+
+test('D: small fields use size="xs", not height and text-size classes', () => {
+  // `size="xs"` is the kit's 32px control with 12px text. `h-8` / `text-xs` written on the
+  // control drift from it (and from the Select beside it).
+  const hits = openingTags("Input|NumberInput").filter(({ tag }) =>
+    /inputClassName="[^"]*(?<![\w:-])(?:h-8|min-h-8|text-xs)(?![\w-])/.test(tag)
+  );
+  assertOnlyKept(hits, [], 'use size="xs"');
+});
+
+test("D: code fields use the mono prop, not font-mono", () => {
+  // `font-mono` has no effect on an <input> or a <textarea>: the kit typography sheet wins.
+  const hits = openingTags(FIELDS).filter(({ tag }) => /(?<![\w:-])font-mono(?![\w-])/.test(tag));
+  assertOnlyKept(hits, [], "use the mono prop");
+});
+
+test("D: numeric fields are the NumberInput adapter", () => {
+  const hits = openingTags("Input").filter(({ tag }) => /type="number"/.test(tag));
+  const kept: Kept[] = [
+    {
+      file: "context/rtk/RtkContextPageClient.tsx",
+      marker: "draftRef.current = event.target.value",
+      reason:
+        "Keeps a text draft that is also saved when the page unmounts and reports the open draft to the page; that contract has tests of its own.",
+    },
+    {
+      file: "context/settings/CompressionPanel.tsx",
+      marker: "AUTO_TRIGGER_MIN",
+      reason:
+        "Leaves a value it rejects in the box instead of clamping it, and Escape drops the edit; the kit field clamps on blur.",
+    },
+  ];
+  assertOnlyKept(hits, kept, "use <NumberInput>");
+});
+
+test("D: a file picker opened from a button is the kit FileTrigger", () => {
+  const raw = openingTags("input").filter(({ tag }) => /type="file"/.test(tag));
+  assertOnlyKept(raw, [], "wrap the button in <FileTrigger>");
+  const read = (file: string) => SOURCES.find((s) => s.file === file)?.source ?? "";
+  for (const file of [
+    "memory/components/tabs/MemoriesTab.tsx",
+    "media-providers/components/SttExampleCard.tsx",
+  ]) {
+    assert.match(read(file), /<FileTrigger\b/, `${file} opens the picker with FileTrigger`);
+    assert.doesNotMatch(read(file), /kit-exception:/, `${file} needs no kit-exception`);
+  }
+});
