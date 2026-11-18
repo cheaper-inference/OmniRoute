@@ -289,7 +289,12 @@ function getBudgetRefusalReason(
   return null;
 }
 
-function getBudgetWindowTotal(apiKeyId: string, periodStartAt: number): number {
+/**
+ * Recorded spend for a key since `periodStartAt` (epoch ms): persisted
+ * domain_cost_history plus the not-yet-flushed spend buffer. The same total the
+ * budget enforcer compares against its limit. Returns 0 on read failure.
+ */
+export function getBudgetWindowTotal(apiKeyId: string, periodStartAt: number): number {
   try {
     return (
       loadCostTotal(apiKeyId, periodStartAt) +

@@ -9,6 +9,7 @@ import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 
 interface RelayToken {
@@ -34,6 +35,7 @@ export default function RelayProxyClient() {
   const [newTokenData, setNewTokenData] = useState<{ rawToken: string; name: string } | null>(null);
   const [form, setForm] = useState({ name: "", description: "", maxRpm: "60", maxRpd: "10000" });
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const fetchTokens = useCallback(async () => {
     setLoading(true);
@@ -96,7 +98,7 @@ export default function RelayProxyClient() {
   };
 
   const deleteToken = async (id: string) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm(t("deleteConfirm")))) return;
     try {
       await fetch(`/api/relay/tokens/${id}`, { method: "DELETE" });
       addNotification({ type: "success", message: t("deleted") });
@@ -126,7 +128,7 @@ export default function RelayProxyClient() {
       {showCreate && (
         <Card>
           <div className="p-4 space-y-4">
-            <h2 className="text-sm font-semibold">{t("createTitle")}</h2>
+            <h2 className="text-sm">{t("createTitle")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label={t("nameRequired")}
@@ -164,7 +166,7 @@ export default function RelayProxyClient() {
       {newTokenData && (
         <Card>
           <div className="p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-success">{t("createdTitle")}</h2>
+            <h2 className="text-sm text-success">{t("createdTitle")}</h2>
             <div className="bg-bg-subtle border border-border rounded-lg p-3">
               <p className="text-xs text-text-muted mb-1">
                 {t.rich("tokenFor", {
@@ -185,7 +187,7 @@ export default function RelayProxyClient() {
       {/* Usage Guide */}
       <Card>
         <div className="p-4 space-y-2">
-          <h2 className="text-sm font-semibold">{t("usage")}</h2>
+          <h2 className="text-sm">{t("usage")}</h2>
           <p className="text-xs text-text-muted">{t("usageDescription")}</p>
           <pre className="text-xs bg-bg-subtle border border-border rounded-lg p-3 overflow-x-auto">
             {`curl ${displayBaseUrl}/v1/relay/chat/completions \\
@@ -199,9 +201,7 @@ export default function RelayProxyClient() {
       {/* Tokens List */}
       <Card>
         <div className="p-4">
-          <h2 className="text-sm font-semibold mb-3">
-            {t("tokenCount", { count: tokens.length })}
-          </h2>
+          <h2 className="text-sm mb-3">{t("tokenCount", { count: tokens.length })}</h2>
           {loading ? (
             <p className="text-sm text-text-muted">{t("loading")}</p>
           ) : tokens.length === 0 ? (
@@ -242,9 +242,8 @@ export default function RelayProxyClient() {
                       {token.enabled ? t("disable") : t("enable")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
-                      className="text-error"
                       onClick={() => deleteToken(token.id)}
                     >
                       {t("delete")}
@@ -256,6 +255,7 @@ export default function RelayProxyClient() {
           )}
         </div>
       </Card>
+      {confirmDialog}
     </div>
   );
 }

@@ -1,8 +1,18 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { after, afterEach } from "node:test";
 
 import { enrichCursorCatalog } from "../../src/lib/db/models/activeSyncedCatalog.ts";
 import { resolveRequestedModel } from "../../open-sse/utils/cursorAgentProtobuf.ts";
+import { CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG } from "../../open-sse/utils/cursorAgentProtobuf/grok47MaxEffort.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+
+afterEach(() => {
+  delete process.env[CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG];
+});
+
+after(() => {
+  resetDbInstance();
+});
 
 const base = [
   { id: "grok-4.7", name: "Grok 4.7", source: "imported" as const, inputTokenLimit: 200_000 },
@@ -18,6 +28,17 @@ test("a live Grok 4.7 base exposes selectable verified effort aliases", () => {
   );
   assert.ok(aliases.every((model) => model.inputTokenLimit === 200_000));
   assert.equal(catalog.filter((model) => model.id === "grok-4.7").length, 1);
+});
+
+test("CURSOR_GROK_47_DROP_MAX_EFFORT on: fallback aliases drop max and reuse GROK_47_EFFORTS", () => {
+  process.env[CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG] = "true";
+  const aliases = enrichCursorCatalog("cursor", base).filter((model) =>
+    model.id.startsWith("grok-4.7-")
+  );
+  assert.deepEqual(
+    aliases.map((model) => model.id),
+    ["low", "medium", "high", "xhigh"].map((tier) => `grok-4.7-${tier}`)
+  );
 });
 
 test("wire membership excludes synthetic aliases so a selected alias becomes a ModelParameter", () => {

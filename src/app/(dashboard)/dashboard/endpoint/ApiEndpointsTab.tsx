@@ -5,7 +5,7 @@ import Icon from "@/shared/components/Icon";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -332,7 +332,7 @@ export default function ApiEndpointsTab() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-semibold">{catalog.info.title || "API"}</h2>
+                  <h2 className="text-base">{catalog.info.title || "API"}</h2>
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono font-semibold">
                     {catalog.info.version}
                   </span>
@@ -377,9 +377,7 @@ export default function ApiEndpointsTab() {
                 <Icon name="error" size={20} className="text-error" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-text-main">
-                  {t("apiEndpointsCatalogUnavailable")}
-                </h3>
+                <h3 className="text-sm text-text-main">{t("apiEndpointsCatalogUnavailable")}</h3>
                 <p className="text-xs text-text-muted mt-1">
                   {catalogError || t("catalogUnavailableDescription")}
                 </p>
@@ -482,9 +480,7 @@ export default function ApiEndpointsTab() {
             <Card key={tag} className="overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
                 <Icon name="folder" size={14} className="text-primary" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  {tag}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{tag}</h3>
                 <Badge size="sm">{endpoints.length}</Badge>
                 <div className="flex-1 h-px bg-border/30" />
               </div>
@@ -498,14 +494,14 @@ export default function ApiEndpointsTab() {
                     <div key={key}>
                       <Button
                         variant="ghost"
-                        className="w-full h-auto justify-start gap-3 rounded-none px-4 py-2.5 text-left font-normal"
+                        className="w-full h-auto justify-start gap-3 rounded-none px-4 py-2.5 text-left"
                         aria-expanded={isExpanded}
                         onClick={() => setExpandedEndpoint(isExpanded ? null : key)}
                       >
                         <Badge
                           size="sm"
                           variant={METHOD_VARIANTS[ep.method] ?? "default"}
-                          className="min-w-[42px] justify-center font-mono font-bold"
+                          className="min-w-[42px] justify-center font-mono font-semibold"
                         >
                           {ep.method}
                         </Badge>
@@ -709,9 +705,7 @@ export default function ApiEndpointsTab() {
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="data_object" size={14} className="text-primary" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  {t("dataSchemas")}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{t("dataSchemas")}</h3>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-muted">
                   {catalog.schemas.length}
                 </span>
@@ -720,7 +714,7 @@ export default function ApiEndpointsTab() {
                 {catalog.schemas.map((schema) => (
                   <span
                     key={schema}
-                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3 font-mono"
+                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3-ink font-mono"
                   >
                     {schema}
                   </span>

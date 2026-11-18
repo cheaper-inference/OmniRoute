@@ -13,7 +13,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
 import { printHeading, printInfo, printSuccess, printError, createPrompt } from "../io.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { writePrivateFileAtomic } from "../private-file.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 
@@ -39,7 +39,7 @@ export function resolveKiloTarget(opts = {}) {
   if (!apiKey) {
     try {
       const c = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      apiKey = c?.accessToken || c?.apiKey;
+      apiKey = contextCredentialFor(c, root);
     } catch {
       /* none */
     }

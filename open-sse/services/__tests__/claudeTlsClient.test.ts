@@ -7,7 +7,7 @@
  * - TlsClientUnavailableError export
  * - Test override hook (__setTlsFetchOverrideForTesting)
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 
 // Carrega o modulo de forma ESTATICA (mesma convenção dos testes irmãos
 // chatgptTlsClient.test.ts / grokTlsClient.test.ts).
@@ -29,10 +29,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import "../claudeTlsClient.ts";
 
 describe("claudeTlsClient", () => {
-  beforeEach(() => {
-    // Clear env vars before each test
-    delete process.env.HTTP_PROXY;
-    delete process.env.HTTPS_PROXY;
+  afterEach(async () => {
+    const { __setTlsFetchOverrideForTesting } = await import("../claudeTlsClient.ts");
+    __setTlsFetchOverrideForTesting(null);
+    vi.unstubAllEnvs();
   });
 
   describe("exports", () => {
@@ -84,6 +84,7 @@ describe("claudeTlsClient", () => {
     it("__setTlsFetchOverrideForTesting allows mocking tlsFetchClaude", async () => {
       const { tlsFetchClaude, __setTlsFetchOverrideForTesting } =
         await import("../claudeTlsClient.ts");
+      vi.stubEnv("HTTPS_PROXY", "http://mock-proxy:8080");
 
       const mockResponse = {
         status: 200,
@@ -101,6 +102,7 @@ describe("claudeTlsClient", () => {
 
       expect(mockFn).toHaveBeenCalledWith("https://claude.ai/api/test", {
         method: "GET",
+        proxyUrl: "http://mock-proxy:8080",
       });
       expect(result.status).toBe(200);
       expect(result.text).toBe("data: test\n\n");
@@ -257,7 +259,7 @@ describe("claudeTlsClient", () => {
       const { __setTlsFetchOverrideForTesting, tlsFetchClaude } =
         await import("../claudeTlsClient.ts");
 
-      process.env.HTTP_PROXY = "http://env-proxy:8080";
+      vi.stubEnv("HTTP_PROXY", "http://env-proxy:8080");
       const mockFn = vi.fn().mockResolvedValue({
         status: 200,
         headers: new Headers(),
@@ -274,14 +276,13 @@ describe("claudeTlsClient", () => {
       expect(callOptions.proxyUrl).toBe("http://call-proxy:9090");
 
       __setTlsFetchOverrideForTesting(null);
-      delete process.env.HTTP_PROXY;
     });
 
     it("falls back to env var when per-call proxyUrl not provided", async () => {
       const { __setTlsFetchOverrideForTesting, tlsFetchClaude } =
         await import("../claudeTlsClient.ts");
 
-      process.env.HTTPS_PROXY = "http://env-proxy:8080";
+      vi.stubEnv("HTTPS_PROXY", "http://env-proxy:8080");
       const mockFn = vi.fn().mockResolvedValue({
         status: 200,
         headers: new Headers(),
@@ -304,7 +305,6 @@ describe("claudeTlsClient", () => {
       expect(callOptions.proxyUrl).toBe("http://env-proxy:8080");
 
       __setTlsFetchOverrideForTesting(null);
-      delete process.env.HTTPS_PROXY;
     });
   });
 });

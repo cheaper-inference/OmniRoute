@@ -57,11 +57,11 @@ do một đặc điểm triển khai cụ thể:
 
 Điều này có ý nghĩa như sau đối với từng bề mặt, ngay cả khi dùng `CORS_ALLOW_ALL=true`:
 
-| Bề mặt                               | Cơ chế xác thực             | Ảnh hưởng của wildcard CORS                                                                                                                                                                                                                                   |
-| ------------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`      | Phiên cookie                | Origin được phản hồi lại, nhưng **nếu không có `Allow-Credentials`** thì trình duyệt sẽ **chặn** việc đọc có thông tin xác thực. Một trang web cross-origin độc hại **không thể đọc** các phản hồi dashboard đã xác thực của bạn và cookie phiên không bị lộ. |
-| Client API `/v1/*`, `/v1beta/*`      | Header Bearer / `x-api-key` | Vốn đã cho phép rộng rãi **theo thiết kế** (`relaxForTokenAuth`): trình duyệt không bao giờ tự động đính kèm `Authorization`/`x-api-key`, vì vậy trang của kẻ tấn công không thể cung cấp khóa của bạn. `CORS_ALLOW_ALL` không mở rộng phạm vi này.           |
-| Chỉ đọc công khai (`/api/health`, …) | Không có                    | Không nhạy cảm; wildcard không gây hại.                                                                                                                                                                                                                       |
+| Bề mặt                               | Cơ chế xác thực             | Ảnh hưởng của wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`      | Phiên cookie                | Origin được phản hồi lại, nhưng **nếu không có `Allow-Credentials`** thì trình duyệt sẽ **chặn** việc đọc có thông tin xác thực. Một trang web cross-origin độc hại **không thể đọc** các phản hồi dashboard đã xác thực của bạn và cookie phiên không bị lộ.                                                                                                                                                        |
+| Client API `/v1/*`, `/v1beta/*`      | Header Bearer / `x-api-key` | Vốn đã cho phép rộng rãi **theo thiết kế** (`relaxForTokenAuth`): trình duyệt không bao giờ tự động đính kèm `Authorization`/`x-api-key`, vì vậy trang của kẻ tấn công không thể cung cấp khóa của bạn. Việc phản hồi lại origin chỉ áp dụng khi khóa được xuất trình đã được xác thực; các phản hồi ẩn danh (`REQUIRE_API_KEY=false`) vẫn tuân theo danh sách cho phép. `CORS_ALLOW_ALL` không mở rộng phạm vi này. |
+| Chỉ đọc công khai (`/api/health`, …) | Không có                    | Không nhạy cảm; wildcard không gây hại.                                                                                                                                                                                                                                                                                                                                                                              |
 
 Vì vậy, mức độ lộ diện **còn lại** của `CORS_ALLOW_ALL=true` chỉ giới hạn ở: (a)
 các thao tác **đọc** cross-origin không có thông tin xác thực đối với dữ liệu vốn đã không yêu cầu
@@ -117,16 +117,34 @@ Các origin được đối sánh không phân biệt chữ hoa chữ thường 
 có thể được thiết lập tại runtime trong **Dashboard → Security → CORS Allowed Origins** mà không cần
 khởi động lại.
 
-## API key so với phiên cookie
+## khóa API và phiên cookie
 
-- **Bearer / `x-api-key` (bề mặt suy luận `/v1/*`):** trình duyệt không bao giờ tự động đính kèm
-  các thông tin này. CORS không phải là một rào cản có ý nghĩa ở đây — API key mới là
-  rào cản — đó là lý do bề mặt này được chủ ý thiết lập theo hướng cho phép để trình duyệt và
-  các client Electron có thể đọc những phản hồi mà chúng vốn đã được quyền truy cập.
-- **Phiên cookie (dashboard):** được bảo vệ bởi mặc định đóng khi có lỗi **và**
-  bởi việc không có `Access-Control-Allow-Credentials` trên đường dẫn dùng chung. Không đưa
-  các origin quản trị/dashboard vào bất kỳ cấu hình cho phép nào; chúng phải luôn
-  đóng khi có lỗi một cách tuyệt đối.
+- **Bearer/ `x-api-key` (bề mặt suy luận `/v1/*` ):** trình duyệt không bao giờ tự động đính kèm những thứ này. CORS không phải là rào cản có ý nghĩa ở đây — khóa API là rào cản — đó là lý do tại sao bề mặt đó được cho phép một cách có chủ ý để trình duyệt và máy khách Electron có thể đọc phản hồi mà họ đã có quyền. Tiếng vang thoải mái tuân theo khóa được xác thực chứ không phải sự hiện diện đơn thuần của tiêu đề: khi `REQUIRE_API_KEY=false` phân phát một yêu cầu ẩn danh, phản hồi thành công của nó sẽ giữ nguyên danh sách cho phép đóng không thành công. Từ chối xác thực (401) vẫn có thể đọc được để khách hàng có thể hiển thị khóa bị thu hồi hoặc nhập sai (#5242): 401 của chính đường dẫn giữ tiếng vang và tuyến từ chối chính khóa đó sau khi đường ống phân phát nó dưới dạng ẩn danh (`/v1/models` và `/v1beta/models` với cấu hình xác thực quản lý, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` và các tuyến ứng cử viên tự động kết hợp) thêm tiếng vang vào 401 đó thông qua `credentialRejectionHeaders()`. Tiếng vang được khóa theo yêu cầu mang tiêu đề thông tin xác thực (`Authorization`, `x-api-key`, `x-goog-api-key` hoặc `auth_token` cookie), không phải trên đó tuyến đường được kiểm tra và không bao giờ được ghép nối với `Access-Control-Allow-Credentials`; phần thân là một đường bao lỗi cố định. Các tuyến quản lý dưới `/api/v1/` được bảo vệ bởi `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) không thêm tiếng vang: với `REQUIRE_API_KEY=false` 401/403 của chúng không thể đọc được trên nhiều nguồn gốc.
+- **Phiên cookie (trang tổng quan):** được bảo vệ bởi mặc định đóng lỗi** Và** bởi sự vắng mặt của `Access-Control-Allow-Credentials` trên đường dẫn chung. Giữ nguồn gốc management/dashboard ngoài mọi cấu hình cho phép; họ phải ở trạng thái đóng chính xác.
+
+## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
+
+Trình duyệt không áp dụng CORS cho WebSocket, vì vậy các transport WebSocket trả về kết quả
+suy luận tự kiểm tra `Origin` của handshake (`src/server/origin/wsOrigin.ts`): WebSocket
+Responses (`/v1/responses`) và, khi OmniRoute chạy bằng `npm start` / `npm run dev`, cầu
+nối `/v1/ws` và `/api/v1/ws`, vốn truyền `/v1/chat/completions`, `/v1/messages` và
+`/v1/responses` dưới dạng các frame. Cầu nối hỏi `/api/v1/ws?handshake=1` để lấy kết luận
+và từ chối nâng cấp kết nối trừ khi route đó đã thực hiện việc kiểm tra. Một handshake được
+chấp nhận khi:
+
+- không có header `Origin` (Codex CLI, SDK và các client không phải trình duyệt khác);
+- `Origin` được danh sách cho phép ở trên chấp nhận (`CORS_ALLOWED_ORIGINS`, thiết lập
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` là một trong các origin công khai của chính OmniRoute (URL cơ sở công khai đã cấu
+  hình, origin được chuyển tiếp bởi một proxy tin cậy, hoặc một host loopback/LAN trực tiếp
+  được chỉ định dưới dạng địa chỉ IP literal hoặc `localhost` — cũng chính là các ứng viên mà
+  bước kiểm tra thao tác thay đổi của dashboard sử dụng); hoặc
+- có mang một API key hợp lệ, giống như trên bề mặt HTTP `/v1/*`.
+
+Mọi trường hợp khác đều nhận `403 ws_origin_forbidden`. Cookie phiên của dashboard không
+miễn trừ cho một `Origin` lạ, vì trình duyệt đính kèm cookie đó vào socket của bất kỳ trang
+nào. `localhost` trên một cổng khác không được coi là cùng origin; hãy thêm các origin phát
+triển như vậy vào `CORS_ALLOWED_ORIGINS`.
 
 ## Ví dụ: reverse proxy phía trước OmniRoute
 
@@ -162,6 +180,7 @@ tab Security), không phải trong proxy.
 | Biểu ngữ cảnh báo trên dashboard                | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Trường CORS Allowed Origins                     | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS theo từng route của Cloud-Agent (ngoại lệ) | `src/lib/cloudAgent/api.ts`                                          |
+| Kiểm tra `Origin` trong handshake WebSocket     | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Xem thêm
 

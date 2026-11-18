@@ -11,55 +11,58 @@ OmniRoute විසින් පරිපාලන ක්රියා, සත්
 
 ක්රියාත්මක කිරීම `src/lib/compliance/index.ts` (T-43 — "අනුකූලතා පාලන") සහ `src/lib/compliance/providerAudit.ts` තුළ පවතී. විගණන ලිවීම් කිසිවිටෙකත් දෝෂයක් විසි නොකරයි: කිසියම් අසාර්ථකත්වයකදී ඇමතුම නිහඬව නොසලකා හරින බැවින් විගණන සටහන්කරණයට ප්රධාන ඉල්ලීම් ප්රවාහය බිඳ දැමිය නොහැක.
 
-## සටහන් කරන්නේ මොනවාද
+## ලොග් වන දේ
 
 ### පරිපාලන විගණන සිදුවීම් (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` වෙත කරන සෑම ඇමතුමක්ම එක් පේළියක් නිපදවයි. ක්රියා තන්තු `domain.verb` (හෝ `domain.verb.outcome`) රටාවක් අනුගමනය කරයි. කේත ගස තුළ තහවුරු කළ ක්රියා වර්ගවලට පහත ඒවා ඇතුළත් වේ:
+`logAuditEvent({ action, actor, target, details, ... })` වෙත කරන සෑම ඇමතුමක්ම එක් පේළියක් නිපදවයි. ක්රියා තන්තු `domain.verb` (හෝ `domain.verb.outcome`) රටාව අනුගමනය කරයි. ගස තුළ තහවුරු කළ ක්රියා වර්ග මෙන්න:
 
-| ක්රියාව                              | මූලාශ්රය                                |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| ක්රියාව                              | මූලාශ්රය                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-සෑම ඇතුළත් කිරීමක්ම `action`, `actor` (පෙරනිමිය `"system"` වේ), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` සහ `timestamp` ග්රහණය කරයි. සංවේදී යතුරු (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` සමඟ ගැළපෙන ඕනෑම දෙයක් ආදිය) පේළිය ලිවීමට පෙර පුනරාවර්තීව `"[redacted]"` ලෙස සඟවනු ලැබේ.
+සෑම ප්රවේශයක්ම `action`, `actor` (පෙරනිමියෙන් `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, සහ `timestamp` ග්රහණය කරයි. සංවේදී යතුරු (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` සමඟ ගැළපෙන ඕනෑම දෙයක් ආදිය) පේළිය ලිවීමට පෙර පුනරාවර්තීව `"[redacted]"` ලෙස සඟවනු ලැබේ.
+
+`api_key.auth.touch` පේළි මඟින් ඉල්ලීම් ලොගයට කිසිවිටෙක ළඟා නොවන සාර්ථක API යතුරු metadata සහ සොයාගැනීම් කියවීම් (GET/HEAD) වාර්තා කරයි: කුමන යතුරද, කවදාද, සහ සාමාන්යකරණය කළ මාර්ගය කුමක්ද යන්න. මේවා එකට එකතු කර පේළි 1,000කට සීමා කරනු ලැබේ. `noLog` සහ පරිසර යතුර සහිත යතුරු මඟ හරිනු ලැබේ. `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` විශේෂාංග ධජය සක්රිය කර ඇති විට පමණක් (පෙරනිමියෙන් අක්රියයි) ඇමතුම්කරුගේ IP ලිපිනය සහ user-agent එක් කරනු ලැබේ.
 
 ### MCP මෙවලම් ඇමතුම් (`mcp_tool_audit`)
 
-සෑම MCP මෙවලම් ආමන්ත්රණයක්ම `open-sse/mcp-server/audit.ts` හරහා පේළියක් ලියයි. යෝජනා ක්රමය (`src/lib/db/migrations/002_mcp_a2a_tables.sql` වෙතින්):
+සෑම MCP මෙවලම් ආයාචනයක්ම `open-sse/mcp-server/audit.ts` හරහා පේළියක් ලියයි. ක්රමලේඛය (`src/lib/db/migrations/002_mcp_a2a_tables.sql` වෙතින්):
 
-| තීරුව            | සටහන්                                  |
-| ---------------- | -------------------------------------- |
-| `id`             | ස්වයංක්රීය වර්ධනය                      |
-| `tool_name`      | MCP මෙවලම් හඳුනාගැනීමේ නාමය            |
-| `input_hash`     | ආදානයේ sha256 (payload එක ගබඩා නොකෙරේ) |
-| `output_summary` | කෙටි, කප්පාදු කළ සාරාංශය               |
-| `duration_ms`    | ගත වූ සැබෑ කාලය                        |
-| `api_key_id`     | ඇමතුම්කරු (හිස් විය හැක)               |
-| `success`        | `1` / `0`                              |
-| `error_code`     | අසාර්ථක වූ විට අවසාන දෝෂ කේතය          |
-| `created_at`     | ISO කාල මුද්රාව                        |
+| තීරුව            | සටහන්                               |
+| ---------------- | ----------------------------------- |
+| `id`             | ස්වයංක්රීයව වැඩිවන අගය              |
+| `tool_name`      | MCP මෙවලම් හඳුනාගැනීමේ නාමය         |
+| `input_hash`     | ආදානයේ sha256 (payload ගබඩා නොකරයි) |
+| `output_summary` | කෙටි, සීමා කළ සාරාංශය               |
+| `duration_ms`    | ගත වූ සම්පූර්ණ කාලය                 |
+| `api_key_id`     | ඇමතුම්කරු (හිස් විය හැක)            |
+| `success`        | `1` / `0`                           |
+| `error_code`     | අසාර්ථක වූ විට අවසාන දෝෂ කේතය       |
+| `created_at`     | ISO වේලා මුද්රාව                    |
 
-### ඉල්ලීම් / භාවිත සටහන්
+### ඉල්ලීම් / භාවිත ලොග්
 
-මේවා මෙහෙයුම් දුරමිතිය වේ (නිරවද්යවම පරිපාලන විගණනයක් නොවේ), නමුත් එකම රඳවාගැනීමේ නළ මාර්ගය බෙදා ගනී:
+මේවා මෙහෙයුම් ටෙලිමෙට්රි වේ (දැඩි අර්ථයෙන් පරිපාලන විගණන නොවේ), නමුත් එකම රඳවාගැනීමේ නලිකාව බෙදා ගනී:
 
-- `usage_history` — එක් එක් ඉල්ලීම සඳහා භාවිත සාරාංශය
-- `call_logs` — එක් එක් ඉල්ලීම සඳහා සම්පූර්ණ සටහන (පේළි සීමාවට යටත් වේ, පහත බලන්න)
-- `proxy_logs` — ප්රොක්සි තදබද සටහන (පේළි සීමාවට යටත් වේ)
-- `request_detail_logs` — පැරණි සවිස්තරාත්මක ඉල්ලීම් සටහන (පවතී නම් තවමත් කප්පාදු කෙරේ)
+- `usage_history` — එක් ඉල්ලීමකට අදාළ භාවිතයේ සමුච්චිත සාරාංශය
+- `call_logs` — එක් ඉල්ලීමකට අදාළ සම්පූර්ණ ලොගය (පේළි සීමාවට යටත්යි, පහත බලන්න)
+- `proxy_logs` — ප්රොක්සි ගමනාගමන ලොගය (පේළි සීමාවට යටත්යි)
+- `request_detail_logs` — පැරණි විස්තරාත්මක ඉල්ලීම් ලොගය (තිබේ නම් තවමත් පිරිසිදු කරනු ලැබේ)
 
 ## ගබඩා යෝජනා ක්රමය
 

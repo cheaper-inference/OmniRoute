@@ -115,10 +115,17 @@ export function extractChatMessage(update: TelegramUpdate): {
   chatId: number;
   text: string;
   messageId?: number;
+  /** Sender user id (differs from chatId in groups). */
+  fromId?: number;
 } | null {
   const msg = update.message;
   if (msg?.chat && typeof msg.text === "string") {
-    return { chatId: msg.chat.id, text: msg.text, messageId: msg.message_id };
+    return {
+      chatId: msg.chat.id,
+      text: msg.text,
+      messageId: msg.message_id,
+      fromId: typeof msg.from?.id === "number" ? msg.from.id : undefined,
+    };
   }
   return null;
 }

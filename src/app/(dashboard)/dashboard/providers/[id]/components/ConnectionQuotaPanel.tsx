@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 
 /**
@@ -189,7 +190,7 @@ export default function ConnectionQuotaPanel({
       title={t("quotaRefresh")}
       aria-label={t("quotaRefresh")}
     >
-      <Icon name="refresh" size={13} className={refreshing ? "animate-spin" : undefined} />
+      {refreshing ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={13} />}
     </Button>
   ) : null;
 
@@ -320,7 +321,14 @@ export default function ConnectionQuotaPanel({
                 {isCreditRow || remaining === null ? (
                   <span className="flex-1" />
                 ) : (
-                  <span className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle">
+                  <span
+                    role="progressbar"
+                    aria-label={row.displayName || row.name}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.min(100, Math.max(0, remaining))}
+                    className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle"
+                  >
                     <span
                       className="block h-full rounded-full"
                       style={{

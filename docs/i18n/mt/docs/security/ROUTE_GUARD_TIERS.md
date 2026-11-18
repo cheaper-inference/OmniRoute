@@ -6,110 +6,93 @@
 
 ## Ħarsa ġenerali
 
-Ir-rotot kollha tal-API ta’ ġestjoni ta’ OmniRoute huma kklassifikati f’wieħed minn tliet livelli ta’
+Ir-rotot kollha tal-API tal-ġestjoni ta’ OmniRoute huma kklassifikati f’wieħed minn tliet livelli ta’
 protezzjoni. Il-klassifikazzjoni hija statika, definita f’`src/server/authz/routeGuard.ts`,
-u evalwata qabel ma titħaddem kwalunkwe fergħa oħra tal-awtentikazzjoni.
+u tiġi evalwata qabel ma titħaddem kwalunkwe fergħa oħra tal-awtentikazzjoni.
 
 ## Livelli
 
 ### Livell 1 — LOCAL_ONLY
 
-**Infurzat minn:** `isLocalOnlyPath(path)` → verifika tal-host loopback  
-**Qbiż:** Ebda wieħed b’mod awtomatiku. Eċċezzjoni limitata għal mogħdijiet f’
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` meta t-talba jkollha ċavetta tal-API valida
-bl-ambitu `manage` (ara [Eċċezzjoni tal-ambitu manage](#manage-scope-carve-out)).
+**Infurzat minn:** `isLocalOnlyPath(path)` → verifika tal-host loopback
+**Eċċezzjoni:** Ebda waħda awtomatikament. Hemm eċċezzjoni dejqa għall-mogħdijiet f’
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` meta t-talba ġġorr ċavetta API valida
+bl-ambitu `manage` (ara [Eċċezzjoni għall-ambitu manage](#manage-scope-carve-out)).
 
-Dawn ir-rotot joħolqu proċessi sekondarji jew jeżegwixxu kodiċi waqt it-tħaddim. Jekk
-jiġu esposti għal traffiku mhux loopback, attakkant li jkun kiseb JWT validu (eż.,
-permezz ta’ mina Cloudflared/Ngrok) ikun jista’ jiskatta l-ħolqien ta’ proċessi —
-klassi magħrufa ta’ CVE
+Dawn ir-rotot iniedu proċessi sekondarji jew jeżegwixxu kodiċi waqt ir-runtime. Jekk jiġu esposti għal
+traffiku mhux loopback, dan jippermetti lil attakkant li jkun kiseb JWT validu (pereżempju,
+permezz ta’ tunnel Cloudflared/Ngrok) iqajjem it-tnedija ta’ proċessi — klassi magħrufa ta’ CVE
 ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**X’inhu GHSA-fhh6-4qxv-rpqj (il-klassi tal-attakk):** server ta’ ġestjoni/aġent
-jesponi endpoint li jħaddem sottoproċess (`npm install`, `node`, brawżer,
-proxy, `git`, `tar`, …). Jekk dak l-endpoint ikun aċċessibbli minn barra l-host —
-għax l-operatur poġġa lil OmniRoute wara mina nginx/Cloudflare/Tailscale u nkixef
-JWT, jew l-awtentikazzjoni kienet ikkonfigurata ħażin — l-attakkant jibdel “sejħa
-lil API” f’“ħaddem kmand fuq il-host” (eżekuzzjoni remota ta’ kodiċi). OmniRoute
-jagħlaq din il-possibbiltà billi jinforza **verifika tal-host loopback mingħajr
-eċċezzjoni, qabel kwalunkwe verifika tal-awtentikazzjoni**, fuq kull rotta li
-tista’ toħloq proċessi: token mikxuf minn ġo mina xorta ma jistax jilħaq il-ħolqien
-tal-proċess.
+**X’inhu GHSA-fhh6-4qxv-rpqj (il-klassi ta’ attakk):** server tal-ġestjoni/aġenti
+jesponi endpoint li jniedi subprocess (`npm install`, `node`, browser,
+proxy, `git`, `tar`, …). Jekk dak l-endpoint ikun aċċessibbli minn barra l-host — minħabba li
+l-operatur poġġa lil OmniRoute wara tunnel nginx/Cloudflare/Tailscale u JWT tnixxef, jew
+l-awtentikazzjoni ġiet ikkonfigurata ħażin — l-attakkant ibiddel “sejħa API” f’“eżegwixxi
+kmand fuq il-host” (eżekuzzjoni remota ta’ kodiċi). OmniRoute jipprevjeni dan billi jinforza
+**verifika tal-host loopback mingħajr eċċezzjoni, qabel kwalunkwe verifika tal-awtentikazzjoni**,
+fuq kull rotta li tista’ tniedi proċess: token li tnixxef permezz ta’ tunnel xorta ma jistax jaċċessa
+t-tnedija tal-proċess.
 
 **Is-sett sħiħ ta’ LOCAL_ONLY.** Is-sors awtorevoli huwa
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` f’
-`src/server/authz/routeGuard.ts`; it-tabella ta’ hawn taħt tirrifletti l-istat
-attwali. Il-gate `check-route-guard-membership` jelenka kull `route.ts` taħt
-il-prefissi li jistgħu joħolqu proċessi u jġiegħel lis-CI tfalli jekk xi wieħed
-minnhom ma jkunx ikklassifikat bħala lokali biss.
+`src/server/authz/routeGuard.ts`; it-tabella hawn taħt tirrifletti l-istat attwali. Il-gate
+`check-route-guard-membership` jelenka kull `route.ts` taħt il-prefissi li jistgħu jniedu proċessi
+u jwaqqaf is-CI jekk xi waħda minnhom ma tkunx ikklassifikata bħala local-only.
 
-| Prefiss / mudell                                                                                         | Għaliex huwa lokali biss                                                                                         |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Server MCP — iniedi pontijiet stdio + handlers SSE                                                               |
-| `/api/cli-tools/runtime/`                                                                                | Runtime tal-għodda CLI — jeżegwixxi kodiċi arbitrarju tal-plugin                                                 |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Kittieba tas-settings għal kull għodda li jistgħu jimmodifikaw il-binarji/konfigurazzjoni tal-għodda fuq il-host |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | L-istess tnedija ta' `getCliRuntimeStatus()` bħas-sitt għodod relatati hawn fuq (GHSA-35fw-cv32-2373)            |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Kontrolli tal-inventarju CLI — iniedu `command -v` / `--version` għal kull għodda (GHSA-35fw-cv32-2373)          |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Kontroll tal-proxy MITM ta' Antigravity (iniedi/jissettja l-proxy tas-sistema)                                   |
-| `/api/modality-bridge/video/`                                                                            | Kontroll strett tar-runtime tal-Video Bridge fuq loopback fdat u pont intern għall-estrazzjoni                   |
-| `/api/services/`                                                                                         | Servizzi inkorporati (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + tnedija                      |
-| `/dashboard/providers/services/`                                                                         | Reverse proxy għall-UI tas-servizzi inkorporati                                                                  |
-| `/api/tunnels/cloudflared`                                                                               | Jinstalla/jiniedi l-binarju cloudflared                                                                          |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Jinstalla/jikkontrolla tailscaled fuq il-host                                                                    |
-| `/api/copilot/`                                                                                          | Driver LLM mhux awtentikat — CLI biss b'mod awtomatiku                                                           |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — iniedi server MITM + modifiki tad-DNS                                                              |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — listener http-proxy + proxy tas-sistema                                                      |
-| `/api/settings/mitm`                                                                                     | Jippermetti l-interċettazzjoni MITM (stat tal-proxy fil-livell tas-sistema)                                      |
-| `/api/issue-agent/`                                                                                      | Aġent tal-issues — iniedi għodod lokali fuq ir-repożitorju                                                       |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — jitgħabbew/jiġu eżegwiti permezz ta' `worker_threads` + `child_process`                                |
-| `/api/middleware/`                                                                                       | Middleware tal-utent — jgħabbi/jeżegwixxi l-kodiċi tal-operatur fl-istess proċess                                |
-| `/api/system/version`                                                                                    | Aġġornament awtomatiku (POST biss; GET/HEAD/OPTIONS eżentati) — iniedi `git checkout` + `npm install`            |
-| `/api/db-backups/exportAll`                                                                              | Iniedi `tar` għall-arkivju tal-esportazzjoni                                                                     |
-| `/api/local/`                                                                                            | Għodod lokali ta' tnedija bi klikk waħda (Redis bħalissa) — iniedi podman/docker                                 |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ċiklu tal-ħajja tal-proxy Headroom — iniedi CLI python / jibgħat sinjali lill-PID                                |
-| `/api/jobs`, `/api/jobs/`                                                                                | Kontroll tal-eżekutur tal-kompiti — jeżegwixxi xogħol skedat fuq il-host                                         |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` qabel ma jimporta l-kredenzjali                                                  |
-| `/api/oauth/kiro/auto-import`                                                                            | Jaqra l-fajls tal-kredenzjali tal-CLI Kiro mill-host                                                             |
-| `/api/skills/collect/`                                                                                   | Ġbir tal-ħiliet — jidentifika/jinstalla għodod lokali                                                            |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Reġistrazzjoni + eżekuzzjoni tal-handler tal-ħiliet — jilħaq it-tnedija tal-container sandbox (GHSA-jx89)        |
-| `/api/discovery/`                                                                                        | Probi għall-iskoperta tan-network lokali/tal-fornitur                                                            |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Iniedi browser b’interfaċċa grafika + sessjoni VNC għal logins interattivi                                       |
-| `/api/acp/agents`                                                                                        | ACP — jiskopri u jniedi binarji lokali ta’ aġenti CLI                                                            |
-| `/api/resilience/connections`                                                                            | JSON tar-reżiljenza għal kull kont (cooldown, breaker, lockout). L-HTML tad-dashboard mhuwiex lokali biss.       |
-| `/api/providers/cursor/agent-availability`                                                               | Kontroll tad-dashboard li jissuġġerixxi installazzjoni — iniedi `cursor-agent status --format json`              |
-| `/api/providers/{id}/login` (regex)                                                                      | Iniedi Playwright Chromium b’interfaċċa grafika għal login permezz ta’ cookies tal-web                           |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Fluss manwali b’interfaċċa grafika + login awtomatiku bit-telefon/SMS ibbażat fuq sessjoni (iniedi Playwright)   |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Tiġdid manwali tas-sessjoni ta’ Cursor — jagħti spinta lil `cursor-agent`                                        |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Jiddijanjostika l-installazzjoni lokali ta’ Codex CLI (iniedi l-binarju)                                         |
+| Prefix / pattern                                                                                         | Għaliex huwa lokali biss                                                                                               |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | Server MCP — jibda bridges stdio + handlers SSE                                                                        |
+| `/api/cli-tools/runtime/`                                                                                | Runtime tal-għodod CLI — jeżegwixxi kodiċi arbitrarju tal-plugin                                                       |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Kittieba tas-settings għal kull għodda li jistgħu jaċċessaw il-binarji/konfigurazzjoni tal-għodda fuq il-host          |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | L-istess `getCliRuntimeStatus()` spawn bħas-sitt aħwa ta’ hawn fuq (GHSA-35fw-cv32-2373)                               |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Probes tal-inventarju CLI — jibdew `command -v` / `--version` għal kull għodda (GHSA-35fw-cv32-2373)                   |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Kontroll tal-proxy MITM ta’ Antigravity (jibda/jindika proxy tas-sistema)                                              |
+| `/api/modality-bridge/video/`                                                                            | Probe tar-runtime tal-Video Bridge b’loopback strettament fdat u bridge intern għall-estrazzjoni                       |
+| `/api/services/`                                                                                         | Servizzi inkorporati (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                              |
+| `/dashboard/providers/services/`                                                                         | Reverse proxy għall-UI tas-servizzi inkorporati                                                                        |
+| `/api/tunnels/cloudflared`                                                                               | Jinstalla/jibda l-binarju cloudflared                                                                                  |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Jinstalla/jikkontrolla tailscaled fuq il-host                                                                          |
+| `/api/copilot/`                                                                                          | Driver LLM mingħajr awtentikazzjoni — CLI biss b’mod awtomatiku                                                        |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — jibda server MITM + jagħmel modifiki fid-DNS                                                             |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — listener http-proxy + proxy tas-sistema                                                            |
+| `/api/settings/mitm`                                                                                     | Jippermetti l-interċettazzjoni MITM (stat tal-proxy fil-livell tas-sistema)                                            |
+| `/api/issue-agent/`                                                                                      | Aġent tal-issues — jibda għodod lokali kontra r-repo                                                                   |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — jitgħabbew/jiġu eżegwiti permezz ta’ `worker_threads` + `child_process`                                      |
+| `/api/middleware/`                                                                                       | Middleware tal-utent — jgħabbi/jeżegwixxi kodiċi tal-operatur fil-proċess                                              |
+| `/api/system/version`                                                                                    | Aġġornament awtomatiku (POST biss; GET/HEAD/OPTIONS eżentati) — jibda `git checkout` + `npm install`                   |
+| `/api/db-backups/exportAll`                                                                              | Jibda `tar` għall-arkivju tal-esportazzjoni                                                                            |
+| `/api/local/`                                                                                            | Launchers lokali bi klikk waħda (Redis illum) — jibdew podman/docker                                                   |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ċiklu tal-ħajja tal-proxy Headroom — jibda CLI python / jibgħat sinjali lill-PID                                       |
+| `/api/jobs`, `/api/jobs/`                                                                                | Kontroll tar-runner tal-jobs — jeżegwixxi xogħol skedat fuq il-host                                                    |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` qabel jimporta l-kredenzjali                                                           |
+| `/api/oauth/kiro/auto-import`                                                                            | Jaqra l-fajls tal-kredenzjali tal-Kiro CLI mill-host                                                                   |
+| `/api/skills/collect/`                                                                                   | Ġbir tal-ħiliet — jiskopri/jinstalla għodod lokali                                                                     |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Reġistrazzjoni tal-handler tal-ħiliet + eżekuzzjoni — jilħqu l-ħolqien tal-kontejner sandbox (GHSA-jx89)               |
+| `/api/discovery/`                                                                                        | Probes għall-iskoperta tan-netwerk lokali/provider                                                                     |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Joħloq browser headful + sessjoni VNC għal login interattiv                                                            |
+| `/api/acp/agents`                                                                                        | ACP — jiskopri u joħloq binarji lokali tal-aġenti CLI                                                                  |
+| `/api/resilience/connections`                                                                            | JSON tar-reżiljenza għal kull kont (cooldown, breaker, lockout). L-HTML tad-dashboard mhuwiex limitat għal dak lokali. |
+| `/api/providers/cursor/agent-availability`                                                               | Kontroll biex jiġi nnotifikat l-installazzjoni tad-dashboard — joħloq `cursor-agent status --format json`              |
+| `/api/providers/{id}/login` (regex)                                                                      | Jniedi Chromium ta’ Playwright headful għal login bil-cookies tal-web                                                  |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Fluss manwali headful + auto-login tat-telefon/SMS ibbażat fuq sessjoni (joħloq Playwright)                            |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Tiġdid manwali tas-sessjoni ta’ Cursor — jinnotifika `cursor-agent`                                                    |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Jiddijanjostika l-installazzjoni lokali ta’ Codex CLI (joħloq il-binarju)                                              |
 
-**Rispons f’każ ta’ ksur:** `403 LOCAL_ONLY`
+**Rispons meta jkun hemm ksur:** `403 LOCAL_ONLY`
 
-#### Eċċezzjoni għall-ambitu tal-ġestjoni
+#### Eċċezzjoni għall-ambitu tal-immaniġġjar
 
-Subsett ta’ mogħdijiet LOCAL_ONLY JISTA’ jiġi aċċessat ukoll minn indirizzi mhux loopback jekk u
-biss jekk it-talba ġġorr `Authorization: Bearer <api-key>` li l-metadata tagħha
-tinkludi l-ambitu `manage` (jew `admin`). L-eċċezzjoni hija kkontrollata
-espliċitament għal kull mogħdija permezz ta’ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` sabiex il-
-valur predefinit għal kwalunkwe mogħdija LOCAL_ONLY ġdida jibqa’ strict-loopback. Talbiet mhux awtentikati
-u talbiet b’ċwievet mingħajr l-ambitu tal-ġestjoni xorta jiġu rrifjutati b’
-`403 LOCAL_ONLY`.
+Sottosett ta’ paths LOCAL_ONLY JISTA’ jkun aċċessibbli wkoll minn indirizz mhux loopback jekk u biss jekk it-talba tinkludi `Authorization: Bearer <api-key>` li l-metadejta tiegħu tinkludi l-ambitu `manage` (jew `admin`). L-eċċezzjoni hija kkontrollata b’mod espliċitu għal kull path permezz ta’ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, sabiex id-default għal kwalunkwe path LOCAL_ONLY ġdid jibqa’ loopback strett. Talbiet mhux awtentikati u talbiet biċ-ċwievet li m’għandhomx l-ambitu manage xorta jiġu rrifjutati b’`403 LOCAL_ONLY`.
 
-Bħalissa l-uniku prefiss li jista’ jaqbeż dan il-kontroll huwa `/api/mcp/`. `/api/cli-tools/runtime/` u
-`/api/services/` huma esklużi apposta minħabba li jistgħu jniedu
-sottoproċessi arbitrarji (`npm install`, `node`), li hija eżattament il-klassi ta’ CVE li s-
-saff LOCAL_ONLY jeżisti biex jipprevjeni.
+Illum l-uniku prefix li jista’ jevita l-kontroll huwa `/api/mcp/`. `/api/cli-tools/runtime/` u `/api/services/` ġew esklużi intenzjonalment għax jistgħu joħolqu subprocesses arbitrarji (`npm install`, `node`), li huwa eżattament il-klassi ta’ CVE li t-tier LOCAL_ONLY jeżisti biex jipprevjeni.
 
-**#7895 — ambitu limitat ta’ `mcp:connect`:** l-eċċezzjoni ta’ `/api/mcp/` TAĊĊETTA WKOLL
-ċavetta Bearer li jkollha l-ambitu limitat `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), ivverifikat permezz ta’
-`hasMcpConnectOrManageScope()` f’`src/server/authz/policies/management.ts`.
-Dan huwa limitat għal `/api/mcp/` BISS — `mcp:connect` ma jagħti xejn fuq ebda rotta oħra
-tal-ġestjoni (inkluż kull prefiss ieħor ta’ bypass għal LOCAL_ONLY, jekk xi darba jiżdied wieħed), u huwa eskluż apposta minn
-`MANAGEMENT_API_KEY_SCOPES`. Ċavetta li jkollha `manage`/`admin` xorta tgħaddi mill-
-eċċezzjoni eżattament bħal qabel; `mcp:connect` huwa alternattiva bi privileġġi aktar baxxi
-għal klijenti remoti li jużaw MCP biss u li m’għandhomx bżonn aċċess wiesa’ għall-ġestjoni.
+**#7895 — ambitu ristrett ta’ `mcp:connect`:** L-eċċezzjoni ta’ `/api/mcp/` TAĊĊETTA WKOLL ċavetta Bearer li għandha l-ambitu ristrett `mcp:connect`
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), iċċekkjat permezz ta’ `hasMcpConnectOrManageScope()` f’`src/server/authz/policies/management.ts`.
+Dan japplika BISS għal `/api/mcp/` — `mcp:connect` ma jagħti l-ebda permess fuq ebda route oħra tal-immaniġġjar (inkluż kull prefix ieħor li jevita LOCAL_ONLY, jekk xi darba jiżdied), u ġie eskluż intenzjonalment minn
+`MANAGEMENT_API_KEY_SCOPES`. Ċavetta li għandha `manage`/`admin` xorta tgħaddi mill-eċċezzjoni eżatt kif qabel; `mcp:connect` hija alternattiva ta’ privileġġ aktar baxx għal dawk li jċemplu MCP mill-bogħod u li m’għandhomx bżonn aċċess wiesa’ għall-immaniġġjar.
 
-| Talba                                                 | Mogħdija                   | Riżultat                      |
+| Talba                                                 | Path                       | Riżultat                      |
 | ----------------------------------------------------- | -------------------------- | ----------------------------- |
 | Mhux loopback, mingħajr Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                |
 | Mhux loopback, Bearer bl-ambitu `manage`              | `/api/mcp/*`               | Permess                       |
@@ -117,216 +100,216 @@ għal klijenti remoti li jużaw MCP biss u li m’għandhomx bżonn aċċess wie
 | Mhux loopback, Bearer mingħajr `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                |
 | Mhux loopback, Bearer bl-ambitu `mcp:connect`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
 | Mhux loopback, Bearer bl-ambitu `manage`              | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
-| Loopback, bi kwalunkwe Bearer/mingħajru               | kwalunkwe LOCAL_ONLY       | Permess (il-kontroll jgħaddi) |
+| Loopback, kwalunkwe Bearer jew mingħajru              | kwalunkwe LOCAL_ONLY       | Permess (il-kontroll jgħaddi) |
 
 #### Gwida għall-operaturi u awditjar
 
 Jekk tħaddem OmniRoute wara reverse proxy jew tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), il-kontroll tal-loopback xorta jipproteġi r-rotot ta’ hawn fuq
-li jistgħu jniedu proċessi — talba li l-indirizz tal-klijent tagħha mhuwiex loopback tiġi rrifjutata b’
-`403 LOCAL_ONLY` **qabel ma titħaddem l-awtentikazzjoni**, għalhekk JWT żvelat ma jistax jilħaq tnedija ta’ proċess. Jibqgħu żewġ
-responsabbiltajiet għall-operatur:
+Tunnel, Tailscale, Ngrok), il-kontroll tal-loopback xorta jipproteġi r-routes li jistgħu joħolqu proċessi msemmija hawn fuq — talba li l-indirizz tal-klijent tagħha mhuwiex loopback tiġi rrifjutata b’`403 LOCAL_ONLY` **qabel ma tibda l-awtentikazzjoni**, għalhekk JWT li jkun inkixef ma jistax jilħaq proċess li joħloq xi ħaġa. Jibqgħu żewġ responsabbiltajiet għall-operatur:
 
-- **Tippruvax "issewwi" 403 billi tiffalsifika l-IP tal-klijent bħala loopback.** L-issettjar ta’
-  `X-Forwarded-For: 127.0.0.1`, jew proxy li jerġa’ jikteb l-indirizz tas-sors għal
+- **Tissolvix 403 billi tiffalsifika l-IP tal-klijent bħala loopback.** L-issettjar ta’
+  `X-Forwarded-For: 127.0.0.1`, jew proxy li jikteb mill-ġdid l-indirizz tas-sors għal
   loopback, jerġa’ jiftaħ eżattament il-klassi RCE li jagħlaq dan il-livell. Esponi d-
-  dashboard/API permezz tal-proxy — qatt ir-rotot li jistgħu jniedu proċessi.
-- **Żomm l-eżenzjoni tal-ambitu manage minima.** `/api/mcp/` biss jista’ jiġi eżentat, u
-  biss b’API key bl-ambitu `manage`. Il-`SPAWN_CAPABLE_PREFIXES` qatt ma jistgħu
-  jiżdiedu mal-lista tal-eżenzjonijiet — l-iskema zod tirrifjutahom u
-  `isLocalOnlyBypassableByManageScope` tiċħadhom waqt l-eżekuzzjoni (difiża fil-fond),
-  li huwa dak li jfisser id-dashboard bi "ma jistgħux isiru eżentabbli". L-istess
-  lista ta’ ċaħda tinkludi wkoll ftit rotot LOCAL_ONLY li ma jniedux proċessi iżda li
-  lanqas qatt ma għandhom ikunu aċċessibbli mill-bogħod — `/api/oauth/kiro/auto-import` (taqra l-fajls
-  tal-kredenzjali ta’ Kiro lokali għall-host), `/api/discovery/` u `/api/issue-agent/`. Il-loader
-  tal-istampa istantanja waqt l-eżekuzzjoni jneħħi wkoll tali entrati minn ringiela ta’ settings maħżuna, u l-
-  importazzjoni legacy tal-JSON (`/api/settings/import-json`) qatt ma tikteb iċ-ċwievet tal-eżenzjoni.
-  Kull entrata ta’ `LOCAL_ONLY_API_PREFIXES` trid tkun jew fil-lista ta’ ċaħda jew
-  rieżaminata bħala eliġibbli għall-eżenzjoni (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Ir-rotot
-  b’segmenti dinamiċi u b’paths statiċi li jistgħu jniedu proċessi taħt `/api/providers/` (eż. `/login`,
-  `/refresh-cursor`) huma koperti mill-komponenti relatati bbażati fuq regex `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` f’
+  dashboard/API permezz tal-proxy — qatt ir-rotot li jistgħu joħolqu proċessi.
+- **Żomm il-bypass tal-manage-scope minimu.** `/api/mcp/` biss jista’ jintuża bħala bypass, u
+  dan biss b’ċavetta API bl-iskop `manage`. `SPAWN_CAPABLE_PREFIXES` qatt ma jista’ jiżdied mal-lista
+  tal-bypass — l-iskema zod tirrifjutahom u
+  `isLocalOnlyBypassableByManageScope` tiċħadhom waqt ir-runtime (difiża f’fond multiplu),
+  li huwa dak li d-dashboard tfisser b’“ma jistgħux isiru bypassable”. L-istess lista ta’
+  ċaħda fiha wkoll xi rotot `LOCAL_ONLY` li ma joħolqux proċessi iżda li lanqas qatt m’għandhom
+  ikunu aċċessibbli mill-bogħod — `/api/oauth/kiro/auto-import` (jaqra fajls ta’
+  kredenzjali Kiro lokali għall-host), `/api/discovery/` u `/api/issue-agent/`. Il-loader
+  tal-istat runtime ineħħi wkoll entrati bħal dawn minn ringiela ta’ settings maħżuna, u
+  l-importazzjoni JSON legata (`/api/settings/import-json`) qatt ma tikteb iċ-ċwievet tal-bypass.
+  Kull entrata ta’ `LOCAL_ONLY_API_PREFIXES` trid tkun jew fil-lista ta’ ċaħda jew tkun
+  riveduta bħala eliġibbli għall-bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Ir-rotot li jistgħu joħolqu proċessi
+  b’segmenti dinamiċi u rotot b’mogħdijiet statiċi taħt `/api/providers/` (pereżempju `/login`,
+  `/refresh-cursor`) huma koperti mill-kumpann ibbażat fuq regex
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` f’
   `src/shared/constants/spawnCapablePrefixes.ts`, mhux mill-array ċatt
-  `SPAWN_CAPABLE_PREFIXES` — l-array ċatt ikollu jkopri l-prefiss kollu
-  `/api/providers/` biex jaqbadhom, u b’hekk iwessa’ żżejjed siġra ta’ rotot li
-  dashboards remoti jużaw b’mod leġittimu għall-CRUD tal-providers.
+  `SPAWN_CAPABLE_PREFIXES` — l-array ċatt ikollu jkopri l-prefiss kollu `/api/providers/`
+  biex jaqbadhom, u b’hekk iwessa’ żżejjed siġra ta’ rotot li d-dashboards remoti jużaw
+  b’mod leġittimu għall-operazzjonijiet CRUD tal-provider.
 
-**Awditjar tal-aċċess** — biex tivverifika li xejn minn barra l-host mhu qed jaċċessa dawn ir-rotot:
+**Verifika tal-aċċess** — biex tivverifika li xejn minn barra l-host ma qed jilħaq dawn ir-rotot:
 
 - Iftaħ l-**Inventarju tal-Awtorizzazzjoni** fuq `/dashboard/settings/security`: dan jirrendi l-
-  lista attiva tal-prefissi LOCAL_ONLY, liema prefissi jistgħu jiġu eżentati, u s-sett ta’
-  rotot li jistgħu jniedu proċessi ("ma jistgħux isiru eżentabbli") stabbilit waqt il-kompilazzjoni.
-- Fittex fir-reġistri tar-reverse proxy / tal-aċċess tiegħek għall-prefissi ta’ hawn fuq flimkien ma’
-  indirizz tal-klijent li mhuwiex loopback. Kull hit bħal dan li rritorna `200` minflok
-  `403 LOCAL_ONLY` ifisser li l-proxy qed jaħbi l-IP reali tal-klijent — sewwi l-proxy.
-- `403 LOCAL_ONLY` fir-reġistri ta’ OmniRoute għal wieħed minn dawn il-paths ifisser li l-gwardja
-  qed taħdem kif intenzjonat, mhux żball li għandu jiġi soppress.
+  lista attwali tal-prefissi `LOCAL_ONLY`, liema prefissi jistgħu jintużaw bħala bypass, u s-sett
+  ta’ rotot li jistgħu joħolqu proċessi fil-ħin tal-kompilazzjoni (“ma jistgħux isiru bypassable”).
+- Fittex fir-reverse-proxy / access logs tiegħek il-prefissi ta’ hawn fuq flimkien ma’ indirizz
+  tal-klijent li mhux loopback. Kull aċċess bħal dan li rritorna `200` minflok
+  `403 LOCAL_ONLY` ifisser li l-proxy qed jaħbi l-indirizz reali tal-klijent — irranġa l-proxy.
+- `403 LOCAL_ONLY` fil-logs ta’ OmniRoute għal waħda minn dawn il-mogħdijiet ifisser li l-gwardja
+  qed taħdem kif maħsub, mhux żball li għandu jiġi mrażżan.
 
-#### Rotot aċċessibbli mill-bogħod b’kontroll tal-probe fil-punt tas-sejħa
+#### Rotot aċċessibbli mill-bogħod b’gate ta’ sonda fil-call site
 
-Xi rotot iridu jibqgħu aċċessibbli minn dashboard remot iżda jmexxu probe fuq in-naħa tal-host
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) għal min isejjaħ lokalment.
-Dawn mhumiex LOCAL_ONLY għal `GET`; minflok, il-handler jaqra l-verdett fdat dwar il-peer
-b’`getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) u jmexxi l-probe biss
-għal min isejjaħ minn `loopback` / `lan`. Min isejjaħ minn `remote` jirċievi l-istess struttura tar-rispons mibnija minn
-sorsi li ma jniedux proċessi (stat persistenti, settings, kontrolli tal-fs), immarkata `probed: false`.
+Xi rotot iridu jibqgħu aċċessibbli minn dashboard remot iżda jwettqu sonda fuq il-host
+(`which <binary>`, `<binary> --version`, `tailscale status --json`) għal min iċempel lokalment.
+Dawn mhumiex `LOCAL_ONLY` għal `GET`; minflok, il-handler jaqra l-verdet lokali tal-peer fdat
+permezz ta’ `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) u jwettaq is-sonda biss
+għal min iċempel `loopback` / `lan`. Min iċempel `remote` jirċievi l-istess forma ta’ tweġiba
+mibnija minn sorsi li ma joħolqux proċessi (stat persistenti, settings, kontrolli tal-fajlsistema),
+bil-bandiera `probed: false`.
 
-| Rotta                                                            | Probe maqbuż għal min isejjaħ mill-bogħod                                           |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Probe tar-runtime tas-CLI (`allowLocalRuntimeProbe`) u tnedija ta’ fallback tas-CLI |
-| `GET /api/headroom/status`                                       | `which headroom` u l-probes `--version` ta’ python                                  |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`                   |
-| `GET /api/tunnels/cloudflared` (GET eżentat minn LOCAL_ONLY)     | Tiftixa fil-PATH b’`which cloudflared`                                              |
+| Rotta                                                              | Sonda ma titwettaqx għal min iċempel remot                                  |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`       | Sonda tal-runtime CLI (`allowLocalRuntimeProbe`) u ħolqien fallback tal-CLI |
+| `GET /api/headroom/status`                                         | Is-sondi `which headroom` u python `--version`                              |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`   | `which tailscale`, `tailscale status/funnel --json`, `which brew`           |
+| `GET /api/tunnels/cloudflared` (eżenti minn `LOCAL_ONLY` għal GET) | Tfittxija ta’ `which cloudflared` fil-PATH                                  |
 
-Rotta ġdida tal-qari li tagħmel probe tal-host issegwi l-istess mudell, jew tiġi kklassifikata
-direttament bħala LOCAL_ONLY.
+Rotta ġdida ta’ qari li tagħmel sonda fuq il-host għandha ssegwi l-istess mudell, jew tiġi kklassifikata
+bħala `LOCAL_ONLY` direttament.
 
 ### Livell 2 — ALWAYS_PROTECTED
 
-**Infurzat minn:** `isAlwaysProtectedPath(path)` → jinjora l-eżenzjoni `requireLogin=false`
-**Eżenzjoni:** Ebda waħda meta `requireLogin=false`; JWT huwa dejjem meħtieġ
+**Infurzat minn:** `isAlwaysProtectedPath(path)` → taqbeż il-bypass `requireLogin=false`
+**Bypass:** L-ebda wieħed meta `requireLogin=false`; JWT dejjem meħtieġ
 
-Dawn ir-rotot huma distruttivi jew irriversibbli. Jekk jitħallew f’installazzjoni
-"mingħajr password", dan ikun ifisser li kwalunkwe persuna fuq l-istess LAN tista’ tħassar id-database jew twaqqaf il-
-proċess tas-server.
+Dawn ir-rotot huma distruttivi jew irriversibbli. Jekk dawn jitħallew f’installazzjoni
+“mingħajr password”, dan ikun ifisser li kull min jinsab fuq l-istess LAN jista’ jħassar
+id-database jew iwaqqaf il-proċess tas-server.
 
-| Path                                      | Raġuni                                                                              |
-| ----------------------------------------- | ----------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Itemm il-proċess tas-server                                                         |
-| `/api/settings/database`                  | Esportazzjoni, importazzjoni u tħassir tad-database                                 |
-| `/api/db-backups`                         | Aċċess għall-arkivju sħiħ tal-backup tad-database                                   |
-| `/api/settings/export-json`               | Jesporta l-blob sħiħ tas-settings (inkl. is-sigrieti)                               |
-| `/api/settings/import-json`               | Jissostitwixxi l-blob sħiħ tas-settings                                             |
-| `/api/providers/health-autopilot/actions` | Jeżegwixxi azzjonijiet ta’ rimedju tal-autopilot                                    |
-| `/api/settings/obsidian`                  | Joħloq kredenzjali WebDAV li jistgħu jerġgħu jintużaw għal kwalunkwe root ta’ vault |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| Path                                      | Raġuni                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| `/api/shutdown`                           | Itemm il-proċess tas-server                                                          |
+| `/api/settings/database`                  | Esportazzjoni, importazzjoni u tħassir tad-database                                  |
+| `/api/db-backups`                         | Aċċess għall-arkivju sħiħ tal-backup tad-database                                    |
+| `/api/settings/export-json`               | Jesporta l-blob sħiħ tas-settings (inklużi s-sigrieti)                               |
+| `/api/settings/import-json`               | Jissostitwixxi l-blob sħiħ tas-settings                                              |
+| `/api/providers/health-autopilot/actions` | Jeżegwixxi azzjonijiet ta’ rimedju awtomatiku                                        |
+| `/api/settings/obsidian`                  | Joħloq kredenzjali WebDAV li jistgħu jerġgħu jintużaw għal kwalunkwe għerq tal-vault |
+| `/api/relay/tokens`                       | Joħloq, jelenka, jeditja u jirrevoka tokens tar-relay                                |
+| `/api/agent-skills/generate`              | Jikteb u jneħħi folders tal-ħiliet fuq il-host                                       |
+| `/api/skills/marketplace/install`         | Jinstalla ħila globali għal kull ċavetta                                             |
+| `/api/skills/skillssh/install`            | Jinstalla ħila globali għal kull ċavetta                                             |
+| `/api/cli-tools/apply`                    | Jikteb mill-ġdid il-konfigurazzjoni CLI tal-host tal-operatur                        |
+| `/api/cli-tools/guide-settings`           | Jikteb fajls tal-konfigurazzjoni CLI ggwidati mill-gwida                             |
+| `/api/cli-tools/hermes-agent-settings`    | Jikteb il-konfigurazzjoni tal-aġent Hermes                                           |
+| `/api/cli-tools/backups`                  | Jirrestawra u jħassar backups tal-konfigurazzjoni CLI                                |
+| `/api/log-export`                         | Jibgħat ir-reġistri tas-sejħiet lejn destinazzjoni kkonfigurata                      |
+| `/api/restart`                            | Jibda mill-ġdid il-proċess tas-server                                                |
 
-**Rispons f’każ ta’ ksur:** `401 Authentication required`
+**Rispons fil-każ ta’ ksur:** `401 Authentication required`
 
-`/api/settings/obsidian` ikopri l-child `/webdav` tiegħu: `POST` jipponta s-servizz tal-fajls WebDAV —
-ipprovdut mis-saff personalizzat ta’ Node qabel Next.js, barra minn dan il-pipeline — lejn root magħżul
-minn min jagħmel is-sejħa u jirritorna kredenzjali Basic ġodda, `DELETE` jirrotahom, u l-`POST` tal-parent jaħżen
-it-token tal-API REST ta’ Obsidian. GHSA-62vw ħeba biss l-iżvelar tal-password permezz ta’ `GET`; il-ħruġ tagħha
-kien għadu fil-livell fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` barra minn hekk
-jirrifjuta vault li jkun id-direttorju tad-data, jinsab fih, jew ikun fih id-direttorju tad-data.
+`/api/settings/obsidian` ikopri l-element `/webdav` tiegħu: `POST` jipponta s-servizz tal-fajls WebDAV —
+moqdi mis-saff personalizzat ta’ Node qabel Next.js, barra minn dan il-pipeline — lejn għerq magħżul
+minn min jagħmel is-sejħa u jirritorna l-kredenzjali Basic maħluqa friska, `DELETE` jibdilhom, u l-`POST`
+tal-element ġenitur jaħżen it-token tal-API REST ta’ Obsidian. GHSA-62vw ħeba biss l-iżvelar tal-password
+ta’ `GET`; il-ħruġ tal-kredenzjali kien għadu fuq il-livell fail-open (GHSA-7pq4-8pvv-rx7r).
+`enableObsidianVaultSync()` jirrifjuta wkoll vault li huwa, jinsab ġewwa, jew fih id-direttorju tad-data.
 
-#### L-esportazzjonijiet tal-kredenzjali huma għall-operaturi biss
+#### L-esportazzjonijiet u r-restawr tal-kredenzjali huma riservati għall-operaturi
 
 Il-livell ta’ hawn fuq jiddeċiedi biss jekk hijiex meħtieġa _xi_ kredenzjali. Ir-rotot li jniżżlu
-l-kredenzjali maħżuna jżidu verifika oħra fil-handler: `GET /api/settings/export-json` (konnessjonijiet
-tal-fornituri deċifrati u ċwievet API mhux ipproċessati), `GET /api/db-backups/export` (il-fajl SQLite) u
+kredenzjali maħżuna jżidu verifika oħra fil-handler: `GET /api/settings/export-json` (konnessjonijiet
+tal-provider dekriptati u ċwievet API mhux ipproċessati), `GET /api/db-backups/export` (il-fajl SQLite) u
 `GET /api/db-backups/exportAll` (l-arkivju sħiħ) isejħu `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Din taċċetta sessjoni tad-dashboard, is-suġġett CLI lokali, jew
-istanza bil-login diżattivat, u twieġeb b’`403` għal ċwievet API ta’ kwalunkwe ambitu (inklużi `manage`
-u `admin`) u għal tokens ta’ aċċess `oma_`. Il-ħruġ ta’ tokens tas-sinkronizzazzjoni (`POST /api/sync/tokens`) juża
-l-istess helper, flimkien mat-token fdat tas-servizz intern fuq il-loopback.
+(`src/lib/api/operatorCredential.ts`). Dan jaċċetta sessjoni tad-dashboard, is-suġġett CLI lokali,
+jew istanza bil-login diżattivat, u jirrispondi `403` għal ċwievet API ta’ kwalunkwe skop (inklużi
+`manage` u `admin`) u għal tokens ta’ aċċess `oma_`. Il-kontropartijiet distruttivi jżommu l-istess
+konfini: `POST /api/db-backups/import` (fajl `.sqlite` imtella’, inkluż `dryRun=true`), `POST /api/db-backups`
+(jirrestawra backup maħżun skont l-id) u `POST /api/settings/import-json` (restawr JSON legat)
+jissostitwixxu d-database attiva jew is-sett kollu ta’ settings/konnessjonijiet/ċwievet API, għalhekk
+kredenzjali tal-magna lanqas ma jistgħu jattivawhom. Il-qerda tal-punti ta’ restawr iżżomm l-istess
+konfini: `DELETE /api/db-backups` (tindif — iżomm l-aħħar N / ineħħi dawk eqdem minn D jum) u
+`PATCH /api/db-backups` (settings taż-żamma), għaliex iż-żamma persistita hija eżattament dak li
+`cleanupDbBackups()` japplika wara kull backup awtomatiku (`src/lib/db/backup.ts`), u għalhekk
+kredenzjali tal-magna li setgħu jsalvaw `keepLatest: 1` kienu jneħħu kollox fl-istampa li jmiss.
+L-elenkar u l-ħolqien tal-backups (`GET`/`PUT /api/db-backups`) jibqgħu jużaw awtentikazzjoni
+ordinarja għall-ġestjoni. Il-ħruġ tat-tokens tas-sinkronizzazzjoni (`POST /api/sync/tokens`) juża
+l-istess helper, flimkien mat-token intern tas-servizz trusted tal-loopback.
 
-#### Credential exports and restores are operator-only
+### Il-bootstrap ta’ installazzjoni friska huwa biss għall-loopback — skont il-peer reali, mhux `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
-
-### Il-bootstrap ta’ installazzjoni ġdida huwa limitat għal-loopback — skont il-peer reali, mhux `Host`
-
-Meta ma tkun ikkonfigurata l-ebda password tal-ġestjoni (u ma jkun hemm l-ebda `INITIAL_PASSWORD`), `isAuthRequired()` f’
-`src/shared/utils/apiAuth.ts` iżomm il-bootstrap anonimu miftuħ **għall-peers loopback biss**.
-Il-loopback jiġi ddeterminat mis-sinjali fdati tal-peer, f’din l-ordni: il-peer TCP reali ttimbrat bit-token
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, dak li tara l-politika), il-verdett tal-pipeline stess
-`AUTHZ_HEADER_PEER_LOCALITY` (dak li jaraw il-handlers tar-rotot, fdat biss sakemm
-`OMNIROUTE_PEER_STAMP_TOKEN` ikun issettjat), jew peer reali tas-socket għal min jagħmel sejħiet diretti. `Host` /
+Meta ma jkun hemm l-ebda password tal-ġestjoni kkonfigurata (u lanqas `INITIAL_PASSWORD`), `isAuthRequired()` f’
+`src/shared/utils/apiAuth.ts` iżomm il-bootstrap anonimu miftuħ **biss għal peers tal-loopback**.
+Il-loopback jiġi determinat mis-sinjali tal-peer trusted, fl-ordni: il-peer TCP reali ttimbrat bit-token
+(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, dak li tara l-politika), il-verdet tal-pipeline stess ta’
+`AUTHZ_HEADER_PEER_LOCALITY` (dak li jaraw il-handlers tar-rotot, trusted biss waqt li jkun issettjat
+`OMNIROUTE_PEER_STAMP_TOKEN`), jew peer reali tas-socket għal min jagħmel sejħiet diretti. `Host` /
 `nextUrl.hostname` qatt ma jiġu kkonsultati, u l-kitba tal-ewwel password
-(`POST /api/settings/require-login`) hija soġġetta għall-istess restrizzjoni minflok ma tkun miftuħa għal kull
-peer tan-network (GHSA-7pq4-8pvv-rx7r). `managementPolicy` jgħaddi l-verdett `peerContext`
-tiegħu stess b’mod espliċitu, sabiex l-headers tat-talba ORIGINAL (qabel it-tneħħija) qatt ma jiddeċiduh.
+(`POST /api/settings/require-login`) hija taħt l-istess restrizzjoni minflok tkun miftuħa għal kull
+peer tan-network (GHSA-7pq4-8pvv-rx7r). `managementPolicy` tgħaddi b’mod espliċitu l-verdet tagħha ta’
+`peerContext` ’l isfel, għalhekk l-headers tat-talba ORIĠINALI (qabel ma jitneħħew) qatt ma jiddeċieduha.
 
-### Livell 3 — ĠESTJONI (predefinit)
+### Livell 3 — ĠESTJONI (default)
 
-Ir-rotot l-oħra kollha tal-ġestjoni. L-awtentikazzjoni hija meħtieġa sakemm ma jkunx
-ikkonfigurat `requireLogin=false`. It-tokens CLI jistgħu jawtentikaw dawn ir-rotot (loopback + HMAC validu).
+Ir-rotot l-oħra kollha tal-ġestjoni. L-awtentikazzjoni hija meħtieġa sakemm ma jkunx ikkonfigurat
+`requireLogin=false`. It-tokens CLI jistgħu jawtentikaw dawn ir-rotot (loopback + HMAC validu).
 
 ## Ordni tal-evalwazzjoni
 
 ```
 managementPolicy.evaluate(ctx)
   1. isLocalOnlyPath(path)?
-     → loopback                                  → kompli għall-pass li jmiss
-     → mhux loopback, Bearer bl-ambitu manage
-        U isLocalOnlyBypassableByManageScope     → ippermetti (management_key)
-     → inkella                                   → irrifjuta 403 LOCAL_ONLY
+     → loopback                                  → fall through
+     → non-loopback, manage-scope Bearer
+        AND isLocalOnlyBypassableByManageScope   → allow (management_key)
+     → otherwise                                  → reject 403 LOCAL_ONLY
   2. isInternalModelSyncRequest(ctx)?
-     → ippermetti (system)
+     → allow (system)
   3. hasValidCliToken(headers)?
-     → ippermetti (cli) [loopback + verifika HMAC b’timingSafeEqual]
-  4. isAlwaysProtectedPath(path) jew requireLogin=true?
+     → allow (cli) [loopback + timingSafeEqual HMAC check]
+  4. isAlwaysProtectedPath(path) or requireLogin=true?
      → isDashboardSessionAuthenticated?
-        → ippermetti (dashboard_session)
-     → Bearer bl-ambitu manage fuq mogħdija li ma tistax tinqabeż?
-        → ippermetti (management_key)
-     → irrifjuta 401/403
+        → allow (dashboard_session)
+     → manage-scope Bearer on a non-bypassable path?
+        → allow (management_key)
+     → reject 401/403
   5. requireLogin=false?
-     → ippermetti (anonymous)
+     → allow (anonymous)
 ```
 
-Il-fergħa tal-ambitu manage fil-pass 1 hija l-unika mogħdija awtentikata li tista’
-tissodisfa rotta LOCAL_ONLY; il-modalità ta’ falliment tal-backend tal-awtentikazzjoni
-tirritorna 503 (mhux 403) sabiex DB skaduta ma tiddegradax fis-skiet għal
-"ċaħda".
+Il-fergħa tal-manage-scope tal-Pass 1 hija l-unika mogħdija awtentikata li tista'
+tissodisfa rotta LOCAL_ONLY; il-mod ta' falliment tal-auth-backend jirritorna 503
+(mhux 403) sabiex DB skaduta ma twassalx b'mod sieket għal "deny".
 
-## Żieda ta’ rotta ġdida li tista’ tniedi proċessi
+## Żieda ta' rotta ġdida kapaċi tniedi proċessi
 
-1. Żid il-prefiss tal-mogħdija ma’ `LOCAL_ONLY_API_PREFIXES` fi
+1. Żid il-prefiss tal-mogħdija ma' `LOCAL_ONLY_API_PREFIXES` f'
    `src/server/authz/routeGuard.ts`
-2. Żid test fi `tests/unit/authz/routeGuard.test.ts` li jivverifika li
-   `isLocalOnlyPath()` tirritorna true għall-prefiss il-ġdid
-3. **Qatt taqbeż dan il-pass** — ara r-Regola Stretta #15 fi `CLAUDE.md`
-4. Iddeċiedi: din ir-rotta għandha tkun UKOLL f’`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`?
-   It-tweġiba awtomatika hija **le**. Agħżel li tinkludiha biss meta r-rotta tkun
-   sikura biex tiġi esposta għal detentur tal-ambitu manage (jiġifieri MA tniedix
-   kodiċi arbitrarju kkontrollat mill-utent).
+2. Żid test f'`tests/unit/authz/routeGuard.test.ts` li jivverifika li
+   `isLocalOnlyPath()` jirritorna true għall-prefiss il-ġdid
+3. **Qatt taqbeż dan il-pass** — ara r-Regola Stretta #15 f'`CLAUDE.md`
+4. Iddeċiedi: din ir-rotta għandha tkun ukoll f'
+   `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`?
+   It-tweġiba awtomatika hija **le**. Agħżel dan biss meta r-rotta tkun sikura
+   biex tiġi esposta lil detentur ta' manage-scope (jiġifieri MA tniedix kodiċi
+   arbitrarju kkontrollat mill-utent).
 
-## Żieda ta’ mogħdija li tista’ tinqabeż bl-ambitu manage
+## Żieda ta' mogħdija li tista' taqbeż ir-restrizzjoni tal-manage-scope
 
-1. Ikkonferma li r-rotta ma teżegwix kodiċi jew kmandi pprovduti mill-utent. Jekk
+1. Ikkonferma li r-rotta ma tesegwixxix kodiċi jew kmandi pprovduti mill-utent. Jekk
    tagħmel dan, waqqaf — din l-eċċezzjoni mhijiex l-għodda t-tajba.
-2. Żid il-prefiss ma’ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` fi
+2. Żid il-prefiss ma' `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` f'
    `src/server/authz/routeGuard.ts`
-3. Żid kopertura fi `tests/unit/authz/management-policy.test.ts` għall-erba’
-   forom kollha tat-talba: mingħajr Bearer (403), Bearer manage (ippermetti),
-   Bearer mhux manage (403), u r-rigressjoni għal kull prefiss li tiżgura li
-   `/api/cli-tools/runtime/*` tibqa’ strettament loopback anki b’Bearer manage.
+3. Żid kopertura f'`tests/unit/authz/management-policy.test.ts` għall-erba'
+   forom kollha tat-talba: mingħajr Bearer (403), Bearer ta' manage (allow),
+   Bearer mhux ta' manage (403), u r-rigressjoni għal kull prefiss li tiżgura li
+   `/api/cli-tools/runtime/*` jibqa' strettament loopback anki b'Bearer ta' manage.
 
 ## Fajls
 
-| Fajl                                         | Għan                                        |
-| -------------------------------------------- | ------------------------------------------- |
-| `src/server/authz/routeGuard.ts`             | Kostanti u funzjonijiet awżiljarji          |
-| `src/server/authz/policies/management.ts`    | Loġika tal-evalwazzjoni                     |
-| `tests/unit/authz/routeGuard.test.ts`        | Testijiet unitarji għall-għodod tal-livelli |
-| `tests/unit/authz/management-policy.test.ts` | Testijiet unitarji għal evaluate()          |
+| Fajl                                         | Għan                                         |
+| -------------------------------------------- | -------------------------------------------- |
+| `src/server/authz/routeGuard.ts`             | Kostanti u funzjonijiet helper               |
+| `src/server/authz/policies/management.ts`    | Loġika tal-evalwazzjoni                      |
+| `tests/unit/authz/routeGuard.test.ts`        | Testijiet unitarji għall-helpers tal-livelli |
+| `tests/unit/authz/management-policy.test.ts` | Testijiet unitarji għal evaluate()           |
 
-## Dokumentazzjoni tal-Livelli tas-Sigurtà f’OpenAPI
+## Dokumentazzjoni tal-Livelli tas-Sigurtà f'OpenAPI
 
-Meta żżid rotta ġdida ma’ `docs/openapi.yaml`, applika l-estensjoni
-tal-fornitur korrispondenti jekk ir-rotta tkun ikklassifikata minn `routeGuard.ts`:
+Meta żżid rotta ġdida ma' `docs/openapi.yaml`, applika l-estensjoni korrispondenti
+tal-vendor jekk ir-rotta tkun ikklassifikata minn `routeGuard.ts`:
 
-| Klassifikazzjoni ta’ routeGuard.ts         | Annotazzjoni YAML              | Infurzar                                               |
-| ------------------------------------------ | ------------------------------ | ------------------------------------------------------ |
-| `LOCAL_ONLY_API_PREFIXES`                  | `x-loopback-only: true`        | Imblukkata mingħajr kundizzjonijiet jekk mhix loopback |
-| `ALWAYS_PROTECTED_API_PATHS`               | `x-always-protected: true`     | Awtentikazzjoni meħtieġa anki b’`requireLogin=false`   |
-| Rotta interna ta’ admin/debug              | `x-internal: true`             | Moħbija minn /dashboard/api-endpoints b’mod awtomatiku |
-| Xejn (pubblika / awtentikazzjoni standard) | (l-ebda annotazzjoni meħtieġa) | Aċċess standard ikkontrollat minn `requireLogin`       |
+| Klassifikazzjoni ta' routeGuard.ts         | Annotazzjoni YAML                  | Infurzar                                             |
+| ------------------------------------------ | ---------------------------------- | ---------------------------------------------------- |
+| `LOCAL_ONLY_API_PREFIXES`                  | `x-loopback-only: true`            | Imblukkata minn non-loopback mingħajr eċċezzjoni     |
+| `ALWAYS_PROTECTED_API_PATHS`               | `x-always-protected: true`         | Awtentikazzjoni meħtieġa anki b'`requireLogin=false` |
+| Rotta interna ta' amministrazzjoni/debug   | `x-internal: true`                 | Moħbija minn /dashboard/api-endpoints awtomatikament |
+| Xejn (pubblika / awtentikazzjoni standard) | (mhi meħtieġa l-ebda annotazzjoni) | Aċċess standard ikkontrollat minn `requireLogin`     |
 
 ### Validazzjoni
 
@@ -334,22 +317,22 @@ tal-fornitur korrispondenti jekk ir-rotta tkun ikklassifikata minn `routeGuard.t
 
 - `scripts/check/check-openapi-coverage.mjs` — ifalli jekk il-kopertura tkun < 99%
 - `scripts/check/check-openapi-security-tiers.mjs` — ifalli jekk l-annotazzjonijiet
-  `x-loopback-only` jew `x-always-protected` jiddevjaw mill-kostanti waqt il-kompilazzjoni
+  `x-loopback-only` jew `x-always-protected` ikunu differenti mill-kostanti fil-ħin tal-kompilazzjoni
 
-Iż-żewġ skripts jitħaddmu fil-hook ta’ pre-commit u fis-CI.
+Iż-żewġ skripts jitħaddmu fil-hook ta' pre-commit u fis-CI.
 
-### Regola dwar Pożittivi Foloz
+### Regola tal-Pożittivi Foloz
 
-Jekk `x-always-protected` jew `x-loopback-only` tiġi annotata fuq rotta li MHIX
-fil-kostanti ta’ `routeGuard.ts`, l-iskript tal-kopertura jfalli. Is-soluzzjoni hija
-dejjem li l-YAML jiġi allinjat ma’ dak li `routeGuard.ts` fil-fatt jinforza — mhux
-li jiżdiedu rotot ma’ `routeGuard.ts` mingħajr ma tiġi implimentata wkoll il-loġika
-tal-infurzar.
+Jekk `x-always-protected` jew `x-loopback-only` jiġi annotat fuq rotta li MHIX f'
+il-kostanti ta' `routeGuard.ts`, l-iskript tal-kopertura jfalli. It-tiswija dejjem
+hija li l-YAML jiġi allinjat ma' dak li `routeGuard.ts` jinforza fil-fatt — mhux li
+jiżdiedu rotot ma' `routeGuard.ts` mingħajr ma tiġi implimentata wkoll il-loġika ta'
+infurzar.
 
 ---
 
 ## Ara wkoll
 
-- `docs/security/CLI_TOKEN.md` — token tal-ID tal-magna tas-CLI
-- `docs/architecture/AUTHZ_GUIDE.md` — pipeline sħiħ tal-awtorizzazzjoni
+- `docs/security/CLI_TOKEN.md` — token tal-magna tal-CLI
+- `docs/architecture/AUTHZ_GUIDE.md` — pipeline sħiħa tal-awtorizzazzjoni
 - `docs/frameworks/MCP-SERVER.md` — trasporti u ambiti tas-server MCP

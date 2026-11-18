@@ -210,3 +210,32 @@ test(
     assert.equal(metadata(cleared).quotaPreflightEnabled, undefined);
   }
 );
+
+test("Codex OAuth re-login keeps the paid-credits opt-in", { timeout: 8_000 }, async () => {
+  const account = {
+    provider: "codex",
+    authType: "oauth",
+    email: "credits-fixture@example.invalid",
+    name: "credits-reimport-fixture",
+    accessToken: "credits-access",
+    providerSpecificData: { workspaceId: "credits-fixture-workspace", allowPaidCredits: true },
+  };
+  const original = await providers.createProviderConnection(account);
+  assert.ok(original && typeof original.id === "string");
+  const reloggedIn = await providers.createProviderConnection({
+    ...account,
+    accessToken: "credits-rotated-access",
+    providerSpecificData: { workspaceId: "credits-fixture-workspace", autoSync: true },
+  });
+  assert.equal(reloggedIn?.id, original.id, "re-login must update the same account");
+  assert.equal(metadata(reloggedIn).allowPaidCredits, true);
+
+  const optedOut = await providers.updateProviderConnection(original.id, {
+    providerSpecificData: { workspaceId: "credits-fixture-workspace", allowPaidCredits: false },
+  });
+  assert.equal(metadata(optedOut).allowPaidCredits, false);
+  const cleared = await providers.updateProviderConnection(original.id, {
+    providerSpecificData: null,
+  });
+  assert.equal(metadata(cleared).allowPaidCredits, undefined);
+});

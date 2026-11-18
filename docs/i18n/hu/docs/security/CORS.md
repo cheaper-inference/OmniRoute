@@ -64,11 +64,11 @@ miatt:
 
 Ez felületenként a következőt jelenti, még `CORS_ALLOW_ALL=true` esetén is:
 
-| Felület                                      | Hitelesítési mechanizmus    | A helyettesítő karakteres CORS hatása                                                                                                                                                                                                                                                        |
-| -------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Irányítópult / MANAGEMENT `/api/*`           | Sütialapú munkamenet        | Az eredet visszatükröződik, de az **`Allow-Credentials` hiánya miatt** a böngésző **blokkolja** a hitelesítési adatokat tartalmazó olvasást. Egy rosszindulatú, más eredetű webhely **nem olvashatja** a hitelesített irányítópult-válaszokat, és a munkamenetsüti sem kerül nyilvánosságra. |
-| Kliens-API `/v1/*`, `/v1beta/*`              | Bearer / `x-api-key` fejléc | Már eleve megengedő **a kialakításából adódóan** (`relaxForTokenAuth`): a böngészők soha nem csatolják automatikusan az `Authorization`/`x-api-key` értéket, így a támadó oldala nem tudja megadni az Ön kulcsát. A `CORS_ALLOW_ALL` ezt nem bővíti.                                         |
-| Nyilvános, csak olvasható (`/api/health`, …) | Nincs                       | Nem érzékeny; a helyettesítő karakter ártalmatlan.                                                                                                                                                                                                                                           |
+| Felület                                      | Hitelesítési mechanizmus    | A helyettesítő karakteres CORS hatása                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Irányítópult / MANAGEMENT `/api/*`           | Sütialapú munkamenet        | Az eredet visszatükröződik, de az **`Allow-Credentials` hiánya miatt** a böngésző **blokkolja** a hitelesítési adatokat tartalmazó olvasást. Egy rosszindulatú, más eredetű webhely **nem olvashatja** a hitelesített irányítópult-válaszokat, és a munkamenetsüti sem kerül nyilvánosságra.                                                                                                                                              |
+| Kliens-API `/v1/*`, `/v1beta/*`              | Bearer / `x-api-key` fejléc | Már eleve megengedő **a kialakításából adódóan** (`relaxForTokenAuth`): a böngészők soha nem csatolják automatikusan az `Authorization`/`x-api-key` értéket, így a támadó oldala nem tudja megadni az Ön kulcsát. Az eredet csak akkor tükröződik vissza, ha a bemutatott kulcs érvényesítése sikerült; a névtelen válaszokra (`REQUIRE_API_KEY=false`) továbbra is az engedélyezési lista vonatkozik. A `CORS_ALLOW_ALL` ezt nem bővíti. |
+| Nyilvános, csak olvasható (`/api/health`, …) | Nincs                       | Nem érzékeny; a helyettesítő karakter ártalmatlan.                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Így a `CORS_ALLOW_ALL=true` **fennmaradó** kitettsége a következőkre korlátozódik:
 (a) a már eleve hitelesítés nélkül hozzáférhető adatok hitelesítési adatok
@@ -127,16 +127,35 @@ Az eredetek összehasonlítása nem érzékeny a kis- és nagybetűkre, a záró
 `http://localhost:3000` és a `http://localhost:3000/` egyenértékű. Ugyanez a CSV
 újraindítás nélkül, futásidőben is beállítható az **Irányítópult → Biztonság → Engedélyezett CORS-eredetek** alatt.
 
-## API-kulcsok és sütialapú munkamenetek
+## API kulcsok és cookie-munkamenetek
 
-- **Bearer / `x-api-key` (a `/v1/*` következtetési felület):** a böngészők ezeket soha nem csatolják
-  automatikusan. A CORS itt nem jelent érdemi akadályt — az API-kulcs jelenti
-  az akadályt —, ezért ez a felület szándékosan megengedő, hogy a böngészős és
-  Electron-kliensek elolvashassák azokat a válaszokat, amelyekhez már egyébként is jogosultságuk van.
-- **Sütialapú munkamenet (az irányítópult):** a hiba esetén tiltó alapértelmezés **és**
-  az `Access-Control-Allow-Credentials` hiánya védi a megosztott útvonalon. A
-  felügyeleti/irányítópulti eredeteket ne vegye fel semmilyen megengedő konfigurációba; ezeknek továbbra is
-  szigorúan hiba esetén tiltó módon kell működniük.
+- **Tartó / `x-api-key` (a `/v1/*` következtetési felület):** a böngészők soha nem csatolják ezeket automatikusan. CORS itt nem jelent értelmes akadályt — a API kulcs a — akadály, ezért ez a felület szándékosan megengedő, így a böngésző és Electron kliensek elolvashatják azokat a válaszokat, amelyekre már jogosultak. A laza visszhang az érvényesített kulcsot követi, nem a fejléc puszta jelenlétét: amikor `REQUIRE_API_KEY=false` névtelenül szolgál ki egy kérést, a sikeres válasz megtartja a sikertelenül zárt engedélyezési listát. A hitelesítési elutasítások (401) olvashatóak maradnak, így a kliensek felbukkanhatnak egy visszavont vagy hibásan begépelt kulcsot (#5242): a folyamat saját 401-je megtartja a visszhangot, és egy olyan útvonal, amely magát a kulcsot visszautasítja, miután a folyamat anonimként szolgálta ki (`/v1/models` és `/v1beta/models` konfigurált felügyeleti hitelesítéssel, a tulajdonos-scoped `/v1/files`, `/v1/batches` `/v1/media` és auto-combo jelölt útvonalak) hozzáadja a visszhangot a 401-hez `/v1/session-leases` `credentialRejectionHeaders()` segítségével. A visszhangot a hitelesítő adatok fejlécet (`Authorization`, `x-api-key`, `x-goog-api-key` vagy a `auth_token` cookie-t) tartalmazó kérelemre kell beírni, nem pedig arra, hogy az útvonal melyiket ellenőrizte, és soha nem párosul `Access-Control-Allow-Credentials` val; a test egy rögzített hibaburok. `requireManagementAuth()` által őrzött `/api/v1/` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) kezelési útvonalak nem adják hozzá a visszhangot: `REQUIRE_API_KEY=false` -vel 401/403 jük nem olvasható kereszteredetű.
+- **Cookie-munkamenet (a műszerfal):** a hibazárás alapértelmezés által védett** és** `Access-Control-Allow-Credentials` hiányával a megosztott úton. Tartsa távol management/dashboard eredetét minden megengedő konfigurációtól; pontosan zárva kell maradniuk.
+
+## WebSocket-kézfogások (`/v1/responses`, `/v1/ws`)
+
+A böngészők nem alkalmaznak CORS-t a WebSocketre, ezért a következtetési kimenetet
+visszaadó WebSocket-átvitelek maguk ellenőrzik a kézfogás `Origin` fejlécét
+(`src/server/origin/wsOrigin.ts`): a Responses WebSocket (`/v1/responses`), valamint
+– ha az OmniRoute `npm start` / `npm run dev` útján fut – a `/v1/ws` és `/api/v1/ws`
+híd, amely a `/v1/chat/completions`, `/v1/messages` és `/v1/responses` válaszait
+keretekként továbbítja. A híd a `/api/v1/ws?handshake=1` útvonaltól kér döntést, és
+megtagadja a protokollváltást, hacsak az az útvonal le nem futtatta az ellenőrzést. A
+kézfogás akkor fogadható el, ha:
+
+- nincs `Origin` fejléce (Codex CLI, SDK-k és más, nem böngészős kliensek);
+- az `Origin` értéket a fenti engedélyezési lista elfogadja (`CORS_ALLOWED_ORIGINS`,
+  a `corsOrigins` beállítás, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- az `Origin` az OmniRoute saját nyilvános eredeteinek egyike (a beállított nyilvános
+  alap-URL, egy megbízható proxy által továbbított eredet, vagy egy IP-literálként
+  vagy `localhost` néven megadott közvetlen loopback-/LAN-gazdagép — ugyanazok a
+  jelöltek, amelyeket az irányítópult módosítási ellenőrzése használ); vagy
+- érvényes API-kulcsot tartalmaz, ahogyan a HTTP `/v1/*` felületen.
+
+Minden más esetben a válasz `403 ws_origin_forbidden`. Az irányítópult munkamenetsütije
+nem mentesít egy idegen `Origin` értéket, mert a böngésző bármely oldal socketjéhez
+csatolja. A más porton futó `localhost` nem számít azonos eredetnek; az ilyen
+fejlesztői eredeteket vegye fel a `CORS_ALLOWED_ORIGINS` listába.
 
 ## Példa: fordított proxy az OmniRoute előtt
 
@@ -170,6 +189,7 @@ Az engedélyezett böngészőeredeteket az OmniRoute-ban (`CORS_ALLOWED_ORIGINS`
 | Irányítópult figyelmeztetősávja                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Engedélyezett CORS-eredetek mező                  | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent útvonalankénti CORS-a (a kivétel)     | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket-kézfogás `Origin`-ellenőrzése           | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Lásd még
 

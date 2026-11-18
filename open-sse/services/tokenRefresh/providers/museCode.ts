@@ -1,12 +1,18 @@
 import { MUSE_CODE_MINT_URL, isMuseDcaToken } from "../../../config/museCode.ts";
-import { mintMuseApiKey } from "../../museCodeAuth.ts";
+import { MuseCodeMintError, mintMuseApiKey } from "../../museCodeAuth.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
 import type { RefreshLogger } from "../shared.ts";
+import { isTransientRefreshError } from "../transientError.ts";
 
 /**
  * Muse Code has no refresh-token grant. CLIProxyAPI remints the inference key
  * from the durable `dca:` device token on 401 / missing API key. OmniRoute
  * stores that DCA token as `refreshToken`.
+ *
+ * Mint-failure contract (#14138): a 401/403 means the OIDC token itself is dead
+ * (expired/revoked) — re-minting can never succeed with it, so force re-login.
+ * A 429 or any other failure is transient: the stored api_key never expires, so
+ * return null and keep it; the next refresh cycle retries.
  */
 export async function refreshMuseCodeToken(
   refreshToken: string,
@@ -23,7 +29,7 @@ export async function refreshMuseCodeToken(
       : "";
   if (!dcaToken) {
     log?.warn?.("TOKEN_REFRESH", "Muse Code refresh missing dca token");
-    return null;
+    return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
   }
 
   try {
@@ -33,7 +39,7 @@ export async function refreshMuseCodeToken(
     return {
       accessToken: minted.apiKey,
       refreshToken: dcaToken,
-      expiresIn: undefined,
+      expiresAt: null,
       providerSpecificData: {
         ...(providerSpecificData && typeof providerSpecificData === "object"
           ? providerSpecificData
@@ -52,7 +58,12 @@ export async function refreshMuseCodeToken(
       },
     };
   } catch (err) {
+    if (err instanceof MuseCodeMintError && (err.status === 401 || err.status === 403)) {
+      log?.warn?.("TOKEN_REFRESH", "Muse Code refresh 401 — OIDC token invalid, re-login required");
+      return { error: "unrecoverable_refresh_error", code: "invalid_oidc_token" };
+    }
     log?.warn?.("TOKEN_REFRESH", `Muse Code remint failed: ${(err as Error)?.message || "error"}`);
+    if (isTransientRefreshError(err)) throw err;
     return null;
   }
 }

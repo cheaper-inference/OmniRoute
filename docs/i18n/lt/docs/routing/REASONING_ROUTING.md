@@ -38,24 +38,19 @@ ir palaiko `any` arba `all` atitiktį.
 `connection` taisyklė vertinama tik tada, kai nelaimėjo jokia ankstyvojo vertinimo taisyklė ir jau buvo
 pasirinktas konkretus teikėjo ryšys. Ji gali pakeisti tik samprotavimo intensyvumą ir biudžetą.
 
-## Samprotavimo intensyvumas ir biudžetas
+## Pastangos ir biudžetas
 
-`sourceEffort` priima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ir
-`ultra`. `missing` reiškia, kad užklausoje nėra nei atskiro samprotavimo intensyvumo, nei samprotavimo perjungiklio,
-nei samprotavimo biudžeto. Todėl tik biudžetą nurodantis signalas atitinka tik `any`.
+`sourceEffort` priima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` `ultra`. `missing` reiškia, kad prašyme nėra nei atskirų pastangų, nei mąstymo perjungimo ar apgalvoto biudžeto. Todėl tik biudžeto signalą atitinka tik `any`.
 
 `effortMode` turi tris variantus:
 
-- `inherit` išlaiko kliento samprotavimo intensyvumą, kartu leisdamas pakeisti modelį arba kombinaciją.
-- `default` nustato `targetEffort` tik tada, kai nėra aiškiai pateikto samprotavimo signalo.
-- `force` pakeičia atskirą samprotavimo intensyvumą į `targetEffort`.
+- `inherit` išlaiko kliento pastangas ir leidžia modeliui ar deriniui keistis.
+- `default` nustato `targetEffort` tik tada, kai nėra aiškaus samprotavimo signalo.
+- `force` diskrečiąsias pastangas pakeičia `targetEffort`.
 
-Nepriklausomai nuo to, `budgetAction` gali būti `preserve`, `remove` arba `set`. `force` su `none` pašalina
-visus atpažįstamus samprotavimo intensyvumo ir biudžeto laukus. `none` kartu su `set` yra neleistinas derinys.
+Nepriklausomai `budgetAction` gali būti `preserve`, `remove` arba `set`. `force` su `none` pašalina visus pripažintus pastangų ir biudžeto laukus, tada nustato `reasoning_effort: "none"`, nes kai kurie teikėjai įjungia mąstymą, kai lauko nėra. Teikėjai, kurie atmeta pažodinį `none`, koreguojami išsiunčiant `open-sse/executors/base/reasoningEffort.ts`. Komandos kodas susieja jį su `low`, išskyrus atsakymų formos užklausas (`input` be `messages`), kur jis išlaiko `none`. Cloudflare Workers AI (`cloudflare-ai`) modeliai, kurie atmeta `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), gauna `low`; kiti Darbuotojai AI modeliai laikyti `none`. Lauko panaikinimas čia nėra parinktis, nes nesant pastangų paleidžiama numatytoji modelio pakopa. `none` kartu su `set` negalioja.
 
-Užklausos, skirtos žinomiems nesuderinamiems modeliams, atmetamos prieš siunčiant jas išorinei sistemai. Kai taikinys yra kombinacija,
-nesuderinami įrašai pašalinami; jei jų nelieka, užklausa grąžina būseną `400`.
-Kai nėra galimybių duomenų, pateikiamas įspėjimas, o taisyklė lieka aktyvi.
+Užklausos, skirtos žinomiems nesuderinamiems modeliams, atmetamos prieš skambinant aukštyn. Kombinuotiems tikslams nesuderinami įrašai pašalinami; jei nė vieno nelieka, užklausa grąžina būseną `400`. Nežinomų galimybių duomenys pateikia įspėjimą ir palieka taisyklę aktyvią.
 
 ## Saugumas ir perdavimo būdai
 

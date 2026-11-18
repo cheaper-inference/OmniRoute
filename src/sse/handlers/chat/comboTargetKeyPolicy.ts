@@ -4,10 +4,13 @@
  * Policy already admitted the requested combo. Per-target
  * `isModelAllowedForKey` must not then skip every member just because the
  * allow-list is the combo name. auto/* / disableNonPublic still check the
- * inner target so #9057 holds.
+ * inner target so #9057 holds. blockedModels applies to every inner target,
+ * including targets granted by the default `combo/*`; only a combo named in
+ * allowedCombos overrides it.
  */
 
 import { isModelBlockedByPatterns } from "@/lib/db/apiKeys";
+import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { isComboNameAllowedForKey } from "@/shared/utils/apiKeyPolicy";
 import { hasApiKeyModelRestrictions } from "@/shared/utils/resolvedModelAccess";
 
@@ -43,8 +46,9 @@ function allowListCoversRequestedCombo(
 }
 
 /**
- * A stored (non-`auto/*`) combo named in the key's `allowedCombos` grants its
- * own targets (#14197). `auto/*` combos keep per-candidate model checks (#9057).
+ * A stored (non-`auto/*`) combo admitted by the key's `allowedCombos` grants its
+ * own targets past `allowedModels` (#14197). `auto/*` combos keep per-candidate
+ * model checks (#9057).
  */
 export function isExplicitlyAllowedComboForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
@@ -58,6 +62,22 @@ export function isExplicitlyAllowedComboForKey(
   );
 }
 
+/**
+ * A granted combo the key names itself, not only through the default `combo/*`.
+ * Naming a combo is the operator's deliberate choice, so its targets also pass
+ * `blockedModels`; `combo/*` is on every new key and must not switch that off.
+ */
+export function isComboNamedForKey(
+  apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
+  requestedModelStr: string | null | undefined
+): boolean {
+  const rules = apiKeyInfo?.allowedCombos;
+  if (!rules || !requestedModelStr) return false;
+  if (!isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return false;
+  const namedRules = rules.filter((rule) => rule !== ALL_COMBOS_ACCESS_RULE);
+  return isComboNameAllowedForKey(namedRules, requestedModelStr);
+}
+
 export async function comboTargetPassesKeyModelPolicy(
   opts: ComboTargetKeyPolicyOptions
 ): Promise<boolean> {
@@ -66,9 +86,11 @@ export async function comboTargetPassesKeyModelPolicy(
 
   if (!hasApiKeyModelRestrictions(apiKeyInfo)) return true;
 
-  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
+  if (isComboNamedForKey(apiKeyInfo, requestedModelStr)) return true;
 
   if (await isModelBlockedByPatterns(apiKeyInfo.blockedModels, targetModelStr)) return false;
+
+  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
 
   if (allowListCoversRequestedCombo(apiKeyInfo.allowedModels, requestedModelStr)) {
     return true;

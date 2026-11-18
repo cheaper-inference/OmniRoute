@@ -289,6 +289,7 @@ test("Normalizers keep Exa and Tavily extras in provider_raw", async () => {
   assert.equal(exa.success, true);
   assert.deepEqual(exa.data?.results[0].provider_raw, {
     id: "exa-result-1",
+    highlights: ["Stable in 1.2"],
     highlight_scores: [0.98],
     summary: "Kubernetes Gateway API graduated.",
     subpages: [{ url: "https://example.com/sub" }],
@@ -317,6 +318,31 @@ test("Normalizers keep Exa and Tavily extras in provider_raw", async () => {
     favicon: "https://investor.example.com/favicon.ico",
   });
   assert.equal(tavily.data?.results[1].provider_raw, null);
+});
+
+test("Exa: every highlight is kept, paired with its score, not only the first (#18109)", async () => {
+  const { result } = await runSearch(
+    { provider: "exa-search" },
+    {
+      results: [
+        {
+          title: "Gateway API",
+          url: "https://gateway-api.sigs.k8s.io/",
+          highlights: ["Stable in 1.2", "HTTPRoute is GA", "GRPCRoute joins the standard channel"],
+          highlightScores: [0.98, 0.91, 0.77],
+        },
+      ],
+    }
+  );
+  assert.equal(result.success, true);
+  const item = result.data?.results[0];
+  assert.equal(item?.snippet, "Stable in 1.2");
+  assert.deepEqual(item?.provider_raw?.highlights, [
+    "Stable in 1.2",
+    "HTTPRoute is GA",
+    "GRPCRoute joins the standard channel",
+  ]);
+  assert.deepEqual(item?.provider_raw?.highlight_scores, [0.98, 0.91, 0.77]);
 });
 
 test("Flat provider_options keys for other providers keep working", async () => {

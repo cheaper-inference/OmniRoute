@@ -8,6 +8,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
+import { Tile } from "@omniroute/ui-kit/tile";
 import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
@@ -392,7 +393,7 @@ export default function CompressionSettingsTab() {
           <Icon name="compress" size={20} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">{t("compressionTitle")}</h3>
+          <h3 className="text-lg">{t("compressionTitle")}</h3>
           <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
         </div>
         {status === "saved" && (
@@ -412,39 +413,23 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-text-main">{t("compressionMode")}</h4>
+            <h4 className="text-sm text-text-main">{t("compressionMode")}</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-2">
               {MODES.map((m) => {
                 const active = config.defaultMode === m.value;
                 return (
-                  // kit-exception: a two-line mode tile (icon, title, description); the kit
-                  // Button is a single-line pill. Kit tokens + the global :focus-visible ring.
-                  <button
+                  // Kit Tile: the mode tiles keep their aria-pressed toggle semantics.
+                  <Tile
                     key={m.value}
-                    type="button"
-                    aria-pressed={active}
+                    layout="stacked"
+                    pressed={active}
                     onClick={() => save({ defaultMode: m.value })}
                     disabled={saving}
-                    className={`flex items-start gap-3 p-3 rounded-lg border text-start transition-all disabled:opacity-60 ${
-                      active
-                        ? "border-info/50 bg-info/5 ring-1 ring-info/20"
-                        : "border-border/50 hover:border-border hover:bg-surface/30"
-                    }`}
-                  >
-                    <Icon
-                      name={m.icon}
-                      size={20}
-                      className={`mt-0.5 ${active ? "text-info" : "text-text-muted"}`}
-                    />
-                    <div className="min-w-0">
-                      <p className={`text-sm font-medium ${active ? "text-info" : ""}`}>
-                        {t(m.labelKey)}
-                      </p>
-                      <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
-                        {t(m.descKey)}
-                      </p>
-                    </div>
-                  </button>
+                    icon={<Icon name={m.icon} />}
+                    title={t(m.labelKey)}
+                    description={t(m.descKey)}
+                    className="p-3"
+                  />
                 );
               })}
             </div>
@@ -453,7 +438,7 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3 pt-4 border-t border-border/30">
-            <h4 className="text-sm font-medium text-text-main">{t("compressionGeneral")}</h4>
+            <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -526,9 +511,7 @@ export default function CompressionSettingsTab() {
                   the panel's `engines.caveman.enabled` is authoritative (planResolution.ts). This tab
                   keeps only the advanced caveman tuning the panel does not expose. */}
               <div data-testid="caveman-panel-note">
-                <h4 className="text-sm font-medium text-text-main">
-                  {t("compressionCavemanConfig")}
-                </h4>
+                <h4 className="text-sm text-text-main">{t("compressionCavemanConfig")}</h4>
                 <p className="text-xs text-text-muted mt-0.5">
                   {t("compressionCavemanConfigDesc")} {t("compressionCavemanPanelHint")}{" "}
                   <code className="text-text-muted">/dashboard/context/settings</code>
@@ -627,9 +610,7 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "aggressive" && config.aggressive && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm font-medium text-text-main">
-                {t("compressionAggressiveConfig")}
-              </h4>
+              <h4 className="text-sm text-text-main">{t("compressionAggressiveConfig")}</h4>
               <p className="text-xs text-text-muted mt-0.5">
                 {t("compressionAggressiveConfigDesc")}
               </p>
@@ -746,7 +727,7 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "ultra" && config.ultra && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm font-medium text-text-main">{t("compressionUltraConfig")}</h4>
+              <h4 className="text-sm text-text-main">{t("compressionUltraConfig")}</h4>
               <p className="text-xs text-text-muted mt-0.5">{t("compressionUltraConfigDesc")}</p>
             </div>
 

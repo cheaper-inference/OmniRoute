@@ -33,6 +33,7 @@ import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
 import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
+  APP_STAGING_ALLOWED_PATH_MATCHERS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
   APP_STAGING_REMOVAL_PATHS,
   findUnexpectedArtifactPaths,
@@ -682,10 +683,12 @@ for (const relativePath of APP_STAGING_REMOVAL_PATHS) {
 // tarball gate, the staged dist/ legitimately contains node_modules (the
 // standalone server's runtime deps, including Turbopack-hashed packages whose
 // wasm files DB init requires). The allowlist prefixes above are the contract.
+// docs/i18n never reaches this point: Step 10.6 removes the whole tree (2026-11-17, npm 413).
 const stagedFiles = walkFiles(DIST_DIR);
 const unexpectedStagedFiles = findUnexpectedArtifactPaths(stagedFiles, {
   exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
   prefixPaths: APP_STAGING_ALLOWED_PATH_PREFIXES,
+  pathMatchers: APP_STAGING_ALLOWED_PATH_MATCHERS,
   neverAllowedSegments: [],
 });
 
@@ -701,6 +704,7 @@ if (unexpectedStagedFiles.length > 0) {
 const remainingUnexpectedFiles = findUnexpectedArtifactPaths(walkFiles(DIST_DIR), {
   exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
   prefixPaths: APP_STAGING_ALLOWED_PATH_PREFIXES,
+  pathMatchers: APP_STAGING_ALLOWED_PATH_MATCHERS,
   neverAllowedSegments: [],
 });
 

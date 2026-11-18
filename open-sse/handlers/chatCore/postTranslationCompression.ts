@@ -51,7 +51,16 @@ export async function applyPostTranslationCompression<TBody>(
   }
 ): Promise<void> {
   const transientFields = new Map<string, unknown>();
-  const postInput = { ...(state.translatedBody as Record<string, unknown>) };
+  const source = state.translatedBody as Record<string, unknown>;
+  // Tool-name ledgers (_namespaceToolIdentityMap #9780, _toolNameMap) are attached
+  // NON-enumerable so they never reach the JSON wire body — the spread below copies
+  // enumerable keys only, so both the compressor input and the restore loop miss
+  // them. Collect them here by name and re-attach them non-enumerably after the
+  // transform, or a successful compression silently drops tool-name restore.
+  const sideChannels = Object.getOwnPropertyNames(source).filter(
+    (key) => key.startsWith("_") && source[key] instanceof Map
+  );
+  const postInput = { ...source };
   for (const [key, value] of Object.entries(postInput)) {
     // Translators keep response-side aliases in Maps under private keys. They
     // are not JSON request fields and would otherwise be stringified to `{}`
@@ -72,6 +81,14 @@ export async function applyPostTranslationCompression<TBody>(
         ...(postResult.body as TBody),
         ...Object.fromEntries(transientFields),
       };
+      for (const key of sideChannels) {
+        Object.defineProperty(state.translatedBody, key, {
+          value: source[key],
+          enumerable: false,
+          configurable: true,
+          writable: true,
+        });
+      }
       // Same arithmetic as the inline `tokensCompressed += …`: a null binding coerces to 0.
       state.tokensCompressed =
         (state.tokensCompressed as number) +

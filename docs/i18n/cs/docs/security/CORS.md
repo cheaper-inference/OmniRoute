@@ -60,11 +60,11 @@ případě**, a to kvůli jednomu konkrétnímu implementačnímu faktu:
 
 Co to znamená pro jednotlivá rozhraní, a to i při `CORS_ALLOW_ALL=true`:
 
-| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                             |
-| ------------------------------------------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.        |
-| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. `CORS_ALLOW_ALL` toto oprávnění nerozšiřuje. |
-| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                      |
+| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.                                                                                                                                                           |
+| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. Vrácení zdroje platí jen tehdy, když byl předložený klíč ověřen; anonymní odpovědi (`REQUIRE_API_KEY=false`) zachovávají seznam povolených zdrojů. `CORS_ALLOW_ALL` toto oprávnění nerozšiřuje. |
+| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                         |
 
 **Zbytkové** vystavení při `CORS_ALLOW_ALL=true` je tedy omezeno na: (a)
 neověřená čtení již veřejně dostupných dat z jiného zdroje a (b) povolení
@@ -120,17 +120,34 @@ U zdrojů se nerozlišují malá a velká písmena a koncové lomítko se ignoru
 lze za běhu nastavit v části **Řídicí panel → Zabezpečení → Povolené zdroje CORS** bez
 restartu.
 
-## Klíče API vs. relace používající soubory cookie
+## Klíče API vs. relace cookie
 
-- **Bearer / `x-api-key` (inferenční rozhraní `/v1/*`):** prohlížeče tyto údaje nikdy
-  nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — bariérou je
-  klíč API — proto je toto rozhraní záměrně permisivní, aby klienti v prohlížečích
-  a Electronu mohli číst odpovědi, ke kterým již mají oprávnění.
-- **Relace používající soubory cookie (řídicí panel):** je chráněna výchozím
-  nastavením, které při chybě přístup zamítne, **a také** absencí
-  `Access-Control-Allow-Credentials` na sdílené cestě. Zdroje pro správu / řídicí
-  panel nezahrnujte do žádné permisivní konfigurace; musí zůstat striktně uzavřené
-  při selhání.
+- **Bearer / `x-api-key` (inferenční rozhraní `/v1/*`):** prohlížeče je nikdy nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — tou je klíč API — a právě proto je toto rozhraní záměrně permisivní, aby klienti v prohlížeči a Electronu mohli číst odpovědi, ke kterým již mají oprávnění. Volnější echo následuje ověřený klíč, nikoli pouhou přítomnost hlavičky: když `REQUIRE_API_KEY=false` obslouží požadavek anonymně, jeho úspěšná odpověď si zachová seznam povolených hodnot v režimu fail-closed. Zamítnutí autentizace (401) zůstávají čitelná, aby klienti mohli zobrazit informaci o odvolaném nebo chybně zadaném klíči (#5242): vlastní 401 z pipeline si zachovává echo a trasa, která samotný klíč odmítne poté, co jej pipeline obsloužila anonymně (`/v1/models` a `/v1beta/models` s nakonfigurovanou autentizací správy, trasy `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` omezené na vlastníka a kandidátní trasy auto-combo), přidá toto echo k 401 prostřednictvím `credentialRejectionHeaders()`. Echo se řídí tím, zda požadavek obsahuje hlavičku s přihlašovacími údaji (`Authorization`, `x-api-key`, `x-goog-api-key` nebo cookie `auth_token`), nikoli tím, kterou z nich trasa kontrolovala, a nikdy se nekombinuje s `Access-Control-Allow-Credentials`; tělo je pevně daný obal chyby. Trasy správy pod `/api/v1/`, které chrání `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), echo nepřidávají: s `REQUIRE_API_KEY=false` jejich 401/403 není čitelná z jiného původu.
+- **Relace cookie (řídicí panel):** chráněná výchozím režimem fail-closed **a** absencí `Access-Control-Allow-Credentials` na sdílené cestě. Ponechte původy správy/řídicího panelu mimo jakoukoli permisivní konfiguraci; musí zůstat přesně v režimu fail-closed.
+
+## Handshaky WebSocket (`/v1/responses`, `/v1/ws`)
+
+Prohlížeče na WebSocket CORS neuplatňují, a proto transporty WebSocket, které vracejí
+výstup inference, kontrolují hlavičku `Origin` handshaku samy
+(`src/server/origin/wsOrigin.ts`): WebSocket pro Responses (`/v1/responses`) a,
+pokud OmniRoute běží přes `npm start` / `npm run dev`, také most `/v1/ws` a
+`/api/v1/ws`, který streamuje `/v1/chat/completions`, `/v1/messages` a
+`/v1/responses` jako rámce. Most si u `/api/v1/ws?handshake=1` vyžádá verdikt a
+upgrade odmítne, pokud tato trasa kontrolu neprovedla. Handshake je přijat, když:
+
+- nemá hlavičku `Origin` (Codex CLI, SDK a další klienti mimo prohlížeč);
+- hlavičku `Origin` připouští výše uvedený seznam povolených zdrojů
+  (`CORS_ALLOWED_ORIGINS`, nastavení `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- hlavička `Origin` je jedním z vlastních veřejných zdrojů OmniRoute (nakonfigurovaná
+  veřejná základní URL, přeposlaný zdroj důvěryhodné proxy nebo přímý hostitel
+  loopback/LAN zadaný jako IP literál nebo `localhost` — tytéž kandidáty používá
+  kontrola mutací řídicího panelu); nebo
+- nese platný klíč API, stejně jako na rozhraní HTTP `/v1/*`.
+
+Cokoli jiného dostane `403 ws_origin_forbidden`. Soubor cookie relace řídicího panelu
+nečiní cizí `Origin` výjimkou, protože jej prohlížeč připojí k socketu jakékoli stránky.
+`localhost` na jiném portu se nepovažuje za stejný zdroj; takové vývojové zdroje
+přidejte do `CORS_ALLOWED_ORIGINS`.
 
 ## Příklad: reverzní proxy před OmniRoute
 
@@ -166,6 +183,7 @@ kartě Security), nikoli v proxy.
 | Varovný banner řídicího panelu                            | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Pole Povolené zdroje CORS                                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS pro jednotlivé trasy Cloud-Agent (výjimka)           | `src/lib/cloudAgent/api.ts`                                          |
+| Kontrola hlavičky `Origin` při handshaku WebSocket        | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Viz také
 

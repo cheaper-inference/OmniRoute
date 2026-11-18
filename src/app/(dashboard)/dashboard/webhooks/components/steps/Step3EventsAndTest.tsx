@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Input from "@/shared/components/Input";
 import Toggle from "@/shared/components/Toggle";
 import { EventChecklist } from "../shared/EventChecklist";
@@ -105,11 +106,11 @@ export function Step3EventsAndTest({
             onClick={() => void sendTest()}
             disabled={testState === "sending"}
           >
-            <Icon
-              name={testState === "sending" ? "sync" : "send"}
-              size={18}
-              className={testState === "sending" ? "animate-spin" : undefined}
-            />
+            {testState === "sending" ? (
+              <Spinner decorative size="sm" />
+            ) : (
+              <Icon name="send" size={18} />
+            )}
             {t("testWebhook")}
           </Button>
 

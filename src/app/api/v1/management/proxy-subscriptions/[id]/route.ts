@@ -4,7 +4,7 @@ import {
   getSubscriptionById,
   updateSubscription,
   deleteSubscription,
-  redactSubscriptionUrl,
+  redactSubscriptionRecord,
   proxySubscriptionUpdateSchema,
   firstIssueMessage,
 } from "@/lib/proxySubscription";
@@ -25,7 +25,7 @@ export async function GET(_request: Request, ctx: RouteCtx) {
     const { id } = await ctx.params;
     const sub = await getSubscriptionById(id);
     if (!sub) return Response.json({ error: "Subscription not found" }, { status: 404 });
-    return Response.json({ ...sub, url: redactSubscriptionUrl(sub.url) });
+    return Response.json(redactSubscriptionRecord(sub));
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to load proxy subscription");
   }
@@ -44,7 +44,7 @@ export async function PATCH(request: Request, ctx: RouteCtx) {
 
     const updated = await updateSubscription(id, parsed.data);
     if (!updated) return Response.json({ error: "Subscription not found" }, { status: 404 });
-    return Response.json({ ...updated, url: redactSubscriptionUrl(updated.url) });
+    return Response.json(redactSubscriptionRecord(updated));
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to update proxy subscription");
   }

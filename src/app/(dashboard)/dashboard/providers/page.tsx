@@ -1,8 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
-
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Badge,
   Card,
@@ -67,9 +66,8 @@ const AddCompatibleProviderModal = dynamic(
   { ssr: false }
 );
 import { CategoryDot } from "./components/CategoryDot";
-const ImportProvidersFromFileModal = dynamic(
-  () =>
-    import("./components/ImportProvidersFromFileModal").then((m) => m.ImportProvidersFromFileModal),
+const ProviderImportModals = dynamic(
+  () => import("./components/ProviderImportModals").then((m) => m.ProviderImportModals),
   { ssr: false }
 );
 import NoAuthProvidersSection from "./components/NoAuthProvidersSection";
@@ -77,6 +75,7 @@ import HighlightableProviderCard from "./components/HighlightableProviderCard";
 import ProviderCountBadge from "./components/ProviderCountBadge";
 import ProviderSummaryCard from "./components/ProviderSummaryCard";
 import DeprecatedProviderBanner from "./components/DeprecatedProviderBanner";
+import ProvidersPageFrame from "./components/ProvidersPageFrame";
 import {
   buildCompactProviderEntriesForPage,
   getCompactProviderAuthType,
@@ -160,7 +159,7 @@ type ProviderBatchTestResults = {
 
 function getConnectionErrorTag(connection, t: ProviderMessageTranslator) {
   if (!connection) return null;
-
+  if (connection.prefixShadowed?.code === "prefix_shadowed") return "prefix_shadowed";
   const explicitType = connection.lastErrorType;
   if (explicitType === "runtime_error") return providerText(t, "errorTypeRuntime", "Runtime");
   if (
@@ -241,7 +240,7 @@ function ProvidersPageContent() {
   const [showAddCompatibleModal, setShowAddCompatibleModal] = useState(false);
   const [showAddAnthropicCompatibleModal, setShowAddAnthropicCompatibleModal] = useState(false);
   const [showAddCcCompatibleModal, setShowAddCcCompatibleModal] = useState(false);
-  const [showImportFromFileModal, setShowImportFromFileModal] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState<"file" | "oauth-export" | null>(null);
   const [testingMode, setTestingMode] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<any>(null);
   const [providerDisplayMode, setProviderDisplayMode] = useState<ProviderDisplayMode>("all");
@@ -943,7 +942,8 @@ function ProvidersPageContent() {
           }}
           onDisplayModeChange={setProviderDisplayMode}
           onNewProvider={() => router.push("/dashboard/providers/new")}
-          onImportFromFile={() => setShowImportFromFileModal(true)}
+          onImportFromFile={() => setOpenImportModal("file")}
+          onImportOAuthExport={() => setOpenImportModal("oauth-export")}
           searchQuery={searchQuery}
           setModelSearchQuery={setModelSearchQuery}
           setSearchQuery={setSearchQuery}
@@ -970,9 +970,7 @@ function ProvidersPageContent() {
                 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}
               />
               <div className="flex-1">
-                <h3
-                  className={`font-semibold ${expirations.summary.expired > 0 ? "text-error" : "text-warning"}`}
-                >
+                <h3 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}>
                   {expirations.summary.expired > 0
                     ? t("expirationBannerExpired", { count: expirations.summary.expired })
                     : t("expirationBannerExpiringSoon", {
@@ -1352,9 +1350,7 @@ function ProvidersPageContent() {
                 />
                 {llmProviderEntries.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                      {t("llmProviders")}
-                    </h3>
+                    <h3 className="text-xs uppercase text-text-muted">{t("llmProviders")}</h3>
                     <ProviderCardGrid>
                       {llmProviderEntries.map(
                         ({ providerId, provider, stats, displayAuthType, toggleAuthType }) => (
@@ -1863,9 +1859,9 @@ function ProvidersPageContent() {
             }}
           />
         )}
-        <ImportProvidersFromFileModal
-          isOpen={showImportFromFileModal}
-          onClose={() => setShowImportFromFileModal(false)}
+        <ProviderImportModals
+          openModal={openImportModal}
+          onClose={() => setOpenImportModal(null)}
           onImported={async () => setConnections((await loadProviderPageData()).connections)}
         />
         {/* Test Results Modal */}
@@ -1885,9 +1881,9 @@ function ProvidersPageContent() {
 
 export default function ProvidersPage() {
   return (
-    <Suspense fallback={null}>
+    <ProvidersPageFrame>
       <ProvidersPageContent />
-    </Suspense>
+    </ProvidersPageFrame>
   );
 }
 

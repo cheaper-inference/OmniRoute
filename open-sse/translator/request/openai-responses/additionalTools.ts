@@ -1,4 +1,4 @@
-import { flattenNamespaceToolName } from "./namespaceFlatten.ts";
+import { collectFlatToolNames, flattenNamespaceToolName } from "./namespaceFlatten.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -119,19 +119,21 @@ export function collectResponsesCustomToolNames(
   inputItems: unknown[]
 ): Set<string> {
   const names = new Set<string>();
+  const allTools = collectResponsesTools(rootTools, inputItems);
+  const flatNames = collectFlatToolNames(allTools);
   const visit = (tools: unknown[], namespaceName = "") => {
     for (const toolValue of tools) {
       const tool = toRecord(toolValue);
       const name = toolName(toolValue);
       if (tool.type === "custom" && name) {
-        names.add(flattenNamespaceToolName(namespaceName, name));
+        names.add(flattenNamespaceToolName(namespaceName, name, flatNames));
       }
       if (tool.type === "namespace" && Array.isArray(tool.tools)) {
         visit(tool.tools, name);
       }
     }
   };
-  visit(collectResponsesTools(rootTools, inputItems));
+  visit(allTools);
   return names;
 }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
@@ -205,7 +206,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="shield" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("builderId")}</h3>
+                  <h3 className="mb-1">{t("builderId")}</h3>
                   <p className="text-sm text-text-muted">
                     {t("builderDescription", { providerLabel })}
                   </p>
@@ -222,7 +223,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="business" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("organization")}</h3>
+                  <h3 className="mb-1">{t("organization")}</h3>
                   <p className="text-sm text-text-muted">
                     {t("organizationDescription", {
                       url: "https://your-org.awsapps.com/start",
@@ -241,7 +242,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="account_circle" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("googleAccount")}</h3>
+                  <h3 className="mb-1">{t("googleAccount")}</h3>
                   <p className="text-sm text-text-muted">{t("googleDescription")}</p>
                 </div>
               </div>
@@ -256,7 +257,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="code" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("githubAccount")}</h3>
+                  <h3 className="mb-1">{t("githubAccount")}</h3>
                   <p className="text-sm text-text-muted">{t("githubDescription")}</p>
                 </div>
               </div>
@@ -271,7 +272,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="file_upload" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("importToken")}</h3>
+                  <h3 className="mb-1">{t("importToken")}</h3>
                   <p className="text-sm text-text-muted">
                     {t("importDescription", { providerLabel })}
                   </p>
@@ -288,7 +289,7 @@ export default function KiroAuthModal({
               <div className="flex items-start gap-3">
                 <Icon name="key" className="text-primary mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{t("apiKey")}</h3>
+                  <h3 className="mb-1">{t("apiKey")}</h3>
                   <p className="text-sm text-text-muted">
                     {t("apiKeyDescription", { providerLabel })}
                   </p>
@@ -340,9 +341,9 @@ export default function KiroAuthModal({
             {autoDetecting && (
               <div className="text-center py-6">
                 <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Icon name="progress_activity" size={30} className="text-primary animate-spin" />
+                  <Spinner size="lg" label={t("autoDetecting")} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{t("autoDetecting")}</h3>
+                <h3 className="text-lg mb-2">{t("autoDetecting")}</h3>
                 <p className="text-sm text-text-muted">
                   {t("readingCredentials", { providerLabel })}
                 </p>
@@ -412,6 +413,7 @@ export default function KiroAuthModal({
             />
 
             <Select
+              native
               label={t("awsRegion")}
               value={apiKeyRegion}
               onChange={(e) => setApiKeyRegion(e.target.value)}

@@ -4,18 +4,20 @@ import fs from "node:fs";
 import path from "node:path";
 
 // #15058: Freebuff suspends free-mode accounts used through third-party clients/proxies.
+// #15336 moved freebuff from the API-key gateways catalog to OAUTH_PROVIDERS (dual-auth card:
+// browser login + pasted token), so the catalog entry is looked up there.
 describe("#15058 freebuff risk notice", () => {
   it("flags freebuff with subscriptionRisk + a riskNoticeVariant", async () => {
-    const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
-    const p = (APIKEY_PROVIDERS as Record<string, Record<string, unknown>>).freebuff;
+    const { OAUTH_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
+    const p = (OAUTH_PROVIDERS as Record<string, Record<string, unknown>>).freebuff;
     assert.ok(p, "freebuff provider must exist");
     assert.strictEqual(p.subscriptionRisk, true);
     assert.strictEqual(p.riskNoticeVariant, "official-client-only");
   });
 
   it("has no 'harvester' wording in provider hints or the add-key modal", async () => {
-    const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
-    const p = (APIKEY_PROVIDERS as Record<string, Record<string, unknown>>).freebuff;
+    const { OAUTH_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
+    const p = (OAUTH_PROVIDERS as Record<string, Record<string, unknown>>).freebuff;
     const hints = [p.authHint, p.apiHint, p.freeNote].filter(Boolean).join(" ");
     assert.doesNotMatch(hints, /harvester/i);
     const modal = fs.readFileSync(

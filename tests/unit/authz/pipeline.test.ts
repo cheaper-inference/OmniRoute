@@ -758,3 +758,92 @@ test("authenticated remote dashboard page is not a login redirect that clears th
   assert.doesNotMatch(setCookie, /Max-Age=0|Expires=Thu, 01 Jan 1970/i);
   assert.equal(response.headers.get("location"), null);
 });
+
+test("runAuthzPipeline does not echo Origin for an unvalidated credential on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const junkHeaders: Record<string, string>[] = [
+    { authorization: "Bearer junk" },
+    { "x-api-key": "junk" },
+    { authorization: "Basic Zm9vOmJhcg==" },
+  ];
+  for (const headers of junkHeaders) {
+    const response = await pipeline.runAuthzPipeline(
+      request("http://localhost/v1/models", {
+        headers: { ...headers, origin: "https://evil.example" },
+      }),
+      { enforce: true }
+    );
+    assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+    // Still served anonymously (#2257), but cross-origin pages must not read it.
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  }
+});
+
+test("runAuthzPipeline still echoes Origin for a valid API key on a keyless install (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+  const created = await apiKeysDb.createApiKey("cors-valid", "0123456789abcdef");
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: `Bearer ${created.key}`, origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps a CLIENT_API auth rejection readable for browser clients (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "true";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  // A fixed 401 envelope carries no data; echoing lets the client show "invalid key".
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline still answers a CLIENT_API CORS preflight on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/chat/completions", {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://app.example",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "authorization,content-type",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps Vary: Accept-Encoding on an anonymous CLIENT_API response (#6737)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://evil.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  assert.match(response.headers.get("Vary") || "", /Accept-Encoding/);
+});

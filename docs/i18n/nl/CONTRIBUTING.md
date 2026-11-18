@@ -15,9 +15,14 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, of `>=24.0.0 <27` (aanbevolen: 24 LTS)
 - **npm** 10+
 
-> **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of de native modules zijn geïnstalleerd:
+> **Windows met Node 24:** gebruik de huidige 24 LTS-patchrelease (minimaal 24.20.0).
+> Eerdere releases kunnen na geslaagde tests afbreken wanneer `--test-force-exit` het
+> proces sluit. Node's [Windows libuv-fix](https://github.com/nodejs/node/pull/61999) verhelpt
+> deze runtimecrash; laat de testasserties en controles van het runner-afsluiten ingeschakeld.
+
+> **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of native modules zijn geïnstalleerd:
 > `node -e "require('better-sqlite3')"`. Als dit mislukt met `MODULE_NOT_FOUND`,
-> voer dan `npm approve-scripts better-sqlite3 && npm install` uit. Zie
+> voer je `npm approve-scripts better-sqlite3 && npm install` uit. Zie
 > [Probleemoplossing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -33,7 +38,7 @@ npm install
 ### Omgevingsvariabelen
 
 ```bash
-# Maak uw .env aan op basis van de sjabloon
+# Maak je .env aan vanuit de template
 cp .env.example .env
 
 # Genereer de vereiste geheimen
@@ -43,77 +48,74 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Belangrijke variabelen voor ontwikkeling:
 
-| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                    |
-| ---------------------- | --------------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                           | Serverpoort                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor de frontend      |
-| `JWT_SECRET`           | (hierboven genereren)             | Geheim voor JWT-ondertekening   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login    |
-| `APP_LOG_LEVEL`        | `info`                            | Detailniveau van logregistratie |
+| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                 |
+| ---------------------- | --------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                           | Serverpoort                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor frontend      |
+| `JWT_SECRET`           | (hierboven genereren)             | JWT-ondertekeningsgeheim     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login |
+| `APP_LOG_LEVEL`        | `info`                            | Niveau van loguitvoer        |
 
 ### Dashboardinstellingen
 
 Het dashboard biedt UI-schakelaars voor functies die ook via omgevingsvariabelen kunnen worden geconfigureerd:
 
-| Locatie van instelling     | Schakelaar            | Beschrijving                                   |
-| -------------------------- | --------------------- | ---------------------------------------------- |
-| Instellingen → Geavanceerd | Debugmodus            | Logboeken voor debugverzoeken inschakelen (UI) |
-| Instellingen → Algemeen    | Zichtbaarheid zijbalk | Secties in de zijbalk tonen/verbergen          |
+| Instellingslocatie  | Schakelaar         | Beschrijving                             |
+| ------------------- | ------------------ | ---------------------------------------- |
+| Settings → Advanced | Debug Mode         | Debug-aanvraaglogboeken inschakelen (UI) |
+| Settings → General  | Sidebar Visibility | Zijbalksecties tonen/verbergen           |
 
-Deze instellingen worden in de database opgeslagen en blijven behouden na herstarts. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
+Deze instellingen worden in de database opgeslagen en blijven na herstarts behouden. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
 
 ### Lokaal uitvoeren
 
 ```bash
-# Ontwikkelmodus (automatisch herladen)
+# Ontwikkelingsmodus (hot reload)
 npm run dev
 
 # Productiebuild
 npm run build    # next build → .build/next/ en vervolgens assembleStandalone → dist/
 npm run start
 
-# Snelle compilatie van alleen backend/API voor wijzigingen van bijdragers
+# Snelle backend/API-only compilatie voor wijzigingen van bijdragers
 npm run build:contributor
 
-# Releasebuild (schone herbouw + HEAD-controlebestand — vereist voor implementatie)
-npm run build:release   # rm -rf .build dist && build + schrijft dist/BUILD_SHA
+# Releasebuild (schone rebuild + HEAD-sentinel — vereist voor deployment)
+npm run build:release   # rm -rf .build dist en build + schrijft dist/BUILD_SHA
 
-# Gebruikelijke poortconfiguratie
+# Veelgebruikte poortconfiguratie
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-De bijdragersbuild voert alleen compilatievalidatie uit: deze stelt de zelfstandige
-distributie niet samen en bouwt geen optionele native pakketassets. Gebruik de reguliere productiebuild wanneer
-u de distribueerbare bundel moet valideren.
+De contributor-build voert uitsluitend compilatievalidatie uit: de standalone-distributie wordt niet samengesteld en optionele native packaging-assets worden niet gebouwd. Gebruik de reguliere productiebuild wanneer je de distributie die kan worden uitgeleverd wilt valideren.
 
-### Indeling van builduitvoer
+### Indeling van de build-uitvoer
 
-| Map       | Inhoud                                                                                   | Bijgehouden |
-| --------- | ---------------------------------------------------------------------------------------- | ----------- |
-| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                            | Ja          |
-| `.build/` | Tussenbestanden — uitvoer van `next build` (genegeerd door Git, `distDir = .build/next`) | Nee         |
-| `dist/`   | Distribueerbare bundel — samengesteld door `assembleStandalone` (genegeerd door Git)     | Nee         |
+| Map       | Inhoud                                                                           | Bijgehouden |
+| --------- | -------------------------------------------------------------------------------- | ----------- |
+| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                    | Ja          |
+| `.build/` | Tussenbestanden — uitvoer van `next build` (gitignored, `distDir = .build/next`) | Nee         |
+| `dist/`   | Uitleverbare bundel — samengesteld door `assembleStandalone` (gitignored)        | Nee         |
 
-De buildpipeline bestaat uit één doorgang:
+De build-pipeline bestaat uit één doorgang:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-uitvoer)
   └─ assembleStandalone()                 (kopieert standalone + static + public + native assets)
-       └─ uitvoer: dist/                  (server.js, .next/static/, public/, node_modules/)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` maakt bovendien eerst beide mappen leeg en schrijft
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als controlebestand voor de integriteit van de implementatie.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als sentinel voor de integriteit van de deployment.
 
-`npm run build:contributor` gebruikt het buildprofiel voor alleen de backend. Tijdens het builden worden
-dashboard-UI-bestanden tijdelijk vervangen door stubs, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
-na de build hersteld. Gebruik `npm run build` voor wijzigingen die invloed hebben op de dashboard-UI of voor volledige
-releasevalidatie; het bijdragersprofiel is geen vervanging voor de releasebuild.
+`npm run build:contributor` gebruikt het backend-only-buildprofiel. Tijdens het bouwen worden
+dashboard-UI-bestanden tijdelijk gestubd, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
+na de build teruggezet. Gebruik `npm run build` voor wijzigingen die gevolgen hebben voor de dashboard-UI of voor volledige releasevalidatie; het contributor-profiel is geen vervanging voor de releasebuild.
 
-> **Opmerking voor VPS-implementatie:** de externe image-map `/usr/lib/node_modules/omniroute/app/`
-> blijft ongewijzigd. De implementatietaken synchroniseren de inhoud van `dist/` er via rsync naartoe.
-> Alleen het pad voor builduitvoer binnen de repository is gewijzigd (`app/` → `dist/`).
+> **Opmerking over VPS-deployment:** de externe imagemap `/usr/lib/node_modules/omniroute/app/`
+> blijft ongewijzigd. De deploy-skills rsync'en de inhoud van `dist/` hiernaartoe.
+> Alleen het build-uitvoerpad in de repository is gewijzigd (`app/` → `dist/`).
 
 Standaard-URL's:
 
@@ -294,67 +296,67 @@ Zie `open-sse/utils/stream.ts` en `open-sse/utils/streamHandler.ts` voor toegepa
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboardpagina's (23 secties)
-│   ├── api/                # API-routes (51 mappen)
-│   └── login/              # Authenticatiepagina's (.tsx)
-├── domain/                 # Beleidsengine (policyEngine, comboResolver, costRules, enz.)
-├── lib/                    # Kernlogica voor bedrijfsprocessen (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3-protocolserver
-│   ├── acp/                # Register voor het Agent Communication Protocol
-│   ├── compliance/         # Beleidsengine voor compliance
-│   ├── db/                 # SQLite-domeinmodules + 130 migraties
-│   ├── memory/             # Permanent gespreksgeheugen
-│   ├── oauth/              # OAuth-providers, -services en -hulpprogramma's
-│   ├── skills/             # Uitbreidbaar skill-framework
-│   ├── usage/              # Gebruiksregistratie en kostenberekening
-│   └── localDb.ts          # Alleen re-exportlaag — voeg hier nooit logica toe
-├── middleware/              # Request-middleware (promptInjectionGuard)
-├── mitm/                   # MITM-proxy (certificaat, DNS, doelroutering)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React-componenten (.tsx)
-│   ├── constants/          # Providerdefinities (329), MCP-scopes, 20 routeringsstrategieën
-│   ├── utils/              # Circuitbreaker, sanitizer en authenticatiehulpprogramma's
-│   └── validation/         # Zod v4-schema's
-└── sse/                    # SSE-proxypijplijn
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse-workspace
-├── executors/              # 150 executormodules (executorklassen + helpers per provider)
-├── handlers/               # 11 requesthandlers (chat, responses, embeddings, afbeeldingen, enz.)
-├── mcp-server/             # MCP-server (110 unieke tools, 3 transportmethoden, 33 scopes)
-├── services/               # 178 services op het hoogste niveau (combo, autoCombo, rateLimitManager, enz.)
-├── translator/             # Formaatvertalers (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API-transformer
-└── utils/                  # 22 hulpprogrammamodules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron-desktopapp (platformonafhankelijk)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js-testrunner (1.574 testbestanden)
-├── integration/            # Integratietests
-├── e2e/                    # Playwright-tests
-├── security/               # Beveiligingstests
-├── translator/             # Vertalerspecifieke tests
-└── load/                   # Belastingtests
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Architectuurbesluiten
-├── architecture/            # Systeemarchitectuur en veerkracht
-├── comparison/              # OmniRoute versus alternatieven
-├── compression/             # Compressiehandleidingen en -regels
-├── dev/                     # Ontwikkelhandleidingen
-├── diagrams/                # Architectuurdiagrammen
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Gebruikershandleiding, Docker, installatie, probleemoplossing
-├── i18n/                    # Geïnternationaliseerde README-vertalingen
-├── marketing/               # Marketingmateriaal
-├── ops/                     # Implementatie, proxy, dekking, releases
-├── providers/               # Providerspecifieke documentatie
-├── reference/               # API-referentie, omgevingsvariabelen, CLI-tools, gratis niveaus
-├── releases/                # Releaseopmerkingen
-├── routing/                 # Auto-combo-engine, herhaling van redeneringen
-├── screenshots/             # Dashboardschermafbeeldingen
-├── security/                # Vangrails, compliance, stealth, tokens
-└── specs/                   # Ontwerpspecificaties
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

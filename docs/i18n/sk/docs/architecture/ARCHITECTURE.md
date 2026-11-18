@@ -8,79 +8,78 @@
 
 _Naposledy aktualizované: 2026-06-28_
 
-## Súhrn
+## Zhrnutie
 
-OmniRoute je lokálna smerovacia brána a ovládací panel pre AI postavený na Next.js.
-Poskytuje jeden koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prevádzku medzi viacerých nadradených poskytovateľov s prekladom, záložným prepínaním, obnovovaním tokenov a sledovaním využitia.
+OmniRoute je lokálna smerovacia brána AI a riadiaci panel postavený na Next.js. Poskytuje jeden koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prevádzku medzi viacerých upstream poskytovateľov s prekladom, záložným, obnovovaním tokenov a sledovaním používania.
 
-Kľúčové funkcie:
+Základné schopnosti:
 
-- API kompatibilné s OpenAI pre CLI/nástroje (375 poskytovateľov, 156 vykonávacích modulov)
-- Preklad požiadaviek a odpovedí medzi formátmi poskytovateľov
-- Záložné prepínanie kombinácie modelov (sekvencia viacerých modelov)
-- Štruktúrované kroky kombinácie (`provider + model + connection`) s poradím za behu podľa `compositeTiers`
-- Záložné prepínanie na úrovni účtu (viac účtov na poskytovateľa)
-- Predbežná kontrola kvóty a výber účtu pomocou P2C so zohľadnením kvóty v hlavnom toku četu
-- Správa pripojení k poskytovateľom cez OAuth a API kľúče (27 modulov poskytovateľov OAuth)
-- Generovanie embeddingov cez `/v1/embeddings` (18 poskytovateľov)
-- Generovanie obrázkov cez `/v1/images/generations` (viac ako 10 poskytovateľov, viac ako 20 modelov)
+- Povrch API kompatibilný s OpenAI pre CLI/tools (394 poskytovateľov, 159 spúšťacích modulov)
+- preklad Request/response naprieč formátmi poskytovateľov
+- Záložná kombinácia modelov (sekvencia viacerých modelov)
+- Štruktúrované kombinované kroky (`provider + model + connection`) s riadením runtime podľa `compositeTiers`
+- Záložný režim na úrovni účtu (viac účtov na poskytovateľa)
+- Predbežná kontrola kvóty a výber účtu P2C s ohľadom na kvóty v hlavnej ceste rozhovoru
+- Správa pripojenia poskytovateľa kľúča API OAuth + (27 modulov poskytovateľa OAuth )
+- Generovanie vkladania cez `/v1/embeddings` (18 poskytovateľov)
+- Generovanie obrázkov prostredníctvom `/v1/images/generations` (10 poskytovateľov +, 20 + modely)
 - Prepis zvuku cez `/v1/audio/transcriptions` (18 poskytovateľov)
 - Prevod textu na reč cez `/v1/audio/speech` (24 vstavaných poskytovateľov)
 - Generovanie videa cez `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generovanie hudby cez `/v1/music/generations` (ComfyUI)
 - Vyhľadávanie na webe cez `/v1/search` (20 poskytovateľov)
-- Moderovanie cez `/v1/moderations`
-- Zmena poradia výsledkov cez `/v1/rerank`
-- Parsovanie značiek uvažovania (`<think>...</think>`) pre modely uvažovania
-- Sanitizácia odpovedí na zabezpečenie striktnej kompatibility s OpenAI SDK
-- Normalizácia rolí (developer→system, system→user) na zabezpečenie kompatibility medzi poskytovateľmi
+- Moderácie cez `/v1/moderations`
+- Zmena poradia cez `/v1/rerank`
+- Myslite na analýzu značiek (`<think>...</think>`) pre modely uvažovania
+- Dezinfekcia odozvy pre prísnu kompatibilitu OpenAI SDK
+- Normalizácia rolí (systém → vývojára, používateľ systému →) pre kompatibilitu medzi poskytovateľmi
 - Konverzia štruktúrovaného výstupu (json_schema → Gemini responseSchema)
-- Lokálne perzistentné ukladanie poskytovateľov, kľúčov, aliasov, kombinácií, nastavení a cien (122 databázových modulov)
-- Sledovanie využitia a nákladov a protokolovanie požiadaviek
-- Voliteľná cloudová synchronizácia stavu medzi viacerými zariadeniami
-- Zoznam povolených a blokovaných IP adries na riadenie prístupu k API
-- Správa rozpočtu na uvažovanie (priame odovzdanie/automatický/vlastný/adaptívny)
-- Globálne vkladanie systémového promptu
-- Sledovanie relácií a vytváranie ich odtlačkov
-- Rozšírené obmedzovanie frekvencie požiadaviek pre jednotlivé účty s profilmi špecifickými pre poskytovateľov
-- Vzor circuit breaker na zvýšenie odolnosti voči výpadkom poskytovateľov
-- Ochrana pred efektom thundering herd pomocou uzamykania mutexom
-- Cache na deduplikáciu požiadaviek založená na podpisoch
-- Doménová vrstva: pravidlá nákladov, zásady záložného prepínania, zásady uzamknutia
-- Context Relay: súhrny odovzdania relácie na zachovanie kontinuity pri rotácii účtov
-- Perzistencia doménového stavu (SQLite cache s priamym zápisom pre záložné prepínania, rozpočty, uzamknutia a circuit breakers)
-- Mechanizmus zásad na centralizované vyhodnocovanie požiadaviek (uzamknutie → rozpočet → záložné prepínanie)
-- Telemetria požiadaviek s agregáciou latencie p50/p95/p99
-- Telemetria cieľov kombinácií a historický stav cieľov kombinácií prostredníctvom `combo_execution_key` / `combo_step_id`
-- Korelačné ID (X-Request-Id) na komplexné sledovanie
-- Protokolovanie auditu súladu s možnosťou deaktivácie pre jednotlivé API kľúče
-- Eval framework na zabezpečenie kvality LLM
-- Panel stavu s informáciami o stave circuit breakers poskytovateľov v reálnom čase
+- Lokálna stálosť pre poskytovateľov, kľúče, aliasy, kombá, nastavenia, ceny (122 modulov DB )
+- sledovanie Usage/cost a zaznamenávanie žiadostí
+- Voliteľná cloudová synchronizácia pre multi-device/state synchronizáciu
+- IP allowlist/blocklist pre riadenie prístupu API
+- Myslenie na správu rozpočtu (passthrough/auto/custom/adaptive)
+- Okamžitá injekcia globálneho systému
+- Sledovanie relácií a snímanie odtlačkov prstov
+- Rozšírené obmedzenie sadzieb na účet s profilmi špecifickými pre poskytovateľov
+- Vzor ističa pre odolnosť poskytovateľa
+- Ochrana stáda proti hromu s blokovaním mutex
+- Cache deduplikácie požiadaviek na základe podpisu
+- Vrstva domény: cenové pravidlá, záložná politika, politika blokovania
+- Context Relay: súhrny odovzdania relácie pre kontinuitu rotácie účtov
+- Trvalosť stavu domény (SQLite zapisovacia vyrovnávacia pamäť pre záložné zdroje, rozpočty, blokovania, ističe)
+- Nástroj pravidiel pre centralizované hodnotenie žiadostí (uzamknutie → budget → záložný)
+- Požiadajte o telemetriu s agregáciou latencie p50/p95/p99
+- Kombinovaná cieľová telemetria a historické kombinované cieľové zdravie cez `combo_execution_key` / `combo_step_id`
+- Korelácia ID (X-Request-Id) pre end-to-end sledovanie
+- Protokolovanie auditu súladu s odhlásením podľa kľúča API
+- Eval rámec pre zabezpečenie kvality LLM
+- Panel zdravia so stavom ističa poskytovateľa v reálnom čase
 - MCP Server (110 nástrojov) s 3 transportmi (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) so zručnosťami a životným cyklom úloh
-- Pamäťový systém (extrakcia, vkladanie, načítanie, sumarizácia)
-- Systém zručností (register, vykonávací modul, sandbox, vstavané zručnosti)
-- MITM proxy so správou certifikátov a obsluhou DNS
-- Middleware na ochranu pred injektážou promptov
-- Reťazec kompresie promptov s Caveman, RTK, skladanými reťazcami, kombináciami kompresie, jazykovými balíkmi a analytikou
-- Register ACP (Agent Communication Protocol)
-- Modulárni poskytovatelia OAuth (22 samostatných modulov v `src/lib/oauth/providers/`)
-- Skripty na odinštalovanie a úplné odinštalovanie
-- Akcia na opravu prostredia OAuth
-- Most WebSocket pre klientov WS kompatibilných s OpenAI (`/v1/ws`)
-- Správa synchronizačných tokenov (vydávanie/odvolávanie, sťahovanie konfiguračného balíka s verziami ETag)
-- GLM Thinking (`glmt`) ako plnohodnotná predvoľba poskytovateľa
-- Hybridné počítanie tokenov (na strane poskytovateľa cez `/messages/count_tokens` so záložným odhadom)
-- Automatické vytváranie aliasov modelov (viac ako 30 normalizácií dialektov medzi proxy pri spustení)
-- Bezpečné odchádzajúce požiadavky fetch s ochranou proti SSRF, blokovaním súkromných URL a konfigurovateľným opakovaním
-- Opakovanie požiadaviek četu so zohľadnením intervalu cooldown a konfigurovateľnými hodnotami `requestRetry` a `maxRetryIntervalSec`
-- Validácia runtime prostredia pomocou Zod pri spustení
-- Audit súladu v2 so stránkovaním, udalosťami CRUD poskytovateľov a protokolovaním validácie zablokovanej ochranou proti SSRF
+- Pamäťový systém (extrakcia, vstrekovanie, vyhľadávanie, sumarizácia)
+- Systém zručností (register, exekútor, sandbox, vstavané zručnosti)
+- MITM proxy so správou certifikátov a spracovaním DNS
+- Prompt vstrekovanie stráž middleware
+- Okamžité kompresné potrubie s Caveman, RTK, skladané potrubia, kompresné kombinácie, jazykové balíky a analýzy
+- register ACP (Agent Communication Protocol).
+- Modulárni poskytovatelia OAuth (22 samostatných modulov pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripty
+- akcia na opravu prostredia OAuth
+- most WebSocket pre klientov WS kompatibilných s OpenAI (`/v1/ws`)
+- Správa synchronizačných tokenov (issue/revoke, stiahnutie konfiguračného balíka verzie ETag)
+- prednastavenie prvotriedneho poskytovateľa GLM Thinking (`glmt`).
+- Počítanie hybridných tokenov ( `/messages/count_tokens` na strane poskytovateľa s záložným odhadom)
+- Automatické nasadenie modelu alias (30 + krížových proxy dialektových normalizácií pri spustení)
+- Bezpečné odchádzajúce načítanie s ochranou SSRF, súkromným blokovaním URL a konfigurovateľným opakovaním
+- Opakujú sa pokusy o chat s konfigurovateľnými `requestRetry` a `maxRetryIntervalSec`
+- Overenie runtime prostredia pomocou Zod pri spustení
+- Audit súladu v2 so stránkovaním, udalosťami CRUD poskytovateľa a protokolovaním overenia blokovaným SSRF
 
 Primárny runtime model:
 
-- Trasy aplikácie Next.js v `src/app/api/*` implementujú API ovládacieho panela aj API kompatibility
-- Zdieľané jadro SSE/smerovania v `src/sse/*` + `open-sse/*` zabezpečuje vykonávanie požiadaviek u poskytovateľov, preklad, streamovanie, záložné prepínanie a sledovanie využitia
+- Trasy aplikácií Next.js pod `src/app/api/*` implementujú APIs dashboard aj kompatibilitu APIs
+- Zdieľané jadro SSE/routing v `src/sse/*` + `open-sse/*` sa stará o vykonávanie poskytovateľa, preklad, streamovanie, záložné zdroje a používanie
 
 ## Referenčné diagramy
 
@@ -266,257 +265,208 @@ Oblasti správy:
 - Konfiguračný balík: `src/app/api/sync/bundle` (GET, snímka nastavení/poskytovateľov/kombinácií/kľúčov s verziami ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — obslužná rutina Upgrade pre klientov WS kompatibilných s OpenAI
 
-## 2) SSE + jadro prekladu
+## 2) SSE + prekladové jadro
 
-Hlavné moduly toku:
+Hlavné prietokové moduly:
 
 - Vstup: `src/sse/handlers/chat.ts`
-- Základná orchestrácia: `open-sse/handlers/chatCore.ts`
-- Adaptéry vykonávania poskytovateľov: `open-sse/executors/*`
-- Detekcia formátu/konfigurácia poskytovateľa: `open-sse/services/provider.ts`
-- Parsovanie/rozlíšenie modelu: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Jadro orchestrácie: `open-sse/handlers/chatCore.ts`
+- Spúšťacie adaptéry poskytovateľa: `open-sse/executors/*`
+- Formát konfigurácie detection/provider : `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Logika záložného účtu: `open-sse/services/accountFallback.ts`
 - Register prekladov: `open-sse/translator/index.ts`
-- Transformácie streamov: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Extrakcia/normalizácia využitia: `open-sse/utils/usageTracking.ts`
-- Parser značiek premýšľania: `open-sse/utils/thinkTagParser.ts`
-- Obsluha embeddingov: `open-sse/handlers/embeddings.ts`
-- Register poskytovateľov embeddingov: `open-sse/config/embeddingRegistry.ts`
+- Transformácie toku: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Použitie extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Analyzátor značiek Think: `open-sse/utils/thinkTagParser.ts`
+- Obslužný nástroj vkladania: `open-sse/handlers/embeddings.ts`
+- Register poskytovateľov vkladania: `open-sse/config/embeddingRegistry.ts`
 - Obsluha generovania obrázkov: `open-sse/handlers/imageGeneration.ts`
-- Register poskytovateľov obrázkov: `open-sse/config/imageRegistry.ts`
-- Sanitizácia odpovedí: `open-sse/handlers/responseSanitizer.ts`
+- Register poskytovateľa obrázkov: `open-sse/config/imageRegistry.ts`
+- Reakcia na sanitáciu: `open-sse/handlers/responseSanitizer.ts`
 - Normalizácia rolí: `open-sse/services/roleNormalizer.ts`
 
-Služby (biznis logika):
+Služby (obchodná logika):
 
-- Výber/hodnotenie účtu: `open-sse/services/accountSelector.ts`
-- Správa životného cyklu kontextu: `open-sse/services/contextManager.ts`
-- Vynucovanie filtra IP adries: `open-sse/services/ipFilter.ts`
-- Sledovanie relácií: `open-sse/services/sessionManager.ts`
-- Deduplikácia požiadaviek: `open-sse/services/signatureCache.ts`
-- Vkladanie systémového promptu: `open-sse/services/systemPrompt.ts`
-- Správa rozpočtu premýšľania: `open-sse/services/thinkingBudget.ts`
-- Smerovanie modelov pomocou zástupných znakov: `open-sse/services/wildcardRouter.ts`
-- Správa limitov frekvencie: `open-sse/services/rateLimitManager.ts`
+- Účet selection/scoring: `open-sse/services/accountSelector.ts`
+- Kontextové riadenie životného cyklu: `open-sse/services/contextManager.ts`
+- presadzovanie filtra IP : `open-sse/services/ipFilter.ts`
+- Sledovanie relácie: `open-sse/services/sessionManager.ts`
+- Žiadosť o deduplikáciu: `open-sse/services/signatureCache.ts`
+- Okamžité vstreknutie systému: `open-sse/services/systemPrompt.ts`
+- Myslenie na riadenie rozpočtu: `open-sse/services/thinkingBudget.ts`
+- Smerovanie modelu so zástupnými znakmi: `open-sse/services/wildcardRouter.ts`
+- Správa limitu sadzieb: `open-sse/services/rateLimitManager.ts`
 - Istič: `src/shared/utils/circuitBreaker.ts`
-- Odovzdanie kontextu: `open-sse/services/contextHandoff.ts` — generovanie a vkladanie súhrnu odovzdania pre stratégiu prenosu kontextu
-- Kompresia: `open-sse/services/compression/*` — proaktívna kompresia pred prekladom poskytovateľa;
-  zahŕňa pravidlá Caveman, filtre RTK, zreťazené pipeline, kombinácie kompresie, štatistiky a validáciu
-- Načítavanie kvóty Codex: `open-sse/services/codexQuotaFetcher.ts` — načítava kvótu Codex na rozhodovanie o odovzdaní pri prenose kontextu
-- Opakovanie zohľadňujúce čas čakania: `src/sse/services/cooldownAwareRetry.ts` — opakované pokusy podľa modelu s konfigurovateľnými `requestRetry` / `maxRetryIntervalSec`
-- Bezpečné odchádzajúce načítanie: `src/shared/network/safeOutboundFetch.ts` — chránené načítanie poskytovateľa/modelu s ochranou proti SSRF, blokovaním súkromných URL, opakovaním a časovým limitom
-- Ochrana odchádzajúcich URL: `src/shared/network/outboundUrlGuard.ts` — kontroly hostiteľov v URL poskytovateľov; `src/shared/network/outboundUrlGuardPolicy.ts` vyberá režim z `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a ich prepínačov na ovládacom paneli (pozri `docs/reference/ENVIRONMENT.md`)
-- Predvolené hodnoty požiadaviek poskytovateľa: `open-sse/services/providerRequestDefaults.ts` — predvolené hodnoty `maxTokens`, `temperature`, `thinkingBudgetTokens` na úrovni poskytovateľa
-- Konštanty poskytovateľa GLM: `open-sse/config/glmProvider.ts` — zdieľané modely GLM, URL kvót, časový limit a predvolené hodnoty GLMT
-- Upstream Antigravity: `open-sse/config/antigravityUpstream.ts` — základná URL a konštanty cesty zisťovania
-- Konštanty klienta Codex: `open-sse/config/codexClient.ts` — verziované hodnoty používateľského agenta a verzie klienta
-- Počiatočné aliasy modelov: `src/lib/modelAliasSeed.ts` — pri spustení inicializuje viac než 30 aliasov dialektov medzi proxy servermi
+- Kontextové odovzdanie: generovanie súhrnu odovzdania `open-sse/services/contextHandoff.ts` — a vloženie pre stratégiu kontextového prenosu
+- Kompresia: `open-sse/services/compression/*` — proaktívna kompresia pred prekladom poskytovateľa; obsahuje pravidlá Cavemana, filtre RTK, skladané potrubia, kompresné kombá, štatistiky a overenie
+- Nástroj na získanie kvót Codex : `open-sse/services/codexQuotaFetcher.ts` — načíta kvótu Codex pre rozhodnutia o odovzdaní kontextového relé
+- Opätovný pokus s ohľadom na chladenie: `src/sse/services/cooldownAwareRetry.ts` — na model zopakuje ochladzovanie s konfigurovateľným `requestRetry` / `maxRetryIntervalSec`
+- Bezpečné odchádzajúce načítanie: chránené provider/model `src/shared/network/safeOutboundFetch.ts` — s ochranou SSRF, blokovanie súkromných adries URL, opakovanie a časový limit
+- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — hostiteľ kontroluje poskytovateľa URLs; `src/shared/network/outboundUrlGuardPolicy.ts` vyberie režim z `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a prepína sa na ich prístrojovom paneli (pozri `docs/reference/ENVIRONMENT.md`)
+- Predvolené hodnoty žiadosti poskytovateľa: predvolené hodnoty `open-sse/services/providerRequestDefaults.ts` — na úrovni poskytovateľa `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- Konštanty poskytovateľa GLM : `open-sse/config/glmProvider.ts` — zdieľané modely GLM, kvóta URLs, GLMT timeout/defaults
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — báza URL a konštanty cesty objavenia
+- Codex klientske konštanty: `open-sse/config/codexClient.ts` — verzie user-agent a hodnoty klientskej verzie
+- Seed modelového aliasu: `src/lib/modelAliasSeed.ts` — semien 30 + krížových proxy dialektových aliasov pri spustení
 
-Moduly doménovej vrstvy:
+Moduly vrstvy domény:
 
-- Pravidlá nákladov/rozpočty: `src/domain/costRules.ts`
-- Zásady záložného riešenia: `src/domain/fallbackPolicy.ts`
-- Riešiteľ kombinácií: `src/domain/comboResolver.ts`
-- Zásady uzamknutia: `src/domain/lockoutPolicy.ts`
-- Nástroj na vyhodnocovanie zásad: `src/domain/policyEngine.ts` — centralizované vyhodnotenie uzamknutia → rozpočtu → záložného riešenia
-- Katalóg chybových kódov: `src/shared/constants/errorCodes.ts`
-- ID požiadavky: `src/shared/utils/requestId.ts`
+- Cena rules/budgets: `src/domain/costRules.ts`
+- Záložná politika: `src/domain/fallbackPolicy.ts`
+- Vyhradená zmluva na kombinované riešenie: `src/domain/comboResolver.ts`; živé smerovanie používa `open-sse/services/combo.ts`
+- Zásady blokovania: `src/domain/lockoutPolicy.ts`
+- Vyhradená zmluva o hodnotení politiky: `src/domain/policyEngine.ts`; cesta požiadavky presadzuje politiku kľúča API cez `src/shared/utils/apiKeyPolicy.ts` a autorizáciu vyriešeného cieľa cez `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Katalóg kódov chýb: `src/shared/constants/errorCodes.ts`
+- Žiadosť ID: `src/shared/utils/requestId.ts`
 - Časový limit načítania: `src/shared/utils/fetchTimeout.ts`
-- Telemetria požiadaviek: `src/shared/utils/requestTelemetry.ts`
-- Súlad/audit: `src/lib/compliance/index.ts`
-- Spúšťač vyhodnotení: `src/lib/evals/evalRunner.ts`
-- Perzistencia stavu domény: `src/lib/db/domainState.ts` — operácie CRUD v SQLite pre reťazce záložných riešení, rozpočty, históriu nákladov, stav uzamknutia a ističe
+- Žiadosť o telemetriu: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval bežec: `src/lib/evals/evalRunner.ts`
+- Trvalosť stavu domény: `src/lib/db/domainState.ts` — SQLite CRUD pre záložné reťazce, rozpočty, históriu nákladov, stav uzamknutia, ističe
 
-Moduly poskytovateľov OAuth (27 samostatných súborov v `src/lib/oauth/providers/`):
+moduly poskytovateľa OAuth (27 samostatných súborov pod `src/lib/oauth/providers/`):
 
 - Index registra: `src/lib/oauth/providers/index.ts`
 - Jednotliví poskytovatelia: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Zdieľané pomocné moduly: `codebuddyDeviceAuth.ts` (tok zariadenia CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Tenký wrapper: `src/lib/oauth/providers.ts` — opätovne exportuje z jednotlivých modulov
+- Zdieľaní pomocníci: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl tok zariadenia), `museCodeDeviceResponse.ts`
+- Tenký obal: `src/lib/oauth/providers.ts` — reexportuje z jednotlivých modulov
 
 ## 5) Vstavané služby (v3.8.4)
 
-OmniRoute dokáže inštalovať, riadiť a smerovať požiadavky na lokálne spustené procesy nástrojov AI,
-ktoré sa nazývajú **vstavané služby**. Dodáva sa ich päť: 9Router, CLIProxyAPI, Bifrost, Mux a Dario.
+OmniRoute môže inštalovať, dohliadať a smerovať k lokálne spusteným procesom nástroja AI tzv** vstavané služby** . Dodáva sa päť: 9Router, CLIProxyAPI, Bifrost, Mux a Dario.
 
 Vrstvy architektúry:
 
-- **UI** (`/dashboard/providers/services`) — stránka s dvoma kartami a ovládacími prvkami životného cyklu,
-  živým streamovaním protokolov, správou kľúčov API a (pre 9Router) vstavaným natívnym používateľským rozhraním
-  prostredníctvom interného reverzného proxy servera.
-- **API** (`/api/services/{name}/*`) — 11 koncových bodov pre 9Router, 10 pre CLIProxyAPI a po 8 pre Bifrost / Mux / Dario,
-  pričom všetky sú klasifikované ako **LOCAL_ONLY** (pevné pravidlo č. 17). Zdieľaný koncový bod SSE `GET /api/services/[name]/logs`
-  slúži obom službám.
-- **Supervízor** (`src/lib/services/`) — všeobecná trieda `ServiceSupervisor` obaľuje
-  `child_process.spawn`, udržiava 5 MB kruhovú vyrovnávaciu pamäť na streamovanie protokolov cez SSE, slučku
-  kontroly stavu, zámok atómovej operácie a korektné ukončenie SIGTERM→SIGKILL.
-  `bootstrap.ts` prepája všetky nakonfigurované služby pri spustení procesu.
-- **Poskytovateľ/exekútor** (`open-sse/executors/ninerouter.ts`) — 9Router je sprístupnený ako
-  skutočný poskytovateľ. Modely majú predponu `9router/{sub}/{model}` a každých 5 minút sa synchronizujú
-  z koncového bodu `/v1/models` služby 9Router.
+- **UI** (`/dashboard/providers/services`) — dvojkartová stránka s ovládacími prvkami životného cyklu, streamovaním živého protokolu, správou kľúčov API a (pre 9Router) zabudovaným natívnym UI prostredníctvom interného reverzného proxy.
+- **API** (`/api/services/{name}/*`) — 11 koncových bodov pre 9Router, 10 pre CLIProxyAPI, po 8 pre Bifrost / Mux / Dario, všetky klasifikované**LOCAL_ONLY** (tvrdé pravidlo #17). Zdieľaný koncový bod `GET /api/services/[name]/logs` SSE obsluhuje obe služby.
+- **Dozorca** (`src/lib/services/`) — generická trieda `ServiceSupervisor` zabalí `child_process.spawn`, obsahuje 5 MB kruhovú vyrovnávaciu pamäť pre streamovanie protokolu SSE, slučku sondy zdravia, blokovanie atómovej operácie a elegantné vypnutie SIGTERM→SIGKILL. `bootstrap.ts` spája všetky nakonfigurované služby pri spustení procesu.
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router je odhalený ako skutočný poskytovateľ. Modely majú predponu `9router/{sub}/{model}` a synchronizujú sa každých 5 minút z koncového bodu `/v1/models` 9Router.
 
-Podrobný rozbor: `docs/frameworks/EMBEDDED-SERVICES.md`
+Hlboký ponor: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Hlavné subsystémy (v3.8.0)
 
-### A. Engine Auto Combo
+### A. Auto Combo Engine
 
-Auto Combo dynamicky vyhodnocuje a vyberá ciele smerovania v čase požiadavky namiesto
-toho, aby sa spoliehal na statickú definíciu kombinácie. Zabezpečuje fungovanie rodiny prefixov modelov `auto/*`.
+Automatické kombo dynamicky hodnotí a vyberá ciele smerovania v čase vyžiadania, namiesto toho, aby sa spoliehalo na definíciu statického komba. Poháňa rodinu predpon modelu `auto/*`.
 
-- Vstupný bod enginu: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (automatická detekcia prefixu `auto/`)
-- Ovládací panel: `/dashboard/auto-combo`
-- Telemetria: tabuľka SQLite `auto_combo_decisions`
+- Vstup motora: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Živý kombinovaný záznam: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), volaný `src/sse/handlers/chat.ts`
+- Prístrojová doska: `/dashboard/auto-combo`
+- Telemetria: tabuľka `auto_combo_decisions` SQLite
 
-Kľúčové funkcie:
+Kľúčové schopnosti:
 
-- **20 stratégií smerovania** (priorita, vážené, najprv naplniť, cyklické, P2C, náhodné,
-  najmenej používané, optimalizované podľa nákladov, zohľadňujúce reset, okno resetu, rezerva, vážené podľa kvóty,
-  striktne náhodné, **auto**, lkgp, optimalizované podľa kontextu, optimalizované podľa vyrovnávacej pamäte, prenos kontextu, **fusion**,
-  pipeline) —
-  auto je hlavnou novinkou vo v3.8.0; `fusion` (rozdelenie do panela + syntéza hodnotiteľom,
-  `open-sse/services/fusion.ts`) je novinkou vo v3.8.36.
-- **Vyhodnocovanie podľa 16 faktorov**: kvóta, stav, inverzné náklady, inverzná latencia, vhodnosť pre úlohu a
-  desať ďalších. Referenčná tabuľka faktorov a ich predvolených váh sa nachádza v
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — jej opätovné uvedenie na tomto mieste by
-  vytvorilo druhé miesto, kde by mohla zastarať.
-- **Virtuálna továreň** vytvára dočasné kombinácie, keď neexistuje žiadna zodpovedajúca pomenovaná kombinácia,
-  pričom kandidátov získava zo zdravých aktívnych pripojení poskytovateľov.
-- **Automatické prefixy**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — každý je založený na vyladenom profile váh.
-- **6 balíkov režimov**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` a `chaos-mode` — prednastavené konfigurácie váh, ktoré možno aktivovať z
-  ovládacieho panela. (Nezamieňajte si ich s prefixmi `auto/*` uvedenými vyššie, ktoré predstavujú
-  varianty používané v čase požiadavky.)
+- **22 stratégií smerovania** (priorita, vážené, vyplňte najskôr, cyklicky, P2C, náhodné, najmenej používané, nákladovo optimalizované, s vedomím obnovenia, okno obnovenia, najskôr expirácia, rezerva, vážené kvótami, prísne náhodné,** auto** , lkgp, kontextovo optimalizované, cache optimalizované, kontextové relé,** fúzie** , pipeline, jev) — auto je pridaný titulok vo verzii 3.8.0; `fusion` (syntéza sudcu + s rozvetveným panelom, `open-sse/services/fusion.ts`) je novinkou vo verzii 3.8.36.
+- **16-faktorové bodovanie** : kvóta, zdravie, inverzné náklady, inverzná latencia, prispôsobenie úloh a desať ďalších. Kanonická tabuľka faktorov a ich predvolené váhy žije v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ak ju tu znova uvedieme, priradíme jej druhé miesto na zastaranie.
+- **Virtuálna továreň** zhmotňuje efemérne kombá, keď neexistuje žiadne zodpovedajúce pomenované kombo, pričom kandidátov získava zo zdravých aktívnych pripojení poskytovateľov.
+- **Automatické predpony** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — každý podporený vyladeným hmotnostným profilom.
+- **6 balíkov režimov** : prednastavené konfigurácie hmotnosti `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` a `chaos-mode` — dostupné z prístrojovej dosky. (Nezamieňajte si s vyššie uvedenými predponami `auto/*`, ktoré predstavujú varianty v čase vyžiadania.)
 
-Úplné podrobnosti o algoritme (vzorce faktorov, ladenie váh) nájdete v
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Úplné podrobnosti o algoritme (faktorové vzorce, ladenie hmotnosti) nájdete [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Cloudoví agenti
+### B. Cloud Agenti
 
-Cloud Agents zastrešuje hostované platformy agentov pre kód od tretích strán (Codex Cloud, Devin,
-Jules) jednotným životným cyklom úloh podporovaným databázou. Všetky koncové body na vytváranie a kontrolu
-úloh vyžadujú autentifikáciu na správu.
+Cloud Agents zahŕňa platformy kódových agentov hostené tretími stranami (Codex Cloud, Devin, Jules) do jednotného životného cyklu úloh podporovaných DB. Všetky koncové body creation/inspection úlohy vyžadujú autentifikáciu manažmentu.
 
-- Koreň modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` a podadresáre jednotlivých agentov v `agents/`)
-- Implementácie jednotlivých agentov: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Verejné koncové body: `/api/v1/agents/tasks/*` (zoznam/vytvorenie/získanie/zrušenie)
-- Koncové body správy: `/api/cloud/*` (zriaďovanie, stav, dávkové operácie)
-- Ovládací panel: `/dashboard/cloud-agents`
-- Úložisko: tabuľka `cloud_agent_tasks`
+- Koreň modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus podadresáre jednotlivých agentov pod `agents/`)
+- Implementácie podľa agentov: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Verejné koncové body: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Koncové body správy: `/api/cloud/*` (poskytovanie, stav, dávka)
+- Prístrojová doska: `/dashboard/cloud-agents`
+- Úložný priestor: `cloud_agent_tasks` stôl
 
-Podrobnosti o zriaďovaní jednotlivých agentov a špecifikách OAuth nájdete v
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Informácie o poskytovaní pre jednotlivých agentov a špecifikách OAuth nájdete [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Ochranné mechanizmy
+### C. Zábradlia
 
-Modul ochranných mechanizmov je vrstva middleware s podporou dynamického opätovného načítania, ktorá kontroluje požiadavky
-a odpovede z hľadiska osobných údajov, vkladania škodlivých inštrukcií a nebezpečného vizuálneho obsahu. Porušenia
-okamžite ukončia požiadavku s HTTP **503** a štruktúrovaným chybovým kódom, čo
-následným volajúcim umožňuje požiadavku zopakovať alebo zvoliť inú vetvu.
+Modul zábradlia je vrstva middlewaru, ktorú možno načítať za tepla, ktorá kontroluje požiadavky a odpovede na PII, rýchle vstrekovanie a nebezpečný obsah videnia. Porušenia skratujú požiadavku pomocou HTTP** 503** plus štruktúrovaný chybový kód, ktorý umožňuje následným volajúcim opakovať pokus alebo odbočiť.
 
-- Koreň modulu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Dynamické opätovné načítanie: register sleduje zmeny konfigurácie a priebežne obnovuje reťazec
-- Body zapojenia: vstup obslužnej rutiny chatu, obslužná rutina generovania obrázkov, sanitizácia odpovedí
-- Kontrakt HTTP: porušenia sa prejavia ako `503` s `error.code = "GUARDRAIL_VIOLATION"`
+- Koreň modulu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: register sleduje zmeny konfigurácie a prestavuje reťazec na mieste
+- Wire-in body: vstup obsluhy chatu, obsluha generovania obrázkov, dezinfekcia odozvy
+- zmluva HTTP : porušenia sa objavujú ako `503` so `error.code = "GUARDRAIL_VIOLATION"`
 
-Informácie o tvorbe sád pravidiel a ladení prahových hodnôt nájdete v
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Informácie o vytváraní sady pravidiel a ladení prahu nájdete [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Doménová vrstva
 
-Menný priestor `src/domain/` centralizuje rozhodnutia o pravidlách, aby obslužné rutiny trás nemuseli
-samostatne zostavovať logiku blokovania/rozpočtu/záložného spracovania.
+Priestor názvov `src/domain/` obsahuje služby domény a rezervované zmluvy o hodnotení. Nie je to jeden povinný vstupný bod politiky pre každú žiadosť.
 
-- Engine pravidiel: `src/domain/policyEngine.ts` — jednotný vstupný bod pre
-  vyhodnotenie pred spustením (poradie blokovanie → rozpočet → záložné spracovanie)
-- Pravidlá nákladov: `src/domain/costRules.ts`
-- Pravidlá záložného spracovania: `src/domain/fallbackPolicy.ts`
-- Pravidlá blokovania: `src/domain/lockoutPolicy.ts`
-- Smerovanie podľa značiek: `src/domain/tagRouter.ts`
-- Resolver kombinácií: `src/domain/comboResolver.ts` — prekladá názvy kombinácií, prefixy auto/\*
-  a zástupné ciele modelov na konkrétne plány vykonania
-- Prepájanie pravidiel pripojení/modelov: `src/domain/connectionModelRules.ts`
-- Snímky dostupnosti modelov: `src/domain/modelAvailability.ts`
-- Sledovanie expirácie poskytovateľov: `src/domain/providerExpiration.ts`
-- Vyrovnávacia pamäť kvót: `src/domain/quotaCache.ts`
+Cesta živého chatu volá `enforceApiKeyPolicy()` z `src/shared/utils/apiKeyPolicy.ts`; autorizácia vyriešených modelov a combo členov je implementovaná v `src/sse/handlers/chat/resolvedModelPolicy.ts`. Vlastne hostený záznam v `src/app/api/v1/chat/completions/route.ts` tiež presadzuje politiku kľúča API pred odoslaním. Kombinované rozlíšenie beží cez `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` a `src/lib/container.ts` zostávajú testovanými zmluvami, nie zapojenie tejto cesty požiadavky. Kontajner zaregistruje nástroj politiky, ale cesta kontrolovanej produkčnej požiadavky to nevyrieši. Samotná zmena týchto zmlúv nezmení politiku živého chatu ani kombinované smerovanie; ich pripojenie alebo odstránenie si vyžaduje samostatné rozhodnutie o návrhu.
+
+- Vyhradený nástroj politiky: `src/domain/policyEngine.ts` — lockout → budget → záložné hodnotenie
+- Pravidlá pre náklady: `src/domain/costRules.ts`
+- Záložná politika: `src/domain/fallbackPolicy.ts`
+- Zásady blokovania: `src/domain/lockoutPolicy.ts`
+- Smerovanie založené na značkách: `src/domain/tagRouter.ts`
+- Vyhradený combo resolver: `src/domain/comboResolver.ts` — samostatný výberový kontrakt; živé kombinované smerovanie je implementované v `open-sse/services/combo.ts`
+- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
+- Snímky dostupnosti modelu: `src/domain/modelAvailability.ts`
+- Sledovanie uplynutia platnosti poskytovateľa: `src/domain/providerExpiration.ts`
+- Vyrovnávacia pamäť kvóty: `src/domain/quotaCache.ts`. Poskytovatelia pridávajú a odstraňujú okná kvóty (OpenAI u niektorých plánov zrušilo 5-hodinové okno Codex ), takže používanie čítajúce adaptér poskytovateľa potvrdzuje ako dokončené (`quotasComplete`, pozri `src/lib/usage/usageReading.ts`) je úplným súborom okien účtu: okno známe skôr, ale chýba v ňom, je vyradené, vo vyrovnávacej pamäti, v `quota_snapshots` sa reštartuje (pridaný záznam Codex vyraďovania kvóty), v saturácii kvóty Claude. vedierka. Čiastočné dôkazy (hlavičky odpovedí, zastarané kópie) aktualizujú iba okná, ktoré nesie.
 - Stav degradácie: `src/domain/degradation.ts`
 - Audit konfigurácie: `src/domain/configAudit.ts`
-- Nástroj na zostavovanie metadát odpovedí OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Subsystém hodnotenia: `src/domain/assessment/` — úlohy periodického vyhodnocovania
+- Zostavovač metadát odpovede OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Hodnotiaci subsystém: `src/domain/assessment/` — úlohy periodického hodnotenia
 
-### E. Autorizačný pipeline
+### E. Autorizačný kanál
 
-Autorizačný pipeline klasifikuje každú prichádzajúcu požiadavku a pred jej odoslaním
-aplikuje príslušný reťazec pravidiel.
+Autorizačný kanál pred odoslaním klasifikuje každú prichádzajúcu požiadavku a aplikuje príslušný reťazec politiky.
 
-- Vstupný bod pipeline: `src/server/authz/pipeline.ts`
-- Klasifikátor požiadaviek: `src/server/authz/classify.ts` — rozlišuje verejné
-  kompatibilné trasy od trás správy
-- Inventár verejných trás: `src/shared/constants/publicApiRoutes.ts`
-- Pravidlá: `src/server/authz/policies/` — skladateľné predikáty
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` atď.)
-- Pomocné nástroje pre hlavičky: `src/server/authz/headers.ts`
-- Pomocná funkcia pre asercie: `src/server/authz/assertAuth.ts`
+- Vstup potrubia: `src/server/authz/pipeline.ts`
+- Klasifikátor požiadaviek: `src/server/authz/classify.ts` — rozlišuje verejné cesty kompatibility od ciest správy
+- Súpis verejnej trasy: `src/shared/constants/publicApiRoutes.ts`
+- Zásady: `src/server/authz/policies/` — skladateľné predikáty (`requireApiKey`, `requireManagement`, `requireFreshAuth` atď.)
+- Nástroje hlavičky: `src/server/authz/headers.ts`
+- Pomocník pri tvrdení: `src/server/authz/assertAuth.ts`
 - Kontext požiadavky: `src/server/authz/context.ts`
 
-Verejné trasy a trasy správy sú striktne oddelené: API agentov/čakacích lehôt a
-zmeny poskytovateľov vyžadujú autentifikáciu na správu (HTTP 401, ak chýba).
+Verejné a manažérske cesty sú tvrdou hranicou: agent/cooldown APIs a mutácie poskytovateľa vyžadujú autentizáciu správy (HTTP 401, ak chýba).
 
-Úplné pravidlá klasifikácie trás nájdete v
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Úplné pravidlá klasifikácie ciest nájdete [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Workflow FSM a router zohľadňujúci úlohy
+### F. Workflow FSM a Task-Aware Router
 
-Router riadený konečným stavovým automatom, ktorý je navrstvený nad výberom kombinácie a smeruje
-prevádzku podľa zistenej fázy pracovného postupu (plánovanie, vykonávanie,
-kontrola) a afinity k úlohám na pozadí.
+Router riadený strojom s konečným stavom vrstvený nad kombinovaným výberom na riadenie prevádzky na základe zistenej fázy pracovného toku (plánovanie, vykonávanie, kontrola) a afinity úlohy na pozadí.
 
-- FSM pracovného postupu: `open-sse/services/workflowFSM.ts`
-- Smerovač zohľadňujúci úlohy: `open-sse/services/taskAwareRouter.ts`
+- Pracovný postup FSM: `open-sse/services/workflowFSM.ts`
+- Router orientovaný na úlohy: `open-sse/services/taskAwareRouter.ts`
 - Detektor úloh na pozadí: `open-sse/services/backgroundTaskDetector.ts`
-- Klasifikátor zámeru: `open-sse/services/intentClassifier.ts`
+- Klasifikátor zámerov: `open-sse/services/intentClassifier.ts`
 
-Prechody FSM vstupujú do bodovania funkcie Auto Combo, pričom pri úlohách na pozadí alebo automatizačných úlohách uprednostňujú lacnejšie modely a pri interaktívnych krokoch plánovania či kontroly výkonnejšie modely.
+Prechody FSM sa zapájajú do bodovania Auto Combo a smerujú k lacnejším modelom pre úlohy background/automation a smerom k silnejším modelom pre interaktívne obraty planning/review.
 
-### G. Odolnosť špecifická pre poskytovateľov
+### G. Odolnosť špecifická pre poskytovateľa
 
-Niekoľko poskytovateľov dodáva špecializované moduly odolnosti a utajenia, ktoré využívajú globálne vrstvy ističa, časového obmedzenia pripojenia a uzamknutia modelu:
+Niekoľko poskytovateľov dodáva vyhradené moduly odolnosti a utajenia, ktoré spájajú vrstvy globálneho ističa / ochladzovania pripojenia / blokovania modelu:
 
-- Mechanizmus Antigravity 429: `open-sse/services/antigravity429Engine.ts` (strieda
-  identity, čistí hlavičky odpovedí a riadi sledovanie kreditov/verzií prostredníctvom
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Zásady kvót ModelScope: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (nadviazanie kompatibilného kanála): `open-sse/services/claudeCodeCCH.ts`,
-  spolu s `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Formovanie odtlačku Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Obfuskácia Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- motor Antigravity 429: `open-sse/services/antigravity429Engine.ts` (otáča identitu, čistí hlavičky odozvy, riadi sledovanie credits/version cez `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (rozpočet na požiadavku upstream 429 na všetkých hostiteľoch, `ANTIGRAVITY_MAX_429_ATTEMPTS`; identické opätovné odoslanie odmietnutého tela je zodpovedané lokálne; `src/sse/handlers/chat.ts` nereštartuje takúto požiadavku prostredníctvom opätovného pokusu s ohľadom na cooldown)
+- politika kvót ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Claude kód CCH (kompatibilný kanál handshake): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Tvarovanie odtlačkov prstov kódu: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude zmätok kódu: `open-sse/services/claudeCodeObfuscation.ts`
 
-Úplný postup utajenia a prevádzkové pokyny nájdete v
-`docs/security/STEALTH_GUIDE.md` (git; nekompiluje sa do `/docs`).
+Úplnú príručku utajenia a prevádzkové pokyny nájdete `docs/security/STEALTH_GUIDE.md` (git; nie je kompilované do `/docs`).
 
-### H. Webhooky, vyrovnávacia pamäť uvažovania, vyrovnávacia pamäť čítania
+### H. Webhooks, Reasoning Cache, Read Cache
 
-- **Webhooky** — odchádzajúce odosielanie udalostí poskytovateľov, účtov a úloh.
+- **Webhooky** odchádzajúce odoslanie — pre udalosti provider/account/task.
   - Dispečer: `src/lib/webhookDispatcher.ts`
-  - Úložisko: tabuľka SQLite `webhooks` (prostredníctvom `src/lib/db/webhooks.ts`)
-  - Ovládací panel: `/dashboard/webhooks` (odbery, tajné kľúče, história opakovaných pokusov)
-  - Taxonómiu udalostí a sémantiku opakovaných pokusov nájdete v [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Vyrovnávacia pamäť uvažovania** — opakovane prehrateľné bloky uvažovania pre poskytovateľov, ktorí generujú
-  tokeny premýšľania (Claude, GLMT atď.), aby následné interakcie mohli preskočiť opätovné premýšľanie.
-  - Vrstva databázy: `src/lib/db/reasoningCache.ts`
-  - Vrstva služby: `open-sse/services/reasoningCache.ts`
-  - Sémantiku opakovaného prehrávania nájdete v [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Vyrovnávacia pamäť čítania** — krátkodobá vyrovnávacia pamäť odpovedí indexovaná podľa signatúry, ktorá sa používa na
-  zlúčenie identických opakovaných pokusov z nefunkčných nadradených SDK.
-  - Vrstva databázy: `src/lib/db/readCache.ts`
-  - Koncový bod štatistík: `GET /api/cache/stats`, ovládací panel na adrese `/dashboard/cache`
+  - Úložisko: tabuľka `webhooks` SQLite (cez `src/lib/db/webhooks.ts`)
+  - Informačný panel: `/dashboard/webhooks` (predplatné, tajomstvá, história opakovaných pokusov)
+  - Taxonómiu udalostí a sémantiku opakovania nájdete [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Reasoning Cache** — prehrateľné bloky uvažovania pre poskytovateľov, ktorí vysielajú tokeny myslenia (Claude, GLMT atď.), takže po sebe idúce ťahy môžu preskočiť opätovné uvažovanie.
+  - vrstva DB : `src/lib/db/reasoningCache.ts`
+  - Servisná vrstva: `open-sse/services/reasoningCache.ts`
+  - Sémantiku opakovaného prehrávania nájdete [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Prečítajte si Cache** — krátkodobá vyrovnávacia pamäť odpovedí kľúčovaná podpisom a používaná na zbalenie rovnakých pokusov z nefunkčného upstream SDKs.
+  - vrstva DB : `src/lib/db/readCache.ts`
+  - Koncový bod štatistík: `GET /api/cache/stats`, informačný panel na `/dashboard/cache`
 
 ## 3) Vrstva perzistencie
 
@@ -901,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: importujte konkrétne moduly priamo — bez súhrnného exportu (stará vrstva opätovného exportu `localDb.ts` bola odstránená)
 - `src/lib/usageDb.ts`: fasáda histórie používania/protokolov volaní nad tabuľkami SQLite
 
-## Pokrytie vykonávačov poskytovateľov (návrhový vzor Strategy)
+## Pokrytie vykonávateľa poskytovateľa (vzor stratégie)
 
-Každý poskytovateľ má špecializovaný vykonávač rozširujúci `BaseExecutor` (v súbore `open-sse/executors/base.ts`), ktorý poskytuje zostavovanie URL, vytváranie hlavičiek, opakovanie pokusov s exponenciálnym oneskorením, hooky na obnovenie prihlasovacích údajov a metódu orchestrácie `execute()`.
+Každý poskytovateľ má špecializovaný spúšťač rozširujúci `BaseExecutor` (v `open-sse/executors/base.ts`), ktorý poskytuje vytváranie URL, konštrukciu hlavičky, opakovanie s exponenciálnym stiahnutím, háky obnovenia poverení a metódu orchestrácie `execute()`.
 
-| Vykonávateľ               | Poskytovateľ(-ia)                                                                                                                                          | Špeciálne spracovanie                                                                       |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA atď. | Dynamická konfigurácia URL/hlavičiek pre jednotlivých poskytovateľov                        |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Vlastné ID projektov/relácií, spracovanie Retry-After, maskovanie 429                       |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Smerovanie podľa nasadenia, vynútenie parametra api-version v dotaze                        |
-| `BlackboxWebExecutor`     | Blackbox AI (webový režim)                                                                                                                                 | Reverzné spracovanie webovej relácie s emuláciou odtlačku TLS                               |
-| `ClaudeIdentityExecutor`  | Claude.ai (cesta CCH)                                                                                                                                      | Kanály obmedzení a premapovania nástrojov, tvarovanie odtlačku                              |
-| `CliProxyApiExecutor`     | Poskytovatelia kompatibilní s CLIProxyAPI                                                                                                                  | Vlastné spracovanie autentifikácie a protokolu                                              |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Vloženie ID účtu, sledovanie využitia založené na Neurons                                   |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Vkladá systémové pokyny, vynucuje mieru úsilia pri uvažovaní                                |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Most rozhrania Responses API pre reláciu prehliadača s pripnutím vlákna/ťahu                |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + rotácia hlavičiek pre každú reláciu                                                 |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | Protokol ConnectRPC, kódovanie Protobuf, podpisovanie požiadaviek pomocou kontrolného súčtu |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Premostenie životného cyklu úloh Devin prostredníctvom modulu cloudového agenta             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Obnova tokenu Copilot, hlavičky napodobňujúce VSCode                                        |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + smerovanie v rozsahu projektu                                                |
-| `GlmExecutor`             | Z.AI GLM (vrátane predvoľby `glmt`)                                                                                                                        | Zohľadnenie rozpočtu na uvažovanie, konštanty predvoľby GLMT                                |
-| `GrokWebExecutor`         | Web xAI Grok                                                                                                                                               | Reverzné spracovanie webovej relácie, výber režimu (uvažovanie/štandardný)                  |
-| `KieExecutor`             | KIE                                                                                                                                                        | Vlastné vydávanie tokenov s rotujúcimi kotvami relácie                                      |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | Binárny formát AWS EventStream → konverzia na SSE                                           |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Reverzné spracovanie webovej relácie s premostením obrazových správ                         |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Tvar tela požiadavky špecifický pre poskytovateľa                                           |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | Nastavenie poskytovateľa kompatibilné s AI SDK                                              |
-| `PerplexityWebExecutor`   | Web Perplexity                                                                                                                                             | Reverzné spracovanie webovej relácie na pokračovanie konverzácie                            |
-| `PetalsExecutor`          | Distribuovaná inferencia Petals                                                                                                                            | Decentralizované smerovanie v roji                                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Nevyžaduje sa kľúč API, požiadavky s obmedzenou frekvenciou                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | Podpora PAT a OAuth, bezplatná úroveň s viacerými modelmi                                   |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Autentifikácia servisného účtu, koncové body podľa regiónu                                  |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importovaný kľúč API + streamovanie chatu cez Connect-protobuf                              |
+| Exekútor                  | Poskytovatelia                                                                                                                                             | Špeciálna manipulácia                                                              |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA atď. | Dynamická konfigurácia URL/header na poskytovateľa                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Vlastné project/session IDs, Opakovať po analýze, 429 zahmlievanie                 |
+| `AzureOpenAIExecutor`     | Azúrová OpenAI                                                                                                                                             | Smerovanie založené na nasadení, vynútenie dotazu verzie API                       |
+| `BlackboxWebExecutor`     | Blackbox AI (webový režim)                                                                                                                                 | Reverzná webová relácia s emuláciou odtlačkov prstov TLS                           |
+| `ClaudeIdentityExecutor`  | Claude.ai (cesta CCH )                                                                                                                                     | Obmedzenie kanálov na premapovanie nástrojov +, tvarovanie odtlačkov prstov        |
+| `CliProxyApiExecutor`     | Poskytovatelia kompatibilný s CLIProxyAPI                                                                                                                  | Vlastné overovanie a spracovanie protokolov                                        |
+| `CloudflareAiExecutor`    | Cloudflare Pracovníci AI                                                                                                                                   | Injekcia ID účtu, sledovanie používania založené na neurónoch                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Vkladá systémové pokyny, núti snahu o uvažovanie                                   |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Browser-session Odpovedá API bridge s pripnutím thread/turn                        |
+| `CommandCodeExecutor`     | Príkazový kód                                                                                                                                              | OAuth + rotácia hlavičky za reláciu                                                |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | protokol ConnectRPC, kódovanie Protobuf, podpísanie požiadavky cez kontrolný súčet |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | premostenie životného cyklu úloh Devin prostredníctvom modulu cloudového agenta    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | obnovenie tokenu Copilot, hlavičky napodobňujúce VSCode                            |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + smerovanie v rozsahu projektu                                       |
+| `GlmExecutor`             | Z.AI GLM (vrátane prednastavenia `glmt` )                                                                                                                  | Myslenie s ohľadom na rozpočet, GLMT prednastavené konštanty                       |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                               | Obrátenie webovej relácie, výber režimu (think/standard)                           |
+| `KieExecutor`             | KIE                                                                                                                                                        | Vydávanie vlastných tokenov s rotujúcimi kotvami relácie                           |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | Konverzia binárneho formátu AWS EventStream → SSE                                  |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Reverzná strana webovej relácie s premostením medzi obrázkom a správou             |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Tvar tela podľa požiadavky poskytovateľa                                           |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | nastavenie poskytovateľa kompatibilného AI SDK                                     |
+| `PerplexityWebExecutor`   | Web zmätenosti                                                                                                                                             | Spätný chod webovej relácie pre pokračovanie chatu                                 |
+| `PetalsExecutor`          | Okvetné lístky distribuovaný záver                                                                                                                         | Decentralizované smerovanie roja                                                   |
+| `PollinationsExecutor`    | Opeľovanie AI                                                                                                                                              | Nevyžaduje sa žiadny kľúč API, požiadavky s obmedzenou sadzbou                     |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                   | Podpora PAT a OAuth, bezplatná úroveň viacerých modelov                            |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Autentifikácia servisného účtu, regionálne koncové body                            |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importovaný kľúč API + Connect-protobuf chat streaming                             |
 
 Všetci ostatní poskytovatelia (vrátane vlastných kompatibilných uzlov) používajú `DefaultExecutor`.
+
+### Automatizované sondy a účty webových relácií
+
+Modelové testy, Test All, kombinované testy a hodnotenia posielajú skutočné žiadosti o chat. Poskytovateľ webovej relácie vystupuje ako prihlásený používateľ, takže každá z týchto žiadostí bude uložená ako konverzácia v tomto účte. automatickým sondám, ktoré opustili takéto konverzácie, bol pozastavený účet (#14780). Po vyriešení cieľového poskytovateľa a pred výberom poverenia (`src/lib/providers/chatProbePolicy.ts`) kanál četu odmietne každý cieľ, ku ktorému sa dostane automatizovaná sonda, ktorej poskytovateľ získa poverenie na webovú reláciu. Odmietnutie je `422` s `error.code` `chat_probe_not_isolated` a bežci sondy to hlásia ako preskočenie, nie ako zlyhanie.
+
+Exekútor, ktorý spúšťa každý chat vo vlastnom režime bez histórie poskytovateľa, to deklaruje pomocou `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); sondy k tomuto poskytovateľovi sú potom povolené. ChatGPT Web deklaruje `temporary-chat`. Pripevnite vyhlásenie k jeho mechanizmu pomocou testu, takže nárok nemôže prežiť kód, ktorý ho robí pravdivým.
 
 ## Matica kompatibility poskytovateľov
 
@@ -1099,11 +1055,11 @@ kompatibilitu so staršími verziami. Aktuálny kontrakt runtime prostredia pou�
 - migrácie schémy SQLite a mechanizmy automatickej aktualizácie pri spustení
 - cesta kompatibility migrácie zo staršieho formátu JSON → SQLite
 
-## 6) Ochrana pred SSRF / odchádzajúcimi URL
+## 6) SSRF / Outbound URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` blokuje všetky súkromné, loopbackové a link-local cieľové URL predtým, než sa dostanú k vykonávacím modulom poskytovateľov
-- Trasy vyhľadávania a overovania modelov poskytovateľov používajú `src/shared/network/safeOutboundFetch.ts`, ktorý aplikuje ochranu pred každou odchádzajúcou požiadavkou
-- Chyby ochrany sa zobrazujú ako `URL_GUARD_BLOCKED` so stavom HTTP 422 a zaznamenávajú sa do protokolu auditu súladu prostredníctvom `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplikuje `src/shared/network/outboundUrlGuard.ts` na žiadosti o rozhovor odoslané cez `BaseExecutor.execute()`. Vo verejnom režime (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` s vypnutým súkromným príznakom) blokuje súkromných hostiteľov a hostiteľov so spätnou väzbou a 169.254.0.0/16; v každom inom režime blokuje hostiteľov cloudových metaúdajov. Pred každým vyhľadávaním DNS skontroluje názov hostiteľa alebo literál IP tak, ako je napísaný. Vstavaní lokálni poskytovatelia to preskočia.
+- Trasy zisťovania a overovania modelu poskytovateľa používajú `src/shared/network/safeOutboundFetch.ts`, ktorý aplikuje ochranu pred každou odchádzajúcou požiadavkou
+- Chyby ochrany sa objavia ako `URL_GUARD_BLOCKED` s HTTP 503 (`getSafeOutboundFetchErrorStatus`; cesta na nájdenie modelu vráti 400) a skutočné bloky SSRF počas overovania sa zaznamenajú do auditovacieho záznamu ako udalosti `provider.validation.ssrf_blocked`
 
 ## Pozorovateľnosť a prevádzkové signály
 

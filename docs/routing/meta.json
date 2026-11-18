@@ -1,4 +1,10 @@
 {
   "title": "Routing",
-  "pages": ["AUTO-COMBO", "QUOTA_SHARE", "REASONING_REPLAY", "REASONING_ROUTING"]
+  "pages": [
+    "AUTO-COMBO",
+    "MODEL_INTELLIGENCE",
+    "QUOTA_SHARE",
+    "REASONING_REPLAY",
+    "REASONING_ROUTING"
+  ]
 }

@@ -14,36 +14,36 @@ AgentBridge je MITM (Man-in-the-Middle) proxy server OmniRoute, ktorý zachytáv
 
 ## §1 Prehľad
 
-### Čo je AgentBridge?
+### čo je AgentBridge?
 
-Keď IDE agent (napr. GitHub Copilot, Cursor, Claude Code) vykoná volanie API, pripája sa priamo k upstream poskytovateľovi AI (OpenAI, Anthropic atď.). AgentBridge toto pripojenie transparentne zachytí na úrovni TLS — bez potreby akejkoľvek zmeny konfigurácie agenta — a prepíše požiadavku cez OmniRoute.
+Keď agent IDE (napr. GitHub Copilot, Cursor, Claude Code) uskutoční volanie API, pripojí sa priamo k poskytovateľovi AI upstream (OpenAI, Anthropic atď.). AgentBridge zachytí toto pripojenie transparentne na úrovni TLS — bez potreby akejkoľvek zmeny konfigurácie agenta — a prepíše požiadavku cez OmniRoute.
 
 To znamená, že môžete:
 
-- **Presmerovať akéhokoľvek agenta na akéhokoľvek poskytovateľa**: Copilot komunikuje s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo na ktoréhokoľvek z 375 poskytovateľov OmniRoute.
-- **Použiť mapovania modelov**: `gemini-3-flash` → `claude-sonnet-4.7` transparentne na úrovni handlera.
-- **Sledovať všetku komunikáciu agentov**: každá zachytená požiadavka je publikovaná do [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Využiť odolnosť OmniRoute**: kombinované smerovanie, circuit breakery, fallbacky a sledovanie nákladov fungujú aj pre komunikáciu IDE agentov.
+- **Presmerujte akéhokoľvek agenta k akémukoľvek poskytovateľovi** : Copilot hovorí s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo ktoréhokoľvek z 394 poskytovateľov OmniRoute.
+- **Použiť modelové mapovania** : `gemini-3-flash` → `claude-sonnet-4.7` transparentne na úrovni obsluhy.
+- **Sledujte všetku návštevnosť agentov** : každá zachytená žiadosť je zverejnená [dopravnému inšpektorovi](./TRAFFIC_INSPECTOR.md).
+- **Použiť odolnosť OmniRoute** : kombinované smerovanie, ističe, núdzové riešenia a sledovanie nákladov fungujú aj pre prevádzku agentov IDE.
 
-### Pozicionovanie voči trhu
+### Umiestňovanie vs. trh
 
-| Funkcia                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity            |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot         |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)             |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex           |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE             |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries         |    —    |    ✓     |        —        |             ✓             |
-| Claude Code            |    —    |    —     |        ✓        |             ✓             |
-| Open Code              |    —    |    —     |        ✓        |             ✓             |
-| Trae                   |    —    |    —     |        —        |       🔍 Zisťuje sa       |
-| UI dashboardu          |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Smerovanie OmniRoute   |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI mapovania modelov   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Zoznam obchádzania     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certifikát upstream CA |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcia              | 9 smerovač | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| -------------------- | :--------: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |     ✓      |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |     ✓      |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |     ✓      |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |     —      |    ✓     |        —        |             ✓             |
+| Cursor IDE           |     ✓      |    ✓     |        —        |             ✓             |
+| Zed Industries       |     —      |    ✓     |        —        |             ✓             |
+| Claude kód           |     —      |    —     |        ✓        |             ✓             |
+| Otvorte kód          |     —      |    —     |        ✓        |             ✓             |
+| Trae                 |     —      |    —     |        —        |      🔍 Vyšetrovanie      |
+| Prístrojová doska UI |     ✓      |    ✗     |        ✗        |             ✓             |
+| Dopravný inšpektor   |     ✗      |    ✗     |        ✓        |             ✓             |
+| smerovanie OmniRoute |     ✗      |    ✗     |        ✗        |             ✓             |
+| Mapovanie modelu UI  |     ✗      |    ✗     |        ✗        |             ✓             |
+| Zoznam obchvatov     |     ✗      |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert     |     ✗      |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -544,26 +544,26 @@ Základná cesta: `/api/tools/agent-bridge/`
 
 ---
 
-## §8 Plán vývoja
+## §8 Cestovná mapa
 
-### Preskúmanie Trae
+### Trae vyšetrovanie
 
-Trae je relatívne nový asistent programovania s umelou inteligenciou. Pred implementáciou obslužného modulu:
+Trae je relatívne nový asistent kódovania AI. Pred implementáciou handlera:
 
-1. Identifikujte binárny súbor/rozšírenie v marketplace VS Code / JetBrains alebo samostatnú aplikáciu
-2. Zachyťte prenos pomocou mitmproxy a zistite hostiteľov API a štruktúru koncových bodov
-3. Určte mechanizmus autentifikácie
-4. Na základe zmluvných podmienok a možnosti preskúmania API posúďte, či pokračovať
+1. Identifikujte binary/extension na trhoch VS Code / JetBrains alebo ako samostatnú aplikáciu
+2. Zachyťte prevádzku pomocou mitmproxy a objavte hostiteľov API a tvary koncových bodov
+3. Určite mechanizmus autentifikácie
+4. Posúďte go/no-go na základe objaviteľnosti TOS a API
 
-Kým sa preskúmanie nedokončí, karta Trae na ovládacom paneli zobrazuje odznak „Prebieha preskúmanie“ s odkazom „Nahlásiť realizovateľnosť“. Zástupný obslužný modul v `src/mitm/handlers/trae.ts` vyvolá štruktúrovanú chybu `Zatiaľ neimplementované`.
+Kým sa vyšetrovanie nedokončí, karta Trae na paneli zobrazuje odznak „Vyšetruje sa“ s odkazom „Nahlásiť životaschopnosť“. Obslužný útržok na `src/mitm/handlers/trae.ts` vyvolá štruktúrovanú chybu `Not yet implemented`.
 
-### Agenti v zozname úloh (vyžaduje sa MITM — bez podpory vlastnej základnej adresy URL)
+### Backlogoví agenti (MITM vyžaduje — bez vlastnej základnej podpory URL )
 
-Nasledujúce nástroje vo svojich aktuálnych verziách nepodporujú vlastné základné adresy URL, takže MITM je jediným spôsobom zachytávania. Posúdenie realizovateľnosti zatiaľ nebolo dokončené:
+Nasledujúce nástroje nepodporujú vlastnú základnú URLs vo svojich aktuálnych verziách, takže MITM je jedinou cestou na zachytenie. Čaká sa na posúdenie životaschopnosti:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — oddelene od Kiro IDE)
-- **Cowork** (desktopová aplikácia Anthropic)
+- **Amp** (zdrojový graf)
+- **Amazon Q / Kiro CLI** (AWS podložie — oddelené od Kiro IDE)
+- **Cowork** (Anthropic desktop)
 
-Poznámka: GitHub Copilot CLI ≥v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — pre tento nástroj použite namiesto MITM priamu konfiguráciu.
+Poznámka: GitHub Copilot CLI ≥ v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — použitie priamej konfigurácie namiesto MITM pre tento nástroj.

@@ -23,6 +23,11 @@
  *   API with the operator's cookie, and whether repeated failed logins are throttled.
  *   Loosening either weakens the login defenses, so both need the same re-auth (the Security
  *   tab asks for the current password) and are dropped by the JSON import.
+ * - `entra*`: Entra ID SSO for `/v1/*` (docs/security/ENTRA_SSO.md) — which authority's
+ *   tokens are trusted (`entraAuthorityHost` / `entraTenantId` / `entraClientId` /
+ *   `entraApiAudience`), which key-group policy SSO users land in (`entraGroupMappings` /
+ *   `entraDefaultKeyGroupId`) and the Graph fallback and its secret. Every `entra*` key of
+ *   the settings schema belongs here (pinned by `tests/unit/entra-sso-auth.test.ts`).
  *
  * Every key here is also OPERATOR-ONLY on `PATCH /api/settings`: a manage-scoped API key or an
  * `oma_` access token is refused with 403 even when it knows the password
@@ -49,6 +54,15 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "oidcScopes",
   "corsOrigins",
   "bruteForceProtection",
+  "entraSsoEnabled",
+  "entraAuthorityHost",
+  "entraTenantId",
+  "entraClientId",
+  "entraApiAudience",
+  "entraGroupMappings",
+  "entraDefaultKeyGroupId",
+  "entraGraphFallbackEnabled",
+  "entraGraphClientSecret",
 ] as const;
 
 /**

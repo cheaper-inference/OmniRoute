@@ -46,7 +46,7 @@ Twój laptop                              zdalny OmniRoute (VPS)
 
 ## Łączenie
 
-### Za pomocą hasła zarządzania (konfiguracja początkowa)
+### Za pomocą hasła zarządzania (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
@@ -54,21 +54,26 @@ omniroute connect 192.168.0.15
 # ✔ Połączono z http://192.168.0.15:20128 — kontekst „192.168.0.15” (zakres: admin)
 ```
 
-Przepływ wykorzystujący hasło domyślnie generuje token **admin** (skoro masz hasło,
+Przepływ z użyciem hasła domyślnie tworzy token **administratora** (masz hasło, więc
 masz już pełną kontrolę). Ogranicz zakres za pomocą `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opcje: `--port <p>` (gdy host nie zawiera portu), `--name <ctx>` (nazwa kontekstu),
-`--scope read|write|admin`. Pełny adres URL jest używany bez zmian:
+Opcje: `--port <p>` (gdy host nie ma portu), `--name <ctx>` (nazwa kontekstu),
+`--scope read|write|admin`. Pełny adres URL jest honorowany bez zmian:
 `omniroute connect https://omni.example.com`.
 
-### Za pomocą wcześniej wygenerowanego tokenu
+Gdy na serwerze jest włączone uwierzytelnianie dwuskładnikowe pulpitu
+(Ustawienia → Bezpieczeństwo), samo hasło zostanie odrzucone: CLI poprosi wtedy
+o kod z aplikacji uwierzytelniającej (lub kod odzyskiwania). W przypadku użycia
+nieinteraktywnego przekaż go z wyprzedzeniem za pomocą `--totp <code>`.
 
-Wygeneruj token z określonym zakresem w panelu administracyjnym (lub za pomocą `omniroute tokens create`) i
-wklej go — hasło nie jest potrzebne:
+### Za pomocą wstępnie wygenerowanego tokenu
+
+Wygeneruj token o określonym zakresie w pulpicie (lub za pomocą `omniroute tokens create`)
+i wklej go — hasło nie jest potrzebne:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -453,14 +458,14 @@ omniroute contexts remove 192-168-0-15 --yes   # usuń lokalny kontekst (nawet j
 
 ---
 
-## Endpointy API (dokumentacja)
+## Punkty końcowe API (materiał referencyjny)
 
-| Metoda | Trasa                 | Uwierzytelnianie  | Zakres                          |
-| ------ | --------------------- | ----------------- | ------------------------------- |
-| POST   | `/api/cli/connect`    | hasło zarządzania | — (publiczny, chroniony hasłem) |
-| GET    | `/api/cli/whoami`     | token dostępu     | odczyt                          |
-| GET    | `/api/cli/tokens`     | token dostępu     | administrator                   |
-| POST   | `/api/cli/tokens`     | token dostępu     | administrator                   |
-| DELETE | `/api/cli/tokens/:id` | token dostępu     | administrator                   |
+| Metoda | Trasa                 | Uwierzytelnianie           | Zakres                          |
+| ------ | --------------------- | -------------------------- | ------------------------------- |
+| POST   | `/api/cli/connect`    | hasło; 2FA, jeśli włączone | — (publiczny, chroniony hasłem) |
+| GET    | `/api/cli/whoami`     | token dostępu              | read                            |
+| GET    | `/api/cli/tokens`     | token dostępu              | admin                           |
+| POST   | `/api/cli/tokens`     | token dostępu              | admin                           |
+| DELETE | `/api/cli/tokens/:id` | token dostępu              | admin                           |
 
-Pełne schematy znajdują się w pliku [openapi.yaml](../openapi.yaml).
+Zobacz [openapi.yaml](../openapi.yaml), aby uzyskać pełne schematy.

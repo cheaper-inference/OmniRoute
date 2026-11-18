@@ -10,6 +10,24 @@
  */
 
 import type { ModelLockoutEntry, ModelFailureState } from "../accountFallback.ts";
+import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.ts";
+
+/**
+ * Antigravity serves one model under several ids, so a lock written under one must be seen
+ * under the others. This runs without the account catalog, so it can only apply the static
+ * alias table: `gemini-3.7-flash-{high,medium,low}` share one key even on an account whose
+ * catalog lists them as separate wire models (`cleanModelName` sends those verbatim). An exact
+ * cooldown on one tier then covers its siblings too, the same collapse the account lease makes
+ * in `canonicalizeAntigravityExactModel`.
+ */
+export function canonicalizeExactModel(provider: string, model: string): string {
+  const normalized = model.trim().toLowerCase();
+  if (provider === "antigravity" || provider === "agy" || provider === "ag") {
+    const bareModel = normalized.replace(/^(?:antigravity|ag|agy)\//, "");
+    return resolveAntigravityModelId(bareModel).trim().toLowerCase();
+  }
+  return normalized;
+}
 
 /** Build the "exact" scoped lockout key — a distinct namespace from the quota-family key. */
 export function buildExactModelLockKey(
@@ -17,7 +35,7 @@ export function buildExactModelLockKey(
   connectionId: string,
   model: string
 ): string {
-  return `${canonicalProvider}:${connectionId}:exact:${model.trim().toLowerCase()}`;
+  return `${canonicalProvider}:${connectionId}:exact:${canonicalizeExactModel(canonicalProvider, model)}`;
 }
 
 /** Dedupe the 3 lockout key shapes callers must check: quota-family, #8050 not_found, exact. */
@@ -54,6 +72,54 @@ export function createGetModelLockKeys(
 }
 
 /**
+ * Entry for an authoritative upstream reset that SHORTENS a longer existing lock
+ * (#CO-402). Shared by lockModel() (quota-family keys) and the exact-model lock.
+ */
+export function buildAuthoritativeShortenedLockEntry(
+  existing: ModelLockoutEntry,
+  reason: string,
+  newUntil: number,
+  metadata: Partial<ModelLockoutEntry>,
+  now: number = Date.now()
+): ModelLockoutEntry {
+  return {
+    reason,
+    until: newUntil,
+    lockedAt: now,
+    failureCount: Math.max(metadata.failureCount ?? existing.failureCount, 1),
+    lastFailureAt: metadata.lastFailureAt ?? now,
+    resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
+  };
+}
+
+/**
+ * A re-lock whose cooldown is SHORTER than the existing lock. An authoritative upstream
+ * reset (Retry-After header, google.rpc.RetryInfo, or a structured reset_at/retry_after
+ * body field) reflects the provider's own clock, so it wins and the lock shortens.
+ * Prose-derived and synthetic cooldowns never shorten an existing lock: they only bump
+ * failureCount (null = leave state untouched).
+ */
+function mergeIntoLongerLock(
+  existing: ModelLockoutEntry,
+  reason: string,
+  newUntil: number,
+  metadata: Partial<ModelLockoutEntry>,
+  now: number,
+  options: { authoritativeReset?: boolean }
+): ModelLockoutEntry | null {
+  if (options.authoritativeReset === true) {
+    return buildAuthoritativeShortenedLockEntry(existing, reason, newUntil, metadata, now);
+  }
+  if (!metadata.failureCount || metadata.failureCount <= existing.failureCount) return null;
+  return {
+    ...existing,
+    failureCount: metadata.failureCount,
+    lastFailureAt: metadata.lastFailureAt ?? existing.lastFailureAt,
+    resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
+  };
+}
+
+/**
  * Compute the next ModelLockoutEntry for an exact-model lock, merging with any existing entry
  * the same way lockModel() does (extend failureCount on a shorter re-lock instead of shrinking
  * the remaining cooldown). Returns null when the caller should leave state untouched.
@@ -62,18 +128,13 @@ export function computeExactModelLockEntry(
   existing: ModelLockoutEntry | undefined,
   reason: string,
   cooldownMs: number,
-  metadata: Partial<ModelLockoutEntry>
+  metadata: Partial<ModelLockoutEntry>,
+  options: { authoritativeReset?: boolean } = {}
 ): ModelLockoutEntry | null {
   const now = Date.now();
   const newUntil = now + cooldownMs;
   if (existing && existing.until > newUntil) {
-    if (!metadata.failureCount || metadata.failureCount <= existing.failureCount) return null;
-    return {
-      ...existing,
-      failureCount: metadata.failureCount,
-      lastFailureAt: metadata.lastFailureAt ?? existing.lastFailureAt,
-      resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
-    };
+    return mergeIntoLongerLock(existing, reason, newUntil, metadata, now, options);
   }
   return {
     reason,
@@ -146,13 +207,20 @@ export function createLockExactModel(
     model: string | null | undefined,
     reason: string,
     cooldownMs: number,
-    metadata: Partial<ModelLockoutEntry> = {}
+    metadata: Partial<ModelLockoutEntry> = {},
+    options: { authoritativeReset?: boolean } = {}
   ): void {
     if (!model) return;
     ensureCleanupTimer();
     const key = buildExactModelLockKey(getCanonicalLockProvider(provider), connectionId, model);
     cleanupModelLockKey(key);
-    const next = computeExactModelLockEntry(modelLockouts.get(key), reason, cooldownMs, metadata);
+    const next = computeExactModelLockEntry(
+      modelLockouts.get(key),
+      reason,
+      cooldownMs,
+      metadata,
+      options
+    );
     if (next) modelLockouts.set(key, next);
   };
 }

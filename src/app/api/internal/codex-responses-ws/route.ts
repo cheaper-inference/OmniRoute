@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { newestChromeProfile } from "@omniroute/open-sse/utils/browserProfiles.ts";
 import {
   applyApiKeyCodexServiceMode,
   withApiKeyCodexServiceMode,
@@ -14,8 +15,10 @@ import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { acquireCodexWsLease, releaseCodexWsLease } from "@/sse/services/codexWsLease";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
+import { StaleCodexOperationError } from "@/lib/db/codexConnectionFences";
 import { resolveCodexWsModelInfo } from "./modelResolution";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { buildHandshakeOriginRequest, isWebSocketOriginAllowed } from "@/server/origin/wsOrigin";
 import { formatMemoryContext } from "@/lib/memory/injection";
 import { retrieveMemories } from "@/lib/memory/retrieval";
 import {
@@ -111,6 +114,7 @@ const bridgePayloadSchema = z
     action: z.string().optional(),
     requestUrl: z.string().optional(),
     headers: z.record(z.string(), z.unknown()).optional(),
+    handshake: z.record(z.string(), z.unknown()).optional(),
     response: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
@@ -335,15 +339,33 @@ function normalizeUpstreamHeaders(headers: Record<string, string>): Record<strin
   return result;
 }
 
-async function authenticate(body: JsonRecord) {
+function getHandshakeOriginRequest(body: JsonRecord, authRequest: Request): Request {
+  return buildHandshakeOriginRequest(body.handshake, authRequest.headers.get("origin"));
+}
+
+async function authenticate(body: JsonRecord, { checkOrigin = false } = {}) {
   const authRequest = getAuthRequest(body);
-  const auth = await authorizeWebSocketHandshake(authRequest);
+  // REQUIRE_API_KEY applies to this transport exactly as it does to HTTP /v1/responses.
+  const auth = await authorizeWebSocketHandshake(authRequest, {
+    requireAuth: isRequireApiKeyEnabled(),
+  });
   if (!auth.authorized) {
     return jsonError(
       auth.hasCredential ? 403 : 401,
       auth.hasCredential ? "ws_auth_invalid" : "ws_auth_required",
       auth.hasCredential ? "Invalid WebSocket credential" : "WebSocket auth required"
     );
+  }
+
+  // Browsers skip CORS for WebSocket, so a cross-site page must be stopped here. A valid
+  // API key is exempt, matching the HTTP CORS relaxation for token-authenticated calls:
+  // the page cannot know the key. A session cookie is not exempt (browsers attach it).
+  if (
+    checkOrigin &&
+    auth.authType !== "api_key" &&
+    !isWebSocketOriginAllowed(getHandshakeOriginRequest(body, authRequest))
+  ) {
+    return jsonError(403, "ws_origin_forbidden", "WebSocket origin not allowed");
   }
 
   return NextResponse.json({
@@ -455,6 +477,8 @@ async function resolveCodexCredentials(
       refreshed = await checkAndRefreshToken(provider, credentials);
     } catch (error) {
       releaseCodexWsLease(leaseId);
+      // A stale selection reached no upstream and is no account failure: read the row again.
+      if (error instanceof StaleCodexOperationError) continue;
       return {
         error: jsonError(
           502,
@@ -640,6 +664,9 @@ async function resolveCodexProxy(
 }
 
 async function prepare(body: JsonRecord) {
+  // Resolve the fingerprint profile before anything below can acquire a WS
+  // lease: a fail-loud throw here must not strand the account semaphore.
+  const browser = newestChromeProfile();
   const context = await resolveCodexRequestContext(body);
   if ("error" in context) return context.error;
   const combo = await getComboByName(context.requestedModel).catch(() => null);
@@ -775,11 +802,7 @@ async function prepare(body: JsonRecord) {
   return NextResponse.json({
     ok: true,
     upstreamUrl: CODEX_RESPONSES_WS_URL,
-    // #5591: chrome_149 does not exist in wreq-js 2.3.1 (max chrome_147) → the
-    // native layer yields a degenerate TLS fingerprint and ChatGPT rejects the
-    // upgrade ("Invalid JSON body"). chrome_142 is the profile that shipped in
-    // v3.8.39 and is confirmed working against this upstream.
-    browser: "chrome_142",
+    browser,
     os: "windows",
     connectionId: refreshedCredentials.connectionId,
     leaseId,
@@ -813,7 +836,7 @@ export async function POST(request: Request) {
 
   const action = typeof body.action === "string" ? body.action : "";
   if (action === "authenticate") {
-    return authenticate(body);
+    return authenticate(body, { checkOrigin: true });
   }
   if (action === "prepare") {
     return prepare(body);

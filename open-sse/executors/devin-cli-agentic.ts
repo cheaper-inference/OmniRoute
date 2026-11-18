@@ -4,8 +4,10 @@ import os from "node:os";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { DEVIN_BRIDGE_NOT_CONFIGURED_CODE, UNSAFE_DEVIN_HOME_CODE } from "../config/constants.ts";
 import { DEVIN_MODEL_CATALOG } from "../config/providers/registry/devin/catalog.ts";
-import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import {
   buildClaudeSseFrames,
   buildClaudeTextResponse,
@@ -129,11 +131,22 @@ export function buildDevinChildEnv(
   source: NodeJS.ProcessEnv = process.env
 ): NodeJS.ProcessEnv {
   const home = source.DEVIN_AGENTIC_HOME?.trim() || "";
-  if (!home || !path.isAbsolute(home) || !isIsolatedDevinHome(home)) {
+  // Both failures are operator configuration, not a transient upstream fault (#18019):
+  // 503 with a stable code that the resilience layer treats as local (no cooldown, no
+  // breaker, no same-account retry). No default home is guessed, so the sandbox
+  // boundary stays an explicit operator choice.
+  if (!home) {
     throw new DevinAgenticBridgeError(
-      "DEVIN_AGENTIC_HOME must be an absolute path inside the bridge sandbox",
-      "unsafe_devin_home",
-      500
+      "Devin agentic bridge is not configured: set DEVIN_AGENTIC_HOME to an absolute path inside the bridge sandbox (a .sandbox directory segment) and restart OmniRoute",
+      DEVIN_BRIDGE_NOT_CONFIGURED_CODE,
+      503
+    );
+  }
+  if (!path.isAbsolute(home) || !isIsolatedDevinHome(home)) {
+    throw new DevinAgenticBridgeError(
+      "DEVIN_AGENTIC_HOME must be an absolute path inside the bridge sandbox (a .sandbox directory segment)",
+      UNSAFE_DEVIN_HOME_CODE,
+      503
     );
   }
 
@@ -589,9 +602,31 @@ export class DevinCliAgenticExecutor extends BaseExecutor {
       };
     } catch (error) {
       const bridge = error instanceof DevinAgenticBridgeError ? error : null;
+      const status = bridge?.status || 500;
+      if (drainAwareFailureStatus(status) !== status) {
+        // The Devin CLI is a LOCAL child process: our own shutdown kills it while
+        // requests are still in flight, so the spawn/ACP failure that follows is
+        // evidence about OUR shutdown, not about the provider's health. The account
+        // state the runtime writes from a 5xx (a provider connection marked
+        // unavailable, a model lockout, a breaker failure, a provider cooldown)
+        // OUTLIVES the restart, so our own teardown must not be recorded as provider
+        // ill health. While the instance is draining, answer 499
+        // (client_disconnected) with the canonical body of the repo's errorResponse
+        // helper (see open-sse/utils/drainStatus.ts). A 4xx of the request keeps its
+        // own status, and a genuine failure outside a drain keeps its 5xx.
+        return {
+          response: errorResponse(
+            499,
+            bridge?.message || (error instanceof Error ? error.message : String(error))
+          ),
+          url: "devin://acp/stdio",
+          headers: {},
+          transformedBody: { model },
+        };
+      }
       return {
         response: new Response(JSON.stringify(errorBody(error)), {
-          status: bridge?.status || 500,
+          status,
           headers: { "Content-Type": "application/json" },
         }),
         url: "devin://acp/stdio",

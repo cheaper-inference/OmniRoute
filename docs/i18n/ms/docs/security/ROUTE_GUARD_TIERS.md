@@ -11,253 +11,144 @@ peringkat perlindungan. Pengelasan ini bersifat statik, ditakrifkan dalam
 `src/server/authz/routeGuard.ts`, dan dinilai sebelum mana-mana cabang pengesahan
 lain dijalankan.
 
-## Peringkat
+## peringkat
 
-### Peringkat 1 — LOCAL_ONLY
+### Tahap 1 — LOCAL_ONLY
 
-**Dikuatkuasakan oleh:** `isLocalOnlyPath(path)` → semakan hos gelung balik  
-**Pintasan:** Tiada secara lalai. Pengecualian terhad untuk laluan dalam
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` apabila permintaan membawa kunci
-API yang sah dengan skop `manage` (lihat [Pengecualian skop manage](#manage-scope-carve-out)).
+**Dikuatkuasakan oleh:** cek hos gelung balik `isLocalOnlyPath(path)` →** Pintasan:** Tiada secara lalai. Ukiran sempit untuk laluan dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` apabila permintaan membawa kunci API yang sah dengan skop `manage` (lihat [Ukiran keluar skop Urus](#manage-scope-carve-out) ).
 
-Laluan ini memulakan proses anak atau melaksanakan kod masa jalan. Mendedahkannya
-kepada trafik bukan gelung balik akan membolehkan penyerang yang memperoleh JWT
-yang sah (cth., melalui terowong Cloudflared/Ngrok) mencetuskan pemulaan proses —
-kelas CVE yang diketahui
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Laluan ini menghasilkan proses anak atau melaksanakan kod masa jalan. Mendedahkan mereka kepada trafik bukan gelung balik akan membolehkan penyerang yang memperoleh JWT yang sah (cth, melalui terowong Cloudflared/Ngrok ) mencetuskan proses pemijahan — kelas CVE yang diketahui ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Apakah itu GHSA-fhh6-4qxv-rpqj (kelas serangan):** pelayan pengurusan/ejen
-mendedahkan titik akhir yang melancarkan subproses (`npm install`, `node`, pelayar,
-proksi, `git`, `tar`, …). Jika titik akhir tersebut boleh dicapai dari luar hos —
-kerana pengendali meletakkan OmniRoute di belakang terowong nginx/Cloudflare/Tailscale
-dan JWT terdedah, atau pengesahan tersalah konfigurasi — penyerang menukar
-"panggil API" menjadi "jalankan perintah pada hos" (pelaksanaan kod jauh).
-OmniRoute mencegah perkara ini dengan menguatkuasakan **semakan hos gelung balik
-tanpa syarat, sebelum sebarang semakan pengesahan**, pada setiap laluan yang
-mampu memulakan proses: token yang terdedah melalui terowong masih tidak dapat
-mencapai fungsi pemulaan proses.
+**Apa itu GHSA-fhh6-4qxv-rpqj (kelas serangan):** pelayan management/agent mendedahkan titik akhir yang melancarkan subproses (`npm install`, `node`, pelayar, proksi, `git`, `tar`, …). Jika titik akhir itu boleh dicapai dari — luar hos kerana pengendali meletakkan OmniRoute di belakang terowong nginx/Cloudflare/Tailscale dan JWT bocor, atau pengesahan tersalah konfigurasi — penyerang menukar "panggil API" kepada "jalankan arahan pada hos" (pelaksanaan kod jauh). OmniRoute menutup ini dengan menguatkuasakan a** hos loopback semak tanpa syarat, sebelum sebarang semakan pengesahan** , pada setiap laluan yang mampu bertelur: token yang bocor di atas terowong masih tidak dapat mencapai bibit.
 
-**Set lengkap LOCAL_ONLY.** Sumber berwibawa ialah
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` dalam
-`src/server/authz/routeGuard.ts`; jadual di bawah mencerminkan keadaan semasa.
-Gerbang `check-route-guard-membership` menyenaraikan setiap `route.ts` di bawah
-awalan yang mampu memulakan proses dan menyebabkan CI gagal jika mana-mana
-daripadanya tidak diklasifikasikan sebagai setempat sahaja.
+**Set LOCAL_ONLY penuh.** Sumber berwibawa ialah `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` dalam `src/server/authz/routeGuard.ts`; jadual di bawah mencerminkan keadaan semasa. Gerbang `check-route-guard-membership` menyenaraikan setiap `route.ts` di bawah awalan berkebolehan bertelur dan gagal CI jika ada yang tidak dikelaskan tempatan sahaja.
 
-| Awalan / corak                                                                                           | Sebab ia hanya setempat                                                                                          |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Pelayan MCP — memulakan jambatan stdio + pengendali SSE                                                          |
-| `/api/cli-tools/runtime/`                                                                                | Masa jalan alat CLI — melaksanakan kod pemalam sembarangan                                                       |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Penulis tetapan bagi setiap alat yang boleh menyentuh binari/konfigurasi alat pada hos                           |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Penciptaan proses `getCliRuntimeStatus()` yang sama seperti enam alat sekeluarga di atas (GHSA-35fw-cv32-2373)   |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Pemeriksaan inventori CLI — memulakan `command -v` / `--version` bagi setiap alat (GHSA-35fw-cv32-2373)          |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Kawalan proksi MITM Antigravity (memulakan/menghalakan proksi sistem)                                            |
-| `/api/modality-bridge/video/`                                                                            | Pemeriksaan masa jalan Video Bridge gelung balik dipercayai yang ketat dan jambatan pengekstrakan dalaman        |
-| `/api/services/`                                                                                         | Perkhidmatan terbenam (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + memulakan proses            |
-| `/dashboard/providers/services/`                                                                         | Proksi songsang kepada UI perkhidmatan terbenam                                                                  |
-| `/api/tunnels/cloudflared`                                                                               | Memasang/memulakan binari cloudflared                                                                            |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Memasang/mengawal tailscaled pada hos                                                                            |
-| `/api/copilot/`                                                                                          | Pemacu LLM tanpa pengesahan — CLI sahaja secara lalai                                                            |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — memulakan pelayan MITM + suntingan DNS                                                             |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — pendengar http-proxy + proksi sistem                                                         |
-| `/api/settings/mitm`                                                                                     | Mendayakan pemintasan MITM (keadaan proksi peringkat sistem)                                                     |
-| `/api/issue-agent/`                                                                                      | Ejen isu — memulakan perkakasan setempat terhadap repositori                                                     |
-| `/api/plugins/`, `/api/plugins`                                                                          | Pemalam — memuatkan/melaksanakan melalui `worker_threads` + `child_process`                                      |
-| `/api/middleware/`                                                                                       | Perisian tengah pengguna — memuatkan/melaksanakan kod pengendali dalam proses                                    |
-| `/api/system/version`                                                                                    | Kemas kini automatik (POST sahaja; GET/HEAD/OPTIONS dikecualikan) — memulakan `git checkout` + `npm install`     |
-| `/api/db-backups/exportAll`                                                                              | Memulakan `tar` untuk arkib eksport                                                                              |
-| `/api/local/`                                                                                            | Pelancar setempat 1 klik (Redis pada masa ini) — memulakan podman/docker                                         |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Kitar hayat proksi Headroom — memulakan CLI python / menghantar isyarat kepada PID                               |
-| `/api/jobs`, `/api/jobs/`                                                                                | Kawalan pelaksana tugas — melaksanakan kerja berjadual pada hos                                                  |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` sebelum mengimport kelayakan                                                     |
-| `/api/oauth/kiro/auto-import`                                                                            | Membaca fail kelayakan Kiro CLI daripada hos                                                                     |
-| `/api/skills/collect/`                                                                                   | Pengumpulan kemahiran — mengesan/memasang perkakasan setempat                                                    |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Pendaftaran + pelaksanaan pengendali kemahiran — mencapai pelancaran bekas sandbox (GHSA-jx89)                   |
-| `/api/discovery/`                                                                                        | Prob penemuan rangkaian/penyedia setempat                                                                        |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Melancarkan pelayar berantara muka + sesi VNC untuk log masuk interaktif                                         |
-| `/api/acp/agents`                                                                                        | ACP — menemui dan melancarkan perduaan ejen CLI setempat                                                         |
-| `/api/resilience/connections`                                                                            | JSON daya tahan bagi setiap akaun (tempoh bertenang, pemutus, sekatan). HTML papan pemuka bukan setempat sahaja. |
-| `/api/providers/cursor/agent-availability`                                                               | Semakan galakan pemasangan papan pemuka — melancarkan `cursor-agent status --format json`                        |
-| `/api/providers/{id}/login` (regex)                                                                      | Melancarkan Playwright Chromium berantara muka untuk log masuk kuki web                                          |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Aliran manual berantara muka + log masuk automatik telefon/SMS berasaskan sesi (melancarkan Playwright)          |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Pembaharuan sesi Cursor secara manual — menggesa `cursor-agent`                                                  |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Mendiagnosis pemasangan Codex CLI setempat (melancarkan perduaan)                                                |
+| Awalan / corak                                                                                           | Mengapa ia tempatan sahaja                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | pelayan MCP — melahirkan jambatan stdio pengendali + SSE                                                      |
+| `/api/cli-tools/runtime/`                                                                                | masa jalan alat CLI — melaksanakan kod pemalam sewenang-wenangnya                                             |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Penulis tetapan setiap alat yang boleh menyentuh binaries/config alat pada hos                                |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | `getCliRuntimeStatus()` yang sama bertelur seperti enam beradik di atas (GHSA-35fw-cv32-2373)                 |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | kuar inventori CLI — menghasilkan `command -v` / `--version` setiap alat (GHSA-35fw-cv32-2373)                |
+| `/api/cli-tools/antigravity-mitm`                                                                        | kawalan proksi Antigravity MITM ( proksi sistem spawns/points )                                               |
+| `/api/modality-bridge/video/`                                                                            | Siasatan masa jalan Jambatan Video gelung balik yang dipercayai dan jambatan pengekstrakan dalaman            |
+| `/api/services/`                                                                                         | Perkhidmatan terbenam (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                    |
+| `/dashboard/providers/services/`                                                                         | Balikkan proksi kepada UIs perkhidmatan terbenam                                                              |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns binari cloudflared                                                                            |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled pada tuan rumah                                                                  |
+| `/api/copilot/`                                                                                          | Pemacu LLM yang tidak disahkan — CLI sahaja secara lalai                                                      |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — menghasilkan MITM pelayan + DNS                                                                 |
+| `/api/tools/traffic-inspector/`                                                                          | Pemeriksa Trafik — http-proksi pendengar proksi sistem +                                                      |
+| `/api/settings/mitm`                                                                                     | Mendayakan pemintasan MITM (keadaan proksi peringkat sistem)                                                  |
+| `/api/issue-agent/`                                                                                      | Ejen isu — menghasilkan alatan tempatan terhadap repo                                                         |
+| `/api/plugins/`, `/api/plugins`                                                                          | Pemalam — load/execute melalui `worker_threads` + `child_process`                                             |
+| `/api/middleware/`                                                                                       | Kod operator — loads/executes middleware pengguna sedang dalam proses                                         |
+| `/api/system/version`                                                                                    | Kemas kini automatik (POST sahaja; GET/HEAD/OPTIONS dikecualikan) — melahirkan `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Melahirkan `tar` untuk arkib eksport                                                                          |
+| `/api/local/`                                                                                            | 1-klik pelancar tempatan (Redis hari ini) — melahirkan podman/docker                                          |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Kitaran hayat proksi bilik kepala — melahirkan python CLI / memberi isyarat PID                               |
+| `/api/jobs`, `/api/jobs/`                                                                                | Kawalan pelari kerja — melaksanakan kerja sampingan yang dijadualkan                                          |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` sebelum mengimport kredit                                                     |
+| `/api/oauth/kiro/auto-import`                                                                            | Membaca fail kelayakan Kiro CLI daripada hos                                                                  |
+| `/api/skills/collect/`                                                                                   | Koleksi kemahiran — detects/installs perkakas tempatan                                                        |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Pendaftaran pengendali kemahiran + pelaksanaan — mencapai benih bekas kotak pasir (GHSA-jx89)                 |
+| `/api/discovery/`                                                                                        | Probe penemuan network/provider tempatan                                                                      |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Melahirkan sesi + VNC pelayar yang penuh perhatian untuk log masuk interaktif                                 |
+| `/api/acp/agents`                                                                                        | ACP — menemui dan melahirkan perduaan ejen CLI tempatan                                                       |
+| `/api/resilience/connections`                                                                            | JSON daya tahan setiap akaun (cooldown, breaker, lockout). Papan pemuka HTML bukan setempat sahaja.           |
+| `/api/providers/cursor/agent-availability`                                                               | Semakan pemasangan-nudge papan pemuka — melahirkan `cursor-agent status --format json`                        |
+| `/api/providers/{id}/login` (regex)                                                                      | Melancarkan Playwright Chromium untuk log masuk kuki web                                                      |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Log masuk automatik phone/SMS aliran headful manual + (melahirkan Playwright)                                 |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Pembaharuan sesi Cursor manual — menyenggol `cursor-agent`                                                    |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Mendiagnosis pemasangan Codex CLI setempat (menimbulkan binari)                                               |
 
-**Respons apabila berlaku pelanggaran:** `403 LOCAL_ONLY`
+**Jawapan mengenai pelanggaran:** `403 LOCAL_ONLY`
 
-#### Pengecualian skop pengurusan
+#### Urus-skop ukiran-keluar
 
-Subset laluan LOCAL_ONLY BOLEH turut dicapai daripada alamat bukan gelung balik jika dan
-hanya jika permintaan membawa `Authorization: Bearer <api-key>` yang
-metadatanya merangkumi skop `manage` (atau `admin`). Pengecualian ini dikawal
-secara eksplisit bagi setiap laluan melalui `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` supaya
-lalai untuk mana-mana laluan LOCAL_ONLY baharu kekal sebagai gelung balik ketat. Permintaan
-tanpa pengesahan dan permintaan dengan kunci bukan pengurusan masih ditolak dengan
-`403 LOCAL_ONLY`.
+Subset laluan LOCAL_ONLY MAY juga boleh diakses daripada bukan gelung balik jika dan hanya jika permintaan itu membawa `Authorization: Bearer <api-key>` yang metadatanya termasuk skop `manage` (atau `admin`). Ukiran itu berpagar secara eksplisit setiap laluan melalui `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` jadi lalai untuk mana-mana laluan LOCAL_ONLY baharu kekal gelung balik yang ketat. Permintaan dan permintaan yang tidak disahkan dengan kunci bukan urus masih ditolak dengan `403 LOCAL_ONLY`.
 
-Pada masa ini, satu-satunya awalan yang boleh dikecualikan ialah `/api/mcp/`. `/api/cli-tools/runtime/` dan
-`/api/services/` sengaja dikecualikan kerana kedua-duanya boleh melancarkan subproses
-sewenang-wenangnya (`npm install`, `node`), iaitu kelas CVE yang tepat yang ingin
-dicegah oleh peringkat LOCAL_ONLY.
+Hari ini satu-satunya awalan boleh pintas ialah `/api/mcp/`. `/api/cli-tools/runtime/` dan `/api/services/` sengaja dikecualikan kerana ia boleh menghasilkan subproses sewenang-wenangnya (`npm install`, `node`), iaitu kelas CVE tepat yang wujud untuk dihalang oleh tier LOCAL_ONLY.
 
-**#7895 — skop sempit `mcp:connect`:** pengecualian `/api/mcp/` TURUT menerima
-kunci Bearer yang mempunyai skop sempit `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), yang diperiksa melalui
-`hasMcpConnectOrManageScope()` dalam `src/server/authz/policies/management.ts`.
-Ini dihadkan kepada `/api/mcp/` SAHAJA — `mcp:connect` tidak memberikan sebarang akses pada mana-mana laluan
-pengurusan lain (termasuk setiap awalan pintasan LOCAL_ONLY yang lain, sekiranya ada yang
-ditambahkan kelak), dan ia sengaja tidak disertakan dalam
-`MANAGEMENT_API_KEY_SCOPES`. Kunci yang mempunyai `manage`/`admin` masih melepasi
-pengecualian tersebut seperti sebelumnya; `mcp:connect` ialah alternatif
-berkeistimewaan lebih rendah untuk pemanggil MCP sahaja dari jauh yang tidak sepatutnya memerlukan akses pengurusan yang luas.
+**#7895 — `mcp:connect` skop sempit:** `/api/mcp/` ukiran ALSO menerima kunci Pembawa yang memegang skop `mcp:connect` sempit (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), diperiksa melalui `hasMcpConnectOrManageScope()` dalam `src/server/authz/policies/management.ts`. Ini adalah skop kepada `/api/mcp/` ONLY — `mcp:connect` tidak memberikan apa-apa pada mana-mana laluan pengurusan lain (termasuk setiap awalan pintasan LOCAL_ONLY lain, sekiranya satu ditambahkan), dan ia sengaja dikecualikan daripada `MANAGEMENT_API_KEY_SCOPES`. Kunci pemegang `manage`/`admin` masih melepasi ukiran sama seperti sebelumnya; `mcp:connect` ialah alternatif keistimewaan yang lebih rendah untuk pemanggil jauh MCP sahaja yang tidak sepatutnya memerlukan akses pengurusan yang luas.
 
-| Permintaan                                              | Laluan                     | Hasil                     |
-| ------------------------------------------------------- | -------------------------- | ------------------------- |
-| Bukan gelung balik, tiada Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY            |
-| Bukan gelung balik, Bearer dengan skop `manage`         | `/api/mcp/*`               | Benarkan                  |
-| Bukan gelung balik, Bearer dengan skop `mcp:connect`    | `/api/mcp/*`               | Benarkan                  |
-| Bukan gelung balik, Bearer tanpa `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY            |
-| Bukan gelung balik, Bearer dengan skop `mcp:connect`    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
-| Bukan gelung balik, Bearer dengan skop `manage`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
-| Gelung balik, dengan/sebarang Bearer                    | mana-mana LOCAL_ONLY       | Benarkan (pagar dilepasi) |
+| Permintaan                                         | Laluan                     | Hasilnya                      |
+| -------------------------------------------------- | -------------------------- | ----------------------------- |
+| Bukan gelung balik, tiada Pembawa                  | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Non-loopback, Pembawa dengan skop `manage`         | `/api/mcp/*`               | benarkan                      |
+| Non-loopback, Pembawa dengan skop `mcp:connect`    | `/api/mcp/*`               | benarkan                      |
+| Non-loopback, Pembawa tanpa `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Non-loopback, Pembawa dengan skop `mcp:connect`    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Non-loopback, Pembawa dengan skop `manage`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Loopback, any/no Bearer                            | mana- LOCAL_ONLY           | Benarkan (laluan pintu masuk) |
 
-#### Panduan pengendali & pengauditan
+#### Bimbingan & pengauditan operator
 
-Jika anda menjalankan OmniRoute di belakang proksi terbalik atau terowong (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), semakan gelung balik masih melindungi laluan yang mampu
-melancarkan proses di atas — permintaan yang alamat kliennya bukan gelung balik akan ditolak dengan
-`403 LOCAL_ONLY` **sebelum pengesahan dijalankan**, jadi JWT yang bocor tidak boleh mencapai pelancaran proses. Dua
-tanggungjawab pengendali masih kekal:
+Jika anda menjalankan OmniRoute di belakang proksi atau terowong terbalik (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok), semakan gelung balik masih melindungi laluan berkemampuan spawn di atas — permintaan yang alamat kliennya bukan gelung ditolak dengan `403 LOCAL_ONLY`** sebelum auth dijalankan** , jadi JWT yang bocor tidak dapat mencapai benih. Dua tanggungjawab pengendali kekal:
 
-- **Jangan "baiki" ralat 403 dengan memalsukan IP klien sebagai gelung balik.** Menetapkan
-  `X-Forwarded-For: 127.0.0.1`, atau menggunakan proksi yang menulis semula alamat sumber kepada
-  gelung balik, akan membuka semula kelas RCE yang ditutup oleh aras ini. Dedahkan
-  papan pemuka/API melalui proksi — jangan sekali-kali dedahkan laluan yang berkeupayaan mencipta proses.
-- **Pastikan pintasan skop urus adalah minimum.** Hanya `/api/mcp/` boleh dipintas, dan
-  hanya dengan kunci API berskop `manage`. `SPAWN_CAPABLE_PREFIXES` tidak boleh
-  ditambahkan pada senarai pintasan — skema zod menolaknya dan
-  `isLocalOnlyBypassableByManageScope` menyekatnya semasa masa jalan (pertahanan berlapis),
-  dan inilah yang dimaksudkan oleh papan pemuka dengan "tidak boleh dijadikan boleh dipintas". Senarai
-  sekatan yang sama turut mengandungi beberapa laluan LOCAL_ONLY yang tidak mencipta proses tetapi juga
-  tidak boleh dicapai dari jauh sama sekali — `/api/oauth/kiro/auto-import` (membaca fail
-  kelayakan Kiro setempat hos), `/api/discovery/` dan `/api/issue-agent/`. Pemuat
-  petikan tetapan masa jalan turut menggugurkan entri sedemikian daripada baris tetapan yang disimpan, dan
-  import JSON legasi (`/api/settings/import-json`) tidak pernah menulis kunci pintasan.
-  Setiap entri `LOCAL_ONLY_API_PREFIXES` mesti sama ada berada dalam senarai sekatan atau
-  disemak sebagai layak untuk pintasan (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Laluan
-  berkeupayaan mencipta proses dengan segmen dinamik dan laluan statik di bawah `/api/providers/` (cth. `/login`,
-  `/refresh-cursor`) diliputi oleh pasangan berasaskan ungkapan nalar `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` dalam
-  `src/shared/constants/spawnCapablePrefixes.ts`, bukannya oleh tatasusunan rata
-  `SPAWN_CAPABLE_PREFIXES` — tatasusunan rata itu perlu meliputi keseluruhan
-  awalan `/api/providers/` untuk mengesannya, sekali gus menjadikan liputan pepohon laluan
-  yang digunakan secara sah oleh papan pemuka jauh untuk CRUD penyedia terlalu luas.
+- **Jangan "betulkan" 403 dengan memalsukan IP pelanggan sebagai gelung balik.** Menetapkan `X-Forwarded-For: 127.0.0.1`, atau proksi yang menulis semula alamat sumber kepada gelung balik, membuka semula dengan tepat kelas RCE yang ditutup peringkat ini. Dedahkan dashboard/API melalui proksi — tidak sekali-kali laluan berkemampuan bertelur.
+- **Pastikan pintasan skop pengurusan minimum.** Hanya `/api/mcp/` boleh dipintas, dan hanya dengan kunci `manage` -scoped API. `SPAWN_CAPABLE_PREFIXES` tidak boleh ditambah pada senarai pintasan — skema zod menolaknya dan `isLocalOnlyBypassableByManageScope` menafikannya pada masa jalanan (mendalam pertahanan), iaitu apa yang dimaksudkan oleh papan pemuka dengan "tidak boleh dipintas". Senarai penafian yang sama juga memegang beberapa laluan LOCAL_ONLY yang tidak menghasilkan tetapi tidak boleh dicapai dari jauh sama ada — `/api/oauth/kiro/auto-import` (membaca fail kelayakan Kiro hos tempatan), `/api/discovery/` dan `/api/issue-agent/`. Pemuat syot kilat masa jalan juga menggugurkan entri sedemikian daripada baris tetapan yang disimpan dan import JSON warisan (`/api/settings/import-json`) tidak pernah menulis kekunci pintasan. Setiap masukan `LOCAL_ONLY_API_PREFIXES` mestilah sama ada dalam senarai penafian atau disemak sebagai layak pintasan (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Laluan berkeupayaan bertelur segmen dinamik dan laluan statik di bawah `/api/providers/` (cth `/login`, `/refresh-cursor`) diliputi oleh pengiring `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` berasaskan regex dalam `src/shared/constants/spawnCapablePrefixes.ts`, bukan oleh tatasusunan `SPAWN_CAPABLE_PREFIXES` rata — tatasusunan rata perlu meliputi keseluruhan awalan `/api/providers/` untuk menangkapnya. terlalu meluaskan papan pemuka laluan untuk pepohon legi CRUD dari jauh
 
-**Pengauditan akses** — untuk mengesahkan tiada apa-apa dari luar hos mencapai laluan ini:
+**Akses mengaudit** — untuk mengesahkan tiada di luar hos yang mencapai laluan ini:
 
-- Buka **Inventori Pengesahan** pada `/dashboard/settings/security`: ia memaparkan
-  senarai awalan LOCAL_ONLY langsung, awalan yang boleh dipintas dan set berkeupayaan
-  mencipta proses masa kompilasi ("tidak boleh dijadikan boleh dipintas").
-- Cari dalam log proksi songsang / akses anda untuk awalan di atas yang dipadankan dengan
-  alamat klien bukan gelung balik. Sebarang capaian sedemikian yang mengembalikan `200` dan bukannya
-  `403 LOCAL_ONLY` bermakna proksi menyembunyikan IP klien sebenar — baiki proksi tersebut.
-- `403 LOCAL_ONLY` dalam log OmniRoute bagi salah satu laluan ini menandakan pelindung
-  berfungsi seperti yang dimaksudkan, bukannya ralat yang perlu disembunyikan.
+- Buka** Inventori Kebenaran** pada `/dashboard/settings/security`: ia menjadikan senarai awalan LOCAL_ONLY langsung, yang awalan boleh dipintas, dan set berkeupayaan bertelur masa kompilasi ("tidak boleh dipintas").
+- Grep proksi terbalik / log akses anda untuk awalan di atas dipasangkan dengan alamat klien bukan gelung balik. Sebarang pukulan sedemikian yang mengembalikan `200` dan bukannya `403 LOCAL_ONLY` bermakna proksi menyembunyikan klien sebenar IP — membetulkan proksi.
+- `403 LOCAL_ONLY` dalam log OmniRoute untuk salah satu laluan ini ialah pengawal yang berfungsi seperti yang dimaksudkan, bukan kesilapan untuk ditekan.
 
-#### Laluan yang boleh dicapai dari jauh dengan pagar semakan pada tapak panggilan
+#### Laluan yang boleh dicapai jauh dengan pintu siasatan tapak panggilan
 
-Sesetengah laluan mesti kekal boleh dicapai daripada papan pemuka jauh tetapi menjalankan semakan pada
-hos (`which <binary>`, `<binary> --version`, `tailscale status --json`) untuk pemanggil setempat.
-Laluan tersebut bukan LOCAL_ONLY untuk `GET`; sebaliknya, pengendali membaca keputusan rakan dipercayai
-dengan `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) dan hanya menjalankan semakan
-untuk pemanggil `loopback` / `lan`. Pemanggil `remote` menerima bentuk respons yang sama, dibina daripada
-sumber yang tidak mencipta proses (keadaan tersimpan, tetapan, semakan fs), dengan tanda `probed: false`.
+Sesetengah laluan mesti kekal boleh dicapai dari papan pemuka jauh tetapi menjalankan siasatan sisi hos (`which <binary>`, `<binary> --version`, `tailscale status --json`) untuk pemanggil tempatan. Mereka bukan LOCAL_ONLY untuk `GET`; sebaliknya pengendali membaca keputusan rakan sebaya yang dipercayai dengan `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) dan hanya menjalankan siasatan untuk pemanggil `loopback` / `lan`. Pemanggil `remote` mendapat bentuk respons yang sama yang dibina daripada sumber tidak bertelur (keadaan berterusan, tetapan, semakan fs), `probed: false` yang dibenderakan.
 
-| Laluan                                                                | Semakan yang dilangkau untuk pemanggil jauh                                          |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`          | Semakan masa jalan CLI (`allowLocalRuntimeProbe`) dan penciptaan proses sandaran CLI |
-| `GET /api/headroom/status`                                            | `which headroom` dan semakan `--version` python                                      |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`      | `which tailscale`, `tailscale status/funnel --json`, `which brew`                    |
-| `GET /api/tunnels/cloudflared` (GET dikecualikan daripada LOCAL_ONLY) | Carian PATH `which cloudflared`                                                      |
+| Laluan                                                                     | Siasatan dilangkau untuk pemanggil jauh                             |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`               | CLI runtime probe (`allowLocalRuntimeProbe`) dan CLI-fallback spawn |
+| `GET /api/headroom/status`                                                 | `which headroom` dan kuar `--version` python                        |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`           | `which tailscale`, `tailscale status/funnel --json`, `which brew`   |
+| `GET /api/tunnels/cloudflared` (DAPATKAN pengecualian daripada LOCAL_ONLY) | `which cloudflared` PATH carian                                     |
 
-Laluan baca baharu yang menyemak hos hendaklah mengikuti corak yang sama, atau diklasifikasikan
-terus sebagai LOCAL_ONLY.
+Laluan baca baharu yang menyiasat hos mengikut corak yang sama, atau diklasifikasikan secara langsung sebagai LOCAL_ONLY.
 
-### Aras 2 — ALWAYS_PROTECTED
+### Tahap 2 — ALWAYS_PROTECTED
 
-**Dikuatkuasakan oleh:** `isAlwaysProtectedPath(path)` → langkau pintasan `requireLogin=false`
-**Pintasan:** Tiada apabila `requireLogin=false`; JWT sentiasa diperlukan
+**Dikuatkuasakan oleh:** `isAlwaysProtectedPath(path)` → langkau `requireLogin=false` bypass** Pintasan:** Tiada apabila `requireLogin=false`; JWT sentiasa diperlukan
 
-Laluan ini bersifat memusnahkan atau tidak boleh dipulihkan. Membenarkannya dalam pemasangan
-"tanpa kata laluan" akan membolehkan sesiapa sahaja pada LAN yang sama memadamkan pangkalan data atau
-mematikan proses pelayan.
+Laluan ini merosakkan atau tidak dapat dipulihkan. Membenarkan mereka dalam pemasangan "tiada kata laluan" bermakna sesiapa sahaja pada LAN yang sama boleh memadam pangkalan data atau membunuh proses pelayan.
 
-| Laluan                                    | Sebab                                                                      |
-| ----------------------------------------- | -------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Menamatkan proses pelayan                                                  |
-| `/api/settings/database`                  | Eksport, import dan pemadaman pangkalan data                               |
-| `/api/db-backups`                         | Akses arkib sandaran penuh pangkalan data                                  |
-| `/api/settings/export-json`               | Mengeksport keseluruhan blob tetapan (termasuk rahsia)                     |
-| `/api/settings/import-json`               | Menggantikan keseluruhan blob tetapan                                      |
-| `/api/providers/health-autopilot/actions` | Melaksanakan tindakan pemulihan autopilot                                  |
-| `/api/settings/obsidian`                  | Menjana kelayakan WebDAV boleh guna semula untuk sebarang akar bilik kebal |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                               |
+| Laluan                                    | Sebab                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `/api/shutdown`                           | Menamatkan proses pelayan                                              |
+| `/api/settings/database`                  | Eksport, import dan padam pangkalan data                               |
+| `/api/db-backups`                         | Akses arkib sandaran pangkalan data penuh                              |
+| `/api/settings/export-json`               | Mengeksport gumpalan tetapan penuh (termasuk rahsia)                   |
+| `/api/settings/import-json`               | Menggantikan gumpalan tetapan penuh                                    |
+| `/api/providers/health-autopilot/actions` | Melaksanakan tindakan pemulihan autopilot                              |
+| `/api/settings/obsidian`                  | Pudina boleh diguna semula WebDAV creds untuk mana-mana akar peti besi |
+| `/api/relay/tokens`                       | Mencetak, menyenaraikan, mengedit dan membatalkan token geganti        |
+| `/api/agent-skills/generate`              | Menulis dan mencantas folder kemahiran pada hos                        |
+| `/api/skills/marketplace/install`         | Memasang kemahiran global untuk setiap kunci                           |
+| `/api/skills/skillssh/install`            | Memasang kemahiran global untuk setiap kunci                           |
+| `/api/cli-tools/apply`                    | Menulis semula konfigurasi CLI hos pengendali                          |
+| `/api/cli-tools/guide-settings`           | Menulis fail konfigurasi CLI dipandu panduan                           |
+| `/api/cli-tools/hermes-agent-settings`    | Menulis konfigurasi ejen Hermes                                        |
+| `/api/cli-tools/backups`                  | Memulihkan dan memadamkan sandaran konfigurasi CLI                     |
+| `/api/log-export`                         | Menghantar log panggilan ke destinasi yang dikonfigurasikan            |
+| `/api/restart`                            | Memulakan semula proses pelayan                                        |
 
-**Respons apabila berlaku pelanggaran:** `401 Authentication required`
+**Jawapan mengenai pelanggaran:** `401 Authentication required`
 
-`/api/settings/obsidian` meliputi anak `/webdav`-nya: `POST` menghalakan perkhidmatan fail WebDAV —
-yang disediakan oleh lapisan Node tersuai sebelum Next.js, di luar saluran pemprosesan ini — kepada akar
-pilihan pemanggil dan mengembalikan kelayakan Basic yang baru dijana, `DELETE` menggilirkan kelayakan tersebut,
-dan `POST` induk menyimpan token API REST Obsidian. GHSA-62vw hanya menyembunyikan pendedahan kata laluan
-`GET`; pengeluarannya masih berada pada aras gagal-terbuka (GHSA-7pq4-8pvv-rx7r).
-`enableObsidianVaultSync()` turut menolak bilik kebal yang merupakan, berada di dalam, atau mengandungi
-direktori data.
+`/api/settings/obsidian` meliputi anak `/webdav` : `POST` menunjuk perkhidmatan fail WebDAV — yang disampaikan oleh lapisan Nod tersuai sebelum Next.js, di luar saluran paip ini — pada akar pilihan pemanggil dan menggemakan kelayakan Asas yang baru dicetak, `DELETE` memutarkannya dan `POST` induk menyimpan token Obsidian REST API. GHSA-62vw hanya menyembunyikan kata laluan `GET` ; terbitan masih pada peringkat gagal terbuka (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` juga menolak peti besi yang terletak di dalam atau mengandungi direktori data.
 
-#### Eksport kelayakan hanya untuk pengendali
+#### Eksport dan pemulihan kelayakan adalah pengendali sahaja
 
-Tahap di atas hanya menentukan sama ada _sesuatu_ bukti kelayakan diperlukan. Laluan yang memuat turun
-bukti kelayakan tersimpan menambahkan pemeriksaan kedua dalam pengendali: `GET /api/settings/export-json` (sambungan
-penyedia yang dinyahsulit dan kunci API mentah), `GET /api/db-backups/export` (fail SQLite) dan
-`GET /api/db-backups/exportAll` (arkib penuh) memanggil `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Ia menerima sesi papan pemuka, subjek CLI setempat, atau
-instans dengan log masuk dilumpuhkan, dan memberikan respons `403` kepada kunci API bagi sebarang skop (termasuk `manage`
-dan `admin`) serta token akses `oma_`. Pengeluaran token penyegerakan (`POST /api/sync/tokens`) menggunakan
-pembantu yang sama, di samping token perkhidmatan dalaman gelung balik yang dipercayai.
+Peringkat di atas hanya memutuskan sama ada _beberapa_ kelayakan diperlukan. Laluan yang memuat turun bukti kelayakan yang disimpan menambah semakan kedua dalam pengendali: `GET /api/settings/export-json` (sambungan pembekal yang dinyahsulit dan kekunci API mentah), `GET /api/db-backups/export` (fail SQLite ) dan `GET /api/db-backups/exportAll` (arkib penuh) panggil `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Ia menerima sesi papan pemuka, subjek CLI setempat atau contoh dengan log masuk dilumpuhkan dan menjawab `403` kepada kekunci API mana-mana skop (termasuk `manage` dan `admin`) dan kepada token akses `oma_`. Rakan sejawat yang merosakkan mempunyai sempadan yang sama: `POST /api/db-backups/import` ( `.sqlite` dimuat naik, termasuk `dryRun=true` ), `POST /api/db-backups` (memulihkan sandaran yang disimpan oleh id) dan `POST /api/settings/import-json` (memulihkan JSON lama) menggantikan pangkalan data langsung atau keseluruhan set settings/connections/API-key, jadi bukti kelayakan mesin tidak boleh mencetuskannya sama ada. Memusnahkan titik pemulihan mempunyai sempadan yang sama: `DELETE /api/db-backups` (pembersihan — kekalkan N terkini / jatuh lebih lama daripada D hari) dan `PATCH /api/db-backups` (tetapan pengekalan), kerana pengekalan berterusan adalah perkara yang `cleanupDbBackups()` terpakai selepas setiap sandaran automatik (`src/lib/db/backup.ts`), jadi bukti kelayakan mesin yang boleh menjimatkan `keepLatest: 1` akan memangkas segala-galanya pada syot kilat seterusnya. Menyenaraikan dan membuat sandaran (`GET`/`PUT /api/db-backups`) mengekalkan pengesahan pengurusan biasa. Pengeluaran token penyegerakan (`POST /api/sync/tokens`) menggunakan pembantu yang sama, serta token perkhidmatan dalaman gelung balik yang dipercayai.
 
-#### Credential exports and restores are operator-only
+### Tali but pemasangan baharu ialah — gelung balik sahaja oleh rakan setara sebenar, bukan `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Tanpa kata laluan pengurusan yang dikonfigurasikan (dan tiada `INITIAL_PASSWORD`), `isAuthRequired()` dalam `src/shared/utils/apiAuth.ts` memastikan bootstrap tanpa nama terbuka** hanya untuk rakan sebaya loopback** . Loopback diputuskan daripada isyarat rakan yang dipercayai, mengikut urutan: rakan TCP sebenar bercop token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, perkara yang dilihat oleh polisi), keputusan `AUTHZ_HEADER_PEER_LOCALITY` saluran paip itu sendiri (apa yang dilihat pengendali laluan, dipercayai hanya semasa `OMNIROUTE_PEER_STAMP_TOKEN` ditetapkan), atau rakan soket sebenar untuk pemanggil langsung. `Host` / `nextUrl.hostname` tidak pernah dirujuk, dan tulis kata laluan pertama (`POST /api/settings/require-login`) berada di bawah kekangan yang sama dan bukannya terbuka kepada setiap rakan rangkaian (GHSA-7pq4-8pvv-rx7r). `managementPolicy` melepaskan keputusan `peerContext` sendiri secara eksplisit, jadi pengepala permintaan ORIGINAL (pra-strip) tidak pernah memutuskannya.
 
-### Pemula pemasangan baharu adalah untuk gelung balik sahaja — berdasarkan rakan sebenar, bukan `Host`
+### Peringkat 3 — MANAGEMENT (lalai)
 
-Apabila tiada kata laluan pengurusan dikonfigurasikan (dan tiada `INITIAL_PASSWORD`), `isAuthRequired()` dalam
-`src/shared/utils/apiAuth.ts` memastikan pemula tanpa nama terbuka **hanya untuk rakan gelung balik**.
-Gelung balik ditentukan berdasarkan isyarat rakan yang dipercayai, mengikut turutan: rakan TCP sebenar yang dicap token
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, iaitu perkara yang dilihat oleh dasar), keputusan
-`AUTHZ_HEADER_PEER_LOCALITY` milik saluran paip itu sendiri (iaitu perkara yang dilihat oleh pengendali laluan, dipercayai hanya semasa
-`OMNIROUTE_PEER_STAMP_TOKEN` ditetapkan), atau rakan soket sebenar bagi pemanggil langsung. `Host` /
-`nextUrl.hostname` tidak pernah dirujuk, dan penulisan kata laluan pertama
-(`POST /api/settings/require-login`) tertakluk pada kekangan yang sama dan bukannya terbuka kepada setiap
-rakan rangkaian (GHSA-7pq4-8pvv-rx7r). `managementPolicy` meneruskan keputusan `peerContext`
-miliknya sendiri secara eksplisit, supaya pengepala permintaan ORIGINAL (sebelum dilucutkan) tidak pernah menentukannya.
-
-### Tahap 3 — MANAGEMENT (lalai)
-
-Semua laluan pengurusan lain. Pengesahan diperlukan melainkan `requireLogin=false`
-dikonfigurasikan. Token CLI boleh mengesahkan laluan ini (gelung balik + HMAC yang sah).
+Semua laluan pengurusan lain. Pengesahan diperlukan melainkan `requireLogin=false` dikonfigurasikan. token CLI boleh mengesahkan laluan ini (loopback + valid HMAC).
 
 ## Turutan penilaian
 

@@ -6,6 +6,7 @@ import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Field } from "@omniroute/ui-kit/field";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 import { Badge, Button, Card, Checkbox, EmptyState, Input, Textarea } from "@/shared/components";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
 import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
 import { parseSelectorTag } from "@/lib/proxySubscription/selectorEndpoint";
@@ -182,6 +183,46 @@ async function fetchSubscriptionsResult(
   }
 }
 
+type SubscriptionFieldErrors = { name?: string; url?: string; ruleProviders?: string };
+
+/**
+ * Client-side form validation. Mirror of requireNameUrl (server): the feed URL
+ * may be empty only for a feedless (selector-only) subscription, which is
+ * accepted when a control URL is set. Pure.
+ */
+function validateSubscriptionForm(
+  form: FormState,
+  t: (key: string) => string
+): SubscriptionFieldErrors {
+  const errors: SubscriptionFieldErrors = {};
+  if (!form.name.trim()) errors.name = t("proxySubscription.nameRequired");
+  if (!form.url.trim() && !form.controlUrl.trim()) {
+    errors.url = t("proxySubscription.urlRequired");
+  }
+  if (form.mode === "rule" && form.ruleProviders.length === 0) {
+    errors.ruleProviders = t("proxySubscription.ruleModeProviderRequired");
+  }
+  return errors;
+}
+
+/** Subscription creation/update payload from the edited form. Pure. */
+function buildSubscriptionPayload(form: FormState): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    name: form.name.trim(),
+    url: form.url.trim(),
+    mode: form.mode,
+    ruleProviders: form.mode === "rule" ? form.ruleProviders : null,
+    localCoreEndpoint: form.localCoreEndpoint.trim() || null,
+    controlUrl: form.controlUrl.trim() || null,
+    coreConfigPath: form.coreConfigPath.trim() || null,
+    selectorMinGapSeconds: Number(form.selectorMinGapSeconds) || 60,
+    updateIntervalMinutes: Number(form.updateIntervalMinutes) || 60,
+    enabled: form.enabled,
+  };
+  if (form.controlSecret.length > 0) payload.controlSecret = form.controlSecret;
+  return payload;
+}
+
 type EarlyReasonLabelKey =
   | "proxySubscription.earlySkipsSinceRestart"
   | "proxySubscription.error.SELECTOR_EARLY_NO_CONTROL"
@@ -224,6 +265,7 @@ export default function SubscriptionTab() {
   const [error, setError] = useState<string | null>(null);
 
   const t = useTranslations("settings");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const localCoreId = useId();
 
   // Map a stored refusal kind to a generic display label. Unknown future
@@ -347,29 +389,12 @@ export default function SubscriptionTab() {
 
   const save = async () => {
     setFormError(null);
-    const nextFieldErrors: { name?: string; url?: string; ruleProviders?: string } = {};
-    if (!form.name.trim()) nextFieldErrors.name = t("proxySubscription.nameRequired");
-    if (!form.url.trim()) nextFieldErrors.url = t("proxySubscription.urlRequired");
-    if (form.mode === "rule" && form.ruleProviders.length === 0) {
-      nextFieldErrors.ruleProviders = t("proxySubscription.ruleModeProviderRequired");
-    }
+    const nextFieldErrors = validateSubscriptionForm(form, t);
     setFieldErrors(nextFieldErrors);
     if (Object.keys(nextFieldErrors).length > 0) return;
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = {
-        name: form.name.trim(),
-        url: form.url.trim(),
-        mode: form.mode,
-        ruleProviders: form.mode === "rule" ? form.ruleProviders : null,
-        localCoreEndpoint: form.localCoreEndpoint.trim() || null,
-        controlUrl: form.controlUrl.trim() || null,
-        coreConfigPath: form.coreConfigPath.trim() || null,
-        selectorMinGapSeconds: Number(form.selectorMinGapSeconds) || 60,
-        updateIntervalMinutes: Number(form.updateIntervalMinutes) || 60,
-        enabled: form.enabled,
-      };
-      if (form.controlSecret.length > 0) payload.controlSecret = form.controlSecret;
+      const payload = buildSubscriptionPayload(form);
       const res = editingId
         ? await fetch(`/api/v1/management/proxy-subscriptions/${editingId}`, {
             method: "PATCH",
@@ -427,7 +452,7 @@ export default function SubscriptionTab() {
   };
 
   const remove = async (sub: SubscriptionRecord) => {
-    if (!window.confirm(t("proxySubscription.confirmDelete", { name: sub.name }))) return;
+    if (!(await requestConfirm(t("proxySubscription.confirmDelete", { name: sub.name })))) return;
     setBusyId(sub.id);
     try {
       const res = await fetch(`/api/v1/management/proxy-subscriptions/${sub.id}`, {
@@ -529,6 +554,9 @@ export default function SubscriptionTab() {
                 placeholder={t("proxySubscription.urlPlaceholder")}
                 error={fieldErrors.url}
               />
+              <span className="text-xs text-text-muted">
+                {t("proxySubscription.urlFeedlessHint")}
+              </span>
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -811,6 +839,7 @@ export default function SubscriptionTab() {
           );
         })}
       </div>
+      {confirmDialog}
     </div>
   );
 }

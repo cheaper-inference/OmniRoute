@@ -14,6 +14,13 @@ const CONDITIONS = new Set([
   "code-or-i18n",
   "code-e2e",
   "pr",
+  // Full matrix (2026-10-27): the heavy lanes (E2E, Electron, package, integration,
+  // ecosystem, protocol clients, Bun) run on push / dispatch / merge_group and on the
+  // Mergify merge-queue candidate, not on every push to an ordinary PR. The org's Free
+  // plan caps hosted runners at 20 concurrent jobs and those lanes were ~18 of each
+  // PR's ~42 CI jobs. A manual pre-merge full run is `gh workflow run ci.yml --ref <branch>`.
+  "full-code",
+  "full-code-e2e",
 ]);
 const RESULTS = new Set(["success", "failure", "cancelled", "skipped"]);
 const FLAGS = ["code", "docs", "i18n", "workflow", "testsOnly"];
@@ -37,8 +44,13 @@ function isMergifyCandidate(context) {
   );
 }
 
-function applies(when, flags, event) {
+function applies(when, flags, event, context) {
+  const fullMatrix = event !== "pull_request" || isMergifyCandidate(context);
   switch (when) {
+    case "full-code":
+      return fullMatrix && flags.code;
+    case "full-code-e2e":
+      return fullMatrix && flags.code && !flags.testsOnly;
     case "always":
       return true;
     case "pr":
@@ -98,7 +110,7 @@ export function evaluateAdmission(policy, profileName, context, needs) {
         errors.push(`invalid job policy: ${id}`);
         continue;
       }
-      const applicable = applies(rule.when, flags, context.event);
+      const applicable = applies(rule.when, flags, context.event, context);
       const result = needs[id]?.result ?? "missing";
       jobs.push({
         id,

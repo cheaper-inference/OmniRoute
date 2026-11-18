@@ -482,21 +482,25 @@ export function normalizeStreamRecoverySettings(
 // provider's static default rather than disabling its budget outright (0 would
 // mean "no cap" for rpm, mirroring the resolveRpm/resolveMaxConcurrent convention
 // elsewhere in this file).
+function pickTruncated(value: unknown, accept: (n: number) => boolean): number | undefined {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) && accept(n) ? Math.trunc(n) : undefined;
+}
+
 function normalizeProviderQuotaOverrideEntry(raw: unknown): ProviderQuotaOverrideSettings | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const record = raw as Record<string, unknown>;
   const out: ProviderQuotaOverrideSettings = {};
-  const rpm = typeof record.rpm === "number" ? record.rpm : Number(record.rpm);
-  if (Number.isFinite(rpm) && rpm > 0) out.rpm = Math.trunc(rpm);
-  const concurrency =
-    typeof record.concurrency === "number" ? record.concurrency : Number(record.concurrency);
-  if (Number.isFinite(concurrency) && concurrency > 0) out.concurrency = Math.trunc(concurrency);
-  const providerConcurrency =
-    typeof record.providerConcurrency === "number"
-      ? record.providerConcurrency
-      : Number(record.providerConcurrency);
-  if (Number.isFinite(providerConcurrency) && providerConcurrency >= 0) {
-    out.providerConcurrency = Math.trunc(providerConcurrency);
+  const rpm = pickTruncated(record.rpm, (n) => n > 0);
+  if (rpm !== undefined) out.rpm = rpm;
+  const concurrency = pickTruncated(record.concurrency, (n) => n > 0);
+  if (concurrency !== undefined) out.concurrency = concurrency;
+  const providerConcurrency = pickTruncated(record.providerConcurrency, (n) => n >= 0);
+  if (providerConcurrency !== undefined) out.providerConcurrency = providerConcurrency;
+  // Per-provider rate-limit retry delay: <=0/non-finite means "Auto" (dropped); capped at 6h.
+  const cooldownSeconds = pickTruncated(record.rateLimitCooldownSeconds, (n) => n >= 1);
+  if (cooldownSeconds !== undefined) {
+    out.rateLimitCooldownSeconds = Math.min(cooldownSeconds, 21_600);
   }
   return Object.keys(out).length > 0 ? out : null;
 }

@@ -58,7 +58,7 @@ test("prompt-only scope: reactive compaction still bypasses native passthrough",
   );
   assert.match(
     chatCoreSource,
-    /reactiveContextCompactionEnabled\s*&&\s*!skipNativeCodexReactiveCompaction\s*&&\s*estimatedTokens\s*>\s*threshold/
+    /reactiveContextCompactionEnabled\s*&&\s*!skipNativeCodexReactiveCompaction\s*&&\s*!protectOpenCodePrefix\s*&&\s*estimatedTokens\s*>\s*threshold/
   );
   assert.match(
     chatCoreSource,

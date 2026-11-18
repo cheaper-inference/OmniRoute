@@ -20,14 +20,16 @@
 
 ## インストール方法
 
-### npm（推奨）
+### npm (推奨)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-ダッシュボードは `http://localhost:20128` で開き、API のベース URL は `http://localhost:20128/v1` です。
+ダッシュボードは`http://localhost:20128`およびAPIで開きます。ベースURLは`http://localhost:20128/v1`です。
+
+> **npm ユーザー:** npm がインストール スクリプト ( `omniroute`、 `better-sqlite3`など) がブロックされたことを警告する場合は、 [— npm install-scriptsブロックされたトラブルシューティング」](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)を参照してください。
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm ユーザー向け:** `better-sqlite3` と `@swc/core` のネイティブビルドスクリプトを有効にするには、`--allow-build` フラグが必要です。pnpm v11 では、グローバルインストールに対して `pnpm approve-builds -g` コマンドはサポートされていません。
+> **pnpm ユーザー:** `--allow-build`フラグは、 `better-sqlite3`および`@swc/core`のネイティブ ビルド スクリプトを有効にするために必要です。 `pnpm approve-builds -g`コマンドは、pnpm v11 でのグローバル インストールではサポートされていません。
 
-### Arch Linux（AUR）
+### アーチLinux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR パッケージ](https://aur.archlinux.org/packages/omniroute-bin)は OmniRoute をインストールし、systemd ユーザーサービスを提供します。
+[AURパッケージは](https://aur.archlinux.org/packages/omniroute-bin)OmniRouteをインストールし、systemd ユーザー サービスを提供します。
 
-### ソースからのインストール
+### ソースから
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows に関する注意:** デフォルトでは、従来の `%USERPROFILE%\.omniroute` ディレクトリが存在しない場合、OmniRoute は `%APPDATA%\omniroute` を使用します。別のデータディレクトリの場所を選択するには、`DATA_DIR` を設定してください。
+> **Windowsメモ:**デフォルトでは、レガシー`%USERPROFILE%\.omniroute`ディレクトリが存在しない場合、 OmniRoute `%APPDATA%\omniroute`を使用します。別のデータ ディレクトリの場所を選択するように`DATA_DIR`を設定します。
 
-> **注意:** `npm install` は初回実行時に `.env.example` から `.env` を自動生成します。それ以降のインストールでは既存の `.env` は上書きされないため、カスタマイズ内容は保持されます。再生成するには、再実行する前に `.env` を削除してください。
+> **注記：** `npm install` 、最初の実行時に`.env.example`から`.env`自動生成します。後続のインストールでは既存の`.env`が上書きされないため、カスタマイズは保持されます。再シードするには、再実行する前に`.env`を削除します。
 
 ### Docker
 
-Compose プロファイルや Caddy HTTPS を含む Docker の完全なセットアップについては、[Docker ガイド](./DOCKER_GUIDE.md)を参照してください。
+Compose プロファイルと Caddy HTTPSを含む完全なDockerセットアップについては、 [Dockerガイド](./DOCKER_GUIDE.md)を参照してください。
 
-### デスクトップアプリ（Electron）
+### デスクトップ アプリ (Electron)
 
-OmniRoute には、Electron 41 + electron-builder 26.10 で構築されたデスクトップラッパーが付属しています。利用可能なスクリプト（ワークスペースルート）は次のとおりです。
+OmniRoute Electron 41 + electric-builder 26.10 に基づいて構築されたデスクトップ ラッパーを出荷します。利用可能なスクリプト (ワークスペース ルート):
 
 ```bash
-npm run electron:dev          # ホットリロードを使用してデスクトップ版を実行
-npm run electron:build        # 現在の OS 向けにビルド（自動検出）
-npm run electron:build:win    # Windows インストーラー（NSIS + ポータブル）
-npm run electron:build:mac    # macOS（dmg + zip、arm64+x64）
-npm run electron:build:linux  # Linux（AppImage + deb + rpm）
-npm run electron:smoke:packaged  # パッケージ化されたビルドのスモークテスト
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
+npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
+npm run electron:build:linux  # Linux (AppImage + deb + rpm)
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-デスクトップインストーラーのリリースは GitHub Releases に添付されています。Electron の詳細（署名、IPC ブリッジ、ディストリビューション）については、[`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md)を参照してください _（後のフェーズで作成）_。
+デスクトップ インストーラーのリリースは、 GitHubリリースに添付されています。 Electron完全な詳細 (署名、 IPCブリッジ、ディストリビューション) については、 [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_」を参照してください。
 
-### ヘッドレスサーバー（CI/自動化）
+### ヘッドレスサーバー (CI/automation)
 
-無人セットアップ（Docker、Kubernetes、CI）には、次を使用します。
+無人セットアップ (Docker、 Kubernetes、 CI) の場合は、次を使用します。
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-環境変数（`INITIAL_PASSWORD`、`OMNIROUTE_WS_BRIDGE_SECRET` など）と組み合わせることで、完全にスクリプト化可能な OmniRoute インスタンスを起動できます。
+環境変数 (`INITIAL_PASSWORD`、 `OMNIROUTE_WS_BRIDGE_SECRET`など) と組み合わせると、完全にスクリプト可能なOmniRouteインスタンスを起動できます。
 
-### CLI オプション
+### CLIオプション
 
-| コマンド                | 説明                                                                    |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `omniroute`             | サーバーを起動（`PORT=20128`、API とダッシュボードは同じポート）        |
-| `omniroute setup`       | パスワードと最初のプロバイダーを設定する対話形式の CLI オンボーディング |
-| `omniroute doctor`      | サーバーを起動せずにローカルの健全性チェックを実行                      |
-| `omniroute providers`   | CLI からプロバイダーを検出、一覧表示、検証、テスト                      |
-| `omniroute config`      | CLI ツールの設定 — 設定の一覧表示、取得、設定、検証                     |
-| `omniroute status`      | オフラインステータスダッシュボード — バージョン、DB、ツール、設定       |
-| `omniroute logs`        | API から使用状況ログをストリーミング（`--follow` をサポート）           |
-| `omniroute update`      | OmniRoute の更新を確認または適用                                        |
-| `omniroute provider`    | プロバイダー接続を管理 — 追加、一覧表示、削除、テスト、デフォルト設定   |
-| `omniroute --port 3000` | 正規/API ポートを 3000 に設定                                           |
-| `omniroute --mcp`       | MCP サーバーを起動（stdio トランスポート）                              |
-| `omniroute --no-open`   | ブラウザーを自動的に開かない                                            |
-| `omniroute --help`      | ヘルプを表示                                                            |
+| 指示                    | 説明                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `omniroute`             | サーバーを起動します (同じポート上の`PORT=20128`、 API 、およびダッシュボード) |
+| `omniroute setup`       | パスワードと最初のプロバイダーに関するガイド付きCLIオンボーディング            |
+| `omniroute doctor`      | サーバーを起動せずにローカルヘルスチェックを実行する                           |
+| `omniroute providers`   | CLIからプロバイダーを検出、リスト、検証、テストします                          |
+| `omniroute config`      | CLIツール構成—リスト、構成の取得、設定、検証                                   |
+| `omniroute status`      | オフライン ステータス ダッシュボード—バージョン、 DB、ツール、構成             |
+| `omniroute logs`        | APIから使用状況ログをストリーミングします ( `--follow`をサポート)              |
+| `omniroute update`      | OmniRouteアップデートを確認または適用する                                      |
+| `omniroute provider`    | プロバイダー接続の管理—追加、リスト、削除、テスト、デフォルト                  |
+| `omniroute --port 3000` | canonical/APIポートを 3000 に設定します                                        |
+| `omniroute --mcp`       | MCPサーバー (stdio トランスポート) を開始します。                              |
+| `omniroute --no-open`   | ブラウザを自動的に開かない                                                     |
+| `omniroute --help`      | ヘルプを表示する                                                               |
 
-ヘッドレスセットアップは、フラグまたは環境変数を使用してスクリプト化できます。
+ヘッドレス セットアップは、フラグまたは環境変数を使用してスクリプト化できます。
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-ダッシュボードを開かずに、SSH またはスクリプトからプロバイダーを管理します。
+ダッシュボードを開かずに、 SSHまたはスクリプトからプロバイダーを管理します。
 
 ```bash
 omniroute providers available
@@ -191,41 +193,45 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## プロトコルのセットアップ（MCP + A2A）
+## プロトコルのセットアップ (MCP + A2A)
 
-### MCP のセットアップ（Model Context Protocol）
+### MCPセットアップ (モデル コンテキスト プロトコル)
 
-stdio モードで MCP トランスポートを起動します。
+stdio モードでMCPトランスポートを開始します。
 
 ```bash
 omniroute --mcp
 ```
 
-推奨される検証フロー：
+推奨される検証フロー:
 
 ```bash
-# 1. MCP サーバーを起動
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP クライアントから以下を呼び出す：
-omniroute_get_health        # システムの正常性が返されること
-omniroute_list_combos       # アクティブなコンボが返されること
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. または、完全な E2E スイートを実行：
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP クライアントの設定
+#### MCPクライアント構成
 
-**Claude Code：**
+**Claudeコード:**
+
+ClaudeコードはHTTP経由で接続しますが、 `omniroute --mcp` (stdio) は起動しません。 HTTPトランスポートはデフォルトではオフになっています。最初に実行中のサーバーで有効にしてください。ダッシュボード ログインが有効な場合、資格情報のないリクエストは`401`を取得するため、 `mcp:connect` (または`manage`) を保持するAPIキーを渡します。 `manage`/`admin`のないキーには、各ツールのスコープも必要です ( [MCPサーバー→ MCPツール スコープ](../frameworks/MCP-SERVER.md#mcp-tool-scopes)」を参照)。
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
-**Cursor / Cline：**
+**Cursor / Cline:**
 
-MCP 設定に以下を追加します。
+MCP設定に追加します (stdio、呼び出し元がプリンシパルを持つようにキーを使用):
 
 ```json
 {
@@ -233,17 +239,24 @@ MCP 設定に以下を追加します。
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP の完全なドキュメント：** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 個のツール、IDE 設定、Python/TS/Go クライアント。
+または、 `mcpTransport`が`streamable-http`の場合 ( `/dashboard/mcp`または`omniroute mcp enable --transport streamable-http`で設定)、クライアントのリモートMCPサーバー エントリを`http://localhost:20128/api/mcp/stream`に指定します。
 
-### A2A のセットアップ（Agent-to-Agent Protocol）
+キーは`Authorization: Bearer <api-key>`として送信されます ( [MCPサーバー→リモート ホストのリモート アクセス」](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass)を参照。リモート キーには`mcp:connect`とそのread/writeスコープが必要です)。
 
-Agent Card を確認します。
+**完全なMCPドキュメント:** [MCPサーバーREADME](../../open-sse/mcp-server/README.md) — 110 ツール、 IDE config、 Python/TS/Goクライアント。圧縮CCR/dedupツールのオペレーター リファレンス (マーカー、前提条件、ツールごとのスコープ、検索ページネーション、診断):[圧縮エンジン→前提条件 / オペレーター ガイド](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+### A2Aセットアップ (エージェント間プロトコル)
+
+エージェント カードを確認します。
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -257,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A の完全なドキュメント：** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0、スキル、ストリーミング、タスクのライフサイクル。
+**完全なA2Aドキュメント:** [A2AサーバーREADME](../../src/lib/a2a/README.md) — JSON-RPC 2.0、スキル、ストリーミング、タスクのライフサイクル。
 
 ---
 
@@ -318,21 +331,21 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) テンプレート
 
-Void Linux ユーザーは、`xbps-src` を使用してネイティブパッケージをビルドできます。次のブロックを `srcpkgs/omniroute/template` として保存してください：
+Void Linuxユーザーの場合は、 `xbps-src`を使用してネイティブ パッケージを構築できます。このブロックを`srcpkgs/omniroute/template`として保存します。
 
 ```bash
-# 'omniroute' 用テンプレートファイル
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="複数の LLM プロバイダーに対応したスマートルーティング機能付きユニバーサル AI ゲートウェイ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 各リリースで次のコマンドを使用してチェックサムを再生成してください：
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

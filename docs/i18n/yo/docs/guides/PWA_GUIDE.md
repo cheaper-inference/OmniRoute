@@ -51,13 +51,13 @@ A ti ṣètò manifest náà pẹ̀lú `display: "fullscreen"`, èyí túmọ̀ 
 
 OmniRoute ní service worker (`sw.js`) tí ó ń pèsè ìfipamọ́ cache ọlọ́gbọ́n:
 
-| Irú Ohun Èlò                                                   | Ìlànà                             | Ìhùwàsí                                                                                             |
-| -------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **App Shell**                                                  | Cache-first                       | `/`, `/offline`, manifest, àti àwọn àmì ni a ti fi sínú cache ṣáájú nígbà fífi sori ẹrọ             |
-| **Àwọn ohun èlò static** (CSS, JS, àwòrán, font)               | Network-first with cache fallback | Ó máa ń gba èyí tuntun láti network; ó máa ń padà sí cache bí kò bá sí ìsopọ̀                        |
-| **Àwọn bundle Next.js** (`/_next/`)                            | Network-first with cache update   | Ó máa ń gba láti network, ó sì máa ń ṣe àfikún sí cache; ó máa ń lo ẹ̀dà inú cache bí kò bá sí ìsopọ̀ |
-| **Àwọn ìbéèrè ìlọ kiri**                                       | Kọjá rẹ̀ (a kì í dá sí i láé)      | Browser ló ń ṣàkóso ìpadàsẹ́yìn HTTP/3→HTTP/2; socket QUIC tí kò ṣiṣẹ́ kò gbọdọ̀ di `Response.error()` |
-| **Àwọn route API / dashboard** (`/api/`, `/a2a`, `/dashboard`) | Kọjá rẹ̀ (a kì í fi sínú cache)    | Ó máa ń lọ tààrà sí server ní gbogbo ìgbà — service worker kì í dá sí i láé                         |
+| Irú Ohun Èlò                                                                                                                                                                                                                | Ìlànà                             | Ìhùwàsí                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **App Shell**                                                                                                                                                                                                               | Cache-first                       | `/`, `/offline`, manifest, àti àwọn àmì ni a ti fi sínú cache ṣáájú nígbà fífi sori ẹrọ             |
+| **Àwọn ohun èlò static** (CSS, JS, àwòrán, font)                                                                                                                                                                            | Network-first with cache fallback | Ó máa ń gba èyí tuntun láti network; ó máa ń padà sí cache bí kò bá sí ìsopọ̀                        |
+| **Àwọn bundle Next.js** (`/_next/`)                                                                                                                                                                                         | Network-first with cache update   | Ó máa ń gba láti network, ó sì máa ń ṣe àfikún sí cache; ó máa ń lo ẹ̀dà inú cache bí kò bá sí ìsopọ̀ |
+| **Àwọn ìbéèrè ìlọ kiri**                                                                                                                                                                                                    | Kọjá rẹ̀ (a kì í dá sí i láé)      | Browser ló ń ṣàkóso ìpadàsẹ́yìn HTTP/3→HTTP/2; socket QUIC tí kò ṣiṣẹ́ kò gbọdọ̀ di `Response.error()` |
+| **Àwọn route API / dashboard** (`/api/`, `/a2a`, `/dashboard`, àwọn alias client-API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, pẹ̀lú `/callback`, `/login`; a ń bá wọn mu láìka ńlá tàbí kékeré lẹ́tà sí) | Kọjá rẹ̀ (a kì í fi sínú cache)    | Ó máa ń lọ tààrà sí server ní gbogbo ìgbà — service worker kì í dá sí i láé                         |
 
 ### Ojú-ìwé Láìsí Ìsopọ̀
 

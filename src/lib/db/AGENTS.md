@@ -2,15 +2,15 @@
 
 **Purpose**: Domain-driven SQLite persistence. Each module owns a specific table set. Schema migrations are versioned and idempotent. No raw SQL in routes — all ops go through `src/lib/db/` modules.
 
-Live count: `ls src/lib/db/*.ts | wc -l` (currently 131). Migrations: `ls src/lib/db/migrations/*.sql | wc -l` (currently 148).
+Live count: `ls src/lib/db/*.ts | wc -l` (currently 158). Migrations: `ls src/lib/db/migrations/*.sql | wc -l` (currently 220).
 
 ---
 
 ## Core Infrastructure
 
-- **`core.ts`** — `getDbInstance()` returns singleton `better-sqlite3` with WAL journaling. Exports `rowToCamel()` (snake_case → camelCase), `encryptConnectionFields()` for provider credentials at rest. `SCHEMA_SQL` defines **17 base tables** (verify: `grep -c "CREATE TABLE" src/lib/db/core.ts` minus 1 for `_omniroute_migrations`). Native-load / missing-driver classification lives in `sqliteLoadError.ts` and is re-exported from here.
+- **`core.ts`** — `getDbInstance()` returns singleton `better-sqlite3` with WAL journaling. Exports `rowToCamel()` (snake_case → camelCase), `encryptConnectionFields()` for provider credentials at rest. `SCHEMA_SQL` defines **19 base tables** (verify: `grep -c "CREATE TABLE" src/lib/db/core.ts` minus 1 for `_omniroute_migrations`). Native-load / missing-driver classification lives in `sqliteLoadError.ts` and is re-exported from here.
 - **`migrationRunner.ts`** — Applies versioned SQL files from `db/migrations/` inside transactions. Tracks applied migrations in `_omniroute_migrations`. Each migration is idempotent.
-- **`db/migrations/`** — 148 SQL files (`001_initial_schema.sql` → `153_radar_local_model_state.sql`; numbering has intentional gaps). Each runs in a transaction, never fails partially.
+- **`db/migrations/`** — 220 SQL files (`001_initial_schema.sql` → `223_call_logs_queue_wait_ms.sql`; numbering has intentional gaps). Each runs in a transaction, never fails partially.
 - The old `localDb.ts` barrel has been removed — consumers must import from the owning named module below.
 
 ## Key Domain Modules
@@ -44,7 +44,7 @@ Live count: `ls src/lib/db/*.ts | wc -l` (currently 131). Migrations: `ls src/li
 | `healthCheck.ts`       | health ops                | DB health monitoring                                |
 | `databaseSettings.ts`  | database settings         | DB-level configuration                              |
 
-Full list: `ls src/lib/db/*.ts | wc -l` (131 files). Drift detection: `npm run check:docs-counts`.
+Full list: `ls src/lib/db/*.ts | wc -l` (158 files). Drift detection: `npm run check:docs-counts`.
 
 ## Encryption & Security
 
@@ -56,7 +56,7 @@ Full list: `ls src/lib/db/*.ts | wc -l` (131 files). Drift detection: `npm run c
 ## Adding a New Domain Module
 
 1. Create `src/lib/db/[module].ts` with CRUD functions
-2. If new tables: create migration in `db/migrations/NNN_[description].sql`
+2. If new tables: create migration with `npm run db:new-migration -- <description>` (writes `db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; see `docs/ops/DATABASE_GUIDE.md`)
 3. Migration runs automatically at startup via `migrationRunner.ts`
 4. Add unit tests in `tests/unit/db/`
 

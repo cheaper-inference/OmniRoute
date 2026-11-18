@@ -44,7 +44,7 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## With Environment File
@@ -60,7 +60,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -342,7 +342,7 @@ Size **cgroup `--memory` above the heap** — native buffers, SQLite, and compre
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Critical Environment Variables
@@ -398,14 +398,14 @@ runtime environment variable.
 
 ### Pre-built root image + runtime subpath
 
-Published `diegosouzapw/omniroute:*` images are built for the domain root. You can still
+Published `cheaperinference/omniroute:*` images are built for the domain root. You can still
 set `OMNIROUTE_BASE_PATH` at runtime; the container patches the bundle once on startup.
 Pair it with the matching public origin:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
@@ -446,7 +446,7 @@ OmniRoute can be securely exposed using Caddy's automatic SSL provisioning. Ensu
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
@@ -496,10 +496,17 @@ Endpoint tunnel panels (Cloudflare, Tailscale, ngrok) can be shown or hidden fro
 
 ## Image Tags
 
-| Image                    | Tag      | Size   | Description                                          |
-| ------------------------ | -------- | ------ | ---------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Highest **published** stable SemVer (not git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Pin this class of tag for GitOps                     |
+| Image                        | Tag      | Size   | Description                                          |
+| ---------------------------- | -------- | ------ | ---------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~250MB | Highest **published** stable SemVer (not git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~250MB | Pin this class of tag for GitOps                     |
+
+The same images are published to three repositories, with the same per-architecture digests:
+`cheaperinference/omniroute` (Docker Hub, the Cheaper Inference organization, from 3.8.53 on),
+`ghcr.io/cheaper-inference/omniroute` and the legacy `diegosouzapw/omniroute`, which keeps its
+pull history and still receives every release. Existing `diegosouzapw/omniroute` deployments
+keep updating; switching the image name is optional. The `:next` / `:next-web` pre-release
+channel below is published to `diegosouzapw/omniroute` and GHCR only.
 
 Multi-platform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selects the matching architecture automatically; pass `--platform linux/amd64` if you need to force AMD64 emulation on ARM hosts.
 
@@ -561,7 +568,7 @@ docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 
 Before testing, back up the OmniRoute data volume or bind-mounted data directory. To roll back, restore the previously used stable version or digest and recreate the container:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
@@ -667,6 +674,10 @@ Stock Docker / Kubernetes OmniRoute is **one Node process + one SQLite writer**.
 
 **Upgrades:** expect every session to drop. Drain clients if you can; there is no rolling update on default SQLite. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` will also replace the only process when the container is Unhealthy — same blast radius.
 
+Ready-made manifests and a Helm chart live in `deploy/kubernetes/` and
+`deploy/helm/omniroute/` — see the
+[Kubernetes deployment guide](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
 Kubernetes snippet for a **single replica** (Recreate is required; do not raise `replicas` against one SQLite file):
 
 ```yaml
@@ -700,6 +711,25 @@ External Postgres / multi-writer HA is **not** a documented stock path. If you n
 
 ## Scale-out: N independent processes
 
+### Codex token rotation ownership
+
+Copies of one Codex account must not independently consume its single-use refresh
+token. On instances that only consume synchronized credentials, set
+`OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`). Leave it unset on the
+single rotation owner. Each process still needs its own `DATA_DIR`; this option
+neither shares SQLite nor supplies token synchronization or a distributed lock.
+
+The passive instance rereads the connection when a refresh is needed and adopts
+only a different, unexpired access token. Otherwise refresh is disabled without
+expiring or deactivating the connection or counting a refresh-breaker failure.
+Real upstream authentication failures still use normal failure accounting,
+exponential cooldown and the normal client error; account deactivation remains
+permanent. Synchronize the owner's rotated tokens before access tokens expire
+(the default proactive refresh lead is five minutes), or re-import the Codex auth
+file. Passive imports store the supplied tokens without validating them at the
+token endpoint. Manual dashboard/API refresh returns `409 refresh_disabled`;
+new OAuth logins are unchanged. See [environment reference](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+
 One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
 ### One-process: more than two long `/v1/responses`
@@ -715,6 +745,64 @@ To **multiply heaps** (independent V8 old-spaces) **today**:
 | Optional: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for **shared quota counters**                                            | Treat Redis as shared SQLite — it is not             |
 | Duplicate provider secrets into each instance (or accept partitioned dashboards)                                                        | Expect one dashboard / one call-log across instances |
 | Front with any load balancer; sticky by API key or session is enough                                                                    | Require a vendor-specific size-aware middleware      |
+
+Session-to-account affinity can also be shared through Redis: set
+`OMNIROUTE_SESSION_AFFINITY_STORE=redis` and `REDIS_URL` on each process, with the
+same `REDIS_KEY_PREFIX` and a positive `sessionAffinityTtlMs` setting. Pins resolve
+hashed usage-account identities to each process's eligible local connection, so
+OAuth accounts with matching identity metadata need not have matching connection
+IDs. Known account identities take precedence over contradictory local IDs in
+pin resolution and guarded eviction; records without identity (or eviction callers
+without identity) retain the legacy ID guard. Accounts without a stable usage
+identity still require matching IDs. Redis
+errors or calls exceeding 100 ms fall back to local SQLite. Each Redis affinity
+store caps outstanding operations at 8, bypasses Redis immediately when full, and
+releases slots only when the underlying work settles, not at the caller deadline.
+During a Redis outage
+there is no shared truth: each instance falls back to its own local affinity,
+sessions may re-pin once per instance, and instances may diverge. Stickiness
+re-converges through Redis when it recovers. The timeout bounds waiting, not a sent
+EVAL, which may land after fallback. Routing writes compare the exact value
+observed by the routing decision, not a fresh mutation-time read; an observed miss
+or a SQLite fallback observation compares as an absent Redis key. Obsolete pins
+are replaced in one CAS, so a late command cannot replace or delete a newer,
+different pin. Redis reads atomically return the value and remaining server TTL;
+positive PTTL (or no expiry) determines liveness, not the writer's JSON timestamp
+or the reader's clock. Local snapshots map that remaining TTL to a local deadline;
+existing JSON keys remain readable and their raw bytes are retained for CAS.
+Redis is the only source of truth while it answers. Confirmed shared upserts,
+touches and deletes remove the local entry, never install or refresh it. SQLite
+on the Redis path holds only this instance's own fallback decisions from Redis
+errors, timeouts or admission saturation,
+TTL-bounded as before. A missing local pin on a later outage costs one fresh pick
+(one prompt-cache miss), not a wrong or evicted account. Rejected upserts return
+the shared winner and its remaining TTL atomically: ordinary selection rechecks
+the mapped local deadline
+and uses a still-live eligible winner, touching usage and logging for that account
+without another shared write.
+If it is unavailable, selection keeps the local candidate, leaves the
+shared pin unchanged and emits one debug message. Rejected CAS does not write
+SQLite; Redis errors, timeouts or admission saturation apply the existing local
+operation instead. If a
+sent mutation's reply arrives after timeout (accepted, rejected or error), a
+synchronous exact serialized-value compare-and-delete removes only the
+byte-identical timeout fallback row. There is no await between that comparison
+and deletion; a newer outage write is preserved. Guarded eviction removes the
+failed account's own local pin even with Redis down, and cleans it again after
+confirmed shared eviction. Pending earlier shared replies cannot restore an
+evicted local pin because shared successes never write SQLite. A later outage
+fallback can repin an account; a later accepted shared write exists only in Redis.
+Redis misses do not consult local fallback state. With the driver off, newly selected pins
+retain the legacy four-field SQLite JSON shape; only Redis routing adds the hashed
+account identity. Prefetched pins are rechecked at their expiry boundary. Redis
+non-lease selection re-reads the store, but synchronous lease planning can still
+use a pin evicted between prefetch and planning (an accepted best-effort window).
+A lease commit cannot switch accounts after a durable claim: on rejected upsert it
+keeps the claimed candidate for that request only and leaves the shared winner
+untouched, so agreement across instances is bounded on that path.
+The rest of the table still applies:
+this does not share combo session stickiness, native Codex turn pins, account
+semaphores, lockouts, spend limits, configuration or call logs.
 
 Hardware: per-instance concurrent long `/v1/responses` is a **memory-budget** question (heap + inflight-byte / #10110). `N` independent `DATA_DIR`s still multiply heaps: host RAM must cover `N × cgroup`, not “one 16 Gi pod with N=8.” Never `replicas > 1` on one SQLite file.
 

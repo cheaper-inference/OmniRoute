@@ -53,6 +53,9 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   // enveloped (see mapProviderSpecificDataSecrets); the dashboard shows and
   // edits the list, so the API returns it masked exactly like `apiKey`.
   "extraApiKeys",
+  // The Zed Hosted billing portal link embeds its Orb portal token, so the whole
+  // value is a credential even though it looks like a URL.
+  "billingPortalUrl",
   // Short-lived provider sub-tokens that refresh / mint flows write back into
   // the metadata object (open-sse/executors/ghe-copilot.ts,
   // open-sse/services/tokenRefresh/providers/museCode.ts + kiro.ts,
@@ -132,19 +135,6 @@ export const PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS = [
 ] as const;
 
 export type ProviderSpecificSecretField = (typeof PROVIDER_SPECIFIC_SECRET_FIELDS)[number];
-
-/**
- * True for a key that holds a credential even though it is not a fixed name in
- * PROVIDER_SPECIFIC_SECRET_FIELDS: WordPress names its session cookie
- * `wordpress_logged_in_<siteHash>`, so veoaifree-web rows may store any suffixed variant
- * (open-sse/utils/wordpressSessionKey.ts, #17041).
- */
-export function isProviderSpecificSecretKey(key: string): boolean {
-  return (
-    (PROVIDER_SPECIFIC_SECRET_FIELDS as readonly string[]).includes(key) ||
-    isWordPressLoggedInKey(key)
-  );
-}
 
 /** Declared secret fields plus any dynamically-named secret key present in `data`. */
 export function providerSpecificSecretKeysIn(data: Record<string, unknown>): string[] {

@@ -18,7 +18,7 @@
 
 ---
 
-## ထည့်သွင်းနည်းများ
+## နည်းလမ်းများ ထည့်သွင်းပါ။
 
 ### npm (အကြံပြုထားသည်)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard ကို `http://localhost:20128` တွင် ဖွင့်မည်ဖြစ်ပြီး API အခြေခံ URL မှာ `http://localhost:20128/v1` ဖြစ်သည်။
+ဒက်ရှ်ဘုတ်သည် `http://localhost:20128` တွင်ဖွင့်ပြီး API အခြေခံ URL သည် `http://localhost:20128/v1` ဖြစ်သည်။
+
+> **npm အသုံးပြုသူများ** ထည့်သွင်းစခရစ်များကို ပိတ်ဆို့ထားကြောင်း npm က သတိပေးပါက (ဥပမာ `omniroute`၊ `better-sqlite3`) ၊ [ပြဿနာဖြေရှင်းခြင်း — npm install-scripts ပိတ်ဆို့ခြင်းကို](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ကြည့်ပါ။
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm အသုံးပြုသူများ:** `better-sqlite3` နှင့် `@swc/core` အတွက် native build script များကို ဖွင့်ရန် `--allow-build` flag လိုအပ်သည်။ pnpm v11 တွင် global install များအတွက် `pnpm approve-builds -g` command ကို မပံ့ပိုးပါ။
+> **pnpm အသုံးပြုသူများ** `better-sqlite3` နှင့် `@swc/core` အတွက် native build scripts များကို ဖွင့်ရန် `--allow-build` အလံ လိုအပ်သည်။ pnpm v11 တွင် ကမ္ဘာလုံးဆိုင်ရာ ထည့်သွင်းမှုများအတွက် `pnpm approve-builds -g` အမိန့်ကို ပံ့ပိုးမထားပါ။
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR package](https://aur.archlinux.org/packages/omniroute-bin) သည် OmniRoute ကို ထည့်သွင်းပေးပြီး systemd user service တစ်ခုကို ပံ့ပိုးပေးသည်။
+[AUR ပက်ကေ့ဂျ်သည်](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ထည့်သွင်းပြီး စနစ်ကျသော သုံးစွဲသူဝန်ဆောင်မှုကို ပေးသည်။
 
-### Source မှ
+### အရင်းအမြစ်မှ
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows မှတ်ချက်:** ပုံမှန်အားဖြင့် legacy `%USERPROFILE%\.omniroute` directory မရှိပါက OmniRoute သည် `%APPDATA%\omniroute` ကို အသုံးပြုသည်။ အခြား data-directory တည်နေရာကို ရွေးချယ်ရန် `DATA_DIR` ကို သတ်မှတ်ပါ။
+> **Windows မှတ်စု-** မူရင်းအားဖြင့် OmniRoute အမွေအနှစ် `%USERPROFILE%\.omniroute` လမ်းညွှန်တွင် မရှိသည့်အခါ `%APPDATA%\omniroute` အသုံးပြုသည်။ မတူညီသောဒေတာလမ်းညွှန်တည်နေရာကို ရွေးချယ်ရန် `DATA_DIR` သတ်မှတ်ပါ။
 
-> **မှတ်ချက်:** ပထမဆုံး run လုပ်ချိန်တွင် `npm install` သည် `.env.example` မှ `.env` ကို အလိုအလျောက် ထုတ်ပေးသည်။ နောက်ပိုင်း install များသည် ရှိပြီးသား `.env` ကို ထပ်ရေးမည်မဟုတ်သောကြောင့် စိတ်ကြိုက်ပြင်ဆင်မှုများကို ထိန်းသိမ်းထားမည်ဖြစ်သည်။ ပြန်လည်အစပြုရန် ထပ်မံ run မလုပ်မီ `.env` ကို ဖျက်ပါ။
+> **မှတ်ချက် -** `npm install` ပထမအပြေးတွင် `.env.example` မှ `.env` အလိုအလျောက်ထုတ်ပေးသည်။ နောက်ဆက်တွဲ ထည့်သွင်းမှုများသည် ရှိပြီးသား `.env` ကို ထပ်ရေးမည်မဟုတ်ပါ၊ ထို့ကြောင့် စိတ်ကြိုက်ပြင်ဆင်မှုများကို ထိန်းသိမ်းထားသည်။ ပြန်လည်မျိုးစေ့ချရန်၊ ပြန်မလည်ပတ်မီ `.env` ဖျက်ပါ။
 
 ### Docker
 
-Compose profile များနှင့် Caddy HTTPS အပါအဝင် Docker စနစ်ထည့်သွင်းမှု အပြည့်အစုံအတွက် [Docker လမ်းညွှန်](./DOCKER_GUIDE.md) ကို ကြည့်ပါ။
+စာစီခြင်းပရိုဖိုင်များနှင့် Caddy HTTPS အပါအဝင် Docker စနစ်ထည့်သွင်းမှုအတွက် [Docker လမ်းညွှန်ကို](./DOCKER_GUIDE.md) ကြည့်ပါ။
 
-### Desktop App (Electron)
+### ဒက်စ်တော့အက်ပ် (Electron)
 
-OmniRoute တွင် Electron 41 + electron-builder 26.10 ကို အခြေခံတည်ဆောက်ထားသည့် desktop wrapper ပါဝင်သည်။ ရရှိနိုင်သော script များ (workspace root) မှာ-
+OmniRoute Electron 41 + အီလက်ထရွန်တည်ဆောက်သူ 26.10 ပေါ်တွင်တည်ဆောက်ထားသော desktop wrapper ကိုပေးပို့သည်။ ရနိုင်သော scripts (workspace root):
 
 ```bash
-npm run electron:dev          # hot-reload ဖြင့် desktop ကို run ပါ
-npm run electron:build        # လက်ရှိ OS အတွက် build လုပ်ပါ (အလိုအလျောက် သိရှိသည်)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
 npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # package လုပ်ထားသည့် build ကို smoke-test လုပ်ပါ
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Desktop installer release များကို GitHub Releases တွင် ပူးတွဲတင်ထားသည်။ Electron အကြောင်း အပြည့်အစုံ အသေးစိတ်လေ့လာရန် (signing၊ IPC bridge၊ distro များ) [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) ကို ကြည့်ပါ _(နောက်ပိုင်းအဆင့်တွင် ဖန်တီးထားသည်)_။
+ဒက်စ်တော့ တပ်ဆင်သူများ၏ ထုတ်ဝေမှုများကို GitHub ဖြန့်ချိမှုများနှင့် တွဲထားသည်။ Electron နက်ရှိုင်းသောငုပ်လျှိုးမှု အပြည့်အစုံ (လက်မှတ်ထိုးခြင်း၊ IPC တံတား၊ distros) အတွက် [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ ကိုကြည့်ပါ။
 
-### Headless server (CI/automation)
+### ဦးခေါင်းမဲ့ဆာဗာ (CI/automation)
 
-လူကိုယ်တိုင် ကြီးကြပ်ရန်မလိုသော စနစ်ထည့်သွင်းမှုများ (Docker၊ Kubernetes၊ CI) အတွက် အောက်ပါတို့ကို အသုံးပြုပါ-
+ပိုင်ရှင်မဲ့ တပ်ဆင်မှုများ (Docker၊ Kubernetes ၊ CI) ကို အသုံးပြုပါ ။
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-၎င်းကို env var များ (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` စသည်) နှင့် တွဲဖက်အသုံးပြုခြင်းဖြင့် OmniRoute instance တစ်ခုကို script ဖြင့် အပြည့်အဝ စတင်နိုင်သည်။
+env vars (`INITIAL_PASSWORD`၊ `OMNIROUTE_WS_BRIDGE_SECRET`၊ စသည်ဖြင့် ) နှင့် ပေါင်းစပ်ထားသောကြောင့် OmniRoute instance ကို အပြည့်အ၀ scriptable လုပ်နိုင်သည်။
 
-### CLI ရွေးချယ်စရာများ
+### CLI ရွေးချယ်မှုများ
 
-| Command                 | ဖော်ပြချက်                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------- |
-| `omniroute`             | Server ကို စတင်ပါ (`PORT=20128`၊ API နှင့် dashboard သည် port တစ်ခုတည်းတွင် ရှိသည်)         |
-| `omniroute setup`       | Password နှင့် ပထမဆုံး provider အတွက် လမ်းညွှန်ပေးသော CLI onboarding                        |
-| `omniroute doctor`      | Server ကို မစတင်ဘဲ local health check များကို လုပ်ဆောင်ပါ                                   |
-| `omniroute providers`   | CLI မှ provider များကို ရှာဖွေ၊ စာရင်းပြုစု၊ အတည်ပြု၊ စမ်းသပ်ပါ                             |
-| `omniroute config`      | CLI ကိရိယာ စီစဉ်သတ်မှတ်ခြင်း — config များကို စာရင်းပြုစု၊ ရယူ၊ သတ်မှတ်၊ အတည်ပြုပါ          |
-| `omniroute status`      | Offline status dashboard — version၊ DB၊ ကိရိယာများ၊ config                                  |
-| `omniroute logs`        | API မှ အသုံးပြုမှု log များကို stream လုပ်ပါ (`--follow` ကို ပံ့ပိုးသည်)                    |
-| `omniroute update`      | OmniRoute update များကို စစ်ဆေးပါ သို့မဟုတ် အသုံးပြုပါ                                      |
-| `omniroute provider`    | Provider ချိတ်ဆက်မှုများကို စီမံပါ — ထည့်၊ စာရင်းပြုစု၊ ဖယ်ရှား၊ စမ်းသပ်၊ default သတ်မှတ်ပါ |
-| `omniroute --port 3000` | canonical/API port ကို 3000 အဖြစ် သတ်မှတ်ပါ                                                 |
-| `omniroute --mcp`       | MCP server ကို စတင်ပါ (stdio transport)                                                     |
-| `omniroute --no-open`   | Browser ကို အလိုအလျောက် မဖွင့်ပါနှင့်                                                       |
-| `omniroute --help`      | အကူအညီကို ပြပါ                                                                              |
+| အမိန့်ပေးသည်။           | ဖော်ပြချက်                                                                                                 |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `omniroute`             | ဆာဗာစတင်ပါ (`PORT=20128`၊ API နှင့် ဒက်ရှ်ဘုတ် တူညီသောဆိပ်ကမ်း)                                            |
+| `omniroute setup`       | စကားဝှက်နှင့် ပထမဆုံးဝန်ဆောင်မှုပေးသူအတွက် CLI စတင်အသုံးပြုခြင်းကို လမ်းညွှန်ထားသည်။                       |
+| `omniroute doctor`      | ဆာဗာကို မစတင်ဘဲ ဒေသတွင်း ကျန်းမာရေးစစ်ဆေးမှုများကို လုပ်ဆောင်ပါ။                                           |
+| `omniroute providers`   | CLI မှရှာဖွေပါ၊ စာရင်းသွင်းပါ၊ အတည်ပြုပါ၊ နှင့်စမ်းသပ်ပေးသူများ                                            |
+| `omniroute config`      | CLI tool configuration — list၊ get၊ set၊ validate configuration                                            |
+| `omniroute status`      | အော့ဖ်လိုင်းအခြေအနေ ဒက်ရှ်ဘုတ် — ဗားရှင်း၊ DB၊ tools၊ config                                               |
+| `omniroute logs`        | API မှ တိုက်ရိုက်အသုံးပြုမှုမှတ်တမ်းများ ( `--follow` ကို ပံ့ပိုးသည်)                                      |
+| `omniroute update`      | OmniRoute အပ်ဒိတ်များကို စစ်ဆေးပါ သို့မဟုတ် အသုံးပြုပါ။                                                    |
+| `omniroute provider`    | ပံ့ပိုးသူချိတ်ဆက်မှုများကို စီမံပါ — ပေါင်းထည့်ခြင်း၊ စာရင်းသွင်းခြင်း၊ ဖယ်ရှားခြင်း၊ စမ်းသပ်ခြင်း၊ မူရင်း |
+| `omniroute --port 3000` | canonical/API port ကို 3000 သို့သတ်မှတ်ပါ။                                                                 |
+| `omniroute --mcp`       | MCP ဆာဗာ (stdio သယ်ယူပို့ဆောင်ရေး) စတင်ပါ                                                                  |
+| `omniroute --no-open`   | ဘရောက်ဆာကို အလိုအလျောက်ဖွင့်ခြင်း မပြုပါနှင့်                                                              |
+| `omniroute --help`      | အကူအညီပြပါ။                                                                                                |
 
-Headless စနစ်ထည့်သွင်းမှုကို flag များ သို့မဟုတ် environment variable များဖြင့် script ရေးသားနိုင်သည်-
+ဦးခေါင်းမပါသော စနစ်ထည့်သွင်းမှုကို အလံများ သို့မဟုတ် ပတ်၀န်းကျင်ဆိုင်ရာ ကိန်းရှင်များဖြင့် ဇာတ်ညွှန်းရေးသားနိုင်သည်-
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Dashboard ကို မဖွင့်ဘဲ local diagnostic များကို လုပ်ဆောင်ပါ-
+ဒက်ရှ်ဘုတ်ကို မဖွင့်ဘဲ စက်တွင်းရောဂါရှာဖွေမှုများကို လုပ်ဆောင်ပါ-
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Dashboard ကို မဖွင့်ဘဲ SSH သို့မဟုတ် script များမှ provider များကို စီမံပါ-
+ဒက်ရှ်ဘုတ်ကို မဖွင့်ဘဲ SSH သို့မဟုတ် scripts များမှ ဝန်ဆောင်မှုပေးသူများကို စီမံခန့်ခွဲပါ-
 
 ```bash
 omniroute providers available
@@ -197,41 +199,45 @@ Tool တစ်ခုချင်းစီအတွက် အသေးစိတ�
 
 ---
 
-## Protocol ဖွဲ့စည်းသတ်မှတ်ခြင်း (MCP + A2A)
+## ပရိုတိုကော စနစ်ထည့်သွင်းခြင်း (MCP + A2A)
 
-### MCP ဖွဲ့စည်းသတ်မှတ်ခြင်း (Model Context Protocol)
+### MCP စနစ်ထည့်သွင်းခြင်း (မော်ဒယ်ဆက်စပ်ပရိုတိုကော)
 
-MCP transport ကို stdio mode ဖြင့် စတင်ပါ-
+stdio မုဒ်တွင် MCP သယ်ယူပို့ဆောင်ရေးကို စတင်ပါ-
 
 ```bash
 omniroute --mcp
 ```
 
-အကြံပြုထားသော စစ်ဆေးအတည်ပြုမှု အဆင့်စဉ်-
+အကြံပြုထားသော အတည်ပြုခြင်းစီးဆင်းမှု-
 
 ```bash
-# 1. MCP server ကို စတင်ပါ
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. သင်၏ MCP client မှ အောက်ပါတို့ကို ခေါ်ဆိုပါ-
-omniroute_get_health        # System health ကို ပြန်ပေးသင့်သည်
-omniroute_list_combos       # လက်ရှိအသုံးပြုနေသော combos များကို ပြန်ပေးသင့်သည်
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. သို့မဟုတ် E2E suite အပြည့်အစုံကို run ပါ-
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP Client ဖွဲ့စည်းသတ်မှတ်ခြင်း
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude ကုဒ်-**
+
+Claude Code သည် HTTP နှင့် ချိတ်ဆက်သည်၊ ၎င်းသည် `omniroute --mcp` (stdio) မစတင်ပါ။ HTTP သယ်ယူပို့ဆောင်ရေးသည် ပုံမှန်အားဖြင့် ပိတ်နေသည်- ၎င်းကို လည်ပတ်နေသော ဆာဗာတွင် ဦးစွာဖွင့်ပါ။ ဒက်ရှ်ဘုတ် လော့ဂ်အင်ကို ဖွင့်သောအခါ၊ အထောက်အထားမပါဘဲ တောင်းဆိုချက်သည် `401` ရရှိသည်၊ ထို့ကြောင့် API သော့ကို ကိုင်ဆောင်ကာ `mcp:connect` (သို့မဟုတ် `manage`); `manage`/`admin` မပါသောသော့သည်လည်း တူးလ်တစ်ခုစီ၏ နယ်ပယ် ( [MCP Server → MCP tool scopes ကို](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ကြည့်ပါ)။
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-သင်၏ MCP ဆက်တင်များတွင် အောက်ပါတို့ကို ထည့်ပါ-
+သင်၏ MCP ဆက်တင်များသို့ ပေါင်းထည့်ပါ (stdio၊ သော့ဖြင့် ခေါ်ဆိုသူတွင် ကျောင်းအုပ်တစ်ခုရှိသည်)။
 
 ```json
 {
@@ -239,23 +245,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP စာရွက်စာတမ်းအပြည့်အစုံ:** [MCP Server README](../../open-sse/mcp-server/README.md) — tool 110 ခု၊ IDE config များ၊ Python/TS/Go client များ။
+သို့မဟုတ်၊ `mcpTransport` သည် `streamable-http` ဖြစ်သောအခါ (၎င်းကို `/dashboard/mcp` သို့မဟုတ် `omniroute mcp enable --transport streamable-http` ဖြင့် သတ်မှတ်ပါ)၊ သုံးစွဲသူ၏ အဝေးထိန်း MCP ဆာဗာ entry ကို `http://localhost:20128/api/mcp/stream` တွင် ညွှန်ပါ။
 
-### A2A ဖွဲ့စည်းသတ်မှတ်ခြင်း (Agent-to-Agent Protocol)
+သော့သည် `Authorization: Bearer <api-key>` အဖြစ် လည်ပတ်သွားသည် (ဝေးလံခေါင်သီသော host များအတွက် [MCP ဆာဗာ → အဝေးထိန်းအသုံးပြုမှုကို](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ကြည့်ပါ၊ အဝေးထိန်းသော့သည် `mcp:connect` နှင့် ၎င်း၏ read/write နယ်ပယ်များ လိုအပ်သည်)။
 
-Agent Card ကို စစ်ဆေးအတည်ပြုပါ-
+**MCP စာရွက်စာတမ်းအပြည့်အစုံ-** [MCP ဆာဗာ README](../../open-sse/mcp-server/README.md) — 110 တူးလ်များ၊ IDE configs၊ Python/TS/Go ဖောက်သည်များ။ compression CCR/dedup ကိရိယာများအတွက် အော်ပရေတာ ရည်ညွှန်းချက် (အမှတ်အသားများ၊ ကြိုတင်လိုအပ်ချက်များ၊ ကိရိယာတစ်ခုစီ၏ နယ်ပယ်များ၊ ထုတ်ယူမှု အပိုင်းအစများ၊ ရောဂါရှာဖွေမှုများ)- [Compression Engines → ကြိုတင်လိုအပ်ချက်များ / အော်ပရေတာလမ်းညွှန်](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ။
+
+### A2A စနစ်ထည့်သွင်းခြင်း (Agent-to-Agent Protocol)
+
+ကိုယ်စားလှယ်ကတ်ကို အတည်ပြုပါ-
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Task တစ်ခု ပို့ပါ-
+လုပ်ဆောင်စရာတစ်ခု ပေးပို့ပါ-
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +276,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A စာရွက်စာတမ်းအပြည့်အစုံ:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0၊ skill များ၊ streaming၊ task lifecycle။
+**A2A စာရွက်စာတမ်းအပြည့်အစုံ-** [A2A ဆာဗာ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0၊ ကျွမ်းကျင်မှု၊ တိုက်ရိုက်ထုတ်လွှင့်မှု၊ အလုပ်သက်တမ်းစက်ဝန်း။
 
 ---
 
@@ -322,12 +335,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) တမ်းပလိတ်
+## Linux (xbps-src) Template ကို ပျက်ပြယ်စေပါသည်။
 
-Void Linux အသုံးပြုသူများသည် `xbps-src` ကို အသုံးပြု၍ မူရင်းပက်ကေ့ချ်တစ်ခုကို တည်ဆောက်နိုင်ပါသည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ် သိမ်းဆည်းပါ။
+Void Linux အသုံးပြုသူများအတွက်၊ သင်သည် `xbps-src` အသုံးပြု၍ မူလပက်ကေ့ခ်ျတစ်ခုကို တည်ဆောက်နိုင်သည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ်သိမ်းဆည်းပါ။
 
 ```bash
-# 'omniroute' အတွက် တမ်းပလိတ်ဖိုင်
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +351,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ထုတ်ဝေမှုတစ်ခုစီအတွက် checksum ကို အောက်ပါအတိုင်း ပြန်လည်ထုတ်လုပ်ပါ။
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

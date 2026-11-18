@@ -34,11 +34,11 @@ Generičko OWASP upozorenje ("wildcard CORS = bilo koja stranica može pozvati v
 
 Šta to znači po površini, čak i sa `CORS_ALLOW_ALL=true`:
 
-| Površina                                 | Mehanizam autentifikacije      | Efekat wildcard CORS-a                                                                                                                                                                                                                |
-| ---------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kontrolna tabla / UPRAVLJANJE `/api/*`   | Sesija kolačića                | Porijeklo se vraća, ali **bez `Allow-Credentials`** preglednik **blokira** credentialed čitanje. Zlonamjerna cross-origin stranica **ne može čitati** vaše autentifikovane odgovore kontrolne table, a sesijski kolačić nije izložen. |
-| Klijentski API `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` zaglavlje | Već permisivno **po dizajnu** (`relaxForTokenAuth`): preglednici nikada automatski ne prilažu `Authorization`/`x-api-key`, tako da stranica napadača ne može dostaviti vaš ključ. `CORS_ALLOW_ALL` ovo ne proširuje.                  |
-| Javni samo za čitanje (`/api/health`, …) | Nijedan                        | Nije osjetljivo; wildcard je bezopasan.                                                                                                                                                                                               |
+| Površina                                 | Mehanizam autentifikacije      | Efekat wildcard CORS-a                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kontrolna tabla / UPRAVLJANJE `/api/*`   | Sesija kolačića                | Porijeklo se vraća, ali **bez `Allow-Credentials`** preglednik **blokira** credentialed čitanje. Zlonamjerna cross-origin stranica **ne može čitati** vaše autentifikovane odgovore kontrolne table, a sesijski kolačić nije izložen.                                                                                                                     |
+| Klijentski API `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` zaglavlje | Već permisivno **po dizajnu** (`relaxForTokenAuth`): preglednici nikada automatski ne prilažu `Authorization`/`x-api-key`, tako da stranica napadača ne može dostaviti vaš ključ. Porijeklo se vraća samo kada je predočeni ključ validiran; anonimni odgovori (`REQUIRE_API_KEY=false`) zadržavaju listu dozvoljenih. `CORS_ALLOW_ALL` ovo ne proširuje. |
+| Javni samo za čitanje (`/api/health`, …) | Nijedan                        | Nije osjetljivo; wildcard je bezopasan.                                                                                                                                                                                                                                                                                                                   |
 
 Dakle, **rezidualna** izloženost `CORS_ALLOW_ALL=true` je ograničena na: (a) ne-credentialed cross-origin **čitanja** već neautentifikovanih podataka, i (b) omogućavanje prolaska CORS **preflight-a** na upravljačkim rutama — koje i dalje zahtijevaju autentifikaciju koju cross-origin stranica ne može pružiti. To **nije** vektor za otmicu sesije ili krađu vjerodajnica na dijeljenoj CORS putanji.
 
@@ -69,10 +69,21 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 
 Porijekla se podudaraju bez obzira na velika/mala slova, a završna kosa crta (trailing slash) se zanemaruje, tako da su `http://localhost:3000` i `http://localhost:3000/` ekvivalentni. Isti CSV se može postaviti tokom izvršavanja u **Dashboard → Security → CORS Allowed Origins** bez ponovnog pokretanja.
 
-## API ključevi naspram sesija kolačića (cookie sessions)
+## API ključevi u odnosu na sesije kolačića
 
-- **Bearer / `x-api-key` (površina za zaključivanje `/v1/*`):** pretraživači ih nikada ne prilažu automatski. CORS ovdje nije značajna barijera — API ključ je barijera — zbog čega je ta površina namjerno permisivna kako bi pretraživači i Electron klijenti mogli čitati odgovore na koje već imaju pravo.
-- **Sesija kolačića (kontrolna tabla):** zaštićena je podrazumijevanim "fail-closed" ponašanjem **i** odsustvom `Access-Control-Allow-Credentials` na dijeljenoj putanji. Držite porijekla za upravljanje/kontrolnu tablu izvan bilo kakve permisivne konfiguracije; ona moraju ostati strogo "fail-closed".
+- **Bearer / `x-api-key` (površina za zaključivanje `/v1/*`):** pregledači ih nikada ne prilažu automatski. CORS ovdje nije smislena barijera — API ključ jeste barijera — zbog čega je ta površina namjerno permisivna, kako bi pregledači i Electron klijenti mogli čitati odgovore na koje već imaju pravo. Opušteni echo prati validirani ključ, a ne samo prisustvo zaglavlja: kada `REQUIRE_API_KEY=false` posluži zahtjev anonimno, njegov uspješan odgovor zadržava fail-closed listu dozvoljenih vrijednosti. Odbijanja autentifikacije (401) ostaju čitljiva kako bi klijenti mogli prikazati opozvani ili pogrešno unesen ključ (#5242): vlastiti 401 cjevovoda zadržava echo, a ruta koja sama odbije ključ nakon što ga je cjevovod poslužio kao anonimni (`/v1/models` i `/v1beta/models` s konfigurisanom autentifikacijom za upravljanje, rute `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ograničene na vlasnika i kandidatske rute za automatske kombinacije) dodaje echo tom 401 putem `credentialRejectionHeaders()`. Echo zavisi od toga da li zahtjev sadrži zaglavlje vjerodajnice (`Authorization`, `x-api-key`, `x-goog-api-key` ili kolačić `auth_token`), a ne od toga koje je od njih ruta provjerila, i nikada se ne uparuje s `Access-Control-Allow-Credentials`; tijelo je fiksni omotač greške. Rute za upravljanje pod `/api/v1/` koje štiti `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ne dodaju echo: uz `REQUIRE_API_KEY=false` njihov 401/403 nije čitljiv s drugih izvora.
+- **Sesija kolačića (kontrolna tabla):** zaštićena je podrazumijevanim fail-closed ponašanjem **i** odsustvom `Access-Control-Allow-Credentials` na dijeljenoj putanji. Porijekla za upravljanje/kontrolnu tablu držite izvan svake permisivne konfiguracije; moraju ostati tačno fail-closed.
+
+## WebSocket rukovanja (`/v1/responses`, `/v1/ws`)
+
+Preglednici ne primjenjuju CORS na WebSocket, pa WebSocket transporti koji vraćaju izlaz zaključivanja sami provjeravaju `Origin` rukovanja (`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) i, kada se OmniRoute pokreće putem `npm start` / `npm run dev`, most `/v1/ws` i `/api/v1/ws`, koji strimuje `/v1/chat/completions`, `/v1/messages` i `/v1/responses` kao okvire. Most traži presudu od `/api/v1/ws?handshake=1` i odbija nadogradnju veze osim ako je ta ruta izvršila provjeru. Rukovanje se prihvata kada:
+
+- nema zaglavlje `Origin` (Codex CLI, SDK-ovi i drugi klijenti koji nisu preglednici);
+- je `Origin` prihvaćen od strane gore opisane liste dozvoljenih (`CORS_ALLOWED_ORIGINS`, postavka `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- je `Origin` jedno od vlastitih javnih porijekla OmniRoutea (konfigurisani javni osnovni URL, proslijeđeno porijeklo pouzdanog proxyja ili direktan loopback/LAN host naveden kao IP literal ili `localhost` — isti kandidati koje koristi provjera izmjena na kontrolnoj tabli); ili
+- nosi važeći API ključ, kao na HTTP površini `/v1/*`.
+
+Sve ostalo dobija `403 ws_origin_forbidden`. Sesijski kolačić kontrolne table ne izuzima strani `Origin`, jer ga preglednik prilaže socketu bilo koje stranice. `localhost` na drugom portu ne tretira se kao isto porijeklo; dodajte takva razvojna porijekla u `CORS_ALLOWED_ORIGINS`.
 
 ## Primjer: obrnuti proxy ispred OmniRoutea
 
@@ -108,6 +119,7 @@ kartici Sigurnost), a ne u proxyju.
 | Baner upozorenja na kontrolnoj tabli              | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Polje CORS Allowed Origins                        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent CORS po ruti (izuzetak)               | `src/lib/cloudAgent/api.ts`                                          |
+| Provjera `Origin` pri WebSocket rukovanju         | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Vidi također
 

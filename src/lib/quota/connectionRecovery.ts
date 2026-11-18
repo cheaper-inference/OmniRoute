@@ -22,6 +22,7 @@
  */
 
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 
 /**
@@ -64,6 +65,22 @@ export interface RecoverableConnectionInput {
   rateLimitedUntil?: string | null;
   lastErrorAt?: string | null;
   lastErrorType?: string | null;
+  /** A Google "verify your account" link is stored (Antigravity 403 VALIDATION_REQUIRED). */
+  verificationPending?: boolean;
+}
+
+/** Project a provider-connection row onto the fields the recovery tick reads. */
+export function toRecoverableConnectionInput(
+  row: Record<string, unknown>
+): RecoverableConnectionInput {
+  return {
+    id: typeof row.id === "string" ? row.id : "",
+    testStatus: typeof row.testStatus === "string" ? row.testStatus : null,
+    rateLimitedUntil: typeof row.rateLimitedUntil === "string" ? row.rateLimitedUntil : null,
+    lastErrorAt: typeof row.lastErrorAt === "string" ? row.lastErrorAt : null,
+    lastErrorType: typeof row.lastErrorType === "string" ? row.lastErrorType : null,
+    verificationPending: readStoredVerificationUrl(row.providerSpecificData) !== null,
+  };
 }
 
 function normalizeStatus(value: string | null | undefined): string {
@@ -133,6 +150,9 @@ export function isRecoverableCooldownConnection(
   const status = normalizeStatus(connection.testStatus);
   if (!RECOVERABLE_TRANSIENT_STATUSES.has(status)) return false;
   if (TERMINAL_CONNECTION_STATUSES.has(status)) return false; // defensive; transient statuses are never terminal
+  // Not stale noise: Google still blocks the account until it is verified, and a passing
+  // connection test (which drops the stored link) is what clears this label.
+  if (connection.verificationPending === true) return false;
   if (status === RECOVERABLE_COOLDOWN_STATUS) {
     return hasElapsedCooldown(connection.rateLimitedUntil, nowMs);
   }
@@ -273,13 +293,7 @@ export async function runConnectionRecoveryTick(
           getProviderConnections({ isActive: false }) as Promise<Array<Record<string, unknown>>>,
         ]);
         const rows = [...(activeRows || []), ...(inactiveRows || [])];
-        return (Array.isArray(rows) ? rows : []).map((row) => ({
-          id: typeof row.id === "string" ? row.id : "",
-          testStatus: typeof row.testStatus === "string" ? row.testStatus : null,
-          rateLimitedUntil: typeof row.rateLimitedUntil === "string" ? row.rateLimitedUntil : null,
-          lastErrorAt: typeof row.lastErrorAt === "string" ? row.lastErrorAt : null,
-          lastErrorType: typeof row.lastErrorType === "string" ? row.lastErrorType : null,
-        }));
+        return (Array.isArray(rows) ? rows : []).map(toRecoverableConnectionInput);
       });
     connections = await load();
   } catch (err) {

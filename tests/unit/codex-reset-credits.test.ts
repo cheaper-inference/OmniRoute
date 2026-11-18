@@ -99,8 +99,8 @@ function mockResetThenUsage(opts: {
           opts.usageBody ?? {
             plan_type: "plus",
             rate_limit: {
-              primary_window: { used_percent: 0 },
-              secondary_window: { used_percent: 0 },
+              primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+              secondary_window: { used_percent: 0, limit_window_seconds: 604800 },
             },
           }
         ),
@@ -152,8 +152,8 @@ test("consumeCodexResetCredit fetches a credit id, posts it, then refreshes usag
         JSON.stringify({
           plan_type: "plus",
           rate_limit: {
-            primary_window: { used_percent: 0 },
-            secondary_window: { used_percent: 40 },
+            primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+            secondary_window: { used_percent: 40, limit_window_seconds: 604800 },
           },
           rate_limit_reset_credits: { available_count: 1 },
         }),
@@ -198,7 +198,7 @@ test("consumeCodexResetCredit accepts alreadyRedeemed as success", async () => {
     if (String(url).includes("/backend-api/wham/usage")) {
       return new Response(
         JSON.stringify({
-          rate_limit: { primary_window: { used_percent: 5 } },
+          rate_limit: { primary_window: { used_percent: 5, limit_window_seconds: 18000 } },
         }),
         { status: 200, headers: { "content-type": "application/json" } }
       );
@@ -463,8 +463,8 @@ test("#12951 consumeCodexResetCredit alreadyRedeemed still needs healthy usage t
     usageBody: {
       plan_type: "plus",
       rate_limit: {
-        primary_window: { used_percent: 100 },
-        secondary_window: { used_percent: 100 },
+        primary_window: { used_percent: 100, limit_window_seconds: 18000 },
+        secondary_window: { used_percent: 100, limit_window_seconds: 604800 },
       },
     },
   });
@@ -560,8 +560,8 @@ test("#4305 consumeCodexResetCredit keeps model lockouts while refreshed usage i
     usageBody: {
       plan_type: "plus",
       rate_limit: {
-        primary_window: { used_percent: 100 },
-        secondary_window: { used_percent: 100 },
+        primary_window: { used_percent: 100, limit_window_seconds: 18000 },
+        secondary_window: { used_percent: 100, limit_window_seconds: 604800 },
       },
     },
   });
@@ -594,4 +594,21 @@ test("#4305 a terminal (banned) account keeps its state after a redemption", asy
   await resetCredits.consumeCodexResetCredit(connection.id, "redeem-4305-banned");
   assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
   assert.equal((await readConnection(connection.id)).testStatus, "banned");
+});
+
+test("consumeCodexResetCredit reports a spent credit even when the post-redeem usage refresh throws", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  mockResetThenUsage({ consumeBody: { code: "reset" } });
+  const upstream = globalThis.fetch;
+  // The credit is consumed upstream; the connection is gone by the time the usage refresh
+  // runs, so fetchAndPersistProviderLimits throws ("Connection not found").
+  globalThis.fetch = (async (url, init) => {
+    if (String(url).includes("/rate-limit-reset-credits/consume")) {
+      await providersDb.deleteProviderConnection(connection.id);
+    }
+    return upstream(url, init);
+  }) as typeof fetch;
+
+  const result = await resetCredits.consumeCodexResetCredit(connection.id, "redeem-refresh-throws");
+  assert.deepEqual(result, { outcome: "reset", usage: {} });
 });

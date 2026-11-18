@@ -358,3 +358,39 @@ describe("comboRunToFlow", () => {
     assert.equal(nodes[5].id, "response");
   });
 });
+
+// ── connectionId (#18374) ─────────────────────────────────────────────────
+
+describe("connectionId carry-over", () => {
+  const event = (type: ComboEventInput["type"], connectionId?: string): ComboEventInput => ({
+    comboName: "c",
+    targetIndex: 0,
+    provider: "p",
+    model: "m",
+    type,
+    timestamp: 1,
+    ...(type === "attempt" ? { strategy: "priority" } : { latencyMs: 5 }),
+    ...(connectionId ? { connectionId } : {}),
+  });
+
+  it("keeps the attempt's account when the outcome event names none", () => {
+    const attempted = reduceComboEvent(null, event("attempt", "conn-1"));
+    for (const outcome of ["succeeded", "failed"] as const) {
+      const run = reduceComboEvent(attempted, event(outcome));
+      assert.equal(run.targets[0].connectionId, "conn-1");
+    }
+  });
+
+  it("lets the outcome event correct a pooled attempt that had no account yet", () => {
+    const attempted = reduceComboEvent(null, event("attempt"));
+    assert.equal(attempted.targets[0].connectionId, null);
+    const run = reduceComboEvent(attempted, event("succeeded", "conn-served"));
+    assert.equal(run.targets[0].connectionId, "conn-served");
+  });
+
+  it("comboRunToFlow passes the account to the target node", () => {
+    const run = reduceComboEvent(null, event("attempt", "conn-1"));
+    const target = comboRunToFlow(run).nodes.find((n) => n.data.connectionId !== undefined);
+    assert.equal(target?.data.connectionId, "conn-1");
+  });
+});

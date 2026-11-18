@@ -14,7 +14,7 @@ test("login page performs full window.location navigation after authentication t
     "LoginPage should not use router.push('/dashboard') after login"
   );
   assert.equal(
-    content.includes('window.location.href = "/dashboard"'),
+    content.includes('window.location.href = withBasePath("/dashboard")'),
     true,
     "LoginPage must perform full window.location navigation after login"
   );

@@ -50,12 +50,16 @@ import {
   cleanGrokThinkingText,
   extractStructuredReasoning,
 } from "./grok-web/text-cleanup.ts";
+import { chromeUserAgent, newestChromeVersion } from "../utils/browserProfiles.ts";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const GROK_CHAT_API = "https://grok.com/rest/app-chat/conversations/new";
-const GROK_USER_AGENT =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
+// Resolved lazily: computing the UA at module scope would throw at import
+// time when the wreq-js runtime is unavailable.
+function grokUserAgent(): string {
+  return chromeUserAgent("X11; Linux x86_64", newestChromeVersion());
+}
 const GROK_PUBLIC_UPSTREAM_ERROR = "Grok upstream error";
 
 function sanitizeGrokUpstreamError(message: unknown): string {
@@ -1002,6 +1006,7 @@ export class GrokWebExecutor extends BaseExecutor {
     const traceId = randomHex(16);
     const spanId = randomHex(8);
 
+    const chromeVersion = newestChromeVersion();
     const headers: Record<string, string> = {
       Accept: "*/*",
       "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -1013,13 +1018,13 @@ export class GrokWebExecutor extends BaseExecutor {
       Origin: "https://grok.com",
       Pragma: "no-cache",
       Referer: "https://grok.com/",
-      "Sec-Ch-Ua": '"Google Chrome";v="149", "Chromium";v="149", "Not(A:Brand";v="24"',
+      "Sec-Ch-Ua": `"Google Chrome";v="${chromeVersion}", "Chromium";v="${chromeVersion}", "Not(A:Brand";v="24"`,
       "Sec-Ch-Ua-Mobile": "?0",
-      "Sec-Ch-Ua-Platform": '"macOS"',
+      "Sec-Ch-Ua-Platform": '"Linux"',
       "Sec-Fetch-Dest": "empty",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-origin",
-      "User-Agent": GROK_USER_AGENT,
+      "User-Agent": grokUserAgent(),
       "x-statsig-id": generateStatsigId(),
       "x-xai-request-id": crypto.randomUUID(),
       traceparent: `00-${traceId}-${spanId}-00`,

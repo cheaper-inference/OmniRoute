@@ -62,13 +62,14 @@ export function normalizeCodexReasoningEffort(value: unknown): CodexReasoningEff
   return normalized as CodexReasoningEffort;
 }
 
-export type CodexServiceTier = "default" | "priority" | "flex";
+export type CodexServiceTier = "default" | "priority" | "flex" | "ultrafast";
 
 export function normalizeCodexServiceTier(value: unknown): CodexServiceTier | undefined {
   const normalized = normalizeString(value);
   if (!normalized) return undefined;
   if (normalized === "fast" || normalized === "priority") return "priority";
-  if (normalized === "default" || normalized === "flex") return normalized;
+  if (normalized === "default" || normalized === "flex" || normalized === "ultrafast")
+    return normalized;
   return undefined;
 }
 
@@ -253,6 +254,22 @@ export function normalizeProviderSpecificData(
   // #2997: per-connection transient-cooldown opt-out — only persist a real boolean.
   if ("disableCooling" in normalized && typeof normalized.disableCooling !== "boolean") {
     delete normalized.disableCooling;
+  }
+
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
+  // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
+  if (
+    "keepMidConversationSystem" in normalized &&
+    typeof normalized.keepMidConversationSystem !== "boolean"
+  ) {
+    delete normalized.keepMidConversationSystem;
   }
 
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only

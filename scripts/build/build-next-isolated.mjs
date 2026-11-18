@@ -97,10 +97,50 @@ export function ensureWindowsBuildProfileDirs(env, mkdirImpl = mkdirSync) {
   mkdirImpl(env.LOCALAPPDATA, { recursive: true });
 }
 
+/**
+ * Return the RAM limit visible to a build process, including container quotas.
+ * Node 22+/24+ exposes cgroup/job-object limits through constrainedMemory().
+ * Ignore zero (unconstrained) and unsafe values rather than taking them as RAM.
+ */
+export function getEffectiveBuildMemoryBytes(
+  physicalBytes = os.totalmem(),
+  constrainedBytes = process.constrainedMemory?.()
+) {
+  const usable = [physicalBytes, constrainedBytes].filter(
+    (value) => Number.isSafeInteger(value) && value > 0
+  );
+  return usable.length ? Math.min(...usable) : null;
+}
+
+/**
+ * #18184: the default Turbopack build can exceed a 16 GiB machine's available
+ * RAM; webpack has completed on that machine. Only choose a different default
+ * when the operator has not set OMNIROUTE_USE_TURBOPACK.
+ */
+export function getLowMemoryBuildWarning(
+  baseEnv = process.env,
+  memoryBytes = getEffectiveBuildMemoryBytes()
+) {
+  if (baseEnv.OMNIROUTE_USE_TURBOPACK === "0") return null;
+  if (Number.isSafeInteger(memoryBytes) && memoryBytes > 16 * 1024 ** 3) return null;
+  const memory =
+    Number.isSafeInteger(memoryBytes) && memoryBytes > 0
+      ? `${(memoryBytes / 1024 ** 3).toFixed(1)} GiB`
+      : "unknown";
+  if (resolveNextBuildBundlerFlag(baseEnv, memoryBytes) === "--webpack") {
+    return `[build-next-isolated] #18184: build RAM limit ${memory}; selecting webpack automatically to avoid Turbopack OOM. Set OMNIROUTE_USE_TURBOPACK=1 to force Turbopack.`;
+  }
+  return `[build-next-isolated] #18184: build RAM limit ${memory}; Turbopack explicitly selected despite OOM risk. Set OMNIROUTE_USE_TURBOPACK=0 to use webpack.`;
+}
+
 function runNextBuild() {
   return new Promise((resolve) => {
     const nextBin = path.join(projectRoot, "node_modules", "next", "dist", "bin", "next");
     const buildEnv = resolveNextBuildEnv(process.env);
+    const memoryBytes = getEffectiveBuildMemoryBytes();
+    const bundlerFlag = resolveNextBuildBundlerFlag(process.env, memoryBytes);
+    const memoryWarning = getLowMemoryBuildWarning(process.env, memoryBytes);
+    if (memoryWarning) console.warn(memoryWarning);
     ensureWindowsBuildProfileDirs(buildEnv);
     const nextArgs = process.versions.bun
       ? [
@@ -108,9 +148,9 @@ function runNextBuild() {
           path.join(projectRoot, "open-sse", "utils", "setupPolyfill.ts"),
           nextBin,
           "build",
-          resolveNextBuildBundlerFlag(),
+          bundlerFlag,
         ]
-      : [nextBin, "build", resolveNextBuildBundlerFlag()];
+      : [nextBin, "build", bundlerFlag];
     const child = spawn(process.execPath, nextArgs, {
       cwd: projectRoot,
       stdio: "inherit",
@@ -136,16 +176,22 @@ function runNextBuild() {
   });
 }
 
-export function resolveNextBuildBundlerFlag(baseEnv = process.env) {
-  // Turbopack is the default; OMNIROUTE_USE_TURBOPACK=0 is the documented escape hatch
-  // to webpack (Windows, native-binding trouble, RAM-constrained machines — #6409, and
-  // docs/reference/ENVIRONMENT.md). The choice is env-only ON PURPOSE: the variable is
-  // the operator's control and CI sets it explicitly, so sniffing the runtime here would
-  // silently override an operator who asked for Turbopack.
-  if (baseEnv.OMNIROUTE_USE_TURBOPACK === "0") {
-    return "--webpack";
+export function resolveNextBuildBundlerFlag(
+  baseEnv = process.env,
+  memoryBytes = getEffectiveBuildMemoryBytes()
+) {
+  // A blank value is common when Compose forwards an unset shell variable.
+  // Treat it like an absent opt-in instead of accidentally forcing Turbopack
+  // on a RAM-constrained host. Keep "0" and all NONEMPTY overrides authoritative.
+  const override = baseEnv.OMNIROUTE_USE_TURBOPACK;
+  if (override !== undefined && override !== "") {
+    return override === "0" ? "--webpack" : "--turbopack";
   }
-  return "--turbopack";
+  // Default to the build path confirmed to work at 16 GiB (#18184). A bad RAM
+  // reading also prefers webpack; on sufficiently large hosts keep Turbopack.
+  return Number.isSafeInteger(memoryBytes) && memoryBytes > 16 * 1024 ** 3
+    ? "--turbopack"
+    : "--webpack";
 }
 
 /**
@@ -217,9 +263,10 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
   // was left unprotected. Respect an existing --max-old-space-size (Docker already
   // sets one — don't clobber/duplicate) and let OMNIROUTE_BUILD_MEMORY_MB override.
   // NOTE (#6409): --max-old-space-size only bounds V8's JS heap — it does NOT bound
-  // Turbopack's native (Rust, off-V8-heap) memory, which is the default bundler as of
-  // #6283. On memory-constrained machines, set OMNIROUTE_USE_TURBOPACK=0 (webpack
-  // fallback) instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
+  // Turbopack's native (Rust, off-V8-heap) memory. Since #18184 an unset
+  // OMNIROUTE_USE_TURBOPACK already selects webpack at <= 16 GiB of effective RAM
+  // (resolveNextBuildBundlerFlag); if Turbopack still OOMs, set OMNIROUTE_USE_TURBOPACK=0
+  // instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
   if (!/--max-old-space-size/.test(env.NODE_OPTIONS || "")) {
     // Default 8 GB (was 4 GB): the clean module graph peaks ~3.9 GB during the webpack
     // production pass, which brushed the old 4 GB ceiling on a borderline OOM. 8 GB gives

@@ -172,44 +172,61 @@ test("appendGoogleDailyQuotaViolation carries the PerDay signal next to the pros
   assert.ok(result.cooldownMs > 0);
 });
 
-test("a PerDay violation locks only the model, not the whole Gemini connection", async () => {
-  fallback.clearAllModelLockouts();
-  const connection = await providersDb.createProviderConnection({
-    provider: "gemini",
-    authType: "apikey",
-    name: "gemini-daily-quota",
-    apiKey: "gemini-daily-quota-key",
-    isActive: true,
-    testStatus: "active",
-    providerSpecificData: {},
+for (const { label, nowMs, expectedLockMs } of [
+  { label: "at noon Pacific", nowMs: NOON_PACIFIC_MS, expectedLockMs: 30 * 60 * 1000 },
+  {
+    label: "just before midnight Pacific (PST)",
+    nowMs: Date.parse("2026-11-02T07:57:16.521Z"),
+    expectedLockMs: 163_479,
+  },
+  {
+    label: "just before midnight Pacific (PDT)",
+    nowMs: Date.parse("2026-10-16T06:57:16.521Z"),
+    expectedLockMs: 163_479,
+  },
+]) {
+  test(`a PerDay violation locks only the model, not the whole Gemini connection ${label}`, async (t) => {
+    // Use a fixed wall clock: the daily reset can legitimately be less than ten minutes away.
+    t.mock.method(Date, "now", () => nowMs);
+    t.after(() => fallback.clearAllModelLockouts());
+    fallback.clearAllModelLockouts();
+    const connection = await providersDb.createProviderConnection({
+      provider: "gemini",
+      authType: "apikey",
+      name: "gemini-daily-quota",
+      apiKey: "gemini-daily-quota-key",
+      isActive: true,
+      testStatus: "active",
+      providerSpecificData: {},
+    });
+    assert.equal(fallback.hasPerModelQuota("gemini", "gemini-2.5-flash"), true);
+
+    const enriched = appendGoogleDailyQuotaViolation(PROSE, DAILY_OBJ);
+    const result = await auth.markAccountUnavailable(
+      connection.id,
+      429,
+      enriched,
+      "gemini",
+      "gemini-2.5-flash"
+    );
+    assert.equal(result.shouldFallback, true);
+
+    const lock = fallback.getModelLockoutInfo("gemini", connection.id, "gemini-2.5-flash");
+    assert.ok(lock, "expected a model lockout for the exhausted model");
+    assert.equal(lock!.reason, "quota_exhausted");
+    // Noon is capped at 30 min; near midnight the lock must stop at the actual reset,
+    // not extend past it or collapse to the upstream 26s per-minute hint.
+    assert.equal(lock!.remainingMs, expectedLockMs);
+    assert.equal(
+      fallback.getModelLockoutInfo("gemini", connection.id, "gemini-2.5-pro"),
+      null,
+      "other models on the same key keep serving"
+    );
+
+    const after = await providersDb.getProviderConnectionById(connection.id);
+    assert.equal(after?.rateLimitedUntil ?? null, null, "no connection-wide cooldown");
   });
-  assert.equal(fallback.hasPerModelQuota("gemini", "gemini-2.5-flash"), true);
-
-  const enriched = appendGoogleDailyQuotaViolation(PROSE, DAILY_OBJ);
-  const result = await auth.markAccountUnavailable(
-    connection.id,
-    429,
-    enriched,
-    "gemini",
-    "gemini-2.5-flash"
-  );
-  assert.equal(result.shouldFallback, true);
-
-  const lock = fallback.getModelLockoutInfo("gemini", connection.id, "gemini-2.5-flash");
-  assert.ok(lock, "expected a model lockout for the exhausted model");
-  assert.equal(lock!.reason, "quota_exhausted");
-  // Bounded by the operator's model-lockout cap (default 30 min), but far beyond the 26s throttle.
-  assert.ok(lock!.remainingMs > 10 * 60 * 1000, `expected a long lock, got ${lock!.remainingMs}ms`);
-  assert.equal(
-    fallback.getModelLockoutInfo("gemini", connection.id, "gemini-2.5-pro"),
-    null,
-    "other models on the same key keep serving"
-  );
-
-  const after = await providersDb.getProviderConnectionById(connection.id);
-  assert.equal(after?.rateLimitedUntil ?? null, null, "no connection-wide cooldown");
-  fallback.clearAllModelLockouts();
-});
+}
 
 test("the streaming leg carries the PerDay signal into its classification message", async () => {
   // The streaming leg cannot be driven standalone in a unit test (see

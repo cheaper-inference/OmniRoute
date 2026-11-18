@@ -17,6 +17,7 @@ import {
   resolveSpawnArgs as llmlinguaSpawnArgs,
   LLMLINGUA_DEFAULT_PORT,
 } from "./installers/llmlingua";
+import { resolveSpawnArgs as singboxSpawnArgs, SINGBOX_DEFAULT_PORT } from "./installers/singbox";
 import { getOrCreateApiKey } from "./apiKey";
 import { scheduleServiceModelSync, stopServiceModelSync } from "./modelSync";
 import type { ServiceStatus } from "./types";
@@ -41,6 +42,7 @@ const BIFROST_PORT = parseInt(process.env.BIFROST_PORT ?? String(BIFROST_DEFAULT
 const DARIO_PORT = parseInt(process.env.DARIO_PORT ?? String(DARIO_DEFAULT_PORT), 10);
 const OPENWA_PORT = parseInt(process.env.OPENWA_SERVICE_PORT ?? String(OPENWA_DEFAULT_PORT), 10);
 const LLMLINGUA_PORT = parseInt(process.env.LLMLINGUA_PORT ?? String(LLMLINGUA_DEFAULT_PORT), 10);
+const SINGBOX_PORT = parseInt(process.env.SINGBOX_PORT ?? String(SINGBOX_DEFAULT_PORT), 10);
 
 type ServiceEntry = {
   tool: string;
@@ -145,6 +147,15 @@ const SERVICES: ServiceEntry[] = [
     logsBufferBytes: 5_242_880,
     needsApiKey: false,
   },
+  {
+    tool: "singbox",
+    port: SINGBOX_PORT,
+    healthPath: "/",
+    healthIntervalMs: 5_000,
+    stopTimeoutMs: 15_000,
+    logsBufferBytes: 5_242_880,
+    needsApiKey: false,
+  },
 ];
 
 function buildSpawnArgsFactory(
@@ -168,6 +179,9 @@ function buildSpawnArgsFactory(
   }
   if (cfg.tool === "llmlingua") {
     return () => llmlinguaSpawnArgs(cfg.port);
+  }
+  if (cfg.tool === "singbox") {
+    return () => singboxSpawnArgs(cfg.port);
   }
   return () => cliproxySpawnArgs(cfg.port, apiKey);
 }

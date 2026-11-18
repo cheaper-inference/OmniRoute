@@ -2,6 +2,7 @@
 
 import { Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 /** Loading / error / empty placeholder shared by the News and Changelog viewers. */
 export function ViewerStatus({
@@ -24,11 +25,11 @@ export function ViewerStatus({
         aria-live={busy ? "polite" : undefined}
         className="flex flex-col items-center justify-center gap-4 py-20 text-center text-text-muted"
       >
-        <Icon
-          name={icon}
-          size={busy ? 32 : 48}
-          className={busy ? "animate-spin" : tone === "error" ? "text-error" : "opacity-60"}
-        />
+        {busy ? (
+          <Spinner decorative size="lg" />
+        ) : (
+          <Icon name={icon} size={48} className={tone === "error" ? "text-error" : "opacity-60"} />
+        )}
         <p className="text-sm">{message}</p>
         {children}
       </div>

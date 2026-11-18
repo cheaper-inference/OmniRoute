@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Modal from "@/shared/components/Modal";
 import type { AgentStateEntry, AgentBridgeServerState } from "../AgentBridgePageClient";
 import type { MitmTargetView } from "@/mitm/types";
@@ -305,7 +306,7 @@ export function SetupWizard({
 
             {loadingModels ? (
               <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
-                <Icon name="progress_activity" size={16} className="animate-spin" />
+                <Spinner decorative size="sm" />
                 {t("wizardDetectingModels")}
               </div>
             ) : detectedModels.length > 0 ? (

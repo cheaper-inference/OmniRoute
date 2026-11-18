@@ -28,10 +28,11 @@ const CLI_DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 /**
  * Locate + parse the bundle-shipped `optional-packs.index.json`.
  * Search order: explicit --source dir, then walking up from the CLI module
- * (bundle installs keep the index at the bundle root), then cwd.
+ * (bundle installs keep the index at the bundle root). The working directory
+ * is not searched: a cwd index is only used when the caller passes `--source`.
  */
 function loadIndex(sourceDir) {
-  const indexFile = findPackIndexFile([sourceDir, CLI_DIR, process.cwd()]);
+  const indexFile = findPackIndexFile([sourceDir, CLI_DIR]);
   if (!indexFile) return { indexFile: null, index: null };
   return { indexFile, index: readPackIndex(indexFile) };
 }

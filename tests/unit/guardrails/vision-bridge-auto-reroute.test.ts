@@ -71,6 +71,27 @@ test.beforeEach(() => {
   mockSettings = baseSettings();
 });
 
+test("mixed-content Auto retains the full request for multimodal compatibility routing", async () => {
+  for (const model of ["auto", "auto/best-vision"]) {
+    for (const attachment of [
+      {
+        type: "file",
+        file: { filename: "test.pdf", file_data: "data:application/pdf;base64,JVBER" },
+      },
+      { type: "input_audio", input_audio: { data: "fixture", format: "wav" } },
+      { type: "video_url", video_url: { url: "https://example.com/video.mp4" } },
+    ]) {
+      const payload = imagePayload({ model });
+      const messages = payload.messages as Array<{ content: unknown[] }>;
+      messages[0].content.push(attachment);
+      const result = await createGuardrail().preCall(payload, createContext({ model }));
+      assert.deepEqual(result, { block: false });
+      assert.equal(visionCallCount, 0);
+      assert.equal(messages[0].content[2], attachment);
+    }
+  }
+});
+
 test("VB-REROUTE-AUTO: auto/best-vision resolves through the router pool and reroutes (no describe)", async () => {
   // Provider "auto" has no credential rows → hasUsableCredentials=false for the
   // raw auto id; the router must still resolve a pool model and reroute.

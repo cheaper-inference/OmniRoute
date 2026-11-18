@@ -12,247 +12,140 @@ Kaikki OmniRouten hallinta-API:n reitit luokitellaan johonkin kolmesta suojausta
 
 ### Taso 1 — LOCAL_ONLY
 
-**Pakotetaan seuraavalla:** `isLocalOnlyPath(path)` → takaisinkytkentäisännän tarkistus  
-**Ohitus:** Ei oletusarvoisesti. Tarkasti rajattu poikkeus koskee polkuja, jotka ovat kohteessa
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, kun pyyntö sisältää kelvollisen
-API-avaimen, jolla on `manage`-käyttöalue (katso [Manage-käyttöalueen poikkeus](#manage-scope-carve-out)).
+**Täytäntöönpano:** `isLocalOnlyPath(path)` → loopback isäntätarkistus** Ohittaa:** Ei mitään oletuksena. Kapea leikkaus poluille `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ssä, kun pyyntö sisältää kelvollisen API avaimen `manage` suojalla (katso [Hallinnoi laajuutta carve-out](#manage-scope-carve-out) ).
 
-Nämä reitit käynnistävät aliprosesseja tai suorittavat ajonaikaista koodia. Niiden
-asettaminen muun kuin takaisinkytkentäliikenteen saataville antaisi kelvollisen JWT:n
-saaneelle hyökkääjälle (esimerkiksi Cloudflared-/Ngrok-tunnelin kautta) mahdollisuuden
-käynnistää prosesseja — kyseessä on tunnettu CVE-luokka
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Nämä reitit synnyttävät lapsiprosesseja tai suorittavat ajonaikaista koodia. Niiden altistaminen ei-paluuliikenteelle sallisi hyökkääjän, joka on saanut kelvollisen JWT :n (esim. Cloudflared/Ngrok tunnelin kautta), laukaista prosessin synnyttävän — tunnetun CVE luokan ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Mikä GHSA-fhh6-4qxv-rpqj on (hyökkäysluokka):** hallinta-/agenttipalvelin
-tarjoaa päätepisteen, joka käynnistää aliprosessin (`npm install`, `node`, selain,
-välityspalvelin, `git`, `tar`, …). Jos kyseinen päätepiste on käytettävissä isäntäkoneen
-ulkopuolelta — koska ylläpitäjä asetti OmniRouten nginx-/Cloudflare-/Tailscale-tunnelin
-taakse ja JWT vuoti tai todennus oli määritetty väärin — hyökkääjä muuttaa
-API-kutsun isäntäkoneessa suoritettavaksi komennoksi (koodin etäsuoritus). OmniRoute
-estää tämän pakottamalla **takaisinkytkentäisännän tarkistuksen ehdoitta ennen mitään
-todennustarkistusta** jokaisella reitillä, joka voi käynnistää prosesseja: tunnelin
-kautta vuotanut tunniste ei edelleenkään pääse käynnistystoimintoon.
+**Mikä GHSA-fhh6-4qxv-rpqj on (hyökkäysluokka):** management/agent -palvelin paljastaa päätepisteen, joka käynnistää aliprosessin (`npm install`, `node`, selain, välityspalvelin, `git`, `tar`, …). Jos kyseinen päätepiste on saavutettavissa off-host — stä, koska operaattori laittoi OmniRoute nginx/Cloudflare/Tailscale tunnelin taakse ja JWT vuoti tai todennus on määritetty väärin —, hyökkääjä muuttaa "soita API" "suorita komento isännässä" (koodin etäsuoritus). OmniRoute sulkee tämän pakottamalla a** loopback-isäntätarkistus ehdoitta, ennen todennustarkistusta** , jokaisella kutemiskelpoisella reitillä: tunnelin yli vuotanut merkki ei silti pääse kutemaan.
 
-**Koko LOCAL_ONLY-joukko.** Määräävä lähde on
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` tiedostossa
-`src/server/authz/routeGuard.ts`; alla oleva taulukko vastaa nykyistä tilaa.
-`check-route-guard-membership`-portti luettelee jokaisen `route.ts`-tiedoston
-prosessien käynnistämiseen kykenevien etuliitteiden alta ja hylkää CI-ajon, jos
-jotakin niistä ei ole luokiteltu vain paikallisesti käytettäväksi.
+**Täysi LOCAL_ONLY setti.** Arvovaltainen lähde on `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` in `src/server/authz/routeGuard.ts`; alla oleva taulukko heijastaa nykyistä tilaa. `check-route-guard-membership` portti luettelee jokaisen `route.ts` spawn-kykyisten etuliitteiden alla ja epäonnistuu CI, jos sellaista ei ole luokiteltu vain paikalliseksi.
 
-| Etuliite / kuvio                                                                                         | Miksi se toimii vain paikallisesti                                                                                                       |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP-palvelin — käynnistää stdio-sillat + SSE-käsittelijät                                                                                |
-| `/api/cli-tools/runtime/`                                                                                | CLI-työkalujen suoritusympäristö — suorittaa mielivaltaista liitännäiskoodia                                                             |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Työkalukohtaiset asetusten kirjoittajat, jotka voivat muokata isäntäkoneen binaareja/määrityksiä                                         |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Sama `getCliRuntimeStatus()`-käynnistys kuin kuudella yllä olevalla sisarratkaisulla (GHSA-35fw-cv32-2373)                               |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI-työkalukartoitukset — käynnistävät työkalukohtaisesti komennon `command -v` / `--version` (GHSA-35fw-cv32-2373)                      |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravityn MITM-välityspalvelimen hallinta (käynnistää järjestelmän välityspalvelimen / ohjaa liikenteen siihen)                       |
-| `/api/modality-bridge/video/`                                                                            | Vain luotettuun silmukkaliitäntään rajattu Video Bridge -suoritusympäristön tarkistus ja sisäinen poimintasilta                          |
-| `/api/services/`                                                                                         | Upotetut palvelut (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + käynnistys                                              |
-| `/dashboard/providers/services/`                                                                         | Käänteinen välityspalvelin upotettujen palvelujen käyttöliittymiin                                                                       |
-| `/api/tunnels/cloudflared`                                                                               | Asentaa/käynnistää cloudflared-binäärin                                                                                                  |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Asentaa/hallitsee tailscaled-palvelua isäntäkoneella                                                                                     |
-| `/api/copilot/`                                                                                          | Todentamaton LLM-ajuri — oletusarvoisesti vain CLI-käyttöön                                                                              |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — käynnistää MITM-palvelimen + muokkaa DNS-asetuksia                                                                         |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy-kuuntelija + järjestelmän välityspalvelin                                                                 |
-| `/api/settings/mitm`                                                                                     | Ottaa MITM-sieppauksen käyttöön (järjestelmätason välityspalvelimen tila)                                                                |
-| `/api/issue-agent/`                                                                                      | Ongelma-agentti — käynnistää paikallisia työkaluja repositoriota vasten                                                                  |
-| `/api/plugins/`, `/api/plugins`                                                                          | Liitännäiset — lataa/suorittaa käyttäen `worker_threads` + `child_process`                                                               |
-| `/api/middleware/`                                                                                       | Käyttäjän väliohjelmisto — lataa/suorittaa operaattorin koodia prosessin sisällä                                                         |
-| `/api/system/version`                                                                                    | Automaattinen päivitys (vain POST; GET/HEAD/OPTIONS vapautettu) — käynnistää `git checkout` + `npm install`                              |
-| `/api/db-backups/exportAll`                                                                              | Käynnistää `tar`-komennon vientiarkistoa varten                                                                                          |
-| `/api/local/`                                                                                            | Yhden napsautuksen paikalliset käynnistimet (tällä hetkellä Redis) — käynnistää podman/docker                                            |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom-välityspalvelimen elinkaari — käynnistää Python-CLI:n / lähettää signaaleja PID:lle                                             |
-| `/api/jobs`, `/api/jobs/`                                                                                | Töiden suorituksen hallinta — suorittaa ajastettuja töitä isäntäkoneella                                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` ennen tunnistetietojen tuontia                                                                           |
-| `/api/oauth/kiro/auto-import`                                                                            | Lukee Kiro CLI:n tunnistetiedostot isäntäkoneelta                                                                                        |
-| `/api/skills/collect/`                                                                                   | Taitojen keräys — tunnistaa/asentaa paikallisia työkaluja                                                                                |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Taitokäsittelijän rekisteröinti ja suoritus — mahdollistaa hiekkalaatikkosäilön käynnistämisen (GHSA-jx89)                               |
-| `/api/discovery/`                                                                                        | Paikallisverkon ja palveluntarjoajien etsintäkyselyt                                                                                     |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Käynnistää käyttöliittymällisen selaimen ja VNC-istunnon vuorovaikutteisia kirjautumisia varten                                          |
-| `/api/acp/agents`                                                                                        | ACP — etsii ja käynnistää paikallisia CLI-agenttibinäärejä                                                                               |
-| `/api/resilience/connections`                                                                            | Tilikohtainen vikasietoisuuden JSON (jäähdytys, katkaisija, lukitus). Hallintapaneelin HTML ei ole rajattu vain paikalliseen käyttöön.   |
-| `/api/providers/cursor/agent-availability`                                                               | Hallintapaneelin asennuskehotteen tarkistus — käynnistää komennon `cursor-agent status --format json`                                    |
-| `/api/providers/{id}/login` (regex)                                                                      | Käynnistää käyttöliittymällisen Playwright Chromiumin verkkopohjaista evästekirjautumista varten                                         |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manuaalinen käyttöliittymällinen työnkulku + istuntopohjainen automaattinen puhelin-/tekstiviestikirjautuminen (käynnistää Playwrightin) |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Cursor-istunnon manuaalinen uusiminen — aktivoi `cursor-agent`-agentin                                                                   |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnosoi paikallisen Codex CLI -asennuksen (käynnistää binäärin)                                                                        |
+| Etuliite / kuvio                                                                                         | Miksi se on vain paikallinen                                                                                |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP palvelin — synnyttää stdio siltoja + SSE käsittelijät                                                   |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — suorittaa mielivaltaisen laajennuskoodin                                                 |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Työkalukohtaisten asetusten kirjoittajat, jotka voivat koskettaa isäntäkoneen työkalua binaries/config      |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Sama `getCliRuntimeStatus()` spawn kuin kuusi yllä olevaa sisarusta (GHSA-35fw-cv32-2373)                   |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventory anturit — spawn `command -v` / `--version` työkalua kohti (GHSA-35fw-cv32-2373)               |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM -välityspalvelinohjaus (spawns/points järjestelmän välityspalvelin)                        |
+| `/api/modality-bridge/video/`                                                                            | Tiukka luotetun silmukan videosillan ajonaikainen anturi ja sisäinen poistosilta                            |
+| `/api/services/`                                                                                         | Sulautetut palvelut (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                    |
+| `/dashboard/providers/services/`                                                                         | Käänteinen välityspalvelin sulautetun palvelun UIs                                                          |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns the cloudflared binääri                                                                     |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled isännässä                                                                      |
+| `/api/copilot/`                                                                                          | Todentamaton LLM -ohjain — CLI-vain oletuksena                                                              |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — synnyttää MITM -palvelimen + DNS -muokkauksia                                                 |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-välityspalvelimen kuuntelija + järjestelmän välityspalvelin                        |
+| `/api/settings/mitm`                                                                                     | Ottaa käyttöön MITM kuuntelun (järjestelmätason välityspalvelimen tila)                                     |
+| `/api/issue-agent/`                                                                                      | Liikkeeseenlaskija — luo paikallisia työkaluja repoa vastaan                                                |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — load/execute kautta `worker_threads` + `child_process`                                            |
+| `/api/middleware/`                                                                                       | Käyttäjän väliohjelmisto — loads/executes -operaattorikoodi kesken                                          |
+| `/api/system/version`                                                                                    | Automaattinen päivitys (vain POST ; GET/HEAD/OPTIONS vapautettu) — synnyttää `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Syntyy `tar` vientiarkistoon                                                                                |
+| `/api/local/`                                                                                            | Paikalliset kantoraketit yhdellä napsautuksella (Redis tänään) — synnyttää podman/docker                    |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Päätilan välityspalvelimen elinkaari — synnyttää pythonin CLI / signaalit PID                               |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job Runner Control — suorittaa ajoitetun isäntäpuolen työn                                                  |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` ennen krediittien tuontia                                                   |
+| `/api/oauth/kiro/auto-import`                                                                            | Lukee Kiro CLI -tunnistetiedostot isännästä                                                                 |
+| `/api/skills/collect/`                                                                                   | Taitokokoelma — detects/installs paikalliset työkalut                                                       |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Taidonkäsittelijän rekisteröinti + suoritus — saavuttaa hiekkalaatikon kontti spawn (GHSA-jx89)             |
+| `/api/discovery/`                                                                                        | Paikalliset network/provider -luotaimet                                                                     |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Muodostaa selaimen + VNC -istunnon interaktiivisia kirjautumisia varten                                     |
+| `/api/acp/agents`                                                                                        | ACP — löytää ja synnyttää paikallisia CLI -agenttibinaareja                                                 |
+| `/api/resilience/connections`                                                                            | Tilikohtainen joustavuus JSON (jäähdytys, katkaisija, lukitus). Kojelauta HTML ei ole vain paikallinen.     |
+| `/api/providers/cursor/agent-availability`                                                               | Kojelaudan asennus-nudge-tarkistus — synnyttää `cursor-agent status --format json`                          |
+| `/api/providers/{id}/login` (säännöllinen)                                                               | Julkaisee huikean Playwright Chromiumin verkkoevästekirjautumiseen                                          |
+| `/api/providers/volcengine-plan/connect` (säännöllinen)                                                  | Manuaalinen headful flow + istuntopohjainen phone/SMS automaattinen sisäänkirjautuminen (spawns Playwright) |
+| `/api/providers/{id}/refresh-cursor` (säännöllinen)                                                      | Manuaalinen Cursor istunnon uusiminen — painaa `cursor-agent`                                               |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (säännöllinen)                                            | Diagnosoi paikallisen Codex CLI -asennuksen (suunnittelee binaarin)                                         |
 
 **Vastaus rikkomukseen:** `403 LOCAL_ONLY`
 
-#### Manage-käyttöalueen poikkeus
+#### Hallinnoi laajuus carve-out
 
-Osaa LOCAL_ONLY-poluista VOIDAAN käyttää myös muusta kuin loopback-osoitteesta, jos ja
-vain jos pyyntö sisältää `Authorization: Bearer <api-key>` -otsakkeen, jonka
-metatietoihin sisältyy käyttöalue `manage` (tai `admin`). Poikkeus otetaan käyttöön
-nimenomaisesti polkukohtaisesti `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-asetuksella, joten
-kaikkien uusien LOCAL_ONLY-polkujen oletuksena säilyy tiukka loopback-rajoitus. Todentamattomat
-pyynnöt ja pyynnöt, joiden avaimilla ei ole manage-käyttöaluetta, hylätään edelleen vastauksella
-`403 LOCAL_ONLY`.
+Osajoukkoa LOCAL_ONLY -polkuista MAY voidaan käyttää myös ei-paluupalkasta, jos ja vain, jos pyyntö sisältää `Authorization: Bearer <api-key>`, jonka metatiedot sisältävät `manage` -alueen (tai `admin`). Carve-out on portitettu eksplisiittisesti polkukohtaisesti `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kautta, joten minkä tahansa uuden LOCAL_ONLY polun oletusarvo on edelleen tiukka silmukka. Todentamattomat pyynnöt ja pyynnöt, joissa on ei-hallinta-avaimia, hylätään edelleen komennolla `403 LOCAL_ONLY`.
 
-Tällä hetkellä ainoa ohitettava etuliite on `/api/mcp/`. `/api/cli-tools/runtime/` ja
-`/api/services/` on jätetty tarkoituksella ulkopuolelle, koska ne voivat käynnistää mielivaltaisia
-aliprosesseja (`npm install`, `node`), mikä on juuri se CVE-luokka, jonka
-LOCAL_ONLY-taso on tarkoitettu estämään.
+Nykyään ainoa ohitettavissa oleva etuliite on `/api/mcp/`. `/api/cli-tools/runtime/` ja `/api/services/` on tarkoituksella jätetty pois, koska ne voivat synnyttää mielivaltaisia aliprosesseja (`npm install`, `node`), joka on täsmälleen CVE luokka, jota LOCAL_ONLY taso estää.
 
-**#7895 — `mcp:connect`-käyttöalueen rajaus:** `/api/mcp/`-poikkeus hyväksyy MYÖS
-Bearer-avaimen, jolla on suppea `mcp:connect`-käyttöalue
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), mikä tarkistetaan
-`hasMcpConnectOrManageScope()`-funktiolla tiedostossa `src/server/authz/policies/management.ts`.
-Tämä on rajattu VAIN polkuun `/api/mcp/` — `mcp:connect` ei myönnä mitään oikeuksia millään muulla
-hallintareitillä (mukaan lukien kaikki muut LOCAL_ONLY-ohituksen etuliitteet, jos sellainen
-joskus lisättäisiin), ja se on tarkoituksella jätetty pois
-`MANAGEMENT_API_KEY_SCOPES`-joukosta. Avaimen `manage`/`admin`-käyttöalue läpäisee
-poikkeuksen edelleen täsmälleen kuten ennenkin; `mcp:connect` on vähäisempien käyttöoikeuksien vaihtoehto
-MCP:tä käyttäville etäkutsujille, joiden ei pitäisi tarvita laajoja hallintaoikeuksia.
+**#7895 — `mcp:connect` kapea alue:** `/api/mcp/` carve-out ALSO hyväksyy siirtotieavaimen, jossa on kapea `mcp:connect` alue (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), joka tarkistetaan `hasMcpConnectOrManageScope()` kautta `src/server/authz/policies/management.ts`:ssä. Tämä koskee `/api/mcp/` ONLY — `mcp:connect` ei myönnä mitään millään muulla hallintareitillä (mukaan lukien joka toinen LOCAL_ONLY ohitusetuliite, jos sellainen koskaan lisätään), ja se on tarkoituksella jätetty pois `MANAGEMENT_API_KEY_SCOPES` sta. Avain, jossa on `manage`/`admin`, välittää edelleen carve-outin täsmälleen kuten ennenkin; `mcp:connect` on alhaisempi etuoikeus vaihtoehto vain etä-MCP-soittajille, joiden ei pitäisi tarvita laajaa hallintaoikeutta.
 
-| Pyyntö                                                                     | Polku                      | Tulos                         |
-| -------------------------------------------------------------------------- | -------------------------- | ----------------------------- |
-| Muu kuin loopback, ei Bearer-avainta                                       | `/api/mcp/*`               | 403 LOCAL_ONLY                |
-| Muu kuin loopback, Bearer-avaimella `manage`-käyttöalue                    | `/api/mcp/*`               | Sallitaan                     |
-| Muu kuin loopback, Bearer-avaimella `mcp:connect`-käyttöalue               | `/api/mcp/*`               | Sallitaan                     |
-| Muu kuin loopback, Bearer-avain ilman `manage`/`mcp:connect`-käyttöaluetta | `/api/mcp/*`               | 403 LOCAL_ONLY                |
-| Muu kuin loopback, Bearer-avaimella `mcp:connect`-käyttöalue               | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
-| Muu kuin loopback, Bearer-avaimella `manage`-käyttöalue                    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
-| Loopback, mikä tahansa Bearer-avain tai ei avainta                         | mikä tahansa LOCAL_ONLY    | Sallitaan (portti läpäistään) |
+| Pyytää                                               | Polku                      | Tulos                 |
+| ---------------------------------------------------- | -------------------------- | --------------------- |
+| Non-loopback, ei kantajaa                            | `/api/mcp/*`               | 403 LOCAL_ONLY        |
+| Non loopback, Kantolaite `manage` tähtäimellä        | `/api/mcp/*`               | Salli                 |
+| Non loopback, Kantolaite `mcp:connect` tähtäimellä   | `/api/mcp/*`               | Salli                 |
+| Non-loopback, siirtotie ilman `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY        |
+| Non loopback, Kantolaite `mcp:connect` tähtäimellä   | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
+| Non loopback, Kantolaite `manage` tähtäimellä        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
+| Loopback, any/no Bearer                              | mikä tahansa LOCAL_ONLY    | Salli (portti kulkee) |
 
-#### Ohjeita ylläpitäjille ja auditointi
+#### Operaattoreiden ohjaus ja auditointi
 
-Jos käytät OmniRoutea käänteisen välityspalvelimen tai tunnelin (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) takana, loopback-tarkistus suojaa edelleen edellä mainittuja
-käynnistystoimintoja mahdollistavia reittejä — pyyntö, jonka asiakasosoite ei ole loopback-osoite, hylätään
-vastauksella `403 LOCAL_ONLY` **ennen todennuksen suorittamista**, joten vuotanut JWT ei voi käynnistää
-prosessia. Ylläpitäjälle jää kaksi vastuuta:
+Jos suoritat OmniRoute käänteisen välityspalvelimen tai tunnelin (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) takana, silmukkatarkistus silti suojaa spawn-kykyisiä reittejä — yläpuolella. Pyyntö, jonka asiakasosoite on ei-palautus, hylätään komennolla `403 LOCAL_ONLY`** ennen kuin todennus suoritetaan** , joten vuotanut JWT ei pääse kutemaan. Kaksi operaattorin vastuuta säilyy:
 
-- **Älä "korjaa" 403-virhettä väärentämällä asiakkaan IP-osoitetta loopback-osoitteeksi.** Asetus
-  `X-Forwarded-For: 127.0.0.1` tai välityspalvelin, joka kirjoittaa lähdeosoitteen uudelleen
-  loopback-osoitteeksi, avaa uudelleen juuri sen RCE-haavoittuvuusluokan, jonka tämä taso sulkee. Julkaise
-  hallintapaneeli/API välityspalvelimen kautta — älä koskaan prosesseja käynnistäviä reittejä.
-- **Pidä manage-scope-ohitus mahdollisimman rajattuna.** Vain `/api/mcp/` voidaan ohittaa, ja
-  vain `manage`-scopea käyttävällä API-avaimella. Kohteen `SPAWN_CAPABLE_PREFIXES` arvoja ei voi koskaan
-  lisätä ohitusluetteloon — zod-skeema hylkää ne ja
-  `isLocalOnlyBypassableByManageScope` estää ne ajon aikana (syvyyssuuntainen suojaus),
-  mitä hallintapaneelin ilmaisu "ohitettavaksi tekeminen ei ole mahdollista" tarkoittaa. Sama
-  estoluettelo sisältää myös muutamia LOCAL_ONLY-reittejä, jotka eivät käynnistä prosesseja mutta jotka eivät myöskään koskaan saa olla
-  etäkäytettävissä — `/api/oauth/kiro/auto-import` (lukee isäntäkoneen paikallisia Kiro-
-  tunnistetiedostoja), `/api/discovery/` ja `/api/issue-agent/`. Myös ajonaikainen
-  tilannevedoksen lataaja poistaa tällaiset merkinnät tallennetulta asetusriviltä, eikä
-  vanha JSON-tuonti (`/api/settings/import-json`) koskaan kirjoita ohitusavaimia.
-  Jokaisen `LOCAL_ONLY_API_PREFIXES`-merkinnän on joko oltava estoluettelossa tai
-  tarkistettu ohituskelpoiseksi (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dynaamisia segmenttejä
-  ja staattisia polkuja sisältävät prosesseja käynnistävät reitit kohteen `/api/providers/` alla (esim. `/login`,
-  `/refresh-cursor`) kattaa säännöllisiin lausekkeisiin perustuva `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS`-kumppani tiedostossa
-  `src/shared/constants/spawnCapablePrefixes.ts`, ei yksitasoinen
-  `SPAWN_CAPABLE_PREFIXES`-taulukko — yksitasoisen taulukon pitäisi kattaa
-  koko `/api/providers/`-etuliite niiden havaitsemiseksi, mikä laajentaisi liikaa reittipuuta,
-  jota etähallintapaneelit käyttävät perustellusti palveluntarjoajien CRUD-toimintoihin.
+- **Älä "korjaa" 403:a väärentämällä asiakas IP silmukaksi.** Asettamalla `X-Forwarded-For: 127.0.0.1` tai välityspalvelin, joka kirjoittaa lähdeosoitteen uudelleen silmukaksi, avaa uudelleen tarkalleen sen RCE luokan, jonka tämä taso sulkee. Paljasta dashboard/API välityspalvelimen — kautta, älä koskaan spawn-kykyisiä reittejä.
+- **Pidä hallinnan laajuuden ohitus minimaalisena.** Vain `/api/mcp/` on ohitettavissa ja vain `manage` -scoped API -näppäimellä. `SPAWN_CAPABLE_PREFIXES` ei voi koskaan lisätä ohituslistalle — zod-skeema hylkää ne ja `isLocalOnlyBypassableByManageScope` kieltää ne ajon aikana (defence-in-depth), mitä kojelauta tarkoittaa "ei voida tehdä ohitettavaksi". Samassa estolistassa on myös muutamia LOCAL_ONLY reittejä, jotka eivät synny, mutta eivät saa koskaan olla etäyhteydessä joko — `/api/oauth/kiro/auto-import` (lukee paikallisia Kiro tunnistetiedostoja), `/api/discovery/` ja `/api/issue-agent/`. Ajonaikainen tilannevedoslataaja myös pudottaa tällaiset merkinnät tallennetuilta asetusriviltä, ja vanha JSON -tuonti (`/api/settings/import-json`) ei koskaan kirjoita ohitusavaimia. Jokaisen `LOCAL_ONLY_API_PREFIXES` merkinnän on oltava joko estoluettelossa tai tarkistettava ohituskelpoiseksi (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dynaamisen segmentin ja staattisen polun spawn-kykyiset reitit `/api/providers/` alla (esim. `/login`, `/refresh-cursor`) katetaan `src/shared/constants/spawnCapablePrefixes.ts` n regex-pohjaisella `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` -kumppanilla, ei litteällä `SPAWN_CAPABLE_PREFIXES` taulukolla — tasaisen taulukon tulisi kattaa koko `/api/providers/` reitti-etuliite to daade. käyttää laillisesti palveluntarjoajalle CRUD.
 
-**Käytön auditointi** — varmista seuraavasti, ettei mikään isäntäkoneen ulkopuolinen taho pääse näille reiteille:
+**Tarkastusoikeus** — varmistaaksesi, että mikään muu isäntä ei saavuta näitä reittejä:
 
-- Avaa **Valtuutusinventaario** sivulla `/dashboard/settings/security`: se näyttää
-  reaaliaikaisen LOCAL_ONLY-etuliiteluettelon, ohitettavissa olevat etuliitteet sekä käännösaikaisen
-  prosesseja käynnistävän joukon ("ohitettavaksi tekeminen ei ole mahdollista").
-- Hae reverse proxy -palvelimen / käyttölokeista yllä olevia etuliitteitä yhdessä muun kuin
-  loopback-asiakasosoitteen kanssa. Jos tällainen osuma palautti arvon `200` arvon
-  `403 LOCAL_ONLY` sijaan, välityspalvelin peittää asiakkaan todellisen IP-osoitteen — korjaa välityspalvelin.
-- OmniRouten lokeissa näkyvä `403 LOCAL_ONLY` jollekin näistä poluista tarkoittaa, että suojaus
-  toimii tarkoitetulla tavalla, eikä kyse ole piilotettavasta virheestä.
+- Avaa** Valtuutusluettelo** `/dashboard/settings/security`:ssa: se tekee live- LOCAL_ONLY -etuliiteluettelosta, joka etuliitteet ovat ohitettavissa, ja käännösajan spawn-kykyiset ("ei voida tehdä ohitettavaksi") asetettuna.
+- Grep käänteisen välityspalvelimen / pääsylokit yllä oleville etuliitteille yhdistettynä ei-paluuasiakkaan osoitteeseen. Jokainen tällainen osuma, joka palautti `200` `403 LOCAL_ONLY` sijaan, tarkoittaa, että välityspalvelin peittää todellisen asiakkaan IP — korjaa välityspalvelimen.
+- `403 LOCAL_ONLY` OmniRoute:n lokeissa jollekin näistä poluista tarkoittaa, että vartija toimii tarkoitetulla tavalla, ei estettävä virhe.
 
-#### Etäkäytettävät reitit, joissa kutsukohdekohtainen tarkistusportti
+#### Kaukosäädettävät reitit soittopaikan luotainportilla
 
-Joidenkin reittien on pysyttävä etähallintapaneelin käytettävissä, mutta suoritettava isäntäpuolen tarkistus
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) paikallisille kutsujille.
-Niitä ei ole luokiteltu LOCAL_ONLY-reiteiksi `GET`-pyynnöissä; sen sijaan käsittelijä lukee luotetun vertaisosapuolen arvion
-funktiolla `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ja suorittaa tarkistuksen vain
-`loopback`- / `lan`-kutsujille. `remote`-kutsuja saa saman vastausrakenteen, joka muodostetaan
-prosesseja käynnistämättömistä lähteistä (tallennettu tila, asetukset, tiedostojärjestelmätarkistukset) ja merkitään arvolla `probed: false`.
+Joidenkin reittien on oltava tavoitettavissa etähallintapaneelista, mutta niissä on suoritettava isäntäpuolen anturi (`which <binary>`, `<binary> --version`, `tailscale status --json`) paikallisia soittajia varten. Ne eivät ole LOCAL_ONLY `GET`; sen sijaan käsittelijä lukee luotetun vertaisarvion komennolla `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ja suorittaa vain `loopback` / `lan` -soittajien luotauksen. `remote` soittaja saa saman vastausmuodon, joka on rakennettu ei-kuteutuvista lähteistä (pysyvä tila, asetukset, fs-tarkistukset), merkitty `probed: false`.
 
-| Reitti                                                                     | Etäkutsujilta ohitettava tarkistus                                            |
-| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`               | CLI:n ajonaikainen tarkistus (`allowLocalRuntimeProbe`) ja CLI-varakäynnistys |
-| `GET /api/headroom/status`                                                 | `which headroom`-tarkistus ja pythonin `--version`-tarkistukset               |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`           | `which tailscale`, `tailscale status/funnel --json`, `which brew`             |
-| `GET /api/tunnels/cloudflared` (`GET` vapautettu LOCAL_ONLY-rajoituksesta) | `which cloudflared`-PATH-haku                                                 |
+| Reitti                                                           | Anturi ohitettiin etäsoittajien osalta                            |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) ja CLI-varmistuspawn |
+| `GET /api/headroom/status`                                       | `which headroom` ja python `--version` -koettimet                 |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew` |
+| `GET /api/tunnels/cloudflared` (GET-vapautettu LOCAL_ONLY:stä)   | `which cloudflared` PATH haku                                     |
 
-Uuden isäntää tarkistavan lukureitin on noudatettava samaa mallia tai se on luokiteltava
-suoraan LOCAL_ONLY-reitiksi.
+Uusi lukureitti, joka tutkii isännän, noudattaa samaa kaavaa tai luokitellaan suoraan LOCAL_ONLY.
 
 ### Taso 2 — ALWAYS_PROTECTED
 
-**Pakottaja:** `isAlwaysProtectedPath(path)` → ohita `requireLogin=false`-ohitus
-**Ohitus:** Ei mitään, kun `requireLogin=false`; JWT vaaditaan aina
+**Täytäntöönpano:** `isAlwaysProtectedPath(path)` → ohita `requireLogin=false` ohitus** Ohittaa:** Ei mitään kun `requireLogin=false`; JWT vaaditaan aina
 
-Nämä reitit suorittavat tuhoavia tai peruuttamattomia toimintoja. Niiden salliminen "salasanattomassa"
-asennuksessa tarkoittaisi, että kuka tahansa samassa lähiverkossa voisi tyhjentää tietokannan tai lopettaa
-palvelinprosessin.
+Nämä reitit ovat tuhoisia tai peruuttamattomia. Niiden salliminen "ei salasanaa" -asennuksessa tarkoittaisi, että kuka tahansa samassa LAN oleva käyttäjä voisi pyyhkiä tietokannan tai tappaa palvelinprosessin.
 
-| Polku                                     | Syy                                                                              |
-| ----------------------------------------- | -------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Lopettaa palvelinprosessin                                                       |
-| `/api/settings/database`                  | Tietokannan vienti, tuonti ja tyhjennys                                          |
-| `/api/db-backups`                         | Pääsy tietokannan täydellisiin varmuuskopioarkistoihin                           |
-| `/api/settings/export-json`               | Vie koko asetusobjektin (mukaan lukien salaisuudet)                              |
-| `/api/settings/import-json`               | Korvaa koko asetusobjektin                                                       |
-| `/api/providers/health-autopilot/actions` | Suorittaa autopilotin korjaustoimenpiteitä                                       |
-| `/api/settings/obsidian`                  | Luo uudelleenkäytettävät WebDAV-tunnukset mille tahansa holvin juurihakemistolle |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                     |
+| Polku                                     | Syy                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| `/api/shutdown`                           | Lopettaa palvelinprosessin                                                      |
+| `/api/settings/database`                  | Tietokannan vienti, tuonti ja tyhjennys                                         |
+| `/api/db-backups`                         | Täysi tietokannan varmuuskopiointi arkistoon                                    |
+| `/api/settings/export-json`               | Vie koko asetusblobin (myös salaisuudet)                                        |
+| `/api/settings/import-json`               | Korvaa koko asetusblobin                                                        |
+| `/api/providers/health-autopilot/actions` | Suorittaa autopilotin korjaustoimia                                             |
+| `/api/settings/obsidian`                  | Tekee uudelleenkäytettäviä WebDAV creds -merkkejä mille tahansa holvin juurelle |
+| `/api/relay/tokens`                       | Rahaa, luetteloi, muokkaa ja peruuttaa välitystokeneja                          |
+| `/api/agent-skills/generate`              | Kirjoittaa ja karsii taitokansioita isännässä                                   |
+| `/api/skills/marketplace/install`         | Asentaa globaalin taidon jokaiselle avaimelle                                   |
+| `/api/skills/skillssh/install`            | Asentaa globaalin taidon jokaiselle avaimelle                                   |
+| `/api/cli-tools/apply`                    | Kirjoittaa uudelleen operaattorin isännän CLI -kokoonpanon                      |
+| `/api/cli-tools/guide-settings`           | Kirjoittaa opaspohjaisia CLI -konfiguraatiotiedostoja                           |
+| `/api/cli-tools/hermes-agent-settings`    | Kirjoittaa Hermes-agentin konfiguraation                                        |
+| `/api/cli-tools/backups`                  | Palauttaa ja poistaa CLI asetusten varmuuskopiot                                |
+| `/api/log-export`                         | Lähettää puhelulokit määritettyyn kohteeseen                                    |
+| `/api/restart`                            | Käynnistää palvelinprosessin uudelleen                                          |
 
 **Vastaus rikkomukseen:** `401 Authentication required`
 
-`/api/settings/obsidian` kattaa alireittinsä `/webdav`: `POST` osoittaa WebDAV-tiedostopalvelun —
-jota mukautettu Node-kerros palvelee ennen Next.js:ää tämän käsittelyketjun ulkopuolella — kutsujan valitsemaan juurihakemistoon
-ja palauttaa juuri luodut Basic-tunnukset, `DELETE` kierrättää ne, ja ylemmän tason `POST` tallentaa
-Obsidianin REST API -tunnuksen. GHSA-62vw peitti vain salasanan paljastumisen `GET`-pyynnössä; tunnusten myöntäminen
-oli edelleen oletusarvoisesti sallivalla tasolla (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` lisäksi
-hylkää holvin, joka on datahakemisto, sijaitsee sen sisällä tai sisältää sen.
+`/api/settings/obsidian` peittää `/webdav` lapsensa: `POST` osoittaa mukautetun solmukerroksen palveleman WebDAV -tiedostopalvelun — ennen Next.js, tämän liukuhihnan ulkopuolella — soittajan valitsemassa juurissa ja toistaa juuri lyötyjä perusvaltuuksia, `DELETE` kiertää niitä ja ylemmän tason `POST` API REST Obsidian. GHSA-62vw peitti vain `GET` -salasanan paljastamisen; liikkeeseenlasku oli edelleen vika-avaamistasolla (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` lisäksi kieltäytyy varastosta, joka on, sijaitsee sisällä tai sisältää tietohakemiston.
 
-#### Tunnistetietojen vienti on sallittu vain ylläpitäjälle
+#### Tunnistetietojen vienti ja palautus tapahtuvat vain operaattorin toimesta
 
-Ylempi taso päättää vain, vaaditaanko _jokin_ tunnistetieto. Tallennettuja tunnistetietoja lataavat
-reitit tekevät käsittelijässä toisen tarkistuksen: `GET /api/settings/export-json` (salauksen purun
-jälkeiset palveluntarjoajayhteydet ja käsittelemättömät API-avaimet), `GET /api/db-backups/export` (SQLite-tiedosto) ja
-`GET /api/db-backups/exportAll` (koko arkisto) kutsuvat funktiota `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Se hyväksyy hallintapaneeli-istunnon, paikallisen CLI-subjektin tai
-esiintymän, jossa kirjautuminen on poistettu käytöstä, ja vastaa koodilla `403` kaikkien käyttöalueiden API-avaimille (mukaan lukien `manage`
-ja `admin`) sekä `oma_`-käyttötunnuksille. Synkronointitunnusten myöntäminen (`POST /api/sync/tokens`) käyttää
-samaa apufunktiota sekä luotettua sisäisen palvelun loopback-tunnusta.
+Yllä oleva taso päättää vain, tarvitaanko _jotkin_ tunnistetiedot. Reitit, jotka lataavat tallennettuja tunnistetietoja, lisäävät toisen tarkistuksen käsittelijään: `GET /api/settings/export-json` (salatut palveluntarjoajan yhteydet ja raaka- API -avaimet), `GET /api/db-backups/export` ( SQLite -tiedosto) ja `GET /api/db-backups/exportAll` (täysi arkisto) kutsuvat `requireOperatorCredential()` kutsua (`src/lib/api/operatorCredential.ts`). Se hyväksyy kojelautaistunnon, paikallisen CLI -aiheen tai ilmentymän, jonka sisäänkirjautuminen on estetty, ja vastaa `403` API -näppäimiin minkä tahansa laajuuden (mukaan lukien `manage` ja `admin`) ja `oma_` käyttövaltuudet. Tuhoavilla vastineilla on sama raja: `POST /api/db-backups/import` (ladattu `.sqlite`, `dryRun=true` mukaan lukien), `POST /api/db-backups` (tallennettu varmuuskopion palauttaminen id:llä) ja `POST /api/settings/import-json` (vanha JSON -palautus) korvaavat elävän tietokannan tai koko settings/connections/API-key joukon, joten koneen tunnistetiedot eivät myöskään voi laukaista niitä. Palautuspisteiden tuhoamisessa on sama raja: `DELETE /api/db-backups` (puhdistus — säilyttää viimeisimmät N / pudotus D päivää vanhemmat) ja `PATCH /api/db-backups` (säilytysasetukset), koska jatkuva säilytys on täsmälleen sitä, mitä `cleanupDbBackups()` soveltaa jokaisen automaattisen varmuuskopioinnin jälkeen (`src/lib/db/backup.ts`), joten koneen valtuustieto, joka voisi tallentaa `keepLatest: 1`, karsiisi kaiken seuraavan. Luettelo ja varmuuskopioiden luominen (`GET`/`PUT /api/db-backups`) säilyttävät tavallisen hallinnan todennuksen. Synkronointitunnuksen myöntäminen (`POST /api/sync/tokens`) käyttää samaa apuohjelmaa sekä luotettua sisäisen palvelun palautustunnusta.
 
-#### Credential exports and restores are operator-only
+### Tuoreen asennuksen bootstrap on vain takaisinkytkentäinen — oikealta vertaiselta, ei `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
-
-### Uuden asennuksen alustaminen on sallittu vain loopback-yhteydestä — todellisen vastapään, ei `Host`-otsakkeen perusteella
-
-Kun hallintasalasanaa ei ole määritetty (eikä `INITIAL_PASSWORD`-muuttujaa ole asetettu), `isAuthRequired()` tiedostossa
-`src/shared/utils/apiAuth.ts` pitää anonyymin alustamisen avoinna **vain loopback-vastapäille**.
-Loopback määritetään luotetuista vastapääsignaaleista seuraavassa järjestyksessä: tunnuksella leimattu todellinen TCP-vastapää
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, jonka käytäntö näkee), käsittelyketjun oma
-`AUTHZ_HEADER_PEER_LOCALITY`-ratkaisu (jonka reittikäsittelijät näkevät ja johon luotetaan vain, kun
-`OMNIROUTE_PEER_STAMP_TOKEN` on asetettu) tai suorien kutsujien todellinen socket-vastapää. `Host`-otsaketta /
-`nextUrl.hostname`-arvoa ei koskaan käytetä, ja ensimmäisen salasanan asetus
-(`POST /api/settings/require-login`) on saman rajoituksen alainen sen sijaan, että se olisi avoin jokaiselle
-verkon vastapäälle (GHSA-7pq4-8pvv-rx7r). `managementPolicy` välittää oman `peerContext`-ratkaisunsa
-nimenomaisesti eteenpäin, joten ALKUPERÄISEN (ennen otsakkeiden poistamista vastaanotetun) pyynnön otsakkeet eivät koskaan ratkaise asiaa.
+Kun hallintasalasanaa ei ole määritetty (eikä `INITIAL_PASSWORD`), `isAuthRequired()` `src/shared/utils/apiAuth.ts` :ssä pitää anonyymin käynnistyksen auki** vain loopback-pelaajille** . Loopback päätetään luotetuista vertaissignaaleista järjestyksessä: token-leimattu todellinen TCP peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, mitä käytäntö näkee), putkilinjan oma `AUTHZ_HEADER_PEER_LOCALITY` päätös (mitä reitinkäsittelijät näkevät, luotetaan vain, kun `OMNIROUTE_PEER_STAMP_TOKEN` on asetettu) tai todellinen socket-peer suorille soittajille. `Host` / `nextUrl.hostname` ei koskaan kuulla, ja ensimmäisen salasanan kirjoitus (`POST /api/settings/require-login`) on saman rajoituksen alainen sen sijaan, että se olisi avoin kaikille verkon vertaisille (GHSA-7pq4-8pvv-rx7r). `managementPolicy` välittää oman `peerContext` tuomionsa eksplisiittisesti, joten ORIGINAL (pre-strip) -pyynnön otsikot eivät koskaan päätä sitä.
 
 ### Taso 3 — MANAGEMENT (oletus)
 
-Kaikki muut hallintareitit. Todennus vaaditaan, ellei `requireLogin=false` ole
-määritetty. CLI-tunnuksilla voidaan todentautua näille reiteille (loopback + kelvollinen HMAC).
+Kaikki muut hallintareitit. Todennus vaaditaan, ellei `requireLogin=false` ole määritetty. CLI -tunnukset voivat todentaa nämä reitit (loopback + valid HMAC).
 
 ## Arviointijärjestys
 
@@ -281,16 +174,12 @@ Vaiheen 1 manage-scope-haara on ainoa todennettu polku, joka voi täyttää
 LOCAL_ONLY-reitin vaatimukset; todennustaustajärjestelmän virhetila palauttaa 503:n (ei 403:a), jotta
 vanhentunut tietokanta ei huomaamatta lievennä tulosta muotoon "estä".
 
-## Uuden prosesseja käynnistävän reitin lisääminen
+## Lisätään uusi syntymiskykyinen reitti
 
-1. Lisää polun etuliite `LOCAL_ONLY_API_PREFIXES`-vakioon tiedostossa
-   `src/server/authz/routeGuard.ts`
-2. Lisää tiedostoon `tests/unit/authz/routeGuard.test.ts` testi, joka varmistaa,
-   että `isLocalOnlyPath()` palauttaa uuden etuliitteen kohdalla arvon true
-3. **Älä koskaan ohita tätä vaihetta** — katso ehdoton sääntö nro 15 tiedostossa `CLAUDE.md`
-4. Päätä: kuuluuko tämä reitti MYÖS `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-vakioon?
-   Oletusvastaus on **ei**. Ota se käyttöön vain, kun reitti voidaan turvallisesti antaa
-   manage-scope-haltijan käyttöön (eli se EI käynnistä mielivaltaista käyttäjän hallitsemaa koodia).
+1. Lisää polun etuliite kohtaan `LOCAL_ONLY_API_PREFIXES` `src/server/authz/routeGuard.ts`:ssä
+2. Lisää `tests/unit/authz/routeGuard.test.ts` testi, joka väittää, että `isLocalOnlyPath()` palauttaa tosi uudelle etuliitteelle
+3. **Älä koskaan ohita tätä vaihetta** — katso Kova sääntö #15 in `CLAUDE.md`
+4. Päätä: kuuluuko tämä reitti ALSO joukkoon `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`? Oletusvastaus on** ei** . Ota käyttöön vain, kun reitti on turvallista paljastaa hallinnan laajuuden haltijalle (eli synnyttääkö NOT mielivaltaista käyttäjän ohjaamaa koodia).
 
 ## Manage-scope-ohituksen sallivan polun lisääminen
 

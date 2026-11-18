@@ -101,7 +101,7 @@ describe("getEffectiveMode", () => {
   });
 
   it("returns default mode when no overrides", () => {
-    assert.equal(getEffectiveMode(baseConfig, null, 100), "lite");
+    assert.equal(getEffectiveMode(baseConfig, null, 100), "stacked");
   });
 
   it("returns combo override mode when present", () => {
@@ -110,12 +110,12 @@ describe("getEffectiveMode", () => {
       defaultMode: "off" as const,
       comboOverrides: { "my-combo": "lite" as const },
     };
-    assert.equal(getEffectiveMode(config, "my-combo", 100), "lite");
+    assert.equal(getEffectiveMode(config, "my-combo", 100), "stacked");
   });
 
-  it("returns lite when auto-trigger threshold reached", () => {
+  it("returns scoped lite when auto-trigger threshold reached", () => {
     const config = { ...baseConfig, defaultMode: "off" as const, autoTriggerTokens: 1000 };
-    assert.equal(getEffectiveMode(config, null, 1500), "lite");
+    assert.equal(getEffectiveMode(config, null, 1500), "stacked");
   });
 
   it("combo override takes precedence over auto-trigger", () => {
@@ -126,6 +126,23 @@ describe("getEffectiveMode", () => {
       comboOverrides: { "my-combo": "off" as const },
     };
     assert.equal(getEffectiveMode(config, "my-combo", 500), "off");
+  });
+});
+
+describe("safe lossy downgrade pipeline", () => {
+  it("uses the configured safe subset for a lossy routing override", () => {
+    const headroom = { engine: "headroom" as const, config: { minRows: 20 } };
+    const config: CompressionConfig = {
+      ...baseConfig,
+      comboOverrides: { "my-combo": "aggressive" },
+      stackedPipeline: [{ engine: "rtk", intensity: "standard" }, headroom, { engine: "lite" }],
+    };
+
+    assert.deepEqual(selectCompressionPlan(config, "my-combo", 0), {
+      mode: "stacked",
+      source: "routing-override",
+      stackedPipeline: [headroom, config.stackedPipeline?.[2]],
+    });
   });
 });
 
@@ -181,10 +198,10 @@ describe("selectCompressionStrategy resolves via the engines map (Task 7)", () =
   });
 });
 
-describe("engines map drives dispatch ONLY when explicit (zero behaviour change for legacy)", () => {
+describe("engines map drives dispatch ONLY when explicit", () => {
   it("legacy install (enginesExplicit false) ignores the backfilled engines map, uses defaultMode", () => {
-    // A backfilled map with rtk+caveman would derive "stacked", but a legacy install must keep
-    // its historical defaultMode until the operator saves via the panel.
+    // The backfilled map must not select rtk+caveman. The legacy Lite default runs
+    // as a scoped step so safe requests cannot clip tool results.
     const legacy: CompressionConfig = {
       ...DEFAULT_COMPRESSION_CONFIG,
       enabled: true,
@@ -192,7 +209,13 @@ describe("engines map drives dispatch ONLY when explicit (zero behaviour change 
       engines: { rtk: { enabled: true }, caveman: { enabled: true, level: "full" } },
       enginesExplicit: false,
     };
-    assert.equal(selectCompressionStrategy(legacy, null, 0), "lite");
+    assert.deepEqual(selectCompressionPlan(legacy, null, 0).stackedPipeline, [
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+    ]);
+    assert.equal(
+      selectCompressionStrategy(legacy, null, 0, undefined, undefined, {}, "allow-lossy"),
+      "lite"
+    );
   });
 
   it("explicit install (enginesExplicit true) uses the engines map over defaultMode", () => {
@@ -232,7 +255,7 @@ describe("enginesMapDerivesStackedPipeline", () => {
 
 describe("selectCompressionStrategy", () => {
   it("returns effective mode", () => {
-    assert.equal(selectCompressionStrategy(baseConfig, null, 100), "lite");
+    assert.equal(selectCompressionStrategy(baseConfig, null, 100), "stacked");
   });
 
   it("downgrades aggressive cache-control requests for caching-aware providers", () => {

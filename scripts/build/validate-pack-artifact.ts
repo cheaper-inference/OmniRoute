@@ -15,8 +15,11 @@ import {
 import { resolveNpmInvocation } from "./resolveNpmEntry.ts";
 import {
   PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
+  PACK_ARTIFACT_ALLOWED_PATH_MATCHERS,
   PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+  PACK_ARTIFACT_MAX_PACKED_BYTES,
   PACK_ARTIFACT_REQUIRED_PATHS,
+  exceedsPackedSizeBudget,
   findMissingArtifactPaths,
   findUnexpectedArtifactPaths,
   parseJsonValuesOutput,
@@ -142,6 +145,7 @@ try {
   const unexpectedPaths: string[] = findUnexpectedArtifactPaths(artifactPaths, {
     exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
     prefixPaths: PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+    pathMatchers: PACK_ARTIFACT_ALLOWED_PATH_MATCHERS,
   });
   const missingRequiredPaths: string[] = POLICY_ONLY
     ? []
@@ -197,11 +201,19 @@ try {
     }
   }
 
+  const overPackedBudget = exceedsPackedSizeBudget(packReport.size);
+  if (overPackedBudget) {
+    console.error(
+      `\n❌ Packed size ${formatBytes(packReport.size)} is over the ${formatBytes(PACK_ARTIFACT_MAX_PACKED_BYTES)} budget (PACK_ARTIFACT_MAX_PACKED_BYTES); npm rejected 3.8.54 with E413 at 206.1 MB.`
+    );
+  }
+
   if (
     unexpectedPaths.length > 0 ||
     missingRequiredPaths.length > 0 ||
     leakedTestPaths.length > 0 ||
-    missingMcpPaths.length > 0
+    missingMcpPaths.length > 0 ||
+    overPackedBudget
   ) {
     process.exit(1);
   }

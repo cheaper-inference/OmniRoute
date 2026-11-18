@@ -5,19 +5,32 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@omniroute/ui-kit/card";
 import { LoadingState } from "@omniroute/ui-kit/loading-state";
 import { Skeleton as KitSkeleton } from "@omniroute/ui-kit/skeleton";
+import {
+  Spinner as KitSpinner,
+  type SpinnerProps as KitSpinnerProps,
+} from "@omniroute/ui-kit/spinner";
 import { cn } from "@/shared/utils/cn";
-import Icon from "./Icon";
 
-type SpinnerSize = "sm" | "md" | "lg" | "xl";
+type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 type LoadingType = "spinner" | "page" | "skeleton" | "card";
 
-// Box and glyph share one size so the icon spins around its own centre.
-const SPINNER_PX: Record<SpinnerSize, number> = { sm: 16, md: 24, lg: 32, xl: 48 };
+// 12/16/24/32/48px. The kit box stops at 20px and calls that `md`, so the steps above `sm` keep
+// this scale with a utility, which beats the kit rule (`@layer components`).
+const SPINNER_BOX: Partial<Record<SpinnerSize, string>> = {
+  md: "size-6",
+  lg: "size-8",
+  xl: "size-12",
+};
 
 interface SpinnerProps extends HTMLAttributes<HTMLSpanElement> {
   size?: SpinnerSize;
   className?: string;
   label?: string;
+  /**
+   * Hidden from assistive technology and drawn in the surrounding text colour, for a spinner in a
+   * named button or next to text that already says what is loading. Ignores `label`.
+   */
+  decorative?: boolean;
 }
 
 interface PageLoadingProps {
@@ -37,26 +50,37 @@ interface LoadingProps extends HTMLAttributes<HTMLDivElement> {
   label?: string;
 }
 
-// Spinner loading — a labelled status with a decorative Lucide spinner.
-export function Spinner({ size = "md", className, label, ...props }: SpinnerProps) {
+// A separate component so a decorative spinner needs no translations.
+function StatusSpinner({
+  label,
+  className,
+  ...props
+}: Omit<KitSpinnerProps, "label"> & { label?: string }) {
   const t = useTranslations("common");
   const ariaLabel = label ?? t("loading");
   return (
-    <span
-      role="status"
+    <KitSpinner
       aria-live="polite"
       aria-label={ariaLabel}
-      className={cn("inline-flex items-center justify-center", className)}
+      label={ariaLabel}
+      className={cn("text-primary", className)}
       {...props}
-    >
-      <span className="sr-only">{ariaLabel}</span>
-      <Icon
-        name="progress_activity"
-        size={SPINNER_PX[size]}
-        className="text-primary animate-spin motion-reduce:animate-none"
-      />
-    </span>
+    />
   );
+}
+
+// Spinner loading — the kit spinner, a labelled status unless `decorative`.
+export function Spinner({
+  size = "md",
+  className,
+  label,
+  decorative = false,
+  ...props
+}: SpinnerProps) {
+  const kitSize = size === "xs" ? "xs" : "sm";
+  const box = cn(SPINNER_BOX[size], className);
+  if (decorative) return <KitSpinner size={kitSize} className={box} {...props} />;
+  return <StatusSpinner size={kitSize} className={box} label={label} {...props} />;
 }
 
 // Full page loading — the kit panel loader, centred over the viewport (route-level fallback).

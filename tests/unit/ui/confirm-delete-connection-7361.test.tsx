@@ -138,7 +138,7 @@ describe("confirm before removing a single connection (#7361)", () => {
   }
 
   function clickConfirmButton() {
-    const dialog = document.body.querySelector("[role='dialog']");
+    const dialog = document.body.querySelector("[role='alertdialog']");
     expect(dialog).toBeTruthy();
     const buttons = Array.from(dialog!.querySelectorAll("button"));
     const confirmButton = buttons.find((b) => b.textContent?.trim() === "Delete");
@@ -151,12 +151,12 @@ describe("confirm before removing a single connection (#7361)", () => {
       root.render(<Harness />);
     });
 
-    expect(document.body.querySelector("[role='dialog']")).toBeNull();
+    expect(document.body.querySelector("[role='alertdialog']")).toBeNull();
 
     clickDeleteButton();
 
     expect(fetchStub).not.toHaveBeenCalled();
-    expect(document.body.querySelector("[role='dialog']")).toBeTruthy();
+    expect(document.body.querySelector("[role='alertdialog']")).toBeTruthy();
   });
 
   it("includes the account name in the confirm dialog copy", async () => {
@@ -166,7 +166,7 @@ describe("confirm before removing a single connection (#7361)", () => {
 
     clickDeleteButton();
 
-    const dialog = document.body.querySelector("[role='dialog']");
+    const dialog = document.body.querySelector("[role='alertdialog']");
     expect(dialog?.textContent).toContain("Production Key");
   });
 

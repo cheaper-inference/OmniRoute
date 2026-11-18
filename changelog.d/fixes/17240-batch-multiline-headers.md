@@ -1,1 +1,0 @@
-- **fix(batch):** Preserve quoted multiline CSV headers when mapping batch input columns. ([#17240](https://github.com/diegosouzapw/OmniRoute/pull/17240)) — thanks @pacocartones

@@ -1,7 +1,7 @@
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { CLAUDE_WEB_FINGERPRINT } from "../../open-sse/config/claudeWebFingerprint.ts";
+import { claudeWebFingerprint } from "../../open-sse/config/claudeWebFingerprint.ts";
 import { ClaudeWebExecutor } from "../../open-sse/executors/claude-web.ts";
 import { transformToClaude } from "../../open-sse/executors/claude-web/payload.ts";
 import { __setTlsFetchOverrideForTesting } from "../../open-sse/services/claudeTlsClient.ts";
@@ -121,9 +121,10 @@ describe("Claude Web live request alignment", () => {
     });
 
     assert.equal(result.response.status, 200);
-    assert.equal(capturedHeaders?.["User-Agent"], CLAUDE_WEB_FINGERPRINT.userAgent);
-    assert.equal(capturedHeaders?.["Sec-Ch-Ua"], CLAUDE_WEB_FINGERPRINT.secChUa);
-    assert.equal(capturedHeaders?.["Sec-Ch-Ua-Platform"], CLAUDE_WEB_FINGERPRINT.secChUaPlatform);
+    const fingerprint = claudeWebFingerprint();
+    assert.equal(capturedHeaders?.["User-Agent"], fingerprint.userAgent);
+    assert.equal(capturedHeaders?.["Sec-Ch-Ua"], fingerprint.secChUa);
+    assert.equal(capturedHeaders?.["Sec-Ch-Ua-Platform"], fingerprint.secChUaPlatform);
     assert.equal(capturedHeaders?.Referer, "https://claude.ai/new");
   });
 

@@ -24,7 +24,11 @@ import { boundedMap } from "../../../src/lib/quota/boundedMap.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { toRecord } from "./scalars.ts";
-import { normalizeClaudeUsageQuotas, type NormalizedClaudeUsageQuotas } from "./claudeQuota.ts";
+import {
+  claudeUsageWindowsComplete,
+  normalizeClaudeUsageQuotas,
+  type NormalizedClaudeUsageQuotas,
+} from "./claudeQuota.ts";
 
 /** Run one usage request through the proxy when an id is present, else directly. */
 async function proxiedOrDirect(
@@ -44,8 +48,20 @@ const CLAUDE_CONFIG = {
   apiVersion: "2023-06-01",
 };
 
-/** A successful OAuth usage read is reused for this long before polling again. */
-export const CLAUDE_USAGE_SUCCESS_TTL_MS = 65_000;
+/**
+ * A successful OAuth usage read is reused for this long before polling again.
+ * Background pollers (quota cache, provider-limits sync, saturation signals) all
+ * go through here, so this is the effective polling interval per credential;
+ * a manual refresh (`forceRefresh`) skips it. Anthropic rate-limits this
+ * endpoint to a few calls per credential per hour.
+ */
+export const CLAUDE_USAGE_SUCCESS_TTL_MS = 15 * 60_000;
+/**
+ * Floor for a manual refresh: the dashboard sends one per open limits card (at most
+ * every 30 s, plus optional auto-refresh), so `forceRefresh` reuses a success younger
+ * than this instead of polling Anthropic again.
+ */
+export const CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS = 5 * 60_000;
 /** Cap on remembered credentials and on concurrent distinct polls. */
 const CLAUDE_USAGE_CACHE_MAX = 128;
 
@@ -61,15 +77,22 @@ export interface ClaudeUsageResult {
   extraUsage?: unknown;
   message?: string;
   bootstrap: ClaudeBootstrap | null;
+  /** The payload listed every window the account has (see isCompleteUsageReading). */
+  quotasComplete?: boolean;
   /** Set when the quota is the last known value served during a 429 cooldown. */
   _stale?: boolean;
   _staleSince?: string;
   _staleReason?: string;
+  /** Set when the plan windows come from a live response's rate-limit headers. */
+  _source?: "response-headers";
+  _observedAt?: string;
 }
 
 interface CachedClaudeUsage {
   value: ClaudeUsageResult;
   fetchedAt: number;
+  /** Set when the quota changed upstream (a reset claim): never reused, still the stale fallback. */
+  expired?: boolean;
 }
 
 // Keyed by sha256(accessToken) — raw tokens never sit as map keys.
@@ -79,6 +102,95 @@ const lastSuccessfulUsage = boundedMap<CachedClaudeUsage>(
   "lru"
 );
 const inFlightUsage = new Map<string, Promise<ClaudeUsageResult>>();
+
+interface ObservedClaudeUsage {
+  /** A `/api/oauth/usage`-shaped body (`five_hour` / `seven_day`) built from the headers. */
+  body: Record<string, unknown>;
+  observedAt: number;
+}
+
+const observedUsage = boundedMap<ObservedClaudeUsage>(
+  "claude-oauth-usage-headers",
+  CLAUDE_USAGE_CACHE_MAX,
+  "lru"
+);
+
+const UNIFIED_WINDOWS = [
+  ["5h", "five_hour"],
+  ["7d", "seven_day"],
+] as const;
+
+/**
+ * Remember the plan-window utilization Anthropic reports on every OAuth response
+ * (`anthropic-ratelimit-unified-{5h,7d}-utilization` 0..1 and `-reset` epoch seconds).
+ * `/api/oauth/usage` allows only a few calls per credential per hour and a refused call
+ * restarts its hour, so these headers are the reliable, free source of the same numbers.
+ */
+export function observeClaudeUsageHeaders(
+  accessToken: string | undefined,
+  headers: Headers | null | undefined,
+  now: number = Date.now()
+): void {
+  if (!accessToken || !headers || typeof headers.get !== "function") return;
+  const body: Record<string, unknown> = {};
+  for (const [suffix, field] of UNIFIED_WINDOWS) {
+    const raw = headers.get(`anthropic-ratelimit-unified-${suffix}-utilization`);
+    const utilization = raw === null || raw.trim() === "" ? Number.NaN : Number(raw);
+    if (!Number.isFinite(utilization) || utilization < 0) continue;
+    const reset = Number(headers.get(`anthropic-ratelimit-unified-${suffix}-reset`));
+    body[field] = {
+      utilization: Math.min(100, Math.round(utilization * 10_000) / 100),
+      resets_at: Number.isFinite(reset) && reset > 0 ? new Date(reset * 1000).toISOString() : null,
+    };
+  }
+  if (Object.keys(body).length === 0) return;
+  observedUsage.set(hashClaudeCredential(accessToken), { body, observedAt: now });
+}
+
+/** When the endpoint read behind `usage` was taken (NaN when unknown, 0 when there is none). */
+function endpointReadAt(usage: ClaudeUsageResult, cached: CachedClaudeUsage | undefined): number {
+  if (usage._stale) return Date.parse(String(usage._staleSince));
+  return usage.quotas ? (cached?.fetchedAt ?? 0) : 0;
+}
+
+/** Per-model weekly windows only come from the endpoint: keep them while that read is recent. */
+function recentEndpointRead(
+  cached: CachedClaudeUsage | undefined,
+  observedAt: number
+): ClaudeUsageResult | null {
+  if (!cached) return null;
+  return observedAt - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS ? cached.value : null;
+}
+
+/**
+ * Serve the plan windows from the latest response headers when they are newer than what
+ * the usage endpoint gave (a cached read, a stale read during a 429 cooldown, or only the
+ * rate-limit message). Other failures (expired auth, transport) stay visible.
+ */
+function preferNewerObservedUsage(key: string, usage: ClaudeUsageResult): ClaudeUsageResult {
+  const observed = observedUsage.get(key);
+  if (!observed) return usage;
+  if (!usage.quotas && usage.message !== RATE_LIMITED_MESSAGE) return usage;
+  const cached = lastSuccessfulUsage.get(key);
+  const readAt = endpointReadAt(usage, cached);
+  if (Number.isFinite(readAt) && observed.observedAt <= readAt) return usage;
+
+  const recentRead = recentEndpointRead(cached, observed.observedAt);
+  const fresh: ClaudeUsageResult = {
+    ...usage,
+    quotas: normalizeClaudeUsageQuotas(observed.body).quotas,
+    modelQuotas: recentRead?.modelQuotas ?? {},
+    extraUsage: recentRead?.extraUsage ?? null,
+    bootstrap: usage.bootstrap ?? null,
+    _source: "response-headers",
+    _observedAt: new Date(observed.observedAt).toISOString(),
+  };
+  delete fresh._stale;
+  delete fresh._staleSince;
+  delete fresh._staleReason;
+  delete fresh.message;
+  return fresh;
+}
 
 export function getClaudePlanLabel(...candidates: Array<string | null | undefined>): string | null {
   for (const candidate of candidates) {
@@ -116,13 +228,27 @@ function staleFromCache(cached: CachedClaudeUsage): ClaudeUsageResult {
  *
  * Polling policy per credential:
  *  - concurrent callers share one in-flight request;
- *  - a success is reused for CLAUDE_USAGE_SUCCESS_TTL_MS (`forceRefresh` skips this);
+ *  - a success is reused for CLAUDE_USAGE_SUCCESS_TTL_MS; `forceRefresh` shortens that
+ *    to CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS;
  *  - a 429 starts a Retry-After-aware cooldown during which the last known quota is
  *    served flagged `_stale` (or a rate-limit message when nothing is cached yet);
  *  - 401 reports expired authentication; only 404/405 fall back to the legacy
- *    settings/org endpoints.
+ *    settings/org endpoints;
+ *  - plan windows seen in a newer response's rate-limit headers replace an older read
+ *    (see observeClaudeUsageHeaders).
  */
 export function getClaudeUsage(
+  accessToken?: string,
+  connectionIdOrOptions?: string | { forceRefresh?: boolean },
+  maybeOptions: { forceRefresh?: boolean } = {}
+): Promise<ClaudeUsageResult> {
+  const usage = getClaudeUsageFromEndpoint(accessToken, connectionIdOrOptions, maybeOptions);
+  if (!accessToken) return usage;
+  const key = hashClaudeCredential(accessToken);
+  return usage.then((value) => preferNewerObservedUsage(key, value));
+}
+
+function getClaudeUsageFromEndpoint(
   accessToken?: string,
   connectionIdOrOptions?: string | { forceRefresh?: boolean },
   maybeOptions: { forceRefresh?: boolean } = {}
@@ -140,11 +266,10 @@ export function getClaudeUsage(
 
   const key = hashClaudeCredential(accessToken);
   const cached = lastSuccessfulUsage.get(key);
-  if (
-    cached &&
-    !options.forceRefresh &&
-    Date.now() - cached.fetchedAt < CLAUDE_USAGE_SUCCESS_TTL_MS
-  ) {
+  const reuseForMs = options.forceRefresh
+    ? CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS
+    : CLAUDE_USAGE_SUCCESS_TTL_MS;
+  if (cached && !cached.expired && Date.now() - cached.fetchedAt < reuseForMs) {
     return Promise.resolve(cached.value);
   }
 
@@ -225,6 +350,8 @@ async function fetchClaudeUsage(
           typeof data.tier === "string" ? data.tier : null,
           typeof data.plan === "string" ? data.plan : null,
           typeof data.subscription_type === "string" ? data.subscription_type : null,
+          // A Team seat's own tier (e.g. max_5x) before the org's base tier (raven).
+          bootstrap?.user_rate_limit_tier,
           bootstrap?.organization_rate_limit_tier
         ) ?? undefined;
 
@@ -232,6 +359,8 @@ async function fetchClaudeUsage(
         ...(plan ? { plan } : {}),
         quotas,
         modelQuotas,
+        // The adapter alone knows the wire format: see isCompleteUsageReading.
+        ...(claudeUsageWindowsComplete(data) ? { quotasComplete: true } : {}),
         extraUsage: data.extra_usage ?? null,
         bootstrap,
       };
@@ -272,6 +401,20 @@ async function fetchClaudeUsage(
       return { ...legacy, bootstrap: await bootstrapPromise };
     }
 
+    if (oauthResponse.status === 403) {
+      const body = toRecord(await oauthResponse.json().catch(() => null));
+      const errorCode = toRecord(toRecord(body.error).details).error_code;
+      // The org refuses OAuth for this account on every call, inference included.
+      // Measured cause on a Team: the member has no seat assigned.
+      if (errorCode === "oauth_not_allowed_for_organization") {
+        return {
+          message:
+            "Claude organization does not allow OAuth for this account (oauth_not_allowed_for_organization); on a Team this usually means the member has no seat assigned.",
+          bootstrap: await bootstrapPromise,
+        };
+      }
+    }
+
     return {
       message: `Claude connected. Usage endpoint returned HTTP ${oauthResponse.status}.`,
       bootstrap: await bootstrapPromise,
@@ -281,9 +424,20 @@ async function fetchClaudeUsage(
   }
 }
 
-/** Test-only: clear the success cache and in-flight polls. */
+/**
+ * Mark the last successful read as outdated, e.g. after a reset claim changed the quota, so
+ * the next read polls Anthropic instead of reusing it. It still backs a stale answer on 429.
+ */
+export function expireClaudeUsageCache(accessToken?: string): void {
+  if (!accessToken) return;
+  const cached = lastSuccessfulUsage.get(hashClaudeCredential(accessToken));
+  if (cached) cached.expired = true;
+}
+
+/** Test-only: clear the success cache, observed headers and in-flight polls. */
 export function _resetClaudeUsagePollingState(): void {
   lastSuccessfulUsage.clear();
+  observedUsage.clear();
   inFlightUsage.clear();
 }
 

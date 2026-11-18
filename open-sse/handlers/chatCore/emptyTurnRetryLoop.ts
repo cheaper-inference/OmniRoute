@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Flush-empty-retry loop, extracted from chatCore so the credential swap
  * and its rollback live in one place (#14715).
@@ -8,7 +9,7 @@
  * rate-limit writes have to stay on the connection that produced it.
  */
 import { getProviderCredentials as defaultGetProviderCredentials } from "@/sse/services/auth";
-import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
+import { convertJsonBodyWithinCap } from "./jsonBodyToSse.ts";
 import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import {
   formatBufferedVerdictLog,
@@ -31,6 +32,7 @@ type LoggerLike = {
 type Verdict = ReturnType<typeof judgeBufferedTurn>;
 
 export interface EmptyTurnRetryDeps {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   credentials: Record<string, unknown>;
   provider: string;
@@ -66,6 +68,7 @@ export interface EmptyTurnRetryDeps {
 }
 
 export interface EmptyTurnRetryResult {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   finalBody: unknown;
   adopted: boolean;
@@ -79,6 +82,7 @@ export async function runEmptyTurnRetryLoop(
   // Named `getProviderCredentials` so the hard-session-lease inventory still sees this call site.
   const getProviderCredentials = deps.getProviderCredentials ?? defaultGetProviderCredentials;
   let providerResponse = deps.providerResponse;
+  let upstreamHttpSelection = deps.upstreamHttpSelection ?? null;
   let finalBody: unknown = deps.finalBody;
   let adopted = false;
 
@@ -109,11 +113,12 @@ export async function runEmptyTurnRetryLoop(
     );
     if (!adoptedRetry) break;
     providerResponse = adoptedRetry.response;
+    upstreamHttpSelection = adoptedRetry.upstreamHttpSelection ?? null;
     finalBody = adoptedRetry.body;
     adopted = true;
   }
 
-  return { providerResponse, finalBody, adopted };
+  return { providerResponse, finalBody, adopted, upstreamHttpSelection };
 }
 
 function notePass(
@@ -136,6 +141,7 @@ function noteBudgetExhausted(
 }
 
 interface AdoptedRetry {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   body: unknown;
 }
@@ -214,7 +220,7 @@ async function runRetryRequest(
     if (retryResponse) await retryResponse.body?.cancel().catch(() => {});
     return null;
   }
-  const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
+  const { response: prepared } = await convertJsonBodyWithinCap(retryResponse, {
     log: deps.log,
     provider: deps.provider,
     model: deps.model,
@@ -237,5 +243,11 @@ async function runRetryRequest(
     (retryResult as { transformedBody?: unknown })?.transformedBody ?? deps.translatedBody
   );
   deps.logTargetRequest(deps.providerUrl, deps.providerHeaders, body);
-  return { response: preparedStream, body };
+  return {
+    response: preparedStream,
+    body,
+    upstreamHttpSelection:
+      (retryResult as { upstreamHttpSelection?: HttpAttemptSelection | null })
+        ?.upstreamHttpSelection ?? null,
+  };
 }

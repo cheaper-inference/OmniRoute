@@ -1,5 +1,5 @@
 export interface ActivityIconSpec {
-  /** Material Symbols icon name (e.g. "extension"). */
+  /** ICON_MAP icon name (e.g. "extension"), rendered through <Icon>. */
   icon: string;
   /** i18n key under namespace `activity.eventVerb.*` for the human verb. */
   i18nKeyVerb: string;

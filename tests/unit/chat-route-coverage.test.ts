@@ -534,7 +534,7 @@ test("handleChat uses the emergency fallback model on budget exhaustion", async 
       });
     }
 
-    return buildOpenAIResponse("Emergency fallback answered", "gpt-oss-120b");
+    return buildOpenAIResponse("Emergency fallback answered", "nemotron-3.5-super-vl-120b-a12b");
   };
 
   const response = await handleChat(
@@ -551,7 +551,7 @@ test("handleChat uses the emergency fallback model on budget exhaustion", async 
 
   assert.equal(response.status, 200);
   assert.equal(seenBodies.length, 2);
-  assert.equal(seenBodies[1].model, "openai/gpt-oss-120b");
+  assert.equal(seenBodies[1].model, "nvidia/nemotron-3.5-super-vl-120b-a12b");
   assert.equal(seenBodies[1].max_tokens, 4096);
   // nvidia supports the legacy `max_tokens` field (#6912 symmetric normalization in
   // chatCore.ts), so the redundant `max_completion_tokens` is renamed away rather than
@@ -600,7 +600,7 @@ test("handleChat returns the primary budget error when emergency fallback also f
   // tries the free model once. (The second hop used to come from the executor-level
   // fallback inside chatCore, which re-sent the OpenAI credentials to the nvidia
   // endpoint — removed as a cross-provider credential leak.)
-  assert.deepEqual(seenModels, ["gpt-4.1", "openai/gpt-oss-120b"]);
+  assert.deepEqual(seenModels, ["gpt-4.1", "nvidia/nemotron-3.5-super-vl-120b-a12b"]);
   assert.match(json.error.message, /quota exceeded/i);
 });
 

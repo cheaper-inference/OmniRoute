@@ -1,3 +1,4 @@
+import { logicalCallSql } from "./logicalCallSql";
 /**
  * Read-only auto-routing aggregations over `call_logs`.
  * `requested_model` keeps the client auto/* id after routing resolves a target.
@@ -23,7 +24,7 @@ export function getAutoRoutingTotalCount(): AutoRoutingTotalResult {
       `
       SELECT COUNT(*) as count
       FROM call_logs
-      WHERE requested_model = 'auto' OR requested_model LIKE 'auto/%'
+      WHERE ${logicalCallSql()} AND (requested_model = 'auto' OR requested_model LIKE 'auto/%')
     `
     )
     .get() as AutoRoutingTotalResult | undefined;
@@ -51,7 +52,7 @@ export function getAutoRoutingVariantBreakdown(): AutoRoutingVariantRow[] {
         END as variant,
         COUNT(*) as count
       FROM call_logs
-      WHERE requested_model = 'auto' OR requested_model LIKE 'auto/%'
+      WHERE ${logicalCallSql()} AND (requested_model = 'auto' OR requested_model LIKE 'auto/%')
       GROUP BY variant
       ORDER BY count DESC
     `
@@ -74,7 +75,7 @@ export function getAutoRoutingTopProviders(): AutoRoutingTopProviderRow[] {
       `
       SELECT provider, COUNT(*) as count
       FROM call_logs
-      WHERE (requested_model = 'auto' OR requested_model LIKE 'auto/%')
+      WHERE ${logicalCallSql()} AND (requested_model = 'auto' OR requested_model LIKE 'auto/%')
         AND provider IS NOT NULL
         AND TRIM(provider) != ''
       GROUP BY provider

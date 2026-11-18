@@ -43,11 +43,11 @@ OWASP ची सर्वसाधारण चेतावणी ("wildcard COR
 
 `CORS_ALLOW_ALL=true` असतानाही, प्रत्येक surface साठी याचा अर्थ:
 
-| Surface                             | Auth mechanism              | Wildcard CORS चा परिणाम                                                                                                                                                                                                                  |
-| ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin echo केला जातो, परंतु **`Allow-Credentials` शिवाय** browser **credentialed read अवरोधित करतो**. एखादी दुर्भावनापूर्ण cross-origin site तुमचे authenticated dashboard प्रतिसाद **वाचू शकत नाही**, आणि session cookie उघड होत नाही. |
-| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | आधीपासूनच **हेतुपुरस्सर** permissive (`relaxForTokenAuth`): browsers कधीही `Authorization`/`x-api-key` आपोआप जोडत नाहीत, त्यामुळे आक्रमणकर्त्याचे page तुमची key पुरवू शकत नाही. `CORS_ALLOW_ALL` याची व्याप्ती वाढवत नाही.              |
-| Public read-only (`/api/health`, …) | काहीही नाही                 | संवेदनशील नाही; wildcard निरुपद्रवी आहे.                                                                                                                                                                                                 |
+| Surface                             | Auth mechanism              | Wildcard CORS चा परिणाम                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin echo केला जातो, परंतु **`Allow-Credentials` शिवाय** browser **credentialed read अवरोधित करतो**. एखादी दुर्भावनापूर्ण cross-origin site तुमचे authenticated dashboard प्रतिसाद **वाचू शकत नाही**, आणि session cookie उघड होत नाही.                                                                                                                       |
+| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | आधीपासूनच **हेतुपुरस्सर** permissive (`relaxForTokenAuth`): browsers कधीही `Authorization`/`x-api-key` आपोआप जोडत नाहीत, त्यामुळे आक्रमणकर्त्याचे page तुमची key पुरवू शकत नाही. सादर केलेली key प्रमाणित झाली असेल तेव्हाच origin echo लागू होतो; अनामिक प्रतिसाद (`REQUIRE_API_KEY=false`) allowlist कायम ठेवतात. `CORS_ALLOW_ALL` याची व्याप्ती वाढवत नाही. |
+| Public read-only (`/api/health`, …) | काहीही नाही                 | संवेदनशील नाही; wildcard निरुपद्रवी आहे.                                                                                                                                                                                                                                                                                                                       |
 
 म्हणून `CORS_ALLOW_ALL=true` चे **उर्वरित** exposure एवढ्यापुरते मर्यादित आहे: (a)
 आधीपासून unauthenticated असलेल्या data चे non-credentialed cross-origin **reads**, आणि (b)
@@ -96,16 +96,33 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 रीस्टार्ट न करता रनटाइममध्ये **Dashboard → Security → CORS Allowed Origins** येथे
 सेट करता येतो.
 
-## API की विरुद्ध कुकी सेशन्स
+## API की वि कुकी सत्रे
 
-- **Bearer / `x-api-key` (`/v1/*` इन्फरन्स पृष्ठभाग):** ब्राउझर हे कधीही
-  आपोआप जोडत नाहीत. येथे CORS हा अर्थपूर्ण अडथळा नाही — API की हाच अडथळा आहे —
-  म्हणूनच हा पृष्ठभाग हेतुपुरस्सर परवानगीशील ठेवला आहे, जेणेकरून ब्राउझर आणि
-  Electron क्लायंट त्यांना आधीपासूनच अधिकार असलेले प्रतिसाद वाचू शकतील.
-- **कुकी सेशन (डॅशबोर्ड):** फेल-क्लोज्ड डीफॉल्टने **आणि** सामायिक पाथवर
-  `Access-Control-Allow-Credentials` नसल्याने संरक्षित आहे. कोणत्याही परवानगीशील
-  कॉन्फिगमध्ये व्यवस्थापन/डॅशबोर्ड ओरिजिन समाविष्ट करू नका; ते पूर्णपणे
-  फेल-क्लोज्डच राहिले पाहिजेत.
+- **वाहक / `x-api-key` ( `/v1/*` अनुमान पृष्ठभाग):** ब्राउझर हे कधीही आपोआप संलग्न करत नाहीत. CORS येथे अर्थपूर्ण अडथळा नाही — API की हा अडथळा — आहे ज्यामुळे ती पृष्ठभाग हेतुपुरस्सर परवानगी आहे जेणेकरून ब्राउझर आणि Electron क्लायंट प्रतिसाद वाचू शकतील ज्याचा त्यांना आधीच हक्क आहे. आरामशीर प्रतिध्वनी हेडरची केवळ उपस्थिती नसून प्रमाणित की फॉलो करते: जेव्हा `REQUIRE_API_KEY=false` अनामिकपणे विनंती करते, तेव्हा त्याचा यशस्वी प्रतिसाद अयशस्वी-बंद अनुमत सूची ठेवतो. ऑथ रिजेक्शन (401) वाचनीय राहतात जेणेकरून क्लायंट रद्द केलेली किंवा चुकीची टाईप केलेली की (#5242) वर ठेवू शकतात: पाइपलाइनची स्वतःची 401 प्रतिध्वनी ठेवते, आणि पाइपलाइनने अनामिक म्हणून सर्व्ह केल्यानंतर की नाकारणारा मार्ग (`/v1/models` आणि `/v1beta/models` व्यवस्थापन प्रमाणीकरण कॉन्फिगर केलेले, मालक- `/v1/batches` `/v1/files` `/v1/media` `/v1/session-leases` आणि ऑटो-कॉम्बो उमेदवार मार्ग) `credentialRejectionHeaders()` द्वारे त्या 401 मध्ये प्रतिध्वनी जोडते. क्रेडेंशियल हेडर (`Authorization`, `x-api-key`, `x-goog-api-key` किंवा `auth_token` कुकी ) असलेल्या विनंतीवर प्रतिध्वनी की केली जाते , त्यापैकी कोणत्या मार्गावर तपासले गेले नाही आणि `Access-Control-Allow-Credentials` सह कधीही जोडलेले नाही ; शरीर एक निश्चित त्रुटी लिफाफा आहे. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) द्वारे संरक्षित `/api/v1/` अंतर्गत व्यवस्थापन मार्ग इको जोडत नाहीत: `REQUIRE_API_KEY=false` सह त्यांचे 401/403 वाचनीय क्रॉस-ओरिजिन नाही.
+- **कुकी सत्र (डॅशबोर्ड):** अयशस्वी-बंद डीफॉल्टद्वारे संरक्षित** आणि** सामायिक मार्गावर `Access-Control-Allow-Credentials` च्या अनुपस्थितीमुळे. management/dashboard मूळ कोणत्याही अनुज्ञेय कॉन्फिगरेशनच्या बाहेर ठेवा; ते अगदी अयशस्वी-बंद राहिले पाहिजे.
+
+## WebSocket हँडशेक (`/v1/responses`, `/v1/ws`)
+
+browsers WebSocket ला CORS लागू करत नाहीत, म्हणून inference output परत करणारे WebSocket
+transports handshake चा `Origin` स्वतः तपासतात (`src/server/origin/wsOrigin.ts`):
+Responses WebSocket (`/v1/responses`) आणि, OmniRoute `npm start` / `npm run dev` द्वारे
+चालत असताना, `/v1/ws` आणि `/api/v1/ws` bridge, जो `/v1/chat/completions`,
+`/v1/messages` आणि `/v1/responses` frames म्हणून stream करतो. bridge निर्णयासाठी
+`/api/v1/ws?handshake=1` ला विचारतो आणि त्या route ने तपासणी चालवली नसेल तर upgrade
+करण्यास नकार देतो. handshake खालील परिस्थितीत स्वीकारला जातो:
+
+- त्यामध्ये `Origin` header नसेल (Codex CLI, SDKs आणि browser नसलेले इतर clients);
+- वरील allowlist ने `Origin` ला परवानगी दिली असेल (`CORS_ALLOWED_ORIGINS`, `corsOrigins`
+  सेटिंग, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` हा OmniRoute च्या स्वतःच्या public origins पैकी एक असेल (कॉन्फिगर केलेला public
+  base URL, विश्वसनीय proxy चा forwarded origin, किंवा IP literal अथवा `localhost` म्हणून
+  दिलेला थेट loopback/LAN host — dashboard ची mutation तपासणी वापरते तेच candidates); किंवा
+- HTTP `/v1/*` surface प्रमाणेच त्यामध्ये वैध API key असेल.
+
+इतर सर्व गोष्टींना `403 ws_origin_forbidden` मिळतो. dashboard session cookie परक्या
+`Origin` ला सूट देत नाही, कारण browser ती कोणत्याही page च्या socket ला जोडतो. दुसऱ्या
+port वरील `localhost` ला same-origin मानले जात नाही; असे dev origins
+`CORS_ALLOWED_ORIGINS` मध्ये जोडा.
 
 ## उदाहरण: OmniRoute च्या पुढे रिव्हर्स प्रॉक्सी
 
@@ -141,6 +158,7 @@ location / {
 | डॅशबोर्ड चेतावणी बॅनर                     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins फील्ड                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent चे प्रति-रूट CORS (अपवाद)     | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake `Origin` तपासणी       | `src/server/origin/wsOrigin.ts`                                      |
 
 ## हे देखील पहा
 

@@ -40,15 +40,17 @@ No compression applied. All messages pass through unchanged.
 
 ### Lite Mode (~15% savings, <1ms latency)
 
-The safest mode — zero semantic change, only formatting cleanup:
+The safest mode — formatting cleanup. Its tool-result truncation is lossy, so the default
+path (no `allow-lossy`, `engine:lite` or named-combo opt-in) runs lite with
+`compressToolResults: false`: earlier tool results reach the provider unchanged.
 
-| Technique                | Description                                       |
-| ------------------------ | ------------------------------------------------- |
-| `collapseWhitespace`     | Merge consecutive blank lines and trailing spaces |
-| `dedupSystemPrompt`      | Remove duplicate system messages                  |
-| `compressToolResults`    | Compress verbose tool/function outputs            |
-| `removeRedundantContent` | Strip repeated instructions                       |
-| `replaceImageUrls`       | Shorten base64 image data URIs                    |
+| Technique                | Description                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Merge consecutive blank lines and trailing spaces                                 |
+| `dedupSystemPrompt`      | Remove duplicate system messages                                                  |
+| `compressToolResults`    | Truncate earlier tool results to the lite cap (lossy: only with a request opt-in) |
+| `removeRedundantContent` | Strip repeated instructions                                                       |
+| `replaceImageUrls`       | Shorten base64 image data URIs                                                    |
 
 **Best for:** Always-on usage, safety-critical workflows.
 
@@ -99,7 +101,7 @@ RTK mode is optimized for verbose tool outputs that appear in coding-agent sessi
 - Applies JSON filter packs from `open-sse/services/compression/engines/rtk/filters/`
 - Imports RTK TOML schema v1 filters from project or global `filters.toml` files, with inline-test
   validation and trust-gating for project files
-- Ships 55 built-in filters with inline verify samples
+- Ships 56 built-in filters with inline verify samples
 - Removes ANSI control sequences, progress bars, repeated lines, and non-actionable noise
 - Preserves failures, errors, warnings, changed files, summaries, and the tail of long output
 - Supports trust-gated project filters, global filters, and optional redacted raw-output recovery
@@ -235,13 +237,19 @@ turn it on. Values:
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | `off`         | No compression for this request.                                                                 |
 | `default`     | The panel-derived Default profile (ignores the active profile). Lossy engines are left off.      |
-| `safe`        | Same as omitting the header: dedup and whitespace folding only.                                  |
+| `safe`        | Same as omitting the header.                                                                     |
 | `allow-lossy` | Keep this request's operator plan, including summaries, relevance filters, and style rewrites.   |
 | `engine:<id>` | A single engine when enabled, e.g. `engine:rtk`. This is the per-request opt-in for that engine. |
 | `<combo>`     | A named combo, matched by name (case-insensitive) first, then by id.                             |
 
-Without `allow-lossy`, `engine:<id>`, or a named combo, lossy engines are not applied. The
-request still gets session dedup and whitespace folding when compression is on.
+Without `allow-lossy`, `engine:<id>`, or a named combo, lossy engines are not applied. When a
+lossy Default, auto-trigger, or routing override is downgraded, OmniRoute keeps the recognized
+lossless steps from the configured stacked pipeline in configured order. It falls back to
+`session-dedup → lite` only when no configured lossless step survives.
+
+The Settings panel's **Effective pipeline** preview shows the ordinary at-rest plan. When an
+auto-trigger can run, the same preview also shows its conditional effective pipeline so the panel
+and header-less runtime resolution stay aligned.
 
 The applied plan is echoed back in the `X-OmniRoute-Compression: <mode>; source=<source>` response
 header, where `<source>` is one of `request-header`, `routing-override`, `active-profile`,

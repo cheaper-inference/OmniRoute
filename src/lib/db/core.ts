@@ -1,3 +1,4 @@
+import { ensureUsageEvidenceSchema } from "./usageEvidenceSchema";
 /**
  * db/core.js — Database infrastructure: schema, singleton, utils, migration.
  *
@@ -35,6 +36,7 @@ import {
 } from "./optimizationSettings";
 import {
   buildArtifactRelativePath,
+  hasRoomForCallLogArtifact,
   writeCallArtifact,
   type CallLogArtifact,
 } from "../usage/callLogArtifacts";
@@ -60,6 +62,7 @@ export { toSnakeCase, toCamelCase, objToSnake, rowToCamel, cleanNulls } from "./
 export { isNativeSqliteLoadError, isSqliteDriverUnavailableError };
 import {
   ensureProviderConnectionsColumns,
+  dropPrefixDuplicateIndexes,
   ensureUsageHistoryAccountIndex,
   ensureUsageHistoryColumns,
   ensureCallLogsColumns,
@@ -143,6 +146,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "provider_nodes", maxRows: 5_000 },
   { table: "combos", maxRows: 5_000 },
   { table: "api_keys", maxRows: 5_000 },
+  { table: "teams", maxRows: 5_000 },
+  { table: "api_key_billing_team_history", maxRows: 20_000 },
   { table: "proxy_registry", maxRows: 5_000 },
   { table: "proxy_assignments", maxRows: 10_000 },
   { table: "model_combo_mappings", maxRows: 5_000 },
@@ -152,6 +157,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "account_key_limits", maxRows: 10_000 },
   { table: "upstream_proxy_config", maxRows: 5_000 },
   { table: "webhooks", maxRows: 5_000 },
+  // Key Templates: editable, secret-free key policy snapshots (operator configuration).
+  { table: "key_templates", maxRows: 5_000 },
 ];
 
 /**
@@ -216,7 +223,6 @@ if (!isCloud && !fs.existsSync(DATA_DIR)) {
 }
 
 // ──────────────── Schema ────────────────
-
 const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS provider_connections (
     id TEXT PRIMARY KEY,
@@ -322,6 +328,8 @@ const SCHEMA_SQL = `
     account_key TEXT,
     account_label TEXT,
     account_label_priority INTEGER DEFAULT 0,
+    billing_team_id TEXT,
+    team_rollup_processed_at TEXT,
     api_key_id TEXT,
     api_key_name TEXT,
     tokens_input INTEGER DEFAULT 0,
@@ -337,8 +345,6 @@ const SCHEMA_SQL = `
     error_code TEXT,
     timestamp TEXT NOT NULL
   );
-  CREATE INDEX IF NOT EXISTS idx_uh_timestamp ON usage_history(timestamp);
-  CREATE INDEX IF NOT EXISTS idx_uh_provider ON usage_history(provider);
   CREATE INDEX IF NOT EXISTS idx_uh_model ON usage_history(model);
   CREATE INDEX IF NOT EXISTS idx_uh_connection_timestamp ON usage_history(connection_id, timestamp);
 
@@ -499,6 +505,19 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_provider_time ON quota_snapshots(provider, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_connection_time ON quota_snapshots(connection_id, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_created_at ON quota_snapshots(created_at);
+
+  -- Key Templates are secret-free policy snapshots copied into independent keys.
+  CREATE TABLE IF NOT EXISTS key_templates (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (revision > 0),
+    schema_version INTEGER NOT NULL DEFAULT 1,
+    policy TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_key_templates_name ON key_templates(name COLLATE NOCASE);
 `;
 
 // `CREATE TABLE IF NOT EXISTS` is a no-op against a legacy database that already owns the
@@ -757,18 +776,16 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         detail_state = 'ready'
     WHERE id = @id
   `);
-  const markMissingStmt = db.prepare(`
-    UPDATE call_logs
-    SET detail_state = 'missing',
-        artifact_relpath = NULL,
-        artifact_size_bytes = NULL,
-        artifact_sha256 = NULL
-    WHERE id = ?
-  `);
 
   let failed = 0;
+  let deferred = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
+      // Below the free-disk floor the row stays legacy-inline; the next startup retries it.
+      if (!hasRoomForCallLogArtifact()) {
+        deferred++;
+        continue;
+      }
       const artifact: CallLogArtifact = {
         schemaVersion: 5,
         summary: {
@@ -810,8 +827,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
         buildArtifactRelativePath(artifact.summary.timestamp, artifact.summary.id)
       );
       if (!artifactResult) {
+        // Keep the row 'legacy-inline': its body still lives in the legacy table, and the next
+        // boot's selector must find it again before that table is dropped.
         failed++;
-        markMissingStmt.run(row.id);
         continue;
       }
 
@@ -826,9 +844,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
 
   tx();
 
-  if (failed > 0) {
+  if (failed > 0 || deferred > 0) {
     console.warn(
-      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed row(s)).`
+      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed, ${deferred} waiting for free disk space).`
     );
     return;
   }
@@ -994,8 +1012,7 @@ export function getDbInstance(): SqliteDatabase {
       // bindings entirely. The native Statement destructor crashes with SIGABRT
       // when the Next.js build worker thread exits (assertion in
       // node::RemoveEnvironmentCleanupHook, env == nullptr). The DB is never
-      // actually queried during build — it only exists so module-eval that
-      // touches getDbInstance() at build time does not throw. (#10060)
+      // queried during build; the stub permits module evaluation. (#10060)
       const noopStatement: PreparedStatement = {
         run: () => ({ changes: 0, lastInsertRowid: 0 }),
         get: () => undefined,
@@ -1005,7 +1022,7 @@ export function getDbInstance(): SqliteDatabase {
         driver: "sql.js",
         open: true,
         name: ":memory:",
-        prepare: () => noopStatement,
+        prepare: <Row = unknown>() => noopStatement as PreparedStatement<Row>,
         exec: () => {},
         pragma: () => undefined,
         transaction: <T>(fn: (...args: unknown[]) => T) => fn,
@@ -1025,6 +1042,7 @@ export function getDbInstance(): SqliteDatabase {
     ensureUsageHistoryAccountIndex(memoryDb);
     ensureCallLogsColumns(memoryDb);
     ensureProviderConnectionsColumns(memoryDb);
+    ensureUsageEvidenceSchema(memoryDb);
     setDb(memoryDb);
     return memoryDb;
   }
@@ -1212,7 +1230,21 @@ export function getDbInstance(): SqliteDatabase {
             `Original error: ${message}`
         );
       }
-      if (!retryProbeIfTransient(sqliteFile, e, openSqliteDatabase, closeProbeIfSafe)) {
+      const probeOutcome = retryProbeIfTransient(
+        sqliteFile,
+        e,
+        openSqliteDatabase,
+        closeProbeIfSafe
+      );
+      if (probeOutcome === "readonly" || probeOutcome === "transient_exhausted") {
+        // #17995: neither proves corruption — fail closed, leave the DB untouched.
+        throw new Error(
+          `[DB] Could not probe ${sqliteFile} (${probeOutcome}); the database was left untouched. ` +
+            `Check that the data volume is writable and no other process holds the lock, then restart. ` +
+            `Original error: ${message}`
+        );
+      }
+      if (probeOutcome === "not_transient") {
         preservedCriticalState = captureCriticalDbState(sqliteFile);
         // SAFETY: Never delete the database — rename to backup so data can be recovered.
         // The old code would silently destroy all user data on any probe failure.
@@ -1269,6 +1301,12 @@ export function getDbInstance(): SqliteDatabase {
     // file EXCLUSIVE (checkpoint + WAL delete); node:sqlite opens with busy timeout 0, so with
     // the pragmas in the other order that window surfaced as `database is locked` at startup.
     db.pragma("busy_timeout = 2000");
+    // auto_vacuum only takes effect before the first page is written; `journal_mode = WAL` writes
+    // the header, so set it first and only on an empty file. Migration 046 seeds INCREMENTAL, so a
+    // new database starts in the mode it is configured for and never needs a conversion VACUUM.
+    if (Number(db.pragma("page_count", { simple: true })) === 0) {
+      db.pragma("auto_vacuum = INCREMENTAL");
+    }
     db.pragma("journal_mode = WAL");
     db.pragma("synchronous = NORMAL");
     db.pragma(`cache_size = -${DEFAULT_DATABASE_SETTINGS.optimization.cacheSize}`);
@@ -1300,6 +1338,7 @@ export function getDbInstance(): SqliteDatabase {
     // Fresh installs need the same post-migration index guarantee as upgraded
     // databases, including recovery from an interrupted migration 127 attempt.
     ensureUsageHistoryAccountIndex(db);
+    dropPrefixDuplicateIndexes(db);
 
     applyStoredDatabaseOptimizationSettings(db);
 

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
   FEATURE_FLAG_DEFINITIONS,
   type FeatureFlagDefinition,
 } from "@/shared/constants/featureFlagDefinitions";
+import { isProtectedFeatureFlag } from "@/shared/constants/protectedFeatureFlags";
 import {
   ADAPTIVE_VIRTUAL_LANES_FLAG_KEY,
   resolveAdaptiveVirtualLanesFlag,
@@ -64,7 +66,7 @@ export async function GET(request: NextRequest) {
   try {
     const resolved = resolveAllFeatureFlags();
 
-    const flags = resolved.map(({ key, effectiveValue, source, definition }) => {
+    const flags = resolved.map(({ key, effectiveValue, source, definition, ...provenance }) => {
       // Flags whose gate resolves with env-wins-over-db precedence (the
       // opposite of resolveAllFeatureFlags' generic db-wins-over-env order)
       // report the gate's own resolution so the dashboard never shows a source
@@ -80,14 +82,19 @@ export async function GET(request: NextRequest) {
         const state = resolveAdaptiveVirtualLanesFlag();
         return flagPayload(definition, state.enabled ? "true" : "false", state.source);
       }
-      return flagPayload(definition, effectiveValue, source);
+      return { ...flagPayload(definition, effectiveValue, source), ...provenance };
     });
 
     const total = flags.length;
     const active = flags.filter((f) => isActive(f.effectiveValue)).length;
     const inactive = total - active;
-    const overriddenByDb = flags.filter((f) => f.source === "db").length;
-    const overriddenByEnv = flags.filter((f) => f.source === "env").length;
+    // Count this flag's configuration, not a dependency's inherited DB/env source twice.
+    const overriddenByDb = resolved.filter(
+      (f, i) => (f.configuredSource ?? flags[i].source) === "db"
+    ).length;
+    const overriddenByEnv = resolved.filter(
+      (f, i) => (f.configuredSource ?? flags[i].source) === "env"
+    ).length;
 
     return NextResponse.json({
       flags,
@@ -102,6 +109,38 @@ const putFeatureFlagSchema = z.object({
   key: z.string().min(1),
   value: z.string().optional(),
 });
+
+/**
+ * Protected flags keep needing a credential when login is disabled: isAuthenticated
+ * is true for everyone then, and a DB override beats the env value immediately.
+ * Returns the refusal response, or null when the caller may write.
+ */
+async function authorizeProtectedFeatureFlagWrite(
+  request: NextRequest,
+  keys: readonly string[]
+): Promise<Response | null> {
+  if (!keys.some((key) => isProtectedFeatureFlag(key))) return null;
+  return requireManagementAuth(request, { alwaysRequireAuth: true });
+}
+
+/**
+ * Rejects an out-of-range enum value. Split out of the handler so the write path
+ * keeps one flat shape instead of nesting the type/enum checks.
+ */
+function rejectInvalidEnumValue(
+  definition: FeatureFlagDefinition,
+  key: string,
+  value: string | undefined
+): NextResponse | null {
+  if (value === undefined || definition.type !== "enum" || !definition.enumValues) return null;
+  if (definition.enumValues.includes(value)) return null;
+  return NextResponse.json(
+    {
+      error: `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`,
+    },
+    { status: 400 }
+  );
+}
 
 /**
  * PUT /api/settings/feature-flags
@@ -134,17 +173,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: `Unknown feature flag key: ${key}` }, { status: 400 });
   }
 
-  // Validate enum values
-  if (value !== undefined && definition.type === "enum" && definition.enumValues) {
-    if (!definition.enumValues.includes(value)) {
-      return NextResponse.json(
-        {
-          error: `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`,
-        },
-        { status: 400 }
-      );
-    }
-  }
+  const authError = await authorizeProtectedFeatureFlagWrite(request, [key]);
+  if (authError) return authError;
+
+  const enumError = rejectInvalidEnumValue(definition, key, value);
+  if (enumError) return enumError;
 
   try {
     // Capture previous state before modifying
@@ -183,6 +216,14 @@ export async function PUT(request: NextRequest) {
       source: reportedSource,
       previousValue,
       previousSource,
+      ...(key === "UNPRICED_USAGE_BUDGET_POLICY"
+        ? {
+            configuredSource: updatedFlag.configuredSource,
+            sourceKey: updatedFlag.sourceKey,
+            previousConfiguredSource: prevFlag.configuredSource,
+            previousSourceKey: prevFlag.sourceKey,
+          }
+        : {}),
       requiresRestart: definition.requiresRestart,
     });
   } catch (error) {
@@ -202,6 +243,10 @@ export async function DELETE(request: NextRequest) {
   try {
     const overrides = getFeatureFlagOverrides();
     const count = Object.keys(overrides).length;
+
+    // Clearing all overrides also drops any security flag the operator set here.
+    const authError = await authorizeProtectedFeatureFlagWrite(request, Object.keys(overrides));
+    if (authError) return authError;
 
     clearAllFeatureFlagOverrides();
 

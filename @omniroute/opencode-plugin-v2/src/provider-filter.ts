@@ -19,11 +19,14 @@
 import type { OmniRouteRawCombo } from "./shared/combos-map.js";
 import type { OmniRouteEnrichmentMap } from "./shared/enrich.js";
 import type { Logger } from "./shared/logger.js";
+import { branchOf, parseBranchClaim } from "./model-filter.js";
 
 /** Compiled allowlist. `undefined` means inactive (empty/absent = full catalog). */
 export interface ProviderFilter {
-  /** Normalized (trimmed, lowercased, deduplicated) allowlist entries. */
+  /** Normalized (trimmed, lowercased, deduplicated) flat entries: they name a provider prefix. */
   allow: Set<string>;
+  /** Normalized (trimmed, lowercased, deduplicated) claimed branches: they name a branch. */
+  branches: Set<string>;
   /** Operator-facing spellings, same order, for diagnostics. */
   originals: string[];
 }
@@ -51,16 +54,33 @@ function normalizeName(value: string): string | undefined {
  */
 export function compileProviderFilter(allow?: string[]): ProviderFilter | undefined {
   if (!allow || allow.length === 0) return undefined;
-  const seen = new Set<string>();
+  const seenAllow = new Set<string>();
+  const seenBranches = new Set<string>();
+  const seenOriginals = new Set<string>();
   const originals: string[] = [];
   for (const raw of allow) {
-    const normalized = normalizeName(raw);
-    if (normalized === undefined || seen.has(normalized)) continue;
-    seen.add(normalized);
-    originals.push(typeof raw === "string" ? raw.trim() : String(raw));
+    if (typeof raw !== "string") continue;
+    const trimmed = raw.trim();
+    if (trimmed.length === 0) continue;
+    const claim = parseBranchClaim(trimmed);
+    if (claim.claimed) {
+      const branch = claim.branch.trim().toLowerCase();
+      if (branch.length === 0 || seenBranches.has(branch)) continue;
+      seenBranches.add(branch);
+      if (seenOriginals.has(trimmed)) continue;
+      seenOriginals.add(trimmed);
+      originals.push(trimmed);
+      continue;
+    }
+    const normalized = normalizeName(trimmed);
+    if (normalized === undefined || seenAllow.has(normalized)) continue;
+    seenAllow.add(normalized);
+    if (seenOriginals.has(trimmed)) continue;
+    seenOriginals.add(trimmed);
+    originals.push(trimmed);
   }
-  if (seen.size === 0) return undefined;
-  return { allow: seen, originals };
+  if (seenAllow.size === 0 && seenBranches.size === 0) return undefined;
+  return { allow: seenAllow, branches: seenBranches, originals };
 }
 
 /**
@@ -68,10 +88,9 @@ export function compileProviderFilter(allow?: string[]): ProviderFilter | undefi
  * ids without a `/` — those carry no provider claim and always pass.
  */
 export function providerOf(id: string): string | undefined {
-  if (typeof id !== "string") return undefined;
-  const slash = id.indexOf("/");
-  if (slash <= 0) return undefined;
-  const prefix = id.slice(0, slash).trim().toLowerCase();
+  const branch = branchOf(id);
+  if (branch === undefined) return undefined;
+  const prefix = branch.trim().toLowerCase();
   return prefix.length > 0 ? prefix : undefined;
 }
 
@@ -165,6 +184,12 @@ export function passesProviderFilter(
 ): boolean {
   if (!filter) return true;
   const prefix = providerOf(id);
+  if (filter.branches.size > 0) {
+    if (prefix === undefined) return false;
+    if (filter.branches.has(prefix)) return true;
+    if (matchesAllow(prefix, filter, resolve)) return true;
+    return false;
+  }
   if (prefix === undefined) return true;
   if (matchesAllow(prefix, filter, resolve)) return true;
   // Fail-open on prefixes unknown to the vocabulary tables: an unknown
@@ -224,6 +249,7 @@ export function unknownProviders(filter: ProviderFilter | undefined, known: Set<
   if (!filter) return [];
   const out: string[] = [];
   for (const original of filter.originals) {
+    if (parseBranchClaim(original.trim()).claimed) continue;
     const normalized = normalizeName(original);
     if (normalized === undefined) continue;
     if (!known.has(normalized)) out.push(original);
@@ -243,6 +269,7 @@ export function warnUnknownProviders(
   log: Pick<Logger, "warn">
 ): void {
   if (!filter) return;
+  if (filter.branches.size > 0) return;
   const unknown = unknownProviders(filter, known);
   if (unknown.length === 0) return;
   const key = `provider-unknown::${[...filter.allow].sort().join(",")}`;
@@ -285,6 +312,8 @@ export function resolveProviderFilter(
     }
     providerResolve = buildProviderResolve(pairs, usableCanonicals);
     providerAllUnknown = filterAllUnknown(providerFilter, providerResolve);
+    if (providerFilter.branches.size > 0)
+      return { providerFilter, providerResolve, providerAllUnknown };
     if (providerResolve.known.size === 0)
       warnNoVocabulary(providerFilter, providerResolve.known, warned, log);
     else warnUnknownProviders(providerFilter, providerResolve.known, warned, log);
@@ -300,6 +329,7 @@ export function warnNoVocabulary(
   log: Pick<Logger, "warn">
 ): void {
   if (!filter) return;
+  if (filter.branches.size > 0) return;
   if (known.size > 0) return;
   const key = "provider-no-vocabulary";
   if (warned.has(key)) return;
@@ -317,7 +347,11 @@ export function warnProviderMatchedNothing(
   log: Pick<Logger, "warn">
 ): void {
   if (!filter) return;
-  const key = `provider-matched-nothing::${[...filter.allow].sort().join(",")}`;
+  const flatKey = [...filter.allow].sort().join(",");
+  const key =
+    filter.branches.size > 0
+      ? `provider-matched-nothing::${flatKey}::branches=${[...filter.branches].sort().join(",")}`
+      : `provider-matched-nothing::${flatKey}`;
   if (warned.has(key)) return;
   warned.add(key);
   log.warn(

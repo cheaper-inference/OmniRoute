@@ -9,12 +9,15 @@ import { SectionHeader } from "@omniroute/ui-kit/page-header";
 import { WorkflowGuide } from "@omniroute/ui-kit/workflow-guide";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
-import { CardSkeleton, Button, Modal } from "@/shared/components";
+import { Spinner } from "@/shared/components/Loading";
+import { CardSkeleton, Button, GuardedAction, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
 import {
+  getProviderHealth,
   isProviderConnectionConnected,
   isProviderConnectionErrored,
+  type ProviderHealth,
 } from "@/shared/utils/providerConnectionStatus";
 import { useNotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
@@ -24,13 +27,9 @@ import { useIsElectron, useOpenExternal } from "@/shared/hooks/useElectron";
 import { HomeProviderTopologySection } from "./HomeProviderTopologySection";
 import { shouldShowProviderTopologyOnHome } from "./homeAppearance";
 import ManualUpdateCommand from "./ManualUpdateCommand";
+import UpdateProgressDialog, { type UpdatePhase, type UpdateStep } from "./UpdateProgressDialog";
 import HomeRecentRequests from "../home/HomeRecentRequests";
-
-type UpdateStep = {
-  step: string;
-  status: string;
-  message: string;
-};
+import { isEnabledNoAuthProvider } from "../home/topologyUtils";
 
 type VersionInfo = {
   current: string;
@@ -220,7 +219,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   }, [isElectron]);
 
   const [updateSteps, setUpdateSteps] = useState<UpdateStep[]>([]);
-  const [updatePhase, setUpdatePhase] = useState<"idle" | "running" | "done" | "failed">("idle");
+  const [updatePhase, setUpdatePhase] = useState<UpdatePhase>("idle");
 
   // Appearance settings for home page pinning
   const [showQuickStartOnHome, setShowQuickStartOnHome] = useState(true); // default on
@@ -228,13 +227,15 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   // topology connection is never opened before we know the user wants it.
   const [showProviderTopologyOnHome, setShowProviderTopologyOnHome] = useState(false);
   const [appearanceSettingsLoaded, setAppearanceSettingsLoaded] = useState(false);
+  const [blockedProviders, setBlockedProviders] = useState<unknown>([]);
 
   useEffect(() => {
     // Fetch the pin settings (lightweight)
     fetch("/api/settings")
       .then((r) => (r.ok ? r.json() : {}))
-      .then((data) => {
+      .then((data: Record<string, unknown> | null) => {
         if (data) {
+          setBlockedProviders(data.blockedProviders);
           if (typeof data.showQuickStartOnHome === "boolean") {
             setShowQuickStartOnHome(data.showQuickStartOnHome);
           }
@@ -473,7 +474,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   }, [selectedProvider, models]);
 
   const topologyProviders = useMemo(() => {
-    type ProviderHealth = "active" | "error" | "idle";
     const byProvider = new Map<
       string,
       { id: string; provider: string; name?: string; status: ProviderHealth }
@@ -484,15 +484,30 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     // at rest (green healthy / red error) instead of going blank between requests. A
     // provider with ≥1 healthy connection is "active"; if none are healthy but some are
     // errored it is "error"; otherwise "idle". Live/recent traffic still overrides this.
+    //
+    // Health is derived from the actual connections, not from `providerStats`: that list
+    // only enumerates the static AI_PROVIDERS catalog, so custom provider nodes
+    // (`openai-compatible-chat-<uuid>`, `anthropic-compatible-<uuid>`, …) never got an
+    // entry and stayed "idle" forever — a grey border in the topology even though their
+    // connection was healthy.
     const healthByProvider = new Map<string, ProviderHealth>();
-    for (const stat of providerStats) {
-      const canonical = normalizeProviderId(stat.id);
-      if (!canonical) continue;
-      healthByProvider.set(
-        canonical,
-        stat.connected > 0 ? "active" : stat.errors > 0 ? "error" : "idle"
+    const noteProviderHealth = (providerId?: string | null) => {
+      const canonical = normalizeProviderId(providerId);
+      if (!canonical || healthByProvider.has(canonical)) return;
+
+      const connections = providerConnections.filter(
+        (connection) => normalizeProviderId(connection.provider) === canonical
       );
-    }
+      // An enabled no-auth provider has no connections to test and is always reachable.
+      const noAuthHealthy =
+        connections.length === 0 && isEnabledNoAuthProvider(canonical, blockedProviders)
+          ? "active"
+          : null;
+      healthByProvider.set(canonical, noAuthHealthy ?? getProviderHealth(connections));
+    };
+
+    providerStats.forEach((stat) => noteProviderHealth(stat.id));
+    providerConnections.forEach((connection) => noteProviderHealth(connection.provider));
 
     const addProvider = (providerId?: string | null, name?: string) => {
       const rawProviderId = typeof providerId === "string" ? providerId.trim() : "";
@@ -501,10 +516,12 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       const canonicalProviderId = normalizeProviderId(rawProviderId);
       if (!canonicalProviderId || byProvider.has(canonicalProviderId)) return;
 
-      // Exclude providers with no active connections (or where all connections are deactivated)
-      const hasActiveConn = providerConnections.some(
-        (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
-      );
+      // Exclude providers with no active connections (or where all connections are deactivated).
+      // No-auth providers have none: they count unless blocked.
+      const hasActiveConn =
+        providerConnections.some(
+          (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
+        ) || isEnabledNoAuthProvider(canonicalProviderId, blockedProviders);
       if (!hasActiveConn) return;
 
       const resolvedName =
@@ -528,7 +545,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     Object.keys(providerMetrics).forEach((provider) => addProvider(provider));
 
     return Array.from(byProvider.values());
-  }, [providerStats, providerMetrics, providerNodes, providerConnections]);
+  }, [providerStats, providerMetrics, providerNodes, providerConnections, blockedProviders]);
 
   const { lastProvider, errorProvider } = providerTopology;
 
@@ -779,13 +796,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     }, 8000);
     return () => clearTimeout(timer);
   }, [updatePhase]);
-  const stepLabels: Record<string, string> = {
-    install: t("stepInstallPackage"),
-    rebuild: t("stepRebuildNativeModules"),
-    restart: t("stepRestartService"),
-    complete: t("stepComplete"),
-    error: t("stepError"),
-  };
   const showUpdateOverlay = updatePhase !== "idle";
 
   if (loading) {
@@ -801,113 +811,18 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Update Progress Overlay */}
-      {showUpdateOverlay && (
-        <div className="fixed inset-0 z-[999] bg-[var(--ci-color-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-bg-main border border-border rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <Icon name="progress_activity" size={28} className="text-primary animate-spin" />
-              <div>
-                <h3 className="text-lg font-bold">
-                  {updatePhase === "done"
-                    ? t("updateCompleteTitle")
-                    : updatePhase === "failed"
-                      ? t("updateFailedTitle")
-                      : t("updatingTitle")}
-                </h3>
-                <p className="text-xs text-text-muted mt-0.5">
-                  {updatePhase === "done"
-                    ? t("reloadNotice")
-                    : updatePhase === "failed"
-                      ? t("retryNotice")
-                      : t("restartNotice")}
-                </p>
-              </div>
-            </div>
-
-            {/* Step list */}
-            <div className="flex flex-col gap-2">
-              {updateSteps
-                .filter((s) => s.step !== "complete" && s.step !== "error")
-                .map((s) => (
-                  <div
-                    key={s.step}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
-                      s.status === "running"
-                        ? "border-primary/40 bg-primary/5"
-                        : s.status === "done"
-                          ? "border-success/30 bg-success/5"
-                          : s.status === "failed"
-                            ? "border-error/30 bg-error/5"
-                            : "border-border bg-bg-subtle"
-                    }`}
-                  >
-                    {s.status === "running" ? (
-                      <Icon
-                        name="progress_activity"
-                        size={18}
-                        className="text-primary animate-spin"
-                      />
-                    ) : s.status === "done" ? (
-                      <Icon name="check_circle" size={18} className="text-success" />
-                    ) : s.status === "failed" ? (
-                      <Icon name="error" size={18} className="text-error" />
-                    ) : (
-                      <Icon name="warning" size={18} className="text-warning" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">{stepLabels[s.step] || s.step}</p>
-                      <p className="text-xs text-text-muted truncate">{s.message}</p>
-                    </div>
-                  </div>
-                ))}
-
-              {/* Error message */}
-              {updateSteps.find((s) => s.step === "error") && (
-                <div className="mt-1 px-3 py-2.5 rounded-lg border border-error/30 bg-error/5 text-error">
-                  <p className="text-xs font-mono break-all">
-                    {updateSteps.find((s) => s.step === "error")?.message}
-                  </p>
-                </div>
-              )}
-
-              {/* Completion message */}
-              {updatePhase === "done" && (
-                <div className="mt-1 px-3 py-2.5 rounded-lg border border-success/30 bg-success/5">
-                  <p className="text-sm font-semibold text-success flex items-center gap-2">
-                    <Icon name="check_circle" size={18} />
-                    {updateSteps.find((s) => s.step === "complete")?.message || t("updateComplete")}
-                  </p>
-                  <p className="text-xs text-text-muted mt-1">{t("reloadingPageAutomatically")}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            {(updatePhase === "failed" || updatePhase === "done") && (
-              <div className="flex gap-2 mt-4">
-                <Button
-                  size="sm"
-                  fullWidth
-                  onClick={() => {
-                    setUpdating(false);
-                    setUpdatePhase("idle");
-                    setUpdateSteps([]);
-                    if (updatePhase === "done") globalThis.window.location.reload();
-                  }}
-                >
-                  {updatePhase === "done" ? t("reloadNow") : t("closeUpdate")}
-                </Button>
-                {updatePhase === "failed" && (
-                  <Button size="sm" variant="secondary" fullWidth onClick={handleUpdate}>
-                    {t("retryUpdate")}
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Update progress: a kit dialog that cannot be dismissed while the update runs */}
+      <UpdateProgressDialog
+        phase={updatePhase}
+        steps={updateSteps}
+        onDismiss={() => {
+          setUpdating(false);
+          setUpdatePhase("idle");
+          setUpdateSteps([]);
+          if (updatePhase === "done") globalThis.window.location.reload();
+        }}
+        onRetry={handleUpdate}
+      />
 
       {/* Update Notification Banner */}
       {versionInfo?.updateAvailable && !showUpdateOverlay && (
@@ -967,18 +882,13 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     <Button
                       size="sm"
                       onClick={() => globalThis.window.electronAPI?.downloadUpdate()}
-                      className="font-semibold"
                     >
                       {t("downloadUpdate")}
                     </Button>
                   )}
                   {electronUpdateStatus.status === "downloading" && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/20">
-                      <Icon
-                        name="progress_activity"
-                        size={16}
-                        className="text-primary animate-spin"
-                      />
+                      <Spinner size="sm" />
                       <span className="text-xs font-semibold">
                         {electronUpdateStatus.percent || 0}%
                       </span>
@@ -988,7 +898,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     <Button
                       size="sm"
                       onClick={() => globalThis.window.electronAPI?.installUpdate()}
-                      className="font-semibold animate-pulse"
+                      className="animate-pulse"
                     >
                       {t("restartAndInstall")}
                     </Button>
@@ -1004,22 +914,25 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                           setElectronUpdateStatus({ status: "error", message: err.message });
                         });
                       }}
-                      className="font-semibold"
                     >
                       {t("checkForUpdate")}
                     </Button>
                   )}
                 </div>
               ) : (
-                <Button
+                <GuardedAction
                   size="sm"
-                  onClick={versionInfo.autoUpdateSupported ? handleUpdate : undefined}
-                  disabled={updating || !versionInfo.autoUpdateSupported}
+                  onClick={handleUpdate}
+                  disabled={updating}
+                  reason={
+                    versionInfo.autoUpdateSupported
+                      ? undefined
+                      : versionInfo.autoUpdateError || t("manualUpdateRequired")
+                  }
                   className="ml-4 shrink-0 font-semibold"
-                  title={versionInfo.autoUpdateError || ""}
                 >
                   {versionInfo.autoUpdateSupported ? t("updateNow") : t("manualUpdate")}
-                </Button>
+                </GuardedAction>
               )}
             </div>
 
@@ -1040,14 +953,14 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                           `https://github.com/cheaper-inference/OmniRoute/releases/tag/v${versionInfo.latest}`
                         )
                       }
-                      className="font-semibold text-xs py-1"
+                      className="text-xs py-1"
                     >
                       {t("releaseNotes")}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => openExternal(electronDownload.url)}
-                      className="font-semibold text-xs py-1"
+                      className="text-xs py-1"
                     >
                       {electronDownload.label}
                     </Button>
@@ -1193,7 +1106,7 @@ function ProviderOverviewCard({
     <Button
       variant="outline"
       onClick={onClick}
-      className="block h-auto min-h-0 w-full p-3 text-left font-normal"
+      className="block h-auto min-h-0 w-full p-3 text-left"
     >
       <div className="flex items-center gap-2.5">
         <div

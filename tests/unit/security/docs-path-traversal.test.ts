@@ -7,7 +7,17 @@ const DOCS_ROOT = path.resolve("/srv/app", "docs");
 const I18N_ROOT = path.join(DOCS_ROOT, "i18n");
 
 test("resolveSafeI18nSectionDir rejects traversal in the locale (cookie-controlled)", () => {
-  const badLocales = ["..", "../..", "/etc", "es/../../etc", "es\0", "..%2f", "en.", "es/x"];
+  const badLocales = [
+    "..",
+    "../..",
+    "/etc",
+    "es/../../etc",
+    "es\0",
+    "..%2f",
+    "en.",
+    "es/x",
+    "pt_BR",
+  ];
   for (const locale of badLocales) {
     assert.strictEqual(
       resolveSafeI18nSectionDir(DOCS_ROOT, locale, ["overview"]),
@@ -18,7 +28,15 @@ test("resolveSafeI18nSectionDir rejects traversal in the locale (cookie-controll
 });
 
 test("resolveSafeI18nSectionDir rejects traversal in slug segments", () => {
-  const badSlugs = [[".."], ["..", "foo"], ["/etc", "passwd"], ["foo", "..", "bar"], ["a/b"]];
+  const badSlugs = [
+    [".."],
+    ["..", "foo"],
+    ["/etc", "passwd"],
+    ["foo", "..", "bar"],
+    ["a/b"],
+    ["_/../_"],
+    ["a_b.md"],
+  ];
   for (const slug of badSlugs) {
     assert.strictEqual(
       resolveSafeI18nSectionDir(DOCS_ROOT, "pt-BR", slug),
@@ -48,5 +66,10 @@ test("resolveSafeI18nSectionDir allows valid locale/slug patterns", () => {
     );
   }
   assert.ok(resolveSafeI18nSectionDir(DOCS_ROOT, "es", ["v1-migration"]));
+  assert.strictEqual(
+    resolveSafeI18nSectionDir(DOCS_ROOT, "pt-BR", ["architecture", "RESILIENCE_GUIDE"]),
+    path.join(I18N_ROOT, "pt-BR", "docs", "architecture"),
+    "most doc file names use underscores"
+  );
   assert.strictEqual(resolveSafeI18nSectionDir(DOCS_ROOT, "es", []), null, "empty slug → null");
 });

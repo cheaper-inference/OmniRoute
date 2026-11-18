@@ -10,6 +10,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { Card } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { cn } from "@/shared/utils/cn";
 
 type HealthState = "healthy" | "degraded" | "down";
@@ -306,11 +307,8 @@ export default function ProviderHealthMatrixCard() {
   }, [onlyIssues, providerFilter, range]);
 
   useEffect(() => {
-    void (async () => {
-      await fetchMatrix();
-    })();
-    const id = setInterval(fetchMatrix, 30000);
-    return () => clearInterval(id);
+    // Skips ticks while the tab is hidden and catches up on return.
+    return startVisiblePolling(fetchMatrix, 30000);
   }, [fetchMatrix]);
 
   const providers = useMemo(() => data?.providers ?? [], [data?.providers]);
@@ -325,7 +323,7 @@ export default function ProviderHealthMatrixCard() {
               <Icon name="grid_view" size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text-main">
+              <h2 className="text-lg text-text-main">
                 {healthText(t, "providerHealthMatrixTitle", "Provider Health Matrix")}
               </h2>
               <p className="text-sm text-text-muted">
@@ -437,7 +435,7 @@ export default function ProviderHealthMatrixCard() {
                 variant="ghost"
                 aria-expanded={isExpanded}
                 onClick={() => setExpanded(isExpanded ? null : provider.provider)}
-                className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-3 whitespace-normal p-4 text-left font-normal lg:flex-row lg:items-center lg:justify-between"
+                className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-3 whitespace-normal p-4 text-left lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

@@ -413,12 +413,14 @@ test("chatCore sanitization strips empty message names and filters empty tool na
   assert.equal(call.body.messages[0].name, undefined);
   assert.equal(call.body.messages[1].name, "valid-name");
   // 3 invalid tools removed: 2 empty function names + 1 empty anthropic name
-  // 2 valid remain (sorted alphabetically): anthropic_lookup + lookup_weather
+  // 2 valid remain in the client's own order: lookup_weather + anthropic_lookup.
+  // Client tools are no longer sorted alphabetically — only gateway-injected tools are —
+  // because a later tool cap keeps the head of the list (#18120).
   assert.equal(call.body.tools.length, 2);
   const tool0Name = call.body.tools[0].function?.name ?? call.body.tools[0].name;
-  assert.equal(tool0Name, "anthropic_lookup");
+  assert.equal(tool0Name, "lookup_weather");
   const tool1Name = call.body.tools[1].function?.name ?? call.body.tools[1].name;
-  assert.equal(tool1Name, "lookup_weather");
+  assert.equal(tool1Name, "anthropic_lookup");
 });
 
 test("chatCore sanitization strips empty input item names on responses endpoint", async () => {
@@ -724,6 +726,59 @@ test("chatCore skips memory injection when memory is disabled or apiKeyInfo is m
   assert.equal(disabled.call.body.messages[0].content, "Hello");
   assert.equal(noApiKey.call.body.messages[0].role, "user");
   assert.equal(noApiKey.call.body.messages[0].content, "Hello");
+});
+
+test("chatCore keeps a Claude Code classifier turn out of memory, in both directions", async () => {
+  await settingsDb.updateSettings({
+    memoryEnabled: true,
+    memoryMaxTokens: 1024,
+    memoryRetentionDays: 30,
+    memoryStrategy: "recent",
+  });
+  invalidateMemorySettingsCache();
+  ensureLegacyMemoryTable();
+
+  const apiKeyId = `key-classifier-${Date.now()}`;
+  await createMemory({
+    apiKeyId,
+    sessionId: "session-1",
+    type: "factual",
+    key: "preference",
+    content: "User prefers concise Rust examples.",
+    metadata: {},
+    expiresAt: null,
+  });
+  const claudeTurn = (system, content) => ({
+    apiKeyInfo: { id: apiKeyId, name: "Memory Key" },
+    endpoint: "/v1/messages",
+    body: {
+      model: "gpt-4o-mini",
+      max_tokens: 16,
+      stream: false,
+      system,
+      messages: [{ role: "user", content }],
+    },
+  });
+  const storedContents = async () => {
+    await flushAsyncSideEffects();
+    const listed = await listMemories({ apiKeyId });
+    return (Array.isArray(listed) ? listed : (listed.data ?? [])).map((row) => row.content);
+  };
+
+  // Control: an ordinary Claude-format turn still reads and writes memory.
+  const ordinary = await invokeChatCore(claudeTurn("You are helpful.", "I prefer blue themes."));
+  assert.match(JSON.stringify(ordinary.call.body), /Memory context: User prefers concise Rust/);
+  const afterOrdinary = await storedContents();
+  assert.ok(afterOrdinary.some((content) => /blue themes/.test(content)));
+
+  const classifier = await invokeChatCore(
+    claudeTurn(
+      "You are a security monitor for autonomous AI coding agents. Reply with <block>no</block>.",
+      "I prefer green themes."
+    )
+  );
+  assert.doesNotMatch(JSON.stringify(classifier.call.body), /Memory context/);
+  assert.deepEqual(await storedContents(), afterOrdinary);
 });
 
 test("chatCore does not share or persist memories when apiKeyInfo is missing", async () => {

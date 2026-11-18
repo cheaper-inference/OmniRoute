@@ -1,7 +1,8 @@
 // Web-cookie provider key validators (part A): deepseek-web, kimi-web, grok-web,
 // perplexity-web, blackbox-web. Extracted from validation.ts (god-file decomposition) — top-level
-// functions with no dispatcher-state captures; behavior is byte-identical to the original inline defs.
+// functions with no dispatcher-state captures.
 import { applyCustomUserAgent } from "./headers";
+import { pplxUserAgent } from "@omniroute/open-sse/executors/perplexity-web/protocol.ts";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
@@ -399,9 +400,8 @@ export async function validatePerplexityWebProvider({ apiKey, providerSpecificDa
         Accept: "text/event-stream",
         Origin: "https://www.perplexity.ai",
         Referer: "https://www.perplexity.ai/",
-        // Firefox 151 — must match the firefox_151 TLS profile of perplexityTlsClient (issue #2459).
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0",
+        // Must match the Firefox TLS profile perplexityTlsClient resolves from wreq-js (issue #2459).
+        "User-Agent": pplxUserAgent(),
         "X-App-ApiClient": "default",
         "X-App-ApiVersion": "client-1.11.0",
         ...(bearerToken

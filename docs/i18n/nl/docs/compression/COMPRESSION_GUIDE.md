@@ -34,91 +34,86 @@ Clientverzoek
 
 ### Uit
 
-Er wordt geen compressie toegepast. Alle berichten worden ongewijzigd doorgegeven.
+Geen compressie toegepast. Alle berichten worden ongewijzigd doorgestuurd.
 
-### Lite-modus (~15% besparing, <1ms latentie)
+### Lite-modus (~15% besparing, <1 ms latentie)
 
-De veiligste modus — geen semantische wijzigingen, alleen opschoning van de opmaak:
+De veiligste modus — opschoning van de opmaak. Het afkappen van toolresultaten is verliesgevend. Daarom gebruikt het standaardpad (zonder `allow-lossy`, `engine:lite` of expliciete opt-in voor een benoemde combinatie) lite met
+`compressToolResults: false`: eerdere toolresultaten bereiken de provider ongewijzigd.
 
-| Techniek                 | Beschrijving                                                 |
-| ------------------------ | ------------------------------------------------------------ |
-| `collapseWhitespace`     | Opeenvolgende lege regels en afsluitende spaties samenvoegen |
-| `dedupSystemPrompt`      | Dubbele systeemberichten verwijderen                         |
-| `compressToolResults`    | Uitgebreide tool-/functie-uitvoer comprimeren                |
-| `removeRedundantContent` | Herhaalde instructies verwijderen                            |
-| `replaceImageUrls`       | URI's met base64-afbeeldingsgegevens inkorten                |
+| Techniek                 | Beschrijving                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Opeenvolgende lege regels en afsluitende spaties samenvoegen                          |
+| `dedupSystemPrompt`      | Dubbele systeemberichten verwijderen                                                  |
+| `compressToolResults`    | Eerdere toolresultaten afkappen tot de lite-limiet (verliesgevend: alleen met opt-in) |
+| `removeRedundantContent` | Herhaalde instructies verwijderen                                                     |
+| `replaceImageUrls`       | Base64-afbeeldingsgegevens-URI's inkorten                                             |
 
-**Het meest geschikt voor:** Permanent gebruik en veiligheidskritieke workflows.
+**Geschikt voor:** Altijd ingeschakeld gebruik, veiligheidskritieke workflows.
 
-### Standard-modus (~30% besparing)
+### Standaardmodus (~30% besparing)
 
 Geïnspireerd door [Caveman](https://github.com/JuliusBrussee/caveman) — verwijdert opvulwoorden en omslachtige formuleringen met behoud van de betekenis:
 
-- Verwijdert opvulwoorden ("alstublieft", "ik denk", "eigenlijk", "feitelijk")
-- Kort omslachtige zinnen in ("met als doel om" → "om", "als gevolg van" → "omdat")
-- Verwijdert beleefde afzwakkingen ("Zou je...", "Als je misschien zou kunnen...")
-- Meer dan 30 regex-regels, afgestemd op programmeerprompts
+- Verwijdert opvulwoorden ("please", "I think", "basically", "actually")
+- Beknopt omslachtige formuleringen ("in order to" → "to", "as a result of" → "because")
+- Verwijdert beleefde afzwakkingen ("Would you mind...", "If you could possibly...")
+- Meer dan 30 regexregels, afgestemd op codeprompts
 
-**Het meest geschikt voor:** Dagelijkse programmeerworkflows en kostenbewuste teams.
+**Geschikt voor:** Dagelijkse codeworkflows, kostenbewuste teams.
 
-### Aggressive-modus (~50% besparing)
+### Agressieve modus (~50% besparing)
 
-Slim geschiedenisbeheer voor lange sessies:
+Slim beheer van de geschiedenis voor lange sessies:
 
-- **Berichtveroudering** — oudere berichten worden steeds verder gecomprimeerd
-- **Compressie van toolresultaten** — lange tooluitvoer wordt afgekapt of weggelaten (eerste/laatste regels,
-  filtering op overeenkomende regels, compactie van JSON-sleutels)
-- **Bewaking van structurele integriteit** — zorgt ervoor dat paren van `tool_use` en `tool_result` consistent blijven
+- **Berichten verouderen** — oudere berichten worden stapsgewijs verder gecomprimeerd
+- **Compressie van toolresultaten** — lange uitvoer wordt afgekapt of weggelaten (eerste/laatste regels,
+  filtering op overeenkomende regels, compactere JSON-sleutels)
+- **Bewakers voor structurele integriteit** — zorgt dat `tool_use` + `tool_result`-paren consistent blijven
 - **Bewustzijn van het contextvenster** — houdt rekening met tokenlimieten per model
 
-**Het meest geschikt voor:** Langdurige debugsessies en grote codebases.
+**Geschikt voor:** Uitgebreide debug-sessies, grote codebases.
 
-### Ultra-modus (~75% besparing)
+### Ultramodus (~75% besparing)
 
-Maximale compressie voor scenario's waarin tokens van cruciaal belang zijn:
+Maximale compressie voor scenario's waarin tokens kritiek zijn:
 
-- **Heuristisch snoeien** — scoregebaseerd snoeien van tokens uit lopende tekst
-- **Structuurbehoud** — omheinde codeblokken, inlinecode, URL's en identifiers worden
-  gemarkeerd en later letterlijk teruggeplaatst; ze worden nooit gesnoeid
-- **Optionele SLM-laag** — een klein lokaal model kan het snoeiresultaat verfijnen wanneer dit is geconfigureerd
-- Onafhankelijk van de Aggressive-modus: berichtveroudering, compressie van toolresultaten
-  en de fallback-samenvatter worden niet uitgevoerd (alleen een fout in de SLM-laag kan een fallback-pass via
-  Aggressive laten verlopen)
+- **Heuristisch snoeien** — op scores gebaseerd snoeien van tokens in proza
+- **Structuurbehoud** — fenced codeblokken, inline code, URL's en identifiers worden
+  tijdelijk gemarkeerd en letterlijk opnieuw ingevoegd; ze worden nooit gesnoeid
+- **Optionele SLM-laag** — een klein lokaal model kan het snoeien verfijnen wanneer dit is geconfigureerd
+- Onafhankelijk van de agressieve modus: voert geen berichtenveroudering, compressie van toolresultaten
+  of de fallback-samenvatter uit (alleen een fout in de SLM-laag kan een fallback-passage via agressief routeren)
 
-**Het meest geschikt voor:** Wanneer je herhaaldelijk contextlimieten bereikt.
+**Geschikt voor:** Wanneer je herhaaldelijk tegen contextlimieten aanloopt.
 
-### RTK-modus (upstreambereik van 60-90%)
+### RTK-modus (60-90% upstreambereik)
 
-De RTK-modus is geoptimaliseerd voor uitgebreide tooluitvoer die voorkomt in sessies met programmeeragents:
+De RTK-modus is geoptimaliseerd voor uitgebreide tooluitvoer in sessies met code-agents:
 
 - Detecteert opdracht-/uitvoerklassen zoals `git status`, `git diff`, `git log`, testrunners,
-  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm-audits/-installaties, Docker-logs, infra-
-  uitvoer en generieke shelluitvoer
+  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm-audits/-installaties, Docker-logs, infrastructuuruitvoer en generieke shell-uitvoer
 - Past JSON-filterpakketten toe uit `open-sse/services/compression/engines/rtk/filters/`
-- Importeert RTK-filters met TOML-schema v1 uit project- of globale `filters.toml`-bestanden, met validatie
-  via inline-tests en vertrouwenscontrole voor projectbestanden
-- Wordt geleverd met 55 ingebouwde filters en inline-verificatievoorbeelden
-- Verwijdert ANSI-besturingsreeksen, voortgangsbalken, herhaalde regels en niet-relevante ruis
-- Behoudt mislukkingen, fouten, waarschuwingen, gewijzigde bestanden, samenvattingen en het einde van lange uitvoer
+- Importeert RTK TOML-schema-v1-filters uit project- of globale `filters.toml`-bestanden, met inline-testvalidatie en vertrouwenscontrole voor projectbestanden
+- Levert 56 ingebouwde filters met inline-verificatievoorbeelden
+- Verwijdert ANSI-besturingsreeksen, voortgangsbalken, herhaalde regels en niet-actiegerichte ruis
+- Behoudt fouten, errorberichten, waarschuwingen, gewijzigde bestanden, samenvattingen en het einde van lange uitvoer
 - Ondersteunt projectfilters met vertrouwenscontrole, globale filters en optioneel herstel van geredigeerde onbewerkte uitvoer
 
-**Het meest geschikt voor:** Agentsessies met shell-, build-, test-, git-, grep- en bestandsuitvoertranscripten.
+**Geschikt voor:** Agent-sessies met shell-, build-, test-, git-, grep- en bestanduitvoertranscripten.
 
-### Stacked-modus (geschikt bereik van 78-95%)
+### Gestapelde modus (78-95% van het in aanmerking komende bereik)
 
-De Stacked-modus voert meerdere compressie-engines in een deterministische volgorde uit. De standaardpipeline is:
+De gestapelde modus voert meerdere compressie-engines uit in een deterministische volgorde. De standaardpipeline is:
 
 ```txt
 RTK -> Caveman
 ```
 
-Door die volgorde wordt terminal-/tooluitvoer eerst compact gemaakt, waarna Caveman semantische condensatie toepast op
-de resterende prompt in natuurlijke taal. Stacked-pipelines kunnen globaal worden geconfigureerd of via
-compressiecombo's die aan routeringscombo's zijn toegewezen.
+Die volgorde houdt terminal-/tooluitvoer eerst compact en past vervolgens semantische condensatie van Caveman toe op
+de resterende prompt in natuurlijke taal. Gestapelde pipelines kunnen globaal of via compressiecombinaties worden geconfigureerd die aan routeringscombinaties zijn toegewezen.
 
-**Het meest geschikt voor:** Gemengde context met grote toollogs in combinatie met menselijke instructies of assistentsamenvattingen.
-
----
+**Geschikt voor:** Gemengde context met grote tool.logboeken plus menselijke instructies of samenvattingen van de assistent.
 
 ## Berekening van upstreambesparingen
 
@@ -194,62 +189,69 @@ Met Stacked:       10K-2.5K tokens verzonden     (geschikt RTK+Caveman-bereik va
 Navigeer naar `Dashboard → Context & Cache`:
 
 - **Caveman** — modusselectie, taalpakketten, voorbeeldweergave en algemene standaardinstellingen
-- **RTK** — voorbeeldweergave van commandofilters, RTK-veiligheidsinstellingen en filtercatalogus
-- **Compressiecombinaties** — benoemde engine-pijplijnen die aan routeringscombinaties zijn toegewezen
-- **Drempelwaarde voor automatisch activeren** — activeert automatisch compressie wanneer het aantal tokens de drempelwaarde overschrijdt
+- **RTK** — voorbeeldweergave van opdrachtfilters, RTK-veiligheidsinstellingen en filtercatalogus
+- **Compressiecombinaties** — benoemde engine-pipelines die aan routeringscombinaties zijn toegewezen
+- **Drempelwaarde voor automatische activering** — compressie automatisch inschakelen wanneer het aantal tokens de drempelwaarde overschrijdt
 
-### Overschrijving per combinatie
+### Override per combinatie
 
 Wijs in `Dashboard → Context & Cache → Compression Combos` een compressiecombinatie toe aan een
 routeringscombinatie:
 
 ```txt
-Combinatie: "free-tier-fallback"
-  Compressiecombinatie: "coding-agent-stack"
-  Pijplijn: RTK -> Caveman
-  Doelen:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Hiermee kunt u gestapelde compressie gebruiken voor gratis/codeerproviders, terwijl de lite-modus
-behouden blijft voor betaalde abonnementen.
+Hiermee kun je gestapelde compressie gebruiken voor gratis/coding-providers, terwijl je de lite-modus
+op betaalde abonnementen behoudt.
 
-Deze toewijzing via "Overschrijving per combinatie" is een andere instelling dan de overschrijving
-van de **compressiemodus van de routeringscombinatie** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — het schema van het veld
-accepteert ook `rtk`, `stacked` en `omniglyph`) — die overschrijving selecteert geen benoemde
-pijplijn voor een compressiecombinatie; deze stelt alleen het veld `compressionMode` in dat door
-`resolveCompressionPlan` wordt geraadpleegd. Dit kan worden ingesteld op de combinatiekaart
+Deze toewijzing van een "Per-Combo Override" is een andere instelling dan de **compressiemodusoverride
+voor routeringscombinaties** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — het schema
+van het veld accepteert ook `rtk`, `stacked` en `omniglyph`) — die override selecteert geen benoemde
+compressiecombinatie-pipeline; deze stelt alleen het veld `compressionMode` in dat door
+`resolveCompressionPlan` wordt geraadpleegd. De instelling kan worden ingesteld op de combinatiekaart
 (`Dashboard → Combos`) of, sinds #6760, per routeringscombinatie in de lijst "Assign to routing" op
-`Dashboard → Context & Cache → Compression Combos`, direct naast het selectievakje voor
-pijplijntoewijzing dat hierboven is beschreven. Beide interfaces slaan hun instellingen op via
-hetzelfde eindpunt `PUT /api/combos/{id}`.
+`Dashboard → Context & Cache → Compression Combos`, direct naast het hierboven beschreven selectievakje
+voor pipeline-toewijzing. Beide locaties slaan de instelling op via hetzelfde
+`PUT /api/combos/{id}`-endpoint.
 
-### Overschrijving per aanvraag
+### Override per aanvraag
 
-Stuur de aanvraagheader `x-omniroute-compression` om het compressieplan voor één aanvraag te
-overschrijven. Deze heeft de hoogste prioriteit — hij heeft voorrang op de overschrijving van de
-routeringscombinatie, het actieve profiel, automatische activering en de paneelinstelling Default.
-Onbekende waarden worden genegeerd (de aanvraag wordt nooit afgewezen) en de algemene hoofdschakelaar
-blijft altijd bepalend: wanneer compressie algemeen is uitgeschakeld, kan de header deze niet
-inschakelen. Waarden:
+Stuur de aanvraagheader `x-omniroute-compression` mee om het compressieplan voor één aanvraag te
+overschrijven. Deze heeft de hoogste prioriteit — de header overschrijft de override voor de
+routeringscombinatie, het actieve profiel, automatische activering en de standaardinstelling van het
+paneel. Onbekende waarden worden genegeerd (de aanvraag wordt nooit afgewezen) en de algemene
+hoofdschakelaar blijft voor alles bepalend: wanneer compressie globaal is uitgeschakeld, kan de header
+deze niet inschakelen. Waarden:
 
-| Waarde        | Effect                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Geen compressie voor deze aanvraag.                                                                                               |
-| `default`     | Het uit het paneel afgeleide Default-profiel (negeert het actieve profiel). Compressie-engines met verlies blijven uitgeschakeld. |
-| `safe`        | Hetzelfde als het weglaten van de header: alleen deduplicatie en het samenvoegen van witruimte.                                   |
-| `allow-lossy` | Behoud het operatorplan van deze aanvraag, inclusief samenvattingen, relevantiefilters en stijlherschrijvingen.                   |
-| `engine:<id>` | Eén engine indien ingeschakeld, bijvoorbeeld `engine:rtk`. Hiermee wordt die engine voor deze aanvraag geactiveerd.               |
-| `<combo>`     | Een benoemde combinatie, eerst vergeleken op naam (hoofdletterongevoelig) en daarna op id.                                        |
+| Waarde        | Effect                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `off`         | Geen compressie voor deze aanvraag.                                                                                |
+| `default`     | Het uit het paneel afgeleide standaardprofiel (negeert het actieve profiel). Lossy-engines blijven uitgeschakeld.  |
+| `safe`        | Hetzelfde als wanneer de header wordt weggelaten.                                                                  |
+| `allow-lossy` | Behoud het operatorplan voor deze aanvraag, inclusief samenvattingen, relevantiefilters en stijltransformaties.    |
+| `engine:<id>` | Eén engine wanneer deze is ingeschakeld, bijvoorbeeld `engine:rtk`. Dit is de opt-in per aanvraag voor die engine. |
+| `<combo>`     | Een benoemde combinatie, eerst op naam (hoofdletterongevoelig) en daarna op id gevonden.                           |
 
-Zonder `allow-lossy`, `engine:<id>` of een benoemde combinatie worden compressie-engines met verlies
-niet toegepast. De aanvraag krijgt nog steeds sessiededuplicatie en samenvoeging van witruimte
-wanneer compressie is ingeschakeld.
+Zonder `allow-lossy`, `engine:<id>` of een benoemde combinatie worden lossy-engines niet toegepast.
+Wanneer een lossy Default, automatische activering of routeringsoverride wordt gedegradeerd, behoudt
+OmniRoute de herkende lossless stappen uit de geconfigureerde gestapelde pipeline, in de
+geconfigureerde volgorde. Er wordt alleen teruggevallen op `session-dedup → lite` wanneer geen enkele
+geconfigureerde lossless stap behouden blijft.
 
-Het toegepaste plan wordt teruggestuurd in de responseheader
-`X-OmniRoute-Compression: <mode>; source=<source>`, waarbij `<source>` een van `request-header`,
-`routing-override`, `active-profile`, `auto-trigger`, `default` of `off` is.
+De voorbeeldweergave **Effective pipeline** van het instellingenpaneel toont het normale plan in
+rusttoestand. Wanneer automatische activering kan worden uitgevoerd, toont dezelfde voorbeeldweergave
+ook de voorwaardelijke effectieve pipeline, zodat de oplossing in het paneel en zonder header in de
+runtime op elkaar afgestemd blijven.
+
+Het toegepaste plan wordt teruggegeven in de antwoordheader
+`X-OmniRoute-Compression: <mode>; source=<source>`, waarbij `<source>` een van
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` of `off` is.
 
 ### API
 
@@ -262,7 +264,7 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Voorbeeld van een specifieke RTK/stacked-payload bekijken
+# Een specifieke RTK/stacked-payload bekijken
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
@@ -270,7 +272,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
 # RTK-filterpakketten weergeven
 curl http://localhost:20128/api/context/rtk/filters
 
-# RTK rechtstreeks testen met optionele commandometadata
+# RTK rechtstreeks testen met optionele opdrachtmetadata
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'

@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { PassThrough } from "node:stream";
 
 /**
  * Stage 8 (issue #10321) — shared standalone web bundle.
@@ -20,6 +21,7 @@ import { createHash } from "node:crypto";
 const bundleMod = await import("../../../scripts/build/standaloneBundle.mjs");
 const manifestMod = await import("../../../scripts/build/standaloneManifest.mjs");
 const hydrateMod = await import("../../../scripts/build/hydrateNativeDeps.mjs");
+const tarballMod = await import("../../../scripts/build/standaloneTarball.mjs");
 
 const { runPack, runRestore } = bundleMod as typeof bundleMod & {
   runPack: (opts: { dir?: string; out: string; manifest?: string }) => Promise<{
@@ -52,6 +54,18 @@ const { hydratePlatformNatives, verifyBundledNatives } = hydrateMod as typeof hy
     errors: string[];
   };
 };
+
+const { BlockSource, READ_AHEAD_BYTES, createTarGz, extractTarGz } =
+  tarballMod as typeof tarballMod & {
+    READ_AHEAD_BYTES: number;
+    BlockSource: new (stream: PassThrough) => {
+      buffered: number;
+      read: (n: number) => Promise<Buffer | null>;
+      readSome: (max?: number) => Promise<Buffer | null>;
+    };
+    createTarGz: (srcDir: string, outFile: string) => Promise<void>;
+    extractTarGz: (archive: string, destDir: string) => Promise<{ entries: number }>;
+  };
 
 const IS_WINDOWS = process.platform === "win32";
 
@@ -164,6 +178,79 @@ test("restore rejects a corrupted archive before extraction", async () => {
     fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
+});
+
+test("extraction does not recopy the buffered stream for every entry", async () => {
+  const src = tmpDir("s8-copies-src-");
+  const outDir = tmpDir("s8-copies-out-");
+  const dst = tmpDir("s8-copies-dst-");
+  const realConcat = Buffer.concat;
+  try {
+    // Restore time on a real bundle (123k entries) went quadratic through
+    // Buffer.concat. Counting the copied bytes proves it without a timing assertion.
+    const entries = 2000;
+    const body = Buffer.alloc(1500, "x");
+    for (let i = 0; i < entries; i++) {
+      fs.writeFileSync(path.join(src, `f${i}.txt`), body);
+    }
+    const archive = path.join(outDir, "web-bundle.tar.gz");
+    await createTarGz(src, archive);
+    const tarBytes = entries * (512 + 2048);
+
+    let copied = 0;
+    Buffer.concat = ((list: Uint8Array[], length?: number) => {
+      const joined = realConcat(list, length);
+      copied += joined.length;
+      return joined;
+    }) as typeof Buffer.concat;
+    const result = await extractTarGz(archive, dst);
+    Buffer.concat = realConcat;
+
+    assert.equal(result.entries, entries);
+    assert.equal(fs.readFileSync(path.join(dst, "f1999.txt")).length, body.length);
+    assert.ok(copied <= tarBytes, `copied ${copied} bytes extracting a ${tarBytes}-byte tar`);
+  } finally {
+    Buffer.concat = realConcat;
+    fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dst, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("BlockSource pauses the stream ahead of a slow reader and loses no bytes", async () => {
+  const stream = new PassThrough({ highWaterMark: 64 * 1024 });
+  const source = new BlockSource(stream);
+  const chunk = Buffer.alloc(256 * 1024, 7);
+  const total = (READ_AHEAD_BYTES / chunk.length) * 4 * chunk.length;
+  let written = 0;
+  const writer = (async () => {
+    while (written < total) {
+      written += chunk.length;
+      if (!stream.write(chunk)) await new Promise((resolve) => stream.once("drain", resolve));
+    }
+    stream.end();
+  })();
+
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.ok(stream.isPaused(), "a reader that is behind must pause the stream");
+  assert.ok(
+    source.buffered <= READ_AHEAD_BYTES + chunk.length,
+    `read-ahead ${source.buffered} exceeds the limit`
+  );
+  assert.ok(written < total, "the writer must feel the backpressure");
+
+  // Reads cross chunk boundaries and must see every byte exactly once.
+  let received = 0;
+  const odd = 1000;
+  for (;;) {
+    const part = await source.read(odd);
+    if (part === null) break;
+    assert.equal(part.length, odd);
+    received += part.length;
+  }
+  await writer;
+  assert.equal(received, Math.floor(total / odd) * odd);
+  assert.equal(await source.readSome(), null, "the stream is exhausted");
 });
 
 test("manifest verification flags modified and smuggled files in a restored tree", async () => {

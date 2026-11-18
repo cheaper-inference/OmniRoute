@@ -11,7 +11,9 @@
 import crypto from "node:crypto";
 
 export const CURSOR_API_BASE_URL = "https://api2.cursor.sh";
+// Preserve the legacy public export for existing consumers.
 export const CURSOR_API_KEY_PREFIX = "crsr_";
+const CURSOR_API_KEY_PREFIXES = [CURSOR_API_KEY_PREFIX, "grok_"];
 export const CURSOR_API_KEY_EXCHANGE_PATH = "/auth/exchange_user_api_key";
 export const CURSOR_API_KEY_EXCHANGE_URL = `${CURSOR_API_BASE_URL}${CURSOR_API_KEY_EXCHANGE_PATH}`;
 
@@ -47,13 +49,16 @@ const sessionCache = new Map<string, CursorSessionToken>();
 const inflightExchanges = new Map<string, Promise<CursorSessionToken>>();
 
 export function isCursorApiKey(value: unknown): value is string {
-  return typeof value === "string" && value.startsWith(CURSOR_API_KEY_PREFIX);
+  return (
+    typeof value === "string" && CURSOR_API_KEY_PREFIXES.some((prefix) => value.startsWith(prefix))
+  );
 }
 
 // Session-cache key fingerprint, not a password/credential hash — keyed with a fixed context
 // label so it reads as a domain-separated digest rather than a bare password hash.
 function cacheKeyFor(apiKey: string): string {
-  return crypto.createHmac("sha256", "omniroute-cursor-session-cache-fingerprint-v1")
+  return crypto
+    .createHmac("sha256", "omniroute-cursor-session-cache-fingerprint-v1")
     .update(apiKey)
     .digest("hex");
 }
@@ -99,7 +104,7 @@ export async function exchangeCursorApiKey(
 ): Promise<CursorSessionToken> {
   if (!isCursorApiKey(apiKey)) {
     throw new CursorApiKeyExchangeError(
-      `Cursor API keys start with "${CURSOR_API_KEY_PREFIX}"`,
+      `Cursor API keys start with ${CURSOR_API_KEY_PREFIXES.join(" or ")}`,
       400
     );
   }

@@ -111,4 +111,17 @@ describe("prepareClaudeRequest preserve-mode fallback", () => {
     const system = result.system as Block[];
     assert.ok(system[system.length - 1].cache_control, "heuristic marker on last system block");
   });
+
+  // The API-key provider talks to the same Messages API as the OAuth one.
+  test("the anthropic API-key provider gets the same heuristic markers as claude", () => {
+    const opts = { fallbackToHeuristicWhenNoMarkers: true };
+    const viaKey = prepareClaudeRequest(baseBody(), "anthropic", true, "claude-sonnet-5", opts);
+    const viaOauth = prepareClaudeRequest(baseBody(), "claude", true, "claude-sonnet-5", opts);
+    assert.ok(
+      collectCacheControls(viaKey as Record<string, unknown>).length > 0,
+      "anthropic requests must not go upstream with zero cache breakpoints"
+    );
+    assert.deepEqual(viaKey.system, viaOauth.system);
+    assert.deepEqual(viaKey.messages, viaOauth.messages);
+  });
 });

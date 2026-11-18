@@ -16,6 +16,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "muse-image-test-secr
 const { getImageProvider, parseImageModel, getAllImageModels } =
   await import("../../open-sse/config/imageRegistry.ts");
 const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
+const { museCodeClientUserAgent } = await import("../../open-sse/config/museCode.ts");
 const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -99,6 +100,28 @@ test("text-to-image posts JSON to /v1/images/generations with the pasted Meta AP
     response_format: "b64_json",
   });
   assert.deepEqual(result.data, { created: 1700000000, data: [{ b64_json: PNG_B64 }] });
+});
+
+test("generation and edit requests carry the Muse Code client identity", async () => {
+  const requests = capture({ data: [{ b64_json: PNG_B64 }] });
+  await generate({}, { apiKey: "meta-api-key" });
+  await generate({ imageBytes: Buffer.from("png"), imageMime: "image/png" }, { apiKey: "k" });
+  assert.equal(requests.length, 2);
+  for (const { headers } of requests) {
+    assert.equal(headers.get("user-agent"), museCodeClientUserAgent());
+    assert.equal(headers.get("x-client-id"), "tbh:exec");
+    assert.equal(headers.get("x-tbh-agent-role"), "main");
+    assert.match(headers.get("traceparent") ?? "", /^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
+    const session = headers.get("x-tbh-session-id") ?? "";
+    assert.match(session, /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    assert.equal(headers.get("x-meta-ai-gateway-session-id"), session);
+    assert.equal(headers.get("x-tbh-thread-id"), session);
+    assert.equal(headers.get("x-tbh-root-session-id"), session);
+  }
+  assert.notEqual(
+    requests[0].headers.get("x-tbh-session-id"),
+    requests[1].headers.get("x-tbh-session-id")
+  );
 });
 
 test("device-flow connections use the minted inference key and minted base URL", async () => {

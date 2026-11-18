@@ -8,79 +8,78 @@
 
 _Última atualização: 2026-06-28_
 
-## Resumo Executivo
+## Sumário executivo
 
-OmniRoute é um gateway local de roteamento de IA e um painel de controle desenvolvido com Next.js.
-Ele fornece um único endpoint compatível com OpenAI (`/v1/*`) e roteia o tráfego entre vários provedores upstream, com tradução, fallback, renovação de tokens e rastreamento de uso.
+OmniRoute é um gateway de roteamento AI local e painel construído em Next.js. Ele fornece um único endpoint compatível com OpenAI (`/v1/*`) e roteia o tráfego entre vários provedores upstream com tradução, fallback, atualização de token e rastreamento de uso.
 
-Principais recursos:
+Capacidades principais:
 
-- Superfície de API compatível com OpenAI para CLIs/ferramentas (375 provedores, 156 módulos executores)
-- Tradução de solicitações/respostas entre formatos de provedores
-- Fallback de combinações de modelos (sequência de vários modelos)
-- Etapas estruturadas de combinação (`provider + model + connection`) com ordenação em tempo de execução por `compositeTiers`
+- Superfície API compatível com OpenAI para CLI/tools (394 provedores, 159 módulos executores)
+- Tradução Request/response em formatos de provedores
+- Fallback de combinação de modelos (sequência de vários modelos)
+- Etapas combinadas estruturadas (`provider + model + connection`) com ordenação de tempo de execução por `compositeTiers`
 - Fallback no nível da conta (várias contas por provedor)
-- Pré-verificação de cota e seleção de conta P2C com reconhecimento de cota no fluxo principal de chat
-- Gerenciamento de conexões de provedores via OAuth + chave de API (27 módulos de provedores OAuth)
-- Geração de embeddings via `/v1/embeddings` (18 provedores)
-- Geração de imagens via `/v1/images/generations` (mais de 10 provedores, mais de 20 modelos)
+- Simulação de cota e seleção de conta P2C com reconhecimento de cota no caminho principal do chat
+- OAuth + gerenciamento de conexão do provedor de chave de API (27 módulos do provedor OAuth )
+- Geração de incorporação via `/v1/embeddings` (18 provedores)
+- Geração de imagens via `/v1/images/generations` (10 provedores +, 20 modelos + )
 - Transcrição de áudio via `/v1/audio/transcriptions` (18 provedores)
-- Conversão de texto em fala via `/v1/audio/speech` (24 provedores integrados)
-- Geração de vídeos via `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Conversão de texto para fala via `/v1/audio/speech` (24 provedores integrados)
+- Geração de vídeo via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Geração de música via `/v1/music/generations` (ComfyUI)
 - Pesquisa na web via `/v1/search` (20 provedores)
 - Moderação via `/v1/moderations`
 - Reclassificação via `/v1/rerank`
-- Análise de tags de pensamento (`<think>...</think>`) para modelos de raciocínio
-- Sanitização de respostas para compatibilidade estrita com o SDK da OpenAI
-- Normalização de funções (developer→system, system→user) para compatibilidade entre provedores
+- Pense na análise de tags (`<think>...</think>`) para modelos de raciocínio
+- Sanitização de resposta para compatibilidade estrita OpenAI SDK
+- Normalização de funções (desenvolvedor do sistema →, usuário do sistema →) para compatibilidade entre provedores
 - Conversão de saída estruturada (json_schema → Gemini responseSchema)
-- Persistência local de provedores, chaves, aliases, combinações, configurações e preços (122 módulos de banco de dados)
-- Rastreamento de uso/custos e registro de solicitações
-- Sincronização opcional com a nuvem para sincronização entre vários dispositivos/estados
-- Lista de permissões/bloqueios de IPs para controle de acesso à API
-- Gerenciamento do orçamento de raciocínio (passagem direta/automático/personalizado/adaptativo)
-- Injeção global de prompt do sistema
-- Rastreamento e identificação de sessões
-- Limitação de taxa aprimorada por conta, com perfis específicos por provedor
-- Padrão de circuit breaker para resiliência dos provedores
-- Proteção contra efeito manada com bloqueio por mutex
-- Cache de desduplicação de solicitações baseado em assinatura
+- Persistência local para provedores, chaves, aliases, combos, configurações, preços (122 módulos DB )
+- rastreamento Usage/cost e registro de solicitação
+- Sincronização em nuvem opcional para sincronização multi-device/state
+- IP allowlist/blocklist para controle de acesso API
+- Pensando na gestão orçamentária (passthrough/auto/custom/adaptive)
+- Injeção imediata do sistema global
+- Rastreamento de sessão e impressão digital
+- Limitação de taxa aprimorada por conta com perfis específicos do provedor
+- Padrão de disjuntor para resiliência do provedor
+- Proteção de rebanho anti-trovão com bloqueio mutex
+- Cache de desduplicação de solicitação baseada em assinatura
 - Camada de domínio: regras de custo, política de fallback, política de bloqueio
-- Context Relay: resumos de transferência de sessão para manter a continuidade durante a rotação de contas
-- Persistência do estado do domínio (cache de gravação imediata no SQLite para fallbacks, orçamentos, bloqueios e circuit breakers)
-- Mecanismo de políticas para avaliação centralizada de solicitações (bloqueio → orçamento → fallback)
-- Telemetria de solicitações com agregação de latência p50/p95/p99
-- Telemetria de destinos de combinações e integridade histórica desses destinos via `combo_execution_key` / `combo_step_id`
-- ID de correlação (X-Request-Id) para rastreamento de ponta a ponta
-- Registro de auditoria de conformidade com opção de desativação por chave de API
-- Framework de avaliação para garantia de qualidade de LLMs
-- Painel de integridade com status em tempo real dos circuit breakers dos provedores
-- Servidor MCP (110 ferramentas) com 3 transportes (stdio/SSE/HTTP transmitível)
+- Context Relay: resumos de transferência de sessão para continuidade de rotação de conta
+- Persistência de estado de domínio (cache write-through SQLite para fallbacks, orçamentos, bloqueios, disjuntores)
+- Mecanismo de política para avaliação centralizada de solicitações (lockout → budget → fallback)
+- Solicitar telemetria com agregação de latência p50/p95/p99
+- Telemetria do alvo combinado e integridade histórica do alvo combinado via `combo_execution_key` / `combo_step_id`
+- Correlação ID (X-Request-Id) para rastreamento de ponta a ponta
+- Registro de auditoria de conformidade com cancelamento por chave API
+- Estrutura de avaliação para garantia de qualidade LLM
+- Painel de saúde com status do disjuntor do fornecedor em tempo real
+- Servidor MCP (110 ferramentas) com 3 transportes (stdio/SSE/Streamable HTTP)
 - Servidor A2A (JSON-RPC 2.0 + SSE) com habilidades e ciclo de vida de tarefas
-- Sistema de memória (extração, injeção, recuperação e sumarização)
-- Sistema de habilidades (registro, executor, sandbox e habilidades integradas)
-- Proxy MITM com gerenciamento de certificados e tratamento de DNS
-- Middleware de proteção contra injeção de prompts
-- Pipeline de compactação de prompts com Caveman, RTK, pipelines empilhados, combinações de compactação, pacotes de idiomas e análises
-- Registro ACP (Agent Communication Protocol)
+- Sistema de memória (extração, injeção, recuperação, resumo)
+- Sistema de habilidades (registro, executor, sandbox, habilidades integradas)
+- proxy MITM com gerenciamento de certificados e manipulação DNS
+- Middleware de proteção de injeção imediata
+- Pipeline de compactação imediata com Caveman, RTK, pipelines empilhados, combos de compactação, pacotes de idiomas e análises
+- Registro ACP (protocolo de comunicação de agente)
 - Provedores OAuth modulares (22 módulos individuais em `src/lib/oauth/providers/`)
-- Scripts de desinstalação/desinstalação completa
-- Ação de reparo do ambiente OAuth
-- Ponte WebSocket para clientes WS compatíveis com OpenAI (`/v1/ws`)
-- Gerenciamento de tokens de sincronização (emissão/revogação e download de pacote de configuração versionado por ETag)
-- Predefinição de provedor de primeira classe GLM Thinking (`glmt`)
-- Contagem híbrida de tokens (`/messages/count_tokens` no lado do provedor, com fallback para estimativa)
-- Propagação automática de aliases de modelos (mais de 30 normalizações de dialetos entre proxies na inicialização)
-- Busca externa segura com proteção contra SSRF, bloqueio de URLs privadas e novas tentativas configuráveis
-- Novas tentativas de chat com reconhecimento de cooldown, usando `requestRetry` e `maxRetryIntervalSec` configuráveis
-- Validação do ambiente de execução com Zod na inicialização
-- Auditoria de conformidade v2 com paginação, eventos CRUD de provedores e registro de validações bloqueadas por SSRF
+- scripts Uninstall/full-uninstall
+- ação de reparação ambiental OAuth
+- ponte WebSocket para clientes WS compatíveis com OpenAI (`/v1/ws`)
+- Gerenciamento de token de sincronização (issue/revoke, download do pacote de configuração com versão ETag)
+- GLM Thinking (`glmt`) predefinição de provedor de primeira classe
+- Contagem de tokens híbridos ( `/messages/count_tokens` do lado do provedor com fallback de estimativa)
+- Propagação automática de alias de modelo (30 normalizações de dialeto de proxy cruzado + na inicialização)
+- Busca de saída segura com SSRF guard, bloqueio URL privado e nova tentativa configurável
+- Novas tentativas de bate-papo com reconhecimento de resfriamento com `requestRetry` e `maxRetryIntervalSec` configuráveis
+- Validação do ambiente de tempo de execução com Zod na inicialização
+- Auditoria de conformidade v2 com paginação, eventos CRUD do provedor e registro de validação bloqueado por SSRF
 
-Modelo principal de execução:
+Modelo de tempo de execução primário:
 
-- As rotas do aplicativo Next.js em `src/app/api/*` implementam tanto as APIs do painel quanto as APIs de compatibilidade
-- Um núcleo compartilhado de SSE/roteamento em `src/sse/*` + `open-sse/*` gerencia a execução de provedores, tradução, streaming, fallback e uso
+- As rotas do aplicativo Next.js no `src/app/api/*` implementam o painel APIs e a compatibilidade APIs
+- Um núcleo SSE/routing compartilhado no `src/sse/*` + `open-sse/*` cuida da execução, tradução, streaming, fallback e uso do provedor
 
 ## Diagramas de Referência
 
@@ -266,259 +265,207 @@ Domínios de gerenciamento:
 - Pacote de configuração: `src/app/api/sync/bundle` (GET, snapshot de configurações/provedores/combos/chaves versionado por ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — manipulador de Upgrade para clientes WS compatíveis com OpenAI
 
-## 2) SSE + núcleo de tradução
+## 2) Núcleo de Tradução SSE +
 
-Módulos do fluxo principal:
+Principais módulos de fluxo:
 
 - Entrada: `src/sse/handlers/chat.ts`
-- Orquestração principal: `open-sse/handlers/chatCore.ts`
-- Adaptadores de execução de provedores: `open-sse/executors/*`
-- Detecção de formato/configuração de provedores: `open-sse/services/provider.ts`
-- Análise/resolução de modelos: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Lógica de fallback de contas: `open-sse/services/accountFallback.ts`
+- Orquestração central: `open-sse/handlers/chatCore.ts`
+- Adaptadores de execução do provedor: `open-sse/executors/*`
+- Configuração do formato detection/provider : `open-sse/services/provider.ts`
+- Modelo parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Lógica de substituição da conta: `open-sse/services/accountFallback.ts`
 - Registro de tradução: `open-sse/translator/index.ts`
-- Transformações de streams: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Extração/normalização de uso: `open-sse/utils/usageTracking.ts`
-- Analisador de tags de pensamento: `open-sse/utils/thinkTagParser.ts`
-- Manipulador de embeddings: `open-sse/handlers/embeddings.ts`
-- Registro de provedores de embeddings: `open-sse/config/embeddingRegistry.ts`
-- Manipulador de geração de imagens: `open-sse/handlers/imageGeneration.ts`
-- Registro de provedores de imagens: `open-sse/config/imageRegistry.ts`
-- Sanitização de respostas: `open-sse/handlers/responseSanitizer.ts`
-- Normalização de funções: `open-sse/services/roleNormalizer.ts`
+- Transformações de fluxo: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Uso extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Pense no analisador de tags: `open-sse/utils/thinkTagParser.ts`
+- Manipulador de incorporação: `open-sse/handlers/embeddings.ts`
+- Incorporando registro do provedor: `open-sse/config/embeddingRegistry.ts`
+- Manipulador de geração de imagem: `open-sse/handlers/imageGeneration.ts`
+- Registro do provedor de imagem: `open-sse/config/imageRegistry.ts`
+- Sanitização de resposta: `open-sse/handlers/responseSanitizer.ts`
+- Normalização de função: `open-sse/services/roleNormalizer.ts`
 
 Serviços (lógica de negócios):
 
-- Seleção/pontuação de contas: `open-sse/services/accountSelector.ts`
+- Conta selection/scoring: `open-sse/services/accountSelector.ts`
 - Gerenciamento do ciclo de vida do contexto: `open-sse/services/contextManager.ts`
-- Aplicação do filtro de IP: `open-sse/services/ipFilter.ts`
-- Rastreamento de sessões: `open-sse/services/sessionManager.ts`
-- Desduplicação de requisições: `open-sse/services/signatureCache.ts`
+- Aplicação do filtro IP : `open-sse/services/ipFilter.ts`
+- Acompanhamento de sessão: `open-sse/services/sessionManager.ts`
+- Solicitar desduplicação: `open-sse/services/signatureCache.ts`
 - Injeção de prompt do sistema: `open-sse/services/systemPrompt.ts`
-- Gerenciamento do orçamento de raciocínio: `open-sse/services/thinkingBudget.ts`
-- Roteamento de modelos com curingas: `open-sse/services/wildcardRouter.ts`
-- Gerenciamento de limites de taxa: `open-sse/services/rateLimitManager.ts`
+- Pensando na gestão orçamentária: `open-sse/services/thinkingBudget.ts`
+- Roteamento de modelo curinga: `open-sse/services/wildcardRouter.ts`
+- Gerenciamento de limite de taxa: `open-sse/services/rateLimitManager.ts`
 - Disjuntor: `src/shared/utils/circuitBreaker.ts`
-- Transferência de contexto: `open-sse/services/contextHandoff.ts` — geração e injeção de resumo de transferência para a estratégia de retransmissão de contexto
-- Compactação: `open-sse/services/compression/*` — compactação proativa antes da tradução do provedor;
-  inclui regras Caveman, filtros RTK, pipelines empilhados, combinações de compactação, estatísticas e validação
-- Coletor de cota do Codex: `open-sse/services/codexQuotaFetcher.ts` — obtém a cota do Codex para decisões de transferência de retransmissão de contexto
-- Nova tentativa com reconhecimento de tempo de espera: `src/sse/services/cooldownAwareRetry.ts` — novas tentativas por modelo após o tempo de espera, com `requestRetry` / `maxRetryIntervalSec` configuráveis
-- Busca externa segura: `src/shared/network/safeOutboundFetch.ts` — busca protegida de provedores/modelos com proteção contra SSRF, bloqueio de URLs privadas, novas tentativas e tempo limite
-- Proteção de URLs externas: `src/shared/network/outboundUrlGuard.ts` — verificações de host em URLs de provedores; `src/shared/network/outboundUrlGuardPolicy.ts` seleciona o modo a partir de `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` e seus controles no painel (consulte `docs/reference/ENVIRONMENT.md`)
-- Padrões de requisição do provedor: `open-sse/services/providerRequestDefaults.ts` — valores padrão de `maxTokens`, `temperature` e `thinkingBudgetTokens` no nível do provedor
-- Constantes do provedor GLM: `open-sse/config/glmProvider.ts` — modelos GLM compartilhados, URLs de cota, tempo limite e padrões do GLMT
-- Serviço upstream do Antigravity: `open-sse/config/antigravityUpstream.ts` — URL base e constantes do caminho de descoberta
-- Constantes do cliente Codex: `open-sse/config/codexClient.ts` — valores versionados de agente do usuário e versão do cliente
-- Semente de aliases de modelos: `src/lib/modelAliasSeed.ts` — inicializa mais de 30 aliases de dialetos entre proxies na inicialização
+- Transferência de contexto: geração e injeção de resumo de transferência `open-sse/services/contextHandoff.ts` — para estratégia de retransmissão de contexto
+- Compressão: compactação proativa `open-sse/services/compression/*` — antes da tradução do provedor; inclui regras do Caveman, filtros RTK, pipelines empilhados, combos de compactação, estatísticas e validação
+- Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — busca a cota Codex para decisões de transferência de retransmissão de contexto
+- Nova tentativa com reconhecimento de resfriamento: novas tentativas de resfriamento por modelo `src/sse/services/cooldownAwareRetry.ts` — com `requestRetry` / `maxRetryIntervalSec` configurável
+- Busca de saída segura: `src/shared/network/safeOutboundFetch.ts` — guarded provider/model fetch com SSRF guard, bloqueio de URL privado, nova tentativa e tempo limite
+- Guarda URL de saída: o host `src/shared/network/outboundUrlGuard.ts` — verifica o provedor URLs; `src/shared/network/outboundUrlGuardPolicy.ts` escolhe o modo `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` e seu painel alterna (consulte `docs/reference/ENVIRONMENT.md`)
+- Padrões de solicitação do provedor: padrões `open-sse/services/providerRequestDefaults.ts` — no nível do provedor `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- Constantes do provedor GLM : modelos GLM compartilhados — `open-sse/config/glmProvider.ts`, cota URLs, GLMT timeout/defaults
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — base URL e constantes de caminho de descoberta
+- Constantes do cliente Codex : valores do agente do usuário e da versão do cliente com versão `open-sse/config/codexClient.ts` —
+- Semente de alias de modelo: `src/lib/modelAliasSeed.ts` — sementes 30 aliases de dialeto de proxy cruzado + na inicialização
 
 Módulos da camada de domínio:
 
-- Regras de custo/orçamentos: `src/domain/costRules.ts`
-- Política de fallback: `src/domain/fallbackPolicy.ts`
-- Resolvedor de combinações: `src/domain/comboResolver.ts`
+- Custo rules/budgets: `src/domain/costRules.ts`
+- Política de reserva: `src/domain/fallbackPolicy.ts`
+- Contrato de resolução combinada reservado: `src/domain/comboResolver.ts`; roteamento ao vivo usa `open-sse/services/combo.ts`
 - Política de bloqueio: `src/domain/lockoutPolicy.ts`
-- Mecanismo de políticas: `src/domain/policyEngine.ts` — avaliação centralizada de bloqueio → orçamento → fallback
+- Contrato reservado de avaliação de políticas: `src/domain/policyEngine.ts`; o caminho da solicitação impõe a política de chave de API por meio `src/shared/utils/apiKeyPolicy.ts` e a autorização de destino resolvido por meio `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Catálogo de códigos de erro: `src/shared/constants/errorCodes.ts`
-- ID da requisição: `src/shared/utils/requestId.ts`
+- Solicitar ID: `src/shared/utils/requestId.ts`
 - Tempo limite de busca: `src/shared/utils/fetchTimeout.ts`
-- Telemetria de requisições: `src/shared/utils/requestTelemetry.ts`
-- Conformidade/auditoria: `src/lib/compliance/index.ts`
-- Executor de avaliações: `src/lib/evals/evalRunner.ts`
-- Persistência do estado do domínio: `src/lib/db/domainState.ts` — CRUD SQLite para cadeias de fallback, orçamentos, histórico de custos, estado de bloqueio e disjuntores
+- Solicitar telemetria: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Corredor de avaliação: `src/lib/evals/evalRunner.ts`
+- Persistência de estado de domínio: `src/lib/db/domainState.ts` — SQLite CRUD para cadeias de fallback, orçamentos, histórico de custos, estado de bloqueio, disjuntores
 
-Módulos de provedores OAuth (27 arquivos individuais em `src/lib/oauth/providers/`):
+Módulos do provedor OAuth (27 arquivos individuais em `src/lib/oauth/providers/`):
 
-- Índice do registro: `src/lib/oauth/providers/index.ts`
+- Índice de registro: `src/lib/oauth/providers/index.ts`
 - Provedores individuais: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Utilitários compartilhados: `codebuddyDeviceAuth.ts` (fluxo de dispositivo do CodeBuddy CN/internacional), `museCodeDeviceResponse.ts`
-- Wrapper mínimo: `src/lib/oauth/providers.ts` — reexporta a partir dos módulos individuais
+- Ajudantes compartilhados: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
+- Invólucro fino: `src/lib/oauth/providers.ts` — reexporta de módulos individuais
 
-## 5) Serviços Incorporados (v3.8.4)
+## 5) Serviços incorporados (v3.8.4)
 
-O OmniRoute pode instalar, supervisionar e rotear para processos de ferramentas de IA executados localmente,
-chamados de **serviços incorporados**. Cinco são fornecidos: 9Router, CLIProxyAPI, Bifrost, Mux e Dario.
+OmniRoute pode instalar, supervisionar e rotear para processos da ferramenta AI em execução local chamados** serviços incorporados** . Cinco são enviados: 9Router, CLIProxyAPI, Bifrost, Mux e Dario.
 
-Camadas da arquitetura:
+Camadas de arquitetura:
 
-- **UI** (`/dashboard/providers/services`) — página com duas abas, controles de ciclo de vida,
-  streaming de logs em tempo real, gerenciamento de chaves de API e (para o 9Router) uma UI nativa incorporada por meio
-  de um proxy reverso interno.
-- **API** (`/api/services/{name}/*`) — 11 endpoints para o 9Router, 10 para o CLIProxyAPI, 8 para cada um de Bifrost / Mux / Dario,
-  todos classificados como **LOCAL_ONLY** (regra rígida nº 17). Um endpoint SSE compartilhado `GET /api/services/[name]/logs`
-  atende a ambos os serviços.
-- **Supervisor** (`src/lib/services/`) — a classe genérica `ServiceSupervisor` encapsula
-  `child_process.spawn`, mantém um buffer circular de 5 MB para streaming de logs via SSE, um loop de
-  sondagem de integridade, um bloqueio atômico de operações e um encerramento gradual SIGTERM→SIGKILL.
-  `bootstrap.ts` conecta todos os serviços configurados na inicialização do processo.
-- **Provedor/executor** (`open-sse/executors/ninerouter.ts`) — o 9Router é exposto como
-  um provedor real. Os modelos recebem o prefixo `9router/{sub}/{model}` e são sincronizados a cada 5 min
-  pelo endpoint `/v1/models` do 9Router.
+- **UI** (`/dashboard/providers/services`) página — de duas guias com controles de ciclo de vida, streaming de log ao vivo, gerenciamento de chaves API e (para 9Router) UI nativo incorporado por meio de um proxy reverso interno.
+- **API** (`/api/services/{name}/*`) — 11 endpoints para 9Router, 10 para CLIProxyAPI, 8 cada para Bifrost/Mux/Dario, todos classificados**LOCAL_ONLY** (regra rígida #17). Um endpoint `GET /api/services/[name]/logs` SSE compartilhado atende ambos os serviços.
+- **Supervisor** (`src/lib/services/`) A classe — genérica `ServiceSupervisor` envolve `child_process.spawn`, contém um buffer de anel de 5 MB para streaming de log SSE, um loop de investigação de integridade, um bloqueio de operação atômica e um desligamento normal SIGTERM→SIGKILL. `bootstrap.ts` conecta todos os serviços configurados no início do processo.
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router é exposto como um provedor real. Os modelos têm o prefixo `9router/{sub}/{model}` e são sincronizados a cada 5 minutos a partir do endpoint `/v1/models` do 9Router.
 
-Análise detalhada: `docs/frameworks/EMBEDDED-SERVICES.md`
+Aprofundamento: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Principais Subsistemas (v3.8.0)
+## Principais subsistemas (v3.8.0)
 
-### A. Mecanismo de Combinação Automática
+### A. Motor de combinação automática
 
-O Auto Combo pontua e seleciona dinamicamente os destinos de roteamento no momento da solicitação, em vez de
-depender de uma definição estática de combinação. Ele é responsável pela família de prefixos de modelo `auto/*`.
+O Auto Combo pontua e escolhe dinamicamente os alvos de roteamento no momento da solicitação, em vez de depender de uma definição de combinação estática. Ele alimenta a família de prefixos do modelo `auto/*`.
 
-- Entrada do mecanismo: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolvedor: `src/domain/comboResolver.ts` (detecção automática do prefixo `auto/`)
+- Entrada do mecanismo: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Entrada do combo ao vivo: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), chamado por `src/sse/handlers/chat.ts`
 - Painel: `/dashboard/auto-combo`
-- Telemetria: tabela SQLite `auto_combo_decisions`
+- Telemetria: tabela `auto_combo_decisions` SQLite
 
-Principais recursos:
+Principais capacidades:
 
-- **20 estratégias de roteamento** (prioridade, ponderada, preencher primeiro, round-robin, P2C, aleatória,
-  menos usada, otimizada por custo, sensível a redefinições, janela de redefinição, margem disponível, ponderada por cota,
-  aleatória estrita, **automática**, lkgp, otimizada por contexto, otimizada por cache, retransmissão de contexto, **fusão**,
-  pipeline) —
-  a estratégia automática é a principal novidade da v3.8.0; `fusion` (distribuição em painel + síntese por avaliador,
-  `open-sse/services/fusion.ts`) é nova na v3.8.36.
-- **Pontuação com 16 fatores**: cota, integridade, custo inverso, latência inversa, adequação à tarefa e
-  outros dez. A tabela canônica de fatores e seus pesos padrão está em
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — repeti-la aqui
-  criaria um segundo local sujeito a ficar desatualizado.
-- **Fábrica virtual** materializa combinações efêmeras quando não existe uma combinação nomeada correspondente,
-  obtendo candidatos de conexões de provedores ativas e íntegras.
-- **Prefixos automáticos**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — cada um respaldado por um perfil de pesos ajustado.
-- **6 pacotes de modos**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` e `chaos-mode` — configurações predefinidas de pesos que podem ser acionadas pelo
-  painel. (Não devem ser confundidas com os prefixos `auto/*` acima, que são
-  variantes aplicadas no momento da solicitação.)
+- **22 estratégias de roteamento** (prioridade, ponderado, preenchimento primeiro, round-robin, P2C, aleatório, menos usado, otimizado para custos, com reconhecimento de redefinição, janela de redefinição, expiração primeiro, headroom, ponderado por cota, aleatório estrito,** auto** , lkgp, otimizado para contexto, otimizado para cache, retransmissão de contexto,** fusão** , pipeline, jev) — auto é a adição do título na v3.8.0; `fusion` (síntese de juiz + fan-out do painel, `open-sse/services/fusion.ts`) é novo na v3.8.36.
+- **Pontuação de 16 fatores** : cota, saúde, custo inverso, latência inversa, ajuste de tarefa e mais dez. A tabela canônica de fatores e seus pesos padrão residem em [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — reafirmá-la aqui daria a ela um segundo lugar para ficar obsoleta.
+- **Fábrica virtual** materializa combos efêmeros quando não existe nenhum combo nomeado correspondente, obtendo candidatos de conexões de provedores ativos e saudáveis.
+- **Prefixos automáticos** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — cada um apoiado por um perfil de peso ajustado.
+- **6 pacotes de modo** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` e `chaos-mode` — configurações de peso predefinidas que podem ser chamadas no painel. (Não deve ser confundido com os prefixos `auto/*` acima, que são variantes no momento da solicitação.)
 
-Para obter todos os detalhes algorítmicos (fórmulas dos fatores, ajuste de pesos), consulte
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Para detalhes algorítmicos completos (fórmulas de fator, ajuste de peso), consulte [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Agentes na Nuvem
+### B. Agentes de Nuvem
 
-O Cloud Agents encapsula plataformas de agentes de código hospedadas por terceiros (Codex Cloud, Devin,
-Jules) por trás de um ciclo de vida de tarefas uniforme e respaldado por banco de dados. Todos os endpoints de criação/inspeção
-de tarefas exigem autenticação de gerenciamento.
+Cloud Agents envolve plataformas de agente de código hospedadas por terceiros (Codex Cloud, Devin, Jules) por trás de um ciclo de vida de tarefa uniforme apoiado por banco de dados. Todos os terminais creation/inspection de tarefa requerem autenticação de gerenciamento.
 
-- Raiz do módulo: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, além dos subdiretórios de cada agente em `agents/`)
+- Raiz do módulo: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, mais subdiretórios por agente em `agents/`)
 - Implementações por agente: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Endpoints públicos: `/api/v1/agents/tasks/*` (listar/criar/obter/cancelar)
-- Endpoints de gerenciamento: `/api/cloud/*` (provisionamento, status, operações em lote)
+- Terminais públicos: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Endpoints de gerenciamento: `/api/cloud/*` (provisionamento, status, lote)
 - Painel: `/dashboard/cloud-agents`
 - Armazenamento: tabela `cloud_agent_tasks`
 
-Para obter detalhes específicos de provisionamento e OAuth de cada agente, consulte
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Para informações específicas sobre provisionamento por agente e OAuth, consulte [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Proteções
+### C. Guarda-corpos
 
-O módulo de proteções é uma camada de middleware com recarregamento dinâmico que inspeciona solicitações
-e respostas em busca de PII, injeção de prompt e conteúdo visual inseguro. Violações
-interrompem imediatamente a solicitação com HTTP **503** e um código de erro estruturado, permitindo
-que os chamadores subsequentes tentem novamente ou sigam outro fluxo.
+O módulo guardrails é uma camada de middleware recarregável que inspeciona solicitações e respostas para PII, injeção de prompt e conteúdo de visão inseguro. Violações causam curto-circuito na solicitação com HTTP** 503** além de um código de erro estruturado, permitindo que os chamadores downstream tentem novamente ou ramifiquem.
 
-- Raiz do módulo: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Recarregamento dinâmico: o registro monitora alterações de configuração e reconstrói a cadeia no próprio local
-- Pontos de integração: entrada do manipulador de chat, manipulador de geração de imagens, sanitizador de respostas
-- Contrato HTTP: violações são apresentadas como `503` com `error.code = "GUARDRAIL_VIOLATION"`
+- Raiz do módulo: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Recarga a quente: o registro observa alterações de configuração e reconstrói a cadeia no local
+- Pontos de conexão: entrada do manipulador de bate-papo, manipulador de geração de imagem, sanitizador de resposta
+- Contrato HTTP : violações surgem como `503` com `error.code = "GUARDRAIL_VIOLATION"`
 
-Para saber como criar conjuntos de regras e ajustar limites, consulte
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Para criação de conjunto de regras e ajuste de limite, consulte [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Camada de Domínio
 
-O namespace `src/domain/` centraliza as decisões de política para que os manipuladores de rotas não
-precisem montar por conta própria a lógica de bloqueio/orçamento/fallback.
+O namespace `src/domain/` contém serviços de domínio e contratos de avaliação reservados. Não é um ponto de entrada de política obrigatório para cada solicitação.
 
-- Mecanismo de políticas: `src/domain/policyEngine.ts` — ponto de entrada único para
-  avaliação prévia à execução (ordem: bloqueio → orçamento → fallback)
+O caminho do chat ao vivo chama `enforceApiKeyPolicy()` de `src/shared/utils/apiKeyPolicy.ts`; a autorização de modelos resolvidos e membros do combo é implementada em `src/sse/handlers/chat/resolvedModelPolicy.ts`. A entrada auto-hospedada no `src/app/api/v1/chat/completions/route.ts` também impõe a política de chave de API antes do envio. A resolução combinada é executada `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` e `src/lib/container.ts` permanecem contratos testados, não a fiação desse caminho de solicitação. O contêiner registra o mecanismo de política, mas o caminho da solicitação de produção inspecionado não o resolve. A alteração desses contratos por si só não altera a política de chat ao vivo ou o roteamento combinado; conectá-los ou removê-los requer uma decisão de projeto separada.
+
+- Mecanismo de política reservado: `src/domain/policyEngine.ts` — lockout → budget → avaliação de fallback
 - Regras de custo: `src/domain/costRules.ts`
-- Política de fallback: `src/domain/fallbackPolicy.ts`
+- Política de reserva: `src/domain/fallbackPolicy.ts`
 - Política de bloqueio: `src/domain/lockoutPolicy.ts`
 - Roteamento baseado em tags: `src/domain/tagRouter.ts`
-- Resolvedor de combinações: `src/domain/comboResolver.ts` — resolve nomes de combinações, prefixos auto/\*
-  e destinos de modelo com curingas em planos de execução concretos
-- Associador de regras de conexão/modelo: `src/domain/connectionModelRules.ts`
-- Instantâneos de disponibilidade de modelos: `src/domain/modelAvailability.ts`
-- Rastreamento de expiração de provedores: `src/domain/providerExpiration.ts`
-- Cache de cotas: `src/domain/quotaCache.ts`
+- Resolvedor combinado reservado: contrato de seleção independente `src/domain/comboResolver.ts` — ; roteamento combinado ao vivo é implementado em `open-sse/services/combo.ts`
+- juntador de regras Connection/model : `src/domain/connectionModelRules.ts`
+- Instantâneos de disponibilidade do modelo: `src/domain/modelAvailability.ts`
+- Rastreamento de expiração do provedor: `src/domain/providerExpiration.ts`
+- Cache de cota: `src/domain/quotaCache.ts`. Os provedores adicionam e removem janelas de cota (OpenAI eliminou a janela Codex de 5 horas para alguns planos), portanto, uma leitura de uso do adaptador do provedor atesta como completo (`quotasComplete`, consulte `src/lib/usage/usageReading.ts`) é o conjunto completo de janelas da conta: uma janela conhecida anteriormente, mas ausente dela, é retirada, no cache, no `quota_snapshots` uma reinicialização reidrata (um registro de aposentadoria anexado), no estado de cota Codex persistente e nos intervalos de saturação de Claude. Evidências parciais (cabeçalhos de resposta, cópias obsoletas) atualizam apenas as janelas que carregam.
 - Estado de degradação: `src/domain/degradation.ts`
 - Auditoria de configuração: `src/domain/configAudit.ts`
-- Construtor de metadados de resposta do OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Subsistema de avaliação: `src/domain/assessment/` — tarefas periódicas de avaliação
+- Construtor de metadados de resposta OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Subsistema de avaliação: trabalhos de avaliação periódica `src/domain/assessment/` —
 
 ### E. Pipeline de Autorização
 
-O pipeline de autorização classifica cada solicitação recebida e aplica a cadeia de políticas
-apropriada antes do encaminhamento.
+O pipeline de autorização classifica cada solicitação recebida e aplica a cadeia de políticas apropriada antes do envio.
 
 - Entrada do pipeline: `src/server/authz/pipeline.ts`
-- Classificador de solicitações: `src/server/authz/classify.ts` — diferencia rotas públicas
-  de compatibilidade das rotas de gerenciamento
+- Classificador de solicitação: `src/server/authz/classify.ts` — distingue rotas de compatibilidade pública de rotas de gerenciamento
 - Inventário de rotas públicas: `src/shared/constants/publicApiRoutes.ts`
-- Políticas: `src/server/authz/policies/` — predicados combináveis
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` etc.)
-- Utilitários de cabeçalhos: `src/server/authz/headers.ts`
+- Políticas: predicados combináveis `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth`, etc.)
+- Utilitários de cabeçalho: `src/server/authz/headers.ts`
 - Auxiliar de asserção: `src/server/authz/assertAuth.ts`
 - Contexto da solicitação: `src/server/authz/context.ts`
 
-As rotas públicas e de gerenciamento possuem uma separação rígida: as APIs de agentes/períodos de espera e
-as mutações de provedores exigem autenticação de gerenciamento (HTTP 401 quando ausente).
+Rotas públicas versus rotas de gerenciamento são um limite rígido: agent/cooldown APIs e mutações de provedor exigem autenticação de gerenciamento (HTTP 401 se estiver faltando).
 
-Para conhecer todas as regras de classificação de rotas, consulte
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Para obter as regras completas de classificação de rotas, consulte [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM de Fluxo de Trabalho e Roteador Sensível a Tarefas
+### F. Fluxo de trabalho FSM e roteador com reconhecimento de tarefas
 
-Um roteador orientado por máquina de estados finitos, disposto acima da seleção de combinações, para direcionar
-o tráfego com base na etapa detectada do fluxo de trabalho (planejamento, execução,
-revisão) e na afinidade com tarefas em segundo plano.
+Um roteador acionado por máquina de estado finito colocado acima da seleção combinada para direcionar o tráfego com base no estágio do fluxo de trabalho detectado (planejamento, execução, revisão) e na afinidade da tarefa em segundo plano.
 
-- FSM de fluxo de trabalho: `open-sse/services/workflowFSM.ts`
+- Fluxo de trabalho FSM: `open-sse/services/workflowFSM.ts`
 - Roteador com reconhecimento de tarefas: `open-sse/services/taskAwareRouter.ts`
 - Detector de tarefas em segundo plano: `open-sse/services/backgroundTaskDetector.ts`
 - Classificador de intenção: `open-sse/services/intentClassifier.ts`
 
-As transições da FSM alimentam a pontuação do Auto Combo, favorecendo modelos mais baratos
-para tarefas em segundo plano/de automação e modelos mais robustos para etapas interativas
-de planejamento/revisão.
+As transições FSM alimentam a pontuação do Auto Combo, direcionando-se para modelos mais baratos para tarefas background/automation e para modelos mais fortes para curvas planning/review interativas.
 
-### G. Resiliência específica por provedor
+### G. Resiliência Específica do Provedor
 
-Vários provedores incluem módulos dedicados de resiliência e discrição que se apoiam
-nas camadas globais de circuit breaker / cooldown de conexão / bloqueio de modelo:
+Vários provedores fornecem módulos dedicados de resiliência e furtividade que aproveitam as camadas globais de disjuntor/resfriamento de conexão/bloqueio de modelo:
 
-- Mecanismo 429 do Antigravity: `open-sse/services/antigravity429Engine.ts` (alterna
-  a identidade, remove cabeçalhos de resposta e controla o rastreamento de créditos/versão por meio de
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Política de cota do ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH (Handshake de Canal de Compatibilidade) do Claude Code: `open-sse/services/claudeCodeCCH.ts`,
-  além de `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Modelagem de impressão digital do Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Ofuscação do Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- Mecanismo Antigravity 429: `open-sse/services/antigravity429Engine.ts` (gira identidade, limpa cabeçalhos de resposta, direciona o rastreamento credits/version via `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (orçamento por solicitação de 429 upstream em todos os hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; um reenvio idêntico de um corpo recusado é respondido localmente; `src/sse/handlers/chat.ts` não reinicia tal solicitação por meio da nova tentativa com reconhecimento de resfriamento)
+- Política de cotas ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Código Claude CCH (handshake do canal de compatibilidade): `open-sse/services/claudeCodeCCH.ts`, mais `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Modelagem de impressão digital do código Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- Ofuscação do código Claude : `open-sse/services/claudeCodeObfuscation.ts`
 
-Para conhecer o playbook completo de discrição e as orientações operacionais, consulte
-`docs/security/STEALTH_GUIDE.md` (git; não compilado em `/docs`).
+Para obter o manual furtivo completo e orientação operacional, consulte `docs/security/STEALTH_GUIDE.md` (git; não compilado em `/docs`).
 
-### H. Webhooks, cache de raciocínio e cache de leitura
+### H. Webhooks, cache de raciocínio, cache de leitura
 
-- **Webhooks** — envio de saída para eventos de provedor/conta/tarefa.
-  - Dispatcher: `src/lib/webhookDispatcher.ts`
-  - Armazenamento: tabela SQLite `webhooks` (por meio de `src/lib/db/webhooks.ts`)
+- **Webhooks** Despacho de saída — para eventos provider/account/task.
+  - Despachante: `src/lib/webhookDispatcher.ts`
+  - Armazenamento: tabela `webhooks` SQLite (via `src/lib/db/webhooks.ts`)
   - Painel: `/dashboard/webhooks` (assinaturas, segredos, histórico de novas tentativas)
-  - Para consultar a taxonomia de eventos e a semântica de novas tentativas, veja [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Cache de raciocínio** — blocos de raciocínio reproduzíveis para provedores que emitem
-  tokens de pensamento (Claude, GLMT etc.), permitindo que turnos consecutivos evitem refazer o raciocínio.
-  - Camada de banco de dados: `src/lib/db/reasoningCache.ts`
+  - Para taxonomia de eventos e semântica de novas tentativas, consulte [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Cache de raciocínio** blocos de raciocínio reproduzíveis — para provedores que emitem tokens de pensamento (Claude, GLMT, etc.) para que turnos consecutivos possam pular o repensar.
+  - camada DB : `src/lib/db/reasoningCache.ts`
   - Camada de serviço: `open-sse/services/reasoningCache.ts`
-  - Para consultar a semântica de reprodução, veja [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Cache de leitura** — cache de respostas de curta duração, indexado por assinatura e usado para
-  agrupar novas tentativas idênticas provenientes de SDKs upstream com defeito.
-  - Camada de banco de dados: `src/lib/db/readCache.ts`
+  - Para semântica de repetição, consulte [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Ler cache** — cache de resposta de curta duração codificado por assinatura e usado para recolher tentativas idênticas de upstream quebrado SDKs.
+  - camada DB : `src/lib/db/readCache.ts`
   - Endpoint de estatísticas: `GET /api/cache/stats`, painel em `/dashboard/cache`
 
 ## 3) Camada de Persistência
@@ -904,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: importe módulos específicos diretamente — sem barrel (a antiga camada de reexportação `localDb.ts` foi removida)
 - `src/lib/usageDb.ts`: fachada de histórico de uso/logs de chamadas sobre as tabelas do SQLite
 
-## Cobertura do Executor de Provedor (Padrão Strategy)
+## Cobertura do Executor do Provedor (Padrão de Estratégia)
 
-Cada provedor tem um executor especializado que estende `BaseExecutor` (em `open-sse/executors/base.ts`), que fornece construção de URLs, criação de cabeçalhos, novas tentativas com backoff exponencial, hooks de renovação de credenciais e o método de orquestração `execute()`.
+Cada provedor possui um executor especializado que estende `BaseExecutor` (em `open-sse/executors/base.ts`), que fornece construção URL, construção de cabeçalho, nova tentativa com espera exponencial, ganchos de atualização de credenciais e o método de orquestração `execute()`.
 
-| Executor                  | Provedor(es)                                                                                                                                               | Tratamento especial                                                                   |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA etc. | Configuração dinâmica de URL/cabeçalho por provedor                                   |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | IDs personalizados de projeto/sessão, análise de Retry-After, ofuscação de 429        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Roteamento baseado em implantação, imposição da consulta api-version                  |
-| `BlackboxWebExecutor`     | Blackbox AI (modo web)                                                                                                                                     | Engenharia reversa de sessão web com emulação de impressão digital TLS                |
-| `ClaudeIdentityExecutor`  | Claude.ai (caminho CCH)                                                                                                                                    | Pipelines de restrições + remapeamento de ferramentas, modelagem de impressão digital |
-| `CliProxyApiExecutor`     | Provedores compatíveis com CLIProxyAPI                                                                                                                     | Autenticação e tratamento de protocolo personalizados                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Injeção de ID de conta, rastreamento de uso baseado em Neurons                        |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Injeta instruções do sistema, força o esforço de raciocínio                           |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Ponte para a Responses API por sessão do navegador, com fixação de thread/turno       |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + rotação de cabeçalhos por sessão                                              |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | Protocolo ConnectRPC, codificação Protobuf, assinatura de solicitações via checksum   |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Ponte para o ciclo de vida de tarefas do Devin via módulo de agente em nuvem          |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Atualização de token do Copilot, cabeçalhos que imitam o VSCode                       |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | OAuth do GitLab + roteamento com escopo de projeto                                    |
-| `GlmExecutor`             | Z.AI GLM (incl. predefinição `glmt`)                                                                                                                       | Sensível ao orçamento de raciocínio, constantes da predefinição GLMT                  |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                               | Engenharia reversa de sessão web, seleção de modo (raciocínio/padrão)                 |
-| `KieExecutor`             | KIE                                                                                                                                                        | Emissão de token personalizado com âncoras de sessão rotativas                        |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | Formato binário AWS EventStream → conversão para SSE                                  |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Engenharia reversa de sessão web com ponte de mensagens de imagem                     |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Formato do corpo da solicitação específico do provedor                                |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | Configuração de provedor compatível com AI SDK                                        |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                             | Engenharia reversa de sessão web para continuação de chat                             |
-| `PetalsExecutor`          | Inferência distribuída Petals                                                                                                                              | Roteamento de enxame descentralizado                                                  |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Nenhuma chave de API necessária, solicitações com limite de taxa                      |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | Suporte a PAT e OAuth, nível gratuito multimodelo                                     |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Autenticação por conta de serviço, endpoints baseados em região                       |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Chave de API importada + streaming de chat via Connect-protobuf                       |
+| Executor                  | Provedor(es)                                                                                                                                                  | Manuseio Especial                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, perplexidade, Together, Fireworks, Cerebras, Cohere, NVIDIA, etc. | Configuração URL/header dinâmica por provedor                                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | project/session IDs personalizado, análise repetida após, ofuscação 429                       |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | Roteamento baseado em implantação, aplicação de consulta de versão API                        |
+| `BlackboxWebExecutor`     | Blackbox AI (modo web)                                                                                                                                        | Reversão de sessão da Web com emulação de impressão digital TLS                               |
+| `ClaudeIdentityExecutor`  | Claude.ai (caminho CCH )                                                                                                                                      | Restringir pipelines de remapeamento de ferramenta +, modelagem de impressão digital          |
+| `CliProxyApiExecutor`     | Provedores compatíveis com CLIProxyAPI                                                                                                                        | Autenticação personalizada e tratamento de protocolo                                          |
+| `CloudflareAiExecutor`    | Cloudflare Trabalhadores AI                                                                                                                                   | Injeção ID de conta, rastreamento de uso baseado em neurônios                                 |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | Injeta instruções do sistema, força o esforço de raciocínio                                   |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | Respostas da sessão do navegador ponte API com fixação thread/turn                            |
+| `CommandCodeExecutor`     | Código de comando                                                                                                                                             | rotação do cabeçalho por sessão OAuth +                                                       |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | Protocolo ConnectRPC, codificação Protobuf, assinatura de solicitação via soma de verificação |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | Ponte do ciclo de vida da tarefa Devin por meio do módulo de agente de nuvem                  |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | atualização de token Copilot, cabeçalhos que imitam VSCode                                    |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | roteamento no escopo do projeto GitLab OAuth +                                                |
+| `GlmExecutor`             | Z.AI GLM (incl. predefinição `glmt` )                                                                                                                         | Consciente do orçamento, constantes predefinidas GLMT                                         |
+| `GrokWebExecutor`         | web xAI Grok                                                                                                                                                  | Inversão de sessão da Web, seleção de modo (think/standard)                                   |
+| `KieExecutor`             | KIE                                                                                                                                                           | Emissão de token personalizado com âncoras de sessão rotativas                                |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | formato binário AWS EventStream conversão → SSE                                               |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                              | Inversão de sessão da Web com ponte de mensagem de imagem                                     |
+| `NlpCloudExecutor`        | NLP                                                                                                                                                           | Formato do corpo da solicitação específico do provedor                                        |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | configuração de provedor compatível AI SDK                                                    |
+| `PerplexityWebExecutor`   | Teia de perplexidade                                                                                                                                          | Sessão web reversa para continuação do chat                                                   |
+| `PetalsExecutor`          | Inferência distribuída de pétalas                                                                                                                             | Roteamento de enxame descentralizado                                                          |
+| `PollinationsExecutor`    | Polinizações AI                                                                                                                                               | Nenhuma chave API necessária, solicitações com taxa limitada                                  |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                      | Suporte PAT e OAuth, nível gratuito multimodelo                                               |
+| `VertexExecutor`          | Google Vértice AI                                                                                                                                             | Autenticação de conta de serviço, endpoints baseados em região                                |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                 | Chave API importada + Connect-protobuf streaming de bate-papo                                 |
 
-Todos os outros provedores (incluindo nós compatíveis personalizados) usam o `DefaultExecutor`.
+Todos os outros provedores (incluindo nós compatíveis personalizados) usam `DefaultExecutor`.
+
+### Sondagens automatizadas e contas de sessão da web
+
+Testes de modelo, Teste tudo, testes combinados e avaliações enviam solicitações reais de chat. Um provedor de sessão da Web atua como o usuário conectado, de modo que cada uma dessas solicitações seria salva como uma conversa nessa conta; sondagens automatizadas que deixaram essas conversas tiveram uma conta suspensa (#14780). O pipeline de bate-papo, portanto, recusa todos os alvos atingidos por uma investigação automatizada cujo provedor obtenha uma credencial de sessão da Web, uma vez que o provedor do alvo seja resolvido e antes que uma credencial seja escolhida (`src/lib/providers/chatProbePolicy.ts`). A recusa é `422` com `error.code` `chat_probe_not_isolated`, e os executores do teste relatam isso como um salto, não como uma falha.
+
+Um executor que executa cada chat no modo sem histórico do próprio provedor o declara com `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); sondagens para esse provedor são então permitidas. ChatGPT Web declara `temporary-chat`. Fixe uma declaração em seu mecanismo com um teste, para que a afirmação não sobreviva ao código que a torna verdadeira.
 
 ## Matriz de Compatibilidade de Provedores
 
@@ -1102,11 +1055,11 @@ compatibilidade legada. O contrato de runtime atual utiliza:
 - migrações de esquema do SQLite e hooks de atualização automática na inicialização
 - caminho de compatibilidade para migração de JSON legado → SQLite
 
-## 6) Proteção contra SSRF / URLs de Saída
+## 6) SSRF / Guarda URL de saída
 
-- `src/shared/network/outboundUrlGuard.ts` bloqueia todos os URLs de destino privados, de loopback ou link-local antes que cheguem aos executores dos provedores
-- As rotas de descoberta e validação de modelos de provedores usam `src/shared/network/safeOutboundFetch.ts`, que aplica a proteção antes de cada solicitação de saída
-- Erros da proteção são expostos como `URL_GUARD_BLOCKED` com HTTP 422 e registrados na trilha de auditoria de conformidade por meio de `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplica `src/shared/network/outboundUrlGuard.ts` a solicitações de bate-papo despachadas por meio de `BaseExecutor.execute()`. No modo somente público (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` com o sinalizador private desativado), ele bloqueia hosts privados e de loopback e 169.254.0.0/16; em todos os outros modos, ele bloqueia hosts de metadados em nuvem. Ele verifica o nome do host ou o literal IP conforme escrito, antes de qualquer pesquisa DNS. Provedores locais integrados ignoram isso.
+- As rotas de descoberta e validação do modelo de provedor usam `src/shared/network/safeOutboundFetch.ts`, que aplica a proteção antes de cada solicitação de saída
+- Erros de proteção aparecem como `URL_GUARD_BLOCKED` com HTTP 503 (`getSafeOutboundFetchErrorStatus`; a rota de descoberta de modelo retorna 400) e blocos SSRF genuínos durante a validação são registrados na trilha de auditoria como eventos `provider.validation.ssrf_blocked`
 
 ## Observabilidade e Sinais Operacionais
 

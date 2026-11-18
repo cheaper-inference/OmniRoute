@@ -43,6 +43,15 @@ function getEnvOverride(provider: string): number | null {
   return null;
 }
 
+/**
+ * True when the operator set a positive `CONTEXT_LENGTH_<PROVIDER>` /
+ * `CONTEXT_LENGTH_DEFAULT` override. `resolveTokenLimit` treats it as a sourced
+ * limit, so callers that gate on "has limit evidence" (combo catalog, #18609) must too.
+ */
+export function hasContextLengthEnvOverride(provider: string): boolean {
+  return getEnvOverride(provider) !== null;
+}
+
 // Reserve tokens override from environment variable
 function getReserveTokensOverride(): number | null {
   const envValue = process.env.CONTEXT_RESERVE_TOKENS;
@@ -68,6 +77,33 @@ const IMAGE_REMOVED_PLACEHOLDER = "[Earlier image removed to fit context window]
 
 // Rough chars-per-token ratio for quick estimation
 const CHARS_PER_TOKEN = 4;
+
+// CJK characters (kana, Han, Hangul) cost about one token each, not 1/4 token. Each one
+// already counts as one serialized char, so it carries the other three on top. Same
+// ranges as the usage tracker's estimator (open-sse/utils/usageTracking.ts).
+const CJK_EXTRA_CHARS = CHARS_PER_TOKEN - 1;
+
+function cjkExtraChars(value: string): number {
+  let count = 0;
+  // Iterate by code point: a supplementary Han character is two UTF-16 units.
+  for (const char of value) {
+    const code = char.codePointAt(0) as number;
+    if (
+      (code >= 0x3000 && code <= 0x9fff) ||
+      (code >= 0xac00 && code <= 0xd7af) ||
+      (code >= 0xf900 && code <= 0xfaff) ||
+      (code >= 0x20000 && code <= 0x2fa1f)
+    ) {
+      count++;
+    }
+  }
+  return count * CJK_EXTRA_CHARS;
+}
+
+/** Serialized length of a JSON string plus the CJK weight, in estimate chars. */
+function estimateStringChars(value: string): number {
+  return encodedStringLength(value) + cjkExtraChars(value);
+}
 
 // Bounded per-image token budget used in place of measuring the raw base64
 // payload as text. In line with the owner's PoC (~1052 total for prompt +
@@ -163,6 +199,31 @@ export function isInlineBase64DocumentBlock(node: Record<string, unknown>): bool
   return matchesOpenAIFileShape(node) || matchesClaudeDocumentShape(node);
 }
 
+/** Binary audio/video is not millions of text tokens of base64 encoding. */
+function isInlineAudioVideoBlock(node: Record<string, unknown>): boolean {
+  const audio = node.input_audio;
+  if (node.type === "input_audio" && audio && typeof audio === "object") {
+    return typeof (audio as Record<string, unknown>).data === "string";
+  }
+  const carrier = node.video_url ?? node.input_video ?? node.audio_url;
+  const url =
+    typeof carrier === "string"
+      ? carrier
+      : carrier && typeof carrier === "object"
+        ? (carrier as Record<string, unknown>).url
+        : null;
+  return typeof url === "string" && /^data:(?:audio|video)\/[a-z0-9.+-]{1,64};base64,/i.test(url);
+}
+
+/** Recognize Gemini audio/video bytes that must not enter image pruning. */
+function isNonImageGeminiMedia(node: Record<string, unknown>): boolean {
+  const data = node.inlineData ?? node.inline_data;
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  const mime = record.mimeType ?? record.mime_type;
+  return typeof mime === "string" && !mime.toLowerCase().startsWith("image/");
+}
+
 /**
  * Detect the 5 documented inline-base64 image content-block shapes (see the
  * shape-specific matchers above).
@@ -212,7 +273,8 @@ export function pruneOlderInlineImages(
         part &&
         typeof part === "object" &&
         !Array.isArray(part) &&
-        isInlineBase64ImageBlock(part as Record<string, unknown>)
+        isInlineBase64ImageBlock(part as Record<string, unknown>) &&
+        !isNonImageGeminiMedia(part as Record<string, unknown>)
       ) {
         locations.push({ messageIndex, contentIndex });
       }
@@ -314,10 +376,11 @@ function isOmittedValue(value: unknown): boolean {
   return value === undefined || typeof value === "function" || typeof value === "symbol";
 }
 
+/** Estimate context text while excluding opaque attachment bytes from token accounting. */
 function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
   if (node === null) return { chars: 4, mediaTokens: 0 };
   const type = typeof node;
-  if (type === "string") return { chars: encodedStringLength(node as string), mediaTokens: 0 };
+  if (type === "string") return { chars: estimateStringChars(node as string), mediaTokens: 0 };
   if (type === "boolean") return { chars: node ? 4 : 5, mediaTokens: 0 };
   if (type === "number") {
     return {
@@ -337,7 +400,10 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     // so it was measured raw — no substitution, no budgets. Any aliasing makes
     // per-slot deltas unsound, so pruning callers fall back to recounting.
     if (flags) flags.aliasedObject = true;
-    return { chars: jsonLength(obj), mediaTokens: 0 };
+    // shortcut: builds the JSON string (aliasing only comes from programmatic input, never JSON.parse); add a CJK-aware jsonLength if this ever shows up in a profile.
+    // Throws on a cycle like jsonLength. Raw length plus the CJK weight of its strings.
+    const json = JSON.stringify(obj) ?? "";
+    return { chars: json.length + cjkExtraChars(json), mediaTokens: 0 };
   }
   seen.add(obj);
 
@@ -363,6 +429,11 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
           mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
           continue;
         }
+        if (isInlineAudioVideoBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
       }
       if (isOmittedValue(item)) {
         chars += 4; // omitted values render as null inside arrays
@@ -382,6 +453,9 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
   if (isInlineBase64DocumentBlock(record)) {
     return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
   }
+  if (isInlineAudioVideoBlock(record)) {
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
+  }
 
   let chars = 2;
   let mediaTokens = 0;
@@ -391,7 +465,7 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     if (!first) chars += 1;
     first = false;
     const result = measureVirtual(value, seen, flags);
-    chars += encodedStringLength(key) + 1 + result.chars;
+    chars += estimateStringChars(key) + 1 + result.chars;
     mediaTokens += result.mediaTokens;
   }
   return { chars, mediaTokens };
@@ -409,7 +483,7 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
 export function estimateTokens(text: unknown): number {
   if (!text) return 0;
   if (typeof text === "string") {
-    return Math.ceil(text.length / CHARS_PER_TOKEN);
+    return Math.ceil((text.length + cjkExtraChars(text)) / CHARS_PER_TOKEN);
   }
   const { chars, mediaTokens } = measureVirtual(text, new Set());
   return Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens;
@@ -1089,4 +1163,21 @@ export function stripTrailingAssistantForProvider(
   if (hasToolUse || hasToolCalls) return messages;
 
   return messages.slice(0, messages.length - 1);
+}
+
+/**
+ * The same rule for a Responses `input` array, where tool calls are items of their own: only a
+ * trailing assistant message is dropped, with the reasoning items of that turn.
+ */
+export function stripTrailingAssistantInputForProvider<T>(input: T, provider: string): T {
+  if (!PROVIDERS_REQUIRING_USER_LAST_MESSAGE.has(provider) || !Array.isArray(input)) return input;
+
+  const items = input as Record<string, unknown>[];
+  const last = items[items.length - 1];
+  const isMessage = last?.type === undefined || last.type === "message";
+  if (last?.role !== "assistant" || !isMessage) return input;
+
+  let end = items.length - 1;
+  while (end > 0 && items[end - 1]?.type === "reasoning") end--;
+  return items.slice(0, end) as T;
 }

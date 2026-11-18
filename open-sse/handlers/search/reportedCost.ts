@@ -103,28 +103,69 @@ export function readReportedUsage(
 
 /**
  * Registry price of one successful call. Flat `costPerQuery`, unless the provider
- * declares `costByMode`: then the price of the `mode` sent in the request body
- * (unknown/absent mode → `costPerQuery`), plus `extraResultCost` for every result
- * returned above `includedResults`. Rounded to 6 decimals (no float dust).
+ * declares `costByMode`: then the price of the mode sent in the request body field
+ * `costModeField` (default `mode`; unknown/absent mode → `costPerQuery`), plus
+ * `extraResultCost` for every result returned above `includedResults`, plus
+ * `contentsCostPerResult[key]` per result for each `contents.<key>` the request
+ * sets. With `resultBlockSize`, the base price is charged once per started block
+ * of that many results (at least one). Rounded to 6 decimals (no float dust).
  */
 export function computeSearchCostUsd(
   config: SearchProviderConfig,
   requestBody: unknown,
   resultCount: number
 ): number {
-  const byMode = config.costByMode;
-  if (!byMode) return config.costPerQuery;
-  let mode: unknown;
-  try {
-    mode = typeof requestBody === "string" ? JSON.parse(requestBody)?.mode : undefined;
-  } catch {
-    mode = undefined;
-  }
-  const base =
-    typeof mode === "string" && Object.hasOwn(byMode, mode) ? byMode[mode] : config.costPerQuery;
-  const extraResults = Math.max(0, resultCount - (config.includedResults ?? resultCount));
-  const total = base + extraResults * (config.extraResultCost ?? 0);
+  if (!config.costByMode && !config.resultBlockSize) return config.costPerQuery;
+  const parsed = parseRequestBody(requestBody);
+  const total =
+    modePrice(config, parsed) * resultBlocks(config, resultCount) +
+    extraResultsCost(config, resultCount) +
+    contentsCost(config, parsed, resultCount);
   return Math.round(total * 1e6) / 1e6;
+}
+
+function parseRequestBody(requestBody: unknown): Record<string, unknown> | undefined {
+  if (typeof requestBody !== "string") return undefined;
+  try {
+    return JSON.parse(requestBody);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Price of the mode sent in `costModeField`; unknown or absent mode → `costPerQuery`. */
+function modePrice(config: SearchProviderConfig, parsed: Record<string, unknown> | undefined) {
+  const byMode = config.costByMode ?? {};
+  const mode = parsed?.[config.costModeField ?? "mode"];
+  return typeof mode === "string" && Object.hasOwn(byMode, mode)
+    ? byMode[mode]
+    : config.costPerQuery;
+}
+
+/** Started `resultBlockSize` blocks of results, at least one; 1 without block pricing. */
+function resultBlocks(config: SearchProviderConfig, resultCount: number): number {
+  const blockSize = config.resultBlockSize;
+  return blockSize ? Math.max(1, Math.ceil(resultCount / blockSize)) : 1;
+}
+
+function extraResultsCost(config: SearchProviderConfig, resultCount: number): number {
+  const extraResults = Math.max(0, resultCount - (config.includedResults ?? resultCount));
+  return extraResults * (config.extraResultCost ?? 0);
+}
+
+/** `contentsCostPerResult[key]` per result for each `contents.<key>` the request sets. */
+function contentsCost(
+  config: SearchProviderConfig,
+  parsed: Record<string, unknown> | undefined,
+  resultCount: number
+): number {
+  const contents = parsed?.contents;
+  if (!config.contentsCostPerResult || !contents || typeof contents !== "object") return 0;
+  let total = 0;
+  for (const [key, perResult] of Object.entries(config.contentsCostPerResult)) {
+    if ((contents as Record<string, unknown>)[key]) total += perResult * resultCount;
+  }
+  return total;
 }
 
 /**

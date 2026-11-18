@@ -1,4 +1,9 @@
+# Compliance & Audit (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../security/COMPLIANCE.md) · 🇪🇹 [am](../../../am/docs/security/COMPLIANCE.md) · 🇸🇦 [ar](../../../ar/docs/security/COMPLIANCE.md) · 🇦🇿 [az](../../../az/docs/security/COMPLIANCE.md) · 🇧🇬 [bg](../../../bg/docs/security/COMPLIANCE.md) · 🇧🇩 [bn](../../../bn/docs/security/COMPLIANCE.md) · 🇧🇦 [bs](../../../bs/docs/security/COMPLIANCE.md) · 🇨🇿 [cs](../../../cs/docs/security/COMPLIANCE.md) · 🇩🇰 [da](../../../da/docs/security/COMPLIANCE.md) · 🇩🇪 [de](../../../de/docs/security/COMPLIANCE.md) · 🇬🇷 [el](../../../el/docs/security/COMPLIANCE.md) · 🇪🇸 [es](../../../es/docs/security/COMPLIANCE.md) · 🇪🇪 [et](../../../et/docs/security/COMPLIANCE.md) · 🇮🇷 [fa](../../../fa/docs/security/COMPLIANCE.md) · 🇫🇮 [fi](../../../fi/docs/security/COMPLIANCE.md) · 🇫🇷 [fr](../../../fr/docs/security/COMPLIANCE.md) · 🇮🇪 [ga](../../../ga/docs/security/COMPLIANCE.md) · 🇮🇳 [gu](../../../gu/docs/security/COMPLIANCE.md) · 🇳🇬 [ha](../../../ha/docs/security/COMPLIANCE.md) · 🇮🇱 [he](../../../he/docs/security/COMPLIANCE.md) · 🇮🇳 [hi](../../../hi/docs/security/COMPLIANCE.md) · 🇭🇷 [hr](../../../hr/docs/security/COMPLIANCE.md) · 🇭🇺 [hu](../../../hu/docs/security/COMPLIANCE.md) · 🇦🇲 [hy](../../../hy/docs/security/COMPLIANCE.md) · 🇮🇩 [id](../../../id/docs/security/COMPLIANCE.md) · 🇳🇬 [ig](../../../ig/docs/security/COMPLIANCE.md) · 🇮🇹 [it](../../../it/docs/security/COMPLIANCE.md) · 🇯🇵 [ja](../../../ja/docs/security/COMPLIANCE.md) · 🇬🇪 [ka](../../../ka/docs/security/COMPLIANCE.md) · 🇰🇭 [km](../../../km/docs/security/COMPLIANCE.md) · 🇮🇳 [kn](../../../kn/docs/security/COMPLIANCE.md) · 🇰🇷 [ko](../../../ko/docs/security/COMPLIANCE.md) · 🇱🇹 [lt](../../../lt/docs/security/COMPLIANCE.md) · 🇱🇻 [lv](../../../lv/docs/security/COMPLIANCE.md) · 🇮🇳 [ml](../../../ml/docs/security/COMPLIANCE.md) · 🇮🇳 [mr](../../../mr/docs/security/COMPLIANCE.md) · 🇲🇾 [ms](../../../ms/docs/security/COMPLIANCE.md) · 🇲🇹 [mt](../../../mt/docs/security/COMPLIANCE.md) · 🇲🇲 [my](../../../my/docs/security/COMPLIANCE.md) · 🇳🇵 [ne](../../../ne/docs/security/COMPLIANCE.md) · 🇳🇱 [nl](../../../nl/docs/security/COMPLIANCE.md) · 🇳🇴 [no](../../../no/docs/security/COMPLIANCE.md) · 🇮🇳 [or](../../../or/docs/security/COMPLIANCE.md) · 🇮🇳 [pa](../../../pa/docs/security/COMPLIANCE.md) · 🇵🇭 [phi](../../../phi/docs/security/COMPLIANCE.md) · 🇵🇹 [pt](../../../pt/docs/security/COMPLIANCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/COMPLIANCE.md) · 🇷🇴 [ro](../../../ro/docs/security/COMPLIANCE.md) · 🇷🇺 [ru](../../../ru/docs/security/COMPLIANCE.md) · 🇱🇰 [si](../../../si/docs/security/COMPLIANCE.md) · 🇸🇰 [sk](../../../sk/docs/security/COMPLIANCE.md) · 🇸🇮 [sl](../../../sl/docs/security/COMPLIANCE.md) · 🇷🇸 [sr](../../../sr/docs/security/COMPLIANCE.md) · 🇸🇪 [sv](../../../sv/docs/security/COMPLIANCE.md) · 🇰🇪 [sw](../../../sw/docs/security/COMPLIANCE.md) · 🇮🇳 [ta](../../../ta/docs/security/COMPLIANCE.md) · 🇮🇳 [te](../../../te/docs/security/COMPLIANCE.md) · 🇹🇭 [th](../../../th/docs/security/COMPLIANCE.md) · 🇹🇷 [tr](../../../tr/docs/security/COMPLIANCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/COMPLIANCE.md) · 🇵🇰 [ur](../../../ur/docs/security/COMPLIANCE.md) · 🇺🇿 [uz](../../../uz/docs/security/COMPLIANCE.md) · 🇻🇳 [vi](../../../vi/docs/security/COMPLIANCE.md) · 🇳🇬 [yo](../../../yo/docs/security/COMPLIANCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/COMPLIANCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/COMPLIANCE.md)
+
 ---
+
 title: "Zgodność i audyt"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -20,64 +25,75 @@ Controls") oraz `src/lib/compliance/providerAudit.ts`. Zapis audytu nigdy nie
 rzuca wyjątku: przy dowolnej awarii wywołanie jest cicho połykane, żeby
 logowanie audytu nie mogło przerwać głównego przepływu żądania.
 
-## Co jest logowane
+## Co jest rejestrowane
 
-### Administracyjne zdarzenia audytu (`audit_log`)
+### Zdarzenia audytu administracyjnego (`audit_log`)
 
 Każde wywołanie `logAuditEvent({ action, actor, target, details, ... })` tworzy
-jeden wiersz. Ciągi akcji mają wzorzec `domain.verb` (lub `domain.verb.outcome`).
-Potwierdzone w drzewie źródłowym typy akcji obejmują:
+jeden wiersz. Ciągi akcji są zgodne ze wzorcem
+`domain.verb` (lub `domain.verb.outcome`). Potwierdzone typy akcji występujące
+w kodzie obejmują:
 
-| Action                               | Source                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Akcja                                | Źródło                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Każdy wpis przechowuje `action`, `actor` (domyślnie `"system"`), `target`,
+Każdy wpis zawiera `action`, `actor` (domyślnie `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` oraz `timestamp`. Wrażliwe klucze (`apiKey`, `accessToken`,
-`refreshToken`, `password`, wszystko pasujące do `*token`/`*secret`/`*apikey`
-itp.) są rekurencyjnie redagowane do `"[redacted]"` przed zapisem wiersza.
+`request_id` i `timestamp`. Klucze wrażliwe (`apiKey`, `accessToken`,
+`refreshToken`, `password`, wszystko pasujące do `*token`/`*secret`/`*apikey`,
+itp.) są rekurencyjnie zastępowane wartością `"[redacted]"` przed zapisaniem
+wiersza.
+
+Wiersze `api_key.auth.touch` rejestrują pomyślne odczyty metadanych klucza API
+i odczyty wykrywania (GET/HEAD), które nigdy nie trafiają do dziennika żądań:
+który klucz został użyty, kiedy oraz znormalizowaną ścieżkę; wpisy są łączone
+i ograniczone do 1 000 wierszy. Klucze z `noLog` oraz klucz środowiskowy są
+pomijane. Adres IP i user agent wywołującego są dodawane wyłącznie wtedy, gdy
+flaga funkcji `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` jest włączona (domyślnie
+wyłączona).
 
 ### Wywołania narzędzi MCP (`mcp_tool_audit`)
 
-Każde wywołanie narzędzia MCP zapisuje wiersz przez
+Każde wywołanie narzędzia MCP zapisuje wiersz za pośrednictwem
 `open-sse/mcp-server/audit.ts`. Schemat (z
 `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Column           | Notes                                        |
-| ---------------- | -------------------------------------------- |
-| `id`             | autoincrement                                |
-| `tool_name`      | identyfikator narzędzia MCP                  |
-| `input_hash`     | sha256 wejścia (bez przechowywania payloadu) |
-| `output_summary` | krótkie, obcięte podsumowanie                |
-| `duration_ms`    | czas ściany (wall time)                      |
-| `api_key_id`     | wywołujący (nullable)                        |
-| `success`        | `1` / `0`                                    |
-| `error_code`     | kod błędu końcowego przy awarii              |
-| `created_at`     | znacznik czasu ISO                           |
+| Kolumna          | Uwagi                                              |
+| ---------------- | -------------------------------------------------- |
+| `id`             | autoincrement                                      |
+| `tool_name`      | identyfikator narzędzia MCP                        |
+| `input_hash`     | sha256 danych wejściowych (bez zapisanego ładunku) |
+| `output_summary` | krótkie, skrócone podsumowanie                     |
+| `duration_ms`    | czas zegarowy                                      |
+| `api_key_id`     | wywołujący (może być pusty)                        |
+| `success`        | `1` / `0`                                          |
+| `error_code`     | końcowy kod błędu w przypadku niepowodzenia        |
+| `created_at`     | znacznik czasu ISO                                 |
 
-### Logi żądań / użycia
+### Dzienniki żądań / użycia
 
-To telemetria operacyjna (nie ściśle admin audit), ale dzieli ten sam
-pipeline retencji:
+Są to dane telemetryczne dotyczące działania (nie są ściśle audytem
+administracyjnym), ale korzystają z tego samego procesu przechowywania:
 
-- `usage_history` — agregat użycia per żądanie
-- `call_logs` — pełny log per żądanie (objęty limitem wierszy, patrz niżej)
-- `proxy_logs` — log ruchu proxy (objęty limitem wierszy)
-- `request_detail_logs` — legacy szczegółowy log żądań (nadal przycinany, jeśli obecny)
+- `usage_history` — zestawienie użycia dla każdego żądania
+- `call_logs` — pełny dziennik każdego żądania (z limitem liczby wierszy, zobacz poniżej)
+- `proxy_logs` — dziennik ruchu proxy (z limitem liczby wierszy)
+- `request_detail_logs` — starszy szczegółowy dziennik żądań (nadal jest czyszczony, jeśli występuje)
 
 ## Schemat przechowywania
 

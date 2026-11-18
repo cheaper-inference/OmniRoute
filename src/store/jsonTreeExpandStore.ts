@@ -3,8 +3,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// The level a JSON tree node is rendered at (react18-json-view's own
-// `collapsed` numeric-depth prop) is 0-indexed, so this store's level uses
+// The level a JSON tree node is rendered at (the kit JsonTree's own
+// `expandDepth` prop) is 0-indexed, so this store's level uses
 // the same convention: level 0 means nothing is expanded ("collapse all"),
 // and a node at depth N is expanded when N < level.
 const MIN_LEVEL = 0;

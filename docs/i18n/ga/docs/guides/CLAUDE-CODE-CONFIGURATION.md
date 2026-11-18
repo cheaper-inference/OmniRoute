@@ -25,27 +25,78 @@ omniroute launch --profile glm52  # Claude Code ag úsáid glm/glm-5.2 trí Omni
 
 ---
 
-## Conas a nascann Claude Code le geata
+## Conas a nascann Cód Claude le geata
 
-Déanann Claude Code cumarsáid le **Anthropic Messages API** agus treoraítear é chuig
-críochphointe saincheaptha le hathróga timpeallachta (níl bratach `--base-url` aige):
+Claude Cód cainteanna an** Teachtaireachtaí Anthropic API** agus tá sé dírithe ar chríochphointe saincheaptha le hathróga timpeallachta (níl aon bhratach `--base-url` aige):
 
-| Athróg                                       | Cuspóir                                                                                                        |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Fréamh-URL an gheata (cuireann Claude Code `/v1/messages` leis). **Gan iarmhír `/v1`.**                        |
-| `ANTHROPIC_AUTH_TOKEN`                       | Seoltar mar `Authorization: Bearer …` é — úsáid do chomhartha rochtana / eochair API OmniRoute                 |
-| `ANTHROPIC_API_KEY`                          | Rogha eile: seoltar mar `x-api-key` é. Má tá an dá cheann socraithe, bíonn tosaíocht ag `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Cuir samhail shonrach i bhfeidhm (sáraíonn sé réamhshocrú roghnóir `/model`)                                   |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → liostaíonn an roghnóir dúchasach `/model` samhlacha `claude*`/`anthropic*` ó `/v1/models`                |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cuir teorainn le comharthaí aschuir in aghaidh an fhreagra (m.sh. `65536`)                                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tairseach comharthaí don uath-chomhbhrú                                                                        |
+| Athróg                                       | Cuspóir                                                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | Gheata root URL (Claude Cód ag gabháil leis `/v1/messages`).** Gan iarmhír `/v1`.**                    |
+| `ANTHROPIC_AUTH_TOKEN`                       | Seolta mar `Authorization: Bearer …` — bain úsáid as OmniRoute eochair chomhartha rochtana / API       |
+| `ANTHROPIC_API_KEY`                          | Rogha eile: seolta mar `x-api-key`. Má shocraíonn an dá cheann, bíonn an bua ag `ANTHROPIC_AUTH_TOKEN` |
+| `ANTHROPIC_MODEL`                            | Cuir iallach ar shamhail ar leith (sáraíonn sé an rogha réamhshocraithe `/model` )                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → liostaíonn an roghnóir `/model` dúchais samhlacha `claude*`/`anthropic*` ó `/v1/models`          |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | comharthaí aschuir caipín in aghaidh an fhreagra (m.sh. `65536`)                                       |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tairseach comhartha le haghaidh uath-dhlúthú                                                           |
 
-> Léitear athróga timpeallachta **uair amháin ag am tosaithe** — atosaigh Claude Code tar éis iad a athrú.
+> Léitear Env vars** uair amháin ag am tosaithe** — atosú Claude Cód tar éis iad a athrú.
 
-Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bun-URL + an comhartha
-ón gcomhthéacs gníomhach (mar sin oibríonn `omniroute connect <vps>` agus ansin
-`omniroute launch` gan aon chumraíocht eile), déanann sé seiceáil sláinte ar an
-bhfreastalaí, agus ritheann sé `claude` trí exec.
+Le haghaidh dintiúir a rothlaíonn in ionad teaghrán seasta, socraigh `apiKeyHelper` in `~/.claude/settings.json` chuig ordú a phriontálann an dintiúir reatha go stdout. Déanann Claude Code a aschur a thaisceadh ar feadh cúig nóiméad de réir réamhshocraithe (sáraíonn `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` é sin) agus seolann sé an luach i `Authorization: Bearer` agus `x-api-key`. Ní mór don script an dintiúir a phriontáil agus ní theipeann ar aon rud eile — bratach taobh leis an cúntóir ar v2.1.227 +.
+
+Seo mar a oibríonn Entra ID SSO : priontaí `scripts/cli/omniroute-sso.mjs token` comhartha rochtana Entra gearrthéarmach a fhíoraíonn OmniRoute in ionad eochair API. Féach [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bonn URL + chomhartha ón gcomhthéacs gníomhach (mar sin `omniroute connect <vps>` ansin oibríonn `omniroute launch` díreach), seiceálann sláinte an freastalaí, agus execs `claude`.
+
+---
+
+## Sannadh úsáide: seisiúin agus tionscadail
+
+Déanann OmniRoute iarratais gach eochair API a ghrúpáil isteach** seisiúin gníomhaire** agus taifid a** tionscadal** oibríodh ar gach seisiún ( tábla `agent_sessions` ), ionas gur féidir úsáid agus costas a thuairisciú in aghaidh an bhaill foirne, in aghaidh an tionscadail agus in aghaidh an tseisiúin.
+
+Cad atá taifeadta gan aon socrú cliant:
+
+| Réimse     | Foinse                                                                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seisiún    | ceanntásc `x-claude-code-session-id` (luach céanna le `metadata.user_id.session_id`), cobhsaí in aghaidh an tseisiúin                                             |
+| Tionscadal | Cuireann an cód `Primary working directory:` líne Claude teachtaireacht ina timpeallacht; fillteáin worktree faoi `.claude/worktrees/` réiteach leis an ainm stór |
+| Brainse    | `Current branch:` ón stádas git cuireann Claude Code leis an gcéad teachtaireacht                                                                                 |
+| Cliant     | `user-agent` (`claude-cli/<version>`)                                                                                                                             |
+
+Aithnítear Codex (`<environment_context><cwd>`) agus OpenCode (`x-opencode-session`) ar an mbealach céanna. Eochracha le** gan logáil** cumasaithe gan ach aitheantas an tseisiúin agus réimsí an tionscadail a sholáthair ceanntásc; ní stóráiltear aon rud a léitear ón leid (cosán, brainse).
+
+### An tionscadal a ainmniú go sainráite (molta)
+
+Tá difríocht idir an t-eolaire oibre idir meaisíní, agus mar sin is féidir an stór céanna a thaispeáint faoi chosáin éagsúla. Seol an tionscadal go sainráite ina ionad sin: cuireann Claude Code aon cheanntásca atá liostaithe in `ANTHROPIC_CUSTOM_HEADERS` le gach iarratas samhail, agus léann OmniRoute dhá cheann acu:
+
+| Ceanntásc                  | Luach                                                           |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | Ainm an tionscadail, m.sh. `omniroute`                          |
+| `x-omniroute-project-repo` | cianrialtán normalaithe, eg `github.com/diegosouzapw/OmniRoute` |
+
+Ní léitear an dá rud ach le haghaidh sannadh; ní chuirtear ar aghaidh chuig an soláthraí réamhtheachtacha iad choíche.
+
+Léitear `ANTHROPIC_CUSTOM_HEADERS` uair amháin ag am tosaithe, agus stórálann comhaid socruithe luachanna litriúla, mar sin ríomh é nuair a sheolann Cód Claude. Cuir é seo le `~/.zshrc` nó `~/.bashrc` agus coinnigh ag tosú `claude` ón bhfillteán tionscadail:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Stiallaíonn slonn `sed` aon dintiúir, teaghrán fiosrúcháin agus blúire atá leabaithe sa chian- URL, agus coimeádtar ceanntásca atá in `ANTHROPIC_CUSTOM_HEADERS` cheana féin. Seolann síntí IDE Cód Claude gan do bhlaosc, mar sin titeann a gcuid seisiúin ar ais chuig an eolaire oibre.
 
 ---
 

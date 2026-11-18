@@ -31,7 +31,7 @@ export function HomeProviderTopologySection({
   const t = useTranslations("home");
   // #4596: gate the live-WS connection so it only opens while the topology
   // section is actually shown on the home page.
-  const { activeRequests: liveActiveRequests } = useLiveRequests({ enabled });
+  const { activeRequests: liveActiveRequests, completedRequests } = useLiveRequests({ enabled });
   const activeRequests = selectActiveRequests(liveActiveRequests);
   const activeProviderCount = new Set(activeRequests.map(({ provider }) => provider)).size;
 
@@ -39,7 +39,7 @@ export function HomeProviderTopologySection({
     <Card>
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-base font-semibold">{t("providerTopology")}</h2>
+          <h2 className="text-base">{t("providerTopology")}</h2>
           <p className="text-xs text-text-muted">
             {t("activeError", { active: activeProviderCount, errors: errorProvider ? 1 : 0 })}
           </p>
@@ -62,6 +62,7 @@ export function HomeProviderTopologySection({
       <ProviderTopology
         providers={providers}
         activeRequests={activeRequests}
+        recentRequests={completedRequests}
         lastProvider={lastProvider}
         errorProvider={errorProvider}
       />

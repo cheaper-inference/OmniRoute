@@ -27,6 +27,10 @@ type WriteOpts = {
   effectiveServiceTier: string | undefined;
   comboName: string | null | undefined;
   mode: string;
+  /** The mode the user configured, when the dispatched plan wraps it (lite run as a one-step
+   *  stacked pipeline by the lossy-request policy). Recorded as mode and engine so analytics
+   *  keeps reporting what was configured, not the wrapper. */
+  reportedMode?: string;
   compressionComboId: string | null | undefined;
   skillRequestId: string;
   cavemanOutputModeApplied: boolean;
@@ -55,6 +59,18 @@ function buildRtkPointerFields(rtkPointers: RtkPointer[]) {
   };
 }
 
+/**
+ * Engine label of a saving row. The configured-mode label only replaces the dispatched engine
+ * when a single step ran (the lite wrapper); a multi-engine run, such as a combo that took over
+ * the plan, keeps the engine the pipeline reported.
+ */
+function analyticsEngine(opts: WriteOpts): string {
+  const { stats } = opts;
+  const steps = stats.engineBreakdown?.length ?? 0;
+  if (opts.reportedMode && steps <= 1) return opts.reportedMode;
+  return stats.engine ?? opts.mode;
+}
+
 function buildAnalyticsRow(
   opts: WriteOpts,
   tokensSaved: number,
@@ -66,8 +82,8 @@ function buildAnalyticsRow(
     timestamp: new Date().toISOString(),
     combo_id: opts.comboName ?? null,
     provider: opts.provider ?? null,
-    mode: opts.mode,
-    engine: stats.engine ?? opts.mode,
+    mode: opts.reportedMode ?? opts.mode,
+    engine: analyticsEngine(opts),
     compression_combo_id: stats.compressionComboId ?? opts.compressionComboId ?? null,
     original_tokens: stats.originalTokens,
     compressed_tokens: stats.compressedTokens,
@@ -110,7 +126,9 @@ export function writeCompressionSkip(opts: WriteOpts, skipReason: string): Promi
         timestamp: new Date().toISOString(),
         combo_id: opts.comboName ?? null,
         provider: opts.provider ?? null,
-        mode: opts.mode,
+        mode: opts.reportedMode ?? opts.mode,
+        // Skip rows keep the dispatched engine: they carry no per-engine breakdown, and the
+        // legacy per-engine totals count them under whatever engine they name.
         engine: stats.engine ?? opts.mode,
         compression_combo_id: stats.compressionComboId ?? opts.compressionComboId ?? null,
         original_tokens: stats.originalTokens,

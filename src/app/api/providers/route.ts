@@ -1,4 +1,10 @@
+import { projectProviderPrefixCollisions } from "@/lib/providers/providerPrefixCollision";
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import {
+  getDiscoveryStatesForConnections,
+  type DiscoveryStateEntry,
+  type DiscoveryStateRecord,
+} from "@/lib/db/discoveryState";
 import { NextResponse } from "next/server";
 import { getSettings } from "@/lib/db/settings";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
@@ -73,7 +79,14 @@ import {
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
+import {
+  compatibleQuotaAuthFor,
+  inheritCompatibleQuotaCheck,
+  isCompatibleQuotaProvider,
+} from "@/shared/utils/compatibleQuotaCheck";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
+import { runConnectionFollowUp } from "@/lib/providers/connectionFollowUps";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -146,7 +159,20 @@ export async function GET(request: Request) {
 
     // Hide or mask sensitive fields
     const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
-    const safeConnections = connections.map((c) => {
+    // The outcome of the last model discovery of each connection. A read
+    // failure must not break the connection list: an unknown outcome simply
+    // reads as "unknown".
+    let discoveryStates = new Map<string, DiscoveryStateRecord>();
+    try {
+      const discoveryEntries: DiscoveryStateEntry[] = connections.map((c) => ({
+        provider: String(c.provider ?? ""),
+        id: String(c.id ?? ""),
+      }));
+      discoveryStates = getDiscoveryStatesForConnections(discoveryEntries);
+    } catch (error) {
+      console.error("Failed to read the stored discovery outcomes:", error);
+    }
+    const safeConnections = (await projectProviderPrefixCollisions(connections)).map((c) => {
       const providerSpecificData = c.providerSpecificData
         ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
@@ -160,6 +186,10 @@ export async function GET(request: Request) {
         // #16940: the row mapper drops null columns; keep "never synced" an
         // explicit null so the dashboard contract does not depend on absence.
         syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        // Same contract for the discovery outcome: absent means "unknown",
+        // never "healthy".
+        discoveryState:
+          discoveryStates.get(`${String(c.provider ?? "")}:${String(c.id ?? "")}`) ?? null,
         rateLimitAutoProtected: isConnectionAutoProtected(
           {
             provider: String(c.provider),
@@ -219,6 +249,7 @@ export async function POST(request: Request) {
       testStatus,
       providerSpecificData: incomingPsd,
       allowNoCredential,
+      proxyEnabled,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
     if (provider === "cloudflare-ai" && Object.hasOwn(body, "accountId")) {
@@ -258,6 +289,28 @@ export async function POST(request: Request) {
 
     let providerSpecificData = incomingPsd || null;
     let persistedApiKey = apiKey;
+
+    const m365Token = parseM365RefreshToken(provider, incomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    if (provider === "copilot-m365-web" && providerSpecificData) {
+      providerSpecificData = { ...providerSpecificData };
+      delete providerSpecificData.refreshToken;
+    }
 
     if (provider === "qoder") {
       providerSpecificData = normalizeQoderPatProviderData(providerSpecificData || {});
@@ -344,13 +397,27 @@ export async function POST(request: Request) {
       providerSpecificData = hydrated.data;
     }
 
+    if (isCompatibleQuotaProvider(provider) && providerSpecificData) {
+      // A key added after the node's "Quota check" was switched on gets the same preset.
+      providerSpecificData = inheritCompatibleQuotaCheck(
+        providerSpecificData,
+        await getProviderConnections({ provider }),
+        {
+          baseUrl: String(providerSpecificData.baseUrl ?? ""),
+          auth: compatibleQuotaAuthFor(provider),
+        }
+      );
+    }
+
     providerSpecificData = normalizeProviderSpecificData(provider, providerSpecificData) || null;
 
     const newConnection = await createProviderConnection({
       provider,
+      ...(proxyEnabled !== undefined ? { proxyEnabled } : {}),
       authType: "apikey",
       name,
       apiKey: persistedApiKey,
+      ...(m365Token.data.refreshToken ? { refreshToken: m365Token.data.refreshToken } : {}),
       priority: priority || 1,
       globalPriority: globalPriority || null,
       defaultModel: defaultModel || null,
@@ -395,25 +462,17 @@ export async function POST(request: Request) {
           ...buildModelSyncInternalHeaders(),
         };
         const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnection.id)}/sync-models?mode=import`;
-        // Intentionally not awaited: this is async/non-blocking work.
-        void fetchModelSyncInternal(syncUrl, {
-          method: "POST",
-          headers: syncHeaders,
-          redirect: "error",
-        })
-          .then((syncRes) => {
-            if (!syncRes.ok) {
-              console.log(
-                `[providers] Auto-sync failed for ${newConnection.id}: ${syncRes.status}`
-              );
-            }
-          })
-          .catch((err) => {
-            console.log(
-              `[providers] Auto-sync error for ${newConnection.id}:`,
-              err?.message || err
-            );
+        // Not awaited by the response, but tracked: graceful shutdown (and tests) wait for it.
+        runConnectionFollowUp(`Auto-sync error for ${newConnection.id}`, async () => {
+          const syncRes = await fetchModelSyncInternal(syncUrl, {
+            method: "POST",
+            headers: syncHeaders,
+            redirect: "error",
           });
+          if (!syncRes.ok) {
+            console.log(`[providers] Auto-sync failed for ${newConnection.id}: ${syncRes.status}`);
+          }
+        });
       } catch (syncSetupError) {
         // Defensive: if URL parsing or header construction itself throws, do
         // not let it break the (already successful) POST response.
@@ -426,29 +485,29 @@ export async function POST(request: Request) {
 
     // Auto-test the newly created connection so `testStatus` reflects reality
     // shortly after creation instead of sitting at "unknown" until the
-    // operator manually clicks "Test" in the dashboard. Fire-and-forget for
-    // the same reason as the auto-sync above: the probe can take a few
-    // seconds (OAuth refresh, upstream round-trip) and must not block the
-    // 201 response. testSingleConnection() persists testStatus/lastError/etc.
-    // itself, so nothing further is needed here beyond logging failures.
+    // operator manually clicks "Test" in the dashboard. Not awaited by the
+    // response for the same reason as the auto-sync above: the probe can take a
+    // few seconds (OAuth refresh, upstream round-trip) and must not block the
+    // 201 response. It is a tracked follow-up, so graceful shutdown waits for it
+    // to persist testStatus/lastError/etc. before closing the database.
     // GHSA-jmq6-8j86-8xqj: the local CLI probe spawns on the host — only for local callers.
     // S-01 (#15159): allowLocalSpawn covers the devin cloud-agent validator's CLI
     // fallback, which also spawns. Same gate, same reason.
-    void testSingleConnection(newConnection.id, undefined, {
-      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
-      allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
-    }).catch((testError: unknown) => {
-      console.log(
-        `[providers] Auto-test failed for ${newConnection.id}:`,
-        (testError as { message?: string })?.message || testError
-      );
-    });
+    runConnectionFollowUp(`Auto-test failed for ${newConnection.id}`, () =>
+      testSingleConnection(newConnection.id, undefined, {
+        allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+        allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
+      })
+    );
 
     // Note: Gemini model sync is now triggered client-side with progress dialog
 
     // Hide sensitive fields
     const result: Record<string, any> = { ...newConnection };
     delete result.apiKey;
+    delete result.accessToken;
+    delete result.refreshToken;
+    delete result.idToken;
     if (result.providerSpecificData) {
       result.providerSpecificData = sanitizeProviderSpecificDataForResponse(
         result.providerSpecificData

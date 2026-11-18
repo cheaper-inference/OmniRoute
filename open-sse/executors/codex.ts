@@ -1,13 +1,17 @@
+import { createRequire } from "module";
+import { scopeCodexServiceTierDefault } from "../config/codexServiceTierModels.ts";
+import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { copyCodexRequestForMutation } from "./codex/requestCopy.ts";
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
-import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
 import {
   getCodexModelScope,
   getCodexRateLimitKey,
   type CodexQuotaScope,
 } from "../config/codexQuotaScopes.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -16,19 +20,15 @@ import {
   type ExecuteInput,
   type ProviderCredentials,
 } from "./base.ts";
-import {
-  CODEX_CHAT_DEFAULT_INSTRUCTIONS,
-  CODEX_DEFAULT_INSTRUCTIONS,
-} from "../config/codexInstructions.ts";
+import { CODEX_CHAT_DEFAULT_INSTRUCTIONS } from "../config/codexInstructions.ts";
 import { FETCH_BODY_TIMEOUT_MS, HTTP_STATUS, PROVIDERS } from "../config/constants.ts";
 import { readCodexPeekChunk, buildCodexTimeoutSafePassthroughBody } from "./codex/bodyTimeout.ts";
 import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRejectedParams.ts";
 import {
   CODEX_CLI_RS_ORIGINATOR,
-  getCodexClientVersion,
-  getCodexClientVersionFromHeaders,
   getCodexUserAgent,
   normalizeCodexSessionId,
+  resolveCodexAdvertisedVersion,
 } from "../config/codexClient.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -36,6 +36,7 @@ import {
   applyCodexClientMetadata,
   applyCodexOriginalIdentityHeaders,
   type CodexClientIdentity,
+  getCodexClientSessionId,
   resolveCodexThreadScopedPromptCacheKey,
   withCodexFingerprintCredentials,
 } from "../config/codexIdentity.ts";
@@ -54,12 +55,9 @@ import {
   buildSyntheticResponsesFailureId,
   buildSyntheticResponsesFailedEvent,
 } from "../utils/responsesSequence.ts";
-import { hasCodexSsePeekProgress } from "./codex/ssePeekProgress.ts";
-import * as overloadedOutput from "./codex/sseOverloadedOutput.ts";
-import * as modelUnavailable from "./codex/sseModelUnavailable.ts";
+import { inspectCodexSsePeek } from "./codex/ssePeekFailure.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
-import { createRequire } from "module";
 import { loadDynamicModule } from "./codex/wreqLoader.ts";
 // Quota parsing/scheduling extracted to a pure leaf; re-exported for the
 // Codex account module and tests.
@@ -75,7 +73,10 @@ import {
   isCodexCompactionWebReplay,
 } from "./codex/compactionReplay.ts";
 import { CODEX_ULTRA_ALIAS_MODELS, splitCodexReasoningSuffix } from "./codex/reasoningSuffix.ts";
-import { applyCodexReasoningSelection } from "./codex/reasoningPolicy.ts";
+import {
+  applyCodexReasoningSelection,
+  normalizeCodexSummaryStreamOptions,
+} from "./codex/reasoningPolicy.ts";
 import { repairMissingCodexToolCallOutputs } from "./codex/toolCallRepair.ts";
 import { recoverCodexReasoningReplayRejection } from "./codex/reasoningReplayRejection.ts";
 import { resolveAppServerConfig } from "./codex/appServerConfig.ts";
@@ -329,7 +330,9 @@ function normalizeEffortValue(value: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
+function ensureCodexReasoningSummary(body: Record<string, unknown>, skipDefaults = false): void {
+  // #18124: a Chat-translated request for a safety-block model stays effort-only.
+  if (skipDefaults) return;
   const reasoning =
     body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
       ? (body.reasoning as Record<string, unknown>)
@@ -348,6 +351,13 @@ function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
   if (!body.include.includes(CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE)) {
     body.include = [...body.include, CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE];
   }
+}
+
+// Set by the Chat -> Responses translator (#18124); see REASONING_SUMMARY_OPT_OUT_MARKER.
+function consumeReasoningSummaryOptOutMarker(body: Record<string, unknown>): boolean {
+  const marker = body._omnirouteSkipReasoningSummaryDefault;
+  delete body._omnirouteSkipReasoningSummaryDefault;
+  return marker === true;
 }
 
 function consumeResponsesStoreMarker(body: Record<string, unknown>): unknown {
@@ -509,9 +519,10 @@ export function codexDropNonstandardEvents(): boolean {
 // re-allocated per block/iteration before hoisting.
 const CODEX_SSE_EVENT_LINE_RE = /^event:\s*(.+)$/m;
 const CODEX_SSE_BLOCK_SEP_RE = /\r?\n\r?\n/;
-export function filterNonstandardCodexSse(response: Response): Response {
+export function filterNonstandardCodexSse(response: Response, assumeSse = false): Response {
   const contentType = response.headers.get("content-type") || "";
-  if (!response.body || !contentType.includes("text/event-stream")) {
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.body || !isSse) {
     return response;
   }
   const decoder = new TextDecoder();
@@ -628,11 +639,6 @@ export function terminateCodexHttpStreamOnTerminal(response: Response): Response
 // signature is found, convert the response into a real 503 so account rotation
 // kicks in. Otherwise re-assemble the stream from the peeked prefix + the
 // remaining upstream body so the passthrough stays byte-identical.
-const CODEX_SSE_TRANSIENT_ERROR_PATTERNS = [
-  "selected model is at capacity",
-  "server_is_overloaded",
-  "service_unavailable_error",
-] as const;
 // A capacity/overloaded rejection is delivered as the very first SSE event, so a
 // small peek window is enough — this bounds how much of a legitimate response we
 // buffer before giving up and passing the stream through unchanged.
@@ -662,7 +668,8 @@ type CodexSseTransientErrorPeek =
  */
 export async function peekCodexSseTransientError(
   response: Response,
-  timeoutMs: number = FETCH_BODY_TIMEOUT_MS
+  timeoutMs: number = FETCH_BODY_TIMEOUT_MS,
+  assumeSse = false
 ): Promise<CodexSseTransientErrorPeek> {
   const contentType = response.headers.get("content-type") || "";
   // #7536: check content-type BEFORE touching `response.body`. On the wreq-js
@@ -672,8 +679,10 @@ export async function peekCodexSseTransientError(
   // upstream response has an empty content-type, so it must short-circuit here
   // WITHOUT reading `.body` — otherwise chatCore's readNonStreamingResponseBody
   // 502s. Only genuine SSE responses (which this peek intends to buffer) reach
-  // the `.body` access below.
-  if (!response.ok || !contentType.includes("text/event-stream") || !response.body) {
+  // the `.body` access below. When the request was explicitly streaming (assumeSse),
+  // an empty content-type from chatgpt.com is treated as SSE.
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.ok || !isSse || !response.body) {
     return { matched: null, message: null, replacementBody: null };
   }
 
@@ -681,31 +690,30 @@ export async function peekCodexSseTransientError(
   const decoder = new TextDecoder();
   const chunks: Uint8Array[] = [];
   let text = "";
-  let matched: string | null = null;
+  let peekedBytes = 0;
+  let decision: ReturnType<typeof inspectCodexSsePeek> = null;
 
   try {
-    while (text.length < CODEX_SSE_PEEK_MAX_BYTES) {
+    while (peekedBytes < CODEX_SSE_PEEK_MAX_BYTES) {
       const { done, value, timedOut } = await readCodexPeekChunk(reader, timeoutMs);
       if (timedOut) {
         return { matched: null, message: null, replacementBody: null, timedOut: true };
       }
-      if (done) break;
-      if (!value) continue;
-      chunks.push(value);
-      text += decoder.decode(value, { stream: true });
-      const lower = text.toLowerCase();
-      const hit = CODEX_SSE_TRANSIENT_ERROR_PATTERNS.find((pattern) => lower.includes(pattern));
-      matched = hit ?? modelUnavailable.matchCodexSseModelUnavailable(text);
-      if (matched) break;
-      // Fake-200 overload delivered as output text (decolua/9router#3232).
-      const overloadStep = overloadedOutput.codexOverloadedOutputPeekStep(text);
-      if (overloadStep === "settled") break;
-      if (overloadStep === "wait") continue;
-      // Hand off actual text/reasoning/tool progress, but retain the early
-      // error window across lifecycle-only frames such as response.created.
-      if (hasCodexSsePeekProgress(text)) {
+      if (done) {
+        // Preserve the existing EOF-only model-unavailable/fake-output handling,
+        // but never inspect an unfinished JSON prefix as a failure declaration.
+        decision = inspectCodexSsePeek(text + decoder.decode(), true);
         break;
       }
+      if (!value) continue;
+      chunks.push(value);
+      // A single upstream chunk can exceed the peek budget. Retain its original
+      // bytes for passthrough, but do not inspect or decode beyond that budget.
+      const prefix = value.subarray(0, CODEX_SSE_PEEK_MAX_BYTES - peekedBytes);
+      peekedBytes += prefix.byteLength;
+      text += decoder.decode(prefix, { stream: true });
+      decision = inspectCodexSsePeek(text);
+      if (decision) break;
     }
   } catch (err) {
     console.warn(
@@ -715,18 +723,18 @@ export async function peekCodexSseTransientError(
     );
   }
 
-  matched ??=
-    modelUnavailable.matchCodexSseModelUnavailable(text, true) ??
-    overloadedOutput.matchCodexOverloadedOutput(text);
-  if (matched) {
+  if (decision?.kind === "failure") {
     try {
       await reader.cancel();
     } catch {
       // Upstream socket may already be closing; nothing to clean up.
     }
-    const message = overloadedOutput.extractCodexSseErrorMessage(text, matched);
-    const isModelUnavailable = modelUnavailable.isCodexSseModelUnavailableMatch(matched);
-    return { matched, message, replacementBody: null, modelUnavailable: isModelUnavailable };
+    return {
+      matched: decision.matched,
+      message: decision.message,
+      replacementBody: null,
+      modelUnavailable: decision.modelUnavailable === true,
+    };
   }
 
   // Re-assemble the stream: peeked prefix chunks, then continue draining the
@@ -896,12 +904,15 @@ export class CodexExecutor extends BaseExecutor {
       if (codexDropNonstandardEvents()) {
         const resp = (httpResult as { response?: Response }).response;
         if (resp?.body) {
-          (httpResult as { response: Response }).response = filterNonstandardCodexSse(resp);
+          (httpResult as { response: Response }).response = filterNonstandardCodexSse(
+            resp,
+            input.stream === true
+          );
         }
       }
       const resp = (httpResult as { response?: Response }).response;
       if (resp) {
-        const peek = await peekCodexSseTransientError(resp);
+        const peek = await peekCodexSseTransientError(resp, undefined, input.stream === true);
         if (peek.modelUnavailable) {
           // Model + account scoped: a 400 lets isModelScoped400 lock the model on this
           // connection and advance the combo; a 503 would feed the provider breaker.
@@ -954,7 +965,17 @@ export class CodexExecutor extends BaseExecutor {
     }
 
     const url = CODEX_RESPONSES_WS_URL;
-    const headers = normalizeCodexWsHeaders(this.buildHeaders(nextInput.credentials, true));
+    // Same identity inputs as the HTTP path (base.ts): the client's session headers and body.
+    const headers = normalizeCodexWsHeaders(
+      this.buildHeaders(
+        nextInput.credentials,
+        true,
+        nextInput.clientHeaders,
+        nextInput.model,
+        undefined,
+        nextInput.body
+      )
+    );
     mergeUpstreamExtraHeaders(headers, nextInput.upstreamExtraHeaders);
 
     const transformedBody = (await this.transformRequest(
@@ -996,6 +1017,14 @@ export class CodexExecutor extends BaseExecutor {
       }
     };
 
+    const cleanupWsListeners = () => {
+      if (ws) {
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
+      }
+    };
+
     let abortHandler: (() => void) | null = null;
     const removeAbortListener = () => {
       if (!abortHandler) return;
@@ -1017,6 +1046,7 @@ export class CodexExecutor extends BaseExecutor {
       if (closed) return;
       closed = true;
       removeAbortListener();
+      cleanupWsListeners();
       if (closeSocket) closeUpstream(reason);
 
       const controller = streamController;
@@ -1069,7 +1099,7 @@ export class CodexExecutor extends BaseExecutor {
 
         try {
           ws = await websocketFn(toWebSocketUrl(url), {
-            browser: "chrome_142",
+            browser: newestChromeProfile(),
             os: "windows",
             headers,
           });
@@ -1116,6 +1146,7 @@ export class CodexExecutor extends BaseExecutor {
             // emit a terminal response.failed instead of ending the client stream as
             // if it completed normally (silent truncation).
             if (closed) return;
+            cleanupWsListeners();
             const closeDetail = event
               ? ` (code ${event.code ?? "unknown"}${event.reason ? `: ${event.reason}` : ""})`
               : "";
@@ -1187,7 +1218,8 @@ export class CodexExecutor extends BaseExecutor {
     stream = true,
     clientHeaders?: Record<string, string> | null,
     model?: string,
-    health?: Record<string, KeyHealth>
+    health?: Record<string, KeyHealth>,
+    body?: unknown
   ) {
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
     const headers = super.buildHeaders(
@@ -1203,8 +1235,8 @@ export class CodexExecutor extends BaseExecutor {
     // version (e.g. "The 'gpt-6-astra' model requires a newer version of Codex"),
     // so a hardcoded value silently rots whenever the user upgrades their CLI.
     // Falls back to the configured/default version when the caller sends none.
-    const clientVersion = getCodexClientVersionFromHeaders(clientHeaders);
-    headers.Version = clientVersion ?? getCodexClientVersion();
+    const clientVersion = resolveCodexAdvertisedVersion(clientHeaders);
+    headers.Version = clientVersion;
     setUserAgentHeader(headers, getCodexUserAgent(clientVersion));
 
     // Add workspace binding header if workspaceId is persisted
@@ -1222,12 +1254,13 @@ export class CodexExecutor extends BaseExecutor {
     // Ref: openai/codex login/src/auth/default_client.rs DEFAULT_ORIGINATOR = "codex_cli_rs"
     headers["originator"] = CODEX_CLI_RS_ORIGINATOR;
 
-    // session_id header — enables prompt cache affinity on the Codex backend.
-    // The official Codex client sets this to conversation_id (a stable UUID per session).
-    // Ref: openai/codex codex-api/src/requests/headers.rs build_conversation_headers()
-    const cacheSessionId = this.getPromptCacheSessionId(credentials, null);
-    if (cacheSessionId) {
-      headers["session_id"] = cacheSessionId;
+    // session_id header — the CLIENT's own session (the official Codex client sends its
+    // conversation_id). Never the account-wide workspaceId: that presented every
+    // conversation on an account to the backend as one session. Converged identity below
+    // still owns this header when fingerprint convergence is enabled.
+    const requestSessionId = this.getClientRequestSessionId(credentials, clientHeaders, body);
+    if (requestSessionId) {
+      headers["session_id"] = requestSessionId;
     }
     applyCodexOriginalIdentityHeaders(headers, originalIdentityHeaders);
     applyCodexClientIdentityHeaders(headers, clientIdentity);
@@ -1240,6 +1273,24 @@ export class CodexExecutor extends BaseExecutor {
     }
 
     return headers;
+  }
+
+  /**
+   * The session the client itself presented: a session header/alias first, then the
+   * outbound `prompt_cache_key` unless that is only the account-wide workspace fallback.
+   * Ref: openai/codex codex-api/src/requests/headers.rs build_conversation_headers()
+   */
+  private getClientRequestSessionId(
+    credentials: ProviderCredentials | null | undefined,
+    clientHeaders: Record<string, string> | null | undefined,
+    body: unknown
+  ): string | null {
+    const fromHeaders = getCodexClientSessionId(clientHeaders);
+    if (fromHeaders) return fromHeaders;
+    const record = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+    const cacheKey = normalizeCodexSessionId(record?.prompt_cache_key);
+    const workspace = normalizeCodexSessionId(credentials?.providerSpecificData?.workspaceId);
+    return cacheKey && cacheKey !== workspace ? cacheKey : null;
   }
 
   /**
@@ -1317,12 +1368,9 @@ export class CodexExecutor extends BaseExecutor {
     credentials: ProviderCredentials
   ) {
     void stream;
-    // Do not mutate the caller's payload in place. Combo quality checks and
-    // other post-execute paths still inspect the original request body.
-    const body: Record<string, unknown> =
-      bodyInput && typeof bodyInput === "object"
-        ? structuredClone(bodyInput as Record<string, unknown>)
-        : {};
+    // Preserve caller-owned inputs while avoiding a deep clone of large histories.
+    // normalizeCodexResponsesInput below makes fresh input items before mutation.
+    const body = copyCodexRequestForMutation(bodyInput);
 
     const nativeCodexPassthrough = body?._nativeCodexPassthrough === true;
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
@@ -1331,6 +1379,7 @@ export class CodexExecutor extends BaseExecutor {
     const thinkingBudgetConfig = getThinkingBudgetConfig();
     const allowConnectionReasoningDefaults = thinkingBudgetConfig.mode === ThinkingMode.PASSTHROUGH;
     consumeResponsesStoreMarker(body);
+    const skipReasoningSummaryDefaults = consumeReasoningSummaryOptOutMarker(body);
 
     // Codex /responses rejects stream=false, but /responses/compact rejects the stream field entirely.
     if (isCompactRequest) {
@@ -1340,15 +1389,17 @@ export class CodexExecutor extends BaseExecutor {
       delete body.include;
     } else {
       body.stream = true;
+      normalizeCodexSummaryStreamOptions(body);
     }
     delete body._nativeCodexPassthrough;
 
+    const connectionServiceTier = scopeCodexServiceTierDefault(requestDefaults.serviceTier, model);
     const requestServiceTier =
       getApiKeyCodexServiceTier(credentials) ?? normalizeServiceTierValue(body.service_tier);
     if (requestServiceTier) {
       body.service_tier = requestServiceTier;
-    } else if (requestDefaults.serviceTier) {
-      body.service_tier = requestDefaults.serviceTier;
+    } else if (connectionServiceTier) {
+      body.service_tier = connectionServiceTier;
     }
 
     // Issue #1832 & #1853: Map messages to input for clients like Cursor 5.5 that use responses/compact but send messages instead of input.
@@ -1415,29 +1466,19 @@ export class CodexExecutor extends BaseExecutor {
     // Ref: PR #1346 (original fix for passthrough only)
     convertSystemToDeveloperRole(body);
 
-    if (nativeCodexPassthrough) {
-      // Passthrough: minimal placeholder instructions.
-      if (
-        !body.instructions ||
-        (typeof body.instructions === "string" && body.instructions.trim() === "")
-      ) {
-        body.instructions = "Follow the developer instructions in the conversation.";
-      }
-    } else {
-      // Translated: keep the full Codex tool instructions only for tool-capable
-      // requests. Bare chat requests still need a neutral instructions value
-      // because the Codex Responses backend rejects requests without it.
-      const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
-      if (
-        !body.instructions ||
-        (typeof body.instructions === "string" && body.instructions.trim() === "")
-      ) {
-        if (hasTools) {
-          body.instructions = CODEX_DEFAULT_INSTRUCTIONS;
-        } else {
-          body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
-        }
-      }
+    // Passthrough forwards the client's own `instructions` (or their absence): native Codex
+    // 0.166+ sends none and the backend accepts that, so injecting a placeholder made
+    // OmniRoute's wire differ from the same client talking to Codex directly.
+    // Translated clients (OpenCode, SDKs) are not Codex CLI: never give them the Codex CLI
+    // persona (whose approval/sandbox rules tell the model to work around constraints). The
+    // backend still requires a value for translated requests, so a neutral one is used only
+    // when the client sent none; the client's own system prompt stays in `input`.
+    if (
+      !nativeCodexPassthrough &&
+      (!body.instructions ||
+        (typeof body.instructions === "string" && body.instructions.trim() === ""))
+    ) {
+      body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
     }
 
     // Store: regular Codex Responses rejects store=true with
@@ -1486,7 +1527,9 @@ export class CodexExecutor extends BaseExecutor {
       allowConnectionReasoningDefaults,
       getForcedReasoningEffort(credentials)
     );
-    ensureCodexReasoningSummary(body);
+    // Native passthrough keeps the client's reasoning object as sent (a summary it did not
+    // ask for is a rewrite); translated clients get summaries unless #18124 opted them out.
+    if (!nativeCodexPassthrough) ensureCodexReasoningSummary(body, skipReasoningSummaryDefaults);
     if (isCompactRequest) {
       delete body.include;
     }
@@ -1573,6 +1616,7 @@ export class CodexExecutor extends BaseExecutor {
       "tools",
       "tool_choice",
       "stream",
+      "stream_options",
       "store",
       "reasoning",
       "service_tier",

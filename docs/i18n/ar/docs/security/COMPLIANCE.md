@@ -11,55 +11,73 @@
 
 يوجد التنفيذ في `src/lib/compliance/index.ts` ‏(T-43 — «عناصر التحكم في الامتثال») و`src/lib/compliance/providerAudit.ts`. لا تطرح عمليات كتابة التدقيق أي استثناءات مطلقًا: عند حدوث أي فشل، يتم تجاهل الاستدعاء بصمت حتى لا يؤدي تسجيل التدقيق إلى تعطيل مسار الطلب الرئيسي.
 
-## ما يتم تسجيله
+## ما الذي يتم تسجيله
 
-### أحداث التدقيق الإدارية (`audit_log`)
+### أحداث التدقيق الإداري (`audit_log`)
 
-ينتج كل استدعاء لـ`logAuditEvent({ action, actor, target, details, ... })` صفًا واحدًا. تتبع سلاسل الإجراءات نمط `domain.verb` (أو `domain.verb.outcome`). تشمل أنواع الإجراءات المؤكدة في شجرة المصدر ما يلي:
+ينتج عن كل استدعاء للدالة `logAuditEvent({ action, actor, target, details, ... })`
+صف واحد. تتبع سلاسل الإجراءات نمط `domain.verb` (أو `domain.verb.outcome`).
+وتشمل أنواع الإجراءات المؤكدة داخل شجرة المصدر ما يلي:
 
-| الإجراء                              | المصدر                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| الإجراء                              | المصدر                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-يلتقط كل إدخال `action` و`actor` (القيمة الافتراضية هي `"system"`) و`target` و`details`/`metadata` ‏(JSON) و`ip_address` و`resource_type` و`status` و`request_id` و`timestamp`. تُحجب المفاتيح الحساسة (`apiKey` و`accessToken` و`refreshToken` و`password` وأي مفتاح يطابق `*token`/`*secret`/`*apikey` وما إلى ذلك) بشكل تكراري وتُستبدل بـ`"[redacted]"` قبل كتابة الصف.
+يسجل كل إدخال `action` و`actor` (تكون قيمته الافتراضية `"system"`)
+و`target` و`details`/`metadata` (بتنسيق JSON) و`ip_address` و`resource_type` و`status`
+و`request_id` و`timestamp`. وتجري إعادة حجب المفاتيح الحساسة بشكل متكرر
+(`apiKey` و`accessToken` و`refreshToken` و`password` وأي شيء يطابق
+`*token`/`*secret`/`*apikey` وغير ذلك) واستبدالها بـ `"[redacted]"`
+قبل كتابة الصف.
 
-### استدعاءات أدوات MCP ‏(`mcp_tool_audit`)
+تسجل الصفوف `api_key.auth.touch` عمليات القراءة الناجحة لبيانات API key الوصفية
+وعمليات الاكتشاف (GET/HEAD) التي لا تصل أبدًا إلى سجل الطلبات: أي مفتاح استُخدم،
+ومتى، والمسار المطبع، مع دمج الإدخالات ووضع حد أقصى لها يبلغ 1,000 صف.
+ويتم تخطي المفاتيح التي تحتوي على `noLog` ومفتاح البيئة. ولا يُضاف عنوان IP
+للمستدعي ووكيل المستخدم إلا عند تفعيل علامة الميزة
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (وهي متوقفة افتراضيًا).
 
-يكتب كل استدعاء لأداة MCP صفًا من خلال `open-sse/mcp-server/audit.ts`. المخطط (من `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### استدعاءات أدوات MCP (`mcp_tool_audit`)
 
-| العمود           | ملاحظات                                    |
-| ---------------- | ------------------------------------------ |
-| `id`             | زيادة تلقائية                              |
-| `tool_name`      | معرّف أداة MCP                             |
-| `input_hash`     | تجزئة sha256 للمدخلات (لا تُخزَّن الحمولة) |
-| `output_summary` | ملخص قصير ومقتطع                           |
-| `duration_ms`    | الزمن المنقضي                              |
-| `api_key_id`     | المستدعي (يمكن أن تكون قيمته خالية)        |
-| `success`        | `1` / `0`                                  |
-| `error_code`     | رمز الخطأ النهائي عند الفشل                |
-| `created_at`     | طابع زمني بتنسيق ISO                       |
+يكتب كل استدعاء لأداة MCP صفًا عبر
+`open-sse/mcp-server/audit.ts`. المخطط (من
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+
+| العمود           | الملاحظات                                 |
+| ---------------- | ----------------------------------------- |
+| `id`             | زيادة تلقائية                             |
+| `tool_name`      | معرّف أداة MCP                            |
+| `input_hash`     | تجزئة sha256 للإدخال (لا تُخزَّن الحمولة) |
+| `output_summary` | ملخص قصير ومقتطع                          |
+| `duration_ms`    | الزمن الفعلي المنقضي                      |
+| `api_key_id`     | المستدعي (قابل لقيمة فارغة)               |
+| `success`        | `1` / `0`                                 |
+| `error_code`     | رمز الخطأ النهائي عند الفشل               |
+| `created_at`     | طابع زمني بتنسيق ISO                      |
 
 ### سجلات الطلبات / الاستخدام
 
-تمثل هذه السجلات قياسات تشغيلية (وليست تدقيقًا إداريًا بالمعنى الدقيق)، لكنها تشترك في مسار الاحتفاظ نفسه:
+هذه بيانات قياس تشغيلية (وليست تدقيقًا إداريًا صارمًا)، لكنها تشترك في
+مسار الاحتفاظ نفسه:
 
-- `usage_history` — تجميع الاستخدام لكل طلب
-- `call_logs` — سجل كامل لكل طلب (يخضع لحد أقصى لعدد الصفوف، انظر أدناه)
-- `proxy_logs` — سجل حركة مرور الوكيل (يخضع لحد أقصى لعدد الصفوف)
-- `request_detail_logs` — سجل قديم لتفاصيل الطلبات (يظل خاضعًا للتنقية إذا كان موجودًا)
+- `usage_history` — تجميع استخدام لكل طلب
+- `call_logs` — سجل كامل لكل طلب (خاضع لحد الصفوف، راجع أدناه)
+- `proxy_logs` — سجل حركة مرور الوكيل (خاضع لحد الصفوف)
+- `request_detail_logs` — سجل طلبات تفصيلي قديم (تتم تنقيته إذا كان موجودًا)
 
 ## مخطط التخزين
 

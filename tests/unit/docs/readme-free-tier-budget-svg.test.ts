@@ -1,0 +1,99 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import {
+  renderReadmeFreeTierBudget,
+  buildFreeTierBudgetCopy,
+  fmtTokens,
+  fmtWords,
+} from "../../../scripts/docs/gen-readme-free-tier-budget.mjs";
+import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+
+// The committed free-tier budget card must be exactly what the generator produces from the live
+// catalog, draw the kit type as outlines, keep every string as text, keep the counts gate's
+// numbers readable as text and declare both palettes with no literal color escaping the theme.
+// Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/free-tier-budget.svg") };
+
+test(
+  "the committed free-tier-budget diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeFreeTierBudget();
+    const committed = readFileSync("docs/diagrams/free-tier-budget.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/free-tier-budget.svg is stale — regenerate with `node --import tsx/esm scripts/docs/gen-readme-free-tier-budget.mjs`"
+    );
+  }
+);
+
+test("no font is embedded (every string is outlined) and nothing is external", async () => {
+  const svg = await renderReadmeFreeTierBudget();
+  assert.equal((svg.match(/@font-face/g) || []).length, 0);
+  const style = svg.slice(svg.indexOf("<style>"), svg.indexOf("</style>"));
+  assert.doesNotMatch(style, /font-family|Switzer/, "nothing here is text: no family to name");
+  assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
+  assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
+  assert.match(svg, /^<svg viewBox="0 0 1200 842" [^>]*role="img"/);
+  assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
+});
+
+test("every copy string stays in the file as text", async () => {
+  const svg = await renderReadmeFreeTierBudget();
+  for (const s of Object.values(buildFreeTierBudgetCopy()).flat()) {
+    assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
+  }
+});
+
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
+  const svg = await renderReadmeFreeTierBudget();
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
+    (c) => Array.isArray(c.files) && c.files.includes("docs/diagrams/free-tier-budget.svg")
+  );
+  assert.ok(checks.length > 0, "the counts gate no longer reads free-tier-budget.svg");
+  for (const c of checks) {
+    const r = c.validate(svg);
+    assert.equal(r.ok, true, `${c.label}: ${r.detail}`);
+  }
+});
+
+test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
+  const svg = await renderReadmeFreeTierBudget();
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
+  const body = svg.slice(svg.indexOf("</style>"));
+  assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
+});
+
+test("fmtTokens keeps one decimal below 10M and rolls a value up to the next unit", () => {
+  assert.equal(fmtTokens(7_200_000), "7.2M");
+  assert.equal(fmtTokens(6_000_000), "6M");
+  assert.equal(fmtTokens(30_000_000), "30M");
+  assert.equal(fmtTokens(999_999), "1M");
+  assert.equal(fmtTokens(999_600_000), "1.00B");
+  assert.equal(fmtTokens(1_000_000_000), "1.00B");
+  assert.equal(fmtTokens(25_000), "25K");
+  assert.equal(fmtWords(1_000_000_000), "1 billion");
+  assert.equal(fmtWords(1_623_225_000), "1.62 billion");
+  assert.equal(fmtWords(999_999), "1 million");
+});

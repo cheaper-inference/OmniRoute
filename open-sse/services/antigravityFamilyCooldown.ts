@@ -1,9 +1,10 @@
 /**
- * Persist Antigravity/agy quota cooldowns per model family (gemini vs claude)
+ * Persist Antigravity/agy quota cooldowns per model family (gemini, claude, argon)
  * on the connection row, without cooling the whole account.
  */
 import { lockModel } from "./accountFallback.ts";
 import {
+  type AntigravityQuotaFamily,
   getAntigravityQuotaFamily,
   isAntigravityQuotaProvider,
 } from "./antigravityQuotaFamily.ts";
@@ -13,9 +14,7 @@ type JsonRecord = Record<string, unknown>;
 const FAMILY_PSD_KEY = "antigravityFamilyRateLimitedUntil";
 
 function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
 function parseUntilMs(value: unknown): number {
@@ -27,8 +26,8 @@ function parseUntilMs(value: unknown): number {
   return NaN;
 }
 
-function dummyModelForFamily(family: "gemini" | "claude"): string {
-  return family === "gemini" ? "gemini-family-lock" : "claude-family-lock";
+function dummyModelForFamily(family: Exclude<AntigravityQuotaFamily, "other">): string {
+  return `${family}-family-lock`;
 }
 
 function lockAntigravityFamilyModel(
@@ -50,12 +49,12 @@ export async function persistAntigravityFamilyCooldown(params: {
   const family = getAntigravityQuotaFamily(params.model);
   if (family === "other") return null;
 
-  const { getProviderConnectionById, updateProviderConnection } = await import(
-    "@/lib/db/providers"
-  );
-  const conn = (await getProviderConnectionById(params.connectionId)) as
-    | { provider?: string; providerSpecificData?: JsonRecord | null }
-    | null;
+  const { getProviderConnectionById, updateProviderConnection } =
+    await import("@/lib/db/providers");
+  const conn = (await getProviderConnectionById(params.connectionId)) as {
+    provider?: string;
+    providerSpecificData?: JsonRecord | null;
+  } | null;
   if (!conn || !isAntigravityQuotaProvider(conn.provider ?? null)) return null;
 
   const psd = asRecord(conn.providerSpecificData);
@@ -108,17 +107,31 @@ export async function persistAntigravityPreflightFamilyLock(params: {
   });
 }
 
+/** Read the saved deadline without installing any process-local model locks. */
+// Accept every family persistAntigravityFamilyCooldown() can write, not just the
+// gemini/claude pair this reader's sibling loop happens to rehydrate. argon is a
+// real bucket (gemini-4*), so narrowing the parameter here made the reader
+// disagree with both the writer and its callers.
+export function getAntigravityFamilyCooldownUntil(
+  providerSpecificData: unknown,
+  family: AntigravityQuotaFamily,
+  now = Date.now()
+): number | null {
+  const untils = asRecord(asRecord(providerSpecificData)[FAMILY_PSD_KEY]);
+  const untilMs = parseUntilMs(untils[family]);
+  return family !== "other" && Number.isFinite(untilMs) && untilMs > now ? untilMs : null;
+}
+
 export function rehydrateAntigravityFamilyLocks(
   provider: string,
   connectionId: string,
   providerSpecificData: JsonRecord | null | undefined
 ): void {
   if (!isAntigravityQuotaProvider(provider)) return;
-  const untils = asRecord(asRecord(providerSpecificData)[FAMILY_PSD_KEY]);
   const now = Date.now();
-  for (const family of ["gemini", "claude"] as const) {
-    const untilMs = parseUntilMs(untils[family]);
-    if (!Number.isFinite(untilMs) || untilMs <= now) continue;
+  for (const family of ["gemini", "claude", "argon"] as const) {
+    const untilMs = getAntigravityFamilyCooldownUntil(providerSpecificData, family, now);
+    if (untilMs === null) continue;
     const model = dummyModelForFamily(family);
     const remainingMs = untilMs - now;
     lockAntigravityFamilyModel(connectionId, model, "quota_exhausted", remainingMs);

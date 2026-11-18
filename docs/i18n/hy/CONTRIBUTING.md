@@ -13,16 +13,21 @@ UI/UX-ի, i18n-ի, CLI-ի, տվյալների բազայի և կառուցման
 
 ---
 
-## Մշակման միջավայրի կարգավորում
+## Մշակման կարգավորում
 
 ### Նախապայմաններ
 
 - **Node.js** `>=22.22.2 <23`, կամ `>=24.0.0 <27` (խորհուրդ է տրվում՝ 24 LTS)
 - **npm** 10+
 
-> **npm v11+ օգտագործողներ (Node 24+).** `npm install`-ից հետո ստուգեք, որ բնիկ մոդուլները տեղադրվել են.
-> `node -e "require('better-sqlite3')"`. Եթե այն ձախողվում է `MODULE_NOT_FOUND` սխալով,
-> գործարկեք `npm approve-scripts better-sqlite3 && npm install`։ Տե՛ս
+> **Windows՝ Node 24-ով.** օգտագործեք ընթացիկ 24 LTS patch թողարկումը (առնվազն 24.20.0)։
+> Ավելի վաղ թողարկումները կարող են դադարեցնել աշխատանքը հաջողված թեստերից հետո, երբ `--test-force-exit`-ը փակում է
+> գործընթացը։ Node-ի [Windows libuv-ի ուղղումը](https://github.com/nodejs/node/pull/61999) լուծում է
+> այս runtime-ի խափանումը․ մի անջատեք թեստերի assertion-ները և runner-ի ելքի ստուգումները։
+
+> **npm v11+ օգտվողներ (Node 24+).** `npm install`-ից հետո ստուգեք՝ արդյոք native մոդուլները տեղադրվել են․
+> `node -e "require('better-sqlite3')"`. Եթե այն ձախողվում է `MODULE_NOT_FOUND`-ով,
+> կատարեք `npm approve-scripts better-sqlite3 && npm install`. Տե՛ս
 > [Խնդիրների լուծում](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)։
 
 - **Git**
@@ -35,7 +40,7 @@ cd OmniRoute
 npm install
 ```
 
-### Միջավայրի փոփոխականներ
+### Շրջակա միջավայրի փոփոխականներ
 
 ```bash
 # Ստեղծեք ձեր .env-ը ձևանմուշից
@@ -46,26 +51,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Մշակման համար հիմնական փոփոխականները.
+Մշակման համար հիմնական փոփոխականները՝
 
 | Փոփոխական              | Մշակման լռելյայն արժեք   | Նկարագրություն                      |
 | ---------------------- | ------------------------ | ----------------------------------- |
 | `PORT`                 | `20128`                  | Սերվերի պորտ                        |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ֆրոնտենդի բազային URL               |
-| `JWT_SECRET`           | (ստեղծեք վերևում)        | JWT ստորագրման գաղտնիք              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend-ի հիմնական URL             |
+| `JWT_SECRET`           | (ստեղծել վերևում)        | JWT ստորագրման գաղտնիք              |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | Առաջին մուտքի գաղտնաբառ             |
 | `APP_LOG_LEVEL`        | `info`                   | Մատյանների մանրամասնության մակարդակ |
 
 ### Կառավարման վահանակի կարգավորումներ
 
-Կառավարման վահանակը տրամադրում է գործառույթների UI փոխարկիչներ, որոնք կարելի է նաև կարգավորել միջավայրի փոփոխականների միջոցով.
+Կառավարման վահանակը տրամադրում է հնարավորությունների համար UI անջատիչներ, որոնք կարող են նաև կարգավորվել շրջակա միջավայրի փոփոխականների միջոցով։
 
-| Կարգավորման տեղադրություն   | Փոխարկիչ                  | Նկարագրություն                                   |
-| --------------------------- | ------------------------- | ------------------------------------------------ |
-| Կարգավորումներ → Ընդլայնված | Վրիպազերծման ռեժիմ        | Միացնել հարցումների վրիպազերծման մատյանները (UI) |
-| Կարգավորումներ → Ընդհանուր  | Կողագոտու տեսանելիություն | Ցուցադրել/թաքցնել կողագոտու բաժինները            |
+| Կարգավորման տեղադրություն | Անջատիչ            | Նկարագրություն                                   |
+| ------------------------- | ------------------ | ------------------------------------------------ |
+| Settings → Advanced       | Debug Mode         | Միացնել վրիպազերծման հարցումների մատյանները (UI) |
+| Settings → General        | Sidebar Visibility | Ցուցադրել/թաքցնել կողագոտու բաժինները            |
 
-Այս կարգավորումները պահվում են տվյալների բազայում և պահպանվում են վերագործարկումներից հետո՝ սահմանված լինելու դեպքում վերագրելով միջավայրի փոփոխականների լռելյայն արժեքները։
+Այս կարգավորումները պահվում են տվյալների բազայում և պահպանվում են վերագործարկումներից հետո՝ սահմանվելու դեպքում փոխարինելով env փոփոխականների լռելյայն արժեքները։
 
 ### Տեղային գործարկում
 
@@ -74,53 +79,48 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 npm run dev
 
 # Արտադրական կառուցում
-npm run build    # next build → .build/next/, ապա assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Արագ՝ միայն բեքենդի/API-ի կոմպիլացում ներդրողների փոփոխությունների համար
+# Արագ backend/API-only կոմպիլյացիա մասնակիցների փոփոխությունների համար
 npm run build:contributor
 
-# Թողարկման կառուցում (մաքուր վերակառուցում + HEAD պահակային նիշ — պարտադիր տեղակայման համար)
-npm run build:release   # rm -rf .build dist && build + գրում է dist/BUILD_SHA
+# Թողարկման կառուցում (մաքուր վերակառուցում + HEAD sentinel — անհրաժեշտ է տեղակայման համար)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Պորտի տարածված կարգավորում
+# Պորտի ընդհանուր կարգավորում
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Ներդրողների համար կառուցումն իրականացնում է միայն կոմպիլացման վավերացում. այն չի հավաքում ինքնուրույն
-բաշխումը կամ չի կառուցում ընտրովի բնիկ փաթեթավորման ռեսուրսները։ Օգտագործեք սովորական արտադրական կառուցումը, երբ
-անհրաժեշտ է վավերացնել առաքման համար նախատեսված փաթեթը։
+Մասնակցի կառուցումը կատարում է միայն կոմպիլյացիայի վավերացում․ այն չի հավաքում standalone բաշխումը և չի կառուցում կամընտիր native փաթեթավորման ակտիվներ։ Օգտագործեք սովորական արտադրական կառուցումը, երբ անհրաժեշտ է վավերացնել առաքման ենթակա փաթեթը։
 
-### Կառուցման արդյունքի կառուցվածքը
+### Կառուցման արդյունքի դասավորություն
 
-| Գրացուցակ | Բովանդակություն                                                                     | Հետևվում է |
-| --------- | ----------------------------------------------------------------------------------- | ---------- |
-| `src/`    | Հավելվածի սկզբնաղբյուր (TypeScript / TSX)                                           | Այո        |
-| `.build/` | Միջանկյալ ֆայլեր՝ `next build`-ի արդյունքը (gitignored, `distDir = .build/next`)    | Ոչ         |
-| `dist/`   | Առաքման համար նախատեսված փաթեթ՝ հավաքված `assembleStandalone`-ի կողմից (gitignored) | Ոչ         |
+| Գրացուցակ | Բովանդակություն                                                                  | Հետևվո՞ւմ է |
+| --------- | -------------------------------------------------------------------------------- | ----------- |
+| `src/`    | Հավելվածի սկզբնական կոդ (TypeScript / TSX)                                       | Այո         |
+| `.build/` | Միջանկյալ ֆայլեր — `next build`-ի արդյունք (gitignored, `distDir = .build/next`) | Ոչ          |
+| `dist/`   | Առաքման ենթակա փաթեթ — հավաքվում է `assembleStandalone`-ի կողմից (gitignored)    | Ոչ          |
 
-Կառուցման հոսքաշարը մեկ անցումով է.
+Կառուցման pipeline-ը մեկ անցում է՝
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-ի արդյունք)
-  └─ assembleStandalone()                 (պատճենում է ինքնուրույն տարբերակը + static + public + բնիկ ռեսուրսները)
-       └─ արդյունք՝ dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (պատճենում է standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release`-ը նաև նախ մաքրում է երկու գրացուցակներն ու գրում
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`)՝ որպես տեղակայման ամբողջականության պահակային նիշ։
+`npm run build:release`-ը լրացուցիչ նախ մաքրում է երկու գրացուցակները և գրում
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`)՝ որպես տեղակայման ամբողջականության sentinel։
 
-`npm run build:contributor`-ն օգտագործում է միայն բեքենդի կառուցման պրոֆիլը։ Կառուցման ընթացքում այն ժամանակավորապես փոխարինում է
-կառավարման վահանակի UI ֆայլերը ժամանակավոր տարբերակներով, պահպանում API երթուղիների մշակիչները և կառուցումից հետո վերականգնում բնօրինակ ֆայլերը։
-Օգտագործեք `npm run build` կառավարման վահանակի UI-ի վրա ազդող փոփոխությունների կամ թողարկման ամբողջական
-վավերացման համար. ներդրողների պրոֆիլը չի փոխարինում թողարկման կառուցմանը։
+`npm run build:contributor`-ը օգտագործում է միայն backend-ի կառուցման պրոֆիլը։ Կառուցման ընթացքում այն ժամանակավորապես փոխարինում է կառավարման վահանակի UI ֆայլերը, պահպանում API route handler-ները և կառուցումից հետո վերականգնում սկզբնական ֆայլերը։ Օգտագործեք `npm run build`-ը այն փոփոխությունների համար, որոնք ազդում են կառավարման վահանակի UI-ի վրա, կամ ամբողջական թողարկման վավերացման համար․ մասնակցի պրոֆիլը չի փոխարինում թողարկման կառուցմանը։
 
-> **VPS-ում տեղակայման նշում.** հեռավար պատկերի `/usr/lib/node_modules/omniroute/app/`
-> գրացուցակը չի փոխվել։ Տեղակայման գործիքները rsync-ի միջոցով դրա մեջ են համաժամացնում `dist/`-ի պարունակությունը։
-> Փոխվել է միայն ռեպոզիտորիայի ներսում կառուցման արդյունքի ուղին (`app/` → `dist/`)։
+> **VPS-ի տեղակայման նշում․** հեռակա image-ի `/usr/lib/node_modules/omniroute/app/`
+> գրացուցակը չի փոխվում։ Տեղակայման skills-ները `dist/`-ի պարունակությունը rsync են անում այնտեղ։
+> Փոխվել է միայն պահոցում կառուցման արդյունքի ուղին (`app/` → `dist/`)։
 
-Լռելյայն URL-ներ.
+Լռելյայն URL-ներ՝
 
 - **Կառավարման վահանակ**՝ `http://localhost:20128/dashboard`
 - **API**՝ `http://localhost:20128/v1`
@@ -292,72 +292,72 @@ npm run test:combo:live:vps:failover     # ավելացնում է իրական 
 
 ---
 
-## Նախագծի կառուցվածքը
+## Ծրագրի կառուցվածքը
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Կառավարման վահանակի էջեր (23 բաժին)
-│   ├── api/                # API երթուղիներ (51 պանակ)
-│   └── login/              # Նույնականացման էջեր (.tsx)
-├── domain/                 # Քաղաքականությունների շարժիչ (policyEngine, comboResolver, costRules և այլն)
-├── lib/                    # Հիմնական բիզնես տրամաբանություն (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 արձանագրության սերվեր
-│   ├── acp/                # Agent Communication Protocol գրանցամատյան
-│   ├── compliance/         # Համապատասխանության քաղաքականությունների շարժիչ
-│   ├── db/                 # SQLite տիրույթի մոդուլներ + 130 միգրացիա
-│   ├── memory/             # Զրույցների մշտական հիշողություն
-│   ├── oauth/              # OAuth մատակարարներ, ծառայություններ և օգտակար գործիքներ
-│   ├── skills/             # Ընդլայնելի հմտությունների հենք
-│   ├── usage/              # Օգտագործման հետագծում և արժեքի հաշվարկ
-│   └── localDb.ts          # Միայն վերաարտահանման շերտ — երբեք այստեղ տրամաբանություն մի ավելացրեք
-├── middleware/              # Հարցումների միջնաշերտ (promptInjectionGuard)
-├── mitm/                   # MITM պրոքսի (վկայագիր, DNS, նպատակակետի երթուղավորում)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React բաղադրիչներ (.tsx)
-│   ├── constants/          # Մատակարարների սահմանումներ (329), MCP տիրույթներ, երթուղավորման 20 ռազմավարություն
-│   ├── utils/              # Շղթայի անջատիչ, մաքրիչ, նույնականացման օժանդակ գործիքներ
-│   └── validation/         # Zod v4 սխեմաներ
-└── sse/                    # SSE պրոքսի մշակման շղթա
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse աշխատանքային տարածք
-├── executors/              # 150 կատարող մոդուլ (կատարող դասեր + յուրաքանչյուր մատակարարի օժանդակ գործիքներ)
-├── handlers/               # Հարցումների 11 մշակիչ (զրույց, պատասխաններ, ներդրումներ, պատկերներ և այլն)
-├── mcp-server/             # MCP սերվեր (110 եզակի գործիք, 3 փոխանցման եղանակ, 33 տիրույթ)
-├── services/               # Վերին մակարդակի 178 ծառայություն (combo, autoCombo, rateLimitManager և այլն)
-├── translator/             # Ձևաչափերի փոխարկիչներ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API փոխակերպիչ
-└── utils/                  # 22 օգտակար մոդուլ (հոսք, TLS, պրոքսի, գրանցամատյանի վարում)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron աշխատասեղանի հավելված (բազմահարթակ)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js թեստերի գործարկիչ (1,574 թեստային ֆայլ)
-├── integration/            # Ինտեգրացիոն թեստեր
-├── e2e/                    # Playwright թեստեր
-├── security/               # Անվտանգության թեստեր
-├── translator/             # Փոխարկիչին հատուկ թեստեր
-└── load/                   # Բեռնվածության թեստեր
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Ճարտարապետական որոշումների գրառումներ
-├── architecture/            # Համակարգի ճարտարապետություն և դիմակայունություն
-├── comparison/              # OmniRoute-ն ընդդեմ այլընտրանքների
-├── compression/             # Սեղմման ուղեցույցներ և կանոններ
-├── dev/                     # Մշակման ուղեցույցներ
-├── diagrams/                # Ճարտարապետական գծապատկերներ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Օգտագործողի ուղեցույց, Docker, կարգավորում, խնդիրների լուծում
-├── i18n/                    # README-ի միջազգայնացված թարգմանություններ
-├── marketing/               # Մարքեթինգային նյութեր
-├── ops/                     # Տեղակայում, պրոքսի, ծածկույթ, թողարկումներ
-├── providers/               # Մատակարարներին հատուկ փաստաթղթեր
-├── reference/               # API տեղեկատու, միջավայրի փոփոխականներ, CLI գործիքներ, անվճար մակարդակներ
-├── releases/                # Թողարկումների նշումներ
-├── routing/                 # Auto-combo շարժիչ, դատողության վերարտադրում
-├── screenshots/             # Կառավարման վահանակի էկրանակադրեր
-├── security/                # Պաշտպանիչ սահմանափակումներ, համապատասխանություն, աննկատություն, թոքեններ
-└── specs/                   # Նախագծման տեխնիկական բնութագրեր
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

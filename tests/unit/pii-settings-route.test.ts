@@ -1,18 +1,22 @@
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { SignJWT } from "jose";
 
 // GET/PUT /api/settings/pii and POST /api/settings/pii/test: Zod-validated,
 // unsafe regex refused on save AND on test, sample capped at 8 KB, error
-// bodies never carry a stack.
+// bodies never carry a stack. PUT needs a credential even with login off, so
+// requests carry a dashboard session cookie, and the PUT cases pin JWT_SECRET
+// for their own duration (other files in a shared process set their own).
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-test-pii-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-secret";
 delete process.env.INITIAL_PASSWORD; // auth not required in this test env
 delete process.env.PII_REDACTION_ENABLED;
 delete process.env.PII_RESPONSE_SANITIZATION;
+const JWT_SECRET = "pii-route-jwt-secret";
 
 const core = await import("../../src/lib/db/core.ts");
 const route = await import("../../src/app/api/settings/pii/route.ts");
@@ -23,10 +27,24 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+const sessionToken = await new SignJWT({ authenticated: true })
+  .setProtectedHeader({ alg: "HS256" })
+  .setExpirationTime("1h")
+  .sign(new TextEncoder().encode(JWT_SECRET));
+
+function useSessionSecret(t: TestContext) {
+  const saved = process.env.JWT_SECRET;
+  process.env.JWT_SECRET = JWT_SECRET;
+  t.after(() => {
+    if (saved === undefined) delete process.env.JWT_SECRET;
+    else process.env.JWT_SECRET = saved;
+  });
+}
+
 function json(url: string, method: string, body: unknown): Request {
   return new Request(`http://localhost${url}`, {
     method,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", cookie: `auth_token=${sessionToken}` },
     body: typeof body === "string" ? body : JSON.stringify(body),
   });
 }
@@ -48,7 +66,8 @@ test("GET returns defaults: masking off, all types, no custom patterns", async (
   assert.equal(body.stats.total, 0);
 });
 
-test("PUT saves the selection and a safe custom pattern", async () => {
+test("PUT saves the selection and a safe custom pattern", async (t) => {
+  useSessionSecret(t);
   const res = await route.PUT(
     json("/api/settings/pii", "PUT", {
       enabledTypes: ["email", "cpf"],
@@ -69,7 +88,8 @@ test("PUT saves the selection and a safe custom pattern", async () => {
   assert.equal((await reset.json()).enabledTypes, null);
 });
 
-test("PUT refuses a catastrophic regex with a sanitized 400", async () => {
+test("PUT refuses a catastrophic regex with a sanitized 400", async (t) => {
+  useSessionSecret(t);
   const res = await route.PUT(
     json("/api/settings/pii", "PUT", {
       customPatterns: [{ id: "x", name: "x", type: "regex", pattern: "(a+)+$", enabled: true }],
@@ -81,7 +101,8 @@ test("PUT refuses a catastrophic regex with a sanitized 400", async () => {
   assertNoStack(body);
 });
 
-test("PUT refuses invalid JSON and unknown keys", async () => {
+test("PUT refuses invalid JSON and unknown keys", async (t) => {
+  useSessionSecret(t);
   const bad = await route.PUT(json("/api/settings/pii", "PUT", "{not json"));
   assert.equal(bad.status, 400);
   assertNoStack(await bad.json());

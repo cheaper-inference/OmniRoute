@@ -12,7 +12,7 @@ import {
   type PoolEgressObservationCounts,
 } from "@/lib/db/proxyLogs";
 import { normalizeAssignmentScopeId, normalizeScope } from "@/lib/db/proxies/mappers";
-import { getScopeProxyPool, readEgressAddressSetForMember } from "@/lib/db/proxies/rotation";
+import { getScopeProxyPool, readEgressKeysForMember } from "@/lib/db/proxies/rotation";
 import { getProxyById, getProviderUpstreamSummary } from "@/lib/db/proxies";
 import { flushProxyLogsSync } from "@/lib/proxyLogger";
 import {
@@ -261,7 +261,7 @@ function mergedMemberEntry(
   if (!isOperatorEgressEnabled()) return journalMember(host, port, observed);
   // The operator rows are the freshest dated observation when newer than the
   // journal: serve them as operator-provided, else the journal read.
-  const merged = readEgressAddressSetForMember({ host, port }, nowMs);
+  const merged = readEgressKeysForMember({ host, port }, nowMs);
   if (merged.freshest === null) return journalMember(host, port, observed);
   return operatorMember(host, port, merged.freshest, Date.parse(observed.at));
 }

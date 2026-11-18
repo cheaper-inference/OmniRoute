@@ -52,8 +52,8 @@ function installThrowingInsertAdapter(): SqliteAdapter {
   const real = core.getDbInstance() as SqliteAdapter;
   const wrapper: SqliteAdapter = {
     ...real,
-    prepare(sql: string) {
-      const stmt = real.prepare(sql);
+    prepare<Row = unknown>(sql: string) {
+      const stmt = real.prepare<Row>(sql);
       if (/\bINSERT\s+INTO\s+batches\b/i.test(sql)) {
         return {
           run() {
@@ -134,8 +134,8 @@ describe("#14089 POST /api/v1/batches error sanitization", () => {
     const real = core.getDbInstance() as SqliteAdapter;
     const wrapper: SqliteAdapter = {
       ...real,
-      prepare(sql: string) {
-        const stmt = real.prepare(sql);
+      prepare<Row = unknown>(sql: string) {
+        const stmt = real.prepare<Row>(sql);
         if (/\bINSERT\s+INTO\s+batches\b/i.test(sql)) {
           return {
             run() {

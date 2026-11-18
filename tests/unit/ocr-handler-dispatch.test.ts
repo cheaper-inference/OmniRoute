@@ -118,9 +118,13 @@ test("OCR canonicalizes blank, plaintext, and mislabeled upstream failures", asy
   }
 });
 
+// Azure returns Operation-Location on the resource endpoint the request went to.
+const AZURE_OPERATION_URL =
+  "https://r.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-read/analyzeResults/1";
+
 test("azure DI path polls Operation-Location until succeeded", async () => {
   const { impl, calls } = fetchStub([
-    { status: 202, headers: { "Operation-Location": "https://poll/op/1" } },
+    { status: 202, headers: { "Operation-Location": AZURE_OPERATION_URL } },
     { status: 200, json: { status: "running" } },
     { status: 200, json: { status: "succeeded", analyzeResult: { content: "# md", pages: [{}] } } },
   ]);
@@ -154,7 +158,7 @@ test("unknown model lists available providers dynamically and errors do not leak
 
 test("azure DI poll returns failed status maps to 502", async () => {
   const { impl } = fetchStub([
-    { status: 202, headers: { "Operation-Location": "https://poll/op/1" } },
+    { status: 202, headers: { "Operation-Location": AZURE_OPERATION_URL } },
     { status: 200, json: { status: "failed" } },
   ]);
   const res = await handleOcr({
@@ -173,7 +177,7 @@ test("azure DI poll returns failed status maps to 502", async () => {
 
 test("azure DI poll returns a non-ok response (401) and fails fast without exhausting the loop", async () => {
   const { impl, calls } = fetchStub([
-    { status: 202, headers: { "Operation-Location": "https://poll/op/1" } },
+    { status: 202, headers: { "Operation-Location": AZURE_OPERATION_URL } },
     { status: 401, json: { error: "unauthorized" } },
   ]);
   const res = await handleOcr({
@@ -193,7 +197,7 @@ test("azure DI poll returns a non-ok response (401) and fails fast without exhau
 });
 
 test("azure DI poll never resolves and times out after 30 attempts with a 504", async () => {
-  const script = [{ status: 202, headers: { "Operation-Location": "https://poll/op/1" } }];
+  const script = [{ status: 202, headers: { "Operation-Location": AZURE_OPERATION_URL } }];
   for (let i = 0; i < 30; i++) {
     script.push({ status: 200, json: { status: "running" } });
   }

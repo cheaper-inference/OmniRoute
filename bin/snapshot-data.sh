@@ -41,7 +41,7 @@ mkdir -p "$dest"
 
 if command -v sqlite3 >/dev/null 2>&1; then
   # VACUUM INTO yields a transactionally-consistent copy under WAL.
-  sqlite3 "$OMNIROUTE_SQLITE" "VACUUM INTO '$dest/storage.sqlite'"
+  ops_sqlite "$OMNIROUTE_SQLITE" "VACUUM INTO $(ops_sql_str "$dest/storage.sqlite")"
 else
   ops_log "sqlite3 not found — copying files (stop writers first for a clean copy)"
   cp -a "$OMNIROUTE_SQLITE" "$dest/storage.sqlite"

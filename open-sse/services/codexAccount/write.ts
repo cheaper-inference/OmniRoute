@@ -1,5 +1,16 @@
 import { getCodexModelScope, type CodexQuotaScope } from "../../config/codexQuotaScopes.ts";
-import { updateCodexScopeCooldown } from "@/lib/db/providers";
+import { getProviderConnectionById, updateCodexScopeCooldown } from "@/lib/db/providers";
+
+// Single seam to the connection table for Codex engine code: the passive refresh reread
+// (tokenRefresh/passiveCodex.ts) loads this lazily instead of importing src/ itself
+// (open-sse → src boundary ratchet, quality-baseline.json).
+export { getProviderConnectionById };
+export {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  getCodexOperationFence,
+  StaleCodexOperationError,
+} from "./fences.ts";
 
 export interface PersistCodexChildCooldownResult {
   readonly scope: CodexQuotaScope;
@@ -11,13 +22,15 @@ export async function persistCodexChildCooldown(params: {
   connectionId: string;
   model: string;
   rateLimitedUntil: string;
+  source?: "fallback" | "quota_preflight";
 }): Promise<PersistCodexChildCooldownResult | null> {
   if (params.model.trim().length === 0) return null;
   const scope = getCodexModelScope(params.model);
   const providerSpecificData = await updateCodexScopeCooldown(
     params.connectionId,
     scope,
-    params.rateLimitedUntil
+    params.rateLimitedUntil,
+    params.source
   );
   return providerSpecificData ? { scope, providerSpecificData } : null;
 }

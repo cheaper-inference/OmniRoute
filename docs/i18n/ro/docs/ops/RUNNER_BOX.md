@@ -27,13 +27,12 @@ Măsurători din 2026-10-18:
 | swap      | 16 GB                                | `omniroute-113-5` rulează cu swap-ul dezactivat (`MemorySwapMax=0`), astfel încât o compilare scăpată de sub control este oprită la atingerea limitei sale, în loc să trimită serverul în swap                                                                                                                                                                                                 |
 | `/tmp`    | **12 GB tmpfs = RAM**                | orice este stocat acolo ocupă memorie; fișierele rămase sunt eliminate după 3 h                                                                                                                                                                                                                                                                                                                |
 | CPU       | sarcină 60 observată pe 32 de nuclee | înainte de aplicarea cotelor, o compilare Turbopack (~1166 % CPU) împreună cu o suită de coverage rulată pe același server au privat de resurse heartbeat-urile celorlalți listeneri (`The self-hosted runner lost communication`, #16853)                                                                                                                                                     |
-| runneri   | **6 listeneri**                      | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` sunt dezactivați (`systemctl enable --now` reactivează unul)                                                                                                                                                                                                                                                                   |
+| runneri   | **7 listeneri** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` are și eticheta `omni-build`; `omniroute-113-3/-4/-8` au fost șterși din depozit (2026-10-28)                                                                                                                                                                                                                                           |
 
 Limitele se află în fișierul `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` al fiecărei unități
 (valorile anterioare sunt păstrate în `override.conf.bak-20261018`) și au fost aplicate în timp real cu
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — fără repornire, astfel încât niciun
-job aflat în execuție nu a fost afectat. Etichetele sunt modificate prin API-ul runnerilor
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+job aflat în execuție nu a fost afectat. Etichetele sunt modificate prin API-ul runnerilor (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), tot în timp real.
 
 ## Instalați procesul de curățare (o singură dată, pe server)
@@ -42,7 +41,7 @@ job aflat în execuție nu a fost afectat. Etichetele sunt modificate prin API-u
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): la fiecare 30 min, jurnal în /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` este obligatoriu: procesul de curățare confirmă că o cale este inactivă printr-un instantaneu al fișierelor deschise înainte de a o elimina, iar fără acest instrument nu elimină nimic și raportează acest lucru (exit 1). Testați mai întâi orice modificare cu `--dry-run` — acesta afișează exact ce ar face și nu modifică nimic.
@@ -100,9 +99,17 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
   compilarea promptfoo a petrecut 54 de minute recuperând memorie acolo; 8 GB elimină limitarea.
 - **Mai puține procese listener în mod intenționat.** Patru unități OmniRoute au fost dezactivate
   pe 2026-08-29 — fiecare listener suplimentar este încă un consumator al bugetului de memorie de
-  mai sus. Limita serviciului de curățare este 6 (`MAX_ACTIVE_RUNNERS=6` în cron): acesta numără
-  fiecare `Runner.Listener` de pe server, iar OmniHeuris + OmniMind adaugă două la cele patru ale
+  mai sus. Limita serviciului de curățare este 8 (`MAX_ACTIVE_RUNNERS=8` în cron): acesta numără
+  fiecare `Runner.Listener` de pe server, iar OmniHeuris + OmniMind adaugă două la cele cinci ale
   noastre.
+- **Joburile Unit și Vitest rămân găzduite.** `ci.yml` trimite fragmentele unit și jobul Vitest către
+  `[self-hosted, omni-ci]` numai când variabila de depozit `vars.USE_VPS_TEST_RUNNER` este
+  `true`, și chiar și atunci doar pentru rulările `pull_request` din același depozit; fork-urile, `merge_group` și push-urile
+  rămân pe `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabila este
+  `false`. Pe 2026-10-28, trei listeneri `omni-ci` cu 4 nuclee au avut nevoie de 250–270 s pentru `npm ci`, iar fiecare
+  fragment unit a atins limita de 30 de minute a jobului, față de ~634 s pentru un fragment găzduit, cu serverul la o
+  încărcare de 17–24. Listenerii au fost șterși. Nu reactivați variabila fără listeneri dimensionați pentru
+  un fragment unit.
 - **Nu curățați niciodată manual `/tmp` sau `_work` cât timp vreun runner este ocupat.** O
   verificare urmată de ștergere, cu un interval între cele două operațiuni, este motivul pentru
   care un job `Build` activ și-a pierdut directorul `_work` pe 2026-08-27. Serviciul de curățare
@@ -118,8 +125,10 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
 
 ## Culoarul găzduit (agenți de execuție găzduiți de GitHub)
 
-Contul este pe planul **Pro**: **40 de joburi găzduite simultan**, partajate de fiecare verificare PR,
-de fiecare flux de lucru declanșat de un push și de configurația implicită CodeQL. Măsurat la 2026-10-18 în timpul unei
+Depozitul aparține organizației `cheaper-inference`, pe planul **Team**: **60 de
+joburi găzduite simultan**, partajate de fiecare depozit din organizație, de fiecare verificare PR,
+de fiecare flux de lucru declanșat de un push și de configurația implicită CodeQL. Cifrele de mai jos au fost măsurate pe
+planul **Pro** (40 de joburi găzduite simultan). Măsurat la 2026-10-18 în timpul unei
 campanii de îmbinare (~10 îmbinări/oră pe `release/v3.8.52`): **2.500 de rulări ale fluxurilor de lucru create în
 24 h**, 44 de push-uri către ramură în 6 h, **106 joburi găzduite în coadă**, în timp ce verificările PR au așteptat
 ore întregi, iar PR-urile au fost îmbinate fără acestea. Nouă fluxuri de lucru au fost declanșate la fiecare push către ramură:

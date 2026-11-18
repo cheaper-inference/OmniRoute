@@ -115,17 +115,17 @@ describe("LanguageSelector — dropdown anchors to inline-end", () => {
 // The Select adapter (KEA-7886) dropped its own absolutely-positioned chevron: the kit
 // (Radix) Select draws its chevron inside the trigger's flex row, and the native
 // `<option>`-children fallback uses the browser arrow with room reserved by
-// `.ci-select-native` in globals.css. The RTL contract moves with it: no physical
+// the kit NativeSelect. The RTL contract moves with it: no physical
 // classes in the adapter, and the fallback reserves the chevron room on the inline end.
 
 describe("Select — chevron room uses logical insets", () => {
   const code = src("src/shared/components/Select.tsx");
-  const css = src("src/app/globals.css");
-  const nativeRule = css.slice(css.indexOf(".ci-select-native {"));
+  const css = src("packages/ui-kit/src/ci-ui.css");
+  const nativeRule = css.slice(css.indexOf(".ci-native-select__control {"));
   const nativeBlock = nativeRule.slice(0, nativeRule.indexOf("}"));
 
-  it("the native fallback rule exists in globals.css", () => {
-    expect(nativeBlock).toContain(".ci-select-native {");
+  it("the native rule comes from the kit", () => {
+    expect(nativeBlock).toContain(".ci-native-select__control {");
   });
 
   it("does not use bare right-0 for the chevron wrapper", () => {
@@ -133,7 +133,7 @@ describe("Select — chevron room uses logical insets", () => {
   });
 
   it("reserves the chevron room with logical padding-inline (start end)", () => {
-    expect(nativeBlock).toMatch(/padding-inline:\s*[^;\s]+\s+[^;\s]+;/);
+    expect(nativeBlock).toMatch(/padding-inline:\s*var\([^)]+\)\s+calc\([^;]+\);/);
   });
 
   it("does not use bare pr-3 for chevron wrapper padding", () => {

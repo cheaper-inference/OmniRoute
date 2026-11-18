@@ -7,7 +7,9 @@ import {
   ChatPlaygroundExecutor,
   chatplaygroundExecutor,
   stripChatId,
+  stripCitationsLine,
   buildChatPlaygroundPayload,
+  resolveChatPlaygroundUpstreamModel,
 } from "../../open-sse/executors/chatplayground.ts";
 import {
   decodeJwtPayload,
@@ -23,6 +25,10 @@ import {
   resolveChatPlaygroundEndpoint,
   resolveChatPlaygroundModel,
   parseChatPlaygroundDiscoveryModels,
+  fetchChatPlaygroundModels,
+  clearChatPlaygroundCatalogCache,
+  expireChatPlaygroundCatalogForTest,
+  CHATPLAYGROUND_FALLBACK_MODELS,
 } from "../../open-sse/services/chatplaygroundModels.ts";
 import { getChatPlaygroundUsage } from "../../open-sse/services/usage/chatplayground.ts";
 
@@ -171,8 +177,8 @@ test("ChatPlayground — auth resolution with cached & minted tokens", async () 
 
 test("ChatPlayground — model & endpoint resolution", () => {
   // Prefix stripping
-  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-5.6-sol"), "gpt-5.6-sol");
-  assert.equal(stripChatPlaygroundPrefix("cpl/claude-sonnet-5"), "claude-sonnet-5");
+  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-6.1-sol"), "gpt-6.1-sol");
+  assert.equal(stripChatPlaygroundPrefix("cpl/claude-sonnet-5-5"), "claude-sonnet-5-5");
   assert.equal(stripChatPlaygroundPrefix("cpl.kimi-k3"), "kimi-k3");
   assert.equal(stripChatPlaygroundPrefix("cp.perplexity-sonar-pro"), "perplexity-sonar-pro");
 
@@ -180,19 +186,19 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "azure" }), "azure");
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "lmsys" }), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "perplexity" }), "perplexity");
-  assert.equal(resolveChatPlaygroundEndpoint("gpt-5.6-sol"), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint("claude-sonnet-5"), "azure");
+  assert.equal(resolveChatPlaygroundEndpoint("gpt-6-luna"), "azure");
+  assert.equal(resolveChatPlaygroundEndpoint("claude-sonnet-5-5"), "azure");
   assert.equal(resolveChatPlaygroundEndpoint("kimi-k3"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("llama-4-scout"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("qwen3.8-max"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("grok-4.5"), "lmsys");
+  assert.equal(resolveChatPlaygroundEndpoint("grok-4.7"), "azure");
   assert.equal(resolveChatPlaygroundEndpoint("perplexity-sonar-pro"), "perplexity");
   assert.equal(resolveChatPlaygroundEndpoint("sonar-pro"), "perplexity");
 
   // Model resolution
-  const m1 = resolveChatPlaygroundModel("cpl/gpt-5.6-sol");
+  const m1 = resolveChatPlaygroundModel("cpl/gpt-6.1-sol");
   assert.ok(m1);
-  assert.equal(m1.id, "gpt-5.6-sol");
+  assert.equal(m1.id, "gpt-6.1-sol");
   assert.equal(m1.endpoint, "azure");
 
   const m2 = resolveChatPlaygroundModel("kimi-k3");
@@ -205,6 +211,28 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(m3.endpoint, "perplexity");
   assert.equal(m3.modelName, "sonar-pro");
 
+  // Catalog reflects the live /api/models contract (2026-10-21): latest bots, provider hints,
+  // and endpoint assignments that keyword heuristics would get wrong (kimi-k2.6 is served on
+  // azure, llama/qwen/glm use vendor-namespaced modelNames, grok-4.7 moved to azure, and
+  // grok-4.6 was retired from the live roster).
+  const m4 = resolveChatPlaygroundModel("kimi-k2.6");
+  assert.ok(m4);
+  assert.equal(m4.endpoint, "azure");
+  const m4b = resolveChatPlaygroundModel("grok-4.7");
+  assert.ok(m4b);
+  assert.equal(m4b.endpoint, "azure");
+  const m5 = resolveChatPlaygroundModel("grok-4.6");
+  assert.ok(m5);
+  assert.equal(m5.active, false);
+  assert.equal(m5.endpoint, "azure");
+  const m6 = resolveChatPlaygroundModel("llama-4-scout");
+  assert.ok(m6);
+  assert.equal(m6.modelName, "meta-llama/llama-4-scout-17b-16e-instruct");
+  const m7 = resolveChatPlaygroundModel("gemini-3.8-flash-l");
+  assert.ok(m7);
+  assert.equal(m7.provider, "google");
+  assert.equal(m7.modelName, "gemini-3.8-flash");
+
   // Model validation — returns null for unrecognized models (no synthesis fallback)
   assert.equal(resolveChatPlaygroundModel("non-existent-model"), null);
 });
@@ -215,22 +243,50 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
   assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
   assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
 
-  // Payload formatting
-  const modelAzure = resolveChatPlaygroundModel("gpt-5.6-sol")!;
+  // CITATIONS stripping (perplexity endpoint appends metadata — on its own line or inline)
+  assert.equal(stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'), "Answer text");
+  assert.equal(stripCitationsLine("no citations here"), "no citations here");
+  assert.equal(stripCitationsLine("The capital is **Canberra**.[1]CITATIONS:[\"https://a\",\"https://b\"]"), "The capital is **Canberra**.[1]");
+
+  // Azure payload mirrors the web client: vendor-prefixed model, botId, noSave
+  const modelAzure = resolveChatPlaygroundModel("gpt-6.1-sol")!;
   const payloadAzure = buildChatPlaygroundPayload(
     {
       messages: [{ role: "user", content: "Hi" }],
-      temperature: 0.5,
-      max_tokens: 1024,
     },
     modelAzure
   );
-  assert.equal(payloadAzure.botId, "gpt-5.6-sol");
-  assert.equal(payloadAzure.model, "gpt-5.6-sol");
-  assert.equal(payloadAzure.temperature, 0.5);
-  assert.equal(payloadAzure.max_tokens, 1024);
+  assert.equal(payloadAzure.botId, "gpt-6.1-sol");
+  assert.equal(payloadAzure.model, "openai/gpt-6.1-sol");
   assert.equal(payloadAzure.noSave, true);
+  assert.equal(payloadAzure.chatId, "");
+  assert.equal(payloadAzure.isRegenerate, false);
+  assert.equal(payloadAzure.promptTemplate, null);
+  assert.equal(payloadAzure.fileUrl, null);
+  assert.match(String(payloadAzure.submissionId), /^[0-9a-f-]{36}$/);
+  // Sampling params the upstream ignores must not leak into the payload
+  assert.equal("temperature" in payloadAzure, false);
+  assert.equal("max_tokens" in payloadAzure, false);
+  assert.equal("stream" in payloadAzure, false);
 
+  // Vendor prefix follows the provider field case-insensitively
+  const gemini = resolveChatPlaygroundModel("gemini-3.8-flash-l")!;
+  assert.equal(resolveChatPlaygroundUpstreamModel(gemini), "google/gemini-3.8-flash");
+
+  // LMSYS payload: plain vendor-namespaced model + botId (required — the API 500s without it),
+  // no azure-only fields
+  const modelLmsys = resolveChatPlaygroundModel("qwen3.8-max")!;
+  const payloadLmsys = buildChatPlaygroundPayload(
+    { messages: [{ role: "user", content: "Hi" }] },
+    modelLmsys
+  );
+  assert.equal(payloadLmsys.model, "qwen/qwen3.8-max");
+  assert.equal(payloadLmsys.botId, "qwen3.8-max");
+  assert.equal("noSave" in payloadLmsys, false);
+  assert.equal("chatId" in payloadLmsys, false);
+
+  // Perplexity payload uses modelName + botId (required — the API 500s without it),
+  // not the azure model field
   const modelPplx = resolveChatPlaygroundModel("perplexity-sonar-pro")!;
   const payloadPplx = buildChatPlaygroundPayload(
     {
@@ -238,8 +294,9 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
     },
     modelPplx
   );
-  assert.equal(payloadPplx.botId, "perplexity-sonar-pro");
   assert.equal(payloadPplx.modelName, "sonar-pro");
+  assert.equal(payloadPplx.botId, "perplexity-sonar-pro");
+  assert.equal("model" in payloadPplx, false);
 });
 
 test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", async () => {
@@ -261,7 +318,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const result = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "Hello" }],
         stream: false,
@@ -300,7 +357,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const streamResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "Hello" }],
         stream: true,
@@ -341,7 +398,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const errResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: { messages: [{ role: "user", content: "Hello" }] },
       credentials: { apiKey: mockJwt },
     });
@@ -466,7 +523,7 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
   // 1. Single string message exceeding limit
   const oversizedMessage = "A".repeat(15_001);
   const errResult = await executor.execute({
-    model: "gpt-5.6-terra",
+    model: "gpt-6.1-sol",
     body: {
       messages: [{ role: "user", content: oversizedMessage }],
     },
@@ -482,7 +539,7 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
 
   // 2. Multipart array message exceeding limit
   const errResultMultipart = await executor.execute({
-    model: "gpt-5.6-terra",
+    model: "gpt-6.1-sol",
     body: {
       messages: [
         {
@@ -557,7 +614,7 @@ test("ChatPlaygroundExecutor — streaming whitespace & token formatting preserv
 
   try {
     const streamResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "code" }],
         stream: true,
@@ -591,15 +648,138 @@ test("ChatPlaygroundExecutor — streaming whitespace & token formatting preserv
 
 test("ChatPlayground — discovery models parser", () => {
   const rawApiData = [
-    { botId: "gpt-5.6-sol", displayName: "GPT 5.6 Sol", modelName: "gpt-5.6-sol", group: "chat" },
+    {
+      botId: "gpt-6.1-sol",
+      displayName: "ChatGPT-6.1 Sol",
+      modelName: "gpt-6.1-sol",
+      group: "chat",
+    },
     { botId: "whisper-v3", displayName: "Whisper V3", group: "audio" },
-    { botId: "claude-sonnet-5", displayName: "Claude Sonnet 5", group: "chat" },
+    { botId: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5", group: "chat" },
   ];
 
   const parsed = parseChatPlaygroundDiscoveryModels(rawApiData);
   assert.equal(parsed.length, 2);
-  assert.equal(parsed[0].id, "gpt-5.6-sol");
-  assert.equal(parsed[0].name, "GPT 5.6 Sol");
+  assert.equal(parsed[0].id, "gpt-6.1-sol");
+  assert.equal(parsed[0].name, "ChatGPT-6.1 Sol");
   assert.equal(parsed[0].owned_by, "chatplayground");
-  assert.equal(parsed[1].id, "claude-sonnet-5");
+  assert.equal(parsed[1].id, "claude-sonnet-5-5");
+});
+
+test("ChatPlayground — dynamic catalog: live fetch, parse, cache", async () => {
+  clearChatPlaygroundCatalogCache();
+  const originalFetch = globalThis.fetch;
+  let fetchCount = 0;
+  const liveCatalog = [
+    {
+      botId: "grok-4.7",
+      displayName: "Grok 4.7",
+      modelName: "grok-4.7",
+      provider: "xAI",
+      group: "chat",
+      endpoint: "azure",
+      active: true,
+      creditWeight: 2,
+      premiumOnly: false,
+      contextWindow: 256000,
+    },
+    {
+      botId: "qwen3.7-plus",
+      displayName: "Qwen 3.7 Plus",
+      modelName: "qwen/qwen3.7-plus",
+      provider: "Qwen",
+      group: "chat",
+      endpoint: "lmsys",
+      active: true,
+      creditWeight: 1,
+      premiumOnly: false,
+    },
+    { botId: "gpt-image-2.5-flare", displayName: "GPT Image 2.5 Flare", group: "image" },
+  ];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    fetchCount += 1;
+    const urlStr = String(input);
+    if (urlStr.includes("/api/models")) {
+      return new Response(JSON.stringify(liveCatalog), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response("Not found", { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const models = await fetchChatPlaygroundModels();
+    assert.equal(fetchCount, 1);
+    // non-chat group dropped, live rows parsed into full routing rows
+    assert.equal(models.length, 2);
+    const grok = models.find((m) => m.id === "grok-4.7")!;
+    assert.equal(grok.endpoint, "azure");
+    assert.equal(grok.provider, "xAI");
+    assert.equal(grok.active, true);
+    assert.equal(grok.premiumOnly, false);
+    assert.equal(grok.creditWeight, 2);
+    assert.equal(grok.contextLength, 256000);
+    const qwen = models.find((m) => m.id === "qwen3.7-plus")!;
+    assert.equal(qwen.endpoint, "lmsys");
+    assert.equal(qwen.modelName, "qwen/qwen3.7-plus");
+
+    // cache: a second call within the TTL does not re-fetch
+    const again = await fetchChatPlaygroundModels();
+    assert.equal(fetchCount, 1);
+    assert.equal(again.length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    clearChatPlaygroundCatalogCache();
+  }
+});
+
+test("ChatPlayground — dynamic catalog: outage falls back to bundled catalog", async () => {
+  clearChatPlaygroundCatalogCache();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new Error("network down");
+  }) as typeof fetch;
+
+  try {
+    const models = await fetchChatPlaygroundModels();
+    assert.equal(models, CHATPLAYGROUND_FALLBACK_MODELS);
+
+    // after a good fetch, a later outage keeps the last good live catalog
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      if (String(input).includes("/api/models")) {
+        return new Response(
+          JSON.stringify([
+            {
+              botId: "kimi-k2.6",
+              displayName: "Kimi K",
+              modelName: "kimi-k2.6",
+              provider: "kimi",
+              group: "chat",
+              endpoint: "azure",
+              active: true,
+            },
+          ]),
+          { status: 200, headers: { "content-type": "application/json" } }
+        );
+      }
+      return new Response("Not found", { status: 404 });
+    }) as typeof fetch;
+    const live = await fetchChatPlaygroundModels();
+    assert.equal(live.length, 1);
+    assert.equal(live[0].id, "kimi-k2.6");
+    assert.equal(live[0].endpoint, "azure");
+
+    // TTL expires and discovery is down again -> the last good live catalog is served
+    expireChatPlaygroundCatalogForTest();
+    globalThis.fetch = (async () => {
+      throw new Error("network down");
+    }) as typeof fetch;
+    const stale = await fetchChatPlaygroundModels();
+    assert.equal(stale.length, 1);
+    assert.equal(stale[0].id, "kimi-k2.6");
+  } finally {
+    globalThis.fetch = originalFetch;
+    clearChatPlaygroundCatalogCache();
+  }
 });

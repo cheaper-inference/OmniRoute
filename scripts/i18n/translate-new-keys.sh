@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
-# OmniRoute — translate the `__MISSING__:<en>` markers a branch adds, every locale in parallel.
+# OmniRoute — translate the `__MISSING__:<en>` markers of the catalogs, every locale in parallel.
 #
 # Why this exists: on 2026-09-16 eight feature PRs added 61 keys to `src/i18n/messages/en.json`
 # and stamped `__MISSING__:<en>` into all 65 locales instead of translating. The new-key gate
-# (`scripts/i18n/check-new-key-coverage.mjs`) now rejects markers, so a branch that adds keys
-# has to translate them before its PR opens — and translating 65 locales one after the other
-# is what makes people skip it. This runner does it in parallel and is safe to detach.
+# (`scripts/i18n/check-new-key-coverage.mjs`) rejects markers in release mode, so the keys a
+# cycle added must be translated before the release PR goes green — and translating 65 locales
+# one after the other is what makes people skip it. This runner does it in parallel and is safe
+# to detach.
+#
+# Who runs it (since 2026-11-13): the release refresh and translation-wave branches
+# (`docs/i18n-*`, `chore/i18n-*`, `chore/derived-*`). A feature PR adds keys to en.json only and
+# never runs it: `check:pr-derived-paths` fails a feature PR that edits another locale catalog
+# (docs/guides/I18N.md → "Feature PRs touch en.json only").
 #
 # What it does: N workers pop locale codes from a queue (`flock`-serialized) and each runs
 #   node scripts/i18n/sync-ui-keys.mjs --catalog=<c> --locale=<code> --translate-markers --batch-size=40
@@ -112,6 +118,10 @@ load_translation_env() {
 load_translation_env
 
 REQUIRED_VARS="OMNIROUTE_TRANSLATION_API_URL OMNIROUTE_TRANSLATION_API_KEY OMNIROUTE_TRANSLATION_MODEL"
+# The Google engine (OMNIROUTE_TRANSLATION_ENGINE=google) needs none of the LLM variables.
+if [ "$(printf '%s' "${OMNIROUTE_TRANSLATION_ENGINE:-llm}" | tr '[:upper:]' '[:lower:]')" = "google" ]; then
+  REQUIRED_VARS=""
+fi
 OPTIONAL_VARS="OMNIROUTE_TRANSLATION_CONCURRENCY OMNIROUTE_TRANSLATION_TIMEOUT_MS"
 missing=""
 for v in $REQUIRED_VARS; do

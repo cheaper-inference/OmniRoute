@@ -115,11 +115,10 @@ const EXA_CONTENTS_FIELDS: FieldSchemas = {
       includeHtmlTags: z.boolean().optional(),
     }),
   ]),
+  // Exa deprecated `numSentences` (use `maxCharacters`) and ignores `highlightsPerUrl`.
   highlights: z.union([
     z.boolean(),
     z.object({
-      numSentences: int(1, 20).optional(),
-      highlightsPerUrl: int(1, 20).optional(),
       maxCharacters: int(1, 10_000).optional(),
       query: text(500).optional(),
     }),
@@ -129,11 +128,16 @@ const EXA_CONTENTS_FIELDS: FieldSchemas = {
     links: int(0, 100).optional(),
     imageLinks: int(0, 100).optional(),
   }),
-  subpages: int(0, 100),
-  subpageTarget: z.union([text(200), z.array(text(200)).max(10)]),
+  // `subpages` / `subpageTarget` are deprecated upstream and no longer forwarded.
   livecrawlTimeout: int(0, 120_000),
   maxAgeHours: int(-1, 876_000),
 };
+
+// Exa 3.0 `type: "lite"` rejects any request that sets a field outside its list
+// (https://exa.ai/docs/reference/search), so the allow-listed fields it does not
+// accept are dropped for lite instead of turning the call into a 400.
+const EXA_LITE_REJECTED_FIELDS = ["additionalQueries", "systemPrompt"];
+const EXA_LITE_CONTENTS_FIELDS = new Set(["text", "highlights"]);
 
 export interface ExaPassthrough {
   /** Top-level body fields (may include `startPublishedDate` mapped from `time_range`). */
@@ -156,6 +160,12 @@ export function resolveExaPassthrough(
     rawContents && typeof rawContents === "object" && !Array.isArray(rawContents)
       ? pickAllowedFields(rawContents as Bag, EXA_CONTENTS_FIELDS)
       : {};
+  if (fields.type === "lite") {
+    for (const key of EXA_LITE_REJECTED_FIELDS) delete fields[key];
+    for (const key of Object.keys(contents)) {
+      if (!EXA_LITE_CONTENTS_FIELDS.has(key)) delete contents[key];
+    }
+  }
   return { fields, contents };
 }
 

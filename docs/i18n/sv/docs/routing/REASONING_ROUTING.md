@@ -31,19 +31,19 @@ Inom en omfattning vinner högre `priority` först, följt av en exakt modellmat
 
 En `connection`-regel utvärderas endast när ingen tidig regel har valts och en konkret leverantörsanslutning redan har valts. Den får endast ändra ansträngningsnivå och budget.
 
-## Ansträngningsnivå och budget
+## Ansträngning och budget
 
-`sourceEffort` accepterar `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` och `ultra`. `missing` innebär att begäran varken innehåller en diskret ansträngningsnivå, en aktivering eller inaktivering av tänkande eller en budget för tänkande. En signal som enbart består av en budget matchas därför endast av `any`.
+`sourceEffort` accepterar `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` och `ultra`. `missing` betyder att förfrågan varken innehåller en diskret insats eller en tankeväxel eller tankebudget. A budget-only signal is therefore matched only by `any`.
 
 `effortMode` har tre varianter:
 
-- `inherit` behåller klientens ansträngningsnivå samtidigt som modellen eller kombinationen fortfarande kan ändras.
-- `default` anger `targetEffort` endast när ingen explicit resonemangssignal finns.
-- `force` ersätter den diskreta ansträngningsnivån med `targetEffort`.
+- `inherit` behåller klientens ansträngning samtidigt som modellen eller kombon fortfarande kan ändras.
+- `default` ställer bara `targetEffort` när ingen explicit resonemangssignal finns.
+- `force` ersätter den diskreta ansträngningen med `targetEffort`.
 
-Oberoende av detta kan `budgetAction` vara `preserve`, `remove` eller `set`. `force` med `none` tar bort alla identifierade fält för ansträngningsnivå och budget. `none` tillsammans med `set` är ogiltigt.
+Oberoende av varandra kan `budgetAction` vara `preserve`, `remove` eller `set`. `force` med `none` tar bort alla erkända ansträngnings- och budgetfält och ställer sedan in `reasoning_effort: "none"`, eftersom vissa leverantörer sätter på tänkandet när fältet är frånvarande. Leverantörer som avvisar den bokstavliga `none` justeras vid leverans i `open-sse/executors/base/reasoningEffort.ts`. Kommandokod mappar den till `low`, förutom på svarsformade förfrågningar (`input` utan `messages`), där den behåller `none`. På Cloudflare Workers AI (`cloudflare-ai`), får modellerna som avvisar `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low`; andra Workers AI modeller behåller `none`. Att släppa fältet är inte ett alternativ där, eftersom en frånvarande ansträngning kör modellens standardnivå. `none` tillsammans med `set` är ogiltigt.
 
-Begäranden riktade mot modeller som är kända för att vara inkompatibla avvisas före anropet till uppströmsleverantören. För kombinationsmål tas inkompatibla poster bort; om inga återstår returnerar begäran status `400`. Okända kapabilitetsdata genererar en varning och lämnar regeln aktiv.
+Förfrågningar som riktar sig till kända inkompatibla modeller avvisas före uppströmsanropet. För kombinationsmål tas inkompatibla poster bort; om ingen återstår, returnerar begäran status `400`. Okänd kapacitetsdata ger en varning och lämnar regeln aktiv.
 
 ## Säkerhet och transporter
 

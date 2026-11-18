@@ -12,7 +12,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { flushBufferedToolArgs } = await import("../../open-sse/executors/kiro.ts");
+const { flushBufferedToolArgs, flushEmptyToolCallArgs } =
+  await import("../../open-sse/executors/kiro.ts");
 
 type ArgsBuffered = Map<string, { toolIndex: number; canonical: string }>;
 type State = { toolArgsEmitted: Map<string, string>; toolArgsBuffered: ArgsBuffered };
@@ -164,4 +165,74 @@ test("FIX: emitting only the final canonical produces parseable JSON", () => {
   const fixedConcat = JSON.stringify(partials[partials.length - 1]);
   assert.doesNotThrow(() => JSON.parse(fixedConcat));
   assert.equal(JSON.parse(fixedConcat).command, "cat /home/wxsys/Project/naskin/.impeccable.md");
+});
+
+// #18718: a tool call that never receives input must still stream parseable arguments.
+type EmptyArgsState = { seenToolIds: Map<string, number>; toolArgsEmitted: Map<string, string> };
+
+test("flushEmptyToolCallArgs sends {} for a started tool call with no arguments", () => {
+  const state: EmptyArgsState = {
+    seenToolIds: new Map([["tool_status", 0]]),
+    toolArgsEmitted: new Map(),
+  };
+  const controller = makeMockController();
+  flushEmptyToolCallArgs(state, controller, CTX);
+
+  const chunks = parseSSEData(controller.enqueued);
+  assert.equal(chunks.length, 1);
+  assert.equal(reconstructArguments(chunks).get(0), "{}");
+  assert.equal(state.toolArgsEmitted.get("tool_status"), "{}");
+});
+
+test("flushEmptyToolCallArgs treats empty and whitespace-only arguments as missing", () => {
+  const state: EmptyArgsState = {
+    seenToolIds: new Map([
+      ["empty", 0],
+      ["blank", 1],
+    ]),
+    toolArgsEmitted: new Map([
+      ["empty", ""],
+      ["blank", "  "],
+    ]),
+  };
+  const controller = makeMockController();
+  flushEmptyToolCallArgs(state, controller, CTX);
+
+  const args = reconstructArguments(parseSSEData(controller.enqueued));
+  assert.deepEqual(JSON.parse(args.get(0)!), {});
+  assert.deepEqual(JSON.parse(args.get(1)!), {});
+});
+
+test("flushEmptyToolCallArgs leaves calls that already streamed arguments untouched", () => {
+  const state: EmptyArgsState = {
+    seenToolIds: new Map([
+      ["with_args", 0],
+      ["without_args", 1],
+    ]),
+    toolArgsEmitted: new Map([["with_args", '{"path":"/tmp/a"}']]),
+  };
+  const controller = makeMockController();
+  flushEmptyToolCallArgs(state, controller, CTX);
+
+  const chunks = parseSSEData(controller.enqueued);
+  assert.equal(chunks.length, 1);
+  const args = reconstructArguments(chunks);
+  assert.equal(args.has(0), false);
+  assert.equal(args.get(1), "{}");
+  assert.equal(state.toolArgsEmitted.get("with_args"), '{"path":"/tmp/a"}');
+});
+
+test("flushEmptyToolCallArgs is idempotent and a no-op without tool calls", () => {
+  const state: EmptyArgsState = {
+    seenToolIds: new Map([["tool_status", 0]]),
+    toolArgsEmitted: new Map(),
+  };
+  const controller = makeMockController();
+  flushEmptyToolCallArgs(state, controller, CTX);
+  flushEmptyToolCallArgs(state, controller, CTX);
+  assert.equal(controller.enqueued.length, 1);
+
+  const empty = makeMockController();
+  flushEmptyToolCallArgs({ seenToolIds: new Map(), toolArgsEmitted: new Map() }, empty, CTX);
+  assert.equal(empty.enqueued.length, 0);
 });

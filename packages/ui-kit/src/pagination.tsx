@@ -17,6 +17,7 @@ export function PaginationItem(props: ComponentProps<"li">) {
 export interface PaginationLinkProps extends ComponentProps<"a"> {
   isActive?: boolean;
   disabled?: boolean;
+  /** Accessible name. PaginationPrevious/Next default to "Go to previous page"/"Go to next page"; pass children to replace the visible text. */
   label?: string;
 }
 

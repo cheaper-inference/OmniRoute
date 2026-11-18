@@ -15,6 +15,7 @@ import {
   extractComboRuntimeConfig,
   getComboControlCenterTargets,
   getResolvedComboControlCenterTargets,
+  getVirtualComboResolvedTargets,
   summarizeComboControlCenter,
   type ComboControlCenterCombo,
   type ComboControlCenterHealth,
@@ -140,6 +141,15 @@ function healthReasonLabel(reason: string, t: ReturnType<typeof useTranslations>
 function targetHealthTone(target: ComboControlCenterTarget | ComboControlCenterTargetHealth) {
   const health = "health" in target ? target.health : target;
   if (!health) return "border-border bg-surface text-text-muted";
+  // Virtual-combo resolved rows carry no measured health — stay neutral
+  // instead of implying a green signal the data doesn't back.
+  const hasMetrics =
+    health.requests != null ||
+    health.successRate != null ||
+    health.avgLatencyMs != null ||
+    health.quotaRemainingPct != null ||
+    health.lastStatus != null;
+  if (!hasMetrics) return "border-border bg-surface text-text-muted";
   if (health.lastStatus === "error" || health.quotaIsExhausted) {
     return "border-error/20 bg-error/10 text-error";
   }
@@ -149,7 +159,10 @@ function targetHealthTone(target: ComboControlCenterTarget | ComboControlCenterT
   return "border-success/20 bg-success/10 text-success";
 }
 
-function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
+// Exported for the dashboard regression test (#17393): the configured-target
+// row is the only place that renders the configured model and the pinned
+// account, so it is the unit under test.
+export function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
   const t = useTranslations("comboControl");
   return (
     <div className="rounded-xl border border-border bg-surface p-3">
@@ -168,10 +181,10 @@ function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
               </Badge>
             )}
           </div>
-          <p className="mt-2 truncate font-mono text-sm text-text-main">{target.label}</p>
+          <p className="mt-2 truncate font-mono text-sm text-text-main">{target.model}</p>
           <p className="mt-1 text-xs text-text-muted">
             {target.provider ? getProviderDisplayName(target.provider) : t("comboReference")} ·{" "}
-            {t("accountShort", { id: shortId(target.connectionId, t("dynamic")) })}
+            {t("accountShort", { id: target.accountLabel || t("dynamic") })}
           </p>
         </div>
         <div className={`rounded-lg border px-3 py-2 text-xs ${targetHealthTone(target)}`}>
@@ -248,6 +261,43 @@ function RecentLogRow({ log }: { log: CallLogEntry }) {
   );
 }
 
+function RuntimeConfigValue({ value }: { value: unknown }) {
+  // Records and arrays render as wrapped chips — a single truncated
+  // JSON.stringify turns settings like the auto-combo weights/candidatePool
+  // into an unreadable blob.
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <code className="text-xs text-text-muted">—</code>;
+    const visible = value.slice(0, 12);
+    return (
+      <div className="flex max-w-md flex-wrap justify-end gap-1">
+        {visible.map((item, i) => (
+          <code key={i} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+            {item !== null && typeof item === "object" ? JSON.stringify(item) : String(item)}
+          </code>
+        ))}
+        {value.length > visible.length && (
+          <code className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-muted">
+            +{value.length - visible.length}
+          </code>
+        )}
+      </div>
+    );
+  }
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    return (
+      <div className="flex max-w-md flex-wrap justify-end gap-1">
+        {entries.map(([k, v]) => (
+          <code key={k} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+            {k}={v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}
+          </code>
+        ))}
+      </div>
+    );
+  }
+  return <code className="max-w-45 truncate text-xs text-text-main">{String(value)}</code>;
+}
+
 export default function ComboControlCenterClient({ comboId }: { comboId: string }) {
   const t = useTranslations("comboControl");
   const [combo, setCombo] = useState<ComboControlCenterCombo | null>(null);
@@ -258,14 +308,15 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Built-in auto combos (auto, auto/*) are virtual — no persisted row/UUID.
+  // They materialize through /api/combos/auto?id= which returns the same
+  // combo shape; the UUID-keyed combo-health endpoint can't serve them, so
+  // the health lookup is skipped (it would only 400 anyway).
+  const isVirtualAutoCombo = comboId === "auto" || comboId.startsWith("auto/");
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // Built-in auto combos (auto, auto/*) are virtual — no persisted row/UUID.
-      // They materialize through /api/combos/auto?id= which returns the same
-      // combo shape; the UUID-keyed combo-health endpoint can't serve them, so
-      // the health lookup is skipped (it would only 400 anyway).
-      const isVirtualAutoCombo = comboId === "auto" || comboId.startsWith("auto/");
       const comboData = await fetchJson<ComboControlCenterCombo>(
         isVirtualAutoCombo
           ? `/api/combos/auto?id=${encodeURIComponent(comboId)}`
@@ -297,7 +348,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
     } finally {
       setLoading(false);
     }
-  }, [comboId, range, t]);
+  }, [comboId, isVirtualAutoCombo, range, t]);
 
   useEffect(() => {
     // Async continuation — see react-hooks/set-state-in-effect.
@@ -311,10 +362,19 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
     [combo, metrics, health]
   );
   const configuredTargets = useMemo(
-    () => (combo ? getComboControlCenterTargets(combo, health) : []),
+    () => (combo ? getComboControlCenterTargets(combo, health, combo.connectionLabels) : []),
     [combo, health]
   );
-  const resolvedTargets = useMemo(() => getResolvedComboControlCenterTargets(health), [health]);
+  const resolvedTargets = useMemo(
+    () =>
+      isVirtualAutoCombo && combo
+        ? // Virtual combos resolve candidates at materialization time — the
+          // models list IS the resolved set; combo-health is UUID-keyed and
+          // can't serve them.
+          getVirtualComboResolvedTargets(combo)
+        : getResolvedComboControlCenterTargets(health),
+    [isVirtualAutoCombo, combo, health]
+  );
   const runtimeConfig = useMemo(() => (combo ? extractComboRuntimeConfig(combo) : {}), [combo]);
 
   if (loading && !combo) {
@@ -334,7 +394,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
           ← {t("backToCombos")}
         </Link>
         <Card className="border border-error/20 bg-error/10 p-6">
-          <h1 className="text-lg font-semibold text-error">{t("unavailable")}</h1>
+          <h1 className="text-lg text-error">{t("unavailable")}</h1>
           <p className="mt-2 text-sm text-error">{error}</p>
         </Card>
       </div>
@@ -394,10 +454,11 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       <Card className="p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-text-main">{t("overview")}</h2>
+            <h2 className="text-lg text-text-main">{t("overview")}</h2>
             <p className="mt-1 text-sm text-text-muted">{t("overviewDescription")}</p>
           </div>
           <SegmentedControl
+            semantics="radio"
             size="sm"
             aria-label={t("timeRange")}
             value={range}
@@ -440,7 +501,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         <Card className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-text-main">{t("configuredTargets")}</h2>
+              <h2 className="text-lg text-text-main">{t("configuredTargets")}</h2>
               <p className="mt-1 text-sm text-text-muted">{t("configuredTargetsDescription")}</p>
             </div>
           </div>
@@ -456,7 +517,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg font-semibold text-text-main">{t("runtimeConfig")}</h2>
+          <h2 className="text-lg text-text-main">{t("runtimeConfig")}</h2>
           <p className="mt-1 text-sm text-text-muted">{t("runtimeConfigDescription")}</p>
           <div className="mt-4 space-y-2">
             {Object.keys(runtimeConfig).length === 0 ? (
@@ -468,9 +529,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
                   className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
                 >
                   <span className="text-sm text-text-muted">{key}</span>
-                  <code className="max-w-45 truncate text-xs text-text-main">
-                    {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                  </code>
+                  <RuntimeConfigValue value={value} />
                 </div>
               ))
             )}
@@ -479,7 +538,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold text-text-main">{t("resolvedTargets")}</h2>
+        <h2 className="text-lg text-text-main">{t("resolvedTargets")}</h2>
         <p className="mt-1 text-sm text-text-muted">{t("resolvedTargetsDescription")}</p>
         <div className="mt-4 space-y-3">
           {resolvedTargets.length === 0 ? (
@@ -497,7 +556,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="p-5">
-          <h2 className="text-lg font-semibold text-text-main">{t("quotaDistribution")}</h2>
+          <h2 className="text-lg text-text-main">{t("quotaDistribution")}</h2>
           <div className="mt-4 space-y-3">
             {(health?.quotaHealth?.providers || []).length === 0 ? (
               <p className="text-sm text-text-muted">{t("noQuotaSnapshots")}</p>
@@ -526,7 +585,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg font-semibold text-text-main">{t("recentDecisions")}</h2>
+          <h2 className="text-lg text-text-main">{t("recentDecisions")}</h2>
           <p className="mt-1 text-sm text-text-muted">{t("recentDecisionsDescription")}</p>
           <div className="mt-4 space-y-2">
             {logs.length === 0 ? (
@@ -541,7 +600,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold text-text-main">{t("quickLinks")}</h2>
+        <h2 className="text-lg text-text-main">{t("quickLinks")}</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {[
             [t("comboHealth"), "/dashboard/analytics/combo-health"],

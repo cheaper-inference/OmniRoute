@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Button, EmptyState, Input, SegmentedControl, Select, Skeleton } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import SidebarPinButton from "@/shared/components/SidebarPinButton";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import FeatureFlagCard from "./FeatureFlagCard";
 
@@ -19,6 +20,8 @@ interface FlagData {
   defaultValue: string;
   effectiveValue: string;
   source: "db" | "env" | "default";
+  configuredSource?: "db" | "env" | "default";
+  sourceKey?: string;
   requiresRestart: boolean;
   warningLevel?: "info" | "caution" | "danger";
 }
@@ -40,6 +43,10 @@ interface FlagUpdateResult {
 }
 
 const ACTIVE_VALUES = new Set(["true", "1", "yes"]);
+const UNPRICED_POLICY_KEYS = new Set([
+  "UNPRICED_USAGE_BUDGET_POLICY",
+  "USAGE_LIMIT_IGNORE_UNPRICED",
+]);
 
 // How card descriptions are displayed. "clamp" keeps cards compact and reveals
 // the full text on hover; "full" always shows the complete description.
@@ -187,7 +194,9 @@ export default function FeatureFlagsGrid() {
           return;
         }
         const result = (await res.json()) as FlagUpdateResult;
-        applyFlagResult(key, result);
+        // Refresh both controls and summary from the runtime projection, not enum defaults.
+        if (UNPRICED_POLICY_KEYS.has(key)) await loadFlags();
+        else applyFlagResult(key, result);
         if (result.requiresRestart) {
           setPendingRestartKeys((prev) => new Set(prev).add(key));
         }
@@ -201,7 +210,7 @@ export default function FeatureFlagsGrid() {
         });
       }
     },
-    [applyFlagResult, t]
+    [applyFlagResult, loadFlags, t]
   );
 
   const handleReset = useCallback(
@@ -218,7 +227,9 @@ export default function FeatureFlagsGrid() {
           return;
         }
         const result = (await res.json()) as FlagUpdateResult;
-        applyFlagResult(key, result);
+        // Refresh both controls and summary from the runtime projection, not enum defaults.
+        if (UNPRICED_POLICY_KEYS.has(key)) await loadFlags();
+        else applyFlagResult(key, result);
         if (result.requiresRestart) {
           setPendingRestartKeys((prev) => new Set(prev).add(key));
         }
@@ -232,7 +243,7 @@ export default function FeatureFlagsGrid() {
         });
       }
     },
-    [applyFlagResult, t]
+    [applyFlagResult, loadFlags, t]
   );
 
   const handleRestart = useCallback(async () => {
@@ -313,10 +324,12 @@ export default function FeatureFlagsGrid() {
           ) : undefined
         }
         actions={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+            <SidebarPinButton itemId="settings-feature-flags" />
             {/* Description view: compact with hover tooltip vs always full text */}
             <div title={t("descriptionModeHint")}>
               <SegmentedControl
+                semantics="radio"
                 size="sm"
                 aria-label={t("descriptionModeLabel")}
                 value={descriptionMode}
@@ -339,6 +352,7 @@ export default function FeatureFlagsGrid() {
             />
 
             <Select
+              native
               compact
               aria-label={t("categoryLabel", {
                 category: t(

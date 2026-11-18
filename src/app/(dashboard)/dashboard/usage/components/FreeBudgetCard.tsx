@@ -291,7 +291,7 @@ function Kpi({ label, value, valueClass }: { label: string; value: string; value
   return (
     <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
       <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
-      <span className={`text-[19px] font-bold tabular-nums ${valueClass ?? "text-text-main"}`}>
+      <span className={`text-[19px] font-semibold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
       </span>
     </div>
@@ -412,7 +412,16 @@ export function FreeBudgetView({
       {/* Stacked bar — pool-deduped; segments sum to steadyRecurringTokens */}
       {barSegments.length > 0 && (
         <div className="px-3 pt-3">
-          <div className="flex h-3 rounded-sm overflow-hidden w-full" data-testid="budget-bar">
+          <div
+            role="progressbar"
+            aria-label={labels.title}
+            aria-valuemin={0}
+            aria-valuemax={Math.max(totalBarTokens, 1)}
+            aria-valuenow={totalBarTokens}
+            aria-valuetext={barSegments.map((seg) => `${seg.label}: ${fmt(seg.tokens)}`).join(", ")}
+            className="flex h-3 rounded-sm overflow-hidden w-full"
+            data-testid="budget-bar"
+          >
             {barSegments.map((seg) => {
               const width =
                 totalBarTokens > 0 ? ((seg.tokens / totalBarTokens) * 100).toFixed(2) : "0";
@@ -514,17 +523,16 @@ export function FreeBudgetView({
           className="min-w-0 text-[11px] [&_td]:h-auto [&_th]:h-auto"
           containerClassName="rounded-none border-0"
           scrollbarLabel={labels.model}
+          scrollLabel={labels.model}
           data-testid="budget-table"
         >
           <TableHeader>
             <TableRow>
-              <TableHead className="font-medium py-1 pr-2">{labels.provider}</TableHead>
-              <TableHead className="font-medium py-1 pr-2">{labels.model}</TableHead>
-              <TableHead className="font-medium py-1 pr-2">{labels.type}</TableHead>
-              <TableHead className="font-medium py-1 pr-2 text-right">
-                {labels.tokensMonth}
-              </TableHead>
-              <TableHead className="font-medium py-1 pr-1 text-center">ToS</TableHead>
+              <TableHead className="py-1 pr-2">{labels.provider}</TableHead>
+              <TableHead className="py-1 pr-2">{labels.model}</TableHead>
+              <TableHead className="py-1 pr-2">{labels.type}</TableHead>
+              <TableHead className="py-1 pr-2 text-right">{labels.tokensMonth}</TableHead>
+              <TableHead className="py-1 pr-1 text-center">ToS</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -625,8 +633,8 @@ export default function FreeBudgetCard() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search model, provider…"
-          aria-label="Search free models"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAria")}
           data-testid="budget-search-input"
           className="min-w-[160px]"
           inputClassName="text-[11px]"
@@ -635,7 +643,7 @@ export default function FreeBudgetCard() {
           compact
           value={providerFilter}
           onChange={(e) => setProviderFilter(e.target.value)}
-          aria-label="Filter by provider"
+          aria-label={t("filterProviderAria")}
           data-testid="budget-provider-select"
           className="w-auto"
         >
@@ -647,7 +655,7 @@ export default function FreeBudgetCard() {
           ))}
         </Select>
         <Checkbox
-          label="Keyless only"
+          label={t("keylessOnly")}
           checked={keylessOnly}
           onChange={(e) => setKeylessOnly(e.target.checked)}
           data-testid="budget-keyless-toggle"

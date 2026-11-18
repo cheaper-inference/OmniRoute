@@ -14,36 +14,36 @@ Az AgentBridge az OmniRoute MITM (Man-in-the-Middle, közbeékelődéses) proxyj
 
 ## §1 Áttekintés
 
-### Mi az AgentBridge?
+### Mi AgentBridge?
 
-Amikor egy IDE-ügynök (pl. GitHub Copilot, Cursor, Claude Code) API-hívást indít, közvetlenül az upstream AI-szolgáltatóhoz (OpenAI, Anthropic stb.) csatlakozik. Az AgentBridge transzparens módon, TLS-szinten elfogja ezt a kapcsolatot — az ügynök konfigurációjának bármilyen módosítása nélkül —, és a kérést az OmniRoute-on keresztül átírja.
+Amikor egy IDE ügynök (pl. GitHub Copilot, Cursor, Claude Code) API hívást kezdeményez, közvetlenül csatlakozik az upstream AI szolgáltatóhoz (OpenAI, Anthropic stb.). AgentBridge transzparensen elfogja ezt a kapcsolatot a TLS szinten — anélkül, hogy — ügynökkonfigurációt kellene módosítania, és átírja a kérést OmniRoute keresztül.
 
-Ez lehetővé teszi, hogy:
+Ez azt jelenti, hogy:
 
-- **Bármely ügynököt bármely szolgáltatóhoz átirányítson**: A Copilot az OpenAI felé kommunikál? Irányítsa át az Anthropic Claude-hoz, a Geminihez vagy az OmniRoute 375 szolgáltatója közül bármelyikhez.
-- **Modell-hozzárendeléseket alkalmazzon**: `gemini-3-flash` → `claude-sonnet-4.7` transzparensen, handler-szinten.
-- **Az összes ügynökforgalmat megfigyelje**: minden elfogott kérés megjelenik a [Forgalomfigyelőben](./TRAFFIC_INSPECTOR.md).
-- **Kihasználja az OmniRoute hibatűrését**: a combo routing, a circuit breakerek, a fallback-mechanizmusok és a költségkövetés az IDE-ügynökök forgalmára is működnek.
+- **Bármely ügynök átirányítása bármely szolgáltatóhoz** : Copilot beszél OpenAI-vel? Irányítsa át Anthropic Claude, Gemini, vagy OmniRoute 394 szolgáltatójának bármelyikére.
+- **Alkalmazzon modellleképezéseket** : `gemini-3-flash` → `claude-sonnet-4.7` transzparensen a kezelő szintjén.
+- **Figyelje meg az összes ügynökforgalmat** : minden elfogott kérést közzétesznek a [Közlekedési Felügyelőnek](./TRAFFIC_INSPECTOR.md).
+- **Alkalmazza OmniRoute rugalmasságot** : kombinált útválasztás, megszakítók, tartalékok és költségkövetési munka IDE ügynökforgalom számára is.
 
-### Pozicionálás a piaccal szemben
+### Pozicionálás kontra piac
 
-| Funkció                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |    🔍 Vizsgálat alatt     |
-| Vezérlőpult UI          |    ✓    |    ✗     |        ✗        |             ✓             |
-| Forgalomfigyelő         |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-útválasztás   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modell-hozzárendelés UI |    ✗    |    ✗     |        ✗        |             ✓             |
-| Kihagyási lista         |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA-tanúsítvány |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkció                 | 9router | anti-api | llm-elfogó | **OmniRoute AgentBridge** |
+| ----------------------- | :-----: | :------: | :--------: | :-----------------------: |
+| Antigravity             |    ✓    |    ✓     |     —      |             ✓             |
+| GitHub Copilot          |    ✓    |    ✓     |     —      |             ✓             |
+| Kiro (AWS)              |    ✓    |    ✓     |     —      |             ✓             |
+| OpenAI Codex            |    —    |    ✓     |     —      |             ✓             |
+| Cursor IDE              |    ✓    |    ✓     |     —      |             ✓             |
+| Zed Industries          |    —    |    ✓     |     —      |             ✓             |
+| Claude kód              |    —    |    —     |     ✓      |             ✓             |
+| Nyissa meg a kódot      |    —    |    —     |     ✓      |             ✓             |
+| Trae                    |    —    |    —     |     —      |        🔍 Nyomozás        |
+| Műszerfal UI            |    ✓    |    ✗     |     ✗      |             ✓             |
+| Közlekedési felügyelő   |    ✗    |    ✗     |     ✓      |             ✓             |
+| OmniRoute routing       |    ✗    |    ✗     |     ✗      |             ✓             |
+| Modelleképezés UI       |    ✗    |    ✗     |     ✗      |             ✓             |
+| Kikerülési lista        |    ✗    |    ✗     |     ✓      |             ✓             |
+| Upstream CA tanúsítvány |    ✗    |    ✗     |     ✓      |             ✓             |
 
 ---
 
@@ -533,26 +533,26 @@ Teljes OpenAPI-sémák: `docs/openapi.yaml` → `AgentBridge` címke.
 
 ---
 
-## §8 Ütemterv
+## 8. § Útiterv
 
-### A Trae vizsgálata
+### Trae vizsgálat
 
-A Trae egy viszonylag új MI-alapú kódolási asszisztens. A kezelő implementálása előtt:
+A Trae egy viszonylag új AI kódolási asszisztens. A kezelő bevezetése előtt:
 
-1. Azonosítsa a bináris fájlt/bővítményt a VS Code / JetBrains piacterein vagy önálló alkalmazásként
-2. Rögzítse a forgalmat a mitmproxy segítségével az API-gazdagépek és a végpontok felépítésének felderítéséhez
+1. A binary/extension azonosítása VS Code / JetBrains piactereken vagy önálló alkalmazásként
+2. Rögzítse a forgalmat a mitmproxy segítségével API gazdagépek és végpont alakzatok felfedezéséhez
 3. Határozza meg a hitelesítési mechanizmust
-4. Mérlegelje a folytatás vagy leállítás lehetőségét a szolgáltatási feltételek és az API feltérképezhetősége alapján
+4. Értékelje go/no-go TOS és API felfedezhetősége alapján
 
-A vizsgálat befejezéséig az irányítópulton lévő Trae-kártyán a „Vizsgálat alatt” jelvény és egy „Életképesség jelentése” hivatkozás látható. A `src/mitm/handlers/trae.ts` fájlban lévő kezelőváz egy strukturált `Még nincs implementálva` hibát dob.
+Amíg a vizsgálat be nem fejeződik, az irányítópulton lévő Trae kártyán egy „Vizsgálat” jelvény látható, és egy „Életképesség bejelentése” link. A `src/mitm/handlers/trae.ts` kezelő csonkja strukturált `Not yet implemented` hibát dob.
 
-### Hátralékban lévő ügynökök (MITM szükséges — egyéni alap-URL nem támogatott)
+### Hátralékos ügynökök (MITM szükséges — nincs egyéni alap URL támogatás)
 
-A következő eszközök jelenlegi verziói nem támogatják az egyéni alap-URL-eket, így a MITM az egyetlen elfogási lehetőség. Az életképességi felmérés még folyamatban van:
+A következő eszközök jelenlegi verzióiban nem támogatják az egyéni URLs, így MITM az egyetlen elfogási útvonal. Az életképesség felmérése folyamatban van:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — a Kiro IDE-től különálló eszköz)
-- **Cowork** (Anthropic asztali alkalmazás)
+- **Amp** (Forrásgrafika)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — külön a Kiro IDE től )
+- **Cowork** (Anthropic desktop)
 
-Megjegyzés: A GitHub Copilot CLI ≥v1.0.19 támogatja a `COPILOT_PROVIDER_BASE_URL` változót — ennél az eszköznél a MITM helyett közvetlen konfigurációt használjon.
+Megjegyzés: GitHub Copilot CLI ≥ v1.0.19 támogatja `COPILOT_PROVIDER_BASE_URL` — használatát, MITM helyett a közvetlen konfigurációt használja az adott eszközhöz.

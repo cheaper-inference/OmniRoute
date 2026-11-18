@@ -5,6 +5,11 @@ import { randomUUID } from "node:crypto";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { COMMAND_CODE_VERSION } from "@omniroute/open-sse/executors/commandCode.ts";
 import {
+  COMMAND_CODE_ZDR_HEADER,
+  applyCommandCodeZdrHeader,
+  isCommandCodeZdrEnabled,
+} from "@omniroute/open-sse/executors/commandCode/zdr.ts";
+import {
   detectReasoningControl,
   getReasoningControlEndpointFingerprint,
 } from "@omniroute/open-sse/utils/reasoningControl.ts";
@@ -14,7 +19,7 @@ import {
   isBedrockNativeAuthError,
 } from "@omniroute/open-sse/services/bedrock.ts";
 import { addModelsSuffix, normalizeBaseUrl, resolveChatUrl } from "./urlHelpers";
-import { applyCustomUserAgent, buildBearerHeaders } from "./headers";
+import { applyCustomUserAgent, buildBearerHeaders, mergeConnectionCustomHeaders } from "./headers";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { validateDirectChatProvider } from "./directChatProbe";
 import { extractCozeValidationError } from "./cozeError";
@@ -215,6 +220,7 @@ export async function validateCommandCodeProvider({ apiKey, providerSpecificData
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
       Accept: "text/event-stream",
+      ...(isCommandCodeZdrEnabled(providerSpecificData) ? { [COMMAND_CODE_ZDR_HEADER]: "1" } : {}),
     },
     body: {
       model: validationModelId,
@@ -243,6 +249,7 @@ export async function validateCommandCodeProvider({ apiKey, providerSpecificData
       "x-session-id": randomUUID(),
     };
     applyCustomUserAgent(alphaHeaders, providerSpecificData);
+    applyCommandCodeZdrHeader(alphaHeaders, providerSpecificData);
 
     const alphaBody = {
       config: { environment: "external" },
@@ -475,6 +482,14 @@ async function readModelsPayloadForReasoningControl(
   }
 }
 
+// Probes send the connection's custom headers like the chat path (#8369).
+function buildProbeHeaders(apiKey: string, providerSpecificData: unknown) {
+  return mergeConnectionCustomHeaders(
+    buildBearerHeaders(apiKey, providerSpecificData),
+    providerSpecificData
+  );
+}
+
 export async function validateOpenAICompatibleProvider({
   apiKey,
   providerSpecificData = {},
@@ -495,7 +510,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const modelsRes = await validationRead(`${baseUrl}/models`, {
       method: "GET",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
     });
 
     modelsReachable = true;
@@ -575,7 +590,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const chatRes = await validationWrite(chatUrl, {
       method: "POST",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
       body: JSON.stringify(testBody),
     });
 
@@ -670,7 +685,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const pingRes = await validationRead(baseUrl, {
       method: "GET",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
     });
 
     // If the server responds at all (even with an error page), it's reachable

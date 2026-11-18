@@ -217,6 +217,35 @@ function normalizePreviousLimits(data: Record<string, unknown>): NormalizedClaud
   return windows;
 }
 
+/** A legacy window field: explicitly present, and either `null` or a parseable utilization. */
+function legacyWindowParses(data: Record<string, unknown>, key: string): boolean {
+  if (!Object.hasOwn(data, key)) return false;
+  const value = data[key];
+  return value === null || safePercentage(toRecord(value).utilization) !== undefined;
+}
+
+/**
+ * Whether this /api/oauth/usage payload lists every window the account has: `five_hour` and
+ * `seven_day` are named explicitly (`null` when the account has no such window, e.g. no open
+ * session) and every non-null legacy window, per-model `seven_day_*` included, parses. Only then
+ * may a window it does not report be retired.
+ */
+export function claudeUsageWindowsComplete(payload: Record<string, unknown>): boolean {
+  if (!legacyWindowParses(payload, "five_hour") || !legacyWindowParses(payload, "seven_day"))
+    return false;
+  return Object.keys(payload)
+    .filter((key) => key.startsWith("seven_day_"))
+    .every((key) => {
+      const value = payload[key];
+      // Non-window `seven_day_*` siblings (e.g. a breakdown object) carry no utilization field.
+      return (
+        value === null ||
+        !Object.hasOwn(toRecord(value), "utilization") ||
+        legacyWindowParses(payload, key)
+      );
+    });
+}
+
 export function normalizeClaudeUsageQuotas(
   payload: Record<string, unknown>
 ): NormalizedClaudeUsageQuotas {

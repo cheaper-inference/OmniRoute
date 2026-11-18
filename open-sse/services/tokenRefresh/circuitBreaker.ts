@@ -8,6 +8,7 @@
 // failures → 30min pause). Unrecoverable refresh errors (invalid_grant,
 // refresh_token_reused, …) short-circuit retries so the HealthCheck can
 // deactivate the account instead of looping every 60s.
+import { isPassiveCodex } from "./passiveCodex.ts";
 import type { RefreshLogger } from "./shared.ts";
 import { isUnrecoverableRefreshError, NO_REFRESH_NEEDED } from "./shared.ts";
 
@@ -180,6 +181,26 @@ function recordFailure(
 }
 
 /**
+ * Count one failed refresh against the breaker key for `provider`, for callers that gate
+ * their own attempts with isProviderBlocked instead of running through refreshWithRetry.
+ */
+export function recordRefreshFailure(
+  provider: string,
+  options?: TokenRefreshBreakerOptions,
+  log: RefreshLoggerLike | null = null
+) {
+  const effective = resolveBreakerOptions(options);
+  const key = breakerKey(provider, options?.connectionId, effective.scope);
+  recordFailure(key, effective.failureThreshold, effective.cooldownMs, log);
+}
+
+/** Reset the breaker key for `provider` after a successful refresh. */
+export function recordRefreshSuccess(provider: string, options?: TokenRefreshBreakerOptions) {
+  const { scope } = resolveBreakerOptions(options);
+  recordSuccess(breakerKey(provider, options?.connectionId, scope));
+}
+
+/**
  * Execute a function with a timeout.
  */
 async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T | null> {
@@ -223,6 +244,7 @@ export async function refreshWithRetry(
   provider = "unknown",
   options?: TokenRefreshBreakerOptions
 ) {
+  if (isPassiveCodex(provider)) return refreshFn();
   const effective = resolveBreakerOptions(options);
   const key = breakerKey(provider, options?.connectionId, effective.scope);
   // Circuit breaker check
@@ -244,7 +266,7 @@ export async function refreshWithRetry(
         if (result === NO_REFRESH_NEEDED) return null;
         log?.warn?.(
           "TOKEN_REFRESH",
-          `Unrecoverable refresh error for ${key}: ${result.error} — skipping retries`
+          `Unrecoverable refresh error for ${key}: ${(result as { error?: string }).error} — skipping retries`
         );
         return result;
       }

@@ -175,3 +175,36 @@ test("#5165: static assets stay cache-first; navigations do not", async () => {
   assert.equal(second.intercepted, true);
   assert.equal(await (await second.response!).text(), "fresh icon");
 });
+
+test("client-API aliases are never intercepted or cached, case-insensitively", async () => {
+  const harness = createServiceWorkerHarness();
+  harness.setFetch(async () => new Response("per-key data", { status: 200 }));
+  for (const path of [
+    "/v1/models",
+    "/V1/models",
+    "/v1beta/models",
+    "/models",
+    "/chat/completions",
+    "/responses",
+    "/codex/responses",
+    "/callback",
+    "/login",
+  ]) {
+    const result = await harness.dispatchFetch({
+      url: `https://app.example${path}`,
+      method: "GET",
+      mode: "no-cors",
+      destination: "image",
+    });
+    assert.equal(result.intercepted, false, `${path} must bypass the worker`);
+  }
+  assert.equal(harness.cacheEntries.size, 0);
+
+  const lookalike = await harness.dispatchFetch({
+    url: "https://app.example/v1foo.png",
+    method: "GET",
+    mode: "no-cors",
+    destination: "image",
+  });
+  assert.equal(lookalike.intercepted, true, "prefix match must stay segment-bounded");
+});

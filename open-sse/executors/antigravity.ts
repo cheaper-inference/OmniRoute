@@ -1,3 +1,4 @@
+import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
@@ -14,6 +15,13 @@ import {
   getAntigravityOAuthUserAgent,
 } from "../services/antigravityHeaders.ts";
 import { classify429, decide429, type Decision } from "../services/antigravity429Engine.ts";
+import {
+  buildAntigravityRefusalReplayResponse,
+  fingerprintAntigravityRequest,
+  getActiveAntigravityRefusal,
+  getAntigravity429AttemptBudget,
+  rememberAntigravity429Refusal,
+} from "../services/antigravity429Guard.ts";
 import { parseRetryFromErrorText, type RetryHintProvenance } from "../services/accountFallback.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
 import {
@@ -61,6 +69,8 @@ import {
   tryCreditsRetry,
   tryEmbedLongRetryAfter,
   buildFinalAntigravityResult,
+  peekFirstAntigravitySseEvent,
+  isAntigravityHeaderDeadlineTimeout,
   buildAntigravity429ErrorMessage,
   markCreditsExhausted,
   isAbortError,
@@ -75,9 +85,8 @@ import {
   resolveAntigravityClientVersion,
 } from "../services/antigravityClientProfile.ts";
 import {
-  generateAntigravityRequestId,
+  buildAntigravityEnvelopeIdentity,
   getAntigravityEnvelopeUserAgent,
-  getAntigravitySessionId,
 } from "../services/antigravityIdentity.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
@@ -354,17 +363,20 @@ const promptNormalizeLog = logger("AG_PROMPT_NORMALIZE");
 /**
  * Normalize systemInstruction.parts text before Antigravity dispatch: strip
  * competing-agent identity sentences (#10420) and rewrite OMP harness markers.
- * Only string `text` parts are touched; every other part and field is kept.
+ * Only string `text` parts are touched; empty objects are dropped. Every other
+ * part and field is kept. Returns undefined when no parts remain.
  * Returns the original reference when nothing matched (no allocation).
  */
 export function normalizeAntigravitySystemInstruction(systemInstruction: unknown): unknown {
   const record = asRecord(systemInstruction);
-  const parts = Array.isArray(record?.parts)
+  const allParts = Array.isArray(record?.parts)
     ? (record.parts as Array<Record<string, unknown>>)
-    : [];
-  if (parts.length === 0) return systemInstruction;
+    : null;
+  if (!allParts) return systemInstruction;
+  const parts = allParts.filter((part) => Object.keys(part).length > 0);
+  if (parts.length === 0) return undefined;
 
-  let changed = false;
+  let changed = parts.length !== allParts.length;
   const newParts = parts.map((part) => {
     if (typeof part.text !== "string" || part.text.length === 0) return part;
     let text = part.text;
@@ -454,9 +466,76 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
 ): T {
   if (!asRecord(request.systemInstruction)) return request;
   const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  if (systemInstruction === undefined) {
+    const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+    return withoutSystemInstruction as T;
+  }
   return systemInstruction === request.systemInstruction
     ? request
     : { ...request, systemInstruction };
+}
+
+/** Remove empty `{}` systemInstruction parts only; every other part and field is kept. */
+function dropEmptyAntigravitySystemParts<T extends Record<string, unknown>>(request: T): T {
+  const record = asRecord(request.systemInstruction);
+  if (!Array.isArray(record?.parts)) return request;
+  const parts = (record.parts as unknown[]).filter(
+    (p) => Object.keys(asRecord(p) ?? {}).length > 0
+  );
+  if (parts.length === record.parts.length) return request;
+  if (parts.length > 0) return { ...request, systemInstruction: { ...record, parts } };
+  const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+  return withoutSystemInstruction as T;
+}
+
+/**
+ * Vertex AI (via Google Cloud Code for Claude models) enforces Anthropic's strict
+ * tool protocol: every tool_use must be immediately followed by a tool_result.
+ * In Gemini contents format, user turns merging tool results with demoted system/user
+ * turns (e.g. Claude Code's `<total_tokens>` budget notices) had `functionResponse`
+ * sorted to the end by `moveFunctionResponsesLast`, causing Vertex AI HTTP 400
+ * "tool_use ids were found without tool_result blocks immediately after".
+ *
+ * For Claude models, strip synthetic `<total_tokens>` budget blocks and ensure all
+ * `functionResponse` parts are placed first in the user turn.
+ */
+export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown[] {
+  return contents.map((content) => {
+    if (!content || typeof content !== "object") return content;
+    const c = content as { role?: unknown; parts?: unknown[] };
+    if (c.role !== "user" || !Array.isArray(c.parts)) return content;
+
+    const hasFunctionResponse = c.parts.some(
+      (p) => p && typeof p === "object" && "functionResponse" in p
+    );
+    if (!hasFunctionResponse) return content;
+    // Only a pure tool-result turn is reordered: a turn that also carries functionCall
+    // parts is not an Anthropic tool_result message, so its part order is left as-is.
+    const hasFunctionCall = c.parts.some((p) => p && typeof p === "object" && "functionCall" in p);
+    if (hasFunctionCall) return content;
+
+    const filteredParts = c.parts.filter((p) => {
+      if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") {
+        const text = (p as { text: string }).text.trim();
+        if (text.startsWith("<total_tokens>") && text.endsWith("</total_tokens>")) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const responses: unknown[] = [];
+    const others: unknown[] = [];
+    for (const part of filteredParts) {
+      if (part && typeof part === "object" && "functionResponse" in part) {
+        responses.push(part);
+      } else {
+        others.push(part);
+      }
+    }
+
+    return { ...c, parts: [...responses, ...others] };
+  });
 }
 
 function sanitizeAntigravityGeminiRequest(
@@ -465,14 +544,15 @@ function sanitizeAntigravityGeminiRequest(
   const clean: Record<string, unknown> = {};
 
   if (Array.isArray(request.contents)) {
-    clean.contents = request.contents;
+    clean.contents = normalizeAntigravityClaudeContents(request.contents);
   }
 
   if (asRecord(request.systemInstruction)) {
     // #10420: strip competing-agent identity sentences (e.g. "You are a
     // Claude agent, built on Anthropic's Claude Agent SDK.") that Antigravity
     // flags and answers with 429 RESOURCE_EXHAUSTED.
-    clean.systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    if (systemInstruction !== undefined) clean.systemInstruction = systemInstruction;
   }
 
   clean.generationConfig = asRecord(request.generationConfig)
@@ -569,12 +649,27 @@ type AntigravityAttemptContext = {
   fallbackCount: number;
   physicalSendCounter: AntigravityPhysicalSendCounter;
   correlationId: string | null;
+  /** Per-request upstream-429 budget across ALL hosts (antigravity429Guard.ts). */
+  rateLimitBudget: AntigravityRateLimitBudget;
+};
+
+/**
+ * Upstream 429s seen for this request across every host. Once `count` reaches `max`
+ * the 429 goes back to the caller instead of being retried, and the request body
+ * (`fingerprint`) is remembered so an identical re-send is answered locally.
+ */
+type AntigravityRateLimitBudget = {
+  max: number;
+  count: number;
+  fingerprint: string | null;
 };
 
 /** Context threaded through the 429/503 handling helpers — adds the sent response. */
 type AntigravityRateLimitContext = AntigravityAttemptContext & {
   response: Response;
   finalHeaders: Record<string, string>;
+  /** This response spent the request's 429 budget: no more retries on any host. */
+  budget429Spent: boolean;
 };
 
 /**
@@ -595,11 +690,21 @@ type AntigravityAttemptOutcome =
   | { action: "retry"; sameUrl: boolean; lastStatus?: number };
 
 export class AntigravityExecutor extends BaseExecutor {
-  constructor() {
+  streamReadinessTimeoutMs?: number;
+
+  constructor(options?: { streamReadinessTimeoutMs?: number }) {
     super("antigravity", PROVIDERS.antigravity);
+    this.streamReadinessTimeoutMs = options?.streamReadinessTimeoutMs;
   }
 
-  override shouldRetry(status: number, urlIndex: number): boolean {
+  override shouldRetry(status: number, urlIndex: number, model?: string): boolean {
+    if (
+      status === HTTP_STATUS.NOT_FOUND &&
+      typeof model === "string" &&
+      /argon|gemini-4/i.test(model)
+    ) {
+      return false;
+    }
     return (
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
@@ -623,10 +728,14 @@ export class AntigravityExecutor extends BaseExecutor {
 
   buildHeaders(credentials: AntigravityCredentials, _stream = true): Record<string, string> {
     const clientProfile = getAntigravityClientProfile(credentials);
-    const raw = {
+    const raw: Record<string, string> = {
       ...getAntigravityContentHeaders(clientProfile, credentials.accessToken),
-      Accept: "text/event-stream",
     };
+    // The native Go CLI requests SSE through `?alt=sse` alone and sends no Accept header;
+    // only the IDE/Electron profile advertises `text/event-stream`.
+    if (clientProfile !== "cli") {
+      raw.Accept = "text/event-stream";
+    }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
     return scrubProxyAndFingerprintHeaders(raw);
   }
@@ -828,14 +937,18 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
+    const identity = buildAntigravityEnvelopeIdentity({
+      isClaude,
+      credentials,
+      sessionIdFallback:
+        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined,
+    });
+
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
     const rawTransformedRequest = {
       ...normalizedRequest,
       ...(contents.length > 0 && { contents }),
-      sessionId: getAntigravitySessionId(
-        credentials,
-        typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined
-      ),
+      sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
       toolConfig:
         Array.isArray(normalizedRequest?.tools) && normalizedRequest.tools.length > 0
@@ -854,10 +967,17 @@ export class AntigravityExecutor extends BaseExecutor {
         ? stripTrailingAntigravityAssistantTurn(
             normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
           )
-        : rawTransformedRequest;
+        : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
+          // and no identity rewrite, but empty system parts are rejected the same way.
+          dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
-
+    // Identity labels join (never replace) the caller's own labels (#16618).
+    const callerLabels = asRecord((transformedRequest as Record<string, unknown>).labels);
+    (transformedRequest as Record<string, unknown>).labels = {
+      ...callerLabels,
+      ...identity.labels,
+    };
     const {
       project: _project,
       model: _model,
@@ -888,7 +1008,7 @@ export class AntigravityExecutor extends BaseExecutor {
     const requestType = _requestType === "image_gen" ? "image_gen" : "agent";
     const envelope: AntigravityRequestEnvelope = {
       project: projectId,
-      requestId: generateAntigravityRequestId(),
+      requestId: identity.requestId,
       request: transformedRequest,
       model: upstreamModel,
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
@@ -1209,7 +1329,13 @@ export class AntigravityExecutor extends BaseExecutor {
         headers: [["Content-Type", "application/json"]],
       });
 
-      return { response: syntheticResponse, url, headers, transformedBody };
+      return {
+        response: syntheticResponse,
+        upstreamHttpSelection: selectHttpResponse(response),
+        url,
+        headers,
+        transformedBody,
+      };
     };
 
     return collect();
@@ -1342,6 +1468,13 @@ export class AntigravityExecutor extends BaseExecutor {
     const creditsMode = getCreditsMode();
     const useCreditsFirst = shouldUseCreditsFirst(credentials?.accessToken || "", creditsMode);
     const creditsRetryState: AntigravityCreditsRetryState = { attempted: false };
+    // Upstream 429s for this request across ALL hosts; once the budget is spent the 429
+    // goes back to the caller instead of being retried (antigravity429Guard.ts).
+    const rateLimitBudget: AntigravityRateLimitBudget = {
+      max: getAntigravity429AttemptBudget(),
+      count: 0,
+      fingerprint: null,
+    };
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const url = this.buildUrl(model, upstreamStream, urlIndex);
@@ -1361,6 +1494,25 @@ export class AntigravityExecutor extends BaseExecutor {
       }
 
       const transformedBody = finalizeAntigravityRequestBody(transformed, useCreditsFirst, l);
+
+      // A body that already spent its 429 budget is answered locally until the block
+      // expires — the client re-sending it must not reach Google again.
+      if (rateLimitBudget.fingerprint === null) {
+        rateLimitBudget.fingerprint = fingerprintAntigravityRequest(accountId, transformedBody);
+        const activeRefusal = getActiveAntigravityRefusal(rateLimitBudget.fingerprint);
+        if (activeRefusal) {
+          l.warn(
+            "AG_429_BUDGET",
+            `Not resending a request Antigravity refused with 429 (repeat ${activeRefusal.strikes}, ${Math.ceil(activeRefusal.remainingMs / 1000)}s left) — answered locally`
+          );
+          return {
+            response: buildAntigravityRefusalReplayResponse(activeRefusal),
+            url,
+            headers,
+            transformedBody,
+          };
+        }
+      }
 
       // Initialize retry counter for this URL
       if (!retryAttemptsByUrl[urlIndex]) {
@@ -1385,6 +1537,7 @@ export class AntigravityExecutor extends BaseExecutor {
           fallbackCount,
           physicalSendCounter,
           correlationId,
+          rateLimitBudget,
         });
 
         if (outcome.action === "return") return outcome.result;
@@ -1397,7 +1550,9 @@ export class AntigravityExecutor extends BaseExecutor {
         }
         // This deadline has already consumed its full header budget. Never
         // spend it again on another host within the SAME provider account.
-        if (isAntigravityPreResponseTimeout(error)) throw error;
+        // A silent body (headers but no first SSE event) is per-host and
+        // still fails over to the next base URL (#13125).
+        if (isAntigravityHeaderDeadlineTimeout(error)) throw error;
         lastError = error;
         // A fetch failure on a URL that still has a fallback is a retry, not a
         // failed request: the loop continues and the client gets the next
@@ -1451,6 +1606,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryAttemptsByUrl,
       physicalSendCounter,
       correlationId,
+      rateLimitBudget,
     } = ctx;
 
     const { response, finalHeaders } = await sendAntigravityRequest(
@@ -1469,15 +1625,21 @@ export class AntigravityExecutor extends BaseExecutor {
     );
 
     let retryMs: number | null = null;
+    let budget429Spent = false;
 
     if (
       response.status === HTTP_STATUS.RATE_LIMITED ||
       response.status === HTTP_STATUS.SERVICE_UNAVAILABLE
     ) {
+      if (response.status === HTTP_STATUS.RATE_LIMITED) {
+        rateLimitBudget.count += 1;
+        budget429Spent = rateLimitBudget.count >= rateLimitBudget.max;
+      }
       const rateLimitOutcome = await this.handleAntigravityRateLimit({
         ...ctx,
         response,
         finalHeaders,
+        budget429Spent,
       });
 
       if (rateLimitOutcome.action === "return") {
@@ -1492,7 +1654,7 @@ export class AntigravityExecutor extends BaseExecutor {
       retryMs = rateLimitOutcome.retryMs;
     }
 
-    if (this.shouldRetry(response.status, urlIndex)) {
+    if (!budget429Spent && this.shouldRetry(response.status, urlIndex, model)) {
       log.debug("RETRY", `${response.status} on ${url}, trying fallback ${urlIndex + 1}`);
       return { action: "retry", sameUrl: false, lastStatus: response.status };
     }
@@ -1544,9 +1706,16 @@ export class AntigravityExecutor extends BaseExecutor {
     signal: AbortSignal | null | undefined,
     log: SafeAntigravityLog
   ): Promise<SsePassthroughResult> {
-    if (!stream && response.ok && response.body) {
+    const peekedResponse = await peekFirstAntigravitySseEvent(
+      response,
+      url,
+      this.streamReadinessTimeoutMs,
+      signal
+    );
+
+    if (!stream && peekedResponse.ok && peekedResponse.body) {
       return this.collectStreamToResponse(
-        response,
+        peekedResponse,
         model,
         url,
         finalHeaders,
@@ -1558,7 +1727,7 @@ export class AntigravityExecutor extends BaseExecutor {
 
     return buildFinalAntigravityResult(
       stream,
-      response,
+      peekedResponse,
       url,
       finalHeaders,
       transformedBody,
@@ -1578,10 +1747,13 @@ export class AntigravityExecutor extends BaseExecutor {
   async handleAntigravityRateLimit(
     ctx: AntigravityRateLimitContext
   ): Promise<AntigravityRateLimitOutcome> {
-    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount } = ctx;
+    const { response, log, urlIndex, retryAttemptsByUrl, fallbackCount, budget429Spent } = ctx;
+    const { rateLimitBudget } = ctx;
 
     // Try to get retry time from headers first
     let retryMs: number | null = this.parseRetryHeaders(response.headers);
+    // What Google itself stated, before decide429 fills in its defaults.
+    let upstreamRetryHintMs: number | null = retryMs;
 
     // If no retry time in headers, try to parse from error message body
     let switchAuth = false;
@@ -1590,6 +1762,22 @@ export class AntigravityExecutor extends BaseExecutor {
       if (resolved.kind === "return") return { action: "return", result: resolved.result };
       retryMs = resolved.retryMs;
       switchAuth = resolved.switchAuth;
+      upstreamRetryHintMs = resolved.upstreamRetryHintMs;
+    }
+
+    if (budget429Spent) {
+      if (rateLimitBudget.fingerprint) {
+        const refusal = rememberAntigravity429Refusal(
+          rateLimitBudget.fingerprint,
+          upstreamRetryHintMs
+        );
+        log.warn(
+          "AG_429_BUDGET",
+          `${rateLimitBudget.count} upstream 429s for this request (budget ${rateLimitBudget.max}) — returning it; identical re-sends are answered locally for ${Math.ceil(refusal.blockMs / 1000)}s`
+        );
+      }
+      // No same-host retry, no next host: the 429 goes back to the caller.
+      return { action: "fallthrough", retryMs, lastStatus: response.status };
     }
 
     // Bounded short-retry: a non-null retryAfterMs ≤ 60s covers nearly every
@@ -1653,11 +1841,15 @@ export class AntigravityExecutor extends BaseExecutor {
    * credits retry. Returns the resolved retryMs, or an early "return" result
    * when the credits retry itself produced a response to hand back to the client.
    */
-  private async tryResolveRetryFromErrorBody(
-    ctx: AntigravityRateLimitContext
-  ): Promise<
+  private async tryResolveRetryFromErrorBody(ctx: AntigravityRateLimitContext): Promise<
     | { kind: "return"; result: SsePassthroughResult }
-    | { kind: "resolved"; retryMs: number | null; switchAuth: boolean }
+    | {
+        kind: "resolved";
+        retryMs: number | null;
+        switchAuth: boolean;
+        /** Retry hint parsed from the body, before decide429 applied its defaults. */
+        upstreamRetryHintMs: number | null;
+      }
   > {
     const {
       response,
@@ -1728,13 +1920,14 @@ export class AntigravityExecutor extends BaseExecutor {
         kind: "resolved",
         retryMs,
         switchAuth: decision.kind === "short_cooldown_switch_auth",
+        upstreamRetryHintMs: parsedRetryMs,
       };
     } catch (error) {
       if (signal?.aborted || isAbortError(error)) {
         throw signal?.reason ?? error;
       }
       // Ignore parse errors, will fall back to exponential backoff
-      return { kind: "resolved", retryMs: null, switchAuth: false };
+      return { kind: "resolved", retryMs: null, switchAuth: false, upstreamRetryHintMs: null };
     }
   }
 

@@ -65,9 +65,9 @@ test("namespaced custom tool_choice resolves to the flattened wire name", () => 
 
   assert.deepEqual(result.tool_choice, {
     type: "function",
-    function: { name: "functions__exec" },
+    function: { name: "exec" },
   });
-  assert.ok(toolNames(result).includes("functions__exec"));
+  assert.ok(toolNames(result).includes("exec"));
 });
 
 test("namespace already ending in `__` does not double the separator", () => {

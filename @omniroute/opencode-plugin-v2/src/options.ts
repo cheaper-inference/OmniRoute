@@ -49,6 +49,9 @@ const pluginOptionsSchema = z
     hiddenModels: z.array(z.string()).optional(),
     providersAllow: z.array(z.string()).optional(),
     usableOnly: z.boolean().default(false),
+    // Hide every combo when false: no /api/combos request and no combo
+    // rows from /v1/models; models are unchanged.
+    combos: z.boolean().default(true),
     // Combo source: "api" (default) folds /api/combos over each combo's
     // members, so a combo publishes only when every member passes the
     // filters. "models" skips that request and publishes the combo rows
@@ -79,9 +82,13 @@ const pluginOptionsSchema = z
     // declarations bound for a Gemini model. On by default — leaving them in
     // fails the whole request with 400 INVALID_ARGUMENT.
     geminiSanitization: z.boolean().default(true),
-    // v1 parity: prefix a model's display name with the upstream provider it
-    // routes to, so the same model sold through two connections is
-    // distinguishable in the picker.
+    // Toggle for the trailing editor parenthesis. The provider (the route that
+    // serves the model: Openrouter, Opencode-go, Nvidia for `nvidia/...` ids)
+    // is always shown; the editor (who made the model: MoonshotAI, Meta,
+    // DeepSeek) appears only here. Example:
+    // `Openrouter - MoonshotAI: Kimi K 3.1 Pro` -> `Openrouter - Kimi K 3.1 Pro (MoonshotAI)`.
+    // The parenthesis is omitted when the editor shares the provider's name.
+    // true (default) shows the parenthesis, false drops it.
     providerTag: z.boolean().default(true),
     // Inference telemetry is off by default: the host must opt in before the
     // plugin touches the sdk domain at all.
@@ -175,6 +182,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     hiddenModels: parsed.hiddenModels,
     providersAllow: parsed.providersAllow,
     usableOnly: parsed.usableOnly,
+    combos: parsed.combos ?? true,
     combosSource: parsed.combosSource,
     freeOnly: parsed.freeOnly,
     freeSignals: parsed.freeSignals,

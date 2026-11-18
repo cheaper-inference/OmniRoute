@@ -81,6 +81,18 @@ unsupported_country_region_territory
 
 ---
 
+## Ọnọdụ proxy ezighi ezi maka akaụntụ ọhụrụ
+
+N'ime** Ntọala → Proxy → Nhazi zuru ụwa ọnụ** , eji** Kwado proxy site na ndabara maka njikọ ọhụrụ** ịhọrọ ọnọdụ proxy mbụ nke akaụntụ ndị na-eweta agbakwunyere ọhụrụ.
+
+Ntọala ọhụrụ ahụ na-achịkwa ọnọdụ proxy mbụ nke akaụntụ ndị na-eweta agbakwunyere ọhụrụ. Ọ naghị agbanwe akaụntụ dị adị ma ọ bụ dochie ngbanwe proxy zuru ụwa ọnụ. Uru mbụ ya na-echekwa omume gara aga. Gbanyụọ ya otu ugboro ka ịmepụta akaụntụ n'ọdịnihu na proxy nwere nkwarụ na ndabara.
+
+A na-echekwa mmasị dị ka `defaultNewConnectionProxyEnabled` site na ntọala API dị. Ọ na-adabara na `true` ma ọ bụrụ na echekwaghị ya. Ịchekwa `false` na-arụ ọrụ maka akaụntụ ọhụrụ na-esote na-enweghị mmalite. `POST /api/providers` na-anabata nhọrọ siri ike boolean `proxyEnabled`; `true` ma ọ bụ `false` doro anya na-ebute ụzọ karịa ndabara okike. Mwepu na akaụntụ oyiri ma ọ bụ njikọ OAuth na-echekwa ọnọdụ echekwara akaụntụ ahụ. Enwere ike ịgbanwu ma ọ bụ gbanyụọ akaụntụ onye ọ bụla ma emechaa.
+
+Nyefe ndị na-eweta ahọpụtara na-eji ndabara nwụnye ebe aga maka akaụntụ ọhụrụ ma chekwaa amụma ebe ị ga-edochi akaụntụ dị adị. Toggles proxy abụghị ogige mbufe mbugharị. Mweghachi ndabere zuru oke na mbugharị JSON/SQL akụkọ ihe mere eme na-ejigide usoro ọmụmụ iweghachi ha dị adị, gụnyere ụkpụrụ akaụntụ echekwara na ndabara atụmatụ nketa; mweghachi ntọala zuru oke nwekwara ike iweghachi mmasị a.
+
+Mmasị a anaghị ekenye onye nnọchiteanya ma ọ bụ gosi na ahụ dị mma ma ọ bụ na-eji ya. Ntugharị n'ezie ka dabere na ngbanwe proxy zuru ụwa ọnụ yana nhazi proxy dị. Ndị na-eweta sịntetik na-enweghị akaụntụ na-adịgide adịgide, okporo ụzọ OAuth tupu ịmepụta akaụntụ, proxies environment/system, na ịkparịta ụka n'azụ azụ dịpụrụ adịpụ.
+
 ## Sistemụ Proxy Ọkwa Anọ
 
 OmniRoute na-akwado nhazi proxy n’**ókè anọ nọọrọ onwe ha**, nke a na-ekpebi dịka usoro mkpa si dị:

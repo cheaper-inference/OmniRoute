@@ -351,6 +351,51 @@ test("combo success keeps the OpenAI {created, data} wrapper and Codex defaults 
   }
 });
 
+test("combo keeps cx/gpt-6.1-sol as an image target (#18687)", async () => {
+  await createProviderConnection({
+    provider: "codex",
+    authType: "apikey",
+    apiKey: "codex-token",
+    name: "codex-gpt-6.1-sol-combo",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await createCombo({
+    name: "codex-sol-images",
+    strategy: "priority",
+    models: ["cx/gpt-6.1-sol"],
+  });
+
+  const upstreamModels: unknown[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, init) => {
+    upstreamModels.push(JSON.parse(String(init?.body ?? "{}")).model);
+    return new Response(
+      buildCodexSSE([
+        { type: "image_generation_call", id: "ig_sol", status: "completed", result: "c29s" },
+      ]),
+      { status: 200, headers: { "content-type": "text/event-stream" } }
+    );
+  };
+
+  try {
+    const response = await executeImageCombo(
+      "codex-sol-images",
+      { model: "codex-sol-images", prompt: "a small red apple" },
+      createMockAuth(),
+      Date.now(),
+      createLog()
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.data[0].b64_json, "c29s");
+    assert.deepEqual(upstreamModels, ["gpt-6.1-sol"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Parallel fan-out — a slow failing first target must not block a healthy one
 // ---------------------------------------------------------------------------

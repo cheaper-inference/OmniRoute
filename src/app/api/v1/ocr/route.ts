@@ -24,6 +24,10 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
+import { getComboByName } from "@/lib/db/combos";
+import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
+import { recordOcrRequest } from "@/lib/usage/specialtyRequestAccounting";
 
 export { resolveVertexOcrAccessToken };
 
@@ -68,42 +72,18 @@ export async function OPTIONS() {
   });
 }
 
-/**
- * POST /v1/ocr — document OCR
- * Mistral OCR API compatible.
- */
-async function postHandler(request, context) {
-  let rawBody;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid JSON body");
-  }
-
-  const validation = validateBody(v1OcrSchema, rawBody);
-  if (isValidationFailure(validation)) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, validation.error.message);
-  }
-  const body = validation.data;
-
-  const model = body.model || "mistral-ocr-latest";
-
-  // Enforce API key policies (model restrictions + budget limits)
-  const policy = await enforceApiKeyPolicy(request, model);
-  if (policy.rejection) return policy.rejection;
-  // GHSA-3w2r: credential selection stays inside the key's connection scope,
-  // the same scope chat applies.
-  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
-  if (scope.rejection) return scope.rejection;
-
-  const { provider } = parseOcrModel(model);
-
-  // Default to mistral if no provider prefix
+/** Dispatch one resolved combo target through the matching OCR provider. */
+async function dispatchOcrModel(
+  body: Record<string, unknown> & { model: string },
+  allowedConnections: string[] | null,
+  accounting: { apiKeyInfo?: { id?: string; name?: string } | null; startTime: number }
+): Promise<Response> {
+  const { provider } = parseOcrModel(body.model);
   const resolvedProvider = provider || "mistral";
   const credentials = await getProviderCredentialsWithQuotaPreflight(
     resolvedProvider,
     null,
-    scope.allowedConnections
+    allowedConnections
   );
   if (!credentials) {
     return errorResponse(
@@ -120,12 +100,82 @@ async function postHandler(request, context) {
 
   const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
   const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
-
-  const response = await handleOcr({ body: { ...body, model }, credentials: ocrCredentials });
-  if (response?.ok) {
-    await clearRecoveredProviderState(credentials);
-  }
+  const response = await handleOcr({
+    body,
+    credentials: ocrCredentials,
+    onSuccess: (result) =>
+      recordOcrRequest({
+        ...result,
+        apiKeyId: accounting.apiKeyInfo?.id,
+        apiKeyName: accounting.apiKeyInfo?.name,
+        connectionId:
+          "connectionId" in credentials && typeof credentials.connectionId === "string"
+            ? credentials.connectionId
+            : null,
+        startTime: accounting.startTime,
+        annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
+      }),
+  });
+  if (response?.ok) await clearRecoveredProviderState(credentials);
   return response;
+}
+
+/**
+ * POST /v1/ocr — document OCR
+ * Mistral OCR API compatible.
+ */
+/** Validate and execute an OCR request, including named combo routing. */
+async function postHandler(request, _context) {
+  const startTime = Date.now();
+  let rawBody;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid JSON body");
+  }
+
+  const validation = validateBody(v1OcrSchema, rawBody);
+  if (isValidationFailure(validation)) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, validation.error.message);
+  }
+  const body = validation.data;
+
+  const model = body.model || "mistral-ocr-latest";
+
+  const endpointMismatch = await getRequestedModelEndpointMismatch(model, "ocr");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
+
+  // Enforce API key policies (model restrictions + budget limits)
+  const policy = await enforceApiKeyPolicy(request, model);
+  if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection stays inside the key's connection scope,
+  // the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  const routedBody = { ...body, model };
+  if (!model.includes("/")) {
+    const combo = await getComboByName(model);
+    if (combo) {
+      return runModelEndpointCombo({
+        name: model,
+        endpoint: "ocr",
+        request,
+        body: routedBody,
+        policy,
+        allowedConnections: scope.allowedConnections,
+        dispatch: (targetBody, allowedConnections) =>
+          dispatchOcrModel(
+            targetBody as Record<string, unknown> & { model: string },
+            allowedConnections,
+            { apiKeyInfo: policy.apiKeyInfo, startTime }
+          ),
+      });
+    }
+  }
+  return dispatchOcrModel(routedBody, scope.allowedConnections, {
+    apiKeyInfo: policy.apiKeyInfo,
+    startTime,
+  });
 }
 
 export const POST = withInjectionGuard(postHandler);

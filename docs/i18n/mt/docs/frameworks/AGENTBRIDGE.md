@@ -12,38 +12,38 @@ AgentBridge huwa l-proxy MITM (Man-in-the-Middle) ta' OmniRoute li jinterċetta 
 
 ---
 
-## §1 Ħarsa Ġenerali
+## §1 Ħarsa ġenerali
 
 ### X'inhu AgentBridge?
 
-Meta aġent tal-IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, jikkonnettja direttament mal-fornitur AI upstream (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b'mod trasparenti fil-livell tat-TLS — mingħajr ma teħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jikteb mill-ġdid it-talba permezz ta' OmniRoute.
+Meta aġent IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, jikkonnettja direttament mal-fornitur AI upstream (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b'mod trasparenti fil-livell TLS — mingħajr ma jeħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jikteb mill-ġdid it-talba permezz OmniRoute.
 
 Dan ifisser li tista':
 
-- **Irreroutja kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot jitkellem ma' OpenAI? Iddirejjah lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mill-375 fornitur ta' OmniRoute.
-- **Applika mappini tal-mudelli**: `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell tal-handler.
-- **Osserva t-traffiku kollu tal-aġenti**: kull talba interċettata tiġi ppublikata fl-[Spezzjoni tat-Traffiku](./TRAFFIC_INSPECTOR.md).
-- **Applika r-reżiljenza ta' OmniRoute**: combo routing, circuit breakers, fallbacks, u intraċċar tal-ispejjeż jaħdmu wkoll għat-traffiku tal-aġenti tal-IDE.
+- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lil Anthropic Claude, Gemini, jew lil xi wieħed mit-394 fornitur ta' OmniRoute.
+- **Applika mappings tal-mudell** : `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell ta' handler.
+- **Osserva t-traffiku kollu tal-aġenti** : kull talba interċettata tiġi ppubblikata lill - [Ispettur tat - Traffiku](./TRAFFIC_INSPECTOR.md).
+- **Applika OmniRoute resilience** : combo routing, circuit breakers, fallbacks, u xogħol ta 'traċċar tal-ispejjeż għat-traffiku tal-aġent IDE ukoll.
 
-### Pożizzjonament meta mqabbel mas-suq
+### Pożizzjonament vs is-suq
 
-| Karatteristika              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                 |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot              |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                  |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                  |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries              |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                 |    —    |    —     |        ✓        |             ✓             |
-| Open Code                   |    —    |    —     |        ✓        |             ✓             |
-| Trae                        |    —    |    —     |        —        |     🔍 Qed tinvestiga     |
-| UI tad-Dashboard            |    ✓    |    ✗     |        ✗        |             ✓             |
-| Spezzjoni tat-Traffiku      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ir-rottar ta' OmniRoute     |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI għall-mappar tal-mudelli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Lista ta' bypass            |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ċertifikat CA upstream      |    ✗    |    ✗     |        ✓        |             ✓             |
+| Karatteristika       | 9router | anti-api | llm-interċettur | **OmniRoute AgentBridge** |
+| -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries       |    —    |    ✓     |        —        |             ✓             |
+| Claude Code          |    —    |    —     |        ✓        |             ✓             |
+| Kodiċi Miftuħ        |    —    |    —     |        ✓        |             ✓             |
+| Trae                 |    —    |    —     |        —        |     🔍 Investigating      |
+| Dashboard UI         |    ✓    |    ✗     |        ✗        |             ✓             |
+| Spettur tat-Traffiku |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute routing    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Model mapping UI     |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lista tal-bypass     |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert     |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -545,24 +545,24 @@ Skemi OpenAPI sħaħ: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ## §8 Pjan Direzzjonali
 
-### Investigazzjoni ta' Trae
+### investigazzjoni Trae
 
-Trae huwa assistent tal-kodifikazzjoni bl-IA relattivament ġdid. Qabel ma jiġi implimentat handler:
+Trae huwa assistent tal-kodifikazzjoni AI relattivament ġdid. Qabel ma timplimenta handler:
 
-1. Identifika l-binary/extension fis-swieq ta' VS Code / JetBrains jew bħala app awtonoma
-2. Aqbad it-traffiku b'mitmproxy biex tiskopri l-hosts tal-API u l-istrutturi tal-endpoints
-3. Iddetermina l-mekkaniżmu ta' awtentikazzjoni
-4. Evalwa jekk għandux jitkompla jew le abbażi tat-TOS u kemm l-API tista' tiġi skoperta
+1. Identifika binary/extension fi VS Code / JetBrains marketplaces jew bħala app waħedha
+2. Aqbad it-traffiku b'mitmproxy biex tiskopri API hosts u forom ta' endpoints
+3. Iddetermina mekkaniżmu ta 'awtentikazzjoni
+4. Evalwa go/no-go ibbażata fuq l-iskoperta ta ' TOS u API
 
-Sakemm titlesta l-investigazzjoni, il-kard ta' Trae fid-dashboard turi badge "Taħt investigazzjoni" b'link "Irrapporta l-vijabbiltà". L-istub tal-handler f'`src/mitm/handlers/trae.ts` jitfa' żball strutturat `Għadu mhux implimentat`.
+Sakemm titlesta l-investigazzjoni, il-karta Trae fid-dashboard turi badge "Investigazzjoni" b'rabta "Rapporta vijabbiltà". Il-handler stub fuq `src/mitm/handlers/trae.ts` jitfa' strutturat `Not yet implemented` error.
 
-### Aġenti fil-backlog (MITM meħtieġ — ebda appoġġ għal URL bażi personalizzat)
+### Aġenti b'lura (MITM meħtieġa — ebda appoġġ URL bażi tad-dwana)
 
-L-għodod li ġejjin ma jappoġġjawx URLs bażi personalizzati fil-verżjonijiet attwali tagħhom, u għalhekk MITM huwa l-uniku mod ta' interċettazzjoni. Il-valutazzjoni tal-vijabbiltà għadha pendenti:
+L-għodod li ġejjin ma jappoġġjawx il-bażi tad-dwana URLs fil-verżjonijiet attwali tagħhom, u jagħmlu MITM l-unika mogħdija ta 'interċettazzjoni. Il-valutazzjoni tal-vijabbiltà hija pendenti:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — separat minn Kiro IDE)
 - **Cowork** (Anthropic desktop)
 
-Nota: GitHub Copilot CLI ≥v1.0.19 jappoġġja `COPILOT_PROVIDER_BASE_URL` — uża konfigurazzjoni diretta minflok MITM għal dik l-għodda.
+Nota: GitHub Copilot CLI ≥ v1.0.19 jappoġġja `COPILOT_PROVIDER_BASE_URL` — tuża konfigurazzjoni diretta minflok MITM għal dik l-għodda.

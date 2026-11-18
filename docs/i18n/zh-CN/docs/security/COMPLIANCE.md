@@ -15,50 +15,66 @@ OmniRoute 将管理操作、身份验证事件、提供者凭据生命周期变�
 
 ### 管理审计事件（`audit_log`）
 
-每次调用 `logAuditEvent({ action, actor, target, details, ... })` 都会生成一行记录。操作字符串遵循 `domain.verb`（或 `domain.verb.outcome`）模式。代码树中已确认的操作类型包括：
+每次调用 `logAuditEvent({ action, actor, target, details, ... })` 都会生成
+一行记录。操作字符串遵循 `domain.verb`（或 `domain.verb.outcome`）
+模式。已在代码库中确认的操作类型包括：
 
-| 操作                                 | 来源                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| 操作                                 | 来源                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-每个条目都会记录 `action`、`actor`（默认为 `"system"`）、`target`、`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、`request_id` 和 `timestamp`。在写入记录之前，敏感键（`apiKey`、`accessToken`、`refreshToken`、`password`、任何匹配 `*token`/`*secret`/`*apikey` 的键等）都会被递归脱敏为 `"[redacted]"`。
+每条记录都会保存 `action`、`actor`（默认为 `"system"`）、`target`、
+`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、
+`request_id` 和 `timestamp`。敏感键（`apiKey`、`accessToken`、
+`refreshToken`、`password`、任何匹配 `*token`/`*secret`/`*apikey`
+的键等）都会在写入记录前递归脱敏为 `"[redacted]"`。
+
+`api_key.auth.touch` 记录成功的 API 密钥元数据和发现读取操作（GET/HEAD），
+这些操作不会进入请求日志：包括使用了哪个密钥、发生时间以及规范化路径；
+记录会合并，且最多保留 1,000 行。带有 `noLog` 的密钥和环境密钥会被跳过。
+仅当 `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` 功能标志启用时，才会添加调用方的
+IP 地址和用户代理；该标志默认关闭。
 
 ### MCP 工具调用（`mcp_tool_audit`）
 
-每次 MCP 工具调用都会通过 `open-sse/mcp-server/audit.ts` 写入一行记录。模式（来自 `src/lib/db/migrations/002_mcp_a2a_tables.sql`）：
+每次 MCP 工具调用都会通过
+`open-sse/mcp-server/audit.ts` 写入一行记录。架构（来自
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`）：
 
 | 列               | 说明                            |
 | ---------------- | ------------------------------- |
 | `id`             | 自动递增                        |
 | `tool_name`      | MCP 工具标识符                  |
-| `input_hash`     | 输入的 sha256（不存储有效负载） |
+| `input_hash`     | 输入内容的 sha256（不存储载荷） |
 | `output_summary` | 简短的截断摘要                  |
-| `duration_ms`    | 实际耗时                        |
+| `duration_ms`    | 墙上时钟时间                    |
 | `api_key_id`     | 调用方（可为空）                |
 | `success`        | `1` / `0`                       |
-| `error_code`     | 失败时的最终错误代码            |
+| `error_code`     | 失败时的终止错误代码            |
 | `created_at`     | ISO 时间戳                      |
 
-### 请求/使用日志
+### 请求/使用情况日志
 
-这些属于运行遥测数据（严格来说并非管理审计），但与审计数据使用相同的保留管道：
+这些属于运营遥测数据（并非严格意义上的管理审计），但共用同一套
+保留流程：
 
 - `usage_history` — 每个请求的使用情况汇总
-- `call_logs` — 完整的逐请求日志（受行数上限约束，见下文）
-- `proxy_logs` — 代理流量日志（受行数上限约束）
+- `call_logs` — 每个请求的完整日志（受行数上限限制，见下文）
+- `proxy_logs` — 代理流量日志（受行数上限限制）
 - `request_detail_logs` — 旧版详细请求日志（如果存在，仍会被清理）
 
 ## 存储架构

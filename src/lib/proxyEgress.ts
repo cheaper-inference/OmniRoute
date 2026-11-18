@@ -11,6 +11,11 @@
  * resolved proxy/dispatcher) and detects same-rotation-group accounts sharing
  * an egress IP, so the operator can confirm exactly which IP each account is
  * entering and leaving by.
+ *
+ * The probe knows two modes: the sequential one stops at the first echo target
+ * that answers (the operator routes keep it), and the dual one queries every
+ * target at once so the address of each family is measured. A tunnel exposes
+ * one address per family, so measuring one family leaves the other unknown.
  */
 import { request as undiciRequest } from "undici";
 import {
@@ -18,7 +23,17 @@ import {
   proxyConfigToUrl,
 } from "@omniroute/open-sse/utils/proxyDispatcher.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
-import { probeEchoTargets } from "./proxyEchoTarget";
+import {
+  probeEchoTargets,
+  probeEchoTargetsInParallel,
+  resolveEgressEchoUrls,
+  splitEchoAttemptBudget,
+} from "./proxyEchoTarget";
+import {
+  demapEgressAddress,
+  egressAddressFamily,
+  type EgressAddressFamily,
+} from "@/shared/network/egressAddress";
 
 const EGRESS_PROBE_TIMEOUT_MS = 6000;
 const EGRESS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -27,19 +42,106 @@ export interface EgressProbeResult {
   ip: string | null;
   latencyMs: number;
   error?: string;
+  /**
+   * Address observed for the IPv4 family; absent = the probe did not report
+   * that family. The merge then derives it from the measured address, whose
+   * family is known.
+   */
+  ipv4?: string | null;
+  /**
+   * Address observed for the IPv6 family; absent = the probe did not report
+   * that family. The merge then derives it from the measured address, whose
+   * family is known.
+   */
+  ipv6?: string | null;
+  /**
+   * Every configured echo target was queried (a target that failed still
+   * counts). Absent = a probe that does not report its coverage: the entry is
+   * then written as complete, so the enrichment never restarts on every log
+   * line.
+   */
+  complete?: boolean;
 }
 
-export type EgressProbe = (proxyUrl: string | null) => Promise<EgressProbeResult>;
+/**
+ * `sequential` stops at the first echo target that answers (one request for a
+ * healthy proxy); `dual` queries every target at once to measure the address
+ * of each family. The mode never changes the reported address.
+ */
+export type EgressProbeMode = "sequential" | "dual";
 
-const egressCache = new Map<string, { ip: string | null; at: number }>();
+export type EgressProbe = (
+  proxyUrl: string | null,
+  mode: EgressProbeMode
+) => Promise<EgressProbeResult>;
 
-async function defaultEgressProbe(proxyUrl: string | null): Promise<EgressProbeResult> {
+/** The addresses one measurement observed, one per family. */
+export interface EgressObservation {
+  /** The reported address: the first target that answered, never synthesized. */
+  ip: string | null;
+  /** The address observed for the IPv4 family; null = family not observed. */
+  ipv4: string | null;
+  /** The address observed for the IPv6 family; null = family not observed. */
+  ipv6: string | null;
+}
+
+interface EgressCacheEntry extends EgressObservation {
+  complete: boolean;
+  at: number;
+}
+
+const egressCache = new Map<string, EgressCacheEntry>();
+
+/**
+ * PURE: read the addresses out of the answers of the echo targets, in the order
+ * of the targets. The reported address is the first answer that came back, even
+ * when it carries no address at all; the family columns hold the address
+ * observed for each family, demapped, and the first address seen for a family
+ * wins.
+ */
+export function buildEgressObservation(answers: Array<{ body: string }>): EgressObservation {
+  let ip: string | null = null;
+  let ipv4: string | null = null;
+  let ipv6: string | null = null;
+  let primaryTaken = false;
+
+  for (const answer of answers) {
+    let parsed: string | null = null;
+    try {
+      parsed = (JSON.parse(answer.body) as { ip?: string }).ip ?? null;
+    } catch {
+      // non-JSON body — leave the address null
+      parsed = null;
+    }
+    if (!primaryTaken) {
+      ip = parsed;
+      primaryTaken = true;
+    }
+    if (typeof parsed !== "string") continue;
+    const family = egressAddressFamily(parsed);
+    const demapped = demapEgressAddress(parsed);
+    if (demapped === null) continue;
+    if (family === "ipv4" && ipv4 === null) ipv4 = demapped;
+    if (family === "ipv6" && ipv6 === null) ipv6 = demapped;
+  }
+
+  return { ip, ipv4, ipv6 };
+}
+
+async function defaultEgressProbe(
+  proxyUrl: string | null,
+  mode: EgressProbeMode = "sequential"
+): Promise<EgressProbeResult> {
   const start = Date.now();
+  const urls = resolveEgressEchoUrls();
+  // The sequential probe splits the budget between the targets, so it may try
+  // fewer targets than the configured ones — the coverage says which.
+  const attempts = splitEchoAttemptBudget(EGRESS_PROBE_TIMEOUT_MS, urls.length).length;
   try {
     const dispatcher = proxyUrl ? createProxyDispatcher(proxyUrl) : undefined;
-    // #9694: each echo target gets its own controller, so exhausting the budget
-    // on an unreachable IPv6-first target does not abort the IPv4 attempt.
-    const { result: text } = await probeEchoTargets(async (url, timeoutMs) => {
+    const run = async (url: string, timeoutMs: number) => {
+      // #9694: each echo target gets its own controller, so exhausting the budget
+      // on an unreachable IPv6-first target does not abort the IPv4 attempt.
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
       try {
@@ -54,19 +156,35 @@ async function defaultEgressProbe(proxyUrl: string | null): Promise<EgressProbeR
       } finally {
         clearTimeout(timeout);
       }
-    }, EGRESS_PROBE_TIMEOUT_MS);
+    };
+
+    if (mode === "dual") {
+      const answers = await probeEchoTargetsInParallel(run, EGRESS_PROBE_TIMEOUT_MS);
+      const observation = buildEgressObservation(
+        answers.map((answer) => ({ body: answer.result }))
+      );
+      return { ...observation, latencyMs: Date.now() - start, complete: true };
+    }
+
+    const { result: text, url } = await probeEchoTargets(run, EGRESS_PROBE_TIMEOUT_MS);
     let ip: string | null = null;
     try {
       ip = (JSON.parse(text) as { ip?: string }).ip ?? null;
     } catch {
       // non-JSON body — leave ip null
     }
-    return { ip, latencyMs: Date.now() - start };
+    // Every target was queried when the answer comes from the last one: the
+    // targets before it were tried and failed.
+    const complete = attempts >= urls.length && url === urls[urls.length - 1];
+    return { ip, latencyMs: Date.now() - start, complete };
   } catch (error) {
     return {
       ip: null,
       latencyMs: Date.now() - start,
       error: error instanceof Error ? error.message : String(error),
+      // Every target was tried before the probe gave up, or the dual probe
+      // queried them all at once: the observation is complete either way.
+      complete: mode === "dual" || attempts >= urls.length,
     };
   }
 }
@@ -83,34 +201,105 @@ export function clearEgressCache(): void {
 }
 
 /**
- * Synchronous read of the cached egress IP for a proxy URL (null = direct).
- * Non-blocking — used by the request hot path to log the egress IP without an
- * echo-IP round-trip. Returns null if not yet probed.
+ * Drop the entry of a proxy URL once it expired, so the next read starts
+ * over. The entry count therefore follows the number of proxy URLs, not the
+ * number of measurements.
  */
-export function getCachedEgressIp(proxyUrl: string | null): string | null {
+function dropExpiredEgressEntry(key: string, at: number): boolean {
+  if (Date.now() - at < EGRESS_CACHE_TTL_MS) return false;
+  egressCache.delete(key);
+  return true;
+}
+
+/**
+ * Synchronous read of the cached observation for a proxy URL (null = direct).
+ * Non-blocking — used by the request hot path to log the egress addresses
+ * without an echo-IP round-trip. Returns null if not yet probed.
+ *
+ * The completeness flag travels with the observation: it says whether every
+ * echo target was queried, so the caller knows whether the other family still
+ * has to be measured.
+ */
+export function getCachedEgressObservation(
+  proxyUrl: string | null
+): (EgressObservation & { complete: boolean }) | null {
   const key = proxyUrl ?? "__direct__";
   const cached = egressCache.get(key);
   if (!cached) return null;
-  if (Date.now() - cached.at >= EGRESS_CACHE_TTL_MS) {
-    egressCache.delete(key);
-    return null;
-  }
-  return cached.ip;
+  if (dropExpiredEgressEntry(key, cached.at)) return null;
+  return { ip: cached.ip, ipv4: cached.ipv4, ipv6: cached.ipv6, complete: cached.complete };
 }
 
 const warmingInFlight = new Set<string>();
 
 /**
  * Fire-and-forget: populate the egress cache for a proxy URL in the background
- * so subsequent proxy log lines carry the real egress IP. Deduped per URL.
+ * so subsequent proxy log lines carry the real egress addresses. Deduped per
+ * URL.
+ *
+ * A live and COMPLETE observation is left alone — that includes a failed
+ * measurement: every target was queried, so there is nothing left to measure
+ * and the entry is honoured until it expires. An incomplete observation (a
+ * sequential measurement stopped at the first target that answered) is
+ * completed in the background, once per URL and per TTL.
  */
 export function warmEgressIp(proxyUrl: string | null): void {
   const key = proxyUrl ?? "__direct__";
-  if (warmingInFlight.has(key) || getCachedEgressIp(proxyUrl) !== null) return;
+  if (warmingInFlight.has(key)) return;
+  const observation = getCachedEgressObservation(proxyUrl);
+  if (observation?.complete) return;
   warmingInFlight.add(key);
-  void resolveEgressIp(proxyUrl)
+  void resolveEgressIp(proxyUrl, { mode: "dual", force: true })
     .catch(() => undefined)
     .finally(() => warmingInFlight.delete(key));
+}
+
+/**
+ * The value of one family column after a measurement. The family of the
+ * measured address is derived from the address itself, so the column of that
+ * family is refreshed with it: the reported address is always carried by the
+ * column of its own family. A family the measurement did not observe keeps the
+ * value it had.
+ */
+function mergeEgressColumn(
+  family: EgressAddressFamily,
+  measuredFamily: EgressAddressFamily | null,
+  measuredAddress: string | null,
+  reported: string | null | undefined,
+  previous: string | null | undefined
+): string | null {
+  if (family === measuredFamily && measuredAddress !== null) return measuredAddress;
+  return reported ?? previous ?? null;
+}
+
+/**
+ * Merge a measurement into the cache entry it replaces. The write is monotone
+ * in completeness: a family the measurement observed is refreshed, a family it
+ * did not observe keeps the value it had, and a complete observation never
+ * goes back to incomplete. An operator action can therefore never erase what
+ * the journal already measured.
+ *
+ * The family of the measured address is derived from the address itself, not
+ * from what the probe reported: a probe that stops at the first target that
+ * answers reports no family at all, and the address it read still belongs to
+ * one. The invariant therefore holds after the merge, not only inside one
+ * measurement.
+ */
+function mergeEgressObservation(
+  previous: EgressCacheEntry | undefined,
+  result: EgressProbeResult
+): EgressCacheEntry {
+  const measuredFamily = egressAddressFamily(result.ip);
+  const measuredAddress = measuredFamily === null ? null : demapEgressAddress(result.ip);
+  return {
+    ip: result.ip ?? null,
+    ipv4: mergeEgressColumn("ipv4", measuredFamily, measuredAddress, result.ipv4, previous?.ipv4),
+    ipv6: mergeEgressColumn("ipv6", measuredFamily, measuredAddress, result.ipv6, previous?.ipv6),
+    // A measurement that does not report its coverage (an injected probe) is
+    // written as complete: it answered, and there is nothing left to measure.
+    complete: (previous?.complete ?? false) || (result.complete ?? true),
+    at: Date.now(),
+  };
 }
 
 /**
@@ -119,17 +308,32 @@ export function warmEgressIp(proxyUrl: string | null): void {
  */
 export async function resolveEgressIp(
   proxyUrl: string | null,
-  opts: { cacheTtlMs?: number; force?: boolean } = {}
+  opts: { cacheTtlMs?: number; force?: boolean; mode?: EgressProbeMode } = {}
 ): Promise<EgressProbeResult & { cached: boolean }> {
   const key = proxyUrl ?? "__direct__";
   const ttl = opts.cacheTtlMs ?? EGRESS_CACHE_TTL_MS;
   const cached = egressCache.get(key);
   if (!opts.force && cached && Date.now() - cached.at < ttl) {
-    return { ip: cached.ip, latencyMs: 0, cached: true };
+    return {
+      ip: cached.ip,
+      latencyMs: 0,
+      cached: true,
+      ipv4: cached.ipv4,
+      ipv6: cached.ipv6,
+      complete: cached.complete,
+    };
   }
-  const result = await probe(proxyUrl);
-  egressCache.set(key, { ip: result.ip, at: Date.now() });
-  return { ...result, cached: false };
+  const result = await probe(proxyUrl, opts.mode ?? "sequential");
+  const entry = mergeEgressObservation(egressCache.get(key), result);
+  egressCache.set(key, entry);
+  return {
+    ...result,
+    ip: entry.ip,
+    ipv4: entry.ipv4,
+    ipv6: entry.ipv6,
+    complete: entry.complete,
+    cached: false,
+  };
 }
 
 export interface ConnectionEgress {

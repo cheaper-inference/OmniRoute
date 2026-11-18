@@ -6,8 +6,10 @@
  */
 
 import { parseModelFromRegistry } from "./registryUtils.ts";
+import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuild.ts";
 import { RUNWAYML_SUPPORTED_VIDEO_MODELS } from "./runway.ts";
 import { SEGMIND_VIDEO_MODELS } from "./providers/registry/segmind/videoModels.ts";
+import { RENDERHOUR_VIDEO_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import { toRegistryVideoModels } from "../services/adobeFireflyModels.ts";
 import { toRegistryVideoModels as toSyntxVideoModels } from "../services/syntxMediaCatalog.ts";
 
@@ -196,12 +198,15 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
   },
   leonardo: {
     id: "leonardo",
-    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
+    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations-text-to-video",
     statusUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
     authType: "apikey",
     authHeader: "bearer",
     format: "leonardo-video",
-    models: [{ id: "phoenix", name: "Phoenix Video" }],
+    models: [
+      { id: "motion-2.0", name: "Motion 2.0" },
+      { id: "motion-2.0-fast", name: "Motion 2.0 Fast" },
+    ],
   },
   pollinations: {
     id: "pollinations",
@@ -389,6 +394,23 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     models: SEGMIND_VIDEO_MODELS,
   },
 
+  // deAPI OpenAI-compatible gateway: POST /v1/videos → poll GET /v1/videos/{id};
+  // the finished clip is only served from the auth-gated /v1/videos/{id}/content,
+  // handled by the "deapi-video-job" preset. `seconds`/`size` are validated per model.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/videos",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "deapi-video-job",
+    models: [
+      { id: "Ltx2_5_22B_Dist_INT8", name: "LTX-2.5 22B (deAPI)" },
+      { id: "MiniMaxH3_33B_Turbo_INT8", name: "MiniMax H3 Turbo (deAPI)" },
+      { id: "Ltx2_3_22B_Dist_INT8", name: "LTX-2.3 22B (deAPI)" },
+      { id: "Ltxv_13B_0_9_8_Distilled_FP8", name: "LTX-Video 13B Distilled (deAPI)" },
+    ],
+  },
+
   novita: {
     id: "novita",
     // Novita's async video APIs are per-model: the model id IS the submit path
@@ -416,6 +438,17 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     authHeader: "bearer",
     format: "xai-video",
     models: [{ id: "grok-imagine-video", name: "Grok Imagine Video" }],
+  },
+
+  "grok-cli": {
+    id: "grok-cli",
+    alias: "gc",
+    baseUrl: `${GROK_BUILD_PROXY_BASE_URL}/videos`,
+    statusUrl: `${GROK_BUILD_PROXY_BASE_URL}/videos`,
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "xai-video",
+    models: [{ id: "grok-imagine-video", name: "Grok Imagine Video (OAuth)" }],
   },
 
   // UC (uncensored.com) video generation. One handler (handleUcVideoGeneration)
@@ -523,6 +556,8 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
       { id: "runway/gen-4.5", name: "Runway Gen-4.5" },
     ],
   },
+  // Last on purpose, as in the image registry: renderhour/<model> addresses these.
+  renderhour: RENDERHOUR_VIDEO_PROVIDER,
 };
 
 /**

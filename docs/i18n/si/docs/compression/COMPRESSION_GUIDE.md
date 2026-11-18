@@ -30,92 +30,92 @@ OmniRoute විසින් ඉල්ලීම් upstream සැපයුම�
 
 ---
 
-## සම්පීඩන ප්රකාර
+## සම්පීඩන මාදිලි
 
-### Off
+### අක්රිය
 
-කිසිදු සම්පීඩනයක් යොදනු නොලැබේ. සියලුම පණිවිඩ වෙනස් නොකරම යවනු ලැබේ.
+සම්පීඩනයක් යෙදිය නොමැත. සියලුම පණිවිඩ වෙනස් නොකර යවනු ලැබේ.
 
-### Lite ප්රකාරය (~15% ඉතිරියක්, <1ms ප්රමාදයක්)
+### ලයිට් මාදිලිය (~15% ඉතිරියක්, <1ms ප්රමාදය)
 
-ආරක්ෂිතම ප්රකාරය — අර්ථයට කිසිදු වෙනසක් සිදු නොකර, ආකෘතිකරණය පමණක් පිරිසිදු කරයි:
+ආරක්ෂිතම මාදිලිය — හැඩතල පිරිසිදු කිරීම. මෙහි මෙවලම්-ප්රතිඵල කප්පාදුව දත්ත නැතිකරන බැවින්, පෙරනිමි
+මාර්ගය (`allow-lossy`, `engine:lite` හෝ නම් කළ සංයෝජන සඳහා opt-in එකක් නොමැතිව) `compressToolResults: false` සමඟ
+lite ක්රියාත්මක කරයි: පෙර මෙවලම් ප්රතිඵල වෙනස් නොකර provider වෙත ළඟා වේ.
 
-| ශිල්පක්රමය               | විස්තරය                                             |
-| ------------------------ | --------------------------------------------------- |
-| `collapseWhitespace`     | අනුක්රමික හිස් පේළි සහ පේළි අග හිස් ඉඩ ඒකාබද්ධ කරයි |
-| `dedupSystemPrompt`      | අනුපිටපත් system පණිවිඩ ඉවත් කරයි                   |
-| `compressToolResults`    | දීර්ඝ tool/function ප්රතිදාන සම්පීඩනය කරයි          |
-| `removeRedundantContent` | නැවත නැවත සඳහන් වන උපදෙස් ඉවත් කරයි                 |
-| `replaceImageUrls`       | base64 රූප දත්ත URI කෙටි කරයි                       |
+| තාක්ෂණය                  | විස්තරය                                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | අඛණ්ඩ හිස් පේළි සහ අවසාන හිස්තැන් ඒකාබද්ධ කිරීම                                           |
+| `dedupSystemPrompt`      | අනුපිටපත් පද්ධති පණිවිඩ ඉවත් කිරීම                                                        |
+| `compressToolResults`    | පෙර මෙවලම් ප්රතිඵල lite සීමාවට කප්පාදු කිරීම (දත්ත නැතිවීම: ඉල්ලීම් opt-in එකක් සමඟ පමණි) |
+| `removeRedundantContent` | නැවත නැවත ඇති උපදෙස් ඉවත් කිරීම                                                           |
+| `replaceImageUrls`       | base64 රූප දත්ත URI කෙටි කිරීම                                                            |
 
-**වඩාත් සුදුසු වන්නේ:** සැමවිටම සක්රීය භාවිතයට සහ ආරක්ෂාව-අතිශය-වැදගත් කාර්ය ප්රවාහ සඳහාය.
+**වඩාත් සුදුසු:** සැමවිටම සක්රිය භාවිතය, ආරක්ෂාව-තීරණාත්මක කාර්ය ප්රවාහ.
 
-### Standard ප්රකාරය (~30% ඉතිරියක්)
+### සම්මත මාදිලිය (~30% ඉතිරියක්)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) වෙතින් ආභාසය ලබා ඇත — අර්ථය සුරකිමින් පිරවුම් වචන සහ අනවශ්ය ලෙස දීර්ඝ යෙදුම් ඉවත් කරයි:
+[Caveman](https://github.com/JuliusBrussee/caveman) මඟින් ආභාෂය ලැබූ — අර්ථය රඳවා ගනිමින් පිරවුම් වචන සහ දිගු වාක්ය ඛණ්ඩ ඉවත් කරයි:
 
-- පිරවුම් වචන ඉවත් කරයි ("කරුණාකර", "මම සිතන්නේ", "මූලික වශයෙන්", "ඇත්තෙන්ම")
-- අනවශ්ය ලෙස දීර්ඝ වාක්ය ඛණ්ඩ සංක්ෂිප්ත කරයි ("කිරීම සඳහා" → "කිරීමට", "ප්රතිඵලයක් ලෙස" → "නිසා")
-- ආචාරශීලී අවිනිශ්චිත යෙදුම් ඉවත් කරයි ("ඔබට අපහසු නැත්නම්...", "ඔබට හැකි නම්...")
-- coding prompt සඳහා සකස් කළ regex රීති 30කට වැඩි ගණනක්
+- පිරවුම් වචන ඉවත් කරයි ("please", "I think", "basically", "actually")
+- දිගු වාක්ය ඛණ්ඩ සංක්ෂිප්ත කරයි ("in order to" → "to", "as a result of" → "because")
+- ආචාරශීලී අවිනිශ්චිත ප්රකාශ ඉවත් කරයි ("Would you mind...", "If you could possibly...")
+- කේතීකරණ විමසුම් සඳහා සකස් කළ regex රීති 30කට වැඩි ප්රමාණයක්
 
-**වඩාත් සුදුසු වන්නේ:** දෛනික coding කාර්ය ප්රවාහ සහ පිරිවැය පිළිබඳ සැලකිලිමත් කණ්ඩායම් සඳහාය.
+**වඩාත් සුදුසු:** දෛනික කේතීකරණ කාර්ය ප්රවාහ, වියදම් පිළිබඳ සැලකිලිමත් කණ්ඩායම්.
 
-### Aggressive ප්රකාරය (~50% ඉතිරියක්)
+### ආක්රමණශීලී මාදිලිය (~50% ඉතිරියක්)
 
 දිගු සැසි සඳහා බුද්ධිමත් ඉතිහාස කළමනාකරණය:
 
-- **පණිවිඩ වයස්ගත කිරීම** — පැරණි පණිවිඩ ක්රමයෙන් වැඩි වශයෙන් සම්පීඩනය කෙරේ
-- **Tool ප්රතිඵල සම්පීඩනය** — දිගු tool ප්රතිදාන කෙටි කර හෝ ඉවත් කරයි (පළමු/අවසාන පේළි,
-  ගැළපෙන පේළි පෙරීම, JSON key සංක්ෂිප්ත කිරීම)
-- **ව්යුහාත්මක අඛණ්ඩතා ආරක්ෂක** — `tool_use` + `tool_result` යුගල අනුකූලව පවතින බව සහතික කරයි
-- **Context Window පිළිබඳ දැනුවත්භාවය** — එක් එක් model සඳහා වන token සීමාවන්ට අනුකූල වේ
+- **පණිවිඩ වයස්ගත කිරීම** — පැරණි පණිවිඩ ක්රමයෙන් සම්පීඩනය කෙරේ
+- **මෙවලම් ප්රතිඵල සම්පීඩනය** — දිගු මෙවලම් ප්රතිදාන කප්පාදු හෝ ඉවත් කෙරේ (පළමු/අවසාන පේළි,
+  ගැළපෙන පේළි පෙරීම, JSON යතුරු සංක්ෂිප්ත කිරීම)
+- **ව්යුහාත්මක අඛණ්ඩතා ආරක්ෂක** — `tool_use` + `tool_result` යුගල අඛණ්ඩව පවතින බව සහතික කරයි
+- **සන්දර්භ කවුළු දැනුවත්භාවය** — එක් එක් මොඩලයේ ටෝකන සීමාවන්ට අනුකූල වේ
 
-**වඩාත් සුදුසු වන්නේ:** දීර්ඝ debugging සැසි සහ විශාල codebase සඳහාය.
+**වඩාත් සුදුසු:** දිගු දෝෂ නිරාකරණ සැසි, විශාල කේත පදනම්.
 
-### Ultra ප්රකාරය (~75% ඉතිරියක්)
+### අල්ට්රා මාදිලිය (~75% ඉතිරියක්)
 
-token අතිශය වැදගත් අවස්ථා සඳහා උපරිම සම්පීඩනය:
+ටෝකන-තීරණාත්මක අවස්ථා සඳහා උපරිම සම්පීඩනය:
 
-- **හියුරිස්ටික් කප්පාදු කිරීම** — ගද්යයේ ලකුණු-පාදක token කප්පාදු කිරීම
-- **ව්යුහය සුරැකීම** — වැටකින් වෙන් කළ code block, inline code, URL සහ identifier
-  tombstone කර, කිසි විටෙක කප්පාදු නොකර, වෙනස් නොකර නැවත සම්බන්ධ කරයි
-- **විකල්ප SLM ස්තරය** — වින්යාස කර ඇති විට කුඩා local model එකකට කප්පාදුව පිරිපහදු කළ හැක
-- Aggressive ප්රකාරයෙන් ස්වාධීන වේ: එය පණිවිඩ වයස්ගත කිරීම, tool-result සම්පීඩනය
-  හෝ fallback සාරාංශකරණය ධාවනය නොකරයි (SLM-tier අසාර්ථකත්වයක් පමණක් fallback වාරයක්
-  aggressive හරහා යොමු කළ හැක)
+- **හියුරිස්ටික් කප්පාදුව** — ලකුණු මත පදනම්ව ගද්යයේ ටෝකන කප්පාදු කිරීම
+- **ව්යුහය සංරක්ෂණය** — fenced code blocks, inline code, URLs සහ identifiers tombstone කර නැවත වචනානුසාරයෙන් සම්බන්ධ කෙරේ; කිසිවිටෙක කප්පාදු නොකෙරේ
+- **විකල්ප SLM ස්තරය** — වින්යාස කළ විට කුඩා ප්රාදේශීය මොඩලයකට කප්පාදුව වැඩිදියුණු කළ හැක
+- ආක්රමණශීලී මාදිලියෙන් ස්වාධීන වේ: එය පණිවිඩ වයස්ගත කිරීම, මෙවලම්-ප්රතිඵල සම්පීඩනය
+  හෝ fallback summarizer ක්රියාත්මක නොකරයි (SLM-ස්තර අසමත් වීමක් පමණක් fallback pass එකක් ආක්රමණශීලී මාදිලිය හරහා යොමු කළ හැක)
 
-**වඩාත් සුදුසු වන්නේ:** ඔබ නැවත නැවතත් context සීමාවන්ට ළඟා වන විටය.
+**වඩාත් සුදුසු:** ඔබ නැවත නැවතත් සන්දර්භ සීමාවන්ට ළඟා වන විට.
 
-### RTK ප්රකාරය (upstream පරාසය 60-90%)
+### RTK මාදිලිය (upstream පරාසයෙන් 60-90%)
 
-RTK ප්රකාරය coding-agent සැසිවල දිස්වන දීර්ඝ tool ප්රතිදාන සඳහා ප්රශස්ත කර ඇත:
+RTK මාදිලිය coding-agent සැසිවල දිස්වන විස්තරාත්මක මෙවලම් ප්රතිදාන සඳහා ප්රශස්ත කර ඇත:
 
-- `git status`, `git diff`, `git log`, test runner,
-  TypeScript/Vite/Webpack build, ESLint/Biome/Prettier, npm audit/install, Docker log, infra
-  ප්රතිදාන සහ සාමාන්ය shell ප්රතිදාන වැනි command/output පන්ති හඳුනා ගනී
-- `open-sse/services/compression/engines/rtk/filters/` වෙතින් JSON filter pack යොදයි
-- inline-test වලංගුකරණය සහ project ගොනු සඳහා trust-gating සමඟ, project හෝ ගෝලීය `filters.toml` ගොනුවලින් RTK TOML schema v1 filter ආයාත කරයි
-- inline verify සාම්පල සහිත built-in filter 55ක් සමඟ සපයනු ලැබේ
-- ANSI පාලන අනුක්රම, ප්රගති තීරු, නැවත නැවත එන පේළි සහ ක්රියාමාර්ග ගත නොහැකි අනවශ්ය දෑ ඉවත් කරයි
-- අසාර්ථකවීම්, දෝෂ, අනතුරු ඇඟවීම්, වෙනස් වූ ගොනු, සාරාංශ සහ දිගු ප්රතිදානයේ අවසාන කොටස සුරකියි
-- trust-gated project filter, ගෝලීය filter සහ විකල්ප redacted raw-output ප්රතිසාධනය සඳහා සහාය දක්වයි
+- `git status`, `git diff`, `git log`, test runners,
+  TypeScript/Vite/Webpack builds, ESLint/Biome/Prettier, npm audit/installs, Docker logs, infra
+  output සහ generic shell output වැනි විධාන/ප්රතිදාන පන්ති හඳුනා ගනී
+- `open-sse/services/compression/engines/rtk/filters/` වෙතින් JSON filter packs යොදයි
+- ව්යාපෘති හෝ ගෝලීය `filters.toml` ගොනු වෙතින් RTK TOML schema v1 filters ආනයනය කරයි; inline-test
+  වලංගුකරණය සහ ව්යාපෘති ගොනු සඳහා trust-gating සමඟ
+- inline verify samples සහිත built-in filters 56ක් සපයයි
+- ANSI පාලන අනුක්රම, progress bars, නැවත නැවත ඇති පේළි සහ ක්රියාමාර්ගයකට අදාළ නොවන noise ඉවත් කරයි
+- failures, errors, warnings, වෙනස් කළ ගොනු, summaries සහ දිගු ප්රතිදානයේ අවසාන කොටස සංරක්ෂණය කරයි
+- trust-gated project filters, global filters සහ විකල්ප redacted raw-output recovery සඳහා සහාය දක්වයි
 
-**වඩාත් සුදුසු වන්නේ:** shell, build, test, git, grep සහ file-output පිටපත් සහිත agent සැසි සඳහාය.
+**වඩාත් සුදුසු:** shell, build, test, git, grep සහ file-output transcripts සහිත Agent සැසි.
 
-### Stacked ප්රකාරය (සුදුසුකම් ලබන පරාසය 78-95%)
+### ස්ටැක් කළ මාදිලිය (සුදුසු පරාසයෙන් 78-95%)
 
-Stacked ප්රකාරය සම්පීඩන engine කිහිපයක් නිශ්චිත අනුපිළිවෙළකට ධාවනය කරයි. පෙරනිමි නල මාර්ගය වන්නේ:
+ස්ටැක් කළ මාදිලිය සම්පීඩන එන්ජින් කිහිපයක් නිශ්චිත අනුපිළිවෙළකට ක්රියාත්මක කරයි. පෙරනිමි pipeline එක:
 
 ```txt
 RTK -> Caveman
 ```
 
-එම අනුපිළිවෙළ පළමුව terminal/tool ප්රතිදානය සංක්ෂිප්තව තබාගෙන, ඉන්පසු ඉතිරි ස්වාභාවික-භාෂා prompt එකට Caveman අර්ථමය සංක්ෂිප්තකරණය යොදයි. Stacked නල මාර්ග ගෝලීයව හෝ routing combo වෙත පවරා ඇති සම්පීඩන combo හරහා වින්යාස කළ හැක.
+එම අනුපිළිවෙළ පළමුව terminal/tool ප්රතිදානය සංක්ෂිප්ත කරයි, ඉන්පසු ඉතිරි ස්වභාවික-භාෂා විමසුමට Caveman අර්ථමය සංක්ෂිප්ත කිරීම යොදයි. ස්ටැක් කළ pipelines ගෝලීයව හෝ routing combos වෙත
+පවරන ලද compression combos හරහා වින්යාස කළ හැක.
 
-**වඩාත් සුදුසු වන්නේ:** විශාල tool log සමඟ මානව උපදෙස් හෝ assistant සාරාංශ අඩංගු මිශ්ර සන්දර්භ සඳහාය.
-
----
+**වඩාත් සුදුසු:** විශාල මෙවලම් ලොග් සහ මානව උපදෙස් හෝ සහායක සාරාංශ සහිත මිශ්ර සන්දර්භ.
 
 ## Upstream ඉතිරිකිරීම් ගණිතය
 
@@ -185,62 +185,52 @@ Stacked සමඟ:       10K-2.5K ටෝකන යවා ඇත     (සුද�
 
 ### උපකරණ පුවරුව
 
-`උපකරණ පුවරුව → සන්දර්භය සහ හැඹිලිය` වෙත යන්න:
+`Dashboard → Context & Cache` වෙත යන්න:
 
-- **Caveman** — ප්රකාර තේරීම, භාෂා පැකේජ, පෙරදසුන සහ ගෝලීය පෙරනිමි
-- **RTK** — විධාන-පෙරහන් පෙරදසුන, RTK ආරක්ෂක සැකසුම් සහ පෙරහන් නාමාවලිය
-- **සම්පීඩන සංයෝජන** — මාර්ගගත කිරීමේ සංයෝජන වෙත පවරන ලද, නම් කළ එන්ජින් නලමාලා
-- **ස්වයංක්රීය-ප්රේරක සීමාව** — ටෝකන ගණන සීමාව ඉක්මවන විට ස්වයංක්රීයව සම්පීඩනය සක්රිය කරයි
+- **Caveman** — මාදිලි තේරීම, භාෂා පැකේජ, පෙරදසුන සහ ගෝලීය පෙරනිමි
+- **RTK** — විධාන-පෙරහන් පෙරදසුන, RTK ආරක්ෂණ සැකසුම් සහ පෙරහන් නාමාවලිය
+- **Compression Combos** — routing combos වෙත පවරන ලද නම් කළ එන්ජින් pipeline
+- **Auto-Trigger Threshold** — token ගණන සීමාව ඉක්මවූ විට සම්පීඩනය ස්වයංක්රීයව සක්රිය කිරීම
 
-### එක් එක් සංයෝජනය සඳහා අතික්රමණය
+### එක් Combo එකකට අදාළ Override
 
-`උපකරණ පුවරුව → සන්දර්භය සහ හැඹිලිය → සම්පීඩන සංයෝජන` තුළ, මාර්ගගත කිරීමේ
-සංයෝජනයකට සම්පීඩන සංයෝජනයක් පවරන්න:
+`Dashboard → Context & Cache → Compression Combos` තුළ routing
+combo එකකට compression combo එකක් පවරන්න:
 
 ```txt
-සංයෝජනය: "free-tier-fallback"
-  සම්පීඩන සංයෝජනය: "coding-agent-stack"
-  නලමාලාව: RTK -> Caveman
-  ඉලක්ක:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-මෙමගින් ගෙවීම් සහිත දායකත්ව සඳහා ලයිට් ප්රකාරය පවත්වා ගනිමින්, නොමිලේ/කේතකරණ සැපයුම්කරුවන් මත
-ස්තරගත සම්පීඩනය භාවිත කිරීමට ඔබට හැකියාව ලැබේ.
+මෙමගින් ගෙවන subscriptions සඳහා lite mode තබා ගනිමින්, නොමිලේ/coding providers මත stacked compression භාවිත කළ හැක.
 
-මෙම "එක් එක් සංයෝජනය සඳහා අතික්රමණය" පැවරීම **මාර්ගගත කිරීමේ-සංයෝජන සම්පීඩන
-ප්රකාර** අතික්රමණයට (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — එම ක්ෂේත්රයේ
-schema මඟින් `rtk`, `stacked` සහ `omniglyph` ද පිළිගනී) වඩා වෙනස් පාලනයකි — එම අතික්රමණය නම් කළ
-සම්පීඩන-සංයෝජන නලමාලාවක් තෝරා නොගනී; එය හුදෙක් `resolveCompressionPlan` විසින් සලකා බලන
-`compressionMode` ක්ෂේත්රය සකසයි. එය සංයෝජන කාඩ්පතේ (`උපකරණ පුවරුව → සංයෝජන`) හෝ, #6760 සිට,
-ඉහත ලේඛනගත කළ නලමාලා-පැවරුම් සලකුණු කොටුවට යාබදව
-`උපකරණ පුවරුව → සන්දර්භය සහ හැඹිලිය → සම්පීඩන සංයෝජන` තුළ ඇති "මාර්ගගත කිරීමට පවරන්න" ලැයිස්තුවේ
-එක් එක් මාර්ගගත කිරීමේ සංයෝජනය සඳහා සැකසිය හැක. අතුරුමුහුණත් දෙකම එකම `PUT /api/combos/{id}` අන්ත ලක්ෂ්යය හරහා ස්ථිරව සුරැකේ.
+මෙම "Per-Combo Override" පැවරීම, **routing-combo compression
+mode** override (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — එම field හි schema එක `rtk`, `stacked` සහ `omniglyph` ද පිළිගනී) වෙතින් වෙනස් පාලනයකි — එම override එක නම් කළ compression-combo pipeline එකක් තෝරා නොගනී; එය `resolveCompressionPlan` විසින් පරීක්ෂා කරන `compressionMode` field එක පමණක් සකසයි. එය combo card එකේ (`Dashboard → Combos`) හෝ, #6760 සිට, `Dashboard → Context & Cache → Compression Combos` හි "Assign to routing" ලැයිස්තුව තුළ එක් routing combo එකකට, ඉහත ලේඛනගත කළ pipeline-assignment checkbox එකට යාබදව, සැකසිය හැක. මතුපිට දෙකම එකම `PUT /api/combos/{id}` endpoint එක හරහා සුරකී.
 
-### එක් එක් ඉල්ලීම සඳහා අතික්රමණය
+### එක් request එකකට අදාළ override
 
-එක් ඉල්ලීමක් සඳහා සම්පීඩන සැලැස්ම අතික්රමණය කිරීමට `x-omniroute-compression` ඉල්ලීම් ශීර්ෂය
-යවන්න. එයට ඉහළම ප්රමුඛතාව ඇත — එය මාර්ගගත කිරීමේ-සංයෝජන අතික්රමණය, සක්රිය පැතිකඩ,
-ස්වයංක්රීය-ප්රේරකය සහ පැනලයේ Default අභිබවා යයි. නොදන්නා අගයන් නොසලකා හරිනු ලැබේ (ඉල්ලීම කිසිවිටෙක ප්රතික්ෂේප නොවේ), එමෙන්ම
-ගෝලීය ප්රධාන ස්විචය තවමත් සියල්ල පාලනය කරයි: සම්පීඩනය ගෝලීයව අක්රිය කර ඇති විට, ශීර්ෂයට
-එය සක්රිය කළ නොහැක. අගයන්:
+එක් request එකක් සඳහා compression plan එක override කිරීමට `x-omniroute-compression` request header එක යවන්න. එයට ඉහළම ප්රමුඛතාව ඇත — එය routing-combo override, සක්රිය profile, auto-trigger සහ panel Default යන සියල්ල අභිබවා යයි. නොදන්නා අගයන් නොසලකා හරිනු ලැබේ (request එක කිසිවිටෙක ප්රතික්ෂේප නොකෙරේ), එසේම ගෝලීය master switch එක සියල්ල පාලනය කරයි: compression ගෝලීයව අක්රිය විට, header එකට එය සක්රිය කළ නොහැක. අගයන්:
 
-| අගය           | බලපෑම                                                                                                    |
-| ------------- | -------------------------------------------------------------------------------------------------------- |
-| `off`         | මෙම ඉල්ලීම සඳහා සම්පීඩනයක් නැත.                                                                          |
-| `default`     | පැනලයෙන් ව්යුත්පන්න වූ Default පැතිකඩ (සක්රිය පැතිකඩ නොසලකා හරියි). දත්ත-හානි සහිත එන්ජින් අක්රියව තබයි. |
-| `safe`        | ශීර්ෂය ඉවත් කිරීම හා සමානය: අනුපිටපත් ඉවත් කිරීම සහ හිස් ඉඩ හැකිළීම පමණි.                                |
-| `allow-lossy` | සාරාංශ, අදාළතා පෙරහන් සහ ශෛලීය නැවත ලිවීම් ඇතුළුව මෙම ඉල්ලීමේ ක්රියාකරු සැලැස්ම තබා ගනී.                 |
-| `engine:<id>` | සක්රිය කර ඇති විට එක් එන්ජිමක්, උදා. `engine:rtk`. මෙය එම එන්ජිම සඳහා එක්-ඉල්ලීම් සක්රිය තේරීමයි.        |
-| `<combo>`     | නමින් (අකුරු විශාලත්වය නොසලකා) පළමුවත්, පසුව id මඟිනුත් ගැළපෙන නම් කළ සංයෝජනයක්.                         |
+| Value         | Effect                                                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | මෙම request එක සඳහා compression නොමැත.                                                                                     |
+| `default`     | panel-derived Default profile එක (සක්රිය profile එක නොසලකා හරී). Lossy engines අක්රියව තබයි.                               |
+| `safe`        | header එක නොයැවීම හා සමානයි.                                                                                               |
+| `allow-lossy` | summaries, relevance filters සහ style rewrites ඇතුළුව, මෙම request හි operator plan එක තබා ගනී.                            |
+| `engine:<id>` | සක්රිය කර ඇති විට එක් engine එකක් පමණක්, උදාහරණයක් ලෙස `engine:rtk`. එම engine සඳහා එක් request එකකට අදාළ opt-in එක මෙයයි. |
+| `<combo>`     | නාමයෙන් ගැළපෙන named combo එකක් (පළමුව case-insensitive ලෙස, පසුව id මගින්).                                               |
 
-`allow-lossy`, `engine:<id>`, හෝ නම් කළ සංයෝජනයක් නොමැතිව, දත්ත-හානි සහිත එන්ජින් යොදනු නොලැබේ.
-සම්පීඩනය සක්රියව ඇති විට ඉල්ලීමට තවමත් සැසි අනුපිටපත් ඉවත් කිරීම සහ හිස් ඉඩ හැකිළීම ලැබේ.
+`allow-lossy`, `engine:<id>` හෝ named combo එකක් නොමැති විට, lossy engines යෙදෙන්නේ නැත. Lossy Default, auto-trigger හෝ routing override එකක් downgrade කළ විට, OmniRoute වින්යාසගත stacked pipeline එකෙන් හඳුනාගත් lossless පියවර වින්යාසගත අනුපිළිවෙළට තබා ගනී. වින්යාසගත lossless පියවරක් නොනැසී පවතින විට පමණක් එය `session-dedup → lite` වෙත fallback වේ.
 
-යෙදූ සැලැස්ම `X-OmniRoute-Compression: <mode>; source=<source>` ප්රතිචාර
-ශීර්ෂය තුළ නැවත දක්වනු ලැබේ, මෙහි `<source>` යනු `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default`, හෝ `off` අතරින් එකකි.
+Settings panel හි **Effective pipeline** පෙරදසුන මඟින් සාමාන්ය at-rest plan එක පෙන්වයි. auto-trigger එකක් ධාවනය කළ හැකි විට, එම පෙරදසුන මඟින් එහි conditional effective pipeline එක ද පෙන්වයි; එමඟින් panel සහ header-රහිත runtime resolution එක සමානව පවතී.
+
+යෙදූ plan එක `X-OmniRoute-Compression: <mode>; source=<source>` response
+header එක තුළ නැවත ලබා දේ; මෙහි `<source>` යනු `request-header`, `routing-override`, `active-profile`,
+`auto-trigger`, `default` හෝ `off` යන අගයන්ගෙන් එකකි.
 
 ### API
 
@@ -253,15 +243,15 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# නිශ්චිත RTK/stacked දත්ත භාරයක පෙරදසුනක් බලන්න
+# නිශ්චිත RTK/stacked payload එකක් පෙරදසුන් කරන්න
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# RTK පෙරහන් පැකේජ ලැයිස්තුගත කරන්න
+# RTK filter packs ලැයිස්තුගත කරන්න
 curl http://localhost:20128/api/context/rtk/filters
 
-# විකල්ප විධාන පාරදත්ත සමඟ RTK සෘජුවම පරීක්ෂා කරන්න
+# විකල්ප command metadata සමඟ RTK සෘජුව පරීක්ෂා කරන්න
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'

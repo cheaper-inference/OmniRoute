@@ -11,55 +11,73 @@ OmniRoute записує адміністративні дії, події ав�
 
 Реалізація міститься в `src/lib/compliance/index.ts` (T-43 — «Засоби контролю відповідності») і `src/lib/compliance/providerAudit.ts`. Операції запису аудиту ніколи не генерують винятків: у разі будь-якої помилки виклик мовчки ігнорується, щоб журналювання аудиту не могло порушити основний потік обробки запиту.
 
-## Що журналюється
+## Що реєструється
 
 ### Події адміністративного аудиту (`audit_log`)
 
-Кожен виклик `logAuditEvent({ action, actor, target, details, ... })` створює один рядок. Рядки дій відповідають шаблону `domain.verb` (або `domain.verb.outcome`). Підтверджені типи дій у кодовій базі:
+Кожен виклик `logAuditEvent({ action, actor, target, details, ... })` створює
+один рядок. Рядки дій відповідають шаблону `domain.verb` (або
+`domain.verb.outcome`). Підтверджені типи дій у кодовій базі:
 
-| Дія                                  | Джерело                                 |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Дія                                  | Джерело                                  |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Кожен запис містить `action`, `actor` (типове значення — `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` і `timestamp`. Конфіденційні ключі (`apiKey`, `accessToken`, `refreshToken`, `password`, усе, що відповідає шаблонам `*token`/`*secret`/`*apikey` тощо) перед записом рядка рекурсивно редагуються до `"[redacted]"`.
+Кожен запис містить `action`, `actor` (типове значення — `"system"`),
+`target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` і `timestamp`. Конфіденційні ключі (`apiKey`, `accessToken`,
+`refreshToken`, `password`, усі ключі, що відповідають шаблонам
+`*token`/`*secret`/`*apikey` тощо) рекурсивно замінюються на `"[redacted]"`
+перед записом рядка.
+
+Рядки `api_key.auth.touch` фіксують успішні операції з метаданими API-ключів
+і читання під час виявлення (GET/HEAD), які ніколи не потрапляють до журналу
+запитів: який ключ, коли саме та нормалізований шлях; записи об’єднуються й
+обмежуються 1 000 рядками. Ключі з `noLog` і ключ середовища пропускаються.
+IP-адреса та user-agent виклику додаються лише тоді, коли ввімкнено прапорець
+функції `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (типово вимкнено).
 
 ### Виклики інструментів MCP (`mcp_tool_audit`)
 
-Кожен виклик інструмента MCP записує рядок через `open-sse/mcp-server/audit.ts`. Схема (із `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Кожен виклик інструмента MCP записує рядок через
+`open-sse/mcp-server/audit.ts`. Схема (з
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Стовпець         | Примітки                                                    |
 | ---------------- | ----------------------------------------------------------- |
-| `id`             | автоматичне збільшення                                      |
+| `id`             | автозбільшення                                              |
 | `tool_name`      | ідентифікатор інструмента MCP                               |
 | `input_hash`     | sha256 вхідних даних (корисне навантаження не зберігається) |
-| `output_summary` | короткий, усічений підсумок                                 |
+| `output_summary` | короткий скорочений підсумок                                |
 | `duration_ms`    | фактичний час виконання                                     |
-| `api_key_id`     | сторона, що викликала інструмент (може бути null)           |
+| `api_key_id`     | викликач (може мати значення null)                          |
 | `success`        | `1` / `0`                                                   |
-| `error_code`     | кінцевий код помилки в разі невдачі                         |
-| `created_at`     | часова позначка ISO                                         |
+| `error_code`     | кінцевий код помилки в разі збою                            |
+| `created_at`     | часовий штамп у форматі ISO                                 |
 
 ### Журнали запитів / використання
 
-Це операційна телеметрія (не суто адміністративний аудит), але для неї використовується той самий конвеєр зберігання:
+Це операційна телеметрія (не суто адміністративний аудит), але для неї
+використовується той самий конвеєр зберігання:
 
-- `usage_history` — агреговані дані про використання для кожного запиту
+- `usage_history` — зведені дані про використання для кожного запиту
 - `call_logs` — повний журнал кожного запиту (з обмеженням кількості рядків, див. нижче)
 - `proxy_logs` — журнал проксі-трафіку (з обмеженням кількості рядків)
-- `request_detail_logs` — застарілий докладний журнал запитів (також очищається, якщо існує)
+- `request_detail_logs` — застарілий детальний журнал запитів (якщо присутній, його все одно очищено)
 
 ## Схема зберігання
 

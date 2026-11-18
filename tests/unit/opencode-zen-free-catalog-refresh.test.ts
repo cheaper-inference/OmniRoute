@@ -1,15 +1,23 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { FREE_MODEL_BUDGETS } from "../../open-sse/config/freeModelCatalog.ts";
+import { getProviderById } from "../../src/shared/constants/providers.ts";
+import {
+  isCatalogFreeModel,
+  isFreeModel,
+  isFreeForProvider,
+  isModelFreeBadge,
+  isPaidModelTarget,
+  matchesOnlyPaidModels,
+  providerHasFreeModels,
+  providerSupportsFreeOnlyImport,
+  selectModelsForImport,
+} from "../../src/shared/utils/freeModels.ts";
 
-// Refreshed 2026-10-20 against the live OpenCode Zen sources:
-//   - served IDs:  https://opencode.ai/zen/v1/models
-//   - $0 pricing:  https://opencode.ai/docs/zen/
-// Only IDs present in BOTH sources are catalogued (the free set rotates:
-// "free for a limited time"). This test pins that intersection so a silent
-// drift in the data file is caught.
-
-const EXPECTED_FREE_IDS = [
+// Official endpoint eligibility, checked 2026-10-27:
+// https://opencode.ai/v2/docs/console/models/#endpoints
+// Public zero prices describe an OpenCode-only offer, not generic proxy eligibility.
+const RESTRICTED_IDS = [
   "opencode/big-pickle",
   "opencode/beam-free",
   "opencode/mimo-v2.6-flash-free",
@@ -22,36 +30,84 @@ const EXPECTED_FREE_IDS = [
   "opencode/minimax-m3.1-flash-free",
 ];
 
-// Dropped 2026-10-20 — gone from the served /zen/v1/models endpoint.
-const REMOVED_IDS = [
-  "opencode/nemotron-3-super-free",
-  "opencode/mimo-v2.5-free",
-  "opencode/north-mini-code-free",
-  "opencode/nemotron-3-ultra-free",
-];
-
-describe("OpenCode Zen free catalog refresh (2026-10-20)", () => {
-  const rows = FREE_MODEL_BUDGETS.filter((r) => r.provider === "opencode-zen");
-
-  it("lists exactly the verified current free model ids", () => {
-    const ids = rows.map((r) => r.modelId).sort();
-    assert.deepEqual(ids, [...EXPECTED_FREE_IDS].sort());
-  });
-
-  it("keeps every free row on the recurring-uncapped opencode-zen-free pool", () => {
-    for (const row of rows) {
-      assert.equal(row.freeType, "recurring-uncapped", row.modelId);
-      assert.equal(row.poolKey, "opencode-zen-free", row.modelId);
-      assert.equal(row.tos, "caution", row.modelId);
-      assert.equal(row.monthlyTokens, 0, row.modelId);
-      assert.equal(row.creditTokens, 0, row.modelId);
+describe("#17028 OpenCode client-restricted free offers", () => {
+  it("does not grant the ten restricted offers through the generic free catalog", () => {
+    assert.equal(
+      FREE_MODEL_BUDGETS.some((row) => row.provider === "opencode-zen"),
+      false
+    );
+    for (const id of RESTRICTED_IDS) {
+      assert.equal(isCatalogFreeModel("opencode-zen", id), false, id);
+      assert.equal(isFreeModel("opencode-zen", { id }), false, id);
+      assert.equal(isFreeForProvider("opencode-zen", { id }), false, id);
     }
   });
 
-  it("drops the ids that left the served endpoint", () => {
-    const ids = new Set(rows.map((r) => r.modelId));
-    for (const gone of REMOVED_IDS) {
-      assert.equal(ids.has(gone), false, gone);
+  it("does not treat public pricing, flags, tags, or suffixes as client eligibility", () => {
+    const candidates = [
+      { id: RESTRICTED_IDS[0], pricing: { input: 0, output: 0 } },
+      { id: "future-free", pricing: { prompt: "0", completion: "0" } },
+      { id: "future-free", isFree: true },
+      { id: "future-free", free: true },
+      { id: "future-free", is_free: true },
+      { id: "future-free", tags: ["free"] },
+      { id: "future:free" },
+      { id: "future-free", isFree: true, pricing: { input: 1, output: 2 } },
+    ];
+    for (const model of candidates) {
+      assert.equal(isFreeModel("opencode-zen", model), false, JSON.stringify(model));
+      assert.equal(isFreeForProvider("opencode-zen", model), false);
+    }
+    assert.deepEqual(selectModelsForImport("opencode-zen", candidates, true), {
+      models: [],
+      freeFilterEmpty: true,
+    });
+  });
+
+  it("removes optimistic Free badges in both modes, including cached public free flags", () => {
+    for (const strict of [false, true]) {
+      for (const id of RESTRICTED_IDS) {
+        assert.equal(
+          isModelFreeBadge("opencode-zen", { id, name: "Free model" }, { strict }),
+          false
+        );
+        assert.equal(
+          isModelFreeBadge("opencode-zen", { id, isFree: true, free: true }, { strict }),
+          false
+        );
+      }
+      assert.equal(isModelFreeBadge("opencode-zen", { id: "future:free" }, { strict }), false);
+    }
+  });
+
+  it("keeps unavailable eligibility unknown instead of asserting that the offers are paid", () => {
+    for (const id of RESTRICTED_IDS) {
+      assert.equal(isPaidModelTarget(`opencode-zen/${id}`), "unknown", id);
+      assert.equal(isPaidModelTarget(`opencode-zen,${id}`), "unknown", id);
+    }
+    assert.equal(matchesOnlyPaidModels("opencode-zen/*"), false);
+  });
+
+  it("preserves the provider and unrestricted import, without offering free-only eligibility", () => {
+    assert.ok(getProviderById("opencode-zen"));
+    assert.equal(providerHasFreeModels("opencode-zen"), false);
+    assert.equal(providerSupportsFreeOnlyImport("opencode-zen"), false);
+    const models = [
+      { id: RESTRICTED_IDS[0] },
+      { id: "paid-model", pricing: { input: 1, output: 2 } },
+    ];
+    assert.deepEqual(selectModelsForImport("opencode-zen", models, false), {
+      models,
+      freeFilterEmpty: false,
+    });
+  });
+
+  it("preserves unrelated free evidence and positive-price vetoes", () => {
+    for (const provider of ["openrouter", "siliconflow"]) {
+      const model = { id: "control:free", pricing: { prompt: "0", completion: "0" } };
+      assert.equal(isFreeModel(provider, model), true);
+      assert.equal(isModelFreeBadge(provider, { ...model, isFree: true }), true);
+      assert.equal(isFreeModel(provider, { ...model, pricing: { input: 1, output: 2 } }), false);
     }
   });
 });

@@ -13,7 +13,8 @@ const quota = await import("../../src/domain/quotaCache.ts");
 const state = await import("../../src/domain/quotaCacheState.ts");
 const resetAt = new Date(Date.now() + 7 * 86400000).toISOString();
 function seed(id: string, remainingPercentage = 0) {
-  quota.setQuotaCache(id, "codex", { session: { remainingPercentage, resetAt } });
+  // Codex has independent per-window freshness tests in codex-banked-reset-cache.test.ts.
+  quota.setQuotaCache(id, "openai", { session: { remainingPercentage, resetAt } });
 }
 function withFlag(on: boolean, fn: () => void) {
   if (on) process.env.QUOTA_WINDOW_BOUNDED_PARK = "true";
@@ -64,15 +65,16 @@ test("flag off (default): an observation older than the park cap keeps blocking 
   withFlag(false, () => {
     seedStale("expired-off");
     assert.equal(quota.getQuotaWindowStatus("expired-off", "session")?.reachedThreshold, true);
-    assert.equal(quota.isQuotaExhaustedForRequest("expired-off", "codex", "gpt-6-sol"), true);
+    assert.equal(quota.isQuotaExhaustedForRequest("expired-off", "openai", "gpt-6-sol"), true);
   });
 });
 
-test("flag on: an observation older than the park cap no longer excludes the account", () => {
+test("non-Codex flag on: an old observation no longer reaches the window threshold", () => {
   withFlag(true, () => {
     seedStale("expired-on");
     assert.equal(quota.getQuotaWindowStatus("expired-on", "session")?.reachedThreshold, false);
-    assert.equal(quota.isQuotaExhaustedForRequest("expired-on", "codex", "gpt-6-sol"), false);
+    // Generic automatic exhaustion still follows its future account-level park deadline.
+    assert.equal(quota.isQuotaExhaustedForRequest("expired-on", "openai", "gpt-6-sol"), true);
   });
 });
 
@@ -89,14 +91,14 @@ test("flag on: the window policy honours a passed bounded park deadline", () => 
   withFlag(true, () => {
     seedParkElapsed("bounded-on");
     assert.equal(quota.getQuotaWindowStatus("bounded-on", "session")?.reachedThreshold, false);
-    assert.equal(quota.isQuotaExhaustedForRequest("bounded-on", "codex", "gpt-6-sol"), false);
+    assert.equal(quota.isQuotaExhaustedForRequest("bounded-on", "openai", "gpt-6-sol"), false);
   });
 });
 
 test("flag on: a fresh persisted exhausted snapshot still blocks after cache hydration", () => {
   withFlag(true, () => {
     snapshots.saveQuotaSnapshot({
-      provider: "codex",
+      provider: "openai",
       connection_id: "hydrated",
       window_key: "session",
       remaining_percentage: 0,
@@ -111,7 +113,7 @@ test("flag on: a fresh persisted exhausted snapshot still blocks after cache hyd
 
 test("an upstream 429 remains blocking with the flag on", () => {
   withFlag(true, () => {
-    quota.markAccountExhaustedFrom429("rate-limited", "codex");
+    quota.markAccountExhaustedFrom429("rate-limited", "openai");
     assert.equal(quota.isAccountQuotaExhausted("rate-limited"), true);
   });
 });
@@ -119,6 +121,6 @@ test("an upstream 429 remains blocking with the flag on", () => {
 test("cache writes do not arm the background refresh timer (instrumentation owns it)", () => {
   quota.stopBackgroundRefresh();
   seed("no-timer");
-  quota.markAccountExhaustedFrom429("no-timer-429", "codex");
+  quota.markAccountExhaustedFrom429("no-timer-429", "openai");
   assert.equal(state.getQuotaCacheState().refreshTimer, null);
 });

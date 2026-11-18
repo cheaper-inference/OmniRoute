@@ -23,22 +23,24 @@ Cumulée :       1 - (1 - 0.80) * (1 - 0.46) = 89.2% économisés
 Plage :         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Ce qui est compressé
+## Ce qu'il compresse
 
-Le catalogue intégré fournit actuellement 49 filtres répartis dans les catégories suivantes :
+Le catalogue intégré est actuellement livré avec 56 filtres répartis dans les catégories suivantes :
 
 | Catégorie | Exemples                                                      |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, tests Go, tests Cargo       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, tests Cargo    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, journaux shell génériques               |
 | `docker`  | `docker ps`, journaux Docker                                  |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Sortie JSON, traces de pile, solution de repli générique      |
+| `generic` | sortie JSON, traces de pile, repli sur une sortie générique   |
 
-Le détecteur dans `open-sse/services/compression/engines/rtk/commandDetector.ts` classifie la sortie avant la sélection du filtre. Les filtres peuvent également effectuer une correspondance à partir d’un motif de commande ou d’une expression régulière appliquée à la sortie lorsqu’une classe de commande ne suffit pas.
+Le détecteur dans `open-sse/services/compression/engines/rtk/commandDetector.ts` classifie la sortie
+avant la sélection du filtre. Les filtres peuvent également correspondre par motif de commande ou
+expression régulière sur la sortie lorsqu'une classe de commande ne suffit pas.
 
 ## Résolution des filtres
 
@@ -338,19 +340,19 @@ node --import tsx/esm --test \
 
 ---
 
-## Niveaux d’intensité (v3.8.16+)
+## Niveaux d'intensité (v3.8.16+)
 
-RTK prend en charge **3 niveaux d’intensité** offrant différents compromis entre **l’agressivité de la compression** et la **sécurité**. Le niveau est défini via `config.intensity` dans la configuration du moteur.
+RTK prend en charge **3 niveaux d'intensité** qui établissent un compromis entre **l'agressivité de la compression** et **la sécurité**. Le niveau est défini via `config.intensity` dans la configuration du moteur.
 
 ### Les 3 niveaux
 
-| Niveau              | Seuil de troncature   | Économie de jetons | Risque      | Idéal pour                             |
-| ------------------- | --------------------- | ------------------ | ----------- | -------------------------------------- |
-| `minimal`           | 24 lignes par section | ~20-40%            | Très faible | Production avec un contexte critique   |
-| `standard` (défaut) | 24 lignes par section | ~50-70%            | Faible      | Sessions quotidiennes de programmation |
-| `aggressive`        | 16 lignes par section | ~70-90%            | Moyen       | Longues sessions, économies maximales  |
+| Niveau                  | Seuil de troncature   | Économies de tokens | Risque      | Idéal pour                            |
+| ----------------------- | --------------------- | ------------------- | ----------- | ------------------------------------- |
+| `minimal`               | 24 lignes par section | ~20-40 %            | Très faible | Production avec contexte critique     |
+| `standard` (par défaut) | 24 lignes par section | ~50-70 %            | Faible      | Sessions de codage quotidiennes       |
+| `aggressive`            | 16 lignes par section | ~70-90 %            | Moyen       | Sessions longues, économies maximales |
 
-### Emplacement de la troncature
+### Où s'applique la troncature
 
 Le seuil de troncature affecte `lineFilter.ts` :
 
@@ -360,40 +362,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Le **début** et la **fin** de chaque section sont tous deux préservés ; le contenu intermédiaire est supprimé lorsque la troncature s’applique.
+Le **début** et la **fin** de chaque section sont conservés ; le contenu intermédiaire est supprimé lorsque la troncature s'applique.
 
 ### Ce qui est conservé et ce qui est supprimé
 
-| Contenu                          | minimal       | standard      | aggressive    |
-| -------------------------------- | ------------- | ------------- | ------------- |
-| Erreurs / traces de pile         | ✅ préservées | ✅ préservées | ✅ préservées |
-| Échecs de tests                  | ✅ préservés  | ✅ préservés  | ✅ préservés  |
-| Erreurs de compilation           | ✅ préservées | ✅ préservées | ✅ préservées |
-| Tests réussis (sortie détaillée) | ✅ préservés  | 🟡 condensés  | 🟡 condensés  |
-| Sortie courante (journaux info)  | 🟡 condensée  | 🟡 condensée  | ❌ supprimée  |
-| Barres de progression            | 🟡 condensées | ❌ supprimées | ❌ supprimées |
-| Bannière / art ASCII             | 🟡 condensé   | ❌ supprimé   | ❌ supprimé   |
+| Contenu                         | minimal     | standard    | aggressive  |
+| ------------------------------- | ----------- | ----------- | ----------- |
+| Erreurs / traces de pile        | ✅ conservé | ✅ conservé | ✅ conservé |
+| Échecs de tests                 | ✅ conservé | ✅ conservé | ✅ conservé |
+| Erreurs de build                | ✅ conservé | ✅ conservé | ✅ conservé |
+| Tests réussis (verbeux)         | ✅ conservé | 🟡 condensé | 🟡 condensé |
+| Sortie de routine (logs d'info) | 🟡 condensé | 🟡 condensé | ❌ supprimé |
+| Barres de progression           | 🟡 condensé | ❌ supprimé | ❌ supprimé |
+| Bannière / art ASCII            | 🟡 condensé | ❌ supprimé | ❌ supprimé |
 
-### Choix de l’intensité appropriée
+### Choisir la bonne intensité
 
 ```
-                  La perte de contexte est-elle catastrophique ?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    OUI          NON       INCERTAIN
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Quel est le     Essayez d’abord `standard`
-      │      niveau critique (convient à 80 % des
-      │      du débit ?      cas)
-      │           │
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │   FAIBLE      ÉLEVÉ
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -401,7 +402,7 @@ Le **début** et la **fin** de chaque section sont tous deux préservés ; le co
       └──────┴─────────┘
 ```
 
-### Configuration de l’intensité
+### Configurer l'intensité
 
 **Par combo** (dans la configuration du combo) :
 
@@ -419,8 +420,8 @@ Le **début** et la **fin** de chaque section sont tous deux préservés ; le co
 **Par programmation** :
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) est un
-`CompressionEngine` et ne possède aucune méthode `updateConfig`. Mettez à jour la configuration d’un moteur
-à l’aide de l’utilitaire du registre :
+`CompressionEngine` et ne possède pas de méthode `updateConfig`. Mettez plutôt à jour
+la configuration d'un moteur via l'utilitaire du registre :
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -428,16 +429,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Vérification de l’effet
+### Vérifier l'effet
 
-Utilisez la **barrière de vérification** (voir ci-dessous) pour confirmer que votre filtre est sûr avec l’intensité choisie :
+Utilisez le **Verify Gate** (voir ci-dessous) pour confirmer que votre filtre est sûr au niveau d'intensité choisi :
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Échec des filtres avec l’intensité aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

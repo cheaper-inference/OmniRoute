@@ -2,7 +2,7 @@
 // Family: sd-webui | Module: sdWebUI | Lines: 3121-3212 (92 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 export async function handleSDWebUIImageGeneration({ model, provider, providerConfig, body, log }) {

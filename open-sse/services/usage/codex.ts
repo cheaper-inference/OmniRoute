@@ -8,7 +8,12 @@
  * imports getCodexUsage (dispatcher). Behavior-preserving move.
  */
 
-import { buildCodexUsageQuotas } from "../codexUsageQuotas.ts";
+import {
+  buildCodexUsageQuotas,
+  codexUsageWindowsComplete,
+  findCodexSparkRateLimit,
+} from "../codexUsageQuotas.ts";
+import { isCodexLimitReached } from "../codexQuotaSignals.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
@@ -31,6 +36,14 @@ export function setCodexUsageFetchForTests(fetchImpl: CodexUsageFetch | null): v
  * IMPORTANT: Uses persisted workspaceId from OAuth to ensure correct workspace binding.
  * No fallback to other workspaces - strict binding to user's selected workspace.
  */
+/**
+ * Marks the reading complete when the payload lists every window the plan has. The adapter
+ * alone knows the wire format: see isCompleteUsageReading.
+ */
+function completenessAttestation(data: unknown): { quotasComplete?: true } {
+  return codexUsageWindowsComplete(data) ? { quotasComplete: true } : {};
+}
+
 export async function getCodexUsage(
   accessToken?: string,
   providerSpecificData: Record<string, unknown> = {},
@@ -87,11 +100,18 @@ export async function getCodexUsage(
 
     const { rateLimit, quotas, bankedResetCredits, rateLimitReachedType, paidCredits } =
       buildCodexUsageQuotas(data);
+    const sparkLimitReached = getFieldValue(
+      findCodexSparkRateLimit(data).rateLimit,
+      "limit_reached",
+      "limitReached"
+    );
 
     return {
+      ...(typeof sparkLimitReached === "boolean" ? { sparkLimitReached } : {}),
       plan: String(getFieldValue(data, "plan_type", "planType") || "unknown"),
-      limitReached: Boolean(getFieldValue(rateLimit, "limit_reached", "limitReached")),
+      limitReached: isCodexLimitReached(rateLimit),
       quotas,
+      ...completenessAttestation(data),
       // Banked reset credits (display-only, eligibility-gated — issue #5199).
       // Absent for most accounts; never throws when the upstream omits it.
       ...(bankedResetCredits !== undefined ? { bankedResetCredits } : {}),

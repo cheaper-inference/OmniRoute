@@ -170,7 +170,7 @@ for (const profile of ["ci", "quality"]) {
   for (const status of ["failure", "cancelled", "skipped", "pending", "unknown"]) {
     test(`${profile}: an applicable required job cannot pass as ${status}`, () => {
       const needs = needsFor(profile);
-      const id = profile === "ci" ? "test-vitest" : "fast-vitest";
+      const id = profile === "ci" ? "test-vitest" : "fast-gates";
       needs[id].result = status;
       assert.notEqual(run(needs, context, profile).verdict, "PASS");
     });
@@ -319,14 +319,23 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    assert.equal(verdict.name, policy.profiles[profile].checkName);
-    assert.equal(verdict.if, "${{ always() }}");
+    // Requested candidates keep the required name; unrequested drafts get no PASS receipt.
+    const checkName = policy.profiles[profile].checkName;
+    const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
+    assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
+    // Classification failure still reaches always(); queue description edits remain excluded.
+    assert.match(
+      verdict.if,
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+    );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push
     // runs there were cancelled by the next merge, 24 of 24 in a day, while holding up to
     // 30 hosted slots). See tests/unit/build/push-storm-diet.test.ts.
-    assert.deepEqual(workflow.on.push.branches, ["main"]);
+    // omni-queue/** (2026-11-13): the omni-queue merge-queue candidates run the full profile
+    // on push (tests/unit/merge-queue/workflows.test.mjs).
+    assert.deepEqual(workflow.on.push.branches, ["main", "omni-queue/**"]);
     assert.ok(workflow.on.merge_group.types.includes("checks_requested"));
     for (const [id, job] of Object.entries(workflow.jobs)) {
       assert.ok(!String(job.if).includes("'hotfix'"), "a label cannot waive candidate evidence");
@@ -336,6 +345,14 @@ for (const profile of ["ci", "quality"]) {
           keepsForkCodeOffSelfHosted(job["runs-on"]),
           `${profile}:${id} must never run fork pull-request code on a self-hosted runner`
         );
+        // A push-capable self-hosted gate must also exclude omni-queue/** candidates: they are
+        // pushes whose tree carries fork code.
+        if (!job["runs-on"].includes("github.event_name == 'pull_request' &&")) {
+          assert.ok(
+            job["runs-on"].includes("!startsWith(github.ref, 'refs/heads/omni-queue/')"),
+            `${profile}:${id} must keep omni-queue/** candidates off the self-hosted runner`
+          );
+        }
       }
     }
     for (const id of ["lint-guard", "merge-integrity"]) {
@@ -350,3 +367,57 @@ for (const profile of ["ci", "quality"]) {
     assert.equal(verdict.steps.at(-1).with["if-no-files-found"], "error");
   });
 }
+
+// Full-matrix lane (2026-10-27): E2E, Electron, package, integration, ecosystem, protocol
+// clients and Bun run on push / dispatch / merge_group and on the Mergify queue candidate,
+// not on every push to an ordinary PR (the org's Free plan caps hosted runners at 20 jobs).
+const FULL_LANE = Object.entries(policy.profiles.ci.jobs)
+  .filter(([, job]) => job.when.startsWith("full-"))
+  .map(([id]) => id);
+
+test("full-matrix lanes cover the heavy jobs and nothing the fast lane needs", () => {
+  for (const id of ["test-e2e", "electron-package-smoke", "package-artifact", "test-integration"])
+    assert.ok(FULL_LANE.includes(id), `${id} belongs to the full-matrix lane`);
+  for (const id of ["lint", "build", "test-unit", "test-vitest", "test-coverage", "test-security"])
+    assert.ok(!FULL_LANE.includes(id), `${id} must keep running on every code PR`);
+});
+
+test("an ordinary code PR may skip the full-matrix lanes; the queue candidate and push may not", () => {
+  const needs = needsFor("ci");
+  for (const id of FULL_LANE) needs[id].result = "skipped";
+  assert.equal(run(needs).verdict, "PASS");
+  assert.notEqual(run(needs, queueContext).verdict, "PASS");
+  assert.notEqual(run(needs, { ...context, event: "push" }).verdict, "PASS");
+  assert.notEqual(run(needs, { ...context, event: "workflow_dispatch" }).verdict, "PASS");
+});
+
+test("a full-matrix lane that ran and failed still fails an ordinary PR", () => {
+  const needs = needsFor("ci");
+  for (const id of FULL_LANE) needs[id].result = "skipped";
+  needs["test-integration"].result = "failure";
+  assert.notEqual(run(needs).verdict, "PASS");
+});
+
+test("tests-only queue candidates still skip browser E2E", () => {
+  const needs = needsFor("ci");
+  needs.changes.outputs.testsOnly = "true";
+  needs["test-e2e"].result = "skipped";
+  assert.equal(run(needs, queueContext).verdict, "PASS");
+});
+
+test("ci.yml gates every full-matrix job on the queue candidate, not on PR readiness", () => {
+  const workflow = loadYaml(
+    readFileSync(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8")
+  );
+  for (const id of FULL_LANE) {
+    const cond = String(workflow.jobs[id].if ?? "");
+    assert.ok(
+      cond.includes("github.event_name != 'pull_request'") &&
+        cond.includes("needs.changes.outputs.queueCandidate == 'true'"),
+      `${id}: if must admit non-PR events and the queue candidate only`
+    );
+    assert.ok(!cond.includes("draft == false"), `${id}: a ready PR alone must not start it`);
+    const needs = [workflow.jobs[id].needs].flat();
+    assert.ok(needs.includes("changes"), `${id} must depend on changes to read queueCandidate`);
+  }
+});

@@ -93,13 +93,12 @@ async function collectUploadedImageRefs(
 async function imagesFromUrls(
   urls: string[],
   wantsBase64: boolean,
-  fetchImpl: typeof fetch,
   signal: AbortSignal | null
 ): Promise<Array<Record<string, unknown>>> {
   const images: Array<Record<string, unknown>> = [];
   for (const url of urls) {
     if (wantsBase64) {
-      const fetched = await fetchSyntxMediaBytes(url, fetchImpl, { signal });
+      const fetched = await fetchSyntxMediaBytes(url, { signal });
       images.push({ b64_json: fetched.bytes.toString("base64") });
     } else {
       images.push({ url });
@@ -152,7 +151,6 @@ async function runSyntxImageJob(options: {
   const images = await imagesFromUrls(
     urls,
     String(options.body.response_format || "").toLowerCase() === "b64_json",
-    options.fetchImpl,
     options.signal ?? null
   );
   options.log?.info?.("IMAGE", `SYNTX generated ${images.length} image(s) via ${options.model}`);

@@ -19,6 +19,12 @@ export interface EndpointCategory {
 
 export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
+    id: "fal",
+    label: "Fal Native",
+    description: "Schema-validated fal model execution and job management",
+    prefixes: ["/v1/fal"],
+  },
+  {
     id: "chat",
     label: "Chat / Messages",
     description: "Chat completions, text completions, messages, and responses",
@@ -57,8 +63,8 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
     id: "video",
     label: "Video",
-    description: "Video generation",
-    prefixes: ["/v1/videos"],
+    description: "Video generation and retained Video Bridge frame access",
+    prefixes: ["/v1/videos", "/v1/video-bridge/drilldown"],
   },
   {
     id: "music",
@@ -71,6 +77,12 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     label: "Rerank",
     description: "Document reranking",
     prefixes: ["/v1/rerank"],
+  },
+  {
+    id: "decisions",
+    label: "Decisions",
+    description: "System One typed decisions (Jev)",
+    prefixes: ["/v1/systemone"],
   },
   {
     id: "models",

@@ -1,9 +1,12 @@
 import { toRecord, toString } from "./helpers.ts";
-import { flattenNamespaceToolName } from "./namespaceFlatten.ts";
+import { collectFlatToolNames, flattenNamespaceToolName } from "./namespaceFlatten.ts";
 
 type ToolIdentity = { namespace: string; name: string };
 
-function collectHistoricalIdentities(input: unknown[]): Map<string, ToolIdentity> {
+function collectHistoricalIdentities(
+  input: unknown[],
+  flatNames: ReadonlySet<string>
+): Map<string, ToolIdentity> {
   const identities = new Map<string, ToolIdentity>();
   for (const value of input) {
     const item = toRecord(value);
@@ -12,7 +15,7 @@ function collectHistoricalIdentities(input: unknown[]): Map<string, ToolIdentity
     const name = toString(item.name).trim();
     if (!namespace.trim() || !name) continue;
 
-    const wireName = flattenNamespaceToolName(namespace, name);
+    const wireName = flattenNamespaceToolName(namespace, name, flatNames);
     const previous = identities.get(wireName);
     // The already-qualified-leaf exception can make two explicit identities
     // share a wire name. Preserve that ambiguity instead of picking by order.
@@ -33,7 +36,7 @@ export function mergeHistoricalToolIdentities(
   input: unknown[],
   tools: unknown[]
 ): void {
-  const historical = collectHistoricalIdentities(input);
+  const historical = collectHistoricalIdentities(input, collectFlatToolNames(tools));
   if (historical.size === 0) return;
 
   const currentNamespaceNames = new Set(current.keys());

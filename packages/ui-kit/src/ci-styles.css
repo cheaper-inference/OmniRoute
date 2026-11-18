@@ -1,0 +1,13 @@
+/* Complete stylesheet (package export ./styles.css): core plus every pattern family. */
+@import "./ci-ui.css";
+@import "./ci-wizard.css";
+@import "./ci-onboarding-patterns.css";
+@import "./ci-announcement-carousel.css";
+@import "./ci-integration-setup.css";
+@import "./ci-integration-resources.css";
+@import "./ci-overview-patterns.css";
+@import "./ci-request-workbench.css";
+@import "./signal-diagram.css";
+@import "./invoice-document.css";
+@import "./cloud-patterns.css";
+@import "./cloud-auth-handoff.css";

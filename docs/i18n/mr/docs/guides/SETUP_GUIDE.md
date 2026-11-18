@@ -18,7 +18,7 @@
 
 ---
 
-## स्थापना पद्धती
+## पद्धती स्थापित करा
 
 ### npm (शिफारस केलेले)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-डॅशबोर्ड `http://localhost:20128` येथे उघडतो आणि API चा मूळ URL `http://localhost:20128/v1` आहे.
+डॅशबोर्ड `http://localhost:20128` वर उघडतो आणि API बेस URL `http://localhost:20128/v1` आहे.
+
+> **एनपीएम वापरकर्ते:** जर npm चेतावणी देत असेल की स्क्रिप्ट स्थापित करा अवरोधित केल्या गेल्या आहेत (उदा., `omniroute`, `better-sqlite3`), [— npm install-scripts blocked समस्यानिवारण](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) पहा.
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm वापरकर्ते:** `better-sqlite3` आणि `@swc/core` साठी नेटिव्ह बिल्ड स्क्रिप्ट सक्षम करण्यासाठी `--allow-build` फ्लॅग आवश्यक आहे. pnpm v11 वरील ग्लोबल स्थापनांसाठी `pnpm approve-builds -g` कमांड समर्थित नाही.
+> **pnpm वापरकर्ते:** `better-sqlite3` आणि `@swc/core` साठी नेटिव्ह बिल्ड स्क्रिप्ट्स सक्षम करण्यासाठी `--allow-build` ध्वज आवश्यक आहे. `pnpm approve-builds -g` कमांड pnpm v11 वर ग्लोबल इंस्टॉलसाठी समर्थित नाही.
 
-### Arch Linux (AUR)
+### आर्क Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR पॅकेज](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute स्थापित करते आणि systemd वापरकर्ता सेवा पुरवते.
+[AUR पॅकेज](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute स्थापित करते आणि सिस्टमड वापरकर्ता सेवा प्रदान करते.
 
-### स्रोतापासून
+### स्त्रोताकडून
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows नोंद:** जुनी `%USERPROFILE%\.omniroute` डिरेक्टरी अस्तित्वात नसल्यास, डीफॉल्टनुसार OmniRoute `%APPDATA%\omniroute` वापरते. वेगळे डेटा-डिरेक्टरी स्थान निवडण्यासाठी `DATA_DIR` सेट करा.
+> **Windows टीप:** डीफॉल्टनुसार, OmniRoute `%APPDATA%\omniroute` वापरते जेव्हा लीगेसी `%USERPROFILE%\.omniroute` डिरेक्टरी उपस्थित नसते. भिन्न डेटा-डिरेक्टरी स्थान निवडण्यासाठी `DATA_DIR` सेट करा.
 
-> **नोंद:** प्रथमच चालवताना `npm install`, `.env.example` पासून `.env` स्वयंचलितपणे तयार करते. त्यानंतरच्या स्थापना विद्यमान `.env` अधिलिखित करणार नाहीत, त्यामुळे सानुकूलने जतन केली जातात. पुन्हा प्रारंभिक मूल्ये भरण्यासाठी, कमांड पुन्हा चालवण्यापूर्वी `.env` हटवा.
+> **टीप:** `npm install` प्रथम रनवर `.env.example` वरून `.env` स्वयं-उत्पन्न करते. त्यानंतरच्या स्थापनेमुळे विद्यमान `.env` अधिलिखित होणार नाही, त्यामुळे सानुकूलने जतन केली जातात. पुन्हा बियाण्यासाठी, पुन्हा चालू करण्यापूर्वी `.env` हटवा.
 
 ### Docker
 
-Compose प्रोफाइल्स आणि Caddy HTTPS सह संपूर्ण Docker सेटअपसाठी [Docker मार्गदर्शक](./DOCKER_GUIDE.md) पहा.
+प्रोफाइल आणि Caddy HTTPS सह पूर्ण Docker सेटअपसाठी [Docker मार्गदर्शक](./DOCKER_GUIDE.md) पहा.
 
 ### डेस्कटॉप ॲप (Electron)
 
-OmniRoute मध्ये Electron 41 + electron-builder 26.10 वर तयार केलेले डेस्कटॉप रॅपर समाविष्ट आहे. उपलब्ध स्क्रिप्ट्स (वर्कस्पेस रूट):
+OmniRoute Electron 41 + इलेक्ट्रॉन-बिल्डर 26.10 वर तयार केलेले डेस्कटॉप रॅपर पाठवते. उपलब्ध स्क्रिप्ट्स (वर्कस्पेस रूट):
 
 ```bash
-npm run electron:dev          # हॉट-रिलोडसह डेस्कटॉप चालवा
-npm run electron:build        # सध्याच्या OS साठी बिल्ड करा (स्वयंचलितपणे ओळखले जाते)
-npm run electron:build:win    # Windows इंस्टॉलर (NSIS + पोर्टेबल)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # पॅकेज केलेल्या बिल्डची स्मोक चाचणी करा
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-डेस्कटॉप इंस्टॉलर्सचे रिलीज GitHub Releases शी संलग्न केलेले असतात. Electron विषयी संपूर्ण सखोल माहितीसाठी (साइनिंग, IPC ब्रिज, डिस्ट्रोज), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) पहा _(नंतरच्या टप्प्यात तयार केलेले)_.
+डेस्कटॉप इंस्टॉलर्सची रिलीझ GitHub रिलीझशी संलग्न आहेत. पूर्ण Electron डीप-डायव्हसाठी (साइनिंग, IPC ब्रिज, डिस्ट्रॉस), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ पहा.
 
-### हेडलेस सर्व्हर (CI/ऑटोमेशन)
+### हेडलेस सर्व्हर (CI/automation)
 
-देखरेखीशिवाय चालणाऱ्या सेटअपसाठी (Docker, Kubernetes, CI), हे वापरा:
+अप्राप्य सेटअपसाठी (Docker, Kubernetes, CI), वापरा:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, इत्यादी) सोबत वापरल्यास, याद्वारे तुम्ही पूर्णपणे स्क्रिप्ट करता येणारे OmniRoute इन्स्टन्स सुरू करू शकता.
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, इ.) सह एकत्रित केलेले, हे तुम्हाला OmniRoute उदाहरण पूर्णपणे स्क्रिप्ट करण्यायोग्य बनवू देते.
 
 ### CLI पर्याय
 
-| कमांड                   | वर्णन                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| `omniroute`             | सर्व्हर सुरू करा (`PORT=20128`, API आणि डॅशबोर्ड एकाच पोर्टवर)                        |
-| `omniroute setup`       | पासवर्ड आणि पहिल्या प्रोव्हायडरसाठी मार्गदर्शित CLI ऑनबोर्डिंग                        |
-| `omniroute doctor`      | सर्व्हर सुरू न करता स्थानिक आरोग्य तपासण्या चालवा                                     |
-| `omniroute providers`   | CLI मधून प्रोव्हायडर्स शोधा, सूचीबद्ध करा, सत्यापित करा आणि तपासा                     |
-| `omniroute config`      | CLI साधन कॉन्फिगरेशन — कॉन्फिग्स सूचीबद्ध करा, मिळवा, सेट करा आणि सत्यापित करा        |
-| `omniroute status`      | ऑफलाइन स्थिती डॅशबोर्ड — आवृत्ती, DB, साधने, कॉन्फिगरेशन                              |
-| `omniroute logs`        | API मधून वापर लॉग्स प्रवाहित करा (`--follow` समर्थित)                                 |
-| `omniroute update`      | OmniRoute अद्यतने तपासा किंवा लागू करा                                                |
-| `omniroute provider`    | प्रोव्हायडर कनेक्शन्स व्यवस्थापित करा — जोडा, सूचीबद्ध करा, काढा, तपासा, डीफॉल्ट ठरवा |
-| `omniroute --port 3000` | कॅनॉनिकल/API पोर्ट 3000 वर सेट करा                                                    |
-| `omniroute --mcp`       | MCP सर्व्हर सुरू करा (stdio ट्रान्सपोर्ट)                                             |
-| `omniroute --no-open`   | ब्राउझर स्वयंचलितपणे उघडू नका                                                         |
-| `omniroute --help`      | मदत दाखवा                                                                             |
+| आज्ञा                   | वर्णन                                                                |
+| ----------------------- | -------------------------------------------------------------------- |
+| `omniroute`             | सर्व्हर सुरू करा ( एकाच पोर्टवर `PORT=20128`, API आणि डॅशबोर्ड)      |
+| `omniroute setup`       | संकेतशब्द आणि प्रथम प्रदात्यासाठी मार्गदर्शित CLI ऑनबोर्डिंग         |
+| `omniroute doctor`      | सर्व्हर सुरू न करता स्थानिक आरोग्य तपासणी करा                        |
+| `omniroute providers`   | CLI मधील प्रदाते शोधा, यादी करा, प्रमाणित करा आणि चाचणी करा          |
+| `omniroute config`      | CLI टूल कॉन्फिगरेशन — यादी, मिळवा, सेट करा, कॉन्फिगरेशन प्रमाणित करा |
+| `omniroute status`      | ऑफलाइन स्थिती डॅशबोर्ड — आवृत्ती, DB, साधने, कॉन्फिगरेशन             |
+| `omniroute logs`        | API वरून प्रवाहित वापर लॉग ( `--follow` ला समर्थन देते)              |
+| `omniroute update`      | OmniRoute अपडेट तपासा किंवा लागू करा                                 |
+| `omniroute provider`    | प्रदाता कनेक्शन — जोडा, सूची, काढा, चाचणी, डीफॉल्ट व्यवस्थापित करा   |
+| `omniroute --port 3000` | canonical/API पोर्ट 3000 वर सेट करा                                  |
+| `omniroute --mcp`       | MCP सर्व्हर सुरू करा (stdio वाहतूक)                                  |
+| `omniroute --no-open`   | ब्राउझर ऑटो-ओपन करू नका                                              |
+| `omniroute --help`      | मदत दाखवा                                                            |
 
-हेडलेस सेटअप फ्लॅग्स किंवा एन्व्हायर्नमेंट व्हेरिएबल्स वापरून स्क्रिप्ट केला जाऊ शकतो:
+हेडलेस सेटअप फ्लॅग्ज किंवा पर्यावरण व्हेरिएबल्ससह स्क्रिप्ट केले जाऊ शकते:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-डॅशबोर्ड न उघडता SSH किंवा स्क्रिप्ट्समधून प्रोव्हायडर्स व्यवस्थापित करा:
+डॅशबोर्ड न उघडता SSH किंवा स्क्रिप्टमधून प्रदाते व्यवस्थापित करा:
 
 ```bash
 omniroute providers available
@@ -199,39 +201,43 @@ env अंतर्भूत करून आणि कोणतेही कॉ
 
 ## प्रोटोकॉल सेटअप (MCP + A2A)
 
-### MCP सेटअप (Model Context Protocol)
+### MCP सेटअप (मॉडेल संदर्भ प्रोटोकॉल)
 
-stdio मोडमध्ये MCP ट्रान्सपोर्ट सुरू करा:
+stdio मोडमध्ये MCP वाहतूक सुरू करा:
 
 ```bash
 omniroute --mcp
 ```
 
-शिफारस केलेला प्रमाणीकरण प्रवाह:
+शिफारस केलेले प्रमाणीकरण प्रवाह:
 
 ```bash
-# 1. MCP सर्व्हर सुरू करा
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. तुमच्या MCP क्लायंटमधून, कॉल करा:
-omniroute_get_health        # सिस्टमची स्थिती परत केली पाहिजे
-omniroute_list_combos       # सक्रिय कॉम्बोज परत केले पाहिजेत
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. किंवा संपूर्ण E2E संच चालवा:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP क्लायंट कॉन्फिगरेशन
 
-**Claude Code:**
+**Claude कोड:**
+
+Claude कोड HTTP वर जोडतो, जो `omniroute --mcp` (stdio) सुरू होत नाही. डीफॉल्टनुसार HTTP वाहतूक बंद आहे: प्रथम चालू सर्व्हरवर ते सक्षम करा. जेव्हा डॅशबोर्ड लॉगिन सक्षम केले जाते, तेव्हा क्रेडेंशियलशिवाय विनंतीला `401` मिळते, म्हणून `mcp:connect` (किंवा `manage`) असलेली API की पास करा; `manage`/`admin` शिवाय की ला देखील प्रत्येक टूलच्या स्कोपची आवश्यकता असते ( [MCP सर्व्हर → MCP टूल स्कोप](../frameworks/MCP-SERVER.md#mcp-tool-scopes) पहा).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-तुमच्या MCP सेटिंग्जमध्ये जोडा:
+तुमच्या MCP सेटिंग्जमध्ये जोडा (stdio, की सह जेणेकरून कॉलरकडे प्रिन्सिपल असेल):
 
 ```json
 {
@@ -239,23 +245,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**संपूर्ण MCP दस्तऐवजीकरण:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 साधने, IDE कॉन्फिगरेशन्स, Python/TS/Go क्लायंट्स.
+किंवा, जेव्हा `mcpTransport` `streamable-http` असेल (ते `/dashboard/mcp` वर सेट करा किंवा `omniroute mcp enable --transport streamable-http` सह), क्लायंटची रिमोट MCP सर्व्हर एंट्री `http://localhost:20128/api/mcp/stream` वर निर्देशित करा.
 
-### A2A सेटअप (Agent-to-Agent Protocol)
+की `Authorization: Bearer <api-key>` म्हणून प्रवास करते (रिमोट होस्टसाठी [MCP सर्व्हर → रिमोट ऍक्सेस](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) पहा; रिमोट कीला `mcp:connect` आणि त्याचे read/write स्कोप आवश्यक आहेत).
 
-Agent Card सत्यापित करा:
+**संपूर्ण MCP दस्तऐवजीकरण:** [MCP सर्व्हर README](../../open-sse/mcp-server/README.md) — 110 टूल्स, IDE कॉन्फिग्स, Python/TS/Go क्लायंट. कॉम्प्रेशन CCR/dedup टूल्ससाठी ऑपरेटर संदर्भ (मार्कर, पूर्वस्थिती, प्रति-टूल स्कोप, पुनर्प्राप्ती पृष्ठांकन, निदान): [कॉम्प्रेशन इंजिन → पूर्वतयारी / ऑपरेटर मार्गदर्शक](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A सेटअप (एजंट-टू-एजंट प्रोटोकॉल)
+
+एजंट कार्ड सत्यापित करा:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-टास्क पाठवा:
+कार्य पाठवा:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +276,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**संपूर्ण A2A दस्तऐवजीकरण:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, कौशल्ये, स्ट्रीमिंग, टास्क जीवनचक्र.
+**संपूर्ण A2A दस्तऐवजीकरण:** [A2A सर्व्हर README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, कौशल्ये, प्रवाह, कार्य जीवनचक्र.
 
 ---
 
@@ -324,10 +337,10 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) टेम्पलेट
 
-Void Linux वापरकर्त्यांसाठी, तुम्ही `xbps-src` वापरून नेटिव्ह पॅकेज बिल्ड करू शकता. हा ब्लॉक `srcpkgs/omniroute/template` म्हणून जतन करा:
+Void Linux वापरकर्त्यांसाठी, तुम्ही `xbps-src` वापरून मूळ पॅकेज तयार करू शकता. हा ब्लॉक `srcpkgs/omniroute/template` म्हणून सेव्ह करा:
 
 ```bash
-# 'omniroute' साठी टेम्पलेट फाइल
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +351,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलीझसाठी चेकसम पुन्हा तयार करा:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

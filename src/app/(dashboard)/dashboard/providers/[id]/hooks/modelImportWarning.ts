@@ -25,19 +25,44 @@ export function extractImportWarning(data: unknown): string | null {
 }
 
 /**
+ * The reason of the degraded discovery, as the server published it.
+ *
+ * The server sends a closed vocabulary (a code or an HTTP status), never the
+ * upstream message, so the screen can show it as a technical value without
+ * leaking anything the provider sent.
+ */
+export function extractImportCause(data: unknown): string | null {
+  if (data && typeof data === "object" && "error" in data) {
+    const cause = (data as { error?: unknown }).error;
+    if (typeof cause === "string" && cause.trim()) return cause.trim();
+  }
+  return null;
+}
+
+/**
  * #15069 — pure phase resolver for the zero-new-models branch in handleImportModels.
  *
- * When all fetched models are already registered, what the user sees depends on whether
- * the fetch came from the live upstream API or fell back to the local catalog:
+ * When all fetched models are already registered, what the user sees depends on
+ * whether the fetch came from the live upstream API or fell back to a local
+ * catalog:
  *
- *  - `importWarning` present → local-catalog fallback → phase "warning" (the remote API was
- *    unreachable; a success indicator would be misleading).
- *  - `importWarning` absent  → remote catalog actually fetched → phase "done" (genuine success).
+ *  - the discovery degraded → phase "warning" (the live list was never read;
+ *    a success indicator would be misleading).
+ *  - the discovery did not degrade → phase "done" (a genuine success, even
+ *    when the server sent a warning with a catalog the operator asked for).
+ *
+ * Called with one argument, the warning text decides (the historical rule).
+ * Called with two, the degraded character decides: a catalog the operator
+ * asked for is not a fallback, and it must not be announced as one.
  *
  * Extracted as a pure function so unit tests can cover this branch without a React renderer.
  */
-export function resolveNoNewModelsPhase(importWarning: string | null): "warning" | "done" {
-  return importWarning ? "warning" : "done";
+export function resolveNoNewModelsPhase(
+  importWarning: string | null,
+  degraded?: boolean
+): "warning" | "done" {
+  if (degraded === undefined) return importWarning ? "warning" : "done";
+  return degraded ? "warning" : "done";
 }
 
 /**
@@ -89,6 +114,8 @@ export type ModelImportClassification = {
   degraded: boolean;
   /** The server's warning text, when there is one. */
   warning: string | null;
+  /** The reason of the fallback, when the server published one. */
+  cause: string | null;
   newCount: number;
   /** How many models discovery returned in total. */
   total: number;
@@ -109,12 +136,21 @@ export function classifyModelImport({
   isKnownModel,
 }: ClassifyModelImportInput): ModelImportClassification {
   const warning = extractImportWarning(modelsData);
+  const cause = extractImportCause(modelsData);
   const degraded = isDegradedDiscovery(
     (modelsData ?? {}) as { source?: unknown; intentional?: unknown; warning?: unknown }
   );
 
   if (fetchedModels.length === 0) {
-    return { outcome: "no-models", degraded, warning, newCount: 0, total: 0, newModels: [] };
+    return {
+      outcome: "no-models",
+      degraded,
+      warning,
+      cause,
+      newCount: 0,
+      total: 0,
+      newModels: [],
+    };
   }
 
   const newModels = fetchedModels.filter(
@@ -125,8 +161,89 @@ export function classifyModelImport({
     outcome: newModels.length === 0 ? "nothing-new" : "import",
     degraded,
     warning,
+    cause,
     newCount: newModels.length,
     total: fetchedModels.length,
     newModels,
   };
+}
+
+/**
+ * What one model import (`POST /api/providers/[id]/sync-models?mode=import`)
+ * did, as the import dialog must report it. Pure, so the contracts below are
+ * unit-testable without a React renderer.
+ *
+ * - `degraded` (#15069, B-03 / #15159): remote discovery failed and only a
+ *   fallback catalog answered. The sync refuses to store a fallback (502), and
+ *   the dialog must never read that as success or as "nothing new". The rule is
+ *   the server's own `isDegradedDiscovery`, so the two cannot drift.
+ * - `no-listing` (#5460/#5465): the provider publishes no model list; its
+ *   built-in catalog is the intended source, not a failure.
+ * - `free-filter-empty`: a free-only connection whose provider lists no free model.
+ * - `synced`: a live listing, with the model ids the import added and the ids
+ *   the provider no longer lists.
+ */
+export type ModelSyncOutcome =
+  | { kind: "degraded"; warning: string | null; cause: string | null }
+  | { kind: "failed"; error: string }
+  | { kind: "free-filter-empty" }
+  | { kind: "no-listing"; warning: string | null; addedModelIds: string[] }
+  | { kind: "synced"; addedModelIds: string[]; removedModelIds: string[] };
+
+function record(data: unknown): Record<string, unknown> {
+  return data && typeof data === "object" && !Array.isArray(data)
+    ? (data as Record<string, unknown>)
+    : {};
+}
+
+function idList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === "string" && id.length > 0)
+    : [];
+}
+
+function failureMessage(data: Record<string, unknown>, status: number): string {
+  const error = data.error;
+  if (typeof error === "string" && error.trim()) return error.trim();
+  const nested = record(error).message;
+  if (typeof nested === "string" && nested.trim()) return nested.trim();
+  return `HTTP ${status}`;
+}
+
+export function classifyModelSync(ok: boolean, status: number, data: unknown): ModelSyncOutcome {
+  const body = record(data);
+  if (!ok) {
+    if (typeof body.source === "string" && isDegradedDiscovery(body)) {
+      return {
+        kind: "degraded",
+        warning: extractImportWarning(body),
+        cause: extractImportCause(body),
+      };
+    }
+    return { kind: "failed", error: failureMessage(body, status) };
+  }
+  if (body.freeFilterEmpty === true) return { kind: "free-filter-empty" };
+  if (body.intentional === true || typeof body.skipped === "string") {
+    return {
+      kind: "no-listing",
+      warning: extractImportWarning(body),
+      addedModelIds: idList(body.addedModelIds),
+    };
+  }
+  return {
+    kind: "synced",
+    addedModelIds: idList(body.addedModelIds),
+    removedModelIds: idList(body.removedModelIds),
+  };
+}
+
+/**
+ * #15069: the dialog phase of an import. A degraded discovery ends in
+ * "warning" — never "done": the live list was never read, so a success
+ * indicator would be a false answer.
+ */
+export function phaseOfModelSync(outcome: ModelSyncOutcome): "done" | "warning" | "error" {
+  if (outcome.kind === "degraded") return "warning";
+  if (outcome.kind === "failed") return "error";
+  return "done";
 }

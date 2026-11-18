@@ -181,6 +181,138 @@ test("expired snapshot reused by the current migration is kept", async () => {
   assert.ok(remaining.includes(recent), "the recent backup must stay");
 });
 
+/**
+ * Count the throwaway snapshots the exemption lookup takes. Each one is a
+ * full-database VACUUM INTO on the main thread, made in a `.cleanup-resolve-`
+ * temp directory under the backup directory.
+ */
+async function countExemptionSnapshots(run: () => Promise<unknown>) {
+  const original = fs.mkdtempSync;
+  let snapshots = 0;
+  fs.mkdtempSync = ((prefix: string, options?: unknown) => {
+    if (path.basename(String(prefix)).startsWith(".cleanup-resolve-")) snapshots++;
+    return (original as (p: string, o?: unknown) => string)(prefix, options);
+  }) as typeof fs.mkdtempSync;
+  try {
+    await run();
+  } finally {
+    fs.mkdtempSync = original;
+  }
+  return snapshots;
+}
+
+function writeAged(filePath: string, contents: string, ageDays: number) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, contents);
+  const when = new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000);
+  fs.utimesSync(filePath, when, when);
+}
+
+test("retention on but no pre-migration snapshot can expire: no exemption snapshot", async () => {
+  backup.setDbBackupRetentionDays(30);
+  backup.setDbBackupMaxFiles(20);
+  const dir = backupDir();
+  const freshSha = createHash("sha256").update("fresh-pre-migration").digest("hex");
+  const fresh = `db_state-${freshSha}_pre-migration.sqlite`;
+  writeAged(path.join(dir, fresh), "fresh", 29);
+  // An expired backup of another kind is pruned without any exemption lookup.
+  const oldManualSha = createHash("sha256").update("old-manual").digest("hex");
+  const oldManual = `db_state-${oldManualSha}_manual.sqlite`;
+  writeAged(path.join(dir, oldManual), "old manual", 60);
+
+  const snapshots = await countExemptionSnapshots(() =>
+    cleanup.runScheduledCleanupPass("periodic")
+  );
+
+  assert.equal(snapshots, 0, "nothing can use the exemption, so no VACUUM INTO");
+  assert.deepEqual(listPrimaries(dir), [fresh]);
+});
+
+test("an expired pre-migration snapshot still gets the exemption lookup", async () => {
+  backup.setDbBackupRetentionDays(30);
+  backup.setDbBackupMaxFiles(20);
+  const dir = backupDir();
+  const sha = createHash("sha256").update("expired-pre-migration").digest("hex");
+  const expired = `db_state-${sha}_pre-migration.sqlite`;
+  writeAged(path.join(dir, expired), "old", 31);
+
+  const snapshots = await countExemptionSnapshots(() =>
+    cleanup.runScheduledCleanupPass("periodic")
+  );
+
+  const db = core.getDbInstance();
+  const native = db.driver !== "sql.js" && Boolean(db.name) && db.name !== ":memory:";
+  assert.equal(snapshots, native ? 1 : 0);
+  assert.deepEqual(listPrimaries(dir), [], "it matches nothing live, so it is pruned");
+});
+
+test("an expired directory-published pre-migration snapshot gets the lookup too", async () => {
+  backup.setDbBackupRetentionDays(30);
+  backup.setDbBackupMaxFiles(20);
+  const dir = backupDir();
+  const sha = createHash("sha256").update("expired-portable").digest("hex");
+  const portable = `db_state-${sha}_pre-migration.sqlite.snapshot`;
+  writeAged(path.join(dir, portable, "snapshot.sqlite"), "old", 45);
+
+  const snapshots = await countExemptionSnapshots(() =>
+    cleanup.runScheduledCleanupPass("periodic")
+  );
+
+  const db = core.getDbInstance();
+  const native = db.driver !== "sql.js" && Boolean(db.name) && db.name !== ":memory:";
+  assert.equal(snapshots, native ? 1 : 0);
+  assert.ok(!fs.existsSync(path.join(dir, portable)), "the expired snapshot directory is pruned");
+});
+
+test("a reused snapshot seconds past the cutoff still gets the exemption", async () => {
+  backup.setDbBackupRetentionDays(30);
+  backup.setDbBackupMaxFiles(20);
+  const dir = backupDir();
+  fs.mkdirSync(dir, { recursive: true });
+  // Same order as "expired snapshot reused by the current migration is kept":
+  // run the row cleanup first so the hash matches what the pass resolves.
+  await cleanup.runAutoCleanup();
+  const db = core.getDbInstance();
+  const native = db.driver !== "sql.js" && Boolean(db.name) && db.name !== ":memory:";
+  const reusedSha = cleanup.resolveReusedPreMigrationSha(db, dir);
+  if (!native) {
+    assert.equal(reusedSha, null, "no native read driver here, nothing to exempt");
+    return;
+  }
+  assert.equal(typeof reusedSha, "string");
+  const reused = `db_state-${reusedSha}_pre-migration.sqlite`;
+  // 30 days and 5 seconds: expired for the age rule, so only the exemption
+  // keeps it. A check that runs early, even by a minute, skips the hash.
+  writeAged(path.join(dir, reused), "reused", 30 + 5 / 86400);
+  // A fresh pre-migration family next to it must not hide the expired one.
+  const freshSha = createHash("sha256").update("fresh-neighbour").digest("hex");
+  const fresh = `db_state-${freshSha}_pre-migration.sqlite`;
+  writeAged(path.join(dir, fresh), "fresh", 1);
+
+  const snapshots = await countExemptionSnapshots(() =>
+    cleanup.runScheduledCleanupPass("periodic")
+  );
+
+  assert.equal(snapshots, 1, "a just-expired pre-migration family needs the lookup");
+  assert.deepEqual(listPrimaries(dir), [fresh, reused].sort(), "the reused snapshot must stay");
+});
+
+test("retention off: no exemption snapshot even with an old pre-migration snapshot", async () => {
+  backup.setDbBackupRetentionDays(0);
+  backup.setDbBackupMaxFiles(20);
+  const dir = backupDir();
+  const sha = createHash("sha256").update("ancient-pre-migration").digest("hex");
+  const ancient = `db_state-${sha}_pre-migration.sqlite`;
+  writeAged(path.join(dir, ancient), "ancient", 400);
+
+  const snapshots = await countExemptionSnapshots(() =>
+    cleanup.runScheduledCleanupPass("periodic")
+  );
+
+  assert.equal(snapshots, 0, "no age rule, so the exemption cannot matter");
+  assert.deepEqual(listPrimaries(dir), [ancient], "count rule only, 1 of 20");
+});
+
 test("missing backup directory: pass stays green", async () => {
   backup.setDbBackupMaxFiles(3);
   assert.ok(!fs.existsSync(backupDir()));

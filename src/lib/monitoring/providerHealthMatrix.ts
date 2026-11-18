@@ -1,3 +1,4 @@
+import { logicalCallSql } from "@/lib/db/logicalCallSql";
 import { registerDbStateResetter } from "@/lib/db/stateReset";
 import { getSyncedAvailableModelsByConnection } from "@/lib/db/models";
 import { getProviderConnections } from "@/lib/db/providers";
@@ -240,7 +241,7 @@ function queryCallLogTargetStats(
           c.id,
           c.error_summary
         FROM call_logs c
-        WHERE c.provider IS NOT NULL
+        WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL
           AND c.provider != '-'
           AND c.timestamp >= @cutoff
           ${providerClause}

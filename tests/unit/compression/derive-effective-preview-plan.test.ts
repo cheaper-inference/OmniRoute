@@ -5,7 +5,10 @@ import {
   type CompressionConfig,
 } from "@omniroute/open-sse/services/compression/types.ts";
 import { selectCompressionPlan } from "@omniroute/open-sse/services/compression/strategySelector.ts";
-import { deriveEffectivePreviewPlan } from "@omniroute/open-sse/services/compression/deriveEffectivePreviewPlan.ts";
+import {
+  deriveEffectiveAutoTriggerPreviewPlan,
+  deriveEffectivePreviewPlan,
+} from "@omniroute/open-sse/services/compression/deriveEffectivePreviewPlan.ts";
 
 // Issue #12063: the dashboard shows an "active profile" selected (e.g. "Standard Savings",
 // pipeline rtk:standard -> caveman:full on /dashboard/context/combos), but the Settings-page
@@ -22,10 +25,14 @@ const namedCombos = {
 };
 
 // #14529 then kept lossy engines off the header-less path: the runtime replaces lossy steps with
-// session-dedup + lite unless the request opts in (`allow-lossy`, `engine:<id>`, a named combo).
+// session-dedup + lite (without tool-result truncation) unless the request opts in
+// (`allow-lossy`, `engine:<id>`, a named combo).
 // The preview must follow — otherwise it shows rtk → caveman while requests run the safe pair,
 // which is #12063 again. Every case below pins preview == runtime, not just a literal plan.
-const SAFE_PIPELINE = [{ engine: "session-dedup" }, { engine: "lite" }];
+const SAFE_PIPELINE = [
+  { engine: "session-dedup" },
+  { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+];
 
 function runtimePlan(config: CompressionConfig) {
   return selectCompressionPlan(
@@ -111,7 +118,7 @@ test("no active profile => the engines-derived plan after the lossy policy, same
   assert.equal(preview.mode, "stacked");
 });
 
-test("a safe-only active profile is shown unchanged", () => {
+test("a safe-only active profile keeps its steps, with lite not truncating tool results", () => {
   const combos = { safe: [{ engine: "session-dedup" }, { engine: "lite" }] };
   const config: CompressionConfig = {
     ...DEFAULT_COMPRESSION_CONFIG,
@@ -120,7 +127,7 @@ test("a safe-only active profile is shown unchanged", () => {
   };
   assert.deepEqual(deriveEffectivePreviewPlan(config, combos as never), {
     mode: "stacked",
-    stackedPipeline: combos.safe,
+    stackedPipeline: SAFE_PIPELINE,
   });
 });
 
@@ -138,7 +145,88 @@ test("legacy install (engines not panel-saved) => preview follows defaultMode li
   };
   const preview = deriveEffectivePreviewPlan(config, namedCombos);
   const runtime = runtimePlan(config);
-  assert.equal(runtime.mode, "lite");
+  assert.equal(runtime.mode, "stacked");
+  assert.deepEqual(runtime.stackedPipeline, [
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
   assert.equal(preview.mode, runtime.mode);
   assert.deepEqual(preview.stackedPipeline, runtime.stackedPipeline);
+});
+
+test("legacy lossy default preview retains the configured safe subset like runtime", () => {
+  const headroom = { engine: "headroom" as const, config: { minRows: 20 } };
+  const config: CompressionConfig = {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: true,
+    enginesExplicit: false,
+    activeComboId: null,
+    defaultMode: "aggressive",
+    autoTriggerTokens: 100_000,
+    stackedPipeline: [{ engine: "rtk", intensity: "standard" }, headroom, { engine: "lite" }],
+  };
+
+  const preview = deriveEffectivePreviewPlan(config, namedCombos);
+  const runtime = runtimePlan(config);
+  assert.equal(preview.mode, runtime.mode);
+  assert.deepEqual(preview.stackedPipeline, runtime.stackedPipeline);
+  assert.deepEqual(preview.stackedPipeline, [headroom, config.stackedPipeline?.[2]]);
+});
+
+test("lossy auto-trigger preview retains the configured safe subset", () => {
+  const headroom = { engine: "headroom" as const, config: { minRows: 20 } };
+  const config: CompressionConfig = {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: true,
+    activeComboId: null,
+    autoTriggerTokens: 1,
+    autoTriggerMode: "aggressive",
+    stackedPipeline: [{ engine: "rtk", intensity: "standard" }, headroom, { engine: "lite" }],
+  };
+
+  assert.deepEqual(deriveEffectiveAutoTriggerPreviewPlan(config, namedCombos), {
+    mode: "stacked",
+    source: "auto-trigger",
+    stackedPipeline: [headroom, config.stackedPipeline?.[2]],
+  });
+});
+
+test("auto-trigger preview is absent when auto-trigger cannot run", () => {
+  const base: CompressionConfig = {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: true,
+    activeComboId: null,
+    autoTriggerTokens: 1,
+    autoTriggerMode: "aggressive",
+  };
+  const adaptive = {
+    policy: "reserve-output" as const,
+    outputReserve: 4096,
+    safetyMargin: 1024,
+    pct: 0.85,
+    absoluteBudget: 0,
+  };
+
+  assert.equal(
+    deriveEffectiveAutoTriggerPreviewPlan(
+      { ...base, activeComboId: "standard-savings" },
+      namedCombos
+    ),
+    null
+  );
+  assert.equal(
+    deriveEffectiveAutoTriggerPreviewPlan({
+      ...base,
+      contextBudget: { ...adaptive, mode: "floor" },
+    }),
+    null
+  );
+  assert.equal(
+    deriveEffectiveAutoTriggerPreviewPlan({
+      ...base,
+      contextBudget: { ...adaptive, mode: "replace-autotrigger" },
+    }),
+    null
+  );
+  assert.equal(deriveEffectiveAutoTriggerPreviewPlan({ ...base, enabled: false }), null);
+  assert.equal(deriveEffectiveAutoTriggerPreviewPlan({ ...base, autoTriggerTokens: 0 }), null);
 });

@@ -110,3 +110,47 @@ export async function verifyDashboardSessionToken(
     return null;
   }
 }
+
+/**
+ * Two-factor login: the short-lived token issued between "password accepted" and "second
+ * factor accepted". It carries `mfaPending` and its own audience but never the session
+ * claim, so `verifyDashboardSessionToken` rejects it everywhere a session is expected —
+ * reusing the intermediate cookie as `auth_token` cannot skip the second factor.
+ */
+export const MFA_PENDING_COOKIE = "omniroute_mfa_pending";
+/** Scoped to the MFA routes so the browser never sends it anywhere else. */
+export const MFA_PENDING_COOKIE_PATH = "/api/auth/mfa";
+export const MFA_PENDING_MAX_AGE_SECONDS = 5 * 60;
+const MFA_PENDING_CLAIM = "mfaPending";
+const MFA_PENDING_AUDIENCE = "omniroute:dashboard-mfa-pending";
+
+export async function mintMfaPendingToken(secret: Uint8Array): Promise<string> {
+  return new SignJWT({ [MFA_PENDING_CLAIM]: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setAudience(MFA_PENDING_AUDIENCE)
+    .setIssuedAt()
+    .setJti(crypto.randomUUID())
+    .setExpirationTime(`${MFA_PENDING_MAX_AGE_SECONDS}s`)
+    .sign(secret);
+}
+
+/** The verified payload when `token` is a live MFA-pending token, else null. Never throws. */
+export async function verifyMfaPendingToken(
+  token: string | null | undefined,
+  secret: Uint8Array | null = getDashboardJwtSecret()
+): Promise<JWTPayload | null> {
+  if (!token || typeof token !== "string" || !secret || secret.length === 0) return null;
+  try {
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+      audience: MFA_PENDING_AUDIENCE,
+    });
+    if (payload[MFA_PENDING_CLAIM] !== true || payload[DASHBOARD_SESSION_CLAIM] === true) {
+      return null;
+    }
+    // A password change since the first factor was accepted voids the pending login too.
+    return (await isDashboardSessionEnded(payload)) ? null : payload;
+  } catch {
+    return null;
+  }
+}

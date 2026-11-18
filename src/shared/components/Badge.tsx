@@ -4,11 +4,10 @@ import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
 
-// Kit Badge variants are default/secondary/destructive/outline/live; OmniRoute's status
-// variants are an outline kit badge with a `data-tone` (globals.css → "Badge status tones").
+// OmniRoute's status variants are kit tones on the borderless `secondary` badge.
 const TONES = {
   default: null,
-  primary: "primary",
+  primary: "accent",
   success: "success",
   warning: "warning",
   error: "danger",
@@ -22,7 +21,7 @@ interface BadgeProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "childr
   variant?: keyof typeof TONES;
   size?: keyof typeof SIZES;
   dot?: boolean;
-  /** Material Symbols name (rendered through <Icon>) or any node. */
+  /** ICON_MAP name (rendered through <Icon>) or any node. */
   icon?: React.ReactNode;
   className?: string;
 }
@@ -41,9 +40,9 @@ export default function Badge({
   return (
     <KitBadge
       {...props}
-      variant={tone ? "outline" : "secondary"}
+      variant="secondary"
       shape="pill"
-      data-tone={tone ?? undefined}
+      tone={tone ?? undefined}
       icon={typeof icon === "string" ? <Icon name={icon} size={14} /> : icon}
       className={cn(SIZES[size], className)}
     >

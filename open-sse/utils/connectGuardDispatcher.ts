@@ -21,6 +21,15 @@ export type ConnectGuardMode = Exclude<OutboundUrlGuardMode, "none">;
 
 export const CONNECT_GUARD_BLOCKED_CODE = "ERR_OUTBOUND_HOST_BLOCKED";
 
+/** True when a failed fetch was refused by the guarded lookup, not by the network. */
+export function isConnectGuardRefusal(error: unknown): boolean {
+  const failure = error as { code?: unknown; cause?: { code?: unknown } } | null;
+  return (
+    failure?.code === CONNECT_GUARD_BLOCKED_CODE ||
+    failure?.cause?.code === CONNECT_GUARD_BLOCKED_CODE
+  );
+}
+
 type LookupAddress = { address: string; family: number };
 type LookupCallback = (
   err: NodeJS.ErrnoException | null,

@@ -28,13 +28,12 @@ Mitattu 2026-10-18:
 | swap        | 16 GB                             | `omniroute-113-5` toimii ilman sivutusta (`MemorySwapMax=0`), joten hallitsemattomasti kasvava koonti katkaistaan sen saavuttaessa rajansa sen sijaan, että koko palvelin alkaisi käyttää sivutusta                                                                                                                                                                                                                  |
 | `/tmp`      | **12 GB tmpfs = RAM**             | kaikki sinne tallennettu kuluttaa muistia; jäänteet poistetaan 3 tunnin kuluttua                                                                                                                                                                                                                                                                                                                                     |
 | CPU         | kuormaksi havaittu 60 32 ytimellä | ennen kiintiöitä yksi Turbopack-koonti (~1166 % CPU) sekä samalla palvelimella ajettu kattavuustestikokonaisuus estivät muita kuuntelijoita lähettämästä heartbeat-signaalejaan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                |
-| suorittajat | **6 kuuntelijaa**                 | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` on poistettu käytöstä (`systemctl enable --now` ottaa yhden takaisin käyttöön)                                                                                                                                                                                                                                                                       |
+| suorittajat | **7 kuuntelijaa** (2026-10-28)    | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` kantaa myös tunnistetta `omni-build`; `omniroute-113-3/-4/-8` poistettiin repositoriosta (2026-10-28)                                                                                                                                                                                                                                                         |
 
 Rajat sijaitsevat kunkin yksikön tiedostossa `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (aiemmat arvot on säilytetty nimellä `override.conf.bak-20261018`), ja ne otettiin käyttöön ajon aikana komennolla
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ilman uudelleenkäynnistystä, joten
-käynnissä oleviin töihin ei puututtu. Tunnisteet muutetaan runners API:n kautta
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+käynnissä oleviin töihin ei puututtu. Tunnisteet muutetaan runners API:n kautta (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), niin ikään ajon aikana.
 
 ## Asenna siivousohjelma (kerran palvelimelle)
@@ -43,7 +42,7 @@ käynnissä oleviin töihin ei puututtu. Tunnisteet muutetaan runners API:n kaut
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): 30 minuutin välein, loki tiedostoon /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` vaaditaan: siivousohjelma varmistaa polun olevan käyttämätön ottamalla yhden tilannekuvan avoimista
@@ -117,8 +116,16 @@ kerrallaan ja vain sen ollessa käyttämätön** siten, että käyttämättömyy
   oli `MemoryHigh=4G` päivään 2026-10-18 asti — promptfoo-koonti käytti 54 minuuttia muistinhallinnan aiheuttamaan hidasteluun;
   8 Gt poistaa rajoittamisen.
 - **Tarkoituksella vähemmän kuuntelijoita.** Neljä OmniRoute-yksikköä poistettiin käytöstä 2026-08-29 — jokainen ylimääräinen
-  kuuntelija kuluttaa osansa edellä mainitusta muistibudjetista. Siivoojan yläraja on 6 (`MAX_ACTIVE_RUNNERS=6` cronissa): se laskee
-  kaikki palvelimen `Runner.Listener`-prosessit, ja OmniHeuris sekä OmniMind lisäävät kaksi kuuntelijaa meidän neljämme lisäksi.
+  kuuntelija kuluttaa osansa edellä mainitusta muistibudjetista. Siivoojan yläraja on 8 (`MAX_ACTIVE_RUNNERS=8` cronissa): se laskee
+  kaikki palvelimen `Runner.Listener`-prosessit, ja OmniHeuris sekä OmniMind lisäävät kaksi kuuntelijaa meidän viiden kuuntelijamme lisäksi.
+- **Unit- ja Vitest-työt pysyvät GitHub-hostattuina.** `ci.yml` lähettää unit-shardinsa ja Vitest-työn kohteeseen
+  `[self-hosted, omni-ci]` vain, kun repositoriomuuttuja `vars.USE_VPS_TEST_RUNNER` on
+  `true`, ja silloinkin vain saman repositorion `pull_request`-suorituksille; forkit, `merge_group` ja push-tapahtumat
+  pysyvät `ubuntu-latest`-ympäristössä (`tests/unit/vps-runner-variable-scope.test.ts`). Muuttujan arvo on
+  `false`. 2026-10-28 kolmelta 4-ytimiseltä `omni-ci`-kuuntelijalta kului 250–270 s komentoon `npm ci`, ja jokainen
+  unit-shard osui 30 minuutin työrajaan, kun GitHub-hostattu shard vei noin 634 s, palvelimen kuorman ollessa
+  17–24. Kuuntelijat poistettiin. Älä ota muuttujaa takaisin käyttöön ilman kuuntelijoita, jotka on mitoitettu
+  unit-shardille.
 - **Älä koskaan siivoa `/tmp`- tai `_work`-hakemistoa käsin, kun jokin suorittaja on varattuna.**
   Tarkistuksen ja poistamisen suorittaminen erikseen niin, että niiden väliin jää tauko, johti käynnissä olevan Build-työn
   `_work`-hakemiston menettämiseen 2026-08-27. Siivooja tekee tarkistuksen ja poiston yhdessä vaiheessa;
@@ -132,8 +139,10 @@ kerrallaan ja vain sen ollessa käyttämätön** siten, että käyttämättömyy
 
 ## GitHub-hostattu suorituskaista (GitHub-hosted runners)
 
-Tili on **Pro**-tilauksessa: käytettävissä on **40 samanaikaista GitHub-hostattua työtä**, jotka jaetaan kaikkien PR-tarkistusten,
-kaikkien push-tapahtumien käynnistämien työnkulkujen ja CodeQL:n oletusmäärityksen kesken. Mittauksessa 2026-10-18
+Repositorio kuuluu `cheaper-inference`-organisaatiolle, joka on **Team**-tilauksessa: käytettävissä on **60
+samanaikaista GitHub-hostattua työtä**, jotka jaetaan kaikkien organisaation repositorioiden, kaikkien PR-tarkistusten,
+kaikkien push-tapahtumien käynnistämien työnkulkujen ja CodeQL:n oletusmäärityksen kesken. Alla olevat luvut mitattiin
+**Pro**-tilauksen aikana (40 samanaikaista GitHub-hostattua työtä). Mittauksessa 2026-10-18
 yhdistämiskampanjan aikana (~10 yhdistämistä tunnissa haarassa `release/v3.8.52`) **2 500 työnkulun suoritusta luotiin
 24 tunnissa**, haaraan tehtiin 44 push-tapahtumaa 6 tunnissa ja **106 GitHub-hostattua työtä jäi jonoon**, kun PR-tarkistukset odottivat
 tunteja ja PR:t yhdistettiin ilman niitä. Yhdeksän työnkulkua käynnistyi jokaisesta haaraan tehdystä push-tapahtumasta:

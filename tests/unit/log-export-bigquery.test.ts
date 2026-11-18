@@ -47,6 +47,7 @@ const RECORD: LogExportRecord = {
   account: "team@example.com",
   connectionId: "conn-1",
   duration: 1234,
+  ttftMs: 250,
   tokensIn: 100,
   tokensOut: 200,
   tokensCacheRead: 10,
@@ -98,6 +99,7 @@ interface RequestBody {
 }
 
 interface Call {
+  headers: Headers;
   url: string;
   method: string;
   body: RequestBody;
@@ -125,6 +127,7 @@ function stubFetch(handlers: StubHandler[]) {
   const calls: Call[] = [];
   const fetchImpl = (async (url: string | URL | Request, init?: RequestInit) => {
     const call: Call = {
+      headers: new Headers(init?.headers),
       url: String(url),
       method: init?.method ?? "GET",
       body: typeof init?.body === "string" ? safeJson(init.body) : {},
@@ -155,11 +158,16 @@ test("toBigQueryRow_EveryDashboardField_HasAColumn", () => {
 
   // One record field per column (plus exported_at), so a new dashboard column cannot
   // be silently dropped on the way out.
-  assert.equal(Object.keys(RECORD).length + 1, schemaNames.length);
+  assert.equal(Object.keys(RECORD).length + 3, schemaNames.length);
 
   assert.equal(row.id, "log-1");
   assert.equal(row.requested_model, "anthropic/claude-opus-5");
   assert.equal(row.duration_ms, 1234);
+  assert.equal(row.ttft_ms, 250);
+  assert.equal(
+    bigquery.toBigQueryRow({ ...RECORD, ttftMs: null }, "2026-08-28T11:00:00.000Z").ttft_ms,
+    null
+  );
   assert.equal(row.tokens_cache_write, 5);
   assert.equal(row.model_pinned, true);
   assert.equal(row.exported_at, "2026-08-28T11:00:00.000Z");
@@ -266,6 +274,105 @@ test("prepare_ExistingTable_CreatesNothing", async () => {
   const writes = calls.filter((call) => call.method === "POST" && !call.url.includes("oauth2"));
   assert.equal(writes.length, 0);
 });
+
+// Exact pre-TTFT schema, independent of the evolving new-table schema.
+const BASE_SCHEMA_NAMES = [
+  "id",
+  "timestamp",
+  "method",
+  "path",
+  "status",
+  "model",
+  "requested_model",
+  "provider",
+  "provider_display",
+  "account",
+  "connection_id",
+  "duration_ms",
+  "tokens_in",
+  "tokens_out",
+  "tokens_cache_read",
+  "tokens_cache_write",
+  "tokens_reasoning",
+  "tokens_compressed",
+  "cache_source",
+  "request_type",
+  "source_format",
+  "target_format",
+  "api_key_id",
+  "api_key_name",
+  "combo_name",
+  "combo_step_id",
+  "combo_execution_key",
+  "error_summary",
+  "error_type",
+  "correlation_id",
+  "session_tag",
+  "model_pinned",
+  "detail_state",
+  "has_request_body",
+  "has_response_body",
+  "has_pipeline_details",
+  "request_body",
+  "response_body",
+  "pipeline_route_decision",
+  "pipeline_client_request",
+  "pipeline_openai_request",
+  "pipeline_provider_request",
+  "pipeline_provider_response",
+  "pipeline_client_response",
+  "pipeline_error",
+  "bodies_truncated",
+  "exported_at",
+];
+for (const hasTtft of [false, true]) {
+  test(`prepare existing schema exports without alteration: ttft_ms=${hasTtft}`, async () => {
+    const names = [...BASE_SCHEMA_NAMES, ...(hasTtft ? ["ttft_ms"] : [])];
+    const schema = {
+      fields: bigquery.BIGQUERY_TABLE_SCHEMA.fields.filter((field) => names.includes(field.name)),
+    };
+    assert.deepEqual(schema.fields.map((field) => field.name).sort(), [...names].sort());
+    const { fetchImpl, calls } = stubFetch([
+      (call) => {
+        if (call.method === "GET" && call.url.endsWith("/tables/call_logs"))
+          return { status: 200, json: { schema } };
+        if (call.url.endsWith("/insertAll")) {
+          const unknown = (call.body.rows ?? []).flatMap((row) =>
+            Object.keys(row.json).filter((name) => !names.includes(name))
+          );
+          return {
+            status: 200,
+            json: unknown.length
+              ? {
+                  insertErrors: [
+                    { index: 0, errors: [{ message: `no such field: ${unknown[0]}` }] },
+                  ],
+                }
+              : {},
+          };
+        }
+        return null;
+      },
+    ]);
+    const client = bigquery.createBigQueryClientForTest(
+      { ...CONFIG, autoCreate: false },
+      fetchImpl
+    );
+    await client.prepare();
+    await client.send([RECORD]);
+    assert.equal(
+      calls.some((call) => call.method === "PATCH"),
+      false
+    );
+    const writes = calls.filter((call) => call.method !== "GET" && !call.url.includes("oauth2"));
+    assert.equal(writes.length, 1);
+    const row = writes[0].body.rows?.[0].json;
+    assert.ok(row);
+    assert.deepEqual(Object.keys(row).sort(), [...names].sort());
+    assert.equal(Object.hasOwn(row, "ttft_ms"), hasTtft);
+    if (hasTtft) assert.equal(row.ttft_ms, RECORD.ttftMs);
+  });
+}
 
 test("prepare_AutoCreateDisabledAndTableMissing_Throws", async () => {
   const { fetchImpl } = stubFetch([]);
@@ -529,4 +636,106 @@ test("toBigQueryRow_PayloadFields_MapOntoTheirColumns", () => {
   assert.equal(row.bodies_truncated, true);
   // A destination that never opted in leaves them null rather than empty strings.
   assert.equal(bigquery.toBigQueryRow(RECORD, "2026-08-29T00:00:00.000Z").request_body, null);
+});
+
+test("existing BigQuery tables cannot silently drop field-level evidence", async () => {
+  const { fetchImpl, calls } = stubFetch([
+    (call) => (call.method === "GET" ? { status: 200, json: { schema: { fields: [] } } } : null),
+  ]);
+  const client = bigquery.createBigQueryClientForTest(CONFIG, fetchImpl);
+  await client.prepare();
+  await assert.rejects(
+    client.send([
+      {
+        ...RECORD,
+        usageEvidence: {
+          input: { source: "reported" },
+          output: { source: "estimated", method: "characters" },
+          cacheRead: { source: "unknown" },
+          cacheCreation: { source: "unknown" },
+        },
+        estimated: true,
+      },
+    ]),
+    /usage_evidence.*usage_estimated/
+  );
+  assert.equal(
+    calls.some((call) => call.url.endsWith("/insertAll")),
+    false
+  );
+});
+test("BigQuery projection retains mixed evidence as JSON", () => {
+  const usageEvidence = {
+    input: { source: "reported" as const },
+    output: { source: "estimated" as const, method: "characters" },
+    cacheRead: { source: "unknown" as const },
+    cacheCreation: { source: "reported" as const },
+  };
+  const row = bigquery.toBigQueryRow(
+    { ...RECORD, usageEvidence, estimated: true, tokensCacheRead: null, tokensCacheWrite: 0 },
+    "2026-01-01T00:00:00Z"
+  );
+  assert.deepEqual(JSON.parse(row.usage_evidence!), usageEvidence);
+  assert.equal(row.usage_estimated, true);
+  assert.equal(row.tokens_cache_read, null);
+  assert.equal(row.tokens_cache_write, 0);
+});
+
+test("autoCreate adds only nullable evidence fields with an etag and preserves metadata", async () => {
+  const existing = [
+    {
+      name: "id",
+      type: "STRING",
+      mode: "REQUIRED",
+      description: "preserve",
+      policyTags: { names: ["tag"] },
+    },
+  ];
+  let fields: Array<{ name: string }> = existing;
+  const { fetchImpl, calls } = stubFetch([
+    (call) => {
+      if (call.method === "GET")
+        return { status: 200, json: { etag: "revision-1", schema: { fields } } };
+      if (call.method === "PATCH") {
+        assert.equal(call.headers.get("If-Match"), "revision-1");
+        assert.deepEqual(call.body.schema?.fields[0], existing[0]);
+        assert.deepEqual(call.body.schema?.fields.slice(1), [
+          { name: "usage_evidence", type: "STRING", mode: "NULLABLE" },
+          { name: "usage_estimated", type: "BOOL", mode: "NULLABLE" },
+        ]);
+        fields = call.body.schema!.fields;
+        return { status: 200, json: { etag: "revision-2", schema: { fields } } };
+      }
+      return null;
+    },
+  ]);
+  const client = bigquery.createBigQueryClientForTest({ ...CONFIG, autoCreate: true }, fetchImpl);
+  await client.prepare();
+  await client.prepare();
+  assert.equal(calls.filter((call) => call.method === "PATCH").length, 1);
+});
+test("evidence schema repair honors autoCreate false and failed preconditions", async () => {
+  for (const autoCreate of [false, true]) {
+    const { fetchImpl, calls } = stubFetch([
+      (call) => {
+        if (call.method === "GET")
+          return {
+            status: 200,
+            json: { etag: "stale", schema: { fields: [{ name: "id", type: "STRING" }] } },
+          };
+        if (call.method === "PATCH")
+          return { status: 412, json: { error: { message: "schema changed" } } };
+        return null;
+      },
+    ]);
+    const client = bigquery.createBigQueryClientForTest({ ...CONFIG, autoCreate }, fetchImpl);
+    if (autoCreate) await assert.rejects(client.prepare(), /schema changed/);
+    else await client.prepare();
+    await assert.rejects(client.send([{ ...RECORD, estimated: true }]), /usage_evidence/);
+    assert.equal(calls.filter((call) => call.method === "PATCH").length, autoCreate ? 1 : 0);
+    assert.equal(
+      calls.some((call) => call.url.endsWith("/insertAll")),
+      false
+    );
+  }
 });

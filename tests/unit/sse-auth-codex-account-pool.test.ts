@@ -43,7 +43,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("paid-credit account passes exhausted subscription snapshots and still falls back on credit exhaustion", async () => {
+test("paid credits wait for sibling subscription quota and still fall back on credit exhaustion", async () => {
   const quotaCache = await import("../../src/domain/quotaCache.ts");
   const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
   const paid = await seedCodexConnection({
@@ -63,10 +63,11 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
     session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
   });
   let available = true;
+  let siblingPercentUsed = 0.2;
   const calls: string[] = [];
   registerQuotaFetcher("codex", async (id) => {
     calls.push(id);
-    const percentUsed = id === paid.id ? 1 : 0.2;
+    const percentUsed = id === paid.id ? 1 : siblingPercentUsed;
     return {
       used: percentUsed * 100,
       total: 100,
@@ -85,6 +86,21 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
     };
   });
   try {
+    const first = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(first.connectionId, sibling.id, "subscription quota is spent before paid credits");
+    assert.deepEqual(calls, [sibling.id]);
+    first.releaseOAuthSession?.();
+
+    siblingPercentUsed = 1;
+    quotaCache.setQuotaCache(sibling.id, "codex", {
+      session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+    });
+    calls.length = 0;
     const selected = await auth.getProviderCredentialsWithQuotaPreflight(
       "codex",
       null,
@@ -98,6 +114,7 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
       "paid-credit consent requires fresh preflight despite legacy opt-out"
     );
     selected.releaseOAuthSession?.();
+
     available = false;
     calls.length = 0;
     const next = await auth.getProviderCredentialsWithQuotaPreflight(
@@ -106,11 +123,57 @@ test("paid-credit account passes exhausted subscription snapshots and still fall
       null,
       "gpt-5.5"
     );
-    assert.equal(next.connectionId, sibling.id);
-    assert.deepEqual(calls, [paid.id, sibling.id]);
-    next.releaseOAuthSession?.();
+    assert.notEqual(next?.connectionId, paid.id, "exhausted credits fall back");
+    assert.equal(next?.allRateLimited, true);
+    assert.deepEqual(calls, [paid.id]);
   } finally {
     quotaCache.__clearForTests();
+  }
+});
+
+test("an unknown quota read skips a paid-credit account for that request without locking it", async () => {
+  const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
+  const paid = await seedCodexConnection({
+    name: "paid-unknown-quota",
+    accessToken: "paid-access",
+    providerSpecificData: { allowPaidCredits: true },
+  });
+  let readable = false;
+  registerQuotaFetcher("codex", async () =>
+    readable
+      ? {
+          used: 10,
+          total: 100,
+          percentUsed: 0.1,
+          resetAt: futureIso(120_000),
+          windows: { session: { percentUsed: 0.1, resetAt: futureIso(120_000) } },
+          paidCredits: { hasCredits: true, unlimited: false, overageLimitReached: false },
+        }
+      : null
+  );
+  try {
+    const whileUnknown = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(whileUnknown.allRateLimited, true, "unknown quota stays fail-closed (#13337)");
+
+    const stored = await providersDb.getProviderConnectionById(paid.id);
+    assert.equal(stored?.testStatus, "active");
+    assert.equal(stored?.rateLimitedUntil ?? null, null);
+
+    readable = true;
+    const afterRecovery = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      null,
+      "gpt-5.5"
+    );
+    assert.equal(afterRecovery.connectionId, paid.id, "no cooldown outlives the failed read");
+  } finally {
+    registerQuotaFetcher("codex", async () => null);
   }
 });
 
@@ -398,4 +461,99 @@ test("markAccountUnavailable keeps model-less Codex 429 state off the parent", a
   assert.equal(updated.errorCode, parentBefore.errorCode);
   assert.equal(updated.backoffLevel, parentBefore.backoffLevel);
   assert.deepEqual(updated.providerSpecificData, parentBefore.providerSpecificData);
+});
+
+test("Codex hosted image ignores only provenance-tagged text preflight and cached text quota", async () => {
+  const codexAccount = await import("../../open-sse/services/codexAccount/index.ts");
+  const quotaCache = await import("../../src/domain/quotaCache.ts");
+  const { imageQuotaPreflightOptions } =
+    await import("../../src/sse/services/imageQuotaSelectionPolicy.ts");
+  const paid = await seedCodexConnection({
+    name: "paid-images-independent-quota",
+    email: "paid-image@example.com",
+    accessToken: "paid-image-access",
+    refreshToken: "paid-image-refresh",
+    providerSpecificData: { workspacePlanType: "plus", quotaPreflightEnabled: true },
+  });
+  const resetAt = futureIso(120_000);
+  const { markQuotaPreflightAccountUnavailable } =
+    await import("../../src/sse/services/quotaPreflightUnavailable.ts");
+  await markQuotaPreflightAccountUnavailable(
+    "codex",
+    paid.id,
+    { quotaPercent: 1, resetAt },
+    "gpt-5.5"
+  );
+  const persisted = await providersDb.getProviderConnectionById(paid.id);
+  assert.equal(persisted.providerSpecificData.codexScopeRateLimitSource.codex, "quota_preflight");
+  assert.equal(codexAccount.isCodexChildUnavailable(persisted as never, "gpt-5.5"), true);
+  quotaCache.setQuotaCache(paid.id, "codex", {
+    session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+  });
+  try {
+    const text = await auth.getProviderCredentials("codex", null, [paid.id], "gpt-5.5");
+    assert.notEqual(text?.connectionId, paid.id, "text still honors its preflight cooldown");
+
+    const image = await auth.getProviderCredentialsWithQuotaPreflight(
+      "codex",
+      null,
+      [paid.id],
+      "gpt-5.5",
+      imageQuotaPreflightOptions("codex")
+    );
+    assert.equal(image.connectionId, paid.id, "image ignores only text quota preflight");
+    image.releaseOAuthSession?.();
+  } finally {
+    quotaCache.__clearForTests();
+  }
+});
+
+test("an upstream Codex cooldown replaces preflight provenance and still blocks hosted images", async () => {
+  const codexAccount = await import("../../open-sse/services/codexAccount/index.ts");
+  const { imageQuotaPreflightOptions } =
+    await import("../../src/sse/services/imageQuotaSelectionPolicy.ts");
+  const account = await seedCodexConnection({
+    name: "paid-upstream-quota",
+    email: "paid-real-cooldown@example.com",
+    accessToken: "paid-real-cooldown-access",
+    refreshToken: "paid-real-cooldown-refresh",
+    providerSpecificData: { workspacePlanType: "plus" },
+  });
+  const resetAt = futureIso(120_000);
+  await codexAccount.persistCodexChildCooldown({
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: resetAt,
+    source: "quota_preflight",
+  });
+  await codexAccount.persistCodexChildCooldown({
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(180_000),
+  });
+  // A late preflight must not overwrite the newer real upstream cooldown.
+  await codexAccount.persistCodexChildCooldown({
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(240_000),
+    source: "quota_preflight",
+  });
+  const persisted = await providersDb.getProviderConnectionById(account.id);
+  assert.equal(persisted.providerSpecificData.codexScopeRateLimitSource.codex, "fallback");
+  assert.equal(
+    codexAccount.isCodexTextQuotaPreflightCooldown(persisted as never, "gpt-5.5"),
+    false
+  );
+  const result = await auth.getProviderCredentialsWithQuotaPreflight(
+    "codex",
+    null,
+    [account.id],
+    "gpt-5.5",
+    imageQuotaPreflightOptions("codex")
+  );
+  assert.notEqual(
+    result?.connectionId,
+    account.id,
+    "real upstream cooldown must still block images"
+  );
 });

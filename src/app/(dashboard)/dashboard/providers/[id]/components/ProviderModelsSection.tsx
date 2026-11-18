@@ -25,6 +25,7 @@ import {
 import ModelRow, { ModelVisibilityToolbar } from "./ModelRow";
 import PassthroughModelsSection from "./PassthroughModelsSection";
 import CompatibleModelsSection from "./CompatibleModelsSection";
+import { useProviderContextOverrides } from "../hooks/useProviderContextOverrides";
 import type { ModelCompatSavePatch } from "../hooks/useModelVisibilityHandlers";
 
 export interface ProviderModelsSectionProps {
@@ -60,6 +61,8 @@ export interface ProviderModelsSectionProps {
     endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
   };
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   syncedAvailableModels: any[];
   syncedCatalogAuthoritative?: boolean;
   compatibleFallbackModels: any[];
@@ -142,6 +145,7 @@ export default function ProviderModelsSection({
   models,
   modelMeta,
   modelAliases,
+  comboUsage,
   syncedAvailableModels,
   syncedCatalogAuthoritative = false,
   compatibleFallbackModels,
@@ -192,6 +196,13 @@ export default function ProviderModelsSection({
 }: ProviderModelsSectionProps) {
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
+  // Catalog rows only: the compatible/passthrough branches mount their own copy of
+  // the hook, so skip the duplicate fetch here. The key is the CANONICAL provider
+  // id — the one the capability resolver reads model_context_overrides by and the
+  // PUT guard validates — not the storage alias.
+  const isCatalogBranch = !isManagedAvailableModelsProvider && !providerInfo?.passthroughModels;
+  const { contextOverrides, savingContextModelId, saveContextWindowOverride } =
+    useProviderContextOverrides(providerId, t, { enabled: isCatalogBranch });
   const canConfigureAutoFetchModels = connections.some(
     (connection) => connection.isActive !== false && typeof connection.id === "string"
   );
@@ -244,7 +255,10 @@ export default function ProviderModelsSection({
     </>
   );
 
-  const clearAllButton = (modelMeta.customModels.length > 0 || providerAliasEntries.length > 0) && (
+  const clearAllButton = (modelMeta.customModels.length > 0 ||
+    providerAliasEntries.length > 0 ||
+    syncedAvailableModels.length > 0 ||
+    (modelMeta.modelCompatOverrides?.length ?? 0) > 0) && (
     <Button
       size="sm"
       variant="danger"
@@ -287,6 +301,7 @@ export default function ProviderModelsSection({
           providerStorageAlias={providerStorageAlias}
           providerDisplayAlias={providerDisplayAlias}
           modelAliases={modelAliases}
+          comboUsage={comboUsage}
           availableModels={syncedAvailableModels}
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           customModels={modelMeta.customModels}
@@ -369,6 +384,7 @@ export default function ProviderModelsSection({
         <PassthroughModelsSection
           providerAlias={providerAlias}
           modelAliases={modelAliases}
+          comboUsage={comboUsage}
           catalogModels={models}
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           availableModels={syncedAvailableModels}
@@ -408,23 +424,27 @@ export default function ProviderModelsSection({
     );
   }
 
-  const importButton = allowModelImport ? (
-    <ActionBar align="start" className="mb-4">
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="download"
-        onClick={handleImportModels}
-        disabled={!canImportModels || importingModels}
-      >
-        {importingModels ? t("importingModels") : t("importFromModels")}
-      </Button>
-      {modelDiscoveryControls}
-      {!canImportModels && (
-        <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
-      )}
-    </ActionBar>
-  ) : null;
+  const importButton =
+    allowModelImport || clearAllButton ? (
+      <ActionBar align="start" className="mb-4">
+        {allowModelImport && (
+          <Button
+            size="sm"
+            variant="secondary"
+            icon="download"
+            onClick={handleImportModels}
+            disabled={!canImportModels || importingModels}
+          >
+            {importingModels ? t("importingModels") : t("importFromModels")}
+          </Button>
+        )}
+        {allowModelImport && modelDiscoveryControls}
+        {clearAllButton}
+        {allowModelImport && !canImportModels && (
+          <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
+        )}
+      </ActionBar>
+    ) : null;
 
   if (models.length === 0) {
     return (
@@ -547,6 +567,7 @@ export default function ProviderModelsSection({
               fullModel={`${providerDisplayAlias}/${model.id}`}
               provider={providerId}
               alias={aliasByModelId[model.id]}
+              combos={comboUsage?.[model.id]}
               copied={copied}
               onCopy={onCopy}
               onSetAlias={(a) => onSetAlias(model.id, a, providerDisplayAlias)}
@@ -567,6 +588,9 @@ export default function ProviderModelsSection({
               onTestModel={onTestModel}
               testStatus={modelTestStatus[model.id] || null}
               testingModel={testingModelId === model.id}
+              contextWindowOverride={contextOverrides[model.id] ?? null}
+              onSaveContextWindowOverride={saveContextWindowOverride}
+              savingContextOverride={savingContextModelId === model.id}
             />
           );
         })}

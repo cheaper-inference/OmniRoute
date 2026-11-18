@@ -31,6 +31,12 @@ vi.mock("next/image", () => ({
     React.createElement("img", { src: props.src as string, alt: props.alt as string }),
 }));
 
+// Echo key + values so the label's source is the catalog key, not a hardcoded string.
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    `${key}|${String(values?.id ?? "")}`,
+}));
+
 // ── Import after mocks ─────────────────────────────────────────────────────
 
 const { ProviderCascadeNode } =
@@ -294,5 +300,31 @@ describe("ProviderCascadeNode", () => {
     expect(container.querySelector("[data-testid='cooldown-badge']")?.textContent).toContain(
       "cooldown 1/2"
     );
+  });
+});
+
+describe("ProviderCascadeNode connection label (#18374)", () => {
+  const uuid = "3f2b8c1d-92aa-4e77-8a11-000000000000";
+
+  it("renders the short id through the i18n keys, with the full id in the tooltip", () => {
+    const container = mount(
+      React.createElement(
+        ProviderCascadeNode,
+        makeNodeProps({ state: "succeeded", connectionId: uuid }) as never
+      )
+    );
+    const label = container.querySelector('[data-testid="connection-id"]');
+    expect(label?.textContent).toBe("liveAccountLabel|3f2b8c1d...");
+    expect(label?.getAttribute("title")).toBe(`liveAccountTooltip|${uuid}`);
+  });
+
+  it("renders no label when the account is unknown", () => {
+    const container = mount(
+      React.createElement(
+        ProviderCascadeNode,
+        makeNodeProps({ state: "attempting", connectionId: null }) as never
+      )
+    );
+    expect(container.querySelector('[data-testid="connection-id"]')).toBeNull();
   });
 });

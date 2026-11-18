@@ -27,13 +27,12 @@ Merané 2026-10-18:
 | swap      | 16 GB                                  | `omniroute-113-5` beží s vypnutým swapom (`MemorySwapMax=0`), takže nekontrolované zostavenie sa ukončí pri dosiahnutí svojho limitu namiesto toho, aby server začal swapovať                                                                                                                                                                                                                          |
 | `/tmp`    | **12 GB tmpfs = RAM**                  | všetko, čo sa tam uloží, zaberá pamäť; zvyšky sa odstraňujú po 3 h                                                                                                                                                                                                                                                                                                                                     |
 | CPU       | zaznamenané zaťaženie 60 na 32 jadrách | pred zavedením kvót jedno zostavenie Turbopack (~1166 % CPU) spolu so súpravou testov pokrytia na tom istom serveri pripravili ostatné listenery o heartbeat komunikáciu (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                         |
-| runnery   | **6 listenerov**                       | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` sú deaktivované (`systemctl enable --now` jeden z nich znova aktivuje)                                                                                                                                                                                                                                                                 |
+| runnery   | **7 listenerov** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nesie aj `omni-build`; `omniroute-113-3/-4/-8` boli z repozitára odstránené (2026-10-28)                                                                                                                                                                                                                                                        |
 
 Limity sa nachádzajú v súbore `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 každej jednotky (predchádzajúce hodnoty sú uložené ako `override.conf.bak-20261018`) a boli aplikované
 za behu pomocou `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez
-reštartu, takže nebola ovplyvnená žiadna spustená úloha. Štítky sa menia prostredníctvom API runnerov
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+reštartu, takže nebola ovplyvnená žiadna spustená úloha. Štítky sa menia prostredníctvom API runnerov (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), takisto za behu.
 
 ## Inštalácia čistiaceho skriptu (jednorazovo, na serveri)
@@ -42,7 +41,7 @@ reštartu, takže nebola ovplyvnená žiadna spustená úloha. Štítky sa menia
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): každých 30 min, zapisovať do /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` je povinný: čistiaci skript pred odstránením overí nečinnosť cesty pomocou jednej snímky otvorených
@@ -120,9 +119,10 @@ a len keď je nečinný**, pričom kontrola nečinnosti a reštart musia byť v 
   `omniroute-113` mal až do 2026-10-18 nastavené `MemoryHigh=4G` — zostavenie promptfoo sa tam
   54 minút prebíjalo opakovaným uvoľňovaním pamäte; 8 GB toto obmedzovanie odstraňuje.
 - **Menej listenerov zámerne.** Štyri jednotky OmniRoute boli 2026-08-29 deaktivované — každý
-  ďalší listener je ďalším nájomníkom vyššie uvedeného pamäťového rozpočtu. Limit janitora je 6
-  (`MAX_ACTIVE_RUNNERS=6` v crone): počíta každý `Runner.Listener` v systéme a OmniHeuris +
-  OmniMind pridávajú k našim štyrom ďalšie dva.
+  ďalší listener je ďalším nájomníkom vyššie uvedeného pamäťového rozpočtu. Limit janitora je 8
+  (`MAX_ACTIVE_RUNNERS=8` v crone): počíta každý `Runner.Listener` v systéme a OmniHeuris +
+  OmniMind pridávajú k našim piatim ďalšie dva.
+- **Úlohy unit a Vitest zostávajú hostované.** `ci.yml` posiela svoje unit shardy a úlohu Vitest na `[self-hosted, omni-ci]` iba vtedy, keď má premenná repozitára `vars.USE_VPS_TEST_RUNNER` hodnotu `true`, a aj vtedy len pre behy `pull_request` z toho istého repozitára; forky, `merge_group` a pushe zostávajú na `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Premenná má hodnotu `false`. Dňa 2026-10-28 trval `npm ci` trom štvorjadrovým listenerom `omni-ci` 250–270 s a každý unit shard narazil na 30-minútový limit úlohy, oproti ~634 s pri hostovanom sharde, pri záťaži servera 17–24. Listenery boli odstránené. Premennú znova nezapínajte bez listenerov dimenzovaných na unit shard.
 - **Nikdy ručne nečistite `/tmp` ani `_work`, keď je ktorýkoľvek runner zaneprázdnený.**
   Kontrola nasledovaná po určitej prestávke odstránením spôsobila, že aktívna úloha `Build`
   prišla 2026-08-27 o svoj adresár `_work`. Janitor vykonáva kontrolu a odstránenie v jednom
@@ -137,8 +137,7 @@ a len keď je nečinný**, pričom kontrola nečinnosti a reštart musia byť v 
 
 ## Hostovaný kanál (runnery hostované službou GitHub)
 
-Účet používa plán **Pro**: **40 súbežných hostovaných úloh**, ktoré zdieľajú všetky kontroly PR,
-všetky pracovné postupy spúšťané pushom aj predvolené nastavenie CodeQL. Merané 2026-10-18 počas
+Repozitár patrí organizácii `cheaper-inference` s plánom **Team**: **60 súbežných hostovaných úloh**, ktoré zdieľajú všetky repozitáre organizácie, všetky kontroly PR, všetky pracovné postupy spúšťané pushom aj predvolené nastavenie CodeQL. Nižšie uvedené čísla boli namerané na pláne **Pro** (40 súbežných hostovaných úloh). Merané 2026-10-18 počas
 kampane zlučovania (~10 zlúčení/hodinu na `release/v3.8.52`): **2 500 behov pracovných postupov vytvorených za
 24 h**, 44 pushov do vetvy za 6 h, **106 hostovaných úloh vo fronte**, zatiaľ čo kontroly PR čakali
 niekoľko hodín a PR boli zlúčené bez nich. Pri každom pushi do vetvy sa spustilo deväť pracovných postupov:

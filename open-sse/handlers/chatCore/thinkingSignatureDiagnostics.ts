@@ -1,8 +1,12 @@
-import { isAnthropicThinkingSignatureError } from "./passthroughHelpers.ts";
+import {
+  isAnthropicThinkingModifiedError,
+  isAnthropicThinkingSignatureError,
+} from "./passthroughHelpers.ts";
 
 /**
- * #15534 — privacy-safe structural diagnostics for Anthropic invalid-thinking-signature
- * 400s. Production post-mortems were impossible because retained logs/artifacts carry no
+ * #15534 — privacy-safe structural diagnostics for Anthropic thinking-block
+ * integrity 400s (invalid signature AND "cannot be modified" variants, #17324).
+ * Production post-mortems were impossible because retained logs/artifacts carry no
  * payload shape: this projector emits ONLY typed structural scalars (counts, booleans,
  * bounded enums). It never emits signature values, thinking text, encrypted content,
  * headers, credentials or raw error bodies — enforced by tests with sentinels.
@@ -76,9 +80,22 @@ function collectSignatures(body: unknown): string[] {
     const content = (messages[index] as { content?: unknown } | null)?.content;
     if (!Array.isArray(content)) continue;
     for (const block of content.slice(0, MAX_TRACKED_BLOCKS_PER_TURN)) {
-      const candidate = block as { type?: unknown; signature?: unknown } | null;
+      const candidate = block as {
+        type?: unknown;
+        signature?: unknown;
+        data?: unknown;
+      } | null;
       if (candidate?.type === "thinking" && typeof candidate.signature === "string") {
         signatures.push(candidate.signature);
+      } else if (
+        // #17324 recurrence: the store-restored blocks ARE redacted_thinking — the
+        // live diff read 0/0/0 while outbound gained +3 redacted blocks. Opaque data
+        // blobs are not secrets (encrypted reasoning, org-scoped), only the thinking
+        // TEXT is; counts-only output stays privacy-safe.
+        candidate?.type === "redacted_thinking" &&
+        typeof candidate.data === "string"
+      ) {
+        signatures.push(candidate.data);
       }
     }
   }
@@ -121,7 +138,11 @@ export function shouldEmitThinkingSignatureDiagnostics(args: {
   status: number;
   message: string;
 }): boolean {
-  return isAnthropicThinkingSignatureError(args);
+  // #17324: the "cannot be modified" variant (cross-org restore, fabricated
+  // placeholder, truncated capture) is the same diagnostic boundary as the
+  // invalid-signature variant — both are thinking-block integrity 400s whose
+  // post-mortems need the ingress/outbound structural comparison.
+  return isAnthropicThinkingSignatureError(args) || isAnthropicThinkingModifiedError(args);
 }
 
 /**

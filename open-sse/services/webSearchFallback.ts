@@ -1,4 +1,5 @@
 import { FORMATS } from "../translator/formats.ts";
+import { isSoleClaudeServerWebSearchTool } from "../translator/helpers/claudeServerWebSearch.ts";
 
 export const OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME = "omniroute_web_search";
 // Prefix match — Anthropic sends date-suffixed variants (web_search_20250305, …).
@@ -166,6 +167,7 @@ export function supportsNativeWebSearchFallbackBypass({
   targetFormat,
   nativeCodexPassthrough,
   interceptSearchOverride,
+  soleClaudeServerWebSearchTool,
 }: {
   provider?: string | null;
   sourceFormat?: string | null;
@@ -175,6 +177,10 @@ export function supportsNativeWebSearchFallbackBypass({
   // true = force interception (never bypass); false = force native bypass; undefined =
   // fall through to the native-bypass defaults below.
   interceptSearchOverride?: boolean;
+  // The Claude Code WebSearch shape: the Anthropic web_search server tool is the
+  // request's only tool. Gates the Codex Responses bypass below; computed by
+  // prepareWebSearchFallbackBody from the body it already holds.
+  soleClaudeServerWebSearchTool?: boolean;
 }): boolean {
   if (typeof interceptSearchOverride === "boolean") {
     return !interceptSearchOverride;
@@ -200,6 +206,29 @@ export function supportsNativeWebSearchFallbackBypass({
     if (provider && CLAUDE_FORMAT_PROVIDERS_WITHOUT_SERVER_TOOLS.has(provider)) return false;
     return true;
   }
+  // Claude -> Codex Responses (#16351 sibling): the Codex upstream implements the
+  // Responses API's hosted `web_search` server tool, and claude-to-openai.ts already
+  // emits it natively for an OPENAI_RESPONSES target (`{ type: "web_search" }`, from
+  // convertClaudeServerWebSearchTool). Rewriting it to the omniroute_web_search
+  // function fallback instead requires a configured /v1/search backend and otherwise
+  // leaves Claude Code's WebSearch with empty results.
+  //
+  // Gated two ways, conservatively:
+  //  - provider "codex" only. Other Responses-format providers are deliberately
+  //    excluded: chatgpt-web-codex drives a browser session and needs Tunnel-ID /
+  //    Runtime-Key for any tool request, codex-app-server is a local WS bridge whose
+  //    protocol has no hosted web_search, and the public "openai" provider's Responses
+  //    models are reasoning models reached with API keys, not the Codex lane. Extend
+  //    this set only for a provider whose upstream is known to run web_search itself.
+  //  - sole server tool only: a mixed request (server tool + client functions) keeps
+  //    the existing fallback conversion byte-for-byte.
+  if (
+    provider === "codex" &&
+    sourceFormat === FORMATS.CLAUDE &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    soleClaudeServerWebSearchTool === true
+  )
+    return true;
   return false;
 }
 
@@ -273,7 +302,14 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     };
   }
 
-  if (supportsNativeWebSearchFallbackBypass(options)) {
+  if (
+    supportsNativeWebSearchFallbackBypass({
+      ...options,
+      // The "sole tool" gate for the Codex Responses bypass is derivable from the body
+      // this function already holds, so callers stay unchanged.
+      soleClaudeServerWebSearchTool: isSoleClaudeServerWebSearchTool(tools),
+    })
+  ) {
     return {
       body,
       fallback: { enabled: false, toolName: null, convertedToolCount: 0 },

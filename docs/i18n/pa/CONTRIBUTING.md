@@ -20,14 +20,19 @@ UI/UX, i18n, CLI, ਡੇਟਾਬੇਸ ਅਤੇ ਬਿਲਡ/ਡਿਪਲੌ�
 - **Node.js** `>=22.22.2 <23`, ਜਾਂ `>=24.0.0 <27` (ਸਿਫ਼ਾਰਸ਼ੀ: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ਵਰਤੋਂਕਾਰ (Node 24+):** `npm install` ਤੋਂ ਬਾਅਦ, ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਨੇਟਿਵ ਮੋਡੀਊਲ ਇੰਸਟਾਲ ਹੋ ਗਏ ਹਨ:
+> **Node 24 ਨਾਲ Windows:** ਮੌਜੂਦਾ 24 LTS ਪੈਚ ਰਿਲੀਜ਼ (ਘੱਟੋ-ਘੱਟ 24.20.0) ਵਰਤੋ।
+> ਪਹਿਲੀਆਂ ਰਿਲੀਜ਼ਾਂ ਸਫਲ ਟੈਸਟਾਂ ਤੋਂ ਬਾਅਦ `--test-force-exit` ਪ੍ਰਕਿਰਿਆ ਬੰਦ ਕਰਨ ਵੇਲੇ
+> ਅਬੋਰਟ ਹੋ ਸਕਦੀਆਂ ਹਨ। Node ਦਾ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ਇਸ
+> ਰਨਟਾਈਮ ਕ੍ਰੈਸ਼ ਨੂੰ ਠੀਕ ਕਰਦਾ ਹੈ; ਟੈਸਟ assertions ਅਤੇ runner exit checks ਚਾਲੂ ਰੱਖੋ।
+
+> **npm v11+ ਵਰਤੋਂਕਾਰ (Node 24+):** `npm install` ਤੋਂ ਬਾਅਦ ਜਾਂਚ ਕਰੋ ਕਿ native modules ਇੰਸਟਾਲ ਹੋਏ ਹਨ:
 > `node -e "require('better-sqlite3')"`. ਜੇ ਇਹ `MODULE_NOT_FOUND` ਨਾਲ ਅਸਫਲ ਹੁੰਦਾ ਹੈ,
 > ਤਾਂ `npm approve-scripts better-sqlite3 && npm install` ਚਲਾਓ। ਵੇਖੋ
-> [ਸਮੱਸਿਆ-ਨਿਵਾਰਨ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
 
-### ਕਲੋਨ ਅਤੇ ਇੰਸਟਾਲ ਕਰੋ
+### ਕਲੋਨ ਅਤੇ ਇੰਸਟਾਲ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,92 +40,92 @@ cd OmniRoute
 npm install
 ```
 
-### ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ
+### ਵਾਤਾਵਰਣ ਵੈਰੀਏਬਲ
 
 ```bash
-# ਟੈਂਪਲੇਟ ਤੋਂ ਆਪਣੀ .env ਫ਼ਾਈਲ ਬਣਾਓ
+# ਟੈਂਪਲੇਟ ਤੋਂ ਆਪਣੀ .env ਬਣਾਓ
 cp .env.example .env
 
-# ਲੋੜੀਂਦੇ ਸੀਕ੍ਰੇਟ ਬਣਾਓ
+# ਲੋੜੀਂਦੇ secrets ਤਿਆਰ ਕਰੋ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ਵਿਕਾਸ ਲਈ ਮੁੱਖ ਵੇਰੀਏਬਲ:
+ਵਿਕਾਸ ਲਈ ਮੁੱਖ ਵੈਰੀਏਬਲ:
 
-| ਵੇਰੀਏਬਲ                | ਵਿਕਾਸ ਡਿਫੌਲਟ             | ਵੇਰਵਾ                 |
+| ਵੈਰੀਏਬਲ                | ਵਿਕਾਸ ਲਈ ਡਿਫ਼ਾਲਟ         | ਵੇਰਵਾ                 |
 | ---------------------- | ------------------------ | --------------------- |
 | `PORT`                 | `20128`                  | ਸਰਵਰ ਪੋਰਟ             |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ਫਰੰਟਐਂਡ ਲਈ ਬੇਸ URL    |
-| `JWT_SECRET`           | (ਉੱਪਰ ਬਣਾਓ)              | JWT ਸਾਈਨਿੰਗ ਸੀਕ੍ਰੇਟ   |
+| `JWT_SECRET`           | (ਉੱਪਰ ਤਿਆਰ ਕਰੋ)          | JWT ਸਾਈਨਿੰਗ secret    |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ਪਹਿਲੇ ਲੌਗਇਨ ਦਾ ਪਾਸਵਰਡ |
-| `APP_LOG_LEVEL`        | `info`                   | ਲੌਗ ਵੇਰਵੇਦਾਰੀ ਦਾ ਪੱਧਰ |
+| `APP_LOG_LEVEL`        | `info`                   | ਲੌਗ ਵੇਰਵੇ ਦਾ ਪੱਧਰ     |
 
 ### ਡੈਸ਼ਬੋਰਡ ਸੈਟਿੰਗਾਂ
 
-ਡੈਸ਼ਬੋਰਡ ਉਹਨਾਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ UI ਟੌਗਲ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਰਾਹੀਂ ਵੀ ਕੌਂਫਿਗਰ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ:
+ਡੈਸ਼ਬੋਰਡ ਉਹਨਾਂ ਫੀਚਰਾਂ ਲਈ UI ਟੌਗਲ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਵਾਤਾਵਰਣ ਵੈਰੀਏਬਲਾਂ ਰਾਹੀਂ ਵੀ ਕੌਂਫਿਗਰ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ:
 
-| ਸੈਟਿੰਗ ਦਾ ਸਥਾਨ  | ਟੌਗਲ         | ਵੇਰਵਾ                          |
-| --------------- | ------------ | ------------------------------ |
-| ਸੈਟਿੰਗਾਂ → ਉੱਨਤ | ਡੀਬੱਗ ਮੋਡ    | ਡੀਬੱਗ ਬੇਨਤੀ ਲੌਗ ਸਮਰੱਥ ਕਰੋ (UI) |
-| ਸੈਟਿੰਗਾਂ → ਆਮ   | ਸਾਈਡਬਾਰ ਦਿੱਖ | ਸਾਈਡਬਾਰ ਭਾਗ ਦਿਖਾਓ/ਲੁਕਾਓ        |
+| ਸੈਟਿੰਗ ਟਿਕਾਣਾ       | ਟੌਗਲ               | ਵੇਰਵਾ                           |
+| ------------------- | ------------------ | ------------------------------- |
+| Settings → Advanced | Debug Mode         | ਡੀਬੱਗ ਰਿਕਵੈਸਟ ਲੌਗ ਚਾਲੂ ਕਰੋ (UI) |
+| Settings → General  | Sidebar Visibility | ਸਾਈਡਬਾਰ ਸੈਕਸ਼ਨ ਦਿਖਾਓ/ਲੁਕਾਓ      |
 
-ਇਹ ਸੈਟਿੰਗਾਂ ਡੇਟਾਬੇਸ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਰੀਸਟਾਰਟ ਤੋਂ ਬਾਅਦ ਵੀ ਕਾਇਮ ਰਹਿੰਦੀਆਂ ਹਨ, ਅਤੇ ਸੈੱਟ ਕੀਤੇ ਜਾਣ 'ਤੇ env var ਡਿਫੌਲਟਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀਆਂ ਹਨ।
+ਇਹ ਸੈਟਿੰਗਾਂ ਡਾਟਾਬੇਸ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਰੀਸਟਾਰਟ ਤੋਂ ਬਾਅਦ ਵੀ ਕਾਇਮ ਰਹਿੰਦੀਆਂ ਹਨ। ਸੈਟ ਕੀਤੇ ਜਾਣ ’ਤੇ ਇਹ env var ਡਿਫ਼ਾਲਟਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀਆਂ ਹਨ।
 
-### ਲੋਕਲ ਤੌਰ 'ਤੇ ਚਲਾਉਣਾ
+### ਲੋਕਲ ਤੌਰ ’ਤੇ ਚਲਾਉਣਾ
 
 ```bash
-# ਵਿਕਾਸ ਮੋਡ (ਹੌਟ ਰੀਲੋਡ)
+# ਵਿਕਾਸ ਮੋਡ (hot reload)
 npm run dev
 
 # ਪ੍ਰੋਡਕਸ਼ਨ ਬਿਲਡ
 npm run build    # next build → .build/next/ ਫਿਰ assembleStandalone → dist/
 npm run start
 
-# ਯੋਗਦਾਨੀ ਤਬਦੀਲੀਆਂ ਲਈ ਤੇਜ਼ ਬੈਕਐਂਡ/API-ਮਾਤਰ ਕੰਪਾਇਲ
+# ਯੋਗਦਾਨਕਰਤਾਵਾਂ ਦੇ ਬਦਲਾਵਾਂ ਲਈ ਤੇਜ਼ backend/API-only compile
 npm run build:contributor
 
-# ਰਿਲੀਜ਼ ਬਿਲਡ (ਸਾਫ਼ ਮੁੜ-ਬਿਲਡ + HEAD ਸੈਂਟੀਨਲ — ਡਿਪਲੌਇ ਲਈ ਲੋੜੀਂਦਾ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ਲਿਖਦਾ ਹੈ
+# ਰਿਲੀਜ਼ ਬਿਲਡ (ਸਾਫ਼ rebuild + HEAD sentinel — deploy ਲਈ ਲੋੜੀਂਦਾ)
+npm run build:release   # rm -rf .build dist ਅਤੇ build + dist/BUILD_SHA ਲਿਖਦਾ ਹੈ
 
 # ਆਮ ਪੋਰਟ ਕੌਂਫਿਗਰੇਸ਼ਨ
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ਯੋਗਦਾਨੀ ਬਿਲਡ ਸਿਰਫ਼ ਕੰਪਾਇਲ ਪ੍ਰਮਾਣਿਕਤਾ ਕਰਦਾ ਹੈ: ਇਹ ਸਟੈਂਡਅਲੋਨ
-ਡਿਸਟ੍ਰੀਬਿਊਸ਼ਨ ਨੂੰ ਅਸੈਂਬਲ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਵਿਕਲਪਿਕ ਨੇਟਿਵ ਪੈਕੇਜਿੰਗ ਐਸੈੱਟ ਨਹੀਂ ਬਣਾਉਂਦਾ। ਜਦੋਂ
-ਤੁਹਾਨੂੰ ਭੇਜੇ ਜਾ ਸਕਣ ਵਾਲੇ ਬੰਡਲ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਨ ਦੀ ਲੋੜ ਹੋਵੇ, ਤਾਂ ਨਿਯਮਿਤ ਪ੍ਰੋਡਕਸ਼ਨ ਬਿਲਡ ਵਰਤੋ।
+ਯੋਗਦਾਨਕਰਤਾ ਬਿਲਡ ਸਿਰਫ਼ compile-only validation ਕਰਦਾ ਹੈ: ਇਹ standalone
+distribution ਨੂੰ assemble ਨਹੀਂ ਕਰਦਾ ਅਤੇ optional native packaging assets ਵੀ build ਨਹੀਂ ਕਰਦਾ। ਜਦੋਂ ਤੁਹਾਨੂੰ
+shippable bundle ਦੀ ਜਾਂਚ ਕਰਨੀ ਹੋਵੇ, ਤਾਂ ਆਮ ਪ੍ਰੋਡਕਸ਼ਨ ਬਿਲਡ ਵਰਤੋ।
 
 ### ਬਿਲਡ ਆਉਟਪੁੱਟ ਲੇਆਉਟ
 
-| ਡਾਇਰੈਕਟਰੀ | ਸਮੱਗਰੀ                                                                        | ਟ੍ਰੈਕ ਕੀਤੀ |
-| --------- | ----------------------------------------------------------------------------- | ---------- |
-| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                                             | ਹਾਂ        |
-| `.build/` | ਵਿਚਕਾਰਲੇ ਆਉਟਪੁੱਟ — `next build` ਆਉਟਪੁੱਟ (gitignored, `distDir = .build/next`) | ਨਹੀਂ       |
-| `dist/`   | ਭੇਜਣਯੋਗ ਬੰਡਲ — `assembleStandalone` ਦੁਆਰਾ ਅਸੈਂਬਲ ਕੀਤਾ (gitignored)            | ਨਹੀਂ       |
+| ਡਾਇਰੈਕਟਰੀ | ਸਮੱਗਰੀ                                                                      | ਟ੍ਰੈਕ ਕੀਤੀ |
+| --------- | --------------------------------------------------------------------------- | ---------- |
+| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                                           | ਹਾਂ        |
+| `.build/` | ਵਿਚਕਾਰਲੇ ਨਤੀਜੇ — `next build` ਆਉਟਪੁੱਟ (gitignored, `distDir = .build/next`) | ਨਹੀਂ       |
+| `dist/`   | Shippable bundle — `assembleStandalone` ਦੁਆਰਾ assembled (gitignored)        | ਨਹੀਂ       |
 
-ਬਿਲਡ ਪਾਈਪਲਾਈਨ ਇੱਕੋ ਪਾਸ ਵਿੱਚ ਚੱਲਦੀ ਹੈ:
+ਬਿਲਡ ਪਾਈਪਲਾਈਨ ਇੱਕੋ pass ਹੈ:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ਆਉਟਪੁੱਟ)
-  └─ assembleStandalone()                 (ਸਟੈਂਡਅਲੋਨ + ਸਟੈਟਿਕ + ਪਬਲਿਕ + ਨੇਟਿਵ ਐਸੈੱਟ ਕਾਪੀ ਕਰਦਾ ਹੈ)
-       └─ ਆਉਟਪੁੱਟ: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets ਕਾਪੀ ਕਰਦਾ ਹੈ)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ਇਸ ਤੋਂ ਇਲਾਵਾ ਪਹਿਲਾਂ ਦੋਵੇਂ ਡਾਇਰੈਕਟਰੀਆਂ ਸਾਫ਼ ਕਰਦਾ ਹੈ ਅਤੇ
-ਡਿਪਲੌਇ ਅਖੰਡਤਾ ਸੈਂਟੀਨਲ ਵਜੋਂ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ਲਿਖਦਾ ਹੈ।
+`npm run build:release` ਪਹਿਲਾਂ ਦੋਵੇਂ ਡਾਇਰੈਕਟਰੀਆਂ ਨੂੰ ਵੀ ਸਾਫ਼ ਕਰਦਾ ਹੈ ਅਤੇ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ਨੂੰ deploy integrity sentinel ਵਜੋਂ ਲਿਖਦਾ ਹੈ।
 
-`npm run build:contributor` ਸਿਰਫ਼-ਬੈਕਐਂਡ ਬਿਲਡ ਪ੍ਰੋਫ਼ਾਈਲ ਵਰਤਦਾ ਹੈ। ਇਹ ਬਿਲਡ ਕਰਦੇ ਸਮੇਂ ਅਸਥਾਈ ਤੌਰ 'ਤੇ
-ਡੈਸ਼ਬੋਰਡ UI ਫ਼ਾਈਲਾਂ ਨੂੰ ਸਟੱਬ ਕਰਦਾ ਹੈ, API ਰੂਟ ਹੈਂਡਲਰਾਂ ਨੂੰ ਕਾਇਮ ਰੱਖਦਾ ਹੈ, ਅਤੇ ਬਿਲਡ ਤੋਂ ਬਾਅਦ ਮੂਲ ਫ਼ਾਈਲਾਂ
-ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਦਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ UI ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰਨ ਵਾਲੀਆਂ ਤਬਦੀਲੀਆਂ ਜਾਂ ਪੂਰੀ ਰਿਲੀਜ਼
-ਪ੍ਰਮਾਣਿਕਤਾ ਲਈ `npm run build` ਵਰਤੋ; ਯੋਗਦਾਨੀ ਪ੍ਰੋਫ਼ਾਈਲ ਰਿਲੀਜ਼ ਬਿਲਡ ਦਾ ਬਦਲ ਨਹੀਂ ਹੈ।
+`npm run build:contributor` backend-only build profile ਵਰਤਦਾ ਹੈ। ਇਹ build ਦੇ ਦੌਰਾਨ
+dashboard UI files ਨੂੰ ਅਸਥਾਈ ਤੌਰ ’ਤੇ stub ਕਰਦਾ ਹੈ, API route handlers ਨੂੰ ਕਾਇਮ ਰੱਖਦਾ ਹੈ,
+ਅਤੇ build ਤੋਂ ਬਾਅਦ ਅਸਲ files ਨੂੰ ਮੁੜ ਬਹਾਲ ਕਰਦਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ UI ’ਤੇ ਅਸਰ ਪਾਉਣ ਵਾਲੇ ਬਦਲਾਵਾਂ ਜਾਂ ਪੂਰੀ
+release validation ਲਈ `npm run build` ਵਰਤੋ; contributor profile release build ਦਾ ਬਦਲ ਨਹੀਂ ਹੈ।
 
-> **VPS ਡਿਪਲੌਇ ਨੋਟ:** ਰਿਮੋਟ ਇਮੇਜ ਡਾਇਰੈਕਟਰੀ `/usr/lib/node_modules/omniroute/app/`
-> ਵਿੱਚ ਕੋਈ ਤਬਦੀਲੀ ਨਹੀਂ ਹੋਈ। ਡਿਪਲੌਇ ਸਕਿਲਜ਼ `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ ਇਸ ਵਿੱਚ rsync ਕਰਦੀਆਂ ਹਨ।
-> ਸਿਰਫ਼ ਰਿਪੋ ਦੇ ਅੰਦਰਲਾ ਬਿਲਡ ਆਉਟਪੁੱਟ ਪਾਥ ਬਦਲਿਆ ਹੈ (`app/` → `dist/`)।
+> **VPS deploy ਨੋਟ:** ਰਿਮੋਟ image directory `/usr/lib/node_modules/omniroute/app/`
+> ਵਿੱਚ ਕੋਈ ਬਦਲਾਅ ਨਹੀਂ ਹੁੰਦਾ। deploy skills `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ ਇਸ ਵਿੱਚ rsync ਕਰਦੀਆਂ ਹਨ।
+> ਸਿਰਫ਼ ਰਿਪੋਜ਼ਟਰੀ ਅੰਦਰਲਾ build output path ਬਦਲਿਆ ਹੈ (`app/` → `dist/`)।
 
-ਡਿਫੌਲਟ URLs:
+ਡਿਫ਼ਾਲਟ URLs:
 
 - **ਡੈਸ਼ਬੋਰਡ**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -288,72 +293,72 @@ PR ਖੋਲ੍ਹਣ ਤੋਂ ਪਹਿਲਾਂ, ਆਪਣੀਆਂ ਤਬਦ
 
 ---
 
-## ਪ੍ਰੋਜੈਕਟ ਸੰਰਚਨਾ
+## ਪ੍ਰੋਜੈਕਟ ਢਾਂਚਾ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ (23 ਭਾਗ)
-│   ├── api/                # API ਰੂਟ (51 ਡਾਇਰੈਕਟਰੀਆਂ)
-│   └── login/              # ਪ੍ਰਮਾਣੀਕਰਨ ਪੰਨੇ (.tsx)
-├── domain/                 # ਨੀਤੀ ਇੰਜਣ (policyEngine, comboResolver, costRules, ਆਦਿ)
-├── lib/                    # ਮੁੱਖ ਕਾਰੋਬਾਰੀ ਤਰਕ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ਪ੍ਰੋਟੋਕੋਲ ਸਰਵਰ
-│   ├── acp/                # Agent Communication Protocol ਰਜਿਸਟਰੀ
-│   ├── compliance/         # ਅਨੁਪਾਲਨਾ ਨੀਤੀ ਇੰਜਣ
-│   ├── db/                 # SQLite ਡੋਮੇਨ ਮੋਡੀਊਲ + 130 ਮਾਈਗ੍ਰੇਸ਼ਨਾਂ
-│   ├── memory/             # ਸਥਾਈ ਗੱਲਬਾਤੀ ਮੈਮੋਰੀ
-│   ├── oauth/              # OAuth ਪ੍ਰਦਾਤਾ, ਸੇਵਾਵਾਂ ਅਤੇ ਉਪਯੋਗਤਾਵਾਂ
-│   ├── skills/             # ਵਿਸਤਾਰਯੋਗ ਹੁਨਰ ਫਰੇਮਵਰਕ
-│   ├── usage/              # ਵਰਤੋਂ ਦੀ ਟ੍ਰੈਕਿੰਗ ਅਤੇ ਲਾਗਤ ਦੀ ਗਣਨਾ
-│   └── localDb.ts          # ਕੇਵਲ ਮੁੜ-ਨਿਰਯਾਤ ਪਰਤ — ਇੱਥੇ ਕਦੇ ਵੀ ਤਰਕ ਨਾ ਜੋੜੋ
-├── middleware/              # ਬੇਨਤੀ ਮਿਡਲਵੇਅਰ (promptInjectionGuard)
-├── mitm/                   # MITM ਪ੍ਰਾਕਸੀ (ਸਰਟੀਫਿਕੇਟ, DNS, ਟਾਰਗੇਟ ਰੂਟਿੰਗ)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React ਕੰਪੋਨੈਂਟ (.tsx)
-│   ├── constants/          # ਪ੍ਰਦਾਤਾ ਪਰਿਭਾਸ਼ਾਵਾਂ (329), MCP ਸਕੋਪ, 20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ
-│   ├── utils/              # ਸਰਕਿਟ ਬ੍ਰੇਕਰ, ਸੈਨਿਟਾਈਜ਼ਰ, ਪ੍ਰਮਾਣੀਕਰਨ ਸਹਾਇਕ
-│   └── validation/         # Zod v4 ਸਕੀਮਾ
-└── sse/                    # SSE ਪ੍ਰਾਕਸੀ ਪਾਈਪਲਾਈਨ
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ਵਰਕਸਪੇਸ
-├── executors/              # 150 ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸਾਂ + ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਸਹਾਇਕ)
-├── handlers/               # 11 ਬੇਨਤੀ ਹੈਂਡਲਰ (ਚੈਟ, ਜਵਾਬ, ਐਮਬੈਡਿੰਗ, ਚਿੱਤਰ, ਆਦਿ)
-├── mcp-server/             # MCP ਸਰਵਰ (110 ਵਿਲੱਖਣ ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ)
-├── services/               # 178 ਸਿਖਰ-ਪੱਧਰੀ ਸੇਵਾਵਾਂ (combo, autoCombo, rateLimitManager, ਆਦਿ)
-├── translator/             # ਫਾਰਮੈਟ ਅਨੁਵਾਦਕ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ਟ੍ਰਾਂਸਫਾਰਮਰ
-└── utils/                  # 22 ਉਪਯੋਗਤਾ ਮੋਡੀਊਲ (ਸਟ੍ਰੀਮ, TLS, ਪ੍ਰਾਕਸੀ, ਲੌਗਿੰਗ)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ਡੈਸਕਟਾਪ ਐਪ (ਕ੍ਰਾਸ-ਪਲੇਟਫਾਰਮ)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ਟੈਸਟ ਰਨਰ (1,574 ਟੈਸਟ ਫਾਈਲਾਂ)
-├── integration/            # ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਸਟ
-├── e2e/                    # Playwright ਟੈਸਟ
-├── security/               # ਸੁਰੱਖਿਆ ਟੈਸਟ
-├── translator/             # ਅਨੁਵਾਦਕ-ਵਿਸ਼ੇਸ਼ ਟੈਸਟ
-└── load/                   # ਲੋਡ ਟੈਸਟ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ਆਰਕੀਟੈਕਚਰ ਫ਼ੈਸਲਾ ਰਿਕਾਰਡ
-├── architecture/            # ਸਿਸਟਮ ਆਰਕੀਟੈਕਚਰ ਅਤੇ ਲਚਕੀਲਾਪਣ
-├── comparison/              # OmniRoute ਬਨਾਮ ਵਿਕਲਪ
-├── compression/             # ਕੰਪਰੈਸ਼ਨ ਗਾਈਡਾਂ ਅਤੇ ਨਿਯਮ
-├── dev/                     # ਵਿਕਾਸ ਗਾਈਡਾਂ
-├── diagrams/                # ਆਰਕੀਟੈਕਚਰ ਡਾਇਗ੍ਰਾਮ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ਵਰਤੋਂਕਾਰ ਗਾਈਡ, Docker, ਸੈੱਟਅੱਪ, ਸਮੱਸਿਆ-ਨਿਵਾਰਣ
-├── i18n/                    # ਅੰਤਰਰਾਸ਼ਟਰੀਕ੍ਰਿਤ README ਅਨੁਵਾਦ
-├── marketing/               # ਮਾਰਕੀਟਿੰਗ ਸਮੱਗਰੀ
-├── ops/                     # ਡਿਪਲੌਇਮੈਂਟ, ਪ੍ਰਾਕਸੀ, ਕਵਰੇਜ, ਰਿਲੀਜ਼ਾਂ
-├── providers/               # ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਦਸਤਾਵੇਜ਼
-├── reference/               # API ਹਵਾਲਾ, ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ, CLI ਟੂਲ, ਮੁਫ਼ਤ ਟੀਅਰ
-├── releases/                # ਰਿਲੀਜ਼ ਨੋਟਸ
-├── routing/                 # ਆਟੋ-ਕੌਂਬੋ ਇੰਜਣ, ਰੀਜ਼ਨਿੰਗ ਰੀਪਲੇ
-├── screenshots/             # ਡੈਸ਼ਬੋਰਡ ਸਕ੍ਰੀਨਸ਼ਾਟ
-├── security/                # ਗਾਰਡਰੇਲ, ਅਨੁਪਾਲਨਾ, ਸਟੀਲਥ, ਟੋਕਨ
-└── specs/                   # ਡਿਜ਼ਾਈਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

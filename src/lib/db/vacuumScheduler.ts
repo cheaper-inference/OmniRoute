@@ -1,3 +1,4 @@
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 
@@ -237,7 +238,14 @@ function armTimer(): void {
     clearTimeout(timer);
     timer = null;
   }
-  if (!currentState.enabled || currentState.nextRunAt === null || currentState.isRunning) {
+  // The flag is checked here because refresh() also runs from the settings API and after a manual
+  // VACUUM, and either of those would otherwise re-arm the timer.
+  if (
+    !currentState.enabled ||
+    currentState.nextRunAt === null ||
+    currentState.isRunning ||
+    isBackgroundServicesDisabled()
+  ) {
     currentState.nextRunAt = null;
     return;
   }
@@ -431,6 +439,10 @@ export function requestFullVacuum(reason: string): VacuumSchedulerState {
  */
 export function init(): VacuumSchedulerState {
   if (timer) return getState();
+
+  if (isBackgroundServicesDisabled()) {
+    console.log("[STARTUP] Vacuum scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)");
+  }
 
   hydrated = false; // an explicit init() always re-reads the persisted blob
   hydrateFromPersistedState();

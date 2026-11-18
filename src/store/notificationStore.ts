@@ -26,7 +26,7 @@ interface Notification {
   onClick?: () => void;
 }
 
-interface NotificationStore {
+export interface NotificationStore {
   notifications: Notification[];
   addNotification: (notification: {
     type?: NotificationType;

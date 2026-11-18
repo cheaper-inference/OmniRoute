@@ -56,6 +56,47 @@ describe("Header on the kit shell", () => {
     }
   );
 
+  it("keeps the action group at full width so a long page subtitle truncates instead", () => {
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={() => {}} />
+      </SidebarProvider>
+    );
+    // At 1280 px the Cache page subtitle squeezed this group and wrapped "Keak OmniRoute" and
+    // "Quick nav" onto two lines; the title column (min-w-0 + truncate) must give way instead.
+    const actions = screen.getByRole("button", { name: "Logout" }).parentElement!;
+    expect(actions.className).toContain("shrink-0");
+    const title = screen.getByRole("heading", { level: 1 });
+    expect(title.className).toContain("truncate");
+    expect(title.closest("div.min-w-0")).not.toBeNull();
+  });
+
+  it("shows the quick navigation shortcut as kit keys, hidden below lg", () => {
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={vi.fn()} />
+      </SidebarProvider>
+    );
+    const group = document.querySelector<HTMLElement>('[data-slot="kbd-group"]')!;
+    expect(group.className).toContain("hidden");
+    expect(group.className).toContain("lg:inline-flex");
+    const keys = Array.from(group.querySelectorAll('[data-slot="kbd"]'));
+    expect(keys.map((key) => key.textContent)).toEqual(["Ctrl", "K"]);
+  });
+
+  it("shows the Mac ⌘ key instead of Ctrl", () => {
+    const platform = vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={vi.fn()} />
+      </SidebarProvider>
+    );
+    const keys = [...document.querySelectorAll('[data-slot="kbd"]')].map((key) => key.textContent);
+    expect(keys).toContain("⌘");
+    expect(keys).not.toContain("Ctrl");
+    platform.mockRestore();
+  });
+
   // F4 (wave-1 checkpoint, api-manager/endpoint): 67+ dashboard pages render a kit PageHeader
   // (its own h1), so the shell title repeated it ("API Keys" × "API Key Management") and the
   // page carried two h1s. The shell drops its title while a PageHeader is mounted (removed from

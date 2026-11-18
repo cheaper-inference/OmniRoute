@@ -93,6 +93,16 @@ test("a refusal on one address sets aside another member sharing it for the same
   // not.
 });
 
+test("pool rotation sees a quota refusal scoped to one model", async () => {
+  const [a, b] = await dbTrio();
+  logEgress(a, "203.0.113.7");
+  logEgress(b, "203.0.113.44");
+  flush();
+  // The pool picks with no model, so it treats the egress as refused for all of them.
+  memory.noteProxyRefusal(memory.proxyEgressKey(a), "ip_quota_429", Date.now(), "model-a");
+  assert.equal(await pick(), b.host);
+});
+
 test("a member on another address stays eligible", async () => {
   const [a, b] = await dbTrio();
   logEgress(a, "203.0.113.7");

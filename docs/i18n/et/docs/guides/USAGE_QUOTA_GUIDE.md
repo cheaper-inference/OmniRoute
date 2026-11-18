@@ -42,27 +42,27 @@ Päring ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Teenus `usage.ts` salvestab iga päringu kohta **kasutussündmuse**:
 
-| Väli               | Tüüp    | Allikas                                                                   |
-| ------------------ | ------- | ------------------------------------------------------------------------- |
-| `id`               | string  | Salvestamisel loodud UUID                                                 |
-| `apiKeyId`         | string  | Päringu algatanud API-võti                                                |
-| `provider`         | string  | Teenusepakkuja ID (openai, anthropic jne)                                 |
-| `model`            | string  | Mudeli ID (gpt-5, claude-opus-4-6 jne)                                    |
-| `comboId`          | string? | Kombinatsiooni ID, kui marsruutimine toimus kombinatsiooni kaudu          |
-| `promptTokens`     | number  | Ülesvoolu vastusest                                                       |
-| `completionTokens` | number  | Ülesvoolu vastusest                                                       |
-| `cachedTokens`     | number  | Vahemälu tabamuse tokenid (Anthropicu viipade vahemällu salvestamine jne) |
-| `totalTokens`      | number  | viip + vastus                                                             |
-| `costUsd`          | number  | Arvutatud hinnaandmete põhjal                                             |
-| `latencyMs`        | number  | Päringu kogukestus                                                        |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                |
-| `errorClass`       | string? | Veaklass, kui olek != success                                             |
-| `timestamp`        | string  | ISO 8601 UTC                                                              |
-| `metadata`         | object  | Plugina lisatud kohandatud andmed                                         |
+| Väli               | Tüüp    | Allikas                                                                  |
+| ------------------ | ------- | ------------------------------------------------------------------------ |
+| `id`               | string  | Salvestamisel genereeritud UUID                                          |
+| `apiKeyId`         | string  | Päringu algatanud API-võti                                               |
+| `provider`         | string  | Teenusepakkuja ID (openai, anthropic jne)                                |
+| `model`            | string  | Mudeli ID (gpt-5, claude-opus-4-6 jne)                                   |
+| `comboId`          | string? | Kombinatsiooni ID, kui päring suunati läbi kombinatsiooni                |
+| `promptTokens`     | number  | Ülesvoolu teenuse vastusest                                              |
+| `completionTokens` | number  | Ülesvoolu teenuse vastusest                                              |
+| `cachedTokens`     | number  | Vahemälutabamuse tokenid (Anthropicu viipade vahemällu salvestamine jne) |
+| `totalTokens`      | number  | Viiba ja vastuse tokenite summa                                          |
+| `costUsd`          | number  | Arvutatud hinnastusandmete põhjal                                        |
+| `latencyMs`        | number  | Päringu kestus algusest lõpuni                                           |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`               |
+| `errorClass`       | string? | Veaklass, kui olek ei ole success                                        |
+| `timestamp`        | string  | ISO 8601 UTC                                                             |
+| `metadata`         | object  | Plugina lisatud kohandatud andmed                                        |
 
 ### Kust tokenid pärinevad
 
-Tokenid eraldatakse ülesvoolu teenusepakkuja vastusest **vastusetöötlejas**:
+Tokenid eraldatakse ülesvoolu teenusepakkuja vastusest **vastusekäsitlejas**:
 
 ```ts
 // Failist open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Teenusepakkujate puhul, kes kasutusandmeid ei tagasta (mõned veebiküpsistepõhised teenusepakkujad), OmniRoute **hindab** tokenite arvu heuristilise reegli `~4 märki tokeni kohta` abil (vt `open-sse/services/autoCombo/pipelineRouter.ts`).
+Teenusepakkujate puhul, kes kasutusandmeid ei tagasta (mõned veebiküpsistel põhinevad teenusepakkujad), **hindab** OmniRoute tokenite arvu heuristiku `~4 chars per token` abil (vt `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Vahemällu salvestatud tokenid
 
-OmniRoute jälgib välja `cached_tokens` väljast `prompt_tokens` eraldi, sest:
+OmniRoute jälgib `cached_tokens` eraldi väärtusest `prompt_tokens`, sest:
 
-- Anthropicu viipade vahemällu salvestamisel rakendatakse vahemällu salvestatud tokenitele madalamat hinda (10% tavahinnast)
-- Mõned teenusepakkujad tagastavad välja `cache_read_input_tokens`, mille hinnastamine peaks olema erinev
-- Analüütika saab kuvada **vahemälu tabamusmäära** = `cached_tokens / prompt_tokens`
+- Anthropicu viipade vahemällu salvestamisel rakendatakse vahemällu salvestatud tokenitele soodushinda (10% tavahinnast)
+- Mõned teenusepakkujad tagastavad `cache_read_input_tokens`, millele tuleks rakendada teistsugust hinda
+- Analüütika saab näidata **vahemälutabamuste määra** = `cached_tokens / prompt_tokens`
+
+### Vahemälukirjutuse tasemete diagnostika
+
+Analüütika juhtpaneeli viibavahemälu seisundi paneel eristab teenusepakkuja teatatud
+5-minutilisi ja 1-tunniseid vahemälukirjutusi. Anthropicu
+`usage.cache_creation.ephemeral_5m_input_tokens` ja
+`usage.cache_creation.ephemeral_1h_input_tokens` säilitatakse nii voogedastusega kui ka
+voogedastuseta kasutusandmete teisendamisel ning salvestatakse koos kutselogi kokkuvõtetega. Vahemälukirjutuste
+koguarvu ei lisata neile kategooriatele teist korda.
+
+Kutsetel, millel on ainult kirjutuste koondloendur, sealhulgas vanematel kirjetel, on tundmatu
+tase. Osalise jaotuse korral jääb jaotamata jäägi tase tundmatuks; vigased või
+vastuolulised loendurid märgistatakse, mitte ei määrata neile vaikimisi TTL-i. Päringupoolsed
+TTL-märgised ei tõenda arveldatavat taset.
+
+Paneeli API-põhine võrdlushinnang kirjutuste maksumusele hõlmab ainult teatatud ja hinnastatud tasemeid, mitte
+kogu päringut. Claude'i/Anthropicu mudelite omapõhise hinnastuse puhul kasutatakse 5-minutiliste kirjutuste jaoks
+1,25-kordset sisendihinda ja 1-tunniste kirjutuste jaoks kahekordset sisendihinda. Puuduv
+hind ei ole saadaval, mitte null. Hinnad talletatakse iga uue kutse logimisel;
+ajalooliste kirjete hindu ümber ei arvutata. Seega võib tellimuspõhistel kontodel olla
+API-põhine võrdlushinnang, ilma et see summa tooks kaasa rahalise kulu või kulutaks tellimuse
+kvooti. Olemasolevad kvoodi-, eelarve- ja teenusepakkuja täpsel hinnastusel põhinevad kuluarvutused ei muutu.
+
+See diagnostika kasutab olemasolevat piiratud mahuga vahemälu seisundi kokkuvõtet ja kutselogi
+säilitusreegleid. See ei muuda päringute TTL-i vaikeväärtusi, marsruutimist ega konto valikut.
+Kliendi taotletud TTL-i ja tegeliku väljamineva TTL-i talletamine teenusepakkujale saatmise
+piiril on edasi lükatud; see paneel näitab teenusepakkuja kinnitatud tasemeid, mitte tegelikku väljaminevat TTL-i.
+
+Teostus: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` ja `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ Hinnaandmeteta mudelite puhul kasutab OmniRoute varuvariandina **hinnangulist ku
 
 ## Kuupäevavahemiku koondamine
 
-Moodul `usageAnalytics.ts` arvutab töötlemata kasutusandmete põhjal töölaua vidinad. See toetab seitset ajavahemikku:
+Moodul `usageAnalytics.ts` arvutab toorkasutusandmete põhjal juhtpaneeli vidinate andmed. See toetab 7 ajavahemikku:
 
 | Vahemik  | Ajavahemik                         | Kasutusjuht                         |
 | -------- | ---------------------------------- | ----------------------------------- |
 | `1d`     | Viimased 24 tundi                  | Tunnipõhiste kuluhüpete tuvastamine |
-| `7d`     | Viimased 7 päeva                   | Nädalaülevaade                      |
-| `30d`    | Viimased 30 päeva                  | Kuupõhine arveldamine               |
+| `7d`     | Viimased 7 päeva                   | Iganädalane ülevaade                |
+| `30d`    | Viimased 30 päeva                  | Igakuine arveldamine                |
 | `90d`    | Viimased 90 päeva                  | Kvartalianalüüs                     |
 | `ytd`    | Alates jooksva aasta 1. jaanuarist | Aastaeelarve jälgimine              |
 | `all`    | Kogu aeg                           | Kogu kasutusaja statistika          |
-| `custom` | Kasutaja määratud algus/lõpp       | Auditid, ühekordsed päringud        |
+| `custom` | Kasutaja määratud algus/lõpp       | Auditid, sihtpäringud               |
 
-### Arvutatavad töölaua vidinad
+### Arvutatavad juhtpaneeli vidinad
 
-Analüüsikiht arvutab iga kuupäevavahemiku kohta järgmised näitajad:
+Analüütikakiht arvutab iga kuupäevavahemiku kohta:
 
 | Vidin                             | Kirjeldus                                                   |
 | --------------------------------- | ----------------------------------------------------------- |
-| **Kokkuvõttekaardid**             | Päringute koguarv, kogukulu, sõnede koguarv, õnnestumismäär |
-| **Päevane trendigraafik**         | Kulu + sõned päeva kohta, mudelite kaupa virnastatuna       |
-| **Aktiivsuse soojuskaart**        | Kellaaeg × nädalapäev, värv = päringute arv                 |
-| **Jaotus mudelite järgi**         | Kulude sektordiagramm mudelite kaupa                        |
-| **Jaotus teenusepakkujate järgi** | Päringute tulpdiagramm teenusepakkujate kaupa               |
-| **Peamised API-võtmed**           | Tabel kümne suurimate kuludega võtme kohta                  |
-| **Vigade analüüs**                | Veamäär aja jooksul, peamised veaklassid                    |
+| **Kokkuvõttekaardid**             | Päringute koguarv, kogukulu, tokenite koguarv, edukuse määr |
+| **Päevatrendi diagramm**          | Kulu + tokenid päevas, virnastatud mudeli järgi             |
+| **Aktiivsuse soojuskaart**        | Tund × nädalapäev ruudustik, värv = päringute arv           |
+| **Jaotus mudelite kaupa**         | Kulude sektordiagramm mudelite kaupa                        |
+| **Jaotus teenusepakkujate kaupa** | Päringute tulpdiagramm teenusepakkujate kaupa               |
+| **Suurima kuluga API-võtmed**     | 10 suurima kuluga võtme tabel                               |
+| **Vigade analüüs**                | Veamäär ajas, peamised veaklassid                           |
 
 ### Programmiline juurdepääs
 
@@ -157,7 +187,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // kasutusajaloo kirjed
   "7d",                 // ajavahemik: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // teenusepakkuja ühenduste kaart (connectionId → konto nimi)
+  connectionMap,        // teenusepakkuja ühenduste vastend (connectionId → konto nimi)
   {
     startDate: "2025-01-01",  // valikuline: vahemiku "custom" jaoks
     endDate: "2025-06-01",   // valikuline: vahemiku "custom" jaoks
@@ -173,55 +203,55 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 API-võtmepõhist kvooti jõustatakse kahes kohas:
 
-1. **Pehme limiit** (`quotaWarnAt`): juhtpaneelil kuvatakse hoiatus, kui kasutus ületab lävendi
-2. **Kõva limiit** (`quotaLimit`): limiidi ületamisel lükatakse päring tagasi HTTP 429 vastusega
+1. **Pehme piirang** (`quotaWarnAt`): juhtpaneeli hoiatus, kui kasutus ületab lävendi
+2. **Range piirang** (`quotaLimit`): ületamise korral lükatakse päring tagasi HTTP olekukoodiga 429
 
-### Konfiguratsioon
+### Seadistamine
 
 ```ts
-// API-võtme kohta
+// Iga API-võtme kohta
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — kuva hoiatus
-  quotaLimit: 10_00,    // $10.00 — täielik peatamine
+  quotaLimit: 10_00,    // $10.00 — range piirang
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Jõustamise voog
+### Jõustamise käik
 
 ```
-Päring ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Limiidi piires?  ──▶ luba
+              ├── Within limit?  ──▶ allow
               │
-              └── Limiit ületatud?  ──▶ 429 Liiga palju päringuid
-                                        koos päisega Retry-After
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
 ### Kvoodi hetktõmmised
 
-Tabel `quotaSnapshots` talletab trendianalüüsiks **ajaloolise kvoodi oleku**:
+Tabel `quotaSnapshots` salvestab **kvoodi ajaloolise oleku** trendianalüüsi jaoks:
 
 | Väli | Kirjeldus |
-| ----------- | ------------------------------------ | ------ | ------- |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Jälgitav võti |
-| `window` | "day" | "week" | "month" |
-| `used` | Selles perioodis kasutatud kulu (sentides) |
-| `limit` | Limiit (sentides) |
-| `resetAt` | Millal periood lähtestatakse |
-| `createdAt` | Millal hetktõmmis tehti |
+| `window` | "päev" | "nädal" | "kuu" |
+| `used` | Selle ajavahemiku jooksul tekkinud kulu (sentides) |
+| `limit` | Piirmäär (sentides) |
+| `resetAt` | Ajavahemiku lähtestamise aeg |
+| `createdAt` | Hetktõmmise tegemise aeg |
 
-Hetktõmmised tehakse **iga päringu korral**, mille kulu on > 0, ning neid kasutatakse järgmiseks:
+Hetktõmmis tehakse **iga päringu korral**, mille kulu on > 0, ning neid kasutatakse selleks, et:
 
-- Kvoodi edenemisriba kuvamine juhtpaneelil
-- 30 päeva kvooditrendide graafikute kuvamine
-- Hoiatuste käivitamine, kui kasutus läheneb limiidile
+- Kuvada juhtpaneelil kvoodi edenemisriba
+- Näidata 30 päeva kvooditrendi diagramme
+- Käivitada hoiatusi, kui kasutus läheneb piirmäärale
 
 ---
 
 ## REST API
 
-### Kasutuskirjete loend
+### Kasutuskirjete loendi pärimine
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -253,7 +283,7 @@ Vastus:
 }
 ```
 
-### Analüütika kokkuvõtte hankimine
+### Analüütika kokkuvõtte pärimine
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Vastus:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,24 +313,24 @@ Vastus:
 
 ### Kasutusanalüütika pärimine
 
-Kasutusandmetele pääseb juurde juhtpaneeli või MCP-tööriistade kaudu, mitte REST-i otseste ekspordi lõpp-punktide kaudu. Saadaval on järgmine analüütika:
+Kasutusandmetele pääseb ligi juhtpaneeli või MCP tööriistade kaudu, mitte otse REST-i ekspordi lõpp-punktide kaudu. Saadaolev analüütika:
 
 - **`/api/usage/analytics`** — koondatud kasutusmõõdikud (rühmitamine mudeli, teenusepakkuja või võtme järgi)
-- **`/api/usage/quota`** — iga API-võtme praegune kvoodiolek
-- **`/api/usage/history`** — päringuajaloo logid
+- **`/api/usage/quota`** — praegune kvoodi olek iga API võtme kohta
+- **`/api/usage/history`** — päringute ajaloo logid
 
 ---
 
-## MCP-tööriistad
+## MCP tööriistad
 
-Kaks MCP-tööriista võimaldavad agentidel kasutusandmetele juurde pääseda (vt `open-sse/mcp-server/tools/`):
+Kaks MCP tööriista teevad kasutusandmed agentidele kättesaadavaks (vt `open-sse/mcp-server/tools/`):
 
-| Tööriist                | Kirjeldus                                                  |
-| ----------------------- | ---------------------------------------------------------- |
-| `omniroute_cost_report` | Genereerib määratud perioodi kohta võtmepõhise kuluaruande |
-| `omniroute_check_quota` | Tagastab API-võtme praeguse kvoodiolek                     |
+| Tööriist                | Kirjeldus                                            |
+| ----------------------- | ---------------------------------------------------- |
+| `omniroute_cost_report` | Loob määratud perioodi kohta võtmepõhise kuluaruande |
+| `omniroute_check_quota` | Tagastab API võtme praeguse kvoodi oleku             |
 
-Agendi näidiskutse:
+Agendi väljakutse näide:
 
 ```json
 {
@@ -318,11 +343,11 @@ Agendi näidiskutse:
 
 ## Säilitamine ja puhastamine
 
-Kasutusandmete maht kasvab ligikaudu 1–10 KB päringu kohta. Suures mahus võib see olla märkimisväärne.
+Kasutusandmete maht kasvab iga päringuga ~1–10 KB võrra. Suure mahu korral võib see olla märkimisväärne.
 
-### Säilitamise seaded
+### Säilitussätted
 
-Kasutusajaloo säilitamist saab seadistada kasutajaliidese andmebaasiseadetes või `/api/settings/database` kaudu.
+Kasutusajaloo säilitamist saab seadistada kasutajaliidese andmebaasisätetes või `/api/settings/database` kaudu.
 
 Vaikimisi säilitatakse kasutusajalugu **90 päeva**.
 
@@ -330,43 +355,43 @@ Vaikimisi säilitatakse kasutusajalugu **90 päeva**.
 
 Vanu kirjeid puhastab `src/lib/db/cleanup.ts`:
 
-- Selle käivitab taustal töötav cron-protsess
-- Kustutab tabelist `usage_history` kirjed, mis on vanemad kui seadistatud `usageHistory` säilitusaeg
+- Käivitatakse taustal töötava cron-protsessi poolt
+- Kustutab tabelist `usage_history` kirjed, mis on vanemad kui säilitussättes `usageHistory` määratud aeg
 
 ### Salvestusmahu hinnang
 
-| Päringute sagedus       | 30 päeva salvestusmaht | 90 päeva salvestusmaht |
+| Päringusagedus          | 30 päeva salvestusmaht | 90 päeva salvestusmaht |
 | ----------------------- | ---------------------- | ---------------------- |
 | 100 päringut päevas     | ~3MB                   | ~9MB                   |
 | 1,000 päringut päevas   | ~30MB                  | ~90MB                  |
 | 10,000 päringut päevas  | ~300MB                 | ~900MB                 |
 | 100,000 päringut päevas | ~3GB                   | ~9GB                   |
 
-Väga suure liikluse korral kaaluge järgmist:
+Väga suure päringumahu korral kaaluge järgmist:
 
-- Lühendage säilitusaega andmebaasiseadete kaudu
-- Kasutage toorkirjete asemel `aggregated_metrics` (ainult analüütika jaoks)
+- Säilitusperioodi lühendamine andmebaasisätete kaudu
+- Toorkirjete asemel `aggregated_metrics` kasutamine (ainult analüütika jaoks)
 
 ---
 
-## Näpunäited kulude optimeerimiseks
+## Nõuanded kulude optimeerimiseks
 
-### 1. Kasutage sobivat mudelit
+### 1. Kasuta õiget mudelit
 
 ```bash
-# Kiire vastus — kasutage odavat ja kiiret mudelit
+# Kiire vastus — kasuta odavat ja kiiret mudelit
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Keerukas ülesanne — kasutage kvaliteetset mudelit
+# Keerukas ülesanne — eelista kvaliteeti
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Lubage vahemällu salvestamine
+### 2. Luba vahemällu salvestamine
 
-Anthropicu viipade vahemällu salvestamine säästab **korduva konteksti korral 90%**:
+Anthropicu viipade vahemällu salvestamine säästab **korduva konteksti puhul 90%**:
 
 ```ts
-// Vahemällu salvestamine toimub automaatselt — lisage lihtsalt sama mahukas süsteemiviip
+// Vahemällu salvestamine on automaatne — lisa lihtsalt sama mahukas süsteemiviip
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Salvestatakse automaatselt vahemällu
@@ -374,9 +399,9 @@ const response = await openai.chat({
 });
 ```
 
-### 3. Kasutage tihendamist
+### 3. Kasuta tihendamist
 
-RTK + Caveman tihendamine säästab **palju tööriistu kasutavate seansside korral 15–95%**:
+RTK + Cavemani tihendamine säästab **rohkelt tööriistu kasutavates seanssides 15-95%**:
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. Määrake võtmekohased kvoodid
+### 4. Määra võtmepõhised kvoodid
 
-Kontrollimatute kulude vältimiseks määrake alati `quotaLimit`:
+Määra alati `quotaLimit`, et vältida kulude kontrollimatut kasvu:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Ülempiir $10 kuus
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Piirang 10 dollarit kuus
 ```
 
-### 5. Auditeerige suurimaid tarbijaid
+### 5. Kontrolli suurimaid tarbijaid
 
-Kasutage juhtpaneeli või **`/api/usage/analytics`**, et rühmitada API-võtme järgi ja sortida kulu alusel:
+Kasuta juhtpaneeli või **`/api/usage/analytics`**, et rühmitada API-võtme järgi ja sortida kulu järgi:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -409,28 +434,28 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ### "Kulu on oodatust suurem"
 
-1. Kontrollige **`/api/usage/analytics?groupBy=model`** — leidke kallis mudel
-2. Kontrollige **`/api/usage/analytics?groupBy=apiKey`** — leidke suur tarbija
-3. Veenduge, et hinnaandmed oleksid ajakohased: `POST /api/pricing/sync`
+1. Kontrolli **`/api/usage/analytics?groupBy=model`** — leia kallis mudel
+2. Kontrolli **`/api/usage/analytics?groupBy=apiKey`** — leia suur tarbija
+3. Veendu, et hinnaandmed on ajakohased: `POST /api/pricing/sync`
 
 ### "Kirjed puuduvad"
 
-- Kontrollige andmebaasi säilitamise seadeid jaotises Dashboard → Database → Cleanup — perioodiline puhastustoiming (`src/lib/db/cleanup.ts`) kustutab vanad kirjed
-- Kontrollige vigu failides `src/lib/db/usage*.ts` — andmebaasi kirjutamise tõrked logitakse, kuid neid ei kuvata
-- Veenduge, et päring jõudis tegelikult funktsioonini `chatCore` — kontrollige kombineeritud marsruutimist
+- Kontrolli andmebaasi säilitussätteid jaotises Juhtpaneel → Andmebaas → Puhastus — perioodiline puhastustoiming kustutab vanad kirjed (`src/lib/db/cleanup.ts`)
+- Kontrolli vigu failides `src/lib/db/usage*.ts` — andmebaasi kirjutamise tõrked logitakse, kuid neid ei kuvata
+- Veendu, et päring jõudis tegelikult funktsioonini `chatCore` — kontrolli kombineeritud marsruutimist
 
 ### "Kvooti ei jõustata"
 
-- Kontrollige võtme seadet `quotaLimit`
-- Veenduge, et `quotaWindow` oleks õigesti seadistatud
-- Otsige `quotaSnapshots` kirjeid — need tuleks luua iga päringu korral
+- Kontrolli võtme sätet `quotaLimit`
+- Veendu, et `quotaWindow` on õigesti määratud
+- Otsi kirjeid `quotaSnapshots` — need peaksid tekkima iga päringu korral
 
 ---
 
-## Vaadake ka
+## Vaata ka
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — kasutustabelite skeem
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — hindade sünkroonimise keskkonnamuutujad
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — kuidas `auto/fast` ja `auto/cheap` kulusid vähendavad
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — täielik `/api/usage/*` dokumentatsioon
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Kasutusandmete tabelite skeem
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Hindade sünkroonimise keskkonnamuutujad
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Kuidas `auto/fast` ja `auto/cheap` kulusid vähendavad
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Täielik `/api/usage/*` viitedokumentatsioon
 - Lähtekood: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

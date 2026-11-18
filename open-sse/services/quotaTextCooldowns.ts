@@ -20,6 +20,8 @@ export interface QuotaTextFallback {
   cooldownMs: number;
   reason: RateLimitReasonValue;
   usedUpstreamRetryHint?: boolean;
+  /** Mirrors accountFallback.ts's RetryHintProvenance — kept local to avoid a circular import. */
+  retryHintSource?: "header" | "google_rpc_retry_info" | "body" | "body_structured";
   quotaResetHintMs?: number;
 }
 
@@ -28,6 +30,21 @@ export interface QuotaTextFallback {
 // Anthropic OAuth (Claude Pro/Team) returns 429 with "Usage Limit Reached"
 // for the 5-hour subscription quota. Without a dedicated branch the request
 // falls through to the generic 429 retry path (~5s base cooldown).
+
+/** #18058: an explicit model entitlement is not depleted account-wide credits. */
+export function isClaudeModelCreditEntitlementText(errorText: string | null | undefined): boolean {
+  return errorText?.toLowerCase().includes("usage credits are required for this model") ?? false;
+}
+
+/** Claude-only subscription wording, isolated to keep the generic classifier bounded. */
+function isClaudeSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
+  return (
+    provider === "claude" &&
+    (lower.includes("this request would exceed your account's rate limit") ||
+      lower.includes("monthly spend limit") ||
+      isClaudeModelCreditEntitlementText(lower))
+  );
+}
 
 export function isSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
   return (
@@ -41,46 +58,49 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("plan's set usage limit") ||
     lower.includes("plan limit exceeded") ||
     lower.includes("usage limit exceeded") ||
-    // Native Claude uses this wording for a long-window quota 429. Fresh quota
-    // evidence decides model versus connection scope; other providers may use
-    // the same phrase for a short RPM throttle.
-    (provider === "claude" &&
-      lower.includes("this request would exceed your account's rate limit")) ||
-    // Native Claude returns this 429 once the account's monthly extra-usage spend cap is reached.
-    // It clears only when the billing month rolls over or the cap is raised, so it must park the
-    // connection like any other long-window quota instead of falling into the ~5s generic backoff.
-    (provider === "claude" && lower.includes("monthly spend limit"))
+    // Model and account subscription limits are Claude-only, not generic RPM.
+    isClaudeSubscriptionQuotaText(lower, provider)
   );
 }
 
 export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
+/** Same value space as accountFallback.ts's RetryHintProvenance (kept local to avoid a circular import). */
+export type QuotaTextHintProvenance =
+  "header" | "google_rpc_retry_info" | "body" | "body_structured";
+
 /**
  * Builds the QUOTA_EXHAUSTED fallback for the subscription-quota text above.
  * Honor upstream Retry-After / reset hints only when the caller's profile
- * enables them (via `getUpstreamRetryHintMs`); otherwise apply a local 1h
+ * enables them (via `getUpstreamRetryHint`); otherwise apply a local 1h
  * cooldown so all Pro accounts on the same subscription tier stop cycling
  * through tight retries. (We deliberately do not use COOLDOWN_MS.paymentRequired
  * — that constant is 2 minutes, shorter than the recovery time of a
  * subscription quota.)
  *
- * `getUpstreamRetryHintMs`/`parseRetryFromErrorText` are injected by the
- * caller (accountFallback.ts) to avoid importing back into that file.
+ * `getUpstreamRetryHint` (whole hint, so the provenance survives to callers:
+ * auth.ts's per-model 402/403 branch treats only an actually-applied upstream
+ * hint as authoritative when shortening a lock) and `parseRetryFromErrorText`
+ * are injected by the caller (accountFallback.ts) to avoid importing back into that file.
  */
 export function buildSubscriptionQuotaFallback(
   errorStr: string,
-  getUpstreamRetryHintMs: () => number | null,
+  getUpstreamRetryHint: () => { retryAfterMs: number; provenance: QuotaTextHintProvenance } | null,
   parseRetryFromErrorText: (text: string, provider?: string | null) => number | null,
   provider?: string | null
 ): QuotaTextFallback | null {
   if (!isSubscriptionQuotaText(errorStr.toLowerCase(), provider)) return null;
-  const hintMs = getUpstreamRetryHintMs();
+  const hint = getUpstreamRetryHint();
   const bodyHint = parseRetryFromErrorText(errorStr, provider);
   return {
     shouldFallback: true,
-    cooldownMs: hintMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
+    cooldownMs: hint?.retryAfterMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
-    usedUpstreamRetryHint: Boolean(hintMs),
+    usedUpstreamRetryHint: Boolean(hint?.retryAfterMs),
+    // Keep the applied hint's provenance: callers decide which cooldowns may shorten
+    // an existing lock from provenance, and a locally scaled cooldown (no applied
+    // hint) must never look authoritative (#CO-402 review).
+    retryHintSource: hint?.provenance,
     quotaResetHintMs: bodyHint ?? undefined,
   };
 }

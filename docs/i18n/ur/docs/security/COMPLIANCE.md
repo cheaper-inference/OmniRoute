@@ -13,53 +13,72 @@ OmniRoute انتظامی کارروائیوں، توثیقی واقعات، فر
 
 ## کیا لاگ کیا جاتا ہے
 
-### انتظامی آڈٹ واقعات (`audit_log`)
+### انتظامی آڈٹ ایونٹس (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` کی ہر کال ایک قطار بناتی ہے۔ کارروائی کی اسٹرنگز `domain.verb` (یا `domain.verb.outcome`) پیٹرن کی پیروی کرتی ہیں۔ سورس ٹری میں تصدیق شدہ کارروائی کی اقسام میں درج ذیل شامل ہیں:
+`logAuditEvent({ action, actor, target, details, ... })` کو ہر بار کال کرنے پر
+ایک قطار تیار ہوتی ہے۔ ایکشن اسٹرنگز `domain.verb` (یا `domain.verb.outcome`)
+پیٹرن کی پیروی کرتی ہیں۔ درخت میں تصدیق شدہ ایکشن کی اقسام میں شامل ہیں:
 
-| کارروائی                             | ماخذ                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| ایکشن                                | ماخذ                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ہر اندراج `action`، `actor` (جس کی ڈیفالٹ قدر `"system"` ہے)، `target`، `details`/`metadata` (JSON)، `ip_address`، `resource_type`، `status`، `request_id`، اور `timestamp` محفوظ کرتا ہے۔ حساس کلیدوں (`apiKey`، `accessToken`، `refreshToken`، `password`، `*token`/`*secret`/`*apikey` سے مطابقت رکھنے والی ہر چیز، وغیرہ) کو قطار لکھے جانے سے پہلے تکراری طور پر `"[redacted]"` سے تبدیل کر دیا جاتا ہے۔
+ہر اندراج میں `action`، `actor` (پہلے سے طے شدہ قدر `"system"`)، `target`،
+`details`/`metadata` (JSON)، `ip_address`، `resource_type`، `status`،
+`request_id`، اور `timestamp` شامل ہوتے ہیں۔ حساس کیز (`apiKey`، `accessToken`،
+`refreshToken`، `password`، `*token`/`*secret`/`*apikey` سے مطابقت رکھنے والی
+کوئی بھی چیز وغیرہ) قطار لکھے جانے سے پہلے بازگشتی طور پر `"[redacted]"` سے
+چھپا دی جاتی ہیں۔
+
+`api_key.auth.touch` قطاریں کامیاب API-key میٹا ڈیٹا اور دریافت سے متعلق
+ریڈز (GET/HEAD) ریکارڈ کرتی ہیں جو کبھی ریکوئسٹ لاگ تک نہیں پہنچتیں: کون سی
+کی استعمال ہوئی، کب، اور معمول کے مطابق بنایا گیا پاتھ؛ ان اندراجات کو یکجا
+کیا جاتا ہے اور زیادہ سے زیادہ 1,000 قطاروں تک محدود رکھا جاتا ہے۔ `noLog` والی
+کیز اور ماحول کی کی کو نظرانداز کیا جاتا ہے۔ کال کرنے والے کا IP ایڈریس اور
+user-agent صرف اسی وقت شامل کیے جاتے ہیں جب
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` فیچر فلیگ فعال ہو (پہلے سے غیر فعال)۔
 
 ### MCP ٹول کالز (`mcp_tool_audit`)
 
-ہر MCP ٹول کی طلبی `open-sse/mcp-server/audit.ts` کے ذریعے ایک قطار لکھتی ہے۔ اسکیما (`src/lib/db/migrations/002_mcp_a2a_tables.sql` سے):
+ہر MCP ٹول انوکیشن `open-sse/mcp-server/audit.ts` کے ذریعے ایک قطار لکھتی ہے۔
+اسکیما (از
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| کالم             | نوٹس                                     |
-| ---------------- | ---------------------------------------- |
-| `id`             | خودکار اضافہ                             |
-| `tool_name`      | MCP ٹول کا شناخت کنندہ                   |
-| `input_hash`     | ان پٹ کا sha256 (پے لوڈ محفوظ نہیں ہوتا) |
-| `output_summary` | مختصر، تراشی ہوئی تلخیص                  |
-| `duration_ms`    | حقیقی گزرا ہوا وقت                       |
-| `api_key_id`     | کال کرنے والا (کالعدم ہو سکتا ہے)        |
-| `success`        | `1` / `0`                                |
-| `error_code`     | ناکامی کی صورت میں آخری خرابی کا کوڈ     |
-| `created_at`     | ISO ٹائم اسٹیمپ                          |
+| کالم             | نوٹس                                         |
+| ---------------- | -------------------------------------------- |
+| `id`             | خودکار اضافہ                                 |
+| `tool_name`      | MCP ٹول شناخت کنندہ                          |
+| `input_hash`     | ان پٹ کا sha256 (پے لوڈ محفوظ نہیں کیا جاتا) |
+| `output_summary` | مختصر، مختصر کیا گیا خلاصہ                   |
+| `duration_ms`    | دیواری وقت                                   |
+| `api_key_id`     | کال کرنے والا (nullable)                     |
+| `success`        | `1` / `0`                                    |
+| `error_code`     | ناکامی کی صورت میں حتمی خرابی کا کوڈ         |
+| `created_at`     | ISO ٹائم اسٹیمپ                              |
 
-### درخواست / استعمال کے لاگز
+### ریکوئسٹ / استعمال کے لاگز
 
-یہ عملی ٹیلی میٹری ہیں (سختی سے انتظامی آڈٹ نہیں)، لیکن برقرار رکھنے کے اسی پائپ لائن کو استعمال کرتے ہیں:
+یہ آپریشنل ٹیلی میٹری ہیں (سخت معنوں میں انتظامی آڈٹ نہیں)، لیکن یہی
+برقراری پائپ لائن استعمال کرتے ہیں:
 
-- `usage_history` — فی درخواست استعمال کا مجموعی خلاصہ
-- `call_logs` — مکمل فی درخواست لاگ (قطاروں کی حد کے تابع، ذیل میں دیکھیے)
+- `usage_history` — فی ریکوئسٹ استعمال کا مجموعی ریکارڈ
+- `call_logs` — فی ریکوئسٹ مکمل لاگ (قطاروں کی حد کے تابع، نیچے دیکھیں)
 - `proxy_logs` — پراکسی ٹریفک لاگ (قطاروں کی حد کے تابع)
-- `request_detail_logs` — سابقہ تفصیلی درخواست لاگ (اگر موجود ہو تو اب بھی حذف کیا جاتا ہے)
+- `request_detail_logs` — پرانا تفصیلی ریکوئسٹ لاگ (اگر موجود ہو تو اب بھی صاف کیا جاتا ہے)
 
 ## اسٹوریج اسکیما
 

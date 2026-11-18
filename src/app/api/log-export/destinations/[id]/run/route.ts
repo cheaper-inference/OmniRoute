@@ -10,7 +10,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { runSingleLogExport } from "@/lib/logExport/runner";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

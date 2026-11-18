@@ -24,7 +24,11 @@ import {
   isAdobeUserAccessToken,
   looksLikeAdobeJwt,
 } from "./adobeFireflyClient.ts";
-import { isAdobeFireflyApiUrl, isAdobeLoginCookieDomain } from "./adobeFireflySecurity.ts";
+import {
+  isAdobeFireflyApiUrl,
+  isAdobeLoginCookieDomain,
+  matchAdobeForterTimestamp,
+} from "./adobeFireflySecurity.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 
 /**
@@ -146,8 +150,7 @@ export function extractAdobeForterTimestampFromValue(value: string): number {
   } catch {
     /* keep */
   }
-  const m = decoded.match(/_(\d{13})__/);
-  return m ? Number(m[1]) : 0;
+  return matchAdobeForterTimestamp(decoded);
 }
 
 /** Drop stale risk cookies from a seed set so force-warm cannot re-inject a dead Forter. */

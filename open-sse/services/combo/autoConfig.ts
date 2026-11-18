@@ -6,6 +6,7 @@ import {
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { resolveNadirRoutingConfig } from "../autoCombo/nadirStrategy.ts";
 import { isRecord } from "./comboData.ts";
+import { readAccountPreferences } from "./accountPreferences.ts";
 import { resolveAutoResetWindowConfig, resolveSlaRoutingPolicy } from "./quotaScoring.ts";
 import type { ComboLike, ResolvedComboTarget } from "./types.ts";
 
@@ -77,5 +78,6 @@ export function parseAutoConfig(combo: ComboLike, eligibleTargets: ResolvedCombo
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    accountPreferences: readAccountPreferences(autoConfigSource.accountPreferences),
   };
 }

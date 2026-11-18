@@ -491,3 +491,156 @@ test("handleToolCallExecution loads registry from DB on cold cache (covers loadF
   assert.equal(result.stop_reason, "end_turn");
   assert.equal(result.stop_sequence, null);
 });
+
+// Claude Code's WebSearch reads only server_tool_use + web_search_tool_result.
+// An omniroute_web_search result in an Anthropic-format response must use that
+// paired shape, not the [Skill result:] text flattening other skills use. #19046
+test("handleToolCallExecution returns Anthropic web-search results as server_tool_use + web_search_tool_result", async () => {
+  const mutableBuiltins = builtinSkills as unknown as Record<
+    string,
+    (
+      input: Record<string, unknown>,
+      context: Record<string, unknown>
+    ) => Promise<Record<string, unknown>>
+  >;
+  const originalWebSearch = mutableBuiltins.web_search;
+  try {
+    mutableBuiltins.web_search = async (args) => ({
+      success: true,
+      provider: "exa-search",
+      query: args.query || "omnirouter",
+      results: [
+        { title: "Example A", url: "https://example.com/a", snippet: "hit a" },
+        { title: "Example B", url: "https://example.com/b", snippet: "hit b" },
+      ],
+    });
+    const anthropicResponse = await handleToolCallExecution(
+      {
+        stop_reason: "tool_use",
+        content: [
+          {
+            type: "tool_use",
+            id: "toolu_search_01",
+            name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+            input: { query: "omnirouter" },
+          },
+        ],
+      },
+      "claude-3-7-sonnet",
+      { ...executionContext, builtinToolNames: ["web_search"] }
+    );
+
+    assert.equal(anthropicResponse.content.length, 2);
+    assert.equal(anthropicResponse.content[0].type, "server_tool_use");
+    assert.equal(anthropicResponse.content[0].id, "srvtoolu_toolu_search_01");
+    assert.equal(anthropicResponse.content[0].name, "web_search");
+    assert.deepEqual(anthropicResponse.content[0].input, { query: "omnirouter" });
+    assert.equal(anthropicResponse.content[1].type, "web_search_tool_result");
+    assert.equal(anthropicResponse.content[1].tool_use_id, "srvtoolu_toolu_search_01");
+    assert.deepEqual(anthropicResponse.content[1].content, [
+      {
+        type: "web_search_result",
+        url: "https://example.com/a",
+        title: "Example A",
+        encrypted_content: "",
+        page_age: null,
+      },
+      {
+        type: "web_search_result",
+        url: "https://example.com/b",
+        title: "Example B",
+        encrypted_content: "",
+        page_age: null,
+      },
+    ]);
+    assert.equal(
+      anthropicResponse.content.some((b: { type: string }) => b.type === "text"),
+      false
+    );
+    assert.equal(anthropicResponse.stop_reason, "end_turn");
+  } finally {
+    mutableBuiltins.web_search = originalWebSearch;
+  }
+});
+
+test("handleToolCallExecution keeps a failed Anthropic web search as text", async () => {
+  const mutableBuiltins = builtinSkills as unknown as Record<
+    string,
+    (input: Record<string, unknown>) => Promise<Record<string, unknown>>
+  >;
+  const originalWebSearch = mutableBuiltins.web_search;
+  try {
+    mutableBuiltins.web_search = async () => {
+      throw new Error("search backend unavailable");
+    };
+    const anthropicResponse = await handleToolCallExecution(
+      {
+        stop_reason: "tool_use",
+        content: [
+          {
+            type: "tool_use",
+            id: "toolu_search_failed",
+            name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+            input: { query: "omnirouter" },
+          },
+        ],
+      },
+      "claude-3-7-sonnet",
+      { ...executionContext, builtinToolNames: ["web_search"] }
+    );
+
+    assert.deepEqual(
+      anthropicResponse.content.map((b: { type: string }) => b.type),
+      ["text"]
+    );
+    assert.match(
+      anthropicResponse.content[0].text,
+      new RegExp(`^\\[Skill result: ${OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME}\\]\\n`)
+    );
+    assert.equal(anthropicResponse.stop_reason, "end_turn");
+  } finally {
+    mutableBuiltins.web_search = originalWebSearch;
+  }
+});
+
+test("handleToolCallExecution places the Anthropic web-search pair before a client-native tool_use", async () => {
+  const mutableBuiltins = builtinSkills as unknown as Record<
+    string,
+    (input: Record<string, unknown>) => Promise<Record<string, unknown>>
+  >;
+  const originalWebSearch = mutableBuiltins.web_search;
+  try {
+    mutableBuiltins.web_search = async (args) => ({
+      success: true,
+      query: args.query,
+      results: [{ title: "Example A", url: "https://example.com/a" }],
+    });
+    const nativeToolUse = { type: "tool_use", id: "toolu_native", name: "Bash", input: {} };
+    const anthropicResponse = await handleToolCallExecution(
+      {
+        stop_reason: "tool_use",
+        content: [
+          { type: "text", text: "searching" },
+          {
+            type: "tool_use",
+            id: "toolu_search_mixed",
+            name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+            input: { query: "omnirouter" },
+          },
+          nativeToolUse,
+        ],
+      },
+      "claude-3-7-sonnet",
+      { ...executionContext, builtinToolNames: ["web_search"] }
+    );
+
+    assert.deepEqual(
+      anthropicResponse.content.map((b: { type: string }) => b.type),
+      ["text", "server_tool_use", "web_search_tool_result", "tool_use"]
+    );
+    assert.deepEqual(anthropicResponse.content[3], nativeToolUse);
+    assert.equal(anthropicResponse.stop_reason, "tool_use");
+  } finally {
+    mutableBuiltins.web_search = originalWebSearch;
+  }
+});

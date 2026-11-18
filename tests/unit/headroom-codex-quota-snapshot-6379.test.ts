@@ -83,8 +83,8 @@ function target(connectionId: string) {
 function usageResponse(primaryUsedPercent: number, secondaryUsedPercent: number) {
   return {
     rate_limit: {
-      primary_window: { used_percent: primaryUsedPercent },
-      secondary_window: { used_percent: secondaryUsedPercent },
+      primary_window: { limit_window_seconds: 18000, used_percent: primaryUsedPercent },
+      secondary_window: { limit_window_seconds: 604800, used_percent: secondaryUsedPercent },
     },
   };
 }

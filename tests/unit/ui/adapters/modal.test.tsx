@@ -206,3 +206,177 @@ describe("Modal adapter → kit Dialog (Radix)", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).not.toBeNull();
   });
 });
+
+describe("ConfirmModal → kit AlertDialog", () => {
+  function Confirm(props: Partial<React.ComponentProps<typeof ConfirmModal>>) {
+    return (
+      <ConfirmModal isOpen onClose={() => {}} onConfirm={() => {}} message="Sure?" {...props} />
+    );
+  }
+
+  it("is a named, described alert dialog that starts on the safe answer", async () => {
+    render(<Confirm title="Delete key" />);
+    const dialog = await screen.findByRole("alertdialog", { name: "Delete key" });
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    expect(dialog.className).toContain("max-w-sm");
+    const description = dialog.querySelector("[data-slot=dialog-description]")!;
+    expect(description.textContent).toBe("Sure?");
+    expect(dialog.getAttribute("aria-describedby")).toBe(description.id);
+    await flush();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Cancel" }));
+  });
+
+  it("falls back to the translated title and action labels", async () => {
+    render(<Confirm />);
+    expect(await screen.findByRole("alertdialog", { name: "Confirm" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Confirm" })).not.toBeNull();
+  });
+
+  it.each([
+    ["danger", "destructive"],
+    ["warning", "warning"],
+    ["primary", "default"],
+    ["secondary", "default"],
+    ["outline", "default"],
+  ] as const)("paints variant %s as the %s action", async (variant, tone) => {
+    render(<Confirm variant={variant} confirmText="Go" />);
+    const action = await screen.findByRole("button", { name: "Go" });
+    expect(action.getAttribute("data-variant")).toBe(tone);
+    expect(screen.getByRole("button", { name: "Cancel" }).getAttribute("data-variant")).toBe(
+      "outline"
+    );
+  });
+
+  it("Cancel and Escape each call onClose once; an outside click does nothing", async () => {
+    const onClose = vi.fn();
+    render(<Confirm onClose={onClose} />);
+    await screen.findByRole("alertdialog");
+    await flush();
+    clickOutside();
+    await flush();
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    await flush();
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it("the action never closes by itself: the caller decides through isOpen", async () => {
+    const onClose = vi.fn();
+    const onConfirm = vi.fn();
+    render(<Confirm onClose={onClose} onConfirm={onConfirm} confirmText="Go" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Go" }));
+    await flush();
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onConfirm).toHaveBeenCalledWith();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).not.toBeNull();
+  });
+
+  it("holds the dialog while an async onConfirm runs, then releases it", async () => {
+    let finish!: () => void;
+    const onClose = vi.fn();
+    const onConfirm = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
+    render(<Confirm onClose={onClose} onConfirm={onConfirm} confirmText="Go" />);
+    const action = (await screen.findByRole("button", { name: "Go" })) as HTMLButtonElement;
+    const cancel = screen.getByRole("button", { name: "Cancel" }) as HTMLButtonElement;
+
+    fireEvent.click(action);
+    await flush();
+    expect(action.getAttribute("aria-busy")).toBe("true");
+    expect(action.disabled).toBe(true);
+    expect(cancel.disabled).toBe(true);
+    fireEvent.click(action);
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).not.toBeNull();
+
+    await act(async () => finish());
+    expect(action.getAttribute("aria-busy")).toBeNull();
+    expect(action.disabled).toBe(false);
+    expect(cancel.disabled).toBe(false);
+    expect(screen.queryByRole("alertdialog")).not.toBeNull();
+  });
+
+  it("releases the dialog when an async onConfirm rejects", async () => {
+    const swallow = vi.fn();
+    process.once("unhandledRejection", swallow);
+    render(<Confirm onConfirm={() => Promise.reject(new Error("nope"))} confirmText="Go" />);
+    const action = (await screen.findByRole("button", { name: "Go" })) as HTMLButtonElement;
+    fireEvent.click(action);
+    await flush();
+    process.off("unhandledRejection", swallow);
+    expect(action.disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "Cancel" }) as HTMLButtonElement).disabled).toBe(
+      false
+    );
+  });
+
+  it("the caller's loading disables Cancel too, and Escape still gets out", async () => {
+    const onClose = vi.fn();
+    render(<Confirm loading onClose={onClose} confirmText="Go" />);
+    const action = (await screen.findByRole("button", { name: "Go" })) as HTMLButtonElement;
+    expect(action.getAttribute("aria-busy")).toBe("true");
+    expect(action.disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Cancel" }) as HTMLButtonElement).disabled).toBe(
+      true
+    );
+    await flush();
+    // Focus cannot start on a disabled Cancel, and must never start on the action.
+    expect(document.activeElement).toBe(screen.getByRole("alertdialog"));
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    await flush();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns focus to the opener of a controlled confirmation", async () => {
+    function App() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Ask
+          </button>
+          <ConfirmModal
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            onConfirm={() => setOpen(false)}
+            message="Sure?"
+            confirmText="Go"
+          />
+        </>
+      );
+    }
+    render(<App />);
+    const opener = screen.getByRole("button", { name: "Ask" });
+    opener.focus();
+    fireEvent.click(opener);
+    fireEvent.click(await screen.findByRole("button", { name: "Go" }));
+    await flush();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it("a click on a toast does not dismiss the confirmation", async () => {
+    const onClose = vi.fn();
+    render(
+      <>
+        <NotificationToast />
+        <Confirm onClose={onClose} />
+      </>
+    );
+    await screen.findByRole("alertdialog");
+    await flush();
+    act(() => {
+      useNotificationStore.getState().error("Save failed", "Error");
+    });
+    const close = await screen.findByRole("button", { name: "Dismiss notification" });
+    fireEvent.pointerDown(close);
+    fireEvent.pointerUp(close);
+    fireEvent.click(close);
+    await flush();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).not.toBeNull();
+  });
+});

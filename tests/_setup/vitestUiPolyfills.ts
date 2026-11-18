@@ -22,6 +22,19 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   };
 }
 
+// jsdom does not implement `ResizeObserver`. The kit `Table` (packages/ui-kit/src/table-scroll-area.tsx,
+// KEA-7886) measures its scroll area with one on mount, so any test rendering a dashboard table
+// crashes with "ResizeObserver is not defined" unless a no-op stub exists. ~50 test files used to
+// repeat this stub locally; registering it once here covers the rest (a file-local `??=` stub
+// stays harmless). Layout is never measured under jsdom, so a no-op is enough.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+
 // #7935 wired `useTranslations`/`useLocale` (next-intl) into ~180 dashboard/shared
 // components (Button, Modal, Select, EmptyState, ProviderIcon, ...). Any UI test that
 // mounts a component depending on one of those — directly or transitively — without its

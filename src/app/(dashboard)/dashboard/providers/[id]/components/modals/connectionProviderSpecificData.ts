@@ -22,6 +22,7 @@ type FormData = QuotaScrapingFieldValues &
     ccCompatibleContext1m: boolean;
     ccCompatibleRedactThinking: boolean;
     ccCompatibleSummarizeThinking: boolean;
+    commandCodeZdrEnabled?: boolean;
     consoleApiKey: string;
     customUserAgent: string;
     huggingfaceBillTo: string;
@@ -29,6 +30,7 @@ type FormData = QuotaScrapingFieldValues &
     excludedModels: string;
     importFreeModelsOnly: boolean;
     m365Tier?: M365TierValue;
+    m365RefreshToken?: string;
     newApiAggregatorBalance: boolean;
     newApiUserId: string;
     passthroughModels: boolean;
@@ -46,7 +48,20 @@ type ProviderSpecificData = Record<string, unknown>;
 // bailian-coding-plan reuses consoleApiKey as its console token; agentrouter (#6850)
 // reuses the same generic field for its New-API System Access Token, paired with
 // newApiUserId (the New-Api-User header value). See agentrouterQuotaFetcher.ts.
-const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter"]);
+// tokenrouter stores its optional Management Key here (open-sse/services/usage/tokenrouter.ts).
+const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter", "tokenrouter"]);
+
+export function assignM365RefreshToken(
+  provider: string | undefined,
+  formData: Pick<FormData, "m365RefreshToken">,
+  target: ProviderSpecificData
+) {
+  if (provider !== "copilot-m365-web") return;
+  // Only explicit input may replace a credential, never copied/validation metadata.
+  delete target.refreshToken;
+  const token = formData.m365RefreshToken?.trim();
+  if (token) target.refreshToken = token;
+}
 
 export function buildAddProviderSpecificData(options: {
   provider?: string;
@@ -94,6 +109,9 @@ export function buildAddProviderSpecificData(options: {
   if (provider === "agentrouter" && formData.newApiUserId.trim()) {
     data.newApiUserId = formData.newApiUserId.trim();
   }
+  if (provider === "command-code" && formData.commandCodeZdrEnabled === true) {
+    data.zdrEnabled = true;
+  }
   assignQuotaScrapingProviderData(provider, formData, data);
   if (isGooglePse && formData.cx.trim()) data.cx = formData.cx.trim();
   if (provider === "aws-polly") {
@@ -121,7 +139,17 @@ export function buildAddProviderSpecificData(options: {
     if (formData.tunnelId.trim()) data.tunnelId = formData.tunnelId.trim();
     if (formData.connectorName.trim()) data.connectorName = formData.connectorName.trim();
   }
+  assignM365RefreshToken(provider, formData, data);
   return Object.keys(data).length > 0 ? data : undefined;
+}
+
+/** Edit: an explicit boolean (never undefined) so the PUT merge can turn ZDR back off. */
+function assignCommandCodeZdrOnEdit(
+  provider: string,
+  formData: FormData,
+  target: ProviderSpecificData
+): void {
+  if (provider === "command-code") target.zdrEnabled = formData.commandCodeZdrEnabled === true;
 }
 
 export function assignEditApiKeyProviderSpecificData(options: {
@@ -165,6 +193,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
   if (o.provider === "agentrouter") {
     o.target.newApiUserId = o.formData.newApiUserId.trim() || undefined;
   }
+  assignCommandCodeZdrOnEdit(o.provider, o.formData, o.target);
   assignQuotaScrapingProviderData(o.provider, o.formData, o.target);
   if (o.formData.validationModelId) o.target.validationModelId = o.formData.validationModelId;
   if (o.isGooglePse) o.target.cx = o.formData.cx.trim() || undefined;
@@ -207,4 +236,5 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.tunnelId = o.formData.tunnelId.trim() || undefined;
     o.target.connectorName = o.formData.connectorName.trim() || undefined;
   }
+  assignM365RefreshToken(o.provider, o.formData, o.target);
 }

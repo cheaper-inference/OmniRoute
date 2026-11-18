@@ -86,7 +86,7 @@ export default function BatchTestResultsModal({
               <Badge
                 variant={r.valid ? "success" : "error"}
                 size="sm"
-                className="font-bold uppercase"
+                className="font-semibold uppercase"
               >
                 {r.valid ? t("okShort") : r.diagnosis?.type || t("errorShort")}
               </Badge>

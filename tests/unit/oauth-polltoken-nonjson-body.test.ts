@@ -50,7 +50,9 @@ for (const { id, config } of providers) {
       assert.equal(result.ok, false);
       assert.equal(result.data.error, "invalid_response");
       if (id === "muse-code") {
-        // Muse's fixed-error contract must not expose an arbitrary upstream body (#15869).
+        // Muse's fixed-error contract must not expose an arbitrary upstream body (#15869), and
+        // an unrecognized body maps to a bare invalid_response (#15521, porting #14267).
+        assert.deepEqual(result.data, { error: "invalid_response" });
         assert.doesNotMatch(
           JSON.stringify(result),
           /502 Bad Gateway|muse-sensitive-fixture-15869|<html>/

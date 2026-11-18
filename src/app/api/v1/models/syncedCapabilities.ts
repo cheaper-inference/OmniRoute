@@ -39,7 +39,7 @@ interface SyncedCapabilityFlags {
 // `k3`/`k3-256k` (and prefixed forms such as `kmca/k3`). Same shape the
 // executor/translator layers use to recognize K3 elsewhere
 // (reasoningContentInjector.ts::K3_AUTHENTIC_REASONING_PATTERN).
-const KIMI_K3_MODEL_ID_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|-)/i;
+const KIMI_K3_MODEL_ID_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|[.-])/i;
 
 /**
  * #12299: only Kimi K3's synced BASE entries are exempt from the

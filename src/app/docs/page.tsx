@@ -1,3 +1,4 @@
+import { Kbd } from "@omniroute/ui-kit/kbd";
 import Icon from "@/shared/components/Icon";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -82,11 +83,7 @@ export default async function DocsHomePage() {
         <p className="text-lg text-fd-muted-foreground mb-6">{t("homeDescription")}</p>
         <p className="text-sm text-fd-muted-foreground">
           {t.rich("homeSearchHint", {
-            kbd: (chunks) => (
-              <kbd className="px-1.5 py-0.5 bg-fd-muted border border-fd-border rounded font-mono text-xs">
-                {chunks}
-              </kbd>
-            ),
+            kbd: (chunks) => <Kbd>{chunks}</Kbd>,
           })}
         </p>
       </div>

@@ -12,17 +12,22 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Forudsætninger
 
-- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (anbefalet: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalet: 24 LTS)
 - **npm** 10+
 
-> **Brugere af npm v11+ (Node 24+):** Efter `npm install` skal du kontrollere, at de native moduler blev installeret:
-> `node -e "require('better-sqlite3')"`. Hvis kommandoen mislykkes med `MODULE_NOT_FOUND`,
-> skal du køre `npm approve-scripts better-sqlite3 && npm install`. Se
+> **Windows med Node 24:** brug den aktuelle 24 LTS-patchudgivelse (mindst 24.20.0).
+> Tidligere udgivelser kan afslutte efter vellykkede tests, når `--test-force-exit` lukker
+> processen. Node's [Windows libuv-rettelse](https://github.com/nodejs/node/pull/61999) afhjælper
+> dette runtime-nedbrud; behold testpåstandene og kontrollerne af runnerens afslutning aktiveret.
+
+> **Brugere af npm v11+ (Node 24+):** Efter `npm install` skal du kontrollere, at native moduler blev installeret:
+> `node -e "require('better-sqlite3')"`. Hvis det mislykkes med `MODULE_NOT_FOUND`,
+> kør `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Fejlfinding](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloning og installation
+### Klon og installation
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -36,84 +41,84 @@ npm install
 # Opret din .env ud fra skabelonen
 cp .env.example .env
 
-# Generer de påkrævede hemmeligheder
+# Generer de nødvendige hemmeligheder
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Vigtige variabler til udvikling:
 
-| Variabel               | Standardværdi til udvikling | Beskrivelse                    |
-| ---------------------- | --------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                     | Serverport                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Basis-URL til frontend         |
-| `JWT_SECRET`           | (generer ovenfor)           | Hemmelighed til JWT-signering  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Adgangskode til første login   |
-| `APP_LOG_LEVEL`        | `info`                      | Detaljeringsniveau for logning |
+| Variabel               | Standard for udvikling   | Beskrivelse                  |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Serverport                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend       |
+| `JWT_SECRET`           | (generer ovenfor)        | JWT-signeringshemmelighed    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Adgangskode til første login |
+| `APP_LOG_LEVEL`        | `info`                   | Logningsdetaljeringsniveau   |
 
-### Indstillinger i dashboardet
+### Dashboard-indstillinger
 
-Dashboardet indeholder kontakter til funktioner, der også kan konfigureres via miljøvariabler:
+Dashboardet indeholder UI-knapper til funktioner, der også kan konfigureres via miljøvariabler:
 
-| Placering af indstilling  | Kontakt                | Beskrivelse                              |
-| ------------------------- | ---------------------- | ---------------------------------------- |
-| Indstillinger → Avanceret | Fejlfindingstilstand   | Aktivér logning af debuganmodninger (UI) |
-| Indstillinger → Generelt  | Sidebjælkens synlighed | Vis/skjul sektioner i sidebjælken        |
+| Indstillingsplacering     | Kontakt                | Beskrivelse                                     |
+| ------------------------- | ---------------------- | ----------------------------------------------- |
+| Indstillinger → Avanceret | Fejlsøgningstilstand   | Aktivér logning af fejlfindingsanmodninger (UI) |
+| Indstillinger → Generelt  | Synlighed af sidepanel | Vis/skjul sektioner i sidepanelet               |
 
-Disse indstillinger gemmes i databasen og bevares på tværs af genstarter. Når de er angivet, tilsidesætter de miljøvariablernes standardværdier.
+Disse indstillinger gemmes i databasen og bevares på tværs af genstarter, hvor de tilsidesætter standardværdierne for miljøvariabler, når de er angivet.
 
-### Lokal kørsel
+### Kørsel lokalt
 
 ```bash
-# Udviklingstilstand (automatisk genindlæsning)
+# Udviklingstilstand (hot reload)
 npm run dev
 
 # Produktionsbuild
-npm run build    # next build → .build/next/ og derefter assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hurtig kompilering kun af backend/API til ændringer fra bidragydere
+# Hurtig backend/API-only-kompilering til bidragyderændringer
 npm run build:contributor
 
-# Release-build (ren genopbygning + HEAD-kontrolfil — påkrævet til udrulning)
-npm run build:release   # rm -rf .build dist && build + skriver dist/BUILD_SHA
+# Release-build (ren genopbygning + HEAD-sentinel — påkrævet til deployment)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Almindelig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragyder-buildet udfører kun validering ved kompilering: Det samler ikke den selvstændige
-distribution og bygger heller ikke valgfrie native pakkeartefakter. Brug det almindelige produktionsbuild, når
-du skal validere den distributionsklare pakke.
+Bidragyder-buildet udfører kun kompileringstest: det samler ikke den selvstændige
+distribution eller bygger valgfrie native-pakkeressourcer. Brug det almindelige produktionsbuild, når
+du har brug for at validere den pakke, der skal leveres.
 
-### Struktur for build-output
+### Layout for buildoutput
 
-| Mappe     | Indhold                                                                               | Versionsstyret |
-| --------- | ------------------------------------------------------------------------------------- | -------------- |
-| `src/`    | Applikationens kildekode (TypeScript / TSX)                                           | Ja             |
-| `.build/` | Mellemprodukter — output fra `next build` (ignoreret af Git, `distDir = .build/next`) | Nej            |
-| `dist/`   | Distributionsklar pakke — samlet af `assembleStandalone` (ignoreret af Git)           | Nej            |
+| Mappe     | Indhold                                                                     | Versionsstyret |
+| --------- | --------------------------------------------------------------------------- | -------------- |
+| `src/`    | Applikationskildekode (TypeScript / TSX)                                    | Ja             |
+| `.build/` | Mellemprodukter — `next build`-output (gitignored, `distDir = .build/next`) | Nej            |
+| `dist/`   | Leveringsklar pakke — samlet af `assembleStandalone` (gitignored)           | Nej            |
 
-Build-pipelinen består af én gennemgang:
+Build-pipelinen er et enkelt gennemløb:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output fra Next.js)
-  └─ assembleStandalone()                 (kopierer standalone + static + public + native aktiver)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rydder desuden begge mapper først og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrolfil for udrulningens integritet.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en sentinel til kontrol af deployment-integritet.
 
-`npm run build:contributor` bruger build-profilen kun til backend. Den erstatter midlertidigt
-dashboardets UI-filer med stubbe under buildet, beholder API-routehandlers og gendanner de oprindelige filer
+`npm run build:contributor` bruger backend-only-buildprofilen. Den opretter midlertidigt stubs for
+dashboardets UI-filer under buildet, beholder API-routehandlerne og gendanner de oprindelige filer
 efter buildet. Brug `npm run build` til ændringer, der påvirker dashboardets UI, eller til fuld
-release-validering. Bidragyderprofilen erstatter ikke release-buildet.
+release-validering; bidragyderprofilen er ikke en erstatning for release-buildet.
 
-> **Bemærkning om VPS-udrulning:** Den eksterne image-mappe `/usr/lib/node_modules/omniroute/app/`
-> er uændret. Udrulningsfunktionerne bruger rsync til at kopiere indholdet af `dist/` til den.
-> Kun stien til build-outputtet i repositoryet er ændret (`app/` → `dist/`).
+> **Bemærkning om VPS-deployment:** Den eksterne billedmappe `/usr/lib/node_modules/omniroute/app/`
+> er uændret. Deployment-færdighederne rsync'er indholdet af `dist/` til den.
+> Kun buildoutputstien i repositoryet er flyttet (`app/` → `dist/`).
 
 Standard-URL'er:
 
@@ -289,72 +294,72 @@ Se `open-sse/utils/stream.ts` og `open-sse/utils/streamHandler.ts` for anvendte 
 
 ---
 
-## Projektstruktur
+## Projektets struktur
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboardsider (23 sektioner)
-│   ├── api/                # API-ruter (51 mapper)
-│   └── login/              # Godkendelsessider (.tsx)
-├── domain/                 # Politikmotor (policyEngine, comboResolver, costRules osv.)
-├── lib/                    # Central forretningslogik (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3-protokolserver
-│   ├── acp/                # Agent Communication Protocol-register
-│   ├── compliance/         # Politikmotor til overholdelse
-│   ├── db/                 # SQLite-domænemoduler + 130 migreringer
-│   ├── memory/             # Vedvarende samtalehukommelse
-│   ├── oauth/              # OAuth-udbydere, -tjenester og -hjælpeværktøjer
-│   ├── skills/             # Udvidelig færdighedsramme
-│   ├── usage/              # Sporing af forbrug og beregning af omkostninger
-│   └── localDb.ts          # Kun reeksportlag — tilføj aldrig logik her
-├── middleware/              # Middleware til anmodninger (promptInjectionGuard)
-├── mitm/                   # MITM-proxy (certifikat, DNS, destinationsrouting)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React-komponenter (.tsx)
-│   ├── constants/          # Udbyderdefinitioner (329), MCP-anvendelsesområder, 20 routingstrategier
-│   ├── utils/              # Kredsløbsafbryder, oprydningsfunktion, godkendelseshjælpere
-│   └── validation/         # Zod v4-skemaer
-└── sse/                    # SSE-proxypipeline
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse-arbejdsområde
-├── executors/              # 150 eksekveringsmoduler (eksekveringsklasser + udbyderspecifikke hjælpere)
-├── handlers/               # 11 anmodningshåndteringsfunktioner (chat, svar, indlejringer, billeder osv.)
-├── mcp-server/             # MCP-server (110 unikke værktøjer, 3 transporter, 33 anvendelsesområder)
-├── services/               # 178 tjenester på øverste niveau (combo, autoCombo, rateLimitManager osv.)
-├── translator/             # Formatoversættere (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API-transformer
-└── utils/                  # 22 hjælpemoduler (streaming, TLS, proxy, logning)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron-desktopapp (på tværs af platforme)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js-testkørsel (1.574 testfiler)
-├── integration/            # Integrationstest
-├── e2e/                    # Playwright-test
-├── security/               # Sikkerhedstest
-├── translator/             # Oversætterspecifikke test
-└── load/                   # Belastningstest
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Arkitekturbeslutningsoptegnelser
-├── architecture/            # Systemarkitektur og robusthed
-├── comparison/              # OmniRoute sammenlignet med alternativer
-├── compression/             # Komprimeringsvejledninger og -regler
-├── dev/                     # Udviklingsvejledninger
-├── diagrams/                # Arkitekturdiagrammer
-├── frameworks/              # MCP, A2A, OpenCode, hukommelse, færdigheder
-├── guides/                  # Brugervejledning, Docker, opsætning, fejlfinding
-├── i18n/                    # Internationaliserede README-oversættelser
-├── marketing/               # Markedsføringsmaterialer
-├── ops/                     # Udrulning, proxy, dækning, udgivelser
-├── providers/               # Udbyderspecifik dokumentation
-├── reference/               # API-reference, miljøvariabler, CLI-værktøjer, gratis niveauer
-├── releases/                # Udgivelsesnoter
-├── routing/                 # Automatisk kombinationsmotor, genafspilning af ræsonnement
-├── screenshots/             # Skærmbilleder af dashboard
-├── security/                # Sikkerhedsforanstaltninger, overholdelse, diskretion, tokens
-└── specs/                   # Designspecifikationer
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -395,22 +400,22 @@ Skriv enhedstests i `tests/unit/`, som som minimum dækker:
 
 ---
 
-## Tjekliste for pull request
+## Træk anmodningstjekliste
 
-- [ ] Tests består (`npm test`)
-- [ ] Linting består (`npm run lint`)
-- [ ] Build lykkes (`npm run build`)
-- [ ] TypeScript-typer er tilføjet for nye offentlige funktioner og interfaces
-- [ ] Ingen hardkodede hemmeligheder eller fallback-værdier
-- [ ] Offentlige upstream-legitimationsoplysninger indlejres via `resolvePublicCred()` (se [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), aldrig som literals
-- [ ] Fejlsvar sendes gennem `buildErrorBody()` / `sanitizeErrorMessage()` — ingen rå stack traces i svartekster (se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Tester bestået (`npm test`)
+- [ ] Linting-pas (`npm run lint`)
+- [ ] Byg lykkes (`npm run build`)
+- [ ] TypeScript typer tilføjet til nye offentlige funktioner og grænseflader
+- [ ] Ingen hårdkodede hemmeligheder eller reserveværdier
+- [ ] Offentlige upstream-legitimationsoplysninger indlejret via `resolvePublicCred()` (se [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), aldrig som bogstavelige
+- [ ] Fejlsvar rute gennem `buildErrorBody()` / `sanitizeErrorMessage()` — ingen rå stak spor i svar bodies (se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
 - [ ] Shell-kommandoer (`exec` / `spawn`) videregiver runtime-værdier via `env`, ikke via strenginterpolation
-- [ ] Alle input valideres med Zod-skemaer
-- [ ] Changelog-**fragment** tilføjet under `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` for brugervendte ændringer (se [`changelog.d/README.md`](./changelog.d/README.md)) — rediger **ikke** `CHANGELOG.md` direkte; fragmenter samles ved udgivelsen og skaber aldrig konflikter mellem pull requests
+- [ ] Alle input valideret med Zod skemaer
+- [ ] Ændringslog** fragment** tilføjet under `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` for brugervendte ændringer (se [`changelog.d/README.md`](./changelog.d/README.md) ) — do** ikke** rediger `CHANGELOG.md` direkte; fragmenter aggregeres ved udgivelsestidspunktet og er aldrig i konflikt mellem PRs
 - [ ] Dokumentation opdateret (hvis relevant)
-- [ ] Ingen nye CodeQL- eller Secret-Scanning-advarsler oprettet, eller hver enkelt er afvist med en teknisk begrundelse, der henviser til det relevante dokument under `docs/security/`
-- [ ] Ruter, der starter underprocesser (`/api/mcp/`, `/api/cli-tools/runtime/`), er klassificeret som `isLocalOnlyPath()` i `src/server/authz/routeGuard.ts` — se [ufravigelig regel nr. 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Ingen AI-/bot-`Co-authored-by`-trailere i commit-meddelelser (ufravigelig regel nr. 16) — menneskelige samarbejdspartnere, hvis arbejde genbruges, krediteres med standardtrailere i formatet `Co-authored-by: Name <email>`
+- [ ] Ingen nye CodeQL / hemmelige scanningsadvarsler åbnet, eller hver enkelt afvist med teknisk begrundelse, der henviser til det relevante `docs/security/` dokument
+- [ ] Ruter, der afføder underordnede processer (`/api/mcp/`, `/api/cli-tools/runtime/`) klassificeret som `isLocalOnlyPath()` i `src/server/authz/routeGuard.ts` — se [hård regel #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Ingen AI/bot `Co-authored-by` trailere i commit-beskeder (Hard Rule #16) — menneskelige samarbejdspartnere, hvis arbejde genbruges, krediteres med standard `Co-authored-by: Name <email>` -trailere
 
 ---
 

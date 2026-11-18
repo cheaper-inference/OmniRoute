@@ -4,60 +4,47 @@
 
 ---
 
-> Aktivér efter eget valg, deaktiveret som standard (når både `modelVisibilityAllowlist` og `modelVisibilityDenylist` er tomme, forbliver
-> `/v1/models`-kataloget OG hver `auto/*`-kandidatpulje byte-identiske). En søskende til
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) for operatører, der ønsker en kurateret
-> modelliste af årsager, som ikke har noget med omkostninger at gøre.
+> Opt-in, slået fra som standard (`modelVisibilityAllowlist`/`modelVisibilityDenylist` begge tomme efterlader `/v1/models` kataloget AND hver `auto/*` kandidatpulje-byte-identisk). En søskende til `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) for operatører, der ønsker en kureret modelliste af årsager, der ikke har noget med omkostninger at gøre.
 
-## Hvorfor dette findes
+## Hvorfor dette eksisterer
 
-`hidePaidModels` besvarer "er denne model gratis?", og `hideAutoCombos` besvarer "skal virtuelle
-`auto/*`-id'er overhovedet annonceres?" — ingen af dem giver en operatør mulighed for at kuratere en vilkårlig delmængde af
-modeller (f.eks. at vise præcis de modeller, som en given Claude Code-/OpenCode-klient skal kunne se,
-uafhængigt af prissætning). #11481 tilføjer dette som to uafhængige indstillinger med tilvalg og streng-arrays.
+`hidePaidModels` svarer "er denne model gratis?" og `hideAutoCombos` svarer "skal `auto/*` virtuelle id'er overhovedet annonceres?" — lader heller ikke en operatør kurere en vilkårlig delmængde af modeller (f.eks. præsentere præcis de modeller en given Claude Code / OpenCode klient skal se, uafhængigt af prissætning). #11481 tilføjer det som to uafhængige, opt-in string-array-indstillinger.
 
 ## Indstillinger
 
-| Nøgle                      | Type       | Standard | Betydning                                                                    |
-| -------------------------- | ---------- | -------- | ---------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`     | Poster, der matcher en kandidat, skjuler den fra kataloget/kandidatpuljen.   |
-| `modelVisibilityAllowlist` | `string[]` | `[]`     | Når den ikke er tom, forbliver KUN poster, der matcher en kandidat, synlige. |
+| Nøgle                      | Type       | Misligholdelse | Mening                                                                             |
+| -------------------------- | ---------- | -------------- | ---------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`           | Indlæg, der matcher en kandidat, skjuler den fra catalog/candidate puljen.         |
+| `modelVisibilityAllowlist` | `string[]` | `[]`           | Når de ikke er tomme, forbliver ONLY poster, der matcher en kandidat, eksponerede. |
 
-Begge accepterer op til 500 poster på op til 200 tegn hver (Zod-valideret i
-`src/shared/validation/settingsSchemas.ts`). En post er enten:
+Begge accepterer op til 500 poster på op til 200 tegn hver (Zod-valideret i `src/shared/validation/settingsSchemas.ts`). En post er enten:
 
-- et eksakt katalog-id — `"gpt-4o"` (model-id uden præfiks) eller `"openai/gpt-4o"` (med udbyderpræfiks), eller
-- et glob-mønster, der bruger `*`/`?` — f.eks. `"openai/gpt-4*"` eller `"anthropic/*"` — som fortolkes via den
-  samme fælles `globToRegex()`-matcher (`src/shared/utils/globPattern.ts`), der allerede bruges af
-  `ModelRoutingSection`s kombinationstilknytninger pr. model og `freeModels.ts::matchesOnlyPaidModels`.
+- et nøjagtigt katalog-id — `"gpt-4o"` (ulæst model-id) eller `"openai/gpt-4o"` (udbyder-præfiks), eller
+- et globmønster ved hjælp af `*`/`?` — f.eks. `"openai/gpt-4*"` eller `"anthropic/*"` — løst via den samme delte `globToRegex()` matcher (`src/shared/utils/globPattern.ts`), som allerede er brugt af `ModelRoutingSection`'s per-model combo mappings og `freeModels.ts::matchesOnlyPaidModels`.
 
-Prioritet: Afvisningslisten kontrolleres først (en afvist post er altid skjult, selv hvis den også
-matcher tilladelseslisten); når tilladelseslisten ikke er tom, er det kun poster, den matcher, der bevares.
+Forrang: afvisningslisten kontrolleres først (en afvist adgang er altid skjult, selvom den også matcher tilladelseslisten); når tilladelseslisten ikke er tom, overlever kun de poster, den matcher.
 
-## To kontrolpunkter, ikke ét
+## To chokepoints, ikke et
 
-Læren fra #6512 (et katalogfilter, der kun brugte `hidePaidModels`, tillod stadig `auto/*` at dirigere til en
-betalingsmodel, da kombinationens kandidatpulje blev opbygget uafhængigt) gælder på samme måde her.
-Matchprædikatet `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kaldes fra BEGGE:
+Lektionen fra #6512 (et `hidePaidModels` -only -katalogfilter lod stadig `auto/*` lede til en betalt model, da kombinationskandidatpuljen blev bygget uafhængigt) gælder identisk her. Det matchende prædikat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kaldes fra BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — selve `/v1/models`-listen ved de samme 5 kontrolpunkter pr. kilde,
-  som `shouldHidePaid()` allerede styrer (statiske `PROVIDER_MODELS`, synkroniserede udbyderrækker,
-  brugerdefinerede rækker, alias-understøttede rækker og administrerede reserverækker).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kaldes
-  fra `virtualFactory.ts::buildPreparedPool` umiddelbart efter det tilsvarende
-  `filterPaidOnlyCandidates()`-kald, så en afvist model heller aldrig kan vælges ind i en
-  `auto/*`-kandidatpulje.
+- `src/app/api/v1/models/catalog.ts` — selve `/v1/models` listen, ved de samme 5 pr. kilde chokepoints `shouldHidePaid()` allerede porter (statisk `PROVIDER_MODELS`, synkroniserede udbyderrækker, brugerdefinerede rækker, alias-understøttede rækker, administrerede reserverækker).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kaldet fra `virtualFactory.ts::buildPreparedPool`, umiddelbart efter det tilsvarende `filterPaidOnlyCandidates()` kald, så en afvist model kan heller aldrig vælges til en `auto/*` kandidatpulje.
 
-## Hvad der IKKE filtreres
+## Hvad er NOT filtreret
 
-Afspejler `hideAutoCombos`s eksisterende adfærd: Et model-id, der sendes **eksplicit** (ikke via `auto/*`
-og ikke fundet gennem kataloglisten), blokeres aldrig ved afsendelse — kun
-annoncering/medlemskab af kandidatpuljen filtreres. Dette er uafhængigt af `hidePaidModels`;
-en operatør kan ønske et kurateret sæt af årsager, der ikke har noget med omkostninger at gøre, så begge
-indstillinger kombineres som uafhængige OG-filtre på samme måde som den eksisterende kombination af flere flag i
-`catalog.ts`.
+Afspejler `hideAutoCombos` eksisterende adfærd: et model-id sendt** eksplicit** (ikke via `auto/*` og ikke opdaget gennem kataloglisten) er aldrig blokeret ved afsendelse — kun advertisement/candidate-pool medlemskab filtreres. Dette er uafhængigt af `hidePaidModels`; en operatør vil måske have et kureret sæt af årsager, der ikke har noget med omkostninger at gøre, så begge indstillinger er sammensat som uafhængige OG-ed-filtre, det samme som den eksisterende multi-flag-sammensætning i `catalog.ts`.
 
-Eksport af indstillinger (`GET /api/settings/export-json`) inkluderer begge arrays ordret ligesom ethvert andet
-indstillingsfelt — i modsætning til `hidePaidModels`s eksportfilter for kombinationstrin er der ingen risiko for
-rehydrering her: Et afvist id, der er indlejret i et eksporteret kombinationstrin, er operatørens eget eksplicitte routingvalg
-og ikke noget, som eksportgrænsen behøver at fjerne.
+Indstillingseksport (`GET /api/settings/export-json`) inkluderer begge arrays ordret, ligesom ethvert andet indstillingsfelt — i modsætning til `hidePaidModels`'s combo-step eksportfilter, er der ingen rehydreringsrisiko her: et afvist id indlejret i et eksporteret combo-trin er operatørens eget eksplicitte routingvalg, ikke noget eksportgrænsen skal fjerne.
+
+## Fortegnelse med kun kombinationer (`exposeCombosOnly`)
+
+En separat boolean, også opt-in og `false` som standard, for implementeringer, hvor kombinationer er den offentlige modeloverflade, og udbydere kun er backends. Når det er `true`, beholder den offentlige liste (`GET /v1/models`, `GET /v1` og de andre `/v1` -opdagelsesruter bygget på `getUnifiedModelsResponse()`) kun rækker med `owned_by: "combo"`: brugerkombinationer plus de indbyggede `auto/*` kombinationer (medmindre `hideAutoCombos` skjuler dem). Den bruger den samme rækketest som per-key `catalogScope: "combos"`, og en nøgles egne allow/deny/scope filtre gælder stadig ovenpå.
+
+Slå det ind** Indstillinger → Routing → Modeller API liste** , eller med `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Ligesom listerne ovenfor ændrer det kun annoncen:
+
+- et eksplicit `provider/model` -id sendes stadig, og `GET /v1/models/{id}` løser det stadig;
+- dashboardkataloget (`GET /api/models/catalog`, brugt af modelvælgerne) er ikke indsnævret;
+- det spejles ikke i `auto/*` kandidatpuljerne, så `auto/*` kombinationer beholder deres fulde pulje.

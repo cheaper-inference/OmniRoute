@@ -37,6 +37,7 @@ const ENV_OVERRIDES: Record<string, string | undefined> = {
   CLI_CONFIG_HOME: undefined,
   XDG_CONFIG_HOME: undefined,
   CODEX_HOME: undefined,
+  PI_CODING_AGENT_DIR: undefined,
   HERMES_HOME: undefined,
   APPDATA: undefined,
   INITIAL_PASSWORD: undefined,
@@ -51,6 +52,7 @@ os.homedir = () => TEST_HOME;
 const core = await import("../../src/lib/db/core.ts");
 const helper = await import("../../src/app/api/cli-tools/_lib/readExistingConfig.ts");
 const { getCliPrimaryConfigPath } = await import("../../src/shared/services/cliRuntime.ts");
+const { getPiModelsPath } = await import("../../src/shared/services/piConfig.ts");
 const codexRoute = await import("../../src/app/api/cli-tools/codex-settings/route.ts");
 const kiloRoute = await import("../../src/app/api/cli-tools/kilo-settings/route.ts");
 const clineRoute = await import("../../src/app/api/cli-tools/cline-settings/route.ts");
@@ -351,8 +353,17 @@ const singleFileCases: Array<{
     name: "pi",
     route: piRoute,
     urlPath: "/api/cli-tools/pi-settings",
-    resolve: () => getCliPrimaryConfigPath("pi") ?? path.join(TEST_HOME, ".pi", "config.json"),
+    // Pi now loads custom providers from ~/.pi/agent/models.json (not the legacy
+    // flat ~/.pi/config.json), so that is the file whose clobber must be refused.
+    resolve: () => getPiModelsPath(),
     bad: '{"theme": "dark"',
+  },
+  {
+    name: "pi (valid JSON without a providers object)",
+    route: piRoute,
+    urlPath: "/api/cli-tools/pi-settings",
+    resolve: () => getPiModelsPath(),
+    bad: '{"theme": "dark"}',
   },
   {
     name: "crush (malformed)",

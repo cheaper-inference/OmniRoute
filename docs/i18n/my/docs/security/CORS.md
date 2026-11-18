@@ -51,11 +51,11 @@ OWASP ၏ ယေဘုယျသတိပေးချက် ("wildcard CORS = မ
 
 `CORS_ALLOW_ALL=true` ဖြစ်နေသည့်တိုင် မျက်နှာပြင်တစ်ခုချင်းစီအတွက် အဓိပ္ပာယ်မှာ အောက်ပါအတိုင်းဖြစ်သည်။
 
-| မျက်နှာပြင်                                             | Auth ယန္တရား                | Wildcard CORS ၏ အကျိုးသက်ရောက်မှု                                                                                                                                                                                                                                                       |
-| ------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`                         | Cookie session              | Origin ကို ပြန်လည်ဖော်ပြသော်လည်း **`Allow-Credentials` မပါသောကြောင့်** browser သည် credentialed ဖတ်ရှုမှုကို **ပိတ်ဆို့ပါသည်**။ အန္တရာယ်ပြုလိုသော cross-origin site တစ်ခုသည် သင်၏ အတည်ပြုထားသော dashboard response များကို **မဖတ်ရှုနိုင်သကဲ့သို့** session cookie ကိုလည်း မဖော်ထုတ်ပါ။ |
-| Client API `/v1/*`, `/v1beta/*`                         | Bearer / `x-api-key` header | **ဒီဇိုင်းအရ** ခွင့်ပြုချက် ကျယ်ပြန့်ပြီးသားဖြစ်သည် (`relaxForTokenAuth`)။ Browser များသည် `Authorization`/`x-api-key` ကို မည်သည့်အခါမျှ အလိုအလျောက် ပူးတွဲမပေးသောကြောင့် တိုက်ခိုက်သူ၏ စာမျက်နှာသည် သင်၏ key ကို မပေးနိုင်ပါ။ `CORS_ALLOW_ALL` သည် ဤခွင့်ပြုချက်ကို ပိုမိုမချဲ့ထွင်ပါ။ |
-| အများပြည်သူဖတ်ရှုနိုင်သည့် read-only (`/api/health`, …) | မရှိပါ                      | အရေးမကြီးသော အချက်အလက်ဖြစ်သောကြောင့် wildcard သည် အန္တရာယ်မရှိပါ။                                                                                                                                                                                                                       |
+| မျက်နှာပြင်                                             | Auth ယန္တရား                | Wildcard CORS ၏ အကျိုးသက်ရောက်မှု                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`                         | Cookie session              | Origin ကို ပြန်လည်ဖော်ပြသော်လည်း **`Allow-Credentials` မပါသောကြောင့်** browser သည် credentialed ဖတ်ရှုမှုကို **ပိတ်ဆို့ပါသည်**။ အန္တရာယ်ပြုလိုသော cross-origin site တစ်ခုသည် သင်၏ အတည်ပြုထားသော dashboard response များကို **မဖတ်ရှုနိုင်သကဲ့သို့** session cookie ကိုလည်း မဖော်ထုတ်ပါ။                                                                                                                                                           |
+| Client API `/v1/*`, `/v1beta/*`                         | Bearer / `x-api-key` header | **ဒီဇိုင်းအရ** ခွင့်ပြုချက် ကျယ်ပြန့်ပြီးသားဖြစ်သည် (`relaxForTokenAuth`)။ Browser များသည် `Authorization`/`x-api-key` ကို မည်သည့်အခါမျှ အလိုအလျောက် ပူးတွဲမပေးသောကြောင့် တိုက်ခိုက်သူ၏ စာမျက်နှာသည် သင်၏ key ကို မပေးနိုင်ပါ။ တင်ပြထားသော key ကို စစ်ဆေးအတည်ပြုပြီးမှသာ origin ကို ပြန်လည်ဖော်ပြသည်။ အမည်မသိ response များ (`REQUIRE_API_KEY=false`) သည် allowlist အတိုင်း ဆက်ရှိနေသည်။ `CORS_ALLOW_ALL` သည် ဤခွင့်ပြုချက်ကို ပိုမိုမချဲ့ထွင်ပါ။ |
+| အများပြည်သူဖတ်ရှုနိုင်သည့် read-only (`/api/health`, …) | မရှိပါ                      | အရေးမကြီးသော အချက်အလက်ဖြစ်သောကြောင့် wildcard သည် အန္တရာယ်မရှိပါ။                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ထို့ကြောင့် `CORS_ALLOW_ALL=true` ၏ **ကျန်ရှိနေသော** ဖော်ထုတ်မှုသည် အောက်ပါတို့တွင်သာ ကန့်သတ်ထားပါသည်။ (a)
 အတည်ပြုရန် မလိုအပ်သည့် ဒေတာကို credential မပါဘဲ cross-origin မှ **ဖတ်ရှုခြင်း**၊ နှင့် (b)
@@ -113,19 +113,35 @@ Origin များကို စာလုံးအကြီးအသေးမခ
 အတူတူပင်ဖြစ်သည်။ အလားတူ CSV ကို restart ပြုလုပ်ရန်မလိုဘဲ runtime တွင်
 **Dashboard → Security → CORS Allowed Origins** မှတစ်ဆင့် သတ်မှတ်နိုင်သည်။
 
-## API key များနှင့် cookie session များ
+## API သော့များနှင့် ကွတ်ကီးဆက်ရှင်များ
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface):** browser များသည်
-  ၎င်းတို့ကို မည်သည့်အခါမျှ အလိုအလျောက်မထည့်သွင်းပါ။ ဤနေရာတွင် CORS သည်
-  အဓိပ္ပာယ်ရှိသော အတားအဆီးတစ်ခုမဟုတ်ပါ — API key ကသာ အတားအဆီးဖြစ်သည် —
-  ထို့ကြောင့် browser နှင့် Electron client များက ၎င်းတို့ဖတ်ရှုခွင့်ရှိပြီးသား
-  response များကို ဖတ်နိုင်စေရန် ထို surface ကို ရည်ရွယ်ချက်ရှိရှိ permissive
-  ပြုလုပ်ထားခြင်းဖြစ်သည်။
-- **Cookie session (dashboard):** fail-closed default **နှင့်**
-  မျှဝေထားသော path တွင် `Access-Control-Allow-Credentials` မရှိခြင်းတို့ဖြင့်
-  ကာကွယ်ထားသည်။ Management/dashboard origin များကို permissive config
-  တစ်ခုခုထဲ မထည့်ပါနှင့်။ ၎င်းတို့သည် fail-closed အတိုင်း တိတိကျကျ
-  ဆက်ရှိနေရမည်။
+- **Bearer / `x-api-key` ( `/v1/*` စုံစုံမျက်နှာပြင်):** ဘရောက်ဆာများသည် ၎င်းတို့ကို မည်သည့်အခါမျှ အလိုအလျောက် မတွဲပါ။ CORS ဤနေရာတွင် အဓိပ္ပါယ်ရှိသော အတားအဆီးတစ်ခုမဟုတ်ပါ — အဆိုပါ API သော့သည် အတားအဆီး — ဖြစ်သောကြောင့် ၎င်းမျက်နှာပြင်သည် ရည်ရွယ်ချက်ရှိရှိ ခွင့်ပြုထားသောကြောင့် browser နှင့် Electron သုံးစွဲသူများသည် ၎င်းတို့ရပိုင်ခွင့်ရှိပြီးသား တုံ့ပြန်ချက်များကို ဖတ်နိုင်သည်။ ဖြေလျှော့ထားသော ပဲ့တင်သံသည် ခေါင်းစီး၏ တည်ရှိမှုမျှသာမဟုတ်ဘဲ အတည်ပြုထားသော သော့ကို လိုက်နာသည်- `REQUIRE_API_KEY=false` အမည်ဝှက်ဖြင့် တောင်းဆိုချက်ကို ဆောင်ရွက်ပေးသောအခါ၊ ၎င်း၏ အောင်မြင်သော တုံ့ပြန်မှုသည် ပျက်ကွက်သော ခွင့်ပြုစာရင်းကို သိမ်းထားသည်။ Auth rejections (401) သည် ဆက်လက်ဖတ်ရှုနိုင်စေရန်အတွက် clients များသည် ရုပ်သိမ်းထားသော သို့မဟုတ် ရိုက်ထားသောသော့ (#5242): ပိုက်လိုင်း၏ကိုယ်ပိုင် 401 သည် ပဲ့တင်သံကို ထိန်းသိမ်းထားပြီး၊ ပိုက်လိုင်းသည် အမည်မသိအဖြစ် လုပ်ဆောင်ပြီးနောက် သော့ကို ငြင်းပယ်သည့် လမ်းကြောင်း (`/v1/models` နှင့် `/v1beta/models` ဖြင့် စီမံခန့်ခွဲမှု auth configured, the owner- `/v1/batches` `/v1/files`, `/v1/media` auto-combo ကိုယ်စားလှယ်လောင်းလမ်းကြောင်းများ) `/v1/session-leases` `credentialRejectionHeaders()` မှတဆင့် 401 သို့ ပဲ့တင်သံကို ပေါင်းထည့်သည်။ အထောက်အထားဆိုင်ရာ ခေါင်းစီး (`Authorization`၊ `x-api-key`၊ `x-goog-api-key` သို့မဟုတ် `auth_token` cookie ) ပါရှိသည့် တောင်းဆိုချက်တွင် ပဲ့တင်သံကို သော့ခတ်ထားပြီး ၎င်းတို့ထဲမှ မည်သည့်လမ်းကြောင်းတွင် မဟုတ်ဘဲ `Access-Control-Allow-Credentials` နှင့် တွဲချိတ်မည် မဟုတ်ပါ။ body သည် fixed error envelope ဖြစ်သည်။ `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) မှ စောင့်ကြပ်ထားသော `/api/v1/` အောက်တွင်ရှိသော စီမံခန့်ခွဲမှုလမ်းကြောင်း 401/403 ပဲ့တင်သံကို မထည့်ပါနှင့် `REQUIRE_API_KEY=false`
+- **ကွတ်ကီးစက်ရှင် (ဒက်ရှ်ဘုတ်)-** fail-closed default ဖြင့် ကာကွယ်ထားသည်။** နှင့်** မျှဝေထားသောလမ်းကြောင်းပေါ်တွင် `Access-Control-Allow-Credentials` မရှိတော့ပါ။ ခွင့်ပြုထားသော config တစ်ခုခုမှ management/dashboard ဇစ်မြစ်များကို သိမ်းဆည်းထားပါ။ အတိအကျ ပြတ်ပြတ်သားသားနေရမယ်။
+
+## WebSocket handshake များ (`/v1/responses`, `/v1/ws`)
+
+Browser များသည် WebSocket အပေါ် CORS ကို မကျင့်သုံးသောကြောင့် inference output ကို ပြန်ပေးသည့်
+WebSocket transport များသည် handshake ၏ `Origin` ကို ကိုယ်တိုင်စစ်ဆေးသည်
+(`src/server/origin/wsOrigin.ts`)။ ၎င်းတို့မှာ Responses WebSocket (`/v1/responses`) နှင့်
+OmniRoute ကို `npm start` / `npm run dev` ဖြင့် run သည့်အခါ `/v1/ws` နှင့် `/api/v1/ws`
+bridge တို့ဖြစ်ပြီး bridge သည် `/v1/chat/completions`၊ `/v1/messages` နှင့် `/v1/responses`
+ကို frame များအဖြစ် stream လုပ်ပေးသည်။ Bridge သည် ဆုံးဖြတ်ချက်ကို `/api/v1/ws?handshake=1`
+ထံ မေးမြန်းပြီး ထို route က စစ်ဆေးမှုကို မလုပ်ဆောင်ခဲ့ပါက connection upgrade ကို ငြင်းပယ်သည်။
+Handshake တစ်ခုကို အောက်ပါအခြေအနေများတွင် လက်ခံသည်-
+
+- ၎င်းတွင် `Origin` header မပါခြင်း (Codex CLI၊ SDK များနှင့် browser မဟုတ်သော အခြား client များ)၊
+- `Origin` ကို အထက်ပါ allowlist က လက်ခံခြင်း (`CORS_ALLOWED_ORIGINS`၊ `corsOrigins` setting၊
+  `CORS_ORIGIN`၊ `CORS_ALLOW_ALL`)၊
+- `Origin` သည် OmniRoute ၏ ကိုယ်ပိုင် public origin များထဲမှ တစ်ခုဖြစ်ခြင်း (စီစဉ်ထားသော public
+  base URL၊ ယုံကြည်ရသော proxy က forward လုပ်ပေးသည့် origin သို့မဟုတ် IP literal သို့မဟုတ်
+  `localhost` အဖြစ် ပေးထားသော တိုက်ရိုက် loopback/LAN host — dashboard mutation စစ်ဆေးမှုက
+  အသုံးပြုသည့် candidate များနှင့် အတူတူပင်)၊ သို့မဟုတ်
+- HTTP `/v1/*` surface ပေါ်ကဲ့သို့ မှန်ကန်သော API key ပါရှိခြင်း။
+
+အခြားမည်သည့်အရာမဆို `403 ws_origin_forbidden` ကို ရရှိသည်။ Dashboard session cookie သည်
+နိုင်ငံခြား `Origin` ကို ကင်းလွတ်ခွင့်မပေးပါ၊ အကြောင်းမှာ browser က ၎င်းကို မည်သည့်စာမျက်နှာ၏
+socket တွင်မဆို ပူးတွဲပေးသောကြောင့်ဖြစ်သည်။ အခြား port ပေါ်ရှိ `localhost` ကို same-origin
+အဖြစ် မသတ်မှတ်ပါ။ ထိုကဲ့သို့သော dev origin များကို `CORS_ALLOWED_ORIGINS` ထဲသို့ ထည့်ပါ။
 
 ## ဥပမာ: OmniRoute ၏ ရှေ့တွင် reverse proxy ထားခြင်း
 
@@ -161,6 +177,7 @@ Security tab) ထဲတွင် သတ်မှတ်ပါ။
 | Dashboard သတိပေး banner                                  | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins field                               | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Route တစ်ခုချင်းစီအလိုက် Cloud-Agent CORS (ခြွင်းချက်)   | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake `Origin` စစ်ဆေးမှု                   | `src/server/origin/wsOrigin.ts`                                      |
 
 ## ထပ်မံကြည့်ရှုရန်
 

@@ -4,12 +4,12 @@
 
 ---
 
-Kontinuirani, inkrementalni izvoz zapisa poziva OmniRoute u vanjsko spremište analitičkih podataka.
+Kontinuirani, inkrementalni izvoz zapisnika poziva OmniRoute u vanjsko analitičko spremište.
 
-Kartica nadzorne ploče Logs čuva povijest zahtjeva u SQLiteu (`call_logs`), čija je veličina ograničena
-rotacijom i pravilima zadržavanja. Izvoz zapisa šalje isti skup zapisa prema rasporedu kako bi se mogli
-čuvati dulje od lokalne baze podataka i povezivati s drugim podacima. BigQuery je prvo odredište;
-cjevovod je registar, pa se dodatna odredišta mogu jednostavno dodavati.
+Kartica Zapisnici na nadzornoj ploči čuva povijest zahtjeva u SQLiteu (`call_logs`), ograničenu
+rotacijom i pravilima zadržavanja. Izvoz zapisnika prema rasporedu šalje isti skup zapisa kako bi se mogao čuvati dulje od
+lokalne baze podataka i povezivati s drugim podacima. BigQuery je prvo odredište;
+cjevovod se temelji na registru, pa se nova odredišta mogu dodavati.
 
 ---
 
@@ -20,163 +20,148 @@ poslužitelj (dešifriranje + provjera konfiguracije, usklađivanje kursora)
   → pokretanje IPC-a → izolirani OS proces exportChild
     → storage.sqlite samo za čitanje → zajednički upit/mapiranje zapisnika poziva
       → asinkrono učitavanje artefakata → odredišni prepare()/send()
-        → paketni IPC → poslužitelj pohranjuje kursor → IPC potvrda
-          → sljedeći paket; IPC poruka done → poslužitelj bilježi uspjeh
+        → IPC za paket → poslužitelj trajno sprema kursor → IPC potvrda
+          → sljedeći paket; IPC završetka → poslužitelj bilježi uspjeh
 ```
 
-- **Raspored** — jedan cron zadatak `JobRegistry`, `log_export`, sa zadanom vrijednošću
-  `0 * * * *` (svakog sata, UTC). Registriran je u `src/lib/initCloudSync.ts`; može se
-  nadjačati varijablom `OMNIROUTE_LOG_EXPORT_CRON`. Svako pokretanje redom obrađuje sva
-  **omogućena** odredišta.
-- **Kursor** — implicitni SQLiteov `call_logs.rowid`, pohranjen za svako odredište u
+- **Raspored** — jedan cron zadatak u registru `JobRegistry`, `log_export`, sa zadanom vrijednošću `0 * * * *` (svakog sata,
+  UTC). Registriran je u `src/lib/initCloudSync.ts`; može se nadjačati varijablom `OMNIROUTE_LOG_EXPORT_CRON`.
+  Pri svakom pokretanju redom obrađuje sve zapise za svako **omogućeno** odredište.
+- **Kursor** — implicitni SQLiteov `call_logs.rowid`, trajno spremljen za svako odredište u
   `log_export_destinations.cursor_row_id`. `timestamp` namjerno nije kursor: pozivatelji
-  mogu navesti vlastitu vrijednost, pa spor zahtjev može biti zapisan nakon bržeg zahtjeva
-  koji je započeo kasnije, a kursor temeljen na vremenskoj oznaci preskočio bi ga.
-- **Grupiranje u pakete** — `batch_size` redaka po zahtjevu (zadano 500),
-  `max_rows_per_run` redaka po izvođenju (zadano 10000), kako bi se velik zaostatak obradio
-  tijekom više pokretanja umjesto da blokira jedno.
-- **Isporuka** — kursor se pomiče tek nakon što se `send()` razriješi. Neuspjeli paket
-  ostavlja kursor na prethodnom mjestu, pa se isti retci ponovno pokušavaju poslati pri
-  sljedećem izvođenju. Jamstvo je isporuka barem jednom uz uklanjanje duplikata na strani
-  odredišta, a ne stvarna isporuka točno jednom: BigQuery svakom retku dodjeljuje ključ prema
-  ID-u zapisnika poziva, što poštuje prema načelu najboljeg mogućeg ishoda unutar vlastitog
-  razdoblja uklanjanja duplikata.
-- **Zaštita od preklapanja** — cron pokretanje i `POST .../run` mogu se aktivirati
-  istodobno. Odredište koje se već obrađuje preskače se umjesto da se obrađuje dvaput
-  (`skipped: true` u rezultatu izvođenja), pa istodobno izvođenje ne može ponovno poslati
-  paket ni vratiti kursor unatrag.
-- **Oporavak nakon čišćenja** — ako `cursor_row_id` završi iznad `MAX(rowid)` (cijela je
-  tablica očišćena, a rowid vrijednosti ponovno su krenule od početka), izvršitelj vraća
-  kursor na 0 umjesto da trajno prestane pronalaziti retke.
+  mogu navesti vlastitu vrijednost, pa se spor zahtjev može zapisati nakon bržeg koji je započeo
+  kasnije, a kursor temeljen na vremenskoj oznaci preskočio bi ga.
+- **Paketna obrada** — `batch_size` redaka po zahtjevu (zadano 500), `max_rows_per_run` redaka po pokretanju
+  (zadano 10000), tako da se velik zaostatak obradi tijekom više pokretanja umjesto da blokira jedno.
+- **Isporuka** — kursor se pomiče tek nakon što se `send()` uspješno dovrši. Neuspjeli paket ostavlja
+  kursor na istom mjestu, pa se slanje istih redaka ponovno pokušava pri sljedećem pokretanju. Jamči se
+  isporuka najmanje jednom uz uklanjanje duplikata na odredištu, a ne istinska isporuka točno jednom: BigQuery svakom
+  retku dodjeljuje ključ prema ID-u zapisa poziva, koji uvažava prema načelu najboljeg napora unutar vlastitog vremenskog prozora za uklanjanje duplikata.
+- **Zaštita od preklapanja** — cron pokretanje i `POST .../run` mogu se aktivirati istodobno. Odredište
+  čija je obrada već u tijeku preskače se umjesto da se obrađuje dvaput (`skipped: true` u rezultatu pokretanja),
+  pa istodobno pokretanje ne može ponovno poslati paket niti pomaknuti kursor unatrag.
+- **Oporavak nakon potpunog brisanja** — ako `cursor_row_id` postane veći od `MAX(rowid)` (cijela je tablica
+  obrisana i vrijednosti rowid ponovno počinju od početka), izvršitelj vraća kursor na 0 umjesto da trajno prestane prepoznavati nove zapise.
 
 ### Izolirani izvršitelj i ograničenja
 
-Svako izvođenje odredišta u Nodeu pokreće zaseban, kratkotrajan podređeni OS proces
-(`child_process` s IPC-om, a ne `worker_threads`). Čitanje tijela, parsiranje/serijalizacija
-JSON korisnog sadržaja, odredišni `prepare()` i mrežni I/O odredišta izvršavaju se u tom
-procesu, a ne u poslužiteljevoj petlji događaja. IPC-om se prenose samo konfiguracija i male
-poruke o napretku; izvezeni zapisi nikad se ne vraćaju poslužitelju. Cron zadatak i ruta
-Pokreni sada zadržavaju isti javni rezultat i zaštitu od preklapanja.
+Svako pokretanje izvoza za odredište u Nodeu pokreće zaseban, kratkotrajan podređeni proces OS-a (`child_process`
+s IPC-om, a ne `worker_threads`). Čitanje tijela, parsiranje/serijalizacija JSON sadržaja, odredišni
+`prepare()` i mrežne ulazno-izlazne operacije odredišta izvršavaju se ondje, a ne u petlji događaja poslužitelja.
+Preko IPC-a prenose se samo konfiguracija i male poruke o napretku; izvezeni zapisi nikad se ne vraćaju
+na poslužitelj. Cron zadatak i ruta Pokreni sada zadržavaju isti javni rezultat i zaštitu od preklapanja.
 
-Podređeni proces otvara poslužiteljev razriješeni `DATA_DIR/storage.sqlite` samo za čitanje
-pomoću `node:sqlite`, uz `busy_timeout=5000` i `query_only=ON`. Ne uvozi nijednu jedinstvenu
-instancu baze podataka i ne obavlja migracije, sigurnosna kopiranja ni SQLite ažuriranja.
-Evidentiranje nedostajućih/oštećenih artefakata (uključujući UPDATE oštećenog artefakta)
-ostaje samo u putanji prikaza pojedinosti nadzorne ploče. Obje putanje dijele čisti razrješivač
-pojedinosti; izvoz koristi asinkrona čitanja datotečnog sustava i isti redoslijed razrješavanja:
-artefakt → naslijeđeni ugrađeni sadržaj → naslijeđeni disk → ništa. Izvođenje snima najveći
-rowid umetanja kada podređeni proces otvori čitač; kasnija umetanja čekaju sljedeće izvođenje.
-To je granica umetanja, a ne dugotrajna SQLite transakcija: WAL zapisivači i kontrolne točke
-ostaju slobodni tijekom čekanja mreže. Ažuriranja/brisanja postojećih redaka nisu zamrznuta
-tom granicom.
+Podređeni proces otvara poslužiteljevu razriješenu putanju `DATA_DIR/storage.sqlite` samo za čitanje pomoću `node:sqlite`,
+uz `busy_timeout=5000` i `query_only=ON`. Ne uvozi jedinstvenu instancu baze podataka i ne provodi
+migracije, sigurnosno kopiranje ni ažuriranja SQLitea. Evidentiranje nedostajućih/oštećenih artefakata (uključujući
+UPDATE za oštećeni artefakt) ostaje isključivo u obradi detaljnog prikaza nadzorne ploče. Oba načina obrade dijele čisti
+razrješivač detalja; izvoz koristi asinkrona čitanja datotečnog sustava i isti redoslijed razrješavanja: artefakt → naslijeđeni
+ugrađeni podaci → naslijeđeni podaci na disku → ništa. Pokretanje bilježi najveći rowid umetanja
+kada podređeni proces otvori čitač; kasnija umetanja čekaju sljedeće pokretanje. To je granica
+umetanja, a ne dugotrajna SQLite transakcija: WAL zapisivači i kontrolne točke ostaju neometani tijekom
+čekanja na mrežu. Ta granica ne zamrzava ažuriranja/brisanja postojećih redaka.
 
-Nakon svakog prihvaćenog paketa podređeni proces čeka potvrdu. Poslužitelj najprije pohranjuje
-kursor pomoću `advanceLogExportCursor`, a zatim šalje `ack`; nijedan sljedeći paket ne počinje
-prije toga. Neuspjeh slanja, rušenje ili istek vremena bilježi neuspjeh bez pomicanja kursora
-za taj paket. Prethodno potvrđeni paketi ostaju spremljeni; najviše se jedan nepotvrđeni paket
-može ponovno poslati. Uspjeh se bilježi tek nakon poruke `done` i urednog završetka podređenog
-procesa. Pri neuspjehu podređeni se proces prekida signalom SIGTERM, uz prijelaz na SIGKILL
-nakon 500 ms, a izvršitelj čeka zatvaranje procesa.
+Nakon svakog prihvaćenog paketa podređeni proces čeka potvrdu. Poslužitelj najprije trajno sprema
+kursor pomoću `advanceLogExportCursor`, a zatim šalje `ack`; sljedeći paket ne započinje prije toga.
+Neuspjelo slanje, rušenje ili istek vremena bilježi se kao neuspjeh bez pomicanja kursora za taj paket. Prethodno
+potvrđeni paketi ostaju trajno zabilježeni; ponovno se može poslati najviše jedan nepotvrđeni paket.
+Uspjeh se bilježi tek nakon `done` i urednog izlaska podređenog procesa. U slučaju neuspjeha podređeni se proces prekida
+signalom SIGTERM, a nakon 500 ms prelazi se na SIGKILL; izvršitelj čeka završetak procesa.
 
-| Varijabla okruženja                           | Zadano | Namjena                             |
-| --------------------------------------------- | ------ | ----------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Vremensko ograničenje po odredištu  |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Ograničenje starog V8 prostora u MB |
+| Varijabla okruženja                           | Zadano | Svrha                                                            |
+| --------------------------------------------- | ------ | ---------------------------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Ograničenje ukupnog trajanja po odredištu                        |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Ograničenje V8 prostora za stare objekte podređenog procesa u MB |
 
-Za nevaljane, nepozitivne vrijednosti ili vrijednosti koje nisu cijeli brojevi koriste se
-zadane vrijednosti. Postavka hrpe nije ograničenje ukupnog RSS-a; vrlo veliki paketi ipak mogu
-iscrpiti memoriju podređenog procesa i sigurno prekinuti izvođenje. Zadana vrijednost od
-1024 MB ostavlja dovoljno prostora za zadani paket od 500 redaka s artefaktima veličine
-512 KiB i uključenim tijelima, uključujući BigQueryevu serijalizaciju JSON-a u blokovima
-bajtova. Ona ne čini sigurnim paket od 10000 redaka s tijelima. Iscrpljivanje V8 hrpe bilježi
-neuspjeh s jasnom uputom za rješavanje: smanjite veličinu paketa ili povećajte
-`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor ostaje na posljednjem potvrđenom paketu.
-Povijesna ugrađena tijela/tijela na disku nisu obuhvaćena suvremenim ograničenjem artefakata.
-Operatori moraju zasebno planirati RSS, osobito unutar spremnika s ograničenom memorijom.
+Za nevaljane vrijednosti, vrijednosti koje nisu pozitivne ili nisu cijeli brojevi upotrebljavaju se zadane vrijednosti. Postavka memorijske hrpe nije ograničenje ukupnog
+RSS-a; vrlo veliki paketi i dalje mogu iscrpiti memoriju podređenog procesa i sigurno prekinuti pokretanje uz neuspjeh.
+Zadana vrijednost od 1024 MB ostavlja memorijsku rezervu za zadani paket od 500 redaka s artefaktima veličine 512 KiB i
+uključenim tijelima, uključujući BigQueryjevu serijalizaciju JSON-a u blokovima određenima brojem bajtova. Ona ne čini
+paket od 10000 redaka s tijelima sigurnim. Iscrpljivanje V8 memorijske hrpe bilježi neuspjeh s uputom za postupanje: smanjite veličinu
+paketa ili povećajte `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor ostaje na posljednjem
+potvrđenom paketu. Povijesna tijela ugrađena u zapise ili spremljena na disk nisu obuhvaćena suvremenim ograničenjem veličine artefakata.
+Operateri moraju zasebno planirati RSS, osobito unutar spremnika s ograničenom memorijom.
 
-Podređeni proces nasljeđuje samo razriješeni `DATA_DIR`, `NODE_ENV`, izričiti `TZ`
-(razrješavanje lokalnog vremena u naslijeđenim nazivima datoteka), `ELECTRON_RUN_AS_NODE`
-kada je prisutan te sljedeće ulazne postavke za izlazne veze: `HTTP_PROXY`, `HTTPS_PROXY`,
-`ALL_PROXY`, `NO_PROXY` (i njihove inačice malim slovima),
+Podređeni proces nasljeđuje samo razriješeni `DATA_DIR`, `NODE_ENV`, izričito postavljeni `TZ` (razrješavanje
+lokalnog vremena za naslijeđene nazive datoteka), `ELECTRON_RUN_AS_NODE` ako postoji te sljedeće ulazne postavke za odlazne veze:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (i njihove oblike malim slovima),
 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globalni Undici dispečer dijeli poslužiteljevo čisto razrješavanje proxyja iz okruženja i
-pravila zaobilaženja lokalnih hostova, uključujući `NO_PROXY`; ne uvozi `proxyFetch.ts` ni
-njegovu bazu podataka/zastavice značajki. Vjerodajnice proxyja redigiraju se iz proslijeđenog
-izlaza i zabilježenih pogrešaka. Vjerodajnice odredišta prenose se samo u jednoj početnoj IPC
-poruci, nikada putem argv-a ili okruženja; proslijeđeni izlaz/pogreške dobivaju prefiks i
-sanitiziraju se. U argumentima izvršavanja podređenog procesa onemogućen je samo
-`ExperimentalWarning` kako bi se izbjeglo ponavljanje Nodeova upozorenja za SQLite pri svakom
-cron izvođenju; ostale vrste upozorenja ostaju vidljive.
+Globalni Undici dispatcher dijeli s poslužiteljem razrješavanje proxyja isključivo iz varijabli okruženja i pravila
+zaobilaženja za lokalne hostove, uključujući `NO_PROXY`; ne uvozi `proxyFetch.ts` ni njegove zastavice baze podataka ili značajki.
+Vjerodajnice proxyja uklanjaju se iz proslijeđenog izlaza i zabilježenih pogrešaka. Vjerodajnice odredišta
+prenose se samo u jednoj početnoj IPC poruci, nikad putem argumenata argv ili okruženja; proslijeđenom izlazu i pogreškama
+dodaje se prefiks te se iz njih uklanjaju osjetljivi podaci. U argumentima za izvršavanje podređenog procesa onemogućen je samo `ExperimentalWarning` kako bi se izbjeglo
+ponavljanje Nodeova upozorenja za SQLite pri svakom pokretanju crona; ostale vrste upozorenja ostaju vidljive.
 
-Odredišni moduli moraju se moći uvesti bez ovisnosti o Next.js-u ili ovisnosti dostupnih samo na poslužitelju. Postojeća
-implementacija za BigQuery već ispunjava taj ugovor. Predmemorije pristupnih tokena traju samo tijekom podređenog
-izvođenja, a ne između izvođenja. Node je podržano izvršno okruženje (`package.json` engines), ali odjeljak o instalaciji
-Buna u README-u i `Dockerfile.bun` također oglašavaju produkcijski put kompatibilnosti koji upotrebljava
-`bun:sqlite` (`src/lib/db/core.ts` / adapteri). Stoga u okruženju Bun izvozi zadržavaju prethodni
-put unutar procesa i prikazuju jednokratno upozorenje: izolacija memorije podređenog procesa i vremenskog ograničenja nije dostupna. Upotrebljavajte
-Node za izolaciju petlje događaja i OOM-a; Bun se ovdje ne smatra okruženjem samo za razvoj.
+Module odredišta mora biti moguće uvesti bez ovisnosti o Next.js-u ili ovisnosti namijenjenih samo poslužitelju. Postojeća
+implementacija za BigQuery već ispunjava taj uvjet. Predmemorije pristupnih tokena traju samo tijekom jednog pokretanja
+podređenog procesa, a ne između pokretanja. Node je podržano izvršno okruženje (`package.json` engines), ali odjeljak README-a o
+instalaciji Buna i `Dockerfile.bun` također navode kompatibilan način rada u produkciji uz
+`bun:sqlite` (`src/lib/db/core.ts` / adapteri). Stoga izvoz pod Bunom zadržava prethodni
+način izvođenja unutar procesa i ispisuje jednokratno upozorenje: izolacija memorijske hrpe i vremenskog ograničenja podređenog procesa nije dostupna. Upotrebljavajte
+Node za izolaciju petlje događaja i pogrešaka zbog nedostatka memorije; Bun se ovdje ne smatra okruženjem samo za razvoj.
 
-Kada je `includeBodies` omogućen, prednost dajte učestalosti na razini minute, primjerice
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, umjesto nakupljanja jednosatnog zaostatka korisnog sadržaja.
-Ograničenja serije i redaka i dalje ograničavaju svako izvođenje. Pokretanje procesa plaća se po odredištu i po izvođenju;
-time se mali trošak pokretanja mijenja za izolaciju petlje događaja poslužitelja, a ne za smanjenu ukupnu upotrebu procesora.
+Kad je `includeBodies` omogućen, dajte prednost učestalosti na razini minuta, primjerice
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, umjesto gomilanja neizvezenog sadržaja tijekom jednog sata.
+Ograničenja serije i broja redaka i dalje ograničavaju svako pokretanje. Trošak pokretanja procesa nastaje za svako odredište pri svakom pokretanju;
+time se mali trošak pokretanja mijenja za izolaciju petlje događaja poslužitelja, a ne za smanjenje ukupne upotrebe procesora.
 
-### Korisni sadržaji (upiti i odgovori)
+### Sadržaji (upiti i odgovori)
 
-Prema zadanim postavkama izvoz prenosi samo sažeta polja koja prikazuje **popis** zapisa. Uključivanjem
-opcije **Izvoz upita i odgovora** (`includeBodies`) dodatno se šalje ono što okno s **pojedinostima**
-zapisa prikazuje za svaki poziv:
+Prema zadanim postavkama izvoz sadrži samo sažetna polja koja prikazuje **popis** zapisnika. Uključivanjem opcije
+**Izvezi upite i odgovore** (`includeBodies`) dodatno se šalje ono što okno s **pojedinostima**
+zapisnika prikazuje za svaki poziv:
 
-| Polje                            | Što sadržava                                                      |
-| -------------------------------- | ----------------------------------------------------------------- |
-| `request_body` / `response_body` | Korisne sadržaje poziva onako kako ih nadzorna ploča prikazuje    |
-| `pipeline_route_decision`        | Koje je odredište i model usmjerivač odabrao                      |
-| `pipeline_client_request`        | Neobrađeni zahtjev točno onako kako ga je klijent poslao          |
-| `pipeline_openai_request`        | Nakon prevođenja u interni OpenAI oblik                           |
-| `pipeline_provider_request`      | Kako je doista poslano nadređenom sustavu, u dijalektu pružatelja |
-| `pipeline_provider_response`     | Neobrađeni odgovor nadređenog sustava                             |
-| `pipeline_client_response`       | Ono što je vraćeno pozivatelju                                    |
-| `pipeline_error`                 | Pojedinosti pogreške na razini obrade za neuspjeli poziv          |
-| `bodies_truncated`               | Istinito kada bilo koje prethodno polje dosegne `maxBodyBytes`    |
+| Polje                            | Što sadrži                                                           |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `request_body` / `response_body` | Sadržaje poziva kako ih prikazuje nadzorna ploča                     |
+| `pipeline_route_decision`        | Koje je odredište i model usmjerivač odabrao                         |
+| `pipeline_client_request`        | Izvorni zahtjev točno onako kako ga je klijent poslao                |
+| `pipeline_openai_request`        | Nakon pretvorbe u interni OpenAI format                              |
+| `pipeline_provider_request`      | Kako je doista poslano pružatelju, u njegovu formatu                 |
+| `pipeline_provider_response`     | Izvorni odgovor pružatelja                                           |
+| `pipeline_client_response`       | Što je vraćeno pozivatelju                                           |
+| `pipeline_error`                 | Pojedinosti pogreške u lancu obrade za neuspjeli poziv               |
+| `bodies_truncated`               | Vrijednost true kad bilo koje prethodno polje dosegne `maxBodyBytes` |
 
 To je sadržaj upita, pa je **prema zadanim postavkama isključen** i namjerno se odabire zasebno za svako odredište.
 Šalje se ono što prikazuje nadzorna ploča jer izvoz i `getCallLogById` dijele razrješavanje
-pojedinosti: korisni sadržaji već su
-očišćeni od osobnih podataka i povjerljivi su podaci redigirani pri zapisivanju, a poziv upućen API ključem
-`noLog` uopće ne pohranjuje korisni sadržaj, pa nema ničega za izvoz.
+pojedinosti: iz sadržaja su
+već pri zapisivanju uklonjeni osobni podaci i tajne, a poziv izvršen API ključem
+`noLog` uopće ne pohranjuje sadržaj, pa nema ničega za izvoz.
 
-Korisni sadržaji čitaju se po retku iz artefakta datotečnog sustava, pa se hidracija izvodi samo za odredišta
-koja su je zatražila. Ako artefakt nedostaje ili je oštećen, izvozi se njegov sažetak s null korisnim sadržajima
-umjesto neuspjeha serije i blokiranja pokazivača.
+Sadržaji se čitaju za svaki redak iz artefakta u datotečnom sustavu, pa se učitavanje potpunih podataka izvodi samo za odredišta
+koja su to zatražila. Ako artefakt nedostaje ili je oštećen, izvozi se njegov sažetak s null vrijednostima sadržaja umjesto
+da obrada serije ne uspije i kursor ostane zaglavljen.
 
-`maxBodyBytes` (zadano 262144) ograničava svako polje. Dulji korisni sadržaji **skraćuju se umjesto
-odbacivanja** — skraćeni upit i dalje odgovara na pitanje „što je zatraženo” — a redak se označava s
-`bodies_truncated`. Delta-vrijednosti strujane dio po dio ne izvoze se; sastavljeni odgovor već se nalazi
-u `pipeline_provider_response` i `pipeline_client_response`.
+`maxBodyBytes` (zadano 262144) ograničava svako polje. Dulji sadržaji **skraćuju se umjesto da se
+odbace** — skraćeni upit i dalje odgovara na pitanje „što je zatraženo” — a redak se označava s
+`bodies_truncated`. Promjene koje se prenose strujanjem, dio po dio, ne izvoze se; sastavljeni odgovor
+već se nalazi u `pipeline_provider_response` i `pipeline_client_response`.
 
 ---
 
 ## 2. Datoteke
 
-| Dio                             | Lokacija                                     |
-| ------------------------------- | -------------------------------------------- |
-| Odredišni ugovor                | `src/lib/logExport/types.ts`                 |
-| Registar                        | `src/lib/logExport/registry.ts`              |
-| Rukovanje tajnama               | `src/lib/logExport/secrets.ts`               |
-| Pokretač (nadređeni IPC)        | `src/lib/logExport/runner.ts`                |
-| Životni ciklus procesa          | `src/lib/logExport/childRunner.ts`           |
-| Ulazna točka podređenog procesa | `src/lib/logExport/exportChild.ts`           |
-| Otvarač samo za čitanje         | `src/lib/db/logExportReadOnly.ts`            |
-| Zajednički upit/mapiranje       | `src/lib/usage/callLogExportQueries.ts`      |
-| Razrješivač pojedinosti         | `src/lib/usage/callLogDetailResolver.ts`     |
-| API projekcija                  | `src/lib/logExport/presenter.ts`             |
-| BigQuery odredište              | `src/lib/logExport/destinations/bigquery.ts` |
-| Google SA autentifikacija       | `src/lib/logExport/googleServiceAccount.ts`  |
-| Izvor zapisnika poziva          | `src/lib/usage/callLogExportSource.ts`       |
-| Trajna pohrana                  | `src/lib/db/logExportDestinations.ts`        |
-| Cron zadatak                    | `src/lib/jobs/logExportJob.ts`               |
-| REST sloj                       | `src/app/api/log-export/`                    |
-| Stranica nadzorne ploče         | `src/app/(dashboard)/dashboard/log-export/`  |
+| Dio                                    | Lokacija                                     |
+| -------------------------------------- | -------------------------------------------- |
+| Ugovor odredišta                       | `src/lib/logExport/types.ts`                 |
+| Registar                               | `src/lib/logExport/registry.ts`              |
+| Obrada tajni                           | `src/lib/logExport/secrets.ts`               |
+| Izvršitelj (IPC nadređenog procesa)    | `src/lib/logExport/runner.ts`                |
+| Životni ciklus procesa                 | `src/lib/logExport/childRunner.ts`           |
+| Ulazna točka podređenog procesa        | `src/lib/logExport/exportChild.ts`           |
+| Otvaranje samo za čitanje              | `src/lib/db/logExportReadOnly.ts`            |
+| Zajednički upiti/preslikavanje         | `src/lib/usage/callLogExportQueries.ts`      |
+| Razrješavanje detalja                  | `src/lib/usage/callLogDetailResolver.ts`     |
+| API projekcija                         | `src/lib/logExport/presenter.ts`             |
+| Odredište BigQuery                     | `src/lib/logExport/destinations/bigquery.ts` |
+| Autentikacija Google servisnim računom | `src/lib/logExport/googleServiceAccount.ts`  |
+| Izvor zapisnika poziva                 | `src/lib/usage/callLogExportSource.ts`       |
+| Trajna pohrana                         | `src/lib/db/logExportDestinations.ts`        |
+| Cron zadatak                           | `src/lib/jobs/logExportJob.ts`               |
+| REST sloj                              | `src/app/api/log-export/`                    |
+| Stranica nadzorne ploče                | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Shema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
@@ -185,120 +170,337 @@ Shema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 ## 3. REST API
 
 Sve rute zahtijevaju autentikaciju za upravljanje (`requireManagementAuth`). Tajne se nikada ne vraćaju:
-pohranjena tajna vraća se kao doslovna vrijednost `__stored__`, a slanje te vrijednosti natrag pri ažuriranju
-zadržava pohranjenu vjerodajnicu.
+pohranjena tajna vraća se kao doslovna vrijednost `__stored__`, a slanje te vrijednosti pri ažuriranju
+zadržava pohranjene vjerodajnice.
 
 Stvaranje ili ažuriranje odredišta čija vrsta deklarira tajnu **zahtijeva
-`STORAGE_ENCRYPTION_KEY`**. Bez njega je `encrypt()` tihi prolaz bez izmjena, pa se zapisivanje
-odbija odgovorom 400 umjesto spremanja vjerodajnice u SQLite kao običnog teksta (ista zaštita koju
-primjenjuje Telegram webhook).
+`STORAGE_ENCRYPTION_KEY`**. Bez njega `encrypt()` neprimjetno propušta podatke bez izmjene, pa se upis
+odbija statusom 400 umjesto da se vjerodajnice pohrane u SQLite kao običan tekst (istu zaštitu primjenjuje
+Telegram webhook).
 
-| Metoda   | Putanja                                  | Svrha                                                         |
-| -------- | ---------------------------------------- | ------------------------------------------------------------- |
-| `GET`    | `/api/log-export/types`                  | Vrste odredišta + njihov popis konfiguracijskih polja         |
-| `GET`    | `/api/log-export/destinations`           | Popis odredišta (tajne su redigirane)                         |
-| `POST`   | `/api/log-export/destinations`           | Stvaranje odredišta                                           |
-| `GET`    | `/api/log-export/destinations/{id}`      | Dohvaćanje jednog odredišta                                   |
-| `PUT`    | `/api/log-export/destinations/{id}`      | Ažuriranje naziva / omogućenosti / konfiguracije / grupiranja |
-| `DELETE` | `/api/log-export/destinations/{id}`      | Brisanje                                                      |
-| `POST`   | `/api/log-export/destinations/{id}/test` | Provjera vjerodajnica bez ikakvog zapisivanja                 |
-| `POST`   | `/api/log-export/destinations/{id}/run`  | Trenutačno pražnjenje, istim putem kao i zakazano pokretanje  |
-| `GET`    | `/api/log-export/status`                 | Stanje crona, nedavna pokretanja, zaostatak po cilju          |
+| Metoda   | Putanja                                  | Svrha                                                                          |
+| -------- | ---------------------------------------- | ------------------------------------------------------------------------------ |
+| `GET`    | `/api/log-export/types`                  | Vrste odredišta + popis njihovih konfiguracijskih polja                        |
+| `GET`    | `/api/log-export/destinations`           | Popis odredišta (tajne skrivene)                                               |
+| `POST`   | `/api/log-export/destinations`           | Stvaranje odredišta                                                            |
+| `GET`    | `/api/log-export/destinations/{id}`      | Dohvat jednog odredišta                                                        |
+| `PUT`    | `/api/log-export/destinations/{id}`      | Ažuriranje naziva / omogućenosti / konfiguracije / grupiranja u serije         |
+| `DELETE` | `/api/log-export/destinations/{id}`      | Brisanje                                                                       |
+| `POST`   | `/api/log-export/destinations/{id}/test` | Provjera vjerodajnica, bez upisivanja                                          |
+| `POST`   | `/api/log-export/destinations/{id}/run`  | Trenutačna obrada svih preostalih zapisa, istim putem kao zakazano izvršavanje |
+| `GET`    | `/api/log-export/status`                 | Stanje crona, nedavna izvršavanja, neobrađeni zapisi po odredištu              |
 
-`GET /api/log-export/types` omogućuje generičko korisničko sučelje: obrazac nadzorne ploče generira se iz
-vraćenih deskriptora polja, pa novo odredište ne zahtijeva promjenu korisničkog sučelja.
+`GET /api/log-export/types` omogućuje generičko korisničko sučelje: obrazac na nadzornoj ploči prikazuje se na temelju
+vraćenih opisa polja, pa novo odredište ne zahtijeva izmjene korisničkog sučelja.
 
 ---
 
-## 4. BigQuery odredište
+## 4. Odredište BigQuery
 
 Konfiguracijski ključevi (`type: "bigquery"`):
 
-| Ključ                | Napomene                                                             |
-| -------------------- | -------------------------------------------------------------------- |
-| `projectId`          | GCP projekt koji sadrži skup podataka                                |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                      |
-| `tableId`            | `[A-Za-z0-9_]+`                                                      |
-| `location`           | Upotrebljava se samo kada treba stvoriti skup podataka (zadano `EU`) |
-| `serviceAccountJson` | Ključ računa usluge. Tajna: šifriran u mirovanju, nikada se ne vraća |
-| `autoCreate`         | Stvaranje skupa podataka i tablice pri prvom izvozu (zadano `true`)  |
+| Ključ                | Napomene                                                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP projekt koji sadrži skup podataka                                                                            |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                  |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                  |
+| `location`           | Upotrebljava se samo kada treba stvoriti skup podataka (zadano `EU`)                                             |
+| `serviceAccountJson` | Ključ servisnog računa. Tajna vrijednost: šifrirana u mirovanju, nikada se ne vraća                              |
+| `autoCreate`         | Stvara nedostajući skup podataka/tablicu; uvjetno dodaje nullable stupce s dokazima o korištenju (zadano `true`) |
 
-Račun usluge treba dopuštenje `bigquery.tables.updateData` na ciljnoj tablici, kao i
+Servisni račun treba imati `bigquery.tables.updateData` za ciljnu tablicu, kao i
 `bigquery.datasets.create` / `bigquery.tables.create` kada je `autoCreate` uključen.
+Ažuriranje postojeće tablice radi dodavanja dvaju nullable polja s dokazima o korištenju također zahtijeva
+`bigquery.tables.update`. Nedostajuća dozvola neuspješno završava izvoz bez pomicanja pokazivača.
 
-Konfigurirana serija jedinica je **kursora**, a ne HTTP-a: `send()` je dijeli na pozive insertAll
-s najviše 500 redaka, tako da veliki `batch_size` ne može prekoračiti BigQueryjevo ograničenje zahtjeva od 10 MB.
-Privremeni statusi (408/429/500/502/503/504) pokušavaju se ponovno do tri puta uz eksponencijalno
-povećanje čekanja, koristeći iste insertIds; pogreške autentikacije i sheme izazivaju iznimku pri prvom pokušaju
-umjesto uzaludnog trošenja pokretanja.
+Konfigurirana grupa je jedinica **pokazivača**, a ne HTTP jedinica: `send()` je dijeli na pozive
+insertAll s najviše 500 redaka, pa veliki `batch_size` ne može dosegnuti ograničenje BigQueryja od 10 MB po zahtjevu.
+Privremeni statusi (408/429/500/502/503/504) ponovno se pokušavaju do tri puta s eksponencijalnim
+odmakom, uz ponovnu upotrebu istih insertIdova; pogreške autentikacije i sheme izbacuju iznimku pri prvom pokušaju,
+umjesto da nepotrebno troše izvođenje.
 
-Tablica stvorena prije nekoliko trenutaka još nije vidljiva krajnjoj točki za strujanje, koja nekoliko
-sekundi odgovara statusom 404. Taj se 404 ponovno pokušava, ali **samo kada je ovo pokretanje stvorilo tablicu** —
-tablica koja doista nedostaje i dalje odmah uzrokuje neuspjeh. Imajte na umu da ponovno stvaranje tablice pod nazivom
-nedavno izbrisane tablice uzrokuje da BigQuery nekoliko minuta odbija umetanja strujanjem; to je svojstvo postupka
-brisanja pa ponovnog stvaranja, stoga radije upotrijebite novi naziv tablice nego da je uklonite i ponovno dodate.
+Tablica stvorena prije nekoliko trenutaka još nije vidljiva krajnjoj točki za streaming, koja vraća
+404 nekoliko sekundi. Taj se 404 ponovno pokušava, ali **samo kada je ova izvedba stvorila tablicu** —
+uistinu nedostajuća tablica i dalje odmah uzrokuje neuspjeh. Imajte na umu da BigQuery odbija streaming umetanja
+nekoliko minuta kada se tablica ponovno stvara pod nazivom koji je nedavno obrisan; to je svojstvo postupka
+brisanja pa ponovnog stvaranja, stoga je bolje upotrijebiti novi naziv tablice nego obrisati postojeću i ponovno je dodati.
 
-**Djelomični neuspjeh stiže kao HTTP 200 s nepraznim `insertErrors[]`.** To se smatra
-neuspjehom i izaziva iznimku, čime se sprječava napredovanje kursora preko redaka koje BigQuery nikada nije
-prihvatio; `tests/unit/log-export-bigquery.test.ts` utvrđuje to ponašanje.
+**Djelomični neuspjeh stiže kao HTTP 200 s nepraznim `insertErrors[]`.** To se tretira kao
+neuspjeh i izbacuje iznimku, čime se sprječava pomicanje pokazivača iza redaka koje BigQuery nikada nije prihvatio;
+`tests/unit/log-export-bigquery.test.ts` utvrđuje takvo ponašanje.
 
-Prijenos se odvija običnim REST-om — samopotpisana RS256 tvrdnja razmjenjuje se za pristupni token na
-`https://oauth2.googleapis.com/token`, a zatim se retci šalju u `tabledata.insertAll`. Ne uključuje se
-nijedan Google SDK. Pristupni tokeni predmemoriraju se unutar procesa za svaki par (račun usluge, opseg).
+Prijenos je običan REST — samopotpisana RS256 asercija razmjenjuje se za pristupni token na adresi
+`https://oauth2.googleapis.com/token`, a zatim se redci šalju u `tabledata.insertAll`. Ne dohvaća se nijedan Google SDK.
+Pristupni tokeni predmemoriraju se unutar procesa po paru (servisni račun, opseg).
 
-Stvorena tablica sadrži po jedan stupac za svako polje kartice Logs te `exported_at`, a organizirana je prema
-načinu na koji se zapisnici poziva zaista pretražuju:
+Stvorena tablica sadrži jedan stupac za svako polje kartice Logs, kao i `exported_at`, a strukturirana je za
+način na koji se zapisnici poziva stvarno upituju:
 
-- **Particionirana po danima prema `timestamp`**, tako da upit ograničen datumom skenira samo te dane.
-- **Grupirana prema `api_key_name`, `provider`, `model`, `status`** (tim redoslijedom), tako da filtriranje prema
-  tome tko je pokrenuo poziv, kamo je otišao ili je li bio neuspješan uklanja blokove unutar svake particije. BigQuery
-  dopušta najviše četiri stupca za grupiranje, a redoslijed je važan: filtar samo prema `api_key_name`
-  uklanja blokove, dok filtar samo prema `status` to ne čini.
-- **Neobavezno zadržavanje particija** putem `partitionExpirationDays` (0 zadržava sve), koje se primjenjuje
-  pri stvaranju tablice.
+- **Particionirano po danu na `timestamp`**, pa upit ograničen samo datumom skenira te dane.
+- **Grupirano prema `api_key_name`, `provider`, `model`, `status`** (tim redoslijedom), pa filtriranje prema
+  tome tko ga je pokrenuo, kamo je upućen ili je li neuspješan izostavlja blokove unutar svake particije. BigQuery
+  dopušta najviše četiri stupca za grupiranje, a redoslijed je važan: filtar samo na `api_key_name` izostavlja blokove,
+  dok ih filtar samo na `status` ne izostavlja.
+- **Neobavezno zadržavanje particija** putem `partitionExpirationDays` (0 zadržava sve), primijenjeno
+  prilikom stvaranja tablice.
 
-Obje se postavke primjenjuju pri stvaranju. Postojeća tablica zadržava raspored koji već ima, stoga
-odredište usmjerite na novi ID tablice ako ih želite primijeniti.
+Obje se postavke primjenjuju u trenutku stvaranja. Postojeća tablica zadržava postojeći raspored, stoga
+odredište usmjerite na novi ID tablice ako ih želite usvojiti.
 
-`tests/unit/log-export-bigquery.test.ts` provjerava da mapiranje i shema tablice ostanu
-usklađeni, tako da se novi stupac zapisnika poziva ne može neprimjetno izostaviti pri izvozu.
+`tests/unit/log-export-bigquery.test.ts` potvrđuje da su mapiranje i shema tablice usklađeni, pa se novi stupac
+zapisnika poziva ne može neprimjetno izgubiti tijekom izvoza.
 
-Paketi se dijele prema **oba** kriterija: broju redaka i broju serijaliziranih bajtova. Sam broj redaka nije dovoljan
-nakon što se počnu izvoziti korisni sadržaji: 500 redaka koji sadrže upite može zauzimati desetke megabajta, a insertAll
-odbija zahtjeve veće od 10 MB. Paketi se zatvaraju pri 500 redaka ili 9 MB, ovisno o tome što nastupi prije.
+Grupe se dijele prema **broju redaka i serijaliziranim bajtovima**. Sam broj redaka nije dovoljan
+kada se izvoze sadržaji: 500 redaka koji sadrže upite mogu zauzimati desetke megabajta, a insertAll
+odbija zahtjev veći od 10 MB. Grupe se zatvaraju na 500 redaka ili 9 MB, što god nastupi prije.
 
 ---
 
-## 5. Dodavanje odredišta
+## 5. Odredište za OTLP/HTTP tragove
 
-1. Stvorite `src/lib/logExport/destinations/<name>.ts` koji izvozi `LogExportDestinationType`:
-   Zod `configSchema`, niz deskriptora `fields` za korisničko sučelje, `secretFields` i
+Konfiguracija upotrebljava `type: "otlp-http"`. Ovo je zakazani izvoz trajno pohranjenih
+dnevnika poziva koji koristi pokazivač, a ne najbolji mogući odvod aktivnih događaja
+usmjeravanja u `open-sse/services/routing/otel.ts`. Ne čita niti mijenja varijable
+okruženja, mjerače vremena ili međuspremnike tog odvoda. Omogućavanje oba odredišta može
+proizvesti dvije neovisne vrste raspona; upotrijebite opseg instrumentacije
+`omniroute.log-export` kako biste razlikovali ove raspone dnevnika poziva.
+
+| Key                      | Zadano / svrha                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `endpoint`               | Obavezan puni URL za tragove HTTP(S); sufiks `/v1/traces` se ne dodaje                       |
+| `headers`                | Neobavezni retci `Name: value` ili JSON objekt nizova; šifrirano                             |
+| `requestHeaderAllowlist` | Prazno (isključeno); nazivi/prefiksi zaglavlja klijenta koji se hvataju kao atributi raspona |
+| `serviceName`            | `omniroute`; resurs `service.name`                                                           |
+| `langfuseMapping`        | `false`; dodaje atribute generiranja/sesije/korisnika za Langfuse                            |
+| `identity`               | `pseudonymous`, `keyName` ili `none`                                                         |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                      |
+| `timeoutMs`              | `30000` po HTTP pokušaju                                                                     |
+| `environment`            | Nije postavljeno; neobavezni `langfuse.environment`                                          |
+
+Generička nadzorna ploča prikazuje ova polja. `paths` prihvaća API polje ili tekstualno
+polje s točnim putanjama odvojenima novim recima/zarezima. Ugradnje, ponovno rangiranje i
+druge putanje preskaču se ako nisu izričito dopuštene. Preskočeni retci i dalje pomiču
+pokazivač; brojači `exported`/`exportedTotal` postojećeg pokretača broje obrađene retke
+izvornika, uključujući filtrirane retke, a ne prihvaćene raspone. Filtriranje se obavlja
+u podređenom procesu, bez promjene njegova IPC ugovora/pokazivača.
+
+Validacija URL-ova upotrebljava pomoćnu funkciju `parseAndValidateNonMetadataUrl`, neovisnu
+o bazi podataka, iz `src/shared/network/outboundUrlGuard.ts`: pravilo `block-metadata`.
+Ono ima iste bezuvjetne provjere metapodataka/protokola/ugrađenih vjerodajnica kao
+validator web-dojavnika, uz omogućene privatne URL-ove, ali namjerno dopušta odredišta
+localhosta/LAN-a bez globalnog nadjačavanja zastavice značajke. To omogućuje krajnje
+točke za samostalno hostane Langfuse, Phoenix, Tempo i Collector usluge, uključujući
+privatne HTTP krajnje točke. Glavena metapodataka u oblaku uvijek su blokirana.
+Preusmjeravanja se ne slijede, pa kolektor ne može preusmjeriti vjerodajnice na drugog
+glavnog računala. Kao i postojeća leksička zaštita URL-ova, ovo ne veže razrješenje DNS-a;
+konfigurirajte samo glavna računala kojima upravlja operater. Kad krajnja točka nije na
+mreži kojoj vjerujete, prednost dajte HTTPS-u.
+
+### Sadržaj i isporuka
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) prenosi
+jedan raspon CLIENT po dopuštenom retku, nazvan njegovom točnom putanjom zahtjeva.
+Naziv putanje razlikuje Chat Completions, Responses i Messages bez ugrađivanja podataka
+o modelu ili identitetu u naziv raspona. Atributi resursa uključuju `service.name` i
+`service.version` paketa.
+
+Uobičajeni zapisivač pokušaja razgovora
+(`open-sse/handlers/chatCore/attemptLogging.ts`) zapisuje
+`duration = Date.now() - startTime` pri dovršetku i ne navodi vremensku oznaku;
+`saveCallLogOperation` u `src/lib/usage/callLogs.ts` prema zadanim postavkama postavlja
+vremensku oznaku na vrijeme zapisivanja (dovršetka). Izvoz stoga postavlja kraj na
+vremensku oznaku retka, a početak na kraj − trajanje (milisekunde pretvorene u decimalne
+nanosekunde). Povijesne vremenske oznake koje je dostavio pozivatelj također se čuvaju
+kao vrijeme završetka; ne postoji razlikovanje početka/dovršetka po retku. Null trajanje
+postaje nula. Nevažeće ili nedostajuće vremenske oznake uzrokuju neuspjeh serije umjesto
+stvaranja nedeterminističkih raspona. `ttftMs` može biti null i preslikava se u
+`omniroute.ttft_ms`.
+
+Atributi uključuju `gen_ai.operation.name="chat"`, pružatelja, zatraženi/model odgovora,
+ulazne/izlazne tokene, neobavezne tokene čitanja predmemorije/stvaranja predmemorije/
+rasuđivanja, HTTP status, kombinaciju, izvor predmemorije, oznaku sesije i ID korelacije.
+Cjelobrojne OTLP vrijednosti i vremenske oznake decimalni su nizovi; nizovi, Booleove
+vrijednosti i razlomljeni brojevi upotrebljavaju svoje izvorne OTLP varijante vrijednosti.
+Raspone s pogreškom imaju status ERROR i pročišćenu statusnu poruku. Kanonski zapis ne
+sadrži URL glavnog računala uzvodne usluge, pa se `server.address` izostavlja umjesto
+netočnog identificiranja kolektora kao poslužitelja modela. Trošak se ne izvozi.
+
+Samo `includeBodies=true` dohvaća sadržaj. Uz `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` sadrže pročišćeni JSON tijela zahtjeva/
+odgovora kako ga pohranjuje OmniRoute (kanoniziran kada ga je moguće raščlaniti), a ne
+preoblikovano polje poruka semantičkih konvencija. Skraćena/ne-JSON tijela ostaju
+neobrađeni tekst. Uz `langfuseMapping=true`, tijela se emitiraju samo kao
+`langfuse.observation.input` / `langfuse.observation.output`; atributi
+`gen_ai.*.messages` izostavljaju se kako bi se svako tijelo poslalo jednom. Oba načina
+nasljeđuju `maxBodyBytes` iz postojećeg puta dohvaćanja;
+`omniroute.bodies_truncated=true` označava skraćivanje.
+Ovo odredište ne dodaje dodatne snimke cjevovoda niti čitanja nesanitiziranih artefakata;
+neobavezno hvatanje zaglavlja zahtjeva upotrebljava postojeću snimku klijenta dohvaćenu
+u nastavku. Pri izvozu tijela koristite učestalost na razini minute, primjerice
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, umjesto nakupljanja satnog zaostatka.
+
+### Neobavezna zaglavlja zahtjeva klijenta
+
+Hvatanje zaglavlja prema zadanim je postavkama **isključeno**. Postavite
+`requestHeaderAllowlist` u konfiguraciji odredišta i omogućite **Izvoz upita i odgovora**
+(`includeBodies: true` na odredištu).
+Popis dopuštenih vrijednosti prihvaća API polje ili tekstualno polje s nazivima odvojenima
+novim recima/zarezima:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Nazivi se podudaraju bez obzira na velika i mala slova i moraju biti identični, osim ako jedan završni znak `*` odabire neprazan prefiks naziva zaglavlja. Samostalni znak `*`, ugrađeni zamjenski znakovi i nevažeći nazivi HTTP zaglavlja odbacuju se.
+Postoji najviše 64 selektora, a svaki naziv/prefiks može imati najviše 256 ASCII bajtova.
+Ova je postavka odvojena od `headers`, koji autentificira izvoznik prema sakupljaču.
+
+Hvatanje čita samo `pipeline_client_request`, popunjen iz spremljenog detaljnog pipelinea putem
+`clientRawRequest` (ili naslijeđenog `clientRequest`). Nikad se ne vraća na zaglavlja zahtjeva pružatelja.
+Detaljno zapisivanje pipelinea moralo je biti omogućeno u trenutku bilježenja zahtjeva. Kada je
+`includeBodies` onemogućen ili nedostaje, oštećen je ili je JSON snimke klijenta skraćen, ne emitiraju se atributi zaglavlja. Povećavanje `maxBodyBytes` može spriječiti skraćivanje snimke tijekom izvoza;
+ne može vratiti pojedinosti koje nikad nisu spremljene. Snimka veća od 1 MiB ili ona koja sadržava više od
+256 unosa zaglavlja zanemaruje se. Postojeći izvoz upita/odgovora ostaje omogućen uz hvatanje zaglavlja; popis dopuštenih ne omogućuje način hidratacije samo zaglavlja.
+
+Odabrane vrijednosti postaju OTLP nizovi znakova `http.request.header.<full lowercase header name>`,
+čak i kada je riječ o jednom nizu. Na primjer, `X-OmniRoute-Meta-Team: example-team` postaje
+`http.request.header.x-omniroute-meta-team` s
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Puni prefiks se zadržava: to su obična zaglavlja, bez raščlambe poslovnih polja ili pretvorbe u
+`omniroute.metadata.*` / Langfuse metapodatke. `langfuseMapping` ne mijenja semantiku zaglavlja. Odabrani `User-Agent` s jednom vrijednošću također postavlja standardni skalarni atribut
+`user_agent.original`. Zarezi unutar jedne vrijednosti ne dijele se. Varijante velikih i malih slova spajaju se redoslijedom spremljenih unosa; svaka nevažeća varijanta izostavlja cijelo to zaglavlje. Atributi su poredani prema nazivu malim slovima.
+
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, zaglavlja API ključeva, nazivi koji sadržavaju oznake auth/token/secret/password/credential i interne vjerodajnice pristupnika uvijek se izuzimaju, čak i ako su odabrani ili djelomično maskirani u pohrani. Poznati obrasci vjerodajnica ponovno upotrebljavaju zajednički detektor vjerodajnica; oznake redigiranja izostavljaju se, ne izvoze se kao sigurne vrijednosti.
+Prihvaćaju se samo nizovi znakova i neprazni nizovi znakova; brojevi i objekti ne pretvaraju se prisilno. Nevažeći nazivi, ključevi prototipa, kontrolni znakovi (osim horizontalne tabulacije) i neispravan Unicode zanemaruju se bez neuspjeha serije ili odražavanja njihova sadržaja u pogreškama.
+
+Svaki span obuhvaća najviše 32 zaglavlja, 16 vrijednosti po zaglavlju, 4096 UTF-8 bajtova po vrijednosti i 16384 ukupnih UTF-8 bajtova za sva uhvaćena imena i vrijednosti zaglavlja. Prevelika/nevažeća zaglavlja izostavljaju se u cijelosti, ne skraćuju se. Odabir je odluka operatora o privatnosti: naizgled sigurna imena i dalje mogu sadržavati osobne podatke, a ova ograničenja/detektori nisu opći čistač PII-ja.
+
+### Ograničenja isporuke
+
+Zahtjevi su ograničeni na 500 spanova i 4 MiB UTF-8 JSON-a, uključujući omotač.
+Veličina svakog dopuštenog spana provjerava se prije prvog zahtjeva serije kursora. Ako je pojedinačni
+span veći od ograničenja, nijedan dio te serije ne šalje se i postupak ne uspijeva uz upute za smanjenje
+`maxBodyBytes`; ne odbacuje se nečujno. Predprovjera zadržava samo reference zapisa
+i broj bajtova, odbacujući svaki privremeni span/JSON; spanovi se ponovno grade za ograničene dijelove
+umjesto da se zadržava druga serijalizirana kopija serije. HTTP 408/429/5xx, mrežni neuspjesi i vremenska ograničenja imaju najviše
+tri pokušaja, s eksponencijalnim čekanjem od 250/500 ms. Sekunde u `Retry-After` ili HTTP datumi
+mogu produljiti čekanje do 5 sekundi. Ostali statusi odmah uzrokuju neuspjeh. Djelomično odbijanje OTLP-a s odgovorom 2xx također uzrokuje pogrešku umjesto
+potvrđivanja izgubljenog spana; prazne ili valjane JSON potvrde prihvaćaju se, uz
+ograničenje čitanja odgovora od 64 KiB.
+
+Pogreške sadržavaju samo činjenice kojima upravlja izvoznik: HTTP status, klasu ponovnog pokušaja, broj pokušaja i broj poslanih spanova ili fiksni tekst o neuspjehu potvrde/mreže. Tijela odgovora sakupljača, broj djelomičnih uspjeha i zaglavlja odgovora nikad se ne kopiraju u pogreške, zapisnike ili nadzornu ploču. Neuspjela ili djelomično prihvaćena serija ne potvrđuje se: odredište prikazuje stanje Failing s tim statusom, kursor ostaje na posljednjoj potvrđenoj seriji, a sljedeće pokretanje ponovno šalje iste retke. Trajni statusi nastavljaju uzrokovati neuspjeh dok se sakupljač ili konfiguracija ne poprave. Za pojedinosti o odgovorima koristite vlastite zapisnike sakupljača. Sažeci pogrešaka zapisnika poziva zadržavaju svoje zasebno redigiranje.
+`prepare()` ne osigurava ništa; Test šalje točno `{"resourceSpans":[]}` i prijavljuje
+HTTP status bez zapisivanja spanova zapisnika poziva.
+
+ID-ovi tragova i ID-ovi spanova prvi su 32/16 heksadecimalnih znamenki SHA-256 vrijednosti nad
+`"omniroute.trace\\0" + callLogId` i `"omniroute.span\\0" + callLogId`. Ponovna slanja sadržavaju
+identične ID-ove. To nije jamstvo deduplikacije: neki pozadinski sustavi, uključujući Langfuse
+v4 ingestion, ne dedupliciraju spanove s istim ID-om. Pad sustava ili neuspjeh djelomičnog dijela može
+ponovno poslati najviše jednu nepotvrđenu seriju kursora; cijela se ta serija može duplicirati,
+a ne samo njezin posljednji HTTP dio. Pri odabiru veličine serije kursora uzmite u obzir taj kompromis.
+
+### Primjer za Langfuse
+
+Konfigurirajte ova polja za samostalno hostanu instancu Langfusea:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Lokalno izgradite vrijednost Authorization kao Base64 doslovnog niza `public-key:secret-key`
+(na primjer pomoću `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Ne umećite stvarne vjerodajnice u zapisnike, snimke zaslona ili prijave problema. Mapiranje automatski
+postavlja `x-langfuse-ingestion-version: 4`; Authorization se i dalje navodi u `headers`.
+I zaglavlja i generirana sol identiteta upotrebljavaju postojeći mehanizam šifriranih tajnih polja i API rezerviranih mjesta; potreban je `STORAGE_ENCRYPTION_KEY`.
+
+Mapiranje dodaje vrstu/model generiranja, pojedinosti o upotrebi JSON-a (ulaz/izlaz/ukupno i dostupni
+ključevi predmemorije), snimke ulaza/izlaza JSON-a, razinu ERROR/DEFAULT, sanitiziranu statusnu poruku,
+naziv traga, ID sesije, neobavezno okruženje i filtrirajući
+`langfuse.observation.metadata.<key>` za pružatelja, zatraženi model, putanju, kombinaciju, izvor
+predmemorije i status. `langfuse.observation.completion_start_time` zapisuje se u formatu ISO 8601 pri
+početku + TTFT samo kada je TTFT poznat i unutar trajanja. Atributi troška se ne šalju.
+
+Načini identiteta primjenjuju se na `langfuse.user.id`:
+
+- `pseudonymous` (zadano): HMAC-SHA256 internog ID-a API ključa s nasumičnom
+  32-bajtnom solju specifičnom za odredište. Sol se generira pri stvaranju ako ne postoji, šifrira
+  kao `identitySalt`, nikad se ne vraća i zadržava se tijekom uređivanja. Sirovi ID-ovi ključeva nikad se ne
+  stavljaju u atribute raspona. Ponovno stvaranje/rotiranje soli odredišta mijenja identitete.
+- `keyName`: konfigurirani naziv API ključa, čime se namjerno otkriva ta oznaka operatora.
+- `none`: nema korisničkog ID-a. Oznake sesije i dalje se izvoze kada postoje; ti načini ne
+  anonimiziraju proizvoljan sadržaj upita ni oznake sesije/korelacije koje je dostavio operator.
+
+### Pokretanje bez dopune
+
+Samo pri stvaranju omogućite **Pokreni s trenutačnog položaja (preskoči postojeće zapisnike)** ili proslijedite
+`startFromCurrentPosition: true` na najvišoj razini korisnog tereta API-ja za stvaranje. Time se
+`cursor_row_id` inicijalizira na trenutačni maksimalni rowid retka dnevnika poziva koji se zadržava, pomoću postojećih
+pomoćnika pokazivača, bez migracije. Zadana je vrijednost false (pokazivač 0 i dopuna zadržane povijesti).
+To nije postavka za ponovno postavljanje pokazivača pri ažuriranju.
+
+Zajedničko dodavanje `ttftMs` također dodaje nullable stupac `ttft_ms` u BigQuery mapper
+i shemu nove tablice: njegov test sheme zahtijeva da svako kanonsko polje zapisa ima
+stupac. Postojeće tablice nastavljaju se izvoziti nepromijenjeno: `prepare()` čita shemu tablice
+i izostavlja samo `ttft_ms` kada taj stupac ne postoji. Dodajte nullable stupac INT64 da biste dobili TTFT
+pri sljedećem pokretanju ili upotrijebite novu tablicu. Neobavezni stupac TTFT ne pokreće ažuriranje sheme. Stupci s dokazima o upotrebi
+slijede uvjetni tok kompatibilnosti uz izričito uključivanje u nastavku; druga polja retka zadržavaju strogu
+provjeru sheme.
+
+---
+
+## 6. Dodavanje odredišta
+
+1. Izradite `src/lib/logExport/destinations/<name>.ts` koji izvozi `LogExportDestinationType`:
+   Zod `configSchema`, polje opisnika `fields` za korisničko sučelje, `secretFields` i
    `createClient(config)` koji vraća `test()` / `prepare()` / `send(records)`.
-2. Dodajte ga u niz `DESTINATIONS` u `src/lib/logExport/registry.ts`.
+2. Dodajte ga u polje `DESTINATIONS` u `src/lib/logExport/registry.ts`.
 3. Napišite testove u `tests/unit/`.
 
-To je cijela izmjena: sloj za trajnu pohranu, cron zadatak, REST sloj, šifriranje tajni i
-obrazac na nadzornoj ploči čitaju registar.
+To je cijela promjena: trajna pohrana, cron zadatak, REST sloj, šifriranje tajni i
+obrazac na nadzornoj ploči svi čitaju registar.
 
 Dva pravila za novo odredište:
 
-- `send()` **mora baciti iznimku** u slučaju djelomičnog neuspjeha. Uspješan završetak znači „odredište sadrži ove retke”,
-  a pokazivač se trajno pomiče iza njih.
-- Odredište koje prihvaća URL koji je unio korisnik mora ga prije dohvaćanja provjeriti putem
-  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`),
-  na isti način kao webhookovi. BigQuery to ne zahtijeva: njegovi su hostovi konstantni.
+- `send()` **mora baciti iznimku** pri djelomičnom neuspjehu. Uspješno dovršavanje znači „odredište ima ove retke”,
+  a kursor se trajno pomiče iza njih.
+- Odredište koje prihvaća URL koji je unio korisnik mora ga provjeriti putem
+  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) prije dohvaćanja,
+  na isti način kao webhookovi. BigQuery to ne treba: njegovi su poslužitelji konstante.
 
 ---
 
-## 6. Upravljanje
+## 7. Upravljanje
 
-- **Nadzorna ploča**: Integracije → Izvoz zapisnika. Dodajte odredište, pokrenite **Test** kako biste provjerili vjerodajnice
+- **Nadzorna ploča**: Integrations → Log export. Dodajte odredište, pokrenite **Test** da biste provjerili vjerodajnice
   bez zapisivanja redaka, a zatim ga omogućite.
-- **Zaostali redci**: svaka kartica odredišta prikazuje retke na čekanju i pokazivač; `GET
-/api/log-export/status` vraća iste podatke i posljednjih 20 izvođenja zadatka.
-- **Neuspjeh jednog odredišta ne uzrokuje neuspjeh ostalih** — sažetak izvođenja bilježi status za svako odredište
-  u `last_status` / `last_error`, a povijest izvođenja zadatka čuva zbirne podatke.
-- **Brisanjem odredišta briše se i njegov pokazivač.** Ponovno dodavanje započinje od najstarijeg zadržanog
-  zapisnika poziva, čime se ponovno šalju redci koje odredište možda već sadrži. U BigQueryju `insertId`
-  za svaki redak to rješava samo unutar vlastitog BigQueryjeva vremenskog okvira za uklanjanje duplikata, stoga je bolje
-  onemogućiti odredište nego ga izbrisati.
+- **Zaostatak**: kartica svakog odredišta prikazuje retke na čekanju i pokazivač; `GET
+/api/log-export/status` vraća iste podatke te posljednjih 20 pokretanja poslova.
+- **Neuspjeh jednog odredišta ne uzrokuje neuspjeh ostalih** — sažetak pokretanja bilježi status po odredištu
+  u `last_status` / `last_error`, a povijest pokretanja poslova zadržava objedinjeni status.
+- **Brisanjem odredišta briše se njegov pokazivač.** Ponovno dodavanje započinje od najstarijeg zadržanog
+  zapisa dnevnika poziva, čime se ponovno šalju retci koje odredište možda već sadrži. Na BigQueryju `insertId` po retku
+  uklanja duplikate samo unutar vlastitog BigQuery prozora za deduplikaciju, stoga je bolje onemogućiti
+  odredište nego ga brisati.
+
+### Kompatibilnost sheme dokaza o korištenju
+
+Nove BigQuery tablice uključuju nullable `usage_evidence` (STRING koji sadrži JSON) i
+`usage_estimated` (BOOL). Kada je `autoCreate` omogućen, postojeća tablica može primiti
+samo te nedostajuće nullable stupce. Izvoznik čuva cijelu postojeću shemu, uključujući metapodatke polja,
+i šalje uvjetni PATCH koristeći vraćeni etag. Istodobna promjena sheme neuspješno završava izvoz umjesto
+da je prebriše; sljedeće pokretanje ponovno čita tablicu.
+
+Kada je `autoCreate` onemogućen, dodajte te stupce sami prije izvoza zapisa
+s dokazima o korištenju. Nedostajući metapodaci sheme/etaga ili neuspjelo ažuriranje također sprječavaju umetanje
+zapisa koji sadrže dokaze. Pokazivač izvoza ne napreduje nakon tog neuspjeha i dokazi se nikada ne odbacuju
+neprimjetno. Lokalno zadržavanje dnevnika i dalje se primjenjuje dok je izvoz blokiran, stoga riješite neuspjeh
+prije nego što zadržani izvorni retci isteknu.

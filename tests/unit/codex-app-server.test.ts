@@ -286,7 +286,10 @@ test("CodexAppServerClient: notifications reach the handler; responses settle re
 // ── Executor: lifecycle order + streaming SSE Response ───────────────────────
 
 /** Drive a full streaming turn against a fake transport and return the SSE text. */
-async function runStreamingTurn(): Promise<{
+async function runStreamingTurn(
+  body: ExecuteInput["body"] = { input: "hello there" },
+  rejectReplay = false
+): Promise<{
   sent: Array<Record<string, unknown>>;
   sseText: string;
 }> {
@@ -304,6 +307,12 @@ async function runStreamingTurn(): Promise<{
     queueMicrotask(() => {
       if (frame.method === "thread/start") {
         ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: { threadId: "thr_1" } });
+      } else if (frame.method === "thread/inject_items" && rejectReplay) {
+        ctrl.emit({
+          jsonrpc: "2.0",
+          id: frame.id,
+          error: { code: -32601, message: "Unsupported method" },
+        });
       } else if (frame.method === "turn/start") {
         ctrl.emit({
           jsonrpc: "2.0",
@@ -322,7 +331,7 @@ async function runStreamingTurn(): Promise<{
     });
   };
 
-  const result = await executor.execute(makeExecuteInput());
+  const result = await executor.execute(makeExecuteInput({ body }));
   const response = "response" in result ? result.response : result;
   assert.equal(response.status, 200);
   assert.match(response.headers.get("Content-Type") ?? "", /text\/event-stream/);
@@ -420,6 +429,62 @@ test("CodexAppServerExecutor: non-streaming turn returns a JSON Response", async
   assert.match(response.headers.get("Content-Type") ?? "", /application\/json/);
   const body = (await response.json()) as Record<string, unknown>;
   assert.ok(Array.isArray(body.output));
+});
+
+/** Run a stream:false turn whose only notification after turn/start is `error`. */
+async function runNonStreamTurnWithError(params: Record<string, unknown>): Promise<Response> {
+  const ctrl = makeFakeSocket();
+  const { fn } = fakeTransport(ctrl);
+  const executor = new CodexAppServerExecutor({ websocketFn: fn });
+  ctrl.socket.send = ((originalSend) => (data: string) => {
+    originalSend(data);
+    const frame = JSON.parse(data) as Record<string, unknown>;
+    if (frame.id == null || !frame.method) return;
+    queueMicrotask(() => {
+      if (frame.method === "thread/start") {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: { threadId: "thr_1" } });
+      } else if (frame.method === "turn/start") {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: {} });
+        ctrl.emit({ jsonrpc: "2.0", method: "error", params });
+      } else {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: {} });
+      }
+    });
+  })(ctrl.socket.send);
+
+  const result = await executor.execute(makeExecuteInput({ stream: false }));
+  return "response" in result ? result.response : (result as Response);
+}
+
+test("execute (non-stream): usageLimitExceeded answers a real 429, not a 200 error body (#19255)", async () => {
+  const response = await runNonStreamTurnWithError({
+    error: {
+      message: "You've hit your usage limit. Try again at 6:42 AM.",
+      codexErrorInfo: "usageLimitExceeded",
+    },
+    willRetry: false,
+  });
+
+  assert.equal(response.status, 429);
+  const body = (await response.json()) as {
+    error: { message: string; type: string; code: string };
+  };
+  assert.equal(body.error.type, "rate_limit_error");
+  // The public body carries the closed 429 identifier, same as the streaming path.
+  assert.equal(body.error.code, "rate_limit_exceeded");
+  assert.match(body.error.message, /hit your usage limit/);
+});
+
+test("execute (non-stream): a generic turn failure keeps the 200 Responses error body", async () => {
+  const response = await runNonStreamTurnWithError({
+    error: { message: "Internal server error occurred" },
+    willRetry: false,
+  });
+
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as { status?: string; error?: { code?: string } };
+  assert.equal(body.status, "failed");
+  assert.equal(body.error?.code, "codex_app_server_turn_failed");
 });
 
 // ── Tool path: INBOUND advertise + OUTBOUND passthrough ──────────────────────
@@ -558,6 +623,140 @@ test("CodexAppServerExecutor: item/tool/call is settled and surfaced as a Respon
   assert.ok(sseText.includes("SF"), "the tool arguments are relayed");
   assert.match(sseText, /event: response\.completed/);
   assert.ok(sseText.includes("[DONE]"));
+});
+
+test("CodexAppServerExecutor: a harness tool result is replayed into the next thread", async () => {
+  const first = await runToolTurn();
+  const completed = first.sseText
+    .split("\n")
+    .filter((line) => line.startsWith("data: {") && line.includes('"response.completed"'))
+    .map((line) => JSON.parse(line.slice(6)));
+  const call = completed[0].response.output.find(
+    (item: { type: string }) => item.type === "function_call"
+  );
+  assert.ok(call, "first request must surface a function call for the harness");
+  const result = { type: "function_call_output", call_id: call.call_id, output: "SF: 18C" };
+  const second = await runStreamingTurn({
+    input: [{ role: "user", content: "what's the weather?" }, call, result],
+    tools: [{ type: "function", name: "get_weather", parameters: { type: "object" } }],
+  });
+
+  const replay = second.sent.find((frame) => frame.method === "thread/inject_items");
+  assert.ok(replay, "the fresh app-server thread must receive the harness's history");
+  assert.deepEqual(replay.params, {
+    threadId: "thr_1",
+    items: [
+      {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "what's the weather?" }],
+      },
+      call,
+      result,
+    ],
+  });
+  assert.deepEqual(
+    second.sent.filter((frame) => frame.method).map((frame) => frame.method),
+    ["initialize", "thread/start", "thread/inject_items", "turn/start"]
+  );
+  const turn = second.sent.find((frame) => frame.method === "turn/start");
+  assert.deepEqual((turn!.params as Record<string, unknown>).input, []);
+  assert.match(second.sseText, /Hello/);
+});
+
+test("CodexAppServerExecutor: system instructions survive native tool-history replay", async () => {
+  const content = [{ type: "input_text", text: "Follow SYSTEM_MARKER when answering." }];
+  const call = {
+    type: "function_call",
+    name: "get_weather",
+    call_id: "call_system",
+    arguments: "{}",
+  };
+  const result = { type: "function_call_output", call_id: "call_system", output: "18C" };
+  for (const system of [
+    { type: "message", role: "system", content },
+    { role: "system", content: "Follow SYSTEM_MARKER when answering." },
+  ]) {
+    const { sent } = await runStreamingTurn({
+      input: [system, { role: "developer", content: "Keep developer instructions." }, call, result],
+    });
+    const replay = sent.find((frame) => frame.method === "thread/inject_items");
+    assert.ok(replay);
+    assert.deepEqual((replay.params as Record<string, unknown>).items, [
+      { type: "message", role: "developer", content },
+      {
+        type: "message",
+        role: "developer",
+        content: [{ type: "input_text", text: "Keep developer instructions." }],
+      },
+      call,
+      result,
+    ]);
+    assert.equal(system.role, "system", "normalization must not mutate the caller's history");
+  }
+});
+
+for (const type of ["custom_tool_call_output", "tool_search_output"]) {
+  test(`CodexAppServerExecutor: preserves structured ${type} history`, async () => {
+    const call =
+      type === "tool_search_output"
+        ? {
+            type: "tool_search_call",
+            call_id: "call_history",
+            execution: "client",
+            arguments: { query: "docs" },
+          }
+        : {
+            type: "custom_tool_call",
+            call_id: "call_history",
+            name: "apply_patch",
+            input: "patch",
+          };
+    const output =
+      type === "tool_search_output"
+        ? { type, call_id: "call_history", status: "completed", execution: "client", tools: [] }
+        : {
+            type,
+            call_id: "call_history",
+            output: [{ type: "input_text", text: "patch applied" }],
+          };
+    const body = {
+      input: [
+        { role: "assistant", content: "I will run the tool." },
+        call,
+        output,
+        { type: "message", role: "user", content: [{ type: "input_text", text: "continue" }] },
+      ],
+    };
+    const { sent } = await runStreamingTurn(body);
+    const replay = sent.find((frame) => frame.method === "thread/inject_items");
+    assert.ok(replay);
+    assert.deepEqual((replay.params as Record<string, unknown>).items, [
+      {
+        type: "message",
+        role: "assistant",
+        content: [{ type: "output_text", text: "I will run the tool." }],
+      },
+      call,
+      output,
+      body.input[3],
+    ]);
+  });
+}
+
+test("CodexAppServerExecutor: rejected replay fails without silently losing tool history", async () => {
+  const { sent, sseText } = await runStreamingTurn(
+    {
+      input: [{ type: "function_call_output", call_id: "call_history", output: "completed" }],
+    },
+    true
+  );
+  assert.equal(
+    sent.some((frame) => frame.method === "turn/start"),
+    false
+  );
+  assert.match(sseText, /response.failed/);
+  assert.match(sseText, /codex_app_server_turn_failed/);
 });
 
 // REGRESSION (live BUG#3, 2026-08-22): the real codex app-server ACCEPTS a turn

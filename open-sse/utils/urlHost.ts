@@ -45,6 +45,20 @@ export function isUrlHostOrSubdomain(value: string | null | undefined, domain: s
   return parsed === expected || parsed.endsWith(`.${expected}`);
 }
 
+/**
+ * True for a loopback hostname: `localhost`, `::1` (bracketed or not) or a literal IPv4 in
+ * `127.0.0.0/8`. A DNS name that merely starts with `127.` (`127.example.com`) is not loopback.
+ */
+export function isLoopbackHostname(hostname: string | null | undefined): boolean {
+  if (typeof hostname !== "string") return false;
+  const host = hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (host === "localhost" || host === "::1") return true;
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!m) return false;
+  const octets = m.slice(1).map(Number);
+  return octets.every((n) => n <= 255) && octets[0] === 127;
+}
+
 function tryHostname(candidate: string): string | null {
   try {
     const hostname = new URL(candidate).hostname;

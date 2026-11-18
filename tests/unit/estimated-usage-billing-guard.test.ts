@@ -110,21 +110,35 @@ function usageEstimatedMeta(entry: unknown): unknown {
   return responseBody?._omniroute?.usageEstimated;
 }
 
-test("extraction keeps an internal estimated marker that never serializes or spreads", () => {
-  const estimatedChunk = { choices: [], usage: { ...USAGE, estimated: true } };
-  const reportedChunk = { choices: [], usage: { ...USAGE } };
-  const estimated = extractUsage(estimatedChunk);
-  const reported = extractUsage(reportedChunk);
+test("extraction preserves serializable field evidence and estimates through copies", () => {
+  const estimated = extractUsage({ choices: [], usage: { ...USAGE, estimated: true } });
+  const reported = extractUsage({ choices: [], usage: { ...USAGE } });
+  const tokenFields = { prompt_tokens: 1200, completion_tokens: 800 };
+  const evidence = {
+    input: { source: "estimated", method: "legacy_estimate" },
+    output: { source: "estimated", method: "legacy_estimate" },
+    cacheRead: { source: "unknown" },
+    cacheCreation: { source: "unknown" },
+  };
+  assert.deepStrictEqual(estimated, { ...tokenFields, usage_evidence: evidence, estimated: true });
+  assert.deepStrictEqual(reported, {
+    ...tokenFields,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
+  });
   assert.equal(isEstimatedUsage(estimated), true);
   assert.equal(isEstimatedUsage(reported), false);
-  assert.deepStrictEqual(estimated, reported, "token fields are untouched");
-  assert.equal(JSON.stringify(estimated), JSON.stringify(reported));
-  assert.equal(isEstimatedUsage({ ...estimated }), false, "spread copies never carry it");
-  assert.equal(isEstimatedUsage(filterUsageForFormat(estimated, "openai")), false);
-
+  assert.equal(isEstimatedUsage({ ...estimated }), true);
+  assert.equal(isEstimatedUsage(JSON.parse(JSON.stringify(estimated))), true);
+  assert.equal(isEstimatedUsage(filterUsageForFormat(estimated, "openai")), true);
   const fromResponse = extractUsageFromResponse({ usage: { ...USAGE, estimated: true } }, "x");
   assert.equal(isEstimatedUsage(fromResponse), true);
-  assert.equal(JSON.stringify(fromResponse).includes("estimated"), false);
+  assert.deepEqual(fromResponse.usage_evidence, evidence);
+  assert.equal(JSON.parse(JSON.stringify(fromResponse)).estimated, true);
   assert.equal(isEstimatedUsage(extractUsageFromResponse({ usage: { ...USAGE } }, "x")), false);
 });
 

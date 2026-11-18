@@ -67,6 +67,14 @@
 - [`GET /api/services/llmlingua/status`](#get-apiservicesllmlinguastatus)
 - [`POST /api/services/llmlingua/auto-start`](#post-apiservicesllmlinguaauto-start)
 - [`POST /api/services/llmlingua/auto-restart-adopted`](#post-apiservicesllmlinguaauto-restart-adopted)
+- [`POST /api/services/singbox/install`](#post-apiservicessingboxinstall)
+- [`POST /api/services/singbox/start`](#post-apiservicessingboxstart)
+- [`POST /api/services/singbox/stop`](#post-apiservicessingboxstop)
+- [`POST /api/services/singbox/restart`](#post-apiservicessingboxrestart)
+- [`POST /api/services/singbox/update`](#post-apiservicessingboxupdate)
+- [`GET /api/services/singbox/status`](#get-apiservicessingboxstatus)
+- [`POST /api/services/singbox/auto-start`](#post-apiservicessingboxauto-start)
+- [`POST /api/services/singbox/auto-restart-adopted`](#post-apiservicessingboxauto-restart-adopted)
 - [`GET /api/services/{name}/logs`](#get-apiservicesnamelogs)
 - [`GET /api/services/9router/models`](#get-apiservices9routermodels)
 - [`POST /api/services/9router/provider-expose`](#post-apiservices9routerprovider-expose)
@@ -867,6 +875,108 @@ When enabled, an externally-adopted (not OmniRoute-spawned) LLMLingua process is
 
 ```bash
 curl -X POST http://localhost:20128/api/services/llmlingua/auto-restart-adopted \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/install
+
+Install sing-box
+
+Downloads the pinned sing-box release binary from GitHub (SagerNet/sing-box) and verifies its SHA256 against a checksum baked into `src/lib/services/installers/singbox.ts` before writing it to DATA_DIR/services/singbox/. Any version other than the pinned one is rejected. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/install \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/start
+
+Start sing-box
+
+Spawns `sing-box run -c config.json`. Idempotent if already running. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/start \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/stop
+
+Stop sing-box
+
+Gracefully stops sing-box. Idempotent. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/stop \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/restart
+
+Restart sing-box
+
+stop() then start() under the operation lock. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/restart \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/update
+
+Re-verify/reinstall the pinned sing-box release
+
+Stops, re-downloads and checksum-verifies the pinned release, restarts. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/update \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/services/singbox/status
+
+Get sing-box status
+
+Returns live supervisor state and DB metadata. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl http://localhost:20128/api/services/singbox/status \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/services/singbox/auto-start
+
+Toggle sing-box auto-start
+
+When enabled, sing-box starts automatically on the next OmniRoute boot. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/auto-start \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/services/singbox/auto-restart-adopted
+
+Toggle sing-box auto-restart-when-adopted
+
+When enabled, an externally-adopted (not OmniRoute-spawned) sing-box process is restarted under OmniRoute's own supervisor on the next health-check cycle instead of being left as adopted-only. **LOCAL_ONLY** — loopback only.
+
+```bash
+curl -X POST http://localhost:20128/api/services/singbox/auto-restart-adopted \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

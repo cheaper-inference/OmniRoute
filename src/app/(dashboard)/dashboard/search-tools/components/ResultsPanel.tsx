@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Badge, Button } from "@/shared/components";
 import Editor from "@/shared/components/MonacoEditor";
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 interface SearchResult {
   title: string;
@@ -120,7 +120,7 @@ export default function ResultsPanel({
       {/* Content */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <Icon name="progress_activity" size={24} className="text-primary animate-spin" />
+          <Spinner size="md" />
         </div>
       )}
 

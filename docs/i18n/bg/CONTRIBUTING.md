@@ -8,15 +8,20 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Настройка на средата за разработка
+## Настройка на разработката
 
 ### Предварителни изисквания
 
 - **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (препоръчва се: 24 LTS)
 - **npm** 10+
 
-> **За потребители на npm v11+ (Node 24+):** След `npm install` проверете дали нативните модули са инсталирани:
-> `node -e "require('better-sqlite3')"`. Ако командата завърши неуспешно с `MODULE_NOT_FOUND`,
+> **Windows с Node 24:** използвайте текущата 24 LTS коригираща версия (поне 24.20.0).
+> По-ранните версии могат да прекратят изпълнението след успешно приключили тестове, когато `--test-force-exit` затвори
+> процеса. [Корекцията на Windows libuv](https://github.com/nodejs/node/pull/61999) отстранява
+> този срив по време на изпълнение; оставете проверките на твърденията в тестовете и проверките за изход на изпълнителя активирани.
+
+> **Потребители на npm v11+ (Node 24+):** След `npm install` проверете дали са инсталирани нативните модули:
+> `node -e "require('better-sqlite3')"`. Ако командата завърши с грешка `MODULE_NOT_FOUND`,
 > изпълнете `npm approve-scripts better-sqlite3 && npm install`. Вижте
 > [Отстраняване на неизправности](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -36,88 +41,83 @@ npm install
 # Създайте своя .env от шаблона
 cp .env.example .env
 
-# Генерирайте необходимите тайни стойности
+# Генерирайте необходимите секрети
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Основни променливи за разработка:
 
-| Променлива             | Стойност по подразбиране за разработка | Описание                            |
-| ---------------------- | -------------------------------------- | ----------------------------------- |
-| `PORT`                 | `20128`                                | Порт на сървъра                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Основен URL адрес за интерфейса     |
-| `JWT_SECRET`           | (генерирайте по-горе)                  | Тайна стойност за подписване на JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                             | Парола за първоначално влизане      |
-| `APP_LOG_LEVEL`        | `info`                                 | Ниво на подробност на регистрите    |
+| Променлива             | Стойност по подразбиране за разработка | Описание                           |
+| ---------------------- | -------------------------------------- | ---------------------------------- |
+| `PORT`                 | `20128`                                | Порт на сървъра                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базов URL адрес за frontend        |
+| `JWT_SECRET`           | (генерирайте по-горе)                  | Секретен ключ за подписване на JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`                             | Парола за първото влизане          |
+| `APP_LOG_LEVEL`        | `info`                                 | Ниво на подробност на журналите    |
 
-### Настройки на таблото за управление
+### Настройки на таблото
 
-Таблото за управление предоставя превключватели в потребителския интерфейс за функции, които могат да бъдат конфигурирани и чрез променливи на средата:
+Таблото предоставя превключватели в потребителския интерфейс за функции, които могат да бъдат конфигурирани и чрез променливи на средата:
 
-| Местоположение на настройката | Превключвател                   | Описание                                                               |
-| ----------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
-| Настройки → Разширени         | Режим за отстраняване на грешки | Активиране на регистри за заявки за отстраняване на грешки (интерфейс) |
-| Настройки → Общи              | Видимост на страничната лента   | Показване/скриване на секциите на страничната лента                    |
+| Местоположение на настройката | Превключвател      | Описание                                                         |
+| ----------------------------- | ------------------ | ---------------------------------------------------------------- |
+| Settings → Advanced           | Debug Mode         | Активиране на журналите за заявки за отстраняване на грешки (UI) |
+| Settings → General            | Sidebar Visibility | Показване/скриване на секциите на страничната лента              |
 
-Тези настройки се съхраняват в базата данни и се запазват между рестартиранията, като при задаване заменят стойностите по подразбиране на променливите на средата.
+Тези настройки се съхраняват в базата данни и се запазват между рестартиранията, като заменят стойностите по подразбиране на променливите на средата, когато са зададени.
 
-### Локално стартиране
+### Локално изпълнение
 
 ```bash
 # Режим за разработка (автоматично презареждане)
 npm run dev
 
-# Продукционна компилация
-npm run build    # next build → .build/next/, след което assembleStandalone → dist/
+# Компилация за продукционна среда
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Бързо компилиране само на бекенда/API за промени от сътрудници
+# Бърза компилация само на backend/API за промени от сътрудници
 npm run build:contributor
 
-# Компилация за издание (чиста повторна компилация + HEAD маркер — задължително за внедряване)
-npm run build:release   # rm -rf .build dist && компилация + записва dist/BUILD_SHA
+# Компилация за издаване (чиста повторна компилация + HEAD маркер — необходима за внедряване)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Обичайна конфигурация на порта
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Компилацията за сътрудници извършва проверка само чрез компилиране: тя не сглобява самостоятелната
-дистрибуция и не изгражда незадължителните нативни ресурси за пакетиране. Използвайте стандартната
-продукционна компилация, когато трябва да проверите пакета, предназначен за разпространение.
+Компилацията за сътрудници извършва само проверка чрез компилация: тя не събира самостоятелната дистрибуция и не компилира незадължителните нативни пакетиращи ресурси. Използвайте стандартната продукционна компилация, когато трябва да проверите пакета, готов за доставка.
 
-### Структура на изходните директории от компилацията
+### Структура на изхода от компилацията
 
-| Директория | Съдържание                                                                             | Проследява се |
-| ---------- | -------------------------------------------------------------------------------------- | ------------- |
-| `src/`     | Изходен код на приложението (TypeScript / TSX)                                         | Да            |
-| `.build/`  | Междинни файлове — изход от `next build` (игнорира се от git, `distDir = .build/next`) | Не            |
-| `dist/`    | Пакет за разпространение — сглобен от `assembleStandalone` (игнорира се от git)        | Не            |
+| Директория | Съдържание                                                                     | Проследява се |
+| ---------- | ------------------------------------------------------------------------------ | ------------- |
+| `src/`     | Изходен код на приложението (TypeScript / TSX)                                 | Да            |
+| `.build/`  | Междинни файлове — изход от `next build` (gitignored, `distDir = .build/next`) | Не            |
+| `dist/`    | Пакет, готов за доставка — събран от `assembleStandalone` (gitignored)         | Не            |
 
-Процесът на компилация се изпълнява в един проход:
+Конвейерът за компилация преминава на един етап:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (изход от Next.js)
-  └─ assembleStandalone()                 (копира самостоятелния пакет + статичните + публичните + нативните ресурси)
-       └─ изход: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` допълнително изчиства първо и двете директории и записва
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) като маркер за целостта при внедряване.
+`npm run build:release` допълнително изчиства и двете директории и записва
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) като маркер за целостност при внедряване.
 
-`npm run build:contributor` използва профила за компилация само на бекенда. По време на компилацията той временно замества
-файловете на потребителския интерфейс на таблото с временни заместители, запазва обработчиците на API маршрути и възстановява оригиналните файлове
-след компилацията. Използвайте `npm run build` за промени, които засягат потребителския интерфейс на таблото, или за пълна
-проверка на изданието; профилът за сътрудници не е заместител на компилацията за издание.
+`npm run build:contributor` използва профила за компилация само на backend. Той временно заменя файловете на потребителския интерфейс на таблото с временни файлове по време на компилацията, запазва обработващите API маршрути и възстановява оригиналните файлове след компилацията. Използвайте `npm run build` за промени, които засягат потребителския интерфейс на таблото, или за пълна проверка преди издаване; профилът за сътрудници не е заместител на компилацията за издаване.
 
-> **Бележка за внедряване на VPS:** отдалечената директория на образа `/usr/lib/node_modules/omniroute/app/`
-> остава непроменена. Инструментите за внедряване синхронизират чрез rsync съдържанието на `dist/` в нея.
-> Променен е само пътят до изходните файлове от компилацията в хранилището (`app/` → `dist/`).
+> **Бележка за внедряване във VPS:** отдалечената директория с образа `/usr/lib/node_modules/omniroute/app/`
+> остава непроменена. Уменията за внедряване синхронизират съдържанието на `dist/` в нея.
+> Преместен е само пътят до изхода от компилацията в хранилището (`app/` → `dist/`).
 
 URL адреси по подразбиране:
 
-- **Табло за управление**: `http://localhost:20128/dashboard`
+- **Табло**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -294,67 +294,67 @@ production компилацията са отговорност на CI — ло
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Страници на таблото (23 раздела)
-│   ├── api/                # API маршрути (51 директории)
-│   └── login/              # Страници за удостоверяване (.tsx)
-├── domain/                 # Механизъм за политики (policyEngine, comboResolver, costRules и др.)
-├── lib/                    # Основна бизнес логика (.ts)
-│   ├── a2a/                # Сървър за протокола Agent-to-Agent v0.3
-│   ├── acp/                # Регистър на Agent Communication Protocol
-│   ├── compliance/         # Механизъм за политики за съответствие
-│   ├── db/                 # Домейн модули за SQLite + 130 миграции
-│   ├── memory/             # Постоянна памет за разговори
-│   ├── oauth/              # OAuth доставчици, услуги и помощни инструменти
-│   ├── skills/             # Разширяема рамка за умения
-│   ├── usage/              # Проследяване на използването и изчисляване на разходите
-│   └── localDb.ts          # Само слой за повторно експортиране — никога не добавяйте логика тук
-├── middleware/              # Междинен софтуер за заявки (promptInjectionGuard)
-├── mitm/                   # MITM прокси (сертификат, DNS, маршрутизиране към целта)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React компоненти (.tsx)
-│   ├── constants/          # Дефиниции на доставчици (329), MCP обхвати, 20 стратегии за маршрутизиране
-│   ├── utils/              # Прекъсвач на веригата, филтър, помощни функции за удостоверяване
-│   └── validation/         # Zod v4 схеми
-└── sse/                    # Конвейер за SSE прокси
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Работно пространство на @omniroute/open-sse
-├── executors/              # 150 модула за изпълнение (класове за изпълнение + помощни функции за всеки доставчик)
-├── handlers/               # 11 манипулатора на заявки (чат, отговори, вграждания, изображения и др.)
-├── mcp-server/             # MCP сървър (110 уникални инструмента, 3 транспорта, 33 обхвата)
-├── services/               # 178 услуги от най-високо ниво (combo, autoCombo, rateLimitManager и др.)
-├── translator/             # Преобразуватели на формати (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Преобразувател за Responses API
-└── utils/                  # 22 помощни модула (поточно предаване, TLS, прокси, регистриране)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron настолно приложение (за множество платформи)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Среда за изпълнение на тестове на Node.js (1 574 тестови файла)
-├── integration/            # Интеграционни тестове
-├── e2e/                    # Playwright тестове
-├── security/               # Тестове за сигурност
-├── translator/             # Специализирани тестове за преобразувателя
-└── load/                   # Тестове за натоварване
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Записи на архитектурни решения
-├── architecture/            # Системна архитектура и устойчивост
-├── comparison/              # OmniRoute спрямо алтернативите
-├── compression/             # Ръководства и правила за компресиране
-├── dev/                     # Ръководства за разработка
-├── diagrams/                # Архитектурни диаграми
-├── frameworks/              # MCP, A2A, OpenCode, памет, умения
-├── guides/                  # Ръководство за потребителя, Docker, настройка, отстраняване на неизправности
-├── i18n/                    # Интернационализирани преводи на README
-├── marketing/               # Маркетингови материали
-├── ops/                     # Внедряване, прокси, покритие, издания
-├── providers/               # Документация за конкретни доставчици
-├── reference/               # Справочник за API, променливи на средата, CLI инструменти, безплатни нива
-├── releases/                # Бележки по изданията
-├── routing/                 # Механизъм за автоматични комбинации, повторно изпълнение на разсъждения
-├── screenshots/             # Екранни снимки на таблото
-├── security/                # Защитни механизми, съответствие, прикриване, токени
-└── specs/                   # Спецификации на дизайна
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -395,22 +395,22 @@ docs/
 
 ---
 
-## Контролен списък за Pull Request
+## Контролен списък за заявка за изтегляне
 
-- [ ] Тестовете преминават успешно (`npm test`)
-- [ ] Проверката за стил преминава успешно (`npm run lint`)
-- [ ] Компилацията е успешна (`npm run build`)
-- [ ] Добавени са TypeScript типове за новите публични функции и интерфейси
-- [ ] Няма твърдо зададени тайни или резервни стойности
-- [ ] Публичните идентификационни данни от upstream са вградени чрез `resolvePublicCred()` (вижте [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), никога като литерали
-- [ ] Отговорите при грешки преминават през `buildErrorBody()` / `sanitizeErrorMessage()` — без необработени stack trace данни в телата на отговорите (вижте [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Shell командите (`exec` / `spawn`) предават стойностите по време на изпълнение чрез `env`, а не чрез интерполация на низове
-- [ ] Всички входни данни са валидирани със Zod схеми
-- [ ] Добавен е **фрагмент** към регистъра на промените в `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` за промени, видими за потребителите (вижте [`changelog.d/README.md`](./changelog.d/README.md)) — **не** редактирайте директно `CHANGELOG.md`; фрагментите се обединяват при издаване на версия и никога не създават конфликти между PR-и
-- [ ] Документацията е актуализирана (ако е приложимо)
-- [ ] Няма нови предупреждения от CodeQL / Secret-Scanning или всяко от тях е отхвърлено с техническа обосновка, която препраща към съответния документ в `docs/security/`
-- [ ] Маршрутите, които стартират дъщерни процеси (`/api/mcp/`, `/api/cli-tools/runtime/`), са класифицирани като `isLocalOnlyPath()` в `src/server/authz/routeGuard.ts` — вижте [Строго правило №15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Няма AI/bot трейлъри `Co-authored-by` в съобщенията за commit-и (Строго правило №16) — човешките сътрудници, чиято работа е използвана повторно, се посочват със стандартни трейлъри `Co-authored-by: Name <email>`
+- [ ] Тестовете са преминали (`npm test`)
+- [ ] Линтинг пропуски (`npm run lint`)
+- [ ] Изграждането е успешно (`npm run build`)
+- [ ] добавени типове TypeScript за нови публични функции и интерфейси
+- [ ] Без твърдо кодирани тайни или резервни стойности
+- [ ] Публични идентификационни данни нагоре, вградени чрез `resolvePublicCred()` (вижте [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), никога като литерали
+- [ ] Маршрут на отговорите за грешка през `buildErrorBody()` / `sanitizeErrorMessage()` — няма необработени следи на стека в телата на отговора (вижте [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Командите на Shell (`exec` / `spawn`) предават стойности по време на изпълнение чрез `env`, а не чрез интерполация на низ
+- [ ] Всички въведени данни са валидирани с Zod схеми
+- [ ] Дневник на промените** фрагмент** добавен под `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` за промени, обърнати към потребителя (вижте [`changelog.d/README.md`](./changelog.d/README.md) ) — do** не** редактирайте директно `CHANGELOG.md` ; фрагментите се агрегират по време на освобождаване и никога не влизат в конфликт между PRs
+- [ ] Актуализирана документация (ако е приложимо)
+- [ ] Няма отворени нови сигнали CodeQL /тайно сканиране или всяко от тях е отхвърлено с техническа обосновка, препращаща към съответния `docs/security/` документ
+- [ ] Маршрути, които раждат дъщерни процеси (`/api/mcp/`, `/api/cli-tools/runtime/`), класифицирани като `isLocalOnlyPath()` в `src/server/authz/routeGuard.ts` — вижте [Hard Rule #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Без AI/bot `Co-authored-by` трейлъри в съобщенията за ангажиране (твърдо правило #16) — човешки сътрудници, чиято работа се използва повторно, се кредитират със стандартни `Co-authored-by: Name <email>` трейлъри
 
 ---
 

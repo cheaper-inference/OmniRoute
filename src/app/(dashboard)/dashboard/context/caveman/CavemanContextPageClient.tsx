@@ -186,6 +186,7 @@ export default function CavemanContextPageClient() {
         description={t("description")}
         actions={
           <SegmentedControl
+            semantics="radio"
             aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}
@@ -252,7 +253,7 @@ export default function CavemanContextPageClient() {
         <Alert
           variant="warning"
           icon={<Icon name="info" size={18} />}
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
           description={t("masterDisabledWarning")}
         />
       )}

@@ -9,11 +9,9 @@
 
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { listPlaygroundPresets, createPlaygroundPreset } from "@/lib/db/playgroundPresets";
+import { getPlaygroundPresetRepository } from "@/lib/db/playgroundPresets";
+import { checkPlaygroundPresetAuth } from "@/lib/api/playgroundPresetAuth";
 import { PlaygroundPresetCreateSchema } from "@/shared/schemas/playground";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { paginationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
@@ -30,26 +28,8 @@ function errorResp(status: number, message: string): Response {
 }
 
 async function checkAuth(request: Request): Promise<Response | null> {
-  const apiKeyRaw = extractApiKey(request);
-  // External-client path: if an API key is presented it MUST be valid.
-  if (apiKeyRaw) {
-    if (!(await isValidApiKey(apiKeyRaw))) {
-      return errorResp(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-    }
-    return null;
-  }
-  // Dashboard path: the Playground page itself calls this route with a
-  // cookie/session (no API key). Under REQUIRE_API_KEY=true that previously
-  // 401'd the authenticated dashboard (QA P1: preset auth mismatch). Accept a
-  // valid management/dashboard session as an alternative to an API key.
-  const managementError = await requireManagementAuth(request);
-  if (!managementError) return null;
-  // Neither an API key nor a valid dashboard session: enforce only when
-  // API-key enforcement is on (preserves the legacy anonymous-allowed default).
-  if (isRequireApiKeyEnabled()) {
-    return errorResp(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  return null;
+  const error = await checkPlaygroundPresetAuth(request);
+  return error ? errorResp(HTTP_STATUS.UNAUTHORIZED, error) : null;
 }
 
 export async function OPTIONS(): Promise<Response> {
@@ -78,7 +58,9 @@ export async function GET(request: Request): Promise<Response> {
       });
     }
     const { limit, offset } = validation.data;
-    const result = listPlaygroundPresets(limit !== undefined ? { limit, offset } : undefined);
+    const result = await getPlaygroundPresetRepository().list(
+      limit !== undefined ? { limit, offset } : undefined
+    );
     return new Response(JSON.stringify({ presets: result.items, total: result.total }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...CORS_HEADERS },
@@ -121,7 +103,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // 3. Create preset (Hard Rule #5 — via DB module)
   try {
-    const created = createPlaygroundPreset({
+    const created = await getPlaygroundPresetRepository().create({
       name: body.name,
       endpoint: body.endpoint,
       model: body.model,

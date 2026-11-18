@@ -6,10 +6,9 @@
  *   - AccountDonut.js, ApiKeyDonut.js, ProviderCostDonut.js
  *   - ApiKeyTable.js, ModelTable.js
  *   - WeeklyPattern.js, MostActiveDay7d.js, WeeklySquares7d.js
- *   - UsageDetail.js, SortIndicator.js
+ *   - UsageDetail.js
  */
 export {
-  SortIndicator,
   StatCard,
   CompactStatGrid,
   ActivityHeatmap,

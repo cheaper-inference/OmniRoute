@@ -3,6 +3,7 @@
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab.tsx
 
@@ -474,8 +475,11 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
             <span className="text-[10px] text-text-muted uppercase mb-1 px-1">
               {t("role.assistant")}
             </span>
-            <div className="px-4 py-2 rounded-2xl text-sm bg-bg-alt border border-border rounded-tl-sm text-text-muted flex items-center gap-2">
-              <Icon name="progress_activity" size={16} className="animate-spin" />
+            <div
+              role="status"
+              className="px-4 py-2 rounded-2xl text-sm bg-bg-alt border border-border rounded-tl-sm text-text-muted flex items-center gap-2"
+            >
+              <Spinner decorative size="sm" />
               {t("generating")}
             </div>
           </div>

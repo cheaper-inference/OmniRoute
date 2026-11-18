@@ -11,7 +11,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { hasUsableWebSessionCredential } from "@/shared/providers/webSessionCredentials";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../../utils/numeric.ts";
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getTokenLimit } from "../contextManager";
@@ -33,7 +33,12 @@ import { resolveVirtualCost } from "../providerCostData";
 import type { AutoVariant } from "./autoPrefix";
 import { buildFamilyCandidateFilter, type ModelFamily } from "./modelFamily";
 import { getHiddenModelsByProvider } from "@/models";
-import { getSyncedAvailableModelsByConnection, getCustomModels } from "@/lib/db/models";
+import {
+  admitSyncedModelsByConnection,
+  getActiveConnectionAdmissionRefs,
+  getCustomModels,
+  getSyncedAvailableModelsByConnection,
+} from "@/lib/db/models";
 import { filterPaidOnlyCandidatesWithDiagnosis } from "./paidModelFilter";
 import { filterLockoutCandidates, warnPoolDrop } from "./modelLockoutFilter";
 import { filterModelExposureCandidates } from "./modelExposureFilter";
@@ -352,7 +357,9 @@ const SYNTHETIC_NOAUTH_CONNECTION_ID = RESILIENCE_NOAUTH_CONNECTION_ID;
 // No-auth providers must opt into prompt-emulated tool calling before entering
 // reliability-curated auto/* pools. Local CLI providers additionally need a
 // successful readiness probe before they are admitted; direct provider/model
-// routing remains unaffected.
+// routing remains unaffected. Family pools bypass only the allowlist: the
+// readiness probe applies to every pool, because a provider that cannot run on
+// this host is never a usable candidate (#18417).
 function isChatAutoComboNoAuthProvider(
   providerDef: NoAuthProviderDefinition,
   bypassAllowlist: boolean
@@ -360,7 +367,7 @@ function isChatAutoComboNoAuthProvider(
   if (providerDef.noAuth !== true) return false;
   if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerDef.id))
     return false;
-  if (!bypassAllowlist && !isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
+  if (!isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
   if (!Array.isArray(providerDef.serviceKinds) || providerDef.serviceKinds.length === 0)
     return true;
   return providerDef.serviceKinds.includes("llm");
@@ -631,10 +638,15 @@ export async function prepareVirtualAutoComboInputs(
     // back to the static catalog only when the user has none. This keeps catalog-only
     // models (e.g. openrouter/auto) out of every auto/* pool when the operator only
     // synced a subset (e.g. OpenRouter with importFreeModelsOnly).
-    const [syncedByConnection, rawCustomModels] = await Promise.all([
+    // A free-only connection contributes only its free rows; a provider whose
+    // free-only connections list no free model has nothing to expand.
+    const [storedByConnection, admissionRefs, rawCustomModels] = await Promise.all([
       getSyncedAvailableModelsByConnection(providerId),
+      getActiveConnectionAdmissionRefs(providerId),
       getCustomModels(providerId),
     ]);
+    const admitted = admitSyncedModelsByConnection(providerId, storedByConnection, admissionRefs);
+    const syncedByConnection = admitted.byConnection;
     // The `customModels` key_value blob is operator-writable and is stored as raw
     // parsed JSON, so a row can be `null` or a non-object. The catalog builder
     // already filters those out (catalog.ts, "Add custom models"); without the same
@@ -669,7 +681,7 @@ export async function prepareVirtualAutoComboInputs(
     }
     // Decided before dropping non-chat ids: an image-only sync must not fall back to
     // the provider's static catalog.
-    const hasUserModels = userVisibleIds.size > 0;
+    const hasUserModels = admitted.freeOnlyExhausted || userVisibleIds.size > 0;
     const modelIds = hasUserModels
       ? Array.from(userVisibleIds)
       : Array.from(new Set([...registryModelIds, ...defaultModelIds]));

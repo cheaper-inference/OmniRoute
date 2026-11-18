@@ -10,6 +10,9 @@ import assert from "node:assert/strict";
 import { muse_codeProvider } from "../../open-sse/config/providers/registry/muse-code/index.ts";
 import { getRegistryEntry } from "../../open-sse/config/providerRegistry.ts";
 import { OAUTH_PROVIDERS, supportsDualAuthProvider } from "../../src/shared/constants/providers.ts";
+import { MuseCodeExecutor } from "../../open-sse/executors/muse-code.ts";
+import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { getDefaultExecutor } from "../../open-sse/executors/defaultResolver.ts";
 
 // ── Registry entry structure ────────────────────────────────────────────────
 
@@ -95,4 +98,35 @@ test("muse-code is dual-auth with an OAuth catalog card", () => {
   assert.equal(supportsDualAuthProvider("muse-code"), true);
   assert.equal(OAUTH_PROVIDERS["muse-code"]?.id, "muse-code");
   assert.equal(muse_codeProvider.baseUrl, "https://api.meta.ai/v1/responses");
+});
+
+// ── #13634: MuseCodeExecutor ──────────────────────────────────────────────────
+
+test("muse-code resolves to MuseCodeExecutor, other providers keep DefaultExecutor", () => {
+  assert.ok(getDefaultExecutor("muse-code") instanceof MuseCodeExecutor);
+  const other = getDefaultExecutor("openai");
+  assert.ok(other instanceof DefaultExecutor);
+  assert.equal(other instanceof MuseCodeExecutor, false);
+});
+
+test("MuseCodeExecutor restores the 24h prompt_cache_retention the generic sanitizer strips", () => {
+  const executor = new MuseCodeExecutor();
+  const out = executor.transformRequest(
+    "muse-spark-1.3",
+    { model: "muse-spark-1.3", input: "hi" },
+    false,
+    { accessToken: "k" }
+  ) as Record<string, unknown>;
+  assert.equal(out.prompt_cache_retention, "24h");
+});
+
+test("MuseCodeExecutor preserves a caller-requested retention window", () => {
+  const executor = new MuseCodeExecutor();
+  const out = executor.transformRequest(
+    "muse-spark-1.3",
+    { model: "muse-spark-1.3", input: "hi", prompt_cache_retention: "1h" },
+    false,
+    { accessToken: "k" }
+  ) as Record<string, unknown>;
+  assert.equal(out.prompt_cache_retention, "1h");
 });

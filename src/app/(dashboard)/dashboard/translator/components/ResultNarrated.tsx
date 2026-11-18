@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
@@ -72,7 +73,7 @@ export default function ResultNarrated({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Icon name="translate" size={20} className="text-primary" />
-        <h3 className="text-sm font-semibold text-text-main">
+        <h3 className="text-sm text-text-main">
           {tr("simpleResultPanelTitle", "Translation + Response")}
         </h3>
       </div>
@@ -91,8 +92,8 @@ export default function ResultNarrated({
 
         {/* translating or sending */}
         {isSpinning && (
-          <div className="flex items-center gap-3 py-6">
-            <Icon name="progress_activity" size={24} className="animate-spin text-primary" />
+          <div role="status" className="flex items-center gap-3 py-6">
+            <Spinner decorative size="md" className="text-primary" />
             <span className="text-sm text-text-muted">
               {result.status === "translating"
                 ? tr("narratedTranslating", "Translating to {target}...", {

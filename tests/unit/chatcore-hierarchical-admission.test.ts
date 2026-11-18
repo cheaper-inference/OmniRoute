@@ -70,7 +70,7 @@ test("each rotated account attempt acquires and releases a fresh composite slot"
   const sendWirings = legs.flatMap(
     (leg) =>
       leg.match(
-        /sendProviderAttempt: \(modelToCall, allowDedup\) =>\s*executeProviderRequest\(modelToCall, allowDedup\)/g
+        /sendProviderAttempt: \(modelToCall, allowDedup(?:, (?:rejection|rejected))?\) =>\s*executeProviderRequest\(modelToCall, allowDedup(?:, undefined, (?:rejection|rejected))?\)/g
       ) ?? []
   );
   assert.equal(sendWirings.length, 2, "both legs send every pipeline attempt through the gate");

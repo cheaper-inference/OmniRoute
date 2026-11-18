@@ -5,15 +5,7 @@ export interface CommandDetectionResult {
   command: string | null;
   confidence: number;
   category:
-    | "git"
-    | "test"
-    | "build"
-    | "shell"
-    | "docker"
-    | "package"
-    | "infra"
-    | "cloud"
-    | "generic";
+    "git" | "test" | "build" | "shell" | "docker" | "package" | "infra" | "cloud" | "generic";
   matchedPatterns: string[];
 }
 
@@ -40,6 +32,8 @@ const COMMAND_PREFIXES = [
   "vitest",
   "jest",
   "pytest",
+  "phpunit",
+  "vendor/bin/phpunit",
   "python",
   "go",
   "cargo",
@@ -152,6 +146,23 @@ const DETECTORS: Detector[] = [
     category: "test",
     commandPatterns: [/^vitest\b/i, /^npm\s+(?:run\s+)?test:vitest\b/i],
     contentPatterns: [/\bvitest\b/i, /^ ✓ /m, /^ ❯ /m, /Test Files\s+\d+\s+(?:passed|failed)/i],
+  },
+  {
+    // Ahead of test-jest: PHPUnit's "Tests: N, Assertions: N" trailer also satisfies the Jest
+    // `Tests:\s+\d+` probe, and an equal-confidence tie keeps the earlier detector.
+    type: "test-phpunit",
+    category: "test",
+    commandPatterns: [
+      /^(?:php\s+)?(?:\.\/)?(?:vendor\/bin\/)?phpunit\b/i,
+      /^php\s+artisan\s+test\b/i,
+      /^composer\s+(?:run(?:-script)?\s+)?test\b/i,
+    ],
+    contentPatterns: [
+      /^PHPUnit \d+\.\d+/m,
+      /^Tests: \d+, Assertions: \d+/m,
+      /^OK \(\d+ tests?, \d+ assertions?\)/m,
+      /^(?:FAILURES|ERRORS)!$/m,
+    ],
   },
   {
     type: "test-jest",

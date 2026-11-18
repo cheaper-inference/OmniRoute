@@ -36,65 +36,83 @@ Saboda lambar ƙiyasi ce:
 
 ---
 
-## Yadda ake ƙiyasta kuɗaɗe
+## Yadda aka kiyasta farashi
 
 ### Tushen farashi
 
-Kuɗaɗe suna fitowa ne daga teburin farashi da ake tantancewa bisa wannan jerin fifiko
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Farashin yana fitowa daga teburin farashin da aka haɗa a cikin [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), a cikin wannan tsari na fifiko (** mafi girma na farko** ):
 
-1. **Sauye-sauyen mai amfani** — farashin da kuka saita a dashboard / ta hanyar `PATCH /api/pricing`.
-2. **Farashin waje da aka daidaita** — wanda aka ɗauko daga
-   `model_prices_and_context_window.json` na jama'a na LiteLLM lokacin da aka kunna daidaitawa (ana adana shi a wani
-   namespace na `pricing_synced` na daban don kada ya taɓa goge sauye-sauyenku).
-3. **Tsoffin ƙimomin da aka dasa a lamba** — waɗanda aka haɗa da OmniRoute.
+1. **Mai amfani ya soke** farashin — da aka saita a cikin dashboard ko ta hanyar `PATCH /api/pricing` (sararin sunan `pricing` ).
+2. **model.dev daidaitawa** farashin — da aka samo daga `https://models.dev/api.json` (sunan `models_dev_pricing` ).
+3. **LiteLLM sync** farashin — da aka samo daga LiteLLM ta jama'a `model_prices_and_context_window.json` (sunan `pricing_synced` ).
+4. **Hardcoded Predefinicións** farashin — ya shigo cikin [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Daidaita farashin waje na buƙatar **bayyanannen amincewa**, kuma a kashe yake ta tsohuwa. Muhimman env vars
-(duba [`.env.example`](../../.env.example)):
+Don provider/model iri ɗaya , ƙima daga yadudduka masu fifiko suna sake rubuta filayen da suka dace a cikin ƙananan yadudduka; filayen da ba su da babban Layer har yanzu suna iya fitowa daga ƙaramin Layer. Ana gyara oda koda lokacin da ayyukan daidaitawa masu zaman kansu ke gudana a lokaci guda. `GET /api/pricing?includeSources=1` yana dawo da `pricing` da `sourceMap`, wanda kowane nau'in tambarin su (`user`, `modelsDev`, `litellm`, `default`) sun gano babban fifikon fifiko mai ɗauke da wannan ƙirar.
 
-| Env var                 | Tsohon ƙima | Manufa                                                               |
-| ----------------------- | ----------- | -------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`     | Kunna daidaita farashin LiteLLM a bango lokacin farawa.              |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Tazarar daidaitawa cikin **daƙiƙoƙi** (ta tsohuwa kullum).           |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Jerin tushe da waƙafi ya raba (a yau `litellm` kaɗai ake tallafawa). |
+**LiteLLM sync** yana shiga, an kashe shi ta tsohuwa. Matsalolin muhallinta (duba [`.env.example`](../../.env.example) ) sune:
 
-### Tsarin lissafin kuɗi
+| Env var                 | Tsohuwar  | Manufar                                                                                |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Kunna aikin daidaita farashin LiteLLM baya.                                            |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Tazarar daidaitawa a cikin daƙiƙa (kullum).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Zaɓin tushen don wannan daidaitawa kawai; a halin yanzu `litellm` kawai ake tallafawa. |
 
-Ana lissafa kuɗi ga kowace buƙata daga adadin token da farashin kowace token miliyan a cikin
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+**model.dev daidaitawa** ya bambanta da daidaitawar LiteLLM kuma an kashe shi ta tsohuwa. Kunna shi a cikin Saituna (models.dev sync) ko amfani da waɗannan masu canji:
 
-- **Token na shigarwa** (bayan cire karatun cache da token na ƙirƙirar cache) × farashin `input`.
-- **Token na karatun cache** × farashin `cached` (yana komawa ga farashin shigarwa idan babu).
-- **Token na ƙirƙirar cache** × farashin `cache_creation` (yana komawa ga farashin shigarwa idan babu).
-- **Token na fitarwa** × farashin `output`.
-- **Token na tunani** × farashin `reasoning` (yana komawa ga farashin fitarwa idan babu).
+| Env var                    | Tsohuwar          | Manufar                                                                                                                           |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(Ba a saita ba)_ | Cire saiti yana biye da jujjuyawar Saituna; `1/true/on/yes` yana kunnawa da kashe `0/false/off/no` (ko da Saituna sun kunna shi). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Default model.dev tazarar daidaitawa a cikin daƙiƙa (kullum).                                                                     |
 
-Ana fassara dukkan farashin a matsayin USD ga kowane token 1,000,000. Matakin sabis na Codex na “fast”/“priority” ko
-“flex” yana amfani da ninkin kuɗi (`getCodexFastCostMultiplier`) — misali, ana cajin flex
-da rangwamen token na 50%, wanda ake nuna shi a matsayin **tanadin flex** a dashboard.
+`PRICING_SYNC_SOURCES` yi** ba** kunna model.dev; yana sarrafa aikin daidaita LiteLLM kawai. Share ƙetare mai amfani baya share ko dai da aka daidaita sararin sunan; Layer na gaba da ake samu na farashi ya zama mai tasiri. Don samfurin mara farashi, duba saitunan daidaitawa biyu da `sourceMap` kafin ƙara jujjuyawar hannu.
 
-Da farko ana daidaita sunayen samfura (ana cire farkon hanyar mai samar da sabis kamar `openai/` ko
-`accounts/fireworks/models/`) domin tsoffin layukan tarihi su ci gaba da dacewa da farashi.
+### Tsarin farashi
 
-### Yadda ake yin rikodin kashe kuɗi
+Ana ƙididdige farashi akan kowane buƙatun daga ƙidayar alama da ƙimar alama-miliyan a [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- Ana lissafa kuɗin kowace buƙata bayan amsa sannan a yi rikodinsa ba tare da jiran kammalawa ba, don kada ya
-  taɓa ƙara jinkiri ga abokin ciniki. Ana tsara amfani da ƙayyadadden rabon gama-gari a zagayen
-  event-loop na gaba ta hanyar [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Ana tara kashe kuɗin mabuɗin API a ma'aji sannan a tura shi rukuni-rukuni ta hanyar
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (tazarar turawa ta tsohuwa ita ce 60s,
-  ma'ajin shigarwa 1,000). Ana iya daidaita su ta hanyar:
+- **Alamomin shigarwa** (a cire cache karantawa da alamun ƙirƙira cache) ƙimar × `input`.
+- **Alamu na karanta cache** ƙimar × `cached` (ya koma ga ƙimar shigarwa).
+- **Alamu na ƙirƙira cache** ƙimar × `cache_creation` (ya koma ga ƙimar shigarwa).
+- **Alamar fitarwa** `output` ×
+- **Alamun dalilai** ƙimar × `reasoning` (ya koma ga ƙimar fitarwa).
 
-  | Env var                             | Tsohon ƙima | Manufa                                           |
-  | ----------------------------------- | ----------- | ------------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Tazarar turawa cikin milliseconds.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Matsakaicin shigarwar da za a tara kafin turawa. |
+Ana fassara duk farashin a matsayin USD a kowace alamar 1,000,000. Matsayin sabis Codex "sauri"/"fififici" ko "flex" matakin sabis yana aiwatar da yawan farashi (`getCodexFastCostMultiplier`) — misali lalƙwalwa ana ƙididdigewa akan ragi na 50%, wanda aka bayyana kamar** m tanadi** a cikin dashboard.
 
-Ba a karanta alkaluman kuɗin dashboard daga adadin dala da aka adana ga kowane layi **ba** — ana
-sake lissafa su nan take daga adadin token da teburin farashi na yanzu a duk lokacin da
-endpoint na analytics ya gudana. Wannan yana nufin gyara farashi mara daidai (da sake daidaitawa) yana sabunta
-ƙiyasin kuɗin tarihi ta baya.
+Sunaye na ƙila an daidaita su da farko (an cire prefixes na masu bayarwa kamar `openai/` ko `accounts/fireworks/models/` ) don haka har yanzu layuka na tarihi sun yi daidai da farashi.
+
+### Yadda ake kashewa ana yin rikodin
+
+- Ana ƙididdige farashin kowane buƙatu a lokacin da ake buƙata. An tsara amfani da keɓaɓɓen keɓaɓɓen ƙididdiga akan alamar madauki na gaba ta hanyar [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Ana kashe kashe makullin API kuma an watsar da shi cikin batches ta hanyar [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (tsoho na 60s flush tazara, buffer-shigarwa 1,000). Mai daidaitawa ta hanyar:
+
+  | Env var                             | Tsohuwar | Manufar                                            |
+  | ----------------------------------- | -------- | -------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Rike tazarar cikin millise seconds.                |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Matsakaicin shigarwar da aka adana kafin a watsar. |
+
+Kudade sun fi son ainihin cajin da aka ba da rahoton (`provider_cost_usd`), sannan hoton buƙatun mai farashi mai ƙima (`calculated_cost_usd`), sannan sake maimaita alama daga kasidar na yanzu. Ba a sake cajin kuɗin da aka adana ta hanyar ƙididdige su. Layukan Legacy-kawai har yanzu suna canzawa lokacin da farashin kasidarsu ya canza.
+
+### OCR da sakawa
+
+- Buƙatun `/v1/ocr` masu nasara suna amfani da `usage_info.pages_processed` na sama, ba kewayon shafi da ake buƙata ko adadin abubuwan shafi da aka dawo ba. Kiyasin shine shafuka × `ocr_cost_per_page` (cikakkiyar USD/page,** ba** USD/million).
+- Buƙatun tare da daftarin aiki ko bayanin akwatunan ɗaure suna buƙatar ware kuɗin fiton `ocr_cost_per_annotated_page`. Idan ba tare da shi ba, farashin ya kasance ba a sani ba; Talatin OCR ba a musanya shi shiru.
+- LiteLLM yana daidaita taswirorin filin `annotation_cost_per_page` na sama zuwa `ocr_cost_per_annotated_page`, yana riƙe da cikakkiyar ƙimar USD/page da shigarwar bayani-kawai, gami da sifili bayyananne. Filin canonical da aka kawo yana ɗaukar fifiko; an yi watsi da ƙimar laƙabi mara inganci. Haɓaka farashin mai amfani yana riƙe fifikonsu na yau da kullun. Duba [maɓallan farashin OCR na LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- amfanin OCR yana adana ƙidayar shafi, farashin ɗaya, ƙididdige kuɗin USD, maɓallin API da zaɓin haɗi. Ba a taɓa wakiltar shafuka azaman alamu ba. rajistan ayyukan kira sun ƙunshi metadata na lissafin kuɗi, ba daftarin aiki ba URLs, PDF bytes ko rubutun da aka ciro.
+- Buƙatun `/v1/embeddings` masu nasara sun yi rikodin jere na amfani a kowane rukuni na zahiri, gami da batches daban waɗanda aka kammala a cikin millisecond ɗaya. Cajin da aka bayar da rahoton mai bayarwa yana kan gaba akan ƙididdige ƙididdiga; combo wrappers ba sa ƙara caji.
+- Tarihin amfani, ƙididdigar farashi, windows provider/account, iyakan kashe makullin API, lissafin farashi da buƙatun amfani da yau da kullun sun haɗa da waɗannan cajin. Maɓallan babu-log ɗin suna riƙe lissafin lambobi ba tare da riƙe rubutun tushe ba.
+- Rashin amfani ko jadawalin kuɗin fito ne** wanda ba a sani ba** , ba kyauta ba: ba a cire taken martani-farashin ba, kuma manufar amfani da mara ƙima ta shafi iyakance maɓallan API. Ƙimar sifili da aka saita a bayyane ya kasance ingantaccen amfani da tsadar sifili.
+
+Wannan lissafin gaba ne kawai. Tsohon kiran OCR/embedding wanda bai taɓa rubuta tarihin amfani ba ba za a iya sake gina shi daga wannan ƙaura ba. Ƙididdiga masu ƙididdiga na USD, ba daftari ba ne, kuma ba su haɗa da canjin kuɗi, haraji ko rangwame ba.
+
+### Magana da hotuna
+
+- Nasara `/v1/audio/transcriptions`, `/v1/audio/speech` da yunƙurin samar da hoto suna raba lissafin lissafi. Kiran kai tsaye da haɗin kai suna ɗaukar maɓallin API na mai kira da haɗin da aka zaɓa; abin rufe fuska bai taɓa ƙara zari na biyu ba.
+- USD da aka ruwaito mai bayarwa ya yi nasara akan kiyasin kasida, gami da cajin sifili bayyananne. OpenRouter's JSON `usage.cost` an daidaita shi zuwa `cost_usd`. In ba haka ba, alamun aunawa suna amfani da farashin alamar, rubutaccen daƙiƙa suna amfani da farashin daƙiƙa ɗaya, shigar da magana yana amfani da ƙidayar halayen Unicode, kuma hotuna masu tsada suna amfani da lambar da aka dawo da gaske, ba `n` ɗin da ake nema ba.
+- Binary OpenRouter TTS bashi da jikin amfanin JSON. Bayan sautin ya ƙare ko mai kiran ya soke, OmniRoute yana tambayar tsararrakinsa ID akan** iri daya** asalin OpenRouter. Buƙatar EU baya faɗuwa zuwa asalin duniya. Wannan iyakataccen bincike ne, karantawa kawai; Ba a sake gwada ƙididdiga don lissafin kuɗi ba. Rubutun lissafin kuɗi na iya bayyana bayan an gama sautin: sake dubawa yana gudana a bango har zuwa daƙiƙa 52, gami da ƙayyadaddun ƙayyadaddun hanyar sadarwa.
+- Yayin wannan binciken, martanin mai jiwuwa yana da `X-OmniRoute-Cost-Status: pending` kuma ba shi da taken amsa-farashin. Cajin sa na ƙarshe yana bayyana a tarihin amfani, nazari da maɓalli na maɓalli bayan sulhu. Idan babu metadata, ana amfani da hoton jadawalin jadawalin kuɗin fito; in ba haka ba farashin ya tsaya ba a sani ba.
+- Daƙiƙa, haruffa da ƙididdigar hoto suna da filayen lissafin raka'a daban-daban, waɗanda ba za su taɓa yin ƙirƙira na jabu ba. Lissafi yana riƙe da amfani na lambobi kawai, ba rubutun magana ba, kwafi ko hoto na hoto. Keɓewar hoton da ba ta da tsada ba ta canzawa: farashin hoton hoton da ya ɓace na gaske baya sabon kulle maɓalli mai iyaka, kuma martanin ya tsallake kan farashin maimakon bayyana kiran kyauta. Rashin lalacewar kantin farashi har yanzu yana riƙe da shaidar amfani don gazawar tilastawa-rufe.
+
+Babu wani cajin speech/image na tarihi da aka ƙirƙira ko ci gaba. Biyan kuɗaɗen mai bayarwa ya kasance maƙasudin rasitoci da kira waɗanda ba a ba da rahoton cajin su ba.
 
 ---
 
@@ -140,53 +158,50 @@ Yankin Kuɗaɗe kuma yana ɗauke da (duk a ƙarƙashin `/dashboard/costs/`):
 
 ---
 
-## Wuraren ƙarshen API
+## API karshen
 
-Duk waɗannan suna buƙatar tantancewar gudanarwa (loopback/JWT, ta hanyar `requireManagementAuth`) sai dai idan
-an bayyana akasin haka.
+Duk waɗannan suna buƙatar auth gudanarwa (loopback/JWT, ta `requireManagementAuth`) sai dai idan an lura.
 
-### Nazarin amfani da kuɗi
+### Amfani & ƙididdigar farashi
 
-| Hanya | Wurin ƙarshe             | Manufa                                                                                                                                                                                |
-| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Cikakken nazarin kuɗi/amfani: taƙaitawa, yanayin yau da kullum, bisa mai samarwa/samfuri/maɓallin API/asusu/mataki. Tambaya: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Amfani da ƙa'idar kowane mai samarwa a tsawon lokaci. Tambaya: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                           |
-| `GET` | `/api/usage/history`     | Layukan ɗanyen tarihin amfani.                                                                                                                                                        |
-| `GET` | `/api/usage/call-logs`   | Rajistan kira na kowace buƙata (samfuri, token, kuɗi, jinkiri, matsayi).                                                                                                              |
-| `GET` | `/api/usage/quota`       | Matsayin ƙa'idar mai samarwa.                                                                                                                                                         |
-| `GET` | `/api/usage/proxy-logs`  | Rajistan buƙatun proxy.                                                                                                                                                               |
+| Hanya | Ƙarshen Ƙarshe           | Manufar                                                                                                                                                                   |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Cikakken nazarin cost/usage : taƙaitawa, yanayin yau da kullun, ta provider/model/API key/account/tier. Tambaya: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Yin amfani da keɓaɓɓen keɓaɓɓen mai bayarwa akan lokaci. Tambaya: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                            |
+| `GET` | `/api/usage/history`     | Layukan tarihin amfanin danye.                                                                                                                                            |
+| `GET` | `/api/usage/call-logs`   | Rukunin rajistan kira na kowane-buƙata (samfuri, alamu, farashi, jinkiri, matsayi).                                                                                       |
+| `GET` | `/api/usage/quota`       | Matsayin rabon mai bayarwa.                                                                                                                                               |
+| `GET` | `/api/usage/proxy-logs`  | Dokokin neman wakili.                                                                                                                                                     |
 
-### Kasafin kuɗi
+### Kasafin kudi
 
-| Hanya  | Wurin ƙarshe             | Manufa                                                                                        |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Taƙaitaccen kuɗi + duba kasafin kuɗi don maɓallin API guda (`apiKeyId` dole ne a tambaya).    |
-| `POST` | `/api/usage/budget`      | Saita iyakokin USD na yau da kullum/mako-mako/wata-wata + matakin faɗakarwa don maɓallin API. |
-| `GET`  | `/api/usage/budget/bulk` | Taƙaitaccen kasafin kuɗi na jimilla a duk maɓallan API.                                       |
+| Hanya  | Ƙarshen Ƙarshe           | Manufar                                                                                                 |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Takaitaccen farashi + duba kasafin kuɗi don maɓalli API ɗaya (ƙirar tambayar `apiKeyId` da ake buƙata). |
+| `POST` | `/api/usage/budget`      | Saita daily/weekly/monthly USD yana iyakance madaidaicin faɗakarwar + don maɓallin API.                 |
+| `GET`  | `/api/usage/budget/bulk` | Takaitattun bayanai na kasafin kuɗi a cikin maɓallan API.                                               |
 
-> API na kasafin kuɗi yana iyakantuwa ga kowane **maɓallin API** (`apiKeyId`). Iyakokin da
-> `GET /api/usage/budget` ke mayarwa sun haɗa da `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold`, da jimillolin da ke gudana (`totalCostToday`, `totalCostMonth`, …).
+> An keɓe API kasafin kuɗi kowane**API ku** (`apiKeyId`). Iyakokin da `GET /api/usage/budget` ya dawo sun haɗa da `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, da jimlar gudu (`totalCostToday`, `totalCostMonth`, …).
 
 ### Farashi
 
-| Hanya    | Wurin ƙarshe            | Manufa                                                                                                                                                 |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Farashi da aka haɗa a halin yanzu (na mai amfani + daidaitacce + tsoffin ƙimomi). Yi amfani da `?includeSources=1` don ganin tushe ga kowace shigarwa. |
-| `PATCH`  | `/api/pricing`          | Sauya farashi don `{ provider: { model: { input, output, cached, … } } }`.                                                                             |
-| `DELETE` | `/api/pricing`          | Mayar da farashi zuwa tsoffin ƙimomi (za a iya iyakancewa ta `?provider=&model=`).                                                                     |
-| `GET`    | `/api/pricing/defaults` | Nuna tsoffin ƙimar madadin ga kowane miliyan 1.                                                                                                        |
-| `GET`    | `/api/pricing/models`   | Farashin da aka tsara bisa samfuri.                                                                                                                    |
-| `POST`   | `/api/pricing/sync`     | Fara daidaitawa da hannu daga tushe na waje (LiteLLM).                                                                                                 |
-| `GET`    | `/api/pricing/sync`     | Matsayin daidaitawa na yanzu.                                                                                                                          |
-| `DELETE` | `/api/pricing/sync`     | Share duk bayanan farashin da aka daidaita.                                                                                                            |
+| Hanya    | Ƙarshen Ƙarshe          | Manufar                                                                                                                                                            |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Haɗe-haɗe farashin farashi mai Layer huɗu (mai amfani, model.dev, LiteLLM, Predefinicións). `?includeSources=1` ya dawo `pricing` + `sourceMap`.                   |
+| `PATCH`  | `/api/pricing`          | Soke farashin `{ provider: { model: { input, output, cached, … } } }`.                                                                                             |
+| `DELETE` | `/api/pricing`          | Cire farashin mai amfani (wanda `?provider=&model=` ya keɓanta da zaɓin); ƙimar daidaitawa ko ginanniyar abubuwan da aka gina a ciki sun kasance azaman koma baya. |
+| `GET`    | `/api/pricing/defaults` | Nuna farashin koma baya na per-1M tsoho.                                                                                                                           |
+| `GET`    | `/api/pricing/models`   | An ƙididdige farashi ta samfuri.                                                                                                                                   |
+| `POST`   | `/api/pricing/sync`     | Fara aiki tare da hannu daga kafofin waje (LiteLLM).                                                                                                               |
+| `GET`    | `/api/pricing/sync`     | Halin daidaitawa na yanzu.                                                                                                                                         |
+| `DELETE` | `/api/pricing/sync`     | Share farashin da aka daidaita LiteLLM kawai (`pricing_synced`); model.dev data ware.                                                                              |
 
-### Sauran wuraren ƙarshe masu alaƙa da kuɗi
+### Sauran abubuwan da suka dace masu tsada
 
-| Hanya | Endpoint                      | Manufa                                                                                                   |
-| ----- | ----------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | Jimillar token na samfurin kyauta, waɗanda aka yi amfani da su a wannan watan, da ragowar adadin kyauta. |
-| `GET` | `/api/quota/pools/[id]/usage` | Amfani na rukunin ƙason da ake rabawa.                                                                   |
+| Hanya | Ƙarshen Ƙarshe                | Manufar                                                                            |
+| ----- | ----------------------------- | ---------------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Jimlar ƙirar ƙira, da aka yi amfani da ita-wannan watan, da ragowar izinin kyauta. |
+| `GET` | `/api/quota/pools/[id]/usage` | Amfani don wurin tafki mai rahusa.                                                 |
 
 ---
 

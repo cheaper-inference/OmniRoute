@@ -57,11 +57,11 @@ zaradi enega konkretnega dejstva implementacije:
 
 Kaj to pomeni za posamezna območja, tudi pri `CORS_ALLOW_ALL=true`:
 
-| Območje                                  | Mehanizem overjanja              | Učinek CORS z nadomestnim znakom                                                                                                                                                                                                 |
-| ---------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nadzorna plošča / MANAGEMENT `/api/*`    | Seja s piškotki                  | Izvor se vrne, vendar brskalnik **brez `Allow-Credentials` blokira** overjeno branje. Zlonamerno spletno mesto drugega izvora **ne more prebrati** vaših overjenih odgovorov nadzorne plošče, sejni piškotek pa ni izpostavljen. |
-| Odjemalski API `/v1/*`, `/v1beta/*`      | Žeton Bearer / glava `x-api-key` | Že namensko permissiven **po zasnovi** (`relaxForTokenAuth`): brskalniki nikoli samodejno ne dodajo `Authorization`/`x-api-key`, zato napadalčeva stran ne more posredovati vašega ključa. `CORS_ALLOW_ALL` tega ne razširi.     |
-| Javno, samo za branje (`/api/health`, …) | Brez                             | Neobčutljivo; nadomestni znak je neškodljiv.                                                                                                                                                                                     |
+| Območje                                  | Mehanizem overjanja              | Učinek CORS z nadomestnim znakom                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nadzorna plošča / MANAGEMENT `/api/*`    | Seja s piškotki                  | Izvor se vrne, vendar brskalnik **brez `Allow-Credentials` blokira** overjeno branje. Zlonamerno spletno mesto drugega izvora **ne more prebrati** vaših overjenih odgovorov nadzorne plošče, sejni piškotek pa ni izpostavljen.                                                                                                                          |
+| Odjemalski API `/v1/*`, `/v1beta/*`      | Žeton Bearer / glava `x-api-key` | Že namensko permissiven **po zasnovi** (`relaxForTokenAuth`): brskalniki nikoli samodejno ne dodajo `Authorization`/`x-api-key`, zato napadalčeva stran ne more posredovati vašega ključa. Odmev velja le, kadar je predloženi ključ preverjen; anonimni odgovori (`REQUIRE_API_KEY=false`) ohranijo seznam dovoljenih. `CORS_ALLOW_ALL` tega ne razširi. |
+| Javno, samo za branje (`/api/health`, …) | Brez                             | Neobčutljivo; nadomestni znak je neškodljiv.                                                                                                                                                                                                                                                                                                              |
 
 **Preostala** izpostavljenost zaradi `CORS_ALLOW_ALL=true` je tako omejena na: (a)
 neoverjena branja med različnimi izvori za podatke, ki so že brez overjanja, in (b)
@@ -116,16 +116,34 @@ Izvori se primerjajo brez razlikovanja med velikimi in malimi črkami, končna p
 `http://localhost:3000` in `http://localhost:3000/` enakovredna. Isti seznam CSV
 lahko med izvajanjem brez ponovnega zagona nastavite v **Dashboard → Security → CORS Allowed Origins**.
 
-## Ključi API v primerjavi s sejami piškotkov
+## ključi API v primerjavi s sejami piškotkov
 
-- **Bearer / `x-api-key` (vmesnik za sklepanje `/v1/*`):** brskalniki jih nikoli ne priložijo
-  samodejno. CORS tukaj ni smiselna ovira — ovira je ključ API —
-  zato je ta vmesnik namenoma permisiven, da lahko brskalniški odjemalci in odjemalci
-  Electron berejo odgovore, do katerih so že upravičeni.
-- **Seja piškotka (nadzorna plošča):** zaščitena je s privzeto nastavitvijo, ki ob napaki zavrne dostop, **in**
-  z odsotnostjo `Access-Control-Allow-Credentials` na skupni poti. Izvorov za
-  upravljanje oziroma nadzorno ploščo ne vključujte v nobeno permisivno konfiguracijo; zanje mora
-  brezpogojno ostati privzeto zavračanje dostopa.
+- **Nosilec / `x-api-key` (sklepna površina `/v1/*` ):** brskalniki jih nikoli ne pripnejo samodejno. CORS tukaj ni pomembna ovira — ključ API je ovira —, zato je ta površina namenoma permisivna, tako da lahko brskalnik in odjemalci Electron berejo odgovore, do katerih so že upravičeni. Sproščen odmev sledi potrjenemu ključu in ne zgolj prisotnosti glave: ko `REQUIRE_API_KEY=false` anonimno streže zahtevo, njegov uspešen odgovor ohrani neuspešno zaprt seznam dovoljenih. Zavrnitve avtifikacije (401) ostanejo berljive, tako da lahko odjemalci prikažejo preklican ali napačno vpisan ključ (#5242): lastni 401 cevovoda ohranja odmev in pot, ki sam zavrne ključ, potem ko ga cevovod servira kot anonimnega (`/v1/models` in `/v1beta/models` s konfiguriranim preverjanjem upravljanja, z lastniškim obsegom `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` in kandidat za samodejno kombiniranje poti) doda odmev temu 401 prek `credentialRejectionHeaders()`. Odmev je vpisan na zahtevo, ki nosi glavo poverilnice (`Authorization`, `x-api-key`, `x-goog-api-key` ali piškotek `auth_token` ), ne na katerem od njih je pot preverila, in ni nikoli seznanjen z `Access-Control-Allow-Credentials`; telo je popravljena ovojnica napake. Poti upravljanja pod `/api/v1/` ki jih varuje `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), ne dodajajo odmeva: z `REQUIRE_API_KEY=false` njihov 401/403 ni berljiv navzkrižno poreklo.
+- **Seja piškotkov (nadzorna plošča):** zaščiten s privzetim zaprtjem ob napaki** in** zaradi odsotnosti `Access-Control-Allow-Credentials` na skupni poti. Izvirnike management/dashboard ne vključite v morebitne permisivne konfiguracije; ostati morajo natančno zaprti.
+
+## Rokovanja WebSocket (`/v1/responses`, `/v1/ws`)
+
+Brskalniki za WebSocket ne uporabljajo CORS, zato transporti WebSocket, ki vračajo
+izhod sklepanja, sami preverijo `Origin` rokovanja
+(`src/server/origin/wsOrigin.ts`): WebSocket Responses (`/v1/responses`) in, kadar
+OmniRoute teče prek `npm start` / `npm run dev`, most `/v1/ws` in
+`/api/v1/ws`, ki pretaka `/v1/chat/completions`, `/v1/messages` in
+`/v1/responses` kot okvirje. Most za odločitev vpraša `/api/v1/ws?handshake=1` in
+nadgradnjo zavrne, razen če je ta pot izvedla preverjanje. Rokovanje je sprejeto, kadar:
+
+- nima glave `Origin` (Codex CLI, SDK-ji in drugi odjemalci, ki niso brskalniki);
+- `Origin` dovoli zgornji seznam dovoljenih (`CORS_ALLOWED_ORIGINS`, nastavitev
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- je `Origin` eden od lastnih javnih izvorov OmniRoute (konfigurirani javni osnovni URL,
+  posredovani izvor zaupanja vrednega posredniškega strežnika ali neposredni gostitelj
+  loopback/LAN, podan kot dobesedni IP ali `localhost` — isti kandidati, ki jih uporablja
+  preverjanje sprememb nadzorne plošče); ali
+- nosi veljaven ključ API, tako kot na površini HTTP `/v1/*`.
+
+Vse drugo dobi `403 ws_origin_forbidden`. Sejni piškotek nadzorne plošče ne izvzame
+tujega `Origin`, ker ga brskalnik priloži vtičnici katere koli strani. `localhost` na
+drugih vratih ne velja za isti izvor; take razvojne izvore dodajte v
+`CORS_ALLOWED_ORIGINS`.
 
 ## Primer: obratni posredniški strežnik pred OmniRoute
 
@@ -161,6 +179,7 @@ zavihku Varnost), ne v posredniškem strežniku.
 | Opozorilna pasica nadzorne plošče                     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Polje CORS Allowed Origins                            | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS za posamezne poti Cloud-Agent (izjema)           | `src/lib/cloudAgent/api.ts`                                          |
+| Preverjanje `Origin` pri rokovanju WebSocket          | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Glejte tudi
 

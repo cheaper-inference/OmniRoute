@@ -31,21 +31,11 @@ Wakati osv au Trivy zinageuka nyekundu kutokana na CVE mpya iliyofichuliwa, sulu
 
 Milango yote miwili **huruka kwa upole** (exit 0) wakati zana haipo au kipimo kinashindwa (osv-scanner haipo kwenye PATH, osv.dev/network haipatikani, JSON batili) — kushindwa kwa **kipimo** hakuzuii kamwe, ni udhaifu **uliopimwa** tu ndio unaozuia.
 
-## Hatari Zinazojulikana na Kukubalika
+## Hatari ya utegemezi mstaafu
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Faili ya kufunga mizizi haijumuishi tena `extract-zip` au kingo tegemezi kwake baada ya kusasisha zana ya ukuzaji ya promptfoo iliyobandikwa. Hii inaondoa msururu wa `promptfoo` → `@openai/codex-security` → `extract-zip` uliokubaliwa hapo awali uliofuatiliwa katika #14482. Ukaguzi wa kurudi nyuma katika `tests/unit/extract-zip-14482-exposure.test.ts` unakataa kuletwa kwake tena na kubakiza marufuku ya uagizaji kutoka kwa msimbo wa uzalishaji.
 
-`extract-zip@2.0.1` ina ushauri mbili za usalama wa kiwango cha juu zisizorekebishwa kuhusu symlink-traversal.
-Kulingana na tawi la "hakuna marekebisho ya chanzo" la suluhisho la Tofauti ya CVE hapo juu, hii ni **hatari iliyokubalika**, si nyongeza:
-
-- **Mfuatano:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Imethibitishwa kupitia `package-lock.json` — ni kifurushi kimoja tu katika mti mzima wa utegemezi (`@openai/codex-security`) kinachotangaza `extract-zip`, na ni kifurushi kimoja tu (`promptfoo`) kinachotangaza `@openai/codex-security`.
-- **Hakuna toleo lililorekebishwa lililopo popote kwenye mfuatano.** `extract-zip@2.0.1` (iliyochapishwa 2020) ni toleo la mwisho la kifurushi — halitunzwi. Toleo la sasa la npm-latest la `@openai/codex-security` (`0.1.29`) bado linatumia `extract-zip@2.0.1`.
-- **Haiwezi kufikiwa kutoka uzalishishaji.** `promptfoo` ni devDependency-only (haijawahi kuorodheshwa chini ya `dependencies`), na hakuna faili chini ya `src/`, `open-sse/`, au `bin/` inayoingiza kifurushi cha npm cha `extract-zip` — msaidizi wa OmniRoute mwenyewe `extractZip()` (`src/lib/versionManager/binaryManager.ts:93`) hutumia `unzip`/`tar` asilia na haihusiani. `@openai/codex-security` pia inajumuisha ulinzi wake wa symlink-traversal juu ya onEntry callback ya extract-zip.
-- **Usifanye** alias ya `extract-zip` kupitia `package.json` `overrides` — mbadala pekee unaofaa ni Electron-org-internal na haioani na API ya ukaguzi wa `@openai/codex-security` mwenyewe wa onEntry/defaultDirMode/defaultFileMode; kuibadilisha kungesababisha ukaguzi wa usalama wa kifurushi hicho kuvunjika kimya kimya.
-- **Msingi:** `vulnCount` (3) iliyopimwa ya osv tayari iko chini sana ya msingi uliogandishwa wa `config/quality/quality-baseline.json` (27) — hakuna mabadiliko ya ratchet yanayohitajika.
-- **Ulinzi wa Regression:** `tests/unit/extract-zip-14482-exposure.test.ts` inathibitisha mfuatano na invariant ya kutokuwa na import ya uzalishaji hapo juu; inashindwa CI ikiwa mojawapo itavunjika (k.m. PR ya baadaye inafanya `extract-zip` kufikiwa kutoka uzalishaji).
-- **Ufuatiliaji:** suala #14482.
+Marekebisho ya sasa ya utegemezi pia yanabatilisha wigo wa uoanifu kwa mteja wa MSAL wa kitambulisho cha Azure na mteja wa FTP wa get-uri. Upataji wa ishara ya Azure na urejeshaji wa FTP hujaribiwa na usafirishaji uliodhibitiwa; vifurushi vyote OpenCode vinaendesha vyumba vyao vya kujenga na vya majaribio. Hesabu za ushauri wa Usajili ni vipimo kwa wakati mmoja na zinaweza kubadilika baada ya faili ya kufuli kutekelezwa.
 
 ## Backlog: Ushauri wa Scorecard → kuzuia
 

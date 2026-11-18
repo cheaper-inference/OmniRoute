@@ -21,8 +21,15 @@ export const testDestination: LogExportDestinationType = {
     serviceAccountJson: z.string().optional(),
   }),
   createClient(config) {
-    let batches = 0;
+    // Ignore SIGTERM as soon as the child knows it is the hang fixture. Installing it only
+    // when the first batch arrives raced the run timeout on a loaded runner: the timeout fired
+    // first, the default SIGTERM handler killed the child, and the escalation test saw
+    // SIGTERM instead of SIGKILL.
     const output = String(config.output);
+    if (config.mode === "hang" && process.send) {
+      process.on("SIGTERM", () => fs.writeFileSync(`${output}.term-ignored`, "ready"));
+    }
+    let batches = 0;
     return {
       async test() {
         return { ok: true, detail: "fixture" };
@@ -94,7 +101,10 @@ export const testDestination: LogExportDestinationType = {
         }
         if (config.mode === "crash" && batches === 3 && process.send) process.exit(23);
         if (config.mode === "hang" && process.send) {
-          process.on("SIGTERM", () => {});
+          // Written only after the handler from createClient is installed and the batch is about
+          // to hang: a parent that sees this file knows any later SIGTERM will be ignored, so the
+          // run must end through the SIGKILL escalation.
+          fs.writeFileSync(`${output}.hang-ready`, String(process.pid));
           await new Promise(() => {
             setInterval(() => {}, 1000);
           });
@@ -145,6 +155,10 @@ export function installBigQueryFetchFixture(config: Record<string, unknown>) {
     if (href.includes("oauth2.googleapis.com/token")) {
       return Response.json({ access_token: "stub-token", expires_in: 3600 });
     }
+    if (config.fixtureSchemaConflict && init?.method === "GET" && href.includes("/tables/"))
+      return Response.json({ etag: "stale", schema: { fields: [{ name: "id", type: "STRING" }] } });
+    if (config.fixtureSchemaConflict && init?.method === "PATCH")
+      return Response.json({ error: { message: "schema changed" } }, { status: 412 });
     if (href.endsWith("/insertAll")) {
       if (config.fixtureFailInsert)
         return Response.json({ error: { message: "backend error" } }, { status: 500 });

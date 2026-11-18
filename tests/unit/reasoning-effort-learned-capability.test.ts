@@ -53,7 +53,7 @@ test("learned cap only clamps when the requested effort is above it", () => {
 test("registry says supportsXHighEffort:false (and no supportsMax path) with a learned cap below 'high': uses the learned cap, not the hardcoded 'high'", () => {
   // claude-haiku-4-5 is registered with supportsXHighEffort:false
   // (open-sse/config/providers/registry/claude/index.ts) and its family is
-  // excluded from supportsClaudeMaxEffort (CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS
+  // excluded from supportsClaudeMaxEffort (Haiku below 5.5 in CLAUDE_MAX_EFFORT_MIN_VERSION
   // in providerModels.ts), so it reaches the hardcoded-"high" line today —
   // a real registry-covered case. Teach a lower cap and confirm it wins.
   recordLearnedReasoningEffort("claude", "claude-haiku-4-5-20251001", ["none", "low", "medium"]);

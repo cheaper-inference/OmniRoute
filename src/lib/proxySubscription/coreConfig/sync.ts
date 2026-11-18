@@ -16,9 +16,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { readPrivateConfigFile, writePrivateConfigFile } from "@/lib/cli-helper/privateConfigFile";
 import { parseLocalCoreEndpoints } from "../coreEndpoint";
-import type { ParsedSubscription } from "../parse";
+import type { NeedsCoreNode, ParsedSubscription, SubscriptionNode } from "../parse";
+import { isUsableSubscriptionContent } from "../parse";
 import { applyRendered, type ApplyBesideReason, type RunCheck } from "./apply";
-import { buildCoreModel, type CoreModel } from "./model";
+import { buildCoreModel, nodeIdentity, type CoreModel } from "./model";
 import { isCoreBinaryPathAllowed } from "./pathGuard";
 import {
   DEFAULT_CORE,
@@ -38,7 +39,8 @@ export interface CoreConfigSub {
 function logSkippedCounts(
   model: { skipped: Array<{ reason: string }> },
   result: { skipped: Array<{ reason: string }> },
-  label: string
+  label: string,
+  perSource?: SourceReport[]
 ): void {
   const counts = new Map<string, number>();
   for (const entry of [...model.skipped, ...result.skipped]) {
@@ -49,10 +51,32 @@ function logSkippedCounts(
     .map((reason) => `${reason}=${counts.get(reason)}`)
     .join(", ");
   console.warn(`[ProxySubscription] core config skipped for ${label}: ${summary}`);
+  if (perSource) {
+    for (const row of perSource) {
+      if (row.skipped > 0 || row.duplicates > 0 || !row.usable) {
+        console.warn(
+          `[ProxySubscription] core config source ${row.index} for ${label}: rendered=${row.rendered} skipped=${row.skipped} duplicates=${row.duplicates} usable=${row.usable}`
+        );
+      }
+    }
+  }
 }
 
 /** Warning code stored in the subscription `error` column when generation skips entries. */
 export type CoreConfigWarningCode = "CORE_CONFIG_ENTRIES_SKIPPED";
+
+/**
+ * Per-feed isolation report (server log and the multi-feed intention). A
+ * duplicate is a node an earlier feed already brought: counted here, never
+ * reported as a skipped entry, since nothing is lost.
+ */
+export interface SourceReport {
+  index: number;
+  rendered: number;
+  skipped: number;
+  duplicates: number;
+  usable: boolean;
+}
 
 /** Counts-only view of skipped entries, shared by the log line and the warning. */
 interface SkippedSummary {
@@ -106,7 +130,8 @@ function warn(reason: string): string {
 function renderAndLog(
   sub: CoreConfigSub,
   model: ReturnType<typeof buildCoreModel>,
-  existingText: string | null
+  existingText: string | null,
+  perSource?: SourceReport[]
 ):
   | string
   | null
@@ -123,7 +148,7 @@ function renderAndLog(
   const result = renderer(model, existingText);
   if (!result.ok) return warn((result as RenderRefused).reason);
   if (result.unchanged) return null;
-  logSkippedCounts(model, result, (sub as { id?: string }).id ?? target);
+  logSkippedCounts(model, result, (sub as { id?: string }).id ?? target, perSource);
   return {
     text: result.text,
     core,
@@ -164,12 +189,152 @@ export interface CoreConfigIntention {
   warning: string | null;
 }
 
+export interface MultiSourceIntention extends CoreConfigIntention {
+  /** Per-source isolation report: one row per input, same order as the input list. */
+  perSource: SourceReport[];
+}
+
+/** Key joining two feeds on the same logical node (canonical model identity). */
+function dedupeKey(node: SubscriptionNode | NeedsCoreNode, index: number): string {
+  const source = node.source;
+  if (!source) return `none:${index}:${node.name}`;
+  return nodeIdentity(source) ?? `none:${index}:${node.name}`;
+}
+
+/**
+ * Merge one parsed feed per source into a single node list. Sources stay
+ * isolated: an unusable feed contributes zero nodes and one
+ * `source_unavailable` skipped entry carrying the source index; a
+ * recognized-but-empty feed adds nothing. Duplicated nodes across sources
+ * are emitted once (first source wins) and counted per source in
+ * `duplicates` so no merge is ever silent.
+ */
+export function mergeParsedSources(parsedList: ParsedSubscription[]): {
+  nodes: SubscriptionNode[];
+  needsCore: NeedsCoreNode[];
+  skipped: Array<{ node?: string; reason: string }>;
+  perSource: SourceReport[];
+} {
+  const nodes: SubscriptionNode[] = [];
+  const needsCore: NeedsCoreNode[] = [];
+  const skipped: Array<{ node?: string; reason: string }> = [];
+  const perSource: SourceReport[] = [];
+  const seen = new Set<string>();
+  parsedList.forEach((parsed, index) => {
+    const usable = isUsableSubscriptionContent(parsed);
+    let rendered = 0;
+    let skippedCount = 0;
+    let duplicates = 0;
+    if (!usable) {
+      skipped.push({ node: `source-${index}`, reason: "source_unavailable" });
+      skippedCount += 1;
+    } else {
+      for (const node of [...parsed.nodes, ...parsed.needsCore] as Array<
+        SubscriptionNode | NeedsCoreNode
+      >) {
+        const key = dedupeKey(node, index);
+        if (seen.has(key)) {
+          duplicates += 1;
+          continue;
+        }
+        seen.add(key);
+        rendered += 1;
+        if ("type" in node && (node as SubscriptionNode).type !== undefined) {
+          nodes.push(node as SubscriptionNode);
+        } else {
+          needsCore.push(node as NeedsCoreNode);
+        }
+      }
+    }
+    perSource.push({ index, rendered, skipped: skippedCount, duplicates, usable });
+  });
+  return { nodes, needsCore, skipped, perSource };
+}
+
 /** Warning-only wrapper (kept for existing callers and tests). */
 export async function generateForSubscription(
   sub: CoreConfigSub,
   parsed: ParsedSubscription
 ): Promise<string | null> {
   return (await generateCoreConfigIntention(sub, parsed)).warning;
+}
+
+/**
+ * Render and apply the beside-file for one subscription from several parsed
+ * feeds. Each feed is validated and isolated: a failing feed contributes
+ * zero nodes plus one skipped entry, the others still render. Tags stay the
+ * stable identity (unchanged from the single-feed path); the source index
+ * only appears in the server log and the returned per-source report.
+ */
+export async function generateCoreConfigIntentionMulti(
+  sub: CoreConfigSub,
+  parsedList: ParsedSubscription[],
+  opts?: GenerateOptions
+): Promise<MultiSourceIntention> {
+  const blank = (configPath: string): MultiSourceIntention => ({
+    status: "none",
+    digestChanged: false,
+    configPath,
+    warning: null,
+    perSource: parsedList.map((parsed, index) => ({
+      index,
+      rendered: 0,
+      skipped: 0,
+      duplicates: 0,
+      usable: isUsableSubscriptionContent(parsed),
+    })),
+  });
+  let target = "";
+  try {
+    target = (sub.coreConfigPath ?? "").trim();
+    if (!target) return blank(target);
+
+    const existingText = readExisting(target);
+    if (existingText.failed) return { ...blank(target), warning: warn("read_failed") };
+
+    const merged = mergeParsedSources(parsedList);
+    const model = buildCoreModel(parseLocalCoreEndpoints(sub.localCoreEndpoint), [
+      ...merged.nodes,
+      ...merged.needsCore,
+    ]);
+    // Merge-level skips (failed source, cross-source duplicate) join the
+    // model skips before the render: the summary stays generic by reason.
+    model.skipped.push(...merged.skipped);
+    const rendered = renderAndLog(sub, model, existingText.text, merged.perSource);
+    if (typeof rendered === "string")
+      return { ...blank(target), warning: rendered, perSource: merged.perSource };
+    if (rendered === null) return { ...blank(target), perSource: merged.perSource };
+    const digest = typeof rendered.digest === "string" ? rendered.digest : undefined;
+
+    const dir = path.dirname(`${target}.generated`);
+    try {
+      if (!fs.statSync(dir).isDirectory())
+        return { ...blank(target), warning: warn("write_failed"), perSource: merged.perSource };
+    } catch {
+      return { ...blank(target), warning: warn("write_failed"), perSource: merged.perSource };
+    }
+    const binaryPath = configuredCoreBinary(sub.id ?? target);
+    if (binaryPath) {
+      const intention = await finishVerifiedPrune(
+        sub,
+        target,
+        binaryPath,
+        model,
+        existingText.text,
+        rendered,
+        digest,
+        [...model.skipped, ...rendered.resultSkipped],
+        opts
+      );
+      return { ...intention, perSource: merged.perSource };
+    }
+    const beside = finishBeside(sub, target, rendered.text, digest, rendered.skippedSummary);
+    return { ...beside, perSource: merged.perSource };
+  } catch {
+    // Fixed text only: the thrown message can carry node names or addresses.
+    console.warn("[ProxySubscription] core config generation failed");
+    return { ...blank(target), warning: warn("internal_error") };
+  }
 }
 
 /**

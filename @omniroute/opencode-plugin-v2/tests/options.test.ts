@@ -8,8 +8,25 @@ import {
   resolveTimeouts,
   toResolvedOptions,
 } from "../src/options.js";
+import { buildModelDisplayName } from "../src/shared/naming.js";
 
 describe("parsePluginOptions", () => {
+  it("providerTag defaults to true and toggles the editor parenthesis", () => {
+    const opts = parsePluginOptions({ baseURL: "https://gw.example.com" });
+    assert.equal(opts.providerTag, true);
+    const withParen = buildModelDisplayName({
+      rawId: "openrouter/kimi-k-3-1-pro",
+      enrichmentName: "MoonshotAI: Kimi K 3.1 Pro",
+      providerTag: opts.providerTag,
+    });
+    assert.equal(withParen, "openrouter - Kimi K 3.1 Pro (MoonshotAI)");
+    const withoutParen = buildModelDisplayName({
+      rawId: "openrouter/kimi-k-3-1-pro",
+      enrichmentName: "MoonshotAI: Kimi K 3.1 Pro",
+      providerTag: false,
+    });
+    assert.equal(withoutParen, "openrouter - Kimi K 3.1 Pro");
+  });
   it("applies the real default path via parsePluginOptions: freeOnly/toolsOnly/visionOnly all off", () => {
     const opts = parsePluginOptions({ baseURL: "https://gw.example.com" });
     assert.equal(opts.providerId, "omniroute");

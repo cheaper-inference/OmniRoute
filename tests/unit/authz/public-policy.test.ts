@@ -8,7 +8,11 @@ import { getMachineTokenSync } from "../../../src/lib/machineToken.ts";
 function ctx(): PolicyContext {
   return {
     request: { method: "GET", headers: new Headers() },
-    classification: { routeClass: "PUBLIC", reason: "public_prefix", normalizedPath: "/api/init" },
+    classification: {
+      routeClass: "PUBLIC",
+      reason: "public_prefix",
+      normalizedPath: "/api/auth/status",
+    },
     requestId: "req_test",
   };
 }

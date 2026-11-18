@@ -17,210 +17,229 @@ OmniRoute ஆனது ஒவ்வொரு API கோரிக்கையை�
 
 ### 1. API விசை (Bearer)
 
-OpenAI/Anthropic/Gemini-இணக்கமான client API-களுக்கும், விசையில் `manage` scope இருக்கும்போது சில நிர்வாக route-களுக்கும் பயன்படுத்தப்படுகிறது.
+OpenAI/Anthropic/Gemini-க்கு இணக்கமான கிளையன்ட் API-களுக்கும், விசையில் `manage` scope இருக்கும் போது சில நிர்வாக வழித்தடங்களுக்கும் பயன்படுத்தப்படுகிறது.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`-இல் உள்ள `isValidApiKey()` / `extractApiKey()` மூலம் சரிபார்க்கப்பட்டு, `src/shared/utils/apiAuth.ts` வழியாக மீண்டும் ஏற்றுமதி செய்யப்படுகிறது. தொடர்ச்சியான passthrough விசைகளாக `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` சூழல் மாறிகளையும் validator ஏற்கிறது (சிக்கல் #1350).
+`src/sse/services/auth.ts`-இல் உள்ள `isValidApiKey()` / `extractApiKey()` மூலம் சரிபார்க்கப்பட்டு, `src/shared/utils/apiAuth.ts` வழியாக மீண்டும் ஏற்றுமதி செய்யப்படுகிறது. `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env vars-ஐ நிலையான passthrough விசைகளாகவும் சரிபார்ப்பி ஏற்றுக்கொள்கிறது (issue #1350).
 
-### 2. Dashboard அமர்வு (auth_token cookie)
+### 2. டாஷ்போர்டு அமர்வு (`auth_token` cookie)
 
-Dashboard பக்கங்களுக்கும் admin செயல்பாடுகளுக்கும்.
+டாஷ்போர்டு பக்கங்களுக்கும் நிர்வாகச் செயல்பாடுகளுக்கும் பயன்படுத்தப்படுகிறது.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWT சரிபார்க்கப்பட்டு **மேலும்** அதில் `authenticated: true` இருந்தால் மட்டுமே ஒரு cookie அமர்வாகக் கருதப்படும்
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). அந்த cookie-ஐப் பயன்படுத்தும் ஒவ்வொரு
-கூறும் (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline புதுப்பிப்பு, WebSocket handshake, நேரடி
-server, `/api/settings/require-login`, `/api/auth/status`) அந்த helper வழியாகவே செல்கிறது.
-`JWT_SECRET` மூலம் கையொப்பமிடப்பட்ட பிற JWT-களும் உள்ளன — விசை வைத்திருப்பவர்களுக்காக Cursor CLI passthrough,
-`iss "omniroute" / aud "cursor-cli"` token-களை உருவாக்குகிறது — அவை ஒருபோதும் அமர்வுகளாகக் கருதப்படுவதில்லை
+JWT சரிபார்க்கப்பட்டு, `authenticated: true` என்பதைக் கொண்டிருந்தால் மட்டுமே cookie ஒரு அமர்வாகக் கருதப்படும்
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). cookie-ஐப் பயன்படுத்தும் ஒவ்வொரு நுகர்வாளரும் (டாஷ்போர்டு வழித்தடக் காவலர் (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
+server, `/api/settings/require-login`, `/api/auth/status`) அந்த உதவியாளர் வழியாகவே செல்கின்றனர்.
+`JWT_SECRET` மூலம் கையொப்பமிடப்பட்ட பிற JWT-களும் உள்ளன — விசை வைத்திருப்பவர்களுக்காக Cursor CLI passthrough
+`iss "omniroute" / aud "cursor-cli"` token-களை உருவாக்குகிறது — அவை ஒருபோதும் அமர்வுகளாகாது
 (#13298).
 
-`src/shared/utils/apiAuth.ts`-இல் உள்ள `isDashboardSessionAuthenticated()` மூலம் சரிபார்க்கப்படுகிறது. JWT-யின் 30 நாள் ஆயுட்காலத்தில் 7 நாட்களுக்கும் குறைவாக மீதமிருக்கும்போது pipeline அதைத் தானாகப் புதுப்பிக்கிறது.
+`src/shared/utils/apiAuth.ts`-இல் உள்ள `isDashboardSessionAuthenticated()` மூலம் சரிபார்க்கப்படுகிறது. 30 நாள் ஆயுட்காலத்தில் 7 நாட்களுக்கும் குறைவாக மீதமிருக்கும்போது pipeline தானாகவே JWT-ஐப் புதுப்பிக்கிறது.
 
-ஒவ்வொரு token உருவாக்குநரும் `mintDashboardSessionToken` வழியாகச் செல்வதால் (வெளியிடப்பட்ட நேரமான `iat` மற்றும் அடையாளமான `jti` உடன்), மேலும் verifier இரண்டு அமைப்புகளைச் சரிபார்ப்பதால், ஓர் அமர்வு அதன் 30 நாட்கள் முடிவதற்கு முன்பே முடிவடையலாம்: கடவுச்சொல் மாற்றப்படும்போது `sessionsValidAfter` அமைக்கப்படுகிறது; இதனால் அதற்கு முன்பு வழங்கப்பட்ட ஒவ்வொரு அமர்வும் சரிபார்ப்பில் தோல்வியடையும் (கடவுச்சொல்லை மாற்றிய browser புதிய cookie-ஐப் பெறும்). மேலும், `revokedDashboardSessions`-இல் `POST /api/auth/logout`, வெளியேறிய அமர்வின் `jti`-ஐச் சேர்க்கிறது. பழைய release மூலம் உருவாக்கப்பட்ட அமர்வுகளில் இந்த இரண்டு claim-களும் இருக்காது; முதல் கடவுச்சொல் மாற்றம் வரை அவை செல்லுபடியாக இருக்கும். அமைப்புகளைப் படிக்க முடியாவிட்டால், அமர்வு நம்பகமானதாகக் கருதப்படாது.
+ஒவ்வொரு minter-மும் `mintDashboardSessionToken` வழியாகச் செல்வதால் (ஒரு issue time `iat` மற்றும் ஓர் id `jti`), மேலும் verifier இரண்டு அமைப்புகளைச் சரிபார்ப்பதால், அதன் 30 நாட்கள் முடிவதற்கு முன்பும் ஒரு அமர்வு முடிவடையலாம்: `sessionsValidAfter`, இது கடவுச்சொல் மாற்றத்தால் அமைக்கப்பட்டு, அதற்கு முன் வழங்கப்பட்ட ஒவ்வொரு அமர்வும் சரிபார்ப்பில் தோல்வியடையச் செய்கிறது (கடவுச்சொல்லை மாற்றிய உலாவி புதிய cookie-ஐப் பெறுகிறது), மற்றும் `revokedDashboardSessions`, இதில் `POST /api/auth/logout` வெளியேறிய அமர்வின் கையொப்பமிடப்பட்ட `jti`-ஐச் சேர்க்கிறது. பழைய release மூலம் உருவாக்கப்பட்ட அமர்வுகளில் இந்த claims இரண்டும் இருக்காது; ஆகவே முதல் கடவுச்சொல் மாற்றம் வரை அவை செல்லுபடியாக இருக்கும். அமைப்புகளைப் படிக்க முடியாவிட்டால், அந்த அமர்வு நம்பகமானதாகக் கருதப்படாது.
 
-சில நிர்வாக route-கள் **ஏதேனும் ஒரு** முறையை ஏற்கின்றன: cookie அல்லது API விசையில் `manage` (அல்லது `admin`) scope இருக்கும்போது `Bearer <key>`. v3.8-இல் சேர்க்கப்பட்ட "API அழைப்புகள் வழியாக உள்ளமைக்கக்கூடியது" என்ற workflow-ஐ இதுவே சாத்தியமாக்குகிறது.
+சில நிர்வாக வழித்தடங்கள் **இரு** முறைகளில் ஏதேனும் ஒன்றை ஏற்றுக்கொள்கின்றன: cookie அல்லது `manage` (அல்லது `admin`) scope கொண்ட API விசையுடன் `Bearer <key>`. v3.8-இல் சேர்க்கப்பட்ட “API அழைப்புகள் மூலம் கட்டமைக்கக்கூடிய” பணிச்செயல்முறையை இது செயல்படுத்துகிறது.
 
-#### விருப்பத்திற்குரிய OIDC உள்நுழைவு gate (#6973)
+#### விருப்பத் தேர்வு OIDC உள்நுழைவு வாயில் (#6973)
 
-இயல்புநிலை கடவுச்சொல் உள்நுழைவுடன் சேர்த்து, dashboard admin உள்நுழைவு **விருப்பத்தின் பேரில் இயக்கக்கூடிய** OIDC (OpenID Connect) flow-ஐயும் ஆதரிக்கிறது — கடவுச்சொல் உள்நுழைவு ஒருபோதும் அகற்றப்படாது; அது கூடுதல் வசதியால் மட்டுமே விரிவுபடுத்தப்படுகிறது:
+இயல்புநிலை கடவுச்சொல் உள்நுழைவுடன் கூடுதலாக, டாஷ்போர்டு நிர்வாகி உள்நுழைவு OIDC (OpenID Connect) flow-ஐயும் ஆதரிக்கிறது
+— கடவுச்சொல் உள்நுழைவு ஒருபோதும் நீக்கப்படாது; அது கூடுதலாக மட்டுமே வழங்கப்படுகிறது:
 
-- `settings.oidcEnabled === true` **ஆகவும்**, `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` அனைத்தும் உள்ளமைக்கப்பட்டிருந்தால் மட்டுமே இது
-  செயல்படுத்தப்படும் (அமைப்புகள் → அங்கீகாரம்). இல்லையெனில்
-  `GET /api/auth/oidc/login` கோரிக்கை `400` என்பதைத் திருப்பியளிக்கும்.
-- `GET /api/auth/oidc/login`, வழங்குநரின்
-  `/.well-known/openid-configuration` இலிருந்து `authorization_endpoint`-ஐக்
-  கண்டறிந்து (`<issuer>/authorize`-ஐ மாற்றாகப் பயன்படுத்தி), உள்வரும் கோரிக்கையிலிருந்து
-  (`x-forwarded-proto`-ஐக் கருத்தில்கொண்டு) திருப்பிவிடல் URI-ஐ உருவாக்கி, சீரற்ற
-  `state` மதிப்பை `httpOnly` வகை `oidc_state` குக்கியில் சேமித்து IdP-க்கு
-  திருப்பிவிடும்.
-- `GET /api/auth/oidc/callback`, `state`-ஐச் சரிபார்த்து, அங்கீகாரக் குறியீட்டைப்
-  பரிமாற்றி, வழங்குநரின் JWKS வழியாக (`jose`-இன் `createRemoteJWKSet`, ஒவ்வொரு
-  JWKS URI-க்கும் தற்காலிகமாகச் சேமிக்கப்படும்) `issuer`/`audience`
-  சரிபார்ப்புகளுடன் ID டோக்கனின் கையொப்பத்தைச் சரிபார்க்கும். டாஷ்போர்டிற்கான
-  அனுமதிக்கு காலியாக இல்லாத `oidcAllowedSubjects` பட்டியல், ஓர்
-  `oidcAdmissionClaim` கொள்கை அல்லது இரண்டும் தேவை. பொருள் பட்டியல், `sub`
-  அல்லது `email_verified === true` என இருக்கும்போது மட்டுமே `email` உடன்
-  பொருந்தும். விருப்பத்திற்குரிய உரிமைகோரல் கொள்கை, புள்ளிகளால் பிரிக்கப்பட்ட
-  ID-டோக்கன் உரிமைகோரல் பாதையையும் (எடுத்துக்காட்டாக, `realm_access.roles`),
-  ஏற்கப்படும் மதிப்புகளின் அணிவரிசையையும் பெறும்; தீர்மானிக்கப்பட்ட உரிமைகோரல்,
-  ஏற்கப்படும் மதிப்புகளில் குறைந்தது ஒன்றைக் கொண்ட சரங்களின் அணிவரிசையாக இருக்க
-  வேண்டும். இரண்டு கொள்கைகளும் உள்ளமைக்கப்பட்டிருந்தால், இரண்டிலும் சரிபார்ப்பு
-  வெற்றிபெற வேண்டும். இல்லாத அல்லது தவறாக வடிவமைக்கப்பட்ட உரிமைகோரல்கள்
-  பாதுகாப்பாக நிராகரிக்கப்படும்; எந்தக் கொள்கையும் இல்லாவிட்டால் callback உள்நுழைவை
-  மறுக்கும் (`not_configured`). ஏற்கெனவே உள்ள, பொருளை மட்டும் அடிப்படையாகக் கொண்ட
-  உள்ளமைவுகள் மாற்றமின்றித் தொடரும்.
-- Keycloak வழக்கமாக realm பாத்திரங்களை access token-களில் இணைக்கிறது; ID
-  token-களில் அவசியமாக இணைப்பதில்லை. `admin` realm பாத்திரத்தைக் கட்டாயமாக்க,
-  இந்த client-க்கான protocol mapper-ஐ அதன் **ID token**-இல்
-  `realm_access.roles`-ஐச் சேர்க்குமாறு உள்ளமைத்து, பின்னர்
-  `oidcAdmissionClaim`-ஐ `{ "path": "realm_access.roles", "values": ["admin"] }`
-  என அமைக்கவும். பாத்திரத்தை மட்டும் அடிப்படையாகக் கொண்ட அனுமதியைச்
-  செயல்படுத்துவதற்கு முன், இந்த client-க்கான உண்மையான ID-டோக்கன் உரிமைகோரலைச்
-  சரிபார்க்கவும்; பயன்பாடு access-token பாத்திரங்களைப் படிப்பதில்லை. IdP
-  தரப்பிலான token மறுப்பு இந்தப் பயன்பாட்டுத் தரப்பு சரிபார்ப்புக்குத் துணையாக
-  இருக்கலாம்; ஆனால் அதை மாற்றீடு செய்யாது.
-- வெற்றிபெற்றால், கடவுச்சொல் உள்நுழைவு வழங்கும் **அதே துல்லியமான** 30-நாள்
-  `auth_token` JWT-ஐ இது உருவாக்கும் (`src/app/api/auth/login/route.ts`);
-  எனவே டாஷ்போர்டின் மீதமுள்ள session செயலாக்கத் தொடர் (தானியக்கப் புதுப்பித்தல்,
-  cookie flags) மாறாது — cookie எவ்வாறு உருவாக்கப்படுகிறது என்பதை மட்டுமே OIDC
-  மாற்றுகிறது; அது வழங்கும் அனுமதிகளை மாற்றாது. IdP பாத்திரங்கள்/குழுக்களில்
-  செய்யப்படும் மாற்றங்கள் ஏற்கெனவே உள்ள OmniRoute session-களைச் செல்லாததாக்காது;
-  logout, கடவுச்சொல் மாற்றம் அல்லது session காலாவதியே அவற்றின் வாழ்நாளைத்
-  தொடர்ந்து நிர்ணயிக்கும்.
+- `settings.oidcEnabled === true` **மற்றும்** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` ஆகிய அனைத்தும் கட்டமைக்கப்பட்டிருந்தால் மட்டுமே
+  இயங்கும் (அமைப்புகள் → அங்கீகாரம்). இல்லையெனில்
+  `GET /api/auth/oidc/login` `400` என்பதைத் திருப்பும்.
+- `GET /api/auth/oidc/login`, issuer-ன்
+  `/.well-known/openid-configuration` இலிருந்து `authorization_endpoint`-ஐ
+  கண்டறியும் (`<issuer>/authorize`-க்கு fallback ஆகும்), உள்வரும் கோரிக்கையிலிருந்து
+  (`x-forwarded-proto`-ஐ கருத்தில் கொண்டு) redirect URI-ஐ உருவாக்கும், மேலும்
+  `httpOnly` `oidc_state` cookie-ல் சேமிக்கப்படும் சீரற்ற `state` மதிப்புடன் IdP-க்கு
+  redirect செய்யும்.
+- `GET /api/auth/oidc/callback`, `state`-ஐ சரிபார்த்து, authorization
+  code-ஐ பரிமாறி, issuer-ன் JWKS வழியாக (`jose`-ன் `createRemoteJWKSet`,
+  JWKS URI-க்கு ஒவ்வொன்றாக cache செய்யப்படும்) ID token-ன் கையொப்பத்தை
+  `issuer`/`audience` சரிபார்ப்புகளுடன் உறுதிப்படுத்தும். Dashboard-க்கான
+  அனுமதிக்கு காலியாக இல்லாத `oidcAllowedSubjects` பட்டியல், `oidcAdmissionClaim`
+  கொள்கை, அல்லது இரண்டும் தேவை. `email_verified === true` ஆக இருக்கும்போது
+  மட்டுமே subject பட்டியல் `sub` அல்லது `email` உடன் பொருந்தும். விருப்பமான claim
+  கொள்கை, புள்ளிகளால் பிரிக்கப்பட்ட ID-token claim பாதையை (உதாரணமாக,
+  `realm_access.roles`) மற்றும் ஏற்றுக்கொள்ளப்பட்ட மதிப்புகளின் array-ஐ பெறும்;
+  தீர்க்கப்பட்ட claim, குறைந்தது ஒரு ஏற்றுக்கொள்ளப்பட்ட மதிப்பைக் கொண்ட strings-ன்
+  array ஆக இருக்க வேண்டும். இரு கொள்கைகளும் கட்டமைக்கப்பட்டிருந்தால், இரண்டும்
+  வெற்றிபெற வேண்டும். காணாமல் போன அல்லது தவறான வடிவிலான claims பாதுகாப்பான
+  மறுப்பாகக் கருதப்படும்; எந்தக் கொள்கையும் இல்லையெனில் callback உள்நுழைவை
+  மறுக்கும் (`not_configured`). ஏற்கனவே உள்ள subject-only கட்டமைப்புகள் மாற்றமின்றி
+  தொடரும்.
+- Keycloak பொதுவாக realm roles-ஐ ID tokens-ல் அவசியம் அல்லாமல் access tokens-ல்
+  map செய்யும். `admin` realm role தேவைப்பட்டால், `realm_access.roles`-ஐ
+  **ID token**-ல் சேர்க்கும் வகையில் இந்த client-க்கான protocol mapper-ஐ
+  கட்டமைத்து, பின்னர் `oidcAdmissionClaim`-ஐ
+  `{ "path": "realm_access.roles", "values": ["admin"] }` என அமைக்கவும்.
+  role-only admission-ஐ இயக்குவதற்கு முன், இந்த client-க்கான உண்மையான ID-token
+  claim-ஐச் சரிபார்க்கவும்; பயன்பாடு access-token roles-ஐப் படிக்காது. IdP தரப்பிலான
+  token மறுப்பு, இந்த பயன்பாடு தரப்பிலான சரிபார்ப்புக்கு துணையாக இருக்கலாம்;
+  ஆனால் அதற்குப் பதிலாக அமையாது.
+- வெற்றியடைந்ததும், password login வழங்கும் அதே **முற்றிலும் ஒரே** 30-நாள்
+  `auth_token` JWT-ஐ (`src/app/api/auth/login/route.ts`) உருவாக்கும். எனவே
+  dashboard session pipeline-ன் மீதிப் பகுதி (auto-refresh, cookie flags)
+  மாற்றமின்றி இருக்கும் — cookie எவ்வாறு உருவாக்கப்படுகிறது என்பதை மட்டுமே OIDC
+  மாற்றுகிறது; அது வழங்கும் அனுமதிகளை மாற்றாது. IdP roles/groups-ல் ஏற்படும்
+  மாற்றங்கள் ஏற்கனவே உள்ள OmniRoute sessions-ஐ செல்லாததாக்காது; logout,
+  password rotation அல்லது session expiry ஆகியவையே அவற்றின் கால அளவை
+  கட்டுப்படுத்தும்.
 - ஒவ்வொரு `oidc*` அமைப்பும் (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`
-  என்பதில் உள்ளது (`src/shared/constants/securityImpactingSettings.ts`):
-  கோரிக்கையின் body-யில் நிர்வாகக் கடவுச்சொல் `currentPassword` ஆக
-  வழங்கப்படாவிட்டால் `PATCH /api/settings`, `400 PASSWORD_REQUIRED` எனப்
-  பதிலளிக்கும் (அது தவறாக இருந்தால் `401 PASSWORD_MISMATCH`).
-  `oidcDisablePasswordLogin`, கடவுச்சொல் _உள்நுழைவை_ (`POST /api/auth/login`)
-  மறுக்கும்; ஆனால் சேமிக்கப்பட்ட password hash-ஐத் தக்கவைக்கும், மேலும்
-  மறுஅங்கீகாரம் இன்னமும் `currentPassword`-ஐ அதனுடன் சரிபார்க்கும்.
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) அனைத்தும்
+  `SECURITY_IMPACTING_SETTINGS_KEYS`-ல்
+  (`src/shared/constants/securityImpactingSettings.ts`) உள்ளன:
+  `PATCH /api/settings`, body-ல் management password-ஐ
+  `currentPassword` ஆகக் கொண்டிருக்காவிட்டால் `400 PASSWORD_REQUIRED` எனப்
+  பதிலளிக்கும் (`currentPassword` தவறாக இருந்தால் `401 PASSWORD_MISMATCH`).
+  `oidcDisablePasswordLogin`, password _login_-ஐ (`POST /api/auth/login`)
+  மறுக்கும்; ஆனால் சேமிக்கப்பட்ட password hash-ஐ வைத்திருக்கும், மேலும் மீண்டும்
+  அங்கீகரிக்கும்போதும் `currentPassword` அதனுடன் சரிபார்க்கப்படும்.
 - `corsOrigins` மற்றும் `bruteForceProtection` ஆகியவையும்
-  `SECURITY_IMPACTING_SETTINGS_KEYS` என்பதில் உள்ளன: இவற்றில் ஏதேனும் ஒன்றைத்
-  தளர்த்துவது உள்நுழைவுப் பாதுகாப்புகளைப் பலவீனப்படுத்தும்; எனவே அவற்றுக்கும் அதே
-  `currentPassword` மறுஅங்கீகாரம் தேவை (பாதுகாப்புத் தாவல் அதைக் கேட்கும்),
-  மேலும் JSON இறக்குமதி அவற்றை நீக்கிவிடும்.
-- ஒவ்வொரு பாதுகாப்புக் கொள்கை விசையும் — `SECURITY_IMPACTING_SETTINGS_KEYS`
-  உள்ளீடுகள், ஒவ்வொரு `oidc*` விசை மற்றும் டாஷ்போர்டு session நிலை —
-  `PATCH /api/settings`-இல் **இயக்குநருக்கு மட்டும்** உரியது: manage scope கொண்ட
-  API key அல்லது `oma_` access token சரியான `currentPassword`-ஐ அனுப்பினாலும்
-  `403` உடன் மறுக்கப்படும்; மேலும் அந்த மறுப்பு `reason: OPERATOR_REQUIRED`
-  என்பதுடன் `settings.update_failed` ஆகத் தணிக்கைப் பதிவில் சேர்க்கப்படும்
-  (`src/lib/api/operatorCredential.ts`-இல் உள்ள `requireOperatorCredential()`).
-  சாதாரண அமைப்புகள் (theme, காட்சி விருப்பத்தேர்வுகள்), `manage` key அல்லது
-  `admin` access token மூலம் தொடர்ந்து எழுதக்கூடியவையாக இருக்கும்.
-  `/api/settings`-இல் செய்யப்படும் ஒவ்வொரு மாற்றத்திற்கும் (மேலும்
-  `/api/settings/require-login`-இல் செய்யப்படுபவற்றிற்கும்) `admin` access-token
-  scope தேவை (`src/server/authz/accessScopes.ts`-இல் உள்ள
-  `ADMIN_MUTATION_EXACT_PATHS`, exact-path பொருத்தம்); `GET` தொடர்ந்து `read`
-  ஆகவே இருக்கும், மேலும் மற்ற `/api/settings/*` துணைப் பாதைகள் (proxies,
-  combo defaults, model aliases, compression, purges…) முறைமையிலிருந்து
-  தீர்மானிக்கப்படும் `write` scope-ஐத் தொடர்ந்து பயன்படுத்தும்.
-- `POST /api/settings/import-json` அந்த மறுஅங்கீகாரத்தைத் தவிர்க்கிறது; எனவே
-  எழுதுவதற்கு முன் `IMPORT_STRIPPED_SETTINGS_KEYS`-இல் உள்ள ஒவ்வொரு விசையையும்
-  (அதே கோப்பு) நீக்கிவிடும்: கடவுச்சொல் மற்றும் `currentPassword`, ஒவ்வொரு
-  `SECURITY_IMPACTING_SETTINGS_KEYS` உள்ளீடு, மேலும் டாஷ்போர்டு session நிலை
-  (`sessionsValidAfter`, `revokedDashboardSessions`). ஆகவே பழைய backup-ஐ
-  இறக்குமதி செய்வதால், கடவுச்சொல் மாற்றம் அல்லது sign-out ஏற்கெனவே முடிவுக்குக்
-  கொண்டுவந்த session-ஐ மீண்டும் உயிர்ப்பிக்க முடியாது.
+  `SECURITY_IMPACTING_SETTINGS_KEYS`-ல் உள்ளன: இவற்றில் ஏதேனும் தளர்த்தப்படுவது
+  login பாதுகாப்புகளை பலவீனப்படுத்தும். எனவே இவைகளுக்கும் அதே
+  `currentPassword` மறுஅங்கீகாரம் தேவைப்படுகிறது (Security tab இதைக்
+  கேட்கும்), மேலும் JSON import இவற்றை நீக்கிவிடும்.
+- ஒவ்வொரு security-policy key-உம் — `SECURITY_IMPACTING_SETTINGS_KEYS`-ன்
+  entries, ஒவ்வொரு `oidc*` key மற்றும் dashboard session state — ஆகியவை
+  `PATCH /api/settings`-ல் **operator-only** ஆகும்: manage-scoped API key அல்லது
+  `oma_` access token, சரியான `currentPassword`-ஐ அனுப்பினாலும் `403` என
+  மறுக்கப்படும்; இந்த மறுப்பு `settings.update_failed` ஆகவும்
+  `reason: OPERATOR_REQUIRED` உடனும் audit செய்யப்படும்
+  (`src/lib/api/operatorCredential.ts`-ல் உள்ள
+  `requireOperatorCredential()`). சாதாரண அமைப்புகள் (theme, display
+  preferences), `manage` key அல்லது `admin` access token கொண்டவர்களால்
+  எழுதக்கூடியவையாகத் தொடரும். `/api/settings`-ன் ஒவ்வொரு mutation-க்கும்
+  (மற்றும் `/api/settings/require-login`-க்கும்) `admin` access-token scope
+  தேவைப்படுகிறது (`src/server/authz/accessScopes.ts`-ல் உள்ள
+  `ADMIN_MUTATION_EXACT_PATHS`, exact-path match); `GET` தொடர்ந்து `read` ஆகும்,
+  மற்ற `/api/settings/*` துணை-route-கள் (proxies, combo defaults, model aliases,
+  compression, purges…) method-inferred `write` scope-ஐத் தொடர்ந்து பயன்படுத்தும்.
+- `POST /api/settings/import-json`, அந்த மறுஅங்கீகாரத்தைத் தவிர்த்து, எழுதுவதற்கு
+  முன் `IMPORT_STRIPPED_SETTINGS_KEYS`-ல் (அதே file) உள்ள ஒவ்வொரு key-ஐயும்
+  நீக்கிவிடும்: password மற்றும் `currentPassword`, ஒவ்வொரு
+  `SECURITY_IMPACTING_SETTINGS_KEYS` entry, மேலும் dashboard session state
+  (`sessionsValidAfter`, `revokedDashboardSessions`). பழைய backup-ஐ
+  import செய்வதால், password மாற்றம் அல்லது sign-out ஏற்கனவே முடித்த session-ஐ
+  மீண்டும் செயல்படுத்த முடியாது.
 
-## ரூட் வகைகள்
+#### விருப்பமான TOTP இரு-காரணி உள்நுழைவு (#16619)
 
-`src/server/authz/types.ts` மூன்று வகைகளை வரையறுக்கிறது; தீர்மானகரமாக வகைப்படுத்த முடியாத எந்த route-உம் `MANAGEMENT`-க்குத் திரும்பும்.
+Settings → Security-ல் பதிவு செய்யப்படும்; operator அதை இயக்கும் வரை
+முடக்கப்பட்டிருக்கும் (`src/server/auth/dashboardMfa.ts`).
 
-| Class        | Description                                                                                                                                             | Auth required                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | வெளிப்படையாகவே பாதுகாப்பான routes — login, logout, status, init, health, onboarding bootstrap.                                                          | எதுவும் தேவையில்லை                                              |
-| `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, மற்றும் aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | `REQUIRE_API_KEY` feature flag செயலில் இருக்கும்போது Bearer key |
-| `MANAGEMENT` | Dashboard பக்கங்கள், settings, providers, keys, admin மற்றும் diagnostics endpoints.                                                                    | Dashboard session அல்லது `manage` scope உடைய Bearer             |
+- **இதில் உள்ளடங்குவது:** கடவுச்சொல் உள்நுழைவு (`POST /api/auth/login`, இதற்குப் பின்னர்
+  `POST /api/auth/mfa/verify` தேவைப்படும்) மற்றும் `omniroute connect` (`POST /api/cli/connect`,
+  இது கடவுச்சொல் மட்டுமே கொண்ட பரிமாற்றத்தை நிராகரித்து, குறியீட்டை `totp` ஆக ஏற்கும்).
+- **இதில் உள்ளடங்காதது:** OIDC / SSO உள்நுழைவு (`/api/auth/oidc/callback`) OmniRoute TOTP-ஐ
+  கேட்காது. இது அடையாள வழங்குநரின் சொந்த இரண்டாம் காரணி மீது சார்ந்துள்ளது; OIDC இயக்கப்பட்டிருந்தால்
+  IdP-இல் MFA-ஐ கட்டாயப்படுத்தவும்.
+- **மீட்டெடுப்பு** (சாதனம் தொலைந்துவிட்டால், மீட்புக் குறியீடுகள் எதுவும் மீதமில்லையெனில், அல்லது ஒரு காரணியை
+  இனி சரிபார்க்க முடியாவிட்டால், உதாரணமாக `STORAGE_ENCRYPTION_KEY` மாறிய பிறகு):
+  1. `OMNIROUTE_DISABLE_MFA=true` உடன் சேவையகத்தை மறுதொடக்கம் செய்யவும்.
+  2. ஹோஸ்டிலேயே (லூப்பேக் peer மற்றும் லூப்பேக் `Host`, உதாரணமாக
+     `http://localhost:20128`), கடவுச்சொல்லைப் பயன்படுத்தி உள்நுழையவும். அந்த origin-க்கு மட்டும்
+     இரண்டாம் காரணி தவிர்க்கப்படும்; பிற ஒவ்வொரு origin-க்கும் குறியீடு இன்னும் தேவைப்படும்.
+  3. Settings → Security → Disable என்பதற்குச் சென்று, கடவுச்சொல்லை உள்ளிட்டு, குறியீட்டுப் புலத்தை
+     காலியாக விடவும். `POST /api/auth/mfa/disable` ஆனது, மாறி அமைக்கப்பட்டிருக்கும் போதும் கோரிக்கை
+     ஹோஸ்டிலிருந்து வரும்போதும் மட்டுமே `code` இல்லாத body-ஐ ஏற்கும்; இருப்பினும் dashboard session
+     மற்றும் தற்போதைய கடவுச்சொல் தேவைப்படும், மேலும் இது `auth.mfa.disabled` என
+     `secondFactor: "recovery_switch"` உடன் தணிக்கையிடப்படும்.
+  4. `OMNIROUTE_DISABLE_MFA`-ஐ unset செய்து, மறுதொடக்கம் செய்யவும்; தேவைப்பட்டால் மீண்டும் enrollment செய்யவும்.
 
-சில `MANAGEMENT` செயல்கள் **operator-only** ஆகும்: `manage` key மட்டும் போதாது. சேமிக்கப்பட்ட credentials-ஐ ஏற்றுமதி செய்தல் (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data-வின் மேல் backup-ஐ மீட்டமைத்தல் (`dryRun=true` உட்பட `POST /api/db-backups/import`, id மூலம் `POST /api/db-backups` restore, `POST /api/settings/import-json`), restore points-ஐ அழித்தல் (`DELETE /api/db-backups` cleanup, மற்றும் `PATCH /api/db-backups` ஏனெனில் அது சேமிக்கும் retention ஒவ்வொரு backup-க்குப் பின்னும் தானியங்கு நீக்கத்தை இயக்குகிறது) ஆகியவற்றுக்கு dashboard session, உள்ளூர் CLI subject, அல்லது login முடக்கப்பட்டிருப்பது தேவை. Sync token-ஐ வழங்குதல் (`POST /api/sync/tokens`) மற்றும் `admin` CLI access token-ஐ உருவாக்குதல் (`POST /api/cli/tokens`) ஒவ்வொரு login mode-இலும் dashboard session அல்லது உள்ளூர் CLI subject தேவை. எந்த scope-இன் API keys-உம், `oma_` access tokens-உம் operator credentials அல்ல: தேவைப்படும்போதெல்லாம் அவை `403` பெறும். இச்சரிபார்ப்பு `src/lib/api/operatorCredential.ts`-இல் உள்ளது (`resolveOperatorCredential()` / `requireOperatorCredential()`). Login settings-ஐ மாற்றுவதும் operator-only: ஒரு கடவுச்சொல் ஏற்கனவே இருந்தால் `POST /api/settings/require-login` (நிர்வாகக் கடவுச்சொல்லை அமைத்தல் / `requireLogin`-ஐ மாற்றுதல்) அந்த credentials-ஐ மட்டுமே ஏற்கும் — கடவுச்சொல் இல்லாத முதல்-முறை bootstrap சாளரம் மாறாது — மேலும் கடவுச்சொல்லை மாற்ற dashboard session `currentPassword` அனுப்ப வேண்டும் (அது இல்லாவிட்டால் அல்லது தவறாக இருந்தால் `403`, `settings.update_failed` என தணிக்கை செய்யப்படும்). உள்ளூர் CLI-உம், login முடக்கப்பட்ட instance-உம் மீட்புப் பாதையைத் தக்கவைக்கின்றன; அவை data directory-ஐ வைத்திருக்கும் host-உடன் பிணைக்கப்பட்டிருப்பதால், அது இல்லாமலேயே கடவுச்சொல்லை அமைக்கலாம்.
+## பாதை வகுப்புகள்
 
-## செயலாக்கத் தொடர்
+`src/server/authz/types.ts` மூன்று வகுப்புகளை வரையறுக்கிறது; நிர்ணயம் செய்ய முடியாத எந்த வழியும் `MANAGEMENT` க்கு திரும்பும்.
+
+| வகுப்பு      | விளக்கம்                                                                                                                                | அங்கீகாரம் தேவை                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `PUBLIC`     | வெளிப்படையான பாதுகாப்பான வழிகள் — உள்நுழைவு, வெளியேறுதல், நிலை, ஆரோக்கியம், உள் நுழைவு பூட்ஸ்ட்ராப்.                                    | இல்லை                                                                       |
+| `CLIENT_API` | — `/api/v1/*`, `/api/v1beta/*`, மேலும் மாற்றுப்பெயர்கள் `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | பயனுள்ள `REQUIRE_API_KEY` அம்சக் கொடி இயக்கப்பட்டிருக்கும் போது தாங்கி விசை |
+| `MANAGEMENT` | டாஷ்போர்டு பக்கங்கள், அமைப்புகள், வழங்குநர்கள், விசைகள், நிர்வாகம் மற்றும் கண்டறியும் முனைப்புள்ளிகள்.                                  | `manage` நோக்கம் கொண்ட டாஷ்போர்டு அமர்வு OR தாங்கி                          |
+
+ஒரு சில `MANAGEMENT` செயல்கள்** ஆபரேட்டர்-மட்டும்** : ஒரு `manage` விசை போதாது. சேமிக்கப்பட்ட நற்சான்றிதழ்களை ஏற்றுமதி செய்தல் (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), நேரடி தரவு மீது காப்புப்பிரதியை மீட்டமைத்தல் (`POST /api/db-backups/import`, ஐடி மூலம் `dryRun=true` மீட்டமைத்தல் , `POST /api/settings/import-json`), மீட்டெடுப்பு புள்ளிகளை அழித்தல் (`DELETE /api/db-backups` சுத்தப்படுத்துதல் மற்றும் `PATCH /api/db-backups`, லோக்கல் பேக்-அப் தொடர்ந்து இயங்குவதால் `POST /api/db-backups` தானாக இயங்கும் ஒவ்வொரு அமர்விற்குப் பிறகும் தானாக இயங்கும் dash CLI இயக்க வேண்டும்) பொருள், அல்லது உள்நுழைவு முடக்கப்பட்டது. ஒத்திசைவு டோக்கனை (`POST /api/sync/tokens`) வழங்குவதற்கும் `admin` CLI அணுகல் டோக்கனை (`POST /api/cli/tokens`) உருவாக்குவதற்கும் ஒவ்வொரு உள்நுழைவு பயன்முறையிலும் டாஷ்போர்டு அமர்வு அல்லது உள்ளூர் CLI பொருள் தேவைப்படுகிறது. எந்த நோக்கத்தின் API விசைகள் மற்றும் `oma_` அணுகல் டோக்கன்கள் ஆபரேட்டர் நற்சான்றிதழ்கள் அல்ல: அவை தேவைப்படும் போதெல்லாம் `403` கிடைக்கும். காசோலை `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) இல் வாழ்கிறது. உள்நுழைவு அமைப்புகளை மாற்றுவது ஆபரேட்டருக்கு மட்டுமே: `POST /api/settings/require-login` (நிர்வாக கடவுச்சொல்லை அமைக்கவும் / `requireLogin` மாற்றவும்) அந்த நற்சான்றிதழ்களை மட்டுமே ஏற்றுக்கொள்கிறது — முதல்-ரன் பூட்ஸ்ட்ராப் சாளரம் (இதுவரை கடவுச்சொல் இல்லை) — மாறாமல் உள்ளது மற்றும் டேஷ்போர்டு அமர்வு `currentPassword` அனுப்ப வேண்டும் அல்லது கடவுச்சொல்லை மாற்றினால் (`403` `settings.update_failed` இருந்தால்). உள்ளூர் CLI மற்றும் உள்நுழைவு முடக்கப்பட்ட ஒரு நிகழ்வு மீட்புப் பாதையை வைத்திருக்கும் மற்றும் அது இல்லாமல் கடவுச்சொல்லை அமைக்கலாம், ஏனெனில் இவை இரண்டும் தரவு கோப்பகத்தை வைத்திருக்கும் ஹோஸ்டுடன் பிணைக்கப்பட்டுள்ளன.
+
+## குழாய்
 
 ```
-உள்வரும் கோரிக்கை → src/proxy.ts
-  → src/server/authz/pipeline.ts-இல் உள்ள runAuthzPipeline()
-    1. நம்பகமான உள் தலைப்புகளை அகற்று (x-omniroute-auth-*, x-omniroute-route-class)
-    2. கோரிக்கை ID-ஐ உருவாக்கி, classifyRoute() வழியாக வழித்தடத்தை வகைப்படுத்து
-    3. pathname == "/" எனில் → /dashboard-க்குத் திருப்பிவிடு
-    4. வடிகட்டிச் செயல்நிறுத்தம் (முறையான பணிநிறுத்தம்) நடைபெற்று, /api/* எனில் → 503
-    5. GET அல்லாத /api/* எனில் → checkBodySize() பாதுகாப்பைச் சரிபார்
-    6. OPTIONS எனில் → CORS முன்சோதனை 204
-    7. options.enforce == false எனில் → route-class தலைப்புகளுடன் அப்படியே அனுப்பு
-    8. இல்லையெனில்: POLICIES[routeClass].evaluate(ctx)
-       - அனுமதி → x-omniroute-auth-{kind,id,label,scopes}-ஐப் பதித்து → NextResponse.next()
-       - நிராகரிப்பு → correlation_id உடன் JSON பிழை (கட்டுப்பாட்டுப் பலகைப் பக்கங்கள் → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-நம்பகமான உள் தலைப்புகள் (`src/server/authz/headers.ts`-இல் வரையறுக்கப்பட்டவை) வகைப்படுத்தலுக்கு முன் **உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்படுகின்றன** — ஒரு பொருளைப் போல ஆள்மாறாட்டம் செய்ய வாடிக்கையாளர்கள் `x-omniroute-auth-*` தலைப்புகளை முன்கூட்டியே நிரப்ப முடியாது.
+நம்பகமான உள் தலைப்புகள் ( `src/server/authz/headers.ts` இல் வரையறுக்கப்பட்டுள்ளன)** உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்பட்டது** — வகைப்பாட்டிற்கு முன் கிளையண்டுகள் ஒரு விஷயத்தைப் போல ஆள்மாறாட்டம் செய்ய `x-omniroute-auth-*` முன் நிரப்ப முடியாது.
 
 ### கொள்கை ஒப்பந்தங்கள்
 
-ஒவ்வொரு வழித்தட வகுப்புக்கும் `src/server/authz/policies/`-இல் ஒரு கொள்கை உள்ளது:
+ஒவ்வொரு வழி வகுப்பிற்கும் `src/server/authz/policies/` இல் கொள்கை உள்ளது:
 
-- **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` என்பதைத் திருப்பித் தரும்.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer-ஐப் பிரித்தெடுத்து, `validateApiKey()` வழியாகச் சரிபார்க்கிறது. நடைமுறையிலுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும்போது மட்டுமே பெயரிலாப் பயன்பாட்டிற்கு வழிவிடுகிறது. நடைமுறையிலுள்ள கொடி `isRequireApiKeyEnabled()` (`DB அம்சக் கொடி மேலெழுதல் > process.env.REQUIRE_API_KEY > இயல்புநிலை`) வழியாகத் தீர்மானிக்கப்படுவதால், கட்டுப்பாட்டுப் பலகையின் அம்சக் கொடிகளும் சூழல் மாறிகளும் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப் பெயர்களை ஒரே மாதிரியாகக் கட்டுப்படுத்துகின்றன; தீர்மானிப்பான் தோல்விகள் அணுகலை மறுக்கும். கிளையன்ட் API வழித்தடங்களில் கட்டுப்பாட்டுப் பலகை அமர்வுக் கோரிக்கைகளை அனுமதிக்கிறது (கட்டுப்பாட்டுப் பலகையின் மாதிரிப் பட்டியல் பயன்படுத்தும் `/api/v1/models` உட்பட).
-- **`managementPolicy`** (`policies/management.ts`) — கட்டுப்பாட்டுப் பலகை அமர்வு, உள் மாதிரி-ஒத்திசைவுக் கோரிக்கைகள் (`/api/providers/[name]/(sync-models|models)` உடன் பொருத்தப்படுபவை) ஆகியவற்றை ஏற்கிறது அல்லது `isAuthRequired()` false என்பதைத் திருப்பினால் முழுமையாகத் தவிர்க்கிறது. Bearer டோக்கன் இருந்தும் செல்லுபடியாகாதபோது 403 (`AUTH_001`) என்பதையும், இல்லையெனில் 401 என்பதையும் திருப்பித் தருகிறது. எந்த அங்கீகாரக் கிளைக்கும் முன்பாக வழித்தடப் பாதுகாப்பு அடுக்குகளையும் (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது — [வழித்தடப் பாதுகாப்பு அடுக்குகள்](../security/ROUTE_GUARD_TIERS.md) என்பதைப் பார்க்கவும். `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-இல் உள்ள LOCAL_ONLY பாதைகளை (தற்போது: `/api/mcp/`) Bearer விசை `manage` வரம்பைக் கொண்டிருக்கும்போது loopback அல்லாத இடங்களிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் வரம்பைப் பொருட்படுத்தாமல் கண்டிப்பாக loopback-க்கு மட்டுமே கட்டுப்படுத்தப்பட்டிருக்கும்.
+- **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` வழங்கும்.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — பிரித்தெடுத்தல் தாங்கி, `validateApiKey()` வழியாக சரிபார்க்கிறது. பயனுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும் போது மட்டுமே அநாமதேயமாக மாறும். பயனுள்ள கொடியானது `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) மூலம் தீர்க்கப்படுகிறது, எனவே டாஷ்போர்டு அம்சம் கொடிகள் மற்றும் சூழல் மாறிகள் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப்பெயர்களை தொடர்ந்து நிர்வகிக்கின்றன; தீர்க்கும் தோல்விகள் தோல்வி அடைகின்றன. கிளையன்ட் API வழிகளில் டேஷ்போர்டு-அமர்வு கோரிக்கைகளை அனுமதிக்கிறது ( `/api/v1/models`, டாஷ்போர்டு மாதிரி அட்டவணையால் பயன்படுத்தப்படுகிறது). Entra ID SSO இயக்கப்பட்டால், கட்டமைப்பு ரீதியாக என்ட்ரா டோக்கனாக இருக்கும் ஒரு தாங்கி (மூன்று base64url பிரிவுகள், `RS*` alg, `kid`) SSO கிளையால் கையாளப்படுகிறது.** முன்** `validateApiKey()` மற்றும் அதன் தீர்ப்பு இறுதி — ஆகும், இது ஒருபோதும் API-கீ பாதை அல்லது சிதைவிலிருந்து அநாமதேய கிளைக்கு வராது, எனவே அடையாள-வழங்குபவர் செயலிழப்பு திறந்த அணுகலாக மாற முடியாது. நிலையான API விசைகள் பாதிக்கப்படாது. [Entra ID SSO](../security/ENTRA_SSO.md) ஐப் பார்க்கவும்.
+- **`managementPolicy`** (`policies/management.ts`) — டாஷ்போர்டு அமர்வு, உள் மாதிரி-ஒத்திசைவு கோரிக்கைகளை ( `/api/providers/[name]/(sync-models|models)` க்கு எதிராகப் பொருந்துகிறது) ஏற்றுக்கொள்கிறது அல்லது `isAuthRequired()` தவறு எனத் திரும்பினால் முழுவதுமாகத் தவிர்க்கிறது. ஒரு தாங்கி டோக்கன் இருக்கும் போது 403 (`AUTH_001`) ஐ வழங்குகிறது ஆனால் செல்லாது, இல்லையெனில் 401. மேலும் வழி — காவலர் [அடுக்குகளை](../security/ROUTE_GUARD_TIERS.md) (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` இல் உள்ள LOCAL_ONLY பாதைகள் (இன்று: `/api/mcp/`) பியரர் விசை `manage` ஸ்கோப்பைக் கொண்டிருக்கும் போது லூப்பேக் அல்லாதவற்றிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் ஸ்கோப்பைப் பொருட்படுத்தாமல் கண்டிப்பான-லூப்பேக்காக இருக்கும்.
 
-வெற்றிகரமான கொள்கை `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` கொண்ட `AuthSubject`-ஐத் திருப்பித் தருகிறது. கீழ்நிலை கையாளிகள் அங்கீகாரத் தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக, `src/server/authz/assertAuth.ts`-இல் உள்ள `assertAuth(request, "CLIENT_API")` வழியாக அதைப் படிக்கலாம்.
+வெற்றிகரமான கொள்கையானது `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` உடன் வழங்கும். கீழ்நிலை கையாளுபவர்கள் அங்கீகார தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக `src/server/authz/assertAuth.ts` இல் `assertAuth(request, "CLIENT_API")` வழியாகப் படிக்கலாம்.
 
-## பொது Routes பட்டியல்
+## பொது வழிகள் பட்டியல்
 
 `src/shared/constants/publicApiRoutes.ts` என்பது வெளிப்படையான அனுமதிப்பட்டியல்:
 
-இந்தப் பட்டியல் **வடிவத்தின்** அடிப்படையில் பிரிக்கப்பட்டுள்ளது; மேலும் இந்தப் பிரிப்பு முக்கியமானது (GHSA-74g9-q8f6-793h): ஒரு prefix,
-`startsWith()` மூலம் பொருத்தப்படுவதால், அதன் தொடக்க எழுத்துகளைப் பகிரும் அருகிலுள்ள ஒவ்வொரு path-உடனும் அது பொருந்தும்.
-`/api/usage/om-usage`-ஐ prefix ஆகக் கொண்டது, `/api/usage/om-usage<anything>`-ஐ PUBLIC எனக் குறித்தது; மேலும் Next அதை
-`/api/usage/[connectionId]` எனத் தீர்மானிக்கிறது — அதற்கென தனியாக auth இல்லாத ஒரு handler.
+பட்டியல் பிரிக்கப்பட்டுள்ளது** வடிவம்** , மற்றும் பிளவு சுமை தாங்கும் (GHSA-74g9-q8f6-793h): ஒரு முன்னொட்டு `startsWith()` உடன் பொருந்துகிறது, எனவே இது அதன் முன்னணி எழுத்துக்களைப் பகிர்ந்து கொள்ளும் ஒவ்வொரு அருகிலுள்ள பாதைக்கும் பொருந்தும். `/api/usage/om-usage` ஒரு முன்னொட்டாக `/api/usage/om-usage<anything>` PUBLIC எனக் குறிக்கப்பட்டது, மேலும் அதன் சொந்த அங்கீகாரம் இல்லாத ஒரு ஹேண்ட்லரை `/api/usage/[connectionId]` — என்று அடுத்து தீர்க்கிறது.
 
 ```ts
-// உண்மையான subtrees. ஒவ்வொரு entry-யும் "/"-இல் முடிய வேண்டும் (unit test மூலம் உறுதிப்படுத்தப்படுகிறது).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify-இல் CLIENT_API ஆகக் கருதப்படுகிறது; "no-auth public" ஆக அல்ல
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// தனிப்பட்ட routes, துல்லியமாகப் பொருத்தப்படுகின்றன (இறுதியில் slash இருந்தாலும் இல்லாவிட்டாலும்).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin தளர்வையும் பெறும் read-only தனிப்பட்ட routes.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS தளர்வு இல்லாத read-only தனிப்பட்ட route.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-பாதுகாப்பான methods-க்கு **மட்டுமே** read-only routes பொது அணுகலுக்குரியவை. குறிப்பு: `classifyRoute()`, PUBLIC fall-through-இலிருந்து `/api/v1/*` மற்றும் `/api/v1beta/*` ஆகியவற்றை விலக்குகிறது — Bearer-key கொள்கை தொடர்ந்து பொருந்துவதற்காக அவை எப்போதும் `CLIENT_API` ஆகவே இருக்கும்.
+படிக்க மட்டும் வழிகள் பொது** மட்டுமே** பாதுகாப்பான முறைகளுக்கு. குறிப்பு: `classifyRoute()` PUBLIC Fal-through — இலிருந்து `/api/v1/*` மற்றும் `/api/v1beta/*` விலக்குகிறது `CLIENT_API`
 
 ## புதிய Route ஒன்றைச் சேர்த்தல்
 
@@ -284,15 +303,15 @@ API கீகள் ஒரு `scopes` வரிசையைக் கொண்�
 
 `oma_live_…` டோக்கன்களில் `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) மூலம் தரவரிசைப்படுத்தப்பட்டுள்ளது. இந்த தரவரிசை அணுகல்-டோக்கன் நற்சான்றிதழுக்கு மட்டுமே பொருந்தும். [மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md) ஐப் பார்க்கவும்.
 
-## Auth Required மாற்று (toggle)
+## அங்கீகாரம் தேவை மாற்று
 
-`src/shared/utils/apiAuth.ts`-இல் உள்ள `isAuthRequired()`, ஒரு request-க்கு **ஏதேனும்** auth கட்டாயமா என்பதை முடிவு செய்கிறது:
+என்பதை `src/shared/utils/apiAuth.ts` இல் உள்ள `isAuthRequired()` தீர்மானிக்கிறது** ஏதேனும்** ஒரு கோரிக்கைக்கு அங்கீகாரம் செயல்படுத்தப்படுகிறது:
 
-- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்படும், ஆனால் எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) தவிர, மற்றும் ஏற்கப்படும் credential-ஐ வழங்கும் calls தவிர — அவை login இயக்கத்தில் இருக்கும்போது தேவைப்படும் அதே credential-ஐக் கோரும்: sync tokens வழங்குதல், எந்த scope-இலும் CLI access tokens உருவாக்குதல், மற்றும் `manage`/`admin` scope கொண்ட API key-ஐ உருவாக்குதல், ஒரு key-க்கு அந்த scope-ஐ வழங்குதல், அல்லது அத்தகைய key-ஐ மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் (`src/lib/api/requireManagementAuth.ts`-இல் `requireCredentialForManagementScopedKey()`). Inference-only keys திறந்தே இருக்கும்.
-- கடவுச்சொல் அமைக்கப்படவில்லை **மற்றும்** `INITIAL_PASSWORD` env var இல்லை → bootstrap mode onboarding wizard-ஐயும் loopback requests-ஐயும் அனுமதிக்கும், ஆனால் வெளிப்படும் network requests-க்கு இன்னும் credentials தேவை.
-- ஏதேனும் DB error → fail closed (secure-by-default).
+- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்பட்டுள்ளது, எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ( [பாதை காவலர் அடுக்குகளைப்](../security/ROUTE_GUARD_TIERS.md) பார்க்கவும்) மற்றும் அது ஏற்றுக்கொள்ளும் நற்சான்றிதழை வழங்கும் அழைப்புகள் தவிர, உள்நுழைவுடன் அதே நற்சான்றிதழ் தேவை: ஒத்திசைவு டோக்கன்களை வழங்குதல், CLI அணுகல் டோக்கன்களை எந்த ஸ்கோப்பிலும் உருவாக்குதல், API ஸ்கோப்பில் உருவாக்குதல், மற்றும் விசையை உருவாக்குதல் ஒரு விசைக்கு அந்த நோக்கத்தை வழங்குதல், அல்லது அத்தகைய `requireCredentialForManagementScopedKey()` மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் ( `manage` `src/lib/api/requireManagementAuth.ts` `admin` ). அனுமானம் மட்டுமே விசைகள் திறந்திருக்கும். பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுதல் (`REQUIRE_API_KEY`, மற்ற பாதுகாப்புக் கொடிகள் மற்றும் SSRF / TLS / MCP- ஸ்கோப் / சாண்ட்பாக்ஸ் கொடிகள் [அம்சக் கொடிகளில்](../reference/FEATURE_FLAGS.md#rest-api) பட்டியலிடப்பட்டுள்ளன ) மற்றும் PII மறைக்கும் அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) நற்சான்றிதழ் தேவைப்படுகிறது.
+- கடவுச்சொல் கட்டமைக்கப்படவில்லை** மற்றும்** `INITIAL_PASSWORD` env var → பூட்ஸ்டார்ப் பயன்முறையானது ஆன்போர்டிங் வழிகாட்டி மற்றும் லூப்பேக் கோரிக்கைகளை அனுமதிக்கிறது, ஆனால் வெளிப்படும் நெட்வொர்க் கோரிக்கைகளுக்கு இன்னும் நற்சான்றிதழ்கள் தேவை. விதிவிலக்கு: பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுவதற்கும், PII முகமூடி அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) லூப்பேக்கிலிருந்தும் ஒரு நற்சான்றிதழ் தேவை, எனவே லூப்பேக் தானாகவே போதுமானதாக இல்லை.
+- எந்த DB பிழை → மூடப்படும் (பாதுகாப்பான-இயல்புநிலை).
 
-Client API key enforcement, நேரடியாக `process.env.REQUIRE_API_KEY`-ஐப் படிப்பதற்குப் பதிலாக, `src/shared/utils/featureFlags.ts`-இல் உள்ள `isRequireApiKeyEnabled()`-ஐப் பயன்படுத்துகிறது. இது deployed instances-க்கு முக்கியம்: Dashboard → Feature Flags-இல் `REQUIRE_API_KEY`-ஐ மாற்றினால் DB override சேமிக்கப்பட்டு, `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மேலும் இந்த helper-ஐப் பகிரும் பிற client-API auth சோதனைகள் உடனடியாகப் பாதிக்கப்படும். Feature flag store படிக்க முடியாவிட்டால், client API auth fail closed ஆகி key-ஐக் கோரும்.
+கிளையண்ட் API விசை அமலாக்கம் `src/shared/utils/featureFlags.ts` இல் `isRequireApiKeyEnabled()` பயன்படுத்துகிறது, நேரடி `process.env.REQUIRE_API_KEY` வாசிப்பு அல்ல. பயன்படுத்தப்பட்ட நிகழ்வுகளுக்கு இது முக்கியமானது: டாஷ்போர்டில் `REQUIRE_API_KEY` மாற்றுவது → அம்சக் கொடிகள் DB மேலெழுதலைச் சேமித்து, உடனடியாக `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மற்றும் பிற கிளையன்ட்-ஏபிஐ அங்கீகாரச் சரிபார்ப்புகளைப் பகிரும் இந்த உதவிச் சரிபார்ப்பைப் பாதிக்கிறது. அம்சக் கொடி அங்காடியைப் படிக்க முடியாவிட்டால், கிளையன்ட் API அங்கீகாரம் மூடப்படுவதில் தோல்வியடைந்து, விசை தேவைப்படுகிறது.
 
 ## இணக்கமுறிவு மாற்றம் — v3.8.0
 
@@ -310,23 +329,23 @@ Client API key enforcement, நேரடியாக `process.env.REQUIRE_API_KE
 
 ## பிழைத்திருத்தம்
 
-பைப்லைன் எப்போதும் பதில்களில் பின்வருவனவற்றைப் பதிக்கிறது:
+பைப்லைன் எப்போதும் பதில்களை முத்திரையிடுகிறது:
 
 ```
-x-request-id:               <தொடர்பு ஐடி, பிழை உள்ளடக்கங்களிலும் பிரதிபலிக்கப்படும்>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-அங்கீகரிக்கப்பட்ட கோரிக்கைகளுக்கு, அப்ஸ்ட்ரீம் (ஹேண்ட்லர்-பக்க) கோரிக்கை தலைப்புகளில் பின்வருவனவும் அடங்கும்:
+அங்கீகரிக்கப்பட்ட கோரிக்கைகளுக்கு அப்ஸ்ட்ரீம் (ஹேண்ட்லர்-பக்கம்) கோரிக்கை தலைப்புகளும் அடங்கும்:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<கடைசி-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (விருப்பத்தேர்வு)
-x-omniroute-auth-scopes:    காற்புள்ளியால் பிரிக்கப்பட்ட பட்டியல்
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ஹேண்ட்லர்களுக்குள் `assertAuth(req, expectedClass)`-ஐப் பயன்படுத்தவும் — மிடில்வேர் தவிர்க்கப்பட்டிருந்தால், இது `AUTHZ_NOT_INITIALIZED` குறியீட்டுடன் `AuthzAssertionError`-ஐ எறியும் (சோதனைகளில் உள்ளமைவு பின்னடைவுகளைக் கண்டறிய உதவும்).
+— ஹேண்ட்லர்களுக்குள் `assertAuth(req, expectedClass)` பயன்படுத்தவும், மிடில்வேர் புறக்கணிக்கப்பட்டிருந்தால், `AUTHZ_NOT_INITIALIZED` குறியீட்டுடன் `AuthzAssertionError` வீசுகிறது (சோதனைகளில் உள்ளமைவு பின்னடைவுகளைப் பிடிக்க உதவுகிறது).
 
 ## மேலும் காண்க
 

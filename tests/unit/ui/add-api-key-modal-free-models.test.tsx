@@ -109,6 +109,33 @@ describe("AddApiKeyModal — import only free models", () => {
   });
 });
 
+describe("AddApiKeyModal — free-only import on compatible nodes", () => {
+  it("shows the toggle with the payload-evidence hint on an OpenAI-compatible node", () => {
+    const el = render({
+      provider: "openai-compatible-12345678-1234-1234-1234-123456789abc",
+      providerName: "Aggregator",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+    expect(el.textContent).toContain("importFreeModelsOnlyCompatibleHint");
+  });
+
+  it("shows the toggle on an Anthropic-compatible node", () => {
+    const el = render({
+      provider: "anthropic-compatible-12345678-1234-1234-1234-123456789abc",
+      providerName: "Anthropic gateway",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+  });
+
+  it("hides the toggle on a Claude Code-compatible node", () => {
+    const el = render({
+      provider: "anthropic-compatible-cc-12345678-1234-1234-1234-123456789abc",
+      providerName: "CC node",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeNull();
+  });
+});
+
 describe("AddApiKeyModal — quota scraping fields", () => {
   it("renders only the API key for OpenCode Go and saves no scraping credentials", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);

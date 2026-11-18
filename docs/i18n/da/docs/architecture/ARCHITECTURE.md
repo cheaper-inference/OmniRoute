@@ -8,79 +8,78 @@
 
 _Senest opdateret: 2026-06-28_
 
-## Sammenfatning
+## Executive Summary
 
-OmniRoute er en lokal AI-routinggateway og et dashboard bygget med Next.js.
-Den leverer ét enkelt OpenAI-kompatibelt slutpunkt (`/v1/*`) og router trafik på tværs af flere upstream-udbydere med oversættelse, fallback, tokenfornyelse og forbrugssporing.
+OmniRoute er en lokal AI routing gateway og dashboard bygget på Next.js. Det giver et enkelt OpenAI-kompatibelt slutpunkt (`/v1/*`) og dirigerer trafik på tværs af flere upstream-udbydere med oversættelse, fallback, token-opdatering og brugssporing.
 
-Primære funktioner:
+Kerneegenskaber:
 
-- OpenAI-kompatibel API-grænseflade til CLI/værktøjer (375 udbydere, 156 eksekveringsmoduler)
-- Oversættelse af forespørgsler og svar på tværs af udbyderformater
-- Fallback for modelkombinationer (sekvens med flere modeller)
-- Strukturerede kombinationstrin (`provider + model + connection`) med rækkefølge under kørsel baseret på `compositeTiers`
-- Fallback på kontoniveau (flere konti pr. udbyder)
-- Forhåndskontrol af kvoter og kvotebevidst P2C-kontovalg i det primære chatflow
-- Administration af udbyderforbindelser via OAuth og API-nøgler (27 OAuth-udbydermoduler)
-- Generering af embeddings via `/v1/embeddings` (18 udbydere)
-- Billedgenerering via `/v1/images/generations` (10+ udbydere, 20+ modeller)
+- OpenAI-kompatibel API overflade til CLI/tools (394 udbydere, 159 eksekveringsmoduler)
+- Request/response -oversættelse på tværs af udbyderformater
+- Model combo fallback (multi-model sekvens)
+- Strukturerede combo-trin (`provider + model + connection`) med runtime-bestilling efter `compositeTiers`
+- Fallback på kontoniveau (multi-konto pr. udbyder)
+- Kvote preflight og kvotebevidst P2C kontovalg i hovedchatstien
+- OAuth + API-nøgle udbyder forbindelsesstyring (27 OAuth udbyder moduler)
+- Indlejringsgenerering via `/v1/embeddings` (18 udbydere)
+- Billedgenerering via `/v1/images/generations` (10 + udbydere, 20 + -modeller)
 - Lydtransskription via `/v1/audio/transcriptions` (18 udbydere)
 - Tekst-til-tale via `/v1/audio/speech` (24 indbyggede udbydere)
 - Videogenerering via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Musikgenerering via `/v1/music/generations` (ComfyUI)
 - Websøgning via `/v1/search` (20 udbydere)
-- Moderering via `/v1/moderations`
-- Genrangering via `/v1/rerank`
-- Fortolkning af think-tags (`<think>...</think>`) til ræsonneringsmodeller
-- Sanitering af svar med henblik på streng kompatibilitet med OpenAI SDK
-- Normalisering af roller (developer→system, system→user) med henblik på kompatibilitet på tværs af udbydere
+- Moderationer via `/v1/moderations`
+- Omrangering via `/v1/rerank`
+- Tænk tag-parsing (`<think>...</think>`) for ræsonnementmodeller
+- Reaktionssanering for streng OpenAI SDK kompatibilitet
+- Rollenormalisering (udvikler → system, system → bruger) for kompatibilitet på tværs af udbydere
 - Konvertering af struktureret output (json_schema → Gemini responseSchema)
-- Lokal persistens af udbydere, nøgler, aliasser, kombinationer, indstillinger og priser (122 DB-moduler)
-- Sporing af forbrug og omkostninger samt logføring af forespørgsler
-- Valgfri cloudsynkronisering til synkronisering af tilstand på tværs af flere enheder
-- IP-tilladelsesliste/blokeringsliste til adgangskontrol for API'et
-- Administration af tænkningsbudget (passthrough/auto/custom/adaptive)
-- Global indsprøjtning af systemprompt
-- Sessionssporing og fingerprinting
-- Udvidet hastighedsbegrænsning pr. konto med udbyderspecifikke profiler
-- Circuit breaker-mønster for robusthed over for udbyderfejl
-- Beskyttelse mod thundering herd med mutex-låsning
-- Signaturbaseret cache til deduplikering af forespørgsler
-- Domænelag: omkostningsregler, fallbackpolitik og lockoutpolitik
-- Context Relay: sessionsoverdragelsesresuméer for at bevare kontinuitet ved kontorotation
-- Persistens af domænetilstand (SQLite-write-through-cache til fallbacks, budgetter, lockouts og circuit breakers)
-- Politikmotor til centraliseret evaluering af forespørgsler (lockout → budget → fallback)
-- Forespørgselstelemetri med aggregering af p50-/p95-/p99-latenstid
-- Telemetri for kombinationsmål og historisk tilstand for kombinationsmål via `combo_execution_key` / `combo_step_id`
-- Korrelations-id (X-Request-Id) til end-to-end-sporing
-- Logføring af compliance-revision med mulighed for fravalg pr. API-nøgle
-- Evalueringsrammeværk til kvalitetssikring af LLM'er
-- Tilstandsdashboard med realtidsstatus for udbydernes circuit breakers
-- MCP-server (110 værktøjer) med 3 transportmekanismer (stdio/SSE/Streamable HTTP)
-- A2A-server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
-- Hukommelsessystem (udtrækning, indsprøjtning, hentning og opsummering)
-- Færdighedssystem (register, eksekveringsenhed, sandbox og indbyggede færdigheder)
-- MITM-proxy med certifikatadministration og DNS-håndtering
-- Middleware til beskyttelse mod promptinjektion
-- Pipeline til promptkomprimering med Caveman, RTK, stablede pipelines, komprimeringskombinationer, sprogpakker og analyse
-- ACP-register (Agent Communication Protocol)
-- Modulære OAuth-udbydere (22 individuelle moduler under `src/lib/oauth/providers/`)
-- Scripts til afinstallation/fuldstændig afinstallation
-- Handling til reparation af OAuth-miljø
-- WebSocket-bro til OpenAI-kompatible WS-klienter (`/v1/ws`)
-- Administration af synkroniseringstokens (udstedelse/tilbagekaldelse og download af ETag-versioneret konfigurationspakke)
-- GLM Thinking (`glmt`) som førsteklasses udbyderforudindstilling
-- Hybrid tokenoptælling (udbydersiden `/messages/count_tokens` med estimering som fallback)
-- Automatisk oprettelse af modelaliasser (30+ normaliseringer af dialekter på tværs af proxyer ved opstart)
-- Sikker udgående fetch med SSRF-beskyttelse, blokering af private URL'er og konfigurerbare genforsøg
-- Cooldown-bevidste chatgenforsøg med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
-- Validering af kørselsmiljøet med Zod ved opstart
-- Compliance-revision v2 med paginering, CRUD-hændelser for udbydere og logføring af SSRF-blokeret validering
+- Lokal persistens for udbydere, nøgler, aliaser, kombinationer, indstillinger, priser (122 DB moduler)
+- Usage/cost sporing og anmodningslogning
+- Valgfri skysynkronisering til multi-device/state synkronisering
+- IP allowlist/blocklist til API adgangskontrol
+- Tænkende budgetstyring (passthrough/auto/custom/adaptive)
+- Global system prompt injektion
+- Sessionssporing og fingeraftryk
+- Forbedret prisbegrænsning pr. konto med udbyderspecifikke profiler
+- Circuit breaker mønster for udbyderens modstandsdygtighed
+- Anti-tordenbeskyttelse med mutex-låsning
+- Signaturbaseret anmodnings deduplikeringscache
+- Domænelag: omkostningsregler, fallback-politik, lockout-politik
+- Kontekstrelæ: sessionsoverdragelsesoversigter for kontinuitet i rotation af konti
+- Domænetilstand persistens (SQLite -gennemskrivningscache til fallbacks, budgetter, lockouts, strømafbrydere)
+- Politikmotor til centraliseret anmodningsevaluering (lockout → budget → fallback)
+- Anmod om telemetri med p50/p95/p99 latency aggregering
+- Combo target telemetri og historisk combo target sundhed via `combo_execution_key` / `combo_step_id`
+- Korrelation ID (X-Request-Id) for ende-til-ende-sporing
+- Overholdelsesrevisionslogning med opt-out pr. API nøgle
+- Eval framework for LLM kvalitetssikring
+- Sundhedsdashboard med udbyderens strømafbryderstatus i realtid
+- MCP Server (110 værktøjer) med 3 transporter (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
+- Hukommelsessystem (ekstraktion, injektion, genfinding, opsummering)
+- Færdighedssystem (registrering, udfører, sandkasse, indbyggede færdigheder)
+- MITM proxy med certifikathåndtering og DNS -håndtering
+- Hurtig mellemvare til injektionsbeskyttelse
+- Spørg komprimeringspipeline med Caveman, RTK, stacked pipelines, kompressionskombinationer, sprogpakker og analyser
+- ACP (Agent Communication Protocol) register
+- Modulære OAuth udbydere (22 individuelle moduler under `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall scripts
+- OAuth miljø reparation handling
+- WebSocket bro til OpenAI-kompatible WS klienter (`/v1/ws`)
+- Administration af synkroniseringstoken (issue/revoke, download af konfigurationspakke med ETag-version)
+- GLM Thinking (`glmt`) førsteklasses udbyder forudindstillet
+- Hybrid tokentælling ( `/messages/count_tokens` på udbydersiden med estimeret fallback)
+- Modelalias auto-seed (30 + cross-proxy dialektnormaliseringer ved opstart)
+- Sikker udgående hentning med SSRF -vagt, privat URL blokering og konfigurerbart genforsøg
+- Cooldown-bevidste chatforsøg med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
+- Kørselsmiljøvalidering med Zod ved opstart
+- Overholdelsesaudit v2 med paginering, udbyder- CRUD hændelser og SSRF-blokeret valideringslogning
 
-Primær kørselsmodel:
+Primær runtime model:
 
-- Next.js-app-ruter under `src/app/api/*` implementerer både dashboard-API'er og kompatibilitets-API'er
-- En delt SSE-/routingkerne i `src/sse/*` + `open-sse/*` håndterer udbydereksekvering, oversættelse, streaming, fallback og forbrug
+- Next.js app-ruter under `src/app/api/*` implementerer både dashboard APIs og kompatibilitet APIs
+- En delt SSE/routing kerne i `src/sse/*` + `open-sse/*` håndterer udbyderudførelse, oversættelse, streaming, fallback og brug
 
 ## Referencediagrammer
 
@@ -266,73 +265,72 @@ Administrationsområder:
 - Konfigurationspakke: `src/app/api/sync/bundle` (GET, ETag-versioneret snapshot af indstillinger/udbydere/kombinationer/nøgler)
 - WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade-handler til OpenAI-kompatible WS-klienter
 
-## 2) SSE + oversættelseskerne
+## 2) SSE + Translation Core
 
-Moduler i hovedforløbet:
+Hovedflowmoduler:
 
-- Indgangspunkt: `src/sse/handlers/chat.ts`
-- Central orkestrering: `open-sse/handlers/chatCore.ts`
-- Eksekveringsadaptere til udbydere: `open-sse/executors/*`
-- Formatregistrering/udbyderkonfiguration: `open-sse/services/provider.ts`
-- Fortolkning/opløsning af modeller: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Logik for reservekonti: `open-sse/services/accountFallback.ts`
+- Indgang: `src/sse/handlers/chat.ts`
+- Kerneorkestrering: `open-sse/handlers/chatCore.ts`
+- Leverandørudførelsesadaptere: `open-sse/executors/*`
+- Formater detection/provider config: `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Konto fallback logik: `open-sse/services/accountFallback.ts`
 - Oversættelsesregister: `open-sse/translator/index.ts`
-- Streamtransformationer: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Udtræk/normalisering af forbrug: `open-sse/utils/usageTracking.ts`
-- Parser til think-tags: `open-sse/utils/thinkTagParser.ts`
-- Handler til embeddings: `open-sse/handlers/embeddings.ts`
-- Register over embeddingudbydere: `open-sse/config/embeddingRegistry.ts`
-- Handler til billedgenerering: `open-sse/handlers/imageGeneration.ts`
-- Register over billedudbydere: `open-sse/config/imageRegistry.ts`
-- Rensning af svar: `open-sse/handlers/responseSanitizer.ts`
+- Strømtransformationer: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Brug extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Tænk tag-parser: `open-sse/utils/thinkTagParser.ts`
+- Indlejringshåndtering: `open-sse/handlers/embeddings.ts`
+- Indlejring af udbyderregistrering: `open-sse/config/embeddingRegistry.ts`
+- Billedgenereringsbehandler: `open-sse/handlers/imageGeneration.ts`
+- Billedudbyderregistrering: `open-sse/config/imageRegistry.ts`
+- Reaktionssanering: `open-sse/handlers/responseSanitizer.ts`
 - Rollenormalisering: `open-sse/services/roleNormalizer.ts`
 
 Tjenester (forretningslogik):
 
-- Valg/scoring af konti: `open-sse/services/accountSelector.ts`
-- Administration af kontekstens livscyklus: `open-sse/services/contextManager.ts`
-- Håndhævelse af IP-filter: `open-sse/services/ipFilter.ts`
+- Konto selection/scoring: `open-sse/services/accountSelector.ts`
+- Kontekstlivscyklusstyring: `open-sse/services/contextManager.ts`
+- IP filter håndhævelse: `open-sse/services/ipFilter.ts`
 - Sessionssporing: `open-sse/services/sessionManager.ts`
-- Deduplikering af anmodninger: `open-sse/services/signatureCache.ts`
-- Indsættelse af systemprompt: `open-sse/services/systemPrompt.ts`
-- Administration af tænkningsbudget: `open-sse/services/thinkingBudget.ts`
-- Modelrouting med jokertegn: `open-sse/services/wildcardRouter.ts`
-- Administration af hastighedsbegrænsning: `open-sse/services/rateLimitManager.ts`
-- Kredsløbsafbryder: `src/shared/utils/circuitBreaker.ts`
-- Kontekstoverdragelse: `open-sse/services/contextHandoff.ts` — generering og indsættelse af overdragelsesresumé til kontekstvideresendelsesstrategien
-- Komprimering: `open-sse/services/compression/*` — proaktiv komprimering før oversættelse til udbyderformat;
-  omfatter Caveman-regler, RTK-filtre, stablede pipelines, komprimeringskombinationer, statistik og validering
-- Hentning af Codex-kvote: `open-sse/services/codexQuotaFetcher.ts` — henter Codex-kvote til beslutninger om kontekstoverdragelse
-- Cooldown-bevidst genforsøg: `src/sse/services/cooldownAwareRetry.ts` — modelspecifikke genforsøg efter cooldown med konfigurerbare `requestRetry` / `maxRetryIntervalSec`
-- Sikker udgående hentning: `src/shared/network/safeOutboundFetch.ts` — beskyttet hentning fra udbyder/model med SSRF-beskyttelse, blokering af private URL'er, genforsøg og timeout
-- Beskyttelse af udgående URL'er: `src/shared/network/outboundUrlGuard.ts` — værtskontrol af udbyder-URL'er; `src/shared/network/outboundUrlGuardPolicy.ts` vælger tilstanden ud fra `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` og deres kontrolpanelindstillinger (se `docs/reference/ENVIRONMENT.md`)
-- Standardværdier for udbyderanmodninger: `open-sse/services/providerRequestDefaults.ts` — standardværdier på udbyderniveau for `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- GLM-udbyderkonstanter: `open-sse/config/glmProvider.ts` — delte GLM-modeller, kvote-URL'er samt GLMT-timeout og -standardværdier
-- Antigravity-upstream: `open-sse/config/antigravityUpstream.ts` — konstanter for basis-URL og registreringssti
-- Codex-klientkonstanter: `open-sse/config/codexClient.ts` — versionsbestemte værdier for user-agent og klientversion
-- Startdata til modelaliasser: `src/lib/modelAliasSeed.ts` — opretter 30+ aliasser på tværs af proxy-dialekter ved opstart
+- Anmod om deduplikation: `open-sse/services/signatureCache.ts`
+- Systemprompt injektion: `open-sse/services/systemPrompt.ts`
+- Tænkende budgetstyring: `open-sse/services/thinkingBudget.ts`
+- Wildcard model routing: `open-sse/services/wildcardRouter.ts`
+- Satsgrænsestyring: `open-sse/services/rateLimitManager.ts`
+- Strømafbryder: `src/shared/utils/circuitBreaker.ts`
+- Context handoff: `open-sse/services/contextHandoff.ts` — handoff resumé generering og injektion til kontekst-relæ strategi
+- Kompression: `open-sse/services/compression/*` — proaktiv komprimering før udbyderoversættelse; inkluderer Caveman-regler, RTK -filtre, stablede pipelines, kompressionskombinationer, statistik og validering
+- Codex -kvotehenter: `open-sse/services/codexQuotaFetcher.ts` — henter Codex kvote til beslutninger om overdragelse af kontekst-relæ
+- Nedkølingsbevidst genforsøg: `src/sse/services/cooldownAwareRetry.ts` — pr. model nedkølingsforsøg med konfigurerbar `requestRetry` / `maxRetryIntervalSec`
+- Sikker udgående hentning: `src/shared/network/safeOutboundFetch.ts` — bevogtet provider/model hentning med SSRF beskyttelse, blokering af privat webadresse, prøv igen og timeout
+- Udgående URL -vagt: `src/shared/network/outboundUrlGuard.ts` — vært tjekker udbyderen URLs; `src/shared/network/outboundUrlGuardPolicy.ts` vælger tilstanden fra `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, og deres dashboard skifter (se `docs/reference/ENVIRONMENT.md`)
+- Udbyderanmodningsstandarder: `open-sse/services/providerRequestDefaults.ts` — udbyderniveau `maxTokens`, `temperature`, `thinkingBudgetTokens` standardindstillinger
+- GLM -udbyderkonstanter: `open-sse/config/glmProvider.ts` — delte GLM modeller, quota URLs, GLMT timeout/defaults
+- Antigravity opstrøms: `open-sse/config/antigravityUpstream.ts` — base URL og opdagelsesstikonstanter
+- Codex -klientkonstanter: `open-sse/config/codexClient.ts` — versionerede brugeragent- og klientversionsværdier
+- Modelaliasseed: `src/lib/modelAliasSeed.ts` — seeds 30 + cross-proxy dialektaliaser ved opstart
 
 Domænelagsmoduler:
 
-- Omkostningsregler/-budgetter: `src/domain/costRules.ts`
-- Reservepolitik: `src/domain/fallbackPolicy.ts`
-- Kombinationsopløser: `src/domain/comboResolver.ts`
+- Pris rules/budgets: `src/domain/costRules.ts`
+- Fallback-politik: `src/domain/fallbackPolicy.ts`
+- Reserveret kombinations-opløsningskontrakt: `src/domain/comboResolver.ts`; live routing bruger `open-sse/services/combo.ts`
 - Lockout-politik: `src/domain/lockoutPolicy.ts`
-- Politikmotor: `src/domain/policyEngine.ts` — centraliseret evaluering af lockout → budget → fallback
-- Katalog over fejlkoder: `src/shared/constants/errorCodes.ts`
-- Anmodnings-id: `src/shared/utils/requestId.ts`
-- Timeout for hentning: `src/shared/utils/fetchTimeout.ts`
-- Telemetri for anmodninger: `src/shared/utils/requestTelemetry.ts`
-- Compliance/revision: `src/lib/compliance/index.ts`
-- Evalueringskørsel: `src/lib/evals/evalRunner.ts`
-- Lagring af domænetilstand: `src/lib/db/domainState.ts` — SQLite-CRUD til fallback-kæder, budgetter, omkostningshistorik, lockout-tilstand og kredsløbsafbrydere
+- Reserveret politik-evalueringskontrakt: `src/domain/policyEngine.ts`; anmodningsstien håndhæver API-nøglepolitik gennem `src/shared/utils/apiKeyPolicy.ts` og resolved-target-autorisation gennem `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Fejlkodekatalog: `src/shared/constants/errorCodes.ts`
+- Anmod ID: `src/shared/utils/requestId.ts`
+- Hent timeout: `src/shared/utils/fetchTimeout.ts`
+- Anmod om telemetri: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Evalløber: `src/lib/evals/evalRunner.ts`
+- Domænetilstand persistens: `src/lib/db/domainState.ts` — SQLite CRUD til reservekæder, budgetter, omkostningshistorik, lockout-tilstand, afbrydere
 
-OAuth-udbydermoduler (27 individuelle filer under `src/lib/oauth/providers/`):
+OAuth udbydermoduler (27 individuelle filer under `src/lib/oauth/providers/`):
 
 - Registerindeks: `src/lib/oauth/providers/index.ts`
-- Individuelle udbydere: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Delte hjælpefunktioner: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl-enhedsflow), `museCodeDeviceResponse.ts`
-- Tynd wrapper: `src/lib/oauth/providers.ts` — reeksporterer fra individuelle moduler
+- Individuelle udbydere: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts` `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Delte hjælpere: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
+- Tyndt omslag: `src/lib/oauth/providers.ts` — reeksporterer fra individuelle moduler
 
 ## 5) Integrerede tjenester (v3.8.4)
 
@@ -357,169 +355,128 @@ Arkitekturlag:
 
 Dybdegående dokumentation: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Vigtige delsystemer (v3.8.0)
+## Større undersystemer (v3.8.0)
 
-### A. Auto Combo-motor
+### A. Auto Combo Engine
 
-Auto Combo scorer og vælger dynamisk routingmål på anmodningstidspunktet i stedet for
-at være afhængig af en statisk combo-definition. Den driver modelpræfiksfamilien `auto/*`.
+Auto Combo scorer og vælger routingmål dynamisk på anmodningstidspunktet i stedet for at stole på en statisk kombinationsdefinition. Den driver `auto/*` -modelpræfiksfamilien.
 
-- Motorens indgangspunkt: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (automatisk registrering af præfikset `auto/`)
+- Motorindgang: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Live combo-indgang: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), kaldet af `src/sse/handlers/chat.ts`
 - Dashboard: `/dashboard/auto-combo`
-- Telemetri: SQLite-tabellen `auto_combo_decisions`
+- Telemetri: `auto_combo_decisions` SQLite bord
 
-Vigtigste funktioner:
+Nøglefunktioner:
 
-- **20 routingstrategier** (prioritet, vægtet, udfyld-først, round-robin, P2C, tilfældig,
-  mindst anvendt, omkostningsoptimeret, nulstillingsbevidst, nulstillingsvindue, råderum, kvotevægtet,
-  strengt tilfældig, **auto**, lkgp, kontekstoptimeret, cacheoptimeret, kontekstrelæ, **fusion**,
-  pipeline) —
-  auto er den vigtigste tilføjelse i v3.8.0; `fusion` (panel-fan-out + dommersyntese,
-  `open-sse/services/fusion.ts`) er ny i v3.8.36.
-- **Scoring med 16 faktorer**: kvote, sundhed, omvendt omkostning, omvendt latenstid, opgaveegnethed og
-  ti mere. Den autoritative tabel over faktorer og deres standardvægte findes i
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — en gentagelse her ville
-  give den endnu et sted, hvor den kan blive forældet.
-- **Virtuel factory** materialiserer midlertidige combos, når der ikke findes en matchende navngiven combo,
-  og henter kandidater fra sunde, aktive provider-forbindelser.
-- **Auto-præfikser**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — hver understøttet af en finjusteret vægtprofil.
-- **6 mode packs**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` og `chaos-mode` — forudindstillede vægtkonfigurationer, der kan aktiveres fra
-  dashboardet. (Må ikke forveksles med `auto/*`-præfikserne ovenfor, som er
-  varianter på anmodningstidspunktet.)
+- **22 rutestrategier** (prioritet, vægtet, fill-first, round-robin, P2C, random, mindst brugt, omkostningsoptimeret, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random,** auto** , lkgp, kontekstoptimeret, cacheoptimeret, kontekst-relæ,** fusion** , pipeline, jev) — auto er overskriften tilføjelse i v3.8.0; `fusion` (panel fan-out + dommersyntese, `open-sse/services/fusion.ts`) er nyt i v3.8.36.
+- **16-faktor scoring** : kvote, sundhed, omvendte omkostninger, omvendt latens, opgavetilpasning og ti mere. Den kanoniske tabel over faktorer og deres standardvægte lever i [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, hvis den gentages her, ville give den et andet sted at blive forældet.
+- **Virtuel fabrik** materialiserer flygtige kombinationer, når der ikke findes en matchende navngiven kombination, og henter kandidater fra sunde aktive udbyderforbindelser.
+- **Auto præfikser** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — hver understøttet af en tunet vægtprofil.
+- **6 mode pakker** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` og `chaos-mode` — forudindstillede vægtkonfigurationer, der kan kaldes fra instrumentbrættet. (Ikke at forveksle med `auto/*` præfikserne ovenfor, som er varianter af anmodningstid).
 
-Se alle algoritmiske detaljer (faktorformler, finjustering af vægte) i
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+For fuldstændige algoritmiske detaljer (faktorformler, vægtjustering), se [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Cloud Agents
+### B. Cloud-agenter
 
-Cloud Agents samler tredjeparts-hostede kodeagentplatforme (Codex Cloud, Devin,
-Jules) bag en ensartet, databaseunderstøttet opgavelivscyklus. Alle endpoints til oprettelse og inspektion
-af opgaver kræver management-godkendelse.
+Cloud Agents omslutter tredjeparts hostede kodeagentplatforme (Codex Cloud, Devin, Jules) bag en ensartet DB-understøttet opgavelivscyklus. Alle opgave creation/inspection slutpunkter kræver administrationsgodkendelse.
 
-- Modulets rod: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` samt undermapper for hver agent under `agents/`)
-- Implementeringer for hver agent: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Offentlige endpoints: `/api/v1/agents/tasks/*` (vis/opret/hent/annuller)
-- Management-endpoints: `/api/cloud/*` (provisionering, status, batch)
+- Modulrod: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus per-agent undermapper under `agents/`)
+- Per-agent implementeringer: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Offentlige endepunkter: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Ledelsesendepunkter: `/api/cloud/*` (provisioning, status, batch)
 - Dashboard: `/dashboard/cloud-agents`
-- Lager: tabellen `cloud_agent_tasks`
+- Opbevaring: `cloud_agent_tasks` bord
 
-Se detaljer om provisionering og OAuth for hver agent i
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+For pr-agent klargøring og OAuth specifikationer, se [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Sikkerhedsrækværk
+### C. Autoværn
 
-Modulet til sikkerhedsrækværk er et middleware-lag med hot reload, der inspicerer anmodninger
-og svar for PII, prompt-injektion og usikkert billedindhold. Overtrædelser
-afbryder anmodningen med HTTP **503** samt en struktureret fejlkode, så
-efterfølgende kaldere kan prøve igen eller forgrene.
+Autoværnmodulet er et hot-genindlæsbart middleware-lag, der inspicerer anmodninger og svar for PII, hurtig indsprøjtning og usikkert synsindhold. Overtrædelser kortslutter anmodningen med HTTP** 503** plus en struktureret fejlkode, så downstream-opkaldere kan prøve igen eller forgrene sig.
 
-- Modulets rod: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Hot reload: registreringsdatabasen overvåger konfigurationsændringer og genopbygger kæden på stedet
-- Integrationspunkter: chat-handlerens indgangspunkt, handleren til billedgenerering, svarrensning
-- HTTP-kontrakt: overtrædelser vises som `503` med `error.code = "GUARDRAIL_VIOLATION"`
+- Modulrod: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: registreringsdatabasen ser efter konfigurationsændringer og genopbygger kæden på plads
+- Wire-in-punkter: indgang til chatbehandler, billedgenereringsbehandler, svarrenser
+- HTTP kontrakt: overtrædelser vises som `503` med `error.code = "GUARDRAIL_VIOLATION"`
 
-Se oprettelse af regelsæt og finjustering af tærskler i
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+For regelsætforfattelse og tærskeljustering, se [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Domænelag
 
-Namespace'et `src/domain/` centraliserer politikbeslutninger, så route-handlere ikke
-selv behøver at sammensætte logik for lockout, budget og fallback.
+`src/domain/` navnerummet indeholder domænetjenester og reserverede evalueringskontrakter. Det er ikke et obligatorisk politikindgangspunkt for hver anmodning.
 
-- Politikmotor: `src/domain/policyEngine.ts` — enkelt indgangspunkt til
-  evaluering før udførelse (rækkefølge: lockout → budget → fallback)
+Live chat-stien kalder `enforceApiKeyPolicy()` fra `src/shared/utils/apiKeyPolicy.ts`; autorisation af løste modeller og kombinationsmedlemmer er implementeret i `src/sse/handlers/chat/resolvedModelPolicy.ts`. Den selv-hostede indgang i `src/app/api/v1/chat/completions/route.ts` håndhæver også API-nøglepolitik før afsendelse. Kombinationsopløsning kører gennem `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` og `src/lib/container.ts` forbliver testede kontrakter, ikke ledningsføringen af denne anmodningssti. Containeren registrerer politikmotoren, men den inspicerede produktionsanmodningssti løser den ikke. Ændring af disse kontrakter alene ændrer ikke livechatpolitikken eller combo routing; tilslutning eller fjernelse af dem kræver en separat designbeslutning.
+
+- Reserveret politikmotor: `src/domain/policyEngine.ts` — lockout → budget → fallback evaluering
 - Omkostningsregler: `src/domain/costRules.ts`
 - Fallback-politik: `src/domain/fallbackPolicy.ts`
 - Lockout-politik: `src/domain/lockoutPolicy.ts`
-- Tagbaseret routing: `src/domain/tagRouter.ts`
-- Combo-resolver: `src/domain/comboResolver.ts` — omsætter combo-navne, auto/\*
-  -præfikser og wildcard-modelmål til konkrete udførelsesplaner
-- Sammenkobling af forbindelses-/modelregler: `src/domain/connectionModelRules.ts`
+- Tag-baseret routing: `src/domain/tagRouter.ts`
+- Reserveret kombinationsresolver: `src/domain/comboResolver.ts` — selvstændig udvælgelseskontrakt; live combo routing er implementeret i `open-sse/services/combo.ts`
+- Connection/model regel snedker: `src/domain/connectionModelRules.ts`
 - Snapshots af modeltilgængelighed: `src/domain/modelAvailability.ts`
-- Sporing af provider-udløb: `src/domain/providerExpiration.ts`
-- Kvotecache: `src/domain/quotaCache.ts`
-- Degraderingstilstand: `src/domain/degradation.ts`
-- Konfigurationsaudit: `src/domain/configAudit.ts`
-- Builder til OmniRoute-svarmetadata: `src/domain/omnirouteResponseMeta.ts`
-- Vurderingsdelsystem: `src/domain/assessment/` — periodiske evalueringsjobs
+- Sporing af udbyderens udløb: `src/domain/providerExpiration.ts`
+- Kvote cache: `src/domain/quotaCache.ts`. Udbydere tilføjer og fjerner kvotevinduer (OpenAI droppede 5-timers Codex vinduet for nogle planer), så en brug, der læser udbyderens adapter, attesterer som komplet (`quotasComplete`, se `src/lib/usage/usageReading.ts`) er kontoens fulde vinduessæt: et vindue, der er kendt tidligere, men fraværende fra det, trækkes tilbage, i cachen, i `quota_snapshots` en restartes og restartes, Codex og i Claude's mætningsspande. Delvis bevis (svaroverskrifter, uaktuelle kopier) opdaterer kun de vinduer, det bærer.
+- Nedbrydningstilstand: `src/domain/degradation.ts`
+- Konfigurationsrevision: `src/domain/configAudit.ts`
+- OmniRoute respons metadata builder: `src/domain/omnirouteResponseMeta.ts`
+- Vurderingsundersystem: `src/domain/assessment/` — periodiske evalueringsjob
 
-### E. Autorisationspipeline
+### E. Autorisationsrørledning
 
-Autorisationspipelinen klassificerer hver indkommende anmodning og anvender den
-relevante politikkæde før videresendelse.
+Autorisationspipelinen klassificerer hver indkommende anmodning og anvender den relevante politikkæde før afsendelse.
 
-- Pipelinens indgangspunkt: `src/server/authz/pipeline.ts`
-- Anmodningsklassifikation: `src/server/authz/classify.ts` — skelner offentlige
-  kompatibilitetsruter fra management-ruter
-- Oversigt over offentlige ruter: `src/shared/constants/publicApiRoutes.ts`
-- Politikker: `src/server/authz/policies/` — komponerbare prædikater
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` osv.)
-- Header-værktøjer: `src/server/authz/headers.ts`
-- Assertion-hjælper: `src/server/authz/assertAuth.ts`
+- Rørledningsindgang: `src/server/authz/pipeline.ts`
+- Anmodningsklassificering: `src/server/authz/classify.ts` — skelner offentlige kompatibilitetsruter fra administrationsruter
+- Offentlig ruteopgørelse: `src/shared/constants/publicApiRoutes.ts`
+- Politikker: `src/server/authz/policies/` — komponerbare prædikater (`requireApiKey`, `requireManagement`, `requireFreshAuth` osv.)
+- Overskriftsværktøjer: `src/server/authz/headers.ts`
+- Påstandshjælper: `src/server/authz/assertAuth.ts`
 - Anmodningskontekst: `src/server/authz/context.ts`
 
-Offentlige ruter og management-ruter er strengt adskilt: agent-/cooldown-API'er og
-provider-ændringer kræver management-godkendelse (HTTP 401, hvis den mangler).
+Offentlige kontra administrationsruter er en hård grænse: agent/cooldown APIs og udbydermutationer kræver administrationsgodkendelse (HTTP 401, hvis den mangler).
 
-Se de fuldstændige regler for ruteklassifikation i
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+For de fulde ruteklassificeringsregler, se [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Workflow-FSM og opgavebevidst router
+### F. Workflow FSM og Task-Aware Router
 
-En router drevet af en finite-state machine, der ligger over combo-valget og dirigerer
-trafik baseret på den registrerede workflow-fase (planlægning, udførelse,
-gennemgang) og affinitet til baggrundsopgaver.
+En finite-state-maskine-drevet router lagdelt over kombinationsvalg for at dirigere trafik baseret på det opdagede workflow-stadium (planlægning, udførelse, gennemgang) og baggrundsopgaveaffinitet.
 
-- Workflow-FSM: `open-sse/services/workflowFSM.ts`
+- Arbejdsgang FSM: `open-sse/services/workflowFSM.ts`
 - Opgavebevidst router: `open-sse/services/taskAwareRouter.ts`
-- Detektor for baggrundsopgaver: `open-sse/services/backgroundTaskDetector.ts`
-- Intentionsklassifikator: `open-sse/services/intentClassifier.ts`
+- Baggrundsopgavedetektor: `open-sse/services/backgroundTaskDetector.ts`
+- Hensigtsklassificering: `open-sse/services/intentClassifier.ts`
 
-FSM-overgangene indgår i Auto Combos scoring og prioriterer billigere modeller
-til baggrunds-/automatiseringsopgaver og stærkere modeller til interaktive
-planlægnings-/gennemgangstrin.
+FSM -overgangene indgår i Auto Combos scoring, idet de retter sig mod billigere modeller til background/automation opgaver og mod stærkere modeller til interaktive planning/review -sving.
 
-### G. Udbyderspecifik robusthed
+### G. Udbyder-specifik modstandsdygtighed
 
-Flere udbydere leverer dedikerede robustheds- og stealth-moduler, der bygger oven på
-de globale lag for circuit breaker, forbindelsesnedkøling og modellåsning:
+Adskillige udbydere leverer dedikerede modstandsdygtighed og stealth-moduler, der piggy-back på den globale kredsløbsafbryder / forbindelsesafkøling / model lockout-lag:
 
-- Antigravity 429-motor: `open-sse/services/antigravity429Engine.ts` (roterer
-  identitet, renser responsheadere og håndterer kredit-/versionssporing via
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- ModelScope-kvotepolitik: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
-  samt `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Formning af Claude Code-fingeraftryk: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code-obfuskering: `open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429-motor: `open-sse/services/antigravity429Engine.ts` (roterer identitet, skrubber svarheadere, driver credits/version -sporing via `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-request-budget på upstream 429s på tværs af alle værter, `ANTIGRAVITY_MAX_429_ATTEMPTS`; en identisk genafsendelse af et afvist organ besvares lokalt; `src/sse/handlers/chat.ts` genstarter ikke en sådan anmodning gennem det nedkølingsbevidste genforsøg)
+- ModelScope -kvotepolitik: `open-sse/services/modelscopePolicy.ts`
+- Claude -kode CCH (kompatibilitetskanalhåndtryk): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kode formning af fingeraftryk: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Kode sløring: `open-sse/services/claudeCodeObfuscation.ts`
 
-Se `docs/security/STEALTH_GUIDE.md` (git; kompileres ikke til `/docs`) for den
-komplette stealth-håndbog og driftsvejledning.
+Se `docs/security/STEALTH_GUIDE.md` (git; ikke kompileret i `/docs`).
 
-### H. Webhooks, ræsonneringscache, læsecache
+### H. Webhooks, Reasoning Cache, Læs Cache
 
-- **Webhooks** — udgående afsendelse af udbyder-, konto- og opgavehændelser.
-  - Dispatcher: `src/lib/webhookDispatcher.ts`
-  - Lager: SQLite-tabellen `webhooks` (via `src/lib/db/webhooks.ts`)
+- **Webhooks** — udgående afsendelse til provider/account/task -begivenheder.
+  - Afsender: `src/lib/webhookDispatcher.ts`
+  - Opbevaring: `webhooks` SQLite bord (via `src/lib/db/webhooks.ts`)
   - Dashboard: `/dashboard/webhooks` (abonnementer, hemmeligheder, genforsøgshistorik)
-  - Se [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) for hændelsestaksonomi og semantik for genforsøg.
-- **Ræsonneringscache** — ræsonneringsblokke, der kan genafspilles, for udbydere, som udsender
-  tænkningstokens (Claude, GLMT osv.), så efterfølgende trin kan undgå at ræsonnere igen.
-  - DB-lag: `src/lib/db/reasoningCache.ts`
+  - For hændelsestaksonomi og genforsøgssemantik, se [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Begrundelse Cache** — replayable ræsonnement-blokke for udbydere, der udsender tænke-tokens (Claude, GLMT, osv.), så på hinanden følgende vendinger kan springe gentænkning over.
+  - DB lag: `src/lib/db/reasoningCache.ts`
   - Servicelag: `open-sse/services/reasoningCache.ts`
-  - Se [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) for genafspilningssemantik.
-- **Læsecache** — kortvarig responscache, der er indekseret efter signatur og bruges til at
-  samle identiske genforsøg fra defekte opstrøms-SDK'er.
-  - DB-lag: `src/lib/db/readCache.ts`
-  - Statistikslutpunkt: `GET /api/cache/stats`, dashboard på `/dashboard/cache`
+  - For replay semantik, se [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Læs cache** — kortvarig svarcache tastet af signatur og bruges til at kollapse identiske genforsøg fra brudt opstrøms SDKs.
+  - DB lag: `src/lib/db/readCache.ts`
+  - Statistik slutpunkt: `GET /api/cache/stats`, dashboard på `/dashboard/cache`
 
 ## 3) Persistenslag
 
@@ -904,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: importér specifikke moduler direkte — ingen barrel-fil (det gamle reeksportlag `localDb.ts` blev fjernet)
 - `src/lib/usageDb.ts`: facade til brugshistorik/kaldslogfiler oven på SQLite-tabeller
 
-## Dækning af provider-executorer (Strategy-mønsteret)
+## Udbyder eksekutørdækning (strategimønster)
 
-Hver provider har en specialiseret executor, der udvider `BaseExecutor` (i `open-sse/executors/base.ts`), som leverer URL-opbygning, konstruktion af headers, genforsøg med eksponentiel backoff, hooks til opdatering af legitimationsoplysninger og orkestreringsmetoden `execute()`.
+Hver udbyder har en specialiseret executor, der udvider `BaseExecutor` (i `open-sse/executors/base.ts`), som giver URL bygning, header-konstruktion, genforsøg med eksponentiel backoff, credential refresh hooks og `execute()` orkestreringsmetoden.
 
-| Eksekutor                 | Udbyder(e)                                                                                                                                                 | Særlig håndtering                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA osv. | Dynamisk URL-/headerkonfiguration pr. udbyder                                             |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Brugerdefinerede projekt-/sessions-id'er, fortolkning af Retry-After, sløring af 429-fejl |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Implementeringsbaseret routing, håndhævelse af api-version-forespørgselsparameter         |
-| `BlackboxWebExecutor`     | Blackbox AI (webtilstand)                                                                                                                                  | Reverse engineering af websession med emulering af TLS-fingeraftryk                       |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH-sti)                                                                                                                                        | Pipelines til begrænsninger og værktøjsomkodning, tilpasning af fingeraftryk              |
-| `CliProxyApiExecutor`     | CLIProxyAPI-kompatible udbydere                                                                                                                            | Brugerdefineret godkendelse og protokolhåndtering                                         |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Indsættelse af konto-id, Neurons-baseret forbrugssporing                                  |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Indsætter systeminstruktioner, gennemtvinger ræsonneringsniveau                           |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Responses API-bro via browsersession med fastlåsning af tråd/tur                          |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + headerrotation pr. session                                                        |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC-protokol, Protobuf-kodning, signering af forespørgsler via kontrolsum          |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Brokobling af Devin-opgavers livscyklus via cloud agent-modul                             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Opdatering af Copilot-token, headere, der efterligner VSCode                              |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + projektafgrænset routing                                                   |
-| `GlmExecutor`             | Z.AI GLM (inkl. forudindstillingen `glmt`)                                                                                                                 | Tager højde for ræsonneringsbudget, GLMT-forudindstillingskonstanter                      |
-| `GrokWebExecutor`         | xAI Grok-web                                                                                                                                               | Reverse engineering af websession, valg af tilstand (tænk/standard)                       |
-| `KieExecutor`             | KIE                                                                                                                                                        | Brugerdefineret tokenudstedelse med roterende sessionsankre                               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | Binært AWS EventStream-format → SSE-konvertering                                          |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Reverse engineering af websession med brokobling af billedbeskeder                        |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Udbyderspecifik struktur for forespørgselsindhold                                         |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK-kompatibel udbyderopsætning                                                        |
-| `PerplexityWebExecutor`   | Perplexity-web                                                                                                                                             | Reverse engineering af websession til fortsættelse af chat                                |
-| `PetalsExecutor`          | Petals-distribueret inferens                                                                                                                               | Decentraliseret swarm-routing                                                             |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Ingen API-nøgle påkrævet, hastighedsbegrænsede forespørgsler                              |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | Understøttelse af PAT og OAuth, gratis niveau med flere modeller                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Tjenestekontogodkendelse, regionsbaserede endpoints                                       |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importeret API-nøgle + Connect-protobuf-chatstreaming                                     |
+| Eksekutør                 | Udbyder(e)                                                                                                                                                 | Særlig håndtering                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA osv. | Dynamisk URL/header -konfiguration pr. udbyder                               |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Brugerdefineret project/session IDs, Prøv igen - Efter parsing, 429 sløring  |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Implementeringsbaseret routing, håndhævelse af forespørgsler i API-version   |
+| `BlackboxWebExecutor`     | Blackbox AI (web-tilstand)                                                                                                                                 | Web-session omvendt med TLS fingeraftryksemulering                           |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH sti)                                                                                                                                        | Begrænsning af + -værktøj-omlægning af pipelines, fingeraftryksformning      |
+| `CliProxyApiExecutor`     | CLIProxyAPI-kompatible udbydere                                                                                                                            | Brugerdefineret godkendelse og protokolhåndtering                            |
+| `CloudflareAiExecutor`    | Cloudflare Arbejdere AI                                                                                                                                    | Konto ID -injektion, neuronbaseret brugssporing                              |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Injicerer systeminstruktioner, fremtvinger ræsonnement                       |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Browser-session Responses API bridge med thread/turn pinning                 |
+| `CommandCodeExecutor`     | Kommandokode                                                                                                                                               | OAuth + per-session headerrotation                                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC protokol, Protobuf-kodning, anmodning om signering via kontrolsum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Devin opgave livscyklus brodannelse via cloud agent modul                    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot token opdatering, VSCode-lignende headere                            |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + projekt-scoped routing                                        |
+| `GlmExecutor`             | Z.AI GLM (inkl. `glmt` forudindstilling)                                                                                                                   | Tænkende-budgetbevidst, GLMT forudindstillede konstanter                     |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                               | Web-session omvendt, valg af tilstand (think/standard)                       |
+| `KieExecutor`             | KIE                                                                                                                                                        | Tilpasset tokenudstedelse med roterende sessionsankre                        |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream binært format → SSE konvertering                             |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Web-session omvendt med billedmeddelelsesbro                                 |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Udbyder-specifik anmodning kropsform                                         |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK kompatibel udbyderopsætning                                           |
+| `PerplexityWebExecutor`   | Forvirring web                                                                                                                                             | Web-session omvendt for chat-fortsættelse                                    |
+| `PetalsExecutor`          | Kronblade fordelt slutning                                                                                                                                 | Decentraliseret sværmerouting                                                |
+| `PollinationsExecutor`    | Bestøvninger AI                                                                                                                                            | Ingen API nøgle påkrævet, satsbegrænsede anmodninger                         |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT og OAuth understøttelse, gratis niveau med flere modeller                |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Tjenestekontogodkendelse, regionsbaserede slutpunkter                        |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importeret API key + Connect-protobuf chat streaming                         |
 
 Alle andre udbydere (inklusive brugerdefinerede kompatible noder) bruger `DefaultExecutor`.
+
+### Automatiserede sonder og websessionskonti
+
+Modeltests, Test All, combo-tests og vurderinger sender rigtige chatforespørgsler. En web-sessionsudbyder fungerer som den loggede bruger, så hver af disse anmodninger vil blive gemt som en samtale på den konto; automatiserede sonder, der forlod sådanne samtaler, fik en konto suspenderet (#14780). Chat-pipelinen afviser derfor ethvert mål, som en automatiseret probe når, hvis udbyder tager en web-session-legitimationsoplysninger, når først målets udbyder er løst, og før en legitimationsoplysninger er valgt (`src/lib/providers/chatProbePolicy.ts`). Afslaget er `422` med `error.code` `chat_probe_not_isolated`, og sondeløberne rapporterer det som et spring, ikke en fiasko.
+
+En executor, der kører hver chat i udbyderens egen no-history-tilstand, erklærer det med `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); sonder til den pågældende udbyder er derefter tilladt. ChatGPT Web erklærer `temporary-chat`. Fastgør en erklæring til dens mekanisme med en test, så påstanden ikke kan overleve den kode, der gør den sand.
 
 ## Kompatibilitetsmatrix for udbydere
 
@@ -1101,11 +1064,11 @@ Den ældre filbaserede forespørgselslogger (`open-sse/utils/requestLogger.ts`) 
 - SQLite-skemamigreringer og hooks til automatisk opgradering ved opstart
 - kompatibilitetssti til migrering fra ældre JSON-format til SQLite
 
-## 6) SSRF-/beskyttelse af udgående URL'er
+## 6) SSRF / Udgående URL -vagt
 
-- `src/shared/network/outboundUrlGuard.ts` blokerer alle private, loopback- og link-local-mål-URL'er, før de når udbydernes eksekveringskomponenter
-- Ruter til registrering og validering af udbydermodeller anvender `src/shared/network/safeOutboundFetch.ts`, som aktiverer beskyttelsen før hver udgående forespørgsel
-- Beskyttelsesfejl vises som `URL_GUARD_BLOCKED` med HTTP 422 og logges i revisionssporet for overholdelse via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) anvender `src/shared/network/outboundUrlGuard.ts` til chatanmodninger, der sendes gennem `BaseExecutor.execute()`. I kun offentlig tilstand (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` med det private flag slået fra) blokerer den private og loopback-værter og 169.254.0.0/16; i hver anden tilstand blokerer den cloud-metadata-værter. Det tjekker værtsnavnet eller IP literal som skrevet, før ethvert DNS opslag. Indbyggede lokale udbydere springer det over.
+- Udbydermodelopdagelse og -valideringsruter bruger `src/shared/network/safeOutboundFetch.ts`, som anvender vagten før hver udgående anmodning
+- Guard-fejl dukker op som `URL_GUARD_BLOCKED` med HTTP 503 (`getSafeOutboundFetchErrorStatus`; modelopdagelsesruten returnerer 400), og ægte SSRF blokke under validering logges til revisionssporet som `provider.validation.ssrf_blocked` hændelser
 
 ## Observerbarhed og operationelle signaler
 

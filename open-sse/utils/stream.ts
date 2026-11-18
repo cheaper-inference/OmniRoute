@@ -1,14 +1,26 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
+import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { mergeUsageSnapshot, repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
+import {
+  resolveStreamAccountingUsage,
+  projectStreamingClientUsage,
+} from "./streamAccountingUsage.ts";
+import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
+import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
-import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
+import {
+  resolveTrailingUsageSummary,
+  hasPriorInputForTrailingUsage,
+} from "./passthroughTrailingUsage.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
+import { createNativeClaudeUsageTracker } from "./nativeClaudeUsage.ts";
 import {
   extractUsage,
   hasValidUsage,
-  estimateUsage,
   logUsage,
   addBufferToUsage,
   filterUsageForFormat,
@@ -37,7 +49,12 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
 import { sseCommentsEnabled } from "./sseHeartbeat.ts";
 import { createStructuredSSECollector } from "./streamPayloadCollector.ts";
-import { STREAM_IDLE_TIMEOUT_MS, FETCH_BODY_TIMEOUT_MS, HTTP_STATUS } from "../config/constants.ts";
+import {
+  STREAM_IDLE_TIMEOUT_MS,
+  FETCH_BODY_TIMEOUT_MS,
+  HTTP_STATUS,
+  RESPONSES_DEFERRED_COMPLETION_GRACE_MS,
+} from "../config/constants.ts";
 import {
   OMIT_STREAMING_CHUNK_MARKER,
   isResponsesCommentaryMessageItem,
@@ -67,6 +84,13 @@ import { collectDeclaredToolNames } from "../translator/response/openai-response
 import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
 import {
+  advancePendingLineBytes,
+  mergeNativeToolCalls,
+  summaryTextTailMarker,
+  trackClaudeNativeToolCall,
+  type StreamToolCall as ToolCall,
+} from "./streamSummaryHelpers.ts";
+import {
   generateSessionId,
   markToolFinish,
   consumeToolFinishTime,
@@ -89,10 +113,7 @@ import {
   hasUnsupportedReasoningSignal,
 } from "./reasoningFields.ts";
 import { applyThinkTag, flushThink, initThinkState } from "./thinkTagParser.ts";
-import {
-  caseInsensitiveToolNameLookup,
-  restoreOpenAIToolNames,
-} from "../translator/helpers/toolCallHelper.ts";
+import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
 import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
 import { collectClaudeDelta } from "./streamClaudeDelta.ts";
@@ -102,6 +123,7 @@ import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
 import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
+import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
 
 function isLateOutputProbeEnabled(): boolean {
   try {
@@ -135,6 +157,7 @@ export { formatSSE };
 export { backfillResponsesCompletedOutput, stripResponsesLifecycleEcho };
 
 type JsonRecord = Record<string, unknown>;
+type StreamPendingRequestIdentity = PendingRequestIdentity | false;
 
 export const PENDING_REQUEST_CLEARED_MARKER = "__omniroutePendingRequestCleared";
 
@@ -168,6 +191,7 @@ type StreamCompletePayload = {
   itlMs?: number | null;
   /** True when the stream was interrupted (timeout/abort/error) before a clean finish. */
   interrupted?: boolean;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   /**
    * Encrypted-reasoning observation (Responses opaque `reasoning` items):
    * flag when seen, wall-clock added→done delta when paired. Efforts are
@@ -232,7 +256,7 @@ type StreamOptions = {
    * codex-compatible `namespace` + `name` fields.
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
-  pendingRequestId?: string | null;
+  pendingRequestId?: StreamPendingRequestIdentity | null;
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -240,7 +264,11 @@ type TranslateState = ReturnType<typeof initState> & {
   toolNameMap?: unknown;
   signatureNamespace?: string | null;
   usage?: unknown;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
+  /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
+  awaitingTrailingUsage?: boolean;
+  completedSent?: boolean;
   copilotCompatibleReasoning?: boolean;
   /** Suppress the `</think>` close marker for clients that render it verbatim (#5245). */
   suppressThinkClose?: boolean;
@@ -267,59 +295,84 @@ type TranslateState = ReturnType<typeof initState> & {
   } | null;
 };
 
-type ToolCall = {
-  id: string | null;
-  index: number;
-  type: string;
-  function: { name: string; arguments: string };
-};
-
 type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
-// #7936 — restore `{namespace, name}` on Responses passthrough `function_call`
-// items when the request-side Responses→Chat flatten stamped the bare leaf on the
-// Chat wire. Codex's ResponseItem::FunctionCall schema declares an independent
-// `namespace: Option<String>` field (see codex-rs/protocol/src/models.rs and the
-// `function_call_deserializes_optional_namespace` round-trip test); emit it back.
-function restoreResponsesPassthroughFunctionCallIdentity(
-  parsed: JsonRecord,
-  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null | undefined
-): boolean {
-  if (!(requestToolIdentityMap instanceof Map)) return false;
+const TERMINAL_STREAM_EVENT_TYPES = new Set([
+  "message_stop",
+  "response.completed",
+  "response.incomplete",
+  "response.failed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+]);
 
-  const restoreItem = (item: unknown): boolean => {
-    if (!item || typeof item !== "object" || Array.isArray(item)) return false;
-    const functionCall = item as JsonRecord;
-    if (functionCall.type !== "function_call" || typeof functionCall.name !== "string")
-      return false;
-
-    const identity = requestToolIdentityMap.get(functionCall.name);
-    if (!identity) return false;
-
-    const changed =
-      functionCall.namespace !== identity.namespace || functionCall.name !== identity.name;
-    functionCall.namespace = identity.namespace;
-    functionCall.name = identity.name;
-    return changed;
-  };
-
-  if (parsed.type === "response.output_item.added" || parsed.type === "response.output_item.done") {
-    return restoreItem(parsed.item);
-  }
-
-  if (parsed.type === "response.completed" && Array.isArray(asRecord(parsed.response).output)) {
-    return (asRecord(parsed.response).output as unknown[]).reduce<boolean>(
-      (changed: boolean, item: unknown) => restoreItem(item) || changed,
-      false
-    );
-  }
-
-  return false;
+/** True for a parsed upstream payload that ends its turn: `[DONE]`, a finish reason or a terminal event. */
+function isTerminalStreamPayload(payload: unknown): boolean {
+  const record = asRecord(payload);
+  if (record.done === true) return true;
+  if (typeof record.type === "string" && TERMINAL_STREAM_EVENT_TYPES.has(record.type)) return true;
+  const finished = (list: unknown, key: string) =>
+    Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
+  return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
 }
+
+/** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
+function isUnparsableDataLine(line: string): boolean {
+  if (!line.startsWith("data:")) return false;
+  const payload = line.slice(5).trim();
+  return payload !== "" && parseSSEDataPayload(payload, { logWarning: false }) === null;
+}
+
+function addRestoredResponsesToolSchemas(
+  schemas: Map<string, JsonRecord> | null,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, { namespace: string; name: string }> | null
+): Map<string, JsonRecord> | null {
+  if (!schemas) return null;
+
+  for (const [wireName, schema] of [...schemas]) {
+    const identity = identities?.get(wireName);
+    const alias = aliases?.get(wireName);
+    const restoredName =
+      identity && typeof identity.name === "string" && identity.name
+        ? identity.name
+        : typeof alias === "string" && alias
+          ? alias
+          : null;
+    if (restoredName && !schemas.has(restoredName)) schemas.set(restoredName, schema);
+  }
+  return schemas;
+}
+
+function asResponsesAliasLedger(value: unknown): ReadonlyMap<string, string> | null {
+  return value instanceof Map ? (value as ReadonlyMap<string, string>) : null;
+}
+
+function resolveStreamToolSchemas(
+  body: unknown,
+  targetFormat: string | undefined,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, { namespace: string; name: string }> | null | undefined
+): Map<string, JsonRecord> | null {
+  const restoresResponses = targetFormat === FORMATS.OPENAI_RESPONSES;
+  return addRestoredResponsesToolSchemas(
+    extractToolSchemaMap(body),
+    restoresResponses ? aliases : null,
+    restoresResponses ? (identities ?? null) : null
+  );
+}
+
+// #7936/#18600 — passthrough Responses call items are restored through the
+// shared shape-safe `restoreResponsesToolNames` helper (see the import above):
+// it resolves both the string alias ledger and the `{namespace, name}` identity
+// ledger by the original emitted wire key before mutating anything, so a
+// string-valued alias can never corrupt a returned `name` the way the
+// object-valued assumption in the previous local restorer could.
 
 function parseTextualToolCallFromContent(text: unknown): { name: string; args: unknown } | null {
   const candidate = parseTextualToolCallCandidate(text);
@@ -359,21 +412,50 @@ function containsMalformedTextualToolCall(
   return false;
 }
 
+function asPlainRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
+function declaredToolItemName(item: JsonRecord): string {
+  const directName = typeof item.name === "string" ? item.name.trim() : "";
+  const fn = asPlainRecord(item.function);
+  const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
+  return functionName || directName;
+}
+
+// Namespace children without a discriminator follow the established function
+// convention; explicit custom/server children stay excluded.
+function isFunctionLikeNamespaceChild(child: JsonRecord): boolean {
+  return child.type === undefined || child.type === "function";
+}
+
+function addNamespaceChildNames(names: Set<string>, children: unknown[]): void {
+  for (const child of children) {
+    const childRecord = asPlainRecord(child);
+    if (!childRecord || !isFunctionLikeNamespaceChild(childRecord)) continue;
+    const name = declaredToolItemName(childRecord);
+    if (name) names.add(name);
+  }
+}
+
+// An EMPTY set means the request body declared no tools at all: quoted
+// `[Tool call: ...]` text can never be a real call. `null` means unknown (no body,
+// or tools whose names could not be read), which keeps the permissive behaviour.
 function extractAllowedToolNames(body: unknown): Set<string> | null {
+  if (!asPlainRecord(body)) return null;
   const record = asRecord(body);
   const tools = record.tools;
+  if (tools == null || (Array.isArray(tools) && tools.length === 0)) return new Set();
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
   for (const tool of tools) {
-    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
-    const item = tool as JsonRecord;
-    const directName = typeof item.name === "string" ? item.name.trim() : "";
-    const fn =
-      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-        ? (item.function as JsonRecord)
-        : null;
-    const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-    const name = functionName || directName;
+    const item = asPlainRecord(tool);
+    if (!item) continue;
+    if (item.type === "namespace" && Array.isArray(item.tools)) {
+      addNamespaceChildNames(names, item.tools);
+      continue;
+    }
+    const name = declaredToolItemName(item);
     if (name) names.add(name);
   }
   return names.size > 0 ? names : null;
@@ -386,7 +468,7 @@ function collectPassthroughTextualToolCall(
 ): ToolCall | null {
   const parsed = parseTextualToolCallFromContent(text);
   if (!parsed) return null;
-  if (allowedToolNames?.size && !allowedToolNames.has(parsed.name)) return null;
+  if (allowedToolNames && !allowedToolNames.has(parsed.name)) return null;
   const key = `textual:${toolCalls.size}`;
   const toolCall: ToolCall = {
     id: `call_${Date.now()}_${toolCalls.size}`,
@@ -811,6 +893,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Explicit option wins; otherwise read the feature flag (default on) — resolved once per stream.
   const shouldDropResponsesCommentary =
     dropResponsesCommentary ?? isFeatureFlagEnabled("RESPONSES_PASSTHROUGH_DROP_COMMENTARY");
+  // #18600 — the alias ledger arrives as `unknown` (cross-workspace plumbing);
+  // normalize once per stream for the Responses name-restoration seams below.
+  const responsesToolAliasMap = asResponsesAliasLedger(toolNameMap);
   const clientExpectsResponsesStream =
     (mode === STREAM_MODE.PASSTHROUGH
       ? clientResponseFormat === FORMATS.OPENAI_RESPONSES
@@ -849,15 +934,36 @@ export function createSSEStream(options: StreamOptions = {}) {
     !clientExpectsResponsesStream && !clientExpectsClaudeStream && !clientExpectsAntigravityStream;
 
   let buffer = "";
+  /** UTF-8 bytes of the unfinished line held in `buffer`, counted per chunk. */
+  let pendingLineBytes = 0;
   let usage: UsageLike | null = null;
+  const mergePassthroughCacheCreationUsage = (value: unknown) => {
+    if (!value) return;
+    const fields = mergeCacheCreationFields(usage, value);
+    if (Object.keys(fields).length > 0) Object.assign((usage ??= {}), fields);
+  };
+  let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
+
   /** Passthrough (OpenAI CC shape): saw tool_calls in stream before finish_reason */
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
   let passthroughSawFinishReason = false;
+  /** Passthrough: the upstream's own terminal finish_reason ("length", …). Kept for
+   * the assembled body so the cache-store truncation guard can see a cut turn. */
+  let passthroughFinishReason: string | null = null;
+  /** Passthrough: a terminal event (finish reason, [DONE], response.completed, message_stop) was seen */
+  let passthroughSawTerminalEvent = false;
+  /** Passthrough: the newest `data:` payload was not JSON and no valid payload followed it */
+  let passthroughUnparsableDataTail = false;
+  /** A success or failure outcome was already recorded; the flush catch must not record a second one */
+  let outcomeRecorded = false;
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
+  /** Passthrough: native Claude tool_use blocks, kept apart so the wire never sees them as textual calls */
+  const passthroughNativeToolCalls = new Map<string, ToolCall>();
   const allowedToolNames = extractAllowedToolNames(body);
+  const noToolsDeclared = allowedToolNames?.size === 0;
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
 
@@ -873,7 +979,15 @@ export function createSSEStream(options: StreamOptions = {}) {
           requestedThinking,
           accumulatedContent: "",
           accumulatedReasoning: "",
-          toolSchemas: extractToolSchemaMap(body),
+          // Responses events are restored to the client identity before response
+          // translation. Keep the same schema reachable under that restored name,
+          // while retaining the provider wire key for untouched event shapes.
+          toolSchemas: resolveStreamToolSchemas(
+            body,
+            targetFormat,
+            responsesToolAliasMap,
+            requestToolIdentityMap
+          ),
           declaredToolNames: collectDeclaredToolNames(body),
           clientTools,
           customToolNames,
@@ -886,6 +1000,33 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   // Track content length for usage estimation (both modes)
   let totalContentLength = 0;
+  const nativeClaudeUsage = createNativeClaudeUsageTracker(body);
+  const nativeContent = createGeneratedContentTracker();
+  const observedContentLength = () => nativeContent.getLength();
+  const observeProviderPayload = (payload: unknown) => {
+    nativeClaudeUsage.observe(payload);
+    nativeContent.observe(payload);
+    providerPayloadCollector.push(payload);
+  };
+  // Accounting uses native receipt evidence rather than a client projection.
+  const getAccountingUsage = (): UsageLike | null =>
+    resolveStreamAccountingUsage({
+      usage: state?.usage ?? usage,
+      native: nativeContent.hasObserved(),
+      nativeUsage: nativeClaudeUsage.getUsage(observedContentLength()),
+      body,
+      contentLength: observedContentLength(),
+      format:
+        mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat,
+    });
+  const getClientUsage = () =>
+    projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
+  const sanitizePassthroughUsage = (payload: unknown) => {
+    const changed =
+      !hasPriorInputForTrailingUsage(payload, usage) &&
+      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
+    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+  };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -953,6 +1094,14 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Guard against duplicate [DONE] events — ensures exactly one per stream
   let doneSent = false;
   let upstreamErrorForwarded = false;
+  // Wire format of the chunks pushed into providerPayloadCollector. TRANSLATE mode receives the raw
+  // provider response (targetFormat). PASSTHROUGH forwards the provider's chunks unchanged, so their
+  // format is the client's -- but passthrough callers (createPassthroughStreamWithLogger) pass only
+  // clientResponseFormat, never sourceFormat. Falling back to clientResponseFormat keeps the
+  // dashboard's Provider Response from collapsing to an empty chat.completion for a Responses
+  // passthrough (e.g. Mistral's native /v1/responses).
+  const providerWireFormat =
+    mode === STREAM_MODE.TRANSLATE ? targetFormat : (sourceFormat ?? clientResponseFormat);
   const providerPayloadCollector = createStructuredSSECollector({
     stage: "provider_response",
     // #9315: compute the summary live from every pushed chunk (not just the
@@ -975,8 +1124,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     // mode has no separate provider/client format split — nothing gets
     // translated, so the provider's raw chunks genuinely ARE in sourceFormat
     // (and real passthrough callers, e.g. createPassthroughStreamWithLogger,
-    // don't even pass targetFormat) — keep using sourceFormat there.
-    format: mode === STREAM_MODE.TRANSLATE ? targetFormat : sourceFormat,
+    // don't even pass targetFormat, nor sourceFormat) — see providerWireFormat above.
+    format: providerWireFormat,
     fallbackModel: model,
   });
   const clientPayloadCollector = createStructuredSSECollector({
@@ -1010,6 +1159,12 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Idle timeout state — closes stream if provider stops sending data
   let lastChunkTime = Date.now();
   let idleTimer: ReturnType<typeof setInterval> | null = null;
+  // Responses client: finish_reason arrived but no usage trailer or [DONE] yet.
+  let deferredCompletionTimer: ReturnType<typeof setTimeout> | null = null;
+  const clearDeferredCompletionTimer = () => {
+    if (deferredCompletionTimer) clearTimeout(deferredCompletionTimer);
+    deferredCompletionTimer = null;
+  };
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -1028,6 +1183,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   const multilineSseDataLineNormalizer = createSSEDataLineNormalizer();
 
   const clearIdleTimer = () => {
+    // Every end-of-stream path (flush, cancel, idle timeout, failure abort) calls this, so the
+    // deferred completion must not fire after any of them.
+    clearDeferredCompletionTimer();
     if (idleTimer) {
       clearInterval(idleTimer);
       idleTimer = null;
@@ -1049,8 +1207,9 @@ export function createSSEStream(options: StreamOptions = {}) {
       const incomingContent = delta.content;
       const bufferedCandidate = passthroughBufferedTextualToolCallContent + incomingContent;
       if (
-        passthroughBufferedTextualToolCallContent ||
-        containsTextualToolCallCandidate(incomingContent)
+        !noToolsDeclared &&
+        (passthroughBufferedTextualToolCallContent ||
+          containsTextualToolCallCandidate(incomingContent))
       ) {
         const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
         if (parsedCandidate?.kind === "complete") {
@@ -1138,9 +1297,22 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
   };
 
+  // Transport adapters leave pending cleanup and ownership markers to their outer request.
+  const markStreamPendingRequestCleared = (error: Error) =>
+    pendingRequestId === false ? error : markPendingRequestCleared(error);
   const clearSeen = { done: false };
   const clearPendingRequestFromStream = () => {
-    clearPendingRequestOnce(clearSeen, { model, provider, connectionId, pendingRequestId });
+    if (clearSeen.done || pendingRequestId === false) return;
+    if (typeof pendingRequestId === "string" && !connectionId) {
+      clearSeen.done = true;
+      return;
+    }
+    clearPendingRequestOnce(clearSeen, {
+      model,
+      provider,
+      connectionId,
+      pendingRequestId,
+    });
   };
 
   const emitClaudeEmptyStreamErrorAndAbort = (
@@ -1148,6 +1320,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     decrementPendingRequest = true
   ) => {
     clearIdleTimer();
+    outcomeRecorded = true;
     const msg = "Claude returned an empty response (no content block)";
     console.warn(
       `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
@@ -1184,7 +1357,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     // and the 502 surfaces with no retry (call logs 96ef4a / 062cf6).
     const emptyStreamError = new Error(msg) as Error & { code?: string };
     emptyStreamError.code = "empty_response";
-    controller.error(markPendingRequestCleared(emptyStreamError));
+    controller.error(markStreamPendingRequestCleared(emptyStreamError));
   };
 
   const emitTranslatedClientItem = (
@@ -1209,12 +1382,12 @@ export function createSSEStream(options: StreamOptions = {}) {
       !hasValidUsage(itemSanitized.usage as UsageLike) &&
       totalContentLength > 0
     ) {
-      const estimated = estimateUsage(body, totalContentLength, sourceFormat);
+      const estimated = getClientUsage();
       itemSanitized.usage = timing.withTps(filterUsageForFormat(estimated, sourceFormat));
       state.usage = estimated;
       if (hasValidUsage(estimated)) translateForwardedUsage = true; // finish chunk carries it
     } else if (state?.finishReason && isFinishChunk && state.usage) {
-      const buffered = addBufferToUsage(state.usage);
+      const buffered = addBufferToUsage(getClientUsage());
       itemSanitized.usage = timing.withTps(
         carryCacheCreationMarker(itemSanitized.usage, filterUsageForFormat(buffered, sourceFormat))
       );
@@ -1354,11 +1527,11 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
   };
 
-  const abortStreamFailure = createStreamFailureAborter({
+  const abortStreamFailureRaw = createStreamFailureAborter({
     onFailure,
     onComplete,
     attachFailureSnapshot: () => buildStreamFailureSnapshot(providerPayloadCollector),
-    getUsage: () => state?.usage,
+    getUsage: getAccountingUsage,
     timing,
     buildProviderPayload: () =>
       providerPayloadCollector.build(providerPayloadCollector.getSummary(), {
@@ -1367,9 +1540,70 @@ export function createSSEStream(options: StreamOptions = {}) {
     buildClientPayload: (body) => clientPayloadCollector.build(body, { includeEvents: false }),
     clearIdleTimer,
     clearPendingRequest: clearPendingRequestFromStream,
-    markPendingRequestCleared,
+    markPendingRequestCleared: markStreamPendingRequestCleared,
     model,
   });
+  const abortStreamFailure: typeof abortStreamFailureRaw = (...args) => {
+    outcomeRecorded = true;
+    return abortStreamFailureRaw(...args);
+  };
+
+  // Keep queued chunks only once client-visible content was forwarded. A
+  // pre-content failure must still reject the stream, while a post-content
+  // failure leaves its queued terminal for slow readers instead of truncating.
+  const shouldPreserveQueuedChunks = (): boolean =>
+    totalContentLength > 0 || passthroughHasToolCalls || forwardedValuableChunk;
+
+  // Set once flush() starts. A preserved failure inside flush() ends the stream
+  // by returning; inside transform() the stream would keep running (later chunks,
+  // then flush()'s success path with finish_reason/[DONE] and a 200 onComplete),
+  // so a transform-time failure must also terminate(): the readable side closes
+  // after the queued terminal and the writable side errors, cancelling upstream.
+  let flushing = false;
+  const failureBoundaryOptions = (): { preserveQueuedChunks: boolean; terminate: boolean } => {
+    const preserveQueuedChunks = shouldPreserveQueuedChunks();
+    return { preserveQueuedChunks, terminate: preserveQueuedChunks && !flushing };
+  };
+
+  // One sanitized error frame in the client's protocol, one onFailure, one failure completion.
+  const abortWithPublicStreamError = (
+    controller: TransformStreamDefaultController<Uint8Array>,
+    message: string,
+    code: string
+  ) => {
+    const failure: StreamFailurePayload = {
+      status: 502,
+      message,
+      code,
+      type: "server_error",
+      streamSnapshot: buildStreamFailureSnapshot(providerPayloadCollector),
+    };
+    try {
+      const output = formatTranslatedStreamError(
+        failure,
+        (mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat) ?? undefined
+      );
+      reqLogger?.appendConvertedChunk?.(output);
+      forward(controller, encoder.encode(output));
+    } catch (e) {
+      console.debug(`[STREAM] failed to queue the error frame (${model || "unknown"}):`, e);
+    }
+    upstreamErrorForwarded = true;
+    doneSent = true;
+    abortStreamFailure(controller, failure, message, {
+      notifyComplete: true,
+      ...failureBoundaryOptions(),
+    });
+  };
+
+  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
+    buffer = "";
+    abortWithPublicStreamError(
+      controller,
+      "Upstream SSE line exceeded the size limit",
+      "invalid_sse_payload"
+    );
+  };
 
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
@@ -1386,6 +1620,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     doneSent = true;
     abortStreamFailure(controller, failure.internalFailure, failure.publicMessage, {
       notifyComplete: true,
+      ...failureBoundaryOptions(),
     });
     return true;
   };
@@ -1428,7 +1663,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               }).catch(() => {});
               const timeoutError = new Error(timeoutMsg);
               timeoutError.name = "StreamIdleTimeoutError";
-              controller.error(markPendingRequestCleared(timeoutError));
+              controller.error(markStreamPendingRequestCleared(timeoutError));
             }
           }, 10_000);
         }
@@ -1439,10 +1674,15 @@ export function createSSEStream(options: StreamOptions = {}) {
         const now = Date.now();
         timing.markByte();
         lastChunkTime = now;
+        const nextPendingLineBytes = advancePendingLineBytes(pendingLineBytes, chunk);
+        if (nextPendingLineBytes === null) return abortOversizePendingLine(controller);
+        pendingLineBytes = nextPendingLineBytes;
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
-        const nlIdx = buffer.lastIndexOf("\n");
+        // Scan only the new text: a line without a newline must not be re-walked per chunk.
+        const textNlIdx = text.lastIndexOf("\n");
+        const nlIdx = textNlIdx >= 0 ? buffer.length - text.length + textNlIdx : -1;
         const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
         if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
 
@@ -1529,7 +1769,9 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (trimmed.startsWith("data:")) {
               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
               if (providerPayload) {
-                providerPayloadCollector.push(providerPayload);
+                observeProviderPayload(providerPayload);
+                passthroughUnparsableDataTail = false;
+                if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
                 if ((providerPayload as { done?: unknown }).done === true) {
                   continue;
                 }
@@ -1605,7 +1847,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
+                if (sanitizePassthroughUsage(parsed)) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -1641,7 +1883,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = extracted;
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -1657,8 +1902,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     const bufferedCandidate =
                       passthroughBufferedTextualToolCallContent + incomingDelta;
                     if (
-                      passthroughBufferedTextualToolCallContent ||
-                      containsTextualToolCallCandidate(incomingDelta)
+                      !noToolsDeclared &&
+                      (passthroughBufferedTextualToolCallContent ||
+                        containsTextualToolCallCandidate(incomingDelta))
                     ) {
                       const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
                       if (parsedCandidate?.kind === "complete") {
@@ -1671,6 +1917,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                           passthroughHasToolCalls = true;
                           const responseToolCallEvents =
                             buildResponsesFunctionCallEvents(collectedToolCall);
+                          for (const event of responseToolCallEvents) {
+                            restoreResponsesToolNames(
+                              event,
+                              responsesToolAliasMap,
+                              requestToolIdentityMap
+                            );
+                          }
                           output = formatSSEDataEvents(responseToolCallEvents);
                           for (const event of responseToolCallEvents) {
                             clientPayloadCollector.push(event);
@@ -1684,6 +1937,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                         }
                         passthroughBufferedTextualToolCallContent = "";
                         parsed.delta = "";
+                        if (collectedToolCall) continue;
                       } else if (parsedCandidate?.kind === "partial") {
                         passthroughBufferedTextualToolCallContent = appendBoundedText(
                           passthroughBufferedTextualToolCallContent,
@@ -1735,6 +1989,18 @@ export function createSSEStream(options: StreamOptions = {}) {
                       parsed.item && typeof parsed.item === "object" && !Array.isArray(parsed.item)
                         ? { ...(parsed.item as JsonRecord) }
                         : null;
+                    // #18600 — restore the client's original tool name on the
+                    // pending copy too: it is pushed into the backfill buffer at
+                    // `arguments.done` / the completed merge, so a stream that
+                    // never emits `output_item.done` would otherwise backfill the
+                    // alias into the empty-output snapshot.
+                    if (item) {
+                      restoreResponsesToolNames(
+                        [item],
+                        responsesToolAliasMap,
+                        requestToolIdentityMap
+                      );
+                    }
                     const pendingKey =
                       item && typeof item.id === "string"
                         ? item.id
@@ -1781,8 +2047,22 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Capture each completed output item so the final
                   // response.completed snapshot can be backfilled when upstream
                   // returns an empty `output` (happens with store: false).
+                  let responsesCommentaryStrippedFromCompleted = false;
+                  let responsesIdentityRestored = false;
                   if (parsed.type === "response.output_item.done" && parsed.item) {
                     emitSyntheticResponsesReasoningSummary(controller, parsed);
+                    // #18600 — restore the client's original tool name BEFORE this
+                    // item joins the backfill buffer, or the alias returns through
+                    // the empty-output snapshot backfill below. `doneItemRestored`
+                    // feeds the re-serialization latch further down.
+                    const doneItemRestored = restoreResponsesToolNames(
+                      parsed as JsonRecord,
+                      responsesToolAliasMap,
+                      requestToolIdentityMap
+                    );
+                    if (doneItemRestored) {
+                      responsesIdentityRestored = true;
+                    }
                     pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [parsed.item]);
                     // L12 replay already filtered above via isDuplicateResponsesSequence.
                     reasoningObserver.note(parsed, Date.now());
@@ -1801,7 +2081,6 @@ export function createSSEStream(options: StreamOptions = {}) {
                       }
                     }
                   }
-                  let responsesCommentaryStrippedFromCompleted = false;
                   if (
                     parsed.type === "response.completed" &&
                     Array.isArray(parsed.response?.output) &&
@@ -1821,23 +2100,45 @@ export function createSSEStream(options: StreamOptions = {}) {
                         responsesCommentaryStrippedFromCompleted = true;
                       }
                     }
+                    // #18600 — restore the client's original tool names on the
+                    // terminal snapshot BEFORE it seeds the backfill buffer, so
+                    // the buffered copy matches what the client receives. The
+                    // generic branch below skips `response.completed` because it
+                    // is handled here; `snapshotRestored` feeds the same
+                    // re-serialization latch.
+                    const snapshotRestored = restoreResponsesToolNames(
+                      parsed as JsonRecord,
+                      responsesToolAliasMap,
+                      requestToolIdentityMap
+                    );
                     pushUniqueResponsesOutputItems(
                       passthroughResponsesOutputItems,
                       parsed.response.output
                     );
+                    if (snapshotRestored) {
+                      responsesIdentityRestored = true;
+                    }
                   }
-                  // #7936 - restore `namespace` + `name` on passthrough Responses
-                  // function_call items. The restoration mutates `parsed`, so a
-                  // real change must be re-serialized; otherwise the client still
-                  // receives the flattened wire name.
-                  const responsesIdentityRestored =
-                    (parsed.type === "response.output_item.added" ||
-                      parsed.type === "response.output_item.done" ||
-                      parsed.type === "response.completed") &&
-                    restoreResponsesPassthroughFunctionCallIdentity(
-                      parsed as JsonRecord,
-                      requestToolIdentityMap
-                    );
+                  // #7936/#18600 — restore provider tool-name aliases (and the
+                  // #7936 `{namespace, name}` identities) on every passthrough
+                  // Responses event through the shared shape-safe helper: call items,
+                  // argument events, and the tools/tool_choice any response object
+                  // echoes (created, in_progress, terminal snapshots). The done and
+                  // completed branches above already restored their own copies and the
+                  // helper is idempotent. The restoration mutates `parsed`, so a real
+                  // change must be re-serialized; otherwise the client still receives
+                  // the alias.
+                  if (typeof parsed.type === "string") {
+                    if (
+                      restoreResponsesToolNames(
+                        parsed as JsonRecord,
+                        responsesToolAliasMap,
+                        requestToolIdentityMap
+                      )
+                    ) {
+                      responsesIdentityRestored = true;
+                    }
+                  }
                   if (
                     parsed.type === "response.completed" &&
                     passthroughResponsesPendingFunctionCalls.size > 0
@@ -1862,18 +2163,28 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed = toResponsesCompletedWithToolCalls(parsed as JsonRecord, [
                       ...passthroughToolCalls.values(),
                     ]) as typeof parsed;
+                    if (
+                      restoreResponsesToolNames(
+                        parsed as JsonRecord,
+                        responsesToolAliasMap,
+                        requestToolIdentityMap
+                      )
+                    ) {
+                      responsesIdentityRestored = true;
+                    }
                   }
                   const stripped = stripResponsesLifecycleEcho(parsed);
                   // Belt-and-suspenders for #10156: filter the backfill buffer itself
                   // before it can seed an empty `response.completed.response.output`,
                   // in case a future code path pushes a commentary item into it
                   // without going through the response.completed branch above.
-                  const backfillCandidates = shouldDropResponsesCommentary
-                    ? filterResponsesCommentaryFromItems(
-                        passthroughResponsesOutputItems,
-                        isResponsesCommentaryMessageItem
-                      ).items
-                    : passthroughResponsesOutputItems;
+                  const backfillCandidates =
+                    shouldDropResponsesCommentary && parsed.type === "response.completed"
+                      ? filterResponsesCommentaryFromItems(
+                          passthroughResponsesOutputItems,
+                          isResponsesCommentaryMessageItem
+                        ).items
+                      : passthroughResponsesOutputItems;
                   const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
                   const usageNormalized = normalizeUsage(parsed);
                   if (
@@ -1913,12 +2224,17 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (!usage) usage = {};
                     const u = usage;
                     const eu = extracted as UsageTokenRecord;
+                    Object.assign(
+                      u,
+                      { usage_evidence: mergeUsageEvidence(u, extracted) },
+                      mergeCacheCreationFields(u, extracted)
+                    );
                     if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
                     if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
                     if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
-                    if (eu.cache_read_input_tokens)
+                    if (eu.cache_read_input_tokens !== undefined)
                       u.cache_read_input_tokens = eu.cache_read_input_tokens;
-                    if (eu.cache_creation_input_tokens)
+                    if (eu.cache_creation_input_tokens !== undefined)
                       u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
                   }
                   if (
@@ -1936,6 +2252,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                     toolNameMap,
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
+                  // Native tool_use blocks only feed the completion summary; the wire is unchanged.
+                  trackClaudeNativeToolCall(passthroughNativeToolCalls, parsed);
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
@@ -1996,6 +2314,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                       );
                       passthroughForwardedUsage = true;
                       passthroughForwardedUsageSummary = true;
+                      parsed.usage = timing.withTps(
+                        filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI)
+                      );
                       output = `data: ${JSON.stringify(parsed)}\n\n`;
                       injectedUsage = true;
                       clientPayload = parsed;
@@ -2036,7 +2357,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // sanitizeStreamingChunk, so the raw line must not be forwarded.
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
+                  const rawToolCallCount = Array.isArray(rawDelta?.tool_calls)
+                    ? rawDelta.tool_calls.length
+                    : 0;
 
+                  // Client sanitization may remove diagnostic status fields.
+                  // Capture provider evidence first without changing token totals.
+                  mergePassthroughCacheCreationUsage(extractUsage(parsed));
                   if (!projectedFailure) {
                     parsed = sanitizeStreamingChunk(parsed);
                     if (
@@ -2107,6 +2434,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // upstream delta did not already carry.
                   const needsReserialization =
                     hadArrayContent ||
+                    // sanitize dropped empty tool_call placeholders from this chunk
+                    rawToolCallCount > (delta?.tool_calls?.length ?? 0) ||
                     splitMixedReasoningContent ||
                     thinkParsed ||
                     hadReasoningAlias ||
@@ -2211,7 +2540,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = extracted;
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2222,8 +2554,17 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (isFinishChunk) {
                     if (passthroughSawFinishReason) continue;
                     if (nativeFailure && !totalContentLength && !passthroughHasToolCalls)
-                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message);
+                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message, {
+                        ...failureBoundaryOptions(),
+                      });
                     passthroughSawFinishReason = true;
+                    // Record the raw upstream reason BEFORE the T18 tool_calls rewrite
+                    // below: a `length` cut must stay visible to the truncation guard
+                    // even when tool calls were streamed.
+                    const upstreamFinish = parsed.choices[0]?.finish_reason;
+                    if (typeof upstreamFinish === "string" && upstreamFinish) {
+                      passthroughFinishReason = upstreamFinish;
+                    }
                   }
 
                   if (isFinishChunk && passthroughHasToolCalls) {
@@ -2286,6 +2627,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                 // Skip non-JSON data lines silently — don't forward garbage to clients.
                 // Upstream providers sometimes return plain-text errors (HTML, rate-limit
                 // messages) in the SSE stream that would break downstream JSON decoders.
+                // Remember it, though: if the stream ends on this line with no terminal
+                // event, flush() reports one error frame instead of a clean success.
+                if (
+                  parsedPassthroughData == null &&
+                  !passthroughSawTerminalEvent &&
+                  isUnparsableDataLine(trimmed)
+                ) {
+                  passthroughUnparsableDataTail = true;
+                }
                 continue;
               }
             }
@@ -2310,7 +2660,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               abortStreamFailure(
                 controller,
                 failurePayload,
-                publicFailureMessage || "Upstream failure"
+                publicFailureMessage || "Upstream failure",
+                failureBoundaryOptions()
               );
               return;
             }
@@ -2359,7 +2710,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             reasoningObserver.note(parsed, Date.now());
 
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
-          providerPayloadCollector.push(parsed);
+          observeProviderPayload(parsed);
           if (parsed && parsed.done) {
             continue;
           }
@@ -2519,24 +2870,51 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (!state.usage) {
               state.usage = extracted;
             } else {
-              const su = state.usage as Record<string, number>;
-              const eu = extracted as Record<string, number>;
+              const su = state.usage as UsageLike;
+              const eu = extracted as UsageLike;
+              Object.assign(
+                su,
+                { usage_evidence: mergeUsageEvidence(su, extracted) },
+                mergeCacheCreationFields(su, extracted)
+              );
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-              if (eu.cache_read_input_tokens > 0)
+              if (eu.cache_read_input_tokens !== undefined)
                 su.cache_read_input_tokens = eu.cache_read_input_tokens;
-              if (eu.cache_creation_input_tokens > 0)
+              if (eu.cache_creation_input_tokens !== undefined)
                 su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-              if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+              if (eu.cache_evidence === "invalid") {
+                delete su.cached_tokens;
+              } else if (eu.cached_tokens !== undefined) {
+                su.cached_tokens = eu.cached_tokens;
+              }
+              if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
               if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
             }
           }
 
           // Translate: targetFormat -> openai -> sourceFormat
+          // #18600 — restore provider tool-name aliases (and #7936 identities) on
+          // raw upstream Responses events BEFORE translation consumes them, so
+          // the Responses→Chat/Claude converters never emit an internal alias.
+          if (
+            targetFormat === FORMATS.OPENAI_RESPONSES &&
+            typeof (parsed as JsonRecord).type === "string"
+          ) {
+            restoreResponsesToolNames(
+              parsed as JsonRecord,
+              responsesToolAliasMap,
+              requestToolIdentityMap
+            );
+          }
           const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+          if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
+            usage = { ...usage, cache_evidence: state?.cacheEvidence };
+            lastPropagatedCacheEvidence = state?.cacheEvidence;
+          }
 
           // Log OpenAI intermediate chunks (if available)
           for (const item of getOpenAIIntermediateChunks(translated)) {
@@ -2549,10 +2927,35 @@ export function createSSEStream(options: StreamOptions = {}) {
               emitTranslatedClientItem(controller, item);
             }
           }
+
+          // The Responses translator defers response.completed for a trailing usage
+          // chunk. If neither usage nor [DONE] follows, flush it after a short grace.
+          if (state?.awaitingTrailingUsage && !state.completedSent && !deferredCompletionTimer) {
+            deferredCompletionTimer = setTimeout(() => {
+              deferredCompletionTimer = null;
+              try {
+                for (const item of translateResponse(targetFormat, sourceFormat, null, state) ||
+                  []) {
+                  emitTranslatedClientItem(controller, item);
+                }
+              } catch (error) {
+                // Every end-of-stream path clears this timer, so the stream is still live:
+                // report the failure and give the client a terminal error (as the transformer does).
+                console.warn(
+                  `[STREAM] deferred completion flush failed (${model || "unknown"}):`,
+                  error
+                );
+                controller.error(error);
+              }
+            }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
+            deferredCompletionTimer.unref?.();
+          }
         }
       },
 
       async flush(controller) {
+        flushing = true;
+        clearDeferredCompletionTimer();
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
@@ -2596,16 +2999,19 @@ export function createSSEStream(options: StreamOptions = {}) {
                 reqLogger?.appendConvertedChunk?.(output);
                 forward(controller, encoder.encode(output));
               },
-              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
+              pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: (payload: unknown) =>
-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+              sanitizeUsagePayload: sanitizePassthroughUsage,
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
-                usage = value as UsageTokenRecord;
+                usage = {
+                  ...mergeUsageSnapshot(usage, value as UsageLike),
+                  ...mergeCacheCreationFields(usage, value),
+                };
               },
+              mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
                 totalContentLength += value;
               },
@@ -2639,13 +3045,23 @@ export function createSSEStream(options: StreamOptions = {}) {
                 toResponsesCompletedWithToolCalls(parsed, [
                   ...passthroughToolCalls.values(),
                 ]) as JsonRecord,
+              restoreResponsesToolNames: (parsed: JsonRecord) =>
+                restoreResponsesToolNames(parsed, responsesToolAliasMap, requestToolIdentityMap),
               restoreOpenAIToolNames: (parsed: JsonRecord) =>
                 restoreOpenAIToolNames(parsed, toolNameMap),
               abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
-                abortStreamFailure(controller, failure, publicMessage),
+                abortStreamFailure(controller, failure, publicMessage, {
+                  ...failureBoundaryOptions(),
+                }),
             };
 
             for (const line of normalizedTailLines) {
+              if (!skipPassthroughEvent && isUnparsableDataLine(line.trim())) {
+                // Same policy as the raw tail below: never forward it, report it once.
+                if (!passthroughSawTerminalEvent) passthroughUnparsableDataTail = true;
+                clearPendingPassthroughEvent();
+                continue;
+              }
               if (processBufferedPassthroughLine(line, tailProcessorContext)) {
                 return;
               }
@@ -2653,6 +3069,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             const bufferedLine = buffer.trim();
             if (skipPassthroughEvent || /^event:\s*keepalive\b/i.test(bufferedLine)) {
               skipPassthroughEvent = false;
+              clearPendingPassthroughEvent();
+            } else if (isUnparsableDataLine(bufferedLine)) {
+              // A cut or plain-text `data:` tail is not forwarded raw as a broken SSE frame.
+              if (!passthroughSawTerminalEvent) passthroughUnparsableDataTail = true;
               clearPendingPassthroughEvent();
             } else if (buffer) {
               let output = buffer;
@@ -2662,7 +3082,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               }
               let bufferedPayload = parseSSELine(bufferedLine);
               if (bufferedPayload) {
-                providerPayloadCollector.push(bufferedPayload);
+                observeProviderPayload(bufferedPayload);
+                passthroughUnparsableDataTail = false;
                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                 if (bufferedProjectedFailure) {
                   bufferedPayload = bufferedProjectedFailure.publicPayload;
@@ -2673,8 +3094,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                if (sanitizePassthroughUsage(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+                mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -2687,32 +3109,65 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (isClaudeEventPayload(bufferedPayload)) {
                   updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, bufferedPayload);
                 }
-                clientPayloadCollector.push(bufferedPayload);
+                let bufferedResponsesCollected = false;
                 // Normalize numeric IDs for final buffered data: chunk (same as transform path)
                 if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
-                  const flushedParsed = bufferedPayload as JsonRecord;
+                  let flushedParsed = bufferedPayload as JsonRecord;
                   const flushedType =
                     typeof flushedParsed.type === "string" ? flushedParsed.type : "";
                   const isResponses = flushedType.startsWith("response.");
                   const isClaude = isClaudeEventPayload(flushedParsed);
                   if (isResponses) {
+                    const textualToolCallBackfilled =
+                      flushedType === "response.completed" && passthroughToolCalls.size > 0;
+                    if (textualToolCallBackfilled) {
+                      flushedParsed = toResponsesCompletedWithToolCalls(flushedParsed, [
+                        ...passthroughToolCalls.values(),
+                      ]) as JsonRecord;
+                      bufferedPayload = flushedParsed;
+                    }
                     const idsNormalized = normalizeResponsesSseIds(flushedParsed);
                     const usageNormalized = normalizeUsage(flushedParsed);
-                    if (idsNormalized || usageNormalized) {
+                    // #18600 — restore tool-name aliases on the final buffered
+                    // Responses frame too (a terminal snapshot can end without a
+                    // trailing newline and reach this flush path).
+                    const identityRestored = restoreResponsesToolNames(
+                      flushedParsed,
+                      responsesToolAliasMap,
+                      requestToolIdentityMap
+                    );
+                    if (
+                      idsNormalized ||
+                      usageNormalized ||
+                      identityRestored ||
+                      textualToolCallBackfilled
+                    ) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
+                    // The collector snapshots payloads immediately. Capture only
+                    // after identity restoration so completion/log summaries match
+                    // the bytes emitted for an unterminated Responses frame.
+                    clientPayloadCollector.push(flushedParsed);
+                    bufferedResponsesCollected = true;
                   } else if (!isClaude) {
                     const { changed: flushChanged, hasFinishReason } =
                       normalizeFinalOpenAIStreamChunk(flushedParsed, toolNameMap);
                     // #7800: track finish_reason in the flush path too, so a
                     // final chunk without trailing newline still suppresses the
                     // synthetic finish_reason synthesis.
-                    if (hasFinishReason) passthroughSawFinishReason = true;
+                    if (hasFinishReason) {
+                      passthroughSawFinishReason = true;
+                      const flushedFinish = flushedParsed.choices?.[0]?.finish_reason;
+                      if (typeof flushedFinish === "string" && flushedFinish) {
+                        passthroughFinishReason = flushedFinish;
+                      }
+                    }
                     if (flushChanged) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
                   }
                 }
+                if (!bufferedResponsesCollected) clientPayloadCollector.push(bufferedPayload);
               }
               if (!bufferedLine) output = passthroughEventPrefix.flush() || output;
               output = passthroughEventPrefix.prefixData(output, buffer);
@@ -2725,10 +3180,20 @@ export function createSSEStream(options: StreamOptions = {}) {
                 abortStreamFailure(
                   controller,
                   bufferedProjectedFailure.internalFailure,
-                  bufferedProjectedFailure.publicMessage
+                  bufferedProjectedFailure.publicMessage,
+                  failureBoundaryOptions()
                 );
                 return;
               }
+            }
+
+            if (passthroughUnparsableDataTail) {
+              abortWithPublicStreamError(
+                controller,
+                "Upstream sent a stream event that is not valid JSON",
+                "invalid_sse_payload"
+              );
+              return;
             }
 
             if (shouldAbortClaudeStream()) {
@@ -2793,9 +3258,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
 
             // Estimate usage if provider didn't return valid usage
-            if (!hasValidUsage(usage) && totalContentLength > 0) {
-              usage = estimateUsage(body, totalContentLength, sourceFormat || FORMATS.OPENAI);
-            }
+            usage = getAccountingUsage();
 
             if (hasValidUsage(usage)) {
               logUsage(provider, usage, model, connectionId, apiKeyInfo);
@@ -2890,18 +3353,25 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (reasoning) {
                   message.reasoning_content = reasoning;
                 }
-                if (passthroughToolCalls.size > 0) {
-                  message.tool_calls = [...passthroughToolCalls.values()].sort(
-                    (a, b) => a.index - b.index
-                  );
+                // Native Claude / Responses calls already went to the client as wire events;
+                // list them here too so logs and the cache keep them (the wire is unchanged).
+                const summaryToolCalls = mergeNativeToolCalls(
+                  [...passthroughToolCalls.values()],
+                  [...passthroughNativeToolCalls.values()],
+                  passthroughResponsesOutputItems,
+                  passthroughResponsesPendingFunctionCalls.values()
+                );
+                const summaryHasToolCalls = passthroughHasToolCalls || summaryToolCalls.length > 0;
+                if (summaryToolCalls.length > 0) {
+                  message.tool_calls = summaryToolCalls;
                 }
                 // Hardening: log empty assistant response after tool completion
                 // for observability — helps diagnose Copilot "Sorry, no response was returned"
-                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
+                if (summaryHasToolCalls && !content.trim() && !reasoning.trim()) {
                   console.warn(
                     `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
                   );
-                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
+                } else if (summaryHasToolCalls && !content.trim() && reasoning.trim()) {
                   message.content = "";
                 }
 
@@ -2909,19 +3379,34 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+                      // Keep the upstream's own terminal reason ("length",
+                      // "content_filter", …): masking it made a cut reply cache as
+                      // complete. Only "stop" upgrades to "tool_calls".
+                      finish_reason:
+                        passthroughFinishReason && passthroughFinishReason !== "stop"
+                          ? passthroughFinishReason
+                          : summaryHasToolCalls
+                            ? "tool_calls"
+                            : "stop",
                     },
                   ],
                   usage: {
+                    ...usage,
                     prompt_tokens: prompt,
                     completion_tokens: completion,
                     total_tokens: prompt + completion,
                   },
                   _streamed: true,
+                  ...summaryTextTailMarker(
+                    passthroughAccumulatedContent,
+                    passthroughAccumulatedReasoning
+                  ),
                 };
+                outcomeRecorded = true;
                 onComplete({
                   status: 200,
                   usage,
+                  cacheEvidence: usage?.cache_evidence as StreamCompletePayload["cacheEvidence"],
                   responseBody,
                   reasoningMeta: reasoningObserver.take(),
                   ...timing.completionTiming(),
@@ -2939,14 +3424,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // reasoning-heavy stream (live incident 2026-09-04) -- see
                   // providerPayloadCollector's own `format:` construction comment above.
                   providerPayload: providerPayloadCollector.build(
-                    sourceFormat === FORMATS.OPENAI_RESPONSES
+                    providerWireFormat === FORMATS.OPENAI_RESPONSES
                       ? providerPayloadCollector.getSummary()
                       : { object: "chat.completion", ...responseBody },
                     { includeEvents: false }
                   ),
                   // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
                   // clientResponseFormat (what the client actually receives) rather than
-                  // sourceFormat (what the upstream sent) -- they're equal in passthrough
+                  // providerWireFormat (what the upstream sent) -- they're equal in passthrough
                   // mode but conceptually distinct. Without this, `entry.responseId` in
                   // src/lib/usage/callLogs.ts is always null for a Responses-API client
                   // (extractResponsesId reads `clientResponse.id`, which the chat-shaped
@@ -3004,13 +3489,27 @@ export function createSSEStream(options: StreamOptions = {}) {
               isDuplicateSequence: (value) => isDuplicateResponsesSequence(value),
               shouldDropCommentary: (parsed) =>
                 shouldDropResponsesCommentary ? dropCommentary(parsed as JsonRecord) : false,
-              pushProviderPayload: (payload) => providerPayloadCollector.push(payload),
+              pushProviderPayload: (payload) => {
+                observeProviderPayload(payload);
+              },
               emitFailureAndAbort: (ctrl, parsed) =>
                 emitTranslatedFailureAndAbort(
                   ctrl as TransformStreamDefaultController<Uint8Array>,
                   parsed
                 ),
               translateAndEmit: (ctrl, parsed) => {
+                // #18600 — restore aliases before translation (same seam as the
+                // main translate loop; the flush tail replays through here).
+                if (
+                  targetFormat === FORMATS.OPENAI_RESPONSES &&
+                  typeof (parsed as JsonRecord).type === "string"
+                ) {
+                  restoreResponsesToolNames(
+                    parsed as JsonRecord,
+                    responsesToolAliasMap,
+                    requestToolIdentityMap
+                  );
+                }
                 const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
                 for (const item of getOpenAIIntermediateChunks(translated)) {
                   const openaiOutput = formatSSE(item, FORMATS.OPENAI);
@@ -3033,7 +3532,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (parsed && !parsed.done) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-              providerPayloadCollector.push(parsed);
+              observeProviderPayload(parsed);
               // Extract usage from remaining buffer — if the usage-bearing event
               // (e.g. response.completed) is the last SSE line, it ends up here
               // in the flush handler where extractUsage was not called.
@@ -3045,23 +3544,49 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (!state.usage) {
                   state.usage = extracted;
                 } else {
-                  const su = state.usage as Record<string, number>;
-                  const eu = extracted as Record<string, number>;
+                  const su = state.usage as UsageLike;
+                  const eu = extracted as UsageLike;
+                  Object.assign(
+                    su,
+                    { usage_evidence: mergeUsageEvidence(su, extracted) },
+                    mergeCacheCreationFields(su, extracted)
+                  );
                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
                   if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
                   if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                  if (eu.cache_read_input_tokens > 0)
+                  if (eu.cache_read_input_tokens !== undefined)
                     su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                  if (eu.cache_creation_input_tokens > 0)
+                  if (eu.cache_creation_input_tokens !== undefined)
                     su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+                  if (eu.cache_evidence === "invalid") {
+                    delete su.cached_tokens;
+                  } else if (eu.cached_tokens !== undefined) {
+                    su.cached_tokens = eu.cached_tokens;
+                  }
+                  if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
                   if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
                 }
               }
 
+              // #18600 — restore aliases before translation on the flush-path
+              // partial buffer too (same seam as the main translate loop).
+              if (
+                targetFormat === FORMATS.OPENAI_RESPONSES &&
+                typeof (parsed as JsonRecord).type === "string"
+              ) {
+                restoreResponsesToolNames(
+                  parsed as JsonRecord,
+                  responsesToolAliasMap,
+                  requestToolIdentityMap
+                );
+              }
               const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+              if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
+                usage = { ...usage, cache_evidence: state?.cacheEvidence };
+                lastPropagatedCacheEvidence = state?.cacheEvidence;
+              }
 
               // Log OpenAI intermediate chunks
               for (const item of getOpenAIIntermediateChunks(translated)) {
@@ -3093,14 +3618,18 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
               }
             } catch {
-              // Swallow flush errors — the controller.error below is the
-              // terminal signal for the client.
+              // Swallow flush errors — the failure abort below is the terminal
+              // signal for the client (controller.error before any content, or
+              // the queued error event once content was forwarded).
             }
 
             const errorBody = buildErrorBody(err.status, err.message);
             const publicErrorMessage = errorBody.error.message;
             err.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
-            abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
+            abortStreamFailure(controller, err, publicErrorMessage, {
+              notifyComplete: true,
+              ...failureBoundaryOptions(),
+            });
             return;
           }
 
@@ -3121,7 +3650,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               clearPendingRequestFromStream,
             })
           ) {
-            controller.error(markPendingRequestCleared(buildEmptyChoicesStreamError()));
+            controller.error(markStreamPendingRequestCleared(buildEmptyChoicesStreamError()));
             return;
           }
 
@@ -3166,20 +3695,9 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
-          /**
-           * Usage injection strategy:
-           * Usage data (input/output tokens) is injected into the last content chunk
-           * or the finish_reason chunk rather than sent as a separate SSE event.
-           * This ensures all major clients (Claude CLI, Continue, Cursor) receive
-           * usage data even if they stop reading after the finish signal.
-           * The usage buffer (state.usage) accumulates across chunks and is only
-           * emitted once at stream end when merged into the final translated chunk.
-           */
-
+          // Finalize accounting fields independently; input alone cannot validate output.
           // Estimate usage if provider didn't return valid usage (for translate mode)
-          if (!hasValidUsage(state?.usage) && totalContentLength > 0) {
-            state.usage = estimateUsage(body, totalContentLength, sourceFormat);
-          }
+          state.usage = getAccountingUsage();
 
           // Send [DONE] (only if not already sent during transform)
           if (!doneSent) {
@@ -3206,8 +3724,15 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
-          if (hasValidUsage(state?.usage)) {
-            logUsage(state.provider || targetFormat, state.usage, model, connectionId, apiKeyInfo);
+          const accountingUsage = getAccountingUsage();
+          if (hasValidUsage(accountingUsage)) {
+            logUsage(
+              state.provider || targetFormat,
+              accountingUsage,
+              model,
+              connectionId,
+              apiKeyInfo
+            );
           } else {
             appendRequestLog({
               model,
@@ -3220,7 +3745,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           // Notify caller for call log persistence (include full response body with accumulated content)
           if (onComplete) {
             try {
-              const u = state?.usage as Record<string, unknown> | null | undefined;
+              const u = accountingUsage;
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
               let content = (state?.accumulatedContent ?? "").trim() || "";
@@ -3264,23 +3789,39 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (hasToolCalls) {
                 message.tool_calls = normalizedToolCalls;
               }
+              // Same rule as the passthrough branch: the translators record the
+              // upstream's terminal reason on state.finishReason — keep it when it
+              // is not "stop" so the cache-store truncation guard can see a cut turn.
+              const upstreamFinishReason =
+                typeof state?.finishReason === "string" && state.finishReason
+                  ? state.finishReason
+                  : null;
               const responseBody = {
                 choices: [
                   {
                     message,
-                    finish_reason: hasToolCalls ? "tool_calls" : "stop",
+                    finish_reason:
+                      upstreamFinishReason && upstreamFinishReason !== "stop"
+                        ? upstreamFinishReason
+                        : hasToolCalls
+                          ? "tool_calls"
+                          : "stop",
                   },
                 ],
                 usage: {
+                  ...accountingUsage,
                   prompt_tokens: prompt,
                   completion_tokens: completion,
                   total_tokens: prompt + completion,
                 },
                 _streamed: true,
+                ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
+              outcomeRecorded = true;
               onComplete({
                 status: 200,
-                usage: state?.usage,
+                usage: accountingUsage,
+                cacheEvidence: state?.cacheEvidence,
                 responseBody,
                 ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
@@ -3330,13 +3871,30 @@ export function createSSEStream(options: StreamOptions = {}) {
           }
         } catch (error) {
           console.log(`[STREAM] Error in flush (${model || "unknown"}):`, error.message || error);
+          // A throw while closing the stream (e.g. a malformed tail frame) still needs one
+          // terminal outcome: an error frame, onFailure, a failure completion, pending cleanup.
+          if (!outcomeRecorded) {
+            try {
+              abortWithPublicStreamError(
+                controller,
+                "Upstream stream could not be processed",
+                "stream_error"
+              );
+            } catch (abortError) {
+              console.debug(
+                `[STREAM] flush failure path error (${model || "unknown"}):`,
+                abortError
+              );
+              clearPendingRequestFromStream();
+            }
+          }
         }
       },
       cancel: () => clearIdleTimer(),
     }),
     ...createByteLengthQueueStrategies(streamBufferBytes)
   );
-  trackStreamPartialUsage(sseStream, body, () => [state?.usage ?? usage, totalContentLength]);
+  trackStreamPartialUsage(sseStream, body, () => [getAccountingUsage(), observedContentLength()]);
   return registerStreamTiming(sseStream, timing);
 }
 
@@ -3361,7 +3919,8 @@ export function createSSETransformStreamWithLogger(
   customToolNames: ReadonlySet<string> = new Set(),
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
   clientTools: unknown = null,
-  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
+  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
+  pendingRequestId: StreamPendingRequestIdentity | null = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.TRANSLATE,
@@ -3383,6 +3942,7 @@ export function createSSETransformStreamWithLogger(
     requestToolIdentityMap,
     streamBufferBytes,
     clientTools,
+    pendingRequestId,
   });
 }
 
@@ -3398,7 +3958,8 @@ export function createPassthroughStreamWithLogger(
   onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
   clientResponseFormat: string | null = null,
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
-  clientTools: unknown = null
+  clientTools: unknown = null,
+  pendingRequestId: StreamPendingRequestIdentity | null = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3414,6 +3975,7 @@ export function createPassthroughStreamWithLogger(
     clientResponseFormat,
     requestToolIdentityMap,
     clientTools,
+    pendingRequestId,
   });
 }
 

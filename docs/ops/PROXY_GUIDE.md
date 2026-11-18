@@ -82,6 +82,33 @@ Even outside blocked regions, proxies are useful for:
 
 ---
 
+## Default proxy state for new accounts
+
+In **Settings → Proxy → Global configuration**, use **Enable proxy by default for new
+connections** to choose the initial proxy state of newly added provider accounts.
+
+The new setting controls the initial proxy state of newly added provider accounts. It does not
+change existing accounts or replace the global proxy switch. Its initial value preserves the
+previous behavior. Turn it off once to create future accounts with proxy disabled by default.
+
+The preference is stored as `defaultNewConnectionProxyEnabled` through the existing Settings API.
+It defaults to `true` when never saved. Saving `false` takes effect for subsequent new accounts
+without a restart. `POST /api/providers` accepts an optional strict boolean `proxyEnabled`;
+an explicit `true` or `false` takes precedence over the creation default. Omission on a duplicate
+account or OAuth reconnect preserves that account's stored state. Individual accounts can still
+be enabled or disabled afterward.
+
+Selective provider transfers use the destination installation's default for new accounts and
+preserve destination policy when replacing existing accounts. Proxy toggles are not portable
+transfer fields. Full backup restoration and historical JSON/SQL migration retain their existing
+restore semantics, including saved account values and legacy schema defaults; a full settings
+restore can also restore this preference.
+
+This preference does not assign a proxy or establish that one is healthy or in use. Actual
+routing still depends on the global proxy switch and applicable proxy configuration. Synthetic
+providers without a persisted account, OAuth traffic before account creation, environment/system
+proxies, and external backends' networking are outside its scope.
+
 ## 4-Level Proxy System
 
 OmniRoute supports proxy configuration at **four independent scopes**, resolved in priority order:

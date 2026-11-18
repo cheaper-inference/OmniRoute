@@ -9,6 +9,7 @@ import { injectSkillsWithMetadata } from "@/lib/skills/injection";
 import { buildMemoryToolsForProvider } from "@/lib/skills/memoryBuiltins";
 import { skillRegistry } from "@/lib/skills/registry";
 import { FORMATS } from "../../translator/formats.ts";
+import { chatStrictForResponses } from "../../translator/helpers/toolStrict.ts";
 import { detectCachingContext } from "../../services/compression/cachingAware.ts";
 
 type MemorySkillsLogger = { debug?: (...args: unknown[]) => void } | null | undefined;
@@ -34,6 +35,41 @@ function getToolName(tool: unknown): string {
 export function sortToolsByName<T>(tools: T[]): T[] {
   if (!Array.isArray(tools) || tools.length <= 1) return tools;
   return [...tools].sort((a, b) => getToolName(a).localeCompare(getToolName(b)));
+}
+
+// #12234: injected tools (memory / skills) are sorted by name so the prompt-cache prefix
+// is deterministic; they follow the client's tools, which keep the client's own order.
+function orderToolsForCaching<T>(tools: T[], clientToolNames: Set<string>): T[] {
+  const fromClient = tools.filter((tool) => clientToolNames.has(getToolName(tool)));
+  const injected = tools.filter((tool) => !clientToolNames.has(getToolName(tool)));
+  return [...fromClient, ...sortToolsByName(injected)];
+}
+
+/**
+ * Memory / skill builders emit Chat-shaped function tools (`{type, function: {...}}`).
+ * A Responses body declares them flat (`{type, name, parameters}`). The Chat shape only
+ * worked while a Responses -> Chat translation normalized it; on a native Responses
+ * passthrough it reaches the upstream, and strict ones reject it (Mistral /v1/responses:
+ * 400 "tools.0.FunctionTool.name: Field required"). Same mapping as the Chat -> Responses
+ * request translator (translator/request/openai-responses/toResponses.ts).
+ */
+function toResponsesFunctionTool(tool: unknown): unknown {
+  if (!tool || typeof tool !== "object") return tool;
+  const record = tool as Record<string, unknown>;
+  const fn = record.function;
+  if (record.type !== "function" || !fn || typeof fn !== "object") return tool;
+  const fnRecord = fn as Record<string, unknown>;
+  return {
+    type: "function",
+    name: fnRecord.name,
+    ...(typeof fnRecord.description === "string" ? { description: fnRecord.description } : {}),
+    parameters: fnRecord.parameters ?? { type: "object", properties: {} },
+    strict: chatStrictForResponses(fnRecord),
+  };
+}
+
+function shapeInjectedTools(tools: unknown[], sourceFormat: string): unknown[] {
+  return sourceFormat === FORMATS.OPENAI_RESPONSES ? tools.map(toResponsesFunctionTool) : tools;
 }
 
 export function getSkillsProviderForFormat(
@@ -72,6 +108,11 @@ export async function injectMemoryAndSkills({
     ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
     : null;
 
+  // Tools the client sent keep their order: a later cap (upstreamBody) keeps the head of
+  // the list, so sorting client tools alphabetically made it drop the built-ins (#18120).
+  const clientToolNames = new Set(
+    Array.isArray(body.tools) ? body.tools.map((tool) => getToolName(tool)) : []
+  );
   const builtinOwnerSet: string[] = [];
   const injectedCustomSkillNames: string[] = [];
 
@@ -188,8 +229,9 @@ export async function injectMemoryAndSkills({
         return [];
       })
     );
-    const newMemoryTools = buildMemoryToolsForProvider(
-      getSkillsProviderForFormat(sourceFormat)
+    const newMemoryTools = shapeInjectedTools(
+      buildMemoryToolsForProvider(getSkillsProviderForFormat(sourceFormat)),
+      sourceFormat
     ).filter((tool) => {
       const record = tool as Record<string, unknown>;
       const name = (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
@@ -247,7 +289,10 @@ export async function injectMemoryAndSkills({
     if (mergedTools.length > existingTools.length) {
       body = {
         ...body,
-        tools: mergedTools,
+        // Only the injected skills are reshaped; the client's tools keep their own form.
+        tools: mergedTools.map((tool) =>
+          existingTools.includes(tool) ? tool : shapeInjectedTools([tool], sourceFormat)[0]
+        ),
       };
       injectedCustomSkillNames.push(...injectedNames);
       log?.debug?.("SKILLS", `Injected ${mergedTools.length - existingTools.length} skills`);
@@ -257,7 +302,7 @@ export async function injectMemoryAndSkills({
   if (Array.isArray(body.tools) && body.tools.length > 1) {
     body = {
       ...body,
-      tools: sortToolsByName(body.tools),
+      tools: orderToolsForCaching(body.tools, clientToolNames),
     };
   }
 

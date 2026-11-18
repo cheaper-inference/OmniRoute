@@ -3,8 +3,12 @@
 import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import Select from "./Select";
+import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
+import { readDiscoveryDegradation } from "@/shared/discovery/degradedCause";
 
 type Model = { id: string; name?: string };
+/** Whether the proposed list comes from the built-in catalog, and why. */
+type CatalogDegradation = { degraded: boolean; cause?: string };
 
 /** Draft-only field: the enclosing connection form owns persistence. */
 export default function ConnectionTestModelField({
@@ -20,6 +24,7 @@ export default function ConnectionTestModelField({
   const id = useId();
   const [modelId, setModelId] = useState("");
   const [models, setModels] = useState<Model[]>([]);
+  const [degradation, setDegradation] = useState<CatalogDegradation>({ degraded: false });
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -35,6 +40,9 @@ export default function ConnectionTestModelField({
         if (controller.signal.aborted) return;
         setModelId(config.modelId || "");
         setModels((catalog.models || []).filter((model: Model) => typeof model.id === "string"));
+        // The proposed list may come from the built-in catalog: the operator
+        // must know it before choosing a model from it.
+        setDegradation(readDiscoveryDegradation(catalog));
       })
       .catch(() => {
         if (!controller.signal.aborted) setFailed(true);
@@ -70,6 +78,7 @@ export default function ConnectionTestModelField({
           </option>
         ))}
       </Select>
+      <DiscoveryDegradedNotice degraded={degradation.degraded} cause={degradation.cause} />
       {failed && (
         <p role="alert" className="mt-1 text-xs text-error">
           {t("failed")}

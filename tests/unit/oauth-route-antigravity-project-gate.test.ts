@@ -23,10 +23,10 @@ const persistenceSource = fs.readFileSync(
   "utf8"
 );
 
-test("degrade gate is wired into both exchange and poll-callback branches", () => {
+test("degrade gate is wired into the exchange, poll-callback and import-token branches", () => {
   const callSites =
     routeSource.match(/antigravityDegradedProjectState\(provider, tokenData\)/g) || [];
-  assert.equal(callSites.length, 2, "gate must run in exchange AND poll-callback");
+  assert.equal(callSites.length, 3, "gate must run in exchange, poll-callback AND import-token");
 });
 
 test("connects are SAVED with degraded status, not rejected", () => {

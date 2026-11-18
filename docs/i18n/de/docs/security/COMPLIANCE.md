@@ -15,51 +15,71 @@ Die Implementierung befindet sich in `src/lib/compliance/index.ts` (T-43 — „
 
 ### Administrative Audit-Ereignisse (`audit_log`)
 
-Jeder Aufruf von `logAuditEvent({ action, actor, target, details, ... })` erzeugt eine Zeile. Aktionszeichenfolgen folgen dem Muster `domain.verb` (oder `domain.verb.outcome`). Zu den im Quellcode bestätigten Aktionstypen gehören:
+Jeder Aufruf von `logAuditEvent({ action, actor, target, details, ... })` erzeugt
+eine Zeile. Aktionszeichenfolgen folgen dem Muster
+`domain.verb` (oder `domain.verb.outcome`). Bestätigte Aktionstypen im
+Quellbaum sind:
 
-| Aktion                               | Quelle                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Aktion                               | Quelle                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Jeder Eintrag erfasst `action`, `actor` (standardmäßig `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` und `timestamp`. Vertrauliche Schlüssel (`apiKey`, `accessToken`, `refreshToken`, `password`, alle mit `*token`/`*secret`/`*apikey` übereinstimmenden Schlüssel usw.) werden rekursiv durch `"[redacted]"` ersetzt, bevor die Zeile geschrieben wird.
+Jeder Eintrag erfasst `action`, `actor` (Standardwert ist `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` und `timestamp`. Sensible Schlüssel (`apiKey`, `accessToken`,
+`refreshToken`, `password`, alle Schlüssel, die auf `*token`/`*secret`/`*apikey`
+passen, usw.) werden rekursiv zu `"[redacted]"` redigiert, bevor die Zeile
+geschrieben wird.
+
+Zeilen mit `api_key.auth.touch` erfassen erfolgreiche API-Key-Metadaten- und
+Discovery-Lesevorgänge (GET/HEAD), die niemals das Request-Log erreichen:
+welcher Schlüssel wann und welcher normalisierte Pfad verwendet wurde,
+zusammengeführt und auf 1.000 Zeilen begrenzt. Schlüssel mit `noLog` sowie der
+Umgebungsschlüssel werden übersprungen. Die IP-Adresse und der User-Agent des
+Aufrufers werden nur hinzugefügt, wenn das Feature-Flag
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` aktiviert ist (standardmäßig deaktiviert).
 
 ### MCP-Tool-Aufrufe (`mcp_tool_audit`)
 
-Jeder Aufruf eines MCP-Tools schreibt über `open-sse/mcp-server/audit.ts` eine Zeile. Schema (aus `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Jeder MCP-Tool-Aufruf schreibt über
+`open-sse/mcp-server/audit.ts` eine Zeile. Schema (aus
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Spalte           | Hinweise                                         |
 | ---------------- | ------------------------------------------------ |
 | `id`             | automatisch inkrementiert                        |
-| `tool_name`      | MCP-Tool-Kennung                                 |
+| `tool_name`      | MCP-Tool-Bezeichner                              |
 | `input_hash`     | sha256 der Eingabe (keine Nutzdaten gespeichert) |
 | `output_summary` | kurze, gekürzte Zusammenfassung                  |
 | `duration_ms`    | verstrichene Zeit                                |
-| `api_key_id`     | Aufrufer (kann NULL sein)                        |
+| `api_key_id`     | Aufrufer (nullable)                              |
 | `success`        | `1` / `0`                                        |
-| `error_code`     | abschließender Fehlercode bei einem Fehler       |
+| `error_code`     | Endfehlercode bei einem Fehler                   |
 | `created_at`     | ISO-Zeitstempel                                  |
 
-### Anfrage-/Nutzungsprotokolle
+### Request- / Nutzungsprotokolle
 
-Dabei handelt es sich um operative Telemetriedaten (nicht ausschließlich um administrative Audit-Daten), sie verwenden jedoch dieselbe Aufbewahrungspipeline:
+Dies sind operative Telemetriedaten (kein strikt administratives Audit), nutzen
+aber dieselbe Aufbewahrungspipeline:
 
-- `usage_history` — aggregierte Nutzung pro Anfrage
-- `call_logs` — vollständiges Protokoll pro Anfrage (unterliegt einer Zeilenobergrenze, siehe unten)
-- `proxy_logs` — Proxy-Datenverkehrsprotokoll (unterliegt einer Zeilenobergrenze)
-- `request_detail_logs` — veraltetes detailliertes Anfrageprotokoll (wird weiterhin bereinigt, sofern vorhanden)
+- `usage_history` — Nutzungszusammenfassung pro Request
+- `call_logs` — vollständiges Protokoll pro Request (unterliegt der Zeilenbegrenzung, siehe unten)
+- `proxy_logs` — Proxy-Datenverkehrsprotokoll (unterliegt der Zeilenbegrenzung)
+- `request_detail_logs` — älteres detailliertes Request-Protokoll (wird weiterhin bereinigt, falls vorhanden)
 
 ## Speicherschema
 

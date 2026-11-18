@@ -18,16 +18,18 @@
 
 ---
 
-## Hanyoyin Shigarwa
+## Shigar Hanyoyin
 
-### npm (ana ba da shawara)
+### npm (an bada shawarar)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard yana buɗewa a `http://localhost:20128`, sannan tushen URL na API shi ne `http://localhost:20128/v1`.
+Dashboard yana buɗewa a `http://localhost:20128` kuma API tushe URL shine `http://localhost:20128/v1`.
+
+> **npm masu amfani:** Idan npm yayi kashedin cewa an katange rubutun shigarwa (misali, `omniroute`, `better-sqlite3`), duba [Shirya matsala — npm an katange rubutun shigarwa](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Masu amfani da pnpm:** ana buƙatar tutar `--allow-build` domin kunna rubutun ginawa na asali don `better-sqlite3` da `@swc/core`. Ba a goyon bayan umarnin `pnpm approve-builds -g` don shigarwa ta duniya a pnpm v11.
+> **masu amfani pnpm:** ana buƙatar tutar `--allow-build` don ba da damar rubutun ginin asali na `better-sqlite3` da `@swc/core`. Ba a tallafawa umarnin `pnpm approve-builds -g` don shigarwa na duniya akan pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Kunshin AUR](https://aur.archlinux.org/packages/omniroute-bin) yana shigar da OmniRoute kuma yana samar da sabis na mai amfani na systemd.
+[Kunshin AUR](https://aur.archlinux.org/packages/omniroute-bin) yana shigar da OmniRoute kuma yana ba da sabis na mai amfani da tsarin.
 
-### Daga Lambar Tushe
+### Daga Source
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Bayanan Windows:** Ta tsohuwa, OmniRoute yana amfani da `%APPDATA%\omniroute` idan tsohon kundin adireshi na `%USERPROFILE%\.omniroute` ba ya nan. Saita `DATA_DIR` don zaɓar wani wurin kundin bayanai daban.
+> **Windows note:** Ta hanyar tsoho, OmniRoute yana amfani da `%APPDATA%\omniroute` lokacin da tarihin `%USERPROFILE%\.omniroute` na gado ba ya nan. Saita `DATA_DIR` don zaɓar wurin daban-daban na bayanai.
 
-> **Lura:** `npm install` yana samar da `.env` kai tsaye daga `.env.example` a farkon gudanarwa. Shigarwa na gaba ba za su sake rubuta `.env` da ke akwai ba, don haka ana adana gyare-gyare. Don sake samar da shi daga tushe, share `.env` kafin sake gudanarwa.
+> **Lura:** `npm install` auto-generates `.env` daga `.env.example` a farkon gudu. Abubuwan shigarwa na gaba ba za su sake rubuta wani `.env` na yanzu ba, don haka ana kiyaye abubuwan da aka keɓancewa. Don sake yin iri, share `.env` kafin sake kunnawa.
 
 ### Docker
 
-Duba [Jagorar Docker](./DOCKER_GUIDE.md) don cikakken saitin Docker, ciki har da bayanan martabar Compose da Caddy HTTPS.
+Duba [Jagorar Docker](./DOCKER_GUIDE.md) don cikakken saitin Docker gami da Rubuta bayanan martaba da Caddy HTTPS.
 
-### Manhajar Tebur (Electron)
+### Desktop App (Electron)
 
-OmniRoute yana zuwa da manhajar tebur da aka gina bisa Electron 41 + electron-builder 26.10. Rubutun da ake da su (a tushen workspace):
+OmniRoute tana jigilar kayan aikin tebur da aka gina akan Electron 41 + mai ginin lantarki 26.10. Akwai rubutun (tushen sararin aiki):
 
 ```bash
-npm run electron:dev          # Gudanar da manhajar tebur tare da sake lodawa kai tsaye
-npm run electron:build        # Gina don OS na yanzu (ana gano shi kai tsaye)
-npm run electron:build:win    # Mai shigarwar Windows (NSIS + mai ɗaukuwa)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Gwajin farko na ginin da aka shirya
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Ana haɗa fitarwar masu shigar da manhajar tebur zuwa GitHub Releases. Don cikakken bayani mai zurfi game da Electron (sa hannu, gadar IPC, rabe-raben Linux), duba [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(an ƙirƙira a wani mataki na gaba)_.
+Ana haɗe fitar da masu shigar da tebur zuwa Sakin GitHub. Don cikakken nutsewar Electron (sa hannu, gadar IPC, distros), duba [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase na baya)_.
 
-### Sabar da ba ta da mahaɗin gani (CI/aikin atomatik)
+### Sabar mara kai (CI/automation)
 
-Don saituna marasa buƙatar kulawa (Docker, Kubernetes, CI), yi amfani da:
+Don saitin da ba a kula ba (Docker, Kubernetes, CI), yi amfani da:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Idan aka haɗa da sauye-sauyen muhalli (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, da sauransu), wannan yana ba ka damar ƙaddamar da wani misalin OmniRoute da za a iya sarrafa shi gaba ɗaya ta rubutun umarni.
+Haɗe tare da env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, da sauransu), wannan yana ba ku damar ƙaddamar da misalin OmniRoute mai cikakken rubutu.
 
-### Zaɓuɓɓukan CLI
+### CLI Zabuka
 
-| Umarni                  | Bayani                                                                |
-| ----------------------- | --------------------------------------------------------------------- |
-| `omniroute`             | Fara sabar (`PORT=20128`, API da dashboard a port ɗaya)               |
-| `omniroute setup`       | Jagorar farawa ta CLI don kalmar sirri da mai samarwa na farko        |
-| `omniroute doctor`      | Gudanar da gwaje-gwajen lafiyar gida ba tare da fara sabar ba         |
-| `omniroute providers`   | Gano, jera, tabbatar, da gwada masu samarwa daga CLI                  |
-| `omniroute config`      | Tsarin kayan aikin CLI — jera, samu, saita, tabbatar da tsare-tsare   |
-| `omniroute status`      | Dashboard na matsayi marar layi — siga, DB, kayan aiki, tsari         |
-| `omniroute logs`        | Nuna rajistan amfani kai tsaye daga API (yana goyon bayan `--follow`) |
-| `omniroute update`      | Bincika ko aiwatar da sabuntawar OmniRoute                            |
-| `omniroute provider`    | Sarrafa haɗin masu samarwa — ƙara, jera, cire, gwada, tsoho           |
-| `omniroute --port 3000` | Saita port na asali/API zuwa 3000                                     |
-| `omniroute --mcp`       | Fara sabar MCP (sufurin stdio)                                        |
-| `omniroute --no-open`   | Kada a buɗe burauza kai tsaye                                         |
-| `omniroute --help`      | Nuna taimako                                                          |
+| Umurni                  | Bayani                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `omniroute`             | Fara uwar garken (`PORT=20128`, API da dashboard akan tashar jiragen ruwa guda) |
+| `omniroute setup`       | Jagorar CLI kan hawan jirgi don kalmar sirri da mai bayarwa na farko            |
+| `omniroute doctor`      | Gudanar da duba lafiyar gida ba tare da fara uwar garken ba                     |
+| `omniroute providers`   | Nemo, jera, ingantawa, da masu samar da gwaji daga CLI                          |
+| `omniroute config`      | CLI kayan aiki sanyi jerin —, samu, saita, inganta saiti                        |
+| `omniroute status`      | Sigar dashboard matsayi na wajen —, DB, kayan aiki, daidaitawa                  |
+| `omniroute logs`        | Raba rajistan ayyukan amfani daga API (yana goyan bayan `--follow`)             |
+| `omniroute update`      | Bincika ko amfani da sabuntawar OmniRoute                                       |
+| `omniroute provider`    | Sarrafa haɗin mai badawa —, jeri, cirewa, gwadawa, tsoho                        |
+| `omniroute --port 3000` | Saita tashar tashar canonical/API zuwa 3000                                     |
+| `omniroute --mcp`       | Fara uwar garken MCP (shirin sitidiyo)                                          |
+| `omniroute --no-open`   | Kar a buɗe mashigar ta atomatik                                                 |
+| `omniroute --help`      | Nuna taimako                                                                    |
 
-Ana iya sarrafa saitin da ba shi da mahaɗin gani ta rubutun umarni ta amfani da tutoci ko sauye-sauyen muhalli:
+Ana iya rubuta saitin mara kai tare da tutoci ko masu canjin yanayi:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Gudanar da binciken matsalolin gida ba tare da buɗe dashboard ba:
+Gudanar da bincike na gida ba tare da buɗe dashboard ba:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Sarrafa masu samarwa daga SSH ko rubutun umarni ba tare da buɗe dashboard ba:
+Sarrafa masu samarwa daga SSH ko rubutun ba tare da buɗe dashboard ba:
 
 ```bash
 omniroute providers available
@@ -198,41 +200,45 @@ Don cikakken bayani kan daidaita kowane kayan aiki (Claude Code, Codex CLI, Curs
 
 ---
 
-## Saitin Yarjejeniya (MCP + A2A)
+## Saitin Protocol (MCP + A2A)
 
-### Saitin MCP (Yarjejeniyar Mahallin Samfuri)
+### Saita MCP (Tsarin Tsarin Magana)
 
-Fara jigilar MCP a yanayin stdio:
+Fara safarar MCP a yanayin sitiyo:
 
 ```bash
 omniroute --mcp
 ```
 
-Hanyar tabbatarwa da aka ba da shawara:
+Shawarar ingantaccen kwarara:
 
 ```bash
-# 1. Fara sabar MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Daga MCP client ɗinka, kira:
-omniroute_get_health        # Ya kamata ya dawo da lafiyar tsarin
-omniroute_list_combos       # Ya kamata ya dawo da combos masu aiki
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ko gudanar da cikakken jerin gwajin E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Daidaita MCP Client
+#### MCP Kanfigareshan Abokin Ciniki
 
 **Claude Code:**
 
+Lambar Claude tana haɗi akan HTTP, wanda `omniroute --mcp` (stdio) ba ya farawa. An kashe jigilar HTTP ta tsohuwa: kunna shi a kan uwar garken da ke aiki tukuna. Lokacin da aka kunna shigar dashboard, buƙatu ba tare da takaddun shaida yana samun `401`, don haka wuce maɓallin API mai riƙe `mcp:connect` (ko `manage`); maɓalli ba tare da `manage`/`admin` kuma yana buƙatar iyakar kowane kayan aiki (duba [MCP Server → MCP scopes Tools](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Ƙara wannan zuwa saitunan MCP naka:
+Ƙara zuwa saitunan MCP ɗinku (stdio, tare da maɓallin don haka mai kira ya sami babba):
 
 ```json
 {
@@ -240,23 +246,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Cikakkun takardun MCP:** [README na Sabar MCP](../../open-sse/mcp-server/README.md) — kayan aiki 110, saitunan IDE, clients na Python/TS/Go.
+Ko, lokacin da `mcpTransport` ke `streamable-http` (saita shi akan `/dashboard/mcp` ko tare da `omniroute mcp enable --transport streamable-http`), nuna shigarwar uwar garken MCP mai nisa a `http://localhost:20128/api/mcp/stream`.
 
-### Saitin A2A (Yarjejeniyar Agent-zuwa-Agent)
+Maɓallin yana tafiya azaman `Authorization: Bearer <api-key>` (duba [MCP Server → Samun nisa](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) don runduna mai nisa; maɓalli mai nisa yana buƙatar `mcp:connect` da read/write ɗin sa).
 
-Tabbatar da Agent Card:
+**Cikakken takardun MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 kayan aikin, IDE configs, Python/TS/Go abokan ciniki. Maganar mai aiki don matsawa kayan aikin CCR/dedup (alamomi, abubuwan da ake buƙata, ƙayyadaddun kayan aiki, fakitin dawo da, bincike): [Injin matsawa → Abubuwan buƙatu / jagorar mai aiki](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Saita A2A (Agent-to-Agent Protocol)
+
+Tabbatar da Katin Agent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Aika wani aiki:
+Aika aiki:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +277,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Cikakkun takardun A2A:** [README na Sabar A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ƙwarewa, watsawa kai tsaye, da zagayowar rayuwar aiki.
+**Cikakken takardun A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, basira, yawo, aikin rayuwa.
 
 ---
 
@@ -323,23 +336,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Samfurin Void Linux (xbps-src)
+## Wurin Linux (xbps-src) Samfura
 
-Ga masu amfani da Void Linux, za ku iya gina kunshin asali ta amfani da `xbps-src`. Ajiye wannan sashe a matsayin `srcpkgs/omniroute/template`:
+Ga masu amfani da Void Linux, zaku iya gina fakitin asali ta amfani da `xbps-src`. Ajiye wannan toshe a matsayin `srcpkgs/omniroute/template`:
 
 ```bash
-# Fayil ɗin samfuri na 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Ƙofar AI ta bai ɗaya mai sarrafa turawa cikin hikima don masu samar da LLM da yawa"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Sake samar da checksum ga kowace fitarwa ta amfani da:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

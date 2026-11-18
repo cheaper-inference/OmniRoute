@@ -15,3 +15,5 @@ mod.parseModel("../etc/passwd"); // malformed → log.warn (security)
 
 // Emit a marker so the harness can attribute output to this run.
 process.stderr.write(`VISIBILITY level=${level}\n`);
+
+export {};

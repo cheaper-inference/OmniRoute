@@ -29,22 +29,22 @@ Intervalo:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## O Que Comprime
 
-Atualmente, o catálogo incorporado inclui 49 filtros distribuídos pelas seguintes categorias:
+O catálogo integrado inclui atualmente 56 filtros distribuídos por estas categorias:
 
-| Categoria | Exemplos                                                                  |
-| --------- | ------------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                         |
-| `test`    | Vitest, Jest, Pytest, Playwright, testes Go, testes Cargo                 |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx             |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler             |
-| `shell`   | `ls`, `find`, `grep`, registos de shell genéricos                         |
-| `docker`  | `docker ps`, registos do Docker                                           |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                                   |
-| `generic` | Resultados JSON, rastreios de pilha, alternativa genérica para resultados |
+| Categoria | Exemplos                                                      |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testes Cargo   |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, registos genéricos da shell             |
+| `docker`  | `docker ps`, registos do Docker                               |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | Saída JSON, stack traces, fallback genérico de saída          |
 
-O detetor em `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica os resultados
-antes da seleção dos filtros. Os filtros também podem corresponder através de um padrão de comando ou de uma expressão regular aplicada aos resultados quando uma classe
-de comandos não é suficiente.
+O detetor em `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica a saída
+antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou regex
+de saída quando uma classe de comando não é suficiente.
 
 ## Resolução de Filtros
 
@@ -352,19 +352,19 @@ node --import tsx/esm --test \
 
 ## Níveis de Intensidade (v3.8.16+)
 
-O RTK suporta **3 níveis de intensidade** que equilibram a **agressividade da compressão** e a **segurança**. O nível é definido através de `config.intensity` na configuração do motor.
+O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de compressão** e **segurança**. O nível é definido através de `config.intensity` na configuração do motor.
 
 ### Os 3 Níveis
 
-| Nível                | Limite de truncagem  | Poupança de tokens | Risco       | Mais adequado para              |
-| -------------------- | -------------------- | ------------------ | ----------- | ------------------------------- |
-| `minimal`            | 24 linhas por secção | ~20-40%            | Muito baixo | Produção com contexto crítico   |
-| `standard` (predef.) | 24 linhas por secção | ~50-70%            | Baixo       | Sessões diárias de programação  |
-| `aggressive`         | 16 linhas por secção | ~70-90%            | Médio       | Sessões longas, poupança máxima |
+| Nível                     | Limiar de truncagem  | Poupança de tokens | Risco       | Ideal para                      |
+| ------------------------- | -------------------- | ------------------ | ----------- | ------------------------------- |
+| `minimal`                 | 24 linhas por secção | ~20-40%            | Muito baixo | Produção com contexto crítico   |
+| `standard` (predefinição) | 24 linhas por secção | ~50-70%            | Baixo       | Sessões diárias de programação  |
+| `aggressive`              | 16 linhas por secção | ~70-90%            | Médio       | Sessões longas, poupança máxima |
 
 ### Onde Ocorre a Truncagem
 
-O limite de truncagem afeta `lineFilter.ts`:
+O limiar de truncagem afeta `lineFilter.ts`:
 
 ```ts
 // De open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -372,44 +372,44 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tanto o **início** como o **fim** de cada secção são preservados; o conteúdo intermédio é eliminado quando a truncagem é acionada.
+Tanto o **início** como o **fim** de cada secção são preservados; o conteúdo intermédio é descartado quando a truncagem é ativada.
 
-### O Que É Mantido e o Que É Cortado
+### O Que é Mantido vs. O Que é Cortado
 
 | Conteúdo                            | minimal       | standard      | aggressive    |
 | ----------------------------------- | ------------- | ------------- | ------------- |
-| Erros/rastreios de pilha            | ✅ preservado | ✅ preservado | ✅ preservado |
+| Erros / stack traces                | ✅ preservado | ✅ preservado | ✅ preservado |
 | Falhas de testes                    | ✅ preservado | ✅ preservado | ✅ preservado |
 | Erros de compilação                 | ✅ preservado | ✅ preservado | ✅ preservado |
-| Testes aprovados (detalhados)       | ✅ preservado | 🟡 condensado | 🟡 condensado |
-| Resultado de rotina (registos info) | 🟡 condensado | 🟡 condensado | ❌ eliminado  |
-| Barras de progresso                 | 🟡 condensado | ❌ eliminado  | ❌ eliminado  |
-| Faixa/arte ASCII                    | 🟡 condensado | ❌ eliminado  | ❌ eliminado  |
+| Testes bem-sucedidos (verbosos)     | ✅ preservado | 🟡 condensado | 🟡 condensado |
+| Saída de rotina (logs informativos) | 🟡 condensado | 🟡 condensado | ❌ descartado |
+| Barras de progresso                 | 🟡 condensado | ❌ descartado | ❌ descartado |
+| Banners / arte ASCII                | 🟡 condensado | ❌ descartado | ❌ descartado |
 
 ### Escolher a Intensidade Certa
 
 ```
                   Perder contexto é catastrófico?
-                  │
-      ┌───────────┼───────────┐
-      │           │           │
-     SIM         NÃO       NÃO TEM A CERTEZA
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
-      │      Quão crítico é  Experimente primeiro `standard`
-      │      o débito?       (funciona em 80% dos
-      │           │          casos)
-      │      ┌────┴────┐
-      │      │         │
-      │    BAIXO      ALTO
-      │      │         │
-      │      ▼         ▼
-      │   standard   aggressive
-      │      │         │
-      └──────┴─────────┘
+                              │
+      ┌───────────────────────┼────────────────┐
+      │                       │                │
+     SIM                     NÃO            INCERTO
+      │                       │                │
+      ▼                       │                │
+   minimal                    │                │
+      │                       │                │
+      │                       ▼                ▼
+      │            Quão crítico é o      Experimente primeiro
+      │            throughput?           `standard` (funciona
+      │                    │             em 80% dos casos)
+      │             ┌──────┴──────┐
+      │             │             │
+      │           BAIXO          ALTO
+      │             │             │
+      │             ▼             ▼
+      │          standard     aggressive
+      │             │             │
+      └─────────────┴─────────────┘
 ```
 
 ### Configurar a Intensidade
@@ -429,8 +429,8 @@ Tanto o **início** como o **fim** de cada secção são preservados; o conteúd
 
 **Programaticamente**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
-`CompressionEngine` e não possui um método `updateConfig`. Em vez disso, atualize a configuração
+O `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
+`CompressionEngine` e não tem método `updateConfig`. Atualize a configuração
 de um motor através da função auxiliar do registo:
 
 ```ts
@@ -441,7 +441,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificar o Efeito
 
-Utilize a **Porta de Verificação** (ver abaixo) para confirmar que o filtro é seguro com a intensidade escolhida:
+Use o **Verify Gate** (ver abaixo) para confirmar que o seu filtro é seguro na intensidade escolhida:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

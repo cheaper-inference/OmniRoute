@@ -44,6 +44,28 @@ export function isTransientProbeError(error: unknown): boolean {
   return typeof errcode === "number" && [5, 10, 15].includes(errcode & 0xff);
 }
 
+export type ProbeFailureKind = "readonly" | "transient" | "corrupt-or-unknown";
+
+/**
+ * Classifies a probe error. SQLITE_READONLY ("attempt to write a readonly
+ * database", e.g. a WAL `-shm` that cannot be written under a readonly
+ * connection) is an environment problem, not corruption (#17995).
+ */
+export function classifyProbeFailure(error: unknown): ProbeFailureKind {
+  const message = error instanceof Error ? error.message : String(error);
+  let readonly = /attempt to write a readonly database|SQLITE_READONLY/i.test(message);
+  if (!readonly && typeof error === "object" && error !== null) {
+    const { code, errcode } = error as { code?: unknown; errcode?: unknown };
+    readonly =
+      (typeof code === "string" && /^SQLITE_READONLY/.test(code)) ||
+      (typeof errcode === "number" && (errcode & 0xff) === 8);
+  }
+  if (readonly) return "readonly";
+  return isTransientProbeError(error) ? "transient" : "corrupt-or-unknown";
+}
+
+export type ProbeRetryResult = "recovered" | "transient_exhausted" | "readonly" | "not_transient";
+
 /**
  * Synchronous sleep that blocks the event loop for `ms` milliseconds.
  * Only used in the transient-probe-error retry path where we are already in
@@ -85,16 +107,19 @@ type OpenDbFn = (
  * @param sqliteFile - Path to the SQLite database file
  * @param openDb - Function to open the database (normally openSqliteDatabase)
  * @param closeDb - Function to safely close the probe adapter
- * @returns true if the retry succeeded (transient condition resolved)
- *          false if all retries were exhausted or error is non-transient
+ * @returns "recovered" if a retry succeeded, "transient_exhausted" if all retries
+ *          failed (NOT proof of corruption), "readonly" for SQLITE_READONLY (not
+ *          retried, not corruption), "not_transient" for genuine/unknown errors.
  */
 export function retryProbeIfTransient(
   sqliteFile: string,
   probeError: unknown,
   openDb: OpenDbFn,
   closeDb: (adapter: { driver: string; open: boolean; close(): void } | null | undefined) => void
-): boolean {
-  if (!isTransientProbeError(probeError)) return false;
+): ProbeRetryResult {
+  const kind = classifyProbeFailure(probeError);
+  if (kind === "readonly") return "readonly";
+  if (kind !== "transient") return "not_transient";
 
   const retryDelays = [500, 1000, 2000];
   for (let i = 0; i < retryDelays.length; i++) {
@@ -102,14 +127,14 @@ export function retryProbeIfTransient(
     try {
       const retryAdapter = openDb(sqliteFile, { readonly: true });
       closeDb(retryAdapter);
-      return true;
+      return "recovered";
     } catch {
       // Retry failed, try next delay
     }
   }
 
   console.warn(
-    `[DB] All ${retryDelays.length} transient probe retries exhausted — declaring corruption`
+    `[DB] All ${retryDelays.length} transient probe retries exhausted — NOT declaring corruption`
   );
-  return false;
+  return "transient_exhausted";
 }

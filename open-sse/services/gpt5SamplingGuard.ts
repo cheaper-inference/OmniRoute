@@ -37,8 +37,8 @@ function asRecord(value: unknown): JsonRecord | null {
 
 /**
  * True when the request carries an active reasoning effort (any level other than
- * `none`). When there is no signal at all we return false: GPT-5.1+ defaults to
- * `none`, so the safe assumption is "reasoning off → sampling allowed".
+ * `none`). When there is no signal at all: GPT-5.1+ defaults to `none` (reasoning
+ * off → sampling allowed), whereas GPT-6 defaults to reasoning on (#16440).
  */
 function hasActiveReasoning(record: JsonRecord, model: string): boolean {
   const effort = record.reasoning_effort;
@@ -51,7 +51,7 @@ function hasActiveReasoning(record: JsonRecord, model: string): boolean {
 
   if (NONE_EFFORT_SUFFIX.test(model)) return false;
   if (ACTIVE_EFFORT_SUFFIX.test(model)) return true;
-  return false;
+  return /^gpt-6/i.test(model);
 }
 
 export function stripGpt5SamplingWhenReasoning<T extends Record<string, unknown>>(
@@ -171,5 +171,28 @@ export function stripGpt5ReasoningWhenTools<T extends Record<string, unknown>>(
     `Stripped ${stripped.join(", ")} for ${model} (function tools + reasoning_effort ` +
       `are rejected on /v1/chat/completions; use /v1/responses instead)`
   );
+  return next as T;
+}
+
+/**
+ * `reasoning` is the Responses envelope: raw api.openai.com Chat Completions only
+ * documents `reasoning_effort` and answers 400 "Unknown parameter: 'reasoning'" (#18912).
+ * Keep the effort on the supported field, with the precedence the effort readers use:
+ * `reasoning_effort` first, then `reasoning.effort`. Compatible providers that accept
+ * the object are out of scope, as are Responses targets.
+ */
+export function foldReasoningForOpenAIChat<T extends Record<string, unknown>>(
+  body: T,
+  provider: string | null | undefined,
+  targetFormat: string | null | undefined
+): T {
+  if (provider !== "openai" || targetFormat !== FORMATS.OPENAI) return body;
+  const record = asRecord(body);
+  if (!record || !Object.hasOwn(record, "reasoning")) return body;
+
+  const next: JsonRecord = { ...record };
+  const effort = next.reasoning_effort ?? asRecord(next.reasoning)?.effort;
+  if (typeof effort === "string") next.reasoning_effort = effort;
+  delete next.reasoning;
   return next as T;
 }

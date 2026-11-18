@@ -28,6 +28,12 @@ test("grok-cli exposes the authenticated grok-build model catalog", () => {
         targetFormat: "openai-responses",
       },
       {
+        id: "grok-4.7-build-fast",
+        name: "Grok 4.7 Build Fast",
+        contextLength: 500000,
+        targetFormat: "openai-responses",
+      },
+      {
         id: "grok-4.6",
         name: "Grok 4.6",
         contextLength: 500000,
@@ -40,16 +46,15 @@ test("grok-cli exposes the authenticated grok-build model catalog", () => {
         targetFormat: "openai-responses",
       },
       {
-        id: "grok-composer-2.5-fast",
-        name: "Composer 2.5",
-        contextLength: 200000,
+        id: "grok-code-fast-1",
+        name: "Grok Code Fast 1",
+        contextLength: undefined,
         targetFormat: "openai-responses",
       },
     ]
   );
   assert.equal(getModelTargetFormat("gc", "grok-4.6"), "openai-responses");
   assert.equal(getModelTargetFormat("gc", "grok-4.5"), "openai-responses");
-  assert.equal(getModelTargetFormat("gc", "grok-composer-2.5-fast"), "openai-responses");
   assert.equal(grok_cliProvider.modelsUrl, GROK_BUILD_MODELS_URL);
 });
 

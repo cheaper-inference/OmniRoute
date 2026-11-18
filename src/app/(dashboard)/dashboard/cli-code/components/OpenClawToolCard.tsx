@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -314,7 +315,7 @@ export default function OpenClawToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="text-sm">{tool.name}</h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={batchStatus}
@@ -334,8 +335,8 @@ export default function OpenClawToolCard({
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingOpenclaw && (
-            <div className="flex items-center gap-2 text-text-muted">
-              <Icon name="progress_activity" className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Open Claw" })}</span>
             </div>
           )}
@@ -531,7 +532,7 @@ export default function OpenClawToolCard({
 
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
+                  <h4 className="text-xs text-text-main mb-2 flex items-center gap-1">
                     <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>

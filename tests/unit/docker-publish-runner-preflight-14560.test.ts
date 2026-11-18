@@ -31,6 +31,17 @@ test("build still runs when runner-preflight is skipped (USE_VPS_RUNNER off)", (
   assert.match(cond, /needs\.prepare\.result == 'success'/);
 });
 
+test("merge still publishes when runner-preflight is skipped", () => {
+  // Run 41703618029 (2026-11-03): both images built with the preflight skipped, and the
+  // manifest job was skipped by the implicit success() over the transitive preflight.
+  const merge = workflow.jobs.merge;
+  const cond = String(merge.if);
+  assert.match(cond, /!cancelled\(\)/);
+  assert.match(cond, /needs\.prepare\.result == 'success'/);
+  assert.match(cond, /needs\.build\.result == 'success'/);
+  assert.match(cond, /needs\.prepare\.outputs\.skip != 'true'/);
+});
+
 test("the nightly schedule run does not share the publish concurrency group", () => {
   const group = workflow.concurrency.group;
   assert.match(group, /github\.event_name == 'schedule'/);

@@ -20,7 +20,9 @@ function mount(ui: React.ReactElement): HTMLElement {
 }
 
 beforeEach(() => {
-  (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+  (
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true;
 });
 afterEach(async () => {
   await act(async () => {
@@ -97,5 +99,24 @@ describe("SaliencyHeatmap", () => {
     for (const span of spans) {
       expect(span.style.backgroundColor).toBeTruthy();
     }
+  });
+
+  it("colours tokens from the kit's diverging ramp: removed on one side, kept on the other", () => {
+    const heatmap: CompressionHeatmap = {
+      mode: "ultra",
+      tokens: [
+        { text: "a", score: 0, kept: false },
+        { text: "b", score: 0.5, kept: false },
+        { text: "c", score: 0.9, kept: false },
+        { text: "d", score: 0, kept: true },
+        { text: "e", score: 0.5, kept: true },
+        { text: "f", score: 1, kept: true },
+      ],
+    };
+    const container = mount(<SaliencyHeatmap heatmap={heatmap} />);
+    const steps = Array.from(container.querySelectorAll<HTMLElement>("[data-score]")).map(
+      (span) => /--ci-scale-div-(\d)/.exec(span.style.backgroundColor)?.[1]
+    );
+    expect(steps).toEqual(["1", "2", "3", "5", "6", "7"]);
   });
 });

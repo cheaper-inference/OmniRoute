@@ -31,6 +31,24 @@ function prepare(job, scenario = "complete") {
     `
     );
     executable("uname", 'console.log(process.argv[2] === "-s" ? "Linux" : "x86_64");');
+    executable("sleep", "process.exit(0);");
+    executable(
+      "gh",
+      `
+      const fs = require("node:fs");
+      const args = process.argv.slice(2);
+      const log = process.env.QG_DOWNLOAD_LOG;
+      const attempts = fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\\n").length : 0;
+      fs.appendFileSync(log, JSON.stringify(args) + "\\n");
+      if (args.slice(0, 3).join(" ") !== "release download v1.7.12" ||
+          args[args.indexOf("--repo") + 1] !== "rhysd/actionlint" ||
+          args[args.indexOf("--pattern") + 1] !== "actionlint_1.7.12_linux_amd64.tar.gz" ||
+          process.env.GH_TOKEN !== "fixture-token") process.exit(9);
+      if (process.env.QG_SCENARIO === "download-failed" ||
+          (process.env.QG_SCENARIO === "retry-download" && attempts < 2)) process.exit(22);
+      fs.writeFileSync(args[args.indexOf("--output") + 1], "external archive fixture");
+    `
+    );
     executable(
       "curl",
       `
@@ -39,7 +57,6 @@ function prepare(job, scenario = "complete") {
       if (process.env.QG_SCENARIO === "download-failed") process.exit(22);
       const url = args.at(-1);
       if (![
-        "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz",
         "https://github.com/zizmorcore/zizmor/releases/download/v1.25.2/zizmor-x86_64-unknown-linux-gnu.tar.gz"
       ].includes(url)) process.exit(23);
       fs.writeFileSync(args[args.indexOf("--output") + 1], "external archive fixture");
@@ -77,6 +94,7 @@ function prepare(job, scenario = "complete") {
     assert.ok(setup, `${job} must prepare scanners before validation`);
     assert.ok(steps.indexOf(setup) < steps.findIndex((step) => step.id === "validate"));
     assert.equal(setup.env.WORKFLOW_SHA, "${{ github.workflow_sha }}");
+    assert.equal(setup.env.GH_TOKEN, "${{ github.token }}");
     assert.notEqual(setup["continue-on-error"], true);
     const pathFile = join(sandbox, "github-path");
     writeFileSync(pathFile, "");
@@ -98,6 +116,8 @@ function prepare(job, scenario = "complete") {
       WORKFLOW_SHA: "1234567890123456789012345678901234567890",
       QG_INSTALLER: join(root, "scripts/ci/install-workflow-scanners.sh"),
       QG_SCENARIO: scenario,
+      GH_TOKEN: "fixture-token",
+      QG_DOWNLOAD_LOG: join(sandbox, "download-log"),
     };
     const setupResult = spawnSync("/bin/bash", ["-c", setup.run], {
       cwd: sandbox,
@@ -144,7 +164,8 @@ function prepare(job, scenario = "complete") {
       assert.equal(result.status, 1, result.stdout + result.stderr);
       verdict = JSON.parse(result.stdout);
     }
-    return { setup: setupResult, publishedPath, audit, verdict };
+    const downloads = readFileSync(env.QG_DOWNLOAD_LOG, "utf8").trim().split("\n");
+    return { setup: setupResult, publishedPath, audit, verdict, downloads };
   } finally {
     rmSync(sandbox, { recursive: true, force: true });
   }
@@ -191,3 +212,18 @@ for (const scenario of ["download-failed", "invalid-zizmor", "wrong-zizmor", "mi
     }
   });
 }
+
+test("a transient release API failure retries the same pinned asset", posix, () => {
+  const result = prepare("release-green", "retry-download");
+  assert.equal(result.setup.status, 0, result.setup.stdout + result.setup.stderr);
+  assert.equal(result.downloads.length, 3);
+  assert.equal(result.audit.status, 0, result.audit.stdout + result.audit.stderr);
+});
+
+test("release download failures stop after three attempts without publishing PATH", posix, () => {
+  const result = prepare("release-green", "download-failed");
+  assert.equal(result.downloads.length, 3);
+  assert.notEqual(result.setup.status, 0);
+  assert.equal(result.publishedPath, "");
+  assert.equal(result.audit, null);
+});

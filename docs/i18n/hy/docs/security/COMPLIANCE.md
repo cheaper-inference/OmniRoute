@@ -11,55 +11,75 @@ OmniRoute-ը վարչական գործողությունները, նույնակ
 
 Իրականացումը գտնվում է `src/lib/compliance/index.ts` (T-43 — «Համապատասխանության վերահսկման միջոցներ») և `src/lib/compliance/providerAudit.ts` ֆայլերում։ Աուդիտի գրանցման գործողությունները երբեք բացառություն չեն նետում․ ցանկացած ձախողման դեպքում կանչը լուռ անտեսվում է, որպեսզի աուդիտի գրանցումը չկարողանա խաթարել հարցման հիմնական հոսքը։
 
-## Ինչ է գրանցվում
+## Ինչն է գրանցվում
 
 ### Վարչական աուդիտի իրադարձություններ (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`-ի յուրաքանչյուր կանչ ստեղծում է մեկ տող։ Գործողությունների տողերը հետևում են `domain.verb` (կամ `domain.verb.outcome`) ձևանմուշին։ Կոդային բազայում հաստատված գործողությունների տեսակներն են՝
+`logAuditEvent({ action, actor, target, details, ... })`-ի յուրաքանչյուր կանչ
+ստեղծում է մեկ տող։ Գործողությունների տողերը հետևում են `domain.verb` (կամ
+`domain.verb.outcome`) ձևաչափին։ Ծառայում ներառված և հաստատված գործողությունների
+տեսակները ներառում են՝
 
-| Գործողություն                        | Աղբյուր                                 |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Յուրաքանչյուր գրառում պարունակում է `action`, `actor` (լռելյայն՝ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` և `timestamp`։ Զգայուն բանալիները (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ձևանմուշներին համապատասխանող ցանկացած բանալի և այլն) նախքան տողի գրանցումը ռեկուրսիվ կերպով քողարկվում են՝ փոխարինվելով `"[redacted]"`-ով։
+Յուրաքանչյուր գրառում ներառում է `action`, `actor` (կանխադրված արժեքը՝
+`"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`,
+`status`, `request_id` և `timestamp`։ Զգայուն բանալիները (`apiKey`, `accessToken`,
+`refreshToken`, `password`, ինչպես նաև `*token`/`*secret`/`*apikey` ձևաչափին
+համապատասխանող ցանկացած բանալի և այլն) տողը գրելուց առաջ ռեկուրսիվորեն
+փոխարինվում են `"[redacted]"` արժեքով։
 
-### MCP գործիքների կանչեր (`mcp_tool_audit`)
+`api_key.auth.touch` տողերում գրանցվում են API բանալու հաջողված մետատվյալների և
+հայտնաբերման ընթերցումները (GET/HEAD), որոնք երբեք չեն հասնում հարցումների
+գրանցամատյան՝ որ բանալին, երբ և նորմալացված ուղին։ Դրանք միավորվում են և
+սահմանափակվում առավելագույնը 1,000 տողով։ `noLog` ունեցող բանալիները և
+միջավայրի բանալին բաց են թողնվում։ Կանչողի IP հասցեն և user-agent-ը ավելացվում են
+միայն այն դեպքում, երբ `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ֆունկցիայի դրոշակը
+միացված է (կանխադրված՝ անջատված)։
 
-MCP գործիքի յուրաքանչյուր կանչ `open-sse/mcp-server/audit.ts`-ի միջոցով գրանցում է մեկ տող։ Սխեման (ըստ `src/lib/db/migrations/002_mcp_a2a_tables.sql`-ի)՝
+### MCP գործիքի կանչեր (`mcp_tool_audit`)
 
-| Սյունակ          | Նշումներ                                                |
-| ---------------- | ------------------------------------------------------- |
-| `id`             | ինքնաճող արժեք                                          |
-| `tool_name`      | MCP գործիքի նույնացուցիչ                                |
-| `input_hash`     | մուտքային տվյալների sha256 (բուն տվյալները չեն պահվում) |
-| `output_summary` | կարճ, կրճատված ամփոփում                                 |
-| `duration_ms`    | փաստացի անցած ժամանակ                                   |
-| `api_key_id`     | կանչող կողմ (կարող է լինել null)                        |
-| `success`        | `1` / `0`                                               |
-| `error_code`     | ձախողման դեպքում՝ վերջնական սխալի կոդ                   |
-| `created_at`     | ISO ժամանակային դրոշմ                                   |
+MCP գործիքի յուրաքանչյուր կանչ տող է գրում `open-sse/mcp-server/audit.ts`-ի
+միջոցով։ Սխեման (ըստ
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`-ի)՝
 
-### Հարցումների / օգտագործման մատյաններ
+| Column           | Notes                                         |
+| ---------------- | --------------------------------------------- |
+| `id`             | ավտոմատ ավելացում                             |
+| `tool_name`      | MCP գործիքի նույնացուցիչ                      |
+| `input_hash`     | մուտքի sha256-ը (բովանդակությունը չի պահվում) |
+| `output_summary` | կարճ, կրճատված ամփոփում                       |
+| `duration_ms`    | անցած ժամանակը                                |
+| `api_key_id`     | կանչողը (կարող է լինել null)                  |
+| `success`        | `1` / `0`                                     |
+| `error_code`     | ձախողման դեպքում վերջնական սխալի կոդը         |
+| `created_at`     | ISO ժամանակադրոշմ                             |
 
-Սրանք գործառնական հեռաչափության տվյալներ են (ոչ խիստ իմաստով վարչական աուդիտ), սակայն օգտագործում են պահպանման ժամկետի կառավարման նույն շղթան՝
+### Հարցումների / օգտագործման գրանցամատյաններ
 
-- `usage_history` — յուրաքանչյուր հարցման օգտագործման ամփոփ գրառում
-- `call_logs` — յուրաքանչյուր հարցման ամբողջական մատյան (տողերի քանակի սահմանաչափով, տե՛ս ստորև)
-- `proxy_logs` — պրոքսի երթևեկության մատյան (տողերի քանակի սահմանաչափով)
-- `request_detail_logs` — հարցումների մանրամասն տվյալների հին ձևաչափի մատյան (առկայության դեպքում դեռ մաքրվում է)
+Սրանք գործառնական հեռաչափության տվյալներ են (ոչ խիստ իմաստով վարչական աուդիտ),
+սակայն օգտագործում են պահպանման նույն խողովակաշարը։
+
+- `usage_history` — յուրաքանչյուր հարցման օգտագործման ամփոփ տվյալներ
+- `call_logs` — յուրաքանչյուր հարցման ամբողջական գրանցամատյան (ենթակա է տողերի քանակի սահմանափակման, տես ստորև)
+- `proxy_logs` — պրոքսիի երթևեկության գրանցամատյան (ենթակա է տողերի քանակի սահմանափակման)
+- `request_detail_logs` — հարցումների հին մանրամասն գրանցամատյան (առկայության դեպքում դեռ մաքրվում է)
 
 ## Պահեստավորման սխեմա
 

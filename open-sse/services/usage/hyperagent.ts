@@ -14,7 +14,7 @@
  *   plan.name → "Pay As You Go" etc.
  */
 import { type UsageQuota } from "./quota.ts";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../../utils/numeric.ts";
 
 const USAGE_URL =
   process.env.HYPERAGENT_USAGE_URL || "https://hyperagent.com/api/settings/billing/usage";

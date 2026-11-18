@@ -56,11 +56,11 @@ yhden konkreettisen toteutusseikan vuoksi:
 
 Tämä tarkoittaa seuraavaa kullekin rajapinnalle, vaikka `CORS_ALLOW_ALL=true`:
 
-| Rajapinta                                        | Todennusmekanismi           | Yleismerkillä määritetyn CORS:n vaikutus                                                                                                                                                                                                                                                  |
-| ------------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hallintapaneeli / MANAGEMENT `/api/*`            | Evästeistunto               | Alkuperä palautetaan vastauksessa, mutta **ilman `Allow-Credentials`-otsaketta** selain **estää** tunnistetietoja sisältävän vastauksen lukemisen. Haitallinen eri alkuperässä oleva sivusto **ei voi lukea** todennettuja hallintapaneelivastauksiasi, eikä istuntoevästettä paljasteta. |
-| Asiakasrajapinta `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key`-otsake | On jo valmiiksi salliva **tarkoituksellisesti** (`relaxForTokenAuth`): selaimet eivät koskaan liitä automaattisesti `Authorization`/`x-api-key`-otsakkeita, joten hyökkääjän sivu ei voi toimittaa avaintasi. `CORS_ALLOW_ALL` ei laajenna tätä.                                          |
-| Julkinen vain luku -rajapinta (`/api/health`, …) | Ei mitään                   | Ei arkaluonteinen; yleismerkki on vaaraton.                                                                                                                                                                                                                                               |
+| Rajapinta                                        | Todennusmekanismi           | Yleismerkillä määritetyn CORS:n vaikutus                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hallintapaneeli / MANAGEMENT `/api/*`            | Evästeistunto               | Alkuperä palautetaan vastauksessa, mutta **ilman `Allow-Credentials`-otsaketta** selain **estää** tunnistetietoja sisältävän vastauksen lukemisen. Haitallinen eri alkuperässä oleva sivusto **ei voi lukea** todennettuja hallintapaneelivastauksiasi, eikä istuntoevästettä paljasteta.                                                                                                      |
+| Asiakasrajapinta `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key`-otsake | On jo valmiiksi salliva **tarkoituksellisesti** (`relaxForTokenAuth`): selaimet eivät koskaan liitä automaattisesti `Authorization`/`x-api-key`-otsakkeita, joten hyökkääjän sivu ei voi toimittaa avaintasi. Alkuperä palautetaan vain, kun esitetty avain on validoitu; anonyymit vastaukset (`REQUIRE_API_KEY=false`) noudattavat sallittujen luetteloa. `CORS_ALLOW_ALL` ei laajenna tätä. |
+| Julkinen vain luku -rajapinta (`/api/health`, …) | Ei mitään                   | Ei arkaluonteinen; yleismerkki on vaaraton.                                                                                                                                                                                                                                                                                                                                                    |
 
 Näin ollen `CORS_ALLOW_ALL=true`-asetuksen **jäännösriski** rajoittuu seuraaviin: (a)
 jo valmiiksi todentamattomien tietojen eri alkuperästä tehtävät **lukupyynnöt** ilman tunnistetietoja ja (b)
@@ -116,16 +116,35 @@ Alkuperät täsmäytetään kirjainkoosta riippumatta ja lopun vinoviiva ohiteta
 voi asettaa ajonaikaisesti kohdassa **Dashboard → Security → CORS Allowed Origins** ilman
 uudelleenkäynnistystä.
 
-## API-avaimet vs. evästeistunnot
+## API -näppäimet vs eväste-istunnot
 
-- **Bearer / `x-api-key` (`/v1/*`-päättelyrajapinta):** selaimet eivät koskaan liitä
-  näitä automaattisesti. CORS ei ole tässä merkityksellinen este — API-avain on
-  este — minkä vuoksi tämä rajapinta on tarkoituksella salliva, jotta selain- ja
-  Electron-asiakkaat voivat lukea vastaukset, joihin niillä on jo oikeus.
-- **Evästeistunto (hallintapaneeli):** sitä suojaavat sekä oletusarvoinen estävä
-  toimintatapa **että** `Access-Control-Allow-Credentials`-otsakkeen puuttuminen
-  jaetulta polulta. Älä sisällytä hallinta- tai hallintapaneelialkuperiä mihinkään
-  sallivaan määritykseen; niiden on pysyttävä täysin oletusarvoisesti estettyinä.
+- **Kantaja / `x-api-key` ( `/v1/*` -päättelypinta):** selaimet eivät koskaan liitä näitä automaattisesti. CORS ei ole tässä merkityksellinen este — API -näppäin on este —, minkä vuoksi tämä pinta on tarkoituksellisesti salliva, jotta selain- ja Electron -asiakkaat voivat lukea vastauksia, joihin heillä on jo oikeus. Rento kaiku seuraa validoitua avainta, ei pelkkää otsikon läsnäoloa: kun `REQUIRE_API_KEY=false` palvelee pyyntöä nimettömästi, sen onnistunut vastaus säilyttää epäonnistuneen sulkemisen sallittujen luettelon. Valtuutuksen hylkäämiset (401) pysyvät luettavissa, jotta asiakkaat voivat tuoda esiin peruutetun tai väärin kirjoitetun avaimen (#5242): liukuhihnan oma 401 säilyttää kaiun ja reitti, joka hylkää itse avaimen sen jälkeen, kun liukuhihna on toiminut sen anonyyminä (`/v1/models` ja `/v1beta/models` hallinnan todennus määritettynä, `/v1/files` scoped, `/v1/batches`, `/v1/media` `/v1/session-leases` ja auto-combo ehdokasreitit) lisää kaiun tähän 401:een `credentialRejectionHeaders()` kautta. Kaiku näppäillään pyyntöön, jossa on valtuustietojen otsikko (`Authorization`, `x-api-key`, `x-goog-api-key` tai `auth_token` -eväste), ei kummassa niistä reitti on tarkistettu, eikä sitä koskaan yhdistetä `Access-Control-Allow-Credentials` kanssa; runko on kiinteä virhekuori. Hallintareitit `/api/v1/` alla, joita vartioi `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) eivät lisää kaikua: `REQUIRE_API_KEY=false` llä niiden 401/403 ei ole luettavissa ristiin.
+- **Eväste-istunto (hallintapaneeli):** suojattu epäonnistuneen sulkemisen oletusarvolla** ja** `Access-Control-Allow-Credentials` puuttuessa yhteisellä polulla. Pidä management/dashboard origins poissa kaikista sallivista määrityksistä; niiden on pysyttävä täsmälleen epäonnistuneina kiinni.
+
+## WebSocket-kättelyt (`/v1/responses`, `/v1/ws`)
+
+Selaimet eivät sovella CORSia WebSocketiin, joten päättelytulosteita palauttavat
+WebSocket-siirrot tarkistavat kättelyn `Origin`-otsakkeen itse
+(`src/server/origin/wsOrigin.ts`): Responses-WebSocket (`/v1/responses`) sekä, kun
+OmniRoutea ajetaan komennolla `npm start` / `npm run dev`, `/v1/ws`- ja
+`/api/v1/ws`-silta, joka suoratoistaa `/v1/chat/completions`-, `/v1/messages`- ja
+`/v1/responses`-vastaukset kehyksinä. Silta kysyy ratkaisua osoitteesta
+`/api/v1/ws?handshake=1` ja kieltäytyy päivittämästä yhteyttä, ellei kyseinen reitti
+suorittanut tarkistusta. Kättely hyväksytään, kun:
+
+- siinä ei ole `Origin`-otsaketta (Codex CLI, SDK:t ja muut kuin selainasiakkaat);
+- yllä kuvattu sallittujen luettelo hyväksyy `Origin`-arvon (`CORS_ALLOWED_ORIGINS`,
+  `corsOrigins`-asetus, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` on jokin OmniRouten omista julkisista alkuperistä (määritetty julkinen
+  perus-URL, luotetun välityspalvelimen välittämä alkuperä tai suora loopback-/LAN-isäntä
+  IP-literaalina tai `localhost`-nimenä — samat ehdokkaat, joita hallintapaneelin
+  muutostarkistus käyttää); tai
+- siinä on kelvollinen API-avain, kuten HTTP-rajapinnassa `/v1/*`.
+
+Kaikki muu saa vastauksen `403 ws_origin_forbidden`. Hallintapaneelin istuntoeväste ei
+vapauta vierasta `Origin`-arvoa, koska selain liittää sen minkä tahansa sivun
+sokettiin. Toisessa portissa olevaa `localhost`-osoitetta ei käsitellä samana
+alkuperänä; lisää tällaiset kehitysalkuperät kohtaan `CORS_ALLOWED_ORIGINS`.
 
 ## Esimerkki: käänteinen välityspalvelin OmniRouten edessä
 
@@ -161,6 +180,7 @@ Security-välilehti), älä välityspalvelimessa.
 | Hallintapaneelin varoitusbanneri                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins -kenttä                        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agentin reittikohtainen CORS (poikkeus)       | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket-kättelyn `Origin`-tarkistus               | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Katso myös
 

@@ -35,6 +35,7 @@ export type ClassificationReason =
   | "client_api_alias"
   | "client_api_codex_alias"
   | "client_api_double_prefix"
+  | "cliproxy_management_alias"
   | "management_api"
   | "root_redirect"
   | "fallback_management";
@@ -57,12 +58,14 @@ export interface RouteClassification {
  * handlers via assertAuth().
  */
 export interface AuthSubject {
-  kind: "client_api_key" | "dashboard_session" | "management_key" | "anonymous";
+  kind: "client_api_key" | "dashboard_session" | "management_key" | "anonymous" | "sso_user";
   /**
    * Stable identifier of the principal:
    *  - hashed key id for API keys
    *  - "dashboard" for the single-tenant dashboard session
    *  - "anonymous" for unauthenticated PUBLIC requests
+   *  - the Entra objectId (oid) for "sso_user" — stable per user per tenant,
+   *    and the lookup key the policy layer uses to find the shadow API key
    */
   id: string;
   /**

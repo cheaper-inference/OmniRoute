@@ -15,6 +15,7 @@ import { usesCcWireImage } from "./ccWireImageBuiltins.ts";
 const OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";
 const OPENAI_COMPATIBLE_ID_TYPES = [
   "responses",
+  "custom-json",
   "embeddings",
   "audio-transcriptions",
   "audio-speech",
@@ -64,7 +65,8 @@ export function getOpenAICompatibleType(
     configuredType === "embeddings" ||
     configuredType === "audio-transcriptions" ||
     configuredType === "audio-speech" ||
-    configuredType === "images-generations"
+    configuredType === "images-generations" ||
+    configuredType === "custom-json"
   ) {
     return configuredType;
   }
@@ -79,6 +81,8 @@ export function getOpenAICompatibleType(
 }
 
 function buildOpenAICompatibleUrl(baseUrl, apiType) {
+  // Custom JSON API nodes store the complete business endpoint URL.
+  if (apiType === "custom-json") return baseUrl;
   const normalized = baseUrl.replace(/\/$/, "");
   let path = "/chat/completions";
   if (apiType === "responses") {
@@ -480,9 +484,14 @@ export function buildProviderHeaders(provider, credentials, stream = true, body 
 }
 
 // Get target format for provider
-export function getTargetFormat(provider, providerSpecificData = null) {
+export function getTargetFormat(provider, providerSpecificData: unknown = null) {
   if (isOpenAICompatible(provider)) {
-    return getOpenAICompatibleType(provider, providerSpecificData) === "responses"
+    // Callers pass connection.providerSpecificData, which is untyped JSON from the DB.
+    const settings =
+      providerSpecificData && typeof providerSpecificData === "object"
+        ? (providerSpecificData as Record<string, unknown>)
+        : null;
+    return getOpenAICompatibleType(provider, settings) === "responses"
       ? "openai-responses"
       : "openai";
   }
@@ -516,11 +525,16 @@ export function hasThinkingConfig(body) {
 }
 
 // Normalize thinking config based on last message role
-// - If lastMessage is not user → remove Claude/Gemini-style thinking config
+// - Only an assistant/model prefill (last turn) removes Claude/Gemini-style thinking config
+// - Tool-result turns (OpenAI role "tool", Claude user tool_result, Gemini role "function")
+//   keep thinking, so agentic loops do not silently degrade to non-thinking mode
 // - Preserve an explicit Claude opt-out; it is request-level intent, not a thinking turn
 // - Keep OpenAI Chat Completions reasoning_effort as a request-level option.
 export function normalizeThinkingConfig(body) {
-  if (!isLastMessageFromUser(body) && body.thinking?.type !== "disabled") {
+  const messages = body.messages || body.contents;
+  const lastRole = messages?.length ? messages[messages.length - 1]?.role : undefined;
+  const isPrefill = lastRole === "assistant" || lastRole === "model";
+  if (isPrefill && body.thinking?.type !== "disabled") {
     delete body.thinking;
   }
   return body;

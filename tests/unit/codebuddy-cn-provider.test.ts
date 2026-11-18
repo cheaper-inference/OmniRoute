@@ -9,6 +9,7 @@ import {
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 import { getExecutor } from "../../open-sse/executors/index.ts";
 import { CodeBuddyCnExecutor } from "../../open-sse/executors/codebuddy-cn.ts";
+import { PROVIDER_MODELS_CONFIG } from "../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts";
 import {
   PROVIDERS as OAUTH_PROVIDER_IDS,
   CODEBUDDY_CN_CONFIG,
@@ -143,28 +144,85 @@ test("codebuddy-cn registry entry has expected shape", () => {
   assert.equal(r.headers?.["X-IDE-Name"], "CLI");
   assert.equal(r.headers?.["x-requested-with"], "XMLHttpRequest");
   assert.equal(r.headers?.["x-codebuddy-request"], "1");
-  // 15 models from the upstream catalog
   const ids = r.models.map((m) => m.id);
-  for (const expected of [
+  assert.deepEqual(ids, [
+    "default",
+    "deepseek-v4-pro",
+    "deepseek-v4-flash",
+    "deepseek-v4.1-flash",
+    "deepseek-v3-2-volc",
+    "minimax-m2.5",
+    "minimax-m2.7",
+    "minimax-m3-pay",
+    "glm-5.3",
+    "glm-5.3-flash",
+    "glm-5.3-flashx",
     "glm-5.2",
     "glm-5.1",
     "glm-5.0",
     "glm-5.0-turbo",
     "glm-5v-turbo",
-    "minimax-m3",
-    "minimax-m2.7",
+    "glm-4.7",
+    "glm-4.6",
+    "glm-4.6v",
+    "kimi-k3-2",
+    "kimi-k2.8-preview",
     "kimi-k2.7",
     "kimi-k2.6",
     "kimi-k2.5",
-    "hy3-preview",
+    "kimi-k2-thinking",
     "hy3",
-    "deepseek-v4-pro",
-    "deepseek-v4-flash",
-    "deepseek-v3-2-volc",
-  ]) {
-    assert.ok(ids.includes(expected), `model ${expected} must be registered`);
-  }
-  assert.equal(r.models.length, 15);
+    "hy3-x",
+    "hy4-preview",
+    "hy4-preview-x",
+    "hunyuan-chat",
+  ]);
+  assert.equal(r.models.length, 30);
+  assert.equal(r.passthroughModels, true);
+});
+
+test("codebuddy-cn discovers its authenticated live catalog and excludes media models", () => {
+  const config = PROVIDER_MODELS_CONFIG["codebuddy-cn"];
+  assert.ok(config, "codebuddy-cn must have live model discovery");
+  assert.equal(config.url, "https://copilot.tencent.com/v3/config");
+  assert.equal(config.method, "GET");
+  assert.equal(config.authHeader, "Authorization");
+  assert.equal(config.authPrefix, "Bearer ");
+  assert.equal(config.headers["X-Product"], "SaaS");
+  assert.equal(config.headers["x-codebuddy-request"], "1");
+
+  const models = config.parseResponse({
+    code: 0,
+    data: {
+      models: [
+        {
+          id: "glm-5.3",
+          name: "GLM-5.3",
+          maxInputTokens: 1000000,
+          maxOutputTokens: 64000,
+          supportsToolCall: true,
+          supportsImages: true,
+          supportsReasoning: true,
+        },
+        { id: "hunyuan-image-alpha", name: "Hunyuan Image Alpha", tags: ["text-to-image"] },
+      ],
+    },
+  });
+
+  assert.deepEqual(models, [
+    {
+      id: "glm-5.3",
+      name: "GLM-5.3",
+      owned_by: "codebuddy-cn",
+      modelType: "chat",
+      contextWindow: 1000000,
+      inputTokenLimit: 1000000,
+      outputTokenLimit: 64000,
+      supportsTools: true,
+      supportsVision: true,
+      supportsThinking: true,
+    },
+  ]);
 });
 
 test("codebuddy-cn glm-5.2 carries 1M context and openai-style reasoning that cannot be disabled", () => {
@@ -178,7 +236,7 @@ test("codebuddy-cn glm-5.2 carries 1M context and openai-style reasoning that ca
 
 test("codebuddy-cn vision flag is set on the visual models", () => {
   const r = REGISTRY["codebuddy-cn"];
-  for (const id of ["glm-5v-turbo", "minimax-m3", "kimi-k2.7", "deepseek-v4-pro"]) {
+  for (const id of ["glm-5v-turbo", "minimax-m3-pay", "kimi-k2.7", "deepseek-v4-pro"]) {
     const m = r.models.find((x) => x.id === id);
     assert.ok(m, `${id} must exist`);
     assert.equal(m.supportsVision, true, `${id} should have vision`);

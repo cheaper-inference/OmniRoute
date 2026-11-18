@@ -51,7 +51,39 @@ export const KIMI_K27_MODELS: RegistryModel[] = [
   },
 ];
 
+export const KIMI_K31_MODELS: RegistryModel[] = [
+  {
+    id: "kimi-k3.1-pro",
+    name: "Kimi K3.1 Pro",
+    contextLength: 1048576,
+    maxOutputTokens: 1048576,
+    supportsVision: true,
+    supportsVideo: true,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsXHighEffort: false,
+    toolCalling: true,
+    interleavedField: "reasoning_content",
+    unsupportedParams: REASONING_UNSUPPORTED,
+  },
+  {
+    id: "kimi-k3.1-pro-highspeed",
+    name: "Kimi K3.1 Pro Highspeed",
+    contextLength: 1048576,
+    maxOutputTokens: 1048576,
+    supportsVision: true,
+    supportsVideo: true,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsXHighEffort: false,
+    toolCalling: true,
+    interleavedField: "reasoning_content",
+    unsupportedParams: REASONING_UNSUPPORTED,
+  },
+];
+
 export const MOONSHOT_KIMI_MODELS: RegistryModel[] = [
+  ...KIMI_K31_MODELS,
   KIMI_K3_MODEL,
   ...KIMI_K27_MODELS,
   {

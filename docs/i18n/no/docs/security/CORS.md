@@ -57,11 +57,11 @@ på grunn av ett konkret implementasjonsforhold:
 
 Dette betyr følgende for hver overflate, selv med `CORS_ALLOW_ALL=true`:
 
-| Overflate                                    | Autentiseringsmekanisme      | Effekt av CORS med jokertegn                                                                                                                                                                                                                                         |
-| -------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kontrollpanel / ADMINISTRASJON `/api/*`      | Informasjonskapselbasert økt | Opprinnelsen returneres, men **uten `Allow-Credentials`** vil nettleseren **blokkere** den legitimerte lesingen. Et ondsinnet nettsted fra en annen opprinnelse **kan ikke lese** autentiserte svar fra kontrollpanelet, og øktinformasjonskapselen eksponeres ikke. |
-| Klient-API `/v1/*`, `/v1beta/*`              | Bearer-/`x-api-key`-header   | Er allerede åpent **med hensikt** (`relaxForTokenAuth`): Nettlesere legger aldri automatisk ved `Authorization`/`x-api-key`, så en angripers side kan ikke oppgi nøkkelen din. `CORS_ALLOW_ALL` utvider ikke dette.                                                  |
-| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                        | Ikke sensitivt; jokertegn er ufarlig.                                                                                                                                                                                                                                |
+| Overflate                                    | Autentiseringsmekanisme      | Effekt av CORS med jokertegn                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kontrollpanel / ADMINISTRASJON `/api/*`      | Informasjonskapselbasert økt | Opprinnelsen returneres, men **uten `Allow-Credentials`** vil nettleseren **blokkere** den legitimerte lesingen. Et ondsinnet nettsted fra en annen opprinnelse **kan ikke lese** autentiserte svar fra kontrollpanelet, og øktinformasjonskapselen eksponeres ikke.                                                                                            |
+| Klient-API `/v1/*`, `/v1beta/*`              | Bearer-/`x-api-key`-header   | Er allerede åpent **med hensikt** (`relaxForTokenAuth`): Nettlesere legger aldri automatisk ved `Authorization`/`x-api-key`, så en angripers side kan ikke oppgi nøkkelen din. Opprinnelsen speiles bare tilbake når den oppgitte nøkkelen er validert; anonyme svar (`REQUIRE_API_KEY=false`) beholder tillatelseslisten. `CORS_ALLOW_ALL` utvider ikke dette. |
+| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                        | Ikke sensitivt; jokertegn er ufarlig.                                                                                                                                                                                                                                                                                                                           |
 
 Den **gjenværende** eksponeringen ved `CORS_ALLOW_ALL=true` er derfor begrenset til: (a)
 ikke-legitimerte **lesinger** på tvers av opprinnelser av data som allerede er tilgjengelige uten autentisering, og (b)
@@ -117,16 +117,35 @@ ignoreres, slik at `http://localhost:3000` og `http://localhost:3000/` er ekviva
 samme CSV-listen kan angis under kjøring i **Dashboard → Security → CORS Allowed Origins**
 uten omstart.
 
-## API-nøkler kontra informasjonskapseløkter
+## API keys vs cookie-økter
 
-- **Bearer / `x-api-key` (`/v1/*`-inferensgrensesnittet):** Nettlesere legger aldri
-  ved disse automatisk. CORS er ikke en meningsfull barriere her — API-nøkkelen er
-  barrieren — og derfor er dette grensesnittet med hensikt åpent, slik at nettleser-
-  og Electron-klienter kan lese svar de allerede har tilgang til.
-- **Informasjonskapseløkt (kontrollpanelet):** Beskyttes av standardinnstillingen som
-  avviser tilgang ved feil, **og** av fraværet av `Access-Control-Allow-Credentials`
-  på den delte banen. Hold opphav for administrasjon og kontrollpanel utenfor
-  alle åpne konfigurasjoner. De må fortsatt avvises som standard.
+- **Bærer / `x-api-key` ( `/v1/*` -inferensoverflaten):** nettlesere legger aldri til disse automatisk. CORS er ikke en meningsfull barriere her — API nøkkelen er barrieren — og det er grunnen til at overflaten er bevisst tillatt slik at nettleser- og Electron klienter kan lese svar de allerede har rett til. Det avslappede ekkoet følger den validerte nøkkelen, ikke bare tilstedeværelsen av overskriften: når `REQUIRE_API_KEY=false` betjener en forespørsel anonymt, holder dens vellykkede svar den feillukkede godkjenningslisten. Auth-avvisninger (401) forblir lesbare slik at klienter kan vise en tilbakekalt eller feilskrevet nøkkel (#5242): rørledningens egen 401 beholder ekkoet, og en rute som nekter selve nøkkelen etter at rørledningen tjente den som anonym (`/v1/models` og `/v1beta/models` med administrasjonsautorisasjon konfigurert, den eier-omfattede `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ) legger til ekkoet til den 401 via `credentialRejectionHeaders()`. Ekkoet tastes inn på forespørselen med en legitimasjonsoverskrift (`Authorization`, `x-api-key`, `x-goog-api-key` eller `auth_token` -informasjonskapselen), ikke på hvilken av dem ruten sjekket, og er aldri sammenkoblet med `Access-Control-Allow-Credentials`; kroppen er en fast feilkonvolutt. Administrasjonsruter under `/api/v1/` bevoktet av `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) legger ikke til ekkoet: med `REQUIRE_API_KEY=false` er 401/403 ikke lesbar kryssopprinnelse.
+- **Cookie-økt (dashbordet):** beskyttet av fail-closed standard** og** ved fravær av `Access-Control-Allow-Credentials` på den delte banen. Hold management/dashboard opprinnelsen unna enhver tillatende konfigurasjon; de må forbli nøyaktig feillukket.
+
+## WebSocket-håndtrykk (`/v1/responses`, `/v1/ws`)
+
+Nettlesere bruker ikke CORS på WebSocket, så WebSocket-transportene som returnerer
+inferensutdata, sjekker selv `Origin` i håndtrykket (`src/server/origin/wsOrigin.ts`):
+Responses-WebSocket (`/v1/responses`) og, når OmniRoute kjøres via `npm start` /
+`npm run dev`, broen `/v1/ws` og `/api/v1/ws`, som strømmer `/v1/chat/completions`,
+`/v1/messages` og `/v1/responses` som rammer. Broen spør `/api/v1/ws?handshake=1` om
+avgjørelsen og nekter å oppgradere med mindre den ruten har kjørt kontrollen. Et
+håndtrykk godtas når:
+
+- det ikke har noen `Origin`-header (Codex CLI, SDK-er og andre klienter som ikke er
+  nettlesere);
+- `Origin` tillates av tillatelseslisten ovenfor (`CORS_ALLOWED_ORIGINS`, innstillingen
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` er en av OmniRoutes egne offentlige opprinnelser (den konfigurerte offentlige
+  basis-URL-en, en klarert proxys videresendte opprinnelse, eller en direkte
+  loopback-/LAN-vert angitt som IP-literal eller `localhost` — de samme kandidatene som
+  kontrollpanelets mutasjonskontroll bruker); eller
+- det har en gyldig API-nøkkel, som på HTTP-grensesnittet `/v1/*`.
+
+Alt annet får `403 ws_origin_forbidden`. En øktinformasjonskapsel for kontrollpanelet
+fritar ikke en fremmed `Origin`, fordi nettleseren legger den ved sokkelen til enhver
+side. `localhost` på en annen port behandles ikke som samme opprinnelse; legg slike
+utviklingsopprinnelser til i `CORS_ALLOWED_ORIGINS`.
 
 ## Eksempel: omvendt proxy foran OmniRoute
 
@@ -162,6 +181,7 @@ fanen Security), ikke i proxyen.
 | Varselbanner i kontrollpanelet                     | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Feltet CORS Allowed Origins                        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per rute for Cloud-Agent (unntaket)           | `src/lib/cloudAgent/api.ts`                                          |
+| Kontroll av `Origin` ved WebSocket-håndtrykk       | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Se også
 

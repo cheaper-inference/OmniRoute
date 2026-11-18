@@ -154,7 +154,6 @@ beforeEach(() => {
     "fetch",
     vi.fn().mockResolvedValue({ ok: true, json: async () => ({}), text: async () => "" })
   );
-  vi.stubGlobal("confirm", vi.fn().mockReturnValue(false)); // don't confirm dialogs
 });
 
 afterEach(() => {
@@ -262,15 +261,15 @@ describe("BatchListTab — rendering", () => {
 
   it("6. shows loading spinner when loading=true and no batches", () => {
     const el = render(<BatchListTab batches={[]} files={[]} loading={true} />);
-    // Loading state renders a spinner (animate-spin class)
-    const spinner = el.querySelector(".animate-spin");
+    // Loading state renders the kit Spinner
+    const spinner = el.querySelector('[data-slot="spinner"]');
     expect(spinner).not.toBeNull();
   });
 
   it("7. shows empty state when no batches and not loading", () => {
     const el = render(<BatchListTab batches={[]} files={[]} loading={false} />);
     // Should show some empty-state indicator (no spinner)
-    expect(el.querySelector(".animate-spin")).toBeNull();
+    expect(el.querySelector('[data-slot="spinner"]')).toBeNull();
   });
 
   it("8. sanitization: rendered content contains no stack traces or file paths", () => {
@@ -372,7 +371,6 @@ describe("BatchListTab — rendering", () => {
     });
 
     vi.stubGlobal("fetch", fetchMock);
-    vi.stubGlobal("alert", vi.fn()); // Mock window.alert to prevent blocking
 
     const onRefresh = vi.fn();
     const batches = [makeBatch({ id: "batch-multi", status: "completed" })];
@@ -482,7 +480,7 @@ describe("FilesListTab — rendering", () => {
 
   it("14. loading state shows spinner", () => {
     const el = render(<FilesListTab files={[]} loading={true} />);
-    const spinner = el.querySelector(".animate-spin");
+    const spinner = el.querySelector('[data-slot="spinner"]');
     expect(spinner).not.toBeNull();
   });
 

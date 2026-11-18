@@ -20,6 +20,8 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import {
+  packArchiveName,
+  verifyArchiveChecksum,
   OPTIONAL_PACKS,
   PACK_INDEX_FILENAME,
   findPack,
@@ -117,8 +119,8 @@ export async function listPackStates({ dataDir, index }) {
  *   contents must equal `<pack>/node_modules`; tarballs are extracted into
  *   `stagingDir` by the caller (installPack).
  */
-export function resolvePackSource(name, sourceDir, stagingDir) {
-  const tarball = path.join(sourceDir, `optional-pack-${name}.tar.gz`);
+export function resolvePackSource(name, sourceDir, stagingDir, entry = { name }) {
+  const tarball = path.join(sourceDir, packArchiveName(entry));
   if (fs.existsSync(tarball)) {
     return { kind: "tarball", tarball, stagingDir };
   }
@@ -129,7 +131,7 @@ export function resolvePackSource(name, sourceDir, stagingDir) {
     if (fs.existsSync(layout)) return { kind: "dir", nodeModulesDir: layout };
   }
   throw new Error(
-    `no payload for pack "${name}" under ${sourceDir} (expected optional-pack-${name}.tar.gz or an extracted pack dir)`
+    `no payload for pack "${name}" under ${sourceDir} (expected ${path.basename(tarball)} or an extracted pack dir)`
   );
 }
 
@@ -155,7 +157,7 @@ function extractTarball(tarball, stagingDir) {
  * Install a pack: extract → verify against the index → atomic rename into
  * `${DATA_DIR}/packs/<name>`. Replaces any previous install.
  *
- * @returns {object} the verified index entry
+ * @returns {Promise<object>} the verified index entry
  */
 export async function installPack(name, { dataDir, index, sourceDir, log = () => {} }) {
   const entry = indexEntryFor(index ?? {}, name);
@@ -165,9 +167,10 @@ export async function installPack(name, { dataDir, index, sourceDir, log = () =>
   const stagingDir = path.join(root, `.staging-${name}-${process.pid}`);
   const finalNodeModules = path.join(installDir, "node_modules");
 
-  const source = resolvePackSource(name, sourceDir, stagingDir);
+  const source = resolvePackSource(name, sourceDir, stagingDir, entry);
   let payloadNodeModules;
   if (source.kind === "tarball") {
+    await verifyArchiveChecksum(entry, source.tarball);
     payloadNodeModules = extractTarball(source.tarball, stagingDir);
   } else {
     payloadNodeModules = source.nodeModulesDir;

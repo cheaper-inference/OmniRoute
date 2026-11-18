@@ -12,7 +12,7 @@ const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-comp-analytics-t
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { writeCompressionAnalytics } =
+const { writeCompressionAnalytics, writeCompressionSkip } =
   await import("../../open-sse/handlers/chatCore/compressionAnalyticsWrite.ts");
 
 type Stats = Parameters<typeof writeCompressionAnalytics>[0]["stats"];
@@ -100,6 +100,62 @@ test("writes the analytics row with mapped tokens/engine and resolves", async ()
   assert.equal(row!.comp, 80);
   assert.equal(row!.saved, 120);
   assert.equal(row!.vf, 0);
+});
+
+test("a wrapped plan records the configured mode as mode and engine", async () => {
+  // Lite dispatched as a one-step stacked pipeline (lossy-request policy) must still show up as
+  // lite in analytics, not as the stacked wrapper.
+  await writeCompressionAnalytics({
+    ...baseOpts("ca-req-reported", { engine: "stacked" }),
+    mode: "stacked",
+    reportedMode: "lite",
+  });
+  const row = analyticsRow("ca-req-reported");
+  assert.equal(row!.mode, "lite");
+  assert.equal(row!.engine, "lite");
+});
+
+test("a multi-engine run keeps the dispatched engine even with a reportedMode", async () => {
+  // A combo that took over the lite plan ran several engines: mode stays the configured lite,
+  // but the engine must not claim that only lite ran.
+  await writeCompressionAnalytics({
+    ...baseOpts("ca-req-combo", {
+      engine: "stacked",
+      engineBreakdown: [
+        { engine: "session-dedup", originalTokens: 200, compressedTokens: 150, durationMs: 2 },
+        { engine: "lite", originalTokens: 150, compressedTokens: 80, durationMs: 3 },
+      ],
+    }),
+    mode: "stacked",
+    reportedMode: "lite",
+  });
+  const row = analyticsRow("ca-req-combo");
+  assert.equal(row!.mode, "lite");
+  assert.equal(row!.engine, "stacked");
+});
+
+test("a skip row keeps the dispatched engine and reports the configured mode", async () => {
+  await writeCompressionSkip(
+    {
+      ...baseOpts("ca-req-skip", { engine: "stacked" }),
+      mode: "stacked",
+      reportedMode: "lite",
+    },
+    "no_savings"
+  );
+  const row = analyticsRow("ca-req-skip");
+  assert.equal(row!.mode, "lite");
+  assert.equal(row!.engine, "stacked");
+});
+
+test("without reportedMode the dispatched mode and engine are recorded as before", async () => {
+  await writeCompressionAnalytics({
+    ...baseOpts("ca-req-stacked", { engine: "stacked" }),
+    mode: "stacked",
+  });
+  const row = analyticsRow("ca-req-stacked");
+  assert.equal(row!.mode, "stacked");
+  assert.equal(row!.engine, "stacked");
 });
 
 test("validation_fallback is 1 when the stats flagged a fallback", async () => {

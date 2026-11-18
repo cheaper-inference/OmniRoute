@@ -27,7 +27,6 @@
  *   finally { session.release(); }
  */
 
-import { type EventEmitter } from "node:events";
 import { createHash, randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
 
@@ -132,7 +131,9 @@ export class SessionPool {
       }
     }
 
-    // No ready sessions — try to create a new one if under max
+    // No ready sessions — first reclaim released dead sessions, then create if under max
+    this.sessions = this.sessions.filter((s) => !this.isReclaimableDead(s));
+
     if (this.sessions.length < this.config.maxSessions) {
       const session = this.createSession();
       session.acquire();
@@ -288,6 +289,11 @@ export class SessionPool {
     return session;
   }
 
+  /** A dead session with no inflight requests can be reclaimed */
+  private isReclaimableDead(session: Session): boolean {
+    return session.status === "dead" && session.inflight === 0;
+  }
+
   /** Periodic log of pool health (every 5s) */
   private maybeLog(): void {
     const now = Date.now();
@@ -305,7 +311,7 @@ export class SessionPool {
     const now = Date.now();
     const before = this.sessions.length;
     this.sessions = this.sessions.filter((s) => {
-      if (s.status === "dead") return false;
+      if (s.status === "dead") return !this.isReclaimableDead(s);
       // Prune idle sessions older than maxIdleMs (default 5min)
       if (s.inflight === 0 && s.lastUsedAt > 0 && now - s.lastUsedAt > maxIdleMs) return false;
       return true;

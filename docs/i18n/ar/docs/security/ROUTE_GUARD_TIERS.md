@@ -10,249 +10,144 @@
 الثلاثة. ويكون التصنيف ثابتًا، ومُعرَّفًا في `src/server/authz/routeGuard.ts`،
 ويُقيَّم قبل تشغيل أي فرع مصادقة آخر.
 
-## المستويات
+## طبقات
 
-### المستوى 1 — LOCAL_ONLY
+### الطبقة 1 — LOCAL_ONLY
 
-**يُفرَض بواسطة:** `isLocalOnlyPath(path)` ← التحقق من مضيف الاسترجاع الحلقي  
-**التجاوز:** لا يوجد افتراضيًا. يوجد استثناء ضيق للمسارات الموجودة في
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` عندما يتضمن الطلب مفتاح API صالحًا
-بنطاق `manage` (راجع [استثناء نطاق الإدارة](#manage-scope-carve-out)).
+**تم التنفيذ بواسطة:** فحص مضيف الاسترجاع `isLocalOnlyPath(path)` →** تجاوز:** لا شيء افتراضيا. اقتطاع ضيق للمسارات في `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` عندما يحمل الطلب مفتاح API صالحًا مع نطاق `manage` (راجع [إدارة اقتطاع النطاق](#manage-scope-carve-out) ).
 
-تُنشئ هذه المسارات عمليات فرعية أو تنفّذ تعليمات برمجية أثناء التشغيل. ومن شأن
-إتاحتها لحركة مرور لا تأتي من الاسترجاع الحلقي أن تسمح لمهاجم حصل على JWT صالح
-(على سبيل المثال، عبر نفق Cloudflared/Ngrok) بتشغيل إنشاء العمليات — وهي فئة
-معروفة من الثغرات الأمنية
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+تولد هذه المسارات عمليات فرعية أو تنفذ تعليمات برمجية وقت التشغيل. إن تعريضها لحركة مرور غير استرجاعية من شأنه أن يسمح للمهاجم الذي حصل على JWT صالح (على سبيل المثال، عبر نفق Cloudflared/Ngrok ) بتشغيل عملية إنتاج — لفئة CVE معروفة ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**ما هي GHSA-fhh6-4qxv-rpqj (فئة الهجوم):** يعرض خادم إدارة/وكيل
-نقطة نهاية تُشغّل عملية فرعية (`npm install`، أو `node`، أو متصفحًا،
-أو وكيلًا، أو `git`، أو `tar`، أو غير ذلك). إذا أمكن الوصول إلى نقطة النهاية
-هذه من خارج المضيف — لأن المشغّل وضع OmniRoute خلف نفق nginx/Cloudflare/Tailscale
-وتسرّب JWT، أو لأن المصادقة أُسيء إعدادها — فإن المهاجم يحوّل «استدعاء API» إلى
-«تشغيل أمر على المضيف» (تنفيذ تعليمات برمجية عن بُعد). يمنع OmniRoute ذلك بفرض
-**التحقق من مضيف الاسترجاع الحلقي دون قيد أو شرط، وقبل أي تحقق من المصادقة**،
-على كل مسار قادر على إنشاء العمليات: حتى الرمز المسرّب عبر نفق لا يمكنه الوصول
-إلى وظيفة إنشاء العمليات.
+**ما هي GHSA-fhh6-4qxv-rpqj (فئة الهجوم):** يكشف خادم management/agent عن نقطة نهاية تقوم بتشغيل عملية فرعية (`npm install`، `node`، متصفح، وكيل، `git`، `tar`، ...). إذا كان من الممكن الوصول إلى نقطة النهاية هذه من — خارج المضيف لأن المشغل وضع OmniRoute خلف نفق nginx/Cloudflare/Tailscale وتسرب JWT ، أو تم تكوين المصادقة بشكل خاطئ — فسيقوم المهاجم بتحويل "استدعاء API" إلى "تشغيل أمر على المضيف" (تنفيذ التعليمات البرمجية عن بعد). يغلق OmniRoute هذا عن طريق فرض a** تحقق مضيف الاسترجاع دون قيد أو شرط، قبل أي فحص المصادقة** ، على كل طريق قادر على النشر: لا يزال الرمز المميز المتسرب عبر النفق غير قادر على الوصول إلى النشر.
 
-**مجموعة LOCAL_ONLY الكاملة.** المصدر المعتمد هو
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` في
-`src/server/authz/routeGuard.ts`؛ ويعكس الجدول أدناه الحالة الحالية. تعدّد بوابة
-`check-route-guard-membership` كل ملف `route.ts` ضمن البادئات القادرة على
-إنشاء العمليات، وتُفشل CI إذا لم يُصنَّف أيٌّ منها على أنه محلي فقط.
+**مجموعة LOCAL_ONLY كاملة.** المصدر الرسمي هو `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` في `src/server/authz/routeGuard.ts`؛ يعكس الجدول أدناه الحالة الحالية. تقوم بوابة `check-route-guard-membership` بتعداد كل `route.ts` ضمن البادئات القادرة على النشر وتفشل في تصنيف CI إن لم يكن أي منها مصنفًا محليًا فقط.
 
-| البادئة / النمط                                                                                          | سبب اقتصاره على البيئة المحلية فقط                                                                              |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | خادم MCP — يُنشئ جسور stdio ومعالجات SSE                                                                        |
-| `/api/cli-tools/runtime/`                                                                                | بيئة تشغيل أداة CLI — تنفّذ تعليمات برمجية عشوائية للإضافات                                                     |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | أدوات كتابة إعدادات خاصة بكل أداة يمكنها تعديل الملفات الثنائية أو إعدادات الأداة على المضيف                    |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | عملية الإنشاء نفسها عبر `getCliRuntimeStatus()` مثل الأدوات الست الشقيقة أعلاه (GHSA-35fw-cv32-2373)            |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | عمليات فحص مخزون أدوات CLI — تُنشئ `command -v` / `--version` لكل أداة (GHSA-35fw-cv32-2373)                    |
-| `/api/cli-tools/antigravity-mitm`                                                                        | التحكم في وكيل MITM الخاص بـ Antigravity (يُنشئ/يُعيّن وكيل النظام)                                             |
-| `/api/modality-bridge/video/`                                                                            | فحص وقت تشغيل Video Bridge الموثوق والمقيّد بواجهة الاسترجاع، وجسر الاستخراج الداخلي                            |
-| `/api/services/`                                                                                         | الخدمات المضمّنة (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + إنشاء عملية                     |
-| `/dashboard/providers/services/`                                                                         | وكيل عكسي لواجهات مستخدم الخدمات المضمّنة                                                                       |
-| `/api/tunnels/cloudflared`                                                                               | يثبّت الملف الثنائي cloudflared ويُنشئ عمليته                                                                   |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | يثبّت tailscaled ويتحكم فيه على المضيف                                                                          |
-| `/api/copilot/`                                                                                          | برنامج تشغيل LLM بلا مصادقة — مخصّص افتراضيًا لـ CLI فقط                                                        |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — يُنشئ خادم MITM ويُجري تعديلات على DNS                                                            |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — مستمع http-proxy ووكيل النظام                                                               |
-| `/api/settings/mitm`                                                                                     | يفعّل اعتراض MITM (حالة وكيل على مستوى النظام)                                                                  |
-| `/api/issue-agent/`                                                                                      | وكيل المشكلات — يُنشئ أدوات محلية للعمل على المستودع                                                            |
-| `/api/plugins/`, `/api/plugins`                                                                          | الإضافات — تُحمّل/تُنفّذ عبر `worker_threads` + `child_process`                                                 |
-| `/api/middleware/`                                                                                       | البرمجيات الوسيطة للمستخدم — تُحمّل/تُنفّذ تعليمات المشغّل البرمجية داخل العملية                                |
-| `/api/system/version`                                                                                    | التحديث التلقائي (POST فقط؛ GET/HEAD/OPTIONS مستثناة) — يُنشئ `git checkout` + `npm install`                    |
-| `/api/db-backups/exportAll`                                                                              | يُنشئ `tar` لأرشيف التصدير                                                                                      |
-| `/api/local/`                                                                                            | مشغّلات محلية بنقرة واحدة (Redis حاليًا) — تُنشئ podman/docker                                                  |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | دورة حياة وكيل Headroom — تُنشئ Python CLI / ترسل إشارات إلى PID                                                |
-| `/api/jobs`, `/api/jobs/`                                                                                | التحكم في مشغّل المهام — ينفّذ أعمالًا مجدولة على جانب المضيف                                                   |
-| `/api/oauth/cursor/auto-import`                                                                          | ينفّذ `execFile("which", ["cursor"])` قبل استيراد بيانات الاعتماد                                               |
-| `/api/oauth/kiro/auto-import`                                                                            | يقرأ ملفات بيانات اعتماد Kiro CLI من المضيف                                                                     |
-| `/api/skills/collect/`                                                                                   | جمع المهارات — يكتشف الأدوات المحلية ويثبّتها                                                                   |
-| `/api/skills/install`, `/api/skills/executions`                                                          | تسجيل معالج المهارات + التنفيذ — الوصول إلى تشغيل حاوية بيئة العزل (GHSA-jx89)                                  |
-| `/api/discovery/`                                                                                        | عمليات استكشاف الشبكة المحلية/المزوّد                                                                           |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | يشغّل متصفحًا بواجهة رسومية + جلسة VNC لعمليات تسجيل الدخول التفاعلية                                           |
-| `/api/acp/agents`                                                                                        | ACP — يكتشف ويشغّل ملفات وكلاء CLI التنفيذية المحلية                                                            |
-| `/api/resilience/connections`                                                                            | ملف JSON للمرونة لكل حساب (فترة التهدئة، قاطع الدائرة، التأمين). ملف HTML الخاص بلوحة المعلومات ليس محليًا فقط. |
-| `/api/providers/cursor/agent-availability`                                                               | فحص مطالبة التثبيت في لوحة المعلومات — يشغّل `cursor-agent status --format json`                                |
-| `/api/providers/{id}/login` (تعبير نمطي)                                                                 | يشغّل Playwright Chromium بواجهة رسومية لتسجيل الدخول عبر ملفات تعريف الارتباط للويب                            |
-| `/api/providers/volcengine-plan/connect` (تعبير نمطي)                                                    | تدفق يدوي بواجهة رسومية + تسجيل دخول تلقائي بالهاتف/الرسائل النصية استنادًا إلى الجلسة (يشغّل Playwright)       |
-| `/api/providers/{id}/refresh-cursor` (تعبير نمطي)                                                        | تجديد يدوي لجلسة Cursor — يحفّز `cursor-agent`                                                                  |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (تعبير نمطي)                                              | يشخّص تثبيت Codex CLI المحلي (يشغّل الملف التنفيذي)                                                             |
+| البادئة / النمط                                                                                          | لماذا هو محلي فقط                                                                         |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | خادم MCP — يولد، جسور stdio، معالجات + SSE                                                |
+| `/api/cli-tools/runtime/`                                                                                | وقت تشغيل أداة CLI ينفذ — تعليمات برمجية إضافية عشوائية                                   |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | كاتبو إعدادات كل أداة يمكنهم لمس الأداة binaries/config على المضيف                        |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | نفس `getCliRuntimeStatus()` تفرخ مثل الأشقاء الستة أعلاه (GHSA-35fw-cv32-2373)            |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | تحقيقات CLI — تفرخ `command -v` / `--version` لكل أداة (GHSA-35fw-cv32-2373)              |
+| `/api/cli-tools/antigravity-mitm`                                                                        | التحكم بالوكيل Antigravity MITM (وكيل نظام spawns/points )                                |
+| `/api/modality-bridge/video/`                                                                            | مسبار وقت تشغيل جسر الفيديو الموثوق به والموثوق وجسر الاستخراج الداخلي                    |
+| `/api/services/`                                                                                         | الخدمات المضمنة (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + Spawn      |
+| `/dashboard/providers/services/`                                                                         | عكس الوكيل إلى UIs الخدمة المضمنة                                                         |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns الثنائي cloudflared                                                       |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled على المضيف                                                   |
+| `/api/copilot/`                                                                                          | برنامج تشغيل LLM غير المصادق عليه — CLI-فقط بشكل افتراضي                                  |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — يولد MITM server + DNS التعديلات                                            |
+| `/api/tools/traffic-inspector/`                                                                          | مفتش المرور — http-proxy المستمع + نظام الوكيل                                            |
+| `/api/settings/mitm`                                                                                     | تمكين اعتراض MITM (حالة الوكيل على مستوى النظام)                                          |
+| `/api/issue-agent/`                                                                                      | وكيل الإصدار — يولد الأدوات المحلية ضد الريبو                                             |
+| `/api/plugins/`, `/api/plugins`                                                                          | الإضافات — load/execute عبر `worker_threads` + `child_process`                            |
+| `/api/middleware/`                                                                                       | رمز مشغل البرنامج الوسيط للمستخدم — loads/executes قيد المعالجة                           |
+| `/api/system/version`                                                                                    | التحديث التلقائي (POST فقط؛ GET/HEAD/OPTIONS معفى) — يولد `git checkout` + `npm install`  |
+| `/api/db-backups/exportAll`                                                                              | يولد `tar` لأرشيف التصدير                                                                 |
+| `/api/local/`                                                                                            | 1-انقر فوق قاذفات محلية (Redis اليوم) — يولد podman/docker                                |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | دورة حياة الوكيل ذات الإرتفاع — تولد بيثون CLI / إشارات PID                               |
+| `/api/jobs`, `/api/jobs/`                                                                                | ينفذ التحكم في مشغل الوظيفة — العمل المجدول من جانب المضيف                                |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` قبل استيراد الاعتمادات                                    |
+| `/api/oauth/kiro/auto-import`                                                                            | يقرأ ملفات بيانات اعتماد Kiro CLI من المضيف                                               |
+| `/api/skills/collect/`                                                                                   | جمع المهارات — detects/installs الأدوات المحلية                                           |
+| `/api/skills/install`, `/api/skills/executions`                                                          | تسجيل معالج المهارة، تنفيذ + — الوصول إلى حاوية وضع الحماية (GHSA-jx89)                   |
+| `/api/discovery/`                                                                                        | تحقيقات اكتشاف network/provider المحلية                                                   |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | يولد جلسة متصفح قوية + VNC لتسجيلات الدخول التفاعلية                                      |
+| `/api/acp/agents`                                                                                        | يكتشف ACP — وينتج ثنائيات وكيل CLI المحلية                                                |
+| `/api/resilience/connections`                                                                            | JSON المرونة لكل حساب (التهدئة، الكسارة، القفل). لوحة القيادة HTML ليست محلية فقط.        |
+| `/api/providers/cursor/agent-availability`                                                               | تثبيت لوحة المعلومات - الدفع بالتحقق من — يولد `cursor-agent status --format json`        |
+| `/api/providers/{id}/login` (التعبير العادي)                                                             | إطلاق Playwright Chromium لتسجيل الدخول إلى ملفات تعريف الارتباط على الويب                |
+| `/api/providers/volcengine-plan/connect` (التعبير العادي)                                                | تسجيل الدخول التلقائي phone/SMS المستند إلى جلسة + للتدفق الرأسي اليدوي (يولد Playwright) |
+| `/api/providers/{id}/refresh-cursor` (التعبير العادي)                                                    | تجديد جلسة Cursor اليدوي — يدفع `cursor-agent`                                            |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (التعبير العادي)                                          | تشخيص تثبيت Codex CLI المحلي (يولد الثنائي)                                               |
 
-**الاستجابة عند المخالفة:** `403 LOCAL_ONLY`
+**الرد على المخالفة:** `403 LOCAL_ONLY`
 
-#### استثناء نطاق الإدارة
+#### إدارة اقتطاع النطاق
 
-يجوز أيضًا الوصول إلى مجموعة فرعية من مسارات LOCAL_ONLY من عناوين غير استرجاعية إذا وفقط
-إذا كان الطلب يحمل `Authorization: Bearer <api-key>` وتتضمن
-بياناته الوصفية نطاق `manage` (أو `admin`). يخضع الاستثناء للتحكم
-صراحةً لكل مسار عبر `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` بحيث يظل
-الإعداد الافتراضي لأي مسار LOCAL_ONLY جديد مقتصرًا بصرامة على العنوان الاسترجاعي. وتظل الطلبات غير
-المصادق عليها والطلبات ذات المفاتيح التي لا تملك نطاق الإدارة مرفوضة بالاستجابة
-`403 LOCAL_ONLY`.
+يمكن أيضًا الوصول إلى مجموعة فرعية من مسارات LOCAL_ONLY MAY من عدم الاسترجاع إذا وفقط إذا كان الطلب يحمل `Authorization: Bearer <api-key>` الذي تتضمن بياناته التعريفية نطاق `manage` (أو `admin`). يتم إجراء عملية الاقتطاع بشكل صريح لكل مسار عبر `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` بحيث يظل الإعداد الافتراضي لأي مسار LOCAL_ONLY جديد استرجاعًا صارمًا. لا تزال الطلبات غير المصادق عليها والطلبات ذات المفاتيح غير الإدارية مرفوضة باستخدام `403 LOCAL_ONLY`.
 
-بادئة التجاوز الوحيدة حاليًا هي `/api/mcp/`. وقد استُبعد المساران `/api/cli-tools/runtime/` و
-`/api/services/` عمدًا لأنهما يستطيعان تشغيل عمليات فرعية
-عشوائية (`npm install`، `node`)، وهي تحديدًا فئة CVE التي وُجدت
-طبقة LOCAL_ONLY لمنعها.
+اليوم البادئة الوحيدة التي يمكن تجاوزها هي `/api/mcp/`. يتم استبعاد `/api/cli-tools/runtime/` و `/api/services/` عمدًا لأنهما يمكن أن ينتجا عمليات فرعية عشوائية (`npm install`, `node`)، وهي فئة CVE الدقيقة التي توجد طبقة LOCAL_ONLY لمنعها.
 
-**#7895 — النطاق الضيق `mcp:connect`:** يقبل استثناء `/api/mcp/` أيضًا
-مفتاح Bearer يحمل النطاق الضيق `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)، ويُتحقق منه عبر
-`hasMcpConnectOrManageScope()` في `src/server/authz/policies/management.ts`.
-يقتصر هذا على `/api/mcp/` فقط — لا يمنح `mcp:connect` أي صلاحية على أي مسار
-إدارة آخر (بما في ذلك أي بادئة تجاوز LOCAL_ONLY أخرى، إن أُضيفت يومًا)، وقد استُبعد عمدًا من
-`MANAGEMENT_API_KEY_SCOPES`. ويظل المفتاح الذي يحمل `manage`/`admin` قادرًا على اجتياز
-الاستثناء تمامًا كما كان من قبل؛ ويُعد `mcp:connect` بديلًا أقل امتيازًا
-للمتصلين البعيدين المقتصرين على MCP الذين ينبغي ألا يحتاجوا إلى وصول إداري واسع.
+**#7895 — `mcp:connect` نطاق ضيق:** يقبل `/api/mcp/` carve-out ALSO مفتاح حامل يحمل نطاق `mcp:connect` الضيق (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) ، ويتم التحقق منه عبر `hasMcpConnectOrManageScope()` في `src/server/authz/policies/management.ts`. يتم تحديد هذا على أن `/api/mcp/` ONLY — `mcp:connect` لا يمنح أي شيء على أي مسار إدارة آخر (بما في ذلك كل بادئة تجاوز LOCAL_ONLY أخرى، في حالة إضافة واحدة على الإطلاق)، ويتم استبعاده عمدًا من `MANAGEMENT_API_KEY_SCOPES`. لا يزال المفتاح الذي يحمل `manage`/`admin` يمرر الاقتطاع تمامًا كما كان من قبل؛ يعد `mcp:connect` بديلاً ذا امتيازات أقل للمتصلين عن بعد عبر MCP فقط والذين لا يحتاجون إلى وصول إداري واسع.
 
-| الطلب                                           | المسار                     | النتيجة               |
-| ----------------------------------------------- | -------------------------- | --------------------- |
-| غير استرجاعي، بلا Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY        |
-| غير استرجاعي، Bearer بنطاق `manage`             | `/api/mcp/*`               | سماح                  |
-| غير استرجاعي، Bearer بنطاق `mcp:connect`        | `/api/mcp/*`               | سماح                  |
-| غير استرجاعي، Bearer بلا `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY        |
-| غير استرجاعي، Bearer بنطاق `mcp:connect`        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
-| غير استرجاعي، Bearer بنطاق `manage`             | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
-| استرجاعي، مع أي Bearer أو بدونه                 | أي مسار LOCAL_ONLY         | سماح (اجتياز البوابة) |
+| طلب                                             | طريق                       | نتيجة                  |
+| ----------------------------------------------- | -------------------------- | ---------------------- |
+| عدم الاسترجاع، لا حامل                          | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| غير استرجاع، حامل بنطاق `manage`                | `/api/mcp/*`               | يسمح                   |
+| غير استرجاع، حامل بنطاق `mcp:connect`           | `/api/mcp/*`               | يسمح                   |
+| عدم الاسترجاع، حامل بدون `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| غير استرجاع، حامل بنطاق `mcp:connect`           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| غير استرجاع، حامل بنطاق `manage`                | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| الاسترجاع، any/no حامل                          | أي LOCAL_ONLY              | السماح (تمرير البوابة) |
 
-#### إرشادات المشغّل والتدقيق
+#### توجيه وتدقيق المشغل
 
-إذا شغّلت OmniRoute خلف وكيل عكسي أو نفق (nginx أو Caddy أو Cloudflare
-Tunnel أو Tailscale أو Ngrok)، فسيظل فحص العنوان الاسترجاعي يحمي المسارات القادرة على التشغيل
-أعلاه — إذ يُرفض الطلب الذي يكون عنوان عميله غير استرجاعي بالاستجابة
-`403 LOCAL_ONLY` **قبل تنفيذ المصادقة**، ولذلك لا يمكن لرمز JWT مُسرّب الوصول إلى عملية تشغيل. وتظل هناك
-مسؤوليتان على عاتق المشغّل:
+إذا قمت بتشغيل OmniRoute خلف وكيل عكسي أو نفق (nginx، Caddy، Cloudflare Tunnel، Tailscale، Ngrok)، فإن فحص الاسترجاع لا يزال يحمي المسارات القادرة على النشر فوق — يتم رفض الطلب الذي يكون عنوان العميل الخاص به غير استرجاعي باستخدام `403 LOCAL_ONLY`** قبل تشغيل المصادقة** ، لذلك لا يمكن لـ JWT المسرب أن يصل إلى مرحلة النشر. تبقى مسؤوليتين للمشغل:
 
-- **لا «تعالج» خطأ 403 بتزوير عنوان IP للعميل ليبدو كعنوان استرجاع حلقي.** يؤدي تعيين
-  `X-Forwarded-For: 127.0.0.1`، أو استخدام وكيل يعيد كتابة عنوان المصدر إلى
-  عنوان استرجاع حلقي، إلى إعادة فتح فئة RCE نفسها التي تغلقها هذه الطبقة. اكشف
-  لوحة المعلومات/API عبر الوكيل — ولا تكشف مطلقًا المسارات القادرة على إنشاء العمليات.
-- **أبقِ تجاوز نطاق الإدارة في حده الأدنى.** لا يمكن تجاوز الحماية إلا لـ `/api/mcp/`،
-  وفقط باستخدام مفتاح API ذي نطاق `manage`. لا يمكن أبدًا إضافة
-  `SPAWN_CAPABLE_PREFIXES` إلى قائمة التجاوز — إذ يرفضها مخطط zod، كما ترفضها
-  `isLocalOnlyBypassableByManageScope` في وقت التشغيل (دفاع متعدد الطبقات)،
-  وهذا ما تقصده لوحة المعلومات بعبارة «لا يمكن جعله قابلًا للتجاوز». تتضمن قائمة
-  المنع نفسها أيضًا بضعة مسارات LOCAL_ONLY لا تنشئ عمليات، لكن يجب ألا تكون
-  قابلة للوصول عن بُعد مطلقًا — `/api/oauth/kiro/auto-import` (يقرأ ملفات بيانات
-  اعتماد Kiro المحلية على المضيف)، و`/api/discovery/` و`/api/issue-agent/`. كما أن
-  محمّل اللقطة في وقت التشغيل يحذف مثل هذه الإدخالات من صف إعدادات مخزّن، ولا
-  تكتب عملية استيراد JSON القديمة (`/api/settings/import-json`) مفاتيح التجاوز مطلقًا.
-  يجب أن يكون كل إدخال في `LOCAL_ONLY_API_PREFIXES` إما ضمن قائمة المنع أو
-  خاضعًا للمراجعة باعتباره مؤهلًا للتجاوز (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). تُغطّى مسارات
-  المقاطع الديناميكية والمسارات الثابتة القادرة على إنشاء العمليات ضمن `/api/providers/`
-  (مثل `/login` و`/refresh-cursor`) بواسطة الرفيق القائم على التعبيرات النمطية
-  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` في
-  `src/shared/constants/spawnCapablePrefixes.ts`، وليس بواسطة مصفوفة
-  `SPAWN_CAPABLE_PREFIXES` المسطّحة — إذ سيتعين على المصفوفة المسطّحة تغطية
-  بادئة `/api/providers/` بأكملها لالتقاطها، ما يوسّع الحماية أكثر من اللازم لتشمل
-  شجرة مسارات تستخدمها لوحات المعلومات البعيدة بصورة مشروعة لعمليات CRUD الخاصة بموفري الخدمة.
+- **لا تقم "بإصلاح" 403 عن طريق تزوير العميل IP كاسترجاع.** يؤدي إعداد `X-Forwarded-For: 127.0.0.1`، أو الوكيل الذي يعيد كتابة عنوان المصدر إلى الاسترجاع، إلى إعادة فتح فئة RCE بالضبط التي يغلقها هذا المستوى. قم بكشف dashboard/API من خلال الوكيل — أبدًا عن الطرق القادرة على النشر.
+- **حافظ على الحد الأدنى من تجاوز نطاق الإدارة.** يمكن تجاوز `/api/mcp/` فقط، وفقط باستخدام مفتاح `manage` -scoped API. لا يمكن أبدًا إضافة `SPAWN_CAPABLE_PREFIXES` إلى قائمة التجاوز — حيث يرفضها مخطط zod وينفيها `isLocalOnlyBypassableByManageScope` في وقت التشغيل (الدفاع المتعمق)، وهو ما تعنيه لوحة المعلومات بـ "لا يمكن جعله قابلاً للتجاوز". تحتوي قائمة الرفض نفسها أيضًا على عدد قليل من مسارات LOCAL_ONLY التي لا تظهر ولكن لا يجب أبدًا الوصول إليها عن بُعد إما — `/api/oauth/kiro/auto-import` (يقرأ ملفات اعتماد Kiro المحلية للمضيف)، و `/api/discovery/` و `/api/issue-agent/`. يقوم مُحمل اللقطات في وقت التشغيل أيضًا بإسقاط هذه الإدخالات من صف الإعدادات المخزنة، ولا يكتب استيراد JSON القديم (`/api/settings/import-json`) أبدًا مفاتيح التجاوز. يجب أن يكون كل إدخال `LOCAL_ONLY_API_PREFIXES` إما في قائمة الرفض أو تتم مراجعته باعتباره مؤهلاً للتجاوز (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). يتم تغطية المسارات القادرة على نشر المقطع الديناميكي والمسار الثابت ضمن `/api/providers/` (على سبيل المثال `/login` و `/refresh-cursor`) بواسطة رفيق `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` القائم على regex في `src/shared/constants/spawnCapablePrefixes.ts`، وليس بواسطة مصفوفة `SPAWN_CAPABLE_PREFIXES` المسطحة — يجب أن تغطي المصفوفة المسطحة بادئة `/api/providers/` بالكامل لالتقاطها، مما يؤدي إلى توسيع لوحات التحكم عن بعد لشجرة المسار بشكل شرعي للموفر CRUD.
 
-**تدقيق الوصول** — للتحقق من أن لا شيء من خارج المضيف يصل إلى هذه المسارات:
+**الوصول للتدقيق** — للتحقق من عدم وصول أي شيء خارج المضيف إلى هذه المسارات:
 
-- افتح **مخزون التفويض** في `/dashboard/settings/security`: فهو يعرض قائمة بادئات LOCAL_ONLY
-  الفعلية، والبادئات القابلة للتجاوز، والمجموعة القادرة على إنشاء العمليات والمحددة وقت
-  الترجمة («لا يمكن جعلها قابلة للتجاوز»).
-- ابحث في سجلات الوكيل العكسي / الوصول عن البادئات أعلاه مقترنة بعنوان عميل
-  لا ينتمي إلى نطاق الاسترجاع الحلقي. أي طلب من هذا النوع أعاد `200` بدلًا من
-  `403 LOCAL_ONLY` يعني أن الوكيل يحجب عنوان IP الحقيقي للعميل — أصلح الوكيل.
-- ظهور `403 LOCAL_ONLY` في سجلات OmniRoute لأحد هذه المسارات يعني أن الحارس
-  يعمل كما هو مقصود، وليس خطأً ينبغي إخفاؤه.
+- افتح** مخزون التفويض** على `/dashboard/settings/security`: يعرض قائمة بادئات LOCAL_ONLY المباشرة، والتي يمكن تجاوز البادئات فيها، ومجموعة القدرة على النشر في وقت الترجمة ("لا يمكن جعلها قابلة للتجاوز").
+- قم بإعداد سجلات الوصول/الوكيل العكسي الخاصة بك للبادئات المذكورة أعلاه والمقترنة بعنوان عميل غير قابل للاسترجاع. أي نتيجة أدت إلى إرجاع `200` بدلاً من `403 LOCAL_ONLY` تعني أن الوكيل يخفي العميل الحقيقي IP — الذي يقوم بإصلاح الوكيل.
+- `403 LOCAL_ONLY` في سجلات OmniRoute لأحد هذه المسارات هو أن الحارس يعمل على النحو المنشود، وليس خطأ يجب قمعه.
 
-#### مسارات قابلة للوصول عن بُعد مع بوابة فحص في موضع الاستدعاء
+#### طرق يمكن الوصول إليها عن بعد مع بوابة فحص لموقع الاتصال
 
-يجب أن تظل بعض المسارات قابلة للوصول من لوحة معلومات بعيدة، لكنها تشغّل فحصًا
-على جانب المضيف (`which <binary>`، أو `<binary> --version`، أو `tailscale status --json`) للمتصلين المحليين.
-وهي ليست LOCAL_ONLY لطلبات `GET`؛ بل يقرأ المعالج حكم النظير الموثوق به
-باستخدام `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`)، ولا يشغّل الفحص
-إلا للمتصلين من نوع `loopback` / `lan`. ويحصل المتصل من نوع `remote` على بنية الاستجابة نفسها،
-مُنشأة من مصادر لا تنشئ عمليات (الحالة المحفوظة، والإعدادات، وفحوصات fs)، مع العلامة `probed: false`.
+يجب أن تظل بعض المسارات قابلة للوصول من لوحة معلومات بعيدة ولكن مع تشغيل مسبار من جانب المضيف (`which <binary>`, `<binary> --version`, `tailscale status --json`) للمتصلين المحليين. إنهم ليسوا LOCAL_ONLY لـ `GET`؛ بدلاً من ذلك، يقرأ المعالج حكم النظير الموثوق به باستخدام `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ويقوم فقط بتشغيل التحقيق للمتصلين `loopback` / `lan`. يحصل المتصل `remote` على نفس شكل الاستجابة المبني من مصادر غير متولدة (الحالة المستمرة، الإعدادات، فحوصات fs)، مع وضع علامة `probed: false`.
 
-| المسار                                                           | الفحص الذي يُتخطى للمتصلين عن بُعد                                             |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | فحص وقت تشغيل CLI (`allowLocalRuntimeProbe`) وإنشاء العملية الاحتياطية عبر CLI |
-| `GET /api/headroom/status`                                       | فحوصات `which headroom` و`--version` الخاصة بـ python                          |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`، و`tailscale status/funnel --json`، و`which brew`            |
-| `GET /api/tunnels/cloudflared` (طلب GET مستثنى من LOCAL_ONLY)    | البحث عن `which cloudflared` في PATH                                           |
+| طريق                                                             | تم تخطي التحقيق للمتصلين عن بعد                                      |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | مسبار وقت التشغيل CLI (`allowLocalRuntimeProbe`) وتفرخ CLI الاحتياطي |
+| `GET /api/headroom/status`                                       | `which headroom` وتحقيقات بيثون `--version`                          |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`    |
+| `GET /api/tunnels/cloudflared` (GET-معفاة من LOCAL_ONLY)         | `which cloudflared` PATH                                             |
 
-يجب أن يتبع أي مسار قراءة جديد يفحص المضيف النمط نفسه، أو أن يُصنّف
-مباشرةً على أنه LOCAL_ONLY.
+يتبع مسار القراءة الجديد الذي يستكشف المضيف نفس النمط، أو يتم تصنيفه على أنه LOCAL_ONLY تمامًا.
 
-### الطبقة 2 — ALWAYS_PROTECTED
+### المستوى 2 — ALWAYS_PROTECTED
 
-**يُفرض بواسطة:** `isAlwaysProtectedPath(path)` ← تخطي تجاوز `requireLogin=false`
-**التجاوز:** لا يوجد عند `requireLogin=false`؛ يلزم JWT دائمًا
+**تم التنفيذ بواسطة:** `isAlwaysProtectedPath(path)` → تخطي تجاوز `requireLogin=false`** تجاوز:** لا شيء عندما `requireLogin=false`; مطلوب JWT دائما
 
-هذه المسارات مدمّرة أو لا يمكن التراجع عن آثارها. إن السماح بها في تثبيت
-«بلا كلمة مرور» يعني أن أي شخص على شبكة LAN نفسها يمكنه مسح قاعدة البيانات
-أو إنهاء عملية الخادم.
+هذه الطرق مدمرة أو لا رجعة فيها. إن السماح لهم بالتثبيت "بدون كلمة مرور" يعني أن أي شخص على نفس LAN يمكنه مسح قاعدة البيانات أو إنهاء عملية الخادم.
 
-| المسار                                    | السبب                                                          |
-| ----------------------------------------- | -------------------------------------------------------------- |
-| `/api/shutdown`                           | ينهي عملية الخادم                                              |
-| `/api/settings/database`                  | تصدير قاعدة البيانات واستيرادها ومسحها                         |
-| `/api/db-backups`                         | الوصول إلى أرشيف النسخة الاحتياطية الكاملة لقاعدة البيانات     |
-| `/api/settings/export-json`               | يصدّر كائن الإعدادات الكامل (بما في ذلك الأسرار)               |
-| `/api/settings/import-json`               | يستبدل كائن الإعدادات الكامل                                   |
-| `/api/providers/health-autopilot/actions` | ينفّذ إجراءات المعالجة التلقائية                               |
-| `/api/settings/obsidian`                  | يُصدر بيانات اعتماد WebDAV قابلة لإعادة الاستخدام لأي جذر مخزن |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                   |
+| طريق                                      | سبب                                                          |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| `/api/shutdown`                           | ينهي عملية الخادم                                            |
+| `/api/settings/database`                  | تصدير قاعدة البيانات واستيرادها ومسحها                       |
+| `/api/db-backups`                         | الوصول الكامل إلى أرشيف النسخ الاحتياطي لقاعدة البيانات      |
+| `/api/settings/export-json`               | يصدر blob الإعدادات الكاملة (بما في ذلك الأسرار)             |
+| `/api/settings/import-json`               | يستبدل blob الإعدادات الكاملة                                |
+| `/api/providers/health-autopilot/actions` | ينفذ إجراءات علاج الطيار الآلي                               |
+| `/api/settings/obsidian`                  | النعناع اعتمادات WebDAV القابلة لإعادة الاستخدام لأي جذر قبو |
+| `/api/relay/tokens`                       | النعناع، والقوائم، والتحرير، وإلغاء الرموز المميزة للترحيل   |
+| `/api/agent-skills/generate`              | يكتب ويقلم مجلدات المهارات على المضيف                        |
+| `/api/skills/marketplace/install`         | تثبيت مهارة عالمية لكل مفتاح                                 |
+| `/api/skills/skillssh/install`            | تثبيت مهارة عالمية لكل مفتاح                                 |
+| `/api/cli-tools/apply`                    | يعيد كتابة إعدادات مضيف المشغل CLI                           |
+| `/api/cli-tools/guide-settings`           | يكتب ملفات تكوين CLI المستندة إلى الدليل                     |
+| `/api/cli-tools/hermes-agent-settings`    | يكتب التكوين وكيل هيرميس                                     |
+| `/api/cli-tools/backups`                  | استعادة وحذف النسخ الاحتياطية لتكوين CLI                     |
+| `/api/log-export`                         | يشحن سجلات المكالمات إلى وجهة تم تكوينها                     |
+| `/api/restart`                            | إعادة تشغيل عملية الخادم                                     |
 
-**الاستجابة عند الانتهاك:** `401 Authentication required`
+**الرد على المخالفة:** `401 Authentication required`
 
-يشمل `/api/settings/obsidian` المسار الفرعي `/webdav` التابع له: إذ يوجّه `POST` خدمة ملفات WebDAV —
-التي توفرها طبقة Node المخصصة قبل Next.js، خارج هذا المسار التنفيذي — إلى جذر يختاره المتصل
-ويعيد بيانات اعتماد Basic المُصدرة حديثًا، ويقوم `DELETE` بتدويرها، بينما يخزّن `POST` على المسار الأب
-رمز API الخاص بـ Obsidian REST. لم يفعل GHSA-62vw سوى إخفاء كشف كلمة المرور عبر `GET`؛ أما الإصدار
-فظل ضمن الطبقة المفتوحة عند الفشل (GHSA-7pq4-8pvv-rx7r). بالإضافة إلى ذلك، ترفض
-`enableObsidianVaultSync()` أي مخزن يكون هو دليل البيانات، أو يقع داخله، أو يحتوي عليه.
+يغطي `/api/settings/obsidian` فرعه `/webdav` : يشير `POST` إلى خدمة ملفات WebDAV — التي تخدمها طبقة العقدة المخصصة قبل Next.js، خارج خط الأنابيب هذا — عند جذر يختاره المتصل ويعيد صدى بيانات الاعتماد الأساسية التي تم سكها حديثًا، ويقوم `DELETE` بتدويرها، ويقوم `POST` الأصلي بتخزين الرمز المميز Obsidian REST API. GHSA-62vw يكشف فقط كلمة مرور `GET` ؛ كان الإصدار لا يزال على مستوى الفشل المفتوح (GHSA-7pq4-8pvv-rx7r). يرفض `enableObsidianVaultSync()` أيضًا قبوًا موجودًا بداخله أو يحتوي على دليل البيانات.
 
-#### عمليات تصدير بيانات الاعتماد مخصصة للمشغّل فقط
+#### عمليات تصدير بيانات الاعتماد واستعادتها مخصصة للمشغل فقط
 
-تحدد الطبقة أعلاه فقط ما إذا كان يلزم وجود _نوع ما_ من بيانات الاعتماد. تضيف المسارات التي تنزّل
-بيانات الاعتماد المخزّنة تحققًا ثانيًا في المعالج: تستدعي `GET /api/settings/export-json` (اتصالات
-موفّري الخدمة بعد فك تشفيرها ومفاتيح API الخام)، و`GET /api/db-backups/export` (ملف SQLite)، و
-`GET /api/db-backups/exportAll` (الأرشيف الكامل) الدالة `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). وهي تقبل جلسة لوحة تحكم، أو هوية CLI المحلية، أو
-مثيلاً عُطّل تسجيل الدخول فيه، وتستجيب بالحالة `403` لمفاتيح API من أي نطاق (بما في ذلك `manage`
-و`admin`) ولرموز الوصول التي تبدأ بـ `oma_`. يستخدم إصدار رموز المزامنة (`POST /api/sync/tokens`)
-الدالة المساعدة نفسها، بالإضافة إلى رمز الخدمة الداخلية الموثوق به عبر عنوان الاسترجاع المحلي.
+يقرر المستوى أعلاه فقط ما إذا كانت بيانات الاعتماد _some_ مطلوبة أم لا. تضيف المسارات التي تقوم بتنزيل بيانات الاعتماد المخزنة فحصًا ثانيًا في المعالج: `GET /api/settings/export-json` (اتصالات الموفر التي تم فك تشفيرها ومفاتيح API الأولية)، `GET /api/db-backups/export` (ملف SQLite )، و `GET /api/db-backups/exportAll` (الأرشيف الكامل) استدعاء `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). فهو يقبل جلسة لوحة المعلومات، أو موضوع CLI المحلي، أو مثيل مع تعطيل تسجيل الدخول، ويجيب `403` على مفاتيح API من أي نطاق (بما في ذلك `manage` و `admin`) وعلى رموز الوصول `oma_`. تحتفظ النظراء المدمرون بنفس الحدود: `POST /api/db-backups/import` ( `.sqlite` الذي تم تحميله، بما في ذلك `dryRun=true` )، `POST /api/db-backups` (استعادة نسخة احتياطية مخزنة بواسطة المعرف)، و `POST /api/settings/import-json` (استعادة JSON القديمة) تحل محل قاعدة البيانات المباشرة أو مجموعة settings/connections/API-key بأكملها، لذلك لا يمكن لبيانات اعتماد الجهاز تشغيلها أيضًا. تدمير نقاط الاستعادة له نفس الحدود: `DELETE /api/db-backups` (تنظيف — يحافظ على أحدث N / drop أقدم من D أيام) و `PATCH /api/db-backups` (إعدادات الاستبقاء)، لأن الاستبقاء المستمر هو بالضبط ما ينطبق عليه `cleanupDbBackups()` بعد كل نسخ احتياطي تلقائي (`src/lib/db/backup.ts`)، لذا فإن بيانات اعتماد الجهاز التي يمكنها حفظ `keepLatest: 1` ستؤدي إلى تقليم كل شيء في اللقطة التالية. إدراج وإنشاء نسخ احتياطية (`GET`/`PUT /api/db-backups`) يحافظ على مصادقة الإدارة العادية. يستخدم إصدار رمز المزامنة (`POST /api/sync/tokens`) نفس المساعد، بالإضافة إلى رمز خدمة الاسترجاع الداخلي الموثوق به.
 
-#### Credential exports and restores are operator-only
+### يعتبر bootstrap الجديد للتثبيت عبارة عن — للاسترجاع فقط بواسطة نظير حقيقي، وليس `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+مع عدم تكوين كلمة مرور للإدارة (وليس `INITIAL_PASSWORD`)، `isAuthRequired()` في `src/shared/utils/apiAuth.ts` يبقي التمهيد المجهول مفتوحًا** فقط لأقران الاسترجاع** . يتم تحديد الاسترجاع من إشارات النظير الموثوق به، بالترتيب: نظير TCP الحقيقي المختوم بالرمز المميز (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`، ما تراه السياسة)، أو حكم `AUTHZ_HEADER_PEER_LOCALITY` الخاص بخط الأنابيب (ما يراه معالجو المسار، موثوق به فقط أثناء تعيين `OMNIROUTE_PEER_STAMP_TOKEN` )، أو نظير مأخذ توصيل حقيقي للمتصلين المباشرين. لا يتم استشارة `Host` / `nextUrl.hostname` أبدًا، كما أن كتابة كلمة المرور الأولى (`POST /api/settings/require-login`) تخضع لنفس القيد وليست مفتوحة لكل نظير في الشبكة (GHSA-7pq4-8pvv-rx7r). يقوم `managementPolicy` بتمرير حكم `peerContext` الخاص به بشكل صريح، وبالتالي فإن رؤوس طلب ORIGINAL (الشريط المسبق) لا تقرره أبدًا.
 
-### تمهيد التثبيت الجديد مخصّص لعنوان الاسترجاع المحلي فقط — وفقًا للنظير الحقيقي، وليس `Host`
+### المستوى 3 — MANAGEMENT (افتراضي)
 
-عند عدم تكوين كلمة مرور للإدارة (وعدم وجود `INITIAL_PASSWORD`)، تُبقي `isAuthRequired()` في
-`src/shared/utils/apiAuth.ts` التمهيد المجهول مفتوحًا **لنظراء الاسترجاع المحلي فقط**.
-يُحدَّد الاسترجاع المحلي من إشارات النظير الموثوق بها، بالترتيب: نظير TCP الحقيقي الموسوم بالرمز
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`، وهو ما تراه السياسة)، أو قرار
-`AUTHZ_HEADER_PEER_LOCALITY` الخاص بمسار المعالجة نفسه (وهو ما تراه معالجات المسارات، ولا يُوثق به إلا أثناء
-تعيين `OMNIROUTE_PEER_STAMP_TOKEN`)، أو نظير مقبس حقيقي للمتصلين المباشرين. لا تجري مطلقًا مراجعة `Host` /
-`nextUrl.hostname`، كما تخضع عملية تعيين كلمة المرور الأولى
-(`POST /api/settings/require-login`) للقيد نفسه بدلًا من أن تكون مفتوحة لكل
-نظير على الشبكة (GHSA-7pq4-8pvv-rx7r). تمرّر `managementPolicy` قرار `peerContext` الخاص بها
-إلى المستوى الأدنى صراحةً، ولذلك لا تحدده ترويسات الطلب ORIGINAL (قبل التجريد).
-
-### الطبقة 3 — الإدارة (الافتراضية)
-
-جميع مسارات الإدارة الأخرى. المصادقة مطلوبة ما لم يُضبط
-`requireLogin=false`. يمكن لرموز CLI مصادقة هذه المسارات (الاسترجاع المحلي + HMAC صالح).
+جميع طرق الإدارة الأخرى. المصادقة مطلوبة ما لم يتم تكوين `requireLogin=false`. يمكن لرموز CLI مصادقة هذه المسارات (استرجاع + صالح HMAC).
 
 ## ترتيب التقييم
 
@@ -281,16 +176,12 @@ managementPolicy.evaluate(ctx)
 LOCAL_ONLY؛ ويُرجع وضع فشل الواجهة الخلفية للمصادقة 503 (وليس 403)، حتى لا تؤدي
 قاعدة بيانات منتهية الصلاحية بصمت إلى الرجوع إلى حالة "الرفض".
 
-## إضافة مسار جديد قادر على التشغيل
+## إضافة طريق جديد قادر على النشر
 
-1. أضف بادئة المسار إلى `LOCAL_ONLY_API_PREFIXES` في
-   `src/server/authz/routeGuard.ts`
-2. أضف اختبارًا في `tests/unit/authz/routeGuard.test.ts` يؤكد أن
-   `isLocalOnlyPath()` تُرجع true للبادئة الجديدة
-3. **لا تتخطَّ هذه الخطوة أبدًا** — راجع القاعدة الصارمة رقم 15 في `CLAUDE.md`
-4. قرر: هل ينتمي هذا المسار أيضًا إلى `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`؟
-   الإجابة الافتراضية هي **لا**. لا تشترك إلا عندما يكون عرض المسار لحامل نطاق
-   manage آمنًا (أي أنه لا يُشغّل تعليمات برمجية عشوائية يتحكم فيها المستخدم).
+1. أضف بادئة المسار إلى `LOCAL_ONLY_API_PREFIXES` في `src/server/authz/routeGuard.ts`
+2. أضف اختبارًا في `tests/unit/authz/routeGuard.test.ts` لتأكيد أن `isLocalOnlyPath()` يُرجع صحيحًا للبادئة الجديدة
+3. **لا تخطي هذه الخطوة أبدا** — راجع القاعدة الصعبة #15 في `CLAUDE.md`
+4. قرر: هل ينتمي هذا المسار ALSO إلى `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`؟ الجواب الافتراضي هو** لا** . لا يتم الاشتراك إلا عندما يكون المسار آمنًا لعرضه على حامل نطاق الإدارة (على سبيل المثال، يقوم NOT بنشر تعليمات برمجية عشوائية يتحكم فيها المستخدم).
 
 ## إضافة مسار يمكن تجاوزه بنطاق manage
 

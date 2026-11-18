@@ -1,11 +1,19 @@
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
+import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
+  setOperatorProviderErrorDefaults,
   setOperatorProviderErrorRules,
+  type OperatorProviderErrorDefault,
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import {
+  normalizeCliVersionOverrides,
+  setCliVersionOverrides,
+  type CliVersionOverrides,
+} from "@omniroute/open-sse/config/cliVersions.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -24,7 +32,9 @@ export type RuntimeReloadSection =
   | "systemTransforms"
   | "systemPrompt"
   | "authzBypass"
-  | "bannedSignals";
+  | "bannedSignals"
+  | "opencodeServer"
+  | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -54,6 +64,9 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  opencodeServerUrl: string;
+  providerErrorDefaults: Record<string, OperatorProviderErrorDefault> | null;
+  cliVersionOverrides: CliVersionOverrides;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` bypassable. Mirrors the
@@ -82,6 +95,9 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  opencodeServerUrl: "",
+  providerErrorDefaults: null,
+  cliVersionOverrides: {},
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
@@ -185,11 +201,26 @@ function normalizeOperatorProviderErrorRules(
       (entry): entry is OperatorProviderErrorRule =>
         !!entry &&
         typeof entry === "object" &&
-        typeof (entry as OperatorProviderErrorRule).status === "number" &&
-        typeof (entry as OperatorProviderErrorRule).match === "string" &&
+        (typeof (entry as OperatorProviderErrorRule).status === "number" ||
+          typeof (entry as OperatorProviderErrorRule).match === "string") &&
         typeof (entry as OperatorProviderErrorRule).scope === "string"
     );
     if (rules.length > 0) result[provider.toLowerCase()] = rules;
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
+/** Same defensive shape-check for the operator catch-all defaults. */
+function normalizeOperatorProviderErrorDefaults(
+  value: unknown
+): Record<string, OperatorProviderErrorDefault> | null {
+  if (value === null || typeof value !== "object") return null;
+  const result: Record<string, OperatorProviderErrorDefault> = {};
+  for (const [provider, entry] of Object.entries(value as Record<string, unknown>)) {
+    const cooldownMs = (entry as OperatorProviderErrorDefault | null)?.cooldownMs;
+    if (typeof cooldownMs === "number" && cooldownMs > 0) {
+      result[provider.toLowerCase()] = entry as OperatorProviderErrorDefault;
+    }
   }
   return Object.keys(result).length > 0 ? result : null;
 }
@@ -311,6 +342,10 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    opencodeServerUrl:
+      typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
+    providerErrorDefaults: normalizeOperatorProviderErrorDefaults(settings.providerErrorDefaults),
+    cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
 
@@ -632,6 +667,35 @@ export async function applyRuntimeSettings(
     hasChanged(currentSnapshot.providerErrorRules, previousSnapshot.providerErrorRules)
   ) {
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
+  }
+
+  if (force || hasChanged(currentSnapshot.opencodeServerUrl, previousSnapshot.opencodeServerUrl)) {
+    setOpencodeServerSettings({ url: currentSnapshot.opencodeServerUrl });
+    markChanged("opencodeServer");
+  }
+
+  if (
+    force ||
+    hasChanged(currentSnapshot.providerErrorDefaults, previousSnapshot.providerErrorDefaults)
+  ) {
+    setOperatorProviderErrorDefaults(currentSnapshot.providerErrorDefaults ?? undefined);
+  }
+
+  // CLI client-version overrides: swap the shared leaf store the Claude Code /
+  // Codex identity presets read on every request. Cheap and idempotent, so it is
+  // safe on every settings write (dashboard edit, import-json, config restore).
+  //
+  // An ABSENT field is not the same as an empty one here. Both production
+  // callers pass getSettings() output, where the key is always present (default
+  // `{}`), but a caller holding a PARTIAL settings object must never be able to
+  // silently drop a value that goes onto the wire as a client fingerprint —
+  // unlike the visible toggles above, this one failing is invisible.
+  if (
+    settings.cliVersionOverrides !== undefined &&
+    (force || hasChanged(currentSnapshot.cliVersionOverrides, previousSnapshot.cliVersionOverrides))
+  ) {
+    setCliVersionOverrides(currentSnapshot.cliVersionOverrides);
+    markChanged("cliVersionOverrides");
   }
 
   lastAppliedSnapshot = currentSnapshot;

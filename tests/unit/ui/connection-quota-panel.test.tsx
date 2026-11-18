@@ -126,6 +126,34 @@ describe("ConnectionQuotaPanel", () => {
     expect(el.textContent).toContain("7d 20%");
   });
 
+  it("shows only reported Claude windows and preserves an observed zero", () => {
+    const el = mount(
+      <ConnectionQuotaPanel
+        {...panelProps({
+          providerId: "claude",
+          connection: { id: "claude-weekly", provider: "claude" } as ConnectionRowConnection,
+          cache: {
+            quotas: {
+              "session (5h)": null,
+              "weekly (7d)": {
+                used: 0,
+                total: 100,
+                remainingPercentage: 100,
+                resetAt: futureReset(120),
+              },
+            },
+            modelQuotas: { "weekly sonnet (7d)": null },
+          },
+        })}
+      />
+    );
+    expect(el.textContent).toContain("7d 0%");
+    expect(el.textContent).not.toContain("5h");
+    expect(el.textContent).not.toContain("sonnet");
+    act(() => el.querySelector<HTMLButtonElement>("button[title='Usage details']")!.click());
+    expect(el.textContent).not.toContain("session (5h)");
+  });
+
   it("surfaces worst per-model windows as chips when no rolling windows exist (antigravity)", () => {
     const modelQuota = (used: number, remaining: number) => ({
       used,

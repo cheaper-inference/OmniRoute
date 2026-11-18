@@ -35,11 +35,11 @@ OmniRoute 通过一个集中式允许列表，控制哪些**浏览器源**可以
 
 这意味着，即使设置了 `CORS_ALLOW_ALL=true`，各接口面的情况仍如下：
 
-| 接口面                           | 身份验证机制                | 通配符 CORS 的影响                                                                                                                                                   |
-| -------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 仪表板 / MANAGEMENT `/api/*`     | Cookie 会话                 | 源会被回显，但由于**没有 `Allow-Credentials`**，浏览器会**阻止**携带凭据的读取。恶意跨源网站**无法读取**经过身份验证的仪表板响应，并且会话 Cookie 不会被暴露。       |
-| 客户端 API `/v1/*`、`/v1beta/*`  | Bearer / `x-api-key` 请求头 | 已经**按设计**允许跨源（`relaxForTokenAuth`）：浏览器从不会自动附加 `Authorization`/`x-api-key`，因此攻击者的页面无法提供你的密钥。`CORS_ALLOW_ALL` 不会扩大此范围。 |
-| 公共只读接口（`/api/health` 等） | 无                          | 不含敏感信息；使用通配符不会造成危害。                                                                                                                               |
+| 接口面                           | 身份验证机制                | 通配符 CORS 的影响                                                                                                                                                                                                                                            |
+| -------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 仪表板 / MANAGEMENT `/api/*`     | Cookie 会话                 | 源会被回显，但由于**没有 `Allow-Credentials`**，浏览器会**阻止**携带凭据的读取。恶意跨源网站**无法读取**经过身份验证的仪表板响应，并且会话 Cookie 不会被暴露。                                                                                                |
+| 客户端 API `/v1/*`、`/v1beta/*`  | Bearer / `x-api-key` 请求头 | 已经**按设计**允许跨源（`relaxForTokenAuth`）：浏览器从不会自动附加 `Authorization`/`x-api-key`，因此攻击者的页面无法提供你的密钥。仅当所提供的密钥通过验证时才会回显源；匿名响应（`REQUIRE_API_KEY=false`）仍沿用允许列表。`CORS_ALLOW_ALL` 不会扩大此范围。 |
+| 公共只读接口（`/api/health` 等） | 无                          | 不含敏感信息；使用通配符不会造成危害。                                                                                                                                                                                                                        |
 
 因此，`CORS_ALLOW_ALL=true` 的**剩余**暴露仅限于：(a) 对本就无需身份验证的数据进行不带凭据的跨源**读取**；以及 (b) 允许管理路由的 CORS **预检请求通过**——但这些路由仍然需要身份验证，而跨源页面无法提供相应凭据。在共享 CORS 路径上，这**不会**导致会话劫持或凭据窃取。
 
@@ -80,14 +80,21 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 `http://localhost:3000` 和 `http://localhost:3000/` 等效。无需重启，
 也可以在运行时通过 **Dashboard → Security → CORS Allowed Origins** 设置相同的 CSV。
 
-## API 密钥与 Cookie 会话
+## API密钥与 cookie 会话
 
-- **Bearer / `x-api-key`（`/v1/*` 推理接口）：**浏览器绝不会自动附加
-  这些信息。CORS 在此处并不是有意义的屏障——真正的屏障是 API 密钥——
-  因此该接口有意采用宽松策略，使浏览器和 Electron 客户端能够读取它们本就有权访问的响应。
-- **Cookie 会话（控制面板）：**受默认拒绝策略**以及**
-  共享路径上不存在 `Access-Control-Allow-Credentials` 的双重保护。
-  不要将管理/控制面板源纳入任何宽松配置；它们必须严格保持默认拒绝。
+- **Bearer / `x-api-key` （ `/v1/*`推理面）：**浏览器永远不会自动附加这些。 CORS在这里不是一个有意义的障碍— API键是障碍—这就是为什么该表面故意是宽松的，以便浏览器和Electron客户端可以读取他们已经有权获得的响应。宽松的回显遵循经过验证的密钥，而不仅仅是标头的存在：当`REQUIRE_API_KEY=false`匿名服务请求时，其成功响应会保留失败关闭的白名单。身份验证拒绝 (401) 保持可读，因此客户端可以显示已撤销或输入错误的密钥 (#5242)：管道自己的 401 保留回显，并且在管道将其作为匿名服务后拒绝密钥本身的路由（配置了管理身份验证的`/v1/models`和`/v1beta/models` ，所有者范围的`/v1/files`、 `/v1/batches`、 `/v1/media`、 `/v1/session-leases`和自动组合候选路由）通过以下方式将回显添加到该 401 `credentialRejectionHeaders()`. echo 以携带凭据标头（`Authorization`、 `x-api-key`、 `x-goog-api-key`或`auth_token` cookie）的请求为关键，而不是在路由检查的其中一个上，并且永远不会与`Access-Control-Allow-Credentials`配对；主体是一个固定误差包络线。由`requireManagementAuth()`保护的`/api/v1/`下的管理路由（`/api/v1/management/*`、 `/api/v1/registered-keys`、 `/api/v1/providers/[provider]/limits`、 `/api/v1/accounts/[id]/limits`、 `/api/v1/issues/report`）不添加 echo：使用`REQUIRE_API_KEY=false`时，它们的401/403不可读跨源。
+- **Cookie 会话（仪表板）：**受故障关闭默认值保护**和**由于共享路径上缺少`Access-Control-Allow-Credentials` 。让management/dashboard起源远离任何允许的配置；它们必须完全保持故障关闭状态。
+
+## WebSocket 握手（`/v1/responses`、`/v1/ws`）
+
+浏览器不会对 WebSocket 应用 CORS，因此返回推理输出的 WebSocket 传输会自行检查握手的 `Origin`（`src/server/origin/wsOrigin.ts`）：Responses WebSocket（`/v1/responses`），以及当 OmniRoute 通过 `npm start` / `npm run dev` 运行时的 `/v1/ws` 和 `/api/v1/ws` 桥接，后者以帧的形式流式传输 `/v1/chat/completions`、`/v1/messages` 和 `/v1/responses`。桥接会向 `/api/v1/ws?handshake=1` 询问判定结果，除非该路由执行了检查，否则拒绝升级。满足以下任一条件时，握手会被接受：
+
+- 没有 `Origin` 请求头（Codex CLI、SDK 及其他非浏览器客户端）；
+- `Origin` 被上文的允许列表接纳（`CORS_ALLOWED_ORIGINS`、`corsOrigins` 设置、`CORS_ORIGIN`、`CORS_ALLOW_ALL`）；
+- `Origin` 是 OmniRoute 自身的公共源之一（已配置的公共基础 URL、受信任代理转发的源，或以 IP 字面量或 `localhost` 形式给出的直连回环/局域网主机——与仪表板变更检查使用的候选项相同）；或
+- 携带有效的 API 密钥，与 HTTP `/v1/*` 接口相同。
+
+其他情况一律返回 `403 ws_origin_forbidden`。仪表板会话 Cookie 不会让外部 `Origin` 获得豁免，因为浏览器会把它附加到任何页面的套接字上。其他端口上的 `localhost` 不被视为同源；请将此类开发源添加到 `CORS_ALLOWED_ORIGINS`。
 
 ## 示例：在 OmniRoute 前设置反向代理
 
@@ -123,6 +130,7 @@ location / {
 | 控制面板警告横幅                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins 字段           | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent 每路由 CORS（例外情况） | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket 握手 `Origin` 检查        | `src/server/origin/wsOrigin.ts`                                      |
 
 ## 另请参阅
 

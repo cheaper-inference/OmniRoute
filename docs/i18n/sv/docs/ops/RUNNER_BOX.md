@@ -27,13 +27,12 @@ Uppmätt 2026-10-18:
 | swap      | 16 GB                        | `omniroute-113-5` körs med swap avstängt (`MemorySwapMax=0`), så ett skenande bygge stoppas vid sin gräns i stället för att få maskinen att använda swap                                                                                                                                                                                                                                        |
 | `/tmp`    | **12 GB tmpfs = RAM**        | allt som placeras där använder minne; kvarlämnade filer rensas efter 3 h                                                                                                                                                                                                                                                                                                                        |
 | CPU       | load 60 på 32 kärnor uppmätt | före kvoterna gjorde ett Turbopack-bygge (~1166 % CPU) tillsammans med en coverage-svit på samma maskin att de andra lyssnarnas hjärtslag inte fick resurser (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                              |
-| runners   | **6 lyssnare**               | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` är inaktiverade (`systemctl enable --now` återaktiverar en)                                                                                                                                                                                                                                                                     |
+| runners   | **7 lyssnare** (2026-10-28)  | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bär även `omni-build`; `omniroute-113-3/-4/-8` togs bort från repot (2026-10-28)                                                                                                                                                                                                                                                         |
 
 Gränserna finns i varje enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (tidigare värden sparades som `override.conf.bak-20261018`) och tillämpades live med
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ingen omstart, så inget
-pågående jobb påverkades. Etiketterna ändras också live via runners-API:t
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+pågående jobb påverkades. Etiketterna ändras också live via runners-API:t (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
 
 ## Installera rensningsskriptet (en gång, på maskinen)
@@ -42,7 +41,7 @@ pågående jobb påverkades. Etiketterna ändras också live via runners-API:t
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): var 30:e minut, logga till /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` krävs: rensningsskriptet verifierar att en sökväg är inaktiv med en ögonblicksbild av öppna
@@ -116,8 +115,16 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
   hade `MemoryHigh=4G` fram till 2026-10-18 — promptfoo-bygget återtog minne under hela sin 54 minuter långa
   körning där; 8 GB eliminerar strypningen.
 - **Färre lyssnare avsiktligt.** Fyra OmniRoute-enheter inaktiverades 2026-08-29 — varje extra
-  lyssnare är ytterligare en konsument av minnesbudgeten ovan. Vaktmästarens tak är 6 (`MAX_ACTIVE_RUNNERS=6` i cron): den räknar
-  varje `Runner.Listener` på servern, och OmniHeuris + OmniMind lägger till två utöver våra fyra.
+  lyssnare är ytterligare en konsument av minnesbudgeten ovan. Vaktmästarens tak är 8 (`MAX_ACTIVE_RUNNERS=8` i cron): den räknar
+  varje `Runner.Listener` på servern, och OmniHeuris + OmniMind lägger till två utöver våra fem.
+- **Unit- och Vitest-jobb stannar värdbaserade.** `ci.yml` skickar sina unit-shards och Vitest-jobbet till
+  `[self-hosted, omni-ci]` endast när repovariabeln `vars.USE_VPS_TEST_RUNNER` är
+  `true`, och då bara för `pull_request`-körningar från samma repo; forkar, `merge_group` och pushar
+  stannar på `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabeln är
+  `false`. Den 2026-10-28 tog tre `omni-ci`-lyssnare med 4 kärnor 250–270 s för `npm ci`, och varje
+  unit-shard nådde jobbgränsen på 30 minuter, mot ~634 s för en värdbaserad shard, med serverns last på
+  17–24. Lyssnarna togs bort. Slå inte på variabeln igen utan lyssnare dimensionerade för
+  en unit-shard.
 - **Rensa aldrig `/tmp` eller `_work` manuellt medan någon runner är upptagen.** En
   kontroll följd av borttagning med ett mellanrum mellan de två gjorde att ett aktivt byggjobb förlorade sin
   `_work` 2026-08-27. Vaktmästaren utför kontrollen och borttagningen i ett enda steg;
@@ -131,8 +138,10 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
 
 ## Värdbaserad kö (GitHub-värdbaserade körmiljöer)
 
-Kontot har **Pro**-planen: **40 samtidiga värdbaserade jobb**, som delas av varje PR-kontroll,
-varje arbetsflöde som utlöses av en push och CodeQL:s standardkonfiguration. Uppmätt 2026-10-18 under en
+Repot tillhör organisationen `cheaper-inference`, på **Team**-planen: **60
+samtidiga värdbaserade jobb**, som delas av varje repo i organisationen, varje PR-kontroll,
+varje arbetsflöde som utlöses av en push och CodeQL:s standardkonfiguration. Siffrorna nedan uppmättes på
+**Pro**-planen (40 samtidiga värdbaserade jobb). Uppmätt 2026-10-18 under en
 sammanslagningskampanj (~10 sammanslagningar/timme på `release/v3.8.52`): **2 500 arbetsflödeskörningar skapades under
 24 timmar**, 44 pushar till grenen under 6 timmar, **106 värdbaserade jobb köades** medan PR-kontroller väntade i
 timmar och PR:er slogs samman utan dem. Nio arbetsflöden utlöstes vid varje push till grenen:

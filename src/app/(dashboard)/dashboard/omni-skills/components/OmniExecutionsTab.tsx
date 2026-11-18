@@ -11,6 +11,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
 import { Card } from "@/shared/components";
+import type { JSX } from "react";
 
 interface Execution {
   id: string;
@@ -42,7 +43,11 @@ export function OmniExecutionsTab({
 
   return (
     <Card>
-      <Table aria-label={t("executionsTab")} scrollbarLabel={t("executionsTab")}>
+      <Table
+        aria-label={t("executionsTab")}
+        scrollbarLabel={t("executionsTab")}
+        containerClassName="rounded-none border-0"
+      >
         <TableHeader>
           <TableRow>
             <TableHead>{t("skill")}</TableHead>
@@ -61,7 +66,7 @@ export function OmniExecutionsTab({
           ) : (
             executions.map((exec) => (
               <TableRow key={exec.id}>
-                <TableCell className="font-medium">{exec.skillName}</TableCell>
+                <TableCell>{exec.skillName}</TableCell>
                 <TableCell>
                   <span
                     className={`text-xs px-2 py-1 rounded ${

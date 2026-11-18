@@ -55,7 +55,7 @@ lastUpdated: 2026-10-18
 1. Create skill in `src/lib/a2a/skills/` (6 already exist: smart-routing, quota-management, provider-discovery, cost-analysis, health-report, list-capabilities)
 2. Skill receives task context (messages, metadata) → returns structured result
 3. Register in `A2A_SKILL_HANDLERS` in `src/lib/a2a/taskExecution.ts`
-4. Expose in `src/app/.well-known/agent.json/route.ts` (Agent Card)
+4. Expose in `src/lib/a2a/agentCardMetadata.ts` (Agent Card skills array, shared by both discovery routes)
 5. Write tests in `tests/unit/`
 6. Document in `docs/frameworks/A2A-SERVER.md` skill table
 

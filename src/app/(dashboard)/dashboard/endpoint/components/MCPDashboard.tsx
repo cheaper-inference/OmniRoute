@@ -14,6 +14,7 @@ import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { useTranslations } from "next-intl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type McpTransport = "stdio" | "sse" | "streamable-http";
 
@@ -192,6 +193,7 @@ function formatPercent(value: number | null | undefined) {
 
 export default function McpDashboardPage() {
   const t = useTranslations("mcpDashboard");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<McpStatusResponse | null>(null);
   const [tools, setTools] = useState<McpTool[]>([]);
@@ -297,9 +299,11 @@ export default function McpDashboardPage() {
     const nextState = selectedCombo.isActive === false;
     const confirmLabel = nextState ? t("activate") : t("deactivate");
     if (
-      !globalThis.confirm(
-        t("confirmSwitchCombo", { action: confirmLabel, combo: selectedCombo.name })
-      )
+      !(await requestConfirm({
+        message: t("confirmSwitchCombo", { action: confirmLabel, combo: selectedCombo.name }),
+        confirmText: confirmLabel,
+        variant: nextState ? "primary" : "danger",
+      }))
     )
       return;
 
@@ -333,7 +337,13 @@ export default function McpDashboardPage() {
       conservative: t("profileConservative"),
     };
     const profileLabel = profileLabelById[selectedProfile];
-    if (!globalThis.confirm(t("confirmApplyProfile", { profile: profileLabel }))) return;
+    if (
+      !(await requestConfirm({
+        message: t("confirmApplyProfile", { profile: profileLabel }),
+        variant: "primary",
+      }))
+    )
+      return;
 
     setActionBusy("resilience");
     setActionMessage("");
@@ -358,7 +368,7 @@ export default function McpDashboardPage() {
   };
 
   const handleResetCircuitBreakers = async () => {
-    if (!globalThis.confirm(t("confirmResetBreakers"))) return;
+    if (!(await requestConfirm(t("confirmResetBreakers")))) return;
 
     setActionBusy("reset");
     setActionMessage("");
@@ -403,7 +413,7 @@ export default function McpDashboardPage() {
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("activity24h")}</h2>
+        <h2 className="text-lg mb-4">{t("activity24h")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <StatCard label={t("totalCalls")} value={status?.activity?.totalCalls24h ?? 0} compact />
           <StatCard
@@ -419,7 +429,7 @@ export default function McpDashboardPage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="rounded-lg border border-border p-3">
-            <h3 className="text-sm font-semibold mb-2">{t("topTools")}</h3>
+            <h3 className="text-sm mb-2">{t("topTools")}</h3>
             {topTools.length === 0 ? (
               <p className="text-sm text-text-muted">{t("noToolCalls24h")}</p>
             ) : (
@@ -434,7 +444,7 @@ export default function McpDashboardPage() {
             )}
           </div>
           <div className="rounded-lg border border-border p-3">
-            <h3 className="text-sm font-semibold mb-2">{t("runtimeDetails")}</h3>
+            <h3 className="text-sm mb-2">{t("runtimeDetails")}</h3>
             <div className="text-sm space-y-1">
               <p>
                 {t("transport")}: <span className="font-mono">{runtimeTransport}</span>
@@ -466,7 +476,7 @@ export default function McpDashboardPage() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("operationalControls")}</h2>
+        <h2 className="text-lg mb-4">{t("operationalControls")}</h2>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <div className="rounded-lg border border-border p-3 space-y-3">
             <p className="text-sm font-semibold">{t("switchCombo")}</p>
@@ -531,9 +541,13 @@ export default function McpDashboardPage() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("toolsAndScopes")}</h2>
+        <h2 className="text-lg mb-4">{t("toolsAndScopes")}</h2>
         <div className="overflow-x-auto">
-          <Table scrollbarLabel={t("toolsAndScopes")}>
+          <Table
+            scrollbarLabel={t("toolsAndScopes")}
+            scrollLabel={t("toolsAndScopes")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("tableTool")}</TableHead>
@@ -559,7 +573,7 @@ export default function McpDashboardPage() {
       <Card className="p-5">
         <div className="flex flex-wrap gap-2 items-end justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">{t("auditLog")}</h2>
+            <h2 className="text-lg">{t("auditLog")}</h2>
             <p className="text-sm text-text-muted">
               {t("auditSummary", { total: auditData.total, page: currentPage, totalPages })}
             </p>
@@ -610,7 +624,11 @@ export default function McpDashboardPage() {
           <p className="text-sm text-text-muted">{t("noAuditEntriesForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <Table scrollbarLabel={t("auditLog")}>
+            <Table
+              scrollbarLabel={t("auditLog")}
+              scrollLabel={t("auditLog")}
+              containerClassName="rounded-none border-0"
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("tableTimestamp")}</TableHead>
@@ -662,6 +680,7 @@ export default function McpDashboardPage() {
           </Button>
         </div>
       </Card>
+      {confirmDialog}
     </div>
   );
 }

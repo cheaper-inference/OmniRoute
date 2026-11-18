@@ -13,6 +13,7 @@ import path from "node:path";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "batch-deletion-route-logic-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 const { canAccessOwnedRecord } = await import("../../src/app/api/v1/_helpers/apiKeyScope.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const TERMINAL = ["completed", "failed", "cancelled", "expired"];
 
@@ -29,6 +30,7 @@ function canDeleteBatch(status: string): boolean {
 }
 
 test.after(() => {
+  resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

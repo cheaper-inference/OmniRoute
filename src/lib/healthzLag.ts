@@ -1,4 +1,5 @@
 import { monitorEventLoopDelay } from "node:perf_hooks";
+import { getHeapSpaceStatistics } from "node:v8";
 
 /** `/healthz` returning 200 after this much event-loop lag is already sick (#10303). */
 export const HEALTHZ_SLOW_LAG_MS = 200;
@@ -63,6 +64,41 @@ let stallCount = 0;
 let stallMaxMs = 0;
 let stallWarnedSampler = false;
 
+// Opt-in, count-only diagnostics for unusually large V8 heaps.
+// Default off; never retain request bodies, stack traces, or heap snapshots.
+const HEAP_DIAGNOSTIC_INTERVAL_MS = 60_000;
+const DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB = 900;
+const MiB = 1024 * 1024;
+let lastHeapDiagnosticAt = Number.NEGATIVE_INFINITY;
+
+function maybeRecordHighHeap(
+  nowMs: number,
+  sampler: () => number,
+  log: (message: string) => void
+): void {
+  if (process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED !== "1") return;
+  if (nowMs - lastHeapDiagnosticAt < HEAP_DIAGNOSTIC_INTERVAL_MS) return;
+  const rawThreshold = Number(process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB);
+  const thresholdMb =
+    Number.isFinite(rawThreshold) && rawThreshold > 0
+      ? rawThreshold
+      : DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB;
+  const memory = process.memoryUsage();
+  if (memory.heapUsed < thresholdMb * MiB) return;
+  lastHeapDiagnosticAt = nowMs;
+  const oldSpace = getHeapSpaceStatistics().find((space) => space.space_name === "old_space");
+  log(
+    "[HEALTHZ] high V8 heap " +
+      `heapUsedMb=${Math.round(memory.heapUsed / MiB)} ` +
+      `heapTotalMb=${Math.round(memory.heapTotal / MiB)} ` +
+      `rssMb=${Math.round(memory.rss / MiB)} ` +
+      `externalMb=${Math.round(memory.external / MiB)} ` +
+      `arrayBuffersMb=${Math.round(memory.arrayBuffers / MiB)} ` +
+      `oldSpaceUsedMb=${Math.round((oldSpace?.space_used_size ?? 0) / MiB)} ` +
+      `inflight=${readInflightSample(sampler, log)}`
+  );
+}
+
 function resolveEventLoopStallThresholdMs(explicit?: number): number {
   if (explicit !== undefined) {
     return explicit === 0 || (Number.isFinite(explicit) && explicit > 0)
@@ -121,6 +157,7 @@ export function startEventLoopStallRecorder(opts: EventLoopStallRecorderOptions 
     const at = now();
     const driftMs = Math.round(at - stallLastTick - EVENT_LOOP_STALL_INTERVAL_MS);
     stallLastTick = at;
+    maybeRecordHighHeap(at, sampler, log);
     if (!Number.isFinite(driftMs) || driftMs <= thresholdMs) return;
     stallCount += 1;
     stallMaxMs = Math.max(stallMaxMs, driftMs);
@@ -156,6 +193,7 @@ export function resetEventLoopStallStatsForTests(): void {
   stallCount = 0;
   stallMaxMs = 0;
   stallWarnedSampler = false;
+  lastHeapDiagnosticAt = Number.NEGATIVE_INFINITY;
 }
 
 export function getEventLoopStallStats(): EventLoopStallStats {

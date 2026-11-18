@@ -1,4 +1,5 @@
 import type { OmniRouteRawModelEntry } from "./shared/index.js";
+import { matchesModelFilter, type ModelListFilter } from "./model-filter.js";
 
 /**
  * Freshness window in days. The millisecond value below derives from it,
@@ -119,6 +120,16 @@ export function isFlatTierId(id: string): boolean {
 }
 
 /**
+ * The bare master auto router (`auto`, served as `owned_by: "combo"`).
+ * It is a routing entry point, not a ranked model: it always publishes
+ * and never takes a per-owner showcase slot. The `auto/*` variants stay
+ * subject to the cap.
+ */
+export function isMasterAutoRouter(entry: OmniRouteRawModelEntry): boolean {
+  return entry.id === "auto" && entry.owned_by === "combo";
+}
+
+/**
  * Pick the showcase ids: per `owned_by` group (prefix before `/`, else
  * `"unknown"`), newest `release_date` first (unknown = oldest), then
  * largest `context_length`. Providers surface at runtime; nothing is
@@ -131,6 +142,7 @@ export function selectShowcaseIds(
   const groups = new Map<string, OmniRouteRawModelEntry[]>();
   for (const entry of entries) {
     if (!entry || typeof entry.id !== "string" || entry.id.length === 0) continue;
+    if (isMasterAutoRouter(entry)) continue;
     const owner = ownerKeyOf(entry);
     const list = groups.get(owner);
     if (list) list.push(entry);
@@ -163,12 +175,12 @@ export function passesWhatServes(
   windowMs: number = FRESHNESS_WINDOW_MS
 ): boolean {
   if (visibleFilter !== undefined) {
-    if (visibleFilter.exact.has(entry.id)) return true;
-    if (matchesSuffix(entry.id, visibleFilter.suffixes)) return true;
+    if (matchesModelFilter(entry.id, visibleFilter)) return true;
   }
   // The raw gateway row may carry a lifecycle hint the typed entry does
   // not declare (it already flows through the fetcher untouched).
   if (readEntryStatus(entry) === "deprecated") return false;
+  if (isMasterAutoRouter(entry)) return true;
   if (isFlatTierId(entry.id)) return false;
   if (isFreshModel(entry, nowMs, windowMs)) {
     if (freshKept !== undefined) return freshKept.has(entry.id);
@@ -197,9 +209,9 @@ export function selectFreshKeptIds(
     if (!entry || typeof entry.id !== "string" || entry.id.length === 0) continue;
     if (readEntryStatus(entry) === "deprecated") continue;
     if (isFlatTierId(entry.id)) continue;
+    if (isMasterAutoRouter(entry)) continue;
     if (visibleFilter !== undefined) {
-      if (visibleFilter.exact.has(entry.id)) continue;
-      if (matchesSuffix(entry.id, visibleFilter.suffixes)) continue;
+      if (matchesModelFilter(entry.id, visibleFilter)) continue;
     }
     if (!isFreshModel(entry, nowMs, windowMs)) continue;
     const owner = ownerKeyOf(entry);
@@ -231,16 +243,4 @@ export function staysDropped(
   if (isFlatTierId(entry.id)) return true;
   if (isFreshModel(entry, nowMs, windowMs) && !freshKept.has(entry.id)) return true;
   return false;
-}
-
-export interface ModelListFilter {
-  exact: Set<string>;
-  suffixes: Set<string>;
-}
-
-export function matchesSuffix(id: string, suffixes: Set<string>): boolean {
-  if (suffixes.size === 0) return false;
-  const slash = id.indexOf("/");
-  const suffix = slash > 0 ? id.slice(slash + 1) : id;
-  return suffixes.has(suffix);
 }

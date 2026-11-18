@@ -273,6 +273,9 @@ test("#15534 real path: a foreign signed-empty historical block is sanitized, re
   // Deliberately FOREIGN signed-empty thinking in HISTORICAL turns, plus a
   // complete active tool cycle whose thinking must survive recovery verbatim.
   const FOREIGN_SIGNATURE = "FOREIGN_NON_ANTHROPIC_SIGNATURE_SENTINEL";
+  // A signed block WITH text cannot be told apart from a genuine one before dispatch, so it
+  // is forwarded; the mocked 400 below must then be recovered by the one-shot retry.
+  const HISTORICAL_SIGNATURE = "HISTORICAL_SIGNED_WITH_TEXT_SENTINEL";
   const clientBody = {
     model: "sig-15534-foreign",
     stream: false,
@@ -282,6 +285,7 @@ test("#15534 real path: a foreign signed-empty historical block is sanitized, re
         role: "assistant",
         content: [
           { type: "thinking", thinking: "", signature: FOREIGN_SIGNATURE },
+          { type: "thinking", thinking: "earlier reasoning", signature: HISTORICAL_SIGNATURE },
           { type: "text", text: "starting" },
         ],
       },
@@ -341,6 +345,16 @@ test("#15534 real path: a foreign signed-empty historical block is sanitized, re
     false,
     "the foreign signature value must not appear anywhere in the first outbound body"
   );
+  assert.equal(
+    firstThinking.some((b) => b.signature === HISTORICAL_SIGNATURE),
+    true,
+    "a signed historical block with text is forwarded on the first attempt"
+  );
+  assert.equal(
+    serializedFirst.includes("redacted_thinking"),
+    false,
+    "no redacted_thinking placeholder is injected"
+  );
   assert.ok(
     firstContent.some((b) => b?.type === "tool_use" && b.id === "toolu_15534"),
     "active tool_use is present on the first attempt"
@@ -353,6 +367,11 @@ test("#15534 real path: a foreign signed-empty historical block is sanitized, re
     retryThinking.some((b) => b.signature === FOREIGN_SIGNATURE),
     false,
     "rejected historical thinking is stripped on the recovery retry"
+  );
+  assert.equal(
+    retryThinking.some((b) => b.signature === HISTORICAL_SIGNATURE),
+    false,
+    "the rejected signed historical block is stripped on the recovery retry"
   );
   assert.ok(
     retryThinking.some((b) => b.signature === "ACTIVE_CYCLE_SIG"),

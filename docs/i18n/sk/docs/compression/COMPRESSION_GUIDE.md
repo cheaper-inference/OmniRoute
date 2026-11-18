@@ -32,93 +32,92 @@ Požiadavka klienta
 
 ## Režimy kompresie
 
-### Vypnutý
+### Vypnuté
 
-Nepoužije sa žiadna kompresia. Všetky správy prejdú bez zmien.
+Nepoužíva sa žiadna kompresia. Všetky správy prechádzajú nezmenené.
 
-### Ľahký režim (úspora ~15 %, latencia <1 ms)
+### Ľahký režim (~15 % úspora, <1 ms latencia)
 
-Najbezpečnejší režim — nulová zmena významu, iba vyčistenie formátovania:
+Najbezpečnejší režim — čistenie formátovania. Skrátenie výsledkov nástrojov spôsobuje stratu údajov, preto predvolená
+cesta (bez `allow-lossy`, `engine:lite` alebo explicitného povolenia pomenovanej kombinácie) spúšťa ľahký režim s
+`compressToolResults: false`: predchádzajúce výsledky nástrojov sa poskytovateľovi odovzdajú nezmenené.
 
-| Technika                 | Opis                                                       |
-| ------------------------ | ---------------------------------------------------------- |
-| `collapseWhitespace`     | Zlúči po sebe nasledujúce prázdne riadky a koncové medzery |
-| `dedupSystemPrompt`      | Odstráni duplicitné systémové správy                       |
-| `compressToolResults`    | Komprimuje rozsiahle výstupy nástrojov/funkcií             |
-| `removeRedundantContent` | Odstráni opakované pokyny                                  |
-| `replaceImageUrls`       | Skráti dátové URI obrázkov vo formáte base64               |
+| Technika                 | Opis                                                                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Zlúčenie po sebe idúcich prázdnych riadkov a koncových medzier                                                               |
+| `dedupSystemPrompt`      | Odstránenie duplicitných systémových správ                                                                                   |
+| `compressToolResults`    | Skrátenie skorších výsledkov nástrojov na limit ľahkého režimu (so stratou údajov: iba s explicitným povolením v požiadavke) |
+| `removeRedundantContent` | Odstránenie opakujúcich sa pokynov                                                                                           |
+| `replaceImageUrls`       | Skrátenie dát URI obrázkov v kódovaní base64                                                                                 |
 
-**Najvhodnejšie pre:** Neustále používanie a pracovné postupy s kritickými požiadavkami na bezpečnosť.
+**Vhodné pre:** Používanie vždy, kriticky dôležité pracovné postupy.
 
-### Štandardný režim (úspora ~30 %)
+### Štandardný režim (~30 % úspora)
 
-Inšpirovaný nástrojom [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňové slová a rozvláčne formulácie, pričom zachováva význam:
+Inšpirovaný projektom [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňové slová a príliš rozvláčne formulácie pri zachovaní významu:
 
-- Odstraňuje výplňové slová („prosím“, „myslím si“, „v podstate“, „vlastne“)
-- Skracuje rozvláčne frázy („s cieľom“ → „na“, „v dôsledku“ → „pretože“)
-- Odstraňuje zdvorilé zmierňujúce formulácie („Nevadilo by vám...“, „Ak by ste mohli...“)
-- Viac ako 30 pravidiel regulárnych výrazov vyladených pre programátorské prompty
+- Odstraňuje výplňové slová („please“, „I think“, „basically“, „actually“)
+- Skracuje rozvláčne formulácie („in order to“ → „to“, „as a result of“ → „because“)
+- Odstraňuje zdvorilé zmierňovanie („Would you mind...“, „If you could possibly...“)
+- Viac než 30 regulárnych výrazov vyladených pre programátorské zadania
 
-**Najvhodnejšie pre:** Každodenné programátorské pracovné postupy a tímy, ktoré dbajú na náklady.
+**Vhodné pre:** Každodenné programátorské pracovné postupy, tímy zamerané na úsporu nákladov.
 
-### Agresívny režim (úspora ~50 %)
+### Agresívny režim (~50 % úspora)
 
 Inteligentná správa histórie pre dlhé relácie:
 
-- **Starnutie správ** — staršie správy sa postupne komprimujú
+- **Starnutie správ** — staršie správy sa postupne viac komprimujú
 - **Kompresia výsledkov nástrojov** — dlhé výstupy nástrojov sa skracujú alebo vynechávajú (prvé/posledné riadky,
-  filtrovanie zhodujúcich sa riadkov, kompakcia kľúčov JSON)
-- **Ochrany štrukturálnej integrity** — zaisťujú konzistentnosť párov `tool_use` + `tool_result`
+  filtrovanie podľa zhodných riadkov, kompaktné kľúče JSON)
+- **Strážcovia štrukturálnej integrity** — zaisťujú konzistentnosť dvojíc `tool_use` + `tool_result`
 - **Zohľadnenie kontextového okna** — rešpektuje limity tokenov jednotlivých modelov
 
-**Najvhodnejšie pre:** Dlhé relácie ladenia a veľké kódové základne.
+**Vhodné pre:** Dlhšie relácie ladenia, rozsiahle kódové základne.
 
-### Režim Ultra (úspora ~75 %)
+### Ultra režim (~75 % úspora)
 
-Maximálna kompresia pre scenáre s kritickým obmedzením tokenov:
+Maximálna kompresia pre scenáre kritické z hľadiska počtu tokenov:
 
-- **Heuristické prerezávanie** — prerezávanie tokenov prózy na základe skóre
-- **Zachovanie štruktúry** — ohraničené bloky kódu, kód v riadku, URL adresy a identifikátory sa
-  nahradia zástupnými značkami a následne sa znova vložia bez zmeny; nikdy sa neprerezávajú
-- **Voliteľná úroveň SLM** — ak je nakonfigurovaná, malé lokálne modely môžu prerezávanie spresniť
-- Nezávisí od agresívneho režimu: nevykonáva starnutie správ, kompresiu výsledkov nástrojov
-  ani záložnú sumarizáciu (iba zlyhanie na úrovni SLM môže nasmerovať záložný priechod cez
-  agresívny režim)
+- **Heuristické orezávanie** — orezávanie tokenov prózy na základe skóre
+- **Zachovanie štruktúry** — bloky kódu s ohraničením, vložený kód, URL a identifikátory sa označia a následne
+  znovu vložia doslovne, nikdy sa neorezávajú
+- **Voliteľná úroveň SLM** — malý lokálny model môže pri nakonfigurovaní spresniť orezanie
+- Nezávislé od agresívneho režimu: nespúšťa starnutie správ, kompresiu výsledkov nástrojov
+  ani záložný sumarizátor (iba zlyhanie úrovne SLM môže presmerovať spracovanie cez agresívny režim)
 
-**Najvhodnejšie pre:** Situácie, keď opakovane narážate na limity kontextu.
+**Vhodné pre:** Situácie, keď opakovane narážate na limity kontextu.
 
-### Režim RTK (rozsah 60 – 90 % pre nadradeného poskytovateľa)
+### Režim RTK (60 – 90 % v rámci upstreamu)
 
-Režim RTK je optimalizovaný pre rozsiahle výstupy nástrojov, ktoré sa objavujú v reláciách programátorských agentov:
+Režim RTK je optimalizovaný pre rozvláčne výstupy nástrojov, ktoré sa objavujú v reláciách s programátorskými agentmi:
 
-- Rozpoznáva triedy príkazov/výstupov, ako sú `git status`, `git diff`, `git log`, nástroje na spúšťanie testov,
-  zostavenia TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audity/inštalácie npm, protokoly Docker, výstup infraštruktúry
-  a všeobecný výstup shellu
+- Rozpoznáva triedy príkazov/výstupov, ako sú `git status`, `git diff`, `git log`, spúšťače testov,
+  zostavenia TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/inštalácie, protokoly Docker, výstupy infraštruktúry
+  a všeobecné výstupy shellu
 - Používa balíky filtrov JSON z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtre schémy RTK TOML v1 z projektových alebo globálnych súborov `filters.toml`, s overením
-  vložených testov a kontrolou dôveryhodnosti projektových súborov
-- Obsahuje 55 vstavaných filtrov s vloženými overovacími vzorkami
-- Odstraňuje riadiace sekvencie ANSI, indikátory priebehu, opakované riadky a šum, ktorý nevyžaduje zásah
+- Importuje filtre schémy RTK TOML v1 zo súborov `filters.toml` projektu alebo globálnych súborov s overením inline testov
+  a riadením dôveryhodnosti súborov projektu
+- Obsahuje 56 vstavaných filtrov s inline overovacími vzorkami
+- Odstraňuje riadiace sekvencie ANSI, indikátory priebehu, opakujúce sa riadky a nerelevantný šum
 - Zachováva zlyhania, chyby, upozornenia, zmenené súbory, súhrny a koniec dlhého výstupu
-- Podporuje projektové filtre s kontrolou dôveryhodnosti, globálne filtre a voliteľné obnovenie redigovaného nespracovaného výstupu
+- Podporuje filtre projektu s riadením dôveryhodnosti, globálne filtre a voliteľnú obnovu redigovaného nespracovaného výstupu
 
-**Najvhodnejšie pre:** Relácie agentov s prepismi shellu, zostavení, testov, gitu, grepu a súborových výstupov.
+**Vhodné pre:** Relácie agentov s výstupmi shellu, zostavení, testov, git, grep a súborov.
 
-### Vrstvený režim (rozsah 78 – 95 % vhodného obsahu)
+### Skladaný režim (78 – 95 % v rámci vhodného rozsahu)
 
-Vrstvený režim spúšťa viacero kompresných enginov v deterministickom poradí. Predvolený pipeline je:
+Skladaný režim spúšťa viacero kompresných nástrojov v deterministickom poradí. Predvolený kanál je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Toto poradie najskôr skomprimuje výstup terminálu/nástrojov a potom použije sémantickú kondenzáciu Caveman na
-zostávajúci prompt v prirodzenom jazyku. Vrstvené pipeline možno konfigurovať globálne alebo prostredníctvom
-kombinácií kompresie priradených ku kombináciám smerovania.
+Toto poradie najprv zjednotí terminálový výstup/výstup nástrojov, potom použije sémantickú kondenzáciu Caveman na
+zostávajúce zadanie v prirodzenom jazyku. Skladané kanály možno konfigurovať globálne alebo prostredníctvom
+kompresných kombinácií priradených ku kombináciám smerovania.
 
-**Najvhodnejšie pre:** Zmiešaný kontext s veľkými protokolmi nástrojov spolu s ľudskými pokynmi alebo súhrnmi asistenta.
-
----
+**Vhodné pre:** Zmiešaný kontext s rozsiahlymi protokolmi nástrojov a ľudskými pokynmi alebo zhrnutiami asistenta.
 
 ## Výpočet úspor z upstream projektov
 
@@ -186,86 +185,92 @@ So Stacked:          10K-2.5K odoslaných tokenov     (rozsah 78-95% pre vhodné
 
 ## Konfigurácia
 
-### Ovládací panel
+### Panel
 
 Prejdite na `Dashboard → Context & Cache`:
 
 - **Caveman** — výber režimu, jazykové balíky, náhľad a globálne predvolené nastavenia
-- **RTK** — náhľad filtrovania príkazov, bezpečnostné nastavenia RTK a katalóg filtrov
-- **Compression Combos** — pomenované postupnosti enginov priradené ku kombináciám smerovania
-- **Auto-Trigger Threshold** — automaticky zapne kompresiu, keď počet tokenov prekročí prahovú hodnotu
+- **RTK** — náhľad filtrovania príkazov, nastavenia bezpečnosti RTK a katalóg filtrov
+- **Compression Combos** — pomenované pipeline nástrojov priradené ku kombináciám smerovania
+- **Auto-Trigger Threshold** — automatické zapnutie kompresie, keď počet tokenov prekročí prahovú hodnotu
 
-### Prepísanie pre konkrétnu kombináciu
+### Prepísanie pre kombináciu
 
-V časti `Dashboard → Context & Cache → Compression Combos` priraďte kombináciu kompresie ku kombinácii
+V časti `Dashboard → Context & Cache → Compression Combos` priraďte kompresnú kombináciu ku kombinácii
 smerovania:
 
 ```txt
-Kombinácia: "free-tier-fallback"
-  Kombinácia kompresie: "coding-agent-stack"
-  Postupnosť: RTK -> Caveman
-  Ciele:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Vďaka tomu môžete používať vrstvenú kompresiu pre bezplatných poskytovateľov alebo poskytovateľov
-určených na programovanie a súčasne zachovať režim Lite pre platené predplatné.
+To vám umožní používať vrstvenú kompresiu u bezplatných poskytovateľov a poskytovateľov na programovanie,
+pričom v platených predplatných zostane zapnutý odľahčený režim.
 
-Toto priradenie „Prepísanie pre konkrétnu kombináciu“ je iný ovládací prvok než prepísanie
-**režimu kompresie kombinácie smerovania** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses —
-schéma poľa podporuje aj hodnoty `rtk`, `stacked` a `omniglyph`) — toto prepísanie nevyberá pomenovanú
-postupnosť kombinácie kompresie; iba nastavuje pole `compressionMode`, ktoré používa
-`resolveCompressionPlan`. Možno ho nastaviť buď na karte kombinácie (`Dashboard → Combos`), alebo od
-verzie #6760 pre každú kombináciu smerovania v zozname „Assign to routing“ v časti
+Toto priradenie „Prepísanie pre kombináciu“ je iné nastavenie než prepísanie **režimu kompresie
+kombinácie smerovania** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — schéma poľa
+akceptuje aj `rtk`, `stacked` a `omniglyph`) — toto prepísanie nevyberá pomenovanú pipeline kompresnej
+kombinácie; iba nastavuje pole `compressionMode`, ktoré používa
+`resolveCompressionPlan`. Dá sa nastaviť buď na karte kombinácie (`Dashboard → Combos`), alebo od
+#6760 pre každú kombináciu smerovania v zozname „Assign to routing“ v časti
 `Dashboard → Context & Cache → Compression Combos`, hneď vedľa začiarkavacieho políčka na priradenie
-postupnosti, ktoré je zdokumentované vyššie. Obe rozhrania ukladajú nastavenia prostredníctvom rovnakého
-koncového bodu `PUT /api/combos/{id}`.
+pipeline opísaného vyššie. Obe rozhrania ukladajú údaje prostredníctvom rovnakého koncového bodu
+`PUT /api/combos/{id}`.
 
-### Prepísanie pre konkrétnu požiadavku
+### Prepísanie pre jednotlivú požiadavku
 
-Odošlite hlavičku požiadavky `x-omniroute-compression`, ak chcete prepísať plán kompresie pre jednu
-požiadavku. Má najvyššiu prioritu — má prednosť pred prepísaním kombinácie smerovania, aktívnym profilom,
-automatickým spustením aj nastavením Default na paneli. Neznáme hodnoty sa ignorujú (požiadavka sa nikdy
-neodmietne) a globálny hlavný prepínač má naďalej rozhodujúcu úlohu: keď je kompresia globálne vypnutá,
+Odošlite hlavičku požiadavky `x-omniroute-compression`, ktorou prepíšete plán kompresie pre jednu
+požiadavku. Má najvyššiu prioritu — prepisuje nastavenie kombinácie smerovania, aktívny profil,
+automatické spustenie aj predvolené nastavenie panela. Neznáme hodnoty sa ignorujú (požiadavka sa
+nikdy nezamietne) a globálny hlavný prepínač stále riadi všetko: keď je kompresia globálne vypnutá,
 hlavička ju nemôže zapnúť. Hodnoty:
 
-| Hodnota       | Účinok                                                                                                                |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Pre túto požiadavku sa nepoužije žiadna kompresia.                                                                    |
-| `default`     | Profil Default odvodený z panela (ignoruje aktívny profil). Stratové enginy zostanú vypnuté.                          |
-| `safe`        | Rovnaké ako vynechanie hlavičky: iba deduplikácia a zlučovanie bielych znakov.                                        |
-| `allow-lossy` | Zachová plán operátora tejto požiadavky vrátane súhrnov, filtrov relevantnosti a úprav štýlu.                         |
-| `engine:<id>` | Jeden engine, ak je povolený, napr. `engine:rtk`. Toto je explicitné zapnutie daného enginu pre konkrétnu požiadavku. |
-| `<combo>`     | Pomenovaná kombinácia; najprv sa vyhľadáva podľa názvu (bez rozlišovania veľkosti písmen) a potom podľa ID.           |
+| Hodnota       | Účinok                                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `off`         | Pre túto požiadavku sa nepoužije žiadna kompresia.                                                                       |
+| `default`     | Profil Default odvodený z panela (ignoruje aktívny profil). Strátové nástroje zostanú vypnuté.                           |
+| `safe`        | To isté ako pri vynechaní hlavičky.                                                                                      |
+| `allow-lossy` | Zachová plán operátora pre túto požiadavku vrátane súhrnov, filtrov relevantnosti a prepisov štýlu.                      |
+| `engine:<id>` | Jeden nástroj, ak je povolený, napr. `engine:rtk`. Ide o explicitné povolenie daného nástroja pre jednotlivú požiadavku. |
+| `<combo>`     | Pomenovaná kombinácia, najskôr porovnaná podľa názvu (bez rozlišovania veľkých a malých písmen), potom podľa ID.         |
 
-Bez hodnoty `allow-lossy`, `engine:<id>` alebo pomenovanej kombinácie sa stratové enginy nepoužijú.
-Ak je kompresia zapnutá, požiadavka naďalej využíva deduplikáciu relácie a zlučovanie bielych znakov.
+Bez `allow-lossy`, `engine:<id>` alebo pomenovanej kombinácie sa strátové nástroje nepoužijú. Keď sa
+strátové nastavenie Default, automatického spustenia alebo prepísania smerovania zníži, OmniRoute
+zachová rozpoznané bezstrátové kroky z nakonfigurovanej vrstvenej pipeline v nakonfigurovanom poradí.
+Na `session-dedup → lite` sa prejde iba vtedy, keď neprežije žiadny nakonfigurovaný bezstrátový krok.
 
-Použitý plán sa zopakuje v hlavičke odpovede `X-OmniRoute-Compression: <mode>; source=<source>`,
-kde `<source>` je jedna z hodnôt `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default` alebo `off`.
+Náhľad **Effective pipeline** na paneli Nastavenia zobrazuje bežný plán uložený v konfigurácii. Keď
+je možné spustiť automatické spustenie, rovnaký náhľad zobrazí aj jeho podmienenú efektívnu pipeline,
+aby rozlíšenie počas behu v paneli aj bez hlavičky zostalo zosúladené.
+
+Použitý plán sa vracia v hlavičke odpovede
+`X-OmniRoute-Compression: <mode>; source=<source>`, kde `<source>` je jedna z hodnôt
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` alebo `off`.
 
 ### API
 
 ```bash
-# Získanie nastavení kompresie
+# Získať nastavenia kompresie
 curl http://localhost:20128/api/settings/compression
 
-# Aktualizácia nastavení kompresie
+# Aktualizovať nastavenia kompresie
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Náhľad konkrétneho obsahu RTK/stacked
+# Zobraziť náhľad konkrétneho payloadu RTK/stacked
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Zobrazenie zoznamu balíkov filtrov RTK
+# Zobraziť zoznam balíkov filtrov RTK
 curl http://localhost:20128/api/context/rtk/filters
 
-# Priame testovanie RTK s voliteľnými metadátami príkazu
+# Priamo otestovať RTK s voliteľnými metadátami príkazu
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'

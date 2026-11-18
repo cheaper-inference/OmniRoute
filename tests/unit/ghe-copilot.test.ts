@@ -99,6 +99,30 @@ test("buildUrl routes unregistered GPT-6 models to the Responses endpoint", () =
   );
 });
 
+test("buildUrl routes gpt-5.5+ and gpt-6.x ids, registered or not, to the Responses endpoint", () => {
+  const executor = new GheCopilotExecutor({
+    gheUrl: "https://ghe.company.com",
+    clientId: "test-client",
+    clientSecret: "test-secret",
+  });
+  const credentials: ProviderCredentials = {
+    providerSpecificData: { gheUrl: "https://ghe.company.com" },
+  };
+
+  for (const model of ["gpt-5.5", "gpt-6.1-terra", "ghe-copilot/gpt-6.1-sol", "gpt-7-nova"]) {
+    assert.strictEqual(
+      executor.buildUrl(model, true, 0, credentials),
+      "https://ghe.company.com/responses",
+      model
+    );
+  }
+  // Ids outside the family stay on Chat Completions.
+  assert.strictEqual(
+    executor.buildUrl("gpt-4o", true, 0, credentials),
+    "https://ghe.company.com/chat/completions"
+  );
+});
+
 // Ids the PR's buildUrl regex (`^gpt-6`) sends to /responses. Unregistered, so
 // they have no catalog targetFormat — the body must still be Responses-shaped.
 const UNREGISTERED_GPT6_MODELS = [

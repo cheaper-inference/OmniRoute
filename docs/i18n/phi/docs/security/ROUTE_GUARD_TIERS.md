@@ -10,250 +10,144 @@ Ang lahat ng ruta ng API sa pamamahala ng OmniRoute ay inuuri sa isa sa tatlong 
 proteksiyon. Hindi nagbabago ang pag-uuri, tinutukoy ito sa `src/server/authz/routeGuard.ts`,
 at sinusuri bago tumakbo ang anumang iba pang sangay ng awtentikasyon.
 
-## Mga Tier
+## Mga tier
 
 ### Tier 1 — LOCAL_ONLY
 
-**Ipinapatupad ng:** `isLocalOnlyPath(path)` → pagsusuri sa loopback host  
-**Pag-bypass:** Wala bilang default. May limitadong eksepsiyon para sa mga path sa
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kapag ang request ay may wastong
-API key na may `manage` scope (tingnan ang [Eksepsiyon para sa manage scope](#manage-scope-carve-out)).
+**Ipinapatupad ng:** `isLocalOnlyPath(path)` → loopback host check** Bypass:** Wala bilang default. Makitid na carve-out para sa mga path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kapag ang kahilingan ay may wastong API key na may `manage` scope (tingnan ang [Manage-scope carve-out](#manage-scope-carve-out) ).
 
-Ang mga route na ito ay naglulunsad ng mga child process o nagpapatakbo ng runtime code. Kung
-ilalantad ang mga ito sa trapikong hindi mula sa loopback, maaaring makapaglunsad ng mga
-process ang isang attacker na nakakuha ng wastong JWT (hal., sa pamamagitan ng
-Cloudflared/Ngrok tunnel) — isang kilalang klase ng CVE
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Ang mga rutang ito ay nagbubunga ng mga proseso ng bata o nagpapatupad ng runtime code. Ang paglalantad sa kanila sa hindi-loopback na trapiko ay magbibigay-daan sa isang umaatake na nakakuha ng wastong JWT (hal., sa pamamagitan ng isang Cloudflared/Ngrok tunnel) na mag-trigger ng proseso ng pagpaparami — ng isang kilalang CVE class ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Ano ang GHSA-fhh6-4qxv-rpqj (ang klase ng pag-atake):** naglalantad ang isang management/agent server
-ng endpoint na naglulunsad ng subprocess (`npm install`, `node`, isang browser,
-isang proxy, `git`, `tar`, …). Kung maaabot ang endpoint na iyon mula sa labas ng host — dahil
-inilagay ng operator ang OmniRoute sa likod ng isang nginx/Cloudflare/Tailscale tunnel at may
-na-leak na JWT, o mali ang pagkaka-configure ng auth — nagagawa ng attacker na gawing "magpatakbo
-ng command sa host" (remote code execution) ang "tumawag sa isang API." Isinasara ng OmniRoute
-ang kahinaang ito sa pamamagitan ng **walang-kondisyong pagpapatupad ng pagsusuri sa loopback host,
-bago ang anumang pagsusuri sa auth**, sa bawat route na maaaring maglunsad ng process: kahit ang
-na-leak na token sa pamamagitan ng tunnel ay hindi pa rin makakarating sa spawn.
+**Ano ang GHSA-fhh6-4qxv-rpqj (ang klase ng pag-atake):** ang isang management/agent server ay naglalantad ng isang endpoint na naglulunsad ng isang subprocess (`npm install`, `node`, isang browser, isang proxy, `git`, `tar`, …). Kung ang endpoint na iyon ay maaabot mula sa off-host — dahil inilagay ng operator OmniRoute sa likod ng isang nginx/Cloudflare/Tailscale tunnel at isang JWT ay na-leak, o ang auth ay mali ang pagkaka-configure ng — gagawin ng attacker ang "tumawag ng isang API" sa "magpatakbo ng isang command sa host" (remote code execution). Isinasara ito OmniRoute sa pamamagitan ng pagpapatupad ng a** ang loopback host ay suriin nang walang kondisyon, bago ang anumang pagsusuri sa auth** , sa bawat rutang may kakayahang mag-spawn: hindi pa rin maabot ng isang leaked token sa ibabaw ng tunnel ang spawn.
 
-**Ang kumpletong hanay ng LOCAL_ONLY.** Ang opisyal na sanggunian ay ang
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` sa
-`src/server/authz/routeGuard.ts`; sinasalamin ng talahanayan sa ibaba ang kasalukuyang estado. Iniisa-isa
-ng gate na `check-route-guard-membership` ang bawat `route.ts` sa ilalim ng
-mga prefix na maaaring maglunsad ng process at ibinabagsak ang CI kung may alinmang hindi nauuri bilang local-only.
+**Ang buong set LOCAL_ONLY.** Ang authoritative source ay `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` sa `src/server/authz/routeGuard.ts`; ang talahanayan sa ibaba ay sumasalamin sa kasalukuyang estado. Binibilang ng `check-route-guard-membership` gate ang bawat `route.ts` sa ilalim ng mga prefix na may kakayahang spawn at nabigo CI kung mayroon man ay hindi nauuri sa lokal lamang.
 
-| Prefix / pattern                                                                                         | Bakit lokal lamang ito                                                                                                |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP server — naglulunsad ng mga stdio bridge + SSE handler                                                            |
-| `/api/cli-tools/runtime/`                                                                                | Runtime ng CLI tool — nagpapatakbo ng arbitraryong plugin code                                                        |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Mga writer ng setting para sa bawat tool na maaaring magbago ng mga binary/config ng tool sa host                     |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Kaparehong pag-spawn ng `getCliRuntimeStatus()` gaya ng anim na kaugnay na endpoint sa itaas (GHSA-35fw-cv32-2373)    |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Mga probe ng imbentaryo ng CLI — naglulunsad ng `command -v` / `--version` para sa bawat tool (GHSA-35fw-cv32-2373)   |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Kontrol ng Antigravity MITM proxy (naglulunsad/nagtatakda ng system proxy)                                            |
-| `/api/modality-bridge/video/`                                                                            | Mahigpit na pinagkakatiwalaang loopback na runtime probe ng Video Bridge at panloob na extraction bridge              |
-| `/api/services/`                                                                                         | Mga naka-embed na serbisyo (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + pag-spawn                   |
-| `/dashboard/providers/services/`                                                                         | Reverse proxy patungo sa mga UI ng naka-embed na serbisyo                                                             |
-| `/api/tunnels/cloudflared`                                                                               | Nag-i-install/naglulunsad ng cloudflared binary                                                                       |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Nag-i-install/kumokontrol sa tailscaled sa host                                                                       |
-| `/api/copilot/`                                                                                          | Hindi authenticated na LLM driver — para lamang sa CLI bilang default                                                 |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — naglulunsad ng MITM server + mga pagbabago sa DNS                                                       |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                                |
-| `/api/settings/mitm`                                                                                     | Pinapagana ang MITM interception (system-level na estado ng proxy)                                                    |
-| `/api/issue-agent/`                                                                                      | Issue agent — naglulunsad ng lokal na tooling laban sa repo                                                           |
-| `/api/plugins/`, `/api/plugins`                                                                          | Mga plugin — nilo-load/isinasagawa sa pamamagitan ng `worker_threads` + `child_process`                               |
-| `/api/middleware/`                                                                                       | Middleware ng user — nilo-load/isinasagawa ang code ng operator sa loob ng proseso                                    |
-| `/api/system/version`                                                                                    | Awtomatikong pag-update (POST lamang; exempted ang GET/HEAD/OPTIONS) — naglulunsad ng `git checkout` + `npm install`  |
-| `/api/db-backups/exportAll`                                                                              | Naglulunsad ng `tar` para sa archive ng pag-export                                                                    |
-| `/api/local/`                                                                                            | Mga 1-click na lokal na launcher (Redis sa kasalukuyan) — naglulunsad ng podman/docker                                |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Lifecycle ng Headroom proxy — naglulunsad ng python CLI / nagpapadala ng signal sa PID                                |
-| `/api/jobs`, `/api/jobs/`                                                                                | Kontrol sa job runner — nagsasagawa ng nakaiskedyul na gawain sa host                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` bago i-import ang mga kredensyal                                                      |
-| `/api/oauth/kiro/auto-import`                                                                            | Binabasa ang mga credential file ng Kiro CLI mula sa host                                                             |
-| `/api/skills/collect/`                                                                                   | Pagkolekta ng skill — tumutukoy/nag-i-install ng lokal na tooling                                                     |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Pagpaparehistro at pagpapatupad ng skill handler — umaabot sa pag-spawn ng sandbox container (GHSA-jx89)              |
-| `/api/discovery/`                                                                                        | Mga probe para sa pagtuklas ng lokal na network/provider                                                              |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Nag-i-spawn ng headful browser + VNC session para sa mga interactive login                                            |
-| `/api/acp/agents`                                                                                        | ACP — tumutuklas at nag-i-spawn ng mga lokal na CLI agent binary                                                      |
-| `/api/resilience/connections`                                                                            | Per-account na resilience JSON (cooldown, breaker, lockout). Hindi local-only ang dashboard HTML.                     |
-| `/api/providers/cursor/agent-availability`                                                               | Pagsusuri ng dashboard install-nudge — nag-i-spawn ng `cursor-agent status --format json`                             |
-| `/api/providers/{id}/login` (regex)                                                                      | Naglulunsad ng headful Playwright Chromium para sa web-cookie login                                                   |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manu-manong headful flow + session-based na awtomatikong pag-login gamit ang telepono/SMS (nag-i-spawn ng Playwright) |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manu-manong pag-renew ng Cursor session — inuudyukan ang `cursor-agent`                                               |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Nagdi-diagnose sa lokal na pag-install ng Codex CLI (nag-i-spawn ng binary)                                           |
+| Prefix / pattern                                                                                         | Bakit ito ay lokal lamang                                                                                   |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — spawns stdio bridges + SSE handlers                                                            |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — executes arbitrary plugin code                                                           |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Mga manunulat ng mga setting ng bawat tool na maaaring hawakan ang tool binaries/config sa host             |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Parehong `getCliRuntimeStatus()` spawn sa anim na magkakapatid sa itaas (GHSA-35fw-cv32-2373)               |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventory probe — spawn `command -v` / `--version` per tool (GHSA-35fw-cv32-2373)                       |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM proxy control (spawns/points system proxy)                                                 |
+| `/api/modality-bridge/video/`                                                                            | Mahigpit na pinagkakatiwalaang-loopback Video Bridge runtime probe at internal extraction bridge            |
+| `/api/services/`                                                                                         | Mga naka-embed na serbisyo (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn             |
+| `/dashboard/providers/services/`                                                                         | Baliktarin ang proxy sa naka-embed na serbisyong UIs                                                        |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns ang cloudflared binary                                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled sa host                                                                        |
+| `/api/copilot/`                                                                                          | Hindi napatotohanang LLM driver — CLI-only bilang default                                                   |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — ay naglalabas MITM server + DNS na mga pag-edit                                               |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                      |
+| `/api/settings/mitm`                                                                                     | Pinapagana ang MITM interception (system-level proxy state)                                                 |
+| `/api/issue-agent/`                                                                                      | Ang ahente ng isyu na — ay naglalabas ng lokal na tooling laban sa repo                                     |
+| `/api/plugins/`, `/api/plugins`                                                                          | Mga plugin — load/execute sa pamamagitan ng `worker_threads` + `child_process`                              |
+| `/api/middleware/`                                                                                       | User middleware — loads/executes operator code in-process                                                   |
+| `/api/system/version`                                                                                    | Awtomatikong pag-update (POST lang; GET/HEAD/OPTIONS exempt) — ay naglalabas `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Nag-spawns `tar` para sa export archive                                                                     |
+| `/api/local/`                                                                                            | 1-click na mga lokal na launcher (Redis ngayon) — spawns podman/docker                                      |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ang headroom proxy lifecycle — ay naglalabas ng python CLI / mga signal PID                                 |
+| `/api/jobs`, `/api/jobs/`                                                                                | Ang job runner control — ay nagsasagawa ng naka-iskedyul na trabaho sa panig ng host                        |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` bago mag-import ng mga cred                                                 |
+| `/api/oauth/kiro/auto-import`                                                                            | Nagbabasa ng mga file ng kredensyal Kiro CLI mula sa host                                                   |
+| `/api/skills/collect/`                                                                                   | Koleksyon ng kasanayan — detects/installs lokal na tooling                                                  |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Pagpaparehistro ng skill handler + execution — maabot ang sandbox container spawn (GHSA-jx89)               |
+| `/api/discovery/`                                                                                        | Mga lokal na probe ng pagtuklas network/provider                                                            |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Nagbubunga ng isang maingat na browser + VNC session para sa mga interactive na pag-log in                  |
+| `/api/acp/agents`                                                                                        | ACP — ay natutuklasan at naglalabas ng mga lokal CLI agent binary                                           |
+| `/api/resilience/connections`                                                                            | Per-account resilience JSON (cooldown, breaker, lockout). Ang dashboard HTML ay hindi lokal lamang.         |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard install-nudge check — spawns `cursor-agent status --format json`                                  |
+| `/api/providers/{id}/login` (regex)                                                                      | Naglulunsad ng maingat na Playwright Chromium para sa web-cookie login                                      |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manu-manong headful flow + session-based phone/SMS auto-login (spawns Playwright)                           |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manu-manong Cursor session renewal — nudges `cursor-agent`                                                  |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Sinusuri ang lokal na pag-install ng Codex CLI (naglalabas ng binary)                                       |
 
 **Tugon sa paglabag:** `403 LOCAL_ONLY`
 
-#### Pagbubukod para sa manage scope
+#### Pamahalaan-saklaw carve-out
 
-MAAARI ring ma-access mula sa non-loopback ang isang subset ng mga LOCAL_ONLY path kung at
-kung lamang may dalang `Authorization: Bearer <api-key>` ang request na ang
-metadata ay kinabibilangan ng `manage` scope (o `admin`). Ang pagbubukod ay tahasang
-nililimitahan per-path sa pamamagitan ng `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` upang manatiling
-strict-loopback ang default para sa anumang bagong LOCAL_ONLY path. Ang mga hindi authenticated na
-request at mga request na may mga key na walang manage scope ay tinatanggihan pa rin gamit ang
-`403 LOCAL_ONLY`.
+Ang isang subset ng mga LOCAL_ONLY path MAY ay maa-access din mula sa non-loopback kung at kung ang kahilingan ay may `Authorization: Bearer <api-key>` na ang metadata ay kinabibilangan ng `manage` scope (o `admin`). Ang carve-out ay tahasang naka-gate per-path sa pamamagitan ng `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kaya ang default para sa anumang bagong LOCAL_ONLY path ay nananatiling strict-loopback. Ang mga hindi napatotohanang kahilingan at mga kahilingan na may mga hindi pinamamahalaang key ay tinatanggihan pa rin ng `403 LOCAL_ONLY`.
 
-Sa kasalukuyan, ang tanging prefix na maaaring lampasan ay `/api/mcp/`. Sadyang hindi kasama ang `/api/cli-tools/runtime/` at
-`/api/services/` dahil maaari silang mag-spawn ng mga arbitraryong
-subprocess (`npm install`, `node`), na siyang mismong klase ng CVE na
-nilalayong pigilan ng LOCAL_ONLY tier.
+Ngayon ang tanging bypassable prefix ay `/api/mcp/`. `/api/cli-tools/runtime/` at `/api/services/` ay sadyang hindi kasama dahil maaari silang mag-spawn ng mga arbitrary na subprocess (`npm install`, `node`), na siyang eksaktong CVE class na umiiral ang LOCAL_ONLY tier upang maiwasan.
 
-**#7895 — makitid na scope ng `mcp:connect`:** tinatanggap DIN ng pagbubukod para sa `/api/mcp/`
-ang isang Bearer key na may makitid na `mcp:connect` scope
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), na sinusuri sa pamamagitan ng
-`hasMcpConnectOrManageScope()` sa `src/server/authz/policies/management.ts`.
-Nalilimitahan ito sa `/api/mcp/` LAMANG — walang anumang ibinibigay na pahintulot ang `mcp:connect` sa iba pang
-management route (kabilang ang bawat iba pang LOCAL_ONLY bypass prefix, kung sakaling
-may idagdag), at sinadya itong hindi isama sa
-`MANAGEMENT_API_KEY_SCOPES`. Ang key na may `manage`/`admin` ay pumapasa pa rin sa
-pagbubukod gaya ng dati; ang `mcp:connect` ay isang alternatibong may mas mababang pribilehiyo
-para sa mga remote na MCP-only caller na hindi dapat mangailangan ng malawak na management access.
+**#7895 — `mcp:connect` makitid na saklaw:** ang `/api/mcp/` carve-out ALSO ay tumatanggap ng isang Bearer key na may hawak na makitid `mcp:connect` scope (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), na sinuri sa pamamagitan ng `hasMcpConnectOrManageScope()` sa `src/server/authz/policies/management.ts`. Sinasaklaw ito sa `/api/mcp/` ONLY — `mcp:connect` na walang ibinibigay sa anumang iba pang ruta ng pamamahala (kabilang ang bawat iba pang LOCAL_ONLY bypass prefix, kung may maidagdag man), at sadyang hindi ito kasama sa `MANAGEMENT_API_KEY_SCOPES`. Ang isang susi na may hawak na `manage`/`admin` ay pumasa pa rin sa carve-out nang eksakto tulad ng dati; `mcp:connect` ay isang mababang-pribilehiyo na alternatibo para sa malalayong MCP-lamang na mga tumatawag na hindi dapat nangangailangan ng malawak na access sa pamamahala.
 
-| Request                                               | Path                       | Resulta                  |
-| ----------------------------------------------------- | -------------------------- | ------------------------ |
-| Non-loopback, walang Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| Non-loopback, Bearer na may `manage` scope            | `/api/mcp/*`               | Payagan                  |
-| Non-loopback, Bearer na may `mcp:connect` scope       | `/api/mcp/*`               | Payagan                  |
-| Non-loopback, Bearer na walang `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| Non-loopback, Bearer na may `mcp:connect` scope       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| Non-loopback, Bearer na may `manage` scope            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| Loopback, mayroon o walang Bearer                     | anumang LOCAL_ONLY         | Payagan (pumasa sa gate) |
+| Kahilingan                                            | Daan                       | Resulta                     |
+| ----------------------------------------------------- | -------------------------- | --------------------------- |
+| Non-loopback, walang Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY              |
+| Non-loopback, Bearer na may `manage` scope            | `/api/mcp/*`               | Payagan                     |
+| Non-loopback, Bearer na may `mcp:connect` scope       | `/api/mcp/*`               | Payagan                     |
+| Non-loopback, Bearer na walang `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY              |
+| Non-loopback, Bearer na may `mcp:connect` scope       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
+| Non-loopback, Bearer na may `manage` scope            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
+| Loopback, any/no Bearer                               | anumang LOCAL_ONLY         | Payagan (nagdaraan ng gate) |
 
-#### Patnubay para sa operator at pag-audit
+#### Gabay at pag-audit ng operator
 
-Kung pinapatakbo mo ang OmniRoute sa likod ng reverse proxy o tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), pinoprotektahan pa rin ng loopback check ang mga route sa itaas na
-may kakayahang mag-spawn — ang isang request na may non-loopback na client address ay tinatanggihan gamit ang
-`403 LOCAL_ONLY` **bago patakbuhin ang auth**, kaya hindi makakaabot sa spawn ang isang leaked na JWT. May natitira pang dalawang
-responsibilidad ang operator:
+Kung nagpapatakbo ka OmniRoute sa likod ng isang reverse proxy o tunnel (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok), pinoprotektahan pa rin ng loopback check ang mga rutang may kakayahang spawn sa itaas — isang kahilingan na ang address ng kliyente ay hindi loopback ay tinanggihan ng `403 LOCAL_ONLY`** bago tumakbo ang auth** , kaya hindi maabot ng isang leaked JWT ang isang spawn. Dalawang responsibilidad ng operator ang nananatili:
 
-- **Huwag "ayusin" ang 403 sa pamamagitan ng pagpapanggap na loopback ang client IP.** Ang pagtatakda ng
-  `X-Forwarded-For: 127.0.0.1`, o paggamit ng proxy na muling nagsusulat sa source address bilang
-  loopback, ay muling nagbubukas sa mismong klase ng RCE na isinasara ng tier na ito. Ilantad ang
-  dashboard/API sa pamamagitan ng proxy — huwag kailanman ang mga route na may kakayahang mag-spawn.
-- **Panatilihing minimal ang bypass na may manage scope.** Tanging `/api/mcp/` ang maaaring i-bypass, at
-  sa pamamagitan lamang ng API key na may `manage` scope. Hindi kailanman maaaring idagdag ang
-  `SPAWN_CAPABLE_PREFIXES` sa bypass list — tinatanggihan ang mga ito ng zod schema at
-  ipinagkakait sila ng `isLocalOnlyBypassableByManageScope` sa runtime (defence-in-depth),
-  na siyang ibig sabihin ng dashboard sa "cannot be made bypassable". Kasama rin sa parehong
-  deny-list ang ilang LOCAL_ONLY route na hindi nag-i-spawn ngunit hindi rin dapat kailanman
-  maabot nang malayuan — `/api/oauth/kiro/auto-import` (binabasa ang mga host-local na Kiro
-  credential file), `/api/discovery/` at `/api/issue-agent/`. Inaalis din ng runtime
-  snapshot loader ang mga naturang entry mula sa nakaimbak na settings row, at hindi kailanman
-  isinusulat ng legacy JSON import (`/api/settings/import-json`) ang mga bypass key.
-  Ang bawat entry ng `LOCAL_ONLY_API_PREFIXES` ay dapat nasa deny-list o
-  nasuri bilang karapat-dapat sa bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Ang mga route
-  na may dynamic segment at static path na may kakayahang mag-spawn sa ilalim ng `/api/providers/` (hal. `/login`,
-  `/refresh-cursor`) ay saklaw ng regex-based na kasamang `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` sa
-  `src/shared/constants/spawnCapablePrefixes.ts`, hindi ng patag na
-  `SPAWN_CAPABLE_PREFIXES` array — kakailanganing saklawin ng patag na array ang
-  buong `/api/providers/` prefix upang matukoy ang mga ito, na labis na magpapalawak sa isang route tree
-  na lehitimong ginagamit ng mga remote dashboard para sa provider CRUD.
+- **Huwag "ayusin" ang isang 403 sa pamamagitan ng pag-forging ng client IP bilang loopback.** Ang pagtatakda ng `X-Forwarded-For: 127.0.0.1`, o isang proxy na nagre-rewrite sa source address sa loopback, ay muling magbubukas sa RCE class na isinasara ng tier na ito. Ilantad ang dashboard/API sa pamamagitan ng proxy — hindi kailanman ang mga rutang may kakayahang spawn.
+- **Panatilihing minimal ang bypass ng pamamahala sa saklaw.** Ang `/api/mcp/` lang ang ma-bypass, at may `manage` -scoped API key lang. Ang `SPAWN_CAPABLE_PREFIXES` ay hindi kailanman maidaragdag sa listahan ng bypass — tinatanggihan sila ng zod schema at tinatanggihan sila `isLocalOnlyBypassableByManageScope` sa runtime (defence-in-depth), na ang ibig sabihin ng dashboard ay "hindi maaaring gawing bypassable". Ang parehong deny-list ay nagtataglay din ng ilang mga ruta LOCAL_ONLY na hindi umusbong ngunit hindi dapat malayuang maabot alinman sa — `/api/oauth/kiro/auto-import` (nagbabasa ng mga file ng kredensyal ng host-local Kiro ), `/api/discovery/` at `/api/issue-agent/`. Ibinabagsak din ng runtime snapshot loader ang mga naturang entry mula sa isang naka-imbak na hanay ng mga setting, at hindi kailanman isinusulat ng legacy JSON import (`/api/settings/import-json`) ang mga bypass key. Ang bawat `LOCAL_ONLY_API_PREFIXES` entry ay dapat nasa deny-list o nasuri bilang bypass-eligible (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Ang dynamic na segment at static-path na mga ruta na may kakayahang spawn sa ilalim ng `/api/providers/` (hal. `/login`, `/refresh-cursor`) ay sakop ng regex-based `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` companion sa `src/shared/constants/spawnCapablePrefixes.ts`, hindi ng flat `SPAWN_CAPABLE_PREFIXES` array — ang flat array ay kailangang sakupin ang buong `/api/providers/` prefix upang mahuli ang mga ito, over-broadening ng provider ng CRUD remote tree.
 
-**Pag-audit ng access** — upang tiyaking walang mula sa labas ng host ang nakaaabot sa mga route na ito:
+**Access sa pag-audit** — upang i-verify na walang off-host ang nakakarating sa mga rutang ito:
 
-- Buksan ang **Authorization Inventory** sa `/dashboard/settings/security`: ipinapakita nito ang
-  live na listahan ng LOCAL_ONLY prefix, kung aling mga prefix ang maaaring i-bypass, at ang compile-time
-  na hanay na may kakayahang mag-spawn ("cannot be made bypassable").
-- Hanapin gamit ang grep sa iyong reverse-proxy / access logs ang mga prefix sa itaas na ipinares sa
-  isang hindi loopback na client address. Anumang ganoong hit na nagbalik ng `200` sa halip na
-  `403 LOCAL_ONLY` ay nangangahulugang itinatago ng proxy ang tunay na client IP — ayusin ang proxy.
-- Ang `403 LOCAL_ONLY` sa mga log ng OmniRoute para sa isa sa mga path na ito ay nangangahulugang
-  gumagana ang guard ayon sa nilalayon, hindi isang error na dapat pigilan.
+- Buksan ang** Imbentaryo ng Awtorisasyon** on `/dashboard/settings/security`: nire-render nito ang live LOCAL_ONLY prefix list, na ang mga prefix ay bypassable, at ang compile-time spawn-capable ("hindi maaaring gawing bypassable") set.
+- I-grep ang iyong reverse-proxy / access logs para sa mga prefix sa itaas na ipinares sa isang non-loopback na address ng kliyente. Anumang naturang hit na nagbalik ng `200` sa halip na `403 LOCAL_ONLY` ay nangangahulugan na ang proxy ay nagtatakip sa tunay na kliyente IP — ayusin ang proxy.
+- Ang isang `403 LOCAL_ONLY` sa mga log ng OmniRoute para sa isa sa mga landas na ito ay ang bantay na gumagana ayon sa nilalayon, hindi isang pagkakamali upang sugpuin.
 
-#### Mga route na maaabot nang malayuan na may call-site probe gate
+#### Mga rutang malalayong maabot na may gate ng pagsisiyasat ng call-site
 
-Kailangang manatiling naaabot mula sa isang remote dashboard ang ilang route ngunit nagpapatakbo ang mga ito
-ng host-side probe (`which <binary>`, `<binary> --version`, `tailscale status --json`) para sa mga lokal na caller.
-Hindi LOCAL_ONLY ang mga ito para sa `GET`; sa halip, binabasa ng handler ang pinagkakatiwalaang peer verdict
-gamit ang `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) at pinapatakbo lamang ang probe
-para sa mga caller na `loopback` / `lan`. Natatanggap ng isang `remote` na caller ang parehong hugis ng response na binuo mula sa
-mga source na hindi nag-i-spawn (persisted state, settings, mga fs check), na minarkahang `probed: false`.
+Ang ilang mga ruta ay dapat manatiling mapupuntahan mula sa isang malayuang dashboard ngunit magpatakbo ng isang host-side probe (`which <binary>`, `<binary> --version`, `tailscale status --json`) para sa mga lokal na tumatawag. Hindi sila LOCAL_ONLY para sa `GET`; sa halip ay binabasa ng handler ang pinagkakatiwalaang hatol ng peer na may `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) at pinapatakbo lamang ang probe para sa mga `loopback` / `lan` na tumatawag. Ang isang `remote` na tumatawag ay nakakakuha ng parehong hugis ng tugon na binuo mula sa mga hindi nag-spawning na mga pinagmulan (patuloy na estado, mga setting, mga pagsusuri sa fs), na-flag `probed: false`.
 
-| Route                                                            | Probe na nilalaktawan para sa mga remote caller                    |
+| Ruta                                                             | Nilaktawan ang pagsisiyasat para sa mga malalayong tumatawag       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) at CLI-fallback spawn |
-| `GET /api/headroom/status`                                       | `which headroom` at mga python `--version` probe                   |
+| `GET /api/headroom/status`                                       | `which headroom` at ang python `--version` probes                  |
 | `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
 | `GET /api/tunnels/cloudflared` (GET-exempt mula sa LOCAL_ONLY)   | `which cloudflared` PATH lookup                                    |
 
-Sinusunod ng isang bagong read route na nagpo-probe sa host ang parehong pattern, o tahasang
-inuuri bilang LOCAL_ONLY.
+Ang isang bagong nabasang ruta na sumusuri sa host ay sumusunod sa parehong pattern, o na-classify LOCAL_ONLY nang tahasan.
 
 ### Tier 2 — ALWAYS_PROTECTED
 
-**Ipinapatupad ng:** `isAlwaysProtectedPath(path)` → laktawan ang `requireLogin=false` bypass
-**Bypass:** Wala kapag `requireLogin=false`; palaging kinakailangan ang JWT
+**Ipinapatupad ng:** `isAlwaysProtectedPath(path)` → laktawan `requireLogin=false` bypass** Bypass:** Wala kapag `requireLogin=false`; JWT palaging kinakailangan
 
-Mapanira o hindi na mababawi ang mga route na ito. Ang pagpapahintulot sa mga ito sa isang installation na
-"walang password" ay mangangahulugang maaaring burahin ng sinuman sa parehong LAN ang database o patayin ang
-server process.
+Ang mga rutang ito ay mapanira o hindi maibabalik. Ang pagpayag sa kanila sa isang "no-password" na pag-install ay nangangahulugang sinuman sa parehong LAN ay maaaring i-wipe ang database o patayin ang proseso ng server.
 
-| Path                                      | Dahilan                                                              |
-| ----------------------------------------- | -------------------------------------------------------------------- |
-| `/api/shutdown`                           | Tinatapos ang server process                                         |
-| `/api/settings/database`                  | Pag-export, pag-import, at pagbura ng database                       |
-| `/api/db-backups`                         | Access sa buong database backup archive                              |
-| `/api/settings/export-json`               | Ine-export ang buong settings blob (kasama ang secrets)              |
-| `/api/settings/import-json`               | Pinapalitan ang buong settings blob                                  |
-| `/api/providers/health-autopilot/actions` | Isinasagawa ang mga autopilot remediation action                     |
-| `/api/settings/obsidian`                  | Gumagawa ng magagamit-muling WebDAV creds para sa anumang vault root |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                         |
+| Daan                                      | Dahilan                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| `/api/shutdown`                           | Tinatapos ang proseso ng server                                         |
+| `/api/settings/database`                  | Pag-export, pag-import, at pag-wipe ng database                         |
+| `/api/db-backups`                         | Buong database backup archive access                                    |
+| `/api/settings/export-json`               | Ini-export ang buong blob ng mga setting (kabilang ang mga lihim)       |
+| `/api/settings/import-json`               | Pinapalitan ang buong blob ng mga setting                               |
+| `/api/providers/health-autopilot/actions` | Nagsasagawa ng mga pagkilos sa remediation ng autopilot                 |
+| `/api/settings/obsidian`                  | Mga mint na magagamit muli WebDAV creds para sa anumang ugat ng vault   |
+| `/api/relay/tokens`                       | Mga mint, listahan, pag-edit at pagbawi ng mga relay token              |
+| `/api/agent-skills/generate`              | Nagsusulat at nag-prune ng mga folder ng kasanayan sa host              |
+| `/api/skills/marketplace/install`         | Nag-i-install ng pandaigdigang kasanayan para sa bawat key              |
+| `/api/skills/skillssh/install`            | Nag-i-install ng pandaigdigang kasanayan para sa bawat key              |
+| `/api/cli-tools/apply`                    | Isinulat muli ang host CLI config ng operator                           |
+| `/api/cli-tools/guide-settings`           | Nagsusulat ng mga file ng CLI config na pinapaandar ng gabay            |
+| `/api/cli-tools/hermes-agent-settings`    | Isinulat ang config ng ahente ng Hermes                                 |
+| `/api/cli-tools/backups`                  | Ibinabalik at tinatanggal ang mga backup CLI config                     |
+| `/api/log-export`                         | Nagpapadala ng mga log ng tawag sa isang naka-configure na patutunguhan |
+| `/api/restart`                            | I-restart ang proseso ng server                                         |
 
-**Response kapag may paglabag:** `401 Authentication required`
+**Tugon sa paglabag:** `401 Authentication required`
 
-Saklaw ng `/api/settings/obsidian` ang child nitong `/webdav`: itinuturo ng `POST` ang WebDAV file service —
-na inihahatid ng custom na Node layer bago ang Next.js, sa labas ng pipeline na ito — sa root na pinili ng caller
-at ibinabalik ang mga bagong gawang Basic credential, nire-rotate ng `DELETE` ang mga ito, at iniimbak ng parent na `POST`
-ang Obsidian REST API token. Tinakpan lamang ng GHSA-62vw ang paglalantad ng password sa `GET`; ang paggawa ng mga ito ay
-nasa fail-open tier pa rin (GHSA-7pq4-8pvv-rx7r). Bukod pa rito, tumatanggi ang `enableObsidianVaultSync()`
-sa isang vault na siyang data directory, nasa loob nito, o naglalaman nito.
+Sinasaklaw `/api/settings/obsidian` `/webdav` na anak nito: itinuturo `POST` ang WebDAV file service — na inihahatid ng custom na layer ng Node bago Next.js, sa labas ng pipeline na ito — sa root na pinili ng tumatawag at nag-e-echo ng mga bagong gawang Basic na kredensyal, pinapaikot `DELETE` ang mga ito, at iniimbak ng magulang na `POST` ang Obsidian REST API token. Tinakpan lang GHSA-62vw ang `GET` password na ibinunyag; ang pagpapalabas ay nasa fail-open tier pa rin (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` ay tinatanggihan din ang isang vault na nasa loob, o naglalaman ng direktoryo ng data.
 
-#### Ang mga credential export ay para lamang sa operator
+#### Ang mga pag-export at pag-restore ng kredensyal ay operator-only
 
-Ang antas sa itaas ay nagpapasya lamang kung kailangan ang _anumang_ kredensyal. Ang mga rutang nagda-download ng
-mga nakaimbak na kredensyal ay nagdaragdag ng pangalawang pagsusuri sa handler: ang `GET /api/settings/export-json` (mga na-decrypt na
-koneksyon sa provider at mga raw API key), `GET /api/db-backups/export` (ang SQLite file), at
-`GET /api/db-backups/exportAll` (ang buong archive) ay tumatawag sa `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Tumatanggap ito ng dashboard session, lokal na CLI subject, o
-instance na naka-disable ang pag-login, at sumasagot ng `403` sa mga API key ng anumang scope (kabilang ang `manage`
-at `admin`) at sa mga `oma_` access token. Ang pag-isyu ng sync token (`POST /api/sync/tokens`) ay gumagamit ng
-parehong helper, kasama ang pinagkakatiwalaang internal-service token sa loopback.
+Ang tier sa itaas ay nagpapasya lamang kung kinakailangan ang _some_ na kredensyal. Ang mga ruta na nagda-download ng mga naka-imbak na kredensyal ay nagdaragdag ng pangalawang pagsusuri sa handler: `GET /api/settings/export-json` (mga naka-decrypt na koneksyon sa provider at mga raw API key), `GET /api/db-backups/export` (ang SQLite file) at `GET /api/db-backups/exportAll` (ang buong archive) tumawag sa `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Tumatanggap ito ng sesyon ng dashboard, ang lokal na CLI na paksa, o isang instance na hindi pinagana ang pag-log in, at sinasagot `403` sa mga API key ng anumang saklaw (kabilang ang `manage` at `admin`) at sa `oma_` access token. Ang mga mapanirang katapat ay may parehong hangganan: `POST /api/db-backups/import` (na-upload na `.sqlite`, kasama ang `dryRun=true` ), `POST /api/db-backups` (i-restore ang naka-imbak na backup sa pamamagitan ng id) at `POST /api/settings/import-json` (legacy JSON restore) palitan ang live na database o ang buong set settings/connections/API-key, kaya hindi rin ma-trigger ang mga ito ng kredensyal ng makina. Ang pagsira sa mga restore point ay may parehong hangganan: `DELETE /api/db-backups` (linisin ang — panatilihin ang pinakabagong N / drop na mas matanda kaysa sa D araw) at `PATCH /api/db-backups` (mga setting ng pagpapanatili), dahil ang patuloy na pagpapanatili ay ang eksaktong ginagamit ng `cleanupDbBackups()` pagkatapos ng bawat awtomatikong pag-backup (`src/lib/db/backup.ts`), kaya ang kredensyal ng makina na makakapagtipid `keepLatest: 1` ay mapuputol ang lahat sa susunod na snapshot. Ang paglista at paglikha ng mga backup (`GET`/`PUT /api/db-backups`) ay nagpapanatili ng ordinaryong pamamahala ng auth. Ang pagpapalabas ng token sa pag-sync (`POST /api/sync/tokens`) ay gumagamit ng parehong helper, kasama ang pinagkakatiwalaang loopback na internal-service token.
 
-#### Credential exports and restores are operator-only
+### Ang bagong-install na bootstrap ay loopback-only na — ng totoong peer, hindi `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Nang walang naka-configure na password sa pamamahala (at walang `INITIAL_PASSWORD`), pinapanatili `isAuthRequired()` sa `src/shared/utils/apiAuth.ts` na bukas ang anonymous na bootstrap** para lamang sa mga loopback na kapantay** . Napagpasyahan ang loopback mula sa mga pinagkakatiwalaang signal ng peer, sa pagkakasunud-sunod: ang token-stamped real TCP peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, kung ano ang nakikita ng patakaran), ang sariling `AUTHZ_HEADER_PEER_LOCALITY` verdict ng pipeline (kung ano ang nakikita ng mga humahawak ng ruta, pinagkakatiwalaan lang habang nakatakda ang `OMNIROUTE_PEER_STAMP_TOKEN` ), o isang tunay na socket peer para sa mga direktang tumatawag. `Host` / `nextUrl.hostname` ay hindi kailanman kinokonsulta, at ang unang-password na isulat (`POST /api/settings/require-login`) ay nasa ilalim ng parehong hadlang sa halip na bukas sa bawat network peer (GHSA-7pq4-8pvv-rx7r). `managementPolicy` ay tahasang nagpapasa ng sarili nitong `peerContext` na hatol, kaya ang mga header ng kahilingan ng ORIGINAL (pre-strip) ay hindi kailanman magpapasya dito.
 
-### Ang bootstrap ng bagong pag-install ay para lamang sa loopback — batay sa tunay na peer, hindi sa `Host`
+### Tier 3 — MANAGEMENT (default)
 
-Kapag walang naka-configure na management password (at walang `INITIAL_PASSWORD`), pinananatiling bukas ng `isAuthRequired()` sa
-`src/shared/utils/apiAuth.ts` ang anonymous bootstrap **para lamang sa mga loopback peer**.
-Tinutukoy ang loopback mula sa mga pinagkakatiwalaang signal ng peer, ayon sa pagkakasunod-sunod: ang tunay na TCP peer na nilagyan ng token
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, na siyang nakikita ng policy), ang sariling
-`AUTHZ_HEADER_PEER_LOCALITY` verdict ng pipeline (na siyang nakikita ng mga route handler, at pinagkakatiwalaan lamang habang
-nakatakda ang `OMNIROUTE_PEER_STAMP_TOKEN`), o ang tunay na socket peer para sa mga direktang caller. Ang `Host` /
-`nextUrl.hostname` ay hindi kailanman sinusuri, at ang pagsusulat ng unang password
-(`POST /api/settings/require-login`) ay nasa ilalim ng parehong limitasyon sa halip na maging bukas sa bawat
-network peer (GHSA-7pq4-8pvv-rx7r). Tahasang ipinapasa ng `managementPolicy` ang sarili nitong `peerContext` verdict
-pababa, kaya hindi ito kailanman napagpapasyahan ng mga header ng ORIGINAL (bago alisin) na request.
-
-### Antas 3 — MANAGEMENT (default)
-
-Lahat ng iba pang management route. Kinakailangan ang auth maliban kung naka-configure ang
-`requireLogin=false`. Maaaring gamitin ang mga CLI token upang mag-authenticate sa mga rutang ito (loopback + valid na HMAC).
+Lahat ng iba pang mga ruta ng pamamahala. Kinakailangan ang auth maliban kung naka-configure `requireLogin=false`. Maaaring patotohanan ng mga CLI token ang mga rutang ito (loopback + valid HMAC).
 
 ## Pagkakasunod-sunod ng pagsusuri
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 // The kit Checkbox directly: the adapter does not type the kit `card` prop.
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import Button from "@/shared/components/Button";
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Input from "@/shared/components/Input";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 
@@ -281,7 +281,7 @@ export default function CompareTab({ providers, onMetrics }: CompareTabProps) {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-10" data-testid="compare-loading">
-          <Icon name="progress_activity" size={28} className="text-primary animate-spin" />
+          <Spinner size="md" />
         </div>
       )}
 

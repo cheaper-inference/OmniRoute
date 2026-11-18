@@ -10,257 +10,144 @@ Alle OmniRoute-management-API-ruter er klassificeret i ét af tre
 beskyttelsesniveauer. Klassificeringen er statisk, defineret i `src/server/authz/routeGuard.ts`,
 og evalueres, før nogen anden godkendelsesgren køres.
 
-## Niveauer
+## Etager
 
-### Niveau 1 — LOCAL_ONLY
+### Tier 1 — LOCAL_ONLY
 
-**Håndhæves af:** `isLocalOnlyPath(path)` → kontrol af loopback-vært
-**Omgåelse:** Ingen som standard. Snæver undtagelse for stier i
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, når anmodningen indeholder en gyldig
-API-nøgle med `manage`-rettighedsområdet (se [Undtagelse for manage-rettighedsområdet](#manage-scope-carve-out)).
+**Håndhæves af:** `isLocalOnlyPath(path)` → loopback værtstjek** Bypass:** Ingen som standard. Snæver udskæring for stier i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, når anmodningen indeholder en gyldig API nøgle med `manage` omfanget (se [Administrer-omfang-udskæring](#manage-scope-carve-out) ).
 
-Disse ruter starter underordnede processer eller afvikler runtime-kode. Hvis de
-eksponeres for trafik, der ikke kommer fra loopback, vil en angriber, som har fået
-fat i en gyldig JWT (f.eks. via en Cloudflared/Ngrok-tunnel), kunne udløse
-processtart — en kendt CVE-klasse
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Disse ruter afføder underordnede processer eller udfører runtime-kode. At udsætte dem for ikke-loopback-trafik vil gøre det muligt for en angriber, der har opnået en gyldig JWT (f.eks. via en Cloudflared/Ngrok tunnel), at udløse proces-spawning — en kendt CVE klasse ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Hvad GHSA-fhh6-4qxv-rpqj er (angrebsklassen):** En administrations-/agentserver
-eksponerer et endpoint, der starter en underproces (`npm install`, `node`, en browser,
-en proxy, `git`, `tar`, …). Hvis dette endpoint kan nås fra en ekstern vært — fordi
-operatøren placerede OmniRoute bag en nginx/Cloudflare/Tailscale-tunnel, og en JWT
-blev lækket, eller godkendelsen var fejlkonfigureret — forvandler angriberen "kald
-et API" til "kør en kommando på værten" (fjernudførelse af kode). OmniRoute
-forhindrer dette ved **ubetinget at håndhæve en kontrol af loopback-værten før
-enhver godkendelseskontrol** på alle ruter, der kan starte processer: En lækket
-token via en tunnel kan stadig ikke nå processtarten.
+**Hvad GHSA-fhh6-4qxv-rpqj er (angrebsklassen):** en management/agent server afslører et slutpunkt, der starter en underproces (`npm install`, `node`, en browser, en proxy, `git`, `tar`, …). Hvis dette endepunkt er tilgængeligt fra off-host —, fordi operatøren satte OmniRoute bag en nginx/Cloudflare/Tailscale tunnel og en JWT lækket, eller auth var forkert konfigureret — ændrer angriberen "kald en API" til "kør en kommando på værten" (ekstern kodeudførelse). OmniRoute lukker dette ved at håndhæve en** loopback værtstjek ubetinget før enhver godkendelseskontrol** , på hver spawn-kapabel rute: et lækket token over en tunnel kan stadig ikke nå spawnen.
 
-**Det fulde LOCAL_ONLY-sæt.** Den autoritative kilde er
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` i
-`src/server/authz/routeGuard.ts`; tabellen nedenfor afspejler den aktuelle tilstand.
-Kontrollen `check-route-guard-membership` oplister hver `route.ts` under de
-præfikser, der kan starte processer, og får CI til at fejle, hvis nogen af dem ikke
-er klassificeret som local-only.
+**Det fulde LOCAL_ONLY sæt.** Den autoritative kilde er `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` i `src/server/authz/routeGuard.ts`; tabellen nedenfor afspejler den aktuelle tilstand. `check-route-guard-membership` porten opregner hver `route.ts` under de spawn-kompatible præfikser og fejler CI hvis nogen ikke er klassificeret kun lokalt.
 
-| Præfiks / mønster                                                                                        | Hvorfor det kun er lokalt                                                                                  |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP-server — starter stdio-broer + SSE-handlere                                                            |
-| `/api/cli-tools/runtime/`                                                                                | CLI-værktøjskørsel — eksekverer vilkårlig plugin-kode                                                      |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Indstillingsskrivere pr. værktøj, der kan tilgå værktøjsbinærfiler/-konfiguration på værten                |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Samme `getCliRuntimeStatus()`-start som de seks relaterede ovenfor (GHSA-35fw-cv32-2373)                   |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI-inventarkontroller — starter `command -v` / `--version` pr. værktøj (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Styring af Antigravity MITM-proxy (starter/indstiller systemproxy)                                         |
-| `/api/modality-bridge/video/`                                                                            | Strengt betroet Video Bridge-kørselskontrol via loopback og intern udtrækningsbro                          |
-| `/api/services/`                                                                                         | Indlejrede tjenester (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + start                  |
-| `/dashboard/providers/services/`                                                                         | Reverse proxy til brugergrænseflader for indlejrede tjenester                                              |
-| `/api/tunnels/cloudflared`                                                                               | Installerer/starter den binære cloudflared-fil                                                             |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installerer/styrer tailscaled på værten                                                                    |
-| `/api/copilot/`                                                                                          | Ikke-godkendt LLM-driver — som standard kun via CLI                                                        |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — starter MITM-server + DNS-ændringer                                                          |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy-lytter + systemproxy                                                        |
-| `/api/settings/mitm`                                                                                     | Aktiverer MITM-opfangning (proxytilstand på systemniveau)                                                  |
-| `/api/issue-agent/`                                                                                      | Issue-agent — starter lokale værktøjer mod repoet                                                          |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — indlæser/eksekverer via `worker_threads` + `child_process`                                       |
-| `/api/middleware/`                                                                                       | Brugermiddleware — indlæser/eksekverer operatørkode i processen                                            |
-| `/api/system/version`                                                                                    | Automatisk opdatering (kun POST; GET/HEAD/OPTIONS undtaget) — starter `git checkout` + `npm install`       |
-| `/api/db-backups/exportAll`                                                                              | Starter `tar` til eksportarkivet                                                                           |
-| `/api/local/`                                                                                            | Lokale startfunktioner med ét klik (Redis i dag) — starter podman/docker                                   |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom-proxyens livscyklus — starter python-CLI / sender signaler til PID                                |
-| `/api/jobs`, `/api/jobs/`                                                                                | Styring af jobkørsel — eksekverer planlagt arbejde på værten                                               |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` før import af legitimationsoplysninger                                     |
-| `/api/oauth/kiro/auto-import`                                                                            | Læser Kiro CLI-legitimationsfiler fra værten                                                               |
-| `/api/skills/collect/`                                                                                   | Indsamling af færdigheder — registrerer/installerer lokale værktøjer                                       |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Registrering + udførelse af skill-handler — når frem til oprettelse af sandbox-containeren (GHSA-jx89)     |
-| `/api/discovery/`                                                                                        | Sonderinger til registrering af lokalt netværk/lokal udbyder                                               |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Starter en browser med brugergrænseflade + en VNC-session til interaktive login                            |
-| `/api/acp/agents`                                                                                        | ACP — finder og starter lokale binære CLI-agentfiler                                                       |
-| `/api/resilience/connections`                                                                            | Robustheds-JSON pr. konto (nedkøling, afbryder, spærring). Dashboardets HTML er ikke kun lokalt.           |
-| `/api/providers/cursor/agent-availability`                                                               | Dashboardkontrol for installationspåmindelse — starter `cursor-agent status --format json`                 |
-| `/api/providers/{id}/login` (regulært udtryk)                                                            | Starter en Playwright Chromium med brugergrænseflade til login via webcookie                               |
-| `/api/providers/volcengine-plan/connect` (regulært udtryk)                                               | Manuelt flow med brugergrænseflade + sessionsbaseret automatisk login via telefon/SMS (starter Playwright) |
-| `/api/providers/{id}/refresh-cursor` (regulært udtryk)                                                   | Manuel fornyelse af Cursor-session — aktiverer `cursor-agent`                                              |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regulært udtryk)                                         | Diagnosticerer den lokale Codex CLI-installation (starter den binære fil)                                  |
+| Præfiks / mønster                                                                                        | Hvorfor det kun er lokalt                                                                             |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — afføder stdio-broer + SSE handlere                                                       |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — udfører vilkårlig plugin-kode                                                      |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Per-værktøj indstillinger forfattere, der kan røre tool binaries/config på værten                     |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Samme `getCliRuntimeStatus()` spawn som de seks søskende ovenfor (GHSA-35fw-cv32-2373)                |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventar prober — spawn `command -v` / `--version` pr. værktøj (GHSA-35fw-cv32-2373)              |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM proxy kontrol (spawns/points system proxy)                                           |
+| `/api/modality-bridge/video/`                                                                            | Strengt betroet loopback Video Bridge runtime sonde og intern ekstraktionsbro                         |
+| `/api/services/`                                                                                         | Indlejrede tjenester (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn             |
+| `/dashboard/providers/services/`                                                                         | Omvendt proxy til embedded-service UIs                                                                |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns den cloudflared binære                                                                |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls haleskaleret på værten                                                              |
+| `/api/copilot/`                                                                                          | Uautoriseret LLM driver — CLI-only som standard                                                       |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — afføder MITM server + DNS redigeringer                                                  |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy lytter + system proxy                                                  |
+| `/api/settings/mitm`                                                                                     | Aktiverer MITM aflytning (proxy-tilstand på systemniveau)                                             |
+| `/api/issue-agent/`                                                                                      | Udstedelsesagent — afføder lokalt værktøj mod repoen                                                  |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — load/execute via `worker_threads` + `child_process`                                         |
+| `/api/middleware/`                                                                                       | Bruger-middleware — loads/executes operatørkode i gang                                                |
+| `/api/system/version`                                                                                    | Automatisk opdatering (kun POST ; GET/HEAD/OPTIONS fritaget) — afføder `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Skaber `tar` til eksportarkivet                                                                       |
+| `/api/local/`                                                                                            | 1-kliks lokale launchers (Redis i dag) — afføder podman/docker                                        |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom proxy livscyklus — afføder python CLI / signaler PID                                         |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job runner control — udfører planlagt arbejde på værtssiden                                           |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` før import af creds                                                   |
+| `/api/oauth/kiro/auto-import`                                                                            | Læser Kiro CLI legitimationsfiler fra værten                                                          |
+| `/api/skills/collect/`                                                                                   | Færdighedsindsamling — detects/installs lokalt værktøj                                                |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Registrering af færdighedshandler + udførelse — nå sandkassebeholderen spawn (GHSA-jx89)              |
+| `/api/discovery/`                                                                                        | Lokale network/provider opdagelsesonder                                                               |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Afføder en hovedfuld browser + VNC session til interaktive logins                                     |
+| `/api/acp/agents`                                                                                        | ACP — opdager og afføder lokale CLI agent binære filer                                                |
+| `/api/resilience/connections`                                                                            | Per-konto modstandskraft JSON (nedkøling, breaker, lockout). Dashboard HTML er ikke kun lokalt.       |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard installation-nudge check — afføder `cursor-agent status --format json`                      |
+| `/api/providers/{id}/login` (regex)                                                                      | Lancerer en hovedfuld Playwright Chromium til web-cookie-login                                        |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manuelt hovedfuldt flow + session-baseret phone/SMS auto-login (afføder Playwright)                   |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manuel Cursor session fornyelse — nudges `cursor-agent`                                               |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnostiserer den lokale Codex CLI -installation (afføder det binære)                                |
 
-**Svar ved overtrædelse:** `403 LOCAL_ONLY`
+**Svar på overtrædelse:** `403 LOCAL_ONLY`
 
-#### Undtagelse for administrationsomfang
+#### Administrer udskæring af omfang
 
-En delmængde af LOCAL_ONLY-stier KAN også tilgås fra adresser uden for loopback,
-hvis og kun hvis anmodningen indeholder en `Authorization: Bearer <api-key>`,
-hvis metadata inkluderer omfanget `manage` (eller `admin`). Undtagelsen styres
-eksplicit pr. sti via `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, så
-standarden for enhver ny LOCAL_ONLY-sti fortsat er strengt begrænset til
-loopback. Ikke-godkendte anmodninger og anmodninger med nøgler uden
-administrationsomfang afvises stadig med `403 LOCAL_ONLY`.
+Et undersæt af LOCAL_ONLY -stier MAY kan også tilgås fra ikke-loopback, hvis og kun hvis anmodningen bærer en `Authorization: Bearer <api-key>`, hvis metadata inkluderer `manage` omfanget (eller `admin`). Udskæringen er eksplicit gatet per sti via `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, så standarden for enhver ny LOCAL_ONLY sti forbliver strict-loopback. Ikke-godkendte anmodninger og anmodninger med ikke-administrerede nøgler afvises stadig med `403 LOCAL_ONLY`.
 
-I øjeblikket er det eneste præfiks, der kan undtages, `/api/mcp/`.
-`/api/cli-tools/runtime/` og `/api/services/` er bevidst udeladt, fordi de kan
-starte vilkårlige underprocesser (`npm install`, `node`), hvilket er præcis den
-CVE-klasse, som LOCAL_ONLY-niveauet er beregnet til at forhindre.
+I dag er det eneste omgåbare præfiks `/api/mcp/`. `/api/cli-tools/runtime/` og `/api/services/` er bevidst udelukket, fordi de kan skabe vilkårlige underprocesser (`npm install`, `node`), som er den nøjagtige CVE klasse, som LOCAL_ONLY laget eksisterer for at forhindre.
 
-**#7895 — snævert `mcp:connect`-omfang:** Undtagelsen for `/api/mcp/` accepterer
-OGSÅ en Bearer-nøgle med det snævre `mcp:connect`-omfang
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), som kontrolleres
-via `hasMcpConnectOrManageScope()` i `src/server/authz/policies/management.ts`.
-Dette er KUN afgrænset til `/api/mcp/` — `mcp:connect` giver ingen rettigheder
-på nogen anden administrationsrute (herunder alle andre LOCAL_ONLY-undtagelsespræfikser,
-hvis et sådant nogensinde tilføjes), og det er bevidst udeladt fra
-`MANAGEMENT_API_KEY_SCOPES`. En nøgle med `manage`/`admin` accepteres fortsat
-af undtagelsen præcis som før; `mcp:connect` er et alternativ med færre
-rettigheder for eksterne klienter, der kun bruger MCP, og som ikke bør have
-behov for bred administrationsadgang.
+**#7895 — `mcp:connect` smalt omfang:** `/api/mcp/` -udskæringen ALSO accepterer en bærernøgle, der holder det smalle `mcp:connect` omfang (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), markeret via `hasMcpConnectOrManageScope()` i `src/server/authz/policies/management.ts`. Dette er beregnet til at `/api/mcp/` ONLY — `mcp:connect` giver intet på nogen anden administrationsrute (inklusive hvert andet LOCAL_ONLY bypass-præfiks, hvis et nogensinde skulle tilføjes), og det er bevidst udelukket fra `MANAGEMENT_API_KEY_SCOPES`. En nøgle, der holder `manage`/`admin` passerer stadig udskæringen nøjagtigt som før; `mcp:connect` er et alternativ med lavere privilegier til fjernopkaldere, der kun har MCP, og som ikke burde have brug for bred administrationsadgang.
 
-| Anmodning                                             | Sti                        | Resultat                   |
-| ----------------------------------------------------- | -------------------------- | -------------------------- |
-| Uden for loopback, ingen Bearer                       | `/api/mcp/*`               | 403 LOCAL_ONLY             |
-| Uden for loopback, Bearer med `manage`-omfang         | `/api/mcp/*`               | Tillad                     |
-| Uden for loopback, Bearer med `mcp:connect`-omfang    | `/api/mcp/*`               | Tillad                     |
-| Uden for loopback, Bearer uden `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY             |
-| Uden for loopback, Bearer med `mcp:connect`-omfang    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY             |
-| Uden for loopback, Bearer med `manage`-omfang         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY             |
-| Loopback, enhver/ingen Bearer                         | enhver LOCAL_ONLY          | Tillad (kontrollen bestås) |
+| Anmodning                                        | Sti                        | Resultat               |
+| ------------------------------------------------ | -------------------------- | ---------------------- |
+| Ikke-loopback, ingen bærer                       | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| Non-loopback, bærer med `manage` scope           | `/api/mcp/*`               | Tillade                |
+| Non-loopback, bærer med `mcp:connect` scope      | `/api/mcp/*`               | Tillade                |
+| Ikke-loopback, bærer uden `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| Non-loopback, bærer med `mcp:connect` scope      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| Non-loopback, bærer med `manage` scope           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| Loopback, any/no Bearer                          | enhver LOCAL_ONLY          | Tillad (gate passerer) |
 
-#### Vejledning til operatører og revision
+#### Operatørvejledning og revision
 
-Hvis du kører OmniRoute bag en reverse proxy eller tunnel (nginx, Caddy,
-Cloudflare Tunnel, Tailscale, Ngrok), beskytter loopback-kontrollen stadig de
-ovenstående ruter, der kan starte processer — en anmodning, hvis klientadresse
-ikke er loopback, afvises med `403 LOCAL_ONLY` **før godkendelsen køres**, så
-en lækket JWT ikke kan bruges til at starte en proces. Der er fortsat to
-ansvarsområder for operatøren:
+Hvis du kører OmniRoute bag en omvendt proxy eller tunnel (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok), beskytter loopback-kontrollen stadig de spawn-kompatible ruter over — en anmodning, hvis klientadresse er non-loopback, afvises med `403 LOCAL_ONLY`** før godkendelsen kører** , så en lækket JWT kan ikke nå en spawn. To operatøransvar er tilbage:
 
-- **Forsøg ikke at "rette" en 403-fejl ved at forfalske klientens IP-adresse som loopback.** Hvis
-  `X-Forwarded-For: 127.0.0.1` angives, eller en proxy omskriver kildeadressen til
-  loopback, genåbnes præcis den RCE-klasse, som dette niveau lukker. Eksponér
-  dashboardet/API'et gennem proxyen — aldrig de spawn-kompatible ruter.
-- **Hold omgåelsen for manage-scope på et minimum.** Kun `/api/mcp/` kan omgås, og
-  kun med en API-nøgle med `manage`-scope. `SPAWN_CAPABLE_PREFIXES` kan aldrig
-  føjes til listen over omgåelser — zod-skemaet afviser dem, og
-  `isLocalOnlyBypassableByManageScope` afviser dem ved kørsel (dybdeforsvar),
-  hvilket er det, dashboardet mener med "kan ikke gøres omgåelig". Den samme
-  afvisningsliste indeholder også nogle få LOCAL_ONLY-ruter, der ikke spawner, men
-  som heller aldrig må være tilgængelige eksternt — `/api/oauth/kiro/auto-import`
-  (læser værtslokale Kiro-legitimationsfiler), `/api/discovery/` og
-  `/api/issue-agent/`. Indlæseren af runtime-snapshots fjerner også sådanne
-  poster fra en gemt indstillingsrække, og den ældre JSON-import
-  (`/api/settings/import-json`) skriver aldrig omgåelsesnøglerne.
-  Hver post i `LOCAL_ONLY_API_PREFIXES` skal enten være på afvisningslisten eller
-  være gennemgået som egnet til omgåelse (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Spawn-kompatible
-  ruter med dynamiske segmenter og statiske stier under `/api/providers/` (f.eks. `/login`,
-  `/refresh-cursor`) dækkes af den regex-baserede ledsager `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` i
-  `src/shared/constants/spawnCapablePrefixes.ts`, ikke af det flade
-  `SPAWN_CAPABLE_PREFIXES`-array — det flade array ville skulle dække hele
-  `/api/providers/`-præfikset for at fange dem, hvilket ville gøre et rutetræ,
-  som eksterne dashboards legitimt bruger til CRUD for udbydere, unødigt bredt.
+- **"Reparer" ikke en 403 ved at forfalske klientens IP som loopback.** Indstilling af `X-Forwarded-For: 127.0.0.1`, eller en proxy, der omskriver kildeadressen til loopback, genåbner præcis den RCE klasse, som denne tier lukker. Udsæt dashboard/API gennem proxyen — aldrig de spawn-kompatible ruter.
+- **Hold administrationsomfanget minimalt.** Kun `/api/mcp/` kan omgås, og kun med en `manage` -scoped API nøgle. `SPAWN_CAPABLE_PREFIXES` kan aldrig tilføjes til bypass-listen — zod-skemaet afviser dem og `isLocalOnlyBypassableByManageScope` nægter dem under kørsel (defence-in-depth), hvilket er hvad dashboardet mener med "kan ikke gøres omgåelig". Den samme afvisningsliste indeholder også et par LOCAL_ONLY ruter, der ikke spawner, men som aldrig må kunne nås eksternt, hverken — `/api/oauth/kiro/auto-import` (læser værtslokale Kiro -legitimationsfiler), `/api/discovery/` og `/api/issue-agent/`. Runtime-snapshot-indlæseren taber også sådanne indtastninger fra en lagret indstillingsrække, og den ældre JSON import (`/api/settings/import-json`) skriver aldrig bypass-nøglerne. Hver `LOCAL_ONLY_API_PREFIXES` post skal enten være på afvisningslisten eller gennemgås som bypass-berettiget (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dynamic-segment og static-path spawn-kompatible ruter under `/api/providers/` (f.eks. `/login`, `/refresh-cursor`) er dækket af den regex-baserede `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` companion i `src/shared/constants/spawnCapablePrefixes.ts`, ikke af den flade `SPAWN_CAPABLE_PREFIXES` array — den flade array skal dække hele `/api/providers/` -præfikset for at fange dem, over-udbredelse af et dashboard til fjernbrug af en rute CRUD
 
-**Revision af adgang** — sådan kontrollerer du, at intet uden for værten tilgår disse ruter:
+**Revisionsadgang** — for at bekræfte, at intet uden for værten når disse ruter:
 
-- Åbn **Autorisationsoversigten** på `/dashboard/settings/security`: Den viser den
-  aktive liste over LOCAL_ONLY-præfikser, hvilke præfikser der kan omgås, og det
-  spawn-kompatible sæt, der fastlægges ved kompilering ("kan ikke gøres omgåelig").
-- Søg med grep i din reverse proxy-/adgangslog efter ovenstående præfikser sammen
-  med en klientadresse, der ikke er loopback. Ethvert sådant hit, der returnerede
-  `200` i stedet for `403 LOCAL_ONLY`, betyder, at proxyen skjuler klientens
-  faktiske IP-adresse — ret proxyen.
-- En `403 LOCAL_ONLY` i OmniRoutes log for en af disse stier betyder, at
-  beskyttelsen fungerer efter hensigten, og er ikke en fejl, der skal undertrykkes.
+- Åbn** Autorisationsfortegnelse** på `/dashboard/settings/security`: den gengiver live LOCAL_ONLY -præfikslisten, hvilke præfikser kan omgås, og den kompilerings-tid spawn-kompatible ("kan ikke gøres omgåelig") indstillet.
+- Grip dine omvendte proxy-/adgangslogfiler til præfikserne ovenfor parret med en ikke-loopback-klientadresse. Ethvert sådant hit, der returnerede `200` i stedet for `403 LOCAL_ONLY` betyder, at proxyen maskerer den rigtige klient IP — fix proxyen.
+- En `403 LOCAL_ONLY` i OmniRoute logfiler for en af disse stier er vagten, der fungerer efter hensigten, ikke en fejl, der skal undertrykkes.
 
-#### Eksternt tilgængelige ruter med en kontrol ved kaldsstedet
+#### Fjerntilgængelige ruter med en call-site sondegate
 
-Nogle ruter skal fortsat være tilgængelige fra et eksternt dashboard, men kører en
-probe på værten (`which <binary>`, `<binary> --version`, `tailscale status --json`)
-for lokale kaldere. De er ikke LOCAL_ONLY for `GET`; i stedet læser handleren den
-betroede peer-vurdering med `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`)
-og kører kun proben for `loopback`- / `lan`-kaldere. En `remote`-kalder får den samme
-svarstruktur opbygget fra kilder, der ikke spawner (vedvarende tilstand, indstillinger,
-fs-kontroller), markeret med `probed: false`.
+Nogle ruter skal forblive tilgængelige fra et fjernbetjeningspanel, men køre en sonde på værtssiden (`which <binary>`, `<binary> --version`, `tailscale status --json`) for lokale opkaldere. De er ikke LOCAL_ONLY for `GET`; i stedet læser handleren den betroede peer-dom med `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) og kører kun sonden for `loopback` / `lan` -kaldere. En `remote` opkalder får den samme svarform bygget fra ikke-spawning-kilder (vedvarende tilstand, indstillinger, fs-tjek), markeret `probed: false`.
 
-| Rute                                                             | Probe, der springes over for eksterne kaldere                        |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI-runtimeprobe (`allowLocalRuntimeProbe`) og spawn som CLI-reserve |
-| `GET /api/headroom/status`                                       | `which headroom` og Python-proberne med `--version`                  |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`    |
-| `GET /api/tunnels/cloudflared` (GET-undtaget fra LOCAL_ONLY)     | `which cloudflared`-opslag i PATH                                    |
+| Rute                                                             | Sonde sprunget over for fjernopkaldere                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) og CLI-fallback spawn |
+| `GET /api/headroom/status`                                       | `which headroom` og python `--version` proberne                    |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
+| `GET /api/tunnels/cloudflared` (GET-fritaget fra LOCAL_ONLY)     | `which cloudflared` PATH opslag                                    |
 
-En ny læserute, der prober værten, følger det samme mønster eller klassificeres
-direkte som LOCAL_ONLY.
+En ny læserute, der sonderer værten, følger det samme mønster eller er klassificeret LOCAL_ONLY direkte.
 
-### Niveau 2 — ALWAYS_PROTECTED
+### Tier 2 — ALWAYS_PROTECTED
 
-**Håndhæves af:** `isAlwaysProtectedPath(path)` → spring omgåelse med `requireLogin=false` over
-**Omgåelse:** Ingen, når `requireLogin=false`; JWT er altid påkrævet
+**Håndhæves af:** `isAlwaysProtectedPath(path)` → over `requireLogin=false` bypass** Bypass:** Ingen når `requireLogin=false`; JWT altid påkrævet
 
-Disse ruter er destruktive eller irreversible. Hvis de blev tilladt i en installation
-"uden adgangskode", ville alle på det samme LAN kunne slette databasen eller afslutte
-serverprocessen.
+Disse ruter er destruktive eller irreversible. At tillade dem i en "no-password" installation ville betyde, at alle på den samme LAN kunne slette databasen eller dræbe serverprocessen.
 
-| Sti                                       | Årsag                                                                        |
-| ----------------------------------------- | ---------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Afslutter serverprocessen                                                    |
-| `/api/settings/database`                  | Eksport, import og sletning af databasen                                     |
-| `/api/db-backups`                         | Adgang til det fulde databasebackup-arkiv                                    |
-| `/api/settings/export-json`               | Eksporterer hele indstillingsobjektet (inkl. hemmeligheder)                  |
-| `/api/settings/import-json`               | Erstatter hele indstillingsobjektet                                          |
-| `/api/providers/health-autopilot/actions` | Udfører autopilotens afhjælpningshandlinger                                  |
-| `/api/settings/obsidian`                  | Udsteder genanvendelige WebDAV-legitimationsoplysninger for enhver vault-rod |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                 |
+| Sti                                       | Årsag                                                      |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `/api/shutdown`                           | Afslutter serverprocessen                                  |
+| `/api/settings/database`                  | Databaseeksport, import og sletning                        |
+| `/api/db-backups`                         | Fuld database backup arkiv adgang                          |
+| `/api/settings/export-json`               | Eksporterer hele indstillingsklodsen (inkl. hemmeligheder) |
+| `/api/settings/import-json`               | Erstatter den fulde indstillingsklump                      |
+| `/api/providers/health-autopilot/actions` | Udfører autopilotudbedringshandlinger                      |
+| `/api/settings/obsidian`                  | Mints genanvendelige WebDAV creds til enhver hvælvingsrod  |
+| `/api/relay/tokens`                       | Mønter, lister, redigerer og tilbagekalder relæ-tokens     |
+| `/api/agent-skills/generate`              | Skriver og beskærer færdighedsmapper på værten             |
+| `/api/skills/marketplace/install`         | Installerer en global færdighed for hver nøgle             |
+| `/api/skills/skillssh/install`            | Installerer en global færdighed for hver nøgle             |
+| `/api/cli-tools/apply`                    | Omskriver operatørens vært CLI config                      |
+| `/api/cli-tools/guide-settings`           | Skriver guide-drevne CLI konfigurationsfiler               |
+| `/api/cli-tools/hermes-agent-settings`    | Skriver Hermes agent konfiguration                         |
+| `/api/cli-tools/backups`                  | Gendanner og sletter CLI config backups                    |
+| `/api/log-export`                         | Sender opkaldslogger til en konfigureret destination       |
+| `/api/restart`                            | Genstarter serverprocessen                                 |
 
-**Svar ved overtrædelse:** `401 Godkendelse påkrævet`
+**Svar på overtrædelse:** `401 Authentication required`
 
-`/api/settings/obsidian` dækker dens underordnede `/webdav`-rute: `POST` retter WebDAV-filtjenesten —
-som betjenes af det brugerdefinerede Node-lag før Next.js og uden for denne pipeline — mod en rod,
-som kalderen vælger, og returnerer nyudstedte Basic-legitimationsoplysninger, `DELETE` roterer dem,
-og den overordnede `POST` gemmer Obsidian REST API-tokenet. GHSA-62vw skjulte kun afsløringen af
-adgangskoden via `GET`; udstedelsen befandt sig stadig på fail-open-niveauet
-(GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` afviser desuden en vault, der er datamappen,
-ligger i den eller indeholder den.
+`/api/settings/obsidian` dækker dets `/webdav` underordnede: `POST` peger WebDAV filtjenesten — der betjenes af det tilpassede nodelag, før Next.js uden for denne pipeline — ved en opkaldsvalgt rod og ekkoer nyslåede grundlæggende legitimationsoplysninger, `DELETE` roterer dem, og den overordnede `POST` gemmer Obsidian REST API tokenet. GHSA-62vw maskerede kun `GET` -adgangskoden afsløre; udstedelsen var stadig på fail-open tier (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` afviser desuden en boks, der er, sidder inde i eller indeholder databiblioteket.
 
-#### Eksport af legitimationsoplysninger er kun for operatører
+#### Eksporter og gendannelser af legitimationsoplysninger er kun for operatøren
 
-Niveauet ovenfor afgør kun, om _en eller anden_ legitimationsoplysning er påkrævet. De ruter, der downloader
-gemte legitimationsoplysninger, tilføjer endnu en kontrol i handleren: `GET /api/settings/export-json` (dekrypterede
-udbyderforbindelser og rå API-nøgler), `GET /api/db-backups/export` (SQLite-filen) og
-`GET /api/db-backups/exportAll` (hele arkivet) kalder `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Den accepterer en dashboardsession, det lokale CLI-subjekt eller
-en instans, hvor login er deaktiveret, og svarer med `403` på API-nøgler uanset omfang (inklusive `manage`
-og `admin`) samt på `oma_`-adgangstokens. Udstedelse af synkroniseringstokens (`POST /api/sync/tokens`) bruger den
-samme hjælpefunktion samt den betroede interne tjenestetoken via loopback.
+Niveauet ovenfor afgør kun, om _noget_ legitimationsoplysninger er påkrævet. De ruter, der downloader lagrede legitimationsoplysninger, tilføjer en anden kontrol i handleren: `GET /api/settings/export-json` (dekrypterede udbyderforbindelser og rå API -nøgler), `GET /api/db-backups/export` ( SQLite -filen) og `GET /api/db-backups/exportAll` (det fulde arkiv) kalder `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Den accepterer en dashboard-session, det lokale CLI emne eller en instans med login deaktiveret og svarer `403` til API nøgler af ethvert omfang (inklusive `manage` og `admin`) og til `oma_` adgangstokens. De destruktive modparter holder den samme grænse: `POST /api/db-backups/import` (uploadet `.sqlite`, `dryRun=true` inkluderet), `POST /api/db-backups` (gendan en lagret sikkerhedskopi efter id) og `POST /api/settings/import-json` (legacy JSON -gendannelse) erstatter live-databasen eller hele settings/connections/API-key sættet, så en maskine-legitimationsoplysninger kan heller ikke udløse dem. Ødelæggelse af gendannelsespunkter har den samme grænse: `DELETE /api/db-backups` (oprydning — hold den seneste N/dråbe ældre end D dage) og `PATCH /api/db-backups` (opbevaringsindstillinger), fordi den vedvarende tilbageholdelse er præcis, hvad `cleanupDbBackups()` gælder efter hver automatisk sikkerhedskopiering (`src/lib/db/backup.ts`), så en maskine legitimationsoplysninger, der kunne gemme `keepLatest: 1` ville beskære alt på det næste øjebliksbillede. Liste og oprettelse af sikkerhedskopier (`GET`/`PUT /api/db-backups`) holder almindelig administrationsgodkendelse. Udstedelse af synkroniseringstoken (`POST /api/sync/tokens`) bruger den samme hjælper plus det betroede loopback intern-service-token.
 
-#### Credential exports and restores are operator-only
+### Fresh-install bootstrap er loopback-only — af ægte peer, ikke `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Uden konfigureret administrationsadgangskode (og ingen `INITIAL_PASSWORD`), holder `isAuthRequired()` i `src/shared/utils/apiAuth.ts` den anonyme bootstrap åben** kun for loopback peers** . Loopback afgøres ud fra de betroede peer-signaler, i rækkefølge: den token-stemplede rigtige TCP peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, hvad politikken ser), pipelinens egen `AUTHZ_HEADER_PEER_LOCALITY` beslutning (hvad rutebehandlere ser, kun tillid til, mens `OMNIROUTE_PEER_STAMP_TOKEN` er indstillet) eller en rigtig socket-peer for direkte opkaldere. `Host` / `nextUrl.hostname` konsulteres aldrig, og skrivningen af det første kodeord (`POST /api/settings/require-login`) er under den samme begrænsning snarere end åben for alle netværks-peer (GHSA-7pq4-8pvv-rx7r). `managementPolicy` afgiver sin egen `peerContext` dom eksplicit, så ORIGINAL (pre-strip) anmodningens overskrifter bestemmer aldrig det.
 
-### Bootstrap ved ny installation er begrænset til loopback — baseret på den faktiske peer, ikke `Host`
+### Tier 3 — MANAGEMENT (standard)
 
-Når der ikke er konfigureret nogen administrationsadgangskode (og ingen `INITIAL_PASSWORD`), holder `isAuthRequired()` i
-`src/shared/utils/apiAuth.ts` den anonyme bootstrap åben **kun for loopback-peers**.
-Loopback afgøres ud fra de betroede peer-signaler i denne rækkefølge: den tokenstemplede faktiske TCP-peer
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, som politikken ser), pipelinens egen
-`AUTHZ_HEADER_PEER_LOCALITY`-afgørelse (som route-handlere ser, og som kun er betroet, mens
-`OMNIROUTE_PEER_STAMP_TOKEN` er angivet) eller en faktisk socket-peer for direkte kaldere. `Host` /
-`nextUrl.hostname` konsulteres aldrig, og den første skrivning af adgangskoden
-(`POST /api/settings/require-login`) er underlagt den samme begrænsning frem for at være åben for alle
-netværkspeers (GHSA-7pq4-8pvv-rx7r). `managementPolicy` videregiver udtrykkeligt sin egen `peerContext`-afgørelse,
-så den OPRINDELIGE (før fjernelse) anmodnings headers aldrig afgør det.
-
-### Niveau 3 — ADMINISTRATION (standard)
-
-Alle andre administrationsruter. Godkendelse er påkrævet, medmindre `requireLogin=false` er
-konfigureret. CLI-tokens kan godkende disse ruter (loopback + gyldig HMAC).
+Alle andre ledelsesruter. Godkendelse påkrævet, medmindre `requireLogin=false` er konfigureret. CLI tokens kan autentificere disse ruter (loopback + valid HMAC).
 
 ## Evalueringsrækkefølge
 
@@ -289,17 +176,12 @@ Manage-scope-grenen i trin 1 er den eneste godkendte sti, der kan opfylde en
 LOCAL_ONLY-rute. Fejltilstanden for auth-backend returnerer 503 (ikke 403), så en
 udløbet database ikke ubemærket nedgraderes til "afvis".
 
-## Tilføjelse af en ny rute, der kan starte processer
+## Tilføjelse af en ny spawn-kompatibel rute
 
-1. Føj stipræfikset til `LOCAL_ONLY_API_PREFIXES` i
-   `src/server/authz/routeGuard.ts`
-2. Tilføj en test i `tests/unit/authz/routeGuard.test.ts`, der bekræfter, at
-   `isLocalOnlyPath()` returnerer true for det nye præfiks
-3. **Spring aldrig dette trin over** — se Ufravigelig regel nr. 15 i `CLAUDE.md`
-4. Beslut: Hører denne rute OGSÅ til i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`?
-   Standardsvaret er **nej**. Vælg kun dette aktivt, når ruten er sikker at
-   eksponere for en indehaver af manage-scope (dvs. at den IKKE starter vilkårlig
-   brugerstyret kode).
+1. Tilføj stipræfikset til `LOCAL_ONLY_API_PREFIXES` i `src/server/authz/routeGuard.ts`
+2. Tilføj en test i `tests/unit/authz/routeGuard.test.ts` der hævder, at `isLocalOnlyPath()` returnerer sand for det nye præfiks
+3. **Spring aldrig dette trin over** — se Hard Rule #15 i `CLAUDE.md`
+4. Beslut: hører denne rute ALSO hjemme i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`? Standardsvaret er** ingen** . Tilmeld dig kun, når ruten er sikker at udsætte for en indehaver af et styringsområde (dvs. afføder NOT vilkårlig brugerstyret kode).
 
 ## Tilføjelse af en sti, der kan omgås med manage-scope
 

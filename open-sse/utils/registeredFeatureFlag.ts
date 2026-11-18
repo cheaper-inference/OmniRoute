@@ -10,7 +10,10 @@ type EnvLike = Record<string, string | undefined>;
  * Resolve a boolean feature flag from open-sse. Without a registered server
  * resolver the environment variable decides. Fails closed when the resolver throws.
  */
-export function isRegisteredFeatureFlagEnabled(key: string, env: EnvLike = process.env): boolean {
+export function isRegisteredFeatureFlagEnabled(
+  key: string,
+  env: EnvLike = typeof process === "undefined" ? {} : process.env
+): boolean {
   try {
     const resolver = (globalThis as Record<symbol, unknown>)[FEATURE_FLAG_RESOLVER_KEY];
     if (typeof resolver === "function") {

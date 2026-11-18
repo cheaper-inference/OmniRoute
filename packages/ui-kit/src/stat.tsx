@@ -1,22 +1,27 @@
+import { useId } from "react";
 import type { ComponentProps, ReactNode } from "react";
+import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
-export type StatTone = "default" | "positive" | "critical";
-export type StatFormat = "number" | "compact" | "currency" | "percent";
+export type StatTone = "default" | "positive" | "critical" | "warning";
+export type StatAnimateFrom = "zero" | "previous";
+export type StatFormat = "number" | "compact" | "currency" | "percent" | "text";
 export type StatLabelVariant = "default" | "eyebrow";
 
-export interface StatProps extends ComponentProps<"div"> {
+interface StatBaseProps extends ComponentProps<"div"> {
   label: ReactNode;
   /** Decorative mark displayed before the label. */
   icon?: ReactNode;
   /** Opt-in compact uppercase treatment for dashboard summary labels. */
   labelVariant?: StatLabelVariant;
-  value: number | null;
   hint?: ReactNode;
+  /** Explanatory text revealed by an info icon after the label (hover or keyboard focus). */
+  info?: ReactNode;
+  /** Accessible name prefix of the info icon; the stat label is appended. Defaults to "More information". */
+  infoLabel?: string;
   suffix?: ReactNode;
   tone?: StatTone;
-  format?: StatFormat;
   currency?: string;
   /** Locale used by both static and animated number formatting. */
   locale?: string;
@@ -27,7 +32,20 @@ export interface StatProps extends ComponentProps<"div"> {
   animationDuration?: number;
   /** Optional NumberTicker viewport behavior override. */
   animateOnView?: boolean;
+  /**
+   * Where an animated number counts from when the value changes. `"zero"` (default) recounts
+   * from 0 every time; `"previous"` counts from the number on screen, for live counters.
+   */
+  animateFrom?: StatAnimateFrom;
 }
+
+/** Text summaries use the same card structure with wrapping, compact typography.
+ * Numeric options and animation only apply to numeric values. Null stays unknown.
+ */
+export type StatProps = StatBaseProps & (
+  | { format?: Exclude<StatFormat, "text">; value: number | null }
+  | { format: "text"; value: string | null }
+);
 
 function formatOptions(format: StatFormat, currency: string): Intl.NumberFormatOptions {
   if (format === "compact") return { notation: "compact", maximumFractionDigits: 1 };
@@ -43,6 +61,8 @@ export function Stat({
   labelVariant = "default",
   value,
   hint,
+  info,
+  infoLabel = "More information",
   suffix,
   tone = "default",
   format = "number",
@@ -52,13 +72,20 @@ export function Stat({
   animate = false,
   animationDuration,
   animateOnView,
+  animateFrom = "zero",
   ...props
 }: StatProps) {
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const infoId = `${baseId}-info`;
+  // Slot rule: null, undefined, booleans and "" are absent, so `info={show && "..."}` renders nothing.
+  const hasInfo = info != null && typeof info !== "boolean" && info !== "";
   const options = { ...formatOptions(format, currency), ...numberFormatOptions };
-  const rendered = value === null ? "—" : new Intl.NumberFormat(locale, options).format(value);
+  const rendered = value === null ? "—" : typeof value === "string" ? value : new Intl.NumberFormat(locale, options).format(value);
   return (
     <div
       data-label-variant={labelVariant}
+      data-value-format={format}
       className={cn("ci-stat", `ci-stat--${tone}`, className)}
       {...props}
     >
@@ -68,18 +95,22 @@ export function Stat({
             {icon}
           </span>
         ) : null}
-        <span className="ci-stat__label-text">{label}</span>
+        <span id={hasInfo ? labelId : undefined} className="ci-stat__label-text">{label}</span>
+        {hasInfo ? (
+          <InfoTooltip id={infoId} content={info} label={infoLabel} aria-labelledby={`${infoId} ${labelId}`} />
+        ) : null}
       </div>
       <div className="ci-stat__value">
         {value === null ? (
           "—"
-        ) : animate ? (
+        ) : animate && typeof value === "number" ? (
           <NumberTicker
             value={value}
             formatOptions={options}
             locale={locale}
             duration={animationDuration}
             animateOnView={animateOnView}
+            from={animateFrom === "previous" ? "previous" : undefined}
           />
         ) : (
           rendered

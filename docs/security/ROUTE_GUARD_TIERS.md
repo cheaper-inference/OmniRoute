@@ -197,6 +197,15 @@ server process.
 | `/api/providers/health-autopilot/actions` | Executes autopilot remediation actions         |
 | `/api/settings/obsidian`                  | Mints reusable WebDAV creds for any vault root |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens   |
+| `/api/agent-skills/generate`              | Writes and prunes skill folders on the host    |
+| `/api/skills/marketplace/install`         | Installs a global skill for every key          |
+| `/api/skills/skillssh/install`            | Installs a global skill for every key          |
+| `/api/cli-tools/apply`                    | Rewrites the operator's host CLI config        |
+| `/api/cli-tools/guide-settings`           | Writes guide-driven CLI config files           |
+| `/api/cli-tools/hermes-agent-settings`    | Writes the Hermes agent config                 |
+| `/api/cli-tools/backups`                  | Restores and deletes CLI config backups        |
+| `/api/log-export`                         | Ships call logs to a configured destination    |
+| `/api/restart`                            | Restarts the server process                    |
 
 **Response on violation:** `401 Authentication required`
 

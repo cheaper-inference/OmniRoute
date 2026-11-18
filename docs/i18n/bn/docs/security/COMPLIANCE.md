@@ -21,59 +21,68 @@ OmniRoute প্রশাসনিক কার্যক্রম, প্রম�
 
 ### প্রশাসনিক অডিট ইভেন্ট (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`-এ করা প্রতিটি কল
-একটি করে সারি তৈরি করে। অ্যাকশন স্ট্রিংগুলো `domain.verb` (অথবা `domain.verb.outcome`)
-প্যাটার্ন অনুসরণ করে। কোডবেসে নিশ্চিত হওয়া অ্যাকশন টাইপগুলোর মধ্যে রয়েছে:
+`logAuditEvent({ action, actor, target, details, ... })`-এর প্রতিটি কল
+একটি সারি তৈরি করে। অ্যাকশন স্ট্রিংগুলো `domain.verb` (অথবা
+`domain.verb.outcome`) প্যাটার্ন অনুসরণ করে। ইন-ট্রি-তে নিশ্চিত অ্যাকশন
+টাইপগুলোর মধ্যে রয়েছে:
 
-| অ্যাকশন                              | উৎস                                     |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-প্রতিটি এন্ট্রিতে `action`, `actor` (ডিফল্ট মান `"system"`), `target`,
+প্রতিটি এন্ট্রিতে `action`, `actor` (ডিফল্ট হলো `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` এবং `timestamp` সংরক্ষিত হয়। সংবেদনশীল কী (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey`-এর সঙ্গে মেলে এমন যেকোনো কিছু,
-ইত্যাদি) সারিটি লেখার আগে রিকার্সিভভাবে `"[redacted]"` দিয়ে আড়াল করা হয়।
+`request_id`, এবং `timestamp` সংরক্ষিত হয়। সংবেদনশীল কী (`apiKey`,
+`accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`-এর
+সঙ্গে মিলে যায় এমন যেকোনো কিছু ইত্যাদি) সারিটি লেখার আগে পুনরাবৃত্তভাবে
+`"[redacted]"` দিয়ে প্রতিস্থাপন করা হয়।
+
+`api_key.auth.touch` সারিগুলো সফল API-কী মেটাডেটা এবং ডিসকভারি রিড
+(GET/HEAD) রেকর্ড করে, যা কখনো রিকোয়েস্ট লগে পৌঁছায় না: কোন কী, কখন এবং
+স্বাভাবিকীকৃত পাথ—এগুলো একত্রিত করে সর্বোচ্চ ১,০০০টি সারিতে সীমাবদ্ধ রাখা হয়।
+`noLog` থাকা কী এবং এনভায়রনমেন্ট কী বাদ দেওয়া হয়। কলকারীর IP ঠিকানা এবং
+ইউজার-এজেন্ট কেবল `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ফিচার ফ্ল্যাগ চালু
+থাকলে যোগ করা হয় (ডিফল্টভাবে বন্ধ)।
 
 ### MCP টুল কল (`mcp_tool_audit`)
 
-প্রতিটি MCP টুল আহ্বান
-`open-sse/mcp-server/audit.ts`-এর মাধ্যমে একটি সারি লেখে। স্কিমা (
-`src/lib/db/migrations/002_mcp_a2a_tables.sql` থেকে):
+প্রতিটি MCP টুল ইনভোকেশন `open-sse/mcp-server/audit.ts`-এর মাধ্যমে একটি সারি
+লেখে। স্কিমা (`src/lib/db/migrations/002_mcp_a2a_tables.sql` থেকে):
 
-| কলাম             | টীকা                                        |
+| Column           | Notes                                       |
 | ---------------- | ------------------------------------------- |
-| `id`             | স্বয়ংক্রিয়ভাবে ক্রমবর্ধমান                |
+| `id`             | অটোইনক্রিমেন্ট                              |
 | `tool_name`      | MCP টুল শনাক্তকারী                          |
 | `input_hash`     | ইনপুটের sha256 (কোনো পেলোড সংরক্ষিত হয় না) |
 | `output_summary` | সংক্ষিপ্ত, ছাঁটাই করা সারাংশ                |
-| `duration_ms`    | মোট অতিবাহিত সময়                           |
-| `api_key_id`     | কলকারী (nullable)                           |
+| `duration_ms`    | দেওয়াল-সময়                                |
+| `api_key_id`     | কলকারী (নাল হতে পারে)                       |
 | `success`        | `1` / `0`                                   |
-| `error_code`     | ব্যর্থতার ক্ষেত্রে চূড়ান্ত এরর কোড         |
+| `error_code`     | ব্যর্থতার ক্ষেত্রে টার্মিনাল ত্রুটি কোড     |
 | `created_at`     | ISO টাইমস্ট্যাম্প                           |
 
 ### রিকোয়েস্ট / ব্যবহার লগ
 
-এগুলো অপারেশনাল টেলিমেট্রি (কঠোর অর্থে প্রশাসনিক অডিট নয়), তবে একই
+এগুলো অপারেশনাল টেলিমেট্রি (কঠোরভাবে প্রশাসনিক অডিট নয়), তবে একই
 রিটেনশন পাইপলাইন ব্যবহার করে:
 
-- `usage_history` — প্রতি রিকোয়েস্টের ব্যবহারের সমষ্টি
-- `call_logs` — প্রতি রিকোয়েস্টের পূর্ণ লগ (সারির সীমা প্রযোজ্য, নিচে দেখুন)
-- `proxy_logs` — প্রক্সি ট্রাফিক লগ (সারির সীমা প্রযোজ্য)
+- `usage_history` — প্রতি-রিকোয়েস্ট ব্যবহারের সারসংক্ষেপ
+- `call_logs` — প্রতি-রিকোয়েস্টের পূর্ণ লগ (সারি-সীমার অধীন, নিচে দেখুন)
+- `proxy_logs` — প্রক্সি ট্র্যাফিক লগ (সারি-সীমার অধীন)
 - `request_detail_logs` — পুরোনো বিস্তারিত রিকোয়েস্ট লগ (উপস্থিত থাকলে এখনও ছাঁটাই করা হয়)
 
 ## স্টোরেজ স্কিমা

@@ -10,6 +10,7 @@ import {
   getCliRuntimeStatus,
 } from "@/shared/services/cliRuntime";
 import { createBackup } from "@/shared/services/backupService";
+import { cliModelLabel } from "../_lib/modelLabel";
 import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
 import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -178,7 +179,13 @@ export async function POST(request: Request) {
       type: "openai-compat",
       base_url: normalizedBaseUrl,
       api_key: apiKey,
-      models: [{ id: model, name: `OmniRoute: ${model}`, context_window: DEFAULT_CONTEXT_WINDOW }],
+      models: [
+        {
+          id: model,
+          name: `OmniRoute: ${cliModelLabel(model)}`,
+          context_window: DEFAULT_CONTEXT_WINDOW,
+        },
+      ],
     };
 
     const updated: Record<string, unknown> = {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GitHub Copilot sub-token refresh helper for the proactive token health check.
  *

@@ -12,7 +12,7 @@ const VALID_TOOLS = ["claude", "codex", "droid", "grok-build", "openclaw", "clin
 
 // GET /api/cli-tools/backups?tool=claude — list backups
 export async function GET(request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {
@@ -42,7 +42,7 @@ export async function GET(request) {
 
 // POST /api/cli-tools/backups { tool, backupId } — restore a backup
 export async function POST(request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;
@@ -98,7 +98,7 @@ export async function POST(request) {
 
 // DELETE /api/cli-tools/backups { tool, backupId } — delete a backup
 export async function DELETE(request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;

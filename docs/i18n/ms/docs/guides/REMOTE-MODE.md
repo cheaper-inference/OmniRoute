@@ -46,7 +46,7 @@ komputer riba anda                       OmniRoute jauh (VPS)
 
 ## Menyambung
 
-### Dengan kata laluan pengurusan (pemulaan)
+### Dengan kata laluan pengurusan (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
@@ -54,8 +54,8 @@ omniroute connect 192.168.0.15
 # ✔ Disambungkan ke http://192.168.0.15:20128 — konteks '192.168.0.15' (skop: admin)
 ```
 
-Aliran kata laluan menghasilkan token **admin** secara lalai (anda memiliki kata laluan tersebut,
-jadi anda sememangnya mempunyai kawalan penuh). Kecilkan skop dengan `--scope`:
+Aliran kata laluan mengeluarkan token **admin** secara lalai (anda memegang kata
+laluan, jadi anda sudah mempunyai kawalan penuh). Hadkan skop dengan `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
@@ -64,6 +64,11 @@ omniroute connect 192.168.0.15 --scope write
 Pilihan: `--port <p>` (apabila hos tidak mempunyai port), `--name <ctx>` (nama konteks),
 `--scope read|write|admin`. URL penuh digunakan tanpa perubahan:
 `omniroute connect https://omni.example.com`.
+
+Apabila pelayan mendayakan pengesahan dua faktor papan pemuka (Tetapan →
+Keselamatan), kata laluan sahaja akan ditolak: CLI kemudiannya meminta kod daripada
+aplikasi pengesah (atau kod pemulihan). Berikan kod tersebut terlebih dahulu dengan
+`--totp <code>` untuk penggunaan tanpa interaksi.
 
 ### Dengan token yang dijana terlebih dahulu
 
@@ -454,12 +459,12 @@ omniroute contexts remove 192-168-0-15 --yes   # buang konteks setempat (walaupu
 
 ## Titik akhir API (rujukan)
 
-| Kaedah | Laluan                | Pengesahan             | Skop                             |
-| ------ | --------------------- | ---------------------- | -------------------------------- |
-| POST   | `/api/cli/connect`    | kata laluan pengurusan | — (awam, dilindungi kata laluan) |
-| GET    | `/api/cli/whoami`     | token akses            | read                             |
-| GET    | `/api/cli/tokens`     | token akses            | admin                            |
-| POST   | `/api/cli/tokens`     | token akses            | admin                            |
-| DELETE | `/api/cli/tokens/:id` | token akses            | admin                            |
+| Kaedah | Laluan                | Pengesahan                       | Skop                             |
+| ------ | --------------------- | -------------------------------- | -------------------------------- |
+| POST   | `/api/cli/connect`    | kata laluan; 2FA jika dihidupkan | — (awam, dilindungi kata laluan) |
+| GET    | `/api/cli/whoami`     | token akses                      | baca                             |
+| GET    | `/api/cli/tokens`     | token akses                      | pentadbir                        |
+| POST   | `/api/cli/tokens`     | token akses                      | pentadbir                        |
+| DELETE | `/api/cli/tokens/:id` | token akses                      | pentadbir                        |
 
 Lihat [openapi.yaml](../openapi.yaml) untuk skema penuh.

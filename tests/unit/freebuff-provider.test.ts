@@ -5,6 +5,8 @@ import { FreebuffExecutor } from "../../open-sse/executors/freebuff.ts";
 import type { ExecuteInput } from "../../open-sse/executors/base.ts";
 import { freebuffProvider } from "../../open-sse/config/providers/registry/freebuff/index.ts";
 import { APIKEY_PROVIDERS_GATEWAYS } from "../../src/shared/constants/providers/apikey/gateways.ts";
+import { OAUTH_PROVIDERS } from "../../src/shared/constants/providers/oauth.ts";
+import { supportsDualAuthProvider } from "../../src/shared/constants/providers.ts";
 import { validateFreebuffProvider } from "../../src/lib/providers/validation.ts";
 
 test("FreebuffExecutor: constructor initializes provider name correctly", () => {
@@ -43,13 +45,19 @@ test("freebuffProvider: registry entry has valid structure and catalog", () => {
   assert.equal(minimax?.supportsVision, true);
 });
 
-test("APIKEY_PROVIDERS_GATEWAYS: freebuff gateway metadata is defined", () => {
-  const fb = APIKEY_PROVIDERS_GATEWAYS.freebuff;
-  assert.ok(fb, "freebuff must be in APIKEY_PROVIDERS_GATEWAYS");
+test("OAUTH_PROVIDERS: freebuff is a dual-auth card (browser login + pasted token)", () => {
+  const fb = OAUTH_PROVIDERS.freebuff;
+  assert.ok(fb, "freebuff must be in OAUTH_PROVIDERS");
   assert.equal(fb.id, "freebuff");
   assert.equal(fb.name, "Freebuff");
   assert.equal(fb.color, "#10B981");
   assert.equal(fb.hasFree, true);
+  assert.equal(supportsDualAuthProvider("freebuff"), true);
+  assert.equal(
+    (APIKEY_PROVIDERS_GATEWAYS as Record<string, unknown>).freebuff,
+    undefined,
+    "freebuff must live in exactly one catalog"
+  );
 });
 
 test("validateFreebuffProvider: returns invalid when apiKey is empty", async () => {

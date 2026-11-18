@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -69,10 +70,9 @@ function ChaosProviderOverrideRow({
         {override.enabled ? t("on") : t("off")}
       </Button>
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="icon"
         icon="close"
-        className="text-error"
         aria-label={t("removeProvider")}
         title={t("removeProvider")}
         onClick={() => onRemove(index)}
@@ -89,19 +89,19 @@ function ChaosAvailableProvidersHint({
   const t = useTranslations("chaosConfig");
   if (availableProviders.length === 0) return null;
   return (
-    <details className="text-xs text-text-muted">
-      <summary className="cursor-pointer hover:text-text-main">
+    <Disclosure className="text-xs text-text-muted">
+      <DisclosureTrigger>
         {t("availableProviders", { count: availableProviders.length })}
-      </summary>
-      <div className="mt-1 flex flex-wrap gap-1">
+      </DisclosureTrigger>
+      <DisclosureContent keepMounted className="mt-1 flex flex-wrap gap-1">
         {availableProviders.map((p) => (
           <span key={p.id} className="px-1.5 py-0.5 rounded bg-bg-subtle">
             {p.provider}
             {p.defaultModel && <span className="opacity-60 ml-1">({p.defaultModel})</span>}
           </span>
         ))}
-      </div>
-    </details>
+      </DisclosureContent>
+    </Disclosure>
   );
 }
 

@@ -122,9 +122,16 @@ function assertBoundSender(call: ts.CallExpression, id: string, originalArgument
 
 function assertChatSenders(source: string) {
   const senders = callsNamed(source, "buildExhaustionOptions");
-  assert.equal(senders.length, 3, "all three chat senders must forward the request id");
+  assert.equal(senders.length, 4, "all four chat senders must forward the request id");
   const common = ["provider", "model", "providerProfile"];
   const expected = [
+    // Muse Code failure that marks the account (#15521).
+    [
+      "credentials.connectionId",
+      "result.status",
+      'String(result.rawMessage ?? result.error ?? "")',
+      ...common,
+    ],
     [
       "credentials.connectionId",
       "result.status || HTTP_STATUS.BAD_GATEWAY",
@@ -143,12 +150,17 @@ function assertChatSenders(source: string) {
     assertBoundSender(call, "runtimeOptions.correlationId ?? null", expected[index])
   );
   assertExpression(
-    optionProperty(senders[2], "headers"),
+    optionProperty(senders[0], "headers"),
+    "result.response.headers",
+    "Muse failure headers"
+  );
+  assertExpression(
+    optionProperty(senders[3], "headers"),
     "result.response.headers",
     "fallback headers"
   );
   assertExpression(
-    optionProperty(senders[2], "persistUnavailableState"),
+    optionProperty(senders[3], "persistUnavailableState"),
     `!(
     isCombo && result.status === 429 && (failureKind === "rate_limit" || failureKind === "transient")
   )`,
@@ -277,7 +289,7 @@ test("exhaustion lines carry the request id", async (t) => {
   });
 });
 
-for (const index of [0, 1, 2]) {
+for (const index of [0, 1, 2, 3]) {
   test(`sender AST rejects missing request id at chat sender ${index + 1}`, () => {
     const source = readSource("../../src/sse/handlers/chat.ts");
     const call = callsNamed(source, "buildExhaustionOptions")[index];
@@ -292,7 +304,7 @@ for (const [property, replacement] of [
 ]) {
   test(`sender AST rejects an unrelated fallback ${property}`, () => {
     const source = readSource("../../src/sse/handlers/chat.ts");
-    const fallback = callsNamed(source, "buildExhaustionOptions")[2];
+    const fallback = callsNamed(source, "buildExhaustionOptions")[3];
     const node = optionProperty(fallback, property);
     assert.ok(node);
     assert.throws(() => assertChatSenders(replaceNode(source, node, replacement)));
@@ -301,14 +313,14 @@ for (const [property, replacement] of [
 
 test("sender AST rejects a detached options helper even when its id text remains", () => {
   const source = readSource("../../src/sse/handlers/chat.ts");
-  const call = callsNamed(source, "buildExhaustionOptions")[2];
+  const call = callsNamed(source, "buildExhaustionOptions")[3];
   const detached = replaceNode(source, call, "{}") + `\n${call.getText()};`;
   assert.throws(() => assertChatSenders(detached));
 });
 
 test("sender AST permits additional structured options and ignores comments and strings", () => {
   const source = readSource("../../src/sse/handlers/chat.ts");
-  const fallback = callsNamed(source, "buildExhaustionOptions")[2];
+  const fallback = callsNamed(source, "buildExhaustionOptions")[3];
   const options = fallback.arguments[1];
   const changed = replaceNode(
     source,

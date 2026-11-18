@@ -7,9 +7,16 @@
  * names (`"vs-dark"`, `"light"`, `"vs"`); MonacoEditor.tsx swaps them for the kit themes when the
  * kit themes could be built, and leaves them untouched otherwise (SSR, jsdom, odd colour formats).
  *
- * Limitation: the kit flips tokens on `[data-theme="dark"] .ci-theme`, so a light probe cannot
- * read light values while the page itself is dark — the light kit theme is then not (re)defined
- * and a `"light"` editor on a dark page keeps Monaco's built-in light theme.
+ * Limitation (Classic palette): the kit flips tokens on `[data-theme="dark"] .ci-theme`, so a
+ * light probe cannot read light values while the page itself is dark — the light kit theme is
+ * then not (re)defined and a `"light"` editor on a dark page keeps Monaco's built-in light theme.
+ *
+ * Editions palette (`data-ci-appearance` on <html>, the default): ci-editions.css resolves
+ * light/dark from the ROOT's `data-theme` with selectors that outrank any probe attribute, so a
+ * probe alone would read the page's own theme for both variants (a `"vs-dark"` editor on a light
+ * page would get light colours). The probe read then flips the root's `data-theme` for the
+ * duration of one synchronous getComputedStyle pass and restores it before returning — no frame
+ * is painted in between — which also lifts the limitation above for Editions.
  */
 
 export const KIT_MONACO_THEME = {
@@ -158,8 +165,16 @@ function normaliseViaCanvas(doc: Document, value: string): string | null {
   }
 }
 
+const APPEARANCE_ATTRIBUTE = "data-ci-appearance";
+
 /** Read the kit palette for one theme off a hidden probe element. */
 export function readKitEditorPalette(dark: boolean, doc: Document = document): KitEditorPalette {
+  const root = doc.documentElement;
+  const pageTheme = root.dataset.theme;
+  const wanted = dark ? "dark" : "light";
+  // Editions: see the module comment — the root's data-theme decides, so flip it for this read.
+  const flipRoot = root.hasAttribute(APPEARANCE_ATTRIBUTE) && pageTheme !== wanted;
+  if (flipRoot) root.dataset.theme = wanted;
   const probe = doc.createElement("div");
   probe.className = "ci-theme";
   probe.dataset.theme = dark ? "dark" : "light";
@@ -177,6 +192,10 @@ export function readKitEditorPalette(dark: boolean, doc: Document = document): K
     return out;
   } finally {
     probe.remove();
+    if (flipRoot) {
+      if (pageTheme === undefined) delete root.dataset.theme;
+      else root.dataset.theme = pageTheme;
+    }
   }
 }
 
@@ -191,8 +210,10 @@ export function defineKitMonacoThemes(
 ): ReadonlySet<string> {
   if (!doc?.body) return definedThemes;
   const pageDark = doc.documentElement.dataset.theme === "dark";
+  const editions = doc.documentElement.hasAttribute(APPEARANCE_ATTRIBUTE);
   for (const dark of [true, false]) {
-    if (!dark && pageDark) continue; // a light probe reads dark values on a dark page
+    // Classic: a light probe reads dark values on a dark page (Editions flips the root instead).
+    if (!dark && pageDark && !editions) continue;
     try {
       const theme = buildMonacoKitTheme(readKitEditorPalette(dark, doc), dark);
       if (!theme) continue;

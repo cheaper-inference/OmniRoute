@@ -25,24 +25,24 @@ Sestavljeno:    1 - (1 - 0.80) * (1 - 0.46) = 89.2% prihranka
 Razpon:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Kaj stiska
+## Kaj stisne
 
-Vgrajeni katalog trenutno vključuje 49 filtrov v naslednjih kategorijah:
+Vgrajeni katalog trenutno vsebuje 56 filtrov v naslednjih kategorijah:
 
-| Kategorija | Primeri                                                       |
-| ---------- | ------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, testi Go, testi Cargo       |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, splošni dnevniki lupine                 |
-| `docker`   | `docker ps`, dnevniki Dockerja                                |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | Izhod JSON, sledi sklada, splošna nadomestna obravnava izhoda |
+| Kategorija | Primeri                                                            |
+| ---------- | ------------------------------------------------------------------ |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`                  |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testi         |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx      |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler      |
+| `shell`    | `ls`, `find`, `grep`, splošni dnevniki lupine                      |
+| `docker`   | `docker ps`, dnevniki Docker                                       |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                            |
+| `generic`  | izhod JSON, sledi skladov (stack traces), splošni nadomestni izhod |
 
 Detektor v `open-sse/services/compression/engines/rtk/commandDetector.ts` razvrsti izhod
-pred izbiro filtra. Filtri se lahko ujemajo tudi po vzorcu ukaza ali regularnem izrazu izhoda, kadar razred
-ukaza ne zadostuje.
+pred izbiro filtra. Filtri se lahko ujemajo tudi po vzorcu ukaza ali regularnem izrazu izhoda,
+ko razred ukaza ni dovolj.
 
 ## Razreševanje filtrov
 
@@ -354,19 +354,19 @@ node --import tsx/esm --test \
 
 ## Ravni intenzivnosti (v3.8.16+)
 
-RTK podpira **3 ravni intenzivnosti**, ki predstavljajo kompromis med **agresivnostjo stiskanja** in **varnostjo**. Raven se nastavi prek `config.intensity` v konfiguraciji mehanizma.
+RTK podpira **3 ravni intenzivnosti**, ki predstavljajo kompromis med **agresivnostjo kompresije** in **varnostjo**. Raven se nastavi prek `config.intensity` v konfiguraciji pogona.
 
-### Tri ravni
+### 3 ravni
 
-| Raven                 | Prag krajšanja        | Prihranek žetonov | Tveganje   | Najprimernejša uporaba            |
-| --------------------- | --------------------- | ----------------- | ---------- | --------------------------------- |
-| `minimal`             | 24 vrstic na razdelek | ~20-40%           | Zelo nizko | Produkcija s kritičnim kontekstom |
-| `standard` (privzeto) | 24 vrstic na razdelek | ~50-70%           | Nizko      | Vsakodnevne seje programiranja    |
-| `aggressive`          | 16 vrstic na razdelek | ~70-90%           | Srednje    | Dolge seje, največji prihranek    |
+| Raven                 | Prag odreza        | Prihranek žetonov | Tveganje   | Najboljše za                      |
+| --------------------- | ------------------ | ----------------- | ---------- | --------------------------------- |
+| `minimal`             | 24 vrstic na odsek | ~20-40%           | Zelo nizko | Produkcija s kritičnim kontekstom |
+| `standard` (privzeto) | 24 vrstic na odsek | ~50-70%           | Nizko      | Vsakodnevne seje kodiranja        |
+| `aggressive`          | 16 vrstic na odsek | ~70-90%           | Srednje    | Dolge seje, največji prihranki    |
 
-### Kje se izvaja krajšanje
+### Kje poteka odrez
 
-Prag krajšanja vpliva na `lineFilter.ts`:
+Prag odreza vpliva na `lineFilter.ts`:
 
 ```ts
 // Iz open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -374,39 +374,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Ohranita se tako **začetek** kot **konec** vsakega razdelka; ko se sproži krajšanje, se vmesna vsebina odstrani.
+Ohranjena sta tako **začetek** kot **konec** vsakega odseka; vmesna vsebina se opusti, ko se odrez sproži.
 
-### Kaj ostane in kaj se odstrani
+### Kaj ostane in kaj je odrezano
 
-| Vsebina                                 | minimal      | standard       | aggressive     |
-| --------------------------------------- | ------------ | -------------- | -------------- |
-| Napake/sledi sklada                     | ✅ ohranjeno | ✅ ohranjeno   | ✅ ohranjeno   |
-| Neuspešni testi                         | ✅ ohranjeno | ✅ ohranjeno   | ✅ ohranjeno   |
-| Napake pri gradnji                      | ✅ ohranjeno | ✅ ohranjeno   | ✅ ohranjeno   |
-| Uspešni testi (podrobno)                | ✅ ohranjeno | 🟡 strnjeno    | 🟡 strnjeno    |
-| Rutinski izhod (informacijski dnevniki) | 🟡 strnjeno  | 🟡 strnjeno    | ❌ odstranjeno |
-| Vrstice napredka                        | 🟡 strnjeno  | ❌ odstranjeno | ❌ odstranjeno |
-| Pasice/umetnost ASCII                   | 🟡 strnjeno  | ❌ odstranjeno | ❌ odstranjeno |
+| Vsebina                                | minimal      | standard     | aggressive   |
+| -------------------------------------- | ------------ | ------------ | ------------ |
+| Napake / sledi sklada                  | ✅ ohranjeno | ✅ ohranjeno | ✅ ohranjeno |
+| Spodleteli testi                       | ✅ ohranjeno | ✅ ohranjeno | ✅ ohranjeno |
+| Napake gradnje                         | ✅ ohranjeno | ✅ ohranjeno | ✅ ohranjeno |
+| Uspešni testi (podrobno)               | ✅ ohranjeno | 🟡 strnjeno  | 🟡 strnjeno  |
+| Rutinski izpis (informativni dnevniki) | 🟡 strnjeno  | 🟡 strnjeno  | ❌ opuščeno  |
+| Vrstice napredka                       | 🟡 strnjeno  | ❌ opuščeno  | ❌ opuščeno  |
+| Pasica / ASCII umetnost                | 🟡 strnjeno  | ❌ opuščeno  | ❌ opuščeno  |
 
-### Izbira ustrezne intenzivnosti
+### Izbira prave intenzivnosti
 
 ```
-                  Ali je izguba konteksta katastrofalna?
+                  Je izguba konteksta katastrofalna?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     DA          NE          NISTE PREPRIČANI
+    DA           NE          NE VEM
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kako kritična   Najprej poskusite `standard`
-      │      je prepustnost? (deluje v 80 %
-      │           │          primerov)
+      │      Kako kritična   Poskusite najprej
+      │      je prepustnost? `standard` (deluje
+      │           │          v 80 % primerov)
       │      ┌────┴────┐
       │      │         │
-      │    NIZKA     VISOKA
+      │     NIZKA     VISOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -414,7 +414,7 @@ Ohranita se tako **začetek** kot **konec** vsakega razdelka; ko se sproži kraj
       └──────┴─────────┘
 ```
 
-### Konfiguriranje intenzivnosti
+### Nastavitev intenzivnosti
 
 **Za posamezno kombinacijo** (v konfiguraciji kombinacije):
 
@@ -432,7 +432,7 @@ Ohranita se tako **začetek** kot **konec** vsakega razdelka; ko se sproži kraj
 **Programsko**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
-`CompressionEngine` in nima metode `updateConfig`. Konfiguracijo mehanizma
+`CompressionEngine` in nima metode `updateConfig`. Konfiguracijo pogona
 namesto tega posodobite prek pomožne funkcije registra:
 
 ```ts
@@ -443,14 +443,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Preverjanje učinka
 
-Uporabite **preverjevalno pregrado** (glejte spodaj), da potrdite, da je vaš filter varen pri izbrani intenzivnosti:
+Uporabite **Verify Gate** (glejte spodaj), da preverite, ali je vaš filter varen pri izbrani intenzivnosti:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtri niso uspešno prestali preverjanja pri agresivni intenzivnosti");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

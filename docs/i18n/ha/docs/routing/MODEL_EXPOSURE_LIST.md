@@ -4,64 +4,47 @@
 
 ---
 
-> Ana kunna shi ne da zaɓi, kuma a kashe yake ta tsohuwa (`modelVisibilityAllowlist`/`modelVisibilityDenylist` idan
-> dukansu babu komai, katalog ɗin `/v1/models` DA kowane tarin zaɓuɓɓukan `auto/*` za su kasance iri ɗaya
-> har zuwa matakin byte). Tsari ne makamancin `hidePaidModels`/`hideAutoCombos`
-> (`src/lib/db/settings.ts`) ga masu gudanarwa waɗanda ke son jerin model da aka tsara
-> saboda dalilan da ba su da alaƙa da kuɗi.
+> Shiga, a kashe ta tsohuwa (`modelVisibilityAllowlist`/`modelVisibilityDenylist` duka babu komai suna barin kundin kundin `/v1/models` AND ɗan takara na `auto/*` mai kama da juna). Dan uwan `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) ga masu aiki waɗanda ke son lissafin ƙirar ƙira saboda dalilan da basu da alaƙa da farashi.
 
-## Dalilin samuwar wannan
+## Me yasa wannan akwai
 
-`hidePaidModels` yana amsa "shin wannan model kyauta ne?" kuma `hideAutoCombos` yana amsa "shin ya kamata
-a tallata ids na kama-da-wane na `auto/*` kwata-kwata?" — babu ɗayansu da ke bai wa mai gudanarwa damar tsara
-wani zaɓaɓɓen rukuni na models yadda yake so (misali, gabatar da ainihin models da wani abokin ciniki na
-Claude Code / OpenCode ya kamata ya gani, ba tare da la'akari da farashi ba). #11481 yana ƙara wannan a matsayin
-saituna biyu masu zaman kansu na jerin string, waɗanda sai an zaɓi kunna su.
+`hidePaidModels` ta amsa "wannan samfurin kyauta ne?" kuma `hideAutoCombos` ya amsa "ya kamata a tallata `auto/*` rumbun ids kwata-kwata?" — ba ya ƙyale ma'aikaci ya tsara ɓangarorin ƙira na sabani (misali gabatar da ainihin ƙirar ƙirar Claude OpenCode abokin ciniki ya kamata ya gani, ba tare da farashi ba). #11481 ya ƙara da cewa a matsayin masu zaman kansu biyu, saitin-tsararrun saituna.
 
 ## Saituna
 
-| Maɓalli                    | Nau'i      | Tsoho | Ma'ana                                                                                      |
-| -------------------------- | ---------- | ----- | ------------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`  | Shigarwar da ta dace da wani zaɓi tana ɓoye shi daga katalog/tarin zaɓuɓɓuka.               |
-| `modelVisibilityAllowlist` | `string[]` | `[]`  | Idan ba fanko ba ne, shigarwar da suka dace da wani zaɓi KAƊAI ne za su ci gaba da bayyana. |
+| Maɓalli                    | Nau'in     | Tsohuwar | Ma'ana                                                                               |
+| -------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------ |
+| `modelVisibilityDenylist`  | `string[]` | `[]`     | Abubuwan da suka dace da ɗan takara suna ɓoye shi daga tafkin catalog/candidate.     |
+| `modelVisibilityAllowlist` | `string[]` | `[]`     | Lokacin da babu komai, shigarwar ONLY da ta dace da ɗan takara ta kasance a fallasa. |
 
-Dukansu suna karɓar shigarwa har 500, kowannensu mai tsawon haruffa har 200 (an tabbatar da su ta Zod a
-`src/shared/validation/settingsSchemas.ts`). Shigarwa na iya zama ɗaya daga cikin waɗannan:
+Dukansu suna karɓar shigarwar har zuwa 500 har zuwa haruffa 200 kowanne (Zod-ingantattun a cikin `src/shared/validation/settingsSchemas.ts`). Shiga ko dai:
 
-- ainihin id na katalog — `"gpt-4o"` (id na model kawai) ko `"openai/gpt-4o"` (mai gabatar da provider), ko
-- tsarin glob mai amfani da `*`/`?` — misali `"openai/gpt-4*"` ko `"anthropic/*"` — wanda ake warwarewa ta
-  hanyar matcher ɗin `globToRegex()` na bai ɗaya (`src/shared/utils/globPattern.ts`) wanda tuni
-  mappings na combo na kowane model na `ModelRoutingSection` da `freeModels.ts::matchesOnlyPaidModels`
-  suke amfani da shi.
+- ainihin katalogi id — `"gpt-4o"` (idan samfurin bare) ko `"openai/gpt-4o"` (wanda aka riga aka tsara), ko
+- ƙirar glob ta amfani da `*`/`?` — misali `"openai/gpt-4*"` ko `"anthropic/*"` — an warware ta hanyar `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) wanda aka riga aka yi amfani da taswirar haɗaɗɗen ƙirar kowane nau'in `ModelRoutingSection` da `freeModels.ts::matchesOnlyPaidModels`.
 
-Fifiko: ana fara duba denylist (shigarwar da aka hana kullum za ta kasance a ɓoye, ko da kuwa ta dace
-da allowlist); idan allowlist ba fanko ba ne, shigarwar da ta dace da shi kaɗai ne za su rage.
+Gabatarwa: an fara bincika wanda aka hana (an hana shigarwa koyaushe, koda kuwa ya dace da jerin izini); lokacin da lissafin izini bai zama fanko ba, kawai shigarwar da ta yi daidai da tsira.
 
-## Wuraren takura guda biyu, ba guda ɗaya ba
+## Biyu chokepoints, ba daya
 
-Darasin daga #6512 (tace katalog ta `hidePaidModels` kaɗai har yanzu tana barin `auto/*` ya tura zuwa
-model mai kuɗi, saboda an gina tarin zaɓuɓɓukan combo daban) yana aiki daidai a nan.
-Ana kiran predicate na daidaitawa `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) daga
-DUK waɗannan wurare biyu:
+Darasi daga #6512 (tace ta `hidePaidModels` -only har yanzu tana barin hanyar `auto/*` zuwa samfurin da aka biya, tun da an gina tafkin ɗan takara da kansa) yana aiki iri ɗaya anan. Ana kiran madaidaicin predicate `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) daga BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — jerin `/v1/models` kansa, a wuraren takura guda 5 na kowace tushe
-  waɗanda `shouldHidePaid()` ya riga ya tsare (static `PROVIDER_MODELS`, rows na provider da aka daidaita,
-  custom rows, rows masu dogaro da alias, da managed-fallback rows).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ana kiran sa
-  daga `virtualFactory.ts::buildPreparedPool`, nan da nan bayan kiran makamancin sa na
-  `filterPaidOnlyCandidates()`, don haka ba za a taɓa iya zaɓar model da aka hana zuwa cikin tarin
-  zaɓuɓɓukan `auto/*` ba.
+- `src/app/api/v1/models/catalog.ts` — da `/v1/models` da ke jera kanta, a guda 5 kowane tushen chokepoints `shouldHidePaid()` riga ƙofofin (a tsaye `PROVIDER_MODELS`, layuka masu bada aiki da aka daidaita, layuka na al'ada, layuka masu goyan baya, layuka da aka sarrafa).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — da ake kira daga `virtualFactory.ts::buildPreparedPool`, nan da nan bayan daidai kiran `filterPaidOnlyCandidates()`, don haka ba za a taɓa zaɓar samfurin da aka ƙi ba a cikin tafkin ɗan takara `auto/*` ko dai.
 
-## Abin da BA a tacewa
+## Me NOT tace
 
-Wannan yana kwaikwayon halin da `hideAutoCombos` yake da shi yanzu: model id da aka aika **kai tsaye**
-(ba ta hanyar `auto/*` ba, kuma ba wanda aka gano ta jerin katalog ba) ba a taɓa hana shi yayin dispatch —
-abin da ake tacewa kawai shi ne tallatawa/mambancin tarin zaɓuɓɓuka. Wannan ba ya dogara da
-`hidePaidModels`; mai gudanarwa na iya son zaɓaɓɓen rukuni saboda dalilan da ba su da alaƙa da kuɗi,
-don haka saitunan biyu suna haɗuwa a matsayin filters masu zaman kansu da aka haɗa da AND, kamar yadda
-haɗin flags da yawa da ake da shi yanzu yake a `catalog.ts`.
+Mirrors halin da ake ciki na `hideAutoCombos`: an aika id na ƙira** a bayyane** (ba ta hanyar `auto/*` ba, kuma ba a gano ta cikin jeri na kasida ba) ba a taɓa toshewa ba yayin aika — kawai membobin advertisement/candidate-pool ake tacewa. Wannan mai zaman kansa ne daga `hidePaidModels`; mai aiki na iya son saitin da aka keɓe don dalilan da ba su da alaƙa da farashi, don haka saituna biyu sun tsara azaman masu tacewa AND-ed masu zaman kansu, iri ɗaya da abun da ke cikin tutoci da yawa a cikin `catalog.ts`.
 
-Fitar da saituna (`GET /api/settings/export-json`) tana haɗa arrays ɗin biyu yadda suke, kamar kowane
-field na saituna — saɓanin tacewar export ta matakan combo ta `hidePaidModels`, babu haɗarin sake cika
-bayani a nan: id da aka hana wanda yake cikin combo step da aka fitar zaɓin routing ne da mai gudanarwar
-da kansa ya yi kai tsaye, ba wani abu da ake buƙatar iyakar export ta cire ba.
+Fitar da saituna (`GET /api/settings/export-json`) ya haɗa da tsararraki biyu na zahiri, kamar kowane filin saiti — sabanin `hidePaidModels`'s combo-mataki fitarwa tace, babu haɗarin sake ruwa a nan: ƙin hana id ɗin da aka saka a cikin matakin haɗaɗɗen fitarwa shine ainihin zaɓin mai aiki da kansa, ba wani abu da iyakar fitarwa ke buƙatar tsiri.
+
+## Jerin Combos-kawai (`exposeCombosOnly`)
+
+Boolean daban, shima ficewa da `false` ta tsohuwa, don turawa inda combos sune saman abin ƙira na jama'a kuma masu samar da baya ne kawai. Lokacin da yake `true`, lissafin jama'a (`GET /v1/models`, `GET /v1`, da sauran hanyoyin gano `/v1` da aka gina akan `getUnifiedModelsResponse()`) suna kiyaye layuka kawai tare da `owned_by: "combo"`: combos masu amfani da haɗin `auto/*` da aka gina (sai dai idan `hideAutoCombos` ya ɓoye su). Yana amfani da gwajin jeri iri ɗaya kamar kowane maɓalli `catalogScope: "combos"`, kuma maɓalli na maɓalli na allow/deny/scope har yanzu yana aiki a saman.
+
+Juya shi a ciki** Saitunan → Rarraba → Model API jeri** , ko da `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kamar lissafin da ke sama, kawai yana canza talla:
+
+- Har ila yau `provider/model` id bayyananne yana aikawa, kuma `GET /v1/models/{id}` yana warware shi;
+- katalogin dashboard (`GET /api/models/catalog`, wanda masu zaɓen ƙirar ke amfani da shi) ba a ƙunshe ba;
+- ba a misaltuwa cikin wuraren tafkunan ƴan takarar `auto/*`, don haka ƙungiyoyin `auto/*` suna kiyaye cikakken tafkinsu.

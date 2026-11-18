@@ -27,6 +27,7 @@
   "playground-studio.spec.ts": 101,
   "protocol-visibility.spec.ts": 25,
   "providers-bailian-coding-plan.spec.ts": 240,
+  "providers-cli-version.spec.ts": 136,
   "providers-management.spec.ts": 324,
   "proxy-registry.smoke.spec.ts": 218,
   "radar-guided-setup.spec.ts": 177,
@@ -40,5 +41,7 @@
   "smoke.spec.ts": 33,
   "traffic-inspector.spec.ts": 212,
   "translator-friendly.spec.ts": 115,
-  "visual-resilience-smoke.spec.ts": 20
+  "visual-resilience-smoke.spec.ts": 20,
+  "rtl-font-loading.spec.ts": 114,
+  "zai-web-current-browser-controls.spec.ts": 97
 }

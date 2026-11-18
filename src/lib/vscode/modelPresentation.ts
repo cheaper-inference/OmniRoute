@@ -95,7 +95,7 @@ export function resolveVscodeModelMetadata(model: VscodeCatalogModel) {
   const normalizedModelId = resolveFamilyFirstPublishedModelId(rawModelId);
   const parsedTierModel = parseVscodeServiceTierVariantModelId(normalizedModelId);
   const canonicalBaseModelId = getReasoningVariantBaseModelId(parsedTierModel.baseModelId);
-  const parsed = parseModel(canonicalBaseModelId, "");
+  const parsed = parseModel(canonicalBaseModelId);
   const provider = parsed.provider || model.owned_by || undefined;
   const providerModel =
     parsed.model ||

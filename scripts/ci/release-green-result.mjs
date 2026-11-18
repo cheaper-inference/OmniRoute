@@ -38,6 +38,22 @@ export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventNa
       evidenceState: "INCOMPLETE",
       reason: "Invalid or missing report/provenance",
     };
+  // Exit 1 from the scanner wrapper can mean missing tooling, not measured drift.
+  // Legacy receipts without explicit measurement evidence cannot certify an audit.
+  if (
+    report.checks.some(
+      (check) =>
+        ["workflow-lint", "check:workflows"].includes(check.id) &&
+        check.evidenceState !== "MEASURED"
+    )
+  ) {
+    return {
+      exit: 1,
+      verdict: "UNKNOWN",
+      evidenceState: "INCOMPLETE",
+      reason: "Workflow audit has no complete measurement",
+    };
+  }
   const failed = report.checks.filter((check) => check.kind === "hard" && !check.ok);
   const consistent =
     report.releaseGreen === (failed.length === 0) &&

@@ -16,7 +16,9 @@ test("colors public surface excludes removed provider-color wrapper", () => {
   assert.equal(Object.hasOwn(colors, "getProviderColor"), false);
   assert.ok(colors.PROVIDER_COLORS.codex);
   assert.equal(colors.getProtocolColor("openai-chat", "openai").label, "OpenAI-Chat");
-  assert.equal(colors.getProxyStatusStyle("success").bg, "#059669");
+  // Kit status tone, not a hex literal (#19066 block 1).
+  assert.equal(colors.getProxyStatusStyle("success").tone, "success");
+  assert.equal(colors.getProxyStatusStyle("success").bg, "var(--ci-color-success-bg)");
 });
 
 test("pricing public surface excludes removed token-cost helper", () => {

@@ -639,10 +639,12 @@ test("usage service covers Codex, Kiro and Kimi usage parsing and error branches
             limit_reached: false,
             primary_window: {
               used_percent: 25,
+              limit_window_seconds: 18000,
               reset_after_seconds: 30,
             },
             secondary_window: {
               used_percent: 50,
+              limit_window_seconds: 604800,
               reset_at: Math.floor(Date.now() / 1000) + 120,
             },
           },
@@ -661,10 +663,12 @@ test("usage service covers Codex, Kiro and Kimi usage parsing and error branches
               rate_limit: {
                 primary_window: {
                   used_percent: 90,
+                  limit_window_seconds: 18000,
                   reset_after_seconds: 60,
                 },
                 secondary_window: {
                   used_percent: 20,
+                  limit_window_seconds: 604800,
                   reset_after_seconds: 600,
                 },
               },

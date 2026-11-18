@@ -9,6 +9,7 @@
  * collide via delimiter composition.
  */
 import { listModelCapabilityOverrides } from "@/lib/db/modelCapabilityOverrides";
+import { listInputModalities, type InputModalityMap } from "@/lib/db/models/inputModalities";
 import type { ReasoningEffortOverrideValue } from "@/shared/reasoning/reasoningEffortsOverride";
 import { listModelContextOverrides } from "@/lib/db/modelContextOverrides";
 import {
@@ -37,6 +38,7 @@ export type NestedReasoningEffortsOverrideMap = ReadonlyMap<
 >;
 
 export interface ModelCapabilityResolutionSnapshot {
+  readonly inputModalities?: InputModalityMap;
   readonly synced: CapabilitiesByProvider;
   readonly maxTokenOverrides: NestedOverrideMap;
   readonly maxInputTokenOverrides: NestedOverrideMap;
@@ -121,5 +123,6 @@ export function createModelCapabilityResolutionSnapshot(
     customModelsByProvider,
     compatVisionOverrides: listModelCompatVisionOverrides(),
     syncedAvailableModelVision: listSyncedAvailableModelVision(),
+    inputModalities: listInputModalities(),
   };
 }

@@ -56,11 +56,11 @@ datorită unui aspect concret al implementării:
 
 Iată ce înseamnă acest lucru pentru fiecare suprafață, chiar și cu `CORS_ALLOW_ALL=true`:
 
-| Suprafață                                      | Mecanism de autentificare  | Efectul CORS cu wildcard                                                                                                                                                                                                                                        |
-| ---------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Panou de control / MANAGEMENT `/api/*`         | Sesiune prin cookie        | Originea este returnată, dar **fără `Allow-Credentials`** browserul **blochează** citirea cu credențiale. Un site rău intenționat de altă origine **nu poate citi** răspunsurile autentificate ale panoului de control, iar cookie-ul de sesiune nu este expus. |
-| API client `/v1/*`, `/v1beta/*`                | Antet Bearer / `x-api-key` | Este deja permisiv **prin proiectare** (`relaxForTokenAuth`): browserele nu atașează niciodată automat `Authorization`/`x-api-key`, astfel încât pagina unui atacator nu poate furniza cheia dvs. `CORS_ALLOW_ALL` nu extinde această expunere.                 |
-| Acces public doar în citire (`/api/health`, …) | Niciunul                   | Date nesensibile; wildcard-ul este inofensiv.                                                                                                                                                                                                                   |
+| Suprafață                                      | Mecanism de autentificare  | Efectul CORS cu wildcard                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Panou de control / MANAGEMENT `/api/*`         | Sesiune prin cookie        | Originea este returnată, dar **fără `Allow-Credentials`** browserul **blochează** citirea cu credențiale. Un site rău intenționat de altă origine **nu poate citi** răspunsurile autentificate ale panoului de control, iar cookie-ul de sesiune nu este expus.                                                                                                                                  |
+| API client `/v1/*`, `/v1beta/*`                | Antet Bearer / `x-api-key` | Este deja permisiv **prin proiectare** (`relaxForTokenAuth`): browserele nu atașează niciodată automat `Authorization`/`x-api-key`, astfel încât pagina unui atacator nu poate furniza cheia dvs. Ecoul se aplică doar atunci când cheia prezentată a fost validată; răspunsurile anonime (`REQUIRE_API_KEY=false`) păstrează lista de permisiuni. `CORS_ALLOW_ALL` nu extinde această expunere. |
+| Acces public doar în citire (`/api/health`, …) | Niciunul                   | Date nesensibile; wildcard-ul este inofensiv.                                                                                                                                                                                                                                                                                                                                                    |
 
 Prin urmare, expunerea **reziduală** a `CORS_ALLOW_ALL=true` este limitată la: (a)
 **citiri** între origini fără credențiale ale unor date deja neautentificate și (b)
@@ -118,14 +118,33 @@ repornire.
 
 ## Chei API vs sesiuni bazate pe cookie-uri
 
-- **Bearer / `x-api-key` (suprafața de inferență `/v1/*`):** browserele nu atașează
-  niciodată automat aceste valori. CORS nu reprezintă o barieră relevantă aici — cheia API este
-  bariera — motiv pentru care această suprafață este intenționat permisivă, astfel încât clienții pentru browser și
-  Electron să poată citi răspunsurile la care au deja dreptul.
-- **Sesiune bazată pe cookie-uri (tabloul de bord):** protejată de valoarea implicită care blochează accesul **și**
-  de absența `Access-Control-Allow-Credentials` pe traseul comun. Nu includeți
-  originile de administrare/ale tabloului de bord în nicio configurație permisivă; acestea trebuie să rămână strict
-  blocate în mod implicit.
+- **Bearer / `x-api-key` (suprafața de inferență `/v1/*`):** browserele nu le atașează niciodată automat. CORS nu reprezintă o barieră relevantă aici — cheia API este bariera — motiv pentru care această suprafață este în mod intenționat permisivă, astfel încât clienții din browser și Electron să poată citi răspunsurile la care au deja dreptul. Ecoul relaxat urmează cheia validată, nu simpla prezență a antetului: atunci când `REQUIRE_API_KEY=false` servește anonim o cerere, răspunsul său reușit păstrează lista de permisiuni cu închidere implicită. Respingerile de autentificare (401) rămân lizibile, astfel încât clienții să poată semnala o cheie revocată sau introdusă greșit (#5242): răspunsul 401 generat de propriul pipeline păstrează ecoul, iar o rută care refuză cheia însăși după ce pipeline-ul a servit-o anonim (`/v1/models` și `/v1beta/models` cu autentificarea de management configurată, rutele cu acces limitat la proprietar `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` și rutele candidate auto-combo) adaugă ecoul la acel 401 prin `credentialRejectionHeaders()`. Ecoul este determinat de faptul că cererea conține un antet de autentificare (`Authorization`, `x-api-key`, `x-goog-api-key` sau cookie-ul `auth_token`), nu de care dintre acestea a verificat ruta, și nu este asociat niciodată cu `Access-Control-Allow-Credentials`; corpul este un pachet de eroare fix. Rutele de management din `/api/v1/` protejate de `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) nu adaugă ecoul: cu `REQUIRE_API_KEY=false`, răspunsurile lor 401/403 nu pot fi citite de pe alte origini.
+- **Sesiunea bazată pe cookie (tabloul de bord):** protejată de comportamentul implicit cu închidere implicită **și** de absența `Access-Control-Allow-Credentials` pe calea partajată. Păstrați originile de management/tablou de bord în afara oricărei configurații permisive; acestea trebuie să rămână strict cu închidere implicită.
+
+## Handshake-uri WebSocket (`/v1/responses`, `/v1/ws`)
+
+Browserele nu aplică CORS pentru WebSocket, așa că transporturile WebSocket care
+returnează rezultate de inferență verifică ele însele `Origin` din handshake
+(`src/server/origin/wsOrigin.ts`): WebSocket-ul Responses (`/v1/responses`) și, când
+OmniRoute rulează prin `npm start` / `npm run dev`, puntea `/v1/ws` și
+`/api/v1/ws`, care transmite `/v1/chat/completions`, `/v1/messages` și
+`/v1/responses` sub formă de cadre. Puntea cere verdictul de la
+`/api/v1/ws?handshake=1` și refuză upgrade-ul dacă acea rută nu a efectuat verificarea.
+Un handshake este acceptat atunci când:
+
+- nu are antetul `Origin` (Codex CLI, SDK-uri și alți clienți care nu sunt browsere);
+- `Origin` este admis de lista de permisiuni de mai sus (`CORS_ALLOWED_ORIGINS`, setarea
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` este una dintre originile publice proprii ale OmniRoute (URL-ul de bază public
+  configurat, originea redirecționată de un proxy de încredere sau o gazdă loopback/LAN
+  directă indicată ca literal IP sau `localhost` — aceiași candidați pe care îi folosește
+  verificarea mutațiilor din panoul de control); sau
+- poartă o cheie API validă, ca pe suprafața HTTP `/v1/*`.
+
+Orice altceva primește `403 ws_origin_forbidden`. Un cookie de sesiune al panoului de
+control nu exceptează o `Origin` străină, deoarece browserul îl atașează la socketul
+oricărei pagini. `localhost` pe alt port nu este tratat ca aceeași origine; adăugați
+astfel de origini de dezvoltare în `CORS_ALLOWED_ORIGINS`.
 
 ## Exemplu: proxy invers în fața OmniRoute
 
@@ -161,6 +180,7 @@ Security), nu în proxy.
 | Bannerul de avertizare din tabloul de bord          | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Câmpul Origini CORS permise                         | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per rută pentru Cloud-Agent (excepția)         | `src/lib/cloudAgent/api.ts`                                          |
+| Verificarea `Origin` la handshake-ul WebSocket      | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Consultați și
 

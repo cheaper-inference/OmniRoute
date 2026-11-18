@@ -336,6 +336,20 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     apiHint:
       "DeepAI uses per-endpoint REST calls (e.g. /api/text2img) instead of OpenAI chat/completions. OmniRoute adapts OpenAI image generation requests to DeepAI's /api/{slug} endpoints.",
   },
+  deapi: {
+    id: "deapi",
+    serviceKinds: [],
+    alias: "deapi",
+    name: "deAPI",
+    icon: "image",
+    color: "#18181B",
+    textIcon: "DE",
+    website: "https://deapi.ai",
+    authHint:
+      "Use your deAPI API key (sk-dp-<id>-<secret>) from deapi.ai. OmniRoute sends it as Authorization: Bearer <key>.",
+    apiHint:
+      "deAPI serves images, video, text-to-speech, transcription and embeddings through its OpenAI-compatible gateway at https://oai.deapi.ai/v1 (no chat/completions). Model ids are deAPI's native ids (Flux1schnell, Ltx2_3_22B_Dist_INT8, Kokoro, WhisperLargeV3, Bge_M3_FP16, ...) — there are no dall-e-3 / tts-1 / whisper-1 aliases.",
+  },
   "cursor-api": {
     id: "cursor-api",
     serviceKinds: ["llm"],
@@ -348,7 +362,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     authHint:
-      "Paste a Cursor user API key (crsr_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
+      "Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
     apiHint:
       "Same agent protocol and model catalog as the Cursor IDE provider. The Cursor CLI can also be pointed at /api/cursor-cli on this instance and authenticated with an OmniRoute API key.",
   },

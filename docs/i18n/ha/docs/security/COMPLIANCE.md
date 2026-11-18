@@ -11,55 +11,73 @@ OmniRoute yana rubuta ayyukan gudanarwa, abubuwan da suka faru na tantancewa, sa
 
 Aiwatarwar tana cikin `src/lib/compliance/index.ts` (T-43 — "Sarrafawar Bin Ka'ida") da `src/lib/compliance/providerAudit.ts`. Rubuce-rubucen bincike ba sa jefa kuskure: idan aka samu kowace irin gazawa, ana yin watsi da kiran a ɓoye domin rubutun bincike kada ya katse babban tsarin buƙatar.
 
-## Abubuwan da Ake Rubutawa
+## Abin da Ake Rubutawa
 
-### Abubuwan binciken gudanarwa (`audit_log`)
+### Abubuwan tantancewar gudanarwa (`audit_log`)
 
-Kowane kira zuwa `logAuditEvent({ action, actor, target, details, ... })` yana samar da layi guda. Kirtanin ayyuka suna bin tsarin `domain.verb` (ko `domain.verb.outcome`). Nau'ikan ayyukan da aka tabbatar suna cikin bishiyar lambar sun haɗa da:
+Kowane kiran `logAuditEvent({ action, actor, target, details, ... })` yana samar da
+jere guda. Kirtattun ayyuka suna bin tsarin
+`domain.verb` (ko `domain.verb.outcome`). Nau'ikan ayyukan da aka tabbatar
+a cikin bishiyar lambar sun haɗa da:
 
-| Aiki                                 | Tushe                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Aiki                                 | Madogara                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Kowane shigarwa yana ɗauke da `action`, `actor` (tsohon ƙimarsa ita ce `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, da `timestamp`. Ana ɓoye maɓallai masu muhimmanci (`apiKey`, `accessToken`, `refreshToken`, `password`, duk wani abu da ya dace da `*token`/`*secret`/`*apikey`, da sauransu) ta hanyar maimaitawa zuwa `"[redacted]"` kafin a rubuta layin.
+Kowane shigarwa yana ɗauke da `action`, `actor` (tsoho shi ne `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, da `timestamp`. Ana sake ɓoye maɓallan masu mahimmanci
+(`apiKey`, `accessToken`, `refreshToken`, `password`, duk wani abu da ya dace da
+`*token`/`*secret`/`*apikey`, da sauransu) zuwa `"[redacted]"` kafin a rubuta jeren.
+
+Layukan `api_key.auth.touch` suna rubuta nasarorin karanta bayanan API-key da
+bincikensa (GET/HEAD) waɗanda ba sa taɓa isa ga kundin buƙatu: wane maɓalli ne,
+yaushe, da daidaitacciyar hanyar, tare da haɗa su da iyakance su zuwa layuka
+1,000. Ana tsallake maɓallan da ke da `noLog` da maɓallin muhalli. Ana ƙara
+adireshin IP da wakilin mai kiran ne kawai idan alamar fasalin
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` tana kunne (a kashe take ta tsohuwa).
 
 ### Kiran kayan aikin MCP (`mcp_tool_audit`)
 
-Kowane kiran kayan aikin MCP yana rubuta layi ta hanyar `open-sse/mcp-server/audit.ts`. Tsarin bayanai (daga `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Kowane kiran kayan aikin MCP yana rubuta jere ta hanyar
+`open-sse/mcp-server/audit.ts`. Tsarin (daga
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Shafi            | Bayani                                             |
-| ---------------- | -------------------------------------------------- |
-| `id`             | ƙaruwa ta atomatik                                 |
-| `tool_name`      | mai gano kayan aikin MCP                           |
-| `input_hash`     | sha256 na shigarwa (ba a adana ainihin bayanin ba) |
-| `output_summary` | taƙaitaccen bayani da aka gajarta                  |
-| `duration_ms`    | ainihin lokacin da aka ɗauka                       |
-| `api_key_id`     | mai kira (yana iya zama babu ƙima)                 |
-| `success`        | `1` / `0`                                          |
-| `error_code`     | lambar kuskuren ƙarshe idan an gaza                |
-| `created_at`     | tambarin lokaci na ISO                             |
+| Ginshiƙi         | Bayanan kula                               |
+| ---------------- | ------------------------------------------ |
+| `id`             | ƙara ta atomatik                           |
+| `tool_name`      | mai gano kayan aikin MCP                   |
+| `input_hash`     | sha256 na shigarwa (ba a adana bayanan ba) |
+| `output_summary` | taƙaitaccen bayani, an rage tsawonsa       |
+| `duration_ms`    | lokacin da ya shige                        |
+| `api_key_id`     | mai kira (na iya zama babu)                |
+| `success`        | `1` / `0`                                  |
+| `error_code`     | lambar kuskuren ƙarshe idan an gaza        |
+| `created_at`     | tambarin lokacin ISO                       |
 
-### Rajistocin buƙata / amfani
+### Kundin buƙatu / amfani
 
-Waɗannan bayanan lura ne na aiki (ba cikakken binciken gudanarwa ba), amma suna amfani da tsarin riƙewa iri ɗaya:
+Waɗannan bayanan telemetry ne na aiki (ba tantancewar gudanarwa kai tsaye ba) amma
+suna amfani da bututun adanawa iri ɗaya:
 
 - `usage_history` — taƙaitaccen amfani na kowace buƙata
-- `call_logs` — cikakken rajistan kowace buƙata (yana ƙarƙashin iyakar layuka, duba ƙasa)
-- `proxy_logs` — rajistan zirga-zirgar proxy (yana ƙarƙashin iyakar layuka)
-- `request_detail_logs` — tsohon cikakken rajistan buƙata (har yanzu ana datse shi idan yana nan)
+- `call_logs` — cikakken kundin kowace buƙata (yana ƙarƙashin iyakar layuka, duba ƙasa)
+- `proxy_logs` — kundin zirga-zirgar wakili (yana ƙarƙashin iyakar layuka)
+- `request_detail_logs` — kundin tsohon bayani dalla-dalla na buƙata (har yanzu ana share shi idan yana nan)
 
 ## Tsarin Ma’ajiya
 

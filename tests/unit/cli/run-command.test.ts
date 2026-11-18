@@ -98,6 +98,21 @@ test("buildRunPlan for Aider uses its OpenAI-compatible root endpoint", async ()
   assert.equal(plan.envDiff.changedOrAdded.includes("OPENAI_API_KEY"), true);
 });
 
+test("buildRunPlan for WhyCodes injects -P omniroute and -m without writing config", async () => {
+  const plan = await buildRunPlan(
+    "why",
+    { baseUrl: "http://localhost:20128", apiKey: "sk_test_x", model: "glm/glm-5.2" },
+    ["generate", "ping", "--format", "json"]
+  );
+  assert.equal(plan.target, "whycodes");
+  assert.deepEqual(logicalArgs(plan.args).slice(0, 4), ["-P", "omniroute", "-m", "glm/glm-5.2"]);
+  assert.equal(plan.envDiff.changedOrAdded.includes("OMNIROUTE_API_KEY"), true);
+  // WhyCodes reads OMNIROUTE_API_KEY for `-P omniroute`; OPENAI_API_KEY would only feed a
+  // configured `openai` fallback and hand the OmniRoute token to api.openai.com.
+  assert.equal(plan.envDiff.changedOrAdded.includes("OPENAI_API_KEY"), false);
+  assert.equal(JSON.stringify(plan).includes("sk_test_x"), false);
+});
+
 test("buildRunPlan for Goose injects provider and model without writing config", async () => {
   const plan = await buildRunPlan(
     "goose-cli",
@@ -235,5 +250,31 @@ test("--api-key-env resolves credentials without exposing their value in the pla
   } finally {
     if (previous === undefined) delete process.env.OMNIROUTE_RUN_TEST_TOKEN;
     else process.env.OMNIROUTE_RUN_TEST_TOKEN = previous;
+  }
+});
+
+test("auth preview follows each target's own credential rules (ANTHROPIC_AUTH_TOKEN only)", async () => {
+  const saved = {
+    ANTHROPIC_AUTH_TOKEN: process.env.ANTHROPIC_AUTH_TOKEN,
+    OMNIROUTE_API_KEY: process.env.OMNIROUTE_API_KEY,
+  };
+  process.env.ANTHROPIC_AUTH_TOKEN = "sk_anthropic_only_private";
+  delete process.env.OMNIROUTE_API_KEY;
+  try {
+    const opts = { baseUrl: "http://localhost:20128" };
+    // Codex never reads ANTHROPIC_AUTH_TOKEN: it launches with the no-auth sentinel.
+    const codex = await buildRunPlan("codex", opts);
+    assert.equal(codex.authSource, "none");
+    // Claude does fall back to ANTHROPIC_AUTH_TOKEN, so the preview names it.
+    const claude = await buildRunPlan("claude", opts);
+    assert.equal(claude.authSource, "env");
+    for (const plan of [codex, claude]) {
+      assert.equal(JSON.stringify(plan).includes("sk_anthropic_only_private"), false);
+    }
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
   }
 });

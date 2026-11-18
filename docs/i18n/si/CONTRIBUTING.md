@@ -20,10 +20,14 @@ UI/UX, i18n, CLI, database, සහ build/deploy වෙනස්කම් ඒව�
 - **Node.js** `>=22.22.2 <23`, හෝ `>=24.0.0 <27` (නිර්දේශිත: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ පරිශීලකයින් (Node 24+):** `npm install` ක්රියාත්මක කිරීමෙන් පසු, ස්වදේශීය මොඩියුල ස්ථාපනය වී ඇති බව තහවුරු කරන්න:
-> `node -e "require('better-sqlite3')"`. එය `MODULE_NOT_FOUND` සමඟ අසාර්ථක වුවහොත්,
-> `npm approve-scripts better-sqlite3 && npm install` ක්රියාත්මක කරන්න. බලන්න
-> [දෝෂ නිරාකරණය](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Node 24 සහිත Windows:** වත්මන් 24 LTS patch නිකුතුව භාවිත කරන්න (අවම වශයෙන් 24.20.0).
+> පැරණි නිකුතු මඟින් `--test-force-exit` ක්රියාවලිය වසා දැමූ පසු සාර්ථක පරීක්ෂණවලින් අනතුරුව
+> ක්රියාවලිය අසාමාන්ය ලෙස අවසන් විය හැක. Node හි [Windows libuv fix](https://github.com/nodejs/node/pull/61999) මඟින්
+> මෙම runtime බිඳවැටීම විසඳයි; පරීක්ෂණ assertions සහ runner exit checks සක්රීයව තබන්න.
+
+> **npm v11+ පරිශීලකයන් (Node 24+):** `npm install` පසුව, native modules ස්ථාපනය වී ඇති බව තහවුරු කරන්න:
+> `node -e "require('better-sqlite3')"`. එය `MODULE_NOT_FOUND` සමඟ අසාර්ථක වන්නේ නම්,
+> `npm approve-scripts better-sqlite3 && npm install` ධාවනය කරන්න. [ගැටලු නිරාකරණය](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) බලන්න.
 
 - **Git**
 
@@ -38,91 +42,92 @@ npm install
 ### පරිසර විචල්ය
 
 ```bash
-# අච්චුවෙන් ඔබේ .env ගොනුව සාදන්න
+# අච්චුවෙන් ඔබේ .env සාදන්න
 cp .env.example .env
 
-# අවශ්ය රහස් ජනනය කරන්න
+# අවශ්ය secrets ජනනය කරන්න
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 සංවර්ධනය සඳහා ප්රධාන විචල්ය:
 
-| විචල්යය                | සංවර්ධන පෙරනිමිය         | විස්තරය                   |
-| ---------------------- | ------------------------ | ------------------------- |
-| `PORT`                 | `20128`                  | සේවාදායක පෝට් එක          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ඉදිරිපස සඳහා මූලික URL එක |
-| `JWT_SECRET`           | (ඉහත පරිදි ජනනය කරන්න)   | JWT අත්සන් කිරීමේ රහස     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු පිවිසුම් මුරපදය      |
-| `APP_LOG_LEVEL`        | `info`                   | ලොග් විස්තර මට්ටම         |
+| විචල්යය                | සංවර්ධන පෙරනිමිය         | විස්තරය                  |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | සේවාදායක port            |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend සඳහා මූලික URL  |
+| `JWT_SECRET`           | (ඉහත ජනනය කරන්න)         | JWT අත්සන් කිරීමේ secret |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු login මුරපදය        |
+| `APP_LOG_LEVEL`        | `info`                   | Log විස්තරාත්මක මට්ටම    |
 
-### උපකරණ පුවරු සැකසුම්
+### Dashboard සැකසුම්
 
-පරිසර විචල්ය හරහාද වින්යාස කළ හැකි විශේෂාංග සඳහා උපකරණ පුවරුව UI මාරු සපයයි:
+Dashboard මඟින් පරිසර විචල්ය හරහාද සැකසිය හැකි විශේෂාංග සඳහා UI toggle සපයයි:
 
-| සැකසුම් ස්ථානය    | මාරුව              | විස්තරය                               |
-| ----------------- | ------------------ | ------------------------------------- |
-| සැකසුම් → උසස්    | දෝෂහරණ ප්රකාරය     | දෝෂහරණ ඉල්ලීම් ලොග් සක්රීය කරන්න (UI) |
-| සැකසුම් → සාමාන්ය | පැති තීරු දෘශ්යතාව | පැති තීරු කොටස් පෙන්වන්න/සඟවන්න       |
+| සැකසුම් ස්ථානය      | Toggle             | විස්තරය                              |
+| ------------------- | ------------------ | ------------------------------------ |
+| Settings → Advanced | Debug Mode         | Debug request logs සක්රීය කරන්න (UI) |
+| Settings → General  | Sidebar Visibility | Sidebar කොටස් පෙන්වන්න/සඟවන්න        |
 
-මෙම සැකසුම් දත්ත සමුදායේ ගබඩා වන අතර නැවත ආරම්භ කිරීම් හරහා පවතිමින්, සකසා ඇති විට පරිසර විචල්යවල පෙරනිමි අගයන් අභිබවා යයි.
+මෙම සැකසුම් database තුළ ගබඩා වන අතර restart කිරීමෙන් පසුවද පවතී. සැකසූ විට, ඒවා env var පෙරනිමි අගයන් අභිබවා යයි.
 
 ### දේශීයව ධාවනය කිරීම
 
 ```bash
-# සංවර්ධන ප්රකාරය (ක්ෂණික නැවත පූරණය)
+# සංවර්ධන මාදිලිය (hot reload)
 npm run dev
 
-# නිෂ්පාදන ගොඩනැගීම
-npm run build    # next build → .build/next/ ඉන්පසු assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# දායක වෙනස්කම් සඳහා වේගවත් පසු-අන්ත/API-පමණක් සම්පාදනය
+# දායකයන්ගේ වෙනස්කම් සඳහා වේගවත් backend/API-only compile කිරීම
 npm run build:contributor
 
-# නිකුතු ගොඩනැගීම (පිරිසිදු නැවත ගොඩනැගීම + HEAD මුර සලකුණ — යෙදවීම සඳහා අවශ්යයි)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ලියයි
+# Release build (පිරිසිදු rebuild + HEAD sentinel — deploy සඳහා අවශ්ය)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# පොදු පෝට් වින්යාසය
+# සාමාන්ය port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-දායක ගොඩනැගීම සම්පාදනය-පමණක් වලංගු කිරීම සිදු කරයි: එය ස්වාධීන
-බෙදාහැරීම එකලස් කිරීම හෝ විකල්ප ස්වදේශීය ඇසුරුම් සම්පත් ගොඩනැගීම සිදු නොකරයි. බෙදාහැරිය හැකි මිටිය
-වලංගු කිරීමට අවශ්ය විට සාමාන්ය නිෂ්පාදන ගොඩනැගීම භාවිත කරන්න.
+දායකයන්ගේ build මඟින් compile-only වලංගුකරණය සිදු කරයි: එය standalone
+distribution එක assemble කිරීම හෝ විකල්ප native packaging assets build කිරීම සිදු නොකරයි.
+deploy කළ හැකි bundle එක වලංගු කිරීමට අවශ්ය විට සාමාන්ය production build භාවිත කරන්න.
 
-### ගොඩනැගීමේ ප්රතිදාන සැකැස්ම
+### Build ප්රතිදාන සැලැස්ම
 
-| නාමාවලිය  | අන්තර්ගතය                                                                   | හඹා යයිද |
-| --------- | --------------------------------------------------------------------------- | -------- |
-| `src/`    | යෙදුම් මූලාශ්රය (TypeScript / TSX)                                          | ඔව්      |
-| `.build/` | අතරමැදි ගොනු — `next build` ප්රතිදානය (gitignored, `distDir = .build/next`) | නැත      |
-| `dist/`   | බෙදාහැරිය හැකි මිටිය — `assembleStandalone` මඟින් එකලස් කරයි (gitignored)   | නැත      |
+| නාමාවලිය  | අන්තර්ගතය                                                                 | Tracked |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                     | Yes     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | No      |
+| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | No      |
 
-ගොඩනැගීමේ නල මාර්ගය තනි වාරයකින් ක්රියාත්මක වේ:
+Build pipeline එක එක් පියවරකින් සමන්විත වේ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ප්රතිදානය)
-  └─ assembleStandalone()                 (standalone + static + public + ස්වදේශීය සම්පත් පිටපත් කරයි)
-       └─ ප්රතිදානය: dist/               (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` මඟින් අතිරේකව පළමුව නාමාවලි දෙකම පිරිසිදු කර,
-යෙදවීමේ අඛණ්ඩතා මුර සලකුණක් ලෙස `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ලියයි.
+`npm run build:release` මඟින් පළමුව නාමාවලි දෙකම පිරිසිදු කර, deploy integrity sentinel එකක් ලෙස
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ලියයි.
 
-`npm run build:contributor` පසු-අන්ත-පමණක් ගොඩනැගීමේ පැතිකඩ භාවිත කරයි. එය ගොඩනැගීමේදී
-උපකරණ පුවරු UI ගොනු තාවකාලිකව ආදේශ කර, API මාර්ග හසුරුවන්නන් තබාගෙන, ගොඩනැගීමෙන්
-පසු මුල් ගොනු ප්රතිසාධනය කරයි. උපකරණ පුවරු UI වෙත බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ
-නිකුතු වලංගු කිරීම සඳහා `npm run build` භාවිත කරන්න; දායක පැතිකඩ නිකුතු ගොඩනැගීම සඳහා ආදේශකයක් නොවේ.
+`npm run build:contributor` backend-only build profile එක භාවිත කරයි. එය build කරන අතරතුර
+dashboard UI files තාවකාලිකව stub කර, API route handlers තබාගෙන, build එකෙන් පසුව
+මුල් files ප්රතිස්ථාපනය කරයි. Dashboard UI වෙත බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ
+release validation සඳහා `npm run build` භාවිත කරන්න; contributor profile එක release build එකට
+ආදේශකයක් නොවේ.
 
-> **VPS යෙදවීමේ සටහන:** දුරස්ථ අනුරූ නාමාවලිය `/usr/lib/node_modules/omniroute/app/`
-> වෙනස් වී නොමැත. යෙදවීමේ කුසලතා `dist/` හි අන්තර්ගතය එයට rsync කරයි.
-> ගබඩාව තුළ ඇති ගොඩනැගීමේ ප්රතිදාන මාර්ගය පමණක් මාරු වී ඇත (`app/` → `dist/`).
+> **VPS deploy සටහන:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> වෙනස් නොවේ. Deploy skills මඟින් `dist/` හි අන්තර්ගතය එයට rsync කරයි.
+> වෙනස් වී ඇත්තේ repository තුළ ඇති build output path එක පමණි (`app/` → `dist/`).
 
-පෙරනිමි URL:
+පෙරනිමි URLs:
 
-- **උපකරණ පුවරුව**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -298,67 +303,67 @@ PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙන�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # උපකරණ පුවරු පිටු (කොටස් 23)
-│   ├── api/                # API මාර්ග (නාමාවලි 51)
-│   └── login/              # සත්යාපන පිටු (.tsx)
-├── domain/                 # ප්රතිපත්ති එන්ජිම (policyEngine, comboResolver, costRules, ආදිය)
-├── lib/                    # මූලික ව්යාපාරික තර්කනය (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ප්රොටෝකෝල සේවාදායකය
-│   ├── acp/                # Agent Communication Protocol ලේඛනය
-│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති එන්ජිම
-│   ├── db/                 # SQLite වසම් මොඩියුල + සංක්රමණ 130
-│   ├── memory/             # ස්ථිර සංවාද මතකය
-│   ├── oauth/              # OAuth සපයන්නන්, සේවා සහ උපයෝගිතා
-│   ├── skills/             # විස්තීරණය කළ හැකි කුසලතා රාමුව
-│   ├── usage/              # භාවිත ලුහුබැඳීම සහ පිරිවැය ගණනය කිරීම
-│   └── localDb.ts          # නැවත-නිර්යාත ස්තරය පමණි — මෙහි කිසිවිටෙක තර්කනය එක් නොකරන්න
-├── middleware/              # ඉල්ලීම් මධ්යස්ථ මෘදුකාංගය (promptInjectionGuard)
-├── mitm/                   # MITM ප්රොක්සිය (සහතික, DNS, ඉලක්ක මාර්ගගත කිරීම)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React සංරචක (.tsx)
-│   ├── constants/          # සපයන්නන්ගේ නිර්වචන (329), MCP විෂය පථ, මාර්ගගත කිරීමේ උපායමාර්ග 20
-│   ├── utils/              # පරිපථ බිඳිනය, පිරිසිදුකාරකය, සත්යාපන සහායක
-│   └── validation/         # Zod v4 ස්කීමා
-└── sse/                    # SSE ප්රොක්සි නල මාර්ගය
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse වැඩබිම
-├── executors/              # ක්රියාත්මක කිරීමේ මොඩියුල 150 (ක්රියාත්මක කිරීමේ පන්ති + එක් එක් සපයන්නා සඳහා සහායක)
-├── handlers/               # ඉල්ලීම් හසුරුවන්නන් 11 (කතාබස්, ප්රතිචාර, කාවැද්දීම්, රූප, ආදිය)
-├── mcp-server/             # MCP සේවාදායකය (අද්විතීය මෙවලම් 110, ප්රවාහන 3, විෂය පථ 33)
-├── services/               # ඉහළ මට්ටමේ සේවා 178 (combo, autoCombo, rateLimitManager, ආදිය)
-├── translator/             # ආකෘති පරිවර්තක (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API පරිණාමකය
-└── utils/                  # උපයෝගිතා මොඩියුල 22 (ප්රවාහ, TLS, ප්රොක්සි, ලොග්කරණය)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ඩෙස්ක්ටොප් යෙදුම (බහු-වේදිකා)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js පරීක්ෂණ ධාවකය (පරීක්ෂණ ගොනු 1,574)
-├── integration/            # ඒකාබද්ධතා පරීක්ෂණ
-├── e2e/                    # Playwright පරීක්ෂණ
-├── security/               # ආරක්ෂක පරීක්ෂණ
-├── translator/             # පරිවර්තකයට විශේෂිත පරීක්ෂණ
-└── load/                   # භාර පරීක්ෂණ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ගෘහනිර්මාණ තීරණ වාර්තා
-├── architecture/            # පද්ධති ගෘහනිර්මාණය සහ ප්රත්යාස්ථතාව
-├── comparison/              # OmniRoute සහ විකල්ප අතර සැසඳීම
-├── compression/             # සම්පීඩන මාර්ගෝපදේශ සහ නීති
-├── dev/                     # සංවර්ධන මාර්ගෝපදේශ
-├── diagrams/                # ගෘහනිර්මාණ රූපසටහන්
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # පරිශීලක මාර්ගෝපදේශය, Docker, පිහිටුවීම, දෝෂ නිරාකරණය
-├── i18n/                    # ජාත්යන්තරකරණය කළ README පරිවර්තන
-├── marketing/               # අලෙවිකරණ ද්රව්ය
-├── ops/                     # යෙදවීම, ප්රොක්සි, ආවරණය, නිකුතු
-├── providers/               # සපයන්නාට විශේෂිත ලේඛන
-├── reference/               # API යොමුව, පරිසර විචල්ය, CLI මෙවලම්, නොමිලේ මට්ටම්
-├── releases/                # නිකුතු සටහන්
-├── routing/                 # ස්වයංක්රීය-සංයෝජන එන්ජිම, තර්කන නැවත ධාවනය
-├── screenshots/             # උපකරණ පුවරු තිර රූ
-├── security/                # ආරක්ෂණ සීමා, අනුකූලතාව, රහස්යභාවය, ටෝකන
-└── specs/                   # සැලසුම් පිරිවිතර
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

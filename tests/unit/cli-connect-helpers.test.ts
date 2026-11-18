@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeBaseUrl, hostLabel } from "../../bin/cli/commands/connect.mjs";
+import {
+  normalizeBaseUrl,
+  hostLabel,
+  buildConnectBody,
+  isMfaRequiredResponse,
+} from "../../bin/cli/commands/connect.mjs";
 import { profileNameFromModel } from "../../bin/cli/commands/configure.mjs";
 
 test("normalizeBaseUrl: bare host gets http:// and the default port", () => {
@@ -32,4 +37,25 @@ test("profileNameFromModel strips the provider prefix and non-alphanumerics", ()
   assert.equal(profileNameFromModel("ollamacloud/gpt-oss:20b"), "gptoss20b");
   assert.equal(profileNameFromModel("cx/gpt-5.5"), "gpt55");
   assert.equal(profileNameFromModel("bare-model"), "baremodel");
+});
+
+test("buildConnectBody only sends totp when a code was given", () => {
+  assert.deepEqual(buildConnectBody({ password: "pw", name: "n", scope: "admin" }), {
+    password: "pw",
+    name: "n",
+    scope: "admin",
+  });
+  assert.deepEqual(buildConnectBody({ password: "pw", name: "n", totp: "  " }), {
+    password: "pw",
+    name: "n",
+    scope: undefined,
+  });
+  assert.equal(buildConnectBody({ password: "pw", name: "n", totp: " 123456 " }).totp, "123456");
+});
+
+test("isMfaRequiredResponse recognises the two-factor refusal of /api/cli/connect", () => {
+  assert.equal(isMfaRequiredResponse(401, { error: "x", mfaRequired: true }), true);
+  assert.equal(isMfaRequiredResponse(401, { error: "Invalid password" }), false);
+  assert.equal(isMfaRequiredResponse(429, { mfaRequired: true }), false);
+  assert.equal(isMfaRequiredResponse(401, null), false);
 });

@@ -10,18 +10,28 @@
  *   - Linux:   Podman (rootless, daemonless)    >  Docker
  *
  * The user can override the auto-detected choice with `SKILLS_SANDBOX_RUNTIME`
- * (`auto | docker | apple | wsl | orbstack | podman`). Each provider maps the
+ * (`auto | docker | apple | wsl | orbstack | podman | agent-sandbox`). Each provider maps the
  * sandbox's intent (resource caps, network isolation, capability drops,
  * read-only fs, tmpfs workspaces) onto the runtime's native flag set.
+ *
+ * `agent-sandbox` is a remote, opt-in runtime (kubernetes-sigs/agent-sandbox
+ * warm pools, see ./agentSandboxProvider.ts). It is never auto-detected.
  */
 
 import { createRequire } from "module";
 import os from "os";
+import { AgentSandboxProvider } from "./agentSandboxProvider.ts";
 
 const require = createRequire(import.meta.url);
 const childProcess = require("child_process") as typeof import("child_process");
 
-export type SandboxRuntimeId = "docker" | "apple" | "wsl" | "orbstack" | "podman";
+export type SandboxRuntimeId =
+  | "docker"
+  | "apple"
+  | "wsl"
+  | "orbstack"
+  | "podman"
+  | "agent-sandbox";
 
 export interface SandboxConfig {
   cpuLimit: number;
@@ -373,8 +383,14 @@ export const ALL_PROVIDERS: ContainerProvider[] = [
   new PodmanProvider(),
 ];
 
+/**
+ * Runtimes that are only used when selected explicitly through
+ * `SKILLS_SANDBOX_RUNTIME`; they are skipped by auto-detection.
+ */
+export const OPT_IN_PROVIDERS: ContainerProvider[] = [new AgentSandboxProvider()];
+
 export const PROVIDER_BY_ID = new Map<SandboxRuntimeId, ContainerProvider>(
-  ALL_PROVIDERS.map((p) => [p.id, p]),
+  [...ALL_PROVIDERS, ...OPT_IN_PROVIDERS].map((p) => [p.id, p]),
 );
 
 /** Priority order for auto-detection on each platform. */

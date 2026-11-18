@@ -24,9 +24,15 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 export async function validateChatGptWebCodexProvider({
   apiKey,
   providerSpecificData = {},
+  allowLocalSpawn = true,
 }: {
   apiKey?: string;
   providerSpecificData?: Record<string, unknown>;
+  /**
+   * Whether this caller may make the host launch a browser. Remote-reachable routes pass
+   * `false` for non-loopback callers (Hard Rules #15/#17); internal callers keep the default.
+   */
+  allowLocalSpawn?: boolean;
 }) {
   try {
     const secrets = decodeChatGptWebCodexSecrets(String(apiKey || ""));
@@ -63,6 +69,15 @@ export async function validateChatGptWebCodexProvider({
       };
     }
     const cdpEndpoint = process.env.CHATGPT_WEB_CODEX_CDP_URL?.trim();
+    // Attaching to an operator-configured CDP endpoint starts nothing on this host; launching
+    // a local browser does, so a remote caller never gets that far.
+    if (!allowLocalSpawn && !cdpEndpoint) {
+      return {
+        valid: false,
+        error:
+          "ChatGPT Web (Codex) browser verification needs a request from this machine. Validate the connection locally, or configure CHATGPT_WEB_CODEX_CDP_URL.",
+      };
+    }
     const { detectChromeExecutable } =
       await import("@omniroute/open-sse/executors/chatgpt-web-codex.ts");
     const chromeExecutablePath = detectChromeExecutable(

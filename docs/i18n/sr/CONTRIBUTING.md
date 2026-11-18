@@ -13,21 +13,26 @@ i korake usaglašavanja.
 
 ---
 
-## Подешавање развојног окружења
+## Podešavanje razvojnog okruženja
 
-### Предуслови
+### Preduslovi
 
-- **Node.js** `>=22.22.2 <23`, или `>=24.0.0 <27` (препоручено: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Корисници npm v11+ (Node 24+):** Након `npm install`, проверите да ли су изворни модули инсталирани:
-> `node -e "require('better-sqlite3')"`. Ако команда не успе уз грешку `MODULE_NOT_FOUND`,
-> покрените `npm approve-scripts better-sqlite3 && npm install`. Погледајте
-> [Решавање проблема](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows sa Node 24:** koristite aktuelno izdanje zakrpe za 24 LTS (najmanje 24.20.0).
+> Starija izdanja mogu prekinuti proces nakon uspešnih testova kada `--test-force-exit` zatvori
+> proces. Node-ova [Windows libuv ispravka](https://github.com/nodejs/node/pull/61999) rešava
+> ovaj pad tokom izvršavanja; zadržite provere tvrdnji testova i izlaza pokretača omogućene.
+
+> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, proverite da li su izvorni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako ne uspe sa greškom `MODULE_NOT_FOUND`,
+> pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
+> [Rešavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Клонирање и инсталација
+### Kloniranje i instalacija
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +40,94 @@ cd OmniRoute
 npm install
 ```
 
-### Променљиве окружења
+### Promenljive okruženja
 
 ```bash
-# Направите своју .env датотеку на основу шаблона
+# Kreirajte svoj .env na osnovu šablona
 cp .env.example .env
 
-# Генеришите неопходне тајне
+# Generišite potrebne tajne
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Кључне променљиве за развој:
+Ključne promenljive za razvoj:
 
-| Променљива             | Подразумевана вредност за развој | Опис                       |
-| ---------------------- | -------------------------------- | -------------------------- |
-| `PORT`                 | `20128`                          | Порт сервера               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Основни URL за фронтенд    |
-| `JWT_SECRET`           | (генерисати изнад)               | Тајна за потписивање JWT-а |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | Лозинка за прву пријаву    |
-| `APP_LOG_LEVEL`        | `info`                           | Ниво опширности евиденције |
+| Promenljiva            | Podrazumevana vrednost za razvoj | Opis                           |
+| ---------------------- | -------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                          | Port servera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Osnovni URL frontend-a         |
+| `JWT_SECRET`           | (generišite iznad)               | Tajna za potpisivanje JWT-a    |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | Lozinka za prvo prijavljivanje |
+| `APP_LOG_LEVEL`        | `info`                           | Nivo detaljnosti zapisnika     |
 
-### Подешавања контролне табле
+### Podešavanja kontrolne table
 
-Контролна табла пружа прекидаче корисничког интерфејса за функције које се такође могу конфигурисати путем променљивих окружења:
+Kontrolna tabla pruža prekidače u korisničkom interfejsu za funkcije koje se takođe mogu konfigurisati putem promenljivih okruženja:
 
-| Локација подешавања   | Прекидач                | Опис                                                   |
-| --------------------- | ----------------------- | ------------------------------------------------------ |
-| Подешавања → Напредно | Режим отклањања грешака | Омогућава евиденцију захтева за отклањање грешака (UI) |
-| Подешавања → Опште    | Видљивост бочне траке   | Приказује/скрива одељке бочне траке                    |
+| Lokacija podešavanja | Prekidač           | Opis                                                  |
+| -------------------- | ------------------ | ----------------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Omogući zapisnike zahteva za otklanjanje grešaka (UI) |
+| Settings → General   | Sidebar Visibility | Prikaži/sakrij odeljke bočne trake                    |
 
-Ова подешавања се чувају у бази података и опстају након поновних покретања, а када су постављена, имају предност над подразумеваним вредностима променљивих окружења.
+Ova podešavanja se čuvaju u bazi podataka i opstaju nakon ponovnog pokretanja, nadjačavajući podrazumevane vrednosti promenljivih okruženja kada su postavljena.
 
-### Локално покретање
+### Lokalno pokretanje
 
 ```bash
-# Развојни режим (аутоматско поновно учитавање)
+# Razvojni režim (ponovno učitavanje bez ručnog pokretanja)
 npm run dev
 
-# Продукциона изградња
-npm run build    # next build → .build/next/ затим assembleStandalone → dist/
+# Produkciona izgradnja
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Брзо компајлирање само бекенда/API-ја за измене сарадника
+# Brza kompilacija samo backend-a/API-ja za izmene saradnika
 npm run build:contributor
 
-# Изградња издања (чиста поновна изградња + HEAD контролна ознака — обавезно за постављање)
-npm run build:release   # rm -rf .build dist && изградња + уписује dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Уобичајена конфигурација порта
+# Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Изградња за сараднике обавља проверу само компајлирањем: не саставља самосталну
-дистрибуцију нити изграђује опционе изворне ресурсе за паковање. Користите редовну продукциону изградњу када
-треба да проверите пакет спреман за испоруку.
+Izgradnja za saradnike obavlja validaciju samo tokom kompilacije: ne sklapa samostalnu
+distribuciju niti izgrađuje opcionalna izvorna sredstva za pakovanje. Koristite standardnu produkcionu
+izgradnju kada treba da proverite paket spreman za isporuku.
 
-### Распоред излазних датотека изградње
+### Raspored izlaza izgradnje
 
-| Директоријум | Садржај                                                                           | Праћено |
-| ------------ | --------------------------------------------------------------------------------- | ------- |
-| `src/`       | Изворни код апликације (TypeScript / TSX)                                         | Да      |
-| `.build/`    | Посредне датотеке — излаз `next build` (игнорише их Git, `distDir = .build/next`) | Не      |
-| `dist/`      | Пакет спреман за испоруку — саставља га `assembleStandalone` (игнорише га Git)    | Не      |
+| Direktorijum | Sadržaj                                                                          | Praćeno |
+| ------------ | -------------------------------------------------------------------------------- | ------- |
+| `src/`       | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da      |
+| `.build/`    | Međurezultati — izlaz komande `next build` (gitignored, `distDir = .build/next`) | Ne      |
+| `dist/`      | Paket spreman za isporuku — sklapa ga `assembleStandalone` (gitignored)          | Ne      |
 
-Процес изградње се извршава у једном пролазу:
+Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (излаз Next.js-а)
-  └─ assembleStandalone()                 (копира самосталне + статичке + јавне + изворне ресурсе)
-       └─ излаз: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` додатно прво чисти оба директоријума и уписује
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) као контролну ознаку интегритета постављања.
+`npm run build:release` dodatno prvo čisti oba direktorijuma i upisuje
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolni pokazatelj integriteta za postavljanje.
 
-`npm run build:contributor` користи профил изградње само за бекенд. Он привремено замењује
-датотеке корисничког интерфејса контролне табле помоћним датотекама током изградње, задржава обрађиваче API рута и враћа оригиналне датотеке
-након изградње. Користите `npm run build` за измене које утичу на кориснички интерфејс контролне табле или за потпуну
-проверу издања; профил за сараднике није замена за изградњу издања.
+`npm run build:contributor` koristi profil izgradnje samo za backend. Privremeno zamenjuje datoteke
+korisničkog interfejsa kontrolne table tokom izgradnje, zadržava rukovaoce API ruta i vraća originalne
+datoteke nakon izgradnje. Koristite `npm run build` za izmene koje utiču na korisnički interfejs kontrolne table
+ili za potpunu validaciju izdanja; profil za saradnike nije zamena za izgradnju izdanja.
 
-> **Напомена за постављање на VPS:** удаљени директоријум слике `/usr/lib/node_modules/omniroute/app/`
-> остаје непромењен. Вештине за постављање помоћу rsync-а синхронизују садржај директоријума `dist/` у њега.
-> Промењена је само путања излаза изградње унутар репозиторијума (`app/` → `dist/`).
+> **Napomena za VPS postavljanje:** udaljeni direktorijum slike `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromenjen. Veštine za postavljanje rsync-om sinhronizuju sadržaj direktorijuma `dist/` u njega.
+> Promenjena je samo putanja izlaza izgradnje unutar repozitorijuma (`app/` → `dist/`).
 
-Подразумевани URL-ови:
+Podrazumevani URL-ovi:
 
-- **Контролна табла**: `http://localhost:20128/dashboard`
+- **Kontrolna tabla**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -298,68 +303,68 @@ npm run test:combo:live:vps:failover     # додаје стварни сцен�
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 рутер апликације
-│   ├── (dashboard)/        # Странице контролне табле (23 одељка)
-│   ├── api/                # API руте (51 директоријум)
-│   └── login/              # Странице за аутентификацију (.tsx)
-├── domain/                 # Механизам политика (policyEngine, comboResolver, costRules, итд.)
-├── lib/                    # Основна пословна логика (.ts)
-│   ├── a2a/                # Сервер протокола Agent-to-Agent v0.3
-│   ├── acp/                # Регистар протокола за комуникацију агената
-│   ├── compliance/         # Механизам политика усклађености
-│   ├── db/                 # SQLite доменски модули + 130 миграција
-│   ├── memory/             # Трајна меморија разговора
-│   ├── oauth/              # OAuth добављачи, услуге и помоћни алати
-│   ├── skills/             # Прошириви оквир вештина
-│   ├── usage/              # Праћење употребе и израчунавање трошкова
-│   └── localDb.ts          # Само слој за поновни извоз — овде никада не додајте логику
-├── middleware/              # Посреднички софтвер за захтеве (promptInjectionGuard)
-├── mitm/                   # MITM прокси (сертификат, DNS, усмеравање ка циљу)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React компоненте (.tsx)
-│   ├── constants/          # Дефиниције добављача (329), MCP опсези, 20 стратегија усмеравања
-│   ├── utils/              # Прекидач струјног кола, санитизатор, помоћни алати за аутентификацију
-│   └── validation/         # Zod v4 шеме
-└── sse/                    # SSE прокси ток обраде
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse радни простор
-├── executors/              # 150 извршних модула (класе извршилаца + помоћни алати за сваког добављача)
-├── handlers/               # 11 обрађивача захтева (ћаскање, одговори, угнежђивања, слике, итд.)
-├── mcp-server/             # MCP сервер (110 јединствених алата, 3 транспорта, 33 опсега)
-├── services/               # 178 услуга највишег нивоа (combo, autoCombo, rateLimitManager, итд.)
-├── translator/             # Преводиоци формата (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Трансформатор Responses API-ја
-└── utils/                  # 22 помоћна модула (ток, TLS, прокси, евидентирање)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron десктоп апликација (за више платформи)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js покретач тестова (1,574 тест-датотеке)
-├── integration/            # Интеграциони тестови
-├── e2e/                    # Playwright тестови
-├── security/               # Безбедносни тестови
-├── translator/             # Тестови специфични за преводиоце
-└── load/                   # Тестови оптерећења
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Записи архитектонских одлука
-├── architecture/            # Архитектура и отпорност система
-├── comparison/              # OmniRoute у односу на алтернативе
-├── compression/             # Водичи и правила за компресију
-├── dev/                     # Водичи за развој
-├── diagrams/                # Дијаграми архитектуре
-├── frameworks/              # MCP, A2A, OpenCode, меморија, вештине
-├── guides/                  # Кориснички водич, Docker, подешавање, решавање проблема
-├── i18n/                    # Интернационализовани README преводи
-├── marketing/               # Маркетиншки материјали
-├── ops/                     # Примена, прокси, покривеност, издања
-├── providers/               # Документација специфична за добављаче
-├── reference/               # API референца, променљиве окружења, CLI алати, бесплатни нивои
-├── releases/                # Напомене о издањима
-├── routing/                 # Механизам аутоматског комбиновања, поновна репродукција резоновања
-├── screenshots/             # Снимци екрана контролне табле
-├── security/                # Заштитне мере, усклађеност, прикривеност, токени
-└── specs/                   # Спецификације дизајна
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

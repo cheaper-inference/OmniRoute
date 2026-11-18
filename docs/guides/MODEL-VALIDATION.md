@@ -44,6 +44,9 @@ Identifiers cannot contain whitespace or control characters. Extra body properti
 URLs, arbitrary prompts, client-provided receipts and credentials are rejected. The body
 limit is 16 KiB; body reading has a 10-second deadline.
 
+On a compatible provider node, a leading copy of the node's prefix in `modelId` is
+stripped before insert; the response and read-back carry the bare stored id.
+
 ## Proofs and persistence
 
 The server generates unpredictable values and checks these three sequential requests:

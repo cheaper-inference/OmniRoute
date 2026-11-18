@@ -21,64 +21,73 @@ na hiarrata.
 
 ## Cad a Logáiltear
 
-### Teagmhais iniúchta riaracháin (`audit_log`)
+### Imeachtaí iniúchta riaracháin (`audit_log`)
 
 Cruthaíonn gach glao ar `logAuditEvent({ action, actor, target, details, ... })`
-ró amháin. Leanann teaghráin gnímh patrún `domain.verb` (nó
-`domain.verb.outcome`). Áirítear iad seo a leanas ar na cineálacha gnímh atá
-deimhnithe sa chrann:
+sraith amháin. Leanann teaghráin ghnímh patrún
+`domain.verb` (nó `domain.verb.outcome`). Deimhnítear na cineálacha gnímh
+seo a leanas sa chrann:
 
-| Gníomh                               | Foinse                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Gníomh                               | Foinse                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Gabhann gach iontráil `action`, `actor` (`"system"` de réir réamhshocraithe),
-`target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id`, agus `timestamp`. Déantar eochracha íogaire (`apiKey`,
-`accessToken`, `refreshToken`, `password`, aon rud a mheaitseálann
-`*token`/`*secret`/`*apikey`, etc.) a cheilt go hathchúrsach mar `"[redacted]"`
-sula scríobhtar an ró.
+Gabhann gach iontráil `action`, `actor` (réamhshocrú: `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, agus `timestamp`. Déantar eochracha íogaire (`apiKey`, `accessToken`,
+`refreshToken`, `password`, aon rud a mheaitseálann `*token`/`*secret`/`*apikey`,
+etc.) a athchúrsáil agus a cheilt mar `"[redacted]"` sula scríobhtar an tsraith.
+
+Déanann sraitheanna `api_key.auth.touch` taifead ar mheiteashonraí rathúla
+eochracha API agus ar léamha fionnachtana (GET/HEAD) nach sroicheann log na
+n-iarratas riamh: cén eochair, cathain, agus an cosán normalaithe, agus
+comhdhlúthaítear iad agus cuirtear teorainn 1,000 sraith orthu. Déantar
+eochracha a bhfuil `noLog` orthu agus eochair na timpeallachta a scipeáil.
+Ní chuirtear seoladh IP agus gníomhaire úsáideora an ghlaoiteora leis ach nuair
+atá bratach ghné `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` cumasaithe (míchumasaithe
+de réir réamhshocraithe).
 
 ### Glaonna uirlisí MCP (`mcp_tool_audit`)
 
-Scríobhann gach agairt ar uirlis MCP ró trí
+Scríobhann gach ionghairm uirlise MCP sraith trí
 `open-sse/mcp-server/audit.ts`. Scéimre (ó
 `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Colún            | Nótaí                                       |
-| ---------------- | ------------------------------------------- |
-| `id`             | incrimintiú uathoibríoch                    |
-| `tool_name`      | aitheantóir uirlise MCP                     |
-| `input_hash`     | sha256 den ionchur (ní stóráiltear pálasta) |
-| `output_summary` | achoimre ghairid theasctha                  |
-| `duration_ms`    | am caite iarbhír                            |
-| `api_key_id`     | glaoiteoir (in-nialasach)                   |
-| `success`        | `1` / `0`                                   |
-| `error_code`     | cód earráide deiridh ar theip               |
-| `created_at`     | stampa ama ISO                              |
+| Colún            | Nótaí                                          |
+| ---------------- | ---------------------------------------------- |
+| `id`             | uathmhéadú                                     |
+| `tool_name`      | aitheantóir uirlise MCP                        |
+| `input_hash`     | sha256 den ionchur (ní stóráiltear an pálasta) |
+| `output_summary` | achoimre ghearr, teasctha                      |
+| `duration_ms`    | am balla                                       |
+| `api_key_id`     | glaoiteoir (incheadaithe ar neamhní)           |
+| `success`        | `1` / `0`                                      |
+| `error_code`     | cód deiridh earráide nuair a theipeann         |
+| `created_at`     | stampa ama ISO                                 |
 
-### Logaí iarratais / úsáide
+### Logaí iarratas / úsáide
 
-Is teiliméadracht oibríochtúil iad seo (ní iniúchadh riaracháin go docht iad),
-ach baineann siad úsáid as an bpíblíne choinneála chéanna:
+Is teiliméadracht oibríochtúil iad seo (ní iniúchadh riaracháin go docht) ach
+úsáideann siad an píblíne coinneála chéanna:
 
-- `usage_history` — achoimre úsáide in aghaidh na hiarrata
-- `call_logs` — loga iomlán in aghaidh na hiarrata (faoi réir teorainn rónna; féach thíos)
-- `proxy_logs` — loga tráchta seachfhreastalaí (faoi réir teorainn rónna)
-- `request_detail_logs` — loga mionsonraithe iarratais oidhreachta (bearrtar fós é má tá sé ann)
+- `usage_history` — rolladh suas úsáide in aghaidh an iarratais
+- `call_logs` — log iomlán in aghaidh an iarratais (faoi réir teorainn sraithe, féach thíos)
+- `proxy_logs` — log tráchta seachfhreastalaí (faoi réir teorainn sraithe)
+- `request_detail_logs` — log mionsonraithe oidhreachta d’iarratais (glantar é fós má tá sé ann)
 
 ## Scéim Stórála
 

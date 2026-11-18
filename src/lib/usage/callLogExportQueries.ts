@@ -1,3 +1,4 @@
+import { storedUsageEvidence } from "./storedUsageEvidence";
 /**
  * Call-log source for the log-export pipeline.
  *
@@ -26,6 +27,8 @@ export const DEFAULT_MAX_BODY_BYTES = 262_144;
 const RESOLVED_ACCOUNT_SQL = "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
 
 type ExportSourceRow = {
+  usage_evidence?: string | null;
+  usage_provenance?: string | null;
   row_id: number;
   id: string;
   timestamp: string | null;
@@ -38,6 +41,7 @@ type ExportSourceRow = {
   account: string | null;
   connection_id: string | null;
   duration: number | null;
+  ttft_ms: number | null;
   tokens_in: number | null;
   tokens_out: number | null;
   tokens_cache_read: number | null;
@@ -76,6 +80,7 @@ function toNumberOrNull(value: unknown): number | null {
 function mapExportRow(row: ExportSourceRow): LogExportRecord {
   const provider = row.provider;
   return {
+    ...storedUsageEvidence(row),
     id: row.id,
     timestamp: row.timestamp,
     method: row.method,
@@ -92,6 +97,7 @@ function mapExportRow(row: ExportSourceRow): LogExportRecord {
     account: row.resolved_account || row.account,
     connectionId: row.connection_id,
     duration: toNumberOrNull(row.duration),
+    ttftMs: toNumberOrNull(row.ttft_ms),
     tokensIn: toNumberOrNull(row.tokens_in),
     tokensOut: toNumberOrNull(row.tokens_out),
     tokensCacheRead: toNumberOrNull(row.tokens_cache_read),

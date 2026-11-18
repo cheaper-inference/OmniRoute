@@ -4,8 +4,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const { applyPayloadRules, getPayloadRulesConfig, resetPayloadRulesConfigForTests } =
-  await import("../../open-sse/services/payloadRules.ts");
+const {
+  applyPayloadRules,
+  applyConfiguredPayloadRules,
+  getPayloadRulesConfig,
+  resetPayloadRulesConfigForTests,
+  setPayloadRulesConfig,
+} = await import("../../open-sse/services/payloadRules.ts");
 
 const ORIGINAL_PAYLOAD_RULES_PATH = process.env.OMNIROUTE_PAYLOAD_RULES_PATH;
 const ORIGINAL_PAYLOAD_RULES_RELOAD_MS = process.env.OMNIROUTE_PAYLOAD_RULES_RELOAD_MS;
@@ -139,4 +144,43 @@ test("payload rules load from JSON file and reload changed content", async () =>
   assert.deepEqual(second.defaultRaw[0].params.response_format, { type: "json_object" });
 
   fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("configured empty payload rules avoid duplicating large input histories", async () => {
+  setPayloadRulesConfig({});
+  const history: Record<string, unknown>[] = [{ type: "message", role: "user" }];
+  Object.defineProperty(history[0], "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("a no-rule request must never deep-clone its history");
+    },
+  });
+  const payload = { model: "gpt-5.4", input: history };
+  const result = await applyConfiguredPayloadRules(payload, "gpt-5.4", "openai");
+
+  assert.strictEqual(result.payload, payload);
+  assert.deepEqual(result.applied, []);
+  assert.strictEqual(result.payload.input, history);
+});
+
+test("configured nonempty payload rules still clone and isolate caller-owned history", async () => {
+  setPayloadRulesConfig({
+    override: [
+      {
+        models: [{ name: "gpt-5.4", protocol: "openai" }],
+        params: { temperature: 0.2 },
+      },
+    ],
+  });
+  const payload = {
+    model: "gpt-5.4",
+    temperature: 0.9,
+    input: [{ type: "message", role: "user", content: "unchanged" }],
+  };
+  const result = await applyConfiguredPayloadRules(payload, "gpt-5.4", "openai");
+  assert.notStrictEqual(result.payload, payload);
+  assert.notStrictEqual(result.payload.input, payload.input);
+  assert.equal(result.payload.temperature, 0.2);
+  assert.equal(payload.temperature, 0.9);
+  assert.deepEqual(result.applied.map((x) => x.type), ["override"]);
 });

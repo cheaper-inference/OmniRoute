@@ -175,3 +175,198 @@ test("an overload never clears an existing terminal account state", async () => 
   const after = await providers.getProviderConnectionById(conn.id);
   assert.equal(after.testStatus, "expired");
 });
+
+test("Codex capacity 429 with disableCooling avoids virtual quota and exact-model lockouts", async () => {
+  const conn = await seed("codex", true);
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  assert.equal(result.shouldFallback, true);
+  assert.equal(result.cooldownMs, 0);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.equal(persisted.testStatus, "active");
+  assert.ok(!persisted.rateLimitedUntil);
+  assert.ok(
+    !(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil,
+    "transient capacity must not be persisted as shared Codex quota"
+  );
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.3-codex"), false);
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.4"), false);
+});
+
+test("Codex capacity 429 briefly cools only the exact model when cooling is enabled", async () => {
+  const conn = await seed("codex", false);
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs > 0 && result.cooldownMs <= 60_000);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.ok(!persisted.rateLimitedUntil);
+  assert.ok(
+    !(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil
+  );
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.3-codex"), true);
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.4"), false);
+});
+
+test("mixed capacity wording and exhausted Codex quota headers still enforce scoped quota", async () => {
+  const conn = await seed("codex", true);
+  const resetAt = new Date(Date.now() + 60_000).toISOString();
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile,
+    {
+      headers: {
+        "x-codex-5h-usage": "100",
+        "x-codex-5h-limit": "100",
+        "x-codex-5h-reset-at": resetAt,
+      },
+    }
+  );
+  assert.equal(result.shouldFallback, true);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.ok(
+    (persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil,
+    "authoritative exhausted quota must retain virtual-scope protections"
+  );
+});
+
+test("Codex capacity classifier requires explicit transient evidence and preserves quota protections", async () => {
+  const { isTransientCodexCapacity429 } =
+    await import("../../open-sse/services/codexAccount/capacity429.ts");
+  const capacity = JSON.stringify({
+    error: { message: "Codex is at capacity, please try again later" },
+  });
+  assert.equal(isTransientCodexCapacity429(429, capacity), true);
+  assert.equal(isTransientCodexCapacity429(503, capacity), false);
+  assert.equal(isTransientCodexCapacity429(429, "Rate limit exceeded"), false);
+  assert.equal(
+    isTransientCodexCapacity429(429, "Codex is at capacity: weekly quota exhausted"),
+    false
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, {
+      "x-codex-5h-usage": "95",
+      "x-codex-5h-limit": "100",
+    }),
+    true,
+    "remaining quota is not exhausted evidence"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(
+      429,
+      capacity,
+      new Headers({ "x-codex-5h-usage": "100", "x-codex-5h-limit": "100" })
+    ),
+    false,
+    "real exhausted quota headers supersede capacity wording"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { "x-ratelimit-remaining-requests": "0" }),
+    false
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { "x-ratelimit-remaining-requests": "" }),
+    true,
+    "empty/non-numeric rate-limit metadata is not proof of exhaustion"
+  );
+
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { get: () => 0 }),
+    true,
+    "malformed header getter values must not throw"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(
+      429,
+      capacity,
+      Object.defineProperty({}, "get", {
+        get() {
+          throw new Error("invalid header accessor");
+        },
+      })
+    ),
+    true,
+    "a malformed header object must not crash the error handling path"
+  );
+});
+
+test("transient Codex capacity cannot clear an earlier genuine scoped quota cooldown", async () => {
+  const { persistCodexChildCooldown } =
+    await import("../../open-sse/services/codexAccount/index.ts");
+  const conn = await seed("codex", true);
+  const previousUntil = new Date(Date.now() + 120_000).toISOString();
+  await persistCodexChildCooldown({
+    connectionId: conn.id,
+    model: "gpt-5.3-codex",
+    rateLimitedUntil: previousUntil,
+  });
+  await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  const scoped = (persisted.providerSpecificData as Record<string, unknown>)
+    .codexScopeRateLimitedUntil as Record<string, unknown>;
+  assert.equal(scoped.codex, previousUntil, "known quota reset must not be cleared");
+});
+
+test("Codex capacity 429 keeps genuine percent and token exhaustion protected", async () => {
+  const { isTransientCodexCapacity429 } =
+    await import("../../open-sse/services/codexAccount/capacity429.ts");
+  const capacity = "Codex is at capacity, please try again later";
+  const exhaustedHeaders = [
+    { "x-codex-primary-used-percent": "100" },
+    { "x-codex-secondary-used-percent": "100" },
+    { "x-ratelimit-remaining": "-1" },
+    { "x-ratelimit-remaining-requests": "-2" },
+    { "x-ratelimit-remaining-tokens": "0" },
+    { "x-ratelimit-remaining": ["0"] },
+  ];
+  for (const headers of exhaustedHeaders) {
+    assert.equal(
+      isTransientCodexCapacity429(429, capacity, headers),
+      false,
+      JSON.stringify(headers)
+    );
+  }
+  assert.equal(
+    isTransientCodexCapacity429(429, "Codex is at capacity\nYour quota\nis exhausted", {}),
+    false
+  );
+  for (const headers of [
+    { "x-codex-primary-used-percent": "99.9" },
+    { "x-codex-secondary-used-percent": "0" },
+    { "x-ratelimit-remaining-tokens": "11" },
+    { "x-ratelimit-remaining-requests": "NaN" },
+  ]) {
+    assert.equal(
+      isTransientCodexCapacity429(429, capacity, headers),
+      true,
+      JSON.stringify(headers)
+    );
+  }
+});

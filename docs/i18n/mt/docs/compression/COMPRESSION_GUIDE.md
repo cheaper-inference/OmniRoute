@@ -30,95 +30,89 @@ Talba tal-Klijent
 
 ---
 
-## Modalitajiet tal-Kompressjoni
+## Modi ta’ Kompressjoni
 
-### Off
+### Mitfi
 
 Ma tiġi applikata l-ebda kompressjoni. Il-messaġġi kollha jgħaddu mingħajr tibdil.
 
-### Modalità Lite (iffrankar ta' ~15%, latenza ta' <1ms)
+### Modalità Lite (~15% iffrankar, latenza <1ms)
 
-L-aktar modalità sikura — ebda bidla semantika, tindif tal-ifformattjar biss:
+L-aktar modalità sigura — tindif tal-ifformattjar. It-tqassir tar-riżultati tal-għodod tagħha jikkawża telf ta’ dejta, għalhekk il-mogħdija awtomatika
+(l-ebda `allow-lossy`, `engine:lite` jew għażla espliċita ta’ kombinazzjoni msemmija) tuża Lite b’
+`compressToolResults: false`: ir-riżultati preċedenti tal-għodod jaslu għand il-fornitur mingħajr tibdil.
 
-| Teknika                  | Deskrizzjoni                                               |
-| ------------------------ | ---------------------------------------------------------- |
-| `collapseWhitespace`     | Tgħaqqad linji vojta konsekuttivi u tneħħi spazji fit-tarf |
-| `dedupSystemPrompt`      | Tneħħi messaġġi tas-sistema duplikati                      |
-| `compressToolResults`    | Tikkompressa outputs verbose tal-għodod/funzjonijiet       |
-| `removeRedundantContent` | Tneħħi struzzjonijiet ripetuti                             |
-| `replaceImageUrls`       | Tqassar URIs tad-data tal-immaġnijiet base64               |
+| Teknika                  | Deskrizzjoni                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Tgħaqqad linji vojta konsekuttivi u spazji fit-tarf                                                     |
+| `dedupSystemPrompt`      | Tneħħi messaġġi tas-sistema duplikati                                                                   |
+| `compressToolResults`    | Tqassar riżultati preċedenti tal-għodod sal-limitu ta’ Lite (b’telf: biss b’għażla espliċita mit-talba) |
+| `removeRedundantContent` | Tneħħi istruzzjonijiet ripetuti                                                                         |
+| `replaceImageUrls`       | Tqassar dejta tal-immaġnijiet kodifikata f’URI ta’ data base64                                          |
 
-**L-aħjar għal:** Użu dejjem attiv u flussi tax-xogħol fejn is-sikurezza hija kritika.
+**L-aħjar għal:** Użu kontinwu, flussi tax-xogħol kritiċi għas-sigurtà.
 
-### Modalità Standard (iffrankar ta' ~30%)
+### Modalità Standard (~30% iffrankar)
 
-Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem żejjed u formulazzjonijiet verbose filwaqt li żżomm it-tifsira:
+Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem ta’ mili u formulazzjonijiet verbose filwaqt li żżomm it-tifsira:
 
-- Tneħħi kliem żejjed ("jekk jogħġbok", "naħseb", "bażikament", "fil-fatt")
-- Tqassar frażijiet verbose ("sabiex" → "biex", "bħala riżultat ta'" → "minħabba")
-- Tneħħi espressjonijiet edukati ta' eżitazzjoni ("Jimportak...", "Jekk tista' possibbilment...")
-- Aktar minn 30 regola regex irfinati għal prompts tal-ipprogrammar
+- Tneħħi kliem ta’ mili ("please", "I think", "basically", "actually")
+- Tikkondensa formulazzjonijiet verbose ("in order to" → "to", "as a result of" → "because")
+- Tneħħi l-espressjonijiet ta’ korteżija li jtaffu t-ton ("Would you mind...", "If you could possibly...")
+- Aktar minn 30 regola regex imfassla għall-prompts tal-kodifikazzjoni
 
-**L-aħjar għal:** Flussi tax-xogħol ta' kuljum għall-ipprogrammar u timijiet konxji mill-ispejjeż.
+**L-aħjar għal:** Flussi tax-xogħol ta’ kuljum għall-kodifikazzjoni, timijiet konxji mill-ispejjeż.
 
-### Modalità Aggressive (iffrankar ta' ~50%)
+### Modalità Aggressiva (~50% iffrankar)
 
 Ġestjoni intelliġenti tal-istorja għal sessjonijiet twal:
 
-- **Tixjiħ tal-Messaġġi** — messaġġi eqdem jiġu kkompressati progressivament
-- **Kompressjoni tar-Riżultati tal-Għodod** — outputs twal tal-għodod jitqassru jew jitħallew barra (l-ewwel/l-aħħar linji,
-  iffiltrar tal-linji li jaqblu, kumpattazzjoni tal-keys JSON)
-- **Protezzjonijiet tal-Integrità Strutturali** — jiżguraw li l-pari `tool_use` + `tool_result` jibqgħu konsistenti
+- **Tixjiħ tal-Messaġġi** — messaġġi aktar antiki jiġu kkompressati progressivament
+- **Kompressjoni tar-Riżultati tal-Għodod** — outputs twal tal-għodod jiġu mqassra jew imħollija barra (l-ewwel/l-aħħar linji,
+  filtrazzjoni skont il-linji li jaqblu, kompattazzjoni taċ-ċwievet JSON)
+- **Gwardji tal-Integrità Strutturali** — jiżguraw li l-pari `tool_use` + `tool_result` jibqgħu konsistenti
 - **Għarfien tat-Tieqa tal-Kuntest** — jirrispetta l-limiti tat-tokens għal kull mudell
 
-**L-aħjar għal:** Sessjonijiet estiżi ta' debugging u codebases kbar.
+**L-aħjar għal:** Sessjonijiet estiżi ta’ debugging, bażijiet ta’ kodiċi kbar.
 
-### Modalità Ultra (iffrankar ta' ~75%)
+### Modalità Ultra (~75% iffrankar)
 
 Kompressjoni massima għal xenarji fejn it-tokens huma kritiċi:
 
-- **Żbir Euristiku** — żbir tal-proża bbażat fuq punteġġ
-- **Preservazzjoni tal-Istruttura** — blokok tal-kodiċi delimitati, kodiċi inline, URLs u identifikaturi jiġu
-  sostitwiti temporanjament u mbagħad jerġgħu jiddaħħlu verbatim, mingħajr ma qatt jinżabru
-- **Livell SLM fakultattiv** — mudell lokali żgħir jista' jirfina ż-żbir meta jkun ikkonfigurat
-- Indipendenti mill-modalità Aggressive: ma jwettaqx tixjiħ tal-messaġġi, kompressjoni tar-riżultati tal-għodod
-  jew is-sommarizzatur fallback (falliment fil-livell SLM biss jista' jgħaddi pass fallback minn
-  aggressive)
+- **Tnaqqis Heuristiku** — tnaqqis tat-tokens tal-proża bbażat fuq il-punteġġ
+- **Preservazzjoni tal-Istruttura** — blokok tal-kodiċi mdawra b’fences, kodiċi inline, URLs u identifikaturi jiġu mmarkati u mqiegħda lura verbatim, qatt ma jitnaqqsu
+- **Livell SLM Fakultattiv** — mudell lokali żgħir jista’ jirfina t-tnaqqis meta jiġi kkonfigurat
+- Indipendenti mill-modalità Aggressiva: ma jwettaqx tixjiħ tal-messaġġi, kompressjoni tar-riżultati tal-għodod jew is-summarizer ta’ riżerva (falliment biss tal-livell SLM jista’ jgħaddi pass ta’ riżerva permezz ta’ Aggressive)
 
-**L-aħjar għal:** Meta tilħaq ripetutament il-limiti tal-kuntest.
+**L-aħjar għal:** Meta tilħaq il-limiti tal-kuntest ripetutament.
 
-### Modalità RTK (firxa upstream ta' 60-90%)
+### Modalità RTK (firxa upstream ta’ 60-90%)
 
-Il-modalità RTK hija ottimizzata għal outputs verbose tal-għodod li jidhru f'sessjonijiet ta' aġenti tal-ipprogrammar:
+Il-modalità RTK hija ottimizzata għall-outputs verbose tal-għodod li jidhru f’sessjonijiet b’aġenti tal-kodifikazzjoni:
 
-- Tidentifika klassijiet ta' kmandi/outputs bħal `git status`, `git diff`, `git log`, test runners,
-  builds ta' TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audits/installazzjonijiet ta' npm, logs ta' Docker, output tal-infrastruttura,
-  u output ġeneriku tax-shell
-- Tapplika pakketti ta' filtri JSON minn `open-sse/services/compression/engines/rtk/filters/`
-- Timporta filtri bl-iskema RTK TOML v1 minn fajls `filters.toml` tal-proġett jew globali, b'validazzjoni
-  ta' testijiet inline u kontroll tal-fiduċja għall-fajls tal-proġett
-- Tinkludi 55 filtru integrat b'kampjuni inline għall-verifika
-- Tneħħi sekwenzi ta' kontroll ANSI, vireg tal-progress, linji ripetuti u storbju li ma jeħtieġx azzjoni
-- Tippreserva fallimenti, żbalji, twissijiet, fajls mibdula, sommarji u t-tarf ta' output twil
-- Tappoġġja filtri tal-proġett b'kontroll tal-fiduċja, filtri globali u rkupru fakultattiv tal-output mhux ipproċessat b'redazzjoni
+- Tidentifika klassijiet ta’ kmandi/outputs bħal `git status`, `git diff`, `git log`, runners tat-testijiet,
+  builds ta’ TypeScript/Vite/Webpack, ESLint/Biome/Prettier, verifiki/installazzjonijiet ta’ npm, logs ta’ Docker, outputs tal-infrastruttura, u outputs ġeneriċi tal-shell
+- Tapplika pakketti ta’ filtri JSON minn `open-sse/services/compression/engines/rtk/filters/`
+- Timporta filtri tal-iskema TOML v1 ta’ RTK minn fajls `filters.toml` tal-proġett jew globali, b’validazzjoni ta’ testijiet inline u kontroll tal-fiduċja għall-fajls tal-proġett
+- Jiġi b’56 filtru integrat b’kampjuni ta’ verifika inline
+- Tneħħi sekwenzi ta’ kontroll ANSI, bars tal-progress, linji ripetuti, u storbju mhux azzjonabbli
+- Iżomm il-fallimenti, l-iżbalji, it-twissijiet, il-fajls mibdula, is-sommarji, u t-tarf tal-output twil
+- Jappoġġja filtri tal-proġett ikkontrollati mill-fiduċja, filtri globali, u rkupru fakultattiv tal-output mhux ipproċessat redatt
 
-**L-aħjar għal:** Sessjonijiet ta' aġenti bi traskrizzjonijiet tas-shell, builds, tests, git, grep u outputs tal-fajls.
+**L-aħjar għal:** Sessjonijiet ta’ aġenti b’transkrizzjonijiet ta’ shell, build, test, git, grep, u output tal-fajls.
 
-### Modalità Stacked (firxa eliġibbli ta' 78-95%)
+### Modalità Stacked (firxa eliġibbli ta’ 78-95%)
 
-Il-modalità Stacked tħaddem diversi magni tal-kompressjoni f'ordni deterministiku. Il-pipeline predefinit huwa:
+Il-modalità Stacked tħaddem diversi magni ta’ kompressjoni f’ordni deterministika. Il-pipeline awtomatiku huwa:
 
 ```txt
 RTK -> Caveman
 ```
 
-Dak l-ordni l-ewwel iżomm kumpatt l-output tat-terminal/għodod, imbagħad japplika l-kondensazzjoni semantika ta' Caveman
-għall-prompt li jifdal bil-lingwa naturali. Il-pipelines Stacked jistgħu jiġu kkonfigurati globalment jew permezz ta'
-combos tal-kompressjoni assenjati lil combos tar-routing.
+Din l-ordni żżomm l-output tat-terminal/għodod kompatt l-ewwel, u mbagħad tapplika l-kondensazzjoni semantika ta’ Caveman għall-prompt lingwistiku li jifdal.
+Il-pipelines Stacked jistgħu jiġu kkonfigurati globalment jew permezz ta’ kombinazzjonijiet ta’ kompressjoni assenjati għal kombinazzjonijiet ta’ routing.
 
-**L-aħjar għal:** Kuntest imħallat b'logs kbar tal-għodod flimkien ma' struzzjonijiet umani jew sommarji tal-assistent.
-
----
+**L-aħjar għal:** Kuntest imħallat b’logs kbar tal-għodod flimkien ma’ struzzjonijiet tal-bniedem jew sommarji tal-assistent.
 
 ## Il-Matematika tal-Iffrankar Upstream
 
@@ -188,80 +182,88 @@ Bi Stacked:             10K-2.5K tokens mibgħuta     (medda eliġibbli ta’ 78
 
 ### Dashboard
 
-Mur lejn `Dashboard → Context & Cache`:
+Naviga lejn `Dashboard → Context & Cache`:
 
-- **Caveman** — għażla tal-modalità, pakketti tal-lingwa, previżjoni, u valuri awtomatiċi globali
-- **RTK** — previżjoni tal-filtru tal-kmandi, konfigurazzjonijiet tas-sikurezza tal-RTK, u katalgu tal-filtri
-- **Compression Combos** — pipelines tal-magni b’isem assenjati lil kombinazzjonijiet tar-routing
-- **Auto-Trigger Threshold** — jattiva awtomatikament il-kompressjoni meta l-għadd ta’ tokens jaqbeż il-limitu
+- **Caveman** — għażla tal-modalità, pakketti tal-lingwi, preview, u defaults globali
+- **RTK** — preview tal-filtru tal-kmandi, settings tas-sigurtà ta’ RTK, u katalogu tal-filtri
+- **Compression Combos** — pipelines tal-magni msemmija assenjati lil combos tar-routing
+- **Auto-Trigger Threshold** — jattiva l-kompressjoni awtomatikament meta l-għadd tat-tokens jaqbeż il-limitu
 
-### Sostituzzjoni għal Kull Kombinazzjoni
+### Override għal kull Combo
 
-F’`Dashboard → Context & Cache → Compression Combos`, assenja kombinazzjoni ta’ kompressjoni lil kombinazzjoni
-tar-routing:
+F’`Dashboard → Context & Cache → Compression Combos`, assenja combo tal-kompressjoni lil
+combo tar-routing:
 
 ```txt
-Kombinazzjoni: "free-tier-fallback"
-  Kombinazzjoni tal-Kompressjoni: "coding-agent-stack"
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
   Pipeline: RTK -> Caveman
-  Miri:
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Dan jippermettilek tuża kompressjoni f’munzelli ma’ fornituri bla ħlas/tal-kodifikazzjoni filwaqt li żżomm il-modalità lite fuq
-abbonamenti bi ħlas.
+Dan jippermettilek tuża kompressjoni magħquda mal-providers b’xejn/tal-coding waqt li żżomm il-modalità
+lite fuq abbonamenti mħallsa.
 
-Din l-assenjazzjoni ta’ "Sostituzzjoni għal Kull Kombinazzjoni" hija kontroll differenti mis-sostituzzjoni tal-**modalità tal-kompressjoni
-tal-kombinazzjoni tar-routing** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — l-iskema tal-kamp
-taċċetta wkoll `rtk`, `stacked` u `omniglyph`) — dik is-sostituzzjoni ma tagħżilx pipeline b’isem
-ta’ kombinazzjoni tal-kompressjoni; sempliċement tissettja l-kamp `compressionMode` ikkonsultat minn
-`resolveCompressionPlan`. Tista’ tiġi ssettjata jew fuq il-kard tal-kombinazzjoni (`Dashboard → Combos`) jew, minn
-#6760 ’l quddiem, għal kull kombinazzjoni tar-routing fil-lista "Assign to routing" fuq
-`Dashboard → Context & Cache → Compression Combos`, eżatt ħdejn il-kaxxa tal-għażla għall-assenjazzjoni tal-pipeline
-dokumentata hawn fuq. Iż-żewġ interfaċċi jippersistu permezz tal-istess endpoint `PUT /api/combos/{id}`.
+Din l-assenjazzjoni ta’ "Per-Combo Override" hija kontroll differenti mill-override tal-**routing-combo compression
+mode** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — l-iskema tal-field taċċetta wkoll
+`rtk`, `stacked` u `omniglyph`) — dak l-override ma jagħżilx pipeline tal-compression-combo msemmi; sempliċement
+jissettja l-field `compressionMode` li jiġi kkonsultat minn
+`resolveCompressionPlan`. Jista’ jiġi ssettjat jew fuq il-combo card (`Dashboard → Combos`) jew, minn
+#6760 ’il quddiem, għal kull combo tar-routing fil-lista "Assign to routing" fuq
+`Dashboard → Context & Cache → Compression Combos`, eżatt ħdejn il-checkbox tal-assenjazzjoni tal-pipeline
+ddokumentat hawn fuq. Iż-żewġ interfaces jippersistu permezz tal-istess endpoint
+`PUT /api/combos/{id}`.
 
-### Sostituzzjoni għal kull talba
+### Override għal kull talba
 
 Ibgħat il-header tat-talba `x-omniroute-compression` biex tissostitwixxi l-pjan tal-kompressjoni għal talba waħda.
-Dan għandu l-ogħla prijorità — jipprevali fuq is-sostituzzjoni tal-kombinazzjoni tar-routing, il-profil attiv,
-l-attivazzjoni awtomatika, u l-valur Default tal-pannell. Valuri mhux magħrufa jiġu injorati (it-talba qatt ma tiġi miċħuda) u
-l-iswiċċ ewlieni globali xorta jikkontrolla kollox: meta l-kompressjoni tkun mitfija globalment, il-header ma jistax
+Għandu l-ogħla preċedenza — jegħleb l-override tal-combo tar-routing, il-profil attiv,
+l-auto-trigger, u l-Default tal-panel. Valuri mhux magħrufa jiġu injorati (it-talba qatt ma tiġi rrifjutata) u
+l-iswiċċ globali ewlieni xorta jikkontrolla kollox: meta l-kompressjoni tkun mitfija globalment, il-header ma jistax
 jixgħelha. Valuri:
 
-| Valur         | Effett                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Ebda kompressjoni għal din it-talba.                                                                                |
-| `default`     | Il-profil Default derivat mill-pannell (jinjora l-profil attiv). Il-magni lossy jibqgħu mitfija.                    |
-| `safe`        | L-istess bħal meta tħalli barra l-header: dedup u tiwi tal-ispazji bojod biss.                                      |
-| `allow-lossy` | Iżomm il-pjan tal-operatur ta’ din it-talba, inklużi sommarji, filtri tar-rilevanza, u kitbiet mill-ġdid tal-istil. |
-| `engine:<id>` | Magna waħda meta tkun attivata, eż. `engine:rtk`. Din hija l-attivazzjoni għal kull talba għal dik il-magna.        |
-| `<combo>`     | Kombinazzjoni b’isem, imqabbla l-ewwel bl-isem (mingħajr distinzjoni bejn ittri kbar u żgħar), imbagħad bl-id.      |
+| Value         | Effect                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `off`         | L-ebda kompressjoni għal din it-talba.                                                                             |
+| `default`     | Il-profil Default derivat mill-panel (jinjora l-profil attiv). Magni lossy jitħallew mitfija.                      |
+| `safe`        | L-istess bħal meta l-header jitħalla barra.                                                                        |
+| `allow-lossy` | Iżomm il-pjan tal-operatur għal din it-talba, inklużi s-sommarji, il-filtri tar-rilevanza, u r-rewrites tal-istil. |
+| `engine:<id>` | Magna waħda meta tkun attivata, pereżempju `engine:rtk`. Dan huwa l-opt-in għal kull talba għal dik il-magna.      |
+| `<combo>`     | Combo msemmi, imqabbel l-ewwel bl-isem (mingħajr distinzjoni bejn kapitali u żgħar), imbagħad bl-id.               |
 
-Mingħajr `allow-lossy`, `engine:<id>`, jew kombinazzjoni b’isem, il-magni lossy ma jiġux applikati. It-
-talba xorta tirċievi dedup tas-sessjoni u tiwi tal-ispazji bojod meta l-kompressjoni tkun mixgħula.
+Mingħajr `allow-lossy`, `engine:<id>`, jew combo msemmi, magni lossy ma jiġux applikati. Meta Default
+lossy, auto-trigger, jew override tar-routing jiġi degradat, OmniRoute iżomm il-passi lossless rikonoxxuti
+mill-pipeline stacked ikkonfigurat fl-ordni kkonfigurat. Jirrikorri għal
+`session-dedup → lite` biss meta l-ebda pass lossless ikkonfigurat ma jibqa’ validu.
 
-Il-pjan applikat jintbagħat lura fil-header tar-rispons `X-OmniRoute-Compression: <mode>; source=<source>`,
-fejn `<source>` huwa wieħed minn `request-header`, `routing-override`, `active-profile`,
+Il-preview **Effective pipeline** tal-panel Settings juri l-pjan ordinarju maħżun. Meta
+auto-trigger ikun jista’ jaħdem, l-istess preview juri wkoll il-pipeline effettiv kundizzjonali tiegħu sabiex
+ir-riżoluzzjoni tar-runtime tal-panel u dik mingħajr header jibqgħu allinjati.
+
+Il-pjan applikat jintbagħat lura fil-header tar-rispons
+`X-OmniRoute-Compression: <mode>; source=<source>`, fejn `<source>` huwa wieħed minn
+`request-header`, `routing-override`, `active-profile`,
 `auto-trigger`, `default`, jew `off`.
 
 ### API
 
 ```bash
-# Ikseb il-konfigurazzjonijiet tal-kompressjoni
+# Ikseb is-settings tal-kompressjoni
 curl http://localhost:20128/api/settings/compression
 
-# Aġġorna l-konfigurazzjonijiet tal-kompressjoni
+# Aġġorna s-settings tal-kompressjoni
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Ipvisualizza minn qabel payload RTK/stacked speċifiku
+# Uri preview ta’ payload speċifiku ta’ RTK/stacked
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Elenka l-pakketti tal-filtri RTK
+# Elenka l-pakketti tal-filtri ta’ RTK
 curl http://localhost:20128/api/context/rtk/filters
 
 # Ittestja RTK direttament b’metadata fakultattiva tal-kmand

@@ -1,7 +1,12 @@
-import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
+import {
+  getEmptyTurnDiagnostics,
+  hasTrustedEmptyTurn,
+  inheritEmptyTurnPolicy,
+} from "./emptyTurnPolicy.ts";
 import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
+import { classifyProviderSafetyError, type ProviderSafetyInput } from "./providerSafety.ts";
 import {
   CODEX_REASONING_REPLAY_ERROR_CODE,
   matchesReasoningReplayRejectionMessage,
@@ -43,9 +48,42 @@ export type StreamReadinessResult =
       upstreamDiagnostic?: string;
       code: string;
       type: string;
+      /**
+       * Arrival moment of the most recent RAW upstream chunk (keepalive pings
+       * included) within the readiness window, on STREAM_READINESS_TIMEOUT
+       * results only: null = zero bytes ever arrived (upstream fully silent);
+       * an epoch-ms value = transport alive but no content event. Pure
+       * telemetry — no routing or retry decision reads it.
+       */
+      anyByteAt?: number | null;
       /** An actual upstream rejection, not a readiness stall eligible for a probe retry. */
       upstreamFailure?: true;
     };
+
+/** Response-header carrier for the anyByteAt telemetry signal (see the type
+ * above). "none" = zero bytes ever arrived; an epoch-ms number = the most
+ * recent raw-chunk arrival. Lets external tooling (curl, dashboards, retries)
+ * read the distinction straight off the 504 without touching the result object. */
+export const ANY_BYTE_AT_HEADER = "X-OmniRoute-Any-Byte-At";
+
+export function buildAnyByteAtHeader(anyByteAt: number | null): Record<string, string> {
+  return { [ANY_BYTE_AT_HEADER]: anyByteAt === null ? "none" : String(anyByteAt) };
+}
+
+/** Log-line suffix naming which readiness-timeout shape occurred (see anyByteAt). */
+function describeSilence(lastChunkAt: number | null): string {
+  return lastChunkAt === null
+    ? "ZERO raw bytes received (upstream went fully silent)"
+    : "raw bytes received but no content event (transport alive, upstream stalled)";
+}
+
+export function parseAnyByteAtHeader(header: string | null | undefined): number | null | undefined {
+  if (header == null || header === "") return undefined;
+  if (header === "none") return null;
+  const parsed = Number(header);
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  return undefined;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -153,6 +191,11 @@ function isPingEventType(type: string): boolean {
   return /^(?:ping|keepalive|heartbeat)$/i.test(type);
 }
 
+// Responses lifecycle frames that carry no model output. Counting them as readiness
+// would hand the stream to the client before a following overload error, which blocks
+// failover to another account. Only these two names are listed on purpose.
+const NON_OUTPUT_LIFECYCLE_TYPES = new Set(["response.queued", "response.metadata"]);
+
 function getPayloadType(payload: unknown, eventType = ""): string {
   if (!isRecord(payload)) return eventType;
   const type = payload.type ?? payload.event ?? payload.object;
@@ -188,6 +231,8 @@ function isErrorOnlyStructuredPayload(payload: Record<string, unknown>): boolean
 function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
   const type = getPayloadType(payload, eventType);
   if (isPingEventType(eventType) || isPingEventType(type)) return false;
+  if (NON_OUTPUT_LIFECYCLE_TYPES.has(eventType) || NON_OUTPUT_LIFECYCLE_TYPES.has(type))
+    return false;
   if (Array.isArray(payload)) return payload.length > 0;
   if (isRecord(payload)) {
     if (Object.keys(payload).length === 0) return false;
@@ -211,7 +256,9 @@ export function hasUsefulStreamContent(text: string, options: UsefulContentOptio
     try {
       if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
-      if (data.length > 0) return true;
+      // A non-JSON `data:` line is not useful stream content: skip it and
+      // inspect the next line instead of failing the whole text.
+      continue;
     }
   }
 
@@ -560,11 +607,40 @@ type StreamReadinessSignalState = {
   pendingLine: string;
   upstreamDiagnostic: string | null;
   cursorFailure?: StreamFailurePayload | null;
+  /** #17049: protocol fields of the first error-only frame, classified once at EOF. */
+  upstreamErrorFields: ProviderSafetyInput | null;
 };
 
 function resetCurrentEvent(state: StreamReadinessSignalState): void {
   state.currentEvent = "";
   state.dataLines = [];
+}
+
+/**
+ * Record the first error-only frame: its sanitized message as the diagnostic and, for
+ * #17049, its protocol fields. Classification is deferred to EOF so the feature-flag
+ * lookup never runs inside the timed read loop.
+ */
+function recordErrorOnlyFrame(
+  state: StreamReadinessSignalState,
+  payload: Record<string, unknown>
+): void {
+  const error = payload.error;
+  const rawMessage =
+    typeof error === "string"
+      ? error
+      : isRecord(error) && typeof error.message === "string"
+        ? error.message
+        : "";
+  const diagnostic = sanitizeErrorMessage(rawMessage).trim();
+  if (diagnostic) state.upstreamDiagnostic = diagnostic;
+  if (!isRecord(error)) return;
+  state.upstreamErrorFields = {
+    status: error.status_code ?? error.status ?? payload.status_code ?? payload.status,
+    code: error.code,
+    type: error.type,
+    message: rawMessage,
+  };
 }
 
 function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean {
@@ -584,15 +660,7 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
       return true;
     }
     if (!state.upstreamDiagnostic && isRecord(payload) && isErrorOnlyStructuredPayload(payload)) {
-      const error = payload.error;
-      const rawMessage =
-        typeof error === "string"
-          ? error
-          : isRecord(error) && typeof error.message === "string"
-            ? error.message
-            : "";
-      const diagnostic = sanitizeErrorMessage(rawMessage).trim();
-      if (diagnostic) state.upstreamDiagnostic = diagnostic;
+      recordErrorOnlyFrame(state, payload);
     }
     return hasNonPingStructuredPayload(payload, eventType);
   } catch {
@@ -665,6 +733,7 @@ export function hasStreamReadinessSignal(text: string): boolean {
     dataLines: [],
     pendingLine: "",
     upstreamDiagnostic: null,
+    upstreamErrorFields: null,
   };
   if (appendStreamReadinessSignal(state, text)) return true;
   return finishStreamReadinessSignal(state);
@@ -675,7 +744,8 @@ function createErrorResponse(
   message: string,
   code: string,
   type: string,
-  upstreamDiagnostic?: string
+  upstreamDiagnostic?: string,
+  extraHeaders?: Record<string, string>
 ): Response {
   return new Response(
     JSON.stringify(
@@ -686,8 +756,40 @@ function createErrorResponse(
         { code, type }
       )
     ),
-    { status, headers: { "Content-Type": "application/json" } }
+    { status, headers: { "Content-Type": "application/json", ...extraHeaders } }
   );
+}
+
+/**
+ * #17049: terminal readiness failure for an explicit provider safety stop that arrived as
+ * an error-only frame on a 200 stream. Same envelope as an HTTP-level stop (403/400,
+ * `invalid_request_error`, safety code), so neither the early-EOF retry, the readiness
+ * stall retry nor combo failover re-sends the stopped conversation.
+ */
+function buildSafetyStopReadiness(
+  safety: { status: number; code: string },
+  failure: { reason: string; classificationReason: string; upstreamDiagnostic?: string },
+  options: { provider?: string | null; model?: string | null; log?: StreamReadinessLogger | null }
+): Extract<StreamReadinessResult, { ok: false }> {
+  const { reason, classificationReason, upstreamDiagnostic } = failure;
+  options.log?.warn?.(
+    "STREAM",
+    `${classificationReason}: provider safety stop ${safety.code} (${options.provider || "provider"}/${options.model || "unknown"})`
+  );
+  return {
+    ok: false,
+    reason,
+    classificationReason,
+    ...(upstreamDiagnostic ? { upstreamDiagnostic } : {}),
+    code: safety.code,
+    type: "invalid_request_error",
+    response: createErrorResponse(
+      safety.status,
+      upstreamDiagnostic || "Upstream request refused",
+      safety.code,
+      "invalid_request_error"
+    ),
+  };
 }
 
 export function prependBufferedChunks(
@@ -762,6 +864,13 @@ export function prependBufferedChunks(
   });
 }
 
+function isDeadlineAbortReason(reason: unknown): boolean {
+  return (
+    reason instanceof Error &&
+    (reason.name === "TimeoutError" || reason.name === "BodyTimeoutError")
+  );
+}
+
 class StreamReadinessReadTimeout extends Error {
   constructor() {
     super("STREAM_READINESS_TIMEOUT");
@@ -799,6 +908,8 @@ export async function ensureStreamReadiness(
     log?: StreamReadinessLogger | null;
     /** Brief content check after the first lifecycle event; expiry hands off, never aborts. */
     contentProbeMs?: number;
+    /** Request signal. An abort on it that is not a deadline is a client disconnect, not a stall. */
+    signal?: AbortSignal | null;
   }
 ): Promise<StreamReadinessResult> {
   if (!response.body || options.timeoutMs <= 0) return { ok: true, response };
@@ -812,8 +923,17 @@ export async function ensureStreamReadiness(
     pendingLine: "",
     upstreamDiagnostic: null,
     ...(options.provider === "cursor" ? { cursorFailure: null } : {}),
+    upstreamErrorFields: null,
   };
   const startedAt = Date.now();
+  // Arrival moment of the most recent RAW upstream chunk (keepalive pings
+  // included). Strictly per-call: a module-level stamp would let one stream's
+  // chunks mark every concurrent stream as "bytes arrived", so a genuinely
+  // silent hang could inherit a sibling request's timestamp and masquerade as
+  // a transport-alive stall. Surfaced on the timeout result (`anyByteAt`) and
+  // on the 504 (`X-OmniRoute-Any-Byte-At`) so operators can tell the two
+  // failure shapes apart at a glance.
+  let lastChunkAt: number | null = null;
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
   // Hard ceiling: the deadline may extend on liveness signals (bytes arriving),
   // but never past this absolute maximum.  When maxTimeoutMs is omitted the
@@ -859,6 +979,38 @@ export async function ensureStreamReadiness(
   const timeoutReason = () =>
     `Stream produced no non-ping SSE event within ${deadline - startedAt}ms (max=${maxDeadline - startedAt}ms)`;
 
+  const failOnTimeout = (): Extract<StreamReadinessResult, { ok: false }> => {
+    const classificationReason = timeoutReason();
+    // Keep the first upstream error frame: the stall hides it otherwise.
+    const upstreamDiagnostic = readinessState.upstreamDiagnostic || undefined;
+    const reason = upstreamDiagnostic
+      ? `${classificationReason}: ${upstreamDiagnostic}`
+      : classificationReason;
+    options.log?.warn?.(
+      "STREAM",
+      `${reason} (${options.provider || "provider"}/${options.model || "unknown"}) — ${describeSilence(lastChunkAt)}`
+    );
+    // The provider owns this promise and may never settle it; the deadline must still return.
+    void reader.cancel(classificationReason).catch(() => {});
+    return {
+      ok: false,
+      reason,
+      classificationReason,
+      ...(upstreamDiagnostic ? { upstreamDiagnostic } : {}),
+      code: "STREAM_READINESS_TIMEOUT",
+      type: "stream_timeout",
+      anyByteAt: lastChunkAt,
+      response: createErrorResponse(
+        HTTP_STATUS.GATEWAY_TIMEOUT,
+        classificationReason,
+        "STREAM_READINESS_TIMEOUT",
+        "stream_timeout",
+        upstreamDiagnostic,
+        buildAnyByteAtHeader(lastChunkAt)
+      ),
+    };
+  };
+
   try {
     while (true) {
       if (contentProbeDeadline && Date.now() >= contentProbeDeadline) {
@@ -866,27 +1018,7 @@ export async function ensureStreamReadiness(
         return { ok: true, response: buildReadyResponse() };
       }
       const remainingMs = (contentProbeDeadline || deadline) - Date.now();
-      if (remainingMs <= 0) {
-        const reason = timeoutReason();
-        options.log?.warn?.(
-          "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
-        );
-        await reader.cancel(reason).catch(() => {});
-        return {
-          ok: false,
-          reason,
-          classificationReason: reason,
-          code: "STREAM_READINESS_TIMEOUT",
-          type: "stream_timeout",
-          response: createErrorResponse(
-            HTTP_STATUS.GATEWAY_TIMEOUT,
-            reason,
-            "STREAM_READINESS_TIMEOUT",
-            "stream_timeout"
-          ),
-        };
-      }
+      if (remainingMs <= 0) return failOnTimeout();
 
       let readResult: ReadableStreamReadResult<Uint8Array>;
       const deadlineBeforeRead = deadline;
@@ -904,6 +1036,33 @@ export async function ensureStreamReadiness(
           // pending read, including a rejection; starting another read would lose a chunk.
           handedOffReader = true;
           return { ok: true, response: buildReadyResponse() };
+        }
+        // A departed client is not an upstream stall: report 499, not a 504. Deadlines
+        // (TimeoutError / BodyTimeoutError) are gateway-owned and stay on the stall path.
+        // Without a signal, only a bare AbortError can be told apart.
+        const signal = options.signal;
+        const clientAborted = signal
+          ? signal.aborted && !isDeadlineAbortReason(signal.reason)
+          : error instanceof Error && error.name === "AbortError";
+        if (clientAborted) {
+          const reason = "Client disconnected before the stream produced a non-ping SSE event";
+          options.log?.debug?.(
+            "STREAM",
+            `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
+          );
+          return {
+            ok: false,
+            reason,
+            classificationReason: reason,
+            code: "client_disconnected",
+            type: "client_disconnected",
+            response: createErrorResponse(
+              499,
+              reason,
+              "client_disconnected",
+              "client_disconnected"
+            ),
+          };
         }
         // A source stream that errors before its first non-ping event (e.g. an
         // executor watchdog giving up on a stalled upstream) must say so instead of
@@ -938,25 +1097,7 @@ export async function ensureStreamReadiness(
             ),
           };
         }
-        const reason = timeoutReason();
-        options.log?.warn?.(
-          "STREAM",
-          `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
-        );
-        await reader.cancel(reason).catch(() => {});
-        return {
-          ok: false,
-          reason,
-          classificationReason: reason,
-          code: "STREAM_READINESS_TIMEOUT",
-          type: "stream_timeout",
-          response: createErrorResponse(
-            HTTP_STATUS.GATEWAY_TIMEOUT,
-            reason,
-            "STREAM_READINESS_TIMEOUT",
-            "stream_timeout"
-          ),
-        };
+        return failOnTimeout();
       }
 
       if (readResult.done) {
@@ -970,6 +1111,10 @@ export async function ensureStreamReadiness(
           !hasTrustedEmptyTurn(response)
         ) {
           const reason = "Provider returned empty content";
+          options.log?.warn?.(
+            "STREAM",
+            `detector=readiness native=${JSON.stringify(getEmptyTurnDiagnostics(response))}`
+          );
           return {
             ok: false,
             reason,
@@ -1031,6 +1176,18 @@ export async function ensureStreamReadiness(
         const reason = upstreamDiagnostic
           ? `${classificationReason}: ${upstreamDiagnostic}`
           : classificationReason;
+        // #17049: an explicit provider safety stop is deterministic and terminal, not a
+        // transient hang-up; see buildSafetyStopReadiness.
+        const safety = readinessState.upstreamErrorFields
+          ? classifyProviderSafetyError(readinessState.upstreamErrorFields)
+          : null;
+        if (safety) {
+          return buildSafetyStopReadiness(
+            safety,
+            { reason, classificationReason, upstreamDiagnostic },
+            options
+          );
+        }
         options.log?.warn?.(
           "STREAM",
           `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
@@ -1054,6 +1211,7 @@ export async function ensureStreamReadiness(
 
       if (!readResult.value) continue;
       chunks.push(readResult.value);
+      lastChunkAt = Date.now();
       const decodedChunk = decoder.decode(readResult.value, { stream: true });
       bufferedBytes += readResult.value.byteLength;
       contentWatcher?.note(decodedChunk);

@@ -31,7 +31,7 @@ import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { isUrlHost } from "../utils/urlHost.ts";
-import { toNumberOrNull } from "@/shared/utils/numeric";
+import { toNumberOrNull } from "../utils/numeric.ts";
 
 const CREDIT_USAGE_URL = "https://api.firecrawl.dev/v2/team/credit-usage";
 const CACHE_TTL_MS = 60_000;

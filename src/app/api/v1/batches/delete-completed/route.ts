@@ -1,4 +1,4 @@
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import { deleteCompletedBatches, type DeleteCompletedBatchesScope } from "@/lib/db/batches";
 import { NextResponse } from "next/server";
 import { getApiKeyRequestScope, resolveEffectiveApiKeyId } from "@/app/api/v1/_helpers/apiKeyScope";
@@ -38,7 +38,7 @@ export async function DELETE(request: Request) {
     });
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 

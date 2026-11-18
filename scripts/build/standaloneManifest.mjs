@@ -32,42 +32,56 @@ async function sha256File(filePath) {
 }
 
 /**
- * Rewrite a symlink target so it is anchored to the tree being packed/verified
- * instead of the machine that happened to create it (issue #11979).
+ * Reduce a symlink target to the portable form the manifest records, or refuse
+ * it when it leaves the tree (issue #11979).
  *
- * `npm`'s bin-links usually produce a target already relative to the
- * symlink's own directory (e.g. `../semver/bin/semver.js`), which survives an
- * archive/restore round trip unchanged on every OS. Some `npm ci` legs
- * (observed on the ubuntu web-build runner) instead emit an ABSOLUTE target
- * tied to that machine's checkout path. An absolute target is inherently
- * non-portable: POSIX restores it as a dangling symlink once the packing
- * machine's path is gone, and Windows' `CreateSymbolicLink` rewrites a
- * leading `/` into a drive-relative path on read-back, so a byte-for-byte
- * comparison against the recorded value fails outright.
+ * The portable form is relative to the symlink's own directory with `/`
+ * separators -- what `npm` writes for its bin links (e.g.
+ * `../semver/bin/semver.js`). It survives an archive/restore round trip on
+ * every OS, with one exception handled here: Node stores `\\` in a Windows
+ * symlink, so a restored link reads back with the other separator.
  *
- * A relative target has no such ambiguity, so an absolute target is resolved
- * against `rootDir` and re-expressed relative to the symlink's own directory
- * -- the same portable shape `npm install` already produces natively.
+ * An ABSOLUTE target is inherently non-portable: POSIX restores it as a
+ * dangling symlink once the packing machine's path is gone, and Windows'
+ * `CreateSymbolicLink` rewrites a leading `/` into a drive-relative path on
+ * read-back. One that points inside `rootDir` is re-expressed in the relative
+ * form. One that points elsewhere is refused: only the step that wrote the link
+ * knows where it should point, so the refusal never tries to find a same-named
+ * file in the tree.
+ *
+ * A relative target that climbs out of the tree is refused under `standalone/`,
+ * the part that ships and must be self-contained. Elsewhere it is legitimate:
+ * Turbopack's hashed externals in `<distDir>/node_modules` are relative links
+ * to the checkout's own `node_modules`, and they resolve on every desktop leg
+ * because each leg has the same checkout layout.
  *
  * @param {string} rootDir absolute path to the tree root
  * @param {string} entryRelPath the symlink's own path, relative to rootDir (posix-separated)
  * @param {string} rawTarget the raw string from fs.readlinkSync
+ * @param {string} [sep] the platform separator readlink reports (override for tests)
  * @returns {{ok: true, value: string} | {ok: false, reason: string}}
  */
-export function normalizeSymlinkTarget(rootDir, entryRelPath, rawTarget) {
-  if (!path.isAbsolute(rawTarget)) {
-    return { ok: true, value: rawTarget };
-  }
+export function normalizeSymlinkTarget(rootDir, entryRelPath, rawTarget, sep = path.sep) {
+  const target = sep === "\\" ? rawTarget.replaceAll("\\", "/") : rawTarget;
   const rootResolved = path.resolve(rootDir);
-  const resolvedTarget = path.resolve(rawTarget);
+  const symlinkDir = path.dirname(path.join(rootResolved, ...entryRelPath.split("/")));
+  const resolvedTarget = path.resolve(symlinkDir, target);
   const relFromRoot = path.relative(rootResolved, resolvedTarget);
-  if (relFromRoot === "" || relFromRoot.startsWith("..") || path.isAbsolute(relFromRoot)) {
+  const leavesTree =
+    relFromRoot === "" ||
+    relFromRoot === ".." ||
+    relFromRoot.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relFromRoot);
+  const isAbsolute = path.isAbsolute(target);
+  if (leavesTree && (isAbsolute || entryRelPath.startsWith("standalone/"))) {
     return {
       ok: false,
       reason: `symlink ${entryRelPath} target escapes the tree root: ${rawTarget}`,
     };
   }
-  const symlinkDir = path.dirname(path.join(rootResolved, ...entryRelPath.split("/")));
+  if (!isAbsolute) {
+    return { ok: true, value: target };
+  }
   const relFromSymlink = path.relative(symlinkDir, resolvedTarget).split(path.sep).join("/");
   return { ok: true, value: relFromSymlink };
 }

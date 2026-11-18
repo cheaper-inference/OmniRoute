@@ -16,6 +16,13 @@ const {
   getModelLockoutSize,
   MODEL_LOCKOUT_EVICTION_CAP,
 } = await import("../../open-sse/services/accountFallback.ts");
+const { evictLockoutOverflow } = await import(
+  "../../open-sse/services/accountFallback/lockoutEviction.ts"
+);
+import type {
+  ModelFailureState,
+  ModelLockoutEntry,
+} from "../../open-sse/services/accountFallback.ts";
 
 const REASON = "rate_limited";
 // Far from expiring — entry.until is well in the future.
@@ -126,4 +133,65 @@ test("eviction removes expired entries while an active lockout in the same overf
     cap,
     "expired fillers should be evicted down to exactly the cap, victim included"
   );
+});
+
+function makeLockoutEntry(): ModelLockoutEntry {
+  const now = Date.now();
+  return {
+    reason: REASON,
+    until: now + ACTIVE_COOLDOWN_MS,
+    lockedAt: now,
+    failureCount: 1,
+    lastFailureAt: now,
+    resetAfterMs: 30 * 60 * 1000,
+  };
+}
+
+function makeFailureEntry(): ModelFailureState {
+  const now = Date.now();
+  return { failureCount: 1, lastFailureAt: now, resetAfterMs: 30 * 60 * 1000 };
+}
+
+test("eviction purges releasable failure entries past head lockouts", () => {
+  const cap = 5;
+  const modelLockouts = new Map<string, ModelLockoutEntry>([
+    ["held-a", makeLockoutEntry()],
+    ["held-b", makeLockoutEntry()],
+  ]);
+  // Locked keys sit at the head in insertion order, releasable keys follow.
+  // Size 7 with cap 5 means overflow 2: the two releasable head-followers
+  // must go while the held keys survive.
+  const modelFailureState = new Map<string, ModelFailureState>([
+    ["held-a", makeFailureEntry()],
+    ["held-b", makeFailureEntry()],
+    ["free-a", makeFailureEntry()],
+    ["free-b", makeFailureEntry()],
+    ["free-c", makeFailureEntry()],
+    ["free-d", makeFailureEntry()],
+    ["free-e", makeFailureEntry()],
+  ]);
+
+  evictLockoutOverflow(modelLockouts, modelFailureState, cap);
+
+  assert.ok(modelFailureState.has("held-a"), "held failure entry must survive eviction");
+  assert.ok(modelFailureState.has("held-b"), "held failure entry must survive eviction");
+  assert.equal(modelFailureState.size, cap, "releasable entries should be purged down to the cap");
+});
+
+test("eviction leaves failure state under cap unchanged", () => {
+  const cap = 5;
+  const modelLockouts = new Map<string, ModelLockoutEntry>([
+    ["held-a", makeLockoutEntry()],
+  ]);
+  const modelFailureState = new Map<string, ModelFailureState>([
+    ["held-a", makeFailureEntry()],
+    ["free-a", makeFailureEntry()],
+    ["free-b", makeFailureEntry()],
+  ]);
+  const before = [...modelFailureState.keys()];
+
+  evictLockoutOverflow(modelLockouts, modelFailureState, cap);
+
+  assert.deepEqual([...modelFailureState.keys()], before);
+  assert.equal(modelFailureState.size, before.length);
 });

@@ -13,53 +13,69 @@ OmniRoute מתעד פעולות ניהוליות, אירועי אימות, שי�
 
 ## מה נרשם
 
-### אירועי ביקורת ניהוליים (`audit_log`)
+### אירועי ביקורת מנהליים (`audit_log`)
 
-כל קריאה אל `logAuditEvent({ action, actor, target, details, ... })` יוצרת שורה אחת. מחרוזות פעולה פועלות לפי התבנית `domain.verb` (או `domain.verb.outcome`). סוגי הפעולות שאושרו בקוד כוללים:
+כל קריאה ל־`logAuditEvent({ action, actor, target, details, ... })` מפיקה
+שורה אחת. מחרוזות הפעולה פועלות לפי תבנית
+`domain.verb` (או `domain.verb.outcome`). סוגי הפעולות שאושרו בעץ הקוד כוללים:
 
-| פעולה                                | מקור                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-כל רשומה כוללת את `action`,‏ `actor` (ערך ברירת המחדל הוא `"system"`),‏ `target`,‏ `details`/`metadata`‏ (JSON),‏ `ip_address`,‏ `resource_type`,‏ `status`,‏ `request_id` ו-`timestamp`. מפתחות רגישים (`apiKey`,‏ `accessToken`,‏ `refreshToken`,‏ `password`, כל מפתח התואם ל-`*token`/`*secret`/`*apikey` וכדומה) מצונזרים באופן רקורסיבי ל-`"[redacted]"` לפני כתיבת השורה.
+כל רשומה כוללת את `action`, את `actor` (ברירת המחדל היא `"system"`), את `target`,
+את `details`/`metadata` (JSON), את `ip_address`, את `resource_type`, את `status`,
+את `request_id` ואת `timestamp`. מפתחות רגישים (`apiKey`, `accessToken`,
+`refreshToken`, `password`, וכל דבר התואם ל־`*token`/`*secret`/`*apikey`,
+וכדומה) עוברים השחרה רקורסיבית ל־`"[redacted]"` לפני כתיבת השורה.
+
+שורות `api_key.auth.touch` מתעדות קריאות מוצלחות של מטא־נתונים וגילוי של מפתחות API
+(GET/HEAD), שאינן מגיעות ליומן הבקשות: איזה מפתח, מתי, והנתיב המנורמל,
+תוך איחוד רשומות והגבלה ל־1,000 שורות. מפתחות עם `noLog` ומפתח הסביבה אינם נכללים.
+כתובת ה־IP וסוכן המשתמש של המתקשר מתווספים רק כאשר דגל התכונה
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` מופעל (כבוי כברירת מחדל).
 
 ### קריאות לכלי MCP (`mcp_tool_audit`)
 
-כל הפעלה של כלי MCP כותבת שורה באמצעות `open-sse/mcp-server/audit.ts`. הסכמה (מתוך `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+כל הפעלה של כלי MCP כותבת שורה באמצעות
+`open-sse/mcp-server/audit.ts`. הסכמה (מתוך
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| עמודה            | הערות                                 |
-| ---------------- | ------------------------------------- |
-| `id`             | מספור אוטומטי עולה                    |
-| `tool_name`      | מזהה כלי MCP                          |
-| `input_hash`     | sha256 של הקלט (המטען עצמו אינו נשמר) |
-| `output_summary` | תקציר קצר וחתוך                       |
-| `duration_ms`    | זמן בפועל                             |
-| `api_key_id`     | הגורם הקורא (יכול להיות null)         |
-| `success`        | `1` / `0`                             |
-| `error_code`     | קוד השגיאה הסופית במקרה של כשל        |
-| `created_at`     | חותמת זמן בפורמט ISO                  |
+| Column           | Notes                                   |
+| ---------------- | --------------------------------------- |
+| `id`             | הגדלה אוטומטית                          |
+| `tool_name`      | מזהה כלי MCP                            |
+| `input_hash`     | sha256 של הקלט (מטען הנתונים אינו נשמר) |
+| `output_summary` | סיכום קצר ומקוצר                        |
+| `duration_ms`    | זמן שעון קיר                            |
+| `api_key_id`     | המתקשר (יכול להיות ריק)                 |
+| `success`        | `1` / `0`                               |
+| `error_code`     | קוד השגיאה הסופי במקרה של כשל           |
+| `created_at`     | חותמת זמן בפורמט ISO                    |
 
 ### יומני בקשות / שימוש
 
-אלו נתוני טלמטריה תפעוליים (ולא ביקורת ניהולית במובן המחמיר), אך הם משתמשים באותו צינור שמירת נתונים:
+אלה נתוני טלמטריה תפעוליים (לא ביקורת מנהלית במובן המחמיר), אך הם משתמשים באותו
+צינור שמירת נתונים:
 
-- `usage_history` — סיכום שימוש לכל בקשה
-- `call_logs` — יומן מלא לכל בקשה (כפוף למגבלת שורות, ראו להלן)
-- `proxy_logs` — יומן תעבורת proxy (כפוף למגבלת שורות)
-- `request_detail_logs` — יומן מפורט מדור קודם של בקשות (עדיין נמחק במסגרת הניקוי, אם הוא קיים)
+- `usage_history` — ריכוז שימוש לכל בקשה
+- `call_logs` — יומן מלא לכל בקשה (כפוף להגבלת מספר השורות, ראו להלן)
+- `proxy_logs` — יומן תעבורת פרוקסי (כפוף להגבלת מספר השורות)
+- `request_detail_logs` — יומן פרטי בקשות מדור קודם (עדיין נמחק אם הוא קיים)
 
 ## סכמת אחסון
 

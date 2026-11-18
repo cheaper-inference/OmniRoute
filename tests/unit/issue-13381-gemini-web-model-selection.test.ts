@@ -208,6 +208,65 @@ test("#13381: a confirmed model-mode read-back lets the request proceed to the p
   );
 });
 
+const ARGON_ENV = "OMNIROUTE_GEMINI_WEB_ARGON_ENABLED";
+
+async function withArgonEnv<T>(value: string | undefined, fn: () => Promise<T>): Promise<T> {
+  const previous = process.env[ARGON_ENV];
+  if (value === undefined) delete process.env[ARGON_ENV];
+  else process.env[ARGON_ENV] = value;
+  try {
+    return await fn();
+  } finally {
+    if (previous === undefined) delete process.env[ARGON_ENV];
+    else process.env[ARGON_ENV] = previous;
+  }
+}
+
+function argonConfirmedScript(): PageScript {
+  const descriptor = GEMINI_WEB_MODEL_MODES["gemini-4-argon"];
+  assert.ok(descriptor.toggleSelector && descriptor.activeIndicatorSelector);
+  return {
+    selectors: {
+      [descriptor.toggleSelector!]: { found: true },
+      [descriptor.activeIndicatorSelector!]: { found: true, text: "Gemini 4 Argon" },
+    },
+  };
+}
+
+test("#16573: gemini-4-argon stays an unknown model while its opt-in switch is off", async () => {
+  for (const value of [undefined, "0", "false", ""]) {
+    const { status, calls, body } = await withArgonEnv(value, () =>
+      runWithFakePage("gemini-4-argon", argonConfirmedScript())
+    );
+    assert.equal(status, 400, `switch=${String(value)} must keep the pre-#16573 rejection`);
+    assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+    assert.match((body as ErrorBodyLike).error.message, /not one of the advertised/);
+    assert.equal(
+      calls.some((c) => c.fn === "mode.click"),
+      false,
+      "with the switch off no mode switch is attempted"
+    );
+    assert.equal(
+      calls.some((c) => c.fn === "editor.click"),
+      false
+    );
+  }
+});
+
+test("#13381: gemini-4-argon model-mode read-back confirmed lets request proceed", async () => {
+  const { status, calls } = await withArgonEnv("1", () =>
+    runWithFakePage("gemini-4-argon", argonConfirmedScript())
+  );
+
+  assert.equal(
+    status,
+    502,
+    "a CONFIRMED mode switch for gemini-4-argon must proceed to the prompt, not 400"
+  );
+  assert.ok(calls.some((c) => c.fn === "mode.click"));
+  assert.ok(calls.some((c) => c.fn === "editor.click"));
+});
+
 // ─── (b) Control missing -> 400, never a silent 200 ─────────────────────────
 
 test("#13381: a missing model-mode control fails closed with 400, not a silent 200", async () => {

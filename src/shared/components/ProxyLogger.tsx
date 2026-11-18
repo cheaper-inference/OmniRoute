@@ -20,9 +20,15 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
+import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import ProxyLogDetail from "./ProxyLogDetail";
-import { TYPE_COLORS, LEVEL_COLORS, PROVIDER_COLORS } from "@/shared/constants/colors";
+import {
+  TYPE_COLORS,
+  LEVEL_COLORS,
+  PROVIDER_COLORS,
+  neutralBadge,
+} from "@/shared/constants/colors";
 import {
   formatTime,
   formatDuration as formatLatency,
@@ -30,6 +36,10 @@ import {
   maskSegment,
   truncateUrl,
 } from "@/shared/utils/formatting";
+import {
+  EGRESS_FAMILY_LABEL_ARGUMENT,
+  observedEgressAddresses,
+} from "@/shared/network/egressAddress";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
 
@@ -75,6 +85,9 @@ const DEFAULT_VISIBLE = Object.fromEntries(PROXY_COLUMN_KEYS.map((key) => [key, 
 export default function ProxyLogger() {
   const t = useTranslations("proxyLogger");
   const tCommon = useTranslations("common");
+  // The family of an egress address is labelled in the proxyLog namespace, the
+  // one the line detail uses too.
+  const tProxyLog = useTranslations("proxyLog");
   const { emailsVisible } = useEmailPrivacyStore();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -300,7 +313,7 @@ export default function ProxyLogger() {
             </Badge>
           )}
           {testsCount > 0 && (
-            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
+            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3-ink">
               {testsCount} {t("filterTests")}
             </Badge>
           )}
@@ -465,12 +478,8 @@ export default function ProxyLogger() {
           )}
 
           {uniqueProviders.map((p) => {
-            // Provider identity colours (brand palette in constants/colors), not status tones.
-            const pc = PROVIDER_COLORS[p] || {
-              bg: "#374151",
-              text: "#fff",
-              label: p.toUpperCase(),
-            };
+            // Provider identity tones (kit chart tokens in constants/colors), not status tones.
+            const pc = PROVIDER_COLORS[p] || neutralBadge(p.toUpperCase());
             const isActive = selectedProvider === p;
             return (
               <Button
@@ -480,14 +489,16 @@ export default function ProxyLogger() {
                 aria-pressed={isActive}
                 onClick={() => setSelectedProvider(isActive ? "" : p)}
                 className={cn(
-                  "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
+                  "h-7 min-h-7 rounded-full border px-3 text-xs uppercase",
                   isActive
                     ? "border-border-strong ring-1 ring-border-strong"
-                    : "border-transparent opacity-70 hover:opacity-100"
+                    : "border-transparent hover:bg-bg-subtle"
                 )}
+                // Active: tint + ink + hue border; inactive: the ink alone (AA on the page).
                 style={{
-                  backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
-                  color: isActive ? pc.text : pc.bg,
+                  backgroundColor: isActive ? pc.bg : undefined,
+                  borderColor: isActive ? pc.border : undefined,
+                  color: pc.text,
                 }}
               >
                 {pc.label}
@@ -506,11 +517,14 @@ export default function ProxyLogger() {
         ) : (
           <Table
             scrollbarLabel={t("tableLabel")}
-            // Opaque bg-surface viewport (#4233); it scrolls both axes under a sticky header.
-            containerClassName="max-h-[calc(100vh-320px)] overflow-auto rounded-none border-0 bg-surface"
+            // Opaque bg-surface viewport (#4233); the kit cap scrolls both axes under a pinned
+            // header and makes the viewport a named tab stop (kit 0.0.116).
+            containerClassName="rounded-none border-0 bg-surface"
+            maxHeight="calc(100vh - 320px)"
+            scrollLabel={t("tableLabel")}
             className="text-left text-xs"
           >
-            <TableHeader className="sticky top-0 z-10">
+            <TableHeader>
               <TableRow>
                 {visibleColumns.status && <TableHead className="px-3">{t("colStatus")}</TableHead>}
                 {visibleColumns.proxy && <TableHead className="px-3">{t("colProxy")}</TableHead>}
@@ -542,27 +556,27 @@ export default function ProxyLogger() {
             </TableHeader>
             <TableBody>
               {sortedLogs.map((log) => {
-                // Proxy type / level keep their categorical palettes (constants/colors).
-                const typeColor = TYPE_COLORS[log.proxy?.type] || {
-                  bg: "#6B7280",
-                  text: "#fff",
-                  label: log.proxy?.type || "-",
-                };
+                // Proxy type / level badges are kit tones (constants/colors).
+                const typeColor =
+                  TYPE_COLORS[log.proxy?.type] || neutralBadge(log.proxy?.type || "-");
                 const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
                 const resolvedProviderLabel =
                   getProviderDisplayLabel(log.provider, providerNodes) ||
                   (log.provider || "-").toUpperCase();
-                const providerColor = PROVIDER_COLORS[log.provider] || {
-                  bg: "#374151",
-                  text: "#fff",
-                  label: resolvedProviderLabel,
-                };
+                const providerColor =
+                  PROVIDER_COLORS[log.provider] || neutralBadge(resolvedProviderLabel);
                 const isError = log.status === "error" || log.status === "timeout";
+                const egressAddress =
+                  observedEgressAddresses({
+                    primary: log.egressIp ?? null,
+                    ipv4: log.egressIpv4 ?? null,
+                    ipv6: log.egressIpv6 ?? null,
+                  })[0] ?? null;
 
                 return (
-                  <TableRow
+                  <InteractiveTableRow
                     key={log.id}
-                    onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
+                    onActivate={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
                     className={cn(
                       "cursor-pointer hover:bg-info/10 transition-colors",
                       isError && "bg-error/5"
@@ -573,7 +587,7 @@ export default function ProxyLogger() {
                         <Badge
                           size="sm"
                           variant={proxyStatusTone(log.status)}
-                          className="min-w-[50px] justify-center font-bold uppercase"
+                          className="min-w-[50px] justify-center font-semibold uppercase"
                         >
                           {log.status}
                         </Badge>
@@ -590,7 +604,7 @@ export default function ProxyLogger() {
                           <Badge
                             size="sm"
                             variant="info"
-                            className="text-[9px] font-bold uppercase"
+                            className="text-[9px] font-semibold uppercase"
                             title={t("tlsFingerprint")}
                           >
                             <span aria-hidden="true">🔒</span> TLS
@@ -603,7 +617,7 @@ export default function ProxyLogger() {
                     {visibleColumns.type && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                           style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
                         >
                           {typeColor.label}
@@ -613,7 +627,7 @@ export default function ProxyLogger() {
                     {visibleColumns.level && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                           style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
                         >
                           {levelColor.label}
@@ -624,7 +638,7 @@ export default function ProxyLogger() {
                       <TableCell className="px-3 py-2">
                         {log.provider ? (
                           <span
-                            className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                            className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                             style={{
                               backgroundColor: providerColor.bg,
                               color: providerColor.text,
@@ -644,7 +658,20 @@ export default function ProxyLogger() {
                     )}
                     {visibleColumns.egress && (
                       <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
-                        {maskSegment(log.egressIp) || "—"}
+                        {egressAddress ? (
+                          <>
+                            {maskSegment(egressAddress.address)}
+                            {egressAddress.family ? (
+                              <span className="ml-1 text-text-muted">
+                                {tProxyLog("egressIpFamily", {
+                                  version: EGRESS_FAMILY_LABEL_ARGUMENT[egressAddress.family],
+                                })}
+                              </span>
+                            ) : null}
+                          </>
+                        ) : (
+                          "—"
+                        )}
                       </TableCell>
                     )}
                     {visibleColumns.correlation && (
@@ -691,7 +718,7 @@ export default function ProxyLogger() {
                         {formatTime(log.timestamp)}
                       </TableCell>
                     )}
-                  </TableRow>
+                  </InteractiveTableRow>
                 );
               })}
             </TableBody>

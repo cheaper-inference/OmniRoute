@@ -23,7 +23,17 @@ test("normalizeUsage keeps finite nested cache-read fields for stream cost calcu
       total_tokens: Number.POSITIVE_INFINITY,
       input_tokens_details: { cached_tokens: 2 },
     }),
-    { input_tokens: 12, output_tokens: 3, cached_tokens: 2 }
+    {
+      input_tokens: 12,
+      output_tokens: 3,
+      cached_tokens: 2,
+      usage_evidence: {
+        input: { source: "unknown" },
+        output: { source: "reported" },
+        cacheRead: { source: "reported" },
+        cacheCreation: { source: "unknown" },
+      },
+    }
   );
 });
 
@@ -45,6 +55,12 @@ test("extractUsageFromResponse reads OpenAI chat completion usage", () => {
     completion_tokens: 8,
     cached_tokens: 3,
     reasoning_tokens: 2,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
@@ -66,6 +82,12 @@ test("extractUsageFromResponse reads OpenAI usage when cache/reasoning live unde
     completion_tokens: 8,
     cached_tokens: 4,
     reasoning_tokens: 1,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
@@ -262,7 +284,7 @@ test("extractUsageFromResponse reads Gemini usageMetadata and thinking tokens", 
   assert.deepEqual(usage, {
     prompt_tokens: 11,
     completion_tokens: 7,
-    cached_tokens: 0,
+    cache_evidence: "unreported",
     reasoning_tokens: 2,
   });
 });
@@ -288,6 +310,7 @@ test("extractUsageFromResponse reads Gemini usageMetadata from the antigravity r
     prompt_tokens: 42,
     completion_tokens: 17,
     cached_tokens: 7,
+    cache_evidence: "hit",
     reasoning_tokens: 4,
   });
 });
@@ -304,9 +327,24 @@ test("extractUsageFromResponse prefers top-level usageMetadata over the envelope
   assert.deepEqual(usage, {
     prompt_tokens: 1,
     completion_tokens: 2,
-    cached_tokens: 0,
+    cache_evidence: "unreported",
     reasoning_tokens: 0,
   });
+});
+
+test("extractUsageFromResponse marks invalid Gemini cache counts", () => {
+  const usage = extractUsageFromResponse(
+    {
+      usageMetadata: {
+        promptTokenCount: 30,
+        candidatesTokenCount: 10,
+        cachedContentTokenCount: 31,
+      },
+    },
+    "gemini"
+  );
+  assert.equal(usage.cached_tokens, undefined);
+  assert.equal(usage.cache_evidence, "invalid");
 });
 
 test("extractUsageFromResponse surfaces Gemini cachedContentTokenCount as cached_tokens", () => {
@@ -328,6 +366,7 @@ test("extractUsageFromResponse surfaces Gemini cachedContentTokenCount as cached
     prompt_tokens: 30,
     completion_tokens: 13,
     cached_tokens: 12,
+    cache_evidence: "hit",
     reasoning_tokens: 3,
   });
 });
@@ -461,6 +500,12 @@ test("extractUsageFromResponse reads flat cached_tokens and reasoning_tokens fro
     completion_tokens: 50,
     cached_tokens: 192,
     reasoning_tokens: 49,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 

@@ -17,7 +17,7 @@ test("global compression off gates reactive and last-resort context compaction",
   // passthrough unless the default-off NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED flag is on).
   assert.match(
     source,
-    /reactiveContextCompactionEnabled\s*&&\s*!skipNativeCodexReactiveCompaction\s*&&\s*estimatedTokens\s*>\s*threshold/
+    /reactiveContextCompactionEnabled\s*&&\s*!skipNativeCodexReactiveCompaction\s*&&\s*!protectOpenCodePrefix\s*&&\s*estimatedTokens\s*>\s*threshold/
   );
   assert.match(
     source,

@@ -8,79 +8,78 @@
 
 _ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ: 2026-06-28_
 
-## ਕਾਰਜਕਾਰੀ ਸੰਖੇਪ
+## ਕਾਰਜਕਾਰੀ ਸੰਖੇਪ ਵਿਚ
 
-OmniRoute, Next.js ਉੱਤੇ ਬਣਿਆ ਇੱਕ ਸਥਾਨਕ AI ਰੂਟਿੰਗ ਗੇਟਵੇ ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਹੈ।
-ਇਹ ਇੱਕੋ OpenAI-ਅਨੁਕੂਲ ਐਂਡਪੌਇੰਟ (`/v1/*`) ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਅਤੇ ਅਨੁਵਾਦ, ਫਾਲਬੈਕ, ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼ ਅਤੇ ਵਰਤੋਂ ਟ੍ਰੈਕਿੰਗ ਸਮੇਤ ਕਈ ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚ ਟ੍ਰੈਫਿਕ ਨੂੰ ਰੂਟ ਕਰਦਾ ਹੈ।
+OmniRoute ਇੱਕ ਸਥਾਨਕ AI ਰੂਟਿੰਗ ਗੇਟਵੇ ਅਤੇ Next.js'ਤੇ ਬਣਿਆ ਡੈਸ਼ਬੋਰਡ ਹੈ। ਇਹ ਇੱਕ ਸਿੰਗਲ ਓਪਨਏਆਈ-ਅਨੁਕੂਲ ਐਂਡਪੁਆਇੰਟ (`/v1/*`) ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਅਤੇ ਅਨੁਵਾਦ, ਫਾਲਬੈਕ, ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼, ਅਤੇ ਵਰਤੋਂ ਟਰੈਕਿੰਗ ਦੇ ਨਾਲ ਮਲਟੀਪਲ ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚ ਆਵਾਜਾਈ ਨੂੰ ਰੂਟ ਕਰਦਾ ਹੈ।
 
 ਮੁੱਖ ਸਮਰੱਥਾਵਾਂ:
 
-- CLI/ਟੂਲਾਂ ਲਈ OpenAI-ਅਨੁਕੂਲ API ਸਤਹ (375 ਪ੍ਰਦਾਤਾ, 156 ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ)
-- ਪ੍ਰਦਾਤਾ ਫਾਰਮੈਟਾਂ ਵਿਚਕਾਰ ਬੇਨਤੀ/ਜਵਾਬ ਅਨੁਵਾਦ
-- ਮਾਡਲ ਕੌਂਬੋ ਫਾਲਬੈਕ (ਬਹੁ-ਮਾਡਲ ਕ੍ਰਮ)
-- `compositeTiers` ਦੁਆਰਾ ਰਨਟਾਈਮ ਕ੍ਰਮਬੱਧਤਾ ਨਾਲ ਸੰਰਚਿਤ ਕੌਂਬੋ ਪੜਾਅ (`provider + model + connection`)
-- ਖਾਤਾ-ਪੱਧਰੀ ਫਾਲਬੈਕ (ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਕਈ ਖਾਤੇ)
-- ਮੁੱਖ ਚੈਟ ਪਾਥ ਵਿੱਚ ਕੋਟਾ ਪ੍ਰੀਫਲਾਈਟ ਅਤੇ ਕੋਟਾ-ਅਧਾਰਿਤ P2C ਖਾਤਾ ਚੋਣ
+- CLI/tools ਲਈ OpenAI- ਅਨੁਕੂਲ API ਸਤਹ (394 ਪ੍ਰਦਾਤਾ, 159 ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ)
+- ਪ੍ਰਦਾਤਾ ਫਾਰਮੈਟਾਂ ਵਿੱਚ Request/response ਅਨੁਵਾਦ
+- ਮਾਡਲ ਕੰਬੋ ਫਾਲਬੈਕ (ਮਲਟੀ-ਮਾਡਲ ਕ੍ਰਮ)
+- `compositeTiers` ਦੁਆਰਾ ਰਨਟਾਈਮ ਆਰਡਰਿੰਗ ਦੇ ਨਾਲ ਸਟ੍ਰਕਚਰਡ ਕੰਬੋ ਸਟੈਪਸ (`provider + model + connection`)
+- ਖਾਤਾ-ਪੱਧਰ ਫਾਲਬੈਕ (ਪ੍ਰਦਾਤਾ ਪ੍ਰਤੀ ਮਲਟੀ-ਖਾਤਾ)
+- ਮੁੱਖ ਚੈਟ ਮਾਰਗ ਵਿੱਚ ਕੋਟਾ ਪ੍ਰੀਫਲਾਈਟ ਅਤੇ ਕੋਟਾ-ਜਾਗਰੂਕ P2C ਖਾਤਾ ਚੋਣ
 - OAuth + API-ਕੁੰਜੀ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਪ੍ਰਬੰਧਨ (27 OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ)
-- `/v1/embeddings` ਰਾਹੀਂ ਐਮਬੈਡਿੰਗ ਤਿਆਰ ਕਰਨਾ (18 ਪ੍ਰਦਾਤਾ)
-- `/v1/images/generations` ਰਾਹੀਂ ਚਿੱਤਰ ਤਿਆਰ ਕਰਨਾ (10+ ਪ੍ਰਦਾਤਾ, 20+ ਮਾਡਲ)
+- `/v1/embeddings` (18 ਪ੍ਰਦਾਤਾ) ਦੁਆਰਾ ਏਮਬੈਡਿੰਗ ਪੀੜ੍ਹੀ
+- `/v1/images/generations` ਰਾਹੀਂ ਚਿੱਤਰ ਬਣਾਉਣਾ (10 + ਪ੍ਰਦਾਤਾ, 20 + ਮਾਡਲ)
 - `/v1/audio/transcriptions` ਰਾਹੀਂ ਆਡੀਓ ਟ੍ਰਾਂਸਕ੍ਰਿਪਸ਼ਨ (18 ਪ੍ਰਦਾਤਾ)
 - `/v1/audio/speech` ਰਾਹੀਂ ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ (24 ਬਿਲਟ-ਇਨ ਪ੍ਰਦਾਤਾ)
-- `/v1/videos/generations` ਰਾਹੀਂ ਵੀਡੀਓ ਤਿਆਰ ਕਰਨਾ (ComfyUI + SD WebUI)
-- `/v1/music/generations` ਰਾਹੀਂ ਸੰਗੀਤ ਤਿਆਰ ਕਰਨਾ (ComfyUI)
-- `/v1/search` ਰਾਹੀਂ ਵੈੱਬ ਖੋਜ (20 ਪ੍ਰਦਾਤਾ)
-- `/v1/moderations` ਰਾਹੀਂ ਮੋਡਰੇਸ਼ਨ
-- `/v1/rerank` ਰਾਹੀਂ ਮੁੜ-ਰੈਂਕਿੰਗ
-- ਰੀਜ਼ਨਿੰਗ ਮਾਡਲਾਂ ਲਈ ਥਿੰਕ ਟੈਗ ਪਾਰਸਿੰਗ (`<think>...</think>`)
-- ਸਖ਼ਤ OpenAI SDK ਅਨੁਕੂਲਤਾ ਲਈ ਜਵਾਬ ਸੈਨਿਟਾਈਜ਼ੇਸ਼ਨ
-- ਵੱਖ-ਵੱਖ ਪ੍ਰਦਾਤਾਵਾਂ ਵਿਚਕਾਰ ਅਨੁਕੂਲਤਾ ਲਈ ਭੂਮਿਕਾ ਸਧਾਰਣੀਕਰਨ (developer→system, system→user)
-- ਸੰਰਚਿਤ ਆਉਟਪੁੱਟ ਰੂਪਾਂਤਰਨ (json_schema → Gemini responseSchema)
-- ਪ੍ਰਦਾਤਾਵਾਂ, ਕੁੰਜੀਆਂ, ਉਪਨਾਮਾਂ, ਕੌਂਬੋਜ਼, ਸੈਟਿੰਗਾਂ ਅਤੇ ਕੀਮਤਾਂ ਲਈ ਸਥਾਨਕ ਸਥਾਈ ਸਟੋਰੇਜ (122 DB ਮੋਡੀਊਲ)
-- ਵਰਤੋਂ/ਲਾਗਤ ਟ੍ਰੈਕਿੰਗ ਅਤੇ ਬੇਨਤੀ ਲੌਗਿੰਗ
-- ਕਈ ਡਿਵਾਈਸਾਂ/ਸਟੇਟ ਸਿੰਕ ਲਈ ਵਿਕਲਪਿਕ ਕਲਾਉਡ ਸਿੰਕ
-- API ਪਹੁੰਚ ਨਿਯੰਤਰਣ ਲਈ IP ਮਨਜ਼ੂਰ-ਸੂਚੀ/ਬਲਾਕ-ਸੂਚੀ
-- ਥਿੰਕਿੰਗ ਬਜਟ ਪ੍ਰਬੰਧਨ (ਪਾਸਥਰੂ/ਆਟੋ/ਕਸਟਮ/ਅਡੈਪਟਿਵ)
-- ਗਲੋਬਲ ਸਿਸਟਮ ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ
-- ਸੈਸ਼ਨ ਟ੍ਰੈਕਿੰਗ ਅਤੇ ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ
-- ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਪ੍ਰੋਫਾਈਲਾਂ ਨਾਲ ਪ੍ਰਤੀ-ਖਾਤਾ ਉੱਨਤ ਰੇਟ ਸੀਮਿਤਕਰਨ
-- ਪ੍ਰਦਾਤਾ ਲਚਕੀਲੇਪਣ ਲਈ ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਪੈਟਰਨ
-- ਮਿਊਟੈਕਸ ਲਾਕਿੰਗ ਨਾਲ ਐਂਟੀ-ਥੰਡਰਿੰਗ ਹਰਡ ਸੁਰੱਖਿਆ
-- ਦਸਤਖਤ-ਅਧਾਰਿਤ ਬੇਨਤੀ ਡੀਡੁਪਲੀਕੇਸ਼ਨ ਕੈਸ਼
-- ਡੋਮੇਨ ਪਰਤ: ਲਾਗਤ ਨਿਯਮ, ਫਾਲਬੈਕ ਨੀਤੀ, ਲਾਕਆਉਟ ਨੀਤੀ
-- ਕੌਂਟੈਕਸਟ ਰਿਲੇ: ਖਾਤਾ ਰੋਟੇਸ਼ਨ ਦੌਰਾਨ ਨਿਰੰਤਰਤਾ ਲਈ ਸੈਸ਼ਨ ਹੈਂਡਆਫ ਸੰਖੇਪ
-- ਡੋਮੇਨ ਸਟੇਟ ਦੀ ਸਥਾਈ ਸਟੋਰੇਜ (ਫਾਲਬੈਕਾਂ, ਬਜਟਾਂ, ਲਾਕਆਉਟਾਂ ਅਤੇ ਸਰਕਿਟ ਬ੍ਰੇਕਰਾਂ ਲਈ SQLite ਰਾਈਟ-ਥਰੂ ਕੈਸ਼)
+- `/v1/videos/generations` (ComfyUI + SD WebUI) ਦੁਆਰਾ ਵੀਡੀਓ ਬਣਾਉਣਾ
+- `/v1/music/generations` (ComfyUI) ਦੁਆਰਾ ਸੰਗੀਤ ਪੀੜ੍ਹੀ
+- `/v1/search` (20 ਪ੍ਰਦਾਤਾ) ਦੁਆਰਾ ਵੈੱਬ ਖੋਜ
+- `/v1/moderations` ਦੁਆਰਾ ਸੰਚਾਲਨ
+- `/v1/rerank` ਰਾਹੀਂ ਮੁੜ ਦਰਜਾਬੰਦੀ
+- ਤਰਕ ਦੇ ਮਾਡਲਾਂ ਲਈ ਟੈਗ ਪਾਰਸਿੰਗ (`<think>...</think>`) ਬਾਰੇ ਸੋਚੋ
+- ਸਖਤ OpenAI SDK ਅਨੁਕੂਲਤਾ ਲਈ ਜਵਾਬ ਸਵੱਛਤਾ
+- ਕਰਾਸ-ਪ੍ਰੋਵਾਈਡਰ ਅਨੁਕੂਲਤਾ ਲਈ ਰੋਲ ਸਧਾਰਣਕਰਨ (ਡਿਵੈਲਪਰ → ਸਿਸਟਮ, ਸਿਸਟਮ → ਉਪਭੋਗਤਾ)
+- ਸਟ੍ਰਕਚਰਡ ਆਉਟਪੁੱਟ ਪਰਿਵਰਤਨ (json_schema → Gemini responseSchema)
+- ਪ੍ਰਦਾਤਾ, ਕੁੰਜੀਆਂ, ਉਪਨਾਮ, ਕੰਬੋਜ਼, ਸੈਟਿੰਗਾਂ, ਕੀਮਤ (122 DB ਮੋਡੀਊਲ) ਲਈ ਸਥਾਨਕ ਸਥਿਰਤਾ
+- Usage/cost ਟਰੈਕਿੰਗ ਅਤੇ ਬੇਨਤੀ ਲੌਗਿੰਗ
+- multi-device/state ਸਿੰਕ ਲਈ ਵਿਕਲਪਿਕ ਕਲਾਉਡ ਸਿੰਕ
+- API ਪਹੁੰਚ ਨਿਯੰਤਰਣ ਲਈ IP allowlist/blocklist
+- ਸੋਚਣਾ ਬਜਟ ਪ੍ਰਬੰਧਨ (passthrough/auto/custom/adaptive)
+- ਗਲੋਬਲ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ
+- ਸੈਸ਼ਨ ਟਰੈਕਿੰਗ ਅਤੇ ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ
+- ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਪ੍ਰੋਫਾਈਲਾਂ ਦੇ ਨਾਲ ਸੀਮਿਤ ਪ੍ਰਤੀ-ਖਾਤਾ ਵਧੀ ਹੋਈ ਦਰ
+- ਪ੍ਰਦਾਤਾ ਲਚਕਤਾ ਲਈ ਸਰਕਟ ਬ੍ਰੇਕਰ ਪੈਟਰਨ
+- ਮਿਊਟੇਕਸ ਲਾਕਿੰਗ ਨਾਲ ਗਰਜ ਵਿਰੋਧੀ ਝੁੰਡ ਸੁਰੱਖਿਆ
+- ਦਸਤਖਤ-ਅਧਾਰਿਤ ਬੇਨਤੀ ਡਿਡਪਲੀਕੇਸ਼ਨ ਕੈਸ਼
+- ਡੋਮੇਨ ਪਰਤ: ਲਾਗਤ ਨਿਯਮ, ਫਾਲਬੈਕ ਨੀਤੀ, ਤਾਲਾਬੰਦੀ ਨੀਤੀ
+- ਸੰਦਰਭ ਰੀਲੇਅ: ਖਾਤਾ ਰੋਟੇਸ਼ਨ ਨਿਰੰਤਰਤਾ ਲਈ ਸੈਸ਼ਨ ਹੈਂਡਆਫ ਸਾਰਾਂਸ਼
+- ਡੋਮੇਨ ਸਟੇਟ ਪਰਸਿਸਟੈਂਸ (ਫਾਲਬੈਕ, ਬਜਟ, ਲਾਕਆਉਟਸ, ਸਰਕਟ ਬ੍ਰੇਕਰਜ਼ ਲਈ SQLite ਰਾਈਟ-ਥਰੂ ਕੈਸ਼)
 - ਕੇਂਦਰੀਕ੍ਰਿਤ ਬੇਨਤੀ ਮੁਲਾਂਕਣ ਲਈ ਨੀਤੀ ਇੰਜਣ (ਲਾਕਆਉਟ → ਬਜਟ → ਫਾਲਬੈਕ)
-- p50/p95/p99 ਲੇਟੈਂਸੀ ਏਗ੍ਰਿਗੇਸ਼ਨ ਨਾਲ ਬੇਨਤੀ ਟੈਲੀਮੀਟਰੀ
-- `combo_execution_key` / `combo_step_id` ਰਾਹੀਂ ਕੌਂਬੋ ਟਾਰਗੇਟ ਟੈਲੀਮੀਟਰੀ ਅਤੇ ਇਤਿਹਾਸਕ ਕੌਂਬੋ ਟਾਰਗੇਟ ਸਿਹਤ
-- ਸ਼ੁਰੂ ਤੋਂ ਅੰਤ ਤੱਕ ਟ੍ਰੇਸਿੰਗ ਲਈ ਕੋਰਿਲੇਸ਼ਨ ID (X-Request-Id)
-- ਪ੍ਰਤੀ API ਕੁੰਜੀ ਔਪਟ-ਆਉਟ ਨਾਲ ਅਨੁਕੂਲਤਾ ਆਡਿਟ ਲੌਗਿੰਗ
-- LLM ਗੁਣਵੱਤਾ ਭਰੋਸੇ ਲਈ ਮੁਲਾਂਕਣ ਫ੍ਰੇਮਵਰਕ
-- ਰੀਅਲ-ਟਾਈਮ ਪ੍ਰਦਾਤਾ ਸਰਕਿਟ ਬ੍ਰੇਕਰ ਸਥਿਤੀ ਵਾਲਾ ਸਿਹਤ ਡੈਸ਼ਬੋਰਡ
-- 3 ਟ੍ਰਾਂਸਪੋਰਟਾਂ (stdio/SSE/Streamable HTTP) ਨਾਲ MCP ਸਰਵਰ (110 ਟੂਲ)
-- ਹੁਨਰਾਂ ਅਤੇ ਟਾਸਕ ਜੀਵਨ-ਚੱਕਰ ਵਾਲਾ A2A ਸਰਵਰ (JSON-RPC 2.0 + SSE)
-- ਮੈਮੋਰੀ ਸਿਸਟਮ (ਐਕਸਟ੍ਰੈਕਸ਼ਨ, ਇੰਜੈਕਸ਼ਨ, ਰੀਟ੍ਰੀਵਲ, ਸੰਖੇਪੀਕਰਨ)
-- ਹੁਨਰ ਸਿਸਟਮ (ਰਜਿਸਟਰੀ, ਐਗਜ਼ੀਕਿਊਟਰ, ਸੈਂਡਬਾਕਸ, ਬਿਲਟ-ਇਨ ਹੁਨਰ)
-- ਸਰਟੀਫਿਕੇਟ ਪ੍ਰਬੰਧਨ ਅਤੇ DNS ਹੈਂਡਲਿੰਗ ਵਾਲਾ MITM ਪ੍ਰੌਕਸੀ
-- ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ ਗਾਰਡ ਮਿਡਲਵੇਅਰ
-- Caveman, RTK, ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ, ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋਜ਼, ਭਾਸ਼ਾ ਪੈਕਾਂ ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ ਸਮੇਤ ਪ੍ਰੌਂਪਟ ਕੰਪ੍ਰੈਸ਼ਨ ਪਾਈਪਲਾਈਨ
-- ACP (Agent Communication Protocol) ਰਜਿਸਟਰੀ
-- ਮੋਡੀਊਲਰ OAuth ਪ੍ਰਦਾਤਾ (`src/lib/oauth/providers/` ਅਧੀਨ 22 ਵੱਖਰੇ ਮੋਡੀਊਲ)
-- ਅਨਇੰਸਟਾਲ/ਪੂਰੀ ਤਰ੍ਹਾਂ ਅਨਇੰਸਟਾਲ ਕਰਨ ਵਾਲੀਆਂ ਸਕ੍ਰਿਪਟਾਂ
-- OAuth ਵਾਤਾਵਰਣ ਮੁਰੰਮਤ ਕਾਰਵਾਈ
-- OpenAI-ਅਨੁਕੂਲ WS ਕਲਾਇੰਟਾਂ ਲਈ WebSocket ਬ੍ਰਿਜ (`/v1/ws`)
-- ਸਿੰਕ ਟੋਕਨ ਪ੍ਰਬੰਧਨ (ਜਾਰੀ ਕਰਨਾ/ਰੱਦ ਕਰਨਾ, ETag-ਵਰਜਨ ਵਾਲਾ ਕਨਫਿਗਰੇਸ਼ਨ ਬੰਡਲ ਡਾਊਨਲੋਡ)
-- GLM ਥਿੰਕਿੰਗ (`glmt`) ਦਾ ਪਹਿਲੀ-ਸ਼੍ਰੇਣੀ ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਸੈੱਟ
-- ਹਾਈਬ੍ਰਿਡ ਟੋਕਨ ਗਿਣਤੀ (ਅਨੁਮਾਨ ਫਾਲਬੈਕ ਨਾਲ ਪ੍ਰਦਾਤਾ-ਪਾਸੇ ਦਾ `/messages/count_tokens`)
-- ਮਾਡਲ ਉਪਨਾਮਾਂ ਦੀ ਆਟੋ-ਸੀਡਿੰਗ (ਸਟਾਰਟਅੱਪ ਵੇਲੇ 30+ ਕ੍ਰਾਸ-ਪ੍ਰੌਕਸੀ ਡਾਇਲੈਕਟ ਸਧਾਰਣੀਕਰਨ)
-- SSRF ਗਾਰਡ, ਨਿੱਜੀ URL ਬਲਾਕਿੰਗ ਅਤੇ ਕਨਫਿਗਰ ਕਰਨ ਯੋਗ ਰੀਟ੍ਰਾਈ ਨਾਲ ਸੁਰੱਖਿਅਤ ਆਉਟਬਾਊਂਡ ਫੈਚ
-- ਕਨਫਿਗਰ ਕਰਨ ਯੋਗ `requestRetry` ਅਤੇ `maxRetryIntervalSec` ਨਾਲ ਕੂਲਡਾਊਨ-ਅਧਾਰਿਤ ਚੈਟ ਰੀਟ੍ਰਾਈ
-- ਸਟਾਰਟਅੱਪ ਵੇਲੇ Zod ਨਾਲ ਰਨਟਾਈਮ ਵਾਤਾਵਰਣ ਪ੍ਰਮਾਣਿਕਤਾ
-- ਪੇਜੀਨੇਸ਼ਨ, ਪ੍ਰਦਾਤਾ CRUD ਇਵੈਂਟਾਂ ਅਤੇ SSRF ਦੁਆਰਾ ਬਲਾਕ ਕੀਤੀ ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੌਗਿੰਗ ਨਾਲ ਅਨੁਕੂਲਤਾ ਆਡਿਟ v2
+- p50/p95/p99 ਲੇਟੈਂਸੀ ਏਗਰੀਗੇਸ਼ਨ ਦੇ ਨਾਲ ਟੈਲੀਮੈਟਰੀ ਦੀ ਬੇਨਤੀ ਕਰੋ
+- ਕੰਬੋ ਟਾਰਗੇਟ ਟੈਲੀਮੈਟਰੀ ਅਤੇ ਇਤਿਹਾਸਕ ਕੰਬੋ ਟੀਚਾ ਸਿਹਤ `combo_execution_key` / `combo_step_id` ਦੁਆਰਾ
+- ਅੰਤ-ਤੋਂ-ਅੰਤ ਟਰੇਸਿੰਗ ਲਈ ਸਬੰਧ ID (X-Request-Id)
+- ਪ੍ਰਤੀ API ਕੁੰਜੀ ਔਪਟ-ਆਊਟ ਦੇ ਨਾਲ ਪਾਲਣਾ ਆਡਿਟ ਲੌਗਿੰਗ
+- LLM ਕੁਆਲਿਟੀ ਅਸ਼ੋਰੈਂਸ ਲਈ ਈਵਲ ਫਰੇਮਵਰਕ
+- ਰੀਅਲ-ਟਾਈਮ ਪ੍ਰਦਾਤਾ ਸਰਕਟ ਬ੍ਰੇਕਰ ਸਥਿਤੀ ਵਾਲਾ ਹੈਲਥ ਡੈਸ਼ਬੋਰਡ
+- MCP ਸਰਵਰ (110 ਟੂਲ) 3 ਟ੍ਰਾਂਸਪੋਰਟਾਂ ਦੇ ਨਾਲ (stdio/SSE/Streamable HTTP)
+- A2A ਸਰਵਰ (JSON-RPC 2.0 + SSE) ਹੁਨਰ ਅਤੇ ਕਾਰਜ ਜੀਵਨ ਚੱਕਰ ਦੇ ਨਾਲ
+- ਮੈਮੋਰੀ ਸਿਸਟਮ (ਐਕਸਟ੍ਰਕਸ਼ਨ, ਇੰਜੈਕਸ਼ਨ, ਮੁੜ ਪ੍ਰਾਪਤੀ, ਸੰਖੇਪ)
+- ਹੁਨਰ ਪ੍ਰਣਾਲੀ (ਰਜਿਸਟਰੀ, ਐਗਜ਼ੀਕਿਊਟਰ, ਸੈਂਡਬੌਕਸ, ਬਿਲਟ-ਇਨ ਹੁਨਰ)
+- ਸਰਟੀਫਿਕੇਟ ਪ੍ਰਬੰਧਨ ਅਤੇ DNS ਹੈਂਡਲਿੰਗ ਦੇ ਨਾਲ MITM ਪ੍ਰੌਕਸੀ
+- ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ ਗਾਰਡ ਮਿਡਲਵੇਅਰ
+- Caveman, RTK, ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ, ਕੰਪਰੈਸ਼ਨ ਕੰਬੋਜ਼, ਭਾਸ਼ਾ ਪੈਕ, ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ ਦੇ ਨਾਲ ਪ੍ਰੋਂਪਟ ਕੰਪਰੈਸ਼ਨ ਪਾਈਪਲਾਈਨ
+- ACP (ਏਜੰਟ ਕਮਿਊਨੀਕੇਸ਼ਨ ਪ੍ਰੋਟੋਕੋਲ) ਰਜਿਸਟਰੀ
+- ਮਾਡਿਊਲਰ OAuth ਪ੍ਰਦਾਤਾ ( `src/lib/oauth/providers/` ਅਧੀਨ 22 ਵਿਅਕਤੀਗਤ ਮੋਡੀਊਲ)
+- Uninstall/full-uninstall ਸਕ੍ਰਿਪਟਾਂ
+- OAuth ਵਾਤਾਵਰਨ ਮੁਰੰਮਤ ਕਾਰਵਾਈ
+- ਓਪਨਏਆਈ-ਅਨੁਕੂਲ WS ਕਲਾਇੰਟਸ ਲਈ WebSocket ਬ੍ਰਿਜ (`/v1/ws`)
+- ਸਿੰਕ ਟੋਕਨ ਪ੍ਰਬੰਧਨ (issue/revoke, ETag-ਵਰਜਨ ਸੰਰਚਨਾ ਬੰਡਲ ਡਾਊਨਲੋਡ)
+- GLM ਥਿੰਕਿੰਗ (`glmt`) ਪਹਿਲੀ ਸ਼੍ਰੇਣੀ ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਸੈਟ
+- ਹਾਈਬ੍ਰਿਡ ਟੋਕਨ ਕਾਉਂਟਿੰਗ (ਪ੍ਰਦਾਤਾ-ਸਾਈਡ `/messages/count_tokens` ਅਨੁਮਾਨ ਫਾਲਬੈਕ ਦੇ ਨਾਲ)
+- ਮਾਡਲ ਉਰਫ ਆਟੋ-ਸੀਡਿੰਗ (ਸਟਾਰਟਅੱਪ 'ਤੇ 30 + ਕਰਾਸ-ਪ੍ਰਾਕਸੀ ਬੋਲੀ ਸਧਾਰਣਕਰਨ)
+- SSRF ਗਾਰਡ, ਪ੍ਰਾਈਵੇਟ URL ਬਲਾਕਿੰਗ, ਅਤੇ ਕੌਂਫਿਗਰੇਬਲ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਨਾਲ ਸੁਰੱਖਿਅਤ ਆਊਟਬਾਉਂਡ ਫੈਚ
+- ਕੌਲਡਾਉਨ-ਜਾਗਰੂਕ ਚੈਟ ਸੰਰਚਨਾਯੋਗ `requestRetry` ਅਤੇ `maxRetryIntervalSec` ਦੇ ਨਾਲ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਦਾ ਹੈ
+- ਸ਼ੁਰੂਆਤੀ ਸਮੇਂ Zod ਨਾਲ ਰਨਟਾਈਮ ਵਾਤਾਵਰਣ ਪ੍ਰਮਾਣਿਕਤਾ
+- ਪੰਨਾਬੰਦੀ, ਪ੍ਰਦਾਤਾ CRUD ਇਵੈਂਟਸ, ਅਤੇ SSRF-ਬਲੌਕ ਕੀਤੇ ਪ੍ਰਮਾਣਿਕਤਾ ਲੌਗਿੰਗ ਦੇ ਨਾਲ ਪਾਲਣਾ ਆਡਿਟ v2
 
-ਮੁੱਖ ਰਨਟਾਈਮ ਮਾਡਲ:
+ਪ੍ਰਾਇਮਰੀ ਰਨਟਾਈਮ ਮਾਡਲ:
 
-- `src/app/api/*` ਅਧੀਨ Next.js ਐਪ ਰੂਟ ਡੈਸ਼ਬੋਰਡ API ਅਤੇ ਅਨੁਕੂਲਤਾ API ਦੋਵੇਂ ਲਾਗੂ ਕਰਦੇ ਹਨ
-- `src/sse/*` + `open-sse/*` ਵਿੱਚ ਇੱਕ ਸਾਂਝਾ SSE/ਰੂਟਿੰਗ ਕੋਰ ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਸ਼ਨ, ਅਨੁਵਾਦ, ਸਟ੍ਰੀਮਿੰਗ, ਫਾਲਬੈਕ ਅਤੇ ਵਰਤੋਂ ਨੂੰ ਸੰਭਾਲਦਾ ਹੈ
+- `src/app/api/*` ਦੇ ਅਧੀਨ Next.js ਐਪ ਰੂਟ ਡੈਸ਼ਬੋਰਡ APIs ਅਤੇ ਅਨੁਕੂਲਤਾ APIs ਦੋਵਾਂ ਨੂੰ ਲਾਗੂ ਕਰਦੇ ਹਨ
+- `src/sse/*` + `open-sse/*` ਵਿੱਚ ਇੱਕ ਸਾਂਝਾ SSE/routing ਕੋਰ ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਸ਼ਨ, ਅਨੁਵਾਦ, ਸਟ੍ਰੀਮਿੰਗ, ਫਾਲਬੈਕ, ਅਤੇ ਵਰਤੋਂ ਨੂੰ ਹੈਂਡਲ ਕਰਦਾ ਹੈ
 
 ## ਹਵਾਲਾ ਡਾਇਗ੍ਰਾਮ
 
@@ -270,69 +269,68 @@ flowchart LR
 
 ਮੁੱਖ ਪ੍ਰਵਾਹ ਮੋਡੀਊਲ:
 
-- ਐਂਟਰੀ: `src/sse/handlers/chat.ts`
-- ਕੋਰ ਆਰਕੇਸਟ੍ਰੇਸ਼ਨ: `open-sse/handlers/chatCore.ts`
-- ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਅਡਾਪਟਰ: `open-sse/executors/*`
-- ਫਾਰਮੈਟ ਪਛਾਣ/ਪ੍ਰਦਾਤਾ ਸੰਰਚਨਾ: `open-sse/services/provider.ts`
-- ਮਾਡਲ ਪਾਰਸ/ਰਿਜ਼ਾਲਵ: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- ਇੰਦਰਾਜ਼: `src/sse/handlers/chat.ts`
+- ਕੋਰ ਆਰਕੈਸਟਰੇਸ਼ਨ: `open-sse/handlers/chatCore.ts`
+- ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਅਡਾਪਟਰ: `open-sse/executors/*`
+- ਫਾਰਮੈਟ detection/provider ਸੰਰਚਨਾ: `open-sse/services/provider.ts`
+- ਮਾਡਲ parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - ਖਾਤਾ ਫਾਲਬੈਕ ਤਰਕ: `open-sse/services/accountFallback.ts`
 - ਅਨੁਵਾਦ ਰਜਿਸਟਰੀ: `open-sse/translator/index.ts`
-- ਸਟ੍ਰੀਮ ਰੂਪਾਂਤਰਣ: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- ਵਰਤੋਂ ਐਕਸਟ੍ਰੈਕਸ਼ਨ/ਨਾਰਮਲਾਈਜ਼ੇਸ਼ਨ: `open-sse/utils/usageTracking.ts`
-- ਥਿੰਕ ਟੈਗ ਪਾਰਸਰ: `open-sse/utils/thinkTagParser.ts`
-- ਐਮਬੈਡਿੰਗ ਹੈਂਡਲਰ: `open-sse/handlers/embeddings.ts`
-- ਐਮਬੈਡਿੰਗ ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀ: `open-sse/config/embeddingRegistry.ts`
-- ਚਿੱਤਰ ਜਨਰੇਸ਼ਨ ਹੈਂਡਲਰ: `open-sse/handlers/imageGeneration.ts`
+- ਸਟ੍ਰੀਮ ਪਰਿਵਰਤਨ: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- ਵਰਤੋਂ extraction/normalization: `open-sse/utils/usageTracking.ts`
+- ਟੈਗ ਪਾਰਸਰ ਬਾਰੇ ਸੋਚੋ: `open-sse/utils/thinkTagParser.ts`
+- ਏਮਬੈਡਿੰਗ ਹੈਂਡਲਰ: `open-sse/handlers/embeddings.ts`
+- ਏਮਬੈਡਿੰਗ ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀ: `open-sse/config/embeddingRegistry.ts`
+- ਚਿੱਤਰ ਬਣਾਉਣ ਵਾਲਾ ਹੈਂਡਲਰ: `open-sse/handlers/imageGeneration.ts`
 - ਚਿੱਤਰ ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀ: `open-sse/config/imageRegistry.ts`
-- ਜਵਾਬ ਸੈਨਿਟਾਈਜ਼ੇਸ਼ਨ: `open-sse/handlers/responseSanitizer.ts`
-- ਭੂਮਿਕਾ ਨਾਰਮਲਾਈਜ਼ੇਸ਼ਨ: `open-sse/services/roleNormalizer.ts`
+- ਜਵਾਬ ਸਵੱਛਤਾ: `open-sse/handlers/responseSanitizer.ts`
+- ਰੋਲ ਸਧਾਰਣਕਰਨ: `open-sse/services/roleNormalizer.ts`
 
 ਸੇਵਾਵਾਂ (ਕਾਰੋਬਾਰੀ ਤਰਕ):
 
-- ਖਾਤਾ ਚੋਣ/ਸਕੋਰਿੰਗ: `open-sse/services/accountSelector.ts`
-- ਕਾਂਟੈਕਸਟ ਜੀਵਨ-ਚੱਕਰ ਪ੍ਰਬੰਧਨ: `open-sse/services/contextManager.ts`
-- IP ਫਿਲਟਰ ਲਾਗੂਕਰਨ: `open-sse/services/ipFilter.ts`
-- ਸੈਸ਼ਨ ਟ੍ਰੈਕਿੰਗ: `open-sse/services/sessionManager.ts`
-- ਬੇਨਤੀ ਡੀਡੁਪਲੀਕੇਸ਼ਨ: `open-sse/services/signatureCache.ts`
-- ਸਿਸਟਮ ਪ੍ਰੌਮਪਟ ਇੰਜੈਕਸ਼ਨ: `open-sse/services/systemPrompt.ts`
-- ਥਿੰਕਿੰਗ ਬਜਟ ਪ੍ਰਬੰਧਨ: `open-sse/services/thinkingBudget.ts`
-- ਵਾਇਲਡਕਾਰਡ ਮਾਡਲ ਰਾਊਟਿੰਗ: `open-sse/services/wildcardRouter.ts`
-- ਰੇਟ ਲਿਮਿਟ ਪ੍ਰਬੰਧਨ: `open-sse/services/rateLimitManager.ts`
-- ਸਰਕਿਟ ਬ੍ਰੇਕਰ: `src/shared/utils/circuitBreaker.ts`
-- ਕਾਂਟੈਕਸਟ ਹੈਂਡਆਫ: `open-sse/services/contextHandoff.ts` — ਕਾਂਟੈਕਸਟ-ਰਿਲੇ ਰਣਨੀਤੀ ਲਈ ਹੈਂਡਆਫ ਸਾਰਾਂਸ਼ ਜਨਰੇਸ਼ਨ ਅਤੇ ਇੰਜੈਕਸ਼ਨ
-- ਕੰਪ੍ਰੈਸ਼ਨ: `open-sse/services/compression/*` — ਪ੍ਰਦਾਤਾ ਅਨੁਵਾਦ ਤੋਂ ਪਹਿਲਾਂ ਸਰਗਰਮ ਕੰਪ੍ਰੈਸ਼ਨ;
-  ਇਸ ਵਿੱਚ Caveman ਨਿਯਮ, RTK ਫਿਲਟਰ, ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ, ਕੰਪ੍ਰੈਸ਼ਨ ਕੰਬੋ, ਅੰਕੜੇ ਅਤੇ ਵੈਲੀਡੇਸ਼ਨ ਸ਼ਾਮਲ ਹਨ
-- Codex ਕੋਟਾ ਫੈਚਰ: `open-sse/services/codexQuotaFetcher.ts` — ਕਾਂਟੈਕਸਟ-ਰਿਲੇ ਹੈਂਡਆਫ ਫ਼ੈਸਲਿਆਂ ਲਈ Codex ਕੋਟਾ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ
-- ਕੂਲਡਾਊਨ-ਅਵੇਅਰ ਰੀਟ੍ਰਾਈ: `src/sse/services/cooldownAwareRetry.ts` — ਸੰਰਚਨਾਯੋਗ `requestRetry` / `maxRetryIntervalSec` ਨਾਲ ਪ੍ਰਤੀ-ਮਾਡਲ ਕੂਲਡਾਊਨ ਰੀਟ੍ਰਾਈ
-- ਸੁਰੱਖਿਅਤ ਆਉਟਬਾਊਂਡ ਫੈਚ: `src/shared/network/safeOutboundFetch.ts` — SSRF ਗਾਰਡ, ਪ੍ਰਾਈਵੇਟ-URL ਬਲਾਕਿੰਗ, ਰੀਟ੍ਰਾਈ ਅਤੇ ਟਾਈਮਆਉਟ ਨਾਲ ਸੁਰੱਖਿਅਤ ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਫੈਚ
-- ਆਉਟਬਾਊਂਡ URL ਗਾਰਡ: `src/shared/network/outboundUrlGuard.ts` — ਪ੍ਰਦਾਤਾ URLs ਉੱਤੇ ਹੋਸਟ ਜਾਂਚਾਂ; `src/shared/network/outboundUrlGuardPolicy.ts`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ਅਤੇ ਉਨ੍ਹਾਂ ਦੇ ਡੈਸ਼ਬੋਰਡ ਟੌਗਲਾਂ ਤੋਂ ਮੋਡ ਚੁਣਦਾ ਹੈ (`docs/reference/ENVIRONMENT.md` ਵੇਖੋ)
-- ਪ੍ਰਦਾਤਾ ਬੇਨਤੀ ਡਿਫਾਲਟ: `open-sse/services/providerRequestDefaults.ts` — ਪ੍ਰਦਾਤਾ-ਪੱਧਰੀ `maxTokens`, `temperature`, `thinkingBudgetTokens` ਡਿਫਾਲਟ
-- GLM ਪ੍ਰਦਾਤਾ ਕਾਂਸਟੈਂਟ: `open-sse/config/glmProvider.ts` — ਸਾਂਝੇ GLM ਮਾਡਲ, ਕੋਟਾ URLs, GLMT ਟਾਈਮਆਉਟ/ਡਿਫਾਲਟ
-- Antigravity ਅੱਪਸਟ੍ਰੀਮ: `open-sse/config/antigravityUpstream.ts` — ਬੇਸ URL ਅਤੇ ਡਿਸਕਵਰੀ ਪਾਥ ਕਾਂਸਟੈਂਟ
-- Codex ਕਲਾਇੰਟ ਕਾਂਸਟੈਂਟ: `open-sse/config/codexClient.ts` — ਵਰਜਨ-ਯੁਕਤ ਯੂਜ਼ਰ-ਏਜੰਟ ਅਤੇ ਕਲਾਇੰਟ-ਵਰਜਨ ਮੁੱਲ
-- ਮਾਡਲ ਉਪਨਾਮ ਸੀਡ: `src/lib/modelAliasSeed.ts` — ਸਟਾਰਟਅੱਪ ਵੇਲੇ 30+ ਕਰਾਸ-ਪ੍ਰੌਕਸੀ ਡਾਇਲੈਕਟ ਉਪਨਾਮ ਸੀਡ ਕਰਦਾ ਹੈ
+- ਖਾਤਾ selection/scoring: `open-sse/services/accountSelector.ts`
+- ਸੰਦਰਭ ਜੀਵਨ ਚੱਕਰ ਪ੍ਰਬੰਧਨ: `open-sse/services/contextManager.ts`
+- IP ਫਿਲਟਰ ਇਨਫੋਰਸਮੈਂਟ: `open-sse/services/ipFilter.ts`
+- ਸੈਸ਼ਨ ਟਰੈਕਿੰਗ: `open-sse/services/sessionManager.ts`
+- ਡੁਪਲੀਕੇਸ਼ਨ ਦੀ ਬੇਨਤੀ ਕਰੋ: `open-sse/services/signatureCache.ts`
+- ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ: `open-sse/services/systemPrompt.ts`
+- ਬਜਟ ਪ੍ਰਬੰਧਨ ਬਾਰੇ ਸੋਚਣਾ: `open-sse/services/thinkingBudget.ts`
+- ਵਾਈਲਡਕਾਰਡ ਮਾਡਲ ਰੂਟਿੰਗ: `open-sse/services/wildcardRouter.ts`
+- ਦਰ ਸੀਮਾ ਪ੍ਰਬੰਧਨ: `open-sse/services/rateLimitManager.ts`
+- ਸਰਕਟ ਤੋੜਨ ਵਾਲਾ: `src/shared/utils/circuitBreaker.ts`
+- ਸੰਦਰਭ ਹੈਂਡਆਫ: `open-sse/services/contextHandoff.ts` — ਹੈਂਡਆਫ ਸੰਖੇਪ ਜਨਰੇਸ਼ਨ ਅਤੇ ਪ੍ਰਸੰਗ-ਰਿਲੇਅ ਰਣਨੀਤੀ ਲਈ ਇੰਜੈਕਸ਼ਨ
+- ਕੰਪਰੈਸ਼ਨ: ਪ੍ਰਦਾਤਾ ਅਨੁਵਾਦ ਤੋਂ ਪਹਿਲਾਂ `open-sse/services/compression/*` — ਪ੍ਰੋਐਕਟਿਵ ਕੰਪਰੈਸ਼ਨ; Caveman ਨਿਯਮ, RTK ਫਿਲਟਰ, ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ, ਕੰਪਰੈਸ਼ਨ ਕੰਬੋਜ਼, ਅੰਕੜੇ, ਅਤੇ ਪ੍ਰਮਾਣਿਕਤਾ ਸ਼ਾਮਲ ਹਨ
+- Codex ਕੋਟਾ ਫੈਚਰ: `open-sse/services/codexQuotaFetcher.ts` — ਪ੍ਰਸੰਗ-ਰਿਲੇ ਹੈਂਡਆਫ ਫੈਸਲਿਆਂ ਲਈ Codex ਕੋਟਾ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ
+- Cooldown-ਜਾਗਰੂਕ ਮੁੜ-ਕੋਸ਼ਿਸ਼: `src/sse/services/cooldownAwareRetry.ts` — ਪ੍ਰਤੀ-ਮਾਡਲ ਕੂਲਡਾਊਨ ਮੁੜ-ਕੋਸ਼ਿਸ਼ `requestRetry` / `maxRetryIntervalSec` ਨਾਲ
+- ਸੁਰੱਖਿਅਤ ਆਊਟਬਾਉਂਡ ਫੈਚ: SSRF ਗਾਰਡ ਦੇ ਨਾਲ `src/shared/network/safeOutboundFetch.ts` — guarded provider/model ਪ੍ਰਾਪਤ ਕਰੋ, ਪ੍ਰਾਈਵੇਟ-URL ਬਲਾਕਿੰਗ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ, ਅਤੇ ਸਮਾਂ ਸਮਾਪਤ
+- ਆਊਟਬਾਉਂਡ URL ਗਾਰਡ: `src/shared/network/outboundUrlGuard.ts` — ਹੋਸਟ ਪ੍ਰਦਾਤਾ URLs'ਤੇ ਜਾਂਚ ਕਰਦਾ ਹੈ; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, ਅਤੇ ਉਹਨਾਂ ਦੇ ਡੈਸ਼ਬੋਰਡ ਟੌਗਲ ਤੋਂ ਮੋਡ ਚੁਣਦਾ ਹੈ (ਵੇਖੋ `docs/reference/ENVIRONMENT.md`)
+- ਪ੍ਰੋਵਾਈਡਰ ਬੇਨਤੀ ਡਿਫੌਲਟ: `open-sse/services/providerRequestDefaults.ts` — ਪ੍ਰਦਾਤਾ-ਪੱਧਰ `maxTokens`, `temperature`, `thinkingBudgetTokens` ਪੂਰਵ-ਨਿਰਧਾਰਤ
+- GLM ਪ੍ਰਦਾਤਾ ਸਥਿਰਾਂਕ: `open-sse/config/glmProvider.ts` — ਸਾਂਝੇ ਕੀਤੇ GLM ਮਾਡਲ, ਕੋਟਾ URLs, GLMT timeout/defaults
+- Antigravity ਅੱਪਸਟ੍ਰੀਮ: `open-sse/config/antigravityUpstream.ts` — ਬੇਸ URL ਅਤੇ ਖੋਜ ਮਾਰਗ ਸਥਿਰਾਂਕ
+- Codex ਕਲਾਇੰਟ ਸਥਿਰਾਂਕ: `open-sse/config/codexClient.ts` — ਵਰਜਨਡ ਯੂਜ਼ਰ-ਏਜੰਟ ਅਤੇ ਕਲਾਇੰਟ-ਵਰਜਨ ਮੁੱਲ
+- ਮਾਡਲ ਉਪਨਾਮ ਬੀਜ: `src/lib/modelAliasSeed.ts` — ਬੀਜ 30 + ਕ੍ਰਾਸ-ਪ੍ਰਾਕਸੀ ਬੋਲੀ ਉਪਨਾਮ ਸ਼ੁਰੂਆਤ 'ਤੇ
 
 ਡੋਮੇਨ ਲੇਅਰ ਮੋਡੀਊਲ:
 
-- ਲਾਗਤ ਨਿਯਮ/ਬਜਟ: `src/domain/costRules.ts`
+- ਲਾਗਤ rules/budgets: `src/domain/costRules.ts`
 - ਫਾਲਬੈਕ ਨੀਤੀ: `src/domain/fallbackPolicy.ts`
-- ਕੰਬੋ ਰਿਜ਼ਾਲਵਰ: `src/domain/comboResolver.ts`
-- ਲੌਕਆਉਟ ਨੀਤੀ: `src/domain/lockoutPolicy.ts`
-- ਨੀਤੀ ਇੰਜਣ: `src/domain/policyEngine.ts` — ਕੇਂਦਰੀਕ੍ਰਿਤ ਲੌਕਆਉਟ → ਬਜਟ → ਫਾਲਬੈਕ ਮੁਲਾਂਕਣ
+- ਰਿਜ਼ਰਵਡ ਕੰਬੋ-ਰੈਜ਼ੋਲੂਸ਼ਨ ਕੰਟਰੈਕਟ: `src/domain/comboResolver.ts`; ਲਾਈਵ ਰੂਟਿੰਗ `open-sse/services/combo.ts` ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ
+- ਤਾਲਾਬੰਦੀ ਨੀਤੀ: `src/domain/lockoutPolicy.ts`
+- ਰਾਖਵਾਂ ਨੀਤੀ-ਮੁਲਾਂਕਣ ਇਕਰਾਰਨਾਮਾ: `src/domain/policyEngine.ts`; ਬੇਨਤੀ ਮਾਰਗ `src/shared/utils/apiKeyPolicy.ts` ਦੁਆਰਾ API-ਕੁੰਜੀ ਨੀਤੀ ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ ਅਤੇ `src/sse/handlers/chat/resolvedModelPolicy.ts` ਦੁਆਰਾ ਹੱਲ-ਨਿਸ਼ਾਨਾ ਪ੍ਰਮਾਣੀਕਰਨ
 - ਗਲਤੀ ਕੋਡ ਕੈਟਾਲਾਗ: `src/shared/constants/errorCodes.ts`
 - ਬੇਨਤੀ ID: `src/shared/utils/requestId.ts`
-- ਫੈਚ ਟਾਈਮਆਉਟ: `src/shared/utils/fetchTimeout.ts`
-- ਬੇਨਤੀ ਟੈਲੀਮੀਟਰੀ: `src/shared/utils/requestTelemetry.ts`
-- ਅਨੁਪਾਲਨਾ/ਆਡਿਟ: `src/lib/compliance/index.ts`
-- ਮੁਲਾਂਕਣ ਰਨਰ: `src/lib/evals/evalRunner.ts`
-- ਡੋਮੇਨ ਸਥਿਤੀ ਪਰਸਿਸਟੈਂਸ: `src/lib/db/domainState.ts` — ਫਾਲਬੈਕ ਚੇਨਾਂ, ਬਜਟਾਂ, ਲਾਗਤ ਇਤਿਹਾਸ, ਲੌਕਆਉਟ ਸਥਿਤੀ ਅਤੇ ਸਰਕਿਟ ਬ੍ਰੇਕਰਾਂ ਲਈ SQLite CRUD
+- ਸਮਾਂ ਸਮਾਪਤ ਪ੍ਰਾਪਤ ਕਰੋ: `src/shared/utils/fetchTimeout.ts`
+- ਟੈਲੀਮੈਟਰੀ ਦੀ ਬੇਨਤੀ ਕਰੋ: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval ਦੌੜਾਕ: `src/lib/evals/evalRunner.ts`
+- ਡੋਮੇਨ ਸਟੇਟ ਸਥਿਰਤਾ: ਫਾਲਬੈਕ ਚੇਨਾਂ, ਬਜਟ, ਲਾਗਤ ਇਤਿਹਾਸ, ਤਾਲਾਬੰਦੀ ਸਥਿਤੀ, ਸਰਕਟ ਤੋੜਨ ਲਈ `src/lib/db/domainState.ts` — SQLite CRUD
 
-OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ (`src/lib/oauth/providers/` ਅਧੀਨ 27 ਵੱਖਰੀਆਂ ਫਾਈਲਾਂ):
+OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ ( `src/lib/oauth/providers/` ਅਧੀਨ 27 ਵਿਅਕਤੀਗਤ ਫਾਈਲਾਂ):
 
-- ਰਜਿਸਟਰੀ ਇੰਡੈਕਸ: `src/lib/oauth/providers/index.ts`
-- ਵੱਖਰੇ ਪ੍ਰਦਾਤਾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- ਸਾਂਝੇ ਹੈਲਪਰ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ਡਿਵਾਈਸ ਪ੍ਰਵਾਹ), `museCodeDeviceResponse.ts`
-- ਪਤਲਾ ਰੈਪਰ: `src/lib/oauth/providers.ts` — ਵੱਖਰੇ ਮੋਡੀਊਲਾਂ ਤੋਂ ਮੁੜ ਐਕਸਪੋਰਟ ਕਰਦਾ ਹੈ
+- ਰਜਿਸਟਰੀ ਸੂਚਕਾਂਕ: `src/lib/oauth/providers/index.ts`
+- ਵਿਅਕਤੀਗਤ ਪ੍ਰਦਾਤਾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- ਸਾਂਝੇ ਸਹਾਇਕ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ਡਿਵਾਈਸ ਪ੍ਰਵਾਹ), `museCodeDeviceResponse.ts`
+- ਪਤਲਾ ਰੈਪਰ: `src/lib/oauth/providers.ts` — ਵਿਅਕਤੀਗਤ ਮੋਡੀਊਲਾਂ ਤੋਂ ਮੁੜ-ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ
 
 ## 5) ਐਂਬੈਡਿਡ ਸੇਵਾਵਾਂ (v3.8.4)
 
@@ -356,162 +354,128 @@ OmniRoute ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਚੱਲ ਰਹੀਆਂ AI ਟੂ�
 
 ਡੂੰਘੀ ਜਾਣਕਾਰੀ: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## ਮੁੱਖ ਉਪ-ਪ੍ਰਣਾਲੀਆਂ (v3.8.0)
+## ਮੁੱਖ ਉਪ-ਪ੍ਰਣਾਲੀ (v3.8.0)
 
-### A. ਆਟੋ ਕੌਂਬੋ ਇੰਜਣ
+### A. ਆਟੋ ਕੰਬੋ ਇੰਜਣ
 
-ਆਟੋ ਕੌਂਬੋ ਸਥਿਰ ਕੌਂਬੋ ਪਰਿਭਾਸ਼ਾ ਉੱਤੇ ਨਿਰਭਰ ਰਹਿਣ ਦੀ ਬਜਾਏ, ਬੇਨਤੀ ਦੇ ਸਮੇਂ ਰਾਊਟਿੰਗ ਟਾਰਗੇਟਾਂ ਨੂੰ ਗਤੀਸ਼ੀਲ ਢੰਗ ਨਾਲ ਸਕੋਰ ਕਰਦਾ ਅਤੇ ਚੁਣਦਾ ਹੈ। ਇਹ `auto/*` ਮਾਡਲ ਪ੍ਰੀਫਿਕਸ ਪਰਿਵਾਰ ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ।
+ਆਟੋ ਕੰਬੋ ਇੱਕ ਸਥਿਰ ਕੰਬੋ ਪਰਿਭਾਸ਼ਾ 'ਤੇ ਭਰੋਸਾ ਕਰਨ ਦੀ ਬਜਾਏ, ਬੇਨਤੀ ਦੇ ਸਮੇਂ 'ਤੇ ਰਾਊਟਿੰਗ ਟੀਚਿਆਂ ਨੂੰ ਗਤੀਸ਼ੀਲ ਤੌਰ 'ਤੇ ਸਕੋਰ ਕਰਦਾ ਹੈ ਅਤੇ ਚੁਣਦਾ ਹੈ। ਇਹ `auto/*` ਮਾਡਲ ਪ੍ਰੀਫਿਕਸ ਪਰਿਵਾਰ ਨੂੰ ਸ਼ਕਤੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
 
-- ਇੰਜਣ ਐਂਟਰੀ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- ਰਿਜ਼ਾਲਵਰ: `src/domain/comboResolver.ts` (`auto/` ਪ੍ਰੀਫਿਕਸ ਦੀ ਸਵੈ-ਪਛਾਣ)
+- ਇੰਜਣ ਐਂਟਰੀ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- ਲਾਈਵ ਕੰਬੋ ਐਂਟਰੀ: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` ਦੁਆਰਾ ਬੁਲਾਇਆ ਜਾਂਦਾ ਹੈ
 - ਡੈਸ਼ਬੋਰਡ: `/dashboard/auto-combo`
 - ਟੈਲੀਮੈਟਰੀ: `auto_combo_decisions` SQLite ਟੇਬਲ
 
 ਮੁੱਖ ਸਮਰੱਥਾਵਾਂ:
 
-- **20 ਰਾਊਟਿੰਗ ਰਣਨੀਤੀਆਂ** (ਤਰਜੀਹ, ਭਾਰਿਤ, ਪਹਿਲਾਂ-ਭਰੋ, ਰਾਊਂਡ-ਰੌਬਿਨ, P2C, ਬੇਤਰਤੀਬ,
-  ਸਭ ਤੋਂ-ਘੱਟ-ਵਰਤਿਆ, ਲਾਗਤ-ਅਨੁਕੂਲਿਤ, ਰੀਸੈੱਟ-ਸਚੇਤ, ਰੀਸੈੱਟ-ਵਿੰਡੋ, ਹੈੱਡਰੂਮ, ਕੋਟਾ-ਭਾਰਿਤ,
-  ਸਖ਼ਤ-ਬੇਤਰਤੀਬ, **auto**, lkgp, ਸੰਦਰਭ-ਅਨੁਕੂਲਿਤ, ਕੈਸ਼-ਅਨੁਕੂਲਿਤ, ਸੰਦਰਭ-ਰੀਲੇਅ, **fusion**,
-  ਪਾਈਪਲਾਈਨ) —
-  auto v3.8.0 ਵਿੱਚ ਮੁੱਖ ਨਵਾਂ ਵਾਧਾ ਹੈ; `fusion` (ਪੈਨਲ ਫੈਨ-ਆਊਟ + ਜੱਜ ਸੰਸ਼ਲੇਸ਼ਣ,
-  `open-sse/services/fusion.ts`) v3.8.36 ਵਿੱਚ ਨਵਾਂ ਹੈ।
-- **16-ਕਾਰਕ ਸਕੋਰਿੰਗ**: ਕੋਟਾ, ਸਿਹਤ, ਉਲਟੀ ਲਾਗਤ, ਉਲਟੀ ਲੇਟੈਂਸੀ, ਕਾਰਜ ਅਨੁਕੂਲਤਾ ਅਤੇ
-  ਦਸ ਹੋਰ। ਕਾਰਕਾਂ ਅਤੇ ਉਨ੍ਹਾਂ ਦੇ ਮੂਲ ਭਾਰਾਂ ਦੀ ਪ੍ਰਮਾਣਿਕ ਸਾਰਣੀ
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ਵਿੱਚ ਹੈ — ਇਸਨੂੰ ਇੱਥੇ ਦੁਬਾਰਾ
-  ਦਰਸਾਉਣ ਨਾਲ ਇਹ ਪੁਰਾਣਾ ਹੋ ਜਾਣ ਲਈ ਇੱਕ ਹੋਰ ਥਾਂ ਬਣ ਜਾਵੇਗੀ।
-- **ਵਰਚੁਅਲ ਫੈਕਟਰੀ** ਜਦੋਂ ਕੋਈ ਮਿਲਦਾ-ਜੁਲਦਾ ਨਾਮਿਤ ਕੌਂਬੋ ਮੌਜੂਦ ਨਾ ਹੋਵੇ ਤਾਂ ਅਸਥਾਈ ਕੌਂਬੋ
-  ਤਿਆਰ ਕਰਦੀ ਹੈ, ਜਿਸ ਲਈ ਉਮੀਦਵਾਰ ਸਿਹਤਮੰਦ ਸਰਗਰਮ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨਾਂ ਤੋਂ ਲਏ ਜਾਂਦੇ ਹਨ।
-- **ਆਟੋ ਪ੍ਰੀਫਿਕਸ**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — ਹਰ ਇੱਕ ਨੂੰ ਟਿਊਨ ਕੀਤੀ ਭਾਰ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸਮਰਥਨ ਪ੍ਰਾਪਤ ਹੈ।
-- **6 ਮੋਡ ਪੈਕ**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` ਅਤੇ `chaos-mode` — ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਕਾਲ ਕੀਤੀਆਂ ਜਾ ਸਕਣ ਵਾਲੀਆਂ
-  ਪਹਿਲਾਂ ਤੋਂ ਨਿਰਧਾਰਤ ਭਾਰ ਸੰਰਚਨਾਵਾਂ। (ਇਨ੍ਹਾਂ ਨੂੰ ਉੱਪਰ ਦਿੱਤੇ `auto/*` ਪ੍ਰੀਫਿਕਸਾਂ ਨਾਲ
-  ਨਾ ਗੁੰਝਲਾਓ, ਜੋ ਬੇਨਤੀ-ਸਮੇਂ ਦੇ ਰੂਪ ਹਨ।)
+- **22 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ** (ਪਹਿਲ, ਵਜ਼ਨਦਾਰ, ਭਰਨ-ਪਹਿਲਾ, ਰਾਊਂਡ-ਰੋਬਿਨ, P2C, ਬੇਤਰਤੀਬ, ਘੱਟ-ਵਰਤਿਆ, ਲਾਗਤ-ਅਨੁਕੂਲ, ਰੀਸੈਟ-ਜਾਗਰੂਕ, ਰੀਸੈਟ-ਵਿੰਡੋ, ਮਿਆਦ-ਪਹਿਲਾ, ਹੈੱਡਰੂਮ, ਕੋਟਾ-ਵੇਟਿਡ, ਸਖਤ-ਰੈਂਡਮ,** ਆਟੋ** , lkgp, ਪ੍ਰਸੰਗ-ਅਨੁਕੂਲ, ਕੈਸ਼-ਅਨੁਕੂਲ, ਸੰਦਰਭ-ਰਿਲੇ,** ਫਿਊਜ਼ਨ** , pipeline, jev) — ਆਟੋ v3.8.0 ਵਿੱਚ ਸਿਰਲੇਖ ਜੋੜ ਹੈ; `fusion` (ਪੈਨਲ ਫੈਨ-ਆਊਟ + ਜੱਜ ਸਿੰਥੇਸਿਸ, `open-sse/services/fusion.ts`) v3.8.36 ਵਿੱਚ ਨਵਾਂ ਹੈ।
+- **16-ਫੈਕਟਰ ਸਕੋਰਿੰਗ** : ਕੋਟਾ, ਸਿਹਤ, ਉਲਟ ਲਾਗਤ, ਉਲਟ ਲੇਟੈਂਸੀ, ਟਾਸਕ ਫਿੱਟ ਅਤੇ ਦਸ ਹੋਰ। ਕਾਰਕਾਂ ਦੀ ਕੈਨੋਨੀਕਲ ਸਾਰਣੀ ਅਤੇ ਉਹਨਾਂ ਦੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਵਜ਼ਨ [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ, ਇਸ ਨੂੰ ਇੱਥੇ ਰੀਸਟ ਕਰਨਾ ਇਸ ਨੂੰ ਬਾਸੀ ਹੋਣ ਲਈ ਦੂਜਾ ਸਥਾਨ ਦੇਵੇਗਾ।
+- **ਵਰਚੁਅਲ ਫੈਕਟਰੀ** ਜਦੋਂ ਕੋਈ ਮੇਲ ਖਾਂਦਾ ਨਾਮਕ ਕੰਬੋ ਮੌਜੂਦ ਨਹੀਂ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਸਿਹਤਮੰਦ ਕਿਰਿਆਸ਼ੀਲ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨਾਂ ਤੋਂ ਉਮੀਦਵਾਰਾਂ ਨੂੰ ਸੋਰਸ ਕਰਦਾ ਹੈ।
+- **ਆਟੋ ਪ੍ਰੀਫਿਕਸ** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ਹਰ ਇੱਕ ਟਿਊਨਡ ਵੇਟ ਪ੍ਰੋਫਾਈਲ ਦੁਆਰਾ ਸਮਰਥਿਤ ਹੈ।
+- **6 ਮੋਡ ਪੈਕ** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` ਅਤੇ `chaos-mode` — ਪ੍ਰੀਸੈਟ ਵੇਟ ਕੌਂਫਿਗਰੇਸ਼ਨ ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਕਾਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ। (ਉਪਰੋਕਤ `auto/*` ਅਗੇਤਰਾਂ ਨਾਲ ਉਲਝਣ ਵਿੱਚ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ, ਜੋ ਕਿ ਬੇਨਤੀ-ਸਮੇਂ ਦੇ ਰੂਪ ਹਨ।)
 
-ਪੂਰੇ ਐਲਗੋਰਿਦਮਿਕ ਵੇਰਵੇ (ਕਾਰਕ ਫਾਰਮੂਲੇ, ਭਾਰ ਟਿਊਨਿੰਗ) ਲਈ,
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ਵੇਖੋ।
+ਪੂਰੇ ਐਲਗੋਰਿਦਮਿਕ ਵੇਰਵੇ (ਕਾਰਕ ਫਾਰਮੂਲੇ, ਭਾਰ ਟਿਊਨਿੰਗ) ਲਈ, [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ਵੇਖੋ।
 
 ### B. ਕਲਾਊਡ ਏਜੰਟ
 
-ਕਲਾਊਡ ਏਜੰਟ ਤੀਜੀ-ਧਿਰ ਦੇ ਹੋਸਟ ਕੀਤੇ ਕੋਡ-ਏਜੰਟ ਪਲੇਟਫਾਰਮਾਂ (Codex Cloud, Devin,
-Jules) ਨੂੰ ਇੱਕਸਾਰ DB-ਸਮਰਥਿਤ ਕਾਰਜ ਜੀਵਨ-ਚੱਕਰ ਦੇ ਪਿੱਛੇ ਸਮੇਟਦਾ ਹੈ। ਸਾਰੇ ਕਾਰਜ ਬਣਾਉਣ/ਨਿਰੀਖਣ
-ਐਂਡਪੌਇੰਟਾਂ ਲਈ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ।
+ਕਲਾਊਡ ਏਜੰਟ ਤੀਜੀ-ਧਿਰ ਦੇ ਹੋਸਟ ਕੀਤੇ ਕੋਡ-ਏਜੰਟ ਪਲੇਟਫਾਰਮਾਂ (Codex Cloud, Devin, Jules) ਨੂੰ ਇੱਕ ਸਮਾਨ DB-ਬੈਕਡ ਟਾਸਕ ਲਾਈਫਸਾਈਕਲ ਦੇ ਪਿੱਛੇ ਲਪੇਟਦਾ ਹੈ। ਸਾਰੇ ਟਾਸਕ creation/inspection ਐਂਡਪੁਆਇੰਟਾਂ ਲਈ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
 
-- ਮੋਡੀਊਲ ਰੂਟ: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, ਨਾਲ ਹੀ `agents/` ਅਧੀਨ ਹਰੇਕ ਏਜੰਟ ਲਈ ਉਪ-ਡਾਇਰੈਕਟਰੀਆਂ)
-- ਹਰੇਕ ਏਜੰਟ ਲਈ ਲਾਗੂਕਰਨ: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- ਜਨਤਕ ਐਂਡਪੌਇੰਟ: `/api/v1/agents/tasks/*` (ਸੂਚੀ/ਬਣਾਓ/ਪ੍ਰਾਪਤ ਕਰੋ/ਰੱਦ ਕਰੋ)
-- ਪ੍ਰਬੰਧਨ ਐਂਡਪੌਇੰਟ: `/api/cloud/*` (ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ, ਸਥਿਤੀ, ਬੈਚ)
+- ਮੋਡੀਊਲ ਰੂਟ: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, ਪਲੱਸ `agents/` ਅਧੀਨ ਪ੍ਰਤੀ-ਏਜੰਟ ਸਬ-ਡਾਇਰੈਕਟਰੀਆਂ)
+- ਪ੍ਰਤੀ-ਏਜੰਟ ਲਾਗੂਕਰਨ: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- ਜਨਤਕ ਅੰਤ ਬਿੰਦੂ: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- ਪ੍ਰਬੰਧਨ ਅੰਤਮ ਬਿੰਦੂ: `/api/cloud/*` (ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ, ਸਥਿਤੀ, ਬੈਚ)
 - ਡੈਸ਼ਬੋਰਡ: `/dashboard/cloud-agents`
 - ਸਟੋਰੇਜ: `cloud_agent_tasks` ਟੇਬਲ
 
-ਹਰੇਕ ਏਜੰਟ ਲਈ ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ ਅਤੇ OAuth ਦੇ ਵਿਸ਼ੇਸ਼ ਵੇਰਵਿਆਂ ਲਈ,
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ਵੇਖੋ।
+ਪ੍ਰਤੀ-ਏਜੰਟ ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ ਅਤੇ OAuth ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ, [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ਦੇਖੋ।
 
-### C. ਗਾਰਡਰੇਲ
+### C. ਪਹਿਰੇਦਾਰ
 
-ਗਾਰਡਰੇਲ ਮੋਡੀਊਲ ਇੱਕ ਹੌਟ-ਰੀਲੋਡਯੋਗ ਮਿਡਲਵੇਅਰ ਪਰਤ ਹੈ ਜੋ PII, ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ ਅਤੇ
-ਅਸੁਰੱਖਿਅਤ ਵਿਜ਼ਨ ਸਮੱਗਰੀ ਲਈ ਬੇਨਤੀਆਂ ਅਤੇ ਜਵਾਬਾਂ ਦੀ ਜਾਂਚ ਕਰਦੀ ਹੈ। ਉਲੰਘਣਾਵਾਂ HTTP **503**
-ਦੇ ਨਾਲ ਇੱਕ ਸੰਰਚਿਤ ਗਲਤੀ ਕੋਡ ਦੇ ਕੇ ਬੇਨਤੀ ਨੂੰ ਤੁਰੰਤ ਰੋਕ ਦਿੰਦੀਆਂ ਹਨ, ਜਿਸ ਨਾਲ ਅਗਲੇ ਪੜਾਅ ਦੇ
-ਕਾਲਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰ ਸਕਦੇ ਹਨ ਜਾਂ ਵੱਖਰੀ ਸ਼ਾਖਾ ਚੁਣ ਸਕਦੇ ਹਨ।
+ਗਾਰਡਰੇਲ ਮੋਡੀਊਲ ਇੱਕ ਗਰਮ-ਰੀਲੋਡ ਹੋਣ ਯੋਗ ਮਿਡਲਵੇਅਰ ਲੇਅਰ ਹੈ ਜੋ PII, ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਅਤੇ ਅਸੁਰੱਖਿਅਤ ਦ੍ਰਿਸ਼ਟੀ ਸਮੱਗਰੀ ਲਈ ਬੇਨਤੀਆਂ ਅਤੇ ਜਵਾਬਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ। ਉਲੰਘਣਾਵਾਂ HTTP ਨਾਲ ਬੇਨਤੀ ਨੂੰ ਸ਼ਾਰਟ-ਸਰਕਟ ਕਰਦੀਆਂ ਹਨ** 503** ਨਾਲ ਹੀ ਇੱਕ ਸਟ੍ਰਕਚਰਡ ਐਰਰ ਕੋਡ, ਡਾਊਨਸਟ੍ਰੀਮ ਕਾਲਰਾਂ ਨੂੰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਜਾਂ ਬ੍ਰਾਂਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ।
 
-- ਮੋਡੀਊਲ ਰੂਟ: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- ਹੌਟ ਰੀਲੋਡ: ਰਜਿਸਟਰੀ ਸੰਰਚਨਾ ਬਦਲਾਵਾਂ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦੀ ਹੈ ਅਤੇ ਚੇਨ ਨੂੰ ਉਸੇ ਥਾਂ ਦੁਬਾਰਾ ਬਣਾਉਂਦੀ ਹੈ
-- ਜੋੜਨ ਦੇ ਬਿੰਦੂ: ਚੈਟ ਹੈਂਡਲਰ ਐਂਟਰੀ, ਚਿੱਤਰ ਜਨਰੇਸ਼ਨ ਹੈਂਡਲਰ, ਜਵਾਬ ਸੈਨਿਟਾਈਜ਼ਰ
-- HTTP ਇਕਰਾਰਨਾਮਾ: ਉਲੰਘਣਾਵਾਂ `error.code = "GUARDRAIL_VIOLATION"` ਦੇ ਨਾਲ `503` ਵਜੋਂ ਸਾਹਮਣੇ ਆਉਂਦੀਆਂ ਹਨ
+- ਮੋਡੀਊਲ ਰੂਟ: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- ਹੌਟ ਰੀਲੋਡ: ਰਜਿਸਟਰੀ ਸੰਰਚਨਾ ਤਬਦੀਲੀਆਂ ਲਈ ਦੇਖਦੀ ਹੈ ਅਤੇ ਚੇਨ ਨੂੰ ਥਾਂ 'ਤੇ ਦੁਬਾਰਾ ਬਣਾਉਂਦੀ ਹੈ
+- ਵਾਇਰ-ਇਨ ਪੁਆਇੰਟ: ਚੈਟ ਹੈਂਡਲਰ ਐਂਟਰੀ, ਚਿੱਤਰ ਬਣਾਉਣ ਵਾਲਾ ਹੈਂਡਲਰ, ਰਿਸਪਾਂਸ ਸੈਨੀਟਾਈਜ਼ਰ
+- HTTP ਇਕਰਾਰਨਾਮਾ: `error.code = "GUARDRAIL_VIOLATION"` ਨਾਲ `503` ਦੇ ਤੌਰ 'ਤੇ ਉਲੰਘਣਾ ਸਤ੍ਹਾ
 
-ਨਿਯਮ-ਸੈੱਟ ਲਿਖਣ ਅਤੇ ਥ੍ਰੈਸ਼ਹੋਲਡ ਟਿਊਨਿੰਗ ਲਈ,
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ਵੇਖੋ।
+ਰੂਲਸੈਟ ਆਥਰਿੰਗ ਅਤੇ ਥ੍ਰੈਸ਼ਹੋਲਡ ਟਿਊਨਿੰਗ ਲਈ, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ਦੇਖੋ।
 
-### D. ਡੋਮੇਨ ਪਰਤ
+### D. ਡੋਮੇਨ ਲੇਅਰ
 
-`src/domain/` ਨੇਮਸਪੇਸ ਨੀਤੀ ਸੰਬੰਧੀ ਫ਼ੈਸਲਿਆਂ ਨੂੰ ਕੇਂਦਰੀਕ੍ਰਿਤ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ ਰੂਟ ਹੈਂਡਲਰਾਂ
-ਨੂੰ ਲੌਕਆਊਟ/ਬਜਟ/ਫਾਲਬੈਕ ਤਰਕ ਖੁਦ ਇਕੱਠਾ ਨਾ ਕਰਨਾ ਪਵੇ।
+`src/domain/` ਨੇਮਸਪੇਸ ਵਿੱਚ ਡੋਮੇਨ ਸੇਵਾਵਾਂ ਅਤੇ ਰਾਖਵੇਂ ਮੁਲਾਂਕਣ ਸਮਝੌਤੇ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ। ਇਹ ਹਰ ਬੇਨਤੀ ਲਈ ਇੱਕ ਲਾਜ਼ਮੀ ਨੀਤੀ ਐਂਟਰੀ ਪੁਆਇੰਟ ਨਹੀਂ ਹੈ।
 
-- ਨੀਤੀ ਇੰਜਣ: `src/domain/policyEngine.ts` — ਕਾਰਜ-ਚਲਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਦੇ
-  ਮੁਲਾਂਕਣ ਲਈ ਇਕੱਲਾ ਐਂਟਰੀ ਬਿੰਦੂ (ਲੌਕਆਊਟ → ਬਜਟ → ਫਾਲਬੈਕ ਕ੍ਰਮ)
+ਲਾਈਵ ਚੈਟ ਮਾਰਗ `src/shared/utils/apiKeyPolicy.ts` ਤੋਂ `enforceApiKeyPolicy()` ਕਾਲ ਕਰਦਾ ਹੈ; ਹੱਲ ਕੀਤੇ ਮਾਡਲਾਂ ਅਤੇ ਕੰਬੋ ਮੈਂਬਰਾਂ ਦਾ ਅਧਿਕਾਰ `src/sse/handlers/chat/resolvedModelPolicy.ts` ਵਿੱਚ ਲਾਗੂ ਕੀਤਾ ਗਿਆ ਹੈ। `src/app/api/v1/chat/completions/route.ts` ਵਿੱਚ ਸਵੈ-ਹੋਸਟ ਕੀਤੀ ਐਂਟਰੀ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ API-ਕੁੰਜੀ ਨੀਤੀ ਨੂੰ ਵੀ ਲਾਗੂ ਕਰਦੀ ਹੈ। ਕੰਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ `open-sse/services/combo.ts` ਰਾਹੀਂ ਚੱਲਦਾ ਹੈ।
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` ਅਤੇ `src/lib/container.ts` ਟੈਸਟ ਕੀਤੇ ਕੰਟਰੈਕਟ ਰਹਿੰਦੇ ਹਨ, ਨਾ ਕਿ ਉਸ ਬੇਨਤੀ ਮਾਰਗ ਦੀ ਵਾਇਰਿੰਗ। ਕੰਟੇਨਰ ਪਾਲਿਸੀ ਇੰਜਣ ਨੂੰ ਰਜਿਸਟਰ ਕਰਦਾ ਹੈ, ਪਰ ਨਿਰੀਖਣ ਕੀਤਾ ਉਤਪਾਦਨ ਬੇਨਤੀ ਮਾਰਗ ਇਸਦਾ ਹੱਲ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਉਨ੍ਹਾਂ ਇਕਰਾਰਨਾਮਿਆਂ ਨੂੰ ਇਕੱਲੇ ਬਦਲਣ ਨਾਲ ਲਾਈਵ ਚੈਟ ਨੀਤੀ ਜਾਂ ਕੰਬੋ ਰੂਟਿੰਗ ਨਹੀਂ ਬਦਲਦੀ; ਉਹਨਾਂ ਨੂੰ ਜੋੜਨ ਜਾਂ ਹਟਾਉਣ ਲਈ ਇੱਕ ਵੱਖਰੇ ਡਿਜ਼ਾਈਨ ਫੈਸਲੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
+
+- ਰਿਜ਼ਰਵਡ ਪਾਲਿਸੀ ਇੰਜਣ: `src/domain/policyEngine.ts` — ਲਾਕਆਉਟ → ਬਜਟ → ਫਾਲਬੈਕ ਮੁਲਾਂਕਣ
 - ਲਾਗਤ ਨਿਯਮ: `src/domain/costRules.ts`
 - ਫਾਲਬੈਕ ਨੀਤੀ: `src/domain/fallbackPolicy.ts`
-- ਲੌਕਆਊਟ ਨੀਤੀ: `src/domain/lockoutPolicy.ts`
-- ਟੈਗ-ਆਧਾਰਿਤ ਰਾਊਟਿੰਗ: `src/domain/tagRouter.ts`
-- ਕੌਂਬੋ ਰਿਜ਼ਾਲਵਰ: `src/domain/comboResolver.ts` — ਕੌਂਬੋ ਨਾਮਾਂ, auto/\*
-  ਪ੍ਰੀਫਿਕਸਾਂ ਅਤੇ ਵਾਈਲਡਕਾਰਡ ਮਾਡਲ ਟਾਰਗੇਟਾਂ ਨੂੰ ਠੋਸ ਕਾਰਜ-ਯੋਜਨਾਵਾਂ ਵਿੱਚ ਰਿਜ਼ਾਲਵ ਕਰਦਾ ਹੈ
-- ਕਨੈਕਸ਼ਨ/ਮਾਡਲ ਨਿਯਮ ਜੋੜਕ: `src/domain/connectionModelRules.ts`
+- ਤਾਲਾਬੰਦੀ ਨੀਤੀ: `src/domain/lockoutPolicy.ts`
+- ਟੈਗ-ਅਧਾਰਿਤ ਰੂਟਿੰਗ: `src/domain/tagRouter.ts`
+- ਰਿਜ਼ਰਵਡ ਕੰਬੋ ਰੈਜ਼ੋਲਵਰ: `src/domain/comboResolver.ts` — ਸਟੈਂਡਅਲੋਨ ਚੋਣ ਇਕਰਾਰਨਾਮਾ; ਲਾਈਵ ਕੰਬੋ ਰੂਟਿੰਗ ਨੂੰ `open-sse/services/combo.ts` ਵਿੱਚ ਲਾਗੂ ਕੀਤਾ ਗਿਆ ਹੈ
+- Connection/model ਨਿਯਮ ਜੋੜਨ ਵਾਲਾ: `src/domain/connectionModelRules.ts`
 - ਮਾਡਲ ਉਪਲਬਧਤਾ ਸਨੈਪਸ਼ਾਟ: `src/domain/modelAvailability.ts`
-- ਪ੍ਰਦਾਤਾ ਮਿਆਦ-ਸਮਾਪਤੀ ਟ੍ਰੈਕਿੰਗ: `src/domain/providerExpiration.ts`
-- ਕੋਟਾ ਕੈਸ਼: `src/domain/quotaCache.ts`
-- ਡਿਗਰੇਡੇਸ਼ਨ ਸਥਿਤੀ: `src/domain/degradation.ts`
+- ਪ੍ਰਦਾਤਾ ਦੀ ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਟਰੈਕਿੰਗ: `src/domain/providerExpiration.ts`
+- ਕੋਟਾ ਕੈਸ਼: `src/domain/quotaCache.ts`. ਪ੍ਰਦਾਤਾ ਕੋਟਾ ਵਿੰਡੋਜ਼ ਨੂੰ ਜੋੜਦੇ ਅਤੇ ਹਟਾਉਂਦੇ ਹਨ (OpenAI ਕੁਝ ਯੋਜਨਾਵਾਂ ਲਈ 5-ਘੰਟੇ ਦੀ Codex ਵਿੰਡੋ ਛੱਡ ਦਿੱਤੀ ਹੈ), ਇਸਲਈ ਪ੍ਰਦਾਤਾ ਦੇ ਅਡੈਪਟਰ ਦੇ ਤਸਦੀਕ ਨੂੰ ਸੰਪੂਰਨ (`quotasComplete`, ਵੇਖੋ `src/lib/usage/usageReading.ts`) ਨੂੰ ਪੜ੍ਹਣ ਵਾਲੀ ਵਰਤੋਂ ਖਾਤੇ ਦਾ ਪੂਰਾ ਵਿੰਡੋ ਸੈੱਟ ਹੈ: ਇੱਕ ਵਿੰਡੋ ਜੋ ਪਹਿਲਾਂ ਜਾਣੀ ਜਾਂਦੀ ਹੈ ਪਰ ਇਸ ਤੋਂ ਗੈਰਹਾਜ਼ਰ ਹੈ, ਕੈਸ਼ ਵਿੱਚ, `quota_snapshots` ਵਿੱਚ, ਰੀਹਾਈਡਰੇਟਨ ਐਪ ਵਿੱਚ ਰਿਕਾਰਡ), ਸਥਿਰ Codex ਕੋਟਾ ਸਥਿਤੀ ਵਿੱਚ ਅਤੇ Claude ਦੀ ਸੰਤ੍ਰਿਪਤਾ ਬਾਲਟੀਆਂ ਵਿੱਚ। ਅੰਸ਼ਕ ਸਬੂਤ (ਜਵਾਬ ਸਿਰਲੇਖ, ਪੁਰਾਣੀ ਕਾਪੀਆਂ) ਸਿਰਫ਼ ਉਹਨਾਂ ਵਿੰਡੋਜ਼ ਨੂੰ ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ ਜੋ ਇਹ ਰੱਖਦਾ ਹੈ।
+- ਪਤਨ ਅਵਸਥਾ: `src/domain/degradation.ts`
 - ਸੰਰਚਨਾ ਆਡਿਟ: `src/domain/configAudit.ts`
 - OmniRoute ਜਵਾਬ ਮੈਟਾਡੇਟਾ ਬਿਲਡਰ: `src/domain/omnirouteResponseMeta.ts`
-- ਮੁਲਾਂਕਣ ਉਪ-ਪ੍ਰਣਾਲੀ: `src/domain/assessment/` — ਆਵਰਤੀ ਮੁਲਾਂਕਣ ਜੌਬਾਂ
+- ਮੁਲਾਂਕਣ ਸਬ-ਸਿਸਟਮ: `src/domain/assessment/` — ਨਿਯਮਿਤ ਮੁਲਾਂਕਣ ਨੌਕਰੀਆਂ
 
-### E. ਅਧਿਕਾਰ-ਪ੍ਰਦਾਨ ਪਾਈਪਲਾਈਨ
+### E. ਪ੍ਰਮਾਣਿਕਤਾ ਪਾਈਪਲਾਈਨ
 
-ਅਧਿਕਾਰ-ਪ੍ਰਦਾਨ ਪਾਈਪਲਾਈਨ ਹਰ ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ ਦਾ ਵਰਗੀਕਰਨ ਕਰਦੀ ਹੈ ਅਤੇ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ
-ਉਚਿਤ ਨੀਤੀ ਚੇਨ ਲਾਗੂ ਕਰਦੀ ਹੈ।
+ਪ੍ਰਮਾਣਿਕਤਾ ਪਾਈਪਲਾਈਨ ਹਰ ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ ਨੂੰ ਵਰਗੀਕ੍ਰਿਤ ਕਰਦੀ ਹੈ ਅਤੇ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ ਉਚਿਤ ਨੀਤੀ ਲੜੀ ਨੂੰ ਲਾਗੂ ਕਰਦੀ ਹੈ।
 
 - ਪਾਈਪਲਾਈਨ ਐਂਟਰੀ: `src/server/authz/pipeline.ts`
-- ਬੇਨਤੀ ਵਰਗੀਕਰਤਾ: `src/server/authz/classify.ts` — ਜਨਤਕ
-  ਅਨੁਕੂਲਤਾ ਰੂਟਾਂ ਨੂੰ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਤੋਂ ਵੱਖ ਕਰਦਾ ਹੈ
-- ਜਨਤਕ ਰੂਟ ਸੂਚੀ: `src/shared/constants/publicApiRoutes.ts`
-- ਨੀਤੀਆਂ: `src/server/authz/policies/` — ਸੰਯੋਜਨਯੋਗ ਪ੍ਰੈਡੀਕੇਟ
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, ਆਦਿ)
-- ਹੈਡਰ ਸਹੂਲਤਾਂ: `src/server/authz/headers.ts`
-- ਅਸਰਸ਼ਨ ਸਹਾਇਕ: `src/server/authz/assertAuth.ts`
-- ਬੇਨਤੀ ਸੰਦਰਭ: `src/server/authz/context.ts`
+- ਬੇਨਤੀ ਵਰਗੀਕਰਣ: `src/server/authz/classify.ts` — ਜਨਤਕ ਅਨੁਕੂਲਤਾ ਰੂਟਾਂ ਨੂੰ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਤੋਂ ਵੱਖ ਕਰਦਾ ਹੈ
+- ਜਨਤਕ ਰੂਟ ਵਸਤੂ ਸੂਚੀ: `src/shared/constants/publicApiRoutes.ts`
+- ਨੀਤੀਆਂ: `src/server/authz/policies/` — ਕੰਪੋਜ਼ ਕਰਨ ਯੋਗ ਭਵਿੱਖਬਾਣੀ (`requireApiKey`, `requireManagement`, `requireFreshAuth`, ਆਦਿ)
+- ਸਿਰਲੇਖ ਉਪਯੋਗਤਾਵਾਂ: `src/server/authz/headers.ts`
+- ਦਾਅਵਾ ਸਹਾਇਕ: `src/server/authz/assertAuth.ts`
+- ਬੇਨਤੀ ਪ੍ਰਸੰਗ: `src/server/authz/context.ts`
 
-ਜਨਤਕ ਅਤੇ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਵਿਚਕਾਰ ਇੱਕ ਸਖ਼ਤ ਸੀਮਾ ਹੈ: ਏਜੰਟ/ਕੂਲਡਾਊਨ APIs ਅਤੇ
-ਪ੍ਰਦਾਤਾ ਮਿਊਟੇਸ਼ਨਾਂ ਲਈ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ (ਨਾ ਹੋਣ ਉੱਤੇ HTTP 401)।
+ਜਨਤਕ ਬਨਾਮ ਪ੍ਰਬੰਧਨ ਰੂਟ ਇੱਕ ਸਖ਼ਤ ਸੀਮਾ ਹਨ: agent/cooldown APIs ਅਤੇ ਪ੍ਰਦਾਤਾ ਪਰਿਵਰਤਨ ਲਈ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਣ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (HTTP 401 ਜੇਕਰ ਗੁੰਮ ਹੈ)।
 
-ਰੂਟ ਵਰਗੀਕਰਨ ਦੇ ਪੂਰੇ ਨਿਯਮਾਂ ਲਈ,
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ਵੇਖੋ।
+ਪੂਰੇ ਰੂਟ ਵਰਗੀਕਰਣ ਨਿਯਮਾਂ ਲਈ, [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ਦੇਖੋ।
 
-### F. ਵਰਕਫਲੋ FSM ਅਤੇ ਕਾਰਜ-ਸਚੇਤ ਰਾਊਟਰ
+### F. ਵਰਕਫਲੋ FSM ਅਤੇ ਟਾਸਕ-ਅਵੇਅਰ ਰਾਊਟਰ
 
-ਇੱਕ ਸੀਮਿਤ-ਅਵਸਥਾ-ਮਸ਼ੀਨ ਦੁਆਰਾ ਚਲਾਇਆ ਜਾਣ ਵਾਲਾ ਰਾਊਟਰ, ਜੋ ਕੌਂਬੋ ਚੋਣ ਤੋਂ ਉੱਪਰ ਪਰਤਬੱਧ ਹੈ
-ਅਤੇ ਪਛਾਣੇ ਗਏ ਵਰਕਫਲੋ ਪੜਾਅ (ਯੋਜਨਾ, ਕਾਰਜ-ਨਿਭਾਉਣਾ,
-ਸਮੀਖਿਆ) ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ-ਕਾਰਜ ਅਨੁਕੂਲਤਾ ਦੇ ਆਧਾਰ ਉੱਤੇ ਟ੍ਰੈਫਿਕ ਨੂੰ ਨਿਰਦੇਸ਼ਿਤ ਕਰਦਾ ਹੈ।
+ਖੋਜੇ ਗਏ ਵਰਕਫਲੋ ਪੜਾਅ (ਯੋਜਨਾ, ਐਗਜ਼ੀਕਿਊਸ਼ਨ, ਸਮੀਖਿਆ) ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ-ਟਾਸਕ ਐਫੀਨਿਟੀ ਦੇ ਆਧਾਰ 'ਤੇ ਸਿੱਧੇ ਟ੍ਰੈਫਿਕ ਲਈ ਕੰਬੋ ਚੋਣ ਦੇ ਉੱਪਰ ਇੱਕ ਸੀਮਿਤ-ਸਟੇਟ-ਮਸ਼ੀਨ-ਚਾਲਿਤ ਰਾਊਟਰ।
 
-- ਵਰਕਫ਼ਲੋ FSM: `open-sse/services/workflowFSM.ts`
-- ਟਾਸਕ-ਸਚੇਤ ਰਾਊਟਰ: `open-sse/services/taskAwareRouter.ts`
+- ਵਰਕਫਲੋ FSM: `open-sse/services/workflowFSM.ts`
+- ਟਾਸਕ-ਅਵੇਅਰ ਰਾਊਟਰ: `open-sse/services/taskAwareRouter.ts`
 - ਬੈਕਗ੍ਰਾਊਂਡ ਟਾਸਕ ਡਿਟੈਕਟਰ: `open-sse/services/backgroundTaskDetector.ts`
-- ਇੰਟੈਂਟ ਕਲਾਸੀਫਾਇਰ: `open-sse/services/intentClassifier.ts`
+- ਇਰਾਦਾ ਵਰਗੀਕਰਣ: `open-sse/services/intentClassifier.ts`
 
-FSM ਟ੍ਰਾਂਜ਼ਿਸ਼ਨ Auto Combo ਦੀ ਸਕੋਰਿੰਗ ਵਿੱਚ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ, ਜਿਸ ਨਾਲ ਬੈਕਗ੍ਰਾਊਂਡ/ਆਟੋਮੇਸ਼ਨ ਟਾਸਕਾਂ ਲਈ ਘੱਟ ਲਾਗਤ ਵਾਲੇ ਮਾਡਲਾਂ ਵੱਲ ਅਤੇ ਇੰਟਰਐਕਟਿਵ ਯੋਜਨਾਬੰਦੀ/ਸਮੀਖਿਆ ਵਾਰੀਆਂ ਲਈ ਵਧੇਰੇ ਸਮਰੱਥ ਮਾਡਲਾਂ ਵੱਲ ਤਰਜੀਹ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।
+FSM ਪਰਿਵਰਤਨ ਆਟੋ ਕੰਬੋ ਦੇ ਸਕੋਰਿੰਗ ਵਿੱਚ ਫੀਡ ਕਰਦਾ ਹੈ, background/automation ਕਾਰਜਾਂ ਲਈ ਸਸਤੇ ਮਾਡਲਾਂ ਅਤੇ ਇੰਟਰਐਕਟਿਵ planning/review ਮੋੜਾਂ ਲਈ ਮਜ਼ਬੂਤ ਮਾਡਲਾਂ ਵੱਲ ਪੱਖਪਾਤ ਕਰਦਾ ਹੈ।
 
-### G. ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਲਚਕੀਲਾਪਣ
+### G. ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਲਚਕਤਾ
 
-ਕਈ ਪ੍ਰਦਾਤਾ ਸਮਰਪਿਤ ਲਚਕੀਲਾਪਣ ਅਤੇ ਸਟੀਲਥ ਮੋਡੀਊਲ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ, ਜੋ ਗਲੋਬਲ ਸਰਕਿਟ ਬ੍ਰੇਕਰ / ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ / ਮਾਡਲ ਲਾਕਆਊਟ ਪਰਤਾਂ ਉੱਤੇ ਕੰਮ ਕਰਦੇ ਹਨ:
+ਕਈ ਪ੍ਰਦਾਤਾ ਸਮਰਪਿਤ ਲਚਕਤਾ ਅਤੇ ਸਟੀਲਥ ਮੋਡੀਊਲ ਭੇਜਦੇ ਹਨ ਜੋ ਗਲੋਬਲ ਸਰਕਟ ਬ੍ਰੇਕਰ / ਕੁਨੈਕਸ਼ਨ ਕੂਲਡਾਉਨ / ਮਾਡਲ ਲਾਕਆਊਟ ਲੇਅਰਾਂ 'ਤੇ ਪਿਗੀ-ਬੈਕ ਕਰਦੇ ਹਨ:
 
-- Antigravity 429 ਇੰਜਣ: `open-sse/services/antigravity429Engine.ts` (ਪਛਾਣ ਨੂੰ ਰੋਟੇਟ ਕਰਦਾ ਹੈ, ਰਿਸਪਾਂਸ ਹੈਡਰਾਂ ਨੂੰ ਸਾਫ਼ ਕਰਦਾ ਹੈ, ਅਤੇ
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts` ਰਾਹੀਂ ਕ੍ਰੈਡਿਟ/ਵਰਜ਼ਨ ਟ੍ਰੈਕਿੰਗ ਚਲਾਉਂਦਾ ਹੈ)
+- Antigravity 429 ਇੰਜਣ: `open-sse/services/antigravity429Engine.ts` (ਪਛਾਣ ਨੂੰ ਘੁੰਮਾਉਂਦਾ ਹੈ, ਜਵਾਬ ਦੇ ਸਿਰਲੇਖਾਂ ਨੂੰ ਸਕ੍ਰਬ ਕਰਦਾ ਹੈ, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` ਰਾਹੀਂ credits/version ਟਰੈਕਿੰਗ ਚਲਾਉਂਦਾ ਹੈ)
+- Antigravity 429 ਗਾਰਡ: `open-sse/services/antigravity429Guard.ts` (ਸਾਰੇ ਮੇਜ਼ਬਾਨਾਂ ਵਿੱਚ ਅੱਪਸਟ੍ਰੀਮ 429s ਦਾ ਪ੍ਰਤੀ-ਬੇਨਤੀ ਬਜਟ, `ANTIGRAVITY_MAX_429_ATTEMPTS`; ਅਸਵੀਕਾਰ ਕੀਤੇ ਸਰੀਰ ਦੀ ਇੱਕ ਸਮਾਨ ਮੁੜ-ਭੇਜਣ ਦਾ ਜਵਾਬ ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ; `src/sse/handlers/chat.ts` ਕੋਲਡਾਊਨ-ਜਾਗਰੂਕ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਦੁਆਰਾ ਅਜਿਹੀ ਬੇਨਤੀ ਨੂੰ ਮੁੜ ਚਾਲੂ ਨਹੀਂ ਕਰਦਾ)
 - ModelScope ਕੋਟਾ ਨੀਤੀ: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (ਅਨੁਕੂਲਤਾ ਚੈਨਲ ਹੈਂਡਸ਼ੇਕ): `open-sse/services/claudeCodeCCH.ts`,
-  ਨਾਲ ਹੀ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Claude Code ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code ਓਬਫਸਕੇਸ਼ਨ: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude ਕੋਡ CCH (ਅਨੁਕੂਲਤਾ ਚੈਨਲ ਹੈਂਡਸ਼ੇਕ): `open-sse/services/claudeCodeCCH.ts`, ਪਲੱਸ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude ਕੋਡ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude ਕੋਡ ਦੀ ਗੜਬੜ: `open-sse/services/claudeCodeObfuscation.ts`
 
-ਪੂਰੀ ਸਟੀਲਥ ਕਾਰਜ-ਯੋਜਨਾ ਅਤੇ ਸੰਚਾਲਨ ਮਾਰਗਦਰਸ਼ਨ ਲਈ,
-`docs/security/STEALTH_GUIDE.md` ਵੇਖੋ (git; `/docs` ਵਿੱਚ ਕੰਪਾਇਲ ਨਹੀਂ ਕੀਤਾ ਗਿਆ)।
+ਪੂਰੀ ਸਟੀਲਥ ਪਲੇਬੁੱਕ ਅਤੇ ਸੰਚਾਲਨ ਮਾਰਗਦਰਸ਼ਨ ਲਈ, `docs/security/STEALTH_GUIDE.md` (git; `/docs` ਵਿੱਚ ਕੰਪਾਇਲ ਨਹੀਂ) ਦੇਖੋ।
 
-### H. ਵੈੱਬਹੁੱਕ, ਰੀਜ਼ਨਿੰਗ ਕੈਸ਼, ਰੀਡ ਕੈਸ਼
+### H. ਵੈਬਹੁੱਕ, ਰੀਜ਼ਨਿੰਗ ਕੈਸ਼, ਰੀਡ ਕੈਸ਼
 
-- **ਵੈੱਬਹੁੱਕ** — ਪ੍ਰਦਾਤਾ/ਖਾਤਾ/ਟਾਸਕ ਇਵੈਂਟਾਂ ਲਈ ਆਊਟਬਾਊਂਡ ਡਿਸਪੈਚ।
+- **ਵੈਬਹੁੱਕ** provider/account/task ਇਵੈਂਟਸ ਲਈ — ਆਊਟਬਾਉਂਡ ਡਿਸਪੈਚ।
   - ਡਿਸਪੈਚਰ: `src/lib/webhookDispatcher.ts`
-  - ਸਟੋਰੇਜ: `webhooks` SQLite ਟੇਬਲ (`src/lib/db/webhooks.ts` ਰਾਹੀਂ)
-  - ਡੈਸ਼ਬੋਰਡ: `/dashboard/webhooks` (ਸਬਸਕ੍ਰਿਪਸ਼ਨਾਂ, ਸੀਕ੍ਰੇਟਾਂ, ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਇਤਿਹਾਸ)
-  - ਇਵੈਂਟ ਵਰਗੀਕਰਨ ਅਤੇ ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਦੇ ਅਰਥ-ਵਿਗਿਆਨ ਲਈ, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ਵੇਖੋ।
-- **ਰੀਜ਼ਨਿੰਗ ਕੈਸ਼** — ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ ਮੁੜ-ਚਲਾਏ ਜਾ ਸਕਣ ਵਾਲੇ ਰੀਜ਼ਨਿੰਗ ਬਲਾਕ ਜੋ ਸੋਚਣ ਵਾਲੇ ਟੋਕਨ (Claude, GLMT, ਆਦਿ) ਜਾਰੀ ਕਰਦੇ ਹਨ, ਤਾਂ ਜੋ ਲਗਾਤਾਰ ਵਾਰੀਆਂ ਵਿੱਚ ਮੁੜ ਸੋਚਣ ਦੀ ਲੋੜ ਨਾ ਪਵੇ।
+  - ਸਟੋਰੇਜ: `webhooks` SQLite ਟੇਬਲ ( `src/lib/db/webhooks.ts` ਰਾਹੀਂ)
+  - ਡੈਸ਼ਬੋਰਡ: `/dashboard/webhooks` (ਗਾਹਕੀ, ਭੇਦ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਇਤਿਹਾਸ)
+  - ਇਵੈਂਟ ਵਰਗੀਕਰਨ ਅਤੇ ਅਰਥ ਵਿਗਿਆਨ ਦੀ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ਵੇਖੋ।
+- **ਰਿਜ਼ਨਿੰਗ ਕੈਸ਼** ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ — ਰੀਪਲੇਏਬਲ ਤਰਕ ਬਲਾਕ ਜੋ ਸੋਚਣ ਵਾਲੇ ਟੋਕਨਾਂ (Claude, GLMT, ਆਦਿ) ਨੂੰ ਛੱਡਦੇ ਹਨ, ਇਸ ਲਈ ਲਗਾਤਾਰ ਮੋੜ ਮੁੜ-ਸੋਚਣਾ ਛੱਡ ਸਕਦੇ ਹਨ।
   - DB ਪਰਤ: `src/lib/db/reasoningCache.ts`
-  - ਸਰਵਿਸ ਪਰਤ: `open-sse/services/reasoningCache.ts`
-  - ਰੀਪਲੇਅ ਦੇ ਅਰਥ-ਵਿਗਿਆਨ ਲਈ, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ਵੇਖੋ।
-- **ਰੀਡ ਕੈਸ਼** — ਸਿਗਨੇਚਰ ਦੁਆਰਾ ਕੁੰਜੀਬੱਧ ਛੋਟੀ ਮਿਆਦ ਵਾਲਾ ਰਿਸਪਾਂਸ ਕੈਸ਼, ਜਿਸਦੀ ਵਰਤੋਂ ਖਰਾਬ ਅੱਪਸਟ੍ਰੀਮ SDKs ਤੋਂ ਆਉਣ ਵਾਲੀਆਂ ਇੱਕੋ ਜਿਹੀਆਂ ਮੁੜ-ਕੋਸ਼ਿਸ਼ਾਂ ਨੂੰ ਇਕੱਠਾ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+  - ਸੇਵਾ ਪਰਤ: `open-sse/services/reasoningCache.ts`
+  - ਰੀਪਲੇਅ ਸੀਮੈਂਟਿਕਸ ਲਈ, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ਵੇਖੋ।
+- **ਕੈਸ਼ ਪੜ੍ਹੋ** — ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ ਰਿਸਪਾਂਸ ਕੈਸ਼ ਨੂੰ ਦਸਤਖਤ ਦੁਆਰਾ ਕੀ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਟੁੱਟੇ ਹੋਏ ਅੱਪਸਟਰੀਮ SDKs ਤੋਂ ਸਮਾਨ ਮੁੜ ਕੋਸ਼ਿਸ਼ਾਂ ਨੂੰ ਸਮੇਟਣ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।
   - DB ਪਰਤ: `src/lib/db/readCache.ts`
-  - ਅੰਕੜਾ ਐਂਡਪੌਇੰਟ: `GET /api/cache/stats`, ਡੈਸ਼ਬੋਰਡ `/dashboard/cache` ਉੱਤੇ ਹੈ
+  - ਅੰਕੜੇ ਅੰਤਮ ਬਿੰਦੂ: `GET /api/cache/stats`, `/dashboard/cache` ਤੇ ਡੈਸ਼ਬੋਰਡ
 
 ## 3) ਸਥਿਰਤਾ ਪਰਤ
 
@@ -896,41 +860,47 @@ flowchart LR
 - `src/lib/db/*`: ਖਾਸ ਮੋਡੀਊਲ ਸਿੱਧੇ ਇੰਪੋਰਟ ਕਰੋ — ਕੋਈ ਬੈਰਲ ਨਹੀਂ (ਪੁਰਾਣੀ `localDb.ts` ਰੀ-ਐਕਸਪੋਰਟ ਪਰਤ ਹਟਾ ਦਿੱਤੀ ਗਈ ਸੀ)
 - `src/lib/usageDb.ts`: SQLite ਟੇਬਲਾਂ ਦੇ ਉੱਪਰ ਵਰਤੋਂ ਇਤਿਹਾਸ/ਕਾਲ ਲੌਗਾਂ ਲਈ ਫਸਾਡ
 
-## ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ਿਕਿਊਟਰ ਕਵਰੇਜ (ਸਟ੍ਰੈਟੇਜੀ ਪੈਟਰਨ)
+## ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਟਰ ਕਵਰੇਜ (ਰਣਨੀਤੀ ਪੈਟਰਨ)
 
-ਹਰੇਕ ਪ੍ਰੋਵਾਈਡਰ ਕੋਲ `BaseExecutor` (`open-sse/executors/base.ts` ਵਿੱਚ) ਨੂੰ ਐਕਸਟੈਂਡ ਕਰਨ ਵਾਲਾ ਇੱਕ ਵਿਸ਼ੇਸ਼ ਐਗਜ਼ਿਕਿਊਟਰ ਹੁੰਦਾ ਹੈ, ਜੋ URL ਬਣਾਉਣ, ਹੈਡਰ ਤਿਆਰ ਕਰਨ, ਐਕਸਪੋਨੇਨਸ਼ੀਅਲ ਬੈਕਆਫ਼ ਨਾਲ ਮੁੜ ਕੋਸ਼ਿਸ਼, ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰਿਫ੍ਰੈਸ਼ ਹੁੱਕਸ, ਅਤੇ `execute()` ਔਰਕੈਸਟ੍ਰੇਸ਼ਨ ਵਿਧੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
+ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਕੋਲ `BaseExecutor` ( `open-sse/executors/base.ts` ਵਿੱਚ) ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਵਾਲਾ ਇੱਕ ਵਿਸ਼ੇਸ਼ ਐਗਜ਼ੀਕਿਊਟਰ ਹੁੰਦਾ ਹੈ, ਜੋ URL ਬਿਲਡਿੰਗ, ਸਿਰਲੇਖ ਨਿਰਮਾਣ, ਐਕਸਪੋਨੈਂਸ਼ੀਅਲ ਬੈਕਆਫ ਦੇ ਨਾਲ ਮੁੜ ਕੋਸ਼ਿਸ਼, ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰਿਫਰੈਸ਼ ਹੁੱਕ, ਅਤੇ `execute()` ਆਰਕੈਸਟਰੇਸ਼ਨ ਵਿਧੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
 
-| ਐਗਜ਼ੀਕਿਊਟਰ                | ਪ੍ਰਦਾਤਾ                                                                                                                                                    | ਵਿਸ਼ੇਸ਼ ਪ੍ਰਬੰਧਨ                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, ਆਦਿ | ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਡਾਇਨਾਮਿਕ URL/ਹੈਡਰ ਸੰਰਚਨਾ                           |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | ਕਸਟਮ ਪ੍ਰੋਜੈਕਟ/ਸੈਸ਼ਨ ID, Retry-After ਪਾਰਸਿੰਗ, 429 ਅਸਪਸ਼ਟੀਕਰਨ        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | ਡਿਪਲੌਇਮੈਂਟ-ਅਧਾਰਿਤ ਰਾਊਟਿੰਗ, api-version ਕਵੇਰੀ ਲਾਗੂ ਕਰਨਾ             |
-| `BlackboxWebExecutor`     | Blackbox AI (ਵੈੱਬ-ਮੋਡ)                                                                                                                                     | TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਨੁਕਰਣ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                        |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH ਪਾਥ)                                                                                                                                        | ਕੰਸਟ੍ਰੇਇੰਟ + ਟੂਲ-ਰੀਮੈਪ ਪਾਈਪਲਾਈਨਾਂ, ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ             |
-| `CliProxyApiExecutor`     | CLIProxyAPI-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ                                                                                                                                 | ਕਸਟਮ ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਪ੍ਰੋਟੋਕੋਲ ਪ੍ਰਬੰਧਨ                              |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | ਖਾਤਾ ID ਇੰਜੈਕਸ਼ਨ, Neurons-ਅਧਾਰਿਤ ਵਰਤੋਂ ਟਰੈਕਿੰਗ                     |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | ਸਿਸਟਮ ਹਦਾਇਤਾਂ ਇੰਜੈਕਟ ਕਰਦਾ ਹੈ, ਤਰਕ ਯਤਨ ਨੂੰ ਲਾਜ਼ਮੀ ਬਣਾਉਂਦਾ ਹੈ        |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | ਥ੍ਰੈੱਡ/ਟਰਨ ਪਿੰਨਿੰਗ ਵਾਲਾ ਬ੍ਰਾਊਜ਼ਰ-ਸੈਸ਼ਨ Responses API ਬ੍ਰਿਜ         |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਹੈਡਰ ਰੋਟੇਸ਼ਨ                                   |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC ਪ੍ਰੋਟੋਕੋਲ, Protobuf ਐਨਕੋਡਿੰਗ, ਚੈਕਸਮ ਰਾਹੀਂ ਬੇਨਤੀ ਸਾਈਨਿੰਗ |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | ਕਲਾਉਡ ਏਜੰਟ ਮੋਡੀਊਲ ਰਾਹੀਂ Devin ਟਾਸਕ ਲਾਈਫਸਾਈਕਲ ਬ੍ਰਿਜਿੰਗ              |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼, VSCode ਦੀ ਨਕਲ ਕਰਨ ਵਾਲੇ ਹੈਡਰ                 |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + ਪ੍ਰੋਜੈਕਟ-ਸਕੋਪਡ ਰਾਊਟਿੰਗ                              |
-| `GlmExecutor`             | Z.AI GLM (`glmt` ਪ੍ਰੀਸੈੱਟ ਸਮੇਤ)                                                                                                                            | ਸੋਚ-ਬਜਟ ਪ੍ਰਤੀ ਜਾਗਰੂਕ, GLMT ਪ੍ਰੀਸੈੱਟ ਕਾਂਸਟੈਂਟ                       |
-| `GrokWebExecutor`         | xAI Grok ਵੈੱਬ                                                                                                                                              | ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ, ਮੋਡ ਚੋਣ (ਸੋਚ/ਮਿਆਰੀ)                              |
-| `KieExecutor`             | KIE                                                                                                                                                        | ਘੁੰਮਦੇ ਸੈਸ਼ਨ ਐਂਕਰਾਂ ਨਾਲ ਕਸਟਮ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ                        |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream ਬਾਈਨਰੀ ਫਾਰਮੈਟ → SSE ਰੂਪਾਂਤਰਨ                       |
-| `MuseSparkWebExecutor`    | Muse Spark (ਵੈੱਬ)                                                                                                                                          | ਚਿੱਤਰ-ਸੁਨੇਹਾ ਬ੍ਰਿਜਿੰਗ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                         |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਬੇਨਤੀ ਬਾਡੀ ਦਾ ਆਕਾਰ                                 |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK-ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਸੈੱਟਅੱਪ                                      |
-| `PerplexityWebExecutor`   | Perplexity ਵੈੱਬ                                                                                                                                            | ਚੈਟ ਜਾਰੀ ਰੱਖਣ ਲਈ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                                  |
-| `PetalsExecutor`          | Petals ਡਿਸਟ੍ਰਿਬਿਊਟਡ ਇਨਫਰੈਂਸ                                                                                                                                | ਵਿਕੇਂਦਰੀਕ੍ਰਿਤ ਸਵਾਰਮ ਰਾਊਟਿੰਗ                                        |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | ਕਿਸੇ API ਕੁੰਜੀ ਦੀ ਲੋੜ ਨਹੀਂ, ਦਰ-ਸੀਮਿਤ ਬੇਨਤੀਆਂ                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT ਅਤੇ OAuth ਸਹਾਇਤਾ, ਬਹੁ-ਮਾਡਲ ਮੁਫ਼ਤ ਟੀਅਰ                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | ਸਰਵਿਸ ਅਕਾਊਂਟ ਪ੍ਰਮਾਣੀਕਰਨ, ਖੇਤਰ-ਅਧਾਰਿਤ ਐਂਡਪੌਇੰਟ                      |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | ਇੰਪੋਰਟ ਕੀਤੀ API ਕੁੰਜੀ + Connect-protobuf ਚੈਟ ਸਟ੍ਰੀਮਿੰਗ             |
+| ਐਗਜ਼ੀਕਿਊਟਰ                | ਪ੍ਰਦਾਤਾ(ਆਂ)                                                                                                                                              | ਵਿਸ਼ੇਸ਼ ਪਰਬੰਧਨ                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, ਪਰੇਸ਼ਾਨੀ, Together, Fireworks, Cerebras, Cohere, NVIDIA ਆਦਿ। | ਪ੍ਰਦਾਤਾ ਪ੍ਰਤੀ ਗਤੀਸ਼ੀਲ URL/header ਸੰਰਚਨਾ                                    |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | ਕਸਟਮ project/session IDs, ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਕਰੋ- ਪਾਰਸ ਕਰਨ ਤੋਂ ਬਾਅਦ, 429 ਗੁੰਝਲਦਾਰ |
+| `AzureOpenAIExecutor`     | ਅਜ਼ੂਰ OpenAI                                                                                                                                             | ਤੈਨਾਤੀ-ਅਧਾਰਿਤ ਰੂਟਿੰਗ, ਏਪੀਆਈ-ਵਰਜਨ ਪੁੱਛਗਿੱਛ ਲਾਗੂਕਰਨ                          |
+| `BlackboxWebExecutor`     | ਬਲੈਕਬਾਕਸ AI (ਵੈੱਬ-ਮੋਡ)                                                                                                                                   | TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਇਮੂਲੇਸ਼ਨ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਰਿਵਰਸ                              |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH ਮਾਰਗ)                                                                                                                                     | ਕੰਸਟ੍ਰੈਂਟ + ਟੂਲ-ਰੀਮੈਪ ਪਾਈਪਲਾਈਨਾਂ, ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ੇਪਿੰਗ                      |
+| `CliProxyApiExecutor`     | CLIProxyAPI- ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ                                                                                                                              | ਕਸਟਮ ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਪ੍ਰੋਟੋਕੋਲ ਹੈਂਡਲਿੰਗ                                     |
+| `CloudflareAiExecutor`    | Cloudflare ਵਰਕਰ AI                                                                                                                                       | ਖਾਤਾ ID ਇੰਜੈਕਸ਼ਨ, ਨਿਊਰੋਨਸ-ਅਧਾਰਿਤ ਵਰਤੋਂ ਟਰੈਕਿੰਗ                             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | ਸਿਸਟਮ ਨਿਰਦੇਸ਼ਾਂ ਨੂੰ ਇੰਜੈਕਟ ਕਰਦਾ ਹੈ, ਤਰਕ ਦੇ ਯਤਨਾਂ ਨੂੰ ਮਜਬੂਰ ਕਰਦਾ ਹੈ         |
+| `ChatGptWebCodexExecutor` | ChatGPT ਵੈੱਬ (Codex)                                                                                                                                     | ਬ੍ਰਾਊਜ਼ਰ-ਸੈਸ਼ਨ thread/turn ਪਿਨਿੰਗ ਦੇ ਨਾਲ API ਬ੍ਰਿਜ ਨੂੰ ਜਵਾਬ ਦਿੰਦਾ ਹੈ       |
+| `CommandCodeExecutor`     | ਕਮਾਂਡ ਕੋਡ                                                                                                                                                | OAuth + ਪ੍ਰਤੀ-ਸੈਸ਼ਨ ਹੈਡਰ ਰੋਟੇਸ਼ਨ                                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC ਪ੍ਰੋਟੋਕੋਲ, ਪ੍ਰੋਟੋਬੁਫ ਏਨਕੋਡਿੰਗ, ਚੈੱਕਸਮ ਰਾਹੀਂ ਦਸਤਖਤ ਕਰਨ ਦੀ ਬੇਨਤੀ  |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | ਕਲਾਉਡ ਏਜੰਟ ਮੋਡੀਊਲ ਰਾਹੀਂDevin ਟਾਸਕ ਲਾਈਫਸਾਈਕਲ ਬ੍ਰਿਜਿੰਗ                       |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼, VSCode-ਨਕਲ ਕਰਨ ਵਾਲੇ ਸਿਰਲੇਖ                          |
+| `GitlabExecutor`          | GitLab ਜੋੜੀ                                                                                                                                              | GitLab OAuth + ਪ੍ਰੋਜੈਕਟ-ਸਕੋਪਡ ਰੂਟਿੰਗ                                       |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` ਪ੍ਰੀਸੈੱਟ ਸਮੇਤ)                                                                                                                         | ਸੋਚ-ਬਜਟ ਜਾਗਰੂਕ, GLMT ਪ੍ਰੀਸੈਟ ਸਥਿਰਾਂਕ                                       |
+| `GrokWebExecutor`         | xAI Grok ਵੈੱਬ                                                                                                                                            | ਵੈੱਬ ਸੈਸ਼ਨ ਰਿਵਰਸ, ਮੋਡ ਚੋਣ (think/standard)                                 |
+| `KieExecutor`             | KIE                                                                                                                                                      | ਰੋਟੇਟਿੰਗ ਸੈਸ਼ਨ ਐਂਕਰਾਂ ਨਾਲ ਕਸਟਮ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ                              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream ਬਾਈਨਰੀ ਫਾਰਮੈਟ → SSE ਰੂਪਾਂਤਰਨ                               |
+| `MuseSparkWebExecutor`    | ਮਿਊਜ਼ ਸਪਾਰਕ (ਵੈੱਬ)                                                                                                                                       | ਚਿੱਤਰ-ਸੁਨੇਹਾ ਬ੍ਰਿਜਿੰਗ ਨਾਲ ਵੈੱਬ-ਸੈਸ਼ਨ ਉਲਟਾ                                  |
+| `NlpCloudExecutor`        | NLP ਬੱਦਲ                                                                                                                                                 | ਪ੍ਰਦਾਨਕ-ਵਿਸ਼ੇਸ਼ ਬੇਨਤੀ ਬਾਡੀ ਸ਼ਕਲ                                            |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK ਅਨੁਕੂਲ ਪ੍ਰਦਾਤਾ ਸੈੱਟਅੱਪ                                              |
+| `PerplexityWebExecutor`   | ਉਲਝਣ ਵੈੱਬ                                                                                                                                                | ਚੈਟ ਜਾਰੀ ਰੱਖਣ ਲਈ ਵੈੱਬ-ਸੈਸ਼ਨ ਉਲਟਾ                                           |
+| `PetalsExecutor`          | ਪੇਟਲ ਵੰਡਿਆ ਅਨੁਮਾਨ                                                                                                                                        | ਵਿਕੇਂਦਰੀਕ੍ਰਿਤ ਝੁੰਡ ਰੂਟਿੰਗ                                                  |
+| `PollinationsExecutor`    | ਪਰਾਗਣ AI                                                                                                                                                 | ਕੋਈ API ਕੁੰਜੀ ਦੀ ਲੋੜ ਨਹੀਂ, ਦਰ-ਸੀਮਤ ਬੇਨਤੀਆਂ                                 |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT ਅਤੇ OAuth ਸਮਰਥਨ, ਮਲਟੀ-ਮਾਡਲ ਫਰੀ ਟੀਅਰ                                    |
+| `VertexExecutor`          | Google ਵਰਟੇਕਸ AI                                                                                                                                         | ਸੇਵਾ ਖਾਤਾ ਪ੍ਰਮਾਣਿਕਤਾ, ਖੇਤਰ-ਆਧਾਰਿਤ ਅੰਤਮ ਬਿੰਦੂ                               |
+| `DevinDesktopExecutor`    | Devin ਡੈਸਕਟਾਪ                                                                                                                                            | ਆਯਾਤ ਕੀਤਾ API ਕੁੰਜੀ + ਕਨੈਕਟ-ਪ੍ਰੋਟੋਬੁਫ ਚੈਟ ਸਟ੍ਰੀਮਿੰਗ                        |
 
-ਹੋਰ ਸਾਰੇ ਪ੍ਰੋਵਾਈਡਰ (ਕਸਟਮ ਅਨੁਕੂਲ ਨੋਡਾਂ ਸਮੇਤ) `DefaultExecutor` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+ਹੋਰ ਸਾਰੇ ਪ੍ਰਦਾਤਾ (ਕਸਟਮ ਅਨੁਕੂਲ ਨੋਡਸ ਸਮੇਤ) `DefaultExecutor` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+
+### ਸਵੈਚਲਿਤ ਪੜਤਾਲਾਂ ਅਤੇ ਵੈੱਬ-ਸ਼ੈਸ਼ਨ ਖਾਤੇ
+
+ਮਾਡਲ ਟੈਸਟ, ਸਾਰੇ ਟੈਸਟ, ਕੰਬੋ ਟੈਸਟ ਅਤੇ ਮੁਲਾਂਕਣ ਅਸਲ ਚੈਟ ਬੇਨਤੀਆਂ ਭੇਜਦੇ ਹਨ। ਇੱਕ ਵੈੱਬ-ਸੈਸ਼ਨ ਪ੍ਰਦਾਤਾ ਸਾਈਨ-ਇਨ ਕੀਤੇ ਉਪਭੋਗਤਾ ਵਜੋਂ ਕੰਮ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਉਹਨਾਂ ਵਿੱਚੋਂ ਹਰੇਕ ਬੇਨਤੀ ਨੂੰ ਉਸ ਖਾਤੇ 'ਤੇ ਇੱਕ ਗੱਲਬਾਤ ਦੇ ਰੂਪ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ; ਸਵੈਚਲਿਤ ਪੜਤਾਲਾਂ ਜੋ ਅਜਿਹੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਨੂੰ ਛੱਡ ਦਿੰਦੀਆਂ ਹਨ, ਇੱਕ ਖਾਤਾ ਮੁਅੱਤਲ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ (#14780)। ਇਸਲਈ ਚੈਟ ਪਾਈਪਲਾਈਨ ਹਰ ਟੀਚੇ ਤੋਂ ਇਨਕਾਰ ਕਰਦੀ ਹੈ ਇੱਕ ਸਵੈਚਲਿਤ ਜਾਂਚ ਪਹੁੰਚਦੀ ਹੈ ਜਿਸਦਾ ਪ੍ਰਦਾਤਾ ਇੱਕ ਵੈੱਬ-ਸੈਸ਼ਨ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲੈਂਦਾ ਹੈ, ਇੱਕ ਵਾਰ ਟਾਰਗਿਟ ਦੇ ਪ੍ਰਦਾਤਾ ਦੇ ਹੱਲ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਅਤੇ ਇੱਕ ਪ੍ਰਮਾਣ ਪੱਤਰ ਚੁਣੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ (`src/lib/providers/chatProbePolicy.ts`)। ਇਨਕਾਰ `error.code` `chat_probe_not_isolated` ਨਾਲ `422` ਹੈ, ਅਤੇ ਪੜਤਾਲ ਦੌੜਾਕ ਇਸ ਨੂੰ ਛੱਡਣ ਵਜੋਂ ਰਿਪੋਰਟ ਕਰਦੇ ਹਨ, ਨਾ ਕਿ ਅਸਫਲਤਾ।
+
+ਇੱਕ ਐਗਜ਼ੀਕਿਊਟਰ ਜੋ ਪ੍ਰਦਾਤਾ ਦੇ ਆਪਣੇ ਨੋ-ਹਿਸਟਰੀ ਮੋਡ ਵਿੱਚ ਹਰ ਚੈਟ ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ, ਇਸਨੂੰ `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) ਨਾਲ ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ; ਫਿਰ ਉਸ ਪ੍ਰਦਾਤਾ ਨੂੰ ਪੜਤਾਲਾਂ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ChatGPT ਵੈੱਬ `temporary-chat` ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ। ਇੱਕ ਘੋਸ਼ਣਾ ਨੂੰ ਇਸਦੇ ਮਕੈਨਿਜ਼ਮ ਵਿੱਚ ਇੱਕ ਟੈਸਟ ਦੇ ਨਾਲ ਪਿੰਨ ਕਰੋ, ਇਸਲਈ ਦਾਅਵਾ ਉਸ ਕੋਡ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਰਹਿ ਸਕਦਾ ਜੋ ਇਸਨੂੰ ਸੱਚ ਬਣਾਉਂਦਾ ਹੈ।
 
 ## ਪ੍ਰੋਵਾਈਡਰ ਅਨੁਕੂਲਤਾ ਮੈਟ੍ਰਿਕਸ
 
@@ -1094,11 +1064,11 @@ flowchart LR
 - ਸਟਾਰਟਅੱਪ ਵੇਲੇ SQLite ਸਕੀਮਾ ਮਾਈਗ੍ਰੇਸ਼ਨ ਅਤੇ ਆਟੋ-ਅੱਪਗ੍ਰੇਡ ਹੁੱਕ
 - ਪੁਰਾਤਨ JSON → SQLite ਮਾਈਗ੍ਰੇਸ਼ਨ ਅਨੁਕੂਲਤਾ ਪਾਥ
 
-## 6) SSRF / ਆਉਟਬਾਊਂਡ URL ਗਾਰਡ
+## 6) SSRF / ਆਊਟਬਾਉਂਡ URL ਗਾਰਡ
 
-- `src/shared/network/outboundUrlGuard.ts` ਸਾਰੇ ਨਿੱਜੀ/ਲੂਪਬੈਕ/ਲਿੰਕ-ਲੋਕਲ ਟਾਰਗੇਟ URL ਨੂੰ ਪ੍ਰਦਾਤਾ ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਤੱਕ ਪਹੁੰਚਣ ਤੋਂ ਪਹਿਲਾਂ ਬਲੌਕ ਕਰਦਾ ਹੈ
-- ਪ੍ਰਦਾਤਾ ਮਾਡਲ ਖੋਜ ਅਤੇ ਪ੍ਰਮਾਣੀਕਰਨ ਰੂਟ `src/shared/network/safeOutboundFetch.ts` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ, ਜੋ ਹਰ ਆਉਟਬਾਊਂਡ ਬੇਨਤੀ ਤੋਂ ਪਹਿਲਾਂ ਗਾਰਡ ਲਾਗੂ ਕਰਦਾ ਹੈ
-- ਗਾਰਡ ਗਲਤੀਆਂ HTTP 422 ਸਮੇਤ `URL_GUARD_BLOCKED` ਵਜੋਂ ਪ੍ਰਗਟ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ `providerAudit.ts` ਰਾਹੀਂ ਪਾਲਣਾ ਆਡਿਟ ਟ੍ਰੇਲ ਵਿੱਚ ਲੌਗ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` ਰਾਹੀਂ ਭੇਜੀਆਂ ਗਈਆਂ ਚੈਟ ਬੇਨਤੀਆਂ 'ਤੇ `src/shared/network/outboundUrlGuard.ts` ਲਾਗੂ ਕਰਦਾ ਹੈ। ਪਬਲਿਕ-ਓਨਲੀ ਮੋਡ ਵਿੱਚ (ਪ੍ਰਾਈਵੇਟ ਫਲੈਗ ਬੰਦ ਦੇ ਨਾਲ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) ਇਹ ਪ੍ਰਾਈਵੇਟ ਅਤੇ ਲੂਪਬੈਕ ਮੇਜ਼ਬਾਨਾਂ ਅਤੇ 169.254.0.0/16 ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ; ਹਰ ਦੂਜੇ ਮੋਡ ਵਿੱਚ ਇਹ ਕਲਾਉਡ-ਮੈਟਾਡੇਟਾ ਮੇਜ਼ਬਾਨਾਂ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਇਹ ਕਿਸੇ ਵੀ DNS ਖੋਜ ਤੋਂ ਪਹਿਲਾਂ, ਹੋਸਟਨਾਮ ਜਾਂ IP ਸ਼ਾਬਦਿਕ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ। ਬਿਲਟ-ਇਨ ਸਥਾਨਕ ਪ੍ਰਦਾਤਾ ਇਸ ਨੂੰ ਛੱਡ ਦਿੰਦੇ ਹਨ।
+- ਪ੍ਰਦਾਤਾ ਮਾਡਲ ਖੋਜ ਅਤੇ ਪ੍ਰਮਾਣਿਕਤਾ ਰੂਟ `src/shared/network/safeOutboundFetch.ts` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ ਜੋ ਹਰ ਆਊਟਬਾਉਂਡ ਬੇਨਤੀ ਤੋਂ ਪਹਿਲਾਂ ਗਾਰਡ ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ
+- `URL_GUARD_BLOCKED` 503 (`getSafeOutboundFetchErrorStatus`; ਮਾਡਲ-ਡਿਸਕਵਰੀ ਰੂਟ 400 ਰਿਟਰਨ ਕਰਦਾ ਹੈ), ਅਤੇ ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਦੌਰਾਨ ਅਸਲੀ SSRF ਬਲਾਕਾਂ ਨੂੰ `provider.validation.ssrf_blocked` ਇਵੈਂਟਾਂ ਵਜੋਂ ਆਡਿਟ ਟ੍ਰੇਲ ਵਿੱਚ ਲੌਗ ਕੀਤਾ ਜਾਂਦਾ ਹੈ HTTP
 
 ## ਨਿਰੀਖਣਯੋਗਤਾ ਅਤੇ ਸੰਚਾਲਕੀ ਸੰਕੇਤ
 

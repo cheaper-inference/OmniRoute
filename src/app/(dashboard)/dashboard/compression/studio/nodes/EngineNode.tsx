@@ -6,8 +6,8 @@ import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { categoricalSlotFor } from "@/shared/utils/categoricalPalette";
 
 // ── Layer pill colours (10-layer model) ───────────────────────────────────
-// Kit chart tokens (KEA-7886 P8), deterministic by position in LAYER_ORDER (chart-(i % 5 + 1));
-// L9 shares chart-1 with L1 — the pill always prints the layer id, so colour is only a cue.
+// Kit chart tokens (KEA-7886 P8; #19066), deterministic by position in LAYER_ORDER (kit series
+// order, ciChartSeriesOrder[i % 8]) — six layers, six colours; the pill also prints the layer id.
 const LAYER_ORDER = ["L1", "L3", "L4", "L5", "L6", "L9"] as const; // prose, tool, code, MCP, history, pruning
 
 /**
@@ -126,7 +126,15 @@ export function EngineNode({ data }: NodeProps) {
             <span>→</span>
             <span>{tokOut.toLocaleString()}</span>
           </div>
-          <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
+          <div
+            role="progressbar"
+            aria-label={engine as string}
+            aria-valuemin={0}
+            aria-valuemax={Math.max(tokIn, tokOut, 1)}
+            aria-valuenow={tokOut}
+            aria-valuetext={`${tokIn.toLocaleString()} → ${tokOut.toLocaleString()}`}
+            className="relative h-1.5 rounded-full overflow-hidden bg-border"
+          >
             <div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{
@@ -141,7 +149,11 @@ export function EngineNode({ data }: NodeProps) {
       {/* Footer */}
       <div className="px-2.5 pb-2 pt-1 flex flex-col gap-0.5">
         {!skipped && (
-          <span className="text-[11px] font-bold" style={{ color }} data-testid="savings-percent">
+          <span
+            className="text-[11px] font-semibold"
+            style={{ color }}
+            data-testid="savings-percent"
+          >
             {`-${savings.toFixed(1)}%`}
           </span>
         )}

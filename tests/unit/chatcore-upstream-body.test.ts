@@ -763,15 +763,20 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
     {
       targetFormat: "openai-responses",
       provider: "at428-flat",
+      limit: 128,
       tool: (name) => ({ type: "function", name, parameters: {} }),
     },
     {
       targetFormat: "claude",
       provider: "at428-claude",
+      // Claude-format targets have no default cap (#18120): exercise the learned-limit path.
+      limit: 100,
       tool: (name) => ({ name: `proxy_${name}`, input_schema: {} }),
     },
   ];
+  const { setDetectedToolLimit } = await import("../../open-sse/services/toolLimitDetector.ts");
   for (const shape of shapes) {
+    if (shape.limit < 128) setDetectedToolLimit(shape.provider, shape.limit);
     const tools = [
       ...Array.from({ length: 200 }, (_, i) =>
         shape.tool(`mcp__jira__tool_${String(i).padStart(3, "0")}`)
@@ -785,7 +790,7 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
       targetFormat: shape.targetFormat,
       credentials: null,
     });
-    assert.equal(out.tools.length, 128, shape.targetFormat);
+    assert.equal(out.tools.length, shape.limit, shape.targetFormat);
     assert.deepEqual(out.tools.at(-1), tools.at(-1), shape.targetFormat);
   }
 });
@@ -849,6 +854,43 @@ test("never injects prompt_cache_key when the target format is not OpenAI", asyn
   assert.equal(out.prompt_cache_key, undefined);
 });
 
+test("#18787: OpenCode's implicit cache signal never adds prompt_cache_key on its own", async () => {
+  for (const [provider, model] of [
+    ["opencode-go", "deepseek-v4.1-flash"],
+    ["opencode-go", "deepseek-flash"],
+    ["opencode-zen", "deepseek-v4.1-flash-free"],
+  ]) {
+    const out = await prepareUpstreamBody({
+      translatedBody: { model, messages: [{ role: "user", content: "hi" }] },
+      modelToCall: model,
+      provider,
+      targetFormat: "openai",
+      credentials: { apiKey: "test-key" },
+    });
+    assert.equal(out.prompt_cache_key, undefined, `${provider}/${model}`);
+  }
+});
+
+test("#18787: an explicit OpenCode cache opt-in keeps its prompt_cache_key", async () => {
+  const out = await prepareUpstreamBody({
+    translatedBody: {
+      model: "kimi-k2.6",
+      messages: [
+        { role: "system", content: "coding instructions" },
+        { role: "user", content: "fix this" },
+      ],
+    },
+    modelToCall: "kimi-k2.6",
+    provider: "opencode-go",
+    targetFormat: "openai",
+    credentials: {
+      apiKey: "test-key",
+      providerSpecificData: { cache: { supportsPromptCaching: true } },
+    },
+  });
+  assert.match(String(out.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
+});
+
 test("injects prompt_cache_key for Kimi Code's OpenAI protocol", async () => {
   const out = await prepareUpstreamBody({
     translatedBody: {
@@ -864,4 +906,149 @@ test("injects prompt_cache_key for Kimi Code's OpenAI protocol", async () => {
     credentials: { accessToken: "oauth-token" },
   });
   assert.match(String(out.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
+});
+
+test("Codex Responses attempts reuse immutable input when no payload rules exist", async () => {
+  setPayloadRulesConfig({});
+  const input = [
+    {
+      type: "message",
+      role: "user",
+      content: [{ type: "input_text", text: "large context" }],
+    },
+  ];
+  const source = {
+    model: "original-model",
+    input,
+    tools: [{ type: "function", name: "lookup", parameters: { type: "object" } }],
+    reasoning: { effort: "low" },
+  };
+  try {
+    const options = {
+      translatedBody: source,
+      provider: "codex",
+      targetFormat: FORMATS.OPENAI_RESPONSES,
+      credentials: null,
+    };
+    const first = await prepareUpstreamBody({ ...options, modelToCall: "gpt-5.4-codex" });
+    assert.notStrictEqual(first, source);
+    assert.strictEqual(first.input, input);
+    assert.strictEqual(first.tools, source.tools);
+    assert.equal(first.model, "gpt-5.4-codex");
+    assert.equal(source.model, "original-model");
+
+    const fallback = await prepareUpstreamBody({ ...options, modelToCall: "gpt-5.3-codex" });
+    assert.equal(fallback.model, "gpt-5.3-codex");
+    assert.strictEqual(fallback.input, input);
+    assert.equal(source.model, "original-model");
+
+    const otherProvider = await prepareUpstreamBody({
+      ...options,
+      provider: "openai",
+      modelToCall: "gpt-5.4-codex",
+    });
+    assert.notStrictEqual(otherProvider.input, input);
+    assert.deepEqual(otherProvider.input, input);
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});
+
+test("Codex attempts preserve caller-owned nested history with configured rules", async () => {
+  setPayloadRulesConfig({
+    override: [
+      {
+        models: [{ name: "gpt-5.4-codex" }],
+        params: { "reasoning.effort": "medium" },
+      },
+    ],
+  });
+  const source = {
+    input: [
+      {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "preserve me" }],
+      },
+    ],
+    reasoning: { effort: "low" },
+  };
+  try {
+    const result = await prepareUpstreamBody({
+      translatedBody: source,
+      provider: "codex",
+      targetFormat: FORMATS.OPENAI_RESPONSES,
+      credentials: null,
+      modelToCall: "gpt-5.4-codex",
+    });
+    assert.notStrictEqual(result.input, source.input);
+    assert.equal((result.reasoning as { effort: string }).effort, "medium");
+    assert.equal(source.reasoning.effort, "low");
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});
+
+// #18912: canonical `effort` also derives a `reasoning` object, the Responses envelope.
+// api.openai.com Chat Completions only documents `reasoning_effort`, so dropping `effort`
+// alone would trade "Unknown parameter: 'effort'" for "Unknown parameter: 'reasoning'".
+async function outboundOpenAIChat(provider: string, model: string, extra: object) {
+  const translatedBody = translateRequest(
+    FORMATS.OPENAI,
+    FORMATS.OPENAI,
+    model,
+    { model, messages: [{ role: "user", content: "Reply with OK" }], stream: false, ...extra },
+    false,
+    null,
+    provider
+  ) as Record<string, unknown>;
+  return prepareUpstreamBody({
+    translatedBody,
+    modelToCall: model,
+    provider,
+    targetFormat: FORMATS.OPENAI,
+    credentials: { apiKey: "x" },
+  });
+}
+
+test("#18912 canonical effort reaches OpenAI Chat Completions as reasoning_effort alone", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-6.1-terra", { effort: "high" });
+  assert.equal("effort" in out, false);
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "high");
+});
+
+test("#18912 a client reasoning.effort is folded onto reasoning_effort for OpenAI Chat", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-5.4", {
+    effort: "high",
+    reasoning: { effort: "low", summary: "auto" },
+  });
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "low");
+});
+
+test("#18912 explicit reasoning_effort outranks reasoning.effort on OpenAI Chat", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-5.4", {
+    reasoning_effort: "medium",
+    reasoning: { effort: "low" },
+  });
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "medium");
+});
+
+test("#18912 providers that accept the reasoning object keep it", async () => {
+  const out = await outboundOpenAIChat("openrouter", "openai/gpt-5.4", { effort: "high" });
+  assert.deepEqual(out.reasoning, { effort: "high" });
+  assert.equal(out.reasoning_effort, "high");
+});
+
+test("#18912 OpenAI Responses targets keep the reasoning object", async () => {
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "gpt-5.5-pro", input: "hi", reasoning: { effort: "high" } },
+    modelToCall: "gpt-5.5-pro",
+    provider: "openai",
+    targetFormat: FORMATS.OPENAI_RESPONSES,
+    credentials: { apiKey: "x" },
+  });
+  assert.deepEqual(out.reasoning, { effort: "high" });
 });

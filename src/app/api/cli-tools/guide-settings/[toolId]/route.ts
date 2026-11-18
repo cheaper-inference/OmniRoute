@@ -47,14 +47,14 @@ const GUIDE_TOOL_TARGETS: Record<string, { resolve: () => string; hostCommand: s
  */
 export async function GET(request, { params }) {
   // cli-tools routes require the shared management auth guard on every exported handler.
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   void params;
   return NextResponse.json({ error: "GET not supported for this tool" }, { status: 400 });
 }
 
 export async function POST(request, { params }) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;

@@ -23,7 +23,13 @@ test("xAI image catalog supports API keys and both OAuth connection identities",
     ["xao", "xai-oauth"],
   ]) {
     assert.deepEqual(parseImageModel(`${prefix}/${model}`), { provider, model });
-    assert.equal(getImageProvider(prefix)?.baseUrl, "https://api.x.ai/v1/images/generations");
+    // Grok Build images go through its own proxy (#15305); the other two identities use xAI.
+    assert.equal(
+      getImageProvider(prefix)?.baseUrl,
+      provider === "grok-cli"
+        ? "https://cli-chat-proxy.grok.com/v1/images/generations"
+        : "https://api.x.ai/v1/images/generations"
+    );
     assert.equal(getImageProvider(prefix)?.authType, provider === "xai" ? "apikey" : "oauth");
     assert.ok(getAllImageModels().some((entry) => entry.id === `${provider}/${model}`));
   }

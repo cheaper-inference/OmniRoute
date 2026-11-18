@@ -25,6 +25,7 @@
  * `name`).
  */
 
+import { translateStringsWithGoogle } from "./google-translate.mjs";
 import process from "node:process";
 
 function logWarn(...parts) {
@@ -69,7 +70,102 @@ export function isFallbackWorthy(err) {
   return !["400", "413", "422"].includes(m[1]);
 }
 
+// ----- Google fallback ---------------------------------------------------------------
+// The LLM backend runs out of quota or credits (Codex weekly 429, 402 on a paid route) and a
+// marker run used to stop until it came back. Every LLM entry point below now falls back to the
+// structure-safe Google engine (lib/google-translate.mjs) when the model chain fails, and the
+// first quota / credit / auth failure flips the whole process to Google, so the remaining keys
+// do not each wait for an LLM round-trip that is known to fail.
+//   OMNIROUTE_TRANSLATION_ENGINE=google      Google only (no LLM variables needed)
+//   OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK=0  disable the fallback
+
+export function translationEngine(env = process.env) {
+  return (env.OMNIROUTE_TRANSLATION_ENGINE || "llm").trim().toLowerCase() === "google"
+    ? "google"
+    : "llm";
+}
+
+export function googleFallbackEnabled(env = process.env) {
+  return (env.OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK ?? "1").trim() !== "0";
+}
+
+/** Pure. Errors after which the LLM backend is not worth trying again in this process. */
+export function isQuotaLike(err) {
+  return /upstream (401|402|403|429)\b|quota|credit|insufficient|billing|exhausted|payment/i.test(
+    String(err?.message ?? err)
+  );
+}
+
+export const llmCircuit = { open: false, reason: "", failures: 0 };
+
+// Consecutive LLM failures (any fallback-worthy kind) after which the circuit opens: a hung or
+// unreachable backend fails every request after its full timeout, so three in a row is enough.
+export const LLM_FAILURE_LIMIT = 3;
+
+export function resetLlmCircuit() {
+  llmCircuit.open = false;
+  llmCircuit.reason = "";
+  llmCircuit.failures = 0;
+}
+
+/** Records an LLM failure; returns true when this failure opened the circuit. */
+export function noteLlmFailure(err) {
+  llmCircuit.failures++;
+  if (llmCircuit.open) return false;
+  if (!isQuotaLike(err) && llmCircuit.failures < LLM_FAILURE_LIMIT) return false;
+  llmCircuit.open = true;
+  llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+  return true;
+}
+
+export function noteLlmSuccess() {
+  llmCircuit.failures = 0;
+}
+
+function useGoogleFirst(backend) {
+  return (backend?.engine ?? translationEngine()) === "google" || llmCircuit.open;
+}
+
+/**
+ * Runs the LLM path, and on failure (or with the circuit open / the google engine) the Google
+ * path. `google()` returning null for an item means that item could not be produced safely.
+ */
+export async function withGoogleFallback(llm, google, label = "translation", backend = null) {
+  if (useGoogleFirst(backend)) return google();
+  try {
+    const value = await llm();
+    noteLlmSuccess();
+    return value;
+  } catch (err) {
+    const fallback = backend?.googleFallback ?? googleFallbackEnabled();
+    // A malformed request (400/413/422) is the caller's bug and stays loud, like the model chain
+    // treats it; quota, credits, auth, 5xx, timeouts and network failures go to Google.
+    if (!fallback || !(isFallbackWorthy(err) || isQuotaLike(err))) throw err;
+    if (noteLlmFailure(err)) {
+      logWarn(`LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`);
+    } else {
+      logWarn(`${label}: LLM failed (${String(err?.message ?? err).slice(0, 120)}) — using Google`);
+    }
+    return google();
+  }
+}
+
+function googleStrings(texts, localeEntry, backend) {
+  return (backend?.googleStrings ?? translateStringsWithGoogle)(texts, localeEntry.code, {
+    protectedTerms: ["OmniRoute"],
+  });
+}
+
 export function backendConfig() {
+  if (translationEngine() === "google") {
+    return {
+      engine: "google",
+      apiUrl: "google-translate",
+      model: "google",
+      fallbackModels: [],
+      timeoutMs: 30000,
+    };
+  }
   const apiUrl = requireEnv("OMNIROUTE_TRANSLATION_API_URL").replace(/\/$/, "");
   const apiKey = requireEnv("OMNIROUTE_TRANSLATION_API_KEY");
   const model = requireEnv("OMNIROUTE_TRANSLATION_MODEL");
@@ -234,8 +330,19 @@ export async function translateString(englishValue, localeEntry, backend) {
     { role: "system", content: TRANSLATION_SYSTEM(englishName, native) },
     { role: "user", content: englishValue },
   ];
-  const out = await callChat(messages, backend);
-  return preserveIcuLiteralQuotes(englishValue, out.trim());
+  let viaGoogle = false;
+  const out = await withGoogleFallback(
+    () => (backend.callChat ?? callChat)(messages, backend),
+    async () => {
+      viaGoogle = true;
+      const [value] = await googleStrings([englishValue], localeEntry, backend);
+      if (value == null) throw new Error("google translate could not restore the string");
+      return value;
+    },
+    `string for ${localeEntry.code}`,
+    backend
+  );
+  return viaGoogle ? out : preserveIcuLiteralQuotes(englishValue, out.trim());
 }
 
 // ----- Batch mode ----------------------------------------------------------
@@ -306,14 +413,34 @@ export async function translateBatch(entries, localeEntry, backend) {
     { role: "system", content: BATCH_SYSTEM(englishName, native) },
     { role: "user", content: JSON.stringify(payload) },
   ];
-  const out = await callChat(messages, backend);
+  let viaGoogle = false;
+  const out = await withGoogleFallback(
+    () => (backend.callChat ?? callChat)(messages, backend),
+    async () => {
+      viaGoogle = true;
+      const values = await googleStrings(
+        entries.map((e) => e.text),
+        localeEntry,
+        backend
+      );
+      // an unrestorable item fails the batch: the caller retries one by one
+      if (values.some((v) => v == null)) {
+        throw new Error("google translate could not restore a batch item");
+      }
+      return new Map(entries.map((e, i) => [e.id, values[i]]));
+    },
+    `batch of ${entries.length} for ${localeEntry.code}`,
+    backend
+  );
+  if (viaGoogle) return out;
+  // A parse failure stays loud: the caller falls back to per-string translation.
   const parsed = parseBatchResponse(
     out,
     entries.map((e) => e.id)
   );
   for (const entry of entries) {
-    if (typeof parsed[entry.id] === "string") {
-      parsed[entry.id] = preserveIcuLiteralQuotes(entry.text, parsed[entry.id]);
+    if (parsed.has(entry.id)) {
+      parsed.set(entry.id, preserveIcuLiteralQuotes(entry.text, parsed.get(entry.id)));
     }
   }
   return parsed;
@@ -450,8 +577,38 @@ export async function translateMultiLocaleBatch(keyEntries, localeEntries, backe
     { role: "system", content: multiLocaleBatchSystem(localeEntries) },
     { role: "user", content: JSON.stringify(payload) },
   ];
-  const out = await callChat(messages, backend);
   const expectedCodes = localeEntries.map((l) => l.code);
+  const viaGoogle = async () => {
+    const perLocale = new Map();
+    const failedLocales = [];
+    await Promise.all(
+      localeEntries.map(async (loc) => {
+        const values = await googleStrings(
+          keyEntries.map((e) => e.text),
+          loc,
+          backend
+        );
+        if (values.some((v) => v == null)) failedLocales.push(loc.code);
+        else perLocale.set(loc.code, new Map(keyEntries.map((e, i) => [e.id, values[i]])));
+      })
+    );
+    if (perLocale.size === 0 && expectedCodes.length > 0) {
+      throw new Error("multi-locale batch translated no locale: google could not restore any");
+    }
+    return { perLocale, failedLocales };
+  };
+  if (useGoogleFirst(backend)) return viaGoogle();
+  let out;
+  try {
+    out = await (backend.callChat ?? callChat)(messages, backend);
+  } catch (err) {
+    return withGoogleFallback(
+      () => Promise.reject(err),
+      viaGoogle,
+      `multi-locale batch of ${keyEntries.length}`,
+      backend
+    );
+  }
   const parsed = parseMultiLocaleBatchResponse(out, expectedCodes, ids);
   const perLocale = new Map();
   for (const [code, values] of parsed.perLocale) {

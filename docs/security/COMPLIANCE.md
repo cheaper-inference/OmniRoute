@@ -27,28 +27,36 @@ Every call to `logAuditEvent({ action, actor, target, details, ... })` produces
 one row. Action strings follow a `domain.verb` (or `domain.verb.outcome`)
 pattern. Confirmed in-tree action types include:
 
-| Action                               | Source                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
 Each entry captures `action`, `actor` (defaults to `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
 `request_id`, and `timestamp`. Sensitive keys (`apiKey`, `accessToken`,
 `refreshToken`, `password`, anything matching `*token`/`*secret`/`*apikey`,
 etc.) are recursively redacted to `"[redacted]"` before the row is written.
+
+`api_key.auth.touch` rows record successful API-key metadata and discovery
+reads (GET/HEAD) that never reach the request log: which key, when, and the
+normalized path, coalesced and capped at 1,000 rows. Keys with `noLog` and the
+environment key are skipped. The caller's IP address and user-agent are added
+only when the `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` feature flag is on (off by
+default).
 
 ### MCP tool calls (`mcp_tool_audit`)
 

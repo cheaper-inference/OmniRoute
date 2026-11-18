@@ -156,10 +156,17 @@ export function deriveDefaultPlanFromConfig(
 
   // Legacy path: defaultMode carries the effective mode (the engines map is display-only here).
   const legacyMode = config.defaultMode;
+  if (legacyMode === "stacked") {
+    // #18637: the backfilled map is what the dashboard renders. Single-mode defaultModes always
+    // backfill their own engine, but "stacked" can derive ZERO enabled engines (lossy-only
+    // default combo, caveman/rtk off) — then the panel shows everything off while dispatch
+    // would still run a pipeline. Nothing legacy is left to preserve: match the display.
+    const anyEngineOn = Object.values(config.engines ?? {}).some((toggle) => toggle?.enabled);
+    if (!anyEngineOn) return { mode: "off", stackedPipeline: [] };
+    return { mode: legacyMode, stackedPipeline: config.stackedPipeline ?? [] };
+  }
   if (legacyMode && legacyMode !== "off") {
-    return legacyMode === "stacked"
-      ? { mode: legacyMode, stackedPipeline: config.stackedPipeline ?? [] }
-      : { mode: legacyMode, stackedPipeline: [] };
+    return { mode: legacyMode, stackedPipeline: [] };
   }
 
   return { mode: "off", stackedPipeline: [] };

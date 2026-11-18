@@ -106,21 +106,29 @@ function normaliseTag(tag) {
 
 // Leading comments/whitespace + directive strings ("use client", 'use server', …).
 // `end` is the offset just past the line holding the last directive (-1 when there is none).
+// When code follows the directive's `;` on the same line (`"use client"; import x …`), `end`
+// is the offset just past that `;`, so an inserted import never lands after that code.
 export function directivePrologue(src) {
   const directives = [];
   let i = 0;
   let end = -1;
+  const lineRest = /^[ \t]*(?:\/\/[^\n]*|\/\*.*?\*\/)?[ \t]*(?:\r?\n|$)/;
   for (;;) {
     i += /^(?:\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/)*/.exec(src.slice(i))[0].length;
+    // A directive ends at its `;` or, without one, at the end of its line (ASI).
     const d =
-      /^(["'])(use [a-z]+)\1[ \t]*;?(?=[ \t]*(?:\/\/[^\n]*|\/\*.*?\*\/)?[ \t]*(?:\r?\n|$))/.exec(
+      /^(["'])(use [a-z]+)\1[ \t]*(?:;|(?=[ \t]*(?:\/\/[^\n]*|\/\*.*?\*\/)?[ \t]*(?:\r?\n|$)))/.exec(
         src.slice(i)
       );
     if (!d) break;
     directives.push(d[2]);
     i += d[0].length;
-    const eol = src.indexOf("\n", i);
-    end = eol === -1 ? src.length : eol + 1;
+    if (lineRest.test(src.slice(i))) {
+      const eol = src.indexOf("\n", i);
+      end = eol === -1 ? src.length : eol + 1;
+    } else {
+      end = i;
+    }
   }
   return { directives, end };
 }

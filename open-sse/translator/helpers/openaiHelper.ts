@@ -1,5 +1,7 @@
 // OpenAI helper functions for translator
 
+import { geminiFunctionParameters } from "./geminiFunctionParameters.ts";
+
 // Valid OpenAI content block types
 // `input_audio` / `audio_url` ported from upstream decolua/9router#913 so audio
 // parts survive `filterToOpenAIFormat()` on OpenAI-target passthrough routes.
@@ -55,8 +57,12 @@ const CLAUDE_TOOL_CHOICE_REQUIRED = "an" + "y";
 export interface FilterToOpenAIFormatOptions {
   /** Keep `cache_control` on content blocks (providers that honor OpenAI-format breakpoints). */
   preserveCacheControl?: boolean;
+  /** Keep OpenAI's explicit prompt-caching `prompt_cache_breakpoint` on content parts (GPT-5.6+). */
+  preservePromptCacheBreakpoint?: boolean;
   /** Keep Moonshot's non-standard `video_url` content block. */
   preserveVideoUrl?: boolean;
+  /** CI resolves HTTPS PDF links before supplier dispatch. */
+  normalizeFileUrls?: boolean;
   /** Keep `reasoning_content` on tool-call assistant turns (reasoning-replay providers). */
   preserveReasoningContent?: boolean;
   /** Keep the `developer` role (targets that accept it); otherwise it is lowered to `system`. */
@@ -67,6 +73,7 @@ function hasToolCalls(msg: { tool_calls?: unknown }): boolean {
   return Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
 }
 
+/** Normalize cross-provider history while preserving supported OpenAI media parts. */
 export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {}) {
   // #2069 — when the routed provider honors OpenAI-format cache_control
   // breakpoints (DashScope/alibaba, Xiaomi MiMo, etc.) and preservation was
@@ -77,6 +84,10 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // Keep that extension opt-in so generic OpenAI-compatible providers still
   // receive only the standard allowlist below.
   const preserveVideoUrl = opts?.preserveVideoUrl === true;
+  // OpenAI explicit prompt caching marks prefix ends with `prompt_cache_breakpoint`
+  // on content parts. With `prompt_cache_options: { mode: "explicit" }` and no
+  // breakpoint the upstream caches nothing, so keep it for providers that accept it.
+  const preservePromptCacheBreakpoint = opts?.preservePromptCacheBreakpoint === true;
   // #4849 strips reasoning_content from tool-call assistant turns to stop O(n^2)
   // context growth — but reasoning-replay providers (DeepSeek V4, Kimi K2, etc.)
   // REQUIRE the client's reasoning_content to be passed back, so keep it for them
@@ -153,6 +164,37 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
       let thinkingText = null;
 
       for (const block of msg.content) {
+        if (opts.normalizeFileUrls && block.type === "file_url") {
+          const raw = block.file_url;
+          const url = typeof raw === "string" ? raw : raw?.url;
+          filteredContent.push({
+            type: "file",
+            file: {
+              file_data: typeof url === "string" ? url : "",
+              filename: block.filename ?? "attachment.pdf",
+            },
+          });
+          continue;
+        }
+        if (
+          opts.normalizeFileUrls &&
+          block.type === "file" &&
+          block.file?.file_url &&
+          !block.file.file_data
+        ) {
+          const { file_url, ...file } = block.file;
+          filteredContent.push({ type: "file", file: { ...file, file_data: file_url } });
+          continue;
+        }
+        if (preserveVideoUrl && block.type === "input_video") {
+          const raw = block.video_url ?? block.input_video ?? block.url;
+          const url = typeof raw === "string" ? raw : raw?.url;
+          filteredContent.push({
+            type: "video_url",
+            video_url: { url: typeof url === "string" ? url : "" },
+          });
+          continue;
+        }
         // Extract thinking blocks as reasoning_content (OpenAI extended thinking)
         if (block.type === "thinking") {
           thinkingText = block.thinking || block.text || "";
@@ -183,6 +225,9 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           const cleanBlock: Record<string, unknown> = { type: block.type };
           if (preserveCacheControl && cache_control !== undefined) {
             cleanBlock.cache_control = cache_control;
+          }
+          if (preservePromptCacheBreakpoint && block.prompt_cache_breakpoint !== undefined) {
+            cleanBlock.prompt_cache_breakpoint = block.prompt_cache_breakpoint;
           }
           for (const field of allowedFields) {
             if (block[field] !== undefined) cleanBlock[field] = block[field];
@@ -278,6 +323,11 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // Codex clients send a top-level `client_metadata` object; OpenAI rejects it
   // with 400 "Unknown parameter: 'client_metadata'" (9router#1157).
   delete body.client_metadata;
+  // OmniRoute's canonical top-level `effort` (#6241) is already folded onto
+  // `reasoning_effort` / `reasoning.effort` by normalizeReasoningRequest; OpenAI
+  // Chat Completions rejects the original key with 400 "Unknown parameter: 'effort'"
+  // (#18912).
+  delete body.effort;
 
   // Map max_output_tokens (from Vercel AI SDK) to max_tokens logic
   if (body.max_output_tokens !== undefined) {
@@ -308,14 +358,14 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           };
         }
 
-        // Gemini format: {functionDeclarations: [{name, description, parameters}]}
+        // Gemini format: {functionDeclarations: [{name, description, parameters | parametersJsonSchema}]}
         if (tool.functionDeclarations && Array.isArray(tool.functionDeclarations)) {
           return tool.functionDeclarations.map((fn) => ({
             type: "function",
             function: {
               name: fn.name,
               description: String(fn.description ?? ""),
-              parameters: fn.parameters || { type: "object", properties: {} },
+              parameters: geminiFunctionParameters(fn) || { type: "object", properties: {} },
             },
           }));
         }

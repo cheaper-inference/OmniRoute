@@ -6,7 +6,7 @@
  * shadow the built-in `cloudflare-ai` provider (alias `cf`). Cloudflare image
  * routes like `cf/@cf/black-forest-labs/...` must keep resolving to the
  * built-in cloudflare-ai provider, regardless of any compatible-node prefix
- * collision.
+ * collision when the builtin has an active configured connection (#17278).
  *
  * Inverse case: a non-reserved compatible-node prefix (e.g. `oct`) must still
  * resolve to the compatible node. The fix is a reserved-prefix guard — it must
@@ -26,6 +26,13 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const { getModelInfo } = await import("../../src/sse/services/model.ts");
 
 test.before(async () => {
+  await providersDb.createProviderConnection({
+    provider: "cloudflare-ai",
+    name: "Synthetic active builtin",
+    authType: "apikey",
+    apiKey: "synthetic-cloudflare-key-17278",
+    isActive: true,
+  });
   await providersDb.createProviderNode({
     id: "openai-compatible-cf-collision",
     type: "openai-compatible",

@@ -6,6 +6,8 @@
 // OmniRoute may already be doing its own auth) — it only logs a loud warning
 // so the operator notices the exposure instead of discovering it from traffic.
 
+import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
+
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"]);
 
 function isLoopbackHost(host: string): boolean {
@@ -13,9 +15,9 @@ function isLoopbackHost(host: string): boolean {
 }
 
 function isRequireApiKeyDisabled(): boolean {
-  const raw = (process.env.REQUIRE_API_KEY || "").trim().toLowerCase();
-  // Matches the feature-flag default: unset/empty falls back to "false".
-  return raw !== "true" && raw !== "1" && raw !== "yes";
+  // Same parser as the request gate, but env only: a DB override (which the gate checks
+  // first) is not seen here, so an override of "false" with env "true" stays silent.
+  return !isRequireApiKeyValueEnabled(process.env.REQUIRE_API_KEY);
 }
 
 /**

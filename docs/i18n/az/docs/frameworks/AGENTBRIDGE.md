@@ -16,34 +16,34 @@ AgentBridge, IDE süni intellekt agentlərindən gələn HTTPS trafikini ələ k
 
 ### AgentBridge nədir?
 
-IDE agenti (məsələn, GitHub Copilot, Cursor, Claude Code) API çağırışı etdikdə, o, birbaşa yuxarı axın AI provayderinə (OpenAI, Anthropic və s.) qoşulur. AgentBridge həmin bağlantını TLS səviyyəsində şəffaf şəkildə ələ keçirir — heç bir agent konfiqurasiyası dəyişikliyi tələb etmədən — və sorğunu OmniRoute vasitəsilə yenidən yazır.
+Bir IDE agenti (məsələn, GitHub Copilot, Cursor, Claude Code) API zəngi etdikdə o, birbaşa yuxarı axın AI provayderinə (OpenAI, Anthropic və s.) qoşulur. AgentBridge heç bir agent konfiqurasiyasının dəyişdirilməsi — tələb etmədən TLS səviyyəsində — bu əlaqəni şəffaf şəkildə kəsir və sorğunu OmniRoute vasitəsilə yenidən yazır.
 
 Bu o deməkdir ki, siz:
 
-- **İstənilən agenti istənilən provayderə yönləndirə bilərsiniz**: Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya OmniRoute-un 375 provayderindən istənilən birinə yönləndirin.
-- **Model uyğunlaşdırmaları tətbiq edin**: `gemini-3-flash` → `claude-sonnet-4.7` handler səviyyəsində şəffaf şəkildə.
-- **Bütün agent trafikini izləyin**: hər bir ələ keçirilmiş sorğu [Trafik İnspektoruna](./TRAFFIC_INSPECTOR.md) dərc olunur.
-- **OmniRoute dayanıqlılığını tətbiq edin**: kombo marşrutlaşdırma, circuit breaker-lər, fallback-lər və xərc izləmə IDE agent trafiki üçün də işləyir.
+- **İstənilən agenti istənilən provayderə yönləndirin** : Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya hər hansı OmniRoute 394 provayderinə yönləndirin.
+- **Model xəritələrini tətbiq edin** : `gemini-3-flash` → `claude-sonnet-4.7` işləyici səviyyəsində şəffaf.
+- **Bütün agent trafikini müşahidə edin** : ələ keçirilən hər sorğu [Trafik Müfəttişinə](./TRAFFIC_INSPECTOR.md) dərc olunur.
+- **OmniRoute möhkəmliyini tətbiq edin** : IDE agent trafiki üçün kombin marşrutlaşdırma, elektrik açarları, ehtiyatlar və xərclərin izlənilməsi də işləyir.
 
-### Bazara nisbətdə mövqelənmə
+### Bazara qarşı mövqeləşdirmə
 
-| Xüsusiyyət                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity               |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot            |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex              |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries            |    —    |    ✓     |        —        |             ✓             |
-| Claude Code               |    —    |    —     |        ✓        |             ✓             |
-| Open Code                 |    —    |    —     |        ✓        |             ✓             |
-| Trae                      |    —    |    —     |        —        |      🔍 Araşdırılır       |
-| İdarə paneli UI           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Trafik İnspektoru         |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute marşrutlaşdırma |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model uyğunlaşdırma UI    |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass siyahısı           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA sertifikatı   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Xüsusiyyət                  | 9 marşrutlaşdırıcı | anti-api | llm-qəbuledici | **OmniRoute AgentBridge** |
+| --------------------------- | :----------------: | :------: | :------------: | :-----------------------: |
+| Antigravity                 |         ✓          |    ✓     |       —        |             ✓             |
+| GitHub Copilot              |         ✓          |    ✓     |       —        |             ✓             |
+| Kiro (AWS)                  |         ✓          |    ✓     |       —        |             ✓             |
+| OpenAI Codex                |         —          |    ✓     |       —        |             ✓             |
+| Cursor IDE                  |         ✓          |    ✓     |       —        |             ✓             |
+| Zed Industries              |         —          |    ✓     |       —        |             ✓             |
+| Claude kodu                 |         —          |    —     |       ✓        |             ✓             |
+| Kod açın                    |         —          |    —     |       ✓        |             ✓             |
+| Trae                        |         —          |    —     |       —        |      🔍 araşdırılır       |
+| İdarə paneli UI             |         ✓          |    ✗     |       ✗        |             ✓             |
+| Yol müfəttişi               |         ✗          |    ✗     |       ✓        |             ✓             |
+| OmniRoute marşrutlaşdırma   |         ✗          |    ✗     |       ✗        |             ✓             |
+| Model xəritələşdirilməsi UI |         ✗          |    ✗     |       ✗        |             ✓             |
+| Yan keçmə siyahısı          |         ✗          |    ✗     |       ✓        |             ✓             |
+| Upstream CA sertifikatı     |         ✗          |    ✗     |       ✓        |             ✓             |
 
 ---
 
@@ -541,22 +541,22 @@ Tam OpenAPI sxemləri: `docs/openapi.yaml` → `AgentBridge` teqi.
 
 ### Trae araşdırması
 
-Trae nisbətən yeni süni intellekt əsaslı kodlaşdırma köməkçisidir. Emal modulunu tətbiq etməzdən əvvəl:
+Trae nisbətən yeni AI kodlaşdırma köməkçisidir. İşləyici tətbiq etməzdən əvvəl:
 
-1. VS Code / JetBrains marketlərində və ya ayrıca tətbiq kimi binar faylı/genişləndirməni müəyyənləşdirin
-2. API hostlarını və endpoint strukturlarını aşkar etmək üçün trafiki mitmproxy ilə qeydə alın
-3. Autentifikasiya mexanizmini müəyyənləşdirin
-4. İstifadə şərtləri və API-nin aşkarlana bilməsi əsasında davam edib-etməmək barədə qərar verin
+1. VS Code / JetBrains bazarlarında və ya müstəqil proqram kimi binary/extension müəyyən edin
+2. API hostlarını və son nöqtə formalarını kəşf etmək üçün mitmproxy ilə trafiki çəkin
+3. Doğrulama mexanizmini müəyyənləşdirin
+4. go/no-go TOS və API kəşfiyyatına əsaslanaraq qiymətləndirin
 
-Araşdırma tamamlanana qədər idarəetmə panelindəki Trae kartında "Həyata keçirilə bilməsi barədə hesabat verin" keçidi ilə birlikdə "Araşdırılır" nişanı göstərilir. `src/mitm/handlers/trae.ts` ünvanındakı emal modulu şablonu strukturlaşdırılmış `Hələ tətbiq edilməyib` xətası yaradır.
+Təhqiqat başa çatana qədər, idarə panelindəki Trae kartında "Müvəqqəti hesabat" linki olan "Araşdırma" nişanı göstərilir. `src/mitm/handlers/trae.ts` -dakı işləyici stub strukturlaşdırılmış `Not yet implemented` xətası atır.
 
-### Gözləyən agentlər (MITM tələb olunur — fərdi baza URL-i dəstəklənmir)
+### Backlog agentləri (MITM tələb olunur — xüsusi baza URL dəstəyi yoxdur)
 
-Aşağıdakı alətlər cari versiyalarında fərdi baza URL-lərini dəstəkləmir, buna görə də MITM yeganə ələkeçirmə yoludur. Həyata keçirilmə imkanının qiymətləndirilməsi gözlənilir:
+Aşağıdakı alətlər cari versiyalarında xüsusi baza URLs dəstəkləmir və MITM yeganə tutma yolu edir. Həyat qabiliyyətinin qiymətləndirilməsi gözlənilir:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE-dən ayrıdır)
-- **Cowork** (Anthropic masaüstü tətbiqi)
+- **Amp** (Mənbə)
+- **Amazon Q / Kiro CLI** (AWS Əsas qaya — Kiro IDE dən ayrı)
+- **Ortaq iş** (Anthropic masa üstü)
 
-Qeyd: GitHub Copilot CLI ≥v1.0.19 `COPILOT_PROVIDER_BASE_URL` dəyişənini dəstəkləyir — həmin alət üçün MITM əvəzinə birbaşa konfiqurasiyadan istifadə edin.
+Qeyd: GitHub Copilot CLI ≥ v1.0.19 `COPILOT_PROVIDER_BASE_URL` — dəstəkləyir ki, həmin alət üçün MITM əvəzinə birbaşa konfiqurasiyadan istifadə edin.

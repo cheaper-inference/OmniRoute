@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Ο πίνακας ελέγχου ανοίγει στη διεύθυνση `http://localhost:20128` και το βασικό URL του API είναι `http://localhost:20128/v1`.
+Το ταμπλό ανοίγει στο `http://localhost:20128` και η βάση API URL είναι `http://localhost:20128/v1`.
+
+> **χρήστες npm:** Εάν το npm προειδοποιεί ότι τα σενάρια εγκατάστασης αποκλείστηκαν (π.χ. `omniroute`, `better-sqlite3`), ανατρέξτε στην [ενότητα Αντιμετώπιση προβλημάτων — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Χρήστες του pnpm:** η σημαία `--allow-build` απαιτείται για την ενεργοποίηση των εγγενών σεναρίων δόμησης για τα `better-sqlite3` και `@swc/core`. Η εντολή `pnpm approve-builds -g` δεν υποστηρίζεται για καθολικές εγκαταστάσεις στο pnpm v11.
+> **χρήστες pnpm:** Η σημαία `--allow-build` απαιτείται για την ενεργοποίηση εγγενών σεναρίων build για `better-sqlite3` και `@swc/core`. Η εντολή `pnpm approve-builds -g` δεν υποστηρίζεται για καθολικές εγκαταστάσεις στο pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-Το [πακέτο AUR](https://aur.archlinux.org/packages/omniroute-bin) εγκαθιστά το OmniRoute και παρέχει μια υπηρεσία χρήστη systemd.
+Το [πακέτο AUR](https://aur.archlinux.org/packages/omniroute-bin) εγκαθιστά OmniRoute και παρέχει μια systemd υπηρεσία χρήστη.
 
-### Από τον πηγαίο κώδικα
+### Από την Πηγή
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Σημείωση για Windows:** Από προεπιλογή, το OmniRoute χρησιμοποιεί το `%APPDATA%\omniroute` όταν δεν υπάρχει ο παλαιού τύπου κατάλογος `%USERPROFILE%\.omniroute`. Ορίστε το `DATA_DIR` για να επιλέξετε διαφορετική τοποθεσία καταλόγου δεδομένων.
+> **Windows σημείωση:** Από προεπιλογή, OmniRoute χρησιμοποιεί `%APPDATA%\omniroute` όταν ο κατάλογος `%USERPROFILE%\.omniroute` παλαιού τύπου δεν υπάρχει. Ρυθμίστε `DATA_DIR` για να επιλέξετε μια διαφορετική τοποθεσία καταλόγου δεδομένων.
 
-> **Σημείωση:** Το `npm install` δημιουργεί αυτόματα το `.env` από το `.env.example` κατά την πρώτη εκτέλεση. Οι επόμενες εγκαταστάσεις δεν θα αντικαταστήσουν ένα υπάρχον `.env`, επομένως οι προσαρμογές διατηρούνται. Για να το δημιουργήσετε εκ νέου, διαγράψτε το `.env` πριν από την επανεκτέλεση.
+> **Σημείωμα:** `npm install` δημιουργεί αυτόματα `.env` από `.env.example` στην πρώτη εκτέλεση. Οι επόμενες εγκαταστάσεις δεν θα αντικαταστήσουν ένα υπάρχον `.env`, επομένως οι προσαρμογές διατηρούνται. Για εκ νέου εμφάνιση, διαγράψτε `.env` πριν από την επανεκτέλεση.
 
 ### Docker
 
-Ανατρέξτε στον [Οδηγό Docker](./DOCKER_GUIDE.md) για την πλήρη ρύθμιση του Docker, συμπεριλαμβανομένων των προφίλ Compose και του Caddy HTTPS.
+Ανατρέξτε στον [Οδηγό Docker](./DOCKER_GUIDE.md) για την πλήρη ρύθμιση Docker, συμπεριλαμβανομένων των προφίλ Σύνταξης και του Caddy HTTPS.
 
-### Εφαρμογή επιφάνειας εργασίας (Electron)
+### Εφαρμογή για υπολογιστές (Electron)
 
-Το OmniRoute περιλαμβάνει ένα περίβλημα εφαρμογής επιφάνειας εργασίας που έχει δημιουργηθεί με Electron 41 + electron-builder 26.10. Διαθέσιμα σενάρια (ριζικός κατάλογος χώρου εργασίας):
+OmniRoute αποστέλλει ένα περιτύλιγμα επιτραπέζιου υπολογιστή που έχει κατασκευαστεί σε Electron 41 + ηλεκτρονιοδομητή 26.10. Διαθέσιμα σενάρια (ρίζα χώρου εργασίας):
 
 ```bash
-npm run electron:dev          # Εκτέλεση της εφαρμογής επιφάνειας εργασίας με άμεση επαναφόρτωση
-npm run electron:build        # Δόμηση για το τρέχον λειτουργικό σύστημα (αυτόματη ανίχνευση)
-npm run electron:build:win    # Πρόγραμμα εγκατάστασης Windows (NSIS + φορητή έκδοση)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Δοκιμή καπνού της πακεταρισμένης έκδοσης
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Οι εκδόσεις των προγραμμάτων εγκατάστασης για επιφάνεια εργασίας επισυνάπτονται στις Εκδόσεις GitHub. Για την πλήρη και εις βάθος τεκμηρίωση του Electron (υπογραφή, γέφυρα IPC, διανομές), ανατρέξτε στο [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(δημιουργήθηκε σε μεταγενέστερη φάση)_.
+Οι εκδόσεις των προγραμμάτων εγκατάστασης επιτραπέζιου υπολογιστή επισυνάπτονται στις εκδόσεις GitHub. Για την πλήρη κατάδυση Electron (υπογραφή, γέφυρα IPC, διανομές), δείτε [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Διακομιστής χωρίς γραφικό περιβάλλον (CI/αυτοματοποίηση)
+### Διακομιστής χωρίς κεφάλι (CI/automation)
 
-Για εγκαταστάσεις χωρίς επίβλεψη (Docker, Kubernetes, CI), χρησιμοποιήστε:
+Για ρυθμίσεις χωρίς επίβλεψη (Docker, Kubernetes, CI), χρησιμοποιήστε:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Σε συνδυασμό με μεταβλητές περιβάλλοντος (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` κ.λπ.), αυτό σας επιτρέπει να θέσετε σε λειτουργία μια πλήρως προγραμματιζόμενη παρουσία του OmniRoute.
+Σε συνδυασμό με το env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, κ.λπ.), αυτό σας επιτρέπει να περιστρέψετε μια παρουσία OmniRoute πλήρως με δυνατότητα script.
 
 ### Επιλογές CLI
 
-| Εντολή                  | Περιγραφή                                                                                |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| `omniroute`             | Εκκίνηση διακομιστή (`PORT=20128`, API και πίνακας ελέγχου στην ίδια θύρα)               |
-| `omniroute setup`       | Καθοδηγούμενη αρχική ρύθμιση μέσω CLI για τον κωδικό πρόσβασης και τον πρώτο πάροχο      |
-| `omniroute doctor`      | Εκτέλεση τοπικών ελέγχων εύρυθμης λειτουργίας χωρίς εκκίνηση του διακομιστή              |
-| `omniroute providers`   | Εντοπισμός, εμφάνιση, επικύρωση και δοκιμή παρόχων από το CLI                            |
-| `omniroute config`      | Διαμόρφωση εργαλείου CLI — εμφάνιση, ανάκτηση, ορισμός και επικύρωση διαμορφώσεων        |
-| `omniroute status`      | Πίνακας ελέγχου κατάστασης εκτός σύνδεσης — έκδοση, βάση δεδομένων, εργαλεία, διαμόρφωση |
-| `omniroute logs`        | Ροή αρχείων καταγραφής χρήσης από το API (υποστηρίζει `--follow`)                        |
-| `omniroute update`      | Έλεγχος για ενημερώσεις του OmniRoute ή εφαρμογή τους                                    |
-| `omniroute provider`    | Διαχείριση συνδέσεων παρόχων — προσθήκη, εμφάνιση, αφαίρεση, δοκιμή, προεπιλογή          |
-| `omniroute --port 3000` | Ορισμός της κανονικής θύρας/θύρας API σε 3000                                            |
-| `omniroute --mcp`       | Εκκίνηση διακομιστή MCP (μεταφορά stdio)                                                 |
-| `omniroute --no-open`   | Να μην ανοίγει αυτόματα το πρόγραμμα περιήγησης                                          |
-| `omniroute --help`      | Εμφάνιση βοήθειας                                                                        |
+| Εντολή                  | Περιγραφή                                                                   |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `omniroute`             | Έναρξη διακομιστή (`PORT=20128`, API και πίνακας ελέγχου στην ίδια θύρα)    |
+| `omniroute setup`       | Καθοδηγούμενη ενσωμάτωση CLI για κωδικό πρόσβασης και πρώτο πάροχο          |
+| `omniroute doctor`      | Εκτελέστε τοπικούς ελέγχους υγείας χωρίς εκκίνηση του διακομιστή            |
+| `omniroute providers`   | Ανακαλύψτε, απαριθμήστε, επικυρώστε και δοκιμάστε παρόχους από CLI          |
+| `omniroute config`      | Διαμόρφωση εργαλείου CLI Λίστα —, λήψη, ρύθμιση, επικύρωση παραμέτρων       |
+| `omniroute status`      | Έκδοση — πίνακα κατάστασης εκτός σύνδεσης, DB, εργαλεία, διαμόρφωση         |
+| `omniroute logs`        | Μεταδώστε αρχεία καταγραφής χρήσης ροής από το API (υποστηρίζει `--follow`) |
+| `omniroute update`      | Ελέγξτε ή εφαρμόστε ενημερώσεις OmniRoute                                   |
+| `omniroute provider`    | Διαχείριση συνδέσεων παρόχου — add, list, remove, test, default             |
+| `omniroute --port 3000` | Ρυθμίστε τη θύρα canonical/API σε 3000                                      |
+| `omniroute --mcp`       | Έναρξη διακομιστή MCP (stdio transport)                                     |
+| `omniroute --no-open`   | Μην ανοίγετε αυτόματα το πρόγραμμα περιήγησης                               |
+| `omniroute --help`      | Δείξτε βοήθεια                                                              |
 
-Η ρύθμιση χωρίς γραφικό περιβάλλον μπορεί να αυτοματοποιηθεί με σημαίες ή μεταβλητές περιβάλλοντος:
+Η ρύθμιση Headless μπορεί να γραφτεί με σημαίες ή μεταβλητές περιβάλλοντος:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Εκτελέστε τοπικά διαγνωστικά χωρίς να ανοίξετε τον πίνακα ελέγχου:
+Εκτελέστε τοπικά διαγνωστικά χωρίς να ανοίξετε τον πίνακα εργαλείων:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Διαχειριστείτε παρόχους μέσω SSH ή σεναρίων χωρίς να ανοίξετε τον πίνακα ελέγχου:
+Διαχειριστείτε παρόχους από SSH ή σενάρια χωρίς να ανοίξετε τον πίνακα ελέγχου:
 
 ```bash
 omniroute providers available
@@ -136,47 +138,46 @@ omniroute providers validate
 
 ---
 
-## Ρύθμιση εργαλείων CLI
+## Διαμόρφωση εργαλείου CLI
 
 ### 1) Συνδέστε παρόχους και δημιουργήστε κλειδί API
 
-1. Ανοίξτε τον Πίνακα ελέγχου → `Πάροχοι` και συνδέστε τουλάχιστον έναν πάροχο (OAuth ή κλειδί API).
-2. Ανοίξτε τον Πίνακα ελέγχου → `Τελικά σημεία` και δημιουργήστε ένα κλειδί API.
-3. (Προαιρετικά) Ανοίξτε τον Πίνακα ελέγχου → `Συνδυασμοί` και ορίστε την αλυσίδα εφεδρείας σας.
+1. Ανοίξτε το Dashboard → `Providers` και συνδέστε τουλάχιστον έναν πάροχο (κλειδί OAuth ή API ).
+2. Ανοίξτε το Dashboard → `Endpoints` και δημιουργήστε ένα κλειδί API.
+3. (Προαιρετικό) Ανοίξτε το Dashboard → `Combos` και ορίστε την εναλλακτική σας αλυσίδα.
 
-### 2) Κατευθύνετε το εργαλείο προγραμματισμού σας
-
-```txt
-Βασικό URL: http://localhost:20128/v1
-Κλειδί API: [αντιγράψτε από τη σελίδα Τελικού σημείου]
-Μοντέλο:     if/qwen3.8-max-preview (ή οποιοδήποτε πρόθεμα παρόχου/μοντέλου)
-```
-
-Αν το πρόγραμμα επεξεργασίας σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε αντ’ αυτού τη βασική διεύθυνση συμβατότητας με ενσωματωμένο διακριτικό:
+### 2) Σημαδέψτε το Εργαλείο Κωδικοποίησής σας
 
 ```txt
-Βασικό URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL μοντέλων: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL συνομιλίας: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL ετικετών Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Endpoint page]
+Model:    if/qwen3.8-max-preview (or any provider/model prefix)
 ```
 
-Λειτουργεί με τα Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDK συμβατά με το OpenAI.
+Εάν ο επεξεργαστής σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε τη βάση συμβατότητας με διακριτικό:
 
-#### Αυτόματη ρύθμιση με `setup-*`
+```txt
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Αντί να επικολλήσετε χειροκίνητα το βασικό URL και το κλειδί, αφήστε το OmniRoute να γράψει τη
-ρύθμιση κάθε εργαλείου από τον ενεργό κατάλογο μοντέλων. Μία εντολή ανά εργαλείο:
+Λειτουργεί με Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDKs συμβατό με OpenAI.
+
+#### Αυτόματη διαμόρφωση με `setup-*`
+
+Αντί να επικολλήσετε το βασικό URL και το κλειδί με το χέρι, αφήστε OmniRoute να γράψει τη δική του διαμόρφωση κάθε εργαλείου από τον κατάλογο ζωντανών μοντέλων. Μία εντολή ανά εργαλείο:
 
 ```bash
-omniroute setup-codex        # Προφίλ ~/.codex/<name>.config.toml
+omniroute setup-codex        # ~/.codex/<name>.config.toml profiles
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (συμβατό με OpenAI)
-omniroute setup-cline        # Ρυθμίσεις Cline CLI + επέκτασης VS Code
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-compatible)
+omniroute setup-cline        # Cline CLI + VS Code extension settings
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Εμφανίζει τα βήματα εντός της εφαρμογής Cursor
-omniroute setup-roo          # Εισαγωγή Roo Code + δείκτης autoImport
+omniroute setup-cursor       # prints Cursor's in-app steps
+omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
 omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
@@ -184,55 +185,53 @@ omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Καθεμία δέχεται `--remote <url> --api-key <key>` για τη ρύθμιση ενός τοπικού εργαλείου ώστε να χρησιμοποιεί ένα
-**απομακρυσμένο** OmniRoute, καθώς και `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με το σωστό
-περιβάλλον ενσωματωμένο και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)·
-τα παλαιού τύπου προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και
-`omniroute launch-codex` (Codex) παραμένουν διαθέσιμα.
+Κάθε ένα δέχεται `--remote <url> --api-key <key>` για να διαμορφώσει ένα τοπικό εργαλείο έναντι του a** μακρινός** OmniRoute, συν `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με το σωστό env και χωρίς καθόλου γραμμένες ρυθμίσεις, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini). οι παλαιού τύπου εκτοξευτές ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex` (Codex) παραμένουν διαθέσιμοι.
 
-Για τον πλήρη πίνακα (τι γράφει κάθε εντολή, κάθε σημαία, τοπική έναντι απομακρυσμένης λειτουργίας, συμβάσεις βασικού URL
-`/v1`), ανατρέξτε στις **[Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)**.
+Για τον πλήρη πίνακα (τι γράφει κάθε εντολή, κάθε σημαία, τοπικές έναντι απομακρυσμένες συμβάσεις `/v1` βάσης-URL), βλ.** [Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)** .
 
-Για λεπτομερείς ρυθμίσεις ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στον ειδικό **[Οδηγό εργαλείων CLI](../reference/CLI-TOOLS.md)**.
+Για λεπτομερείς ρυθμίσεις παραμέτρων ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στο ειδικό** [Οδηγός εργαλείων CLI](../reference/CLI-TOOLS.md)** .
 
 ---
 
-## Ρύθμιση πρωτοκόλλων (MCP + A2A)
+## Ρύθμιση πρωτοκόλλου (MCP + A2A)
 
-### Ρύθμιση MCP (Model Context Protocol)
+### Ρύθμιση MCP (Πρωτόκολλο περιβάλλοντος μοντέλου)
 
-Εκκινήστε τη μεταφορά MCP σε λειτουργία stdio:
+Ξεκινήστε τη μεταφορά MCP σε λειτουργία stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Προτεινόμενη ροή επαλήθευσης:
+Προτεινόμενη ροή επικύρωσης:
 
 ```bash
-# 1. Εκκινήστε τον διακομιστή MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Από τον πελάτη MCP σας, καλέστε:
-omniroute_get_health        # Θα πρέπει να επιστρέψει την κατάσταση εύρυθμης λειτουργίας του συστήματος
-omniroute_list_combos       # Θα πρέπει να επιστρέψει τους ενεργούς συνδυασμούς
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Εναλλακτικά, εκτελέστε την πλήρη σουίτα E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Διαμόρφωση πελάτη MCP
 
-**Claude Code:**
+**Κωδικός Claude :**
+
+Ο κώδικας Claude συνδέεται μέσω HTTP, ο οποίος `omniroute --mcp` (stdio) δεν ξεκινά. Η μεταφορά HTTP είναι απενεργοποιημένη από προεπιλογή: ενεργοποιήστε την πρώτα στον τρέχοντα διακομιστή. Όταν η σύνδεση στον πίνακα εργαλείων είναι ενεργοποιημένη, ένα αίτημα χωρίς διαπιστευτήριο λαμβάνει `401`, οπότε περάστε ένα κλειδί API που περιέχει `mcp:connect` (ή `manage`). ένα κλειδί χωρίς `manage`/`admin` χρειάζεται επίσης το εύρος κάθε εργαλείου (βλ. [MCP Server → MCP toolscopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Προσθέστε το εξής στις ρυθμίσεις MCP:
+Προσθέστε στις ρυθμίσεις σας MCP (stdio, με το κλειδί ώστε ο καλών να έχει έναν κύριο):
 
 ```json
 {
@@ -240,23 +239,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Πλήρης τεκμηρίωση MCP:** [README διακομιστή MCP](../../open-sse/mcp-server/README.md) — 110 εργαλεία, διαμορφώσεις IDE, πελάτες Python/TS/Go.
+Ή, όταν `mcpTransport` είναι `streamable-http` (ρυθμίστε το σε `/dashboard/mcp` ή με `omniroute mcp enable --transport streamable-http`), τοποθετήστε την καταχώρηση απομακρυσμένου διακομιστή MCP του πελάτη στο `http://localhost:20128/api/mcp/stream`.
 
-### Ρύθμιση A2A (Πρωτόκολλο μεταξύ πρακτόρων)
+Το κλειδί ταξιδεύει ως `Authorization: Bearer <api-key>` (δείτε [MCP Server → Απομακρυσμένη πρόσβαση](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) για απομακρυσμένους κεντρικούς υπολογιστές· ένα απομακρυσμένο κλειδί χρειάζεται `mcp:connect` συν τα πεδία read/write του).
 
-Επαληθεύστε την κάρτα πράκτορα:
+**Πλήρης τεκμηρίωση MCP :** [Διακομιστής MCP README](../../open-sse/mcp-server/README.md) — 110 εργαλεία, ρυθμίσεις παραμέτρων IDE, πελάτες Python/TS/Go. Αναφορά χειριστή για τα εργαλεία συμπίεσης CCR/dedup (δείκτες, προαπαιτούμενα, πεδία ανά εργαλείο, σελιδοποίηση ανάκτησης, διαγνωστικά): [Μηχανές συμπίεσης → Προαπαιτούμενα / οδηγός χειριστή](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Ρύθμιση A2A (Πρωτόκολλο Agent-to-Agent)
+
+Επαληθεύστε την κάρτα αντιπροσώπου:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Στείλτε μια εργασία:
+Αποστολή εργασίας:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Πλήρης τεκμηρίωση A2A:** [README διακομιστή A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή δεδομένων, κύκλος ζωής εργασιών.
+**Πλήρης τεκμηρίωση A2A :** [Διακομιστής A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή, κύκλος ζωής εργασιών.
 
 ---
 
@@ -323,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Πρότυπο για Void Linux (xbps-src)
+## Κενό πρότυπο Linux (xbps-src).
 
-Για χρήστες του Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας το `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
+Για χρήστες Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
 
 ```bash
-# Αρχείο προτύπου για το 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Δημιουργήστε ξανά το άθροισμα ελέγχου για κάθε έκδοση με:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

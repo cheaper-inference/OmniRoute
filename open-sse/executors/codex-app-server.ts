@@ -1,7 +1,8 @@
 import { bridgeToResponsesSSE, buildResponseJSON } from "../vendor/codex-chatgpt-web/bridge.ts";
 import { AsyncEventQueue } from "../vendor/codex-chatgpt-web/event-queue.ts";
 import type { AdapterEvent } from "../vendor/codex-chatgpt-web/types.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { errorResponse as canonicalErrorResponse, sanitizeErrorMessage } from "../utils/error.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import { CodexAppServerClient, type CodexAppServerClientOptions } from "./codex/appServerClient.ts";
@@ -122,6 +123,50 @@ const FREEFORM_INPUT_SCHEMA: Record<string, unknown> = {
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+}
+
+/** Replay tool history natively: turn/start's UserInput cannot carry tool results. */
+function extractReplayItems(body: unknown): unknown[] | null {
+  const input = asRecord(body)?.input;
+  const toolTypes = [
+    "function_call",
+    "function_call_output",
+    "custom_tool_call",
+    "custom_tool_call_output",
+    "tool_search_call",
+    "tool_search_output",
+  ];
+  if (
+    !Array.isArray(input) ||
+    !input.some((item) => toolTypes.includes(String(asRecord(item)?.type)))
+  ) {
+    return null;
+  }
+  return input.map((item) => {
+    const message = asRecord(item);
+    if (
+      !message ||
+      typeof message.role !== "string" ||
+      (message.type && message.type !== "message")
+    ) {
+      return item;
+    }
+    return {
+      ...message,
+      type: "message",
+      // Codex drops system-role history; developer preserves these instructions.
+      role: message.role === "system" ? "developer" : message.role,
+      content:
+        typeof message.content === "string"
+          ? [
+              {
+                type: message.role === "assistant" ? "output_text" : "input_text",
+                text: message.content,
+              },
+            ]
+          : message.content,
+    };
+  });
 }
 
 function appServerThreadId(result: { thread?: { id?: unknown }; threadId?: unknown }): string {
@@ -247,6 +292,7 @@ export class CodexAppServerExecutor extends BaseExecutor {
     const policy = resolveThreadStartPolicy(config, psd);
 
     const promptText = extractPromptText(input.body);
+    const replayItems = extractReplayItems(input.body);
     const { baseModel, effort: suffixEffort } = splitCodexReasoningSuffix(input.model);
     const bodyEffort = extractEffort(input.body);
     // Explicit model suffix selection (e.g. gpt-5.5-high) represents an explicit
@@ -381,9 +427,13 @@ export class CodexAppServerExecutor extends BaseExecutor {
         };
         input.signal?.addEventListener("abort", onAbort, { once: true });
 
-        const turnInput: CodexTextUserInput[] = [
-          { type: "text", text: promptText, text_elements: [] },
-        ];
+        if (replayItems) {
+          await client.request("thread/inject_items", { threadId, items: replayItems });
+        }
+        if (terminated) return;
+        const turnInput: CodexTextUserInput[] = replayItems
+          ? []
+          : [{ type: "text", text: promptText, text_elements: [] }];
         await client.request("turn/start", {
           threadId,
           input: turnInput,
@@ -398,12 +448,14 @@ export class CodexAppServerExecutor extends BaseExecutor {
         await turnDone;
       } catch (err) {
         if (!terminated) {
+          const message = sanitizeErrorMessage(err instanceof Error ? err.message : err);
+          const status = drainAwareFailureStatus(502);
           events.push({
             type: "error",
-            message: sanitizeErrorMessage(err instanceof Error ? err.message : err),
-            status: 502,
-            errorType: "provider_error",
-            code: "codex_app_server_turn_failed",
+            message,
+            status,
+            errorType: status === 499 ? "client_disconnected" : "provider_error",
+            code: status === 499 ? "client_disconnected" : "codex_app_server_turn_failed",
           });
           events.close();
           markTerminated();
@@ -417,6 +469,8 @@ export class CodexAppServerExecutor extends BaseExecutor {
       const running = run();
       const collected = await events.collect();
       await running;
+      const failureResponse = nonStreamFailureResponse(collected);
+      if (failureResponse) return { response: failureResponse, url: config.url };
       const response = buildResponseJSON(collected, input.model, {
         toolNsMap: toolMaps.namespace,
         freeformToolNames: toolMaps.freeform,
@@ -443,6 +497,27 @@ export class CodexAppServerExecutor extends BaseExecutor {
       url: config.url,
     };
   }
+}
+
+/**
+ * The failures a non-streaming turn must answer with their own HTTP status, instead
+ * of the 200 Responses body that `buildResponseJSON` would wrap them in.
+ */
+function nonStreamFailureResponse(collected: AdapterEvent[]): Response | null {
+  for (const event of collected) {
+    if (event.type !== "error") continue;
+    // Our own shutdown tore the app-server down under a request that was still
+    // in flight: the turn was never really served by the provider. Answer 499
+    // (client_disconnected) with the canonical body of the repo's errorResponse
+    // helper, so the runtime does not read our own teardown as provider ill
+    // health (see open-sse/utils/drainStatus.ts).
+    if (event.status === 499) return canonicalErrorResponse(499, event.message);
+    // An exhausted account (usageLimitExceeded) has to reach the runtime as a 429:
+    // inside a 200 body the combo reads it as a quality failure, skips the quota
+    // cooldown and retries every sibling variant of the model (#19255).
+    if (event.status === 429) return canonicalErrorResponse(429, event.message);
+  }
+  return null;
 }
 
 function errorResponse(status: number, message: string, code: string): Response {

@@ -44,37 +44,41 @@ kọ̀ǹpútà alágbèéká rẹ                     OmniRoute jíjìn (VPS)
 
 ---
 
-## Ṣíṣopọ̀
+## Sísopọ̀
 
-### Pẹ̀lú ọ̀rọ̀ aṣínà ìṣàkóso (ìpilẹ̀ṣẹ̀)
+### Pẹ̀lú ọ̀rọ̀ aṣínà ìṣàkóso (ìbẹ̀rẹ̀)
 
 ```bash
 omniroute connect 192.168.0.15
 # Ọ̀rọ̀ aṣínà ìṣàkóso fún http://192.168.0.15:20128: ********
-# ✔ A ti sopọ̀ mọ́ http://192.168.0.15:20128 — context '192.168.0.15' (ààlà: admin)
+# ✔ A ti sopọ̀ mọ́ http://192.168.0.15:20128 — àyíká '192.168.0.15' (scope: admin)
 ```
 
-Ìlànà ọ̀rọ̀ aṣínà máa ń ṣẹ̀dá tóókì **admin** ní àkọ́kọ́ (wọ́n ní ọ̀rọ̀ aṣínà náà, nítorí náà
-o ti ní ìṣàkóso kíkún tẹ́lẹ̀). Dín ààlà kù pẹ̀lú `--scope`:
+Ìlànà ọ̀rọ̀ aṣínà ń dá àmi **admin** sílẹ̀ ní àìpẹ̀kun (nítorí pé o ní ọ̀rọ̀ aṣínà, o ti ní àkóso kíkún tẹ́lẹ̀). Dín àyè rẹ̀ kù pẹ̀lú `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Àwọn àṣàyàn: `--port <p>` (nígbà tí host kò ní èyí kankan), `--name <ctx>` (orúkọ context),
-`--scope read|write|admin`. A ó tẹ̀lé URL kíkún gẹ́gẹ́ bí ó ṣe rí:
+Àwọn àṣàyàn: `--port <p>` (nígbà tí host kò bá ní ọ̀kan), `--name <ctx>` (orúkọ àyíká),
+`--scope read|write|admin`. URL kíkún ni a máa bọ̀wọ̀ fún gẹ́gẹ́ bí ó ṣe rí:
 `omniroute connect https://omni.example.com`.
 
-### Pẹ̀lú tóókì tí a ti ṣẹ̀dá ṣáájú
+Nígbà tí ìfàṣẹsí ìgbésẹ̀ méjì dashboard bá ṣiṣẹ́ (Settings →
+Security), ọ̀rọ̀ aṣínà nìkan ni a kọ̀: CLI yóò béèrè fún kóòdù láti inú
+ìṣàfilọ́lẹ̀ ìfàṣẹsí (tàbí kóòdù ìmúpadàbọ̀sípò). Fìránṣẹ́ sí i ṣáájú pẹ̀lú `--totp <code>` fún
+lílò láìsí ìbáṣepọ̀.
 
-Ṣẹ̀dá tóókì tí a fi ààlà sí nínú dashboard (tàbí pẹ̀lú `omniroute tokens create`), lẹ́yìn náà
-lẹ̀ ẹ́ mọ́ ọn — kò nílò ọ̀rọ̀ aṣínà:
+### Pẹ̀lú àmi tí a ṣe jáde tẹ́lẹ̀
+
+Ṣe àmi kan tí a yan àyè rẹ̀ nínú dashboard (tàbí pẹ̀lú `omniroute tokens create`) kí o
+sì lẹ̀ mọ́ ọn — kò nílò ọ̀rọ̀ aṣínà:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI náà máa ń fìdí rẹ̀ múlẹ̀ nípasẹ̀ `GET /api/cli/whoami`, ó sì máa ń tọ́jú rẹ̀ gẹ́gẹ́ bí context tó ń ṣiṣẹ́.
+CLI máa ń fọwọ́sí rẹ̀ nípasẹ̀ `GET /api/cli/whoami`, ó sì ń fipamọ́ rẹ̀ gẹ́gẹ́ bí àyíká tó ń ṣiṣẹ́.
 
 ---
 
@@ -431,12 +435,12 @@ omniroute contexts remove 192-168-0-15 --yes   # yọ àyíká agbègbè kúrò 
 
 ## Àwọn endpoint API (ìtọ́kasí)
 
-| Ọ̀nà    | Route                 | Ìfàṣẹsí           | Scope                                |
-| ------ | --------------------- | ----------------- | ------------------------------------ |
-| POST   | `/api/cli/connect`    | ọ̀rọ̀ aṣínà ìṣàkóso | — (gbangba, ọ̀rọ̀ aṣínà ló dáàbò bò ó) |
-| GET    | `/api/cli/whoami`     | token ìwọlé       | kíkà                                 |
-| GET    | `/api/cli/tokens`     | token ìwọlé       | admin                                |
-| POST   | `/api/cli/tokens`     | token ìwọlé       | admin                                |
-| DELETE | `/api/cli/tokens/:id` | token ìwọlé       | admin                                |
+| Method | Route                 | Auth                       | Scope                      |
+| ------ | --------------------- | -------------------------- | -------------------------- |
+| POST   | `/api/cli/connect`    | ọ̀rọ̀ìpamọ́; 2FA tí ó bá ṣiṣẹ́ | — (àkọsílẹ̀, ọ̀rọ̀ìpamọ́ nílò) |
+| GET    | `/api/cli/whoami`     | àmi ìráyè                  | kíkà                       |
+| GET    | `/api/cli/tokens`     | àmi ìráyè                  | alákóso                    |
+| POST   | `/api/cli/tokens`     | àmi ìráyè                  | alákóso                    |
+| DELETE | `/api/cli/tokens/:id` | àmi ìráyè                  | alákóso                    |
 
-Wo [openapi.yaml](../openapi.yaml) fún àwọn schema kíkún.
+Wo [openapi.yaml](../openapi.yaml) fún àwọn àtòjọ schema ní kíkún.

@@ -15,51 +15,68 @@ OmniRoute ਪ੍ਰਸ਼ਾਸਕੀ ਕਾਰਵਾਈਆਂ, ਪ੍ਰਮਾ�
 
 ### ਪ੍ਰਸ਼ਾਸਕੀ ਆਡਿਟ ਇਵੈਂਟ (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` ਲਈ ਹਰ ਕਾਲ ਇੱਕ ਕਤਾਰ ਬਣਾਉਂਦੀ ਹੈ। ਐਕਸ਼ਨ ਸਟ੍ਰਿੰਗਾਂ `domain.verb` (ਜਾਂ `domain.verb.outcome`) ਪੈਟਰਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ। ਕੋਡ-ਟ੍ਰੀ ਵਿੱਚ ਪੁਸ਼ਟੀ ਕੀਤੀਆਂ ਐਕਸ਼ਨ ਕਿਸਮਾਂ ਵਿੱਚ ਇਹ ਸ਼ਾਮਲ ਹਨ:
+`logAuditEvent({ action, actor, target, details, ... })` ਨੂੰ ਕੀਤੀ ਹਰ ਕਾਲ
+ਇੱਕ ਕਤਾਰ ਬਣਾਉਂਦੀ ਹੈ। ਐਕਸ਼ਨ ਸਟ੍ਰਿੰਗਾਂ `domain.verb` (ਜਾਂ `domain.verb.outcome`)
+ਪੈਟਰਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ। ਟ੍ਰੀ ਵਿੱਚ ਪੁਸ਼ਟੀ ਕੀਤੀਆਂ ਐਕਸ਼ਨ ਕਿਸਮਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
 
-| ਐਕਸ਼ਨ                                | ਸਰੋਤ                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| ਐਕਸ਼ਨ                                | ਸਰੋਤ                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ਹਰ ਐਂਟਰੀ `action`, `actor` (ਡਿਫਾਲਟ ਰੂਪ ਵਿੱਚ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` ਅਤੇ `timestamp` ਨੂੰ ਕੈਪਚਰ ਕਰਦੀ ਹੈ। ਸੰਵੇਦਨਸ਼ੀਲ ਕੁੰਜੀਆਂ (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਕੋਈ ਵੀ ਚੀਜ਼, ਆਦਿ) ਨੂੰ ਕਤਾਰ ਲਿਖੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਰਿਕਰਸਿਵ ਢੰਗ ਨਾਲ `"[redacted]"` ਵਿੱਚ ਰੀਡੈਕਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਹਰ ਐਂਟਰੀ ਵਿੱਚ `action`, `actor` (ਡਿਫ਼ਾਲਟ `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, ਅਤੇ `timestamp` ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ। ਸੰਵੇਦਨਸ਼ੀਲ ਕੁੰਜੀਆਂ (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey` ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਕੋਈ ਵੀ ਚੀਜ਼,
+ਆਦਿ) ਨੂੰ ਕਤਾਰ ਲਿਖੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਦੁਹਰਾਅਵਾਂ ਰੂਪ ਵਿੱਚ `"[redacted]"` ਨਾਲ ਬਦਲ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
+
+`api_key.auth.touch` ਕਤਾਰਾਂ ਸਫਲ API-ਕੁੰਜੀ ਮੈਟਾਡਾਟਾ ਅਤੇ ਖੋਜ-ਸੰਬੰਧੀ
+ਰੀਡਾਂ (GET/HEAD) ਨੂੰ ਦਰਜ ਕਰਦੀਆਂ ਹਨ, ਜੋ ਕਦੇ ਵੀ ਰਿਕਵੈਸਟ ਲੌਗ ਤੱਕ ਨਹੀਂ ਪਹੁੰਚਦੀਆਂ:
+ਕਿਹੜੀ ਕੁੰਜੀ, ਕਦੋਂ, ਅਤੇ ਸਧਾਰਣੀਕ੍ਰਿਤ ਪਾਥ; ਇਹਨਾਂ ਨੂੰ ਇਕੱਠਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ
+ਵੱਧ ਤੋਂ ਵੱਧ 1,000 ਕਤਾਰਾਂ ਤੱਕ ਸੀਮਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। `noLog` ਵਾਲੀਆਂ ਕੁੰਜੀਆਂ ਅਤੇ
+ਵਾਤਾਵਰਣ ਕੁੰਜੀ ਨੂੰ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਕਾਲਰ ਦਾ IP ਪਤਾ ਅਤੇ ਯੂਜ਼ਰ-ਏਜੰਟ
+ਸਿਰਫ਼ ਉਦੋਂ ਜੋੜੇ ਜਾਂਦੇ ਹਨ ਜਦੋਂ `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ਫੀਚਰ ਫਲੈਗ
+ਚਾਲੂ ਹੋਵੇ (ਡਿਫ਼ਾਲਟ ਰੂਪ ਵਿੱਚ ਬੰਦ)।
 
 ### MCP ਟੂਲ ਕਾਲਾਂ (`mcp_tool_audit`)
 
-ਹਰ MCP ਟੂਲ ਇਨਵੋਕੇਸ਼ਨ `open-sse/mcp-server/audit.ts` ਰਾਹੀਂ ਇੱਕ ਕਤਾਰ ਲਿਖਦੀ ਹੈ। ਸਕੀਮਾ (`src/lib/db/migrations/002_mcp_a2a_tables.sql` ਤੋਂ):
+ਹਰ MCP ਟੂਲ ਇਨਵੋਕੇਸ਼ਨ `open-sse/mcp-server/audit.ts` ਰਾਹੀਂ ਇੱਕ ਕਤਾਰ ਲਿਖਦਾ ਹੈ।
+ਸਕੀਮਾ (`src/lib/db/migrations/002_mcp_a2a_tables.sql` ਤੋਂ):
 
-| ਕਾਲਮ             | ਨੋਟਸ                                         |
-| ---------------- | -------------------------------------------- |
-| `id`             | ਸਵੈਚਲਿਤ ਵਾਧਾ                                 |
-| `tool_name`      | MCP ਟੂਲ ਪਛਾਣਕਰਤਾ                             |
-| `input_hash`     | ਇਨਪੁੱਟ ਦਾ sha256 (ਕੋਈ ਪੇਲੋਡ ਸਟੋਰ ਨਹੀਂ ਹੁੰਦਾ) |
-| `output_summary` | ਛੋਟਾ, ਕੱਟਿਆ ਹੋਇਆ ਸਾਰ                         |
-| `duration_ms`    | ਅਸਲ ਬੀਤਿਆ ਸਮਾਂ                               |
-| `api_key_id`     | ਕਾਲਰ (null ਹੋ ਸਕਦਾ ਹੈ)                       |
-| `success`        | `1` / `0`                                    |
-| `error_code`     | ਅਸਫਲਤਾ ਹੋਣ 'ਤੇ ਅੰਤਿਮ ਐਰਰ ਕੋਡ                 |
-| `created_at`     | ISO ਟਾਈਮਸਟੈਂਪ                                |
+| ਕਾਲਮ             | ਨੋਟਸ                                     |
+| ---------------- | ---------------------------------------- |
+| `id`             | ਆਟੋਇਨਕ੍ਰੀਮੈਂਟ                            |
+| `tool_name`      | MCP ਟੂਲ ਪਛਾਣਕਰਤਾ                         |
+| `input_hash`     | ਇਨਪੁੱਟ ਦਾ sha256 (ਪੇਲੋਡ ਸਟੋਰ ਨਹੀਂ ਹੁੰਦਾ) |
+| `output_summary` | ਛੋਟਾ, ਕੱਟਿਆ ਹੋਇਆ ਸਾਰ                     |
+| `duration_ms`    | ਕੁੱਲ ਲੱਗਿਆ ਸਮਾਂ                          |
+| `api_key_id`     | ਕਾਲਰ (ਨੱਲਯੋਗ)                            |
+| `success`        | `1` / `0`                                |
+| `error_code`     | ਅਸਫਲਤਾ ਵੇਲੇ ਅੰਤਿਮ ਗਲਤੀ ਕੋਡ               |
+| `created_at`     | ISO ਟਾਈਮਸਟੈਂਪ                            |
 
-### ਬੇਨਤੀ / ਵਰਤੋਂ ਲੌਗ
+### ਰਿਕਵੈਸਟ / ਵਰਤੋਂ ਲੌਗ
 
-ਇਹ ਸੰਚਾਲਨਾਤਮਕ ਟੈਲੀਮੀਟਰੀ ਹਨ (ਸਖ਼ਤੀ ਨਾਲ ਪ੍ਰਸ਼ਾਸਕੀ ਆਡਿਟ ਨਹੀਂ), ਪਰ ਇੱਕੋ ਰਿਟੇਨਸ਼ਨ ਪਾਈਪਲਾਈਨ ਸਾਂਝੀ ਕਰਦੇ ਹਨ:
+ਇਹ ਓਪਰੇਸ਼ਨਲ ਟੈਲੀਮੈਟਰੀ ਹਨ (ਸਖ਼ਤੀ ਨਾਲ ਪ੍ਰਸ਼ਾਸਕੀ ਆਡਿਟ ਨਹੀਂ), ਪਰ ਇਹ ਉਹੀ
+ਰਿਟੈਂਸ਼ਨ ਪਾਈਪਲਾਈਨ ਸਾਂਝੀ ਕਰਦੇ ਹਨ:
 
-- `usage_history` — ਹਰ ਬੇਨਤੀ ਲਈ ਵਰਤੋਂ ਦਾ ਇਕੱਠਾ ਸਾਰ
-- `call_logs` — ਹਰ ਬੇਨਤੀ ਦਾ ਪੂਰਾ ਲੌਗ (ਕਤਾਰ ਸੀਮਾ ਦੇ ਅਧੀਨ, ਹੇਠਾਂ ਵੇਖੋ)
-- `proxy_logs` — ਪ੍ਰੌਕਸੀ ਟ੍ਰੈਫਿਕ ਲੌਗ (ਕਤਾਰ ਸੀਮਾ ਦੇ ਅਧੀਨ)
-- `request_detail_logs` — ਵਿਰਾਸਤੀ ਵਿਸਤ੍ਰਿਤ ਬੇਨਤੀ ਲੌਗ (ਮੌਜੂਦ ਹੋਣ 'ਤੇ ਅਜੇ ਵੀ ਛਾਂਟਿਆ ਜਾਂਦਾ ਹੈ)
+- `usage_history` — ਹਰ ਰਿਕਵੈਸਟ ਦੀ ਵਰਤੋਂ ਦਾ ਰੋਲ-ਅੱਪ
+- `call_logs` — ਹਰ ਰਿਕਵੈਸਟ ਦਾ ਪੂਰਾ ਲੌਗ (ਕਤਾਰ-ਸੀਮਾ ਦੇ ਅਧੀਨ, ਹੇਠਾਂ ਦੇਖੋ)
+- `proxy_logs` — ਪ੍ਰੌਕਸੀ ਟ੍ਰੈਫ਼ਿਕ ਲੌਗ (ਕਤਾਰ-ਸੀਮਾ ਦੇ ਅਧੀਨ)
+- `request_detail_logs` — ਵਿਰਾਸਤੀ ਵਿਸਤ੍ਰਿਤ ਰਿਕਵੈਸਟ ਲੌਗ (ਮੌਜੂਦ ਹੋਣ ’ਤੇ ਅਜੇ ਵੀ ਸਾਫ਼ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)
 
 ## ਸਟੋਰੇਜ ਸਕੀਮਾ
 

@@ -2,9 +2,14 @@
 // Family: haiper | Module: haiper | Lines: 3315-3426 (112 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "../../../utils/remoteMediaFetch.ts";
 
 export async function handleHaiperImageGeneration({
   model,
@@ -50,15 +55,16 @@ export async function handleHaiperImageGeneration({
       if (status.status === "completed" || status.status === "succeeded") {
         const imgUrl = status.creation_url || status.output?.image_url;
         if (imgUrl) {
-          const imgRes = await fetch(imgUrl);
-          if (!imgRes.ok) {
+          let buf: Buffer;
+          try {
+            ({ buffer: buf } = await downloadUpstreamMedia(imgUrl, UPSTREAM_MEDIA_LIMITS.image));
+          } catch (err) {
             return {
               success: false,
-              status: imgRes.status,
-              error: `Failed to download image: ${imgRes.status}`,
+              status: 502,
+              error: `Failed to download image: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
             };
           }
-          const buf = await imgRes.arrayBuffer();
           saveCallLog({
             method: "POST",
             path: "/v1/images/generations",
@@ -71,7 +77,7 @@ export async function handleHaiperImageGeneration({
             success: true,
             data: {
               created: Math.floor(Date.now() / 1000),
-              data: [{ b64_json: Buffer.from(buf).toString("base64") }],
+              data: [{ b64_json: buf.toString("base64") }],
             },
           };
         }
@@ -117,4 +123,3 @@ export async function handleHaiperImageGeneration({
     };
   }
 }
-

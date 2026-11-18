@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { SectionHeader } from "@omniroute/ui-kit/page-header";
 import { Button, ProviderCardGrid } from "@/shared/components";
-import { getProviderAlias } from "@/shared/constants/providers";
+import { computeNextBlockedProviders } from "@/shared/utils/noAuthProviders";
 import type { ProviderEntry } from "../providerPageUtils";
 import ProviderCard from "./ProviderCard";
 import { CategoryDot } from "./CategoryDot";
@@ -35,9 +35,9 @@ interface NoAuthProvidersSectionProps {
   blockedEntries: NoAuthEntry[];
   /** Current blocked-provider list (id/alias), used to compute the un-block delta. */
   blockedProviders: string[];
-  /** Persist a new blocked-provider list after an un-block. */
+  /** Persist a new blocked-provider list after a block / un-block. */
   onBlockedChange: (next: string[]) => void;
-  /** Surface a failure message (un-block PATCH failed). */
+  /** Surface a failure message (block / un-block PATCH failed). */
   onError: (message: string) => void;
   testingMode: string | null;
   onBatchTest: (mode: string) => void;
@@ -48,6 +48,10 @@ interface NoAuthProvidersSectionProps {
  * The "No Auth" section of the providers page. Disabled (blocked) no-auth
  * providers are surfaced in a dedicated "Disabled" group with an Enable button
  * that un-blocks them in place, instead of vanishing from the page (#5166/#5183).
+ *
+ * No-auth providers usually have no connection rows, so their card toggle and the
+ * Disable all / Enable all actions write `settings.blockedProviders`; each change is
+ * also forwarded to `onToggleProvider` so any connection rows follow the same state.
  */
 export default function NoAuthProvidersSection({
   visibleEntries,
@@ -62,11 +66,9 @@ export default function NoAuthProvidersSection({
 }: NoAuthProvidersSectionProps) {
   const t = useTranslations("providers");
 
-  const handleUnblock = async (providerId: string) => {
-    const alias = getProviderAlias(providerId);
-    const keysToRemove = new Set([providerId, alias].filter(Boolean) as string[]);
+  const updateBlocked = async (targetIds: string[], enable: boolean) => {
     const previous = blockedProviders;
-    const next = previous.filter((p) => !keysToRemove.has(p));
+    const next = computeNextBlockedProviders(previous, targetIds, enable);
     onBlockedChange(next);
     try {
       const response = await fetch("/api/settings", {
@@ -85,6 +87,17 @@ export default function NoAuthProvidersSection({
     }
   };
 
+  /** Flip the given entries on/off: connection rows via onToggleProvider, plus the block list. */
+  const setEntriesActive = (entries: NoAuthEntry[], active: boolean) => {
+    for (const { providerId, toggleAuthType } of entries) {
+      onToggleProvider(providerId, toggleAuthType, active);
+    }
+    return updateBlocked(
+      entries.map((entry) => entry.providerId),
+      active
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <SectionHeader
@@ -97,28 +110,36 @@ export default function NoAuthProvidersSection({
         }
         description={t("noAuthProvidersDesc")}
         actions={
-          <Button
-            size="sm"
-            variant="outline"
-            icon="play_arrow"
-            loading={testingMode === "no-auth"}
-            onClick={() => onBatchTest("no-auth")}
-            disabled={!!testingMode}
-            title={t("testAll")}
-          >
-            {testingMode === "no-auth" ? t("testing") : t("testAll")}
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              icon="play_arrow"
+              loading={testingMode === "no-auth"}
+              onClick={() => onBatchTest("no-auth")}
+              disabled={!!testingMode}
+              title={t("testAll")}
+            >
+              {testingMode === "no-auth" ? t("testing") : t("testAll")}
+            </Button>
+            <BulkToggleButtons
+              canDisable={visibleEntries.length > 0}
+              canEnable={blockedEntries.length > 0}
+              onDisableAll={() => setEntriesActive(visibleEntries, false)}
+              onEnableAll={() => setEntriesActive(blockedEntries, true)}
+            />
+          </>
         }
       />
       <ProviderCardGrid>
-        {visibleEntries.map(({ providerId, provider, stats, toggleAuthType }) => (
+        {visibleEntries.map((entry) => (
           <ProviderCard
-            key={providerId}
-            providerId={providerId}
-            provider={provider}
-            stats={stats}
+            key={entry.providerId}
+            providerId={entry.providerId}
+            provider={entry.provider}
+            stats={entry.stats}
             authType="no-auth"
-            onToggle={(active) => onToggleProvider(providerId, toggleAuthType, active)}
+            onToggle={(active) => setEntriesActive([entry], active)}
           />
         ))}
       </ProviderCardGrid>
@@ -128,14 +149,14 @@ export default function NoAuthProvidersSection({
             {t("disabled")}
           </p>
           <ProviderCardGrid>
-            {blockedEntries.map(({ providerId, provider }) => (
+            {blockedEntries.map((entry) => (
               <div
-                key={providerId}
+                key={entry.providerId}
                 className="flex items-center justify-between gap-2 rounded-xl border border-border bg-bg-subtle px-3 py-2.5 opacity-80"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-sm font-medium text-text-main">
-                    {provider.name}
+                    {entry.provider.name}
                   </span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-error">
                     <span className="size-1.5 rounded-full bg-error" />
@@ -145,7 +166,7 @@ export default function NoAuthProvidersSection({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleUnblock(providerId)}
+                  onClick={() => setEntriesActive([entry], true)}
                   className="shrink-0"
                   title={t("enableProvider")}
                 >
@@ -157,5 +178,48 @@ export default function NoAuthProvidersSection({
         </div>
       )}
     </div>
+  );
+}
+
+interface BulkToggleButtonsProps {
+  canDisable: boolean;
+  canEnable: boolean;
+  onDisableAll: () => void;
+  onEnableAll: () => void;
+}
+
+/** "Disable all" (visible cards) / "Enable all" (disabled cards) section actions. */
+function BulkToggleButtons({
+  canDisable,
+  canEnable,
+  onDisableAll,
+  onEnableAll,
+}: BulkToggleButtonsProps) {
+  const tc = useTranslations("common");
+  return (
+    <>
+      {canDisable && (
+        <Button
+          size="sm"
+          variant="outline"
+          icon="block"
+          onClick={onDisableAll}
+          title={`${tc("disable")} ${tc("all")}`}
+        >
+          {tc("disable")} {tc("all")}
+        </Button>
+      )}
+      {canEnable && (
+        <Button
+          size="sm"
+          variant="outline"
+          icon="check_circle"
+          onClick={onEnableAll}
+          title={`${tc("enable")} ${tc("all")}`}
+        >
+          {tc("enable")} {tc("all")}
+        </Button>
+      )}
+    </>
   );
 }

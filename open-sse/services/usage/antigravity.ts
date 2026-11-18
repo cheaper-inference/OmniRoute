@@ -562,6 +562,15 @@ async function probeAntigravityCreditBalanceUncached(
  * buckets, so prefer it when present and fall back to fetchAvailableModels only for
  * models that have no retrieveUserQuota entry (for example Claude/GPT OSS buckets).
  */
+/** Ultra always includes the Argon pool; otherwise trust the quota summary when it says. */
+function antigravityHasArgonField(
+  plan: string,
+  quotaSummary: { hasArgon?: boolean }
+): { hasArgon?: boolean } {
+  if (plan === "Ultra") return { hasArgon: true };
+  return typeof quotaSummary.hasArgon === "boolean" ? { hasArgon: quotaSummary.hasArgon } : {};
+}
+
 export async function getAntigravityUsage(
   provider: "antigravity" | "agy",
   accessToken?: string,
@@ -581,7 +590,11 @@ export async function getAntigravityUsage(
     // its User-Agent from the synchronous cache, and on a cold process (dashboard poll before
     // any chat request) that would otherwise be the static fallback. Best-effort — the
     // resolver swallows feed errors, caches for 6h and coalesces concurrent lookups.
-    await resolveAntigravityClientVersion(clientProfile);
+    // retrieveUserQuotaSummary below always uses the `cli` fingerprint, so warm that too.
+    await Promise.all([
+      resolveAntigravityClientVersion(clientProfile),
+      resolveAntigravityClientVersion("cli"),
+    ]);
     subscriptionInfo = await getAntigravitySubscriptionInfoCached(
       accessToken,
       providerSpecificData,
@@ -622,10 +635,11 @@ export async function getAntigravityUsage(
       );
     }
 
+    const plan = getAntigravityPlanLabel(subscriptionInfo, providerSpecificData);
     const [data, userQuotaData, quotaSummary] = await Promise.all([
       fetchAntigravityAvailableModelsCached(accessToken, projectId, clientProfile, options),
       fetchAntigravityUserQuotaCached(accessToken, projectId, clientProfile, options),
-      fetchAndParseAntigravityQuotaSummary(accessToken, projectId, clientProfile, options),
+      fetchAndParseAntigravityQuotaSummary(accessToken, projectId, "cli", { ...options, plan }),
     ]);
     const dataObj = toRecord(data);
     if (dataObj.__antigravityForbidden === true) {
@@ -751,13 +765,14 @@ export async function getAntigravityUsage(
         const family = getAntigravityQuotaFamily(modelId);
         return (
           (group.id === "gemini" && family === "gemini") ||
-          (group.id === "claude_gpt" && family === "claude")
+          (group.id === "claude_gpt" && family === "claude") ||
+          (group.id === "gemini_4_argon" && family === "argon")
         );
       }),
     }));
 
     return {
-      plan: getAntigravityPlanLabel(subscriptionInfo, providerSpecificData),
+      plan,
       quotaGroups,
       quotas: {
         ...quotas,
@@ -773,6 +788,7 @@ export async function getAntigravityUsage(
         }),
       },
       subscriptionInfo,
+      ...antigravityHasArgonField(plan, quotaSummary),
     };
   } catch (error) {
     return {
@@ -824,7 +840,7 @@ async function getAntigravitySubscriptionInfo(
     const response = await fetch(ANTIGRAVITY_CONFIG.loadProjectApiUrl, {
       method: "POST",
       headers: getAntigravityContentHeaders(profile, accessToken),
-      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata() }),
+      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata(profile) }),
     });
 
     if (!response.ok) return null;

@@ -23,6 +23,14 @@ const { isEmptyContentResponse } = await import("../../open-sse/services/errorCl
 const { detectMalformedNonStream } = await import("../../open-sse/utils/diagnostics.ts");
 const { validateResponseQuality } = await import("../../open-sse/services/combo.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
+const { isTrustedEmptyTurn } = await import("../../open-sse/services/combo/emptyTurnTrust.ts");
+const { markEmptyTurnExecution } = await import("../../open-sse/utils/emptyTurnPolicy.ts");
+const { translateNonStreamingResponse } =
+  await import("../../open-sse/handlers/responseTranslator.ts");
+const { sanitizeResponsesApiResponse } =
+  await import("../../open-sse/handlers/responseSanitizer.ts");
+const { finalizeResponsesTerminalStatus } =
+  await import("../../open-sse/translator/helpers/responsesTerminalStatus.ts");
 
 test.after(() => {
   core.resetDbInstance();
@@ -140,4 +148,107 @@ test("combo quality check accepts an empty refusal as a final answer", async () 
   });
   const result = await validateResponseQuality(response, true, { warn: () => {} });
   assert.equal(result.valid, true, "reason" in result ? String(result.reason) : undefined);
+});
+
+const nativeRefusal = {
+  id: "msg_refusal",
+  type: "message",
+  role: "assistant",
+  model: "claude-opus-5-5",
+  content: [],
+  stop_reason: "refusal",
+  stop_details: stopDetails,
+  usage: { input_tokens: 5, output_tokens: 0 },
+};
+
+function jsonResponse(body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+/** What a combo holds once chatCore has read a native non-streaming Claude reply. */
+async function nativeTrust(body: unknown): Promise<() => boolean> {
+  const response = markEmptyTurnExecution(
+    jsonResponse(body),
+    "https://api.anthropic.com/v1/messages",
+    { connectionId: "selected", apiKey: "synthetic-key" }
+  );
+  const permission = await isTrustedEmptyTurn(null, response);
+  await response.text();
+  return permission;
+}
+
+function toChatCompletion(body: unknown) {
+  return translateNonStreamingResponse(structuredClone(body), FORMATS.CLAUDE, FORMATS.OPENAI);
+}
+
+/** Same steps as nonStreamingClientTranslate.ts for a Responses client. */
+function toResponsesBody(body: unknown) {
+  const chat = toChatCompletion(body) as { choices: { finish_reason: string }[] };
+  const responses = sanitizeResponsesApiResponse(chat) as Record<string, unknown>;
+  finalizeResponsesTerminalStatus(responses, chat.choices[0].finish_reason);
+  return responses;
+}
+
+test("combo keeps a native non-streaming refusal translated to Chat Completions", async () => {
+  const chat = toChatCompletion(nativeRefusal) as { choices: { finish_reason: string }[] };
+  assert.equal(chat.choices[0].finish_reason, "content_filter");
+  const result = await validateResponseQuality(
+    jsonResponse(chat),
+    false,
+    { warn: () => {} },
+    null,
+    null,
+    await nativeTrust(nativeRefusal)
+  );
+  assert.equal(result.valid, true, "reason" in result ? String(result.reason) : undefined);
+});
+
+test("a native non-streaming refusal reaches a Responses client as incomplete", async () => {
+  const responses = toResponsesBody(nativeRefusal);
+  assert.equal(responses.status, "incomplete");
+  assert.deepEqual(responses.incomplete_details, { reason: "content_filter" });
+  const permission = await nativeTrust(nativeRefusal);
+  assert.equal(detectMalformedNonStream(responses, "claude", permission()), null);
+  const result = await validateResponseQuality(
+    jsonResponse(responses),
+    false,
+    { warn: () => {} },
+    null,
+    null,
+    permission
+  );
+  assert.equal(result.valid, true, "reason" in result ? String(result.reason) : undefined);
+});
+
+test("an empty filter stop without native trust still fails the combo target over", async () => {
+  const chat = await validateResponseQuality(jsonResponse(toChatCompletion(nativeRefusal)), false, {
+    warn: () => {},
+  });
+  assert.equal(chat.valid, false);
+  const responses = toResponsesBody(nativeRefusal);
+  assert.equal(detectMalformedNonStream(responses, "claude", false), "empty_choices");
+  const result = await validateResponseQuality(jsonResponse(responses), false, { warn: () => {} });
+  assert.equal(result.valid, false);
+});
+
+test("trust does not excuse an empty Responses body cut off by the token limit", async () => {
+  const truncated = {
+    object: "response",
+    status: "incomplete",
+    incomplete_details: { reason: "max_output_tokens" },
+    output: [],
+  };
+  assert.equal(detectMalformedNonStream(truncated, "claude", true), "empty_choices");
+  const result = await validateResponseQuality(
+    jsonResponse(truncated),
+    false,
+    { warn: () => {} },
+    null,
+    null,
+    true
+  );
+  assert.equal(result.valid, false);
 });

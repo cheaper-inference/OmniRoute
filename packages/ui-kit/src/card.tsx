@@ -1,4 +1,5 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
+import { brandTintVars } from "./brand-tint";
 import { cn } from "./lib/utils";
 
 export type CardFooterAlign = "start" | "between" | "end";
@@ -11,13 +12,16 @@ export interface CardProps extends Omit<ComponentProps<"div">, "title"> {
   flush?: boolean;
   /** A subtle neutral gradient for grouped secondary actions. */
   surface?: "default" | "subtle";
+  /** A third-party brand as a tint: `#rgb` or `#rrggbb`. Replaces `surface`; other values are ignored. */
+  brandColor?: string;
 }
 
-export function Card({ className, title, description, action, footer, footerAlign = "end", flush = false, surface = "default", children, ...props }: CardProps) {
+export function Card({ className, title, description, action, footer, footerAlign = "end", flush = false, surface = "default", brandColor, style, children, ...props }: CardProps) {
+  const brand = brandTintVars(brandColor);
   const hasHeader = title != null || description != null || action != null;
   const structured = hasHeader || footer != null;
   return (
-    <div data-slot="card" data-surface={surface === "subtle" ? surface : undefined} className={cn("ci-card", className)} {...props}>
+    <div data-slot="card" data-surface={surface === "subtle" && !brand ? surface : undefined} className={cn("ci-card", brand && "ci-brand-tint", className)} style={brand ? { ...brand, ...style } as CSSProperties : style} {...props}>
       {hasHeader && <CardHeader>{title != null && <CardTitle>{title}</CardTitle>}{description != null && <CardDescription>{description}</CardDescription>}{action != null && <CardAction>{action}</CardAction>}</CardHeader>}
       {structured && !flush ? <CardContent>{children}</CardContent> : children}
       {footer != null && <CardFooter align={footerAlign}>{footer}</CardFooter>}

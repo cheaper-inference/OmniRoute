@@ -1,3 +1,4 @@
+import type { UsageEvidence } from "../usage/usageEvidence";
 /**
  * Log export — the destination contract.
  *
@@ -23,6 +24,10 @@ import type { ZodType } from "zod";
  * and secret-redacted, and rows written under a `noLog` API key carry none.
  */
 export interface LogExportRecord {
+  usageEvidence?: UsageEvidence | null;
+  usageProvenance?: string | null;
+  estimated?: boolean;
+  costEstimated?: boolean;
   id: string;
   timestamp: string | null;
   method: string | null;
@@ -35,6 +40,8 @@ export interface LogExportRecord {
   account: string | null;
   connectionId: string | null;
   duration: number | null;
+  /** Time to first token, in milliseconds; null when unknown. */
+  ttftMs: number | null;
   tokensIn: number | null;
   tokensOut: number | null;
   tokensCacheRead: number | null;
@@ -96,6 +103,8 @@ export interface LogExportConfigField {
   type: LogExportFieldType;
   required?: boolean;
   secret?: boolean;
+  /** Generic form defaults; omitted preserves legacy behaviour. */
+  defaultValue?: string | number | boolean;
   placeholder?: string;
   helpFallback?: string;
   options?: ReadonlyArray<{ value: string; labelFallback: string }>;
@@ -127,5 +136,7 @@ export interface LogExportDestinationType<TConfig = Record<string, unknown>> {
   secretFields: readonly string[];
   fields: readonly LogExportConfigField[];
   configSchema: ZodType<TConfig>;
+  /** Create-time secret/default generation, before encryption and persistence. */
+  initializeConfig?(config: TConfig): TConfig;
   createClient(config: TConfig): LogExportClient;
 }

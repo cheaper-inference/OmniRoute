@@ -1,5 +1,6 @@
-import { hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
+import { getEmptyTurnDiagnostics, hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
 import { createCompletionDrain } from "./streamCompletionDrain.ts";
+import { createClientTerminalWatcher } from "./streamTerminal.ts";
 import type { StreamControllerOptions } from "./streamControllerTypes.ts";
 import { trackPendingRequest } from "@/lib/usageDb";
 import { STREAM_ACTIVE_TIMEOUT_MS, STREAM_IDLE_TIMEOUT_MS } from "../config/constants.ts";
@@ -13,6 +14,8 @@ import { createStallWatchdog } from "./streamStallWatchdog.ts";
 import {
   buildSyntheticResponsesFailureId,
   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+  withResponsesFailureContext,
+  type ResponsesStreamContext,
 } from "./responsesSequence.ts";
 
 // Stream handler with disconnect detection - shared for all providers
@@ -26,6 +29,7 @@ import {
 // the watchdog must track upstream byte activity instead. Ported from
 // decolua/9router#1243.
 const DEFAULT_STREAM_STALL_TIMEOUT_MS = STREAM_IDLE_TIMEOUT_MS;
+const SSE_EVENT_BOUNDARY = new TextEncoder().encode("\n\n");
 
 type StreamController = ReturnType<typeof createStreamController>;
 
@@ -180,36 +184,6 @@ function isDeadlineAbortReason(reason: unknown): reason is Error {
   );
 }
 
-function hasClientTerminalSseMarker(text: string, clientResponseFormat?: string | null): boolean {
-  if (/(?:^|\r?\n)data:\s*\[DONE\]\s*(?:\r?\n|$)/.test(text)) {
-    return true;
-  }
-
-  if (isResponsesClientFormat(clientResponseFormat)) {
-    return (
-      /(?:^|\r?\n)event:\s*response\.completed\s*(?:\r?\n|$)/.test(text) ||
-      /"type"\s*:\s*"response\.completed"/.test(text)
-    );
-  }
-
-  if (clientResponseFormat === FORMATS.CLAUDE) {
-    return (
-      /(?:^|\r?\n)event:\s*message_stop\s*(?:\r?\n|$)/.test(text) ||
-      /"type"\s*:\s*"message_stop"/.test(text)
-    );
-  }
-
-  // OpenAI chat completions: some providers omit `data: [DONE]` (already
-  // matched above) and terminate with a finish_reason chunk instead. A
-  // non-null finish_reason value is that terminal signal — a bare
-  // `finish_reason: null` delta chunk must NOT count (#10443).
-  if (clientResponseFormat === FORMATS.OPENAI) {
-    return /"finish_reason"\s*:\s*"[^"]+"/.test(text);
-  }
-
-  return false;
-}
-
 /**
  * Create stream controller with abort and disconnect detection
  * @param {object} options
@@ -308,6 +282,8 @@ export function createStreamController({
     startTime,
 
     isConnected: () => !disconnected,
+
+    clearPendingRequest,
 
     // Call when client disconnects
     handleDisconnect: (reason = "client_closed") => {
@@ -461,7 +437,8 @@ export function createStreamController({
 export function buildStreamErrorChunks(
   errorMsg: string,
   statusCode: number,
-  clientResponseFormat?: string | null
+  clientResponseFormat?: string | null,
+  responsesContext: ResponsesStreamContext = {}
 ) {
   const statusMapping = getStreamErrorStatusMapping(statusCode);
   const publicErrorMessage = getPublicErrorMessage(errorMsg, statusCode);
@@ -476,6 +453,10 @@ export function buildStreamErrorChunks(
       sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
       response: {
         id: buildSyntheticResponsesFailureId(),
+        object: "response",
+        created_at: Math.floor(Date.now() / 1000),
+        model: "unknown",
+        output: [],
         status: "failed",
         error: {
           message: publicErrorMessage,
@@ -485,7 +466,9 @@ export function buildStreamErrorChunks(
       },
     };
 
-    return encodeSseEvent(errorEvent, { event: "response.failed" });
+    return encodeSseEvent(withResponsesFailureContext(errorEvent, responsesContext), {
+      event: "response.failed",
+    });
   }
 
   if (clientResponseFormat === FORMATS.CLAUDE) {
@@ -655,16 +638,20 @@ function resolveSilentCloseOutcome(input: {
 export function createDisconnectAwareStream(
   transformStream,
   streamController,
-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
+  options: {
+    highWaterMark?: number;
+    permitsEmptyTurn?: () => boolean;
+    emptyTurnDiagnostics?: () => ReturnType<typeof getEmptyTurnDiagnostics>;
+  } = {}
 ) {
   const reader = transformStream.readable.getReader();
   const writer = transformStream.writable.getWriter();
   const terminalDecoder = new TextDecoder();
+  const terminalWatcher = createClientTerminalWatcher(streamController.clientResponseFormat);
   const contentDecoder = new TextDecoder();
   const contentWatcher = createStreamContentWatcher();
   const completedToolHandoffWatcher = createCompletedResponsesToolHandoffWatcher();
   const toolHandoffDecoder = new TextDecoder();
-  let terminalTail = "";
   let clientTerminalSeen = false;
   let bytesWereForwarded = false;
   const completionDrain = createCompletionDrain(reader, writer, streamController, () =>
@@ -686,16 +673,7 @@ export function createDisconnectAwareStream(
     }
     if (clientTerminalSeen) return;
 
-    terminalTail += terminalDecoder.decode(chunk, { stream: true });
-    // Scan before bounding retained state: a compaction terminal frame can
-    // exceed the tail budget because encrypted_content is carried inline.
-    clientTerminalSeen = hasClientTerminalSseMarker(
-      terminalTail,
-      streamController.clientResponseFormat
-    );
-    if (terminalTail.length > 4096) {
-      terminalTail = terminalTail.slice(-4096);
-    }
+    clientTerminalSeen = terminalWatcher.note(terminalDecoder.decode(chunk, { stream: true }));
     if (clientTerminalSeen) {
       streamController.markClientTerminalSeen?.();
     }
@@ -751,14 +729,26 @@ export function createDisconnectAwareStream(
                 // downstream may have closed; stream already marked complete
               }
             } else if (silentClose) {
+              console.warn(
+                `[STREAM] detector=post-translation reason=${
+                  silentClose.reason === "Provider returned empty content"
+                    ? "empty-content"
+                    : "missing-terminal"
+                } native=${JSON.stringify(
+                  options.emptyTurnDiagnostics?.() ?? { nativeExecutionObserved: false }
+                )}`
+              );
               streamController.handleError(
                 Object.assign(new Error(silentClose.reason), { statusCode: 502 })
               );
               try {
+                // Isolate generated failure from any unfinished provider data.
+                if (!terminalWatcher.atBoundary()) controller.enqueue(SSE_EVENT_BOUNDARY);
                 for (const chunk of buildStreamErrorChunks(
                   silentClose.reason,
                   502,
-                  streamController.clientResponseFormat
+                  streamController.clientResponseFormat,
+                  terminalWatcher.responsesContext()
                 )) {
                   controller.enqueue(chunk);
                 }
@@ -809,10 +799,12 @@ export function createDisconnectAwareStream(
           const statusCode = getErrorStatusCode(error);
 
           try {
+            if (!terminalWatcher.atBoundary()) controller.enqueue(SSE_EVENT_BOUNDARY);
             for (const chunk of buildStreamErrorChunks(
               errorMsg,
               statusCode,
-              streamController.clientResponseFormat
+              streamController.clientResponseFormat,
+              terminalWatcher.responsesContext()
             )) {
               controller.enqueue(chunk);
             }
@@ -905,6 +897,7 @@ export function pipeWithDisconnect(
       {
         highWaterMark: opts.highWaterMark,
         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+        emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
       }
     );
   }
@@ -1093,17 +1086,30 @@ export function pipeWithDisconnect(
     }, contentStallTimeoutMs);
   };
 
+  // A request-signal abort calls the inner controller directly (bound in
+  // createStreamController), which skips the wrapper below. Watch the same signal so
+  // that path clears the timers too; every normal terminal path detaches the listener.
+  const abortSignal = streamController.signal;
+  const clearOnAbort = () => {
+    clearWatchdogs();
+    clearContentStall();
+  };
+  const detachAbortWatch = () => abortSignal?.removeEventListener?.("abort", clearOnAbort);
+  abortSignal?.addEventListener?.("abort", clearOnAbort, { once: true });
+
   // Wrap controller so every termination path clears all watchdog timers.
   // Without this, abort/complete/error/disconnect paths leave a timer armed
   // and a stale abort could fire after the request has already ended.
   const wrappedController: StreamController = {
     ...streamController,
     handleComplete: () => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.handleComplete();
     },
     handleError: (e: unknown) => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       // A watchdog already fired its own handleError — the inner pull()
@@ -1113,11 +1119,13 @@ export function pipeWithDisconnect(
       streamController.handleError(e);
     },
     handleDisconnect: (reason?: string) => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.handleDisconnect(reason);
     },
     abort: () => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.abort();
@@ -1140,6 +1148,8 @@ export function pipeWithDisconnect(
       armStall();
       armActive();
       armContentStall();
+      // The request may already be aborted: the abort event fired before the listener.
+      if (abortSignal?.aborted) clearOnAbort();
     },
     transform(chunk, controller) {
       armStall();
@@ -1165,6 +1175,7 @@ export function pipeWithDisconnect(
       controller.enqueue(chunk);
     },
     flush() {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
     },
@@ -1179,6 +1190,7 @@ export function pipeWithDisconnect(
     {
       highWaterMark: opts.highWaterMark,
       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+      emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
     }
   );
 }

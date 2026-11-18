@@ -81,6 +81,18 @@ Puhverserverid on kasulikud ka väljaspool blokeeritud piirkondi:
 
 ---
 
+## Uute kontode puhverserveri vaikeolek
+
+sisse** Seaded → Puhverserver → Globaalne konfiguratsioon** , kasutage** Luba uute ühenduste jaoks vaikimisi puhverserver** äsja lisatud pakkujakontode esialgse puhverserveri oleku valimiseks.
+
+Uus säte juhib äsja lisatud pakkujakontode esialgset puhverserveri olekut. See ei muuda olemasolevaid kontosid ega asenda globaalset puhverserveri lülitit. Selle algväärtus säilitab varasema käitumise. Lülitage see üks kord välja, et luua tulevasi kontosid, kus puhverserver on vaikimisi keelatud.
+
+Eelistus salvestatakse `defaultNewConnectionProxyEnabled` -na olemasolevate sätete API kaudu. Kui seda pole kunagi salvestatud, on see vaikimisi `true`. `false` salvestamine jõustub järgmiste uute kontode puhul ilma taaskäivitamiseta. `POST /api/providers` aktsepteerib valikulist ranget tõeväärtust `proxyEnabled`; selgesõnaline `true` või `false` on loomise vaikeväärtuse suhtes ülimuslik. Duplikaatkonto väljajätmine või OAuth uuesti ühendamine säilitab selle konto salvestatud oleku. Individuaalseid kontosid saab ka hiljem lubada või keelata.
+
+Pakkuja valikulised ülekanded kasutavad uute kontode jaoks sihtinstalli vaikeseadet ja säilitavad olemasolevate kontode asendamisel sihtkoha poliitika. Puhverserveri lülitid ei ole kaasaskantavad edastusväljad. Täielik varukoopia taastamine ja ajalooline JSON/SQL migratsioon säilitavad olemasoleva taastamise semantika, sealhulgas salvestatud kontoväärtused ja pärandskeemi vaikeseaded; seadete täielik taastamine võib ka selle eelistuse taastada.
+
+See eelistus ei määra puhverserverit ega kinnita, et see on terve või kasutusel. Tegelik marsruutimine sõltub endiselt globaalsest puhverserveri lülitist ja kohaldatavast puhverserveri konfiguratsioonist. Ilma püsiva kontota sünteetilised pakkujad, OAuth -liiklus enne konto loomist, environment/system puhverserverid ja väliste taustaprogrammide võrgud jäävad selle kohaldamisalast välja.
+
 ## 4-tasemeline puhverserverisüsteem
 
 OmniRoute toetab puhverserveri seadistamist **neljas sõltumatus ulatuses**, mis lahendatakse prioriteetsuse järjekorras:

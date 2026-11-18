@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
+import type { JSX } from "react";
 
 // SSR-safe origin via useSyncExternalStore.
 // Server snapshot returns "" (avoids hydration mismatch).
@@ -50,7 +51,7 @@ function LinkCard({ label, url, icon, prompt }: LinkCardProps): JSX.Element {
             size="sm"
             onClick={() => void handleCopy()}
             className={cn(
-              "h-6 shrink-0 gap-1 px-1.5 text-[10px] font-medium",
+              "h-6 shrink-0 gap-1 px-1.5 text-[10px]",
               copied ? "bg-success/10 text-success" : "text-text-muted hover:text-text-main"
             )}
             title={t("copyUrl")}

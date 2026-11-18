@@ -27,13 +27,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const repoRoot = path.join(path.dirname(new URL(import.meta.url).pathname), "..", "..");
-
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-14298-"));
 process.env.OMNIROUTE_API_KEY = "***";
 process.env.NODE_ENV = "test";
 
-const { runOAuthStart } = await import(path.join(repoRoot, "bin/cli/commands/oauth.mjs"));
+const { runOAuthStart } = await import(
+  new URL("../../bin/cli/commands/oauth.mjs", import.meta.url).href
+);
 
 function startFakeServer(handler) {
   const requests = [];
@@ -61,6 +61,13 @@ function startFakeServer(handler) {
 function respondJson(res, status, obj) {
   res.writeHead(status, { "content-type": "application/json" });
   res.end(JSON.stringify(obj));
+}
+
+async function closeFakeServer(server: http.Server) {
+  server.closeAllConnections();
+  await new Promise<void>((resolve, reject) =>
+    server.close((error) => (error ? reject(error) : resolve()))
+  );
 }
 
 // process.exit is called by the CLI on failure paths; capture the code and
@@ -152,7 +159,7 @@ test("#14298: copilot device flow resolves to the github backend key and polls /
       "poll must carry the PKCE verifier when present"
     );
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -196,7 +203,7 @@ test("#14298: a fatal poll error ends the flow instead of looping until timeout"
     assert.ok(Date.now() - started < 30000, "a fatal poll error must not burn the full timeout");
   } finally {
     process.stderr.write = realWrite;
-    server.close();
+    await closeFakeServer(server);
   }
 
   assert.equal(exitCode, 1, "a fatal poll error must exit(1)");

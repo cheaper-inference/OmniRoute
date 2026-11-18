@@ -38,31 +38,31 @@ Buƙata ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Abubuwan da Ake Rikodawa
+## Abin da Ake Rubutawa
 
-Sabis ɗin `usage.ts` yana ɗaukar **lamarin amfani** ga kowace buƙata:
+Sabis ɗin `usage.ts` yana tattara **aukuwar amfani** ga kowace buƙata:
 
-| Fili               | Nau'i   | Tushe                                                                 |
-| ------------------ | ------- | --------------------------------------------------------------------- |
-| `id`               | string  | UUID da aka samar yayin yin rikodi                                    |
-| `apiKeyId`         | string  | API key da ya fara buƙatar                                            |
-| `provider`         | string  | ID na provider (openai, anthropic, da sauransu)                       |
-| `model`            | string  | ID na model (gpt-5, claude-opus-4-6, da sauransu)                     |
-| `comboId`          | string? | ID na combo idan an tura ta cikin combo                               |
-| `promptTokens`     | number  | Daga martanin upstream                                                |
-| `completionTokens` | number  | Daga martanin upstream                                                |
-| `cachedTokens`     | number  | Tokens da aka samu daga cache (Anthropic prompt caching, da sauransu) |
-| `totalTokens`      | number  | prompt + completion                                                   |
-| `costUsd`          | number  | An ƙididdige shi daga bayanan farashi                                 |
-| `latencyMs`        | number  | Tsawon lokacin buƙatar daga farko zuwa ƙarshe                         |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`            |
-| `errorClass`       | string? | Ajin kuskure idan status != success                                   |
-| `timestamp`        | string  | ISO 8601 UTC                                                          |
-| `metadata`         | object  | Bayanai na musamman da plugin ya saka                                 |
+| Fanni              | Nau'i   | Tushe                                                                             |
+| ------------------ | ------- | --------------------------------------------------------------------------------- |
+| `id`               | string  | UUID da ake samarwa lokacin rubutawa                                              |
+| `apiKeyId`         | string  | Maɓallin API da ya fara buƙatar                                                   |
+| `provider`         | string  | ID na mai samarwa (openai, anthropic, da sauransu)                                |
+| `model`            | string  | ID na samfurin (gpt-5, claude-opus-4-6, da sauransu)                              |
+| `comboId`          | string? | ID na combo idan an bi ta combo                                                   |
+| `promptTokens`     | number  | Daga amsar mai samarwa na sama                                                    |
+| `completionTokens` | number  | Daga amsar mai samarwa na sama                                                    |
+| `cachedTokens`     | number  | Token da aka samu a ma'ajiyar wucin gadi (adana prompt na Anthropic, da sauransu) |
+| `totalTokens`      | number  | prompt + kammalawa                                                                |
+| `costUsd`          | number  | An lissafa daga bayanan farashi                                                   |
+| `latencyMs`        | number  | Tsawon lokacin buƙata daga farko zuwa ƙarshe                                      |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                        |
+| `errorClass`       | string? | Rukunin kuskure idan hali != nasara                                               |
+| `timestamp`        | string  | ISO 8601 UTC                                                                      |
+| `metadata`         | object  | Bayanai na musamman da plugin ya saka                                             |
 
-### Inda Tokens Suke Fitowa
+### Inda Token Suke Fitowa
 
-Ana ciro tokens daga martanin upstream provider a cikin **response handler**:
+Ana ciro token daga amsar mai samarwa na sama a cikin **mai sarrafa amsa**:
 
 ```ts
 // Daga open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Ga providers da ba sa dawo da bayanan amfani (wasu web-cookie providers), OmniRoute yana **kimanta** tokens ta amfani da ƙa'idar `~4 chars per token` (duba `open-sse/services/autoCombo/pipelineRouter.ts`).
+Ga masu samarwa da ba sa dawo da bayanan amfani (wasu masu samarwa na web-cookie), OmniRoute yana **ƙiyasta** token ta amfani da ƙa'idar ƙiyasi ta `~4 chars per token` (duba `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Cached Tokens
+### Token da Aka Adana a Ma'ajiyar Wucin Gadi
 
 OmniRoute yana bibiyar `cached_tokens` dabam da `prompt_tokens` saboda:
 
-- Anthropic prompt caching yana cajin rahusa ga cached tokens (10% na farashin al'ada)
-- Wasu providers suna dawo da `cache_read_input_tokens` waɗanda ya kamata a ƙididdige farashinsu ta wata hanya dabam
-- Bayanan nazari za su iya nuna **cache hit rate** = `cached_tokens / prompt_tokens`
+- Adana prompt na Anthropic yana cajin ragi ga token da aka adana (10% na farashin yau da kullum)
+- Wasu masu samarwa suna dawo da `cache_read_input_tokens` waɗanda ya kamata a sanya musu farashi dabam
+- Nazari zai iya nuna **ƙimar samun bayanai a ma'ajiyar wucin gadi** = `cached_tokens / prompt_tokens`
+
+### Binciken matakan rubutawa zuwa ma'ajiyar wucin gadi
+
+Sashen lafiyar ma'ajiyar prompt a allon Nazari yana bambanta rubutawa zuwa ma'ajiyar wucin gadi
+na minti 5 da awa 1 da mai samarwa ya bayar da rahoto. Ana kiyaye
+`usage.cache_creation.ephemeral_5m_input_tokens` da
+`usage.cache_creation.ephemeral_1h_input_tokens` na Anthropic yayin fassara bayanan amfani
+na yawo da marasa yawo, kuma ana adana su tare da taƙaitattun rajistar kira. Ba a ƙara jimillar
+rubutawa zuwa ma'ajiyar wucin gadi da aka haɗa a waɗannan rukunai a karo na biyu ba.
+
+Kiran da ke da ma'aunin rubutawa da aka haɗa kawai, ciki har da tsofaffin bayanai, suna da matakin
+da ba a sani ba. Idan rarrabawar ba ta cika ba, ragowar da ba a ware ba yana kasancewa ba a sani ba; ana yi wa ma'aunai marasa inganci ko
+masu saɓani alama maimakon a sanya musu TTL ba tare da sanarwa ba. Alamomin
+TTL daga ɓangaren buƙata ba hujja ba ne ta matakin da aka caje.
+
+Ƙiyasin rubutawa na sashen da ya yi daidai da na API ya ƙunshi matakan da aka bayar da rahoto kuma
+aka sanya wa farashi kawai, ba dukan buƙatar ba. Ga farashin samfuran Claude/Anthropic na asali, yana amfani da sau 1.25 na
+ƙimar shigarwa don rubutawar minti 5 da sau biyu na ƙimar shigarwa don rubutawar awa 1. Idan babu
+farashi, yana nuna cewa ba a samu ba, ba sifili ba. Ana ɗaukar farashi lokacin da ake rubuta kowane sabon kira;
+ba a sake sanya wa bayanan tarihi farashi ba. Saboda haka asusun biyan kuɗin rajista na iya samun
+ƙiyasin da ya yi daidai da na API ba tare da an kashe wannan adadin a matsayin kuɗi ko kaso na
+biyan kuɗin rajista ba. Lissafin kaso, kasafin kuɗi da ainihin kuɗin mai samarwa da ake da su ba su canza ba.
+
+Waɗannan bincike suna amfani da taƙaitaccen lafiyar ma'ajiyar wucin gadi mai iyaka da tsarin riƙe rajistar kira
+da ake da su. Ba sa canza tsoffin saitunan TTL na buƙata, hanyar bi ko zaɓin asusu.
+An ɗage ɗaukar TTL da abokin ciniki ya nema tare da ainihin TTL mai fita a iyakar aikawa
+ga mai samarwa; wannan sashe yana bayar da rahoton matakan da ke kan rasit, ba ainihin TTL mai fita ba.
+
+Aiwatarwa: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, da `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,33 +151,33 @@ Ga samfuran da ba su da bayanan farashi, OmniRoute yana koma wa **kimanta kuɗi*
 
 ---
 
-## Tattara Bayanai Bisa Tsawon Kwanaki
+## Haɗa Bayanai Bisa Zangon Kwanan Wata
 
-Module ɗin `usageAnalytics.ts` yana ƙididdige widget na dashboard daga ɗanyen bayanan amfani. Yana goyon bayan nau'ikan tsawon lokaci guda 7:
+Modul ɗin `usageAnalytics.ts` yana lissafa ɓangarorin allon bayanai daga ɗanyen bayanan amfani. Yana tallafa wa zangunan lokaci 7:
 
-| Tsawon lokaci | Tagar lokaci                          | Amfani                                    |
-| ------------- | ------------------------------------- | ----------------------------------------- |
-| `1d`          | Awanni 24 da suka gabata              | Gano ƙaruwar kuɗi a kowace awa            |
-| `7d`          | Kwanaki 7 da suka gabata              | Bita na mako-mako                         |
-| `30d`         | Kwanaki 30 da suka gabata             | Lissafin kuɗi na wata-wata                |
-| `90d`         | Kwanaki 90 da suka gabata             | Bincike na kwata-kwata                    |
-| `ytd`         | Tun daga 1 ga Janairun bana           | Bibiyar kasafin kuɗi na shekara           |
-| `all`         | Duk tsawon lokaci                     | Ƙididdigar duk tsawon rayuwar tsarin      |
-| `custom`      | Farawa/ƙarewa da mai amfani ya ayyana | Binciken ƙididdiga, tambayoyin wucin gadi |
+| Zango    | Tsawon lokaci                        | Yanayin amfani                               |
+| -------- | ------------------------------------ | -------------------------------------------- |
+| `1d`     | Sa'o'i 24 da suka gabata             | Gano hauhawar kuɗi a kowace awa              |
+| `7d`     | Kwanaki 7 da suka gabata             | Bitar mako                                   |
+| `30d`    | Kwanaki 30 da suka gabata            | Lissafin kuɗin wata                          |
+| `90d`    | Kwanaki 90 da suka gabata            | Nazarin kowane wata uku                      |
+| `ytd`    | Tun 1 ga Janairu na shekarar nan     | Bibiyar kasafin kuɗin shekara                |
+| `all`    | Duk tsawon lokaci                    | Ƙididdigar duk tsawon amfani                 |
+| `custom` | Farko/ƙarshe da mai amfani ya ayyana | Binciken kuɗi, tambayoyin buƙata ta musamman |
 
-### Widget na Dashboard da Aka Ƙididdige
+### Ɓangarorin Allon Bayanai da Ake Lissafawa
 
-Ga kowane tsawon lokaci, matakin nazari yana ƙididdige:
+Ga kowane zangon kwanan wata, ɓangaren nazari yana lissafa:
 
-| Widget                              | Bayani                                                       |
-| ----------------------------------- | ------------------------------------------------------------ |
-| **Katunan taƙaitawa**               | Jimillar buƙatu, jimillar kuɗi, jimillar token, ƙimar nasara |
-| **Jadawalin yanayin yau da kullum** | Kuɗi + token na kowace rana, a jere bisa samfuri             |
-| **Taswirar zafin ayyuka**           | Jadawalin sa'ar yini × ranar mako, launi = adadin buƙatu     |
-| **Rarrabawa bisa samfuri**          | Jadawalin kek na kuɗi bisa samfuri                           |
-| **Rarrabawa bisa mai samarwa**      | Jadawalin sanduna na buƙatu bisa mai samarwa                 |
-| **Manyan API keys**                 | Teburin manyan keys guda 10 bisa kuɗi                        |
-| **Nazarin kurakurai**               | Ƙimar kurakurai a tsawon lokaci, manyan ajin kurakurai       |
+| Ɓangare                            | Bayani                                                       |
+| ---------------------------------- | ------------------------------------------------------------ |
+| **Katunan taƙaitawa**              | Jimillar buƙatu, jimillar kuɗi, jimillar token, ƙimar nasara |
+| **Jadawalin sauyin yau da kullum** | Kuɗi + token a kowace rana, an jera su bisa samfurin         |
+| **Taswirar zafin ayyuka**          | Ragar awa ta rana × ranar mako, launi = yawan buƙatu         |
+| **Rarrabuwa bisa samfurin**        | Jadawalin da'ira na kuɗi bisa samfurin                       |
+| **Rarrabuwa bisa mai samarwa**     | Jadawalin sanduna na buƙatu bisa mai samarwa                 |
+| **Manyan maɓallan API**            | Teburin maɓallai 10 mafi girma bisa kuɗi                     |
+| **Nazarin kurakurai**              | Ƙimar kurakurai bisa lokaci, manyan rukunin kurakurai        |
 
 ### Samun Dama Ta Shirye-shirye
 
@@ -156,72 +186,72 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
   history,              // bayanan tarihin amfani
-  "7d",                 // tsawon lokaci: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
+  "7d",                 // zangon lokaci: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // taswirar haɗin mai samarwa (connectionId → sunan asusu)
   {
-    startDate: "2025-01-01",  // na zaɓi: don tsawon lokaci na "custom"
-    endDate: "2025-06-01",   // na zaɓi: don tsawon lokaci na "custom"
+    startDate: "2025-01-01",  // na zaɓi: don zangon "custom"
+    endDate: "2025-06-01",   // na zaɓi: don zangon "custom"
   }
 );
 
-console.log(analytics.summary.totalCost);   // 12.34 (cents)
+console.log(analytics.summary.totalCost);   // 12.34 (senti)
 console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
 
-## Aiwatar da Ƙa'idar Ƙayyadadden Amfani
+## Tilasta Iyakokin Amfani
 
-Ana aiwatar da ƙayyadadden amfani na kowace maɓallin API a wurare biyu:
+Ana tilasta iyakar amfani ta kowane maɓallin API a wurare biyu:
 
-1. **Iyaka mai sassauci** (`quotaWarnAt`): gargadi a dashboard lokacin da amfani ya wuce ma'aunin da aka saita
-2. **Iyaka mai tsauri** (`quotaLimit`): ana ƙin buƙata tare da HTTP 429 lokacin da aka wuce iyakar
+1. **Iyakar gargaɗi** (`quotaWarnAt`): gargaɗi a allon bayanai idan amfani ya wuce matakin da aka saita
+2. **Iyakar tsayawa** (`quotaLimit`): ana ƙin buƙata da HTTP 429 idan an wuce iyakar
 
-### Tsarawa
+### Saituna
 
 ```ts
-// Ga kowace maɓallin API
+// Ga kowane maɓallin API
 await updateApiKey(keyId, {
-  quotaWarnAt: 5_00,    // $5.00 — nuna gargadi
-  quotaLimit: 10_00,    // $10.00 — dakatarwa kai tsaye
+  quotaWarnAt: 5_00,    // $5.00 — nuna gargaɗi
+  quotaLimit: 10_00,    // $10.00 — dakatar gaba ɗaya
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Gudanar da Aiwatarwa
+### Tsarin Tilastawa
 
 ```
 Buƙata ──▶ quotaCheck()
               │
               ├── Cikin iyaka?  ──▶ ba da izini
               │
-              └── Ya wuce iyaka?  ──▶ 429 Too Many Requests
-                                      tare da taken Retry-After
+              └── Ya wuce iyaka?  ──▶ 429 Buƙatu Sun Yi Yawa
+                                   tare da kan bayanin Retry-After
 ```
 
-### Hotunan Matsayin Ƙayyadadden Amfani
+### Hotunan Yanayin Iyakar Amfani
 
-Jadawalin `quotaSnapshots` yana adana **tarihin matsayin ƙayyadadden amfani** domin nazarin sauye-sauye:
+Teburin `quotaSnapshots` yana adana **tarihin yanayin iyakar amfani** don nazarin sauye-sauye:
 
 | Fili | Bayani |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Maɓallin da ake bibiyarsa |
-| `window` | "day" | "week" | "month" |
-| `used` | Kuɗin da aka yi amfani da shi a wannan lokaci (cents) |
-| `limit` | Iyakar (cents) |
+| `window` | "rana" | "mako" | "wata" |
+| `used` | Kuɗin da aka yi amfani da su a wannan zangon (senti) |
+| `limit` | Iyakar (senti) |
 | `resetAt` | Lokacin da zangon zai sake farawa |
-| `createdAt` | Lokacin da aka ɗauki hoton matsayin |
+| `createdAt` | Lokacin da aka ɗauki hoton yanayin |
 
-Ana ɗaukar hotunan matsayin **a kowace buƙata** da ke amfani da kuɗi > 0, kuma ana amfani da su don:
+Ana ɗaukar hotunan yanayi **a kowace buƙata** da ke amfani da kuɗi > 0, kuma ana amfani da su don:
 
-- Nuna sandar ci gaban ƙayyadadden amfani a dashboard
-- Nuna jadawalan sauyin ƙayyadadden amfani na kwanaki 30
-- Kunna faɗakarwa lokacin da amfani ya kusanci iyakar
+- Nuna sandar ci gaban iyakar amfani a allon bayanai
+- Nuna jadawalin sauyin iyakar amfani na kwanaki 30
+- Kunna faɗakarwa idan amfani ya kusanci iyakar
 
 ---
 
 ## REST API
 
-### Jera Bayanan Amfani
+### Jera Bayanai na Amfani
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -253,7 +283,7 @@ Amsa:
 }
 ```
 
-### Samo Taƙaitaccen Bayanin Nazari
+### Samu Taƙaitaccen Nazari
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Amsa:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,26 +311,26 @@ Amsa:
 }
 ```
 
-### Neman Nazarin Amfani
+### Nemi Nazarin Amfani
 
-Ana samun bayanan amfani ta dashboard ko kayan aikin MCP, ba ta wuraren fitarwa na REST kai tsaye ba. Nazarin da ake da su:
+Ana samun bayanan amfani ta allon sa ido ko kayan aikin MCP, ba ta wuraren fitar da bayanai na REST kai tsaye ba. Nazarin da ake da shi:
 
-- **`/api/usage/analytics`** — jimillar ma'aunan amfani (a haɗa bisa model, provider, key)
-- **`/api/usage/quota`** — matsayin ƙayyadadden amfani na yanzu ga kowace maɓallin API
-- **`/api/usage/history`** — rajistan tarihin buƙatu
+- **`/api/usage/analytics`** — ma'aunan amfani da aka tattara (a rarraba bisa samfurin AI, mai samarwa, maɓalli)
+- **`/api/usage/quota`** — matsayin iyakar amfani na yanzu ga kowane maɓallin API
+- **`/api/usage/history`** — rajistar tarihin buƙatu
 
 ---
 
 ## Kayan Aikin MCP
 
-Kayan aikin MCP guda biyu suna ba wakilai damar samun bayanan amfani (duba `open-sse/mcp-server/tools/`):
+Kayan aikin MCP guda biyu suna bai wa wakilan AI damar samun bayanan amfani (duba `open-sse/mcp-server/tools/`):
 
-| Kayan aiki              | Bayani                                                                 |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `omniroute_cost_report` | Yana samar da rahoton kuɗi na kowace maɓalli na wani takamaiman lokaci |
-| `omniroute_check_quota` | Yana dawo da matsayin ƙayyadadden amfani na yanzu ga maɓallin API      |
+| Kayan aiki              | Bayani                                                                |
+| ----------------------- | --------------------------------------------------------------------- |
+| `omniroute_cost_report` | Yana samar da rahoton kuɗin kowane maɓalli na wani ƙayyadadden lokaci |
+| `omniroute_check_quota` | Yana mayar da matsayin iyakar amfani na yanzu ga maɓallin API         |
 
-Misalin kiran wakili:
+Misalin kiran kayan aiki daga wakilin AI:
 
 ```json
 {
@@ -318,38 +343,38 @@ Misalin kiran wakili:
 
 ## Riƙewa da Tsaftacewa
 
-Bayanan amfani suna ƙaruwa da kusan ~1-10KB a kowace buƙata. A babban sikeli, wannan na iya zama adadi mai yawa.
+Bayanan amfani suna ƙaruwa da ~1-10KB ga kowace buƙata. Idan buƙatun suka yi yawa, wannan na iya zama babba.
 
 ### Saitunan Riƙewa
 
-Ana saita tsawon lokacin riƙe tarihin amfani ta hanyar Database Settings a cikin UI ko ta `/api/settings/database`.
+Ana saita tsawon lokacin riƙe tarihin amfani ta Saitunan Rumbun Bayanai a UI ko ta `/api/settings/database`.
 
-A tsoho, ana riƙe tarihin amfani na tsawon **kwanaki 90**.
+Ta tsohuwa, ana riƙe tarihin amfani na **kwanaki 90**.
 
 ### Tsaftacewa
 
-Ana tsaftace tsofaffin bayanai ta `src/lib/db/cleanup.ts`:
+Ana share tsofaffin bayanai ta `src/lib/db/cleanup.ts`:
 
-- Tsarin cron da ke gudana a bango ne ke kunna shi
-- Yana share bayanan da ke cikin `usage_history` waɗanda suka girmi lokacin riƙewa da aka saita a `usageHistory`
+- Tsarin cron da ke aiki a bayan fage ne ke tayar da shi
+- Yana share bayanai daga `usage_history` waɗanda suka wuce tsawon lokacin riƙewa da aka saita a `usageHistory`
 
-### Kimanta Ma'ajiya
+### Ƙiyasin Wurin Ajiya
 
-| Yawan buƙatu        | Ma'ajiyar kwanaki 30 | Ma'ajiyar kwanaki 90 |
-| ------------------- | -------------------- | -------------------- |
-| Buƙatu 100/rana     | ~3MB                 | ~9MB                 |
-| Buƙatu 1,000/rana   | ~30MB                | ~90MB                |
-| Buƙatu 10,000/rana  | ~300MB               | ~900MB               |
-| Buƙatu 100,000/rana | ~3GB                 | ~9GB                 |
+| Yawan buƙatu        | Ajiya na kwanaki 30 | Ajiya na kwanaki 90 |
+| ------------------- | ------------------- | ------------------- |
+| Buƙatu 100/rana     | ~3MB                | ~9MB                |
+| Buƙatu 1,000/rana   | ~30MB               | ~90MB               |
+| Buƙatu 10,000/rana  | ~300MB              | ~900MB              |
+| Buƙatu 100,000/rana | ~3GB                | ~9GB                |
 
-Don zirga-zirga mai matuƙar yawa, yi la'akari da:
+Idan yawan buƙatu ya yi matuƙar yawa, yi la'akari da:
 
-- Rage lokacin riƙewa ta Database Settings
+- Rage tsawon lokacin riƙewa ta Saitunan Rumbun Bayanai
 - Amfani da `aggregated_metrics` maimakon ɗanyen bayanai (don nazari kawai)
 
 ---
 
-## Shawarwarin Inganta Kuɗi
+## Shawarwarin Rage Kuɗin Amfani
 
 ### 1. Yi Amfani da Samfurin da Ya Dace
 
@@ -357,26 +382,26 @@ Don zirga-zirga mai matuƙar yawa, yi la'akari da:
 # Amsa cikin sauri — yi amfani da mai arha + sauri
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Aiki mai rikitarwa — yi amfani da mai inganci
+# Aiki mai sarƙaƙiya — yi amfani da mai inganci
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Kunna Adana Bayanai na Wucin Gadi
+### 2. Kunna Adanawa a Ma'ajiyar Wucin Gadi
 
-Adana prompt na Anthropic yana rage **90% na kuɗin mahallin da ake maimaitawa**:
+Adana umarnin Anthropic a ma'ajiyar wucin gadi yana rage **kuɗi da kashi 90% ga bayanan mahalli da ake maimaitawa**:
 
 ```ts
-// Adanawar wucin gadi ta atomatik ce — kawai saka babban system prompt iri ɗaya
+// Adanawa a ma'ajiyar wucin gadi na faruwa ta atomatik — kawai haɗa wannan babban umarnin tsarin
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Za a adana shi ta atomatik
+  system: longSystemPrompt, // Za a adana shi a ma'ajiyar wucin gadi ta atomatik
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
-### 3. Yi Amfani da Matsewa
+### 3. Yi Amfani da Matsawa
 
-Matsewar RTK + Caveman tana rage **15-95% na kuɗi a zaman da ake yawan amfani da kayan aiki**:
+Matsawar RTK + Caveman tana rage **kuɗi da kashi 15-95% a zaman da ake yawan amfani da kayan aiki**:
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. Saita Ƙayyadadden Amfani ga Kowace Maɓalli
+### 4. Saita Iyakokin Amfani ga Kowanne Maɓalli
 
-Koyaushe saita `quotaLimit` don hana kuɗi ƙaruwa ba tare da iko ba:
+Koyaushe saita `quotaLimit` don hana kuɗin amfani ƙaruwa ba tare da iyaka ba:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Iyakar $10/wata
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Iyaka ta $10/wata
 ```
 
-### 5. Binciki Manyan Masu Amfani
+### 5. Binciki Masu Amfani Mafi Yawa
 
-Yi amfani da dashboard ko **`/api/usage/analytics`** don haɗawa bisa API key da jera su bisa kuɗi:
+Yi amfani da allon gudanarwa ko **`/api/usage/analytics`** don rarrabawa bisa maɓallin API da jerantawa bisa kuɗin amfani:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -405,21 +430,21 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ---
 
-## Warware Matsaloli
+## Magance Matsaloli
 
-### "Kuɗin ya fi yadda ake tsammani"
+### "Kuɗin amfani ya fi yadda aka zata"
 
 1. Duba **`/api/usage/analytics?groupBy=model`** — gano samfurin mai tsada
 2. Duba **`/api/usage/analytics?groupBy=apiKey`** — gano mai yawan amfani
-3. Tabbatar bayanan farashi sun sabunta: `POST /api/pricing/sync`
+3. Tabbatar bayanan farashi sun dace da na yanzu: `POST /api/pricing/sync`
 
-### "Wasu bayanai sun ɓace"
+### "Bayanan da aka adana sun ɓace"
 
-- Duba saitunan riƙewar DB a ƙarƙashin Dashboard → Database → Cleanup — aikin tsaftacewa na lokaci-lokaci yana share tsofaffin bayanai (`src/lib/db/cleanup.ts`)
-- Bincika kurakurai a `src/lib/db/usage*.ts` — ana rubuta gazawar rubutawa zuwa DB a log amma ba a nuna ta ga mai amfani
-- Tabbatar buƙatar ta isa `chatCore` — duba combo routing
+- Duba saitunan riƙe bayanai na DB a ƙarƙashin Allon Gudanarwa → Rumbun Bayanai → Tsaftacewa — aikin tsaftacewa na lokaci-lokaci yana goge tsofaffin bayanai (`src/lib/db/cleanup.ts`)
+- Duba kurakurai a `src/lib/db/usage*.ts` — ana rubuta gazawar rubutu zuwa DB a rajista amma ba a nuna su
+- Tabbatar cewa buƙatar ta isa `chatCore` da gaske — duba hanyar combo
 
-### "Ba a aiwatar da ƙayyadadden amfani"
+### "Ba a aiwatar da iyakar amfani"
 
 - Duba saitin `quotaLimit` na maɓallin
 - Tabbatar an saita `quotaWindow` daidai
@@ -429,8 +454,8 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Duba Kuma
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Tsarin teburan amfani
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — env vars na daidaita farashi
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Yadda `auto/fast`, `auto/cheap` ke rage kuɗi
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Cikakken bayani na `/api/usage/*`
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Tsarin teburorin bayanan amfani
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — masu canjin muhalli na daidaita farashi
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Yadda `auto/fast`, `auto/cheap` ke rage kuɗin amfani
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Cikakken jagoran `/api/usage/*`
 - Tushe: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

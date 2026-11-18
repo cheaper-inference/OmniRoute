@@ -25,26 +25,78 @@ omniroute launch --profile glm52  # Claude Code glm/glm-5.2ን በOmniRoute በ�
 
 ---
 
-## Claude Code ከጌትዌይ ጋር እንዴት እንደሚገናኝ
+## Claude ኮድ ከመግቢያው ጋር እንዴት እንደሚገናኝ
 
-Claude Code ከ **Anthropic Messages API** ጋር ይገናኛል፣ እናም የአካባቢ ተለዋዋጮችን በመጠቀም ወደ ብጁ
-መዳረሻ ይመራል (`--base-url` ጠቋሚ የለውም)፦
+Claude ኮድ ይናገራል**Anthropic መልዕክቶች API** እና ከአካባቢ ተለዋዋጮች ጋር በብጁ የመጨረሻ ነጥብ ላይ ተጠቁሟል ( `--base-url` ባንዲራ የለውም)
 
 | ተለዋዋጭ                                        | ዓላማ                                                                             |
 | -------------------------------------------- | ------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | የጌትዌይ መሠረታዊ URL (Claude Code `/v1/messages`ን ይጨምራል)። **የ`/v1` ቅጥያ አይኖርም።**      |
-| `ANTHROPIC_AUTH_TOKEN`                       | እንደ `Authorization: Bearer …` ይላካል — የOmniRoute መዳረሻ ቶከንዎን / API ቁልፍዎን ይጠቀሙ     |
-| `ANTHROPIC_API_KEY`                          | አማራጭ፦ እንደ `x-api-key` ይላካል። ሁለቱም ከተዋቀሩ፣ `ANTHROPIC_AUTH_TOKEN` ቅድሚያ ያገኛል        |
-| `ANTHROPIC_MODEL`                            | የተወሰነ ሞዴል እንዲጠቀም ያስገድዳል (የ`/model` መራጭን ነባሪ ይሽራል)                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ቤተኛው የ`/model` መራጭ ከ`/v1/models` የተገኙ `claude*`/`anthropic*` ሞዴሎችን ይዘረዝራል |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | በእያንዳንዱ ምላሽ የውጤት ቶከኖችን ይገድባል (ለምሳሌ `65536`)                                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ለራስ-ሰር ማጠቃለያ የቶከን ገደብ                                                           |
+| `ANTHROPIC_BASE_URL`                         | የጌትዌይ ሥር URL (Claude ኮድ `/v1/messages` ን ይጨምራል)።** `/v1` ቅጥያ የለም።**             |
+| `ANTHROPIC_AUTH_TOKEN`                       | እንደ `Authorization: Bearer …` — የተላከው የእርስዎን OmniRoute መዳረሻ ማስመሰያ/ API ቁልፍ ይጠቀሙ |
+| `ANTHROPIC_API_KEY`                          | አማራጭ፡ እንደ `x-api-key` ተልኳል። ሁለቱም ከተዋቀሩ `ANTHROPIC_AUTH_TOKEN` ያሸንፋል             |
+| `ANTHROPIC_MODEL`                            | አንድ የተወሰነ ሞዴል አስገድድ (የ `/model` መራጭ ነባሪውን ይሽራል)                                 |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → የቤተኛ `/model` መራጭ `claude*`/`anthropic*` ሞዴሎችን ከ `/v1/models` ይዘረዝራል።     |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | የካፕ ውፅዓት ቶከኖች በምላሽ (ለምሳሌ `65536`)                                               |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | የማስመሰያ ገደብ ለራስ-መጠቅለል                                                            |
 
-> የአካባቢ ተለዋዋጮች **በማስጀመሪያ ጊዜ አንድ ጊዜ** ይነበባሉ — ከቀየሯቸው በኋላ Claude Codeን እንደገና ያስጀምሩ።
+> Env vars ይነበባል** አንድ ጊዜ ጅምር ላይ** — እነሱን ከቀየሩ በኋላ Claude ኮድን እንደገና ያስጀምሩ።
 
-`omniroute launch` እነዚህን ሁሉ ያዋቅርልዎታል፦ መሠረታዊ URL + ቶከንን
-ከንቁው አውድ ይፈታል (ስለዚህ `omniroute connect <vps>` ከዚያም `omniroute launch`
-በቀጥታ ይሠራል)፣ የሰርቨሩን ጤና ይፈትሻል፣ እና `claude`ን ያስኬዳል።
+ከቋሚ ሕብረቁምፊ ይልቅ ለሚሽከረከር ምስክርነት፣ `apiKeyHelper` በ `~/.claude/settings.json` ወደ stdout ወደሚያትመው ትዕዛዝ ያቀናብሩ። Claude ኮድ በነባሪነት ውጤቱን ለአምስት ደቂቃዎች ይሸፍናል (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ያንን ይሻራል) እና እሴቱን በሁለቱም `Authorization: Bearer` እና `x-api-key` ይልካል። ስክሪፕቱ ምስክርነቱን ማተም አለበት እና ምንም ሌላ ነገር የለም — ከሱ ጎን ያለው ባነር ረዳቱን በ v2.1.227 + ላይ አይወድቅም።
+
+Entra ID SSO እንደዚህ ነው የሚሰራው `scripts/cli/omniroute-sso.mjs token` ከ API ቁልፍ ይልቅ OmniRoute የሚያረጋግጥ አጭር ጊዜ የሚቆይ የEntra access token ያትማል። [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ይመልከቱ።
+
+`omniroute launch` እነዚህን ሁሉ ያዘጋጀልዎታል፡ መሰረታዊውን URL + ቶከንን ከገባሪ አውድ ይፈታል (ስለዚህ `omniroute connect <vps>` ከዚያ `omniroute launch` ብቻ ይሰራል)፣ ጤናን ሰርቨር ይፈትሻል እና execs `claude`.
+
+---
+
+## የአጠቃቀም ባህሪ: ክፍለ-ጊዜዎች እና ፕሮጀክቶች
+
+OmniRoute የእያንዳንዱን API ቁልፍ ጥያቄዎች ወደ ውስጥ ይመድባል** ወኪል ክፍለ ጊዜዎች** እና መዝገቦች የትኛው** ፕሮጀክት** እያንዳንዱ ክፍለ ጊዜ በ (`agent_sessions` table) ላይ ሰርቷል፣ ስለዚህ አጠቃቀም እና ወጪ በእያንዳንዱ የቡድን አባል፣ በፕሮጀክት እና በአንድ ክፍለ ጊዜ ሪፖርት ሊደረግ ይችላል።
+
+ያለ ደንበኛ ማዋቀር የሚቀዳው፡-
+
+| መስክ    | ምንጭ                                                                                                                                    |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| ክፍለ ጊዜ | `x-claude-code-session-id` ራስጌ (ከ `metadata.user_id.session_id` ጋር ተመሳሳይ እሴት)፣ በእያንዳንዱ ክፍለ ጊዜ የተረጋጋ                                    |
+| ፕሮጀክት  | `Primary working directory:` መስመር Claude ኮድ በውስጡ የአካባቢ መልእክት ውስጥ ይልካል; በ `.claude/worktrees/` ስር ያሉ የ worktree አቃፊዎች ወደ ማከማቻው ስም ይወስዳሉ |
+| ቅርንጫፍ  | `Current branch:` ከ git ሁኔታ Claude ኮድ ከመጀመሪያው መልእክት ጋር ይልካል                                                                            |
+| ደንበኛ   | `user-agent` (`claude-cli/<version>`)                                                                                                  |
+
+Codex (`<environment_context><cwd>`) እና OpenCode (`x-opencode-session`) በተመሳሳይ መንገድ ይታወቃሉ። ቁልፎች በ** ምንም-ምዝግብ ማስታወሻ** የነቃ የክፍለ ጊዜ መታወቂያ እና ራስጌ የሚቀርቡ የፕሮጀክት መስኮችን ብቻ ማስቀመጥ; ከጥያቄው (መንገድ ፣ ቅርንጫፍ) የተነበበ ምንም ነገር አይከማችም።
+
+### ፕሮጀክቱን በግልፅ መሰየም (የሚመከር)
+
+የስራ ማውጫው በማሽኖች መካከል ይለያያል, ስለዚህ ተመሳሳይ ማከማቻ በተለያዩ መንገዶች ስር ሊታይ ይችላል. በምትኩ ፕሮጀክቱን በግልፅ ይላኩ፡- Claude Code በ `ANTHROPIC_CUSTOM_HEADERS` የተዘረዘሩ ማናቸውንም አርዕስት በእያንዳንዱ የሞዴል ጥያቄ ላይ ያክላል፣ እና OmniRoute ሁለቱን ያነባል፡-
+
+| ራስጌ                        | ዋጋ                                                         |
+| -------------------------- | ---------------------------------------------------------- |
+| `x-omniroute-project`      | የፕሮጀክት ስም፣ ለምሳሌ `omniroute`                                |
+| `x-omniroute-project-repo` | መደበኛ የርቀት መቆጣጠሪያ፣ ለምሳሌ `github.com/diegosouzapw/OmniRoute` |
+
+ሁለቱም የሚነበቡት ለባለቤትነት ብቻ ነው; ወደ ላይኛው ዥረት አቅራቢ በጭራሽ አይተላለፉም።
+
+`ANTHROPIC_CUSTOM_HEADERS` በሚነሳበት ጊዜ አንድ ጊዜ ይነበባል፣ እና የቅንጅቶች ፋይሎች ትክክለኛ እሴቶችን ያከማቻሉ፣ ስለዚህ Claude Code ሲጀመር ያሰሉት። ይህንን ወደ `~/.zshrc` ወይም `~/.bashrc` ያክሉ እና `claude` ከፕሮጀክት አቃፊው ይጀምሩ
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` አገላለጽ ማንኛቸውም ምስክርነቶችን፣ የመጠይቅ ሕብረቁምፊ እና በሩቅ URL ውስጥ የተከተተ ቁርጥራጭ፣ እና ራስጌዎች በ `ANTHROPIC_CUSTOM_HEADERS` ውስጥ ይቀመጣሉ። IDE ቅጥያዎች Claude ኮድን ያለእርስዎ ሼል ያስጀምራሉ፣ ስለዚህ ክፍለ ጊዜዎቻቸው ወደ የስራ ማውጫው ይመለሳሉ።
 
 ---
 

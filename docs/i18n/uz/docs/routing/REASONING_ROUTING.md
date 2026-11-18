@@ -38,24 +38,19 @@ va `any` yoki `all` boʻyicha moslashtirishni qoʻllab-quvvatlaydi.
 `connection` qoidasi faqat dastlabki qoida tanlanmagan va muayyan provayder ulanishi
 allaqachon tanlangan boʻlsa baholanadi. U faqat sarflanadigan kuch va budjetni oʻzgartirishi mumkin.
 
-## Sarflanadigan kuch va budjet
+## Harakat va byudjet
 
-`sourceEffort` qiymati sifatida `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` va
-`ultra` ni qabul qiladi. `missing` soʻrovda na alohida sarflanadigan kuch, na fikrlashni almashtirish
-parametri, na fikrlash budjeti mavjudligini anglatadi. Shu sababli faqat budjet signali faqat `any` bilan mos keladi.
+`sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` va `ultra` ni qabul qiladi. `missing` so'rovda na diskret harakat, na fikrlash tugmasi yoki fikrlash byudjeti mavjud emasligini anglatadi. Shuning uchun faqat byudjet signali faqat `any` tomonidan mos keladi.
 
 `effortMode` uchta variantga ega:
 
-- `inherit` mijozning sarflanadigan kuch qiymatini saqlaydi, bunda model yoki combo oʻzgarishiga ham ruxsat beriladi.
-- `default` faqat aniq mulohaza yuritish signali mavjud boʻlmaganda `targetEffort` ni oʻrnatadi.
-- `force` alohida sarflanadigan kuch qiymatini `targetEffort` bilan almashtiradi.
+- `inherit` mijozning harakatini saqlab qoladi, shu bilan birga model yoki kombinatsiyani o'zgartirishga ruxsat beradi.
+- `default` `targetEffort` faqat aniq fikrlash signali mavjud bo'lmaganda o'rnatadi.
+- `force` diskret harakatni `targetEffort` bilan almashtiradi.
 
-Bundan mustaqil ravishda, `budgetAction` qiymati `preserve`, `remove` yoki `set` boʻlishi mumkin. `none` bilan birga ishlatilgan `force`
-barcha tan olingan sarflanadigan kuch va budjet maydonlarini olib tashlaydi. `none` ni `set` bilan birga ishlatish yaroqsiz.
+Mustaqil ravishda `budgetAction` `preserve`, `remove` yoki `set` bo'lishi mumkin. `none` bilan `force` barcha tan olingan harakat va byudjet maydonlarini olib tashlaydi, keyin `reasoning_effort: "none"` o'rnatadi, chunki ba'zi provayderlar maydon yo'q bo'lganda fikrlashni yoqadilar. To'g'ridan-to'g'ri `none` rad etuvchi provayderlar jo'natilishda `open-sse/executors/base/reasoningEffort.ts` da sozlanadi. Buyruq kodi uni `low` bilan taqqoslaydi, javob shaklidagi so'rovlar bundan mustasno (`input` `messages`), u erda `none` saqlaydi. Cloudflare Workers AI (`cloudflare-ai`) da `none` rad etuvchi modellar (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low`; boshqa Ishchilar AI modellari `none` saqlaydi. Maydonni tashlab qo'yish bu erda variant emas, chunki mavjud bo'lmagan harakat modelning standart darajasida ishlaydi. `none` `set` bilan birgalikda yaroqsiz.
 
-Mos kelmasligi maʼlum boʻlgan modellarga yoʻnaltirilgan soʻrovlar yuqori oqimga yuborilishidan oldin rad etiladi. Combo
-maqsadlari uchun mos kelmaydigan elementlar olib tashlanadi; hech biri qolmasa, soʻrov `400` holatini qaytaradi.
-Imkoniyatlar haqidagi nomaʼlum maʼlumotlar ogohlantirish hosil qiladi va qoidani faol holda qoldiradi.
+Ma'lum bo'lgan mos kelmaydigan modellarga qaratilgan so'rovlar yuqori oqim qo'ng'irog'idan oldin rad etiladi. Birlashtirilgan maqsadlar uchun mos kelmaydigan yozuvlar olib tashlanadi; agar hech biri qolmasa, so'rov `400` holatini qaytaradi. Noma'lum qobiliyat ma'lumotlari ogohlantirish beradi va qoidani faol qoldiradi.
 
 ## Xavfsizlik va transportlar
 

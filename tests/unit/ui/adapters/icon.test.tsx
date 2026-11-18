@@ -20,6 +20,11 @@ describe("<Icon> adapter (icon name → Lucide only; no Material fallback)", () 
     expect(container.querySelector(".material-symbols-outlined")).toBeNull();
   });
 
+  it("draws the combo builder's 1/2/3 stage icons from one icon family", () => {
+    const stages = ["looks_one", "looks_two", "looks_3"].map((name) => ICON_MAP[name]?.displayName);
+    expect(stages).toEqual(["Tally1", "Tally2", "Tally3"]);
+  });
+
   it("exposes an accessible name when ariaLabel is given", () => {
     const { getByRole } = render(<Icon name="search" ariaLabel="Search" size={16} />);
     const svg = getByRole("img", { name: "Search" });

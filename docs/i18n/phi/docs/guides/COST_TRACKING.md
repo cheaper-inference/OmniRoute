@@ -36,65 +36,83 @@ Dahil pagtatantiya ang numero:
 
 ---
 
-## Paano tinatantiya ang mga gastos
+## Paano tinatantya ang mga gastos
 
 ### Ang pinagmulan ng pagpepresyo
 
-Nagmumula ang mga gastos sa isang pricing table na tinutukoy ayon sa sumusunod na pagkakasunod-sunod ng priyoridad
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Ang mga gastos ay nagmumula sa pinagsanib na talahanayan ng pagpepresyo sa [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), sa ganitong pagkakasunud-sunod ng pangunguna (** pinakamataas muna** ):
 
-1. **Mga override ng user** — mga presyong itinakda mo sa dashboard / sa pamamagitan ng `PATCH /api/pricing`.
-2. **Naka-sync na external pricing** — kinukuha mula sa pampublikong
-   `model_prices_and_context_window.json` ng LiteLLM kapag naka-enable ang sync (iniimbak sa hiwalay na
-   `pricing_synced` namespace upang hindi nito kailanman ma-overwrite ang iyong mga override).
-3. **Mga hardcoded na default** — kasama sa OmniRoute.
+1. **Nag-override ang user** Ang mga presyo — ay nakatakda sa dashboard o sa pamamagitan `PATCH /api/pricing` (ang `pricing` namespace).
+2. **pag-sync ng models.dev** — pricing na kinuha mula sa `https://models.dev/api.json` (ang `models_dev_pricing` namespace).
+3. **LiteLLM sync** Mga presyo — na kinuha mula sa pampublikong `model_prices_and_context_window.json` ng LiteLLM(ang namespace `pricing_synced` ).
+4. **Mga naka-hardcode na default** — rate na ipinadala sa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Ang external pricing sync ay **opt-in** at naka-disable bilang default. Mga nauugnay na env var
-(tingnan ang [`.env.example`](../../.env.example)):
+Para sa parehong provider/model, ino-overwrite ng mga value mula sa mga layer na may mas mataas na priyoridad ang mga tumutugmang field sa mas mababang mga layer; ang mga field na wala sa itaas na layer ay maaari pa ring magmula sa mas mababang layer. Ang pagkakasunud-sunod ay naayos kahit na ang parehong mga independiyenteng trabaho sa pag-sync ay tumatakbo nang sabay. `GET /api/pricing?includeSources=1` ay nagbabalik ng `pricing` at `sourceMap`, na ang mga label ng bawat modelo (`user`, `modelsDev`, `litellm`, `default`) ay tumutukoy sa pinakamataas na priyoridad na layer na naglalaman ng modelong iyon.
 
-| Env var                 | Default   | Layunin                                                                                                 |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | I-enable ang background na LiteLLM pricing sync sa startup.                                             |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval ng sync sa **segundo** (araw-araw bilang default).                                             |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Listahan ng mga source na pinaghihiwalay ng kuwit (`litellm` lamang ang sinusuportahan sa kasalukuyan). |
+**LiteLLM sync** ay opt-in, hindi pinagana bilang default. Ang mga variable ng kapaligiran nito (tingnan [`.env.example`](../../.env.example) ) ay:
+
+| Env var                 | Default   | Layunin                                                                                               |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Paganahin ang pag-sync ng pagpepresyo ng background LiteLLM.                                          |
+| `PRICING_SYNC_INTERVAL` | `86400`   | I-sync ang pagitan sa mga segundo (araw-araw).                                                        |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Pagpili ng pinagmulan para sa pag-sync na ito lamang; kasalukuyang `litellm` lang ang sinusuportahan. |
+
+**pag-sync ng models.dev** ay hiwalay sa LiteLLM sync at naka-disable din bilang default. Paganahin ito sa Mga Setting (models.dev sync) o gamitin ang mga variable na ito:
+
+| Env var                    | Default   | Layunin                                                                                                                                             |
+| -------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Ang Unset ay sumusunod sa toggle ng Mga Setting; `1/true/on/yes` forces on at `0/false/off/no` forces off (kahit na pinapagana ito ng Mga Setting). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Default na agwat ng pag-sync ng models.dev sa mga segundo (araw-araw).                                                                              |
+
+ginagawa `PRICING_SYNC_SOURCES`** hindi** paganahin ang models.dev; kinokontrol lamang nito ang pag-sync LiteLLM. Ang pagtanggal ng override ng user ay hindi na-clear ang alinman sa naka-sync na namespace; magiging epektibo ang susunod na magagamit na layer ng pagpepresyo. Para sa isang modelong walang presyo, tingnan ang parehong mga setting ng pag-sync at ang `sourceMap` bago magdagdag ng manu-manong override.
 
 ### Ang formula ng gastos
 
-Kinakalkula ang gastos para sa bawat request mula sa bilang ng mga token at mga rate sa bawat isang milyong token sa
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kinakalkula ang gastos sa bawat kahilingan mula sa mga bilang ng token at mga rate ng per-million-token sa [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Mga input token** (ibinawas ang mga cache read at cache-creation token) × `input` rate.
-- **Mga cache-read token** × `cached` rate (gagamitin ang input rate bilang fallback).
-- **Mga cache-creation token** × `cache_creation` rate (gagamitin ang input rate bilang fallback).
-- **Mga output token** × `output` rate.
-- **Mga reasoning token** × `reasoning` rate (gagamitin ang output rate bilang fallback).
+- **Mga token ng input** (bawas ang mga nabasang cache at mga token ng paglikha ng cache) × `input` rate.
+- **Mga token na binasa ng cache** × `cached` rate (bumabalik sa input rate).
+- **Mga token sa paggawa ng cache** × `cache_creation` rate (bumabalik sa input rate).
+- **Mga token ng output** × `output` rate.
+- **Mga token ng pangangatwiran** × `reasoning` rate (bumabalik sa output rate).
 
-Itinuturing ang lahat ng rate bilang USD sa bawat 1,000,000 token. Naglalapat ang Codex "fast"/"priority" o
-"flex" service tier ng cost multiplier (`getCodexFastCostMultiplier`) — hal., sinisingil ang flex
-nang may 50% diskuwento sa mga token, na ipinapakita bilang **flex savings** sa dashboard.
+Ang lahat ng mga rate ay binibigyang kahulugan bilang USD bawat 1,000,000 token. Ang Codex "mabilis"/"priyoridad" o "flex" na tier ng serbisyo ay naglalapat ng cost multiplier (`getCodexFastCostMultiplier`) — eg flex ay sinisingil sa 50% na diskwento sa token, na ipinapakita bilang** ibaluktot ang pagtitipid** sa dashboard.
 
-Nino-normalize muna ang mga pangalan ng model (inaalis ang mga provider-path prefix gaya ng `openai/` o
-`accounts/fireworks/models/`) upang maitugma pa rin ang mga historical row sa isang presyo.
+Na-normalize muna ang mga pangalan ng modelo (tinatanggal ang mga prefix ng provider-path gaya ng `openai/` o `accounts/fireworks/models/` ) kaya tumutugma pa rin ang mga makasaysayang hilera sa isang presyo.
 
-### Paano itinatala ang paggastos
+### Paano naitala ang paggastos
 
-- Kinakalkula ang gastos para sa bawat request pagkatapos ng response at itinatala sa paraang fire-and-forget upang
-  hindi ito kailanman magdagdag ng latency para sa client. Isine-schedule ang paggamit ng shared quota sa susunod na
-  event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Binu-buffer at fina-flush nang batch ang paggastos ng API key ng
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (default na 60s flush interval,
-  1,000-entry buffer). Maaaring isaayos sa pamamagitan ng:
+- Ang gastos sa bawat kahilingan ay kinukuwenta sa pagkumpleto ng kahilingan. Naka-iskedyul ang pagkonsumo ng shared-quota sa susunod na event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Ang paggastos sa API-key ay bina-buffer at pinapa-flush ng [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) sa mga batch (default na 60s flush interval, 1,000-entry buffer). Natutugtog sa pamamagitan ng:
 
-  | Env var                             | Default | Layunin                                         |
-  | ----------------------------------- | ------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval ng flush sa millisecond.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maximum na naka-buffer na entry bago mag-flush. |
+  | Env var                             | Default | Layunin                                      |
+  | ----------------------------------- | ------- | -------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Flush interval sa milliseconds.              |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max na buffered na mga entry bago mag-flush. |
 
-Ang mga halaga ng gastos sa dashboard ay **hindi** binabasa mula sa nakaimbak na halagang dolyar para sa bawat row — ang mga ito
-ay muling kinakalkula kaagad mula sa bilang ng mga token at sa kasalukuyang pricing table sa tuwing
-tumatakbo ang analytics endpoint. Nangangahulugan itong ang pagwawasto ng maling presyo (at muling pag-sync) ay
-nag-a-update sa mga historical na pagtatantiya ng gastos nang retroaktibo.
+Mas gusto ng mga gastos ang eksaktong singil na iniulat ng provider (`provider_cost_usd`), pagkatapos ay snapshot ng kahilingan sa presyo ng catalogue (`calculated_cost_usd`), pagkatapos ay muling pagpepresyo ng token mula sa kasalukuyang catalog. Ang mga nakaimbak na gastos ay hindi na muling sisingilin sa pamamagitan ng kanilang mga bilang ng token. Nagbabago pa rin ang mga legacy na token-only row kapag nagbago ang presyo ng kanilang catalog.
+
+### OCR at mga pag-embed
+
+- Ang mga matagumpay na kahilingan `/v1/ocr` ay gumagamit ng upstream `usage_info.pages_processed`, hindi ang hiniling na hanay ng pahina o ang bilang ng mga ibinalik na bagay sa pahina. Ang pagtatantya ay mga pahina × `ocr_cost_per_page` (absolute USD/page,** hindi** USD/million).
+- Nangangailangan ng hiwalay na taripa `ocr_cost_per_annotated_page` ang mga kahilingang may mga anotasyon ng dokumento o kahon ng hangganan. Kung wala ito, ang gastos ay nananatiling hindi alam; ang ordinaryong OCR taripa ay hindi tahimik na pinapalitan.
+- LiteLLM sync ay nagmamapa sa upstream `annotation_cost_per_page` na field sa `ocr_cost_per_annotated_page`, pinapanatili ang ganap USD/page value at mga entry na anotasyon lamang, kabilang ang tahasang zero. Ang isang ibinigay na canonical field ay mauuna; hindi papansinin ang mga di-wastong halaga ng alias. Pinapanatili ng mga override sa pagpepresyo ng user ang kanilang normal na priyoridad. Tingnan ang [LiteLLM's OCR pricing keys](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Ang paggamit OCR ay nag-iimbak ng bilang ng pahina, presyo ng yunit, kinakalkula na halaga USD, API key at napiling koneksyon. Ang mga pahina ay hindi kailanman kinakatawan bilang mga token. Ang mga log ng tawag ay naglalaman ng metadata ng pagsingil, hindi URLs ng dokumento, PDF byte o na-extract na text.
+- Ang mga matagumpay na kahilingan `/v1/embeddings` ay nagtatala ng isang hilera ng paggamit sa bawat pisikal na batch, kabilang ang mga hiwalay na batch na nakumpleto sa parehong millisecond. Ang mga singil na iniulat ng provider ay nangunguna kaysa sa mga pagtatantya ng token; Ang mga combo wrapper ay hindi nagdaragdag ng bayad.
+- Ang history ng paggamit, ang Costs analytics, provider/account window, API-key na mga limitasyon sa paggastos, ang request-cost ledger at araw-araw na rollup sa paggamit ay kinabibilangan ng mga singil na ito. Ang mga walang-log na key ay nagpapanatili ng numerical accounting nang hindi pinapanatili ang source text.
+- Ang mga nawawalang paggamit o mga taripa ay** hindi kilala** , hindi libre: ang header ng response-cost ay tinanggal, at ang umiiral na patakaran sa hindi nakapresyo sa paggamit ay nalalapat sa mga limitadong API key. Ang mga tahasang na-configure na zero rate ay nananatiling wastong paggamit ng zero-cost.
+
+Forward-only accounting ito. Ang mga lumang OCR/embedding na tawag na hindi kailanman nagsulat ng kasaysayan ng paggamit ay hindi maaaring buuin mula sa paglipat na ito. Ang mga pagtatantya ng catalog ay mga pagtatantya USD, hindi isang invoice, at hindi kasama ang conversion ng currency, buwis o mga diskwento.
+
+### Pagsasalita at mga larawan
+
+- Ang matagumpay `/v1/audio/transcriptions`, `/v1/audio/speech` at mga pagtatangka sa pagbuo ng imahe ay nagbabahagi ng numerical accounting. Ang mga direktang at combo na tawag ay nagdadala ng API key ng tumatawag at ang napiling koneksyon; ang isang combo wrapper ay hindi kailanman nagdaragdag ng pangalawang debit.
+- USD na iniulat ng provider ay nanalo sa pagtatantya ng catalog, kabilang ang isang tahasang zero charge. OpenRouter `usage.cost` ng JSON ay na-normalize sa `cost_usd`. Kung hindi, ang mga sinusukat na token ay gumagamit ng mga presyo ng token, ang mga segundo ng transkripsyon ay gumagamit ng mga per-segundo na presyo, ang speech input ay gumagamit ng mga bilang ng karakter ng Unicode, at ang mga flat-price na larawan ay gumagamit ng numerong aktwal na ibinalik, hindi ang hiniling na `n`.
+- Ang binary OpenRouter TTS ay walang JSON na katawan ng paggamit. Pagkatapos makumpleto ang audio o magkansela ang tumatawag, itatanong OmniRoute ang henerasyong ID nito sa** pareho** na-configure ang pinagmulan OpenRouter. Ang isang EU na kahilingan ay hindi na babalik sa pandaigdigang pinagmulan. Ito ay isang bounded, read-only lookup; ang synthesis ay hindi muling sinubukan para sa accounting. Maaaring lumitaw ang mga tala sa pagsingil pagkatapos ng audio: ang mga muling pagsubok sa paghahanap ay tumatakbo sa background nang hanggang sa humigit-kumulang 52 segundo, kabilang ang mga deadline ng network.
+- Sa panahon ng paghahanap na iyon, ang tugon ng audio ay may `X-OmniRoute-Cost-Status: pending` at walang header ng gastos sa pagtugon. Ang huling singil nito ay lilitaw sa kasaysayan ng paggamit, analytics at ang pangunahing ledger pagkatapos ng pagkakasundo. Kung hindi available ang metadata, isang naka-configure na snapshot ng taripa ang ginagamit; kung hindi man ang gastos ay mananatiling hindi alam.
+- Ang mga segundo, ang mga character at mga bilang ng larawan ay may magkahiwalay na mga field ng unit ng pagsingil, hindi kailanman mga pekeng bilang ng token. Ang accounting ay nagpapanatili lamang ng numerical na paggamit, hindi speech text, transcript o image byte. Ang mga kasalukuyang hindi napresyuhan na mga pagbubukod sa imahe ay hindi nagbabago: ang isang tunay na nawawalang taripa ng imahe ay hindi bagong nakakandado ng isang limitadong susi, at ang tugon ay nag-aalis sa header ng gastos sa halip na ideklarang libre ang tawag. Ang isang pagkabigo sa pagpepresyo sa tindahan ay nagpapanatili pa rin ng ebidensya sa paggamit para sa mabigong pagsasara ng pagpapatupad.
+
+Walang makasaysayang singil speech/image na naimbento o na-backfill. Ang pagsingil ng provider ay nananatiling reference para sa mga invoice at para sa mga tawag na hindi naiulat ang pagsingil.
 
 ---
 
@@ -139,53 +157,50 @@ Makikita rin sa bahagi ng Mga Gastos ang mga sumusunod (lahat ay nasa ilalim ng 
 
 ---
 
-## Mga API endpoint
+## API mga endpoint
 
-Nangangailangan ang lahat ng ito ng management auth (loopback/JWT, sa pamamagitan ng `requireManagementAuth`) maliban kung
-may ibang nakasaad.
+Ang lahat ng ito ay nangangailangan ng pamamahala ng auth (loopback/JWT, sa pamamagitan `requireManagementAuth`) maliban kung nabanggit.
 
 ### Analytics ng paggamit at gastos
 
-| Paraan | Endpoint                 | Layunin                                                                                                                                                                              |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`  | `/api/usage/analytics`   | Kumpletong analytics ng gastos/paggamit: buod, pang-araw-araw na trend, ayon sa provider/model/API key/account/tier. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Paggamit ng quota ng bawat provider sa paglipas ng panahon. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                      |
-| `GET`  | `/api/usage/history`     | Mga raw na row ng history ng paggamit.                                                                                                                                               |
-| `GET`  | `/api/usage/call-logs`   | Mga log ng tawag sa bawat request (model, mga token, gastos, latency, status).                                                                                                       |
-| `GET`  | `/api/usage/quota`       | Status ng quota ng provider.                                                                                                                                                         |
-| `GET`  | `/api/usage/proxy-logs`  | Mga log ng proxy request.                                                                                                                                                            |
+| Pamamaraan | Endpoint                 | Layunin                                                                                                                                                            |
+| ---------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`      | `/api/usage/analytics`   | Buong cost/usage analytics: buod, pang-araw-araw na trend, ni provider/model/API key/account/tier. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`      | `/api/usage/utilization` | Paggamit ng quota ng bawat provider sa paglipas ng panahon. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                    |
+| `GET`      | `/api/usage/history`     | Mga hilera ng raw na history ng paggamit.                                                                                                                          |
+| `GET`      | `/api/usage/call-logs`   | Mga log ng tawag sa bawat kahilingan (modelo, mga token, gastos, latency, status).                                                                                 |
+| `GET`      | `/api/usage/quota`       | Katayuan ng quota ng provider.                                                                                                                                     |
+| `GET`      | `/api/usage/proxy-logs`  | Mga log ng kahilingan sa proxy.                                                                                                                                    |
 
 ### Mga badyet
 
-| Paraan | Endpoint                 | Layunin                                                                                                              |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Buod ng gastos + pagsusuri ng badyet para sa isang API key (kinakailangan ang `apiKeyId` query param).               |
-| `POST` | `/api/usage/budget`      | Magtakda ng pang-araw-araw/panglingguhan/pangbuwanang limitasyon sa USD + threshold ng babala para sa isang API key. |
-| `GET`  | `/api/usage/budget/bulk` | Maramihang buod ng badyet sa lahat ng API key.                                                                       |
+| Pamamaraan | Endpoint                 | Layunin                                                                                       |
+| ---------- | ------------------------ | --------------------------------------------------------------------------------------------- |
+| `GET`      | `/api/usage/budget`      | Buod ng gastos + budget check para sa isang API key (`apiKeyId` query param kinakailangan).   |
+| `POST`     | `/api/usage/budget`      | Itakda daily/weekly/monthly USD na limitasyon + na threshold ng babala para sa isang API key. |
+| `GET`      | `/api/usage/budget/bulk` | Maramihang buod ng badyet sa mga API key.                                                     |
 
-> Nakatuon ang budget API sa bawat **API key** (`apiKeyId`). Kasama sa mga limitasyong ibinabalik ng
-> `GET /api/usage/budget` ang `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> isang `warningThreshold`, at ang mga kasalukuyang kabuuan (`totalCostToday`, `totalCostMonth`, …).
+> Ang budget API ay saklaw bawat** susi ng API** (`apiKeyId`). Kasama sa mga limitasyong ibinalik ng `GET /api/usage/budget` `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, isang `warningThreshold`, at ang mga kabuuang tumatakbo (`totalCostToday`, `totalCostMonth`, …).
 
 ### Pagpepresyo
 
-| Paraan   | Endpoint                | Layunin                                                                                                                         |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Kasalukuyang pinagsamang pagpepresyo (user + synced + mga default). `?includeSources=1` upang makita ang source ng bawat entry. |
-| `PATCH`  | `/api/pricing`          | I-override ang pagpepresyo para sa `{ provider: { model: { input, output, cached, … } } }`.                                     |
-| `DELETE` | `/api/pricing`          | I-reset ang pagpepresyo sa mga default (opsyonal na nililimitahan ayon sa `?provider=&model=`).                                 |
-| `GET`    | `/api/pricing/defaults` | Ipakita ang mga default na fallback rate sa bawat 1M.                                                                           |
-| `GET`    | `/api/pricing/models`   | Pagpepresyong naka-key ayon sa model.                                                                                           |
-| `POST`   | `/api/pricing/sync`     | Mag-trigger ng manual na pag-sync mula sa mga external source (LiteLLM).                                                        |
-| `GET`    | `/api/pricing/sync`     | Kasalukuyang status ng pag-sync.                                                                                                |
-| `DELETE` | `/api/pricing/sync`     | I-clear ang lahat ng naka-sync na datos ng pagpepresyo.                                                                         |
+| Pamamaraan | Endpoint                | Layunin                                                                                                                                                                  |
+| ---------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`      | `/api/pricing`          | Pinagsamang apat na layer na pagpepresyo (user, models.dev, LiteLLM, mga default). ibinabalik ng `?includeSources=1` ang `pricing` + `sourceMap`.                        |
+| `PATCH`    | `/api/pricing`          | I-override ang pagpepresyo para sa `{ provider: { model: { input, output, cached, … } } }`.                                                                              |
+| `DELETE`   | `/api/pricing`          | Alisin ang mga override sa presyo ng user (opsyonal na saklaw ng `?provider=&model=`); Ang mga naka-sync na rate o mga built-in na default ay nananatiling mga fallback. |
+| `GET`      | `/api/pricing/defaults` | Ipakita ang mga default na rate ng fallback per-1M.                                                                                                                      |
+| `GET`      | `/api/pricing/models`   | Ang pagpepresyo ay sinuri ng modelo.                                                                                                                                     |
+| `POST`     | `/api/pricing/sync`     | Mag-trigger ng manu-manong pag-sync mula sa mga panlabas na mapagkukunan (LiteLLM).                                                                                      |
+| `GET`      | `/api/pricing/sync`     | Kasalukuyang katayuan ng pag-sync.                                                                                                                                       |
+| `DELETE`   | `/api/pricing/sync`     | I-clear ang LiteLLM-sync na pagpepresyo lamang (`pricing_synced`); Ang data ng models.dev ay hiwalay.                                                                    |
 
-### Iba pang mga endpoint na nauugnay sa gastos
+### Iba pang mga endpoint na may kaugnayan sa gastos
 
-| Paraan | Endpoint                      | Layunin                                                                                   |
-| ------ | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Kabuuang token ng libreng modelo, nagamit ngayong buwan, at natitirang libreng allowance. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Paggamit para sa isang pool ng nakabahaging quota.                                        |
+| Pamamaraan | Endpoint                      | Layunin                                                                                       |
+| ---------- | ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `GET`      | `/api/free-tier/summary`      | Mga kabuuang token ng libreng modelo, ginamit ngayong buwan, at natitirang libreng allowance. |
+| `GET`      | `/api/quota/pools/[id]/usage` | Paggamit para sa shared-quota pool.                                                           |
 
 ---
 
