@@ -127,6 +127,7 @@ function isRowInventoryProvider(provider: unknown, requestedModel: string): prov
   return (
     typeof provider === "string" &&
     (isSelfHostedChatProvider(provider) ||
+      provider === "chatgpt" ||
       (provider === "codex" && !isCodexImageModel(requestedModel)))
   );
 }
@@ -175,6 +176,9 @@ export async function loadAdvertisedModelsForConnections(
 ): Promise<Map<string, Set<string>>> {
   const advertised = new Map<string, Set<string>>();
   if (!requestedModel) return advertised;
+  for (const connection of connections) {
+    if (connection.provider === "chatgpt") advertised.set(connection.id, new Set());
+  }
 
   const inventoryProviders = collectInventoryProviders(
     connections,

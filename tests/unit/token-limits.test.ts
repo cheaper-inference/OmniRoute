@@ -200,7 +200,7 @@ test("seed total excludes cache tokens (no double-count) (FIX 2)", async () => {
   });
 
   // tokens_input ALREADY INCLUDES cache_read + cache_creation (these columns are a
-  // breakdown, per migration 012). Billable = input + output + reasoning ONLY.
+  // breakdown, per migration 012). Billable = input + output (reasoning is inside output) ONLY.
   insertUsage(
     "k2c",
     "anthropic",
@@ -215,8 +215,9 @@ test("seed total excludes cache tokens (no double-count) (FIX 2)", async () => {
     }
   );
 
-  // 500 + 200 + 40 = 740. Must NOT add cacheRead/cacheCreation again (would be 1140).
-  assert.equal(counter.seedWindowUsageFromHistory(limit, NOW_JAN), 740);
+  // 500 + 200 = 700: reasoning (40) is inside output. Must NOT add cacheRead/cacheCreation
+  // again (would be 1100) and must NOT add reasoning on top of output (would be 740).
+  assert.equal(counter.seedWindowUsageFromHistory(limit, NOW_JAN), 700);
 });
 
 test("cold-window recordTokenUsage seeds from history before increment (FIX 4)", async () => {

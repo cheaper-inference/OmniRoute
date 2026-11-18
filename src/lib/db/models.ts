@@ -7,6 +7,7 @@
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
+import { withCodexConnectionWrite, StaleCodexOperationError } from "./codexConnectionFences";
 import { isSyncedAtFresh } from "./models/syncedCatalogFreshness";
 import { getProviderConnectionsCount, touchConnectionSyncedModelsAt } from "./providers";
 import { type JsonRecord, getKeyValue } from "./models/shared";
@@ -59,6 +60,14 @@ export {
 } from "./models/aliases";
 export { getMitmAlias, setMitmAliasAll } from "./models/mitmAlias";
 export type { SyncedAvailableModel } from "./models/synced";
+export {
+  admitConnectionModels,
+  admitSyncedModelsByConnection,
+  getActiveConnectionAdmissionRefs,
+  unionAdmittedModels,
+  type AdmittedSyncedModels,
+  type ConnectionAdmissionRef,
+} from "./models/freeOnlyAdmission";
 export {
   getCustomModelVisionOverride,
   listCustomModelVisionOverrides,
@@ -612,12 +621,14 @@ export async function replaceSyncedAvailableModelsForConnection(
 ): Promise<SyncedAvailableModel[]> {
   const key = `${providerId}:${connectionId}`;
   const normalizedModels = normalizeSyncedAvailableModels(models, providerId);
-  persistCanonicalSyncedAvailableModels(key, normalizedModels, normalizeSyncedAvailableModels);
+  const applied = withCodexConnectionWrite(connectionId, () => {
+    persistCanonicalSyncedAvailableModels(key, normalizedModels, normalizeSyncedAvailableModels);
+    // Catalog and sync timestamp belong to one operation/owner and commit together.
+    if (connectionId) touchConnectionSyncedModelsAt(connectionId);
+    return true;
+  });
+  if (!applied) throw new StaleCodexOperationError();
   notifyQuotaCombosForProvider(providerId);
-  // #12849: stamp the sync time on every successful sync — even a re-sync that
-  // returns an unchanged list proves the catalog is still current, so staleness
-  // gating in getActiveSyncedCatalog must not treat it as aging regardless.
-  if (connectionId) await touchConnectionSyncedModelsAt(connectionId);
   // Return the full unioned list for the provider
   return getSyncedAvailableModels(providerId);
 }
@@ -964,37 +975,59 @@ function getCustomModelRow(providerId: string, modelId: string): JsonRecord | nu
   }
 }
 
+type NormalizeFlagSource = {
+  normalizeToolCallId?: unknown;
+  compatByProtocol?: CompatByProtocolMap;
+};
+
+/**
+ * Explicit normalizeToolCallId set on a custom-model row or compat override, if any:
+ * the per-protocol slice wins over the top-level flag; `undefined` means "not set".
+ */
+function readExplicitNormalizeToolCallId(
+  row: NormalizeFlagSource | null | undefined,
+  protocol: string | null
+): boolean | undefined {
+  if (!row) return undefined;
+  const pc = protocol ? row.compatByProtocol?.[protocol as keyof CompatByProtocolMap] : undefined;
+  if (pc && Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
+    return Boolean(pc.normalizeToolCallId);
+  }
+  if (Object.prototype.hasOwnProperty.call(row, "normalizeToolCallId")) {
+    return Boolean(row.normalizeToolCallId);
+  }
+  return undefined;
+}
+
 /**
  * Whether the given provider/model has "normalize tool call id" (9-char Mistral-style) enabled.
  * Custom model row wins; otherwise {@link getModelCompatOverrides}.
  * When `sourceFormat` is one of `openai` | `openai-responses` | `claude`, per-protocol
- * `compatByProtocol[sourceFormat].normalizeToolCallId` overrides the legacy top-level flag.
+ * `compatByProtocol[sourceFormat].normalizeToolCallId` overrides legacy top-level flag.
+ * If neither custom model nor compat override sets an explicit value, defaults to true for
+ * provider "mistral" (whose API enforces 9-character alphanumeric IDs) and false for all other providers.
+ *
+ * @param providerId - Target provider identifier (e.g. "mistral", "openai").
+ * @param modelId - Target model identifier.
+ * @param sourceFormat - Client source format key (e.g. "openai", "claude").
+ * @returns Whether tool call ID normalization to 9-char alphanumeric format is enabled.
  */
 export function getModelNormalizeToolCallId(
   providerId: string,
   modelId: string,
   sourceFormat?: string | null
 ): boolean {
-  const m = getCustomModelRow(providerId, modelId);
   const protocol = sourceFormat && isCompatProtocolKey(sourceFormat) ? sourceFormat : null;
+  const m = getCustomModelRow(providerId, modelId) as NormalizeFlagSource | null;
+  const fromCustom = readExplicitNormalizeToolCallId(m, protocol);
+  if (fromCustom !== undefined) return fromCustom;
 
-  if (m) {
-    if (protocol) {
-      const pc = (m.compatByProtocol as CompatByProtocolMap | undefined)?.[protocol];
-      if (pc && Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
-        return Boolean(pc.normalizeToolCallId);
-      }
-    }
-    return Boolean(m.normalizeToolCallId);
-  }
-  const co = readCompatList(providerId).find((e) => e.id === modelId);
-  if (protocol && co?.compatByProtocol?.[protocol]) {
-    const pc = co.compatByProtocol[protocol]!;
-    if (Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
-      return Boolean(pc.normalizeToolCallId);
-    }
-  }
-  return Boolean(co?.normalizeToolCallId);
+  const co = readCompatList(providerId).find((e) => e.id === modelId) as
+    NormalizeFlagSource | undefined;
+  const fromOverride = readExplicitNormalizeToolCallId(co, protocol);
+  if (fromOverride !== undefined) return fromOverride;
+
+  return providerId === "mistral";
 }
 
 /**

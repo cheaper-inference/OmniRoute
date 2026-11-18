@@ -227,10 +227,12 @@ const stats = {
   activeConnections: 0,
   lastRequestAt: null,
   lastInterceptAt: null,
+  ingestFailures: 0,
 };
 
 function writeStats() {
   try {
+    stats.ingestFailures = ingestShim.getIngestFailureCount();
     fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
   } catch {
     // Stats are best-effort and should not affect proxy traffic.
@@ -497,7 +499,10 @@ function captureToInspector(o) {
       proxyLatencyMs: o.proxyLatencyMs,
       upstreamLatencyMs: o.upstreamLatencyMs,
     });
-    void ingestShim.postIngestEntry(ROUTER_BASE_URL, INGEST_TOKEN, entry);
+    // A failed post finishes after the request handler, so it must trigger its own stats write.
+    void ingestShim.postIngestEntry(ROUTER_BASE_URL, INGEST_TOKEN, entry).then((ok) => {
+      if (!ok) writeStats();
+    });
   } catch {
     // capture is best-effort — never break proxy traffic
   }
