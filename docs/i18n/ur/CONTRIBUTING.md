@@ -291,72 +291,72 @@ PR کھولنے سے پہلے، اپنی تبدیلی کے لیے مرکوز ع�
 
 ---
 
-## پروجیکٹ کی ساخت
+## پروجیکٹ کا ڈھانچہ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ڈیش بورڈ کے صفحات (23 حصے)
-│   ├── api/                # API روٹس (51 ڈائریکٹریاں)
-│   └── login/              # توثیقی صفحات (.tsx)
-├── domain/                 # پالیسی انجن (policyEngine, comboResolver, costRules وغیرہ)
-├── lib/                    # بنیادی کاروباری منطق (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 پروٹوکول سرور
-│   ├── acp/                # Agent Communication Protocol رجسٹری
-│   ├── compliance/         # تعمیل کا پالیسی انجن
-│   ├── db/                 # SQLite ڈومین ماڈیولز + 130 مائیگریشنز
-│   ├── memory/             # مستقل مکالماتی میموری
-│   ├── oauth/              # OAuth فراہم کنندگان، سروسز، اور سہولیات
-│   ├── skills/             # قابلِ توسیع مہارتوں کا فریم ورک
-│   ├── usage/              # استعمال کی ٹریکنگ اور لاگت کا حساب
-│   └── localDb.ts          # صرف دوبارہ برآمد کی تہہ — یہاں کبھی منطق شامل نہ کریں
-├── middleware/              # درخواست کا مڈل ویئر (promptInjectionGuard)
-├── mitm/                   # MITM پراکسی (سرٹیفکیٹ، DNS، ہدف کی روٹنگ)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React اجزا (.tsx)
-│   ├── constants/          # فراہم کنندگان کی تعریفیں (329)، MCP اسکوپس، روٹنگ کی 20 حکمتِ عملیاں
-│   ├── utils/              # سرکٹ بریکر، سینیٹائزر، توثیقی معاون افعال
-│   └── validation/         # Zod v4 اسکیماز
-└── sse/                    # SSE پراکسی پائپ لائن
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ورک اسپیس
-├── executors/              # 150 ایگزیکیوٹر ماڈیولز (ایگزیکیوٹر کلاسز + ہر فراہم کنندہ کے معاون افعال)
-├── handlers/               # درخواستوں کے 11 ہینڈلرز (چیٹ، جوابات، ایمبیڈنگز، تصاویر وغیرہ)
-├── mcp-server/             # MCP سرور (110 منفرد ٹولز، 3 ٹرانسپورٹس، 33 اسکوپس)
-├── services/               # 178 اعلیٰ سطحی سروسز (combo, autoCombo, rateLimitManager وغیرہ)
-├── translator/             # فارمیٹ مترجم (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ٹرانسفارمر
-└── utils/                  # 22 یوٹیلیٹی ماڈیولز (اسٹریم، TLS، پراکسی، لاگنگ)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ڈیسک ٹاپ ایپ (کراس پلیٹ فارم)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ٹیسٹ رنر (1,574 ٹیسٹ فائلیں)
-├── integration/            # انٹیگریشن ٹیسٹس
-├── e2e/                    # Playwright ٹیسٹس
-├── security/               # سیکیورٹی ٹیسٹس
-├── translator/             # مترجم سے مخصوص ٹیسٹس
-└── load/                   # لوڈ ٹیسٹس
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # تعمیراتی فیصلوں کے ریکارڈز
-├── architecture/            # سسٹم کا فنِ تعمیر اور لچک
-├── comparison/              # OmniRoute بمقابلہ متبادل
-├── compression/             # کمپریشن گائیڈز اور قواعد
-├── dev/                     # ڈیولپمنٹ گائیڈز
-├── diagrams/                # تعمیراتی خاکے
-├── frameworks/              # MCP، A2A، OpenCode، میموری، مہارتیں
-├── guides/                  # صارف گائیڈ، Docker، سیٹ اپ، خرابیوں کا ازالہ
-├── i18n/                    # README کے بین الاقوامی تراجم
-├── marketing/               # مارکیٹنگ کا مواد
-├── ops/                     # تعیناتی، پراکسی، کوریج، ریلیزز
-├── providers/               # فراہم کنندہ سے مخصوص دستاویزات
-├── reference/               # API حوالہ، ماحولیاتی متغیرات، CLI ٹولز، مفت درجے
-├── releases/                # ریلیز نوٹس
-├── routing/                 # آٹو کومبو انجن، استدلال کی دوبارہ کارگزاری
-├── screenshots/             # ڈیش بورڈ کے اسکرین شاٹس
-├── security/                # حفاظتی حدود، تعمیل، پوشیدگی، ٹوکنز
-└── specs/                   # ڈیزائن کی وضاحتیں
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

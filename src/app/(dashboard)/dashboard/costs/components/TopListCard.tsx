@@ -33,9 +33,7 @@ export function TopListCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
-        {title}
-      </h3>
+      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
       <div className="space-y-2">
         {rows.slice(0, 6).map((row) => (
           <div

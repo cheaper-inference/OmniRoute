@@ -291,67 +291,67 @@ production build ஆகியவை CI-யின் பொறுப்பு —
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # டாஷ்போர்டு பக்கங்கள் (23 பிரிவுகள்)
-│   ├── api/                # API வழித்தடங்கள் (51 கோப்பகங்கள்)
-│   └── login/              # அங்கீகாரப் பக்கங்கள் (.tsx)
-├── domain/                 # கொள்கை இயந்திரம் (policyEngine, comboResolver, costRules போன்றவை)
-├── lib/                    # முதன்மை வணிகத் தர்க்கம் (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 நெறிமுறைச் சேவையகம்
-│   ├── acp/                # Agent Communication Protocol பதிவகம்
-│   ├── compliance/         # இணக்கக் கொள்கை இயந்திரம்
-│   ├── db/                 # SQLite களத் தொகுதிகள் + 130 இடமாற்றங்கள்
-│   ├── memory/             # நிலையான உரையாடல் நினைவகம்
-│   ├── oauth/              # OAuth வழங்குநர்கள், சேவைகள் மற்றும் பயன்பாட்டுக் கருவிகள்
-│   ├── skills/             # விரிவாக்கக்கூடிய திறன் கட்டமைப்பு
-│   ├── usage/              # பயன்பாட்டுக் கண்காணிப்பு மற்றும் செலவுக் கணக்கீடு
-│   └── localDb.ts          # மறு-ஏற்றுமதி அடுக்கு மட்டுமே — இங்கே ஒருபோதும் தர்க்கத்தைச் சேர்க்க வேண்டாம்
-├── middleware/              # கோரிக்கை இடைநிரல் (promptInjectionGuard)
-├── mitm/                   # MITM பதிலாள் (சான்றிதழ், DNS, இலக்கு வழிப்படுத்தல்)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React கூறுகள் (.tsx)
-│   ├── constants/          # வழங்குநர் வரையறைகள் (329), MCP நோக்கங்கள், 20 வழிப்படுத்தல் உத்திகள்
-│   ├── utils/              # சுற்று முறிப்பான், தூய்மையாக்கி, அங்கீகார உதவிகள்
-│   └── validation/         # Zod v4 திட்டவடிவங்கள்
-└── sse/                    # SSE பதிலாள் செயலாக்கத் தொடர்
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse பணியிடம்
-├── executors/              # 150 செயலாக்கி தொகுதிகள் (செயலாக்கி வகுப்புகள் + ஒவ்வொரு வழங்குநருக்குமான உதவிகள்)
-├── handlers/               # 11 கோரிக்கைக் கையாளிகள் (அரட்டை, பதில்கள், உட்பொதிவுகள், படங்கள் போன்றவை)
-├── mcp-server/             # MCP சேவையகம் (110 தனித்துவமான கருவிகள், 3 பரிமாற்ற முறைகள், 33 நோக்கங்கள்)
-├── services/               # 178 உயர்நிலைச் சேவைகள் (combo, autoCombo, rateLimitManager போன்றவை)
-├── translator/             # வடிவமைப்பு மொழிபெயர்ப்பிகள் (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API உருமாற்றி
-└── utils/                  # 22 பயன்பாட்டுக் கருவித் தொகுதிகள் (தரவு ஓட்டம், TLS, பதிலாள், பதிவாக்கம்)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron மேசைக்கணினிச் செயலி (பல தளங்களுக்கு ஏற்றது)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js சோதனை இயக்கி (1,574 சோதனைக் கோப்புகள்)
-├── integration/            # ஒருங்கிணைப்புச் சோதனைகள்
-├── e2e/                    # Playwright சோதனைகள்
-├── security/               # பாதுகாப்புச் சோதனைகள்
-├── translator/             # மொழிபெயர்ப்பிக்கான குறிப்பிட்ட சோதனைகள்
-└── load/                   # சுமைச் சோதனைகள்
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # கட்டமைப்புத் தீர்மானப் பதிவுகள்
-├── architecture/            # அமைப்புக் கட்டமைப்பு மற்றும் மீட்சித்திறன்
-├── comparison/              # OmniRoute மற்றும் மாற்றுகளின் ஒப்பீடு
-├── compression/             # சுருக்க வழிகாட்டிகள் மற்றும் விதிகள்
-├── dev/                     # உருவாக்க வழிகாட்டிகள்
-├── diagrams/                # கட்டமைப்பு வரைபடங்கள்
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # பயனர் வழிகாட்டி, Docker, அமைப்பு, சிக்கல் தீர்த்தல்
-├── i18n/                    # பன்னாட்டுமயமாக்கப்பட்ட README மொழிபெயர்ப்புகள்
-├── marketing/               # சந்தைப்படுத்தல் உள்ளடக்கங்கள்
-├── ops/                     # நிறுவல், பதிலாள், சோதனை உள்ளடக்கம், வெளியீடுகள்
-├── providers/               # வழங்குநர் சார்ந்த ஆவணங்கள்
-├── reference/               # API குறிப்பு, சூழல் மாறிகள், CLI கருவிகள், இலவச அடுக்குகள்
-├── releases/                # வெளியீட்டுக் குறிப்புகள்
-├── routing/                 # தானியங்கு-சேர்க்கை இயந்திரம், காரணவியல் மறுஇயக்கம்
-├── screenshots/             # டாஷ்போர்டு திரைப்பிடிப்புகள்
-├── security/                # பாதுகாப்புத் தடுப்புகள், இணக்கம், மறைநிலை, டோக்கன்கள்
-└── specs/                   # வடிவமைப்பு விவரக்குறிப்புகள்
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
