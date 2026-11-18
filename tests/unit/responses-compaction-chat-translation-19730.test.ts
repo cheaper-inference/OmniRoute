@@ -4,6 +4,7 @@ import { openaiResponsesToOpenAIRequest } from "../../open-sse/translator/reques
 import { convertResponsesApiFormat } from "../../open-sse/translator/helpers/responsesApiHelper.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { translateRequest } from "../../open-sse/translator/index.ts";
+import { normalizeCodexResponsesInput } from "../../open-sse/utils/responsesInputNormalization.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
 test.after(() => resetDbInstance());
@@ -114,23 +115,90 @@ test("compaction item with role assistant preserves assistant role", () => {
   assert.deepEqual(msgs[0].content, [{ type: "text", text: "I already investigated the bug." }]);
 });
 
-test("compaction_trigger marker is skipped without failing turn", () => {
-  const body = {
+test("compaction_trigger is rejected explicitly instead of answering as a normal turn", () => {
+  // Codex remote compaction v2 requires exactly one `compaction` output item for a request that
+  // carries this marker; a Chat Completions upstream cannot produce it, so dropping the marker
+  // would return a plain assistant message the client cannot use. Reject it so a combo can move
+  // on to a target that serves remote compaction.
+  const withHistory = {
     input: [
-      { type: "compaction_trigger" },
       {
         type: "message",
         role: "user",
         content: [{ type: "input_text", text: "continue" }],
       },
+      { type: "compaction_trigger" },
+    ],
+  };
+  const triggerOnly = { input: [{ type: "compaction_trigger" }] };
+
+  for (const body of [withHistory, triggerOnly]) {
+    assert.throws(() => openaiResponsesToOpenAIRequest("fixture-model", body, true, {}), {
+      statusCode: 400,
+      errorType: "unsupported_feature",
+    });
+  }
+});
+
+test("blank compaction content falls back to the readable text field", () => {
+  const body = {
+    input: [{ type: "compaction", content: "", text: "Summary kept in text" }],
+  };
+
+  const msgs = messages(openaiResponsesToOpenAIRequest("fixture-model", body, true, {}));
+  assert.equal(msgs.length, 1);
+  assert.deepEqual(msgs[0].content, [{ type: "text", text: "Summary kept in text" }]);
+});
+
+test("compaction content that is neither text nor a part array is not forwarded as-is", () => {
+  const body = {
+    input: [{ type: "compaction", content: { summary: "not a content array" } }],
+  };
+
+  assert.throws(() => openaiResponsesToOpenAIRequest("fixture-model", body, true, {}), {
+    statusCode: 400,
+    errorType: "unsupported_feature",
+  });
+});
+
+test("Codex normalization restores assistant compaction text as output_text", () => {
+  const body: Record<string, unknown> = {
+    input: [
+      { type: "compaction", role: "assistant", content: "I already investigated the bug." },
+      {
+        type: "compaction_summary",
+        role: "assistant",
+        content: [{ type: "input_text", text: "Root cause is in the parser." }],
+      },
+      { type: "compaction", role: "assistant", text: "Fix is staged." },
+      { type: "compaction", content: "User-side summary" },
     ],
   };
 
-  const result = openaiResponsesToOpenAIRequest("fixture-model", body, true, {});
-  const msgs = messages(result);
-  assert.equal(msgs.length, 1);
-  assert.equal(msgs[0].role, "user");
-  assert.deepEqual(msgs[0].content, [{ type: "text", text: "continue" }]);
+  normalizeCodexResponsesInput(body);
+
+  assert.deepEqual(body.input, [
+    {
+      type: "message",
+      role: "assistant",
+      content: [{ type: "output_text", text: "I already investigated the bug." }],
+    },
+    {
+      type: "message",
+      role: "assistant",
+      content: [{ type: "output_text", text: "Root cause is in the parser." }],
+    },
+    {
+      type: "message",
+      role: "assistant",
+      content: [{ type: "output_text", text: "Fix is staged." }],
+    },
+    {
+      type: "message",
+      role: "user",
+      content: [{ type: "input_text", text: "User-side summary" }],
+    },
+  ]);
 });
 
 test("compaction item with empty content rejects unsupported feature", () => {
