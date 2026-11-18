@@ -272,7 +272,6 @@ export async function getUsageForProvider(
     case "googleflow-web":
     case "googleflow":
     case "gflow":
-    case "flow":
       return await getGoogleFlowUsage(apiKey || accessToken || "", providerSpecificData);
     case "hyperagent":
     case "ha":
