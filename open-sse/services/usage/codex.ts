@@ -50,16 +50,21 @@ export async function getCodexUsage(
   providerSpecificData: Record<string, unknown> = {},
   connectionId?: string
 ) {
-  try {
-    // A rotated or imported token can belong to a different account than the
-    // connection's saved personal workspace. Do not attach that user's usage
-    // (including its paid plan) to the wrong connection.
-    if (codexCredentialBindingMismatch(accessToken, providerSpecificData)) {
-      return {
-        message: "Codex OAuth token identity does not match this connection; re-authenticate it.",
-      };
-    }
+  // Keep credential preflight outside the quota fetcher: existing quota
+  // handling has a strict complexity ratchet and must not grow a new branch.
+  const mismatch = codexCredentialBindingMismatch(accessToken, providerSpecificData);
+  if (mismatch) {
+    return { message: "Codex OAuth token identity does not match this connection; re-authenticate it." };
+  }
+  return fetchCodexUsageUnchecked(accessToken, providerSpecificData, connectionId);
+}
 
+async function fetchCodexUsageUnchecked(
+  accessToken?: string,
+  providerSpecificData: Record<string, unknown> = {},
+  connectionId?: string
+) {
+  try {
     // Use persisted workspace ID from OAuth - NO FALLBACK
     const accountId =
       typeof providerSpecificData.workspaceId === "string"
