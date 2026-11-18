@@ -72,6 +72,26 @@ function resolveAuthTokenOption(targetOpts = {}) {
 }
 
 /** Resolve supported target (id or alias) to canonical id via the manifest. */
+/**
+ * Env entries that pin Oh My Pi's home into the throwaway overlay: HOME plus the XDG dirs
+ * omp 18.x honors, and USERPROFILE on Windows, where `os.homedir()` reads it instead of HOME
+ * (without it omp would read and write the user's real ~/.omp there). Pure + testable.
+ * @param {string} overlayHome
+ * @param {string} [platform]
+ * @returns {Record<string, string>}
+ */
+export function ompOverlayEnv(overlayHome, platform = process.platform) {
+  const env = {
+    HOME: overlayHome,
+    XDG_CONFIG_HOME: join(overlayHome, ".config"),
+    XDG_STATE_HOME: join(overlayHome, ".local", "state"),
+    XDG_DATA_HOME: join(overlayHome, ".local", "share"),
+    XDG_CACHE_HOME: join(overlayHome, ".cache"),
+  };
+  if (platform === "win32") env.USERPROFILE = overlayHome;
+  return env;
+}
+
 export function resolveRunTarget(target) {
   return resolveManifestTarget(target, "run");
 }
@@ -471,11 +491,7 @@ async function runGenericTarget(target, rawOpts, args) {
         encoding: "utf8",
         mode: 0o600,
       });
-      childEnv.HOME = overlayHome;
-      childEnv.XDG_CONFIG_HOME = join(overlayHome, ".config");
-      childEnv.XDG_STATE_HOME = join(overlayHome, ".local", "state");
-      childEnv.XDG_DATA_HOME = join(overlayHome, ".local", "share");
-      childEnv.XDG_CACHE_HOME = join(overlayHome, ".cache");
+      Object.assign(childEnv, ompOverlayEnv(overlayHome));
     } catch (error) {
       try {
         rmSync(overlayHome, { recursive: true, force: true });

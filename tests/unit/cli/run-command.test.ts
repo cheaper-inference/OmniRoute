@@ -1,8 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import os from "node:os";
+import path from "node:path";
 
 import {
   buildRunPlan,
+  ompOverlayEnv,
   resolveRunTarget,
   resolveModelFromTargetOptions,
   runCliTarget,
@@ -282,6 +285,21 @@ test("buildRunPlan for Oh My Pi never double-prefixes an already-prefixed model"
   const args = logicalArgs(plan.args);
   assert.deepEqual(args.slice(0, 2), ["--model", "omniroute/glm/glm-5.2"]);
   assert.equal(args.filter((arg) => arg === "--model").length, 1);
+});
+
+test("Oh My Pi overlay env pins HOME and XDG dirs, plus USERPROFILE on Windows", () => {
+  const home = path.join(os.tmpdir(), "omniroute-omp-run-test");
+  const linux = ompOverlayEnv(home, "linux");
+  assert.equal(linux.HOME, home);
+  assert.equal(linux.XDG_CONFIG_HOME, path.join(home, ".config"));
+  assert.equal(linux.XDG_STATE_HOME, path.join(home, ".local", "state"));
+  assert.equal(linux.XDG_DATA_HOME, path.join(home, ".local", "share"));
+  assert.equal(linux.XDG_CACHE_HOME, path.join(home, ".cache"));
+  assert.equal("USERPROFILE" in linux, false);
+  // os.homedir() reads USERPROFILE (not HOME) on Windows, so the overlay must pin it there.
+  const windows = ompOverlayEnv(home, "win32");
+  assert.equal(windows.USERPROFILE, home);
+  assert.equal(windows.HOME, home);
 });
 
 test("auth preview follows each target's own credential rules (ANTHROPIC_AUTH_TOKEN only)", async () => {

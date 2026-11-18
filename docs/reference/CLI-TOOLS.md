@@ -550,7 +550,8 @@ The ten roles and how to pin each (values are `omniroute/<id>` with an optional
 
 `--roles-all` assigns the `--model` selection to every role in a single pass.
 `--dry-run` previews both files without writing; a timestamped backup of
-`models.yml` is written before every overwrite (`--no-backup` opts out).
+`models.yml` (and of `config.yml` when roles are merged into it) is written before every
+overwrite (`--no-backup` opts out).
 
 **Verify:**
 

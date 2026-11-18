@@ -341,15 +341,23 @@ export async function runSetupOmpCommand(opts = {}) {
     const dir = dirname(p);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   }
-  if (backup && existsSync(modelsPath)) {
-    const bak = `${modelsPath}.bak-${timestamp()}`;
-    copyFileSync(modelsPath, bak);
+  // Back up every existing file this run rewrites: models.yml always, config.yml only when
+  // roles are merged into it (js-yaml re-serialization drops the user's comments).
+  const writesSettings = settingsDoc != null && hasAssignments;
+  const stamp = timestamp();
+  for (const [file, willWrite] of [
+    [modelsPath, true],
+    [settingsPath, writesSettings],
+  ]) {
+    if (!backup || !willWrite || !existsSync(file)) continue;
+    const bak = `${file}.bak-${stamp}`;
+    copyFileSync(file, bak);
     printInfo(`Backup written to ${bak}`);
   }
 
   writeFileSync(modelsPath, modelsDoc, "utf8");
   printSuccess(`${basename(modelsPath)} updated at ${modelsPath} (provider 'omniroute')`);
-  if (settingsDoc != null && hasAssignments) {
+  if (writesSettings) {
     writeFileSync(settingsPath, settingsDoc, "utf8");
     printSuccess(
       `${basename(settingsPath)} updated at ${settingsPath} (roles: ${Object.keys(assignments).join(", ")})`
@@ -406,8 +414,11 @@ export function registerSetupOmp(program, { run = runSetupOmpCommand } = {}) {
     .option("--dry-run", "Print both documents without touching the filesystem")
     .option("--config-path <path>", "Override the models.yml target path")
     .option("--settings-path <path>", "Override the config.yml (settings) target path")
-    .option("--backup", "Write models.yml.bak-<timestamp> before overwriting (default)")
-    .option("--no-backup", "Skip the models.yml backup")
+    .option(
+      "--backup",
+      "Write models.yml/config.yml .bak-<timestamp> copies before overwriting (default)"
+    )
+    .option("--no-backup", "Skip the models.yml/config.yml backups")
     .option(
       "--allow-container-write",
       "Write even when the target is inside a container and not mounted from the host"

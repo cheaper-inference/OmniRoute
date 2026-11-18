@@ -347,6 +347,41 @@ test(
 );
 
 test(
+  "runSetupOmpCommand backs up an existing config.yml before merging roles into it",
+  withTempHome(async (tmp) => {
+    const settingsPath = path.join(tmp, ".omp", "agent", "config.yml");
+    const agentDir = path.dirname(settingsPath);
+    fs.mkdirSync(agentDir, { recursive: true });
+    const original = "# my comment survives only in the backup\ntheme: dark\n";
+    fs.writeFileSync(settingsPath, original);
+    const configBaks = () =>
+      fs.readdirSync(agentDir).filter((f) => f.startsWith("config.yml.bak-"));
+
+    // No role assignment: config.yml is not rewritten, so no backup of it either.
+    assert.equal(await runSetupOmpCommand({ remote: "http://127.0.0.1:20128" }), 0);
+    assert.equal(configBaks().length, 0, "config.yml untouched, nothing to back up");
+
+    const code = await runSetupOmpCommand({
+      remote: "http://127.0.0.1:20128",
+      role: ["smol=glm/glm-5-turbo"],
+    });
+    assert.equal(code, 0);
+    const baks = configBaks();
+    assert.equal(baks.length, 1, "default backup of config.yml written before overwrite");
+    assert.equal(fs.readFileSync(path.join(agentDir, baks[0]), "utf8"), original);
+    assert.ok(!fs.readFileSync(settingsPath, "utf8").includes("my comment"), "file rewritten");
+
+    const code2 = await runSetupOmpCommand({
+      remote: "http://127.0.0.1:20128",
+      role: ["smol=glm/glm-5-turbo"],
+      backup: false,
+    });
+    assert.equal(code2, 0);
+    assert.equal(configBaks().length, 1, "--no-backup writes no additional config.yml backup");
+  })
+);
+
+test(
   "runSetupOmpCommand exits 2 on an unknown role and writes nothing",
   withTempHome(async (tmp) => {
     const code = await runSetupOmpCommand({
