@@ -191,7 +191,7 @@ podman run -d --name omniroute \
   -e DATA_DIR=/app/data \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  docker.io/diegosouzapw/omniroute:latest
+  docker.io/cheaperinference/omniroute:latest
 ```
 
 For a bind mount that still fails, inspect or repair the shared path from the

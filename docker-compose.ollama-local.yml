@@ -23,7 +23,7 @@
 
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     environment:
       - OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS=${OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS:-300000}

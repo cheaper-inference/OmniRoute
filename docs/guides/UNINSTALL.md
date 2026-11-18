@@ -72,6 +72,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Optional) Remove the image
+docker rmi cheaperinference/omniroute:latest
+# Older installs pulled the legacy name:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

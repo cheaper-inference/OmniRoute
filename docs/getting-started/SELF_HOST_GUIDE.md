@@ -117,7 +117,7 @@ you need to change them.
 docker compose -f docker-compose.selfhost.yml up -d
 ```
 
-Pulls `diegosouzapw/omniroute:latest` (multi-arch AMD64 + ARM64, ~250 MB) and
+Pulls `cheaperinference/omniroute:latest` (multi-arch AMD64 + ARM64, ~250 MB) and
 `redis:8.6.5-alpine`, starts both, and waits for Redis to be healthy before
 the app boots.
 
