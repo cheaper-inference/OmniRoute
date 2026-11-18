@@ -109,18 +109,13 @@ export default function SessionsTab() {
           <p className="text-xs mt-1">{t("sessionsHint")}</p>
         </div>
       ) : (
-        <Table
-          className="text-sm"
-          containerClassName="rounded-none border-0"
-          scrollbarLabel={t("session")}
-          scrollLabel={t("session")}
-        >
+        <Table variant="plain" scrollbarLabel={t("session")} scrollLabel={t("session")}>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-left py-2 px-3">{t("session")}</TableHead>
-              <TableHead className="text-left py-2 px-3">{t("age")}</TableHead>
-              <TableHead className="text-right py-2 px-3">{t("requests")}</TableHead>
-              <TableHead className="text-left py-2 px-3">{t("connection")}</TableHead>
+              <TableHead>{t("session")}</TableHead>
+              <TableHead>{t("age")}</TableHead>
+              <TableHead numeric>{t("requests")}</TableHead>
+              <TableHead>{t("connection")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -128,7 +123,7 @@ export default function SessionsTab() {
               const leaseBacked = isLeaseBackedSession(s);
               return (
                 <TableRow key={s.sessionId}>
-                  <TableCell className="py-2.5 px-3">
+                  <TableCell>
                     <div className="flex items-center gap-2">
                       <span
                         className="font-mono text-xs px-2 py-1 rounded bg-surface/40 text-text-muted"
@@ -143,13 +138,13 @@ export default function SessionsTab() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-text-muted tabular-nums">
+                  <TableCell className="text-text-muted tabular-nums">
                     {formatAge(s.ageMs)}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-right">
+                  <TableCell numeric>
                     <span className="font-semibold tabular-nums">{s.requestCount}</span>
                   </TableCell>
-                  <TableCell className="py-2.5 px-3">
+                  <TableCell>
                     {s.connectionId ? (
                       <span className="text-xs font-mono text-info" title={s.connectionId}>
                         {(leaseBacked && s.connectionName) || s.connectionId.slice(0, 10)}

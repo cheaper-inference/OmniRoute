@@ -18,7 +18,7 @@ import GuardedAction from "@/shared/components/GuardedAction";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
-import { cn } from "@/shared/utils/cn";
+
 import { matchesSearch } from "@/shared/utils/turkishText";
 import FileDetailModal from "./FileDetailModal";
 import ExpirationBadge from "./components/ExpirationBadge";
@@ -187,10 +187,10 @@ export default function FilesListTab({
       {/* Table */}
       <Card padding="none" className="overflow-hidden">
         <Table
-          className="text-sm"
+          density="compact"
           aria-label={t("batchFilesListFilesTable")}
           scrollbarLabel={t("batchFilesListFilesTable")}
-          containerClassName="rounded-none border-0"
+          variant="plain"
         >
           <TableHeader>
             <TableRow>
@@ -242,14 +242,13 @@ export default function FilesListTab({
                     key={file.id}
                     onActivate={() => handleFileClick(file)}
                     selected={selectedFileId === file.id}
-                    className={cn("cursor-pointer", selectedFileId === file.id && "bg-accent/10")}
                   >
-                    <TableCell className="font-mono text-xs text-text-muted max-w-[140px]">
+                    <TableCell className="font-mono text-text-muted max-w-[140px]">
                       <span className="truncate block" title={file.id}>
                         {file.id}
                       </span>
                     </TableCell>
-                    <TableCell className="text-text-main text-xs max-w-[180px]">
+                    <TableCell className="text-text-main max-w-[180px]">
                       <span className="truncate block" title={file.filename}>
                         {file.filename}
                       </span>
@@ -257,11 +256,11 @@ export default function FilesListTab({
                     <TableCell>
                       <PurposeBadge value={file.purpose} />
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {formatBytes(file.bytes)}
                     </TableCell>
                     {/* "Used by" column (D12) — shows batch id + role (input/output/error) per plan §4 */}
-                    <TableCell className="text-xs">
+                    <TableCell>
                       {related.length === 0 ? (
                         <span className="text-text-muted">{t("filesListUsedByNone")}</span>
                       ) : (
@@ -293,10 +292,10 @@ export default function FilesListTab({
                         })()
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {fileCreatedAt ? relativeTime(fileCreatedAt, locale) : "—"}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {fileExpiresAt ? (
                         <ExpirationBadge expiresAt={fileExpiresAt} variant="compact" />
                       ) : (

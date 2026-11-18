@@ -517,19 +517,20 @@ export function FreeBudgetView({
       {/* Per-model table */}
       <div className="px-3 pb-3 pt-2">
         <Table
-          className="min-w-0 text-2xs [&_td]:h-auto [&_th]:h-auto"
-          containerClassName="rounded-none border-0"
+          density="compact"
+          className="min-w-0"
+          variant="plain"
           scrollbarLabel={labels.model}
           scrollLabel={labels.model}
           data-testid="budget-table"
         >
           <TableHeader>
             <TableRow>
-              <TableHead className="py-1 pr-2">{labels.provider}</TableHead>
-              <TableHead className="py-1 pr-2">{labels.model}</TableHead>
-              <TableHead className="py-1 pr-2">{labels.type}</TableHead>
-              <TableHead className="py-1 pr-2 text-right">{labels.tokensMonth}</TableHead>
-              <TableHead className="py-1 pr-1 text-center">ToS</TableHead>
+              <TableHead>{labels.provider}</TableHead>
+              <TableHead>{labels.model}</TableHead>
+              <TableHead>{labels.type}</TableHead>
+              <TableHead numeric>{labels.tokensMonth}</TableHead>
+              <TableHead align="center">ToS</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -550,7 +551,7 @@ export function FreeBudgetView({
                     : "—";
               return (
                 <TableRow key={`${m.provider}:${m.modelId}`}>
-                  <TableCell className="py-1 pr-2">
+                  <TableCell>
                     <span className="inline-flex items-center gap-1.5">
                       <span
                         className="inline-block w-2 h-2 rounded-sm flex-shrink-0"
@@ -559,22 +560,19 @@ export function FreeBudgetView({
                       <span className="text-text-muted">{m.provider}</span>
                     </span>
                   </TableCell>
-                  <TableCell
-                    className="py-1 pr-2 text-text-main truncate max-w-[180px]"
-                    title={m.modelId}
-                  >
+                  <TableCell className="text-text-main truncate max-w-[180px]" title={m.modelId}>
                     {m.displayName}
                   </TableCell>
-                  <TableCell className="py-1 pr-2">
+                  <TableCell>
                     <FreeTypeBadge
                       freeType={m.freeType}
                       label={labels.freeTypes[m.freeType] ?? m.freeType}
                     />
                   </TableCell>
-                  <TableCell className="py-1 pr-2 text-right text-text-main tabular-nums">
+                  <TableCell numeric className="text-text-main">
                     {amount}
                   </TableCell>
-                  <TableCell className="py-1 pr-1 text-center">
+                  <TableCell align="center">
                     {badge && (
                       <span className={`inline-flex ${badge.cls}`} title={badge.title}>
                         <Icon name={badge.icon} size={13} ariaLabel={badge.title} />

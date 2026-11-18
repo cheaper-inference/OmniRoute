@@ -258,3 +258,65 @@ test("F: card and section headings take their size from ci-heading, not a text u
     exceptions
   );
 });
+
+// ── E. Tables ───────────────────────────────────────────────────────────────
+
+test('E: a table without a frame is variant="plain", not container classes', () => {
+  assertClean(
+    'frame removed by hand (use variant="plain")',
+    /containerClassName="[^"]*\b(?:rounded-none|border-0)\b[^"]*"/g,
+    []
+  );
+});
+
+test("E: cell alignment, padding and height come from the kit props and the table density", () => {
+  const exceptions: Exception[] = [
+    {
+      file: "usage/components/ProviderLimits/CursorModelUsageTable.tsx",
+      fragment: "px-1 py-0.5",
+      why: "six-column usage grid inside the dense quota card: the compact density (32px rows, 12px text) does not fit the card width",
+    },
+    {
+      file: "usage/components/ProviderLimits/CursorModelUsageTable.tsx",
+      fragment: "{CELL}",
+      why: "same grid: CELL holds the 4px/2px padding",
+    },
+  ];
+  // text-left / text-right, or a padding / height utility, on a head or body cell. An empty-state
+  // row (a cell with colSpan) keeps its vertical padding.
+  const PATTERN =
+    /(?<![\w:-])(?:text-(?:left|right)|p[xytrbl]?-(?:\d|\[)|h-(?:auto|\d))|\{CELL\}|\$\{CELL\}/;
+  const hits: Hit[] = [];
+  const used = new Set<Exception>();
+  for (const { rel, text } of sources()) {
+    for (const { index, tag } of openingTags(text, "TableHead|TableCell")) {
+      if (!PATTERN.test(tag) || /\bcolSpan=/.test(tag)) continue;
+      const exception = exceptions.find((e) => e.file === rel && tag.includes(e.fragment));
+      if (exception) used.add(exception);
+      else
+        hits.push({ rel, line: lineOf(text, index), text: tag.replace(/\s+/g, " ").slice(0, 200) });
+    }
+  }
+  assert.equal(hits.length, 0, `cells styled by hand:\n${report(hits)}`);
+  assert.deepEqual(
+    exceptions.filter((e) => !used.has(e)).map((e) => `${e.file}: ${e.fragment}`),
+    []
+  );
+});
+
+test("E: an activatable row leaves the pointer and the selected state to the kit", () => {
+  assertNoTag(
+    "row classes that repeat the kit activatable row",
+    "TableRow",
+    /\bonActivate=[\s\S]*(?<![\w:-])(?:cursor-pointer|bg-accent\/10|hover:bg-)/,
+    []
+  );
+});
+
+test("E: the audit pagers are the kit pagination, not a pair of Buttons", () => {
+  for (const rel of ["audit/A2aAuditTab.tsx", "audit/McpAuditTab.tsx", "audit/ComplianceTab.tsx"]) {
+    const text = fs.readFileSync(path.join(DASHBOARD, rel), "utf8");
+    assert.doesNotMatch(text, /\{t\("previous"\)\}|\{t\("next"\)\}/, `${rel}: hand-made pager`);
+    assert.match(text, /<Pager\b|<PaginationPrevious\b/, `${rel}: kit pager`);
+  }
+});

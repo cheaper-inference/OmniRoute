@@ -40,16 +40,17 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
     <Table
       scrollbarLabel={t("apiKeyColumn")}
       scrollLabel={t("apiKeyColumn")}
-      className="min-w-0 text-2xs"
-      containerClassName="rounded-none border-0"
+      density="compact"
+      className="min-w-0"
+      variant="plain"
     >
       <TableHeader>
         <TableRow>
-          <TableHead className="h-8 px-2">{t("apiKeyColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("weightColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("realConsumedColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("deficitColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("policy")}</TableHead>
+          <TableHead>{t("apiKeyColumn")}</TableHead>
+          <TableHead numeric>{t("weightColumn")}</TableHead>
+          <TableHead numeric>{t("realConsumedColumn")}</TableHead>
+          <TableHead numeric>{t("deficitColumn")}</TableHead>
+          <TableHead align="end">{t("policy")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -66,7 +67,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
 
           return (
             <TableRow key={alloc.apiKeyId}>
-              <TableCell className="h-auto px-2 py-1.5">
+              <TableCell>
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span
                     className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
@@ -85,13 +86,13 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   )}
                 </div>
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums" style={{ color }}>
+              <TableCell numeric style={{ color }}>
                 {alloc.weight}%
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums text-text-muted">
+              <TableCell numeric className="text-text-muted">
                 {consumed !== null ? consumed.toLocaleString() : "—"}
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums">
+              <TableCell numeric>
                 {deficit !== null ? (
                   <span
                     className={
@@ -110,7 +111,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   </span>
                 )}
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right">
+              <TableCell align="end">
                 <Badge
                   size="sm"
                   variant={

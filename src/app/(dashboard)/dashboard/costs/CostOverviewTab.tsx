@@ -1119,7 +1119,7 @@ function CostExplorerCard({
             scrollbarLabel={t("costExplorerTitle")}
             scrollLabel={t("costExplorerTitle")}
             className="min-w-205"
-            containerClassName="rounded-none border-0"
+            variant="plain"
           >
             <TableHeader>
               <TableRow>
@@ -1140,7 +1140,7 @@ function CostExplorerCard({
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="pr-4">
+                  <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium text-text-main">{row.name}</span>
                       {row.detail ? (
@@ -1150,21 +1150,21 @@ function CostExplorerCard({
                       ) : null}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {formatCost(row.cost)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {numberFormatter.format(row.requests)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {compactFormatter.format(row.totalTokens)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {row.avgCostPerRequest > 0
                       ? currencyFormatter.format(row.avgCostPerRequest)
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell numeric>
                     <div className="flex items-center justify-end gap-2">
                       <div
                         role="progressbar"
@@ -1280,14 +1280,11 @@ function CostBreakdownTable({
       <h3 className="ci-eyebrow mb-4" data-weight="medium">
         {title}
       </h3>
-      <Table scrollbarLabel={title} scrollLabel={title} containerClassName="rounded-none border-0">
+      <Table scrollbarLabel={title} scrollLabel={title} variant="plain">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead
-                key={column.key}
-                className={column.align === "right" ? "text-right" : "text-left"}
-              >
+              <TableHead key={column.key} numeric={column.align === "right"}>
                 {column.label}
               </TableHead>
             ))}
@@ -1299,10 +1296,11 @@ function CostBreakdownTable({
               {columns.map((column) => (
                 <TableCell
                   key={column.key}
+                  numeric={column.align === "right"}
                   className={
                     column.align === "right"
-                      ? "text-right font-mono text-text-muted"
-                      : "max-w-50 truncate text-left text-text-main"
+                      ? "text-text-muted"
+                      : "max-w-50 truncate text-text-main"
                   }
                 >
                   {formatValue(row[column.key], column.format)}

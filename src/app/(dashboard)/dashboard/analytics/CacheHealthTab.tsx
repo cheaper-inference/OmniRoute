@@ -8,7 +8,7 @@ import Badge from "@/shared/components/Badge";
 import { Skeleton } from "@/shared/components/Loading";
 import TimeRangeSelector from "@/shared/components/analytics/TimeRangeSelector";
 import type { UtilizationTimeRange } from "@/shared/types/utilization";
-import { cn } from "@/shared/utils/cn";
+
 import {
   Table,
   TableBody,
@@ -284,59 +284,47 @@ export default function CacheHealthTab() {
               {text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             </h3>
             <Table
-              className="min-w-[560px] text-sm"
-              containerClassName="rounded-none border-0"
+              className="min-w-[560px]"
+              variant="plain"
               scrollbarLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
               scrollLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             >
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pb-2 pr-4">
-                    {text(t, "cacheHealthModel", "Model")}
-                  </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right">
-                    {text(t, "cacheHealthCalls", "Calls")}
-                  </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right">
-                    {text(t, "cacheHealthRead", "Read")}
-                  </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right">
-                    {text(t, "cacheHealthWrite", "Written")}
-                  </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right">W/R</TableHead>
-                  <TableHead className="pb-2 text-right">
-                    {text(t, "cacheHealthHeavy", "Heavy")}
-                  </TableHead>
+                  <TableHead>{text(t, "cacheHealthModel", "Model")}</TableHead>
+                  <TableHead numeric>{text(t, "cacheHealthCalls", "Calls")}</TableHead>
+                  <TableHead numeric>{text(t, "cacheHealthRead", "Read")}</TableHead>
+                  <TableHead numeric>{text(t, "cacheHealthWrite", "Written")}</TableHead>
+                  <TableHead numeric>W/R</TableHead>
+                  <TableHead numeric>{text(t, "cacheHealthHeavy", "Heavy")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.byModel.map((m) => (
                   <TableRow key={m.model}>
-                    <TableCell className="py-2 pr-4 font-mono text-xs text-text-main">
-                      {m.model}
-                    </TableCell>
-                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                    <TableCell className="font-mono text-xs text-text-main">{m.model}</TableCell>
+                    <TableCell numeric className="text-text-muted">
                       {compact(m.calls)}
                     </TableCell>
-                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                    <TableCell numeric className="text-text-muted">
                       {compact(m.cacheReadTotal)}
                     </TableCell>
-                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                    <TableCell numeric className="text-text-muted">
                       {compact(m.cacheWriteTotal)}
                     </TableCell>
                     <TableCell
-                      className={cn(
-                        "py-2 pr-4 text-right",
+                      numeric
+                      className={
                         m.writeReadRatio > 1
                           ? "text-error"
                           : m.writeReadRatio > 0.2
                             ? "text-warning"
                             : "text-text-main"
-                      )}
+                      }
                     >
                       {m.writeReadRatio.toFixed(2)}
                     </TableCell>
-                    <TableCell className="py-2 text-right text-text-muted">
+                    <TableCell numeric className="text-text-muted">
                       {compact(m.heavyWriteCalls)}
                     </TableCell>
                   </TableRow>

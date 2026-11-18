@@ -435,10 +435,10 @@ export default function BatchListTab({
       {/* Table — 9 columns: Status | ID | Endpoint | Model | Progress | Cost | Created | Expires | Actions */}
       <Card padding="none" className="overflow-hidden">
         <Table
-          className="text-sm"
+          density="compact"
           aria-label={t("batchListBatchesTable")}
           scrollbarLabel={t("batchListBatchesTable")}
-          containerClassName="rounded-none border-0"
+          variant="plain"
         >
           <TableHeader>
             <TableRow>
@@ -496,20 +496,16 @@ export default function BatchListTab({
                 })();
 
                 return (
-                  <TableRow
-                    key={batch.id}
-                    onActivate={() => setSelectedBatch(batch)}
-                    className="cursor-pointer"
-                  >
+                  <TableRow key={batch.id} onActivate={() => setSelectedBatch(batch)}>
                     <TableCell>
                       <StatusBadge batch={batch} />
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-text-muted max-w-[180px]">
+                    <TableCell className="font-mono text-text-muted max-w-[180px]">
                       <span className="truncate block" title={batch.id}>
                         {batch.id}
                       </span>
                     </TableCell>
-                    <TableCell className="text-text-main text-xs whitespace-nowrap">
+                    <TableCell className="text-text-main whitespace-nowrap">
                       {(() => {
                         const p = deriveProvider(batch.model);
                         if (p === "unknown") return t("batchListProviderUnknown");
@@ -517,8 +513,8 @@ export default function BatchListTab({
                         return p;
                       })()}
                     </TableCell>
-                    <TableCell className="text-text-main text-xs">{batch.endpoint}</TableCell>
-                    <TableCell className="text-text-muted text-xs">{batch.model ?? "—"}</TableCell>
+                    <TableCell className="text-text-main">{batch.endpoint}</TableCell>
+                    <TableCell className="text-text-muted">{batch.model ?? "—"}</TableCell>
                     {/* Progress — ProgressBarBicolor from F3; spinner when validating (G2); (partial) suffix when expired with failures (G-AUD3) */}
                     <TableCell className="min-w-[140px]">
                       {batch.status === "validating" ? (
@@ -545,7 +541,7 @@ export default function BatchListTab({
                       )}
                     </TableCell>
                     {/* Cost column — heuristic estimate (D8) with -50% badge per wireframe §3 (G-AUD2) */}
-                    <TableCell className="text-xs whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap">
                       <span className="text-text-muted">{estimatedCost}</span>
                       {estimatedCost !== "—" && (
                         <Badge variant="success" size="sm" className="ml-1 align-middle">
@@ -553,11 +549,11 @@ export default function BatchListTab({
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {relativeTime(batch.createdAt)}
                     </TableCell>
                     {/* Expiration — countdown badge for active batches (D11) */}
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {["in_progress", "validating", "finalizing"].includes(batch.status) ? (
                         <ExpirationBadge expiresAt={batch.expiresAt ?? null} variant="compact" />
                       ) : batch.expiresAt ? (
