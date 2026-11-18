@@ -1,0 +1,1 @@
+- **fix(ci):** align the release acceptance unit-test inventory with the CI shard's current subdirectory glob, including chatcore, so the collector's API, authorization, database and other unit tests remain in the canonical scope instead of being recorded as unexecuted.
