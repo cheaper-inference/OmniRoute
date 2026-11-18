@@ -24,19 +24,21 @@ De a tipikus kliensek (Cursor, Cline, Roo Code, OpenAI SDK) kivonják `reasoning
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 A rögzítés `open-sse/handlers/chatCore.ts` ban történik (két helyen, a két `cacheReasoningFromAssistantMessage` hívási helyen). A visszajátszás `open-sse/translator/index.ts` ben a séma kényszerítése után, de a feladás előtt történik.
+
+Az eszközhívási bejegyzések `buildToolCallCacheKey()` alatt tárolódnak, amely a kérelem hatókörének és az eszközhívási azonosítónak a kivonata, így ugyanaz az azonosító, amelyet egy másik API kulcs vagy munkamenet használ, nem választja ki a bejegyzést. A hatókör `buildReasoningCacheScope()` ből származik: a API kulcs azonosítója, valamint a munkamenet kulcsa, ha a kérés rendelkezik ilyennel. A `tool_call_id` oszlop és az irányítópult ezért ezeket a bejegyzéseket jeleníti meg.
 
 A sima (nem eszközhívásos) asszisztens körök eltérően vannak billentyűzve: `buildAssistantMessageCacheKey()` a munkamenet hatókörét és a normalizált OpenAI-formátumú átiratot emészti fel egészen addig a körig, mert DeepSeek megköveteli _minden_ előző kör érvelését, ha `tools` jelen van. A Responses-API-célok esetében (például `opencode-go/deepseek-v4-flash`, `/responses`-re irányítva) az upstream törzs `input` hordozza, nem `messages`, így `translateRequest()` (`open-sse/translator/index.ts`) jelenti a visszahívási opción keresztül megemésztett pivot-átiratot, és a rögzítési helyek ugyanazt az átiratot emésztik fel. A Responses replay pass minden forrásformátumhoz a OpenAI pivoton fut, így Anthropic Messages kliensek (Claude → OpenAI → Responses) is újrajátszanak.
 
@@ -73,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Indexek: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epocha másodpercként van tárolva; a SELECT réteg normalizálja az örökölt szövegértékeket `EXPIRES_AT_EPOCH_SQL` segítségével.
+Indexek: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epocha másodpercként van tárolva; a SELECT réteg normalizálja a régi szövegértékeket `EXPIRES_AT_EPOCH_SQL` segítségével.
 
 ## Szolgáltató/modellészlelés
 
