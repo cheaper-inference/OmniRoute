@@ -114,14 +114,16 @@ for (const [url, methods] of missing) {
       lines.push("          type: string");
     }
   }
-  const loopbackOnly = isLocalOnlyPath(url);
   const alwaysProtected = ALWAYS_PROTECTED_API_PATHS.includes(url);
   for (const method of methods.sort()) {
     lines.push(`    ${method.toLowerCase()}:`);
     lines.push(`      tags:`);
     lines.push(`        - ${tag}`);
     lines.push(`      summary: "${summaryFor(url, method)}"`);
-    if (loopbackOnly || isLocalOnlyPath(url, method)) lines.push(`      x-loopback-only: true`);
+    // Method-aware only: isLocalOnlyPath(url) without a method skips the GET
+    // exemptions, so caching it per path marks reachable safe-method routes as
+    // loopback-only and check-openapi-security-tiers rejects the result.
+    if (isLocalOnlyPath(url, method)) lines.push(`      x-loopback-only: true`);
     if (alwaysProtected) lines.push(`      x-always-protected: true`);
     lines.push(`      responses:`);
     lines.push(`        "200":`);

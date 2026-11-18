@@ -245,7 +245,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
 | `check:cli-i18n`               | CLI `t()` keys exist in `bin/cli/locales/en.json` (both modes); pt-BR / zh-CN / zh-TW parity with `en.json` in release mode only                  | Yes                        |
 | `check:openapi-coverage`       | OpenAPI spec covers at least a ratcheted floor of real routes                                                                                     | Yes                        |
-| `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Advisory**               |
+| `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Blocking (one direction)** |
 | `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
 | `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
 | `i18n translation drift`       | `docs/i18n/**` mirrors vs `.i18n-state.json` — advisory on PRs (mirrors are refreshed by the translation wave), strict on push and nightly        | **Advisory** on PRs        |
