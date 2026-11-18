@@ -11,11 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import InteractiveTableRow from "@/shared/components/InteractiveTableRow";
 import Modal from "@/shared/components/Modal";
 import { PROVIDER_COLORS, getHttpStatusStyle } from "@/shared/constants/colors";
 import { formatTime } from "@/shared/utils/formatting";
@@ -87,14 +88,14 @@ function ProviderBadge({ provider }: { provider: string | null }) {
   const style = PROVIDER_COLORS[provider];
   if (!style) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-bg-subtle text-text-muted border border-border">
+      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-bg-subtle text-text-muted border border-border">
         {provider}
       </span>
     );
   }
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {style.label}
@@ -107,7 +108,7 @@ function StatusBadge({ status }: { status: number | null }) {
   const style = getHttpStatusStyle(status);
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {status}
@@ -221,6 +222,7 @@ function ConversationLogView({
 
 function ConversationsPageContent() {
   const t = useTranslations("conversations");
+  const tSidebar = useTranslations("sidebar");
   const router = useRouter();
   const searchParams = useSearchParams();
   // Read once on mount, mirroring dashboard/logs/page.tsx (#6830/#8354): re-reading the
@@ -773,8 +775,9 @@ function ConversationsPageContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionHeader
-        title={t("title")}
+      <PageHeader
+        compact
+        title={tSidebar("conversations")}
         description={t("countSummary", { total })}
         actions={
           <Input
@@ -859,6 +862,7 @@ function ConversationsPageContent() {
             className="text-sm"
             containerClassName="hidden sm:block"
             scrollbarLabel={t("title")}
+            scrollLabel={t("title")}
           >
             <TableHeader>
               <TableRow>
@@ -873,10 +877,10 @@ function ConversationsPageContent() {
             </TableHeader>
             <TableBody>
               {conversations.map((row) => (
-                <TableRow
+                <InteractiveTableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => openConversation(row)}
+                  onActivate={() => openConversation(row)}
                 >
                   <TableCell className="font-mono text-[11px] text-text-main">
                     <span className="flex items-center gap-1.5">
@@ -910,7 +914,7 @@ function ConversationsPageContent() {
                   <TableCell className="text-right text-text-muted">
                     {formatTime(row.lastSeenAt)}
                   </TableCell>
-                </TableRow>
+                </InteractiveTableRow>
               ))}
             </TableBody>
           </Table>

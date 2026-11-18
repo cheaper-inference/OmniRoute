@@ -126,7 +126,15 @@ export function EngineNode({ data }: NodeProps) {
             <span>→</span>
             <span>{tokOut.toLocaleString()}</span>
           </div>
-          <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
+          <div
+            role="progressbar"
+            aria-label={engine as string}
+            aria-valuemin={0}
+            aria-valuemax={Math.max(tokIn, tokOut, 1)}
+            aria-valuenow={tokOut}
+            aria-valuetext={`${tokIn.toLocaleString()} → ${tokOut.toLocaleString()}`}
+            className="relative h-1.5 rounded-full overflow-hidden bg-border"
+          >
             <div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{
@@ -141,7 +149,11 @@ export function EngineNode({ data }: NodeProps) {
       {/* Footer */}
       <div className="px-2.5 pb-2 pt-1 flex flex-col gap-0.5">
         {!skipped && (
-          <span className="text-[11px] font-bold" style={{ color }} data-testid="savings-percent">
+          <span
+            className="text-[11px] font-semibold"
+            style={{ color }}
+            data-testid="savings-percent"
+          >
             {`-${savings.toFixed(1)}%`}
           </span>
         )}

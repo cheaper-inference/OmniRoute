@@ -3,6 +3,7 @@
 // shape, WorkBuddy's own host. See src/lib/oauth/constants/oauth.ts
 // (WORKBUDDY_CONFIG) for the live verification notes.
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import type { RefreshLogger } from "../shared.ts";
 
 /**
@@ -46,7 +47,8 @@ async function readRefreshPayload(response, refreshToken: string, log: RefreshLo
   if (!response.ok) {
     log?.error?.("TOKEN_REFRESH", "Failed to refresh WorkBuddy token", {
       status: response.status,
-      error: await response.text(),
+      // The OAuth server can echo the refresh token or client secret back in its error body.
+      error: sanitizeErrorMessage(await response.text()),
     });
     return null;
   }

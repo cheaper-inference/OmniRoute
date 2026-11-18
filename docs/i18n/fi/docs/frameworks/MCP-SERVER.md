@@ -20,6 +20,8 @@ Tai open-sse-kuljetuksella:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -102,21 +104,21 @@ Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_x_search`            | `execute:search`      | Hae X:stä xAI/SuperGrokin kautta tai valitse `xquik-search` Xquik API -tuloksia varten. Vaatii tunnistetiedot valitulle taustaohjelmalle. |
 | `omniroute_web_fetch`           | `execute:search`      | Hae verkkosisältöä määritettyjen hakupalveluntarjoajien kautta                                                                            |
 
-## Edistyneet työkalut (11) — Vaihe 2
+## Lisätyökalut (11) — Vaihe 2
 
-| Työkalu                            | Laajuudet                            | Kuvaus                                                                                                                            |
-| :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Kuiva-ajo reitityssimulaatio varapuun kanssa                                                                                      |
-| `omniroute_set_budget_guard`       | `write:budget`                       | Istunnon budjetti heikennys-/esto-/hälytystoiminnolla                                                                             |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | Päivitä yhdistelmästrategia ajon aikana (prioriteetti/painotettu/auto/jne.)                                                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressiivista` / `tasapainoista` / `konservatiivista` joustavuuden esiasetusta                                            |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Jokaisen palveluntarjoajan reaaliaikainen testaus yhdistelmässä käyttäen todellista ylävirran kutsua                              |
-| `omniroute_get_provider_metrics`   | `read:health`                        | Palveluntarjoajakohtaiset mittarit p50/p95/p99 viiveellä ja katkaisijan tilalla                                                   |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Suosittele yhdistelmää tehtävätyypin mukaan budjetti-/viiverajoituksilla                                                          |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | Selitä, miksi pyyntö reititettiin palveluntarjoajalle (pisteytystekijät + vararatkaisut)                                          |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | Täysi istunnon tilannekuva: kustannukset, tokenit, parhaat mallit/palveluntarjoajat, virheet, budjettisuoja                       |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Diagnosoi (ja valinnaisesti korjaa automaattisesti) tietokannan poikkeamat, kuten rikkinäiset yhdistelmäviittaukset / orvot rivit |
-| `omniroute_sync_pricing`           | `pricing:write`                      | Synkronoi hintatiedot ulkoisista lähteistä (LiteLLM); tukee `dryRun`-toimintoa                                                    |
+| Työkalu                            | Soveltamisalat                       | Kuvaus                                                                                                                        |
+| :--------------------------------- | :----------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Kuivakäynnistetty reitityssimulaatio varapuulla                                                                               |
+| `omniroute_set_budget_guard`       | `write:budget`                       | Istuntobudjetti degrade/block/alert -toiminnolla                                                                              |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | Päivitä yhdistelmästrategia suoritusaikana (priority/weighted/auto/etc.)                                                      |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressive` / `balanced` / `conservative` joustavuuden esiasetusta                                                     |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Jokaisen palveluntarjoajan live-testi yhdistelmänä todellisen ylävirran puhelun avulla                                        |
+| `omniroute_get_provider_metrics`   | `read:health`                        | Palveluntarjoajakohtaiset tiedot p50/p95/p99 -viiveellä ja katkaisijan tilalla                                                |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Suosittele yhdistelmää tehtävätyypin mukaan budget/latency rajoituksilla                                                      |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | Selitä, miksi pyyntö reititettiin palveluntarjoajalle (pisteytystekijät + varavarat)                                          |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | Koko istunnon tilannekuva: kustannukset, rahakkeet, top models/providers, virheet, budjetin vartija                           |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Diagnosoi (ja valinnaisesti korjaa automaattisesti) tietokannan ajautuminen, kuten rikkinäiset yhdistelmäviitteet / orporivit |
+| `omniroute_sync_pricing`           | `pricing:write`                      | Synkronoi hinnoittelutiedot ulkoisista lähteistä (LiteLLM); tukee `dryRun`                                                    |
 
 ## Välimuistityökalut (2)
 
@@ -143,7 +145,7 @@ Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_rtk_discover`            | `read:compression`  | Löydä toistuva kohina opt-in RTK -lähtönäytteissä                                                                                     |
 | `omniroute_rtk_learn`               | `read:compression`  | Luo tarkistettava RTK suodatinluonnos valinnaisista näytteistä                                                                        |
 
-CCR -merkinnät käyttävät kaksitasoista varastoa: kuumaa muistitasoa, jota tukee paikallisissa ei-pilvikäyttöajoissa kestävä SQLite -taso (`ccr_blocks`, oletuksena päällä), joten lohko selviää häätöstä tai uudelleenkäynnistyksestä, kunnes sen TTL loppuu —, paitsi lohkot, jotka ovat yli 512:n ajonaikaisen KB :n pilvimuistia. Jokainen lohko on rajoitettu 2 MiB, kukin pääasiallinen 16 MiB ja globaali myymälä 64 MiB. Merkintöjen oletusarvo on 24 tunnin TTL (enintään seitsemän päivää). Täysi MCP haku on rajoitettu 256 KiB:iin; Suuremmat lohkot ovat käytettävissä ranged- ja grep-tilojen kautta. Tallennus, haku, luettelointi, tarkastus, poistaminen ja tilastot erotetaan todennettujen API-avainpäämiesten avulla. Tarkastustietueet sisältävät tiiviste- ja kokometatietoja, eivät koskaan sisältöä. Käyttäjää koskevat tiedot (kaksi merkintää, asiakkaan edellytykset, `codemode:false`, työkalukohtaiset laajuudet, sivutus ja diagnostiikkamatriisi) ovat saatavilla [Compression Engines → Edellytykset / käyttäjän opas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR -merkinnät käyttävät kaksitasoista tallennustilaa: kuumaa muistitasoa, jota tukee paikallisissa ei-pilvikäyttöajoissa kestävä SQLite -taso (`ccr_blocks`, oletuksena päällä), joten lohko selviää häätöstä tai uudelleenkäynnistyksestä, kunnes sen TTL loppuu — paitsi lohkot, jotka ovat yli KB:n muistin ajoaika `COMPRESSION_CCR_DURABLE_STORE=false`. Kestävä kirjoitus on paras yritys: se hylätään, kun 1 000 kirjoitusta on jo odottamassa, ja epäonnistunut SQLite -kirjoitus kirjataan lokiin, ei yritetä uudelleen, joten lohko menetetään uudelleenkäynnistyksen yhteydessä. Jokainen lohko on rajoitettu 2 MiB, kukin pääasiallinen arvo on 16 MiB ja globaali myymälä 64 MiB. Merkintöjen oletusarvo on 24 tunnin TTL (enintään seitsemän päivää). Täysi MCP haku on rajoitettu 256 KiB:iin; Suuremmat lohkot ovat käytettävissä ranged- ja grep-tilojen kautta. Tallennus, haku, luettelointi, tarkastus, poistaminen ja tilastot erotetaan todennettujen API-avainpäämiesten avulla. Tarkastustietueet sisältävät tiiviste- ja kokometatietoja, eivät koskaan sisältöä. Käyttäjää koskevat tiedot (kaksi merkintää, asiakkaan edellytykset, `codemode:false`, työkalukohtaiset laajuudet, sivutus ja diagnostiikkamatriisi) ovat saatavilla [Compression Engines → -julkaisussa Edellytykset / käyttäjän opas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` raportoi MCP -kuvauksen pakkauksen erikseen kohdassa `analytics.mcpDescriptionCompression`. Nämä arvot ovat metatietojen kokoarvioita MCP listattavissa oleville kuvauksille (`tools`, `prompts`, `resources` ja `resourceTemplates`); ne eivät ole palveluntarjoajan käyttökuitteja, ja ne on merkitty `source: "mcp_metadata_estimate"` llä.
 
@@ -488,32 +490,32 @@ Käytä kojelautaa tai `/api/mcp/audit` ja `/api/mcp/audit/stats` REST-päätepi
 
 ## Tiedostot
 
-| Tiedosto                                                                 | Tarkoitus                                                                      |
-| :----------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| `open-sse/mcp-server/server.ts`                                          | MCP-palvelimen tehdas, stdio-sisääntulopiste, rajatut työkalurekisteröinnit    |
-| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + striimattava HTTP-siirto (istunnonhallinta)                              |
-| `open-sse/mcp-server/scopeEnforcement.ts`                                | Työkalun soveltamisalan arviointi ja kutsujan ratkaisu                         |
-| `open-sse/mcp-server/audit.ts`                                           | Työkalukutsujen auditointiloki (`mcp_tool_audit`)                              |
-| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio-sykkeen kirjoittaja (`mcp-heartbeat.json`)                               |
-| `open-sse/mcp-server/descriptionCompressor.ts`                           | Kuvausten pakkaus työkalu- / kehotus- / resurssirekistereille                  |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod-skeemat + työkalurekisteri (MCP_TOOLS, 45 merkintää)                       |
-| `open-sse/mcp-server/tools/advancedTools.ts`                             | Vaiheen 2 + välimuistin + 1proxy-työkalujen käsittelijät                       |
-| `open-sse/mcp-server/tools/compressionTools.ts`                          | Pakkaustyökalujen käsittelijät                                                 |
-| `open-sse/mcp-server/tools/memoryTools.ts`                               | Muistityökalujen määrittelyt (3 työkalua)                                      |
-| `open-sse/mcp-server/tools/skillTools.ts`                                | Taitotyökalujen määrittelyt (4 työkalua)                                       |
-| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion-kontekstilähdetyökalujen määrittelyt (6 työkalua)                       |
-| `open-sse/mcp-server/tools/gamificationTools.ts`                         | Pelillistämistyökalujen määrittelyt (8 työkalua)                               |
-| `open-sse/mcp-server/tools/pluginTools.ts`                               | Liitännäisten rekisteröinti- ja hallintatyökalut (8 työkalua)                  |
-| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status`-päätepiste                                                   |
-| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools`-päätepiste                                                    |
-| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE-siirtoreitti                                                |
-| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` striimattava HTTP-siirtoreitti                               |
-| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit` auditointilokikysely                                          |
-| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats` kootut auditointimittarit                               |
-| `src/lib/notion/api.ts`                                                  | Notion REST API -asiakas (uudelleenyritys, aikakatkaisu, virheiden luokittelu) |
-| `src/lib/db/notion.ts`                                                   | Notion-tunnuksen pysyvyys (`key_value`-taulu)                                  |
-| `src/app/api/settings/notion/route.ts`                                   | Notion-asetusten API (GET/POST/DELETE)                                         |
-| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion-tunnusten hallintakäyttöliittymä                                        |
-| `tests/unit/notion-api.test.ts`                                          | Notion API -asiakastestit (7)                                                  |
-| `tests/unit/notion-tools.test.ts`                                        | Notion-työkalujen soveltamisalan valvontatestit (10)                           |
-| `tests/unit/db/notion.test.mjs`                                          | Notion DB -moduulitestit (3)                                                   |
+| Tiedosto                                                                 | Tarkoitus                                                                            |
+| :----------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| `open-sse/mcp-server/server.ts`                                          | MCP -palvelintehdas, stdio-sisääntulopiste, laajennettujen työkalujen rekisteröinnit |
+| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + Streamable HTTP -siirto (istunnonhallinta)                                     |
+| `open-sse/mcp-server/scopeEnforcement.ts`                                | Työkalun laajuuden arviointi ja soittajan ratkaisu                                   |
+| `open-sse/mcp-server/audit.ts`                                           | Työkalukutsun tarkastusloki (`mcp_tool_audit`)                                       |
+| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio heartbeat kirjoittaja (`mcp-heartbeat.json`)                                   |
+| `open-sse/mcp-server/descriptionCompressor.ts`                           | Kuvauspakkaus työkalu-/kehote-/resurssirekistereille                                 |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod schemas + -työkalurekisteri (`MCP_TOOLS`, 45 merkintää)                          |
+| `open-sse/mcp-server/tools/advancedTools.ts`                             | Vaihe 2 + -välimuisti + 1-välityspalvelintyökalut                                    |
+| `open-sse/mcp-server/tools/compressionTools.ts`                          | Puristustyökalujen käsittelijät                                                      |
+| `open-sse/mcp-server/tools/memoryTools.ts`                               | Muistityökalujen määritelmät (3 työkalua)                                            |
+| `open-sse/mcp-server/tools/skillTools.ts`                                | Taitotyökalujen määritelmät (4 työkalua)                                             |
+| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion kontekstilähdetyökalun määritelmät (6 työkalua)                               |
+| `open-sse/mcp-server/tools/gamificationTools.ts`                         | Pelillistämistyökalujen määritelmät (8 työkalua)                                     |
+| `open-sse/mcp-server/tools/pluginTools.ts`                               | Lisäosien rekisteröinti- ja hallintatyökalut (8 työkalua)                            |
+| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status` päätepiste                                                         |
+| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools` päätepiste                                                          |
+| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE kuljetusreitti                                                    |
+| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` Streamable HTTP -kuljetusreitti                                    |
+| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit` -tarkastuslokikysely                                                |
+| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats` aggregated audit metrics                                      |
+| `src/lib/notion/api.ts`                                                  | Notion REST API asiakas (yritä uudelleen, aikakatkaisu, virheluokitus)               |
+| `src/lib/db/notion.ts`                                                   | Notion tunnuksen pysyvyys (`key_value` taulukko)                                     |
+| `src/app/api/settings/notion/route.ts`                                   | Notion asetukset API (GET/POST/DELETE)                                               |
+| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion tokenin hallinta UI                                                           |
+| `tests/unit/notion-api.test.ts`                                          | Notion API asiakastestit (7)                                                         |
+| `tests/unit/notion-tools.test.ts`                                        | Notion Tools Scope valvontatestit (10)                                               |
+| `tests/unit/db/notion.test.mjs`                                          | Notion DB -moduulitestit (3)                                                         |

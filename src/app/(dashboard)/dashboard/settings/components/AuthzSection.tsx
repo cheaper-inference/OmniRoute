@@ -398,7 +398,7 @@ export default function AuthzSection() {
             <div key={tier.name} className="rounded-lg border border-border bg-bg-subtle p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <h4 className="font-semibold">{t(`authz.tier.${tier.name}`)}</h4>
+                  <h4>{t(`authz.tier.${tier.name}`)}</h4>
                   {tier.bypassable && (
                     <Badge variant="warning" size="sm">
                       {t("authz.badge.bypassable")}
