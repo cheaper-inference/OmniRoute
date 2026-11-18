@@ -7,9 +7,8 @@ import { join } from "node:path";
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-search-deepseek-"));
 
 const { handleSearch } = await import("../../open-sse/handlers/search.ts");
-const { SEARCH_PROVIDERS, resolveSearchProviderId } = await import(
-  "../../open-sse/config/searchRegistry.ts"
-);
+const { SEARCH_PROVIDERS, resolveSearchProviderId } =
+  await import("../../open-sse/config/searchRegistry.ts");
 
 function deepseekSearchPayload() {
   return {
