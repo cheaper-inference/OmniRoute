@@ -884,7 +884,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   }
   // The usage guard's body size and input estimate depend only on the request, so they are
   // computed at most once per stream instead of on every chunk that carries usage (#20086).
-  const requestUsageBasis = createRequestUsageBasis(body);
+  const usageBasis = createRequestUsageBasis(body);
 
   // Canonical streaming timing (TTFT / ITL / interruption). One instance per
   // stream, marked from the transform below. ttft() = first-forwarded-SSE-chunk
@@ -1028,12 +1028,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   const sanitizePassthroughUsage = (payload: unknown) => {
     const changed =
       !hasPriorInputForTrailingUsage(payload, usage) &&
-      sanitizeUsagePayloadForRequest(
-        payload as UsageLike,
-        body,
-        clientResponseFormat,
-        requestUsageBasis
-      );
+      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat, usageBasis);
+    // Only message_delta takes the receipt, which re-estimates from the body (#20086).
+    if ((payload as { type?: string } | null)?.type !== "message_delta") return changed;
     return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
   };
   // Passthrough: accumulate content and reasoning separately for call log response body
@@ -2723,7 +2720,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           if (parsed && parsed.done) {
             continue;
           }
-          sanitizeUsagePayloadForRequest(parsed, body, targetFormat, requestUsageBasis);
+          sanitizeUsagePayloadForRequest(parsed, body, targetFormat, usageBasis);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
           }
@@ -3475,7 +3472,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               openaiFormat: FORMATS.OPENAI,
               openaiResponsesFormat: FORMATS.OPENAI_RESPONSES,
               body,
-              usageBasis: requestUsageBasis,
+              usageBasis,
               state: state as TranslateState & Record<string, unknown>,
               sessionId,
               now: () => Date.now(),
