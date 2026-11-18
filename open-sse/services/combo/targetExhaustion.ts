@@ -166,6 +166,13 @@ export type ComboTargetExhaustionResult = {
   effectiveTargetCooldownMs: number;
   lockoutHintMs: number;
   lockoutHintVerified: boolean;
+  /**
+   * #20343: true when `lockoutHintMs` came from relative-prose quota prose
+   * ("Resets in 76h25m43s" → "body_relative_countdown"). The lockout caller
+   * clamps these to quotaProseMaxCooldownMs (6h default) instead of the generic
+   * maxCooldownMs (30m relock loop) — header/RetryInfo hints stay honored exactly.
+   */
+  lockoutHintIsRelativeProse: boolean;
 };
 
 type DerivedTargetFailure = Omit<ComboTargetExhaustionResult, "providerExhausted">;
@@ -227,6 +234,12 @@ function deriveTargetFailure(
     effectiveTargetCooldownMs: claudeQuotaScope.cooldownMs ?? fallbackCooldownMs,
     lockoutHintMs,
     lockoutHintVerified: modelScopedClaudeCooldownMs !== null || fallbackLockoutHintVerified,
+    // #20343: relative-prose resets ("Resets in 76h25m43s") are verified but
+    // clamped to quotaProseMaxCooldownMs (6h default) by the lockout path — the
+    // combo call sites must tell recordModelLockoutFailure apart from
+    // header/RetryInfo hints, which stay clamped to maxCooldownMs or honored
+    // exactly respectively.
+    lockoutHintIsRelativeProse: opts.fallbackResult.retryHintSource === "body_relative_countdown",
   };
 }
 

@@ -3123,7 +3123,10 @@ export async function markAccountUnavailable(
       status === 410 &&
       (provider === "nvidia" ||
         (typeof provider === "string" && provider.toLowerCase().startsWith("opencode")));
-    const modelLockoutOptions = { maxCooldownMs: effectiveProviderProfile?.maxCooldownMs };
+    const modelLockoutOptions = {
+      maxCooldownMs: effectiveProviderProfile?.maxCooldownMs,
+      quotaProseMaxCooldownMs: mlSettings.quotaProseMaxCooldownMs,
+    };
     // Same persisted reason the agentrouter 403 model-scope branch hard-codes
     // ("forbidden"): the lock key is the getModelLockKey tuple shared with the
     // combo path, and the declared 1h (same order as that combo lock) is
@@ -3254,6 +3257,13 @@ export async function markAccountUnavailable(
             exactCooldownMs === upstreamCooldownMs &&
             (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
               hasClaudeScopedReset),
+          // #20343: relative-prose resets ("Resets in 76h25m43s") clamp to the
+          // dedicated quotaProseMaxCooldownMs (6h) instead of the generic 30m
+          // maxCooldownMs — same bounded-ceiling treatment as the Antigravity
+          // core-owned path in accountFallback.ts.
+          exactCooldownIsRelativeProseReset:
+            exactCooldownMs === upstreamCooldownMs &&
+            fallbackResult.retryHintSource === "body_relative_countdown",
         }
       );
       // Update last error for observability (without changing terminal status)

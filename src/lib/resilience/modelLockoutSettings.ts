@@ -5,6 +5,16 @@ export interface ModelLockoutSettings {
   errorCodes: number[];
   baseCooldownMs: number;
   maxCooldownMs: number;
+  /**
+   * Operator ceiling for model lockouts derived from RELATIVE-prose quota
+   * resets ("Resets in 76h25m43s"). Relative prose is an upstream statement of
+   * the reset window, so it bypasses the generic maxCooldownMs clamp — but a
+   * malicious/buggy upstream must not lock the model for days either, so it is
+   * bounded by its own ceiling. Default 6h: long enough to stop a 30-minute
+   * relock loop on subscription windows, short enough to recover early from an
+   * early (random) upstream reset.
+   */
+  quotaProseMaxCooldownMs: number;
   maxBackoffSteps: number;
   useExponentialBackoff: boolean;
 }
@@ -14,6 +24,7 @@ export const DEFAULT_MODEL_LOCKOUT_SETTINGS: ModelLockoutSettings = {
   errorCodes: [403, 404, 429, 502, 503, 504],
   baseCooldownMs: 120_000,
   maxCooldownMs: 1_800_000,
+  quotaProseMaxCooldownMs: 6 * 60 * 60 * 1000, // 6 hours
   maxBackoffSteps: 10,
   useExponentialBackoff: true,
 };
@@ -75,12 +86,20 @@ export function resolveModelLockoutSettings(
     }),
     baseCooldownMs // cap must be >= base or exponential backoff is meaningless
   );
+  const quotaProseMaxCooldownMs = Math.max(
+    toInteger(raw.quotaProseMaxCooldownMs, DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs, {
+      min: isTest ? 0 : 60_000,
+      max: 24 * 60 * 60 * 1000, // 24h hard ceiling — an upstream prose reset must never lock for days
+    }),
+    maxCooldownMs // prose ceiling must be >= generic cap or it is a silent regression
+  );
 
   return {
     enabled: toBoolean(raw.enabled, DEFAULT_MODEL_LOCKOUT_SETTINGS.enabled),
     errorCodes: toNumberArray(raw.errorCodes, DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes),
     baseCooldownMs,
     maxCooldownMs,
+    quotaProseMaxCooldownMs,
     maxBackoffSteps: toInteger(
       raw.maxBackoffSteps,
       DEFAULT_MODEL_LOCKOUT_SETTINGS.maxBackoffSteps,

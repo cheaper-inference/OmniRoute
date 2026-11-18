@@ -91,12 +91,17 @@ const RESETS_IN_RE = /resets? in (\d+h)?(\d+m)?(\d+s)?/i;
 const RETRY_IN_SEC_RE = /please retry in (\d+(?:\.\d+)?)\s*s/i;
 const COOLDOWN_NUMERIC_RE = /^\d+(\.\d+)?$/;
 
-export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body" | "body_structured";
+export type RetryHintProvenance =
+  "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_relative_countdown";
 
 export function retryHintBypassesMaxCooldownMs(
   provenance: RetryHintProvenance | undefined
 ): boolean {
-  return provenance === "header" || provenance === "google_rpc_retry_info";
+  return (
+    provenance === "header" ||
+    provenance === "google_rpc_retry_info" ||
+    provenance === "body_relative_countdown"
+  );
 }
 
 /** Structured provenances reflect the provider's own reset clock and may shorten an existing model lock (#CO-402). */
@@ -677,6 +682,8 @@ export async function recordCoreOwnedAntigravityQuotaState({
 }) {
   const profile = profileOverride ?? (await getRuntimeProviderProfile(provider));
   const fallback = checkFallbackError(status, errorText, 0, model, provider, headers, profile);
+  const { getCachedSettings } = await import("@/lib/db/readCache");
+  const mlSettings = resolveModelLockoutSettings(await getCachedSettings());
   const lockout = recordModelLockoutFailure(
     provider,
     connectionId,
@@ -691,7 +698,13 @@ export async function recordCoreOwnedAntigravityQuotaState({
           ? fallback.cooldownMs
           : (fallback.quotaResetHintMs ?? null),
       maxCooldownMs: profile.maxCooldownMs,
+      quotaProseMaxCooldownMs: mlSettings.quotaProseMaxCooldownMs,
       scope: "exact",
+      // #20343: relative-prose resets ("Resets in 76h25m43s") get their own
+      // ceiling (6h) instead of the generic 30m cap — the upstream announced
+      // the window, so a 30-minute relock loop is wrong; but 76h straight is
+      // equally wrong on an early random reset, hence the bounded ceiling.
+      exactCooldownIsRelativeProseReset: fallback.retryHintSource === "body_relative_countdown",
       exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(fallback.retryHintSource),
     }
   );
@@ -904,6 +917,23 @@ export function recordModelLockoutFailure(
      */
     exactCooldownIsUpstreamReset?: boolean;
     /**
+     * Dedicated operator ceiling for relative-prose quota resets
+     * ("Resets in 76h25m43s" → "body_relative_countdown"). Relative prose
+     * bypasses the generic maxCooldownMs clamp (the upstream announced the
+     * window), but must never lock a model for days — this bounded ceiling
+     * (default 6h, max 24h) keeps early reset recovery alive.
+     */
+    quotaProseMaxCooldownMs?: number;
+    /**
+     * #20343: set true only when `exactCooldownMs` came from relative-prose
+     * quota prose ("Resets in XhYmZs" → provenance "body_relative_countdown").
+     * Such hints clamp to `quotaProseMaxCooldownMs` instead of the generic
+     * maxCooldownMs — and unlike `exactCooldownIsUpstreamReset`, this flag never
+     * lets a hint skip ALL ceilings (a 76h prose window must not lock the model
+     * for three days).
+     */
+    exactCooldownIsRelativeProseReset?: boolean;
+    /**
      * A structured body hint (reset_at / retry_after seconds parsed from JSON) is
      * the provider's own reset clock: a NEW such hint may SHORTEN an existing
      * model lock instead of only extending it. Header/RetryInfo hints already
@@ -947,11 +977,23 @@ export function recordModelLockoutFailure(
     typeof options.maxCooldownMs === "number" && options.maxCooldownMs > 0
       ? options.maxCooldownMs
       : null;
+  const quotaProseMaxCooldownMs =
+    typeof options.quotaProseMaxCooldownMs === "number" && options.quotaProseMaxCooldownMs > 0
+      ? options.quotaProseMaxCooldownMs
+      : null;
   const cooldownMs =
     typeof options.exactCooldownMs === "number" && options.exactCooldownMs > 0
-      ? maxCooldownMs !== null && !options.exactCooldownIsUpstreamReset
-        ? Math.min(options.exactCooldownMs, maxCooldownMs)
-        : options.exactCooldownMs
+      ? options.exactCooldownIsRelativeProseReset === true
+        ? // Relative prose: honor the window up to the dedicated prose ceiling
+          // (6h default) — never the full 76h, never the 30m relock loop.
+          quotaProseMaxCooldownMs !== null
+          ? Math.min(options.exactCooldownMs, quotaProseMaxCooldownMs)
+          : maxCooldownMs !== null
+            ? Math.min(options.exactCooldownMs, maxCooldownMs)
+            : options.exactCooldownMs
+        : maxCooldownMs !== null && !options.exactCooldownIsUpstreamReset
+          ? Math.min(options.exactCooldownMs, maxCooldownMs)
+          : options.exactCooldownMs
       : Math.min(
           getScaledCooldown(
             baseCooldownMs,
@@ -1624,6 +1666,41 @@ export function parseRetryFromErrorText(
  */
 const MAX_PROVIDER_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+/**
+ * Provenance of the duration-shaped quota reset found in an upstream body.
+ *
+ * `parseRetryFromErrorText` collapses every body phrasing into one number, but
+ * the lockout path needs to tell a RELATIVE countdown ("Resets in 76h25m43s")
+ * apart from a short throttle hint or an absolute clock: the countdown is
+ * plausible enough to outlive the generic maxCooldownMs, yet it is not an
+ * authoritative transport reset, so it must still be bounded (#20343).
+ *
+ * Returns `null` when the text carries no relative countdown.
+ */
+export function classifyRelativeCountdownProvenance(
+  errorText: unknown,
+  provider?: string | null,
+  nowMs: number = Date.now()
+): "body_relative_countdown" | null {
+  if (!errorText || typeof errorText !== "string") return null;
+  const msg: string = String(errorText);
+
+  // Mirror parseRetryFromErrorText's precedence: anything it resolves BEFORE the
+  // countdown regexes (daily quota, JSON RetryInfo, "please retry in", absolute
+  // ISO) is a different kind of hint and must not be reclassified as prose.
+  if (hasGoogleDailyQuotaViolation(msg)) return null;
+  if (parseRetryHintFromJsonBody(msg, MAX_PROVIDER_COOLDOWN_MS) !== null) return null;
+  const pleaseRetryMs = parseDelayString(PLEASE_RETRY_RE.exec(msg)?.[1]);
+  if (pleaseRetryMs !== null && pleaseRetryMs > 0) return null;
+  if (parseIsoDateTimeResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider) !== null) return null;
+
+  for (const pattern of [RESETS_AFTER_RE, WILL_RESET_AFTER_RE, RESETS_IN_RE]) {
+    const match = pattern.exec(msg);
+    if (match?.[1] || match?.[2] || match?.[3]) return "body_relative_countdown";
+  }
+  return null;
+}
+
 function computeDurationMs(match: RegExpMatchArray): number | null {
   let totalMs = 0;
   if (match[1]) totalMs += Number.parseInt(match[1], 10) * 3600 * 1000; // hours
@@ -1975,7 +2052,13 @@ export function checkFallbackError(
 
     const retryFromErrorText = parseRetryFromErrorText(errorStr, provider);
     if (retryFromErrorText && retryFromErrorText > 0) {
-      return { retryAfterMs: retryFromErrorText, provenance: "body" };
+      // #20343: a relative countdown ("Resets in 76h25m43s") is a deliberate
+      // upstream window, not a bare body guess — tag it so the lockout path can
+      // honor it beyond maxCooldownMs, bounded by quotaProseMaxCooldownMs.
+      return {
+        retryAfterMs: retryFromErrorText,
+        provenance: classifyRelativeCountdownProvenance(errorStr, provider) ?? "body",
+      };
     }
 
     return null;

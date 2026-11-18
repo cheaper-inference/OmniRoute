@@ -748,6 +748,12 @@ export const updateSettingsSchema = z.object({
         .min(5000, "Must be at least 5,000ms")
         .max(3600000, "Must be at most 3,600,000ms (1 h)")
         .optional(),
+      quotaProseMaxCooldownMs: z
+        .number()
+        .int()
+        .min(5000, "Must be at least 5,000ms")
+        .max(86400000, "Must be at most 86,400,000ms (24 h)")
+        .optional(),
       maxBackoffSteps: z
         .number()
         .int()

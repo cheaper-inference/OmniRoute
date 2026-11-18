@@ -89,7 +89,7 @@ test("antigravity executor parseRetryFromErrorMessage matches plural 'Resets in'
   assert.ok(ms && ms > 150 * HOUR, `expected ~160h, got ${ms}`);
 });
 
-test("prose reset above max is identified as text and capped", () => {
+test("prose reset above max is identified as relative countdown and prose-ceiling capped", () => {
   const maxCooldownMs = 30 * 60_000;
   const result = checkFallbackError(
     429,
@@ -107,8 +107,12 @@ test("prose reset above max is identified as text and capped", () => {
     }
   );
 
-  assert.equal(result.retryHintSource, "body");
-  assert.equal(retryHintBypassesMaxCooldownMs(result.retryHintSource), false);
+  // Relative prose ("Resets in Xh") is the upstream's own reset window — it gets
+  // its dedicated provenance instead of the generic "body", so the model lockout
+  // clamp honors it under quotaProseMaxCooldownMs (6h default) rather than the
+  // 30-minute maxCooldownMs (relock loop, #20281/#20343).
+  assert.equal(result.retryHintSource, "body_relative_countdown");
+  assert.equal(retryHintBypassesMaxCooldownMs(result.retryHintSource), true);
 });
 
 test("Retry-After remains authoritative for model locks when connection hints are disabled", () => {
