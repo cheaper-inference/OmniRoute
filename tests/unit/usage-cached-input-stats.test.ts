@@ -70,8 +70,10 @@ test(
     const body = await response.json();
     assert.equal(body.summary.promptTokens, 100);
     assert.equal(body.summary.cachedInputTokens, 60);
+    assert.equal(body.summary.knownFreshInputTokens, 40);
     assert.equal(body.byModel[0].model, "fixture-model");
     assert.equal(body.byModel[0].cachedInputTokens, 60);
+    assert.equal(body.byModel[0].knownFreshInputTokens, 40);
     for (const breakdown of [
       result.byProvider,
       result.byModel,

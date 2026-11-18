@@ -1,0 +1,105 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+
+const data = fs.mkdtempSync(path.join(os.tmpdir(), "analytics-known-fresh-"));
+process.env.DATA_DIR = data;
+process.env.SQLITE_FILE = path.join(data, "storage.sqlite");
+process.env.OMNIROUTE_SQLITE_FILE = process.env.SQLITE_FILE;
+process.env.APP_LOG_TO_FILE = "false";
+process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+const core = await import("../../src/lib/db/core.ts");
+const { getCachedInputAnalytics } = await import("../../src/lib/db/cachedInputAnalytics.ts");
+const options = {
+  sinceIso: null,
+  untilIso: null,
+  rawCutoffDate: "2020-02-01",
+  apiKeyWhere: "",
+  apiKeyParams: {},
+};
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(data, { recursive: true, force: true });
+});
+
+test("raw known fresh input excludes unknown and inconsistent reads in both query branches", () => {
+  const db = core.getDbInstance();
+  const insert = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read, api_key_id)
+    VALUES ('fixture', ?, '2020-03-01T12:00:00.000Z', ?, 0, ?, 'fixture-key')`);
+  for (const [index, [input, cached]] of [
+    [1000, 400],
+    [500, null],
+    [100, 900],
+    [200, 0],
+  ].entries()) {
+    insert.run(index % 2 ? "vendor/Model" : "Model", input, cached);
+  }
+  for (const query of [options, { ...options, sinceIso: "2020-03-01" }]) {
+    const result = getCachedInputAnalytics(query, (model) => model.split("/").at(-1)!);
+    assert.equal(result.summary.knownFreshInputTokens, 800);
+    assert.equal(result.summary.cachedInputTokensComplete, false);
+    assert.equal(result.byModel.length, 1);
+    assert.equal(result.byModel[0].knownFreshInputTokens, 800);
+  }
+  assert.equal(
+    db
+      .prepare<{ n: number }>(
+        "SELECT COUNT(*) as n FROM usage_history WHERE tokens_cache_read IS NULL"
+      )
+      .get()?.n,
+    1
+  );
+});
+
+test("archives contribute only complete consistent rows and never leak into key filters", () => {
+  const db = core.getDbInstance();
+  const insert = db.prepare(`INSERT INTO daily_usage_summary
+    (provider, model, date, total_requests, total_input_tokens, total_output_tokens,
+     total_cost, total_cache_read_tokens, cached_input_unknown_requests)
+    VALUES ('archive', ?, '2020-01-01', 1, ?, 0, 0, ?, ?)`);
+  insert.run("known", 1000, 400, 0);
+  insert.run("unknown", 500, null, 1);
+  insert.run("inconsistent", 100, 900, 0);
+  insert.run("mixed", 2000, 200, 1);
+  const result = getCachedInputAnalytics(options);
+  assert.equal(result.summary.knownFreshInputTokens, 1400);
+  assert.equal(result.summary.cachedInputTokensComplete, false);
+  assert.equal(result.byModel.find((row) => row.model === "known")?.knownFreshInputTokens, 600);
+  for (const model of ["unknown", "inconsistent", "mixed"]) {
+    assert.equal(result.byModel.find((row) => row.model === model)?.knownFreshInputTokens, 0);
+  }
+  const filtered = getCachedInputAnalytics({
+    ...options,
+    apiKeyWhere: "api_key_id = @key",
+    apiKeyParams: { key: "fixture-key" },
+  });
+  assert.equal(filtered.summary.knownFreshInputTokens, 800);
+  assert.equal(filtered.summary.cachedInputTokensComplete, false);
+});
+
+test("malformed source counters never inflate known fresh input", () => {
+  const db = core.getDbInstance();
+  const raw = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_cache_read)
+    VALUES ('malformed', 'malformed', '2020-03-01', ?, ?)`);
+  const archive = db.prepare(`INSERT INTO daily_usage_summary
+    (provider, model, date, total_requests, total_input_tokens, total_cache_read_tokens, cached_input_unknown_requests)
+    VALUES ('malformed', ?, '2020-01-01', 1, ?, ?, 0)`);
+  for (const [i, [input, cache]] of [
+    [100, -10],
+    [100, 0.5],
+    [100.5, 0],
+    [9007199254740992, 0],
+  ].entries()) {
+    raw.run(input, cache);
+    archive.run(`malformed-${i}`, input, cache);
+  }
+  const result = getCachedInputAnalytics(options);
+  for (const row of result.byModel.filter((row) => row.model.startsWith("malformed"))) {
+    assert.equal(row.knownFreshInputTokens, 0);
+  }
+});

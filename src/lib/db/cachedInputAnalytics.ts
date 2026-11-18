@@ -3,12 +3,14 @@ import { buildUnifiedSource, type BuildUnifiedSourceOptions } from "./usageAnaly
 
 export type CachedInputMeasurement = {
   cachedInputTokens: number | null;
+  knownFreshInputTokens: number;
   cachedInputTokensComplete: boolean;
 };
 
 type MeasurementRow = {
   model?: string;
   cachedInputTokens: number | null;
+  knownFreshInputTokens: number;
   cachedInputTokensComplete: number;
 };
 
@@ -19,6 +21,7 @@ export function getCachedInputAnalytics(
   const { unifiedSource, unifiedParams } = buildUnifiedSource(options);
   const db = getDbInstance();
   const columns = `SUM(cached_input_tokens) as cachedInputTokens,
+    COALESCE(SUM(known_fresh_input), 0) as knownFreshInputTokens,
     COALESCE(SUM(cached_input_unknown_requests), 0) = 0 as cachedInputTokensComplete`;
   const summary = db
     .prepare(`SELECT ${columns} FROM ${unifiedSource} AS _u`)
@@ -33,16 +36,19 @@ export function getCachedInputAnalytics(
     const existing = models.get(model) ?? {
       model,
       cachedInputTokens: null,
+      knownFreshInputTokens: 0,
       cachedInputTokensComplete: !filteredHistoryMissing,
     };
     if (row.cachedInputTokens !== null)
       existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
+    existing.knownFreshInputTokens += row.knownFreshInputTokens;
     existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
     models.set(model, existing);
   }
   return {
     summary: {
       cachedInputTokens: summary?.cachedInputTokens ?? null,
+      knownFreshInputTokens: summary?.knownFreshInputTokens ?? 0,
       cachedInputTokensComplete:
         !filteredHistoryMissing && Boolean(summary?.cachedInputTokensComplete ?? true),
     },

@@ -14,6 +14,7 @@ test("splits inclusive prompt totals without double counting cache reads", () =>
       totalTokens: 110,
       totalInputTokens: 100,
       inputTokens: 40,
+      inputTokensPartial: false,
       cachedInputTokens: 60,
       outputTokens: 10,
       cacheComplete: true,
@@ -94,4 +95,54 @@ test("cache writes remain in input, not in the cache-read bucket", () => {
     value.inputTokens! + value.cachedInputTokens! + value.outputTokens!,
     value.totalTokens
   );
+});
+
+test("incomplete or inconsistent cache coverage retains only measured fresh input", () => {
+  for (const cache of [
+    { cachedInputTokens: 400, cachedInputTokensComplete: false },
+    { cachedInputTokens: 2000, cachedInputTokensComplete: true },
+  ]) {
+    const result = getAnalyticsTokenBreakdown({
+      promptTokens: 1800,
+      completionTokens: 10,
+      ...cache,
+      knownFreshInputTokens: 550,
+    });
+    assert.equal(result.inputTokens, 550);
+    assert.equal(result.inputTokensPartial, true);
+    assert.equal(result.totalTokens, 1810);
+  }
+});
+
+test("exact coverage takes precedence over a known fresh-input subtotal", () => {
+  const result = getAnalyticsTokenBreakdown({
+    promptTokens: 1000,
+    cachedInputTokens: 400,
+    cachedInputTokensComplete: true,
+    knownFreshInputTokens: 550,
+  });
+  assert.equal(result.inputTokens, 600);
+  assert.equal(result.inputTokensPartial, false);
+});
+
+test("absent, empty, and malformed known parts do not invent a fresh-input total", () => {
+  for (const knownFreshInputTokens of [undefined, null, 0, -1, 0.5, NaN, Infinity]) {
+    const result = getAnalyticsTokenBreakdown({
+      promptTokens: 1000,
+      cachedInputTokensComplete: false,
+      knownFreshInputTokens,
+    });
+    assert.equal(result.inputTokens, null);
+    assert.equal(result.inputTokensPartial, false);
+  }
+});
+
+test("a known subtotal cannot exceed the inclusive input total", () => {
+  const result = getAnalyticsTokenBreakdown({
+    promptTokens: 100,
+    cachedInputTokensComplete: false,
+    knownFreshInputTokens: 110,
+  });
+  assert.equal(result.inputTokens, null);
+  assert.equal(result.inputTokensPartial, false);
 });

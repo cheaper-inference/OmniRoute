@@ -141,6 +141,13 @@ describe("Analytics token cards", () => {
     expect(count("Total Tokens", "11,000")).toBeTruthy();
   });
 
+  it("labels the exact known fresh-input subtotal as partial", () => {
+    renderCards({ ...summary, cachedInputTokensComplete: false, knownFreshInputTokens: 550 });
+    expect(count("Input Tokens", "550+ (Partial)").textContent).toBe("550+ (Partial)");
+    expect(count("Total Input Tokens", "10,000")).toBeTruthy();
+    expect(screen.queryByText(en.analytics.inputSplitUnavailable)).toBeNull();
+  });
+
   it("shows measured zero but does not clamp contradictory provider counts", () => {
     const view = renderCards({ ...summary, cachedInputTokens: 10_000 });
     expect(count("Input Tokens", "0").textContent).toBe("0");
