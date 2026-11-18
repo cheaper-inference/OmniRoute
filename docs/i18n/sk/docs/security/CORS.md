@@ -116,32 +116,10 @@ Pri porovnávaní pôvodov sa nerozlišujú veľké a malé písmená a koncová
 `http://localhost:3000` a `http://localhost:3000/` sú ekvivalentné. Rovnakú hodnotu CSV
 možno za behu bez reštartu nastaviť v časti **Dashboard → Security → CORS Allowed Origins**.
 
-## Kľúče API verzus relácie používajúce súbory cookie
+## Kľúče API vs. relácie cookie
 
-- **Bearer / `x-api-key` (inferenčné rozhranie `/v1/*`):** prehliadače ich nikdy nepripájajú
-  automaticky. CORS tu nepredstavuje účinnú bariéru — bariérou je kľúč API
-  — preto je toto rozhranie zámerne permisívne, aby si klienti v prehliadači a
-  Electron mohli čítať odpovede, na ktoré už majú oprávnenie.
-  Uvoľnené vrátenie zdroja sa riadi overeným kľúčom, nie samotnou prítomnosťou hlavičky:
-  keď `REQUIRE_API_KEY=false` obslúži požiadavku anonymne, jej úspešná odpoveď zachováva
-  zoznam povolených zdrojov uzavretý pri zlyhaní. Zamietnutia overenia (401) zostávajú
-  čitateľné, aby klienti mohli zobraziť odvolaný alebo nesprávne zadaný kľúč (#5242):
-  vlastná odpoveď 401 z pipeline vrátenie zdroja zachováva a trasa, ktorá kľúč sama
-  odmietne po tom, čo ho pipeline obslúžila ako anonymný (`/v1/models` a
-  `/v1beta/models` s nakonfigurovaným overovaním správy, trasy obmedzené na vlastníka
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` a trasy kandidátov
-  auto-combo), pridá vrátenie zdroja k tejto odpovedi 401 pomocou
-  `credentialRejectionHeaders()`. Vrátenie zdroja závisí od toho, či požiadavka nesie
-  hlavičku s prihlasovacími údajmi (`Authorization`, `x-api-key`, `x-goog-api-key` alebo
-  súbor cookie `auth_token`), nie od toho, ktorú z nich trasa skontrolovala, a nikdy sa
-  nekombinuje s `Access-Control-Allow-Credentials`; telo je pevná chybová obálka. Trasy
-  správy pod `/api/v1/` chránené pomocou `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) vrátenie zdroja nepridávajú: pri
-  `REQUIRE_API_KEY=false` nie sú ich odpovede 401/403 čitateľné z iného zdroja.
-- **Relácia používajúca súbor cookie (ovládací panel):** je chránená predvoleným nastavením uzavretým pri zlyhaní **a**
-  absenciou hlavičky `Access-Control-Allow-Credentials` na zdieľanej ceste. Nezahŕňajte
-  pôvody pre správu a ovládací panel do žiadnej permisívnej konfigurácie; musia zostať striktne
-  uzavreté pri zlyhaní.
+- **Bearer / `x-api-key` (inferenčné rozhranie `/v1/*`):** prehliadače ich nikdy nepripájajú automaticky. CORS tu nie je relevantnou bariérou — touto bariérou je kľúč API — preto je toto rozhranie zámerne permisívne, aby prehliadače a klienti Electron mohli čítať odpovede, na ktoré už majú oprávnenie. Uvoľnené echo nasleduje po overenom kľúči, nie iba po prítomnosti hlavičky: keď `REQUIRE_API_KEY=false` obslúži požiadavku anonymne, jej úspešná odpoveď si zachová allowlist s predvoleným zamietnutím. Zamietnutia autentifikácie (401) zostávajú čitateľné, aby klienti mohli zobraziť informáciu o odvolanom alebo nesprávne zadanom kľúči (#5242): vlastná odpoveď pipeline 401 si zachováva echo a trasa, ktorá sama odmietne kľúč po tom, čo ju pipeline obslúžila anonymne (`/v1/models` a `/v1beta/models` s nakonfigurovanou autentifikáciou správy, trasy `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` obmedzené na vlastníka a kandidátske trasy auto-combo), pridá toto echo k odpovedi 401 prostredníctvom `credentialRejectionHeaders()`. Echo závisí od toho, či požiadavka obsahuje hlavičku poverenia (`Authorization`, `x-api-key`, `x-goog-api-key` alebo cookie `auth_token`), nie od toho, ktorú z nich trasa overovala, a nikdy sa nekombinuje s `Access-Control-Allow-Credentials`; telo je pevne daný chybový obal. Trasy správy pod `/api/v1/`, chránené pomocou `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), echo nepridávajú: pri `REQUIRE_API_KEY=false` ich odpovede 401/403 nie sú čitateľné z iného pôvodu.
+- **Relácia cookie (dashboard):** chránená predvoleným režimom s odmietnutím **aj** absenciou `Access-Control-Allow-Credentials` na zdieľanej ceste. Pôvody správy/dashboardu ponechajte mimo akejkoľvek permisívnej konfigurácie; musia zostať presne v režime s odmietnutím.
 
 ## Handshaky WebSocket (`/v1/responses`, `/v1/ws`)
 

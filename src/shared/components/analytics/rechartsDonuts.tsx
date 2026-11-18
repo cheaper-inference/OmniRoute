@@ -42,9 +42,7 @@ function CompactDonutCard({
 
   return (
     <Card className="p-4 flex-1">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-        {title}
-      </h3>
+      <h3 className="text-sm text-text-muted uppercase mb-3">{title}</h3>
       <div className="flex items-center gap-4">
         <ResponsiveContainer width={120} height={120}>
           <PieChart>
@@ -113,9 +111,7 @@ export function AccountDonut({ byAccount }) {
   if (!hasData) {
     return (
       <Card className="p-4 flex-1">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-          {t("chartByAccount")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartByAccount")}</h3>
         <div className="text-center text-text-muted text-sm py-8">{t("chartNoData")}</div>
       </Card>
     );
@@ -143,9 +139,7 @@ export function ApiKeyDonut({ byApiKey }) {
   if (!hasData) {
     return (
       <Card className="p-4 flex-1">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-          {t("chartByApiKey")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartByApiKey")}</h3>
         <div className="text-center text-text-muted text-sm py-8">{t("chartNoData")}</div>
       </Card>
     );
@@ -184,9 +178,7 @@ export function ProviderCostDonut({ byProvider }) {
   if (!hasData) {
     return (
       <Card className="p-4 flex-1">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-          {t("chartCostByProvider")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-3">{t("chartCostByProvider")}</h3>
         <div className="text-center text-text-muted text-sm py-8">{t("chartNoCostData")}</div>
       </Card>
     );

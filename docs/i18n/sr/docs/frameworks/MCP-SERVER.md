@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -103,21 +105,21 @@ Cursor, Cline i kompatibilno podešavanje MCP klijenta.
 | `omniroute_x_search`            | `execute:search`      | Pretraga X-a putem xAI/SuperGrok-a, ili odaberite `xquik-search` za rezultate Xquik API-ja. Zahteva akreditive za odabrani bek-end. |
 | `omniroute_web_fetch`           | `execute:search`      | Preuzimanje veb sadržaja putem konfigurisanih provajdera preuzimanja                                                                |
 
-## Napredni alati (11) — Faza 2
+## Напредни алати (11) — фаза 2
 
-| Alat                               | Opsezi                               | Opis                                                                                                                                          |
-| :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Simulacija rutiranja u probnom režimu sa rezervnim stablom                                                                                    |
-| `omniroute_set_budget_guard`       | `write:budget`                       | Budžet sesije sa akcijama degradacije/blokiranja/upozorenja                                                                                   |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | Ažuriranje strategije kombinacije u toku izvršavanja (prioritetna/ponderisana/automatska/itd.)                                                |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Primena `agresivnog` / `balansiranog` / `konzervativnog` profila otpornosti                                                                   |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Testiranje uživo svakog provajdera u kombinaciji korišćenjem stvarnog uzvodnog poziva                                                         |
-| `omniroute_get_provider_metrics`   | `read:health`                        | Metrike po provajderu sa p50/p95/p99 kašnjenjem i stanjem prekidača kola                                                                      |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Preporučite kombinaciju po tipu zadatka sa ograničenjima budžeta/kašnjenja                                                                    |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | Objasnite zašto je zahtev rutiran ka provajderu (faktori bodovanja + rezervni mehanizmi)                                                      |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | Potpuni snimak sesije: trošak, tokeni, najbolji modeli/provajderi, greške, zaštita budžeta                                                    |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Dijagnostikovanje (i opciono automatsko popravljanje) odstupanja baze podataka kao što su neispravne reference kombinacija / osamljeni redovi |
-| `omniroute_sync_pricing`           | `pricing:write`                      | Sinhronizacija podataka o cenama iz eksternih izvora (LiteLLM); podržava `dryRun`                                                             |
+| Алат                               | Сцопес                               | Опис                                                                                                                      |
+| :--------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Симулација рутирања на суво са резервним стаблом                                                                          |
+| `omniroute_set_budget_guard`       | `write:budget`                       | Буџет сесије са degrade/block/alert акцијом                                                                               |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | Ажурирајте комбиновану стратегију у току рада (priority/weighted/auto/etc.)                                               |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Примените унапред подешену отпорност `aggressive` / `balanced` / `conservative`                                           |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Тест уживо сваког провајдера у комбинацији користећи прави упстреам позив                                                 |
+| `omniroute_get_provider_metrics`   | `read:health`                        | метрика по провајдеру са p50/p95/p99 латенцијом и стањем прекидача                                                        |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Препоручите комбинацију према типу задатка са budget/latency ограничењима                                                 |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | Објасните зашто је захтев преусмерен добављачу (фактори бодовања + резервни фактори)                                      |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | Снимак целе сесије: цена, токени, топ models/providers, грешке, чување буџета                                             |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Дијагностикујте (и опционо аутоматску поправку) померања базе података попут покварених комбинованих референци / сирочади |
+| `omniroute_sync_pricing`           | `pricing:write`                      | Синхронизација података о ценама из екстерних извора (LiteLLM); подржава `dryRun`                                         |
 
 ## Alati za keširanje (2)
 
@@ -144,7 +146,7 @@ Cursor, Cline i kompatibilno podešavanje MCP klijenta.
 | `omniroute_rtk_discover`            | `read:compression`  | Откријте понављајућу буку у изборним RTK излазним узорцима                                                                            |
 | `omniroute_rtk_learn`               | `read:compression`  | Генеришите нацрт RTK филтера који се може прегледати из узорака за избор                                                              |
 
-CCR уноси користе двослојно складиште: врући ниво у меморији подржан, на локалним временима извођења без облака, издржљивим SQLite нивоом (`ccr_blocks`, подразумевано укључен), тако да блок преживљава избацивање или поновно покретање док његов TTL не понестане — осим блокова преко 512 KB који остају укључени у меморији. Сваки блок је ограничен на 2 MiB, сваки принципал на 16 MiB, а глобално складиште на 64 MiB. Уноси су подразумевани на 24-часовни TTL (максимално седам дана). Потпуно MCP преузимање је ограничено на 256 KiB; већи блокови остају доступни кроз режиме рангирања и греп. Складиштење, преузимање, листање, инспекција, брисање и статистика су изоловани од стране ауторизованог принципала АПИ кључа. Ревизорски записи садрже хешове и метаподатке о величини, никада садржај. Детаљи окренути оператеру (два маркера, предуслови за клијента, `codemode:false`, опсег по алату, пагинација и дијагностичка матрица) налазе се у [Цомпрессион Енгинес → Предуслови / водич за оператера](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR уноси користе двослојно складиште: врући ниво у меморији подржан, на локалним временима извођења без облака, издржљивим SQLite нивоом (`ccr_blocks`, подразумевано укључен), тако да блок преживљава избацивање или поновно покретање све док његов TTL не понестане — осим блокова преко 512 KB који остају у меморији у времену извођења у облаку, `COMPRESSION_CCR_DURABLE_STORE=false`. Трајно уписивање је најбољи напор: одбацује се док је 1.000 уписа већ на чекању, а неуспело уписивање SQLite се евидентира, а не покушава поново, тако да се тај блок губи при поновном покретању. Сваки блок је ограничен на 2 MiB, сваки принципал на 16 MiB, а глобално складиште на 64 MiB. Уноси су подразумевани на 24-часовни TTL (максимално седам дана). Потпуно MCP преузимање је ограничено на 256 KiB; већи блокови остају доступни кроз режиме рангирања и греп. Складиштење, преузимање, листање, инспекција, брисање и статистика су изоловани од стране ауторизованог принципала АПИ кључа. Ревизорски записи садрже хешове и метаподатке о величини, никада садржај. Детаљи окренути оператеру (два маркера, предуслови клијента, `codemode:false`, опсег по алату, пагинација и дијагностичка матрица) налазе се у [→ Предуслови / водич за оператера](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` пријављује компресију описа MCP одвојено под `analytics.mcpDescriptionCompression`. Те вредности су процене величине метаподатака за MCP пописиве описе (`tools`, `prompts`, `resources` и `resourceTemplates`); нису признанице о коришћењу добављача и означене су са `source: "mcp_metadata_estimate"`.
 

@@ -14,7 +14,7 @@
  */
 
 import { getDbInstance } from "./core";
-import { createApiKey, deleteApiKey } from "./apiKeys";
+import { clearApiKeyCaches, createApiKey, deleteApiKey } from "./apiKeys";
 import { addKeyToGroup, getKeyGroupsForApiKey, removeKeyFromGroup } from "./apiKeyGroups";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import * as log from "@/sse/utils/logger";
@@ -112,10 +112,14 @@ function markKeyAsSso(apiKeyId: string): void {
 
 export function setSsoKeyActive(apiKeyId: string, active: boolean): boolean {
   const db = getDbInstance();
+  // Match only a real state change, so a repeat call does not report a change and clear caches.
   const result = db
-    .prepare("UPDATE api_keys SET is_active = ? WHERE id = ?")
-    .run(active ? 1 : 0, apiKeyId);
-  return (result.changes ?? 0) > 0;
+    .prepare("UPDATE api_keys SET is_active = ? WHERE id = ? AND is_active IS NOT ?")
+    .run(active ? 1 : 0, apiKeyId, active ? 1 : 0);
+  const changed = (result.changes ?? 0) > 0;
+  // A cached pass would keep a deactivated key authenticating until the cache TTL ends.
+  if (changed) clearApiKeyCaches();
+  return changed;
 }
 
 /** Skips all writes when the resolved set matches `previous`, the common case. */

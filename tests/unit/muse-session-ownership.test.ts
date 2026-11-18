@@ -195,10 +195,11 @@ test("exhausted account is skipped for new sessions and unserved pins move to a 
     served,
     generation
   ).text();
-  assert.throws(
-    () => claimMuseSession(served, { input: "continue" }, exhausted),
-    (error: { status?: number; message?: string }) =>
-      error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
+  // The owner exists but is cooling down: the session keeps it, and the caller answers
+  // 429 with the reset instead of a cross-account 503 (which made clients retry-loop).
+  assert.equal(
+    claimMuseSession(served, { input: "continue" }, exhausted).connectionId,
+    "account-a"
   );
   assert.equal(claimMuseSession(served, { input: "continue" }, flipped).connectionId, "account-a");
 });

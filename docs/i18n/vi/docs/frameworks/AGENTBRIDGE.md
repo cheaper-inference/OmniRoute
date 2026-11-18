@@ -20,7 +20,7 @@ Khi một tác nhân IDE (ví dụ: GitHub Copilot, Cursor, Claude Code) thực 
 
 Điều này có nghĩa là bạn có thể:
 
-- **Định tuyến lại bất kỳ đại lý nào đến bất kỳ nhà cung cấp nào** : Copilot đang nói chuyện với OpenAI? Chuyển hướng nó tới Anthropic Claude, Gemini hoặc bất kỳ nhà cung cấp nào trong số 381 nhà cung cấp của OmniRoute.
+- **Định tuyến lại bất kỳ đại lý nào đến bất kỳ nhà cung cấp nào** : Copilot đang nói chuyện với OpenAI? Chuyển hướng nó tới Anthropic Claude, Gemini hoặc bất kỳ nhà cung cấp nào trong số 394 nhà cung cấp của OmniRoute.
 - **Áp dụng ánh xạ mô hình** : `gemini-3-flash` → `claude-sonnet-4.7` một cách minh bạch ở cấp độ xử lý.
 - **Quan sát tất cả lưu lượng đại lý** : mọi yêu cầu bị chặn sẽ được công bố tới [Thanh tra giao thông](./TRAFFIC_INSPECTOR.md).
 - **Áp dụng khả năng phục hồi OmniRoute** : định tuyến kết hợp, bộ ngắt mạch, dự phòng và theo dõi chi phí cũng hoạt động đối với lưu lượng tác nhân IDE.
@@ -545,24 +545,24 @@ Các schema OpenAPI đầy đủ: `docs/openapi.yaml` → thẻ `AgentBridge`.
 
 ## §8 Lộ trình
 
-### Khảo sát Trae
+### Trà điều tra
 
-Trae là một trợ lý lập trình AI tương đối mới. Trước khi triển khai một handler:
+Trae là một trợ lý mã hóa AI tương đối mới. Trước khi thực hiện một trình xử lý:
 
-1. Xác định tệp nhị phân/tiện ích mở rộng trên các marketplace của VS Code / JetBrains hoặc dưới dạng ứng dụng độc lập
-2. Ghi lại lưu lượng truy cập bằng mitmproxy để xác định các máy chủ API và cấu trúc endpoint
+1. Xác định binary/extension trong các thị trường Mã VS / JetBrains hoặc dưới dạng một ứng dụng độc lập
+2. Nắm bắt lưu lượng truy cập bằng mitmproxy để khám phá máy chủ API và hình dạng điểm cuối
 3. Xác định cơ chế xác thực
-4. Đánh giá nên tiếp tục hay dừng lại dựa trên TOS và khả năng khám phá API
+4. Đánh giá go/no-go dựa trên khả năng khám phá TOS và API
 
-Cho đến khi quá trình khảo sát hoàn tất, thẻ Trae trên dashboard sẽ hiển thị huy hiệu "Đang khảo sát" cùng liên kết "Báo cáo tính khả thi". Stub của handler tại `src/mitm/handlers/trae.ts` sẽ đưa ra lỗi có cấu trúc `Chưa được triển khai`.
+Cho đến khi cuộc điều tra hoàn tất, thẻ Trae trong trang tổng quan sẽ hiển thị huy hiệu "Đang điều tra" cùng với liên kết "Báo cáo khả năng tồn tại". Sơ khai trình xử lý tại `src/mitm/handlers/trae.ts` đưa ra lỗi `Not yet implemented` có cấu trúc.
 
-### Các agent tồn đọng (bắt buộc dùng MITM — không hỗ trợ base URL tùy chỉnh)
+### Đại lý tồn đọng (MITM yêu cầu — không hỗ trợ URL cơ sở tùy chỉnh)
 
-Các công cụ sau không hỗ trợ base URL tùy chỉnh trong phiên bản hiện tại, khiến MITM trở thành phương thức chặn bắt duy nhất. Việc đánh giá tính khả thi vẫn đang chờ xử lý:
+Các công cụ sau không hỗ trợ URLs cơ sở tùy chỉnh trong các phiên bản hiện tại của chúng, khiến MITM trở thành đường dẫn chặn duy nhất. Đang chờ đánh giá khả năng tồn tại:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
+- **Bộ khuếch đại** (Nguồn ảnh)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — tách biệt với Kiro IDE)
-- **Cowork** (ứng dụng desktop của Anthropic)
+- **đồng nghiệp** (máy tính để bàn Anthropic )
 
-Lưu ý: GitHub Copilot CLI ≥v1.0.19 hỗ trợ `COPILOT_PROVIDER_BASE_URL` — hãy sử dụng cấu hình trực tiếp thay vì MITM cho công cụ đó.
+Lưu ý: GitHub Copilot CLI ≥ v1.0.19 hỗ trợ `COPILOT_PROVIDER_BASE_URL` — sử dụng cấu hình trực tiếp thay vì MITM cho công cụ đó.

@@ -832,93 +832,180 @@ Ayyukan batch masu dacewa da OpenAI.
 
 ## API ɗin Bincike
 
-Ƙyamar mai samar da binciken yanar gizo/bincike (Tavily, Brave, Exa, Serper, da sauransu).
+Tsarin cire bambanci na masu samar da binciken yanar gizo (Tavily, Brave, Exa, Serper, da sauransu).
 
-| Method | Path                   | Description                                                                                                 |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Jera masu samar da binciken da aka saita + damar su                                                         |
-| POST   | `/v1/search`           | Gudanar da tambayar bincike — `v1SearchSchema` ne ke tantance jiki, yana goyan bayan adanawa da haɗa buƙatu |
-| GET    | `/v1/search/analytics` | Ƙididdigar sakamako/jinkiri/ma’ajiyar kowane mai samarwa                                                    |
+| Hanya | Hanya                  | Bayani                                                                                                               |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Jera masu samar da binciken da aka tsara + damar da suke da su                                                       |
+| POST  | `/v1/search`           | Gudanar da tambayar bincike — `v1SearchSchema` ne ke tabbatar da jikin buƙatar, yana goyon bayan adanawa/haɗa buƙatu |
+| GET   | `/v1/search/analytics` | Ƙididdigar sakamako/jinkiri/cache ga kowane mai samarwa                                                              |
 
-**Auth:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tilasta manufar bincike ta `enforceApiKeyPolicy`.
+**Tabbatarwa:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tilasta manufar bincike ta `enforceApiKeyPolicy`.
 
-**Auto-select:** idan babu `provider`, mai samarwa mafi arha da ke da haɗin da aka saita shi ne ke fara aiki, sannan na gaba mafi arha shi ne na madadin idan na farko ya gaza. Ana amfani da masu samarwa kyauta na madadin ƙarshe (`duckduckgo-free`) ne kawai idan ba a saita wani abu dabam ba. Ana ɗaukar SearXNG mai karɓar kansa a matsayin wanda aka saita da zarar haɗinsa ya adana ainihin `baseUrl` (ba tsohon adireshin kundin `http://localhost:8888/search` ba): daga nan sai ya kasance mai samarwa na $0 a matsayi na gaba bayan masu maɓalli, yayin da mai samarwa mafi arha mai maɓalli yake zama na madadin, har ma idan SearXNG ya amsa da 400, 401, 403 ko 404. `baseUrl` da ba ingantaccen adireshin `http(s)` ba ne ko kuma ya nuna adireshin metadata na gajimare ba ya ƙirga. Haɗin SearXNG da ke adana alama yana matsayi haka ne kawai a kan `https://` ko `http://` na loopback. A kan `http://` na nesa mara kariya, ba ya taɓa zama na madadin kuma yana kasancewa na madadin ƙarshe, ana amfani da shi ne kawai idan ba a saita wani mai samarwa ba ko kuma an nema da suna; saboda haka yana aika alamar ba tare da ɓoyewa ba a waɗannan lokuta biyu.
+### Haɗaɗɗun bincike/ciro masu suna
+
+Duka `POST /v1/search` da `POST /v1/web/fetch` suna karɓar `model` a matsayin sunan haɗin da aka adana.
+Yi amfani da ko dai `model` ko `provider` bayyananne; aika duka biyun yana dawo da `400`.
+Idan babu ɗaya daga cikin filayen biyu, zaɓin mai samarwa na atomatik da ake da shi zai ci gaba da aiki ba tare da canji ba.
+
+Duka Combo Builder da kundin Add Model ɗinsa suna nuna shigarwar ayyukan yanar gizo na asali
+ga masu samarwar da aka haɗa, ko da ba su da jerin samfuran LLM. Serper yana nuna
+**Binciken yanar gizo**; Tavily yana nuna **Binciken yanar gizo / Ciro shafi**, yayin da masu samarwa
+waɗanda ke ciro kawai suke nuna **Ciro shafi**. Zaɓi shigarwar da asusun kamar yadda aka saba.
+Shigarwar Tavily guda ɗaya tana aiki ga duka wuraren aikin yanar gizo;
+ba a ƙara waɗannan shigarwar ayyuka ga masu zaɓin abokan ciniki na hira-kawai ko binciken samfuran hira ba.
+
+Misali, ƙirƙiri haɗin **fifiko** mai suna `shared-free` tare da waɗannan wuraren da aka jera:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Sannan yi amfani da suna ɗaya a kowace fuska:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Bincike yana duba Tavily sannan Serper; ciro yana duba Tavily sannan Jina Reader;
+hira tana tsallake keɓaɓɓun masu samar da bincike/ciro kuma tana duba OpenAI. Daidaituwa
+tana fitowa ne daga rajistar masu aiwatar da bincike/ciro, ba daga kalmomin da ke cikin sunan samfuri ba.
+Tacewa tana zuwa kafin zaɓin bayanan sirri da aika buƙata, kuma ba ta taɓa gyara haɗin da aka adana ba.
+
+Hanyoyin damar da ba na hira ba suna goyon bayan `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, da `p2c`. Dabarun haɗa sakamako na hira-kawai kamar
+`fusion`, `pipeline`, da `context-relay` ana ƙi su a hanyoyin da ba na hira ba maimakon
+a yi amfani da su a ɓoye wajen bincike ko kafofin watsa labarai da aka samar.
+Injin haɗin da ake da shi yana sarrafa komawa zuwa matakai na baya, har da gazawar adadin amfani daga mai samarwa,
+kuma yana riƙe ID na matakai, daure asusu, jerin asusun da aka yarda da su ga kowane mataki,
+nassoshi masu matakai, iyakokin haɗin mai kira/adadin amfani da manufar samun damar haɗi. Sakamako yana riƙe
+tsarin bincike/ciro na asali, har da ainihin mai samarwa; `X-OmniRoute-Combo-Trace` yana gano
+shawarar hanyar da aka ɗauka. Haɗaɗɗun da ba a sani ba suna dawo da `404`; haɗaɗɗun da ba su aiki ba da
+haɗaɗɗun da ba su da wuraren da suka dace suna dawo da `400`.
+
+Kowane yunƙurin haɗi yana amfani da mai samarwa guda ɗaya bayyananne.
+Ba zai iya kiran tafkin masu samarwa na atomatik na asali a bayan haɗin ba. Buƙatun da aka yi wa mai samarwa
+bayyananne suna riƙe halayensu na mai samarwa guda ɗaya da ake da su. Buƙatun hira kai tsaye da aka nufa ga
+keɓaɓɓun masu samar da bincike/ciro suna dawo da JSON `400` mai bayani kan matakin da za a ɗauka,
+maimakon su faɗa cikin mai aiwatarwa irin na OpenAI.
+
+### Hanyoyin haɗi na musamman ga damar aiki
+
+Haɗaɗɗun da aka adana na iya ƙunsar wani abu na `routes` wanda maɓallan sa su ne damar API.
+Kowace hanya tana da nata jerin wuraren nufi, dabara, da saitin lokacin gudu. `models`, `strategy`, da `config`
+na matakin sama suna nan a matsayin shirin Chat mai dacewa da tsofaffin sigogi; tsoffin haɗaɗɗun da ba su da `routes`
+za su ci gaba da aiki ba tare da canji ba.
+
+Maɓallan hanyoyin da ake goyon baya su ne `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, da `audio-generation`. Ana tantance hanyar ƙarshen aiki kafin zaɓin bayanan sirri,
+ƙididdigewa, ko aika buƙata. Nassoshin haɗi na cikin gida suna zaɓar hanyar haɗin ɗan haɗin don wannan damar.
+
+`POST /v1/music/generations` da `POST /v1/ocr` suna karɓar sunan haɗi a cikin `model`. Na asali mai dacewa da
+ElevenLabs `POST /v1/music` ma yana karɓar sunan haɗi a cikin `model_id`, amma kowane wurin nufi da za a iya amfani da shi
+a wannan hanyar ta asali dole ne ya zama samfurin kiɗa na ElevenLabs domin a kiyaye yarjejeniyar amsar binary ɗinsa.
+`POST /v1/sound-generation` yana karɓar haɗin `audio-generation` a cikin `model_id` ƙarƙashin
+irin wannan ƙa'idar binary ta asali. Yi amfani da `/v1/music/generations` don masu samar da kiɗa iri-iri.
+
+**Zaɓi ta atomatik:** ba tare da `provider` ba, mai samarwa mafi arha da ke da haɗin da aka tsara shi ne ke fara aiki,
+kuma na gaba mafi arha shi ne madadin gazawa. Ana amfani da masu samarwa na kyauta na matakin ƙarshe (`duckduckgo-free`)
+ne kawai idan ba a tsara wani abu dabam ba. SearXNG da aka karɓi da kansa ana ɗauka an tsara shi da zarar haɗinsa
+ya adana ainihin `baseUrl` (ba tsohuwar hanyar kundin `http://localhost:8888/search` ba): a lokacin
+ana jera shi a matsayin mai samarwa na $0 a gaban waɗanda ke buƙatar maɓalli, tare da mai samarwa mafi arha mai maɓalli
+a matsayin madadin gazawa, har ma lokacin da SearXNG ya amsa da 400, 401, 403 ko 404. `baseUrl` da ba ingantacciyar
+URL ta `http(s)` ba ce ko wadda ta nuna adireshin metadata na gajimare ba ta ƙirga. Haɗin SearXNG da ke adana alama
+yana samun wannan matsayi ne kawai a kan `https://` ko `http://` na loopback. A kan `http://` na nesa marar ɓoye,
+ba ya taɓa zama madadin gazawa kuma yana kasancewa a matsayin zaɓin ƙarshe, ana amfani da shi ne kawai lokacin da
+ba a tsara wani mai samarwa ba ko kuma aka nema da suna; saboda haka yana aika alamar a sarari a waɗannan yanayi biyu.
 
 ### `provider_options` na Exa da Tavily
 
-Exa da Tavily suna karanta filayen da suka kebanta da mai samarwa daga jaka mai suna:
+Exa da Tavily suna karanta filayen da suka keɓanta ga mai bayarwa daga jaka mai suna:
 `provider_options.exa` (ko `provider_options["exa-search"]`) da `provider_options.tavily`
-(ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kawai ake turawa. Ana bincika kowannensu
-da nasa tsarin Zod a cikin `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-kuma ana cire maɓalli mai nau’in da bai dace ba. Ana watsi da duk wani maɓalli, har da na tantancewa, adireshin tushe,
-`stream` da `outputSchema`. Maɓallan madaidaiciya da sauran masu samarwa ke amfani da su (`cx`, `depth`, ...) suna aiki
-kamar da.
+(ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kaɗai ake turawa. Ana
+duba kowannensu bisa nasa tsarin Zod a cikin `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+kuma ana cire maɓalli idan nau'in darajarsa ba daidai ba ne. Ana watsi da duk wani maɓalli,
+har da auth, base URL, `stream` da `outputSchema`. Maɓallan da suke a fili waɗanda sauran
+masu bayarwa ke amfani da su (`cx`, `depth`, ...) suna aiki kamar da.
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ƙimomin asali madaidaiciya), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                   | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ana haɗa su a kan tsoho `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (fili na asali), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ana haɗa su bisa tsohowar `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-Filayen gabaɗaya koyaushe su ne ke da fifiko: `query`, `max_results`, `filters` (yankuna), `country` da
-batun da aka samo daga `search_type`. A Exa, `search_type: "news"` yana riƙe `category: "news"`.
-Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
+Filayen gabaɗaya koyaushe su ne ke da fifiko: `query`, `max_results`, `filters` (domains),
+`country` da topic ɗin da aka samo daga `search_type`. A Exa, `search_type: "news"` yana
+riƙe `category: "news"`. Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
 
-Ana rubuta kuɗin binciken Firecrawl ga kowane tubali na sakamako 10 da aka fara dawowa, a $0.002 (ƙiredit 2)
-ga kowane tubali, kuma aƙalla tubali guda ɗaya ga kowace kira
-([Kudin Firecrawl](https://docs.firecrawl.dev/billing)): sakamako 11 yana kashe $0.004.
+Ana rubuta kuɗin binciken Firecrawl ga kowane ɓangaren sakamako 10 da aka dawo da shi,
+a farashin $0.002 (credits 2) a kowane ɓangare, kuma aƙalla ɓangare guda ɗaya a kowane kira
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): sakamako 11 yana kashe $0.004.
 
-Filin gama-gari `time_range` yanzu yana isa ga masu samarwa duka: Exa yana samun `startPublishedDate` (tambarin lokaci na ISO)
-kuma Tavily yana samun `start_date` (`YYYY-MM-DD`). Bayyanannen kwanan wata a cikin `provider_options`
-yana rinjayar wanda aka tsara.
+Filin gabaɗaya `time_range` yanzu yana isa ga duka masu bayarwa: Exa yana samun
+`startPublishedDate` (tambarin lokaci na ISO), Tavily kuma yana samun `start_date`
+(`YYYY-MM-DD`). Kwanan wata bayyananne a cikin `provider_options` yana maye gurbin wanda
+aka tsara.
 
-Sakamakon Exa yana riƙe `id`, `highlights` (dukkan abubuwan haskakawa, ba na farko kaɗai da aka yi amfani da shi a matsayin
-`snippet` ba), `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin `provider_raw`. Sakamakon Tavily
-yana riƙe `images` da `favicon`.
+Sakamakon Exa yana riƙe `id`, `highlights` (kowane highlight, ba na farko kaɗai da aka
+yi amfani da shi a matsayin `snippet` ba), `highlight_scores`, `summary`, `subpages`,
+`entities` da `extras` a cikin `provider_raw`. Sakamakon Tavily yana riƙe `images` da
+`favicon`.
 
-Ana rubuta kuɗin binciken Linkup a $0.005 ga `depth` `fast` da `standard`, sannan $0.05 ga
-`deep` ([Farashin Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+Ana rubuta kuɗin binciken Linkup a $0.005 ga `depth` `fast` da `standard`, kuma $0.05 ga
+`deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
 ko da kuwa `depth` ya fito daga `provider_options` ko saitunan haɗin.
 
-Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin rukunin filaye kuma yana ƙin dukkan buƙatar
-idan an saita wani filin daban. Ga lite, ana cire `additionalQueries`, `systemPrompt` da kowane maɓallin
-`contents` ban da `text` da `highlights` kafin kira. Ba a ƙara tura tsofaffin
-`subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl`.
+Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin jerin filaye kuma yana ƙin dukan buƙatar
+idan an saita wani filin. Ga lite, ana cire `additionalQueries`, `systemPrompt` da kowane
+maɓalli na `contents` ban da `text` da `highlights` kafin kiran. Ba a ƙara tura tsoffin
+`subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl` ba.
 
-Ana yin lissafin kuɗi ta amfani da rajistar lebur `costPerQuery`, sai dai Exa, wanda ke bin
-farashin Exa na kansa: $0.007 kan kowane kira na `auto` (da `fast` na gado) ko $0.004 na
-`lite` (da `instant` na gado), wanda ya ƙunshi sakamako 10; $0.001 kan kowane ƙarin
-sakamako; da $0.001 kan kowane sakamakon da aka dawo da shi idan an saita
-`contents.summary`. Ana rubuta Tavily da kiredit 1 ($0.008) don `search_depth` `basic`,
-`fast` da `ultra-fast`, da kiredit 2 ($0.016) don `advanced`
-([kiredit ɗin Tavily API](https://docs.tavily.com/documentation/api-credits)). Kira mai
-`auto_parameters: true` wanda Tavily ya haɓaka zuwa advanced har yanzu ana rubuta shi da kiredit 1.
+Lissafin kuɗi yana amfani da rajistar kai tsaye ta `costPerQuery`, sai dai Exa, wanda ke
+bin nasa tsarin farashi: $0.007 a kowane kira ga `auto` (da tsohon `fast`) ko $0.004 ga
+`lite` (da tsohon `instant`), wanda ya ƙunshi sakamako 10; $0.001 ga kowane ƙarin sakamako;
+da $0.001 ga kowane sakamakon da aka dawo da shi idan an saita `contents.summary`.
+Ana rubuta Tavily da credit 1 ($0.008) ga `search_depth` `basic`, `fast` da `ultra-fast`,
+kuma credits 2 ($0.016) ga `advanced`
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). Kiran da ke da
+`auto_parameters: true`, wanda ya sa Tavily ya haɓaka zuwa advanced, har yanzu ana rubuta
+shi da credit 1.
 
----
+## Web Fetch API
 
-## API ɗin Web Fetch
+Cire abun ciki daga URL ta hanyar mai samar da web-fetch da aka tsara (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Ciro abun ciki daga URL ta hanyar wani mai samar da web-fetch da aka tsara (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
-
-Parallel Extract (`parallel-search`, yana amfani da API key iri ɗaya da Parallel Search) yana dawo da Markdown
-kawai — duk wani `format` zai zama `400` — kuma yana iyakance abun ciki zuwa haruffa 100,000. Lokacin da ba za a iya ciro shafin da ake nema da kansa ba, upstream yana sanar da hakan a cikin HTTP 200;
+Parallel Extract (`parallel-search`, yana amfani da API key iri ɗaya da Parallel Search) yana mayar da Markdown
+kaɗai — duk wani `format` zai haifar da `400` — kuma yana iyakance abun ciki zuwa haruffa 100,000. Idan ba za a iya cire shafin da ake nufi da kansa ba, upstream yana sanar da hakan a cikin HTTP 200;
 OmniRoute yana bayyana hakan a matsayin `422` tare da saƙo tsayayye.
 
-| Hanya | Hanya           | Bayani                                                                |
-| ----- | --------------- | --------------------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | Ciro/scrape URL — jikin buƙatar ana inganta shi ta `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) ma yana mayar da Markdown kaɗai (duk wani `format` zai haifar da
+`400`) kuma yana iyakance abun ciki zuwa haruffa 100,000. Yana aiki ba tare da key ba: buƙatar
+`provider: "keenable-search"` a sarari ba tare da connection ba tana amfani da endpoint ɗin Keenable marar key
+(iyakar buƙata ta kowace IP). Key da aka tsara yana cire waɗannan iyakoki ne kawai; zaɓin atomatik yana amfani da Keenable ne kawai idan an tsara key.
 
-**Tabbatarwa:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ana tilasta ƙa'ida ta hanyar `enforceApiKeyPolicy`.
+| Method | Path            | Description                                              |
+| ------ | --------------- | -------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Ciro/scrape URL — `v1WebFetchSchema` ne ke tantance body |
 
-**Madadin mai lura da quota (#8297):** idan ba a bayar da `provider` a sarari ba, ana zagayawa cikin pool
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ana aiwatar da manufa ta hanyar `enforceApiKeyPolicy`.
+
+Haɗaɗɗun suna suna amfani da [kwangilar sarrafa hanya ta `model`](#named-searchfetch-combinations)
+da ke sama, yayin da suke adana zaɓuɓɓuka da amsoshi na musamman ga fetch.
+
+**Komowa mai kula da quota (#8297):** idan ba a bayar da `provider` ko `model` ba, ana bi ta cikin pool ɗin
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) cikin tsayayyen
-tsarin fifiko (fill-first) — ana tsallake mai samarwa da aka saita amma aka iyakance masa yawan buƙatu
-maimakon dakatar da buƙatar nan take, kuma gazawar upstream da za a iya sake gwadawa/ta quota
-(HTTP 429 koyaushe; 402/403 ga Firecrawl/Tavily/TinyFish idan quota ta shafi matakan kyauta —
-ba ga Jina Reader ba, kuma ba a taɓa amfani da wannan ga 400 na buƙatar da ba ta dace ba) tana wucewa zuwa
-mai samarwa na gaba mai takardun shaida wanda ba a gwada ba a lokacin buƙatar. Idan kowane mai samarwa da ke cikin pool ya ƙare,
-endpoint yana dawo da `429` guda ɗaya (tare da kanun `Retry-After`) maimakon `400` na gabaɗaya da ake samu a baya. Idan an buƙaci `provider` a sarari, **babu madadin ɓoye** — kuskure ko iyakancewar mai samarwa da aka zaɓa yana bayyana da kansa (`429` idan an iyakance shi, in ba haka ba matsayin upstream).
+`parallel-search` → `keenable-search`) cikin tsayayyen
+tsarin fifiko (fill-first) — ana tsallake provider da aka tsara amma ya kai iyakar rate maimakon dakatar da buƙatar nan take, kuma gazawar upstream da za a iya sake gwadawa/quota (HTTP 429 koyaushe; 402/403 ga Firecrawl/Tavily/TinyFish na matakan free tier masu salo na quota —
+ba ga Jina Reader ba, kuma ba a taɓa yin hakan ga buƙatar 400 mara inganci kawai ba) tana wucewa zuwa
+provider na gaba mai lasisin shiga da ba a gwada ba a lokacin buƙata. Idan an ƙare dukkan provider da ke cikin pool ɗin, endpoint ɗin yana mayar da `429` guda ɗaya (tare da kanun
+`Retry-After`) maimakon `400` na gama-gari da ake samu a baya. Idan an nemi `provider` a sarari, babu
+komawa a ɓoye — provider ɗin da aka zaɓa wanda ya kai iyakar rate ko ya gaza yana bayyana nasa kuskuren (`429` idan ya kai iyakar rate, in ba haka ba matsayin upstream).
 
 ---
 
@@ -987,32 +1074,33 @@ CLI yana haɓaka `base_url + /responses` zuwa WebSocket, kuma OmniRoute tana rat
 
 ## Rahoton Ƙayyadaddun Amfani da Matsaloli
 
-| Hanya | Hanya               | Bayani                                                                                               |
-| ----- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Tabbatar da quota tun farko don `provider` + `accountId` kafin bayar da maɓallin da aka yi rajista   |
-| POST  | `/v1/issues/report` | Ba da rahoton gazawar bayar da quota/maɓalli zuwa GitHub (yana buƙatar `GITHUB_ISSUES_REPO` + token) |
+| Hanya | Hanya               | Bayani                                                                                           |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| GET   | `/v1/quotas/check`  | Tabbatar da ƙayyadaddun amfani tun kafin samar da registered key don `provider` + `accountId`    |
+| POST  | `/v1/issues/report` | Ba da rahoton gazawar samar da quota/key zuwa GitHub (yana buƙatar `GITHUB_ISSUES_REPO` + token) |
 
-**Tabbatarwa:** Maɓallin API na Bearer (`isAuthenticated`).
+**Tabbatarwa:** `/v1/quotas/check` yana karɓar Bearer API key (`isAuthenticated`). `/v1/issues/report` na
+masu gudanarwa kawai ne (`requireManagementAuth`), kamar `/api/v1/registered-keys`: zaman dashboard,
+alamar CLI ta gida, ko API key mai ikon `manage`/`admin`; API keys na inference-kawai suna samun `403`.
 
-### Maido da zaman quota (na zaɓi)
+### Maido da zaman quota (zaɓin shiga)
 
-`POST /v1/chat/completions` ko `POST /v1/responses` wanda ba na streaming ba, idan ya gaza da
-kuskuren quota na ƙarshe (`402`/`429`/`503` wanda jikin amsar ya ce quota ko credits sun ƙare),
-ana iya ajiye shi a sake kunna shi daga baya maimakon mayar da kuskuren. Mai kira yana zaɓar wannan
-a kowane request ta amfani da headers guda uku:
+Buƙatar `POST /v1/chat/completions` ko `POST /v1/responses` wadda ba ta amfani da streaming kuma ta gaza da
+kuskuren quota na ƙarshe (`402`/`429`/`503` wanda jikinsa ke cewa quota ko credits sun ƙare)
+ana iya ajiyewa a jira a sake kunna ta daga baya maimakon mayar da kuskuren. Mai kira yana zaɓar wannan ga kowace buƙata
+ta amfani da headers uku:
 
-| Header                       | Ƙima                                                     |
-| ---------------------------- | -------------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                                   |
-| `x-omniroute-session`        | ID na zaman, `[A-Za-z0-9._:-]{1,128}`                    |
-| `x-omniroute-recovery-turn`  | ID na juyawa na musamman a cikin zaman (ƙa'ida iri ɗaya) |
+| Header                       | Ƙima                                                           |
+| ---------------------------- | -------------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                         |
+| `x-omniroute-session`        | ID na zaman, `[A-Za-z0-9._:-]{1,128}`                          |
+| `x-omniroute-recovery-turn`  | ID na juyawa wanda ya bambanta a cikin zaman (ƙa'ida iri ɗaya) |
 
-Juyawar da ke da `stream: false` kawai, waɗanda ba su da tools, tarihin tool ko
-`previous_response_id`, kuma ba su da pin na `x-omniroute-connection`, ne suka cancanta; dole ne a saita
-`STORAGE_ENCRYPTION_KEY` (ana adana request ɗin cikin ɓoyayyen tsari na har zuwa awanni 24). Daga nan amsar
-ta zama `202` mai ɗauke da `recovery.poll`; a yi polling da `GET /v1/quota-recoveries/{id}` (`202` yayin da ake jira,
-`200` tare da jikin amsar da aka dawo da ita idan an kammala) ko a soke ta da `DELETE`. Tikiti ana iya ganin su ne kawai
-ga maɓallin API da ya ƙirƙire su. Sake kunna request ɗin da ba a tabbatar da sakamakonsa ba yana ƙarewa da
+Juyawar da ke da `stream: false` kawai, ba tare da tools, tarihin kayan aiki ko `previous_response_id` ba, kuma ba tare da
+`x-omniroute-connection` pin ba, ne suka cancanta; dole ne a saita `STORAGE_ENCRYPTION_KEY` (ana adana
+buƙatar cikin ɓoyayyen tsari har zuwa sa'o'i 24). Daga nan amsar ta zama `202` tare da
+`recovery.poll`; a bincika ta `GET /v1/quota-recoveries/{id}` (`202` yayin da take jiran aiki, `200` tare da
+jikin amsar da aka dawo da ita idan an kammala) ko a soke ta da `DELETE`. API key ɗin da ya ƙirƙiri tikitin ne kawai zai iya ganin tikitin. Sake kunnawa wanda sakamakonsa ba shi da tabbas yana ƙarewa da
 `needs_confirmation` maimakon a aika shi sau biyu. Madogara: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
@@ -1763,17 +1851,21 @@ Biyan kuɗin webhook na waje don abubuwan OmniRoute (kammala buƙata, ƙarewar k
 
 ## Maɓallan da Aka Yi Rajista (Gudanarwa ta atomatik)
 
-Ana amfani da su ta tsarin gudanar da maɓallai ta atomatik don fitarwa da jujjuya maɓallan API a kan mai samarwa/asusu na baya, tare da kaso na yau da kullum/na awa.
+Tsarin sarrafa maɓallan ta atomatik yana amfani da wannan don fitarwa da sauya maɓallan API daga mai samarwa/asusu na baya, tare da ƙayyadaddun iyaka na yau da kullum da na sa’a.
 
-| Hanya  | Hanya                                 | Bayani                                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Jera maɓallan da aka yi rajista (gabatarwar da aka ɓoye kawai)                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Fitar da sabon maɓallin da aka yi rajista — jiki: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana dawo da maɓallin danye **sau ɗaya kawai**. Yana dawo da `429` idan an ƙi saboda kaso. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dawo da bayanan maɓallin da aka yi rajista (babu ainihin abin da ke cikin maɓallin)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Soke maɓallin da aka yi rajista                                                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Ƙarshen API na soke maɓalli a sarari (sakamako iri ɗaya da DELETE)                                                                                                                                                                      |
+| Hanya  | Hanya                                 | Bayani                                                                                                                                                                                                                                                   |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Jera maɓallan da aka yi rajista (gabatarwar da aka ɓoye kawai)                                                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Fitar da sabon maɓalli da aka yi rajista — jiki: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana mayar da ainihin maɓallin **sau ɗaya kawai**. Yana mayar da `429` idan an ƙi saboda ƙayyadadden amfani. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dawo da bayanan maɓallin da aka yi rajista (babu ainihin bayanan maɓalli)                                                                                                                                                                                |
+| DELETE | `/api/v1/registered-keys/[id]`        | Soke maɓallin da aka yi rajista                                                                                                                                                                                                                          |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Ƙarshen hanyar soke maɓalli kai tsaye (sakamako iri ɗaya da DELETE)                                                                                                                                                                                      |
+| GET    | `/api/v1/providers/[provider]/limits` | Karanta iyakokin fitar da maɓalli na mai samarwa                                                                                                                                                                                                         |
+| PUT    | `/api/v1/providers/[provider]/limits` | Saita iyakokin fitar da maɓalli na mai samarwa — jiki: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                           |
+| GET    | `/api/v1/accounts/[id]/limits`        | Karanta iyakokin fitar da maɓalli na asusu                                                                                                                                                                                                               |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Saita iyakokin fitar da maɓalli na asusu — jiki iri ɗaya da na hanyar mai samarwa                                                                                                                                                                        |
 
-**Tabbatarwa:** zaman gudanarwa/maɓallin API (`requireManagementAuth`) — mai gadi iri ɗaya da `/api/keys`: zaman dashboard, alamar CLI ta cikin gida, ko maɓallin API mai ikon `manage`/`admin`; maɓallan API na inference-kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
+**Tabbatarwa:** zaman gudanarwa/maɓallin API (`requireManagementAuth`) — kariya iri ɗaya da `/api/keys`: zaman dashboard, alamar CLI ta gida, ko maɓallin API mai iyakar `manage`/`admin`; maɓallan API na inference-kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
 
 ---
 
