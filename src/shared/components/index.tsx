@@ -60,5 +60,11 @@ export { default as DistributeProxiesButton } from "./DistributeProxiesButton";
 
 export { SkillsConceptCard } from "./SkillsConceptCard";
 
+// Kit components that draw no text of their own and have no legacy props to map: re-exported as
+// they are, so a screen takes them from the same place as the adapters.
+// InlineCode: the chip for a model id, an env var, a flag or a path inside text. A command or
+// URL the reader copies is `CodePreview showHeader={false}` (./CodePreview, imported by path).
+export { InlineCode } from "@omniroute/ui-kit/inline-code";
+
 // Layouts
 export * from "./layouts";
