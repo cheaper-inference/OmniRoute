@@ -14,6 +14,7 @@ const core = await import("../../src/lib/db/core.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { getModelLockoutInfo, clearAllModelLockouts, parseRetryFromErrorText } =
   await import("../../open-sse/services/accountFallback.ts");
+import { DEFAULT_MODEL_LOCKOUT_SETTINGS } from "../../src/lib/resilience/modelLockoutSettings.ts";
 
 const UPSTREAM_429_MESSAGE =
   "429: Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 92h27m28s.";
@@ -76,12 +77,16 @@ test("combo 429 body reset beats base cooldown but is capped by maxCooldownMs (#
 
   const info = getModelLockoutInfo(provider, "", model);
   assert.ok(info, "combo 429 must record a model lockout");
-  // Preserve #6863 (do not fall back to ~seconds), but prose is not an
-  // authoritative reset and must not bypass the operator's 30m maximum.
+  // Preserve #6863 (do not fall back to ~seconds), but relative prose is not an
+  // authoritative clock: it is honored up to the dedicated prose ceiling
+  // (quotaProseMaxCooldownMs, 6h default), NOT clamped to the generic
+  // maxCooldownMs. That 30m clamp was re-locking the account every 30 minutes
+  // for the whole announced window (#20343); 92h would be the other extreme,
+  // parking the model for four days across an early reset.
   assert.ok(
-    info!.remainingMs > settings.modelLockout.maxCooldownMs - 5_000 &&
-      info!.remainingMs <= settings.modelLockout.maxCooldownMs,
-    `body reset must clamp to maxCooldownMs (${settings.modelLockout.maxCooldownMs}ms); got ${info!.remainingMs}ms`
+    info!.remainingMs > DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs - 5_000 &&
+      info!.remainingMs <= DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs,
+    `body reset must clamp to quotaProseMaxCooldownMs (${DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs}ms), not maxCooldownMs; got ${info!.remainingMs}ms`
   );
 });
 
