@@ -312,7 +312,10 @@ jobs:
         # its budget had never been measured against a real run. It then blew the limit
         # on its debut: `npm pack` alone took 24m37s, leaving 5 minutes for two installs
         # and two boots. 30 was a guess; 60 is sized to the one measurement we have.
-        timeout-minutes: 60
+        # 120 since the v3.8.54 re-publish (run 44220411903): on the shared .113 runner the
+        # step's own `npm pack` took 23m09s, the clean install 17m31s and the 3.8.53 install
+        # 10m39s, and the upgrade was still installing when the 60-minute limit killed it.
+        timeout-minutes: 120
         run: npm run check:install-upgrade
 
       # WS1.3 (D2, v3.8.49 plan): STAGED publishing by default — `npm stage publish`
