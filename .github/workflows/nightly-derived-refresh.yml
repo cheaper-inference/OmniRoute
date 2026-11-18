@@ -66,6 +66,10 @@ jobs:
           # A freeze issue is titled "🔒 release-freeze: vX.Y.Z in progress"; v3.8.5 must not
           # match v3.8.52, and a freeze that names no version freezes everything.
           VER_RE=$(printf '%s' "${BASE#release/}" | sed 's/\./\\./g')
+          # A checked assignment: a failed lookup fails the step. Fed through `< <(gh ...)`, the
+          # failure was invisible to set -e, the loop read EOF and the run went on as not frozen.
+          FREEZES=$(gh issue list --repo "$GITHUB_REPOSITORY" --label release-freeze --state open \
+            --json number,title --jq '.[] | "\(.number)\t\(.title)"')
           FROZEN=""
           while IFS=$'\t' read -r NUM TITLE; do
             [ -n "$NUM" ] || continue
@@ -73,8 +77,7 @@ jobs:
               || ! printf '%s' "$TITLE" | grep -qE 'v[0-9]+\.[0-9]+\.[0-9]+'; then
               FROZEN="#$NUM"
             fi
-          done < <(gh issue list --repo "$GITHUB_REPOSITORY" --label release-freeze --state open \
-            --json number,title --jq '.[] | "\(.number)\t\(.title)"')
+          done <<< "$FREEZES"
           RED=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "Release branch not green: $BASE in:title" --json number --jq '.[0].number // empty')
           {
@@ -122,6 +125,12 @@ jobs:
         run: |
           set -euo pipefail
           TITLE="chore(docs): refresh derived numbers on ${BASE}"
+          # The fetched tip is the robot's own only when the bot both authored AND committed it:
+          # `git commit --amend --no-edit` on the bot commit keeps the bot as author but records
+          # the maintainer as committer, and that hand fix must be neither closed nor overwritten.
+          robot_tip() {
+            [ "$(git log -1 --format='%ae %ce' FETCH_HEAD)" = "$BOT_EMAIL $BOT_EMAIL" ]
+          }
           git add -A
           if git diff --cached --quiet; then
             echo "Every derived number on \`$BASE\` already matches the live code." >> "$GITHUB_STEP_SUMMARY"
@@ -132,7 +141,7 @@ jobs:
               --json number --jq '.[0].number // empty')
             if [ -n "$STALE" ]; then
               git fetch -q --depth=1 origin "$REFRESH_BRANCH"
-              if [ "$(git log -1 --format=%ae FETCH_HEAD)" = "$BOT_EMAIL" ]; then
+              if robot_tip; then
                 gh pr close "$STALE" --repo "$GITHUB_REPOSITORY" \
                   --comment "Closed by the nightly derived refresh: \`$BASE\` already matches the live code (${RUN_URL})." > /dev/null
                 echo "Closed the stale refresh PR #$STALE." >> "$GITHUB_STEP_SUMMARY"
@@ -151,7 +160,7 @@ jobs:
           REMOTE_SHA=$(git ls-remote --heads origin "$REFRESH_BRANCH" | cut -f1)
           if [ -n "$OPEN_PR" ] && [ -n "$REMOTE_SHA" ]; then
             git fetch -q --depth=1 origin "$REFRESH_BRANCH"
-            if [ "$(git log -1 --format=%ae FETCH_HEAD)" != "$BOT_EMAIL" ]; then
+            if ! robot_tip; then
               echo "PR #${OPEN_PR%% *} has commits pushed by hand; not overwriting them." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi

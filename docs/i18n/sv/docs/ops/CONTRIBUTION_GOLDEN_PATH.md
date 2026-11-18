@@ -29,70 +29,61 @@ ersätter inte de områdesspecifika arkitektur- och säkerhetsdokument som länk
 6. **Dokumentera underlag.** Ange i mallen för pull requests vilka kommandon som körts, varje testfil som lagts till eller ändrats,
    migreringar eller funktionsflaggor samt eventuell validering som endast utförs i CI och fortfarande väntar.
 
-## Standardflöden per ändringstyp
+## Gyllene stigar efter bytetyp
 
-Kommandona nedan är de minsta fokuserade kontrollerna, inte ett tillstånd att hoppa över ett test som direkt täcker
-beteendet du ändrade.
+Kommandon nedan är minsta fokuserade kontroller, inte behörighet att hoppa över ett test som direkt täcker beteendet du ändrade.
 
 ### Leverantör
 
 **Kontrakt**
 
-- Leverantörsdefinitionen i `src/shared/constants/providers/` och dess sammansättning i
-  `src/shared/constants/providers.ts`.
+- Leverantörsdefinition i `src/shared/constants/providers/` och dess sammansättning i `src/shared/constants/providers.ts`.
 - Modeller och funktioner i `open-sse/config/providerRegistry.ts` eller dess extraherade registerfiler.
-- Val av exekverare/översättare, OAuth- eller API-nyckelkonfiguration, resurser för kontrollpanelen och genererad
-  leverantörsreferens där det är tillämpligt.
-- Publika autentiseringsuppgifter måste använda `resolvePublicCred()`; felsvar måste använda de delade sanerade
-  felhjälparna. Se `docs/security/PUBLIC_CREDS.md` (git; kompileras inte till `/docs`) och
-  [Felsanering](../security/ERROR_SANITIZATION.md).
+- Executor/translator -val, OAuth eller API-nyckelkonfiguration och instrumentpanelstillgångar. Begå inte de regenererade `docs/reference/PROVIDER_REFERENCE.md` eller README diagrammen: releaseuppdateringen skriver om dem (`check:pr-derived-paths` misslyckas med en funktion PR som bär dem).
+- Offentliga referenser måste använda `resolvePublicCred()`; felsvar måste använda de delade sanerade felhjälparna. Se `docs/security/PUBLIC_CREDS.md` (git; inte kompilerad till `/docs`) och [Felsanering](../security/ERROR_SANITIZATION.md).
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # när katalogen ändras; committa den genererade diffen
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Testa även varje påverkad typ av begäran: chatt, Responses, bilder, inbäddningar, ljud eller video.
-Granska genererade katalog- och golden-diffar som kontraktsändringar; godkänn dem inte blint.
+Testa också alla berörda förfrågningsfamiljer: chatt, svar, bilder, inbäddningar, ljud eller video. Granska genererad katalog och gyllene skillnader när kontraktet ändras; acceptera dem inte blint.
 
-### Routning
+### Routing
 
 **Kontrakt**
 
-- Publika strategivärden och UI-metadata i `src/shared/constants/routingStrategies.ts`.
-- Dirigering och ordning under `open-sse/services/combo.ts` och `open-sse/services/combo/`.
-- Combo-scheman, persistens, resiliensstatus, modellfunktioner och API-/UI-kontroller.
-- [Auto-Combo-motorn](../routing/AUTO-COMBO.md) och resiliensdokumentationen när beteendet ändras.
+- Offentliga strategivärden och UI metadata i `src/shared/constants/routingStrategies.ts`.
+- Utskick och beställning under `open-sse/services/combo.ts` och `open-sse/services/combo/`.
+- Kombinationsscheman, persistens, motståndskraftstillstånd, modellfunktioner och API/UI -kontroller.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) och motståndskraftsdokumentation när beteendet förändras.
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # ändringar av strategi eller dirigering
-npm run check:known-symbols      # ändringar av strategiregistrering
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Använd deterministiska tester med mockade uppströmstjänster lokalt. Live-smoketester för combo kräver autentiseringsuppgifter och är
-manuella, inte ersättningar för CI.
+Använd deterministiska hånade uppströmstest lokalt. Live combo smokes kräver inloggningsuppgifter och är manuella, inte CI -ersättningar.
 
 ### UI / UX
 
 **Kontrakt**
 
-- Next.js-rutt/-sida och gränser för delade komponenter under `src/app/` och
-  `src/shared/components/`.
-- Former för API-svar, laddnings-, tom- och feltillstånd, beteende för tangentbord och skärmläsare,
-  responsiv layout, teman och utökning av språkversioner.
-- Engelska UI-källsträngar i `src/i18n/messages/en.json`; hårdkoda inte ny användarsynlig text.
+- Next.js route/page och delade komponentgränser under `src/app/` och `src/shared/components/`.
+- API -svarsformer, loading/empty/error tillstånd, tangentbords- och skärmläsarbeteende, responsiv layout, teman och lokalexpansion.
+- Engelska UI källsträngar i `src/i18n/messages/en.json`; hårdkoda inte en ny användarvänd kopia.
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Kör appen för interaktions- eller visuella ändringar och kontrollera både smala och breda visningsytor. CI kör
-produktionsbygget och bredare testsviter; visuellt beteende kräver fortfarande ett fokuserat komponenttest, Playwright-test
-eller en dokumenterad manuell kontroll som är lämplig för ändringen.
+Kör appen för interaktion eller visuella förändringar och kontrollera både smala och breda vyportar. CI driver produktionsbygget och bredare sviter; visuellt beteende behöver fortfarande en fokuserad komponent, Playwright, eller dokumenterad manuell kontroll som är lämplig för ändringen.
 
 ### i18n
 
 **Kontrakt**
 
-- `src/i18n/messages/en.json` är UI-källan; `config/i18n.json` är källan för språkversioner.
-- CLI-kataloger finns separat under `bin/cli/locales/`.
-- Bevara ICU-platshållare och taggar exakt. Översätt inte produkt-, leverantörs- eller modellnamn,
-  protokoll- och rubriknamn, kommandon, kod-/JSON-identifierare, URL:er, miljövariabler eller
-  skyddade termer som `OmniRoute`, `OAuth`, `MCP` och `A2A`. Den aktuella källistan är
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` är UI källan; `config/i18n.json` är lokalkällan.
+- CLI kataloger lever separat under `bin/cli/locales/`.
+- Bevara ICU platshållare och taggar exakt. Översätt inte product/provider/model namn, protokoll- och rubriknamn, kommandon, code/JSON identifierare, URLs, miljövariabler eller skyddade termer som `OmniRoute`, `OAuth`, `MCP` och `A2A`. Den aktuella källlistan är `scripts/i18n/glossary/protected-terms.json`.
 
-**Fokuserad loop**
+En funktion PR redigerar endast `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); de andra språkinställningarna slutförs en gång per release av releaseuppdateringen eller en översättningsvåg (`docs/guides/I18N.md` → "Funktion PRs touch endast `en.json` "). `npm run check:pr-derived-paths` misslyckas med en funktion PR som redigerar en annan lokalkatalog.
+
+**Fokuserad slinga**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # när CLI-strängar/-kataloger ändras
 npm run lint
 ```
 
-Detta är vägledning för det befintliga systemet, inte en uppmaning att utöka dess verktyg eller nyckelmodell.
-Håll i18n-patchar avgränsade medan ersättningssystemet utformas. Kör inte översättningskommandon
-som anropar externa tjänster om inte uppgiften uttryckligen kräver genererade översättningar och
-du har granskat den resulterande diffen.
+Utan `--mode=pr` kör dessa grindar i frigöringsläge lokalt och rapporterar varje nyckel som cykeln lagts till eller skrevs om i `en.json`; det är releaseuppdateringens arbete, inte dina PR:s.
+
+Detta är vägledning för det befintliga systemet, inte en inbjudan att utöka dess verktyg eller nyckelmodell. Håll i18n plåster kirurgiska medan ersättningssystemet designas. Kör inte översättningskommandon som anropar externa tjänster om inte uppgiften uttryckligen kräver genererade översättningar och du har granskat den resulterande skillnaden.
 
 ### CLI
 
 **Kontrakt**
 
-- Publika kommandon och flaggor i `bin/cli/`, genererade API-kommandon, slutkoder, stdout/stderr och
-  strukturer för JSON-utdata, konfigurations-/miljöbeteende samt paketerade filer.
-- Användarvända strängar i CLI måste använda CLI:ns i18n-lager och hålla katalogerna `en`/`pt-BR` synkroniserade.
-- Bevara Node som den runtime som stöds och kontraktet för den publicerade binärfilen.
+- Offentliga kommandon och flaggor i `bin/cli/`, genererade API -kommandon, exit-koder, stdout/stderr och JSON -utdataformer, config/environment -beteende och paketerade filer.
+- CLI användarvända strängar måste använda lagret CLI i18n (`t()` nycklar som finns i `bin/cli/locales/en.json`). En funktion PR redigerar endast `en.json`; `pt-BR` och de andra språkinställningarna är klara vid release.
+- Bevara Node som den stödda körtiden och det publicerade binära kontraktet.
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ändringar i genererad/paketerad CLI
-npm run check:pack-policy     # ändringar i paketets publika yta
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Använd det exakta kommandot i en tillfällig datakatalog när beteendet beror på parsning, filer eller
-slutstatus. CI utför de bredare kontrollerna av paketartefakter och ekosystem.
+Använd det exakta kommandot i en temporär datakatalog när beteendet beror på analys, filer eller utgångsstatus. CI utför de bredare paketartefakt- och ekosystemkontrollerna.
 
 ### Databas
 
 **Kontrakt**
 
-- Domänmoduler under `src/lib/db/`; importera specifika moduler direkt (det gamla återexportlagret `localDb.ts` har tagits bort).
-- Numrerade, idempotenta SQL-migreringar under `src/lib/db/migrations/`, transaktionssäkerhet, uppgraderingsbeteende,
-  index och varje anropare som påverkas av schemat.
-- Routes och hanterare kör aldrig rå SQL direkt.
+- Domänmoduler under `src/lib/db/`; importera specifika moduler direkt (det gamla `localDb.ts` -återexportlagret togs bort).
+- Numrerade, idempotenta SQL -migreringar under `src/lib/db/migrations/`, transaktionssäkerhet, uppgraderingsbeteende, index och varje anropare som påverkas av schemat.
+- Rutter och hanterare utfärdar aldrig rå SQL direkt.
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Testa både en ny databas och uppgradering från det föregående schemat när du lägger till en migrering. Databastester
-måste stänga handles och anropa `resetDbInstance()` under upprensningen. Kör `npm run test:bun:db` endast när
-adaptervägen för Bun enligt bästa förmåga ändras; Node förblir auktoritativ.
+Testa både en ny databas och uppgradering från det tidigare schemat när du lägger till en migrering. Databastester måste stänga handtag och anropa `resetDbInstance()` under sanering. Kör endast `npm run test:bun:db` när den bästa sökvägen Bun adaptern ändras; Noden förblir auktoritativ.
 
-### Bygge / driftsättning
+### Bygg / distribuera
 
 **Kontrakt**
 
-- Rot- och workspace-manifest/låsfil, `scripts/build/`, fristående Next.js-sammansättning, paketinnehåll i `dist/`,
-  Electron-plattformsmetadata, CI-arbetsflöden och driftsättningssentineler.
-- Node-intervallen som stöds och den uttryckligen tillåtna användningen av Bun i `CLAUDE.md` måste förbli intakta.
-- Byggartefakter förblir ospårade; policyer för beroenden, licenser, arbetsflöden och paket gäller.
+- Rot- och arbetsyta manifests/lockfile, `scripts/build/`, Next.js fristående sammansättning, `dist/` paketinnehåll, Electron -plattformsmetadata, CI -arbetsflöden och distributionsvakter.
+- Nodområden som stöds och den tillåtna användningen Bun i `CLAUDE.md` måste förbli intakt.
+- Byggartefakter förblir ospårade; beroende, licens, arbetsflöde och paketpolicyer gäller.
 
-**Fokuserad loop**
+**Fokuserad slinga**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # ändringar i beroenden eller låsfil
-npm run check:pack-policy      # ändringar i det publicerade paketets yta
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Använd `npm run build` lokalt endast när ändringen påverkar kompilering, fristående sammansättning, resurser
-eller runtime-paketering. Använd `npm run build:release` endast för validering av release/driftsättning. CI:s bygge är
-den slutliga plattformsöverskridande signalen; plattformsspecifika Electron-ändringar kräver motsvarande fokuserat bygge
-eller smoke-testbevis.
+Använd `npm run build` endast lokalt när ändringen påverkar kompilering, fristående sammansättning, tillgångar eller runtime-buntning. Använd endast `npm run build:release` för release/deploy validering. CI build är den slutliga plattformsoberoende signalen; plattformsspecifika Electron -ändringar kräver matchande fokuserad bygg- eller rökbevis.
 
 ## Utvecklarskript för en delad maskin
 

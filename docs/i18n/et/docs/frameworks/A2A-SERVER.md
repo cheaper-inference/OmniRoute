@@ -163,7 +163,7 @@ OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.t
 | Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
 | Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva agendioskuste kataloogi (23 API + 21 CLI + 1 konfiguratsioon) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agendikaarti tuleks hoida vastavuses reaalajas 381-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 394-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
 
 ### `list-capabilities` oskuste üksikasjad
 
@@ -250,14 +250,14 @@ Kui mandaati on vaja, töötab `read` -scope `oma_` luba ainult `GET` puhul.
 ## Ülesande elutsükkel
 
 ```
-esitatud → töös → valmis
-                → ebaõnnestunud
-                → tühistatud
+submitted → working → completed
+                    → failed
+                    → cancelled
 ```
 
-- Ülesanded aeguvad vaikimisi 5 minuti pärast (vt [Ülesande TTL](#ülesande-ttl))
-- Lõppseisundid: `valmis`, `ebaõnnestunud`, `tühistatud`
-- Sündmuste logi jälgib igat seisundimuutust
+- Ülesanded aeguvad vaikimisi 5 minuti pärast (vt [Ülesanne TTL](#task-ttl) )
+- Terminalolekud: `completed`, `failed`, `cancelled`
+- Sündmuste logi jälgib iga oleku üleminekut
 
 ---
 

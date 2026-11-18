@@ -37,34 +37,34 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 
 ### 검색 탭
 
-기존 `SearchForm` + `ResultsPanel` + `RerankPanel`을 하나의 탭으로 발전시킵니다:
+기존 `SearchForm` + `ResultsPanel` + `RerankPanel` 탭으로 발전시킵니다.
 
-- 쿼리 → 결과(제목, URL, 스니펫, 관련성 점수).
-- Config 창의 제공자 메타데이터(비용, 할당량, 상태).
-- 재순위 지정 섹션: 재순위 지정 모델을 선택하고 결과 순서를 재정렬하며 `positionDelta`를 표시합니다.
-- 검색 제공자가 구성되지 않은 경우 CTA가 포함된 빈 상태를 표시합니다.
-- `SearchHistory.tsx`를 통한 검색 기록.
-- `POST /v1/search`를 호출합니다(기존 엔드포인트, 변경 없음).
+- → 결과(제목, URL, 스니펫, 관련성 점수)를 쿼리합니다.
+- 구성 창의 공급자 메타데이터(비용, 할당량, 상태)
+- 섹션 재지정: 재지정 모델을 선택하고, 결과를 재정렬하고, `positionDelta` 표시합니다.
+- 검색 공급자가 구성되지 않은 경우 CTA 있는 빈 상태입니다.
+- `SearchHistory.tsx` 통한 검색 기록.
+- `POST /v1/search` 호출합니다(기존 엔드포인트, 변경 사항 없음).
 
-### 스크레이프 탭
+### 긁힌 탭
 
-`POST /v1/web/fetch`(계획 05에서 생성됨)를 통해 URL에서 콘텐츠를 추출하는 새로운 탭입니다:
+`POST /v1/web/fetch` 통해 URL 에서 콘텐츠를 추출하기 위한 새 탭(계획 05에서 생성됨):
 
 - 입력: URL + 전체 페이지 토글 + 형식 선택기(markdown / text / HTML).
-- 제출 → 가져오기 → `ScrapeResult.tsx` 렌더링.
-- `ScrapeResult`는 마크다운 미리보기 + 원본 토글을 렌더링합니다.
-- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `(잘림, 원본 보기)`가 표시되고 Monaco 모달에서 원본이 열립니다(D21).
-- 메타데이터 패널: 제공자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), 지연 시간, 비용, 응답 크기, 링크 수.
-- `useScrapeFetch.ts` 훅을 사용합니다.
+- → fetch → render `ScrapeResult.tsx` 제출하세요.
+- `ScrapeResult` 마크다운 미리보기 + 원시 토글을 렌더링합니다.
+- 캡: 응답 본문 > 인 경우** KB** , UI `(truncated, view raw)` 표시하고 Monaco 모달(D21)에서 원시를 엽니다.
+- 메타데이터 패널: 공급자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), 대기 시간, 비용, 응답 크기, 링크 수.
+- `useScrapeFetch.ts` 후크를 사용합니다.
 
 ### 비교 탭
 
-최대 **4개의 제공자에서 동일한 쿼리/URL을 병렬로** 실행합니다(D22):
+최대 전체에 걸쳐 동일한 query/URL 실행합니다.** 4개의 공급자가 병렬로 연결됨** (D22):
 
-- 제공자별 나란히 배치된 열.
-- 지표: 지연 시간, 비용, 결과 수, 응답 크기.
-- 검색에 대한 URL 중복 계산(초기 결과 대비 공유된 URL 수).
-- 제공자별로 `POST /v1/search`(검색) 또는 `POST /v1/web/fetch`(스크레이프)를 호출합니다.
+- 공급자별로 열을 나란히 표시합니다.
+- 지표: 대기 시간, 비용, 결과 수, 응답 크기.
+- 검색을 위한 URL 중복 계산(공유된 URLs 수 대 초기 결과).
+- 공급자별로 `POST /v1/search` (검색) 또는 `POST /v1/web/fetch` (스크랩)를 호출합니다.
 
 ---
 
@@ -97,14 +97,15 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 
 ---
 
-## 제공자 카탈로그
+## 공급자 카탈로그
 
-`ProviderCatalog.tsx`는 `GET /api/search/providers`에서 전체 제공자 목록을 노출합니다
-(F4에서 fetch 제공자를 포함하도록 확장됨):
+`ProviderCatalog.tsx` `GET /api/search/providers` 의 전체 공급자 목록을 노출합니다(F4에서 가져오기 공급자를 포함하도록 확장됨).
 
-| `kind` | `"search"`(20개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24개 제공자) 또는 `"fetch"` (firecrawl, jina-reader, tavily-search,tinyfish, nimble-search,anysearch-search,병렬 검색,keenable-search) |
 
-상태는 자격 증명의 존재 여부와 모든 키가 현재 쿨다운 상태인지 확인하여 **요청 시점에 파생**됩니다.
+상태는** 요청 시 파생됨** 자격 증명이 존재하는지, 모든 키가 현재 휴지 상태인지 확인합니다.
+
+`codex-search` (Codex Web Search)에는 자체 키가 없습니다. 연결된 Codex (ChatGPT) 계정을 재사용하므로 각 검색은 ChatGPT 구독 할당량을 소비하고 약 10~40초가 걸립니다. 요청이 이름을 지정하면 실행됩니다. 자동 선택에는 `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` 기능 플래그가 필요합니다(기본적으로 꺼져 있음).
 
 ---
 
@@ -118,16 +119,16 @@ API 키 플레이스홀더는 항상 `$OMNIROUTE_API_KEY`입니다(D11, Playgrou
 
 ## 백엔드 변경 사항
 
-이 기능을 위해 필요한 백엔드 변경 사항은 하나뿐이었습니다.
+이 기능에는 단 하나의 백엔드 변경이 필요했습니다.
 
 ### 확장된 `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts`는 다음과 같이 확장되었습니다.
+`src/app/api/search/providers/route.ts` 다음으로 확장되었습니다.
 
-- 모든 가져오기 제공자(`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`)를 배열에 포함합니다.
-- 모든 항목에 `kind: "search" | "fetch"`를 추가합니다.
-- 실시간 자격 증명 상태에서 파생된 `status: "configured" | "missing" | "rate_limited"`를 추가합니다.
-- 하위 호환성을 유지합니다. 기존 필드(`id`, `name` 등)는 변경되지 않습니다.
+- 모든 가져오기 공급자(`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`)를 배열에 포함합니다.
+- 모든 항목에 `kind: "search" | "fetch"` 추가하세요.
+- 라이브 자격 증명 상태에서 파생된 `status: "configured" | "missing" | "rate_limited"` 추가합니다.
+- — 기존 필드(`id`, `name` 등)는 변경되지 않고 이전 버전과의 호환성을 유지합니다.
 
 ---
 

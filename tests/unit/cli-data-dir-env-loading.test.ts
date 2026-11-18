@@ -158,7 +158,9 @@ test("CLI startup loads later non-conflicting .env files without overriding earl
     );
     fs.writeFileSync(
       path.join(cwd, ".env"),
-      ["OMNIROUTE_BASE_URL=https://cwd.example/v1", "PORT=34567", ""].join("\n"),
+      ["OMNIROUTE_BASE_URL=https://cwd.example/v1", "PORT=34567", "REQUIRE_API_KEY=true", ""].join(
+        "\n"
+      ),
       "utf-8"
     );
 
@@ -167,6 +169,7 @@ test("CLI startup loads later non-conflicting .env files without overriding earl
       "OMNIROUTE_BASE_URL",
       "OMNIROUTE_HTTP_TIMEOUT_MS",
       "PORT",
+      "REQUIRE_API_KEY",
       "STORAGE_ENCRYPTION_KEY",
     ]) {
       delete cleanEnv[key];
@@ -186,7 +189,10 @@ test("CLI startup loads later non-conflicting .env files without overriding earl
     const current = readCliEnvShow(env, cwd);
     assert.equal(current.OMNIROUTE_BASE_URL, "https://data.example/v1");
     assert.equal(current.OMNIROUTE_HTTP_TIMEOUT_MS, "1234");
-    assert.equal(current.PORT, "34567");
+    // The working-directory .env still fills keys it may set, but not the port
+    // the CLI talks to (bin/cli/utils/untrustedCwdEnv.mjs).
+    assert.equal(current.REQUIRE_API_KEY, "true");
+    assert.equal(current.PORT, undefined);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
