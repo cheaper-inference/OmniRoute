@@ -820,70 +820,180 @@ Tinatanggihan ng `GET /v1/batches` ang anonymous caller gamit ang `401` kahit `R
 
 ---
 
-## Hanapin API
+## Search API
 
-Web/search provider abstraction (Tavily, Brave, Exa, Serper, atbp.).
+Abstraction para sa provider ng web/paghahanap (Tavily, Brave, Exa, Serper, atbp.).
 
-| Pamamaraan | Daan                   | Paglalarawan                                                                                                   |
-| ---------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| GET        | `/v1/search`           | Ilista ang mga naka-configure na search provider + na kakayahan                                                |
-| POST       | `/v1/search`           | Magpatakbo ng query sa paghahanap — body na napatunayan ng `v1SearchSchema`, sumusuporta sa caching/coalescing |
-| GET        | `/v1/search/analytics` | Bawat provider hit/latency/cache stats                                                                         |
+| Method | Path                   | Description                                                                            |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Ilista ang mga naka-configure na search provider + mga kakayahan                       |
+| POST   | `/v1/search`           | Magpatakbo ng search query — bine-validate ng `v1SearchSchema`, may caching/coalescing |
+| GET    | `/v1/search/analytics` | Mga hit/latency/cache statistic ayon sa provider                                       |
 
-**Awth:** Tagadala ng API key (`extractApiKey` + `isValidApiKey`). Ipinatupad ang patakaran sa paghahanap sa pamamagitan ng `enforceApiKeyPolicy`.
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ipinapatupad ang search policy sa pamamagitan ng `enforceApiKeyPolicy`.
 
-**Auto-select:** nang walang `provider`, ang pinakamurang provider na may naka-configure na koneksyon ay tumatakbo muna at ang susunod na pinakamurang ay ang failover. Ang mga libreng last-resort provider (`duckduckgo-free`) ay ginagamit lamang kapag wala nang iba pang naka-configure. Ang isang self-hosted SearXNG ay binibilang bilang na-configure kapag ang koneksyon nito ay nag-imbak ng isang tunay `baseUrl` (hindi ang catalog default `http(s)` `http://localhost:8888/search`): ito ay nagraranggo bilang isang $0 na provider na nangunguna sa mga naka- `baseUrl`, na ang pinakamurang naka-key na URL bilang failover, kabilang ang kapag SearXNG ay sumagot ng 400, 401, 403 o 404. hindi mabilang. Ang koneksyong SearXNG na nag-iimbak ng token ay nasa ganitong paraan lamang sa `https://` o loopback `http://`. Sa malayuang plain `http://` hindi ito isang failover at nananatiling huling paraan, ginagamit lamang kapag walang ibang provider ang na-configure o kapag hiniling sa pamamagitan ng pangalan, kaya ipinapadala nito ang token sa cleartext sa dalawang sitwasyong iyon.
+### Mga pinangalanang kombinasyon ng search/fetch
 
-### Exa at Tavily `provider_options`
+Tumatanggap ang `POST /v1/search` at `POST /v1/web/fetch` ng `model` bilang pangalan ng naka-save na combo.
+Gamitin ang alinman sa `model` o isang tahasang `provider`; kapag parehong ipinadala, magbabalik ito ng
+`400`. Kapag wala ang alinman sa dalawang field, mananatiling hindi nagbabago ang umiiral na awtomatikong
+pagpili ng provider.
 
-Binabasa ng Exa at Tavily ang mga field na partikular sa provider mula sa isang namespaced na bag: `provider_options.exa` (o `provider_options["exa-search"]`) at `provider_options.tavily` (o `provider_options["tavily-search"]`). Ang mga susi lamang sa ibaba ang ipinapasa. Ang bawat isa ay sinusuri laban sa sarili nitong Zod schema sa `open-sse/handlers/search/providerOptionsPassthrough.ts`, at ang isang susi na may maling uri ay nahuhulog. Anumang iba pang susi ay binabalewala, kabilang ang auth, base URL, `stream` at `outputSchema`. Ang mga flat key na ginagamit ng ibang mga provider (`cx`, `depth`, ...) ay gumagana tulad ng dati.
+Ipinapakita ng Combo Builder at ng Add Model catalog nito ang mga native na entry para sa mga operasyon sa web
+ng mga nakakonektang provider, kahit wala silang listahan ng LLM model. Ipinapakita ng Serper ang
+**Paghahanap sa web**; ipinapakita ng Tavily ang **Paghahanap sa web / Pagkuha ng page**, at ipinapakita ng
+mga provider na fetch-only ang **Pagkuha ng page**. Piliin ang entry at account gaya ng dati. Isang entry ng
+Tavily ang nagsisilbi sa parehong web endpoint; hindi idinadagdag ang mga entry na ito sa mga selector ng
+client na chat-only o sa mga probe ng chat model.
 
-| Provider | Mga patlang sa pinakamataas na antas                                                                                                                                                                                                                                                                                                                                      | Nested                                                                                                                                |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Pinagsama `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sa default `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+Halimbawa, gumawa ng **priority** combo na pinangalanang `shared-free` na may ganitong pagkakasunod-sunod ng target:
 
-Palaging panalo ang mga generic na field: `query`, `max_results`, `filters` (mga domain), `country` at ang paksang hinango mula sa `search_type`. Sa Exa, pinapanatili ng `search_type: "news"` `category: "news"`. Tumatanggap din ang Tavily `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Ang gastos sa paghahanap ng Firecrawl ay naitala sa bawat panimulang bloke ng 10 ibinalik na mga resulta, sa $0.002 (2 credits) isang bloke at hindi bababa sa isang bloke bawat tawag ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): Ang 11 resulta ay nagkakahalaga ng $0.004.
+Pagkatapos, gamitin ang parehong pangalan sa bawat surface:
 
-Naabot na ngayon ng generic `time_range` ang parehong provider: Ang Exa ay nakakakuha ng `startPublishedDate` (ISO timestamp) at Tavily ay nakakakuha ng `start_date` (`YYYY-MM-DD`). Ino-override ng isang tahasang petsa sa `provider_options` ang naka-map.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Ang mga resulta ng Exa ay nagpapanatili `id`, `highlights` (bawat highlight, hindi lamang ang unang ginamit bilang `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa `provider_raw`. Ang mga resulta ng Tavily ay nagpapanatili `images` at `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Ang gastos sa paghahanap ng linkup ay naitala sa $0.005 para sa `depth` `fast` at `standard` at $0.05 para sa `deep` ( [Pagpepresyo ng linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kung `depth` ay nanggaling sa `provider_options` o sa mga setting ng koneksyon.
+Isinasaalang-alang ng search ang Tavily at pagkatapos ay Serper; isinasaalang-alang ng fetch ang Tavily at
+pagkatapos ay Jina Reader; nilalaktawan ng chat ang mga dedikadong search/fetch provider at isinasaalang-alang
+ang OpenAI. Nagmumula ang compatibility sa mga registry ng search/fetch executor, hindi sa mga salita sa
+pangalan ng model. Nauuna ang pag-filter sa pagpili ng credential at dispatch, at hindi nito kailanman
+ina-edit ang naka-save na combo.
 
-Ang Exa `type: "lite"` (Exa 3.0) ay tumatanggap ng mas maliit na hanay ng mga field at tinatanggihan ang buong kahilingan kapag nakatakda ang anumang ibang field. Para sa lite, `additionalQueries`, `systemPrompt` at bawat `contents` key maliban `text` at `highlights` ay ibinababa bago ang tawag. Ang hindi na ginagamit na `subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl` ay hindi na naipapasa.
+Sinusuportahan ng mga non-chat capability route ang `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, at `p2c`. Tinatanggihan ang mga synthesis strategy na chat-only gaya
+ng `fusion`, `pipeline`, at `context-relay` sa mga non-chat route sa halip na tahimik na ilapat ang mga ito
+sa search o nabuong media.
+Pinangangasiwaan ng umiiral na combo engine ang ordered fallback, kabilang ang mga upstream quota failure,
+at pinananatili nito ang mga step ID, account pin, mga allowlist ng account sa bawat step, nested reference,
+mga scope ng koneksyon/quota ng caller, at combo access policy. Pinananatili ng mga resulta ang native nitong
+search/fetch schema, kabilang ang aktuwal na provider; tinutukoy ng `X-OmniRoute-Combo-Trace` ang desisyon sa
+routing. Nagbabalik ng `404` ang mga hindi kilalang combo; nagbabalik naman ng `400` ang mga hindi aktibong
+combo at mga kombinasyong walang compatible na target.
 
-Ang cost accounting ay ang flat registry `costPerQuery`, maliban sa Exa, na sumusunod sa sariling pagpepresyo ng Exa: $0.007 bawat tawag para sa `auto` (at ang legacy `fast`) o $0.004 para sa `lite` (at ang legacy `instant`), na sumasaklaw sa 10 resulta; $0.001 para sa bawat karagdagang resulta; at $0.001 bawat ibinalik na resulta kapag itinakda ang `contents.summary`. Ang Tavily ay naitala sa 1 credit ($0.008) para sa `search_depth` `basic`, `fast` at `ultra-fast`, at 2 credits ($0.016) para sa `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ang isang tawag na may `auto_parameters: true` na ina-upgrade ni Tavily sa advanced ay naitala pa rin sa 1 credit.
+Gumagamit ang bawat pagtatangka ng combo ng isang tahasang provider. Hindi nito maaaring tawagin nang palihim
+ang native automatic provider pool sa likod ng combo. Pinananatili ng mga request na may tahasang provider
+ang dati nitong single-provider behavior. Ang mga direktang chat request na nagta-target sa mga dedikadong
+search/fetch provider ay nagbabalik ng naaaksyunang JSON `400` sa halip na dumaan sa isang OpenAI-style executor.
+
+### Mga route ng combo na partikular sa capability
+
+Maaaring maglaman ang mga naka-save na combo ng `routes` object na ang mga key ay mga API capability. Pagmamay-ari
+ng bawat route ang sarili nitong listahan ng target, strategy, at runtime config. Nananatiling legacy-compatible
+Chat plan ang top-level na `models`, `strategy`, at `config`; patuloy na gumagana nang hindi nagbabago ang mga
+lumang combo na walang `routes`.
+
+Ang mga sinusuportahang route key ay `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, at `audio-generation`. Isinasagawa ang endpoint projection bago ang pagpili ng
+credential, scoring, o dispatch. Pinipili ng mga nested combo reference ang route ng child combo para sa
+parehong capability.
+
+Tumatanggap ang `POST /v1/music/generations` at `POST /v1/ocr` ng pangalan ng combo sa `model`. Tumatanggap
+din ang native na ElevenLabs-compatible na `POST /v1/music` ng pangalan ng combo sa `model_id`, ngunit dapat
+na ElevenLabs music model ang bawat magagamit na target sa native endpoint na iyon upang mapanatili ang binary
+response contract nito. Tumatanggap ang `POST /v1/sound-generation` ng `audio-generation` combo sa `model_id`
+sa ilalim ng parehong native-binary constraint. Gamitin ang `/v1/music/generations` para sa mga music provider
+na magkakaiba.
+
+**Auto-select:** kapag walang `provider`, unang tatakbo ang pinakamurang provider na may naka-configure na
+koneksyon at ang susunod na pinakamura ang magiging failover. Ginagamit lamang ang mga free last-resort
+provider (`duckduckgo-free`) kapag wala nang ibang naka-configure. Itinuturing na naka-configure ang isang
+self-hosted SearXNG kapag ang koneksyon nito ay nag-iimbak ng totoong `baseUrl` (hindi ang catalog default na
+`http://localhost:8888/search`): pagkatapos, niraranggo ito bilang $0 provider bago ang mga may key, at ang
+pinakamurang may-key na provider ang failover, kabilang kapag nagbalik ang SearXNG ng 400, 401, 403 o 404.
+Hindi itinuturing na wasto ang isang `baseUrl` na hindi valid na `http(s)` URL o tumuturo sa isang
+cloud-metadata address. Ang koneksyon sa SearXNG na nag-iimbak ng token ay niraranggo sa ganitong paraan
+lamang sa `https://` o loopback `http://`. Kapag remote plain `http://`, hindi ito kailanman magiging
+failover at mananatili itong last resort; gagamitin lamang ito kapag walang ibang naka-configure na provider
+o kapag hiniling ayon sa pangalan, kaya ipinapadala nito ang token nang walang encryption sa dalawang
+sitwasyong iyon.
+
+### `provider_options` ng Exa at Tavily
+
+Ang Exa at Tavily ay nagbabasa ng mga field na partikular sa provider mula sa isang namespaced bag:
+`provider_options.exa` (o `provider_options["exa-search"]`) at `provider_options.tavily`
+(o `provider_options["tavily-search"]`). Tanging ang mga key sa ibaba ang ipinapasa. Ang bawat isa ay
+sinusuri laban sa sarili nitong Zod schema sa `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+at inaalis ang key na may maling uri. Binabalewala ang anumang ibang key, kabilang ang auth, base URL,
+`stream` at `outputSchema`. Gumagana pa rin gaya ng dati ang mga flat key na ginagamit ng ibang provider (`cx`, `depth`, ...).
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (mga flat primitive), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` na pinagsasama sa default na `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
+
+Palaging nangingibabaw ang mga generic field: `query`, `max_results`, `filters` (mga domain), `country` at ang
+topic na hinango mula sa `search_type`. Sa Exa, pinananatili ng `search_type: "news"` ang
+`category: "news"`. Tumatanggap din ang Tavily ng `search_type: "finance"` (`topic: "finance"`).
+
+Itinatala ang gastos sa paghahanap ng Firecrawl sa bawat nagsimulang block ng 10 ibinalik na resulta, sa halagang $0.002 (2
+credit) bawat block at hindi bababa sa isang block bawat tawag
+([pagsingil ng Firecrawl](https://docs.firecrawl.dev/billing)): nagkakahalaga ang 11 resulta ng $0.004.
+
+Umaabot na ngayon ang generic na `time_range` sa parehong provider: nakakakuha ang Exa ng `startPublishedDate` (ISO
+timestamp) at nakakakuha ang Tavily ng `start_date` (`YYYY-MM-DD`). Pinapalitan ng isang tahasang petsa sa `provider_options`
+ang na-map na petsa.
+
+Pinananatili ng mga resulta ng Exa ang `id`, `highlights` (bawat highlight, hindi lamang ang una na ginamit bilang
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa
+`provider_raw`. Pinananatili ng mga resulta ng Tavily ang `images` at `favicon`.
+
+Itinatala ang gastos sa paghahanap ng Linkup sa halagang $0.005 para sa `depth` na `fast` at `standard`, at $0.05 para sa
+`deep` ([pagpepresyo ng Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+mula man ang `depth` sa `provider_options` o sa mga setting ng koneksyon.
+
+Ang Exa `type: "lite"` (Exa 3.0) ay tumatanggap ng mas maliit na set ng mga field at tinatanggihan ang buong request
+kapag may ibang field na nakatakda. Para sa lite, inaalis ang `additionalQueries`, `systemPrompt` at bawat
+`contents` key maliban sa `text` at `highlights` bago ang tawag. Hindi na ipinapasa ang mga deprecated na
+`subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl`.
+
+Ang pagtatala ng gastos ay gumagamit ng flat registry na `costPerQuery`, maliban sa Exa, na sumusunod sa sariling pagpepresyo ng Exa: $0.007 bawat tawag para sa `auto` (at legacy na `fast`) o $0.004 para sa `lite` (at legacy na `instant`), na sumasaklaw sa 10 resulta; $0.001 para sa bawat karagdagang resulta; at $0.001 bawat
+ibinalik na resulta kapag nakatakda ang `contents.summary`. Itinatala ang Tavily sa 1 credit ($0.008) para sa
+`search_depth` na `basic`, `fast` at `ultra-fast`, at 2 credit ($0.016) para sa `advanced`
+([mga credit ng Tavily API](https://docs.tavily.com/documentation/api-credits)). Ang tawag na may
+`auto_parameters: true` na awtomatikong ina-upgrade ng Tavily sa advanced ay itinatala pa rin sa 1 credit.
 
 ---
 
 ## Web Fetch API
 
 Mag-extract ng content mula sa isang URL sa pamamagitan ng naka-configure na web-fetch provider (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Ang Parallel Extract (`parallel-search`, kaparehong API key ng Parallel Search) ay nagbabalik ng Markdown
-lamang — anumang ibang `format` ay nagreresulta sa `400` — at nililimitahan ang content sa 100,000 character. Kapag hindi ma-extract ang target page mismo, iniuulat ito ng upstream sa loob ng HTTP 200;
+Ang Parallel Extract (`parallel-search`, kapareho ng API key ng Parallel Search) ay Markdown
+lamang ang ibinabalik — anumang ibang `format` ay `400` — at nililimitahan ang content sa 100,000 character. Kapag hindi ma-extract ang mismong target na page, iniuulat ito ng upstream sa loob ng HTTP 200;
 ipinapakita iyon ng OmniRoute bilang `422` na may nakapirming mensahe.
 
-| Method | Path            | Description                                                                |
-| ------ | --------------- | -------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Mag-fetch/mag-scrape ng URL — bina-validate ang body ng `v1WebFetchSchema` |
+Ang Keenable Fetch (`keenable-search`) ay Markdown lamang din ang ibinabalik (anumang ibang `format` ay
+`400`) at nililimitahan ang content sa 100,000 character. Gumagana ito nang walang key: ang tahasang
+`provider: "keenable-search"` na request na walang connection ay gumagamit ng keyless endpoint ng Keenable
+(may mga rate limit bawat IP). Ang naka-configure na key ay nag-aalis lamang sa mga limitasyong iyon; ang auto-select ay gumagamit lamang ng Keenable kapag may naka-configure na key.
+
+| Method | Path            | Description                                                                       |
+| ------ | --------------- | --------------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Mag-fetch/mag-scrape ng URL — bina-validate ang body gamit ang `v1WebFetchSchema` |
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ipinapatupad ang policy sa pamamagitan ng `enforceApiKeyPolicy`.
 
-**Quota-aware fallback (#8297):** kapag walang ibinigay na tahasang `provider`, nilalakbay ang pool
+Gumagamit ang mga pinangalanang kombinasyon ng [routing contract ng `model`](#named-searchfetch-combinations)
+sa itaas, habang pinananatili ang mga opsyon at response na partikular sa fetch.
+
+**Quota-aware fallback (#8297):** kapag walang ibinigay na `provider` o `model`, nilalakbay ang pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) sa nakapirming
-priority order (fill-first) — nilalaktawan ang provider na may rate limit ngunit naka-configure
-sa halip na agad wakasan ang request, at ang isang retryable/quota upstream failure
-(HTTP 429 palagi; 402/403 para sa mga quota-style free tier ng Firecrawl/Tavily/TinyFish —
-hindi para sa Jina Reader, at hindi kailanman para sa simpleng 400 na bad request) ay ipinapasa sa
-susunod na hindi pa nasusubukang credentialed provider sa oras ng request. Kapag naubos ang lahat ng provider sa pool, nagbabalik ang endpoint ng isang `429` (na may `Retry-After`
-header) sa halip na dating generic na `400`. Kapag tahasang hiniling ang `provider`, walang
-silent fallback — ipinapakita ng pumalya o na-rate-limit na tahasang provider ang sarili nitong error (`429` kung rate-limited, kung hindi ay ang upstream status).
+`parallel-search` → `keenable-search`) sa nakapirming pagkakasunod-sunod ng prayoridad (fill-first) — nilalaktawan ang isang provider na may rate limit ngunit naka-configure sa halip na ihinto ang request, at ang isang retryable/quota upstream failure
+(HTTP 429 palagi; 402/403 para sa mga quota-style na libreng tier ng Firecrawl/Tavily/TinyFish —
+hindi para sa Jina Reader, at hindi kailanman para sa isang simpleng 400 na maling request) ay ipinapasa sa susunod na hindi pa nasusubukang provider na may credential sa oras ng request. Kapag naubos ang lahat ng provider sa pool, nagbabalik ang endpoint ng isang `429` (na may `Retry-After`
+header) sa halip na dating generic na `400`. Kapag tahasang hiniling ang isang `provider`, walang tahimik na fallback — ipinapakita ng rate-limited o pumapalya na tahasang provider ang sarili nitong error (`429` kung rate-limited, kung hindi ay ang upstream status).
 
 ---
 
@@ -956,19 +1066,19 @@ sa napiling codex OAuth connection. Na-validate ito end-to-end laban sa lokal na
 
 ## Pag-uulat ng Mga Quota at Isyu
 
-| Paraan | Path                | Paglalarawan                                                                                             |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Paunang pagpapatunay ng quota para sa `provider` + `accountId` bago mag-isyu ng nakarehistrong key       |
-| POST   | `/v1/issues/report` | Iulat sa GitHub ang pagkabigo sa pag-isyu ng quota/key (nangangailangan ng `GITHUB_ISSUES_REPO` + token) |
+| Paraan | Path                | Paglalarawan                                                                                            |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Paunang pagpapatunay ng quota para sa `provider` + `accountId` bago mag-isyu ng nakarehistrong key      |
+| POST   | `/v1/issues/report` | Iulat sa GitHub ang pagkabigo sa pag-isyu ng quota/key (kinakailangan ang `GITHUB_ISSUES_REPO` + token) |
 
-**Auth:** Bearer API key (`isAuthenticated`).
+**Pagpapatotoo:** Ang `/v1/quotas/check` ay tumatanggap ng Bearer API key (`isAuthenticated`). Ang `/v1/issues/report` ay para lamang sa pamamahala (`requireManagementAuth`), gaya ng `/api/v1/registered-keys`: isang dashboard session,
+ang lokal na CLI token, o isang API key na may saklaw na `manage`/`admin`; ang mga API key na para lamang sa inference ay nakatatanggap ng `403`.
 
 ### Pagbawi ng quota session (opsyonal)
 
 Ang isang non-streaming na `POST /v1/chat/completions` o `POST /v1/responses` na nabigo dahil sa
-terminal quota error (`402`/`429`/`503` na ang body ay nagsasabing naubos na ang quota o credits)
-ay maaaring iparada at i-replay sa ibang pagkakataon sa halip na ibalik ang error. Nag-o-opt in ang
-caller sa bawat request gamit ang tatlong header:
+terminal na error sa quota (`402`/`429`/`503` na nagsasabing ubos na ang quota o credits)
+ay maaaring iparada at i-replay sa ibang pagkakataon sa halip na ibalik ang error. Nag-o-opt in ang tumatawag bawat request gamit ang tatlong header:
 
 | Header                       | Halaga                                                        |
 | ---------------------------- | ------------------------------------------------------------- |
@@ -976,13 +1086,12 @@ caller sa bawat request gamit ang tatlong header:
 | `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`                          |
 | `x-omniroute-recovery-turn`  | turn id na natatangi sa loob ng session (parehong panuntunan) |
 
-Ang mga turn lang na `stream: false` na walang tools, tool history o `previous_response_id`, at walang
-`x-omniroute-connection` pin, ang kwalipikado, at dapat nakatakda ang `STORAGE_ENCRYPTION_KEY` (ang
-request ay naka-store na encrypted nang hanggang 24 na oras). Ang response ay magiging `202` na may
-`recovery.poll`; i-poll ang `GET /v1/quota-recoveries/{id}` (`202` habang nakabinbin, `200` na may
-recovered body kapag nakumpleto) o kanselahin gamit ang `DELETE`. Ang mga ticket ay makikita lamang ng
-API key na lumikha sa mga ito. Ang replay na hindi tiyak ang kinalabasan ay nagtatapos sa
-`needs_confirmation` sa halip na maipadala nang dalawang beses. Source: `src/lib/quota/quotaSessionRecovery.ts`.
+Ang mga turn lamang na may `stream: false`, walang tools, history ng tool o `previous_response_id`, at walang
+`x-omniroute-connection` pin ang kwalipikado, at dapat nakatakda ang `STORAGE_ENCRYPTION_KEY` (ang request ay naka-encrypt na nakaimbak nang hanggang 24 na oras). Ang tugon ay magiging `202` na may
+`recovery.poll`; i-poll ang `GET /v1/quota-recoveries/{id}` (`202` habang naghihintay, `200` na may
+na-recover na body kapag nakumpleto) o kanselahin gamit ang `DELETE`. Ang mga ticket ay makikita lamang ng API
+key na lumikha sa mga ito. Ang replay na hindi tiyak ang kinalabasan ay nagtatapos sa `needs_confirmation`
+sa halip na maipadala nang dalawang beses. Pinagmulan: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1734,17 +1843,21 @@ Mga outbound na subscription ng webhook para sa mga event ng OmniRoute (pagkumpl
 
 ## Mga Nakarehistrong Key (Awtomatikong Pamamahala)
 
-Ginagamit ng subsystem ng awtomatikong pamamahala ng key upang mag-isyu at magpaikot ng mga API key laban sa isang backing provider/account, na may mga quota bawat araw/oras.
+Ginagamit ng subsystem ng awtomatikong pamamahala ng key upang mag-isyu at mag-rotate ng mga API key laban sa isang provider/account na pinagkukunan, na may mga pang-araw-araw/pang-oras na quota.
 
-| Paraan | Path                                  | Paglalarawan                                                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Ilista ang mga nakarehistrong key (masked prefix lamang)                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Mag-isyu ng bagong nakarehistrong key — katawan: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ibinabalik ang raw key **nang isang beses lamang**. Nagbabalik ng `429` kapag tinanggihan dahil sa quota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Kunin ang metadata ng isang nakarehistrong key (walang raw material)                                                                                                                                                                                  |
-| DELETE | `/api/v1/registered-keys/[id]`        | Bawiin ang isang nakarehistrong key                                                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Tiyak na endpoint para sa pagbawi (kapareho ng epekto ng DELETE)                                                                                                                                                                                      |
+| Method | Path                                  | Description                                                                                                                                                                                                                                     |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Ilista ang mga nakarehistrong key (ang naka-mask na prefix lamang)                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | Mag-isyu ng bagong nakarehistrong key — katawan: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ibinabalik ang raw key nang **isang beses**. Ibinabalik ang `429` kapag tinanggihan dahil sa quota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Kunin ang metadata ng isang nakarehistrong key (walang raw na materyal)                                                                                                                                                                         |
+| DELETE | `/api/v1/registered-keys/[id]`        | Bawiin ang isang nakarehistrong key                                                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Tahasang endpoint ng pagbawi (pareho ang epekto sa DELETE)                                                                                                                                                                                      |
+| GET    | `/api/v1/providers/[provider]/limits` | Basahin ang mga limitasyon sa pag-isyu ng provider                                                                                                                                                                                              |
+| PUT    | `/api/v1/providers/[provider]/limits` | Itakda ang mga limitasyon sa pag-isyu ng provider — katawan: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Basahin ang mga limitasyon sa pag-isyu ng account                                                                                                                                                                                               |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Itakda ang mga limitasyon sa pag-isyu ng account — kaparehong katawan ng ruta ng provider                                                                                                                                                       |
 
-**Pagpapatunay:** management session/API key (`requireManagementAuth`) — kaparehong guard ng `/api/keys`: isang dashboard session, ang lokal na CLI token, o isang API key na may `manage`/`admin` scope; ang mga API key na para lamang sa inference ay nakakakuha ng `403`. Tingnan din ang `/v1/quotas/check` at `/v1/issues/report`.
+**Auth:** session/API key sa pamamahala (`requireManagementAuth`) — kaparehong guard gaya ng `/api/keys`: isang session ng dashboard, ang lokal na CLI token, o isang API key na may saklaw na `manage`/`admin`; ang mga API key na para lamang sa inference ay makatatanggap ng `403`. Tingnan din ang `/v1/quotas/check` at `/v1/issues/report`.
 
 ---
 

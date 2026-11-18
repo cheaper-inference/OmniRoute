@@ -94,7 +94,7 @@ export default function RtkLearnDiscoverCard() {
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* ── Discover ─────────────────────────────────────────────── */}
         <div>
-          <h3 className="text-xs font-medium text-text-main">{t("discoverHeading")}</h3>
+          <h3 className="text-xs text-text-main">{t("discoverHeading")}</h3>
           <Button
             variant="outline"
             size="sm"
@@ -134,7 +134,7 @@ export default function RtkLearnDiscoverCard() {
 
         {/* ── Learn ────────────────────────────────────────────────── */}
         <div>
-          <h3 className="text-xs font-medium text-text-main">{t("learnHeading")}</h3>
+          <h3 className="text-xs text-text-main">{t("learnHeading")}</h3>
           <div className="mt-2 flex gap-2">
             <Input
               type="text"

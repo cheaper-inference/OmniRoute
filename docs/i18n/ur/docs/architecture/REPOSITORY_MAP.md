@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## روٹ فائلیں
+## روٹ فائلیں۔
 
-| فائل                                        | مقصد                                                                                    |
-| ------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **README.md**                               | مارکیٹنگ لینڈنگ پیج + فوری آغاز + خصوصیات کا میٹرکس (`llm.txt` بھی دیکھیں)              |
-| **CHANGELOG.md**                            | ہر ریلیز کا تبدیلی نامہ (`/version-bump-cc` اسکل کے ذریعے خودکار طور پر تیار کردہ)      |
-| **LICENSE**                                 | MIT لائسنس کا متن                                                                       |
-| **CLAUDE.md**                               | Claude Code ایجنٹس کے لیے پروجیکٹ کے قواعد (سخت قواعد، روایات، منظرنامے)                |
-| **AGENTS.md**                               | CLAUDE.md جیسا ہی، مگر غیر Claude AI ایجنٹس (Codex، Cursor وغیرہ) کے لیے                |
-| **GEMINI.md**                               | Gemini پر مبنی ایجنٹس کے لیے مختصر قواعد (CLAUDE.md کا ذیلی مجموعہ)                     |
-| **CONTRIBUTING.md**                         | معاونین کے لیے رہنما: سیٹ اپ، روایتی کمیٹس، ٹیسٹنگ، PR کا طریقۂ کار                     |
-| **SECURITY.md**                             | کمزوریوں کی اطلاع دینے کی پالیسی، معاونت یافتہ ورژنز، خطرات کا ماڈل                     |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — کمیونٹی کے رویّے سے متعلق توقعات                                 |
-| **llm.txt**                                 | LLM کرالرز کے لیے موزوں بنایا گیا سادہ متن کا لینڈنگ پیج (AI معاونین کے لیے SEO)        |
-| **package.json**                            | npm مینی فیسٹ، اسکرپٹس، انحصارات، انجنز، c8 کوریج گیٹ                                   |
-| **package-lock.json**                       | مقفل انحصاری درخت                                                                       |
-| **tsconfig.json**                           | بنیادی TypeScript کنفیگریشن                                                             |
-| **tsconfig.typecheck-core.json**            | `src/` کور کے لیے ٹائپ چیک کنفیگریشن                                                    |
-| **tsconfig.typecheck-noimplicit-core.json** | سخت (`noImplicitAny`) ٹائپ چیک                                                          |
-| **tsconfig.tsbuildinfo**                    | TS تدریجی بلڈ کیش (gitignored)                                                          |
-| **next.config.mjs**                         | Next.js 16 بلڈ کنفیگریشن (اسٹینڈ الون آؤٹ پٹ)                                           |
-| **next-env.d.ts**                           | Next.js کی خودکار طور پر تیار کردہ env ٹائپس                                            |
-| **eslint.config.mjs**                       | ESLint فلیٹ کنفیگریشن (پروجیکٹ کے ہر حصے کے لیے قواعد)                                  |
-| **prettier.config.mjs**                     | Prettier فارمیٹنگ کے قواعد                                                              |
-| **postcss.config.mjs**                      | Tailwind/CSS پائپ لائن کے لیے PostCSS کنفیگریشن                                         |
-| **playwright.config.ts**                    | Playwright E2E ٹیسٹ کنفیگریشن                                                           |
-| **vitest.config.ts**                        | Vitest کنفیگریشن (ڈیفالٹ سویٹ)                                                          |
-| **vitest.mcp.config.ts**                    | MCP سرور / autoCombo / کیش سویٹس کے لیے Vitest کنفیگریشن                                |
-| **sonar-project.properties**                | SonarQube/SonarCloud کنفیگریشن (کوڈ کا معیار)                                           |
-| **Dockerfile**                              | کثیر مرحلہ Docker بلڈ (builder → runner-base → runner-cli)                              |
-| **docker-compose.yml**                      | 4 پروفائلز (base، cli، host، cliproxyapi) + redis سائڈکار کے ساتھ ڈیولپمنٹ کمپوز        |
-| **docker-compose.prod.yml**                 | پروڈکشن کمپوز (پورٹ 20130، redis، نام زد والیومز)                                       |
-| **.dockerignore**                           | Docker کانٹیکسٹ سے خارج کردہ فائلیں                                                     |
-| **fly.toml**                                | Fly.io ڈیپلائمنٹ کنفیگریشن (ریجن `sin`، پورٹ 20128، /data والیوم)                       |
-| **.env.example**                            | env فائل کا ٹیمپلیٹ (پہلی انسٹالیشن پر خودکار طور پر `.env` میں کاپی کیا جاتا ہے)       |
-| **.gitignore**                              | Git اگنور پیٹرنز                                                                        |
-| **.npmignore**                              | npm پبلش سے خارج کی جانے والی فہرست                                                     |
-| **.npmrc**                                  | npm کنفیگریشن (رجسٹری، لاک فائل پالیسی)                                                 |
-| **.node-version**                           | Node ورژن پن (nvm سے ہم آہنگ ٹولز استعمال کرتے ہیں)                                     |
-| **.nvmrc**                                  | nvm کے لیے Node ورژن پن                                                                 |
-| **eslint.complexity.config.mjs**            | پیچیدگی ریچٹ کے لیے ESLint کنفیگریشن (`scripts/check/check-complexity.mjs --config`)    |
-| **eslint.sonarjs.config.mjs**               | SonarJS قواعد کے لیے ESLint کنفیگریشن (ادراکی پیچیدگی / نقل)                            |
-| **source.config.ts**                        | Fumadocs `defineDocs` سورس کنفیگریشن (`.source/` کو فیڈ کرتا ہے)                        |
-| **knip.json**                               | Knip کنفیگریشن — غیر استعمال شدہ فائلیں/ایکسپورٹس/انحصارات (ڈیڈ کوڈ گیٹ کو فیڈ کرتا ہے) |
-| **stryker.conf.json**                       | Stryker میوٹیشن ٹیسٹنگ کنفیگریشن                                                        |
-| **.size-limit.json**                        | size-limit بنڈل بجٹ کی تشکیل                                                            |
-| **promptfooconfig.yaml**                    | promptfoo ایویلیوایشن کی تشکیل                                                          |
-| **.gitleaks.toml**                          | gitleaks خفیہ معلومات اسکین کرنے کے قواعد                                               |
-| **.zizmor.yml**                             | zizmor GitHub-Actions سیکیورٹی لنٹ کی تشکیل                                             |
-| **socket.yml**                              | Socket.dev سپلائی چین کی تشکیل                                                          |
-| **news.json**                               | مقامی زبانوں میں v2 اعلانات کی فیڈ؛ Radar لانچ آئٹم غیر فعال حالت میں فراہم ہوتا ہے     |
-| **flake.nix** / **flake.lock**              | Nix dev-shell کی تعریف + لاک                                                            |
-| **.env**                                    | مقامی خفیہ معلومات (gitignored — `.env.example` سے تیار کردہ)                           |
+| فائل                                        | مقصد                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **README.md**                               | مارکیٹنگ لینڈنگ پیج + کوئیک سٹارٹ + فیچر میٹرکس ( `llm.txt` بھی دیکھیں)              |
+| **CHANGELOG.md**                            | فی ریلیز چینج لاگ ( `/version-bump-cc` مہارت کے ذریعہ خود کار طریقے سے تیار کیا گیا) |
+| **LICENSE**                                 | MIT لائسنس کا متن                                                                    |
+| **CLAUDE.md**                               | Claude کوڈ ایجنٹس کے لیے پروجیکٹ کے اصول (سخت اصول، کنونشنز، منظرنامے)               |
+| **AGENTS.md**                               | CLAUDE.md جیسا ہی لیکن نان کلاڈ AI ایجنٹس (Codex، Cursor، وغیرہ) کے لیے              |
+| **GEMINI.md**                               | جیمنی پر مبنی ایجنٹوں کے لیے مختصر اصول ( CLAUDE.md کا ذیلی سیٹ)                     |
+| **CONTRIBUTING.md**                         | کنٹریبیوٹر گائیڈ: سیٹ اپ، روایتی کمٹ، ٹیسٹنگ، PR فلو                                 |
+| **SECURITY.md**                             | خطرے کی اطلاع دینے کی پالیسی، تعاون یافتہ ورژن، خطرے کا ماڈل                         |
+| **CODE_OF_CONDUCT.md**                      | تعاون کنندہ عہد — کمیونٹی کے رویے کی توقعات                                          |
+| **llm.txt**                                 | سادہ متن کی لینڈنگ LLM کرالر کے لیے موزوں ہے ( AI معاونین کے لیے SEO )               |
+| **package.json**                            | این پی ایم مینی فیسٹ، اسکرپٹ، انحصار، انجن، سی 8 کوریج گیٹ                           |
+| **package-lock.json**                       | مقفل انحصار درخت                                                                     |
+| **tsconfig.json**                           | جڑ TypeScript تشکیل                                                                  |
+| **tsconfig.typecheck-core.json**            | `src/` کور کے لیے ترتیب کو ٹائپ کریں۔                                                |
+| **tsconfig.typecheck-noimplicit-core.json** | سخت (`noImplicitAny`) ٹائپ چیک                                                       |
+| **tsconfig.tsbuildinfo**                    | TS انکریمنٹل بلڈ کیشے (gitignored)                                                   |
+| **اگلا config.mjs**                         | Next.js 16 تعمیر کنفیگریشن (اسٹینڈ آؤٹ پٹ)                                           |
+| **اگلا ماحول d.ts**                         | Next.js خود کار طریقے سے تیار کردہ env کی اقسام                                      |
+| **eslint config.mjs**                       | ESLint فلیٹ تشکیل (قواعد فی پروجیکٹ ایریا)                                           |
+| **خوبصورت config.mjs**                      | Prettier فارمیٹنگ کے قوانین                                                          |
+| **پوسٹ سی ایس ایس config.mjs**              | PostCSS config Tailwind/CSS پائپ لائن کے لیے                                         |
+| **ڈرامہ نگار config.ts**                    | Playwright E2E ٹیسٹ کی تشکیل                                                         |
+| **vitest config.ts**                        | Vitest تشکیل (پہلے سے طے شدہ سویٹ)                                                   |
+| **vitest.mcp.config.ts**                    | Vitest config for MCP سرور / autoCombo / کیشے سویٹس                                  |
+| **sonar-project.properties**                | SonarQube/SonarCloud تشکیل (کوڈ کوالٹی)                                              |
+| **ڈاکر فائل**                               | ملٹی اسٹیج Docker بلڈ (بلڈر → رنر-بیس → رنر-cli)                                     |
+| **docker-compose.yml**                      | 4 پروفائلز کے ساتھ دیو کمپوز کریں (بیس، کلی، میزبان، کلپروکسیپی) + redis sidecar     |
+| **docker-compose.prod.yml**                 | پروڈکشن کمپوز (پورٹ 20130، ریڈیس، نامزد جلدیں)                                       |
+| **.dockerignore**                           | فائلز کو Docker سیاق و سباق سے خارج کر دیا گیا ہے۔                                   |
+| **fly.toml**                                | Fly.io کی تعیناتی کی تشکیل (علاقہ `sin`، پورٹ 20128، /ڈیٹا والیوم)                   |
+| **env.example**                             | ٹیمپلیٹ env فائل (پہلی انسٹال پر `.env` میں خودکار کاپی)                             |
+| **.gitignore**                              | گٹ پیٹرن کو نظر انداز کریں۔                                                          |
+| **.npmignore**                              | npm نے اخراج کی فہرست شائع کی۔                                                       |
+| **.npmrc**                                  | این پی ایم تشکیل (رجسٹری، لاک فائل پالیسی)                                           |
+| **.node-version**                           | نوڈ ورژن پن (nvm کے موافق ٹولز کے ذریعے استعمال کیا جاتا ہے)                         |
+| **.nvmrc**                                  | nvm کے لیے نوڈ ورژن پن                                                               |
+| **eslint.complexity.config.mjs**            | پیچیدگی شافٹ کے لئے ESLint تشکیل (`scripts/check/check-complexity.mjs --config`)     |
+| **eslint.sonarjs.config.mjs**               | ESLint config for SonarJS قواعد (علمی پیچیدگی / نقل)                                 |
+| **ذریعہ config.ts**                         | Fumadocs `defineDocs` سورس کنفگ (فیڈز `.source/`)                                    |
+| **knip.json**                               | Knip config — غیر استعمال شدہ files/exports/deps (ڈیڈ کوڈ گیٹ کو فیڈ کرتا ہے)        |
+| **اسٹرائیکر conf.mjs**                      | اسٹرائیکر میوٹیشن ٹیسٹنگ کنفیگ ( `mutate` سے `tap.testFiles` کی گنتی کرتا ہے)        |
+| **.size-limit.json**                        | سائز کی حد بنڈل بجٹ کی تشکیل                                                         |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                |
+| **.gitleaks.toml**                          | gitleaks سیکرٹ اسکین رولسیٹ                                                          |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                           |
+| **socket.yml**                              | Socket.dev سپلائی چین کی تشکیل                                                       |
+| **news.json**                               | مقامی v2 اعلان فیڈ؛ ریڈار لانچ آئٹم جہاز غیر فعال                                    |
+| **flake.nix** /** flake.lock**              | نکس دیو شیل تعریف + لاک                                                              |
+| **env**                                     | مقامی راز ( `.env.example` سے پیدا کردہ gitignored — )                               |
 
-> **v3.8.26 میں روٹ سے باہر منتقل کیا گیا (بے ترتیبی کم کرنے کے لیے):**
+> **v3.8.26 (declutter) میں جڑ سے باہر منتقل:**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json`، اور تیار کردہ `quality-metrics.json` (gitignored)۔ دیکھیں [`## config/`](#config--static-configs--quality-gate-state)۔
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, اور تیار کردہ `quality-metrics.json` (gitigned)۔ [`## config/`](#config--static-configs--quality-gate-state) دیکھیں۔
 
 ---
 
@@ -154,9 +154,9 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ٹریفک انسپکٹر ڈیش بورڈ صفحہ — DevTools اسپلٹ، 7 ڈیٹیل ٹیبز، 4 کیپچر موڈ ٹوگلز، سیشن ریکارڈر، سیاق و سباق کا رنگ کاری۔ i18n PT-BR + EN۔ `docs/frameworks/TRAFFIC_INSPECTOR.md` دیکھیں۔                                                                                                                             |
 | `app/(dashboard)/dashboard/activity/`                                        | سرگرمی فیڈ صفحہ (گروپ بی): `page.tsx` (سرور) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — دیکھیں `docs/architecture/MONITORING_SECTIONS.md`                                                                                                              |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | کوٹہ شیئرنگ پیج (گروپ بی): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | فراہم کنندہ کی منصوبہ بندی کا صفحہ (گروپ بی): `page.tsx` + `ProviderPlanConfigClient.tsx` — کوٹہ کے طول و عرض فی کنکشن اوور رائڈ                                                                                                                                                                                  |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | فراہم کنندہ کی منصوبہ بندی کا صفحہ (گروپ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — کوٹہ کے طول و عرض فی کنکشن اوور رائڈ                                                                                                                                                                                   |
 | `app/docs/`                                                                  | ایمبیڈڈ دستاویزات کا ناظر ( `docs/*.md` پیش کرتا ہے)                                                                                                                                                                                                                                                              |
-| `app/landing/`                                                               | مارکیٹنگ لینڈنگ پیج                                                                                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | مارکیٹنگ لینڈنگ کا صفحہ                                                                                                                                                                                                                                                                                           |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | توثیق سے متعلق صفحات                                                                                                                                                                                                                                                                                              |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP غلطی والے صفحات                                                                                                                                                                                                                                                                                              |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status صفحات                                                                                                                                                                                                                                                                                               |
@@ -221,7 +221,7 @@ src/
 | ---------------------- | -------------------------------------------------------- |
 | `policy.ts`            | پالیسی انجن                                              |
 | `fallbackPolicy.ts`    | فال بیک فیصلے کا درخت                                    |
-| `costRules.ts`         | لاگت کے حساب کتاب کے اصول                                |
+| `costRules.ts`         | لاگت کے حساب کتاب کے قواعد                               |
 | `lockoutPolicy.ts`     | Model/connection لاک آؤٹ پالیسی                          |
 | `tagRouter.ts`         | ٹیگ پر مبنی روٹنگ                                        |
 | `comboResolver.ts`     | کومبو ریزولوشن (کومبو انجن کے ذریعے استعمال کیا جاتا ہے) |
@@ -242,12 +242,12 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | `components/`                    | ڈیش بورڈ جزو API: اڈاپٹر اوور `packages/ui-kit` — دیکھیں `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز کے ذریعے استعمال ہونے والے آئیکن کے نام → Lucide اجزاء (`<Icon>`)         |
-| `constants/providers.ts`         | **381 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
+| `constants/providers.ts`         | **394 فراہم کرنے والے** Zod توثیق کے ساتھ (سچائی کا ذریعہ)                                    |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                         |
-| `constants/routingStrategies.ts` | **20 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
+| `constants/routingStrategies.ts` | **22 روٹنگ کی حکمت عملی** ترجیحات کے ساتھ                                                     |
 | `constants/publicApiRoutes.ts`   | وہ راستے جن کے لیے بیئرر (بمقابلہ مینجمنٹ) تصنیف کی ضرورت ہوتی ہے۔                            |
 | `constants/upstreamHeaders.ts`   | اپ اسٹریم درخواستوں کے لیے ہیڈر کی انکاری فہرست                                               |
-| `validation/schemas.ts`          | ~ 80 Zod اسکیماس ( API معاہدوں کے لیے سچائی کا واحد ذریعہ)                                    |
+| `validation/schemas.ts`          | ~ 80 Zod اسکیما ( API معاہدوں کے لیے سچائی کا واحد ذریعہ)                                     |
 | `validation/helpers.ts`          | Zod توثیق مددگار (`validateBody`، وغیرہ)                                                      |
 | `types/`                         | مشترکہ TS اقسام                                                                               |
 | `contracts/`                     | عوامی API معاہدے ( `files:` کے ذریعے `package.json` میں استعمال کیا جاتا ہے)                  |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 فائلیں (12 ہینڈلرز + 4 ہیلپرز): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search وغیرہ۔
-├── executors/           # 150 ایگزیکیوٹر ماڈیولز (BaseExecutor کو وسعت دینے والی کلاسز + ہر پرووائیڈر کے لیے ہیلپرز)
+├── executors/           # 163 ایگزیکیوٹر ماڈیولز (BaseExecutor کو وسعت دینے والی کلاسز + ہر پرووائیڈر کے لیے ہیلپرز)
 ├── translator/          # فارمیٹ کنورٹرز (9 درخواست، 9 جواب، 9 ہیلپرز)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ سروس ماڈیولز (combo، accountFallback، autoCombo، reasoningCache، claude code/chatgpt stealth، modelDeprecation، taskAwareRouter، workflowFSM وغیرہ)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | بیرونی CLI انضمام + اندرونی OmniRoute CLI                                                    |
 | `I18N.md`                   | i18n فن تعمیر، ایک زبان کا اضافہ، 67 لوکیلز                                                  |
 | `UNINSTALL.md`              | ان انسٹال کے مراحل کو صاف کریں۔                                                              |
-| `PROVIDER_REFERENCE.md`     | **خود بخود تیار کردہ** 381 فراہم کنندگان کی فہرست ( regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **خود بخود تیار کردہ** 394 فراہم کنندگان کی فہرست ( regen: `npm run gen:provider-reference`) |
 
 ### سب سسٹم گہرے غوطے
 

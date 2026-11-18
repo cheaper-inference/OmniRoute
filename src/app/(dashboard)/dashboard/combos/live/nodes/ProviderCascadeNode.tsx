@@ -226,7 +226,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
           <span
             className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
             style={{
-              backgroundColor: `${CB_BADGE_COLORS[cbState]}20`,
+              backgroundColor: flowColorAlpha(CB_BADGE_COLORS[cbState], 13),
               color: CB_BADGE_COLORS[cbState],
             }}
             data-testid="cb-state-badge"
@@ -244,7 +244,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
           <span
             className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
             style={{
-              backgroundColor: `${COOLDOWN_BADGE_COLOR}20`,
+              backgroundColor: flowColorAlpha(COOLDOWN_BADGE_COLOR, 13),
               color: COOLDOWN_BADGE_COLOR,
             }}
             data-testid="cooldown-badge"

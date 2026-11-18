@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## রুট ফাইলসমূহ
+## রুট ফাইল
 
 | ফাইল                                        | উদ্দেশ্য                                                                                |
 | ------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **README.md**                               | মার্কেটিং ল্যান্ডিং পেজ + দ্রুত শুরু + ফিচার ম্যাট্রিক্স (`llm.txt`-ও দেখুন)            |
-| **CHANGELOG.md**                            | প্রতিটি রিলিজের পরিবর্তনলিপি (`/version-bump-cc` স্কিল দ্বারা স্বয়ংক্রিয়ভাবে তৈরি)    |
+| **README.md**                               | মার্কেটিং ল্যান্ডিং পেজ + দ্রুত শুরু + বৈশিষ্ট্য ম্যাট্রিক্স (এছাড়াও `llm.txt` দেখুন)  |
+| **CHANGELOG.md**                            | প্রতি-রিলিজ চেঞ্জলগ ( `/version-bump-cc` দক্ষতা দ্বারা স্বয়ংক্রিয়ভাবে তৈরি)           |
 | **LICENSE**                                 | MIT লাইসেন্সের পাঠ্য                                                                    |
-| **CLAUDE.md**                               | Claude Code এজেন্টদের জন্য প্রজেক্টের নিয়মাবলি (কঠোর নিয়ম, রীতিনীতি, পরিস্থিতি)       |
-| **AGENTS.md**                               | CLAUDE.md-এর অনুরূপ, তবে Claude-বহির্ভূত AI এজেন্টদের জন্য (Codex, Cursor ইত্যাদি)      |
-| **GEMINI.md**                               | Gemini-ভিত্তিক এজেন্টদের জন্য সংক্ষিপ্ত নিয়মাবলি (CLAUDE.md-এর উপসেট)                  |
-| **CONTRIBUTING.md**                         | অবদানকারীর নির্দেশিকা: সেটআপ, conventional commits, টেস্টিং, PR প্রক্রিয়া              |
-| **SECURITY.md**                             | দুর্বলতা রিপোর্ট করার নীতি, সমর্থিত সংস্করণ, থ্রেট মডেল                                 |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — কমিউনিটিতে আচরণের প্রত্যাশা                                      |
-| **llm.txt**                                 | LLM ক্রলারের জন্য অপ্টিমাইজ করা প্লেইন-টেক্সট ল্যান্ডিং পেজ (AI সহকারীর জন্য SEO)       |
+| **CLAUDE.md**                               | Claude কোড এজেন্টদের জন্য প্রকল্পের নিয়ম (কঠিন নিয়ম, নিয়ম, পরিস্থিতি)                |
+| **AGENTS.md**                               | CLAUDE.md মতোই কিন্তু নন-ক্লাউড AI এজেন্টদের জন্য (Codex, Cursor, ইত্যাদি)              |
+| **GEMINI.md**                               | মিথুন-ভিত্তিক এজেন্টদের জন্য সংক্ষিপ্ত নিয়ম ( CLAUDE.md এর উপসেট)                      |
+| **CONTRIBUTING.md**                         | অবদানকারী গাইড: সেটআপ, প্রচলিত প্রতিশ্রুতি, পরীক্ষা, PR প্রবাহ                          |
+| **SECURITY.md**                             | দুর্বলতা রিপোর্টিং নীতি, সমর্থিত সংস্করণ, হুমকি মডেল                                    |
+| **CODE_OF_CONDUCT.md**                      | অবদানকারী চুক্তি — সম্প্রদায় আচরণ প্রত্যাশা                                            |
+| **llm.txt**                                 | প্লেইন-টেক্সট ল্যান্ডিং LLM ক্রলারদের জন্য অপ্টিমাইজ করা হয়েছে ( AI সহকারীর জন্য SEO ) |
 | **package.json**                            | npm ম্যানিফেস্ট, স্ক্রিপ্ট, নির্ভরতা, ইঞ্জিন, c8 কভারেজ গেট                             |
-| **package-lock.json**                       | লক করা নির্ভরতা ট্রি                                                                    |
-| **tsconfig.json**                           | রুট TypeScript কনফিগ                                                                    |
-| **tsconfig.typecheck-core.json**            | `src/` কোরের জন্য টাইপচেক কনফিগ                                                         |
-| **tsconfig.typecheck-noimplicit-core.json** | কঠোর (`noImplicitAny`) টাইপচেক                                                          |
-| **tsconfig.tsbuildinfo**                    | TS ইনক্রিমেন্টাল বিল্ড ক্যাশ (gitignored)                                               |
-| **next.config.mjs**                         | Next.js 16 বিল্ড কনফিগারেশন (standalone আউটপুট)                                         |
-| **next-env.d.ts**                           | Next.js দ্বারা স্বয়ংক্রিয়ভাবে তৈরি env টাইপ                                           |
-| **eslint.config.mjs**                       | ESLint ফ্ল্যাট কনফিগ (প্রজেক্টের প্রতিটি অংশের জন্য নিয়ম)                              |
-| **prettier.config.mjs**                     | Prettier ফরম্যাটিং নিয়মাবলি                                                            |
-| **postcss.config.mjs**                      | Tailwind/CSS পাইপলাইনের জন্য PostCSS কনফিগ                                              |
-| **playwright.config.ts**                    | Playwright E2E টেস্ট কনফিগ                                                              |
-| **vitest.config.ts**                        | Vitest কনফিগ (ডিফল্ট স্যুট)                                                             |
-| **vitest.mcp.config.ts**                    | MCP সার্ভার / autoCombo / ক্যাশ স্যুটের জন্য Vitest কনফিগ                               |
-| **sonar-project.properties**                | SonarQube/SonarCloud কনফিগ (কোডের গুণমান)                                               |
-| **Dockerfile**                              | মাল্টি-স্টেজ Docker বিল্ড (builder → runner-base → runner-cli)                          |
-| **docker-compose.yml**                      | ৪টি প্রোফাইলসহ ডেভেলপমেন্ট compose (base, cli, host, cliproxyapi) + redis sidecar       |
-| **docker-compose.prod.yml**                 | প্রোডাকশন compose (পোর্ট 20130, redis, named volumes)                                   |
-| **.dockerignore**                           | Docker context থেকে বাদ দেওয়া ফাইল                                                     |
-| **fly.toml**                                | Fly.io ডিপ্লয়মেন্ট কনফিগ (অঞ্চল `sin`, পোর্ট 20128, /data ভলিউম)                       |
-| **.env.example**                            | env ফাইলের টেমপ্লেট (প্রথম ইনস্টলে স্বয়ংক্রিয়ভাবে `.env`-এ কপি করা হয়)               |
-| **.gitignore**                              | Git ignore প্যাটার্ন                                                                    |
-| **.npmignore**                              | npm publish-এর বর্জন তালিকা                                                             |
-| **.npmrc**                                  | npm কনফিগ (রেজিস্ট্রি, lockfile নীতি)                                                   |
-| **.node-version**                           | Node সংস্করণ পিন (nvm-সামঞ্জস্যপূর্ণ টুলে ব্যবহৃত)                                      |
-| **.nvmrc**                                  | nvm-এর জন্য Node সংস্করণ পিন                                                            |
-| **eslint.complexity.config.mjs**            | complexity ratchet-এর জন্য ESLint কনফিগ (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | SonarJS নিয়মের জন্য ESLint কনফিগ (cognitive complexity / duplication)                  |
-| **source.config.ts**                        | Fumadocs `defineDocs` সোর্স কনফিগ (`.source/`-এ তথ্য সরবরাহ করে)                        |
-| **knip.json**                               | Knip কনফিগ — অব্যবহৃত ফাইল/এক্সপোর্ট/নির্ভরতা (dead-code gate-এ তথ্য সরবরাহ করে)        |
-| **stryker.conf.json**                       | Stryker mutation-testing কনফিগ                                                          |
-| **.size-limit.json**                        | size-limit বান্ডেল বাজেট কনফিগারেশন                                                     |
-| **promptfooconfig.yaml**                    | promptfoo মূল্যায়ন কনফিগারেশন                                                          |
-| **.gitleaks.toml**                          | gitleaks গোপন তথ্য স্ক্যানের নিয়মাবলি                                                  |
-| **.zizmor.yml**                             | zizmor GitHub-Actions নিরাপত্তা লিন্ট কনফিগারেশন                                        |
+| **package-lock.json**                       | তালাবদ্ধ নির্ভরতা গাছ                                                                   |
+| **tsconfig.json**                           | রুট TypeScript কনফিগারেশন                                                               |
+| **tsconfig।typecheck-core.json**            | `src/` কোরের জন্য টাইপচেক কনফিগারেশন                                                    |
+| **tsconfig।typecheck-noimplicit-core.json** | কঠোর (`noImplicitAny`) টাইপচেক                                                          |
+| **tsconfig.tsbuildinfo**                    | TS ইনক্রিমেন্টাল বিল্ড ক্যাশে (gitigned)                                                |
+| **পরবর্তীconfig.mjs**                       | Next.js 16 বিল্ড কনফিগারেশন (স্বতন্ত্র আউটপুট)                                          |
+| **পরবর্তী পরিবেশ d.ts**                     | Next.js স্বয়ংক্রিয়ভাবে তৈরি করা env প্রকার                                            |
+| **eslint config.mjs**                       | ESLint ফ্ল্যাট কনফিগারেশন (প্রকল্প এলাকা প্রতি নিয়ম)                                   |
+| **সুন্দর config.mjs**                       | Prettier ফরম্যাটিং নিয়ম                                                                |
+| **পোস্টসিএসএস config.mjs**                  | Tailwind/CSS পাইপলাইনের জন্য PostCSS কনফিগারেশন                                         |
+| **নাট্যকার config.ts**                      | Playwright E2E পরীক্ষা কনফিগার                                                          |
+| **ভিটেস্ট config.ts**                       | Vitest কনফিগারেশন (ডিফল্ট স্যুট)                                                        |
+| **vitest.mcp.config.ts**                    | Vitest config সার্ভার / MCP / ক্যাশে স্যুটগুলির autoCombo                               |
+| **sonar-project.properties**                | SonarQube/SonarCloud কনফিগারেশন (কোড গুণমান)                                            |
+| **ডকারফাইল**                                | মাল্টি-স্টেজ Docker বিল্ড (নির্মাতা → রানার-বেস → রানার-cli)                            |
+| **docker-compose.yml**                      | 4টি প্রোফাইল (বেস, ক্লি, হোস্ট, ক্লিপ্রোক্সাপি) + redis sidecar সহ দেব রচনা করুন        |
+| **docker- রচনাprod.yml**                    | উত্পাদন রচনা (পোর্ট 20130, রেডিস, নামকৃত ভলিউম)                                         |
+| **.dockerignore**                           | ফাইলগুলি Docker প্রসঙ্গ থেকে বাদ দেওয়া হয়েছে৷                                         |
+| **fly.toml**                                | Fly.io ডিপ্লয়মেন্ট কনফিগারেশন (অঞ্চল `sin`, পোর্ট 20128, /ডেটা ভলিউম)                  |
+| **.env.example**                            | টেমপ্লেট env ফাইল (প্রথম ইনস্টলে `.env` তে স্বয়ংক্রিয়ভাবে অনুলিপি করা হয়েছে)         |
+| **.gitignore**                              | Git উপেক্ষা নিদর্শন                                                                     |
+| **.npmignore**                              | npm প্রকাশ বর্জনের তালিকা                                                               |
+| **.npmrc**                                  | npm কনফিগারেশন (রেজিস্ট্রি, লকফাইল নীতি)                                                |
+| **.নোড-সংস্করণ**                            | নোড সংস্করণ পিন (এনভিএম-সামঞ্জস্যপূর্ণ সরঞ্জাম দ্বারা ব্যবহৃত)                          |
+| **.nvmrc**                                  | এনভিএম-এর জন্য নোড সংস্করণ পিন                                                          |
+| **eslint.complexity.config.mjs**            | জটিলতা র্যাচেটের জন্য ESLint কনফিগারেশন (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | SonarJS নিয়মের জন্য ESLint কনফিগারেশন (জ্ঞানগত জটিলতা / নকল)                           |
+| **উৎস config.ts**                           | Fumadocs `defineDocs` সোর্স কনফিগারেশন (ফিড `.source/`)                                 |
+| **knip.json**                               | Knip config — অব্যবহৃত files/exports/deps (ডেড-কোড গেটকে ফিড করে)                       |
+| **স্ট্রাইকার conf.mjs**                     | স্ট্রাইকার মিউটেশন-টেস্টিং কনফিগারেশন ( `mutate` থেকে `tap.testFiles` গণনা করে)         |
+| **.size-limit.json**                        | আকার-সীমা বান্ডিল বাজেট কনফিগারেশন                                                      |
+| **promptfooconfig.yaml**                    | promptfoo eval কনফিগারেশন                                                               |
+| **.gitleaks.toml**                          | gitleaks গোপন-স্ক্যান নিয়ম সেট                                                         |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                              |
 | **socket.yml**                              | Socket.dev সাপ্লাই-চেইন কনফিগারেশন                                                      |
-| **news.json**                               | স্থানীয়কৃত v2 ঘোষণা ফিড; Radar চালুর আইটেমটি নিষ্ক্রিয় অবস্থায় সরবরাহ করা হয়        |
-| **flake.nix** / **flake.lock**              | Nix ডেভ-শেল সংজ্ঞা + লক                                                                 |
-| **.env**                                    | স্থানীয় গোপন তথ্য (gitignored — `.env.example` থেকে তৈরি)                              |
+| **news.json**                               | স্থানীয়কৃত v2 ঘোষণা ফিড; রাডার লঞ্চ আইটেম জাহাজ নিষ্ক্রিয়                             |
+| **flake.nix** /** flake.lock**              | নিক্স ডেভ-শেল সংজ্ঞা + লক                                                               |
+| **.env**                                    | স্থানীয় গোপনীয়তা (gitigned — `.env.example` থেকে উত্পন্ন)                             |
 
-> **v3.8.26-এ রুটের বাইরে সরানো হয়েছে (বিশৃঙ্খলা কমাতে):**
+> **v3.8.26-এ রুট থেকে সরানো হয়েছে (ডিক্লাটার):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং তৈরি হওয়া `quality-metrics.json` (gitignored)। দেখুন [`## config/`](#config--static-configs--quality-gate-state)।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং জেনারেট করা `quality-metrics.json` (gitigned)। [`## config/`](#config--static-configs--quality-gate-state) দেখুন।
 
 ---
 
@@ -196,7 +196,7 @@ src/
 | `oauth/`                                 | 22টি প্রদানকারী মডিউলের জন্য OAuth/import প্রবাহিত হয় (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimiroqe, , ওপেনকোড xai-oauth, জেড-হোস্টেড, জেড)                                                          |
 | `plugins/`                               | প্লাগইন রেজিস্ট্রি                                                                                                                                                                                                                                                                                                  |
 | `promptCache/`                           | নৃতাত্ত্বিক-শৈলী প্রম্পট ক্যাশে ব্রেকপয়েন্ট                                                                                                                                                                                                                                                                        |
-| `skills/`                                | স্কিল ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH) — দেখুন `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                         |
+| `skills/`                                | দক্ষতা ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH) — দেখুন `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                        |
 | `playground/`                            | প্লেগ্রাউন্ড স্টুডিও শেয়ার্ড হেল্পার: `codeExport.ts` (curl/Python/TS জেনারেটর), `promptImprover.ts` (মেটা-প্রম্পট নির্মাতা), `streamMetrics.ts` (বিশুদ্ধ TTFT/TPS), `types.ts` (মূল্য নির্ধারণের টেবিল) — দেখুন `docs/frameworks/PLAYGROUND_STUDIO.md`                                                            |
 | `webhookDispatcher.ts`                   | HMAC ওয়েবহুক ডেলিভারি — `docs/frameworks/WEBHOOKS.md` দেখুন                                                                                                                                                                                                                                                        |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | টানেল ম্যানেজাররা — `docs/ops/TUNNELS_GUIDE.md` দেখুন                                                                                                                                                                                                                                                               |
@@ -241,10 +241,10 @@ src/
 | মডিউল                            | উদ্দেশ্য                                                                                                   |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ড্যাশবোর্ড কম্পোনেন্ট API: অ্যাডাপ্টার ওভার `packages/ui-kit` — দেখুন `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রীন দ্বারা ব্যবহৃত আইকনের নাম → Lucide উপাদান (`<Icon>`)                                   |
-| `constants/providers.ts`         | **381 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
+| `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রিন দ্বারা ব্যবহৃত আইকনের নাম → Lucide উপাদান (`<Icon>`)                                   |
+| `constants/providers.ts`         | **394 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
 | `constants/cliTools.ts`          | বাহ্যিক CLI টুল রেজিস্ট্রি                                                                                 |
-| `constants/routingStrategies.ts` | **20টি রাউটিং কৌশল** অগ্রাধিকার সহ                                                                         |
+| `constants/routingStrategies.ts` | **22 রাউটিং কৌশল** অগ্রাধিকার সহ                                                                           |
 | `constants/publicApiRoutes.ts`   | যে রুটের জন্য Bearer (বনাম ম্যানেজমেন্ট) auth প্রয়োজন                                                     |
 | `constants/upstreamHeaders.ts`   | আপস্ট্রিম অনুরোধের জন্য হেডার অস্বীকৃত                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod স্কিমা ( API চুক্তির জন্য সত্যের একক উৎস)                                                         |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — স্ট্রিমিং ইঞ্জিন ওয়ার্কস্পেস
 
-পৃথক npm ওয়ার্কস্পেস (`@omniroute/open-sse`)। অনুরোধ প্রক্রিয়াকরণ + প্রোভাইডার এক্সিকিউশন পরিচালনা করে।
+আলাদা npm ওয়ার্কস্পেস (`@omniroute/open-sse`)। + প্রদানকারীর এক্সিকিউশন প্রক্রিয়াকরণের অনুরোধ পরিচালনা করে।
 
 ```
 open-sse/
-├── handlers/            # ১৬টি ফাইল (১২টি হ্যান্ডলার + ৪টি হেল্পার): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ইত্যাদি।
-├── executors/           # ১৫০টি এক্সিকিউটর মডিউল (BaseExecutor এক্সটেন্ড করা ক্লাস + প্রতি-প্রোভাইডার হেল্পার)
-├── translator/          # ফরম্যাট কনভার্টার (৯টি রিকোয়েস্ট, ৯টি রেসপন্স, ৯টি হেল্পার)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~৮০+টি সার্ভিস মডিউল (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ইত্যাদি)
-├── mcp-server/          # MCP সার্ভার (১১০টি টুল, ৩টি ট্রান্সপোর্ট, ৩৩টি স্কোপ)
-├── config/              # প্রোভাইডার/মডেল রেজিস্ট্রি, হেডার কনফিগ, মডেল অ্যালিয়াস
-├── utils/               # TLS ক্লায়েন্ট, প্রক্সি fetch/dispatcher, নেটওয়ার্ক হেল্পার
-├── index.ts             # ওয়ার্কস্পেস এন্ট্রি
-├── package.json         # ওয়ার্কস্পেস ম্যানিফেস্ট
-├── tsconfig.json        # ওয়ার্কস্পেস TS কনফিগ
-└── types.d.ts           # ওয়ার্কস্পেস টাইপ ডিক্লারেশন
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| পাথ                         | উদ্দেশ্য                                                                            |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP সার্ভারের লাইফসাইকেল (stdio + HTTP ট্রান্সপোর্ট)                                |
-| `httpTransport.ts`          | HTTP Streamable + SSE ট্রান্সপোর্ট (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | `mcp_tool_audit` টেবিলে অডিট লগিং                                                   |
-| `scopeEnforcement.ts`       | প্রতি-টুল স্কোপ যাচাইকরণ                                                            |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`-এ স্বাস্থ্যসংক্রান্ত হার্টবিট                 |
-| `descriptionCompressor.ts`  | কনটেক্সট সাশ্রয়ের জন্য টুলের বিবরণসংক্রান্ত মেটাডেটা কম্প্রেস করে                  |
-| `schemas/tools.ts`          | ৩৬টি বেস টুলের সংজ্ঞা + স্কোপ                                                       |
-| `tools/advancedTools.ts`    | উন্নত টুলের ইমপ্লিমেন্টেশন                                                          |
-| `tools/memoryTools.ts`      | ৩টি মেমরি টুল (অনুসন্ধান/যোগ/মুছে ফেলা)                                             |
-| `tools/skillTools.ts`       | ৪টি স্কিল টুল (তালিকা/সক্রিয়/এক্সিকিউট/এক্সিকিউশন)                                 |
-| `tools/compressionTools.ts` | ৫টি কম্প্রেশন টুল                                                                   |
-| `README.md`                 | অভ্যন্তরীণ MCP সার্ভার README (`docs/frameworks/MCP-SERVER.md` থেকে ক্রস-লিঙ্ক করা) |
+| পথ                          | উদ্দেশ্য                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP সার্ভার জীবনচক্র (stdio + HTTP পরিবহন)                                        |
+| `httpTransport.ts`          | HTTP স্ট্রিমেবল + SSE পরিবহন (`/api/mcp/sse`, `/api/mcp/stream`)                  |
+| `audit.ts`                  | `mcp_tool_audit` টেবিলে অডিট লগিং                                                 |
+| `scopeEnforcement.ts`       | প্রতি টুল সুযোগ বৈধতা                                                             |
+| `runtimeHeartbeat.ts`       | স্বাস্থ্য হার্টবিট `DATA_DIR/runtime/mcp-heartbeat.json`                          |
+| `descriptionCompressor.ts`  | প্রসঙ্গ সংরক্ষণ করতে টুল বর্ণনা মেটাডেটা সংকুচিত করুন                             |
+| `schemas/tools.ts`          | 36 বেস টুল সংজ্ঞা + স্কোপ                                                         |
+| `tools/advancedTools.ts`    | উন্নত টুল বাস্তবায়ন                                                              |
+| `tools/memoryTools.ts`      | 3টি মেমরি টুল (search/add/clear)                                                  |
+| `tools/skillTools.ts`       | 4টি দক্ষতার সরঞ্জাম (list/enable/execute/executions)                              |
+| `tools/compressionTools.ts` | 5 কম্প্রেশন টুল                                                                   |
+| `README.md`                 | অভ্যন্তরীণ MCP সার্ভার README ( `docs/frameworks/MCP-SERVER.md` থেকে ক্রস লিঙ্কড) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | বাহ্যিক CLI ইন্টিগ্রেশন + অভ্যন্তরীণ OmniRoute CLI                                           |
 | `I18N.md`                   | i18n আর্কিটেকচার, একটি ভাষা যোগ করা, 67টি লোকেল                                              |
 | `UNINSTALL.md`              | আনইনস্টল পদক্ষেপগুলি পরিষ্কার করুন                                                           |
-| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 381 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 394 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
 
 ### সাবসিস্টেম গভীর-ডাইভ
 
