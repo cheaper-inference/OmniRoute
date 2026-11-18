@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { buttonVariants } from "@omniroute/ui-kit/button";
+
 import { Field } from "@omniroute/ui-kit/field";
 import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
@@ -18,6 +18,8 @@ import {
 } from "@/shared/components";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import { FileTrigger } from "@/shared/components/FileInput";
+
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -1332,34 +1334,19 @@ export default function EvalsTab() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {/* A hidden native file input driven by its label (styled as a kit outline button):
-                the only way to open the OS file picker without a second click target. */}
-            <label
-              className={buttonVariants({
-                variant: "outline",
-                className: `cursor-pointer gap-2 ${
-                  running !== null || runningAll ? "pointer-events-none opacity-50" : ""
-                }`,
-              })}
+            {/* The pick imports at once: the kit FileTrigger opens the file picker from the button. */}
+            <FileTrigger
+              accept="application/json,.json"
+              disabled={running !== null || runningAll}
+              onFilesChange={(files) => {
+                const file = files[0];
+                if (file) void handleImportSuite(file);
+              }}
             >
-              <Icon name="upload_file" size={18} />
-              {t("importSuite")}
-              {/* kit-exception: Hidden picker in a toolbar import button; the pick imports at once, so the
-                  kit FileInput status line would only add noise beside Run all / New suite. */}
-              <input
-                type="file"
-                accept="application/json,.json"
-                className="hidden"
-                disabled={running !== null || runningAll}
-                onChange={(event) => {
-                  const file = event.currentTarget.files?.[0];
-                  if (file) {
-                    void handleImportSuite(file);
-                  }
-                  event.currentTarget.value = "";
-                }}
-              />
-            </label>
+              <Button variant="outline" icon="upload_file">
+                {t("importSuite")}
+              </Button>
+            </FileTrigger>
             <Button
               icon="play_arrow"
               variant="secondary"

@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
-import { Button, Input, Toggle } from "@/shared/components";
+import { Button, Toggle } from "@/shared/components";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import NumberInput from "@/shared/components/NumberInput";
 
 export interface ApiKeyUsageLimitPayload {
   key: {
@@ -167,24 +168,22 @@ export function ApiKeyUsageLimitCard({
           value={loading || !status ? "..." : formatter.format(status.weeklySpentUsd)}
         />
         <Card.Section>
-          <Input
-            type="number"
+          <NumberInput
             min={0}
-            step="0.01"
+            step={0.01}
             label={t("dailyQuota")}
-            value={dailyLimit}
-            onChange={(event) => setDailyLimit(event.target.value)}
+            value={dailyLimit === "" ? null : Number(dailyLimit)}
+            onValueChange={(value) => setDailyLimit(value === null ? "" : String(value))}
             placeholder="0.00"
           />
         </Card.Section>
         <Card.Section>
-          <Input
-            type="number"
+          <NumberInput
             min={0}
-            step="0.01"
+            step={0.01}
             label={t("weeklyQuota")}
-            value={weeklyLimit}
-            onChange={(event) => setWeeklyLimit(event.target.value)}
+            value={weeklyLimit === "" ? null : Number(weeklyLimit)}
+            onValueChange={(value) => setWeeklyLimit(value === null ? "" : String(value))}
             placeholder="0.00"
             hint={formatResetHint(status?.weeklyResetAtIso ?? null, t)}
           />

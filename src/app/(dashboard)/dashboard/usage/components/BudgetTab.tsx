@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import FilterPills from "@/shared/components/FilterPills";
+import NumberInput from "@/shared/components/NumberInput";
+
 import { Button, GuardedAction, Input, EmptyState, Select, Checkbox } from "@/shared/components";
 import Card from "@/shared/components/Card";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -968,40 +970,44 @@ function BudgetRowExpanded({
           {t("budgetLimits")}
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-          <Input
+          <NumberInput
             label={t("budgetDailyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.dailyLimitUsd}
-            onChange={(e) => setForm({ ...form, dailyLimitUsd: e.target.value })}
+            value={form.dailyLimitUsd === "" ? null : Number(form.dailyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, dailyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetWeeklyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.weeklyLimitUsd}
-            onChange={(e) => setForm({ ...form, weeklyLimitUsd: e.target.value })}
+            value={form.weeklyLimitUsd === "" ? null : Number(form.weeklyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, weeklyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetMonthlyDollar")}
-            type="number"
-            step="0.01"
-            min="0"
+            step={0.01}
+            min={0}
             placeholder="—"
-            value={form.monthlyLimitUsd}
-            onChange={(e) => setForm({ ...form, monthlyLimitUsd: e.target.value })}
+            value={form.monthlyLimitUsd === "" ? null : Number(form.monthlyLimitUsd)}
+            onValueChange={(value) =>
+              setForm({ ...form, monthlyLimitUsd: value === null ? "" : String(value) })
+            }
           />
-          <Input
+          <NumberInput
             label={t("budgetWarnAtPct")}
-            type="number"
-            min="1"
-            max="100"
-            value={form.warningThreshold}
-            onChange={(e) => setForm({ ...form, warningThreshold: e.target.value })}
+            min={1}
+            max={100}
+            value={form.warningThreshold === "" ? null : Number(form.warningThreshold)}
+            onValueChange={(value) =>
+              setForm({ ...form, warningThreshold: value === null ? "" : String(value) })
+            }
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">

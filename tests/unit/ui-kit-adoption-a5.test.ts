@@ -397,3 +397,23 @@ test("C: a neutral panel inside a card is Card.Section, not a div with border, f
     []
   );
 });
+
+// ── D. Fields ───────────────────────────────────────────────────────────────
+
+test("D: number fields are the NumberInput adapter", () => {
+  assertNoTag('<Input type="number"> (use NumberInput)', "Input|input", /\btype="number"/, []);
+});
+
+test('D: a 32px field is size="xs", not height and text classes', () => {
+  assertClean(
+    'fields sized by hand (use size="xs")',
+    /inputClassName=(?:"[^"]*"|\{`[^`]*`\})/g,
+    [],
+    (m) =>
+      /(?<![\w:-])(?:h-8|min-h-8|h-7|min-h-7)(?![\w.-])/.test(m[0]) || /\$\{inputCls\}/.test(m[0])
+  );
+});
+
+test("D: a file is picked through the kit FileInput or FileTrigger, not a hidden input", () => {
+  assertNoTag("hidden native file inputs (use FileTrigger)", "input|Input", /\btype="file"/, []);
+});

@@ -6,6 +6,8 @@ import Button from "@/shared/components/Button";
 import Checkbox from "@/shared/components/Checkbox";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
+
 import Select from "@/shared/components/Select";
 import type { QuotaSchedule, ReserveRule } from "@/lib/quota/schedules";
 
@@ -197,7 +199,6 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
   }, [rows, poolId, t]);
 
   // Dense inline editor rows: kit controls at a compact height.
-  const inputCls = "h-8 min-h-8 px-1.5 text-xs";
 
   return (
     <div className="mt-2 pt-2 border-t border-border">
@@ -276,7 +277,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
 
                     <Input
                       type="time"
-                      inputClassName={inputCls}
+                      size="xs"
                       value={minutesToTime(row.startMinute)}
                       onChange={(e) =>
                         patchRow(index, {
@@ -288,7 +289,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                     <span className="text-2xs text-text-muted">→</span>
                     <Input
                       type="time"
-                      inputClassName={inputCls}
+                      size="xs"
                       value={minutesToTime(row.endMinute)}
                       onChange={(e) =>
                         patchRow(index, { endMinute: timeToMinutes(e.target.value, row.endMinute) })
@@ -359,20 +360,17 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                               </option>
                             ))}
                           </Select>
-                          <Input
-                            type="number"
+                          <NumberInput
+                            size="xs"
                             min={0}
                             max={100}
                             step={RESERVE_STEP}
                             value={rule.percent}
-                            onChange={(e) =>
-                              patchReserve(index, ruleIndex, {
-                                ...rule,
-                                percent: Number(e.target.value) || 0,
-                              })
+                            onValueChange={(percent) =>
+                              patchReserve(index, ruleIndex, { ...rule, percent: percent ?? 0 })
                             }
                             aria-label={t("schedulesReserve")}
-                            inputClassName={`${inputCls} w-16`}
+                            inputClassName="w-16"
                           />
                           <span className="text-2xs text-text-muted">%</span>
                           <Button
@@ -397,22 +395,23 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       <span className="text-2xs text-text-muted" title={t("schedulesBudgetHint")}>
                         {t("schedulesBudget")}
                       </span>
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         aria-label={t("schedulesBudget")}
                         min={0}
-                        value={row.budgetValue ?? ""}
+                        precision={6}
+                        value={row.budgetValue ?? null}
                         placeholder="—"
-                        onChange={(e) =>
+                        onValueChange={(budgetValue) =>
                           patchRow(index, {
-                            budgetValue: e.target.value === "" ? undefined : Number(e.target.value),
+                            budgetValue: budgetValue ?? undefined,
                             // A value needs a unit to be countable; seed one so a
                             // half-filled budget can never be submitted.
                             budgetUnit:
-                              e.target.value === "" ? undefined : (row.budgetUnit ?? "tokens"),
+                              budgetValue === null ? undefined : (row.budgetUnit ?? "tokens"),
                           })
                         }
-                        inputClassName={`${inputCls} w-24`}
+                        inputClassName="w-24"
                       />
                       <Select
                         nativeSize="xs"
@@ -462,17 +461,18 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       value={row.timezone ?? ""}
                       placeholder="Europe/Rome"
                       onChange={(e) => patchRow(index, { timezone: e.target.value.trim() || null })}
-                      inputClassName={`${inputCls} w-40`}
+                      size="xs"
+                      inputClassName="w-40"
                     />
                     <span className="ml-1 text-2xs text-text-muted">{t("schedulesPriority")}</span>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      size="xs"
                       aria-label={t("schedulesPriority")}
                       min={0}
                       max={1000}
                       value={row.priority}
-                      onChange={(e) => patchRow(index, { priority: Number(e.target.value) || 0 })}
-                      inputClassName={`${inputCls} w-14`}
+                      onValueChange={(priority) => patchRow(index, { priority: priority ?? 0 })}
+                      inputClassName="w-14"
                     />
                   </div>
                 </div>

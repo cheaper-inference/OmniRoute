@@ -507,7 +507,8 @@ export default function QuotaSharePageClient() {
               }}
               placeholder={t("groupNamePrompt")}
               autoFocus
-              inputClassName="h-8 min-h-8 w-36"
+              size="xs"
+              inputClassName="w-36"
             />
             <Button
               variant="secondary"

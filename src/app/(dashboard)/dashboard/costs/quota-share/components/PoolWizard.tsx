@@ -24,6 +24,8 @@ import ModalWizard, { MODAL_WIZARD_BODY_CLASS } from "@/shared/components/ModalW
 import Badge from "@/shared/components/Badge";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
+
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Select from "@/shared/components/Select";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
@@ -803,14 +805,15 @@ export default function PoolWizard({
                         </option>
                       ))}
                     </Select>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      size="xs"
                       min={0}
+                      precision={6}
                       aria-label={tPlans("limitLabel")}
                       value={dim.limit}
-                      onChange={(e) => updateDimension(i, { limit: Number(e.target.value) })}
+                      onValueChange={(limit) => updateDimension(i, { limit: limit ?? 0 })}
                       placeholder={tPlans("limitLabel")}
-                      inputClassName="h-8 min-h-8 text-right text-xs tabular-nums"
+                      inputClassName="text-right"
                     />
                     <Button
                       variant="ghost"
@@ -863,28 +866,24 @@ export default function PoolWizard({
                         style={{ background: color }}
                       />
                       <span className="text-[12px] font-mono truncate">{keyLabel(a.apiKeyId)}</span>
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
                         max={100}
+                        precision={6}
                         value={a.weight}
-                        onChange={(e) => updateWeight(a.apiKeyId, Number(e.target.value))}
-                        inputClassName="h-8 min-h-8 px-2 text-right tabular-nums"
+                        onValueChange={(weight) => updateWeight(a.apiKeyId, weight ?? 0)}
+                        inputClassName="text-right"
                         title={t("weightPercent")}
                         aria-label={t("weightPercent")}
                       />
-                      <Input
-                        type="number"
+                      <NumberInput
+                        size="xs"
                         min={0}
-                        value={a.capValue ?? ""}
-                        onChange={(e) =>
-                          updateCapValue(
-                            a.apiKeyId,
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
+                        precision={6}
+                        value={a.capValue ?? null}
+                        onValueChange={(cap) => updateCapValue(a.apiKeyId, cap ?? undefined)}
                         placeholder={t("policyCapAbsolutePlaceholder")}
-                        inputClassName="h-8 min-h-8 px-2 text-xs tabular-nums"
                         title={t("policyCapAbsoluteLabel")}
                         aria-label={t("policyCapAbsoluteLabel")}
                       />

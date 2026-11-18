@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  // The NumberInput adapter reads the app locale for its decimal separator.
+  useLocale: () => "en",
 }));
 
 const { default: PoolWizard } =
