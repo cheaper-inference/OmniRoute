@@ -125,6 +125,13 @@ export async function generateConfig(
       ? await pathAware({ ...options, configPath })
       : await generate(options);
 
+    // The rich hermes-agent generator returns `{ yaml, error }`, not a string.
+    // Surface its refusal instead of passing the object on as file content.
+    const refusal = (content as unknown as { error?: unknown } | null)?.error;
+    if (typeof content !== "string" && typeof refusal === "string" && refusal) {
+      return { success: false, configPath: "", error: refusal };
+    }
+
     let migration: string | undefined;
     if (canonicalToolId === "codex") {
       const legacyYaml = findLegacyCodexYaml();

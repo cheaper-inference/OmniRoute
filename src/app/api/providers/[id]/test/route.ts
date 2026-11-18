@@ -12,6 +12,7 @@ import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCliResolve.ts";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
 import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
 import { redactVerificationUrls } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   clearAntigravityVerificationUrl,
@@ -54,7 +55,8 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 // Match the API-key path's 30s timeout so a hung OAuth upstream cannot block the test queue.
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
-import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { CLI_RUNTIME_PROVIDER_MAP, hasQoderToken } from "./cliRuntimeProviderMap";
+import { testChatGptConnection } from "./chatgptTest";
 import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
@@ -62,19 +64,6 @@ import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 const providerConnectionTestBodySchema = z.object({
   validationModelId: z.string().max(500).optional(),
 });
-
-function hasQoderToken(connection: any): boolean {
-  if (typeof connection?.apiKey === "string" && connection.apiKey.trim().length > 0) return true;
-  const psd = connection?.providerSpecificData;
-  if (psd && typeof psd === "object") {
-    const pat =
-      (psd as Record<string, unknown>).personalAccessToken ??
-      (psd as Record<string, unknown>).pat ??
-      (psd as Record<string, unknown>).accessToken;
-    if (typeof pat === "string" && pat.trim().length > 0) return true;
-  }
-  return false;
-}
 
 // GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
 // but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
@@ -217,6 +206,9 @@ async function refreshOAuthToken(connection: any) {
         const expiresAt = new Date(Date.now() + refreshed.expiresIn * 1000).toISOString();
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
+      } else if (provider === "muse-code" && refreshed.expiresAt === null) {
+        update.expiresAt = null;
+        update.tokenExpiresAt = null;
       } else {
         // Upstream returned neither expiresAt nor expiresIn. Persist a
         // conservative 30-minute expiry so a NULL expiresAt (treated as
@@ -259,6 +251,14 @@ async function refreshOAuthToken(connection: any) {
 function isTokenExpired(connection: any) {
   const expiresAtValue = connection.expiresAt || connection.tokenExpiresAt;
   if (!expiresAtValue) {
+    if (
+      connection.provider === "muse-code" &&
+      typeof connection.accessToken === "string" &&
+      connection.accessToken.trim() &&
+      !isMuseDcaToken(connection.accessToken)
+    ) {
+      return false;
+    }
     return typeof connection.refreshToken === "string" && connection.refreshToken.length > 0;
   }
   const expiresAt = new Date(expiresAtValue).getTime();
@@ -371,6 +371,7 @@ export async function testOAuthConnection(
   connection: any,
   timeoutMs: number = OAUTH_TEST_TIMEOUT_MS
 ) {
+  if (connection.provider === "chatgpt") return testChatGptConnection(connection);
   const config = OAUTH_TEST_CONFIG[connection.provider];
 
   if (!config) {

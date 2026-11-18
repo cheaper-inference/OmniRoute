@@ -73,7 +73,7 @@ export default function EmbeddingSourceSelector({ settings, providers, onSave, s
             onClick={() => handleSourceChange(opt.value)}
             disabled={saving}
             className={cn(
-              "h-auto flex-col items-start whitespace-normal p-3 text-left font-normal",
+              "h-auto flex-col items-start whitespace-normal p-3 text-left",
               currentSource === opt.value
                 ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
                 : "border-border/50 hover:border-border hover:bg-bg-subtle"

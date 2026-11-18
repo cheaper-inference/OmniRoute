@@ -51,6 +51,7 @@ export const pricingFieldsSchema = z
     output_cost_per_video_per_second: z.number().min(0).optional(),
     search_unit_cost: z.number().min(0).optional(),
     ocr_cost_per_page: z.number().min(0).optional(),
+    ocr_cost_per_annotated_page: z.number().min(0).optional(),
   })
   .strict();
 

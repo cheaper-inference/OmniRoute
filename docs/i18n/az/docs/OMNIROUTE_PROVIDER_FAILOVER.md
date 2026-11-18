@@ -4,10 +4,20 @@
 
 ---
 
-Yenidən cəhd qərarları verilməzdən əvvəl xətalar təsnif edilir.
+Yenidən cəhd qərarları qəbul edilməzdən əvvəl uğursuzluqlar təsnif edilir.
 
-Taymautlar, şəbəkə xətaları, sürət limitləri və provayderin 5xx cavabları kimi müvəqqəti xətalarda ehtiyat provayderə keçid edilə bilər. Autentifikasiya xətaları, icazə xətaları, etibarsız sorğular, əlçatan olmayan modellər və naməlum xətalar kor-koranə yenidən sınanmır.
+Taymoutlar, şəbəkə xətaları, tarif limitləri və provayderin 5xx cavabları kimi müvəqqəti uğursuzluqlar uğursuz ola bilər. Tükənmiş kvota və ya kredit (kvota 429 və ya 402 Ödəniş Tələb olunur) heç vaxt eyni provayderdə təkrar yoxlanılmır, lakin kvotası ayrı olan digərinə keçmir. Doğrulama xətaları, icazə xətaları, etibarsız sorğular, əlçatmaz modellər və naməlum uğursuzluqlar kor-koranə təkrar yoxlanılmır.
 
-Standart provayderlərarası siyasət üçədək provayder cəhdinə icazə verir, sürət limitləri və taymautlar zamanı yenidən cəhd edir və inzibati deaktivləşdirməni müvəqqəti dövrə vəziyyətindən ayrı saxlayır.
+Defolt provayderlər arası siyasət üçə qədər provayder cəhdinə icazə verir, sürət limitlərini və fasilələri təkrar sınar, tükənmiş kvota üzrə uğursuzluqla üzləşir və inzibati deaktivləşdirməni müvəqqəti dövrə vəziyyətindən ayrı saxlayır.
 
-Dövrə vəziyyətləri `closed`, `open` və `half_open`-dır. Soyuma müddəti məhdud bir yoxlama cəhdi planlaşdırır; uğurlu yoxlama dövrəni bağlayır, uğursuz yoxlama isə onu yenidən açır.
+## Harada tətbiq olunur
+
+- **Kombolar** kombonun öz strategiyasına və parametrlərinə uyğun olaraq hədəfləri arasında uğursuzluğa düçar olurlar.
+- **Çılpaq model id** ( `provider/` prefiksi yoxdur) bir neçə aktiv provayderin xidmət etdiyi, dəqiq adın kombinasiyası olmadan əvvəlcə provayderin nəticə seçimlərinə göndərilir. Bu cəhd siyasətin uğursuz olduğu şəkildə uğursuz olarsa, eyni sorğu id-yə xidmət edən növbəti aktiv provayderə göndərilir. Cavab, cavab verəndən əvvəl sınaqdan keçirilmiş provayderlərin sayı ilə `x-omniroute-fallback-attempts` daşıyır.
+  - Hər bir alternativ, nəticə onu seçmiş kimi tam olaraq səlahiyyətlidir. API açarının blokladığı və ya qəbul etmədiyi hədəf yuxarı zəng olmadan atlanır və müştəri heç vaxt adlandırmadığı hədəf üçün siyasətin rədd edilməsini deyil, real upstream xətasını alır.
+  - Yalnız uğursuz cavab davam edir: ilk axın baytından sonra heç nə uğursuz olmur.
+  - Fövqəladə vəziyyətdə geri dönmə model dəyişdirilməsi yalnız tələb olunan modelin hər bir provayderi uğursuz olduqdan sonra tətbiq edilir.
+  - Bağlantıya (`x-omniroute-connection`) bərkidilmiş sorğu onun üzərində qalır.
+  - Prefiksli id (`provider/model`) heç vaxt başqa provayderə yönləndirilmir.
+
+Dövrə vəziyyətləri `closed`, `open` və `half_open` dir. Sərinləmə müddəti məhdud zondu planlaşdırır; uğurlu zond dövrəni bağlayır və uğursuz bir zond onu yenidən açır.

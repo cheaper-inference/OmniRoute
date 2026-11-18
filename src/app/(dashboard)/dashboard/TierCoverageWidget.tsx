@@ -45,7 +45,7 @@ const TIER_LABELS: Record<string, string> = {
 const TIER_COLORS: Record<string, string> = {
   tier1: "text-warning",
   tier2: "text-success",
-  tier3: "text-chart-2",
+  tier3: "text-chart-2-ink",
 };
 
 export function TierCoverageWidget() {
@@ -93,7 +93,7 @@ export function TierCoverageWidget() {
     <div className="rounded-xl border border-border bg-surface p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-sm">{t("tierCoverageTitle")}</h3>
+          <h3 className="text-sm">{t("tierCoverageTitle")}</h3>
           <p className="text-xs text-text-muted mt-0.5">{t("tierCoverageSubtitle")}</p>
         </div>
         <Link
@@ -107,7 +107,7 @@ export function TierCoverageWidget() {
       <div className="grid grid-cols-3 gap-3">
         {tiers.map(({ key, label, colorClass, configured, active }) => (
           <div key={key} className="text-center">
-            <div className={`text-2xl font-bold ${colorClass}`}>{active}</div>
+            <div className={`text-2xl font-semibold ${colorClass}`}>{active}</div>
             <div className="text-xs text-text-muted mt-0.5">{label}</div>
             {configured > 0 && active < configured && (
               <div className="text-xs text-warning mt-0.5">{configured - active} inactive</div>

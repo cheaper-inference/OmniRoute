@@ -24,19 +24,21 @@ Amma abokan ciniki na yau da kullun (Cursor, Cline, Roo Code, OpenAI SDK) cire `
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Kamawa yana faruwa a cikin `open-sse/handlers/chatCore.ts` (shafukan biyu, a wuraren kiran `cacheReasoningFromAssistantMessage` guda biyu). Sake kunnawa yana faruwa a cikin `open-sse/translator/index.ts` bayan tilasta makirci amma kafin aikawa.
+
+Ana adana shigarwar-kiran kayan aiki a ƙarƙashin `buildToolCallCacheKey()`, narkar da iyakar buƙatu da id ɗin kiran kayan aiki, don haka id iri ɗaya da wani maɓalli API ko zaman ke amfani da shi baya zaɓi shigarwar. Iyalin ya fito daga `buildReasoningCacheScope()`: maɓalli API, da maɓallin zaman lokacin da buƙatar tana da ɗaya. Rukunin `tool_call_id` da dashboard don haka suna nuna wannan narkar da waɗancan shigarwar.
 
 Maɓalli (ba kayan aiki ba) maɓallai maɓallai ne daban-daban: `buildAssistantMessageCacheKey()` yana narkar da iyakar zaman tare da daidaitaccen kwafin tsarin OpenAI-har zuwa wancan lokacin, saboda DeepSeek yana buƙatar dalilin _kowane_ gaba ɗaya sau ɗaya `tools` ya kasance. Don Maƙasudin Manufofin-API (misali `opencode-go/deepseek-v4-flash`, wanda aka zagaya zuwa `/responses`) jiki na sama yana ɗaukar `input`, ba `messages`, don haka `translateRequest()` (`open-sse/translator/index.ts`) ya ba da rahoton kwafin pivot ɗin da ya narkar da shi ta hanyar zaɓin sake kira kuma wuraren da aka kama suna narkar da wannan kwafin. Fas ɗin sake kunna martani yana gudana akan pivot OpenAI don kowane tsari na tushe, don haka ana sake kunna abokan cinikin Anthropic Saƙonnin (Claude → OpenAI → Responses).
 

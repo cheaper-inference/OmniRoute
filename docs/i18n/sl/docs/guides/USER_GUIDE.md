@@ -360,7 +360,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (vrata, `REQUIRE_API_KEY`, področne in barvne nastavitve); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (`REQUIRE_API_KEY`, področne nastavitve, časovni pas in barvne nastavitve, ne pa vrat); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način pladnja
 
@@ -697,7 +697,7 @@ Opombe:
 
 ### Ponudniki po meri, združljivi z OpenAI
 
-Vsak prehod, ki govori OpenAI API (samostujoči proxy, vLLM, agregator tretje osebe), je mogoče dodati kot lastno vozlišče ponudnika:
+Vsak prehod, ki govori OpenAI API (samogostiteljski proxy, vLLM, agregator tretje osebe), je mogoče dodati kot lastno vozlišče ponudnika:
 
 1. **Ponudniki → Add OpenAI Compatible** .
 2. **Ime** : prikazna oznaka za vozlišče.
@@ -722,7 +722,7 @@ Izberite ločeno predpono (`mygw`, `acme-proxy`). Če zahteve do vozlišča po m
 
 Ti ključi gredo v `providerSpecificData` povezave (na primer prek `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celo število, 1–1024) — za povezave, združljive s formatom klepeta OpenAI, katerih prehod zavrača dolga imena orodij. Daljša imena se pošljejo kot kratki vzdevki in obnovijo v odgovoru.
+- `toolNameMaxLength` (celo število, 1–1024) — za povezave, združljive s formatom klepeta OpenAI, katerih prehod zavrača dolga imena orodij. Daljša imena se pošljejo kot kratki vzdevki in obnovijo v odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go in Muse Code že imajo vzdevke, ki vsebujejo več kot 64 znakov brez nastavitve. Vrednost povezave nadomesti privzeto vrednost Azure OpenAI /Azure AI Foundry (povezava Azure za strožjim prehodom) in nastavi omejitev za združljivo vozlišče po meri; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go in Muse Code ohranjajo svojo omejitev registra in jo ignorirajo.
 - `quotaEndpoint` — končna točka quota/credits prehoda, branje za trak s kvotami na nadzorni plošči in usmerjanje, ki upošteva kvote. Deluje na povezavah, združljivih z OpenAI in Anthropic; polna oblika je dokumentirana v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -820,9 +820,9 @@ Vrne modele, razvrščene po ponudnikih s tipi (`chat`, `embedding`, `image`).
 
 ### LLM Gateway Intelligence (faza 9)
 
-- **Semantični predpomnilnik** — Samodejno predpomni odzive brez pretakanja, temperatura = 0 (obvoz z `X-OmniRoute-No-Cache: true`)
-- **Idempotenca zahteve** — Odstrani podvojitve zahtev v 5 sekundah prek glave `Idempotency-Key` ali `X-Request-Id`
-- **Sledenje napredku** — Omogočanje dogodkov SSE `event: progress` prek glave `X-OmniRoute-Progress: true`
+- **Semantični predpomnilnik** — Samodejno predpomni odzive brez pretakanja, temperature = 0 (obhod z `X-OmniRoute-No-Cache: true`)
+- **Idempotenca zahteve** — Deduplicira zahteve v 5 s prek glave `Idempotency-Key` ali `X-Request-Id`
+- **Sledenje napredku** — Opt-in SSE `event: progress` dogodki prek glave `X-OmniRoute-Progress: true`
 
 ---
 
@@ -851,25 +851,25 @@ Konfigurirajte prek** Nadzorna plošča → Nastavitve → Usmerjanje** . Nadzor
 
 **Strategije, vidne na nadzorni plošči (usmerjanje na ravni računa):**
 
-| strategija                  | Opis                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Najprej izpolnite**       | Uporablja račune v prednostnem vrstnem redu — primarni račun obravnava vse zahteve, dokler ni na voljo |
-| **Round Robin**             | Kroži skozi vse račune z nastavljivo lepljivo omejitvijo (privzeto: 3 klici na račun)                  |
-| **P2C (Moč dveh izbir)**    | Izbere 2 naključna računa in se usmeri k bolj zdravemu — uravnoteži obremenitev z zavedanjem o zdravju |
-| **Naključno**               | Naključno izbere račun za vsako zahtevo s premešanjem Fisher-Yates                                     |
-| **Najmanj uporabljeno**     | Usmeri do računa z najstarejšim časovnim žigom `lastUsedAt` in enakomerno porazdeli promet             |
-| **Stroškovno optimizirano** | Usmerja do računa z najnižjo vrednostjo prioritete, optimizira za ponudnike z najcenejšimi stroški     |
+| strategija                  | Opis                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Najprej izpolnite**       | Uporablja račune v prednostnem vrstnem redu — primarni račun obravnava vse zahteve, dokler ni na voljo  |
+| **Round Robin**             | Kroži skozi vse račune z nastavljivo lepljivo omejitvijo (privzeto: 3 klici na račun)                   |
+| **P2C (Moč dveh izbir)**    | Izbere 2 naključna računa in usmeri poti do bolj zdravega — uravnava obremenitev z zavedanjem o zdravju |
+| **Naključno**               | Naključno izbere račun za vsako zahtevo s premešanjem Fisher-Yates                                      |
+| **Najmanj uporabljeno**     | Usmeri do računa z najstarejšim časovnim žigom `lastUsedAt` in enakomerno porazdeli promet              |
+| **Stroškovno optimizirano** | Usmerja do računa z najnižjo vrednostjo prioritete, optimizira za ponudnike z najcenejšimi stroški      |
 
-**Napredne kombinirane in samodejne strategije** (nastavljivo na kombinacijo ali prek predpon `auto/*` — glejte [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Napredne kombinirane in samodejne strategije** (nastavljivo na kombinacijo ali prek predpon `auto/*` — glej [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — strog red, nikoli krožno
 - `weighted` — sorazmerni promet, razdeljen glede na uteži na model
-- `fill-first` — izpraznite prvi model, dokler ne dosežete omejitev
+- `fill-first` — izčrpajte prvi model, dokler ne dosežete omejitev
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Moč dveh izbir)
 - `least-used` in `cost-optimized`
 - `auto` — na podlagi rezultatov vseh kandidatov
-- `lkgp` (zadnji znani dober ponudnik) — pripne se na zadnjega uspešnega ponudnika, nato pa se vrne k pravilom
+- `lkgp` (zadnji znani dober ponudnik) — se pripne na zadnjega uspešnega ponudnika, nato pa se vrne k pravilom
 - `context-optimized` — izbere model z največjim prostim kontekstnim oknom
 - `context-relay` — veriži modele z dolgim kontekstom za nadaljnje zavoje
 
@@ -978,30 +978,30 @@ Konfigurirajte prek** Nadzorna plošča → Nastavitve → Odpornost** .
 
 OmniRoute implementira odpornost na ravni ponudnika s petimi komponentami:
 
-1. **Zahtevajte čakalno vrsto in tempo** — Oblikovanje zahtev na ravni sistema:
+1. **Zahtevajte čakalno vrsto in tempo** — Oblikovanje zahteve na sistemski ravni:
    - **Zahteve na minuto (RPM)** — Največje število zahtev na minuto na račun
    - **Najmanjši čas med zahtevami** — Najmanjši razmik v milisekundah med zahtevami
    - **Največ sočasnih zahtev** — Največje število sočasnih zahtev na račun
 
-2. **Ohladitev povezave** — Konfiguracija na vrsto avtorizacije za eno samo povezavo po napakah, ki jih je mogoče znova poskusiti:
-   - **Osnovno ohlajanje** — Privzeto ohlajevalno okno za napake navzgor, ki jih je mogoče ponovno poskusiti
+2. **Ohladitev povezave** — Per-auth-type konfiguracija za eno povezavo po napakah, ki jih je mogoče znova poskusiti:
+   - **Osnovno ohlajanje** — Privzeto ohlajevalno okno za ponovne napake navzgor
    - **Uporabite namige za ponovni poskus navzgor** — Upošteva avtoritativne namige `Retry-After` ali ponastavitev, če so na voljo
    - **Največji koraki odmika** — Največja eksponentna stopnja odmika za ponavljajoče se okvare
 
-3. **Odklopnik ponudnika** — Sledi okvaram ponudnika od konca do konca, označi ponudnika, ki je degradiran pri konfiguriranem opozorilnem pragu, in odpre odklopnik, ko je dosežen konfigurirani prag odpovedi:
+3. **Odklopnik ponudnika** — Sledi okvaram ponudnika od konca do konca, označi ponudnika, ki je degradiran pri konfiguriranem opozorilnem pragu, in odpre odklopnik, ko je dosežen konfigurirani prag napake:
    - **Prag degradacije** — Zaporedne napake ponudnika pred vstopom v `DEGRADED`
    - **Prag napake** — Zaporedne napake ponudnika pred vstopom v `OPEN`
    - **Ponastavi časovno omejitev** — Časovno okno pred ponovnim testiranjem ponudnika
    - **CLOSED** (Zdravo) — Zahteve tečejo normalno
    - **DEGRADED** — Zahteve še vedno tečejo, medtem ko se sledi povišanim napakam
-   - **OPEN** — Ponudnik je po ponavljajočih se napakah začasno blokiran
+   - **OPEN** Ponudnik — je po ponavljajočih se napakah začasno blokiran
    - **HALF_OPEN** — Testiranje, če si je ponudnik opomogel
 
    Omejitve hitrosti `429` v obsegu povezave ostanejo nespremenjene** Ohladitev povezave** in se ne štejejo za prekinitev ponudnika.
 
    Stanje izvajalnega časa prekinitve ponudnika je prikazano na** Nadzorna plošča → Health** samo.
 
-4. **Počakajte na ohladitev** — Če se vsaka kandidatna povezava že ohlaja, lahko OmniRoute počaka na najzgodnejšo ohlajanje in samodejno znova poskusi isto zahtevo odjemalca.
+4. **Počakajte na ohladitev** — Če se vsaka kandidatna povezava že ohlaja, lahko OmniRoute počaka na najzgodnejše ohlajanje in samodejno znova poskusi isto zahtevo odjemalca.
 
 5. **Samodejno zaznavanje omejitve hitrosti** — Ko ponudniki navzgor vrnejo eksplicitna čakalna okna, ti namigi preglasijo ohlajanje lokalne povezave, ko je nastavitev omogočena.
 
@@ -1045,17 +1045,17 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Stran z nastavitvami je organizirana v** 7 zavihkov** za enostavno navigacijo:
 
-| Tab            | Vsebina                                                                                                                                                                                        |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Splošno**    | Orodja za sistemsko shranjevanje, privzeto vedenje, vidnost tunela končne točke                                                                                                                |
-| **Videz**      | Kontrolniki teme (light/dark/system), vidnost stranske vrstice, preklopi plošč za kartice tunela Cloudflare/Tailscale/ngrok                                                                    |
-| **AI**         | Proračun za razmišljanje (prehod / samodejni odrez / po meri / prilagodljiv – glejte [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalni sistemski poziv, statistika predpomnilnika pozivov |
-| **Varnost**    | nastavitve Login/Password, nadzor dostopa IP, auth API za `/models`, blokiranje ponudnika, zaščita pred vstavljanjem                                                                           |
-| **Usmerjanje** | Globalna strategija usmerjanja (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), vzdevki modela z nadomestnimi znaki, nadomestne verige, privzete kombinacije           |
-| **Odpornost**  | Čakalna vrsta zahtev, ohlajanje povezave, konfiguracija prekinitve ponudnika in vedenje čakanja na ohlajanje                                                                                   |
-| **Napredno**   | Globalna konfiguracija proxyja (HTTP/SOCKS5), preglasitve proxyja za posameznega ponudnika                                                                                                     |
+| Tab            | Vsebina                                                                                                                                                                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Splošno**    | Orodja za sistemsko shranjevanje, privzeto vedenje, vidnost tunela končne točke                                                                                                                       |
+| **Videz**      | Kontrolniki teme (light/dark/system), vidnost stranske vrstice, preklopi plošč za kartice tunela Cloudflare/Tailscale/ngrok                                                                           |
+| **AI**         | Razmišljanje proračuna (prehod / samodejno odstranjevanje / po meri / prilagodljiv — glejte [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalni sistemski poziv, statistika predpomnilnika pozivov |
+| **Varnost**    | nastavitve Login/Password, nadzor dostopa IP, auth API za `/models`, blokiranje ponudnika, zaščita pred vstavljanjem                                                                                  |
+| **Usmerjanje** | Globalna strategija usmerjanja (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), vzdevki modela z nadomestnimi znaki, nadomestne verige, privzete kombinacije                  |
+| **Odpornost**  | Čakalna vrsta zahtev, ohlajanje povezave, konfiguracija prekinitve ponudnika in vedenje čakanja na ohlajanje                                                                                          |
+| **Napredno**   | Globalna konfiguracija proxyja (HTTP/SOCKS5), preglasitve proxyja za posameznega ponudnika                                                                                                            |
 
-Splošno ne podvaja več beležk samo za branje in predpomnilnika. Nastavitve hrambe podatkovne baze in optimizacije se ohranjajo prek `/api/settings/database`; ročno brisanje predpomnilnika uporablja `DELETE /api/cache`. Omejitve vrstic dnevnika zahtev in proxyja nadzirata `CALL_LOGS_TABLE_MAX_ROWS` in `PROXY_LOGS_TABLE_MAX_ROWS`.
+Splošno ne podvaja več beležk samo za branje in predpomnilnika. Nastavitve hrambe in optimizacije baze podatkov se ohranjajo prek `/api/settings/database`; ročno brisanje predpomnilnika uporablja `DELETE /api/cache`. Omejitve vrstic dnevnika zahtev in proxyja nadzirata `CALL_LOGS_TABLE_MAX_ROWS` in `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1066,7 +1066,7 @@ Dostop prek** Nadzorna plošča → Stroški** .
 | Tab          | Namen                                                                                               |
 | ------------ | --------------------------------------------------------------------------------------------------- |
 | **Proračun** | Nastavite omejitve porabe na ključ API s proračuni daily/weekly/monthly in sledenjem v realnem času |
-| **Cene**     | Ogled in urejanje vnosov cen modelov — cena na 1K žetonov input/output na ponudnika                 |
+| **Cene**     | Ogled in urejanje vnosov cen modela — strošek na 1K žetonov input/output na ponudnika               |
 
 ```bash
 # API: Set a budget
@@ -1078,7 +1078,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Sledenje stroškom:** Vsaka zahteva zabeleži uporabo žetona in izračuna stroške z uporabo tabele cen. Oglejte si razčlenitve v** Uporaba nadzorne plošče →** po ponudniku, modelu in ključu API.
+**Sledenje stroškom:** Vsaka zahteva beleži uporabo žetonov in izračuna stroške z uporabo tabele cen. Oglejte si razčlenitve v** Uporaba nadzorne plošče →** po ponudniku, modelu in ključu API.
 
 ---
 
@@ -1098,7 +1098,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` je izvorna pot Deepgram in potrebuje ključ Deepgram API. Če je konfiguriran samo OpenRouter, uporabite `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` je izvirna pot Deepgram in potrebuje ključ Deepgram API. Če je konfiguriran samo OpenRouter, uporabite `openrouter/deepgram/nova-3`.
 
 **Pretvorba govora v besedilo (transkripcija)** ponudniki:
 
@@ -1127,7 +1127,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. izhodni formati TTS so odvisni od ponudnika (mp3, wav, opus, pcm, mulaw).
+Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Izhodni formati TTS so odvisni od ponudnika (mp3, wav, opus, pcm, mulaw).
 
 ---
 
