@@ -135,11 +135,23 @@ lastUpdated: 2026-11-03
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
    spacing and layout, not to re-color kit components. Typography is the exception:
-   `packages/ui-kit/src/ci-typography.css` is imported outside any layer, so its tag rules beat
+   `packages/ui-kit/src/ci-typography.css` is imported outside any layer, so its tag defaults beat
    utilities. Weight, `tracking-*` and `leading-*` classes have no effect on `h1`–`h6`, weight and
    `tracking-*` have none on table cells, and weight has none on buttons
    (`tests/unit/dead-typography-classes.test.ts` rejects them there); `font-mono` has no effect on
    `th`, `td`, `button`, `input` and `textarea`. Size, colour and `uppercase` utilities still apply.
+   The tag defaults have two exits, and neither makes a utility the way to set weight or tracking:
+   - An element that carries a kit type class is skipped by the tag defaults, so the class reads the
+     same on any tag. The role classes (`type-heading`, `type-body`, `type-reading`, `type-control`,
+     `type-data`, `type-caption`) are unlayered too, so utilities still lose next to them.
+     `ci-eyebrow` is a `components` rule: `<h3 className="ci-eyebrow">` now gets the eyebrow type,
+     and a utility on it does apply (the guard does not flag it), but prefer the eyebrow's own
+     `data-size` and `data-weight`. `ci-heading` is not an exit: the heading default still applies.
+   - `data-ci-type-roles="layered"` on a container moves the tag defaults of everything under it
+     into `@layer utilities.ci-type-roles`, below the host utilities. The dashboard does not set
+     it: setting it makes every weight, tracking and leading utility under it take effect at
+     once, so it needs this rule and the guard reviewed in the same change (the guard fails when
+     the attribute appears under `src/`).
 5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
    display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
