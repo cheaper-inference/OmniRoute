@@ -3,6 +3,79 @@ import { join } from "node:path";
 import { load as parseYaml } from "js-yaml";
 import { execFileSync } from "node:child_process";
 
+const IMMUTABLE_SHA = /^[0-9a-f]{40}$/;
+
+function assertTestMaskingSha(value) {
+  if (typeof value !== "string" || !IMMUTABLE_SHA.test(value) || /^0+$/.test(value)) {
+    throw new Error("Test-masking comparison requires an immutable base SHA");
+  }
+  return value;
+}
+
+function testMaskingGit(root, args) {
+  try {
+    return execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      timeout: 30000,
+      maxBuffer: 4096,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        GIT_ALLOW_PROTOCOL: "",
+        GIT_NO_LAZY_FETCH: "1",
+        GIT_OPTIONAL_LOCKS: "0",
+      },
+    }).trim();
+  } catch (error) {
+    throw new Error(
+      `Cannot resolve test-masking comparison from local Git objects (${args[0]}: ${error.code ?? error.status ?? "unknown"})`
+    );
+  }
+}
+
+function immutableBaseEnv(baseSha) {
+  return {
+    GITHUB_BASE_SHA: assertTestMaskingSha(baseSha),
+    GITHUB_BASE_REF: "",
+    GIT_ALLOW_PROTOCOL: "",
+    GIT_NO_LAZY_FETCH: "1",
+  };
+}
+
+/** Validate retained local objects without consulting a moving ref or fetching. */
+export function testMaskingGateEnv(root, baseSha) {
+  assertTestMaskingSha(baseSha);
+  const resolved = testMaskingGit(root, [
+    "rev-parse",
+    "--verify",
+    "--end-of-options",
+    `${baseSha}^{commit}`,
+  ]);
+  if (resolved !== baseSha) throw new Error("Pinned test-masking base did not resolve exactly");
+  const mergeBases = testMaskingGit(root, ["merge-base", "--all", "--", baseSha, "HEAD"]).split(
+    /\r?\n/
+  );
+  if (mergeBases.length !== 1 || !IMMUTABLE_SHA.test(mergeBases[0])) {
+    throw new Error("Test-masking comparison needs one unique local merge base");
+  }
+  return immutableBaseEnv(baseSha);
+}
+
+/** Capture one immutable base before the observer executes any of its gates. */
+export function resolveTestMaskingBase(root, argv = []) {
+  const flag = "--test-masking-base-sha";
+  if (argv.some((arg) => arg.startsWith("--test-masking") && arg !== flag)) {
+    throw new Error("Unknown observer test-masking argument or unsupported syntax");
+  }
+  const positions = argv.flatMap((arg, index) => (arg === flag ? [index] : []));
+  if (positions.length > 1) throw new Error("Repeated observer test-masking base SHA");
+  if (!positions.length) return resolveOriginCommit(root, "main");
+  const baseSha = assertTestMaskingSha(argv[positions[0] + 1]);
+  testMaskingGateEnv(root, baseSha);
+  return baseSha;
+}
+
 /** Validate a versioned argv inventory; workflow shell is inspected, never executed or expanded. */
 export function validateFullCiProfile(profile, scripts, ci, quality) {
   if (
@@ -85,13 +158,18 @@ export function validateFullCiProfile(profile, scripts, ci, quality) {
   return profile.gates.map(({ id, job, args, env, kind }) => ({ id, job, args, env, kind }));
 }
 
-/** Resolve `origin/<ref>` to a commit SHA in the checkout at `root`. */
+/** Resolve and validate a local remote-tracking commit; never fetch a replacement. */
 function resolveOriginCommit(root, ref) {
-  return execFileSync("git", ["rev-parse", "--verify", `origin/${ref}^{commit}`], {
-    cwd: root,
-    encoding: "utf8",
-    timeout: 30000,
-  }).trim();
+  const baseSha = assertTestMaskingSha(
+    testMaskingGit(root, [
+      "rev-parse",
+      "--verify",
+      "--end-of-options",
+      `refs/remotes/origin/${ref}^{commit}`,
+    ])
+  );
+  testMaskingGateEnv(root, baseSha);
+  return baseSha;
 }
 
 /**
@@ -108,7 +186,7 @@ export function loadFullCiProfile(root, resolveBaseSha = resolveOriginCommit) {
   );
   for (const gate of gates) {
     if (gate.env?.GITHUB_BASE_REF) {
-      gate.env = { GITHUB_BASE_SHA: resolveBaseSha(root, gate.env.GITHUB_BASE_REF) };
+      gate.env = immutableBaseEnv(resolveBaseSha(root, gate.env.GITHUB_BASE_REF));
     }
   }
   return gates;

@@ -1242,15 +1242,42 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - name: Install Bun (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+      # npm ci provisions Bun and its platform binary from the exact lockfile.
+      # Validate the executable and npm shim before the compatibility smoke.
+      - name: Verify locked Bun runtime
+        shell: bash
         run: |
-          powershell -c "iwr bun.sh/install.ps1 -useb | iex"
-          echo "$env:USERPROFILE\.bun\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-      - name: Install Bun (non-Windows)
-        if: runner.os != 'Windows'
-        run: npm install -g bun
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import { execFileSync } from "node:child_process";
+          import { readFileSync, realpathSync, statSync } from "node:fs";
+          import { isAbsolute, relative, resolve, sep } from "node:path";
+          const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
+          const expected = readJson("package.json").devDependencies.bun;
+          assert.match(expected, /^\d+\.\d+\.\d+$/);
+          const lock = readJson("package-lock.json");
+          assert.equal(lock.packages[""].devDependencies.bun, expected);
+          const locked = lock.packages["node_modules/bun"];
+          assert.equal(locked.version, expected);
+          const installed = readJson("node_modules/bun/package.json");
+          assert.equal(installed.version, expected);
+          assert.equal(installed.bin.bun, locked.bin.bun);
+          const packageRoot = resolve("node_modules/bun");
+          const executable = resolve(packageRoot, installed.bin.bun);
+          const localPath = relative(packageRoot, realpathSync(executable));
+          assert.ok(localPath && !isAbsolute(localPath) && localPath !== ".." && !localPath.startsWith(`..${sep}`));
+          const shim = resolve("node_modules/.bin", process.platform === "win32" ? "bun.cmd" : "bun");
+          if (process.platform === "win32") {
+            assert.ok(statSync(shim).isFile());
+            const shimText = readFileSync(shim, "utf8").replaceAll("\\", "/");
+            assert.ok(shimText.includes(`../bun/${installed.bin.bun}`));
+          } else {
+            assert.equal(realpathSync(shim), realpathSync(executable));
+          }
+          const actual = execFileSync(executable, ["--version"], { encoding: "utf8", timeout: 15000 }).trim();
+          assert.equal(actual, expected);
+          console.log(`bunVersion=${actual} source=package-lock.json`);
+          NODE
       - run: npm run test:bun:db
 
   test-vitest:

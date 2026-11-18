@@ -1,0 +1,1 @@
+Shared test helpers and setup changes now request the full unit suite, including deleted and renamed files. Impact selection preserves deleted production sources and both sides of renames while excluding removed test paths, and incomplete Git reads no longer turn into empty local test runs.

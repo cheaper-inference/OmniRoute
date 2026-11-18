@@ -1,0 +1,1 @@
+- Compare CHANGELOG integrity against the base captured by each CI event so rerunning an unchanged candidate is unaffected by later base-branch changes. Preserve omni-queue batch and base-check references, and reject missing event bases without falling back to a moving branch.

@@ -173,6 +173,8 @@ test("test-masking receives a fixed base SHA in the full profile", () => {
   const gate = loadFullCiProfile(root, fixedBase).find((g) => g.id === "check:test-masking");
   assert.match(gate.env.GITHUB_BASE_SHA, /^[0-9a-f]{40}$/);
   assert.equal(gate.env.GITHUB_BASE_SHA, FIXED_BASE_SHA);
-  assert.equal(gate.env.GITHUB_BASE_REF, undefined);
+  assert.equal(gate.env.GITHUB_BASE_REF, "");
+  assert.equal(gate.env.GIT_ALLOW_PROTOCOL, "");
+  assert.equal(gate.env.GIT_NO_LAZY_FETCH, "1");
   assert.ok(resolvedRefs.includes("main"), "the declared base ref is the one pinned");
 });
