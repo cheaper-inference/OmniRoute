@@ -295,6 +295,44 @@ test("updateProviderCredentials persists rotated tokens and returns false for mi
   assert.equal(missing, false);
 });
 
+function syntheticCodexIdentityToken(accountId: string, userId: string) {
+  const claims = {
+    sub: userId,
+    "https://api.openai.com/auth": {
+      chatgpt_account_id: accountId,
+      chatgpt_user_id: userId,
+    },
+  };
+  return `e30.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.test-signature`;
+}
+
+test("Codex refresh does not persist a token belonging to a different user", async () => {
+  const ownerToken = syntheticCodexIdentityToken("personal-a", "user-a");
+  const otherToken = syntheticCodexIdentityToken("personal-b", "user-b");
+  const connection = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    name: "Codex token owner fence",
+    accessToken: ownerToken,
+    refreshToken: "original-refresh",
+    idToken: ownerToken,
+    isActive: true,
+    providerSpecificData: {
+      workspaceId: "personal-a",
+      workspaceStructure: "personal",
+    },
+  });
+
+  const applied = await tokenRefresh.updateProviderCredentials((connection as any).id, {
+    accessToken: otherToken,
+    refreshToken: "other-refresh",
+  });
+  const stored = await providersDb.getProviderConnectionById((connection as any).id);
+  assert.equal(applied, false);
+  assert.equal(stored.accessToken, ownerToken);
+  assert.equal(stored.refreshToken, "original-refresh");
+});
+
 test("OAuth refresh prefers connection proxy over provider proxy", async () => {
   const providerId = "custom-oauth-connection-proxy";
   const refreshRequests = [];
