@@ -252,9 +252,31 @@ export function verifyBasicAuth(authHeader, expectedUsername, expectedPassword) 
 export const WEBDAV_AUTH_MAX_FAILURES = 10;
 export const WEBDAV_AUTH_WINDOW_MS = 60 * 1000; // 60 seconds
 export const WEBDAV_AUTH_LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
+/** Expired failure entries are swept at most once per interval, never on every failure. */
+export const WEBDAV_AUTH_SWEEP_INTERVAL_MS = 1000;
 
 /** @type {Map<string, { count: number, resetAt: number, lockedUntil: number | null }>} */
 const authFailureMap = new Map();
+const WEBDAV_AUTH_SWEEP_THRESHOLD = 256;
+let lastAuthFailureSweepAt = 0;
+
+/**
+ * Drop expired failure entries once the map grows past the threshold. Rate-limited to one pass
+ * per WEBDAV_AUTH_SWEEP_INTERVAL_MS so a burst of distinct clients cannot turn every failed
+ * attempt into a full scan. Active lockouts are kept until they expire.
+ *
+ * @param {number} now
+ */
+function sweepExpiredWebdavAuthFailures(now) {
+  if (authFailureMap.size <= WEBDAV_AUTH_SWEEP_THRESHOLD) return;
+  if (now - lastAuthFailureSweepAt < WEBDAV_AUTH_SWEEP_INTERVAL_MS) return;
+  lastAuthFailureSweepAt = now;
+  for (const [k, v] of authFailureMap) {
+    if ((v.lockedUntil && v.lockedUntil <= now) || (!v.lockedUntil && now > v.resetAt)) {
+      authFailureMap.delete(k);
+    }
+  }
+}
 
 /**
  * Normalise a client IP address for the WebDAV rate-limit key.
@@ -322,14 +344,7 @@ export function checkWebdavRateLimit(rawIp, now = Date.now()) {
  */
 export function recordWebdavAuthFailure(rawIp, now = Date.now()) {
   const ip = normalizeWebdavClientIp(rawIp);
-
-  if (authFailureMap.size > 256) {
-    for (const [k, v] of authFailureMap) {
-      if ((v.lockedUntil && v.lockedUntil <= now) || (!v.lockedUntil && now > v.resetAt)) {
-        authFailureMap.delete(k);
-      }
-    }
-  }
+  sweepExpiredWebdavAuthFailures(now);
 
   const existing = authFailureMap.get(ip);
   let state;
@@ -367,10 +382,33 @@ export function resetWebdavAuthFailures(rawIp) {
 }
 
 /**
+ * Number of client addresses with tracked failures (for testing).
+ *
+ * @returns {number}
+ */
+export function getWebdavAuthFailureStateSize() {
+  return authFailureMap.size;
+}
+
+/**
  * Clear all rate limiting state (for testing).
  */
 export function clearWebdavRateLimits() {
   authFailureMap.clear();
+  lastAuthFailureSweepAt = 0;
+}
+
+/**
+ * Count a rejected Basic-auth attempt. A request that carries no Authorization header is the
+ * client's challenge probe, not a password guess: it gets the 401 without spending an attempt.
+ *
+ * @param {string | undefined} authHeader
+ * @param {string} clientIp
+ * @returns {{ allowed: boolean, retryAfter?: number }}
+ */
+function recordRejectedWebdavAuth(authHeader, clientIp) {
+  if (!authHeader) return { allowed: true };
+  return recordWebdavAuthFailure(clientIp);
 }
 
 /**
@@ -1064,8 +1102,9 @@ export async function maybeHandleWebdav(req, res) {
   }
 
   // Authenticate
-  if (!verifyBasicAuth(req.headers["authorization"], config.username, config.password)) {
-    const failureDecision = recordWebdavAuthFailure(clientIp);
+  const authHeader = req.headers["authorization"];
+  if (!verifyBasicAuth(authHeader, config.username, config.password)) {
+    const failureDecision = recordRejectedWebdavAuth(authHeader, clientIp);
     if (!failureDecision.allowed) {
       sendError(res, 429, "Too Many Requests", {
         "Retry-After": String(failureDecision.retryAfter || 60),
