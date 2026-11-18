@@ -106,7 +106,9 @@ function MiniStat({ label, value }: { label: string; value: number }) {
     <Card>
       <div className="p-4">
         <p className="text-lg font-semibold text-text-main">{value}</p>
-        <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+        <p className="ci-eyebrow" data-size="3xs">
+          {label}
+        </p>
       </div>
     </Card>
   );
@@ -328,7 +330,7 @@ export default function StreamTransformerAccordion({
                   {/* Raw SSE input */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm text-text-main">
+                      <h3 className="ci-heading" data-size="sm">
                         {translateOrFallback("rawChatSseInput", "Raw chat completions SSE")}
                       </h3>
                       <Button
@@ -356,7 +358,7 @@ export default function StreamTransformerAccordion({
                   {/* Transformed SSE output */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm text-text-main">
+                      <h3 className="ci-heading" data-size="sm">
                         {translateOrFallback(
                           "transformedResponsesSse",
                           "Transformed Responses API SSE"
@@ -409,7 +411,7 @@ export default function StreamTransformerAccordion({
             {/* Event timeline */}
             <Card>
               <div className="p-4 space-y-3">
-                <h3 className="text-sm text-text-main">
+                <h3 className="ci-heading" data-size="sm">
                   {translateOrFallback("transformedEventTimeline", "Transformed event timeline")}
                 </h3>
 

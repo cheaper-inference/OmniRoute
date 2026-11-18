@@ -423,7 +423,9 @@ export default function RawJsonPanel({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon name="input" size={18} className="text-text-muted" />
-                      <h3 className="text-sm text-text-main">{tr("input", "Input")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {tr("input", "Input")}
+                      </h3>
                       {detectedFormat && (
                         <Badge variant="info" size="sm" dot>
                           {FORMAT_META[detectedFormat]?.label ?? detectedFormat}
@@ -486,7 +488,7 @@ export default function RawJsonPanel({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Icon name="hub" size={18} className="text-warning" />
-                        <h3 className="text-sm text-text-main">
+                        <h3 className="ci-heading" data-size="sm">
                           {tr("openaiIntermediatePanel", "OpenAI Intermediate")}
                         </h3>
                         <Badge variant="warning" size="sm">
@@ -530,7 +532,9 @@ export default function RawJsonPanel({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon name="output" size={18} className="text-text-muted" />
-                      <h3 className="text-sm text-text-main">{tr("output", "Output")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {tr("output", "Output")}
+                      </h3>
                       {outputContent && (
                         <Badge variant="success" size="sm" dot>
                           {FORMAT_META[targetFormat]?.label ?? targetFormat}
@@ -573,7 +577,7 @@ export default function RawJsonPanel({
               <div className="p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Icon name="library_books" size={18} className="text-primary" />
-                  <h3 className="text-sm text-text-main">
+                  <h3 className="ci-heading" data-size="sm">
                     {tr("exampleTemplates", "Example Templates")}
                   </h3>
                   <span className="text-xs text-text-muted">

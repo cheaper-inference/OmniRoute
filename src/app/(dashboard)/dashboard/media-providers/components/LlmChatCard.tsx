@@ -567,12 +567,12 @@ export function LlmChatCard({
                   </div>
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <div className="flex items-baseline gap-2 min-w-0">
-                      <span className="text-[10px] uppercase tracking-wider text-text-muted font-medium shrink-0">
+                      <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                         {isUser ? t("you") : isError ? t("errorLabel") : t("assistant")}
                       </span>
                       {!isUser && !isError && msg.model && (
                         <span
-                          className="text-[10px] font-mono text-text-muted/60 truncate"
+                          className="text-3xs font-mono text-text-muted/60 truncate"
                           title={msg.model}
                         >
                           · {msg.model}
@@ -634,7 +634,7 @@ export function LlmChatCard({
 
       {/* Stats row */}
       {stats && (
-        <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-1.5 text-2xs text-text-muted">
           <Icon name="bolt" size={13} />
           <span>
             {t("statsLine", {

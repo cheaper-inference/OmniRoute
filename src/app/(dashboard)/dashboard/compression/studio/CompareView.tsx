@@ -135,7 +135,7 @@ function VerifyControls({
         {verifying ? t("verifying") : t("verifyAll")}
       </GuardedAction>
       {spent !== null && (
-        <span className="text-[10px] text-text-muted">
+        <span className="text-3xs text-text-muted">
           {t("spent", { spent: spent.toFixed(3), cap: capUsd.toFixed(2) })}
           {capped ? ` · ${t("capReached")}` : ""}
         </span>

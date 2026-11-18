@@ -260,7 +260,9 @@ export default function QdrantConfigCard() {
           <Icon name="database" size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm text-text-main">{t("qdrant.title")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("qdrant.title")}
+          </h3>
           <p className="text-xs text-text-muted">{t("qdrant.description")}</p>
           <Button
             variant="ghost"

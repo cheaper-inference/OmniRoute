@@ -223,7 +223,9 @@ function AutoFeaturesCard() {
       >
         <div className="flex items-center gap-2">
           <Icon name="auto_fix_high" size={20} className="text-primary" />
-          <h3 className="text-sm text-text-main">{t("autoFeaturesTitle")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("autoFeaturesTitle")}
+          </h3>
           <Badge variant="primary" size="sm">
             {t("autoFeaturesCount")}
           </Badge>
@@ -324,7 +326,7 @@ function FeatureChip({
         <Icon name={icon} size={16} className={colorMap.icon} />
         <p className="text-xs font-semibold text-text-main">{title}</p>
       </div>
-      <p className="text-[10px] leading-relaxed text-text-muted">{description}</p>
+      <p className="text-xs leading-relaxed text-text-muted">{description}</p>
     </div>
   );
 }

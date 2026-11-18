@@ -292,7 +292,9 @@ function TestBenchContent() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <h3 className="text-sm text-text-main">{t("compatibilityReport")}</h3>
+                <h3 className="ci-heading" data-size="sm">
+                  {t("compatibilityReport")}
+                </h3>
                 <Badge
                   variant={
                     compatibility >= 80 ? "success" : compatibility >= 50 ? "warning" : "error"
@@ -368,7 +370,7 @@ function TestBenchContent() {
                       <p className="text-sm font-medium text-text-main">
                         {scenarioLabels[scenario.id] || scenario.id}
                       </p>
-                      <p className="text-[10px] text-text-muted uppercase">
+                      <p className="ci-eyebrow" data-size="3xs">
                         {srcMeta.label} →{" "}
                         {providerOptions.find((o) => o.value === provider)?.label || provider}
                       </p>

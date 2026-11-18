@@ -294,7 +294,7 @@ function HistoryGridTable({
         <TableRow>
           <TableHead scope="col" className="px-2 py-1 sticky left-0 z-10 bg-surface" />
           {grid.buckets.map((bucket, i) => (
-            <TableHead key={i} scope="col" className="px-0.5 py-1 text-[9px] whitespace-nowrap">
+            <TableHead key={i} scope="col" className="px-0.5 py-1 text-3xs whitespace-nowrap">
               {formatBucketLabel(bucket.start, preset)}
             </TableHead>
           ))}
@@ -308,7 +308,7 @@ function HistoryGridTable({
               className="text-left px-2 py-1 sticky left-0 z-10 bg-surface whitespace-nowrap"
             >
               <span className="font-medium">{row.identity}</span>{" "}
-              <span className="text-[9px] uppercase text-text-muted">
+              <span className="ci-eyebrow" data-size="3xs">
                 {t(SOURCE_KEY[row.source])}
               </span>
             </TableHead>
@@ -453,8 +453,8 @@ export function HistoryTab() {
       <div className="flex items-center gap-2 flex-wrap">
         <PresetButtons preset={preset} t={t} onSelect={onSelectPreset} />
         <CompareToggle compareMode={compareMode} t={t} onToggle={onToggleCompareMode} />
-        {compareMode && <span className="text-[10px] text-text-muted">{t("compareHint")}</span>}
-        <span className="text-[10px] text-text-muted">{t("historyConductorNote")}</span>
+        {compareMode && <span className="text-xs text-text-muted">{t("compareHint")}</span>}
+        <span className="text-xs text-text-muted">{t("historyConductorNote")}</span>
       </div>
 
       <FailedSourcesList failedSources={failedSources} t={t} />

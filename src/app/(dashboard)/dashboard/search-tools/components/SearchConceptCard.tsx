@@ -64,7 +64,7 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
       <Disclosure open={!collapsed} onOpenChange={(open) => setCollapsed(!open)}>
         {/* Header */}
         <DisclosureTrigger className="rounded-none px-4">
-          <span className="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2">
+          <span className="ci-eyebrow flex items-center gap-2" data-weight="medium">
             <span>ⓘ</span>
             <span>{t("modalitiesGuide")}</span>
           </span>

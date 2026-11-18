@@ -201,7 +201,7 @@ export default function CavemanContextPageClient() {
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         {statCards.map(([label, value]) => (
           <Card key={label} padding="sm">
-            <p className="text-xs uppercase text-text-muted">{label}</p>
+            <p className="ci-eyebrow">{label}</p>
             <p className="mt-1 text-xl font-semibold text-text-main">{value}</p>
           </Card>
         ))}

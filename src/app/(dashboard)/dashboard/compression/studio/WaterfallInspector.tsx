@@ -85,12 +85,12 @@ function StepRow({ step, maxTokens }: { step: CompressionEngineStep; maxTokens: 
 
       {/* Token counts */}
       <div className="w-36 shrink-0 text-right">
-        <div className="text-[10px] text-text-muted">
+        <div className="text-3xs text-text-muted">
           {fmt(step.originalTokens)} → {fmt(step.compressedTokens)}
         </div>
         {!skipped && (
           <div
-            className="text-[11px] font-semibold"
+            className="text-2xs font-semibold"
             style={{ color }}
             data-testid="waterfall-savings-text"
           >
@@ -98,7 +98,7 @@ function StepRow({ step, maxTokens }: { step: CompressionEngineStep; maxTokens: 
           </div>
         )}
         {step.durationMs != null && (
-          <div className="text-[9px] text-text-muted">{step.durationMs.toFixed(1)}ms</div>
+          <div className="text-3xs text-text-muted">{step.durationMs.toFixed(1)}ms</div>
         )}
       </div>
     </div>
@@ -166,7 +166,7 @@ export function WaterfallInspector({ run, className = "" }: WaterfallInspectorPr
             {t("tokenCount", { count: run.compressedTokens })}
           </div>
           <div
-            className="text-[11px] font-semibold"
+            className="text-2xs font-semibold"
             style={{ color: "var(--orch-status-success)" }}
             data-testid="waterfall-total-savings"
           >
@@ -176,7 +176,7 @@ export function WaterfallInspector({ run, className = "" }: WaterfallInspectorPr
       </div>
 
       {/* Summary bar */}
-      <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-border/10 mt-2 text-[11px] text-text-muted">
+      <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-border/10 mt-2 text-2xs text-text-muted">
         <span>
           {fmt(run.originalTokens)} → {fmt(run.compressedTokens)} {t("tokenShort")}
         </span>

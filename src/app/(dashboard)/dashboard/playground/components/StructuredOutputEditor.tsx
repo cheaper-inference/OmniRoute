@@ -92,10 +92,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
 
           {/* Schema JSON textarea */}
           <div className="flex flex-col gap-1">
-            <span
-              className="text-[10px] text-text-muted uppercase tracking-wider"
-              aria-hidden="true"
-            >
+            <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
               {t("jsonSchema")}
             </span>
             <Textarea

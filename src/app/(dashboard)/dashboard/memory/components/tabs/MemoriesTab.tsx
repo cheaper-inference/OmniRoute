@@ -416,7 +416,9 @@ export default function MemoriesTab() {
       <Card>
         <div className="p-4">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg">{t("memories")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("memories")}
+            </h2>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 icon="search"

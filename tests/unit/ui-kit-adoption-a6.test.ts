@@ -156,9 +156,14 @@ function lines(): Tag[] {
 
 test('A: pills are the Badge adapter (size="sm"), not a padded rounded span', () => {
   // A small tinted or bordered box around a word: horizontal padding of at most 8px, vertical
-  // padding of at most 2px (or none), a radius and a text size under 12px.
-  const PILL =
-    /(?=[^"`]*(?<![\w:-])px-(?:1|1\.5|2)(?![\w.-]))(?=[^"`]*(?<![\w:-])rounded(?:-sm|-md|-full)?(?![\w-]))(?=[^"`]*text-\[(?:8|9|10|11)px\])/;
+  // padding of at most 2px and a radius, in one class string. A monospace one is a code chip
+  // (the kit InlineCode), checked with the small pieces below.
+  const has = (tag: string, re: RegExp) => re.test(tag);
+  const isPill = (tag: string) =>
+    has(tag, /(?<![\w:-])px-(?:1|1\.5|2)(?![\w.-])/) &&
+    has(tag, /(?<![\w:-])py-(?:0|0\.5|px)(?![\w.-])/) &&
+    has(tag, /(?<![\w:-])rounded(?:-sm|-md|-full)?(?![\w-])/) &&
+    !has(tag, /font-mono/);
   const kept: Kept[] = [
     {
       file: "context/settings/CompressionPanel.tsx",
@@ -168,7 +173,7 @@ test('A: pills are the Badge adapter (size="sm"), not a padded rounded span', ()
     },
   ];
   assertOnlyKept(
-    lines().filter(({ tag }) => PILL.test(tag)),
+    lines().filter(({ tag }) => isPill(tag)),
     kept,
     'use <Badge size="sm">'
   );
@@ -234,4 +239,48 @@ test('B: muted ghost and outline buttons use tone="muted"', () => {
     },
   ];
   assertOnlyKept(hits, kept, 'use tone="muted" instead of text-text-muted');
+});
+
+// ── F: type scale ────────────────────────────────────────────────────────────────────────
+
+test("F: no arbitrary text size under the kit's 12px floor", () => {
+  // Labels use the kit's two small label sizes (`text-2xs` 11px, `text-3xs` 10px); running
+  // text is `text-xs` (12px) or larger.
+  const hits = lines().filter(({ tag }) =>
+    /(?<![\w-])text-\[(?:8|9|10|11)(?:\.\d+)?px\]/.test(tag)
+  );
+  assertOnlyKept(hits, [], "use text-2xs / text-3xs for a label, text-xs for running text");
+});
+
+test("F: uppercase labels are the kit eyebrow, not hand-made utilities", () => {
+  const hits = lines().filter(({ tag }) => /(?<![\w:-])uppercase(?![\w-])/.test(tag));
+  const kept: Kept[] = [
+    {
+      file: "context/settings/EngineGuidanceDetail.tsx",
+      marker: 'className="uppercase tracking-wider"',
+      reason: "A Badge whose word is set in caps; the Badge sets the rest of its type.",
+    },
+    {
+      file: "context/settings/EngineGuidanceDetail.tsx",
+      marker: 'className="uppercase text-primary"',
+      reason: "A Button label set in caps; the Button sets the rest of its type.",
+    },
+  ];
+  assertOnlyKept(hits, kept, 'use className="ci-eyebrow" with data-size / data-weight');
+});
+
+test("F: section headings take their size from ci-heading data-size", () => {
+  const hits = openingTags("h2|h3|h4").filter(({ tag }) =>
+    /(?<![\w:-])text-(?:xs|sm|base|lg|xl|2xl)(?![\w-])/.test(tag)
+  );
+  const kept: Kept[] = ["text-xl my-2", "text-lg my-1.5", "text-base my-1"].map((marker) => ({
+    file: "playground/components/MarkdownMessage.tsx",
+    marker,
+    reason: "Headings of a rendered chat message (Markdown content), not a section of the screen.",
+  }));
+  assertOnlyKept(hits, kept, 'use className="ci-heading" data-size="…"');
+  for (const { file, line, tag } of openingTags("h2|h3|h4")) {
+    if (file === "playground/components/MarkdownMessage.tsx") continue;
+    assert.match(tag, /ci-heading|ci-eyebrow/, `${file}:${line} names a kit heading class`);
+  }
 });

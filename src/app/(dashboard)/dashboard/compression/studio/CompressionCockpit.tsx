@@ -176,7 +176,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
     <div className="flex flex-col h-full gap-2" data-testid="compression-cockpit">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-border bg-bg/60 shrink-0">
-        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+        <span className="ci-eyebrow" data-weight="medium">
           {run.mode}
         </span>
         {run.comboId && (
@@ -214,7 +214,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
               onClick={() => setView("waterfall")}
             />
           </div>
-          <span className="text-[11px] text-text-muted">
+          <span className="text-2xs text-text-muted">
             {fmt(run.originalTokens)} → {fmt(run.compressedTokens)} {t("tokenShort")}
           </span>
           <span className="text-xs font-semibold" style={{ color: "var(--orch-status-success)" }}>
@@ -269,7 +269,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
             ))}
           </div>
           {displayRun && currentFrame && (
-            <span className="ml-auto text-[11px] text-text-muted">
+            <span className="ml-auto text-2xs text-text-muted">
               {t("stepProgress", {
                 current: displayRun?.steps.length ?? 0,
                 total: run.steps.length,

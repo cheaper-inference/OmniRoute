@@ -256,14 +256,11 @@ export default function BuildTab({ configState }: BuildTabProps) {
                   <Icon name="function" size={14} className="text-warning" />
                   <code className="text-xs font-mono text-text-main">{tc.function.name}</code>
                 </div>
-                <pre className="text-[11px] font-mono text-text-muted bg-bg-alt rounded p-2 overflow-x-auto mb-2 whitespace-pre-wrap break-all">
+                <pre className="text-xs font-mono text-text-muted bg-bg-alt rounded p-2 overflow-x-auto mb-2 whitespace-pre-wrap break-all">
                   {tc.function.arguments}
                 </pre>
                 <div className="flex flex-col gap-2">
-                  <span
-                    className="text-[10px] text-text-muted uppercase tracking-wider"
-                    aria-hidden="true"
-                  >
+                  <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
                     Tool result
                   </span>
                   <Textarea

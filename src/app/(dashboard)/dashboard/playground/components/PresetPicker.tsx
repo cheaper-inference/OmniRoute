@@ -95,7 +95,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+        <span className="ci-eyebrow" data-weight="medium">
           {t("presetsLabel")}
         </span>
 
@@ -146,7 +146,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
             {presets.map((preset) => (
               <div
                 key={preset.id}
-                className="flex items-center justify-between text-[11px] text-text-muted hover:text-text-main group"
+                className="flex items-center justify-between text-xs text-text-muted hover:text-text-main group"
               >
                 <Button
                   variant="ghost"

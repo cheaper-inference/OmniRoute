@@ -54,7 +54,7 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-[10px] text-text-muted">{label}</span>
+      <span className="text-3xs text-text-muted">{label}</span>
       {values.map((v) => (
         <ToggleChip key={v} size="sm" pressed={active.has(v)} onClick={() => onToggle(v)}>
           {renderLabel(v)}

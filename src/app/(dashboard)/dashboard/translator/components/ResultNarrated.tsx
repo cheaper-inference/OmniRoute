@@ -73,7 +73,7 @@ export default function ResultNarrated({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Icon name="translate" size={20} className="text-primary" />
-        <h3 className="text-sm text-text-main">
+        <h3 className="ci-heading" data-size="sm">
           {tr("simpleResultPanelTitle", "Translation + Response")}
         </h3>
       </div>

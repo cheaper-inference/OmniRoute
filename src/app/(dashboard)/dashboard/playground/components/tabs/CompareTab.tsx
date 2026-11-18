@@ -427,7 +427,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
         </div>
 
         {/* Column count indicator */}
-        <span className="ml-auto text-[11px] text-text-muted">
+        <span className="ml-auto text-2xs text-text-muted">
           {t("columnCount", { count: columns.length, max: MAX_COLUMNS })}
         </span>
       </div>

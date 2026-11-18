@@ -118,7 +118,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
       {/* Existing tools */}
       {tools.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("toolsCount", { count: tools.length })}
           </span>
           {tools.map((tool, idx) => {
@@ -133,7 +133,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                     <Icon name="function" size={14} className="text-text-muted" />
                     <code className="text-xs font-mono text-text-main">{tool.function.name}</code>
                     {tool.function.description && (
-                      <span className="text-[11px] text-text-muted truncate max-w-[200px]">
+                      <span className="text-xs text-text-muted truncate max-w-[200px]">
                         — {tool.function.description}
                       </span>
                     )}
@@ -206,7 +206,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
 
       {/* Add tool form */}
       <div className="border border-border rounded-lg p-3 flex flex-col gap-2 bg-surface">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+        <span className="ci-eyebrow" data-weight="medium">
           {t("addTool")}
         </span>
 
@@ -229,7 +229,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-text-muted uppercase tracking-wider" aria-hidden="true">
+          <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
             {t("toolParamsLabel")}
           </span>
           <Textarea

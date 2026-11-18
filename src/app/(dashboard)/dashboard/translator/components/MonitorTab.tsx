@@ -69,7 +69,9 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
         </div>
         <div>
           <p className="text-lg font-semibold text-text-main">{value}</p>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">{label}</p>
+          <p className="ci-eyebrow" data-size="3xs">
+            {label}
+          </p>
         </div>
       </div>
     </Card>
@@ -245,7 +247,9 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       {/* Events table */}
       <Card>
         <div className="p-4">
-          <h3 className="text-sm text-text-main mb-3">{t("recentTranslations")}</h3>
+          <h3 className="ci-heading mb-3" data-size="sm">
+            {t("recentTranslations")}
+          </h3>
 
           {loading ? (
             <div role="status" className="flex items-center justify-center py-12 text-text-muted">
@@ -315,7 +319,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                                 </Badge>
                               ) : null}
                             </div>
-                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-text-muted">
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-2xs text-text-muted">
                               <span>
                                 {translateOrFallback("routeEndpointLabel", "Endpoint")}:{" "}
                                 {event.routeEndpoint ?? event.endpoint ?? notAvailable}

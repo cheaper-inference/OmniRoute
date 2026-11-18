@@ -148,7 +148,7 @@ export default function SearchForm({
             />
             {/* Catalog metadata badge (F8 — provider cost/quota/status) */}
             {catalogInfo && (
-              <div className="mt-1 flex flex-wrap gap-x-2 text-[10px] text-text-muted">
+              <div className="mt-1 flex flex-wrap gap-x-2 text-3xs text-text-muted">
                 <span>
                   <span className="font-medium text-text-main">
                     ${catalogInfo.costPerQuery.toFixed(4)}
@@ -219,7 +219,7 @@ export default function SearchForm({
       <div className="p-4 border-b border-border">
         <Disclosure open={showFilters} onOpenChange={setShowFilters}>
           <DisclosureTrigger>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+            <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
               {t("filters")}
             </span>
           </DisclosureTrigger>

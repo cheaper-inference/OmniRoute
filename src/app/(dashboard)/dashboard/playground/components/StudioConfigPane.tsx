@@ -173,7 +173,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+        <span className="ci-eyebrow" data-weight="medium">
           {tp("configPane")}
         </span>
         <Button
@@ -292,7 +292,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
 
         {/* Param sliders */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          <span className="ci-eyebrow" data-weight="medium">
             {tp("parametersLabel")}
           </span>
           <ParamSliders params={configState.params} setParams={(p) => update("params", p)} />

@@ -33,7 +33,7 @@ export default function ReasoningControls({ spec, params, setParams }: Reasoning
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+      <span className="ci-eyebrow" data-weight="medium">
         {t("reasoningLabel")}
       </span>
 

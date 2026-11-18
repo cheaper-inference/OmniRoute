@@ -126,7 +126,7 @@ export default function PlaygroundTab() {
       {result && (
         <Card>
           <div className="p-4">
-            <h3 className="text-sm text-text-main mb-4">
+            <h3 className="ci-heading mb-4" data-size="sm">
               {t("playground.resultsTitle", { count: result.memories.length })}
             </h3>
             <RetrievePreview result={result} />

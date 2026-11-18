@@ -58,7 +58,7 @@ function EngineOptions({
           disabled
           label={
             <>
-              llmlingua <span className="text-[10px]">({t("requiresOnnx")})</span>
+              llmlingua <span className="text-3xs">({t("requiresOnnx")})</span>
             </>
           }
         />

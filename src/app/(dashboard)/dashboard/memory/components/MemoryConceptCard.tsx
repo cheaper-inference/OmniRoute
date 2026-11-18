@@ -18,7 +18,9 @@ export default function MemoryConceptCard() {
           <Icon name="psychology" size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm text-text-main">{t("concept.title")}</h2>
+          <h2 className="ci-heading" data-size="sm">
+            {t("concept.title")}
+          </h2>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">{t("concept.description")}</p>
           <Button
             variant="ghost"

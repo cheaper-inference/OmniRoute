@@ -19,7 +19,7 @@ function StatusBadge({ status }: { status: SearchProviderCatalogItem["status"] }
   if (status === "configured") {
     return (
       <span
-        className="inline-flex items-center gap-1 text-[10px] text-success font-medium"
+        className="inline-flex items-center gap-1 text-3xs text-success font-medium"
         data-testid="status-configured"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" aria-hidden="true" />
@@ -30,7 +30,7 @@ function StatusBadge({ status }: { status: SearchProviderCatalogItem["status"] }
   if (status === "rate_limited") {
     return (
       <span
-        className="inline-flex items-center gap-1 text-[10px] text-warning font-medium"
+        className="inline-flex items-center gap-1 text-3xs text-warning font-medium"
         data-testid="status-rate-limited"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-warning inline-block" aria-hidden="true" />
@@ -40,7 +40,7 @@ function StatusBadge({ status }: { status: SearchProviderCatalogItem["status"] }
   }
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] text-text-muted font-medium"
+      className="inline-flex items-center gap-1 text-3xs text-text-muted font-medium"
       data-testid="status-missing"
     >
       <span className="w-1.5 h-1.5 rounded-full bg-border inline-block" aria-hidden="true" />
@@ -85,14 +85,14 @@ function ProviderCard({
       <div className="flex justify-between items-start gap-2">
         <div>
           <div className="text-xs font-semibold text-text-main">{item.name}</div>
-          <div className="text-[10px] text-text-muted mt-0.5">
+          <div className="text-3xs text-text-muted mt-0.5">
             {item.kind === "search" ? t("kindSearch") : t("kindFetch")}
           </div>
         </div>
         <StatusBadge status={item.status} />
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-text-muted">
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-3xs text-text-muted">
         <span>
           <span className="font-medium text-text-main">${item.costPerQuery.toFixed(4)}</span>/query
         </span>
@@ -132,7 +132,7 @@ function ProviderCard({
       {item.status === "missing" && (
         <Link
           href={item.configureHref}
-          className="mt-2 block text-[10px] text-accent hover:underline"
+          className="mt-2 block text-3xs text-accent hover:underline"
           data-testid={`configure-link-${item.id}`}
         >
           Configure →

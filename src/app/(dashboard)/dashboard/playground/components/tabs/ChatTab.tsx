@@ -435,7 +435,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                 msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
               }`}
             >
-              <span className="text-[10px] text-text-muted uppercase mb-1 px-1">
+              <span className="ci-eyebrow mb-1 px-1" data-size="3xs">
                 {t(`role.${msg.role}`)}
               </span>
               <div
@@ -470,7 +470,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         {/* Loading indicator */}
         {loading && messages[messages.length - 1]?.role === "user" && (
           <div className="flex flex-col max-w-[85%] mr-auto items-start">
-            <span className="text-[10px] text-text-muted uppercase mb-1 px-1">
+            <span className="ci-eyebrow mb-1 px-1" data-size="3xs">
               {t("role.assistant")}
             </span>
             <div

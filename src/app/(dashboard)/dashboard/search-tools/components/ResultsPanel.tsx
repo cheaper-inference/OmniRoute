@@ -77,7 +77,7 @@ export default function ResultsPanel({
       {/* Header */}
       <div className="flex justify-between items-center p-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("searchResults")}
           </span>
           {statusCode > 0 && (
@@ -178,7 +178,7 @@ export default function ResultsPanel({
                 href={r.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent text-[11px] block mt-0.5"
+                className="text-accent text-2xs block mt-0.5"
               >
                 {r.url}
               </a>

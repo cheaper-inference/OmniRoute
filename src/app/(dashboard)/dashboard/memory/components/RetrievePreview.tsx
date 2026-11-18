@@ -74,7 +74,7 @@ export default function RetrievePreview({ result }: Props) {
                 <span className="text-xs text-text-muted">{m.tokens} tok</span>
               </div>
               <p className="text-xs text-text-muted truncate">{m.content}</p>
-              <div className="flex gap-3 text-[10px] text-text-muted/70 font-mono">
+              <div className="flex gap-3 text-3xs text-text-muted/70 font-mono">
                 {m.vecScore !== null && <span>vec: {m.vecScore.toFixed(3)}</span>}
                 {m.ftsScore !== null && <span>fts: {m.ftsScore.toFixed(3)}</span>}
               </div>

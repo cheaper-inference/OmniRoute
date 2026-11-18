@@ -91,7 +91,7 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
         </div>
 
         {/* Options summary */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-2xs text-text-muted">
           <span>
             Format: <span className="text-text-main font-medium">{configState.fetchFormat}</span>
           </span>
