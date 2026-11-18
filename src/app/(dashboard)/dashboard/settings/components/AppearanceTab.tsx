@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Button, Card, Input, Toggle } from "@/shared/components";
+import { Button, Card, FileTrigger, Input, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useIsElectron } from "@/shared/hooks/useElectron";
@@ -17,6 +17,7 @@ import {
   normalizeAppearancePalette,
 } from "@/shared/constants/appearancePalette";
 import AccountEmailVisibilitySetting from "./AccountEmailVisibilitySetting";
+import SavedNumberInput from "./SavedNumberInput";
 
 export default function AppearanceTab() {
   const { theme, setTheme, isDark, palette, setPalette } = useTheme();
@@ -24,8 +25,6 @@ export default function AppearanceTab() {
 
   const isElectron = useIsElectron();
   const [autostartEnabled, setAutostartEnabled] = useState(false);
-  const logoFileRef = useRef<HTMLInputElement>(null);
-  const faviconFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isElectron && window.electronAPI) {
@@ -101,6 +100,20 @@ export default function AppearanceTab() {
     } catch (err) {
       console.error("Failed to update", key, err);
     }
+  };
+
+  // Reads a picked image and saves it as a data URL; the kit trigger already filtered the file
+  // by type and size.
+  const readImageSetting = (target: "logo" | "favicon", key: string, file: File) => {
+    setUploadError(null);
+    const reader = new FileReader();
+    reader.onerror = () => {
+      setUploadError({ target, message: t("failedToReadFile") });
+    };
+    reader.onload = (event) => {
+      updateSetting(key, event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const comboConfigModeOptions: Array<{
@@ -428,24 +441,20 @@ export default function AppearanceTab() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Input
-                  type="number"
+                <SavedNumberInput
                   aria-label={getSettingsLabel(
                     "providerQuotaAutoRefreshInterval",
                     "Refresh interval"
                   )}
+                  suffix={t("seconds")}
                   min={10}
                   max={3600}
                   step={10}
                   value={quotaRefreshInterval}
-                  onChange={async (e) => {
-                    const next = Math.min(3600, Math.max(10, Number(e.target.value) || 180));
-                    await updateSetting("autoRefreshProviderQuotaInterval", next);
-                  }}
+                  onSave={(next) => updateSetting("autoRefreshProviderQuotaInterval", next)}
                   disabled={loading || !autoRefreshProviderQuota}
-                  className="w-28 shrink-0"
+                  className="w-32 shrink-0"
                 />
-                <span className="text-xs text-text-muted">{t("seconds")}</span>
               </div>
             </div>
           </div>
@@ -527,51 +536,24 @@ export default function AppearanceTab() {
             <div className="flex flex-col gap-2">
               <p className="font-medium">{t("uploadLogo")}</p>
               <div className="flex items-center gap-2">
-                <Input
-                  ref={logoFileRef}
-                  type="file"
-                  aria-label={t("uploadLogo")}
+                <FileTrigger
                   accept="image/png,image/jpeg,image/svg+xml,image/gif,image/webp"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      if (file.size > 500 * 1024) {
-                        setUploadError({ target: "logo", message: t("logoFileTooLarge") });
-                        return;
-                      }
-                      const validTypes = [
-                        "image/png",
-                        "image/jpeg",
-                        "image/svg+xml",
-                        "image/gif",
-                        "image/webp",
-                      ];
-                      if (!validTypes.includes(file.type)) {
-                        setUploadError({ target: "logo", message: t("invalidLogoFileType") });
-                        return;
-                      }
-                      setUploadError(null);
-                      const reader = new FileReader();
-                      reader.onerror = () => {
-                        setUploadError({ target: "logo", message: t("failedToReadFile") });
-                      };
-                      reader.onload = (event) => {
-                        const base64 = event.target?.result as string;
-                        updateSetting("customLogoBase64", base64);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="hidden"
-                  tabIndex={-1}
-                />
-                <Button
-                  variant="outline"
-                  icon="upload"
-                  onClick={() => logoFileRef.current?.click()}
+                  maxSize={500 * 1024}
+                  onFilesChange={([file]) => readImageSetting("logo", "customLogoBase64", file)}
+                  onFilesRejected={([rejection]) =>
+                    setUploadError({
+                      target: "logo",
+                      message:
+                        rejection.reason === "size"
+                          ? t("logoFileTooLarge")
+                          : t("invalidLogoFileType"),
+                    })
+                  }
                 >
-                  {t("uploadLogo")}
-                </Button>
+                  <Button variant="outline" icon="upload">
+                    {t("uploadLogo")}
+                  </Button>
+                </FileTrigger>
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -630,57 +612,26 @@ export default function AppearanceTab() {
             <div className="flex flex-col gap-2">
               <p className="font-medium">{t("uploadFavicon")}</p>
               <div className="flex items-center gap-2">
-                <Input
-                  ref={faviconFileRef}
-                  type="file"
-                  aria-label={t("uploadFavicon")}
+                <FileTrigger
                   accept="image/png,image/x-icon,image/svg+xml,image/gif,image/webp"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      if (file.size > 50 * 1024) {
-                        setUploadError({
-                          target: "favicon",
-                          message: t("faviconFileTooLarge"),
-                        });
-                        return;
-                      }
-                      const validTypes = [
-                        "image/png",
-                        "image/x-icon",
-                        "image/svg+xml",
-                        "image/gif",
-                        "image/webp",
-                      ];
-                      if (!validTypes.includes(file.type)) {
-                        setUploadError({
-                          target: "favicon",
-                          message: t("invalidFaviconFileType"),
-                        });
-                        return;
-                      }
-                      setUploadError(null);
-                      const reader = new FileReader();
-                      reader.onerror = () => {
-                        setUploadError({ target: "favicon", message: t("failedToReadFile") });
-                      };
-                      reader.onload = (event) => {
-                        const base64 = event.target?.result as string;
-                        updateSetting("customFaviconBase64", base64);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="hidden"
-                  tabIndex={-1}
-                />
-                <Button
-                  variant="outline"
-                  icon="upload"
-                  onClick={() => faviconFileRef.current?.click()}
+                  maxSize={50 * 1024}
+                  onFilesChange={([file]) =>
+                    readImageSetting("favicon", "customFaviconBase64", file)
+                  }
+                  onFilesRejected={([rejection]) =>
+                    setUploadError({
+                      target: "favicon",
+                      message:
+                        rejection.reason === "size"
+                          ? t("faviconFileTooLarge")
+                          : t("invalidFaviconFileType"),
+                    })
+                  }
                 >
-                  {t("uploadFavicon")}
-                </Button>
+                  <Button variant="outline" icon="upload">
+                    {t("uploadFavicon")}
+                  </Button>
+                </FileTrigger>
                 <Button
                   variant="secondary"
                   onClick={() => {

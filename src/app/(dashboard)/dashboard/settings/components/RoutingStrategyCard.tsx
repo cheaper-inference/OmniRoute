@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Input, Toggle } from "@/shared/components";
+import { Card, NumberInput, Toggle } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 
@@ -130,23 +131,19 @@ function AccountRoundRobinSection({ t, busy, settings, setSettings, run }: Secti
             <p className="font-medium text-sm sm:text-base">{t("stickyLimit")}</p>
             <p className="text-xs sm:text-sm text-text-muted">{t("stickyLimitDesc")}</p>
           </div>
-          <Input
-            type="number"
+          <NumberInput
             aria-label={t("stickyLimit")}
             min={1}
             max={1000}
             disabled={busy}
             className="w-16 sm:w-20 text-center shrink-0"
-            value={settings.stickyRoundRobinLimit ?? 3}
-            onChange={(e) =>
-              setSettings((prev) => ({ ...prev, stickyRoundRobinLimit: e.target.value }))
+            value={fieldNumber(settings.stickyRoundRobinLimit ?? 3)}
+            onValueChange={(value) =>
+              setSettings((prev) => ({ ...prev, stickyRoundRobinLimit: fieldText(value) }))
             }
-            onBlur={() =>
+            onValueCommit={(value) =>
               run(async () => {
-                const limit = Math.min(
-                  1000,
-                  Math.max(1, parseInt(String(settings.stickyRoundRobinLimit), 10) || 3)
-                );
+                const limit = Math.min(1000, Math.max(1, value || 3));
                 const updated = await patchSettings({ stickyRoundRobinLimit: limit });
                 setSettings((prev) => ({
                   ...prev,
@@ -192,23 +189,19 @@ function ComboRoundRobinSection({ t, busy, settings, setSettings, run }: Section
             <p className="font-medium">{t("comboStickyLimit")}</p>
             <p className="text-sm text-text-muted">{t("comboStickyLimitDesc")}</p>
           </div>
-          <Input
-            type="number"
+          <NumberInput
             aria-label={t("comboStickyLimit")}
             min={1}
             max={1000}
             disabled={busy}
             className="w-20 text-center"
-            value={settings.comboStickyRoundRobinLimit ?? 1}
-            onChange={(e) =>
-              setSettings((prev) => ({ ...prev, comboStickyRoundRobinLimit: e.target.value }))
+            value={fieldNumber(settings.comboStickyRoundRobinLimit ?? 1)}
+            onValueChange={(value) =>
+              setSettings((prev) => ({ ...prev, comboStickyRoundRobinLimit: fieldText(value) }))
             }
-            onBlur={() =>
+            onValueCommit={(value) =>
               run(async () => {
-                const limit = Math.min(
-                  1000,
-                  Math.max(1, parseInt(String(settings.comboStickyRoundRobinLimit), 10) || 1)
-                );
+                const limit = Math.min(1000, Math.max(1, value || 1));
                 const updated = await patchSettings({ comboStickyRoundRobinLimit: limit });
                 setSettings((prev) => ({
                   ...prev,

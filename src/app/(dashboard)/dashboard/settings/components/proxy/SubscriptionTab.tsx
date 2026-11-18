@@ -5,7 +5,16 @@ import { useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Field } from "@omniroute/ui-kit/field";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Badge, Button, Card, Checkbox, EmptyState, Input, Textarea } from "@/shared/components";
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  EmptyState,
+  Input,
+  NumberInput,
+  Textarea,
+} from "@/shared/components";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
 import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
@@ -659,28 +668,22 @@ export default function SubscriptionTab() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Input
-                type="number"
+              <NumberInput
                 min={0}
                 max={3600}
                 label={t("proxySubscription.selectorMinGap")}
                 value={form.selectorMinGapSeconds}
-                onChange={(e) =>
-                  setForm({ ...form, selectorMinGapSeconds: Number(e.target.value) || 0 })
-                }
+                onValueChange={(value) => setForm({ ...form, selectorMinGapSeconds: value ?? 0 })}
                 hint={t("proxySubscription.selectorHelp")}
               />
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:items-end">
-              <Input
-                type="number"
+              <NumberInput
                 min={5}
                 label={t("proxySubscription.autoRefreshInterval")}
                 value={form.updateIntervalMinutes}
-                onChange={(e) =>
-                  setForm({ ...form, updateIntervalMinutes: Number(e.target.value) || 60 })
-                }
+                onValueChange={(value) => setForm({ ...form, updateIntervalMinutes: value || 60 })}
               />
               <Checkbox
                 className="md:pb-2.5"

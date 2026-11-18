@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@omniroute/ui-kit/table";
 import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
-import { Button, EmptyState, Input, Select } from "@/shared/components";
+import { Button, EmptyState, Input, NumberInput, Select } from "@/shared/components";
+import { fieldNumber, fieldText } from "../numberFieldText";
 import SourceToggleBar, {
   type SourceId,
   ALL_SOURCE_IDS,
@@ -280,11 +281,10 @@ export default function FreePoolTab() {
               className="w-32"
               aria-label={translateOrFallback("proxyFreePoolFilterCountry", "Filter by country")}
             />
-            <Input
-              type="number"
+            <NumberInput
               placeholder={translateOrFallback("proxyFreePoolMinQualityPlaceholder", "Min quality")}
-              value={minQuality}
-              onChange={(e) => setMinQuality(e.target.value)}
+              value={fieldNumber(minQuality)}
+              onValueChange={(value) => setMinQuality(fieldText(value))}
               min={0}
               max={100}
               className="w-32"

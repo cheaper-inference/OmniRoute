@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Input } from "@/shared/components";
+import { Badge, Button, NumberInput } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
 export type BackupCleanupOptions = {
@@ -100,34 +100,27 @@ export default function DatabaseBackupRetentionCard({
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <Input
+        <NumberInput
           label={t("storageBackupKeepLatest")}
-          type="number"
           min={1}
           max={200}
           value={backupCleanupOptions.keepLatest}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value || "1", 10);
+          onValueChange={(value) => {
             setBackupRetentionStatus({ type: "", message: "" });
-            setBackupCleanupOptions((prev) => ({
-              ...prev,
-              keepLatest: Number.isFinite(parsed) ? Math.max(1, parsed) : 1,
-            }));
+            setBackupCleanupOptions((prev) => ({ ...prev, keepLatest: Math.max(1, value ?? 1) }));
           }}
           className="w-32 shrink-0"
         />
-        <Input
+        <NumberInput
           label={t("storageBackupDeleteOlderThan")}
-          type="number"
           min={0}
           max={3650}
           value={backupCleanupOptions.retentionDays}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value || "0", 10);
+          onValueChange={(value) => {
             setBackupRetentionStatus({ type: "", message: "" });
             setBackupCleanupOptions((prev) => ({
               ...prev,
-              retentionDays: Number.isFinite(parsed) ? Math.max(0, parsed) : 0,
+              retentionDays: Math.max(0, value ?? 0),
             }));
           }}
           className="w-32 shrink-0"

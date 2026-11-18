@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Button, Checkbox, Input, Select, Toggle } from "@/shared/components";
+import { Button, Checkbox, Input, NumberInput, Select, Toggle } from "@/shared/components";
 
 type Schedule =
   | { kind: "interval"; minutes: number }
@@ -230,13 +230,12 @@ function WakeupForm({
       {kind === "daily" ? (
         <DailyFields value={daily} onChange={setDaily} />
       ) : (
-        <Input
-          type="number"
+        <NumberInput
           min={5}
           max={10080}
           label={t("codexWakeups.minutes")}
-          value={String(minutes)}
-          onChange={(e) => setMinutes(Number(e.target.value))}
+          value={minutes}
+          onValueChange={(value) => setMinutes(value ?? 0)}
         />
       )}
       <div>

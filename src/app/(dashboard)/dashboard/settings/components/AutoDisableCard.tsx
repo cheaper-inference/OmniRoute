@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Card, Button, Checkbox, Input } from "@/shared/components";
+import { Card, Button, Checkbox, NumberInput } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
@@ -132,16 +132,13 @@ export default function AutoDisableCard() {
 
           <div className="rounded-lg bg-bg-subtle p-4">
             {editMode ? (
-              <Input
-                type="number"
+              <NumberInput
                 label={t("autoDisableThreshold")}
                 hint={t("autoDisableThresholdDesc")}
-                min="1"
-                max="10"
+                min={1}
+                max={10}
                 value={draft.threshold}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, threshold: parseInt(e.target.value) || 1 }))
-                }
+                onValueChange={(value) => setDraft((prev) => ({ ...prev, threshold: value || 1 }))}
               />
             ) : (
               <>

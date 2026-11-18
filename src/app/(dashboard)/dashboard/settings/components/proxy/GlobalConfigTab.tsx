@@ -293,7 +293,7 @@ export default function GlobalConfigTab() {
             onChange={(e) => setTargetUrl(e.target.value)}
             placeholder="https://api.openai.com/v1/models"
             className="flex-1"
-            inputClassName="font-mono"
+            mono
           />
           <Button
             size="sm"

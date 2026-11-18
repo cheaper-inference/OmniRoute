@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input } from "@/shared/components";
+import { Button, Card, NumberInput } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 import Icon from "@/shared/components/Icon";
 
 export default function UsageTokenBufferTab() {
@@ -76,13 +77,12 @@ export default function UsageTokenBufferTab() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Input
-          type="number"
+        <NumberInput
           aria-label={t("storageUsageTokenBuffer")}
           min={0}
           max={50000}
-          value={bufferInput}
-          onChange={(e) => setBufferInput(e.target.value)}
+          value={fieldNumber(bufferInput)}
+          onValueChange={(value) => setBufferInput(fieldText(value))}
           onKeyDown={(e) => {
             if (e.key === "Enter") void updateUsageTokenBuffer();
           }}

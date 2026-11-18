@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Input, Select } from "@/shared/components";
+import { NumberInput, Select } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 import { useTranslations } from "next-intl";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
 
@@ -142,15 +143,16 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
           ]}
         />
         {strategy === "round-robin" && (
-          <Input
+          <NumberInput
             label={t("stickyLimit")}
-            type="number"
             min={1}
             max={1000}
             disabled={busy}
-            value={stickyLimit || "3"}
-            onChange={(e) => setStickyLimit(e.target.value)}
-            onBlur={() => save(strategy, stickyLimit).catch(console.error)}
+            value={fieldNumber(stickyLimit || "3")}
+            onValueChange={(value) => setStickyLimit(fieldText(value))}
+            onValueCommit={(value) =>
+              save(strategy, stickyLimit === "" ? "" : fieldText(value)).catch(console.error)
+            }
           />
         )}
       </div>

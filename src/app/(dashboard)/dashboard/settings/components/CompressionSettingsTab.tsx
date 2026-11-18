@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
 } from "./CompressionTokenSaverCard";
+import SavedNumberInput from "./SavedNumberInput";
 
 type CompressionMode =
   "off" | "lite" | "standard" | "aggressive" | "ultra" | "rtk" | "codex-responses" | "stacked";
@@ -441,14 +442,13 @@ export default function CompressionSettingsTab() {
             <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionAutoTrigger")}
                 hint={t("tokens")}
-                type="number"
                 min={0}
                 max={100000}
                 value={config.autoTriggerTokens}
-                onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
+                onSave={(value) => save({ autoTriggerTokens: value })}
               />
               <Select
                 label={t("compressionSettingsAutoTriggerMode")}
@@ -461,14 +461,13 @@ export default function CompressionSettingsTab() {
                   </option>
                 ))}
               </Select>
-              <Input
+              <SavedNumberInput
                 label={t("compressionCacheTTL")}
                 hint={t("minutes")}
-                type="number"
                 min={1}
                 max={60}
                 value={config.cacheMinutes}
-                onChange={(e) => save({ cacheMinutes: parseInt(e.target.value) || 5 })}
+                onSave={(value) => save({ cacheMinutes: value })}
               />
               <Select
                 label={t("compressionPreserveSystem")}
@@ -539,19 +538,12 @@ export default function CompressionSettingsTab() {
                   </div>
                 </div>
 
-                <Input
+                <SavedNumberInput
                   label={t("compressionMinLength")}
-                  type="number"
                   min={0}
                   max={100000}
                   value={config.cavemanConfig.minMessageLength}
-                  onChange={(e) =>
-                    save({
-                      cavemanConfig: {
-                        minMessageLength: parseInt(e.target.value) || 50,
-                      },
-                    })
-                  }
+                  onSave={(value) => save({ cavemanConfig: { minMessageLength: value || 50 } })}
                   className="sm:max-w-xs"
                 />
 
@@ -600,7 +592,8 @@ export default function CompressionSettingsTab() {
                       });
                     }}
                     placeholder="https?://\S+\n```[\s\S]*?```"
-                    className="w-full min-h-[80px] font-mono resize-y"
+                    mono
+                    className="w-full min-h-[80px] resize-y"
                   />
                 </div>
               </>
@@ -629,36 +622,22 @@ export default function CompressionSettingsTab() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionMaxTokensPerMessage")}
                 hint={t("tokens")}
-                type="number"
                 min={256}
                 max={32768}
                 value={config.aggressive.maxTokensPerMessage}
-                onChange={(e) =>
-                  save({
-                    aggressive: {
-                      maxTokensPerMessage: parseInt(e.target.value) || 2048,
-                    },
-                  })
-                }
+                onSave={(value) => save({ aggressive: { maxTokensPerMessage: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionMinSavings")}
                 hint="%"
-                type="number"
                 min={0}
                 max={1}
                 step={0.01}
                 value={config.aggressive.minSavingsThreshold}
-                onChange={(e) =>
-                  save({
-                    aggressive: {
-                      minSavingsThreshold: parseFloat(e.target.value) || 0.05,
-                    },
-                  })
-                }
+                onSave={(value) => save({ aggressive: { minSavingsThreshold: value || 0.05 } })}
               />
             </div>
 
@@ -669,22 +648,13 @@ export default function CompressionSettingsTab() {
               <p className="text-xs text-text-muted">{t("compressionAgingThresholdsDesc")}</p>
               <div className="grid grid-cols-2 gap-2">
                 {(["fullSummary", "moderate", "light", "verbatim"] as const).map((tier) => (
-                  <Input
+                  <SavedNumberInput
                     key={tier}
                     label={tier.replace(/([A-Z])/g, " $1").trim()}
-                    type="number"
                     min={1}
                     max={100}
                     value={config.aggressive!.thresholds[tier]}
-                    onChange={(e) =>
-                      save({
-                        aggressive: {
-                          thresholds: {
-                            [tier]: parseInt(e.target.value) || 2,
-                          },
-                        },
-                      })
-                    }
+                    onSave={(value) => save({ aggressive: { thresholds: { [tier]: value } } })}
                     className="rounded border border-border/50 p-2 capitalize"
                   />
                 ))}
@@ -744,50 +714,29 @@ export default function CompressionSettingsTab() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
+              <SavedNumberInput
                 label={t("compressionUltraRate")}
-                type="number"
                 min={0}
                 max={1}
                 step={0.05}
                 value={config.ultra.compressionRate}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      compressionRate: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { compressionRate: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionUltraMinScore")}
-                type="number"
                 min={0}
                 max={1}
                 step={0.05}
                 value={config.ultra.minScoreThreshold}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      minScoreThreshold: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { minScoreThreshold: value } })}
               />
-              <Input
+              <SavedNumberInput
                 label={t("compressionMaxTokensPerMessage")}
                 hint={t("tokens")}
-                type="number"
                 min={0}
                 max={32768}
                 value={config.ultra.maxTokensPerMessage}
-                onChange={(e) =>
-                  save({
-                    ultra: {
-                      maxTokensPerMessage: parseInt(e.target.value) || 0,
-                    },
-                  })
-                }
+                onSave={(value) => save({ ultra: { maxTokensPerMessage: value } })}
               />
             </div>
 
@@ -815,7 +764,7 @@ export default function CompressionSettingsTab() {
                 })
               }
               placeholder="/path/to/model.onnx"
-              inputClassName="font-mono"
+              mono
             />
           </div>
         )}

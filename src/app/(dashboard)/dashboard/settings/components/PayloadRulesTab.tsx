@@ -261,7 +261,8 @@ export default function PayloadRulesTab() {
               error={Boolean(parsedEditor.error)}
               spellCheck={false}
               rows={22}
-              className="w-full rounded-none border-0 px-4 py-4 text-sm font-mono leading-6 resize-y min-h-[420px]"
+              mono
+              className="w-full rounded-none border-0 px-4 py-4 text-sm leading-6 resize-y min-h-[420px]"
               disabled={loading || saving}
             />
           </div>

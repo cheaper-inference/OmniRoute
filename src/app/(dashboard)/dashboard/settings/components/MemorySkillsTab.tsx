@@ -511,7 +511,7 @@ export default function MemorySkillsTab() {
               value={qdrant.host}
               onChange={(e) => setQdrant((s) => ({ ...s, host: e.target.value }))}
               placeholder="http://127.0.0.1"
-              inputClassName="font-mono"
+              mono
             />
           </div>
 
@@ -527,7 +527,7 @@ export default function MemorySkillsTab() {
                 }))
               }
               placeholder="6333"
-              inputClassName="font-mono"
+              mono
             />
           </div>
 
@@ -538,7 +538,7 @@ export default function MemorySkillsTab() {
               value={qdrant.collection}
               onChange={(e) => setQdrant((s) => ({ ...s, collection: e.target.value }))}
               placeholder="omniroute_memory"
-              inputClassName="font-mono"
+              mono
             />
           </div>
 
@@ -581,7 +581,7 @@ export default function MemorySkillsTab() {
               value={qdrant.embeddingModel}
               onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
               placeholder={t("qdrantEmbeddingInputPlaceholder")}
-              inputClassName="font-mono"
+              mono
             />
           </div>
 
@@ -607,7 +607,7 @@ export default function MemorySkillsTab() {
                     : t("qdrantApiKeyPlaceholderOptional")
                 }
                 className="flex-1"
-                inputClassName="font-mono"
+                mono
               />
               {qdrant.hasApiKey && (
                 <Button
@@ -750,7 +750,7 @@ export default function MemorySkillsTab() {
               onChange={(e) => setSkillsmpApiKey(e.target.value)}
               placeholder="sk_live_..."
               className="flex-1"
-              inputClassName="font-mono"
+              mono
             />
             <Button variant="primary" onClick={saveSkillsmpApiKey} disabled={skillsmpSaving}>
               {skillsmpSaving ? t("saving") : t("save")}

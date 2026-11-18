@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Slider } from "@omniroute/ui-kit/slider";
-import { Button, Card, Badge, Input, Toggle, Select, SegmentedControl } from "@/shared/components";
+import {
+  Button,
+  Card,
+  Badge,
+  Input,
+  NumberInput,
+  Toggle,
+  Select,
+  SegmentedControl,
+} from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 
 type Message = { type: "success" | "error"; text: string };
 
@@ -490,15 +500,14 @@ export default function CacheSettingsTab() {
                   </p>
                 </div>
 
-                <Input
+                <NumberInput
                   id="sem-retention"
-                  type="number"
                   label={`${t("semanticCacheRetention")} (${t("semanticCacheMinutes")})`}
                   hint={t("semanticCacheRetentionHint")}
                   min={1}
                   max={10080}
                   value={semTtlMinutes}
-                  onChange={(e) => setSemTtlMinutes(Math.max(1, parseInt(e.target.value) || 1))}
+                  onValueChange={(value) => setSemTtlMinutes(Math.max(1, value || 1))}
                   inputClassName="w-28"
                   disabled={semSaving}
                 />
@@ -522,14 +531,13 @@ export default function CacheSettingsTab() {
 
                 {semBackend === "memory" ? (
                   <div className="mt-3">
-                    <Input
+                    <NumberInput
                       id="sem-max-entries"
-                      type="number"
                       label={t("semanticCacheMaxEntries")}
                       min={10}
                       max={100000}
                       value={semMaxSize}
-                      onChange={(e) => setSemMaxSize(parseInt(e.target.value) || 100)}
+                      onValueChange={(value) => setSemMaxSize(value || 100)}
                       inputClassName="w-32"
                       disabled={semSaving}
                     />
@@ -699,16 +707,16 @@ export default function CacheSettingsTab() {
             <p className="text-sm text-text-muted mt-1">{t("modelCatalogCacheTtlDescription")}</p>
           </div>
           <div className="flex flex-wrap items-start gap-3">
-            <Input
+            <NumberInput
               id="model-catalog-ttl-ms"
-              type="number"
               aria-label={t("modelCatalogCacheTtlLabel")}
+              suffix={t("semanticCacheMilliseconds")}
               min={MIN_TTL_MS}
               max={MAX_TTL_MS}
               step={100}
-              value={catalogTtl}
-              onChange={(event) => {
-                setCatalogTtl(event.target.value);
+              value={fieldNumber(catalogTtl)}
+              onValueChange={(value) => {
+                setCatalogTtl(fieldText(value));
                 setCatalogMessage(null);
               }}
               onKeyDown={(event) => {
@@ -719,7 +727,6 @@ export default function CacheSettingsTab() {
               inputClassName="w-32"
               disabled={catalogLoading || catalogSaving}
             />
-            <span className="py-2.5 text-xs text-text-muted">{t("semanticCacheMilliseconds")}</span>
             <Button
               size="sm"
               variant="primary"

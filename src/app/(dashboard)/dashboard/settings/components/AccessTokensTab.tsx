@@ -17,12 +17,14 @@ import {
   Card,
   Button,
   Input,
+  NumberInput,
   Select,
   Badge,
   ConfirmModal,
   EmptyState,
   Modal,
 } from "@/shared/components";
+import { fieldNumber, fieldText } from "./numberFieldText";
 
 interface AccessTokenRow {
   id: string;
@@ -195,13 +197,12 @@ export default function AccessTokensTab() {
               { value: "admin", label: t("accessTokensScopeAdmin") },
             ]}
           />
-          <Input
-            type="number"
+          <NumberInput
             min={1}
             label={t("accessTokensColExpires")}
             placeholder={t("accessTokensExpiresPlaceholder")}
-            value={expires}
-            onChange={(e) => setExpires(e.target.value)}
+            value={fieldNumber(expires)}
+            onValueChange={(value) => setExpires(fieldText(value))}
           />
           <Button onClick={createToken} disabled={creating || !name.trim()}>
             {creating ? t("accessTokensCreating") : t("accessTokensCreate")}

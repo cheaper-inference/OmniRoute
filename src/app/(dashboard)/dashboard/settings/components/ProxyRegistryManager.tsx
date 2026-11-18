@@ -1241,7 +1241,8 @@ export default function ProxyRegistryManager({
           <Textarea
             aria-labelledby={bulkImportDescId}
             data-testid="proxy-registry-bulk-import-textarea"
-            className="font-mono text-xs leading-relaxed placeholder:whitespace-pre-wrap"
+            mono
+            className="leading-relaxed placeholder:whitespace-pre-wrap"
             rows={14}
             value={bulkImportText}
             placeholder={BULK_IMPORT_PLACEHOLDER}

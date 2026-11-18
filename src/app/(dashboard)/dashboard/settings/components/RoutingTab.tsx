@@ -5,7 +5,16 @@ import { useTranslations } from "next-intl";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Field } from "@omniroute/ui-kit/field";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Button, Card, Collapsible, Input, Select, Textarea, Toggle } from "@/shared/components";
+import {
+  Button,
+  Card,
+  Collapsible,
+  Input,
+  NumberInput,
+  Select,
+  Textarea,
+  Toggle,
+} from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ModelSelectField from "@/shared/components/ModelSelectField";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -489,7 +498,7 @@ function OpEditor({
               value={op.text || ""}
               disabled={disabled}
               onChange={(e) => updateField("text", e.target.value)}
-              className="font-mono"
+              mono
             />
           </Field>
           <Input
@@ -1234,7 +1243,8 @@ export default function RoutingTab() {
                           aria-describedby={
                             errorMsg ? `routing-json-editor-${providerId}-error` : undefined
                           }
-                          className="resize-y font-mono text-[11px]"
+                          mono
+                          className="resize-y"
                         />
                       </Field>
                       <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -1471,37 +1481,27 @@ export default function RoutingTab() {
               15 seconds overall, and each provider&apos;s own limit.
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
-              <Input
+              <NumberInput
                 label="Overall budget (ms)"
-                type="number"
                 min={1000}
                 max={120000}
-                defaultValue={settings.searchTimeoutMs ?? ""}
+                defaultValue={settings.searchTimeoutMs ?? null}
                 placeholder="15000"
-                onBlur={(e) => {
-                  const raw = e.target.value.trim();
-                  const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
-                  if (parsed !== undefined && Number.isNaN(parsed)) return;
-                  updateSetting({ searchTimeoutMs: parsed });
-                }}
+                onValueCommit={(value) => updateSetting({ searchTimeoutMs: value ?? undefined })}
                 className="w-32 shrink-0"
               />
               {["exa-search", "tavily-search", "firecrawl", "context7", "jina-search"].map((id) => (
-                <Input
+                <NumberInput
                   key={id}
                   label={`${id} (ms)`}
-                  type="number"
                   min={1}
                   max={120000}
-                  defaultValue={settings.searchProviderTimeoutsMs?.[id] ?? ""}
+                  defaultValue={settings.searchProviderTimeoutsMs?.[id] ?? null}
                   placeholder="default"
-                  onBlur={(e) => {
-                    const raw = e.target.value.trim();
-                    const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
-                    if (parsed !== undefined && Number.isNaN(parsed)) return;
+                  onValueCommit={(value) => {
                     const next = { ...(settings.searchProviderTimeoutsMs ?? {}) };
-                    if (parsed === undefined) delete next[id];
-                    else next[id] = parsed;
+                    if (value === null) delete next[id];
+                    else next[id] = value;
                     updateSetting({ searchProviderTimeoutsMs: next });
                   }}
                   className="w-32 shrink-0"

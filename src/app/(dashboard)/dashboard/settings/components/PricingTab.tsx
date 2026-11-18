@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Badge, Card, Button, Input } from "@/shared/components";
+import { Badge, Card, Button, Input, NumberInput, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import InfoTooltip from "@/shared/components/InfoTooltip";
@@ -1114,14 +1114,15 @@ function ModelRow({
       </TableCell>
       {PRICING_FIELDS.map((field) => (
         <TableCell key={field} className="px-2 py-1.5">
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
+          <NumberInput
+            step={0.01}
+            precision={6}
+            min={0}
             aria-label={`${model.name} ${t(FIELD_LABEL_KEYS[field])}`}
             value={pricing?.[field] || 0}
-            onChange={(event) => onPricingChange(field, event.target.value)}
-            inputClassName="text-right text-xs tabular-nums"
+            onValueChange={whenNumber((value) => onPricingChange(field, String(value)))}
+            size="xs"
+            inputClassName="text-right tabular-nums"
           />
         </TableCell>
       ))}
