@@ -111,7 +111,7 @@ describe("ConnectionRow Codex account pool", () => {
       "button[aria-controls]:not([aria-haspopup])"
     ) as HTMLButtonElement;
     expect(disclosure.getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelectorAll('[role="meter"]')).toHaveLength(0);
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
     act(() => disclosure.click());
     expect(disclosure.getAttribute("aria-expanded")).toBe("true");
     expect(container.textContent).toContain("Codex quota pools");

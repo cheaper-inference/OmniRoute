@@ -92,6 +92,7 @@ describe("Provider collection views and pagination", () => {
       <CollectionLayout
         view="table"
         columns={3}
+        label="Accounts"
         headers={["Account", "Status", "Quota", "Actions"]}
       >
         <ConnectionRow {...props} />
@@ -132,13 +133,16 @@ describe("Provider collection views and pagination", () => {
         <CollectionLayout
           view={view}
           columns={3}
+          label="Accounts"
           headers={["Account", "Status", "Quota", "Actions"]}
         >
           <ConnectionRow {...props} />
         </CollectionLayout>
       );
-      expect(screen.getAllByRole("meter")).toHaveLength(1);
-      expect(screen.getByRole("meter", { name: "7d" }).getAttribute("aria-valuenow")).toBe("50");
+      expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+      expect(screen.getByRole("progressbar", { name: "7d" }).getAttribute("aria-valuenow")).toBe(
+        "50"
+      );
       expect(screen.queryByText("5h")).toBeNull();
     });
   }

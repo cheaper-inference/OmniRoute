@@ -3,6 +3,7 @@
 import {
   CollectionViewControls,
   CollectionPagination,
+  CollectionFiltersPopover,
   OptionalCollectionLayout,
   type CollectionView,
   type CollectionPageSize,
@@ -234,6 +235,7 @@ export default function ConnectionsListPanel({
   const layoutProps = {
     view: viewMode,
     columns,
+    label: providerText(t, "accounts", "Accounts"),
     headers: [
       providerText(t, "accountColumn", "Account"),
       providerText(t, "statusColumn", "Status"),
@@ -402,14 +404,9 @@ export default function ConnectionsListPanel({
   const searchToolbar = providerId === "codex" && (
     <div className="mb-3 grid grid-cols-1 items-center gap-3 rounded-xl border border-border bg-surface p-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
       {accountSearchInput}
-      <details className="relative rounded-lg border border-border px-3 py-2 text-sm">
-        <summary className="cursor-pointer font-medium">
-          {providerText(t, "collectionFilters", "Filters")}
-        </summary>
-        <div className="absolute right-0 top-full z-30 mt-2 flex w-72 max-w-[calc(100vw-3rem)] flex-wrap gap-2 rounded-xl border border-border bg-surface p-3 shadow-xl">
-          {filterPills}
-        </div>
-      </details>
+      <CollectionFiltersPopover label={providerText(t, "collectionFilters", "Filters")}>
+        {filterPills}
+      </CollectionFiltersPopover>
       {listControls}
     </div>
   );

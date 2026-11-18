@@ -83,6 +83,7 @@ describe("Codex account list controls", () => {
     render(<Harness filter="reset_credits" />);
     expect(screen.getAllByTestId("account-row")).toHaveLength(1);
     expect(screen.getByTestId("account-row").textContent).toBe("Account 3");
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
     fireEvent.click(screen.getByRole("button", { name: "Inactive" }));
     expect(screen.getAllByTestId("account-row")[0].textContent).toBe("Account 1");
   });

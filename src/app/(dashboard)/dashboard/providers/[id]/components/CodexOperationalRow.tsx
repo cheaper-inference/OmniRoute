@@ -41,21 +41,23 @@ function QuotaCell({
           <span className="font-normal text-text-muted">{percent === null ? "" : usedLabel}</span>
         </span>
       </div>
-      <div
-        className="h-1.5 overflow-hidden rounded-full bg-bg-subtle"
-        role={percent === null ? undefined : "meter"}
-        aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent ?? undefined}
-      >
-        {percent !== null && (
+      {percent === null ? (
+        <div className="h-1.5 rounded-full bg-bg-subtle" />
+      ) : (
+        <div
+          className="h-1.5 overflow-hidden rounded-full bg-bg-subtle"
+          role="progressbar"
+          aria-label={label}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+        >
           <div
             className={`h-full rounded-full ${percent >= 95 ? "bg-error" : percent >= 80 ? "bg-warning" : "bg-success"}`}
             style={{ width: `${percent}%` }}
           />
-        )}
-      </div>
+        </div>
+      )}
       <div className="text-[11px] tabular-nums text-text-muted">
         {quota.resetAt ? (
           <time dateTime={quota.resetAt} title={new Date(quota.resetAt).toLocaleString(locale)}>

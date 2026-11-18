@@ -2,8 +2,10 @@
 
 import type { ComponentType, ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
 import { Table } from "@omniroute/ui-kit/table";
 import { Button, Select } from "@/shared/components";
+import { cn } from "@/shared/utils/cn";
 import { providerText } from "../providerPageHelpers";
 
 export type CollectionView = "list" | "cards" | "table";
@@ -146,6 +148,8 @@ type CollectionLayoutProps = {
   view: CollectionView;
   columns: number;
   headers: string[];
+  /** Translated accessible name of the table view (the kit scroll region and scrollbar). */
+  label: string;
   children: ReactNode;
   empty?: boolean;
   className?: string;
@@ -155,26 +159,31 @@ export function CollectionLayout({
   view,
   columns,
   headers,
+  label,
   children,
   empty = false,
 }: CollectionLayoutProps) {
   if (empty) return <div className="rounded-lg border border-border">{children}</div>;
   if (view === "table")
     return (
-      <div className="max-w-full overflow-x-auto rounded-lg border border-border">
-        <Table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="bg-bg-subtle">
-            <tr>
-              {headers.map((h) => (
-                <th key={h} scope="col" className="px-4 py-3 font-medium text-text-muted">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">{children}</tbody>
-        </Table>
-      </div>
+      // The surrounding card is the only frame: the kit container scrolls without a border.
+      <Table
+        className="w-full min-w-[800px] text-left text-sm"
+        containerClassName="max-w-full border-0"
+        scrollLabel={label}
+        scrollbarLabel={label}
+      >
+        <thead className="bg-bg-subtle">
+          <tr>
+            {headers.map((h) => (
+              <th key={h} scope="col" className="px-4 py-3 font-medium text-text-muted">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">{children}</tbody>
+      </Table>
     );
   return (
     <div
@@ -186,6 +195,34 @@ export function CollectionLayout({
     >
       {children}
     </div>
+  );
+}
+
+/** Collection filters in a kit Popover (portaled, collision-aware, Escape/outside press). */
+export function CollectionFiltersPopover({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" icon="filter_list">
+          {label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        aria-label={label}
+        className={cn("flex w-72 max-w-[calc(100vw-3rem)] flex-wrap gap-2 p-3", className)}
+      >
+        {children}
+      </PopoverContent>
+    </Popover>
   );
 }
 

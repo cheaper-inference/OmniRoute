@@ -23,6 +23,7 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ProviderActionsMenu from "./ProviderActionsMenu";
+import { CollectionFiltersPopover } from "./ProviderCollectionControls";
 import ModelCompatPopover from "./ModelCompatPopover";
 import {
   ContextWindowOverrideEditButton,
@@ -267,14 +268,12 @@ export function ModelVisibilityToolbar({
       <>
         <div className="mb-3 grid grid-cols-1 items-center gap-3 rounded-xl border border-border bg-surface p-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
           {search}
-          <details className="relative rounded-lg border border-border px-3 py-2 text-sm">
-            <summary className="cursor-pointer font-medium">
-              {providerText(t, "collectionFilters", "Filters")}
-            </summary>
-            <div className="absolute right-0 top-full z-30 mt-2 flex w-80 max-w-[calc(100vw-3rem)] flex-wrap items-center gap-3 rounded-xl border border-border bg-surface p-3 shadow-xl">
-              {filters}
-            </div>
-          </details>
+          <CollectionFiltersPopover
+            label={providerText(t, "collectionFilters", "Filters")}
+            className="w-80 items-center gap-3"
+          >
+            {filters}
+          </CollectionFiltersPopover>
           {collectionControls}
         </div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">

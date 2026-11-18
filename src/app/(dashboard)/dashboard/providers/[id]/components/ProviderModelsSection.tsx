@@ -595,6 +595,7 @@ export default function ProviderModelsSection({
             ? {
                 view: collectionView,
                 columns,
+                label: providerText(t, "availableModels", "Available Models"),
                 headers: [
                   providerText(t, "modelColumn", "Model"),
                   providerText(t, "modelDetailsColumn", "Details & actions"),
