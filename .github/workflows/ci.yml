@@ -155,9 +155,16 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
+      # External state (the npm advisory database; "externalState" in
+      # config/quality/release-green-static-profile.json): advisory on an omni-queue candidate,
+      # so an advisory published during the batch's CI cannot throw the batch out.
       - run: npm run audit:deps
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
+      # The cache, the JSON report and its upload run even when a step above failed:
+      # quality-gate still runs on a failed lint job and its ESLint download is strict, so a
+      # missing artifact would skip the complexity / duplication / dead-code ratchets too.
       - name: Restore ESLint file cache
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && !cancelled()
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
@@ -172,6 +179,7 @@ jobs:
       # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
       # a second cold full-tree pass for eslintWarnings ratchet counts.
       - name: ESLint (JSON report)
+        if: ${{ !cancelled() }}
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
@@ -236,6 +244,13 @@ jobs:
         env:
           CANDIDATE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: npm run check:ai-attribution -- --range "$CANDIDATE_BASE..$GITHUB_SHA"
+      # Release-Green holds test-masking as a hard gate; on pull requests it runs in PR Test
+      # Policy, which never runs on a push. A candidate is judged here, against its base.
+      - name: Detect test-masking against the omni-queue candidate base
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
+        env:
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+        run: npm run check:test-masking
       # A test parked in vitest.config.ts's exclude list does not run, and looks like
       # coverage to whoever reads the tree. 62 files accumulated behind a comment pointing
       # at #8618 — closed in August while the list grew to 62; 51 of them passed when
@@ -384,12 +399,19 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
+      # Kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down. The
+      # pre-commit hook runs it too, but `git commit --no-verify` skips the hook.
+      - name: Type scale ratchet
+        run: npm run check:type-scale-ratchet -- --ratchet
       # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
       # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
       # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)
       # é skip gracioso com exit 0 — security-events:read no job-level permissions.
+      # External state (the repository's open code-scanning alerts): advisory on an omni-queue
+      # candidate, blocking everywhere else.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append summary
@@ -517,9 +539,11 @@ jobs:
       # failure in the advisory-scanner step above surfaces here as
       # `vulnCount=INCOMPLETE reason=binary-absent`. See the CVE-variance note in
       # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
-      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
+      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount. That variance
+      # is external state: advisory on an omni-queue candidate, blocking everywhere else.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
         run: npm run check:vuln-ratchet -- --ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
       # BLOCKING ratchet (Etapa 2): zizmorFindings must not regress vs the baseline.
       # ONLY zizmor is ratcheted — actionlint findings are reported, not blocking.
       # Both tools must complete with valid reports. Missing/broken scanners or

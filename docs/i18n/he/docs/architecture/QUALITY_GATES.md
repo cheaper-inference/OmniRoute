@@ -118,28 +118,29 @@ Mergify כותבת את תקציר התור שלה לתיאור הטיוטה, ו
 
 רץ אחרי `test-coverage`. בלוקים מתמזגים על כישלון.
 
-| תַסרִיט                      | מאמת                                                                                                                                  | חסימה                     |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `quality:collect`            | פולט `quality-metrics.json` (ספירת אזהרות ESLint, סיקור מדוח רסיס ממוזג)                                                              | כן (במעלה הזרם של הראצ'ט) |
-| `quality:ratchet`            | כל מדד ב- `quality-baseline.json` לא נסוג (ESLint warnings ≤ baseline; כיסוי ≥ baseline)                                              | כֵּן                      |
-| `check:duplication`          | שכפול קוד (jscpd@4) אינו עולה על קו הבסיס ב- `quality-baseline.json`                                                                  | כֵּן                      |
-| `check:complexity`           | המורכבות הציקלומטית ברמת הקובץ אינה חורגת מהמכסה (core ESLint `complexity` + `max-lines-per-function`)                                | כֵּן                      |
-| `check:cognitive-complexity` | מורכבות קוגניטיבית מחגר (`eslint-plugin-sonarjs`) — נפרד ESLint pass; CI מריץ את שניהם ממוזגים כשלב `check:complexity-ratchets` היחיד | כֵּן                      |
-| `check:dead-code`            | יצוא / קבצים לא בשימוש (knip) אינו נסוג לעומת קו הבסיס                                                                                | כֵּן                      |
-| `check:compression-budget`   | רצפות חסכון באסימון דחיסה של תקציב — לכל מנוע אסורות לסגת                                                                             | כֵּן                      |
-| `check:type-coverage`        | ראצ'ט שהוקלד באחוזים (`type-coverage`) אינו נסוג; סובלת במידה רבה `typecheck:noimplicit:core`                                         | כֵּן                      |
-| `check:codeql-ratchet`       | ספירת ההתראות הפתוחה CodeQL אינה נסוגה (קורא דרך `gh api`; דילוג חינני ללא אסימון) קצב רענון — והדק ידני: ראה "CodeQL ratchet" למטה   | כֵּן                      |
+| תַסרִיט                      | מאמת                                                                                                                                          | חסימה                     |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `quality:collect`            | פולט `quality-metrics.json` (ספירת אזהרות ESLint, סיקור מדוח רסיס ממוזג)                                                                      | כן (במעלה הזרם של הראצ'ט) |
+| `quality:ratchet`            | כל מדד ב- `quality-baseline.json` לא נסוג (ESLint warnings ≤ baseline; כיסוי ≥ baseline)                                                      | כֵּן                      |
+| `check:duplication`          | שכפול קוד (jscpd@4) אינו עולה על קו הבסיס ב- `quality-baseline.json`                                                                          | כֵּן                      |
+| `check:complexity`           | המורכבות הציקלומטית ברמת הקובץ אינה חורגת מהמכסה (core ESLint `complexity` + `max-lines-per-function`)                                        | כֵּן                      |
+| `check:cognitive-complexity` | מורכבות קוגניטיבית מחגר (`eslint-plugin-sonarjs`) — נפרד ESLint pass; CI מריץ את שניהם ממוזגים כשלב `check:complexity-ratchets` היחיד         | כֵּן                      |
+| `check:dead-code`            | יצוא / קבצים לא בשימוש (knip) אינו נסוג לעומת קו הבסיס                                                                                        | כֵּן                      |
+| `check:compression-budget`   | רצפות חסכון באסימון דחיסה של תקציב — לכל מנוע אסורות לסגת                                                                                     | כֵּן                      |
+| `check:type-coverage`        | ראצ'ט שהוקלד באחוזים (`type-coverage`) אינו נסוג; סובלת במידה רבה `typecheck:noimplicit:core`                                                 | כֵּן                      |
+| `check:codeql-ratchet`       | ספירת ההתראות הפתוחה CodeQL אינה נסוגה (קורא דרך `gh api`; דילוג חינני ללא אסימון) קצב רענון — והדק ידני: ראה "CodeQL ratchet" למטה           | כֵּן                      |
+| `check:type-scale-ratchet`   | סולם סוג ערכה: גדלים מתחת ל-12 פיקסלים ו- `font-bold` ב- `src/` רק יורדים (`typeScaleSubFloorSizes`, `typeScaleFontBold`); גם ב-pre-commit וו | כֵּן                      |
 
 ### עבודה: `quality-extended`
 
-כל התפקיד הוא מייעץ (`continue-on-error: true`). הראצ'טים מבוססי npm פועלים באמת; הסורקים החיצוניים מתקינים באמצעות `gh release download` ודילוג עצמי (יציאה 0) כאשר עדיין חסר קובץ בינארי.
+עבודה מעורבת, ללא `continue-on-error` ברמת עבודה: צעד שעובר את `--ratchet` נכשל בעבודה ברגרסיה מדודה לעומת `quality-baseline.json`. רק `check:circular-deps` ושלב התקנת הסורק הם ייעוץ ( `continue-on-error: true` ברמת צעד). הסורקים החיצוניים מתקינים באמצעות `gh release download`; `check:secrets` דילוג עצמי (יציאה 0) כאשר gitleaks נעדר, בעוד `check:vuln-ratchet`, `check:workflows` ו- `check:openapi-breaking` נכשלים סגורים כאשר המדידה שלהם חסרה.
 
 | תַסרִיט                  | מאמת                                                                                                                                                                                     | חסימה                              |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | `check:circular-deps`    | אין תלות מעגלית (dpdm)                                                                                                                                                                   | **מְיָעֵץ**                        |
-| `check:bundle-size`      | גודל החבילה אינו חורג מהמכסה                                                                                                                                                             | **מְיָעֵץ**                        |
-| `check:secrets`          | סריקה סודית (gitleaks) — מדלג אם בינארי נעדר                                                                                                                                             | **מְיָעֵץ**                        |
-| `check:vuln-ratchet`     | פרצות תלות (osv-scanner) אינן נסוגות — `--ratchet` נכשל כ- INCOMPLETE (יציאה 2) אם לא נמדדת                                                                                              | **מְיָעֵץ**                        |
+| `check:bundle-size`      | גודל החבילה אינו חורג מהמכסה; גם גודל בלתי מדיד נכשל                                                                                                                                     | **חסימה עם --ratchet**             |
+| `check:secrets`          | סריקה סודית (gitleaks) — מדלג אם בינארי נעדר                                                                                                                                             | **חסימה עם --ratchet**             |
+| `check:vuln-ratchet`     | פרצות תלות (osv-scanner) אינן נסוגות — `--ratchet` נכשל כ- INCOMPLETE (יציאה 2) אם לא נמדדת                                                                                              | **חסימה עם --ratchet**             |
 | `check:workflows`        | מוך זרימת עבודה (actionlint + zizmor); סורקי missing/broken, דוחות לא חוקיים או קו בסיס מחגר חסר נכשלים כ- INCOMPLETE. ממצאים תקפים פועלים בהתאם למדיניות strict/advisory/ratchet שנבחרה | נדרש ביצוע; חוסם מחגר zizmor ב- CI |
 | `check:openapi-breaking` | חוזה API ציבורי נגד התחייבויות אירוע מוצמדות (PR מיזוג-בסיס, push before, merge-group base; scheduled/manual checkout אב ראשון); המדידה הנדרשת נכשלה סגורה                               | **חסימה עם --ratchet**             |
 

@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI naa n gbe `.env` laifọwọyi lati `~/.omniroute/.env` tabi `./.env`. A `./.env` ninu iwe ilana iṣẹ le ṣeto atokọ iyọọda kukuru ti awọn bọtini (awọn ibudo, `REQUIRE_API_KEY`, agbegbe ati awọn eto awọ); fi ohun gbogbo miiran sinu `~/.omniroute/.env`. Wo [awọn adehun ifilọlẹ CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI naa n gbe `.env` laifọwọyi lati `~/.omniroute/.env` tabi `./.env`. A `./.env` ninu iwe ilana iṣẹ le ṣeto nikan atokọ iyọọda kukuru ti awọn bọtini (`REQUIRE_API_KEY`, agbegbe, agbegbe aago ati awọn eto awọ, kii ṣe awọn ebute oko oju omi); fi ohun gbogbo miiran sinu `~/.omniroute/.env`. Wo [awọn adehun ifilọlẹ CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ipo atẹ
 
@@ -600,7 +600,7 @@ post_install() {
 | Ayípadà                                 | Aiyipada                 | Apejuwe                                                                                                                                   |
 | --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`                            | _(ti ipilẹṣẹ laifọwọyi)_ | JWT wíwọlé ìkọ̀kọ̀ — laifọwọyi ti ipilẹṣẹ lori ṣiṣe akọkọ ati tẹsiwaju si `server.env`; ṣeto ni kedere nigbati awọn data liana ni ephemeral |
-| `INITIAL_PASSWORD`                      | _(a ko ṣeto)_            | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
+| `INITIAL_PASSWORD`                      | _(a ko ṣeto) _           | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
 | `DATA_DIR`                              | `~/.omniroute`           | Itọsọna data (db, lilo, awọn akọọlẹ)                                                                                                      |
 | `PORT`                                  | aiyipada ilana           | Ibudo iṣẹ (`20128` ninu awọn apẹẹrẹ)                                                                                                      |
 | `HOSTNAME`                              | aiyipada ilana           | Di agbalejo (awọn aiyipada Docker si `0.0.0.0`)                                                                                           |
@@ -610,7 +610,7 @@ post_install() {
 | `API_KEY_SECRET`                        | _(ti ipilẹṣẹ laifọwọyi)_ | Aṣiri HMAC fun awọn bọtini API ti ipilẹṣẹ — ti ipilẹṣẹ laifọwọyi ni ṣiṣe akọkọ ati tẹsiwaju si `server.env`                               |
 | `REQUIRE_API_KEY`                       | `false`                  | Fi agbara mu Bọtini API Bearer lori `/v1/*`                                                                                               |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | Gba awọn olumulo dasibodu ti o ni idaniloju lati ṣafihan awọn iye bọtini API ti o fipamọ ni kikun lori ibeere                             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | cadence isọdọtun ẹgbẹ olupin fun data Awọn opin Olupese ti a fipamọ; awọn bọtini isọdọtun UI ṣi nfa amuṣiṣẹpọ afọwọṣe                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Cadence isọdọtun ẹgbẹ olupin fun data Awọn opin Ifilelẹ Olupese ti a fipamọ; awọn bọtini isọdọtun UI ṣi nfa amuṣiṣẹpọ afọwọṣe             |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Pa a laifọwọyi SQLite snapshots ṣaaju ki o writes/import/restore; Afowoyi backups si tun ṣiṣẹ                                             |
 | `APP_LOG_TO_FILE`                       | `true`                   | Mu ohun elo ṣiṣẹ ati iṣẹjade iwe ayẹwo si disk                                                                                            |
 | `AUTH_COOKIE_SECURE`                    | `false`                  | Fi ipa mu kuki `Secure` auth (lẹhin aṣoju yiyipada HTTPS )                                                                                |
@@ -733,7 +733,7 @@ Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba k
 
 Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ lori 64 ohun kikọ pẹlu ko si eto; iye asopọ kan dinku opin nikan nibiti olupese ko ni ọkan ti a ṣe sinu (asopọ Azure kan lẹhin ẹnu-ọna ti o muna, tabi ipade ibaramu aṣa).
+- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ ju awọn ohun kikọ 64 lọ laisi eto. Iye asopọ kan rọpo Azure OpenAI / Azure AI Foundry aiyipada (asopọ Azure kan lẹhin ẹnu-ọna ti o muna) ati ṣeto opin fun ipade ibaramu aṣa; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code pa opin iforukọsilẹ wọn mọ ki o foju rẹ.
 - `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ ni kikun jẹ akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

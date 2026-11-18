@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) និង OpenCode (`x-opencode-session`) �
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-កន្សោម `sed` ដកព័ត៌មានសម្ងាត់ណាមួយដែលបានបង្កប់នៅក្នុង URL ពីចម្ងាយ។ ផ្នែកបន្ថែម IDE បើកដំណើរការកូដ Claude ដោយគ្មានសែលរបស់អ្នក ដូច្នេះវគ្គរបស់ពួកគេត្រឡប់ទៅថតការងារវិញ។
+កន្សោម `sed` ច្រូតព័ត៌មានអត្តសញ្ញាណ ខ្សែសំណួរ និងបំណែកដែលបានបង្កប់នៅក្នុង URL ពីចម្ងាយ ហើយបឋមកថានៅក្នុង `ANTHROPIC_CUSTOM_HEADERS` ត្រូវបានរក្សាទុក។ ផ្នែកបន្ថែម IDE បើកដំណើរការ Claude Code ដោយគ្មានសែលរបស់អ្នក ដូច្នេះវគ្គរបស់ពួកគេត្រលប់ទៅថតការងារវិញ។
 
 ---
 

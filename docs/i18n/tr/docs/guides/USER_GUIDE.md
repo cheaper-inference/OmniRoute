@@ -359,7 +359,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI `.env` `~/.omniroute/.env` veya `./.env` otomatik olarak yükler. Çalışma dizinindeki bir `./.env` anahtarların (bağlantı noktaları, `REQUIRE_API_KEY`, yerel ayar ve renk ayarları) yalnızca kısa bir izin verilenler listesini ayarlayabilir; geri kalan her şeyi `~/.omniroute/.env` koyun. [CLI lansman sözleşmelerine](CLI-LAUNCH-CONTRACTS.md#working-directory-env) bakın.
+CLI `.env` `~/.omniroute/.env` veya `./.env` otomatik olarak yükler. Çalışma dizinindeki bir `./.env` anahtarların yalnızca kısa bir izin verilenler listesini (`REQUIRE_API_KEY`, yerel ayar, saat dilimi ve renk ayarları, bağlantı noktaları değil) ayarlayabilir; geri kalan her şeyi `~/.omniroute/.env` koyun. [CLI lansman sözleşmelerine](CLI-LAUNCH-CONTRACTS.md#working-directory-env) bakın.
 
 ### Tepsi modu
 
@@ -585,28 +585,28 @@ post_install() {
 
 ### Ortam Değişkenleri
 
-| Değişken                                | Varsayılan                      | Tanım                                                                                                                                           |
-| --------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(otomatik olarak oluşturulan)_ | JWT imzalama sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur; veri dizini geçici olduğunda açıkça ayarlayın    |
-| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_                 | İlk giriş şifresi. npm/source kurulumları `CHANGEME` ile başlar: değiştirin. Ayarlanmadı: katılım sihirbazı                                     |
-| `DATA_DIR`                              | `~/.omniroute`                  | Veri dizini (db, kullanım, günlükler)                                                                                                           |
-| `PORT`                                  | çerçeve varsayılanı             | Servis portu (örneklerde `20128` )                                                                                                              |
-| `HOSTNAME`                              | çerçeve varsayılanı             | Ana makineyi bağlayın (Docker varsayılan olarak `0.0.0.0`)                                                                                      |
-| `NODE_ENV`                              | çalışma zamanı varsayılanı      | Dağıtım için `production` ayarlayın                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Genel taban URL kontrol paneline çıktı ve sunucuya sunuldu (eski `BASE_URL` yerini aldı)                                                        |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Bulut senkronizasyonu uç noktası tabanı URL (eski `CLOUD_URL` yerine geçer)                                                                     |
-| `API_KEY_SECRET`                        | _(otomatik olarak oluşturulan)_ | oluşturulan API anahtarları için HMAC sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur                          |
-| `REQUIRE_API_KEY`                       | `false`                         | `/v1/*` Taşıyıcı API anahtarını zorunlu kıl                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Kimliği doğrulanmış kontrol paneli kullanıcılarının talep üzerine depolanan API anahtar değerlerinin tamamını ortaya çıkarmasına izin ver       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Önbelleğe alınan Sağlayıcı Sınırları verileri için sunucu tarafı yenileme temposu; UI yenileme düğmeleri hala manuel senkronizasyonu tetikliyor |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | writes/import/restore önce otomatik SQLite anlık görüntülerini devre dışı bırakın; manuel yedeklemeler hala çalışıyor                           |
-| `APP_LOG_TO_FILE`                       | `true`                          | Diske uygulama ve denetim günlüğü çıktısını etkinleştirir                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                         | `Secure` kimlik doğrulama çerezini zorla ( HTTPS ters proxy'nin arkasında)                                                                      |
-| `CLOUDFLARED_BIN`                       | ayarlanmamış                    | Yönetilen indirme yerine mevcut `cloudflared` ikili programını kullanın                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Yönetilen Hızlı Tüneller için aktarım (`http2`, `quic` veya `auto`)                                                                             |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                           | MBNode.js yığın sınırı                                                                                                                          |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimum istem önbellek girişleri                                                                                                               |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimum anlamsal önbellek girişi                                                                                                               |
+| Değişken                                | Varsayılan                      | Tanım                                                                                                                                            |
+| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(otomatik olarak oluşturulan)_ | JWT imzalama sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur; veri dizini geçici olduğunda açıkça ayarlayın     |
+| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_                 | İlk giriş şifresi. npm/source kurulumları `CHANGEME` ile başlar: değiştirin. Ayarlanmadı: katılım sihirbazı                                      |
+| `DATA_DIR`                              | `~/.omniroute`                  | Veri dizini (db, kullanım, günlükler)                                                                                                            |
+| `PORT`                                  | çerçeve varsayılanı             | Servis portu (örneklerde `20128` )                                                                                                               |
+| `HOSTNAME`                              | çerçeve varsayılanı             | Ana makineyi bağlayın (Docker varsayılan olarak `0.0.0.0`)                                                                                       |
+| `NODE_ENV`                              | çalışma zamanı varsayılanı      | Dağıtım için `production` ayarlayın                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Genel taban URL kontrol paneline çıktı ve sunucuya sunuldu (eski `BASE_URL` yerini aldı)                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Bulut senkronizasyonu uç noktası tabanı URL (eski `CLOUD_URL` yerine geçer)                                                                      |
+| `API_KEY_SECRET`                        | _(otomatik olarak oluşturulan)_ | oluşturulan API anahtarları için HMAC sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur                           |
+| `REQUIRE_API_KEY`                       | `false`                         | `/v1/*` Taşıyıcı API anahtarını zorunlu kıl                                                                                                      |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Kimliği doğrulanmış kontrol paneli kullanıcılarının talep üzerine depolanan API anahtar değerlerinin tamamını ortaya çıkarmasına izin ver        |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Önbelleğe alınmış Sağlayıcı Sınırları verileri için sunucu tarafı yenileme temposu; UI yenileme düğmeleri hala manuel senkronizasyonu tetikliyor |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | writes/import/restore önce otomatik SQLite anlık görüntülerini devre dışı bırakın; manuel yedeklemeler hala çalışıyor                            |
+| `APP_LOG_TO_FILE`                       | `true`                          | Diske uygulama ve denetim günlüğü çıktısını etkinleştirir                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                         | `Secure` kimlik doğrulama çerezini zorla ( HTTPS ters proxy'nin arkasında)                                                                       |
+| `CLOUDFLARED_BIN`                       | ayarsız                         | Yönetilen indirme yerine mevcut `cloudflared` ikili programını kullanın                                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Yönetilen Hızlı Tüneller için aktarım (`http2`, `quic` veya `auto`)                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                           | MBNode.js yığın sınırı                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimum istem önbellek girişleri                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimum anlamsal önbellek girişi                                                                                                                |
 
 Ortam değişkeni referansının tamamı için [README](../README.md) bakın.
 
@@ -721,7 +721,7 @@ Farklı bir önek seçin (`mygw`, `acme-proxy`). Özel bir düğüme yapılan is
 
 Bu anahtarlar bir bağlantının `providerSpecificData` gider (örneğin `PUT /api/providers/{id}` yoluyla):
 
-- `toolNameMaxLength` (tamsayı, 1–1024) —, ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet formatı uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code zaten ayar olmadan 64 karakterin üzerinde takma adlara sahiptir; bağlantı değeri, yalnızca sağlayıcının yerleşik bir bağlantıya sahip olmadığı durumlarda (daha katı bir ağ geçidinin arkasındaki Azure bağlantısı veya özel uyumlu bir düğüm) sınırı düşürür.
+- `toolNameMaxLength` (tamsayı, 1–1024) —, ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet formatı uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code zaten ayar olmadan 64 karakterin üzerinde takma adlara sahiptir. Bir bağlantı değeri, Azure OpenAI / Azure AI Foundry varsayılanının (daha katı bir ağ geçidinin arkasındaki bir Azure bağlantısı) yerini alır ve özel uyumlu bir düğüm için sınırı belirler; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code kayıt defteri sınırlarını korur ve bunu yok sayar.
 - `quotaEndpoint` — ağ geçidinin quota/credits uç noktası, kontrol paneli kota şeridi ve kotaya duyarlı yönlendirme için okunur. Hem OpenAI hem de Antropik uyumlu bağlantılarda çalışır; tam şekil `open-sse/services/usage/openaiCompatible.ts` belgelenmiştir.
 
 ```json

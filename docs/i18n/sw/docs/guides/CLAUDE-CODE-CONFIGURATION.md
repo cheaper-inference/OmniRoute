@@ -81,18 +81,22 @@ Zote mbili zinasomwa tu kwa maelezo; kamwe hazitumiwi kwa mtoaji huduma za juu.
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Usemi wa `sed` huondoa kitambulisho chochote kilichopachikwa kwenye URL ya mbali. upanuzi wa IDE huzindua Msimbo Claude bila ganda lako, kwa hivyo vipindi vyao vinarudi kwenye saraka ya kufanya kazi.
+Usemi wa `sed` huondoa kitambulisho chochote, kamba ya hoja na kipande kilichopachikwa kwenye kidhibiti cha mbali URL, na vichwa vilivyo tayari katika `ANTHROPIC_CUSTOM_HEADERS` huhifadhiwa. IDE huzindua Msimbo Claude bila ganda lako, kwa hivyo vipindi vyao vinarudi kwenye saraka ya kufanya kazi.
 
 ---
 

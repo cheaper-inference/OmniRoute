@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) และ OpenCode (`x-opencode-session`) �
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-นิพจน์ `sed` จะตัดข้อมูลรับรองใดๆ ที่ฝังอยู่ใน URL ระยะไกล ส่วนขยาย IDE เปิดใช้โค้ด Claude โดยไม่ต้องใช้เชลล์ ดังนั้นเซสชันของส่วนขยายจึงกลับไปที่ไดเร็กทอรีการทำงาน
+นิพจน์ `sed` จะตัดข้อมูลประจำตัว สตริงการสืบค้น และแฟรกเมนต์ที่ฝังอยู่ใน URL ระยะไกล และส่วนหัวที่อยู่ใน `ANTHROPIC_CUSTOM_HEADERS` จะถูกเก็บไว้ ส่วนขยาย IDE เปิดใช้ Claude Code โดยไม่ต้องใช้เชลล์ ดังนั้นเซสชันของส่วนขยายจึงกลับไปที่ไดเร็กทอรีการทำงาน
 
 ---
 

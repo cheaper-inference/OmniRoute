@@ -164,11 +164,11 @@
     "notificationAnnouncement": "Pranešimas: {message}",
     "codeCopying": "Kopijuojama…",
     "codeCopiedAnnouncement": "Kodas nukopijuotas į iškarpinę",
-    "codeCopyError": "Nepavyko nukopijuoti kodo. Pasirinkite jį ir bandykite dar kartą.",
+    "codeCopyError": "Nepavyko nukopijuoti kodo. Pažymėkite jį ir bandykite dar kartą.",
     "codeCopyErrorRetry": "Nepavyko nukopijuoti kodo. Bandykite dar kartą.",
     "codeRegionLabel": "{language} kodas",
     "modalWizardProgress": "Veiksmai",
-    "modalWizardGoBackTo": "Eiti atgal į",
+    "modalWizardGoBackTo": "Grįžti į",
     "modalWizardGoTo": "Eiti į",
     "modalWizardCompleted": "užbaigta",
     "toggleColumns": "Rodyti/slėpti stulpelius",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Tarpinis serveris sustabdytas arba paleidžiamas iš naujo.",
     "expandSidebar": "Išskleisti šoninę juostą",
     "collapseSidebar": "Sutraukti šoninę juostą",
-    "toggleSidebar": "Perjungti šoninę juostą",
+    "toggleSidebar": "Rodyti arba slėpti šoninę juostą",
     "createTheme": "Kurti temą",
     "chooseColor": "Pasirinkite vieną spalvą",
     "cliToolsShort": "Įrankiai",
@@ -1971,10 +1971,10 @@
     "autoCombo": "Automatinis derinys",
     "config": "Konfigūracija",
     "connect": "Prisijungti",
-    "intel": "Intel",
+    "intel": "Įžvalgos",
     "mediaProviders": "Medijos teikėjai",
     "offers": "Pasiūlymai",
-    "onboarding": "Įvadinis procesas"
+    "onboarding": "Pradinis supažindinimas"
   },
   "home": {
     "quickStart": "Sparčioji pradžia",
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "Talpykloje saugomi įvesties žetonai",
-    "inputTokensHint": "Neįtraukiami talpyklos skaitymai. Įrašai į talpyklą lieka įvesties žetonais.",
+    "inputTokensHint": "Talpyklos skaitymai neįtraukiami. Talpyklos įrašymai lieka įvesties žetonais.",
     "inputSplitUnavailable": "Įvesties išskaidymas nepasiekiamas, nes talpyklos skaitymo duomenys yra neišsamūs arba nenuoseklūs.",
-    "cachedInputTokensHint": "Pateikiami tik talpyklos skaitymai, jau įtraukti į bendrą įvestį.",
+    "cachedInputTokensHint": "Tik pateikti talpyklos skaitymai, jau įtraukti į bendrą įvesties kiekį.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Naudojimo analitika",
     "tokenDisplayCompact": "Glaustas",
@@ -13765,7 +13765,7 @@
     "description": "Kiekvieno teikėjo ir modelio srautas, delsa bei sėkmės rodikliai",
     "combo": "Derinys",
     "toggleModels": "Rodyti {provider} modelius",
-    "modelsTable": "Modeliai, skirti {provider}",
+    "modelsTable": "„{provider}“ modeliai",
     "windowSince": "Nuo {date}"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "Registruoti galinį tašką arba pakeisti schemą",
     "schema": "Schema pagal OpenAPI 3",
     "download": "Atsisiųsti išvesties failą",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Naujas generavimas",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: pirminė užduotis vis dar gali būti vykdoma. Prieš pradėdami kitą generavimą, atkurkite pradinį kvitą.",
+    "recover": "Atkurti pradinę pateiktį",
+    "recoveryRecord": "Išsaugota pateiktis",
+    "recoveryMismatch": "Atkūrimui po įkėlimo iš naujo reikalingas pradinis ryšys ir visiškai sutampantis juodraštis. Nauja užklausa nebuvo išsiųsta.",
+    "recoveryHelp": "Atkuriant pakartotinai naudojami pradinis turinys ir raktas. Įkėlę iš naujo, atkurkite tikslų galinį tašką, ryšį, perdavimo būdą ir įvestį. Naujas generavimas pradeda atskirą apmokestinamą užklausą. Šiame skirtuke saugoma iki 20 kvitų.",
+    "streamIncomplete": "Srautas nutrūko negavus užbaigto galutinio įvykio. Nežinoma, ar pirminė užduotis baigta.",
+    "streamError": "Pirminis srautas pranešė apie klaidą. Gauti failai tebėra pasiekiami."
   }
 }

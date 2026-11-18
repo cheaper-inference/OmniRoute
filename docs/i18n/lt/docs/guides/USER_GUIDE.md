@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (prievadai, `REQUIRE_API_KEY`, lokalės ir spalvų parametrai); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (`REQUIRE_API_KEY`, lokalę, laiko juostos ir spalvų parametrus, o ne prievadus); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Dėklo režimas
 
@@ -600,7 +600,7 @@ post_install() {
 
 | Kintamasis                              | Numatytoji                      | Aprašymas                                                                                                                                                      |
 | --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiškai sugeneruotas)_   | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
+| `JWT_SECRET`                            | _(automatiškai sugeneruota)_    | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
 | `INITIAL_PASSWORD`                      | _(nustatyta)_                   | Pirmasis prisijungimo slaptažodis. npm/source diegimas prasideda `CHANGEME`: pakeiskite jį. Atšaukta: priėmimo vedlys                                          |
 | `DATA_DIR`                              | `~/.omniroute`                  | Duomenų katalogas (db, naudojimas, žurnalai)                                                                                                                   |
 | `PORT`                                  | numatytosios sistemos           | Aptarnavimo prievadas (`20128` pavyzdžiuose)                                                                                                                   |
@@ -608,7 +608,7 @@ post_install() {
 | `NODE_ENV`                              | vykdymo laikas pagal nutylėjimą | Nustatyti `production` diegimui                                                                                                                                |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Viešas bazinis URL pateiktas prietaisų skydelyje ir rodomas serveryje (pakeičia seną `BASE_URL`)                                                               |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Debesų sinchronizavimo pabaigos taško bazė URL (pakeičia seną `CLOUD_URL`)                                                                                     |
-| `API_KEY_SECRET`                        | _(automatiškai sugeneruotas)_   | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
+| `API_KEY_SECRET`                        | _(automatiškai sugeneruota)_    | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
 | `REQUIRE_API_KEY`                       | `false`                         | Įgalinkite nešiklio API klavišą `/v1/*`                                                                                                                        |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                         | Leiskite autentifikuotiems prietaisų skydelio naudotojams pareikalavus atskleisti visas išsaugotas API raktų reikšmes                                          |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Talpykloje saugomų teikėjo apribojimų duomenų atnaujinimo dažnis serverio pusėje; UI atnaujinimo mygtukai vis tiek suaktyvina rankinį sinchronizavimą          |
@@ -734,7 +734,7 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 Šie klavišai patenka į ryšio `providerSpecificData` (pavyzdžiui, per `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirtas su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code jau slapyvardžiai yra daugiau nei 64 simboliai be jokio nustatymo; ryšio vertė sumažina ribą tik tada, kai teikėjas neturi įmontuoto (Azure ryšio už griežtesnio šliuzo arba tinkinto suderinamo mazgo).
+- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirtas su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code jau yra daugiau nei 64 simbolių slapyvardžiai be jokio nustatymo. Ryšio reikšmė pakeičia Azure OpenAI / Azure AI Foundry numatytąjį nustatymą (Azure ryšį už griežtesnio šliuzo) ir nustato tinkinto suderinamo mazgo ribą; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code laikosi savo registro limito ir jo nepaiso.
 - `quotaEndpoint` — šliuzo quota/credits galinis taškas, skaitykite prietaisų skydelio kvotų juostą ir kvotą žinantį maršrutą. Veikia su OpenAI ir Anthropic suderinamomis jungtimis; visa forma yra dokumentuota `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -820,7 +820,7 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### Cloudflare greitasis tunelis
 
-- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
+- Galima įsigyti** Prietaisų skydelio → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
 - Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
 - Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
 - Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio

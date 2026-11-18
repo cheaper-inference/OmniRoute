@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, definições de localidade e cores); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (`REQUIRE_API_KEY`, localização, fuso horário e definições de cor, e não as portas); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -411,7 +411,7 @@ Ative a inicialização no próximo login da máquina:
 omniroute autostart enable
 ```
 
-A inicialização automática utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
+O arranque automático utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
 
 Desative a inicialização no login:
 
@@ -736,7 +736,7 @@ Escolha um prefixo distinto (`mygw`, `acme-proxy`). Se os pedidos para um nó pe
 
 Estas chaves vão para o `providerSpecificData` de uma ligação (por exemplo, através `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (inteiro, 1–1024) — para ligações compatíveis com o formato de chat OpenAI cuja gateway rejeita nomes de ferramentas longos. Os nomes mais longos são enviados como aliases curtos e restaurados na resposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code já alias de nomes com mais de 64 caracteres sem configuração; um valor de ligação reduz o limite apenas quando o fornecedor não tem um interno (uma ligação Azure atrás de um gateway mais rigoroso ou um nó compatível personalizado).
+- `toolNameMaxLength` (inteiro, 1–1024) — para ligações compatíveis com o formato de chat OpenAI cuja gateway rejeita nomes de ferramentas longos. Os nomes mais longos são enviados como aliases curtos e restaurados na resposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code já alias de nomes com mais de 64 caracteres sem configuração. Um valor de ligação substitui o padrão Azure OpenAI /Azure AI Foundry (uma ligação Azure atrás de um gateway mais rigoroso) e define o limite para um nó compatível personalizado; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code mantêm o seu limite de registo e ignoram-no.
 - `quotaEndpoint` — o endpoint quota/credits do gateway, lê a gama de quotas do painel e o encaminhamento com reconhecimento de quotas. Funciona em ligações compatíveis com OpenAI e Anthropic; a forma completa está documentada em `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

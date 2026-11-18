@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatycznie ładuje `.env` z `~/.omniroute/.env` lub `./.env`. `./.env` w katalogu roboczym może ustawić tylko krótką listę dozwolonych kluczy (porty, `REQUIRE_API_KEY`, ustawienia regionalne i kolory); umieść wszystko inne w `~/.omniroute/.env`. Zobacz [kontrakty na uruchomienie CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatycznie ładuje `.env` z `~/.omniroute/.env` lub `./.env`. `./.env` w katalogu roboczym może ustawić tylko krótką listę dozwolonych kluczy (`REQUIRE_API_KEY`, ustawienia regionalne, strefa czasowa i ustawienia kolorów, a nie porty); umieść wszystko inne w `~/.omniroute/.env`. Zobacz [kontrakty na uruchomienie CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tryb tacy
 
@@ -607,7 +607,7 @@ post_install() {
 | `HOSTNAME`                              | domyślne ramy                  | Powiąż hosta (domyślnie Docker to `0.0.0.0`)                                                                                                                      |
 | `NODE_ENV`                              | domyślne środowisko wykonawcze | Ustaw `production` do wdrożenia                                                                                                                                   |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`       | Publiczna baza URL pojawiła się na pulpicie nawigacyjnym i udostępniona serwerowi (zastępuje starsze `BASE_URL`)                                                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | Baza punktu końcowego synchronizacji w chmurze URL (zastępuje starszą wersję `CLOUD_URL`)                                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | Podstawowy punkt końcowy synchronizacji w chmurze URL (zastępuje starsze `CLOUD_URL`)                                                                             |
 | `API_KEY_SECRET`                        | _(wygenerowane automatycznie)_ | Sekret HMAC dla wygenerowanych kluczy API — wygenerowany automatycznie przy pierwszym uruchomieniu i utrwalony w `server.env`                                     |
 | `REQUIRE_API_KEY`                       | `false`                        | Wymuś klucz Bearer API na `/v1/*`                                                                                                                                 |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                        | Zezwalaj uwierzytelnionym użytkownikom pulpitu nawigacyjnego na ujawnianie na żądanie pełnych zapisanych wartości kluczy API                                      |
@@ -621,7 +621,7 @@ post_install() {
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                           | Maksymalna liczba wpisów w pamięci podręcznej monitów                                                                                                             |
 | `SEMANTIC_CACHE_MAX_SIZE`               | `100`                          | Maksymalna liczba wpisów w semantycznej pamięci podręcznej                                                                                                        |
 
-Aby zapoznać się z pełnym odwołaniem do zmiennych środowiskowych, zobacz [README](../README.md).
+Aby zapoznać się z pełnym odwołaniem do zmiennej środowiskowej, zobacz [README](../README.md).
 
 ---
 
@@ -734,7 +734,7 @@ Wybierz odrębny przedrostek (`mygw`, `acme-proxy`). Jeśli żądania kierowane 
 
 Te klucze trafiają do `providerSpecificData` połączenia (na przykład poprzez `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code mają już aliasy o długości powyżej 64 znaków bez ustawień; wartość połączenia obniża limit tylko wtedy, gdy dostawca nie ma wbudowanego limitu (połączenie platformy Azure za bardziej rygorystyczną bramą lub niestandardowy zgodny węzeł).
+- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code mają już aliasy o długości ponad 64 znaków bez ustawień. Wartość połączenia zastępuje wartość domyślną platformy Azure OpenAI / Azure AI Foundry (połączenie platformy Azure za bardziej rygorystyczną bramą) i ustawia limit dla niestandardowego zgodnego węzła; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zachowują limit rejestru i ignorują go.
 - `quotaEndpoint` — punkt końcowy quota/credits bramy, odczytaj pasek przydziałów w panelu kontrolnym i routing uwzględniający przydziały. Działa zarówno na połączeniach kompatybilnych z OpenAI, jak i Anthropic; pełny kształt jest udokumentowany w `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

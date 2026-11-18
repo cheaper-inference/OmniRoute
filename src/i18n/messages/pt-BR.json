@@ -1968,13 +1968,13 @@
     "usage": "Uso",
     "orchestration": "Orquestração",
     "access": "Acesso",
-    "autoCombo": "Combo automático",
+    "autoCombo": "Combinação automática",
     "config": "Configuração",
     "connect": "Conectar",
-    "intel": "Intel",
+    "intel": "Inteligência",
     "mediaProviders": "Provedores de mídia",
     "offers": "Ofertas",
-    "onboarding": "Configuração inicial"
+    "onboarding": "Integração"
   },
   "home": {
     "quickStart": "Início Rápido",
@@ -2110,8 +2110,8 @@
   "analytics": {
     "cachedInputTokens": "Tokens de entrada em cache",
     "inputTokensHint": "Exclui leituras do cache. As gravações no cache continuam sendo tokens de entrada.",
-    "inputSplitUnavailable": "A divisão da entrada está indisponível porque os dados de leitura do cache estão incompletos ou inconsistentes.",
-    "cachedInputTokensHint": "Informa apenas as leituras do cache, já incluídas no total de entrada.",
+    "inputSplitUnavailable": "A divisão da entrada não está disponível porque os dados de leitura do cache estão incompletos ou inconsistentes.",
+    "cachedInputTokensHint": "Apenas leituras do cache informadas, já incluídas no total de entrada.",
     "title": "Análises",
     "usageAnalyticsTitle": "Análise de Uso",
     "tokenDisplayCompact": "Compacto",
@@ -16675,13 +16675,13 @@
     "register": "Registrar endpoint ou substituição de esquema",
     "schema": "Esquema OpenAPI 3",
     "download": "Baixar arquivo de saída",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nova geração",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: a tarefa upstream pode ainda estar em execução. Recupere o recibo original antes de iniciar outra geração.",
+    "recover": "Recuperar envio original",
+    "recoveryRecord": "Envio salvo",
+    "recoveryMismatch": "A recuperação requer a conexão original e um rascunho exatamente igual após o recarregamento. Nenhuma nova solicitação foi enviada.",
+    "recoveryHelp": "A recuperação reutiliza o payload e a chave originais. Após o recarregamento, restaure exatamente o endpoint, a conexão, o transporte e a entrada. Uma nova geração inicia uma solicitação faturável separada. Até 20 recibos são mantidos nesta aba.",
+    "streamIncomplete": "O stream terminou sem um evento final completo. A conclusão upstream é desconhecida.",
+    "streamError": "O stream upstream relatou um erro. Os arquivos recebidos continuam disponíveis."
   }
 }

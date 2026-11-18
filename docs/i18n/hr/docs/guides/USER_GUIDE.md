@@ -368,7 +368,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dopuštenih ključeva (portovi, `REQUIRE_API_KEY`, lokalne postavke i postavke boja); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratki popis dopuštenih ključeva (`REQUIRE_API_KEY`, lokalizacija, vremenska zona i postavke boja, ne portovi); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način ladice
 
@@ -730,7 +730,7 @@ Odaberite poseban prefiks (`mygw`, `acme-proxy`). Ako zahtjevi prema prilagođen
 
 Ovi ključevi idu u `providerSpecificData` veze (na primjer putem `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI chat formatom čiji pristupnik odbija duga imena alata. Dulja imena šalju se kao kratki aliasi i vraćaju u odgovor. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već zamjenska imena preko 64 znaka bez postavke; vrijednost veze smanjuje ograničenje samo tamo gdje pružatelj nema ugrađenu (Azure veza iza strožeg pristupnika ili prilagođeni kompatibilni čvor).
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI chat formatom čiji pristupnik odbija duga imena alata. Dulja imena šalju se kao kratki aliasi i vraćaju u odgovor. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već imaju pseudonime preko 64 znaka bez postavke. Vrijednost veze zamjenjuje zadanu vrijednost Azure OpenAI / Azure AI Foundry (Azure veza iza strožeg pristupnika) i postavlja ograničenje za prilagođeni kompatibilni čvor; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zadržavaju svoje ograničenje registra i ignoriraju ga.
 - `quotaEndpoint` — krajnja točka quota/credits pristupnika, pročitajte za traku kvota nadzorne ploče i usmjeravanje s obzirom na kvote. Radi na OpenAI- i Anthropic-kompatibilnim vezama; puni oblik je dokumentiran u `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

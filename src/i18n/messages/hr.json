@@ -166,7 +166,7 @@
     "codeCopiedAnnouncement": "Kôd je kopiran u međuspremnik",
     "codeCopyError": "Kôd nije moguće kopirati. Odaberite ga i pokušajte ponovno.",
     "codeCopyErrorRetry": "Kôd nije moguće kopirati. Pokušajte ponovno.",
-    "codeRegionLabel": "{language} kôd",
+    "codeRegionLabel": "Kôd za {language}",
     "modalWizardProgress": "Koraci",
     "modalWizardGoBackTo": "Vrati se na",
     "modalWizardGoTo": "Idi na",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Proxy poslužitelj je zaustavljen ili se ponovno pokreće.",
     "expandSidebar": "Proširi bočnu traku",
     "collapseSidebar": "Sažmi bočnu traku",
-    "toggleSidebar": "Prikaži/sakrij bočnu traku",
+    "toggleSidebar": "Prikaži ili sakrij bočnu traku",
     "createTheme": "Stvori temu",
     "chooseColor": "Odaberi jednu boju",
     "cliToolsShort": "Alati",
@@ -1970,11 +1970,11 @@
     "access": "Pristup",
     "autoCombo": "Automatska kombinacija",
     "config": "Konfiguracija",
-    "connect": "Poveži",
-    "intel": "Intel",
-    "mediaProviders": "Pružatelji medija",
+    "connect": "Povezivanje",
+    "intel": "Informacije",
+    "mediaProviders": "Pružatelji medijskih sadržaja",
     "offers": "Ponude",
-    "onboarding": "Početno postavljanje"
+    "onboarding": "Uvođenje"
   },
   "home": {
     "quickStart": "Brzi početak",
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "Predmemorirani ulazni tokeni",
-    "inputTokensHint": "Isključuje čitanja iz predmemorije. Upisi u predmemoriju ostaju ulazni tokeni.",
-    "inputSplitUnavailable": "Podjela ulaza nije dostupna jer su podaci o čitanju iz predmemorije nepotpuni ili nedosljedni.",
-    "cachedInputTokensHint": "Prikazuju se samo čitanja iz predmemorije, koja su već uključena u ukupni ulaz.",
+    "inputTokensHint": "Ne uključuje čitanja iz predmemorije. Upisi u predmemoriju i dalje se računaju kao ulazni tokeni.",
+    "inputSplitUnavailable": "Raspodjela ulaza nije dostupna jer su podaci o čitanju iz predmemorije nepotpuni ili nedosljedni.",
+    "cachedInputTokensHint": "Samo prijavljena čitanja iz predmemorije, već uključena u ukupan ulaz.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika korištenja",
     "tokenDisplayCompact": "Sažeto",
@@ -10176,7 +10176,7 @@
   "compressionStudio": {
     "noRun": "Nije dostupno nijedno izvođenje kompresije.",
     "liveDataHint": "Podaci uživo stižu putem WebSocket kanala za kompresiju.",
-    "liveTitle": "Kompresija uživo",
+    "liveTitle": "Komprimiranje uživo",
     "cockpitView": "Pogled iz pilotske kabine",
     "canvas": "Platno",
     "waterfall": "Kaskadni prikaz",
@@ -16675,13 +16675,13 @@
     "register": "Registriraj krajnju točku ili zamjensku shemu",
     "schema": "Shema OpenAPI 3",
     "download": "Preuzmi izlaznu datoteku",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nova generacija",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: prethodni zadatak možda se još uvijek izvršava. Oporavite izvornu potvrdu prije pokretanja nove generacije.",
+    "recover": "Oporavi izvornu prijavu",
+    "recoveryRecord": "Spremljena prijava",
+    "recoveryMismatch": "Oporavak zahtijeva izvornu vezu i potpuno podudaran nacrt nakon ponovnog učitavanja. Nije poslan novi zahtjev.",
+    "recoveryHelp": "Oporavak ponovno upotrebljava izvorne podatke i ključ. Nakon ponovnog učitavanja vratite potpuno istu krajnju točku, vezu, prijenos i ulazne podatke. Nova generacija pokreće zaseban naplativi zahtjev. U ovoj se kartici čuva do 20 potvrda.",
+    "streamIncomplete": "Prijenos je završio bez potpunog završnog događaja. Nije poznato je li prethodni postupak dovršen.",
+    "streamError": "Prethodni prijenos prijavio je pogrešku. Primljene datoteke i dalje su dostupne."
   }
 }

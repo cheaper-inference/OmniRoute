@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "O servidor proxy foi interrompido ou está reiniciando.",
     "expandSidebar": "Expandir barra lateral",
     "collapseSidebar": "Recolher barra lateral",
-    "toggleSidebar": "Mostrar/ocultar barra lateral",
+    "toggleSidebar": "Alternar barra lateral",
     "createTheme": "Criar tema",
     "chooseColor": "Escolhe uma cor",
     "cliToolsShort": "Ferramentas",
@@ -1968,10 +1968,10 @@
     "usage": "Utilização",
     "orchestration": "Orquestração",
     "access": "Acesso",
-    "autoCombo": "Auto Combo",
+    "autoCombo": "Combinação automática",
     "config": "Configuração",
     "connect": "Ligar",
-    "intel": "Intel",
+    "intel": "Informações",
     "mediaProviders": "Fornecedores de multimédia",
     "offers": "Ofertas",
     "onboarding": "Integração inicial"
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "Tokens de entrada em cache",
-    "inputTokensHint": "Exclui as leituras da cache. As gravações na cache continuam a ser tokens de entrada.",
+    "inputTokensHint": "Exclui as leituras da cache. As escritas na cache continuam a ser tokens de entrada.",
     "inputSplitUnavailable": "A divisão da entrada não está disponível porque os dados de leitura da cache estão incompletos ou são inconsistentes.",
-    "cachedInputTokensHint": "Apenas as leituras da cache comunicadas, já incluídas no total da entrada.",
+    "cachedInputTokensHint": "Apenas leituras da cache comunicadas, já incluídas no total da entrada.",
     "title": "Análise",
     "usageAnalyticsTitle": "Análise de Utilização",
     "tokenDisplayCompact": "Compacto",
@@ -13765,7 +13765,7 @@
     "description": "Tráfego, latência e taxas de sucesso por fornecedor e por modelo",
     "combo": "Combinação",
     "toggleModels": "Mostrar modelos de {provider}",
-    "modelsTable": "Modelos para {provider}",
+    "modelsTable": "Modelos de {provider}",
     "windowSince": "Desde {date}"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "Registar endpoint ou substituir esquema",
     "schema": "Esquema OpenAPI 3",
     "download": "Descarregar ficheiro de saída",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nova geração",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: a tarefa a montante pode ainda estar em execução. Recupere o recibo original antes de iniciar outra geração.",
+    "recover": "Recuperar submissão original",
+    "recoveryRecord": "Submissão guardada",
+    "recoveryMismatch": "A recuperação requer a ligação original e um rascunho exatamente igual após o recarregamento. Não foi enviado nenhum novo pedido.",
+    "recoveryHelp": "A recuperação reutiliza os dados e a chave originais. Após o recarregamento, restaure exatamente o endpoint, a ligação, o transporte e os dados introduzidos. Uma nova geração inicia um pedido faturável separado. São mantidos até 20 recibos neste separador.",
+    "streamIncomplete": "O fluxo terminou sem um evento final completo. A conclusão a montante é desconhecida.",
+    "streamError": "O fluxo a montante comunicou um erro. Os ficheiros recebidos permanecem disponíveis."
   }
 }

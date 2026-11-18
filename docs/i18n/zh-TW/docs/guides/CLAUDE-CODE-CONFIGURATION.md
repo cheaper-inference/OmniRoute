@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) 和OpenCode (`x-opencode-session`) 的辨�
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed`表達式會刪除遠端URL中嵌入的所有憑證。 IDE擴充功能無需您的 shell 即可啟動Claude程式碼，因此它們的會話會回退到工作目錄。
+`sed`表達式會刪除遠端URL中嵌入的所有憑證、查詢字串和片段，並保留`ANTHROPIC_CUSTOM_HEADERS`中已有的標頭。 IDE擴充功能無需您的 shell 即可啟動Claude程式碼，因此它們的會話會回退到工作目錄。
 
 ---
 

@@ -1,5 +1,6 @@
 // omni-queue candidate verdict (scripts/merge-queue/checks.mjs): plan §3.4, mirroring the
-// Mergify merge_conditions (zero non-advisory failures, zero pending, required = success).
+// Mergify merge_conditions (zero non-advisory failures, zero pending, required = success) for
+// check runs only: unlike Mergify, the verdict deliberately reads no commit status.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
@@ -53,7 +54,15 @@ const at = (minutesAfterStart) =>
 const timed = (name, conclusion, id, startMin, endMin, extra = {}) =>
   run(name, conclusion, { id, startedAt: at(startMin), completedAt: at(endMin), ...extra });
 
-function evaluate(checkRuns, statuses = [], now = NOW) {
+function evaluate(checkRuns, now = NOW) {
+  return evaluateChecks({ checkRuns, config, startedAt: STARTED, now });
+}
+
+/**
+ * The same verdict, asked by a caller that still hands over the commit statuses of the SHA
+ * (whoever created them). evaluateChecks takes none and must ignore them: only check runs count.
+ */
+function evaluateWithStatuses(checkRuns, statuses, now = NOW) {
   return evaluateChecks({ checkRuns, statuses, config, startedAt: STARTED, now });
 }
 
@@ -105,6 +114,24 @@ test("runs naming different workflows are never re-runs of each other", () => {
   assert.equal(evaluate([...allRequiredGreen(), ciRun, later]).verdict, "red");
   const rerun = timed("Change Classification", "success", 5, 10, 12, { workflow: "CI" });
   assert.deepEqual(latestByName([ciRun, rerun]), [rerun]);
+});
+
+test("G4 (final review p7): a later same-named success in another check suite never supersedes a failure; in the same suite (a re-run attempt) it does", () => {
+  const failed = timed("Shared Name", "failure", 1, 1, 5, { checkSuiteId: 1 });
+  const otherSuite = timed("Shared Name", "success", 2, 6, 8, { checkSuiteId: 2 });
+  assert.deepEqual(latestByName([failed, otherSuite]), [failed, otherSuite]);
+  const result = evaluate([...allRequiredGreen(), failed, otherSuite]);
+  assert.equal(result.verdict, "red");
+  assert.deepEqual(
+    result.failures.map((f) => f.id),
+    [1]
+  );
+  const rerun = timed("Shared Name", "success", 3, 6, 8, { checkSuiteId: 1 });
+  assert.deepEqual(latestByName([failed, rerun]), [rerun]);
+  assert.equal(evaluate([...allRequiredGreen(), failed, rerun]).verdict, "green");
+  // A suite id known on one side only: the rule does not apply (timestamps decide, as before).
+  const unknown = timed("Shared Name", "success", 4, 6, 8);
+  assert.deepEqual(latestByName([failed, unknown]), [unknown]);
 });
 
 test("all required success and nothing pending → green", () => {
@@ -198,13 +225,13 @@ test("anything still running (advisory included) keeps the verdict pending", () 
 
 test("undecided after checksTimeoutMinutes → timeout; just before → pending", () => {
   const checks = [run(GATE_CI), run(GATE_QUALITY)];
-  assert.equal(evaluate(checks, [], AFTER_TIMEOUT).verdict, "timeout");
+  assert.equal(evaluate(checks, AFTER_TIMEOUT).verdict, "timeout");
   const justBefore = new Date(Date.parse(AFTER_TIMEOUT) - 1000).toISOString();
-  assert.equal(evaluate(checks, [], justBefore).verdict, "pending");
+  assert.equal(evaluate(checks, justBefore).verdict, "pending");
   // a decided verdict is not turned into a timeout
-  assert.equal(evaluate(allRequiredGreen(), [], AFTER_TIMEOUT).verdict, "green");
+  assert.equal(evaluate(allRequiredGreen(), AFTER_TIMEOUT).verdict, "green");
   assert.equal(
-    evaluate([...allRequiredGreen(), run("Lint", "failure")], [], AFTER_TIMEOUT).verdict,
+    evaluate([...allRequiredGreen(), run("Lint", "failure")], AFTER_TIMEOUT).verdict,
     "red"
   );
 });
@@ -223,46 +250,104 @@ test("a re-run whose newest attempt is green replaces the older failure", () => 
   assert.equal(result.failures[0].id, 400);
 });
 
-test("commit statuses: failure/error → red, pending → pending, newest per context wins", () => {
+// Commit statuses never enter the verdict, whoever created them (another App, a user's token, the
+// queue's own App) and whatever their context or state: only the check runs of the candidate's
+// push count. evaluateChecks takes no statuses; these tests hand some over anyway.
+const THIRD_PARTY = "external-ci[bot]";
+const QUEUE_APP = "omni-queue[bot]";
+
+test("a failure status from another app on the candidate does not make it red", () => {
   const green = allRequiredGreen();
-  const failed = evaluate(green, [status("ci/legacy", "failure")]);
-  assert.equal(failed.verdict, "red");
-  assert.equal(failed.failures.length, 1);
-  assert.equal(failed.failures[0].name, "ci/legacy");
-  assert.equal(failed.failures[0].id, 0, "statuses have no check-run annotations");
-  assert.equal(failed.failures[0].source, "status");
-  assert.equal(evaluate(green, [status("ci/legacy", "error")]).verdict, "red");
-  const pending = evaluate(green, [status("ci/legacy", "pending")]);
-  assert.equal(pending.verdict, "pending");
-  assert.deepEqual(pending.pending, ["ci/legacy"]);
-  const recovered = evaluate(green, [
-    status("ci/legacy", "success", "2026-11-13T10:50:00.000Z"),
-    status("ci/legacy", "failure", "2026-11-13T10:40:00.000Z"),
+  for (const state of ["failure", "error"]) {
+    for (const creator of [THIRD_PARTY, "someone", QUEUE_APP]) {
+      const result = evaluateWithStatuses(green, [status("ci/legacy", state, NOW, { creator })]);
+      assert.equal(result.verdict, "green", `${state} by ${creator}`);
+      assert.deepEqual(result.failures, []);
+      assert.deepEqual(result.advisoryFailures, []);
+      assert.deepEqual(result.pending, []);
+    }
+  }
+  // newest per context does not matter either: a failure newer than a success stays out too
+  const flipped = evaluateWithStatuses(green, [
+    status("ci/legacy", "failure", "2026-11-13T10:50:00.000Z", { creator: THIRD_PARTY }),
+    status("ci/legacy", "success", "2026-11-13T10:40:00.000Z", { creator: THIRD_PARTY }),
   ]);
-  assert.equal(recovered.verdict, "green");
+  assert.equal(flipped.verdict, "green");
+  // and without the green runs the verdict is what the runs alone say: pending, never red
+  const runsOnly = evaluateWithStatuses(
+    [run(GATE_CI), run(GATE_QUALITY, null)],
+    [status("ci/legacy", "failure", NOW, { creator: THIRD_PARTY })]
+  );
+  assert.equal(runsOnly.verdict, "pending");
+  assert.deepEqual(runsOnly.failures, []);
 });
 
-test("a commit status can fail a required check but never satisfy it", () => {
-  const forged = evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "success")]);
-  assert.notEqual(forged.verdict, "green");
+test("a pending status does not keep it pending", () => {
+  const green = allRequiredGreen();
+  for (const creator of [THIRD_PARTY, QUEUE_APP]) {
+    const result = evaluateWithStatuses(green, [
+      status("ci/legacy", "pending", NOW, { creator }),
+      status(GATE_CI, "pending", NOW, { creator }),
+    ]);
+    assert.equal(result.verdict, "green", creator);
+    assert.deepEqual(result.pending, []);
+    assert.equal(result.required[GATE_CI], "success");
+  }
+});
+
+test("a success status with a required name is still missing", () => {
+  const forged = evaluateWithStatuses(
+    [run(GATE_CI), run(GATE_QUALITY)],
+    [status(INTEGRITY, "success", NOW, { creator: THIRD_PARTY })]
+  );
   assert.equal(forged.verdict, "pending");
   assert.equal(forged.required[INTEGRITY], "missing");
-  assert.ok(forged.pending.includes(INTEGRITY));
+  assert.deepEqual(forged.pending, [INTEGRITY]);
   // after the timeout it is a timeout, still never green
   assert.equal(
-    evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "success")], AFTER_TIMEOUT)
-      .verdict,
+    evaluateWithStatuses(
+      [run(GATE_CI), run(GATE_QUALITY)],
+      [status(INTEGRITY, "success", NOW, { creator: QUEUE_APP })],
+      AFTER_TIMEOUT
+    ).verdict,
     "timeout"
   );
-  const failing = evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "failure")]);
-  assert.equal(failing.verdict, "red");
-  assert.equal(failing.required[INTEGRITY], "failure");
-  // a real Actions run plus a success status: green through the run
-  const both = evaluate(allRequiredGreen(), [status(INTEGRITY, "success")]);
-  assert.equal(both.verdict, "green");
-  // a real Actions success does not hide a failing status of the same name
-  const mixed = evaluate(allRequiredGreen(), [status(INTEGRITY, "failure")]);
-  assert.equal(mixed.verdict, "red");
+  // every required name only as a success status: CI never ran, so no-ci-run after 45 min
+  const statusesOnly = config.requiredChecks.map((name) =>
+    status(name, "success", NOW, { creator: THIRD_PARTY })
+  );
+  const early = evaluateWithStatuses([], statusesOnly, at(10));
+  assert.equal(early.verdict, "pending");
+  assert.deepEqual(
+    Object.values(early.required),
+    config.requiredChecks.map(() => "missing")
+  );
+  const late = evaluateWithStatuses([], statusesOnly, at(NO_RUN_TIMEOUT_MINUTES));
+  assert.equal(late.verdict, "timeout");
+  assert.equal(late.reason, "no-ci-run");
+});
+
+test("a failure status with a required name neither fails that check nor hides its run", () => {
+  const failing = evaluateWithStatuses(
+    [run(GATE_CI), run(GATE_QUALITY)],
+    [status(INTEGRITY, "failure", NOW, { creator: THIRD_PARTY })]
+  );
+  assert.equal(failing.verdict, "pending");
+  assert.equal(failing.required[INTEGRITY], "missing");
+  assert.deepEqual(failing.failures, []);
+  // the Actions run decides the required check, in both directions
+  const green = evaluateWithStatuses(allRequiredGreen(), [
+    status(INTEGRITY, "failure", NOW, { creator: THIRD_PARTY }),
+  ]);
+  assert.equal(green.verdict, "green");
+  assert.equal(green.required[INTEGRITY], "success");
+  const failedRun = run(INTEGRITY, "failure");
+  const red = evaluateWithStatuses(
+    [run(GATE_CI), run(GATE_QUALITY), failedRun],
+    [status(INTEGRITY, "success", NOW, { creator: THIRD_PARTY })]
+  );
+  assert.equal(red.verdict, "red");
+  assert.deepEqual(red.failures, [failedRun]);
 });
 
 test("a required check run from another app never satisfies it", () => {
@@ -277,24 +362,31 @@ test("a required check run from another app never satisfies it", () => {
   assert.equal(evaluate([...allRequiredGreen(), failing]).verdict, "red");
 });
 
-test("advisory statuses are tolerated like advisory runs", () => {
-  const result = evaluate(allRequiredGreen(), [status(ADVISORY, "failure")]);
-  assert.equal(result.verdict, "green");
-  assert.equal(result.advisoryFailures.length, 1);
-});
-
-test("the queue's own omni-queue/* statuses never count", () => {
-  const result = evaluate(allRequiredGreen(), [
-    status("omni-queue/approval", "failure"),
-    status("omni-queue/protected-approval", "pending"),
+test("an advisory-named status is not even reported as an advisory failure", () => {
+  const result = evaluateWithStatuses(allRequiredGreen(), [
+    status(ADVISORY, "failure", NOW, { creator: THIRD_PARTY }),
   ]);
   assert.equal(result.verdict, "green");
-  assert.deepEqual(result.pending, []);
+  assert.deepEqual(result.advisoryFailures, []);
+  // an advisory check run is still tolerated and reported
+  const adv = run(ADVISORY, "failure");
+  assert.deepEqual(evaluate([...allRequiredGreen(), adv]).advisoryFailures, [adv]);
+});
+
+test("a check run named omni-queue/* never counts", () => {
+  const failed = run("omni-queue/x", "failure");
+  const red = evaluate([...allRequiredGreen(), failed]);
+  assert.equal(red.verdict, "green", "a failed omni-queue/ run does not make it red");
+  assert.deepEqual(red.failures, []);
+  assert.deepEqual(red.advisoryFailures, []);
+  const running = evaluate([...allRequiredGreen(), run("omni-queue/x", null)]);
+  assert.equal(running.verdict, "green", "a pending omni-queue/ run does not keep it pending");
+  assert.deepEqual(running.pending, []);
 });
 
 test("no checks at all is pending, never vacuously green", () => {
   // Before NO_RUN_TIMEOUT_MINUTES: CI may still be queued.
-  const result = evaluate([], [], at(10));
+  const result = evaluate([], at(10));
   assert.equal(result.verdict, "pending");
   assert.deepEqual(result.pending.sort(), [...config.requiredChecks].sort());
   // Later it is a "no CI run" timeout — still never green.
@@ -303,15 +395,15 @@ test("no checks at all is pending, never vacuously green", () => {
 
 test("no GitHub Actions run NO_RUN_TIMEOUT_MINUTES (45) after the push → timeout no-ci-run", () => {
   assert.equal(NO_RUN_TIMEOUT_MINUTES, 45);
-  const justBefore = evaluate([], [], at(44));
+  const justBefore = evaluate([], at(44));
   assert.equal(justBefore.verdict, "pending");
   assert.equal(justBefore.reason, undefined);
-  const noRun = evaluate([], [], at(45));
+  const noRun = evaluate([], at(45));
   assert.equal(noRun.verdict, "timeout");
   assert.equal(noRun.reason, "no-ci-run");
   assert.deepEqual(noRun.failures, []);
   // Only statuses / runs of other apps (or the queue's own statuses): CI still never ran.
-  const others = evaluate(
+  const others = evaluateWithStatuses(
     [run("external scan", "success", { appSlug: "some-other-app" })],
     [status("ci/legacy", "pending"), status("omni-queue/approval", "success")],
     at(46)
@@ -322,10 +414,19 @@ test("no GitHub Actions run NO_RUN_TIMEOUT_MINUTES (45) after the push → timeo
 
 test("an Actions run in progress keeps the verdict pending until checksTimeoutMinutes", () => {
   const running = [run(GATE_CI, null), run(GATE_QUALITY, null)];
-  assert.equal(evaluate(running, [], at(50)).verdict, "pending");
-  const late = evaluate(running, [], AFTER_TIMEOUT);
+  assert.equal(evaluate(running, at(50)).verdict, "pending");
+  const late = evaluate(running, AFTER_TIMEOUT);
   assert.equal(late.verdict, "timeout");
   assert.equal(late.reason, "checks-timeout");
-  // a failure without any Actions run is still red, not a timeout
-  assert.equal(evaluate([], [status("ci/legacy", "failure")], at(60)).verdict, "red");
+  // a failed check run without any Actions run is still red, not a timeout
+  const external = run("external scan", "failure", { appSlug: "some-other-app" });
+  assert.equal(evaluate([external], at(60)).verdict, "red");
+  // a failure status without any Actions run is ignored: CI never ran, so no-ci-run
+  const statusOnly = evaluateWithStatuses(
+    [],
+    [status("ci/legacy", "failure", NOW, { creator: THIRD_PARTY })],
+    at(60)
+  );
+  assert.equal(statusOnly.verdict, "timeout");
+  assert.equal(statusOnly.reason, "no-ci-run");
 });

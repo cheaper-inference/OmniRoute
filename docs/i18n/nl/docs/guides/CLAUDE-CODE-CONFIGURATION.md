@@ -81,18 +81,22 @@ Beide worden alleen gelezen ter attributie; ze worden nooit doorgestuurd naar de
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-De `sed` expressie verwijdert alle inloggegevens die zijn ingebed in de externe URL. IDE extensies starten Claude Code zonder uw shell, zodat hun sessies terugvallen naar de werkmap.
+De `sed` expressie verwijdert alle inloggegevens, queryreeksen en fragmenten die zijn ingebed in de externe URL, en headers die al in `ANTHROPIC_CUSTOM_HEADERS` zijn, blijven behouden. IDE extensies starten Claude Code zonder uw shell, zodat hun sessies terugvallen naar de werkmap.
 
 ---
 

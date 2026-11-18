@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, configurações de localidade e cores); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (`REQUIRE_API_KEY`, localidade, fuso horário e configurações de cores, não as portas); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -610,7 +610,7 @@ post_install() {
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Base de endpoint de sincronização em nuvem URL (substitui `CLOUD_URL` herdado)                                                                                        |
 | `API_KEY_SECRET`                        | _(gerado automaticamente)_  | segredo HMAC para chaves API geradas — gerado automaticamente na primeira execução e persistido no `server.env`                                                       |
 | `REQUIRE_API_KEY`                       | `false`                     | Aplicar chave API do portador no `/v1/*`                                                                                                                              |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Permitir que usuários autenticados do painel revelem valores-chave API completos armazenados sob demanda                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Permitir que usuários autenticados do painel revelem valores-chave API armazenados completos sob demanda                                                              |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Cadência de atualização do lado do servidor para dados armazenados em cache do Provider Limits; Os botões de atualização UI ainda acionam a sincronização manual      |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Desative os snapshots automáticos SQLite antes writes/import/restore; backups manuais ainda funcionam                                                                 |
 | `APP_LOG_TO_FILE`                       | `true`                      | Ativa a saída de aplicativos e logs de auditoria para disco                                                                                                           |
@@ -734,7 +734,7 @@ Escolha um prefixo distinto (`mygw`, `acme-proxy`). Se as solicitações para um
 
 Essas chaves vão para o `providerSpecificData` de uma conexão (por exemplo, via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (inteiro, 1–1024) — para conexões compatíveis com formato de bate-papo OpenAI cujo gateway rejeita nomes de ferramentas longos. Nomes mais longos são enviados como aliases curtos e restaurados na resposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code já alias de nomes com mais de 64 caracteres sem configuração; um valor de conexão reduz o limite somente quando o provedor não possui um interno (uma conexão do Azure atrás de um gateway mais rigoroso ou um nó compatível personalizado).
+- `toolNameMaxLength` (inteiro, 1–1024) — para conexões compatíveis com formato de bate-papo OpenAI cujo gateway rejeita nomes de ferramentas longos. Nomes mais longos são enviados como aliases curtos e restaurados na resposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code já alias de nomes com mais de 64 caracteres sem configuração. Um valor de conexão substitui o padrão Azure OpenAI /Azure AI Foundry (uma conexão do Azure atrás de um gateway mais rigoroso) e define o limite para um nó compatível personalizado; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code mantêm seu limite de registro e o ignoram.
 - `quotaEndpoint` — o endpoint quota/credits do gateway, leia a faixa de cota do painel e o roteamento com reconhecimento de cota. Funciona em conexões compatíveis com OpenAI e Anthropic; a forma completa está documentada em `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

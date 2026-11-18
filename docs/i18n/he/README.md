@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                             |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                             |        v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | --------------------------- | :--------------------: | :---------: | :-------------------: |
 | 🌐 ספקים                    |          352           |   **358**   |          394          |
 | 🧠 מזהי מודלי צ'אט ייחודיים |          1320          |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 
 </div>
 
-> הדגשים האחרונים מ־**v3.8.20 → v3.8.54**. ההיסטוריה המלאה נמצאת ב־[`CHANGELOG.md`](CHANGELOG.md).
+> הדגשים האחרונים מ־**v3.8.20 → v3.8.55**. ההיסטוריה המלאה נמצאת ב־[`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ ניתוב `quota-weighted`** — אסטרטגיית הקומבו ה־20 מדלגת על חשבונות שמכסתם נוצלה, ואז בוחרת מבין הנותרים ביחס למכסה שנותרה ÷ העומס שבטיפול, תוך שמירה על הצמדת שיחות קיימות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 מצב ללא ממשק משתמש** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מפעיל רק את מנוע ה־proxy של `/v1/*`, כאשר לוח הבקרה ותתי־המערכות הבלעדיים ללוח מושבתים. → [מצב ללא ממשק משתמש](docs/guides/HEADLESS.md)
@@ -1039,7 +1039,7 @@ omniroute
 ```
 
 > 💡 רואה `npm warn ERESOLVE` או אזהרות לגבי peer dependencies? [הן harmless](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **משתמשים ב־npm 11 ואילך?** npm עשוי לחסום סקריפטים במחזור החיים של חבילות, אלא אם הם מורשים. ה־`postinstall` של OmniRoute (`node scripts/build/postinstall.mjs`) נדרש כדי להכין את קובצי זמן הריצה המקוריים שלו. אשר את החבילות המופיעות באזהרה של npm בעת התקנה גלובלית. עבור קבוצת החבילות שדווחה על ידי OmniRoute 3.8.54:
+> **משתמשים ב־npm 11 ואילך?** npm עשוי לחסום סקריפטים במחזור החיים של חבילות, אלא אם הם מורשים. ה־`postinstall` של OmniRoute (`node scripts/build/postinstall.mjs`) נדרש כדי להכין את קובצי זמן הריצה המקוריים שלו. אשר את החבילות המופיעות באזהרה של npm בעת התקנה גלובלית. עבור קבוצת החבילות שדווחה על ידי OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1836,7 +1836,7 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
 
 **[⬆ חזרה לראש הדף](#-omniroute)** · נבנה עם ❤️ עבור קהילת הבינה המלאכותית בקוד פתוח.
 
-<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions מופעל לדיונים ושאלות ותשובות של הקהילה -->

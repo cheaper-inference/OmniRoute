@@ -164,9 +164,9 @@
     "notificationAnnouncement": "Értesítés: {message}",
     "codeCopying": "Másolás…",
     "codeCopiedAnnouncement": "A kód a vágólapra másolva",
-    "codeCopyError": "A kódot nem sikerült másolni. Jelölje ki, majd próbálja újra.",
-    "codeCopyErrorRetry": "A kódot nem sikerült másolni. Próbálja újra.",
-    "codeRegionLabel": "{language} kód",
+    "codeCopyError": "Nem sikerült másolni a kódot. Jelölje ki, majd próbálja újra.",
+    "codeCopyErrorRetry": "Nem sikerült másolni a kódot. Próbálja újra.",
+    "codeRegionLabel": "{language}-kód",
     "modalWizardProgress": "Lépések",
     "modalWizardGoBackTo": "Vissza ide:",
     "modalWizardGoTo": "Ugrás ide:",
@@ -1971,10 +1971,10 @@
     "autoCombo": "Automatikus kombináció",
     "config": "Konfiguráció",
     "connect": "Csatlakozás",
-    "intel": "Intel",
+    "intel": "Információk",
     "mediaProviders": "Médiaszolgáltatók",
     "offers": "Ajánlatok",
-    "onboarding": "Bevezetés"
+    "onboarding": "Kezdeti beállítás"
   },
   "home": {
     "quickStart": "Gyors kezdés",
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "Gyorsítótárazott bemeneti tokenek",
-    "inputTokensHint": "A gyorsítótárból történő olvasásokat nem tartalmazza. A gyorsítótárba írások továbbra is bemeneti tokenek.",
-    "inputSplitUnavailable": "A bemenet felosztása nem érhető el, mert a gyorsítótárból történő olvasás adatai hiányosak vagy inkonzisztensek.",
-    "cachedInputTokensHint": "Csak a jelentett gyorsítótárból történő olvasásokat tartalmazza, amelyek már szerepelnek a teljes bemenetben.",
+    "inputTokensHint": "A gyorsítótár-olvasásokat nem tartalmazza. A gyorsítótár-írások továbbra is bemeneti tokennek számítanak.",
+    "inputSplitUnavailable": "A bemenet felosztása nem érhető el, mert a gyorsítótár-olvasási adatok hiányosak vagy ellentmondásosak.",
+    "cachedInputTokensHint": "Csak a jelentett gyorsítótár-olvasások; ezek már szerepelnek a teljes bemeneti mennyiségben.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Használati elemzések",
     "tokenDisplayCompact": "Tömör",
@@ -16675,13 +16675,13 @@
     "register": "Végpont regisztrálása vagy séma felülbírálása",
     "schema": "OpenAPI 3-séma",
     "download": "Kimeneti fájl letöltése",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Új generálás",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: előfordulhat, hogy a felsőbb szintű feladat még fut. Új generálás indítása előtt állítsa helyre az eredeti nyugtát.",
+    "recover": "Eredeti beküldés helyreállítása",
+    "recoveryRecord": "Mentett beküldés",
+    "recoveryMismatch": "A helyreállításhoz az eredeti kapcsolat és az újratöltés után pontosan egyező piszkozat szükséges. Nem lett új kérés elküldve.",
+    "recoveryHelp": "A helyreállítás újra felhasználja az eredeti adattartalmat és kulcsot. Újratöltés után állítsa vissza pontosan ugyanazt a végpontot, kapcsolatot, átviteli módot és bemenetet. Az új generálás külön számlázható kérést indít. Ezen a lapon legfeljebb 20 nyugta marad meg.",
+    "streamIncomplete": "Az adatfolyam teljes záróesemény nélkül ért véget. A felsőbb szintű feldolgozás befejezése ismeretlen.",
+    "streamError": "A felsőbb szintű adatfolyam hibát jelzett. A fogadott fájlok továbbra is elérhetők."
   }
 }

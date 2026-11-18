@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) ו- OpenCode (`x-opencode-session`) מזו�
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-הביטוי `sed` מסיר את כל האישורים המוטמעים ב- URL המרוחק. הרחבות IDE משיקות את קוד Claude ללא המעטפת שלך, כך שההפעלות שלהם נופלות חזרה לספריית העבודה.
+הביטוי `sed` מסיר את כל האישורים, מחרוזת השאילתה והפרגמנט המוטמעים ב- URL המרוחק, והכותרות שכבר נמצאות ב- `ANTHROPIC_CUSTOM_HEADERS` נשמרות. הרחבות IDE משיקות את קוד Claude ללא המעטפת שלך, כך שההפעלות שלהם נופלות חזרה לספריית העבודה.
 
 ---
 

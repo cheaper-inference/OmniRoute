@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                       |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
+|                                       |        v3.8.50        | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------------------- | :-------------------: | :---------: | :-------------------: |
 | 🌐 المزوّدون                          |          352          |   **358**   |          394          |
 | 🧠 معرّفات نماذج المحادثة الفريدة     |         1320          |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 
 </div>
 
-> أبرز التحديثات الأخيرة من **v3.8.20 → v3.8.54**. راجع السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
+> أبرز التحديثات الأخيرة من **v3.8.20 → v3.8.55**. راجع السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ توجيه `quota-weighted`** — تتجاوز استراتيجية الدمج رقم 20 الحسابات المستنفدة، ثم تختار من الحسابات المتبقية بما يتناسب مع الحصة المتبقية ÷ الحمل قيد التنفيذ، مع إبقاء المحادثات الحالية مثبتة. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
 - **🧰 الوضع عديم الواجهة** — يعمل `omniroute serve --headless` (أو `OMNIROUTE_HEADLESS=1`) على تشغيل محرك الوكيل `/v1/*` فقط، مع إيقاف لوحة المعلومات والأنظمة الفرعية الخاصة بها. → [الوضع عديم الواجهة](docs/guides/HEADLESS.md)
@@ -1040,7 +1040,7 @@ omniroute
 ```
 
 > 💡 هل ترى `npm warn ERESOLVE` أو تحذيرات تبعيات الندّ؟ [إنها غير مؤذية](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **هل تستخدم npm 11 أو إصدارًا أحدث؟** قد يحظر npm نصوص دورة حياة الحزم ما لم يُسمح بها. إن `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) مطلوب لإعداد ملفات وقت التشغيل الأصلية الخاصة به. اسمح للحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة إلى مجموعة الحزم التي أبلغ عنها OmniRoute 3.8.54:
+> **هل تستخدم npm 11 أو إصدارًا أحدث؟** قد يحظر npm نصوص دورة حياة الحزم ما لم يُسمح بها. إن `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) مطلوب لإعداد ملفات وقت التشغيل الأصلية الخاصة به. اسمح للحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة إلى مجموعة الحزم التي أبلغ عنها OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1829,7 +1829,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ العودة إلى الأعلى](#-omniroute)** · صُمم بحب ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
 
-<sub>أنشأه <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>أنشأه <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- تم تفعيل GitHub Discussions للأسئلة والأجوبة الخاصة بالمجتمع -->

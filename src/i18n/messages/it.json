@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Il server proxy è stato arrestato o si sta riavviando.",
     "expandSidebar": "Espandi la barra laterale",
     "collapseSidebar": "Comprimi la barra laterale",
-    "toggleSidebar": "Attiva/disattiva barra laterale",
+    "toggleSidebar": "Mostra/nascondi barra laterale",
     "createTheme": "Crea tema",
     "chooseColor": "Scegli un colore",
     "cliToolsShort": "Strumenti",
@@ -1971,7 +1971,7 @@
     "autoCombo": "Combinazione automatica",
     "config": "Configurazione",
     "connect": "Connetti",
-    "intel": "Intel",
+    "intel": "Informazioni",
     "mediaProviders": "Provider multimediali",
     "offers": "Offerte",
     "onboarding": "Configurazione iniziale"
@@ -2110,8 +2110,8 @@
   "analytics": {
     "cachedInputTokens": "Token di input memorizzati nella cache",
     "inputTokensHint": "Esclude le letture dalla cache. Le scritture nella cache rimangono token di input.",
-    "inputSplitUnavailable": "La suddivisione dell'input non è disponibile perché i dati delle letture dalla cache sono incompleti o incoerenti.",
-    "cachedInputTokensHint": "Indica solo le letture dalla cache, già incluse nel totale dell'input.",
+    "inputSplitUnavailable": "La suddivisione dell'input non è disponibile perché i dati sulle letture dalla cache sono incompleti o incoerenti.",
+    "cachedInputTokensHint": "Solo letture dalla cache segnalate, già incluse nell'input totale.",
     "title": "Analitica",
     "usageAnalyticsTitle": "Analisi dell'utilizzo",
     "tokenDisplayCompact": "Compatto",
@@ -16675,13 +16675,13 @@
     "register": "Registra un endpoint o sostituisci lo schema",
     "schema": "Schema OpenAPI 3",
     "download": "Scarica il file di output",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nuova generazione",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: il processo upstream potrebbe essere ancora in esecuzione. Recupera la ricevuta originale prima di avviare un'altra generazione.",
+    "recover": "Recupera l'invio originale",
+    "recoveryRecord": "Invio salvato",
+    "recoveryMismatch": "Il recupero richiede la connessione originale e una bozza perfettamente corrispondente dopo il ricaricamento. Non è stata inviata alcuna nuova richiesta.",
+    "recoveryHelp": "Il recupero riutilizza il payload e la chiave originali. Dopo il ricaricamento, ripristina esattamente endpoint, connessione, trasporto e input. Una nuova generazione avvia una richiesta fatturabile separata. In questa scheda vengono conservate fino a 20 ricevute.",
+    "streamIncomplete": "Lo stream è terminato senza un evento finale completo. Il completamento upstream è sconosciuto.",
+    "streamError": "Lo stream upstream ha segnalato un errore. I file ricevuti rimangono disponibili."
   }
 }

@@ -166,7 +166,7 @@
     "codeCopiedAnnouncement": "コードをクリップボードにコピーしました",
     "codeCopyError": "コードをコピーできませんでした。選択してもう一度お試しください。",
     "codeCopyErrorRetry": "コードをコピーできませんでした。もう一度お試しください。",
-    "codeRegionLabel": "{language}コード",
+    "codeRegionLabel": "{language} コード",
     "modalWizardProgress": "手順",
     "modalWizardGoBackTo": "戻る",
     "modalWizardGoTo": "移動",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "プロキシ サーバーが停止しているか、再起動中です。",
     "expandSidebar": "サイドバーを展開する",
     "collapseSidebar": "サイドバーを折りたたむ",
-    "toggleSidebar": "サイドバーを切り替え",
+    "toggleSidebar": "サイドバーを切り替える",
     "createTheme": "テーマを作成",
     "chooseColor": "色を1つ選択",
     "cliToolsShort": "ツール",
@@ -1971,7 +1971,7 @@
     "autoCombo": "自動コンボ",
     "config": "設定",
     "connect": "接続",
-    "intel": "インテル",
+    "intel": "インテリジェンス",
     "mediaProviders": "メディアプロバイダー",
     "offers": "オファー",
     "onboarding": "オンボーディング"
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "キャッシュ済み入力トークン",
-    "inputTokensHint": "キャッシュの読み取りは含まれません。キャッシュへの書き込みは入力トークンとして残ります。",
-    "inputSplitUnavailable": "キャッシュ読み取りデータが不完全または一貫していないため、入力の内訳を利用できません。",
-    "cachedInputTokensHint": "報告されたキャッシュ読み取りのみで、合計入力にすでに含まれています。",
+    "inputTokensHint": "キャッシュ読み取りは除外されます。キャッシュ書き込みは入力トークンとして残ります。",
+    "inputSplitUnavailable": "キャッシュ読み取りデータが不完全または不整合なため、入力の内訳を表示できません。",
+    "cachedInputTokensHint": "報告されたキャッシュ読み取りのみ。入力合計にはすでに含まれています。",
     "title": "分析",
     "usageAnalyticsTitle": "使用状況分析",
     "tokenDisplayCompact": "コンパクト",
@@ -13765,7 +13765,7 @@
     "description": "プロバイダー別およびモデル別のトラフィック、レイテンシー、成功率",
     "combo": "コンボ",
     "toggleModels": "{provider} のモデルを表示",
-    "modelsTable": "{provider}のモデル",
+    "modelsTable": "{provider} のモデル",
     "windowSince": "{date}以降"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "エンドポイントまたは上書き用スキーマを登録",
     "schema": "OpenAPI 3 スキーマ",
     "download": "出力ファイルをダウンロード",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "新しい生成",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: アップストリームのジョブがまだ実行中の可能性があります。別の生成を開始する前に、元の受領情報を復元してください。",
+    "recover": "元の送信を復元",
+    "recoveryRecord": "保存済みの送信",
+    "recoveryMismatch": "復元には、再読み込み後も元の接続と完全に一致する下書きが必要です。新しいリクエストは送信されていません。",
+    "recoveryHelp": "復元では元のペイロードとキーを再利用します。再読み込み後、エンドポイント、接続、トランスポート、入力を完全に元どおりに復元してください。新しい生成を開始すると、別途課金対象のリクエストが発生します。このタブには最大20件の受領情報が保持されます。",
+    "streamIncomplete": "完全な最終イベントを受信しないままストリームが終了しました。アップストリームでの完了状況は不明です。",
+    "streamError": "アップストリームのストリームでエラーが報告されました。受信済みのファイルは引き続き利用できます。"
   }
 }

@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI avtomatik olaraq `.env` `~/.omniroute/.env` və ya `./.env` dən yükləyir. İş qovluğundakı `./.env` açarların yalnız qısa icazəli siyahısını təyin edə bilər (portlar, `REQUIRE_API_KEY`, yerli və rəng parametrləri); qalan hər şeyi `~/.omniroute/.env` a qoyun. [CLI işə salma müqavilələrinə](CLI-LAUNCH-CONTRACTS.md#working-directory-env) baxın.
+CLI avtomatik olaraq `.env` `~/.omniroute/.env` və ya `./.env` dən yükləyir. İş qovluğundakı `./.env` açarların yalnız qısa icazəli siyahısını təyin edə bilər (`REQUIRE_API_KEY`, yerli, saat qurşağı və rəng parametrləri, portlar deyil); qalan hər şeyi `~/.omniroute/.env` a qoyun. [CLI işə salma müqavilələrinə](CLI-LAUNCH-CONTRACTS.md#working-directory-env) baxın.
 
 ### Tabla rejimi
 
@@ -736,7 +736,7 @@ Fərqli bir prefiks seçin (`mygw`, `acme-proxy`). Fərdi noda sorğular daxili 
 
 Bu düymələr əlaqənin `providerSpecificData` daxil olur (məsələn, `PUT /api/providers/{id}` vasitəsilə):
 
-- `toolNameMaxLength` (tam ədəd, 1–1024) şluz uzun alət adlarını rədd edən OpenAI chat formatına uyğun bağlantılar üçün —. Daha uzun adlar qısa ləqəb kimi göndərilir və cavabda bərpa olunur. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go və Muse Code artıq heç bir parametr olmadan 64 simvoldan artıq ləqəb adları daşıyır; bağlantı dəyəri limiti yalnız provayderin daxili bağlantısı olmadığı halda azaldır (daha sərt şlüz arxasında Azure bağlantısı və ya fərdi uyğun qovşaq).
+- `toolNameMaxLength` (tam ədəd, 1–1024) şluz uzun alət adlarını rədd edən OpenAI chat formatına uyğun bağlantılar üçün —. Daha uzun adlar qısa ləqəb kimi göndərilir və cavabda bərpa olunur. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go və Muse Code artıq heç bir parametr olmadan 64 simvoldan artıq ləqəb adlandırır. Bağlantı dəyəri Azure OpenAI / Azure AI Foundry defoltunu (daha sərt şlüz arxasında Azure bağlantısı) əvəz edir və fərdi uyğun node üçün limit təyin edir; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go və Muse Code öz reyestr limitini saxlayır və ona məhəl qoymur.
 - `quotaEndpoint` — şlüzün quota/credits son nöqtəsi, idarə paneli kvota zolağı və kvotadan xəbərdar marşrutlaşdırma üçün oxuyun. Həm OpenAI, həm də Antropik uyğunluqlar üzərində işləyir; tam forma `open-sse/services/usage/openaiCompatible.ts` ilə sənədləşdirilmişdir.
 
 ```json

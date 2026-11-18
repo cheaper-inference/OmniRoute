@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
+|                                  |          v3.8.50           | **v3.8.51** |      `v3.8.55+`       |
 | -------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 සපයන්නන්                      |            352             |   **358**   |          394          |
 | 🧠 අනන්ය චැට් මාදිලි ID          |            1320            |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar භාවිතය තෝරාගත හැකි අතර එය GET �
 
 </div>
 
-> **v3.8.20 → v3.8.54** අතර නවතම විශේෂාංග. සම්පූර්ණ ඉතිහාසය [`CHANGELOG.md`](CHANGELOG.md) හි ඇත.
+> **v3.8.20 → v3.8.55** අතර නවතම විශේෂාංග. සම්පූර්ණ ඉතිහාසය [`CHANGELOG.md`](CHANGELOG.md) හි ඇත.
 
 - **⚖️ `quota-weighted` routing** — 20වන combo strategy එක quota අවසන් වූ accounts මඟහැර, ඉතිරි accounts අතර leftover quota ÷ in-flight load අනුපාතයට අනුව තෝරා ගනී. පවතින conversations ඒවායේ account වෙතම සම්බන්ධව පවතී. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (හෝ `OMNIROUTE_HEADLESS=1`) මඟින් `/v1/*` proxy engine එක පමණක් ක්රියාත්මක කරයි; dashboard එක සහ dashboard සඳහා පමණක් වන subsystems අක්රිය කරයි. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1038,7 +1038,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` හෝ peer-dep warnings පෙනෙනවාද? [ඒවා හානිකර නොවේ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 හෝ ඊට පසු version එකක් භාවිත කරනවාද?** ඒවාට අවසර දී නොමැති නම් npm package lifecycle scripts අවහිර කළ හැක. OmniRoute හි `postinstall` (`node scripts/build/postinstall.mjs`) එහි native runtime files සූදානම් කිරීමට අවශ්ය වේ. globally ස්ථාපනය කරන විට npm warning එකේ නම් කර ඇති packages වලට අවසර දෙන්න. OmniRoute 3.8.54 මඟින් වාර්තා කරන package set එක සඳහා:
+> **npm 11 හෝ ඊට පසු version එකක් භාවිත කරනවාද?** ඒවාට අවසර දී නොමැති නම් npm package lifecycle scripts අවහිර කළ හැක. OmniRoute හි `postinstall` (`node scripts/build/postinstall.mjs`) එහි native runtime files සූදානම් කිරීමට අවශ්ය වේ. globally ස්ථාපනය කරන විට npm warning එකේ නම් කර ඇති packages වලට අවසර දෙන්න. OmniRoute 3.8.55 මඟින් වාර්තා කරන package set එක සඳහා:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1833,7 +1833,7 @@ MIT බලපත්රය - විස්තර සඳහා [LICENSE](LICENSE) �
 
 **[⬆ ඉහළට ආපසු](#-omniroute)** · විවෘත මූලාශ්ර AI ප්රජාව සඳහා ❤️ සමඟ නිර්මාණය කරන ලදී.
 
-<sub>නිර්මාණය කළේ <a href="https://github.com/diegosouzapw">Diego Souza</a> විසිනි · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>නිර්මාණය කළේ <a href="https://github.com/diegosouzapw">Diego Souza</a> විසිනි · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ප්රජා ප්රශ්න සහ පිළිතුරු සඳහා GitHub Discussions සක්රීය කර ඇත -->

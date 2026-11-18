@@ -370,7 +370,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (ọdụ ụgbọ mmiri, `REQUIRE_API_KEY`, ntọala mpaghara na agba); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (`REQUIRE_API_KEY`, mpaghara, mpaghara oge na ntọala agba, ọ bụghị ọdụ ụgbọ mmiri); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ụdị tray
 
@@ -496,7 +496,7 @@ Maka ụdị agbakwunyere ndị ọbịa nwere ọnụọgụ abụọ CLI, lee 
 
 ### Ihe efu Linux (xbps-src)
 
-Ndị ọrụ Linux na-abaghị uru nwere ike wụnye OmniRoute site na iji usoro mkpokọta `xbps-src`. Nke a na-eme ka ụlọ Node.js kwụ ọtọ yana njide `better-sqlite3` achọrọ.
+Ndị ọrụ Linux efu nwere ike wụnye OmniRoute na ala site na iji usoro mkpokọta `xbps-src`. Nke a na-eme ka ụlọ Node.js kwụ ọtọ yana njigide `better-sqlite3` achọrọ.
 
 <details>
 <summary><b>Lelee ndebiri xbps-src</b></summary>
@@ -594,7 +594,7 @@ post_install() {
 
 </details>
 
-### Mgbanwe gburugburu
+### Ngbanwe gburugburu
 
 | Na-agbanwe agbanwe                      | Ọdabara                  | Nkọwa                                                                                                                                      |
 | --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -732,7 +732,7 @@ Họrọ prefix dị iche (`mygw`, `acme-proxy`). Ọ bụrụ na arịrịọ m
 
 Igodo ndị a na-aga na `providerSpecificData` njikọ (dịka ọmụmaatụ site na `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — maka njikọ dakọtara na nkata nkata OpenAI nke ọnụ ụzọ ajụọ ogologo aha ngwa ọrụ. A na-eziga aha ndị toro ogologo dị ka aha mkpirisi ma weghachite na nzaghachi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code ugbua alias aha n'elu 64 odide na-enweghị ntọala; Uru njikọ na-ewetu oke naanị ebe onye na-eweta enweghị arụnyere n'ime ya (njikọ Azure n'azụ ọnụ ụzọ siri ike, ma ọ bụ ọnụ ụzọ dakọtara na omenala).
+- `toolNameMaxLength` (integer, 1–1024) — maka njikọ dakọtara na nkata nkata OpenAI nke ọnụ ụzọ ajụọ ogologo aha ngwa ọrụ. A na-eziga aha ndị toro ogologo dị ka aha mkpirisi ma weghachite na nzaghachi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code ugbua utu aha karịrị mkpụrụedemede 64 na enweghị ntọala. Uru njikọ na-anọchi Azure OpenAI / Azure AI ntọala ntọala (njikọ Azure n'azụ ọnụ ụzọ siri ike) ma debe oke maka ọnụ ọnụ omenala dakọtara; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code dobe oke ndekọ ha ma leghara ya anya.
 - `quotaEndpoint` — njedebe quota/credits nke ọnụ ụzọ ámá, gụọ maka eriri dashboard quota strip na ntinye aka-aware. Na-arụ ọrụ na ma njikọ OpenAI- na Anthropic dakọtara; A na-edepụta ọdịdị zuru oke na `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

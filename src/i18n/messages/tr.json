@@ -164,12 +164,12 @@
     "notificationAnnouncement": "Bildirim: {message}",
     "codeCopying": "Kopyalanıyor…",
     "codeCopiedAnnouncement": "Kod panoya kopyalandı",
-    "codeCopyError": "Kod kopyalanamadı. Seçip tekrar deneyin.",
+    "codeCopyError": "Kod kopyalanamadı. Kodu seçip tekrar deneyin.",
     "codeCopyErrorRetry": "Kod kopyalanamadı. Lütfen tekrar deneyin.",
     "codeRegionLabel": "{language} kodu",
     "modalWizardProgress": "Adımlar",
-    "modalWizardGoBackTo": "Şuraya geri dön",
-    "modalWizardGoTo": "Şuraya git",
+    "modalWizardGoBackTo": "Şuraya geri dön:",
+    "modalWizardGoTo": "Şuraya git:",
     "modalWizardCompleted": "tamamlandı",
     "toggleColumns": "Sütunları aç/kapat",
     "confirmTitle": "Onayla",
@@ -1971,10 +1971,10 @@
     "autoCombo": "Otomatik Kombinasyon",
     "config": "Yapılandırma",
     "connect": "Bağlan",
-    "intel": "Intel",
+    "intel": "İstihbarat",
     "mediaProviders": "Medya Sağlayıcıları",
     "offers": "Teklifler",
-    "onboarding": "Başlangıç"
+    "onboarding": "İlk Kullanım"
   },
   "home": {
     "quickStart": "Hızlı Başlangıç",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Önbelleğe Alınmış Girdi Belirteçleri",
-    "inputTokensHint": "Önbellek okumalarını içermez. Önbellek yazmaları girdi belirteçleri olarak kalır.",
-    "inputSplitUnavailable": "Önbellekten okuma verileri eksik veya tutarsız olduğu için girdi dökümü kullanılamıyor.",
-    "cachedInputTokensHint": "Yalnızca bildirilen önbellek okumaları; toplam girdiye zaten dahildir.",
+    "cachedInputTokens": "Önbelleğe Alınmış Girdi Token'ları",
+    "inputTokensHint": "Önbellek okumalarını hariç tutar. Önbellek yazmaları girdi token'ı olarak kalır.",
+    "inputSplitUnavailable": "Önbellek okuma verileri eksik veya tutarsız olduğundan girdi dağılımı kullanılamıyor.",
+    "cachedInputTokensHint": "Yalnızca bildirilen önbellek okumaları; bunlar zaten toplam girdiye dahildir.",
     "title": "Analitik",
     "usageAnalyticsTitle": "Kullanım Analitiği",
     "tokenDisplayCompact": "Kısa",
@@ -16675,13 +16675,13 @@
     "register": "Uç nokta veya mevcut şemanın yerine kullanılacak şemayı kaydet",
     "schema": "OpenAPI 3 şeması",
     "download": "Çıktı dosyasını indir",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Yeni oluşturma",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: üst sistemdeki iş hâlâ çalışıyor olabilir. Başka bir oluşturma işlemi başlatmadan önce orijinal alındıyı kurtarın.",
+    "recover": "Orijinal gönderimi kurtar",
+    "recoveryRecord": "Kaydedilen gönderim",
+    "recoveryMismatch": "Kurtarma işlemi, yeniden yüklemeden sonra orijinal bağlantıyı ve tam olarak eşleşen bir taslağı gerektirir. Yeni bir istek gönderilmedi.",
+    "recoveryHelp": "Kurtarma işlemi, orijinal veri yükünü ve anahtarı yeniden kullanır. Yeniden yüklemeden sonra uç noktayı, bağlantıyı, aktarım yöntemini ve girdiyi tam olarak geri yükleyin. Yeni oluşturma işlemi, ayrıca ücretlendirilebilir ayrı bir istek başlatır. Bu sekmede en fazla 20 alındı saklanır.",
+    "streamIncomplete": "Akış, eksiksiz bir nihai olay olmadan sona erdi. Üst sistemdeki işlemin tamamlanıp tamamlanmadığı bilinmiyor.",
+    "streamError": "Üst sistem akışı bir hata bildirdi. Alınan dosyalar kullanılabilir durumda kalır."
   }
 }

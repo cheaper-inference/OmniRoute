@@ -18,34 +18,36 @@
 
 ---
 
-## इंस्टॉलेशन विधियाँ
+## विधियाँ स्थापित करें
 
-### npm (अनुशंसित)
+### एनपीएम (अनुशंसित)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-डैशबोर्ड `http://localhost:20128` पर खुलता है और API का आधार URL `http://localhost:20128/v1` है।
+डैशबोर्ड `http://localhost:20128` और API आधार पर खुलता है URL `http://localhost:20128/v1` है।
 
-### pnpm
+> **एनपीएम उपयोगकर्ता:** यदि npm चेतावनी देता है कि इंस्टॉल स्क्रिप्ट अवरुद्ध कर दी गई हैं (उदाहरण के लिए, `omniroute`, `better-sqlite3`), [तो समस्या निवारण — npm इंस्टॉल-स्क्रिप्ट अवरुद्ध](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) देखें।
+
+### पीएनपीएम
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **pnpm उपयोगकर्ता:** `better-sqlite3` और `@swc/core` के लिए नेटिव बिल्ड स्क्रिप्ट सक्षम करने हेतु `--allow-build` फ़्लैग आवश्यक है। pnpm v11 पर ग्लोबल इंस्टॉलेशन के लिए `pnpm approve-builds -g` कमांड समर्थित नहीं है।
+> **पीएनपीएम उपयोगकर्ता:** `better-sqlite3` और `@swc/core` के लिए मूल निर्माण स्क्रिप्ट को सक्षम करने के लिए `--allow-build` ध्वज आवश्यक है। `pnpm approve-builds -g` कमांड pnpm v11 पर वैश्विक इंस्टॉल के लिए समर्थित नहीं है।
 
-### Arch Linux (AUR)
+### आर्क Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR पैकेज](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute इंस्टॉल करता है और एक systemd उपयोगकर्ता सेवा प्रदान करता है।
+[AUR पैकेज](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute स्थापित करता है और एक सिस्टमडी उपयोगकर्ता सेवा प्रदान करता है।
 
 ### स्रोत से
 
@@ -54,59 +56,59 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows संबंधी टिप्पणी:** डिफ़ॉल्ट रूप से, जब पुरानी `%USERPROFILE%\.omniroute` डायरेक्टरी मौजूद नहीं होती है, तो OmniRoute `%APPDATA%\omniroute` का उपयोग करता है। किसी अन्य डेटा-डायरेक्टरी स्थान को चुनने के लिए `DATA_DIR` सेट करें।
+> **Windows नोट:** डिफ़ॉल्ट रूप से, OmniRoute `%APPDATA%\omniroute` का उपयोग करता है जब विरासत `%USERPROFILE%\.omniroute` निर्देशिका मौजूद नहीं होती है। भिन्न डेटा-निर्देशिका स्थान चुनने के लिए `DATA_DIR` सेट करें।
 
-> **टिप्पणी:** पहली बार चलाने पर `npm install`, `.env.example` से `.env` स्वतः जनरेट करता है। बाद के इंस्टॉलेशन मौजूदा `.env` को ओवरराइट नहीं करेंगे, इसलिए अनुकूलन सुरक्षित रहते हैं। इसे फिर से जनरेट करने के लिए, दोबारा चलाने से पहले `.env` हटाएँ।
+> **टिप्पणी:** `npm install` पहली बार चलाने पर `.env.example` से `.env` स्वतः उत्पन्न करता है। बाद की स्थापनाएं मौजूदा `.env` अधिलेखित नहीं करेंगी, इसलिए अनुकूलन संरक्षित हैं। दोबारा सीड करने के लिए, दोबारा चलाने से पहले `.env` हटा दें।
 
 ### Docker
 
-Compose प्रोफ़ाइल और Caddy HTTPS सहित संपूर्ण Docker सेटअप के लिए [Docker मार्गदर्शिका](./DOCKER_GUIDE.md) देखें।
+कंपोज़ प्रोफाइल और कैडी HTTPS सहित संपूर्ण Docker सेटअप के लिए [Docker गाइड](./DOCKER_GUIDE.md) देखें।
 
 ### डेस्कटॉप ऐप (Electron)
 
-OmniRoute के साथ Electron 41 + electron-builder 26.10 पर निर्मित एक डेस्कटॉप रैपर मिलता है। उपलब्ध स्क्रिप्ट (वर्कस्पेस रूट):
+OmniRoute Electron 41 + इलेक्ट्रॉन-बिल्डर 26.10 पर निर्मित एक डेस्कटॉप रैपर शिप करता है। उपलब्ध स्क्रिप्ट (कार्यस्थान रूट):
 
 ```bash
-npm run electron:dev          # हॉट-रीलोड के साथ डेस्कटॉप चलाएँ
-npm run electron:build        # वर्तमान OS के लिए बिल्ड करें (स्वतः पहचाना गया)
-npm run electron:build:win    # Windows इंस्टॉलर (NSIS + पोर्टेबल)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # पैकेज किए गए बिल्ड का स्मोक-टेस्ट करें
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-डेस्कटॉप इंस्टॉलर के रिलीज़ GitHub Releases से संलग्न होते हैं। Electron के संपूर्ण गहन विवरण (साइनिंग, IPC ब्रिज, डिस्ट्रो) के लिए, [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) देखें _(बाद के चरण में बनाया गया)_।
+डेस्कटॉप इंस्टालर की रिलीज़ GitHub रिलीज़ से जुड़ी हुई हैं। संपूर्ण Electron डीप-डाइव (साइनिंग, IPC ब्रिज, डिस्ट्रोस) के लिए, [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase positore)_ देखें।
 
-### हेडलेस सर्वर (CI/ऑटोमेशन)
+### हेडलेस सर्वर (CI/automation)
 
-बिना निगरानी वाले सेटअप (Docker, Kubernetes, CI) के लिए, इसका उपयोग करें:
+अप्राप्य सेटअप (Docker, Kubernetes, CI) के लिए, उपयोग करें:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, आदि) के साथ संयोजित करके, यह आपको पूरी तरह स्क्रिप्ट-योग्य OmniRoute इंस्टेंस शुरू करने देता है।
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, आदि) के साथ संयुक्त, यह आपको एक OmniRoute उदाहरण को पूरी तरह से स्क्रिप्ट योग्य बनाने की सुविधा देता है।
 
 ### CLI विकल्प
 
-| कमांड                   | विवरण                                                                                           |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| `omniroute`             | सर्वर शुरू करें (`PORT=20128`, API और डैशबोर्ड एक ही पोर्ट पर)                                  |
-| `omniroute setup`       | पासवर्ड और पहले प्रोवाइडर के लिए निर्देशित CLI ऑनबोर्डिंग                                       |
-| `omniroute doctor`      | सर्वर शुरू किए बिना स्थानीय स्वास्थ्य जाँच चलाएँ                                                |
-| `omniroute providers`   | CLI से प्रोवाइडर खोजें, सूचीबद्ध करें, सत्यापित करें और उनका परीक्षण करें                       |
-| `omniroute config`      | CLI टूल कॉन्फ़िगरेशन — कॉन्फ़िग सूचीबद्ध करें, प्राप्त करें, सेट करें और सत्यापित करें          |
-| `omniroute status`      | ऑफ़लाइन स्थिति डैशबोर्ड — संस्करण, DB, टूल, कॉन्फ़िग                                            |
-| `omniroute logs`        | API से उपयोग लॉग स्ट्रीम करें (`--follow` समर्थित है)                                           |
-| `omniroute update`      | OmniRoute अपडेट की जाँच करें या उन्हें लागू करें                                                |
-| `omniroute provider`    | प्रोवाइडर कनेक्शन प्रबंधित करें — जोड़ें, सूचीबद्ध करें, हटाएँ, परीक्षण करें, डिफ़ॉल्ट सेट करें |
-| `omniroute --port 3000` | कैनोनिकल/API पोर्ट को 3000 पर सेट करें                                                          |
-| `omniroute --mcp`       | MCP सर्वर शुरू करें (stdio ट्रांसपोर्ट)                                                         |
-| `omniroute --no-open`   | ब्राउज़र स्वतः न खोलें                                                                          |
-| `omniroute --help`      | सहायता दिखाएँ                                                                                   |
+| आज्ञा                   | विवरण                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `omniroute`             | सर्वर प्रारंभ करें (`PORT=20128`, API और डैशबोर्ड एक ही पोर्ट पर)                      |
+| `omniroute setup`       | पासवर्ड और प्रथम प्रदाता के लिए निर्देशित CLI ऑनबोर्डिंग                               |
+| `omniroute doctor`      | सर्वर प्रारंभ किए बिना स्थानीय स्वास्थ्य जांच चलाएँ                                    |
+| `omniroute providers`   | CLI से प्रदाताओं को खोजें, सूचीबद्ध करें, सत्यापित करें और परीक्षण करें                |
+| `omniroute config`      | CLI टूल कॉन्फ़िगरेशन — सूची, कॉन्फ़िगरेशन प्राप्त करें, सेट करें, मान्य करें           |
+| `omniroute status`      | ऑफ़लाइन स्थिति डैशबोर्ड — संस्करण, DB, उपकरण, कॉन्फ़िगरेशन                             |
+| `omniroute logs`        | API से स्ट्रीम उपयोग लॉग ( `--follow` का समर्थन करता है)                               |
+| `omniroute update`      | OmniRoute अद्यतनों की जाँच करें या उन्हें लागू करें                                    |
+| `omniroute provider`    | प्रदाता कनेक्शन प्रबंधित करें — जोड़ें, सूची बनाएं, हटाएं, परीक्षण करें, डिफ़ॉल्ट करें |
+| `omniroute --port 3000` | canonical/API पोर्ट को 3000 पर सेट करें                                                |
+| `omniroute --mcp`       | MCP सर्वर प्रारंभ करें (stdio ट्रांसपोर्ट)                                             |
+| `omniroute --no-open`   | ब्राउज़र को स्वतः न खोलें                                                              |
+| `omniroute --help`      | मदद दिखायें                                                                            |
 
-हेडलेस सेटअप को फ़्लैग या एनवायरनमेंट वेरिएबल के साथ स्क्रिप्ट किया जा सकता है:
+हेडलेस सेटअप को झंडे या पर्यावरण चर के साथ स्क्रिप्ट किया जा सकता है:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-डैशबोर्ड खोले बिना SSH या स्क्रिप्ट से प्रोवाइडर प्रबंधित करें:
+डैशबोर्ड खोले बिना SSH या स्क्रिप्ट से प्रदाताओं को प्रबंधित करें:
 
 ```bash
 omniroute providers available
@@ -225,8 +227,12 @@ npm run test:protocols:e2e
 
 **Claude कोड:**
 
+Claude कोड HTTP से जुड़ता है, जो `omniroute --mcp` (stdio) प्रारंभ नहीं होता है। HTTP ट्रांसपोर्ट डिफ़ॉल्ट रूप से बंद है: पहले इसे चालू सर्वर पर सक्षम करें। जब डैशबोर्ड लॉगिन सक्षम होता है, तो क्रेडेंशियल के बिना एक अनुरोध `401` प्राप्त होता है, इसलिए एक API कुंजी पास करें जिसमें `mcp:connect` (या `manage`) हो; `manage`/`admin` के बिना एक कुंजी को भी प्रत्येक टूल के दायरे की आवश्यकता होती है ( [MCP सर्वर → MCP टूल स्कोप](../frameworks/MCP-SERVER.md#mcp-tool-scopes) देखें)।
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

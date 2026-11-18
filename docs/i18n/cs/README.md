@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Poskytovatelé                   |           352            |   **358**   |          394          |
 | 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1491          |
@@ -598,7 +598,7 @@ aktuálním katalogu najdete na **[radar.omniroute.online/planos](https://radar.
 
 </div>
 
-> Nejnovější zajímavosti z **v3.8.20 → v3.8.54**. Úplná historie v [`CHANGELOG.md`](CHANGELOG.md).
+> Nejnovější zajímavosti z **v3.8.20 → v3.8.55**. Úplná historie v [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Směrování `quota-weighted`** — 20. strategie kombinací vynechá vyčerpané účty a mezi zbývajícími vybírá v poměru k nevyčerpané kvótě ÷ počtu probíhajících požadavků, přičemž zachovává připnutí existujících konverzací. → [Automatické kombinace](docs/routing/AUTO-COMBO.md)
 - **🧰 Bezhlavý režim** — `omniroute serve --headless` (nebo `OMNIROUTE_HEADLESS=1`) spouští pouze proxy engine `/v1/*`, zatímco řídicí panel a subsystémy vyhrazené pouze pro řídicí panel zůstanou vypnuté. → [Bezhlavý režim](docs/guides/HEADLESS.md)
@@ -1048,7 +1048,7 @@ omniroute
 ```
 
 > 💡 Vidíte `npm warn ERESOLVE` nebo varování týkající se peer závislostí? [Jsou neškodná](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Používáte npm 11 nebo novější?** npm může zablokovat skripty životního cyklu balíčků, pokud nejsou povoleny. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) je nutný k přípravě nativních runtime souborů. Při globální instalaci povolte balíčky uvedené ve varování npm. Pro sadu balíčků hlášenou OmniRoute 3.8.54:
+> **Používáte npm 11 nebo novější?** npm může zablokovat skripty životního cyklu balíčků, pokud nejsou povoleny. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) je nutný k přípravě nativních runtime souborů. Při globální instalaci povolte balíčky uvedené ve varování npm. Pro sadu balíčků hlášenou OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1844,7 +1844,7 @@ Licence MIT – podrobnosti najdete v [LICENSE](LICENSE).
 
 **[⬆ Zpět nahoru](#-omniroute)** · Vytvořeno s ❤️ pro open-source komunitu AI.
 
-<sub>Vytvořil <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Vytvořil <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions je povoleno pro komunitní otázky a odpovědi -->

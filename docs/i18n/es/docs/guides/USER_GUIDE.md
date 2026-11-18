@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-El CLI carga automáticamente `.env` desde `~/.omniroute/.env` o `./.env`. Un `./.env` en el directorio de trabajo puede establecer solo una breve lista de claves permitidas (puertos, `REQUIRE_API_KEY`, configuración regional y de color); Pon todo lo demás en `~/.omniroute/.env`. Ver [contratos de lanzamiento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+El CLI carga automáticamente `.env` desde `~/.omniroute/.env` o `./.env`. Un `./.env` en el directorio de trabajo puede establecer solo una breve lista de claves permitidas (`REQUIRE_API_KEY`, configuración regional, zona horaria y color, no los puertos); Pon todo lo demás en `~/.omniroute/.env`. Ver [contratos de lanzamiento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -610,7 +610,7 @@ post_install() {
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`            | Base de punto final de sincronización en la nube URL (reemplaza `CLOUD_URL` heredado)                                                                                         |
 | `API_KEY_SECRET`                        | _(generado automáticamente)_       | Secreto HMAC para las claves API generadas. — se genera automáticamente en la primera ejecución y persiste en `server.env`                                                    |
 | `REQUIRE_API_KEY`                       | `false`                            | Aplicar la clave Bearer API en `/v1/*`                                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores clave API almacenados completos a pedido                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores completos de las claves API almacenadas a pedido                                                         |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                               | Cadencia de actualización del lado del servidor para datos de límites de proveedor almacenados en caché; Los botones de actualización UI aún activan la sincronización manual |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                            | Deshabilite las instantáneas automáticas SQLite antes de writes/import/restore; las copias de seguridad manuales todavía funcionan                                            |
 | `APP_LOG_TO_FILE`                       | `true`                             | Permite la salida de registros de auditoría y aplicaciones al disco                                                                                                           |
@@ -734,7 +734,7 @@ Elija un prefijo distinto (`mygw`, `acme-proxy`). Si las solicitudes a un nodo p
 
 Estas claves van en el `providerSpecificData` de una conexión (por ejemplo a través `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (entero, 1–1024) — para conexiones compatibles con el formato de chat OpenAI cuya puerta de enlace rechaza nombres de herramientas largos. Los nombres más largos se envían como alias cortos y se restauran en la respuesta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go y Muse Code ya tienen nombres de alias de más de 64 caracteres sin configuración; un valor de conexión reduce el límite solo cuando el proveedor no tiene uno integrado (una conexión de Azure detrás de una puerta de enlace más estricta o un nodo compatible personalizado).
+- `toolNameMaxLength` (entero, 1–1024) — para conexiones compatibles con el formato de chat OpenAI cuya puerta de enlace rechaza nombres de herramientas largos. Los nombres más largos se envían como alias cortos y se restauran en la respuesta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go y Muse Code ya tienen nombres de alias de más de 64 caracteres sin configuración. Un valor de conexión reemplaza el valor predeterminado de Azure OpenAI /Azure AI Foundry (una conexión de Azure detrás de una puerta de enlace más estricta) y establece el límite para un nodo compatible personalizado; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go y Muse Code mantienen su límite de registro y lo ignoran.
 - `quotaEndpoint` — el punto final quota/credits de la puerta de enlace, lea la franja de cuota del panel y el enrutamiento basado en cuotas. Funciona en conexiones compatibles con OpenAI y Anthropic; la forma completa está documentada en `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

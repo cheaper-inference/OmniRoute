@@ -81,18 +81,22 @@ Mejeji ti wa ni nikan ka fun ikalara; wọn ko firanṣẹ siwaju si olupese ti 
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Ọrọ ikosile `sed` naa yọ awọn iwe-ẹri eyikeyi ti a fi sii ninu URL latọna jijin. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
+Awọn ila ikosile `sed` eyikeyi awọn iwe-ẹri, okun ibeere ati ajẹkù ti a fi sinu URL latọna jijin, ati awọn akọle tẹlẹ ni `ANTHROPIC_CUSTOM_HEADERS` wa ni ipamọ. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
 
 ---
 

@@ -165,10 +165,10 @@
     "codeCopying": "Se copiază…",
     "codeCopiedAnnouncement": "Cod copiat în clipboard",
     "codeCopyError": "Codul nu a putut fi copiat. Selectați-l și încercați din nou.",
-    "codeCopyErrorRetry": "Nu s-a putut copia codul. Încercați din nou.",
-    "codeRegionLabel": "cod {language}",
+    "codeCopyErrorRetry": "Codul nu a putut fi copiat. Încercați din nou.",
+    "codeRegionLabel": "Cod {language}",
     "modalWizardProgress": "Pași",
-    "modalWizardGoBackTo": "Reveniți la",
+    "modalWizardGoBackTo": "Înapoi la",
     "modalWizardGoTo": "Accesați",
     "modalWizardCompleted": "finalizat",
     "toggleColumns": "Comută coloanele",
@@ -1971,10 +1971,10 @@
     "autoCombo": "Combinație automată",
     "config": "Configurare",
     "connect": "Conectare",
-    "intel": "Intel",
+    "intel": "Informații",
     "mediaProviders": "Furnizori media",
     "offers": "Oferte",
-    "onboarding": "Configurare inițială"
+    "onboarding": "Integrare inițială"
   },
   "home": {
     "quickStart": "Pornire rapidă",
@@ -2110,8 +2110,8 @@
   "analytics": {
     "cachedInputTokens": "Tokenuri de intrare din cache",
     "inputTokensHint": "Exclude citirile din cache. Scrierile în cache rămân tokenuri de intrare.",
-    "inputSplitUnavailable": "Împărțirea datelor de intrare nu este disponibilă deoarece datele privind citirile din cache sunt incomplete sau inconsistente.",
-    "cachedInputTokensHint": "Raportează doar citirile din cache, deja incluse în totalul datelor de intrare.",
+    "inputSplitUnavailable": "Defalcarea intrării nu este disponibilă deoarece datele privind citirile din cache sunt incomplete sau inconsecvente.",
+    "cachedInputTokensHint": "Doar citirile din cache raportate, deja incluse în totalul intrării.",
     "title": "Analiză",
     "usageAnalyticsTitle": "Analiza utilizării",
     "tokenDisplayCompact": "Compact",
@@ -16675,13 +16675,13 @@
     "register": "Înregistrează un punct final sau o schemă alternativă",
     "schema": "Schemă OpenAPI 3",
     "download": "Descarcă fișierul rezultat",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Generare nouă",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: este posibil ca sarcina din amonte să fie încă în curs de rulare. Recuperați confirmarea originală înainte de a începe o altă generare.",
+    "recover": "Recuperați trimiterea originală",
+    "recoveryRecord": "Trimitere salvată",
+    "recoveryMismatch": "Recuperarea necesită conexiunea originală și o schiță identică după reîncărcare. Nu a fost trimisă nicio solicitare nouă.",
+    "recoveryHelp": "Recuperarea reutilizează sarcina utilă și cheia originale. După reîncărcare, restabiliți exact punctul final, conexiunea, transportul și datele de intrare. O generare nouă inițiază o solicitare facturabilă separată. În această filă sunt păstrate până la 20 de confirmări.",
+    "streamIncomplete": "Fluxul s-a încheiat fără un eveniment final complet. Starea finalizării în amonte este necunoscută.",
+    "streamError": "Fluxul din amonte a raportat o eroare. Fișierele primite rămân disponibile."
   }
 }

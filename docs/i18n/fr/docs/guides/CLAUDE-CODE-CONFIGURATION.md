@@ -81,18 +81,22 @@ Les deux ne sont lus que pour attribution ; ils ne sont jamais transmis au four
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-L'expression `sed` supprime toutes les informations d'identification intégrées dans le URL distant. Les extensions IDE lancent Claude Code sans votre shell, donc leurs sessions reviennent au répertoire de travail.
+L'expression `sed` supprime toutes les informations d'identification, chaîne de requête et fragment intégrés dans le URL distant, et les en-têtes déjà dans `ANTHROPIC_CUSTOM_HEADERS` sont conservés. Les extensions IDE lancent Claude Code sans votre shell, donc leurs sessions reviennent au répertoire de travail.
 
 ---
 

@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar pendek kunci yang diizinkan (port, `REQUIRE_API_KEY`, pengaturan lokal dan warna); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar kunci pendek yang diizinkan (`REQUIRE_API_KEY`, pengaturan lokal, zona waktu dan warna, bukan port); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modus baki
 
@@ -423,7 +423,7 @@ Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untu
 
 | Memerintah               | Tindakan                                                                                      |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Menghapus aplikasi sistem tapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.       |
+| `npm run uninstall`      | Menghapus aplikasi sistem tetapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.     |
 | `npm run uninstall:full` | Menghapus aplikasi AND secara permanen** menghapus semua konfigurasi, kunci, dan database** . |
 
 > Catatan: Untuk menjalankan perintah ini, navigasikan ke folder proyek OmniRoute (jika Anda mengkloningnya) dan jalankan. Alternatifnya, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.
@@ -734,7 +734,7 @@ Pilih awalan yang berbeda (`mygw`, `acme-proxy`). Jika permintaan ke node kustom
 
 Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah memiliki nama alias lebih dari 64 karakter tanpa pengaturan; nilai koneksi menurunkan batas hanya jika penyedia tidak memiliki nilai koneksi bawaan (koneksi Azure di belakang gateway yang lebih ketat, atau node kustom yang kompatibel).
+- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah memiliki nama alias lebih dari 64 karakter tanpa pengaturan. Nilai koneksi menggantikan default Azure OpenAI / Azure AI Foundry (koneksi Azure di belakang gateway yang lebih ketat) dan menetapkan batas untuk node kustom yang kompatibel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code menjaga batas registrinya dan mengabaikannya.
 - `quotaEndpoint` — titik akhir quota/credits gateway, baca untuk strip kuota dasbor dan perutean sadar kuota. Bekerja pada koneksi yang kompatibel dengan OpenAI dan Anthropic; bentuk lengkapnya didokumentasikan di `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

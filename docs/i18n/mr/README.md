@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                            |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
+|                            |          v3.8.50           | **v3.8.51** |      `v3.8.55+`       |
 | -------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 प्रदाते                 |            352             |   **358**   |          394          |
 | 🧠 अद्वितीय चॅट मॉडेल आयडी |            1320            |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ Radar वापरणे ऐच्छिक असून तो केवळ GET
 
 </div>
 
-> **v3.8.20 → v3.8.54** मधील अलीकडील ठळक वैशिष्ट्ये. संपूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मध्ये.
+> **v3.8.20 → v3.8.55** मधील अलीकडील ठळक वैशिष्ट्ये. संपूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मध्ये.
 
 - **⚖️ `quota-weighted` रूटिंग** — 20 वी कॉम्बो रणनीती संपलेली खाती वगळते, त्यानंतर उर्वरित खात्यांमधून शिल्लक कोटा ÷ चालू लोड यांच्या प्रमाणात निवड करते आणि विद्यमान संभाषणे त्याच खात्यांशी जोडलेली ठेवते. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 हेडलेस मोड** — `omniroute serve --headless` (किंवा `OMNIROUTE_HEADLESS=1`) फक्त `/v1/*` प्रॉक्सी इंजिन चालवतो; डॅशबोर्ड आणि फक्त-डॅशबोर्डसाठी असलेल्या उपप्रणाली बंद राहतात. → [हेडलेस मोड](docs/guides/HEADLESS.md)
@@ -1035,7 +1035,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` किंवा peer-dep चेतावण्या दिसत आहेत? [त्या निरुपद्रवी आहेत](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 किंवा त्यानंतरचे वापरत आहात?** परवानगी दिलेली नसल्यास npm पॅकेजच्या लाइफसायकल स्क्रिप्ट्स रोखू शकते. OmniRoute ची `postinstall` (`node scripts/build/postinstall.mjs`) ही तिच्या नेटिव्ह रनटाइम फाइल्स तयार करण्यासाठी आवश्यक आहे. ग्लोबली इंस्टॉल करताना npm च्या चेतावणीत नमूद केलेल्या पॅकेजेसना परवानगी द्या. OmniRoute 3.8.54 ने नोंदवलेल्या पॅकेज संचासाठी:
+> **npm 11 किंवा त्यानंतरचे वापरत आहात?** परवानगी दिलेली नसल्यास npm पॅकेजच्या लाइफसायकल स्क्रिप्ट्स रोखू शकते. OmniRoute ची `postinstall` (`node scripts/build/postinstall.mjs`) ही तिच्या नेटिव्ह रनटाइम फाइल्स तयार करण्यासाठी आवश्यक आहे. ग्लोबली इंस्टॉल करताना npm च्या चेतावणीत नमूद केलेल्या पॅकेजेसना परवानगी द्या. OmniRoute 3.8.55 ने नोंदवलेल्या पॅकेज संचासाठी:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1829,7 +1829,7 @@ MIT परवाना - तपशीलांसाठी [LICENSE](LICENSE) �
 
 **[⬆ शीर्षस्थानी परत जा](#-omniroute)** · मुक्त-स्रोत AI समुदायासाठी ❤️ ने तयार केलेले.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> यांनी तयार केले · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT परवाना · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> यांनी तयार केले · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT परवाना · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- समुदायाच्या प्रश्नोत्तरांसाठी GitHub Discussions सक्षम केले आहे -->

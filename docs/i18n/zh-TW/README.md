@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                     |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
+|                     |        v3.8.50        | **v3.8.51** |      `v3.8.55+`       |
 | ------------------- | :-------------------: | :---------: | :-------------------: |
 | 🌐 提供者           |          352          |   **358**   |          394          |
 | 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 
 </div>
 
-> **v3.8.20 → v3.8.54** 的近期重點。完整歷史記錄請參閱 [`CHANGELOG.md`](CHANGELOG.md)。
+> **v3.8.20 → v3.8.55** 的近期重點。完整歷史記錄請參閱 [`CHANGELOG.md`](CHANGELOG.md)。
 
 - **⚖️ `quota-weighted` 路由** — 第 20 種組合策略會跳過已耗盡的帳戶，接著按照剩餘配額 ÷ 執行中負載的比例，在其餘帳戶中進行抽選，同時讓現有對話維持固定路由。→ [自動組合](docs/routing/AUTO-COMBO.md)
 - **🧰 無頭模式** — `omniroute serve --headless`（或 `OMNIROUTE_HEADLESS=1`）只執行 `/v1/*` 代理引擎，關閉儀表板及僅供儀表板使用的子系統。→ [無頭模式](docs/guides/HEADLESS.md)
@@ -1038,7 +1038,7 @@ omniroute
 ```
 
 > 💡 看到 `npm warn ERESOLVE` 或 peer-dep 警告嗎？[這些警告不影響使用](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)。
-> **使用 npm 11 或更新版本？** npm 可能會封鎖套件生命週期指令碼，除非允許執行這些指令碼。OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`）需要用來準備原生執行階段檔案。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.54 回報的套件集合：
+> **使用 npm 11 或更新版本？** npm 可能會封鎖套件生命週期指令碼，除非允許執行這些指令碼。OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`）需要用來準備原生執行階段檔案。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.55 回報的套件集合：
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1829,7 +1829,7 @@ MIT 授權條款 - 詳情請參閱 [LICENSE](LICENSE)。
 
 **[⬆ 返回頂端](#-omniroute)** · 為開源 AI 社群用 ❤️ 打造。
 
-<sub>由 <a href="https://github.com/diegosouzapw">Diego Souza</a> 建立 · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>由 <a href="https://github.com/diegosouzapw">Diego Souza</a> 建立 · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- 已啟用 GitHub 討論區，供社群問答使用 -->

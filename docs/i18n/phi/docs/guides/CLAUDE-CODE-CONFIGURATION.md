@@ -81,18 +81,22 @@ Parehong binabasa lamang para sa pagpapatungkol; hindi sila kailanman ipinapasa 
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Tinatanggal ng ekspresyong `sed` ang anumang mga kredensyal na naka-embed sa remote URL. Ang mga IDE extension ay naglulunsad ng Claude Code nang wala ang iyong shell, kaya ang kanilang mga session ay bumalik sa gumaganang direktoryo.
+Tinatanggal ng ekspresyong `sed` ang anumang mga kredensyal, string ng query at fragment na naka-embed sa remote URL, at pinapanatili ang mga header na nasa `ANTHROPIC_CUSTOM_HEADERS` na. Ang mga IDE extension ay naglulunsad ng Claude Code nang wala ang iyong shell, kaya ang kanilang mga session ay bumalik sa gumaganang direktoryo.
 
 ---
 

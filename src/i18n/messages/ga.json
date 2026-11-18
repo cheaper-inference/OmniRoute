@@ -162,7 +162,7 @@
     "dismissNotification": "Dún fógra",
     "moreInformation": "Tuilleadh eolais",
     "notificationAnnouncement": "Fógra: {message}",
-    "codeCopying": "Cóipeáil á dhéanamh…",
+    "codeCopying": "Á chóipeáil…",
     "codeCopiedAnnouncement": "Cóipeáladh an cód chuig an ngearrthaisce",
     "codeCopyError": "Níorbh fhéidir an cód a chóipeáil. Roghnaigh é agus bain triail eile as.",
     "codeCopyErrorRetry": "Níorbh fhéidir an cód a chóipeáil. Bain triail eile as.",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Tá an seachfhreastalaí stoptha nó á atosú.",
     "expandSidebar": "Leathnaigh an taobh-bharra",
     "collapseSidebar": "Fill an taoibh-bharra",
-    "toggleSidebar": "Taispeáin/folaigh an barra taoibh",
+    "toggleSidebar": "Scoránaigh an barra taoibh",
     "createTheme": "Cruthaigh téama",
     "chooseColor": "Roghnaigh dath amháin",
     "cliToolsShort": "Uirlisí",
@@ -1968,13 +1968,13 @@
     "usage": "Úsáid",
     "orchestration": "Orcastráil",
     "access": "Rochtain",
-    "autoCombo": "Uath-chomhcheangal",
+    "autoCombo": "Teaglaim Uathoibríoch",
     "config": "Cumraíocht",
     "connect": "Ceangail",
-    "intel": "Intel",
-    "mediaProviders": "Soláthraithe meán",
+    "intel": "Faisnéis",
+    "mediaProviders": "Soláthraithe Meán",
     "offers": "Tairiscintí",
-    "onboarding": "Treoir tosaigh"
+    "onboarding": "Ionduchtú"
   },
   "home": {
     "quickStart": "Tús Tapa",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Comharthaí ionchuir i dtaisce",
-    "inputTokensHint": "Ní áirítear léamha taisce. Fanann scríbhinní taisce ina gcomharthaí ionchuir.",
-    "inputSplitUnavailable": "Níl miondealú an ionchuir ar fáil toisc go bhfuil sonraí léamh na taisce neamhiomlán nó neamh-chomhsheasmhach.",
-    "cachedInputTokensHint": "Léamha taisce amháin a thuairiscítear; áirítear iad san ionchur iomlán cheana féin.",
+    "cachedInputTokens": "Comharthaí Ionchuir i dTaisce",
+    "inputTokensHint": "Ní áirítear léamha ón taisce. Fanann scríobhanna sa taisce mar chomharthaí ionchuir.",
+    "inputSplitUnavailable": "Níl an miondealú ionchuir ar fáil toisc go bhfuil na sonraí faoi léamha ón taisce neamhiomlán nó neamhréireach.",
+    "cachedInputTokensHint": "Léamha tuairiscithe ón taisce amháin, atá san áireamh cheana féin san ionchur iomlán.",
     "title": "Anailísíocht",
     "usageAnalyticsTitle": "Anailísíocht Úsáide",
     "tokenDisplayCompact": "Dlúth",
@@ -13765,7 +13765,7 @@
     "description": "Trácht, aga folaigh agus rátaí ratha de réir soláthraí agus de réir samhla",
     "combo": "Teaglaim",
     "toggleModels": "Taispeáin samhlacha do {provider}",
-    "modelsTable": "Múnlaí le haghaidh {provider}",
+    "modelsTable": "Samhlacha do {provider}",
     "windowSince": "Ó {date}"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "Cláraigh críochphointe nó sáraigh an scéimre",
     "schema": "Scéimre OpenAPI 3",
     "download": "Íoslódáil an comhad aschuir",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Giniúint nua",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: seans go bhfuil an jab réamhtheachtach fós ar siúl. Aisghabh an admháil bhunaidh sula dtosaíonn tú giniúint eile.",
+    "recover": "Aisghabh an aighneacht bhunaidh",
+    "recoveryRecord": "Aighneacht shábháilte",
+    "recoveryMismatch": "Chun aisghabháil a dhéanamh, teastaíonn an nasc bunaidh agus dréacht atá díreach mar an gcéanna tar éis athlódála. Níor seoladh aon iarratas nua.",
+    "recoveryHelp": "Athúsáideann an aisghabháil an t-ualach pá agus an eochair bhunaidh. Tar éis athlódála, athchóirigh an críochphointe, an nasc, an t-iompar agus an t-ionchur díreach mar a bhí siad. Cuireann giniúint nua tús le hiarratas inmhuirir ar leith. Coinnítear suas le 20 admháil sa chluaisín seo.",
+    "streamIncomplete": "Tháinig deireadh leis an sruth gan teagmhas deiridh iomlán. Ní fios ar cuireadh an obair réamhtheachtach i gcrích.",
+    "streamError": "Thuairiscigh an sruth réamhtheachtach earráid. Tá na comhaid a fuarthas fós ar fáil."
   }
 }

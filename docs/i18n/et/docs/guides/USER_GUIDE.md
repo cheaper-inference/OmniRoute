@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (pordid, `REQUIRE_API_KEY`, lokaadi ja värvi sätted); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (`REQUIRE_API_KEY`, lokaat, ajavööndi ja värvi seaded, mitte pordid); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Salve režiim
 
@@ -733,7 +733,7 @@ Valige erinev eesliide (`mygw`, `acme-proxy`). Kui kohandatud sõlme päringud n
 
 Need klahvid lähevad ühenduse `providerSpecificData` (näiteks `PUT /api/providers/{id}` kaudu):
 
-- `toolNameMaxLength` (täisarv, 1–1024) — OpenAI vestlusvorminguga ühilduvate ühenduste jaoks, mille lüüs lükkab tagasi pikad tööriistanimed. Pikemad nimed saadetakse lühikeste varjunimedena ja taastatakse vastuses. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code on juba üle 64 tähemärgi aliasnimed ilma seadistusteta; ühenduse väärtus alandab limiiti ainult siis, kui pakkujal pole seda sisse ehitatud (Azure'i ühendus rangema lüüsi taga või kohandatud ühilduv sõlm).
+- `toolNameMaxLength` (täisarv, 1–1024) — OpenAI vestlusvorminguga ühilduvate ühenduste jaoks, mille lüüs lükkab tagasi pikad tööriistanimed. Pikemad nimed saadetakse lühikeste varjunimedena ja taastatakse vastuses. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code on juba üle 64 tähemärgi aliasnimed ilma seadistusteta. Ühenduse väärtus asendab Azure OpenAI / Azure AI Foundry vaikeväärtuse (rangema lüüsi taga asuv Azure'i ühendus) ja määrab kohandatud ühilduva sõlme piirangu; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code säilitavad oma registripiirangu ja eiravad seda.
 - `quotaEndpoint` — lüüsi quota/credits lõpp-punkt, lugege armatuurlaua kvoodiriba ja kvooditeadlikku marsruutimist. Töötab nii OpenAI- kui ka Anthropic-ühilduvate ühendustega; täiskuju on dokumenteeritud `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -1016,7 +1016,7 @@ OmniRoute rakendab pakkujatasemel vastupidavust viie komponendiga:
 
 5. **Rate Limit Auto-Tuvastamine** — Kui ülesvoolu pakkujad tagastavad selgesõnalised ooteaknad, alistavad need vihjed kohaliku ühenduse jahtumise, kui seade on lubatud.
 
-**Pro nõuanded:** Kasutage** Tervis** leht, et kontrollida ja lähtestada reaalajas teenusepakkuja kaitselüliteid pärast katkestust. Vastupidavuse leht muudab ainult konfiguratsiooni.
+**Pro näpunäide:** Kasutage** Tervis** leht, et kontrollida ja lähtestada reaalajas teenusepakkuja kaitselüliteid pärast katkestust. Vastupidavuse leht muudab ainult konfiguratsiooni.
 
 ---
 
@@ -1176,7 +1176,7 @@ Juurdepääs kaudu** Armatuurlaud → Health** . Reaalajas süsteemi seisundi ü
 | **Allkirja vahemälu**      | Deduplikatsiooni vahemälu statistika (aktiivsed võtmed, tabamusmäär) |
 | **Latentsuse telemeetria** | p50/p95/p99 latentsusagregatsioon pakkuja kohta                      |
 
-**Pro nõuanded:** Tervise lehekülge värskendatakse automaatselt iga 10 sekundi järel. Kasutage kaitselülitikaarti, et tuvastada, millistel pakkujatel on probleeme.
+**Pro näpunäide:** Tervise lehekülge värskendatakse automaatselt iga 10 sekundi järel. Kasutage kaitselülitikaarti, et tuvastada, millistel pakkujatel on probleeme.
 
 ---
 

@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) і OpenCode (`x-opencode-session`) розп
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Вираз `sed` видаляє всі облікові дані, вбудовані у віддалений URL. Розширення IDE запускають код Claude без вашої оболонки, тому їхні сеанси повертаються до робочого каталогу.
+Вираз `sed` видаляє всі облікові дані, рядок запиту та фрагмент, вбудований у віддалений URL, а заголовки, які вже є в `ANTHROPIC_CUSTOM_HEADERS` зберігаються. Розширення IDE запускають код Claude без вашої оболонки, тому їх сеанси повертаються до робочого каталогу.
 
 ---
 

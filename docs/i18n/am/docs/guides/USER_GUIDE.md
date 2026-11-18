@@ -376,7 +376,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI በራስሰር `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል። በስራ ማውጫው ውስጥ ያለው `./.env` አጭር የተፈቀደ ቁልፍ ዝርዝር ብቻ ሊያዘጋጅ ይችላል (ወደቦች ፣ `REQUIRE_API_KEY`፣ የአካባቢ እና የቀለም ቅንጅቶች)። ሁሉንም ነገር በ `~/.omniroute/.env` ውስጥ ያስቀምጡ. [CLI ማስጀመሪያ ውሎችን](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ይመልከቱ።
+CLI በራስሰር `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል። በስራ ማውጫው ውስጥ ያለው `./.env` አጭር የተፈቀደ ቁልፍ ዝርዝር ብቻ ሊያዘጋጅ ይችላል (`REQUIRE_API_KEY`, የአካባቢ, የሰዓት ሰቅ እና የቀለም ቅንጅቶች, ወደቦች አይደለም); ሁሉንም ነገር በ `~/.omniroute/.env` ውስጥ ያስቀምጡ. [CLI ማስጀመሪያ ውሎችን](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ይመልከቱ።
 
 ### የትሪ ሁነታ
 
@@ -605,7 +605,7 @@ post_install() {
 | ተለዋዋጭ                                   | ነባሪ                      | መግለጫ                                                                                                  |
 | --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`                            | _(በራስ-ሰር የተፈጠረ)_         | JWT ፊርማ ሚስጥራዊ — በራስ የመነጨ በመጀመሪያ ሩጫ እና እስከ `server.env` ድረስ ቀጠለ; የውሂብ ማውጫው ጊዜያዊ በሚሆንበት ጊዜ በግልጽ ያስቀምጡት። |
-| `INITIAL_PASSWORD`                      | _(ያልተቀናበረ)_              | መጀመሪያ የመግቢያ የይለፍ ቃል. npm/source ጭነቶች በ `CHANGEME` ይጀምራሉ: ይተኩ. አልተዋቀረም፡ የመሳፈር አዋቂ                      |
+| `INITIAL_PASSWORD`                      | _(ያልተቀናበረ)_              | መጀመሪያ የመግቢያ የይለፍ ቃል. npm/source ጭነቶች በ `CHANGEME` ይጀምራሉ: ይተኩ. ያልተዋቀረ፡ ተሳፍሪ አዋቂ                        |
 | `DATA_DIR`                              | `~/.omniroute`           | የውሂብ ማውጫ (ዲቢ፣ አጠቃቀም፣ ምዝግብ ማስታወሻዎች)                                                                    |
 | `PORT`                                  | ማዕቀፍ ነባሪ                 | የአገልግሎት ወደብ (`20128` በምሳሌዎች)                                                                          |
 | `HOSTNAME`                              | ማዕቀፍ ነባሪ                 | አስረው አስተናጋጅ (Docker ነባሪ ወደ `0.0.0.0`)                                                                 |
@@ -738,7 +738,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 እነዚህ ቁልፎች በግንኙነት `providerSpecificData` ውስጥ ይሄዳሉ (ለምሳሌ በ `PUT /api/providers/{id}`)፡-
 
-- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ 64 ቁምፊዎች በላይ ስም ተሰጥቷል; የግንኙነት ዋጋ ገደቡን ዝቅ የሚያደርገው አቅራቢው ምንም አብሮገነብ ከሌለው ብቻ ነው (ከጠንካራ መግቢያ በር ጀርባ ያለው የAzure ግንኙነት ወይም ብጁ ተኳሃኝ መስቀለኛ መንገድ)።
+- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ64 ቁምፊዎች በላይ ስም ተሰጥቶታል። የግንኙነት እሴት የ Azure OpenAI / Azure AI Foundry ነባሪ (ከጠንካራ ፍኖት ጀርባ ያለው የ Azure ግንኙነት) ይተካዋል እና ለብጁ ተስማሚ የሆነ መስቀለኛ መንገድ ገደቡን ያዘጋጃል። OpenAI, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ የመመዝገቢያ ገደባቸውን ይጠብቃሉ እና ችላ ይበሉት።
 - `quotaEndpoint` — የጌትዌይው quota/credits መጨረሻ ነጥብ፣ ለዳሽቦርድ ኮታ ስትሪፕ አንብብ እና ኮታ የሚያውቅ ማዘዋወር። በሁለቱም በ OpenAI- እና Anthropic-ተኳሃኝ ግንኙነቶች ላይ ይሰራል; ሙሉው ቅርጽ በ `open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል.
 
 ```json

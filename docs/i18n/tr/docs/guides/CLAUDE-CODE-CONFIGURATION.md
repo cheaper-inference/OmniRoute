@@ -81,18 +81,22 @@ Her ikisi de yalnızca atıfta bulunmak için okunur; hiçbir zaman yukarı akı
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` ifadesi, uzak URL katıştırılmış tüm kimlik bilgilerini çıkarır. IDE uzantıları Claude Kodunu kabuğunuz olmadan başlatır, böylece oturumları çalışma dizinine geri döner.
+`sed` ifadesi, uzak URL gömülü tüm kimlik bilgilerini, sorgu dizesini ve parçalarını çıkarır ve zaten `ANTHROPIC_CUSTOM_HEADERS` bulunan başlıklar tutulur. IDE uzantıları Claude Code'u kabuğunuz olmadan başlatır, böylece oturumları çalışma dizinine geri döner.
 
 ---
 

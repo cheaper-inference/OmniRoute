@@ -81,18 +81,22 @@ Mindkettő csak forrásmegjelölés céljából olvasható; soha nem továbbítj
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-A `sed` kifejezés törli a távoli URL ágyazott hitelesítő adatokat. IDE kiterjesztések Claude kódot a shell nélkül indítják el, így a munkameneteik visszakerülnek a munkakönyvtárba.
+A `sed` kifejezés eltávolítja a távoli URL be ágyazott hitelesítő adatokat, lekérdezési karakterláncot és töredéket, és `ANTHROPIC_CUSTOM_HEADERS` -ben már meglévő fejlécek megmaradnak. IDE kiterjesztések Claude kódot a shell nélkül indítják el, így a munkameneteik visszakerülnek a munkakönyvtárba.
 
 ---
 

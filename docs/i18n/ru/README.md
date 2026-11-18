@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                      |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                      |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------------------ | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Провайдеры                        |            352            |   **358**   |          394          |
 | 🧠 Уникальные ID чат-моделей         |           1320            |  **1374**   |         1491          |
@@ -1040,7 +1040,7 @@ omniroute
 ```
 
 > 💡 Видите `npm warn ERESOLVE` или предупреждения о peer-зависимостях? [Они безвредны](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Используете npm 11 или более позднюю версию?** npm может блокировать скрипты жизненного цикла пакетов, если им не разрешён запуск. `postinstall` в OmniRoute (`node scripts/build/postinstall.mjs`) необходим для подготовки собственных файлов среды выполнения. При глобальной установке разрешите пакеты, названные в предупреждении npm. Для набора пакетов, указанного в OmniRoute 3.8.54:
+> **Используете npm 11 или более позднюю версию?** npm может блокировать скрипты жизненного цикла пакетов, если им не разрешён запуск. `postinstall` в OmniRoute (`node scripts/build/postinstall.mjs`) необходим для подготовки собственных файлов среды выполнения. При глобальной установке разрешите пакеты, названные в предупреждении npm. Для набора пакетов, указанного в OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1836,7 +1836,7 @@ OmniRoute стоит на плечах гигантов. Он начинался
 
 **[⬆ Вернуться наверх](#-omniroute)** · Создано ❤️ для сообщества разработчиков ИИ с открытым исходным кодом.
 
-<sub>Создано <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Создано <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Обсуждения GitHub включены для вопросов и ответов сообщества -->

@@ -356,7 +356,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laddar automatiskt `.env` från `~/.omniroute/.env` eller `./.env`. En `./.env` i arbetskatalogen kan endast ställa in en kort godkännandelista med nycklar (portar, `REQUIRE_API_KEY`, språkinställningar och färginställningar); lägg allt annat i `~/.omniroute/.env`. Se [CLI lanseringskontrakt](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laddar automatiskt `.env` från `~/.omniroute/.env` eller `./.env`. En `./.env` i arbetskatalogen kan endast ställa in en kort godkännandelista med nycklar (`REQUIRE_API_KEY`, locale, tidszon och färginställningar, inte portarna); lägg allt annat i `~/.omniroute/.env`. Se [CLI lanseringskontrakt](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Fackläge
 
@@ -582,28 +582,28 @@ post_install() {
 
 ### Miljövariabler
 
-| Variabel                                | Standard                  | Beskrivning                                                                                                                                                     |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiskt genererad)_ | JWT -signeringshemligheten — genererades automatiskt vid första körningen och fortsatte att `server.env`; ställ in det explicit när datakatalogen är tillfällig |
-| `INITIAL_PASSWORD`                      | _(avstängd)_              | Första inloggningslösenordet. npm/source installationer börjar med `CHANGEME`: ersätt det. Avaktiverad: introduktionsguide                                      |
-| `DATA_DIR`                              | `~/.omniroute`            | Datakatalog (db, användning, loggar)                                                                                                                            |
-| `PORT`                                  | ram standard              | Serviceport (`20128` i exempel)                                                                                                                                 |
-| `HOSTNAME`                              | ram standard              | Bind värd (Docker är standard till `0.0.0.0`)                                                                                                                   |
-| `NODE_ENV`                              | runtime standard          | Ställ in `production` för utplacering                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Public base URL dök upp till instrumentpanelen och exponerades för servern (ersätter äldre `BASE_URL`)                                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud sync endpoint base URL (ersätter äldre `CLOUD_URL`)                                                                                                       |
-| `API_KEY_SECRET`                        | _(automatiskt genererad)_ | HMAC hemlighet för genererade API nycklar — genererades automatiskt vid första körningen och fortsatte till `server.env`                                        |
-| `REQUIRE_API_KEY`                       | `false`                   | Framtvinga bärarens API nyckel på `/v1/*`                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Tillåt autentiserade instrumentpanelanvändare att avslöja fullständiga lagrade API nyckelvärden på begäran                                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Uppdateringskadens på serversidan för cachelagrade Provider Limits-data; UI refresh-knappar utlöser fortfarande manuell synkronisering                          |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Inaktivera automatiska SQLite -ögonblicksbilder före writes/import/restore; manuella säkerhetskopieringar fungerar fortfarande                                  |
-| `APP_LOG_TO_FILE`                       | `true`                    | Aktiverar utmatning av program och granskningslogg till disk                                                                                                    |
-| `AUTH_COOKIE_SECURE`                    | `false`                   | Forcera `Secure` auth-cookie (bakom HTTPS omvänd proxy)                                                                                                         |
-| `CLOUDFLARED_BIN`                       | avstängd                  | Använd en befintlig `cloudflared` -binär istället för hanterad nedladdning                                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport för hanterade snabba tunnlar (`http2`, `quic` eller `auto`)                                                                                           |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap limit i MB                                                                                                                                         |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Max prompt cache-poster                                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Max semantiska cacheposter                                                                                                                                      |
+| Variabel                                | Standard                  | Beskrivning                                                                                                                                                  |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(automatiskt genererad)_ | JWT signeringshemlighet — genererades automatiskt vid första körningen och fortsatte att `server.env`; ställ in det explicit när datakatalogen är tillfällig |
+| `INITIAL_PASSWORD`                      | _(avstängd)_              | Första inloggningslösenordet. npm/source installationer börjar med `CHANGEME`: ersätt det. Avaktiverad: introduktionsguide                                   |
+| `DATA_DIR`                              | `~/.omniroute`            | Datakatalog (db, användning, loggar)                                                                                                                         |
+| `PORT`                                  | ram standard              | Serviceport (`20128` i exempel)                                                                                                                              |
+| `HOSTNAME`                              | ram standard              | Bind värd (Docker är standard till `0.0.0.0`)                                                                                                                |
+| `NODE_ENV`                              | runtime standard          | Ställ in `production` för utplacering                                                                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Public base URL dök upp till instrumentpanelen och exponerades för servern (ersätter äldre `BASE_URL`)                                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud sync endpoint base URL (ersätter äldre `CLOUD_URL`)                                                                                                    |
+| `API_KEY_SECRET`                        | _(automatiskt genererad)_ | HMAC hemlighet för genererade API nycklar — genererades automatiskt vid första körningen och fortsatte till `server.env`                                     |
+| `REQUIRE_API_KEY`                       | `false`                   | Framtvinga bärarens API nyckel på `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Tillåt autentiserade instrumentpanelanvändare att avslöja fullständiga lagrade API nyckelvärden på begäran                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Uppdateringskadens på serversidan för cachelagrade Provider Limits-data; UI refresh-knappar utlöser fortfarande manuell synkronisering                       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Inaktivera automatiska SQLite -ögonblicksbilder före writes/import/restore; manuella säkerhetskopieringar fungerar fortfarande                               |
+| `APP_LOG_TO_FILE`                       | `true`                    | Aktiverar utmatning av program och granskningslogg till disk                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Forcera `Secure` auth-cookie (bakom HTTPS omvänd proxy)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | avstängd                  | Använd en befintlig `cloudflared` -binär istället för hanterad nedladdning                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport för hanterade snabba tunnlar (`http2`, `quic` eller `auto`)                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap limit i MB                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Max prompt cache-poster                                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Max semantiska cacheposter                                                                                                                                   |
 
 För den fullständiga referensen till miljövariabeln, se [README](../README.md).
 
@@ -718,7 +718,7 @@ Välj ett distinkt prefix (`mygw`, `acme-proxy`). Om förfrågningar till en anp
 
 Dessa nycklar går i en anslutnings `providerSpecificData` (till exempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltal, 1–1024) — för OpenAI -chattformatkompatibla anslutningar vars gateway avvisar långa verktygsnamn. Längre namn skickas som korta alias och återställs i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go och Muse Code alias redan över 64 tecken utan inställning; ett anslutningsvärde sänker gränsen endast där leverantören inte har någon inbyggd (en Azure-anslutning bakom en striktare gateway eller en anpassad kompatibel nod).
+- `toolNameMaxLength` (heltal, 1–1024) — för OpenAI -chattformatkompatibla anslutningar vars gateway avvisar långa verktygsnamn. Längre namn skickas som korta alias och återställs i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go och Muse Code alias redan över 64 tecken utan inställning. Ett anslutningsvärde ersätter Azure OpenAI / Azure AI Foundry-standarden (en Azure-anslutning bakom en striktare gateway) och anger gränsen för en anpassad kompatibel nod; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go och Muse Code behåller sin registergräns och ignorerar den.
 - `quotaEndpoint` — gatewayens quota/credits slutpunkt, läs för instrumentpanelens kvotremsa och kvotmedveten routing. Fungerar på både OpenAI- och Anthropic-kompatibla anslutningar; den fullständiga formen dokumenteras i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
