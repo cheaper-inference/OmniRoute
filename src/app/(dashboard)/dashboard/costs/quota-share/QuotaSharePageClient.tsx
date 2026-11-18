@@ -545,11 +545,10 @@ export default function QuotaSharePageClient() {
         )}
         {selectedGroupId !== "all" && selectedGroupId !== "group-demo" && (
           <Button
-            variant="ghost"
+            variant="destructive-ghost"
             size="sm"
             icon="delete"
             onClick={() => void handleDeleteGroup()}
-            className="hover:text-error"
           >
             {t("deleteGroup")}
           </Button>

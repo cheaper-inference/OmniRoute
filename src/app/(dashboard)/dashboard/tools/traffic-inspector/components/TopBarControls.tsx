@@ -85,6 +85,7 @@ export function TopBarControls({
     <div className="flex flex-wrap items-center gap-2 border-b border-border bg-bg-subtle px-3 py-2">
       {/* Profile selector */}
       <SegmentedControl
+        semantics="radio"
         size="sm"
         aria-label={t("trafficProfile")}
         value={profile}

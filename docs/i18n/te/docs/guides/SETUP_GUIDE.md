@@ -18,7 +18,7 @@
 
 ---
 
-## ఇన్స్టాలేషన్ పద్ధతులు
+## ఇన్స్టాల్ మెథడ్స్
 
 ### npm (సిఫార్సు చేయబడింది)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-డాష్బోర్డ్ `http://localhost:20128` వద్ద తెరుచుకుంటుంది మరియు API బేస్ URL `http://localhost:20128/v1`.
+డాష్బోర్డ్ `http://localhost:20128` వద్ద తెరవబడుతుంది మరియు API బేస్ URL `http://localhost:20128/v1`.
+
+> **npm వినియోగదారులు:** ఇన్స్టాల్ స్క్రిప్ట్లు బ్లాక్ చేయబడిందని npm హెచ్చరిస్తే (ఉదా, `omniroute`, `better-sqlite3`), [ట్రబుల్షూటింగ్ — npm ఇన్స్టాల్-స్క్రిప్ట్లు బ్లాక్ చేయబడ్డాయి](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm వినియోగదారులు:** `better-sqlite3` మరియు `@swc/core` కోసం స్థానిక బిల్డ్ స్క్రిప్ట్లను ప్రారంభించడానికి `--allow-build` ఫ్లాగ్ అవసరం. pnpm v11లో గ్లోబల్ ఇన్స్టాలేషన్లకు `pnpm approve-builds -g` కమాండ్కు మద్దతు లేదు.
+> **pnpm వినియోగదారులు:** `better-sqlite3` మరియు `@swc/core` కోసం స్థానిక బిల్డ్ స్క్రిప్ట్లను ప్రారంభించడానికి `--allow-build` ఫ్లాగ్ అవసరం. pnpm v11లో గ్లోబల్ ఇన్స్టాల్లకు `pnpm approve-builds -g` కమాండ్కు మద్దతు లేదు.
 
-### Arch Linux (AUR)
+### ఆర్చ్ Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR ప్యాకేజీ](https://aur.archlinux.org/packages/omniroute-bin) OmniRouteను ఇన్స్టాల్ చేసి, systemd వినియోగదారు సేవను అందిస్తుంది.
+[AUR ప్యాకేజీ](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ఇన్స్టాల్ చేస్తుంది మరియు systemd వినియోగదారు సేవను అందిస్తుంది.
 
-### సోర్స్ నుండి
+### మూలం నుండి
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows గమనిక:** లెగసీ `%USERPROFILE%\.omniroute` డైరెక్టరీ లేకపోతే, డిఫాల్ట్గా OmniRoute `%APPDATA%\omniroute`ను ఉపయోగిస్తుంది. వేరొక డేటా-డైరెక్టరీ స్థానాన్ని ఎంచుకోవడానికి `DATA_DIR`ను సెట్ చేయండి.
+> **Windows గమనిక:** డిఫాల్ట్గా, లెగసీ `%USERPROFILE%\.omniroute` డైరెక్టరీ లేనప్పుడు OmniRoute `%APPDATA%\omniroute` ఉపయోగిస్తుంది. వేరే డేటా-డైరెక్టరీ స్థానాన్ని ఎంచుకోవడానికి `DATA_DIR` సెట్ చేయండి.
 
-> **గమనిక:** మొదటిసారి అమలు చేసినప్పుడు `npm install`, `.env.example` నుండి `.env`ను స్వయంచాలకంగా రూపొందిస్తుంది. తరువాతి ఇన్స్టాలేషన్లు ఇప్పటికే ఉన్న `.env`ను ఓవర్రైట్ చేయవు, కాబట్టి అనుకూలీకరణలు భద్రపరచబడతాయి. మళ్లీ రూపొందించడానికి, తిరిగి అమలు చేసే ముందు `.env`ను తొలగించండి.
+> **గమనిక:** `npm install` మొదటి రన్లో `.env.example` నుండి `.env` స్వయంచాలకంగా ఉత్పత్తి చేస్తుంది. తదుపరి ఇన్స్టాల్లు ఇప్పటికే ఉన్న `.env` ఓవర్రైట్ చేయవు, కాబట్టి అనుకూలీకరణలు భద్రపరచబడతాయి. మళ్లీ సీడ్ చేయడానికి, మళ్లీ అమలు చేయడానికి ముందు `.env` తొలగించండి.
 
 ### Docker
 
-Compose ప్రొఫైల్లు మరియు Caddy HTTPSతో సహా పూర్తి Docker సెటప్ కోసం [Docker గైడ్](./DOCKER_GUIDE.md) చూడండి.
+కంపోజ్ ప్రొఫైల్స్ మరియు కేడీ HTTPS తో సహా పూర్తి Docker సెటప్ కోసం [Docker గైడ్ని](./DOCKER_GUIDE.md) చూడండి.
 
 ### డెస్క్టాప్ యాప్ (Electron)
 
-OmniRoute, Electron 41 + electron-builder 26.10పై నిర్మించిన డెస్క్టాప్ ర్యాపర్తో వస్తుంది. అందుబాటులో ఉన్న స్క్రిప్ట్లు (వర్క్స్పేస్ రూట్):
+OmniRoute Electron 41 + ఎలక్ట్రాన్-బిల్డర్ 26.10పై నిర్మించిన డెస్క్టాప్ రేపర్ను రవాణా చేస్తుంది. అందుబాటులో ఉన్న స్క్రిప్ట్లు (వర్క్స్పేస్ రూట్):
 
 ```bash
-npm run electron:dev          # హాట్-రీలోడ్తో డెస్క్టాప్ను అమలు చేయండి
-npm run electron:build        # ప్రస్తుత OS కోసం బిల్డ్ చేయండి (స్వయంచాలకంగా గుర్తించబడుతుంది)
-npm run electron:build:win    # Windows ఇన్స్టాలర్ (NSIS + పోర్టబుల్)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # ప్యాకేజ్ చేసిన బిల్డ్ను స్మోక్-టెస్ట్ చేయండి
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-డెస్క్టాప్ ఇన్స్టాలర్ల విడుదలలు GitHub Releasesకు జోడించబడతాయి. పూర్తి Electron వివరణాత్మక సమాచారం (సైనింగ్, IPC బ్రిడ్జ్, డిస్ట్రోలు) కోసం, [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) చూడండి _(తరువాతి దశలో సృష్టించబడింది)_.
+డెస్క్టాప్ ఇన్స్టాలర్ల విడుదలలు GitHub విడుదలలకు జోడించబడ్డాయి. పూర్తి Electron డీప్-డైవ్ (సైనింగ్, IPC బ్రిడ్జ్, డిస్ట్రోస్) కోసం [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ చూడండి.
 
-### హెడ్లెస్ సర్వర్ (CI/ఆటోమేషన్)
+### హెడ్లెస్ సర్వర్ (CI/automation)
 
-పర్యవేక్షణ అవసరం లేని సెటప్ల కోసం (Docker, Kubernetes, CI), వీటిని ఉపయోగించండి:
+గమనించని సెటప్ల కోసం (Docker, Kubernetes, CI), ఉపయోగించండి:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-env varsతో (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, మొదలైనవి) కలిపి ఉపయోగించడం ద్వారా, పూర్తిగా స్క్రిప్ట్ చేయగల OmniRoute ఇన్స్టాన్స్ను ప్రారంభించవచ్చు.
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, మొదలైనవి)తో కలిపి, ఇది OmniRoute ఉదంతాన్ని పూర్తిగా స్క్రిప్టుగా మార్చడానికి మిమ్మల్ని అనుమతిస్తుంది.
 
 ### CLI ఎంపికలు
 
-| కమాండ్                  | వివరణ                                                                                                           |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | సర్వర్ను ప్రారంభించండి (`PORT=20128`, API మరియు డాష్బోర్డ్ ఒకే పోర్ట్లో)                                        |
-| `omniroute setup`       | పాస్వర్డ్ మరియు మొదటి ప్రొవైడర్ కోసం మార్గదర్శిత CLI ఆన్బోర్డింగ్                                               |
-| `omniroute doctor`      | సర్వర్ను ప్రారంభించకుండా స్థానిక ఆరోగ్య తనిఖీలను అమలు చేయండి                                                    |
-| `omniroute providers`   | CLI నుండి ప్రొవైడర్లను కనుగొనండి, జాబితా చేయండి, ధ్రువీకరించండి మరియు పరీక్షించండి                              |
-| `omniroute config`      | CLI సాధనం కాన్ఫిగరేషన్ — కాన్ఫిగ్లను జాబితా చేయండి, పొందండి, సెట్ చేయండి, ధ్రువీకరించండి                        |
-| `omniroute status`      | ఆఫ్లైన్ స్థితి డాష్బోర్డ్ — వెర్షన్, DB, సాధనాలు, కాన్ఫిగ్                                                      |
-| `omniroute logs`        | API నుండి వినియోగ లాగ్లను స్ట్రీమ్ చేయండి (`--follow`కు మద్దతు ఉంది)                                            |
-| `omniroute update`      | OmniRoute అప్డేట్ల కోసం తనిఖీ చేయండి లేదా వాటిని వర్తింపజేయండి                                                  |
-| `omniroute provider`    | ప్రొవైడర్ కనెక్షన్లను నిర్వహించండి — జోడించండి, జాబితా చేయండి, తొలగించండి, పరీక్షించండి, డిఫాల్ట్గా సెట్ చేయండి |
-| `omniroute --port 3000` | ప్రామాణిక/API పోర్ట్ను 3000కు సెట్ చేయండి                                                                       |
-| `omniroute --mcp`       | MCP సర్వర్ను ప్రారంభించండి (stdio ట్రాన్స్పోర్ట్)                                                               |
-| `omniroute --no-open`   | బ్రౌజర్ను స్వయంచాలకంగా తెరవవద్దు                                                                                |
-| `omniroute --help`      | సహాయాన్ని చూపండి                                                                                                |
+| ఆదేశం                   | వివరణ                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| `omniroute`             | సర్వర్ను ప్రారంభించండి (`PORT=20128`, API మరియు అదే పోర్ట్లో డాష్బోర్డ్)                                 |
+| `omniroute setup`       | పాస్వర్డ్ మరియు మొదటి ప్రొవైడర్ కోసం గైడెడ్ CLI ఆన్బోర్డింగ్                                             |
+| `omniroute doctor`      | సర్వర్ను ప్రారంభించకుండానే స్థానిక ఆరోగ్య తనిఖీలను అమలు చేయండి                                           |
+| `omniroute providers`   | CLI నుండి ప్రొవైడర్లను కనుగొనండి, జాబితా చేయండి, ధృవీకరించండి మరియు పరీక్షించండి                         |
+| `omniroute config`      | CLI టూల్ కాన్ఫిగరేషన్ — జాబితా, పొందండి, సెట్ చేయండి, కాన్ఫిగరేషన్లను ధృవీకరించండి                       |
+| `omniroute status`      | ఆఫ్లైన్ స్థితి డాష్బోర్డ్ — వెర్షన్, DB, సాధనాలు, కాన్ఫిగర్                                              |
+| `omniroute logs`        | API నుండి స్ట్రీమ్ వినియోగ లాగ్లు ( `--follow` కి మద్దతు ఇస్తుంది)                                       |
+| `omniroute update`      | OmniRoute అప్డేట్ల కోసం తనిఖీ చేయండి లేదా వర్తింపజేయండి                                                  |
+| `omniroute provider`    | ప్రొవైడర్ కనెక్షన్లను నిర్వహించండి — జోడించండి, జాబితా చేయండి, తీసివేయండి, పరీక్షించండి, డిఫాల్ట్ చేయండి |
+| `omniroute --port 3000` | canonical/API పోర్ట్ను 3000కి సెట్ చేయండి                                                                |
+| `omniroute --mcp`       | MCP సర్వర్ను ప్రారంభించండి (stdio రవాణా)                                                                 |
+| `omniroute --no-open`   | బ్రౌజర్ను ఆటో-ఓపెన్ చేయవద్దు                                                                             |
+| `omniroute --help`      | సహాయం చూపించు                                                                                            |
 
-హెడ్లెస్ సెటప్ను ఫ్లాగ్లు లేదా ఎన్విరాన్మెంట్ వేరియబుల్లతో స్క్రిప్ట్ చేయవచ్చు:
+హెడ్లెస్ సెటప్ను ఫ్లాగ్లు లేదా ఎన్విరాన్మెంట్ వేరియబుల్స్తో స్క్రిప్ట్ చేయవచ్చు:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-డాష్బోర్డ్ను తెరవకుండా స్థానిక డయాగ్నస్టిక్లను అమలు చేయండి:
+డాష్బోర్డ్ను తెరవకుండానే స్థానిక విశ్లేషణలను అమలు చేయండి:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-డాష్బోర్డ్ను తెరవకుండా SSH లేదా స్క్రిప్ట్ల నుండి ప్రొవైడర్లను నిర్వహించండి:
+డాష్బోర్డ్ను తెరవకుండానే SSH లేదా స్క్రిప్ట్ల నుండి ప్రొవైడర్లను నిర్వహించండి:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude కోడ్:**
 
+Claude కోడ్ HTTP ద్వారా కలుపుతుంది, ఇది `omniroute --mcp` (stdio) ప్రారంభం కాదు. HTTP రవాణా డిఫాల్ట్గా ఆఫ్ చేయబడింది: ముందుగా నడుస్తున్న సర్వర్లో దీన్ని ప్రారంభించండి. డాష్బోర్డ్ లాగిన్ ప్రారంభించబడినప్పుడు, క్రెడెన్షియల్ లేని అభ్యర్థన `401` పొందుతుంది, కాబట్టి `mcp:connect` (లేదా `manage`)ని కలిగి ఉన్న API కీని పాస్ చేయండి. `manage`/`admin` లేని కీకి ప్రతి సాధనం యొక్క పరిధి కూడా అవసరం ( [MCP సర్వర్ → MCP సాధనం స్కోప్లను](../frameworks/MCP-SERVER.md#mcp-tool-scopes) చూడండి).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

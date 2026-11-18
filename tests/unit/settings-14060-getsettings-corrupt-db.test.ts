@@ -13,6 +13,7 @@ const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiAuth = await import("../../src/shared/utils/apiAuth.ts");
 const { loadHomeSettings } = await import("../../src/app/(dashboard)/home/loadHomeSettings.ts");
+const requireLoginRoute = await import("../../src/app/api/settings/require-login/route.ts");
 
 test.after(() => {
   core.resetDbInstance();
@@ -77,6 +78,13 @@ test("#14060: corrupted key_value keeps auth fail-closed and Home degrades witho
   // (b) Home degrades to defaults instead of rejecting (the original 500).
   const homeSettings = await loadHomeSettings();
   assert.deepEqual(homeSettings, { setupComplete: false });
+
+  // (c) #19211: GET /api/settings/require-login keeps its fail-safe values but flags them as
+  // unavailable, so the onboarding wizard does not mistake them for a configured password.
+  const loginSettings = await (await requireLoginRoute.GET()).json();
+  assert.equal(loginSettings.requireLogin, true);
+  assert.equal(loginSettings.hasPassword, true);
+  assert.equal(loginSettings.settingsUnavailable, true);
 });
 
 test("loadHomeSettings passes healthy settings through untouched", async () => {
