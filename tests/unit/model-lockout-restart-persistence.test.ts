@@ -21,6 +21,7 @@ delete process.env.OMNIROUTE_PERSIST_MODEL_LOCKOUTS;
 const {
   lockModel,
   isModelLocked,
+  getModelLockoutInfo,
   clearAllModelLockouts,
   recordModelLockoutFailure,
   exportModelLockoutStateForPersistence,
@@ -54,6 +55,7 @@ test("serialize/parse roundtrip preserves lockout and failure entries", () => {
       [
         "openai::conn-1::gpt-x",
         {
+          reason: REASON,
           until: now + 60_000,
           lockedAt: now,
           failureCount: 2,
@@ -74,6 +76,7 @@ test("serialize/parse roundtrip preserves lockout and failure entries", () => {
   assert.equal(parsed.lockouts.length, 1);
   assert.equal(parsed.lockouts[0][0], "openai::conn-1::gpt-x");
   assert.equal(parsed.lockouts[0][1].failureCount, 2);
+  assert.equal(parsed.lockouts[0][1].reason, REASON, "the lockout reason must survive a restart");
   assert.equal(parsed.failures.length, 1);
   assert.equal(parsed.failures[0][1].lastCooldownMs, 10_000);
 });
@@ -92,10 +95,32 @@ test("parse rejects malformed payloads without throwing", () => {
     version: 1,
     savedAt: 1,
     lockouts: [
-      ["bad", { until: "soon", lockedAt: 1, failureCount: 1, lastFailureAt: 1, resetAfterMs: 1 }],
+      [
+        "bad",
+        {
+          reason: REASON,
+          until: "soon",
+          lockedAt: 1,
+          failureCount: 1,
+          lastFailureAt: 1,
+          resetAfterMs: 1,
+        },
+      ],
+      // No reason: ModelLockoutEntry requires one, so the entry is malformed.
+      [
+        "no-reason",
+        {
+          until: Date.now() + 60_000,
+          lockedAt: 1,
+          failureCount: 1,
+          lastFailureAt: 1,
+          resetAfterMs: 1,
+        },
+      ],
       [
         "good",
         {
+          reason: REASON,
           until: Date.now() + 60_000,
           lockedAt: 1,
           failureCount: 1,
@@ -136,6 +161,7 @@ test("restore drops already-expired lockouts and out-of-window failure state", (
       [
         "k-live",
         {
+          reason: REASON,
           until: now + 120_000,
           lockedAt: now,
           failureCount: 1,
@@ -146,6 +172,7 @@ test("restore drops already-expired lockouts and out-of-window failure state", (
       [
         "k-expired",
         {
+          reason: REASON,
           until: now - 1_000,
           lockedAt: now,
           failureCount: 1,
@@ -222,6 +249,11 @@ test("DB snapshot roundtrip survives a simulated restart and drops expired entri
 
   assert.equal(restoreModelLockoutsFromDb(), 1, "only the still-active lockout restores");
   assert.equal(isModelLocked("openai", "conn-db", "gpt-db"), true);
+  assert.equal(
+    getModelLockoutInfo("openai", "conn-db", "gpt-db")?.reason,
+    REASON,
+    "a lockout restored from the DB keeps its reason"
+  );
   assert.equal(isModelLocked("openai", "conn-db-old", "gpt-db"), false);
 });
 

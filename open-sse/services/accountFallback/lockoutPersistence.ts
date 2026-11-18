@@ -60,6 +60,7 @@ function coerceLockoutEntry(raw: unknown): ModelLockoutEntry | null {
   if (!raw || typeof raw !== "object") return null;
   const entry = raw as Partial<ModelLockoutEntry>;
   if (
+    typeof entry.reason !== "string" ||
     !isFiniteNumber(entry.until) ||
     !isFiniteNumber(entry.lockedAt) ||
     !isFiniteNumber(entry.failureCount) ||
@@ -69,6 +70,9 @@ function coerceLockoutEntry(raw: unknown): ModelLockoutEntry | null {
     return null;
   }
   return {
+    // The reason drives transient-lockout handling (e.g. the combo retry-after hint),
+    // so a restored entry must carry it like a live one.
+    reason: entry.reason,
     until: entry.until,
     lockedAt: entry.lockedAt,
     failureCount: entry.failureCount,
