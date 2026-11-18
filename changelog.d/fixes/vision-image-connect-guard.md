@@ -1,0 +1,1 @@
+- **fix(security):** Vision bridge image downloads check the connected address on every hop, so a host name that passes the public-address check but connects to loopback, LAN or cloud metadata is refused

@@ -4,6 +4,7 @@
 import { detectMediaParts, type MediaPart } from "@omniroute/open-sse/utils/mediaParts";
 import { normalizeDataUri } from "@omniroute/open-sse/utils/imageNormalize";
 import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
+import { getGuardedDispatcher } from "@omniroute/open-sse/utils/connectGuardDispatcher";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatBodyAdmission";
 import { getBestVisionModel, getFallbackModels, recordLatency } from "./visionBridgeRouter";
@@ -300,6 +301,22 @@ export function resolveImageAsDataUri(imageUrl: string): string {
   return `data:image/png;base64,${imageUrl}`;
 }
 
+/**
+ * Send every hop of an image download through the connect-time guarded dispatcher. The
+ * public-only check resolves the name once; the socket resolves it again, so a name that is
+ * public for the check could still connect to loopback, LAN or cloud metadata. The guarded
+ * dispatcher checks the addresses of the lookup the socket actually uses and refuses a private
+ * one. Where that dispatcher is unavailable (Bun), the download fails instead of going out
+ * unguarded.
+ */
+function withPublicOnlyConnectGuard(fetchImpl: typeof fetch): typeof fetch {
+  return (async (input: RequestInfo | URL, init?: RequestInit) =>
+    fetchImpl(input, {
+      ...init,
+      dispatcher: getGuardedDispatcher("public-only"),
+    } as RequestInit)) as typeof fetch;
+}
+
 async function fetchRemoteImageAsDataUri(
   imageUrl: string,
   signal: AbortSignal,
@@ -311,13 +328,13 @@ async function fetchRemoteImageAsDataUri(
     // local-first default install), which would let a request body make the server
     // fetch loopback/LAN URLs and inline the bytes into the vision self-call.
     guard: "public-only",
-    // `pinDns` is validation-only here: with `fetchImpl` injected the library validates
-    // every DNS answer but cannot pin the connection (it never builds its own fetch).
+    // With `fetchImpl` injected the library validates every DNS answer but cannot pin the
+    // connection; the connect-time guard below closes that gap on every redirect hop.
     pinDns: true,
     signal,
     // Bypass the runtime's hooked global fetch (ProxyFetch) — a dead local
     // proxy (e.g. 127.0.0.1:8317) would otherwise break the download.
-    fetchImpl,
+    fetchImpl: withPublicOnlyConnectGuard(fetchImpl),
   });
   const mediaType = remoteImage.contentType.split(";")[0]?.trim() || "image/png";
   const dataUri = `data:${mediaType};base64,${remoteImage.buffer.toString("base64")}`;
