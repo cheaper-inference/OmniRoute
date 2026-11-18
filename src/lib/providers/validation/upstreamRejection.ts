@@ -273,38 +273,43 @@ function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+/** First non-empty message field of a parsed JSON error body. */
+function pickJsonErrorMessage(root: Record<string, unknown> | null | undefined): string {
+  if (!root || typeof root !== "object") return "";
+  const err = root.error as { message?: unknown } | string | null | undefined;
+  const candidates = [
+    typeof err === "object" && err ? err.message : undefined,
+    typeof err === "string" ? err : undefined,
+    root.message,
+    root.detail,
+    root.msg,
+    root.error_description,
+  ];
+  return String(candidates.find((c) => typeof c === "string" && c.trim()) ?? "");
+}
+
+function messageFromJsonBody(raw: string): string {
+  if (!raw.startsWith("{") && !raw.startsWith("[")) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    return pickJsonErrorMessage(Array.isArray(parsed) ? parsed[0] : parsed);
+  } catch {
+    return ""; // Not JSON after all — treated as text.
+  }
+}
+
+function messageFromHtmlBody(raw: string): string {
+  if (!/<\s*(html|head|body|title|h1)\b/i.test(raw)) return "";
+  const title = raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1];
+  const heading = raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
+  return title || heading || raw.replace(/<[^>]*>/g, " ");
+}
+
 /** Best-effort short human message out of a JSON / HTML / text error body. */
 export function summarizeUpstreamBody(body: string | undefined, apiKey: string | null): string {
   if (!body) return "";
   const raw = body.trim();
-  let message = "";
-
-  if (raw.startsWith("{") || raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw);
-      const root = Array.isArray(parsed) ? parsed[0] : parsed;
-      const err = root?.error;
-      const candidates = [
-        typeof err === "object" && err ? err.message : undefined,
-        typeof err === "string" ? err : undefined,
-        root?.message,
-        root?.detail,
-        root?.msg,
-        root?.error_description,
-      ];
-      message = String(candidates.find((c) => typeof c === "string" && c.trim()) ?? "");
-    } catch {
-      // Not JSON after all — treated as text below.
-    }
-  }
-
-  if (!message && /<\s*(html|head|body|title|h1)\b/i.test(raw)) {
-    const title = raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1];
-    const heading = raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
-    message = title || heading || raw.replace(/<[^>]*>/g, " ");
-  }
-
-  if (!message) message = raw;
+  const message = messageFromJsonBody(raw) || messageFromHtmlBody(raw) || raw;
   return truncate(
     collapseWhitespace(redactValidationText(message, apiKey)),
     MAX_SURFACED_MESSAGE_CHARS
@@ -336,6 +341,97 @@ export function buildAccessDeniedMessage(status: number, summary: string): strin
   );
 }
 
+interface RefinementContext {
+  kind: ValidationRejectionKind;
+  explicit: boolean;
+  status: number;
+  summary: string;
+  isCannedInvalid: boolean;
+  isGenericFailure: boolean;
+}
+
+type RefinedVerdict<T> = { result: T; outcome: ValidationRejectionKind | "valid" };
+
+function buildRefinementContext(
+  result: ValidationResultLike,
+  decisive: ObservedValidationResponse,
+  apiKey: string | null
+): RefinementContext {
+  const { kind, explicit } = classifyValidationRejection(decisive.status, decisive.body);
+  const errorText = typeof result.error === "string" ? result.error.trim() : "";
+  return {
+    kind,
+    explicit: explicit === true,
+    status: decisive.status,
+    summary: summarizeUpstreamBody(decisive.body, apiKey),
+    isCannedInvalid: result.valid === false && CANNED_INVALID_KEY.test(errorText),
+    // A bare "Validation failed: <same status>" carries no more than the status.
+    isGenericFailure:
+      result.valid === false &&
+      GENERIC_STATUS_FAILURE.exec(errorText)?.[1] === String(decisive.status),
+  };
+}
+
+function refineAccessDenied<T extends ValidationResultLike>(
+  result: T,
+  ctx: RefinementContext
+): RefinedVerdict<T> | null {
+  if (ctx.kind !== "access_denied") return null;
+  const error = buildAccessDeniedMessage(ctx.status, ctx.summary);
+  if (ctx.explicit && ctx.isGenericFailure) {
+    return { result: { ...result, error }, outcome: "access_denied" };
+  }
+  // A bare 403 only overrides the canned "Invalid API key"; overriding a
+  // `valid: true` verdict needs an explicit refusal (451 / geo wording), since
+  // some validators deliberately tolerate a 403 on an optional last probe.
+  if (!ctx.isCannedInvalid && !(result.valid === true && ctx.explicit)) return null;
+  const refined = { ...result, valid: false, error };
+  delete (refined as ValidationResultLike).warning;
+  return { result: refined, outcome: "access_denied" };
+}
+
+function refineRateLimitedWarning<T extends ValidationResultLike>(
+  result: T,
+  ctx: RefinementContext
+): RefinedVerdict<T> | null {
+  // Validators deliberately accept a key on 429 (authentication passed) — keep
+  // the verdict, but do not hide that the provider is throttling.
+  if (ctx.kind !== "rate_limited" || result.valid !== true || result.warning) return null;
+  return {
+    result: {
+      ...result,
+      warning: `Provider rate limited the validation request (${describe(ctx.status, ctx.summary)}`,
+    },
+    outcome: "valid",
+  };
+}
+
+/** Rewrites of the canned "Invalid API key", by the decisive response's kind. */
+const CANNED_INVALID_REWRITES: Partial<
+  Record<ValidationRejectionKind, (detail: string) => string>
+> = {
+  // Keep the "Invalid API key" verdict (consumers match on it) but surface the
+  // evidence: a bare 403 may equally be a provider-side access refusal.
+  forbidden_ambiguous: (detail) =>
+    `Invalid API key (${detail} — the provider answered 403 ` +
+    `without naming the cause; if the key is valid, the provider may be refusing access ` +
+    `from this network or region.`,
+  rate_limited: (detail) => `Provider rate limited the validation request (${detail}`,
+  unavailable: (detail) => `Provider unavailable (${detail}`,
+};
+
+function refineCannedInvalid<T extends ValidationResultLike>(
+  result: T,
+  ctx: RefinementContext
+): RefinedVerdict<T> | null {
+  const rewrite = ctx.isCannedInvalid ? CANNED_INVALID_REWRITES[ctx.kind] : undefined;
+  if (!rewrite) return null;
+  return {
+    result: { ...result, error: rewrite(describe(ctx.status, ctx.summary)) },
+    outcome: ctx.kind,
+  };
+}
+
 /**
  * Re-derive the verdict from the decisive (last) upstream response when the
  * validator's canned answer misstates it. Only two shapes are rewritten:
@@ -362,80 +458,13 @@ export function refineValidationResult<T extends ValidationResultLike>(
     return { result, outcome: result.valid ? "valid" : "passthrough", decisive };
   }
 
-  const { kind, explicit } = classifyValidationRejection(decisive.status, decisive.body);
-  const summary = summarizeUpstreamBody(decisive.body, apiKey);
-  const errorText = typeof result.error === "string" ? result.error.trim() : "";
-  const isCannedInvalid = result.valid === false && CANNED_INVALID_KEY.test(errorText);
-  // A bare "Validation failed: <same status>" carries no more than the status.
-  const isGenericFailure =
-    result.valid === false &&
-    GENERIC_STATUS_FAILURE.exec(errorText)?.[1] === String(decisive.status);
-
-  if (kind === "access_denied" && explicit && isGenericFailure) {
-    return {
-      result: { ...result, error: buildAccessDeniedMessage(decisive.status, summary) },
-      outcome: "access_denied",
-      decisive,
-    };
-  }
-  // Validators deliberately accept a key on 429 (authentication passed) — keep
-  // the verdict, but do not hide that the provider is throttling.
-  if (kind === "rate_limited" && result.valid === true && !result.warning) {
-    return {
-      result: {
-        ...result,
-        warning: `Provider rate limited the validation request (${describe(decisive.status, summary)}`,
-      },
-      outcome: "valid",
-      decisive,
-    };
-  }
-
-  // A bare 403 only overrides the canned "Invalid API key"; overriding a
-  // `valid: true` verdict needs an explicit refusal (451 / geo wording), since
-  // some validators deliberately tolerate a 403 on an optional last probe.
-  if (kind === "access_denied" && (isCannedInvalid || (result.valid === true && explicit))) {
-    const refined = {
-      ...result,
-      valid: false,
-      error: buildAccessDeniedMessage(decisive.status, summary),
-    };
-    delete (refined as ValidationResultLike).warning;
-    return { result: refined, outcome: "access_denied", decisive };
-  }
-  if (isCannedInvalid && kind === "forbidden_ambiguous") {
-    // Keep the "Invalid API key" verdict (consumers match on it) but surface the
-    // evidence: a bare 403 may equally be a provider-side access refusal.
-    return {
-      result: {
-        ...result,
-        error:
-          `Invalid API key (${describe(decisive.status, summary)} — the provider answered 403 ` +
-          `without naming the cause; if the key is valid, the provider may be refusing access ` +
-          `from this network or region.`,
-      },
-      outcome: "forbidden_ambiguous",
-      decisive,
-    };
-  }
-  if (isCannedInvalid && kind === "rate_limited") {
-    return {
-      result: {
-        ...result,
-        error: `Provider rate limited the validation request (${describe(decisive.status, summary)}`,
-      },
-      outcome: "rate_limited",
-      decisive,
-    };
-  }
-  if (isCannedInvalid && kind === "unavailable") {
-    return {
-      result: { ...result, error: `Provider unavailable (${describe(decisive.status, summary)}` },
-      outcome: "unavailable",
-      decisive,
-    };
-  }
-  return { result, outcome: result.valid ? "valid" : kind, decisive };
+  const ctx = buildRefinementContext(result, decisive, apiKey);
+  const refined =
+    refineAccessDenied(result, ctx) ??
+    refineRateLimitedWarning(result, ctx) ??
+    refineCannedInvalid(result, ctx);
+  if (refined) return { ...refined, decisive };
+  return { result, outcome: result.valid ? "valid" : ctx.kind, decisive };
 }
 
 // ---------------------------------------------------------------------------
