@@ -60,8 +60,8 @@ function LinkCard({ label, url, icon, prompt }: LinkCardProps): JSX.Element {
             {copied ? "✓" : t("copyUrl")}
           </Button>
         </div>
-        <code className="block truncate text-[10px] font-mono text-text-muted">{url}</code>
-        <p className="mt-1 text-[10px] text-text-muted leading-relaxed italic">{prompt}</p>
+        <code className="block truncate text-xs font-mono text-text-muted">{url}</code>
+        <p className="mt-1 text-xs text-text-muted leading-relaxed italic">{prompt}</p>
       </div>
     </div>
   );

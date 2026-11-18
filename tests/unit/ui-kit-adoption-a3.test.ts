@@ -307,3 +307,42 @@ test("G: a PageHeader takes its icon in the icon prop, not inside the title", ()
   const offenders = openingTags("PageHeader").filter((t) => /title=\{\s*</.test(t.tag));
   assert.equal(offenders.length, 0, `pass icon={…} and a text title:\n${where(offenders)}`);
 });
+
+// ── F. Typography: kit label sizes, eyebrow and heading scale ────────────────────────────────
+
+test("F: no arbitrary pixel text size; labels use text-2xs / text-3xs, running text text-xs", () => {
+  const offenders = FILES.flatMap(({ file, source }) =>
+    source
+      .split("\n")
+      .map((text, i) => ({ file, line: i + 1, text }))
+      .filter((l) => /(?<![\w-])!?text-\[\d+(?:\.\d+)?px\]/.test(l.text))
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `use text-3xs (10px), text-2xs (11px) or text-xs:\n${offenders.map((o) => `${o.file}:${o.line}`).join("\n")}`
+  );
+});
+
+test("F: an uppercase label is the kit ci-eyebrow", () => {
+  // Badge and Button keep their own type; an uppercase badge is a pill, not a label.
+  const offenders = openingTags("p|span|div|dt|label").filter(
+    (t) => /(?<![\w:-])uppercase(?![\w-])/.test(t.tag) && !/ci-eyebrow/.test(t.tag)
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `use className="ci-eyebrow" with data-size / data-weight:\n${where(offenders)}`
+  );
+});
+
+test("F: a heading takes its size from ci-heading data-size, not from a text utility", () => {
+  const offenders = openingTags("h[1-6]").filter((t) =>
+    /(?<![\w:-])text-(?:xs|sm|base|lg|xl|[2-9]xl)(?![\w-])/.test(t.tag)
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `use className="ci-heading" data-size="…":\n${where(offenders)}`
+  );
+});

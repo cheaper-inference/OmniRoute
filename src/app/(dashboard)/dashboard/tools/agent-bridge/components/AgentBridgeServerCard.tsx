@@ -61,7 +61,7 @@ export function AgentBridgeServerCard({
             <Icon name="link" />
           </IconChip>
           <div className="min-w-0">
-            <h2 className="ci-heading flex flex-wrap items-center gap-2 text-sm">
+            <h2 className="ci-heading flex flex-wrap items-center gap-2" data-size="sm">
               {t("serverCardTitle") || "AgentBridge Server"}
               <Badge variant={isRunning ? "success" : "default"} size="sm" dot>
                 {isRunning ? t("statusRunning") || "Running" : t("statusStopped") || "Stopped"}
@@ -180,7 +180,9 @@ export function AgentBridgeServerCard({
         <div className="flex flex-col gap-5 border-t border-border px-5 pt-4 pb-5">
           <UpstreamCaField value={upstreamCa} onChange={setUpstreamCa} onSave={onUpstreamCaSave} />
           <div>
-            <h3 className="ci-heading mb-2 text-xs">{t("bypassSectionTitle") || "Bypass List"}</h3>
+            <h3 className="ci-heading mb-2" data-size="xs">
+              {t("bypassSectionTitle") || "Bypass List"}
+            </h3>
             <p className="mb-3 text-xs text-text-muted">
               {t("bypassSectionDesc") ||
                 "Hosts matching these patterns are tunneled directly (no TLS decryption). Defaults include banks, .gov, and corporate SSO."}

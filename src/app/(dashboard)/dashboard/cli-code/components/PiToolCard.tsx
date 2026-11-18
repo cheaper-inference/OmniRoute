@@ -272,7 +272,9 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm">{tool.name}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {tool.name}
+            </h3>
             <CliStatusBadge {...statusBadge} />
           </div>
           <p className="text-xs text-text-muted truncate">{t("toolDescriptions.pi")}</p>
@@ -468,7 +470,7 @@ function PiManualPreview({ t }) {
   return (
     <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
       <p className="text-xs font-medium text-text-muted mb-2">{t("piManualConfigTitle")}</p>
-      <pre className="text-[11px] font-mono overflow-x-auto whitespace-pre text-text-main">
+      <pre className="text-xs font-mono overflow-x-auto whitespace-pre text-text-main">
         {t("piManualConfigSample")}
       </pre>
       <p className="text-xs text-text-muted mt-2">{t("piManualConfigHint")}</p>

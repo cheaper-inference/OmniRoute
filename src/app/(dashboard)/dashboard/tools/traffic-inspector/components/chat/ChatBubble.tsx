@@ -58,7 +58,7 @@ export function ChatBubble({ turn, onClick, isCurrent }: ChatBubbleProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium opacity-70">{t(ROLE_LABEL_KEY[turn.role])}</span>
           {turn.timestamp && (
-            <span className="text-[10px] opacity-50 font-mono">{formatTime(turn.timestamp)}</span>
+            <span className="text-3xs opacity-50 font-mono">{formatTime(turn.timestamp)}</span>
           )}
         </div>
         {isSystem && (

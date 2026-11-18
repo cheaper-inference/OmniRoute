@@ -584,9 +584,7 @@ export default function DefaultToolCard({
         {canShowGuide() && tool.codeBlock && (
           <div className="mt-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-text-muted uppercase tracking-wide">
-                {tool.codeBlock.language}
-              </span>
+              <span className="ci-eyebrow">{tool.codeBlock.language}</span>
               <Button
                 variant="outline"
                 size="sm"
@@ -709,7 +707,9 @@ export default function DefaultToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               {(() => {
                 // Use runtime status if available (after expanding), otherwise use batch status
                 const rs = runtimeStatus;

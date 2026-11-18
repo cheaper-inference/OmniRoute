@@ -228,7 +228,7 @@ export function AgentSkillsPageClient(): JSX.Element {
         {/* Coverage */}
         <div>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+            <span className="ci-eyebrow" data-weight="medium">
               {t("coverageLabel")}
             </span>
             {showGenerateButton && (

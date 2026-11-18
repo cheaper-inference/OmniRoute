@@ -207,7 +207,9 @@ export default function CopilotToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <Badge variant="info" size="sm" dot>
                 {t("guide")}
               </Badge>

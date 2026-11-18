@@ -129,7 +129,9 @@ export function SkillInspectorPane({
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="auto_fix_high" size={18} className="text-primary" />
-          <h3 className="text-text-main text-sm">{skill.name}</h3>
+          <h3 className="ci-heading text-text-main" data-size="sm">
+            {skill.name}
+          </h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
@@ -167,7 +169,7 @@ export function SkillInspectorPane({
         {activeTab === "schema" && (
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+              <p className="ci-eyebrow mb-1.5" data-weight="medium">
                 {t("inputSchema")}
               </p>
               <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
@@ -175,7 +177,7 @@ export function SkillInspectorPane({
               </pre>
             </div>
             <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+              <p className="ci-eyebrow mb-1.5" data-weight="medium">
                 {t("outputSchema")}
               </p>
               <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
@@ -187,7 +189,7 @@ export function SkillInspectorPane({
 
         {activeTab === "handler" && (
           <div>
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+            <p className="ci-eyebrow mb-1.5" data-weight="medium">
               {t("handlerCode")}
             </p>
             <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[400px] text-text-main font-mono whitespace-pre-wrap">
@@ -248,7 +250,7 @@ export function SkillInspectorPane({
 
         {activeTab === "sandbox" && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+            <p className="ci-eyebrow mb-1.5" data-weight="medium">
               {t("sandboxConfig")}
             </p>
             {[
@@ -263,7 +265,7 @@ export function SkillInspectorPane({
               >
                 <div>
                   <p className="text-xs font-medium">{item.label}</p>
-                  <p className="text-[10px] text-text-muted">{item.desc}</p>
+                  <p className="text-xs text-text-muted">{item.desc}</p>
                 </div>
                 <span className="text-xs font-mono text-text-muted">{item.value}</span>
               </div>

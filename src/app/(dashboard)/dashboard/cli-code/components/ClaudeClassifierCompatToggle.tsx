@@ -84,7 +84,9 @@ export default function ClaudeClassifierCompatToggle() {
     <div className="rounded-lg border border-border bg-bg-subtle p-3">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="text-xs text-text-main">{t("classifierCompatTitle")}</h4>
+          <h4 className="ci-heading text-text-main" data-size="xs">
+            {t("classifierCompatTitle")}
+          </h4>
           <p className="text-xs text-text-muted">
             {t.rich("classifierCompatDescription", {
               code: (chunks) => <code>{chunks}</code>,

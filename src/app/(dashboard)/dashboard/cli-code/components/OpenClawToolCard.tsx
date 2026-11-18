@@ -316,7 +316,9 @@ export default function OpenClawToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={batchStatus}
@@ -536,7 +538,10 @@ export default function OpenClawToolCard({
 
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs text-text-main mb-2 flex items-center gap-1">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>

@@ -287,7 +287,9 @@ export default function AntigravityToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               {isRunning ? (
                 <Badge variant="success" size="sm">
                   {t("active")}
@@ -448,10 +450,10 @@ export default function AntigravityToolCard({
                     <span className="font-medium text-text-main">{t("howItWorks")}</span>{" "}
                     {t("mitmHowWorksDesc", { toolName })}
                   </p>
-                  <div className="flex flex-col gap-0.5 text-[11px] text-text-muted">
+                  <div className="flex flex-col gap-0.5 text-xs text-text-muted">
                     <span>{t("mitmStep1")}</span>
                     <span>{t("mitmStep2Prefix")}</span>
-                    <ul className="list-none my-0.5 flex flex-col gap-0.5 font-mono text-[10px] text-text-muted break-all">
+                    <ul className="list-none my-0.5 flex flex-col gap-0.5 font-mono text-xs text-text-muted break-all">
                       {hosts.map((host) => (
                         <li key={host}>
                           <span className="text-primary">127.0.0.1</span> {host}

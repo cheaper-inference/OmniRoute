@@ -360,11 +360,11 @@ export default function HermesAgentToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm flex items-center gap-2">
+              <h3 className="ci-heading flex items-center gap-2" data-size="sm">
                 {tool?.name || "Hermes Agent"}
                 {firstSetupAt && (
                   <span
-                    className="text-[10px] text-text-muted flex items-center gap-0.5 font-normal"
+                    className="text-3xs text-text-muted flex items-center gap-0.5 font-normal"
                     title={t("hermesFirstSetupTitle", {
                       date: new Date(firstSetupAt).toLocaleDateString(),
                     })}
@@ -477,7 +477,7 @@ export default function HermesAgentToolCard({
                   {/* Left: role label + subtitle (now has room so long descriptions stay on one line) */}
                   <div className="min-w-0 pr-3">
                     <div className="font-medium text-sm text-text-main">{t(role.labelKey)}</div>
-                    <div className="text-[10px] leading-tight text-text-muted">
+                    <div className="text-xs leading-tight text-text-muted">
                       {t(role.descriptionKey)}
                     </div>
                   </div>
@@ -489,7 +489,7 @@ export default function HermesAgentToolCard({
                         {displayedModel}
                       </InlineCode>
                     ) : (
-                      <span className="text-text-muted text-[10px]">—</span>
+                      <span className="text-text-muted text-xs">—</span>
                     )}
 
                     {badge && (
@@ -584,7 +584,7 @@ export default function HermesAgentToolCard({
           {/* Inline YAML preview — toggled by the Preview button, styled like other config previews on the CLI tools page */}
           {previewYaml && (
             <div className="mt-2">
-              <div className="text-[10px] font-medium text-text-muted mb-1.5 flex items-center gap-1.5">
+              <div className="text-3xs font-medium text-text-muted mb-1.5 flex items-center gap-1.5">
                 <span>{t("hermesPreviewPath")}</span>
               </div>
               <pre className="p-4 bg-bg-subtle rounded-lg border border-border overflow-auto max-h-80 text-xs">

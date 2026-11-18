@@ -379,7 +379,9 @@ export default function GrokBuildToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={null}
@@ -521,12 +523,12 @@ export default function GrokBuildToolCard({
           </div>
 
           <div className="my-2 h-px bg-border/50" />
-          <div className="mb-2 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
+          <div className="ci-eyebrow mb-2 text-right" data-size="2xs" data-weight="medium">
             Subagent model overrides
           </div>
           {SUBAGENTS.map((type) => (
             <div className={`${rowClass} group`} key={type}>
-              <span className="w-32 shrink-0 truncate text-right text-[11px] font-mono text-text-main opacity-70 transition-opacity group-hover:opacity-100">
+              <span className="w-32 shrink-0 truncate text-right text-2xs font-mono text-text-main opacity-70 transition-opacity group-hover:opacity-100">
                 {modelLabel(type)}
               </span>
               <Icon
@@ -620,7 +622,7 @@ export default function GrokBuildToolCard({
 
           {showBackups && (
             <div className="mt-2 rounded-lg border border-border bg-surface p-3">
-              <h4 className="mb-2 flex items-center gap-1 text-xs text-text-main">
+              <h4 className="ci-heading mb-2 flex items-center gap-1 text-text-main" data-size="xs">
                 <Icon name="history" size={14} />
                 {t("configBackups")}
               </h4>

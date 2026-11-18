@@ -200,7 +200,7 @@ export function AgentBridgeMaintenanceCard({
             <Icon name="build" />
           </IconChip>
           <div>
-            <h2 className="ci-heading text-sm">
+            <h2 className="ci-heading" data-size="sm">
               {t("maintenanceTitle") || "Maintenance & Diagnostics"}
             </h2>
             <p className="mt-0.5 text-xs text-text-muted">

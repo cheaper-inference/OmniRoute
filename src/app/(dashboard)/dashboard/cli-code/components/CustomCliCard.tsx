@@ -139,7 +139,9 @@ export default function CustomCliCard({
           </IconChip>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <Badge variant="success" size="sm" dot>
                 {translateOrFallback("custom", "Custom")}
               </Badge>
@@ -241,7 +243,7 @@ export default function CustomCliCard({
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm">
+                  <h4 className="ci-heading" data-size="sm">
                     {translateOrFallback("customCliAliasMappingsLabel", "Alias mappings")}
                   </h4>
                   <p className="text-xs text-text-muted mt-1">
@@ -325,7 +327,7 @@ export default function CustomCliCard({
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-sm">
+                <h4 className="ci-heading" data-size="sm">
                   {translateOrFallback("customCliEnvBlockTitle", "Env / shell snippet")}
                 </h4>
                 <Button variant="outline" size="sm" onClick={() => handleCopy(envScript, "env")}>
@@ -342,7 +344,7 @@ export default function CustomCliCard({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-sm">
+                <h4 className="ci-heading" data-size="sm">
                   {translateOrFallback("customCliJsonBlockTitle", "Provider JSON block")}
                 </h4>
                 <Button variant="outline" size="sm" onClick={() => handleCopy(jsonConfig, "json")}>

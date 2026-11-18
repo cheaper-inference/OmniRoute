@@ -429,7 +429,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={batchStatus}
@@ -685,12 +687,12 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
                 <div className="h-px bg-border/50 my-2"></div>
 
-                <div className="text-[11px] text-text-muted mb-2 font-medium uppercase tracking-wider text-right">
+                <div className="ci-eyebrow mb-2 text-right" data-size="2xs" data-weight="medium">
                   {t("modelAliases")} ([notice.model_migrations])
                 </div>
                 {CODEX_DEFAULT_MODELS.map((defaultModel) => (
                   <div key={defaultModel} className="flex items-center gap-2 group">
-                    <span className="w-32 shrink-0 text-[11px] font-mono text-text-main text-right truncate opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span className="w-32 shrink-0 text-2xs font-mono text-text-main text-right truncate opacity-70 group-hover:opacity-100 transition-opacity">
                       {defaultModel}
                     </span>
                     <Icon
@@ -821,7 +823,10 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               {/* Profiles Section */}
               {showProfiles && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs text-text-main mb-2 flex items-center gap-1">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="manage_accounts" size={14} />
                     {t("savedProfiles")}
                   </h4>
@@ -891,7 +896,10 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               {/* Backups Section */}
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs text-text-main mb-2 flex items-center gap-1">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
