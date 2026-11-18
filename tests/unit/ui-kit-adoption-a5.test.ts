@@ -500,3 +500,17 @@ test("G: the compression KPI tiles are the compact kit Stat fed with numbers", (
   assert.doesNotMatch(text, /format="text"/);
   assert.match(text, /<StatRow size="sm"/);
 });
+
+// ── Charts and gauges ───────────────────────────────────────────────────────
+
+test("the provider utilization chart is the kit LineChart and the diversity gauge the kit RadialMeter", () => {
+  const read = (rel: string) => fs.readFileSync(path.join(DASHBOARD, rel), "utf8");
+  const chart = read("analytics/components/ProviderCharts.tsx");
+  assert.match(chart, /from "@omniroute\/ui-kit\/reporting-charts"/);
+  assert.match(chart, /yDomain=\{\[0, 100\]\}/);
+  assert.match(chart, /\bconnectNulls\b/);
+  assert.doesNotMatch(chart, /from "recharts"/);
+  const gauge = read("analytics/components/DiversityScoreCard.tsx");
+  assert.match(gauge, /<RadialMeter\b/);
+  assert.doesNotMatch(gauge, /<svg\b/);
+});

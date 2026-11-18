@@ -6,11 +6,13 @@ import test from "node:test";
 // drift from the look of the kit's own charts. Each chart keeps only what is particular to it.
 const THEMED_FILES = [
   "src/shared/components/analytics/rechartsUsageCharts.tsx",
-  "src/app/(dashboard)/dashboard/analytics/components/ProviderCharts.tsx",
   "src/app/(dashboard)/dashboard/costs/components/CostCharts.tsx",
   "src/app/(dashboard)/dashboard/costs/quota-share/components/BurnRateChartInner.tsx",
   "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/tabs/StatsCharts.tsx",
 ];
+
+// The provider utilization chart is the kit LineChart (fixed domain, joined gaps): no recharts.
+const PROVIDER_CHARTS = "src/app/(dashboard)/dashboard/analytics/components/ProviderCharts.tsx";
 
 for (const file of THEMED_FILES) {
   test(`${file} styles recharts through the kit chartTheme`, () => {
@@ -26,15 +28,16 @@ for (const file of THEMED_FILES) {
 
 test("the charts the kit LineChart covers use it; the ones it cannot draw stay on recharts", () => {
   const kitImport = /import \{ LineChart \} from "@omniroute\/ui-kit\/reporting-charts"/;
-  for (const file of [THEMED_FILES[2], THEMED_FILES[4]]) {
+  for (const file of [PROVIDER_CHARTS, THEMED_FILES[1], THEMED_FILES[3]]) {
     assert.match(readFileSync(file, "utf8"), kitImport, file);
   }
-  // Fixed 0–100 domain and gaps joined across missing samples.
-  const provider = readFileSync(THEMED_FILES[1], "utf8");
-  assert.match(provider, /domain=\{\[0, 100\]\}/);
+  // Fixed 0–100 domain and gaps joined across missing samples: kit props, no recharts by hand.
+  const provider = readFileSync(PROVIDER_CHARTS, "utf8");
+  assert.match(provider, /yDomain=\{\[0, 100\]\}/);
   assert.match(provider, /connectNulls/);
+  assert.doesNotMatch(provider, /from "recharts"/);
   // A projection: dashed, with no Y axis.
-  const burnRate = readFileSync(THEMED_FILES[3], "utf8");
+  const burnRate = readFileSync(THEMED_FILES[2], "utf8");
   assert.match(burnRate, /strokeDasharray="4 2"/);
   assert.match(burnRate, /<YAxis hide \/>/);
 });

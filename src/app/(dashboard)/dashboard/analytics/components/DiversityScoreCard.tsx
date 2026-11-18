@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Progress } from "@omniroute/ui-kit/progress";
+import { RadialMeter } from "@omniroute/ui-kit/radial-meter";
 
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
@@ -112,34 +113,12 @@ export default function DiversityScoreCard() {
       {/* Horizontal layout: gauge + risk label + provider bars */}
       <div className="flex flex-col sm:flex-row items-center gap-5">
         {/* Gauge */}
-        <div className="relative shrink-0 h-20 w-20">
-          <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-border/70"
-              strokeWidth="3.5"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className={riskColor}
-              strokeWidth="3.5"
-              strokeDasharray={`${scorePercentage}, 100`}
-              stroke="currentColor"
-              fill="none"
-              strokeLinecap="round"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-lg font-semibold tabular-nums ${riskColor}`}>
-              {scorePercentage}%
-            </span>
-            <span className="ci-eyebrow" data-size="3xs">
-              {t("diversityScoreLabel")}
-            </span>
-          </div>
-        </div>
+        <RadialMeter
+          value={scorePercentage}
+          tone={riskTone}
+          label={t("diversityScoreLabel")}
+          className="shrink-0"
+        />
 
         {/* Risk label */}
         <div className="shrink-0 text-center sm:text-left">
