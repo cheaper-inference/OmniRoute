@@ -343,9 +343,11 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ engine, edges })) {
-    assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
-  }
+  assert.ok(engine.includes("var(--orch-status-"), "engine reads the status tokens");
+  // The shared edge palette is the kit's flow-edge tokens (kit #287), read through the kit's
+  // token references, never a literal.
+  assert.ok(edges.includes("ciTokenReferences.flowEdge."), "edges read the kit flow-edge tokens");
+  assert.doesNotMatch(edges, /#[0-9a-fA-F]{6}\b/);
   // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
   // tokens), mapped per outcome, never a literal.
   assert.match(
