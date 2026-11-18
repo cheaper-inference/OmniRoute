@@ -389,10 +389,11 @@ export class AgyAcpProcess implements BridgePeer {
 
     // A workspace of its own per process: the agent definition and agy's log go
     // here, so a proxied request never writes into the operator's project.
-    this.workspace = await fs.promises.mkdtemp(path.join(os.tmpdir(), "omniroute-agy-bridge-"));
-    await writeAgentDefinition(this.workspace);
+    const workspace = await fs.promises.mkdtemp(path.join(os.tmpdir(), "omniroute-agy-bridge-"));
+    this.workspace = workspace;
+    await writeAgentDefinition(workspace);
 
-    const child = this.spawnChild(port, binDir);
+    const child = this.spawnChild(port, binDir, workspace);
     this.watchChild(child);
     this.conn = this.openConnection(child);
 
@@ -401,8 +402,15 @@ export class AgyAcpProcess implements BridgePeer {
     );
   }
 
-  /** The agy process for this instance, already in its own workspace. */
-  private spawnChild(port: number, binDir: string): ChildProcess {
+  /**
+   * The agy process for this instance, already in its own workspace.
+   *
+   * `workspace` is passed in rather than read from `this.workspace`: that field
+   * is `string | null` (it is null until the bridge starts, and the teardown
+   * check relies on that), so reading it here would hand `spawn` a `cwd` of
+   * `null`, which its overloads reject.
+   */
+  private spawnChild(port: number, binDir: string, workspace: string): ChildProcess {
     const args = ["acp", "--agent", AGENT_NAME, "--ide-mcp-port", String(port)];
     if (this.options.workDir) args.push("--add-dir", this.options.workDir);
     const spawnSpec = agySpawnSpec(this.options.agyPath, args, process.platform, process.env);
@@ -415,7 +423,7 @@ export class AgyAcpProcess implements BridgePeer {
     let child: ChildProcess;
     try {
       child = spawn(spawnSpec.file, spawnSpec.args, {
-        cwd: this.workspace,
+        cwd: workspace,
         // `childEnv` builds a plain record; Next augments `NodeJS.ProcessEnv`
         // with a required `NODE_ENV`, which a spawn env does not need.
         env: env as NodeJS.ProcessEnv,
