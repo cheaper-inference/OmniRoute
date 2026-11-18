@@ -160,7 +160,7 @@ export default function RadarCombosPage() {
                     <span className="text-xs uppercase tracking-wide text-text-muted">
                       {t("familyLabel")}
                     </span>
-                    <h2 className="text-lg font-semibold font-mono">{suggestion.familyId}</h2>
+                    <h2 className="text-lg font-mono">{suggestion.familyId}</h2>
                     <p className="text-sm text-text-muted">{t("strategyReason")}</p>
                   </div>
 
