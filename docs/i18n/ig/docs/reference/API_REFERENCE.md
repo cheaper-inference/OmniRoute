@@ -800,61 +800,174 @@ Nhazi batch dakọtara na OpenAI.
 
 ---
 
-## Chọọ API
+## API ọchụchọ
 
-onye na-enye Web/search abstraction (Tavily, Brave, Exa, Serper, wdg).
+Nchịkọta ndị na-eweta web/ọchụchọ (Tavily, Brave, Exa, Serper, wdg.).
 
-| Usoro | Ụzọ                    | Nkọwa                                                                               |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Ndepụta ahaziri ndị na-eweta ọchụchọ + ike                                          |
-| POST  | `/v1/search`           | Gbaa ajụjụ ọchụchọ — ahụ nke `v1SearchSchema` kwadoro, na-akwado caching/coalescing |
-| GET   | `/v1/search/analytics` | Onye na-eweta hit/latency/cache stats                                               |
+| Method | Path                   | Description                                                                        |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Depụta ndị na-eweta ọchụchọ ahaziri + ikike ha                                     |
+| POST   | `/v1/search`           | Mee ajụjụ ọchụchọ — `v1SearchSchema` na-enyocha body, na-akwado caching/coalescing |
+| GET    | `/v1/search/analytics` | Ọnụọgụ hit/latency/cache kwa onye na-eweta                                         |
 
-**Nyocha:** Igodo API onye na-ebu (`extractApiKey` + `isValidApiKey`). Amụma ọchụchọ kwadoro site na `enforceApiKeyPolicy`.
+**Nyocha ikike:** Igodo API Bearer (`extractApiKey` + `isValidApiKey`). A na-amanye iwu ọchụchọ site na `enforceApiKeyPolicy`.
 
-**Họrọ akpaaka:** enweghị `provider`, onye na-eweta dị ọnụ ala nke nwere njikọ ahaziri na-ebu ụzọ na nke ọzọ dị ọnụ ala bụ ọdịda. A na-eji ndị na-eweta ebe ezumike ikpeazụ n'efu (`duckduckgo-free`) naanị mgbe ahazighị ihe ọzọ. SearXNG na-akwado onwe ya na-agụta dị ka ahaziri ozugbo njikọ ya na-echekwa ezigbo `baseUrl` (ọ bụghị katalọgụ ndabara `http://localhost:8888/search`): ọ ga-abụkwa ọkwa dị ka onye na-eweta $0 n'ihu ndị keyed, yana onye na URL eweta `baseUrl` `http(s)` ọnụ ala dị ka ọdịda, gụnyere mgbe SearXNG zara 400, 401, 403 ma ọ bụ 404. gụọ. Njikọ SearXNG nke na-echekwa akara ngosi na-adabere otu a naanị `https://` ma ọ bụ loopback `http://`. N'ime `http://` dịpụrụ adịpụ, ọ dịghị mgbe ọ ga-adaba ma na-anọ ebe ikpeazụ, a na-eji ya naanị mgbe ahazighị onye na-eweta ọrụ ọzọ ma ọ bụ mgbe a rịọrọ ya aha, yabụ ọ na-eziga akara ngosi na ederede doro anya n'okwu abụọ ahụ.
+### Ngwakọta ọchụchọ/fetch ndị a kpọrọ aha
 
-### Exa na Tavily `provider_options`
+Ma `POST /v1/search` ma `POST /v1/web/fetch` na-anabata `model` dị ka aha combo echekwara.
+Jiri `model` ma ọ bụ `provider` akọwapụtara nke ọma; izipu ha abụọ na-alaghachi `400`.
+Ọ bụrụ na enweghị ubi ọ bụla n’ime ha, nhọrọ onye na-eweta akpaka dị ugbu a na-aga n’ihu n’enweghị mgbanwe.
 
-Exa na Tavily na-agụ mpaghara ndị na-eweta-kpọmkwem site na akpa nwere aha: `provider_options.exa` (ma ọ bụ `provider_options["exa-search"]`) na `provider_options.tavily` (ma ọ bụ `provider_options["tavily-search"]`). Naanị igodo dị n'okpuru ka a na-ebugharị. A na-enyocha nke ọ bụla megide atụmatụ Zod nke ya na `open-sse/handlers/search/providerOptionsPassthrough.ts`, na-atụfu igodo nwere ụdị na-ezighi ezi. A na-eleghara igodo ọ bụla ọzọ anya, gụnyere auth, base URL, `stream` na `outputSchema`. Igodo dị larịị nke ndị na-enye ndị ọzọ na-eji (`cx`, `depth`, ...) na-arụ ọrụ dịka ọ dị na mbụ.
+Ma Combo Builder ma katalọgụ Add Model ya na-egosipụta ntinye ọrụ web nke obodo
+maka ndị na-eweta ejikọrọ, ọbụna mgbe ha enweghị ndepụta ụdị LLM. Serper na-egosi
+**Ọchụchọ web**; Tavily na-egosi **Ọchụchọ web / Mwepụta ibe**, ebe ndị na-eweta naanị fetch na-egosi **Mwepụta ibe**.
+Họrọ ntinye ahụ na akaụntụ ahụ dịka ọ na-adị. Otu ntinye Tavily na-eje ozi maka endpoints web abụọ ahụ;
+a naghị etinye ntinye ọrụ ndị a na ndị na-ahọrọ ndị ahịa chat-only ma ọ bụ nyocha ụdị chat.
 
-| Onye na-enye | Ogige dị elu                                                                                                                                                                                                                                                                                                                                                              | Akwu                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` merged n'elu ndabara `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+Dịka ọmụmaatụ, mepụta combo **priority** aha ya bụ `shared-free` nke nwere ebumnuche ndị a n’usoro:
 
-Oghere ọnụọgụgụ mgbe niile na-emeri: `query`, `max_results`, `filters` (ngalaba), `country` na isiokwu sitere na `search_type`. Na Exa, `search_type: "news"` na-edobe `category: "news"`. Tavily na-anabatakwa `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-A na-edekọ ọnụ ahịa ọchụchọ Firecrawl n'otu ngọngọ mmalite nke nsonaazụ iri eweghachiri, na $0.002 (kredit 2) ngọngọ yana opekata mpe otu ngọngọ kwa oku ( [ịgba ụgwọ Firecrawl](https://docs.firecrawl.dev/billing) ): rịzọlt 11 na-efu $0.004.
+Jiri otu aha ahụ n’elu ihu ọrụ ọ bụla:
 
-Ngụkọta `time_range` ugbu a erutela ndị na-enye ha abụọ: Exa na-enweta `startPublishedDate` (ISO timestamp) na Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị doro anya na `provider_options` na-akagbu nke e sere ese.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Nsonaazụ nyocha na-edobe `id`, `highlights` (ihe ngosi ọ bụla, ọ bụghị naanị nke mbụ ejiri dị ka `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` na `extras` na `provider_raw`. Nsonaazụ tavily dowe `images` na `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-A na-edekọ ọnụ ahịa ọchụchọ Linkup na $0.005 maka `depth` `fast` na `standard` na $0.05 maka `deep` ( [ọnụahịa Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), ma `depth` sitere na `provider_options` ma ọ bụ ntọala njikọ.
+Ọchụchọ na-atụle Tavily, emesịa Serper; fetch na-atụle Tavily, emesịa Jina Reader;
+chat na-amafe ndị na-eweta ọchụchọ/fetch raara nye ma na-atụle OpenAI. Ndakọrịta
+na-esite na ndekọ ndị na-eme ọchụchọ/fetch, ọ bụghị n’okwu ndị dị n’aha model.
+Nzacha na-ebute ụzọ tupu ịhọrọ nzere na dispatch, ọ dịghịkwa agbanwe combo echekwara.
 
-Exa `type: "lite"` (Exa 3.0) na-anabata obere ogige ma jụ arịrịọ niile mgbe edobere ubi ọ bụla ọzọ. Maka lite, `additionalQueries`, `systemPrompt` na igodo `contents` ọ bụla ma e wezụga `text` na `highlights` a na-atụba tupu oku a. Agakwaghị ebugharị `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl`.
+Ụzọ ikike ndị na-abụghị chat na-akwado `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, na `p2c`. Atụmatụ synthesis nke chat-only dịka
+`fusion`, `pipeline`, na `context-relay` na-ajụ na ụzọ ndị na-abụghị chat kama itinye ha
+n’ezoghị ọnụ na ọchụchọ ma ọ bụ media emepụtara.
+Igwe combo dị ugbu a na-ejikwa fallback ahaziri, gụnyere ọdịda quota sitere n’aka upstream,
+ma na-echekwa step IDs, account pins, allowlist akaụntụ kwa step, references ndị dị n’ime,
+scopes njikọ/quota nke onye kpọrọ ya na iwu ohere combo. Nsonaazụ na-echekwa
+schema ọchụchọ/fetch obodo ha, gụnyere ezigbo onye na-eweta ya; `X-OmniRoute-Combo-Trace` na-egosi
+mkpebi routing ahụ. Combo ndị a na-amaghị na-alaghachi `404`; combo ndị na-adịghị arụ ọrụ na ngwakọta
+na-enweghị ebumnuche dakọtara na-alaghachi `400`.
 
-Ịkọ ọnụ ahịa ọnụ ahịa bụ ewepụghị ndekọ `costPerQuery`, ma e wezụga Exa, nke na-esote ọnụahịa nke Exa: $ 0.007 kwa oku maka `auto` (na ihe nketa `fast`) ma ọ bụ $ 0.004 maka `lite` (na ihe nketa `instant`), na-ekpuchi 10 nsonaazụ; $0.001 maka nsonaazụ ọ bụla ọzọ; yana $0.001 kwa rịzọlt weghachi mgbe edobere `contents.summary`. A na-edekọ Tavily na 1 kredit ($0.008) maka `search_depth` `basic`, `fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). A ka na-edekọ oku nwere `auto_parameters: true` nke Tavily kwalitere na kredit 1.
+Mgbalị combo ọ bụla na-eji otu onye na-eweta akọwapụtara nke ọma.
+Ọ nweghị ike ịkpọ pool onye na-eweta akpaka obodo dị n’azụ combo ahụ n’amaghị ya. Arịrịọ nwere onye na-eweta akọwapụtara
+na-echekwa omume onye na-eweta otu ahụ ha nwere na mbụ. Arịrịọ chat kpọmkwem nke na-elekwasị anya na ndị na-eweta ọchụchọ/fetch raara nye
+na-alaghachi JSON `400` nwere nkọwa bara uru kama ịdaba n’aka executor ụdị OpenAI.
+
+### Ụzọ combo ndị akọwapụtara site n’ikike
+
+Combo ndị echekwara nwere ike inwe ihe `routes` nke igodo ya bụ ikike API. Route ọ bụla nwere
+ndepụta ebumnuche ya, strategy ya, na nhazi runtime ya. `models`, `strategy`, na `config` dị n’elu
+ka bụ atụmatụ Chat dakọtara na legacy; combo ochie ndị na-enweghị `routes` na-aga n’ihu n’enweghị mgbanwe.
+
+Igodo route ndị akwadoro bụ `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, na `audio-generation`. Projection endpoint na-eme tupu ịhọrọ nzere, ịtụ akara,
+ma ọ bụ dispatch. References combo ndị dị n’ime na-ahọrọ route nke combo nwa maka otu ikike ahụ.
+
+`POST /v1/music/generations` na `POST /v1/ocr` na-anabata aha combo n’ime `model`. Native
+ElevenLabs-compatible `POST /v1/music` na-anabatakwa aha combo n’ime `model_id`, mana ebumnuche ọ bụla a pụrụ iji
+na endpoint obodo ahụ ga-abụrịrị ụdị music ElevenLabs ka e wee chekwaa nkwekọrịta nzaghachi binary ya.
+`POST /v1/sound-generation` na-anabata combo `audio-generation` n’ime `model_id` n’okpuru otu mmachi native-binary ahụ.
+Jiri `/v1/music/generations` maka ndị na-eweta egwu dị iche iche.
+
+**Nhọrọ akpaka:** na-enweghị `provider`, onye na-eweta kachasị ọnụ ala nwere njikọ ahaziri na-agba ọsọ
+mbụ, onye na-esote ya kachasị ọnụ ala bụ failover. A na-eji ndị na-eweta nnapụta ikpeazụ efu (`duckduckgo-free`)
+naanị mgbe ahazighị ihe ọzọ. SearXNG nke a na-akwado n’onwe ya na-agụta dị ka ahaziri ozugbo njikọ ya
+chekwaara `baseUrl` dị adị (ọ bụghị catalog default `http://localhost:8888/search`): mgbe ahụ ọ na-ahọpụta onwe ya dịka onye na-eweta $0
+n’ihu ndị nwere igodo, ebe onye na-eweta nwere igodo nke kachasị ọnụ ala bụ failover,
+gụnyere mgbe SearXNG zara 400, 401, 403 ma ọ bụ 404. `baseUrl` nke na-abụghị URL `http(s)` ziri ezi
+ma ọ bụ nke na-atụ aka na adreesị cloud-metadata anaghị agụta. Njikọ SearXNG nke chekwara token
+na-ahọpụta otu a naanị n’elu `https://` ma ọ bụ loopback `http://`. N’elu remote plain `http://`, ọ naghị abụ failover
+ma ọ na-anọgide bụrụ nnapụta ikpeazụ, a na-ejikwa ya naanị mgbe ahazighị onye na-eweta ọzọ ma ọ bụ mgbe
+a kpọrọ ya site n’aha; ya mere ọ na-eziga token ahụ n’enweghị izo ya ezo n’ọnọdụ abụọ ahụ.
+
+### `provider_options` Exa na Tavily
+
+Exa na Tavily na-agụ ubi ndị metụtara onye na-eweta ọrụ site na akpa nwere namespace:
+`provider_options.exa` (ma ọ bụ `provider_options["exa-search"]`) na `provider_options.tavily`
+(ma ọ bụ `provider_options["tavily-search"]`). Ọ bụ naanị igodo ndị dị n’okpuru ka a na-ebufe. A na-enyocha nke ọ bụla
+megide atụmatụ Zod nke ya dị na `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+ma ọ bụrụ na ụdị igodo adịghị mma, a na-atụfu ya. A na-eleghara igodo ọ bụla ọzọ anya, gụnyere auth, base URL,
+`stream` na `outputSchema`. Igodo dị larịị ndị ndị na-eweta ọrụ ndị ọzọ na-eji (`cx`, `depth`, ...) na-arụ ọrụ
+dị ka ọ dị na mbụ.
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ụkpụrụ dị larịị), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` a na-ejikọta ya n’elu ndabara `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                              |
+
+Ubi izugbe na-emeri mgbe niile: `query`, `max_results`, `filters` (domains), `country` na isiokwu e nwetara site na
+`search_type`. Na Exa, `search_type: "news"` na-edobe `category: "news"`.
+Tavily na-anabatakwa `search_type: "finance"` (`topic: "finance"`).
+
+A na-edekọ ụgwọ ọchụchọ Firecrawl kwa blọk 10 nke nsonaazụ eweghachiri malitere, na $0.002 (kredit 2) kwa
+blọk, yana opekata mpe otu blọk kwa oku
+([Ịkwụ ụgwọ Firecrawl](https://docs.firecrawl.dev/billing)): nsonaazụ 11 na-efu $0.004.
+
+`time_range` izugbe na-eru ndị na-eweta ọrụ abụọ ahụ ugbu a: Exa na-enweta `startPublishedDate` (timestamp ISO)
+ma Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị doro anya dị na `provider_options`
+na-emeri nke e mapụtara.
+
+Nsonaazụ Exa na-edobe `id`, `highlights` (highlight niile, ọ bụghị naanị nke mbụ e ji mee ihe dị ka
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` na `extras` n’ime `provider_raw`.
+Nsonaazụ Tavily na-edobe `images` na `favicon`.
+
+A na-edekọ ụgwọ ọchụchọ Linkup dị ka $0.005 maka `depth` `fast` na `standard`, yana $0.05 maka
+`deep` ([Ọnụahịa Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+ma `depth` si na `provider_options` ma ọ bụ na ntọala njikọ ahụ.
+
+Exa `type: "lite"` (Exa 3.0) na-anabata obere nchịkọta ubi ma na-ajụ arịrịọ niile
+mgbe e debere ubi ọ bụla ọzọ. Maka lite, a na-atụfu `additionalQueries`, `systemPrompt` na igodo
+`contents` niile ewezuga `text` na `highlights` tupu oku ahụ. `subpages`, `subpageTarget`,
+`highlights.numSentences` na `highlights.highlightsPerUrl` ndị ochie adịkwaghị ebufe.
+
+Nchịkọta ụgwọ bụ ndekọ dị larịị `costPerQuery`, ewezuga Exa, nke na-agbaso ọnụahịa nke Exa:
+$0.007 kwa oku maka `auto` (na `fast` ochie) ma ọ bụ $0.004 maka `lite` (na `instant` ochie),
+nke na-ekpuchi nsonaazụ 10; $0.001 maka nsonaazụ ọ bụla ọzọ; yana $0.001 kwa nsonaazụ eweghachiri
+mgbe edobere `contents.summary`. A na-edekọ Tavily dị ka kredit 1 ($0.008) maka `search_depth` `basic`,
+`fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced`
+([Kredit Tavily API](https://docs.tavily.com/documentation/api-credits)). A ka na-edekọ oku nwere
+`auto_parameters: true` nke Tavily kwalitere gaa na advanced dị ka kredit 1.
 
 ---
 
 ## Web Fetch API
 
-Wepụ ọdịnaya site na URL site na onye na-eweta web-fetch ahaziri (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Wepụ ọdịnaya site na URL site na onye na-eweta web-fetch ahaziri ahazi (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, na-eji igodo API ahụ Parallel Search na-eji) na-eweghachi naanị Markdown — `format` ọ bụla ọzọ bụ `400` — ma na-amachibido ọdịnaya ruo mkpụrụedemede 100,000. Mgbe enweghị ike iwepụta ibe a chọrọ n'onwe ya, upstream na-akọ nke ahụ n'ime HTTP 200; OmniRoute na-egosipụta ya dịka `422` nwere ozi a kapịrị ọnụ.
+Parallel Extract (`parallel-search`, na-eji otu API key ahụ dị ka Parallel Search) na-eweghachite naanị Markdown — `format` ọ bụla ọzọ bụ `400` — ma na-amachi ọdịnaya na mkpụrụedemede 100,000. Mgbe enweghị ike wepụ ibe a chọrọ n'onwe ya, upstream na-akọ ya n'ime HTTP 200; OmniRoute na-egosipụta nke ahụ dịka `422` nwere ozi a kapịrị ọnụ.
 
-| Method | Path            | Description                                          |
-| ------ | --------------- | ---------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Weta/scrape URL — `v1WebFetchSchema` na-enyocha body |
+Keenable Fetch (`keenable-search`) na-eweghachite naanị Markdown ( `format` ọ bụla ọzọ bụ
+`400`) ma na-amachi ọdịnaya na mkpụrụedemede 100,000. Ọ na-arụ ọrụ n'enweghị key: arịrịọ doro anya `provider: "keenable-search"` na-enweghị njikọ na-eji endpoint Keenable na-enweghị key
+(limits kwa IP). Key ahaziri ahazi na-ewepụ naanị limits ndị ahụ; auto-select na-eji Keenable naanị mgbe ahaziri key.
 
-**Auth:** Igodo API Bearer (`extractApiKey` + `isValidApiKey`). A na-amanye iwu site na `enforceApiKeyPolicy`.
+| Usoro | Ụzọ             | Nkọwa                                                         |
+| ----- | --------------- | ------------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Weta/scrape URL — ahụ a na-enyocha site na `v1WebFetchSchema` |
 
-**Nlaghachi dabere na oke (#8297):** mgbe enyeghị `provider` doro anya, a na-aga n'ime ọdọ ahụ
+**Nyocha:** Bearer API key (`extractApiKey` + `isValidApiKey`). A na-amanye iwu site na `enforceApiKeyPolicy`.
+
+Ngwakọta aha na-eji [nkwekọrịta ntụgharị `model`](#named-searchfetch-combinations)
+dị n'elu, na-echekwa nhọrọ na nzaghachi ndị metụtara fetch.
+
+**Nlaghachi dabere na quota (#8297):** mgbe enyeghị `provider` ma ọ bụ `model`, a na-agafe pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) n'usoro mkpa a kapịrị ọnụ (fill-first) — a na-awụpụ provider e haziri ma oke ya agwụla kama ịkwụsị arịrịọ ahụ ozugbo, njehie upstream a ga-anwaligharị/oke ya agwụla (HTTP 429 mgbe niile; 402/403 maka Firecrawl/Tavily/TinyFish free tiers nwere ụdị oke — ọ bụghị maka Jina Reader, ọ dịghịkwa mgbe ọ bụ 400 nkịtị nke arịrịọ na-adịghị mma) na-aga n'ihu ruo credentialed provider ọzọ a na-anwabeghị n'oge arịrịọ ahụ. Mgbe provider niile dị n'ọdọ ahụ gwụchara, endpoint na-eweghachi otu `429` (ya na isi `Retry-After`) kama `400` izugbe mbụ. Mgbe a rịọrọ `provider` doro anya, **ọ dịghị nlaghachi nzuzo** — provider doro anya dara ma ọ bụ oke ya gwụchara na-egosipụta njehie nke ya (`429` ma ọ bụrụ na oke agwụla, ma ọ bụghị ya, ọnọdụ upstream).
+`parallel-search` → `keenable-search`) n'usoro
+mbu ụzọ a kapịrị ọnụ (fill-first) — a na-awụpụ provider nwere limit ọnụego mana ahaziri ya
+kama ịkwụsị arịrịọ ahụ ozugbo, ọdịda upstream nwere ike ịnwale ọzọ/quota (HTTP 429 mgbe niile; 402/403 maka Firecrawl/Tavily/TinyFish quota-style free tiers —
+ọ bụghị maka Jina Reader, ọ dịghịkwa mgbe ọ bụ 400 arịrịọ ọjọọ nkịtị) na-agafe gaa na
+provider ọzọ nwere nzere nke a nwabeghị n'oge arịrịọ ahụ. Mgbe ike gwụchara provider niile dị na pool, endpoint na-eweghachite otu `429` (ya na
+header `Retry-After`) kama `400` izugbe gara aga. Mgbe a rịọrọ `provider` doro anya, **ọ dịghị fallback nzuzo** — provider doro anya nwere limit ọnụego ma ọ bụ na-ada ada na-egosipụta njehie nke ya (`429` ma ọ bụrụ na limit ọnụego dị, ma ọ bụghị ya, ọkwa upstream).
 
 ---
 
@@ -923,26 +1036,29 @@ na njikọ OAuth codex ahọpụtara. A nwalechara ya site na mmalite ruo na nje
 
 ---
 
-## Akụkụ Quota na Nkọpụta Nsogbu
+## Akụkọ Banyere Oke Ojiji na Nsogbu
 
-| Usoro | Ụzọ                 | Nkọwa                                                                                    |
-| ----- | ------------------- | ---------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Nyochaa quota tupu oge eruo maka `provider` + `accountId` tupu ịnye igodo edebanyere aha |
-| POST  | `/v1/issues/report` | Kọọ ọdịda quota/ịnye igodo na GitHub (chọrọ `GITHUB_ISSUES_REPO` + token)                |
+| Usoro | Ụzọ                 | Nkọwa                                                                                      |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET   | `/v1/quotas/check`  | Lelee oke ojiji tupu oge eruo maka `provider` + `accountId` tupu ịnye igodo edebanyere aha |
+| POST  | `/v1/issues/report` | Kọọ ọdịda metụtara oke ojiji/inyepụta igodo na GitHub (chọrọ `GITHUB_ISSUES_REPO` + token) |
 
-**Nyocha:** Igodo API Bearer (`isAuthenticated`).
+**Nyocha ikike:** `/v1/quotas/check` na-anata igodo API Bearer (`isAuthenticated`). `/v1/issues/report` bụ naanị maka njikwa (`requireManagementAuth`), dị ka `/api/v1/registered-keys`: nnọkọ dashboard,
+token CLI mpaghara, ma ọ bụ igodo API nwere oke `manage`/`admin`; igodo API nke naanị maka inference na-enweta `403`.
 
-### Mweghachi nnọkọ quota (nhọrọ)
+### Iweghachite nnọkọ oke ojiji (nhọrọ)
 
-Arịrịọ `POST /v1/chat/completions` ma ọ bụ `POST /v1/responses` na-adịghị asọgharị nke dara n'ihi njehie quota ikpeazụ (`402`/`429`/`503` nke ahụ ya na-ekwu na quota ma ọ bụ kredit agwụla) nwere ike idowe ma kpọọghachi ya ma emechaa kama iweghachi njehie ahụ. Onye na-akpọ ọrụ ahụ na-ahọrọ nke a maka arịrịọ ọ bụla site na headers atọ:
+Arịrịọ na-abụghị streaming nke `POST /v1/chat/completions` ma ọ bụ `POST /v1/responses` nke dara n’ihi njehie oke ojiji ikpeazụ (`402`/`429`/`503` nke ahụ ya na-ekwu na oke ojiji ma ọ bụ kredit agwụla)
+nwere ike idobe ma kpọgharịa ya ọzọ ma emechaa kama iweghachi njehie ahụ. Onye na-akpọ ọrụ ahụ na-ahọrọ nke a maka arịrịọ ọ bụla site n’iji nkụnye ndị a atọ:
 
-| Header                       | Uru                                                        |
+| Nkụnye                       | Uru                                                        |
 | ---------------------------- | ---------------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                                     |
 | `x-omniroute-session`        | njirimara nnọkọ, `[A-Za-z0-9._:-]{1,128}`                  |
-| `x-omniroute-recovery-turn`  | njirimara ntụgharị pụrụ iche n'ime nnọkọ ahụ (otu iwu ahụ) |
+| `x-omniroute-recovery-turn`  | njirimara ntụgharị pụrụ iche n’ime nnọkọ ahụ (otu iwu ahụ) |
 
-Naanị ntụgharị nwere `stream: false` nke na-enweghị ngwaọrụ, akụkọ ngwaọrụ ma ọ bụ `previous_response_id`, na nke na-enweghị pin `x-omniroute-connection`, tozuru oke, ma a ga-edobe `STORAGE_ENCRYPTION_KEY` (a na-echekwa arịrịọ ahụ n'ụdị ezoro ezo ruo awa 24). A na-eweghachi `202` na `recovery.poll`; jiri `GET /v1/quota-recoveries/{id}` jụọ ya (`202` mgbe ọ ka na-eche, `200` nwere ahụ eweghachiri mgbe ọ gwụchara) ma ọ bụ jiri `DELETE` kagbuo ya. Naanị igodo API nke mepụtara tiketi ndị ahụ nwere ike ịhụ ha. Ọ bụrụ na ejighị n'aka banyere nsonaazụ replay, ọ na-akwụsị na `needs_confirmation` kama iziga ya ugboro abụọ. Isi mmalite: `src/lib/quota/quotaSessionRecovery.ts`.
+Naanị ntụgharị `stream: false` na-enweghị ngwaọrụ, akụkọ ihe mere eme ngwaọrụ ma ọ bụ `previous_response_id`, na-enweghị ntụnye `x-omniroute-connection`, ka tozuru oke, ma a ga-edobe `STORAGE_ENCRYPTION_KEY` (a na-echekwa arịrịọ ahụ n’ụdị ezoro ezo ruo awa 24). Nzaghachi ahụ ga-abụ `202` nwere
+`recovery.poll`; jiri `GET /v1/quota-recoveries/{id}` nyochaa ya (`202` mgbe ọ ka na-eche, `200` nwere ahụ enwetaghachiri mgbe emechara) ma ọ bụ kagbuo ya site na `DELETE`. Naanị igodo API mepụtara tiketi ahụ nwere ike ịhụ ha. Ọ bụrụ na amaghị ihe nsonaazụ replay bụ, ọ na-ejedebe na `needs_confirmation` kama iziga ya ugboro abụọ. Isi mmalite: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1672,19 +1788,23 @@ Ndebanye aha webhook ndị na-apụ apụ maka ihe omume OmniRoute (mmecha arị
 
 ---
 
-## Igodo Edebanyere (Nlekọta Akpaaka)
+## Igodo Edebanyere (Njikwa Akpaaka)
 
-A na-eji ya n’usoro nlekọta igodo akpaaka iji wepụta ma tụgharịa igodo API megide onye na-eweta/akaụntụ nkwado, yana oke kwa ụbọchị/kwa elekere.
+A na-eji nke a site na sistemụ njikwa igodo akpaaka wepụta ma tụgharịa igodo API megide onye na-eweta ọrụ/akaụntụ ndabere, nwere oke kwa ụbọchị/awa.
 
-| Usoro  | Ụzọ                                   | Nkọwa                                                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Depụta igodo edebanyere (naanị prefix e kpuchiri)                                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | Wepụta igodo edebanyere ọhụrụ — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ọ na-eweghachi igodo mbụ **otu ugboro**. Ọ na-eweghachi `429` mgbe a jụrụ ya n’ihi oke. |
-| GET    | `/api/v1/registered-keys/[id]`        | Nweta metadata igodo edebanyere (enweghị igodo mbụ)                                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Kagbuo igodo edebanyere                                                                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Ebe njedebe ịkagbu nke doro anya (otu mmetụta ahụ na DELETE)                                                                                                                                                             |
+| Method | Path                                  | Description                                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Depụta igodo edebanyere (naanị prefix e kpuchiri)                                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Wepụta igodo edebanyere ọhụrụ — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ọ na-eweghachi igodo raw **naanị otu ugboro**. Ọ na-eweghachi `429` mgbe a jụrụ n'ihi oke. |
+| GET    | `/api/v1/registered-keys/[id]`        | Nweta metadata nke igodo edebanyere (enweghị data raw)                                                                                                                                                                      |
+| DELETE | `/api/v1/registered-keys/[id]`        | Kagbuo igodo edebanyere                                                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint kagbuo doro anya (otu mmetụta ahụ na DELETE)                                                                                                                                                                       |
+| GET    | `/api/v1/providers/[provider]/limits` | Gụọ oke mwepụta nke onye na-eweta ọrụ ahụ                                                                                                                                                                                   |
+| PUT    | `/api/v1/providers/[provider]/limits` | Tọọ oke mwepụta nke onye na-eweta ọrụ ahụ — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                   |
+| GET    | `/api/v1/accounts/[id]/limits`        | Gụọ oke mwepụta nke akaụntụ ahụ                                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Tọọ oke mwepụta nke akaụntụ ahụ — otu body ahụ dị na ụzọ onye na-eweta ọrụ ahụ                                                                                                                                              |
 
-**Nyocha ikike:** nnọkọ/API key njikwa (`requireManagementAuth`) — otu nchedo ahụ dị ka `/api/keys`: nnọkọ dashboard, token CLI mpaghara, ma ọ bụ API key nwere oke `manage`/`admin`; igodo API ndị bụ naanị maka inference na-enweta `403`. Hụkwa `/v1/quotas/check` na `/v1/issues/report`.
+**Nyocha ikike:** nnọkọ njikwa/igodo API (`requireManagementAuth`) — otu onye nche ahụ dị ka `/api/keys`: nnọkọ dashboard, token CLI mpaghara, ma ọ bụ igodo API nwere oke ikike `manage`/`admin`; igodo API nke naanị inference na-enweta `403`. Hụkwa `/v1/quotas/check` na `/v1/issues/report`.
 
 ---
 

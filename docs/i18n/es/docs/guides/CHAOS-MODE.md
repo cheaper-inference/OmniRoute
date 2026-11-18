@@ -46,23 +46,21 @@ nunca se ve afectado.
 
 ## Configuración
 
-1. Abra **Panel de control → Modo Caos** (`/dashboard/chaos`).
-2. **Actívelo**: el Modo Caos viene **desactivado de forma predeterminada** (`enabled: false` en
-   `src/lib/chaos/chaosConfig.ts`). Mientras esté desactivado, `POST /api/chaos/run` responde con
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Elija los participantes y los valores predeterminados (se conservan por instancia mediante el almacén de configuración):
+1. Abierto** Panel de control → Modo Caos** (`/dashboard/chaos`).
+2. Gíralo** en** Naves del Modo Caos —** deshabilitado por defecto** (`enabled: false` en `src/lib/chaos/chaosConfig.ts`). Mientras está deshabilitado, `POST /api/chaos/run` responde `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Elija los participantes y los valores predeterminados (persistentes por instancia a través de la tienda de configuración):
 
-   | Campo               | Significado                                                               | Valor predeterminado / límites                    |
-   | ------------------- | ------------------------------------------------------------------------- | ------------------------------------------------- |
-   | `enabled`           | Interruptor principal                                                     | `false`                                           |
-   | `defaultMode`       | `parallel` o `collaborative` (consulte más abajo)                         | `parallel`                                        |
-   | `providerOverrides` | Participación por proveedor (`providerId`, `modelId` opcional, `enabled`) | vacío = todos los proveedores activos, máximo 200 |
-   | `systemPrompt`      | Reemplazo del prompt de sistema integrado de Chaos                        | opcional, máximo de 10 000 caracteres             |
-   | `timeoutMs`         | Tiempo máximo por llamada al modelo                                       | `120000` (5 000–600 000)                          |
-   | `maxTokens`         | `max_tokens` por llamada al modelo                                        | `4096` (256–128 000)                              |
+   | Campo               | Significado                                                               | Predeterminado/límites                     |
+   | ------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
+   | `enabled`           | interruptor maestro                                                       | `false`                                    |
+   | `defaultMode`       | `parallel` o `collaborative` (ver más abajo)                              | `parallel`                                 |
+   | `providerOverrides` | Participación por proveedor (`providerId`, opcional `modelId`, `enabled`) | vaciar = cada proveedor activo, máximo 200 |
+   | `systemPrompt`      | Anulación del mensaje integrado del sistema Chaos                         | opcional, máximo 10 000 caracteres         |
+   | `timeoutMs`         | Tiempo máximo por llamada de modelo                                       | `120000` (5 000–600 000)                   |
+   | `maxTokens`         | `max_tokens` por llamada de modelo                                        | `4096` (256–128 000)                       |
 
-4. Ejecute una **prueba desde la propia página**: el panel de resultados muestra la respuesta,
-   el estado y la duración de cada proveedor.
+4. Ofrezca a cada proveedor participante una** modelo** . El modelo de un proveedor es el `modelId` de su anulación habilitada en la página del Modo Caos (gana); de lo contrario, el** modelo predeterminado** de su conexión. Nunca se utiliza una identificación de proveedor como nombre de modelo. Un proveedor que no tiene ninguno de los dos es** no llamado** : aparece en los resultados como `status: "error"` con el mensaje _"No hay modelo establecido para este proveedor. Establezca un modelo para él en la página Modo Caos o un modelo predeterminado en la conexión."_ y un `modelId` vacío, mientras los otros proveedores se ejecutan normalmente. Si ningún proveedor seleccionado tiene un modelo, la ejecución falla antes de cualquier solicitud ascendente con _"Ningún proveedor tiene un modelo establecido..."_ (HTTP 500 en ambos puntos finales).
+5. ejecutar un** prueba desde la propia página** — el panel de resultados muestra la respuesta, el estado y la duración de cada proveedor.
 
 ## Modos de ejecución
 
@@ -74,27 +72,24 @@ nunca se ve afectado.
 
 ## API
 
-### `POST /api/chaos/run` — sesión del panel de control
+### sesión del panel de — `POST /api/chaos/run`
 
-Autenticación mediante cookies (la sesión de administración; consulte
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); lo utiliza la página del panel de control.
+Autenticado por cookie (la sesión de administración — ver [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); utilizado por la página del panel de control.
 
 ```jsonc
-// cuerpo
+// body
 {
-  "task": "Compare approaches to X", // obligatorio
-  "providers": ["glm", "kimi"], // filtro opcional
-  "mode": "parallel", // opcional — reemplaza defaultMode
-  "systemPrompt": "…", // reemplazo opcional
-  "maxTokens": 4096, // reemplazo opcional
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — clave de API
+### clave `POST /api/skills/collect/chaos` — API
 
-Variante con token Bearer para clientes externos. La clave debe tener el **permiso de Modo Caos**
-(`chaosModeEnabled`), que está **desactivado de forma predeterminada**; actívelo para cada clave en
-**Panel de control → Gestor de API → editar clave → permisos → Modo Caos**. Usa el mismo cuerpo que el anterior.
+Variante de token al portador para llamantes externos. La llave debe llevar el** Permiso del modo Caos** (`chaosModeEnabled`), que es** desactivado por defecto** — lo habilita por clave en** Panel de control → API Manager → editar clave permisos → → Modo Caos** . Mismo cuerpo que el anterior.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Ambos endpoints devuelven la misma estructura:
+Ambos puntos finales devuelven la misma forma:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Ambos endpoints devuelven la misma estructura:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // solo en modo colaborativo
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Solución de problemas
 
-- **`400 Chaos Mode is not enabled`**: consulte el paso 2 anterior; el interruptor global está desactivado.
-- **La clave de API se rechaza en `/api/skills/collect/chaos`**: la clave no tiene el permiso por clave
-  `chaosModeEnabled` (desactivado de forma predeterminada; se trata de una configuración, no de un error).
-- **Un proveedor esperado no aparece en los resultados**: compruebe `providerOverrides` en la
-  página Modo Caos (un reemplazo desactivado lo excluye) y verifique si la conexión del proveedor está
-  activa.
+- **`400 Chaos Mode is not enabled`** — paso 2 anterior: el interruptor global está apagado.
+- **La clave API es rechazada en `/api/skills/collect/chaos`** — la clave carece del permiso `chaosModeEnabled` por clave (desactivado de forma predeterminada; esto es una configuración, no un error).
+- **Un proveedor muestra `No model set for this provider`** — configura su modelo en la página Modo Caos o un modelo predeterminado en su conexión (consulte Configuración, paso 4).
+- **Un proveedor que esperabas no aparece en los resultados.** — verifique `providerOverrides` en la página Modo Caos (una anulación deshabilitada lo excluye) y si la conexión del proveedor está activa.
