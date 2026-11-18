@@ -102,6 +102,80 @@ test("slow handler emits early keepalive then forwards the real body (#2544)", a
   assert.match(body, /data: \[DONE\]/);
 });
 
+test("slow path does not drain upstream for a client that has not read the startup frame", async () => {
+  const handler = Promise.withResolvers<Response>();
+  const upstreamCancelled = Promise.withResolvers<void>();
+  const secondPull = Promise.withResolvers<void>();
+  let pulls = 0;
+  const upstream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulls++;
+      controller.enqueue(Uint8Array.of(pulls));
+      if (pulls === 2) secondPull.resolve();
+      if (pulls === 64) controller.close();
+    },
+    cancel() {
+      upstreamCancelled.resolve();
+    },
+  });
+  const response = await withEarlyStreamKeepalive(handler.promise, { thresholdMs: 0 });
+  handler.resolve(new Response(upstream, { headers: { "Content-Type": "text/event-stream" } }));
+  await new Promise<void>(setImmediate);
+  assert.equal(pulls, 1, "only the upstream's own prefetch is allowed");
+
+  const reader = response.body!.getReader();
+  try {
+    await reader.read(); // startup frame
+    await secondPull.promise;
+    await new Promise<void>(setImmediate);
+    assert.equal(pulls, 2, "one downstream pull must not drain the rest of upstream");
+  } finally {
+    await reader.cancel();
+  }
+  await upstreamCancelled.promise;
+  await new Promise<void>(setImmediate);
+  assert.equal(upstream.locked, false);
+});
+
+test("cancelling before headers aborts work behind the keepalive response", async () => {
+  const handler = Promise.withResolvers<Response>();
+  const deadlineController = new AbortController();
+  const response = await withEarlyStreamKeepalive(handler.promise, {
+    thresholdMs: 0,
+    deadlineController,
+    signal: deadlineController.signal,
+  });
+  await response.body!.cancel();
+  assert.equal(deadlineController.signal.aborted, true);
+  const discarded = Promise.withResolvers<void>();
+  handler.resolve(new Response(new ReadableStream({ cancel: () => discarded.resolve() })));
+  await discarded.promise;
+});
+
+test("slow path emits an error frame only after a complete upstream SSE event", async () => {
+  for (const [parts, complete] of [
+    [[`data: ${"x".repeat(4096)}\r\n\r`, "\n"], true],
+    [["data: unfinished", "\n"], false],
+  ] as const) {
+    const handler = Promise.withResolvers<Response>();
+    const response = await withEarlyStreamKeepalive(handler.promise, { thresholdMs: 0 });
+    let index = 0;
+    handler.resolve(
+      new Response(
+        new ReadableStream({
+          pull(controller) {
+            if (index < parts.length) controller.enqueue(new TextEncoder().encode(parts[index++]));
+            else controller.error(new Error("upstream disconnected"));
+          },
+        }),
+        { headers: { "Content-Type": "text/event-stream" } }
+      )
+    );
+    if (complete) assert.match(await response.text(), /\r\n\r\nevent: error\n/);
+    else await assert.rejects(response.text(), /Upstream stream failed before completion/);
+  }
+});
+
 // Anthropic clients (Claude Code, the Anthropic SDK) ignore SSE comments for their
 // stream/first-token watchdog and abort+retry on a slow first token. The /v1/messages
 // route keeps the connection warm with a REAL `event: ping` instead of the comment frame.

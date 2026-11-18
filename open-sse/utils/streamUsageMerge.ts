@@ -27,10 +27,12 @@ export function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLik
 /** Native output repair without projecting inclusive prompt totals onto fresh input. */
 export function repairClaudeFinalWireUsage(
   value: unknown,
-  receipt: UsageLike | null | undefined
+  getReceipt: () => UsageLike | null | undefined
 ): boolean {
   const event = value as { type?: string; usage?: UsageLike };
-  if (event?.type !== "message_delta" || !receipt) return false;
+  if (event?.type !== "message_delta") return false;
+  const receipt = getReceipt();
+  if (!receipt) return false;
   const output = receipt.completion_tokens ?? receipt.output_tokens ?? 0;
   if (event.usage?.output_tokens === output) return false;
   event.usage = {

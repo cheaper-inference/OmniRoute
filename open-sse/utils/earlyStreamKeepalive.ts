@@ -552,6 +552,8 @@ export async function withEarlyStreamKeepalive(
   // Cleanup state is hoisted so both start() and cancel() (client disconnect) can stop
   // the keepalive loop and cancel the upstream read.
   let stopKeepalive = () => {};
+  let removeAbortListeners = () => {};
+  let resumeRead: (() => void) | undefined;
   let upstreamReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   let aborted = false;
   const stopDeadline = () => {
@@ -562,15 +564,15 @@ export async function withEarlyStreamKeepalive(
     releaseDeadlineController(deadlineController);
   };
 
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
+  const source = {
+    async forward(controller: ReadableStreamDefaultController<Uint8Array>) {
       let stopped = false;
       let streamErrored = false;
       let nextApplicationKeepaliveAt = applicationKeepalive
         ? performance.now() + applicationKeepalive.intervalMs
         : Number.POSITIVE_INFINITY;
       const interval = setInterval(() => {
-        if (stopped) return;
+        if (stopped || (controller.desiredSize ?? 0) <= 0) return;
         try {
           const now = performance.now();
           let frame = keepaliveFrame;
@@ -615,6 +617,8 @@ export async function withEarlyStreamKeepalive(
         aborted = true;
         stopDeadline();
         stopKeepalive();
+        removeAbortListeners();
+        resumeRead?.();
         upstreamReader?.cancel().catch(() => {});
         try {
           controller.close();
@@ -632,6 +636,7 @@ export async function withEarlyStreamKeepalive(
         aborted = true;
         stopDeadline();
         stopKeepalive();
+        removeAbortListeners();
         try {
           deadlineController?.abort();
         } catch {
@@ -658,18 +663,17 @@ export async function withEarlyStreamKeepalive(
           /* already closed */
         }
       };
-      let deadlineListenerAttached = false;
+      removeAbortListeners = () => {
+        signal?.removeEventListener("abort", onAbort);
+        deadlineController?.signal.removeEventListener("abort", onExpired);
+      };
       if (deadlineEnabled && deadlineController) {
-        if (deadlineController.signal.aborted) {
-          onExpired();
-        } else {
-          deadlineController.signal.addEventListener("abort", onExpired, { once: true });
-          deadlineListenerAttached = true;
-        }
+        deadlineController.signal.addEventListener("abort", onExpired, { once: true });
       }
       signal?.addEventListener("abort", onAbort, { once: true });
       // addEventListener does not replay an abort that happened before registration.
       // Checking after registration closes that gap without missing a concurrent abort.
+      if (deadlineEnabled && deadlineController?.signal.aborted) onExpired();
       if (signal?.aborted) onAbort();
 
       try {
@@ -701,8 +705,10 @@ export async function withEarlyStreamKeepalive(
             // Last four forwarded bytes. A finished SSE event ends in \n\n (or \r\n\r\n).
             const tail = [0, 0, 0, 0];
             const noteTail = (value: Uint8Array) => {
-              for (let i = 0; i < value.byteLength; i++) {
-                tail.copyWithin(0, 1);
+              for (let i = Math.max(0, value.length - tail.length); i < value.length; i++) {
+                tail[0] = tail[1];
+                tail[1] = tail[2];
+                tail[2] = tail[3];
                 tail[3] = value[i];
               }
             };
@@ -717,9 +723,16 @@ export async function withEarlyStreamKeepalive(
               );
             };
             try {
-              while (true) {
+              while (!aborted) {
+                if ((controller.desiredSize ?? 0) <= 0) {
+                  const { promise, resolve } = Promise.withResolvers<void>();
+                  resumeRead = resolve;
+                  await promise;
+                  resumeRead = undefined;
+                  if (aborted) break;
+                }
                 const { done, value } = await upstreamReader.read();
-                if (done) break;
+                if (done || aborted) break;
                 if (value && value.byteLength > 0) {
                   controller.enqueue(value);
                   bytesForwarded += value.byteLength;
@@ -744,6 +757,9 @@ export async function withEarlyStreamKeepalive(
                 streamErrored = true;
                 controller.error(new Error("Upstream stream failed before completion."));
               }
+            } finally {
+              upstreamReader.releaseLock();
+              upstreamReader = null;
             }
           } else {
             // Non-SSE response (e.g. a JSON error) reached us after we already
@@ -781,10 +797,7 @@ export async function withEarlyStreamKeepalive(
       } finally {
         stopDeadline();
         stopKeepalive();
-        signal?.removeEventListener("abort", onAbort);
-        if (deadlineListenerAttached && deadlineController) {
-          deadlineController.signal.removeEventListener("abort", onExpired);
-        }
+        removeAbortListeners();
         try {
           if (!streamErrored) controller.close();
         } catch {
@@ -792,14 +805,25 @@ export async function withEarlyStreamKeepalive(
         }
       }
     },
+    start(controller: ReadableStreamDefaultController<Uint8Array>) {
+      // Returning the pump promise from start() would block pull() until EOF.
+      void source.forward(controller);
+    },
+    pull() {
+      resumeRead?.();
+    },
     cancel() {
       // Consumer (Next.js → client) went away — stop keepalives and release the upstream.
       aborted = true;
       stopDeadline();
       stopKeepalive();
+      removeAbortListeners();
+      resumeRead?.();
       upstreamReader?.cancel().catch(() => {});
+      deadlineController?.abort();
     },
-  });
+  };
+  const stream = new ReadableStream(source);
 
   return new Response(stream, {
     status: 200,

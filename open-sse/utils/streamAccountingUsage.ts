@@ -18,14 +18,14 @@ export function canonicalStreamingUsage(usage: UsageLike | null | undefined): Us
 type StreamAccountingInput = {
   usage: UsageLike | null | undefined;
   native: boolean;
-  nativeUsage: UsageLike | null;
+  nativeUsage: () => UsageLike | null;
   body: unknown;
   contentLength: number;
   format: string;
 };
 export function resolveStreamAccountingUsage(input: StreamAccountingInput): UsageLike | null {
   if (input.native)
-    return input.nativeUsage ?? finalizeStreamingUsage(null, input.body, input.contentLength);
+    return input.nativeUsage() ?? finalizeStreamingUsage(null, input.body, input.contentLength);
   if (!input.usage && input.contentLength === 0) return null;
   return canonicalStreamingUsage(
     finalizeStreamingUsage(
