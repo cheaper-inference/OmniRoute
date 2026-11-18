@@ -70,6 +70,17 @@ export { InlineCode } from "@omniroute/ui-kit/inline-code";
 // a Card, `density="compact"` for 36px rows; `onActivate` or `asChild` make the whole row one
 // control. Three columns or more is a Table.
 export { ItemList, Item } from "@omniroute/ui-kit/item-list";
+// Progress: every bar, in place of a track and a fill drawn by hand. Thin quota and share bars
+// take `size="xs"` (4px) or `"sm"` (6px) with `animate={false}`; a series colour goes in `color`;
+// parts of one total go in `segments`; quota, coverage and share are `semantics="meter"`, named
+// by `aria-label` with the reading in `aria-valuetext`.
+export { Progress } from "@omniroute/ui-kit/progress";
+export type {
+  ProgressProps,
+  ProgressSegment,
+  ProgressSize,
+  ProgressTone,
+} from "@omniroute/ui-kit/progress";
 
 // Layouts
 export * from "./layouts";
