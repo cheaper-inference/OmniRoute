@@ -6,6 +6,7 @@ import { parsePluginOptions } from "../src/options.js";
 import { compareByRecency } from "../src/catalog-freshness.js";
 import {
   catalogOrderComparator,
+  DEFAULT_CATALOG_ORDER,
   toOrderEntry,
   type CatalogOrderEntry,
   type CatalogOrderSpec,
@@ -69,9 +70,25 @@ describe("published catalog order", () => {
         ["ac/b2", { name: "Same" }],
       ])
     );
-    // "ac/b2" is newer in the raw data, so the tie on the display name
-    // resolves recency-descending before the id.
-    assert.deepEqual(ids(tied.payload), ["ac/b2", "ac/b1"]);
+    // The published set never keeps two equal display names: the catalog
+    // disambiguates the collision with a route suffix ("… (ac/b1)",
+    // "… (ac/b2)"), so the pair is ordered by those names.
+    assert.deepEqual(ids(tied.payload), ["ac/b1", "ac/b2"]);
+    // On an equal display name the default chain resolves recency-descending
+    // before the id: "ac/b2" is newer, so it leads despite the larger id.
+    const older = {
+      ...toOrderEntry("omniroute/ac/b1", noCostLegacy()),
+      name: "Same",
+      releaseDateMs: Date.parse("2026-01-02T00:00:00Z"),
+    };
+    const newer = {
+      ...toOrderEntry("omniroute/ac/b2", noCostLegacy()),
+      name: "Same",
+      releaseDateMs: Date.parse("2026-01-09T00:00:00Z"),
+    };
+    const byDefault = catalogOrderComparator(DEFAULT_CATALOG_ORDER);
+    assert.equal(byDefault(newer, older) < 0, true);
+    assert.equal(byDefault(older, newer) > 0, true);
   });
 
   it("sorts by name with a fixed, case- and number-aware collation", async () => {
