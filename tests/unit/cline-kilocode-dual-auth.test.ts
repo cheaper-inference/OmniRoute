@@ -65,9 +65,20 @@ test("cline and kilocode are registered in SPECIALTY_VALIDATORS for direct chat 
   assert.equal(resCline.valid, false);
   assert.equal(resCline.error, "Provider and API key required");
 
-  const resKilo = await validateProviderApiKey({ provider: "kilocode", apiKey: "" });
-  assert.equal(resKilo.valid, false);
-  assert.equal(resKilo.error, "Provider and API key required");
+  // kilocode is marked optional in the registry, so an empty key reaches the
+  // specialized validator instead of the missing-credential guard. Probe the local
+  // fake upstream (not Kilo's public endpoint) to prove the dispatch and verdict:
+  // the validator sends the registry's anonymous bearer token, which the fake accepts.
+  chatRequests = 0;
+  const resKilo = await validateProviderApiKey({
+    provider: "kilocode",
+    apiKey: "",
+    providerSpecificData: { baseUrl },
+  });
+  assert.ok(chatRequests > 0, "the empty-key validator must dispatch to the chat route");
+  assert.equal(lastChatAuthorization, "Bearer anonymous");
+  assert.equal(resKilo.valid, true);
+  assert.equal(resKilo.error, null);
 });
 
 // ── Validator dispatch against a fake upstream (#16298) ─────────────────────
@@ -124,7 +135,9 @@ before(async () => {
         } catch {
           lastChatBody = null;
         }
-        if (auth !== `Bearer ${VALID_KEY}`) {
+        // Kilo also serves its free tier with the registry's anonymous bearer token;
+        // accept it here so the keyless-validation dispatch can be tested locally.
+        if (auth !== `Bearer ${VALID_KEY}` && auth !== "Bearer anonymous") {
           res.writeHead(401, { "content-type": "application/json" });
           res.end(JSON.stringify({ error: "Unauthorized" }));
           return;

@@ -1,0 +1,1 @@
+- **fix(providers):** accept keyless connections for providers marked optional or none in the registry ([#20458](https://github.com/cheaper-inference/OmniRoute/pull/20458)) — thanks @maxmad64bis

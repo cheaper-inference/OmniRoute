@@ -5,19 +5,19 @@ const { createProviderSchema, providersBatchTestSchema } =
   await import("../../src/shared/validation/schemas.ts");
 const { providerAllowsOptionalApiKey } = await import("../../src/shared/constants/providers.ts");
 
-// #11117: Pollinations no longer serves anonymous requests (401 without a key),
-// so it left EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS — key is now required.
-test("Pollinations requires an API key", () => {
-  assert.equal(providerAllowsOptionalApiKey("pollinations"), false);
+// The registry declares optional auth for Pollinations, so a connection without
+// a pasted key is valid and a key, when supplied, is still honoured.
+test("Pollinations allows an optional API key", () => {
+  assert.equal(providerAllowsOptionalApiKey("pollinations"), true);
 });
 
-test("createProviderSchema rejects Pollinations without apiKey", () => {
+test("createProviderSchema accepts Pollinations without apiKey", () => {
   const result = createProviderSchema.safeParse({
     provider: "pollinations",
     name: "Pollinations",
   });
 
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test("providersBatchTestSchema accepts cloud-agent batch mode", () => {

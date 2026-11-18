@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 // behind `allowNoCredential === true`, so the route only threw a ReferenceError
 // (HTTP 500) for that request shape; every other create path stayed green.
 
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
@@ -21,6 +21,7 @@ const route = await import("../../src/app/api/providers/route.ts");
 
 test.after(() => {
   core.resetDbInstance();
+  rmSync(DATA_DIR, { recursive: true, force: true });
 });
 
 function post(body: Record<string, unknown>) {
@@ -49,4 +50,16 @@ test("allowNoCredential on a provider that allows an optional key passes the opt
   assert.notEqual(res.status, 500, "must not 500 (ReferenceError) on the allowNoCredential branch");
   const text = JSON.stringify(await res.json().catch(() => ({})));
   assert.doesNotMatch(text, /does not allow a connection without a credential/);
+});
+
+test("allowNoCredential on a registry provider marked optional is accepted by the route", async () => {
+  const res = await post({
+    provider: "ovhcloud",
+    name: "no-cred-ovhcloud",
+    allowNoCredential: true,
+  });
+  assert.equal(res.status, 201, "an allowed keyless connection must be created with 201");
+  const body = (await res.json()) as { connection?: { provider?: string }; error?: unknown };
+  assert.equal(body.connection?.provider, "ovhcloud");
+  assert.doesNotMatch(JSON.stringify(body), /does not allow a connection without a credential/);
 });
