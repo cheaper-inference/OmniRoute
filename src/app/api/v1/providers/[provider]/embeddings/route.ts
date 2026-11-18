@@ -1,6 +1,9 @@
 import { isSelectedProviderCredentials } from "@/sse/services/credentialSentinel";
-import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
-import { errorResponse, unavailableResponse } from "@omniroute/open-sse/utils/error.ts";
+import {
+  isAllRateLimitedCredentials,
+  rateLimitedProviderResponse,
+} from "@/app/api/v1/_shared/rateLimit";
+import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
@@ -21,6 +24,13 @@ import {
 } from "@/sse/services/keyConnectionScope";
 import { v1EmbeddingsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+
+function credentialUnavailableResponse(provider: string, credentials: unknown): Response {
+  if (isAllRateLimitedCredentials(credentials)) {
+    return rateLimitedProviderResponse(provider, credentials);
+  }
+  return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Provider credentials unavailable");
+}
 
 /**
  * Handle CORS preflight
@@ -76,7 +86,7 @@ export async function POST(request, { params }) {
   // Validate provider match
   if (body.model) {
     const prefix = body.model.split("/")[0];
-    if (prefix !== providerAlias && prefix !== rawProvider && prefix !== providerEntry.id) {
+    if (![providerAlias, rawProvider, providerEntry.id].includes(prefix)) {
       return errorResponse(
         HTTP_STATUS.BAD_REQUEST,
         `Model "${body.model}" does not belong to provider "${rawProvider}"`
@@ -95,17 +105,8 @@ export async function POST(request, { params }) {
   if (isKeyScopeBlockedCredentials(credentials)) {
     return keyScopeBlockedResponse(rawProvider, credentials);
   }
-  if (isAllRateLimitedCredentials(credentials)) {
-    return unavailableResponse(
-      HTTP_STATUS.RATE_LIMITED,
-      `[${rawProvider}] All accounts rate limited`,
-      credentials.retryAfter,
-      credentials.retryAfterHuman
-    );
-  }
-
   if (!isSelectedProviderCredentials(credentials)) {
-    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Provider credentials unavailable");
+    return credentialUnavailableResponse(rawProvider, credentials);
   }
   const result = await handleEmbedding({
     body,

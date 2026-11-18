@@ -81,7 +81,10 @@ test("F1: cache route GET batches its four async reads (#11396)", () => {
   assert.match(body, /getCacheTrend\(trendHours\)/);
   // settings-load failure must degrade to {} *inside* the batch, not reject
   // the whole Promise.all and 500 the stats endpoint
-  assert.match(body, /getCachedSettings\(\)\.catch\(\s*\(\s*\)\s*=>\s*\(\s*\{\}\s*\)\s*\)/);
+  assert.match(
+    body,
+    /getCachedSettings\(\)\.catch\(\s*\(\s*\)(?:: Record<string, unknown>)?\s*=>\s*\(\s*\{\}\s*\)\s*\)/
+  );
 
   // no serial waterfall remains for the same reads
   assert.doesNotMatch(src, /await getIdempotencyStats\(\)\s*;/);

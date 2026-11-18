@@ -24,17 +24,15 @@ export function isCredentialDiagnosticSentinel(value: unknown): boolean {
   );
 }
 
-import type { getProviderCredentials } from "./auth";
-
 /** A selection refusal is not a credential; do not send it upstream. */
-export type SelectedProviderCredentials = Extract<
-  NonNullable<Awaited<ReturnType<typeof getProviderCredentials>>>,
+export type SelectedProviderCredentials<T> = Extract<
+  NonNullable<T>,
   { apiKey: unknown; accessToken: unknown }
 >;
 
-export function isSelectedProviderCredentials(
-  value: unknown
-): value is SelectedProviderCredentials {
+export function isSelectedProviderCredentials<T>(
+  value: T
+): value is SelectedProviderCredentials<T> {
   if (!value || typeof value !== "object") return false;
   const record = value as Record<string, unknown>;
   if (

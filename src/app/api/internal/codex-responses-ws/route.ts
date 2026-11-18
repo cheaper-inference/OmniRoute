@@ -446,6 +446,11 @@ async function prepareReasoningRoute(
   return { decision, intent: reasoningIntent, sourceModels, routingTags };
 }
 
+function getCredentialMaxConcurrent(credentials: object): number | null {
+  const value: unknown = Reflect.get(credentials, "maxConcurrent");
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 async function resolveCodexCredentials(
   provider: string,
   model: string,
@@ -469,7 +474,7 @@ async function resolveCodexCredentials(
 
     const leaseId = await acquireCodexWsLease(
       credentials.connectionId,
-      "maxConcurrent" in credentials ? credentials.maxConcurrent : null
+      getCredentialMaxConcurrent(credentials)
     );
     if (!leaseId) {
       excludedConnectionIds.push(credentials.connectionId);
