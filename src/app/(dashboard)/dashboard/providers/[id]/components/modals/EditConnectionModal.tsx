@@ -1005,7 +1005,11 @@ export default function EditConnectionModal({
               options={[
                 {
                   value: TRANSPORT_DEFAULT_VALUE,
-                  label: providerText(t, "qoderCliTransportDefault", "Default (qodercli --print)"),
+                  label: providerText(
+                    t,
+                    "qoderCliTransportDefault",
+                    "Default (inherit process setting)"
+                  ),
                 },
                 {
                   value: "print",

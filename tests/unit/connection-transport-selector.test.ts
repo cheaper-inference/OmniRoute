@@ -124,3 +124,12 @@ test("qoderCliTransport wins over QODER_CLI_TRANSPORT; absent defers to env", ()
     else process.env.QODER_CLI_TRANSPORT = previous;
   }
 });
+
+test("the qoder Default option says it inherits the process setting", async () => {
+  // With QODER_CLI_TRANSPORT=acp the Default option runs ACP, so it must not promise --print.
+  const { readFileSync } = await import("node:fs");
+  const en = readFileSync(new URL("../../src/i18n/messages/en.json", import.meta.url), "utf8");
+  const label = /"qoderCliTransportDefault":\s*"([^"]*)"/.exec(en)?.[1] ?? "";
+  assert.match(label, /inherit/i);
+  assert.doesNotMatch(label, /--print/);
+});
