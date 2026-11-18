@@ -48,6 +48,8 @@ const { getCliRuntimeStatus, checkKnownPath } =
   await import("../../src/shared/services/cliRuntime.ts");
 
 test("#7753: a CLI symlink located inside an expected parent dir is wrongly reported not-installed when its resolved target escapes EXPECTED_PARENT_PATHS", async () => {
+  const known = await checkKnownPath(path.join(installDir, binaryName));
+  assert.equal(known.installed, true, `expected trusted known path, reason=${known.reason}`);
   const status = await getCliRuntimeStatus("opencode");
   assert.equal(
     status.installed,
@@ -56,7 +58,7 @@ test("#7753: a CLI symlink located inside an expected parent dir is wrongly repo
   );
 });
 
-test("#7753: a genuinely unsafe symlink whose ORIGINAL location is also untrusted must still be rejected", async () => {
+test("#7753: a genuinely unsafe symlink whose ORIGINAL location is also untrusted must still be rejected", async (t) => {
   // Neither the path we check nor its resolved target is inside any
   // EXPECTED_PARENT_PATHS entry — this must stay rejected as symlink_escape.
   // Use a DIFFERENT target dir from the trusted fixture: isLocationTrusted()
@@ -65,28 +67,20 @@ test("#7753: a genuinely unsafe symlink whose ORIGINAL location is also untruste
   const untrustedTargetDir = fs.mkdtempSync(
     path.join(os.tmpdir(), "omniroute-7753-untrusted-target-")
   );
+  t.after(() =>
+    fsp.rm(untrustedTargetDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+  );
   fs.writeFileSync(path.join(untrustedTargetDir, binaryName), realBinaryContent);
   const untrustedDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-7753-untrusted-"));
+  t.after(() =>
+    fsp.rm(untrustedDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+  );
   const untrustedInstallDir = path.join(untrustedDir, "installed");
   linkInstallDir(untrustedTargetDir, untrustedInstallDir);
 
   const result = await checkKnownPath(path.join(untrustedInstallDir, binaryName));
   assert.equal(result.installed, false);
   assert.equal(result.reason, "symlink_escape");
-
-  await fsp.rm(untrustedInstallDir, {
-    recursive: true,
-    force: true,
-    maxRetries: 5,
-    retryDelay: 100,
-  });
-  await fsp.rm(untrustedDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  await fsp.rm(untrustedTargetDir, {
-    recursive: true,
-    force: true,
-    maxRetries: 5,
-    retryDelay: 100,
-  });
 });
 
 test.after(async () => {

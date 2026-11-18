@@ -44,13 +44,12 @@ const { getCliRuntimeStatus } = await import("../../src/shared/services/cliRunti
 
 // Windows npm CLIs are `.cmd` shims, not `#!/usr/bin/env node` scripts, so this
 // POSIX shebang fixture is never a known-path candidate there (getKnownToolPaths
-// only enumerates .cmd/.exe). Additionally getLookupEnv() already merges node's
-// own bin dir into PATH on Windows (#12563), so the healthcheck PATH merge this
-// test targets cannot be isolated on that platform. Skip with a reason instead
-// of a fixture that would pass for the wrong reason.
+// only enumerates .cmd/.exe), so this fixture does not exercise the Windows
+// shim path. Skip with a reason instead of a fixture that would pass for the
+// wrong reason.
 const win32Skip =
   process.platform === "win32"
-    ? "POSIX shebang / minimal-PATH scenario; Windows uses .cmd shims and already merges node's bin dir (#12563)"
+    ? "POSIX shebang / minimal-PATH scenario; Windows uses .cmd shims, not #!/usr/bin/env node scripts"
     : false;
 
 test(
