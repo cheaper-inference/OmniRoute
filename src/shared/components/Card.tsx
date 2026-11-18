@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  type CardProps as KitCardProps,
 } from "@omniroute/ui-kit/card";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
@@ -89,19 +90,24 @@ function Card({
   );
 }
 
-interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
-}
+/** The kit Card props, minus the surface: a section is always the inset panel. */
+type CardSectionProps = Omit<KitCardProps, "surface">;
 
-// Sub-component: Bordered section inside Card
-function CardSection({ children, className, ...props }: CardSectionProps) {
+/**
+ * Card.Section — a panel nested one level inside a card or dialog: the kit
+ * `<Card surface="inset">` (flat fill, subtle border, nested radius, 16px padding).
+ *
+ * `title`, `description` and `action` draw the kit's compact header; the other kit Card props
+ * (`footer`, `flush`, `brandColor`) pass through. Without a header the children are direct
+ * children of the panel, so layout classes (`flex gap-2`, `grid`, `space-y-3`) keep acting on
+ * the element that holds them. A nested panel that stays a plain `<div>` takes the same radius
+ * with `rounded-card-nested`.
+ */
+function CardSection({ children, ...props }: CardSectionProps) {
   return (
-    <div
-      className={cn("p-4 rounded-lg", "bg-surface-2", "border border-border", className)}
-      {...props}
-    >
+    <KitCard surface="inset" {...props}>
       {children}
-    </div>
+    </KitCard>
   );
 }
 

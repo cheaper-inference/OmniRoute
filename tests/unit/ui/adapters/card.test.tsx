@@ -128,6 +128,45 @@ describe("Card adapter → kit Card", () => {
     expect(container.querySelector("[data-slot=card-header]")!.className).toContain("p-0");
   });
 
+  // Kit `Card surface="inset"` (keak-ai/cheaper-inference-ui-kit#220): the nested panel is the
+  // kit's, with its own fill, border, nested radius and 16px padding, instead of hand-made
+  // `p-4 rounded-lg bg-surface-2 border` classes.
+  it("Card.Section is the kit inset card; untitled, it holds the children directly", () => {
+    const { container, getByText } = render(
+      <Card>
+        <Card.Section data-testid="s" className="flex gap-2">
+          <span>a</span>
+        </Card.Section>
+      </Card>
+    );
+    const section = container.querySelector("[data-testid=s]")!;
+    expect(section.getAttribute("data-slot")).toBe("card");
+    expect(section.getAttribute("data-surface")).toBe("inset");
+    expect(section.className).toContain("ci-card");
+    // The kit panel owns fill, border, radius and padding: none of them is a utility here.
+    expect(section.className).not.toMatch(/\b(p-4|rounded-lg|bg-surface-2|border-border)\b/);
+    // Layout classes still act on the element that holds the children.
+    expect(section.className).toContain("flex");
+    expect(getByText("a").parentElement).toBe(section);
+    expect(section.querySelector("[data-slot=card-content]")).toBeNull();
+  });
+
+  it("Card.Section passes title, description and action to the kit header", () => {
+    const { container, getByText } = render(
+      <Card.Section title="Limits" description="Per key" action={<button>Edit</button>}>
+        body
+      </Card.Section>
+    );
+    const section = container.querySelector("[data-surface=inset]")!;
+    expect(getByText("Limits").closest("[data-slot=card-title]")).not.toBeNull();
+    expect(getByText("Per key").closest("[data-slot=card-description]")).not.toBeNull();
+    expect(getByText("Edit").closest("[data-slot=card-action]")).not.toBeNull();
+    expect(section.querySelector("[data-slot=card-header]")!.parentElement).toBe(section);
+    expect(getByText("body").getAttribute("data-slot")).toBe("card-content");
+    // `title` is the panel's heading, never a native tooltip on the box.
+    expect(section.hasAttribute("title")).toBe(false);
+  });
+
   it("keeps Card.Section / Card.Row / Card.ListItem (also as named exports) with their markup", () => {
     expect(Card.Section).toBe(CardModule.CardSection);
     expect(Card.Row).toBe(CardModule.CardRow);
@@ -139,7 +178,7 @@ describe("Card adapter → kit Card", () => {
         <Card.ListItem actions={<button>Del</button>}>item</Card.ListItem>
       </Card>
     );
-    expect(container.querySelector("[data-testid=s]")!.className).toContain("border-border");
+    expect(container.querySelector("[data-testid=s]")!.getAttribute("data-surface")).toBe("inset");
     expect(getByText("row").className).toContain("border-b");
     const item = getByText("item").parentElement!;
     expect(item.className).toContain("group");

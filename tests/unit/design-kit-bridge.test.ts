@@ -501,6 +501,15 @@ test("@theme inline exposes the kit 2xs and 3xs font sizes as text-2xs / text-3x
   assert.equal(cn("text-text-muted", "text-3xs"), "text-text-muted text-3xs");
 });
 
+test("@theme inline exposes rounded-card-nested on the kit nested-surface radius", () => {
+  // A panel nested in a card that stays a plain <div> takes the same radius as the kit's
+  // `Card surface="inset"` (Card.Section): Classic 4px, Editions 8px, never above the card's.
+  const theme = block("@theme inline {");
+  assert.match(theme, /--radius-card-nested:\s*var\(--ci-radius-surface-nested\);/);
+  const tokens = fs.readFileSync(path.join(ROOT, "packages/ui-kit/src/ci-tokens.css"), "utf8");
+  assert.match(tokens, /--ci-radius-surface-nested:/, "the kit defines the token");
+});
+
 test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
   // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
   // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.

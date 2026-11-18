@@ -306,6 +306,7 @@ html:root[data-ci-appearance="editions"] {
      (controls, --ci-radius-control). Custom names so the default rounded-* utilities stay. */
   --radius-card: var(--radius);
   --radius-control: var(--radius-control);
+  --radius-card-nested: var(--ci-radius-surface-nested);
 }
 
 /* ── Focus Indicators (U-3) ── kept in @layer base so kit components (which style their own
