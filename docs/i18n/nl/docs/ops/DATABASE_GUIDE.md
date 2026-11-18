@@ -186,29 +186,92 @@ De volledige lijst met circa 30+ tabellen staat in `src/lib/db/migrations/`.
 
 ## Migraties
 
-OmniRoute gebruikt **geversioneerde, idempotente migraties** in `src/lib/db/migrations/`. Elke migratie is één SQL-bestand met de naam `NNN_description.sql`.
+OmniRoute gebruikt** versiebeheerde, idempotente migraties** in `src/lib/db/migrations/`. Elke migratie is één SQL bestand. Er bestaan twee naamgevingsformaten naast elkaar; de versie vastgelegd in `_omniroute_migrations` is het numerieke voorvoegsel.
 
-### Naamgeving van migraties
+### Naamgeving van migratie
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formaat                                            | Voorbeeld                            | Gebruikt voor                                                                                                                                                              |
+| -------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (precies 3 cijfers)          | `241_seen_models.sql`                | De oude serie `001`–`241`. Bevroren toen het tijdstempelformaat landde (`240` en `241` werden vlak daarvoor samengevoegd): geen enkel nieuw bestand krijgt een volgnummer. |
+| `YYYYMMDDHHMMSS_description.sql` (14 cijfers, UTC) | `20261113120000_add_usage_index.sql` | Elke migratie die vanaf 13-11-2026 is gemaakt.                                                                                                                             |
 
-### Hoe migraties worden uitgevoerd
+Waarom de verandering: met opeenvolgende nummers koos parallelle PRs hetzelfde volgende nummer en op één na moesten ze allemaal opnieuw nummeren voordat ze konden worden samengevoegd. Een UTC tijdstempel geeft elke PR een eigen versie.
 
-Bij het opstarten voert `migrationRunner.ts` het volgende uit:
+Regels voor het tijdstempelformaat (afgedwongen door `npm run check:migration-numbering`, gedeeld met de generator in `scripts/check/lib/migrationNaming.mjs`):
 
-1. Maakt de tabel `_omniroute_migrations` aan als deze niet bestaat
-2. Vraagt reeds toegepaste migraties op
+- De tijdstempel is een echte UTC datum en -tijd, niet eerder dan `20261113000000` en niet meer dan 10 minuten in de toekomst.
+- De beschrijving bestaat uit kleine letters `snake_case` beginnend met een letter (`a-z`, `0-9`, enkele `_` tussen woorden), met een maximum van 80 tekens.
+- Twee bestanden met dezelfde tijdstempel zijn een duplicaat.
+- De no-gap-regel geldt alleen voor de oude reeksen: elk getal van `001` tot `241` moet bestaan, behalve de bekende gaten `026`, `055` en `121`. Het verwijderen van `241` (of een ander oud bestand) mislukt de poort. `001` en `241` kunnen nooit worden toegevoegd aan de `KNOWN_GAPS` toelatingslijst. Bestanden met tijdstempel creëren nooit een gat.
+- Elke invoer in `src/lib/db/migrations/` moet een normaal bestand zijn met een geldige `.sql` -naam in kleine letters. Een directory, een symlink, een `.SQL` of `.sql.bak` bestand, een verborgen bestand of een naam met een spatie faalt door de poort, omdat de runner deze stilletjes overslaat of crasht bij het opstarten.
+
+**Orde toepassen.** De runner sorteert op de numerieke waarde van het voorvoegsel, niet op tekst: eerst de oude `001`–`241` bestanden, daarna de bestanden met tijdstempel in tijdstempelvolgorde, en vervolgens alle mappen met naamruimte die zijn geregistreerd bij `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versies zoals `ee-001`). Een lopende migratie is elk bestand waarvan de versie niet in `_omniroute_migrations` staat, dus een migratie van een oudere branch die samenvoegt na een nieuwere branch is nog steeds van toepassing op bestaande databases.
+
+**De tijdstempel is de aanmaakvolgorde, niet de samenvoegvolgorde.** Als uw migratie afhankelijk is van een tabel of kolom die is gemaakt door een migratie met a** nieuwer** tijdstempel (bijvoorbeeld een van een andere PR die als eerste is samengevoegd), zou een nieuwe database de jouwe eerst uitvoeren en mislukken. Terwijl uw PR nog open is, genereert u de bestandsnaam opnieuw met `npm run db:new-migration` zodat deze een nieuwere tijdstempel krijgt, of maakt u deze onafhankelijk. `npm run test:migrations:fresh` past elke migratie toe op een lege database en vangt deze op.
+
+### Een samengevoegde migratie wordt nooit verwijderd of hernoemd
+
+Zodra een migratiebestand zich op een release branch of `main` bevindt, is het al uitgevoerd in homolog- en ontwikkelaarsdatabases, op VPS installaties en in de Enterprise-synchronisatie. Vanaf dat moment:
+
+- **Verwijder het nooit.** Nieuwe installaties zouden hun schema verliezen, terwijl geüpgradede databases dit behouden.
+- **Hernoem het nooit.** De versie in `_omniroute_migrations` zou niet langer overeenkomen met een bestand, dus elke database die het al had toegepast, zou het opnieuw uitvoeren. Niet-idempotente SQL dupliceert vervolgens gegevens of stopt het opstarten.
+- **Een ander schema nodig?** Maak een nieuwe migratie met `npm run db:new-migration`.
+
+Het hernoemen is alleen veilig voor een bestand dat nog niet is samengevoegd, wat het geval is waarnaar de hints van de poort verwijzen. Een releasetag verandert hier niets: elke push naar een `release/v*` branch publiceert de Docker `:next` image en draait op homoloog, VPS installaties en de Enterprise-synchronisatie, dus een samengevoegde migratie is op echte databases uitgevoerd voordat er een `vX.Y.Z` tag bestond. De poort mislukt elke verwijdering van een basisbestand, al dan niet getagd.
+
+- **Een samengevoegde migratie ongedaan maken.** Een `git revert` die het bestand verwijdert, mislukt door de poort. Behoud het bestand en maak het schema ongedaan in een nieuwe migratie: `npm run db:new-migration -- <description>`, met `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` enzovoort. Geüpgradede en nieuwe databases eindigen dan met hetzelfde schema.
+- **De enige geaccepteerde hernoeming: een compatibiliteitsinvoer en identieke inhoud.** Als een samengevoegd bestand moet worden verplaatst (twee samengevoegde bestanden delen bijvoorbeeld een tijdstempel en de runner stopt met een versiebotsing), hernoem het laatste bestand zonder de SQL aan te raken en voeg `{ fromVersion, fromName, toVersion, toName }` toe aan `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts`. Databases die de oude versie hebben toegepast, krijgen hun `_omniroute_migrations` rij verplaatst in plaats van het bestand opnieuw uit te voeren. De poort waarschuwt voor een dergelijke hernoeming en voert altijd de commutatiecontrole uit, ongeacht de nieuwe tijdstempel: nieuwe installaties passen het bestand op de nieuwe positie toe, geüpgradede databases niet, dus kies een nieuwe tijdstempel in de buurt van de oude. De poort mislukt de hernoeming als de inhoud is gewijzigd (een schemawijziging gaat nog steeds door bij een nieuwe migratie) of als het doelbestand van het item niet op schijf staat.
+- **Hernoem nooit binnen hetzelfde tijdstempel.** Een hernoeming die de tijdstempel behoudt en alleen de beschrijving verandert, mislukt de poort, met of zonder invoer. Met een item waarvan `toVersion` gelijk is aan zijn `fromVersion`, verwijdert de runner de oude `_omniroute_migrations` rij en past het bestand opnieuw toe op elke database die het al draaide. Zonder invoer houdt de runner alleen de versie bij: hij slaat het bestand in die databases over (nieuwe inhoud wordt daar nooit uitgevoerd) en registreert bij elke opstart een hernummeringsfout. Gebruik een andere tijdstempel plus een compatibiliteitsvermelding, of behoud de naam.
+- **De poort controleert of het hernoemde bestand niet opnieuw wordt uitgevoerd.** Voor elke afgedekte hernoeming geeft de poort de nieuwe bestandsnaam door aan de commutatiecontrole met `--must-not-apply`. De controle start de geüpgradede database op met de echte runner, en als de runner dat bestand opnieuw toepast (bijvoorbeeld omdat het item een verkeerde versie of naam heeft, of omdat de tekstparser van de gate `constants.ts` anders leest dan TypeScript), mislukt de gate met `migration renomeada rodaria de novo` en vraagt je om de oude en nieuwe versies en namen van het item te controleren.
+
+### Wat de poort vergelijkt met de basis
+
+Bij het uitvoeren van pull-aanvragen en merge-queues vergelijkt `npm run check:migration-numbering` `src/lib/db/migrations/` op schijf met dezelfde map op de basisvertakking. De basis is, in deze volgorde: `--base-latest-tag`, `--base <ref>`, de `MIGRATION_BASE_REF` variabele, of, wanneer `GITHUB_EVENT_NAME` `pull_request`, `pull_request_target` of `merge_group` is, de eerste ouder van de merge commit, de `merge_group.base_sha` van de payload van de gebeurtenis, of `git merge-base HEAD origin/$GITHUB_BASE_REF`. Bij een pull-request of merge-queue run zonder oplosbare basis faalt de poort. Buiten CI zonder `--base` wordt `comparação com a base: pulada (sem --base)` afgedrukt en worden deze regels overgeslagen.
+
+`--base-latest-tag` is te vergelijken met de nieuwste releasetag (`vX.Y.Z` in semver-volgorde; tags met achtervoegsels zoals nightlies tellen niet mee) die zich in de geschiedenis van `HEAD` bevindt, met dezelfde regels als `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) voert de poort op deze manier uit, omdat push- en geplande runs geen pull-verzoekbasis hebben en een samenvoeging kan landen zonder een nieuwe CI run. Zonder vrijgavetag in de geschiedenis faalt de poort; voer `git fetch --tags` uit (in CI brengt `actions/checkout` met `fetch-depth: 0` de tags).
+
+| Wijziging van de pull-aanvraag                                                                                                                              | Resultaat                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Een bestand dat op de basis bestaat, krijgt een nieuwe naam, met een `RENAMED_MIGRATION_COMPATIBILITY` -invoer                                              | **Waarschuwing** als de inhoud identiek is en de commutatiecontrole ongeacht de nieuwe tijdstempel wordt uitgevoerd; het mislukt als de nieuwe positie het uiteindelijke schema verandert (de hernoeming ongedaan maakt of een andere nieuwe tijdstempel kiest waar deze naartoe pendelt) of als de hardloper het hernoemde bestand opnieuw zou toepassen op een geüpgradede database.** Mislukt** als de inhoud verandert. |
+| Een bestand dat op de basis bestaat, krijgt een nieuwe naam, waarbij de tijdstempel behouden blijft (alleen de beschrijving verandert)                      | **Mislukt** , met of zonder inzending: de loper zou het opnieuw toepassen (met de inzending) of het per versie overslaan (zonder). Gebruik een andere tijdstempel plus een compatibiliteitsvermelding, of behoud de naam.                                                                                                                                                                                                   |
+| Een bestand dat op de basis bestaat, wordt verwijderd of hernoemd zonder invoer                                                                             | **Mislukt** , ongeacht of het bestand zich in een releasetag bevindt. Om het ongedaan te maken, herstelt u het bestand met `git checkout <base> -- src/lib/db/migrations/<file>`; Om het schema terug te zetten, voeg je een nieuwe migratie toe met `DROP ... IF EXISTS`.                                                                                                                                                  |
+| Een bestand dat op de basis bestaat, heeft een andere inhoud                                                                                                | **Waarschuwing** (een `::warning` -annotatie in GitHub Actions) en de commutatiecontrole wordt uitgevoerd. Het mislukt als de bewerking het uiteindelijke schema verandert, omdat geüpgradede databases het bewerkte bestand niet opnieuw toepassen: plaats de wijziging in een nieuwe migratie. Een onschuldige bewerking (een opmerking, `IF NOT EXISTS`) waarschuwt alleen.                                              |
+| Er wordt een tijdstempelbestand toegevoegd met een tijdstempel die niet nieuwer is dan de nieuwste van de basis                                             | Voert de commutatiecontrole uit, die hieronder wordt beschreven.                                                                                                                                                                                                                                                                                                                                                            |
+| Er wordt een `NNN_` bestand in oud formaat toegevoegd met een nummer onder het nieuwste bestand in oud formaat van de basis                                 | **Mislukt** , zelfs als `KNOWN_GAPS` in hetzelfde pull-verzoek wordt bewerkt: de oude serie is bevroren, maak de migratie aan met `npm run db:new-migration`. Bestanden in een oud formaat boven de nieuwste van de basis (een `release/v*` naar `main` pull-verzoek) worden geaccepteerd.                                                                                                                                  |
+| Een bestand dat niet in de juiste volgorde staat, is bewerkt of een andere naam heeft gekregen, bevat `INSERT`, `UPDATE`, `DELETE` of `REPLACE` instructies | **Waarschuwing** : de commutatiecontrole vergelijkt geen gegevens, dus controleer of de volgorde waarin geüpgradede en nieuwe databases deze toepassen het resultaat verandert.                                                                                                                                                                                                                                             |
+
+Eén uitvoering van de commutatiecontrole omvat de bestanden die niet in orde zijn, de bewerkte bestanden en de hernoemde bestanden samen.
+
+De commutatiecontrole (`scripts/check/migration-commutation.ts`) bouwt twee tijdelijke databases op met het echte installatiepad: an** geüpgraded** één (opstarten met de basismigraties, en dan opnieuw opstarten met hetzelfde bestand met de migraties van het pull-verzoek) en a** vers** één (één opstart met de migraties van het pull-verzoek). Het vergelijkt de resulterende schema's: tabellen en kolommen (waarbij de kolomvolgorde wordt genegeerd), UNIQUE / PRIMARY KEY en FOREIGN KEY -beperkingen, de genormaliseerde `CREATE TABLE` tekst van elke tabel (die CHECK beperkingen, sorteringen, gegenereerde kolommen en tabelopties omvat), indexen, triggers en weergaven. Rijgegevens worden niet vergeleken. Als ze overeenkomen, geeft de poort aan dat het bestand niet in orde is, maar pendelt en passeert. Als ze verschillen, faalt de poort met het verschil en een hint voor het geval: voor een bestand dat niet in de juiste volgorde staat, regenereert u de naam ervan met `npm run db:new-migration`, wat veilig is omdat het bestand nog niet is samengevoegd; voor een bewerkt basisbestand: herstel de basisinhoud en plaats de wijziging in een nieuwe migratie; voor een hernoemd bestand maakt u de hernoeming ongedaan of kiest u een andere nieuwe tijdstempel waar het naartoe pendelt, nooit dezelfde tijdstempel met een andere naam. Als de controle zelf niet kan worden uitgevoerd, faalt de poort in CI en waarschuwt alleen lokaal. Voor een bewerkt basisbestand wordt de geüpgradede database gebouwd met de basisinhoud van dat bestand, en bij de tweede keer opstarten wordt dit overgeslagen omdat de versie ervan al is vastgelegd. Voor een hernoemd bestand wordt de geüpgradede database gebouwd met het bestand onder de oude naam, en bij de tweede keer opstarten wordt de `_omniroute_migrations` -rij door de compatibiliteitsinvoer verplaatst in plaats van deze opnieuw uit te voeren; de poort geeft de nieuwe naam door met `--must-not-apply`, dus de controle mislukt als de tweede keer opstarten deze toepast. Als een pull request-migratie niet kan worden toegepast op het geüpgradede pad, dat wil zeggen na elke basismigratie (ongeacht of deze ook mislukt bij een nieuwe installatie), rapporteert de poort `migration do PR não aplica` en vraagt u om de SQL te repareren tegen het huidige basisschema; als het bestand afhankelijk is van een andere pull-request-migratie met een latere tijdstempel, genereer de naam dan opnieuw met `npm run db:new-migration`.
+
+Als u dezelfde vergelijking lokaal wilt uitvoeren, geeft u de basis expliciet door, bijvoorbeeld `npm run check:migration-numbering -- --base origin/<base-branch>` of `npm run check:migration-numbering -- --base-latest-tag` om te vergelijken met de nieuwste release.
+
+### Een open PR- `NNN` -migratie converteren
+
+Een pull-verzoek dat vóór de switch is geopend, kan nog steeds een sequentieel bestand bevatten, zoals `242_add_widgets.sql`. Oude getallen boven `241` worden afgewezen, dus converteer deze voordat u deze samenvoegt:
+
+1. **Hernoem het bestand met de generator en behoud de beschrijving.** Voer `npm run db:new-migration -- <same description>` uit om de nieuwe naam te krijgen, verplaats de SQL ernaar en verwijder het oude `NNN_` bestand. De beschrijving moet identiek blijven: de onderstaande compatibiliteitsvermelding komt erop overeen.
+2. **Voeg een compatibiliteitsvermelding toe als een persistente database het oude nummer gebruikte.** Als een database die wordt bijgehouden (homoloog, een VPS, de eigen installatie van een bijdrager) een build van de PR met het `NNN_` bestand heeft uitgevoerd, voeg dan `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` toe aan `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts`. Dit is** vereist voor `237` tot `241`** : die slots bevatten nu de canonieke `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` en `241_seen_models.sql`, en zonder de invoer slaat zo'n database de canonieke migratie voor altijd over en voert de geconverteerde versie opnieuw uit. Het werkt ook voor een slot dat leeg blijft, zoals `242`, wanneer de bestemming een tijdstempel is. Voeg bij twijfel de vermelding toe. Waar je het in de array toevoegt, doet er niet toe: wanneer het doelslot van een item nog steeds een rij bevat waar een ander item vandaan beweegt (bijvoorbeeld `237` die een PR rij vasthoudt terwijl een oudere `usage_history_calculated_cost` rij wacht om naar `237` te gaan), laat de runner dat item wachten totdat het slot vrij is. Alleen een echt conflict, zoals een slot dat wordt vastgehouden door een rij zonder invoerbewegingen, of twee invoeren die van slot wisselen, stopt het opstarten met `Cannot reconcile ...`.
+3. **Houd de SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), omdat de geconverteerde migratie mogelijk een database tegenkomt waarvan het schema al bestaat.
+4. **Speciale gevallen met versiesleutel verplaatsen.** Als de PR een naamval heeft toegevoegd voor zijn oude nummer in `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) of in `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), wijzig dan de sleutel naar de nieuwe tijdstempel.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` is een werkend voorbeeld van een test voor een hernoemde migratie.
+
+### Backports naar vestigingen vóór de overstap
+
+Kies nooit een `YYYYMMDDHHMMSS_` bestand uit en backport het niet naar een branch die dateert van vóór de switch (bijvoorbeeld een oudere `release/v*` branch). De runner daar sorteert bestandsnamen als tekst, zodat een bestand met tijdstempel zou draaien tussen `201_` en `202_` op een nieuwe database, en de oude poort daar begrijpt geen 14-cijferige voorvoegsels. Op zo'n branch schrijf je de wijziging als het eigen volgende `NNN_` bestand van die branch, idempotent, dus het is een no-op als de versie met tijdstempel later arriveert.
+
+### Hoe migraties verlopen
+
+Bij het opstarten, `migrationRunner.ts`:
+
+1. Creëert `_omniroute_migrations` tabel als deze niet bestaat
+2. Query's voor reeds toegepaste migraties
 3. Past eventuele nieuwe migraties op volgorde toe, elk in een transactie
-4. Registreert elke toegepaste migratie met een tijdstempel
+4. Registreert elke toegepaste migratie met tijdstempel
 
 ```ts
-// src/lib/db/migrationRunner.ts (vereenvoudigd)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotentie
 
-Migraties moeten **idempotent** zijn — als ze twee keer worden uitgevoerd, mag de tweede uitvoering niets doen:
+Migraties moeten dat zijn** idempotent** — om ze twee keer uit te voeren zou een no-op moeten zijn:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Gebruik royaal clausules zoals `IF NOT EXISTS`, `IF EXISTS` en `OR IGNORE` / `OR REPLACE`.
+Gebruik royaal `IF NOT EXISTS`, `IF EXISTS` en `OR IGNORE` / `OR REPLACE` -clausules.
 
 ### Een nieuwe migratie toevoegen
 
-1. **Bepaal het volgende nummer**: `ls src/lib/db/migrations/ | tail -1`
-2. **Maak het bestand aan**: `NNN_my_change.sql`
-3. **Gebruik veilige DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Vul gegevens zorgvuldig aan**: gebruik `UPDATE ... WHERE ...` om bestaande rijen correct te verwerken
-5. **Test op een kopie**: voer nooit ongeteste migraties uit in productie
+1. **Maak het bestand met de generator** : `npm run db:new-migration -- <description>` (bijvoorbeeld `npm run db:new-migration -- add combo priority`). Het schrijft `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` met de huidige UTC tijd en een commentaarkop, gaat een seconde vooruit als dat tijdstempel wordt gebruikt, en overschrijft nooit een bestand. Kies een nummer niet met de hand.
+2. **Gebruik veilige DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Vul de gegevens zorgvuldig in** : gebruik `UPDATE ... WHERE ...` om bestaande rijen te verwerken
+4. **Controleer volgorde en naamgeving** : `npm run test:migrations:fresh` (alle migraties op een lege database) en `npm run check:migration-numbering`
+5. **Test op een kopie** : voer nooit ongeteste migraties uit op productie
 
 Voorbeeld:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Niet-achterwaarts-compatibele wijzigingen** (bijvoorbeeld het verwijderen van kolommen) zijn lastig. OmniRoute ondersteunt GEEN downgrade — zodra een migratie is toegepast, is de schemawijziging permanent. Houd hier rekening mee bij het plannen.
+> **Achterwaarts incompatibele wijzigingen** (bijvoorbeeld kolommen laten vallen) zijn lastig. OmniRoute ondersteunt NOT het downgraden — zodra een migratie is toegepast, is de schemawijziging permanent. Plan dienovereenkomstig.
 
 ---
 
@@ -403,26 +466,27 @@ Dit gebruikt de online back-up-API van SQLite — veilig om uit te voeren terwij
 
 ---
 
-## Prestatieoptimalisatie
+## Prestatieafstemming
 
-### WAL-modus
+### WAL -modus
 
-WAL is standaard ingeschakeld. Overweeg voor workloads met veel schrijfbewerkingen:
+WAL is standaard ingeschakeld. Voor hoge schrijfbelastingen kunt u het volgende overwegen:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint elke 1000 pagina's
-PRAGMA journal_size_limit = 67108864;  -- WAL-limiet van 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute stelt `journal_size_limit` niet in. Een controlepunt verplaatst WAL frames naar het hoofdbestand, maar het WAL bestand behoudt de grootste toegewezen grootte. De `OMNIROUTE_WAL_GUARD_MAX_MB` bewaker waarschuwt alleen en voert `wal_checkpoint(RESTART)` uit; het is geen limiet voor schijfgrootte.
 
 ### Indexen
 
-Belangrijke indexen voor de prestaties (automatisch aangemaakt door migraties):
+Belangrijkste indexen voor prestaties (automatisch gemaakt door migraties):
 
-- `idx_models_provider` — modellen opzoeken op provider
-- `idx_combo_targets_combo_id` — combo-doelen uitvouwen
-- `idx_usage_history_api_key_timestamp` — gebruiksanalyses
-- `idx_quota_snapshots_api_key_window` — quotumbewaking
-- `idx_call_logs_timestamp` — query's op aanroeplogboeken
+- `idx_models_provider` — -model opzoeken per provider
+- `idx_combo_targets_combo_id` — combo doeluitbreiding
+- `idx_usage_history_api_key_timestamp` — gebruiksanalyse
+- `idx_quota_snapshots_api_key_window` — quota volgen
+- `idx_call_logs_timestamp` — oproeplogboekquery's
 
 Maak een migratie om een nieuwe index toe te voegen:
 
@@ -431,24 +495,24 @@ Maak een migratie om een nieuwe index toe te voegen:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Geheugentoewijzing voor I/O
+### Geheugen-toegewezen I/O
 
-Voor zeer grote databases (>10 GB) kan geheugentoewijzing worden aangepast via een SQLite-pragma:
+Voor zeer grote databases (> 10GB) kan de geheugentoewijzing worden aangepast via SQLite pragma:
 
 ```sql
--- Instellen via SQLite-pragma (aanpassen in core.ts of tijdens runtime)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Compactie
+### Verdichting
 
-Langdurig actieve OmniRoute-instanties hebben baat bij het af en toe uitvoeren van `VACUUM`:
+Langdurige OmniRoute instanties profiteren van incidentele `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Voer dit maandelijks uit tijdens perioden met weinig verkeer. (De WAL-modus vermindert de noodzaak, maar neemt deze niet volledig weg.)
+Wordt maandelijks uitgevoerd tijdens periodes met weinig verkeer. (WAL modus vermindert de behoefte, maar elimineert deze niet.)
 
 ---
 

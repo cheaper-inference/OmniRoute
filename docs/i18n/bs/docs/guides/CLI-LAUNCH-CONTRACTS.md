@@ -1,0 +1,59 @@
+# Shared CLI launch and configuration contracts (Bosanski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-LAUNCH-CONTRACTS.md)
+
+---
+
+Neutralni `config/cli-tools-manifest.json` ugovor deklarira kanonski IDs, pseudonime, binarne kandidate, recepte za postavljanje, argumente modela i mogućnosti. Obični adapter čvora u `bin/cli/cli-manifest.mjs` i TypeScript adapter u `src/shared/constants/cliIntegrationManifest.ts` čitaju istu datoteku. Vrijeme izvođenja, katalog, konfiguracija, završetak, generatori i pozadinska registracija se provjeravaju zajedno od strane `tests/unit/cli/cli-manifest-drift.test.ts`. To što je katalogiziran ne znači da se alat može pokrenuti ili konfigurirati. Konkretno, 5dive ostaje samo za konfiguraciju.
+
+## Okruženje djeteta i životni ciklus
+
+`omniroute run`, `omniroute launch` i `omniroute launch-codex` nasljeđuju listu dopuštenih OS/terminal kompatibilnosti i ubacuju vjerodajnice odabranog cilja. Nepovezane tajne dobavljača i baze podataka se ne nasljeđuju po defaultu. `--inherit-env` eksplicitno vraća potpuno nasljeđivanje roditeljskog okruženja; koristite ga samo kada odabrani proces treće strane treba da primi te vrijednosti. Ovo je filtriranje okruženja, a ne OS sandbox: proces i dalje radi sa dozvolama sistema datoteka pozivaoca.
+
+Signali prekida i prekida se prosljeđuju djetetu. Pokretač čeka događaj zatvaranja djeteta prije nego što ukloni privremenu konfiguraciju. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrolira grejs period prije prisilnog prekida (podrazumevano 5000 milisekundi).
+
+## Gemini persistent setup
+
+```bash
+omniroute setup-gemini --remote https://omni.example --model provider/model --yes
+omniroute configure gemini --model provider/model --yes
+omniroute run gemini --model provider/model --dry-run --json
+```
+
+Prve dvije naredbe konfiguriraju ovaj stroj za odabrani lokalni ili udaljeni server. Podešavanje čuva nepovezane JSON postavke, bira Gemini API ključ auth i upisuje krajnju tačku i vjerodajnice u privatnu `.gemini/.env` datoteku. Odbija nevažeći JSON umjesto da ga prepisuje. Krajnja točka URLs mora biti HTTP(S), bez ugrađenih vjerodajnica, parametara upita ili fragmenata. Dry-run ispisuje putanje, a ne vrijednosti vjerodajnica.
+
+`GEMINI_CLI_HOME` ili `--gemini-home` bira stalni početni korijen. Stvarni `run gemini` stvara i kasnije uklanja svoj vlastiti privremeni dom. Niti jedan način ne zaobilazi Gemini provjere povjerenja radnog prostora.
+
+## Codex profile
+
+`configure codex` piše privatni `<name>.config.toml` sa modelom i njegovom krajnjom tačkom OmniRoute dobavljača. Akreditivi se pozivaju preko `OMNIROUTE_API_KEY`, nikada nisu ugrađeni. Naredba za pokretanje postavlja odabrani model na `model` tipku najvišeg nivoa, a ne unutar `model_providers`.
+
+Odvojeni fajlovi profila su trenutni dokumentovani Codex ugovor; oni prekrivaju korisničku konfiguraciju kada su odabrani sa `codex --profile <name>`. Pogledajte [zvaničnu referencu profila](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles) i [OmniRoute Codex vodič](./CODEX-CLI-CONFIGURATION.md).
+
+## Hermetičko izvršenje komande
+
+Uz eksplicitni `DATA_DIR`, postavljanje `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` sprječava pokretanje pokretanja da propadne u okruženje vjerodajnica zadanog direktorija korisničkih podataka. Ovo je korisno za izolovane testove. Ne onemogućuje druge eksplicitno odabrane datoteke okruženja.
+
+## Radni imenik `.env`
+
+CLI čita `.env` datoteke ovim redoslijedom, a prva datoteka koja postavi ključ pobjeđuje: eksplicitni `DATA_DIR`, zadani direktorij podataka, trenutni radni direktorij, zatim direktorij paketa. Shell varijable uvijek pobjeđuju.
+
+Radni direktorij može pripadati nekom drugom (klonirano spremište, raspakirana arhiva), a `omniroute serve` prosljeđuje CLI okruženje na server i na svaki alat koji server pokreće. Dakle, `.env` tamo može postaviti samo ove ključeve, navedene u `bin/cli/utils/untrustedCwdEnv.mjs`:
+
+| Ključ                           | Prihvaćene vrijednosti                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| `REQUIRE_API_KEY`               | `true`, `1` ili `yes` u svakom slučaju, vrijednosti koje server tretira kao on |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | do 64 slova, cifara, `_`, `.`, `@` ili `-`                                     |
+| `LANGUAGE`                      | isto, plus `:`                                                                 |
+| `TZ`                            | do 64 slova, cifara, `_`, `+`, `-` ili `/`, ne počinju sa `/`                  |
+| `NO_COLOR`, `FORCE_COLOR`       | do 16 slova i cifara                                                           |
+
+Svaka vrijednost `REQUIRE_API_KEY` prihvati uključuje provjeru, tako da datoteka ne može sama isključiti provjeru. Međutim, to ne odlučuje o rezultatu: server čita `REQUIRE_API_KEY` nadjačavanje pohranjeno u bazi podataka prije okruženja, dok upozorenje pri pokretanju o slušanju na svim interfejsima bez API ključa čita samo okruženje. Sa pohranjenim nadjačavanjem `false`, radni direktorij `REQUIRE_API_KEY=true` ostavlja API otvorenim i skriva to upozorenje. Pravilo `TZ` je uže od POSIX: odbija `.`, `:`, `,` i `<>`, tako da `:Area/City` oblik i pravila kao što je `EST5EDT,M3.2.0,M11.1.0` moraju biti postavljeni u ljusci ili u `<DATA_DIR>/.env`.
+
+Imena se moraju tačno podudarati, velikim slovima. Svaki drugi red, vrijednost koja ne prođe provjeru i ime koje nije obična ASCII slova, cifre i `_` (na primjer onaj sa NUL bajtom ili sličnim slovom) se preskaču. CLI ispisuje jedno upozorenje koje imenuje ključeve koje ne može postaviti i jedno koje imenuje dozvoljene ključeve koje je ignorirao, svako sa onim što treba promijeniti (`TZ (expected a zone name such as Europe/Berlin)`, `lang (write the name as LANG)`). Ni jedno ni drugo ne ispisuje vrijednosti. Putanja datoteka u ovim porukama i `.env` putanja `omniroute doctor` izvještaja se izbjegavaju kada sadrže kontrolne ili bidi znakove. Ograničenje se ne primjenjuje kada je radni direktorij direktorij podataka ili direktorij paketa.
+
+`PORT`, `API_PORT` i `DASHBOARD_PORT` nisu na listi. Bez osnovnog URL iz izvora većeg prioriteta, CLI razgovara sa `localhost:<PORT>`, a sve što tamo sluša prima CLI-ov API ključ, kontekstualni token i CLI strojni token (`x-omniroute-cli-token`, vidi [CLI_TOKEN.md](../security/CLI_TOKEN.md) ), koje lokalni server prihvata za pozive upravljanja iz povratne petlje. Port iz radnog direktorija bi dozvolio toj datoteci da odabere slušaoca, pa postavite portove u ljusci, u `<DATA_DIR>/.env` ili sa `--port` opcijom komandi koje imaju jednu (`serve`, `launch`, `run`).
+
+Parser nema `export` sintaksu. Red kao što je `export LD_PRELOAD=...` imenuje varijablu `export LD_PRELOAD`; iz radnog direktorija se preskače, au drugim `.env` fajlovima postavlja to literalno ime koje ništa ne čita.
+
+CLI uparuje pohranjeni token konteksta (pristupni token ili naslijeđeni API ključ) samo s vlastitim porijeklom tog konteksta: šema, host i port, u poređenju sa `URL.origin`. Ovo se odnosi na zahtjeve napravljene preko CLI-ovog HTTP klijenta (`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`) i na naredbe `launch`, `launch codex`, `configure` i `setup-*` koje pišu osnovni URL i unose u konfiguraciju drugog alata. Usmjereni na drugi server sa `--remote`, oni koriste eksplicitni `--api-key` ili `OMNIROUTE_API_KEY` ako je postavljen, i nema token konteksta. Poređenje je tačno, pa se `localhost` i `127.0.0.1`, ili host sa i bez završne tačke, računaju kao različiti serveri i ne dobijaju kontekstni token. URL sa korisničkim informacijama, obrnutom kosom crtom ili razmakom se nikada ne poklapa, jer drugi URL parseri (Pythonovi `urllib` i `httpx`, na primjer) mogu čitati različite hostove iz njega. Za zahtjeve koje CLI šalje sam, ta provjera pokriva samo šemu i ovlaštenje, tako da id sa razmakom u putanji ili upitu zadržava token.

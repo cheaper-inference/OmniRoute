@@ -36,7 +36,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../utils/remoteMediaFetch.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleGeminiMusicGeneration } from "./mediaGeneration/geminiMusic.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
