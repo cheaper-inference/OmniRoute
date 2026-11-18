@@ -275,8 +275,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               <Table
                 scrollbarLabel={t("recentTranslations")}
                 scrollLabel={t("recentTranslations")}
-                className="text-sm"
-                containerClassName="rounded-none border-0"
+                variant="plain"
               >
                 <TableHeader>
                   <TableRow>
@@ -286,7 +285,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                     <TableHead>{t("target")}</TableHead>
                     <TableHead>{t("model")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
-                    <TableHead className="text-right">{t("latency")}</TableHead>
+                    <TableHead numeric>{t("latency")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -357,7 +356,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-right text-xs text-text-muted">
+                        <TableCell numeric className="text-xs text-text-muted">
                           {event.latency ? formatLatency(event.latency) : notAvailable}
                         </TableCell>
                       </TableRow>

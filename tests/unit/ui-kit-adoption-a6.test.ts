@@ -431,3 +431,73 @@ test("D: a file picker opened from a button is the kit FileTrigger", () => {
     assert.doesNotMatch(read(file), /kit-exception:/, `${file} needs no kit-exception`);
   }
 });
+
+// ── E: tables ────────────────────────────────────────────────────────────────────────────
+
+test('E: a table framed by its card is variant="plain", not a class override', () => {
+  const hits = openingTags("Table|DataTableShell").filter(({ tag }) =>
+    /containerClassName="[^"]*(?:rounded-none|border-0)/.test(tag)
+  );
+  assertOnlyKept(hits, [], 'use variant="plain"');
+});
+
+test("E: row height and cell text size come from the table density", () => {
+  // `density="compact"` is the 32px row with 12px text. A table sized by `text-xs` on the
+  // <table>, or by `h-8` / padding classes on each cell, drifts from it.
+  const tables = openingTags("Table").filter(({ tag }) =>
+    /className="[^"]*(?<![\w:-])text-(?:xs|sm|left)(?![\w-])/.test(tag)
+  );
+  assertOnlyKept(
+    tables,
+    [
+      {
+        file: "playground/components/MarkdownMessage.tsx",
+        marker: 'containerClassName="my-2"',
+        reason:
+          "A table of a rendered chat message (Markdown content): it follows the message text.",
+      },
+    ],
+    'use density="compact"'
+  );
+  const cells = openingTags("TableHead|TableCell").filter(({ tag }) =>
+    /className="[^"]*(?<![\w:-])(?:h-8|p[xy]-(?:2|3)|py-1|text-left)(?![\w.-])/.test(tag)
+  );
+  assertOnlyKept(
+    cells,
+    [
+      {
+        file: "orchestration/tabs/HistoryTab.tsx",
+        marker: "px-0.5 py-1",
+        reason:
+          "Column header of the history heatmap: one column per time bucket over 12px cells, narrower than any table density.",
+      },
+    ],
+    "set density on the table"
+  );
+});
+
+test("E: number columns use numeric, pinned columns sticky, a bounded table fill", () => {
+  const cells = openingTags("TableHead|TableCell");
+  assertOnlyKept(
+    cells.filter(({ tag }) => /(?<![\w:-])text-right(?![\w-])/.test(tag)),
+    [],
+    "use the numeric prop"
+  );
+  assertOnlyKept(
+    cells.filter(({ tag }) => /className="[^"]*(?<![\w:-])sticky(?![\w-])/.test(tag)),
+    [],
+    'use sticky="start" / sticky="end"'
+  );
+  const scrolled = openingTags("Table").filter(({ tag }) =>
+    /containerClassName="[^"]*overflow-y-auto/.test(tag)
+  );
+  assertOnlyKept(scrolled, [], "use the fill prop");
+});
+
+test("E: pagers are the Pager adapter", () => {
+  const memories = SOURCES.find((s) => s.file === "memory/components/tabs/MemoriesTab.tsx");
+  assert.match(memories?.source ?? "", /<Pager\b[^>]*pageCount=\{totalPages\}/);
+  // A hand-made pager: a button that steps the page state.
+  const hits = openingTags(BUTTONS).filter(({ tag }) => /setPage\(\(?\w+\)? =>/.test(tag));
+  assertOnlyKept(hits, [], "use <Pager>");
+});

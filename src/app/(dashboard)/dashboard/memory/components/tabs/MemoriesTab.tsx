@@ -16,6 +16,7 @@ import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
 import EmptyState from "@/shared/components/EmptyState";
 import { FileTrigger } from "@/shared/components/FileInput";
 import InfoTooltip from "@/shared/components/InfoTooltip";
+import Pager from "@/shared/components/Pager";
 import EditMemoryModal from "../EditMemoryModal";
 
 interface Memory {
@@ -447,11 +448,7 @@ export default function MemoriesTab() {
             </div>
           ) : (
             <>
-              <Table
-                aria-label={t("memories")}
-                scrollbarLabel={t("memories")}
-                containerClassName="rounded-none border-0"
-              >
+              <Table aria-label={t("memories")} scrollbarLabel={t("memories")} variant="plain">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("type")}</TableHead>
@@ -512,24 +509,7 @@ export default function MemoriesTab() {
                 <div className="text-sm text-text-muted">
                   {t("pageInfo", { page, totalPages, total })}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    {t("previous")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    {t("next")}
-                  </Button>
-                </div>
+                <Pager page={page} pageCount={totalPages} onPageChange={setPage} />
               </div>
             </>
           )}

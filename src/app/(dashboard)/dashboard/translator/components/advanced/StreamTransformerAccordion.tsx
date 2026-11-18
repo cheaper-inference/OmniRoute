@@ -427,8 +427,7 @@ export default function StreamTransformerAccordion({
                   <Table
                     scrollbarLabel={translateOrFallback("eventType", "Event type")}
                     scrollLabel={translateOrFallback("eventType", "Event type")}
-                    className="text-sm"
-                    containerClassName="rounded-none border-0"
+                    variant="plain"
                   >
                     <TableHeader>
                       <TableRow>

@@ -156,7 +156,8 @@ function ComparisonTable({
     <Table
       scrollbarLabel={t("compareTab")}
       scrollLabel={t("compareTab")}
-      className="min-w-0 text-xs"
+      density="compact"
+      className="min-w-0"
     >
       <TableHeader>
         <TableRow>

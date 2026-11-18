@@ -284,15 +284,10 @@ function HistoryGridTable({
     // Kept mounted (with the previous range's rows) while `isLoading` is true for a refetch —
     // only the very first load (no rows yet) falls through to the loading line above instead of
     // an empty bordered table.
-    <Table
-      className="text-xs"
-      containerClassName="flex-1 min-h-0 overflow-y-auto"
-      scrollbarLabel={t("tabHistory")}
-      scrollLabel={t("tabHistory")}
-    >
+    <Table fill density="compact" scrollbarLabel={t("tabHistory")} scrollLabel={t("tabHistory")}>
       <TableHeader>
         <TableRow>
-          <TableHead scope="col" className="px-2 py-1 sticky left-0 z-10 bg-surface" />
+          <TableHead scope="col" sticky="start" />
           {grid.buckets.map((bucket, i) => (
             <TableHead key={i} scope="col" className="px-0.5 py-1 text-3xs whitespace-nowrap">
               {formatBucketLabel(bucket.start, preset)}
@@ -303,10 +298,7 @@ function HistoryGridTable({
       <TableBody>
         {grid.rows.map((row) => (
           <TableRow key={`${row.source}:${row.identity}`}>
-            <TableHead
-              scope="row"
-              className="text-left px-2 py-1 sticky left-0 z-10 bg-surface whitespace-nowrap"
-            >
+            <TableHead scope="row" sticky="start" className="whitespace-nowrap">
               <span className="font-medium">{row.identity}</span>{" "}
               <span className="ci-eyebrow" data-size="3xs">
                 {t(SOURCE_KEY[row.source])}
