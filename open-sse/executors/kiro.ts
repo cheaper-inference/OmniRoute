@@ -28,6 +28,11 @@ import {
   resolveKiroRuntimeRegion,
 } from "../services/kiroRegion.ts";
 import {
+  getKiroV3RuntimeHeaders,
+  isKiroV3Protocol,
+  toKiroV3Payload,
+} from "../services/kiroV3Protocol.ts";
+import {
   KIRO_TOOL_CALL_WRAPPER,
   appendBufferedKiroToolInput,
   encodeSse,
@@ -374,13 +379,17 @@ export class KiroExecutor extends BaseExecutor {
 
   buildHeaders(credentials: ProviderCredentials, stream = true) {
     void stream;
-    const headers = {
+    const headers: Record<string, string> = {
       ...this.config.headers,
       "Amz-Sdk-Request": "attempt=1; max=3",
       "Amz-Sdk-Invocation-Id": uuidv4(),
       "x-amzn-bedrock-cache-control": "enable",
       "anthropic-beta": "prompt-caching-2024-07-31",
     };
+
+    if (isKiroV3Protocol(credentials)) {
+      Object.assign(headers, getKiroV3RuntimeHeaders());
+    }
 
     const authMethod =
       typeof credentials.providerSpecificData?.authMethod === "string"
@@ -432,10 +441,10 @@ export class KiroExecutor extends BaseExecutor {
     // (for backward compatibility if something else bypasses the translator)
     if (!kiroPayload.conversationState) {
       const { model: _model, ...rest } = b;
-      return rest;
+      return isKiroV3Protocol(credentials) ? toKiroV3Payload(rest) : rest;
     }
 
-    return kiroPayload;
+    return isKiroV3Protocol(credentials) ? toKiroV3Payload(kiroPayload) : kiroPayload;
   }
 
   /**
@@ -474,8 +483,11 @@ export class KiroExecutor extends BaseExecutor {
     // back to the raw AWS host on an auth/profile-shaped failure.
     const isCodeWhispererOnly =
       authMethod === "api_key" || authMethod === "idc" || isExternalIdpAuthMethod(authMethod);
-    const candidateUrls =
-      region === "us-east-1" && !isCodeWhispererOnly
+    // Kiro CLI 3.x posts to the root of the branded runtime gateway with a completely
+    // different payload shape; the legacy /generateAssistantResponse path rejects it.
+    const candidateUrls = isKiroV3Protocol(credentials)
+      ? [`https://runtime.${region}.kiro.dev/`]
+      : region === "us-east-1" && !isCodeWhispererOnly
         ? ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse", regionalUrl]
         : [regionalUrl];
 
