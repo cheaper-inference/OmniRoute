@@ -75,54 +75,54 @@ OmniRoute/
 
 ```
 src/
-├── app/                  Các trang App Router + các tuyến API
+├── app/                  Các trang App Router + các route API
 ├── lib/                  Các thư viện cốt lõi (DB, xác thực, OAuth, kỹ năng, bộ nhớ, …)
-├── domain/               Lớp miền thuần túy (chính sách, dự phòng, chi phí, khóa truy cập, …)
-├── server/               Các mô-đun chỉ dành cho máy chủ (phân quyền, CORS, xác thực)
-├── shared/               Kiểu, hằng số, xác thực dữ liệu, hợp đồng, tiện ích (an toàn khi dùng xuyên ranh giới)
-├── mitm/                 Các trình hỗ trợ proxy trung gian cho việc tích hợp CLI
-├── models/               Siêu dữ liệu / ánh xạ bí danh của mô hình cục bộ
-├── sse/                  Các trình xử lý SSE cũ vẫn nằm trong src/ (không phải open-sse/)
-├── store/                Các kho trạng thái phía máy khách
-├── middleware/           Các tiện ích middleware cấp tuyến (không phải middleware toàn cục của Next.js)
-├── scripts/              Các tập lệnh trong cây có thể được mã ứng dụng nhập
-├── types/                Các kiểu TS môi trường và dùng chung
+├── domain/               Lớp miền thuần (chính sách, dự phòng, chi phí, khóa truy cập, …)
+├── server/               Các mô-đun chỉ chạy trên server (phân quyền, cors, xác thực)
+├── shared/               Kiểu, hằng số, xác thực, hợp đồng, tiện ích (an toàn khi dùng xuyên ranh giới)
+├── mitm/                 Các helper proxy trung gian cho tích hợp CLI
+├── models/               Siêu dữ liệu / bí danh mô hình cục bộ
+├── sse/                  Các trình xử lý SSE cũ vẫn nằm dưới src/ (không phải open-sse/)
+├── store/                Các kho trạng thái phía client
+├── middleware/           Các tiện ích middleware cấp route (không phải middleware toàn cục của Next.js)
+├── scripts/              Các script trong cây mã nguồn có thể được mã ứng dụng import
+├── types/                Các kiểu TS ambient và dùng chung
 ├── i18n/                 Các gói bản địa hóa
-├── instrumentation.ts    Hook đo lường của Next.js
+├── instrumentation.ts    Hook instrumentation của Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              Trình hỗ trợ khởi tạo proxy cấp cao nhất
+└── proxy.ts              Helper khởi động proxy cấp cao nhất
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router cung cấp cả giao diện bảng điều khiển và API HTTP công khai/quản lý.
-**Không có middleware toàn cục** — việc chặn được thực hiện theo từng tuyến.
+App Router cung cấp cả giao diện người dùng dashboard và HTTP API công khai/quản trị.
+**Không có middleware toàn cục** — việc chặn được thực hiện theo từng route.
 
-Các phân đoạn cấp cao nhất trong `src/app/`:
+Các phân đoạn cấp cao nhất dưới `src/app/`:
 
-| Đường dẫn                                                                     | Mục đích                                                     |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `api/`                                                                        | Tất cả các tuyến API HTTP (xem phân tích bên dưới)           |
-| `a2a/`                                                                        | Điểm cuối A2A JSON-RPC 2.0 (`POST /a2a`)                     |
-| `.well-known/agent.json/`                                                     | Tài liệu khám phá A2A Agent Card                             |
-| `(dashboard)/`                                                                | Giao diện bảng điều khiển (nhóm tuyến, không có tiền tố URL) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Các luồng xác thực                                           |
-| `landing/`                                                                    | Trang tiếp thị/trang đích                                    |
-| `docs/`                                                                       | Trình xem tài liệu API được nhúng                            |
-| `status/`, `maintenance/`, `offline/`                                         | Các trang vận hành                                           |
-| `privacy/`, `terms/`                                                          | Các trang pháp lý                                            |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Các trang lỗi tĩnh                                           |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Các ranh giới lỗi/tải của framework                          |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Khung gốc                                                    |
+| Path                                                                          | Mục đích                                               |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `api/`                                                                        | Tất cả các route HTTP API (xem phân tích bên dưới)     |
+| `a2a/`                                                                        | Endpoint A2A JSON-RPC 2.0 (`POST /a2a`)                |
+| `.well-known/agent.json/`                                                     | Tài liệu phát hiện A2A Agent Card                      |
+| `(dashboard)/`                                                                | Giao diện dashboard (nhóm route, không có tiền tố URL) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Các luồng xác thực                                     |
+| `landing/`                                                                    | Trang tiếp thị/landing                                 |
+| `docs/`                                                                       | Trình xem tài liệu API được nhúng                      |
+| `status/`, `maintenance/`, `offline/`                                         | Các trang vận hành                                     |
+| `privacy/`, `terms/`                                                          | Các trang pháp lý                                      |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Các trang lỗi tĩnh                                     |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Các boundary lỗi/tải của framework                     |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Shell gốc                                              |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Các trang giao diện người dùng
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — Các trang UI
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, cùng với `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx` ở thư mục gốc.
+`translator`, `usage`, `webhooks`, cùng với `page.tsx` gốc, `HomePageClient.tsx`,
+`BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Các nhóm API cấp cao nhất
 
@@ -177,52 +177,52 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Quản lý dịch vụ nhúng (9router, cliproxy) — LOCAL_ONLY
+├── services/   Quản lý dịch vụ được nhúng (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         API công khai tương thích với OpenAI
-├── v1beta/     Khả năng tương thích theo phong cách Gemini
+├── v1beta/     Tương thích theo kiểu Gemini
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Quản lý dịch vụ nhúng
+#### 3.1.2a `src/app/api/services/` — Quản lý dịch vụ được nhúng
 
-Các tuyến để cài đặt, khởi động, dừng và giám sát 9Router cùng CLIProxyAPI.
-Tất cả đường dẫn được phân loại là **LOCAL_ONLY** (chỉ loopback, quy tắc cứng #17) vì chúng
+Các route để cài đặt, khởi động, dừng và giám sát 9Router và CLIProxyAPI.
+Tất cả các đường dẫn đều được phân loại là **LOCAL_ONLY** (chỉ loopback, quy tắc cứng #17) vì chúng
 có thể gọi `npm install` và tạo các tiến trình con.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             trình trợ giúp getOrInitSupervisor()
+│   ├── _lib.ts             helper getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install thông qua execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install phiên bản mới hơn
 │   ├── rotate-key/route.ts POST — tạo API key mới + khởi động lại
-│   ├── status/route.ts     GET  — trạng thái trực tiếp + DB + siêu dữ liệu phiên bản
-│   └── auto-start/route.ts POST — bật/tắt cờ auto_start
+│   ├── status/route.ts     GET  — trạng thái trực tiếp + trạng thái DB + siêu dữ liệu phiên bản
+│   └── auto-start/route.ts POST — chuyển đổi cờ auto_start
 ├── cliproxy/
-│   ├── _lib.ts             trình trợ giúp getOrInitSupervisor()
+│   ├── _lib.ts             helper getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install phiên bản mới hơn
-│   ├── status/route.ts     GET  — trạng thái trực tiếp + DB + siêu dữ liệu phiên bản
-│   └── auto-start/route.ts POST — bật/tắt cờ auto_start
+│   ├── status/route.ts     GET  — trạng thái trực tiếp + trạng thái DB + siêu dữ liệu phiên bản
+│   └── auto-start/route.ts POST — chuyển đổi cờ auto_start
 └── [name]/
-    └── logs/route.ts       GET  — luồng log SSE theo thời gian thực (dùng chung cho tất cả dịch vụ)
+    └── logs/route.ts       GET  — truyền đuôi nhật ký SSE (dùng chung cho tất cả dịch vụ)
 ```
 
 Giao diện dashboard tương ứng:
 `src/app/(dashboard)/dashboard/providers/services/` — trang hai tab (CLIProxyAPI + 9Router).
-Proxy ngược cho giao diện nhúng của 9Router:
+Reverse proxy cho giao diện nhúng của 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Tìm hiểu chuyên sâu: `docs/frameworks/EMBEDDED-SERVICES.md`
+Phân tích chuyên sâu: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — API công khai tương thích với OpenAI
 
@@ -230,24 +230,24 @@ Tìm hiểu chuyên sâu: `docs/frameworks/EMBEDDED-SERVICES.md`
 v1/
 ├── accounts/[id]/                       tra cứu tài khoản
 ├── agents/tasks/[id]/, agents/tasks/    các endpoint tác vụ theo phong cách A2A
-├── api/                                 các trình trợ giúp API nội bộ được cung cấp dưới v1/api
+├── api/                                 các helper API nội bộ được cung cấp dưới v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
 ├── chat/completions/                    Chat Completions (endpoint chính)
-├── completions/                         hoàn thành văn bản kiểu cũ
+├── completions/                         hoàn tất văn bản kế thừa
 ├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            các trình trợ giúp route dùng chung (không có URL công khai)
+├── _helpers/                            các helper route dùng chung (không có URL công khai)
 ├── images/{edits, generations}/         tạo + chỉnh sửa hình ảnh
-├── issues/                              các endpoint trợ giúp phân loại
-├── management/{proxies}/                các route thuộc phạm vi quản lý bên trong v1
-├── messages/{count_tokens}/             tương thích messages theo phong cách Anthropic
-├── models/                              danh sách mô hình (`route.ts`, `catalog.ts`)
+├── issues/                              các endpoint helper phân loại sự cố
+├── management/{proxies}/                các route trong phạm vi quản lý bên trong v1
+├── messages/{count_tokens}/             khả năng tương thích messages theo phong cách Anthropic
+├── models/                              liệt kê model (`route.ts`, `catalog.ts`)
 ├── moderations/                         kiểm duyệt
 ├── music/                               tạo nhạc
-├── providers/[provider]/                các thao tác theo từng nhà cung cấp
-├── quotas/{check}                       thăm dò hạn ngạch
-├── registered-keys/                     quản trị khóa đã đăng ký
+├── providers/[provider]/                các thao tác theo từng provider
+├── quotas/{check}                       kiểm tra quota
+├── registered-keys/                     quản trị key đã đăng ký
 ├── rerank/                              xếp hạng lại
 ├── responses/[...path]/                 OpenAI Responses API (bắt tất cả)
 ├── search/                              tìm kiếm web
@@ -256,65 +256,65 @@ v1/
 └── route.ts                             trình xử lý chỉ mục
 ```
 
-Mỗi tệp route đều tuân theo cùng một mẫu:
+Mọi tệp route đều tuân theo cùng một mẫu:
 
 ```
-Route → CORS preflight → xác thực phần thân bằng Zod → xác thực tùy chọn
-      → thực thi chính sách API key → ủy quyền cho trình xử lý (open-sse)
+Route → CORS preflight → Xác thực body bằng Zod → xác thực tùy chọn
+      → thực thi chính sách API key → ủy quyền xử lý (open-sse)
 ```
 
-`v1beta/` là bề mặt tương thích theo phong cách Gemini (một lớp bọc mỏng chuyển đổi sang
-cùng pipeline `open-sse/handlers/`).
+`v1beta/` là bề mặt tương thích theo phong cách Gemini (một lớp wrapper mỏng chuyển đổi thành cùng
+pipeline `open-sse/handlers/`).
 
 ### 3.2 `src/lib/` — Các thư viện cốt lõi
 
-Luôn nhập dữ liệu, đồng bộ hóa, OAuth, kỹ năng, bộ nhớ, v.v. thông qua các mô-đun này. Bảng
-nhóm các thư mục thực tế và những tệp cấp cao nhất đáng chú ý.
+Luôn import dữ liệu, đồng bộ hóa, OAuth, skill, memory, v.v. thông qua các module này. Bảng
+này nhóm các thư mục thực tế và những tệp cấp cao nhất đáng chú ý.
 
-| Mô-đun            | Mục đích                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | Máy chủ giao thức A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 kỹ năng: phân tích chi phí, báo cáo tình trạng, khám phá nhà cung cấp, quản lý hạn ngạch, định tuyến thông minh, liệt kê khả năng)                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `acp/`            | Giao thức Agent-Control: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `api/`            | Các tiện ích hỗ trợ API nội bộ: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `auth/`           | `managementPassword.ts` (đặt lại mật khẩu / băm mật khẩu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `batches/`        | Dịch vụ OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `catalog/`        | Đồng bộ danh mục OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `cloudAgent/`     | Sổ đăng ký tác nhân đám mây: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `combos/`         | Các trình trợ giúp phân giải tổ hợp                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `compliance/`     | Kiểm toán + kiểm toán nhà cung cấp: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `config/`         | Mã kết nối cấu hình thời gian chạy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `db/`             | Các mô-đun miền SQLite (xem §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `display/`        | Các trình trợ giúp UI/hiển thị được các phản hồi API sử dụng                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `embeddings/`     | Sổ đăng ký dịch vụ embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `env/`            | Tải + kiểm tra môi trường                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `evals/`          | Môi trường chạy đánh giá                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `jobs/`           | Các tác vụ nền (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `memory/`         | Bộ nhớ lâu dài: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `oauth/`          | Các mô-đun nhà cung cấp OAuth/nhập dữ liệu (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, cùng với `services/`, `utils/` và `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                           |
-| `plugins/`        | Trình tải plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `providerModels/` | Vòng đời mô hình được quản lý: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `providers/`      | Các tiện ích hỗ trợ nhà cung cấp: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `resilience/`     | `settings.ts` — cài đặt cho bộ ngắt mạch, thời gian chờ, khóa truy cập                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `runtime/`        | Phát hiện tính năng trong thời gian chạy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `services/`       | Khung dịch vụ nhúng: `ServiceSupervisor.ts` (bộ giám sát tiến trình con tổng quát với khóa thao tác, bộ đệm vòng và trình kiểm tra tình trạng), `bootstrap.ts` (đăng ký ở cấp tiến trình và tự động khởi động), `registry.ts` (ánh xạ công cụ → bộ giám sát), `apiKey.ts` (kho khóa AES-256-GCM), `modelSync.ts` (đồng bộ mô hình định kỳ), `ringBuffer.ts` (bộ đệm nhật ký vòng 5 MB), `healthCheck.ts` (thăm dò tình trạng qua HTTP), `types.ts`, `embedWsProxy.ts` (proxy WebSocket), `installers/{ninerouter,cliproxy}.ts`. Xem `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                               |
-| `agentSkills/`    | Danh mục và trình tạo Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → ghi vào `skills/{id}/SKILL.md`), `openapiParser.ts` (trích xuất các điểm cuối REST từ đặc tả OpenAPI), `cliRegistryParser.ts` (trích xuất các lệnh con CLI từ bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Được sử dụng bởi các tuyến REST (`/api/agent-skills/*`), các công cụ MCP (`omniroute_agent_skills_*`) và kỹ năng A2A `list-capabilities`. Xem [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Khung kỹ năng: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, cùng với `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `spend/`          | `batchWriter.ts` (bộ đệm ghi trì hoãn)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Đồng bộ đám mây)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `system/`         | Các tiện ích hỗ trợ cấp hệ thống                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `translator/`     | Lớp kết nối trình dịch cấp cao nhất (ủy quyền cho `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `usage/`          | Kế toán mức sử dụng: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `versionManager/` | Tự động cập nhật + bản kê phiên bản                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `ws/`             | Cầu nối WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `zed-oauth/`      | Luồng OAuth của trình soạn thảo Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Module            | Mục đích                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | Máy chủ giao thức A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 kỹ năng: phân tích chi phí, báo cáo tình trạng, khám phá nhà cung cấp, quản lý hạn ngạch, định tuyến thông minh, liệt kê các khả năng)                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `api/`            | Các trình trợ giúp API nội bộ: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `auth/`           | `managementPassword.ts` (đặt lại / băm mật khẩu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `batches/`        | Dịch vụ API Batches của OpenAI (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `catalog/`        | Đồng bộ danh mục OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `cloudAgent/`     | Sổ đăng ký tác nhân đám mây: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `combos/`         | Các trình trợ giúp phân giải combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `compliance/`     | Kiểm toán + kiểm toán nhà cung cấp: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `config/`         | Kết nối cấu hình thời gian chạy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `db/`             | Các mô-đun miền SQLite (xem §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `display/`        | Các trình trợ giúp giao diện người dùng/hiển thị được API sử dụng trong các phản hồi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `embeddings/`     | Sổ đăng ký dịch vụ embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `env/`            | Tải và tự kiểm tra Env                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `evals/`          | Môi trường thời gian chạy đánh giá                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `jobs/`           | Các tác vụ nền (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `memory/`         | Bộ nhớ liên tục: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `oauth/`          | Các mô-đun nhà cung cấp OAuth/nhập (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, cùng với `services/`, `utils/` và `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                |
+| `plugins/`        | Trình tải plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `providerModels/` | Quản lý vòng đời mô hình: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `providers/`      | Các trình trợ giúp cho nhà cung cấp: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `resilience/`     | `settings.ts` — các tùy chọn cho bộ ngắt mạch, thời gian giảm nhiệt và thời gian khóa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `runtime/`        | Phát hiện tính năng thời gian chạy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `services/`       | Khung dịch vụ nhúng: `ServiceSupervisor.ts` (trình giám sát tiến trình con tổng quát với khóa thao tác, bộ đệm vòng và trình kiểm tra tình trạng), `bootstrap.ts` (đăng ký ở cấp tiến trình và tự động khởi động), `registry.ts` (ánh xạ công cụ → trình giám sát), `apiKey.ts` (kho khóa AES-256-GCM), `modelSync.ts` (đồng bộ mô hình định kỳ), `ringBuffer.ts` (bộ đệm nhật ký vòng 5 MB), `healthCheck.ts` (thăm dò tình trạng HTTP), `types.ts`, `embedWsProxy.ts` (proxy WebSocket), `installers/{ninerouter,cliproxy}.ts`. Xem `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                          |
+| `agentSkills/`    | Danh mục và trình tạo Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → ghi vào `skills/{id}/SKILL.md`), `openapiParser.ts` (trích xuất các endpoint REST từ đặc tả OpenAPI), `cliRegistryParser.ts` (trích xuất các lệnh con CLI từ bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Được sử dụng bởi các tuyến REST (`/api/agent-skills/*`), các công cụ MCP (`omniroute_agent_skills_*`) và skill A2A `list-capabilities`. Xem [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Khung skill: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, cùng với `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `spend/`          | `batchWriter.ts` (bộ đệm ghi phía sau)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Đồng bộ đám mây)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `system/`         | Các trình trợ giúp cấp hệ thống                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `translator/`     | Lớp kết nối translator cấp cao nhất (ủy quyền cho `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `usage/`          | Hạch toán mức sử dụng: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `versionManager/` | Tự động cập nhật + tệp kê khai phiên bản                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ws/`             | Cầu nối WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `zed-oauth/`      | Quy trình OAuth của trình soạn thảo Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 Các tệp cấp cao nhất trong `src/lib/`:
 
-- Barrel `localDb.ts` cũ đã bị xóa — các thành phần sử dụng sẽ nhập trực tiếp các mô-đun `src/lib/db/*` cụ thể.
+- Barrel `localDb.ts` cũ đã bị xóa — các consumer import trực tiếp những module `src/lib/db/*` cụ thể.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -329,13 +329,13 @@ Các tệp cấp cao nhất trong `src/lib/`:
 #### 3.2.1 `src/lib/db/`
 
 Cơ sở dữ liệu SQLite singleton (`getDbInstance()` trong `core.ts`, ghi nhật ký WAL).
-**Không bao giờ viết SQL thô trong các route hoặc handler** — hãy thông qua các mô-đun này.
+**Không bao giờ viết SQL thô trong các route hoặc handler** — hãy đi qua các module này.
 
-![Tổng quan lược đồ cơ sở dữ liệu (các bảng cốt lõi được chọn)](../diagrams/exported/db-schema-overview.svg)
+![Tổng quan schema cơ sở dữ liệu (các bảng cốt lõi được chọn)](../diagrams/exported/db-schema-overview.svg)
 
 > Nguồn: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Các mô-đun miền (mỗi mô-đun sở hữu một hoặc nhiều bảng): `apiKeys.ts`, `backup.ts`,
+Các module miền (mỗi module sở hữu một hoặc nhiều bảng): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,7 +349,7 @@ Các mô-đun miền (mỗi mô-đun sở hữu một hoặc nhiều bảng): `a
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` chứa 168 tệp `.sql` được đánh phiên bản (có tính lũy đẳng, hỗ trợ giao dịch) và được
+`migrations/` chứa 168 tệp `.sql` được đánh phiên bản (idempotent, có tính giao dịch) và được
 `migrationRunner.ts` thực thi khi khởi động.
 
 Các bảng được tạo trong toàn bộ các migration (tổng cộng 123 bảng):
@@ -368,98 +368,107 @@ Các bảng được tạo trong toàn bộ các migration (tổng cộng 123 b�
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (cùng với các bảng ảo FTS5 để tìm kiếm bộ nhớ).
+`webhooks` (cùng với các bảng ảo FTS5 phục vụ tìm kiếm memory).
 
-### 3.3 `src/domain/` — Lớp miền
+### 3.3 `src/domain/` — Tầng miền
 
-Logic nghiệp vụ thuần túy, không có I/O. Được các route và handler nhập vào.
+Các dịch vụ miền và các contract đánh giá. Một số module được gọi bởi đường dẫn
+request đang hoạt động; các module khác vẫn là những contract độc lập. Không nên
+giả định toàn bộ thư mục này không có I/O hoặc việc thay đổi mọi module sẽ ảnh hưởng đến
+định tuyến production.
 
-| Tệp                                        | Mục đích                                              |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `policyEngine.ts`                          | Bộ phân giải chính sách cấp cao nhất                  |
-| `fallbackPolicy.ts`                        | Cây quyết định dự phòng                               |
-| `costRules.ts`                             | Các quy tắc tính chi phí                              |
-| `lockoutPolicy.ts`                         | Các quyết định khóa mô hình                           |
-| `tagRouter.ts`                             | Định tuyến dựa trên thẻ                               |
-| `comboResolver.ts`                         | Phân giải combo từ yêu cầu → danh sách đích           |
-| `connectionModelRules.ts`                  | Bộ lọc mô hình theo từng kết nối                      |
-| `modelAvailability.ts`                     | Kiểm tra tính khả dụng của mô hình                    |
-| `degradation.ts`                           | Chuyển đổi sang chế độ suy giảm                       |
-| `providerExpiration.ts`                    | Phát hiện tài khoản/khóa đã hết hạn                   |
-| `quotaCache.ts`                            | Các quyết định hạn ngạch được lưu vào bộ nhớ đệm      |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Các trình trợ giúp định dạng phản hồi                 |
-| `configAudit.ts`                           | Kiểm tra thay đổi cấu hình                            |
-| `assessment/`                              | Đánh giá mô hình (theo RFC, được triển khai một phần) |
-| `types.ts`                                 | Các kiểu miền dùng chung                              |
+Các bề mặt policy đang hoạt động là `src/shared/utils/apiKeyPolicy.ts` và
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. Việc xử lý combo và phân giải target đang
+hoạt động sử dụng `open-sse/services/combo.ts`. Các contract `policyEngine.ts` và
+`comboResolver.ts` được kiểm thử, cùng với `src/lib/container.ts`, không phải là phần
+wiring của đường dẫn request chat được kiểm tra. Khi lập kế hoạch thay đổi định tuyến, hãy
+tách chúng khỏi những bề mặt đang hoạt động đó.
+
+| Tệp                                        | Mục đích                                            |
+| ------------------------------------------ | --------------------------------------------------- |
+| `policyEngine.ts`                          | Contract đánh giá policy dành riêng                 |
+| `fallbackPolicy.ts`                        | Cây quyết định fallback                             |
+| `costRules.ts`                             | Quy tắc tính chi phí                                |
+| `lockoutPolicy.ts`                         | Quyết định khóa model                               |
+| `tagRouter.ts`                             | Định tuyến dựa trên tag                             |
+| `comboResolver.ts`                         | Contract lựa chọn combo dành riêng                  |
+| `connectionModelRules.ts`                  | Bộ lọc model theo từng connection                   |
+| `modelAvailability.ts`                     | Kiểm tra tính khả dụng của model                    |
+| `degradation.ts`                           | Chuyển đổi sang chế độ suy giảm                     |
+| `providerExpiration.ts`                    | Phát hiện account/key hết hạn                       |
+| `quotaCache.ts`                            | Các quyết định quota được cache                     |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Helper định dạng response                           |
+| `configAudit.ts`                           | Audit thay đổi cấu hình                             |
+| `assessment/`                              | Đánh giá model (theo RFC, được triển khai một phần) |
+| `types.ts`                                 | Các kiểu miền dùng chung                            |
 
 ### 3.4 `src/server/` — Chỉ dành cho máy chủ
 
-Không thể được nhập từ các component phía máy khách.
+Không thể import từ các component client.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Phân loại route là công khai hay quản trị
-│   ├── assertAuth.ts      Trình trợ giúp xác nhận
-│   ├── context.ts         Ngữ cảnh authz cho mỗi yêu cầu
+│   ├── classify.ts        Phân loại các route thành công khai hoặc quản trị
+│   ├── assertAuth.ts      Helper xác thực
+│   ├── context.ts         Ngữ cảnh authz cho từng request
 │   ├── headers.ts
 │   ├── pipeline.ts        Pipeline authz
-│   ├── policies/          Các chính sách cụ thể
+│   ├── policies/          Các policy cụ thể
 │   └── types.ts
-└── cors/origins.ts        Danh sách cho phép nguồn gốc CORS
+└── cors/origins.ts        Allowlist origin CORS
 ```
 
 ### 3.5 `src/shared/` — An toàn để chia sẻ
 
-Được chia thành các thư mục con tập trung:
+Chia thành các thư mục con tập trung theo chức năng:
 
-- `constants/` — `providers.ts` (danh mục nhà cung cấp được xác thực bằng Zod), `models.ts`,
+- `constants/` — `providers.ts` (catalog provider được xác thực bằng Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (danh sách chặn), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (~80 schema Zod), `compressionConfigSchemas.ts`,
+- `validation/` — `schemas.ts` (khoảng 80 schema Zod), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — các hợp đồng API công khai được phát hành lên npm.
+- `contracts/` — các contract API công khai được phát hành lên npm.
 - `types/` — các kiểu TS dùng chung.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, cùng các hook/thành phần của bảng điều khiển trong `services/`, `network/`,
+  `cors.ts`, `featureFlags.ts`, `fetchTimeout.ts`, `formatting.ts`,
+  `inputSanitizer.ts`, `logger.ts`, `machine.ts`, `machineId.ts`, `maskEmail.ts`,
+  `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `parseApiKeys.ts`,
+  `providerHints.ts`, `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
+  `a11yAudit.ts`, cùng các hook/component dashboard trong `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
-- `components/` — API thành phần của bảng điều khiển (barrel `index.tsx`: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Các primitive là những adapter bọc quanh bộ công cụ
-  được tích hợp sẵn (`packages/ui-kit`, được nhập qua đường dẫn con của thành phần như
-  `@omniroute/ui-kit/button`), nhờ đó các màn hình giữ nguyên phần import trong khi markup thuộc về
-  bộ công cụ. Shell là `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (`SidebarProvider`/`SidebarInset` của bộ công cụ) cùng với `Sidebar.tsx` và `Header.tsx`; các biểu tượng
-  được xử lý thông qua `Icon.tsx` và `constants/iconMap.ts`. Xem `docs/architecture/DESIGN_SYSTEM.md`.
+- `components/` — API component của dashboard (`index.tsx` dạng barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Các primitive là adapter trên
+  kit được vendored (`packages/ui-kit`, được import theo subpath của component như
+  `@omniroute/ui-kit/button`), vì vậy các screen vẫn giữ nguyên import trong khi markup
+  thuộc về kit. Shell là `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` của kit), cùng với `Sidebar.tsx` và `Header.tsx`; icon
+  đi qua `Icon.tsx` và `constants/iconMap.ts`. Xem `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — không gian làm việc cho công cụ streaming
+## 4. `open-sse/` — workspace engine streaming
 
-Không gian làm việc npm riêng được phát hành dưới tên `@omniroute/open-sse`. Phụ trách xử lý
-request, các executor, translator, service, transformer và máy chủ MCP.
+Workspace npm riêng được phát hành dưới tên `@omniroute/open-sse`. Phụ trách xử lý
+request, executor, translator, service, transformer và máy chủ MCP.
 
 ```
 open-sse/
 ├── index.ts                Các export công khai
-├── package.json            Manifest của workspace
+├── package.json            Manifest workspace
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Registry provider, profile header, identity, …
-├── handlers/               Các trình xử lý request (chat, embeddings, audio, image, …)
-├── executors/              159 module executor của provider (class executor + helper theo provider)
+├── handlers/               Handler request (chat, embedding, audio, image, …)
+├── executors/              170 module executor của provider (class executor + helper riêng cho từng provider)
 ├── translator/             Chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Transformer stream Responses API ↔ Chat Completions
+├── transformer/            Transformer luồng Responses API ↔ Chat Completions
 ├── services/               Hơn 80 module service (combo, fallback, quota, identity, …)
 ├── utils/                  Helper streaming, client TLS, AWS SigV4, proxy fetch, …
 └── mcp-server/             Máy chủ MCP (3 transport, 33 scope, 110 tool)
@@ -471,40 +480,41 @@ open-sse/
 | ----------------------- | ---------------------------------------------------------------------------------- |
 | `chatCore.ts`           | Pipeline chat chính (cache, giới hạn tốc độ, định tuyến combo, phân phối executor) |
 | `responsesHandler.ts`   | Điểm vào OpenAI Responses API                                                      |
-| `embeddings.ts`         | Embeddings                                                                         |
-| `imageGeneration.ts`    | Tạo ảnh                                                                            |
+| `embeddings.ts`         | Embedding                                                                          |
+| `imageGeneration.ts`    | Tạo hình ảnh                                                                       |
 | `audioSpeech.ts`        | Chuyển văn bản thành giọng nói                                                     |
 | `audioTranscription.ts` | Chuyển giọng nói thành văn bản                                                     |
 | `videoGeneration.ts`    | Tạo video                                                                          |
 | `musicGeneration.ts`    | Tạo nhạc                                                                           |
 | `rerank.ts`             | Xếp hạng lại                                                                       |
 | `moderations.ts`        | Kiểm duyệt                                                                         |
-| `search.ts`             | Tìm kiếm web                                                                       |
+| `search.ts`             | Tìm kiếm trên web                                                                  |
 | `sseParser.ts`          | Trình phân tích sự kiện SSE                                                        |
-| `usageExtractor.ts`     | Trích xuất số lượng token từ các stream upstream                                   |
-| `responseSanitizer.ts`  | Loại bỏ dữ liệu nhiễu đặc thù của provider                                         |
+| `usageExtractor.ts`     | Trích xuất số lượng token từ các luồng upstream                                    |
+| `responseSanitizer.ts`  | Loại bỏ nhiễu riêng của từng provider                                              |
 | `responseTranslator.ts` | Kết nối giữa response của provider và lớp translator                               |
 
 ### 4.2 `open-sse/executors/`
 
-159 module executor cấp cao nhất (`*.ts` trừ `base.ts`, `index.ts` và các test — số lượng
-được đo bằng `npm run check:docs-counts`). Mỗi class executor đều mở rộng `BaseExecutor` (`base.ts`),
-trực tiếp hoặc thông qua `DefaultExecutor` hay một executor khác; các module còn lại là
-helper theo provider (schema tool, adapter fetch/TTS, trình xử lý khác biệt). Các executor bao gồm:
+170 module executor cấp cao nhất (`*.ts`, không tính `base.ts`, `index.ts` và các
+test — số lượng được đo bằng `npm run check:docs-counts`). Mọi class executor đều
+mở rộng `BaseExecutor` (`base.ts`), trực tiếp hoặc thông qua `DefaultExecutor` hay
+một executor khác; các module còn lại là helper riêng của từng provider (schema tool,
+adapter fetch/TTS, handler cho các điểm khác biệt). Các executor bao gồm:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, cùng với `claudeIdentity.ts`
-(helper identity dùng chung) và `index.ts` (registry).
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, cùng với
+`claudeIdentity.ts` (helper identity dùng chung) và `index.ts` (registry).
 
 > Lưu ý: các provider không được liệt kê ở đây được phục vụ bởi `default.ts` bằng executor
-> tương thích OpenAI chung. Danh mục provider đầy đủ (381 provider) nằm trong
+> tương thích OpenAI chung. Catalog provider đầy đủ (394 provider) nằm tại
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Mô hình dịch hub-and-spoke (OpenAI là hub).
+Mô hình chuyển đổi hub-and-spoke (OpenAI là hub).
 
 - **9 translator request** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -522,28 +532,29 @@ Mô hình dịch hub-and-spoke (OpenAI là hub).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Bộ chuyển đổi dựa trên `TransformStream` giữa Responses API và Chat
-  Completions (được sử dụng bởi catch-all route `responses/`).
+- `responsesTransformer.ts` — Bộ chuyển đổi Responses API ↔ Chat
+  Completions dựa trên `TransformStream` (được sử dụng bởi catch-all của route
+  `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Các điểm nổi bật (danh sách đầy đủ nằm trong `open-sse/services/`):
+Các điểm nổi bật (danh sách đầy đủ nằm dưới `open-sse/services/`):
 
-| Mối quan tâm       | Tệp                                                                                                                                                                                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Định tuyến combo   | `combo.ts` (20 chiến lược), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
-| Công cụ Auto Combo | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Khả năng phục hồi  | `accountFallback.ts` (thời gian chờ + khóa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                       |
-| Hạn ngạch          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Bộ nhớ đệm         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Trí tuệ định tuyến | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Xử lý mô hình      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Nén                | `compression/` — kết nối đầy đủ của công cụ nén                                                                                                                                                                                                          |
-| Token + phiên      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Tầng / manifest    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / mạng          | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Lô                 | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Mức sử dụng        | `usage.ts`                                                                                                                                                                                                                                               |
+| Mối quan tâm        | Tệp                                                                                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Định tuyến Combo    | `combo.ts` (22 chiến lược), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Công cụ Auto Combo  | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Khả năng chống chịu | `accountFallback.ts` (thời gian hạ nhiệt + khóa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                  |
+| Hạn ngạch           | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Bộ nhớ đệm          | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Trí tuệ định tuyến  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Xử lý mô hình       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Nén                 | `compression/` — kết nối đầy đủ của công cụ nén                                                                                                                                                                                                          |
+| Token + phiên       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Cấp / manifest      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / mạng           | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Lô                  | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Mức sử dụng         | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
@@ -551,12 +562,12 @@ Các điểm nổi bật (danh sách đầy đủ nằm trong `open-sse/services
   các mô-đun memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
   local-corpus và compression — hợp nhất được tính bằng `countUniqueMcpTools`).
 - **3 phương thức truyền tải**: stdio, HTTP Streamable, SSE.
-- **33 phạm vi** được thực thi trong thời gian chạy — danh sách cơ sở nằm trong `src/shared/constants/mcpScopes.ts`, toàn bộ tập hợp là hợp của các phạm vi được khai báo bởi từng mô-đun công cụ.
+- **33 phạm vi** được thực thi khi chạy — danh sách cơ sở nằm trong `src/shared/constants/mcpScopes.ts`, toàn bộ tập hợp là hợp của các phạm vi được khai báo bởi từng mô-đun công cụ.
 - Bảng kiểm tra: `mcp_tool_audit` (được điền bởi `audit.ts`).
 - Tệp: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  cùng các bài kiểm thử trong `__tests__/`.
+  cùng với các bài kiểm thử trong `__tests__/`.
 - Xem [MCP-SERVER.md](../frameworks/MCP-SERVER.md) để biết danh mục công cụ đầy đủ.
 
 ### 4.7 `open-sse/config/`
@@ -568,14 +579,14 @@ Các registry của nhà cung cấp (`providerRegistry.ts`, `providerModels.ts`,
 các trình trợ giúp nhận dạng (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-các trình trợ giúp thông tin xác thực (`credentialLoader.ts`, `codexClient.ts`), và các
-bộ điều hợp đám mây (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+các trình trợ giúp thông tin xác thực (`credentialLoader.ts`, `codexClient.ts`), và các bộ
+chuyển đổi đám mây (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Các primitive streaming và helper của nhà cung cấp: `stream.ts`, `streamHandler.ts`,
+Các thành phần nguyên thủy để truyền dữ liệu và các tiện ích hỗ trợ nhà cung cấp: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -702,44 +713,45 @@ Các lệnh thường dùng:
 
 ---
 
-## 9. Quy trình xử lý yêu cầu (Tóm tắt)
+## 9. Đường ống yêu cầu (Tóm tắt)
 
-![Quy trình xử lý yêu cầu (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Đường ống yêu cầu (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Nguồn: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Yêu cầu từ máy khách
+Yêu cầu từ client
   → /v1/chat/completions (route.ts)
      Kiểm tra preflight CORS
-     Xác thực bằng Zod (chatCompletionsSchema trong shared/validation/schemas.ts)
+     Xác thực Zod (chatCompletionsSchema trong shared/validation/schemas.ts)
      Xác thực (extractApiKey + isValidApiKey HOẶC requireManagementAuth)
-     Công cụ chính sách (src/server/authz/pipeline.ts)
-     Biện pháp bảo vệ (che giấu PII, ngăn chặn prompt injection, cầu nối thị giác)
+     Phân quyền route (src/server/authz/pipeline.ts)
+     Chính sách khóa API (src/shared/utils/apiKeyPolicy.ts; được thực thi trên đường dẫn đã chọn)
+     Các lớp bảo vệ (trình che PII, chống prompt injection, cầu nối vision)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Kiểm tra bộ nhớ đệm (bộ nhớ đệm ngữ nghĩa + bộ nhớ đệm đọc)
+     Kiểm tra bộ nhớ đệm (ngữ nghĩa + bộ nhớ đệm đọc)
      Giới hạn tốc độ (rateLimitManager, accountSemaphore)
-     Định tuyến tổ hợp (nếu mô hình được phân giải thành một tổ hợp)
-       comboResolver → lặp qua từng đích → handleSingleModel()
+     Định tuyến combo (nếu model phân giải thành một combo)
+       resolveComboTargets (open-sse/services/combo.ts) → phân phối theo từng target
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       fetch đến nguồn ngược dòng → thử lại/chờ tăng dần thông qua accountFallback
+       fetch upstream → thử lại/backoff thông qua accountFallback
      translateResponse() (open-sse/translator/response/*)
      Luồng SSE HOẶC phản hồi JSON
      Nếu là Responses API: TransformStream thông qua open-sse/transformer/responsesTransformer.ts
-  → Kiểm toán tuân thủ (src/lib/compliance/)
-  → Phản hồi cho máy khách
+  → Kiểm tra tuân thủ (src/lib/compliance/)
+  → Phản hồi đến client
 ```
 
-### Trạng thái thời gian chạy về khả năng phục hồi (ba cơ chế)
+### Trạng thái runtime về khả năng phục hồi (ba cơ chế)
 
-| Cơ chế                    | Phạm vi                          | Vị trí                                                                                                           |
-| ------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Bộ ngắt mạch nhà cung cấp | Toàn bộ nhà cung cấp             | `src/shared/utils/circuitBreaker.ts`, được lưu bền vững trong `domain_circuit_breakers`                          |
-| Thời gian chờ kết nối     | Một tài khoản/khóa               | `markAccountUnavailable()` trong `src/sse/services/auth.ts`; được `accountFallback.checkFallbackError()` sử dụng |
-| Khóa mô hình              | Nhà cung cấp + kết nối + mô hình | `open-sse/services/accountFallback.ts`, được lưu bền vững trong `domain_lockout_state`                           |
+| Cơ chế                     | Phạm vi                    | Vị trí                                                                                                               |
+| -------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Bộ ngắt mạch của provider  | Toàn bộ provider           | `src/shared/utils/circuitBreaker.ts`, được lưu trong `domain_circuit_breakers`                                       |
+| Thời gian cooldown kết nối | Một account/khóa           | `markAccountUnavailable()` trong `src/sse/services/auth.ts`; được sử dụng bởi `accountFallback.checkFallbackError()` |
+| Khóa model                 | Provider + kết nối + model | `open-sse/services/accountFallback.ts`, được lưu trong `domain_lockout_state`                                        |
 
-Xem [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) và phần chuyên biệt trong
+Xem [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) và phần riêng trong
 [CLAUDE.md](../../CLAUDE.md).
 
 ---
@@ -748,47 +760,49 @@ Xem [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) và phần chuyên biệt trong
 
 ### Thêm nhà cung cấp mới
 
-1. Đăng ký trong `src/shared/constants/providers.ts` (được Zod xác thực khi tải).
+1. Đăng ký trong `src/shared/constants/providers.ts` (được xác thực bằng Zod khi tải).
 2. Thêm một executor trong `open-sse/executors/` nếu cần logic tùy chỉnh
    (mở rộng `BaseExecutor`).
-3. Thêm một translator trong `open-sse/translator/` nếu nhà cung cấp không sử dụng định dạng OpenAI.
-4. Nếu dựa trên OAuth, hãy thêm cấu hình trong `src/lib/oauth/providers/` và
+3. Thêm một translator trong `open-sse/translator/` nếu không sử dụng định dạng OpenAI.
+4. Nếu dựa trên OAuth, thêm cấu hình trong `src/lib/oauth/providers/` và
    `src/lib/oauth/services/`.
-5. Đăng ký các model trong `open-sse/config/providerRegistry.ts` (hoặc registry dành riêng cho định dạng
-   trong `open-sse/config/`).
-6. Viết kiểm thử trong `tests/unit/`.
+5. Đăng ký các model trong `open-sse/config/providerRegistry.ts` (hoặc registry dành riêng cho
+   định dạng trong `open-sse/config/`).
+6. Viết các bài kiểm thử trong `tests/unit/`.
 
 ### Thêm route API mới
 
 1. Tạo `src/app/api/your-route/route.ts`.
-2. Tuân theo mẫu: CORS → xác thực body bằng Zod → xác thực danh tính → ủy quyền cho handler.
-3. Nếu có cấu trúc request mới: thêm schema Zod vào `src/shared/validation/schemas.ts`.
-4. Nếu chỉ dành cho quản trị: thêm đường dẫn vào `src/shared/constants/publicApiRoutes.ts`
-   (danh sách từ chối cho bề mặt API công khai).
-5. Thêm kiểm thử trong `tests/unit/`.
+2. Tuân theo mẫu: CORS → xác thực body bằng Zod → xác thực → ủy quyền xử lý.
+3. Nếu có cấu trúc request mới: thêm schema Zod trong `src/shared/validation/schemas.ts`.
+4. Nếu chỉ dành cho quản lý: thêm đường dẫn vào `src/shared/constants/publicApiRoutes.ts`
+   (denylist cho bề mặt API công khai).
+5. Thêm các bài kiểm thử trong `tests/unit/`.
 6. Cập nhật `docs/reference/API_REFERENCE.md` và `docs/openapi.yaml`.
 
-### Thêm mô-đun DB mới
+### Thêm module DB mới
 
 1. Tạo `src/lib/db/yourModule.ts` và import `getDbInstance()` từ `./core.ts`.
-2. Export các hàm CRUD cho miền nghiệp vụ của bạn.
-3. Nếu có bảng mới: thêm migration trong `src/lib/db/migrations/`, được đánh số
-   tuần tự, có tính lũy đẳng và giao dịch.
-4. Các mô-đun sử dụng phải import trực tiếp từ `@/lib/db/yourModule` (không dùng barrel — lớp tái export `localDb.ts` cũ đã bị xóa).
-5. Thêm kiểm thử trong `tests/unit/`.
+2. Export các hàm CRUD cho domain của bạn.
+3. Nếu có bảng mới: thêm migration bằng `npm run db:new-migration -- <description>` (ghi vào
+   `src/lib/db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; xem
+   `docs/ops/DATABASE_GUIDE.md`), có tính idempotent và mang tính giao dịch.
+4. Importer sử dụng các import trực tiếp từ `@/lib/db/yourModule` (không dùng barrel — lớp tái export
+   `localDb.ts` cũ đã bị loại bỏ).
+5. Thêm các bài kiểm thử trong `tests/unit/`.
 
 ### Thêm công cụ MCP mới
 
 1. Thêm định nghĩa công cụ trong `open-sse/mcp-server/tools/` (hoặc mở rộng
    `open-sse/mcp-server/schemas/tools.ts`).
-2. Gán phạm vi phù hợp trong `src/shared/constants/mcpScopes.ts`.
+2. Gán scope phù hợp trong `src/shared/constants/mcpScopes.ts`.
 3. Đăng ký công cụ trong `open-sse/mcp-server/server.ts`.
-4. Thêm kiểm thử trong `open-sse/mcp-server/__tests__/`.
+4. Thêm các bài kiểm thử trong `open-sse/mcp-server/__tests__/`.
 5. Cập nhật [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
-### Thêm kỹ năng A2A mới
+### Thêm skill A2A mới
 
-Xem [A2A-SERVER.md § Thêm kỹ năng mới](../frameworks/A2A-SERVER.md). Các kỹ năng nằm trong
+Xem [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Các skill nằm trong
 `src/lib/a2a/skills/` và được đăng ký thông qua trình quản lý tác vụ A2A.
 
 ---

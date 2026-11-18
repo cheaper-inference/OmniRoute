@@ -118,31 +118,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 නැවත ආරම්භ කිරීමකින් තොරව runtime හිදී **Dashboard → Security → CORS Allowed Origins** තුළ සැකසිය
 හැකිය.
 
-## API keys සහ cookie sessions අතර වෙනස
+## API යතුරු එදිරිව කුකී සැසි
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface එක):** browsers කිසිවිටෙකත්
-  මේවා ස්වයංක්රීයව අමුණන්නේ නැත. මෙහිදී CORS අර්ථවත් බාධකයක් නොවේ — බාධකය වන්නේ API key එකයි —
-  ඒ නිසා browser සහ Electron clients හට දැනටමත් හිමිකම් ඇති responses කියවීමට හැකි වන පරිදි
-  එම surface එක හිතාමතාම ලිහිල් කර ඇත.
-  ලිහිල් කළ ප්රතිරාවය අනුගමනය කරන්නේ වලංගු කළ key එකයි, header එක තිබීම පමණක් නොවේ:
-  `REQUIRE_API_KEY=false` මඟින් request එකක් නිර්නාමිකව සේවය කරන විට, එහි සාර්ථක response
-  එක fail-closed අවසර ලැයිස්තුවම රඳවා ගනී. Auth ප්රතික්ෂේප කිරීම් (401) කියවිය හැකිව පවතින
-  බැවින් clients හට අවලංගු කළ හෝ වැරදියට ටයිප් කළ key එකක් පෙන්විය හැක (#5242): pipeline
-  එකේම 401 ප්රතිරාවය රඳවා ගන්නා අතර, pipeline එක request එක නිර්නාමික ලෙස සේවය කළ පසු key
-  එක තමන්ම ප්රතික්ෂේප කරන route එකක් (management auth වින්යාස කර ඇති විට `/v1/models` සහ
-  `/v1beta/models`, හිමිකරු-සීමිත `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` සහ auto-combo අපේක්ෂක routes) `credentialRejectionHeaders()` හරහා
-  එම 401 එකට ප්රතිරාවය එක් කරයි. ප්රතිරාවය රඳා පවතින්නේ request එක credential header එකක්
-  (`Authorization`, `x-api-key`, `x-goog-api-key` හෝ `auth_token` cookie එක) රැගෙන යනවාද
-  යන්න මතය, route එක ඒවායින් කුමක් පරීක්ෂා කළේද යන්න මත නොවේ; එය කිසිවිටෙකත්
-  `Access-Control-Allow-Credentials` සමඟ යුගල නොකෙරේ; body එක ස්ථාවර දෝෂ envelope එකකි.
-  `requireManagementAuth()` මඟින් ආරක්ෂා කර ඇති `/api/v1/` යටතේ ඇති management routes
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) ප්රතිරාවය එක් නොකරයි:
-  `REQUIRE_API_KEY=false` සමඟ ඒවායේ 401/403 හරස්-මූලයකින් කියවිය නොහැක.
-- **Cookie session එක (dashboard එක):** fail-closed පෙරනිමියෙන් **සහ**
-  හවුල් path එකේ `Access-Control-Allow-Credentials` නොමැති වීමෙන් ආරක්ෂා වේ.
-  management/dashboard origins ඕනෑම ලිහිල් config එකකින් බැහැරව තබන්න; ඒවා නියත වශයෙන්ම
-  fail-closed ලෙස පැවතිය යුතුය.
+- **දරන්නා / `x-api-key` ( `/v1/*` අනුමාන මතුපිට):** බ්‍රව්සර් කිසිවිටෙක මේවා ස්වයංක්‍රීයව අමුණන්නේ නැත. CORS මෙහි අර්ථවත් බාධකයක් නොවේ — API යතුර බාධක — වන අතර එම මතුපිට හිතාමතාම අවසර ලබා දී ඇති නිසා බ්‍රවුසරයට සහ Electron සේවාදායකයින්ට ඔවුන්ට දැනටමත් හිමි ප්‍රතිචාර කියවිය හැකිය. ලිහිල් කරන ලද දෝංකාරය වලංගු යතුර අනුගමනය කරයි, ශීර්ෂයේ හුදු පැවැත්ම නොවේ: `REQUIRE_API_KEY=false` නිර්නාමිකව ඉල්ලීමක් කරන විට, එහි සාර්ථක ප්‍රතිචාරය අසාර්ථක-වසා ඇති අවසර ලැයිස්තුව තබා ගනී. Auth ප්‍රතික්ෂේප කිරීම් (401) කියවිය හැකි බැවින් සේවාදායකයාට අවලංගු කරන ලද හෝ වැරදි ලෙස ටයිප් කළ යතුරක් (#5242) මතු කළ හැකිය: නල මාර්ගයේම 401 දෝංකාරය තබා ගන්නා අතර නල `/v1/session-leases` එය නිර්නාමික ලෙස සේවය කළ පසු යතුර ප්‍රතික්ෂේප කරන මාර්ගයක් (`/v1/models` සහ `/v1beta/models` සමඟ කළමනාකරණය auth scope configured, `/v1/files`, `/v1/batches` `/v1/media` සහ auto-combo අපේක්ෂක මාර්ග) `credentialRejectionHeaders()` හරහා එම 401 වෙත දෝංකාරය එක් කරයි. අක්තපත්‍ර ශීර්ෂයක් (`Authorization`, `x-api-key`, `x-goog-api-key` හෝ `auth_token` කුකිය) සහිත ඉල්ලීම මත දෝංකාරය යතුරු කර ඇත, ඒවායින් කුමන මාර්ගය පරීක්ෂා කර ඇත්ද යන්න සහ කිසි විටෙකත් `Access-Control-Allow-Credentials` සමඟ යුගල නොකෙරේ; ශරීරය ස්ථාවර දෝෂ සහිත ලියුම් කවරයකි. `/api/v1/` යටතේ කළමනාකරණ මාර්ග `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) මඟින් දෝංකාරය එක් නොකරයි: `REQUIRE_API_KEY=false` සමඟ ඒවායේ 401/403 හරස් ප්‍රභවය කියවිය නොහැක.
+- **කුකී සැසිය (උපකරණ පුවරුව):** අසාර්ථක සංවෘත පෙරනිමියෙන් ආරක්ෂා කර ඇත** සහ** හවුල් මාර්ගයෙහි `Access-Control-Allow-Credentials` නොමැති වීමෙන්. management/dashboard මූලාරම්භය ඕනෑම අවසර ලත් වින්‍යාසයකින් බැහැර කරන්න; ඔවුන් හරියටම අසාර්ථක විය යුතුය.
 
 ## WebSocket handshakes (`/v1/responses`, `/v1/ws`) පිළිබඳව
 

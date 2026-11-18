@@ -4,13 +4,13 @@
 
 ---
 
-## Rappurtar ta’ Vulnerabbiltajiet
+## Rappurtar ta' Vulnerabbiltajiet
 
-Jekk tiskopri vulnerabbiltà tas-sigurtà f’OmniRoute, jekk jogħġbok irrapportaha b’mod responsabbli:
+Jekk tiskopri vulnerabbiltà tas-sigurtà OmniRoute, jekk jogħġbok irrapportaha b'mod responsabbli:
 
-1. **TIFTAĦX** kwistjoni pubblika fuq GitHub
-2. Uża [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Inkludi: deskrizzjoni, passi għar-riproduzzjoni, u l-impatt potenzjali
+1. **DO NOT** tiftaħ kwistjoni pubblika GitHub
+2. Uża [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Inkludi: deskrizzjoni, passi tar-riproduzzjoni, u impatt potenzjali
 
 ## Skeda ta’ Rispons
 
@@ -29,25 +29,14 @@ Jekk tiskopri vulnerabbiltà tas-sigurtà f’OmniRoute, jekk jogħġbok irrappo
 | 3.7.x    | ✅ Sigurtà                                            |
 | < 3.7.0  | ❌ Mhux appoġġjata                                    |
 
-## Perjodu ta’ appoġġ LTS (v3.9.x)
+## tieqa ta' appoġġ LTS (v3.9.x)
 
-Wara 3.8.59, il-verżjoni li jmiss hija **3.9.0**, li tiftaħ il-linja ta’ appoġġ fit-tul fil-fergħa
-`stable/v3` (ara [`ROADMAP.md`](ROADMAP.md) → "Fażi 3 — v3.9.0 LTS").
+Wara 3.8.59 il-verżjoni li jmiss hija** 3.9.0** , li tiftaħ il-linja ta 'appoġġ fit-tul fuq il-fergħa `stable/v3` (ara [`ROADMAP.md`](ROADMAP.md) → "Fażi 3 — v3.9.0 LTS").
 
-- **X’jirċievi `stable/v3`:** tiswijiet ta’ bugs, garżi tas-sigurtà u aġġornamenti tal-fornituri. Karatteristiċi
-  ġodda jmorru fil-kanal v4; il-linja LTS tagħti prijorità lill-istabbiltà. `npm install omniroute`
-  (id-dist-tag `latest`) jibqa’ fuq v3 matul iċ-ċiklu kollu ta’ v4.
-- **Tul tal-perjodu:** `stable/v3` jirċievi **tiswijiet tas-sigurtà u tiswijiet għal regressjonijiet kritiċi għal
-  12-il xahar wara r-rilaxx ta’ 3.9.0, jew sa 90 jum wara li v4.0.0 jiġi ppubblikat bħala `latest` —
-  skont liema minnhom ikun l-aktar tard**. Id-data tat-tmiem li tirriżulta tiġi rreġistrata fin-noti tar-rilaxx ta’ 3.9.0 u
-  f’[`ROADMAP.md`](ROADMAP.md) meta jsir ir-rilaxx.
-- **Kif tirrapporta vulnerabbiltà fil-linja LTS:** uża l-istess kanal bħal għal kwalunkwe verżjoni oħra —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
-  u qatt issue pubblika. Speċifika liema verżjoni ttestjajt (pereżempju `3.9.2`); it-tiswijiet jiddaħħlu f’
-  `stable/v3` u jiġu trasferiti ’l quddiem għal v4.
-- **Linja bażi tas-sigurtà fil-mument tar-rilaxx LTS:** l-istat imkejjel tal-iskanner, il-garanziji tal-protezzjoni tar-rotot u
-  l-provi tal-kredenzjali pubbliċi jiġu rreġistrati f’
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **X'jirċievi `stable/v3` :** bug fixes, irqajja tas-sigurtà u aġġornamenti tal-fornitur. Karatteristiċi ġodda jmorru għall-kanal v4; il-linja LTS hija l-istabbiltà l-ewwel. `npm install omniroute` (id-dist-tag `latest` ) jibqa' fuq v3 matul iċ-ċiklu kollu v4.
+- **Tul tat-tieqa:** `stable/v3` jircievi** soluzzjonijiet ta' sigurtà u rigressjonijiet kritiċi għal 12-il xahar wara l-qtugħ ta' 3.9.0, jew sa 90 jum wara li v4.0.0 jiġi ppubblikat bħala `latest` — liema minnhom ikun aktar tard** . Id-data tat-tmiem li tirriżulta hija rreġistrata fin-noti tar-rilaxx 3.9.0 u [`ROADMAP.md`](ROADMAP.md) meta sseħħ il-qtugħ.
+- **Ir-rappurtar ta' vulnerabbiltà fil-linja LTS :** l-istess kanal bħal kwalunkwe verżjoni oħra — a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), qatt kwistjoni pubblika. Għid liema verżjoni ttestjajt (per eżempju `3.9.2`); jiffissa l-art fuq `stable/v3` u huma portati 'l quddiem għal v4.
+- **Linja bażi tas-sigurtà fil-qatgħa LTS :** l-istat tal-iskaner imkejjel, il-gwardja tar-rotta u l-provi tal-kredenzjali pubbliċi huma rreġistrati [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

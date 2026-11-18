@@ -9,6 +9,7 @@
 import { hashInput, summarizeOutput } from "./schemas/audit.ts";
 import { runtimeRequire } from "../../src/lib/db/adapters/runtimeRequire.ts";
 import { isNativeSqliteLoadError } from "../../src/lib/db/core.ts";
+import { isTestContext } from "../../src/lib/dataPaths.ts";
 import { resolveMcpCallerApiKeyId } from "./mcpCallerIdentity.ts";
 
 // ============ Database Connection ============
@@ -307,6 +308,20 @@ async function getDb(): Promise<AuditDatabase | null> {
     const { homedir } = await import("node:os");
     const { join } = await import("node:path");
     const { existsSync } = await import("node:fs");
+
+    // A test run that never chose a DATA_DIR must not write to the developer's real database:
+    // the same rule src/lib/dataPaths.ts applies to the main database (#10428), with the same
+    // opt-in. Not cached, so a DATA_DIR set later in the process still enables auditing.
+    if (
+      !process.env.DATA_DIR &&
+      isTestContext() &&
+      process.env.OMNIROUTE_ALLOW_DEFAULT_DATA_DIR !== "1"
+    ) {
+      console.error(
+        "[MCP Audit] No DATA_DIR in a test context — audit logging disabled instead of using ~/.omniroute"
+      );
+      return null;
+    }
 
     const dbPath = process.env.DATA_DIR
       ? join(process.env.DATA_DIR, "storage.sqlite")

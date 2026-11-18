@@ -35,57 +35,32 @@ npm run test:e2e           # اختیاری مگر تجویز کردہ
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (v3.8.51 سے ڈیفالٹ) — درخواست پر مرحلہ وار، بصورت دیگر براہِ راست
+## npm ٹرسٹڈ پبلشنگ (v3.8.51 سے پہلے سے طے شدہ) — درخواست پر پیش کیا گیا، براہ راست فال بیک کے طور پر
 
-`npm-publish.yml` ڈیفالٹ طور پر **npm Trusted Publishing (OIDC)** کے ذریعے شائع کرتا ہے:
-`stage-npm` جاب (github-hosted) اس رَن کے لیے GitHub کے id-token کو مختصر مدت کی npm
-اسناد سے تبدیل کرتی ہے — repository secrets میں کوئی طویل مدتی npm ٹوکن نہیں، کوئی 2FA پرامپٹ نہیں، اور provenance منسلک ہوتا ہے۔
-اب جبکہ npm ایسے ٹوکنز کو ختم کر رہا ہے جو 2FA کو نظر انداز کرتے ہیں، یہی npm کا منظور شدہ متبادل ہے؛
-یہ WS1.3 کی ضمانت برقرار رکھتے ہوئے اس مکمل خودکار فلو کو بحال کرتا ہے جو پروجیکٹ میں v3.8.48 تک موجود تھا
-(لیک شدہ ٹوکن اکیلا شائع نہیں کر سکتا — کیونکہ کوئی ٹوکن موجود ہی نہیں ہے)۔
+`npm-publish.yml` کے ذریعے شائع ہوتا ہے۔** npm ٹرسٹڈ پبلشنگ (OIDC)** بذریعہ ڈیفالٹ: `stage-npm` جاب (github-hosted) GitHub کے id-token کا تبادلہ کرتا ہے ایک مختصر مدت کے npm اسناد کے لیے اس رن کے لیے — کوئی طویل المدتی npm ٹوکن ریپوزٹری سیکریٹ میں نہیں، کوئی 2FA پرامپٹ، پرووینس منسلک نہیں۔ یہ ہے بائی پاس این پی ایم پابندیاں اب 2FA کو چھوڑنے والے ٹوکنز کو ریٹائر کیا جا رہا ہے۔ یہ WS1.3 گارنٹی رکھتے ہوئے پروجیکٹ کے v3.8.48 تک مکمل طور پر خودکار بہاؤ کو بحال کرتا ہے (ایک لیک شدہ ٹوکن اکیلے — شائع نہیں کر سکتا کوئی ٹوکن نہیں ہے)۔
 
-**ایک بار کا سیٹ اپ (مالک):** npmjs.com → package `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`، repo `OmniRoute`، workflow `npm-publish.yml`
-(environment: none)۔ اس کے موجود ہونے تک خودکار مرحلہ `ENEEDAUTH` کے ساتھ ناکام ہوگا:
-`publish_mode=staged` (ذیل میں) یا `direct` کے ساتھ دوبارہ dispatch کریں۔
+**ایک وقتی سیٹ اپ (مالک):** npmjs.com → پیکیج `omniroute` → ترتیبات → _Trusted Publisher_ → GitHub: مالک `diegosouzapw`، repo `OmniRoute`، ورک فلو `npm-publish.yml` (ماحول: کوئی نہیں)۔ جب تک یہ موجود نہ ہو، خودکار مرحلہ `ENEEDAUTH` کے ساتھ ناکام ہو جاتا ہے : `publish_mode=staged` (نیچے) یا `direct` کے ساتھ دوبارہ بھیجیں۔
 
 ### مرحلہ وار اشاعت (درخواست پر — `publish_mode=staged`)
 
-npm-publish workflow اب براہِ راست شائع نہیں کرتا: یہ پیک شدہ tarball کو بوٹ کرتا ہے
-(`check:pack-boot`) اور پھر `npm stage publish` چلاتا ہے — بعینہٖ وہی bytes registry پر رکھ دی جاتی ہیں،
-مگر مالک کی منظوری تک **انسٹال نہیں کی جا سکتیں**۔ انسانی 2FA گیٹ اب ثبوت سے پہلے نہیں بلکہ
-اس کے بعد آتا ہے۔
+npm-publish ورک فلو اب براہ راست شائع نہیں کرتا ہے: یہ پیکڈ ٹربال (`check:pack-boot`) کو بوٹ کرتا ہے اور پھر `npm stage publish` — چلاتا ہے بالکل صحیح بائٹس رجسٹری پر کھڑی ہیں،** انسٹال نہیں** جب تک مالک منظور نہیں کرتا۔ انسانی 2FA گیٹ AFTER ثبوت میں منتقل ہوا، اس سے پہلے نہیں۔
 
-**workflow کے گرین ہونے کے بعد مالک کا فلو:**
+**ورک فلو سبز ہونے کے بعد مالک کا بہاؤ:**
 
-1. `npm stage list omniroute` — stage id تلاش کریں (یہ workflow summary میں بھی پرنٹ ہوتی ہے)۔
-2. مرحلہ وار رکھی گئی bytes کی تصدیق کریں (تجویز کردہ): `npm stage download <id>`، پھر ڈاؤن لوڈ شدہ
-   tarball کو ایک عارضی prefix میں انسٹال کر کے بوٹ کریں (`npm run check:pack-boot`، CI میں اسی
-   pack→install→boot فیصلے کو خودکار بناتا ہے)۔
-3. `npm stage approve <id>` — 2FA پرامپٹ ہی اشاعت ہے۔ `npm stage reject <id>` اسے مسترد کر دیتا ہے۔
-4. اشاعت کے بعد حفاظتی جانچ: post-publish verifier (v3.8.49 پلان کا WS1.4) ایک صاف container میں
-   public registry سے شائع شدہ ورژن انسٹال کر کے اسے بوٹ کرتا ہے۔
+1. `npm stage list omniroute` — اسٹیج آئی ڈی تلاش کریں ( ورک فلو سمری میں بھی پرنٹ کیا گیا ہے)۔
+2. اسٹیج شدہ بائٹس کی تصدیق کریں (تجویز کردہ): `npm stage download <id>`، پھر ڈاؤن لوڈ کردہ ٹربال کو ایک عارضی سابقہ میں انسٹال کریں اور اسے بوٹ کریں (`npm run check:pack-boot` اسی پیک کو خودکار کرتا ہے → install → boot verdict CI میں)۔
+3. `npm stage approve <id>` — 2FA پرامپٹ IS شائع کریں۔ `npm stage reject <id>` رد کرتا ہے۔
+4. پوسٹ پبلش نیٹ: پوسٹ پبلش تصدیق کنندہ (v3.8.49 پلان کا WS1 4) پبلک رجسٹری سے شائع شدہ ورژن کو صاف کنٹینر میں انسٹال کرتا ہے اور اسے بوٹ کرتا ہے۔
 
-**ہنگامی متبادل:** `publish_mode=direct` کے ساتھ `workflow_dispatch` پرانا فوری
-`npm publish` بحال کرتا ہے (صرف اس صورت میں استعمال کریں جب staging خود درست طور پر کام نہ کرے؛ وجہ درج کریں)۔
+**ایمرجنسی فال بیک:** `workflow_dispatch` `publish_mode=direct` کے ساتھ وراثت کو فوری طور پر بحال کرتا ہے `npm publish` (صرف اس صورت میں استعمال کریں جب اسٹیجنگ خود غلط برتاؤ کرے؛ کیوں ریکارڈ کریں)۔
 
-**ایک بار کی سخت حفاظتی ترتیب (مالک، npmjs.com):** `omniroute` کے لیے Trusted Publisher کو
-stage-only موڈ میں ترتیب دیں، تاکہ لیک شدہ طویل مدتی ٹوکن کہیں سے بھی براہِ راست `npm publish`
-نہ کر سکے — CI صرف stage کر سکتا ہے؛ صرف مالک کا 2FA ریلیز کر سکتا ہے۔
+**ایک بار سخت ہونا (مالک، npmjs.com):** `omniroute` کے لیے ٹرسٹڈ پبلشر کو صرف اسٹیج موڈ میں کنفیگر کریں تاکہ ایک لیک ہونے والا طویل المیعاد ٹوکن براہ راست کسی بھی جگہ سے `npm publish` نہیں کرسکتا — CI صرف اسٹیج کر سکتا ہے۔ صرف مالک کی 2FA ریلیز۔
 
-**خراب artifact کے لیے طریقۂ کار (بلا تبدیلی):** ڈیفالٹ فوری ردِعمل کے طور پر
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` استعمال کریں (چند منٹ، قابلِ واپسی)؛
-`npm unpublish` صرف 72h/no-dependents ونڈو کے اندر استعمال کریں اور کبھی بھی پہلے اقدام کے طور پر نہیں۔
-Docker: کسی version tag کو کبھی دوبارہ نہ لکھیں — rollback کا مطلب `latest` کو آخری درست digest کی طرف دوبارہ اشارہ کرنا ہے۔
+**ٹوٹے ہوئے آرٹفیکٹ پلے بک (بغیر تبدیل شدہ):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` بطور ڈیفالٹ اضطراری (منٹ، ریورس ایبل)؛ `npm unpublish` صرف 72h/no-dependents ونڈو کے اندر اور کبھی بھی پہلی حرکت کے طور پر نہیں۔ Docker: کبھی بھی ورژن ٹیگ کو دوبارہ نہ لکھیں — رول بیک `latest` آخری اچھے ڈائجسٹ پر دوبارہ اشارہ کر رہا ہے۔
 
-**Docker Hub `latest` (ہر مستحکم SemVer اشاعت پر ضروری):**
-`docker-publish` workflow کو **دونوں** `X.Y.Z` اور، جب
-`should-promote-latest.sh` اس کے بلند ترین مستحکم SemVer ہونے کی تصدیق کرے، `:latest`
-کو **اسی digest** کے ساتھ tag کرنا چاہیے۔ جاب کے بعد: Hub کے `latest` کا digest نئے
-SemVer digest کے برابر ہو اور `last_updated` آگے بڑھ چکا ہو۔ `:latest` کو کسی پرانے
-build پر مت چھوڑیں جبکہ release notes ان اصلاحات کا ذکر کر رہے ہوں جو صرف git میں موجود ہیں۔
-Compose quickstarts میں `:latest` استعمال ہوتا ہے؛ GitOps میں `X.Y.Z` کو pin کرنا جاری رکھیں۔
-[Docker ریلیز چینلز](../guides/DOCKER_GUIDE.md#release-channels) اور #10317 دیکھیں۔
+**Docker Hub `latest` (ہر مستحکم SemVer اشاعت پر ضروری ہے):** `docker-publish` ورک فلو کو ٹیگ کرنا ضروری ہے۔** دونوں** `X.Y.Z` اور، جب `should-promote-latest.sh` اتفاق کرتا ہے تو یہ سب سے زیادہ مستحکم SemVer ہے، `:latest` کے ساتھ** ایک ہی ڈائجسٹ** . کام کے بعد: حب `latest` ڈائجسٹ نئے SemVer ڈائجسٹ اور `last_updated` منتقل ہونے کے برابر ہے۔ `:latest` پرانی تعمیر پر مت چھوڑیں جب کہ ریلیز نوٹ ان اصلاحات کے بارے میں بات کرتے ہیں جو صرف گٹ پر موجود ہیں۔ کمپوز کوئیک سٹارٹس `:latest` استعمال کرتے ہیں؛ GitOps `X.Y.Z` کو پن کرتے رہنا چاہئے۔ [Docker ریلیز چینلز](../guides/DOCKER_GUIDE.md#release-channels) اور #10317 دیکھیں۔
+
+**Docker حب تنظیمی ذخیرہ (`cheaperinference/omniroute`):** Docker Hub نام کی جگہوں کے درمیان کسی ذخیرے کو منتقل نہیں کرسکتا، لہذا `diegosouzapw/omniroute` اپنی پل ہسٹری اور ہر ریلیز کو برقرار رکھتا ہے، اور `docker-publish` کی `mirror-org-dockerhub` جاب ہر جاری کردہ ورژن (اور `:latest` کو فروغ دینے پر) `ghcr.io/cheaper-inference/omniroute` سے تنظیم کے ذخیرے میں کاپی کرتی ہے۔ اسے `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` راز کی ضرورت ہے۔ ان کے بغیر کام "Docker Hub org mirror skipped" وارننگ کے ساتھ سبز رہتا ہے اور دوسری رجسٹریاں عام طور پر شائع ہوتی ہیں۔ وہاں بعد میں جاری کردہ ورژن شائع کرنے کے لیے، چلائیں۔** ایکشنز → Mirror Docker امیج کو Docker Hub org → رن ورک فلو پر** `version=X.Y.Z` کے ساتھ (اور اعلی ترین مستحکم ورژن کے لیے `promote_latest` ): یہ موجودہ امیجز کو کاپی کرتا ہے، کوئی دوبارہ تعمیر نہیں۔
 
 ## ہاٹ فکس فاسٹ لین (لیبل `hotfix`)
 
@@ -111,162 +86,159 @@ release branch پر دوبارہ توثیق کی جاتی ہے (مسلسل relea
 
 ## تفصیلی چیک لسٹ
 
-### ریلیز سے پہلے
+### پری ریلیز
 
-- [ ] اس ریلیز کے لیے ہدف بنائے گئے تمام PRs کو `release/vX.Y.0` میں ضم کر دیا گیا ہے
-- [ ] اس ورژن کے تمام کھلے Linear/issue آئٹمز بند کر دیے گئے ہیں یا اگلے سنگِ میل میں منتقل کر دیے گئے ہیں
-- [ ] `release/vX.Y.0` برانچ پر CI کامیاب ہے
-- [ ] کوڈ میں کوئی `TODO(release)` مارکر موجود نہیں: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker بیس امیج تازہ ترین ہے (فی الحال `node:24.15.0-trixie-slim`)
+- [ ] اس ریلیز کے لیے ہدف بنائے گئے تمام PRs کو `release/vX.Y.0` میں ضم کر دیا گیا ہے۔
+- [ ] اس ورژن کے لیے تمام کھلے Linear/issue آئٹمز بند کر دیے گئے ہیں یا اگلے سنگ میل کی طرف دھکیل دیے گئے ہیں۔
+- [ ] `release/vX.Y.0` برانچ پر CI سبز
+- [ ] کوڈ میں کوئی `TODO(release)` مارکر نہیں: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker بیس امیج اپ ٹو ڈیٹ (فی الحال `node:24.15.0-trixie-slim`)
 
-### ورژن اور تبدیلیوں کا ریکارڈ
+### ورژن اور چینج لاگ
 
-- [ ] `/version-bump-cc <patch|minor|major>` چلائیں (Claude Code اسکل)
-  - `package.json`، `electron/package.json` کے ورژن بڑھاتا ہے
-  - آخری ٹیگ کے بعد کے git کمیٹس سے `CHANGELOG.md` دوبارہ بناتا ہے
-  - README.md بیجز اپ ڈیٹ کرتا ہے
-- [ ] CHANGELOG.md کا دستی طور پر جائزہ لیں اور ضرورت ہو تو کمیٹ پیغامات درست کریں
-- [ ] یقینی بنائیں کہ `CHANGELOG.md` کا تازہ ترین semver سیکشن `package.json` کے ورژن کے برابر ہے
-- [ ] آئندہ کام کے لیے `## [Unreleased]` کو تبدیلیوں کے ریکارڈ کا پہلا سیکشن رکھیں
-- [ ] `docs/openapi.yaml` اپ ڈیٹ کریں → `info.version` لازماً `package.json` کے ورژن کے برابر ہو
+- [ ] `/version-bump-cc <patch|minor|major>` چلائیں (Claude کوڈ کی مہارت)
+  - ٹکرانے `package.json`، `electron/package.json`
+  - آخری ٹیگ کے بعد سے git کمٹ سے `CHANGELOG.md` دوبارہ تخلیق کرتا ہے۔
+  - README.md بیجز کو اپ ڈیٹ کرتا ہے۔
+- [ ] CHANGELOG.md دستی طور پر جائزہ لیں اور اگر ضرورت ہو تو کمٹ میسیجز کو صاف کریں۔
+- [ ] اس بات کو یقینی بنائیں کہ `CHANGELOG.md` میں semver کا تازہ ترین سیکشن `package.json` ورژن کے برابر ہے۔
+- [ ] `## [Unreleased]` آنے والے کام کے لیے پہلے چینج لاگ سیکشن کے طور پر رکھیں
+- [ ] `docs/openapi.yaml` → `info.version` کو اپ ڈیٹ کرنا `package.json` ورژن کے برابر ہونا چاہیے۔
 
-### کوڈ کا معیار
+### کوڈ کوالٹی
 
-- [ ] `npm run lint` — 0 خرابیاں (تنبیہات پہلے سے موجود ہیں)
+- [ ] `npm run lint` — 0 غلطیاں (انتباہات پہلے سے موجود ہیں)
 - [ ] `npm run typecheck:core` — صاف
 - [ ] `npm run typecheck:noimplicit:core` — صاف (سخت)
-- [ ] `npm run check:cycles:ratchet` — منجمد `metrics.cycles` حد کے اندر (`check:cycles` اکیلا کسی بھی سائیکل پر 1 کے ساتھ خارج ہوتا ہے، #15281)
-- [ ] `npm run check:any-budget:t11` — بجٹ کے اندر
+- [ ] `npm run check:cycles:ratchet` — منجمد `metrics.cycles` چھت کے اندر (ننگے `check:cycles` کسی بھی سائیکل پر 1 سے باہر نکلتا ہے، #15281)
+- [ ] بجٹ کے اندر `npm run check:any-budget:t11` —
 - [ ] `npm run check:route-validation:t06` — صاف
-- [ ] `npm run check:node-runtime` — معاون رن ٹائم کی کم از کم حد پوری ہو (`>=22.22.2 <23`، `>=24.0.0 <27`، `src/shared/utils/nodeRuntimeSupport.ts` میں `SUPPORTED_NODE_RANGE` کے مطابق؛ `package.json` کے `engines` سے ہم آہنگ)
+- [ ] `npm run check:node-runtime` — تعاون یافتہ رن ٹائم فلور میٹ (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`؛ `package.json` `engines` کے ساتھ منسلک)
 
-### جانچ
+### ٹیسٹنگ
 
-- [ ] `npm run test:unit` — کامیاب
-- [ ] `npm run test:vitest` — کامیاب (MCP سرور، autoCombo، کیش)
-- [ ] `npm run test:coverage` — 60/60/60/60 کی حد پوری ہو (اسٹیٹمنٹس/لائنز/فنکشنز/برانچز)
-- [ ] `npm run test:integration` — کامیاب (اگر تبدیلیاں DB / ہینڈلرز کو متاثر کرتی ہیں)
-- [ ] `npm run test:combo:matrix` — کامیاب (combo حکمتِ عملی میٹرکس: تمام 19 عوامی روٹنگ حکمتِ عملیوں کے انتخابی فیصلوں کو قطعی طور پر ثابت کرتا ہے؛ combo روٹنگ، حکمتِ عملی کے تعین، یا fallback منطق میں تبدیلی کے وقت چلائیں)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **اختیاری/دستی** (گیٹ شدہ حقیقی upstream smoke؛ VPS `root@192.168.0.15` سے صرف پڑھنے کے لیے DB اسنیپ شاٹ حاصل کرتا ہے؛ حقیقی فراہم کنندگان کو کال کرتا ہے اور کریڈٹس خرچ ہوتے ہیں؛ CI میں کبھی نہیں چلتا؛ گیٹ کے بغیر صاف طور پر چھوڑ دیا جاتا ہے)
-- [ ] `npm run test:combo:live:vps` — **اختیاری/دستی** (Phase-3 VPS لائیو smoke: سادہ Node ESM کے ذریعے لائیو `.15` سرور کے خلاف 7 HTTP منظرنامے؛ `ssh root@192.168.0.15` درکار ہے؛ صرف `__live_test__*` combos بناتا/حذف کرتا ہے؛ حقیقی فراہم کنندگان کو کال کرتا ہے؛ CI میں کبھی نہیں چلتا)
-- [ ] `npm run test:e2e` — کامیاب (UI تبدیلیاں)
-- [ ] `npm run test:protocols:e2e` — کامیاب (MCP/A2A تبدیلیاں)
-- [ ] `npm run test:ecosystem` — کامیاب
+- [ ] `npm run test:unit` — پاس
+- [ ] `npm run test:vitest` — پاس (MCP سرور، autoCombo، کیشے)
+- [ ] `npm run test:coverage` — گیٹ 60/60/60/60 مطمئن (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — پاس (اگر تبدیلیاں ٹچ DB / ہینڈلرز)
+- [ ] `npm run test:combo:matrix` — پاس (کومبو حکمت عملی میٹرکس: تمام 22 عوامی روٹنگ حکمت عملیوں کے انتخاب کے فیصلوں کو ثابت کرتا ہے؛ کامبو روٹنگ، حکمت عملی ریزولوشن، یا فال بیک منطق کو چھوتے وقت چلائیں)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (گیٹڈ ریئل اپ اسٹریم اسموک؛ ذرائع VPS `root@192.168.0.15` سے صرف پڑھنے کے لیے DB سنیپ شاٹ؛ حقیقی فراہم کنندگان کو ٹکراتے ہیں، کریڈٹ کی لاگت آتی ہے؛ CI میں کبھی نہیں چلتا؛ گیٹ کے بغیر صاف طور پر نہیں جاتا)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS لائیو سموک: سادہ نوڈ ESM کے ذریعے براہ راست `.15` سرور کے خلاف 7 HTTP منظرنامے؛ `ssh root@192.168.0.15` کی ضرورت ہے؛ creates/deletes صرف `__live_test__*` کومبوز؛ حقیقی فراہم کنندگان کو ٹکراتے ہیں؛ CI میں کبھی نہیں چلتا ہے)
+- [ ] `npm run test:e2e` — پاس (UI تبدیلیاں)
+- [ ] `npm run test:protocols:e2e` — پاس (MCP/A2A تبدیلیاں)
+- [ ] `npm run test:ecosystem` — پاس
 
-### Hooks (Husky سے توثیق شدہ)
+### ہکس (ہسکی کی توثیق شدہ)
 
-Husky hooks، `.husky/` میں موجود ہیں اور git کارروائیوں پر خودکار طور پر چلتے ہیں۔
+ہسکی ہکس `.husky/` میں رہتے ہیں اور خود بخود گٹ آپریشنز پر چلتے ہیں۔
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** تیز اور قطعی گیٹس — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 کو فعال کیا گیا)۔ جان بوجھ کر `test:unit` کو شامل نہیں کرتا (سست ہے؛ CI کی `test-unit` جاب میں شامل ہے)۔
-  - ریلیز برانچز push کرنے سے پہلے `npm run test:unit` دستی طور پر چلائیں۔
+- **قبل از کمٹ:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **پری پش:** فاسٹ ڈیٹرمینسٹک گیٹس — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (فعال 2026-06-13)۔ جان بوجھ کر `test:unit` خارج کرتا ہے (سست؛ CI `test-unit` جاب کے ذریعے احاطہ کرتا ہے)۔
+  - رہائی کی شاخوں کو آگے بڑھانے سے پہلے `npm run test:unit` دستی طور پر چلائیں۔
 
-اگر کوئی hook ناکام ہو: بنیادی مسئلہ درست کریں، `--no-verify` کے ذریعے اسے نظرانداز نہ کریں۔
+اگر کوئی ہک ناکام ہوجاتا ہے: بنیادی مسئلہ کو حل کریں، `--no-verify` کے ساتھ بائی پاس نہ کریں۔
 
-### روایتی کمیٹس
+### روایتی کمٹ
 
-ریلیز میں شامل تمام کمیٹس کو لازماً `type(scope): subject` فارمیٹ کی پیروی کرنی چاہیے۔
+تمام ریلیز کے پابند عہدوں کو `type(scope): subject` فارمیٹ پر عمل کرنا چاہیے۔
 
-**درست اقسام:** `feat`، `fix`، `refactor`، `docs`، `test`، `chore`، `perf`، `style`، `ci`
+**درست اقسام:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**درست دائرۂ کار:** `db`، `sse`، `oauth`، `dashboard`، `api`، `cli`، `docker`، `ci`، `mcp`، `a2a`، `memory`، `skills`، `cloud-agent`، `guardrails`، `compression`، `auto-combo`، `resilience`، `providers`، `executors`، `translator`، `domain`، `authz`
+**درست دائرہ کار:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `skills`, `cloud-agent`, `guardrails`, `compression` `translator` `auto-combo`, `resilience`, `providers`, `executors`، `domain` `memory` `authz`
 
-اہم تبدیلیاں: `BREAKING CHANGE:` فوٹر شامل کریں یا دائرۂ کار کے بعد `!` لگائیں (مثلاً `feat(api)!: drop /v0`)۔
+بریکنگ تبدیلیاں: دائرہ کار کے بعد `BREAKING CHANGE:` فوٹر یا `!` شامل کریں (جیسے `feat(api)!: drop /v0`)۔
 
-### دستاویزات
+### دستاویزی
 
-- [ ] `npm run check:docs-sync` کامیاب ہو (pre-commit کے ذریعے خودکار طور پر چلتا ہے)
-- [ ] `npm run check:docs-all` کامیاب ہو (جامع جانچ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` کوڈ 0 کے ساتھ خارج ہو — کوڈ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` کا env معاہدہ برقرار ہے
-- [ ] `npm run check:doc-links` کوڈ 0 کے ساتھ خارج ہو — تنظیمِ نو کے بعد کوئی اندرونی markdown حوالہ ٹوٹا ہوا نہیں
-- [ ] اسٹوریج/رن ٹائم کے انحراف کے لیے `docs/architecture/ARCHITECTURE.md` کا جائزہ لیا گیا ہے
-- [ ] env var اور آپریشنل انحراف کے لیے `docs/guides/TROUBLESHOOTING.md` کا جائزہ لیا گیا ہے
-- [ ] اگر `.env.example` تبدیل ہوا ہے: `docs/reference/ENVIRONMENT.md` اپ ڈیٹ کیا گیا ہے
-- [ ] اگر نئی خصوصیت کا UI ہے: `docs/guides/USER_GUIDE.md` میں اس کا ذکر موجود ہے
-- [ ] اگر نئی خصوصیت کا API ہے: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` اپ ڈیٹ کیے گئے ہیں
-- [ ] اگر نئی خصوصیت ایک ماڈیول ہے: مختص `docs/<MODULE>.md` موجود ہے
-- [ ] اگر اہم تبدیلی ہے: `docs/guides/TROUBLESHOOTING.md` میں منتقلی کا نوٹ موجود ہے
+- [ ] `npm run check:docs-sync` پاسز (پری کمٹ کے ذریعے خود کار طریقے سے چلایا جاتا ہے)
+- [ ] `npm run check:docs-all` پاسز (چھتری: docs-sync + docs-counts + env-doc-sync + فرسودہ ورژن + دستاویز کے لنکس)
+- [ ] `npm run check:env-doc-sync` 0 — کوڈ سے باہر نکلتا ہے ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env معاہدہ برقرار ہے
+- [ ] `npm run check:doc-links` ری اسٹرکچرنگ کے بعد 0 — کوئی ٹوٹا ہوا اندرونی مارک ڈاؤن حوالہ جات سے باہر نکلتا ہے۔
+- [ ] `docs/architecture/ARCHITECTURE.md` نے storage/runtime بڑھے کے لیے جائزہ لیا۔
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var اور آپریشنل ڈرفٹ کا جائزہ لیا۔
+- [ ] اگر `.env.example` تبدیل ہو گیا: `docs/reference/ENVIRONMENT.md` اپ ڈیٹ ہو گیا۔
+- [ ] اگر نئی خصوصیت میں UI ہے: `docs/guides/USER_GUIDE.md` اس کا ذکر کرتا ہے۔
+- [ ] اگر نئی خصوصیت میں API ہے: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` اپ ڈیٹ کر دیا گیا ہے۔
+- [ ] اگر نئی خصوصیت ایک ماڈیول ہے: وقف شدہ `docs/<MODULE>.md` موجود ہے۔
+- [ ] تبدیلی کی صورت میں: `docs/guides/TROUBLESHOOTING.md` میں منتقلی کا نوٹ ہے۔
 
 ### i18n
 
-- [ ] `npm run i18n:check` کوڈ 0 کے ساتھ خارج ہو — ترجمے کی حالت (`.i18n-state.json`) ماخذ دستاویزات کے ساتھ ہم آہنگ ہے (سخت موڈ میں کوئی منحرف ماخذ نہیں؛ آخری وقت کی دستاویزی درستیوں کے لیے warn-mode کی مشاورتی تنبیہ قابلِ قبول ہے، لیکن ٹیگ لگانے سے پہلے نتیجہ 0 ہونا چاہیے)
-- [ ] `npm run i18n:check-ui-coverage` کوڈ 0 کے ساتھ خارج ہو — ہر UI locale کم از کم 80% کوریج کی حد پر یا اس سے اوپر ہے
-- [ ] `npm run i18n:sync-ui:dry` تمام 66 ہدفی locales میں 0 گم شدہ keys رپورٹ کرے (`en` ماخذ کے علاوہ ہر locale)
-- [ ] اگر ماخذ انگریزی دستاویزات تبدیل ہوئی ہیں تو ٹیگ لگانے سے پہلے `npm run i18n:run` چلائیں (`.env` میں `OMNIROUTE_TRANSLATION_API_KEY` درکار ہے)
-- [ ] اگر ترجمے کی شراکت معمولی ہو تو اسے اگلی ریلیز تک مؤخر کیا جا سکتا ہے (CHANGELOG میں درج کریں)
+- [ ] `npm run i18n:check` ماخذ دستاویزات کے ساتھ مطابقت پذیری میں 0 — ترجمہ حالت (`.i18n-state.json`) سے باہر نکلتا ہے (سخت موڈ میں کوئی بہتے ہوئے ذرائع نہیں؛ وارننگ موڈ ایڈوائزری آخری منٹ کے ڈاک ٹچ اپس کے لیے قابل قبول ہے، لیکن ٹیگ کرنے سے پہلے 0 ہونا چاہیے)
+- [ ] `npm run i18n:check-ui-coverage` 80% کوریج فلور پر یا اس سے اوپر ہر UI لوکل 0 — باہر نکلتا ہے
+- [ ] `npm run i18n:sync-ui:dry` نے تمام 66 ٹارگٹ لوکلز میں 0 غائب کیز کی اطلاع دی ہے (ہر لوکیل سوائے `en` سورس کے)
+- [ ] اگر ماخذ انگریزی دستاویزات کو تبدیل کیا گیا ہے تو، ٹیگ کرنے سے پہلے `npm run i18n:run` ( `.env` میں `OMNIROUTE_TRANSLATION_API_KEY` کی ضرورت ہے) چلائیں
+- [ ] اگر معمولی ہو تو ترجمے کی شراکت کو اگلی ریلیز تک موخر کیا جا سکتا ہے ( CHANGELOG میں ٹریک کریں)
 
-### ڈیٹابیس مائیگریشنز
+### ڈیٹا بیس کی منتقلی
 
-- [ ] اگر `src/lib/db/migrations/` میں نئی فائلیں ہیں:
-  - [ ] ہر مائیگریشن idempotent ہے (`CREATE TABLE IF NOT EXISTS`، وغیرہ)
-  - [ ] مائیگریشنز transactions میں لپٹی ہوئی ہیں
-  - [ ] درست ترتیب سے نمبر دیے گئے ہیں (تسلسل میں کوئی خلا نہیں)
-- [ ] تازہ انسٹالیشن پر جانچ کریں: `~/.omniroute/omniroute.db` حذف کریں اور `npm run dev` چلائیں
-- [ ] موجودہ انسٹالیشن پر جانچ کریں: DB کا بیک اپ لیں، مائیگریشن چلائیں، schema کی توثیق کریں
-- [ ] اگر مائیگریشن tables کو دوبارہ لکھتی ہے تو WAL فائلیں (`-wal`، `-shm`) درست طریقے سے سنبھالی گئی ہیں
+- [ ] اگر `src/lib/db/migrations/` کے پاس نئی فائلیں ہیں:
+  - [ ] ہر ہجرت غیرمعمولی ہے (`CREATE TABLE IF NOT EXISTS`، وغیرہ)
+  - [ ] ہجرتیں لین دین میں لپٹی ہوئی ہیں۔
+  - [ ] صحیح طریقے سے شمار کیا گیا (ترتیب میں کوئی فرق نہیں)
+- [ ] تازہ انسٹال پر ٹیسٹ کریں: `~/.omniroute/omniroute.db` حذف کریں اور `npm run dev` چلائیں۔
+- [ ] موجودہ انسٹال پر ٹیسٹ کریں: بیک اپ DB، منتقلی چلائیں، اسکیما کی تصدیق کریں۔
+- [ ] WAL فائلیں (`-wal`, `-shm`) درست طریقے سے ہینڈل ہوتی ہیں اگر منتقلی میزیں دوبارہ لکھتی ہے
 
-### پرووائیڈر کیٹلاگ (Zod سے توثیق شدہ)
+### فراہم کنندہ کیٹلاگ (زوڈ کی توثیق شدہ)
 
-- [ ] `src/shared/constants/providers.ts` کی Zod اسکیما لوڈ ہوتے وقت درست ہو
-  - [ ] تمام پرووائیڈرز میں مطلوبہ فیلڈز (`id`، `label`، `kind` وغیرہ) موجود ہوں
-  - [ ] نئے مفت پرووائیڈرز کے لیے `freeNote` فراہم کیا گیا ہو
-  - [ ] OAuth پرووائیڈرز کا `oauthConfig`، `src/lib/oauth/constants/oauth.ts` میں رجسٹرڈ ہو
-- [ ] اگر نیا پرووائیڈر شامل کیا گیا ہے: `open-sse/executors/` میں اس کا متعلقہ ایگزیکیوٹر موجود ہو
-- [ ] اگر فارمیٹ OpenAI کا نہیں ہے: `open-sse/translator/` میں ٹرانسلیٹر موجود ہو
-- [ ] ماڈلز `open-sse/config/providerRegistry.ts` میں رجسٹرڈ ہوں
-- [ ] `tests/unit/` میں یونٹ ٹیسٹس پرووائیڈر کی درجہ بندی اور روٹنگ کا احاطہ کرتے ہوں
+- [ ] `src/shared/constants/providers.ts` Zod اسکیما لوڈ کے وقت درست ہے۔
+  - [ ] تمام فراہم کنندگان کے پاس مطلوبہ فیلڈز ہیں (`id`، `label`، `kind`، وغیرہ)
+  - [ ] `freeNote` نئے مفت فراہم کنندگان کے لیے فراہم کی گئی ہے۔
+  - [ ] OAuth فراہم کرنے والوں کے پاس `src/lib/oauth/constants/oauth.ts` میں `oauthConfig` رجسٹرڈ ہے۔
+- [ ] اگر نیا فراہم کنندہ شامل کیا گیا ہے: `open-sse/executors/` میں متعلقہ ایگزیکٹو
+- [ ] اگر اوپن اے آئی فارمیٹ نہ ہو: `open-sse/translator/` میں مترجم
+- [ ] `open-sse/config/providerRegistry.ts` میں رجسٹرڈ ماڈلز
+- [ ] `tests/unit/` کور فراہم کنندہ کی درجہ بندی اور روٹنگ میں یونٹ ٹیسٹ
 
 ### ڈیسک ٹاپ (Electron)
 
-اگر `electron/` تبدیل ہوا ہے:
+اگر `electron/` بدل گیا ہے:
 
-- [ ] `npm run electron:smoke:packaged` کامیاب ہو
-- [ ] `:win`، `:mac`، `:linux` میں سے کم از کم ایک کے لیے بلڈز ٹیسٹ کیے گئے ہوں
-- [ ] کوڈ سائننگ سرٹیفکیٹس کی میعاد ختم نہ ہوئی ہو (اگر سائننگ کی جا رہی ہو)
-- [ ] `electron/package.json` کا ورژن روٹ `package.json` سے مماثل ہو
-- [ ] اگر `stable` پر ریلیز کی جا رہی ہو تو خودکار اپ ڈیٹ چینل پوائنٹر اپ ڈیٹ کیا گیا ہو
+- [ ] `npm run electron:smoke:packaged` گزر جاتا ہے۔
+- [ ] `:win`, `:mac`, `:linux` میں سے کم از کم ایک کے لیے جانچ کی گئی تعمیرات
+- [ ] کوڈ پر دستخط کرنے والے سرٹیفکیٹ کی میعاد ختم نہیں ہوئی ہے (اگر دستخط کر رہے ہیں)
+- [ ] `electron/package.json` ورژن روٹ `package.json` سے میل کھاتا ہے۔
+- [ ] `stable` کو جاری کرنے پر چینل پوائنٹر کو خودکار اپ ڈیٹ کریں۔
 
-### بلڈ لے آؤٹ
+### لے آؤٹ بنائیں
 
-ریپوزٹری تین الگ آؤٹ پٹ ڈائریکٹریز استعمال کرتی ہے — انہیں کبھی باہم نہ ملائیں:
+ریپوزٹری تین الگ آؤٹ پٹ ڈائریکٹریز کا استعمال کرتی ہے — ان کو کبھی نہیں ملاتا:
 
-| ڈائریکٹری | مقصد                                                           | ٹریک شدہ؟         |
-| --------- | -------------------------------------------------------------- | ----------------- |
-| `src/`    | ایپلیکیشن سورس (TypeScript / TSX)                              | ہاں               |
-| `.build/` | بلڈ کے عبوری فائلز — `next build` آؤٹ پٹ (`distDir`)           | نہیں (gitignored) |
-| `dist/`   | قابلِ ترسیل npm بنڈل — `assembleStandalone` کے ذریعے تیار کردہ | نہیں (gitignored) |
+| ڈائریکٹری | مقصد                                                  | ٹریک کیا؟        |
+| --------- | ----------------------------------------------------- | ---------------- |
+| `src/`    | درخواست کا ذریعہ (TypeScript / TSX)                   | جی ہاں           |
+| `.build/` | انٹرمیڈیٹس کی تعمیر — `next build` آؤٹ پٹ (`distDir`) | نہیں (نظر انداز) |
+| `dist/`   | `assembleStandalone` کی طرف سے جمع کردہ npm بنڈل —    | نہیں (نظر انداز) |
 
-> **آپریٹر نوٹ:** ریموٹ VPS امیج ڈائریکٹری بدستور `/usr/lib/node_modules/omniroute/app/` ہے۔
-> صرف **ریپوزٹری کے اندر موجود** بلڈ آؤٹ پٹ منتقل ہوا (`app/` → `dist/`)۔ ڈپلائے اسکلز
-> `dist/` کے مواد کو ریموٹ `app/` ڈائریکٹری میں rsync کرتی ہیں — VPS پاتھ میں کسی تبدیلی کی ضرورت نہیں۔
+> **آپریٹر نوٹ:** ریموٹ VPS امیج ڈائرکٹری `/usr/lib/node_modules/omniroute/app/` ہی رہتی ہے۔ صرف** ریپو میں** تعمیر آؤٹ پٹ منتقل (`app/` → `dist/`)۔ ریموٹ `app/` dir — میں rsync `dist/` مشمولات کی تعیناتی کی مہارتیں VPS راستے میں تبدیلی کی ضرورت نہیں ہے۔
 
 **سنگل بلڈ فلو:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (صفائی)
-  └─ next build → .build/next/   (عبوری فائلز)
-  └─ assembleStandalone          (standalone + static + public + natives کو dist/ میں کاپی کرتا ہے)
-  └─ writes dist/BUILD_SHA       (HEAD سینٹینل)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-ڈپلائے کے لیے `npm run build` کے بعد الگ سے `npm run build:cli` مت چلائیں — اس کے بجائے
-`npm run build:release` استعمال کریں، جو ایک ہی کمانڈ میں صاف ری بلڈ + سینٹینل بناتا ہے۔
+کیا NOT `npm run build` چلائیں اس کے بعد — تعیناتی کے لیے علیحدہ `npm run build:cli` استعمال کریں `npm run build:release` جو ایک کمانڈ میں کلین ریبلڈ + سینٹینل کرتا ہے۔
 
-### آرٹیفیکٹ کی توثیق
+### آرٹفیکٹ کی توثیق
 
-- [ ] `npm run build:release` کامیاب ہو اور `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` صاف ہو — کوئی `app.__qa_backup`، `scripts/scratch`، `package-lock.json` یا دوسری مقامی باقیات نہ ہوں
-- [ ] بلڈ کے بعد `dist/server.js` موجود ہو
-- [ ] اختیاری مقامی پیکجڈ رن ٹائم اسموک ٹیسٹ: `npm run dev:candidate -- build` کے بعد `npm run dev:candidate -- validate` ایک الگ تھلگ `DATA_DIR` پر پیک شدہ tarball کو بوٹ کرتا ہے اور `/api/health` + `/v1/models` کو چیک کرتا ہے (دیکھیے [کنٹریبیوشن گولڈن پاتھ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` کامیاب ہوتا ہے اور `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` کلین — no `app.__qa_backup`، `scripts/scratch`، `package-lock.json`، یا دیگر مقامی باقیات
+- [ ] `dist/server.js` تعمیر کے بعد موجود ہے۔
+- [ ] اختیاری مقامی پیکڈ رن ٹائم دھواں: `npm run dev:candidate -- validate` `npm run dev:candidate -- build` کے بعد پیکڈ ٹربال کو الگ تھلگ `DATA_DIR` پر بوٹ کرتا ہے اور `/api/health` + `/v1/models` چیک کرتا ہے (دیکھیں [کنٹریبیوشن گولڈن پاتھ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### ٹیگنگ اور ریلیز
 
-- [ ] `/generate-release-cc` چلائیں (Claude Code اسکل):
-  - `vX.Y.Z` ٹیگ بناتا ہے
-  - ٹیگ اور برانچ پش کرتا ہے
-  - چینج لاگ متن کے ساتھ GitHub Release کھولتا ہے
-  - Electron انسٹالرز منسلک کرتا ہے (اگر بنائے گئے ہوں)
+- [ ] `/generate-release-cc` چلائیں (Claude کوڈ کی مہارت):
+  - ٹیگ `vX.Y.Z` بناتا ہے۔
+  - ٹیگ اور شاخ کو دھکیلتا ہے۔
+  - چینج لاگ باڈی کے ساتھ GitHub ریلیز کھولتا ہے۔
+  - Electron انسٹالرز کو منسلک کرتا ہے (اگر بنایا گیا ہے)
 - [ ] یا دستی طور پر:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +246,45 @@ npm run build:release
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### ڈپلائے
+### تعینات کریں۔
 
-ڈپلائے اسکلز ہلکا rsync فلو استعمال کرتی ہیں — نہ `npm pack`، نہ `npm i -g`:
+تعیناتی کی مہارتیں لائٹ rsync فلو استعمال کریں — no `npm pack`، no `npm i -g`:
 
-- [ ] ہدف سے مماثل ڈپلائے اسکل استعمال کریں:
-  - `/deploy-vps-local-cc` — مقامی VPS (192.168.0.15)
+- [ ] تعیناتی کی مہارت کا استعمال کریں جو ہدف سے میل کھاتا ہے:
+  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — دونوں
-- [ ] ڈپلائے کرنے سے پہلے تصدیق کریں کہ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] بلڈ ایسی جگہ چلنا چاہیے جہاں `node_modules` حقیقی ہو (مرکزی چیک آؤٹ یا `npm ci` کیا گیا worktree — symlink شدہ worktree نہیں)
-- [ ] ڈپلائے شدہ انسٹینس کا اسموک ٹیسٹ کریں:
-  - `/dashboard/health` کھولیں → چیک کریں کہ ورژن اسٹرنگ ریلیز سے مماثل ہے
-  - کسی معلوم پرووائیڈر کے خلاف `/v1/chat/completions` ریکویسٹ چلائیں
-  - تصدیق کریں کہ `/api/monitoring/health`، `CLOSED` سرکٹ بریکرز واپس کرتا ہے
-  - تصدیق کریں کہ MCP ٹرانسپورٹس جواب دیتے ہیں (`/mcp` HTTP، `/mcp-sse` SSE)
+- [ ] تعینات کرنے سے پہلے، `dist/BUILD_SHA` == `git rev-parse --short HEAD` تصدیق کریں۔
+- [ ] جہاں `node_modules` اصلی ہو وہاں تعمیر کو چلنا چاہیے (مین چیک آؤٹ یا `npm ci` worktree — NOT ایک ہم آہنگ ورک ٹری)
+- [ ] دھواں ٹیسٹ تعینات مثال:
+  - کھولیں `/dashboard/health` → چیک ورژن سٹرنگ میچ ریلیز
+  - کسی معروف فراہم کنندہ کے خلاف `/v1/chat/completions` درخواست چلائیں۔
+  - تصدیق کریں کہ `/api/monitoring/health` `CLOSED` سرکٹ بریکر واپس کرتا ہے۔
+  - MCP ٹرانسپورٹ کے جواب کی تصدیق کریں (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### ریلیز کے بعد
+### رہائی کے بعد
 
-- [ ] `/capture-release-evidences-cc` چلائیں (Claude Code اسکل)
-  - نئی خصوصیات کے WebP اسکرین شاٹس/ریکارڈنگز محفوظ کرتا ہے
-  - انہیں ریلیز نوٹس / بلاگ پوسٹ کے ساتھ منسلک کرتا ہے
-- [ ] ریلیز کے اعلان کے ساتھ GitHub Discussions / Discord کو اپ ڈیٹ کریں
-- [ ] اگلے ورژن کے لیے مائل اسٹون کھولیں
-- [ ] اگر اہم ہو: ڈسکشن پن کریں یا ایپ کے اندر بینر کے لیے `news.json` میں پوسٹ کریں
+- [ ] `/capture-release-evidences-cc` چلائیں (Claude کوڈ کی مہارت)
+  - نئی خصوصیات کے WebP screenshots/recordings کیپچر کرتا ہے۔
+  - ریلیز نوٹس / بلاگ پوسٹ کے ساتھ منسلک کرتا ہے۔
+- [ ] GitHub ڈسکشنز / Discord کو ریلیز کے اعلان کے ساتھ اپ ڈیٹ کریں۔
+- [ ] اگلے ورژن کے لیے سنگ میل کھولیں۔
+- [ ] اگر اہم ہے: ایپ بینر کے لیے `news.json` میں بحث کو پن کریں یا پوسٹ کریں۔
 
-### Radar عوامی لانچ گیٹ
+### ریڈار پبلک لانچ گیٹ
 
-Radar کا اعلان دانستہ طور پر `active: false` کے ساتھ کمٹ کیا گیا ہے۔ ذیل کی ہر شے کے ثبوت
-فراہم ہونے کے بعد ایک الگ تبدیلی کے ذریعے اسے فعال کیا جائے گا:
+ریڈار کا اعلان `active: false` کے ساتھ جان بوجھ کر کیا گیا ہے۔ مندرجہ ذیل ہر آئٹم کے ثبوت کے بعد ایکٹیویشن ایک الگ تبدیلی ہے:
 
-- [ ] تمام اسٹیک شدہ Radar PRs مرج ہو چکے ہوں اور release-tip CI سبز ہو
-- [ ] `RADAR_ENABLED` کو بدستور بطور ڈیفالٹ بند رکھتے ہوئے OSS Radar روٹس کو ڈپلائے اور اسموک ٹیسٹ کریں
-- [ ] نامزد Radar ہوسٹ پر `GET /planos`، `/termos`، `/privacidade`، اور `/reembolso` کا اسموک ٹیسٹ کریں
-- [ ] نجی سروس میں آپریٹر کی شناخت/رابطہ/پتہ اور مالک سے منظور شدہ قانونی جائزہ ریکارڈ کریں
-- [ ] صرف ٹیسٹ موڈ میں Stripe Checkout اور سائن شدہ webhook آزمائیں
-- [ ] منظور شدہ مرسل/ڈومین کے ساتھ ایک انکرپٹڈ ٹرانزیکشنل ای میل کی ترسیل آزمائیں
-- [ ] بیک اپ ریسٹور اور زیرِ نگرانی، بجٹ کی حد کے پابند ایک تحقیقی رن کا ثبوت دیں
-- [ ] عطیے کا ثبوت قبول کرنے سے پہلے BRL/PIX جائزہ پالیسی منظور کریں
-- [ ] صرف سابقہ گیٹس مکمل ہونے کے بعد عوامی Checkout فعال کریں، پھر نئی `news.json` ID کو فعال کریں
-- [ ] تصدیق کریں کہ Home بینر مقامی زبان کا متن استعمال کرتا ہے اور پرانی ID مسترد کیے جانے کے بعد نئی ID دوبارہ ظاہر ہوتی ہے
+- [ ] تمام اسٹیک شدہ Radar PRs ضم کر دیا گیا ہے اور ریلیز ٹپ CI سبز ہے۔
+- [ ] OSS ریڈار کے راستوں کو `RADAR_ENABLED` کے ساتھ ڈیفالٹ کے طور پر بند کریں
+- [ ] نامی ریڈار میزبان پر `GET /planos`، `/termos`، `/privacidade`، اور `/reembolso` دھواں
+- [ ] نجی سروس میں ریکارڈ آپریٹر identity/contact/address اور مالک سے منظور شدہ قانونی جائزہ
+- [ ] صرف ٹیسٹ موڈ میں اسٹرائپ چیک آؤٹ اور دستخط شدہ ویب ہک کی مشق کریں۔
+- [ ] منظور شدہ sender/domain کے ساتھ ایک انکرپٹڈ ٹرانزیکشنل ای میل ڈیلیوری کی مشق کریں۔
+- [ ] بیک اپ کی بحالی اور ایک زیر نگرانی، بجٹ کے مطابق تحقیق کو ثابت کریں۔
+- [ ] عطیہ کے ثبوت کو قبول کرنے سے پہلے BRL/PIX کی نظرثانی کی پالیسی کو منظور کریں۔
+- [ ] پچھلے گیٹس کے بعد ہی عوامی چیک آؤٹ کو فعال کریں، پھر نئے `news.json` ID فعال کریں
+- [ ] تصدیق کریں کہ ہوم بینر لوکلائزڈ کاپی کا استعمال کرتا ہے اور پرانے ID کو برخاست کرنے کے بعد ایک نیا ID دوبارہ ظاہر ہوتا ہے۔
 
 ## ایمبیڈڈ سروسز اسموک (v3.8.4+)
 
