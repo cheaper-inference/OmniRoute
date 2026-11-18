@@ -43,6 +43,7 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
+import { observeMuseSubscriptionUsage } from "../../services/museSubscriptionUsage.ts";
 import {
   captureCodexConnectionFence,
   runWithCodexConnectionFence,
@@ -472,6 +473,13 @@ export async function executeProviderRequest(
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
             }
+            // Muse Code reports its subscription usage in the stream itself; keep the reading.
+            res.response = await observeMuseSubscriptionUsage({
+              provider,
+              connectionId: attemptConnectionId,
+              response: res.response,
+              isProbe: shouldIsolateProbeFailures,
+            });
             if (
               attemptConnectionId &&
               res.response.status === 429 &&

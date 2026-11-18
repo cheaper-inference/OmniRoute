@@ -8,6 +8,7 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-vscode-re
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "vscode-responses-models-secret";
 
+const { NOAUTH_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
@@ -16,6 +17,13 @@ const modelsDb = await import("../../src/lib/db/models.ts");
 const vscodeModelsRoute = await import("../../src/app/api/v1/vscode/[token]/models/route.ts");
 const vscodeRawModelsRoute =
   await import("../../src/app/api/v1/vscode/raw/[token]/models/route.ts");
+
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+let hordeCalls = 0;
+test.mock.method(aiHordeImageCatalog, "ensureFresh", async () => {
+  hordeCalls++;
+  throw new Error("Unexpected live image discovery in the Codex metadata fixture");
+});
 
 type MetadataModel = {
   id?: string;
@@ -47,6 +55,9 @@ test("vscode model metadata routes keep Responses text-generation models", async
     requireLogin: true,
     password: "hashed-password",
     requireAuthForModels: true,
+    // This fixture exercises Codex text metadata, not no-auth live discovery or auto pools.
+    blockedProviders: Object.values(NOAUTH_PROVIDERS).map((provider) => provider.id),
+    hideAutoCombos: true,
   });
   const connection = await providersDb.createProviderConnection({
     provider: "codex",
@@ -91,6 +102,7 @@ test("vscode model metadata routes keep Responses text-generation models", async
     (entry) => entry.root === "future-codex-responses"
   );
 
+  assert.equal(hordeCalls, 0, "Codex metadata must not depend on live Horde discovery");
   assert.equal(rawResponse.status, 200);
   assert.equal(groupedResponse.status, 200);
   assert.ok(rawModel, "raw metadata route dropped a Responses text-generation model");
