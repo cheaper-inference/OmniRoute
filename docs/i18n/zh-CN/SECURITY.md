@@ -6,11 +6,11 @@
 
 ## 报告漏洞
 
-如果您在 OmniRoute 中发现安全漏洞，请负责任地进行报告：
+如果您发现OmniRoute中存在安全漏洞，请负责任地报告：
 
-1. **请勿**创建公开的 GitHub issue
-2. 使用 [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. 请包含：漏洞描述、复现步骤和潜在影响
+1. **DO NOT**公开GitHub问题
+2. 使用[GitHub安全公告](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. 包括：描述、复制步骤和潜在影响
 
 ## 响应时间表
 
@@ -29,23 +29,14 @@
 | 3.7.x   | ✅ 安全支持                                 |
 | < 3.7.0 | ❌ 不受支持                                 |
 
-## LTS 支持期限（v3.9.x）
+## LTS支持窗口 (v3.9.x)
 
-3.8.59 之后的下一个版本是 **3.9.0**，该版本将在
-`stable/v3` 分支上开启长期支持线（参见 [`ROADMAP.md`](ROADMAP.md) → “阶段 3 — v3.9.0 LTS”）。
+3.8.59之后的下一个版本是**3.9.0** ，在`stable/v3`分支上打开长期支撑线（参见[`ROADMAP.md`](ROADMAP.md) → “第3阶段— v3.9.0 LTS”）。
 
-- **`stable/v3` 接收的更新：**错误修复、安全补丁和提供者更新。新功能将进入 v4 渠道；LTS 支持线以稳定性为首要目标。在整个 v4 周期内，`npm install omniroute`
-  （`latest` dist-tag）将保持在 v3。
-- **支持期限：**`stable/v3` 将在 **3.9.0 发布后的 12 个月内，或在 v4.0.0 以 `latest` 发布后的 90 天内接收安全修复和关键回归修复——
-  以两者中较晚的日期为准**。确定的结束日期将在 3.9.0 发布时记录于其发行说明和
-  [`ROADMAP.md`](ROADMAP.md) 中。
-- **报告 LTS 支持线中的漏洞：**使用与任何其他版本相同的渠道——
-  私密的 [GitHub 安全公告](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
-  切勿提交公开议题。请说明测试的版本（例如 `3.9.2`）；修复将合入
-  `stable/v3`，并向前移植到 v4。
-- **LTS 发布时的安全基线：**扫描器的实测状态、路由防护及
-  公共凭据证明记录在
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) 中。
+- **`stable/v3`收到什么：**错误修复、安全补丁和提供者更新。新功能进入v4通道； LTS线是稳定第一的。 `npm install omniroute` （ `latest` dist-tag）在整个 v4 周期中保留在 v3 上。
+- **窗口持续时间：** `stable/v3`收到**3.9.0 版本削减后 12 个月内的安全修复和关键回归，或 v4.0.0 发布为`latest` —后 90 天（以较晚者为准）** 。最终的结束日期记录在 3.9.0 发行说明中以及削减发生时的[`ROADMAP.md`](ROADMAP.md)中。
+- **报告LTS行中的漏洞：**与任何其他版本相同的频道—是私人[GitHub安全建议](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)，绝不是公开问题。说出您测试的版本（例如`3.9.2`）；修复了`stable/v3`上的问题并向前移植到 v4。
+- **LTS削减时的安全基线：**测量的扫描仪状态、路由保护和公共凭证证明记录在[`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md)中。
 
 ---
 

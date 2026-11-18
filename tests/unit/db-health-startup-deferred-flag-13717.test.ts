@@ -23,7 +23,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 const core = await import(process.env.OMNI_CORE_TS_PATH);
-// Without a "test"-tokened argv/NODE_ENV, shouldRunStartupDbHealthCheck()
+// Without inherited runner signals, shouldRunStartupDbHealthCheck()
 // (src/lib/db/core.ts) runs the check on EVERY getDbInstance() cold-open,
 // not only when OMNIROUTE_FORCE_DB_HEALTHCHECK is set (that env only matters
 // for a test-detected process). Both the flag override and the broken row
@@ -108,7 +108,7 @@ function runCase(deferred: "0" | "1") {
       env: {
         ...process.env,
         DATA_DIR: dir,
-        // Deliberately NOT NODE_ENV=test / a "test"-tokened argv here:
+        // Deliberately clear inherited runner signals here:
         // isAutomatedTestProcess() (src/shared/utils/testProcess.ts) would
         // make createManagedDbBackup() a permanent no-op, so a startup
         // repair could never actually complete in either branch and this
@@ -117,6 +117,9 @@ function runCase(deferred: "0" | "1") {
         // subprocess is otherwise fully isolated (its own DATA_DIR, own
         // process), so a real VACUUM INTO backup is safe here.
         NODE_ENV: undefined,
+        NODE_TEST_CONTEXT: undefined,
+        VITEST: undefined,
+        JEST_WORKER_ID: undefined,
         APP_LOG_TO_FILE: "false",
         DISABLE_SQLITE_AUTO_BACKUP: "true",
         OMNIROUTE_TEST_DEFERRED: deferred,

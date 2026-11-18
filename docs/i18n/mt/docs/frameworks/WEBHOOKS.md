@@ -16,21 +16,22 @@ jibqgħu jfallu.
 
 ## Avvenimenti Appoġġjati
 
-It-tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, użat minn `src/lib/webhookDispatcher.ts`) bħalissa jimmudella eżattament erba’ avvenimenti:
+It-tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ikkunsmat minn `src/lib/webhookDispatcher.ts`) bħalissa jimmudella tmien avvenimenti:
 
-| Avveniment          | Jiġi attivat meta                                                               |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `request.completed` | Talba mibgħuta permezz ta’ proxy titlesta b’suċċess                             |
-| `request.failed`    | Talba mibgħuta permezz ta’ proxy tfalli wara l-provi mill-ġdid/fallbacks kollha |
-| `quota.exceeded`    | Ċavetta API taqbeż limitu ta’ baġit/kwota                                       |
-| `test.ping`         | Avveniment sintetiku użat mill-endpoint tat-test                                |
+| Avveniment                | Nirien meta                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Talba b'prokura titlesta b'suċċess                                                                                        |
+| `request.failed`          | Talba prokurat tfalli wara kollox retries/fallback                                                                        |
+| `quota.exceeded`          | Ċavetta API taqsam limitu budget/quota                                                                                    |
+| `proxy.set_aside`         | Membru tal-grupp ta' prokura jitwarrab wara rifjuti ripetuti (tranżizzjoni biss)                                          |
+| `proxy.pool.exhausted`    | Kull membru ta' ambitu ta' pool ta' prokura jitwarrab                                                                     |
+| `provider.reset_redeemed` | L-applikazzjoni awtomatika ta' resets bankarji mifdija kreditu ta' reset jew ir-reset tas-sessjoni ta' kull ġimgħa Claude |
+| `provider.exhausted`      | Kull kont ta' fornitur qed jonqos (l-aktar darba għal kull fornitur kull 10 minuti)                                       |
+| `test.ping`               | Avveniment sintetiku użat mill-endpoint tat-test                                                                          |
 
-L-abbonamenti jaċċettaw il-valur litterali `"*"` biex jirċievu kull avveniment. Ismijiet ta’
-avvenimenti mhux magħrufa f’`events` jiġu injorati waqt id-dispaċċ.
+Abbonamenti jaċċettaw il- `"*"` letterali biex jirċievu kull avveniment. Ismijiet ta' avvenimenti mhux magħrufa `events` jiġu injorati fil-ħin tad-dispaċċ.
 
-> Nota: l-API tad-dispatcher hija mqabbda, iżda s-siti tas-sejħiet tal-produzzjoni għal uħud mill-
-> avvenimenti li mhumiex `test.ping` għadhom qed jiġu implimentati. Iċċekkja `grep dispatchEvent` biex tara
-> liema mogħdijiet bħalissa jsejħu lid-dispatcher fir-rilaxx tiegħek.
+> Nota: id-dispatcher API huwa bil-fili, iżda s-siti tas-sejħiet tal-produzzjoni għal xi wħud mill-avvenimenti mhux `test.ping` għadhom qed jinżlu. Iċċekkja `grep dispatchEvent` biex tara liema mogħdijiet bħalissa jinvokaw lid-dispaċċ fir-rilaxx tiegħek.
 
 ## Arkitettura
 

@@ -7,6 +7,7 @@ import { invalidateDbCache } from "../readCache";
 import { backupDbFile } from "../backup";
 import { bumpProxyConfigGeneration } from "../settings";
 import { stripCodexChildCooldownsFromConnection } from "./codexAccountState";
+import { withCodexConnectionWrite } from "../codexConnectionFences";
 
 interface StatementLike<TRow = unknown> {
   all: (...params: unknown[]) => TRow[];
@@ -41,9 +42,14 @@ export function setConnectionRateLimitUntil(connectionId: string, until: number 
     return;
   }
   const db = getDbInstance() as unknown as DbLike;
-  db.prepare(
-    "UPDATE provider_connections SET rate_limited_until = ?, updated_at = ? WHERE id = ?"
-  ).run(until, new Date().toISOString(), connectionId);
+  const applied = withCodexConnectionWrite(connectionId, () =>
+    db
+      .prepare(
+        "UPDATE provider_connections SET rate_limited_until = ?, updated_at = ? WHERE id = ?"
+      )
+      .run(until, new Date().toISOString(), connectionId)
+  );
+  if (!applied) return;
   // Routing-only write (rate_limited_until) — the /v1/models builder never reads
   // it, so bust the connections read cache without dropping the catalog cache.
   invalidateDbCache("connections", connectionId, { skipModelCatalog: true });
@@ -268,9 +274,10 @@ export async function clearConnectionErrorIfUnchanged(
 ): Promise<boolean> {
   const db = getDbInstance() as unknown as DbLike;
   backupDbFile("pre-write");
-  const result = db
-    .prepare(
-      `
+  const result = withCodexConnectionWrite(id, () =>
+    db
+      .prepare(
+        `
     UPDATE provider_connections SET
       test_status = 'active',
       last_error = NULL,
@@ -295,15 +302,16 @@ export async function clearConnectionErrorIfUnchanged(
       AND IFNULL(last_error_at, '') = ?
       AND IFNULL(rate_limited_until, '') = ?
     `
-    )
-    .run(
-      new Date().toISOString(),
-      id,
-      expected.testStatus ?? "",
-      expected.lastErrorAt ?? "",
-      expected.rateLimitedUntil ?? ""
-    );
-  const applied = (result.changes ?? 0) > 0;
+      )
+      .run(
+        new Date().toISOString(),
+        id,
+        expected.testStatus ?? "",
+        expected.lastErrorAt ?? "",
+        expected.rateLimitedUntil ?? ""
+      )
+  );
+  const applied = (result?.changes ?? 0) > 0;
   if (applied) {
     // Routing/health-only fields + codex-scope cooldown keys — none are read by
     // the /v1/models builder (it only reads providerSpecificData.excludedModels).

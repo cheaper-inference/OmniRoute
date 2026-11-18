@@ -163,7 +163,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 | گزارش سلامت         | `health-report`      | قطع کننده مدار، خنک کننده، حالت قفل در هر ارائه دهنده                                                                                         | سلامتی، تاب آوری        | "نمایش وضعیت سلامت همه ارائه دهندگان"             |
 | لیست قابلیت ها      | `list-capabilities`  | کاتالوگ کامل 45 ورودی Agent Skills (23 API + 21 CLI + 1 config) را به عنوان جدول علامت گذاری با SKILL.md URLs خام برای تزریق متن برمی گرداند. | کاتالوگ، کشف، مهارت     | "لیست تمام قابلیت های OmniRoute "                 |
 
-> کارت نماینده باید با کاتالوگ 381 ارائهدهنده زنده همسو باشد. تعداد ارائهدهنده و ابرداده free/no-auth از رجیستری زمان اجرا منبع میشوند.
+> کارت نماینده باید با کاتالوگ 394 ارائهدهنده زنده همسو باشد. تعداد ارائهدهنده و ابرداده free/no-auth از رجیستری زمان اجرا منبع میشوند.
 
 ### جزئیات مهارت `list-capabilities`
 
@@ -176,7 +176,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 ...
 ```
 
-هر سطر شامل ستون `rawUrl` است تا عوامل بتوانند فورا SKILL.md کامل را واکشی کنند. میدان `metadata.totalSkills` منعکس کننده اندازه کاتالوگ است (امروزه 45). پیاده سازی: `src/lib/a2a/skills/listCapabilities.ts`. به [AGENT-SKILLS.md](./AGENT-SKILLS.md) نیز مراجعه کنید.
+هر ردیف شامل ستون `rawUrl` است، بنابراین عوامل می توانند بلافاصله SKILL.md کامل را واکشی کنند. میدان `metadata.totalSkills` منعکس کننده اندازه کاتالوگ (45 امروز) است. پیاده سازی: `src/lib/a2a/skills/listCapabilities.ts`. به [AGENT-SKILLS.md](./AGENT-SKILLS.md) نیز مراجعه کنید.
 
 ---
 

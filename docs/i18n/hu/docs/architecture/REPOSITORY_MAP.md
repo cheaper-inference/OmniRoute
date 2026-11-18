@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Gyökérszintű fájlok
+## Root fájlok
 
-| Fájl                                        | Rendeltetés                                                                                   |
+| Fájl                                        | Cél                                                                                           |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **README.md**                               | Marketing-céloldal + gyors kezdés + funkciómátrix (lásd még: `llm.txt`)                       |
-| **CHANGELOG.md**                            | Kiadásonkénti változásnapló (a `/version-bump-cc` skill automatikusan generálja)              |
-| **LICENSE**                                 | MIT-licenc szövege                                                                            |
-| **CLAUDE.md**                               | Projektszabályok Claude Code-ügynökök számára (szigorú szabályok, konvenciók, forgatókönyvek) |
-| **AGENTS.md**                               | Ugyanaz, mint a CLAUDE.md, de nem Claude-alapú AI-ügynökök számára (Codex, Cursor stb.)       |
-| **GEMINI.md**                               | Tömör szabályok Gemini-alapú ügynökök számára (a CLAUDE.md részhalmaza)                       |
-| **CONTRIBUTING.md**                         | Közreműködői útmutató: beállítás, konvencionális commitok, tesztelés, PR-folyamat             |
-| **SECURITY.md**                             | Sérülékenység-bejelentési szabályzat, támogatott verziók, fenyegetési modell                  |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — a közösségi viselkedéssel kapcsolatos elvárások                        |
-| **llm.txt**                                 | LLM-feltérképezők számára optimalizált egyszerű szöveges céloldal (SEO AI-asszisztensekhez)   |
-| **package.json**                            | npm-manifeszt, szkriptek, függőségek, motorok, c8-lefedettségi kapu                           |
+| **README.md**                               | Marketing céloldal + gyorsindítás + funkciómátrix (lásd még `llm.txt`)                        |
+| **CHANGELOG.md**                            | Kiadásonkénti változásnapló (automatikusan `/version-bump-cc` skill által generált)           |
+| **LICENSE**                                 | MIT licenc szövege                                                                            |
+| **CLAUDE.md**                               | Projektszabályok Claude Code ügynökök számára (kemény szabályok, konvenciók, forgatókönyvek)  |
+| **AGENTS.md**                               | Ugyanaz, mint CLAUDE.md, de nem Claude AI ügynökökhöz (Codex, Cursor stb.)                    |
+| **GEMINI.md**                               | Tömör szabályok a Gemini-alapú ügynökökhöz ( CLAUDE.md részhalmaza)                           |
+| **CONTRIBUTING.md**                         | Útmutató a közreműködőknek: beállítás, hagyományos véglegesítés, tesztelés, PR áramlás        |
+| **SECURITY.md**                             | Sebezhetőségi jelentési szabályzat, támogatott verziók, fenyegetésmodell                      |
+| **CODE_OF_CONDUCT.md**                      | A Contributor Covenant — közösségi viselkedési elvárások                                      |
+| **llm.txt**                                 | Egyszerű szöveges leszállás LLM bejárókhoz (SEO AI asszisztensekhez)                          |
+| **package.json**                            | npm jegyzék, szkriptek, függőségek, motorok, c8 lefedettségi kapu                             |
 | **package-lock.json**                       | Zárolt függőségi fa                                                                           |
-| **tsconfig.json**                           | Gyökérszintű TypeScript-konfiguráció                                                          |
-| **tsconfig.typecheck-core.json**            | Típusellenőrzési konfiguráció az `src/` maghoz                                                |
+| **tsconfig.json**                           | Root TypeScript config                                                                        |
+| **tsconfig.typecheck-core.json**            | Typecheck konfiguráció `src/` maghoz                                                          |
 | **tsconfig.typecheck-noimplicit-core.json** | Szigorú (`noImplicitAny`) típusellenőrzés                                                     |
-| **tsconfig.tsbuildinfo**                    | TS növekményes build-gyorsítótár (git által figyelmen kívül hagyva)                           |
-| **next.config.mjs**                         | Next.js 16 buildkonfiguráció (önálló kimenet)                                                 |
-| **next-env.d.ts**                           | A Next.js által automatikusan generált környezeti típusok                                     |
-| **eslint.config.mjs**                       | ESLint lapos konfiguráció (projektrészenkénti szabályok)                                      |
-| **prettier.config.mjs**                     | Prettier-formázási szabályok                                                                  |
-| **postcss.config.mjs**                      | PostCSS-konfiguráció a Tailwind/CSS-folyamathoz                                               |
-| **playwright.config.ts**                    | Playwright E2E-tesztkonfiguráció                                                              |
-| **vitest.config.ts**                        | Vitest-konfiguráció (alapértelmezett tesztcsomag)                                             |
-| **vitest.mcp.config.ts**                    | Vitest-konfiguráció az MCP-szerverhez / autoCombo / gyorsítótár-tesztcsomagokhoz              |
-| **sonar-project.properties**                | SonarQube/SonarCloud-konfiguráció (kódminőség)                                                |
-| **Dockerfile**                              | Többlépcsős Docker-build (builder → runner-base → runner-cli)                                 |
-| **docker-compose.yml**                      | Fejlesztői compose 4 profillal (base, cli, host, cliproxyapi) + redis sidecar                 |
-| **docker-compose.prod.yml**                 | Éles környezethez készült compose (20130-as port, redis, elnevezett kötetek)                  |
-| **.dockerignore**                           | A Docker-környezetből kizárt fájlok                                                           |
-| **fly.toml**                                | Fly.io telepítési konfiguráció (`sin` régió, 20128-as port, /data kötet)                      |
-| **.env.example**                            | Környezetifájl-sablon (az első telepítéskor automatikusan `.env` néven másolódik)             |
-| **.gitignore**                              | Git figyelmen kívül hagyási minták                                                            |
-| **.npmignore**                              | npm-közzétételi kizárási lista                                                                |
-| **.npmrc**                                  | npm-konfiguráció (regisztrációs adatbázis, lockfile-szabályzat)                               |
-| **.node-version**                           | Rögzített Node-verzió (nvm-kompatibilis eszközök használják)                                  |
-| **.nvmrc**                                  | Rögzített Node-verzió az nvm számára                                                          |
-| **eslint.complexity.config.mjs**            | ESLint-konfiguráció a komplexitási racsnihoz (`scripts/check/check-complexity.mjs --config`)  |
-| **eslint.sonarjs.config.mjs**               | ESLint-konfiguráció a SonarJS-szabályokhoz (kognitív komplexitás / duplikáció)                |
-| **source.config.ts**                        | Fumadocs `defineDocs` forráskonfiguráció (a `.source/` bemenete)                              |
-| **knip.json**                               | Knip-konfiguráció — nem használt fájlok/exportok/függőségek (a holtkód-kapu bemenete)         |
-| **stryker.conf.json**                       | Stryker mutációtesztelési konfiguráció                                                        |
-| **.size-limit.json**                        | size-limit csomagméretkeret-konfiguráció                                                      |
-| **promptfooconfig.yaml**                    | promptfoo kiértékelési konfiguráció                                                           |
-| **.gitleaks.toml**                          | gitleaks titokellenőrzési szabálykészlet                                                      |
-| **.zizmor.yml**                             | zizmor GitHub Actions biztonsági lintelési konfiguráció                                       |
-| **socket.yml**                              | Socket.dev ellátásilánc-konfiguráció                                                          |
-| **news.json**                               | Lokalizált v2 bejelentési hírfolyam; a Radar indulási eleme inaktív állapotban érkezik        |
-| **flake.nix** / **flake.lock**              | Nix fejlesztői shell definíciója + zárolása                                                   |
-| **.env**                                    | Helyi titkos adatok (a git figyelmen kívül hagyja — a `.env.example` alapján generálva)       |
+| **tsconfig.tsbuildinfo**                    | TS növekményes felépítési gyorsítótár (gitignorálva)                                          |
+| **következő.config.mjs**                    | Next.js 16 build konfiguráció (önálló kimenet)                                                |
+| **next-env.d.ts**                           | Next.js automatikusan generált env típusok                                                    |
+| **eslint.config.mjs**                       | ESLint lapos konfiguráció (projektterületenkénti szabályok)                                   |
+| **szebb.config.mjs**                        | Prettier formázási szabályok                                                                  |
+| **postcss.config.mjs**                      | PostCSS konfiguráció Tailwind/CSS csővezetékhez                                               |
+| **drámaíró.config.ts**                      | Playwright E2E teszt konfig                                                                   |
+| **vitest.config.ts**                        | Vitest config (alapértelmezett csomag)                                                        |
+| **vitest.mcp.config.ts**                    | Vitest konfiguráció MCP szerver / autoCombo / cache suite számára                             |
+| **szonár-projekt.tulajdonságok**            | SonarQube/SonarCloud config (kódminőség)                                                      |
+| **Dockerfile**                              | Többlépcsős Docker build (builder → runner-base → runner-cli)                                 |
+| **docker-compose.yml**                      | Fejlesztői írás 4 profillal (alap, klip, gazdagép, cliproxyapi) + redis oldalkocsi            |
+| **dokkoló-komponálni.prod.yml**             | Gyártás összeállítása (port 20130, redis, megnevezett kötetek)                                |
+| **.docker figyelmen kívül hagyni**          | Docker környezetből kizárt fájlok                                                             |
+| **fly.toml**                                | Fly.io telepítési konfiguráció ( `sin` régió, 20128-as port, /adatkötet)                      |
+| **.env.example**                            | Sablon env fájl (automatikusan átmásolva `.env` az első telepítéskor)                         |
+| **.gitignore**                              | Git figyelmen kívül hagyja a mintákat                                                         |
+| **.npmignore**                              | npm kizárási lista közzététele                                                                |
+| **.npmrc**                                  | npm konfiguráció (nyilvántartás, zárolási szabályzat)                                         |
+| **.node-verzió**                            | Csomópont-verzió PIN-kódja (nvm-kompatibilis eszközök által használt)                         |
+| **.nvmrc**                                  | Csomópont-verzió PIN-kódja nvm-hez                                                            |
+| **eslint.bonyolultság.config.mjs**          | ESLint konfiguráció a bonyolultsági racsnihoz (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint konfiguráció SonarJS szabályokhoz (kognitív összetettség / duplikáció)                 |
+| **forrás.config.ts**                        | Fumadocs `defineDocs` forráskonfiguráció ( `.source/` feedeket)                               |
+| **knip.json**                               | Knip config — unused files/exports/deps (táplálja a holtkód kaput)                            |
+| **csatár.conf.mjs**                         | Stryker mutációtesztelő konfiguráció ( `tap.testFiles` `mutate` ből számítja ki)              |
+| **.size-limit.json**                        | méretkorlátos csomag költségvetési konfigurációja                                             |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                         |
+| **.gitleaks.toml**                          | gitleaks titkos keresési szabálykészlet                                                       |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                    |
+| **socket.yml**                              | Socket.dev ellátási lánc konfigurációja                                                       |
+| **news.json**                               | Lokalizált v2 közlemény feed; A radar indító eleme inaktív                                    |
+| **pehely.nix** /** pehely.zár**             | Nix dev-shell definíciós + zár                                                                |
+| **.env**                                    | Helyi titkok (gitignorált — `.env.example` ből generált)                                      |
 
-> **A v3.8.26 verzióban kikerült a gyökérkönyvtárból (rendezés):**
+> **Kikerült a gyökérből a 3.8.26-os verzióban (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, valamint a generált `quality-metrics.json` (a git figyelmen kívül hagyja). Lásd: [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` és a generált `quality-metrics.json` (gitignorálva). Lásd [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + útvonal (kérések, munkamenetek, gazdagépek, rögzítési módok, exportálás, ws). LOCAL_ONLY + SPAWN_CAPABLE. Lásd: `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                    |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 belépési pont (`POST /a2a`)                                                                                                                                                                                                                                                                         |
 | `app/.well-known/agent.json/`                                                | A2A ügynökkártya (felfedezés)                                                                                                                                                                                                                                                                                        |
-| `app/(dashboard)/dashboard/`                                                 | Irányítópult UI oldalak (50 + szakasz, ~ 118 page.tsx fájl: szolgáltatók, kombók, beállítások, memória, készségek, webhookok, értékelések, audit, köteg, gyorsítótár, költségek, állapot, rendszer, tevékenység stb.)                                                                                                |
+| `app/(dashboard)/dashboard/`                                                 | Irányítópult UI oldalak (50 + szakasz, ~ 118 page.tsx fájl: szolgáltatók, kombinációk, beállítások, memória, készségek, webhookok, értékelések, audit, köteg, gyorsítótár, költségek, állapot, rendszer, tevékenység stb.)                                                                                           |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Keresőeszközök Studio UI (3 lap: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — lásd `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                        |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (21. terv): `page.tsx` (3 lapos shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/`, (useEngineStatususeMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge irányítópult oldala — szerverkártya, 9 ügynökkártya, beállítási varázsló, modellleképezés, megkerülési lista. i18n PT-BR + EN. Lásd `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                    |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Irányítópult komponens API: `packages/ui-kit` adapterek — lásd `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: a képernyők által használt ikonnevek → Lucide összetevők (`<Icon>`)                     |
-| `constants/providers.ts`         | **381 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
+| `constants/providers.ts`         | **394 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
 | `constants/cliTools.ts`          | Külső CLI eszköznyilvántartás                                                                       |
-| `constants/routingStrategies.ts` | **20 útválasztási stratégia** prioritásokkal                                                        |
+| `constants/routingStrategies.ts` | **22 útválasztási stratégia** prioritásokkal                                                        |
 | `constants/publicApiRoutes.ts`   | Útvonalak, amelyek hordozó hitelesítést igényelnek (vs menedzsment)                                 |
 | `constants/upstreamHeaders.ts`   | Fejléc-megtagadó lista az upstream kérésekhez                                                       |
 | `validation/schemas.ts`          | ~ 80 Zod séma (az igazság egyetlen forrása API szerződésekhez)                                      |
@@ -265,7 +265,7 @@ Különálló npm-munkaterület (`@omniroute/open-sse`). A kérések feldolgozá
 ```
 open-sse/
 ├── handlers/            # 16 fájl (12 kezelő + 4 segéd): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search stb.
-├── executors/           # 150 végrehajtómodul (a BaseExecutor osztályt kiterjesztő osztályok + szolgáltatónkénti segédek)
+├── executors/           # 163 végrehajtómodul (a BaseExecutor osztályt kiterjesztő osztályok + szolgáltatónkénti segédek)
 ├── translator/          # Formátumkonverterek (9 kérés-, 9 válasz- és 9 segédmodul)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ szolgáltatásmodul (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM stb.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Külső CLI integrációk + Belső OmniRoute CLI                                                     |
 | `I18N.md`                   | i18n architektúra, nyelv hozzáadása, 67 terület                                                 |
 | `UNINSTALL.md`              | Tiszta eltávolítási lépések                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 381 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 394 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
 
 ### Alrendszer mély merülések
 

@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## فایلهای ریشه
+## فایل های ریشه
 
-| فایل                                        | کاربرد                                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **README.md**                               | صفحهٔ فرود بازاریابی + شروع سریع + ماتریس قابلیتها (همچنین `llm.txt` را ببینید)                   |
-| **CHANGELOG.md**                            | گزارش تغییرات هر انتشار (بهصورت خودکار توسط مهارت `/version-bump-cc` تولید میشود)                 |
-| **LICENSE**                                 | متن مجوز MIT                                                                                      |
-| **CLAUDE.md**                               | قوانین پروژه برای عاملهای Claude Code (قوانین سختگیرانه، قراردادها، سناریوها)                     |
-| **AGENTS.md**                               | همان CLAUDE.md، اما برای عاملهای هوش مصنوعی غیر Claude (Codex، Cursor و غیره)                     |
-| **GEMINI.md**                               | قوانین مختصر برای عاملهای مبتنی بر Gemini (زیرمجموعهای از CLAUDE.md)                              |
-| **CONTRIBUTING.md**                         | راهنمای مشارکتکنندگان: راهاندازی، کامیتهای متعارف، آزمون، فرایند PR                               |
-| **SECURITY.md**                             | سیاست گزارش آسیبپذیری، نسخههای پشتیبانیشده، مدل تهدید                                             |
-| **CODE_OF_CONDUCT.md**                      | پیماننامهٔ مشارکتکنندگان — انتظارات رفتاری جامعه                                                  |
-| **llm.txt**                                 | صفحهٔ فرود متنی بهینهشده برای خزندههای LLM (سئو برای دستیارهای هوش مصنوعی)                        |
-| **package.json**                            | مانیفست npm، اسکریپتها، وابستگیها، موتورهای اجرایی، دروازهٔ پوشش c8                               |
-| **package-lock.json**                       | درخت وابستگی قفلشده                                                                               |
-| **tsconfig.json**                           | پیکربندی ریشهٔ TypeScript                                                                         |
-| **tsconfig.typecheck-core.json**            | پیکربندی بررسی نوع برای هستهٔ `src/`                                                              |
-| **tsconfig.typecheck-noimplicit-core.json** | بررسی نوع سختگیرانه (`noImplicitAny`)                                                             |
-| **tsconfig.tsbuildinfo**                    | کش ساخت افزایشی TS (نادیدهگرفتهشده توسط git)                                                      |
-| **next.config.mjs**                         | پیکربندی ساخت Next.js 16 (خروجی مستقل)                                                            |
-| **next-env.d.ts**                           | نوعهای محیطی تولیدشده بهصورت خودکار توسط Next.js                                                  |
-| **eslint.config.mjs**                       | پیکربندی تخت ESLint (قوانین مختص هر بخش پروژه)                                                    |
-| **prettier.config.mjs**                     | قوانین قالببندی Prettier                                                                          |
-| **postcss.config.mjs**                      | پیکربندی PostCSS برای خط لولهٔ Tailwind/CSS                                                       |
-| **playwright.config.ts**                    | پیکربندی آزمون سرتاسری Playwright                                                                 |
-| **vitest.config.ts**                        | پیکربندی Vitest (مجموعهٔ پیشفرض)                                                                  |
-| **vitest.mcp.config.ts**                    | پیکربندی Vitest برای مجموعههای سرور MCP / autoCombo / کش                                          |
-| **sonar-project.properties**                | پیکربندی SonarQube/SonarCloud (کیفیت کد)                                                          |
-| **Dockerfile**                              | ساخت چندمرحلهای Docker (builder → runner-base → runner-cli)                                       |
-| **docker-compose.yml**                      | پیکربندی compose توسعه با ۴ پروفایل (base، cli، host، cliproxyapi) + سرویس جانبی redis            |
-| **docker-compose.prod.yml**                 | پیکربندی compose تولید (درگاه 20130، redis، حجمهای نامگذاریشده)                                   |
-| **.dockerignore**                           | فایلهای مستثناشده از زمینهٔ Docker                                                                |
-| **fly.toml**                                | پیکربندی استقرار Fly.io (منطقهٔ `sin`، درگاه 20128، حجم /data)                                    |
-| **.env.example**                            | فایل محیطی الگو (در نخستین نصب بهطور خودکار در `.env` کپی میشود)                                  |
-| **.gitignore**                              | الگوهای نادیدهگیری Git                                                                            |
-| **.npmignore**                              | فهرست موارد مستثنا از انتشار npm                                                                  |
-| **.npmrc**                                  | پیکربندی npm (رجیستری، سیاست فایل قفل)                                                            |
-| **.node-version**                           | تثبیت نسخهٔ Node (مورد استفادهٔ ابزارهای سازگار با nvm)                                           |
-| **.nvmrc**                                  | تثبیت نسخهٔ Node برای nvm                                                                         |
-| **eslint.complexity.config.mjs**            | پیکربندی ESLint برای سازوکار کنترل تدریجی پیچیدگی (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | پیکربندی ESLint برای قوانین SonarJS (پیچیدگی شناختی / تکرار)                                      |
-| **source.config.ts**                        | پیکربندی منبع `defineDocs` در Fumadocs (تأمینکنندهٔ `.source/`)                                   |
-| **knip.json**                               | پیکربندی Knip — فایلها/خروجیها/وابستگیهای استفادهنشده (ورودی دروازهٔ کد مرده)                     |
-| **stryker.conf.json**                       | پیکربندی آزمون جهش Stryker                                                                        |
-| **.size-limit.json**                        | پیکربندی بودجهٔ باندل size-limit                                                                  |
-| **promptfooconfig.yaml**                    | پیکربندی ارزیابی promptfoo                                                                        |
-| **.gitleaks.toml**                          | مجموعهقواعد اسکن اسرار gitleaks                                                                   |
-| **.zizmor.yml**                             | پیکربندی لینت امنیتی GitHub Actions برای zizmor                                                   |
-| **socket.yml**                              | پیکربندی زنجیرهٔ تأمین Socket.dev                                                                 |
-| **news.json**                               | فید بومیسازیشدهٔ اطلاعیههای v2؛ آیتم راهاندازی Radar بهصورت غیرفعال عرضه میشود                    |
-| **flake.nix** / **flake.lock**              | تعریف پوستهٔ توسعهٔ Nix + فایل قفل                                                                |
-| **.env**                                    | اسرار محلی (نادیدهگرفتهشده توسط git — تولیدشده از `.env.example`)                                 |
+| فایل                                        | هدف                                                                                |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **README.md**                               | ماتریس ویژگی + شروع سریع + صفحه فرود بازاریابی (همچنین به `llm.txt` مراجعه کنید)   |
+| **CHANGELOG.md**                            | تغییرات هر نسخه (به طور خودکار توسط مهارت `/version-bump-cc` ایجاد می شود)         |
+| **LICENSE**                                 | متن مجوز MIT                                                                       |
+| **CLAUDE.md**                               | قوانین پروژه برای عوامل Claude Code (قوانین سخت، قراردادها، سناریوها)              |
+| **AGENTS.md**                               | مانند CLAUDE.md اما برای عوامل غیر کلود AI (Codex، Cursor، و غیره)                 |
+| **GEMINI.md**                               | قوانین مختصر برای عوامل مبتنی بر جمینی (زیر مجموعه CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | راهنمای مشارکتکننده: راهاندازی، تعهدات مرسوم، آزمایش، جریان PR                     |
+| **SECURITY.md**                             | خط مشی گزارش آسیب پذیری، نسخه های پشتیبانی شده، مدل تهدید                          |
+| **CODE_OF_CONDUCT.md**                      | میثاق مشارکت کننده انتظارات رفتار جامعه —                                          |
+| **llm.txt**                                 | فرود متن ساده برای خزنده های LLM بهینه شده است (SEO برای دستیاران AI )             |
+| **package.json**                            | مانیفست npm، اسکریپت ها، وابستگی ها، موتورها، گیت پوشش c8                          |
+| **package-lock.json**                       | درخت وابستگی قفل شده                                                               |
+| **tsconfig.json**                           | پیکربندی ریشه TypeScript                                                           |
+| **tsconfig.typecheck-core.json**            | پیکربندی تایپ چک برای هسته `src/`                                                  |
+| **tsconfig.typecheck-noimplicit-core.json** | تایپ دقیق (`noImplicitAny`).                                                       |
+| **tsconfig.tsbuildinfo**                    | حافظه پنهان ساخت افزایشی TS (غیر قابل توجه)                                        |
+| **بعدی config.mjs**                         | پیکربندی ساخت Next.js 16 (خروجی مستقل)                                             |
+| **next-env.d.ts**                           | انواع env تولید خودکار Next.js                                                     |
+| **اسلینت config.mjs**                       | پیکربندی مسطح ESLint (قوانین در هر منطقه پروژه)                                    |
+| **زیباتر config.mjs**                       | قوانین قالب بندی Prettier                                                          |
+| **postcss config.mjs**                      | پیکربندی PostCSS برای خط لوله Tailwind/CSS                                         |
+| **نمایشنامه نویس config.ts**                | پیکربندی تست Playwright E2E                                                        |
+| **ویتست config.ts**                         | پیکربندی Vitest (مجموعه پیش فرض)                                                   |
+| **vitest.mcp.config.ts**                    | پیکربندی Vitest برای سرور MCP / autoCombo / مجموعههای کش                           |
+| **sonar-project.properties**                | پیکربندی SonarQube/SonarCloud (کیفیت کد)                                           |
+| **Dockerfile**                              | ساخت چند مرحله ای Docker (builder → runner-base → runner-cli)                      |
+| **docker-compose.yml**                      | برنامه نویس با 4 پروفایل (پایه، cli، میزبان، cliproxyapi) + redis sidecar          |
+| **docker-compose.prod.yml**                 | نوشتن تولید (پورت 20130، redis، حجم های نامگذاری شده)                              |
+| **.dockerignore**                           | فایلهای حذف شده از زمینه Docker                                                    |
+| **fly.toml**                                | پیکربندی استقرار Fly.io (منطقه `sin`، پورت 20128، / حجم داده)                      |
+| **env.example**                             | فایل env الگو (در اولین نصب به طور خودکار در `.env` کپی می شود)                    |
+| **.gitignore**                              | الگوهای نادیده گرفتن Git                                                           |
+| **npmignore**                               | npm لیست محرومیت را منتشر می کند                                                   |
+| **npmrc**                                   | پیکربندی npm (رجیستری، خط مشی فایل قفل)                                            |
+| **.node-version**                           | پین نسخه Node (استفاده شده توسط ابزارهای سازگار با nvm)                            |
+| **nvmrc**                                   | پین نسخه Node برای nvm                                                             |
+| **eslint.پیچیدگی.config.mjs**               | پیکربندی ESLint برای جغجغه پیچیدگی (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | پیکربندی ESLint برای قوانین SonarJS (پیچیدگی شناختی / تکراری)                      |
+| **منبع config.ts**                          | پیکربندی منبع Fumadocs `defineDocs` (feed `.source/`)                              |
+| **knip.json**                               | Knip config — unused files/exports/deps (تغذیه گیت dead-code)                      |
+| **استرایکر conf.mjs**                       | پیکربندی تست جهش Stryker ( `tap.testFiles` از `mutate` محاسبه میکند)               |
+| **.size-limit.json**                        | پیکربندی بودجه بسته نرم افزاری با محدودیت اندازه                                   |
+| **promptfooconfig.yaml**                    | پیکربندی promptfoo eval                                                            |
+| **.gitleaks.toml**                          | مجموعه قوانین اسکن مخفی gitleaks                                                   |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                         |
+| **socket.yml**                              | پیکربندی زنجیره تامین Socket.dev                                                   |
+| **news.json**                               | فید اطلاعیه v2 محلی. مورد پرتاب رادار غیرفعال است                                  |
+| **flake.nix** /** پوسته پوسته شدن.قفل**     | Nix dev-shell تعریف قفل +                                                          |
+| **env**                                     | اسرار محلی ( — نادیده گرفته شده تولید شده از `.env.example`)                       |
 
-> **در v3.8.26 از ریشه منتقل شد (برای کاهش شلوغی):**
+> **خارج از ریشه در نسخه 3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json` و فایل تولیدشدهٔ `quality-metrics.json` (نادیدهگرفتهشده توسط git). به [`## config/`](#config--static-configs--quality-gate-state) مراجعه کنید.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` و `quality-metrics.json` تولید شده (gitignored). رجوع به [`## config/`](#config--static-configs--quality-gate-state) شود.
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | جزء داشبورد API: آداپتورهای روی `packages/ui-kit` — به `docs/architecture/DESIGN_SYSTEM.md` مراجعه کنید |
 | `constants/iconMap.ts`           | `ICON_MAP`: نام نمادهای مورد استفاده در صفحه نمایش اجزای → Lucide (`<Icon>`)                            |
-| `constants/providers.ts`         | **381 ارائه دهنده** با اعتبار Zod (منبع حقیقت)                                                          |
+| `constants/providers.ts`         | **394 ارائه دهنده** با اعتبار Zod (منبع حقیقت)                                                          |
 | `constants/cliTools.ts`          | رجیستری ابزار CLI خارجی                                                                                 |
-| `constants/routingStrategies.ts` | **20 استراتژی مسیریابی** با اولویت ها                                                                   |
+| `constants/routingStrategies.ts` | **22 استراتژی مسیریابی** با اولویت ها                                                                   |
 | `constants/publicApiRoutes.ts`   | مسیرهایی که به مجوز حامل (در مقابل مدیریت) نیاز دارند                                                   |
 | `constants/upstreamHeaders.ts`   | فهرست رد سرصفحه برای درخواستهای بالادستی                                                                |
 | `validation/schemas.ts`          | طرحوارههای ~ 80 Zod (منبع منفرد حقیقت برای قراردادهای API )                                             |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 فایل (12 هندلر + 4 ابزار کمکی): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search و غیره
-├── executors/           # 150 ماژول اجراکننده (کلاسهایی که BaseExecutor را گسترش میدهند + ابزارهای کمکی مختص هر ارائهدهنده)
+├── executors/           # 163 ماژول اجراکننده (کلاسهایی که BaseExecutor را گسترش میدهند + ابزارهای کمکی مختص هر ارائهدهنده)
 ├── translator/          # مبدلهای قالب (9 درخواست، 9 پاسخ، 9 ابزار کمکی)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # بیش از ~80 ماژول سرویس (combo، accountFallback، autoCombo، reasoningCache، claude code/chatgpt stealth، modelDeprecation، taskAwareRouter، workflowFSM و غیره)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ادغام CLI خارجی + داخلی OmniRoute CLI                                                             |
 | `I18N.md`                   | معماری i18n، اضافه کردن یک زبان، 67 منطقه                                                         |
 | `UNINSTALL.md`              | مراحل حذف را پاک کنید                                                                             |
-| `PROVIDER_REFERENCE.md`     | **به صورت خودکار تولید می شود** کاتالوگ 381 ارائه دهنده (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **به صورت خودکار تولید می شود** کاتالوگ 394 ارائه دهنده (regen: `npm run gen:provider-reference`) |
 
 ### زیرسیستم غواصی عمیق
 
