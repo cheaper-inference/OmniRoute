@@ -261,3 +261,44 @@ test("bounded queue fails open and rate-limits saturation warnings", async () =>
     console.warn = originalWarn;
   }
 });
+
+test("#20449 worker resolution falls back cleanly when moduleUrl is not a valid local file URL", () => {
+  const layoutRoot = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-worker-win32-url-"));
+  const createWorker = (workerFile: string) => {
+    fs.mkdirSync(path.dirname(workerFile), { recursive: true });
+    fs.writeFileSync(workerFile, "");
+  };
+
+  try {
+    const appRoot = path.join(layoutRoot, "win32-app");
+    const entryWorker = path.join(appRoot, "src", "lib", "usage", "callLogArtifactWorker.js");
+    createWorker(entryWorker);
+
+    for (const moduleUrl of [
+      "file:///home/runner/work/OmniRoute/OmniRoute/src/lib/usage/callLogArtifactWriter.ts",
+      "webpack-internal:///./src/lib/usage/callLogArtifactWriter.ts",
+    ]) {
+      assert.deepEqual(
+        resolveCallLogArtifactWorker({
+          moduleUrl,
+          cwd: path.join(layoutRoot, "other-cwd"),
+          entryFile: path.join(appRoot, "server.js"),
+          fileExists: fs.existsSync,
+        }),
+        { workerFile: entryWorker, execArgv: [] }
+      );
+    }
+
+    assert.deepEqual(
+      resolveCallLogArtifactWorker({
+        moduleUrl: "webpack-internal:///./src/lib/usage/callLogArtifactWriter.ts",
+        cwd: appRoot,
+        entryFile: null,
+        fileExists: fs.existsSync,
+      }),
+      { workerFile: entryWorker, execArgv: [] }
+    );
+  } finally {
+    fs.rmSync(layoutRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
