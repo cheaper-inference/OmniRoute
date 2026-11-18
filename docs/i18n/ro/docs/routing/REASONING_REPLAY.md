@@ -24,19 +24,21 @@ Dar clienții tipici (Cursor, Cline, Roo Code, OpenAI SDK) scot `reasoning_conte
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Captura are loc în `open-sse/handlers/chatCore.ts` (două site-uri, la cele două site-uri de apel `cacheReasoningFromAssistantMessage` ). Reluarea are loc în `open-sse/translator/index.ts` după constrângerea schemei, dar înainte de expediere.
+
+Intrările pentru apeluri de instrumente sunt stocate sub `buildToolCallCacheKey()`, un rezumat al domeniului de aplicare al solicitării și ID-ul apelului instrumentului, astfel încât același id folosit de altă cheie sau sesiune API nu selectează intrarea. Domeniul de aplicare provine de la `buildReasoningCacheScope()`: id-ul cheii API, plus cheia de sesiune atunci când cererea are una. Prin urmare, coloana `tool_call_id` și tabloul de bord arată acest rezumat pentru acele intrări.
 
 Virajele asistenților simple (fără apeluri de instrumente) sunt tastate diferit: `buildAssistantMessageCacheKey()` digeră domeniul sesiunii plus transcrierea normalizată în format OpenAI până la acel turn, deoarece DeepSeek necesită raționamentul _fiecărei_ ture anterioare odată ce `tools` este prezent. Pentru țintele Responses-API (de exemplu `opencode-go/deepseek-v4-flash`, direcționat către `/responses`) corpul din amonte poartă `input`, nu `messages`, așa că `translateRequest()` (`open-sse/translator/index.ts`) raportează transcrierea pivot pe care a digerat-o printr-o opțiune de apel invers, iar site-urile de captură digeră aceeași transcriere. Trecerea de reluare a răspunsurilor rulează pe pivotul OpenAI pentru fiecare format sursă, astfel încât clienții Anthropic Messages (Claude → OpenAI → Responses) sunt de asemenea reluați.
 

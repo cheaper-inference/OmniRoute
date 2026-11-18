@@ -832,76 +832,188 @@ OpenAI-yhteensopiva eräkäsittely.
 
 ---
 
-## API
+## Haku-API
 
-Web/search palveluntarjoajan abstraktio (Tavily, Brave, Exa, Serper jne.).
+Web-/hakupalveluntarjoajien abstraktio (Tavily, Brave, Exa, Serper jne.).
 
-| Menetelmä | Polku                  | Kuvaus                                                                                |
-| --------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| GET       | `/v1/search`           | Listaa määritetyt hakupalveluntarjoajat + -ominaisuudet                               |
-| POST      | `/v1/search`           | Suorita hakukysely — body, jonka `v1SearchSchema` vahvistaa, tukee caching/coalescing |
-| GET       | `/v1/search/analytics` | Palveluntarjoajakohtaiset hit/latency/cache tilastot                                  |
+| Menetelmä | Polku                  | Kuvaus                                                                                                                 |
+| --------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/v1/search`           | Määritettyjen hakupalveluntarjoajien ja ominaisuuksien luettelo                                                        |
+| POST      | `/v1/search`           | Hakukyselyn suorittaminen — runko validoidaan `v1SearchSchema`-määrityksen avulla, välimuistia ja yhdistämistä tuetaan |
+| GET       | `/v1/search/analytics` | Palveluntarjoajakohtaiset osuma-, viive- ja välimuistitilastot                                                         |
 
-**Todennus:** Kuljetin API avain (`extractApiKey` + `isValidApiKey`). Hakukäytäntö pakotettu `enforceApiKeyPolicy` kautta.
+**Todennus:** Bearer API-avain (`extractApiKey` + `isValidApiKey`). Hakukäytäntöä valvotaan `enforceApiKeyPolicy`-toiminnolla.
 
-**Automaattinen valinta:** ilman `provider` halvin palveluntarjoaja, jolla on määritetty yhteys, toimii ensimmäisenä ja seuraavaksi halvin on vikasieto. Ilmaisia viimeisen keinon tarjoajia (`duckduckgo-free`) käytetään vain, kun mitään muuta ei ole määritetty. Itseisännöity SearXNG lasketaan määritetyksi, kun sen yhteys tallentaa todellisen `baseUrl` (ei luettelon oletusarvoisen `http://localhost:8888/search`): sen jälkeen se sijoittuu 0 dollarin palveluntarjoajaksi avaimia edeltäviksi, ja halvin avaimella varustettu palveluntarjoaja toimii vikasietoisena, myös silloin, kun SearXNG vastaa 400, 401, 403 tai 404. `baseUrl` ei ole kelvollinen `http(s)` tai URL pilvi-metadata-osoitetta ei lasketa. Tokenin tallentava SearXNG yhteys sijoittuu tällä tavalla vain `https://` tai loopback- `http://` n yli. Pelkän etäkäyttöisen `http://` kautta se ei koskaan ole vikasieto, ja se on viimeinen keino, ja sitä käytetään vain, kun muuta palveluntarjoajaa ei ole määritetty tai kun sitä pyydetään nimellä, joten se lähettää tunnuksen selkeänä tekstinä näissä kahdessa tapauksessa.
+### Nimetyt haku-/noutoyhdistelmät
 
-### Exa ja Tavily `provider_options`
+Sekä `POST /v1/search` että `POST /v1/web/fetch` hyväksyvät `model`-kentässä tallennetun yhdistelmän nimen.
+Käytä joko `model`-kenttää tai eksplisiittistä `provider`-kenttää; molempien lähettäminen palauttaa vastauksen `400`.
+Jos kumpaakaan kenttää ei anneta, nykyinen automaattinen palveluntarjoajan valinta säilyy ennallaan.
 
-Exa ja Tavily lukevat palveluntarjoajakohtaisia kenttiä nimiavaroidusta pussista: `provider_options.exa` (tai `provider_options["exa-search"]`) ja `provider_options.tavily` (tai `provider_options["tavily-search"]`). Vain alla olevat avaimet välitetään eteenpäin. Jokainen tarkistetaan sen omaan Zod -skeemaan `open-sse/handlers/search/providerOptionsPassthrough.ts` ssä, ja väärän tyyppinen avain pudotetaan. Kaikki muut näppäimet ohitetaan, mukaan lukien auth, base URL, `stream` ja `outputSchema`. Muiden tarjoajien käyttämät litteät näppäimet (`cx`, `depth`, ...) toimivat kuten ennenkin.
+Sekä Combo Builder että sen Add Model -luettelo näyttävät yhdistettyjen palveluntarjoajien alkuperäiset verkkotoimintojen merkinnät, vaikka niillä ei olisi LLM-malliluetteloa. Serper näyttää merkinnän **Web-haku**;
+Tavily näyttää merkinnät **Web-haku / Sivun poiminta**, ja vain noutoa tukevat palveluntarjoajat näyttävät merkinnän **Sivun poiminta**.
+Valitse merkintä ja tili tavalliseen tapaan. Yksi Tavily-merkintä palvelee molempia verkkopäätepisteitä;
+näitä toimintamerkintöjä ei lisätä vain keskustelua tukevien asiakkaiden valitsimiin tai keskustelumallien tarkistuksiin.
 
-| Palveluntarjoaja | Huipputason kentät                                                                                                                                                                                                                                                                                                                                                        | Sisäkkäinen                                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa              | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiivit), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` yhdistettiin oletusarvoiseen `{ text: true, highlights: true }` |
-| Tavily           | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
+Luo esimerkiksi **priority**-yhdistelmä nimeltä `shared-free` seuraavilla järjestetyillä kohteilla:
 
-Yleiset kentät voittaa aina: `query`, `max_results`, `filters` (domains), `country` ja `search_type`:stä johdettu aihe. Exassa `search_type: "news"` säilyttää `category: "news"`. Tavily hyväksyy myös `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl-haun hinta kirjataan 10 palautetun tuloksen aloitettua lohkoa kohti, 0,002 dollaria (2 krediittiä) lohko ja vähintään yksi lohko per puhelu ( [Firecrawl -laskutus](https://docs.firecrawl.dev/billing) ): 11 tuloksen hinta on 0,004 dollaria.
+Käytä samaa nimeä kullakin pinnalla:
 
-Yleinen `time_range` saavuttaa nyt molemmat palveluntarjoajat: Exa saa `startPublishedDate` (ISO -aikaleiman) ja Tavily saa `start_date` (`YYYY-MM-DD`). Selkeä päivämäärä `provider_options` ssä ohittaa kartoitetun päivämäärän.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa-tulokset säilyttävät `id`, `highlights` (jokainen kohokohta, ei vain ensimmäinen, jota käytetään `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras` `provider_raw`:ssä. Tavilyn tulokset pitävät `images` ja `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Linkkihaun hinta kirjataan 0,005 $ `depth` `fast` lle ja `standard` ja 0,05 $ `deep` lle ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) riippumatta siitä, tuleeko `depth` `provider_options` stä tai yhteyden asetuksista.
+Haku kokeilee ensin Tavilyä ja sitten Serperiä; nouto kokeilee ensin Tavilyä ja sitten Jina Readeria;
+keskustelu ohittaa erilliset haku-/noutopalveluntarjoajat ja kokeilee OpenAI:ta. Yhteensopivuus
+perustuu haku-/noutosuorittimien rekistereihin, ei mallin nimessä oleviin sanoihin.
+Suodatus tehdään ennen tunnistetietojen valintaa ja lähetystä, eikä tallennettua yhdistelmää muokata.
 
-Exa `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, kun jokin muu kenttä on asetettu. Lite:ssä `additionalQueries`, `systemPrompt` ja kaikki `contents` -näppäimet paitsi `text` ja `highlights` pudotetaan ennen kutsua. Käytöstä poistettuja `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää lähetetä edelleen.
+Muut kuin keskusteluun liittyvät ominaisuusreitit tukevat strategioita `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` ja `p2c`. Vain keskustelua tukevat koostamisstrategiat, kuten
+`fusion`, `pipeline` ja `context-relay`, hylätään muilla kuin keskustelureiteillä sen sijaan, että
+niitä sovellettaisiin hiljaisesti hakuun tai luotavaan mediaan.
+Olemassa oleva yhdistelmämoottori käsittelee järjestetyn varareitityksen, mukaan lukien ylemmän tason
+kiintiövirheet, ja säilyttää vaiheiden tunnukset, tilikiinnitykset, vaihekohtaiset tilien sallittujen luettelot,
+sisäkkäiset viittaukset, kutsujan yhteys-/kiintiöalueet sekä yhdistelmän käyttöoikeuskäytännön. Tulokset säilyttävät alkuperäisen
+haku-/noutokaavionsa, mukaan lukien todellisen palveluntarjoajan; `X-OmniRoute-Combo-Trace` ilmaisee
+reitityspäätöksen. Tuntemattomat yhdistelmät palauttavat vastauksen `404`; passiiviset yhdistelmät ja yhdistelmät,
+joilla ei ole yhteensopivia kohteita, palauttavat vastauksen `400`.
 
-Kustannuslaskenta on tasainen rekisteri `costPerQuery`, paitsi Exa, joka noudattaa Exan omaa hinnoittelua: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
+Kukin yhdistelmäyritys käyttää yhtä eksplisiittistä palveluntarjoajaa. Se ei voi kutsua yhdistelmän taustalla olevaa
+alkuperäistä automaattista palveluntarjoajajoukkoa. Eksplisiittisen palveluntarjoajan pyynnöt säilyttävät nykyisen
+yhden palveluntarjoajan toimintansa. Suoraan erillisille haku-/noutopalveluntarjoajille kohdistetut keskustelupyynnöt
+palauttavat toimintaohjeita sisältävän JSON-vastauksen `400` sen sijaan, että ne siirtyisivät OpenAI-tyyliseen suorittimeen.
+
+### Ominaisuuskohtaiset yhdistelmäreitit
+
+Tallennetut yhdistelmät voivat sisältää `routes`-objektin, jonka avaimet ovat API-ominaisuuksia. Jokainen reitti omistaa
+oman kohdeluettelonsa, strategiansa ja ajonaikaisen määrityksensä. Ylimmän tason `models`-, `strategy`- ja `config`-kentät
+säilyvät vanhojen versioiden kanssa yhteensopivana Chat-suunnitelmana; vanhat yhdistelmät, joissa ei ole `routes`-objektia,
+toimivat edelleen muuttumattomina.
+
+Tuetut reittiavaimet ovat `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` ja `audio-generation`. Päätepisteen reititys tehdään ennen tunnistetietojen valintaa,
+pisteytystä tai lähetystä. Sisäkkäiset yhdistelmäviittaukset valitsevat lapsiyhdistelmän reitin samaa ominaisuutta varten.
+
+`POST /v1/music/generations` ja `POST /v1/ocr` hyväksyvät yhdistelmän nimen `model`-kentässä. Alkuperäinen
+ElevenLabs-yhteensopiva `POST /v1/music` hyväksyy myös yhdistelmän nimen `model_id`-kentässä, mutta jokaisen käytettävän
+kohteen kyseisessä alkuperäisessä päätepisteessä on oltava ElevenLabs-musiikkimalli, jotta sen binäärivastaussopimus
+säilyy. `POST /v1/sound-generation` hyväksyy `audio-generation`-yhdistelmän `model_id`-kentässä saman alkuperäisen
+binäärirajoitteen mukaisesti. Käytä `/v1/music/generations`-päätepistettä heterogeenisille musiikkipalveluntarjoajille.
+
+**Automaattinen valinta:** ilman `provider`-kenttää halvin palveluntarjoaja, jolla on määritetty yhteys, suoritetaan ensin,
+ja seuraavaksi halvin toimii varapalveluntarjoajana. Ilmaisia viimeisenä keinona käytettäviä palveluntarjoajia (`duckduckgo-free`)
+käytetään vain, kun mitään muuta ei ole määritetty. Itse isännöity SearXNG lasketaan määritetyksi, kun sen yhteys tallentaa
+todellisen `baseUrl`-arvon (ei luettelon oletusarvoa `http://localhost:8888/search`): tällöin se sijoittuu 0 dollarin
+palveluntarjoajana avainta käyttävien edelle, ja halvin avainta käyttävä palveluntarjoaja toimii varapalveluntarjoajana,
+myös silloin, kun SearXNG vastaa virheellä 400, 401, 403 tai 404. `baseUrl`-arvoa, joka ei ole kelvollinen `http(s)`-URL-osoite
+tai joka osoittaa pilven metatieto-osoitteeseen, ei lasketa. SearXNG-yhteys, johon on tallennettu tunnus, sijoittuu tällä tavalla
+vain `https://`-osoitteiden tai loopback-osoitteen `http://`-osoitteiden yläpuolelle. Etäiseen pelkkään `http://`-osoitteeseen
+yhdistettynä se ei koskaan toimi varapalveluntarjoajana, vaan säilyy viimeisenä keinona ja sitä käytetään vain, kun mitään muuta
+palveluntarjoajaa ei ole määritetty tai kun sitä pyydetään nimellä, jolloin tunnus lähetetään selväkielisenä näissä kahdessa tapauksessa.
+
+### Exan ja Tavilyn `provider_options`-asetukset
+
+Exa ja Tavily lukevat palveluntarjoajakohtaiset kentät nimiavaruudellisesta säilöstä:
+`provider_options.exa` (tai `provider_options["exa-search"]`) ja `provider_options.tavily`
+(tai `provider_options["tavily-search"]`). Vain alla luetellut avaimet välitetään eteenpäin. Jokainen
+tarkistetaan omaa Zod-skeemaansa vasten tiedostossa `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+ja väärän tyyppinen avain poistetaan. Kaikki muut avaimet ohitetaan, mukaan lukien auth, base URL,
+`stream` ja `outputSchema`. Muiden palveluntarjoajien käyttämät litteät avaimet (`cx`, `depth`, ...)
+toimivat kuten ennenkin.
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiivit), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` yhdistettynä oletusarvon `{ text: true, highlights: true }` päälle |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
+
+Yleiset kentät voittavat aina: `query`, `max_results`, `filters` (verkkotunnukset), `country` ja
+`search_type`-arvosta johdettu aihe. Exalla `search_type: "news"` säilyttää arvon
+`category: "news"`. Tavily hyväksyy myös arvon `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl-haun kustannus kirjataan jokaista aloitettua 10 palautetun tuloksen lohkoa kohden, hintaan
+0,002 $ (2 krediittiä) lohkolta, ja jokaista kutsua kohden kirjataan vähintään yksi lohko
+([Firecrawl-laskutus](https://docs.firecrawl.dev/billing)): 11 tulosta maksaa 0,004 $.
+
+Yleinen `time_range` välitetään nyt molemmille palveluntarjoajille: Exa saa
+`startPublishedDate`-arvon (ISO-aikaleima) ja Tavily saa `start_date`-arvon (`YYYY-MM-DD`). Kohdassa
+`provider_options` määritetty päivämäärä ohittaa yhdistetyn arvon.
+
+Exa-tulokset säilyttävät kentät `id`, `highlights` (jokaisen korostuksen, ei ainoastaan ensimmäistä,
+jota käytetään `snippet`-kenttänä), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
+kentässä `provider_raw`. Tavily-tulokset säilyttävät kentät `images` ja `favicon`.
+
+Linkup-haun kustannus kirjataan arvoksi 0,005 $, kun `depth` on `fast` tai `standard`, ja arvoksi
+0,05 $, kun se on `deep`
+([Linkup-hinnoittelu](https://docs.linkup.so/pages/documentation/development/pricing)),
+riippumatta siitä, tuleeko `depth` kohteesta `provider_options` vai yhteyden asetuksista.
+
+Exan `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, jos jokin
+muu kenttä on asetettu. Lite-tilassa `additionalQueries`, `systemPrompt` ja kaikki `contents`-avaimet
+lukuun ottamatta avaimia `text` ja `highlights` poistetaan ennen kutsua. Vanhentuneita kenttiä
+`subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää
+välitetä eteenpäin.
+
+Kustannusten laskenta käyttää tasaista rekisteriä `costPerQuery`, paitsi Exan kohdalla, joka noudattaa
+Exan omaa hinnoittelua: 0,007 $ kutsulta arvolla `auto` (ja vanhalla arvolla `fast`) tai 0,004 $
+arvolla `lite` (ja vanhalla arvolla `instant`), kattaen 10 tulosta; 0,001 $ jokaisesta seuraavasta
+tuloksesta; ja 0,001 $ jokaisesta palautetusta tuloksesta, kun `contents.summary` on asetettu. Tavily
+kirjataan 1 krediittinä (0,008 $), kun `search_depth` on `basic`, `fast` tai `ultra-fast`, ja
+2 krediittinä (0,016 $), kun se on `advanced`
+([Tavily API -krediitit](https://docs.tavily.com/documentation/api-credits)). Kutsu, jossa
+`auto_parameters: true` päivittää Tavilyn käyttämään advanced-tasoa, kirjataan silti 1 krediittinä.
 
 ---
 
-## Web Fetch -rajapinta
+## Web Fetch API
 
-Poimi sisältö URL-osoitteesta määritetyn verkosta noutavan palveluntarjoajan (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) kautta.
+Poimi sisältöä URL-osoitteesta määritetyn web-fetch-palveluntarjoajan avulla (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, sama API-avain kuin Parallel Searchissa) palauttaa
-vain Markdownia — mikä tahansa muu `format` aiheuttaa `400`-virheen — ja rajoittaa
-sisällön 100 000 merkkiin. Kun kohdesivua itsessään ei voida poimia, upstream-palvelu
-ilmoittaa siitä HTTP 200 -vastauksen sisällä; OmniRoute tuo tämän esiin `422`-vastauksena
-kiinteällä viestillä.
+Parallel Extract (`parallel-search`, sama API-avain kuin Parallel Searchissa) palauttaa vain
+Markdownia — mikä tahansa muu `format` tuottaa vastauksen `400` — ja rajoittaa sisällön 100 000 merkkiin. Kun
+kohdesivua ei voida poimia, ylävirran palvelu ilmoittaa siitä HTTP 200 -vastauksen sisällä;
+OmniRoute välittää tämän `422`-vastauksena, jossa on kiinteä viesti.
 
-| Menetelmä | Polku           | Kuvaus                                                                  |
-| --------- | --------------- | ----------------------------------------------------------------------- |
-| POST      | `/v1/web/fetch` | Nouda/poimi URL-osoite — runko validoidaan skeemalla `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) palauttaa myös vain Markdownia (mikä tahansa muu `format` tuottaa
+vastauksen `400`) ja rajoittaa sisällön 100 000 merkkiin. Se toimii ilman avainta: eksplisiittinen
+`provider: "keenable-search"` -pyyntö ilman yhteyttä käyttää Keenablen avaimetonta päätepistettä
+(IP-kohtaiset nopeusrajoitukset). Määritetty avain vain poistaa nämä rajoitukset; automaattinen valinta käyttää Keenablea
+vain, kun avain on määritetty.
 
-**Todennus:** Bearer-API-avain (`extractApiKey` + `isValidApiKey`). Käytäntö
-valvotaan komennolla `enforceApiKeyPolicy`.
+| Metodi | Polku           | Kuvaus                                                                    |
+| ------ | --------------- | ------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Nouda/haravoi URL-osoite — runko validoidaan `v1WebFetchSchema`-skeemalla |
 
-**Kiintiöt huomioiva varmistusmenettely (#8297):** kun `provider`-arvoa ei anneta,
-poolia (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) käydään läpi kiinteässä
-prioriteettijärjestyksessä (fill-first) — nopeusrajoitettu mutta määritetty palveluntarjoaja
-ohitetaan pyynnön keskeyttämisen sijaan, ja uudelleen yritettävä/kiintiöön liittyvä upstream-virhe
-(HTTP 429 aina; 402/403 Firecr:wallen/Tavilyn/TinyFishin kiintiötyyppisillä ilmaistasoilla —
-ei Jina Readerilla eikä koskaan tavallisella virheellisellä 400-pyynnöllä) siirtyy
-pyynnön aikana seuraavalle kokeilemattomalle tunnistetietoja käyttävälle palveluntarjoajalle.
-Kun kaikki poolin palveluntarjoajat on käytetty loppuun, päätepiste palauttaa yhden `429`-vastauksen
-(`Retry-After`-otsakkeen kanssa) aiemman yleisen `400`-vastauksen sijaan. Kun `provider`-arvo
-annetaan eksplisiittisesti, hiljaista varmistusmenettelyä **ei ole** — nopeusrajoitettu tai
-epäonnistuva eksplisiittinen palveluntarjoaja tuo esiin oman virheensä (`429`, jos nopeusrajoitus
-on voimassa, muuten upstream-palvelun tilan).
+**Todennus:** Bearer-API-avain (`extractApiKey` + `isValidApiKey`). Käytäntö pakotetaan `enforceApiKeyPolicy`-toiminnolla.
+
+Nimetyt yhdistelmät käyttävät yllä olevaa [`model`-reitityssopimusta](#named-searchfetch-combinations)
+säilyttäen noutokohtaiset asetukset ja vastaukset.
+
+**Kiintiöt huomioiva varajärjestely (#8297):** kun kumpaakaan, `provider`- tai `model`-arvoa, ei ole annettu,
+joukko (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`) käydään
+läpi kiinteässä
+prioriteettijärjestyksessä (täyttöjärjestyksessä) — nopeusrajoitettu mutta määritetty palveluntarjoaja ohitetaan
+sen sijaan, että pyyntö keskeytettäisiin heti, ja uudelleen yritettävästä tai kiintiöön liittyvästä ylävirran virheestä
+(HTTP 429 aina; 402/403 Firecrawlin, Tavily-palvelun tai TinyFishin kiintiötyylisillä ilmaisversioilla —
+ei Jina Readerilla eikä koskaan tavallisen virheellisen pyynnön 400-vastauksella) siirrytään
+pyyntöhetkellä seuraavaan vielä kokeilemattomaan palveluntarjoajaan, jolle on määritetty tunnistetiedot. Kun kaikki joukon
+palveluntarjoajat on käytetty loppuun, päätepiste palauttaa yhden `429`-vastauksen (jossa on `Retry-After`-
+otsake) aiemman yleisen `400`-vastauksen sijaan. Kun eksplisiittistä `provider`-arvoa
+pyydetään, **hiljaista** varajärjestelyä ei käytetä — nopeusrajoitettu tai virheen palauttava eksplisiittinen
+palveluntarjoaja välittää oman virheensä (`429`, jos nopeusrajoitettu, muussa tapauksessa ylävirran
+tilakoodi).
 
 ---
 
@@ -982,36 +1094,34 @@ ja suoratoistaa valmistuneen vastauksen.
 
 ---
 
-## Kiintiöt ja ongelmien raportointi
+## Kiintiöiden ja ongelmien raportointi
 
-| Menetelmä | Polku               | Kuvaus                                                                                                        |
-| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
-| GET       | `/v1/quotas/check`  | Tarkistaa kiintiön etukäteen yhdistelmälle `provider` + `accountId` ennen rekisteröidyn avaimen myöntämistä   |
-| POST      | `/v1/issues/report` | Raportoi kiintiö-/avaimenmyöntämisvirheen GitHubiin (edellyttää `GITHUB_ISSUES_REPO`-asetusta ja tunnistetta) |
+| Method | Path                | Description                                                                                              |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Kiintiön ennakkotarkistus yhdistelmälle `provider` + `accountId` ennen rekisteröidyn avaimen myöntämistä |
+| POST   | `/v1/issues/report` | Kiintiö- tai avaimenmyöntämisvirheen raportointi GitHubiin (edellyttää `GITHUB_ISSUES_REPO` + tunnusta)  |
 
-**Todennus:** Bearer-API-avain (`isAuthenticated`).
+**Todennus:** `/v1/quotas/check` hyväksyy Bearer API -avaimen (`isAuthenticated`). `/v1/issues/report` on
+vain hallintaan tarkoitettu (`requireManagementAuth`), kuten `/api/v1/registered-keys`: hallintapaneelin istunto,
+paikallinen CLI-tunnus tai API-avain, jolla on `manage`/`admin`-käyttöoikeus; vain päättelyyn tarkoitetut API-avaimet saavat `403`-vastauksen.
 
-### Kiintiöistunnon palautus (valinnainen)
+### Kiintiöistunnon palautus (valinnainen käyttöönotto)
 
 Suoratoistamaton `POST /v1/chat/completions`- tai `POST /v1/responses`-pyyntö, joka epäonnistuu
-lopulliseen kiintiövirheeseen (`402`/`429`/`503`, jonka leipäteksti ilmoittaa kiintiön tai krediittien
-loppuneen), voidaan asettaa jonoon ja toistaa myöhemmin virheen palauttamisen sijaan. Kutsuja ottaa
-ominaisuuden käyttöön pyyntökohtaisesti kolmella otsakkeella:
+lopulliseen kiintiövirheeseen (`402`/`429`/`503`, jonka runko ilmoittaa kiintiön tai hyvitysten olevan käytetty),
+voidaan asettaa odottamaan ja toistaa myöhemmin virheen palauttamisen sijaan. Kutsuja ottaa ominaisuuden käyttöön pyyntökohtaisesti kolmella otsakkeella:
 
-| Otsake                       | Arvo                                                      |
+| Header                       | Value                                                     |
 | ---------------------------- | --------------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                                    |
 | `x-omniroute-session`        | istunnon tunnus, `[A-Za-z0-9._:-]{1,128}`                 |
 | `x-omniroute-recovery-turn`  | istunnon sisällä yksilöllinen vuoron tunnus (sama sääntö) |
 
-Vain `stream: false` -vuorot, joissa ei ole työkaluja, työkaluhistoriaa tai
-`previous_response_id`-tunnistetta eikä `x-omniroute-connection`-kiinnitystä, ovat kelvollisia, ja
-`STORAGE_ENCRYPTION_KEY` on asetettava (pyyntö tallennetaan salattuna enintään 24 tunniksi). Vastaus
-on tällöin `202` ja sisältää `recovery.poll`; kysy tila uudelleen osoitteella
-`GET /v1/quota-recoveries/{id}` (`202` odottamisen aikana, `200` ja palautettu leipäteksti
-valmistumisen jälkeen) tai peruuta toiminto komennolla `DELETE`. Tiketit näkyvät vain niiden luoneelle
-API-avaimelle. Toisto, jonka lopputulos on epävarma, päätyy tilaan `needs_confirmation` sen sijaan,
-että se lähetettäisiin kahdesti. Lähde: `src/lib/quota/quotaSessionRecovery.ts`.
+Vain `stream: false` -vuorot, joissa ei ole työkaluja, työkaluhistoriaa tai `previous_response_id`-tunnusta eikä
+`x-omniroute-connection`-kiinnitystä, ovat kelvollisia, ja `STORAGE_ENCRYPTION_KEY` on asetettava
+(pyyntö tallennetaan salattuna enintään 24 tunniksi). Vastauksena palautetaan `202` sekä
+`recovery.poll`; kysy tila osoitteella `GET /v1/quota-recoveries/{id}` (`202` odottavan käsittelyn aikana, `200`, jonka
+runko sisältää palautetun vastauksen käsittelyn valmistuttua) tai peruuta toiminto komennolla `DELETE`. Tiketit näkyvät vain niiden luoneelle API-avaimelle. Uudelleentoisto, jonka lopputuloksesta ei ole varmuutta, päättyy tilaan `needs_confirmation` sen sijaan, että pyyntö lähetettäisiin kahdesti. Lähde: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1765,17 +1875,21 @@ OmniRoute-tapahtumien lähtevät webhook-tilaukset (pyynnön valmistuminen, kiin
 
 ## Rekisteröidyt avaimet (automaattinen hallinta)
 
-Automaattinen avaintenhallintajärjestelmä käyttää tätä API-avainten myöntämiseen ja kiertämiseen taustalla olevan palveluntarjoajan/tilin kautta sekä päivä- ja tuntikohtaisten kiintiöiden hallintaan.
+Automaattinen avaintenhallinnan alijärjestelmä käyttää näitä API-avainten myöntämiseen ja kierrättämiseen taustalla olevan palveluntarjoajan/tilin kautta päivä- ja tuntikiintiöiden mukaisesti.
 
-| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                                           |
-| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET       | `/api/v1/registered-keys`             | Luettele rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                                          |
-| POST      | `/api/v1/registered-keys`             | Myönnä uusi rekisteröity avain — runko: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raakamuotoisen avaimen **vain kerran**. Palauttaa `429`, jos kiintiö estää pyynnön. |
-| GET       | `/api/v1/registered-keys/[id]`        | Nouda rekisteröidyn avaimen metatiedot (ei raakamuotoista avainta)                                                                                                                                                               |
-| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                                       |
-| POST      | `/api/v1/registered-keys/[id]/revoke` | Nimenomainen peruutuspäätepiste (sama vaikutus kuin komennolla `DELETE`)                                                                                                                                                         |
+| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/v1/registered-keys`             | Luettele rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                                                |
+| POST      | `/api/v1/registered-keys`             | Myönnä uusi rekisteröity avain — runko: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raakamuodossa olevan avaimen **vain kerran**. Palauttaa `429`, jos kiintiö estää pyynnön. |
+| GET       | `/api/v1/registered-keys/[id]`        | Hae rekisteröidyn avaimen metatiedot (ei raakaa avainmateriaalia)                                                                                                                                                                      |
+| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                                             |
+| POST      | `/api/v1/registered-keys/[id]/revoke` | Erillinen peruutuspäätepiste (sama vaikutus kuin DELETE)                                                                                                                                                                               |
+| GET       | `/api/v1/providers/[provider]/limits` | Lue palveluntarjoajan myöntämisen ylärajat                                                                                                                                                                                             |
+| PUT       | `/api/v1/providers/[provider]/limits` | Aseta palveluntarjoajan myöntämisen ylärajat — runko: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                          |
+| GET       | `/api/v1/accounts/[id]/limits`        | Lue tilin myöntämisen ylärajat                                                                                                                                                                                                         |
+| PUT       | `/api/v1/accounts/[id]/limits`        | Aseta tilin myöntämisen ylärajat — sama runko kuin palveluntarjoajan reitillä                                                                                                                                                          |
 
-**Todennus:** hallintaistunto/API-avain (`requireManagementAuth`) — sama suojaus kuin kohteessa `/api/keys`: hallintapaneelin istunto, paikallinen CLI-tunnus tai API-avain, jolla on `manage`/`admin`-käyttöoikeusalue; vain päättelyyn tarkoitetut API-avaimet saavat vastauksen `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
+**Todennus:** hallintaistunto/API-avain (`requireManagementAuth`) — sama suojaus kuin reitillä `/api/keys`: hallintapaneelin istunto, paikallinen CLI-tunnus tai API-avain, jolla on `manage`/`admin`-käyttöoikeusalue; vain päättelyyn tarkoitetut API-avaimet saavat vastaukseksi `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
 
 ---
 

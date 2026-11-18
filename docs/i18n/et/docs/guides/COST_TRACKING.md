@@ -80,7 +80,7 @@ Mudelite nimed normaliseeritakse kõigepealt (teenusepakkuja tee eesliited, nagu
 
 ### Kuidas kulutusi registreeritakse
 
-- Päringu hind arvutatakse pärast vastust ja salvestatakse tule ja unusta, nii et see ei lisa kliendile kunagi latentsust. Jagatud kvoodi tarbimine on ajastatud järgmise sündmusetsükli linnukesega [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
+- Taotluse maksumus arvutatakse taotluse täitmisel. Jagatud kvoodi tarbimine on ajastatud järgmise sündmusetsükli linnukesega [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kaudu.
 - API-võtme kulutused puhverdab ja loputab partiidena [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (vaikimisi 60-sekundiline loputusintervall, 1000 sisestusega puhver). Häälestatav:
 
   | Env var                             | Vaikimisi | Eesmärk                                 |
@@ -88,7 +88,29 @@ Mudelite nimed normaliseeritakse kõigepealt (teenusepakkuja tee eesliited, nagu
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Loputusintervall millisekundites.       |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max puhverdatud kirjed enne loputamist. |
 
-Armatuurlaua kulunumbrid on järgmised** mitte** loetakse iga rea kohta salvestatud dollarisummast — need arvutatakse käigu pealt uuesti lubade arvu ja praeguse hinnakujundustabeli põhjal iga kord, kui analüütika lõpp-punkt töötab. See tähendab, et vale hinna parandamine (ja uuesti sünkroonimine) värskendab ajaloolisi kuluprognoose tagasiulatuvalt.
+Kulud eelistavad täpset pakkuja teatatud tasu (`provider_cost_usd`), seejärel kataloogihinnaga päringu hetketõmmist (`calculated_cost_usd`), seejärel kehtivast kataloogist token-ümberhindamist. Salvestatud kulude eest ei võeta uuesti tasu nende märgiloendite kaudu. Ainult loa pärandread muutuvad ka siis, kui nende kataloogihind muutub.
+
+### OCR ja manused
+
+- Edukad `/v1/ocr` -päringud kasutavad ülesvoolu `usage_info.pages_processed`, mitte taotletud lehevahemikku või tagastatud leheobjektide arvu. Prognoos on lehekülgi × `ocr_cost_per_page` (absoluutne USD/page,** mitte** USD/million).
+- Dokumendi või piirdekasti märkustega päringud nõuavad eraldi `ocr_cost_per_annotated_page` tariifi. Ilma selleta jääb maksumus teadmata; tavalist OCR tariifi ei asendata vaikselt.
+- LiteLLM sync kaardistab oma ülesvoolu `annotation_cost_per_page` välja `ocr_cost_per_annotated_page`, säilitades absoluutse USD/page väärtuse ja ainult annotatsiooniga kirjed, sealhulgas selge nulli. Esitatud kanooniline väli on ülimuslik; kehtetuid pseudonüümi väärtusi ignoreeritakse. Kasutajahindade alistamised säilitavad oma tavapärase prioriteedi. Vaadake [LiteLLMOCR hinnavõtmeid](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR kasutamine salvestab lehtede arvu, ühikuhinna, arvutatud USD maksumuse, API -võtme ja valitud ühenduse. Lehti ei esitata kunagi märkidena. Kõnelogid sisaldavad arvelduse metaandmeid, mitte dokumendi URLs, PDF baite ega ekstraktitud teksti.
+- Edukad `/v1/embeddings` -päringud salvestavad ühe kasutusrea füüsilise partii kohta, sealhulgas sama millisekundi jooksul täidetud eraldi partiid. Pakkuja teatatud tasud on sümboolsete hinnangute suhtes ülimuslikud; kombineeritud ümbrised ei lisa tasu.
+- Kasutusajalugu, kulude analüüs, provider/account aknad, API-võtme kululimiidid, päringu-kulude pearaamat ja igapäevased kasutuskogumid sisaldavad neid tasusid. Logimata klahvid säilitavad numbrilise arvestuse lähteteksti säilitamata.
+- Kasutus või tariifid puuduvad** teadmata** , mitte tasuta: vastusekulu päis jäetakse välja ja piiratud API võtmetele kehtivad olemasolevad hinnavaba kasutamise eeskirjad. Selgelt konfigureeritud nullmäärad jäävad kehtima nullkuluga kasutamiseks.
+
+See on ainult edasine arvestus. Vanu OCR/embedding -kõnesid, mis pole kunagi kasutusajalugu kirjutanud, ei saa selle migratsiooni põhjal rekonstrueerida. Kataloogi hinnangud on USD -hinnangud, mitte arve, ega sisalda valuuta konverteerimist, makse ega allahindlusi.
+
+### Kõne ja pildid
+
+- Edukad `/v1/audio/transcriptions`, `/v1/audio/speech` ja kujutise genereerimise katsed jagavad numbrilist arvestust. Otsesed ja kombineeritud kõned kannavad helistaja API klahvi ja valitud ühendust; kombineeritud ümbris ei lisa kunagi teist deebetit.
+- Pakkuja teatatud USD võidab kataloogihinnangu, sealhulgas selgesõnalise nulltasu. OpenRouterJSON `usage.cost` on normaliseeritud väärtuseks `cost_usd`. Vastasel juhul kasutavad mõõdetud märgid lubade hindu, transkriptsioonisekundid sekundihindu, kõnesisend Unicode'i tähemärkide loendust ja kindla hinnaga kujutised kasutavad tegelikult tagastatud numbrit, mitte nõutud `n`.
+- Binaarsel OpenRouter TTS puudub JSON kasutuskeha. Kui heli on lõppenud või helistaja tühistab, küsib OmniRoute selle generatsiooni ID** sama** konfigureeritud OpenRouter päritolu. EU päring ei lange kunagi tagasi globaalsele päritolule. See on piiratud, kirjutuskaitstud otsing; sünteesi raamatupidamiseks uuesti ei proovita. Arvelduskirjed võivad ilmuda pärast seda, kui heli on lõppenud: kordusotsingud jooksevad taustal kuni umbes 52 sekundit, sealhulgas võrgu tähtajad.
+- Selle otsingu ajal on helivastusel `X-OmniRoute-Cost-Status: pending` ja vastusekulu päis puudub. Selle lõplik tasu kuvatakse pärast vastavust kasutusajaloos, analüütikas ja võtmeraamatus. Kui metaandmed pole saadaval, kasutatakse konfigureeritud tariifi ülevaadet; muidu jääb hind teadmata.
+- Sekunditel, märkidel ja piltide loendustel on eraldi arveldusühiku väljad, mitte kunagi võltsitud žetoonide arv. Raamatupidamine säilitab ainult numbrikasutust, mitte kõneteksti, ärakirju ega pildibaite. Olemasolevad hinnavaba pildi erandid ei muutu: tõeliselt puuduv pilditariif ei lukusta äsja piiratud võtit ja vastusest jäetakse välja kulu päis, selle asemel, et kõne tasutaks kuulutada. Hinnakujunduspoe tõrge säilitab endiselt kasutustõendeid tõrkega suletud jõustamise jaoks.
+
+Ühtegi ajaloolist speech/image laengut ei leiuta ega täideta. Teenusepakkuja arveldamine jääb arvete ja kõnede viiteallikaks, mille tasu ei ole teatatud.
 
 ---
 
