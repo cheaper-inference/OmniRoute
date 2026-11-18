@@ -85,3 +85,40 @@ test("repairUnpairedSurrogates keeps a pair and replaces a following lone surrog
   repairUnpairedSurrogates(body);
   assert.equal(body.messages[0].content[0].text, "end \uD83D\uDE00\uFFFD");
 });
+
+test("claude wire body repairs a lone surrogate in a tool-input property name", async () => {
+  const wire = await claudeWire([
+    { type: "tool_use", id: "toolu_1", name: "edit", input: { ["cut\uD800"]: "value" } },
+  ]);
+  assert.doesNotMatch(wire, /\\ud800/i);
+  const parsed = JSON.parse(wire) as {
+    messages: Array<{ content: Array<{ input: Record<string, unknown> }> }>;
+  };
+  assert.deepEqual(parsed.messages[0].content[0].input, { "cut�": "value" });
+});
+
+test("repairUnpairedSurrogates keeps key order and lets a well-formed key win a collision", () => {
+  const input: Record<string, unknown> = {
+    first: 1,
+    ["dup\uD800"]: "malformed",
+    "dup�": "well-formed",
+    ["other\uDC00"]: "a",
+    ["other\uD800"]: "b",
+    last: 2,
+  };
+  repairUnpairedSurrogates(input);
+  assert.deepEqual(Object.keys(input), ["first", "dup�", "other�", "last"]);
+  assert.equal(input["dup�"], "well-formed");
+  assert.equal(input["other�"], "a");
+});
+
+test("repairUnpairedSurrogates keeps a parsed __proto__ key an own property", () => {
+  const input = JSON.parse('{"__proto__":{"polluted":true},"key\\ud800":"v"}') as Record<
+    string,
+    unknown
+  >;
+  repairUnpairedSurrogates(input);
+  assert.equal(Object.getPrototypeOf(input), Object.prototype);
+  assert.deepEqual(Object.keys(input), ["__proto__", "key�"]);
+  assert.equal(({} as Record<string, unknown>).polluted, undefined);
+});

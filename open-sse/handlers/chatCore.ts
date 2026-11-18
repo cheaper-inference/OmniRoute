@@ -22,6 +22,7 @@ import {
 } from "./chatCore/failureUsage.ts";
 import { buildRequestTranslationErrorResult } from "./chatCore/requestTranslationError.ts";
 import {
+  calibratedCompactionTarget,
   estimateCalibratedFinalInputTokens,
   estimateFinalInputTokenBreakdown,
 } from "./chatCore/contextEstimation.ts";
@@ -2155,7 +2156,14 @@ async function handleChatCoreInner({
     const lastResortResult = compressContext(lastResortAdapter.body, {
       provider,
       model: effectiveModel,
-      maxTokens: effectiveCompactionCeiling,
+      // The gate above reads the calibrated estimate; compressContext reads the
+      // raw one. Size the raw target so the calibrated result also fits.
+      maxTokens: calibratedCompactionTarget(
+        effectiveCompactionCeiling,
+        body,
+        provider,
+        effectiveModel
+      ),
     });
     if (lastResortResult.compressed && lastResortResult.body) {
       body = lastResortAdapter.adapted

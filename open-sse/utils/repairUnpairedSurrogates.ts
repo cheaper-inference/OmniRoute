@@ -18,6 +18,33 @@ function isPlainObject(value: object): boolean {
   return proto === Object.prototype || proto === null;
 }
 
+/**
+ * A lone surrogate in a property name (a tool-input key) serializes to the same
+ * rejected `\ud800` escape. Keys are rebuilt in their original order. Collision
+ * policy: a key that was already well-formed keeps its value, and among
+ * malformed keys that repair to the same name the first one wins; the others
+ * are dropped. defineProperty keeps a `__proto__` own key an own key.
+ */
+function repairKeys(record: Record<string, unknown>): void {
+  const keys = Object.keys(record);
+  if (!keys.some((key) => HAS_SURROGATE.test(key) && repairString(key) !== key)) return;
+  const wellFormed = new Set(keys.filter((key) => repairString(key) === key));
+  const entries = keys.map((key) => [key, record[key]] as const);
+  for (const key of keys) delete record[key];
+  for (const [key, item] of entries) {
+    const repaired = repairString(key);
+    if (repaired !== key && (wellFormed.has(repaired) || Object.hasOwn(record, repaired))) {
+      continue;
+    }
+    Object.defineProperty(record, repaired, {
+      value: item,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+}
+
 function walk(value: unknown, seen: WeakSet<object>): void {
   if (Array.isArray(value)) {
     if (seen.has(value)) return;
@@ -39,6 +66,7 @@ function walk(value: unknown, seen: WeakSet<object>): void {
   seen.add(value);
 
   const record = value as Record<string, unknown>;
+  repairKeys(record);
   for (const key of Object.keys(record)) {
     const item = record[key];
     if (typeof item === "string") {
@@ -50,7 +78,7 @@ function walk(value: unknown, seen: WeakSet<object>): void {
   }
 }
 
-/** Replace lone surrogates in string values. Keys, Buffers, and class instances stay. */
+/** Replace lone surrogates in string values and keys. Buffers and class instances stay. */
 export function repairUnpairedSurrogates(value: unknown): void {
   walk(value, new WeakSet());
 }
