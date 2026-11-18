@@ -197,6 +197,7 @@ import {
   isForcedConnectionMissingFromPool,
   resolveForcedConnectionForCredentialPool,
   resolveSessionAffinityTtlMs,
+  peekSessionAffinityConnection,
   selectSessionAffinityConnection,
   planSessionAffinityConnection,
   syncSessionAffinityRuntimeFields,
@@ -1967,14 +1968,19 @@ export async function getProviderCredentials(
       ? connection
       : options.lease
         ? affinityPlan?.connection
-        : await selectSessionAffinityConnection(
-            provider,
-            options.sessionKey,
-            allOrderedConnections,
-            sessionAffinityTtlMs,
-            undefined,
-            options.affinityReadOnly === true
-          );
+        : options.affinityReadOnly === true
+          ? await peekSessionAffinityConnection(
+              provider,
+              options.sessionKey,
+              allOrderedConnections,
+              sessionAffinityTtlMs
+            )
+          : await selectSessionAffinityConnection(
+              provider,
+              options.sessionKey,
+              allOrderedConnections,
+              sessionAffinityTtlMs
+            );
     if (affinityConnection) {
       connection = affinityConnection;
       if (options.lease && !options.affinityReadOnly)

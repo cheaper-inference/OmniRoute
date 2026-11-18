@@ -1,5 +1,5 @@
 import { getSessionAffinityStore } from "../../../src/lib/db/sessionAccountAffinity";
-import { getProviderConnectionById } from "../../../src/lib/db/providers";
+import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache";
 import { resolveSessionAffinityConnection } from "../../../src/lib/db/sessionAffinity/accountIdentity";
 import {
   resolveSessionAffinityTtlMs,
@@ -33,7 +33,9 @@ export async function preferSessionAccountTarget(
       (!target.allowedConnectionIds || target.allowedConnectionIds.includes(record.connectionId))
   );
   if (!candidate || candidate === head) return targets;
-  const connection = await getProviderConnectionById(record.connectionId);
+  // State read through the shared read cache (invalidated on every connection
+  // write): this only reorders candidates, dispatch still selects and leases.
+  const connection = await getCachedProviderConnectionById(record.connectionId);
   if (
     !connection ||
     !connection.isActive ||
