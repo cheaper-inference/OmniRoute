@@ -2,6 +2,7 @@ import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
+import { QUOTA_DAILY_REVALIDATION_FLAG } from "./featureFlagDefinitionsQuotaRevalidation";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import {
   PII_RESPONSE_SANITIZATION_MODE_FLAG,
@@ -1343,18 +1344,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-  {
-    key: "QUOTA_DAILY_REVALIDATION",
-    label: "Resilience: Revalidate Long Quota Locks Daily",
-    description:
-      "Let the credential health sweep re-probe a model that a quota failure parked for more than a day, at most once a day per lock and 5 per sweep, so a quota that resets early (or a lock derived from a bad parse) stops parking the model until the announced window ends. Off by default: a long quota lock lasts exactly the window it announced, and no extra upstream request is made (#20343).",
-    descriptionI18nKey: "featureFlagQuotaDailyRevalidationDescription",
-    category: "health",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
+  QUOTA_DAILY_REVALIDATION_FLAG,
   {
     key: "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY",
     label: "Credential Gate: Auth Diagnoses Only",

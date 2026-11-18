@@ -33,6 +33,16 @@ function lockProviderModel(provider: string, connectionId: string, model: string
   });
 }
 
+/** Every connection the tests lock is active and keeps the default health-check cadence. */
+const allActive = async () =>
+  ["conn-a", "conn-b", "conn-c", "conn-d", "conn-e", "conn-f", "conn-g", "conn-h", "conn-i"].map(
+    (id) => ({
+      id,
+      isActive: true,
+      healthCheckInterval: null,
+    })
+  );
+
 test.beforeEach(() => {
   clearAllModelLockouts();
 });
@@ -53,6 +63,7 @@ test("an enabled pass probes a long lock and clears it when the quota is back", 
   const result = await runDailyQuotaRevalidation({
     nowMs: now,
     enabled: true,
+    loadConnections: allActive,
     probe: async (candidate) => {
       probed.push(`${candidate.provider}/${candidate.connectionId}/${candidate.model}`);
       return "recovered";
@@ -72,6 +83,7 @@ test("a failing probe keeps the lock and does not shorten it", async () => {
 
   const result = await runDailyQuotaRevalidation({
     enabled: true,
+    loadConnections: allActive,
     probe: async () => "still-locked",
   });
 
@@ -90,6 +102,7 @@ test("an inconclusive probe neither clears the lock nor counts as recovered", as
 
   const result = await runDailyQuotaRevalidation({
     enabled: true,
+    loadConnections: allActive,
     probe: async () => "unknown",
   });
 
@@ -124,6 +137,7 @@ test("a short lock is not probed even when the pass is enabled", async () => {
   let calls = 0;
   const result = await runDailyQuotaRevalidation({
     enabled: true,
+    loadConnections: allActive,
     probe: async () => {
       calls += 1;
       return "recovered";
@@ -143,11 +157,11 @@ test("one probing pass does not re-probe the same lock on the next sweep", async
     return "still-locked" as const;
   };
 
-  await runDailyQuotaRevalidation({ enabled: true, probe });
+  await runDailyQuotaRevalidation({ enabled: true, loadConnections: allActive, probe });
   assert.equal(calls, 1);
 
   // The store remembers the probe, so the same lock is not hammered every sweep.
-  await runDailyQuotaRevalidation({ enabled: true, probe });
+  await runDailyQuotaRevalidation({ enabled: true, loadConnections: allActive, probe });
   assert.equal(calls, 1, "a lock probed moments ago must not be probed again");
 });
 
@@ -166,4 +180,109 @@ test("the feature flag keeps the pass off by default, with no probe", async () =
   assert.equal(calls, 0, "the flag defaults to off: no upstream request may be made");
   assert.equal(result.probed, 0);
   assert.equal(getAllModelLockouts().length, 1, "the lock survives the default-off sweep");
+});
+
+test("a lock on an inactive or health-check-opted-out connection is never probed", async () => {
+  // The probe is the regular connection test, which switches a connection back on
+  // when it passes: probing an operator- or ban-disabled connection from here
+  // would re-enable it behind the operator's back.
+  lockProviderModel("antigravity", "conn-off", "gemini-3-pro");
+  lockProviderModel("antigravity", "conn-optout", "gemini-3-pro");
+  lockProviderModel("antigravity", "conn-on", "gemini-3-pro");
+
+  const probed: string[] = [];
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => [
+      { id: "conn-off", isActive: false, healthCheckInterval: null },
+      { id: "conn-optout", isActive: true, healthCheckInterval: 0 },
+      { id: "conn-on", isActive: true, healthCheckInterval: null },
+    ],
+    probe: async (candidate) => {
+      probed.push(candidate.connectionId);
+      return "recovered";
+    },
+  });
+
+  assert.deepEqual(probed, ["conn-on"], "only the active, opted-in connection may be probed");
+  assert.equal(result.recovered, 1);
+  const remaining = getAllModelLockouts()
+    .map((entry) => entry.connectionId)
+    .sort();
+  assert.deepEqual(
+    remaining,
+    ["conn-off", "conn-optout"],
+    "skipped locks stay exactly as they were"
+  );
+});
+
+test("a lock whose connection no longer exists is not probed", async () => {
+  lockProviderModel("antigravity", "conn-gone", "gemini-3-pro");
+
+  let calls = 0;
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => [],
+    probe: async () => {
+      calls += 1;
+      return "recovered";
+    },
+  });
+
+  assert.equal(calls, 0);
+  assert.equal(result.probed, 0);
+  assert.equal(getAllModelLockouts().length, 1);
+});
+
+test("unreadable connections make the pass probe nothing", async () => {
+  lockProviderModel("antigravity", "conn-i", "gemini-3-pro");
+
+  let calls = 0;
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => {
+      throw new Error("db unavailable");
+    },
+    probe: async () => {
+      calls += 1;
+      return "recovered";
+    },
+    logger: {},
+  });
+
+  assert.equal(calls, 0, "an unreadable connection list must not lead to a probe");
+  assert.equal(result.probed, 0);
+  assert.equal(getAllModelLockouts().length, 1);
+});
+
+test("a sweep cadence of 0 (sweep turned off) makes no probe even with the flag on", async () => {
+  lockProviderModel("antigravity", "conn-h", "gemini-3-pro");
+
+  let calls = 0;
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    sweepIntervalMs: 0,
+    loadConnections: allActive,
+    probe: async () => {
+      calls += 1;
+      return "recovered";
+    },
+  });
+
+  assert.equal(calls, 0, "an operator who turned the sweep off must see no upstream request");
+  assert.equal(result.probed, 0);
+  assert.equal(getAllModelLockouts().length, 1);
+
+  // A positive cadence keeps the daily probe.
+  const enabledResult = await runDailyQuotaRevalidation({
+    enabled: true,
+    sweepIntervalMs: 300_000,
+    loadConnections: allActive,
+    probe: async () => {
+      calls += 1;
+      return "recovered";
+    },
+  });
+  assert.equal(calls, 1);
+  assert.equal(enabledResult.recovered, 1);
 });

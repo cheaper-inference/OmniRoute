@@ -67,6 +67,41 @@ function pruneProbed(nowMs: number, intervalMs: number): void {
   }
 }
 
+/** The connection fields that decide whether its locks may be probed. */
+type DailyRevalidationConnection = {
+  id: string;
+  isActive?: boolean | null;
+  healthCheckInterval?: number | null;
+};
+
+/**
+ * Connections whose locks the pass may probe: active, and not opted out of
+ * health checks (`healthCheckInterval <= 0`). A probe goes through the regular
+ * connection test, which switches a connection back on when it passes, so a
+ * lock on an inactive connection (operator-disabled, ban-disabled or switched
+ * off by the gateway) must never be probed from here; the capped auto-disabled
+ * retest is the only path that may bring such a connection back.
+ */
+function eligibleConnectionIds(
+  connections: readonly DailyRevalidationConnection[] | null | undefined
+): Set<string> {
+  const ids = new Set<string>();
+  for (const connection of Array.isArray(connections) ? connections : []) {
+    if (!connection || typeof connection.id !== "string" || connection.id.length === 0) continue;
+    if (connection.isActive !== true) continue;
+    const interval = connection.healthCheckInterval;
+    if (typeof interval === "number" && interval <= 0) continue;
+    ids.add(connection.id);
+  }
+  return ids;
+}
+
+async function loadActiveConnections(): Promise<DailyRevalidationConnection[]> {
+  const { getProviderConnections } = await import("@/lib/db/providers");
+  const rows = await getProviderConnections({ isActive: true });
+  return (Array.isArray(rows) ? rows : []) as unknown as DailyRevalidationConnection[];
+}
+
 /**
  * Whether the operator turned the pass on.
  *
@@ -101,26 +136,87 @@ function toCandidates(nowMs: number): DailyRevalidationCandidate[] {
   });
 }
 
+type DailyRevalidationLogger = { info?: (msg: string) => void; warn?: (msg: string) => void };
+
+function describeError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/** Eligible connection ids, or null when they cannot be read (then nothing is probed). */
+async function readEligibleConnectionIds(
+  load: () => Promise<DailyRevalidationConnection[]>,
+  logger: DailyRevalidationLogger
+): Promise<Set<string> | null> {
+  try {
+    return eligibleConnectionIds(await load());
+  } catch (error) {
+    // Unreadable connections: probe nothing, the safe direction.
+    logger.warn?.(
+      `[quota-daily] could not load connections; no probe this sweep: ${describeError(error)}`
+    );
+    return null;
+  }
+}
+
+/** Probe one due lock; true when it recovered and its lock was cleared. */
+async function revalidateOne(
+  candidate: DailyRevalidationCandidate,
+  probe: DailyRevalidationProbe,
+  nowMs: number,
+  logger: DailyRevalidationLogger
+): Promise<boolean> {
+  const key = candidateKey(candidate);
+  // Recorded before the probe: a probe that throws must not be retried in a
+  // tight loop against an upstream that is already unhappy.
+  lastProbedAt.set(key, nowMs);
+
+  let verdict: DailyRevalidationVerdict;
+  try {
+    verdict = await probe(candidate);
+  } catch (error) {
+    logger.warn?.(
+      `[quota-daily] probe of ${candidate.provider}/${candidate.model} failed: ${describeError(error)}`
+    );
+    return false;
+  }
+
+  if (verdict !== "recovered") return false;
+
+  clearModelLock(candidate.provider, candidate.connectionId, candidate.model);
+  lastProbedAt.delete(key);
+  logger.info?.(
+    `[quota-daily] ${candidate.provider}/${candidate.model} answered again; lock cleared early`
+  );
+  return true;
+}
+
 /**
  * Probe the quota locks that have outlived a day, once each per day.
  *
  * A passing probe clears the lock so the model returns to rotation; a failing or
  * inconclusive one leaves it untouched, because the upstream never confirmed the
- * quota was back.
+ * quota was back. Only locks on active connections that keep their health
+ * checks are probed, and nothing runs while the sweep cadence is 0.
  */
 export async function runDailyQuotaRevalidation(
   deps: {
     nowMs?: number;
     /** Overrides the feature flag. Tests set it; production reads the flag. */
     enabled?: boolean;
+    /** The sweep's global cadence; 0 means the operator turned the sweep off. */
+    sweepIntervalMs?: number;
+    /** Connections the locks belong to; production reads the active ones. */
+    loadConnections?: () => Promise<DailyRevalidationConnection[]>;
     probe?: DailyRevalidationProbe;
     limit?: number;
-    logger?: { info?: (msg: string) => void; warn?: (msg: string) => void };
+    logger?: DailyRevalidationLogger;
   } = {}
 ): Promise<DailyRevalidationResult> {
   const result: DailyRevalidationResult = { selected: 0, probed: 0, recovered: 0 };
   const enabled = deps.enabled ?? isEnabled();
   if (!enabled) return result;
+  // An operator who set the sweep cadence to 0 turned the sweep off: no probe.
+  if (deps.sweepIntervalMs !== undefined && !(deps.sweepIntervalMs > 0)) return result;
 
   const probe = deps.probe ?? probeWithConnectionTest;
 
@@ -132,45 +228,25 @@ export async function runDailyQuotaRevalidation(
 
   pruneProbed(nowMs, 24 * 60 * 60 * 1000);
 
+  const eligible = await readEligibleConnectionIds(
+    deps.loadConnections ?? loadActiveConnections,
+    logger
+  );
+  if (!eligible) return result;
+
   const limit = deps.limit ?? MAX_DAILY_REVALIDATIONS_PER_SWEEP;
-  const due = selectDailyRevalidations(toCandidates(nowMs), nowMs, limit, { enabled: true });
+  const candidates = toCandidates(nowMs).filter((candidate) =>
+    eligible.has(candidate.connectionId)
+  );
+  const due = selectDailyRevalidations(candidates, nowMs, limit, { enabled: true });
   result.selected = due.length;
 
   for (const candidate of due) {
-    const key = candidateKey(candidate);
-    // Recorded before the probe: a probe that throws must not be retried in a
-    // tight loop against an upstream that is already unhappy.
-    lastProbedAt.set(key, nowMs);
     result.probed += 1;
-
-    let verdict: DailyRevalidationVerdict;
-    try {
-      verdict = await probe(candidate);
-    } catch (error) {
-      logger.warn?.(
-        `[quota-daily] probe of ${candidate.provider}/${candidate.model} failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      continue;
-    }
-
-    if (verdict !== "recovered") continue;
-
-    clearModelLock(candidate.provider, candidate.connectionId, candidate.model);
-    lastProbedAt.delete(key);
-    result.recovered += 1;
-    logger.info?.(
-      `[quota-daily] ${candidate.provider}/${candidate.model} answered again; lock cleared early`
-    );
+    if (await revalidateOne(candidate, probe, nowMs, logger)) result.recovered += 1;
   }
 
   return result;
-}
-
-/** Test seam: forget every recorded probe. */
-export function resetDailyRevalidationProbeMemory(): void {
-  lastProbedAt.clear();
 }
 
 /**

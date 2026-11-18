@@ -334,7 +334,9 @@ export async function sweep(): Promise<void> {
     // the model until the announced window ends. Runs before the active pass so a
     // recovered model is already unlocked when that pass builds its candidate list.
     try {
-      const quotaRevalidation = await runDailyQuotaRevalidation();
+      const quotaRevalidation = await runDailyQuotaRevalidation({
+        sweepIntervalMs: globalIntervalMs,
+      });
       if (quotaRevalidation.recovered > 0) {
         console.log(
           LOG_PREFIX,
