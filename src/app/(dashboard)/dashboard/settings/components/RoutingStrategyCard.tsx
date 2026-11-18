@@ -5,6 +5,7 @@ import { Card, NumberInput, Toggle } from "@/shared/components";
 import { fieldNumber, fieldText } from "./numberFieldText";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
+import IconChip from "@/shared/components/IconChip";
 
 type RoutingSettings = {
   fallbackStrategy?: string;
@@ -258,9 +259,9 @@ export default function RoutingStrategyCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted shrink-0">
+        <IconChip className="shrink-0">
           <Icon name="route" size={20} />
-        </div>
+        </IconChip>
         <div>
           <h3 className="text-base sm:text-lg">{t("routingStrategyTitle")}</h3>
           <p className="text-xs text-text-muted">{t("routingStrategySubtitle")}</p>

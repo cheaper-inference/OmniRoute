@@ -8,6 +8,7 @@ import { Switch } from "@omniroute/ui-kit/switch";
 import { Button, Card, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
+import IconChip from "@/shared/components/IconChip";
 
 interface MemoryConfig {
   enabled: boolean;
@@ -305,9 +306,9 @@ export default function MemorySkillsTab() {
     return (
       <Card data-testid="memory-settings-card">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="psychology" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("memorySkillsTitle")}
@@ -325,9 +326,9 @@ export default function MemorySkillsTab() {
       {/* Memory Settings */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="memory" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("memoryTitle")}
@@ -442,9 +443,9 @@ export default function MemorySkillsTab() {
       {/* Qdrant (optional semantic memory index) */}
       <Card data-testid="qdrant-settings-card">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="database" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("qdrantTitle")}
@@ -703,9 +704,9 @@ export default function MemorySkillsTab() {
       {/* Skills Settings */}
       <Card data-testid="skills-settings-card">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="handyman" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("skillsTitle")}
@@ -733,9 +734,9 @@ export default function MemorySkillsTab() {
       {/* SkillsMP Marketplace API Key */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="storefront" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("memorySkillsSkillsmpMarketplace")}
@@ -779,9 +780,9 @@ export default function MemorySkillsTab() {
       {/* Active Skills Provider */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="hub" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("memorySkillsActiveSkillsProvider")}

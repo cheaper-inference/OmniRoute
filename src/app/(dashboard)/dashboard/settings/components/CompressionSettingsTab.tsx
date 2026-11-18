@@ -14,6 +14,7 @@ import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
 } from "./CompressionTokenSaverCard";
 import SavedNumberInput from "./SavedNumberInput";
+import IconChip from "@/shared/components/IconChip";
 
 type CompressionMode =
   "off" | "lite" | "standard" | "aggressive" | "ultra" | "rtk" | "codex-responses" | "stacked";
@@ -390,9 +391,9 @@ export default function CompressionSettingsTab() {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-info/10 text-info">
+        <IconChip tone="info">
           <Icon name="compress" size={20} />
-        </div>
+        </IconChip>
         <div>
           <h3 className="ci-heading" data-size="lg">
             {t("compressionTitle")}

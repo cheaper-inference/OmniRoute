@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 import { Slider } from "@omniroute/ui-kit/slider";
 import { Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 // Dedicated i18n keys — do NOT reuse settings.auto / autoDesc (those are routing
 // "Auto Combo" strings and previously made Thinking Budget look like a routing mode).
@@ -91,9 +92,9 @@ export default function ThinkingBudgetTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="psychology" size={20} />
-        </div>
+        </IconChip>
         <div>
           <h3 className="ci-heading" data-size="lg">
             {t("thinkingBudgetTitle")}

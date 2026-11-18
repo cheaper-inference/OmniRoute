@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Slider } from "@omniroute/ui-kit/slider";
 import { Button, Card, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 interface ModelsDevStatus {
   enabled: boolean;
@@ -223,9 +224,9 @@ export default function ModelsDevSyncTab() {
     return (
       <Card>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="sync" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("modelsDevTitle")}
@@ -256,9 +257,9 @@ export default function ModelsDevSyncTab() {
       {/* Main sync card */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="database" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("modelsDevTitle")}
@@ -337,9 +338,9 @@ export default function ModelsDevSyncTab() {
       {status && (status.providerCount > 0 || status.modelCount > 0) && (
         <Card>
           <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <IconChip>
               <Icon name="bar_chart" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("modelsDevStats")}
@@ -386,9 +387,9 @@ export default function ModelsDevSyncTab() {
       {/* Info card */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="info" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("modelsDevInfo")}

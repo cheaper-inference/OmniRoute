@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
 import { Button, Card, Collapsible, Input, ModelSelectField, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 export default function BackgroundDegradationTab() {
   const [config, setConfig] = useState({
@@ -89,9 +90,9 @@ export default function BackgroundDegradationTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="speed" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
           <h3 className="ci-heading" data-size="lg">
             {t("backgroundDegradationTitle")}

@@ -320,3 +320,49 @@ test("A2/B: settings buttons use the kit dense sizes and the muted tone", () => 
   assert.equal(buttons.filter(({ attrs }) => attrs.size === "icon-2xs").length, 2);
   assert.equal(buttons.filter(({ attrs }) => attrs.tone === "muted").length, 2);
 });
+
+// G — small pieces: an icon on a tinted square is the kit `IconChip`, a `<code>` drawn as a chip
+// is `InlineCode`, a bar is the kit `Progress`, and a one-message tinted box is `Notice`.
+test("A2/G: settings uses IconChip, InlineCode, Progress and Notice for the small pieces", () => {
+  const boxes = elements(["div", "p", "span", "code"]);
+  const classed = (tags: string[], pattern: RegExp) =>
+    boxes
+      .filter(({ tag, attrs }) => tags.includes(tag) && pattern.test(attrs.className ?? ""))
+      .map(({ file, line, attrs }) => `${file}:${line}: ${attrs.className}`);
+
+  // Icon squares: padding + radius + tint around a lone icon.
+  assert.deepEqual(
+    classed(["div", "span"], /^p-2 rounded-lg bg-[\w/-]+ text-[\w-]+( h-fit| shrink-0)?$/),
+    []
+  );
+  assert.equal(elements(["IconChip"]).length, 30);
+
+  // Chip-like <code>: its own fill and padding. Plain <code> inside text stays.
+  assert.deepEqual(classed(["code"], /\bbg-[\w/-]+\b.*\bpx?-|\bpx?-.*\bbg-[\w/-]+\b/), []);
+  assert.equal(elements(["InlineCode"]).length, 5);
+
+  // Bars: no hand-made progressbar.
+  assert.deepEqual(
+    hits(/role="progressbar"/).map(({ file, line }) => `${file}:${line}`),
+    []
+  );
+
+  // One-message boxes: a tinted, bordered element that only carries a status message.
+  const tinted = /\bbg-(error|success|warning|info)(-bg|\/\d+)/;
+  const roleBoxes = elements(["div", "p"])
+    .filter(({ attrs }) => {
+      const classes = attrs.className ?? "";
+      const isStatus = attrs.role === "alert" || attrs.role === "status";
+      return isStatus && classes.split(/[\s"`]+/).includes("border") && tinted.test(classes);
+    })
+    .map(({ file, attrs }) => `${file}: ${attrs.className}`);
+  assert.deepEqual(roleBoxes, [
+    // These hold more than one message (a title, a list, an action): left as composed boxes.
+    "components/AuthzSection.tsx: flex items-start gap-3 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-warning",
+    "components/FeatureFlagsGrid.tsx: flex items-center justify-between gap-3 rounded-card border border-error/30 bg-error-bg p-4",
+    "components/RoutingTab.tsx: mb-3 rounded border border-error/40 bg-error/10 p-2 text-xs text-error",
+    "components/SidebarTab.tsx: mt-3 flex flex-col gap-3 rounded-lg border border-warning/30 bg-warning-bg p-3 sm:flex-row sm:items-center",
+    "components/systemStorageAuth.tsx: mb-4 rounded-xl border border-warning/30 bg-warning-bg px-5 py-4",
+  ]);
+  assert.equal(elements(["Notice"]).length, 15);
+});

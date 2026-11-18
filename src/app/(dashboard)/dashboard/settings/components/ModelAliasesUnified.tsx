@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Card, Collapsible, Input, SegmentedControl } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 interface WildcardAlias {
   pattern: string;
@@ -179,9 +180,9 @@ export default function ModelAliasesUnified() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="swap_horiz" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
           <h3 className="ci-heading" data-size="lg">
             {translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}

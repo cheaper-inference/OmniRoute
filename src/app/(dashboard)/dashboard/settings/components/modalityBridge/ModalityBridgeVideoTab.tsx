@@ -22,6 +22,7 @@ import {
 } from "@/shared/constants/modalityBridgeDefaults";
 
 import ModalityBridgeStatsRow from "./ModalityBridgeStatsRow";
+import Notice from "@/shared/components/Notice";
 
 interface VideoState {
   modalityBridgeVideoEnabled: boolean;
@@ -230,12 +231,9 @@ export default function ModalityBridgeVideoTab({
     >
       <div className="space-y-4">
         {errorState === "save" ? (
-          <div
-            role="alert"
-            className="rounded-control border border-error/30 p-3 text-sm text-error"
-          >
+          <Notice variant="critical">
             {t("modalityBridgeTestError", { message: tRoot("common.error") })}
-          </div>
+          </Notice>
         ) : null}
         <div
           className={`rounded-control border p-3 text-sm ${

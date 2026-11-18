@@ -60,6 +60,7 @@ import {
   repairRelayResponseSchema,
   useProxyBulkImportLimit,
 } from "./proxyRegistryData";
+import Notice from "@/shared/components/Notice";
 
 export default function ProxyRegistryManager({
   onRedeployRelay,
@@ -750,20 +751,14 @@ export default function ProxyRegistryManager({
         </div>
 
         {error && (
-          <div
-            role="alert"
-            className="mb-3 px-3 py-2 rounded border border-error/30 bg-error-bg text-sm text-error"
-          >
+          <Notice variant="critical" className="mb-3">
             {error}
-          </div>
+          </Notice>
         )}
         {relayTested !== null && relayAlive !== null && (
-          <div
-            role="status"
-            className="mb-3 px-3 py-2 rounded border border-border bg-bg-subtle text-xs text-text-muted"
-          >
+          <Notice className="mb-3">
             {t("relayProbeSummary", { tested: relayTested, alive: relayAlive })}
-          </div>
+          </Notice>
         )}
 
         {loading ? (
@@ -1346,16 +1341,13 @@ export default function ProxyRegistryManager({
 
           {/* Import result */}
           {bulkImportResult && (
-            <div
-              role="status"
-              className="px-3 py-2 rounded border border-success/30 bg-success-bg text-sm text-success"
-            >
+            <Notice variant="success">
               {t("bulkImportSuccess", {
                 created: bulkImportResult.created,
                 updated: bulkImportResult.updated,
                 failed: bulkImportResult.failed,
               })}
-            </div>
+            </Notice>
           )}
 
           {/* Actions */}

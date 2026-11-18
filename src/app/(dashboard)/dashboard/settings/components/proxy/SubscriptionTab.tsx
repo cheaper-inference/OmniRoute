@@ -20,6 +20,8 @@ import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
 import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
 import { parseSelectorTag } from "@/lib/proxySubscription/selectorEndpoint";
 import type { SelectorEarlyReasonCounts } from "@/lib/proxySubscription/selectorEarlyReasons";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import Notice from "@/shared/components/Notice";
 
 interface SelectorLastSwitchEntry {
   at: string;
@@ -518,14 +520,7 @@ export default function SubscriptionTab() {
         )}
       </div>
 
-      {error && (
-        <div
-          role="alert"
-          className="rounded-md border border-error/30 bg-error-bg px-3 py-2 text-sm text-error"
-        >
-          {error}
-        </div>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {showForm && (
         <Card
@@ -780,9 +775,7 @@ export default function SubscriptionTab() {
                       </p>
                       <p>{t("proxySubscription.coreHintDesc")}</p>
                       <div className="flex flex-wrap items-center gap-2">
-                        <code className="rounded bg-surface px-2 py-1 border border-border">
-                          socks5://127.0.0.1:2080
-                        </code>
+                        <InlineCode>socks5://127.0.0.1:2080</InlineCode>
                         <Button
                           size="sm"
                           variant="outline"

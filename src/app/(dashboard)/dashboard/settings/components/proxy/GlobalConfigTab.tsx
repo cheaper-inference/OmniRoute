@@ -13,6 +13,7 @@ import {
 import { Badge, Card, Button, Input, Spinner, Toggle, ProxyConfigModal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
+import Notice from "@/shared/components/Notice";
 
 type GlobalProxyConfig = { type: string; host: string; port: number } | null;
 
@@ -306,14 +307,7 @@ export default function GlobalConfigTab() {
           </Button>
         </div>
 
-        {error && (
-          <div
-            role="alert"
-            className="p-3 rounded-lg bg-error-bg border border-error/30 text-sm text-error"
-          >
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         {testing && !results && (
           <div className="flex items-center gap-2 text-sm text-text-muted py-2" role="status">

@@ -12,6 +12,7 @@ import {
   SETTINGS_FALLBACK_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
 import { useTranslations } from "next-intl";
+import IconChip from "@/shared/components/IconChip";
 
 const STRATEGY_LABEL_FALLBACKS: Record<string, string> = {
   "context-relay": "Context Relay",
@@ -295,9 +296,9 @@ export default function ComboDefaultsTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="tune" size={20} />
-        </div>
+        </IconChip>
         <h3 className="ci-heading" data-size="lg">
           {translateOrFallback(t, "comboDefaultsTitle", "Default Routing & Combo Settings")}
         </h3>

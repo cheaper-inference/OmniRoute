@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, Card } from "@/shared/components";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import Notice from "@/shared/components/Notice";
 
 type IntegrityState = {
   integrityCheck: "ok" | "error" | null;
@@ -112,12 +113,9 @@ export default function StorageIntegrityCheckControl() {
         </Button>
       </div>
       {status.message ? (
-        <div
-          className="mt-3 p-3 rounded-lg text-sm bg-error/10 text-error border border-error/20"
-          role="alert"
-        >
+        <Notice variant="critical" className="mt-3">
           {status.message}
-        </div>
+        </Notice>
       ) : null}
     </Card.Section>
   );

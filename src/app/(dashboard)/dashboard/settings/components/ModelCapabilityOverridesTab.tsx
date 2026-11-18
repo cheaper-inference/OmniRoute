@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { EmptyState } from "@omniroute/ui-kit/empty-state";
 import { Badge, Card, Button, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import {
   filterModelOverrideTargets,
   toModelOverrideTargets,
@@ -29,10 +30,10 @@ interface StatusMessage {
   message: string;
 }
 
-function statusClassName(tone: StatusTone) {
-  if (tone === "success") return "bg-success/10 border-success/20 text-success";
-  if (tone === "error") return "bg-error/10 border-error/20 text-error";
-  return "bg-info/10 border-info/20 text-info";
+function statusVariant(tone: StatusTone) {
+  if (tone === "success") return "success";
+  if (tone === "error") return "critical";
+  return "info";
 }
 
 function useModelCapabilityOverridesData() {
@@ -140,11 +141,7 @@ export default function ModelCapabilityOverridesTab() {
 }
 
 function StatusMessageBanner({ status }: { status: StatusMessage }) {
-  return (
-    <div className={`px-3 py-2 rounded-lg border text-sm ${statusClassName(status.tone)}`}>
-      {status.message}
-    </div>
-  );
+  return <Notice variant={statusVariant(status.tone)}>{status.message}</Notice>;
 }
 
 function ModelCapabilityOverridesPanel({

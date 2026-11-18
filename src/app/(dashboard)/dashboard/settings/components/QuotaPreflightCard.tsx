@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, NumberInput, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
+import IconChip from "@/shared/components/IconChip";
 
 type QuotaPreflightSettings = {
   enabled: boolean;
@@ -116,9 +117,9 @@ export default function QuotaPreflightCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted shrink-0">
+        <IconChip className="shrink-0">
           <Icon name="battery_alert" size={20} />
-        </div>
+        </IconChip>
         <div>
           <h3 className="text-base sm:text-lg">
             {tx("quotaPreflightTitle", "Quota Preflight Cutoff")}

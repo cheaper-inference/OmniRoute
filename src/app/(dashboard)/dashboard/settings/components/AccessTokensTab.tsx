@@ -25,6 +25,7 @@ import {
   Modal,
 } from "@/shared/components";
 import { fieldNumber, fieldText } from "./numberFieldText";
+import Notice from "@/shared/components/Notice";
 
 interface AccessTokenRow {
   id: string;
@@ -241,14 +242,7 @@ export default function AccessTokensTab() {
         </div>
       </Modal>
 
-      {error && (
-        <div
-          role="alert"
-          className="rounded-control border border-error/40 bg-error-bg px-4 py-3 text-sm text-error"
-        >
-          {error}
-        </div>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {/* List */}
       <Card title={t("accessTokensExisting")}>

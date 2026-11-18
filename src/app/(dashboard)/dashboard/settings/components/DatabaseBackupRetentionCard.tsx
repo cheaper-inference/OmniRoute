@@ -3,7 +3,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Button, Card, NumberInput } from "@/shared/components";
-import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 
 export type BackupCleanupOptions = {
   keepLatest: number;
@@ -43,19 +43,13 @@ function StatusAlert({ status }: { status: BackupRetentionStatus }) {
 
   const isSuccess = status.type === "success";
   return (
-    <div
-      className={`mt-3 p-3 rounded-lg text-sm ${
-        isSuccess
-          ? "bg-success/10 text-success border border-success/20"
-          : "bg-error/10 text-error border border-error/20"
-      }`}
-      role="alert"
+    <Notice
+      variant={isSuccess ? "success" : "critical"}
+      icon={isSuccess ? "check_circle" : "error"}
+      className="mt-3"
     >
-      <div className="flex items-center gap-2">
-        <Icon name={isSuccess ? "check_circle" : "error"} size={16} />
-        {status.message}
-      </div>
-    </div>
+      {status.message}
+    </Notice>
   );
 }
 

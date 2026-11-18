@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button, Card, NumberInput } from "@/shared/components";
 import { fieldNumber, fieldText } from "./numberFieldText";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 export default function UsageTokenBufferTab() {
   const t = useTranslations("settings");
@@ -67,9 +68,9 @@ export default function UsageTokenBufferTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="pin" size={20} />
-        </div>
+        </IconChip>
         <div>
           <h3 className="ci-heading" data-size="lg">
             {t("storageUsageTokenBuffer")}

@@ -16,6 +16,7 @@ import { Badge, Card, Button, Input, NumberInput, whenNumber } from "@/shared/co
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import InfoTooltip from "@/shared/components/InfoTooltip";
+import Notice from "@/shared/components/Notice";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -627,17 +628,17 @@ export default function PricingTab() {
       </Card>
 
       {statusMessage && (
-        <div
-          className={`px-3 py-2 rounded-lg border text-sm ${
+        <Notice
+          variant={
             statusMessage.tone === "success"
-              ? "bg-success/10 border-success/20 text-success"
+              ? "success"
               : statusMessage.tone === "error"
-                ? "bg-error/10 border-error/20 text-error"
-                : "bg-info/10 border-info/20 text-info"
-          }`}
+                ? "critical"
+                : "info"
+          }
         >
           {statusMessage.message}
-        </div>
+        </Notice>
       )}
 
       {/* Search + Filters */}
@@ -970,25 +971,22 @@ function ProviderSection({
           {(() => {
             const pct =
               provider.modelCount > 0 ? Math.round((pricedCount / provider.modelCount) * 100) : 0;
-            const barColor = pct >= 100 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-error";
+            const barTone = pct >= 100 ? "success" : pct >= 50 ? "warning" : "danger";
             const textColor =
               pct >= 100 ? "text-success" : pct >= 50 ? "text-warning" : "text-error";
             const icon = pct >= 100 ? "✓" : pct >= 50 ? "◐" : "⚠";
             return (
               <>
-                <div
-                  role="progressbar"
+                <Progress
+                  semantics="meter"
+                  size="sm"
+                  tone={barTone}
+                  animate={false}
+                  value={pct}
                   aria-label={`${provider.id}: ${t("withPricing")}`}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={pct}
-                  className="w-20 h-1.5 bg-border/60 rounded-full overflow-hidden"
-                >
-                  <div
-                    className={`h-full ${barColor} rounded-full transition-all`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                  aria-valuetext={`${pct}%`}
+                  className="w-20"
+                />
                 <span
                   className={`text-2xs font-semibold tabular-nums w-10 text-right ${textColor}`}
                   title={`${pricedCount}/${provider.modelCount} ${t("withPricing")}`}

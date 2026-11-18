@@ -27,6 +27,8 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getClaudeCodeClientBuildRevision } from "@/shared/constants/claudeCodeClient";
 import { compareTr } from "@/shared/utils/turkishText";
 import { HERMES } from "./systemTransformsHermesDefaults";
+import IconChip from "@/shared/components/IconChip";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 
 // Provider keys (mirror of open-sse/services/systemTransforms.ts).
 const PROVIDER_CLAUDE = "claude";
@@ -920,9 +922,9 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="auto_awesome" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("routingZeroConfigTitle")}
@@ -993,9 +995,9 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="tune" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("systemTransforms")}
@@ -1065,9 +1067,7 @@ export default function RoutingTab() {
                 defaultOpen={false}
                 title={
                   <div className="flex items-center gap-2 flex-wrap">
-                    <code className="text-xs font-mono rounded bg-surface px-1.5 py-0.5">
-                      {providerId}
-                    </code>
+                    <InlineCode>{providerId}</InlineCode>
                     <span className="text-sm font-medium">{displayName}</span>
                   </div>
                 }
@@ -1286,9 +1286,9 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="security" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("cliFingerprint")}
@@ -1334,9 +1334,9 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="cached" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("routingClientCacheControlTitle")}
@@ -1381,9 +1381,9 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <IconChip>
             <Icon name="fingerprint" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("routingAntigravitySignatureTitle")}
@@ -1429,9 +1429,9 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="badge" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("echoRequestedModelTitle")}
@@ -1453,9 +1453,9 @@ export default function RoutingTab() {
       {/* #4481 layer 2 — Web-Search Routing (CCR-style Router.webSearch) */}
       <Card>
         <div className="flex gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="travel_explore" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
             <h3 className="ci-heading" data-size="lg">
               {t("webSearchRouteTitle")}
@@ -1487,9 +1487,9 @@ export default function RoutingTab() {
 
       <Card>
         <div className="flex gap-3">
-          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+          <IconChip>
             <Icon name="timer" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
             <h3 className="ci-heading" data-size="lg">
               Search timeouts
@@ -1533,9 +1533,9 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="verified" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("lkgpToggleTitle")}
@@ -1600,9 +1600,9 @@ export default function RoutingTab() {
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <IconChip>
               <Icon name="network_ping" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("adaptiveVolumeRouting")}
