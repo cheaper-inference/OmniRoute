@@ -329,3 +329,62 @@ test("F: headings take their size from ci-heading data-size, not a size utility"
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(offenders, [], 'use className="ci-heading" data-size="xs|sm|md|lg|xl"');
 });
+
+// ── E. Tables: kit variant, density, cell props and the Pager adapter ───────────────────────
+
+const TABLE_PARTS = /^(Table|TableHead|TableCell|SortableTableHead)$/;
+
+test('E: a frameless table says variant="plain", not border and radius resets', () => {
+  const offenders = TAGS.filter(({ tag }) =>
+    has(tag, /(?<![\w:-])(rounded-none|border-0)(?![\w-])/)
+  )
+    .filter(({ name }) => name === "Table" || name === "DataTableShell")
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use <Table variant="plain">');
+});
+
+// Padding, height and the default text size of a cell come from the table: `density` on the
+// Table, or the `--ci-table-cell-*` tokens. A class per cell repeats or fights them.
+const CELL_METRICS = /(?<![\w:-])(h-auto|h-\d+|p[xy]-[\d.]+|text-sm|text-left)(?![\w-])/;
+const CELL_METRICS_KEPT: Kept[] = [
+  {
+    file: "models/CatalogTableParts.tsx",
+    marker: 'className="border-t border-border px-4 py-3"',
+    reason: "DataTableFooter, not a cell: the padding of the footer strip under the table.",
+  },
+];
+
+test("E: table cells do not set their own padding, height or default text size", () => {
+  const { offenders, stale } = audit(
+    TAGS.filter(({ name, tag }) => TABLE_PARTS.test(name) || /^<DataTableFooter\b/.test(tag)),
+    ({ tag }) => has(tag, CELL_METRICS),
+    CELL_METRICS_KEPT
+  );
+  assert.deepEqual(offenders, [], 'use density="compact|comfortable" on the Table');
+  assert.deepEqual(stale, [], "stale CELL_METRICS_KEPT entries: remove them");
+});
+
+test("E: right-aligned cells use the kit numeric / align props (logical, mirrored in RTL)", () => {
+  const offenders = TAGS.filter(({ name }) => TABLE_PARTS.test(name))
+    .filter(({ tag }) => has(tag, /(?<![\w:-])text-(right|end)(?![\w-])/))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use numeric (numbers) or align="end" (actions)');
+});
+
+// Paging kept in state goes through the Pager adapter (kit PaginationControls, translated).
+test("E: previous/next paging is the Pager adapter", () => {
+  const handMade = SOURCES.filter(
+    (s) =>
+      /icon(Right)?="chevron_(left|right)"/.test(s.source) &&
+      /(previousPage|nextPage)/.test(s.source)
+  ).map((s) => s.file);
+  assert.deepEqual(handMade, [], "use <Pager page pageCount onPageChange>");
+  for (const file of [
+    "cache/components/CacheEntriesTab.tsx",
+    "combos/ComboListControls.tsx",
+    "models/CatalogTableParts.tsx",
+  ]) {
+    const source = SOURCES.find((s) => s.file === file)?.source ?? "";
+    assert.match(source, /<Pager\b/, `${file} renders the Pager adapter`);
+  }
+});

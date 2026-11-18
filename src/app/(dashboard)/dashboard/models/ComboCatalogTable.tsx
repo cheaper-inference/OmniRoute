@@ -52,7 +52,6 @@ function SortableHeading({
   return (
     <SortableTableHead
       scope="col"
-      className="px-4"
       direction={active ? direction : undefined}
       defaultDirection="asc"
       onDirectionChange={() => onSort(field)}
@@ -126,7 +125,7 @@ function ComboCatalogTableHead({
 function ComboMembersCell({ combo }: { combo: ComboCatalogRow }) {
   const t = useTranslations("modelCatalog");
   return (
-    <TableCell className="h-auto whitespace-normal px-4 py-3 align-top">
+    <TableCell className="whitespace-normal align-top">
       <span className="font-medium tabular-nums text-text-main">
         {combo.memberCount}{" "}
         {combo.memberCount === 1 ? t("modelCountSingle") : t("modelCountPlural")}
@@ -187,7 +186,7 @@ function ComboCatalogTableRow({
         onToggle={() => onToggleSelect(combo.id)}
         label={t("selectCombo", { name: combo.name })}
       />
-      <TableCell className="h-auto max-w-sm whitespace-normal px-4 py-3 align-top">
+      <TableCell className="max-w-sm whitespace-normal align-top">
         <div className="font-medium text-text-main">{combo.displayName}</div>
         {combo.displayName !== combo.name && (
           <span className="font-mono text-xs text-text-muted">{combo.name}</span>
@@ -196,21 +195,21 @@ function ComboCatalogTableRow({
           <p className="mt-1 line-clamp-2 text-xs text-text-muted">{combo.description}</p>
         )}
       </TableCell>
-      <TableCell className="h-auto px-4 py-3 align-top">
+      <TableCell className="align-top">
         <Badge size="sm" variant="default">
           {humanize(combo.strategy)}
         </Badge>
       </TableCell>
       <ComboMembersCell combo={combo} />
-      <TableCell className="h-auto px-4 py-3 align-top">
+      <TableCell className="align-top">
         <Badge size="sm" variant={combo.status === "active" ? "success" : "default"}>
           {combo.status === "active" ? t("active") : t("paused")}
         </Badge>
       </TableCell>
-      <TableCell className="h-auto px-4 py-3 align-top">
+      <TableCell className="align-top">
         <CatalogTestBadge result={result} loading={isTesting} />
       </TableCell>
-      <TableCell className="h-auto whitespace-nowrap px-4 py-3 text-right align-top">
+      <TableCell align="end" className="whitespace-nowrap align-top">
         {renderKeyAccess?.(combo.name)}
         <Button
           variant="secondary"
@@ -280,7 +279,8 @@ export default function ComboCatalogTable({
       <div role="region" aria-label={t("combosTableRegion")}>
         <Table
           scrollbarLabel={t("combosTableRegion")}
-          containerClassName="rounded-none border-0"
+          variant="plain"
+          density="comfortable"
           className="min-w-[900px]"
         >
           <TableCaption className="sr-only">{t("combosTableCaption")}</TableCaption>

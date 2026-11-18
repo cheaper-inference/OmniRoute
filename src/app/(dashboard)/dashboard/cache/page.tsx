@@ -314,8 +314,8 @@ function PromptTrendPanel({
       </div>
 
       <Table
-        className="text-sm"
-        containerClassName="mt-5 rounded-none border-0"
+        variant="plain"
+        containerClassName="mt-5"
         maxHeight="20rem"
         scrollLabel={title}
         scrollbarLabel={title}
@@ -638,8 +638,8 @@ export default function CachePage() {
 
                     {providerEntries.length > 0 ? (
                       <Table
-                        className="text-sm"
-                        containerClassName="mt-3 rounded-none border-0"
+                        variant="plain"
+                        containerClassName="mt-3"
                         scrollbarLabel={t("byProvider")}
                         scrollLabel={t("byProvider")}
                       >

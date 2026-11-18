@@ -457,7 +457,7 @@ export default function A2ADashboardPage() {
             <Table
               scrollbarLabel={t("taskManagement")}
               scrollLabel={t("taskManagement")}
-              containerClassName="rounded-none border-0"
+              variant="plain"
             >
               <TableHeader>
                 <TableRow>

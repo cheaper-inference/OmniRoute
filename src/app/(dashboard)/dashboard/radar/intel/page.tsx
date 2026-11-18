@@ -173,19 +173,14 @@ export default function RadarIntelPage() {
             {intel.rankings.length === 0 ? (
               <p className="py-6 text-center text-text-muted">{t("noRankings")}</p>
             ) : (
-              <Table
-                className="text-sm"
-                aria-label={t("ranking")}
-                scrollbarLabel={t("ranking")}
-                containerClassName="rounded-none border-0"
-              >
+              <Table aria-label={t("ranking")} scrollbarLabel={t("ranking")} variant="plain">
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead>{t("model")}</TableHead>
                     <TableHead>{t("category")}</TableHead>
-                    <TableHead className="text-right">{t("rating")}</TableHead>
-                    <TableHead className="text-right">{t("matches")}</TableHead>
+                    <TableHead numeric>{t("rating")}</TableHead>
+                    <TableHead numeric>{t("matches")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -196,8 +191,8 @@ export default function RadarIntelPage() {
                         {ranking.provider}/{ranking.modelId}
                       </TableCell>
                       <TableCell>{ranking.category}</TableCell>
-                      <TableCell className="text-right">{ranking.rating}</TableCell>
-                      <TableCell className="text-right">{ranking.matches}</TableCell>
+                      <TableCell numeric>{ranking.rating}</TableCell>
+                      <TableCell numeric>{ranking.matches}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

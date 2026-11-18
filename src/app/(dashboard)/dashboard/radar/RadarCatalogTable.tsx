@@ -227,11 +227,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
   return (
     <>
       <Card padding="none" className="overflow-hidden">
-        <Table
-          aria-label={t("catalogTab")}
-          scrollbarLabel={t("catalogTab")}
-          containerClassName="rounded-none border-0"
-        >
+        <Table aria-label={t("catalogTab")} scrollbarLabel={t("catalogTab")} variant="plain">
           <TableHeader>
             <TableRow>
               <TableHead>{t("colProvider")}</TableHead>
@@ -241,7 +237,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
               <TableHead>{t("colContext")}</TableHead>
               <TableHead>{t("colCapabilities")}</TableHead>
               <TableHead>{t("colTos")}</TableHead>
-              <TableHead className="text-right">{t("colActions")}</TableHead>
+              <TableHead align="end">{t("colActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -280,7 +276,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       <p className="text-xs text-error mt-0.5">{t("disabledByFeed")}</p>
                     )}
                   </TableCell>
-                  <TableCell className="text-text-muted text-sm font-mono max-w-[240px]">
+                  <TableCell className="text-text-muted font-mono max-w-[240px]">
                     {editingKey === key ? (
                       <Input
                         type="text"
@@ -295,8 +291,8 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       <span className="block truncate">{entry.displayName}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{budgetLabel(entry)}</TableCell>
-                  <TableCell className="text-sm text-text-muted">
+                  <TableCell>{budgetLabel(entry)}</TableCell>
+                  <TableCell className="text-text-muted">
                     {(() => {
                       const limits = formatLimits(entry);
                       return limits === "—" ? (
@@ -306,7 +302,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       );
                     })()}
                   </TableCell>
-                  <TableCell className="text-sm text-text-muted">
+                  <TableCell className="text-text-muted">
                     {entry.contextWindow != null ? (
                       `${(entry.contextWindow / 1000).toFixed(0)}K`
                     ) : (

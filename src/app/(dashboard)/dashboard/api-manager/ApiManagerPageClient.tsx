@@ -972,7 +972,7 @@ export default function ApiManagerPageClient() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-text-muted whitespace-nowrap">
+                  <TableCell className="text-text-muted whitespace-nowrap">
                     {new Date(key.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
@@ -1036,7 +1036,7 @@ export default function ApiManagerPageClient() {
                   <TableHead>{t("permissions")}</TableHead>
                   <TableHead>{t("usage")}</TableHead>
                   <TableHead>{t("created")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
+                  <TableHead align="end">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
             );

@@ -556,7 +556,7 @@ export default function McpDashboardPage() {
           <Table
             scrollbarLabel={t("toolsAndScopes")}
             scrollLabel={t("toolsAndScopes")}
-            containerClassName="rounded-none border-0"
+            variant="plain"
           >
             <TableHeader>
               <TableRow>
@@ -636,11 +636,7 @@ export default function McpDashboardPage() {
           <p className="text-sm text-text-muted">{t("noAuditEntriesForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <Table
-              scrollbarLabel={t("auditLog")}
-              scrollLabel={t("auditLog")}
-              containerClassName="rounded-none border-0"
-            >
+            <Table scrollbarLabel={t("auditLog")} scrollLabel={t("auditLog")} variant="plain">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("tableTimestamp")}</TableHead>
