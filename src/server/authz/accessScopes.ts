@@ -40,6 +40,8 @@ export const ADMIN_MUTATION_PREFIXES: readonly string[] = [
   // manage-scoped key is full-access on every management route (including token mint),
   // so a `write` token must not be able to reach it (GHSA-35gq-52m5-wgw2).
   "/api/keys",
+  // Reusable policies can grant the same authority as direct key administration.
+  "/api/key-templates",
 ];
 
 /**

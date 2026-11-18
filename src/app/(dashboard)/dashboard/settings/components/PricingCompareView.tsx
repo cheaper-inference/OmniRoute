@@ -13,7 +13,11 @@ import {
 import { Badge, Button } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
-import type { ModelComparisonGroup, ModelOffer } from "./pricingCompare";
+import {
+  compareEmptyMessageKey,
+  type ModelComparisonGroup,
+  type ModelOffer,
+} from "./pricingCompare";
 
 function formatPrice(value: number): string {
   if (value === 0) return "$0";
@@ -40,7 +44,12 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
           {new Set(group.offers.map((offer) => offer.providerAlias)).size} {t("providers")}
         </Badge>
       </div>
-      <Table scrollbarLabel={group.name} className="text-sm">
+      <Table
+        scrollbarLabel={group.name}
+        scrollLabel={group.name}
+        className="text-sm"
+        containerClassName="rounded-none border-0"
+      >
         <TableHeader>
           <TableRow>
             <TableHead>{t("providers")}</TableHead>
@@ -91,11 +100,16 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
  */
 export default function PricingCompareView({
   groups,
+  searchQuery,
+  providerCount,
   visibleCount,
   onShowMore,
   showMoreIncrement,
 }: {
   groups: ModelComparisonGroup[];
+  searchQuery: string;
+  /** Providers left after the Auth and Configured filters. */
+  providerCount: number;
   visibleCount: number;
   onShowMore: () => void;
   showMoreIncrement: number;
@@ -106,7 +120,7 @@ export default function PricingCompareView({
       <EmptyState
         compact
         icon={<Icon name="search_off" size={24} />}
-        title={t("pricingCompareEmpty")}
+        title={t(compareEmptyMessageKey({ searchQuery, providerCount }))}
       />
     );
   }

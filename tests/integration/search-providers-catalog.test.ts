@@ -2,7 +2,7 @@
  * Integration tests for GET /api/search/providers — extended catalog (F4).
  *
  * Tests:
- * - Returns 31 items total (23 search + 8 fetch providers).
+ * - Returns 34 items total (25 search + 9 fetch providers).
  * - Each item carries the correct `kind` field.
  * - Status reflects actual DB credential state:
  *   - "configured"  when an active, non-rate-limited connection exists.
@@ -48,11 +48,12 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 23 search-kind providers: deepseek, serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
-// google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
-// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search.
-const EXPECTED_SEARCH_COUNT = 23;
-const EXPECTED_FETCH_COUNT = 8;
+// 25 search-kind providers: deepseek, serper, brave, perplexity, exa, tavily, nimble-search,
+// firecrawl, google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search,
+// anysearch-search, context7 (#11140), duckduckgo-free, x-search, xquik-search,
+// parallel-search, kimi-search, keenable-search, codex-search.
+const EXPECTED_SEARCH_COUNT = 25;
+const EXPECTED_FETCH_COUNT = 9;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
 // ---------------------------------------------------------------------------
@@ -138,7 +139,7 @@ test("search-providers-catalog: returns 401 for unauthenticated requests when au
   assert.ok(!bodyStr.includes(" at /"), "error body must not contain stack trace");
 });
 
-test("search-providers-catalog: returns 31 providers (23 search + 8 fetch)", async () => {
+test("search-providers-catalog: returns 34 providers (25 search + 9 fetch)", async () => {
   const req = await buildAuthRequest();
   const res = await route.GET(req);
 
@@ -294,6 +295,7 @@ test("search-providers-catalog: fetch providers have correct metadata", async ()
   assert.ok(ids.includes("nimble-search"), "nimble-search must be present");
   assert.ok(ids.includes("anysearch-search"), "anysearch-search must be present");
   assert.ok(ids.includes("parallel-search"), "parallel-search must be present");
+  assert.ok(ids.includes("keenable-search"), "keenable-search must be present");
 
   const firecrawl = fetchProviders.find((p: { id: string }) => p.id === "firecrawl");
   assert.equal(firecrawl.name, "Firecrawl");
@@ -430,4 +432,14 @@ test("search-providers-catalog: DeepSeek Search and Fetch reuse the active LLM c
     assert.equal(entry.costPerQuery, 0.00075);
     assert.equal(entry.freeMonthlyQuota, 0);
   }
+});
+
+test("search-providers-catalog: codex-search is configured via a connected Codex account", async () => {
+  await seedActiveConnection("codex");
+  const res = await route.GET(await buildAuthRequest());
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  const codex = body.providers.find((p: { id: string }) => p.id === "codex-search");
+  assert.equal(codex?.status, "configured");
+  assert.deepEqual(codex.searchTypes, ["web", "news"]);
 });

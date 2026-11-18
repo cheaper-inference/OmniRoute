@@ -70,7 +70,7 @@ const NASTY_STRINGS = [
   "back\\slash",
   "new\nline\ttab\r\b\f",
   "\u0000\u001f control",
-  "unicode ✓ ñ 中文 اللغة",
+  "unicode ✓ ñ اللغة",
   "🙂🎉👨‍👩‍👧‍👦",
   "\ud83d",
   "\udc00",

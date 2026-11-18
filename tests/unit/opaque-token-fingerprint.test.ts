@@ -91,6 +91,10 @@ const MIGRATED_FILES = [
   "src/server/authz/entra/evaluate.ts",
   "open-sse/executors/m365ImageGeneration.ts",
   "open-sse/services/combo/handoffSessionScope.ts",
+  // Sign in with ChatGPT (#15201): the attempt owner is a fingerprint of the dashboard session.
+  "src/app/api/oauth/chatgpt/session/route.ts",
+  "src/lib/db/agentSessions.ts",
+  "src/lib/db/proxyTraffic.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {
@@ -106,6 +110,17 @@ test("migrated call sites import the helper instead of hashing inline", () => {
       `${rel} is expected to use opaqueTokenFingerprint()`
     );
   }
+});
+
+test("fal idempotency keys and Codex auto-spend keys are derived through the helper", () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  // fal.ts keeps createHash for the request-content fingerprint; only the key lookup moves.
+  const fal = readFileSync(path.join(root, "src/lib/db/fal.ts"), "utf8");
+  assert.ok(fal.includes("opaqueTokenFingerprint(`${owner}:${idempotencyKey}`)"));
+  assert.ok(!/createHash\("sha256"\)\.update\(`\$\{owner\}:\$\{idempotencyKey\}`\)/.test(fal));
+  const credits = readFileSync(path.join(root, "src/lib/usage/codexResetCredits.ts"), "utf8");
+  assert.ok(!/createHash\(|createHmac\(/.test(credits));
+  assert.ok(credits.includes("opaqueTokenFingerprint(`auto-spend:"));
 });
 
 test("the Z Code per-key state map is keyed through the helper", () => {

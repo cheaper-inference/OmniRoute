@@ -41,6 +41,9 @@ export const ROTATION_LOCK_GROUP: Record<string, string> = {
   // Openference rotates one-time-use refresh tokens on its own endpoint; a
   // concurrent sibling refresh would burn the token, so it gets its own lane.
   openference: "openference",
+  // RenderHour rotates its refresh tokens (rhrt_*): each refresh returns a new pair
+  // and the old token stops working at once, so siblings get their own lane.
+  renderhour: "renderhour",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the

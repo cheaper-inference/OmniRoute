@@ -1520,7 +1520,7 @@ test("chatCore keeps Claude normalization for non-Claude-Code Claude passthrough
             { type: "text", text: "" },
             { type: "text", text: "hello" },
             { type: "document", name: "README.md", content: "Read me" },
-            { type: "future_block", payload: { drop: true } },
+            { type: "future_block", payload: { keep: true } },
           ],
         },
       ],
@@ -1535,9 +1535,13 @@ test("chatCore keeps Claude normalization for non-Claude-Code Claude passthrough
     false
   );
   assert.equal(call.body.system.at(-1).text, "system role should move");
+  // #19030: the target speaks the Anthropic Messages format, so a block type
+  // outside the known set (search_result, container_upload, newer ones) is
+  // forwarded verbatim instead of being deleted with only a debug log (#4383).
   assert.deepEqual(call.body.messages[0].content, [
     { type: "text", text: "hello" },
     { type: "text", text: "[README.md]\nRead me" },
+    { type: "future_block", payload: { keep: true } },
   ]);
 });
 
