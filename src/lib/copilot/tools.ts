@@ -25,6 +25,8 @@ import {
   type CodeGraphQueryResult,
 } from "./codegraphKnowledge";
 import { getAllKeyGroups } from "@/lib/db/apiKeyGroups";
+import { hasManageScope } from "@/shared/constants/managementScopes";
+import { maskStoredApiKey } from "@/shared/utils/apiKeyMask";
 
 // ── Tool Types ───────────────────────────────────────────────────────────────
 
@@ -35,11 +37,34 @@ export interface CopilotToolParam {
   required: boolean;
 }
 
+export interface CopilotToolContext {
+  /**
+   * Set only by the chat engine after the HTTP caller proved a management credential
+   * (`requireCredentialForManagementScopedKey`). Never derived from the user's message.
+   */
+  managementScopeAuthorized?: boolean;
+}
+
 export interface CopilotTool {
   name: string;
   description: string;
   parameters: CopilotToolParam[];
-  handler: (args: Record<string, unknown>) => Promise<string>;
+  handler: (args: Record<string, unknown>, context?: CopilotToolContext) => Promise<string>;
+}
+
+export const MANAGEMENT_SCOPE_KEY_REFUSAL =
+  "⛔ API keys with the `manage` or `admin` scope cannot be created from the copilot without a " +
+  "management credential (dashboard session, CLI token or a manage-scoped API key). " +
+  "Create it from Dashboard → API Keys instead.";
+
+/** Parse the comma-separated `scopes` tool argument into normalized scope names. */
+export function parseCopilotKeyScopes(raw: unknown): string[] | undefined {
+  if (typeof raw !== "string" || !raw.trim()) return undefined;
+  const scopes = raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return scopes.length > 0 ? scopes : undefined;
 }
 
 // ── Helper: format CodeGraph results ─────────────────────────────────────────
@@ -199,15 +224,17 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         required: false,
       },
     ],
-    handler: async (args) => {
+    handler: async (args, context) => {
       const name = args.name as string;
       if (!name) return "Error: name is required.";
-      const scopes = args.scopes
-        ? (args.scopes as string).split(",").map((s) => s.trim())
-        : undefined;
+      const scopes = parseCopilotKeyScopes(args.scopes);
+      // Fail closed: a management-scoped key needs a credential the engine verified.
+      if (hasManageScope(scopes ?? []) && context?.managementScopeAuthorized !== true) {
+        return MANAGEMENT_SCOPE_KEY_REFUSAL;
+      }
       const result = await createApiKey(name, (args.machineId as string) || "copilot", scopes);
-      const r = result as any;
-      return `✅ API key **${name}** created:\n\`\`\`\n${r.key}\n\`\`\`\nSave this now — it won't be shown again.`;
+      // The chat reply can be persisted or fed back to a model, so it never carries the secret.
+      return `✅ API key **${name}** created (ID: \`${result.id}\`, key: \`${maskStoredApiKey(result.key)}\`).\nThe full key is not shown in chat. Open Dashboard → API Keys to reveal or regenerate it.`;
     },
   },
   {

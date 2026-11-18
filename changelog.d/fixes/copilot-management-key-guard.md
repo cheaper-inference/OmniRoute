@@ -1,0 +1,1 @@
+- **fix(security):** the dashboard copilot now requires a management credential before creating a `manage`/`admin`-scoped API key (even with login disabled), never echoes a new key's secret in the chat reply, and decides CLI command approval from the command words instead of the arguments

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json(buildErrorBody(400, validation.error), { status: 400 });
     }
 
-    const response = await processCopilotChat(validation.data);
+    const response = await processCopilotChat(validation.data, request);
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

@@ -7,7 +7,15 @@
  */
 
 import { getCopilotSystemPrompt } from "./systemPrompt";
-import { COPILOT_TOOLS, getCopilotTool, getCopilotToolDescriptions } from "./tools";
+import { requireCredentialForManagementScopedKey } from "@/lib/api/requireManagementAuth";
+import { hasManageScope } from "@/shared/constants/managementScopes";
+import {
+  COPILOT_TOOLS,
+  MANAGEMENT_SCOPE_KEY_REFUSAL,
+  getCopilotTool,
+  getCopilotToolDescriptions,
+  parseCopilotKeyScopes,
+} from "./tools";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -276,7 +284,15 @@ function getHelpResponse(): string {
 
 // ── Chat Engine ──────────────────────────────────────────────────────────────
 
-export async function processCopilotChat(request: CopilotRequest): Promise<CopilotResponse> {
+/**
+ * @param httpRequest The HTTP request that carried the chat message. Tools that need the
+ *   caller's credential (creating a management-scoped API key) check it here; without it
+ *   they refuse.
+ */
+export async function processCopilotChat(
+  request: CopilotRequest,
+  httpRequest?: Request
+): Promise<CopilotResponse> {
   const lastMessage = request.messages[request.messages.length - 1];
   if (!lastMessage || lastMessage.role !== "user") {
     return { message: "No user message found." };
@@ -333,11 +349,22 @@ Puedes decirme algo como:
     const tool = getCopilotTool("createApiKey");
     if (!tool) return { message: "Error: createApiKey tool not found." };
 
-    const result = await tool.handler({
-      name,
-      machineId: "copilot",
-      scopes,
-    });
+    // The scopes come from the user's free text, so a management scope needs the same
+    // credential POST /api/keys demands — even when login is disabled. No request, no key.
+    const requestedScopes = parseCopilotKeyScopes(scopes);
+    let managementScopeAuthorized = false;
+    if (hasManageScope(requestedScopes ?? [])) {
+      const authError = httpRequest
+        ? await requireCredentialForManagementScopedKey(httpRequest, requestedScopes)
+        : true;
+      if (authError) return { message: MANAGEMENT_SCOPE_KEY_REFUSAL };
+      managementScopeAuthorized = true;
+    }
+
+    const result = await tool.handler(
+      { name, machineId: "copilot", scopes },
+      { managementScopeAuthorized }
+    );
 
     return {
       message: result,
