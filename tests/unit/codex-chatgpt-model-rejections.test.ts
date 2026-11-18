@@ -381,6 +381,61 @@ test("all connections rejected → the cooldown result reports model_not_support
   );
 });
 
+test("a non-entitlement lock on every connection does not report model_not_supported", async () => {
+  const connectionId = await seedCodexConnection("flag-transient");
+  // An ordinary transient lock on the same exact model is a cooldown, not a refusal.
+  locks.lockExactModel("codex", connectionId, MODEL, "rate_limited", 60_000);
+  assert.equal(locks.isModelLocked("codex", connectionId, MODEL), true);
+
+  assert.deepEqual(
+    rejections.codexChatgptRejectionFlag(
+      "codex",
+      MODEL,
+      [{ id: connectionId }],
+      new Map([[connectionId, "modelLocked"]])
+    ),
+    {}
+  );
+});
+
+test("a structured invalid_request_error carrying the codex refusal still rotates", async () => {
+  const { shouldSkipConnDisable } =
+    await import("../../open-sse/services/combo/comboPredicates.ts");
+  const refusal = { status: 400, errorType: "invalid_request_error", error: { message: MESSAGE } };
+  assert.equal(shouldSkipConnDisable(refusal, false, false, "codex"), false);
+
+  // Every other invalid_request_error stays request-scoped.
+  const shape = {
+    status: 400,
+    errorType: "invalid_request_error",
+    error: { message: "Unsupported parameter: 'foo'." },
+  };
+  assert.equal(shouldSkipConnDisable(shape, false, false, "codex"), true);
+  // The exception is codex-only.
+  assert.equal(shouldSkipConnDisable(refusal, false, false, "openai"), true);
+});
+
+test("a success clears the dispatched model and its effort-less base", async () => {
+  const connectionId = await seedCodexConnection("clear-variants");
+  // The upstream names the base model, so the writer stores both forms.
+  await auth.markAccountUnavailable(connectionId, 400, MESSAGE, "codex", `${MODEL}-high`);
+  assert.deepEqual((await persistedModels(connectionId)).sort(), [MODEL, `${MODEL}-high`].sort());
+
+  // A bare request resolved to the connection default dispatches a different id than it named.
+  assert.deepEqual(rejections.codexServedModelVariants(["auto", `${MODEL}-high`]).sort(), [
+    "auto",
+    MODEL,
+    `${MODEL}-high`,
+  ]);
+  for (const served of rejections.codexServedModelVariants([`${MODEL}-high`])) {
+    locks.clearModelLock("codex", connectionId, served);
+    providersDb.clearCodexUnsupportedModel(connectionId, served);
+  }
+  assert.deepEqual(await persistedModels(connectionId), []);
+  assert.equal(locks.isModelLocked("codex", connectionId, MODEL), false);
+  assert.equal(locks.isModelLocked("codex", connectionId, `${MODEL}-high`), false);
+});
+
 // ---------------------------------------------------------------------------
 // Combo dispatch: executeTargetAttempt must not fall through to the quota-family
 // lock. Without the interception, `lockModelIfPerModelQuota()` → getModelLockKey()

@@ -33,6 +33,7 @@ import {
   isDailyQuotaExhausted,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { clearCodexUnsupportedModel } from "@/lib/db/providers";
+import { codexServedModelVariants } from "@omniroute/open-sse/services/codexChatgptModelRejections.ts";
 import {
   applyAvalancheSuppressionHeaders,
   evaluateAvalancheRisk,
@@ -2455,10 +2456,15 @@ async function handleSingleModelChat(
       if (result.success) {
         if (isCodexResponseCurrent(result.response, true)) {
           clearModelLock(provider, credentials.connectionId, model);
-          // The account just served the model it previously rejected: drop the persisted
-          // exact-model rejection so it is not re-materialized on the next restart.
+          // The account just served the model it previously rejected: drop the exact-model
+          // rejection (in memory and persisted, so a restart does not re-materialize it) for
+          // what was actually dispatched — a bare request may have resolved to the connection
+          // default — and for the effort-less base the lock writer also stored.
           if (provider === "codex" && model) {
-            clearCodexUnsupportedModel(credentials.connectionId, model);
+            for (const served of codexServedModelVariants([model, effectiveModel])) {
+              if (served !== model) clearModelLock(provider, credentials.connectionId, served);
+              clearCodexUnsupportedModel(credentials.connectionId, served);
+            }
           }
           markQuotaHealthy(credentials.connectionId);
         }

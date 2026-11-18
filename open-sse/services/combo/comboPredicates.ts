@@ -627,7 +627,10 @@ export function shouldSkipConnDisable(
     // the same model attribution predicate as failure persistence; ordinary
     // invalid_request_error (including 400) remains request-scoped.
     (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
-      !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
+      !(provider === "cursor" && isModelNotFound404(result.status, errorText)) &&
+      // The codex ChatGPT-account refusal often arrives typed `invalid_request_error`; it is
+      // still ACCOUNT-scoped, so it must not skip the rotation the text check above allows.
+      !isCodexChatgptUnsupportedModelText(errorText, provider)) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
     isChatGptWebBridgeFailure(provider, result.error) ||

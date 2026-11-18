@@ -299,7 +299,11 @@ const NON_COOLDOWN_FILTER_STATES = new Set([
   "terminalStatus",
 ]);
 
-/** Whether every otherwise-routable connection currently rejects this exact model. */
+/**
+ * Whether every otherwise-routable connection currently rejects this exact model. Only a lock
+ * learned from the entitlement refusal counts: an ordinary quota or transient lock on the same
+ * model is a cooldown the caller can honour, not a `model_not_supported`.
+ */
 export function areCodexConnectionsRejected(
   provider: string,
   model: string | null | undefined,
@@ -307,7 +311,31 @@ export function areCodexConnectionsRejected(
 ): boolean {
   if (!model || canonicalProviderOf(provider) !== CODEX_CANONICAL_PROVIDER) return false;
   if (connections.length === 0) return false;
-  return connections.every((connection) => isModelLocked(provider, connection.id, model));
+  const requested = normalizeCodexModelId(model);
+  const rejected = new Set(
+    getCodexChatgptModelRejections()
+      .filter((entry) => normalizeCodexModelId(entry.model) === requested)
+      .map((entry) => entry.connectionId)
+  );
+  return connections.every((connection) => rejected.has(connection.id));
+}
+
+/**
+ * The model ids a successful response clears: each dispatched id as sent and its effort-less
+ * base, the same variant set lockCodexChatgptModelNotSupported writes (a `-high` request whose
+ * refusal named the base model locks both forms).
+ */
+export function codexServedModelVariants(
+  models: ReadonlyArray<string | null | undefined>
+): string[] {
+  const variants = new Set<string>();
+  for (const model of models) {
+    if (typeof model !== "string" || model.trim().length === 0) continue;
+    variants.add(model.trim());
+    const base = stripCodexEffortSuffix(model);
+    if (base) variants.add(base);
+  }
+  return Array.from(variants);
 }
 
 /**
