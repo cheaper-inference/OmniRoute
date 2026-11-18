@@ -40,6 +40,38 @@ describe("Card adapter → kit Card", () => {
     ).toBeTruthy();
   });
 
+  // Kit `IconChip` (keak-ai/cheaper-inference-ui-kit#259): the header icon is the kit chip, not
+  // a hand-made 36px box, and takes the kit tones through `iconTone`.
+  it("draws the header icon in the kit IconChip, neutral unless iconTone says otherwise", () => {
+    const { container, rerender } = render(
+      <Card title="Usage" icon="analytics">
+        body
+      </Card>
+    );
+    const chip = container.querySelector("[data-slot=card-header] > [data-slot=icon-chip]")!;
+    expect(chip, "the header icon sits in a kit IconChip").not.toBeNull();
+    expect(chip.className).toContain("ci-icon-chip");
+    expect(chip.getAttribute("data-tone")).toBe("neutral");
+    expect(chip.getAttribute("data-size")).toBe("md");
+    expect(chip.getAttribute("aria-hidden")).toBe("true");
+    expect(chip.querySelector("svg.oi-icon")).not.toBeNull();
+    // No hand-made box left around the icon.
+    expect(container.querySelector("[data-slot=card-header] .size-9")).toBeNull();
+
+    rerender(
+      <Card title="Usage" icon="analytics" iconTone="accent">
+        body
+      </Card>
+    );
+    expect(
+      container
+        .querySelector("[data-slot=card-header] > [data-slot=icon-chip]")!
+        .getAttribute("data-tone")
+    ).toBe("accent");
+    // `iconTone` is the adapter's prop: it never reaches the DOM.
+    expect(container.querySelector("[data-slot=card]")!.hasAttribute("icontone")).toBe(false);
+  });
+
   it("className keeps acting on the element that holds the children (legacy layout contract)", () => {
     const { container, getByText } = render(
       <Card className="flex gap-2 p-1">

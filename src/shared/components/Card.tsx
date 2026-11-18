@@ -9,13 +9,16 @@ import {
 } from "@omniroute/ui-kit/card";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
+import IconChip, { type IconChipTone } from "./IconChip";
 
 interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   children?: React.ReactNode;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** ICON_MAP name, rendered through <Icon> in the header chip. */
+  /** ICON_MAP name, rendered through <Icon> in the header's kit IconChip. */
   icon?: string;
+  /** Kit IconChip tone of the header icon: a status tone or `chart-N`. Defaults to `neutral`. */
+  iconTone?: IconChipTone;
   action?: React.ReactNode;
   padding?: "none" | "xs" | "sm" | "md" | "lg";
   hover?: boolean;
@@ -42,6 +45,7 @@ function Card({
   title,
   subtitle,
   icon,
+  iconTone,
   action,
   padding = "md",
   hover = false,
@@ -61,9 +65,9 @@ function Card({
       {hasHeader && (
         <CardHeader className="mb-4 flex items-center justify-between gap-3 p-0">
           {icon && (
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted">
+            <IconChip tone={iconTone}>
               <Icon name={icon} size={20} />
-            </span>
+            </IconChip>
           )}
           <div className="min-w-0 flex-1">
             {title && (
