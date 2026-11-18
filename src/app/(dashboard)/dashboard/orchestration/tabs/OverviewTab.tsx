@@ -67,8 +67,7 @@ function Card({
         </span>
         <Button
           variant="ghost"
-          size="sm"
-          className="h-6 min-h-6 px-1.5 text-[10px]"
+          size="2xs"
           onClick={(e) => {
             e.stopPropagation();
             onSeeInGraph();

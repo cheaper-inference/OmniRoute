@@ -393,7 +393,8 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
               size="sm"
               icon="refresh"
               onClick={() => void handleRegenerate()}
-              className="text-xs text-text-muted"
+              tone="muted"
+              className="text-xs"
               title={t("regenerateLastResponse")}
             >
               {t("regenerate")}

@@ -156,7 +156,8 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
           variant="ghost"
           size="icon-sm"
           onClick={() => setCollapsed(false)}
-          className="mt-2 text-text-muted"
+          tone="muted"
+          className="mt-2"
           title={tp("expandConfig")}
           aria-label={tp("expandConfig")}
           icon="settings"
@@ -179,7 +180,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
           variant="ghost"
           size="icon-sm"
           onClick={() => setCollapsed(true)}
-          className="text-text-muted"
+          tone="muted"
           title={tp("collapseConfig")}
           aria-label={tp("collapseConfig")}
           icon="chevron_right"

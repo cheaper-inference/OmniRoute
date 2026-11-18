@@ -418,7 +418,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             icon="add"
             onClick={addColumn}
             reason={atColumnLimit ? t("maxColumnsReached", { max: MAX_COLUMNS }) : undefined}
-            className="text-text-muted"
+            tone="muted"
             title={t("addColumn")}
             aria-label={t("addModelColumn")}
           >

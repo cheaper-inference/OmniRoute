@@ -703,7 +703,7 @@ export default function ApiTab(_props: ApiTabProps) {
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => void handleCopy(requestBody)}
-                  className="text-text-muted"
+                  tone="muted"
                   title={t("copy")}
                   aria-label={t("copy")}
                   icon="content_copy"
@@ -717,7 +717,7 @@ export default function ApiTab(_props: ApiTabProps) {
                       (template as Record<string, unknown>).model = selectedModel;
                     setRequestBody(JSON.stringify(template, null, 2));
                   }}
-                  className="text-text-muted"
+                  tone="muted"
                   title={t("resetToDefault")}
                   aria-label={t("resetToDefault")}
                   icon="restart_alt"
@@ -775,7 +775,7 @@ export default function ApiTab(_props: ApiTabProps) {
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => void handleCopy(responseBody)}
-                  className="text-text-muted"
+                  tone="muted"
                   title={t("copy")}
                   aria-label={t("copy")}
                   icon="content_copy"

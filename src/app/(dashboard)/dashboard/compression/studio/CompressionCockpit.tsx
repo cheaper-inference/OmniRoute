@@ -50,10 +50,11 @@ function SpeedButton({
   return (
     <Button
       variant={active ? "secondary" : "ghost"}
-      size="sm"
+      size="2xs"
+      tone={active ? undefined : "muted"}
       onClick={onClick}
       aria-pressed={active}
-      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
+      className={active ? "text-primary" : undefined}
     >
       {s}×
     </Button>
@@ -76,11 +77,12 @@ function ViewButton({
   return (
     <Button
       variant={active ? "secondary" : "ghost"}
-      size="sm"
+      size="2xs"
+      tone={active ? undefined : "muted"}
       onClick={onClick}
       data-testid={testId}
       aria-pressed={active}
-      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
+      className={active ? "text-primary" : undefined}
     >
       {label}
     </Button>
@@ -256,7 +258,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
             variant="ghost"
             size="icon-sm"
             onClick={reset}
-            className="text-text-muted"
+            tone="muted"
             aria-label={t("resetReplay")}
           >
             <Icon name="replay" size={16} />

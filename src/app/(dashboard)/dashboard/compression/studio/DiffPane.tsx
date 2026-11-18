@@ -20,7 +20,7 @@ export function DiffPane({ segments, preservedBlocks }: DiffPaneProps) {
         <Badge size="sm" variant="info">
           {t("inlineView")}
         </Badge>
-        <Button variant="ghost" size="sm" disabled className="h-6 min-h-6 px-2 text-[10px]">
+        <Button variant="ghost" size="2xs" disabled>
           {t("splitComingSoon")}
         </Button>
       </div>

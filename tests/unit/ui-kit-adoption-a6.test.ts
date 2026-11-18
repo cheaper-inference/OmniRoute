@@ -193,3 +193,45 @@ test("A: filter chips are the kit ToggleChip and removable chips the kit ScopeCh
   assert.match(form?.source ?? "", /<ScopeChip\b[^>]*tone="success"/);
   assert.match(form?.source ?? "", /<ScopeChip\b[^>]*tone="danger"/);
 });
+
+// ── B: dense buttons and the muted tone ──────────────────────────────────────────────────
+
+test("B: 24px buttons use the kit dense sizes, not hand-made height classes", () => {
+  // `size="2xs"` / `size="icon-2xs"` are the kit's 24px sizes (12px text). A button shrunk
+  // by class (`h-6 min-h-6`, `size-4`, `h-auto min-h-0` + padding) drifts from them.
+  const hits = openingTags(BUTTONS).filter(({ tag }) =>
+    /(?<![\w-])(?:(?:h|size|min-h)-(?:4|5|6)|min-h-0)(?![\w-])/.test(tag)
+  );
+  assertOnlyKept(hits, [], 'use size="2xs" or size="icon-2xs"');
+});
+
+test("B: a button never sets a text size under the kit's 12px floor", () => {
+  const hits = openingTags(BUTTONS).filter(({ tag }) => /text-\[(?:8|9|10|11)px\]/.test(tag));
+  assertOnlyKept(hits, [], "drop the size: the kit button sizes set the text");
+});
+
+test('B: muted ghost and outline buttons use tone="muted"', () => {
+  // `text-text-muted` on a ghost/outline/secondary button also mutes its hover ink;
+  // `tone="muted"` mutes the resting ink only and keeps the variant's hover.
+  const hits = openingTags(BUTTONS).filter(({ tag }) =>
+    /(?<![\w:-])text-text-muted(?![\w/-])/.test(tag)
+  );
+  const kept: Kept[] = [
+    {
+      file: "playground/components/CompareColumn.tsx",
+      marker: "onRemove(id)",
+      reason: "Owner decision #19620: this x keeps the quiet grey with error ink on hover.",
+    },
+    {
+      file: "playground/components/tabs/ApiTab.tsx",
+      marker: "setUploadedImages([])",
+      reason: "Owner decision #19620: clears the attached images, error ink on hover only.",
+    },
+    {
+      file: "playground/components/tabs/ChatTab.tsx",
+      marker: "onClick={handleClear}",
+      reason: "Owner decision #19620: toolbar icon that resets the chat, error ink on hover only.",
+    },
+  ];
+  assertOnlyKept(hits, kept, 'use tone="muted" instead of text-text-muted');
+});

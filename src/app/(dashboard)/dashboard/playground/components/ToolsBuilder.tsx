@@ -144,7 +144,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => startEdit(idx)}
-                        className="text-text-muted"
+                        tone="muted"
                         aria-label={t("editTool", { name: tool.function.name })}
                         icon="edit"
                       />

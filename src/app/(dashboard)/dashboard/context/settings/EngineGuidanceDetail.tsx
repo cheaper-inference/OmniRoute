@@ -54,11 +54,11 @@ export default function EngineGuidanceDetail({
         )}
         <Button
           variant="ghost"
-          size="sm"
+          size="2xs"
           data-testid={`engine-guidance-toggle-${id}`}
           onClick={onToggle}
           aria-expanded={expanded}
-          className="h-6 min-h-6 px-1.5 text-[10px] uppercase tracking-wider text-primary"
+          className="uppercase text-primary"
         >
           {expanded ? t("compressionGuidanceHide") : t("compressionGuidanceShow")}
         </Button>
