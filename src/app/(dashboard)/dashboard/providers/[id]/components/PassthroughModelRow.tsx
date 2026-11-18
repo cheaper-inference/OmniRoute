@@ -346,7 +346,7 @@ export default function PassthroughModelRow({
               icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(modelId, !isHidden)}
               disabled={togglingHidden}
-              className="size-6 min-h-6 rounded text-text-muted disabled:cursor-not-allowed disabled:opacity-40"
+              className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-40"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")

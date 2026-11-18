@@ -3,6 +3,7 @@ import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { readButtonTooltip } from "../../../_helpers/buttonTooltip";
 import { NextIntlClientProvider } from "next-intl";
 
 import messages from "../../../../src/i18n/messages/en.json";
@@ -94,7 +95,8 @@ describe("DistributeProxiesButton", () => {
   it("disables button when disabled prop is true", async () => {
     const { container } = await renderButton({ disabled: true });
     const button = container.querySelector("button") as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    // The button carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("calls onDistribute after confirmation", async () => {
@@ -119,7 +121,8 @@ describe("DistributeProxiesButton", () => {
 
     // Should show distributing state
     expect(button.textContent).toContain("Distributing...");
-    expect(button.disabled).toBe(true);
+    // The button carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect(button.getAttribute("aria-disabled")).toBe("true");
     const spinner = container.querySelector('[data-slot="spinner"]');
     expect(spinner?.getAttribute("data-size")).toBe("xs");
 
@@ -182,6 +185,7 @@ describe("DistributeProxiesButton", () => {
     });
 
     expect(button.textContent).toContain("Distribute Proxies");
+    expect(button.hasAttribute("aria-disabled")).toBe(false);
     expect(button.disabled).toBe(false);
   });
 
@@ -219,9 +223,11 @@ describe("DistributeProxiesButton", () => {
     expect(button.getAttribute("aria-label")).toBe("Distribute Proxies");
   });
 
-  it("sets title to the current label", async () => {
+  it("shows the current label as its tooltip", async () => {
     const { container } = await renderButton();
     const button = container.querySelector("button") as HTMLButtonElement;
-    expect(button.getAttribute("title")).toBe("Distribute Proxies");
+    // The Button adapter shows `title` through the kit tooltip, not as a native attribute.
+    expect(button.hasAttribute("title")).toBe(false);
+    expect(await readButtonTooltip(button)).toBe("Distribute Proxies");
   });
 });

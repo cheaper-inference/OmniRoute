@@ -478,7 +478,7 @@ export default function ConnectionRow({
                   icon="sync"
                   onClick={() => onToggleAutoSync?.(!autoSyncEnabled)}
                   disabled={connection.isActive === false}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs aria-disabled:opacity-40 ${
                     autoSyncEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"

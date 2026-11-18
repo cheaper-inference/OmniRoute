@@ -32,7 +32,7 @@ export default function ConnectionQuotaRefreshButton({ refreshing, state, onRefr
         disabled={refreshing}
         aria-busy={!!refreshing}
         title={t("quotaRefreshCurrentHint")}
-        className="h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-primary disabled:cursor-wait disabled:opacity-60"
+        className="h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-primary aria-disabled:opacity-60"
       >
         {refreshing ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={13} />}
         {t(refreshing ? "quotaRefreshing" : "quotaRefreshCurrent")}

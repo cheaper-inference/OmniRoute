@@ -926,7 +926,7 @@ export default function CustomModelsSection({
                     icon={model.isHidden ? "visibility_off" : "visibility"}
                     onClick={() => handleToggleHidden(model.id!, !model.isHidden)}
                     disabled={togglingModelId === model.id}
-                    className="size-6 min-h-6 rounded text-text-muted disabled:opacity-50"
+                    className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
                     aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
                   />

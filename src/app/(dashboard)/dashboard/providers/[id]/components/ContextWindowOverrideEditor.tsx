@@ -107,7 +107,7 @@ export function ContextWindowOverrideField({
           icon="check"
           onClick={() => void editor.submit()}
           disabled={saving}
-          className="size-6 min-h-6 rounded text-text-muted disabled:opacity-40"
+          className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-40"
           title={providerText(t, "save", "Save")}
           aria-label={providerText(t, "save", "Save")}
         />
@@ -117,7 +117,7 @@ export function ContextWindowOverrideField({
           icon="close"
           onClick={editor.cancel}
           disabled={saving}
-          className="size-6 min-h-6 rounded text-text-muted disabled:opacity-40"
+          className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-40"
           title={providerText(t, "cancel", "Cancel")}
           aria-label={providerText(t, "cancel", "Cancel")}
         />
