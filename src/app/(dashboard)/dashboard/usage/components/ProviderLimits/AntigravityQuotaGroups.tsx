@@ -198,6 +198,38 @@ export function antigravityQuotaBelongsToGroup(
   return families[group.id] === getAntigravityQuotaFamily(key);
 }
 
+function AntigravityGroupHeader({
+  group,
+  hideLabel,
+  onHideGroup,
+}: {
+  group: QuotaGroup;
+  hideLabel: string;
+  onHideGroup?: (group: QuotaGroup) => void;
+}) {
+  const label = `${hideLabel}: ${group.displayName}`;
+  return (
+    <div className="mb-2 flex items-center justify-between gap-2">
+      <h4 className="text-xs text-text-main">{group.displayName}</h4>
+      {onHideGroup && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="size-5 min-h-5 shrink-0 text-text-muted"
+          title={label}
+          aria-label={label}
+          onClick={(event) => {
+            event.stopPropagation();
+            onHideGroup(group);
+          }}
+        >
+          <Icon name="visibility_off" size={16} />
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export default function AntigravityQuotaGroups({
   groups,
   now,
@@ -225,23 +257,7 @@ export default function AntigravityQuotaGroups({
             key={group.id}
             className="rounded-md border border-border/60 bg-bg-subtle/40 p-2"
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <h4 className="text-xs text-text-main">{group.displayName}</h4>
-              {onHideGroup && (
-                <button
-                  type="button"
-                  className="text-text-muted hover:text-text-main"
-                  title={`${hideLabel}: ${group.displayName}`}
-                  aria-label={`${hideLabel}: ${group.displayName}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onHideGroup(group);
-                  }}
-                >
-                  <Icon name="visibility_off" size={16} />
-                </button>
-              )}
-            </div>
+            <AntigravityGroupHeader group={group} hideLabel={hideLabel} onHideGroup={onHideGroup} />
             <div className="flex flex-col gap-2">
               <QuotaWindowRow label="5 hour" window={group.windows?.session} now={now} />
               <QuotaWindowRow label="Weekly" window={group.windows?.weekly} now={now} />
