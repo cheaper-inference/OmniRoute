@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import Button from "@/shared/components/Button";
+import Pager from "@/shared/components/Pager";
 import { Card } from "@/shared/components";
 import type { JSX } from "react";
 import Badge from "@/shared/components/Badge";
@@ -87,24 +87,19 @@ export function OmniExecutionsTab({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-        <span className="text-sm text-text-muted">
-          {t("pageInfo", { page: execPage, totalPages: execTotalPages, total: execTotal }) ||
-            `Page ${execPage} of ${execTotalPages} (${execTotal} total)`}
-        </span>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onPagePrev} disabled={execPage === 1}>
-            {t("previous") || "Prev"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPageNext}
-            disabled={execPage === execTotalPages || execTotalPages === 0}
-          >
-            {t("next") || "Next"}
-          </Button>
-        </div>
+      <div className="flex justify-end mt-4 pt-4 border-t border-border">
+        <Pager
+          variant="summary"
+          page={execPage}
+          pageCount={Math.max(1, execTotalPages)}
+          onPageChange={(next) => (next < execPage ? onPagePrev() : onPageNext())}
+          labels={{
+            previous: t("previous"),
+            next: t("next"),
+            summary: () =>
+              t("pageInfo", { page: execPage, totalPages: execTotalPages, total: execTotal }),
+          }}
+        />
       </div>
     </Card>
   );

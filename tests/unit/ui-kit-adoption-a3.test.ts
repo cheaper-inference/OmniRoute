@@ -373,3 +373,12 @@ test("C: a bordered panel inside a card is Card.Section", () => {
   );
   assert.equal(offenders.length, 0, `use <Card.Section>:\n${where(offenders)}`);
 });
+
+// ── E (cont.). Paginators: the Pager adapter ─────────────────────────────────────────────────
+
+test("E: a previous/next paginator is the Pager adapter", () => {
+  const offenders = openingTags("Button").filter((t) =>
+    /onClick=\{[^}]*(?:onPagePrev|onPageNext|setPage\(|setExecPage\()/.test(t.tag)
+  );
+  assert.equal(offenders.length, 0, `use <Pager variant="summary">:\n${where(offenders)}`);
+});
