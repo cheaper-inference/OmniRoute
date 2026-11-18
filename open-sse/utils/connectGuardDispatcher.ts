@@ -1,4 +1,5 @@
 import dns from "node:dns";
+import { createRequire } from "node:module";
 import { Agent, type Dispatcher } from "undici";
 import * as undici from "undici";
 import {
@@ -76,10 +77,14 @@ export function createGuardedLookup(
   };
 }
 
+const UNSUPPORTED_RUNTIME = "This runtime does not support guarded outbound dispatchers";
+
+function assertDispatches(agent: Dispatcher): void {
+  if (typeof agent.dispatch !== "function") throw new Error(UNSUPPORTED_RUNTIME);
+}
+
 function compatibleGuardedDispatcher(agent: Dispatcher): Dispatcher {
-  if (typeof agent.dispatch !== "function") {
-    throw new Error("This runtime does not support guarded outbound dispatchers");
-  }
+  assertDispatches(agent);
   const Bridge = undici.Dispatcher1Wrapper;
   if (typeof Bridge !== "function") return agent;
   return new (class extends Bridge {
@@ -91,6 +96,20 @@ function compatibleGuardedDispatcher(agent: Dispatcher): Dispatcher {
   })(agent);
 }
 
+function createGuardedAgent(AgentClass: typeof Agent, guard: ConnectGuardMode): Dispatcher {
+  const options = getDispatcherOptions();
+  return new AgentClass({
+    ...options,
+    keepAliveTimeout: 1,
+    keepAliveMaxTimeout: 1,
+    pipelining: 0,
+    connect: {
+      ...(options.connect as object),
+      lookup: createGuardedLookup(guard),
+    } as never,
+  });
+}
+
 const guardedDispatchers = new Map<ConnectGuardMode, Dispatcher>();
 
 /**
@@ -98,23 +117,62 @@ const guardedDispatchers = new Map<ConnectGuardMode, Dispatcher>();
  * One instance per guard mode (the validation is per connect, so hosts can share it). Sockets are
  * not kept alive: this dispatcher bypasses the patched fetch's stale-socket retry, and a socket
  * that is never reused cannot be stale.
+ *
+ * Throws under Bun: Bun's fetch (the global one and its built-in `undici` shim) ignores
+ * `dispatcher`, so a caller would connect unguarded. Use {@link fetchWithConnectGuard} there.
  */
 export function getGuardedDispatcher(guard: ConnectGuardMode): Dispatcher {
+  if (process.versions.bun) throw new Error(UNSUPPORTED_RUNTIME);
   let dispatcher = guardedDispatchers.get(guard);
   if (!dispatcher) {
-    const options = getDispatcherOptions();
-    dispatcher = new Agent({
-      ...options,
-      keepAliveTimeout: 1,
-      keepAliveMaxTimeout: 1,
-      pipelining: 0,
-      connect: {
-        ...(options.connect as object),
-        lookup: createGuardedLookup(guard),
-      } as never,
-    });
-    dispatcher = compatibleGuardedDispatcher(dispatcher);
+    dispatcher = compatibleGuardedDispatcher(createGuardedAgent(Agent, guard));
     guardedDispatchers.set(guard, dispatcher);
   }
   return dispatcher;
+}
+
+type BunGuardedTransport = {
+  fetch: typeof undici.fetch;
+  agents: Map<ConnectGuardMode, Dispatcher>;
+};
+let bunTransport: BunGuardedTransport | null = null;
+
+/**
+ * Bun resolves the bare `undici` specifier to its built-in shim (an Agent without `dispatch`, a
+ * fetch that ignores `dispatcher`). The package's own entry file is the real undici: it runs on
+ * Bun and opens its sockets through `node:net` with the guarded `lookup`.
+ */
+function getBunGuardedTransport(): BunGuardedTransport {
+  if (!bunTransport) {
+    const real = createRequire(import.meta.url)("undici/index.js") as typeof undici;
+    const agents = new Map<ConnectGuardMode, Dispatcher>();
+    for (const mode of ["public-only", "block-metadata"] as const) {
+      const agent = createGuardedAgent(real.Agent, mode);
+      assertDispatches(agent); // got the shim after all: fail closed, never connect unguarded
+      agents.set(mode, agent);
+    }
+    bunTransport = { fetch: real.fetch, agents };
+  }
+  return bunTransport;
+}
+
+/**
+ * `fetch(url, init)` whose connection is validated by {@link createGuardedLookup}. On Node the
+ * guarded dispatcher rides the ambient (proxy-patched) fetch, as before. On Bun, whose fetch
+ * ignores dispatchers, the request goes through the real undici package's fetch and a guarded
+ * agent; if that cannot be loaded the call throws instead of connecting unguarded.
+ */
+export function fetchWithConnectGuard(
+  url: string,
+  init: RequestInit,
+  guard: ConnectGuardMode
+): Promise<Response> {
+  if (!process.versions.bun) {
+    return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
+  }
+  const transport = getBunGuardedTransport();
+  return transport.fetch(url, {
+    ...init,
+    dispatcher: transport.agents.get(guard),
+  } as never) as unknown as Promise<Response>;
 }

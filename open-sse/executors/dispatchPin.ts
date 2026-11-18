@@ -4,7 +4,7 @@ import {
   parseAndValidatePublicUrl,
 } from "@/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
-import { getGuardedDispatcher } from "../utils/connectGuardDispatcher.ts";
+import { fetchWithConnectGuard } from "../utils/connectGuardDispatcher.ts";
 import {
   hasAmbientProxyContext,
   isDirectFetchContext,
@@ -70,9 +70,10 @@ type DispatchCredentials = { providerSpecificData?: { baseUrl?: unknown } } | nu
  * node gets its host. Built-in providers' hosts are fixed registry values, so they keep the
  * ordinary pooled dispatcher (and its retry policy).
  *
- * For an operator URL the call goes through the AMBIENT global `fetch` — the patched one from
- * `proxyFetch.ts`, or whatever a test stubbed in — carrying a `dispatcher` whose connections are
- * validated at connect time (`getGuardedDispatcher`). No DNS lookup happens here, so stubbed
+ * For an operator URL the call goes through `fetchWithConnectGuard`: on Node, the AMBIENT global
+ * `fetch` — the patched one from `proxyFetch.ts`, or whatever a test stubbed in — carrying a
+ * `dispatcher` whose connections are validated at connect time; on Bun, whose fetch ignores
+ * dispatchers, the real undici package with the same guard. No DNS lookup happens here, so stubbed
  * fetches never touch DNS. Nothing is guarded (string-level check only) when the provider is
  * exempt, the guard is `"none"`, or {@link canGuardDirectConnection} says a proxy /
  * TLS-impersonation / explicit-direct route applies — when in doubt we do NOT swap the transport.
@@ -107,7 +108,7 @@ function dispatchOnce(
   ) {
     return fetch(url, init);
   }
-  return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
+  return fetchWithConnectGuard(url, init, guard);
 }
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
