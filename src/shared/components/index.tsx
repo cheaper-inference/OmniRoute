@@ -45,6 +45,7 @@ export { default as CapabilityBadge } from "./CapabilityBadge";
 export { default as AutoGrid } from "./AutoGrid";
 export { default as Breadcrumbs } from "./Breadcrumbs";
 export { default as EmptyState } from "./EmptyState";
+export { default as Notice } from "./Notice";
 export { default as NotificationToast } from "./NotificationToast";
 export { default as FilterBar } from "./FilterBar";
 export { default as ColumnToggle } from "./ColumnToggle";
