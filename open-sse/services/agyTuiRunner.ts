@@ -70,6 +70,37 @@ type SubmitState = { submittedAt: number | null; retried: boolean };
 /** Progress bookkeeping for `awaitStop`: last screen, last record revision, when. */
 type StopWatch = { previous: string; revision: number; since: number };
 
+/**
+ * agy's own wording for a failure that is NOT a server fault.
+ *
+ * agy reports a spent quota as a banner inside the turn, not as a process exit,
+ * so the transport has to read its words to keep the real status: an exhausted
+ * quota is a 429 (connection cooldown + account rotation), and a spent credit
+ * balance is a 402. Collapsing either into a 502 turns "this account is out of
+ * quota" into "the provider is broken" — the resilience layer then never rotates
+ * the account, and the operator debugs a fault that does not exist.
+ *
+ * Mirrors `agyAgentText` on the ACP side (the same banners), kept local because
+ * that module does not exist on this transport.
+ */
+const EXHAUSTED_QUOTA_RE = /(code\s*429|resource_exhausted)/i;
+const EXHAUSTED_QUOTA_DETAIL_RE = /resource has been exhausted/i;
+const CREDITS_EXHAUSTED_RE = /(ai )?credits balance is too low/i;
+
+/**
+ * The HTTP status agy's failure detail implies.
+ *
+ * Pure and allocation-free on the common path: it reads a terminal transcript,
+ * so it tolerates missing newlines and added prefixes. Unrecognised text stays
+ * 502 — a real provider fault must never be reported as a rate limit, which
+ * would park a healthy connection.
+ */
+export function agyTurnFailureStatus(detail: string): number {
+  if (CREDITS_EXHAUSTED_RE.test(detail)) return 402;
+  if (EXHAUSTED_QUOTA_RE.test(detail) || EXHAUSTED_QUOTA_DETAIL_RE.test(detail)) return 429;
+  return 502;
+}
+
 /** A turn that failed for a reason the caller has to be told. */
 export class AgyTuiTurnError extends Error {
   constructor(
@@ -253,6 +284,14 @@ class AgyTuiTurn {
       if (!this.progress.response.trim()) {
         throw new AgyTuiTurnError("agy ended the turn without a reply", 502);
       }
+      // #20343: agy sometimes reports the failure ONLY as a banner row, leaving
+      // the turn with no prose of its own. That used to surface as a 502 "no
+      // reply", which is the same lie the hook path told: a spent quota became an
+      // unreadable server fault. Classify the text we do have before falling back.
+      const bannerStatus = agyTurnFailureStatus(this.progress.response);
+      if (bannerStatus !== 502) {
+        throw new AgyTuiTurnError(this.progress.response.trim(), bannerStatus);
+      }
       return {
         text: this.progress.response,
         conversationId: this.conversationId,
@@ -333,7 +372,12 @@ class AgyTuiTurn {
     if (payload.error) {
       const reason =
         typeof payload.terminationReason === "string" ? payload.terminationReason : "error";
-      throw new AgyTuiTurnError(`${reason}: ${String(payload.error)}`, 502);
+      const detail = `${reason}: ${String(payload.error)}`;
+      // #20343: keep the status agy's own words imply. A spent quota is a 429
+      // (or a 402 for credits), NOT a 502 — collapsing it into a server error
+      // hid the cause from the resilience layer, so the connection never cooled
+      // down and the account was never rotated.
+      throw new AgyTuiTurnError(detail, agyTurnFailureStatus(detail));
     }
     // Like print mode, the turn waits for its background commands to finish.
     this.stopped = payload.fullyIdle === true;
