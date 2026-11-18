@@ -11,7 +11,11 @@ function buildFile(contents: string, name: string, type: string) {
   return new File([Buffer.from(contents)], name, { type });
 }
 
-function immediateTimeout(callback: (...args: unknown[]) => void, _ms?: number, ...args: unknown[]) {
+function immediateTimeout(
+  callback: (...args: unknown[]) => void,
+  _ms?: number,
+  ...args: unknown[]
+) {
   if (typeof callback === "function") callback(...args);
   return 0;
 }
