@@ -1324,7 +1324,7 @@ Fún runtime headless tí kò ní dashboard, lo profaili Docker `base` (lókè) 
   <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (kò sí <code>any</code> nínú mojútò láti ìgbà v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àjọṣe àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣípadà 240</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àjọṣe àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣípadà 241</td></tr>
   <tr><td nowrap><b>Ìrántí</b></td><td>SQLite FTS5 fún wíwá nínú gbogbo ọ̀rọ̀ + àwọn ìṣàpẹẹrẹ fekito tí a ṣe ìwọ̀n sí int8, ìdíndínà tí a tẹ̀wé</td></tr>
   <tr><td nowrap><b>Àwọn ètò àgbékalẹ̀</b></td><td>Zod 4 — ìmúdájú I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
