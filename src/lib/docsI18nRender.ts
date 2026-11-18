@@ -134,8 +134,9 @@ async function renderMirrorMarkdown(
  *
  * Returns `null` whenever the English page should be served instead: default locale, no mirror
  * for this page or locale, or a mirror that cannot be read or rendered. A bad translation must
- * never take the docs page down. npm, Docker and Electron builds ship the mirrors this reads
- * (scripts/build/docsMirrorRuntime.mjs decides which).
+ * never take the docs page down. Docker and Electron builds ship the mirrors this reads
+ * (scripts/build/docsMirrorRuntime.mjs decides which); the npm package ships none, so npm
+ * installs always get the English page.
  */
 export async function loadTranslatedDoc(
   slug: string[],
