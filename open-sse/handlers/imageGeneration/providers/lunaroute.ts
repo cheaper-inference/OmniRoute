@@ -58,18 +58,41 @@ async function upstreamError(response: Response, fallback: string): Promise<stri
   }
 }
 
+/**
+ * A rejected fetch (connection reset, DNS, abort) becomes a classified failure result so the
+ * image combo loop can fall back to the next target instead of aborting the request.
+ */
+function transportFailure(
+  error: unknown,
+  signal: AbortSignal | null | undefined,
+  label: string
+): { status: number; error: string } {
+  if (signal?.aborted) return { status: 499, error: `${label} cancelled` };
+  const message = error instanceof Error ? error.message : String(error);
+  const timedOut = (error as { name?: unknown } | null)?.name === "AbortError";
+  return {
+    status: timedOut ? 504 : 502,
+    error: `${label} failed: ${sanitizeErrorMessage(message || "request failed")}`,
+  };
+}
+
 /** Upload one source image and return the LunaRoute-owned image id. */
 async function uploadImage(
   image: LunaRouteImageReference,
   token: string,
   signal?: AbortSignal | null
 ): Promise<{ id: string } | { status: number; error: string }> {
-  const response = await fetch(LUNAROUTE_IMAGE_UPLOAD_URL, {
-    method: "POST",
-    headers: bearerHeaders(token, image.mime || "application/octet-stream"),
-    body: new Uint8Array(image.bytes),
-    signal: signal ?? undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(LUNAROUTE_IMAGE_UPLOAD_URL, {
+      method: "POST",
+      headers: bearerHeaders(token, image.mime || "application/octet-stream"),
+      body: new Uint8Array(image.bytes),
+      signal: signal ?? undefined,
+    });
+  } catch (error) {
+    return transportFailure(error, signal, "LunaRoute image upload");
+  }
   if (!response.ok) {
     return {
       status: response.status,
@@ -116,12 +139,17 @@ export async function handleLunaRouteImageEdit(
   if (input.size) body.size = input.size;
   if (input.responseFormat) body.response_format = input.responseFormat;
 
-  const response = await fetch(LUNAROUTE_IMAGE_EDIT_URL, {
-    method: "POST",
-    headers: bearerHeaders(token, "application/json"),
-    body: JSON.stringify(body),
-    signal: input.signal ?? undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(LUNAROUTE_IMAGE_EDIT_URL, {
+      method: "POST",
+      headers: bearerHeaders(token, "application/json"),
+      body: JSON.stringify(body),
+      signal: input.signal ?? undefined,
+    });
+  } catch (error) {
+    return { success: false, ...transportFailure(error, input.signal, "LunaRoute image edit") };
+  }
   if (!response.ok) {
     return {
       success: false,

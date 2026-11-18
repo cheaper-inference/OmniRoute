@@ -52,6 +52,8 @@ const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
 export const LUNAROUTE_SYSTEM_ONE_PROVIDER_ID = "lunaroute";
 export const LUNAROUTE_SYSTEM_ONE_BASE_URL = "https://gw.lunaroute.com";
 export const LUNAROUTE_SYSTEM_ONE_URL = `${LUNAROUTE_SYSTEM_ONE_BASE_URL}/v1/systemone`;
+/** The catalog can publish synced decision models under the provider's short alias too. */
+const LUNAROUTE_SYSTEM_ONE_PREFIXES = [`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`, "lr/"];
 
 export const LUNAROUTE_SYSTEM_ONE_MODELS = [
   {
@@ -165,8 +167,9 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
   if (cloudflare !== undefined) return cloudflare;
   const ollamaLocal = resolveOllamaLocalTarget(trimmed);
   if (ollamaLocal !== undefined) return ollamaLocal;
-  if (trimmed.startsWith(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`)) {
-    const upstreamModel = trimmed.slice(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`.length);
+  const lunaroutePrefix = LUNAROUTE_SYSTEM_ONE_PREFIXES.find((p) => trimmed.startsWith(p));
+  if (lunaroutePrefix) {
+    const upstreamModel = trimmed.slice(lunaroutePrefix.length);
     if (!LUNAROUTE_SYSTEM_ONE_MODELS.some((model) => model.id === upstreamModel)) return null;
     return {
       backend: "lunaroute",

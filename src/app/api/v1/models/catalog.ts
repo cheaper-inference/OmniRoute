@@ -1712,13 +1712,14 @@ async function buildUnifiedModelsResponseCore(
         input_modalities: decisionModel.supportsVision ? ["text", "image"] : ["text"],
         output_modalities: ["text"],
       };
-      const existing = models.find(
+      // Dual-prefix catalogs carry both `lr/<id>` and `lunaroute/<id>`: retype every identity.
+      const existing = models.filter(
         (model) =>
           model?.id === decisionModel.id ||
           (model?.owned_by === decisionModel.provider && model?.root === rawModelId)
       );
-      if (existing) {
-        Object.assign(existing, fields);
+      if (existing.length > 0) {
+        for (const model of existing) Object.assign(model, fields);
         continue;
       }
       models.push({

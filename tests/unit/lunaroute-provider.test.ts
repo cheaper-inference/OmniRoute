@@ -151,3 +151,14 @@ test("LunaRoute registers and resolves every current System One model", () => {
   assert.equal(resolveSystemOneTarget("lunaroute/unknown"), null);
   assert.equal(resolveSystemOneTarget("lunaroute/"), null);
 });
+
+test("LunaRoute decision models resolve under the lr alias the catalog publishes", () => {
+  for (const model of LUNAROUTE_SYSTEM_ONE_MODELS) {
+    const target = resolveSystemOneTarget(`lr/${model.id}`);
+    assert.equal(target?.backend, "lunaroute");
+    assert.equal(target?.provider, "lunaroute");
+    assert.equal(target?.upstreamModel, model.id);
+    assert.equal(target?.upstreamUrl, LUNAROUTE_SYSTEM_ONE_URL);
+  }
+  assert.equal(resolveSystemOneTarget("lr/unknown"), null);
+});

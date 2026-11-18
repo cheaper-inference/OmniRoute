@@ -12,7 +12,12 @@ import {
   MICROSOFT_DESIGNER_WEB_RETIRED_MESSAGE,
 } from "@/shared/constants/designerWebRetirement";
 
-import { getImageProvider, parseImageModel } from "../config/imageRegistry.ts";
+import {
+  getImageModelEntry,
+  getImageProvider,
+  modalitiesRequireImageInput,
+  parseImageModel,
+} from "../config/imageRegistry.ts";
 import { handleGrokImageGeneration } from "./grokMedia.ts";
 import { saveCallLog, saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 export { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
@@ -67,6 +72,7 @@ import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleSyntxImageGeneration } from "./imageGeneration/providers/syntx.ts";
+import { handleLunaRouteImageEdit } from "./imageGeneration/providers/lunaroute.ts";
 import * as geminiInline from "./imageGeneration/providers/geminiInline.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
@@ -522,6 +528,15 @@ export async function handleImageGeneration({
       signal,
       longJobs,
     });
+  }
+
+  // #19800: LunaRoute edit models need the upload -> image id -> edit workflow on every path
+  // (direct requests and image combos), never a plain /images/generations call.
+  if (provider === "lunaroute") {
+    const entry = getImageModelEntry(`${provider}/${model}`);
+    if (entry?.imageRequired || modalitiesRequireImageInput(entry?.inputModalities)) {
+      return handleLunaRouteGenerationEdit({ model, body, credentials, signal });
+    }
   }
 
   const requestedCount = resolveRequestedImageCount(body.n);
@@ -2241,6 +2256,31 @@ async function handleTopazImageGeneration({
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });
   }
+}
+
+/** Resolve the request's reference images, then run LunaRoute's upload/edit contract. */
+async function handleLunaRouteGenerationEdit({ model, body, credentials, signal }) {
+  let images;
+  try {
+    images = await Promise.all(
+      extractImageInputs(body).imageUrls.map(async (source) => {
+        const resolved = await resolveImageSource(source);
+        return { bytes: resolved.buffer, mime: resolved.contentType };
+      })
+    );
+  } catch {
+    return { success: false, status: 400, error: "Invalid LunaRoute image edit input" };
+  }
+  return handleLunaRouteImageEdit({
+    model,
+    prompt: String(body.prompt ?? ""),
+    images,
+    credentials,
+    size: typeof body.size === "string" ? body.size : null,
+    responseFormat: typeof body.response_format === "string" ? body.response_format : null,
+    options: body,
+    signal,
+  });
 }
 
 export function extractImageInputs(body) {

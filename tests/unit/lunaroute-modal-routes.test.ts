@@ -16,6 +16,10 @@ const imageGenerationRoute = await import("../../src/app/api/v1/images/generatio
 const providerEmbeddingsRoute =
   await import("../../src/app/api/v1/providers/[provider]/embeddings/route.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const modelsDb = await import("../../src/lib/db/models.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
+const { handleLunaRouteImageEdit } =
+  await import("../../open-sse/handlers/imageGeneration/providers/lunaroute.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -173,4 +177,87 @@ test("provider-scoped LunaRoute embeddings canonicalize lr to lunaroute before d
 
   assert.equal(response.status, 200);
   assert.deepEqual(upstreamBody, { model: "emb-qwen3", input: "hello" });
+});
+
+test("synced LunaRoute decision models are retyped under every catalog identity", async () => {
+  const connections = await providersDb.getProviderConnections({ provider: "lunaroute" });
+  const connection = connections[0];
+  assert.ok(connection?.id, "seeded LunaRoute connection");
+  await modelsDb.replaceSyncedAvailableModelsForConnection("lunaroute", connection.id, [
+    { id: "clef-flash", name: "Clef Flash" },
+    { id: "djev", name: "djev" },
+  ]);
+  v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
+
+  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
+    new Request("http://localhost/api/v1/models")
+  );
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as {
+    data: Array<{ id: string; type?: string; supported_endpoints?: string[] }>;
+  };
+  const decisionRows = body.data.filter((model) =>
+    /^(lr|lunaroute)\/(clef-flash|djev)$/.test(model.id)
+  );
+  assert.ok(decisionRows.length >= 2, "both decision models are listed");
+  for (const row of decisionRows) {
+    assert.equal(row.type, "decisions", `${row.id} must not be classified as a chat model`);
+    assert.deepEqual(row.supported_endpoints, ["decisions"]);
+  }
+});
+
+test("LunaRoute image edit returns a classified failure when a fetch rejects", async () => {
+  const editInput = {
+    model: "qwen-image-edit-2511",
+    prompt: "make the background blue",
+    images: [{ bytes: Buffer.from(SOURCE_BYTES), mime: "image/png" }],
+    credentials: { apiKey: "lr_test_modal_routes" },
+  };
+
+  globalThis.fetch = async () => {
+    throw new TypeError("fetch failed");
+  };
+  const uploadFailure = await handleLunaRouteImageEdit(editInput);
+  assert.equal(uploadFailure.success, false);
+  assert.equal((uploadFailure as { status: number }).status, 502);
+
+  globalThis.fetch = async (url) => {
+    if (String(url).endsWith("/v1/images/uploads")) return Response.json({ id: "img_source_1" });
+    throw new TypeError("socket hang up");
+  };
+  const editFailure = await handleLunaRouteImageEdit(editInput);
+  assert.equal(editFailure.success, false);
+  assert.equal((editFailure as { status: number }).status, 502);
+
+  const controller = new AbortController();
+  controller.abort();
+  globalThis.fetch = async () => {
+    throw new DOMException("aborted", "AbortError");
+  };
+  const cancelled = await handleLunaRouteImageEdit({ ...editInput, signal: controller.signal });
+  assert.equal(cancelled.success, false);
+  assert.equal((cancelled as { status: number }).status, 499);
+});
+
+test("LunaRoute edit target inside an image combo uses the upload/edit workflow", async () => {
+  await combosDb.createCombo({
+    name: "lunaroute-edit-combo",
+    models: ["lunaroute/qwen-image-edit-2511"],
+    strategy: "priority",
+  });
+  const calls = installImageEditFetchMock();
+  const response = await imageGenerationRoute.POST(
+    new Request("http://localhost/api/v1/images/generations", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "lunaroute-edit-combo",
+        prompt: "make the background blue",
+        image_url: SOURCE_IMAGE,
+      }),
+    })
+  );
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).data[0].url, "https://images.example/edited.png");
+  assertUploadThenEdit(calls);
 });
