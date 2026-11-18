@@ -839,74 +839,179 @@ OpenAI-kompatibel batchbearbetning.
 
 ---
 
-## Sök API
+## Sök-API
 
-Web/search -leverantörsabstraktion (Tavily, Brave, Exa, Serper, etc.).
+Abstraktion för webb-/sökleverantörer (Tavily, Brave, Exa, Serper osv.).
 
-| Metod | Väg                    | Beskrivning                                                                     |
-| ----- | ---------------------- | ------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Lista konfigurerade sökleverantörers + funktioner                               |
-| POST  | `/v1/search`           | Kör en sökfråga — body validerad av `v1SearchSchema`, stöder caching/coalescing |
-| GET   | `/v1/search/analytics` | hit/latency/cache -statistik per leverantör                                     |
+| Metod | Sökväg                 | Beskrivning                                                                                    |
+| ----- | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Lista konfigurerade sökleverantörer + funktioner                                               |
+| POST  | `/v1/search`           | Kör en sökfråga — brödtexten valideras av `v1SearchSchema`, stöder cachelagring/sammanslagning |
+| GET   | `/v1/search/analytics` | Statistik över träffar/svarstid/cache per leverantör                                           |
 
-**Auth:** Bärare API nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicy tillämpas via `enforceApiKeyPolicy`.
+**Autentisering:** Bearer API-nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicyn tillämpas via `enforceApiKeyPolicy`.
 
-**Välj automatiskt:** utan `provider` körs den billigaste leverantören med en konfigurerad anslutning först och den näst billigaste är failover. Gratis sista utvägsleverantörer (`duckduckgo-free`) används endast när inget annat är konfigurerat. En självvärderad SearXNG räknas som konfigurerad när dess anslutning lagrar en riktig `baseUrl` (inte katalogens standard `http://localhost:8888/search`): den rankas sedan som en $0-leverantör före nycklade, med den billigaste nyckelleverantören som failover, inklusive när SearXNG svarar 400, 401, 403 eller 404. A `baseUrl` URL eller som inte är a `http(s)` -poäng molnmetadataadress räknas inte. En SearXNG anslutning som lagrar en token rankas endast på detta sätt över `https://` eller loopback `http://`. Över remote plain `http://` är det aldrig en failover och förblir en sista utväg, används endast när ingen annan leverantör är konfigurerad eller när den efterfrågas av namn, så den skickar token i klartext i dessa två fall.
+### Namngivna sök-/hämtningskombinationer
 
-### Exa och Tavily `provider_options`
+Både `POST /v1/search` och `POST /v1/web/fetch` accepterar `model` som namnet på en sparad kombination.
+Använd antingen `model` eller en explicit `provider`; om båda skickas returneras `400`.
+Utan något av dessa fält förblir det befintliga automatiska valet av leverantör oförändrat.
 
-Exa och Tavily läser leverantörsspecifika fält från en namnavståndspåse: `provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily` (eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en kontrolleras mot sitt eget Zod schema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, och en nyckel med fel typ släpps. Alla andra nyckelr ignoreras, inklusive auth, base URL, `stream` och `outputSchema`. De platta nycklarna som används av andra leverantörer (`cx`, `depth`, ...) fungerar som tidigare.
+Både Combo Builder och katalogen Add Model visar inbyggda poster för webboperationer
+för anslutna leverantörer, även när de inte har någon lista över LLM-modeller. Serper visar
+**Webbsökning**; Tavily visar **Webbsökning / Extrahering av sidor**, och leverantörer som endast stöder hämtning visar **Extrahering av sidor**.
+Välj posten och kontot som vanligt. En enda Tavily-post används för båda webbaserade slutpunkterna;
+dessa operationsposter läggs inte till i klientväljare som endast gäller chatt eller i sonderingar av chattmodeller.
 
-| Leverantör | Fält på högsta nivå                                                                                                                                                                                                                                                                                                                                                       | Kapslad                                                                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` slogs samman över standard `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
+Skapa till exempel en **prioritets**kombination med namnet `shared-free` och följande ordnade mål:
 
-De generiska fälten vinner alltid: `query`, `max_results`, `filters` (domäner), `country` och ämnet som härrör från `search_type`. På Exa behåller `search_type: "news"` `category: "news"`. Tavily accepterar också `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl-sökningskostnaden registreras per startat block av 10 returnerade resultat, 0,002 USD (2 poäng) per block och minst ett block per samtal ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultat kostar 0,004 USD.
+Använd sedan samma namn på varje yta:
 
-Den generiska `time_range` når nu båda leverantörerna: Exa får `startPublishedDate` (ISO timestamp) och Tavily får `start_date` (`YYYY-MM-DD`). Ett explicit datum i `provider_options` åsidosätter det mappade.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa-resultat behåller `id`, `highlights` (varje höjdpunkt, inte bara den första som används som `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i `provider_raw`. Tavily resultat behåller `images` och `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Kostnaden för länksökning registreras till $0,005 för `depth` `fast` och `standard` och $0,05 för `deep` ( [Linkup-prissättning](https://docs.linkup.so/pages/documentation/development/pricing) ), oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
+Sökningen beaktar Tavily och därefter Serper; hämtningen beaktar Tavily och därefter Jina Reader;
+chatten hoppar över de dedikerade sök-/hämtningsleverantörerna och beaktar OpenAI. Kompatibiliteten
+kommer från exekveringsregistren för sökning/hämtning, inte från ord i ett modellnamn.
+Filtrering sker före val av autentiseringsuppgifter och distribution, och den sparade kombinationen ändras aldrig.
 
-Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när något annat fält ställs in. För lite släpps `additionalQueries`, `systemPrompt` och varje `contents` knapp utom `text` och `highlights` före samtalet. De föråldrade `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte längre.
+Icke-chatbaserade funktionsrutter stöder `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` och `p2c`. Syntesstrategier som endast gäller chatt, till exempel
+`fusion`, `pipeline` och `context-relay`, avvisas på icke-chattbaserade rutter i stället för att
+tillämpas tyst på sökning eller genererade medier.
+Den befintliga kombinationsmotorn hanterar ordnad reservväxling, inklusive kvotfel uppströms,
+och bevarar steg-ID:n, kontolåsningar, tillåtelselistor för konton per steg, kapslade referenser,
+anroparens anslutnings-/kvotomfattningar och åtkomstpolicy för kombinationen. Resultaten behåller sitt ursprungliga
+sök-/hämtningsschema, inklusive den faktiska leverantören; `X-OmniRoute-Combo-Trace` identifierar
+dirigeringsbeslutet. Okända kombinationer returnerar `404`; inaktiva kombinationer och kombinationer
+utan kompatibla mål returnerar `400`.
 
-Kostnadsredovisning är det platta registret `costPerQuery`, förutom Exa, som följer Exas egen prissättning: 0,007 USD per samtal för `auto` (och äldre `fast`) eller 0,004 USD för `lite` (och äldre `instant`), som täcker 10 resultat; $0,001 för varje ytterligare resultat; och $0,001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 poäng ($0,008) för `search_depth` `basic`, `fast` och `ultra-fast`, och 2 poäng ($0,016) för `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ett samtal med `auto_parameters: true` som Tavily uppgraderar till avancerad spelas fortfarande in med 1 poäng.
+Varje kombinationsförsök använder en explicit leverantör. Den kan inte i smyg anropa den inbyggda automatiska
+leverantörspoolen bakom kombinationen. Förfrågningar med en explicit leverantör behåller sitt befintliga beteende
+för en enda leverantör. Direkta chattförfrågningar som riktas till dedikerade sök-/hämtningsleverantörer
+returnerar ett användbart JSON-svar med `400` i stället för att falla igenom till en executor i OpenAI-stil.
+
+### Kombinationsrutter specifika för funktioner
+
+Sparade kombinationer kan innehålla ett `routes`-objekt vars nycklar är API-funktioner. Varje rutt äger
+sin mållista, strategi och körningskonfiguration. `models`, `strategy` och `config` på toppnivå
+förblir den bakåtkompatibla Chat-planen; gamla kombinationer utan `routes` fortsätter att fungera oförändrat.
+
+Routenycklar som stöds är `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` och `audio-generation`. Projektion av slutpunkt sker före val av autentiseringsuppgifter,
+poängsättning eller distribution. Kapslade kombinationsreferenser väljer den underordnade kombinationens rutt för samma funktion.
+
+`POST /v1/music/generations` och `POST /v1/ocr` accepterar ett kombinationsnamn i `model`. Den inbyggda
+ElevenLabs-kompatibla `POST /v1/music` accepterar också ett kombinationsnamn i `model_id`, men varje användbart
+mål på den inbyggda slutpunkten måste vara en ElevenLabs-musikmodell så att dess binära svarskontrakt
+bevaras. `POST /v1/sound-generation` accepterar en `audio-generation`-kombination i `model_id` med
+samma begränsning för inbyggda binära svar. Använd `/v1/music/generations` för heterogena musikleverantörer.
+
+**Automatiskt val:** utan `provider` körs den billigaste leverantören med en konfigurerad anslutning
+först, och den näst billigaste används vid reservväxling. Kostnadsfria leverantörer i sista hand
+(`duckduckgo-free`) används endast när inget annat är konfigurerat. En egen SearXNG-installation räknas som konfigurerad när dess
+anslutning lagrar en verklig `baseUrl` (inte katalogens standardvärde `http://localhost:8888/search`): den
+rangordnas då som en leverantör för 0 dollar före leverantörer som kräver nyckel, med den billigaste nyckelbaserade
+leverantören som reserv, även när SearXNG svarar med 400, 401, 403 eller 404. En `baseUrl` som inte är en giltig `http(s)`-URL
+eller som pekar på en adress för molnmetadata räknas inte. En SearXNG-anslutning som lagrar en token
+rangordnas på detta sätt endast över `https://` eller loopback-`http://`. Över fjärransluten vanlig `http://`
+används den aldrig som reservleverantör utan förblir en leverantör i sista hand, som endast används när ingen annan
+leverantör är konfigurerad eller när den efterfrågas med namn; i dessa två fall skickas alltså tokenen i klartext.
+
+### `provider_options` för Exa och Tavily
+
+Exa och Tavily läser providerspecifika fält från en namespacad behållare:
+`provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily`
+(eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en
+valideras mot sitt eget Zod-schema i `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+och en nyckel med fel typ tas bort. Alla andra nycklar ignoreras, inklusive autentisering, bas-URL,
+`stream` och `outputSchema`. De platta nycklar som används av andra providers (`cx`, `depth`, ...)
+fungerar som tidigare.
+
+| Provider | Toppnivåfält                                                                                                                                                                                                                                                                                                                                                              | Kapslade                                                                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiva värden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sammanfogade över standardvärdet `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
+
+De generiska fälten vinner alltid: `query`, `max_results`, `filters` (domäner), `country` och det
+ämne som härleds från `search_type`. För Exa behåller `search_type: "news"` `category: "news"`.
+Tavily accepterar även `search_type: "finance"` (`topic: "finance"`).
+
+Kostnaden för Firecrawl-sökningar registreras per påbörjat block om 10 returnerade resultat, till
+0,002 USD (2 krediter) per block och minst ett block per anrop
+([Firecrawl-fakturering](https://docs.firecrawl.dev/billing)): 11 resultat kostar 0,004 USD.
+
+Det generiska `time_range` når nu båda providrarna: Exa får `startPublishedDate` (ISO-tidsstämpel)
+och Tavily får `start_date` (`YYYY-MM-DD`). Ett uttryckligt datum i `provider_options`
+åsidosätter det mappade datumet.
+
+Exa-resultat behåller `id`, `highlights` (varje highlight, inte bara den första som används som
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i
+`provider_raw`. Tavily-resultat behåller `images` och `favicon`.
+
+Kostnaden för Linkup-sökningar registreras till 0,005 USD för `depth` `fast` och `standard`, och 0,05 USD för
+`deep` ([Linkup-priser](https://docs.linkup.so/pages/documentation/development/pricing)),
+oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
+
+Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran
+när något annat fält har angetts. För lite tas `additionalQueries`, `systemPrompt` och alla
+`contents`-nycklar utom `text` och `highlights` bort före anropet. De föråldrade
+`subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte
+längre.
+
+Kostnadsredovisningen använder det platta registret `costPerQuery`, utom för Exa, som följer Exas
+egna priser: 0,007 USD per anrop för `auto` (och det äldre `fast`) eller 0,004 USD för `lite` (och det äldre
+`instant`), vilket täcker 10 resultat; 0,001 USD för varje ytterligare resultat; samt 0,001 USD per
+returnerat resultat när `contents.summary` har angetts. Tavily registreras till 1 kredit (0,008 USD) för
+`search_depth` `basic`, `fast` och `ultra-fast`, och 2 krediter (0,016 USD) för `advanced`
+([Tavily API-krediter](https://docs.tavily.com/documentation/api-credits)). Ett anrop med
+`auto_parameters: true` som Tavily uppgraderar till advanced registreras fortfarande till 1 kredit.
 
 ---
 
 ## Web Fetch API
 
 Extrahera innehåll från en URL via en konfigurerad webbhämtningsleverantör (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, samma API-nyckel som Parallel Search) returnerar endast Markdown — alla andra
-`format`-värden ger ett `400` — och begränsar innehållet till 100 000 tecken. När målsidan
-själv inte kan extraheras rapporterar upstream detta i ett HTTP 200;
-OmniRoute exponerar det som ett `422` med ett fast meddelande.
+Parallel Extract (`parallel-search`, samma API-nyckel som Parallel Search) returnerar endast Markdown — alla andra `format` ger en `400` — och begränsar innehållet till 100 000 tecken. När målsidan inte kan extraheras rapporterar uppströmsleverantören detta i ett HTTP 200-svar; OmniRoute exponerar det som en `422` med ett fast meddelande.
 
-| Method | Path            | Description                                                |
-| ------ | --------------- | ---------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Hämta/skrapa en URL — body valideras av `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) returnerar också endast Markdown (alla andra `format` ger en
+`400`) och begränsar innehållet till 100 000 tecken. Det fungerar utan nyckel: en explicit
+begäran med `provider: "keenable-search"` utan anslutning använder Keenable-slutpunkten utan nyckel
+(rate limits per IP). En konfigurerad nyckel häver endast dessa begränsningar; automatiskt val använder
+Keenable endast när en nyckel är konfigurerad.
 
-**Autentisering:** Bearer API-nyckel (`extractApiKey` + `isValidApiKey`). Policyn tillämpas via
-`enforceApiKeyPolicy`.
+| Metod | Sökväg          | Beskrivning                                                |
+| ----- | --------------- | ---------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Hämta/skrapa en URL — body valideras av `v1WebFetchSchema` |
 
-**Kvotmedveten fallback (#8297):** när ingen explicit `provider` anges gås poolen
+**Autentisering:** Bearer-API-nyckel (`extractApiKey` + `isValidApiKey`). Policyn tillämpas via `enforceApiKeyPolicy`.
+
+Namngivna kombinationer använder [`model`-routingkontraktet](#named-searchfetch-combinations)
+ovan och bevarar hämtningsspecifika alternativ och svar.
+
+**Kvotmedveten reservväg (#8297):** när varken `provider` eller `model` anges genomsöks poolen
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) igenom i fast
-prioritetsordning (fill-first) — en hastighetsbegränsad men konfigurerad leverantör hoppas över
-i stället för att avbryta begäran, och ett återförsökningsbart upstream-fel/kvotfel
-(HTTP 429 alltid; 402/403 för Firecrawl/Tavily/TinyFish-kvoter i kostnadsfria nivåer —
-inte för Jina Reader och aldrig för en vanlig felaktig 400-begäran) går vidare till
-nästa oprövade leverantör med autentiserade uppgifter vid tiden för begäran. När alla leverantörer i
-poolen är uttömda returnerar slutpunkten ett enda `429` (med en `Retry-After`-header)
-i stället för det tidigare generiska `400`. När en explicit `provider` begärs finns
-ingen tyst fallback — en hastighetsbegränsad eller felande explicit leverantör visar sitt eget fel (`429`
-vid hastighetsbegränsning, annars upstream-statusen).
+`parallel-search` → `keenable-search`) i fast prioritetsordning (fyll först) — en
+kvotbegränsad men konfigurerad leverantör hoppas över i stället för att avbryta begäran, och ett
+försöksbart fel från uppströmsleverantören eller ett kvotfel (HTTP 429 alltid; 402/403 för
+Firecrawl/Tavily/TinyFish kvotbaserade kostnadsfria nivåer — inte för Jina Reader, och aldrig för en
+vanlig felaktig 400-begäran) går vidare till nästa ännu oprövade leverantör med autentiseringsuppgifter vid begäran. När alla leverantörer i poolen är förbrukade returnerar slutpunkten en enda
+`429` (med en `Retry-After`-header) i stället för det tidigare generiska `400`. När en explicit
+`provider` begärs sker ingen tyst reservväg — en kvotbegränsad eller felande explicit
+leverantör exponerar sitt eget fel (`429` vid kvotbegränsning, annars uppströmsleverantörens status).
 
 ---
 
@@ -990,28 +1095,31 @@ slutförandet.
 | GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan en registrerad nyckel utfärdas                  |
 | POST  | `/v1/issues/report` | Rapportera ett misslyckande vid kvot-/nyckelutfärdande till GitHub (kräver `GITHUB_ISSUES_REPO` + token) |
 
-**Autentisering:** Bearer API-nyckel (`isAuthenticated`).
+**Autentisering:** `/v1/quotas/check` tar en Bearer-API-nyckel (`isAuthenticated`). `/v1/issues/report` är
+endast för hantering (`requireManagementAuth`), precis som `/api/v1/registered-keys`: en
+dashboard-session, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast
+ger inferens får `403`.
 
 ### Återställning av kvotsession (valfritt)
 
-En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med
-ett terminalt kvotfel (`402`/`429`/`503` vars body anger att kvoten eller krediterna är slut)
-kan parkeras och spelas upp senare i stället för att returnera felet. Anroparen väljer detta per
+En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med ett
+slutgiltigt kvotfel (`402`/`429`/`503` vars body anger att kvoten eller krediterna är slut)
+kan parkeras och spelas upp igen senare i stället för att returnera felet. Anroparen väljer detta per
 begäran med tre headers:
 
-| Header                       | Värde                                            |
-| ---------------------------- | ------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                           |
-| `x-omniroute-session`        | sessions-ID, `[A-Za-z0-9._:-]{1,128}`            |
-| `x-omniroute-recovery-turn`  | tur-ID som är unikt inom sessionen (samma regel) |
+| Header                       | Värde                                             |
+| ---------------------------- | ------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                            |
+| `x-omniroute-session`        | sessions-ID, `[A-Za-z0-9._:-]{1,128}`             |
+| `x-omniroute-recovery-turn`  | turn-ID som är unikt inom sessionen (samma regel) |
 
-Endast turer med `stream: false` utan verktyg, verktygshistorik eller `previous_response_id`, och utan
-`x-omniroute-connection`-bindning, är berättigade, och `STORAGE_ENCRYPTION_KEY` måste vara angiven
+Endast turer med `stream: false`, utan verktyg, verktygshistorik eller `previous_response_id`, och utan
+`x-omniroute-connection`-låsning kan komma i fråga, och `STORAGE_ENCRYPTION_KEY` måste vara inställd
 (begäran lagras krypterad i upp till 24 timmar). Svaret blir då `202` med
-`recovery.poll`; polla `GET /v1/quota-recoveries/{id}` (`202` medan den väntar, `200` med den
-återställda bodyn när den är klar) eller avbryt med `DELETE`. Ärenden är endast synliga för den API-
-nyckel som skapade dem. En uppspelning vars resultat är osäkert avslutas i `needs_confirmation`
-i stället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
+`recovery.poll`; hämta status med `GET /v1/quota-recoveries/{id}` (`202` medan den väntar, `200` med
+den återställda body:n när den är klar) eller avbryt med `DELETE`. Biljetter är endast synliga för den API-nyckel
+som skapade dem. En återuppspelning vars resultat är osäkert avslutas i
+`needs_confirmation` i stället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1766,17 +1874,21 @@ Utgående webhookprenumerationer för OmniRoute-händelser (slutförda begärand
 
 ## Registrerade nycklar (automatisk hantering)
 
-Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en underliggande leverantör/ett konto, med dagliga/timvisa kvoter.
+Används av subsystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en underliggande leverantör/ett konto, med dagliga/timvisa kvoter.
 
 | Metod  | Sökväg                                | Beskrivning                                                                                                                                                                                                  |
 | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerat prefix)                                                                                                                                                          |
 | POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång**. Returnerar `429` vid nekad kvot. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inget råvärde)                                                                                                                                                     |
+| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inga råa nyckeldata)                                                                                                                                               |
 | DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit endpoint för återkallande (samma effekt som DELETE)                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit slutpunkt för återkallande (samma effekt som DELETE)                                                                                                                                                |
+| GET    | `/api/v1/providers/[provider]/limits` | Läs leverantörens begränsningar för utfärdande                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ange leverantörens begränsningar för utfärdande — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                              |
+| GET    | `/api/v1/accounts/[id]/limits`        | Läs kontots begränsningar för utfärdande                                                                                                                                                                     |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ange kontots begränsningar för utfärdande — samma body som leverantörens route                                                                                                                               |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en dashboardsession, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast har behörighet för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
+**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma skydd som för `/api/keys`: en dashboard-session, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast används för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
 
 ---
 

@@ -18,16 +18,18 @@
 
 ---
 
-## Àwọn Ọ̀nà Ìfi Sórí Ẹ̀rọ
+## Awọn ọna Fi sori ẹrọ
 
-### npm (a ṣe ìṣeduro rẹ̀)
+### npm (a ṣe iṣeduro)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard yóò ṣí ní `http://localhost:20128`, URL ìpìlẹ̀ API sì jẹ́ `http://localhost:20128/v1`.
+Dasibodu ṣii ni `http://localhost:20128` ati ipilẹ URL API `http://localhost:20128/v1`.
+
+> **npm:** Ti npm ba kilọ pe a ti dinamọ awọn iwe afọwọkọ sori ẹrọ (fun apẹẹrẹ, `omniroute`, `better-sqlite3`), wo [Laasigbotitusita — npm awọn iwe afọwọkọ fifi sori ẹrọ dina](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Àwọn olùlò pnpm:** àsìá `--allow-build` jẹ́ dandan láti mú àwọn skripti ìkọ́lé abinibi ṣiṣẹ́ fún `better-sqlite3` àti `@swc/core`. A kò ṣe àtìlẹ́yìn fún àṣẹ `pnpm approve-builds -g` fún ìfísórí-ẹ̀rọ àgbáyé lórí pnpm v11.
+> **awọn olumulo pnpm:** asia `--allow-build` ni a nilo lati mu awọn iwe afọwọkọ kikọ abinibi ṣiṣẹ fun `better-sqlite3` ati `@swc/core`. Aṣẹ `pnpm approve-builds -g` ko ṣe atilẹyin fun awọn fifi sori ẹrọ agbaye lori pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Package AUR](https://aur.archlinux.org/packages/omniroute-bin) náà ń fi OmniRoute sórí ẹ̀rọ, ó sì pèsè iṣẹ́ onílò systemd.
+[package AUR](https://aur.archlinux.org/packages/omniroute-bin) nfi OmniRoute sori ẹrọ ati pese iṣẹ olumulo ti eto kan.
 
-### Láti Kóòdù Orísun
+### Lati Orisun
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Àkíyèsí Windows:** Ní àìyẹsẹ̀, OmniRoute máa ń lo `%APPDATA%\omniroute` nígbà tí fódà àtijọ́ `%USERPROFILE%\.omniroute` kò bá sí. Ṣètò `DATA_DIR` láti yan ibi mìíràn fún fódà dátà.
+> **Windows akiyesi:** Nipa aiyipada, OmniRoute nlo `%APPDATA%\omniroute` nigbati itọsọna `%USERPROFILE%\.omniroute` julọ ko si. Ṣeto `DATA_DIR` lati yan ipo-itọsọna data ọtọtọ.
 
-> **Àkíyèsí:** `npm install` máa ń dá `.env` sílẹ̀ láti inú `.env.example` ní àkókò ìṣiṣẹ́ àkọ́kọ́. Àwọn ìfísórí-ẹ̀rọ tó tẹ̀lé kò ní kọ lé `.env` tó ti wà, nítorí náà àwọn àtúnṣe rẹ yóò dúró. Láti tún un ṣe láti ìbẹ̀rẹ̀, pa `.env` rẹ́ kí o tó tún ṣiṣẹ́.
+> **Akiyesi:** `npm install` laifọwọyi ṣe ipilẹṣẹ `.env` lati `.env.example` ni ṣiṣe akọkọ. Awọn fifi sori atẹle kii yoo tun kọ `.env` ti o wa tẹlẹ, nitorinaa awọn isọdi ti wa ni ipamọ. Lati tun-irugbin, pa `.env` ṣaaju ki o to tun nṣiṣẹ.
 
 ### Docker
 
-Wo [Ìtọ́sọ́nà Docker](./DOCKER_GUIDE.md) fún ìṣètò Docker pípé, pẹ̀lú àwọn prófáìlì Compose àti Caddy HTTPS.
+Wo [Itọsọna Docker](./DOCKER_GUIDE.md) fun iṣeto Docker pipe pẹlu Ṣajọ awọn profaili ati Caddy HTTPS.
 
-### Ètò Orí Dẹ́sítọ́ọ̀bù (Electron)
+### Ohun elo Tabili (Electron)
 
-OmniRoute ní àpò dìde dẹ́sítọ́ọ̀bù tí a kọ́ lórí Electron 41 + electron-builder 26.10. Àwọn skripti tó wà (ní gbòǹgbò workspace):
+OmniRoute gbe apẹrẹ tabili tabili kan ti a ṣe lori Electron 41 + elekitironi-akọle 26.10. Awọn iwe afọwọkọ ti o wa (gbòngbo aaye iṣẹ):
 
 ```bash
-npm run electron:dev          # Ṣi dẹ́sítọ́ọ̀bù pẹ̀lú àtúnrù-gbóná
-npm run electron:build        # Kọ́ fún OS tó ń ṣiṣẹ́ lọ́wọ́ (a máa ṣàwárí rẹ̀ fúnra rẹ̀)
-npm run electron:build:win    # Ẹ̀rọ ìfísórí Windows (NSIS + portable)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Ṣe àdánwò-smoke fún ìkọ́lé tí a ti dì
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Àwọn ẹ̀yà ìtújáde ẹ̀rọ ìfísórí dẹ́sítọ́ọ̀bù wà gẹ́gẹ́ bí asomọ́ sí GitHub Releases. Fún àlàyé Electron ní kíkún (fífi àmì sí, afárá IPC, àwọn distro), wo [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(tí a ṣẹ̀dá ní ìpele tó tẹ̀lé)_.
+Awọn idasilẹ ti awọn fifi sori tabili tabili ni asopọ si Awọn idasilẹ GitHub. Fun ni kikun Electron jin-besomi (fibuwọlu, IPC afara, distros), wo [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase ẹhin)_.
 
-### Sẹ́fà aláìní ojú-ìwò (CI/àìfọwọ́ṣe)
+### olupin ti ko ni ori (CI/automation)
 
-Fún àwọn ìṣètò tí kò nílò ẹni láti bójú tó (Docker, Kubernetes, CI), lo:
+Fun awọn iṣeto ti a ko tọju (Docker, Kubernetes, CI), lo:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Nípa lílò èyí papọ̀ pẹ̀lú àwọn env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ), o lè mú instance OmniRoute kan ṣiṣẹ́ tí a lè darí ní kíkún pẹ̀lú skripti.
+Ni idapọ pẹlu env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, ati bẹbẹ lọ), eyi n jẹ ki o yi apẹẹrẹ OmniRoute kan ni kikun iwe afọwọkọ.
 
-### Àwọn Àṣàyàn CLI
+### CLI Awọn aṣayan
 
-| Àṣẹ                     | Àpèjúwe                                                              |
+| Òfin                    | Apejuwe                                                              |
 | ----------------------- | -------------------------------------------------------------------- |
-| `omniroute`             | Bẹ̀rẹ̀ sẹ́fà (`PORT=20128`, API àti dashboard lórí pọ́ọ̀tù kan náà)       |
-| `omniroute setup`       | Ìtọ́sọ́nà ìbẹ̀rẹ̀ CLI fún ọ̀rọ̀ aṣínà àti provider àkọ́kọ́                   |
-| `omniroute doctor`      | Ṣe àwọn àyẹ̀wò ìlera agbègbè láì bẹ̀rẹ̀ sẹ́fà                            |
-| `omniroute providers`   | Ṣàwárí, ṣe àkójọ, fìdí múlẹ̀, kí o sì dán àwọn provider wò láti CLI   |
-| `omniroute config`      | Ìṣètò irinṣẹ́ CLI — ṣe àkójọ, gbà, ṣètò, kí o sì fìdí àwọn ìṣètò múlẹ̀ |
-| `omniroute status`      | Dashboard ipò àìsílóníforíkorí — ẹ̀yà, DB, irinṣẹ́, ìṣètò              |
-| `omniroute logs`        | Ṣàgbéjáde àwọn àkọsílẹ̀ lílò láti API (ó ṣe àtìlẹ́yìn fún `--follow`)  |
-| `omniroute update`      | Ṣàyẹ̀wò tàbí lo àwọn ìmúdójúìwọ̀n OmniRoute                            |
-| `omniroute provider`    | Ṣàkóso àwọn àsopọ̀ provider — ṣàfikún, ṣe àkójọ, yọ, dán wò, àìyẹsẹ̀   |
-| `omniroute --port 3000` | Ṣètò pọ́ọ̀tù àṣẹ/API sí 3000                                           |
-| `omniroute --mcp`       | Bẹ̀rẹ̀ sẹ́fà MCP (ìgbékalẹ̀ stdio)                                       |
-| `omniroute --no-open`   | Má ṣe ṣí browser fúnra rẹ̀                                            |
-| `omniroute --help`      | Fi ìrànlọ́wọ́ hàn                                                      |
+| `omniroute`             | Bẹrẹ olupin (`PORT=20128`, API ati dasibodu lori ibudo kanna)        |
+| `omniroute setup`       | Itọsọna CLI lori wiwọ fun ọrọ igbaniwọle ati olupese akọkọ           |
+| `omniroute doctor`      | Ṣiṣe awọn sọwedowo ilera agbegbe lai bẹrẹ olupin naa                 |
+| `omniroute providers`   | Ṣawari, ṣe atokọ, fọwọsi, ati awọn olupese idanwo lati CLI           |
+| `omniroute config`      | CLI irinṣẹ iṣeto ni — akojọ, gba, ṣeto, sooto awọn atunto            |
+| `omniroute status`      | Aisinipo ipo dasibodu — ẹya, DB, irinṣẹ, konfigi                     |
+| `omniroute logs`        | Awọn igbasilẹ lilo ṣiṣanwọle lati API (ṣe atilẹyin `--follow`)       |
+| `omniroute update`      | Ṣayẹwo fun tabi lo awọn imudojuiwọn OmniRoute                        |
+| `omniroute provider`    | Ṣakoso awọn asopọ olupese — ṣafikun, atokọ, yọkuro, idanwo, aiyipada |
+| `omniroute --port 3000` | Ṣeto ibudo canonical/API si 3000                                     |
+| `omniroute --mcp`       | Bẹrẹ olupin MCP (irinna stdio)                                       |
+| `omniroute --no-open`   | Maṣe ṣii ẹrọ aṣawakiri laifọwọyi                                     |
+| `omniroute --help`      | Ṣe afihan iranlọwọ                                                   |
 
-A lè lo skripti ṣe ìṣètò aláìní ojú-ìwò pẹ̀lú àwọn àsìá tàbí àwọn oníyí àyíká:
+Eto ti ko ni ori le jẹ kikọ pẹlu awọn asia tabi awọn oniyipada ayika:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Ṣe àwọn àyẹ̀wò àṣìṣe agbègbè láì ṣí dashboard:
+Ṣiṣe awọn iwadii agbegbe laisi ṣiṣi dasibodu naa:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Ṣàkóso àwọn provider láti SSH tàbí àwọn skripti láì ṣí dashboard:
+Ṣakoso awọn olupese lati SSH tabi awọn iwe afọwọkọ laisi ṣiṣi dasibodu naa:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **koodu Claude :**
 
+koodu Claude so lori HTTP, eyiti `omniroute --mcp` (stdio) ko bẹrẹ. Gbigbe HTTP naa wa ni pipa nipasẹ aiyipada: mu ṣiṣẹ lori olupin nṣiṣẹ ni akọkọ. Nigbati iwọle dasibodu ba ṣiṣẹ, ibeere laisi iwe-ẹri gba `401`, nitorinaa gba bọtini API kan ti o di `mcp:connect` (tabi `manage`); bọtini laisi `manage`/`admin` tun nilo aaye irinṣẹ kọọkan (wo [MCP Server → MCP awọn aaye irinṣẹ](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -253,7 +259,7 @@ Tabi, nigbati `mcpTransport` jẹ `streamable-http` (ṣeto sori `/dashboard/mcp
 
 Bọtini naa rin irin-ajo bi `Authorization: Bearer <api-key>` (wo [MCP Server → Wiwọle jijin](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) fun awọn agbalejo latọna jijin; bọtini jijin nilo `mcp:connect` pẹlu awọn aaye read/write rẹ).
 
-**Iwe MCP ni kikun:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 irinṣẹ, IDE atunto, Python/TS/Go ibara. Itọkasi onišẹ fun awọn irinṣẹ CCR/dedup funmorawon (awọn ami ami, awọn ohun pataki, awọn iwọn fun-ọpa, pagination igbapada, awọn iwadii aisan): [Awọn ẹrọ titẹkuro → Awọn iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**Iwe MCP ni kikun:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 irinṣẹ, IDE atunto, Python/TS/Go ibara. Itọkasi onišẹ fun awọn irinṣẹ CCR/dedup funmorawon (awọn ami ami, awọn ohun pataki, awọn iwọn fun-ọpa, pagination igbapada, awọn iwadii aisan): [Awọn ẹrọ titẹkuro → Awọn ohun elo iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### Eto A2A (Ilana Aṣoju-si-Aṣoju)
 

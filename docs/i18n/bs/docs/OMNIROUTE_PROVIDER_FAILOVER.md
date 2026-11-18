@@ -4,10 +4,20 @@
 
 ---
 
-Neuspjesi se klasifikuju prije donošenja odluka o ponovnom pokušaju.
+Neuspjesi se klasificiraju prije donošenja odluka o ponovnom pokušaju.
 
-Prolazni neuspjesi kao što su vremenska ograničenja, mrežne greške, ograničenja stope i 5xx odgovori provajdera mogu preći na alternativu. Greške autentifikacije, greške dozvola, nevažeći zahtjevi, nedostupni modeli i nepoznati neuspjesi se ne pokušavaju ponovo naslijepo.
+Prolazni kvarovi kao što su vremenska ograničenja, mrežne greške, ograničenja brzine i odgovori provajdera 5xx mogu prestati. Iscrpljena kvota ili kredit (kvota 429 ili 402 Zahteva se plaćanje) se nikada ne pokušava ponovo kod istog provajdera, ali se ne prebacuje na drugog, čija je kvota odvojena. Greške u autentifikaciji, greške u dozvoli, nevažeći zahtjevi, nedostupni modeli i nepoznati kvarovi se ne pokušavaju naslijepo.
 
-Podrazumijevana politika za više provajdera dozvoljava do tri pokušaja provajdera, ponovo pokušava kod ograničenja stope i vremenskih ograničenja, te drži administrativnu onemogućenost odvojenom od privremenog stanja kola.
+Podrazumevana politika više provajdera dozvoljava do tri pokušaja provajdera, ograničenja stope ponovnih pokušaja i vremenska ograničenja, neuspešno prelazak na iscrpljenu kvotu i drži administrativno onemogućavanje odvojeno od privremenog stanja kola.
 
-Stanja kola su `closed`, `open` i `half_open`. Period hlađenja zakazuje ograničenu provjeru; uspješna provjera zatvara kolo, a neuspješna provjera ga ponovo otvara.
+## Gdje se primjenjuje
+
+- **Kombinacije** neuspjeh između svojih ciljeva prema vlastitoj strategiji i postavkama kombinacije.
+- **ID golog modela** (bez `provider/` prefiksa) koje opslužuje nekoliko aktivnih provajdera, bez kombinacije tog tačnog imena, prvo se šalje odabiru za zaključivanje provajdera. Ako taj pokušaj ne uspije na način na koji politika ne uspije, isti zahtjev se šalje sljedećem aktivnom provajderu koji poslužuje ID. Odgovor nosi `x-omniroute-fallback-attempts` sa brojem provajdera koji su pokušali prije onog koji je odgovorio.
+  - Svaki zamjenik je ovlašten točno kao da ga je zaključak odabrao. Cilj koji API ključ blokira ili ne priznaje se preskače bez upstream poziva, a klijent dobija stvarnu uzvodnu grešku, a ne odbijanje politike za cilj koji nikada nije imenovao.
+  - Nastavlja se samo neuspjeli odgovor: ništa ne uspijeva nakon prvog prenesenog bajta.
+  - Hitna zamjenska zamjena modela primjenjuje se samo nakon što svaki dobavljač traženog modela nije uspio.
+  - Zahtjev zakačen na vezu (`x-omniroute-connection`) ostaje na njoj.
+  - Id sa prefiksom (`provider/model`) se nikada ne preusmjerava na drugog provajdera.
+
+Stanja kola su `closed`, `open` i `half_open`. Hlađenje zakazuje ograničenu sondu; uspješna sonda zatvara krug, a neuspješna sonda ga ponovo otvara.

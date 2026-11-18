@@ -24,19 +24,21 @@ Lakini wateja wa kawaida (Cursor, Cline, Roo Code, OpenAI SDK) huondoa `reasonin
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Kunasa hufanyika katika `open-sse/handlers/chatCore.ts` (tovuti mbili, kwenye tovuti mbili za simu `cacheReasoningFromAssistantMessage` ). Kucheza tena hufanyika `open-sse/translator/index.ts` baada ya kulazimishwa kwa schema lakini kabla ya kutumwa.
+
+Maingizo ya simu ya zana huhifadhiwa chini ya `buildToolCallCacheKey()`, muhtasari wa upeo wa ombi na kitambulisho cha simu ya zana, kwa hivyo kitambulisho sawa kinachotumiwa na kitufe kingine API au kipindi hakichagui ingizo. Wigo unatoka `buildReasoningCacheScope()`: kitambulisho cha API, pamoja na kitufe cha kikao wakati ombi lina moja. Kwa hivyo safu wima `tool_call_id` na dashibodi huonyesha muhtasari huu kwa maingizo hayo.
 
 Zamu za usaidizi wa kawaida (zisizo za simu) huwekwa vifunguo tofauti: `buildAssistantMessageCacheKey()` huchanganua upeo wa kipindi pamoja na manukuu ya umbizo la OpenAI iliyorekebishwa hadi zamu hiyo, kwa sababu DeepSeek inahitaji hoja ya _kila_ zamu ya awali mara `tools` inapopatikana. Kwa malengo ya Responses-API (kwa mfano `opencode-go/deepseek-v4-flash`, iliyoelekezwa kwa `/responses`) sehemu ya juu ya mkondo hubeba `input`, si `messages`, kwa hivyo `translateRequest()` (`open-sse/translator/index.ts`) huripoti nakala ya egemeo iliyochakachuliwa kupitia chaguo la kurudisha nyuma na tovuti za kunasa huchanganua nakala hiyo hiyo. Pasi ya uchezaji wa marudio ya Majibu inaendeshwa kwenye egemeo la OpenAI kwa kila umbizo la chanzo, kwa hivyo wateja wa Anthropic Messages (Claude → OpenAI → Majibu) huchezwa tena.
 

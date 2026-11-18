@@ -29,7 +29,7 @@ const head12 = (sha) => sha.slice(0, 12);
 const nums = (prs) => prs.map((p) => p.n);
 
 /**
- * Scenarios 1–9 and 11–14 are independent worlds (own sandbox, own fake server): they run
+ * Scenarios 1–9 and 11–16 are independent worlds (own sandbox, own fake server): they run
  * concurrently.
  * Scenario 10 mutates process.env for main() and runs alone, after them.
  */
@@ -277,6 +277,99 @@ scenario(
 );
 
 scenario(
+  "scenario 2e (live): blessed, then the base moves before the landing push: the push is refused, the status withdrawn, the batch recomposed",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    const heads = await approvedPrs(w, [1]);
+    await w.tick();
+    const f = w.state().inFlight;
+    w.runCi(f.candidateSha, f.candidateRef);
+    // A manual merge lands between the landing's own tip read and its push.
+    let moved = null;
+    w.beforeBasePush = () => {
+      moved = w.sb.advanceBase({ "manual.txt": "merged by hand\n" }, "manual merge");
+    };
+
+    await w.tick();
+    let state = w.state();
+    assert.ok(moved, "the base moved right before the push");
+    assert.equal(w.baseTip(), moved, "the push was refused: the base is the manual merge");
+    assert.ok(!w.isAncestor(f.candidateSha, w.baseTip()), "the candidate did not land");
+    assert.deepEqual(landStatuses(w, f.candidateSha), [
+      ["failure", BOT_LOGIN, `omni-queue ${f.batchId}: landing withdrawn (base-moved)`],
+      ["success", BOT_LOGIN, `omni-queue ${f.batchId}: checks green`],
+    ]);
+    assert.equal(w.events("land-blessed").length, 1);
+    assert.equal(w.events("landed").length, 0);
+    const rejected = w.events("land-rejected");
+    assert.equal(rejected.length, 1);
+    assert.match(rejected[0].detail, /^base moved: .*stale info.*; recomposing$/);
+    assert.equal(state.paused, null);
+    assert.equal(state.inFlight.baseSha, moved, "recomposed on the moved tip");
+    assert.equal(state.inFlight.stage, "testing");
+    assert.notEqual(state.inFlight.candidateSha, f.candidateSha);
+    assert.deepEqual(nums(state.inFlight.prs), [1]);
+    assert.ok(w.isAncestor(moved, state.inFlight.candidateSha));
+    assert.equal("landWithdrawals" in state, false);
+
+    await drain(w);
+    state = w.state();
+    assert.equal(w.events("landed").length, 1);
+    assert.ok(w.isAncestor(heads[1], w.baseTip()), "#1 landed on the moved base");
+    assert.ok(w.isAncestor(moved, w.baseTip()));
+    assert.notEqual(w.baseTip(), base0);
+    assert.deepEqual(landStatuses(w, f.candidateSha)[0][0], "failure", "still withdrawn");
+  }
+);
+
+scenario(
+  "scenario 2f (live): a planted candidate with the same parents and another tree is refused by the real composition check",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    const heads = await approvedPrs(w, [1]);
+    await w.tick();
+    const state = w.state();
+    const f = state.inFlight;
+    const parents = w.sb.origin(["log", "-1", "--format=%P", f.candidateSha]).stdout.split(" ");
+    assert.deepEqual(parents, [base0, heads[1]], "one PR: the candidate is its merge commit");
+    // The same parents and the same message (trailers included) on the bare base's tree: the
+    // merge commit a state edit could plant to land a tree nobody tested.
+    const message = w.sb.origin(["log", "-1", "--format=%B", f.candidateSha]).stdout;
+    const planted = w.sb.origin(
+      ["commit-tree", `${base0}^{tree}`, "-p", base0, "-p", heads[1], "-F", "-"],
+      { input: `${message}\n` }
+    ).stdout;
+    assert.notEqual(planted, f.candidateSha);
+    const ref = candidateRef(QBASE, f.batchId, planted);
+    w.sb.origin(["update-ref", `refs/heads/${ref}`, planted]);
+    state.inFlight = { ...f, candidateSha: planted, candidateRef: ref };
+    w.fake.commitFiles({
+      branch: STATE_BRANCH,
+      files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+      message: "planted",
+    });
+    w.runCi(planted, ref); // its CI is green: a planted tree controls its own checks
+
+    await w.tick();
+    const after = w.state();
+    assert.deepEqual(landStatuses(w, planted), [], "no land status on the planted commit");
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "nor on the composed one");
+    assert.equal(w.baseTip(), base0, "nothing landed");
+    assert.equal(w.events("land-blessed").length, 0);
+    assert.equal(after.inFlight, null);
+    assert.equal(after.paused?.reason, "error");
+    assert.match(after.paused.detail, /does not match its candidate/);
+    assert.ok(
+      after.paused.detail.includes(`merge commit ${head12(planted)} of #1: tree `),
+      after.paused.detail
+    );
+    assert.match(after.paused.detail, /recomposing gives [0-9a-f]{12}/);
+  }
+);
+
+scenario(
   "scenario 2b: a pull request opened on the candidate SHA never decides the candidate's verdict",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
@@ -324,6 +417,83 @@ scenario(
     assert.equal(w.state().paused, null);
   }
 );
+
+/**
+ * A commit status on `sha` written by `creator` (any App or user with statuses:write), listed
+ * newest first the way the fake's POST /statuses/:sha records one.
+ */
+function postStatus(w, sha, { context, state, creator }) {
+  const at = w.fake.now();
+  const status = {
+    id: Date.parse(at) + (w.fake.statuses.get(sha)?.length ?? 0),
+    state,
+    context,
+    description: `${context}: ${state}`,
+    target_url: null,
+    creator: { login: creator, type: /\[bot\]$/.test(creator) ? "Bot" : "User" },
+    created_at: at,
+    updated_at: at,
+  };
+  if (!w.fake.statuses.has(sha)) w.fake.statuses.set(sha, []);
+  w.fake.statuses.get(sha).unshift(status);
+}
+
+scenario("a status an App posts on the candidate SHA never decides its verdict", async (t) => {
+  const w = await createQueueWorld(t, { mode: "live" });
+  w.seedGreenBase(); // the tip the queue landed: no base check needed
+  // #2 is opened now (on the base tip the sandbox knows) and approved after #1 has landed.
+  w.openPr(2, { "pr-2.txt": "change 2\n" });
+
+  // A green candidate with failing and pending statuses on its SHA: it lands.
+  await approvedPrs(w, [1]);
+  await w.tick();
+  const green = w.state().inFlight;
+  postStatus(w, green.candidateSha, {
+    context: "ci/external",
+    state: "failure",
+    creator: "external-ci[bot]",
+  });
+  postStatus(w, green.candidateSha, {
+    context: "security/scan",
+    state: "error",
+    creator: "external-ci[bot]",
+  });
+  postStatus(w, green.candidateSha, {
+    context: "ci/slow",
+    state: "pending",
+    creator: BOT_LOGIN, // the queue's own App, under a context that is not omni-queue/
+  });
+  w.runCi(green.candidateSha, green.candidateRef);
+  await w.tick();
+  assert.equal(w.baseTip(), green.candidateSha, "the candidate's own green runs landed it");
+  assert.equal(w.events("checks-red").length, 0);
+  assert.equal(w.events("checks-green").length, 1);
+
+  // A candidate whose required checks exist only as success statuses: never green.
+  assert.equal((await w.label(2)).action, "approved");
+  w.clock.advance(w.config.batch.maxWaitMinutes);
+  await w.tick();
+  const forged = w.state().inFlight;
+  assert.deepEqual(nums(forged.prs), [2]);
+  for (const name of w.config.requiredChecks) {
+    postStatus(w, forged.candidateSha, { context: name, state: "success", creator: "forger[bot]" });
+  }
+  postStatus(w, forged.candidateSha, {
+    context: w.config.requiredChecks[0],
+    state: "success",
+    creator: BOT_LOGIN,
+  });
+  w.clock.advance(5);
+  await w.tick();
+  assert.equal(w.baseTip(), green.candidateSha, "statuses alone landed nothing");
+  assert.equal(w.state().inFlight?.candidateSha, forged.candidateSha, "still waiting for its CI");
+  assert.equal(w.events("checks-green").length, 1);
+  w.runCi(forged.candidateSha, forged.candidateRef);
+  await w.tick();
+  assert.equal(w.baseTip(), forged.candidateSha, "its own green runs land it");
+  assert.equal(w.events("checks-red").length, 0);
+  assert.equal(w.state().paused, null);
+});
 
 scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
@@ -734,6 +904,135 @@ scenario("scenario 8: a protected surface without protected-approved does not en
 });
 
 scenario(
+  "scenario 8c: a PR whose own gates are not green waits, label kept, no comment",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    assert.deepEqual(w.config.prChecksRequired, [
+      "Gate / CI",
+      "Gate / Quality",
+      "API Route Typecheck", // reported green by reportPrGates unless a scenario says otherwise
+    ]);
+    for (const n of [1, 2, 3]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2: a later Gate / CI run in another suite fails (the earlier green one cannot hide it);
+    // #3: Gate / Quality is still running.
+    w.reportPrGates(2, { conclusions: { "Gate / CI": "failure", "Gate / Quality": "success" } });
+    w.reportPrGates(3, { conclusions: { "Gate / CI": "success", "Gate / Quality": null } });
+    for (const n of [1, 2, 3]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    const from = w.fake.requests.length;
+    await w.tick();
+
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [1], "only the PR with both gates green is composed");
+    const onPrs = writesIn(w.fake.requests.slice(from)).filter((r) =>
+      /^\/(issues|pulls)\/[23](\/|$)/.test(r.path)
+    );
+    assert.deepEqual(onPrs, [], "no label removal and no comment on the waiting PRs");
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+    assert.deepEqual(w.labelsOf(3), ["omni-queue"]);
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ Quality pending \|/);
+    assert.match(dashboard.body, /batch window 6 \(max 12\)/);
+  }
+);
+
+scenario(
+  "scenario 8d: a newer green run of the gate's workflow on the same head lets the PR in",
+  async (t) => {
+    const CI_WORKFLOW = 234399967; // ci.yml
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2 is retargeted: ci.yml runs again on the same head (cancel-in-progress), and the
+    // cancelled run's `if: always()` gate concludes failure in that run's own check suite.
+    const cancelled = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "failure",
+      workflowId: CI_WORKFLOW,
+    });
+    const rerun = w.reportPrGateRun(2, "Gate / CI", { conclusion: null, workflowId: CI_WORKFLOW });
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the newest ci.yml run is still running");
+    let dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI pending \|/);
+
+    // The newer run of the same workflow concludes green: the superseded failure no longer counts.
+    const job = w.fake.checkRuns
+      .get(w.headOf(2))
+      .find((c) => c.check_suite.id === rerun.check_suite_id);
+    Object.assign(job, { status: "completed", conclusion: "success", completed_at: w.clock.now() });
+    Object.assign(rerun, { status: "completed", conclusion: "success" });
+    assert.ok(rerun.id > cancelled.id);
+    const first = w.state().inFlight;
+    w.runCi(first.candidateSha, first.candidateRef);
+    const from = w.fake.requests.length;
+    await w.tick(); // #1 lands; #2 is composed into the next batch
+    assert.equal(w.events("landed").length, 1);
+    assert.deepEqual(nums(w.state().inFlight.prs), [2]);
+    dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.doesNotMatch(dashboard.body, /pr-checks-not-green/);
+    // The head's workflow runs were listed once (its gate was ambiguous); #1's never (the
+    // candidate's own push runs are listed with their branch, as before).
+    const heads = [w.headOf(1), w.headOf(2)];
+    const listings = w.fake.requests
+      .slice(from)
+      .filter(
+        (r) => r.method === "GET" && r.path === "/actions/runs" && heads.includes(r.query?.head_sha)
+      );
+    assert.deepEqual(
+      listings.map((r) => r.query.head_sha),
+      [w.headOf(2)]
+    );
+  }
+);
+
+scenario(
+  "scenario 8e: a green job of the same name in another workflow keeps a red gate red",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    w.reportPrGateRun(2, "Gate / CI", { conclusion: "failure", workflowId: 234399967 });
+    w.reportPrGateRun(2, "Gate / CI", { conclusion: "success", workflowId: 297155324 });
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the PR with the red gate stays out");
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+  }
+);
+
+scenario(
+  "scenario 8f: a green workflow_dispatch run of ci.yml does not supersede the red pull_request run",
+  async (t) => {
+    const CI_WORKFLOW = 234399967; // ci.yml
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2's PR run of ci.yml is red; a maintainer dispatches ci.yml at the same SHA (a
+    // full-profile E2E) and it is green: another concurrency group, it supersedes nothing.
+    const prRun = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "failure",
+      workflowId: CI_WORKFLOW,
+    });
+    const dispatch = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "success",
+      workflowId: CI_WORKFLOW,
+      event: "workflow_dispatch",
+    });
+    assert.ok(dispatch.id > prRun.id);
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the PR with the red PR run stays out");
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+  }
+);
+
+scenario(
   "scenario 8b: a PR whose file list GitHub truncates needs protected-approved",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
@@ -1105,6 +1404,9 @@ scenario(
     assert.equal(state.inFlight.batchId, `basecheck-${head12(base0)}-r1`);
     assert.match(state.inFlight.candidateRef, baseCheckRefRe(base0, "-r1"));
     assert.equal(state.paused, null);
+    // The retry's ref was pushed by this tick: its runs count from this tick's clock.
+    const retryStartedAt = w.clock.now();
+    assert.equal(state.inFlight.startedAt, retryStartedAt);
 
     w.clock.advance(NO_RUN_TIMEOUT_MINUTES + 1); // nor on its retry
     await w.tick();
@@ -1113,7 +1415,7 @@ scenario(
       baseSha: base0,
       ref: baseCheckRef(QBASE, base0, 1),
       status: "timeout",
-      startedAt: state.baseChecks[0].startedAt,
+      startedAt: retryStartedAt, // the verdict is the retry's: it starts when the retry was pushed
       signatures: [],
     });
     assert.equal(state.paused, null, "no pause on a base check without a result");
@@ -1156,6 +1458,124 @@ scenario(
     assert.ok(!w.isAncestor(heads[2], w.baseTip()));
     assert.equal(state.paused, null);
     assert.deepEqual(w.candidateRefs(), []);
+  }
+);
+
+scenario(
+  "scenario 15: a flaky red batch: its failed jobs are re-run once, green, and it lands",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live", config: { flakyReruns: 1 } });
+    const heads = await approvedPrs(w, [1, 2]);
+    w.seedGreenBase(); // a red batch on it is PR-red: bisection would follow
+    await w.tick(); // compose b1 [1, 2]
+    const f = w.state().inFlight;
+    w.runCi(f.candidateSha, f.candidateRef, { red: true }); // a flaky failure: no culprit
+    const { requests } = await w.tick();
+    const run = w.fake.workflowRuns.find(
+      (r) => r.event === "push" && r.head_branch === f.candidateRef && r.head_sha === f.candidateSha
+    );
+    assert.deepEqual(
+      writesIn(requests)
+        .filter((r) => r.path.startsWith("/actions/"))
+        .map((r) => [r.method, r.path]),
+      [["POST", `/actions/runs/${run.id}/rerun-failed-jobs`]]
+    );
+    assert.deepEqual(w.fake.reruns, [run.id]);
+    assert.deepEqual(
+      w.events("flaky-rerun").map((e) => e.detail),
+      ["re-running the failed jobs of b1 once (Gate / CI) before bisecting"]
+    );
+    let state = w.state();
+    assert.equal(state.inFlight.rerun.ref, f.candidateRef);
+    assert.deepEqual(state.inFlight.rerun.runIds, [run.id]);
+    assert.equal(state.counters.bisections, 0);
+
+    await w.tick(); // the re-run has not reported: the old failure is not read as its verdict
+    state = w.state();
+    assert.equal(state.counters.bisections, 0);
+    assert.equal(w.events("checks-red").length, 1);
+    assert.deepEqual(w.fake.reruns, [run.id], "not re-run twice");
+
+    w.reportRerun(f.candidateSha, { pass: true });
+    await w.tick();
+    state = w.state();
+    assert.deepEqual(
+      w.events("checks-green").map((e) => e.detail),
+      ["green after re-running Gate / CI (flaky)"]
+    );
+    assert.deepEqual(
+      w.events("landed").map((e) => e.batchId),
+      ["b1"]
+    );
+    assert.ok(w.isAncestor(heads[1], w.baseTip()));
+    assert.ok(w.isAncestor(heads[2], w.baseTip()), "the PR the first run blamed lands too");
+    assert.deepEqual(w.events("culprit-found"), []);
+    assert.equal(state.inFlight, null);
+    assert.deepEqual(w.fake.reruns, [run.id], "one re-run in all");
+  }
+);
+
+scenario(
+  "scenario 16: red while its run is in progress: waits, re-runs once the run concludes, red again, the culprit is dequeued",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live", config: { flakyReruns: 1 } });
+    const heads = await approvedPrs(w, [1]);
+    w.culprits.add(1);
+    w.seedGreenBase(); // a red batch of one on it is PR-red: its PR is the culprit
+    await w.tick(); // compose b1 [1]
+    const f = w.state().inFlight;
+    // the first job fails while the others still run: the push run is in progress
+    w.runCi(f.candidateSha, f.candidateRef, { runStatus: "in_progress" });
+    const run = w.fake.workflowRuns.find(
+      (r) => r.event === "push" && r.head_branch === f.candidateRef && r.head_sha === f.candidateSha
+    );
+    assert.deepEqual([run.status, run.conclusion], ["in_progress", null]);
+    let { requests } = await w.tick();
+    assert.deepEqual(eventTypes(w), ["batch-started"], "red, but no checks-red yet: it waits");
+    assert.deepEqual(w.fake.reruns, []);
+    assert.deepEqual(
+      writesIn(requests).filter((r) => r.path.startsWith("/actions/")),
+      [],
+      "no re-run asked while the run is in progress"
+    );
+
+    w.concludeRuns(f.candidateSha);
+    ({ requests } = await w.tick());
+    assert.deepEqual(
+      writesIn(requests)
+        .filter((r) => r.path.startsWith("/actions/"))
+        .map((r) => [r.method, r.path]),
+      [["POST", `/actions/runs/${run.id}/rerun-failed-jobs`]]
+    );
+    assert.deepEqual(
+      w.events("flaky-rerun").map((e) => e.detail),
+      ["re-running the failed jobs of b1 once (Gate / CI) before dequeuing #1"]
+    );
+
+    w.startRerun(f.candidateSha);
+    w.clock.advance(40); // attempt 2 runs past the 30-minute guard: still waited for
+    await w.tick();
+    assert.deepEqual(eventTypes(w), ["batch-started", "checks-red", "flaky-rerun"]);
+
+    w.reportRerun(f.candidateSha, { pass: false });
+    await w.tick();
+    const state = w.state();
+    assert.deepEqual(eventTypes(w), [
+      "batch-started",
+      "checks-red",
+      "flaky-rerun",
+      "checks-red",
+      "culprit-found",
+    ]);
+    assert.deepEqual(
+      w.events("culprit-found").map((e) => e.prs),
+      [[1]]
+    );
+    assert.deepEqual(w.labelsOf(1), []);
+    assert.equal(w.commentsWithKey(1, `culprit:${head12(heads[1])}`).length, 1);
+    assert.deepEqual(w.fake.reruns, [run.id], "exactly one re-run");
+    assert.equal(state.inFlight, null);
+    assert.equal(state.counters.redBatches, 1);
   }
 );
 

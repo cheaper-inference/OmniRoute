@@ -24,19 +24,21 @@ Ali tipični klijenti (Cursor, Cline, Roo Code, OpenAI SDK) uklanjaju `reasoning
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-Hvatanje se događa u `open-sse/handlers/chatCore.ts` (dva mjesta, na dva `cacheReasoningFromAssistantMessage` mjesta poziva). Reprodukcija se događa u `open-sse/translator/index.ts` nakon prisile sheme, ali prije slanja.
+Hvatanje se događa u `open-sse/handlers/chatCore.ts` (dva mjesta, na dva `cacheReasoningFromAssistantMessage` mjesta poziva). Reprodukcija se događa u `open-sse/translator/index.ts` nakon prisiljavanja sheme, ali prije slanja.
+
+Unosi poziva alata pohranjeni su pod `buildToolCallCacheKey()`, pregledom opsega zahtjeva i ID-a poziva alata, tako da isti ID koji koristi drugi API ključ ili sesija ne odabire unos. Opseg dolazi od `buildReasoningCacheScope()`: API ID ključa, plus ključ sesije kada ga zahtjev ima. Stupac `tool_call_id` i nadzorna ploča stoga prikazuju ovaj sažetak za te unose.
 
 Obični (ne-poziv alata) zaokreti pomoćnika imaju drugačije ključeve: `buildAssistantMessageCacheKey()` probavlja opseg sesije plus normalizirani transkript OpenAI-formata do tog zaokreta, jer DeepSeek zahtijeva obrazloženje _svakog_ prethodnog zaokreta nakon što je `tools` prisutan. Za Responses-API ciljeve (na primjer `opencode-go/deepseek-v4-flash`, usmjeren na `/responses`) uzvodno tijelo nosi `input`, a ne `messages`, tako da `translateRequest()` (`open-sse/translator/index.ts`) izvješćuje o zaokretnom transkriptu koji je probavio putem opcije povratnog poziva, a web-mjesta za snimanje probavljaju taj isti transkript. Prolaz ponavljanja odgovora pokreće se na OpenAI stožeru za svaki izvorni format, tako da se ponovno reproduciraju i klijenti Anthropic poruka (Claude → OpenAI → odgovori).
 

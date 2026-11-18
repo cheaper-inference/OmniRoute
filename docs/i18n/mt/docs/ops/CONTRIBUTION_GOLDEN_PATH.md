@@ -29,70 +29,61 @@ ta’ bidla mal-kuntratti tiegħu, mal-kontrolli mmirati, u mal-kopertura tas-CI
 6. **Irreġistra l-evidenza.** Fit-template tal-PR, elenka l-kmandi mħaddma, kull fajl tat-test miżjud jew mibdul,
    il-migrazzjonijiet jew il-feature flags, u kwalunkwe validazzjoni li għadha pendenti u ssir biss fis-CI.
 
-## Mogħdijiet rakkomandati skont it-tip ta’ bidla
+## Mogħdijiet tad-deheb skond it-tip ta 'bidla
 
-Il-kmandi ta’ hawn taħt huma kontrolli mmirati minimi, mhux permess biex taqbeż test li jkopri direttament l-
-imġiba li bdilt.
+Kmandi hawn taħt huma kontrolli minimi ffukati, mhux permess biex taqbeż test li jkopri direttament l-imġieba li bdejt.
 
-### Provider
+### Fornitur
 
 **Kuntratti**
 
-- Id-definizzjoni tal-provider f’`src/shared/constants/providers/` u l-kompożizzjoni tagħha f’
-  `src/shared/constants/providers.ts`.
-- Il-mudelli u l-kapaċitajiet f’`open-sse/config/providerRegistry.ts` jew fil-fajls tar-reġistru estratti minnu.
-- L-għażla tal-executor/translator, il-konfigurazzjoni tal-OAuth jew tal-API key, l-assets tad-dashboard, u r-referenza
-  tal-provider iġġenerata fejn applikabbli.
-- Il-kredenzjali pubbliċi jridu jużaw `resolvePublicCred()`; it-tweġibiet ta’ żball iridu jużaw il-helpers kondiviżi
-  għas-sanitizzazzjoni tal-iżbalji. Ara `docs/security/PUBLIC_CREDS.md` (git; mhux ikkompilat f’`/docs`) u
-  [Sanitizzazzjoni tal-Iżbalji](../security/ERROR_SANITIZATION.md).
+- Definizzjoni tal-fornitur fiz `src/shared/constants/providers/` u l-komposizzjoni tieghu fiz `src/shared/constants/providers.ts`.
+- Mudelli u kapaċitajiet `open-sse/config/providerRegistry.ts` jew il-fajls tar-reġistru estratti tiegħu.
+- għażla Executor/translator, konfigurazzjoni OAuth jew API-key u assi dashboard. Tikkommettix id-dijagrammi `docs/reference/PROVIDER_REFERENCE.md` jew README riġenerati: l-aġġornament tar-rilaxx jerġa' jiktebhom (`check:pr-derived-paths` jonqos karatteristika PR li ġġorrhom).
+- Il-kredenzjali pubbliċi għandhom jużaw `resolvePublicCred()`; tweġibiet ta 'żball għandhom jużaw il-helpers ta' żball kondiviż sanitizzati. Ara `docs/security/PUBLIC_CREDS.md` (git; mhux miġbura `/docs`) u [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Ċiklu mmirat**
+**Loop iffukat**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # meta jinbidel il-katalgu; ikkommetti d-diff iġġenerat
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Ittestja wkoll kull familja ta’ requests affettwata: chat, Responses, images, embeddings, audio, jew video.
-Irrevedi d-diffs tal-katalgu ġġenerat u dawk golden bħala bidliet fil-kuntratt; taċċettahomx bl-addoċċ.
+Ittestja wkoll kull familja ta 'talba affettwata: chat, Risposti, stampi, inkorporazzjonijiet, awdjo, jew vidjo. Irrevedi l-katalgu ġġenerat u d-differenzi tad-deheb hekk kif jinbidel il-kuntratt; taċċettahomx bl-addoċċ.
 
-### Routing
+### Rotot
 
 **Kuntratti**
 
-- Il-valuri pubbliċi tal-istrateġiji u l-metadata tal-UI f’`src/shared/constants/routingStrategies.ts`.
-- Id-dispatch u l-ordni taħt `open-sse/services/combo.ts` u `open-sse/services/combo/`.
-- L-iskemi tal-combo, il-persistenza, l-istat tar-reżiljenza, il-kapaċitajiet tal-mudelli, u l-kontrolli tal-API/UI.
-- [Magna Auto-Combo](../routing/AUTO-COMBO.md) u d-dokumentazzjoni dwar ir-reżiljenza meta tinbidel l-imġiba.
+- Valuri tal-istrateġija pubblika u metadata UI `src/shared/constants/routingStrategies.ts`.
+- Dispatch u ordni taht `open-sse/services/combo.ts` u `open-sse/services/combo/`.
+- Skemi kombinati, persistenza, stat ta 'reżiljenza, kapaċitajiet tal-mudell, u kontrolli API/UI.
+- [Magna Auto-Combo](../routing/AUTO-COMBO.md) u dokumentazzjoni tar-reżiljenza meta l-imġieba tinbidel.
 
-**Ċiklu mmirat**
+**Loop iffukat**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # bidliet fl-istrateġija jew fid-dispatch
-npm run check:known-symbols      # bidliet fir-reġistrazzjoni tal-istrateġija
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Uża lokalment testijiet deterministiċi b’upstream simulat. Smoke tests live tal-combo jeħtieġu kredenzjali u huma
-manwali, mhux sostituti għas-CI.
+Uża testijiet deterministiċi mocked-upstream lokalment. It-tipjip live combo jehtieg kredenzjali u huma manwali, mhux sostituti CI.
 
 ### UI / UX
 
 **Kuntratti**
 
-- Ir-route/page ta’ Next.js u l-konfini tal-komponenti kondiviżi taħt `src/app/` u
-  `src/shared/components/`.
-- Il-forom tat-tweġibiet tal-API, l-istati ta’ loading/vojt/żball, l-imġiba tat-tastiera u tal-screen reader,
-  il-layout responsiv, it-theming, u l-espansjoni tal-locale.
-- Is-strings sors tal-UI bl-Ingliż f’`src/i18n/messages/en.json`; tagħmilx hard-coding ta’ copy ġdid għall-utent.
+- Next.js route/page u konfini tal-komponenti kondiviżi taħt `src/app/` u `src/shared/components/`.
+- forom ta 'rispons API, stati loading/empty/error, imġieba tat-tastiera u tal-qarrejja tal-iskrin, tqassim li jirrispondu, tema, u espansjoni tal-lokal.
+- Ingliż UI source strings in `src/i18n/messages/en.json`; ma hard-code kopja ġdida li tiffaċċja l-utent.
 
-**Ċiklu mmirat**
+**Loop iffukat**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Ħaddem l-app għal bidliet fl-interazzjoni jew viżwali u ċċekkja kemm viewports dojoq kif ukoll wesgħin. Is-CI tħaddem il-
-build tal-produzzjoni u suites usa’; l-imġiba viżwali xorta teħtieġ komponent immirat, Playwright,
-jew kontroll manwali dokumentat adattat għall-bidla.
+Mexxi l-app għall-interazzjoni jew bidliet viżwali u iċċekkja kemm viewports dojoq kif ukoll wesgħin. CI tmexxi l-produzzjoni tal-bini u suites usa’; l-imġieba viżwali għadha teħtieġ komponent iffukat, Playwright, jew kontroll manwali dokumentat xieraq għall-bidla.
 
 ### i18n
 
 **Kuntratti**
 
-- `src/i18n/messages/en.json` huwa s-sors tal-UI; `config/i18n.json` huwa s-sors tal-locale.
-- Il-katalgi tas-CLI jinsabu separatament taħt `bin/cli/locales/`.
-- Żomm il-placeholders u t-tags tal-ICU eżattament kif inhuma. Tittraduċix ismijiet ta’ prodotti/providers/mudelli,
-  ismijiet ta’ protokolli u headers, kmandi, identifikaturi ta’ code/JSON, URLs, varjabbli tal-ambjent, jew
-  termini protetti bħal `OmniRoute`, `OAuth`, `MCP`, u `A2A`. Il-lista sors attwali tinsab f’
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` huwa s-sors UI ; `config/i18n.json` huwa s-sors lokali.
+- katalgi CLI jgħixu separatament taħt `bin/cli/locales/`.
+- Ippreserva ICU placeholders u tags eżattament. Tittraduċix ismijiet product/provider/model, ismijiet ta' protokoll u header, kmandi, identifikaturi code/JSON, URLs, varjabbli ambjentali, jew termini protetti bħal `OmniRoute`, `OAuth`, `MCP`, u `A2A`. Il-lista tas-sors kurrenti hija `scripts/i18n/glossary/protected-terms.json`.
 
-**Ċiklu mmirat**
+Karatteristika PR teditja biss `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); il-lokalijiet l-oħra jitlestew darba għal kull rilaxx mill-aġġornament tar-rilaxx jew mewġa ta 'traduzzjoni (`docs/guides/I18N.md` → "Feature PRs touch `en.json` biss"). `npm run check:pr-derived-paths` jonqos karatteristika PR li teditja katalgu lokali ieħor.
+
+**Loop iffukat**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # meta jinbidlu strings/katalgi tas-CLI
 npm run lint
 ```
 
-Din hija gwida għas-sistema eżistenti, mhux stedina biex tespandi l-għodod jew il-mudell tal-keys tagħha.
-Żomm il-patches tal-i18n limitati u preċiżi waqt li tkun qed titfassal is-sistema sostituttiva. Tħaddimx kmandi tat-traduzzjoni
-li jsejħu servizzi esterni sakemm il-kompitu ma jkunx jeħtieġ b’mod espliċitu traduzzjonijiet iġġenerati u
-tkun irrevedejt id-diff li jirriżulta.
+Mingħajr `--mode=pr` dawn il-gradi jimxu fil-modalità ta’ rilaxx lokalment u jirrappurtaw kull ċavetta ċ-ċiklu miżjud jew miktub mill-ġdid `en.json`; dak huwa x-xogħol tal-aġġornament tar-rilaxx, mhux PR tiegħek.
+
+Din hija gwida għas-sistema eżistenti, mhux stedina biex tespandi l-għodda jew il-mudell ewlieni tagħha. Żomm irqajja i18n kirurġiċi waqt li s-sistema ta' sostituzzjoni tkun qed tiġi ddisinjata. Tħaddimx kmandi tat-traduzzjoni li jsejħu servizzi esterni sakemm il-kompitu ma jirrikjedix b'mod espliċitu traduzzjonijiet iġġenerati u tkun irrevedjajt id-differenza li tirriżulta.
 
 ### CLI
 
 **Kuntratti**
 
-- Kmandi u flags pubbliċi f’`bin/cli/`, kmandi API ġġenerati, kodiċijiet tal-ħruġ, stdout/stderr u
-  strutturi tal-output JSON, l-imġiba tal-konfigurazzjoni/ambjent, u fajls inklużi fil-pakkett.
-- Strings tas-CLI li jarahom l-utent iridu jużaw is-saff i18n tas-CLI u jżommu l-katalgi `en`/`pt-BR` allinjati.
-- Żomm Node bħala l-ambjent ta’ eżekuzzjoni appoġġjat u ppreserva l-kuntratt tal-binarju ppubblikat.
+- Kmandi pubbliċi u bnadar `bin/cli/`, kmandi API iġġenerati, kodiċi tal-ħruġ, forom ta 'output stdout/stderr u JSON, imġieba config/environment, u fajls ippakkjati.
+- Kordi CLI li jħarsu lejn l-utent għandhom jużaw is-saff CLI i18n (ċwievet `t()` li jeżistu `bin/cli/locales/en.json`). Karatteristika PR teditja biss `en.json`; `pt-BR` u l-lokalijiet l-oħra jitlestew mar-rilaxx.
+- Ippreserva Node bħala l-runtime appoġġjat u l-kuntratt binarju ppubblikat.
 
-**Ċiklu ffukat**
+**Loop iffukat**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # bidliet fis-CLI ġġenerat/ippakkjat
-npm run check:pack-policy     # bidliet fl-interfaċċa tal-pakkett
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Uża l-kmand eżatt f’direttorju temporanju tad-data meta l-imġiba tiddependi mill-parsing, mill-fajls, jew mill-istatus
-tal-ħruġ. CI jwettaq il-verifiki usa’ tal-artefatt tal-pakkett u tal-ekosistema.
+Uża l-kmand eżatt f'direttorju tad-dejta temporanju meta l-imġieba tiddependi fuq parsing, fajls, jew status ta 'ħruġ. CI twettaq il-kontrolli tal-artifact u l-ekosistema tal-pakkett usa'.
 
-### Bażi tad-data
+### Database
 
 **Kuntratti**
 
-- Moduli tad-dominju taħt `src/lib/db/`; importa moduli speċifiċi direttament (is-saff l-antik ta’ esportazzjoni mill-ġdid `localDb.ts` tneħħa).
-- Migrazzjonijiet SQL innumerati u idempotenti taħt `src/lib/db/migrations/`, sikurezza tat-tranżazzjonijiet, imġiba
-  tal-aġġornament, indiċijiet, u kull min isejjaħ u huwa affettwat mill-iskema.
-- Ir-rotot u l-handlers qatt ma joħorġu SQL mhux ipproċessat direttament.
+- Domain modules under `src/lib/db/`; jimporta moduli speċifiċi direttament (is-saff antik ta 'esportazzjoni mill-ġdid `localDb.ts` tneħħa).
+- Migrazzjonijiet SQL numerati, idempotenti taħt `src/lib/db/migrations/`, sigurtà tat-tranżazzjonijiet, imġieba ta 'aġġornament, indiċi, u kull min iċempel affettwat mill-iskema.
+- Routes and handlers qatt ma joħorġu SQL mhux maħdum direttament.
 
-**Ċiklu ffukat**
+**Loop iffukat**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Meta żżid migrazzjoni, ittestja kemm bażi tad-data ġdida kif ukoll aġġornament mill-iskema preċedenti. It-testijiet tal-bażi tad-data
-jridu jagħlqu l-handles u jsejħu `resetDbInstance()` waqt it-tindif. Ħaddem `npm run test:bun:db` biss meta
-tinbidel il-mogħdija tal-adapter Bun bl-aħjar sforz possibbli; Node jibqa’ l-awtorità.
+Ittestja kemm database ġdida kif ukoll aġġorna mill-iskema preċedenti meta żżid migrazzjoni. It-testijiet tad-database għandhom jagħlqu l-pumi u jċemplu `resetDbInstance()` waqt it-tindif. Mexxi `npm run test:bun:db` biss meta tinbidel il-passaġġ tal-adapter Bun bl-aħjar sforz; Node jibqa awtorevoli.
 
-### Bini / skjerament
+### Ibni / skjerament
 
 **Kuntratti**
 
-- Manifests/lockfile tal-għerq u tal-workspace, `scripts/build/`, assemblaġġ standalone ta’ Next.js, kontenut tal-pakkett
-  `dist/`, metadata tal-pjattaforma Electron, workflows tas-CI, u sentinelli tal-iskjerament.
-- Il-firxiet appoġġjati ta’ Node u l-użu ta’ Bun fil-lista ta’ permessi f’`CLAUDE.md` iridu jibqgħu intatti.
-- L-artefatti tal-bini jibqgħu mhux traċċati; japplikaw il-politiki tad-dipendenzi, tal-liċenzji, tal-workflows, u tal-pakketti.
+- Għeruq u spazju tax-xogħol manifests/lockfile, `scripts/build/`, assemblaġġ waħdu Next.js, kontenut tal-pakkett `dist/`, metadejta tal-pjattaforma Electron, flussi tax-xogħol CI, u sentinelli tal-iskjerament.
+- Firxiet ta' Nodi appoġġjati u l-użu ta' Bun elenkat `CLAUDE.md` għandhom jibqgħu intatti.
+- Ibni l-artifacts jibqgħu mhux segwiti; japplikaw politiki dwar id-dipendenza, il-liċenzja, il-fluss tax-xogħol u l-pakkett.
 
-**Ċiklu ffukat**
+**Loop iffukat**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # bidliet fid-dipendenzi jew fil-lockfile
-npm run check:pack-policy      # bidliet fl-interfaċċa tal-pakkett ippubblikat
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Uża `npm run build` lokalment biss meta l-bidla taffettwa l-kompilazzjoni, l-assemblaġġ standalone, l-assi,
-jew l-ippakkjar waqt l-eżekuzzjoni. Uża `npm run build:release` biss għall-validazzjoni tar-rilaxx/skjerament. Il-build tas-CI huwa
-s-sinjal finali bejn il-pjattaformi; bidliet ta’ Electron speċifiċi għal pjattaforma jeħtieġu l-build iffukat korrispondenti
-jew evidenza minn test bażiku.
+Uża `npm run build` lokalment biss meta l-bidla taffettwa l-kumpilazzjoni, l-assemblaġġ waħdu, l-assi, jew ir-runtime bundling. Uża `npm run build:release` biss għall-validazzjoni release/deploy. CI's build hija s-sinjal finali cross-platform; Il-bidliet Electron speċifiċi għall-pjattaforma jeħtieġu l-evidenza tal-bini jew tad-duħħan iffukati li jaqblu.
 
 ## Skripts għall-iżviluppaturi għal magna kondiviża
 

@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 कॅप्चर `open-sse/handlers/chatCore.ts` मध्ये होते (दोन साइट्स, दोन `cacheReasoningFromAssistantMessage` कॉल साइट्सवर). स्कीमा बळजबरीनंतर पण पाठवण्यापूर्वी `open-sse/translator/index.ts` मध्ये रिप्ले होतो.
+
+टूल-कॉल एंट्री `buildToolCallCacheKey()` अंतर्गत संग्रहित केल्या जातात, विनंती स्कोप आणि टूल कॉल आयडीचा डायजेस्ट, म्हणून दुसऱ्या API की किंवा सत्राद्वारे वापरलेला समान आयडी एंट्री निवडत नाही. स्कोप `buildReasoningCacheScope()` कडून येतो : API की आयडी, तसेच जेव्हा विनंती असेल तेव्हा सत्र की. त्यामुळे `tool_call_id` स्तंभ आणि डॅशबोर्ड त्या नोंदींसाठी हे डायजेस्ट दाखवतात.
 
 साधा (नॉन-टूल-कॉल) सहाय्यक वळणे वेगळ्या पद्धतीने की केले जातात: `buildAssistantMessageCacheKey()` त्या वळणापर्यंत सत्र व्याप्ती आणि सामान्यीकृत OpenAI-स्वरूप उतारा पचवते, कारण DeepSeek एकदा `tools` उपस्थित झाल्यानंतर _प्रत्येक_ आधीच्या वळणाचा तर्क आवश्यक असतो. प्रतिसाद-API लक्ष्यांसाठी (उदाहरणार्थ `opencode-go/deepseek-v4-flash`, `/responses` कडे राउट केलेले) अपस्ट्रीम बॉडी `input` घेऊन जाते, `messages` नाही, म्हणून `translateRequest()` (`open-sse/translator/index.ts`) कॉलबॅक पर्यायाद्वारे पचलेल्या पिव्हट ट्रान्सक्रिप्टचा अहवाल देतो आणि कॅप्चर साइट्स तेच ट्रान्सक्रिप्ट डायजेस्ट करतात. प्रतिसाद रिप्ले पास प्रत्येक स्त्रोत स्वरूपासाठी OpenAI पिव्होटवर चालतो, म्हणून Anthropic संदेश क्लायंट (Claude → OpenAI → प्रतिसाद) देखील रीप्ले केले जातात.
 
