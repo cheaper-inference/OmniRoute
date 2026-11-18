@@ -3,13 +3,13 @@
  * using browser automation + RPC response interception.
  */
 
-import { acquireFlowBrowser, releaseFlowBrowser, type FlowBrowser } from "./browserLease.ts";
+import type { BrowserContext, Response as PlaywrightResponse } from "playwright";
+import { acquireFlowBrowser, releaseFlowBrowser } from "./browserLease.ts";
 import {
   normalizeFlowCookies,
   fetchFlowCredits,
   invalidateFlowCreditsCache,
 } from "../../services/usage/googleflow.ts";
-import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export const FLOW_USER_AGENT =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
@@ -35,12 +35,22 @@ export interface FlowMediaResult {
   b64_json?: string;
 }
 
-async function syncRotatedCookies(context: any, connectionId?: string): Promise<void> {
+/** Credential fields the Flow client reads beyond the cookie string. */
+type FlowCredentialExtras = {
+  connectionId?: string;
+  customUserAgent?: unknown;
+  providerSpecificData?: { customUserAgent?: unknown };
+};
+
+async function syncRotatedCookies(
+  context: Pick<BrowserContext, "cookies"> | null,
+  connectionId?: string
+): Promise<void> {
   if (!context || !connectionId) return;
   try {
     const cookies = await context.cookies();
     if (!Array.isArray(cookies) || cookies.length === 0) return;
-    const hasTimestamp = cookies.some((c: any) => c && c.name && c.name.includes("PSIDTS"));
+    const hasTimestamp = cookies.some((c) => c && c.name && c.name.includes("PSIDTS"));
     if (!hasTimestamp) return;
 
     const fs = await import("fs").catch(() => null);
@@ -58,8 +68,8 @@ async function syncRotatedCookies(context: any, connectionId?: string): Promise<
     if (!key) return;
 
     const cookieStr = cookies
-      .filter((c: any) => c && typeof c.name === "string" && typeof c.value === "string")
-      .map((c: any) => `${c.name}=${c.value}`)
+      .filter((c) => c && typeof c.name === "string" && typeof c.value === "string")
+      .map((c) => `${c.name}=${c.value}`)
       .join("; ");
 
     const staticKey = crypto.scryptSync(key, "omniroute-field-encryption-v1", 32);
@@ -163,7 +173,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     );
   }
 
-  let playwright: any;
+  let playwright: typeof import("playwright");
   try {
     playwright = await import("playwright");
   } catch {
@@ -171,19 +181,18 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
   }
 
   const browser = await acquireFlowBrowser((options) => playwright.chromium.launch(options));
-  let context: any = null;
+  let context: BrowserContext | null = null;
 
   try {
-    const customUa =
-      (opts.credentials as any)?.providerSpecificData?.customUserAgent ||
-      (opts.credentials as any)?.customUserAgent;
+    const extras = opts.credentials as FlowCredentialExtras;
+    const customUa = extras?.providerSpecificData?.customUserAgent || extras?.customUserAgent;
     const resolvedUserAgent =
       typeof customUa === "string" && customUa.trim() ? customUa.trim() : FLOW_USER_AGENT;
 
-    context = await browser.newContext({
+    context = (await browser.newContext({
       userAgent: resolvedUserAgent,
       viewport: { width: 1280, height: 800 },
-    });
+    })) as BrowserContext;
 
     let cookiesToSet: Array<{
       name: string;
@@ -201,8 +210,8 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         const rawList = JSON.parse(rawTrimmed);
         if (Array.isArray(rawList)) {
           cookiesToSet = rawList
-            .filter((item: any) => item && item.name && typeof item.value === "string")
-            .map((item: any) => {
+            .filter((item) => item && item.name && typeof item.value === "string")
+            .map((item) => {
               const name = String(item.name).trim();
               let domain =
                 item.domain ||
@@ -319,7 +328,6 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     }
 
     // Now click New Project on the main dashboard to create a brand new isolated project
-    let newProjectCreated = false;
     const newProjBtn = page
       .locator("button:has-text('New project'), button:has-text('Новый проект')")
       .first();
@@ -331,7 +339,6 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         await page.waitForURL((url) => url.href.includes("/project/") && url.href !== startUrl, {
           timeout: 15_000,
         });
-        newProjectCreated = true;
         console.log("[FLOW_DEBUG] Created fresh project via button:", page.url());
       } catch (err) {
         console.log("[FLOW_DEBUG] Failed to wait for new project URL:", err);
@@ -363,7 +370,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       );
     } catch {}
 
-    const initialAssetListener = async (response: any) => {
+    const initialAssetListener = async (response: PlaywrightResponse) => {
       try {
         const text = await response.text();
         const foundUuids =
@@ -387,7 +394,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         }
       }, 600_000);
 
-      page.on("response", async (response: any) => {
+      page.on("response", async (response: PlaywrightResponse) => {
         if (isFinished) return;
         const url = response.url();
         const now = Date.now();
@@ -608,10 +615,8 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             }
           }
           const videos = await page
-            .$$eval("video", (els: any[]) =>
-              els
-                .map((e: any) => e.src || e.currentSrc)
-                .filter((s: string) => s && s.startsWith("http"))
+            .$$eval("video", (els) =>
+              els.map((e) => e.src || e.currentSrc).filter((s) => s && s.startsWith("http"))
             )
             .catch(() => []);
           const newVideos = videos.filter((v: string) => {
@@ -649,7 +654,8 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
-      await syncRotatedCookies(context, (opts.credentials as any)?.connectionId).catch(() => {});
+      const connectionId = (opts.credentials as FlowCredentialExtras)?.connectionId;
+      await syncRotatedCookies(context, connectionId).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});
@@ -666,7 +672,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     throw new Error("Missing Google Flow cookies (__Secure-1PSID)");
   }
 
-  let playwright: any;
+  let playwright: typeof import("playwright");
   try {
     playwright = await import("playwright");
   } catch {
@@ -674,19 +680,18 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
   }
 
   const browser = await acquireFlowBrowser((options) => playwright.chromium.launch(options));
-  let context: any = null;
+  let context: BrowserContext | null = null;
 
   try {
-    const customUa =
-      (opts.credentials as any)?.providerSpecificData?.customUserAgent ||
-      (opts.credentials as any)?.customUserAgent;
+    const extras = opts.credentials as FlowCredentialExtras;
+    const customUa = extras?.providerSpecificData?.customUserAgent || extras?.customUserAgent;
     const resolvedUserAgent =
       typeof customUa === "string" && customUa.trim() ? customUa.trim() : FLOW_USER_AGENT;
 
-    context = await browser.newContext({
+    context = (await browser.newContext({
       userAgent: resolvedUserAgent,
       viewport: { width: 1280, height: 800 },
-    });
+    })) as BrowserContext;
 
     let cookiesToSet: Array<{
       name: string;
@@ -704,8 +709,8 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         const rawList = JSON.parse(rawTrimmed);
         if (Array.isArray(rawList)) {
           cookiesToSet = rawList
-            .filter((item: any) => item && item.name && typeof item.value === "string")
-            .map((item: any) => {
+            .filter((item) => item && item.name && typeof item.value === "string")
+            .map((item) => {
               const name = String(item.name).trim();
               let domain =
                 item.domain ||
@@ -823,7 +828,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         reject(new Error("Timed out waiting for image generation to complete (60s limit)"));
       }, 60_000);
 
-      page.on("response", async (response: any) => {
+      page.on("response", async (response: PlaywrightResponse) => {
         const url = response.url();
         if (!url.includes("batchexecute")) return;
         try {
@@ -881,10 +886,10 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         }
         if (isFinished) return "";
         try {
-          const imgs = await page.$$eval("img", (els: any[]) =>
+          const imgs = await page.$$eval("img", (els) =>
             els
-              .map((e: any) => e.src || e.currentSrc)
-              .filter((s: string) => s && s.includes("googleusercontent.com/asb/"))
+              .map((e) => e.src || e.currentSrc)
+              .filter((s) => s && s.includes("googleusercontent.com/asb/"))
           );
           if (imgs.length > 0) {
             isFinished = true;
@@ -908,7 +913,8 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
-      await syncRotatedCookies(context, (opts.credentials as any)?.connectionId).catch(() => {});
+      const connectionId = (opts.credentials as FlowCredentialExtras)?.connectionId;
+      await syncRotatedCookies(context, connectionId).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});

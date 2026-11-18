@@ -49,10 +49,10 @@ export async function handleGoogleFlowWebVideoGeneration({
       accessToken:
         typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
       connectionId:
-        typeof (credentials as any)?.connectionId === "string"
-          ? (credentials as any).connectionId
-          : typeof (credentials as any)?.id === "string"
-            ? (credentials as any).id
+        typeof credentials?.connectionId === "string"
+          ? credentials.connectionId
+          : typeof credentials?.id === "string"
+            ? credentials.id
             : undefined,
     };
 
@@ -80,8 +80,9 @@ export async function handleGoogleFlowWebVideoGeneration({
         ],
       },
     };
-  } catch (err: any) {
-    const message = sanitizeErrorMessage(err?.message || "Google Flow video generation failed");
+  } catch (err) {
+    const raw = err instanceof Error ? err.message : "";
+    const message = sanitizeErrorMessage(raw || "Google Flow video generation failed");
     log?.error?.("VIDEO", `Google Flow video generation error: ${message}`);
 
     const status =

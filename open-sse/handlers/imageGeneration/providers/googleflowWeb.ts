@@ -77,8 +77,9 @@ export async function handleGoogleFlowWebImageGeneration({
         data: [item],
       },
     };
-  } catch (err: any) {
-    const message = sanitizeErrorMessage(err?.message || "Google Flow image generation failed");
+  } catch (err) {
+    const raw = err instanceof Error ? err.message : "";
+    const message = sanitizeErrorMessage(raw || "Google Flow image generation failed");
     log?.error?.("IMAGE", `Google Flow image generation error: ${message}`);
 
     const status =

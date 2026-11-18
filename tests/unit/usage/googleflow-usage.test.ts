@@ -54,7 +54,11 @@ test("getGoogleFlowUsage returns standard UsageQuota record", async () => {
     );
   };
 
-  const usage = await getGoogleFlowUsage("__Secure-1PSID=test_cookie", {}, mockFetch as any);
+  const usage = await getGoogleFlowUsage(
+    "__Secure-1PSID=test_cookie",
+    {},
+    mockFetch as unknown as typeof fetch
+  );
   assert.ok(usage.quotas.veo_credits);
   assert.equal(usage.quotas.veo_credits.total, 42);
   assert.equal(usage.quotas.veo_credits.remaining, 42);

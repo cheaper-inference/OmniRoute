@@ -6,8 +6,6 @@ import {
   normalizeImageModel,
   normalizeVideoAspectRatio,
   normalizeImageAspectRatio,
-  VIDEO_MODEL_MAP,
-  IMAGE_MODEL_MAP,
 } from "../../open-sse/executors/googleflow-web/flowClient.ts";
 
 test("normalizeVideoModel: resolves active Flow video models from UI screenshot", () => {
