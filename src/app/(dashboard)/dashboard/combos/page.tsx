@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
@@ -40,6 +42,8 @@ import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
 import Tooltip from "@/shared/components/Tooltip";
 import { ComboCompressionModeSelect } from "@/shared/components/compression/ComboCompressionModeSelect";
+import IconChip from "@/shared/components/IconChip";
+import Notice from "@/shared/components/Notice";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { FieldLabelWithHelp, WeightTotalBar } from "./parts";
 import { ComboTargetOptions } from "./ComboQuotaOnlyFallbackToggle";
@@ -1490,9 +1494,7 @@ function CombosPageContent() {
                   `Combo "${recentlyCreatedCombo}" ready to validate`
                 )}
               </p>
-              <code className="inline-block text-2xs mt-0.5 px-1.5 py-0.5 rounded bg-success/15 text-success">
-                {recentlyCreatedCombo}
-              </code>
+              <InlineCode className="mt-0.5 inline-block">{recentlyCreatedCombo}</InlineCode>
               <p className="text-xs text-text-muted mt-0.5">
                 {getI18nOrFallback(
                   t,
@@ -1757,9 +1759,9 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
     <Card padding="sm">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Icon name="tips_and_updates" size={16} className="text-primary" />
-          </div>
+          <IconChip tone="accent" size="sm" className="shrink-0">
+            <Icon name="tips_and_updates" />
+          </IconChip>
           <div className="min-w-0">
             <h2 className="ci-heading" data-size="sm">
               {getI18nOrFallback(t, "wizardGuideTitle", "Getting Started with Combos")}
@@ -1919,17 +1921,14 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
       </div>
 
       {showNudge && (
-        <div
-          data-testid="strategy-change-nudge"
-          className="mt-2 rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-xs text-primary"
-        >
+        <Notice variant="info" data-testid="strategy-change-nudge" className="mt-2">
           {getI18nOrFallback(
             t,
             "recommendationsUpdated",
             "Recommendations updated for {strategy}.",
             { strategy: strategyLabel }
           ).replace("{strategy}", strategyLabel)}
-        </div>
+        </Notice>
       )}
     </Card.Section>
   );
@@ -2073,9 +2072,9 @@ function ComboCardInner({
             </Button>
           )}
 
-          <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Icon name="layers" size={18} className="text-primary" />
-          </div>
+          <IconChip tone="accent" size="sm" className="shrink-0">
+            <Icon name="layers" />
+          </IconChip>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <code className="text-sm font-medium font-mono truncate">{combo.name}</code>
@@ -2119,17 +2118,14 @@ function ComboCardInner({
                 models.slice(0, 3).map((entry, index) => {
                   const { weight } = normalizeModelEntry(entry);
                   return (
-                    <code
-                      key={index}
-                      className="text-3xs font-mono bg-bg-subtle px-1.5 py-0.5 rounded text-text-muted"
-                    >
+                    <InlineCode key={index} className="text-text-muted">
                       {formatComboEntryDisplay(entry, {
                         providerNodes,
                         includeConnection: true,
                         showFullEmails: emailsVisible,
                       })}
                       {strategy === "weighted" && weight > 0 ? ` (${weight}%)` : ""}
-                    </code>
+                    </InlineCode>
                   );
                 })
               )}
@@ -2322,10 +2318,7 @@ function ComboTestResolvedBy({ results, emailsVisible }: { results: any; emailsV
       <Icon name="check_circle" size={18} className="text-success" />
       <div className="min-w-0">
         <div>
-          First healthy target in combo order:{" "}
-          <code className="text-xs bg-success/10 text-success px-1.5 py-0.5 rounded font-mono">
-            {results.resolvedBy}
-          </code>
+          First healthy target in combo order: <InlineCode>{results.resolvedBy}</InlineCode>
         </div>
         {target?.connectionId || target?.label ? (
           <div className="mt-1 text-xs text-text-muted">
@@ -3991,14 +3984,14 @@ function ComboFormModal({
                       </Button>
                     </div>
                     {(manualModelError || manualModelHasDuplicate) && (
-                      <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
+                      <Notice variant="warning" className="mt-2">
                         {manualModelError ||
                           getI18nOrFallback(
                             t,
                             "builderDuplicateExact",
                             "This exact provider/model/account step is already in the combo."
                           )}
-                      </div>
+                      </Notice>
                     )}
                   </div>
                 )}
@@ -4195,9 +4188,9 @@ function ComboFormModal({
                 )}
 
                 {builderError && (
-                  <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
+                  <Notice variant="warning" className="mt-2">
                     {builderError}
-                  </div>
+                  </Notice>
                 )}
               </Card.Section>
 
@@ -4210,10 +4203,12 @@ function ComboFormModal({
               </div>
 
               {models.length === 0 ? (
-                <div className="text-center py-4 border border-dashed border-border rounded-lg bg-bg-subtle">
-                  <Icon name="layers" size={20} className="mx-auto mb-1 text-text-muted" />
-                  <p className="text-xs text-text-muted">{t("noModelsYet")}</p>
-                </div>
+                <EmptyState
+                  layout="inline"
+                  border="dashed"
+                  icon="layers"
+                  title={t("noModelsYet")}
+                />
               ) : (
                 <div className="flex flex-col gap-1 max-h-[240px] overflow-y-auto">
                   {models.map((entry, index) => (
@@ -4349,25 +4344,21 @@ function ComboFormModal({
                       {pricedModelCount}/{models.length} ({pricingCoveragePercent}%)
                     </span>
                   </div>
-                  <div
-                    role="progressbar"
+                  <Progress
+                    className="mt-1"
+                    size="sm"
+                    semantics="meter"
+                    animate={false}
+                    value={pricingCoveragePercent}
+                    tone={
+                      pricingCoveragePercent === 100
+                        ? "success"
+                        : pricingCoveragePercent > 0
+                          ? "warning"
+                          : "danger"
+                    }
                     aria-label={getI18nOrFallback(t, "pricingCoverage", "Pricing coverage")}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={pricingCoveragePercent}
-                    className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden"
-                  >
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        pricingCoveragePercent === 100
-                          ? "bg-success"
-                          : pricingCoveragePercent > 0
-                            ? "bg-warning"
-                            : "bg-error"
-                      }`}
-                      style={{ width: `${pricingCoveragePercent}%` }}
-                    />
-                  </div>
+                  />
                   {!isExpertMode && (
                     <p className="text-xs text-text-muted mt-1">
                       {getI18nOrFallback(
@@ -4381,59 +4372,46 @@ function ComboFormModal({
               )}
 
               {hasNoModels && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
-                  <Icon name="warning" size={12} />
-                  <span>{t("noModelsYet")}</span>
-                </div>
+                <Notice variant="warning" icon="warning" className="mt-2">
+                  {t("noModelsYet")}
+                </Notice>
               )}
 
               {hasInvalidWeightedTotal && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
-                  <Icon name="warning" size={12} />
-                  <span>
-                    {t("weighted")} {weightTotal}% {"\u2260"} 100%. {t("autoBalance")}
-                  </span>
-                </div>
+                <Notice variant="warning" icon="warning" className="mt-2">
+                  {t("weighted")} {weightTotal}% {"\u2260"} 100%. {t("autoBalance")}
+                </Notice>
               )}
 
               {!isExpertMode && hasRoundRobinSingleModel && (
-                <div className="mt-2 rounded-md border border-info/20 bg-info/10 px-2 py-1.5 text-xs text-info flex items-center gap-1">
-                  <Icon name="info" size={12} />
-                  <span>
-                    {getI18nOrFallback(
-                      t,
-                      "warningRoundRobinSingleModel",
-                      "Round-robin is most useful with at least 2 models."
-                    )}
-                  </span>
-                </div>
+                <Notice variant="info" icon="info" className="mt-2">
+                  {getI18nOrFallback(
+                    t,
+                    "warningRoundRobinSingleModel",
+                    "Round-robin is most useful with at least 2 models."
+                  )}
+                </Notice>
               )}
 
               {hasCostOptimizedPartialPricing && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
-                  <Icon name="warning" size={12} />
-                  <span>
-                    {typeof t.has === "function" && t.has("warningCostOptimizedPartialPricing")
-                      ? t("warningCostOptimizedPartialPricing", {
-                          priced: pricedModelCount,
-                          total: models.length,
-                        })
-                      : `Only ${pricedModelCount} of ${models.length} models have pricing. Routing may be partially cost-aware.`}
-                  </span>
-                </div>
+                <Notice variant="warning" icon="warning" className="mt-2">
+                  {typeof t.has === "function" && t.has("warningCostOptimizedPartialPricing")
+                    ? t("warningCostOptimizedPartialPricing", {
+                        priced: pricedModelCount,
+                        total: models.length,
+                      })
+                    : `Only ${pricedModelCount} of ${models.length} models have pricing. Routing may be partially cost-aware.`}
+                </Notice>
               )}
 
               {hasCostOptimizedWithoutPricing && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
-                  <Icon name="warning" size={12} />
-                  <span>
-                    {getI18nOrFallback(
-                      t,
-                      "warningCostOptimizedNoPricing",
-                      "No pricing data found for this combo. Cost-optimized may route unexpectedly."
-                    )}
-                  </span>
-                </div>
+                <Notice variant="warning" icon="warning" className="mt-2">
+                  {getI18nOrFallback(
+                    t,
+                    "warningCostOptimizedNoPricing",
+                    "No pricing data found for this combo. Cost-optimized may route unexpectedly."
+                  )}
+                </Notice>
               )}
 
               {showInlineReadinessPanel && (
@@ -5388,7 +5366,7 @@ function ComboFormModal({
           )}
 
           {(isExpertMode || builderStage !== "review") && !canAdvanceFromCurrentStage && (
-            <div className="rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
+            <Notice variant="warning">
               {builderStage === "basics"
                 ? getI18nOrFallback(
                     t,
@@ -5400,7 +5378,7 @@ function ComboFormModal({
                     "addStepBeforeContinue",
                     "Add at least one step before continuing to the next stage."
                   )}
-            </div>
+            </Notice>
           )}
         </div>
       </Modal>

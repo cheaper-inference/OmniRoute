@@ -403,9 +403,7 @@ export default function ReasoningCacheTab() {
         </div>
 
         {entries.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-            {t("reasoningNoData")}
-          </div>
+          <EmptyState layout="inline" border="dashed" title={t("reasoningNoData")} />
         ) : (
           <Table
             variant="plain"

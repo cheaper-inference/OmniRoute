@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -271,14 +272,12 @@ function RuntimeConfigValue({ value }: { value: unknown }) {
     return (
       <div className="flex max-w-md flex-wrap justify-end gap-1">
         {visible.map((item, i) => (
-          <code key={i} className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-main">
+          <InlineCode key={i}>
             {item !== null && typeof item === "object" ? JSON.stringify(item) : String(item)}
-          </code>
+          </InlineCode>
         ))}
         {value.length > visible.length && (
-          <code className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-muted">
-            +{value.length - visible.length}
-          </code>
+          <InlineCode className="text-text-muted">+{value.length - visible.length}</InlineCode>
         )}
       </div>
     );
@@ -288,9 +287,9 @@ function RuntimeConfigValue({ value }: { value: unknown }) {
     return (
       <div className="flex max-w-md flex-wrap justify-end gap-1">
         {entries.map(([k, v]) => (
-          <code key={k} className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-main">
+          <InlineCode key={k}>
             {k}={v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}
-          </code>
+          </InlineCode>
         ))}
       </div>
     );

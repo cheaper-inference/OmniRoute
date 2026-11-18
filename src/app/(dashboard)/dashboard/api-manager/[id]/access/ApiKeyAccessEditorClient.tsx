@@ -13,6 +13,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -836,9 +837,9 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (notFound) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
-          <Icon name="key_off" size={24} />
-        </div>
+        <IconChip tone="danger" size="lg" shape="circle">
+          <Icon name="key_off" />
+        </IconChip>
         <div className="flex flex-col gap-1">
           <h2 className="ci-heading" data-size="xl">
             {t("keyNotFound")}
@@ -857,9 +858,9 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (fetchError || !apiKey) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
-          <Icon name="error" size={24} />
-        </div>
+        <IconChip tone="danger" size="lg" shape="circle">
+          <Icon name="error" />
+        </IconChip>
         <div className="flex flex-col gap-1">
           <h2 className="ci-heading" data-size="xl">
             {fetchError || t("failedLoadKey")}

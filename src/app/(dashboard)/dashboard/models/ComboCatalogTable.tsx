@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Badge, Button } from "@/shared/components";
+import { Badge, Button, InlineCode } from "@/shared/components";
 import CatalogTestBadge from "./CatalogTestBadge";
 import {
   ActionsHeading,
@@ -133,16 +133,16 @@ function ComboMembersCell({ combo }: { combo: ComboCatalogRow }) {
       {combo.models.length > 0 && (
         <div className="mt-1 flex flex-wrap gap-1">
           {combo.models.slice(0, 3).map((m, idx) => (
-            <span
+            <InlineCode
               key={idx}
-              className="inline-block max-w-[150px] truncate rounded bg-bg-subtle px-1.5 py-0.5 font-mono text-3xs text-text-muted"
+              className="inline-block max-w-[150px] truncate text-text-muted"
               title={m.model}
             >
               {m.label ||
                 (m.kind === "combo-ref"
                   ? t("comboRefMember", { name: m.model })
                   : m.model.split("/").pop())}
-            </span>
+            </InlineCode>
           ))}
           {combo.models.length > 3 && (
             <span className="text-3xs text-text-muted">

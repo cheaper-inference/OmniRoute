@@ -731,9 +731,12 @@ export default function CachePage() {
                         </TableBody>
                       </Table>
                     ) : (
-                      <div className="mt-3 rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                        {t("noPromptCacheData")}
-                      </div>
+                      <EmptyState
+                        layout="inline"
+                        border="dashed"
+                        title={t("noPromptCacheData")}
+                        className="mt-3"
+                      />
                     )}
                   </div>
 
@@ -754,9 +757,7 @@ export default function CachePage() {
                   />
                 </>
               ) : (
-                <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                  {t("noPromptCacheData")}
-                </div>
+                <EmptyState layout="inline" border="dashed" title={t("noPromptCacheData")} />
               )}
             </div>
           </Card>

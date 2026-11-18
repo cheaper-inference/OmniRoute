@@ -467,3 +467,96 @@ test("D: the combos import button opens the picker through the kit FileTrigger",
   );
   assert.deepEqual(raw, [], "no raw file input in the slice");
 });
+
+// ── G. Small pieces: IconChip, InlineCode, Notice, EmptyState, Progress ─────────────────────
+
+const TINT = "(primary|info|success|warning|error|chart-\\d)";
+
+// An icon in a tinted square or circle is the kit IconChip (tone, size, shape). Number bubbles
+// (a step or rank number in a 20-28px circle) are not icons and are not matched: they are
+// smaller than the smallest chip that was drawn by hand here (28px).
+test("G: tinted icon squares and circles are IconChip", () => {
+  const offenders = TAGS.filter(({ name }) => name === "div" || name === "span")
+    .filter(({ tag }) => {
+      const cls = /className="([^"]*)"/.exec(tag)?.[1] ?? "";
+      return (
+        has(cls, /(?<![\w:-])(size-(8|9|10|12|16)|w-(8|10|12|16) h-(8|10|12|16))(?![\w-])/) &&
+        has(cls, /(?<![\w:-])rounded-(full|md|lg|xl)(?![\w-])/) &&
+        has(cls, new RegExp(`(?<![\\w:-])bg-${TINT}/\\d+(?![\\w-])`)) &&
+        has(cls, /(?<![\w:-])justify-center(?![\w-])/)
+      );
+    })
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <IconChip tone size shape>");
+});
+
+// A <code> with its own fill, padding and radius is the kit InlineCode chip. Two URL lines of
+// the endpoint page keep their own markup: each sits next to its own copy button and copy
+// state, and the kit piece for a line the reader copies is CodePreview, which brings its own.
+const CODE_CHIP_KEPT: Kept[] = [
+  {
+    file: "endpoint/EndpointPageClient.tsx",
+    marker: "bg-bg-subtle px-3 py-1",
+    reason: "Base URL under the page title, with the copy row below it (see above).",
+  },
+  {
+    file: "endpoint/EndpointPageClient.tsx",
+    marker: "bg-surface/80 px-2 py-1",
+    reason: "Endpoint path of an endpoint card, next to its copy button (see above).",
+  },
+];
+
+test("G: code chips are InlineCode", () => {
+  const { offenders, stale } = audit(
+    TAGS.filter(({ name }) => name === "code" || name === "span"),
+    ({ name, tag }) => {
+      const cls = /className="([^"]*)"/.exec(tag)?.[1] ?? "";
+      const chip =
+        has(cls, /(?<![\w:-])bg-[\w/[\].-]+/) &&
+        has(cls, /(?<![\w:-])px-[\d.]+/) &&
+        has(cls, /(?<![\w:-])rounded(-\w+)?(?![\w-])/);
+      // A span counts only when it is a monospace chip without a control inside (the removable
+      // chips of the key policy editor are kept, see mapping A).
+      return chip && (name === "code" || (has(cls, /font-mono/) && !has(cls, /inline-flex/)));
+    },
+    CODE_CHIP_KEPT
+  );
+  assert.deepEqual(offenders, [], "use <InlineCode>");
+  assert.deepEqual(stale, [], "stale CODE_CHIP_KEPT entries: remove them");
+});
+
+// A one-line tinted note (border, tint and ink of one status colour, 12px text) is the Notice
+// adapter (kit Alert size="sm").
+test("G: one-line tinted notes are Notice", () => {
+  const offenders = TAGS.filter(({ name }) => name === "div" || name === "p")
+    .filter(({ tag }) => {
+      const cls = /className="([^"]*)"/.exec(tag)?.[1] ?? "";
+      const tone = new RegExp(`(?<![\\w:-])border-${TINT}/\\d+`).exec(cls)?.[1];
+      return (
+        tone !== undefined &&
+        has(cls, new RegExp(`(?<![\\w:-])bg-${tone}/\\d+`)) &&
+        has(cls, new RegExp(`(?<![\\w:-])text-${tone}(?![\\w/-])`)) &&
+        has(cls, /(?<![\w:-])text-xs(?![\w-])/)
+      );
+    })
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <Notice variant icon>");
+});
+
+test("G: dashed empty boxes are EmptyState", () => {
+  const offenders = TAGS.filter(({ name }) => name === "div" || name === "p")
+    .filter(({ tag }) => has(tag, /(?<![\w:-])border-dashed(?![\w-])/))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(
+    offenders,
+    [],
+    'use <EmptyState border="dashed"> (layout="inline" for one line)'
+  );
+});
+
+test("G: bars are the kit Progress, not a track and a fill drawn by hand", () => {
+  const offenders = TAGS.filter(
+    ({ name, tag }) => /^[a-z]/.test(name) && /role="(progressbar|meter)"/.test(tag)
+  ).map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <Progress> (segments for stacked parts)");
+});

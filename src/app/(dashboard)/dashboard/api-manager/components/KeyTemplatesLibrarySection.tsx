@@ -10,6 +10,8 @@ import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
+import EmptyState from "@/shared/components/EmptyState";
 import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
 import { anchorReferenceIssues, clearFieldValidationIssues } from "../keyTemplateReferenceIssues";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -396,18 +398,18 @@ export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySec
 
       <TemplateLibraryStatus model={model} />
       {templates.length === 0 && unreadable.length === 0 && !loadError && !loading ? (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg border border-dashed border-border bg-surface/20">
-          <div className="flex items-center gap-3">
-            <Icon name="inventory_2" size={24} className="text-text-muted shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-text-main">{t("noTemplatesYet")}</p>
-              <p className="text-xs text-text-muted">{t("noTemplatesYetDesc")}</p>
-            </div>
-          </div>
-          <Button size="sm" variant="outline" icon="add" onClick={openCreateModal}>
-            {t("newTemplateAction")}
-          </Button>
-        </div>
+        <EmptyState
+          layout="inline"
+          border="dashed"
+          icon="inventory_2"
+          title={t("noTemplatesYet")}
+          description={t("noTemplatesYetDesc")}
+          actions={
+            <Button size="sm" variant="outline" icon="add" onClick={openCreateModal}>
+              {t("newTemplateAction")}
+            </Button>
+          }
+        />
       ) : (
         <TemplateCards model={model} />
       )}
@@ -654,9 +656,9 @@ function TemplateLibraryHeader({ model }: { model: LibraryModel }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-          <Icon name="layers" className="text-xl text-primary" />
-        </div>
+        <IconChip tone="accent" className="shrink-0">
+          <Icon name="layers" />
+        </IconChip>
         <div>
           <h3>
             {t("keyTemplatesTitle")}

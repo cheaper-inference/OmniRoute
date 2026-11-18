@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Field } from "@omniroute/ui-kit/field";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
@@ -1005,9 +1006,9 @@ export default function MediaPageClient() {
               <p className="text-xs text-text-muted">
                 {t("providerCount", { count: providerCount })}
               </p>
-              <code className="block mt-2 break-all text-xs text-text-muted bg-bg-subtle rounded px-2 py-1">
+              <InlineCode className="mt-2 block break-all text-text-muted">
                 POST {cfg.endpoint}
-              </code>
+              </InlineCode>
             </Card>
           );
         })}

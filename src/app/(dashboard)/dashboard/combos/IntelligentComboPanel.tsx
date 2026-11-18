@@ -1,11 +1,14 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
 
 import { useMemo, useState } from "react";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   FACTOR_LABELS,
@@ -135,7 +138,7 @@ export default function IntelligentComboPanel({
               )}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs text-text-muted">
-              <code className="rounded bg-bg-subtle px-2 py-1 text-text-main">{combo?.name}</code>
+              <InlineCode>{combo?.name}</InlineCode>
               <span>{t("intelligentComboCount", { count: allCombos.length })}</span>
               <span>{t("providersInScope", { count: providerScopeCount })}</span>
             </div>
@@ -236,13 +239,15 @@ export default function IntelligentComboPanel({
 
             <div className="mt-3 flex flex-col gap-2">
               {providerScores.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border p-3 text-xs text-text-muted">
-                  {getI18nOrFallback(
+                <EmptyState
+                  layout="inline"
+                  border="dashed"
+                  title={getI18nOrFallback(
                     t,
                     "allProvidersEvaluated",
                     "No candidate pool configured. All active providers are evaluated at runtime."
                   )}
-                </div>
+                />
               ) : (
                 providerScores.map((entry) => {
                   const percentage = Math.round(entry.score * 100);
@@ -260,19 +265,14 @@ export default function IntelligentComboPanel({
                         </Badge>
                       </div>
 
-                      <div
-                        role="progressbar"
+                      <Progress
+                        className="mt-2"
+                        semantics="meter"
+                        animate={false}
+                        value={percentage}
+                        color="var(--color-chart-2)"
                         aria-label={formatProviderLabel(entry.provider, activeProviders)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={percentage}
-                        className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden"
-                      >
-                        <div
-                          className="h-full rounded-full bg-chart-2 transition-all"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
+                      />
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {Object.entries(entry.factors).map(([factorKey, factorValue]) => (

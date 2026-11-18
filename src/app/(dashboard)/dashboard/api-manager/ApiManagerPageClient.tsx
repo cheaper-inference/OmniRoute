@@ -45,6 +45,8 @@ import { readActiveOnlyPreference, writeActiveOnlyPreference } from "./apiManage
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { hasProviderQuotaBypassScope } from "@/shared/constants/apiKeyPolicyScopes";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
+import IconChip from "@/shared/components/IconChip";
+import EmptyState from "@/shared/components/EmptyState";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 
 import { useCreateKeySubmission } from "./useCreateKeySubmission";
@@ -648,9 +650,9 @@ export default function ApiManagerPageClient() {
       <Card>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-lg bg-warning/10 shrink-0">
-              <Icon name="vpn_key" className="text-xl text-warning" />
-            </div>
+            <IconChip tone="warning" className="shrink-0">
+              <Icon name="vpn_key" />
+            </IconChip>
             <div>
               <h3>
                 {t("registeredKeys")}
@@ -688,31 +690,31 @@ export default function ApiManagerPageClient() {
         <p className="text-sm text-text-muted mb-4">{t("keysSecurityNote")}</p>
 
         {keys.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-border rounded-lg">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-              <Icon name="vpn_key" size={32} />
-            </div>
-            <p className="text-text-main font-medium mb-2">{t("noKeys")}</p>
-            <p className="text-sm text-text-muted mb-4">{t("noKeysDesc")}</p>
-            <Button
-              icon="add"
-              onClick={() => {
-                setNameError(null);
-                setCreateError(null);
-                setShowAddModal(true);
-              }}
-            >
-              {t("createFirstKey")}
-            </Button>
-          </div>
+          <EmptyState
+            border="dashed"
+            icon="vpn_key"
+            title={t("noKeys")}
+            description={t("noKeysDesc")}
+            actions={
+              <Button
+                icon="add"
+                onClick={() => {
+                  setNameError(null);
+                  setCreateError(null);
+                  setShowAddModal(true);
+                }}
+              >
+                {t("createFirstKey")}
+              </Button>
+            }
+          />
         ) : filteredKeys.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-border rounded-lg">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-              <Icon name="search_off" size={32} />
-            </div>
-            <p className="text-text-main font-medium mb-2">{t("emptyFilterTitle")}</p>
-            <Button onClick={handleClearFilters}>{t("emptyFilterClear")}</Button>
-          </div>
+          <EmptyState
+            border="dashed"
+            icon="search_off"
+            title={t("emptyFilterTitle")}
+            actions={<Button onClick={handleClearFilters}>{t("emptyFilterClear")}</Button>}
+          />
         ) : (
           (() => {
             const renderKeyRow = (key: ApiKey) => {

@@ -13,6 +13,7 @@ import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
+import IconChip from "@/shared/components/IconChip";
 import { cn } from "@/shared/utils/cn";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
@@ -327,9 +328,9 @@ export default function ApiEndpointsTab() {
         <Card className="p-5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center size-10 rounded-xl bg-primary/10">
-                <Icon name="api" size={20} className="text-primary" />
-              </div>
+              <IconChip tone="accent">
+                <Icon name="api" />
+              </IconChip>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="ci-heading" data-size="md">
@@ -375,9 +376,9 @@ export default function ApiEndpointsTab() {
         <>
           <Card className="p-6">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-error/10">
-                <Icon name="error" size={20} className="text-error" />
-              </div>
+              <IconChip tone="danger">
+                <Icon name="error" />
+              </IconChip>
               <div>
                 <h3 className="ci-heading" data-size="sm">
                   {t("apiEndpointsCatalogUnavailable")}
