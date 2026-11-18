@@ -121,7 +121,7 @@ export default function AccountQuotaRow({
   if (error || caches === null) {
     return (
       <div className="mt-2 pt-2 border-t border-border/30">
-        <span className="text-[10px] uppercase tracking-wide font-bold text-text-muted block mb-1">
+        <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1">
           {t("accountQuotaTitle")}
         </span>
         {renderFallback()}
@@ -133,7 +133,7 @@ export default function AccountQuotaRow({
   if (ids.length === 0) {
     return (
       <div className="mt-2 pt-2 border-t border-border/30">
-        <span className="text-[10px] uppercase tracking-wide font-bold text-text-muted block mb-1">
+        <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1">
           {t("accountQuotaTitle")}
         </span>
         {renderFallback()}
@@ -143,7 +143,7 @@ export default function AccountQuotaRow({
 
   return (
     <div className="mt-2 pt-2 border-t border-border/30">
-      <span className="text-[10px] uppercase tracking-wide font-bold text-text-muted block mb-1.5">
+      <span className="text-[10px] uppercase tracking-wide font-semibold text-text-muted block mb-1.5">
         {t("accountQuotaTitle")}
       </span>
       <div className="flex flex-col gap-1">

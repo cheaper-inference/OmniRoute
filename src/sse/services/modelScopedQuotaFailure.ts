@@ -40,3 +40,12 @@ export function isModelScopedFailure(
       fallbackResult.reason === RateLimitReason.RATE_LIMIT_EXCEEDED)
   );
 }
+
+/**
+ * Detect workspace/account policy budget error (e.g. OpenCode Go "Policy budget exceeded").
+ * These are account-scoped budget exhaustions and must never trigger egress-IP sibling lockouts (#19314).
+ */
+export function isWorkspacePolicyBudget429(errorText: unknown): boolean {
+  if (typeof errorText !== "string") return false;
+  return /\b(?:policy\s+budget|workspace\s+policy|workspace\s+budget)\b/i.test(errorText);
+}
