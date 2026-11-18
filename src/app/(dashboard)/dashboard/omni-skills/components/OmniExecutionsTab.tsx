@@ -43,11 +43,7 @@ export function OmniExecutionsTab({
 
   return (
     <Card>
-      <Table
-        aria-label={t("executionsTab")}
-        scrollbarLabel={t("executionsTab")}
-        containerClassName="rounded-none border-0"
-      >
+      <Table variant="plain" aria-label={t("executionsTab")} scrollbarLabel={t("executionsTab")}>
         <TableHeader>
           <TableRow>
             <TableHead>{t("skill")}</TableHead>
@@ -81,7 +77,7 @@ export function OmniExecutionsTab({
                   </span>
                 </TableCell>
                 <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
-                <TableCell className="text-text-muted text-sm">
+                <TableCell className="text-text-muted">
                   {new Date(exec.createdAt).toLocaleString()}
                 </TableCell>
               </TableRow>

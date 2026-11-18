@@ -209,10 +209,10 @@ export function SkillInspectorPane({
             ) : (
               // The inspector pane's border is the frame around this table (#19620).
               <Table
-                className="text-xs"
+                variant="plain"
+                density="compact"
                 aria-label={t("executionsTab")}
                 scrollbarLabel={t("executionsTab")}
-                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>

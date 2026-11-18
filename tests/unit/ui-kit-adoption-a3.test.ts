@@ -149,3 +149,30 @@ test("D: a file picker opened from a button is the kit FileTrigger", () => {
   const offenders = openingTags("Input|input").filter((t) => /type="file"/.test(t.tag));
   assert.equal(offenders.length, 0, `wrap the button in FileTrigger:\n${where(offenders)}`);
 });
+
+// ── E. Tables: plain variant, density and cell props ─────────────────────────────────────────
+
+test("E: a table inside a card or pane is the kit plain variant", () => {
+  const offenders = openingTags("Table|DataTableShell").filter((t) =>
+    /containerClassName=[^>]*(?:rounded-none|border-0)/.test(t.tag)
+  );
+  assert.equal(offenders.length, 0, `use variant="plain":\n${where(offenders)}`);
+});
+
+test("E: a table takes its text size from the kit density", () => {
+  const offenders = openingTags("Table").filter((t) =>
+    /className="[^"]*(?<![\w:-])(?:text-xs|text-sm|text-\[\d+px\])(?![\w-])/.test(t.tag)
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `drop text-sm (the default) or use density="compact":\n${where(offenders)}`
+  );
+});
+
+test("E: table cells use numeric, action and align instead of alignment and px classes", () => {
+  const offenders = openingTags("TableHead|TableCell").filter((t) =>
+    /(?<![\w:-])(?:text-right|text-left|tabular-nums|text-\[\d+px\])(?![\w-])/.test(t.tag)
+  );
+  assert.equal(offenders.length, 0, `use numeric / action / align="end":\n${where(offenders)}`);
+});

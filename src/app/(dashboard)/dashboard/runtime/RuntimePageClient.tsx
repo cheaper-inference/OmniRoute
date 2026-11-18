@@ -917,17 +917,17 @@ export default function RuntimePageClient() {
           ) : (
             <div className="mt-2">
               <Table
-                className="text-sm"
+                variant="plain"
+                density="compact"
                 scrollbarLabel={t("sessionsTitle")}
                 scrollLabel={t("sessionsTitle")}
-                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("tblSession")}</TableHead>
-                    <TableHead className="text-right">{t("tblAge")}</TableHead>
-                    <TableHead className="text-right">{t("tblIdle")}</TableHead>
-                    <TableHead className="text-right">{t("tblReqs")}</TableHead>
+                    <TableHead numeric>{t("tblAge")}</TableHead>
+                    <TableHead numeric>{t("tblIdle")}</TableHead>
+                    <TableHead numeric>{t("tblReqs")}</TableHead>
                     <TableHead>{t("tblBoundTo")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -935,24 +935,22 @@ export default function RuntimePageClient() {
                   {(health?.sessions?.top ?? []).map((s) => (
                     <TableRow key={s.sessionId}>
                       <TableCell>
-                        <span className="font-mono text-[11px] text-text-muted">
+                        <span className="font-mono text-text-muted">
                           {shortId(s.sessionId, 14)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
+                      <TableCell numeric className="text-text-muted">
                         {fmtMs(s.ageMs)}
                       </TableCell>
-                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
+                      <TableCell numeric className="text-text-muted">
                         {fmtMs(s.idleMs)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <span className="text-[11px] font-semibold tabular-nums">
-                          {s.requestCount}
-                        </span>
+                      <TableCell numeric>
+                        <span className="font-semibold">{s.requestCount}</span>
                       </TableCell>
                       <TableCell>
                         {s.connectionId ? (
-                          <span className="font-mono text-[10px] text-chart-2-ink">
+                          <span className="font-mono text-chart-2-ink">
                             {shortId(s.connectionId, 12)}
                           </span>
                         ) : (
