@@ -4,6 +4,7 @@ import { forwardRef, useState } from "react";
 import {
   Button as KitButton,
   type ButtonSize as KitSize,
+  type ButtonTone as KitTone,
   type ButtonVariant as KitVariant,
 } from "@omniroute/ui-kit/button";
 import { cn } from "@/shared/utils/cn";
@@ -21,7 +22,10 @@ export type ButtonVariant =
   | "danger"
   /** Quiet delete/revoke inside table rows and lists (kit #191). Confirmations stay `danger`. */
   | "destructive-ghost";
-export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
+/** `2xs` and `icon-2xs` are the kit's 24px dense sizes, for row and inline actions. */
+export type ButtonSize = "2xs" | "sm" | "md" | "lg" | "icon" | "icon-2xs" | "icon-sm";
+/** `muted`: muted resting ink that keeps the variant's hover (`ghost`, `outline`, `secondary`). */
+export type ButtonTone = KitTone;
 
 const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: string }> = {
   primary: { variant: "default" },
@@ -35,10 +39,12 @@ const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: s
 };
 
 const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {
+  "2xs": "2xs",
   sm: "sm",
   md: "default",
   lg: "lg",
   icon: "icon",
+  "icon-2xs": "icon-2xs",
   "icon-sm": "icon-sm",
 };
 
@@ -46,6 +52,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children?: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  tone?: ButtonTone;
   /** ICON_MAP name (resolved through <Icon>). */
   icon?: string;
   iconRight?: string;
@@ -54,7 +61,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
 }
 
-const ICON_SIZE: Record<ButtonSize, number> = { sm: 14, md: 16, lg: 18, icon: 20, "icon-sm": 16 };
+const ICON_SIZE: Record<ButtonSize, number> = {
+  "2xs": 14,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  icon: 20,
+  "icon-2xs": 14,
+  "icon-sm": 16,
+};
 
 /**
  * Legacy variant/size → kit props. Unknown strings (untyped JS callers, stale data) fall back
@@ -120,6 +135,7 @@ const LegacyKitButton = forwardRef<HTMLButtonElement, ButtonProps>(function Lega
     children,
     variant = "primary",
     size = "md",
+    tone,
     icon,
     iconRight,
     disabled = false,
@@ -139,6 +155,7 @@ const LegacyKitButton = forwardRef<HTMLButtonElement, ButtonProps>(function Lega
       type={type}
       variant={kit.variant}
       size={kit.size}
+      tone={tone}
       loading={loading}
       disabled={disabled || loading}
       className={cn(kit.className, fullWidth && "w-full", className)}
