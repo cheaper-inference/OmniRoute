@@ -13,6 +13,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -564,7 +565,7 @@ export default function DroidToolCard({
               </div>
 
               {showBackups && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
+                <CardSection className="mt-2">
                   <h4
                     className="ci-heading text-text-main mb-2 flex items-center gap-1"
                     data-size="xs"
@@ -600,7 +601,7 @@ export default function DroidToolCard({
                       ))}
                     </div>
                   )}
-                </div>
+                </CardSection>
               )}
             </>
           )}

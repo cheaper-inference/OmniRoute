@@ -15,6 +15,7 @@ import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -293,7 +294,7 @@ export default function KiloToolCard({
           {kiloStatus && !checkingKilo && (
             <div className="flex flex-col gap-4">
               {/* Runtime status */}
-              <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-subtle/50 border-border">
+              <CardSection className="flex items-start gap-3">
                 <Icon
                   name={cliReady ? "check_circle" : "warning"}
                   size={18}
@@ -318,7 +319,7 @@ export default function KiloToolCard({
                     </p>
                   )}
                 </div>
-              </div>
+              </CardSection>
 
               {cliReady && (
                 <>

@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import Notice from "@/shared/components/Notice";
 import CodePreview from "@/shared/components/CodePreview";
+import { CardSection } from "@/shared/components/Card";
 
 /** Pi loads this provider with its OpenAI-compatible transport. */
 const PI_PROVIDER_API = "openai-completions";
@@ -298,7 +299,7 @@ function runtimeHeadline(t, piStatus, cliReady) {
 
 function PiRuntimeStatus({ t, piStatus, cliReady }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-subtle/50 border-border">
+    <CardSection className="flex items-start gap-3">
       <Icon
         name={cliReady ? "check_circle" : "warning"}
         size={18}
@@ -317,13 +318,13 @@ function PiRuntimeStatus({ t, piStatus, cliReady }) {
           </p>
         )}
       </div>
-    </div>
+    </CardSection>
   );
 }
 
 function PiInstallHint({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
+    <CardSection>
       <p className="text-sm font-medium mb-1">{t("piInstallTitle")}</p>
       <p className="text-xs text-text-muted mb-2">{t("piInstallInstructions")}</p>
       <CodePreview showHeader={false} variant="surface" code={t("piInstallCommand")} />
@@ -335,7 +336,7 @@ function PiInstallHint({ t }) {
       >
         {t("openToolDocs")}
       </a>
-    </div>
+    </CardSection>
   );
 }
 
@@ -468,14 +469,14 @@ function PiMessageBanner({ message }) {
 /** Copy-paste fallback for remote/headless installs. */
 function PiManualPreview({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
+    <CardSection>
       <p className="text-xs font-medium text-text-muted mb-2">{t("piManualConfigTitle")}</p>
       <pre className="text-xs font-mono overflow-x-auto whitespace-pre text-text-main">
         {t("piManualConfigSample")}
       </pre>
       <p className="text-xs text-text-muted mt-2">{t("piManualConfigHint")}</p>
       <p className="text-xs text-text-muted mt-2">{t("piManualMergeHint")}</p>
-    </div>
+    </CardSection>
   );
 }
 

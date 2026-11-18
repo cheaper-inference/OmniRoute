@@ -16,6 +16,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 const SETTINGS_ENDPOINT = "/api/cli-tools/grok-build-settings";
 const PRESETS_KEY = "omniroute.grokBuildEndpointPresets";
@@ -621,7 +622,7 @@ export default function GrokBuildToolCard({
           </div>
 
           {showBackups && (
-            <div className="mt-2 rounded-lg border border-border bg-surface p-3">
+            <CardSection className="mt-2">
               <h4 className="ci-heading mb-2 flex items-center gap-1 text-text-main" data-size="xs">
                 <Icon name="history" size={14} />
                 {t("configBackups")}
@@ -654,7 +655,7 @@ export default function GrokBuildToolCard({
                   ))}
                 </div>
               )}
-            </div>
+            </CardSection>
           )}
         </div>
       )}

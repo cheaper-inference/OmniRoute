@@ -21,6 +21,7 @@ import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Notice from "@/shared/components/Notice";
 import CodePreview from "@/shared/components/CodePreview";
+import { CardSection } from "@/shared/components/Card";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -404,7 +405,7 @@ export default function ClaudeToolCard({
                   : t("installCliPrompt", { tool: "Claude" })}
               </Notice>
               {showInstallGuide && (
-                <div className="p-4 bg-surface border border-border rounded-lg">
+                <CardSection>
                   <h4 className="mb-3">{t("installationGuide")}</h4>
                   <div className="space-y-3 text-sm">
                     <div>
@@ -419,7 +420,7 @@ export default function ClaudeToolCard({
                       {t("afterInstallationRun")} <InlineCode>claude</InlineCode> {t("toVerify")}
                     </p>
                   </div>
-                </div>
+                </CardSection>
               )}
             </div>
           )}
@@ -595,7 +596,7 @@ export default function ClaudeToolCard({
 
               {/* Backups Section */}
               {showBackups && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
+                <CardSection className="mt-2">
                   <h4
                     className="ci-heading text-text-main mb-2 flex items-center gap-1"
                     data-size="xs"
@@ -631,7 +632,7 @@ export default function ClaudeToolCard({
                       ))}
                     </div>
                   )}
-                </div>
+                </CardSection>
               )}
             </>
           )}

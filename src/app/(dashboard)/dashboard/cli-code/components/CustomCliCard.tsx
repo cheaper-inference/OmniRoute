@@ -19,6 +19,7 @@ import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Badge from "@/shared/components/Badge";
 import IconChip from "@/shared/components/IconChip";
 import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 interface ModelOption {
   value: string;
@@ -311,7 +312,7 @@ export default function CustomCliCard({
             </div>
           </div>
 
-          <div className="rounded-lg border border-border/60 bg-bg-subtle p-3 text-xs text-text-muted">
+          <CardSection className="text-xs text-text-muted">
             <p className="font-medium text-text-main">
               {translateOrFallback("customCliEndpointHintLabel", "How to wire the endpoint")}
             </p>
@@ -322,7 +323,7 @@ export default function CustomCliCard({
                 { endpoint: chatCompletionsEndpoint }
               )}
             </p>
-          </div>
+          </CardSection>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="space-y-2">

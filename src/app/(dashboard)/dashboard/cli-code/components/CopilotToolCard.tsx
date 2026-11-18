@@ -20,6 +20,7 @@ import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Badge from "@/shared/components/Badge";
 import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 /**
  * GitHub Copilot Configuration Generator
@@ -402,13 +403,13 @@ export default function CopilotToolCard({
                 </pre>
 
                 {/* Usage instructions */}
-                <div className="mt-3 p-3 bg-bg-subtle rounded-lg border border-border">
+                <CardSection className="mt-3">
                   <p className="text-xs text-text-muted">
                     <span className="font-medium text-text-main">{t("copilotPasteInto")} </span>
                     <InlineCode>~/.config/Code/User/chatLanguageModels.json</InlineCode>
                   </p>
                   <p className="text-xs text-text-muted mt-1">{t("copilotReloadInstruction")}</p>
-                </div>
+                </CardSection>
               </div>
             )}
           </div>

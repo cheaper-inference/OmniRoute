@@ -17,6 +17,7 @@ import {
 import type { AgentBridgeConfig, ImportResult } from "@/lib/inspector/configPortability";
 import Notice from "@/shared/components/Notice";
 import IconChip from "@/shared/components/IconChip";
+import { CardSection } from "@/shared/components/Card";
 
 interface AgentBridgeMaintenanceCardProps {
   /** A crash left DNS spoof / CA / system proxy behind → surface the repair banner. */
@@ -326,7 +327,7 @@ export function AgentBridgeMaintenanceCard({
 
         {/* Diagnose report */}
         {report && (
-          <div className="mx-5 mb-4 rounded-control border border-border bg-bg-subtle p-3">
+          <CardSection className="mx-5 mb-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-medium">
               <Icon
                 name={report.healthy ? "check_circle" : "error"}
@@ -356,7 +357,7 @@ export function AgentBridgeMaintenanceCard({
                 </li>
               ))}
             </ul>
-          </div>
+          </CardSection>
         )}
       </Card>
 

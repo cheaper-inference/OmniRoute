@@ -346,3 +346,30 @@ test("F: a heading takes its size from ci-heading data-size, not from a text uti
     `use className="ci-heading" data-size="…":\n${where(offenders)}`
   );
 });
+
+// ── C. Inner panels: Card.Section ────────────────────────────────────────────────────────────
+
+const PANEL_EXCEPTIONS: Exception[] = [
+  {
+    file: "cli-code/components/CliCompanionPanel.tsx",
+    marker: "aria-labelledby={id}",
+    reason: "Top-level section of the page, not a panel nested in a card.",
+  },
+  {
+    file: "cli-code/components/CliProfileAutoSyncToggles.tsx",
+    marker: "bg-surface/40",
+    reason: "Top-level block of the page, not a panel nested in a card.",
+  },
+];
+
+test("C: a bordered panel inside a card is Card.Section", () => {
+  const offenders = openingTags("div|section").filter(
+    (t) =>
+      /(?<![\w:-])border-border(?:\/\d+)?(?![\w-])/.test(t.tag) &&
+      /(?<![\w:-])bg-(?:bg-subtle|surface)(?:\/\d+)?(?![\w-])/.test(t.tag) &&
+      BOX_RADIUS.test(t.tag) &&
+      /(?<![\w:-])p-[34](?![\w.-])/.test(t.tag) &&
+      !isException(PANEL_EXCEPTIONS, t)
+  );
+  assert.equal(offenders.length, 0, `use <Card.Section>:\n${where(offenders)}`);
+});

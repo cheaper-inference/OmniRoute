@@ -19,6 +19,7 @@ import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Notice from "@/shared/components/Notice";
 import CodePreview from "@/shared/components/CodePreview";
+import { CardSection } from "@/shared/components/Card";
 
 export default function CodexToolCard({
   tool,
@@ -493,7 +494,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   : t("installCodexPrompt")}
               </Notice>
               {showInstallGuide && (
-                <div className="p-4 bg-surface border border-border rounded-lg">
+                <CardSection>
                   <h4 className="mb-3">{t("installationGuide")}</h4>
                   <div className="space-y-3 text-sm">
                     <div>
@@ -515,7 +516,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       </p>
                     </div>
                   </div>
-                </div>
+                </CardSection>
               )}
             </div>
           )}
@@ -822,7 +823,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
               {/* Profiles Section */}
               {showProfiles && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
+                <CardSection className="mt-2">
                   <h4
                     className="ci-heading text-text-main mb-2 flex items-center gap-1"
                     data-size="xs"
@@ -890,12 +891,12 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       {t("saveCurrent")}
                     </Button>
                   </div>
-                </div>
+                </CardSection>
               )}
 
               {/* Backups Section */}
               {showBackups && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
+                <CardSection className="mt-2">
                   <h4
                     className="ci-heading text-text-main mb-2 flex items-center gap-1"
                     data-size="xs"
@@ -931,7 +932,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       ))}
                     </div>
                   )}
-                </div>
+                </CardSection>
               )}
             </>
           )}
