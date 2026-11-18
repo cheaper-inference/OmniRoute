@@ -475,6 +475,30 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
 });
 
+// The kit's two sub-12px label sizes (11px and 10px). The utilities exist so a small label can
+// name a token instead of `text-[11px]` / `text-[10px]`; the type-scale ratchet counts those.
+test("@theme inline exposes the kit 2xs and 3xs font sizes as text-2xs / text-3xs", async () => {
+  const tokens = read("packages/ui-kit/src/ci-tokens.css");
+  assert.match(tokens, /--ci-font-size-2xs:\s*0\.6875rem;/);
+  assert.match(tokens, /--ci-font-size-3xs:\s*0\.625rem;/);
+
+  // Compiled by the Tailwind of this checkout, from the real @theme block.
+  const { compile } = await import("tailwindcss");
+  const start = css.indexOf("@theme inline {");
+  const theme = css.slice(start, css.indexOf("\n}", start) + 2);
+  const compiled = await compile(`${theme}\n@tailwind utilities;`);
+  const out = compiled.build(["text-2xs", "text-3xs", "text-4xs"]).replace(/\s+/g, " ");
+  assert.ok(out.includes(".text-2xs { font-size: var(--ci-font-size-2xs); }"), out.slice(-400));
+  assert.ok(out.includes(".text-3xs { font-size: var(--ci-font-size-3xs); }"), out.slice(-400));
+  assert.ok(!out.includes(".text-4xs"), "an unknown size still generates nothing");
+
+  // cn() reads them as font sizes: they replace another size and leave a text colour alone.
+  const { cn } = await import("../../src/shared/utils/cn.ts");
+  assert.equal(cn("text-sm", "text-2xs"), "text-2xs");
+  assert.equal(cn("text-3xs", "text-xs"), "text-xs");
+  assert.equal(cn("text-text-muted", "text-3xs"), "text-text-muted text-3xs");
+});
+
 test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
   // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
   // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.

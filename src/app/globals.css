@@ -293,6 +293,11 @@ html:root[data-ci-appearance="editions"] {
   --font-sans: var(--ci-font-ui);
   --font-mono: var(--ci-font-code);
   --font-display: var(--ci-font-display);
+  /* The kit's two label sizes below `text-xs`: text-2xs (11px) and text-3xs (10px), for labels
+     only (running text stays at text-xs or larger). They replace the arbitrary pixel sizes the
+     type-scale ratchet counts (scripts/check/check-type-scale-ratchet.mjs). */
+  --text-2xs: var(--ci-font-size-2xs);
+  --text-3xs: var(--ci-font-size-3xs);
 
   /* Nested surface (enables bg-surface-2) */
   --color-surface-2: var(--surface-2);
