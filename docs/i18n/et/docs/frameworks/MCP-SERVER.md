@@ -20,6 +20,8 @@ Või avatud transpordiga:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline ja ühilduvate MCP klientide seadistamiseks.
 | `omniroute_rtk_discover`            | `read:compression`  | Avastage korduvat müra opt-in RTK väljundnäidistes                                                                              |
 | `omniroute_rtk_learn`               | `read:compression`  | Looge lubatud näidistest ülevaatav RTK -filtri mustand                                                                          |
 
-CCR kirjed kasutavad kahetasandilist salvestusruumi: kuum mälusisene tase, mida toetab kohalikel mittepilvede käitusaegadel vastupidav SQLite tasand (`ccr_blocks`, vaikimisi sees), nii et plokk jääb ellu väljatõstmise või taaskäivitamise, kuni selle TTL saab — otsa, välja arvatud plokid, mis on üle 512 pilve käitusaja KB, ja jäävad alles. Iga plokk on piiratud 2 MiB, iga põhiosa 16 MiB ja globaalne pood 64 MiB-ga. Kirjete vaikeväärtus on 24-tunnine TTL (maksimaalselt seitse päeva). Täielik MCP otsimine on piiratud 256 KiB; suuremad plokid jäävad kättesaadavaks vahemiku ja grep režiimide kaudu. Salvestus, otsimine, loetlemine, ülevaatus, kustutamine ja statistika on isoleeritud autentitud API-võtme põhimõttega. Auditikirjed sisaldavad räsi ja suuruse metaandmeid, mitte kunagi sisu. Operaatorile suunatud üksikasjad (kaks markerit, kliendi eeltingimused, `codemode:false`, tööriistapõhised ulatused, lehekülgede arv ja diagnostiline maatriks) asuvad [tihendusmootorites → Eeltingimused / operaatori juhend](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR -kirjed kasutavad kahetasandilist salvestusruumi: kuum mälutasand, mida toetab kohalikel mittepilvede käitusaegadel vastupidav SQLite tasand (`ccr_blocks`, vaikimisi sisse lülitatud), nii et plokk jääb üle väljatõstmise või taaskäivitamise, kuni selle TTL saab — otsa, välja arvatud plokid, mis on üle 512 mälu tööaja KB, ja `COMPRESSION_CCR_DURABLE_STORE=false`-ly. Püsiv kirjutamine on parim pingutus: see tühistatakse, kui 1000 kirjutust on juba ootel, ja ebaõnnestunud SQLite -kirjutamine logitakse, mitte ei proovita uuesti, nii et blokk läheb taaskäivitamisel kaotsi. Iga plokk on piiratud 2 MiB, iga põhiosa 16 MiB ja globaalne pood 64 MiB-ga. Kirjed on vaikimisi 24-tunnine TTL (maksimaalselt seitse päeva). Täielik MCP otsimine on piiratud 256 KiB; suuremad plokid jäävad kättesaadavaks vahemiku ja grep režiimide kaudu. Salvestus, otsimine, loetlemine, ülevaatus, kustutamine ja statistika on isoleeritud autentitud API-võtme põhimõttega. Auditikirjed sisaldavad räsi ja suuruse metaandmeid, mitte kunagi sisu. Operaatorile suunatud üksikasjad (kaks markerit, kliendi eeltingimused, `codemode:false`, tööriistapõhised ulatused, lehekülgede arv ja diagnostiline maatriks) asuvad [tihendusmootorites → Eeltingimused / operaatori juhend](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` teatab MCP kirjelduse tihendamisest eraldi `analytics.mcpDescriptionCompression` all. Need väärtused on metaandmete suuruse hinnangud MCP loendatavate kirjelduste jaoks (`tools`, `prompts`, `resources` ja `resourceTemplates`); need ei ole teenusepakkuja kasutuskviitungid ja on tähistatud tähisega `source: "mcp_metadata_estimate"`.
 
@@ -476,14 +478,14 @@ Südamelöögi hetktõmmis sisaldab:
 
 ## Auditi logimine
 
-Iga tööriistakõne logitakse SQLite `mcp_tool_audit` tabelisse faili `open-sse/mcp-server/audit.ts` poolt:
+Iga tööriistakutse logib SQLite `mcp_tool_audit` tabelisse `open-sse/mcp-server/audit.ts` poolt:
 
-- Tööriista nimi, argumendid (räsitud/kärbitud vastavalt tööriistapõhisele `auditLevel`-ile), tulemus
-- Kestus millisekundites, õnnestumise/ebaõnnestumise lipp, veateade (kui asjakohane)
+- Tööriista nimi, argumendid (hashed/truncated as per-tool `auditLevel`), tulemus
+- Kestus ms, success/failure lipp, veateade (kui see on kohaldatav)
 - API võtme räsi, ajatempel
-- Ulatuse keeldumised logitakse kujul `scope_denied:<põhjus>` koos puuduvate ulatuste loendiga
+- Ulatuse keelamised logitakse `scope_denied:<reason>` koos puuduva ulatuse loendiga
 
-Kasuta töölauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte, et vaadata viimaseid kõnesid.
+Kasutage viimaste kõnede kontrollimiseks armatuurlauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte.
 
 ---
 

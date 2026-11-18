@@ -38,14 +38,24 @@ export default function StackedAllocationBar({
     }
   }
 
+  const allocatedTotal = allocations.reduce((sum, alloc) => sum + (alloc.weight || 0), 0);
+
   return (
     <div className="mb-3">
-      <h4 className="text-[10px] uppercase tracking-wide font-bold text-text-muted mb-1.5">
-        {t("stackedBarTitle")}
-      </h4>
+      <h4 className="text-[10px] uppercase text-text-muted mb-1.5">{t("stackedBarTitle")}</h4>
 
-      {/* Stacked bar */}
-      <div className="flex h-3 rounded overflow-hidden w-full mb-2">
+      {/* Stacked bar: one segment per key; the spoken value is the total allocated share. */}
+      <div
+        role="progressbar"
+        aria-label={t("stackedBarTitle")}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.min(Math.max(allocatedTotal, 0), 100)}
+        aria-valuetext={allocations
+          .map((alloc) => `${keyLabels[alloc.apiKeyId] ?? alloc.apiKeyId}: ${alloc.weight}%`)
+          .join(", ")}
+        className="flex h-3 rounded overflow-hidden w-full mb-2"
+      >
         {allocations.map((alloc, i) => {
           const color = getSeriesColor(i);
           const keyUsage = perKeyMap[alloc.apiKeyId];

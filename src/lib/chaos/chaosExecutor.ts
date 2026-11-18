@@ -117,21 +117,41 @@ function resolveEffectiveRunParams(
 }
 
 /**
- * Resolve the best model ID for a provider connection.
- * Applies provider overrides from global chaos config if present.
+ * Resolve the model ID for a provider connection: an enabled override's `modelId`
+ * wins, then the connection's `defaultModel`. Returns `null` when neither is set —
+ * a provider id is not a model name, so it is never used as a fallback.
  */
 function resolveModelId(
   conn: { provider?: string; id?: string; defaultModel?: string | null },
   overrides: ChaosConfig["providerOverrides"]
-): string {
+): string | null {
   const override = overrides.find(
     (o) =>
       o.enabled &&
       (o.providerId.toLowerCase() === (conn.provider || "").toLowerCase() ||
         o.providerId.toLowerCase() === (conn.id || "").toLowerCase())
   );
-  if (override?.modelId) return override.modelId;
-  return conn.defaultModel || conn.provider || conn.id || "unknown";
+  const overrideModel = override?.modelId?.trim();
+  if (overrideModel) return overrideModel;
+  return conn.defaultModel?.trim() || null;
+}
+
+export const NO_MODEL_PARTICIPANT_ERROR =
+  "No model set for this provider. Set a model for it on the Chaos Mode page or a default model on the connection.";
+export const NO_MODEL_RUN_ERROR =
+  "No provider has a model set. Set a model for each provider on the Chaos Mode page or a default model on its connection.";
+
+/** A participant that could not be dispatched because it has no model; nothing is sent upstream. */
+function buildNoModelResult(provider: ProviderInfo): ModelResult {
+  return {
+    providerId: provider.id,
+    providerName: provider.name,
+    modelId: "",
+    status: "error",
+    content: null,
+    error: NO_MODEL_PARTICIPANT_ERROR,
+    durationMs: 0,
+  };
 }
 
 // ── Internal helpers — provider selection ───────────────────────────────────
@@ -293,8 +313,7 @@ async function dispatchToModel(
   const ctx = { providerId, providerName, modelId };
 
   try {
-    const model = modelId || providerId;
-    const request = buildDispatchRequest(model, messages, maxTokens, timeoutMs, apiKey);
+    const request = buildDispatchRequest(modelId, messages, maxTokens, timeoutMs, apiKey);
     const res = await chatDispatch.postChatCompletion(request);
     return await parseDispatchResponse(res, ctx, start);
   } catch (err: unknown) {
@@ -344,8 +363,9 @@ async function dispatchParallel(
   overrides: ChaosConfig["providerOverrides"],
   params: EffectiveRunParams
 ): Promise<ModelResult[]> {
-  const tasks = providers.map((p) => () => {
+  const tasks = providers.map((p) => async () => {
     const modelId = resolveModelId(p, overrides);
+    if (!modelId) return buildNoModelResult(p);
     const messages = buildMessages(params.effectiveSystemPrompt, input.task);
     return dispatchToModel(
       p.id,
@@ -381,6 +401,10 @@ async function dispatchCollaborative(
 
   for (const p of providers) {
     const modelId = resolveModelId(p, overrides);
+    if (!modelId) {
+      results.push(buildNoModelResult(p));
+      continue;
+    }
     const messages = buildMessages(params.effectiveSystemPrompt, context);
 
     const result = await dispatchToModel(
@@ -423,6 +447,10 @@ export async function executeChaosRun(input: ChaosRunInput): Promise<ChaosRunRes
   const globalConfig = await getChaosConfig();
   const params = resolveEffectiveRunParams(input, globalConfig);
   const { providers, enabledOverrides } = await selectChaosProviders(input, globalConfig);
+
+  if (!providers.some((p) => resolveModelId(p, enabledOverrides))) {
+    throw new Error(NO_MODEL_RUN_ERROR);
+  }
 
   const startedAt = new Date().toISOString();
   const results =

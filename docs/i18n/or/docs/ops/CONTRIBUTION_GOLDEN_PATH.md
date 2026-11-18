@@ -28,69 +28,61 @@
 6. **ପ୍ରମାଣ ଲିପିବଦ୍ଧ କରନ୍ତୁ।** PR templateରେ ଚଲାଯାଇଥିବା commands, ଯୋଡ଼ାଯାଇଥିବା କିମ୍ବା ପରିବର୍ତ୍ତିତ ପ୍ରତ୍ୟେକ test file,
    migrations କିମ୍ବା feature flags, ଏବଂ ଏପର୍ଯ୍ୟନ୍ତ pending ଥିବା ଯେକୌଣସି CI-only validation ତାଲିକାଭୁକ୍ତ କରନ୍ତୁ।
 
-## Change type ଅନୁଯାୟୀ Golden paths
+## ପରିବର୍ତ୍ତନ ପ୍ରକାର ଦ୍ୱାରା ସୁବର୍ଣ୍ଣ ପଥ।
 
-ନିମ୍ନର commandsଗୁଡ଼ିକ ସର୍ବନିମ୍ନ focused checks ଅଟେ, ଆପଣ ପରିବର୍ତ୍ତନ କରିଥିବା ଆଚରଣକୁ ସିଧାସଳଖ cover କରୁଥିବା
-testକୁ ଛାଡ଼ିଦେବା ପାଇଁ ଅନୁମତି ନୁହେଁ।
+ନିମ୍ନରେ ଥିବା ନିର୍ଦ୍ଦେଶଗୁଡ଼ିକ ହେଉଛି ସର୍ବନିମ୍ନ ଫୋକସ୍ ଚେକ୍, ଏକ ପରୀକ୍ଷଣକୁ ଏଡ଼ାଇବାକୁ ଅନୁମତି ନୁହେଁ ଯାହା ତୁମେ ବଦଳାଇଥିବା ଆଚରଣକୁ ସିଧାସଳଖ ଆବୃତ କରେ।
 
-### Provider
+### ପ୍ରଦାନକାରୀ।
 
-**Contracts**
+**ଚୁକ୍ତିନାମା**
 
-- `src/shared/constants/providers/`ରେ Provider definition ଏବଂ
-  `src/shared/constants/providers.ts`ରେ ତାହାର composition।
-- `open-sse/config/providerRegistry.ts` କିମ୍ବା ଏଥିରୁ extract କରାଯାଇଥିବା registry filesରେ models ଏବଂ capabilities।
-- ପ୍ରଯୋଜ୍ୟ ହେଲେ Executor/translator selection, OAuth କିମ୍ବା API-key configuration, dashboard assets, ଏବଂ generated
-  provider reference।
-- Public credentials ନିଶ୍ଚିତ ଭାବେ `resolvePublicCred()` ବ୍ୟବହାର କରିବା ଉଚିତ; error responses ନିଶ୍ଚିତ ଭାବେ shared sanitized
-  error helpers ବ୍ୟବହାର କରିବା ଉଚିତ। `docs/security/PUBLIC_CREDS.md` (git; `/docs`ରେ compile କରାଯାଇନାହିଁ) ଏବଂ
-  [Error Sanitization](../security/ERROR_SANITIZATION.md) ଦେଖନ୍ତୁ।
+- `src/shared/constants/providers/` ରେ ପ୍ରଦାନକାରୀ ସଂଜ୍ଞା ଏବଂ `src/shared/constants/providers.ts` ରେ ଏହାର ରଚନା।
+- `open-sse/config/providerRegistry.ts` କିମ୍ବା ଏହାର ବାହାର କରାଯାଇଥିବା ରେଜିଷ୍ଟ୍ରି ଫାଇଲରେ ମଡେଲ ଏବଂ ସାମର୍ଥ୍ୟ।
+- Executor/translator ଚୟନ, OAuth କିମ୍ବା API- କି ସଂରଚନା ଏବଂ ଡ୍ୟାସବୋର୍ଡ ସମ୍ପତ୍ତି। ପୁନ ener ନିର୍ମାଣ `docs/reference/PROVIDER_REFERENCE.md` କିମ୍ବା README ଚିତ୍ରଗୁଡ଼ିକ କର ନାହିଁ: ରିଲିଜ୍ ସତେଜ ସେମାନଙ୍କୁ ପୁନ r ଲିଖନ କରେ (`check:pr-derived-paths` ଏକ ବ feature ଶିଷ୍ଟ୍ୟ PR ବିଫଳ କରେ ଯାହା ସେମାନଙ୍କୁ ବହନ କରେ)।
+- ସର୍ବସାଧାରଣ ପରିଚୟପତ୍ର ନିଶ୍ଚିତ ଭାବରେ `resolvePublicCred()` ବ୍ୟବହାର କରିବ; ତ୍ରୁଟି ପ୍ରତିକ୍ରିୟା ନିଶ୍ଚିତ ଭାବରେ ଅଂଶୀଦାରିତ ପରିମଳ ତ୍ରୁଟି ସହାୟକକାରୀମାନଙ୍କୁ ବ୍ୟବହାର କରିବା ଉଚିତ। `docs/security/PUBLIC_CREDS.md` (git; `/docs` ରେ ସଂକଳିତ ନୁହେଁ) ଏବଂ [ତ୍ରୁଟି ସାନିଟାଇଜେସନ୍](../security/ERROR_SANITIZATION.md) ଦେଖନ୍ତୁ।
 
-**Focused loop**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # catalog ପରିବର୍ତ୍ତନ ହେଲେ; generated diffକୁ commit କରନ୍ତୁ
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-ପ୍ରଭାବିତ ପ୍ରତ୍ୟେକ request familyକୁ ମଧ୍ୟ test କରନ୍ତୁ: chat, Responses, images, embeddings, audio, କିମ୍ବା video।
-Generated catalog ଏବଂ golden diffsକୁ contract changes ଭାବରେ review କରନ୍ତୁ; ସେଗୁଡ଼ିକୁ ଅନ୍ଧ ଭାବରେ ଗ୍ରହଣ କରନ୍ତୁ ନାହିଁ।
+ପ୍ରତ୍ୟେକ ପ୍ରଭାବିତ ଅନୁରୋଧ ପରିବାରକୁ ମଧ୍ୟ ପରୀକ୍ଷା କରନ୍ତୁ: ଚାଟ୍, ପ୍ରତିକ୍ରିୟା, ପ୍ରତିଛବି, ଏମ୍ବେଡିଂ, ଅଡିଓ, କିମ୍ବା ଭିଡିଓ। ଚୁକ୍ତିନାମା ପରିବର୍ତ୍ତନ ପରି ଉତ୍ପାଦିତ କାଟାଲଗ୍ ଏବଂ ସୁବର୍ଣ୍ଣ ଭିନ୍ନତାକୁ ସମୀକ୍ଷା କରନ୍ତୁ; ସେମାନଙ୍କୁ ଅନ୍ଧ ଭାବରେ ଗ୍ରହଣ କର ନାହିଁ।
 
-### Routing
+### ମାର୍ଗ
 
-**Contracts**
+**ଚୁକ୍ତିନାମା**
 
-- `src/shared/constants/routingStrategies.ts`ରେ Public strategy values ଏବଂ UI metadata।
-- `open-sse/services/combo.ts` ଏବଂ `open-sse/services/combo/` ଅଧୀନରେ dispatch ଏବଂ ordering।
-- Combo schemas, persistence, resilience state, model capabilities, ଏବଂ API/UI controls।
-- ଆଚରଣ ପରିବର୍ତ୍ତନ ହେଲେ [Auto-Combo Engine](../routing/AUTO-COMBO.md) ଏବଂ resilience documentation।
+- ସର୍ବସାଧାରଣ ରଣନୀତି ମୂଲ୍ୟ ଏବଂ `src/shared/constants/routingStrategies.ts` ରେ UI ମେଟାଡାଟା।
+- `open-sse/services/combo.ts` ଏବଂ `open-sse/services/combo/` ଅଧୀନରେ ପଠାନ୍ତୁ ଏବଂ ଅର୍ଡର କରନ୍ତୁ।
+- କମ୍ବୋ ସ୍କିମା, ସ୍ଥିରତା, ସ୍ଥିରତା ସ୍ଥିତି, ମଡେଲ କ୍ଷମତା, ଏବଂ API/UI ନିୟନ୍ତ୍ରଣ।
+- ଆଚରଣ ପରିବର୍ତ୍ତନ ହେଲେ [ଅଟୋ-କମ୍ବୋ ଇଞ୍ଜିନ୍](../routing/AUTO-COMBO.md) ଏବଂ ସ୍ଥିରତା ଡକ୍ୟୁମେଣ୍ଟେସନ୍।
 
-**Focused loop**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategy କିମ୍ବା dispatch ପରିବର୍ତ୍ତନ
-npm run check:known-symbols      # strategy registration ପରିବର୍ତ୍ତନ
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-ସ୍ଥାନୀୟ ଭାବେ deterministic mocked-upstream tests ବ୍ୟବହାର କରନ୍ତୁ। Live combo smokes ପାଇଁ credentials ଆବଶ୍ୟକ ଏବଂ ସେଗୁଡ଼ିକ
-manual, CIର ବିକଳ୍ପ ନୁହେଁ।
+ସ୍ଥାନୀୟ ଭାବରେ ସ୍ଥିରିକୃତ ମକ୍-ଅପଷ୍ଟ୍ରିମ୍ ପରୀକ୍ଷା ବ୍ୟବହାର କରନ୍ତୁ। ଲାଇଭ୍ କମ୍ବୋ ଧୂଆଁଗୁଡ଼ିକ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ କରେ ଏବଂ ମାନୁଆଲ୍, CI ବିକଳ୍ପ ନୁହେଁ।
 
 ### UI / UX
 
-**Contracts**
+**ଚୁକ୍ତିନାମା**
 
-- `src/app/` ଏବଂ `src/shared/components/` ଅଧୀନରେ Next.js route/page ଏବଂ shared component boundaries।
-- API response shapes, loading/empty/error states, keyboard ଏବଂ screen-reader ଆଚରଣ,
-  responsive layout, theming, ଏବଂ locale expansion।
-- `src/i18n/messages/en.json`ରେ English UI source strings; ନୂତନ user-facing copyକୁ hard-code କରନ୍ତୁ ନାହିଁ।
+- Next.js route/page ଏବଂ `src/app/` ଏବଂ `src/shared/components/` ଅନ୍ତର୍ଗତ ଅଂଶୀଦାର ଉପାଦାନ ସୀମା।
+- API ପ୍ରତିକ୍ରିୟା ଆକୃତି, loading/empty/error ଅବସ୍ଥା, କୀବୋର୍ଡ୍ ଏବଂ ସ୍କ୍ରିନ୍-ରିଡର୍ ଆଚରଣ, ପ୍ରତିକ୍ରିୟାଶୀଳ ଲେଆଉଟ୍, ଥିମ୍, ଏବଂ ଲୋକାଲ୍ ବିସ୍ତାର।
+- `src/i18n/messages/en.json` ରେ ଇଂରାଜୀ UI ଉତ୍ସ ଷ୍ଟ୍ରିଙ୍ଗ୍; ନୂତନ ଉପଭୋକ୍ତା-ମୁହାଁ କପି ହାର୍ଡ-କୋଡ୍ କରନ୍ତୁ ନାହିଁ।
 
-**Focused loop**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -99,68 +91,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interaction କିମ୍ବା visual ପରିବର୍ତ୍ତନ ପାଇଁ app ଚଲାନ୍ତୁ ଏବଂ ଉଭୟ narrow ଓ wide viewports ଯାଞ୍ଚ କରନ୍ତୁ। CI
-production build ଏବଂ broader suites ଚଲାଏ; visual ଆଚରଣ ପାଇଁ ତଥାପି ପରିବର୍ତ୍ତନ ଅନୁଯାୟୀ ଏକ focused component, Playwright,
-କିମ୍ବା ଲିପିବଦ୍ଧ manual check ଆବଶ୍ୟକ।
+ପାରସ୍ପରିକ କ୍ରିୟା କିମ୍ବା ଭିଜୁଆଲ୍ ପରିବର୍ତ୍ତନ ପାଇଁ ଆପ୍ ଚଲାନ୍ତୁ ଏବଂ ଉଭୟ ସଂକୀର୍ଣ୍ଣ ଏବଂ ପ୍ରଶସ୍ତ ଦୃଶ୍ୟ ଯାଞ୍ଚ କରନ୍ତୁ। CI ଉତ୍ପାଦନ ନିର୍ମାଣ ଏବଂ ବ୍ୟାପକ ସୁଟ୍ ଚଲାଇଥାଏ। ଭିଜୁଆଲ୍ ଆଚରଣ ତଥାପି ପରିବର୍ତ୍ତନ ପାଇଁ ଉପଯୁକ୍ତ ଏକ ଫୋକସ୍ ଉପାଦାନ, Playwright, କିମ୍ବା ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଥିବା ମାନୁଆଲ୍ ଯାଞ୍ଚ ଆବଶ୍ୟକ କରେ।
 
 ### i18n
 
-**Contracts**
+**ଚୁକ୍ତିନାମା**
 
-- `src/i18n/messages/en.json` ହେଉଛି UI source; `config/i18n.json` ହେଉଛି locale source।
-- CLI catalogs ପୃଥକ ଭାବରେ `bin/cli/locales/` ଅଧୀନରେ ରହେ।
-- ICU placeholders ଏବଂ tagsକୁ ଅବିକଳ ସଂରକ୍ଷଣ କରନ୍ତୁ। Product/provider/model names,
-  protocol ଏବଂ header names, commands, code/JSON identifiers, URLs, environment variables, କିମ୍ବା
-  `OmniRoute`, `OAuth`, `MCP`, ଏବଂ `A2A` ପରି protected termsକୁ ଅନୁବାଦ କରନ୍ତୁ ନାହିଁ। ବର୍ତ୍ତମାନର source list ହେଉଛି
-  `scripts/i18n/glossary/protected-terms.json`।
+- `src/i18n/messages/en.json` ହେଉଛି UI ଉତ୍ସ; `config/i18n.json` ହେଉଛି ସ୍ଥାନୀୟ ଉତ୍ସ।
+- CLI ତାଲିକାଗୁଡ଼ିକ `bin/cli/locales/` ଅଧୀନରେ ପୃଥକ ଭାବରେ ବାସ କରନ୍ତି।
+- ICU ସ୍ଥାନଧାରୀ ଏବଂ ଟ୍ୟାଗ୍ଗୁଡ଼ିକୁ ସଠିକ୍ ଭାବରେ ସଂରକ୍ଷଣ କରନ୍ତୁ। product/provider/model ନାମ, ପ୍ରୋଟୋକଲ୍ ଏବଂ ହେଡର୍ ନାମ, ନିର୍ଦ୍ଦେଶ, code/JSON ପରିଚାୟକ, URLs, ପରିବେଶ ଭେରିଏବଲ୍, କିମ୍ବା ସଂରକ୍ଷିତ ଶବ୍ଦ ଯେପରିକି `OmniRoute`, `OAuth`, `MCP`, ଏବଂ `A2A` ଅନୁବାଦ କରନ୍ତୁ ନାହିଁ। ସାମ୍ପ୍ରତିକ ଉତ୍ସ ତାଲିକା ହେଉଛି `scripts/i18n/glossary/protected-terms.json`।
 
-**Focused loop**
+ଏକ ବ feature ଶିଷ୍ଟ୍ୟ PR କେବଳ `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`) ସଂପାଦନ କରେ। ରିଲିଜ୍ ରିଫ୍ରେସ୍ କିମ୍ବା ଏକ ଅନୁବାଦ ତରଙ୍ଗ (`docs/guides/I18N.md` → "କେବଳ ବ q ଶିଷ୍ଟ୍ୟ PRs ସ୍ପର୍ଶ `en.json` ") ଦ୍ release ାରା ରିଲିଜ୍ ପ୍ରତି ଥରେ ଅନ୍ୟ ଲୋକାଲ୍ ସମାପ୍ତ ହୁଏ। `npm run check:pr-derived-paths` ଏକ ବ feature ଶିଷ୍ଟ୍ୟ PR ବିଫଳ କରେ ଯାହା ଅନ୍ୟ ଏକ ଲୋକାଲ୍ କାଟାଲଗ୍ ଏଡିଟ୍ କରେ।
+
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI strings/catalogs ପରିବର୍ତ୍ତନ ହେଲେ
 npm run lint
 ```
 
-ଏହା ବିଦ୍ୟମାନ system ପାଇଁ ମାର୍ଗଦର୍ଶନ, ତାହାର tooling କିମ୍ବା key model ବିସ୍ତାର କରିବା ପାଇଁ ଆମନ୍ତ୍ରଣ ନୁହେଁ।
-Replacement systemର design ଚାଲିଥିବା ସମୟରେ i18n patchesକୁ ଅତ୍ୟନ୍ତ ସୀମିତ ରଖନ୍ତୁ। Taskଟି ସ୍ପଷ୍ଟ ଭାବରେ generated translations ଆବଶ୍ୟକ ନକରିଲେ ଏବଂ
-ଆପଣ resulting diffକୁ review କରିନଥିଲେ, external servicesକୁ call କରୁଥିବା translation
-commands ଚଲାନ୍ତୁ ନାହିଁ।
+`--mode=pr` ବିନା ଏହି ଗେଟ୍ ଗୁଡିକ ସ୍ଥାନୀୟ ଭାବରେ ରିଲିଜ୍ ମୋଡ୍ ରେ ଚାଲିଥାଏ ଏବଂ `en.json` ରେ ଚକ୍ର ଯୋଡାଯାଇଥିବା କିମ୍ବା ପୁନ r ଲିଖନ କରୁଥିବା ପ୍ରତ୍ୟେକ ଚାବିକୁ ରିପୋର୍ଟ କରେ। ତାହା ହେଉଛି ରିଲିଜ୍ ସତେଜ କାର୍ଯ୍ୟ, ତୁମର PR ର ନୁହେଁ।
+
+ବିଦ୍ୟମାନ ସିଷ୍ଟମ ପାଇଁ ଏହା ଏକ ମାର୍ଗଦର୍ଶିକା, ଏହାର ସାଧନ କିମ୍ବା କି ମଡେଲକୁ ବିସ୍ତାର କରିବାକୁ ଆମନ୍ତ୍ରଣ ନୁହେଁ। ରିପ୍ଲେସମେଣ୍ଟ ସିଷ୍ଟମ ଡିଜାଇନ୍ ହୋଇଥିବାବେଳେ i18n ପ୍ୟାଚ୍ ସର୍ଜିକାଲ୍ ରଖନ୍ତୁ। ଅନୁବାଦ ନିର୍ଦ୍ଦେଶଗୁଡିକ ଚଲାନ୍ତୁ ନାହିଁ ଯାହା ବାହ୍ୟ ସେବାକୁ କଲ୍ କରେ ଯଦି ଟାସ୍କ ସ୍ପଷ୍ଟ ଭାବରେ ଉତ୍ପାଦିତ ଅନୁବାଦଗୁଡିକ ଆବଶ୍ୟକ କରେ ନାହିଁ ଏବଂ ଆପଣ ଫଳାଫଳର ଭିନ୍ନତାକୁ ସମୀକ୍ଷା କରିଛନ୍ତି।
 
 ### CLI
 
-**Contracts**
+**ଚୁକ୍ତିନାମା**
 
-- `bin/cli/` ଭିତରେ ଥିବା ସାର୍ବଜନୀନ କମାଣ୍ଡ ଏବଂ ଫ୍ଲାଗ୍, ଉତ୍ପାଦିତ API କମାଣ୍ଡ, exit code, stdout/stderr ଏବଂ
-  JSON ଆଉଟପୁଟ୍ ଆକୃତି, config/environment ଆଚରଣ, ଏବଂ ପ୍ୟାକେଜ୍ ହୋଇଥିବା ଫାଇଲ୍ଗୁଡ଼ିକ।
-- CLI ବ୍ୟବହାରକାରୀଙ୍କୁ ଦୃଶ୍ୟମାନ ଷ୍ଟ୍ରିଙ୍ଗ୍ଗୁଡ଼ିକ ନିଶ୍ଚିତ ଭାବେ CLI i18n ସ୍ତର ବ୍ୟବହାର କରିବା ଉଚିତ ଏବଂ `en`/`pt-BR` କ୍ୟାଟାଲଗ୍ଗୁଡ଼ିକୁ ସମନ୍ୱିତ ରଖିବା ଉଚିତ।
-- ସମର୍ଥିତ runtime ଭାବରେ Node ଏବଂ ପ୍ରକାଶିତ binary contract କୁ ସଂରକ୍ଷିତ ରଖନ୍ତୁ।
+- `bin/cli/` ରେ ସାର୍ବଜନୀନ ନିର୍ଦ୍ଦେଶ ଏବଂ ପତାକା, API ନିର୍ଦ୍ଦେଶ, ନିର୍ଗତ କୋଡ୍, stdout/stderr ଏବଂ JSON ଆଉଟପୁଟ୍ ଆକୃତି, config/environment ଆଚରଣ, ଏବଂ ପ୍ୟାକେଜ୍ ଫାଇଲଗୁଡିକ ସୃଷ୍ଟି।
+- CLI ଉପଭୋକ୍ତା ମୁହାଁ ହୋଇଥିବା ଷ୍ଟ୍ରିଙ୍ଗଗୁଡ଼ିକ ନିଶ୍ଚିତ ଭାବରେ CLI i18n ସ୍ତର (`t()` କିଗୁଡ଼ିକ `bin/cli/locales/en.json` ରେ ବିଦ୍ୟମାନ) ବ୍ୟବହାର କରିବା ଜରୁରୀ। ଏକ ବ feature ଶିଷ୍ଟ୍ୟ PR କେବଳ `en.json` ସଂପାଦନ କରେ; `pt-BR` ଏବଂ ଅନ୍ୟାନ୍ୟ ଲୋକାଲ୍ ରିଲିଜ୍ ସମୟରେ ସମାପ୍ତ ହୋଇଛି।
+- ସମର୍ଥିତ ଚାଲିବା ସମୟ ଏବଂ ପ୍ରକାଶିତ ବାଇନାରୀ ଚୁକ୍ତି ଭାବରେ ନୋଡ୍ ସଂରକ୍ଷଣ କରନ୍ତୁ।
 
-**କେନ୍ଦ୍ରିତ ଲୁପ୍**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ଉତ୍ପାଦିତ/ବଣ୍ଡଲ୍ ହୋଇଥିବା CLI ପରିବର୍ତ୍ତନ
-npm run check:pack-policy     # ପ୍ୟାକେଜ୍ର ସାର୍ବଜନୀନ ପୃଷ୍ଠର ପରିବର୍ତ୍ତନ
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-ଯେତେବେଳେ ଆଚରଣ parsing, ଫାଇଲ୍ କିମ୍ବା exit status ଉପରେ ନିର୍ଭର କରେ, ସେତେବେଳେ ଏକ ଅସ୍ଥାୟୀ data directory ମଧ୍ୟରେ ଠିକ୍ ସେହି କମାଣ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ। CI ଅଧିକ ବ୍ୟାପକ package artifact ଏବଂ ecosystem ଯାଞ୍ଚଗୁଡ଼ିକ ସମ୍ପାଦନ କରେ।
+ଯେତେବେଳେ ଆଚରଣ ବିଶ୍ଳେଷଣ, ଫାଇଲ, କିମ୍ବା ପ୍ରସ୍ଥାନ ସ୍ଥିତି ଉପରେ ନିର୍ଭର କରେ, ଏକ ଅସ୍ଥାୟୀ ଡାଟା ଡିରେକ୍ଟୋରୀରେ ସଠିକ୍ ନିର୍ଦ୍ଦେଶ ବ୍ୟବହାର କରନ୍ତୁ। CI ବିସ୍ତୃତ ପ୍ୟାକେଜ୍ ଆର୍ଟିଫାକ୍ଟ ଏବଂ ଇକୋସିଷ୍ଟମ୍ ଯାଞ୍ଚ କରିଥାଏ।
 
 ### ଡାଟାବେସ୍
 
-**ଚୁକ୍ତିଗୁଡ଼ିକ**
+**ଚୁକ୍ତିନାମା**
 
-- `src/lib/db/` ଅଧୀନରେ ଥିବା domain module ଗୁଡ଼ିକ; ନିର୍ଦ୍ଦିଷ୍ଟ module ଗୁଡ଼ିକୁ ସିଧାସଳଖ import କରନ୍ତୁ (ପୁରୁଣା `localDb.ts` re-export ସ୍ତରକୁ ହଟାଇ ଦିଆଯାଇଛି)।
-- `src/lib/db/migrations/` ଅଧୀନରେ ଥିବା କ୍ରମାଙ୍କିତ, idempotent SQL migration, transaction ସୁରକ୍ଷା, upgrade
-  ଆଚରଣ, index, ଏବଂ schema ଦ୍ୱାରା ପ୍ରଭାବିତ ପ୍ରତ୍ୟେକ caller।
-- Route ଏବଂ handler ଗୁଡ଼ିକ କେବେ ମଧ୍ୟ ସିଧାସଳଖ raw SQL ଜାରି କରନ୍ତି ନାହିଁ।
+- `src/lib/db/` ଅନ୍ତର୍ଗତ ଡୋମେନ୍ ମଡ୍ୟୁଲ୍; ସିଧାସଳଖ ନିର୍ଦ୍ଦିଷ୍ଟ ମଡ୍ୟୁଲଗୁଡିକ ଆମଦାନୀ କରନ୍ତୁ (ପୁରୁଣା `localDb.ts` ପୁନ - ରପ୍ତାନି ସ୍ତର ଅପସାରିତ ହୋଇଛି)।
+- ସଂଖ୍ୟା କିମ୍ବା `src/lib/db/migrations/` ସହିତ SQL ମଧ୍ଯ ବ୍ୟବହାର କରି।
+- ମାର୍ଗ ଏବଂ ନିୟନ୍ତ୍ରକମାନେ କଞ୍ଚା SQL ସିଧାସଳଖ ପ୍ରଦାନ କରନ୍ତି ନାହିଁ।
 
-**କେନ୍ଦ୍ରିତ ଲୁପ୍**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 npm run check:migration-numbering
@@ -170,32 +157,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-ଏକ migration ଯୋଡ଼ିବା ସମୟରେ ଉଭୟ ନୂତନ database ଏବଂ ପୂର୍ବ schema ରୁ upgrade କୁ ପରୀକ୍ଷା କରନ୍ତୁ। Database ପରୀକ୍ଷାଗୁଡ଼ିକ
-ନିଶ୍ଚିତ ଭାବେ handle ଗୁଡ଼ିକୁ ବନ୍ଦ କରିବା ଏବଂ cleanup ସମୟରେ `resetDbInstance()` କଲ୍ କରିବା ଉଚିତ। ସର୍ବୋତ୍ତମ-ପ୍ରୟାସ Bun adapter path ପରିବର୍ତ୍ତିତ ହେଲେ ମାତ୍ର `npm run test:bun:db` ଚଲାନ୍ତୁ; Node ପ୍ରାମାଣିକ ରହିବ।
+ଏକ ନୂତନ ଡାଟାବେସ୍ ପରୀକ୍ଷା କରନ୍ତୁ ଏବଂ ସ୍ଥାନାନ୍ତରଣ ଯୋଡିବାବେଳେ ପୂର୍ବ ସ୍କିମାରୁ ଅପଗ୍ରେଡ୍ କରନ୍ତୁ। ଡାଟାବେସ୍ ପରୀକ୍ଷଣ ନିଶ୍ଚିତ ଭାବରେ ହ୍ୟାଣ୍ଡେଲଗୁଡିକ ବନ୍ଦ କରିବା ଏବଂ ସଫେଇ ସମୟରେ `resetDbInstance()` କଲ୍ କରିବା ଆବଶ୍ୟକ। `npm run test:bun:db` ଚଲାନ୍ତୁ ଯେତେବେଳେ ସର୍ବୋତ୍ତମ-ପ୍ରୟାସ Bun ଆଡାପ୍ଟର ପଥ ପରିବର୍ତ୍ତନ ହୁଏ; ନୋଡ୍ ପ୍ରାଧିକୃତ ରହିଥାଏ।
 
-### Build / deploy
+### ନିର୍ମାଣ / ନିୟୋଜନ।
 
-**ଚୁକ୍ତିଗୁଡ଼ିକ**
+**ଚୁକ୍ତିନାମା**
 
-- Root ଏବଂ workspace manifest/lockfile, `scripts/build/`, Next.js standalone assembly, `dist/`
-  ପ୍ୟାକେଜ୍ ବିଷୟବସ୍ତୁ, Electron platform metadata, CI workflow, ଏବଂ deployment sentinel।
-- ସମର୍ଥିତ Node range ଏବଂ `CLAUDE.md` ରେ ଅନୁମୋଦିତ ତାଲିକାରେ ଥିବା Bun ବ୍ୟବହାର ଅକ୍ଷୁଣ୍ଣ ରହିବା ଆବଶ୍ୟକ।
-- Build artifact ଗୁଡ଼ିକ untracked ରହିବ; dependency, license, workflow, ଏବଂ package policy ଲାଗୁ ହେବ।
+- ରୁଟ୍ ଏବଂ ୱାର୍କସ୍ପେସ୍ manifests/lockfile, `scripts/build/`, Next.js ଷ୍ଟାଣ୍ଡାଲୋନ୍ ଆସେମ୍ବଲି, `dist/` ପ୍ୟାକେଜ୍ ବିଷୟବସ୍ତୁ, Electron ପ୍ଲାଟଫର୍ମ ମେଟାଡାଟା, CI ୱାର୍କଫ୍ଲୋ, ଏବଂ ନିୟୋଜନ ସେଣ୍ଟିନେଲ।
+- ସମର୍ଥିତ ନୋଡ ପରିସର ଏବଂ `CLAUDE.md` ରେ ଅନୁମତି-ତାଲିକାଭୁକ୍ତ Bun ବ୍ୟବହାର ନିଶ୍ଚିତ ଭାବରେ ଅକ୍ଷୁର୍ଣ୍ଣ ରହିବ।
+- କଳାକୃତି ନିର୍ମାଣ ଅନାବଶ୍ୟକ ରୁହନ୍ତୁ; ନିର୍ଭରଶୀଳତା, ଲାଇସେନ୍ସ, କାର୍ଯ୍ୟଧାରା, ଏବଂ ପ୍ୟାକେଜ୍ ନୀତି ପ୍ରଯୁଜ୍ୟ।
 
-**କେନ୍ଦ୍ରିତ ଲୁପ୍**
+**ଫୋକସ୍ ହୋଇଥିବା ଲୁପ୍।**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # dependency କିମ୍ବା lockfile ପରିବର୍ତ୍ତନ
-npm run check:pack-policy      # ପ୍ରକାଶିତ ପ୍ୟାକେଜ୍ର ସାର୍ବଜନୀନ ପୃଷ୍ଠର ପରିବର୍ତ୍ତନ
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-ପରିବର୍ତ୍ତନଟି compilation, standalone assembly, asset,
-କିମ୍ବା runtime bundling କୁ ପ୍ରଭାବିତ କଲେ ମାତ୍ର ସ୍ଥାନୀୟ ଭାବରେ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ। କେବଳ release/deploy validation ପାଇଁ `npm run build:release` ବ୍ୟବହାର କରନ୍ତୁ। CI ର build ହେଉଛି
-ଅନ୍ତିମ cross-platform ସଙ୍କେତ; platform-specific Electron ପରିବର୍ତ୍ତନ ପାଇଁ ସମ୍ପର୍କିତ କେନ୍ଦ୍ରିତ build
-କିମ୍ବା smoke ପ୍ରମାଣ ଆବଶ୍ୟକ।
+`npm run build` ସ୍ଥାନୀୟ ଭାବରେ ବ୍ୟବହାର କରନ୍ତୁ ଯେତେବେଳେ ପରିବର୍ତ୍ତନ ସଂକଳନ, ସ୍ୱତନ୍ତ୍ର ସଭା, ସମ୍ପତ୍ତି, କିମ୍ବା ଚାଲିବା ସମୟ ବଣ୍ଡଲିଂ ଉପରେ ପ୍ରଭାବ ପକାଇଥାଏ। କେବଳ release/deploy valid ଧତା ପାଇଁ `npm run build:release` ବ୍ୟବହାର କରନ୍ତୁ। CI ର ନିର୍ମାଣ ହେଉଛି ଅନ୍ତିମ କ୍ରସ୍ ପ୍ଲାଟଫର୍ମ ସଙ୍କେତ; ପ୍ଲାଟଫର୍ମ ନିର୍ଦ୍ଦିଷ୍ଟ Electron ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ମେଳ ଖାଉଥିବା ବିଲ୍ଡ କିମ୍ବା ଧୂଆଁ ପ୍ରମାଣ ଆବଶ୍ୟକ କରେ।
 
 ## ସହଭାଗୀ ମେସିନ୍ ପାଇଁ ଡେଭେଲପର୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକ
 

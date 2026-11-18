@@ -239,20 +239,47 @@ test("token-array input is rejected instead of being silently dropped", async ()
   }
 });
 
-test("unsupported output options are rejected instead of ignored", async () => {
-  for (const extra of [{ encoding_format: "base64" }, { dimensions: 1536 }]) {
-    const calls: Array<Record<string, unknown>> = [];
-    mockClova(calls);
-    try {
-      const result = await handleEmbedding({
-        body: { model: "clova-studio/clova-embedding-v2", input: "text", ...extra },
-        credentials: { apiKey: "test-key" },
-      });
-      assert.equal(result.success, false);
-      assert.equal((result as { status: number }).status, 400);
-      assert.equal(calls.length, 0);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+test("a fixed-size dimensions request is rejected instead of ignored", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  mockClova(calls);
+  try {
+    const result = await handleEmbedding({
+      body: { model: "clova-studio/clova-embedding-v2", input: "text", dimensions: 1536 },
+      credentials: { apiKey: "test-key" },
+    });
+    assert.equal(result.success, false);
+    assert.equal((result as { status: number }).status, 400);
+    assert.equal(calls.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("encoding_format base64 returns little-endian float32 base64 vectors", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  mockClova(calls);
+  try {
+    const result = await handleEmbedding({
+      body: {
+        model: "clova-studio/clova-embedding-v2",
+        input: ["ab", "c"],
+        encoding_format: "base64",
+      },
+      credentials: { apiKey: "test-key" },
+    });
+    assert.equal(result.success, true, JSON.stringify(result));
+    // The mock answers [text.length, 1, 2] per text; the upstream body never carries the field.
+    assert.deepEqual(
+      calls.map((c) => Object.keys(c)),
+      [["text"], ["text"]]
+    );
+    const vectors = (result as { data: { data: Array<{ embedding: unknown }> } }).data.data.map(
+      (d) => d.embedding
+    );
+    const pack = (values: number[]) =>
+      Buffer.from(new Float32Array(values).buffer).toString("base64");
+    assert.deepEqual(vectors, [pack([2, 1, 2]), pack([1, 1, 2])]);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });

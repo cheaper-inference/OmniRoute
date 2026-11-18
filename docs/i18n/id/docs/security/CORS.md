@@ -117,32 +117,10 @@ Origin dicocokkan tanpa membedakan huruf besar-kecil dan garis miring di akhir d
 dapat ditetapkan saat runtime melalui **Dashboard → Security → CORS Allowed Origins** tanpa perlu
 memulai ulang.
 
-## Kunci API vs sesi cookie
+## kunci API vs sesi cookie
 
-- **Bearer / `x-api-key` (permukaan inferensi `/v1/*`):** browser tidak pernah menyertakan
-  ini secara otomatis. CORS bukanlah penghalang yang berarti di sini — kunci API-lah yang menjadi
-  penghalang — karena itu permukaan ini sengaja dibuat permisif agar klien browser dan
-  Electron dapat membaca respons yang memang berhak mereka akses.
-  Echo yang dilonggarkan mengikuti kunci yang tervalidasi, bukan sekadar keberadaan
-  header: ketika `REQUIRE_API_KEY=false` melayani permintaan secara anonim, respons
-  suksesnya tetap memakai daftar izin fail-closed. Penolakan autentikasi (401) tetap dapat
-  dibaca agar klien dapat menampilkan kunci yang dicabut atau salah ketik (#5242): 401
-  milik pipeline sendiri mempertahankan echo, dan rute yang menolak kunci itu sendiri
-  setelah pipeline melayaninya sebagai anonim (`/v1/models` dan `/v1beta/models` dengan
-  autentikasi manajemen yang dikonfigurasi, rute `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` yang dibatasi per pemilik, serta rute kandidat
-  auto-combo) menambahkan echo ke 401 tersebut melalui `credentialRejectionHeaders()`.
-  Echo ditentukan oleh ada tidaknya header kredensial pada permintaan (`Authorization`,
-  `x-api-key`, `x-goog-api-key` atau cookie `auth_token`), bukan oleh header mana yang
-  diperiksa rute, dan tidak pernah dipasangkan dengan `Access-Control-Allow-Credentials`;
-  body-nya adalah amplop galat yang tetap. Rute manajemen di bawah `/api/v1/` yang
-  dijaga oleh `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) tidak menambahkan echo: dengan `REQUIRE_API_KEY=false`,
-  401/403 milik rute tersebut tidak dapat dibaca lintas origin.
-- **Sesi cookie (dasbor):** dilindungi oleh default fail-closed **dan**
-  oleh tidak adanya `Access-Control-Allow-Credentials` pada jalur bersama. Jangan
-  masukkan origin pengelolaan/dasbor ke konfigurasi permisif apa pun; origin tersebut harus tetap
-  sepenuhnya fail-closed.
+- **Pembawa / `x-api-key` (permukaan inferensi `/v1/*` ):** browser tidak pernah melampirkan ini secara otomatis. CORS bukanlah penghalang yang berarti di sini — kunci API adalah penghalang — itulah sebabnya permukaan tersebut sengaja dipermisif sehingga browser dan klien Electron dapat membaca tanggapan yang menjadi hak mereka. Gema yang santai mengikuti kunci yang divalidasi, bukan hanya kehadiran header: ketika `REQUIRE_API_KEY=false` melayani permintaan secara anonim, respons yang berhasil membuat daftar yang diizinkan gagal ditutup. Penolakan autentikasi (401) tetap dapat dibaca sehingga klien dapat menampilkan kunci yang dicabut atau salah ketik (#5242): 401 milik pipeline menyimpan gema, dan rute yang menolak kunci itu sendiri setelah pipeline menyajikannya sebagai anonim (`/v1/models` dan `/v1beta/models` dengan auth manajemen dikonfigurasi, cakupan pemilik `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` dan rute kandidat kombo otomatis) menambahkan gema ke 401 tersebut melalui `credentialRejectionHeaders()`. Echo dikunci pada permintaan yang membawa header kredensial (`Authorization`, `x-api-key`, `x-goog-api-key` atau cookie `auth_token` ), bukan pada rute mana yang diperiksa, dan tidak pernah dipasangkan dengan `Access-Control-Allow-Credentials`; isi adalah amplop kesalahan tetap. Rute manajemen di bawah `/api/v1/` dijaga oleh `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) jangan tambahkan gema: dengan `REQUIRE_API_KEY=false` 401/403 mereka tidak dapat dibaca lintas asal.
+- **Sesi cookie (dasbor):** dilindungi oleh default gagal-ditutup** Dan** dengan tidak adanya `Access-Control-Allow-Credentials` di jalur bersama. Jauhkan asal management/dashboard dari konfigurasi permisif apa pun; mereka harus tetap tertutup rapat.
 
 ## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
 

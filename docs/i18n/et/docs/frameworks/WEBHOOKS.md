@@ -16,21 +16,22 @@ mille tõrked jätkuvad.
 
 ## Toetatud sündmused
 
-Tüüp `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, mida kasutab `src/lib/webhookDispatcher.ts`) modelleerib praegu täpselt nelja sündmust:
+`WebhookEvent` tüüp (`src/lib/webhooks/eventDescriptions.ts`, tarbib `src/lib/webhookDispatcher.ts`) modelleerib praegu kaheksat sündmust:
 
-| Sündmus             | Käivitub, kui                                               |
-| ------------------- | ----------------------------------------------------------- |
-| `request.completed` | Proksitud päring lõpetatakse edukalt                        |
-| `request.failed`    | Proksitud päring nurjub pärast kõiki korduskatseid/varuteid |
-| `quota.exceeded`    | API-võti ületab eelarve-/kvoodipiiri                        |
-| `test.ping`         | Testimise lõpp-punkti kasutatav sünteetiline sündmus        |
+| Sündmus                   | Põleb, kui                                                                                                            |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Puhverserveri taotlus on edukalt lõpule viidud                                                                        |
+| `request.failed`          | Puhverserveri taotlus nurjub pärast retries/fallback lõppu                                                            |
+| `quota.exceeded`          | API klahv ületab budget/quota läve                                                                                    |
+| `proxy.set_aside`         | Puhverserveri koguli liige jäetakse pärast korduvaid keeldumisi kõrvale (ainult üleminek)                             |
+| `proxy.pool.exhausted`    | Iga puhverserveri kogumi liige on kõrvale jäetud                                                                      |
+| `provider.reset_redeemed` | Panga lähtestamise automaatne rakendamine, mis on lunastatud lähtestamiskrediidi või Claude nädalaseansi lähtestamine |
+| `provider.exhausted`      | Iga teenusepakkuja konto jahtub (maksimaalselt üks kord iga 10 minuti järel)                                          |
+| `test.ping`               | Testi lõpp-punktis kasutatav sünteetiline sündmus                                                                     |
 
-Tellimused aktsepteerivad literaali `"*"`, et võtta vastu kõik sündmused. Tundmatuid sündmuste
-nimesid väljal `events` eiratakse dispetšimise ajal.
+Tellimused aktsepteerivad iga sündmuse vastuvõtmiseks sõnasõnalist `"*"`. Tundmatuid sündmuste nimesid `events` s eiratakse lähetamise ajal.
 
-> Märkus: dispetšeri API on ühendatud, kuid mõne muu sündmuse kui
-> `test.ping` tootmiskeskkonna väljakutsekohad on endiselt lisamisel. Kontrollige käsuga `grep dispatchEvent`,
-> millised teed teie väljalaskes praegu dispetšeri välja kutsuvad.
+> Märkus: dispetšeri API on juhtmega, kuid mõnede mitte-`test.ping` -sündmuste tootmiskõnede saidid maanduvad endiselt. Kontrollige `grep dispatchEvent` et näha, millised teed teie versioonis praegu dispetšerit kutsuvad.
 
 ## Arhitektuur
 
@@ -52,25 +53,23 @@ Väljakutsuja (töötleja, teenus, seire)
 Dispetšimine toimub väljakutsuja jaoks käivita-ja-unusta-põhimõttel: `Promise.allSettled` neelab
 iga veebihaagi vead, et üks vigane vastuvõtja ei saaks teisi blokeerida.
 
-## HMAC-allkirjastamine
+## HMAC allkirjastamine
 
-Kui veebihaagil on `secret`, allkirjastab OmniRoute JSON-sisu ja saadab:
+Kui veebihaagil on `secret`, allkirjastab OmniRoute JSON keha ja saadab:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <sündmus>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<kuueteistkümnendkujul HMAC-SHA256(secret, sisu)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Päisenimed kasutavad prefiksit `X-Webhook-*` (mitte `X-OmniRoute-*`). Allkirja
-> väärtus on `sha256=<kuueteistkümnendkujul väärtus>` — kontrollige kogu prefiksit.
+> Päise nimed kasutavad `X-Webhook-*` eesliidet (mitte `X-OmniRoute-*`). Allkirja väärtus on `sha256=<hex>` — kontrollige täielikku eesliidet.
 
-Kui `createWebhook` kutsutakse välja ilma saladuseta, genereerib andmebaasimoodul selle
-(`whsec_<48 kuueteistkümnendmärki>`), mistõttu allkirjastatakse vaikimisi kõik veebihaagid.
+Kui `createWebhook` kutsutakse ilma saladuseta, genereerib DB moodul ühe (`whsec_<48 hex>`), nii et kõik veebihaagid allkirjastatakse vaikimisi.
 
-### Kontrollimine vastuvõtjas
+### Vastuvõtja kontrollimine
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,7 +82,7 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Kontrollige alati **töötlemata** päringusisu enne JSON-i sõelumist.
+Kontrollige alati vastu** toores** päringu sisu enne JSON sõelumist.
 
 ## Korduskatsete ja tõrgete reeglistik
 
@@ -123,24 +122,22 @@ Telegram / kohandatud lasti teisendajad) lisati migratsiooniga `070_webhooks_kin
 
 ## REST API
 
-Kõik lõpp-punktid nõuavad haldusautentimist (`requireManagementAuth`).
+Kõik lõpp-punktid nõuavad haldamise autentimist (`requireManagementAuth`).
 
-| Lõpp-punkt                      | Meetod | Kirjeldus                                 |
+| Lõpp-punkt                      | meetod | Kirjeldus                                 |
 | ------------------------------- | ------ | ----------------------------------------- |
-| `/api/webhooks`                 | GET    | Webhook'ide loend (saladused maskitud)    |
-| `/api/webhooks`                 | POST   | Webhook'i loomine                         |
-| `/api/webhooks/[id]`            | GET    | Webhook'i üksikasjad (täielik saladus)    |
-| `/api/webhooks/[id]`            | PUT    | Väljade uuendamine                        |
-| `/api/webhooks/[id]`            | DELETE | Eemaldamine                               |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping` käivitamine (korduskatseteta) |
-| `/api/webhooks/[id]/deliveries` | GET    | Ühe webhook'i hiljutised tarnekatsed      |
-| `/api/webhooks/validate-url`    | POST   | URL-i eelkontroll (SSRF-i kaitse)         |
+| `/api/webhooks`                 | GET    | Veebihaagide loend (saladused varjatud)   |
+| `/api/webhooks`                 | POST   | Loo veebihaak                             |
+| `/api/webhooks/[id]`            | GET    | Veebihaagi üksikasjad (täielik saladus)   |
+| `/api/webhooks/[id]`            | PUT    | Värskenda väljad                          |
+| `/api/webhooks/[id]`            | DELETE | Eemalda                                   |
+| `/api/webhooks/[id]/test`       | POST   | Käivitage `test.ping` (ei proovi uuesti)  |
+| `/api/webhooks/[id]/deliveries` | GET    | Ühe veebihaagi hiljutised edastamiskatsed |
+| `/api/webhooks/validate-url`    | POST   | Lennueelne URL valideerimine (SSRF valve) |
 
-`GET /api/webhooks` maskeerib saladuse kujule `<esimesed 10 märki>...`, et vältida
-selle lekkimist loendilehtedel. Kasutage `[id]` GET-päringut siis, kui vajate
-tegelikult saladust.
+`GET /api/webhooks` varjab `<first 10 chars>...` saladust, et vältida loendilehtedele lekkimist. Kasutage `[id]` GET kui teil on tegelikult saladust vaja.
 
-### Webhook'i loomine
+### Loo veebihaak
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -154,18 +151,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Kui `secret` puudub, genereerib server saladuse kujul `whsec_<hex>` ja tagastab
-selle vastuses.
+Kui `secret` jäetakse välja, genereerib server `whsec_<hex>` saladuse ja tagastab selle vastuses.
 
-### Webhook'i testimine
+### Testige veebihaagi
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Tagastab `{ delivered, status, error }`. Korduskatseid ei tehta — see on kasulik,
-et kiiresti kontrollida, kas vastuvõtja aktsepteerib lasti ja allkirja.
+Tagastab `{ delivered, status, error }`. Korduskatseid ei üritata. — on kasulik kiireks kinnitamiseks, et vastuvõtja aktsepteerib kasulikku lasti ja allkirja.
 
 ## Juhtpaneel
 
