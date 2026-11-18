@@ -1161,7 +1161,11 @@
     "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
     "tokensServerUrlLabel": "Server URL",
     "table": "Table",
-    "tableScrollbarLabel": "Top {name} horizontal scrollbar"
+    "tableScrollbarLabel": "Top {name} horizontal scrollbar",
+    "previous": "Previous",
+    "goToPage": "Go to page {page}",
+    "morePages": "More pages",
+    "pageSummary": "Page {page} of {pageCount}"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",

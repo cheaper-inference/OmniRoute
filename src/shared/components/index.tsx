@@ -47,6 +47,7 @@ export { default as NotificationToast } from "./NotificationToast";
 export { default as FilterBar } from "./FilterBar";
 export { default as ColumnToggle } from "./ColumnToggle";
 export { default as DataTable } from "./DataTable";
+export { default as Pager, usePagerLabels } from "./Pager";
 export { default as NoAuthProviderCard } from "./NoAuthProviderCard";
 export { default as NoAuthAccountCard } from "./NoAuthAccountCard";
 export { default as CollapsibleSection } from "./CollapsibleSection";
