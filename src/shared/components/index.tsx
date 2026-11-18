@@ -50,7 +50,7 @@ export { default as NotificationToast } from "./NotificationToast";
 export { default as FilterBar } from "./FilterBar";
 export { default as ColumnToggle } from "./ColumnToggle";
 export { default as DataTable } from "./DataTable";
-export { default as Pager, usePagerLabels } from "./Pager";
+export { default as Pager } from "./Pager";
 export { default as NoAuthProviderCard } from "./NoAuthProviderCard";
 export { default as NoAuthAccountCard } from "./NoAuthAccountCard";
 export { default as CollapsibleSection } from "./CollapsibleSection";
@@ -75,12 +75,6 @@ export { ItemList, Item } from "@omniroute/ui-kit/item-list";
 // parts of one total go in `segments`; quota, coverage and share are `semantics="meter"`, named
 // by `aria-label` with the reading in `aria-valuetext`.
 export { Progress } from "@omniroute/ui-kit/progress";
-export type {
-  ProgressProps,
-  ProgressSegment,
-  ProgressSize,
-  ProgressTone,
-} from "@omniroute/ui-kit/progress";
 
 // Layouts
 export * from "./layouts";

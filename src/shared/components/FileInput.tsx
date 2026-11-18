@@ -13,7 +13,6 @@ export type {
   FileDropZoneProps,
   FileInputProps,
   FileRejection,
-  FileTriggerProps,
 } from "@omniroute/ui-kit/file-input";
 
 /**

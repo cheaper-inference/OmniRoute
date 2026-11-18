@@ -10,9 +10,4 @@
  * @module shared/components/IconChip
  */
 export { IconChip, IconChip as default } from "@omniroute/ui-kit/icon-chip";
-export type {
-  IconChipProps,
-  IconChipShape,
-  IconChipSize,
-  IconChipTone,
-} from "@omniroute/ui-kit/icon-chip";
+export type { IconChipTone } from "@omniroute/ui-kit/icon-chip";
