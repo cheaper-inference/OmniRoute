@@ -228,5 +228,14 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     usedPercentage: 60,
   });
   assert.ok(general.quota.observedAt);
-  assert.equal(general.quota.observedAt, spark.quota.observedAt);
+  assert.ok(spark.quota.observedAt);
+  // Each scoped cache snapshot is timestamped independently; a millisecond
+  // boundary between consecutive writes must not make the route test flaky.
+  const observationDeltaMs = Math.abs(
+    Date.parse(general.quota.observedAt) - Date.parse(spark.quota.observedAt)
+  );
+  assert.ok(
+    Number.isFinite(observationDeltaMs) && observationDeltaMs < 1_000,
+    "Codex and Spark observations should be from the same cache update"
+  );
 });
