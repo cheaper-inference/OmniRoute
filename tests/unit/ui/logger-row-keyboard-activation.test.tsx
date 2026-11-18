@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 // Review of 2026-11-15, defect 5 (finding A5-03): the rows of the two main loggers opened the
-// detail on a mouse click only. They now render `InteractiveTableRow`, so the row is a tab stop
-// and Enter / Space open the same detail, while the controls inside the row keep their own keys.
+// detail on a mouse click only. They now render the kit `<TableRow onActivate>`, so the row is a
+// tab stop and Enter / Space open the same detail, while the controls inside the row keep their
+// own keys.
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";

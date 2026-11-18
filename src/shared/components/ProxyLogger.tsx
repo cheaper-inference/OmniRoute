@@ -20,7 +20,6 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
-import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import ProxyLogDetail from "./ProxyLogDetail";
 import {
@@ -574,7 +573,7 @@ export default function ProxyLogger() {
                   })[0] ?? null;
 
                 return (
-                  <InteractiveTableRow
+                  <TableRow
                     key={log.id}
                     onActivate={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
                     className={cn(
@@ -718,7 +717,7 @@ export default function ProxyLogger() {
                         {formatTime(log.timestamp)}
                       </TableCell>
                     )}
-                  </InteractiveTableRow>
+                  </TableRow>
                 );
               })}
             </TableBody>

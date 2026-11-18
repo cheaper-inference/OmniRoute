@@ -87,12 +87,13 @@ lastUpdated: 2026-11-03
   `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
   button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
   `NativeSelect`.
-  Two adapters are imported by path, not from the index: `InteractiveTableRow`
-  (`src/shared/components/InteractiveTableRow.tsx`), a kit `TableRow` that takes `onActivate` and
-  `selected` and answers Tab, Enter and Space, and `CodePreview`
+  One adapter is imported by path, not from the index: `CodePreview`
   (`src/shared/components/CodePreview.tsx`), the kit code block with its copy labels translated.
+  A clickable table row has no adapter: it is the kit `TableRow` with `onActivate` and `selected`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
-- **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
+- **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which wraps the shell in
+  `KitLabelsProvider` (kit texts set once for every screen: the translated sentence that names a
+  table's persistent scrollbar) and renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
   `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), with OmniRoute's navigation logic in
   `src/shared/components/Sidebar.tsx`. A "skip to content" link to `#main-content` is the first focusable
@@ -176,11 +177,14 @@ lastUpdated: 2026-11-03
    (`tests/unit/color-alpha-concatenation.test.ts`).
 9. Tables: every kit `Table` passes `scrollLabel`, the name of its scroll region, and
    `scrollbarLabel` when it draws the persistent scrollbar
-   (`tests/unit/kit-tables-have-accessible-name.test.ts`). A clickable row is an
-   `InteractiveTableRow` with `onActivate`, never `<TableRow onClick>`
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). A clickable row is the kit
+   `<TableRow onActivate>` (tab stop, click, Enter and Space; a control inside the row, a portal
+   opened from it and a click that ends a text selection do not activate it), with `selected` for
+   the selected row, never a pointer-only `<TableRow onClick>`
    (`tests/unit/table-row-click-needs-keyboard.test.ts`). A table inside a card, or inside any
-   bordered box, drops its own frame with `containerClassName="rounded-none border-0"`
-   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+   bordered box, drops its own frame: `variant="plain"` on the kit `Table` or `DataTableShell`,
+   `framed={false}` on the `DataTable` adapter (`containerClassName="rounded-none border-0"` is the
+   older spelling, still accepted) (`tests/unit/datatable-not-framed-inside-card.test.ts`).
 10. A bar that shows an amount is the kit `Progress`, or carries `role="progressbar"` with a name and a
     value when the kit bar cannot draw it (`tests/unit/progress-bars-have-semantics.test.ts`). Menus,
     popovers and tooltips come from the kit (`Popover`, `SearchableSelect`, the `Tooltip` adapter), not

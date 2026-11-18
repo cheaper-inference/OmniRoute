@@ -17,7 +17,6 @@ import Badge from "@/shared/components/Badge";
 import GuardedAction from "@/shared/components/GuardedAction";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
-import InteractiveTableRow from "@/shared/components/InteractiveTableRow";
 import Select from "@/shared/components/Select";
 import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -239,7 +238,7 @@ export default function FilesListTab({
                 const canDelete = related.length === 0 || allTerminal;
 
                 return (
-                  <InteractiveTableRow
+                  <TableRow
                     key={file.id}
                     onActivate={() => handleFileClick(file)}
                     selected={selectedFileId === file.id}
@@ -344,7 +343,7 @@ export default function FilesListTab({
                         </GuardedAction>
                       </div>
                     </TableCell>
-                  </InteractiveTableRow>
+                  </TableRow>
                 );
               })
             )}

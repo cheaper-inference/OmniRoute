@@ -33,7 +33,6 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
-import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
 import RequestLogTokens from "./RequestLogTokens";
@@ -1385,7 +1384,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   const isHoveredGroup = !!hoveredCid && log.correlationId === hoveredCid;
 
                   return (
-                    <InteractiveTableRow
+                    <TableRow
                       key={log.id}
                       onActivate={() => openDetail(log)}
                       data-cid={log.correlationId || undefined}
@@ -1694,7 +1693,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           )}
                         </TableCell>
                       )}
-                    </InteractiveTableRow>
+                    </TableRow>
                   );
                 })}
               </TableBody>
