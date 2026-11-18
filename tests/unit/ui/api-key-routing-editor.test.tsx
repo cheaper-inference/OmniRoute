@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
 import ReasoningRoutingRules from "../../../src/shared/components/ReasoningRoutingRules";
@@ -124,12 +124,17 @@ describe("isolated routing editor", () => {
   it("stores a selected source combo NAME while keeping the key scope", async () => {
     const writes = setup();
     fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
-    chooseKitSelectValue(screen.getByRole("combobox", { name: "Match requests for" }), "combo");
+    // Keep accessible-role/name assertions scoped to the form being edited.
+    // Scanning unrelated picker controls repeatedly is expensive in jsdom.
+    const editor = within(
+      screen.getByRole("textbox", { name: "Name", exact: true }).closest("form")!
+    );
+    chooseKitSelectValue(editor.getByRole("combobox", { name: "Match requests for" }), "combo");
     chooseKitSelectValue(
-      screen.getByRole("combobox", { name: "Source combo" }),
+      editor.getByRole("combobox", { name: "Source combo" }),
       "gpt-5.6-luna-combo"
     );
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    fireEvent.click(editor.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(writes).toHaveLength(1));
     expect(writes[0]).toMatchObject({
       modelPattern: "gpt-5.6-luna-combo",

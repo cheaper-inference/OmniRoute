@@ -38,24 +38,19 @@
 仅当早期规则均未胜出且已选定具体的提供者连接时，才会求值 `connection` 规则。
 它只能更改强度和预算。
 
-## 强度和预算
+## 努力和预算
 
-`sourceEffort` 接受 `any`、`missing`、`none`、`low`、`medium`、`high`、`xhigh`、`max` 和
-`ultra`。`missing` 表示请求既不包含离散的推理强度，也不包含思考开关或思考预算。
-因此，仅包含预算的信号只会被 `any` 匹配。
+`sourceEffort`接受`any`、 `missing`、 `none`、 `low`、 `medium`、 `high`、 `xhigh`、 `max`和`ultra`。 `missing`意味着请求既不包含离散的工作，也不包含思维切换或思维预算。因此，仅预算信号仅由`any`匹配。
 
-`effortMode` 有三种变体：
+`effortMode`有三种变体：
 
-- `inherit` 保留客户端的推理强度，同时仍允许更改模型或组合。
-- `default` 仅在不存在显式推理信号时设置 `targetEffort`。
-- `force` 使用 `targetEffort` 替换离散的推理强度。
+- `inherit`保留了客户的精力，同时仍然允许模型或组合发生变化。
+- `default`仅当不存在明确的推理信号时才设置`targetEffort` 。
+- `force`用`targetEffort`代替离散工作。
 
-此外，`budgetAction` 可以是 `preserve`、`remove` 或 `set`。`force` 与 `none` 结合使用时，会移除
-所有可识别的推理强度和预算字段。`none` 与 `set` 同时使用是无效的。
+独立地， `budgetAction`可以是`preserve`、 `remove`或`set`。 `force`和`none`会删除所有公认的工作量和预算字段，然后设置`reasoning_effort: "none"`，因为某些提供者会在该字段不存在时开启思考。拒绝文字`none`的提供者在`open-sse/executors/base/reasoningEffort.ts`中调度时进行调整。命令代码将其映射到`low`，但响应形请求（没有`messages` `input` ）除外，它保留`none`。在Cloudflare Workers AI (`cloudflare-ai`) 上，拒绝`none`模型 (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) 得到`low`；其他工人AI模型保留`none`。在那里删除该字段不是一个选项，因为缺席的工作会运行模型的默认层。 `none`与`set`一起使用无效。
 
-针对已知不兼容模型的请求会在上游调用之前被拒绝。对于组合目标，不兼容的条目会被移除；
-如果没有任何条目保留，请求将返回状态码 `400`。
-未知的能力数据会产生警告，但规则仍保持活动状态。
+在上游调用之前，针对已知不兼容模型的请求将被拒绝。对于组合目标，不兼容的条目将被删除；如果没有剩余，则请求返回状态`400`。未知的能力数据会产生警告并使规则保持活动状态。
 
 ## 安全性和传输协议
 

@@ -47,6 +47,23 @@ const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 // Cache TTL — short enough to be reactive, long enough to avoid rate limits
 const CACHE_TTL_MS = 60_000; // 60 seconds
 
+// Max age for reusing a cached snapshot when a refresh fails or times out
+const MAX_STALE_CACHE_MS = 15 * 60_000; // 15 minutes
+
+// The preflight awaits this fetch on the request path, so the default stays short.
+const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+
+// Largest delay a Node timer honors; AbortSignal.timeout also rejects fractions.
+const MAX_REQUEST_TIMEOUT_MS = 2_147_483_647;
+
+export function getCodexQuotaFetchTimeoutMs(): number {
+  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_REQUEST_TIMEOUT_MS
+    ? parsed
+    : DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
 // Per-account quota window info; structural slots exist only for known durations.
 export interface CodexDualWindowQuota extends QuotaInfo {
   window5h?: { percentUsed: number; resetAt: string | null };
@@ -71,15 +88,17 @@ interface CacheEntry {
 // In-memory cache: connectionId → { quota, fetchedAt }
 const quotaCache = new Map<string, CacheEntry>();
 
-// Auto-cleanup stale entries every 5 minutes
-const _cacheCleanup = setInterval(() => {
+function sweepQuotaCache(): void {
   const now = Date.now();
   for (const [key, entry] of quotaCache) {
-    if (now - entry.fetchedAt > CACHE_TTL_MS * 5) {
+    if (now - entry.fetchedAt > MAX_STALE_CACHE_MS) {
       quotaCache.delete(key);
     }
   }
-}, 5 * 60_000);
+}
+
+// Auto-cleanup stale entries every 5 minutes
+const _cacheCleanup = setInterval(sweepQuotaCache, 5 * 60_000);
 
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
@@ -106,6 +125,9 @@ const MAX_QUOTA_CACHE_ENTRIES = 200;
  * @param meta - Access token and optional workspace ID
  */
 export function registerCodexConnection(connectionId: string, meta: CodexConnectionMeta): void {
+  const current = connectionRegistry.get(connectionId);
+  if (current?.accessToken === meta.accessToken && current.workspaceId === meta.workspaceId) return;
+  deleteQuotaCacheForConnection(connectionId);
   if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
     const oldestKey = connectionRegistry.keys().next().value;
     if (oldestKey !== undefined) {
@@ -113,7 +135,8 @@ export function registerCodexConnection(connectionId: string, meta: CodexConnect
       connectionRegistry.delete(oldestKey);
     }
   }
-  connectionRegistry.set(connectionId, meta);
+  // Object identity is an immutable registration epoch, including A -> B -> A.
+  connectionRegistry.set(connectionId, Object.freeze({ ...meta }));
 }
 
 function getQuotaCacheKey(connectionId: string, requestedModel?: string | null): string {
@@ -141,6 +164,10 @@ function getRequestedModel(connection?: Record<string, unknown>): string | null 
     : null;
 }
 
+function nonBlankString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
 function getCodexConnectionMeta(
   connectionId: string,
   connection?: Record<string, unknown>
@@ -152,27 +179,13 @@ function getCodexConnectionMeta(
       !Array.isArray(connection.providerSpecificData)
         ? (connection.providerSpecificData as Record<string, unknown>)
         : {};
-    const accessToken =
-      typeof connection.accessToken === "string" && connection.accessToken.trim().length > 0
-        ? connection.accessToken
-        : null;
-    const workspaceId =
-      typeof providerSpecificData.workspaceId === "string" &&
-      providerSpecificData.workspaceId.trim().length > 0
-        ? providerSpecificData.workspaceId
-        : undefined;
+    const accessToken = nonBlankString(connection.accessToken);
+    const workspaceId = nonBlankString(providerSpecificData.workspaceId) ?? undefined;
 
     if (accessToken) {
       const meta = { accessToken, ...(workspaceId ? { workspaceId } : {}) };
-      if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
-        const oldestKey = connectionRegistry.keys().next().value;
-        if (oldestKey !== undefined) {
-          deleteQuotaCacheForConnection(oldestKey);
-          connectionRegistry.delete(oldestKey);
-        }
-      }
-      connectionRegistry.set(connectionId, meta);
-      return meta;
+      registerCodexConnection(connectionId, meta);
+      return connectionRegistry.get(connectionId) ?? null;
     }
   }
 
@@ -182,11 +195,30 @@ function getCodexConnectionMeta(
 // ─── Core Fetcher ────────────────────────────────────────────────────────────
 
 /**
+ * The snapshot a failed refresh may fall back to. A spent window can have been
+ * reset upstream and a window past its resetAt no longer says anything, so
+ * either one leaves the account unknown (null), as if nothing had been cached.
+ * The `stale` mark lets the cutoff apply the connection's own thresholds.
+ */
+function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
+  if (!cached || Date.now() - cached.fetchedAt >= MAX_STALE_CACHE_MS) return null;
+  const { quota } = cached;
+  if (quota.limitReached) return null;
+  const now = Date.now();
+  const outdated = Object.values(quota.windows ?? {}).some(
+    ({ percentUsed, resetAt }) =>
+      percentUsed >= 1 || (resetAt ? new Date(resetAt).getTime() <= now : false)
+  );
+  return outdated ? null : { ...quota, stale: true };
+}
+
+/**
  * Fetch current quota for a Codex connection.
  * Returns percentUsed = max(5h%, 7d%) — worst-case across both windows.
  *
  * @param connectionId - Connection ID from the DB (used to look up credentials)
- * @returns QuotaInfo or null if fetch fails / no credentials
+ * @returns QuotaInfo, a usable stale snapshot if the refresh fails, or null when
+ *   the quota is unknown (no credentials, or a failed fetch with no usable snapshot)
  */
 export async function fetchCodexQuota(
   connectionId: string,
@@ -195,17 +227,13 @@ export async function fetchCodexQuota(
   const requestedModel = getRequestedModel(connection);
   const cacheKey = getQuotaCacheKey(connectionId, requestedModel);
 
-  // Check cache first
+  // Resolve credentials first: a connection id can be reused for a different owner.
+  const meta = getCodexConnectionMeta(connectionId, connection);
+  if (!meta?.accessToken) return null;
+  const isCurrent = () => connectionRegistry.get(connectionId) === meta;
   const cached = quotaCache.get(cacheKey);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
-  }
-
-  // Look up credentials
-  const meta = getCodexConnectionMeta(connectionId, connection);
-  if (!meta?.accessToken) {
-    // No credentials registered — skip preflight gracefully
-    return null;
   }
 
   try {
@@ -228,40 +256,44 @@ export async function fetchCodexQuota(
     // hits above never reach here; this only paces genuine network calls and is
     // configurable (OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS, 0 = disabled).
     await throttleQuotaFetch();
+    if (!isCurrent()) return null;
 
     const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
       method: "GET",
       headers,
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(getCodexQuotaFetchTimeoutMs()),
     });
-    if (!response) return null;
+    if (!isCurrent()) return null;
+    if (!response) return getUsableCachedQuota(cached);
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
-      // Return null to proceed (fail-open — don't block on API errors).
+      // Keep a usable snapshot, otherwise null: an API error is not exhaustion.
       if (response.status === 401 || response.status === 403) {
         // Token expired — remove from cache so next call re-fetches
         deleteQuotaCacheForConnection(connectionId);
         connectionRegistry.delete(connectionId);
+        return null;
       }
-      return null;
+      return getUsableCachedQuota(cached);
     }
 
     const data = await response.json();
     const quota = parseCodexUsageResponse(data, requestedModel);
 
-    if (!quota) return null;
+    if (!isCurrent()) return null;
+    if (!quota) return getUsableCachedQuota(cached);
 
     // Store in cache
-    if (!quotaCache.has(connectionId) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
+    if (!quotaCache.has(cacheKey) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
       const oldestCacheKey = quotaCache.keys().next().value;
       if (oldestCacheKey !== undefined) quotaCache.delete(oldestCacheKey);
     }
     quotaCache.set(cacheKey, { quota, fetchedAt: Date.now() });
     return quota;
   } catch {
-    // Network error, timeout, etc. — fail open
-    return null;
+    // Network error, timeout, etc. — same fallback as a non-2xx response
+    return getUsableCachedQuota(cached);
   }
 }
 
@@ -324,3 +356,14 @@ export function registerCodexQuotaFetcher(): void {
     CODEX_SPARK_QUOTA_WEEKLY,
   ]);
 }
+
+export const __testing = {
+  sweepQuotaCache,
+  ageCacheEntry(connectionIdOrKey: string, ageMs: number): void {
+    for (const [key, entry] of quotaCache) {
+      if (key === connectionIdOrKey || key.startsWith(`${connectionIdOrKey}:`)) {
+        quotaCache.set(key, { ...entry, fetchedAt: Date.now() - ageMs });
+      }
+    }
+  },
+};

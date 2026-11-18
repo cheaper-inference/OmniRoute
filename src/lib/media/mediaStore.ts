@@ -3,6 +3,7 @@ import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { resolveDataDir } from "@/lib/dataPaths";
 import { getCallLogRetentionDays } from "@/lib/logEnv";
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 
 /**
  * On-disk storage for generated media the caller could not otherwise fetch.
@@ -24,6 +25,34 @@ const isBuildPhase =
 const DATA_DIR = resolveDataDir({ isCloud });
 
 export const MEDIA_DIR = isCloud || isBuildPhase ? null : path.join(DATA_DIR, "media");
+
+/**
+ * Default upper bound for the bytes kept in MEDIA_DIR (2 GiB). Age alone does not bound the
+ * directory: a burst of video jobs inside the retention window can fill the disk. Past the
+ * cap the oldest files are evicted first (the file just written is never evicted). The cap in
+ * force comes from `resolveMediaStoreMaxBytes()`.
+ */
+export const MAX_MEDIA_BYTES = 2 * 1024 ** 3;
+
+const MIB = 1024 ** 2;
+
+/**
+ * The size cap in force, in bytes. The env `MEDIA_STORE_MAX_MB` wins when it is a whole number
+ * above 0 (anything else is ignored, so a typo cannot turn the cap off). Otherwise the Storage
+ * setting `retention.mediaStoreMaxMb` applies, then the 2 GiB default. Read at every write, so
+ * a dashboard change takes effect without a restart.
+ */
+export function resolveMediaStoreMaxBytes(): number {
+  const raw = process.env.MEDIA_STORE_MAX_MB?.trim();
+  if (raw && /^[1-9]\d*$/.test(raw)) return Number(raw) * MIB;
+  try {
+    const stored = getUserDatabaseSettings().retention.mediaStoreMaxMb;
+    if (Number.isInteger(stored) && stored > 0) return stored * MIB;
+  } catch {
+    // Settings unavailable (very early startup): keep the default.
+  }
+  return MAX_MEDIA_BYTES;
+}
 
 /**
  * Owner tag for media written with no owner key (a dashboard-session request with no API key).
@@ -83,12 +112,13 @@ export function writeMediaFile(
     }
     return null;
   }
-  // Bound the directory without a scheduler: every write sweeps expired files, so
-  // growth tracks generation activity rather than running away between sweeps.
+  // Bound the directory without a scheduler: every write sweeps expired files and trims
+  // the total to the size cap, so growth tracks generation activity rather than running
+  // away between sweeps.
   // ponytail: O(files) scan per write, and nothing expires while no generation runs.
   // Both are fine at this scale (a few dozen files); move to a scheduled sweep if the
   // directory ever reaches thousands of entries.
-  pruneExpiredMedia();
+  pruneExpiredMedia(Date.now(), resolveMediaStoreMaxBytes(), id);
   return id;
 }
 
@@ -112,8 +142,43 @@ export function mediaOwnerTag(id: string): string | null {
   return match ? match[1] : null;
 }
 
+type KeptMedia = { id: string; absPath: string; size: number; mtimeMs: number };
+
+/** Remove expired files; return the live ones (in-flight tmp files are neither) and the count removed. */
+function sweepExpiredMedia(
+  entries: string[],
+  cutoff: number
+): { kept: KeptMedia[]; removed: number } {
+  let removed = 0;
+  const kept: KeptMedia[] = [];
+  for (const entry of entries) {
+    const absPath = path.join(MEDIA_DIR as string, entry);
+    try {
+      // Skip anything that is not a file we generated, including in-flight tmp files.
+      const generated = MEDIA_ID_PATTERN.test(entry);
+      if (!generated && !entry.includes(".tmp")) continue;
+      const stat = fs.statSync(absPath);
+      if (!stat.isFile()) continue;
+      if (stat.mtimeMs >= cutoff) {
+        // In-flight tmp files are not counted: a writer still owns them.
+        if (generated) kept.push({ id: entry, absPath, size: stat.size, mtimeMs: stat.mtimeMs });
+        continue;
+      }
+      fs.rmSync(absPath, { force: true });
+      removed += 1;
+    } catch {
+      // A file that vanished or is unreadable is not worth failing the write over.
+    }
+  }
+  return { kept, removed };
+}
+
 /**
- * Delete media older than the call-log retention window.
+ * Delete media older than the call-log retention window, then evict the oldest remaining
+ * files until the total is at most `maxBytes`. The file named by `protectId` (the one just
+ * written) is never evicted, so the id handed back to the caller always resolves, even when
+ * several files share one mtime. That one file may alone exceed `maxBytes`: the cap bounds
+ * the folder, it is not a hard limit on disk use.
  *
  * Deliberately reuses `CALL_LOG_RETENTION_DAYS` (default 7) so there is one
  * retention knob rather than two that can drift. The coupling is real: lowering
@@ -122,7 +187,11 @@ export function mediaOwnerTag(id: string): string | null {
  * Age comes from mtime, not from any database row — media ids are deliberately
  * stateless (see MEDIA_ID_PATTERN), so the filesystem is the only record.
  */
-export function pruneExpiredMedia(now = Date.now()): number {
+export function pruneExpiredMedia(
+  now = Date.now(),
+  maxBytes = resolveMediaStoreMaxBytes(),
+  protectId: string | null = null
+): number {
   if (!MEDIA_DIR) return 0;
   let entries: string[];
   try {
@@ -131,20 +200,21 @@ export function pruneExpiredMedia(now = Date.now()): number {
     return 0;
   }
   const cutoff = now - getCallLogRetentionDays() * 24 * 60 * 60 * 1000;
-  let removed = 0;
-  for (const entry of entries) {
-    const absPath = path.join(MEDIA_DIR, entry);
+  const swept = sweepExpiredMedia(entries, cutoff);
+  let removed = swept.removed;
+
+  let total = swept.kept.reduce((sum, file) => sum + file.size, 0);
+  const evictable = swept.kept.filter((file) => file.id !== protectId);
+  evictable.sort((a, b) => a.mtimeMs - b.mtimeMs);
+  // Without a named file the newest one stays: it is the one most likely just written.
+  const stop = protectId === null ? evictable.length - 1 : evictable.length;
+  for (let i = 0; i < stop && total > maxBytes; i++) {
     try {
-      // Skip anything that is not a file we generated, including in-flight tmp files.
-      if (!MEDIA_ID_PATTERN.test(entry)) {
-        if (!entry.includes(".tmp")) continue;
-      }
-      const stat = fs.statSync(absPath);
-      if (!stat.isFile() || stat.mtimeMs >= cutoff) continue;
-      fs.rmSync(absPath, { force: true });
+      fs.rmSync(evictable[i].absPath, { force: true });
+      total -= evictable[i].size;
       removed += 1;
     } catch {
-      // A file that vanished or is unreadable is not worth failing the write over.
+      // Best effort, same as the age sweep.
     }
   }
   return removed;

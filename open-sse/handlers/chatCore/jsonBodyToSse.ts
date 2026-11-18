@@ -14,9 +14,15 @@
  * inline block.
  */
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { HTTP_STATUS } from "../../config/constants.ts";
+import { buildErrorBody } from "../../utils/error.ts";
 import { withBodyTimeout as defaultWithBodyTimeout } from "../../utils/stream.ts";
 import { synthesizeOpenAiSseFromJson as defaultSynthesize } from "../../utils/jsonToSse.ts";
-import { prependBufferedChunks } from "../../utils/streamReadiness.ts";
+import { prependBufferedChunks, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  readResponseTextWithinCap,
+} from "../../utils/responseBodyCap.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
@@ -120,7 +126,7 @@ export async function maybeConvertJsonBodyToSse(
   const { sseResponse, jsonBody } = await sniffJsonBodyForSse(providerResponse, ctx, deps);
   if (sseResponse) return inheritEmptyTurnPolicy(providerResponse, sseResponse);
 
-  const jsonText = await deps.withBodyTimeout<string>(jsonBody.text());
+  const jsonText = await deps.withBodyTimeout<string>(readResponseTextWithinCap(jsonBody));
   const synthesizedSse = deps.synthesizeOpenAiSseFromJson(jsonText);
   const rebuiltHeaders = new Headers(providerResponse.headers);
   rebuiltHeaders.delete("content-length");
@@ -149,4 +155,49 @@ export async function maybeConvertJsonBodyToSse(
       headers: rebuiltHeaders,
     })
   );
+}
+
+const RESPONSE_TOO_LARGE_CODE = "upstream_response_too_large";
+
+function overCapReadiness(
+  error: NonStreamingResponseTooLargeError
+): Extract<StreamReadinessResult, { ok: false }> {
+  const status = HTTP_STATUS.BAD_GATEWAY;
+  const type = "upstream_error";
+  return {
+    ok: false,
+    reason: error.message,
+    classificationReason: error.message,
+    code: RESPONSE_TOO_LARGE_CODE,
+    type,
+    upstreamFailure: true,
+    response: new Response(
+      JSON.stringify(
+        buildErrorBody(status, error.message, undefined, { code: RESPONSE_TOO_LARGE_CODE, type })
+      ),
+      { status, headers: { "Content-Type": "application/json" } }
+    ),
+  };
+}
+
+/**
+ * {@link maybeConvertJsonBodyToSse} for the streaming call sites. `handleChatCore` reports
+ * upstream failures by resolving, so an over-cap body must not throw past the pending-request,
+ * call-log and account-fallback handling: it ends as the same 502 as the non-streaming path.
+ * `overCap` feeds the readiness-failure branch; the non-ok `response` is a failed retry.
+ */
+export async function convertJsonBodyWithinCap(
+  providerResponse: Response,
+  ctx: Parameters<typeof maybeConvertJsonBodyToSse>[1]
+): Promise<{
+  response: Response;
+  overCap: Extract<StreamReadinessResult, { ok: false }> | null;
+}> {
+  try {
+    return { response: await maybeConvertJsonBodyToSse(providerResponse, ctx), overCap: null };
+  } catch (error) {
+    if (!(error instanceof NonStreamingResponseTooLargeError)) throw error;
+    const overCap = overCapReadiness(error);
+    return { response: overCap.response, overCap };
+  }
 }

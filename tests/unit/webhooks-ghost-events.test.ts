@@ -12,9 +12,12 @@ describe("webhook catalogue", () => {
     assert.equal(keys.includes("provider.error"), false);
     assert.equal(keys.includes("provider.recovered"), false);
     assert.equal(keys.includes("combo.switched"), false);
-    assert.equal(keys.length, 6); // completed, failed, quota.exceeded, test.ping, proxy.set_aside, proxy.pool.exhausted
+    // completed, failed, quota.exceeded, test.ping, proxy.set_aside, proxy.pool.exhausted,
+    // provider.reset_redeemed, provider.exhausted
+    assert.equal(keys.length, 8);
     assert.equal(keys.includes("proxy.set_aside"), true);
     assert.equal(keys.includes("proxy.pool.exhausted"), true);
+    assert.equal(keys.includes("provider.reset_redeemed"), true);
   });
 
   it("rejected legacy events via zod (400)", () => {
@@ -28,6 +31,7 @@ describe("webhook catalogue", () => {
     assert.equal(schema.safeParse("test.ping").success, true);
     assert.equal(schema.safeParse("proxy.set_aside").success, true);
     assert.equal(schema.safeParse("proxy.pool.exhausted").success, true);
+    assert.equal(schema.safeParse("provider.reset_redeemed").success, true);
   });
 
   it("notifyWebhookEvent still available for remaining events", async () => {

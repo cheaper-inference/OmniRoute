@@ -137,6 +137,16 @@ test("openference gets its own rotation lane", () => {
   assert.notEqual(lane, rotationGroupFor("codex"));
 });
 
+test("renderhour gets its own rotation lane", () => {
+  // RenderHour rotates one-time-use refresh tokens (rhrt_*), so the token health
+  // sweep must treat it as rotating; tokenHealthCheck derives that list from the
+  // rotation-lane map.
+  const lane = rotationGroupFor("renderhour");
+  assert.notEqual(lane, null, "renderhour must be a rotating provider with a lane");
+  assert.notEqual(lane, rotationGroupFor("openference"));
+  assert.notEqual(lane, rotationGroupFor("codex"));
+});
+
 test("two amazon-q refreshes never overlap in the shared kiro lane", async () => {
   __resetRefreshSerializerForTest();
   let active = 0;

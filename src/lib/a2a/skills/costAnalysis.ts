@@ -5,6 +5,7 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
+import { buildSelfLoopHeaders, type A2ACallerContext } from "../selfLoopAuth";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 import { formatCost } from "@/shared/utils/formatting";
 import { toNumber } from "@/shared/utils/numeric";
@@ -19,7 +20,6 @@ type CostEntry = {
 };
 
 const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
 
 function detectRange(task: A2ATask): string {
   const metadataRange = task.input.metadata?.range;
@@ -33,19 +33,20 @@ function detectRange(task: A2ATask): string {
   return "30d";
 }
 
-async function costFetch(path: string): Promise<AnalyticsRecord> {
+async function costFetch(path: string, caller?: A2ACallerContext): Promise<AnalyticsRecord> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-  };
-  const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
+  const response = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(15000),
+    // Never follow a redirect while carrying the caller's API key.
+    redirect: "error",
+  });
   if (!response.ok) {
     throw new Error(`API [${response.status}]: ${await response.text().catch(() => "error")}`);
   }
   return response.json();
 }
-
 
 function toCostEntries(value: unknown): CostEntry[] {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
@@ -105,10 +106,14 @@ export interface CostAnalysisResult {
   };
 }
 
-export async function executeCostAnalysis(task: A2ATask): Promise<CostAnalysisResult> {
+export async function executeCostAnalysis(
+  task: A2ATask,
+  caller?: A2ACallerContext
+): Promise<CostAnalysisResult> {
   const range = detectRange(task);
   const analytics = await costFetch(
-    `/api/usage/analytics?range=${encodeURIComponent(range)}&presets=1d,7d,30d,90d,ytd`
+    `/api/usage/analytics?range=${encodeURIComponent(range)}&presets=1d,7d,30d,90d,ytd`,
+    caller
   );
   const summary = (analytics.summary || {}) as AnalyticsRecord;
   const providerCosts = toCostEntries(analytics.byProvider).slice(0, 10);

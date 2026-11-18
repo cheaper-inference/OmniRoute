@@ -69,6 +69,18 @@ test("single-quoted and use-server directives behind comments stay first", () =>
   }
 });
 
+test("a directive followed by code on the same line stays first (#18079)", () => {
+  for (const head of ['"use client"; import x from "y";', "'use client';export const k = 1;"]) {
+    const input = `${head}\nconst a = <span className="material-symbols-outlined">close</span>;\n`;
+    const { code, converted } = transformSource(input, "G.tsx");
+    assert.equal(converted, 1);
+    const directive = head.slice(0, head.indexOf(";") + 1);
+    assert.ok(code.startsWith(`${directive}\n\nimport Icon from`), code);
+    // The rest of the original line survives after the inserted import.
+    assert.ok(code.includes(head.slice(directive.length).trim()), code);
+  }
+});
+
 test("a file without a directive keeps the import at the very top", () => {
   const input = `import x from "y";\nconst a = <span className="material-symbols-outlined">close</span>;\n`;
   const { code } = transformSource(input, "F.tsx");

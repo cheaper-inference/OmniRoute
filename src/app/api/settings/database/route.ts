@@ -3,6 +3,7 @@ import { z } from "zod";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { databaseSettingsSchema } from "@/shared/validation/settingsSchemas";
+import { backupDbFileAwaited } from "@/lib/db/backup";
 import { getDatabaseSettings, updateDatabaseSettings } from "@/lib/db/databaseSettings";
 import { redactCacheSecrets } from "@/lib/db/cacheSecrets";
 import type { UserDatabaseSettings } from "@/lib/db/databaseSettings";
@@ -50,6 +51,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    // Snapshot the state BEFORE the write and wait for it. A failed routine snapshot is logged
+    // and does not block the write.
+    await backupDbFileAwaited("pre-write").catch((error: unknown) => {
+      console.error(
+        "[DB] Pre-write backup failed:",
+        error instanceof Error ? error.message : error
+      );
+    });
     updateDatabaseSettings(validation.data as Partial<UserDatabaseSettings>);
 
     // Return merged settings (GET response pattern)

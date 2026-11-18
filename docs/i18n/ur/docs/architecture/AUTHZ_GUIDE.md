@@ -162,17 +162,17 @@ Settings → Security سے enroll کیا جاتا ہے؛ operator کے اسے ف
   4. `OMNIROUTE_DISABLE_MFA` کو ان سیٹ کریں، دوبارہ شروع کریں، اور ضرورت ہو تو دوبارہ
      اندراج کریں۔
 
-## راستوں کی اقسام
+## روٹ کلاسز
 
-`src/server/authz/types.ts` تین اقسام متعین کرتا ہے؛ جو راستہ قطعی طور پر درجہ بند نہ ہو سکے وہ `MANAGEMENT` پر واپس آ جاتا ہے۔
+`src/server/authz/types.ts` تین طبقات کی وضاحت کرتا ہے۔ کوئی بھی راستہ جس کی درجہ بندی قطعی طور پر نہیں کی جا سکتی وہ واپس `MANAGEMENT` پر آتا ہے۔
 
-| قسم          | تفصیل                                                                                                                                            | احراز ہویت درکار ہے                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| `PUBLIC`     | واضح طور پر محفوظ راستے — login، logout، status، init، health، onboarding bootstrap۔                                                             | کوئی نہیں                                                  |
-| `CLIENT_API` | ماڈل سروِنگ اینڈ پوائنٹس — `/api/v1/*`، `/api/v1beta/*`، اور عرف `/v1/*`، `/v1beta/*`، `/chat/completions`، `/responses`، `/models`، `/codex/*`۔ | جب مؤثر `REQUIRE_API_KEY` فیچر فلیگ فعال ہو تو Bearer کلید |
-| `MANAGEMENT` | ڈیش بورڈ صفحات، ترتیبات، فراہم کنندگان، کلیدیں، ایڈمن اور تشخیصی اینڈ پوائنٹس۔                                                                   | ڈیش بورڈ سیشن یا `manage` اسکوپ کے ساتھ Bearer             |
+| کلاس         | تفصیل                                                                                                                                                             | تصدیق درکار ہے۔                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `PUBLIC`     | واضح طور پر محفوظ راستے — لاگ ان، لاگ آؤٹ، اسٹیٹس، صحت، آن بورڈنگ بوٹسٹریپ۔                                                                                       | کوئی نہیں۔                                              |
+| `CLIENT_API` | ماڈل پیش کرنے والے اختتامی پوائنٹس — `/api/v1/*`, `/api/v1beta/*`, علاوہ عرفی نام `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`۔ | بیئرر کلید جب مؤثر `REQUIRE_API_KEY` فیچر فلیگ فعال ہو۔ |
+| `MANAGEMENT` | ڈیش بورڈ کے صفحات، ترتیبات، فراہم کنندگان، کلیدیں، منتظم اور تشخیصی اختتامی پوائنٹس۔                                                                              | ڈیش بورڈ سیشن OR بیئرر `manage` دائرہ کار کے ساتھ       |
 
-چند `MANAGEMENT` اقدامات **صرف آپریٹر کے لیے** ہیں: صرف `manage` کلید کافی نہیں۔ محفوظ شدہ اسناد ایکسپورٹ کرنا (`GET /api/settings/export-json`، `GET /api/db-backups/export`، `GET /api/db-backups/exportAll`)، لائیو ڈیٹا پر بیک اپ بحال کرنا (`dryRun=true` سمیت `POST /api/db-backups/import`، ID کے ذریعے بحالی `POST /api/db-backups`، `POST /api/settings/import-json`) اور بحالی کے نقطے ختم کرنا (`DELETE /api/db-backups` کی صفائی، اور `PATCH /api/db-backups` کیونکہ یہ برقرار رکھنے کی پالیسی محفوظ کرتا ہے جو ہر بیک اپ کے بعد خودکار صفائی چلاتی ہے) کے لیے ڈیش بورڈ سیشن، مقامی CLI کا subject، یا لاگ ان کا بند ہونا درکار ہے۔ sync ٹوکن جاری کرنا (`POST /api/sync/tokens`) اور `admin` اسکوپ کا CLI رسائی ٹوکن بنانا (`POST /api/cli/tokens`) ہر لاگ ان موڈ میں ڈیش بورڈ سیشن یا مقامی CLI کا subject مانگتے ہیں۔ کسی بھی اسکوپ کی API کلیدیں اور `oma_` رسائی ٹوکن آپریٹر اسناد نہیں ہیں: جب بھی کوئی ایسی اسناد درکار ہو، انہیں `403` ملتا ہے۔ اس کی جانچ `src/lib/api/operatorCredential.ts` میں ہے (`resolveOperatorCredential()` / `requireOperatorCredential()`)۔ لاگ ان ترتیبات کی تبدیلی بھی صرف آپریٹر کے لیے ہے: `POST /api/settings/require-login` (مینجمنٹ پاس ورڈ سیٹ کرنا / `requireLogin` ٹوگل کرنا) ایک بار پاس ورڈ موجود ہونے کے بعد صرف انہی اسناد کو قبول کرتا ہے — پہلی بار کی بوٹ اسٹریپ ونڈو (جب ابھی پاس ورڈ نہ ہو) میں کوئی تبدیلی نہیں — اور ڈیش بورڈ سیشن کو پاس ورڈ بدلنے کے لیے `currentPassword` بھیجنا ہوگا (غائب یا غلط ہونے پر `403`، `settings.update_failed` کے طور پر آڈٹ ہوتا ہے)۔ مقامی CLI اور وہ انسٹنس جس کا لاگ ان بند ہو بحالی کا راستہ برقرار رکھتے ہیں اور اس کے بغیر پاس ورڈ سیٹ کر سکتے ہیں، کیونکہ دونوں اُس میزبان سے جڑے ہیں جو ڈیٹا ڈائریکٹری کا مالک ہے۔
+`MANAGEMENT` چند اعمال یہ ہیں۔** صرف آپریٹر** : ایک `manage` کلید کافی نہیں ہے۔ ذخیرہ شدہ اسناد کو برآمد کرنا (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) ، لائیو ڈیٹا پر بیک اپ بحال کرنا (`POST /api/db-backups/import` سمیت `dryRun=true`, `POST /api/db-backups` بحال کرنا id , `POST /api/settings/import-json`) ، بحالی پوائنٹس کو تباہ کرنا (`DELETE /api/db-backups` کلین اپ ، اور `PATCH /api/db-backups` کیونکہ برقرار رکھنے کی ضرورت ہوتی ہے ہر ایک مقامی سیشن کے بعد خود کار طریقے سے بیک اپ چلانے کی ضرورت ہوتی ہے ) CLI موضوع، یا لاگ ان غیر فعال ہے۔ ایک سنک ٹوکن (`POST /api/sync/tokens`) جاری کرنے اور `admin` CLI رسائی ٹوکن (`POST /api/cli/tokens`) کو منٹ کرنے کے لیے ہر لاگ ان موڈ میں ڈیش بورڈ سیشن یا مقامی CLI موضوع کی ضرورت ہوتی ہے۔ کسی بھی دائرہ کار کی API کیز اور `oma_` ایکسیس ٹوکن آپریٹر کی اسناد نہیں ہیں: جب بھی کسی کی ضرورت ہوتی ہے وہ `403` حاصل کرتے ہیں۔ چیک `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) میں رہتا ہے۔ لاگ ان سیٹنگز کو تبدیل کرنا صرف آپریٹر کے لیے بھی ہے: `POST /api/settings/require-login` (منیجمنٹ پاس ورڈ سیٹ کریں / ٹوگل `requireLogin`) صرف ان ہی اسناد کو قبول کرتا ہے جب پاس ورڈ موجود ہوتا ہے — پہلی بار چلنے والی بوٹسٹریپ ونڈو (ابھی تک کوئی پاس ورڈ نہیں ہے) — کوئی تبدیلی نہیں کی گئی ہے اور ڈیش بورڈ سیشن کو `currentPassword` بھیجنا ضروری ہے تاکہ پاس ورڈ کو تبدیل کیا جا سکے (`403` کی غلطی یا `settings.update_failed` کے طور پر)۔ لوکل CLI اور لاگ ان غیر فعال ہونے والی مثال ریکوری کا راستہ برقرار رکھتی ہے اور اس کے بغیر پاس ورڈ سیٹ کر سکتی ہے، کیونکہ دونوں اس میزبان کے پابند ہیں جو ڈیٹا ڈائرکٹری کا مالک ہے۔
 
 ## پائپ لائن
 
@@ -203,53 +203,49 @@ Incoming request → src/proxy.ts
 
 ایک کامیاب پالیسی `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` کے ساتھ `AuthSubject` واپس کرتی ہے۔ ڈاؤن اسٹریم ہینڈلرز اسے `src/server/authz/assertAuth.ts` میں `assertAuth(request, "CLIENT_API")` کے ذریعے auth logic کو دوبارہ چلانے کے بجائے پڑھ سکتے ہیں۔
 
-## عوامی روٹس کی فہرست
+## عوامی راستوں کی فہرست
 
-`src/shared/constants/publicApiRoutes.ts` واضح اجازت شدہ فہرست ہے:
+`src/shared/constants/publicApiRoutes.ts` واضح اجازت دی گئی فہرست ہے:
 
-یہ فہرست **شکل** کے لحاظ سے تقسیم کی گئی ہے، اور یہ تقسیم نہایت اہم ہے (GHSA-74g9-q8f6-793h): کسی prefix کو
-`startsWith()` کے ذریعے ملایا جاتا ہے، اس لیے یہ ان تمام ملحقہ paths سے بھی match ہو جاتا ہے جو اس کے ابتدائی حروف
-شیئر کرتے ہیں۔ `/api/usage/om-usage` کو prefix کے طور پر `/api/usage/om-usage<anything>` PUBLIC نشان زد کرتا ہے، اور Next اسے
-`/api/usage/[connectionId]` پر resolve کرتا ہے — ایسا handler جس کی اپنی کوئی auth نہیں ہے۔
+فہرست کی طرف سے تقسیم کیا جاتا ہے** شکل** ، اور تقسیم بوجھ برداشت کرنے والی ہے (GHSA-74g9-q8f6-793h): ایک سابقہ `startsWith()` کے ساتھ مماثل ہے، لہذا یہ ہر ملحقہ راستے سے بھی میل کھاتا ہے جو اس کے اہم کرداروں کا اشتراک کرتا ہے۔ `/api/usage/om-usage` بطور سابقہ نشان زد `/api/usage/om-usage<anything>` PUBLIC، اور اگلا حل کرتا ہے کہ `/api/usage/[connectionId]` — ہینڈلر کو اس کی اپنی کوئی سند نہیں ہے۔
 
 ```ts
-// حقیقی subtrees۔ ہر entry کا "/" پر ختم ہونا لازمی ہے (unit test کے ذریعے assert کیا جاتا ہے)۔
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify میں CLIENT_API سمجھا جاتا ہے، "no-auth public" نہیں
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// واحد routes، جنہیں trailing slash کے ساتھ یا اس کے بغیر EXACTLY match کیا جاتا ہے۔
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP کے لیے login step 2؛ MFA-pending cookie درکار ہے
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// صرف پڑھنے کے لیے واحد routes، جن پر CORS origin relaxation بھی لاگو ہوتی ہے۔
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// صرف پڑھنے کے لیے واحد route، جس پر CORS relaxation لاگو نہیں ہوتی۔
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-صرف محفوظ methods کے لیے read-only routes عوامی ہوتے ہیں۔ نوٹ: `classifyRoute()`، PUBLIC fall-through سے `/api/v1/*` اور `/api/v1beta/*` کو خارج کرتا ہے — یہ ہمیشہ `CLIENT_API` ہوتے ہیں، اس لیے Bearer-key policy بدستور لاگو رہتی ہے۔
+صرف پڑھنے کے راستے عوامی ہیں۔** صرف** محفوظ طریقوں کے لیے۔ نوٹ: `classifyRoute()` `/api/v1/*` اور `/api/v1beta/*` PUBLIC فال تھرو — سے خارج کرتا ہے وہ ہمیشہ `CLIENT_API` ہوتے ہیں لہذا Bearer-key پالیسی اب بھی لاگو ہوتی ہے۔
 
 ## نیا Route شامل کرنا
 
@@ -313,15 +309,15 @@ API کیز میں ایک `scopes` ایرے شامل ہوتا ہے (جو `api_key
 
 `oma_live_…` ٹوکنز پر `read` / `write` / `admin`، جن کی درجہ بندی `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) کے ذریعے کی جاتی ہے۔ یہ درجہ بندی صرف ایکسیس ٹوکن کریڈینشل پر لاگو ہوتی ہے۔ [مینجمنٹ تصدیق](../guides/MANAGEMENT-AUTH.md) دیکھیں۔
 
-## Auth Required ٹوگل
+## توثیق مطلوبہ ٹوگل
 
-`src/shared/utils/apiAuth.ts` میں `isAuthRequired()` طے کرتا ہے کہ کسی درخواست کے لیے **کوئی بھی** احراز ہویت نافذ ہونی چاہیے یا نہیں:
+`src/shared/utils/apiAuth.ts` میں `isAuthRequired()` فیصلہ کرتا ہے کہ آیا** کوئی بھی** auth ایک درخواست کے لیے نافذ ہے:
 
-- `settings.requireLogin === false` → احراز ہویت مجموعی طور پر غیر فعال ہے، سوائے ہمیشہ محفوظ رہنے والے درجے کے (دیکھیں [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) اور ان کالز کے جو ایسی اسناد جاری کرتی ہیں جنہیں قبول کیا جاتا ہے اور جنہیں لاگ ان فعال ہونے کی صورت جیسی ہی اسناد درکار ہوتی ہیں: sync ٹوکن جاری کرنا، کسی بھی اسکوپ کے CLI رسائی ٹوکن بنانا، اور `manage`/`admin` اسکوپ والی API کلید بنانا، کسی کلید کو وہ اسکوپ دینا، یا ایسی کلید کو دوبارہ بنانا یا ظاہر کرنا (`src/lib/api/requireManagementAuth.ts` میں `requireCredentialForManagementScopedKey()`)۔ صرف‌ استنتاج والی کلیدیں کھلی رہتی ہیں۔
-- کوئی پاس ورڈ کنفیگر نہیں **اور** `INITIAL_PASSWORD` ماحولیاتی متغیر موجود نہیں → بوٹ اسٹریپ موڈ آن بورڈنگ وزرڈ اور loopback درخواستوں کی اجازت دیتا ہے، لیکن نیٹ ورک پر ظاہر درخواستوں کو اب بھی اسناد درکار ہیں۔
-- کوئی DB خرابی → بند ہو جاتا ہے (ڈیفالٹ کے طور پر محفوظ)۔
+- `settings.requireLogin === false` → auth عالمی سطح پر غیر فعال ہے، سوائے ہمیشہ محفوظ درجے کے ( [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) دیکھیں) اور کالز جو اسے قبول کرتا ہے ایک سند فراہم کرتا ہے، جس کے لیے وہی سند کی ضرورت ہوتی ہے جیسے لاگ ان کے ساتھ: مطابقت پذیری ٹوکن جاری کرنا، CLI رسائی ٹوکنز کو کسی بھی دائرہ کار میں minting، اور `manage`/`admin` اسکوپ کے ساتھ API بنانا کسی کلید کو اس گنجائش فراہم کرنا، یا ایسی کلید کو دوبارہ تخلیق کرنا یا ظاہر کرنا (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)۔ صرف تخمینہ کی چابیاں کھلی رہتی ہیں۔ ایک محفوظ فیچر فلیگ (`REQUIRE_API_KEY`، دیگر سیکیورٹی فلیگ، اور [فیچر فلیگ](../reference/FEATURE_FLAGS.md#rest-api) میں درج SSRF / TLS /MCP-scope/sandbox فلیگ) لکھنا اور PII ماسکنگ سیٹنگز (`PUT /api/settings/pii`) کو محفوظ کرنے کے لیے بھی ایک سند کی ضرورت رہتی ہے۔
+- کوئی پاس ورڈ کنفیگر نہیں ہے۔** اور** no `INITIAL_PASSWORD` env var → بوٹسٹریپ موڈ آن بورڈنگ وزرڈ اور لوپ بیک کی درخواستوں کی اجازت دیتا ہے، لیکن بے نقاب نیٹ ورک کی درخواستوں کو ابھی بھی اسناد کی ضرورت ہے۔ استثناء: ایک محفوظ فیچر فلیگ لکھنے اور PII ماسکنگ سیٹنگز (`PUT /api/settings/pii`) کو محفوظ کرنے کے لیے لوپ بیک سے بھی ایک سند کی ضرورت ہوتی ہے، اس لیے وہاں خود لوپ بیک کافی نہیں ہے۔
+- کوئی بھی DB ایرر → بند ہوجاتا ہے (بذریعہ ڈیفالٹ محفوظ)۔
 
-کلائنٹ API کلید کا نفاذ `src/shared/utils/featureFlags.ts` میں `isRequireApiKeyEnabled()` استعمال کرتا ہے، براہ راست `process.env.REQUIRE_API_KEY` پڑھنے کے بجائے۔ تعینات شدہ انسٹنسز کے لیے یہ اہم ہے: ڈیش بورڈ → Feature Flags میں `REQUIRE_API_KEY` ٹوگل کرنے سے DB اوور رائڈ محفوظ ہوتا ہے اور فوراً `/v1/*`، `/v1beta/*`، `/models`، `/responses`، `/chat/completions`، `/codex/*` اور وہ دیگر کلائنٹ API احراز ہویت چیکس متاثر ہوتے ہیں جو اس ہیلپر کو استعمال کرتے ہیں۔ اگر فیچر فلیگ اسٹور نہ پڑھا جا سکے تو کلائنٹ API احراز ہویت بند ہو جاتی ہے اور کلید لازم ہوتی ہے۔
+کلائنٹ API کلیدی نفاذ `src/shared/utils/featureFlags.ts` میں `isRequireApiKeyEnabled()` استعمال کرتا ہے، براہ راست `process.env.REQUIRE_API_KEY` پڑھنے کا نہیں۔ یہ تعینات شدہ مثالوں کے لیے اہم ہے: ڈیش بورڈ → فیچر فلیگس میں `REQUIRE_API_KEY` کو ٹوگل کرنا DB اوور رائیڈ کو اسٹور کرتا ہے اور فوری طور پر `/v1/*`، `/v1beta/*`، `/models`، `/responses`، `/chat/completions`، `/codex/*`، اور اس مددگار کو شیئر کرنے والے دیگر کلائنٹ-API auth چیکس کو متاثر کرتا ہے۔ اگر فیچر فلیگ اسٹور کو پڑھا نہیں جا سکتا، تو کلائنٹ API auth بند ہو جاتا ہے اور اسے کلید کی ضرورت ہوتی ہے۔
 
 ## بریکنگ تبدیلی — v3.8.0
 

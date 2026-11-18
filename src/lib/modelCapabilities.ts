@@ -13,6 +13,7 @@ import {
   getAuthoritativeContextWindow,
   getAuthoritativeProviderContextWindow,
   getModelSpec,
+  type GeminiThinkingLevel,
   type ModelSpec,
 } from "@/shared/constants/modelSpecs";
 import { getSyncedCapability } from "@/lib/modelsDevSync";
@@ -40,6 +41,20 @@ import {
   type ModelLimitSources,
 } from "@/lib/modelCapabilityLimits";
 import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSiblings";
+
+export type { GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
+
+/** Native Gemini thinking levels from the static catalog, without a new SSE-to-src import. */
+export function getNativeGeminiThinkingSpec(model: string): {
+  levels: readonly GeminiThinkingLevel[];
+  defaultLevel: GeminiThinkingLevel | undefined;
+} {
+  const spec = getModelSpec(model);
+  return {
+    levels: spec?.geminiThinkingLevels ?? [],
+    defaultLevel: spec?.defaultGeminiThinkingLevel,
+  };
+}
 
 export type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";

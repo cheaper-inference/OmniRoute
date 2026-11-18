@@ -45,6 +45,19 @@ export function isCodexPaidCreditsEnabled(
   );
 }
 
+/** Credits that can actually absorb a request, not merely the opt-in flag. */
+export function isCodexPaidCreditsBacked(
+  provider: string | null | undefined,
+  providerSpecificData: unknown,
+  requestedModel: string | null | undefined,
+  credits: CodexPaidCredits | undefined
+): boolean {
+  return (
+    isCodexPaidCreditsEnabled(provider, providerSpecificData, requestedModel) &&
+    hasCodexPaidCredits(credits)
+  );
+}
+
 export function hasCodexPaidCredits(credits: CodexPaidCredits | undefined): boolean {
   if (!credits || credits.overageLimitReached) return false;
   return (

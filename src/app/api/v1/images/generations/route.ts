@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -48,13 +49,16 @@ import {
 } from "@/lib/providerModels/syncedEndpointRouting";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
-import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
-import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
+import {
+  imageRequestBill,
+  runImageRequestWithAccounting,
+} from "@/lib/usage/imageRequestAccounting";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
+import { updateProviderCredentials } from "@/sse/services/tokenRefresh";
+import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
   assertCommonChatGptWebModelAvailable,
@@ -189,6 +193,7 @@ async function postHandler(request, context) {
         body.model as string,
         body,
         {
+          prepareFalInput: getFalCompatibilityPreparer(),
           request,
           policy,
           keyScope: {
@@ -300,7 +305,8 @@ async function postHandler(request, context) {
       provider,
       null,
       allowedConnections,
-      requestedModel
+      requestedModel,
+      imageQuotaPreflightOptions(provider)
     );
     if (!credentials) {
       return errorResponse(
@@ -395,6 +401,7 @@ async function postHandler(request, context) {
           },
           () =>
             handleImageGeneration({
+              prepareFalInput: getFalCompatibilityPreparer(),
               body,
               credentials: attemptCredentials,
               log,
@@ -402,6 +409,18 @@ async function postHandler(request, context) {
               signal: request.signal,
               // #16260 — IMAGE_GENERATION_LONG_JOBS (default off): null keeps the default path.
               longJobs: getImageLongJobOptions(),
+              // Providers that refresh OAuth credentials mid-request persist them like chat does.
+              onCredentialsRefreshed: attemptCredentials?.connectionId
+                ? async (next: Record<string, unknown>) => {
+                    await updateProviderCredentials(attemptCredentials.connectionId, {
+                      accessToken: next.accessToken,
+                      refreshToken: next.refreshToken,
+                      expiresIn: next.expiresIn,
+                      expiresAt: next.expiresAt,
+                      providerSpecificData: next.providerSpecificData,
+                    });
+                  }
+                : undefined,
               clientHeaders: publicBaseUrlHeaders(request.headers),
               // Trusted "loopback"|"lan"|"remote" verdict stamped by the authz
               // pipeline from the real TCP peer (never the spoofable Host
@@ -431,19 +450,18 @@ async function postHandler(request, context) {
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
-    // Bill the images actually delivered: a provider that returns fewer than the
-    // requested `n` must not be charged for the missing ones (#16398 follow-up).
-    const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
-    const costUsd = await calculateModalCost("image", provider, body.model, { n });
-    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
+    const bill = imageRequestBill(result);
+    const costUsd = bill?.costUsd ?? null;
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,
       model: body.model,
       costUsd,
       latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      requestId: bill?.requestId || generateRequestId(),
     });
+    if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
+    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
     return new Response(JSON.stringify((result as { data: unknown }).data), {
       status: 200,
       headers,

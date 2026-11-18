@@ -81,6 +81,18 @@ Mesmo fora das regiões bloqueadas, os proxies são úteis para:
 
 ---
 
+## Estado de proxy padrão para novas contas
+
+Em** Configurações → Proxy → Configuração global** , uso** Ativar proxy por padrão para novas ligações** para escolher o estado inicial do proxy das contas de fornecedor recém-adicionadas.
+
+A nova configuração controla o estado inicial do proxy das contas de fornecedor recém-adicionadas. Não altera as contas existentes nem substitui a opção de proxy global. O seu valor inicial preserva o comportamento anterior. Desative-o uma vez para criar contas futuras com o proxy desativado por defeito.
+
+A preferência é guardada como `defaultNewConnectionProxyEnabled` através das definições existentes API. O padrão é `true` quando nunca é guardado. Guardar `false` entra em vigor para novas contas subsequentes sem reinicialização. `POST /api/providers` aceita um booleano estrito opcional `proxyEnabled`; um `true` ou `false` explícito tem precedência sobre o padrão de criação. A omissão numa conta duplicada ou a reconexão OAuth preserva o estado armazenado dessa conta. As contas individuais ainda podem ser ativadas ou desativadas posteriormente.
+
+As transferências seletivas de fornecedores utilizam o padrão da instalação de destino para novas contas e preservam a política de destino ao substituir as contas existentes. Os alternadores de proxy não são campos de transferência portáteis. A restauração completa do backup e a migração histórica JSON/SQL mantêm a semântica de restauração existente, incluindo os valores de conta guardados e os padrões de esquema legado; uma restauração completa das definições também pode restaurar esta preferência.
+
+Esta preferência não atribui um proxy nem estabelece que este esteja íntegro ou em utilização. O encaminhamento real ainda depende do switch de proxy global e da configuração de proxy aplicável. Os fornecedores sintéticos sem uma conta persistente, o tráfego OAuth antes da criação da conta, os proxies environment/system e as redes de back-end externas estão fora do seu âmbito.
+
 ## Sistema de Proxy em 4 Níveis
 
 O OmniRoute suporta a configuração de proxies em **quatro âmbitos independentes**, resolvidos por ordem de prioridade:

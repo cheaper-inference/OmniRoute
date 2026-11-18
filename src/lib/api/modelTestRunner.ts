@@ -14,7 +14,11 @@ import {
 } from "@/lib/combos/testHealth";
 import { getCustomModels } from "@/lib/db/models";
 import { getProviderNodeById } from "@/lib/db/providers";
-import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
+import {
+  CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+  chatProbeLeavesNoConversation,
+  isChatProbeRefusal,
+} from "@/lib/providers/chatProbePolicy";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry";
 import { withRateLimit } from "@omniroute/open-sse/services/rateLimitManager";
@@ -27,10 +31,10 @@ import { getTrustedLocalRateLimitError } from "@omniroute/open-sse/services/rate
 import { runAsProbe } from "@/shared/utils/probeOrigin";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 
 const INTERNAL_ORIGIN = "http://omniroute.internal";
 export const DEFAULT_MODEL_TEST_TIMEOUT_MS = 30_000;
-const CHATGPT_WEB_CLEAN_ROOM_PROVIDER_ID = "chatgpt-web";
 const DOLA_PRO_TEST_TIMEOUT_MS = 90_000;
 const DOUBAO_WEB_PROVIDER_ID = "doubao-web";
 const ZAI_WEB_PROVIDER_ID = "zai-web";
@@ -45,14 +49,6 @@ const STREAMING_CHAT_TEST_MAX_TOKENS = 64;
 // ignored on that endpoint, which would let a reasoning model spend the whole
 // default budget before emitting any visible text.
 const RESPONSES_TEST_MAX_OUTPUT_TOKENS = 256;
-
-export function shouldSkipWebSessionModelTest(providerId: unknown): boolean {
-  return (
-    requiresWebSessionCredential(providerId) &&
-    (typeof providerId !== "string" ||
-      providerId.trim().toLowerCase() !== CHATGPT_WEB_CLEAN_ROOM_PROVIDER_ID)
-  );
-}
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -200,8 +196,10 @@ export function buildInternalChatRequest(
       // The bearer gives the request a memory owner; a connection test must not receive
       // injected memory/skills or feed memory extraction (same opt-out as #13139).
       "x-omniroute-no-memory": "true",
-      // Reuse the existing strict-mode internal bypass for live health checks.
+      // Reuse the existing strict-mode internal bypass for live health checks. The mark only
+      // counts next to the process token: this call never crosses fetch, so nothing stamps it.
       "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
       "X-OmniRoute-No-Cache": "true",
       // #6240: a connection test must be clean — never let the operator's globally-enabled
       // Output Styles (e.g. "Ultra terse") leak a system prompt into a test-model call.
@@ -227,6 +225,7 @@ export function buildInternalResponsesRequest(
       Authorization: `Bearer ${resolveSelfLoopBearer()}`,
       "x-omniroute-no-memory": "true",
       "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
       "X-OmniRoute-No-Cache": "true",
       "X-OmniRoute-Compression": "off",
       "X-Request-Id": `model-test-${randomUUID()}`,
@@ -545,6 +544,18 @@ export function classifyTestErrorQuota(errorText: string): {
  * `SingleModelTestResult` (not an HTTP Response) so the single-test and
  * batch-test endpoints can format it differently.
  */
+/** A probe the conversation-isolation policy kept off a signed-in account: never dispatched. */
+function skippedProbe(modelId: string): SingleModelTestResult {
+  return {
+    modelId,
+    status: "error",
+    latencyMs: 0,
+    httpStatus: 422,
+    skipped: true,
+    error: CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+  };
+}
+
 export async function runSingleModelTest(
   options: RunSingleModelTestOptions
 ): Promise<SingleModelTestResult> {
@@ -571,17 +582,8 @@ export async function runSingleModelTest(
   if (!fullModelStr.includes("/")) {
     fullModelStr = `${providerId}/${modelId}`;
   }
-  if (shouldSkipWebSessionModelTest(providerId)) {
-    return {
-      modelId: fullModelStr,
-      status: "error",
-      latencyMs: 0,
-      httpStatus: 422,
-      skipped: true,
-      error:
-        "Skipped: web-session providers are excluded from chat probes to avoid creating provider conversations",
-    };
-  }
+  // Every probe kind asks the same policy the chat pipeline enforces (#14780).
+  if (!(await chatProbeLeavesNoConversation(providerId))) return skippedProbe(fullModelStr);
   const effectiveTimeoutMs = resolveModelTestTimeoutMs(providerId, fullModelStr, timeoutMs);
 
   const catalogError = await prepareConnectionModelTest(providerId, connectionId, fullModelStr);
@@ -889,6 +891,8 @@ export async function runSingleModelTest(
   let errorMsg = "";
   try {
     const errBody = await res.json();
+    // A probe that reached a non-isolated target indirectly (e.g. through a combo).
+    if (isChatProbeRefusal(errBody)) return skippedProbe(fullModelStr);
     errorMsg = extractProviderErrorMessage(errBody, res.statusText);
   } catch {
     errorMsg = res.statusText;

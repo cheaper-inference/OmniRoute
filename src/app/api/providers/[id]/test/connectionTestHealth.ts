@@ -57,7 +57,14 @@ export async function persistConnectionTestHealth({
     !result.valid &&
     terminalTestStatuses.has(String(diagnosis.code ?? diagnosis.type ?? "").toLowerCase());
   const updateData: Record<string, unknown> = {
-    testStatus: clearErrorState ? "active" : result.valid ? connection.testStatus : "error",
+    testStatus:
+      provider === "chatgpt" && !result.valid && diagnosis.code === "expired"
+        ? "expired"
+        : clearErrorState
+          ? "active"
+          : result.valid
+            ? connection.testStatus
+            : "error",
     ...(result.valid && !operatorDisabled ? { isActive: true } : {}),
     lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
     lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
@@ -77,11 +84,12 @@ export async function persistConnectionTestHealth({
       : result.valid
         ? connection.errorCode
         : diagnosis.code || result.statusCode || null,
-    rateLimitedUntil: clearErrorState
-      ? null
-      : isTerminalFailure || result.valid
-        ? connection.rateLimitedUntil || null
-        : new Date(Date.now() + 30_000).toISOString(),
+    rateLimitedUntil:
+      clearErrorState || (provider === "chatgpt" && !result.valid && diagnosis.code === "expired")
+        ? null
+        : isTerminalFailure || result.valid
+          ? connection.rateLimitedUntil || null
+          : new Date(Date.now() + 30_000).toISOString(),
   };
   if (clearErrorState) updateData.backoffLevel = 0;
   if (result.valid && (connection.apiKey || connection.accessToken)) {

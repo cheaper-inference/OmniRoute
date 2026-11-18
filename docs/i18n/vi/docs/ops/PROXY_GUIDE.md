@@ -81,6 +81,18 @@ Ngay cả khi ở ngoài các khu vực bị chặn, proxy vẫn hữu ích cho 
 
 ---
 
+## Trạng thái proxy mặc định cho tài khoản mới
+
+TRONG** Cài đặt → Proxy → Cấu hình toàn cầu** , sử dụng** Bật proxy theo mặc định cho các kết nối mới** để chọn trạng thái proxy ban đầu của tài khoản nhà cung cấp mới được thêm vào.
+
+Cài đặt mới kiểm soát trạng thái proxy ban đầu của tài khoản nhà cung cấp mới được thêm vào. Nó không thay đổi các tài khoản hiện có hoặc thay thế chuyển đổi proxy toàn cầu. Giá trị ban đầu của nó duy trì hành vi trước đó. Tắt nó một lần để tạo các tài khoản trong tương lai với proxy bị tắt theo mặc định.
+
+Tùy chọn được lưu trữ dưới dạng `defaultNewConnectionProxyEnabled` thông qua Cài đặt API hiện có. Nó mặc định là `true` khi không bao giờ được lưu. Việc lưu `false` có hiệu lực đối với các tài khoản mới tiếp theo mà không cần khởi động lại. `POST /api/providers` chấp nhận một boolean `proxyEnabled` nghiêm ngặt tùy chọn; `true` hoặc `false` rõ ràng được ưu tiên hơn mặc định tạo. Việc bỏ sót một tài khoản trùng lặp hoặc kết nối lại OAuth sẽ duy trì trạng thái được lưu trữ của tài khoản đó. Tài khoản cá nhân vẫn có thể được kích hoạt hoặc vô hiệu hóa sau đó.
+
+Chuyển nhà cung cấp có chọn lọc sử dụng cài đặt mặc định của cài đặt đích cho các tài khoản mới và duy trì chính sách đích khi thay thế các tài khoản hiện có. Chuyển đổi proxy không phải là trường chuyển di động. Khôi phục sao lưu toàn bộ và di chuyển JSON/SQL lịch sử giữ lại ngữ nghĩa khôi phục hiện có của chúng, bao gồm các giá trị tài khoản đã lưu và mặc định lược đồ cũ; khôi phục cài đặt đầy đủ cũng có thể khôi phục tùy chọn này.
+
+Tùy chọn này không chỉ định proxy hoặc xác nhận rằng proxy đó hoạt động tốt hoặc đang được sử dụng. Định tuyến thực tế vẫn phụ thuộc vào chuyển đổi proxy toàn cầu và cấu hình proxy hiện hành. Các nhà cung cấp tổng hợp không có tài khoản liên tục, lưu lượng truy cập OAuth trước khi tạo tài khoản, proxy environment/system và mạng của các chương trình phụ trợ bên ngoài đều nằm ngoài phạm vi của nó.
+
 ## Hệ thống Proxy 4 cấp
 
 OmniRoute hỗ trợ cấu hình proxy ở **bốn phạm vi độc lập**, được phân giải theo thứ tự ưu tiên:

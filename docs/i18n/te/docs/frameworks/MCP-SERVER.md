@@ -19,8 +19,11 @@ omniroute --mcp
 లేదా ఓపెన్-sse రవాణా ద్వారా:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 HTTP రవాణాలు (`sse` / `streamable-http`, డ్యాష్బోర్డ్ సర్వర్ ద్వారా ప్రాసెస్లో అందించబడతాయి) డిఫాల్ట్గా ఆఫ్ చేయబడ్డాయి మరియు గతంలో `/dashboard/mcp` పేజీ నుండి మాత్రమే టోగుల్ చేయగలవు. v3.8.51 నాటికి CLI సమానత్వాన్ని కలిగి ఉంది:
@@ -126,25 +129,25 @@ Claude డెస్క్టాప్, Cursor, Cline మరియు అను�
 
 ## కుదింపు సాధనాలు (13)
 
-| సాధనం                               | పరిధులు             | వివరణ                                                                                                                           |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | కంప్రెషన్ సెట్టింగ్లు, అనలిటిక్స్ సారాంశం మరియు కాష్-అవేర్ గణాంకాలు ( `analytics.mcpDescriptionCompression` మెటాడేటాతో సహా)     |
-| `omniroute_compression_configure`   | `write:compression` | కంప్రెషన్ మోడ్, థ్రెషోల్డ్, టార్గెట్ రేషియో, సిస్టమ్-ప్రాంప్ట్ ప్రిజర్వేషన్, MCP వివరణ కంప్రెషన్ టోగుల్ని కాన్ఫిగర్ చేయండి      |
-| `omniroute_set_compression_engine`  | `write:compression` | క్రియాశీల ఇంజిన్ (off/caveman/rtk/stacked) మరియు Caveman/RTK తీవ్రతను ఎంచుకోండి                                                 |
-| `omniroute_list_compression_combos` | `read:compression`  | కంప్రెషన్ కాంబోలు మరియు వాటి ఇంజిన్ పైప్లైన్ల పేరు పెట్టబడిన జాబితా                                                             |
-| `omniroute_compression_combo_stats` | `read:compression`  | కంప్రెషన్ కాంబో మరియు ఇంజిన్ ద్వారా సమూహం చేయబడిన విశ్లేషణలు                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | బౌండెడ్ ఇన్-మెమరీ CCR స్టోర్లో కాలర్-ఐసోలేటెడ్ కంటెంట్ను స్టోర్ చేయండి మరియు మార్కర్తో పాటు `ccr://` రిఫరెన్స్ను తిరిగి ఇవ్వండి |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR కంటెంట్ను పూర్తిగా లేదా తల, తోక, పంక్తులు, grep మరియు గణాంకాల మోడ్లతో తిరిగి పొందండి                                        |
-| `omniroute_ccr_inspect`             | `read:compression`  | కంటెంట్ని తిరిగి ఇవ్వకుండా కాలర్ యాజమాన్యంలోని CCR మెటాడేటాను తనిఖీ చేయండి                                                      |
-| `omniroute_ccr_list`                | `read:compression`  | కాలర్ యాజమాన్యంలోని CCR బ్లాక్ల కోసం పేజీల మెటాడేటాను జాబితా చేయండి                                                             |
-| `omniroute_ccr_delete`              | `write:compression` | కాలర్ యాజమాన్యంలోని CCR బ్లాక్ని తొలగించండి                                                                                     |
-| `omniroute_ccr_stats`               | `read:compression`  | కాలర్-స్కోప్డ్ మెమరీ వినియోగం, జీవితచక్ర కౌంటర్లు మరియు స్టోర్ పరిమితులను నివేదించండి                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | ఆప్ట్-ఇన్ RTK అవుట్పుట్ నమూనాలలో పునరావృత శబ్దాన్ని కనుగొనండి                                                                   |
-| `omniroute_rtk_learn`               | `read:compression`  | ఎంపిక నమూనాల నుండి సమీక్షించదగిన RTK ఫిల్టర్ డ్రాఫ్ట్ను రూపొందించండి                                                            |
+| సాధనం                               | పరిధులు             | వివరణ                                                                                                                              |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | కంప్రెషన్ సెట్టింగ్లు, అనలిటిక్స్ సారాంశం మరియు కాష్-అవేర్ గణాంకాలు ( `analytics.mcpDescriptionCompression` మెటాడేటాతో సహా)        |
+| `omniroute_compression_configure`   | `write:compression` | కంప్రెషన్ మోడ్, థ్రెషోల్డ్, టార్గెట్ రేషియో, సిస్టమ్-ప్రాంప్ట్ ప్రిజర్వేషన్, MCP డిస్క్రిప్షన్ కంప్రెషన్ టోగుల్ని కాన్ఫిగర్ చేయండి |
+| `omniroute_set_compression_engine`  | `write:compression` | క్రియాశీల ఇంజిన్ (off/caveman/rtk/stacked) మరియు Caveman/RTK తీవ్రతను ఎంచుకోండి                                                    |
+| `omniroute_list_compression_combos` | `read:compression`  | కంప్రెషన్ కాంబోలు మరియు వాటి ఇంజిన్ పైప్లైన్ల పేరు పెట్టబడిన జాబితా                                                                |
+| `omniroute_compression_combo_stats` | `read:compression`  | కంప్రెషన్ కాంబో మరియు ఇంజిన్ ద్వారా సమూహం చేయబడిన విశ్లేషణలు                                                                       |
+| `omniroute_ccr_store`               | `write:compression` | బౌండెడ్ ఇన్-మెమరీ CCR స్టోర్లో కాలర్-ఐసోలేటెడ్ కంటెంట్ను స్టోర్ చేయండి మరియు మార్కర్తో పాటు `ccr://` రిఫరెన్స్ను తిరిగి ఇవ్వండి    |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR కంటెంట్ను పూర్తిగా లేదా తల, తోక, పంక్తులు, grep మరియు గణాంకాల మోడ్లతో తిరిగి పొందండి                                           |
+| `omniroute_ccr_inspect`             | `read:compression`  | కంటెంట్ని తిరిగి ఇవ్వకుండా కాలర్ యాజమాన్యంలోని CCR మెటాడేటాను తనిఖీ చేయండి                                                         |
+| `omniroute_ccr_list`                | `read:compression`  | కాలర్ యాజమాన్యంలోని CCR బ్లాక్ల కోసం పేజీల మెటాడేటాను జాబితా చేయండి                                                                |
+| `omniroute_ccr_delete`              | `write:compression` | కాలర్ యాజమాన్యంలోని CCR బ్లాక్ని తొలగించండి                                                                                        |
+| `omniroute_ccr_stats`               | `read:compression`  | కాలర్-స్కోప్డ్ మెమరీ వినియోగం, జీవితచక్ర కౌంటర్లు మరియు స్టోర్ పరిమితులను నివేదించండి                                              |
+| `omniroute_rtk_discover`            | `read:compression`  | ఆప్ట్-ఇన్ RTK అవుట్పుట్ నమూనాలలో పునరావృత శబ్దాన్ని కనుగొనండి                                                                      |
+| `omniroute_rtk_learn`               | `read:compression`  | ఎంపిక నమూనాల నుండి సమీక్షించదగిన RTK ఫిల్టర్ డ్రాఫ్ట్ను రూపొందించండి                                                               |
 
-CCR ఎంట్రీలు మెమరీలో మాత్రమే ఉంటాయి మరియు పునఃప్రారంభించినప్పుడు అదృశ్యమవుతాయి. ప్రతి బ్లాక్ 2 MiB కి, ప్రతి ప్రిన్సిపల్ 16 MiB కి మరియు గ్లోబల్ స్టోర్ 64 MiB కి పరిమితం చేయబడింది. ఎంట్రీలు 24-గంటల TTL కి డిఫాల్ట్గా ఉంటాయి (గరిష్టంగా ఏడు రోజులు). పూర్తి MCP తిరిగి పొందడం 256 KiB కి పరిమితం చేయబడింది; రేంజ్డ్ మరియు grep మోడ్ల ద్వారా పెద్ద బ్లాక్లు అందుబాటులో ఉంటాయి. నిల్వ, పునరుద్ధరణ, జాబితా, తనిఖీ, తొలగింపు మరియు గణాంకాలు ప్రమాణీకరించబడిన API-కీ ప్రిన్సిపాల్ ద్వారా వేరుచేయబడతాయి. ఆడిట్ రికార్డ్లు హ్యాష్లు మరియు సైజ్ మెటాడేటాను కలిగి ఉంటాయి, ఎప్పుడూ కంటెంట్ కాదు.
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB, cloud runtimes and `COMPRESSION_CCR_DURABLE_STORE=false`, which stay memory-only. The durable write is best effort: it is dropped while 1,000 writes are already pending, and a failed SQLite write is logged, not retried, so that block is lost on restart. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` `analytics.mcpDescriptionCompression` కింద విడిగా MCP వివరణ కుదింపును నివేదిస్తుంది. ఆ విలువలు MCP జాబితా చేయదగిన వివరణల కోసం మెటాడేటా-పరిమాణ అంచనాలు (`tools`, `prompts`, `resources`, మరియు `resourceTemplates`); అవి ప్రొవైడర్ వినియోగ రశీదులు కావు మరియు `source: "mcp_metadata_estimate"` తో గుర్తించబడతాయి.
+`omniroute_compression_status` MCP వివరణ కంప్రెషన్ను `analytics.mcpDescriptionCompression` కింద విడిగా నివేదిస్తుంది. ఆ విలువలు MCP జాబితా చేయదగిన వివరణల కోసం మెటాడేటా-పరిమాణ అంచనాలు (`tools`, `prompts`, `resources`, మరియు `resourceTemplates`); అవి ప్రొవైడర్ వినియోగ రశీదులు కావు మరియు `source: "mcp_metadata_estimate"` తో గుర్తించబడతాయి.
 
 ### MCP యాక్సెసిబిలిటీ ట్రీ ఫిల్టర్ (v3.8.0)
 

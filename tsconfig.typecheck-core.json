@@ -36,7 +36,8 @@
     "open-sse/translator/registry.ts",
     "open-sse/handlers/responseSanitizer.ts",
     "open-sse/handlers/responseTranslator.ts",
-    "src/lib/tokenHealthCheckCursor.ts"
+    "src/lib/tokenHealthCheckCursor.ts",
+    "src/shared/constants/iconMap.ts"
   ],
   "exclude": ["node_modules", ".next", "app.__qa_backup", "vscode-extension"]
 }

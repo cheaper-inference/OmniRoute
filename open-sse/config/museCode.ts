@@ -36,6 +36,13 @@ export const MUSE_CODE_TOKEN_URL = `${MUSE_CODE_AUTH_HOST}/oidc/device/token/`;
 export const MUSE_CODE_MINT_URL = "https://api.meta.ai/muse-code/key";
 export const MUSE_CODE_API_BASE_URL = "https://api.meta.ai/v1";
 export const MUSE_CODE_RESPONSES_URL = `${MUSE_CODE_API_BASE_URL}/responses`;
+/** The models this key can call: the routing authority for Muse Code. */
+export const MUSE_CODE_MODELS_URL = `${MUSE_CODE_API_BASE_URL}/models`;
+/**
+ * The catalog the Muse Code client builds its model picker from: one row per
+ * model with `metadata["muse-code"]` (limits, modalities, efforts, visibility).
+ */
+export const MUSE_CODE_CATALOG_URL = "https://api.meta.ai/muse-code/models";
 /** Muse Image (OpenAI-compatible): JSON generations + multipart edits on the same key. */
 export const MUSE_CODE_IMAGES_GENERATIONS_URL = `${MUSE_CODE_API_BASE_URL}/images/generations`;
 export const MUSE_CODE_IMAGES_EDITS_URL = `${MUSE_CODE_API_BASE_URL}/images/edits`;

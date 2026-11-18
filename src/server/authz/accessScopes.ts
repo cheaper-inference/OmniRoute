@@ -33,12 +33,15 @@ export const ADMIN_SCOPE_PREFIXES: readonly string[] = [
 
 /** Require `admin` only for mutating methods; GET/HEAD under these stay `read`. */
 export const ADMIN_MUTATION_PREFIXES: readonly string[] = [
+  "/api/resilience", // persist policy, reset breakers and mutate account cooldowns
   "/api/providers", // POST add provider / rotate key = admin; GET status = read
   "/api/cli-tools/apply", // writes config onto the host filesystem
   // Creating/patching/regenerating an API key can attach the `manage` scope, and a
   // manage-scoped key is full-access on every management route (including token mint),
   // so a `write` token must not be able to reach it (GHSA-35gq-52m5-wgw2).
   "/api/keys",
+  // Reusable policies can grant the same authority as direct key administration.
+  "/api/key-templates",
 ];
 
 /**

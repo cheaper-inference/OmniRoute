@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ഡാഷ്ബോർഡ് `http://localhost:20128`-ൽ തുറക്കും, API അടിസ്ഥാന URL `http://localhost:20128/v1` ആയിരിക്കും.
+ഡാഷ്ബോർഡ് `http://localhost:20128` ൽ തുറക്കുന്നു, API ബേസ് URL `http://localhost:20128/v1` ആണ്.
+
+> **npm ഉപയോക്താക്കൾ:** ഇൻസ്റ്റാൾ സ്ക്രിപ്റ്റുകൾ ബ്ലോക്ക് ചെയ്തതായി npm മുന്നറിയിപ്പ് നൽകിയാൽ (ഉദാ, `omniroute`, `better-sqlite3`), [ട്രബിൾഷൂട്ടിംഗ് — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) കാണുക.
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm ഉപയോക്താക്കൾ:** `better-sqlite3`, `@swc/core` എന്നിവയ്ക്കായുള്ള നേറ്റീവ് ബിൽഡ് സ്ക്രിപ്റ്റുകൾ പ്രവർത്തനക്ഷമമാക്കാൻ `--allow-build` ഫ്ലാഗ് ആവശ്യമാണ്. pnpm v11-ലെ ഗ്ലോബൽ ഇൻസ്റ്റാളേഷനുകൾക്ക് `pnpm approve-builds -g` കമാൻഡ് പിന്തുണയ്ക്കുന്നില്ല.
+> **pnpm ഉപയോക്താക്കൾ:** `better-sqlite3`, `@swc/core` നേറ്റീവ് ബിൽഡ് സ്ക്രിപ്റ്റുകൾ പ്രവർത്തനക്ഷമമാക്കാൻ `--allow-build` ഫ്ലാഗ് ആവശ്യമാണ്. pnpm v11-ലെ ഗ്ലോബൽ ഇൻസ്റ്റാളുകളെ `pnpm approve-builds -g` കമാൻഡ് പിന്തുണയ്ക്കുന്നില്ല.
 
-### Arch Linux (AUR)
+### ആർച്ച് Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR പാക്കേജ്](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ഇൻസ്റ്റാൾ ചെയ്യുകയും ഒരു systemd ഉപയോക്തൃ സർവീസ് നൽകുകയും ചെയ്യുന്നു.
+[AUR പാക്കേജ്](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ഇൻസ്റ്റാൾ ചെയ്യുകയും systemd ഉപയോക്തൃ സേവനം നൽകുകയും ചെയ്യുന്നു.
 
-### സോഴ്സിൽ നിന്ന്
+### ഉറവിടത്തിൽ നിന്ന്
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows കുറിപ്പ്:** ലെഗസി `%USERPROFILE%\.omniroute` ഡയറക്ടറി നിലവിലില്ലെങ്കിൽ, ഡിഫോൾട്ടായി OmniRoute `%APPDATA%\omniroute` ഉപയോഗിക്കുന്നു. മറ്റൊരു ഡാറ്റാ-ഡയറക്ടറി ലൊക്കേഷൻ തിരഞ്ഞെടുക്കാൻ `DATA_DIR` സജ്ജമാക്കുക.
+> **Windows കുറിപ്പ്:** സ്ഥിരസ്ഥിതിയായി, ലെഗസി `%USERPROFILE%\.omniroute` ഡയറക്ടറി ഇല്ലാത്തപ്പോൾ OmniRoute `%APPDATA%\omniroute` ഉപയോഗിക്കുന്നു. മറ്റൊരു ഡാറ്റ-ഡയറക്ടറി ലൊക്കേഷൻ തിരഞ്ഞെടുക്കുന്നതിന് `DATA_DIR` സജ്ജമാക്കുക.
 
-> **കുറിപ്പ്:** ആദ്യമായി പ്രവർത്തിപ്പിക്കുമ്പോൾ `npm install`, `.env.example`-ൽ നിന്ന് `.env` സ്വയമേവ സൃഷ്ടിക്കുന്നു. തുടർന്നുള്ള ഇൻസ്റ്റാളേഷനുകൾ നിലവിലുള്ള `.env` തിരുത്തിയെഴുതില്ല, അതിനാൽ ഇഷ്ടാനുസൃത മാറ്റങ്ങൾ നിലനിർത്തപ്പെടും. വീണ്ടും പ്രാരംഭ മൂല്യങ്ങൾ നൽകാൻ, വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിന് മുമ്പ് `.env` ഇല്ലാതാക്കുക.
+> **കുറിപ്പ്:** `npm install` ആദ്യ ഓട്ടത്തിൽ `.env.example` ൽ നിന്ന് `.env` സൃഷ്ടിക്കുന്നു. തുടർന്നുള്ള ഇൻസ്റ്റാളുകൾ നിലവിലുള്ള ഒരു `.env` പുനരാലേഖനം ചെയ്യില്ല, അതിനാൽ ഇഷ്ടാനുസൃതമാക്കലുകൾ സംരക്ഷിക്കപ്പെടും. വീണ്ടും സീഡ് ചെയ്യുന്നതിന്, വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിന് മുമ്പ് `.env` ഇല്ലാതാക്കുക.
 
 ### Docker
 
-Compose പ്രൊഫൈലുകളും Caddy HTTPS-ഉം ഉൾപ്പെടെയുള്ള സമ്പൂർണ്ണ Docker സജ്ജീകരണത്തിനായി [Docker ഗൈഡ്](./DOCKER_GUIDE.md) കാണുക.
+കമ്പോസ് പ്രൊഫൈലുകളും Caddy HTTPS ഉം ഉൾപ്പെടെ പൂർണ്ണമായ Docker സജ്ജീകരണത്തിനായി [Docker ഗൈഡ്](./DOCKER_GUIDE.md) കാണുക.
 
 ### ഡെസ്ക്ടോപ്പ് ആപ്പ് (Electron)
 
-Electron 41 + electron-builder 26.10 അടിസ്ഥാനമാക്കി നിർമ്മിച്ച ഒരു ഡെസ്ക്ടോപ്പ് റാപ്പറോടെയാണ് OmniRoute വിതരണം ചെയ്യുന്നത്. ലഭ്യമായ സ്ക്രിപ്റ്റുകൾ (വർക്ക്സ്പേസ് റൂട്ട്):
+OmniRoute Electron 41 + ഇലക്ട്രോൺ-ബിൽഡറിൽ നിർമ്മിച്ച ഒരു ഡെസ്ക്ടോപ്പ് റാപ്പർ ഷിപ്പ് ചെയ്യുന്നു 26.10. ലഭ്യമായ സ്ക്രിപ്റ്റുകൾ (വർക്ക്സ്പെയ്സ് റൂട്ട്):
 
 ```bash
-npm run electron:dev          # ഹോട്ട്-റീലോഡോടെ ഡെസ്ക്ടോപ്പ് പ്രവർത്തിപ്പിക്കുക
-npm run electron:build        # നിലവിലെ OS-നായി ബിൽഡ് ചെയ്യുക (സ്വയമേവ കണ്ടെത്തുന്നു)
-npm run electron:build:win    # Windows ഇൻസ്റ്റാളർ (NSIS + പോർട്ടബിൾ)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # പാക്കേജ് ചെയ്ത ബിൽഡ് സ്മോക്ക്-ടെസ്റ്റ് ചെയ്യുക
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-ഡെസ്ക്ടോപ്പ് ഇൻസ്റ്റാളറുകളുടെ റിലീസുകൾ GitHub Releases-ൽ അറ്റാച്ച് ചെയ്തിട്ടുണ്ട്. Electron-നെക്കുറിച്ചുള്ള സമഗ്ര വിശദീകരണത്തിനായി (സൈനിംഗ്, IPC ബ്രിഡ്ജ്, ഡിസ്ട്രോകൾ), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) കാണുക _(പിന്നീടുള്ള ഘട്ടത്തിൽ സൃഷ്ടിച്ചത്)_.
+ഡെസ്ക്ടോപ്പ് ഇൻസ്റ്റാളറുകളുടെ റിലീസുകൾ GitHub റിലീസുകളിൽ ഘടിപ്പിച്ചിരിക്കുന്നു. മുഴുവൻ Electron ഡീപ്പ്-ഡൈവിനായി (സൈനിംഗ്, IPC ബ്രിഡ്ജ്, ഡിസ്ട്രോസ്), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ കാണുക.
 
-### ഹെഡ്ലെസ് സെർവർ (CI/ഓട്ടോമേഷൻ)
+### തലയില്ലാത്ത സെർവർ (CI/automation)
 
-മേൽനോട്ടമില്ലാത്ത സജ്ജീകരണങ്ങൾക്ക് (Docker, Kubernetes, CI), ഇവ ഉപയോഗിക്കുക:
+ശ്രദ്ധിക്കപ്പെടാത്ത സജ്ജീകരണങ്ങൾക്ക് (Docker, Kubernetes, CI), ഉപയോഗിക്കുക:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-എൻവയോൺമെന്റ് വേരിയബിളുകളുമായി (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` തുടങ്ങിയവ) സംയോജിപ്പിക്കുമ്പോൾ, പൂർണ്ണമായും സ്ക്രിപ്റ്റ് ചെയ്യാവുന്ന രീതിയിൽ ഒരു OmniRoute ഇൻസ്റ്റൻസ് ആരംഭിക്കാൻ ഇത് നിങ്ങളെ അനുവദിക്കുന്നു.
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, മുതലായവ) സംയോജിപ്പിച്ച്, ഇത് ഒരു OmniRoute ഉദാഹരണം പൂർണ്ണമായും സ്ക്രിപ്റ്റ് ചെയ്യാൻ നിങ്ങളെ അനുവദിക്കുന്നു.
 
 ### CLI ഓപ്ഷനുകൾ
 
 | കമാൻഡ്                  | വിവരണം                                                                                                              |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | സെർവർ ആരംഭിക്കുക (`PORT=20128`, API-യും ഡാഷ്ബോർഡും ഒരേ പോർട്ടിൽ)                                                    |
-| `omniroute setup`       | പാസ്വേഡിനും ആദ്യ പ്രൊവൈഡറിനുമുള്ള മാർഗനിർദേശത്തോടെയുള്ള CLI ഓൺബോർഡിംഗ്                                              |
-| `omniroute doctor`      | സെർവർ ആരംഭിക്കാതെ ലോക്കൽ ആരോഗ്യ പരിശോധനകൾ പ്രവർത്തിപ്പിക്കുക                                                        |
-| `omniroute providers`   | CLI-യിൽ നിന്ന് പ്രൊവൈഡറുകളെ കണ്ടെത്തുക, പട്ടികപ്പെടുത്തുക, സാധൂകരിക്കുക, പരിശോധിക്കുക                               |
-| `omniroute config`      | CLI ടൂൾ കോൺഫിഗറേഷൻ — കോൺഫിഗുകൾ പട്ടികപ്പെടുത്തുക, നേടുക, സജ്ജമാക്കുക, സാധൂകരിക്കുക                                  |
-| `omniroute status`      | ഓഫ്ലൈൻ സ്റ്റാറ്റസ് ഡാഷ്ബോർഡ് — പതിപ്പ്, DB, ടൂളുകൾ, കോൺഫിഗ്                                                         |
-| `omniroute logs`        | API-യിൽ നിന്നുള്ള ഉപയോഗ ലോഗുകൾ സ്ട്രീം ചെയ്യുക (`--follow` പിന്തുണയ്ക്കുന്നു)                                       |
-| `omniroute update`      | OmniRoute അപ്ഡേറ്റുകൾ പരിശോധിക്കുകയോ പ്രയോഗിക്കുകയോ ചെയ്യുക                                                         |
-| `omniroute provider`    | പ്രൊവൈഡർ കണക്ഷനുകൾ നിയന്ത്രിക്കുക — ചേർക്കുക, പട്ടികപ്പെടുത്തുക, നീക്കംചെയ്യുക, പരിശോധിക്കുക, ഡിഫോൾട്ട് സജ്ജമാക്കുക |
-| `omniroute --port 3000` | കാനോണിക്കൽ/API പോർട്ട് 3000 ആയി സജ്ജമാക്കുക                                                                         |
-| `omniroute --mcp`       | MCP സെർവർ ആരംഭിക്കുക (stdio ട്രാൻസ്പോർട്ട്)                                                                         |
-| `omniroute --no-open`   | ബ്രൗസർ സ്വയമേവ തുറക്കാതിരിക്കുക                                                                                     |
+| `omniroute`             | സെർവർ ആരംഭിക്കുക (`PORT=20128`, API, ഡാഷ്ബോർഡ് എന്നിവ ഒരേ പോർട്ടിൽ)                                                 |
+| `omniroute setup`       | പാസ്വേഡിനും ആദ്യ ദാതാവിനുമായി ഗൈഡഡ് CLI ഓൺബോർഡിംഗ്                                                                  |
+| `omniroute doctor`      | സെർവർ ആരംഭിക്കാതെ തന്നെ പ്രാദേശിക ആരോഗ്യ പരിശോധനകൾ നടത്തുക                                                          |
+| `omniroute providers`   | CLI യിൽ നിന്ന് ദാതാക്കളെ കണ്ടെത്തുക, പട്ടികപ്പെടുത്തുക, സാധൂകരിക്കുക, പരീക്ഷിക്കുക                                  |
+| `omniroute config`      | CLI ടൂൾ കോൺഫിഗറേഷൻ — ലിസ്റ്റ്, നേടുക, സജ്ജമാക്കുക, കോൺഫിഗറേഷനുകൾ സാധൂകരിക്കുക                                       |
+| `omniroute status`      | ഓഫ്ലൈൻ സ്റ്റാറ്റസ് ഡാഷ്ബോർഡ് — പതിപ്പ്, DB, ടൂളുകൾ, കോൺഫിഗർ                                                         |
+| `omniroute logs`        | API ൽ നിന്നുള്ള സ്ട്രീം ഉപയോഗ ലോഗുകൾ ( `--follow` പിന്തുണയ്ക്കുന്നു)                                                |
+| `omniroute update`      | OmniRoute അപ്ഡേറ്റുകൾ പരിശോധിക്കുക അല്ലെങ്കിൽ പ്രയോഗിക്കുക                                                          |
+| `omniroute provider`    | ദാതാവ് കണക്ഷനുകൾ കൈകാര്യം ചെയ്യുക — ചേർക്കുക, ലിസ്റ്റ് ചെയ്യുക, നീക്കം ചെയ്യുക, ടെസ്റ്റ് ചെയ്യുക, ഡിഫോൾട്ട് ചെയ്യുക |
+| `omniroute --port 3000` | canonical/API പോർട്ട് 3000 ആയി സജ്ജമാക്കുക                                                                          |
+| `omniroute --mcp`       | MCP സെർവർ ആരംഭിക്കുക (stdio ഗതാഗതം)                                                                                 |
+| `omniroute --no-open`   | ബ്രൗസർ സ്വയമേവ തുറക്കരുത്                                                                                           |
 | `omniroute --help`      | സഹായം കാണിക്കുക                                                                                                     |
 
-ഫ്ലാഗുകളോ എൻവയോൺമെന്റ് വേരിയബിളുകളോ ഉപയോഗിച്ച് ഹെഡ്ലെസ് സജ്ജീകരണം സ്ക്രിപ്റ്റ് ചെയ്യാം:
+തലയില്ലാത്ത സജ്ജീകരണം ഫ്ലാഗുകളോ പരിസ്ഥിതി വേരിയബിളുകളോ ഉപയോഗിച്ച് സ്ക്രിപ്റ്റ് ചെയ്യാവുന്നതാണ്:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-ഡാഷ്ബോർഡ് തുറക്കാതെ ലോക്കൽ ഡയഗ്നോസ്റ്റിക്സ് പ്രവർത്തിപ്പിക്കുക:
+ഡാഷ്ബോർഡ് തുറക്കാതെ തന്നെ പ്രാദേശിക ഡയഗ്നോസ്റ്റിക്സ് പ്രവർത്തിപ്പിക്കുക:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-ഡാഷ്ബോർഡ് തുറക്കാതെ SSH-യിൽ നിന്നോ സ്ക്രിപ്റ്റുകളിൽ നിന്നോ പ്രൊവൈഡറുകളെ നിയന്ത്രിക്കുക:
+ഡാഷ്ബോർഡ് തുറക്കാതെ തന്നെ SSH അല്ലെങ്കിൽ സ്ക്രിപ്റ്റുകളിൽ നിന്നുള്ള ദാതാക്കളെ നിയന്ത്രിക്കുക:
 
 ```bash
 omniroute providers available
@@ -193,39 +195,43 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ## പ്രോട്ടോക്കോൾ സജ്ജീകരണം (MCP + A2A)
 
-### MCP സജ്ജീകരണം (മോഡൽ കോൺടെക്സ്റ്റ് പ്രോട്ടോക്കോൾ)
+### MCP സജ്ജീകരണം (മോഡൽ സന്ദർഭ പ്രോട്ടോക്കോൾ)
 
-stdio മോഡിൽ MCP ട്രാൻസ്പോർട്ട് ആരംഭിക്കുക:
+stdio മോഡിൽ MCP ഗതാഗതം ആരംഭിക്കുക:
 
 ```bash
 omniroute --mcp
 ```
 
-ശുപാർശ ചെയ്യുന്ന പരിശോധനാ പ്രവാഹം:
+ശുപാർശ ചെയ്യുന്ന മൂല്യനിർണ്ണയ ഫ്ലോ:
 
 ```bash
-# 1. MCP സെർവർ ആരംഭിക്കുക
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. നിങ്ങളുടെ MCP ക്ലയന്റിൽനിന്ന് വിളിക്കുക:
-omniroute_get_health        # സിസ്റ്റത്തിന്റെ ആരോഗ്യനില തിരികെ നൽകണം
-omniroute_list_combos       # സജീവ കോമ്പോകൾ തിരികെ നൽകണം
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. അല്ലെങ്കിൽ പൂർണ്ണ E2E സ്യൂട്ട് പ്രവർത്തിപ്പിക്കുക:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP ക്ലയന്റ് കോൺഫിഗറേഷൻ
+#### MCP ക്ലയൻ്റ് കോൺഫിഗറേഷൻ
 
-**Claude Code:**
+**Claude കോഡ്:**
+
+Claude കോഡ് HTTP വഴി ബന്ധിപ്പിക്കുന്നു, ഏത് `omniroute --mcp` (stdio) ആരംഭിക്കുന്നില്ല. HTTP ട്രാൻസ്പോർട്ട് ഡിഫോൾട്ടായി ഓഫാണ്: ആദ്യം പ്രവർത്തിക്കുന്ന സെർവറിൽ ഇത് പ്രവർത്തനക്ഷമമാക്കുക. ഡാഷ്ബോർഡ് ലോഗിൻ പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, ക്രെഡൻഷ്യൽ ഇല്ലാത്ത ഒരു അഭ്യർത്ഥനയ്ക്ക് `401` ലഭിക്കുന്നു, അതിനാൽ `mcp:connect` (അല്ലെങ്കിൽ `manage`) കൈവശമുള്ള ഒരു API കീ കൈമാറുക; `manage`/`admin` ഇല്ലാത്ത ഒരു കീയ്ക്കും ഓരോ ടൂളിൻ്റെയും സ്കോപ്പ് ആവശ്യമാണ് ( [MCP സെർവർ → MCP ടൂൾ സ്കോപ്പുകൾ](../frameworks/MCP-SERVER.md#mcp-tool-scopes) കാണുക).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-നിങ്ങളുടെ MCP ക്രമീകരണങ്ങളിലേക്ക് ചേർക്കുക:
+നിങ്ങളുടെ MCP ക്രമീകരണങ്ങളിലേക്ക് ചേർക്കുക (stdio, കീ ഉപയോഗിച്ച് വിളിക്കുന്നയാൾക്ക് ഒരു പ്രിൻസിപ്പൽ):
 
 ```json
 {
@@ -233,17 +239,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**പൂർണ്ണ MCP ഡോക്യുമെന്റേഷൻ:** [MCP സെർവർ README](../../open-sse/mcp-server/README.md) — 110 ടൂളുകൾ, IDE കോൺഫിഗറേഷനുകൾ, Python/TS/Go ക്ലയന്റുകൾ.
+അല്ലെങ്കിൽ, `mcpTransport` `streamable-http` ആയിരിക്കുമ്പോൾ (അത് `/dashboard/mcp` അല്ലെങ്കിൽ `omniroute mcp enable --transport streamable-http` ഉപയോഗിച്ച് സജ്ജമാക്കുക), ക്ലയൻ്റിൻറെ റിമോട്ട് MCP സെർവർ എൻട്രി `http://localhost:20128/api/mcp/stream` ലേക്ക് പോയിൻ്റ് ചെയ്യുക.
 
-### A2A സജ്ജീകരണം (ഏജന്റ്-ടു-ഏജന്റ് പ്രോട്ടോക്കോൾ)
+കീ `Authorization: Bearer <api-key>` ആയി സഞ്ചരിക്കുന്നു (റിമോട്ട് ഹോസ്റ്റുകൾക്കുള്ള [MCP സെർവർ → റിമോട്ട് ആക്സസ്](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) കാണുക; ഒരു റിമോട്ട് കീയ്ക്ക് `mcp:connect` കൂടാതെ അതിൻ്റെ read/write സ്കോപ്പുകളും ആവശ്യമാണ്).
 
-Agent Card പരിശോധിക്കുക:
+**മുഴുവൻ MCP ഡോക്യുമെൻ്റേഷൻ:** [MCP സെർവർ README](../../open-sse/mcp-server/README.md) — 110 ടൂളുകൾ, IDE കോൺഫിഗറുകൾ, Python/TS/Go ക്ലയൻ്റുകൾ. കംപ്രഷൻ CCR/dedup ടൂളുകൾക്കായുള്ള ഓപ്പറേറ്റർ റഫറൻസ് (മാർക്കറുകൾ, മുൻവ്യവസ്ഥകൾ, ഓരോ ടൂൾ സ്കോപ്പുകൾ, വീണ്ടെടുക്കൽ പേജിനേഷൻ, ഡയഗ്നോസ്റ്റിക്സ്): [കംപ്രഷൻ എഞ്ചിനുകൾ → മുൻവ്യവസ്ഥകൾ / ഓപ്പറേറ്റർ ഗൈഡ്](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A സജ്ജീകരണം (ഏജൻ്റ്-ടു-ഏജൻറ് പ്രോട്ടോക്കോൾ)
+
+ഏജൻ്റ് കാർഡ് പരിശോധിക്കുക:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -257,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**പൂർണ്ണ A2A ഡോക്യുമെന്റേഷൻ:** [A2A സെർവർ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, സ്കില്ലുകൾ, സ്ട്രീമിംഗ്, ടാസ്ക് ലൈഫ്സൈക്കിൾ.
+**മുഴുവൻ A2A ഡോക്യുമെൻ്റേഷൻ:** [A2A സെർവർ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, കഴിവുകൾ, സ്ട്രീമിംഗ്, ടാസ്ക് ലൈഫ് സൈക്കിൾ.
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) ടെംപ്ലേറ്റ്
+## അസാധുവായ Linux (xbps-src) ടെംപ്ലേറ്റ്
 
-Void Linux ഉപയോക്താക്കൾക്ക് `xbps-src` ഉപയോഗിച്ച് ഒരു നേറ്റീവ് പാക്കേജ് നിർമ്മിക്കാം. ഈ ബ്ലോക്ക് `srcpkgs/omniroute/template` ആയി സംരക്ഷിക്കുക:
+Void Linux ഉപയോക്താക്കൾക്കായി, നിങ്ങൾക്ക് `xbps-src` ഉപയോഗിച്ച് ഒരു നേറ്റീവ് പാക്കേജ് നിർമ്മിക്കാൻ കഴിയും. ഈ ബ്ലോക്ക് `srcpkgs/omniroute/template` ആയി സംരക്ഷിക്കുക:
 
 ```bash
-# 'omniroute'-നുള്ള ടെംപ്ലേറ്റ് ഫയൽ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ഓരോ റിലീസിനും ചെക്ക്സം ഇനിപ്പറയുന്ന കമാൻഡ് ഉപയോഗിച്ച് വീണ്ടും സൃഷ്ടിക്കുക:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

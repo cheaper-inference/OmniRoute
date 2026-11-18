@@ -1,6 +1,6 @@
 "use client";
 
-import { Switch } from "@omniroute/ui-kit/switch";
+import { Switch, type SwitchSide } from "@omniroute/ui-kit/switch";
 
 interface ToggleProps {
   checked?: boolean;
@@ -13,6 +13,12 @@ interface ToggleProps {
   className?: string;
   title?: string;
   ariaLabel?: string;
+  /** Puts the switch to the left (kit default) or the right of its label. */
+  side?: SwitchSide;
+  /** Forwarded to the switch input. */
+  id?: string;
+  name?: string;
+  "data-testid"?: string;
 }
 
 /**
@@ -36,6 +42,10 @@ export default function Toggle({
   className,
   title,
   ariaLabel,
+  side,
+  id,
+  name,
+  "data-testid": testId,
 }: ToggleProps) {
   return (
     <Switch
@@ -50,6 +60,10 @@ export default function Toggle({
       aria-checked={checked}
       title={title}
       size={size === "xs" || size === "sm" ? "sm" : "default"}
+      side={side}
+      id={id}
+      name={name}
+      data-testid={testId}
       className={className}
     />
   );

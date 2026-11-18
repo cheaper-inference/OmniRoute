@@ -38,24 +38,19 @@
 `connection` 규칙은 초기 규칙이 선택되지 않았고 구체적인 공급자 연결이
 이미 선택된 경우에만 평가됩니다. 이 규칙은 effort와 budget만 변경할 수 있습니다.
 
-## Effort 및 Budget
+## 노력과 예산
 
-`sourceEffort`는 `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` 및
-`ultra`를 허용합니다. `missing`은 요청에 개별 effort, thinking 토글 또는 thinking budget이
-모두 포함되지 않았음을 의미합니다. 따라서 budget만 있는 신호는 `any`로만 일치합니다.
+`sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` 및 `ultra` 허용합니다. `missing` 요청에 별도의 노력이나 사고 토글 또는 사고 예산이 포함되어 있지 않음을 의미합니다. 따라서 예산 전용 신호는 `any` 에 의해서만 일치됩니다.
 
-`effortMode`에는 세 가지 변형이 있습니다.
+`effortMode` 에는 세 가지 변형이 있습니다.
 
-- `inherit`는 클라이언트 effort를 유지하면서도 모델 또는 콤보를 변경할 수 있게 합니다.
-- `default`는 명시적인 추론 신호가 없는 경우에만 `targetEffort`를 설정합니다.
-- `force`는 개별 effort를 `targetEffort`로 대체합니다.
+- `inherit` 모델이나 콤보의 변경을 허용하면서 클라이언트의 노력을 유지합니다.
+- `default` 명시적인 추론 신호가 없는 경우에만 `targetEffort` 설정합니다.
+- `force` 개별 노력을 `targetEffort` 로 대체합니다.
 
-이와 별개로 `budgetAction`은 `preserve`, `remove` 또는 `set`일 수 있습니다. `none`을 사용하는 `force`는
-인식되는 모든 effort 및 budget 필드를 제거합니다. `none`과 `set`을 함께 사용하는 것은 유효하지 않습니다.
+독립적으로 `budgetAction` `preserve`, `remove` 또는 `set` 일 수 있습니다. `force` 와 `none` 는 인식된 모든 노력 및 예산 필드를 제거한 다음 `reasoning_effort: "none"` 설정합니다. 일부 공급자는 해당 필드가 없을 때 생각을 켜기 때문입니다. 리터럴 `none` 거부하는 공급자는 `open-sse/executors/base/reasoningEffort.ts` 에서 발송 시 조정됩니다. 명령 코드는 `none` 유지하는 응답 형식 요청( `messages` 없는 `input` )을 제외하고 이를 `low` 에 매핑합니다. Cloudflare 작업자 AI (`cloudflare-ai`)에서 `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash)를 거부하는 모델은 `low` 얻습니다. 다른 작업자 AI 모델은 `none` 유지합니다. 노력이 없으면 모델의 기본 계층이 실행되므로 필드를 삭제하는 것은 옵션이 아닙니다. `none` 와 `set` 는 유효하지 않습니다.
 
-알려진 비호환 모델을 대상으로 하는 요청은 업스트림 호출 전에 거부됩니다. 콤보
-대상의 경우 비호환 항목이 제거되며, 남은 항목이 없으면 요청은 상태 `400`을 반환합니다.
-알 수 없는 기능 데이터는 경고를 생성하지만 규칙은 활성 상태로 유지됩니다.
+알려진 호환되지 않는 모델을 대상으로 하는 요청은 업스트림 호출 전에 거부됩니다. 콤보 대상의 경우 호환되지 않는 항목이 제거됩니다. 아무것도 남아 있지 않으면 요청은 상태 `400` 반환합니다. 알 수 없는 기능 데이터는 경고를 생성하고 규칙을 활성 상태로 유지합니다.
 
 ## 보안 및 전송 방식
 

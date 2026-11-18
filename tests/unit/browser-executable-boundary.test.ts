@@ -22,6 +22,9 @@ const ENV_KEYS = [
   "CHATGPT_WEB_CODEX_CHROME_PATH",
   "CHATGPT_WEB_CHROME_PATH",
   "CHATGPT_WEB_CODEX_CDP_URL",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "LOCALAPPDATA",
 ];
 const savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
 for (const k of ENV_KEYS) delete process.env[k];
@@ -62,6 +65,23 @@ test("codex: the operator's own CHATGPT_WEB_CODEX_CHROME_PATH / CHROME_PATH stil
     assert.equal(detectChromeExecutable(), NOT_A_BROWSER);
   } finally {
     delete process.env.CHROME_PATH;
+  }
+});
+
+// #18850: on Windows the codex detector knew no install location, so Chrome in its default
+// place was never found and the connection could not be added without CHROME_PATH.
+test("codex: Chrome in the Windows install locations is an operator browser", () => {
+  for (const envKey of ["PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA"]) {
+    const root = fs.mkdtempSync(path.join(TEST_DATA_DIR, "win-"));
+    const chromeExe = path.join(root, "Google", "Chrome", "Application", "chrome.exe");
+    fs.mkdirSync(path.dirname(chromeExe), { recursive: true });
+    fs.writeFileSync(chromeExe, "");
+    process.env[envKey] = root;
+    try {
+      assert.equal(detectChromeExecutable(chromeExe), chromeExe, envKey);
+    } finally {
+      delete process.env[envKey];
+    }
   }
 });
 

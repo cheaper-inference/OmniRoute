@@ -176,49 +176,61 @@ test("without cfg.bypassMark the OUTPUT rule cannot exclude sing-box egress → 
 });
 
 test("real sockets: sing-box inbounds and the native 0.0.0.0:onPort listener bind side by side", async () => {
-  // Pick a free port to play the role of cfg.onPort for the native IP_TRANSPARENT listener.
-  const probe = net.createServer();
-  await new Promise<void>((r) => probe.listen(0, "0.0.0.0", r));
-  const onPort = (probe.address() as net.AddressInfo).port;
-  await new Promise<void>((r) => probe.close(() => r()));
-
-  const { sup } = fakeSupervisor();
-  registerSupervisor(sup as never);
-  process.env.SINGBOX_PORT = String(onPort); // worst case: the service port was configured onto onPort
-  try {
-    assert.equal(await ensureSingboxTproxy({ ...CFG, onPort }), true);
-  } finally {
-    delete process.env.SINGBOX_PORT;
-  }
-  const written = readWrittenConfig();
-
-  const servers: net.Server[] = [];
-  try {
-    // native listener first (what startTproxyCapture does, default listenIp 0.0.0.0)
+  // Keep the chosen native port bound throughout the assertion. Previously a
+  // temporary probe released it, allowing another parallel test to claim it.
+  // Unrelated tests can also occupy onPort+1, so retry only on an external
+  // EADDRINUSE; a generated collision with the native port always fails.
+  const attempts = 5;
+  for (let attempt = 0; attempt < attempts; attempt++) {
     const native = net.createServer();
-    await new Promise<void>((resolve, reject) => {
-      native.once("error", reject);
-      native.listen(onPort, "0.0.0.0", resolve);
-    });
-    servers.push(native);
-    // then every sing-box inbound exactly as generated
-    for (const inbound of written.inbounds) {
-      const s = net.createServer();
+    const servers: net.Server[] = [native];
+    let externalPortCollision = false;
+    try {
       await new Promise<void>((resolve, reject) => {
-        s.once("error", (e) =>
-          reject(
-            new Error(
-              `${inbound.type} inbound ${inbound.listen}:${inbound.listen_port}: ${e.message}`
-            )
-          )
-        );
-        s.listen(inbound.listen_port, inbound.listen, resolve);
+        native.once("error", reject);
+        native.listen(0, "0.0.0.0", resolve);
       });
-      servers.push(s);
+      const onPort = (native.address() as net.AddressInfo).port;
+      const { sup } = fakeSupervisor();
+      registerSupervisor(sup as never);
+      process.env.SINGBOX_PORT = String(onPort);
+      assert.equal(await ensureSingboxTproxy({ ...CFG, onPort }), true);
+      const written = readWrittenConfig();
+
+      for (const inbound of written.inbounds) {
+        assert.notEqual(
+          inbound.listen_port,
+          onPort,
+          "a sing-box inbound must never take the native TPROXY listener port"
+        );
+        const server = net.createServer();
+        try {
+          await new Promise<void>((resolve, reject) => {
+            server.once("error", reject);
+            server.listen(inbound.listen_port, inbound.listen, resolve);
+          });
+          servers.push(server);
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === "EADDRINUSE") {
+            // The native port remains reserved, and a same-port generated
+            // collision was rejected above: this is an external port race.
+            externalPortCollision = true;
+            break;
+          }
+          throw error;
+        }
+      }
+      if (!externalPortCollision) return;
+    } finally {
+      delete process.env.SINGBOX_PORT;
+      unregisterSupervisor("singbox");
+      await Promise.all(
+        servers.filter((server) => server.listening)
+          .map((server) => new Promise<void>((resolve) => server.close(() => resolve())))
+      );
     }
-  } finally {
-    await Promise.all(servers.map((s) => new Promise<void>((r) => s.close(() => r()))));
   }
+  assert.fail("could not find a collision-free ephemeral sing-box port range in 5 attempts");
 });
 
 test("ensureSingboxTproxy never throws on a config-write failure and reports false", async () => {

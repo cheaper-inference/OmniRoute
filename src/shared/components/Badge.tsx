@@ -21,7 +21,7 @@ interface BadgeProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "childr
   variant?: keyof typeof TONES;
   size?: keyof typeof SIZES;
   dot?: boolean;
-  /** Material Symbols name (rendered through <Icon>) or any node. */
+  /** ICON_MAP name (rendered through <Icon>) or any node. */
   icon?: React.ReactNode;
   className?: string;
 }

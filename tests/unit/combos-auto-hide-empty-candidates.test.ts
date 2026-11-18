@@ -9,9 +9,11 @@
  *
  * Note: `opencode` is a no-auth provider, so even an "empty" DB has candidates
  * for the unconstrained combos (auto, auto/coding, ...) and for families its
- * oc/* models match (auto/mimo, auto/deepseek). Families with no matching
- * connected model — auto/minimax, auto/zai — still come back with an empty
- * pool and are the reliable negative cases.
+ * oc/* models match (auto/mimo, auto/deepseek). The same holds for
+ * `minimax-code`: it is a no-auth provider, and its MiniMax-* models belong to
+ * the minimax family, so auto/minimax has candidates as well. A family with no
+ * matching connected model — auto/zai — still comes back with an empty pool
+ * and is the reliable negative case.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -31,7 +33,7 @@ const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 
 // Families with no matching models in any seeded registry — the materialized
 // pool is empty, so these ids must be filtered from every listing.
-const EMPTY_FAMILY_IDS = ["auto/minimax", "auto/zai"];
+const EMPTY_FAMILY_IDS = ["auto/zai"];
 
 const SEEDED_PROVIDERS = ["openai", "anthropic", "gemini", "groq", "deepseek", "mistral"];
 

@@ -58,6 +58,11 @@ export type NonStreamingProviderLegResult =
       providerBody: Record<string, unknown>;
       providerRequest: Record<string, unknown>;
       usage: ProviderLegUsage | null;
+      /**
+       * Full provider usage extracted before the client translate mutated the body
+       * (cost/credit fields, estimate marker included). Billing source of truth.
+       */
+      billingUsage?: Record<string, unknown> | null;
       responsePayloadFormat: string;
       looksLikeSSE: boolean;
       connectionId: string;

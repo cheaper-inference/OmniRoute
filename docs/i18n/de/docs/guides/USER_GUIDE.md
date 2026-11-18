@@ -347,63 +347,63 @@ Modell: cc/claude-opus-4-7
 
 ## 🚀 Bereitstellung
 
-### Globale npm-Installation (empfohlen)
+### Globale NPM-Installation (empfohlen)
 
 ```bash
 npm install -g omniroute
 
-# Konfigurationsverzeichnis erstellen
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env-Datei erstellen (siehe .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Server starten
+# Start server
 omniroute
-# Oder mit benutzerdefiniertem Port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Die CLI lädt `.env` automatisch aus `~/.omniroute/.env` oder `./.env`.
+Der CLI lädt `.env` automatisch von `~/.omniroute/.env` oder `./.env`. Ein `./.env` im Arbeitsverzeichnis darf nur eine kurze Zulassungsliste von Schlüsseln festlegen (`REQUIRE_API_KEY`, Gebietsschema, Zeitzone und Farbeinstellungen, nicht die Ports); füge alles andere in `~/.omniroute/.env`. Siehe [CLI Startverträge](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Tray-Modus
+### Fachmodus
 
-Starte OmniRoute im System-Tray:
+Starten Sie OmniRoute in der Taskleiste:
 
 ```bash
 omniroute serve --tray
 ```
 
-Der Befehl wird beendet, sobald der Server und das Tray bereit sind.
+Der Befehl kehrt zurück, nachdem der Server und das Fach bereit sind.
 
-Der Server läuft ohne das Terminal weiter.
+Der Server läuft ohne Terminal weiter.
 
-Der Tray-Modus unterstützt macOS, Windows und grafische Linux-Sitzungen. Im Tray-Modus wird das Dashboard nicht automatisch geöffnet.
+Der Tray-Modus unterstützt macOS, Windows und grafische Linux Sitzungen. Der Tray-Modus öffnet das Dashboard nicht automatisch.
 
-Verwende das Tray-Menü für folgende Aktionen:
+Verwenden Sie das Taskleistenmenü für diese Aktionen:
 
-- Dashboard öffnen.
-- `/dashboard/logs` öffnen.
+- Öffnen Sie das Dashboard.
+- Öffnen Sie `/dashboard/logs`.
 - Autostart ändern.
-- OmniRoute beenden.
+- Stopp OmniRoute.
 
-Kombiniere `--tray` nicht mit diesen Optionen:
+Kombinieren Sie `--tray` nicht mit diesen Optionen:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Diese Modi erfordern eine unterschiedliche Prozessverwaltung.
+Diese Modi erfordern unterschiedliche Prozesseigentümer.
 
-Aktiviere den Start bei der nächsten Anmeldung am Rechner:
+Aktivieren Sie den Start beim nächsten Computer-Login:
 
 ```bash
 omniroute autostart enable
 ```
 
-Der Autostart verwendet auf macOS, Windows und in grafischen Linux-Sitzungen den Tray-Modus. Unter Headless-Linux wird der vorhandene systemd-Benutzerdienst verwendet.
+Der automatische Start verwendet den Tray-Modus für macOS, Windows und grafische Linux Sitzungen. Headless Linux nutzt den vorhandenen systemd-Benutzerdienst.
 
-Deaktiviere den Start bei der Anmeldung:
+Start beim Anmelden deaktivieren:
 
 ```bash
 omniroute autostart disable
@@ -411,16 +411,16 @@ omniroute autostart disable
 
 ### Deinstallation
 
-Wenn du OmniRoute nicht mehr benötigst, stellen wir zwei schnelle Skripte für eine saubere Entfernung bereit:
+Wenn Sie OmniRoute nicht mehr benötigen, stellen wir zwei schnelle Skripte für eine saubere Entfernung bereit:
 
-| Befehl                   | Aktion                                                                                               |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Entfernt die Systemanwendung, **behält aber deine Datenbank und Konfigurationen** in `~/.omniroute`. |
-| `npm run uninstall:full` | Entfernt die Anwendung UND **löscht dauerhaft alle Konfigurationen, Schlüssel und Datenbanken**.     |
+| Befehl                   | Aktion                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Entfernt die System-App, aber** Behält Ihre DB und Konfigurationen** in `~/.omniroute`.     |
+| `npm run uninstall:full` | Entfernt die App AND dauerhaft** löscht alle Konfigurationen, Schlüssel und Datenbanken** . |
 
-> Hinweis: Um diese Befehle auszuführen, wechsle zum OmniRoute-Projektordner (falls du ihn geklont hast) und führe sie dort aus. Bei einer globalen Installation kannst du alternativ einfach `npm uninstall -g omniroute` ausführen.
+> Hinweis: Um diese Befehle auszuführen, navigieren Sie zum OmniRoute -Projektordner (falls Sie ihn geklont haben) und führen Sie sie aus. Alternativ können Sie bei globaler Installation einfach `npm uninstall -g omniroute` ausführen.
 
-### VPS-Bereitstellung
+### VPS Bereitstellung
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -436,25 +436,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Oder: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-Bereitstellung (geringer Speicherbedarf)
+### PM2 -Bereitstellung (wenig Arbeitsspeicher)
 
-Verwende für Server mit begrenztem RAM die Option zur Speicherbegrenzung:
+Verwenden Sie für Server mit begrenztem RAM die Option „Speicherlimit“:
 
 ```bash
-# Mit einem Limit von 512MB (Standard)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Oder mit benutzerdefiniertem Speicherlimit
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Oder mit ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Erstelle `ecosystem.config.js`:
+`ecosystem.config.js` erstellen:
 
 ```javascript
 module.exports = {
@@ -479,24 +479,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image erstellen (Standard = runner-cli mit vorinstalliertem codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portabler Modus (empfohlen)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Informationen zum hostintegrierten Modus mit CLI-Binärdateien findest du im Docker-Abschnitt der Hauptdokumentation.
+Informationen zum hostintegrierten Modus mit CLI Binärdateien finden Sie im Abschnitt Docker in den Hauptdokumenten.
 
 ### Void Linux (xbps-src)
 
-Benutzer von Void Linux können OmniRoute mithilfe des Cross-Compilation-Frameworks `xbps-src` nativ paketieren und installieren. Dadurch werden der eigenständige Node.js-Build sowie die erforderlichen nativen `better-sqlite3`-Bindings automatisiert.
+Void Linux Benutzer können OmniRoute mithilfe des `xbps-src` -Cross-Compilation-Frameworks nativ verpacken und installieren. Dadurch wird der eigenständige Node.js -Build zusammen mit den erforderlichen nativen `better-sqlite3` -Bindungen automatisiert.
 
 <details>
-<summary><b>xbps-src-Template anzeigen</b></summary>
+<summary><b>xbps-src-Vorlage anzeigen</b></summary>
 
 ```bash
-# Template-Datei für 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -517,7 +517,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Ziel-CPU-Architektur für node-gyp ermitteln
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -526,29 +526,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Alle Abhängigkeiten installieren – Skripte überspringen
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Eigenständiges Next.js-Bundle erstellen
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Statische Assets in das eigenständige Bundle kopieren
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Natives better-sqlite3-Binding kompilieren
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Kompiliertes Binding im eigenständigen Bundle ablegen
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Architekturspezifische sharp-Bundles entfernen
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Von der statischen Next.js-Analyse ausgelassene pino-Laufzeitabhängigkeiten kopieren:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -562,7 +562,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Entfernen leerer Next.js-App-Router-Verzeichnisse durch den Post-Install-Hook verhindern
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -590,30 +590,30 @@ post_install() {
 
 ### Umgebungsvariablen
 
-| Variable                                | Standardwert                         | Beschreibung                                                                                                                                                                                         |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Geheimnis zum Signieren von JWTs (**in der Produktion ändern**)                                                                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Passwort für die erste Anmeldung                                                                                                                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datenverzeichnis (Datenbank, Nutzung, Protokolle)                                                                                                                                                    |
-| `PORT`                                  | Framework-Standardwert               | Dienst-Port (`20128` in den Beispielen)                                                                                                                                                              |
-| `HOSTNAME`                              | Framework-Standardwert               | Host für die Bindung (Docker verwendet standardmäßig `0.0.0.0`)                                                                                                                                      |
-| `NODE_ENV`                              | Laufzeit-Standardwert                | Für die Bereitstellung auf `production` setzen                                                                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Öffentliche Basis-URL, die im Dashboard angezeigt und dem Server bereitgestellt wird (ersetzt das bisherige `BASE_URL`)                                                                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL des Cloud-Synchronisierungsendpunkts (ersetzt das bisherige `CLOUD_URL`)                                                                                                                   |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-Geheimnis für generierte API-Schlüssel                                                                                                                                                          |
-| `REQUIRE_API_KEY`                       | `false`                              | Bearer-API-Schlüssel für `/v1/*` erzwingen                                                                                                                                                           |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Authentifizierten Dashboard-Benutzern erlauben, vollständig gespeicherte API-Schlüsselwerte bei Bedarf anzuzeigen                                                                                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serverseitiges Aktualisierungsintervall für zwischengespeicherte Daten zu Anbieterlimits; die Aktualisierungsschaltflächen der Benutzeroberfläche lösen weiterhin eine manuelle Synchronisierung aus |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Automatische SQLite-Snapshots vor Schreib-, Import- oder Wiederherstellungsvorgängen deaktivieren; manuelle Sicherungen funktionieren weiterhin                                                      |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktiviert die Ausgabe von Anwendungs- und Audit-Protokollen auf den Datenträger                                                                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure`-Authentifizierungs-Cookie erzwingen (hinter einem HTTPS-Reverse-Proxy)                                                                                                                      |
-| `CLOUDFLARED_BIN`                       | nicht festgelegt                     | Vorhandene `cloudflared`-Binärdatei anstelle des verwalteten Downloads verwenden                                                                                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportprotokoll für verwaltete Quick Tunnels (`http2`, `quic` oder `auto`)                                                                                                                        |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-Heap-Limit in MB                                                                                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maximale Anzahl der Einträge im Prompt-Cache                                                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maximale Anzahl der Einträge im semantischen Cache                                                                                                                                                   |
+| Variable                                | Standard                  | Beschreibung                                                                                                                                                                        |
+| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatisch generiert)_ | JWT -Signaturgeheimnis — wird bei der ersten Ausführung automatisch generiert und auf `server.env` gespeichert; Legen Sie es explizit fest, wenn das Datenverzeichnis kurzlebig ist |
+| `INITIAL_PASSWORD`                      | _(unscharf)_              | Erstes Login-Passwort. npm/source -Installationen beginnen mit `CHANGEME`: Ersetzen Sie es. Deaktiviert: Onboarding-Assistent                                                       |
+| `DATA_DIR`                              | `~/.omniroute`            | Datenverzeichnis (Datenbank, Nutzung, Protokolle)                                                                                                                                   |
+| `PORT`                                  | Framework-Standard        | Service-Port (`20128` in Beispielen)                                                                                                                                                |
+| `HOSTNAME`                              | Framework-Standard        | Host binden (Docker ist standardmäßig `0.0.0.0`)                                                                                                                                    |
+| `NODE_ENV`                              | Laufzeitstandard          | Legen Sie `production` für die Bereitstellung fest                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Die öffentliche Basis- URL wird im Dashboard angezeigt und dem Server zugänglich gemacht (ersetzt die alte `BASE_URL`).                                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud-Synchronisierungsendpunkt-Basis URL (ersetzt Legacy- `CLOUD_URL`)                                                                                                             |
+| `API_KEY_SECRET`                        | _(automatisch generiert)_ | HMAC -Geheimnis für generierte API Schlüssel — wird bei der ersten Ausführung automatisch generiert und auf `server.env` gespeichert                                                |
+| `REQUIRE_API_KEY`                       | `false`                   | Erzwingen Sie den Bearer- API -Schlüssel auf `/v1/*`                                                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Ermöglichen Sie authentifizierten Dashboard-Benutzern, bei Bedarf vollständig gespeicherte API -Schlüsselwerte anzuzeigen                                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Serverseitige Aktualisierungsfrequenz für zwischengespeicherte Provider-Limit-Daten; UI Aktualisierungsschaltflächen lösen weiterhin eine manuelle Synchronisierung aus             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Automatische SQLite Snapshots vor writes/import/restore deaktivieren; Manuelle Backups funktionieren weiterhin                                                                      |
+| `APP_LOG_TO_FILE`                       | `true`                    | Ermöglicht die Ausgabe von Anwendungs- und Prüfprotokollen auf die Festplatte                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | `Secure` Authentifizierungs-Cookie erzwingen (hinter dem HTTPS -Reverse-Proxy)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | nicht gesetzt             | Verwenden Sie eine vorhandene `cloudflared` -Binärdatei anstelle eines verwalteten Downloads                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport für verwaltete Quick Tunnels (`http2`, `quic` oder `auto`)                                                                                                                |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js Heap-Limit in MB                                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Maximale Eingabeaufforderungs-Cache-Einträge                                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Maximale Einträge im semantischen Cache                                                                                                                                             |
 
-Die vollständige Referenz der Umgebungsvariablen finden Sie in der [README](../README.md).
+Die vollständige Referenz zu Umgebungsvariablen finden Sie im [README](../README.md).
 
 ---
 
@@ -708,7 +708,7 @@ Jedes Gateway, das OpenAI API spricht (ein selbstgehosteter Proxy, vLLM, ein Agg
 3. **Präfix** : der Routing-Name. Clients nennen Modelle `<prefix>/<model>`, sodass ein Knoten mit dem Präfix `mygw` `mygw/gpt-4o-mini` bedient. Erforderlich; Es gibt keine Zeichenbeschränkung.
 4. **API Typ** : die Endpunktfamilie, die das Gateway bedient (Chat-Abschlüsse, Antworten, Einbettungen, Audio, Bilder).
 5. **Basis URL** : das API Stammverzeichnis bis einschließlich `/v1` (z. B. `https://gateway.example.com/v1`), nicht der vollständige `/chat/completions` Pfad. Gateways mit nicht standardmäßigen Pfaden legen sie fest** Erweiterte Einstellungen** (Chatpfad, Modellpfad).
-6. Der**API -Schlüssel (zur Überprüfung)** Das Feld testet nur die Verbindung. Nachdem Sie den Knoten erstellt haben, öffnen Sie ihn und verwenden Sie ihn** Verbindung hinzufügen** um den Schlüssel zu speichern, den Anfragen verwenden.
+6. Der**API -Schlüssel (zur Prüfung)** Das Feld testet nur die Verbindung. Nachdem Sie den Knoten erstellt haben, öffnen Sie ihn und verwenden Sie ihn** Verbindung hinzufügen** um den Schlüssel zu speichern, den Anfragen verwenden.
 
 Der Knoten erhält eine interne ID der Form `openai-compatible-<apiType>-<uuid>`; Sie müssen es nie eingeben, das Präfix ist der öffentliche Name.
 
@@ -726,8 +726,8 @@ Wählen Sie ein eindeutiges Präfix (`mygw`, `acme-proxy`). Wenn Anfragen an ein
 
 Diese Schlüssel gehen in den `providerSpecificData` einer Verbindung (zum Beispiel über `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (Ganzzahl, 1–1024) – für OpenAI -Chat-Format kompatible Verbindungen, deren Gateway lange Tool-Namen ablehnt. Längere Namen werden als kurze Aliase gesendet und in der Antwort wiederhergestellt.
-- `quotaEndpoint` – der quota/credits Endpunkt des Gateways, gelesen für den Dashboard-Kontingentstreifen und das kontingentbewusste Routing. Funktioniert sowohl mit OpenAI- als auch mit Anthropic-kompatiblen Verbindungen; Die vollständige Form ist in `open-sse/services/usage/openaiCompatible.ts` dokumentiert.
+- `toolNameMaxLength` (Ganzzahl, 1–1024) — für OpenAI -Chat-Format kompatible Verbindungen, deren Gateway lange Tool-Namen ablehnt. Längere Namen werden als kurze Aliase gesendet und in der Antwort wiederhergestellt. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go und Muse Code haben bereits Aliasnamen mit mehr als 64 Zeichen ohne Einstellung. Ein Verbindungswert ersetzt den Azure OpenAI /Azure AI Foundry-Standard (eine Azure-Verbindung hinter einem strengeren Gateway) und legt den Grenzwert für einen benutzerdefinierten kompatiblen Knoten fest; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go und Muse Code behalten ihr Registrierungslimit und ignorieren es.
+- `quotaEndpoint` — Der quota/credits Endpunkt des Gateways, gelesen für den Dashboard-Kontingentstreifen und das kontingentbewusste Routing. Funktioniert sowohl mit OpenAI- als auch mit Anthropic-kompatiblen Verbindungen; Die vollständige Form ist in `open-sse/services/usage/openaiCompatible.ts` dokumentiert.
 
 ```json
 {
@@ -824,9 +824,9 @@ Gibt nach Anbieter gruppierte Modelle mit Typen (`chat`, `embedding`, `image`) z
 
 ### LLM Gateway Intelligence (Phase 9)
 
-- **Semantischer Cache** — Automatisches Zwischenspeichern von Nicht-Streaming- und Temperatur =-0-Antworten (Umgehung mit `X-OmniRoute-No-Cache: true`)
-- **Fordern Sie Idempotenz an** – Dedupliziert Anfragen innerhalb von 5 Sekunden über `Idempotency-Key` oder `X-Request-Id` -Header
-- **Fortschrittsverfolgung** – Melden Sie sich für SSE `event: progress` Ereignisse über den `X-OmniRoute-Progress: true` Header an
+- **Semantischer Cache** — speichert automatisch Nicht-Streaming- und Temperatur-=-0-Antworten im Cache (mit `X-OmniRoute-No-Cache: true` umgehen)
+- **Fordern Sie Idempotenz an** — Dedupliziert Anfragen innerhalb von 5 Sekunden über `Idempotency-Key` oder `X-Request-Id` Header
+- **Fortschrittsverfolgung** — Opt-in für SSE `event: progress` Ereignisse über `X-OmniRoute-Progress: true` Header
 
 ---
 
@@ -855,27 +855,27 @@ Konfigurieren über** Dashboard → -Einstellungen → Routing** . Das Dashboard
 
 **Im Dashboard sichtbare Strategien (Routing auf Kontoebene):**
 
-| Strategie                                | Beschreibung                                                                                                                      |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Zuerst füllen**                        | Verwendet Konten in der Reihenfolge ihrer Priorität – das primäre Konto bearbeitet alle Anfragen, bis es nicht mehr verfügbar ist |
-| **Round Robin**                          | Durchläuft alle Konten mit einem konfigurierbaren Sticky-Limit (Standard: 3 Anrufe pro Konto)                                     |
-| **P2C (Macht zweier Wahlmöglichkeiten)** | Wählt zwei zufällige Konten aus und leitet sie an das gesündere weiter – gleicht Belastung und Gesundheitsbewusstsein aus         |
-| **Zufällig**                             | Wählt für jede Anfrage per Fisher-Yates-Shuffle zufällig ein Konto aus                                                            |
-| **Am wenigsten genutzt**                 | Leitet zum Konto mit dem ältesten `lastUsedAt` Zeitstempel weiter und verteilt den Datenverkehr gleichmäßig                       |
-| **Kostenoptimiert**                      | Leitet zum Konto mit dem niedrigsten Prioritätswert weiter und optimiert so für Anbieter mit den niedrigsten Kosten               |
+| Strategie                                | Beschreibung                                                                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Zuerst füllen**                        | Verwendet Konten in der Reihenfolge ihrer Priorität. Das primäre — -Konto bearbeitet alle Anfragen, bis sie nicht mehr verfügbar sind |
+| **Round Robin**                          | Durchläuft alle Konten mit einem konfigurierbaren Sticky-Limit (Standard: 3 Anrufe pro Konto)                                         |
+| **P2C (Macht zweier Wahlmöglichkeiten)** | Wählt zwei zufällige Konten aus und leitet sie an das gesündere weiter. — gleicht Last mit Gesundheitsbewusstsein aus                 |
+| **Zufällig**                             | Wählt für jede Anfrage per Fisher-Yates-Shuffle zufällig ein Konto aus                                                                |
+| **Am wenigsten genutzt**                 | Leitet zum Konto mit dem ältesten `lastUsedAt` Zeitstempel weiter und verteilt den Datenverkehr gleichmäßig                           |
+| **Kostenoptimiert**                      | Leitet zum Konto mit dem niedrigsten Prioritätswert weiter und optimiert so für Anbieter mit den niedrigsten Kosten                   |
 
-**Erweiterte Combo- und Auto-Strategien** (konfigurierbar per Combo oder über `auto/*` Präfixe – siehe [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Erweiterte Combo- und Auto-Strategien** (konfigurierbar per Combo oder über `auto/*` -Präfixe — siehe [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` – strenge Reihenfolge, niemals Round-Robins
-- `weighted` – proportionale Verkehrsaufteilung nach Modellgewichten
-- `fill-first` – Entleeren Sie das erste Modell, bis die Grenzen erreicht sind
+- `priority` — strikte Reihenfolge, niemals Round-Robins
+- `weighted` — proportionale Verkehrsaufteilung nach Gewichtungen pro Modell
+- `fill-first` — Entleeren Sie das erste Modell, bis die Grenzen erreicht sind
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Macht zweier Wahlmöglichkeiten)
 - `least-used` und `cost-optimized`
-- `auto` – punktzahlgesteuert für alle Kandidaten
-- `lkgp` (Last Known Good Provider) – heftet sich an den letzten erfolgreichen Anbieter und greift dann auf die Regeln zurück
-- `context-optimized` – wählt das Modell mit dem größten freien Kontextfenster aus
-- `context-relay` – verkettet Modelle mit langem Kontext für Folgerunden
+- `auto` — punktzahlgesteuert für alle Kandidaten
+- `lkgp` (Last Known Good Provider) — heftet sich an den letzten erfolgreichen Anbieter und greift dann auf die Regeln zurück
+- `context-optimized` — wählt das Modell mit dem größten freien Kontextfenster aus
+- `context-relay` — verkettet Modelle mit langem Kontext für Folgerunden
 
 #### Externer Sticky-Session-Header
 
@@ -982,32 +982,32 @@ Konfigurieren über** Dashboard → -Einstellungen → Resilienz** .
 
 OmniRoute implementiert Resilienz auf Anbieterebene mit fünf Komponenten:
 
-1. **Anforderungswarteschlange und Taktung** – Anforderungsgestaltung auf Systemebene:
+1. **Anforderungswarteschlange und Taktung** — Anforderungsgestaltung auf Systemebene:
    - **Anfragen pro Minute (RPM)** — Maximale Anfragen pro Minute und Konto
-   - **Mindestzeit zwischen Anfragen** – Mindestlücke in Millisekunden zwischen Anfragen
+   - **Mindestzeit zwischen Anfragen** — Minimale Lücke in Millisekunden zwischen Anfragen
    - **Max. gleichzeitige Anfragen** — Maximale gleichzeitige Anfragen pro Konto
 
-2. **Abklingzeit der Verbindung** – Konfiguration pro Authentifizierungstyp für eine einzelne Verbindung nach wiederholbaren Fehlern:
-   - **Basis-Abklingzeit** – Standard-Abklingzeitfenster für wiederholbare Upstream-Fehler
-   - **Verwenden Sie Upstream-Wiederholungshinweise** – Berücksichtigt maßgebliche `Retry-After` oder Reset-Hinweise, sofern bereitgestellt
-   - **Max. Backoff-Schritte** — Maximales exponentielles Backoff-Niveau bei wiederholten Ausfällen
+2. **Abklingzeit der Verbindung** — Per-Auth-Konfiguration für eine einzelne Verbindung nach wiederholbaren Fehlern:
+   - **Basis-Abklingzeit** — Standard-Abklingzeitfenster für wiederholbare Upstream-Fehler
+   - **Verwenden Sie Upstream-Wiederholungshinweise** — Würdigt maßgebliche `Retry-After` oder Reset-Hinweise, sofern bereitgestellt
+   - **Max. Backoff-Schritte** — Maximaler exponentieller Backoff-Level für wiederholte Fehler
 
-3. **Leistungsschalter des Anbieters** – Verfolgt Ausfälle von End-to-End-Anbietern, markiert einen Anbieter als beeinträchtigt, wenn der konfigurierte Warnschwellenwert erreicht ist, und öffnet den Leistungsschalter, wenn der konfigurierte Fehlerschwellenwert erreicht ist:
-   - **Abbauschwelle** – Aufeinanderfolgende Ausfälle des Anbieters vor dem Eintritt in `DEGRADED`
-   - **Fehlerschwelle** – Aufeinanderfolgende Ausfälle des Anbieters vor dem Eintritt in `OPEN`
+3. **Leistungsschalter des Anbieters** — Verfolgt Ausfälle von End-to-End-Anbietern, markiert einen Anbieter, der beim konfigurierten Warnschwellenwert beeinträchtigt ist, und öffnet den Leistungsschalter, wenn der konfigurierte Fehlerschwellenwert erreicht ist:
+   - **Abbauschwelle** — Aufeinanderfolgende Anbieterausfälle vor der Eingabe von `DEGRADED`
+   - **Fehlerschwelle** — Aufeinanderfolgende Anbieterausfälle vor der Eingabe von `OPEN`
    - **Timeout zurücksetzen** — Zeitfenster, bevor der Anbieter erneut getestet wird
-   - **CLOSED** (Gesund) – Anfragen fließen normal
-   - **DEGRADED** – Anfragen werden weiterhin weitergeleitet, während erhöhte Fehler nachverfolgt werden
-   - **OPEN** — Provider wird nach wiederholten Ausfällen vorübergehend gesperrt
-   - **HALF_OPEN** — Testen, ob sich der Anbieter erholt hat
+   - **CLOSED** (Gesund) — -Anfragen fließen normal
+   - **DEGRADED** — Anfragen fließen weiterhin, während erhöhte Fehler verfolgt werden
+   - **OPEN** Der — Provider wird nach wiederholten Ausfällen vorübergehend blockiert
+   - **HALF_OPEN** — Testet, ob sich der Anbieter erholt hat
 
    Verbindungsbezogene `429` -Ratenbegrenzungen bleiben bestehen** Abklingzeit der Verbindung** und zählen nicht zum Provider Breaker.
 
    Der Laufzeitstatus des Provider-Breakers wird angezeigt** Dashboard → Gesundheit** nur.
 
-4. **Warten Sie auf die Abklingzeit** — Wenn jede Kandidatenverbindung bereits abgekühlt ist, kann OmniRoute auf die früheste Abkühlung warten und dieselbe Client-Anfrage automatisch erneut versuchen.
+4. **Warten Sie auf die Abklingzeit** — Wenn jede Kandidatenverbindung bereits abkühlt, kann OmniRoute auf die früheste Abkühlung warten und dieselbe Client-Anfrage automatisch erneut versuchen.
 
-5. **Automatische Erkennung der Ratenbegrenzung** – Wenn Upstream-Anbieter explizite Wartefenster zurückgeben, überschreiben diese Hinweise die Abklingzeit der lokalen Verbindung, wenn die Einstellung aktiviert ist.
+5. **Automatische Erkennung der Ratenbegrenzung** — Wenn Upstream-Anbieter explizite Wartefenster zurückgeben, überschreiben diese Hinweise die Abklingzeit der lokalen Verbindung, wenn die Einstellung aktiviert ist.
 
 **Profi-Tipp:** Benutzen Sie die** Gesundheit** Seite zum Überprüfen und Zurücksetzen von Leistungsschaltern des Live-Anbieters nach einem Ausfall. Auf der Seite „Resilienz“ wird nur die Konfiguration geändert.
 
@@ -1047,19 +1047,19 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 ### Einstellungs-Dashboard
 
-Die Einstellungsseite ist unterteilt in** 7 Registerkarten** zur einfachen Navigation:
+Die Einstellungsseite ist unterteilt in:** 7 Registerkarten** zur einfachen Navigation:
 
-| Tab                      | Inhalt                                                                                                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Allgemein**            | Systemspeicher-Tools, Standardverhalten, Sichtbarkeit des Endpunkttunnels                                                                                                                                    |
-| **Aussehen**             | Theme-Steuerelemente (light/dark/system), Sichtbarkeit der Seitenleiste, Panel-Umschaltung für Cloudflare/Tailscale/ngrok -Tunnelkarten                                                                      |
-| **AI**                   | Denken Sie an Budget (Passthrough / Auto-Strip / Benutzerdefiniert / Adaptiv – siehe [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale Systemeingabeaufforderung, Eingabeaufforderungs-Cache-Statistiken |
-| **Sicherheit**           | Login/Password Einstellungen, IP -Zugriffskontrolle, API -Authentifizierung für `/models`, Provider-Blockierung, Prompt-Injection-Guard                                                                      |
-| **Routenführung**        | Globale Routing-Strategie (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), Wildcard-Modell-Aliase, Fallback-Ketten, Combo-Standardwerte                                              |
-| **Widerstandsfähigkeit** | Anforderungswarteschlange, Verbindungsabklingzeit, Anbieterunterbrechungskonfiguration und Verhalten beim Warten auf die Abklingzeit                                                                         |
-| **Fortschrittlich**      | Globale Proxy-Konfiguration (HTTP/SOCKS5), Proxy-Überschreibungen pro Anbieter                                                                                                                               |
+| Tab                      | Inhalt                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Allgemein**            | Systemspeicher-Tools, Standardverhalten, Sichtbarkeit des Endpunkttunnels                                                                                                                                        |
+| **Aussehen**             | Theme-Steuerelemente (light/dark/system), Sichtbarkeit der Seitenleiste, Panel-Umschaltung für Cloudflare/Tailscale/ngrok -Tunnelkarten                                                                          |
+| **AI**                   | Denken Sie an Budget (Passthrough / Auto-Strip / benutzerdefiniertes / adaptives — siehe [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale Systemeingabeaufforderung, Eingabeaufforderungs-Cache-Statistiken |
+| **Sicherheit**           | Login/Password Einstellungen, IP -Zugriffskontrolle, API -Authentifizierung für `/models`, Provider-Blockierung, Prompt-Injection-Guard                                                                          |
+| **Routenführung**        | Globale Routing-Strategie (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), Wildcard-Modell-Aliase, Fallback-Ketten, Combo-Standardwerte                                                  |
+| **Widerstandsfähigkeit** | Anforderungswarteschlange, Verbindungsabklingzeit, Anbieterunterbrechungskonfiguration und Verhalten beim Warten auf die Abklingzeit                                                                             |
+| **Fortschrittlich**      | Globale Proxy-Konfiguration (HTTP/SOCKS5), Proxy-Überschreibungen pro Anbieter                                                                                                                                   |
 
-Allgemein dupliziert keine schreibgeschützte Protokollierung und Cache-Notizen mehr. Die Einstellungen zur Datenbankaufbewahrung und -optimierung werden über `/api/settings/database` beibehalten. Das manuelle Löschen des Caches verwendet `DELETE /api/cache`. Die Obergrenzen für Anforderungs- und Proxy-Protokollzeilen werden von `CALL_LOGS_TABLE_MAX_ROWS` und `PROXY_LOGS_TABLE_MAX_ROWS` gesteuert.
+Allgemein dupliziert keine schreibgeschützte Protokollierung und Cache-Notizen mehr. Die Einstellungen zur Datenbankaufbewahrung und -optimierung werden über `/api/settings/database` beibehalten. Das manuelle Löschen des Caches verwendet `DELETE /api/cache`. Die Obergrenzen für Anforderungs- und Proxy-Protokollzeilen werden durch `CALL_LOGS_TABLE_MAX_ROWS` und `PROXY_LOGS_TABLE_MAX_ROWS` gesteuert.
 
 ---
 
@@ -1070,7 +1070,7 @@ Zugriff über** Dashboard- → Kosten** .
 | Tab        | Zweck                                                                                                    |
 | ---------- | -------------------------------------------------------------------------------------------------------- |
 | **Budget** | Legen Sie mit daily/weekly/monthly Budgets und Echtzeitverfolgung Ausgabenlimits pro API -Schlüssel fest |
-| **Preise** | Modellpreiseinträge anzeigen und bearbeiten – Kosten pro 1.000 input/output Tokens pro Anbieter          |
+| **Preise** | Modellpreiseinträge anzeigen und bearbeiten. — -Kosten pro 1.000 input/output -Token pro Anbieter        |
 
 ```bash
 # API: Set a budget
@@ -1152,7 +1152,7 @@ Es können globale Combo-Standardwerte festgelegt werden** Dashboard → -Einste
 
 Kombinationsoptimierungen ohne Latenz sind optional. Verlassen** Optimierungen ohne Latenz** deaktiviert, um zu verhindern, dass diese Latenzfunktionen Fallback-Ziele beschleunigen, Ziele basierend auf dem TTFT Verlauf überspringen oder Fallback-Anfragen komprimieren; Die Aktivierung ermöglicht konfiguriertes Hedging, prädiktive TTFT Sprünge und proaktive Fallback-Komprimierung, um routing/request Treue gegen eine geringere Tail-Latenz einzutauschen.
 
-Deaktivieren** Begründungstokenpuffer** wenn Upstream-Anbieter strenge `max_tokens` / `maxOutputTokens` Grenzwerte verlangen. Wenn diese Option aktiviert ist, erhöht das Combo-Routing den Spielraum des Reasoning-Modells nur für Modelle mit einer bekannten Ausgabeobergrenze und lässt das Client-Token-Limit unverändert, wenn der sicher gepufferte Wert diese Obergrenze überschreiten würde. Wenn das Client-Limit bereits über einer bekannten Obergrenze liegt, begrenzt OmniRoute es auf diese Obergrenze, bevor die Upstream-Anfrage gesendet wird.
+Deaktivieren** Begründungstokenpuffer** wenn Upstream-Anbieter strenge `max_tokens` / `maxOutputTokens` Grenzwerte verlangen. Wenn die Kombinationsweiterleitung aktiviert ist, erhöht sie den Spielraum des Reasoning-Modells nur für Modelle mit einer bekannten Ausgabeobergrenze und lässt das Client-Token-Limit unverändert, wenn der sichere gepufferte Wert diese Obergrenze überschreiten würde. Wenn das Client-Limit bereits über einer bekannten Obergrenze liegt, begrenzt OmniRoute es auf diese Obergrenze, bevor die Upstream-Anfrage gesendet wird.
 
 ---
 
@@ -1164,7 +1164,7 @@ Zugriff über** Dashboard → Gesundheit** . Echtzeit-Übersicht über den Syste
 | ---------------------------- | ---------------------------------------------------------------------- |
 | **Systemstatus**             | Betriebszeit, Version, Speichernutzung, Datenverzeichnis               |
 | **Gesundheit des Anbieters** | Laufzeitstatus des Leistungsschalters des globalen Anbieters           |
-| **Ratenbegrenzungen**        | Aktive Verbindungsabklingzeiten pro Konto mit verbleibender Zeit       |
+| **Ratenbeschränkungen**      | Aktive Verbindungsabklingzeiten pro Konto mit verbleibender Zeit       |
 | **Aktive Sperren**           | Aktive modellbezogene Sperren und vorübergehende Ausschlüsse           |
 | **Signatur-Cache**           | Statistiken zum Deduplizierungs-Cache (aktive Schlüssel, Trefferquote) |
 | **Latenztelemetrie**         | p50/p95/p99 -Latenzaggregation pro Anbieter                            |

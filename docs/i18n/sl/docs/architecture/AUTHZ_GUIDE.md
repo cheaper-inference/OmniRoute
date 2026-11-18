@@ -147,15 +147,15 @@ Vpis se izvede v Nastavitve → Varnost; možnost je izklopljena, dokler je oper
 
 ## Razredi poti
 
-`src/server/authz/types.ts` določa tri razrede; vsaka pot, ki je ni mogoče deterministično razvrstiti, pade v `MANAGEMENT`.
+`src/server/authz/types.ts` definira tri razrede; vsaka pot, ki je ni mogoče deterministično klasificirati, se vrne v `MANAGEMENT`.
 
-| Razred       | Opis                                                                                                                                                      | Zahtevana avtentikacija                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PUBLIC`     | Izrecno varne poti — prijava, odjava, stanje, inicializacija, health, zagonski bootstrap.                                                                 | Brez                                                                    |
-| `CLIENT_API` | Končne točke za strežbo modelov — `/api/v1/*`, `/api/v1beta/*` ter aliasi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ključ Bearer, kadar je omogočena učinkovita zastavica `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Strani nadzorne plošče, nastavitve, ponudniki, ključi, skrbniške in diagnostične končne točke.                                                            | Seja nadzorne plošče ALI Bearer z obsegom `manage`                      |
+| Razred       | Opis                                                                                                                                                         | Zahtevana avtorizacija                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `PUBLIC`     | Eksplicitno varne poti — prijava, odjava, status, zdravje, onboarding bootstrap.                                                                             | Noben                                                                          |
+| `CLIENT_API` | Končne točke, ki strežejo model — `/api/v1/*`, `/api/v1beta/*`, plus vzdevki `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ključ nosilca, ko je omogočena zastavica učinkovite funkcije `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Strani nadzorne plošče, nastavitve, ponudniki, ključi, skrbniške in diagnostične končne točke.                                                               | Nosilec OR nadzorne plošče z obsegom `manage`                                  |
 
-Nekatera dejanja `MANAGEMENT` so **samo za upravitelja**: ključ `manage` ni dovolj. Izvoz shranjenih poverilnic (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), obnovitev varnostne kopije čez žive podatke (`POST /api/db-backups/import`, vključno z `dryRun=true`, `POST /api/db-backups` obnovitev po id-ju, `POST /api/settings/import-json`) in uničenje točk obnovitve (čiščenje z `DELETE /api/db-backups` in tudi `PATCH /api/db-backups`, ker shranjeno hrambo nastavlja samodejno obrezovanje po vsaki varnostni kopiji) zahtevajo sejo nadzorne plošče, lokalni subjekt CLI ali onemogočeno prijavo. Izdaja žetona za sinhronizacijo (`POST /api/sync/tokens`) in ustvarjanje žetona za dostop CLI z obsegom `admin` (`POST /api/cli/tokens`) zahtevata sejo nadzorne plošče ali lokalni subjekt CLI v vseh načinih prijave. Ključi API katerega koli obsega in žetoni za dostop `oma_` niso upraviteljske poverilnice: kadar je upraviteljska poverilnica zahtevana, dobijo `403`. Preverjanje je v `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Spreminjanje nastavitev prijave je prav tako samo za upravitelja: `POST /api/settings/require-login` (nastavitev upravljalskega gesla / preklop `requireLogin`) sprejme samo te poverilnice, ko geslo že obstaja — okno prvega zagona (še brez gesla) ostane nespremenjeno — seja nadzorne plošče pa mora za zamenjavo gesla poslati `currentPassword` (`403`, če manjka ali je napačno, se revidira kot `settings.update_failed`). Lokalni CLI in instanca z onemogočeno prijavo ohranita pot za obnovitev in lahko nastavita geslo brez tega, ker sta obe vezani na gostitelja, ki je lastnik podatkovnega imenika.
+Nekaj dejanj `MANAGEMENT` je** samo za operaterja** : ključ `manage` ni dovolj. Izvoz shranjenih poverilnic (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), obnovitev varnostne kopije preko podatkov v živo (`POST /api/db-backups/import` vključno `dryRun=true`, `POST /api/db-backups` obnovitev z id-jem, `POST /api/settings/import-json`), uničenje obnovitvenih točk ( čiščenje `DELETE /api/db-backups` in `PATCH /api/db-backups` ker ohranjanje, ki ga ohranja, poganja samodejno obrezovanje po vsaki varnostni kopiji) zahtevajo sejo na nadzorni plošči, lokalni subjekt CLI ali onemogočeno prijavo. Izdajanje žetona za sinhronizacijo (`POST /api/sync/tokens`) in kovanje žetona dostopa `admin` CLI (`POST /api/cli/tokens`) zahtevata sejo nadzorne plošče ali lokalni subjekt CLI v vsakem načinu prijave. ključi API katerega koli obsega in žetoni dostopa `oma_` niso poverilnice operaterja: dobijo `403` kadar koli se zahteva. Ček živi v `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Spreminjanje nastavitev za prijavo je prav tako samo za operaterja: `POST /api/settings/require-login` (nastavite geslo za upravljanje / preklopite `requireLogin`) sprejme samo tiste poverilnice, ko geslo obstaja — zagonsko okno ob prvem zagonu (še ni gesla) je nespremenjeno — in seja na nadzorni plošči mora poslati `currentPassword` za zamenjavo gesla (`403` če manjka ali je napačno, pregledano kot `settings.update_failed`). Lokalni CLI in primerek z onemogočeno prijavo ohranita obnovitveno pot in lahko nastavita geslo brez nje, saj sta oba vezana na gostitelja, ki ima v lasti podatkovni imenik.
 
 ## Cevovod
 
@@ -188,51 +188,47 @@ Uspešen pravilnik vrne `AuthSubject` z `kind ∈ { client_api_key, dashboard_se
 
 ## Seznam javnih poti
 
-`src/shared/constants/publicApiRoutes.ts` je izrecni seznam dovoljenih poti:
+`src/shared/constants/publicApiRoutes.ts` je eksplicitni dovoljeni seznam:
 
-Seznam je razdeljen glede na **obliko**, ta razdelitev pa je ključnega pomena (GHSA-74g9-q8f6-793h): predpona
-se ujema z uporabo `startsWith()`, zato se ujema tudi z vsako sosednjo potjo, ki ima enake začetne znake.
-`/api/usage/om-usage` kot predpona označi `/api/usage/om-usage<anything>` kot PUBLIC, Next pa to razreši
-v `/api/usage/[connectionId]` — obravnavo brez lastnega preverjanja pristnosti.
+Seznam je razdeljen na** oblika** , in delitev je nosilna (GHSA-74g9-q8f6-793h): predpona se ujema z `startsWith()`, tako da se ujema tudi z vsako sosednjo potjo, ki si deli vodilne znake. `/api/usage/om-usage` kot predpono z oznako `/api/usage/om-usage<anything>` PUBLIC in Next to razreši v `/api/usage/[connectionId]` — obravnavo brez lastne avtorizacije.
 
 ```ts
-// Prava poddrevesa. Vsak vnos se MORA končati z "/"; to preverja test enote.
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // v classify se obravnava kot CLIENT_API, ne kot "javno brez preverjanja pristnosti"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Posamezne poti, ki se ujemajo NATANČNO (z zaključnim poševnim znakom ali brez njega).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 2. korak prijave za izbirni TOTP; potreben je piškotek MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Posamezne poti samo za branje, za katere velja tudi sprostitev izvora CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Posamezna pot samo za branje, za katero sprostitev izvora CORS NE velja.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Poti samo za branje so javne **le** za varne metode. Opomba: `classifyRoute()` izloči `/api/v1/*` in `/api/v1beta/*` iz javnega nadaljevanja — ti sta vedno `CLIENT_API`, zato zanju še vedno velja pravilnik ključa Bearer.
+Poti samo za branje so javne** samo** za varne metode. Opomba: `classifyRoute()` izključuje `/api/v1/*` in `/api/v1beta/*` iz padajočega — PUBLIC, ki sta vedno `CLIENT_API` tako da pravilnik o nosilnem ključu še vedno velja.
 
 ## Dodajanje nove poti
 
@@ -307,15 +303,15 @@ Ostane izklopljeno, razen če je `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Ta rang velja samo za poverilnico dostopnega žetona.
 Glejte [Avtentikacija upravljanja](../guides/MANAGEMENT-AUTH.md).
 
-## Preklop zahtevane avtentikacije
+## Preklop zahtevane avtorizacije
 
-`isAuthRequired()` v `src/shared/utils/apiAuth.ts` odloča, ali se za zahtevo sploh uveljavi **katerakoli** avtentikacija:
+`isAuthRequired()` v `src/shared/utils/apiAuth.ts` odloči, ali** katerikoli** avtorizacija je uveljavljena za zahtevo:
 
-- `settings.requireLogin === false` → avtentikacija je globalno onemogočena, razen za vedno zaščiteno raven (glej [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) in klice, ki izdajajo poverilnico, ki jo ta nastavitev sprejme; ti zahtevajo enako poverilnico kot pri vklopljeni prijavi: izdajanje žetonov za sinhronizacijo, ustvarjanje žetonov za dostop CLI katerega koli obsega in ustvarjanje ključa API z obsegom `manage`/`admin`, dodeljevanje tega obsega ključu, ponovno ustvarjanje ali razkrivanje takega ključa (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Ključi, namenjeni samo sklepanju, ostanejo odprti.
-- Geslo ni nastavljeno **in** okoljska spremenljivka `INITIAL_PASSWORD` ni nastavljena → način bootstrap dovoli čarovnika za nastavitev in zahteve z loopbacka, zunanje omrežne zahteve pa še vedno zahtevajo poverilnice.
-- Katera koli napaka baze → zaprto varno (secure-by-default).
+- `settings.requireLogin === false` → auth je globalno onemogočen, razen za vedno zaščiteno raven (glejte [Stopnje varovanja poti](../security/ROUTE_GUARD_TIERS.md) ) in klice, ki oddajo poverilnico, ki jo sprejme, ki potrebujejo isto poverilnico kot pri prijavi: izdajanje žetonov za sinhronizacijo, kovanje žetonov za dostop CLI v katerem koli obsegu in ustvarjanje ključa API z obsegom `manage`/`admin`, dodelitev tega obsega ključu ali regeneracijo ali razkritje takega ključa (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Tipke samo za sklepanje ostanejo odprte. Pisanje zastavice zaščitene funkcije (`REQUIRE_API_KEY`, druge varnostne zastavice in zastavice SSRF / TLS / MCP-scope / sandbox zastavice, navedene v [Zastavicah funkcij](../reference/FEATURE_FLAGS.md#rest-api) ) in shranjevanje nastavitev maskiranja PII (`PUT /api/settings/pii`) prav tako še naprej potrebujeta poverilnico.
+- Geslo ni konfigurirano** in** no `INITIAL_PASSWORD` env var → zagonski način omogoča čarovnika za vkrcanje in zahteve za povratno zanko, vendar izpostavljene omrežne zahteve še vedno potrebujejo poverilnice. Izjema: pisanje zastavice zaščitene funkcije in shranjevanje nastavitev maskiranja PII (`PUT /api/settings/pii`) potrebujeta poverilnico tudi pri povratni zanki, zato povratna zanka sama po sebi ni dovolj.
+- Vsaka napaka DB → se ne zapre (privzeto varno).
 
-Uveljavljanje ključa API odjemalca uporablja `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, ne neposrednega branja `process.env.REQUIRE_API_KEY`. To je pomembno za nameščene instance: preklop `REQUIRE_API_KEY` v Dashboard → Feature Flags shrani prepis v bazo in takoj vpliva na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` in druge preverjanje avtentikacije API-ja odjemalca, ki delijo ta pomočnik. Če shrambe zastavic ni mogoče prebrati, se avtentikacija API-ja odjemalca zapre in zahteva ključ.
+Uveljavljanje ključa API odjemalca uporablja `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, ne neposrednega branja `process.env.REQUIRE_API_KEY`. To je pomembno za nameščene primerke: preklop `REQUIRE_API_KEY` na nadzorni plošči → Feature Flags shrani DB preglasitev in takoj vpliva na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` in druga preverjanja avtentičnosti API-ja odjemalca, ki imajo skupno to pomoč. Če shrambe zastavic funkcij ni mogoče prebrati, se overitev API odjemalca ne zapre in zahteva ključ.
 
 ## Nezdružljiva sprememba — v3.8.0
 

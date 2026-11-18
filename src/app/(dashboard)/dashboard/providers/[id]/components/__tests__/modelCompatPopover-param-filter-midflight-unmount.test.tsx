@@ -99,7 +99,6 @@ it("does not lose the new target when unmounted during the older target save", a
   });
   await flushEffects();
 
-
   expect(server.models).toEqual({
     "model-a": { block: ["aaa"], allow: [] },
     "model-b": { block: ["bbb"], allow: [] },

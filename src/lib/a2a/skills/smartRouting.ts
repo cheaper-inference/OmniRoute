@@ -6,19 +6,26 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
+import { buildSelfLoopHeaders, type A2ACallerContext } from "../selfLoopAuth";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 import { resolveRequestedComboModel } from "@omniroute/open-sse/utils/resolveRequestedComboModel";
 
 const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
 
-async function routeFetch(path: string, options: RequestInit = {}): Promise<any> {
+async function routeFetch(
+  path: string,
+  options: RequestInit = {},
+  caller?: A2ACallerContext
+): Promise<any> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-  };
-  const res = await fetch(url, { ...options, headers, signal: AbortSignal.timeout(30000) });
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
+  const res = await fetch(url, {
+    ...options,
+    headers,
+    signal: AbortSignal.timeout(30000),
+    // Never follow a redirect while carrying the caller's API key.
+    redirect: "error",
+  });
   if (!res.ok) throw new Error(`API [${res.status}]: ${await res.text().catch(() => "error")}`);
   return res.json();
 }
@@ -39,7 +46,10 @@ export interface SmartRoutingResult {
   };
 }
 
-export async function executeSmartRouting(task: A2ATask): Promise<SmartRoutingResult> {
+export async function executeSmartRouting(
+  task: A2ATask,
+  caller?: A2ACallerContext
+): Promise<SmartRoutingResult> {
   const messages = task.input.messages;
   const model = (task.input.metadata?.model as string) || "auto";
   const route = resolveRequestedComboModel(model, task.input.metadata?.combo);
@@ -48,10 +58,11 @@ export async function executeSmartRouting(task: A2ATask): Promise<SmartRoutingRe
   const start = Date.now();
   const body: Record<string, unknown> = { model: route.model, messages, stream: false };
 
-  const raw = await routeFetch("/v1/chat/completions", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+  const raw = await routeFetch(
+    "/v1/chat/completions",
+    { method: "POST", body: JSON.stringify(body) },
+    caller
+  );
   const latencyMs = Date.now() - start;
 
   const content = raw?.choices?.[0]?.message?.content || "";

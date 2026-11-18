@@ -55,6 +55,8 @@ import {
   rrCounters,
 } from "./rrState.ts";
 import { executeRuntimeUnitCombo } from "./runtimeUnits.ts";
+import { orderJevRuntimeUnits } from "./jevRuntimeUnits.ts";
+import type { JevResilienceSettings } from "./jevBlockChecker.ts";
 import {
   releaseQualityClone,
   releaseRejectedQualityResponse,
@@ -73,6 +75,7 @@ import type {
   IsModelAvailable,
   HiddenModelsByProvider,
   NestedComboMode,
+  ResolvedComboTarget,
   ResolvedComboUnit,
   SingleModelTarget,
 } from "./types.ts";
@@ -183,19 +186,32 @@ export function pinIsDurablyUnhealthy(
  * active connections, and decide via {@link pinIsDurablyUnhealthy}. Fail-open
  * (return false) on any error so a lookup bug never drops a healthy pin.
  */
-async function isPinnedModelDurablyUnhealthy(pinnedModel: string): Promise<boolean> {
+async function isPinnedModelDurablyUnhealthy(
+  pinnedModel: string,
+  boundConnectionIds?: readonly string[] | null
+): Promise<boolean> {
   try {
     const provider = parseModel(pinnedModel).provider;
     if (!provider) return false;
     const circuitState = getCircuitBreaker(provider)?.getStatus?.()?.state;
-    const connections = (await getCachedProviderPoolConnections({
+    let connections = (await getCachedProviderPoolConnections({
       provider,
       isActive: true,
     })) as Array<{
+      id?: string | null;
       testStatus?: string | null;
       backoffLevel?: number | null;
       rateLimitedUntil?: string | null;
     }>;
+    // A pin bound to specific account(s) can only be served by those: judge the
+    // pool the pin can actually use, not the whole provider. Otherwise a healthy
+    // sibling account keeps a dead bound pin alive and every turn dead-ends in
+    // the pinned dispatch (402 from handleNoCredentials) despite available
+    // fallback targets. A bound id missing from the active pool counts as dead.
+    if (Array.isArray(boundConnectionIds) && boundConnectionIds.length > 0) {
+      const bound = new Set(boundConnectionIds);
+      connections = connections.filter((c) => typeof c.id === "string" && bound.has(c.id));
+    }
     return pinIsDurablyUnhealthy(circuitState, connections || [], Date.now());
   } catch {
     return false;
@@ -297,7 +313,12 @@ async function evaluatePinnedResponse(args: {
   )
     return pinnedResult;
   const pinnedStatus = pinnedResult.status || 500;
-  if (![401, 408, 429, 500, 502, 503, 504].includes(pinnedStatus)) {
+  // 402 must fall through like 401: handleNoCredentials() surfaces a
+  // credits-exhausted account as 402 (#12441 kept 401 for expired/banned), and
+  // the pinned dispatch is bound to the member's account(s) — returning 402
+  // as-is would fail every following turn of the session while the combo loop
+  // would skip the exhausted account and serve from a healthy target.
+  if (![401, 402, 408, 429, 500, 502, 503, 504].includes(pinnedStatus)) {
     return pinnedResult;
   }
   log.warn(
@@ -305,6 +326,38 @@ async function evaluatePinnedResponse(args: {
     `Pinned model ${pinnedModel} failed (${pinnedStatus}), falling through to combo retry/fallback`
   );
   return null;
+}
+
+/**
+ * The account binding a context-cache pin must keep. The pin only records the model string, so
+ * without this the pinned dispatch ran with no connection at all and the provider-level selector
+ * (session affinity / LRU) could serve a member bound to account A from account B of the same
+ * provider. Mirrors the main loop: a single matching step keeps its `connectionId`; several steps
+ * sharing the model string are limited to the union of their allowlists; any matching step
+ * without a binding (dynamic account) leaves the whole provider pool open, as before.
+ */
+export function resolvePinnedConnectionBinding(
+  comboTargets: ReadonlyArray<
+    Pick<ResolvedComboTarget, "modelStr" | "connectionId" | "allowedConnectionIds">
+  >,
+  pinnedModel: string
+): { connectionId?: string; allowedConnectionIds?: string[] } {
+  const matches = comboTargets.filter((t) => t.modelStr === pinnedModel);
+  if (matches.length === 0) return {};
+  const allowed = new Set<string>();
+  for (const target of matches) {
+    const ids =
+      Array.isArray(target.allowedConnectionIds) && target.allowedConnectionIds.length > 0
+        ? target.allowedConnectionIds
+        : target.connectionId
+          ? [target.connectionId]
+          : [];
+    if (ids.length === 0) return {};
+    for (const id of ids) allowed.add(id);
+  }
+  const allowedConnectionIds = [...allowed];
+  const single = matches.length === 1 ? matches[0].connectionId : null;
+  return single ? { connectionId: single, allowedConnectionIds } : { allowedConnectionIds };
 }
 
 /**
@@ -316,6 +369,7 @@ async function dispatchHonoredPin(args: {
   combo: ComboLike;
   pinnedModel: string;
   comboTargets: ReturnType<typeof resolveComboTargets>;
+  connectionBinding: { connectionId?: string; allowedConnectionIds?: string[] };
   config: ComboSetupConfig;
   clientRequestedStream: boolean;
   handleSingleModelWithTimeout: HandleSingleModel;
@@ -328,6 +382,7 @@ async function dispatchHonoredPin(args: {
     combo,
     pinnedModel,
     comboTargets,
+    connectionBinding,
     config,
     clientRequestedStream,
     handleSingleModelWithTimeout,
@@ -354,6 +409,7 @@ async function dispatchHonoredPin(args: {
     if (recoveryAborted(preContentTransportRecovery, signal))
       return errorResponse(499, "Client disconnected");
     pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
+      ...connectionBinding,
       modelPinned: true,
     } as SingleModelTarget);
   } catch (pinErr) {
@@ -472,7 +528,12 @@ export async function tryPinnedModelDispatch(args: {
   // failover) — incident 2026-06-22: laila stuck on a throttled claude account
   // and credits_exhausted accounts never failing over. A transient cooldown is
   // tolerated (pin kept) so an unstable provider does not churn the pin.
-  const pinDurablyDown = pinInCombo ? await isPinnedModelDurablyUnhealthy(pinnedModel) : false;
+  // The same binding the honored dispatch will use — the health gate must judge
+  // exactly the account pool the pin can be served from.
+  const pinnedBinding = resolvePinnedConnectionBinding(comboTargets, pinnedModel);
+  const pinDurablyDown = pinInCombo
+    ? await isPinnedModelDurablyUnhealthy(pinnedModel, pinnedBinding.allowedConnectionIds)
+    : false;
   if (pinInCombo && !pinDurablyDown) {
     log.info(
       "COMBO",
@@ -483,6 +544,7 @@ export async function tryPinnedModelDispatch(args: {
       combo,
       pinnedModel,
       comboTargets,
+      connectionBinding: pinnedBinding,
       config,
       clientRequestedStream,
       handleSingleModelWithTimeout,
@@ -894,6 +956,7 @@ async function orderRuntimeUnits(args: {
  * `flatten`, or when the strategy needs the full target machinery.
  */
 type RuntimeUnitDispatchArgs = {
+  invocationId?: string;
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -905,6 +968,8 @@ type RuntimeUnitDispatchArgs = {
   isModelAvailable?: IsModelAvailable;
   log: ComboLogger;
   settings?: Record<string, unknown> | null;
+  /** Combo-setup resilience settings; the `jev` runtime-unit gates read them. */
+  resilienceSettings: JevResilienceSettings;
   relayOptions?: HandleComboChatOptions["relayOptions"];
   signal?: AbortSignal | null;
   apiKeyAllowedConnections?: string[] | null;
@@ -918,13 +983,51 @@ type RuntimeUnitDispatchArgs = {
   runCombo: RunCombo;
 };
 
+/**
+ * Runtime-unit order for the strategy. `jev` (#15276) asks System One which units run
+ * and keeps the operator's order for failover; every other strategy uses its own order.
+ */
+async function orderRuntimeUnitsForStrategy(
+  args: RuntimeUnitDispatchArgs,
+  executeModeUnits: ResolvedComboUnit[]
+): Promise<RuntimeUnitOrdering | { earlyResponse: Response }> {
+  const { body, combo, config, strategy, allCombos, log, settings } = args;
+  if (strategy !== "jev") {
+    return orderRuntimeUnits({ strategy, executeModeUnits, combo, config, settings });
+  }
+  const jevOrdering = await orderJevRuntimeUnits({
+    units: executeModeUnits,
+    body,
+    comboName: combo.name,
+    config,
+    resilienceSettings: args.resilienceSettings,
+    allCombos: allCombos ?? [],
+    apiKeyAllowedConnections: args.apiKeyAllowedConnections,
+    hiddenModelsByProvider: args.hiddenModelsByProvider,
+    isModelAvailable: args.isModelAvailable,
+    invocationId: args.invocationId,
+    signal: args.signal,
+    log,
+  });
+  if (jevOrdering.earlyResponse) return { earlyResponse: jevOrdering.earlyResponse };
+  return {
+    units: jevOrdering.units,
+    executionStrategy: jevOrdering.executionStrategy,
+    stickyLimit: null,
+    stickyTargets: executeModeUnits,
+  };
+}
+
 /** Dispatch a runtime unit after resolving its target and request compatibility. */
 export async function tryRuntimeUnitDispatch(
   args: RuntimeUnitDispatchArgs
 ): Promise<Response | null> {
   const { body, combo, config, strategy, allCombos, log, settings } = args;
   const nestingContext = buildDefaultNesting(args.nesting, combo.name, config);
-  const nestedComboMode = normalizeNestedComboMode(config.nestedComboMode);
+  // Jev's spec treats a combo-ref as one opaque choice; never flatten child targets
+  // into the parent's choice set, even when a persisted combo predates execute mode.
+  const nestedComboMode =
+    strategy === "jev" ? "execute" : normalizeNestedComboMode(config.nestedComboMode);
 
   const executeModeUnits =
     nestedComboMode === "execute" && allCombos
@@ -943,13 +1046,8 @@ export async function tryRuntimeUnitDispatch(
   const runtimeUnitsSupported = getStrategyTraits(strategy).runtimeUnitOrder !== "unsupported";
   if (!hasExecutableComboRef || !runtimeUnitsSupported) return null;
 
-  const ordering = await orderRuntimeUnits({
-    strategy,
-    executeModeUnits,
-    combo,
-    config,
-    settings,
-  });
+  const ordering = await orderRuntimeUnitsForStrategy(args, executeModeUnits);
+  if ("earlyResponse" in ordering) return ordering.earlyResponse;
   const {
     units: runtimeUnits,
     executionStrategy: unitExecutionStrategy,

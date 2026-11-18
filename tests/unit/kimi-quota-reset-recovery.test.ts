@@ -20,7 +20,8 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("Kimi billing-cycle quota errors remain active and recover at the cached reset", async () => {
+test("Kimi billing-cycle quota errors remain active and recover at the cached reset", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: Date.UTC(2026, 9, 25, 12) });
   await settingsDb.updateSettings({ autoDisableBannedAccounts: true });
 
   const connection = await providersDb.createProviderConnection({
@@ -51,11 +52,9 @@ test("Kimi billing-cycle quota errors remain active and recover at the cached re
   const after = await providersDb.getProviderConnectionById(connectionId);
 
   assert.equal(result.shouldFallback, true);
-  assert.ok(Math.abs(result.cooldownMs - 30 * 60 * 1000) < 2_000);
+  assert.equal(result.cooldownMs, 30 * 60 * 1000);
   assert.equal(after.isActive, true);
   assert.equal(after.testStatus, "unavailable");
   assert.equal(after.lastErrorType, "quota_exhausted");
-  assert.ok(
-    Math.abs(new Date(after.rateLimitedUntil).getTime() - new Date(resetAt).getTime()) < 100
-  );
+  assert.equal(new Date(after.rateLimitedUntil).getTime(), new Date(resetAt).getTime());
 });

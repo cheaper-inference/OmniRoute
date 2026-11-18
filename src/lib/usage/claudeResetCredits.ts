@@ -15,6 +15,7 @@ import {
   fetchAndSeedClaudeResetCreditUsage,
   forgetClaudeResetCreditCount,
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
+import { expireClaudeUsageCache } from "@omniroute/open-sse/services/usage/claude.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 
@@ -146,6 +147,25 @@ export async function listClaudeResetCredits(connectionId: string): Promise<Clau
   }
 }
 
+/**
+ * Usage after a claim upstream already granted. The reset is spent either way, so a failed
+ * refresh is logged and reported as empty usage instead of turning the redeem into an error
+ * (which the auto-apply caps would read as "not spent").
+ */
+async function refreshUsageAfterClaim(connectionId: string): Promise<JsonRecord> {
+  try {
+    const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
+      allowRotatingRefresh: true,
+    });
+    return refreshed.usage;
+  } catch (error) {
+    console.warn(
+      `[ClaudeResetCredits] Usage refresh after a granted reset failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+    );
+    return {};
+  }
+}
+
 export async function consumeClaudeResetCredit(
   connectionId: string,
   idempotencyKey: string,
@@ -184,10 +204,9 @@ export async function consumeClaudeResetCredit(
     forgetClaudeResetCreditCount(connection.id);
 
     if (claim.result === "reset" || claim.result === "not_limited") {
-      const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
-        allowRotatingRefresh: true,
-      });
-      return { outcome: "reset", usage: refreshed.usage };
+      // The quota just changed: the next read must not reuse the pre-claim usage.
+      expireClaudeUsageCache(token);
+      return { outcome: "reset", usage: await refreshUsageAfterClaim(connectionId) };
     }
     if (claim.result === "already_used") {
       throw new ClaudeResetCreditError(

@@ -5,6 +5,9 @@ import path from "node:path";
 import test from "node:test";
 
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-provider-autofetch-"));
 process.env.DATA_DIR = TEST_DATA_DIR;

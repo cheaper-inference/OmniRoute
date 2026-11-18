@@ -53,61 +53,61 @@ OmniRoute/
 
 ## ರೂಟ್ ಫೈಲ್ಗಳು
 
-| ಫೈಲ್                                        | ಉದ್ದೇಶ                                                                                         |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| **README.md**                               | ಮಾರ್ಕೆಟಿಂಗ್ ಲ್ಯಾಂಡಿಂಗ್ ಪುಟ + ತ್ವರಿತ ಪ್ರಾರಂಭ + ವೈಶಿಷ್ಟ್ಯ ಮ್ಯಾಟ್ರಿಕ್ಸ್ (`llm.txt` ಸಹ ನೋಡಿ)       |
-| **CHANGELOG.md**                            | ಪ್ರತಿ ಬಿಡುಗಡೆಗೆ ಬದಲಾವಣೆಗಳ ಪಟ್ಟಿ (`/version-bump-cc` skill ಮೂಲಕ ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ)               |
-| **LICENSE**                                 | MIT ಪರವಾನಗಿ ಪಠ್ಯ                                                                               |
-| **CLAUDE.md**                               | Claude Code ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಪ್ರಾಜೆಕ್ಟ್ ನಿಯಮಗಳು (ಕಡ್ಡಾಯ ನಿಯಮಗಳು, ಸಂಪ್ರದಾಯಗಳು, ಸನ್ನಿವೇಶಗಳು)        |
-| **AGENTS.md**                               | CLAUDE.md ನಂತೆಯೇ, ಆದರೆ Claude ಅಲ್ಲದ AI ಏಜೆಂಟ್ಗಳಿಗಾಗಿ (Codex, Cursor, ಇತ್ಯಾದಿ)                  |
-| **GEMINI.md**                               | Gemini-ಆಧಾರಿತ ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಸಂಕ್ಷಿಪ್ತ ನಿಯಮಗಳು (CLAUDE.md ನ ಉಪವಿಭಾಗ)                            |
-| **CONTRIBUTING.md**                         | ಕೊಡುಗೆದಾರರ ಮಾರ್ಗದರ್ಶಿ: ಸೆಟಪ್, ಸಾಂಪ್ರದಾಯಿಕ ಕಮಿಟ್ಗಳು, ಪರೀಕ್ಷೆ, PR ಪ್ರಕ್ರಿಯೆ                      |
-| **SECURITY.md**                             | ದುರ್ಬಲತೆ ವರದಿ ನೀತಿ, ಬೆಂಬಲಿತ ಆವೃತ್ತಿಗಳು, ಅಪಾಯ ಮಾದರಿ                                             |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — ಸಮುದಾಯದ ನಡವಳಿಕೆಯ ನಿರೀಕ್ಷೆಗಳು                                            |
-| **llm.txt**                                 | LLM ಕ್ರಾಲರ್ಗಳಿಗೆ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಿದ ಸರಳ-ಪಠ್ಯ ಲ್ಯಾಂಡಿಂಗ್ ಪುಟ (AI ಸಹಾಯಕರಿಗಾಗಿ SEO)                  |
-| **package.json**                            | npm ಮ್ಯಾನಿಫೆಸ್ಟ್, ಸ್ಕ್ರಿಪ್ಟ್ಗಳು, ಅವಲಂಬನೆಗಳು, ಎಂಜಿನ್ಗಳು, c8 ಕವರೇಜ್ ಗೇಟ್                         |
-| **package-lock.json**                       | ಲಾಕ್ ಮಾಡಲಾದ ಅವಲಂಬನೆ ಟ್ರೀ                                                                       |
-| **tsconfig.json**                           | ರೂಟ್ TypeScript ಕಾನ್ಫಿಗ್                                                                       |
-| **tsconfig.typecheck-core.json**            | `src/` ಕೋರ್ಗಾಗಿ ಟೈಪ್ಚೆಕ್ ಕಾನ್ಫಿಗ್                                                              |
-| **tsconfig.typecheck-noimplicit-core.json** | ಕಟ್ಟುನಿಟ್ಟಿನ (`noImplicitAny`) ಟೈಪ್ಚೆಕ್                                                        |
-| **tsconfig.tsbuildinfo**                    | TS ಇನ್ಕ್ರಿಮೆಂಟಲ್ ಬಿಲ್ಡ್ ಕ್ಯಾಶ್ (gitignored)                                                    |
-| **next.config.mjs**                         | Next.js 16 ಬಿಲ್ಡ್ ಕಾನ್ಫಿಗರೇಶನ್ (ಸ್ವತಂತ್ರ ಔಟ್ಪುಟ್)                                              |
-| **next-env.d.ts**                           | Next.js ಸ್ವಯಂ-ರಚಿಸಿದ env ಟೈಪ್ಗಳು                                                               |
-| **eslint.config.mjs**                       | ESLint ಫ್ಲಾಟ್ ಕಾನ್ಫಿಗ್ (ಪ್ರಾಜೆಕ್ಟ್ ಪ್ರದೇಶವಾರು ನಿಯಮಗಳು)                                         |
-| **prettier.config.mjs**                     | Prettier ಫಾರ್ಮ್ಯಾಟಿಂಗ್ ನಿಯಮಗಳು                                                                 |
-| **postcss.config.mjs**                      | Tailwind/CSS ಪೈಪ್ಲೈನ್ಗಾಗಿ PostCSS ಕಾನ್ಫಿಗ್                                                     |
-| **playwright.config.ts**                    | Playwright E2E ಪರೀಕ್ಷಾ ಕಾನ್ಫಿಗ್                                                                |
-| **vitest.config.ts**                        | Vitest ಕಾನ್ಫಿಗ್ (ಡೀಫಾಲ್ಟ್ ಸೂಟ್)                                                                |
-| **vitest.mcp.config.ts**                    | MCP ಸರ್ವರ್ / autoCombo / ಕ್ಯಾಶ್ ಸೂಟ್ಗಳಿಗಾಗಿ Vitest ಕಾನ್ಫಿಗ್                                    |
-| **sonar-project.properties**                | SonarQube/SonarCloud ಕಾನ್ಫಿಗ್ (ಕೋಡ್ ಗುಣಮಟ್ಟ)                                                   |
-| **Dockerfile**                              | ಬಹು-ಹಂತದ Docker ಬಿಲ್ಡ್ (builder → runner-base → runner-cli)                                    |
-| **docker-compose.yml**                      | 4 ಪ್ರೊಫೈಲ್ಗಳು (base, cli, host, cliproxyapi) + redis ಸೈಡ್ಕಾರ್ ಹೊಂದಿರುವ ಡೆವ್ ಕಂಪೋಸ್             |
-| **docker-compose.prod.yml**                 | ಪ್ರೊಡಕ್ಷನ್ ಕಂಪೋಸ್ (ಪೋರ್ಟ್ 20130, redis, ಹೆಸರಿಸಲಾದ ವಾಲ್ಯೂಮ್ಗಳು)                                 |
-| **.dockerignore**                           | Docker ಕಾಂಟೆಕ್ಸ್ಟ್ನಿಂದ ಹೊರಗಿಡಲಾದ ಫೈಲ್ಗಳು                                                       |
-| **fly.toml**                                | Fly.io ಡಿಪ್ಲಾಯ್ಮೆಂಟ್ ಕಾನ್ಫಿಗ್ (ಪ್ರದೇಶ `sin`, ಪೋರ್ಟ್ 20128, /data ವಾಲ್ಯೂಮ್)                     |
-| **.env.example**                            | env ಫೈಲ್ ಟೆಂಪ್ಲೇಟ್ (ಮೊದಲ ಇನ್ಸ್ಟಾಲ್ನಲ್ಲಿ `.env` ಗೆ ಸ್ವಯಂ-ನಕಲು ಮಾಡಲಾಗುತ್ತದೆ)                     |
-| **.gitignore**                              | Git ನಿರ್ಲಕ್ಷ್ಯ ಪ್ಯಾಟರ್ನ್ಗಳು                                                                    |
-| **.npmignore**                              | npm ಪ್ರಕಟಣೆ ಹೊರಗಿಡುವ ಪಟ್ಟಿ                                                                     |
-| **.npmrc**                                  | npm ಕಾನ್ಫಿಗ್ (ರೆಜಿಸ್ಟ್ರಿ, ಲಾಕ್ಫೈಲ್ ನೀತಿ)                                                       |
-| **.node-version**                           | Node ಆವೃತ್ತಿ ಪಿನ್ (nvm-ಹೊಂದಾಣಿಕೆಯ ಪರಿಕರಗಳು ಬಳಸುತ್ತವೆ)                                          |
-| **.nvmrc**                                  | nvm ಗಾಗಿ Node ಆವೃತ್ತಿ ಪಿನ್                                                                     |
-| **eslint.complexity.config.mjs**            | ಕಾಂಪ್ಲೆಕ್ಸಿಟಿ ರ್ಯಾಚೆಟ್ಗಾಗಿ ESLint ಕಾನ್ಫಿಗ್ (`scripts/check/check-complexity.mjs --config`)     |
-| **eslint.sonarjs.config.mjs**               | SonarJS ನಿಯಮಗಳಿಗಾಗಿ ESLint ಕಾನ್ಫಿಗ್ (ಕಾಗ್ನಿಟಿವ್ ಕಾಂಪ್ಲೆಕ್ಸಿಟಿ / ನಕಲು)                          |
-| **source.config.ts**                        | Fumadocs `defineDocs` ಮೂಲ ಕಾನ್ಫಿಗ್ (`.source/` ಗೆ ಪೂರೈಕೆ ಮಾಡುತ್ತದೆ)                            |
-| **knip.json**                               | Knip ಕಾನ್ಫಿಗ್ — ಬಳಕೆಯಾಗದ ಫೈಲ್ಗಳು/ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು/ಅವಲಂಬನೆಗಳು (ಡೆಡ್-ಕೋಡ್ ಗೇಟ್ಗೆ ಪೂರೈಕೆ ಮಾಡುತ್ತದೆ) |
-| **stryker.conf.json**                       | Stryker ಮ್ಯೂಟೇಶನ್-ಪರೀಕ್ಷಾ ಕಾನ್ಫಿಗ್                                                             |
-| **.size-limit.json**                        | size-limit ಬಂಡಲ್ ಬಜೆಟ್ ಸಂರಚನೆ                                                                  |
-| **promptfooconfig.yaml**                    | promptfoo ಮೌಲ್ಯಮಾಪನ ಸಂರಚನೆ                                                                     |
-| **.gitleaks.toml**                          | gitleaks ರಹಸ್ಯ-ಸ್ಕ್ಯಾನ್ ನಿಯಮಸಮೂಹ                                                               |
-| **.zizmor.yml**                             | zizmor GitHub-Actions ಭದ್ರತಾ-ಲಿಂಟ್ ಸಂರಚನೆ                                                      |
-| **socket.yml**                              | Socket.dev ಪೂರೈಕೆ-ಸರಪಳಿ ಸಂರಚನೆ                                                                 |
-| **news.json**                               | ಸ್ಥಳೀಕೃತ v2 ಪ್ರಕಟಣೆ ಫೀಡ್; Radar ಬಿಡುಗಡೆ ಐಟಂ ನಿಷ್ಕ್ರಿಯವಾಗಿ ರವಾನೆಯಾಗುತ್ತದೆ                       |
-| **flake.nix** / **flake.lock**              | Nix ಡೆವ್-ಶೆಲ್ ವ್ಯಾಖ್ಯಾನ + ಲಾಕ್                                                                 |
-| **.env**                                    | ಸ್ಥಳೀಯ ರಹಸ್ಯಗಳು (gitignore ಮಾಡಲಾಗಿದೆ — `.env.example` ನಿಂದ ರಚಿಸಲಾಗಿದೆ)                         |
+| ಫೈಲ್                                        | ಉದ್ದೇಶ                                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **README.md**                               | ಮಾರ್ಕೆಟಿಂಗ್ ಲ್ಯಾಂಡಿಂಗ್ ಪೇಜ್ + ಕ್ವಿಕ್ ಸ್ಟಾರ್ಟ್ + ಫೀಚರ್ ಮ್ಯಾಟ್ರಿಕ್ಸ್ ( `llm.txt` ಸಹ ನೋಡಿ)      |
+| **CHANGELOG.md**                            | ಪ್ರತಿ-ಬಿಡುಗಡೆ ಚೇಂಜ್ಲಾಗ್ ( `/version-bump-cc` ಕೌಶಲ್ಯದಿಂದ ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ)                    |
+| **LICENSE**                                 | MIT ಪರವಾನಗಿ ಪಠ್ಯ                                                                             |
+| **CLAUDE.md**                               | Claude ಕೋಡ್ ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಯೋಜನೆಯ ನಿಯಮಗಳು (ಕಠಿಣ ನಿಯಮಗಳು, ಸಂಪ್ರದಾಯಗಳು, ಸನ್ನಿವೇಶಗಳು)            |
+| **AGENTS.md**                               | CLAUDE.md ಯಂತೆಯೇ ಆದರೆ ಕ್ಲೌಡ್ ಅಲ್ಲದ AI ಏಜೆಂಟ್ಗಳಿಗೆ (Codex, Cursor, ಇತ್ಯಾದಿ.)                  |
+| **GEMINI.md**                               | ಜೆಮಿನಿ-ಆಧಾರಿತ ಏಜೆಂಟ್ಗಳಿಗೆ ಸಂಕ್ಷಿಪ್ತ ನಿಯಮಗಳು ( CLAUDE.md ಉಪವಿಭಾಗ)                             |
+| **CONTRIBUTING.md**                         | ಕೊಡುಗೆದಾರರ ಮಾರ್ಗದರ್ಶಿ: ಸೆಟಪ್, ಸಾಂಪ್ರದಾಯಿಕ ಬದ್ಧತೆಗಳು, ಪರೀಕ್ಷೆ, PR ಹರಿವು                       |
+| **SECURITY.md**                             | ದುರ್ಬಲತೆ ವರದಿ ನೀತಿ, ಬೆಂಬಲಿತ ಆವೃತ್ತಿಗಳು, ಬೆದರಿಕೆ ಮಾದರಿ                                        |
+| **CODE_OF_CONDUCT.md**                      | ಕೊಡುಗೆದಾರರ ಒಪ್ಪಂದ — ಸಮುದಾಯ ನಡವಳಿಕೆಯ ನಿರೀಕ್ಷೆಗಳು                                              |
+| **llm.txt**                                 | LLM ಕ್ರಾಲರ್ಗಳಿಗೆ ಸರಳ-ಪಠ್ಯ ಲ್ಯಾಂಡಿಂಗ್ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ ( AI ಸಹಾಯಕರಿಗೆSEO )                 |
+| **package.json**                            | npm ಮ್ಯಾನಿಫೆಸ್ಟ್, ಸ್ಕ್ರಿಪ್ಟ್ಗಳು, ಅವಲಂಬನೆಗಳು, ಎಂಜಿನ್ಗಳು, c8 ಕವರೇಜ್ ಗೇಟ್                       |
+| **package-lock.json**                       | ಬೀಗ ಹಾಕಿದ ಅವಲಂಬನೆ ಮರ                                                                         |
+| **tsconfig.json**                           | ರೂಟ್ TypeScript ಸಂರಚನೆ                                                                       |
+| **tsconfig.typecheck-core.json**            | `src/` ಕೋರ್ಗಾಗಿ ಟೈಪ್ ಚೆಕ್ ಕಾನ್ಫಿಗರ್                                                          |
+| **tsconfig.typecheck-noimplicit-core.json** | ಕಟ್ಟುನಿಟ್ಟಾದ (`noImplicitAny`) ಟೈಪ್ ಚೆಕ್                                                     |
+| **tsconfig.tsbuildinfo**                    | TS ಹೆಚ್ಚುತ್ತಿರುವ ಬಿಲ್ಡ್ ಸಂಗ್ರಹ (ಜಿಟಿಗ್ನೋರ್ಡ್)                                                |
+| **ಮುಂದೆ.config.mjs**                        | Next.js 16 ಬಿಲ್ಡ್ ಕಾನ್ಫಿಗರೇಶನ್ (ಸ್ವತಂತ್ರ ಔಟ್ಪುಟ್)                                            |
+| **ಮುಂದಿನ-env d.ts**                         | Next.js ಸ್ವಯಂ-ರಚಿಸಿದ env ಪ್ರಕಾರಗಳು                                                           |
+| **ಎಸ್ಲಿಂಟ್.config.mjs**                     | ESLint ಫ್ಲಾಟ್ ಸಂರಚನೆ (ಪ್ರತಿ ಯೋಜನಾ ಪ್ರದೇಶಕ್ಕೆ ನಿಯಮಗಳು)                                        |
+| **ಸುಂದರ.config.mjs**                        | Prettier ಫಾರ್ಮ್ಯಾಟಿಂಗ್ ನಿಯಮಗಳು                                                               |
+| **postcss.config.mjs**                      | Tailwind/CSS ಪೈಪ್ಲೈನ್ಗಾಗಿPostCSS ಸಂರಚನೆ                                                      |
+| **ನಾಟಕಕಾರ.config.ts**                       | Playwright E2E ಪರೀಕ್ಷಾ ಸಂರಚನೆ                                                                |
+| **vitest.config.ts**                        | Vitest ಸಂರಚನೆ (ಡೀಫಾಲ್ಟ್ ಸೂಟ್)                                                                |
+| **vitest.mcp config.ts**                    | MCP ಸರ್ವರ್ / autoCombo / ಕ್ಯಾಶ್ ಸೂಟ್ಗಳಿಗಾಗಿVitest ಸಂರಚನೆ                                     |
+| **ಸೋನಾರ್-ಪ್ರಾಜೆಕ್ಟ್.ಪ್ರಾಪರ್ಟೀಸ್**           | SonarQube/SonarCloud ಸಂರಚನೆ (ಕೋಡ್ ಗುಣಮಟ್ಟ)                                                   |
+| **ಡಾಕರ್ಫೈಲ್**                               | ಬಹು-ಹಂತದ Docker ನಿರ್ಮಾಣ (ಬಿಲ್ಡರ್ → ರನ್ನರ್-ಬೇಸ್ → ರನ್ನರ್-ಕ್ಲೈ)                                |
+| **docker-compose.yml**                      | ದೇವ್ 4 ಪ್ರೊಫೈಲ್ಗಳೊಂದಿಗೆ (ಬೇಸ್, ಕ್ಲೈ, ಹೋಸ್ಟ್, ಕ್ಲಿಪ್ರೊಕ್ಸಿಯಾಪಿ) + ರೆಡಿಸ್ ಸೈಡ್ಕಾರ್ ಸಂಯೋಜನೆ     |
+| **ಡಾಕರ್-ಸಂಯೋಜನೆ.prod.yml**                  | ಪ್ರೊಡಕ್ಷನ್ ಕಂಪೋಸ್ (ಪೋರ್ಟ್ 20130, ರೆಡಿಸ್, ಹೆಸರಿನ ಸಂಪುಟಗಳು)                                    |
+| **.ಡಾಕೆರಿಗ್ನೋರ್**                           | Docker ಸಂದರ್ಭದಿಂದ ಫೈಲ್ಗಳನ್ನು ಹೊರಗಿಡಲಾಗಿದೆ                                                    |
+| **fly.toml**                                | Fly.io ನಿಯೋಜನೆ ಸಂರಚನೆ (ಪ್ರದೇಶ `sin`, ಪೋರ್ಟ್ 20128, / ಡೇಟಾ ಪರಿಮಾಣ)                            |
+| **.env.ಉದಾಹರಣೆ**                            | ಟೆಂಪ್ಲೇಟ್ env ಫೈಲ್ (ಮೊದಲ ಸ್ಥಾಪನೆಯಲ್ಲಿ `.env` ಗೆ ಸ್ವಯಂ-ನಕಲು)                                  |
+| **.ಗಿಟಿಗ್ನೋರ್**                             | ಮಾದರಿಗಳನ್ನು ನಿರ್ಲಕ್ಷಿಸಿ                                                                      |
+| **.npmignore**                              | npm ಹೊರಗಿಡುವ ಪಟ್ಟಿಯನ್ನು ಪ್ರಕಟಿಸುತ್ತದೆ                                                        |
+| **.npmrc**                                  | npm ಸಂರಚನೆ (ರಿಜಿಸ್ಟ್ರಿ, ಲಾಕ್ಫೈಲ್ ನೀತಿ)                                                       |
+| **.ನೋಡ್-ಆವೃತ್ತಿ**                           | ನೋಡ್ ಆವೃತ್ತಿ ಪಿನ್ (nvm-ಹೊಂದಾಣಿಕೆಯ ಪರಿಕರಗಳಿಂದ ಬಳಸಲಾಗಿದೆ)                                      |
+| **.nvmrc**                                  | nvm ಗಾಗಿ ನೋಡ್ ಆವೃತ್ತಿ ಪಿನ್                                                                   |
+| **eslint.ಸಂಕೀರ್ಣತೆ.config.mjs**             | ಸಂಕೀರ್ಣತೆಯ ರಾಟ್ಚೆಟ್ಗಾಗಿESLint ಸಂರಚನೆ (`scripts/check/check-complexity.mjs --config`)         |
+| **eslint.sonarjs.config.mjs**               | SonarJS ನಿಯಮಗಳಿಗೆESLint ಸಂರಚನೆ (ಅರಿವಿನ ಸಂಕೀರ್ಣತೆ / ನಕಲು)                                     |
+| **ಮೂಲ.config.ts**                           | Fumadocs `defineDocs` ಮೂಲ ಸಂರಚನೆ (ಫೀಡ್ಗಳು `.source/`)                                        |
+| **knip.json**                               | Knip config — ಬಳಕೆಯಾಗದ files/exports/deps (ಡೆಡ್-ಕೋಡ್ ಗೇಟ್ ಅನ್ನು ಫೀಡ್ ಮಾಡುತ್ತದೆ)              |
+| **ಸ್ಟ್ರೈಕರ್.conf.mjs**                      | ಸ್ಟ್ರೈಕರ್ ಮ್ಯುಟೇಶನ್-ಟೆಸ್ಟಿಂಗ್ ಕಾನ್ಫಿಗರ್ ( `mutate` ನಿಂದ `tap.testFiles` ಲೆಕ್ಕಾಚಾರ ಮಾಡುತ್ತದೆ) |
+| **.size-limit.json**                        | ಗಾತ್ರ-ಮಿತಿ ಬಂಡಲ್ ಬಜೆಟ್ ಸಂರಚನೆ                                                                |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                        |
+| **.gitleaks.toml**                          | gitleaks ರಹಸ್ಯ ಸ್ಕ್ಯಾನ್ ನಿಯಮಾವಳಿ                                                             |
+| **.zizmor.yml**                             | zizmor GitHub-ಆಕ್ಷನ್ಸ್ ಸೆಕ್ಯುರಿಟಿ-ಲಿಂಟ್ ಕಾನ್ಫಿಗರ್                                            |
+| **socket.yml**                              | Socket.dev ಪೂರೈಕೆ-ಸರಪಳಿ ಸಂರಚನೆ                                                               |
+| **news.json**                               | ಸ್ಥಳೀಕರಿಸಿದ v2 ಪ್ರಕಟಣೆ ಫೀಡ್; ರಾಡಾರ್ ಉಡಾವಣಾ ಐಟಂ ಹಡಗುಗಳು ನಿಷ್ಕ್ರಿಯವಾಗಿವೆ                       |
+| **ಫ್ಲೇಕ್.ನಿಕ್ಸ್** /** flake.lock**          | ನಿಕ್ಸ್ ದೇವ್-ಶೆಲ್ ವ್ಯಾಖ್ಯಾನ + ಲಾಕ್                                                            |
+| **.env**                                    | ಸ್ಥಳೀಯ ರಹಸ್ಯಗಳು ( `.env.example` ನಿಂದ ರಚಿಸಲಾದ gitignored — )                                 |
 
-> **v3.8.26 ರಲ್ಲಿ ರೂಟ್ನಿಂದ ಹೊರಗೆ ಸರಿಸಲಾಗಿದೆ (ಅವ್ಯವಸ್ಥೆ ನಿವಾರಣೆ):**
+> **v3.8.26 (ಡಿಕ್ಲಟರ್) ನಲ್ಲಿ ಮೂಲದಿಂದ ಹೊರಕ್ಕೆ ಸರಿಸಲಾಗಿದೆ:**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ಮತ್ತು ರಚಿಸಲಾದ `quality-metrics.json` (gitignore ಮಾಡಲಾಗಿದೆ). [`## config/`](#config--static-configs--quality-gate-state) ನೋಡಿ.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ಮತ್ತು ರಚಿಸಲಾದ `quality-metrics.json` (ಜಿಟಿಗ್ನೋರ್ಡ್). [`## config/`](#config--static-configs--quality-gate-state) ನೋಡಿ.
 
 ---
 
@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ಹೊದಿಕೆ — KNN ಬ್ರೂಟ್-ಫೋರ್ಸ್ + ಹೈಬ್ರಿಡ್ RRF (FTS5 + ವೆಕ್ಟರ್, k = 60). Lazy-init, sqlite-vec ಲಭ್ಯವಿಲ್ಲದಿದ್ದಾಗ ಆಕರ್ಷಕವಾಗಿ ಕ್ಷೀಣಿಸುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                                 |
 | `memory/reindex.ts`                      | `runReindexBatch()` — ಹಿನ್ನಲೆಯಲ್ಲಿ `needs_reindex=1` ನೊಂದಿಗೆ ನೆನಪುಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತದೆ; `POST /api/memory/reindex` ಮತ್ತು ಲೇಜಿ-ಬ್ಯಾಕ್ಫಿಲ್ ಮಾರ್ಗದಿಂದ ಕರೆಯಲಾಗುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                               |
 | `monitoring/`                            | ಆರೋಗ್ಯ ತಪಾಸಣೆ, ಮೆಟ್ರಿಕ್ಸ್ ಹೊರಸೂಸುವಿಕೆ                                                                                                                                                                                                                                                                             |
-| `oauth/`                                 | OAuth/import 22 ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳಿಗೆ ಹರಿಯುತ್ತದೆ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kirood, openference, xai-auth, zed-ಹೋಸ್ಟ್, zed)                                                |
+| `oauth/`                                 | OAuth/import 22 ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳಿಗಾಗಿ ಹರಿಯುತ್ತದೆ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kirood, openference, xai-auth, zed-ಹೋಸ್ಟ್, zed)                                              |
 | `plugins/`                               | ಪ್ಲಗಿನ್ ನೋಂದಾವಣೆ                                                                                                                                                                                                                                                                                                  |
 | `promptCache/`                           | ಆಂಥ್ರೊಪಿಕ್ ಶೈಲಿಯ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಷ್ ಬ್ರೇಕ್ಪಾಯಿಂಟ್ಗಳು                                                                                                                                                                                                                                                                |
 | `skills/`                                | ಕೌಶಲ್ಯಗಳ ಚೌಕಟ್ಟು (ಅಂತರ್ನಿರ್ಮಿತ + ಮಾರುಕಟ್ಟೆ ಸ್ಥಳ + SkillsSH) — ನೋಡಿ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                    |
@@ -241,10 +241,10 @@ src/
 | ಮಾಡ್ಯೂಲ್                         | ಉದ್ದೇಶ                                                                                                |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಘಟಕ API: `packages/ui-kit` — ಮೇಲಿನ ಅಡಾಪ್ಟರುಗಳು `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
-| `constants/iconMap.ts`           | `ICON_MAP`: ಪರದೆಗಳಿಂದ ಬಳಸಲಾಗುವ ಐಕಾನ್ ಹೆಸರುಗಳು → ಲುಸೈಡ್ ಘಟಕಗಳು (`<Icon>`)                              |
-| `constants/providers.ts`         | **380 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
+| `constants/iconMap.ts`           | `ICON_MAP`: ಪರದೆಗಳಿಂದ ಬಳಸಲಾಗುವ ಐಕಾನ್ ಹೆಸರುಗಳು → ಲುಸಿಡ್ ಘಟಕಗಳು (`<Icon>`)                              |
+| `constants/providers.ts`         | **394 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
 | `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                             |
-| `constants/routingStrategies.ts` | **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                |
+| `constants/routingStrategies.ts` | **22 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                |
 | `constants/publicApiRoutes.ts`   | ಬೇರರ್ (ವಿರುದ್ಧ ನಿರ್ವಹಣೆ) ದೃಢೀಕರಣದ ಅಗತ್ಯವಿರುವ ಮಾರ್ಗಗಳು                                                 |
 | `constants/upstreamHeaders.ts`   | ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಗಳಿಗಾಗಿ ಶಿರೋಲೇಖ ನಿರಾಕರಣೆ                                                            |
 | `validation/schemas.ts`          | ~ 80 Zod ಸ್ಕೀಮಾಗಳು ( API ಒಪ್ಪಂದಗಳಿಗೆ ಸತ್ಯದ ಏಕೈಕ ಮೂಲ)                                                  |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 ಫೈಲ್ಗಳು (12 ಹ್ಯಾಂಡ್ಲರ್ಗಳು + 4 ಸಹಾಯಕಗಳು): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ಇತ್ಯಾದಿ.
-├── executors/           # 150 ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (BaseExecutor ಅನ್ನು ವಿಸ್ತರಿಸುವ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರನ ಸಹಾಯಕಗಳು)
+├── executors/           # 163 ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (BaseExecutor ಅನ್ನು ವಿಸ್ತರಿಸುವ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರನ ಸಹಾಯಕಗಳು)
 ├── translator/          # ಫಾರ್ಮ್ಯಾಟ್ ಪರಿವರ್ತಕಗಳು (9 ವಿನಂತಿ, 9 ಪ್ರತಿಕ್ರಿಯೆ, 9 ಸಹಾಯಕಗಳು)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ಇತ್ಯಾದಿ.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ಬಾಹ್ಯ CLI ಸಂಯೋಜನೆಗಳು + ಆಂತರಿಕ OmniRoute CLI                                              |
 | `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಒಂದು ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                               |
 | `UNINSTALL.md`              | ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ                                                      |
-| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 380 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (ರೀಜೆನ್: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 394 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (ರೀಜೆನ್: `npm run gen:provider-reference`) |
 
 ### ಉಪವ್ಯವಸ್ಥೆಯ ಡೀಪ್-ಡೈವ್ಸ್
 
@@ -439,10 +439,10 @@ open-sse/
 
 | ಡಾಕ್                            | ಉದ್ದೇಶ                                      |
 | ------------------------------- | ------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ಕಂಪ್ರೆಷನ್ ಮೋಡ್ಗಳ ಅವಲೋಕನ + ರೋಡ್ಮ್ಯಾಪ್        |
+| `COMPRESSION_GUIDE.md`          | ಸಂಕೋಚನ ವಿಧಾನಗಳ ಅವಲೋಕನ + ಮಾರ್ಗಸೂಚಿ           |
 | `COMPRESSION_ENGINES.md`        | ಕೇವ್ಮ್ಯಾನ್ + RTK ಎಂಜಿನ್ಗಳು, ನೋಂದಾವಣೆ ಒಪ್ಪಂದ |
-| `COMPRESSION_RULES_FORMAT.md`   | ಕೇವ್ಮ್ಯಾನ್ ನಿಯಮ ಪ್ಯಾಕ್ JSON ಸ್ಕೀಮಾ          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ ಭಾಷೆಯ ನಿಯಮ ಪ್ಯಾಕ್ ದಾಸ್ತಾನು            |
+| `COMPRESSION_RULES_FORMAT.md`   | ಗುಹಾನಿವಾಸಿ ನಿಯಮ ಪ್ಯಾಕ್ JSON ಸ್ಕೀಮಾ          |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ-ಭಾಷೆಯ ನಿಯಮ ಪ್ಯಾಕ್ ದಾಸ್ತಾನು            |
 | `RTK_COMPRESSION.md`            | RTK ಡಿಕ್ಲೇರೇಟಿವ್ ಪೈಪ್ಲೈನ್ (56 ಫಿಲ್ಟರ್ಗಳು)   |
 
 ### ನಿಯೋಜನೆ

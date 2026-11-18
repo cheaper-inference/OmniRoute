@@ -84,27 +84,27 @@ export default function IPFilterSection() {
     <Card title={t("ipAccessControl")} subtitle={t("ipAccessControlDesc")} icon="security">
       {/* Mode selector */}
       <RadioGroup
-        aria-label={t("ipAccessControl")}
+        aria-label={t("ipAccessMode")}
+        columns={4}
+        minItemWidth="8rem"
         value={activeMode}
         onValueChange={setMode}
         disabled={loading}
         className="mb-5"
       >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {MODES.map((m) => (
-            <RadioGroupItem
-              key={m.value}
-              card
-              value={m.value}
-              label={
-                <span className="inline-flex items-center gap-1.5">
-                  <Icon name={m.icon} size={18} className="text-text-muted" />
-                  {t(m.labelKey)}
-                </span>
-              }
-            />
-          ))}
-        </div>
+        {MODES.map((m) => (
+          <RadioGroupItem
+            key={m.value}
+            card
+            value={m.value}
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name={m.icon} size={18} className="text-text-muted" />
+                {t(m.labelKey)}
+              </span>
+            }
+          />
+        ))}
       </RadioGroup>
 
       {config.enabled && (

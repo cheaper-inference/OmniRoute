@@ -141,17 +141,17 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
   3. في الإعدادات → الأمان → تعطيل، أدخل كلمة المرور واترك الرمز فارغًا. يقبل `POST /api/auth/mfa/disable` نصًا دون `code` فقط أثناء تعيين المتغير وعندما يأتي الطلب من المضيف؛ ولا يزال يتطلب جلسة لوحة المعلومات وكلمة المرور الحالية، ويُسجّل في سجل التدقيق باسم `auth.mfa.disabled` مع `secondFactor: "recovery_switch"`.
   4. ألغِ تعيين `OMNIROUTE_DISABLE_MFA`، وأعد التشغيل، وسجّل العوامل من جديد إذا لزم الأمر.
 
-## فئات المسارات
+## فئات الطريق
 
-يعرّف `src/server/authz/types.ts` ثلاث فئات، وأي مسار لا يمكن تصنيفه بشكل حتمي يرجع إلى `MANAGEMENT`.
+`src/server/authz/types.ts` يحدد ثلاث فئات؛ أي طريق لا يمكن تصنيفه بشكل حتمي يعود إلى `MANAGEMENT`.
 
-| Class        | Description                                                                                                                                                     | Auth required                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `PUBLIC`     | مسارات آمنة صراحةً: تسجيل الدخول، وتسجيل الخروج، والحالة، والتهيئة، والصحة، وتمهيد الإعداد الأولي.                                                              | لا شيء                                                        |
-| `CLIENT_API` | نقاط خدمة النماذج: `/api/v1/*` و`/api/v1beta/*`، بالإضافة إلى الأسماء المستعارة `/v1/*` و`/v1beta/*` و`/chat/completions` و`/responses` و`/models` و`/codex/*`. | مفتاح Bearer عندما تكون ميزة `REQUIRE_API_KEY` الفعلية مفعّلة |
-| `MANAGEMENT` | صفحات لوحة التحكم، والإعدادات، والمزوّدون، والمفاتيح، ونقاط الإدارة والتشخيص.                                                                                   | جلسة لوحة التحكم **أو** Bearer بنطاق `manage`                 |
+| فصل          | وصف                                                                                                                                                                       | المصادقة مطلوبة                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `PUBLIC`     | طرق آمنة بشكل صريح تسجيل الدخول — ، تسجيل الخروج، الحالة، الصحة، onboarding bootstrap.                                                                                    | لا أحد                                                      |
+| `CLIENT_API` | نقاط نهاية خدمة النماذج — `/api/v1/*` `/api/v1beta/*` بالإضافة إلى الأسماء المستعارة `/v1/*` و `/v1beta/*` و `/chat/completions` و `/responses` و `/models` و `/codex/*`. | مفتاح الحامل عند تمكين علامة ميزة `REQUIRE_API_KEY` الفعالة |
+| `MANAGEMENT` | صفحات لوحة المعلومات والإعدادات والموفرين والمفاتيح والمسؤول ونقاط نهاية التشخيص.                                                                                         | جلسة لوحة القيادة OR Bearer مع نطاق `manage`                |
 
-تحتاج بعض إجراءات `MANAGEMENT` إلى **المشغّل فقط**: فمفتاح `manage` لا يكفي. فتصدير بيانات الاعتماد المخزّنة (`GET /api/settings/export-json` و`GET /api/db-backups/export` و`GET /api/db-backups/exportAll`)، واستعادة نسخة احتياطية فوق البيانات الحية (`POST /api/db-backups/import` بما فيه `dryRun=true`، و`POST /api/db-backups` للاستعادة بالمعرّف، و`POST /api/settings/import-json`)، وإتلاف نقاط الاستعادة (تنظيف `DELETE /api/db-backups`، و`PATCH /api/db-backups` لأن الاحتفاظ الذي يحفظه يقود التقليم التلقائي بعد كل نسخة احتياطية) كلها تتطلب جلسة لوحة التحكم، أو هوية CLI المحلية، أو تعطيل تسجيل الدخول. ويتطلب إصدار رمز مزامنة (`POST /api/sync/tokens`) وسكّ رمز وصول CLI بنطاق `admin` (`POST /api/cli/tokens`) جلسة لوحة التحكم أو هوية CLI المحلية في كل أوضاع تسجيل الدخول. ومفاتيح API بأي نطاق ورموز الوصول `oma_` ليست بيانات اعتماد للمشغّل: فتتلقى الخطأ `403` كلما اشترط المسار ذلك. ويقع الفحص في `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). وتغيير إعدادات تسجيل الدخول مقصور على المشغّل أيضًا: إذ لا يقبل `POST /api/settings/require-login` (لضبط كلمة مرور الإدارة أو تبديل `requireLogin`) إلا هذه البيانات بعد وجود كلمة مرور، أما نافذة التمهيد الأولي عند أول تشغيل (قبل وجود كلمة مرور) فتبقى كما هي، ويجب أن ترسل جلسة لوحة التحكم `currentPassword` لاستبدال كلمة المرور (فيعيد `403` عند غيابها أو خطئها، ويُدقَّق بوصفه `settings.update_failed`). وتحتفظ CLI المحلية، والنسخة التي عُطّل فيها تسجيل الدخول، بمسار الاسترداد، ويجوز لها ضبط كلمة مرور دون هذا الشرط، لأن كليهما مرتبط بالمضيف الذي يملك مجلد البيانات.
+هناك عدد قليل من الإجراءات `MANAGEMENT`** المشغل فقط** : مفتاح `manage` لا يكفي. تصدير بيانات الاعتماد المخزنة (`GET /api/settings/export-json` و `GET /api/db-backups/export` و `GET /api/db-backups/exportAll`) واستعادة نسخة احتياطية على البيانات المباشرة (`POST /api/db-backups/import` بما في ذلك `dryRun=true` و `POST /api/db-backups` استعادة بواسطة المعرف و `POST /api/settings/import-json`) وتدمير نقاط الاستعادة ( تنظيف `DELETE /api/db-backups` و `PATCH /api/db-backups` لأن الاحتفاظ بها المستمر يؤدي إلى التقليم التلقائي بعد كل نسخة احتياطية) يتطلب جلسة لوحة معلومات، أو موضوع CLI المحلي، أو تعطيل تسجيل الدخول. يتطلب إصدار رمز المزامنة (`POST /api/sync/tokens`) وسك رمز وصول `admin` CLI (`POST /api/cli/tokens`) جلسة لوحة معلومات أو موضوع CLI المحلي في كل وضع تسجيل دخول. مفاتيح API من أي نطاق ورموز الوصول `oma_` ليست بيانات اعتماد المشغل: فهي تحصل على `403` عندما يكون ذلك مطلوبًا. الشيك موجود في `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). تغيير إعدادات تسجيل الدخول هو للمشغل فقط أيضًا: `POST /api/settings/require-login` (تعيين كلمة مرور الإدارة / تبديل `requireLogin`) يقبل فقط بيانات الاعتماد هذه بمجرد وجود كلمة مرور — نافذة التمهيد التي تم تشغيلها لأول مرة (لا توجد كلمة مرور حتى الآن) لم تتغير — ويجب أن ترسل جلسة لوحة المعلومات `currentPassword` لاستبدال كلمة المرور (`403` عندما تكون مفقودة أو خاطئة، يتم تدقيقها كـ `settings.update_failed`). يحتفظ CLI المحلي والمثيل الذي تم تعطيل تسجيل الدخول بمسار الاسترداد وقد يقومان بتعيين كلمة مرور بدونه، حيث أن كلاهما مرتبطان بالمضيف الذي يمتلك دليل البيانات.
 
 ## خط أنابيب
 
@@ -182,51 +182,49 @@ Incoming request → src/proxy.ts
 
 السياسة الناجحة ترجع `AuthSubject` مع `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. يمكن للمعالجات النهائية قراءتها عبر `assertAuth(request, "CLIENT_API")` في `src/server/authz/assertAuth.ts` بدلاً من إعادة تشغيل منطق المصادقة.
 
-## قائمة المسارات العامة
+## قائمة الطرق العامة
 
-`src/shared/constants/publicApiRoutes.ts` هي القائمة المسموح بها بشكل صريح:
+`src/shared/constants/publicApiRoutes.ts` هي القائمة المسموح بها الصريحة:
 
-تنقسم القائمة حسب **البنية**، وهذا التقسيم أساسي لسلامة النظام (GHSA-74g9-q8f6-793h): تتم مطابقة البادئة باستخدام `startsWith()`، ولذلك فهي تطابق أيضًا كل مسار مجاور يشاركها الأحرف الافتتاحية.
-تجعل `/api/usage/om-usage` كبادئة كل `/api/usage/om-usage<anything>` PUBLIC، ويحل Next ذلك إلى `/api/usage/[connectionId]` — وهو معالج لا يفرض المصادقة من جانبه.
+القائمة مقسمة حسب** شكل** ، والتقسيم حامل (GHSA-74g9-q8f6-793h): تتم مطابقة البادئة مع `startsWith()`، لذا فهي تتطابق أيضًا مع كل مسار مجاور يتقاسم أحرفه الرئيسية. `/api/usage/om-usage` كبادئة تم وضع علامة `/api/usage/om-usage<anything>` PUBLIC عليها، ويحل Next ذلك إلى `/api/usage/[connectionId]` — معالج بدون مصادقة خاصة به.
 
 ```ts
-// أشجار فرعية حقيقية. يجب أن تنتهي كل خانة بـ "/" (ويؤكد اختبار وحدات ذلك).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // تُعامل كـ CLIENT_API في classify، وليست "عامة بلا مصادقة"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// مسارات مفردة، تتم مطابقتها بشكل EXACTLY (مع شرطة مائلة لاحقة أو بدونها).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // الخطوة 2 من تسجيل الدخول لـ TOTP الاختياري؛ تحتاج إلى ملف تعريف الارتباط MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// مسارات مفردة للقراءة فقط، تحصل أيضًا على تخفيف قيود مصدر CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// مسار مفرد للقراءة فقط بدون تخفيف قيود CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-تكون مسارات القراءة فقط عامة **فقط** للطرق الآمنة. ملاحظة: تستبعد `classifyRoute()` المسارات `/api/v1/*` و`/api/v1beta/*` من المسار الاحتياطي PUBLIC — فهي دائمًا `CLIENT_API`، ولذلك تظل سياسة مفتاح Bearer سارية.
+طرق القراءة فقط عامة** فقط** للطرق الآمنة. ملاحظة: `classifyRoute()` تستبعد `/api/v1/*` و `/api/v1beta/*` من PUBLIC Fall-through — وهما دائمًا `CLIENT_API` لذا تظل سياسة Bearer-key سارية.
 
 ## إضافة مسار جديد
 
@@ -302,15 +300,15 @@ export async function POST(request: Request) {
 (`src/lib/accessTokens/scopes.ts`). ينطبق هذا الترتيب على بيانات اعتماد رمز الوصول
 فقط. راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md).
 
-## تبديل اشتراط المصادقة
+## المصادقة مطلوبة للتبديل
 
-تحدّد `isAuthRequired()` في `src/shared/utils/apiAuth.ts` ما إذا كانت **أي** مصادقة مطلوبة لطلب ما:
+`isAuthRequired()` في `src/shared/utils/apiAuth.ts` يقرر ما إذا كان** أي** يتم فرض المصادقة على الطلب:
 
-- `settings.requireLogin === false` ← تُعطّل المصادقة على مستوى النظام، باستثناء فئة الحماية الدائمة (انظر [مستويات حارس المسارات](../security/ROUTE_GUARD_TIERS.md)) والاستدعاءات التي تُسلّم بيانات اعتماد يقبلها النظام، والتي تتطلب بيانات الاعتماد نفسها كما لو كان تسجيل الدخول مفعّلًا: إصدار رموز المزامنة، وسكّ رموز وصول CLI بأي نطاق، وإنشاء مفتاح API بنطاق `manage`/`admin`، ومنح هذا النطاق لمفتاح، أو إعادة توليد مفتاح من هذا النوع أو كشفه (`requireCredentialForManagementScopedKey()` في `src/lib/api/requireManagementAuth.ts`). أما مفاتيح الاستدلال فقط فتبقى مفتوحة.
-- لا توجد كلمة مرور مُعدّة **ولا** متغير البيئة `INITIAL_PASSWORD` ← يسمح وضع التمهيد بمعالج الإعداد وبالطلبات المحلية (loopback)، لكن الطلبات الشبكية المكشوفة ما زالت تحتاج إلى بيانات اعتماد.
-- أي خطأ في قاعدة البيانات ← يفشل النظام مغلقًا (آمن افتراضيًا).
+- تم تعطيل مصادقة `settings.requireLogin === false` → عالميًا، باستثناء الطبقة المحمية دائمًا (راجع [طبقات حماية الطريق](../security/ROUTE_GUARD_TIERS.md) ) والمكالمات التي توزع بيانات اعتماد تقبلها، والتي تحتاج إلى نفس بيانات الاعتماد كما هو الحال عند تسجيل الدخول: إصدار رموز المزامنة، وسك رموز وصول CLI في أي نطاق، وإنشاء مفتاح API باستخدام نطاق `manage`/`admin` ، ومنح هذا النطاق لمفتاح، أو إعادة إنشاء مثل هذا المفتاح أو الكشف عنه (`requireCredentialForManagementScopedKey()` في `src/lib/api/requireManagementAuth.ts`). تظل مفاتيح الاستدلال فقط مفتوحة. كتابة علامة ميزة محمية (`REQUIRE_API_KEY`، وعلامات الأمان الأخرى، وإشارات SSRF / TLS / MCP-scope / sandbox المدرجة في [علامات الميزات](../reference/FEATURE_FLAGS.md#rest-api) ) وحفظ إعدادات إخفاء PII (`PUT /api/settings/pii`) تظل أيضًا بحاجة إلى بيانات اعتماد.
+- لم يتم تكوين كلمة مرور** و** لا يسمح وضع `INITIAL_PASSWORD` env var → bootstrap بمعالج الإعداد وطلبات الاسترجاع، لكن طلبات الشبكة المكشوفة لا تزال بحاجة إلى بيانات الاعتماد. استثناء: كتابة علامة ميزة محمية وحفظ إعدادات إخفاء PII (`PUT /api/settings/pii`) تحتاج إلى بيانات اعتماد حتى من الاسترجاع، لذا فإن الاسترجاع في حد ذاته لا يكفي هناك.
+- أي خطأ DB فشل → في إغلاقه (آمن بشكل افتراضي).
 
-يستخدم فرض مفتاح API للعميل `isRequireApiKeyEnabled()` في `src/shared/utils/featureFlags.ts`، لا قراءة مباشرة لـ `process.env.REQUIRE_API_KEY`. وهذا مهم للنسخ المنشورة: فتبديل `REQUIRE_API_KEY` في لوحة التحكم ← أعلام الميزات يخزّن تجاوزًا في قاعدة البيانات ويؤثر فورًا في `/v1/*` و`/v1beta/*` و`/models` و`/responses` و`/chat/completions` و`/codex/*`، وفي فحوص مصادقة واجهة برمجة العميل الأخرى التي تشارك هذه الدالة المساعدة. وإذا تعذّرت قراءة مخزن أعلام الميزات فإن مصادقة واجهة العميل تفشل مغلقة وتشترط مفتاحًا.
+يستخدم تطبيق مفتاح API للعميل `isRequireApiKeyEnabled()` في `src/shared/utils/featureFlags.ts`، وليس قراءة `process.env.REQUIRE_API_KEY` مباشرة. هذا مهم بالنسبة للمثيلات المنشورة: يؤدي تبديل `REQUIRE_API_KEY` في Dashboard → Features Flags إلى تخزين تجاوز DB ويؤثر على الفور على `/v1/*` و `/v1beta/*` `/models` `/responses` و `/chat/completions` و `/codex/*` وغيرها من عمليات التحقق من مصادقة واجهة برمجة التطبيقات الخاصة بالعميل والتي تشترك في هذا المساعد. إذا تعذرت قراءة مخزن علامة الميزة، فسيفشل إغلاق مصادقة العميل API ويتطلب مفتاحًا.
 
 ## تغيير غير متوافق — v3.8.0
 

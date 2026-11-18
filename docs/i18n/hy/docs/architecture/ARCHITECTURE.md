@@ -10,77 +10,76 @@ _Վերջին թարմացումը՝ 2026-06-28_
 
 ## Գործադիր ամփոփագիր
 
-OmniRoute-ը Next.js-ի վրա կառուցված տեղային AI երթուղավորման gateway և վահանակ է։
-Այն տրամադրում է OpenAI-ի հետ համատեղելի մեկ endpoint (`/v1/*`) և երթուղավորում է տրաֆիկը բազմաթիվ upstream մատակարարների միջև՝ թարգմանությամբ, պահուստային անցմամբ, token-ի թարմացմամբ և օգտագործման հետևմամբ։
+OmniRoute տեղական AI երթուղային դարպաս է և վահանակ, որը կառուցված է Next.js վրա: Այն ապահովում է OpenAI-ի հետ համատեղելի մեկ վերջնական կետ (`/v1/*`) և ուղղորդում է երթևեկությունը մի քանի վերին հոսքի մատակարարների միջոցով՝ թարգմանության, հետադարձ կապի, նշանների թարմացման և օգտագործման հետագծման միջոցով:
 
-Հիմնական հնարավորությունները՝
+Հիմնական հնարավորություններ.
 
-- OpenAI-ի հետ համատեղելի API մակերես CLI-ի/գործիքների համար (380 մատակարար, 159 executor մոդուլ)
-- Հարցումների/պատասխանների թարգմանություն մատակարարների ձևաչափերի միջև
-- Մոդելների combo fallback (բազմամոդել հաջորդականություն)
-- Կառուցվածքային combo քայլեր (`provider + model + connection`)՝ կատարման ժամանակի դասավորմամբ ըստ `compositeTiers`
-- Հաշիվների մակարդակի fallback (մեկ մատակարարի համար բազմաթիվ հաշիվներ)
-- Քվոտայի նախնական ստուգում և քվոտային իրազեկ P2C հաշվի ընտրություն հիմնական chat ուղում
-- OAuth և API key-ով մատակարարների միացումների կառավարում (27 OAuth մատակարարի մոդուլ)
-- Embedding-ի գեներացում `/v1/embeddings`-ի միջոցով (18 մատակարար)
-- Պատկերների գեներացում `/v1/images/generations`-ի միջոցով (10+ մատակարար, 20+ մոդել)
-- Աուդիոյի տրանսկրիպցիա `/v1/audio/transcriptions`-ի միջոցով (18 մատակարար)
-- Տեքստից խոսքի վերածում `/v1/audio/speech`-ի միջոցով (24 ներկառուցված մատակարար)
-- Տեսանյութերի գեներացում `/v1/videos/generations`-ի միջոցով (ComfyUI + SD WebUI)
-- Երաժշտության գեներացում `/v1/music/generations`-ի միջոցով (ComfyUI)
-- Վեբ որոնում `/v1/search`-ի միջոցով (20 մատակարար)
-- Մոդերացիաներ `/v1/moderations`-ի միջոցով
-- Վերադասակարգում `/v1/rerank`-ի միջոցով
-- Մտածողության tag-երի վերլուծություն (`<think>...</think>`) reasoning մոդելների համար
-- Պատասխանների մաքրում՝ OpenAI SDK-ի խիստ համատեղելիության համար
-- Դերերի նորմալացում (developer→system, system→user)՝ մատակարարների միջև համատեղելիության համար
-- Կառուցվածքային ելքի փոխակերպում (json_schema → Gemini responseSchema)
-- Մատակարարների, բանալիների, alias-ների, combo-ների, կարգավորումների և գնագոյացման տեղային պահպանում (122 DB մոդուլ)
-- Օգտագործման/արժեքի հետևում և հարցումների գրանցում
-- Ընտրովի ամպային համաժամացում՝ բազմաթիվ սարքերի/վիճակի համաժամացման համար
-- IP-ների թույլատրման/արգելափակման ցուցակ API-ի հասանելիության վերահսկման համար
-- Thinking բյուջեի կառավարում (passthrough/auto/custom/adaptive)
-- Համընդհանուր system prompt-ի ներարկում
-- Սեսիաների հետևում և fingerprinting
-- Ընդլայնված սահմանաչափում յուրաքանչյուր հաշվի համար՝ մատակարարին հատուկ պրոֆիլներով
-- Circuit breaker pattern՝ մատակարարների դիմակայունության համար
-- Հակա-thundering herd պաշտպանություն՝ mutex կողպմամբ
-- Ստորագրության վրա հիմնված հարցումների deduplication քեշ
-- Դոմեյնի շերտ՝ արժեքի կանոններ, fallback-ի քաղաքականություն, lockout-ի քաղաքականություն
-- Context Relay՝ հաշիվների պտտման շարունակականության համար սեսիայի փոխանցման ամփոփումներ
-- Դոմեյնի վիճակի պահպանում (SQLite write-through քեշ՝ fallback-ների, բյուջեների, lockout-ների և circuit breaker-ների համար)
-- Քաղաքականությունների շարժիչ՝ հարցումների կենտրոնացված գնահատման համար (lockout → budget → fallback)
-- Հարցումների telemetry՝ p50/p95/p99 ուշացման ագրեգացմամբ
-- Combo թիրախների telemetry և combo թիրախների պատմական վիճակ՝ `combo_execution_key` / `combo_step_id`-ի միջոցով
-- Correlation ID (X-Request-Id)՝ end-to-end հետագծման համար
-- Համապատասխանության աուդիտի գրանցում՝ յուրաքանչյուր API key-ի համար opt-out հնարավորությամբ
-- Eval framework՝ LLM-ի որակի ապահովման համար
-- Առողջության վահանակ՝ մատակարարների circuit breaker-ների իրական ժամանակում ցուցադրվող կարգավիճակով
-- MCP Server (110 գործիք)՝ 3 transport-ով (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE)՝ հմտություններով և առաջադրանքների lifecycle-ով
-- Հիշողության համակարգ (արդյունահանում, ներարկում, որոնում, ամփոփում)
-- Skills համակարգ (ռեեստր, executor, sandbox, ներկառուցված skills)
-- MITM proxy՝ վկայագրերի կառավարմամբ և DNS-ի մշակմամբ
-- Prompt injection guard middleware
-- Prompt compression pipeline՝ Caveman-ով, RTK-ով, stacked pipeline-ներով, compression combo-ներով, լեզվային փաթեթներով և analytics-ով
-- ACP (Agent Communication Protocol) ռեեստր
-- Մոդուլային OAuth մատակարարներ (22 անհատական մոդուլ `src/lib/oauth/providers/`-ի ներքո)
-- Uninstall/full-uninstall սկրիպտեր
-- OAuth միջավայրի վերականգնման գործողություն
-- WebSocket bridge՝ OpenAI-ի հետ համատեղելի WS հաճախորդների համար (`/v1/ws`)
-- Sync token-ների կառավարում (թողարկում/չեղարկում, ETag-ով տարբերակավորված config bundle-ի ներբեռնում)
-- GLM Thinking (`glmt`)՝ որպես առաջին կարգի մատակարարի preset
-- Հիբրիդ token-ների հաշվարկ (մատակարարի կողմից `/messages/count_tokens`՝ գնահատման fallback-ով)
-- Model alias-ների ավտոմատ seedավորում (գործարկման ժամանակ՝ cross-proxy dialect-ների 30+ նորմալացում)
-- Անվտանգ outbound fetch՝ SSRF guard-ով, private URL-ների արգելափակմամբ և կարգավորվող retry-ով
-- Cooldown-ին իրազեկ chat retry-ներ՝ կարգավորվող `requestRetry`-ով և `maxRetryIntervalSec`-ով
-- Runtime միջավայրի վավերացում Zod-ով՝ գործարկման ժամանակ
-- Համապատասխանության աուդիտ v2՝ pagination-ով, մատակարարների CRUD իրադարձություններով և SSRF-ով արգելափակված վավերացման գրանցմամբ
+- OpenAI-ի հետ համատեղելի API մակերես CLI/tools համար (394 մատակարար, 159 կատարող մոդուլ)
+- Request/response թարգմանություն մատակարարների ձևաչափերով
+- Մոդելի համակցված վերադարձ (բազմ մոդելային հաջորդականություն)
+- Կառուցվածքային համակցված քայլեր (`provider + model + connection`)՝ գործարկման ժամանակի դասակարգմամբ `compositeTiers` ով
+- Հաշվի մակարդակի հետադարձ կապ (մի քանի հաշիվ յուրաքանչյուր մատակարարի համար)
+- Քվոտաների նախնական թռիչքը և քվոտաներին ծանոթ P2C հաշվի ընտրությունը հիմնական զրույցի ուղու վրա
+- OAuth + API-բանալին մատակարարի կապի կառավարում (27 OAuth մատակարարի մոդուլ)
+- Ներկառուցում `/v1/embeddings` միջոցով (18 մատակարար)
+- Պատկերի ստեղծում `/v1/images/generations` միջոցով (10 + մատակարար, 20 + մոդել)
+- Աուդիո տառադարձում `/v1/audio/transcriptions` միջոցով (18 մատակարար)
+- Տեքստից խոսք `/v1/audio/speech` միջոցով (24 ներկառուցված մատակարար)
+- Տեսանյութերի ստեղծում `/v1/videos/generations` միջոցով (ComfyUI + SD WebUI)
+- Երաժշտության սերունդ `/v1/music/generations` միջոցով (ComfyUI)
+- Վեբ որոնում `/v1/search` միջոցով (20 մատակարար)
+- Մոդերացիա `/v1/moderations` միջոցով
+- Վերադասակարգում `/v1/rerank` միջոցով
+- Մտածեք թեգերի վերլուծությունը (`<think>...</think>`) հիմնավորման մոդելների համար
+- Արձագանքման ախտահանում խիստ OpenAI SDK համատեղելիության համար
+- Դերերի նորմալացում (մշակողի → համակարգ, համակարգի → օգտվող) խաչաձեւ մատակարարների համատեղելիության համար
+- Կառուցվածքային ելքային փոխակերպում (json_schema → Gemini responseSchema)
+- Տեղական կայունություն պրովայդերների, բանալիների, կեղծանունների, կոմբինացիաների, պարամետրերի, գնագոյացման համար (122 DB մոդուլ)
+- Usage/cost ի հետևում և հարցումների գրանցում
+- Կամընտիր ամպային համաժամացում multi-device/state համաժամացման համար
+- IP allowlist/blocklist API մուտքի վերահսկման համար
+- Մտածողության բյուջեի կառավարում (passthrough/auto/custom/adaptive)
+- Համաշխարհային համակարգի արագ ներարկում
+- Նիստի հետևում և մատնահետքեր
+- Մեկ հաշվի ընդլայնված տոկոսադրույքի սահմանափակում՝ հատուկ մատակարարի պրոֆիլներով
+- Անջատիչի օրինակը մատակարարի ճկունության համար
+- Հոտի ամպրոպի դեմ պաշտպանություն մութեքս կողպման միջոցով
+- Ստորագրության վրա հիմնված հարցումների կրկնօրինակման քեշ
+- Դոմենի շերտ. ծախսերի կանոններ, հետադարձ քաղաքականություն, արգելափակման քաղաքականություն
+- Համատեքստային ռելե. նստաշրջանի փոխանցման ամփոփագրեր՝ հաշվի ռոտացիայի շարունակականության համար
+- Դոմենի վիճակի հաստատակամություն (SQLite քեշի մուտքագրում հետադարձ կապի, բյուջեների, կողպեքների, անջատիչների համար)
+- Կենտրոնացված հարցումների գնահատման քաղաքականության շարժիչ (lockout → budget → backback)
+- Հայցեք հեռաչափություն p50/p95/p99 latency ագրեգացմամբ
+- Համակցված թիրախային հեռաչափություն և պատմական համակցված թիրախային առողջություն `combo_execution_key` / `combo_step_id` ի միջոցով
+- Հարաբերակցություն ID (X-Request-Id) ծայրից ծայր հետագծման համար
+- Համապատասխանության աուդիտի գրանցում՝ հրաժարվելով մեկ API բանալիով
+- Eval շրջանակ LLM որակի ապահովման համար
+- Առողջապահական վահանակ իրական ժամանակում մատակարարի անջատիչի կարգավիճակով
+- MCP սերվեր (110 գործիքներ) 3 փոխադրումներով (stdio/SSE/Streamable HTTP)
+- A2A սերվեր (JSON-RPC 2.0 + SSE) հմտություններով և առաջադրանքի կյանքի ցիկլով
+- Հիշողության համակարգ (հանում, ներարկում, որոնում, ամփոփում)
+- Հմտությունների համակարգ (ռեգիստր, կատարող, ավազատուփ, ներկառուցված հմտություններ)
+- MITM վստահված անձ վկայագրի կառավարմամբ և DNS կառավարմամբ
+- Օպերատիվ ներարկման պաշտպանիչ միջնակարգ սարք
+- Արագ սեղմման խողովակաշար Caveman-ի, RTK, կուտակված խողովակաշարերի, սեղմման կոմպոզիցիաների, լեզվական փաթեթների և վերլուծականի միջոցով
+- ACP (Գործակալի հաղորդակցման արձանագրություն) գրանցամատյան
+- Մոդուլային OAuth մատակարարներ (22 անհատական մոդուլներ `src/lib/oauth/providers/` ի տակ)
+- Uninstall/full-uninstall սցենարներ
+- OAuth միջավայրի վերանորոգման գործողություն
+- WebSocket կամուրջ OpenAI-ի հետ համատեղելի WS հաճախորդների համար (`/v1/ws`)
+- Համաժամեցրեք նշանների կառավարումը (issue/revoke, ETag տարբերակով կազմաձևման փաթեթի ներբեռնում)
+- GLM Thinking (`glmt`) առաջին կարգի մատակարարի նախադրված
+- Հիբրիդային նշանների հաշվարկ (մատակարարի կողմի `/messages/count_tokens` հետադարձ գնահատմամբ)
+- Model alias auto-seeding (30 + cross-proxy բարբառի նորմալացում գործարկման ժամանակ)
+- Անվտանգ ելքային բեռնում SSRF պահակով, մասնավոր URL արգելափակմամբ և կարգավորելի կրկնակի փորձով
+- Cooldown-ի տեղեկացված զրույցը կրկնում է կարգավորելի `requestRetry` և `maxRetryIntervalSec` միջոցով
+- Գործարկման միջավայրի վավերացում Zod հետ գործարկման ժամանակ
+- Համապատասխանության աուդիտ v2 էջադրման, մատակարարի CRUD իրադարձությունների և SSRF-ով արգելափակված վավերացման գրանցման հետ
 
-Գործարկման հիմնական մոդելը՝
+Գործարկման ժամանակի հիմնական մոդելը.
 
-- Next.js հավելվածի երթուղիները `src/app/api/*`-ի ներքո իրականացնում են ինչպես վահանակի API-ները, այնպես էլ համատեղելիության API-ները
-- Համօգտագործվող SSE/երթուղավորման core-ը `src/sse/*` + `open-sse/*`-ում մշակում է մատակարարների կատարումը, թարգմանությունը, streaming-ը, fallback-ը և օգտագործումը
+- Next.js հավելվածի երթուղիները `src/app/api/*` ներքո իրականացնում են ինչպես APIs վահանակի, այնպես էլ APIs համատեղելիությունը
+- `src/sse/*` + `open-sse/*` ում ընդհանուր SSE/routing միջուկը կարգավորում է մատակարարի կատարումը, թարգմանությունը, հոսքը, հետադարձ կապը և օգտագործումը
 
 ## Տեղեկատու դիագրամներ
 
@@ -266,73 +265,72 @@ flowchart LR
 - Կազմաձևման փաթեթ՝ `src/app/api/sync/bundle` (GET՝ կարգավորումների/մատակարարների/համակցությունների/բանալիների ETag-ով տարբերակավորված ակնթարթային պատկեր)
 - WebSocket՝ `src/app/api/v1/ws/route.ts` — Upgrade մշակիչ OpenAI-ի հետ համատեղելի WS հաճախորդների համար
 
-## 2) SSE + թարգմանության միջուկ
+## 2) SSE + Թարգմանական Core
 
-Հիմնական հոսքի մոդուլներ․
+Հիմնական հոսքի մոդուլներ.
 
-- Մուտքային կետ՝ `src/sse/handlers/chat.ts`
-- Հիմնական համակարգում՝ `open-sse/handlers/chatCore.ts`
-- Մատակարարների կատարման ադապտերներ՝ `open-sse/executors/*`
-- Ձևաչափի հայտնաբերում/մատակարարի կազմաձևում՝ `open-sse/services/provider.ts`
-- Մոդելի վերլուծում/լուծում՝ `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Հաշվի պահուստային անցման տրամաբանություն՝ `open-sse/services/accountFallback.ts`
-- Թարգմանության գրանցամատյան՝ `open-sse/translator/index.ts`
+- Մուտք՝ `src/sse/handlers/chat.ts`
+- Հիմնական նվագախումբ՝ `open-sse/handlers/chatCore.ts`
+- Մատակարարի կատարման ադապտերներ՝ `open-sse/executors/*`
+- Ձևաչափեք detection/provider կազմաձևը՝ `open-sse/services/provider.ts`
+- Մոդել parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Հաշվի հետադարձ տրամաբանություն՝ `open-sse/services/accountFallback.ts`
+- Թարգմանչական մատյան՝ `open-sse/translator/index.ts`
 - Հոսքի փոխակերպումներ՝ `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Օգտագործման տվյալների դուրսբերում/նորմալացում՝ `open-sse/utils/usageTracking.ts`
-- Think թեգի վերլուծիչ՝ `open-sse/utils/thinkTagParser.ts`
-- Ներդրման մշակիչ՝ `open-sse/handlers/embeddings.ts`
-- Ներդրման մատակարարների գրանցամատյան՝ `open-sse/config/embeddingRegistry.ts`
-- Պատկերների գեներացման մշակիչ՝ `open-sse/handlers/imageGeneration.ts`
-- Պատկերների մատակարարների գրանցամատյան՝ `open-sse/config/imageRegistry.ts`
-- Պատասխանի մաքրում՝ `open-sse/handlers/responseSanitizer.ts`
-- Դերերի նորմալացում՝ `open-sse/services/roleNormalizer.ts`
+- Օգտագործումը extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Մտածեք թեգերի վերլուծիչը՝ `open-sse/utils/thinkTagParser.ts`
+- Ներդրման կարգավորիչ՝ `open-sse/handlers/embeddings.ts`
+- Ներկառուցված մատակարարի ռեեստրը՝ `open-sse/config/embeddingRegistry.ts`
+- Պատկերի ստեղծման կարգավորիչ՝ `open-sse/handlers/imageGeneration.ts`
+- Պատկերների մատակարարի ռեեստր՝ `open-sse/config/imageRegistry.ts`
+- Արձագանքման սանիտարականացում՝ `open-sse/handlers/responseSanitizer.ts`
+- Դերի նորմալացում՝ `open-sse/services/roleNormalizer.ts`
 
-Ծառայություններ (բիզնես տրամաբանություն)․
+Ծառայություններ (բիզնեսի տրամաբանություն).
 
-- Հաշվի ընտրություն/գնահատում՝ `open-sse/services/accountSelector.ts`
-- Համատեքստի կենսացիկլի կառավարում՝ `open-sse/services/contextManager.ts`
-- IP զտիչի կիրառում՝ `open-sse/services/ipFilter.ts`
-- Սեսիաների հետագծում՝ `open-sse/services/sessionManager.ts`
-- Հարցումների կրկնօրինակների վերացում՝ `open-sse/services/signatureCache.ts`
-- Համակարգային հուշման ներարկում՝ `open-sse/services/systemPrompt.ts`
-- Մտածողության բյուջեի կառավարում՝ `open-sse/services/thinkingBudget.ts`
-- Փոխարինող նշանով մոդելի երթուղավորում՝ `open-sse/services/wildcardRouter.ts`
-- Հաճախականության սահմանաչափի կառավարում՝ `open-sse/services/rateLimitManager.ts`
-- Շղթայի անջատիչ՝ `src/shared/utils/circuitBreaker.ts`
-- Համատեքստի փոխանցում՝ `open-sse/services/contextHandoff.ts` — փոխանցման ամփոփագրի գեներացում և ներարկում՝ համատեքստի վերահաղորդման ռազմավարության համար
-- Սեղմում՝ `open-sse/services/compression/*` — կանխարգելիչ սեղմում՝ մատակարարի թարգմանությունից առաջ․
-  ներառում է Caveman կանոններ, RTK զտիչներ, շերտավորված մշակման շղթաներ, սեղմման համակցություններ, վիճակագրություն և վավերացում
-- Codex քվոտայի ստացող՝ `open-sse/services/codexQuotaFetcher.ts` — ստանում է Codex քվոտան՝ համատեքստի վերահաղորդման փոխանցման որոշումների համար
-- Սպասման ժամանակահատվածը հաշվի առնող կրկնափորձ՝ `src/sse/services/cooldownAwareRetry.ts` — յուրաքանչյուր մոդելի համար սպասման ժամանակահատվածով կրկնափորձեր՝ կազմաձևելի `requestRetry` / `maxRetryIntervalSec` պարամետրերով
-- Անվտանգ ելքային հարցում՝ `src/shared/network/safeOutboundFetch.ts` — պաշտպանված մատակարարի/մոդելի հարցում՝ SSRF պաշտպանությամբ, մասնավոր URL-ների արգելափակմամբ, կրկնափորձով և ժամանակային սահմանափակմամբ
-- Ելքային URL-ի պաշտպանություն՝ `src/shared/network/outboundUrlGuard.ts` — մատակարարի URL-ների հոսթերի ստուգումներ․ `src/shared/network/outboundUrlGuardPolicy.ts`-ը ռեժիմն ընտրում է `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` և դրանց կառավարման վահանակի փոխարկիչներից (տե՛ս `docs/reference/ENVIRONMENT.md`)
-- Մատակարարի հարցման լռելյայն արժեքներ՝ `open-sse/services/providerRequestDefaults.ts` — մատակարարի մակարդակի `maxTokens`, `temperature`, `thinkingBudgetTokens` լռելյայն արժեքներ
-- GLM մատակարարի հաստատուններ՝ `open-sse/config/glmProvider.ts` — համօգտագործվող GLM մոդելներ, քվոտայի URL-ներ, GLMT ժամանակային սահմանափակումներ/լռելյայն արժեքներ
-- Antigravity վերին մակարդակի ծառայություն՝ `open-sse/config/antigravityUpstream.ts` — բազային URL-ի և հայտնաբերման ուղու հաստատուններ
-- Codex հաճախորդի հաստատուններ՝ `open-sse/config/codexClient.ts` — տարբերակավորված օգտատիրոջ գործակալի և հաճախորդի տարբերակի արժեքներ
-- Մոդելի այլանունների սկզբնական հավաքածու՝ `src/lib/modelAliasSeed.ts` — գործարկման պահին սկզբնավորում է տարբեր պրոքսի-բարբառների 30+ այլանուն
+- Հաշիվ selection/scoring: `open-sse/services/accountSelector.ts`
+- Համատեքստի կյանքի ցիկլի կառավարում. `open-sse/services/contextManager.ts`
+- IP ֆիլտրի ամրացում՝ `open-sse/services/ipFilter.ts`
+- Նիստի հետևում՝ `open-sse/services/sessionManager.ts`
+- Պահանջել կրկնօրինակում՝ `open-sse/services/signatureCache.ts`
+- Համակարգի արագ ներարկում՝ `open-sse/services/systemPrompt.ts`
+- Մտածող բյուջեի կառավարում. `open-sse/services/thinkingBudget.ts`
+- Wildcard մոդելի երթուղում. `open-sse/services/wildcardRouter.ts`
+- Գնահատման սահմանաչափի կառավարում՝ `open-sse/services/rateLimitManager.ts`
+- Անջատիչ՝ `src/shared/utils/circuitBreaker.ts`
+- Համատեքստային փոխանցում. `open-sse/services/contextHandoff.ts` — փոխանցման ամփոփ ստեղծման և ներարկում համատեքստային-ռելեի ռազմավարության համար
+- Սեղմում. `open-sse/services/compression/*` — ակտիվ սեղմում նախքան մատակարարի թարգմանությունը; ներառում է Caveman կանոնները, RTK ֆիլտրերը, կուտակված խողովակաշարերը, սեղմման կոմպոզիցիաները, վիճակագրությունը և վավերացումը
+- Codex Codex — `open-sse/services/codexQuotaFetcher.ts`
+- Cooldown-aware կրկնակի փորձ. `src/sse/services/cooldownAwareRetry.ts` — յուրաքանչյուր մոդելի համար սառեցման փորձեր՝ կարգավորելի `requestRetry` / `maxRetryIntervalSec` ով
+- Անվտանգ ելքային բեռնում. `src/shared/network/safeOutboundFetch.ts` — պահպանված provider/model բեռնում SSRF պաշտպանիչով, մասնավոր URL-ի արգելափակում, նորից փորձ և ժամանակի վերջ
+- Արտագնա URL պահակ. `src/shared/network/outboundUrlGuard.ts` — հյուրընկալողը ստուգում է մատակարար URLs ին; `src/shared/network/outboundUrlGuardPolicy.ts` ընտրում է ռեժիմը `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` ից, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` և դրանց վահանակը միացնում է (տես `docs/reference/ENVIRONMENT.md`)
+- Մատակարարի հարցումը կանխադրված է. `open-sse/services/providerRequestDefaults.ts` — մատակարարի մակարդակի `maxTokens`, `temperature`, `thinkingBudgetTokens` լռելյայն
+- GLM մատակարարի հաստատուններ. `open-sse/config/glmProvider.ts` — համօգտագործվող GLM մոդելներ, քվոտա URLs, GLMT timeout/defaults
+- Antigravity հոսանքին հակառակ՝ `open-sse/config/antigravityUpstream.ts` — հիմք URL և հայտնաբերման ուղու հաստատուններ
+- Codex հաճախորդի հաստատուններ. `open-sse/config/codexClient.ts` — տարբերակված օգտագործող-գործակալ և հաճախորդ-տարբերակի արժեքներ
+- `src/lib/modelAliasSeed.ts` — seed +
 
-Տիրույթի շերտի մոդուլներ․
+Դոմենի շերտի մոդուլներ.
 
-- Արժեքի կանոններ/բյուջեներ՝ `src/domain/costRules.ts`
-- Պահուստային անցման քաղաքականություն՝ `src/domain/fallbackPolicy.ts`
-- Համակցությունների լուծիչ՝ `src/domain/comboResolver.ts`
-- Արգելափակման քաղաքականություն՝ `src/domain/lockoutPolicy.ts`
-- Քաղաքականությունների շարժիչ՝ `src/domain/policyEngine.ts` — կենտրոնացված արգելափակում → բյուջե → պահուստային անցում գնահատում
-- Սխալի կոդերի կատալոգ՝ `src/shared/constants/errorCodes.ts`
-- Հարցման ID՝ `src/shared/utils/requestId.ts`
-- Հարցման ժամանակային սահմանափակում՝ `src/shared/utils/fetchTimeout.ts`
-- Հարցման հեռաչափություն՝ `src/shared/utils/requestTelemetry.ts`
-- Համապատասխանություն/աուդիտ՝ `src/lib/compliance/index.ts`
-- Գնահատումների գործարկիչ՝ `src/lib/evals/evalRunner.ts`
-- Տիրույթի վիճակի պահպանում՝ `src/lib/db/domainState.ts` — SQLite CRUD՝ պահուստային անցման շղթաների, բյուջեների, ծախսերի պատմության, արգելափակման վիճակի և շղթայի անջատիչների համար
+- Արժեք rules/budgets: `src/domain/costRules.ts`
+- Հետադարձ քաղաքականություն. `src/domain/fallbackPolicy.ts`
+- Պահպանված համակցված բանաձեւի պայմանագիր՝ `src/domain/comboResolver.ts`; կենդանի երթուղին օգտագործում է `open-sse/services/combo.ts`
+- Կողպեքի քաղաքականություն՝ `src/domain/lockoutPolicy.ts`
+- Պահպանված քաղաքականության-գնահատման պայմանագիր՝ `src/domain/policyEngine.ts`; հարցումի ուղին պարտադրում է API-բանալինների քաղաքականությունը `src/shared/utils/apiKeyPolicy.ts` միջոցով և լուծված թիրախի թույլտվությունը `src/sse/handlers/chat/resolvedModelPolicy.ts` միջոցով
+- Սխալների կոդերի կատալոգ՝ `src/shared/constants/errorCodes.ts`
+- Հարցում ID: `src/shared/utils/requestId.ts`
+- Վերբեռնման ժամանակի ավարտը՝ `src/shared/utils/fetchTimeout.ts`
+- Պահանջել հեռաչափություն՝ `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval վազորդ՝ `src/lib/evals/evalRunner.ts`
+- Դոմենի վիճակի կայունություն. `src/lib/db/domainState.ts` — SQLite CRUD հետադարձ շղթաների, բյուջեների, ծախսերի պատմություն, արգելափակման վիճակ, անջատիչներ
 
-OAuth մատակարարների մոդուլներ (27 առանձին ֆայլ `src/lib/oauth/providers/`-ի ներքո)․
+OAuth մատակարարի մոդուլներ (27 առանձին ֆայլեր `src/lib/oauth/providers/` ի տակ).
 
-- Գրանցամատյանի ինդեքս՝ `src/lib/oauth/providers/index.ts`
-- Առանձին մատակարարներ՝ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Համօգտագործվող օժանդակիչներ՝ `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl սարքային հոսք), `museCodeDeviceResponse.ts`
-- Թեթև փաթեթավորիչ՝ `src/lib/oauth/providers.ts` — վերաարտահանում է առանձին մոդուլներից
+- Ռեեստրի ինդեքս՝ `src/lib/oauth/providers/index.ts`
+- Անհատական մատակարարներ՝ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Համօգտագործվող օգնականներ՝ `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl սարքի հոսք), `museCodeDeviceResponse.ts`
+- Բարակ փաթաթան. `src/lib/oauth/providers.ts` — վերաարտահանվում է առանձին մոդուլներից
 
 ## 5) Ներդրված ծառայություններ (v3.8.4)
 
@@ -363,17 +361,17 @@ OmniRoute-ը կարող է տեղադրել, վերահսկել և հարցու�
 Auto Combo-ն դինամիկ գնահատում և ընտրում է երթուղային թիրախները ըստ պահանջի ժամանակի, այլ ոչ թե հենվելու ստատիկ համակցված սահմանման վրա: Այն ապահովում է `auto/*` մոդելի նախածանցային ընտանիքը:
 
 - Շարժիչի մուտքը՝ `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Լուծող՝ `src/domain/comboResolver.ts` ( `auto/` նախածանցի ավտոմատ հայտնաբերում)
+- Կենդանի համակցված մուտք՝ `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), որը կոչվում է `src/sse/handlers/chat.ts` կողմից
 - Վահանակ՝ `/dashboard/auto-combo`
 - Հեռաչափություն՝ `auto_combo_decisions` SQLite աղյուսակ
 
 Հիմնական հնարավորություններ.
 
-- **20 երթուղային ռազմավարություն** (առաջնահերթություն, կշռված, լրացնել առաջինը, շրջանաձև, P2C, պատահական, ամենաքիչ օգտագործված, ծախսերի օպտիմալացված, վերակայված, վերակայված պատուհան, գլխամասային տարածք, քվոտա կշռված, խիստ պատահական,** ավտո** , lkgp, համատեքստով օպտիմիզացված, քեշի օպտիմիզացված, համատեքստային ռելե,** միաձուլում** , խողովակաշար) — auto-ն v3.8.0-ի վերնագրի հավելումն է; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) նոր է v3.8.36-ում:
-- **16 գործոնային միավոր** քվոտա, առողջություն, հակադարձ ծախս, հակադարձ ուշացում, առաջադրանքների համապատասխանություն և տասը այլ: Գործոնների կանոնական աղյուսակը և դրանց լռելյայն կշիռները ապրում են [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ում, վերահաստատելով այն այստեղ, այն երկրորդ տեղը կտար հնանալու համար:
+- **22 երթուղային ռազմավարություն** (առաջնահերթություն, կշռված, լրացնել առաջինը, շրջանաձև, P2C, պատահական, ամենաքիչ օգտագործված, ծախսերի օպտիմալացված, վերակայված, վերակայված պատուհան, ժամկետի ավարտ, սկզբնական տարածք, քվոտա կշռված, խիստ պատահական,** ավտո** , lkgp, համատեքստով օպտիմիզացված, քեշի օպտիմիզացված, համատեքստային ռելե,** միաձուլում** , pipeline, jev) — auto-ը վերնագրի լրացումն է v3.8.0-ում; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) նոր է v3.8.36-ում:
+- **16 գործոնային միավոր** քվոտա, առողջություն, հակադարձ ծախս, հակադարձ ուշացում, առաջադրանքների համապատասխանություն և տասը ևս: Գործոնների կանոնական աղյուսակը և դրանց լռելյայն կշիռները ապրում են [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ում, վերահաստատելով այն այստեղ, այն երկրորդ տեղը կտար հնանալու համար:
 - **Վիրտուալ գործարան** նյութականացնում է ժամանակավոր կոմբինացիաներ, երբ համապատասխան անվանումով կոմբինացիաներ չկան՝ թեկնածուներ ստանալով առողջ ակտիվ պրովայդերների կապերից:
 - **Ավտոմատ նախածանցներ** `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — յուրաքանչյուրն ապահովված է կարգավորված քաշային պրոֆիլով:
-- **6 ռեժիմի փաթեթներ** `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` և `chaos-mode` — նախադրված քաշի կոնֆիգուրացիաներ, որոնք կարող են կանչվել վահանակից: (Չպետք է շփոթել վերը նշված `auto/*` նախածանցների հետ, որոնք պահանջի ժամանակի տարբերակներ են):
+- **6 ռեժիմի փաթեթներ** `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` և `chaos-mode` — նախադրված քաշի կոնֆիգուրացիաներ, որոնք կարող են կանչվել վահանակից: (Չպետք է շփոթել վերը նշված `auto/*` նախածանցների հետ, որոնք հարցում ժամանակի տարբերակներ են):
 
 Ամբողջական ալգորիթմական մանրամասների համար (գործոնների բանաձևեր, քաշի կարգավորում) տե՛ս [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) :
 
@@ -399,22 +397,26 @@ Cloud Agents-ը փաթաթում է երրորդ կողմի հյուրընկալ
 - Լարերի միացման կետեր. զրույցի կարգավորիչի մուտք, պատկերների ստեղծման կարգավորիչ, արձագանքման ախտահանիչ
 - HTTP պայմանագիր. խախտումների մակերեսը որպես `503` `error.code = "GUARDRAIL_VIOLATION"` ով
 
-Կանոնների հավաքածուի հեղինակման և շեմերի թյունինգի համար տե՛ս [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) :
+Կանոնների հավաքածուի հեղինակման և շեմերի կարգավորումների համար տե՛ս [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) :
 
 ### Դ. Դոմենի շերտ
 
-`src/domain/` անվանումների տարածքը կենտրոնացնում է քաղաքականության որոշումները, այնպես որ երթուղիների մշակողները ստիպված չլինեն ինքնուրույն հավաքել lockout/budget/fallback տրամաբանությունը:
+`src/domain/` անվանատարածքը պարունակում է տիրույթի ծառայություններ և վերապահված գնահատման պայմանագրեր: Այն յուրաքանչյուր հարցման համար քաղաքականության մուտքի մեկ պարտադիր կետ չէ:
 
-- Քաղաքականության շարժիչ. `src/domain/policyEngine.ts` — մեկ մուտքային կետ նախնական կատարման գնահատման համար (lockout → բյուջեն → հետադարձ պատվեր)
+Ուղիղ զրույցի ուղին `enforceApiKeyPolicy()` է կանչում `src/shared/utils/apiKeyPolicy.ts` ից; Լուծված մոդելների և համակցված անդամների թույլտվությունն իրականացվում է `src/sse/handlers/chat/resolvedModelPolicy.ts` ում: `src/app/api/v1/chat/completions/route.ts` ում ինքնակառավարվող մուտքը նաև պարտադրում է API-բանալինների քաղաքականությունը նախքան առաքումը: Combo բանաձեւը անցնում է `open-sse/services/combo.ts`:
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` և `src/lib/container.ts` մնում են փորձարկված պայմանագրեր, այլ ոչ թե այդ հարցման ուղու միացումը: Բեռնարկղը գրանցում է քաղաքականության շարժիչը, սակայն ստուգված արտադրության հարցումի ուղին չի լուծում այն: Միայն այդ պայմանագրերի փոփոխությունը չի փոխում ուղիղ զրույցի քաղաքականությունը կամ համակցված երթուղին. դրանք միացնելը կամ հեռացնելը պահանջում է առանձին նախագծային որոշում:
+
+- Պահպանված քաղաքականության շարժիչ. `src/domain/policyEngine.ts` — lockout → բյուջեն → հետադարձ գնահատում
 - Արժեքի կանոններ՝ `src/domain/costRules.ts`
 - Հետադարձ քաղաքականություն. `src/domain/fallbackPolicy.ts`
 - Կողպեքի քաղաքականություն՝ `src/domain/lockoutPolicy.ts`
-- Պիտակների վրա հիմնված երթուղղում՝ `src/domain/tagRouter.ts`
-- Համակցված լուծիչ. `src/domain/comboResolver.ts` — լուծում է համակցված անունները, ավտոմատ/\* նախածանցները և նիշերի մոդելի թիրախները կոնկրետ կատարման պլաններին
+- Պիտակների վրա հիմնված երթուղում՝ `src/domain/tagRouter.ts`
+- Վերապահված համակցված լուծիչ. `src/domain/comboResolver.ts` — ինքնուրույն ընտրության պայմանագիր; Live Combo Routing-ն իրականացվում է `open-sse/services/combo.ts` ում
 - Connection/model կանոն հյուսն՝ `src/domain/connectionModelRules.ts`
 - Մոդելի առկայության նկարներ՝ `src/domain/modelAvailability.ts`
 - Մատակարարի ժամկետի հետևում. `src/domain/providerExpiration.ts`
-- Քվոտայի քեշ՝ `src/domain/quotaCache.ts`
+- Քվոտայի քեշ՝ `src/domain/quotaCache.ts`. Մատակարարները ավելացնում և հեռացնում են քվոտայի պատուհանները (OpenAI հանել է 5-ժամյա Codex պատուհանը որոշ պլանների համար), ուստի մատակարարի ադապտեր կարդալու օգտագործումը վկայում է որպես ամբողջական (`quotasComplete`, տե՛ս `src/lib/usage/usageReading.ts`) հաշվի ամբողջական պատուհանների հավաքածուն է. ավելի վաղ հայտնի, բայց դրանից բացակայող պատուհանն անջատված է, քեշում, rehydrates rehydrates a `quota_snapshots` (rehydrates a rehydrates a): պահպանվել է Codex քվոտայի վիճակը և Claude ի հագեցվածության դույլերում: Մասնակի ապացույցները (պատասխանի վերնագրեր, հնացած պատճեններ) թարմացնում են միայն այն պատուհանները, որոնք կրում են:
 - Դեգրադացիայի վիճակ՝ `src/domain/degradation.ts`
 - Կազմաձևման աուդիտ՝ `src/domain/configAudit.ts`
 - OmniRoute պատասխանի մետատվյալների ստեղծող՝ `src/domain/omnirouteResponseMeta.ts`
@@ -443,7 +445,7 @@ Cloud Agents-ը փաթաթում է երրորդ կողմի հյուրընկալ
 - Աշխատանքային հոսք FSM: `open-sse/services/workflowFSM.ts`
 - Առաջադրանքների մասին տեղյակ երթուղիչ՝ `open-sse/services/taskAwareRouter.ts`
 - Ֆոնային առաջադրանքի դետեկտոր՝ `open-sse/services/backgroundTaskDetector.ts`
-- Մտադրության դասակարգիչ՝ `open-sse/services/intentClassifier.ts`
+- Մտադրությունների դասակարգիչ՝ `open-sse/services/intentClassifier.ts`
 
 FSM անցումները սնվում են Auto Combo-ի միավորների մեջ՝ կողմնակալություն դեպի background/automation առաջադրանքների համար ավելի էժան մոդելներ և ինտերակտիվ planning/review պտույտների համար ավելի ուժեղ մոդելներ:
 
@@ -858,41 +860,47 @@ flowchart LR
 - `src/lib/db/*`: ներմուծեք կոնկրետ մոդուլներն անմիջապես՝ առանց barrel-ի (հին `localDb.ts` վերարտահանման շերտը հեռացվել է)
 - `src/lib/usageDb.ts`: SQLite աղյուսակների վրա կառուցված՝ օգտագործման պատմության/կանչերի մատյանների ֆասադ
 
-## Մատակարարների կատարիչների ծածկույթը (Strategy Pattern)
+## Մատակարարի կատարողի ծածկույթ (ռազմավարության օրինակ)
 
-Յուրաքանչյուր մատակարար ունի `BaseExecutor`-ը ընդլայնող մասնագիտացված կատարիչ (`open-sse/executors/base.ts`-ում), որն ապահովում է URL-ի ձևավորում, վերնագրերի կառուցում, էքսպոնենցիալ հետաձգմամբ կրկնակի փորձեր, հավատարմագրերի թարմացման հուկեր և `execute()` օրկեստրավորման մեթոդը։
+Յուրաքանչյուր մատակարար ունի մասնագիտացված կատարող, որը ընդլայնում է `BaseExecutor` ( `open-sse/executors/base.ts` ում), որն ապահովում է URL կառուցում, վերնագրի կառուցում, կրկնակի փորձարկում էքսպոնենցիալ հետընթացով, հավատարմագրերի թարմացման կեռիկներ և `execute()` նվագախմբավորման մեթոդ:
 
-| Կատարիչ                   | Մատակարար(ներ)                                                                                                                                               | Հատուկ մշակում                                                                                   |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA և այլն | Դինամիկ URL/վերնագրերի կազմաձևում՝ ըստ մատակարարի                                                |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | Նախագծի/աշխատաշրջանի հատուկ ID-ներ, Retry-After-ի վերլուծում, 429-ի քողարկում                    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | Տեղակայման վրա հիմնված երթուղավորում, api-version հարցման պարամետրի պարտադրում                   |
-| `BlackboxWebExecutor`     | Blackbox AI (վեբ ռեժիմ)                                                                                                                                      | Վեբ աշխատաշրջանի հակադարձ մշակում՝ TLS մատնահետքի նմանակմամբ                                     |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH ուղի)                                                                                                                                         | Սահմանափակումների + գործիքների վերաքարտեզագրման շղթաներ, մատնահետքի ձևավորում                    |
-| `CliProxyApiExecutor`     | CLIProxyAPI-ի հետ համատեղելի մատակարարներ                                                                                                                    | Նույնականացման և արձանագրության հատուկ մշակում                                                   |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                        | Հաշվի ID-ի ներարկում, Neurons-ի վրա հիմնված օգտագործման հետևում                                  |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Ներարկում է համակարգային հրահանգներ, պարտադրում է դատողության ջանք                               |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | Դիտարկիչի աշխատաշրջանի Responses API կամուրջ՝ թեմայի/քայլի ամրակցմամբ                            |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                 | OAuth + յուրաքանչյուր աշխատաշրջանի վերնագրերի պտտում                                             |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | ConnectRPC արձանագրություն, Protobuf կոդավորում, հարցումների ստորագրում՝ ստուգիչ գումարի միջոցով |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Devin առաջադրանքի կենսաշրջանի կամրջում՝ ամպային գործակալի մոդուլի միջոցով                        |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Copilot նշանի թարմացում, VSCode-ը նմանակող վերնագրեր                                             |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth + նախագծի շրջանակով երթուղավորում                                                   |
-| `GlmExecutor`             | Z.AI GLM (ներառյալ `glmt` նախակարգավորումը)                                                                                                                  | Մտածողության բյուջեն հաշվի առնող մշակում, GLMT նախակարգավորման հաստատուններ                      |
-| `GrokWebExecutor`         | xAI Grok վեբ                                                                                                                                                 | Վեբ աշխատաշրջանի հակադարձ մշակում, ռեժիմի ընտրություն (մտածողություն/ստանդարտ)                   |
-| `KieExecutor`             | KIE                                                                                                                                                          | Հատուկ նշանի տրամադրում՝ պտտվող աշխատաշրջանային խարիսխներով                                      |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | AWS EventStream երկուական ձևաչափ → SSE փոխակերպում                                               |
-| `MuseSparkWebExecutor`    | Muse Spark (վեբ)                                                                                                                                             | Վեբ աշխատաշրջանի հակադարձ մշակում՝ պատկերային հաղորդագրությունների կամրջմամբ                     |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | Մատակարարին հատուկ հարցման մարմնի կառուցվածք                                                     |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | AI SDK-ի հետ համատեղելի մատակարարի կարգավորում                                                   |
-| `PerplexityWebExecutor`   | Perplexity վեբ                                                                                                                                               | Վեբ աշխատաշրջանի հակադարձ մշակում՝ զրույցի շարունակման համար                                     |
-| `PetalsExecutor`          | Petals բաշխված եզրահանգում                                                                                                                                   | Ապակենտրոնացված բազմության երթուղավորում                                                         |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                              | API բանալի չի պահանջվում, հաճախականությամբ սահմանափակված հարցումներ                              |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                     | PAT-ի և OAuth-ի աջակցություն, բազմամոդել անվճար մակարդակ                                         |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | Ծառայողական հաշվի նույնականացում, տարածաշրջանի վրա հիմնված վերջնակետեր                           |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | Ներմուծված API բանալի + Connect-protobuf զրույցի հոսքային փոխանցում                              |
+| Կատարող                   | Մատակարար(ներ)                                                                                                                                                  | Հատուկ բեռնաթափում                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, եւ այլն։ | Դինամիկ URL/header կազմաձևում յուրաքանչյուր մատակարարի համար                            |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                              | Պատվերով project/session IDs, Կրկնել-վերլուծությունից հետո, 429 մշուշում                |
+| `AzureOpenAIExecutor`     | Լազուր OpenAI                                                                                                                                                   | Տեղակայման վրա հիմնված երթուղղում, api-տարբերակի հարցումների կատարում                   |
+| `BlackboxWebExecutor`     | Blackbox AI (վեբ ռեժիմ)                                                                                                                                         | Վեբ-սեսիան հակադարձ է TLS մատնահետքի էմուլյացիայի միջոցով                               |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH ուղի)                                                                                                                                            | Սահմանափակել + գործիք-քարտեզ խողովակաշարերը, մատնահետքի ձևավորում                       |
+| `CliProxyApiExecutor`     | CLIProxyAPI-ի հետ համատեղելի մատակարարներ                                                                                                                       | Պատվերով վավերացման և արձանագրության մշակում                                            |
+| `CloudflareAiExecutor`    | Cloudflare Բանվորներ AI                                                                                                                                         | Հաշվի ID ներարկում, նեյրոնների վրա հիմնված օգտագործման հետևում                          |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                    | Ներարկում է համակարգի հրահանգները, ստիպում է բանական ջանքեր                             |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                             | Զննարկիչ-սեսիա Պատասխանում է API կամուրջը thread/turn ամրացմամբ                         |
+| `CommandCodeExecutor`     | Հրամանի կոդը                                                                                                                                                    | OAuth + յուրաքանչյուր նստաշրջանի վերնագրի ռոտացիա                                       |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                      | ConnectRPC արձանագրություն, Protobuf կոդավորում, հարցումի ստորագրում checksum-ի միջոցով |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                       | Devin առաջադրանքի կյանքի ցիկլի կամրջում ամպային գործակալի մոդուլի միջոցով               |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                  | Copilot նշանի թարմացում, VSCode-նմանող վերնագրեր                                        |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                      | GitLab OAuth + նախագծի շրջանակով երթուղղում                                             |
+| `GlmExecutor`             | Z.AI GLM (ներառյալ `glmt` նախադրվածը)                                                                                                                           | Մտածողություն-բյուջեի իմացություն, GLMT նախադրված հաստատուններ                          |
+| `GrokWebExecutor`         | xAI Grok վեբ                                                                                                                                                    | Վեբ նիստի հակադարձ ռեժիմ, ռեժիմի ընտրություն (think/standard)                           |
+| `KieExecutor`             | KIE                                                                                                                                                             | Պատվերով նշանի թողարկում պտտվող նստաշրջանի խարիսխներով                                  |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                          | AWS EventStream երկուական ձևաչափ → SSE փոխակերպում                                      |
+| `MuseSparkWebExecutor`    | Muse Spark (վեբ)                                                                                                                                                | Վեբ-սեսիան հակադարձվում է պատկեր-հաղորդագրությունների կամրջման միջոցով                  |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                       | Մատակարարի հատուկ հարցում մարմնի ձևը                                                    |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                        | AI SDK համատեղելի մատակարարի կարգավորում                                                |
+| `PerplexityWebExecutor`   | Շփոթության վեբ                                                                                                                                                  | Վեբ-սեսիան հակադարձ է՝ զրույցի շարունակության համար                                     |
+| `PetalsExecutor`          | Ծաղկաթերթերը բաշխեցին եզրակացություն                                                                                                                            | Ապակենտրոնացված երթուղի                                                                 |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                 | Ոչ մի API բանալի չի պահանջվում, հարցումները սահմանափակ են                               |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                        | PAT և OAuth աջակցություն, բազմամոդել անվճար մակարդակ                                    |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                                | Ծառայության հաշվի վավերացում, տարածաշրջանի վրա հիմնված վերջնակետեր                      |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                   | Ներմուծված API բանալին + Connect-protobuf զրույցի հոսք                                  |
 
-Մնացած բոլոր պրովայդերները (ներառյալ հատուկ համատեղելի հանգույցները) օգտագործում են `DefaultExecutor`-ը։
+Բոլոր մյուս մատակարարները (ներառյալ հարմարեցված համատեղելի հանգույցները) օգտագործում են `DefaultExecutor`:
+
+### Ավտոմատացված հետաքննություններ և վեբ նիստերի հաշիվներ
+
+Մոդելային թեստերը, Test All-ը, համակցված թեստերը և գնահատումները ուղարկում են իրական զրույցի հարցումներ: Վեբ նիստի մատակարարը հանդես է գալիս որպես մուտք գործած օգտատեր, ուստի այդ հարցումներից յուրաքանչյուրը կպահվի որպես խոսակցություն տվյալ հաշվի վրա. ավտոմատացված հետաքննությունները, որոնք թողել են նման խոսակցությունները, հաշիվը կասեցվել է (#14780): Հետևաբար, զրույցի խողովակաշարը մերժում է յուրաքանչյուր թիրախ, որին հասնում է ավտոմատացված հետաքննությունը, որի մատակարարը վերցնում է վեբ նիստի հավատարմագիրը, երբ թիրախի մատակարարը լուծված է և նախքան հավատարմագրի ընտրությունը (`src/lib/providers/chatProbePolicy.ts`): Մերժումը `422` է `error.code` `chat_probe_not_isolated` ով, և զոնդ վազողներն այն հայտնում են որպես բացթողում, ոչ թե ձախողում:
+
+Կատարողը, որը վարում է յուրաքանչյուր զրույց պրովայդերի սեփական առանց պատմության ռեժիմում, այն հայտարարում է `ChatProbeIsolatingExecutor` ով (`open-sse/executors/chatProbeIsolation.ts`); Այնուհետև թույլատրվում են հետաքննություններ կատարել այդ մատակարարին: ChatGPT Web-ը հայտարարում է `temporary-chat`: Հռչակագիրն ամրացրե՛ք դրա մեխանիզմին թեստով, այնպես որ հայցը չի կարող գերազանցել այն ճշմարիտ ծածկագիրը:
 
 ## Պրովայդերների համատեղելիության մատրիցա
 
@@ -1056,11 +1064,11 @@ flowchart LR
 - SQLite սխեմայի միգրացիաներ և գործարկման պահին ավտոմատ արդիականացման մշակիչներ
 - ժառանգական JSON → SQLite միգրացիայի համատեղելիության ուղի
 
-## 6) SSRF / Ելքային URL-ի պաշտպանություն
+## 6) SSRF / Արտագնա URL պահակ
 
-- `src/shared/network/outboundUrlGuard.ts`-ն արգելափակում է բոլոր մասնավոր/հետադարձ օղակի/link-local նպատակային URL-ները՝ նախքան դրանք մատակարարների կատարիչներին հասնելը
-- Մատակարարի մոդելի հայտնաբերման և վավերացման երթուղիներն օգտագործում են `src/shared/network/safeOutboundFetch.ts`, որը յուրաքանչյուր ելքային հարցումից առաջ կիրառում է պաշտպանությունը
-- Պաշտպանության սխալները ներկայացվում են որպես `URL_GUARD_BLOCKED`՝ HTTP 422 կարգավիճակով, և `providerAudit.ts`-ի միջոցով գրանցվում են համապատասխանության աուդիտի մատյանում
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) կիրառում է `src/shared/network/outboundUrlGuard.ts` `BaseExecutor.execute()` միջոցով ուղարկված զրույցի հարցումների համար: Միայն հանրային ռեժիմում (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` մասնավոր դրոշակով անջատված) այն արգելափակում է մասնավոր և շրջադարձային հոսթերները և 169.254.0.0/16; յուրաքանչյուր այլ ռեժիմում այն արգելափակում է ամպային մետատվյալների հոսթերը: Այն ստուգում է հյուրընկալողի անունը կամ IP բառացի, ինչպես գրված է, նախքան DNS որոնումը: Ներկառուցված տեղական մատակարարները բաց են թողնում այն:
+- Մատակարարի մոդելի հայտնաբերման և վավերացման երթուղիները օգտագործում են `src/shared/network/safeOutboundFetch.ts`, որը կիրառում է պահակախումբը յուրաքանչյուր ելքային հարցումից առաջ
+- Պահակային սխալները հայտնվում են որպես `URL_GUARD_BLOCKED` HTTP 503-ով (`getSafeOutboundFetchErrorStatus`; մոդելի հայտնաբերման երթուղին վերադարձնում է 400), իսկ վավերացման ընթացքում իսկական SSRF բլոկները գրանցվում են աուդիտի հետքերում՝ որպես `provider.validation.ssrf_blocked` իրադարձություններ:
 
 ## Դիտարկելիություն և գործառնական ազդանշաններ
 

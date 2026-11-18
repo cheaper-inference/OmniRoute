@@ -18,7 +18,7 @@ const museCredentials = {
 
 test("muse-code Responses models with a stored baseUrl route to /responses", () => {
   const executor = new DefaultExecutor("muse-code");
-  for (const model of ["muse-spark-1.3", "muse-spark-1.2-contributor", "llama-4-maverick"]) {
+  for (const model of ["muse-spark-1.3", "muse-spark-1.2-contributor", "muse-wonder-1.0"]) {
     assert.equal(
       executor.buildUrl(model, true, 0, museCredentials),
       "https://api.meta.ai/v1/responses",

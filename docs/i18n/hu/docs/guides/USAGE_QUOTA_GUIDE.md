@@ -38,31 +38,31 @@ Kérés ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Milyen adatok kerülnek rögzítésre
+## Mi kerül rögzítésre?
 
 A `usage.ts` szolgáltatás minden kéréshez rögzít egy **használati eseményt**:
 
-| Mező               | Típus   | Forrás                                                               |
-| ------------------ | ------- | -------------------------------------------------------------------- |
-| `id`               | string  | A rekord létrehozásakor generált UUID                                |
-| `apiKeyId`         | string  | A kérést kezdeményező API-kulcs                                      |
-| `provider`         | string  | Szolgáltatóazonosító (openai, anthropic stb.)                        |
-| `model`            | string  | Modellazonosító (gpt-5, claude-opus-4-6 stb.)                        |
-| `comboId`          | string? | Kombinációazonosító, ha az útválasztás kombináción át történt        |
-| `promptTokens`     | number  | A külső szolgáltató válaszából                                       |
-| `completionTokens` | number  | A külső szolgáltató válaszából                                       |
-| `cachedTokens`     | number  | Gyorsítótár-találati tokenek (Anthropic prompt-gyorsítótárazás stb.) |
-| `totalTokens`      | number  | prompt + válasz                                                      |
-| `costUsd`          | number  | Az árazási adatokból kiszámítva                                      |
-| `latencyMs`        | number  | A kérés teljes, elejétől végéig mért időtartama                      |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`           |
-| `errorClass`       | string? | Hibaosztály, ha az állapot != success                                |
-| `timestamp`        | string  | ISO 8601 UTC                                                         |
-| `metadata`         | object  | Beépülő modul által hozzáadott egyéni adatok                         |
+| Mező               | Típus   | Forrás                                                                        |
+| ------------------ | ------- | ----------------------------------------------------------------------------- |
+| `id`               | string  | A rögzítéskor generált UUID                                                   |
+| `apiKeyId`         | string  | A kérést kezdeményező API-kulcs                                               |
+| `provider`         | string  | Szolgáltatóazonosító (openai, anthropic stb.)                                 |
+| `model`            | string  | Modellazonosító (gpt-5, claude-opus-4-6 stb.)                                 |
+| `comboId`          | string? | Kombóazonosító, ha az útválasztás kombón keresztül történt                    |
+| `promptTokens`     | number  | A háttérszolgáltató válaszából                                                |
+| `completionTokens` | number  | A háttérszolgáltató válaszából                                                |
+| `cachedTokens`     | number  | Gyorsítótár-találathoz tartozó tokenek (Anthropic promptgyorsítótárazás stb.) |
+| `totalTokens`      | number  | Prompt + kiegészítés                                                          |
+| `costUsd`          | number  | Díjszabási adatokból számítva                                                 |
+| `latencyMs`        | number  | A kérés teljes, végpontok közötti időtartama                                  |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                    |
+| `errorClass`       | string? | Hibaosztály, ha az állapot nem success                                        |
+| `timestamp`        | string  | ISO 8601 UTC                                                                  |
+| `metadata`         | object  | Bővítmény által beillesztett egyéni adatok                                    |
 
-### Honnan származnak a tokenek
+### Honnan származnak a tokenek?
 
-A tokenek kinyerése a külső szolgáltató válaszából, a **válaszkezelőben** történik:
+A tokeneket a **válaszkezelő** nyeri ki a háttérszolgáltató válaszából:
 
 ```ts
 // Az open-sse/handlers/chatCore.ts fájlból
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Azoknál a szolgáltatóknál, amelyek nem adnak vissza használati adatokat (például egyes webes cookie-alapú szolgáltatók), az OmniRoute egy `~4 karakter tokenenként` heurisztikával **becsüli meg** a tokenek számát (lásd: `open-sse/services/autoCombo/pipelineRouter.ts`).
+Azoknál a szolgáltatóknál, amelyek nem adnak vissza használati adatokat (egyes webes sütiket használó szolgáltatók), az OmniRoute a `~4 chars per token` heurisztikával **becsüli meg** a tokenek számát (lásd: `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Gyorsítótárazott tokenek
 
-Az OmniRoute a `cached_tokens` értékét a `prompt_tokens` értékétől elkülönítve követi nyomon, mert:
+Az OmniRoute a `cached_tokens` értékét a `prompt_tokens` értékétől elkülönítve követi, mert:
 
-- Az Anthropic prompt-gyorsítótárazása kedvezményes díjat számít fel a gyorsítótárazott tokenekért (a normál díj 10%-át)
-- Egyes szolgáltatók `cache_read_input_tokens` értéket adnak vissza, amelyet eltérően kell árazni
+- Az Anthropic promptgyorsítótárazása kedvezményes díjat számít fel a gyorsítótárazott tokenekre (a normál díj 10%-át)
+- Egyes szolgáltatók `cache_read_input_tokens` értéket adnak vissza, amelyre eltérő díjszabást kell alkalmazni
 - Az analitika megjelenítheti a **gyorsítótár-találati arányt** = `cached_tokens / prompt_tokens`
+
+### A gyorsítótár-írási szintek diagnosztikája
+
+Az analitikai irányítópult promptgyorsítótár-állapotpanelje megkülönbözteti a szolgáltató által jelentett
+5 perces és 1 órás gyorsítótár-írásokat. Az Anthropic
+`usage.cache_creation.ephemeral_5m_input_tokens` és
+`usage.cache_creation.ephemeral_1h_input_tokens` értékei megmaradnak a streamelt és
+nem streamelt használati adatok átalakítása során, és a hívásnapló összesítéseivel együtt tárolódnak. Az összesített
+gyorsítótár-írási végösszeg nem adódik hozzá másodszor is ezekhez a kategóriákhoz.
+
+Azok a hívások, amelyekhez csak összesített írási számláló tartozik, beleértve a régebbi rekordokat is, ismeretlen
+szintűnek minősülnek. Részleges bontás esetén a besorolatlan maradék ismeretlen marad; az érvénytelen vagy
+ellentmondó számlálók jelölést kapnak ahelyett, hogy a rendszer észrevétlenül TTL-t rendelne hozzájuk. A kérésoldali
+TTL-jelölők nem bizonyítják a számlázott szintet.
+
+A panel API-egyenértékű írási becslése csak a jelentett, díjszabással rendelkező szintekre terjed ki, nem
+a teljes kérésre. Natív Claude/Anthropic modelldíjszabás esetén az 5 perces írásokhoz
+a bemeneti díj 1,25-szörösét, az 1 órás írásokhoz pedig annak kétszeresét használja. Hiányzó
+díjszabás esetén az érték nem érhető el, nem pedig nulla. Az árakat minden új hívás naplózásakor rögzíti a rendszer;
+a korábbi rekordok árazását nem számítja újra. Az előfizetéses fiókokhoz ezért tartozhat
+API-egyenértékű becslés anélkül, hogy az összeg tényleges pénzkiadásként vagy az előfizetési
+kvóta terhére jelentkezne. A meglévő kvóta-, költségkeret- és szolgáltatóspecifikusan pontos költségszámítások változatlanok maradnak.
+
+Ezek a diagnosztikai adatok a meglévő, korlátozott méretű gyorsítótár-állapotösszesítést és a hívásnapló
+megőrzési szabályait használják. Nem módosítják a kérések alapértelmezett TTL-értékeit, az útválasztást vagy a fiókválasztást.
+A kliens által kért és a ténylegesen kiküldött TTL rögzítése a szolgáltatónak történő küldés
+határán későbbre marad; ez a panel a visszaigazolt szinteket jelenti, nem a ténylegesen kiküldött TTL-t.
+
+Megvalósítás: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` és `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ Az árképzési adatokkal nem rendelkező modellek esetén az OmniRoute belső �
 
 ## Dátumtartomány szerinti összesítés
 
-A `usageAnalytics.ts` modul a nyers használati adatokból számítja ki az irányítópult elemeit. Hét időtartományt támogat:
+A `usageAnalytics.ts` modul nyers használati adatokból számítja ki az irányítópult widgetjeinek adatait. 7 időtartományt támogat:
 
-| Tartomány | Időablak                              | Felhasználási eset                   |
-| --------- | ------------------------------------- | ------------------------------------ |
-| `1d`      | Az elmúlt 24 óra                      | Óránkénti költségcsúcsok észlelése   |
-| `7d`      | Az elmúlt 7 nap                       | Heti áttekintés                      |
-| `30d`     | Az elmúlt 30 nap                      | Havi számlázás                       |
-| `90d`     | Az elmúlt 90 nap                      | Negyedéves elemzés                   |
-| `ytd`     | A tárgyév január 1-jétől              | Az éves költségvetés nyomon követése |
-| `all`     | A teljes időszak                      | Összesített statisztikák             |
-| `custom`  | Felhasználó által megadott kezdet/vég | Auditok, eseti lekérdezések          |
+| Tartomány | Időablak                                       | Felhasználási eset                         |
+| --------- | ---------------------------------------------- | ------------------------------------------ |
+| `1d`      | Az elmúlt 24 óra                               | Óránkénti költségkiugrások észlelése       |
+| `7d`      | Az elmúlt 7 nap                                | Heti áttekintés                            |
+| `30d`     | Az elmúlt 30 nap                               | Havi számlázás                             |
+| `90d`     | Az elmúlt 90 nap                               | Negyedéves elemzés                         |
+| `ytd`     | A folyó év január 1-jétől                      | Éves költségkeret követése                 |
+| `all`     | A teljes időszak                               | Teljes élettartamra vonatkozó statisztikák |
+| `custom`  | Felhasználó által megadott kezdő- és záródátum | Auditok, eseti lekérdezések                |
 
-### Az irányítópulton kiszámított elemek
+### Az irányítópult kiszámított widgetjei
 
-Az elemzési réteg minden dátumtartományhoz a következőket számítja ki:
+Az analitikai réteg bármely dátumtartományra kiszámítja a következőket:
 
-| Elem                             | Leírás                                                          |
-| -------------------------------- | --------------------------------------------------------------- |
-| **Összefoglaló kártyák**         | Kérések száma, teljes költség, tokenek száma, sikerességi arány |
-| **Napi trenddiagram**            | Napi költség és tokenszám, modellenként rétegezve               |
-| **Aktivitási hőtérkép**          | Napszak × hét napja rács, szín = kérések száma                  |
-| **Modellek szerinti bontás**     | A költség modellenkénti megoszlását ábrázoló kördiagram         |
-| **Szolgáltatók szerinti bontás** | A kérések szolgáltatónkénti megoszlását ábrázoló oszlopdiagram  |
-| **Legfontosabb API-kulcsok**     | A 10 legnagyobb költségű kulcs táblázata                        |
-| **Hibaelemzés**                  | Hibaarány időbeli alakulása, leggyakoribb hibaosztályok         |
+| Widget                              | Leírás                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
+| **Összesítő kártyák**               | Kérések teljes száma, teljes költség, tokenek teljes száma, sikerességi arány |
+| **Napi trenddiagram**               | Napi költség és tokenszám, modellenként halmozva                              |
+| **Aktivitási hőtérkép**             | Napszak × a hét napja rács, szín = kérések száma                              |
+| **Modellenkénti bontás**            | A költségek modellenkénti kördiagramja                                        |
+| **Szolgáltatónkénti bontás**        | A kérések szolgáltatónkénti oszlopdiagramja                                   |
+| **Legnagyobb költségű API-kulcsok** | A 10 legnagyobb költségű kulcs táblázata                                      |
+| **Hibaelemzés**                     | Hibaarány időbeli alakulása, leggyakoribb hibaosztályok                       |
 
 ### Programozott hozzáférés
 
@@ -155,7 +185,7 @@ Az elemzési réteg minden dátumtartományhoz a következőket számítja ki:
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // használati előzmények rekordjai
+  history,              // használati előzményrekordok
   "7d",                 // időtartomány: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // szolgáltatói kapcsolatok leképezése (connectionId → fióknév)
   {
@@ -169,12 +199,12 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Kvótakorlátozás
+## Kvóták érvényesítése
 
-Az API-kulcsonkénti kvóta betartatása két helyen történik:
+Az API-kulcsonkénti kvóta érvényesítése két helyen történik:
 
-1. **Puha korlát** (`quotaWarnAt`): figyelmeztetés az irányítópulton, amikor a használat meghaladja a küszöbértéket
-2. **Kemény korlát** (`quotaLimit`): a kérés HTTP 429-es válasszal elutasításra kerül a korlát túllépésekor
+1. **Figyelmeztetési korlát** (`quotaWarnAt`): figyelmeztetés az irányítópulton, ha a használat túllépi a küszöbértéket
+2. **Szigorú korlát** (`quotaLimit`): túllépés esetén a kérés elutasítása HTTP 429 válasszal
 
 ### Konfiguráció
 
@@ -182,38 +212,38 @@ Az API-kulcsonkénti kvóta betartatása két helyen történik:
 // API-kulcsonként
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — figyelmeztetés megjelenítése
-  quotaLimit: 10_00,    // $10.00 — kemény leállítás
+  quotaLimit: 10_00,    // $10.00 — szigorú leállítás
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Korlátozási folyamat
+### Az érvényesítés folyamata
 
 ```
-Kérés ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Korláton belül?  ──▶ engedélyezés
+              ├── Within limit?  ──▶ allow
               │
-              └── Korlát felett?  ──▶ 429 Túl sok kérés
-                                      Retry-After fejléccel
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
 ### Kvótapillanatképek
 
-A `quotaSnapshots` tábla a **kvóta előzményállapotát** tárolja a trendelemzéshez:
+A `quotaSnapshots` tábla **korábbi kvótaállapotokat** tárol trendelemzéshez:
 
 | Mező | Leírás |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | A nyomon követett kulcs |
 | `window` | "day" | "week" | "month" |
-| `used` | Az ebben az időablakban felhasznált költség (centben) |
-| `limit` | A korlát (centben) |
-| `resetAt` | Az időablak visszaállításának időpontja |
+| `used` | Az ebben az időablakban felhasznált költség (cent) |
+| `limit` | A korlát (cent) |
+| `resetAt` | Az időablak alaphelyzetbe állításának időpontja |
 | `createdAt` | A pillanatkép készítésének időpontja |
 
-Pillanatkép készül **minden olyan kérésnél**, amelynek költsége > 0, és ezek a következőkre használhatók:
+Pillanatkép készül **minden olyan kérésnél**, amelynek költsége > 0, és ezek a következőkre szolgálnak:
 
-- A kvóta folyamatjelzőjének megjelenítése az irányítópulton
+- A kvóta folyamatjelző sávjának megjelenítése az irányítópulton
 - 30 napos kvótatrend-diagramok megjelenítése
 - Riasztások kiváltása, amikor a használat megközelíti a korlátot
 
@@ -253,7 +283,7 @@ Válasz:
 }
 ```
 
-### Analitikai összefoglaló lekérése
+### Analitikai összesítés lekérése
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Válasz:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,24 +313,24 @@ Válasz:
 
 ### Használati analitika lekérdezése
 
-A használati adatok az irányítópulton vagy MCP-eszközökön keresztül érhetők el, nem pedig közvetlen REST-exportálási végpontokon. Az elérhető analitikák:
+A használati adatok az irányítópulton vagy MCP-eszközökön keresztül érhetők el, nem közvetlen REST-exportvégpontokon. Elérhető analitikai funkciók:
 
-- **`/api/usage/analytics`** — összesített használati mérőszámok (csoportosítás modell, szolgáltató vagy kulcs szerint)
-- **`/api/usage/quota`** — az egyes API-kulcsok aktuális kvótaállapota
-- **`/api/usage/history`** — kéréselőzmény-naplók
+- **`/api/usage/analytics`** — összesített használati mutatók (csoportosítás modell, szolgáltató vagy kulcs szerint)
+- **`/api/usage/quota`** — aktuális kvótaállapot API-kulcsonként
+- **`/api/usage/history`** — kérések előzménynaplói
 
 ---
 
 ## MCP-eszközök
 
-Két MCP-eszköz teszi elérhetővé a használati adatokat az ügynökök számára (lásd: `open-sse/mcp-server/tools/`):
+Két MCP-eszköz teszi elérhetővé a használati adatokat az ágensek számára (lásd: `open-sse/mcp-server/tools/`):
 
 | Eszköz                  | Leírás                                                   |
 | ----------------------- | -------------------------------------------------------- |
 | `omniroute_cost_report` | Kulcsonkénti költségjelentést készít egy adott időszakra |
 | `omniroute_check_quota` | Visszaadja egy API-kulcs aktuális kvótaállapotát         |
 
-Példa ügynökhívásra:
+Példa ágens általi meghívásra:
 
 ```json
 {
@@ -318,38 +343,38 @@ Példa ügynökhívásra:
 
 ## Megőrzés és tisztítás
 
-A használati adatok kéréseként ~1–10 KB-tal növekednek. Nagy léptékben ez jelentős lehet.
+A használati adatok mérete kérésenként ~1-10KB-tal nő. Nagy terhelés mellett ez jelentős mennyiség lehet.
 
 ### Megőrzési beállítások
 
-A használati előzmények megőrzése a felhasználói felület Adatbázis-beállításaiban vagy a `/api/settings/database` végponton keresztül konfigurálható.
+A használati előzmények megőrzése a felhasználói felület adatbázis-beállításaiban vagy a `/api/settings/database` végponton keresztül konfigurálható.
 
 Alapértelmezés szerint a használati előzményeket **90 napig** őrzi meg a rendszer.
 
 ### Tisztítás
 
-A régi rekordokat a `src/lib/db/cleanup.ts` tisztítja:
+A régi rekordok törlését a `src/lib/db/cleanup.ts` végzi:
 
-- A háttérben futó cron-folyamat indítja el
-- Törli a `usage_history` táblából a konfigurált `usageHistory` megőrzési időnél régebbi rekordokat
+- A háttérben futó cron folyamat indítja el
+- Törli a `usage_history` azon rekordjait, amelyek régebbiek a konfigurált `usageHistory` megőrzési beállításnál
 
 ### Tárhelyigény becslése
 
 | Kérések gyakorisága | 30 napos tárhelyigény | 90 napos tárhelyigény |
 | ------------------- | --------------------- | --------------------- |
-| 100 kérés/nap       | ~3 MB                 | ~9 MB                 |
-| 1 000 kérés/nap     | ~30 MB                | ~90 MB                |
-| 10 000 kérés/nap    | ~300 MB               | ~900 MB               |
-| 100 000 kérés/nap   | ~3 GB                 | ~9 GB                 |
+| 100 kérés/nap       | ~3MB                  | ~9MB                  |
+| 1 000 kérés/nap     | ~30MB                 | ~90MB                 |
+| 10 000 kérés/nap    | ~300MB                | ~900MB                |
+| 100 000 kérés/nap   | ~3GB                  | ~9GB                  |
 
-Nagyon nagy forgalom esetén fontolja meg a következőket:
+Nagyon nagy forgalom esetén érdemes megfontolni:
 
-- A megőrzési idő csökkentése az Adatbázis-beállításokban
-- Az `aggregated_metrics` használata a nyers rekordok helyett (csak elemzési célokra)
+- A megőrzési idő csökkentését az adatbázis-beállításokban
+- Az `aggregated_metrics` használatát a nyers rekordok helyett (csak analitikai célokra)
 
 ---
 
-## Költségoptimalizálási tippek
+## Tippek a költségek optimalizálásához
 
 ### 1. Használja a megfelelő modellt
 
@@ -357,26 +382,26 @@ Nagyon nagy forgalom esetén fontolja meg a következőket:
 # Gyors válasz — használjon olcsó és gyors modellt
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Összetett feladat — használjon minőségi modellt
+# Összetett feladat — válassza a minőséget
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Engedélyezze a gyorsítótárazást
 
-Az Anthropic prompt-gyorsítótárazása **90%-os megtakarítást biztosít az ismétlődő kontextusoknál**:
+Az Anthropic promptgyorsítótárazása **90%-os megtakarítást biztosít ismétlődő kontextus esetén**:
 
 ```ts
-// A gyorsítótárazás automatikus — csak használja ugyanazt a nagy rendszerpromptot
+// A gyorsítótárazás automatikus — csak adja meg ugyanazt a nagy rendszerpromptot
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Automatikusan gyorsítótárazásra kerül
+  system: longSystemPrompt, // Automatikusan gyorsítótárazva lesz
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Használjon tömörítést
 
-Az RTK + Caveman tömörítés **15–95%-os megtakarítást biztosít az eszközigényes munkameneteknél**:
+Az RTK + Caveman tömörítés **15-95%-os megtakarítást biztosít intenzív eszközhasználattal járó munkamenetekben**:
 
 ```ts
 const config = {
@@ -389,15 +414,15 @@ const config = {
 
 ### 4. Állítson be kulcsonkénti kvótákat
 
-Az elszabaduló költségek megelőzése érdekében mindig állítsa be a `quotaLimit` értékét:
+Mindig állítsa be a `quotaLimit` értékét az elszabaduló költségek elkerülése érdekében:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Havi 10 dolláros korlát
 ```
 
-### 5. Ellenőrizze a legnagyobb fogyasztókat
+### 5. Vizsgálja meg a legnagyobb fogyasztókat
 
-A vezérlőpult vagy a **`/api/usage/analytics`** segítségével csoportosítsa az adatokat API-kulcs szerint, majd rendezze őket költség alapján:
+Az irányítópult vagy a **`/api/usage/analytics`** segítségével csoportosítson API-kulcs szerint, és rendezzen költség szerint:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Hibaelhárítás
 
-### „A költség magasabb a vártnál”
+### "A költség magasabb a vártnál"
 
-1. Ellenőrizze a **`/api/usage/analytics?groupBy=model`** végpontot — keresse meg a költséges modellt
+1. Ellenőrizze a **`/api/usage/analytics?groupBy=model`** végpontot — keresse meg a drága modellt
 2. Ellenőrizze a **`/api/usage/analytics?groupBy=apiKey`** végpontot — keresse meg a nagy fogyasztót
 3. Ellenőrizze, hogy az árazási adatok naprakészek-e: `POST /api/pricing/sync`
 
-### „Hiányzó rekordok”
+### "Hiányzó rekordok"
 
-- Ellenőrizze az adatbázis megőrzési beállításait a Vezérlőpult → Adatbázis → Tisztítás menüpont alatt — a régi rekordokat az időszakos tisztítási feladat (`src/lib/db/cleanup.ts`) törli
-- Ellenőrizze a hibákat a `src/lib/db/usage*.ts` fájlokban — az adatbázis-írási hibákat a rendszer naplózza, de nem jeleníti meg
-- Ellenőrizze, hogy a kérés valóban elérte-e a `chatCore` komponenst — ellenőrizze a kombinált útválasztást
+- Ellenőrizze az adatbázis megőrzési beállításait az Irányítópult → Adatbázis → Tisztítás menüpontban — a régi rekordokat az időszakos tisztítási feladat törli (`src/lib/db/cleanup.ts`)
+- Ellenőrizze, vannak-e hibák a `src/lib/db/usage*.ts` fájlokban — az adatbázis-írási hibák naplózásra kerülnek, de nem jelennek meg a felhasználónak
+- Ellenőrizze, hogy a kérés valóban eljutott-e a `chatCore` függvényhez — ellenőrizze a kombinációs útválasztást
 
-### „A kvóta nincs kikényszerítve”
+### "A kvóta nincs érvényesítve"
 
 - Ellenőrizze a kulcs `quotaLimit` beállítását
 - Ellenőrizze, hogy a `quotaWindow` megfelelően van-e beállítva
-- Keresse meg a `quotaSnapshots` rekordokat — minden kérésnél létre kell jönniük
+- Keressen `quotaSnapshots` rekordokat — ezeknek minden kérésnél létre kell jönniük
 
 ---
 
 ## Lásd még
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — A használati táblák sémája
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Az árazásszinkronizálás környezeti változói
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Hogyan csökkenti az `auto/fast` és az `auto/cheap` a költségeket
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — A `/api/usage/*` teljes referenciája
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Az árazás szinkronizálásának környezeti változói
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Hogyan csökkenti a költségeket az `auto/fast` és az `auto/cheap`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Teljes `/api/usage/*` referencia
 - Forrás: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

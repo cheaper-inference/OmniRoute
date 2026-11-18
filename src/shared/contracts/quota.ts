@@ -6,7 +6,8 @@ export interface QuotaProviderEntry {
   connectionId: string;
   quotaUsed: number;
   quotaTotal: number | null;
-  percentRemaining: number;
+  /** `null` when no quota signal exists (unknown, not "100% remaining"). */
+  percentRemaining: number | null;
   resetAt: string | null;
   tokenStatus: QuotaTokenStatus;
 }
@@ -63,15 +64,13 @@ export function sanitizeQuotaProvider(input: unknown): QuotaProviderEntry {
   const quotaUsed =
     quotaTotal !== null ? clamp(quotaUsedRaw, 0, quotaTotal) : Math.max(0, quotaUsedRaw);
 
+  // An absent total is not proof of full capacity: without an explicit percentage
+  // or a positive total to derive one from, the remaining share is unknown (#18745).
   let percentRemainingRaw = toNumber(source.percentRemaining);
-  if (percentRemainingRaw === null) {
-    if (quotaTotal && quotaTotal > 0) {
-      percentRemainingRaw = ((quotaTotal - quotaUsed) / quotaTotal) * 100;
-    } else {
-      percentRemainingRaw = 100;
-    }
+  if (percentRemainingRaw === null && quotaTotal !== null && quotaTotal > 0) {
+    percentRemainingRaw = ((quotaTotal - quotaUsed) / quotaTotal) * 100;
   }
-  const percentRemaining = clamp(percentRemainingRaw, 0, 100);
+  const percentRemaining = percentRemainingRaw === null ? null : clamp(percentRemainingRaw, 0, 100);
 
   const resetAt =
     typeof source.resetAt === "string" && source.resetAt.trim() ? source.resetAt : null;

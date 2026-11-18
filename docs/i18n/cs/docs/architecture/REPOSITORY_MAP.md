@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Soubory v kořenovém adresáři
+## Kořenové soubory
 
-| Soubor                                      | Účel                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **README.md**                               | Marketingová vstupní stránka + rychlý start + matice funkcí (viz také `llm.txt`)                       |
-| **CHANGELOG.md**                            | Přehled změn pro jednotlivá vydání (automaticky generovaný pomocí dovednosti `/version-bump-cc`)       |
-| **LICENSE**                                 | Text licence MIT                                                                                       |
-| **CLAUDE.md**                               | Pravidla projektu pro agenty Claude Code (pevná pravidla, konvence, scénáře)                           |
-| **AGENTS.md**                               | Totéž jako CLAUDE.md, ale pro AI agenty jiné než Claude (Codex, Cursor atd.)                           |
-| **GEMINI.md**                               | Stručná pravidla pro agenty založené na Gemini (podmnožina CLAUDE.md)                                  |
-| **CONTRIBUTING.md**                         | Příručka pro přispěvatele: nastavení, konvenční commity, testování, postup PR                          |
-| **SECURITY.md**                             | Zásady hlášení zranitelností, podporované verze, model hrozeb                                          |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — očekávání ohledně chování v komunitě                                            |
-| **llm.txt**                                 | Textová vstupní stránka optimalizovaná pro crawlery LLM (SEO pro AI asistenty)                         |
-| **package.json**                            | Manifest npm, skripty, závislosti, běhová prostředí, limit pokrytí c8                                  |
-| **package-lock.json**                       | Uzamčený strom závislostí                                                                              |
-| **tsconfig.json**                           | Kořenová konfigurace TypeScriptu                                                                       |
-| **tsconfig.typecheck-core.json**            | Konfigurace kontroly typů pro jádro `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | Striktní kontrola typů (`noImplicitAny`)                                                               |
-| **tsconfig.tsbuildinfo**                    | Mezipaměť inkrementálního sestavení TS (ignorovaná Gitem)                                              |
-| **next.config.mjs**                         | Konfigurace sestavení Next.js 16 (samostatný výstup)                                                   |
-| **next-env.d.ts**                           | Automaticky generované typy prostředí Next.js                                                          |
-| **eslint.config.mjs**                       | Plochá konfigurace ESLint (pravidla pro jednotlivé oblasti projektu)                                   |
-| **prettier.config.mjs**                     | Pravidla formátování Prettier                                                                          |
-| **postcss.config.mjs**                      | Konfigurace PostCSS pro pipeline Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Konfigurace E2E testů Playwright                                                                       |
-| **vitest.config.ts**                        | Konfigurace Vitest (výchozí sada)                                                                      |
-| **vitest.mcp.config.ts**                    | Konfigurace Vitest pro server MCP / sady autoCombo / mezipaměti                                        |
-| **sonar-project.properties**                | Konfigurace SonarQube/SonarCloud (kvalita kódu)                                                        |
-| **Dockerfile**                              | Vícefázové sestavení Dockeru (builder → runner-base → runner-cli)                                      |
-| **docker-compose.yml**                      | Vývojová konfigurace Compose se 4 profily (base, cli, host, cliproxyapi) + pomocný kontejner Redis     |
-| **docker-compose.prod.yml**                 | Produkční konfigurace Compose (port 20130, Redis, pojmenované svazky)                                  |
-| **.dockerignore**                           | Soubory vyloučené z kontextu Dockeru                                                                   |
-| **fly.toml**                                | Konfigurace nasazení Fly.io (oblast `sin`, port 20128, svazek /data)                                   |
-| **.env.example**                            | Šablona souboru prostředí (při první instalaci automaticky zkopírovaná do `.env`)                      |
-| **.gitignore**                              | Vzory ignorovaných souborů Gitu                                                                        |
-| **.npmignore**                              | Seznam souborů vyloučených při publikování npm                                                         |
-| **.npmrc**                                  | Konfigurace npm (registr, zásady souboru lockfile)                                                     |
-| **.node-version**                           | Připnutí verze Node (používané nástroji kompatibilními s nvm)                                          |
-| **.nvmrc**                                  | Připnutí verze Node pro nvm                                                                            |
-| **eslint.complexity.config.mjs**            | Konfigurace ESLint pro postupné zpřísňování složitosti (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Konfigurace ESLint pro pravidla SonarJS (kognitivní složitost / duplicita)                             |
-| **source.config.ts**                        | Konfigurace zdroje Fumadocs `defineDocs` (napájí `.source/`)                                           |
-| **knip.json**                               | Konfigurace Knip — nepoužité soubory/exporty/závislosti (podklad pro kontrolu mrtvého kódu)            |
-| **stryker.conf.json**                       | Konfigurace mutačního testování Stryker                                                                |
-| **.size-limit.json**                        | Konfigurace limitu velikosti balíčku size-limit                                                        |
-| **promptfooconfig.yaml**                    | Konfigurace vyhodnocování promptfoo                                                                    |
-| **.gitleaks.toml**                          | Sada pravidel gitleaks pro kontrolu tajných údajů                                                      |
-| **.zizmor.yml**                             | Konfigurace bezpečnostní kontroly GitHub Actions pomocí zizmor                                         |
-| **socket.yml**                              | Konfigurace zabezpečení dodavatelského řetězce Socket.dev                                              |
-| **news.json**                               | Lokalizovaný kanál oznámení v2; položka o spuštění Radaru je dodávána jako neaktivní                   |
-| **flake.nix** / **flake.lock**              | Definice vývojového shellu Nix + zámek                                                                 |
-| **.env**                                    | Místní tajné údaje (ignorováno systémem git — generováno z `.env.example`)                             |
+| Soubor                                      | Účel                                                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | Marketingová vstupní stránka + rychlý start matice funkcí + (viz také `llm.txt`)               |
+| **CHANGELOG.md**                            | Protokol změn podle vydání (automaticky generovaný dovedností `/version-bump-cc` )             |
+| **LICENSE**                                 | text licence MIT                                                                               |
+| **CLAUDE.md**                               | Pravidla projektu pro agenty kódu Claude (pevná pravidla, konvence, scénáře)                   |
+| **AGENTS.md**                               | Stejné jako CLAUDE.md, ale pro jiné agenty AI než Claude (Codex, Cursor atd.)                  |
+| **GEMINI.md**                               | Stručná pravidla pro agenty založené na Gemini (podmnožina CLAUDE.md)                          |
+| **CONTRIBUTING.md**                         | Průvodce pro přispěvatele: nastavení, konvenční odevzdání, testování, tok PR                   |
+| **SECURITY.md**                             | Zásady hlášení zranitelnosti, podporované verze, model hrozeb                                  |
+| **CODE_OF_CONDUCT.md**                      | Přispěvatel Covenant — očekávání chování komunity                                              |
+| **llm.txt**                                 | Přistání ve formátu prostého textu optimalizované pro prohledávače LLM (SEO pro asistenty AI ) |
+| **package.json**                            | manifest npm, skripty, závislosti, motory, brána pokrytí c8                                    |
+| **package-lock.json**                       | Uzamčený strom závislostí                                                                      |
+| **tsconfig.json**                           | Kořenová konfigurace TypeScript                                                                |
+| **tsconfig.typecheck-core.json**            | Konfigurace kontroly typu pro jádro `src/`                                                     |
+| **tsconfig.typecheck-noimplicit-core.json** | Přísná (`noImplicitAny`) typová kontrola                                                       |
+| **tsconfig.tsbuildinfo**                    | TS mezipaměť přírůstkového sestavení (gitignorováno)                                           |
+| **další.config.mjs**                        | Konfigurace sestavení Next.js 16 (samostatný výstup)                                           |
+| **next-env.d.ts**                           | automaticky generované typy env Next.js                                                        |
+| **eslint.config.mjs**                       | ESLint flat config (pravidla pro oblast projektu)                                              |
+| **hezčí.config.mjs**                        | pravidla formátování Prettier                                                                  |
+| **postcss.config.mjs**                      | Konfigurace PostCSS pro potrubí Tailwind/CSS                                                   |
+| **dramatik.config.ts**                      | testovací konfigurace Playwright E2E                                                           |
+| **vitest.config.ts**                        | konfigurace Vitest (výchozí sada)                                                              |
+| **vitest.mcp.config.ts**                    | Konfigurace Vitest pro sady MCP server / autoCombo / cache                                     |
+| **sonar-projekt.vlastnosti**                | SonarQube/SonarCloud config (kvalita kódu)                                                     |
+| **Dockerfile**                              | Vícefázové sestavení Docker (tvůrce → runner-base → runner-cli)                                |
+| **docker-compose.yml**                      | Vývojář se skládá ze 4 profilů (base, cli, host, cliproxyapi) + redis sidecar                  |
+| **docker-compose.prod.yml**                 | Skládání produkce (port 20130, redis, pojmenované svazky)                                      |
+| **.dockerignore**                           | Soubory vyloučené z kontextu Docker                                                            |
+| **fly.toml**                                | Konfigurace nasazení Fly.io (region `sin`, port 20128, /objem dat)                             |
+| **.env.příklad**                            | Soubor env šablony (automaticky zkopírován do `.env` při první instalaci)                      |
+| **.gitignore**                              | Git ignoruje vzory                                                                             |
+| **.npmignore**                              | npm zveřejnit seznam vyloučení                                                                 |
+| **.npmrc**                                  | npm config (registr, zásada lockfile)                                                          |
+| **.uzel-verze**                             | Pin verze uzlu (používaný nástroji kompatibilními s nvm)                                       |
+| **.nvmrc**                                  | Pin verze uzlu pro nvm                                                                         |
+| **eslint.složitost.config.mjs**             | ESLint config pro složitost ratchet (`scripts/check/check-complexity.mjs --config`)            |
+| **eslint.sonarjs.config.mjs**               | konfigurace ESLint pro pravidla SonarJS (kognitivní složitost / duplikace)                     |
+| **zdroj.config.ts**                         | Zdrojová konfigurace Fumadocs `defineDocs` (zdroje `.source/`)                                 |
+| **knip.json**                               | Knip config — unused files/exports/deps (napájení brány mrtvého kódu)                          |
+| **stryker.conf.mjs**                        | Konfigurace pro testování mutace Stryker (počítá `tap.testFiles` ze `mutate`)                  |
+| **.size-limit.json**                        | velikost-limit bundle budget config                                                            |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                          |
+| **.gitleaks.toml**                          | sada pravidel tajného skenování gitleaks                                                       |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                     |
+| **socket.yml**                              | Konfigurace dodavatelského řetězce Socket.dev                                                  |
+| **news.json**                               | Lokalizovaný kanál oznámení v2; Radarové vypouštěcí lodě jsou neaktivní                        |
+| **vločka.nix** /** vločka.zámek**           | Nix dev-shell definice + zámek                                                                 |
+| **.env**                                    | Místní tajemství (gitignorované — generované z `.env.example`)                                 |
 
-> **Přesunuto z kořenového adresáře ve verzi v3.8.26 (pro zpřehlednění):**
+> **Přesunuto z kořenového adresáře ve verzi 3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a generovaný soubor `quality-metrics.json` (ignorovaný systémem git). Viz [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a vygenerované `quality-metrics.json` (gitignorováno). Viz [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta palubní desky API: adaptéry přes `packages/ui-kit` — viz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **380 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **394 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externí registr nástrojů CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 směrovacích strategií** s prioritami                                                                |
+| `constants/routingStrategies.ts` | **22 směrovacích strategií** s prioritami                                                                |
 | `constants/publicApiRoutes.ts`   | Cesty, které vyžadují ověření nosiče (vs. management).                                                   |
 | `constants/upstreamHeaders.ts`   | Seznam odmítnutí záhlaví pro upstream požadavky                                                          |
 | `validation/schemas.ts`          | schémata ~ 80 Zod (jediný zdroj pravdy pro smlouvy API )                                                 |
@@ -265,7 +265,7 @@ Samostatný pracovní prostor npm (`@omniroute/open-sse`). Zajišťuje zpracová
 ```
 open-sse/
 ├── handlers/            # 16 souborů (12 obslužných rutin + 4 pomocné moduly): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search atd.
-├── executors/           # 150 modulů executorů (třídy rozšiřující BaseExecutor + pomocné moduly pro jednotlivé poskytovatele)
+├── executors/           # 163 modulů executorů (třídy rozšiřující BaseExecutor + pomocné moduly pro jednotlivé poskytovatele)
 ├── translator/          # Převodníky formátů (9 pro požadavky, 9 pro odpovědi, 9 pomocných modulů)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modulů služeb (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM atd.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externí integrace CLI + Vnitřní OmniRoute CLI                                                  |
 | `I18N.md`                   | architektura i18n, přidání jazyka, 67 lokalit                                                  |
 | `UNINSTALL.md`              | Čisté kroky odinstalace                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 380 poskytovatelů (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 394 poskytovatelů (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hloubkové ponory
 

@@ -182,14 +182,14 @@ test("the post-call verdict is applied to what is cached, and the cache write is
 
 test("proxyFetch stamps the self-hop header before any dispatch decision", () => {
   const proxyFetch = read("open-sse/utils/proxyFetch.ts");
-  const fn = indexOrFail(proxyFetch, "async function patchedFetchUnrecorded(");
-  const stamp = indexOrFail(proxyFetch, "stampOwnListenerSelfHop(input, options);", fn);
-  const direct = indexOrFail(
-    proxyFetch,
-    "if (proxyContext.getStore() === DIRECT_PROXY_CONTEXT)",
-    fn
-  );
-  assert.ok(stamp < direct);
+  const facade = indexOrFail(proxyFetch, "function patchedFetchUnrecorded(");
+  indexOrFail(proxyFetch, "return dispatchProxyFetch(input, options, deps, {", facade);
+  const transport = read("open-sse/utils/proxyFetchTransport.ts");
+  const fn = indexOrFail(transport, "export async function dispatchProxyFetch(");
+  const stamp = indexOrFail(transport, "stampOwnListenerSelfHop(input, options);", fn);
+  const context = indexOrFail(transport, "const context = runtime.proxyContext.getStore();", fn);
+  const direct = indexOrFail(transport, "if (context === DIRECT_PROXY_CONTEXT)", fn);
+  assert.ok(stamp < context && context < direct);
 });
 
 test("characterization: the vision-bridge describe call uses undici fetch, bypassing the self-hop stamp", () => {
@@ -207,4 +207,64 @@ test("characterization: the vision-bridge describe call uses undici fetch, bypas
   const helpers = read("src/lib/guardrails/visionBridgeHelpers.ts");
   assert.doesNotMatch(helpers, /self-hop|selfHop/);
   assert.match(helpers, /headers\["x-omniroute-disabled-guardrails"\] = routeThroughOmniRoute/);
+});
+
+// ─── 6. Reversible PII vault scope (design 2026-11-08, #18017 wiring) ───────────────────
+
+test("handleChat opens one PII vault scope per client request and hands it to the pre-call pass", () => {
+  const chat = read("src/sse/handlers/chat.ts");
+  assert.match(
+    chat,
+    /export const handleChat = chatAdmission\.withChatAdmission\(\s*\(\.\.\.args: Parameters<typeof handleChatImplementation>\) =>\s*runWithRequestTokenVault\(\(\) =>\s*runWithTurnExecutionOwnership\(\(\) => handleChatImplementation\(\.\.\.args\)\)\s*\)\s*\);/
+  );
+  const call = indexOrFail(chat, "guardrailRegistry.runPreCallHooks(body, {");
+  assert.match(
+    chat.slice(call, call + 1500),
+    /tokenVault: getActiveRequestTokenVault\(\) \?\? null,/
+  );
+  // The guardrail dry-run API runs without a scope, so it keeps showing placeholders.
+  assert.doesNotMatch(read("src/app/api/guardrails/test/route.ts"), /tokenVault|pii\/tokenVault/);
+});
+
+test("tokens are restored only at the handleChat exit, never inside open-sse", () => {
+  const detokenizers = filesMatching(
+    /from\s+["'][^"']*(?:requestTokenVaultScope|detokenizeSseTransform)["']/
+  );
+  assert.deepEqual(
+    detokenizers.filter((file) => !file.startsWith("src/lib/pii/")),
+    ["src/sse/handlers/chat.ts"],
+    "only handleChat imports the exit; chatCore, fusion and combo legs keep tokens"
+  );
+  for (const leaf of [
+    "open-sse/handlers/chatCore/nonStreamingJsonResponse.ts",
+    "open-sse/handlers/chatCore/streamingPipeline.ts",
+    "open-sse/services/fusion.ts",
+  ]) {
+    assert.doesNotMatch(read(leaf), /tokenVault|detokeni[sz]e/i, leaf);
+  }
+  // Embeddings, moderation-like and media routes never create a vault.
+  for (const route of ["src/app/api/v1/embeddings/route.ts"]) {
+    assert.doesNotMatch(read(route), /tokenVault|runWithRequestTokenVault/, route);
+  }
+});
+
+test("minted tokens skip memory, the idempotency save and both semantic cache writes", () => {
+  const core = read("open-sse/handlers/chatCore.ts");
+  assert.match(core, /const piiTokensMinted = hasMintedPiiTokens\(\);/);
+  assert.equal(core.match(/\n\s+piiTokensMinted,\n/g)?.length, 2, "passed to both response leaves");
+  const leaf = read("open-sse/handlers/chatCore/nonStreamingResponse.ts");
+  assert.match(
+    leaf,
+    /if \(!piiTokensMinted\) await saveIdempotency\(idempotencyKey, translatedResponse, 200\);/
+  );
+  const tail = read("open-sse/handlers/chatCore/streamingTail.ts");
+  for (const source of [leaf, tail]) {
+    assert.match(source, /runMemoryExtractionGate\(\{[^}]*piiTokensMinted,/);
+    assert.match(source, /SemanticCacheResponse\(\{[^}]*piiTokensMinted,/);
+  }
+});
+
+test("the vault has no global singleton and no timers", () => {
+  const vault = read("open-sse/utils/piiTokenVault.ts");
+  assert.doesNotMatch(vault, /globalThis|setInterval|setTimeout|getInstance/);
 });

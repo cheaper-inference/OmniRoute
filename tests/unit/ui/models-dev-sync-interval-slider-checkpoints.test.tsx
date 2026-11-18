@@ -127,6 +127,38 @@ describe("ModelsDevSyncTab interval slider checkpoints", () => {
     expect(getLabel(container)).toBe("24h");
   });
 
+  it("draws the checkpoint ruler as kit slider marks under the track (#18073)", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    const marks = Array.from(container.querySelectorAll<HTMLElement>(".ci-slider__mark"));
+    expect(marks.map((mark) => mark.textContent)).toEqual(["1h", "6h", "24h", "7d"]);
+    // One tick per checkpoint position, evenly spread across [0, 3].
+    expect(marks.map((mark) => mark.style.getPropertyValue("--ci-slider-mark-position"))).toEqual([
+      "0",
+      String(1 / 3),
+      String(2 / 3),
+      "1",
+    ]);
+    // The hand-made flex ruler that used to sit under the slider is gone.
+    const sliderRoot = getSlider(container).closest(".ci-slider");
+    expect(sliderRoot?.nextElementSibling?.textContent ?? "").not.toContain("1h6h24h7d");
+  });
+
+  it("keeps the marks on the track's direction and names the value for screen readers", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    // The kit positions marks with `left`, so the slider is pinned LTR: in an RTL page the
+    // range minimum (1h) would otherwise sit on the right while its mark stays on the left.
+    expect(getSlider(container).closest("[dir]")?.getAttribute("dir")).toBe("ltr");
+    // The kit draws the marks aria-hidden and the input runs 0..3, so the value is spoken
+    // as the formatted interval.
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("24h");
+    await setSliderValue(container, "1.5");
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("15h");
+  });
+
   it("shows interpolated hours while dragging between checkpoints", async () => {
     const container = await render();
     await waitFor(() => getSlider(container).value === "2", "saved interval to load");

@@ -352,82 +352,82 @@ Mọ́dẹ́lì: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Ìmúṣiṣẹ́
+## 🚀 Gbigbe
 
-### Fífi npm sí gbogbo ètò (A Dámọ̀ràn)
+### Fi sori ẹrọ npm agbaye (Ti ṣeduro)
 
 ```bash
 npm install -g omniroute
 
-# Ṣẹ̀dá àpò ìṣètò
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ṣẹ̀dá fáìlì .env (wo .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Bẹ̀rẹ̀ olupin
+# Start server
 omniroute
-# Tàbí pẹ̀lú port àkànṣe:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI máa ń kojọpọ̀ `.env` láti `~/.omniroute/.env` tàbí `./.env` láìfọwọ́yí.
+CLI naa n gbe `.env` laifọwọyi lati `~/.omniroute/.env` tabi `./.env`. A `./.env` ninu iwe ilana iṣẹ le ṣeto nikan atokọ iyọọda kukuru ti awọn bọtini (`REQUIRE_API_KEY`, agbegbe, agbegbe aago ati awọn eto awọ, kii ṣe awọn ebute oko oju omi); fi ohun gbogbo miiran sinu `~/.omniroute/.env`. Wo [awọn adehun ifilọlẹ CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ipò tray
+### Ipo atẹ
 
-Bẹ̀rẹ̀ OmniRoute nínú tray ètò:
+Bẹrẹ OmniRoute ninu atẹ eto:
 
 ```bash
 omniroute serve --tray
 ```
 
-Àṣẹ náà máa padà lẹ́yìn tí olupin àti tray bá ti ṣetán.
+Aṣẹ naa pada lẹhin olupin ati atẹ ti ṣetan.
 
-Olupin náà máa tẹ̀síwájú láìsí terminal.
+Olupin naa tẹsiwaju laisi ebute.
 
-Ipò tray ń ṣe àtìlẹ́yìn fún macOS, Windows, àti àwọn session Linux aláwòrán. Ipò tray kì í ṣí dashboard láìfọwọ́yí.
+Ipo atẹ ṣe atilẹyin macOS, Windows, ati awọn akoko Linux ayaworan. Ipo atẹ ko ṣii dasibodu laifọwọyi.
 
-Lo àkójọ aṣàyàn tray fún àwọn ìgbésẹ̀ wọ̀nyí:
+Lo akojọ aṣayan atẹ fun awọn iṣe wọnyi:
 
-- Ṣí dashboard.
-- Ṣí `/dashboard/logs`.
-- Yí ìbẹ̀rẹ̀-láìfọwọ́yí padà.
-- Dá OmniRoute dúró.
+- Ṣii dasibodu naa.
+- Ṣii `/dashboard/logs`.
+- Yi pada laifọwọyi ibere.
+- Duro OmniRoute.
 
-Má ṣe darapọ̀ `--tray` mọ́ àwọn aṣàyàn wọ̀nyí:
+Maṣe dapọ `--tray` pẹlu awọn aṣayan wọnyi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Àwọn ipò wọ̀nyí nílò ìṣàkóso process tó yàtọ̀.
+Awọn ipo wọnyi nilo nini ilana ti o yatọ.
 
-Mú ìbẹ̀rẹ̀ ṣiṣẹ́ ní ìwọlé ẹ̀rọ tó kàn:
+Mu ibẹrẹ ṣiṣẹ ni wiwọle ẹrọ atẹle:
 
 ```bash
 omniroute autostart enable
 ```
 
-Ìbẹ̀rẹ̀-láìfọwọ́yí máa ń lo ipò tray lórí macOS, Windows, àti àwọn session Linux aláwòrán. Linux tí kò ní ìfihàn máa ń lo iṣẹ́ onílò systemd tó ti wà tẹ́lẹ̀.
+Ibẹrẹ aifọwọyi nlo ipo atẹ lori macOS, Windows, ati awọn akoko Linux ayaworan. Linux ti ko ni ori nlo iṣẹ olumulo ti o wa tẹlẹ.
 
-Mú ìbẹ̀rẹ̀ nígbà ìwọlé kúrò:
+Pa ibẹrẹ ni wiwọle:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Yíyọ Kúrò
+### Yiyokuro
 
-Nígbà tí o kò bá nílò OmniRoute mọ́, a pèsè script kíákíá méjì fún yíyọ ọ́ kúrò lọ́nà mímọ́:
+Nigbati o ko nilo OmniRoute mọ, a pese awọn iwe afọwọkọ iyara meji fun yiyọkuro mimọ:
 
-| Àṣẹ                      | Ìgbésẹ̀                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Yọ app ètò náà kúrò ṣùgbọ́n ó **pa DB àti àwọn ìṣètò rẹ mọ́** sínú `~/.omniroute`. |
-| `npm run uninstall:full` | Yọ app náà kúrò, Ó SÌ **pa gbogbo ìṣètò, kọ́kọ́rọ́, àti database rẹ́ pátápátá**.     |
+| Òfin                     | Iṣe                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Yọ awọn eto app sugbon** ntọju DB rẹ ati awọn atunto** ninu `~/.omniroute`.          |
+| `npm run uninstall:full` | Yọ AND app kuro patapata** nu gbogbo awọn atunto, awọn bọtini, ati awọn database** . |
 
-> Àkíyèsí: Láti ṣiṣẹ́ àwọn àṣẹ wọ̀nyí, lọ sí àpò iṣẹ́-àkànṣe OmniRoute (tí o bá ṣe clone rẹ̀), kí o sì ṣiṣẹ́ wọn. Ní ọ̀nà míì, tí o bá fi sí gbogbo ètò, o lè ṣiṣẹ́ `npm uninstall -g omniroute` nìkan.
+> Akiyesi: Lati ṣiṣe awọn aṣẹ wọnyi, lilö kiri si folda ise agbese OmniRoute (ti o ba ṣe cloned) ati ṣiṣe wọn. Ni omiiran, ti o ba fi sori ẹrọ agbaye, o le jiroro ni ṣiṣe `npm uninstall -g omniroute`.
 
-### Ìmúṣiṣẹ́ VPS
+### VPS Gbigbe
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,25 +443,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Tàbí: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Ìmúṣiṣẹ́ PM2 (Memory Kékeré)
+### Gbigbe PM2 (Iranti Kekere)
 
-Fún àwọn olupin tó ní RAM tó ní ààlà, lo aṣàyàn ààlà memory:
+Fun awọn olupin ti o ni opin RAM, lo aṣayan opin iranti:
 
 ```bash
-# Pẹ̀lú ààlà 512MB (àkọ́ṣe)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Tàbí pẹ̀lú ààlà memory àkànṣe
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Tàbí nípa lílo ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ṣẹ̀dá `ecosystem.config.js`:
+Ṣẹda `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -486,30 +486,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Kọ image (àkọ́ṣe = runner-cli pẹ̀lú codex/claude/droid tí a ti fi sí tẹ́lẹ̀)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Ipò tó ṣeé gbé kiri (a dámọ̀ràn)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Fún ipò tó darapọ̀ mọ́ host pẹ̀lú àwọn binary CLI, wo apá Docker nínú docs pàtàkì.
+Fun ipo iṣọpọ-ogun pẹlu awọn alakomeji CLI, wo apakan Docker ninu awọn docs akọkọ.
 
-### Void Linux (xbps-src)
+### Linux ofo (xbps-src)
 
-Àwọn olumulo Void Linux lè ṣe àkójọpọ̀ package OmniRoute kí wọ́n sì fi sí ẹ̀rọ wọn lọ́nà abinibi nípa lílo ìlànà àkójọpọ̀ agbelebu `xbps-src`. Èyí ń ṣe àkójọpọ̀ standalone Node.js àti àwọn binding abinibi `better-sqlite3` tí a nílò láìfọwọ́ṣe.
+Awọn olumulo Linux ofo le ṣajọ ati fi sori ẹrọ OmniRoute ni abinibi nipa lilo ilana akojọpọ-agbelebu `xbps-src`. Eyi ṣe adaṣe adaṣe imurasilẹ Node.js pẹlu awọn asopọ abinibi `better-sqlite3` ti o nilo.
 
 <details>
-<summary><b>Wo template xbps-src</b></summary>
+<summary><b>Wo awoṣe xbps-src</b></summary>
 
 ```bash
-# Fáìlì template fún 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Ẹnu-ọ̀nà AI àgbáyé pẹ̀lú ìdarí ọlọ́gbọ́n fún ọ̀pọ̀ olùpèsè LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Ṣe ìdánimọ̀ faaji CPU àfojúsùn fún node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Fi gbogbo deps sílẹ̀ – fo àwọn script
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Kọ́ bundle standalone Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Da àwọn ohun èlò static sínú standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Ṣàkójọpọ̀ binding abinibi better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Fi binding tí a ṣàkójọpọ̀ sínú bundle standalone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Yọ àwọn bundle sharp tí ó jẹ́ ti faaji pàtó kúrò
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Da àwọn deps runtime pino tí ìṣàyẹ̀wò static Next.js kò fi sí:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Dènà kí hook lẹ́yìn ìfiṣílẹ̀ má ba à yọ àwọn directory app router Next.js tí ó ṣófo
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -595,32 +595,32 @@ post_install() {
 
 </details>
 
-### Àwọn Àyípadà Àyíká
+### Awọn iyipada Ayika
 
-| Àyípadà                                 | Àkọ́ṣe                                | Àpèjúwe                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Àṣírí ìfọwọ́sí JWT (**yí i padà ní ìṣelọpọ**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ọ̀rọ̀ aṣínà fún ìwọlé àkọ́kọ́                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | Àpò-ọ̀nà dátà (db, lílò, àwọn àkọsílẹ̀)                                                                                                 |
-| `PORT`                                  | àkọ́ṣe framework                      | Port iṣẹ́ (`20128` nínú àwọn àpẹẹrẹ)                                                                                                   |
-| `HOSTNAME`                              | àkọ́ṣe framework                      | Host ìsopọ̀ (Docker máa ń lo `0.0.0.0` gẹ́gẹ́ bí àkọ́ṣe)                                                                                  |
-| `NODE_ENV`                              | àkọ́ṣe runtime                        | Ṣètò sí `production` fún ìmúṣiṣẹ́                                                                                                      |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ìpìlẹ̀ gbogbogbò tí a fi hàn sí dashboard tí server sì lè ráyè sí (ó rọ́pò `BASE_URL` àtijọ́)                                        |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ìpìlẹ̀ endpoint fún ìṣiṣẹ́pọ̀ cloud (ó rọ́pò `CLOUD_URL` àtijọ́)                                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Àṣírí HMAC fún àwọn kọ́kọ́rọ́ API tí a ṣẹ̀dá                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Fi ipa mú lílo kọ́kọ́rọ́ API Bearer lórí `/v1/*`                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Gba àwọn olùlò dashboard tí a ti jẹ́rìí sí láyè láti fi gbogbo iye kọ́kọ́rọ́ API tí a tọ́jú hàn nígbà ìbéèrè                               |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Àkókò ìmúdójúìwọ̀n ní ẹ̀gbẹ́ server fún dátà Provider Limits tí a fi pamọ́ sínú cache; àwọn bọ́tìnì ìmúdójúìwọ̀n UI ṣì ń fa ìṣiṣẹ́pọ̀ afọwọ́ṣe |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Pa àwọn snapshot SQLite aládàáṣiṣẹ́ ṣáájú kíkọ/import/restore; àwọn backup afọwọ́ṣe ṣì ń ṣiṣẹ́                                           |
-| `APP_LOG_TO_FILE`                       | `true`                               | Mú àbájáde àkọsílẹ̀ ohun èlò àti àyẹ̀wò lọ sí disk                                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fi ipa mú cookie ìjẹ́rìí `Secure` (lẹ́yìn HTTPS reverse proxy)                                                                          |
-| `CLOUDFLARED_BIN`                       | kò ṣètò                              | Lo binary `cloudflared` tó ti wà dípò gbígbàsílẹ̀ tí a ń ṣàkóso                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Ọ̀nà ìgbékalẹ̀ fún àwọn Quick Tunnels tí a ń ṣàkóso (`http2`, `quic`, tàbí `auto`)                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Òpin heap Node.js ní MB                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ prompt cache                                                                                             |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ semantic cache                                                                                           |
+| Ayípadà                                 | Aiyipada                 | Apejuwe                                                                                                                                   |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ti ipilẹṣẹ laifọwọyi)_ | JWT wíwọlé ìkọ̀kọ̀ — laifọwọyi ti ipilẹṣẹ lori ṣiṣe akọkọ ati tẹsiwaju si `server.env`; ṣeto ni kedere nigbati awọn data liana ni ephemeral |
+| `INITIAL_PASSWORD`                      | _(a ko ṣeto) _           | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
+| `DATA_DIR`                              | `~/.omniroute`           | Itọsọna data (db, lilo, awọn akọọlẹ)                                                                                                      |
+| `PORT`                                  | aiyipada ilana           | Ibudo iṣẹ (`20128` ninu awọn apẹẹrẹ)                                                                                                      |
+| `HOSTNAME`                              | aiyipada ilana           | Di agbalejo (awọn aiyipada Docker si `0.0.0.0`)                                                                                           |
+| `NODE_ENV`                              | aiyipada asiko isise     | Ṣeto `production` fun ransogun                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL ipilẹ ti gbogbo eniyan farahan si dasibodu ati fifihan si olupin naa (rọpo `BASE_URL` julọ)                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Ipilẹṣẹ ìsiṣẹpọ awọsanma URL (rọpo ogún `CLOUD_URL`)                                                                                      |
+| `API_KEY_SECRET`                        | _(ti ipilẹṣẹ laifọwọyi)_ | Aṣiri HMAC fun awọn bọtini API ti ipilẹṣẹ — ti ipilẹṣẹ laifọwọyi ni ṣiṣe akọkọ ati tẹsiwaju si `server.env`                               |
+| `REQUIRE_API_KEY`                       | `false`                  | Fi agbara mu Bọtini API Bearer lori `/v1/*`                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Gba awọn olumulo dasibodu ti o ni idaniloju lati ṣafihan awọn iye bọtini API ti o fipamọ ni kikun lori ibeere                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Cadence isọdọtun ẹgbẹ olupin fun data Awọn opin Ifilelẹ Olupese ti a fipamọ; awọn bọtini isọdọtun UI ṣi nfa amuṣiṣẹpọ afọwọṣe             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Pa a laifọwọyi SQLite snapshots ṣaaju ki o writes/import/restore; Afowoyi backups si tun ṣiṣẹ                                             |
+| `APP_LOG_TO_FILE`                       | `true`                   | Mu ohun elo ṣiṣẹ ati iṣẹjade iwe ayẹwo si disk                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Fi ipa mu kuki `Secure` auth (lẹhin aṣoju yiyipada HTTPS )                                                                                |
+| `CLOUDFLARED_BIN`                       | unset                    | Lo alakomeji `cloudflared` ti o wa tẹlẹ dipo igbasilẹ iṣakoso                                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Gbigbe fun Awọn Tunnel Iyara ti a ṣakoso (`http2`, `quic`, tabi `auto`)                                                                   |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js okiti iye to ni MB                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Awọn titẹ sii kaṣe kiakia ti o pọju                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Awọn titẹ sii kaṣe atunmọ to pọju                                                                                                         |
 
-Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md).
+Fun itọkasi iyipada ayika ni kikun, wo [README](../README.md).
 
 ---
 
@@ -733,8 +733,8 @@ Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba k
 
 Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (odidi, 1-1024) - fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun.
-- `quotaEndpoint` — aaye ipari quota/credits ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ kikun ti wa ni akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ ju awọn ohun kikọ 64 lọ laisi eto. Iye asopọ kan rọpo Azure OpenAI / Azure AI Foundry aiyipada (asopọ Azure kan lẹhin ẹnu-ọna ti o muna) ati ṣeto opin fun ipade ibaramu aṣa; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code pa opin iforukọsilẹ wọn mọ ki o foju rẹ.
+- `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ ni kikun jẹ akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -751,7 +751,7 @@ Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹr�
 
 ### Chaining OmniRoute ẹlẹgbẹ
 
-Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo `/v1` ipilẹ URL ẹlẹgbẹ ati igbẹhin, bọtini API ti o kere ju ti o ti gbejade nipasẹ ẹlẹgbẹ yẹn.
+Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo ipilẹ `/v1` ti ẹlẹgbẹ ati URL, bọtini API ti o kere ju ti a ṣejade nipasẹ ẹlẹgbẹ yẹn.
 
 Fun awọn ẹwọn ilọtun-pada tabi awọn ẹwọn hop-pupọ, jẹ ki ẹṣọ lupu ijade ṣiṣẹ ni gbogbo ẹnu-ọna:
 
@@ -824,16 +824,16 @@ Dapada awọn awoṣe akojọpọ nipasẹ olupese pẹlu awọn oriṣi (`chat`
 - Akọkọ jeki fifi `cloudflared` sori ẹrọ nikan nigbati o nilo; nigbamii tun bẹrẹ tun lo alakomeji iṣakoso kanna
 - Awọn Tunnels iyara kii ṣe atunṣe-laifọwọyi lẹhin OmniRoute tabi atunbere eiyan; tun mu wọn ṣiṣẹ lati dasibodu nigbati o nilo
 - Tunnel URLs jẹ ephemeral ati yi pada ni gbogbo igba ti o ba stop/start oju eefin naa
-- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP alariwo ni awọn apoti ti o ni ihamọ
+- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP ariwo ni awọn apoti ti o ni ihamọ
 - Ṣeto `CLOUDFLARED_PROTOCOL=quic` tabi `auto` ti o ba fẹ lati bori yiyan irinna ti iṣakoso
 - Ṣeto `CLOUDFLARED_BIN` ti o ba fẹran lilo alakomeji `cloudflared` ti a ti fi sii tẹlẹ dipo igbasilẹ iṣakoso
 - Cloudflare Eefin iyara, Tailscale Funnel, ati awọn panẹli eefin ngrok le ṣe afihan tabi farapamọ sinu** Eto → Irisi** . Ìbòmọ́lẹ̀ pánẹ́ẹ̀lì kan kò dá eefin tí ń ṣiṣẹ́ dúró.
 
 ### Imọye Ẹnu-ọna LLM (Ipele 9)
 
-- **Kaṣe atunmọ** - Awọn caches aifọwọyi ti kii ṣe ṣiṣanwọle, awọn idahun = 0 otutu (fori pẹlu `X-OmniRoute-No-Cache: true`)
-- **Beere Idempotency** - Ṣe iyasọtọ awọn ibeere laarin 5s nipasẹ `Idempotency-Key` tabi akọsori `X-Request-Id`
-- **Ilọsiwaju Àtòjọ** - Jade-ni awọn iṣẹlẹ SSE `event: progress` nipasẹ akọsori `X-OmniRoute-Progress: true`
+- **Kaṣe atunmọ** — Aifọwọyi awọn caches ti kii ṣe ṣiṣanwọle, awọn idahun = 0 otutu (fori pẹlu `X-OmniRoute-No-Cache: true`)
+- **Beere Idempotency** — Ṣe iyasọtọ awọn ibeere laarin 5s nipasẹ `Idempotency-Key` tabi akọsori `X-Request-Id`
+- **Ilọsiwaju Àtòjọ** — Jade-ni awọn iṣẹlẹ SSE `event: progress` akọsori `X-OmniRoute-Progress: true`
 
 ---
 
@@ -862,27 +862,27 @@ Tunto nipasẹ** Dasibodu → Eto → afisona** . Dasibodu naa ṣafihan awọn 
 
 **Awọn ilana ti o han Dasibodu (iṣalaye ipele-iroyin):**
 
-| Ilana                           | Apejuwe                                                                                                        |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Kun First**                   | Nlo awọn akọọlẹ ni aṣẹ pataki - akọọlẹ akọkọ n ṣakoso gbogbo awọn ibeere titi ko si                            |
-| **Yika Robin**                  | Awọn iyipo nipasẹ gbogbo awọn akọọlẹ pẹlu opin alalepo atunto (aiyipada: awọn ipe 3 fun akọọlẹ kan)            |
-| **P2C (Agbara ti Aṣayan Meji)** | Yan awọn akọọlẹ laileto 2 ati awọn ipa-ọna si ọkan ti o ni ilera - awọn iwọntunwọnsi fifuye pẹlu akiyesi ilera |
-| **Laileto**                     | Laileto yan iroyin kan fun ibeere kọọkan nipa lilo Fisher-Yates Daarapọmọra                                    |
-| **Ti o kere julọ Lo**           | Awọn ipa ọna si akọọlẹ pẹlu akọbi `lastUsedAt` timestamp, pinpin ijabọ boṣeyẹ                                  |
-| **Iṣapeye idiyele**             | Awọn ipa ọna si akọọlẹ pẹlu iye ayo to kere julọ, iṣapeye fun awọn olupese ti o kere julọ                      |
+| Ilana                           | Apejuwe                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Kun First**                   | Nlo awọn akọọlẹ ni ipo pataki — akọọlẹ akọkọ n ṣakoso gbogbo awọn ibeere titi ko si                  |
+| **Yika Robin**                  | Awọn iyipo nipasẹ gbogbo awọn akọọlẹ pẹlu opin alalepo atunto (aiyipada: awọn ipe 3 fun akọọlẹ kan)  |
+| **P2C (Agbara ti Aṣayan Meji)** | Yan awọn akọọlẹ laileto 2 ati awọn ipa-ọna si alara lile ọkan awọn iwọntunwọnsi — pẹlu akiyesi ilera |
+| **Laileto**                     | Laileto yan iroyin kan fun ibeere kọọkan nipa lilo Fisher-Yates Daarapọmọra                          |
+| **Ti o kere julọ Lo**           | Awọn ipa ọna si akọọlẹ pẹlu akọbi `lastUsedAt` timestamp, pinpin ijabọ boṣeyẹ                        |
+| **Iṣapeye idiyele**             | Awọn ipa ọna si akọọlẹ pẹlu iye ayo to kere julọ, iṣapeye fun awọn olupese ti o kere julọ            |
 
-**To ti ni ilọsiwaju konbo ati auto ogbon** (ṣe atunto fun konbo tabi nipasẹ awọn ami-iṣaaju `auto/*` — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**To ti ni ilọsiwaju konbo ati auto ogbon** (atunto fun konbo tabi nipasẹ `auto/*` ìpele — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - ti o muna ibere, kò yika-robins
-- `weighted` - ijabọ ipin nipasẹ awọn iwuwo awoṣe kọọkan
-- `fill-first` - imugbẹ akọkọ awoṣe titi awọn ifilelẹ lọ lu
+- `priority` — aṣẹ ti o muna, kii ṣe iyipo-robins
+- `weighted` — ijabọ ipin nipasẹ awọn iwuwo awoṣe-kọọkan
+- `fill-first` — imugbẹ akọkọ awoṣe titi awọn ifilelẹ lọ lu
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Agbara ti Aṣayan Meji)
 - `least-used` ati `cost-optimized`
-- `auto` - Dimegilio-ìṣó kọja gbogbo awọn oludije
-- `lkgp` (Olupese to dara ti a mọ kẹhin) - awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
-- `context-optimized` - mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
-- `context-relay` - awọn ẹwọn awọn awoṣe ọrọ-gun-gun fun awọn titan-tẹle
+- `auto` — Dimegilio-ìṣó kọja gbogbo awọn oludije
+- `lkgp` (Olupese to dara ti a mọ kẹhin) — pin si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
+- `context-optimized` — mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
+- awọn ẹwọn `context-relay` — awọn awoṣe ọrọ-gigun fun awọn titan-tẹle
 
 #### Akọsori Ikoni Alalepo Ita
 
@@ -902,7 +902,7 @@ underscores_in_headers on;
 
 #### Wildcard awoṣe Aliases
 
-Ṣẹda awọn awoṣe kaadi igbẹ lati yi awọn orukọ awoṣe pada:
+Ṣẹda awọn awoṣe kaadi egan lati yi awọn orukọ awoṣe pada:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -913,7 +913,7 @@ Wildcards ṣe atilẹyin `*` (awọn ohun kikọ eyikeyi) ati `?` (ohun kikọ 
 
 #### Awọn ẹwọn Fallback
 
-Ṣetumo awọn ẹwọn isubu agbaye ti o waye lori gbogbo awọn ibeere:
+Ṣe alaye awọn ẹwọn ipadasẹhin agbaye ti o waye lori gbogbo awọn ibeere:
 
 ```
 Chain: production-fallback
@@ -924,11 +924,11 @@ Chain: production-fallback
 
 ---
 
-### Awọn akojọpọ Olupese ti o wọpọ & Awọn Ilana ipa-ọna
+### Awọn akojọpọ Olupese ti o wọpọ & Awọn ilana ipa ọna
 
 Eyi ni awọn apẹẹrẹ apẹẹrẹ fun apapọ ọpọlọpọ awọn olupese ati ipa ọna laarin wọn ni OmniRoute:
 
-#### 1. Aṣoju Ifaminsi Konbo: Idiye ipari-giga pẹlu Cost/Speed Fallback
+#### 1. Aṣoju Ifaminsi Konbo: Idiye-giga-Opin pẹlu Cost/Speed Fallback
 
 Apẹrẹ fun awọn aṣoju ifaminsi (OpenCode, koodu Claude, Cursor, Cline). Awọn ipa ọna ni ibẹrẹ si awọn awoṣe ero iwaju, ja bo pada si awọn awoṣe ifaminsi iyara lori irẹwẹsi ipin tabi awọn aṣiṣe.
 
@@ -989,32 +989,32 @@ Tunto nipasẹ** Dasibodu → Eto → Resilience** .
 
 OmniRoute ṣe imuse resilience ipele olupese pẹlu awọn paati marun:
 
-1. **Bere isinyi & Pacing** - Ṣiṣeto ipele eto eto:
-   - **Awọn ibeere fun Iṣẹju kan (RPM)** - Awọn ibeere to pọju fun iṣẹju kan fun akọọlẹ kan
-   - **Min Time Laarin awọn ibeere** - Aafo ti o kere julọ ni awọn iṣẹju-aaya laarin awọn ibeere
-   - **Max Awọn ibeere igbakanna** - Awọn ibeere igbakana ti o pọju fun akọọlẹ kan
+1. **Bere isinyi & Pacing** — ti n ṣe apẹrẹ ipele eto:
+   - **Awọn ibeere fun Iṣẹju kan (RPM)** — Awọn ibeere to pọju fun iṣẹju kan fun akọọlẹ kan
+   - **Min Time Laarin awọn ibeere** — Aafo to kere julọ ni awọn iṣẹju-aaya laarin awọn ibeere
+   - **Max Awọn ibeere igbakanna** — Awọn ibeere igbakana ti o pọju fun akọọlẹ kan
 
-2. **Itutu Asopọmọra** - Iṣeto ni iru-auth fun asopọ ẹyọkan lẹhin awọn ikuna atunyan:
-   - **Mimọ Cooldown** - Ferese itutu agbaiye aiyipada fun awọn ikuna oke ti o ṣee tun gbiyanju
-   - **Lo Awọn Italolobo Tun gbiyanju ni oke** - Bọla fun `Retry-After` aṣẹ tabi tun awọn amọran to nigba ti a pese
-   - **Max Backoff Igbesẹ** - Ipele ẹhin ipari ti o pọju fun awọn ikuna ti o leralera
+2. **Itutu Asopọmọra** — Per-auth-Iru iṣeto ni fun asopọ ẹyọkan lẹhin awọn ikuna atunyan:
+   - **Mimọ Cooldown** — Ferese itutu agbaiye aiyipada fun awọn ikuna oke ti o ṣee tun gbiyanju
+   - **Lo Awọn Italolobo Tun gbiyanju ni oke** — Bọla fun `Retry-After` alaṣẹ tabi tun awọn amọran to nigba ti a pese
+   - **Max Backoff Igbesẹ** — Ipele ifẹhinti ipari ti o pọju fun awọn ikuna leralera
 
-3. **Olupese Circuit Fifọ** - Tọpinpin awọn ikuna olupese lati opin-si-opin, samisi olupese ti o bajẹ ni iloro ikilọ ti atunto, ati ṣi ẹrọ fifọ nigbati o ba de opin ikuna atunto:
-   - **Ibalẹ Ibalẹ** - Awọn ikuna olupese itẹlera ṣaaju titẹ `DEGRADED`
-   - **Ipari Ikuna** - Awọn ikuna olupese itẹlera ṣaaju titẹ `OPEN`
-   - **Tun Aago Iṣeto** - Window akoko ṣaaju idanwo olupese lẹẹkansi
-   - **CLOSED** (ni ilera) - Awọn ibeere ṣan ni deede
-   - **DEGRADED** - Awọn ibeere ṣi nṣàn lakoko ti o ti tọpinpin awọn ikuna ti o ga
-   - **OPEN** - Olupese ti ni idinamọ fun igba diẹ lẹhin awọn ikuna leralera
-   - **HALF_OPEN** - Idanwo ti olupese ba ti gba pada
+3. **Olupese Circuit Fifọ** — Tọpa awọn ikuna olupese lati opin-si-opin, samisi olupese ti o bajẹ ni iloro ikilọ ti iṣeto, o si ṣii fifọ nigbati o ba ti de opin ikuna atunto:
+   - **Ibalẹ Ibalẹ** — Awọn ikuna olupese itẹlera ṣaaju titẹ `DEGRADED`
+   - **Ipari Ikuna** — Awọn ikuna olupese itẹlera ṣaaju titẹ `OPEN`
+   - **Tun Aago Iṣeto** — window akoko ṣaaju idanwo olupese lẹẹkansi
+   - **CLOSED** (ni ilera) — Awọn ibeere nṣan ni deede
+   - **DEGRADED** Awọn ibeere — ṣi nṣàn lakoko ti a tọpa awọn ikuna ti o ga
+   - **OPEN** Olupese — ti dinamọ fun igba diẹ lẹhin awọn ikuna leralera
+   - **HALF_OPEN** — Idanwo ti olupese ba ti gba pada
 
    Awọn opin oṣuwọn `429` ti asopọ-dopin duro ni** Itutu Asopọmọra** ati ki o ma ṣe ka si olupilẹṣẹ olupese.
 
    Ipo asiko isise fifọ olupese yoo han lori** Dasibodu → Health** nikan.
 
-4. **Duro Fun Itutu** - Ti gbogbo asopọ oludije ti n tutu tẹlẹ, OmniRoute le duro fun itutu agbaiye akọkọ ati tun gbiyanju ibeere alabara kanna ni adaṣe.
+4. **Duro Fun Itutu** — Ti gbogbo asopọ oludije ti n tutu tẹlẹ, OmniRoute le duro fun itutu agbaiye akọkọ ki o tun gbiyanju ibeere alabara kanna laifọwọyi.
 
-5. **Oṣuwọn Ifilelẹ Aifọwọyi-iwari** - Nigbati awọn olupese oke ba pada awọn window iduro ti o fojuhan, awọn amọran wọnyẹn bori itutu asopọ agbegbe nigbati eto naa ba ṣiṣẹ.
+5. **Oṣuwọn Ifilelẹ Aifọwọyi-iwari** — ti awọn olupese oke ba pada awọn ferese iduro ti o han gbangba, awọn amọran wọnyẹn bori itutu asopọ agbegbe nigbati eto naa ba ṣiṣẹ.
 
 **Imọran Pro:** Lo awọn** Ilera** oju-iwe lati ṣayẹwo ati tunto awọn fifọ olupese laaye lẹhin ijade kan. Oju-iwe Resilience nikan yi iṣeto ni pada.
 
@@ -1027,7 +1027,7 @@ OmniRoute ṣe imuse resilience ipele olupese pẹlu awọn paati marun:
 | Iṣe                       | Apejuwe                                                                                                                                            |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Gbejade aaye data**     | Ṣe igbasilẹ aaye data SQLite lọwọlọwọ bi faili `.sqlite` kan                                                                                       |
-| **Jade Gbogbo (.tar.gz)** | Ṣe igbasilẹ iwe ipamọ afẹyinti ni kikun pẹlu: aaye data, awọn eto, awọn akojọpọ, awọn asopọ olupese (ko si awọn iwe-ẹri), metadata bọtini API      |
+| **Jade Gbogbo (.tar.gz)** | Ṣe igbasilẹ iwe ipamọ afẹyinti ni kikun pẹlu: ibi ipamọ data, awọn eto, awọn akojọpọ, awọn asopọ olupese (ko si awọn iwe-ẹri), metadata bọtini API |
 | **Gbe aaye data wọle**    | Ṣe igbasilẹ faili `.sqlite` kan lati rọpo aaye data lọwọlọwọ. Atilẹyin agbewọle-ṣaaju ti ṣẹda laifọwọyi ayafi ti `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
@@ -1060,13 +1060,13 @@ Oju-iwe eto ti ṣeto sinu** 7 awọn taabu** fun irọrun lilọ kiri:
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Gbogboogbo**         | Awọn irinṣẹ ibi ipamọ eto, ihuwasi aiyipada, hihan oju eefin Endpoint                                                                                     |
 | **Ifarahan**           | Awọn idari akori (light/dark/system), hihan ẹgbẹ ẹgbẹ, awọn iyipada nronu fun awọn kaadi eefin Cloudflare/Tailscale/ngrok                                 |
-| **AI**                 | Isuna ero (passthrough / auto-strip / custom / adaptive — wo [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), eto eto agbaye, awọn iṣiro kaṣe kiakia         |
-| **Aabo**               | awọn eto Login/Password, Iṣakoso Wiwọle IP, API auth fun `/models`, Idilọwọ Olupese, oluso abẹrẹ kiakia                                                   |
+| **AI**                 | Isuna ero (passthrough / auto-strip / custom / adaptive — see [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), eto eto agbaye, awọn iṣiro kaṣe kiakia        |
+| **Aabo**               | eto Login/Password, Iṣakoso Wiwọle IP, API auth fun `/models`, Dina olupese, oluso abẹrẹ kiakia                                                           |
 | **Ipa ọna**            | Ilana ipa-ọna agbaye (Fikun akọkọ / Yika Robin / P2C / ID / Lilo ti o kere ju / Iṣapeye idiyele), inagijẹ awoṣe kaadi, awọn ẹwọn isubu, awọn abawọn konbo |
-| **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi idaduro-duro                                                                            |
+| **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi iduro-fun-itutu                                                                         |
 | **To ti ni ilọsiwaju** | Iṣeto-aṣoju agbaye (HTTP/SOCKS5), aṣoju aṣoju-olupese dojukọ                                                                                              |
 
-Gbogboogbo ko ṣe ẹda-iwe kika-nikan ati awọn akọsilẹ kaṣe mọ. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
+Gbogboogbo ko tun ṣe pidánpidán kika-nikan gedu ati awọn akọsilẹ kaṣe. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1077,7 +1077,7 @@ Wiwọle nipasẹ** Dasibodu → Awọn idiyele** .
 | Taabu         | Idi                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------- |
 | **Isuna**     | Ṣeto awọn opin inawo fun bọtini API pẹlu awọn eto isuna daily/weekly/monthly ati ipasẹ akoko gidi |
-| **Ifowoleri** | Wo ati ṣatunkọ awọn titẹ sii idiyele awoṣe - idiyele fun awọn ami ami input/output 1K fun olupese |
+| **Ifowoleri** | Wo ati ṣatunkọ awọn titẹ sii idiyele awoṣe — idiyele fun awọn ami ami input/output 1K fun olupese |
 
 ```bash
 # API: Set a budget
@@ -1153,11 +1153,11 @@ Awọn ọna kika ohun ti o ni atilẹyin fun kikọ silẹ: `mp3`, `wav`, `m4a`
 | **Laileto**           | Yiyan awoṣe laileto lati konbo fun ibeere kọọkan                          |
 | **Ti iwuwo**          | Awọn ipa-ọna ni iwọn ti o da lori awọn iwuwo ti a sọtọ fun awoṣe          |
 | **Ti o kere julọ-Lo** | Awọn ipa ọna si awoṣe pẹlu awọn ibeere aipẹ diẹ (nlo awọn metiriki konbo) |
-| **Iṣapeye idiyele**   | Awọn ọna si awoṣe ti o wa lawin (nlo tabili idiyele)                      |
+| **Iṣapeye idiyele**   | Awọn ipa ọna si awoṣe to wa lawin (nlo tabili idiyele)                    |
 
-Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadabọ yiyara.
+Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo ẹni kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadasẹhin yiyara.
 
-Awọn iṣapeye konbo airi-idairi ti wa ni ijade. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu jẹ ki o ngbanilaaye hedging tunto, awọn fo TTFT asọtẹlẹ, ati funmorawon fallback ti n ṣiṣẹ lati ṣowo iṣotitọ routing/request fun airi iru kekere.
+Awọn iṣapeye konbo-aiduro odo jẹ ijade-inu. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu gba ọ laaye lati tunto hedging, asọtẹlẹ TTFT foo, ati funmorawon fallback amojuto lati isowo routing/request iṣootọ fun kekere iru lairi.
 
 Pa a** Idaduro àmi Idi** nigbati awọn olupese oke nilo awọn opin `max_tokens` / `maxOutputTokens` ti o muna. Nigbati o ba ṣiṣẹ, ipa-ọna konbo nikan ṣe afikun ero-awoṣe headroom fun awọn awoṣe pẹlu fila iṣelọpọ ti a mọ ati fi opin ami ami alabara silẹ ko yipada nigbati iye ifipamọ ailewu yoo kọja fila yẹn. Ti opin alabara ba ti wa loke fila ti a mọ, OmniRoute dimole si fila yẹn ṣaaju fifiranṣẹ ibeere oke.
 

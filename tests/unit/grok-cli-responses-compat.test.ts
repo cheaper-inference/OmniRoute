@@ -28,6 +28,12 @@ test("grok-cli exposes the authenticated grok-build model catalog", () => {
         targetFormat: "openai-responses",
       },
       {
+        id: "grok-4.7-build-fast",
+        name: "Grok 4.7 Build Fast",
+        contextLength: 500000,
+        targetFormat: "openai-responses",
+      },
+      {
         id: "grok-4.6",
         name: "Grok 4.6",
         contextLength: 500000,
@@ -37,6 +43,12 @@ test("grok-cli exposes the authenticated grok-build model catalog", () => {
         id: "grok-4.5",
         name: "Grok 4.5",
         contextLength: 500000,
+        targetFormat: "openai-responses",
+      },
+      {
+        id: "grok-code-fast-1",
+        name: "Grok Code Fast 1",
+        contextLength: undefined,
         targetFormat: "openai-responses",
       },
     ]

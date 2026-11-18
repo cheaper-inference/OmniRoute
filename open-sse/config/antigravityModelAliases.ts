@@ -113,6 +113,8 @@ const ANTIGRAVITY_RETIRED_MODEL_IDS = new Set([
   "gemini-3.5-flash-high",
   "gemini-3.5-flash-medium",
   "gemini-3.5-flash-preview",
+  // Gemini API shut down this preview on 2026-05-25; keep the stable 3.1 Flash Lite.
+  "gemini-3.1-flash-lite-preview",
   "gemini-2.5-pro",
   "gemini-2.5-flash-thinking",
   "gemini-2.5-flash",

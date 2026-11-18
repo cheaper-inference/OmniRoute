@@ -4,7 +4,10 @@ import type {
 } from "../../utils/providerHttpAttempts.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
-import type { getProviderCredentials } from "@/sse/services/auth.ts";
+import type {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+} from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import type { writeTerminalStatus } from "@/shared/utils/terminalStatus.ts";
 import type { updateProviderConnection } from "@/lib/db/providers.ts";
@@ -28,7 +31,13 @@ import {
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import {
+  bindCodexResponseCallbacks,
+  runWithCodexResponseFence,
+  isCodexResponseCurrent,
+} from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -86,6 +95,12 @@ export interface PipelineConnectionContext {
   onCredentialsRefreshed: (next: Record<string, unknown>) => void | Promise<void>;
   assertManagedLeaseFence: (connectionId: string) => void;
   getProviderCredentials: typeof getProviderCredentials;
+  /**
+   * Quota-preflight-aware selector used for the Codex 429 in-request rotation (#18425),
+   * so the replacement account is chosen with the same quota cutoff as primary selection.
+   * Falls back to `getProviderCredentials` when not wired.
+   */
+  getProviderCredentialsWithQuotaPreflight?: typeof getProviderCredentialsWithQuotaPreflight;
   /**
    * Connection allowlist the request was routed under (API key allowlist ∩ combo
    * step allowlist ∩ quota pool). Account rotation must stay inside it; null means
@@ -212,7 +227,7 @@ async function recordUpstreamRateLimit(
   }
   let capacity429 = false;
   try {
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     capacity429 =
       provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
@@ -289,7 +304,7 @@ async function toOutcome(
   try {
     // clone() is the drain. sendProviderAttempt must not cancel() a streaming
     // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     try {
       body = JSON.parse(text);
       fields = readUpstreamErrorFields(body);
@@ -365,7 +380,7 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state } = input;
+  const { policy, target, connection, wire, state: baseState } = input;
   const sendProviderAttempt = async (model: string, allowDedup: boolean) => {
     const rejection: HttpAttemptRejectionSlot = { selection: null };
     if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
@@ -409,6 +424,26 @@ export async function runProviderExecutionPipeline(
     }
   };
 
+  const tryAuthenticationRefresh = async (response: Response): Promise<boolean> => {
+    if (
+      authRefreshed ||
+      (response.status !== 401 && response.status !== 403) ||
+      typeof connection.refreshCredentials !== "function" ||
+      (await shouldSkipCredentialRefresh(target.provider, response))
+    )
+      return false;
+    if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
+    const refreshed = await runWithCodexResponseFence(response, () =>
+      connection.refreshCredentials!(connection.getCredentials())
+    );
+    if (!refreshed || (!refreshed.accessToken && !refreshed.copilotToken)) return false;
+    connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
+    await connection.onCredentialsRefreshed(refreshed);
+    authRefreshed = true;
+    authRefreshPending = true;
+    return true;
+  };
+
   while (
     attempts < maxAttempts ||
     antigravityByopRotationPending ||
@@ -423,6 +458,21 @@ export async function runProviderExecutionPipeline(
 
     const attempt = await sendProviderAttempt(wire.currentModel, attempts === 0);
     lastAttempt = attempt;
+    const state = bindCodexResponseCallbacks(attempt.response, baseState);
+    if (!isCodexResponseCurrent(attempt.response)) {
+      // A passive replica may reread a newer token for the same owner. The
+      // refresh adapter validates that adoption; the stale response still
+      // cannot run rate-limit, health or other mutation callbacks.
+      if (isPassiveCodex(target.provider) && (await tryAuthenticationRefresh(attempt.response))) {
+        continue;
+      }
+      return toOutcome(
+        attempt,
+        wire.currentModel,
+        currentConnectionId(connection),
+        target.provider
+      );
+    }
 
     const after = assertLease(policy, connection, wire.currentModel);
     if (after) return after;
@@ -473,11 +523,27 @@ export async function runProviderExecutionPipeline(
         }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
-      const nextCreds = await connection
-        .getProviderCredentials("codex", null, allowedConnections, wire.currentModel, {
-          excludeConnectionIds: [...excludedIds],
-        })
-        .catch(() => null);
+      // Both arms stay direct `connection.*` calls so the hard-lease credential
+      // inventory (tests/unit/hard-session-lease-bypass-inventory.test.ts) keeps
+      // seeing this rotation site; an aliased selector would hide it.
+      const codexFailoverOptions = { excludeConnectionIds: [...excludedIds] };
+      const nextCreds = await (
+        connection.getProviderCredentialsWithQuotaPreflight
+          ? connection.getProviderCredentialsWithQuotaPreflight(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
+          : connection.getProviderCredentials(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
+      ).catch(() => null);
       if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
         await state.onAuditAccountRotation?.({
           action: "codex.account_rotation",
@@ -495,10 +561,7 @@ export async function runProviderExecutionPipeline(
     if (canRotateAccount && target.provider === "antigravity" && status === 422) {
       // Same drain as toOutcome: clone the Response. A prior body.cancel()
       // makes this throw "Body has already been consumed" and skips rotate.
-      const byopBody = await attempt.response
-        .clone()
-        .text()
-        .catch(() => "");
+      const byopBody = await readResponseTextWithinCap(attempt.response.clone()).catch(() => "");
       if (byopBody.includes("gcp_project_required")) {
         const failedId = currentConnectionId(connection);
         if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
@@ -521,27 +584,12 @@ export async function runProviderExecutionPipeline(
       }
     }
 
-    if (
-      !authRefreshed &&
-      (status === 401 || status === 403) &&
-      typeof connection.refreshCredentials === "function" &&
-      !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
-    ) {
-      if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
-      const refreshed = await connection.refreshCredentials(connection.getCredentials());
-      if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
-        connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
-        await connection.onCredentialsRefreshed(refreshed);
-        authRefreshed = true;
-        authRefreshPending = true;
-        continue;
-      }
-    }
+    if (await tryAuthenticationRefresh(attempt.response)) continue;
 
     {
       let signatureMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {
@@ -592,7 +640,7 @@ export async function runProviderExecutionPipeline(
             let message = response.statusText || "upstream error";
             let responseBody: unknown = null;
             try {
-              responseBody = JSON.parse(await response.clone().text());
+              responseBody = JSON.parse(await readResponseTextWithinCap(response.clone()));
               const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
               if (typeof err?.message === "string" && err.message) message = err.message;
             } catch {
@@ -661,7 +709,7 @@ export async function runProviderExecutionPipeline(
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {

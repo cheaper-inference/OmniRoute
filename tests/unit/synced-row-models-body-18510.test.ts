@@ -115,3 +115,90 @@ test("the sync layer does not publish tool_calling from supportsTools", () => {
     tool_calling: false,
   });
 });
+
+test("defaulted custom row does not mask declared/inferred endpoints from synced row", async () => {
+  await seedSynced("mistral", [
+    {
+      id: "mistral-embed-18510",
+      capabilities: { completion_chat: false },
+      supportedEndpoints: ["embeddings"],
+      endpointCapabilitySource: "inferred",
+      apiFormat: "embeddings",
+      modelType: "embedding",
+    },
+  ]);
+
+  // Simulate "Import from /models" or legacy defaulted custom row
+  await modelsDb.addCustomModel(
+    "mistral",
+    "mistral-embed-18510",
+    "mistral-embed-18510",
+    "imported",
+    "chat-completions",
+    ["chat"],
+    undefined,
+    {},
+    undefined,
+    undefined,
+    undefined,
+    { endpointCapabilitySource: "defaulted" }
+  );
+
+  const row = await catalogRow("mistral/mistral-embed-18510");
+  assert.deepEqual(row.supported_endpoints, ["embeddings"]);
+  assert.equal(row.type, "embedding");
+  assert.equal(row.api_format, "embeddings");
+});
+
+test("an operator custom row still overrides discovered endpoints in /v1/models", async () => {
+  await seedSynced("mistral", [
+    {
+      id: "mistral-embed-op-18510",
+      capabilities: { completion_chat: false },
+      supportedEndpoints: ["embeddings"],
+      endpointCapabilitySource: "inferred",
+      apiFormat: "embeddings",
+      modelType: "embedding",
+    },
+  ]);
+  await modelsDb.addCustomModel(
+    "mistral",
+    "mistral-embed-op-18510",
+    "mistral-embed-op-18510",
+    "manual",
+    "chat-completions",
+    ["chat"]
+  );
+
+  const row = await catalogRow("mistral/mistral-embed-op-18510");
+  assert.deepEqual(row.supported_endpoints, ["chat"]);
+  assert.equal(row.api_format, "chat-completions");
+});
+
+test("an unmarked legacy custom row keeps its explicit non-placeholder endpoint list", async () => {
+  await seedSynced("mistral", [
+    {
+      id: "mistral-embed-legacy-18510",
+      capabilities: { completion_chat: false },
+      supportedEndpoints: ["embeddings"],
+      endpointCapabilitySource: "inferred",
+      apiFormat: "embeddings",
+      modelType: "embedding",
+    },
+  ]);
+  // Rows written before #16929 carry no provenance; every current write path stamps one.
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "customModels",
+      "mistral",
+      JSON.stringify([
+        { id: "mistral-embed-legacy-18510", source: "manual", supportedEndpoints: ["rerank"] },
+      ])
+    );
+
+  const row = await catalogRow("mistral/mistral-embed-legacy-18510");
+  assert.deepEqual(row.supported_endpoints, ["rerank"]);
+  assert.equal(row.type, "rerank");
+});

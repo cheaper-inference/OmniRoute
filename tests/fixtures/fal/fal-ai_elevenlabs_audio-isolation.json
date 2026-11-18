@@ -1,0 +1,339 @@
+{
+  "endpoint_id": "fal-ai/elevenlabs/audio-isolation",
+  "metadata": {
+    "display_name": "ElevenLabs Audio Isolation",
+    "category": "audio-to-audio",
+    "description": "Isolate audio tracks using ElevenLabs advanced audio isolation technology.",
+    "status": "active",
+    "tags": ["audio"],
+    "updated_at": "2026-04-21T17:45:06.581Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://storage.googleapis.com/falserverless/web-examples/elevenlabs/elevenlabs_thumbnail.webp",
+    "model_url": "https://fal.run/fal-ai/elevenlabs/audio-isolation",
+    "license_type": "commercial",
+    "date": "2025-02-27T00:00:00.000Z",
+    "group": {
+      "key": "elevenlabs-audio",
+      "label": "Audio Isolation"
+    },
+    "highlighted": false,
+    "stream_url": "https://fal.run/fal-ai/elevenlabs/audio-isolation/stream",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/elevenlabs/audio-isolation",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/elevenlabs/audio-isolation queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/elevenlabs/audio-isolation",
+        "category": "audio-to-audio",
+        "thumbnailUrl": "https://storage.googleapis.com/falserverless/web-examples/elevenlabs/elevenlabs_thumbnail.webp",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/elevenlabs/audio-isolation",
+        "documentationUrl": "https://fal.ai/models/fal-ai/elevenlabs/audio-isolation/api",
+        "about": "ElevenLabs Audio Isolation: Extract clean voice from audio.\n\nIsolates and enhances voice content from audio files, removing background noise,\nmusic, and other non-voice sounds."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "ElevenlabsAudioIsolationInput": {
+          "properties": {
+            "audio_url": {
+              "examples": ["https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"],
+              "title": "Audio Url",
+              "description": "URL of the audio file to isolate voice from",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "video_url": {
+              "title": "Video Url",
+              "description": "Video file to use for audio isolation. Either `audio_url` or `video_url` must be provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "title": "AudioIsolationRequest",
+          "type": "object",
+          "x-fal-order-properties": ["audio_url", "video_url"]
+        },
+        "ElevenlabsAudioIsolationOutput": {
+          "properties": {
+            "timestamps": {
+              "title": "Timestamps",
+              "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "audio": {
+              "examples": [
+                {
+                  "url": "https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"
+                }
+              ],
+              "$ref": "#/components/schemas/File",
+              "description": "The generated audio file"
+            }
+          },
+          "title": "TTSOutput",
+          "type": "object",
+          "x-fal-order-properties": ["audio", "timestamps"],
+          "required": ["audio"]
+        },
+        "File": {
+          "properties": {
+            "content_type": {
+              "examples": ["image/png"],
+              "title": "Content Type",
+              "description": "The mime type of the file.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "title": "Url",
+              "description": "The URL where the file can be downloaded from.",
+              "type": "string"
+            },
+            "file_size": {
+              "examples": [4404019],
+              "title": "File Size",
+              "description": "The size of the file in bytes.",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_name": {
+              "examples": ["z9RV14K95DvU.png"],
+              "title": "File Name",
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "title": "File",
+          "type": "object",
+          "x-fal-order-properties": ["url", "content_type", "file_name", "file_size"],
+          "required": ["url"]
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/elevenlabs/audio-isolation/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/elevenlabs/audio-isolation/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/elevenlabs/audio-isolation": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElevenlabsAudioIsolationInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/elevenlabs/audio-isolation/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ElevenlabsAudioIsolationOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

@@ -1,3 +1,4 @@
+import { ESTIMATED_USAGE_SQL, UNKNOWN_USAGE_SQL } from "../db/usageEvidenceAggregates";
 /**
  * Aggregation utility functions for usage data summarization.
  * Rolls up usage_history (and quota_snapshots) into daily summary tables.
@@ -54,6 +55,10 @@ export async function rollupDailyUsage(
         total_requests = excluded.total_requests,
         total_input_tokens = excluded.total_input_tokens,
         total_output_tokens = excluded.total_output_tokens,
+        total_cache_read_tokens = NULL,
+        estimated_requests = NULL,
+        unknown_evidence_requests = NULL,
+        cached_input_unknown_requests = NULL,
         total_cost = excluded.total_cost
     `;
 
@@ -271,11 +276,14 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(tokens_reasoning, 0) as requestReasoningTokens,
           COALESCE(SUM(tokens_input), 0) as inputTokens,
           COALESCE(SUM(tokens_output), 0) as outputTokens,
-          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+          SUM(tokens_cache_read) as cacheReadTokens,
+          SUM(${ESTIMATED_USAGE_SQL}) as estimatedRequests,
+          SUM(${UNKNOWN_USAGE_SQL}) as unknownEvidenceRequests,
+          SUM(CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END) as cachedInputUnknownRequests,
           COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
           COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-          (provider_cost_usd IS NOT NULL) as hasStoredCost,
-          COALESCE(SUM(provider_cost_usd), 0) as storedCost
+          (COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL) as hasStoredCost,
+          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost
         FROM usage_history
         WHERE timestamp < ?
           AND provider IS NOT NULL AND provider != ''
@@ -297,7 +305,10 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
       requestReasoningTokens: number;
       inputTokens: number;
       outputTokens: number;
-      cacheReadTokens: number;
+      cacheReadTokens: number | null;
+      estimatedRequests: number;
+      unknownEvidenceRequests: number;
+      cachedInputUnknownRequests: number;
       cacheCreationTokens: number;
       reasoningTokens: number;
       hasStoredCost: number;
@@ -315,7 +326,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         // one cache-heavy request's clamped surplus cancel another request's
         // billable input.
         //
-        // A request with a provider-reported exact cost (`provider_cost_usd`) is
+        // A request with a provider-reported cost or catalogue snapshot is
         // archived at that cost; none of its tokens are priced.
         totalCost: row.hasStoredCost
           ? row.storedCost
@@ -350,6 +361,11 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             existing.totalRequests += row.totalRequests;
             existing.inputTokens += row.inputTokens;
             existing.outputTokens += row.outputTokens;
+            if (row.cacheReadTokens !== null)
+              existing.cacheReadTokens = (existing.cacheReadTokens ?? 0) + row.cacheReadTokens;
+            existing.estimatedRequests += row.estimatedRequests;
+            existing.unknownEvidenceRequests += row.unknownEvidenceRequests;
+            existing.cachedInputUnknownRequests += row.cachedInputUnknownRequests;
             existing.totalCost += row.totalCost;
           } else {
             byDay.set(key, {
@@ -359,22 +375,30 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
               totalRequests: row.totalRequests,
               inputTokens: row.inputTokens,
               outputTokens: row.outputTokens,
+              cacheReadTokens: row.cacheReadTokens,
+              estimatedRequests: row.estimatedRequests,
+              unknownEvidenceRequests: row.unknownEvidenceRequests,
+              cachedInputUnknownRequests: row.cachedInputUnknownRequests,
               totalCost: row.totalCost,
             });
           }
           return byDay;
-        }, new Map<string, { provider: string; model: string; date: string; totalRequests: number; inputTokens: number; outputTokens: number; totalCost: number }>())
+        }, new Map<string, { provider: string; model: string; date: string; totalRequests: number; inputTokens: number; outputTokens: number; cacheReadTokens: number | null; estimatedRequests: number; unknownEvidenceRequests: number; cachedInputUnknownRequests: number; totalCost: number }>())
         .values()
     );
 
     const upsert = db.prepare(
       `INSERT INTO daily_usage_summary
-        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cache_read_tokens, total_cost, estimated_requests, unknown_evidence_requests, cached_input_unknown_requests)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(provider, model, date) DO UPDATE SET
         total_requests = excluded.total_requests,
         total_input_tokens = excluded.total_input_tokens,
         total_output_tokens = excluded.total_output_tokens,
+        total_cache_read_tokens = excluded.total_cache_read_tokens,
+        estimated_requests = excluded.estimated_requests,
+        unknown_evidence_requests = excluded.unknown_evidence_requests,
+        cached_input_unknown_requests = excluded.cached_input_unknown_requests,
         total_cost = excluded.total_cost`
     );
     const insertRows = db.transaction((items: typeof archivedRows) => {
@@ -388,7 +412,11 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             row.totalRequests,
             row.inputTokens,
             row.outputTokens,
-            row.totalCost
+            row.cacheReadTokens,
+            row.totalCost,
+            row.estimatedRequests,
+            row.unknownEvidenceRequests,
+            row.cachedInputUnknownRequests
           ).changes,
         0
       );

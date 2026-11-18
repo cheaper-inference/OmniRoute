@@ -48,8 +48,11 @@ export default defineConfig({
   // a slow shard was cancelled at its timeout the log showed only "Running N
   // tests" then silence — impossible to tell which test was slow/hung.
   reporter: process.env.CI ? "line" : "html",
+  // Same assertion budget locally as in CI. With 10 s locally, navigation,
+  // providers-management and compression-studio timed out on a local cold start while CI
+  // passed (#18079). Retries stay CI-only so local runs still show flakes.
   expect: {
-    timeout: process.env.CI ? 30_000 : 10_000,
+    timeout: 30_000,
   },
   use: {
     baseURL: dashboardBaseUrl,

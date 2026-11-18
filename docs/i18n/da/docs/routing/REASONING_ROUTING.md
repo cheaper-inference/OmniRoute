@@ -40,22 +40,17 @@ er valgt. Den kan kun ændre indsats og budget.
 
 ## Indsats og budget
 
-`sourceEffort` accepterer `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` og
-`ultra`. `missing` betyder, at anmodningen hverken indeholder et særskilt indsatsniveau, en tænkningstil/fra-indstilling
-eller et tænkningsbudget. Et signal, der kun angiver et budget, matches derfor kun af `any`.
+`sourceEffort` accepterer `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` og `ultra`. `missing` betyder, at forespørgslen hverken indeholder en diskret indsats eller et tænkeskifte eller tænkebudget. Et signal med kun budget matches derfor kun af `any`.
 
 `effortMode` har tre varianter:
 
-- `inherit` bevarer klientens indsatsniveau, mens modellen eller kombinationen stadig kan ændres.
-- `default` angiver kun `targetEffort`, når der ikke findes noget eksplicit ræsonneringssignal.
-- `force` erstatter det særskilte indsatsniveau med `targetEffort`.
+- `inherit` bevarer klientens indsats, mens den stadig lader modellen eller kombinationen ændre sig.
+- `default` sætter kun `targetEffort`, når der ikke er noget eksplicit ræsonnementsignal til stede.
+- `force` erstatter den diskrete indsats med `targetEffort`.
 
-Uafhængigt heraf kan `budgetAction` være `preserve`, `remove` eller `set`. `force` med `none` fjerner
-alle genkendte indsats- og budgetfelter. `none` sammen med `set` er ugyldigt.
+Uafhængigt kan `budgetAction` være `preserve`, `remove` eller `set`. `force` med `none` fjerner alle anerkendte indsats- og budgetfelter og sætter derefter `reasoning_effort: "none"`, fordi nogle udbydere tænder for tænkning, når feltet er fraværende. Udbydere, der afviser den bogstavelige `none`, justeres ved afsendelse i `open-sse/executors/base/reasoningEffort.ts`. Kommandokode knytter det til `low` undtagen på svarformede anmodninger (`input` uden `messages`), hvor det beholder `none`. På Cloudflare Workers AI (`cloudflare-ai`), får de modeller, der afviser `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), `low`; andre Workers AI modeller beholder `none`. At droppe feltet er ikke en mulighed dér, fordi en fraværende indsats kører modellens standardniveau. `none` sammen med `set` er ugyldig.
 
-Anmodninger, der er målrettet modeller med kendt inkompatibilitet, afvises før upstream-kaldet. For kombinationsmål
-fjernes inkompatible poster. Hvis ingen er tilbage, returnerer anmodningen status `400`.
-Ukendte kapabilitetsdata genererer en advarsel og lader reglen forblive aktiv.
+Anmodninger, der er målrettet mod kendte inkompatible modeller, afvises før opstrømsopkaldet. For kombinationsmål fjernes inkompatible poster; hvis der ikke er nogen tilbage, returnerer anmodningen status `400`. Ukendte kapacitetsdata frembringer en advarsel og lader reglen være aktiv.
 
 ## Sikkerhed og transportprotokoller
 

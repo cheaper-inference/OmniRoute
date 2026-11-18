@@ -21,9 +21,14 @@ test("muse-code models have unique ids", () => {
   assert.equal(unique.size, ids.length, "model IDs must be unique");
 });
 
-test("muse-code models include llama-4-maverick", () => {
+test("muse-code models include no Llama ids", () => {
+  // The Muse Code key answers model_not_found for every Llama id, and neither
+  // /v1/models nor the Muse Code client catalog lists one.
   const ids = muse_codeProvider.models.map((m) => m.id);
-  assert.ok(ids.includes("llama-4-maverick"), "must include llama-4-maverick");
+  assert.deepEqual(
+    ids.filter((id) => id.startsWith("llama-")),
+    []
+  );
 });
 
 test("muse-code models include muse-spark subscription ids", () => {
@@ -32,30 +37,28 @@ test("muse-code models include muse-spark subscription ids", () => {
   assert.ok(ids.includes("muse-spark-1.3-contributor"), "must include muse-spark-1.3-contributor");
 });
 
-test("muse-code models include llama-4-scout", () => {
+test("muse-code models include the Muse Wonder ids", () => {
   const ids = muse_codeProvider.models.map((m) => m.id);
-  assert.ok(ids.includes("llama-4-scout"), "must include llama-4-scout");
+  assert.ok(ids.includes("muse-wonder-1.0"), "must include muse-wonder-1.0");
+  assert.ok(
+    ids.includes("muse-wonder-1.0-contributor"),
+    "must include muse-wonder-1.0-contributor"
+  );
 });
 
-test("muse-code models include llama-3.3-70b", () => {
-  const ids = muse_codeProvider.models.map((m) => m.id);
-  assert.ok(ids.includes("llama-3.3-70b"), "must include llama-3.3-70b");
+test("Muse Wonder and Spark 1.3 have supportsXHighEffort and the max effort", () => {
+  for (const id of ["muse-wonder-1.0", "muse-spark-1.3"]) {
+    const model = muse_codeProvider.models.find((m) => m.id === id);
+    assert.ok(model, `${id} must exist`);
+    assert.equal(model.supportsXHighEffort, true);
+    assert.ok(model.supportedThinkingEfforts?.includes("max"), `${id} must offer max`);
+  }
 });
 
-test("llama-4 models have supportsXHighEffort", () => {
-  const maverick = muse_codeProvider.models.find((m) => m.id === "llama-4-maverick");
-  assert.ok(maverick, "llama-4-maverick must exist");
-  assert.equal(maverick.supportsXHighEffort, true);
-
-  const scout = muse_codeProvider.models.find((m) => m.id === "llama-4-scout");
-  assert.ok(scout, "llama-4-scout must exist");
-  assert.equal(scout.supportsXHighEffort, true);
-});
-
-test("llama-3.3-70b does not support reasoning", () => {
-  const model = muse_codeProvider.models.find((m) => m.id === "llama-3.3-70b");
-  assert.ok(model, "llama-3.3-70b must exist");
-  assert.equal(model.supportsReasoning, false);
+test("Muse Spark 1.2 stops at xhigh, as the client catalog publishes", () => {
+  const model = muse_codeProvider.models.find((m) => m.id === "muse-spark-1.2");
+  assert.ok(model, "muse-spark-1.2 must exist");
+  assert.deepEqual(model.supportedThinkingEfforts, ["minimal", "low", "medium", "high", "xhigh"]);
 });
 
 test("non-reasoning models do not declare supportsXHighEffort", () => {
@@ -74,14 +77,18 @@ test("non-reasoning models do not declare supportsXHighEffort", () => {
 
 test("vision models have supportsVision: true", () => {
   const expectedVision = [
-    "llama-4-maverick",
-    "llama-4-scout",
-    "llama-3.2-90b-vision",
-    "llama-3.2-11b-vision",
+    "muse-wonder-1.0",
+    "muse-wonder-1.0-contributor",
+    "muse-spark-1.3",
+    "muse-spark-1.3-contributor",
+    "muse-spark-1.2",
+    "muse-spark-1.2-contributor",
   ];
-  for (const model of muse_codeProvider.models) {
-    if (expectedVision.includes(model.id)) {
-      assert.equal(model.supportsVision, true, `${model.id} should have supportsVision`);
-    }
+  for (const id of expectedVision) {
+    const model = muse_codeProvider.models.find((m) => m.id === id);
+    assert.ok(model, `${id} must exist`);
+    assert.equal(model.supportsVision, true, `${id} should have supportsVision`);
   }
+  const spark11 = muse_codeProvider.models.find((m) => m.id === "muse-spark-1.1");
+  assert.equal(spark11?.supportsVision, false, "muse-spark-1.1 takes text only");
 });

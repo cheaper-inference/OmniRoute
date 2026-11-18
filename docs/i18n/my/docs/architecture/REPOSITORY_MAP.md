@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Root files များ
+## Root ဖိုင်များ
 
-| ဖိုင်                                       | ရည်ရွယ်ချက်                                                                                                          |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | မားကတ်တင်း မိတ်ဆက်စာမျက်နှာ + အမြန်စတင်နည်း + လုပ်ဆောင်ချက်ဇယား (`llm.txt` ကိုလည်း ကြည့်ပါ)                          |
-| **CHANGELOG.md**                            | ထုတ်ဝေမှုတစ်ခုချင်းစီအလိုက် ပြောင်းလဲမှုမှတ်တမ်း (`/version-bump-cc` skill က အလိုအလျောက် ဖန်တီးပေးသည်)               |
-| **LICENSE**                                 | MIT လိုင်စင်စာသား                                                                                                    |
-| **CLAUDE.md**                               | Claude Code agent များအတွက် ပရောဂျက်စည်းမျဉ်းများ (မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်းများ၊ သတ်မှတ်ချက်များ၊ အခြေအနေများ) |
-| **AGENTS.md**                               | CLAUDE.md နှင့် တူညီသော်လည်း Claude မဟုတ်သော AI agent များအတွက် (Codex၊ Cursor စသည်)                                 |
-| **GEMINI.md**                               | Gemini အခြေပြု agent များအတွက် အကျဉ်းချုပ်စည်းမျဉ်းများ (CLAUDE.md ၏ တစ်စိတ်တစ်ပိုင်း)                               |
-| **CONTRIBUTING.md**                         | ပံ့ပိုးကူညီသူလမ်းညွှန်- တည်ဆောက်ပြင်ဆင်မှု၊ conventional commit များ၊ စမ်းသပ်မှု၊ PR လုပ်ငန်းစဉ်                     |
-| **SECURITY.md**                             | အားနည်းချက်အစီရင်ခံခြင်း မူဝါဒ၊ ပံ့ပိုးထားသော version များ၊ ခြိမ်းခြောက်မှုမော်ဒယ်                                   |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — အသိုင်းအဝိုင်း၏ အပြုအမူဆိုင်ရာ မျှော်လင့်ချက်များ                                             |
-| **llm.txt**                                 | LLM crawler များအတွက် အကောင်းဆုံးဖြစ်အောင် ပြုလုပ်ထားသော ရိုးရိုးစာသား မိတ်ဆက်စာမျက်နှာ (AI assistant များအတွက် SEO) |
-| **package.json**                            | npm manifest၊ script များ၊ dependency များ၊ engine များ၊ c8 coverage gate                                            |
-| **package-lock.json**                       | သတ်မှတ်ပိတ်ထားသော dependency tree                                                                                    |
-| **tsconfig.json**                           | မူလ TypeScript config                                                                                                |
-| **tsconfig.typecheck-core.json**            | `src/` core အတွက် typecheck config                                                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | တင်းကျပ်သော (`noImplicitAny`) typecheck                                                                              |
-| **tsconfig.tsbuildinfo**                    | TS incremental build cache (gitignore ထဲတွင် ထည့်ထားသည်)                                                             |
-| **next.config.mjs**                         | Next.js 16 build configuration (standalone output)                                                                   |
-| **next-env.d.ts**                           | Next.js က အလိုအလျောက်ဖန်တီးထားသော env type များ                                                                      |
-| **eslint.config.mjs**                       | ESLint flat config (ပရောဂျက်ဧရိယာအလိုက် စည်းမျဉ်းများ)                                                               |
-| **prettier.config.mjs**                     | Prettier format ချခြင်းဆိုင်ရာ စည်းမျဉ်းများ                                                                         |
-| **postcss.config.mjs**                      | Tailwind/CSS pipeline အတွက် PostCSS config                                                                           |
-| **playwright.config.ts**                    | Playwright E2E စမ်းသပ်မှု config                                                                                     |
-| **vitest.config.ts**                        | Vitest config (မူလ suite)                                                                                            |
-| **vitest.mcp.config.ts**                    | MCP server / autoCombo / cache suite များအတွက် Vitest config                                                         |
-| **sonar-project.properties**                | SonarQube/SonarCloud config (ကုဒ်အရည်အသွေး)                                                                          |
-| **Dockerfile**                              | အဆင့်များစွာပါဝင်သော Docker build (builder → runner-base → runner-cli)                                               |
-| **docker-compose.yml**                      | profile ၄ ခုပါဝင်သော development compose (base၊ cli၊ host၊ cliproxyapi) + redis sidecar                              |
-| **docker-compose.prod.yml**                 | Production compose (port 20130၊ redis၊ အမည်ပေးထားသော volume များ)                                                    |
-| **.dockerignore**                           | Docker context မှ ဖယ်ထုတ်ထားသော ဖိုင်များ                                                                            |
-| **fly.toml**                                | Fly.io deployment config (region `sin`၊ port 20128၊ /data volume)                                                    |
-| **.env.example**                            | env ဖိုင် template (ပထမဆုံး install လုပ်ချိန်တွင် `.env` သို့ အလိုအလျောက် ကူးယူသည်)                                  |
-| **.gitignore**                              | Git ignore pattern များ                                                                                              |
-| **.npmignore**                              | npm publish မှ ဖယ်ထုတ်မည့်စာရင်း                                                                                     |
-| **.npmrc**                                  | npm config (registry၊ lockfile မူဝါဒ)                                                                                |
-| **.node-version**                           | Node version သတ်မှတ်ချက် (nvm-compatible tool များက အသုံးပြုသည်)                                                     |
-| **.nvmrc**                                  | nvm အတွက် Node version သတ်မှတ်ချက်                                                                                   |
-| **eslint.complexity.config.mjs**            | complexity ratchet အတွက် ESLint config (`scripts/check/check-complexity.mjs --config`)                               |
-| **eslint.sonarjs.config.mjs**               | SonarJS စည်းမျဉ်းများအတွက် ESLint config (cognitive complexity / duplication)                                        |
-| **source.config.ts**                        | Fumadocs `defineDocs` source config (`.source/` သို့ ပေးပို့သည်)                                                     |
-| **knip.json**                               | Knip config — အသုံးမပြုထားသော ဖိုင်များ/exports/deps (dead-code gate သို့ ပေးပို့သည်)                                |
-| **stryker.conf.json**                       | Stryker mutation-testing config                                                                                      |
-| **.size-limit.json**                        | size-limit bundle အရွယ်အစားကန့်သတ်ချက် config                                                                        |
-| **promptfooconfig.yaml**                    | promptfoo eval config                                                                                                |
-| **.gitleaks.toml**                          | gitleaks လျှို့ဝှက်ချက် scan စည်းမျဉ်းအစုံ                                                                           |
-| **.zizmor.yml**                             | zizmor GitHub-Actions လုံခြုံရေး lint config                                                                         |
-| **socket.yml**                              | Socket.dev supply-chain config                                                                                       |
-| **news.json**                               | ဘာသာစကားအလိုက် ပြင်ဆင်ထားသော v2 ကြေညာချက် feed; Radar စတင်မိတ်ဆက်မှု item ကို inactive အဖြစ် ဖြန့်ချိထားသည်          |
-| **flake.nix** / **flake.lock**              | Nix dev-shell သတ်မှတ်ချက် + lock                                                                                     |
-| **.env**                                    | Local လျှို့ဝှက်ချက်များ (gitignored — `.env.example` မှ ထုတ်လုပ်ထားသည်)                                             |
+| ဖို                                         | ရည်ရွယ်ချက်                                                                                                 |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **README.md**                               | စျေးကွက်ရှာဖွေရေးစာမျက်နှာ + အမြန်စတင်သည့် + အင်္ဂါရပ်မက်ထရစ် ( `llm.txt` ကိုလည်းကြည့်ပါ)                   |
+| **CHANGELOG.md**                            | ထုတ်ဝေမှုတစ်ကြိမ်ပြောင်းလဲမှုမှတ်တမ်း ( `/version-bump-cc` ကျွမ်းကျင်မှုဖြင့် အလိုအလျောက်ထုတ်ပေးသည်)        |
+| **LICENSE**                                 | MIT လိုင်စင်စာသား                                                                                           |
+| **CLAUDE.md**                               | Claude ကုဒ်အေးဂျင့်များအတွက် ပရောဂျက်စည်းမျဉ်းများ (ခက်ခဲစည်းမျဉ်းများ၊ စည်းမျဥ်းစည်းကမ်းများ၊ အခြေအနေများ) |
+| **AGENTS.md**                               | CLAUDE.md နှင့်တူသော်လည်း Claude AI မဟုတ်သော အေးဂျင့်များအတွက် (Codex၊ Cursor စသည်ဖြင့်)                    |
+| **GEMINI.md**                               | Gemini အခြေပြု အေးဂျင့်များအတွက် အတိုချုံးစည်းမျဉ်းများ ( CLAUDE.md၏ အခွဲ)                                  |
+| **CONTRIBUTING.md**                         | ပံ့ပိုးကူညီသူလမ်းညွှန်- စနစ်ထည့်သွင်းမှု၊ သမားရိုးကျလုပ်ဆောင်မှုများ၊ စမ်းသပ်မှု၊ PR စီးဆင်းမှု             |
+| **SECURITY.md**                             | အားနည်းချက်အစီရင်ခံခြင်းမူဝါဒ၊ ပံ့ပိုးထားသောဗားရှင်းများ၊ ခြိမ်းခြောက်မှုပုံစံ                              |
+| **CODE_OF_CONDUCT.md**                      | ပံ့ပိုးကူညီသူ ပဋိညာဉ် — အသိုင်းအဝိုင်း၏ အပြုအမူ မျှော်လင့်ချက်များ                                          |
+| **llm.txt**                                 | LLM crawlers (SEO for AI assistant) အတွက် ရိုးရှင်းသော စာသားဆင်းသက်ခြင်း                                    |
+| **package.json**                            | npm manifest၊ scripts၊ dependencies၊ engines၊ c8 coverage gate                                              |
+| **package-lock.json**                       | သော့ခတ်ထားသော မှီခိုသစ်ပင်                                                                                  |
+| **tsconfig.json**                           | Root TypeScript config                                                                                      |
+| **tsconfig typecheck-core.json**            | `src/` core အတွက် ပုံစံစစ်ဆေးပါ။                                                                            |
+| **tsconfig typecheck-noimplicit-core.json** | တင်းကျပ်သော (`noImplicitAny`) စာရိုက်ချက်                                                                   |
+| **tsconfig.tsbuildinfo**                    | TS incremental build cache (gitignored)                                                                     |
+| **နောက်တစ်ခု။config.mjs**                   | Next.js 16 တည်ဆောက်မှုဖွဲ့စည်းပုံ (သီးသန့်အထွက်နှုန်း)                                                      |
+| **နောက်တစ်ခု။d.ts**                         | Next.js အလိုအလျောက်ထုတ်ပေးသော env အမျိုးအစားများ                                                            |
+| **eslint config.mjs**                       | ESLint flat config (ပရောဂျက်ဧရိယာအလိုက် စည်းမျဉ်းများ)                                                      |
+| **ပိုလှတယ်။config.mjs**                     | Prettier ဖော်မတ်ချခြင်း စည်းမျဉ်းများ                                                                       |
+| **postcss config.mjs**                      | Tailwind/CSS ပိုက်လိုင်းအတွက်PostCSS config                                                                 |
+| **ပြဇာတ်ရေးဆရာ။config.ts**                  | Playwright E2E စမ်းသပ်မှု config                                                                            |
+| **vitest config.ts**                        | Vitest config (မူရင်းအစုံ)                                                                                  |
+| **vitest.mcp config.ts**                    | MCP server / autoCombo / cache suites အတွက်Vitest config                                                    |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (ကုဒ်အရည်အသွေး)                                                                 |
+| **Dockerfile**                              | Multi-stage Docker build (Builder → runner-base → runner-cli)                                               |
+| **docker-compose.yml**                      | Dev သည် ပရိုဖိုင် 4 ခု (base၊ cli၊ host၊ cliproxyapi) + redis sidecar ဖြင့် ရေးဖွဲ့ပါ။                      |
+| **docker-compose ။prod.yml**                | ထုတ်လုပ်ရေးဖွဲ့ခြင်း (port 20130၊ redis၊ အမည်ပေးထားသော အတွဲများ)                                            |
+| **.dockerignore**                           | Docker အကြောင်းအရာမှ ဖယ်ထုတ်ထားသော ဖိုင်များ                                                                |
+| **fly.toml**                                | Fly.io အသုံးချမှု config (ဒေသ `sin`၊ ဆိပ်ကမ်း 20128၊ /ဒေတာပမာဏ)                                             |
+| **.env.ဥပမာ**                               | နမူနာပုံစံ env ဖိုင် (ပထမဆုံးထည့်သွင်းစဥ်တွင် `.env` သို့ အလိုအလျောက်ကူးယူသည်)                              |
+| **.gitignore**                              | ပုံစံများကို လျစ်လျူရှုပါ။                                                                                  |
+| **.npmignore**                              | npm မှ ဖယ်ထုတ်ထားသောစာရင်း                                                                                  |
+| **.npmrc**                                  | npm config (registry၊ lockfile policy)                                                                      |
+| **.node-ဗားရှင်း**                          | Node ဗားရှင်း ပင်နံပါတ် (nvm- တွဲဖက်သုံးနိုင်သော ကိရိယာများဖြင့် အသုံးပြုသည်)                               |
+| **.nvmrc**                                  | nvm အတွက် Node ဗားရှင်း pin                                                                                 |
+| **eslint.complexity config.mjs**            | ရှုပ်ထွေးမှု ratchet (`scripts/check/check-complexity.mjs --config`) အတွက်ESLint config                     |
+| **eslint.sonarjs။config.mjs**               | SonarJS စည်းမျဉ်းများအတွက်ESLint config (သိမှုရှုပ်ထွေးမှု / ပွားခြင်း)                                     |
+| **အရင်းအမြစ်။config.ts**                    | Fumadocs `defineDocs` အရင်းအမြစ် config (feds `.source/`)                                                   |
+| **knip.json**                               | Knip config — အသုံးမပြုသော files/exports/deps ( dead-code gate ကို ကျွေးသည် )                               |
+| **တိုက်စစ်မှူး။conf.mjs**                   | Stryker ဗီဇပြောင်းလဲမှု-စမ်းသပ်ခြင်း config ( `mutate` မှ `tap.testFiles` ကိုတွက်ချက်သည်)                   |
+| **.size-limit.json**                        | အရွယ်အစား-ကန့်သတ် အတွဲလိုက် ဘတ်ဂျက်ပြင်ဆင်မှု                                                               |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                                       |
+| **.gitleaks.toml**                          | gileaks လျှို့ဝှက်စကင်န်စည်းမျဉ်းသတ်မှတ်                                                                    |
+| **.zizmor.yml**                             | zizmor GitHub-Actions လုံခြုံရေး-lint config                                                                |
+| **socket.yml**                              | Socket.dev ထောက်ပံ့ရေးကွင်းဆက်ပုံစံ                                                                         |
+| **news.json**                               | v2 ကြေငြာချက်ဖိဒ် ရေဒါပစ်လွှတ်သည့်အရာသည် သင်္ဘောမလှုပ်ရှားပါ။                                               |
+| **flake.nix** /** flake.lock**              | Nix dev-shell အဓိပ္ပါယ် + လော့ခ်                                                                            |
+| **.env**                                    | ဒေသဆိုင်ရာလျှို့ဝှက်ချက်များ ( `.env.example` မှထုတ်လုပ်ထားသော gitignored — )                               |
 
-> **v3.8.26 တွင် root မှ ရွှေ့ထုတ်ထားသည် (ရှုပ်ထွေးမှုလျှော့ချရန်):**
+> **v3.8.26 (declutter) တွင် အမြစ်မှ ရွှေ့ထားသည်-**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` နှင့် ထုတ်လုပ်ထားသော `quality-metrics.json` (gitignored)။ [`## config/`](#config--static-configs--quality-gate-state) ကို ကြည့်ပါ။
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` နှင့် ထုတ်လုပ်ထားသော `quality-metrics.json` (gitignored)။ [`## config/`](#config--static-configs--quality-gate-state) ကြည့်ပါ။
 
 ---
 
@@ -222,7 +222,7 @@ src/
 | `policy.ts`            | မူဝါဒအင်ဂျင်                                        |
 | `fallbackPolicy.ts`    | ဆုတ်ယုတ်သောဆုံးဖြတ်ချက်သစ်ပင်                       |
 | `costRules.ts`         | ကုန်ကျစရိတ်တွက်ချက်နည်းများ                         |
-| `lockoutPolicy.ts`     | Model/connection လော့ခ်ချမှုမူဝါဒ                   |
+| `lockoutPolicy.ts`     | Model/connection လော့ခ်ချခြင်းမူဝါဒ                 |
 | `tagRouter.ts`         | Tag-based လမ်းကြောင်း                               |
 | `comboResolver.ts`     | Combo resolution (ပေါင်းစပ်အင်ဂျင်ဖြင့်အသုံးပြုသည်) |
 | `modelAvailability.ts` | မော်ဒယ်အလိုက်ရရှိနိုင်မှုကို စစ်ဆေးပါ။              |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ဒက်ရှ်ဘုတ် အစိတ်အပိုင်း API: `packages/ui-kit` — ပေါ်ရှိ အဒက်တာများသည် `docs/architecture/DESIGN_SYSTEM.md` ကြည့်ပါ။ |
 | `constants/iconMap.ts`           | `ICON_MAP`: စခရင်များ → Lucide အစိတ်အပိုင်းများ (`<Icon>`) အသုံးပြုသည့် အိုင်ကွန်အမည်များ                            |
-| `constants/providers.ts`         | **380 ပံ့ပိုးပေးသည်။** Zod မှန်ကန်မှု (အမှန်တရားအရင်းအမြစ်) နှင့်အတူ                                                 |
+| `constants/providers.ts`         | **394 ပံ့ပိုးပေးသည်။** Zod မှန်ကန်မှု (အမှန်တရားအရင်းအမြစ်) နှင့်အတူ                                                 |
 | `constants/cliTools.ts`          | ပြင်ပ CLI ကိရိယာ မှတ်ပုံတင်ခြင်း                                                                                     |
-| `constants/routingStrategies.ts` | **လမ်းကြောင်း ဗျူဟာ 20** ဦးစားပေးများဖြင့်                                                                           |
+| `constants/routingStrategies.ts` | **လမ်းကြောင်းဗျူဟာ 22 ခု** ဦးစားပေးများဖြင့်                                                                         |
 | `constants/publicApiRoutes.ts`   | Bearer (vs စီမံခန့်ခွဲမှု) auth လိုအပ်သောလမ်းကြောင်းများ                                                             |
 | `constants/upstreamHeaders.ts`   | အထက်စီးကြောင်း တောင်းဆိုချက်များ အတွက် ခေါင်းစီး ငြင်းဆိုစာရင်း                                                      |
 | `validation/schemas.ts`          | ~ 80 Zod schemas ( API စာချုပ်များအတွက် အမှန်တရား၏ တစ်ခုတည်းသောအရင်းအမြစ်)                                           |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # ဖိုင် 16 ခု (handler 12 ခု + helper 4 ခု): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search စသည်
-├── executors/           # executor module 150 ခု (BaseExecutor ကို တိုးချဲ့ထားသော class များ + provider တစ်ခုချင်းအလိုက် helper များ)
+├── executors/           # executor module 163 ခု (BaseExecutor ကို တိုးချဲ့ထားသော class များ + provider တစ်ခုချင်းအလိုက် helper များ)
 ├── translator/          # Format converter များ (request 9 ခု၊ response 9 ခု၊ helper 9 ခု)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # service module ~80+ ခု (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM စသည်)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစည်းမှု + အတွင်းပိုင်း OmniRoute CLI                                                  |
 | `I18N.md`                   | i18n ဗိသုကာလက်ရာ၊ ဘာသာစကားတစ်ခု၊ ဘာသာစကား ၆၇ ခုကို ပေါင်းထည့်ခြင်း။                                   |
 | `UNINSTALL.md`              | ဖယ်ရှားရှင်းလင်းရေးအဆင့်များ                                                                          |
-| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ 380 ၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ 394 ၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
 
 ### စနစ်ခွဲများသည် နက်ရှိုင်းစွာ ငုပ်လျှိုးနေသည်။
 
@@ -428,7 +428,7 @@ open-sse/
 | `EVALS.md`                                     | Eval မူဘောင် (အစုံ၊ အပြေး၊ ရူဘယ်)                                                     |
 | `GUARDRAILS.md`                                | PII မျက်နှာဖုံး၊ ချက်ချင်းထိုးဆေး၊ အမြင်အာရုံတံတား                                    |
 | `COMPLIANCE.md`                                | စာရင်းစစ်မှတ်တမ်း၊ ထိန်းသိမ်းထားမှု၊ noLog ဖယ်ထုတ်ခြင်း။                              |
-| `WEBHOOKS.md`                                  | HMAC မှ လက်မှတ်ထိုးထားသော webhook ပေးပို့ခြင်း။                                       |
+| `WEBHOOKS.md`                                  | HMAC မှ လက်မှတ်ရေးထိုးထားသော webhook ပေးပို့ခြင်း။                                    |
 | `REASONING_REPLAY.md`                          | `reasoning_content` အတွက် hybrid memory/SQLite ကက်ရှ်                                 |
 | `AUTHZ_GUIDE.md`                               | ခွင့်ပြုချက် ပိုက်လိုင်း (`classify` → `policies` → `enforce`)                        |
 | `RESILIENCE_GUIDE.md`                          | circuit breaker + cooldown + model lockout                                            |

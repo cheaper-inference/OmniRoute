@@ -10,6 +10,7 @@
 
 import { getDbInstance } from "../core";
 import { backupDbFile } from "../backup";
+import { deleteCodexAutospendCount } from "../codexResetCreditAutospend";
 import { cleanupComboConnectionRefs } from "../combos";
 import { deleteLKGPByConnectionIds } from "../settings/lkgp";
 import { deleteProviderLimitsCache } from "../providerLimits";
@@ -98,6 +99,11 @@ function _purgeProviderLimitsCacheForConnections(ids: string[]) {
       deleteProviderLimitsCache(id);
     } catch (error) {
       console.error("Failed to purge provider limits cache for deleted connection:", error);
+    }
+    try {
+      deleteCodexAutospendCount(id);
+    } catch (error) {
+      console.error("Failed to purge reset-credit auto-spend state of deleted connection:", error);
     }
   }
 }

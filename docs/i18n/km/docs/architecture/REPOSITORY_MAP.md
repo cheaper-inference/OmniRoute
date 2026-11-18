@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## ឯកសារនៅថតឫស
+## ឯកសារជា Root
 
-| ឯកសារ                                       | គោលបំណង                                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | ទំព័រចុះចតសម្រាប់ទីផ្សារ + ការចាប់ផ្តើមរហ័ស + ម៉ាទ្រីសលក្ខណៈពិសេស (សូមមើលផងដែរ `llm.txt`)                      |
-| **CHANGELOG.md**                            | កំណត់ហេតុផ្លាស់ប្តូរតាមការចេញផ្សាយនីមួយៗ (បង្កើតដោយស្វ័យប្រវត្តិដោយជំនាញ `/version-bump-cc`)                   |
-| **LICENSE**                                 | អត្ថបទអាជ្ញាបណ្ណ MIT                                                                                           |
-| **CLAUDE.md**                               | ច្បាប់គម្រោងសម្រាប់ភ្នាក់ងារ Claude Code (ច្បាប់តឹងរ៉ឹង អនុសញ្ញា សេណារីយ៉ូ)                                    |
-| **AGENTS.md**                               | ដូចគ្នានឹង CLAUDE.md ប៉ុន្តែសម្រាប់ភ្នាក់ងារ AI ដែលមិនមែនជា Claude (Codex, Cursor ជាដើម)                       |
-| **GEMINI.md**                               | ច្បាប់សង្ខេបសម្រាប់ភ្នាក់ងារដែលផ្អែកលើ Gemini (សំណុំរងនៃ CLAUDE.md)                                            |
-| **CONTRIBUTING.md**                         | មគ្គុទ្ទេសក៍អ្នករួមចំណែក៖ ការរៀបចំ conventional commits ការធ្វើតេស្ត និងលំហូរ PR                               |
-| **SECURITY.md**                             | គោលការណ៍រាយការណ៍ភាពងាយរងគ្រោះ កំណែដែលគាំទ្រ និងគំរូការគំរាមកំហែង                                               |
-| **CODE_OF_CONDUCT.md**                      | កតិកាសញ្ញាអ្នករួមចំណែក — ការរំពឹងទុកអំពីអាកប្បកិរិយាក្នុងសហគមន៍                                                |
-| **llm.txt**                                 | ទំព័រចុះចតជាអត្ថបទធម្មតាដែលបានបង្កើនប្រសិទ្ធភាពសម្រាប់កម្មវិធីរុករករបស់ LLM (SEO សម្រាប់ជំនួយការ AI)           |
-| **package.json**                            | manifest របស់ npm, scripts, dependencies, engines និងច្រកកម្រិត coverage របស់ c8                               |
-| **package-lock.json**                       | មែកធាង dependencies ដែលបានចាក់សោ                                                                               |
-| **tsconfig.json**                           | ការកំណត់រចនាសម្ព័ន្ធ TypeScript មេ                                                                             |
-| **tsconfig.typecheck-core.json**            | ការកំណត់រចនាសម្ព័ន្ធ typecheck សម្រាប់ផ្នែកស្នូល `src/`                                                        |
-| **tsconfig.typecheck-noimplicit-core.json** | ការកំណត់រចនាសម្ព័ន្ធ typecheck ដ៏តឹងរ៉ឹង (`noImplicitAny`)                                                     |
-| **tsconfig.tsbuildinfo**                    | ឃ្លាំងសម្ងាត់ incremental build របស់ TS (ត្រូវបាន gitignore)                                                   |
-| **next.config.mjs**                         | ការកំណត់រចនាសម្ព័ន្ធ build របស់ Next.js 16 (លទ្ធផល standalone)                                                 |
-| **next-env.d.ts**                           | ប្រភេទ env ដែលបង្កើតដោយស្វ័យប្រវត្តិដោយ Next.js                                                                |
-| **eslint.config.mjs**                       | ការកំណត់រចនាសម្ព័ន្ធបែប flat របស់ ESLint (ច្បាប់តាមតំបន់គម្រោងនីមួយៗ)                                          |
-| **prettier.config.mjs**                     | ច្បាប់ធ្វើទ្រង់ទ្រាយរបស់ Prettier                                                                              |
-| **postcss.config.mjs**                      | ការកំណត់រចនាសម្ព័ន្ធ PostCSS សម្រាប់ pipeline របស់ Tailwind/CSS                                                |
-| **playwright.config.ts**                    | ការកំណត់រចនាសម្ព័ន្ធតេស្ត E2E របស់ Playwright                                                                  |
-| **vitest.config.ts**                        | ការកំណត់រចនាសម្ព័ន្ធ Vitest (សំណុំតេស្តលំនាំដើម)                                                               |
-| **vitest.mcp.config.ts**                    | ការកំណត់រចនាសម្ព័ន្ធ Vitest សម្រាប់ MCP server / autoCombo / សំណុំតេស្ត cache                                  |
-| **sonar-project.properties**                | ការកំណត់រចនាសម្ព័ន្ធ SonarQube/SonarCloud (គុណភាពកូដ)                                                          |
-| **Dockerfile**                              | Docker build ពហុដំណាក់កាល (builder → runner-base → runner-cli)                                                 |
-| **docker-compose.yml**                      | compose សម្រាប់ការអភិវឌ្ឍដែលមាន 4 profiles (base, cli, host, cliproxyapi) + redis sidecar                      |
-| **docker-compose.prod.yml**                 | compose សម្រាប់ production (port 20130, redis, named volumes)                                                  |
-| **.dockerignore**                           | ឯកសារដែលត្រូវបានដកចេញពី Docker context                                                                         |
-| **fly.toml**                                | ការកំណត់រចនាសម្ព័ន្ធ deployment របស់ Fly.io (តំបន់ `sin`, port 20128, volume /data)                            |
-| **.env.example**                            | ឯកសារ env គំរូ (ចម្លងដោយស្វ័យប្រវត្តិទៅ `.env` នៅពេលដំឡើងលើកដំបូង)                                             |
-| **.gitignore**                              | លំនាំមិនអើពើរបស់ Git                                                                                           |
-| **.npmignore**                              | បញ្ជីដកចេញពីការបោះផ្សាយ npm                                                                                    |
-| **.npmrc**                                  | ការកំណត់រចនាសម្ព័ន្ធ npm (registry, គោលការណ៍ lockfile)                                                         |
-| **.node-version**                           | ការកំណត់ថេរកំណែ Node (ប្រើដោយឧបករណ៍ដែលឆបគ្នាជាមួយ nvm)                                                         |
-| **.nvmrc**                                  | ការកំណត់ថេរកំណែ Node សម្រាប់ nvm                                                                               |
-| **eslint.complexity.config.mjs**            | ការកំណត់រចនាសម្ព័ន្ធ ESLint សម្រាប់ច្រកត្រួតពិនិត្យ complexity (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ការកំណត់រចនាសម្ព័ន្ធ ESLint សម្រាប់ច្បាប់ SonarJS (ភាពស្មុគស្មាញផ្នែកការយល់ដឹង / ការស្ទួន)                     |
-| **source.config.ts**                        | ការកំណត់រចនាសម្ព័ន្ធប្រភព `defineDocs` របស់ Fumadocs (ផ្គត់ផ្គង់ទៅ `.source/`)                                 |
-| **knip.json**                               | ការកំណត់រចនាសម្ព័ន្ធ Knip — ឯកសារ/exports/deps ដែលមិនបានប្រើ (ផ្គត់ផ្គង់ទៅច្រកត្រួតពិនិត្យ dead-code)          |
-| **stryker.conf.json**                       | ការកំណត់រចនាសម្ព័ន្ធ mutation-testing របស់ Stryker                                                             |
-| **.size-limit.json**                        | ការកំណត់រចនាសម្ព័ន្ធថវិកាទំហំ bundle របស់ size-limit                                                           |
-| **promptfooconfig.yaml**                    | ការកំណត់រចនាសម្ព័ន្ធ eval របស់ promptfoo                                                                       |
-| **.gitleaks.toml**                          | សំណុំច្បាប់ស្កេនរកព័ត៌មានសម្ងាត់របស់ gitleaks                                                                  |
-| **.zizmor.yml**                             | ការកំណត់រចនាសម្ព័ន្ធ security-lint សម្រាប់ GitHub Actions របស់ zizmor                                          |
-| **socket.yml**                              | ការកំណត់រចនាសម្ព័ន្ធសង្វាក់ផ្គត់ផ្គង់របស់ Socket.dev                                                           |
-| **news.json**                               | មតិព័ត៌មានប្រកាស v2 ដែលបានធ្វើមូលដ្ឋានីយកម្ម; ធាតុបើកដំណើរការ Radar ត្រូវបានចេញផ្សាយក្នុងស្ថានភាពអសកម្ម        |
-| **flake.nix** / **flake.lock**              | និយមន័យ dev-shell របស់ Nix + ឯកសារ lock                                                                        |
-| **.env**                                    | ព័ត៌មានសម្ងាត់ក្នុងម៉ាស៊ីន (ត្រូវបាន gitignore — បង្កើតពី `.env.example`)                                      |
+| ឯកសារ                                        | គោលបំណង                                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **README.md**                                | ទំព័រចុះចតទីផ្សារ + ការចាប់ផ្តើមរហ័ស + លក្ខណៈពិសេសម៉ាទ្រីស (សូមមើលផងដែរ `llm.txt`)          |
+| **CHANGELOG.md**                             | រាល់ការចេញផ្សាយការផ្លាស់ប្តូរ (បង្កើតដោយស្វ័យប្រវត្តិដោយជំនាញ `/version-bump-cc` )          |
+| **LICENSE**                                  | អត្ថបទអាជ្ញាប័ណ្ណ MIT                                                                       |
+| **CLAUDE.md**                                | ច្បាប់គម្រោងសម្រាប់ភ្នាក់ងារកូដ Claude (ច្បាប់រឹង អនុសញ្ញា សេណារីយ៉ូ)                       |
+| **AGENTS.md**                                | ដូចគ្នានឹង CLAUDE.md ប៉ុន្តែសម្រាប់ភ្នាក់ងារដែលមិនមែនជា Claude AI (Codex, Cursor, ល។ )      |
+| **GEMINI.md**                                | ច្បាប់សង្ខេបសម្រាប់ភ្នាក់ងារដែលមានមូលដ្ឋានលើ Gemini (សំណុំរងនៃ CLAUDE.md)                   |
+| **CONTRIBUTING.md**                          | មគ្គុទ្ទេសក៍អ្នករួមចំណែក៖ ការដំឡើង ការប្តេជ្ញាចិត្តសាមញ្ញ ការធ្វើតេស្ត លំហូរ PR             |
+| **SECURITY.md**                              | គោលការណ៍រាយការណ៍ភាពងាយរងគ្រោះ កំណែដែលគាំទ្រ គំរូគំរាមកំហែង                                  |
+| **CODE_OF_CONDUCT.md**                       | ការរំពឹងទុកអំពីអាកប្បកិរិយាសហគមន៍របស់អ្នកចូលរួមកតិកាសញ្ញា —                                 |
+| **llm.txt**                                  | ការចុះចតជាអត្ថបទធម្មតាបានធ្វើឱ្យប្រសើរសម្រាប់ឧបករណ៍រាវរក LLM (SEO សម្រាប់ជំនួយ AI )         |
+| **package.json**                             | npm manifest, scripts, dependencies, engines, c8 coverage gate                              |
+| **package-lock.json**                        | ចាក់សោដើមឈើអាស្រ័យ                                                                          |
+| **tsconfig.json**                            | កំណត់រចនាសម្ព័ន្ធ root TypeScript                                                           |
+| **tsconfig ។typecheck-core.json**            | Typecheck config សម្រាប់ `src/` core                                                        |
+| **tsconfig ។typecheck-noimplicit-core.json** | ការវាយអក្សរយ៉ាងតឹងរឹង (`noImplicitAny`)                                                     |
+| **tsconfig.tsbuildinfo**                     | TS ឃ្លាំងសម្ងាត់បង្កើតបន្ថែម (មិនអើពើ)                                                      |
+| **បន្ទាប់។config.mjs**                       | ការកំណត់រចនាសម្ព័ន្ធស្ថាបនាNext.js 16 (លទ្ធផលដាច់ដោយឡែក)                                    |
+| **បន្ទាប់-env ។d.ts**                        | Next.js ប្រភេទ env បង្កើតដោយស្វ័យប្រវត្តិ                                                   |
+| **អេលីន។config.mjs**                         | ESLint flat config (ច្បាប់ក្នុងមួយតំបន់គម្រោង)                                              |
+| **ស្អាតជាង។config.mjs**                      | ក្បួនធ្វើទ្រង់ទ្រាយ Prettier                                                                |
+| **postcss ។config.mjs**                      | PostCSS config សម្រាប់ Tailwind/CSS pipeline                                                |
+| **អ្នកនិពន្ធរឿងល្ខោន។config.ts**             | ការកំណត់រចនាសម្ព័ន្ធសាកល្បង Playwright E2E                                                  |
+| **ភ្ញៀវ។config.ts**                          | Vitest config (ឈុតលំនាំដើម)                                                                 |
+| **vitest.mcp ។config.ts**                    | Vitest config សម្រាប់ MCP server / autoCombo / cache suites                                 |
+| **sonar-project.properties**                 | SonarQube/SonarCloud config (គុណភាពកូដ)                                                     |
+| **ឯកសារឯកសារ**                               | ការបង្កើត Docker ច្រើនដំណាក់កាល (អ្នកបង្កើត → runner-base → runner-cli)                     |
+| **docker-compose.yml**                       | Dev តែងជាមួយទម្រង់ 4 (base, cli, host, cliproxyapi) + redis sidecar                         |
+| **docker-តែង។prod.yml**                      | សមាសភាពផលិតកម្ម (ច្រក 20130, បោះពុម្ពឡើងវិញ, បរិមាណដែលមានឈ្មោះ)                             |
+| **.dockerignore**                            | ឯកសារត្រូវបានដកចេញពីបរិបទ Docker                                                            |
+| **fly.toml**                                 | ការកំណត់ការដាក់ពង្រាយ Fly.io (តំបន់ `sin` ច្រក 20128 / បរិមាណទិន្នន័យ)                      |
+| **.env.ឧទាហរណ៍**                             | ឯកសារគំរូ env (ចម្លងដោយស្វ័យប្រវត្តិទៅ `.env` នៅពេលដំឡើងដំបូង)                              |
+| **.gitignore**                               | Git មិនអើពើនឹងលំនាំ                                                                         |
+| **.npmignore**                               | npm បោះផ្សាយបញ្ជីមិនរាប់បញ្ចូល                                                              |
+| **.npmrc**                                   | npm config (បញ្ជីឈ្មោះ គោលការណ៍ចាក់សោឯកសារ)                                                 |
+| **.node-កំណែ**                               | ម្ជុលកំណែថ្នាំង (ប្រើដោយឧបករណ៍ដែលឆបគ្នាជាមួយ nvm)                                           |
+| **.nvmrc**                                   | លេខសម្ងាត់កំណែថ្នាំងសម្រាប់ nvm                                                             |
+| **eslint.complexity ។config.mjs**            | ESLint config សម្រាប់ ratchet ភាពស្មុគស្មាញ (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs ។config.mjs**               | ESLint កំណត់រចនាសម្ព័ន្ធសម្រាប់ច្បាប់ SonarJS (ភាពស្មុគស្មាញនៃការយល់ដឹង / ការចម្លង)         |
+| **ប្រភព config.ts**                          | ការកំណត់ប្រភព Fumadocs `defineDocs` (feeds `.source/`)                                      |
+| **knip.json**                                | Knip config — unused files/exports/deps (feed the dead-code gate)                           |
+| **ខ្សែប្រយុទ្ធ។conf.mjs**                    | ការកំណត់រចនាសម្ព័ន្ធការធ្វើតេស្តការផ្លាស់ប្តូរ Stryker (គណនា `tap.testFiles` ពី `mutate`)   |
+| **.size-limit.json**                         | ការកំណត់ទំហំកញ្ចប់ថវិកាកំណត់                                                                |
+| **promptfooconfig.yaml**                     | promptfoo eval config                                                                       |
+| **.gitleaks.toml**                           | សំណុំច្បាប់ស្កេនសម្ងាត់ gileaks                                                             |
+| **.zizmor.yml**                              | zizmor GitHub-Actions security-lint config                                                  |
+| **socket.yml**                               | ការកំណត់រចនាសម្ព័ន្ធខ្សែសង្វាក់ផ្គត់ផ្គង់ Socket.dev                                        |
+| **news.json**                                | អត្ថបទប្រកាស v2 បានធ្វើមូលដ្ឋានីយកម្ម; រ៉ាដាចាប់ផ្តើមបញ្ជូនធាតុអសកម្ម                       |
+| **flake.nix** /** flake.lock**               | Nix dev-shell និយមន័យ + lock                                                                |
+| **.env**                                     | អាថ៌កំបាំងក្នុងតំបន់ ( gitignored — បង្កើតពី `.env.example`)                                |
 
-> **បានផ្លាស់ទីចេញពីថត root ក្នុង v3.8.26 (ដើម្បីកាត់បន្ថយភាពរញ៉េរញ៉ៃ):**
+> **បានផ្លាស់ប្តូរចេញពីឫសក្នុង v3.8.26 (decclutter)៖**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` និង `quality-metrics.json` ដែលបានបង្កើត (ត្រូវបាន gitignore)។ សូមមើល [`## config/`](#config--static-configs--quality-gate-state)។
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, និង `quality-metrics.json` ដែលបានបង្កើត (gitignored) ។ សូមមើល [`## config/`](#config--static-configs--quality-gate-state) ។
 
 ---
 
@@ -141,7 +141,7 @@ src/
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | សាធារណៈ OpenAI-compat API (~ 25 ផ្លូវរង៖ ការជជែក ការបំពេញ ការបង្កប់ ឯកសារ បណ្តុំ អូឌីយ៉ូ រូបភាព វីដេអូ តន្ត្រី ចំណាត់ថ្នាក់ឡើងវិញ ការសម្របសម្រួល ការស្វែងរក ws ភ្នាក់ងារ គណនី អ្នកផ្តល់សេវា ។ល។)                                                                                                                          |
 | `app/api/v1beta/`                                                            | ចំណុចបញ្ចប់ API រចនាប័ទ្ម Gemini                                                                                                                                                                                                                                                                                          |
-| `app/api/playground/`                                                        | ផ្លូវស្ទូឌីយោសួនកុមារ៖ `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — មើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                             |
+| `app/api/playground/`                                                        | Playground Studio ផ្លូវ៖ `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — មើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                           |
 | `app/api/` (non-v1)                                                          | Management/admin routes (~ 60 directory: providers, combos, settings, mcp, a2a, evals, memory, skill, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, etc.)                                                                                                                                             |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ផ្លូវ (ការគ្រប់គ្រងម៉ាស៊ីនមេ, ភ្នាក់ងារ state/DNS/mappings, ផ្លូវវាង, cert, upstream-CA) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/AGENTBRIDGE.md §7`។                                                                                                                              |
 | `app/api/tools/traffic-inspector/`                                           | អធិការចរាចរណ៍ REST + WS API — 16 + ផ្លូវ (សំណើ, វគ្គ, ម៉ាស៊ីន, របៀបចាប់យក, នាំចេញ, ws) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md §8`។                                                                                                                                                    |
@@ -169,7 +169,7 @@ src/
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | កម្មវិធីគ្រប់គ្រងភារកិច្ចពិធីការ A2A ជំនាញ (5) ការផ្សាយ                                                                                                                                                                                                                                                                 |
 | `acp/`                                   | CLI ភ្នាក់ងារចុះបញ្ជី (ការរកឃើញ CLI ក្នុងស្រុក — សូមមើល `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                     |
-| `api/`                                   | ចែករំលែកជំនួយ API (`requireManagementAuth`, validation )                                                                                                                                                                                                                                                                |
+| `api/`                                   | បានចែករំលែកជំនួយ API (`requireManagementAuth`, validation )                                                                                                                                                                                                                                                             |
 | `auth/`                                  | វគ្គ ការដាក់លេខសម្ងាត់ សុពលភាពសញ្ញាសម្ងាត់                                                                                                                                                                                                                                                                              |
 | `batches/`                               | OpenAI Batches អ្នកដោះស្រាយ API                                                                                                                                                                                                                                                                                         |
 | `catalog/`                               | កាតាឡុកអ្នកផ្តល់សេវា Zod សុពលភាពដំណោះស្រាយសមត្ថភាព +                                                                                                                                                                                                                                                                    |
@@ -220,7 +220,7 @@ src/
 | ម៉ូឌុល                 | គោលបំណង                                                |
 | ---------------------- | ------------------------------------------------------ |
 | `policy.ts`            | ម៉ាស៊ីនគោលនយោបាយ                                       |
-| `fallbackPolicy.ts`    | ដើមឈើការសម្រេចចិត្តធ្លាក់ចុះ                           |
+| `fallbackPolicy.ts`    | មែកធាងការសម្រេចចិត្តថយក្រោយ                            |
 | `costRules.ts`         | ច្បាប់នៃការគណនាថ្លៃដើម                                 |
 | `lockoutPolicy.ts`     | គោលនយោបាយចាក់សោរ Model/connection                      |
 | `tagRouter.ts`         | ការកំណត់ផ្លូវដែលមានមូលដ្ឋានលើស្លាក                     |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | សមាសធាតុផ្ទាំងគ្រប់គ្រង API: អាដាប់ទ័រលើ `packages/ui-kit` — មើល `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → Lucide components (`<Icon>`)                             |
-| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 380** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                         |
+| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 394** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                         |
 | `constants/cliTools.ts`          | បញ្ជីឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                          |
-| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** ជាមួយនឹងអាទិភាព                                                    |
+| `constants/routingStrategies.ts` | **22 យុទ្ធសាស្រ្តកំណត់ផ្លូវ** ជាមួយនឹងអាទិភាព                                                         |
 | `constants/publicApiRoutes.ts`   | ផ្លូវដែលទាមទារសិទ្ធិ Bearer (ទល់នឹងការគ្រប់គ្រង)                                                      |
 | `constants/upstreamHeaders.ts`   | បញ្ជីបដិសេធបឋមកថាសម្រាប់សំណើខាងលើ                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod គ្រោងការណ៍ (ប្រភពតែមួយនៃសេចក្តីពិតសម្រាប់កិច្ចសន្យា API )                                    |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # ឯកសារ 16 (កម្មវិធីដោះស្រាយ 12 + ឧបករណ៍ជំនួយ 4)៖ chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ជាដើម
-├── executors/           # ម៉ូឌុលប្រតិបត្តិ 150 (ថ្នាក់ដែលពង្រីកពី BaseExecutor + ឧបករណ៍ជំនួយសម្រាប់អ្នកផ្តល់សេវានីមួយៗ)
+├── executors/           # ម៉ូឌុលប្រតិបត្តិ 163 (ថ្នាក់ដែលពង្រីកពី BaseExecutor + ឧបករណ៍ជំនួយសម្រាប់អ្នកផ្តល់សេវានីមួយៗ)
 ├── translator/          # កម្មវិធីបម្លែងទម្រង់ (សំណើ 9, ការឆ្លើយតប 9, ឧបករណ៍ជំនួយ 9)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ម៉ូឌុលសេវាកម្ម ~80+ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ជាដើម)
@@ -411,8 +411,8 @@ open-sse/
 | `FREE_TIERS.md`             | អ្នកផ្តល់សេវាថ្នាក់ឥតគិតថ្លៃដែលបានជ្រើសរើស (48 + ឥតគិតថ្លៃ + 11 OAuth)                            |
 | `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + ខាងក្នុង OmniRoute CLI                                                 |
 | `I18N.md`                   | ស្ថាបត្យកម្ម i18n បន្ថែមភាសា 67 មូលដ្ឋាន                                                          |
-| `UNINSTALL.md`              | សម្អាតជំហានលុបការដំឡើង                                                                            |
-| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 380 (regen: `npm run gen:provider-reference`) |
+| `UNINSTALL.md`              | សម្អាតជំហានដកការដំឡើង                                                                             |
+| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 394 (regen: `npm run gen:provider-reference`) |
 
 ### ប្រព័ន្ធរងការជ្រមុជទឹកជ្រៅ
 
@@ -423,7 +423,7 @@ open-sse/
 | `AGENT_PROTOCOLS_GUIDE.md`                | មគ្គុទ្ទេសក៍បង្រួបបង្រួម៖ A2A vs ACP vs Cloud Agents                     |
 | `CLOUD_AGENT.md`                          | Codex Cloud / Devin / Jules orchestration                                |
 | `SKILLS.md`                               | ក្របខ័ណ្ឌជំនាញ (ដែលភ្ជាប់មកជាមួយនៅក្នុងទីផ្សារ + + SkillsSH + sandbox)   |
-| `RADAR.md`                                | ការត្រួតលើកាតាឡុកម៉ូដែលឥតគិតថ្លៃរ៉ាដា (`RADAR_ENABLED` បិទតាមលំនាំដើម)   |
+| `RADAR.md`                                | ការត្រួតលើកាតាឡុកគំរូឥតគិតថ្លៃរ៉ាដា (`RADAR_ENABLED` បិទតាមលំនាំដើម)     |
 | `MEMORY.md`                               | ប្រព័ន្ធអង្គចងចាំ (SQLite FTS5 + Qdrant)                                 |
 | `EVALS.md`                                | ក្របខ័ណ្ឌ Eval (ឈុត ការរត់ រូបិយវត្ថុ)                                   |
 | `GUARDRAILS.md`                           | របាំងមុខ PII, ការចាក់ភ្លាមៗ, ស្ពានចក្ខុវិស័យ                             |

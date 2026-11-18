@@ -121,6 +121,26 @@ export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
     format: "syntx-music",
     models: toSyntxMusicModels(),
   },
+  /**
+   * Lyria 3 on the Gemini API (`generativelanguage.googleapis.com`), not Vertex.
+   * Shares the `gemini` chat connection's key but none of the contracts already
+   * handled here: `vertex-lyria` is `:predict` (Lyria 2 only), and the chat path
+   * answers with a `content[]` part typed `image_url`. AI Studio's Lyria 3 is
+   * `:generateContent` and returns the finished track as an inline audio part, so
+   * there is no task id to poll.
+   */
+  gemini: {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-lyria",
+    models: [
+      { id: "lyria-3-pro-preview", name: "Lyria 3 Pro (preview)" },
+      { id: "lyria-3-clip-preview", name: "Lyria 3 Clip (preview)" },
+      { id: "lyria-3.5", name: "Lyria 3.5" },
+    ],
+  },
 };
 
 /**

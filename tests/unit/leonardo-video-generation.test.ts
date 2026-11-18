@@ -153,6 +153,24 @@ test("a 480p size picks RESOLUTION_480 and keeps a portrait orientation", async 
   );
 });
 
+// Leonardo also takes 512x768 (2:3) and 576x720 (4:5); at RESOLUTION_720 the same pair picks
+// the aspect. Checked live (Motion 2.0 Fast, 2026-11-08): 512x768 at 720p returned a 768x1152
+// mp4, 576x720 at 720p returned 832x1024, and 512x768 at 480p returned 512x768.
+test("2:3 and 4:5 portrait sizes keep their aspect instead of becoming 9:16", async () => {
+  const sent = async (size: string) => {
+    const body = (await generate("motion-2.0-fast", { size })).submitted?.body;
+    return [body?.resolution, body?.width, body?.height];
+  };
+  assert.deepEqual(await sent("512x768"), ["RESOLUTION_480", 512, 768]);
+  assert.deepEqual(await sent("576x720"), ["RESOLUTION_480", 576, 720]);
+  assert.deepEqual(await sent("768x1152"), ["RESOLUTION_720", 512, 768]);
+  assert.deepEqual(await sent("864x1024"), ["RESOLUTION_720", 576, 720]);
+  assert.deepEqual(await sent("832x1024"), ["RESOLUTION_720", 576, 720]);
+  // Sizes Leonardo has no shape for keep the 16:9 / 9:16 mapping.
+  assert.deepEqual(await sent("1024x1024"), ["RESOLUTION_720", 1280, 720]);
+  assert.deepEqual(await sent("768x512"), ["RESOLUTION_720", 1280, 720]);
+});
+
 test("the catalog lists the Motion 2.0 models", () => {
   assert.deepEqual(
     providerConfig.models.map((m: { id: string }) => m.id),

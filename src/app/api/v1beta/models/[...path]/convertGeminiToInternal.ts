@@ -18,6 +18,7 @@
  */
 
 import { createGeminiToolCallIdPairing } from "@omniroute/open-sse/translator/helpers/geminiToolCallIds.ts";
+import { geminiFunctionParameters } from "@omniroute/open-sse/translator/helpers/geminiFunctionParameters.ts";
 
 interface GeminiFunctionCall {
   name?: string;
@@ -48,6 +49,7 @@ interface GeminiTool {
     name?: string;
     description?: string;
     parameters?: unknown;
+    parametersJsonSchema?: unknown;
   }>;
 }
 
@@ -260,7 +262,7 @@ export function convertGeminiToInternal(
           function: {
             name: func.name || "",
             description: func.description || "",
-            parameters: func.parameters || { type: "object", properties: {} },
+            parameters: geminiFunctionParameters(func) || { type: "object", properties: {} },
           },
         });
       }
