@@ -963,7 +963,8 @@ export async function collectCatalog(
       apiFormat: opts.apiFormat,
     });
     if (servedCombo) {
-      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
+      // From the raw id: the mapper's name already carries the provider prefix.
+      mapped.name = buildModelDisplayName({ rawId: entry.id, isCombo: true });
     }
     const enrichmentEntry = lookupEnrichment(
       entry.id,

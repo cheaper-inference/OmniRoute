@@ -1,0 +1,59 @@
+# Shared CLI launch and configuration contracts (Lietuvių)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-LAUNCH-CONTRACTS.md)
+
+---
+
+Neutralioje `config/cli-tools-manifest.json` sutartyje deklaruojamas kanoninis IDs, slapyvardžiai, dvejetainiai kandidatai, sąrankos receptai, modelio argumentai ir galimybės. Paprastas mazgo adapteris `bin/cli/cli-manifest.mjs` ir TypeScript adapteris `src/shared/constants/cliIntegrationManifest.ts` skaito tą patį failą. Vykdymo laiką, katalogą, konfigūravimą, užbaigimą, generatorius ir užpakalinės programos registraciją kartu tikrina `tests/unit/cli/cli-manifest-drift.test.ts`. Katalogas nereiškia, kad įrankis gali būti paleistas arba sukonfigūruotas. Visų pirma, „5dive“ lieka tik konfigūruoti.
+
+## Vaiko aplinka ir gyvenimo ciklas
+
+`omniroute run`, `omniroute launch` ir `omniroute launch-codex` paveldi OS/terminal suderinamumo leidžiamųjų sąrašą ir įveda pasirinkto tikslo kredencialus. Nesusijusių teikėjų ir duomenų bazių paslaptys pagal numatytuosius nustatymus nepaveldimi. `--inherit-env` aiškiai atkuria visišką tėvų aplinkos paveldėjimą; naudoti tik tada, kai pasirinktas trečiosios šalies procesas turėtų gauti tas vertes. Tai aplinkos filtravimas, o ne OS smėlio dėžė: procesas vis tiek vykdomas su skambinančiojo failų sistemos leidimais.
+
+Pertraukimo ir nutraukimo signalai perduodami vaikui. Prieš pašalindama laikiną konfigūraciją, paleidimo priemonė laukia vaiko uždarymo įvykio. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontroliuoja atidėjimo laikotarpį prieš priverstinį nutraukimą (numatytasis 5000 milisekundžių).
+
+## Gemini nuolatinė sąranka
+
+```bash
+omniroute setup-gemini --remote https://omni.example --model provider/model --yes
+omniroute configure gemini --model provider/model --yes
+omniroute run gemini --model provider/model --dry-run --json
+```
+
+Pirmosios dvi komandos konfigūruoja šį įrenginį pasirinktam vietiniam arba nuotoliniam serveriui. Sąranka išsaugo nesusijusius JSON nustatymus, pasirenka Gemini API rakto autentifikavimą ir įrašo galutinį tašką bei kredencialus į privatų `.gemini/.env` failą. Jis atsisako netinkamo JSON, o ne perrašo jį. Galutinis taškas URLs turi būti HTTP(S), be įterptųjų kredencialų, užklausos parametrų ar fragmentų. Sausas paleidimas spausdina kelius, o ne kredencialų vertes.
+
+`GEMINI_CLI_HOME` arba `--gemini-home` pasirenka nuolatinę namų šaknį. Tikrasis `run gemini` sukuria ir vėliau pašalina savo laikinus namus. Nė vienas režimas neapeina Gemini darbo srities pasitikėjimo patikrų.
+
+## Codex profiliai
+
+`configure codex` rašo privatų `<name>.config.toml` su modeliu ir jo OmniRoute teikėjo galutiniu tašku. Kredencialai nurodomi per `OMNIROUTE_API_KEY`, niekada neįterpiami. Paleidimo komanda nustato pasirinktą modelį aukščiausio lygio `model` klavišu, o ne `model_providers` viduje.
+
+Atskiri profilio failai yra dabartinė dokumentuota Codex sutartis; jie perdengia vartotojo konfigūraciją, kai pasirenkama su `codex --profile <name>`. Žr. [oficialią profilio nuorodą](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles) ir [OmniRoute Codex vadovą](./CODEX-CLI-CONFIGURATION.md).
+
+## Hermetiškas komandos vykdymas
+
+Naudojant aiškų `DATA_DIR`, `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` nustatymas neleidžia paleisties patekti į numatytąją vartotojo duomenų katalogo kredencialų aplinką. Tai naudinga atliekant izoliuotus bandymus. Tai neišjungia kitų aiškiai pasirinktų aplinkos failų.
+
+## Darbinis katalogas `.env`
+
+CLI skaito `.env` failus tokia tvarka, o pirmasis failas, kuriame nustatytas raktas, laimi: aiškus `DATA_DIR`, numatytasis duomenų katalogas, dabartinis darbo katalogas, tada paketų katalogas. Shell kintamieji visada laimi.
+
+Darbinis katalogas gali priklausyti kam nors kitam (klonuotai saugyklai, išpakuotam archyvui), o `omniroute serve` perduoda CLI aplinką serveriui ir kiekvienam serverio vykdomam įrankiui. Taigi `.env` gali nustatyti tik šiuos raktus, išvardytus `bin/cli/utils/untrustedCwdEnv.mjs`:
+
+| Raktas                          | Priimtos vertybės                                                      |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`               | `true`, `1` arba `yes` bet kuriuo atveju, serverio vertinamos reikšmės |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | iki 64 raidžių, skaitmenų, `_`, `.`, `@` arba `-`                      |
+| `LANGUAGE`                      | tas pats, plius `:`                                                    |
+| `TZ`                            | iki 64 raidžių, skaitmenų, `_`, `+`, `-` arba `/`, neprasidedant `/`   |
+| `NO_COLOR`, `FORCE_COLOR`       | iki 16 raidžių ir skaitmenų                                            |
+
+Kiekviena `REQUIRE_API_KEY` priimta reikšmė įjungia patikrinimą, todėl failas negali pats jo išjungti. Tačiau jis neapsprendžia rezultato: serveris nuskaito duomenų bazėje saugomą `REQUIRE_API_KEY` nepaisymą prieš aplinką, o paleidimo įspėjimas apie klausymąsi visose sąsajose be API rakto nuskaito tik aplinką. Išsaugojus `false` nepaisymą, darbinis katalogas `REQUIRE_API_KEY=true` palieka API atidarytą ir paslepia šį įspėjimą. `TZ` taisyklė yra siauresnė nei POSIX: ji atmeta `.`, `:`, `,` ir `<>`, todėl `:Area/City` forma ir taisyklės, pvz. `EST5EDT,M3.2.0,M11.1.0` turi būti nustatytos apvalkale arba `<DATA_DIR>/.env`.
+
+Vardai turi tiksliai sutapti didžiosiomis raidėmis. Bet kuri kita eilutė, reikšmė, kurios nepavyksta patikrinti, ir pavadinimas, kuris nėra paprastos ASCII raidės, skaitmenys ir `_` (pavyzdžiui, su NUL baitu arba panašia raide), praleidžiami. CLI išspausdina vieną įspėjimą, įvardijantį klavišus, kurių negali nustatyti, ir vieną, kuriame įvardijami leidžiami klavišai, kurių nepaisė, kiekviename nurodant, ką keisti (`TZ (expected a zone name such as Europe/Berlin)`, `lang (write the name as LANG)`). Nei vienas, nei kitas nespausdina verčių. Failų keliai šiuose pranešimuose ir `.env` kelio `omniroute doctor` ataskaitose yra pašalinami, kai juose yra valdymo arba bidi simbolių. Apribojimas netaikomas, kai darbinis katalogas yra duomenų katalogas arba paketų katalogas.
+
+`PORT`, `API_PORT` ir `DASHBOARD_PORT` sąraše nėra. Be bazinio URL iš aukštesnės pirmenybės šaltinio, CLI kalbasi su `localhost:<PORT>`, o kas ten klausosi, gauna CLIAPI raktą, konteksto atpažinimo raktą ir CLI mašinos prieigos raktą (`x-omniroute-cli-token`, žr. [CLI_TOKEN.md](../security/CLI_TOKEN.md) ), kuriuos vietinis serveris priima valdymo skambučiams iš kilpos. Prievadas iš darbinio katalogo leistų šiam failui pasirinkti klausytoją, todėl nustatykite prievadus apvalkale, `<DATA_DIR>/.env` arba komandų, turinčių vieną, `--port` parinktį (`serve`, `launch`, `run`).
+
+Analizatorius neturi `export` sintaksės. Tokia eilutė kaip `export LD_PRELOAD=...` įvardija kintamąjį `export LD_PRELOAD`; iš darbinio katalogo jis praleidžiamas, o kituose `.env` failuose nustato tą pažodinį pavadinimą, kurio niekas neskaito.
+
+CLI susieja konteksto saugomą prieigos raktą (prieigos prieigos raktą arba senąjį API raktą) tik su paties konteksto kilme: schema, priegloba ir prievadu, palyginti su `URL.origin`. Tai taikoma užklausoms, pateiktoms per CLIHTTP klientą (`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`), ir komandoms `launch`, `launch codex`, `configure` ir `setup-*`, kurios įrašo bazinį URL ir raktą į kito įrankio konfigūraciją. Nukreipti į kitą serverį su `--remote`, jie naudoja aiškų `--api-key` arba `OMNIROUTE_API_KEY` jei toks nustatytas, ir nenaudoja konteksto prieigos rakto. Palyginimas yra tikslus, todėl `localhost` ir `127.0.0.1` arba pagrindinis kompiuteris su tašku ir be jo laikomi skirtingais serveriais ir negauna konteksto prieigos rakto. URL su vartotojo informacija, pasviruoju brūkšniu arba tarpais niekada nesutampa, nes kiti URL analizatoriai (pavyzdžiui, Python `urllib` ir `httpx`) gali nuskaityti kitą pagrindinį kompiuterį. Užklausoms CLI siunčia pats, tas patikrinimas apima tik schemą ir autoritetą, todėl ID su tarpu kelyje arba užklausoje išsaugo prieigos raktą.

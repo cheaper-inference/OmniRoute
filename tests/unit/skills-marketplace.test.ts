@@ -8,6 +8,7 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-skills-marketpla
 const originalDataDir = process.env.DATA_DIR;
 process.env.DATA_DIR = tmpDir;
 
+const { createManagementSessionHeaders } = await import("../helpers/managementSession.ts");
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { GLOBAL_SKILL_OWNER_ID, skillRegistry } = await import("../../src/lib/skills/registry.ts");
@@ -44,9 +45,10 @@ test.after(() => {
 });
 
 test("SkillsMP installs are available to API-key-scoped requests", async () => {
+  // The install route requires management auth even when login is off.
   const req = new Request("http://localhost/api/skills/marketplace/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: await createManagementSessionHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({
       name: "release-notes",
       description: "Draft release notes from repository changes",

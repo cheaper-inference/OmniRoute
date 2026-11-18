@@ -32,6 +32,7 @@ import {
   resolveClaudeUsageLimitKey,
   type ClaudeLowPriorityWait,
 } from "../services/claudeLowPriority.ts";
+import { observeClaudeUsageHeaders } from "../services/usage/claude.ts";
 import type { ExecutorLog, ProviderCredentials } from "./base.ts";
 
 /** Safety margin kept between the last lane wait and the request's own upstream timeout. */
@@ -119,6 +120,8 @@ export class ClaudeUsageLimitGuard {
     input: ClaudeUsageLimitRetryInput
   ): Promise<boolean> {
     if (this.key === null) return false;
+    // Every Claude OAuth response carries the plan-window utilization: feed the quota views.
+    observeClaudeUsageHeaders(input.credentials?.accessToken, response.headers);
     const key = this.key;
     const credentials = input.credentials;
     // The operator policy's verdict: onSettled reports a claim's outcome, release frees a

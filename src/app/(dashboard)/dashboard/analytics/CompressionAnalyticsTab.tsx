@@ -9,9 +9,11 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Stat, StatRow } from "@omniroute/ui-kit/stat";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import SegmentedControl from "@/shared/components/SegmentedControl";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 interface CompressionAnalyticsSummary {
@@ -84,7 +86,7 @@ function ModeBar({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-sm">
-        <span className="font-medium text-text capitalize">{mode}</span>
+        <span className="font-medium text-text-main capitalize">{mode}</span>
         <span className="text-text-muted">
           {t("compressionAnalyticsModeStats", {
             count,
@@ -99,12 +101,7 @@ function ModeBar({
           )}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={mode} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );
@@ -126,7 +123,7 @@ function ProviderBar({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-sm">
-        <span className="font-medium text-text">{provider}</span>
+        <span className="font-medium text-text-main">{provider}</span>
         <span className="text-text-muted">
           {t("compressionAnalyticsModeStats", {
             count,
@@ -134,12 +131,7 @@ function ProviderBar({
           })}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={provider} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );
@@ -177,11 +169,11 @@ export default function CompressionAnalyticsTab() {
 
   if (error || !stats) {
     return (
-      <div className="card p-6 text-center text-text-muted">
+      <Card className="p-6 text-center text-text-muted">
         <Icon name="compress" size={32} className="mb-2 block" />
         {error || t("compressionAnalyticsNoDataYet")}
         <p className="text-xs mt-2">{t("compressionAnalyticsNoDataDescription")}</p>
-      </div>
+      </Card>
     );
   }
 
@@ -197,6 +189,7 @@ export default function CompressionAnalyticsTab() {
     <div className="flex flex-col gap-6">
       {/* Time Range Selector */}
       <SegmentedControl
+        semantics="radio"
         size="sm"
         aria-label={t("compressionAnalyticsTitle")}
         value={since}
@@ -249,33 +242,33 @@ export default function CompressionAnalyticsTab() {
       </StatRow>
 
       {stats.realUsage.requestsWithReceipts > 0 && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+        <Card className="p-5">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="receipt_long" size={20} className="text-primary" />
             {t("compressionAnalyticsRealUsageReceipts")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
             <div>
               <div className="text-text-muted">{t("compressionAnalyticsPromptTokens")}</div>
-              <div className="text-lg font-semibold text-text">
+              <div className="text-lg font-semibold text-text-main">
                 {stats.realUsage.promptTokens.toLocaleString()}
               </div>
             </div>
             <div>
               <div className="text-text-muted">{t("compressionAnalyticsCompletionTokens")}</div>
-              <div className="text-lg font-semibold text-text">
+              <div className="text-lg font-semibold text-text-main">
                 {stats.realUsage.completionTokens.toLocaleString()}
               </div>
             </div>
             <div>
               <div className="text-text-muted">{t("compressionAnalyticsTotalTokens")}</div>
-              <div className="text-lg font-semibold text-text">
+              <div className="text-lg font-semibold text-text-main">
                 {stats.realUsage.totalTokens.toLocaleString()}
               </div>
             </div>
             <div>
               <div className="text-text-muted">{t("compressionAnalyticsCacheTokens")}</div>
-              <div className="text-lg font-semibold text-text">
+              <div className="text-lg font-semibold text-text-main">
                 {(
                   (stats.realUsage.cacheReadTokens ?? 0) + (stats.realUsage.cacheWriteTokens ?? 0)
                 ).toLocaleString()}
@@ -283,20 +276,20 @@ export default function CompressionAnalyticsTab() {
             </div>
             <div>
               <div className="text-text-muted">{t("compressionAnalyticsSources")}</div>
-              <div className="text-lg font-semibold text-text">
+              <div className="text-lg font-semibold text-text-main">
                 {Object.entries(stats.realUsage.bySource)
                   .map(([source, count]) => `${source}: ${count}`)
                   .join(", ")}
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Mode Breakdown */}
       {modes.length > 0 && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+        <Card className="p-5">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="tune" size={20} className="text-primary" />
             {t("compressionAnalyticsModeBreakdown")}
           </h3>
@@ -312,13 +305,13 @@ export default function CompressionAnalyticsTab() {
               />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Provider Breakdown */}
       {providers.length > 0 && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+        <Card className="p-5">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("compressionAnalyticsProviderBreakdown")}
           </h3>
@@ -333,13 +326,13 @@ export default function CompressionAnalyticsTab() {
               />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Last 24h Hourly Chart (CSS-only height-based bars) */}
       {stats.last24h.length > 0 && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+        <Card className="p-5">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="show_chart" size={20} className="text-primary" />
             {t("compressionAnalyticsLast24HoursActivity")}
           </h3>
@@ -393,20 +386,20 @@ export default function CompressionAnalyticsTab() {
               })}
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Empty state */}
       {totalAttempts === 0 && (
-        <div className="card p-8 text-center text-text-muted">
+        <Card className="p-8 text-center text-text-muted">
           <Icon name="compress" size={48} className="mb-3 block text-primary opacity-50" />
-          <p className="font-medium text-text">{t("compressionAnalyticsNoDataYet")}</p>
+          <p className="font-medium text-text-main">{t("compressionAnalyticsNoDataYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("compressionAnalyticsStartTracking", {
-              code: (chunks) => <code className="bg-bg-muted px-1 rounded">{chunks}</code>,
+              code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
             })}
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Info note */}

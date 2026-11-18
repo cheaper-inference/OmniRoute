@@ -83,21 +83,17 @@ export default function ImportProgressModal({
               label={`${importProgress.current} / ${importProgress.total}`}
               showValue
               animate={false}
-              className={
-                importProgress.phase === "done"
-                  ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
-                  : undefined
-              }
+              tone={importProgress.phase === "done" ? "success" : "default"}
             />
           )}
 
-        {/* Fetching indeterminate bar */}
+        {/* Fetching: no measurable progress, so the bar is indeterminate (no aria-valuenow). */}
         {importProgress.phase === "fetching" && (
-          // Decorative: the fetch has no measurable progress, so keep the bar out of the a11y
-          // tree instead of announcing a fabricated value (the kit Progress has no indeterminate mode).
-          <div aria-hidden="true" data-testid="import-fetching-bar">
-            <Progress value={60} animate={false} className="animate-pulse" />
-          </div>
+          <Progress
+            indeterminate
+            data-testid="import-fetching-bar"
+            aria-label={t("importingModelsTitle")}
+          />
         )}
 
         {/* Error message */}
