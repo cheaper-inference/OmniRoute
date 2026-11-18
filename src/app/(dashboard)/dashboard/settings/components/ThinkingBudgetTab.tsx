@@ -135,7 +135,7 @@ export default function ThinkingBudgetTab() {
 
       {/* Custom budget slider */}
       {config.mode === "custom" && (
-        <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+        <Card.Section className="mb-4">
           <Slider
             label={t("tokenBudget")}
             min={0}
@@ -145,12 +145,12 @@ export default function ThinkingBudgetTab() {
             onValueChange={(next) => save({ customBudget: next })}
             formatValue={(value) => `${value.toLocaleString()} ${t("tokens")}`}
           />
-        </div>
+        </Card.Section>
       )}
 
       {/* Adaptive effort level */}
       {config.mode === "adaptive" && (
-        <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section>
           <p className="text-sm font-medium mb-3">{t("baseEffortLevel")}</p>
           <p className="text-xs text-text-muted mb-3">{t("adaptiveHint")}</p>
           <RadioGroup
@@ -165,7 +165,7 @@ export default function ThinkingBudgetTab() {
               <RadioGroupItem key={e.value} card value={e.value} label={t(e.labelKey)} />
             ))}
           </RadioGroup>
-        </div>
+        </Card.Section>
       )}
     </Card>
   );

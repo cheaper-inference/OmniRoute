@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Badge, Button } from "@/shared/components";
+import { Badge, Button, Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import {
@@ -36,7 +36,7 @@ function PriceCell({ value, offer }: { value: number | null; offer: ModelOffer }
 function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
   const t = useTranslations("settings");
   return (
-    <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-3">
+    <Card.Section>
       <div className="flex items-center gap-2 mb-2">
         <span className="font-semibold text-sm truncate">{group.name}</span>
         <code className="text-xs text-text-muted truncate">{group.key}</code>
@@ -90,7 +90,7 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
           })}
         </TableBody>
       </Table>
-    </div>
+    </Card.Section>
   );
 }
 

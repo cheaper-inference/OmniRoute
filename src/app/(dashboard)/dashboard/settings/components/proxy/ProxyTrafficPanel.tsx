@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import { fmtFull } from "@/shared/utils/formatting";
 import type { TrafficCounters, TrafficItem } from "@/lib/db/proxyTraffic";
 
@@ -49,8 +50,9 @@ export default function ProxyTrafficPanel() {
   }, [revision]);
 
   return (
-    <section
-      className="rounded-lg border border-border bg-bg-subtle p-4 space-y-3"
+    <Card.Section
+      role="region"
+      className="space-y-3"
       aria-labelledby="proxy-traffic-heading"
       aria-busy={loading}
     >
@@ -92,7 +94,7 @@ export default function ProxyTrafficPanel() {
       ) : (
         <TrafficTable report={report} />
       )}
-    </section>
+    </Card.Section>
   );
 }
 

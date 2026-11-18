@@ -167,7 +167,7 @@ export default function FallbackChainsEditor() {
     >
       {/* Create Form */}
       {showCreate && (
-        <div className="p-4 rounded-lg border border-border bg-bg-subtle mb-4">
+        <Card.Section className="mb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <Input
               label={t("modelName")}
@@ -185,7 +185,7 @@ export default function FallbackChainsEditor() {
           <Button variant="primary" size="sm" onClick={handleCreate} loading={saving}>
             {t("createChain")}
           </Button>
-        </div>
+        </Card.Section>
       )}
 
       {/* Chains List */}
@@ -199,10 +199,7 @@ export default function FallbackChainsEditor() {
         ) : (
           <div className="flex flex-col gap-2">
             {chainEntries.map(([model, chain]) => (
-              <div
-                key={model}
-                className="flex items-center justify-between gap-2 px-4 py-3 rounded-lg border border-border bg-bg-subtle"
-              >
+              <Card.Section key={model} className="flex items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
                   <span className="font-mono text-sm text-text-main truncate max-w-[200px]">
                     {model}
@@ -234,7 +231,7 @@ export default function FallbackChainsEditor() {
                 >
                   <Icon name="close" size={16} />
                 </Button>
-              </div>
+              </Card.Section>
             ))}
           </div>
         )}

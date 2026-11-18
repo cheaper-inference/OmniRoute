@@ -298,7 +298,7 @@ function ModelOverrideEditor({
 }) {
   const t = useTranslations("settings");
   return (
-    <div className="rounded-lg border border-border/50 p-3 flex flex-col gap-3">
+    <Card.Section className="flex flex-col gap-3">
       <div>
         <p className="text-[10px] uppercase tracking-wide text-text-muted font-semibold mb-1">
           {t("selectedModel")}
@@ -307,7 +307,7 @@ function ModelOverrideEditor({
       </div>
       <ModelOverrideForm activeTarget={activeTarget} onSave={onSave} />
       <ModelOverrideRows activeOverrides={activeOverrides} onRemove={onRemove} />
-    </div>
+    </Card.Section>
   );
 }
 

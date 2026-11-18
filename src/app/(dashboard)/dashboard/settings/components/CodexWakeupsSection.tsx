@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Button, Checkbox, Input, NumberInput, Select, Toggle } from "@/shared/components";
+import { Button, Card, Checkbox, Input, NumberInput, Select, Toggle } from "@/shared/components";
 
 type Schedule =
   | { kind: "interval"; minutes: number }
@@ -210,7 +210,7 @@ function WakeupForm({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+    <Card.Section className="flex flex-col gap-3">
       <Input
         label={t("codexWakeups.name")}
         value={name}
@@ -249,7 +249,7 @@ function WakeupForm({
           {t("codexWakeups.add")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 

@@ -111,7 +111,7 @@ export default function BackgroundDegradationTab() {
       </div>
 
       {/* Toggle */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+      <Card.Section className="flex items-center justify-between mb-4">
         <div>
           <p className="text-sm font-medium">{t("enableDegradation")}</p>
           <p className="text-xs text-text-muted mt-0.5">
@@ -125,7 +125,7 @@ export default function BackgroundDegradationTab() {
           disabled={loading || saving}
           ariaLabel={t("enableDegradation")}
         />
-      </div>
+      </Card.Section>
 
       {/* Stats */}
       {config.stats && config.stats.detected > 0 && (

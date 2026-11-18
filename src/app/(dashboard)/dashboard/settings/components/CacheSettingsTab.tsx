@@ -594,7 +594,7 @@ export default function CacheSettingsTab() {
                 </Button>
 
                 {showAdvanced && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 p-3 rounded-lg bg-bg-subtle border border-border/40">
+                  <Card.Section className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                     <Input
                       id="sem-base-url"
                       type="text"
@@ -611,7 +611,7 @@ export default function CacheSettingsTab() {
                       value={semApiKey}
                       onChange={(e) => setSemApiKey(e.target.value)}
                     />
-                  </div>
+                  </Card.Section>
                 )}
               </div>
 

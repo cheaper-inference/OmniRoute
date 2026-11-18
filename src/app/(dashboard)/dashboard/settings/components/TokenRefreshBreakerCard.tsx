@@ -120,24 +120,24 @@ function ReadOnlyFields({ value }: { value: TokenRefreshBreakerValue }) {
   const t = useTranslations("settings");
   return (
     <>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshScopeLabel")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">
           {value.scope === "connection"
             ? t("resilienceTokenRefreshScopeConnection")
             : t("resilienceTokenRefreshScopeProvider")}
         </div>
-      </div>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      </Card.Section>
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshThreshold")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">{value.failureThreshold}</div>
-      </div>
-      <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      </Card.Section>
+      <Card.Section>
         <div className="text-xs text-text-muted">{t("resilienceTokenRefreshCooldown")}</div>
         <div className="mt-1 text-sm font-semibold text-text-main">
           {Math.round(value.cooldownMs / 60000)} min
         </div>
-      </div>
+      </Card.Section>
     </>
   );
 }

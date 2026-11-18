@@ -732,7 +732,7 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings?.stats) return null;
 
     return (
-      <div className="mb-4 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mb-4">
         <div className="flex items-center justify-between gap-3 mb-3">
           <h4 className="text-sm flex items-center gap-2">
             <Icon name="analytics" size={18} />
@@ -794,7 +794,7 @@ export default function SystemStorageTab() {
             </p>
           </div>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -904,7 +904,7 @@ export default function SystemStorageTab() {
     ];
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mt-6">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
             <h4 className="text-sm flex items-center gap-2">
@@ -990,7 +990,7 @@ export default function SystemStorageTab() {
             onCleanupBackups={handleCleanupBackups}
           />
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -998,7 +998,7 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings) return null;
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mt-6">
         <h4 className="text-sm mb-3 flex items-center gap-2">
           <Icon name="tune" size={18} />
           {t("storageOptimizationSettings")}
@@ -1114,7 +1114,7 @@ export default function SystemStorageTab() {
             {t("storageSaveOptimization")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -1122,7 +1122,7 @@ export default function SystemStorageTab() {
     if (dbSettingsLoading || !dbSettings) return null;
 
     return (
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
+      <Card.Section className="mt-6">
         <h4 className="text-sm mb-3 flex items-center gap-2">
           <Icon name="compress" size={18} />
           {t("storageCompressionAggregation")}
@@ -1185,7 +1185,7 @@ export default function SystemStorageTab() {
             {t("storageSaveAggregation")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
     );
   };
 
@@ -1215,14 +1215,14 @@ export default function SystemStorageTab() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-bg border border-border">
+        <Card.Section>
           <p className="text-[11px] text-text-muted uppercase tracking-wide mb-1">
             {t("databasePath")}
           </p>
           <p className="text-sm font-mono text-text-main break-all">
             {storageHealth.dbPath || "~/.omniroute/storage.sqlite"}
           </p>
-        </div>
+        </Card.Section>
       </div>
 
       {dbSettingsAuthRequired && !dbSettingsLoading && <AuthRequiredBanner t={t} />}
@@ -1412,7 +1412,7 @@ export default function SystemStorageTab() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg bg-bg border border-border mb-4">
+      <Card.Section className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="schedule" size={16} className="text-warning" />
           <div>
@@ -1448,7 +1448,7 @@ export default function SystemStorageTab() {
             {backupsExpanded ? t("hide") : t("viewBackups")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
 
       {manualBackupStatus.message && (
         <div className="mb-4">{renderStatusAlert(manualBackupStatus, 0)}</div>

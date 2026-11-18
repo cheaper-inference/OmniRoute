@@ -149,13 +149,13 @@ function ProfileColumn({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-subtle p-4">
+    <Card.Section>
       <div className="mb-4 flex items-center gap-2">
         <Icon name={icon} size={16} className="text-primary" />
         <h3 className="text-sm uppercase text-text-main">{title}</h3>
       </div>
       <div className="space-y-3">{children}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -308,54 +308,54 @@ function RequestQueueCard({
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceAutoEnableApiKeyProviders")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.autoEnableApiKeyProviders ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceRequestsPerMinute")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.requestsPerMinute}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMinTimeBetweenRequests")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.minTimeBetweenRequestsMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceConnectionScopeConcurrentRequests")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.concurrentRequests}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceGlobalConcurrentRequests")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.globalConcurrentRequests || t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxQueueWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxExecutionWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.executionMaxWaitMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -732,22 +732,22 @@ function WaitForCooldownCard({
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">{value.maxRetries}</div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxWaitPerAttempt")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.maxRetryWaitSec}s
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -842,28 +842,28 @@ function ComboCooldownWaitCard({
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceComboCooldownMaxWaitMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">{value.maxAttempts}</div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceComboCooldownBudgetMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.budgetMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -931,12 +931,12 @@ function QuotaShareConcurrencyLimitCard({
             onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
           />
         ) : (
-          <div className="rounded-xl border border-border bg-bg-subtle p-4">
+          <Card.Section>
             <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
             <div className="mt-1 text-sm font-semibold text-text-main">
               {value.enabled ? t("statusEnabled") : t("statusDisabled")}
             </div>
-          </div>
+          </Card.Section>
         )}
       </div>
     </Card>
@@ -1025,26 +1025,26 @@ export function ProviderCooldownCard({
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceProviderCooldownEnabled")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMin")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.minRetryCooldownMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMax")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxRetryCooldownMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -1117,13 +1117,13 @@ function CredentialHealthCheckCard({
                 setEditing((prev) => ({ ...prev, intervalMinutes }))
               )}
             />
-            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+            <Card.Section className="text-xs text-text-muted">
               {t("resilienceCredentialHealthHint")}
-            </div>
+            </Card.Section>
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceCredentialHealthInterval")}
               </div>
@@ -1134,10 +1134,10 @@ function CredentialHealthCheckCard({
                       minutes: value.intervalMinutes,
                     })}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+            </Card.Section>
+            <Card.Section className="text-xs text-text-muted">
               {t("resilienceCredentialHealthHint")}
-            </div>
+            </Card.Section>
           </>
         )}
       </div>

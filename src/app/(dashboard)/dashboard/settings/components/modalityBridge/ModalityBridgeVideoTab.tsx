@@ -323,9 +323,9 @@ export default function ModalityBridgeVideoTab({
           className="text-sm"
         />
 
-        <div
+        <Card.Section
           data-testid="video-promotion-readiness"
-          className="rounded-control border border-border p-3 text-sm"
+          className="text-sm"
           aria-live="polite"
         >
           <strong>{t("modalityBridgeVideoPromotionTitle")}</strong>
@@ -334,7 +334,7 @@ export default function ModalityBridgeVideoTab({
           <p className="mt-2 text-xs text-text-muted">
             {t("modalityBridgeVideoPromotionContextRequired")}
           </p>
-        </div>
+        </Card.Section>
 
         <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

@@ -338,7 +338,7 @@ export default function MemorySkillsTab() {
         </div>
 
         {/* Enable toggle */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+        <Card.Section className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-medium">{t("memoryEnabled")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("memoryEnabledDesc")}</p>
@@ -351,7 +351,7 @@ export default function MemorySkillsTab() {
             aria-checked={config.enabled}
             aria-label={t("memoryEnabled")}
           />
-        </div>
+        </Card.Section>
 
         {/* Token-cost warning — memory injection is billed (PRD-2026-06-19) */}
         {config.enabled && (
@@ -371,7 +371,7 @@ export default function MemorySkillsTab() {
         {config.enabled && (
           <>
             {/* Max tokens */}
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+            <Card.Section className="mb-4">
               <Slider
                 data-testid="memory-max-tokens-slider"
                 label={t("maxTokens")}
@@ -389,10 +389,10 @@ export default function MemorySkillsTab() {
                   { value: 16000, label: "16K" },
                 ]}
               />
-            </div>
+            </Card.Section>
 
             {/* Retention days */}
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+            <Card.Section className="mb-4">
               <Slider
                 data-testid="memory-retention-slider"
                 label={t("retentionDays")}
@@ -410,7 +410,7 @@ export default function MemorySkillsTab() {
                   { value: 90, label: "90" },
                 ]}
               />
-            </div>
+            </Card.Section>
 
             {/* Strategy selector */}
             <RadioGroup
@@ -469,7 +469,7 @@ export default function MemorySkillsTab() {
           </span>
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+        <Card.Section className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-medium">{t("qdrantEnable")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("qdrantEnableDesc")}</p>
@@ -492,7 +492,7 @@ export default function MemorySkillsTab() {
               aria-label={t("qdrantEnable")}
             />
           </div>
-        </div>
+        </Card.Section>
 
         {qdrantStatus === "saved" && (
           <div className="mb-4 text-xs font-medium text-success flex items-center gap-1">
@@ -504,7 +504,7 @@ export default function MemorySkillsTab() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+          <Card.Section>
             <Input
               label={t("qdrantHost")}
               hint={t("qdrantHostHint")}
@@ -513,9 +513,9 @@ export default function MemorySkillsTab() {
               placeholder="http://127.0.0.1"
               mono
             />
-          </div>
+          </Card.Section>
 
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+          <Card.Section>
             <Input
               label={t("qdrantPort")}
               hint={t("qdrantPortHint")}
@@ -529,9 +529,9 @@ export default function MemorySkillsTab() {
               placeholder="6333"
               mono
             />
-          </div>
+          </Card.Section>
 
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+          <Card.Section>
             <Input
               label={t("qdrantCollection")}
               hint={t("qdrantCollectionHint")}
@@ -540,9 +540,9 @@ export default function MemorySkillsTab() {
               placeholder="omniroute_memory"
               mono
             />
-          </div>
+          </Card.Section>
 
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+          <Card.Section>
             <div className="flex items-center gap-2 mb-2">
               <p className="text-sm font-medium">{t("qdrantEmbeddingModel")}</p>
               <Button
@@ -556,7 +556,7 @@ export default function MemorySkillsTab() {
               />
             </div>
             {qdrantHelpOpen && (
-              <div className="mb-3 p-3 rounded-lg bg-bg-subtle border border-border/60 text-xs text-text-muted leading-relaxed">
+              <div className="mb-3 p-3 rounded-card-nested bg-bg-subtle border border-border/60 text-xs text-text-muted leading-relaxed">
                 <p className="font-medium text-text-main mb-1">{t("qdrantHelpQuickTitle")}</p>
                 <p>{t("qdrantHelpStep1")}</p>
                 <p>{t("qdrantHelpStep2")}</p>
@@ -583,9 +583,9 @@ export default function MemorySkillsTab() {
               placeholder={t("qdrantEmbeddingInputPlaceholder")}
               mono
             />
-          </div>
+          </Card.Section>
 
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30 md:col-span-2">
+          <Card.Section className="md:col-span-2">
             <div className="flex items-end gap-2">
               <Input
                 type="password"
@@ -631,10 +631,10 @@ export default function MemorySkillsTab() {
               </Button>
             </div>
             <p className="text-xs text-text-muted mt-2">{t("qdrantSaveHint")}</p>
-          </div>
+          </Card.Section>
         </div>
 
-        <div className="mt-4 p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section className="mt-4">
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium">{t("qdrantSearchTestTitle")}</p>
@@ -656,7 +656,10 @@ export default function MemorySkillsTab() {
           {qdrantResults.length > 0 && (
             <div className="mt-3 space-y-2">
               {qdrantResults.map((r) => (
-                <div key={r.id} className="p-3 rounded-lg bg-bg/40 border border-border/40">
+                <div
+                  key={r.id}
+                  className="p-3 rounded-card-nested bg-bg/40 border border-border/40"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono text-text-muted">{r.id}</span>
                     <span className="text-xs font-mono text-success">
@@ -673,9 +676,9 @@ export default function MemorySkillsTab() {
           {qdrantResults.length === 0 && qdrantQuery.trim().length > 0 && !qdrantSearching && (
             <p className="mt-3 text-xs text-text-muted">{t("qdrantNoResults")}</p>
           )}
-        </div>
+        </Card.Section>
 
-        <div className="mt-4 p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section className="mt-4">
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium">{t("qdrantCleanupTitle")}</p>
@@ -688,7 +691,7 @@ export default function MemorySkillsTab() {
             </Button>
           </div>
           {qdrantCleanupMsg && <p className="mt-2 text-xs text-text-muted">{qdrantCleanupMsg}</p>}
-        </div>
+        </Card.Section>
       </Card>
 
       {/* Skills Settings */}
@@ -703,7 +706,7 @@ export default function MemorySkillsTab() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">{t("skillsEnabled")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("skillsEnabledDesc")}</p>
@@ -716,7 +719,7 @@ export default function MemorySkillsTab() {
             aria-checked={config.skillsEnabled}
             aria-label={t("skillsEnabled")}
           />
-        </div>
+        </Card.Section>
       </Card>
 
       {/* SkillsMP Marketplace API Key */}
@@ -741,7 +744,7 @@ export default function MemorySkillsTab() {
           )}
         </div>
 
-        <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+        <Card.Section>
           <div className="flex items-end gap-2">
             <Input
               type="password"
@@ -760,7 +763,7 @@ export default function MemorySkillsTab() {
             {t("skillsmpApiKeyHintBefore")} <span className="text-primary">skillsmp.com</span>
             {t("skillsmpApiKeyHintAfter", { limit: 500 })}
           </p>
-        </div>
+        </Card.Section>
       </Card>
 
       {/* Active Skills Provider */}

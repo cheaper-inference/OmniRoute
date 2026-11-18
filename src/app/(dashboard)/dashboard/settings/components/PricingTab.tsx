@@ -549,7 +549,7 @@ export default function PricingTab() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
           {/* Stats panel with coverage bar */}
-          <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4">
+          <Card.Section>
             <div className="grid grid-cols-4 gap-3 mb-3">
               <HeroStat label={t("providers")} value={stats.providers} />
               <HeroStat label={t("registry")} value={stats.totalModels} />
@@ -575,10 +575,10 @@ export default function PricingTab() {
                 animate={false}
               />
             </div>
-          </div>
+          </Card.Section>
 
           {/* Sync panel */}
-          <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4 flex flex-col gap-3">
+          <Card.Section className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h3 className="text-xs uppercase text-text-muted">{t("pricingSyncTitle")}</h3>
@@ -628,7 +628,7 @@ export default function PricingTab() {
                 value={formatSyncDate(syncStatus?.nextSync || null)}
               />
             </div>
-          </div>
+          </Card.Section>
         </div>
       </Card>
 

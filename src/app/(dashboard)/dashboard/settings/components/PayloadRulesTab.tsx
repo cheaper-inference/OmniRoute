@@ -186,10 +186,10 @@ export default function PayloadRulesTab() {
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
           {ruleCards.map(([titleKey, descKey]) => (
-            <div key={titleKey} className="rounded-lg border border-border bg-bg-subtle p-3">
+            <Card.Section key={titleKey}>
               <p className="text-sm font-medium">{t(titleKey)}</p>
               <p className="text-xs text-text-muted mt-1">{t(descKey)}</p>
-            </div>
+            </Card.Section>
           ))}
         </div>
 

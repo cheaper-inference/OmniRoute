@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, NumberInput } from "@/shared/components";
+import { Badge, Button, Card, NumberInput } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
 export type BackupCleanupOptions = {
@@ -76,7 +76,7 @@ export default function DatabaseBackupRetentionCard({
   const t = useTranslations("settings");
 
   return (
-    <div className={`p-3 rounded-lg bg-bg border border-border ${className}`}>
+    <Card.Section className={className}>
       <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
         <div>
           <p className="text-sm font-medium text-text-main">{title}</p>
@@ -146,6 +146,6 @@ export default function DatabaseBackupRetentionCard({
       </div>
       <StatusAlert status={backupRetentionStatus} />
       <StatusAlert status={cleanupBackupsStatus} />
-    </div>
+    </Card.Section>
   );
 }

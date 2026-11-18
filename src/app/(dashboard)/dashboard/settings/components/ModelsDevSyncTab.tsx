@@ -274,7 +274,7 @@ export default function ModelsDevSyncTab() {
         </div>
 
         {/* Enable toggle */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+        <Card.Section className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-medium">{t("modelsDevEnabled")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("modelsDevEnabledDesc")}</p>
@@ -285,13 +285,13 @@ export default function ModelsDevSyncTab() {
             disabled={saving}
             ariaLabel={t("modelsDevEnabled")}
           />
-        </div>
+        </Card.Section>
 
         {/* Sync interval */}
         {enabled && (
           // dir="ltr": the kit places marks with `left`, so in an RTL page the 1h mark would
           // sit at the 7d end of the (mirrored) track. Pinning the slider LTR keeps them aligned.
-          <div dir="ltr" className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+          <Card.Section dir="ltr" className="mb-4">
             <Slider
               label={t("modelsDevInterval")}
               min={0}
@@ -307,7 +307,7 @@ export default function ModelsDevSyncTab() {
               // The kit marks are aria-hidden and the input runs 0..3: speak the interval.
               aria-valuetext={formatInterval(positionToHours(draftPos))}
             />
-          </div>
+          </Card.Section>
         )}
 
         {/* Manual sync button */}
@@ -343,30 +343,30 @@ export default function ModelsDevSyncTab() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
+            <Card.Section className="text-center">
               <p className="text-2xl font-semibold text-info">
                 {status.providerCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("providers")}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
+            </Card.Section>
+            <Card.Section className="text-center">
               <p className="text-2xl font-semibold text-success">
                 {status.modelCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelsWithPricing")}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
+            </Card.Section>
+            <Card.Section className="text-center">
               <p className="text-2xl font-semibold text-primary">
                 {status.capabilityCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("capabilities")}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
+            </Card.Section>
+            <Card.Section className="text-center">
               <p className="text-2xl font-semibold text-warning">
                 {status.lastSyncModelCount > 0 ? status.lastSyncModelCount.toLocaleString() : "—"}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("lastSyncCount")}</p>
-            </div>
+            </Card.Section>
           </div>
 
           {status.lastSync && (

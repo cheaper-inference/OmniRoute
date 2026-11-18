@@ -148,3 +148,35 @@ test("A2/D: settings opens the file picker through FileTrigger", () => {
   );
   assert.equal(elements(["FileTrigger"]).length, 4);
 });
+
+// C — card-inset: a panel nested inside a card (border, radius, neutral fill, padding) is
+// `Card.Section`, the kit inset card, so every inner panel shares one fill, border, radius and
+// 16px padding. Left alone on purpose: status-coloured boxes (notices), list frames
+// (`overflow-hidden` / `divide-y`, whose rows pad themselves), hover rows, and a second level of
+// nesting, which stays a `div` with `rounded-card-nested`.
+function isHandMadePanel(classes: string): boolean {
+  const tokens = classes.split(/\s+/).filter(Boolean);
+  const has = (pattern: RegExp) => tokens.some((token) => pattern.test(token));
+  if (!tokens.includes("border")) return false;
+  if (!has(/^rounded(-(sm|md|lg|xl|2xl|control|card))?$/)) return false;
+  if (!has(/^p-[34]$/) && !(tokens.includes("px-4") && tokens.includes("py-3"))) return false;
+  if (has(/^(border|bg)-.*(info|warning|error|success|primary|accent|dashed)/)) return false;
+  return !has(/^(overflow-hidden|divide-y|hover:.*)$/);
+}
+
+test("A2/C: settings draws inner panels with Card.Section, not by hand", () => {
+  const handMade = elements(["div", "section"])
+    .filter(({ attrs }) => isHandMadePanel(attrs.className ?? ""))
+    .map(({ file, line, attrs }) => `${file}:${line}: ${attrs.className}`);
+  assert.deepEqual(handMade, []);
+  assert.ok(
+    elements(["Card.Section"]).length >= 79,
+    "the settings panels are Card.Section elements"
+  );
+  // The detector itself: a neutral padded panel is caught, a notice and a list frame are not.
+  assert.equal(isHandMadePanel("rounded-xl border border-border bg-bg-subtle p-4"), true);
+  assert.equal(isHandMadePanel("space-y-3 rounded-xl border border-border p-3"), true);
+  assert.equal(isHandMadePanel("rounded-lg border border-info/20 bg-info/5 p-3"), false);
+  assert.equal(isHandMadePanel("rounded-lg border border-border overflow-hidden"), false);
+  assert.equal(isHandMadePanel("p-3 rounded-card-nested bg-bg/40 border border-border/40"), false);
+});

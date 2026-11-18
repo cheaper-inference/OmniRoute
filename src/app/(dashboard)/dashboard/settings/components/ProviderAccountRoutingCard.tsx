@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { NumberInput, Select } from "@/shared/components";
+import { Card, NumberInput, Select } from "@/shared/components";
 import { fieldNumber, fieldText } from "./numberFieldText";
 import { useTranslations } from "next-intl";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
@@ -123,7 +123,7 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
   if (connectionCount < 2) return null;
 
   return (
-    <div className="mb-4 rounded-lg border border-border bg-bg-subtle p-3">
+    <Card.Section className="mb-4">
       <p className="text-sm font-medium">{t("providerAccountRoutingTitle")}</p>
       <p className="text-xs text-text-muted mb-3">{t("providerAccountRoutingDesc")}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -156,6 +156,6 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
           />
         )}
       </div>
-    </div>
+    </Card.Section>
   );
 }

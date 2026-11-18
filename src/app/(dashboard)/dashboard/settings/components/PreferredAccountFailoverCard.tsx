@@ -112,7 +112,7 @@ function OverrideEditor({
   };
 
   return (
-    <div className="space-y-3 rounded-xl border border-border p-3">
+    <Card.Section className="space-y-3">
       <h3 className="text-sm">{kind === "provider" ? "Provider overrides" : "Model overrides"}</h3>
       <p className="text-xs text-text-muted">
         {kind === "provider"
@@ -160,7 +160,7 @@ function OverrideEditor({
           {error}
         </p>
       )}
-    </div>
+    </Card.Section>
   );
 }
 

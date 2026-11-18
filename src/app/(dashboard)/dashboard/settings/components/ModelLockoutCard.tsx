@@ -328,7 +328,7 @@ export default function ModelLockoutCard() {
 
       <div className="space-y-5">
         {/* Master toggle */}
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+        <Card.Section>
           <Toggle
             checked={draft.enabled}
             onChange={(checked) => {
@@ -338,10 +338,10 @@ export default function ModelLockoutCard() {
             label={t("modelLockoutEnabled")}
             description={t("modelLockoutEnabledDescription")}
           />
-        </div>
+        </Card.Section>
 
         {/* Error codes — tag input */}
-        <div className="rounded-lg border border-border bg-bg-subtle p-4">
+        <Card.Section>
           <Field
             label={t("modelLockoutErrorCodes")}
             hint={t("modelLockoutErrorCodesDescription")}
@@ -414,11 +414,11 @@ export default function ModelLockoutCard() {
               </div>
             )}
           </Field>
-        </div>
+        </Card.Section>
 
         {/* Cooldowns - grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section>
             <NumberInput
               label={t("modelLockoutBaseCooldown")}
               value={draft.baseCooldownMs}
@@ -433,9 +433,9 @@ export default function ModelLockoutCard() {
             <p className="mt-1.5 text-xs text-text-muted">
               {t("modelLockoutBaseCooldownDescription")}
             </p>
-          </div>
+          </Card.Section>
 
-          <div className="rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section>
             <NumberInput
               label={t("modelLockoutMaxCooldown")}
               value={draft.maxCooldownMs}
@@ -450,11 +450,11 @@ export default function ModelLockoutCard() {
             <p className="mt-1.5 text-xs text-text-muted">
               {t("modelLockoutMaxCooldownDescription")}
             </p>
-          </div>
+          </Card.Section>
         </div>
 
         {/* Exponential backoff */}
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+        <Card.Section>
           <Toggle
             checked={draft.useExponentialBackoff}
             onChange={(checked) => {
@@ -467,10 +467,10 @@ export default function ModelLockoutCard() {
             label={t("modelLockoutExponentialBackoff")}
             description={t("modelLockoutExponentialBackoffDescription")}
           />
-        </div>
+        </Card.Section>
 
         {/* Max backoff steps */}
-        <div className="rounded-lg border border-border bg-bg-subtle p-4">
+        <Card.Section>
           <NumberInput
             label={t("modelLockoutMaxBackoffSteps")}
             value={draft.maxBackoffSteps}
@@ -482,7 +482,7 @@ export default function ModelLockoutCard() {
           <p className="mt-1.5 text-xs text-text-muted">
             {t("modelLockoutMaxBackoffStepsDescription")}
           </p>
-        </div>
+        </Card.Section>
       </div>
     </Card>
   );

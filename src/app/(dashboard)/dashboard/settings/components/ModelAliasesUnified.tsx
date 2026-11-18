@@ -206,7 +206,7 @@ export default function ModelAliasesUnified() {
         )}
       </div>
 
-      <div className="mb-5 rounded-lg border border-border/30 bg-surface/20 p-4">
+      <Card.Section className="mb-5">
         <SegmentedControl
           semantics="radio"
           aria-label={translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
@@ -272,7 +272,7 @@ export default function ModelAliasesUnified() {
             {t("add")}
           </Button>
         </div>
-      </div>
+      </Card.Section>
 
       <div className="mb-4">
         <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
