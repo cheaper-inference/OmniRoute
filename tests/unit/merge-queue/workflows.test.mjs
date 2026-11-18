@@ -1749,7 +1749,7 @@ test("quality.yml: merge integrity and impact selection compare against the cand
     mi.steps[idx].run,
     'node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"'
   );
-  const changelog = mi.steps.findIndex((s) => s.run === "npm run check:changelog-integrity");
+  const changelog = mi.steps.findIndex((s) => s.run?.includes("npm run check:changelog-integrity"));
   assert.ok(idx >= 0 && idx < changelog);
   const ref = mi.steps[changelog].env.CHANGELOG_BASE_REF;
   const ctx = (sha) => ({
@@ -1757,7 +1757,7 @@ test("quality.yml: merge integrity and impact selection compare against the cand
     steps: { candidate: { outputs: { BASE_SHA: sha } } },
   });
   assert.equal(render(ref, ctx(BASE_SHA)), BASE_SHA);
-  // Skipped resolver → empty → check-changelog-integrity falls back to GITHUB_BASE_REF.
+  // Empty output stays empty: the comparison resolver must reject a missing queue base.
   assert.equal(render(ref, ctx(null)), null);
 
   const fast = wf.jobs["fast-gates"];
