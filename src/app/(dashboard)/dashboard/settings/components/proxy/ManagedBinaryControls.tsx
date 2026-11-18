@@ -53,7 +53,7 @@ export default function ManagedBinaryControls({
   } = useReleaseCatalog(core);
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-      <h4 className="text-sm font-medium">{t("binaryTitle")}</h4>
+      <h4 className="text-sm">{t("binaryTitle")}</h4>
       <p className="text-xs text-text-muted">{t("binaryHint")}</p>
       <Select
         label={t("distribution")}

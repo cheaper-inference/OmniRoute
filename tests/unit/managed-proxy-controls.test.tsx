@@ -87,3 +87,18 @@ test("fragmentation controls are opt-in and disappear for unsupported core", asy
   selectCore("singbox");
   expect(screen.queryByLabelText("fragmentEnable")).toBeNull();
 });
+
+test("managed proxy title delegates font weight to the kit heading role", async () => {
+  render(<ManagedProxyTab />);
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  const heading = screen.getByRole("heading", { name: "title", level: 3 });
+  expect(heading.className).not.toMatch(/(?:^|\s)font-(?:normal|medium|semibold|bold)(?:\s|$)/);
+});
+
+test("managed binary title delegates font weight to the kit heading role", async () => {
+  render(<ManagedProxyTab />);
+  selectCore();
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  const heading = screen.getByRole("heading", { name: "binaryTitle", level: 4 });
+  expect(heading.className).not.toMatch(/(?:^|\s)font-(?:normal|medium|semibold|bold)(?:\s|$)/);
+});

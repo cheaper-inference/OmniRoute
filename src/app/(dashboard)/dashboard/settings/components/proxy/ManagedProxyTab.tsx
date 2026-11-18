@@ -151,7 +151,7 @@ export default function ManagedProxyTab() {
   } = state;
   return (
     <section className="flex flex-col gap-4 max-w-2xl">
-      <h3 className="text-base font-medium text-text-primary">{t("title")}</h3>
+      <h3 className="text-base text-text-primary">{t("title")}</h3>
       <p className="text-sm text-text-muted">{t("description")}</p>
       <ManagedCoreList cores={cores} busy={busy} operation={operation} />
       <ManagedSourceFields
