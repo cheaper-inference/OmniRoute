@@ -1024,25 +1024,25 @@ export default function EvalsTab() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsSuites")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-chart-3-ink">{suites.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsTestCases")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-info">{totalCases}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsModels")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-success">{uniqueModels.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
-          <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("statsCoverage")}
           </span>
           <div className="text-2xl font-semibold mt-1 text-warning">
@@ -1057,7 +1057,9 @@ export default function EvalsTab() {
             <Icon name="route" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("evalControlsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("evalControlsTitle")}
+            </h3>
             <p className="text-xs text-text-muted">{t("evalControlsHint")}</p>
           </div>
         </div>
@@ -1123,34 +1125,28 @@ export default function EvalsTab() {
               <Icon name="analytics" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("scorecardTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("scorecardTitle")}
+              </h3>
               <p className="text-xs text-text-muted">{t("scorecardHint")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardSuites")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardSuites")}</p>
               <p className="text-2xl font-semibold text-chart-3-ink mt-1">{scorecard.suites}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardCases")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardCases")}</p>
               <p className="text-2xl font-semibold text-info mt-1">{scorecard.totalCases}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardPassed")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardPassed")}</p>
               <p className="text-2xl font-semibold text-success mt-1">{scorecard.totalPassed}</p>
             </Card>
             <Card className="px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted">
-                {t("scorecardPassRate")}
-              </p>
+              <p className="ci-eyebrow">{t("scorecardPassRate")}</p>
               <p className="text-2xl font-semibold text-warning mt-1">
                 {scorecard.overallPassRate}%
               </p>
@@ -1189,7 +1185,9 @@ export default function EvalsTab() {
               <Icon name="help" size={20} />
             </div>
             <div>
-              <h3 className="text-sm text-text-main">{t("howItWorks")}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {t("howItWorks")}
+              </h3>
               <p className="text-xs text-text-muted">{t("howItWorksSubtitle")}</p>
             </div>
           </div>
@@ -1209,27 +1207,33 @@ export default function EvalsTab() {
                 <div className="w-10 h-10 rounded-full bg-chart-3/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-chart-3-ink">1</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("define")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("define")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("defineStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-info/5 border border-info/10">
                 <div className="w-10 h-10 rounded-full bg-info/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-info">2</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("run")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("run")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("runStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-success/5 border border-success/10">
                 <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center mb-3">
                   <span className="text-lg font-semibold text-success">3</span>
                 </div>
-                <h4 className="text-sm text-text-main mb-1">{t("evaluate")}</h4>
+                <h4 className="ci-heading mb-1" data-size="sm">
+                  {t("evaluate")}
+                </h4>
                 <p className="text-xs text-text-muted">{t("evaluateStepDescription")}</p>
               </div>
             </div>
 
             <div className="mt-6">
-              <h4 className="text-xs text-text-muted uppercase mb-3">
+              <h4 className="ci-eyebrow mb-3" data-weight="medium">
                 {t("evaluationStrategies")}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -1259,7 +1263,9 @@ export default function EvalsTab() {
             <Icon name="history" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("recentRunsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("recentRunsTitle")}
+            </h3>
             <p className="text-xs text-text-muted">{t("recentRunsHint")}</p>
           </div>
         </div>
@@ -1322,7 +1328,9 @@ export default function EvalsTab() {
               <Icon name="science" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("evalSuites")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("evalSuites")}
+              </h3>
               <p className="text-xs text-text-muted">{t("evalSuitesHint")}</p>
             </div>
           </div>
@@ -1488,7 +1496,7 @@ export default function EvalsTab() {
                           {suiteModels.map((model) => (
                             <span
                               key={model}
-                              className="px-1.5 py-0.5 rounded text-[10px] font-mono text-text-muted bg-surface-2"
+                              className="px-1.5 py-0.5 rounded text-3xs font-mono text-text-muted bg-surface-2"
                             >
                               {model}
                             </span>
@@ -1573,7 +1581,9 @@ export default function EvalsTab() {
                       <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <h4 className="text-sm text-text-main">{t("targetComparisonTitle")}</h4>
+                            <h4 className="ci-heading" data-size="sm">
+                              {t("targetComparisonTitle")}
+                            </h4>
                             <p className="text-xs text-text-muted">{t("targetComparisonHint")}</p>
                           </div>
                           <span className="text-lg font-semibold text-primary">
@@ -1613,7 +1623,7 @@ export default function EvalsTab() {
                           <Card key={run.id} className="p-4">
                             <div className="flex items-center justify-between gap-3 mb-3">
                               <div>
-                                <h4 className="text-sm text-text-main">
+                                <h4 className="ci-heading" data-size="sm">
                                   {getTargetLabel(run.target, t)}
                                 </h4>
                                 <p className="text-xs text-text-muted">
@@ -1705,7 +1715,11 @@ export default function EvalsTab() {
                                       {isResultExpanded && (
                                         <div className="grid grid-cols-1 gap-3 border-t border-border/20 p-3 lg:grid-cols-2">
                                           <div>
-                                            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                                            <p
+                                              className="ci-eyebrow mb-1"
+                                              data-size="2xs"
+                                              data-weight="medium"
+                                            >
                                               {t("expectedOutputLabel")}
                                             </p>
                                             <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border/20 bg-surface-2 p-3 text-xs text-text-main">
@@ -1713,7 +1727,11 @@ export default function EvalsTab() {
                                             </pre>
                                           </div>
                                           <div>
-                                            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                                            <p
+                                              className="ci-eyebrow mb-1"
+                                              data-size="2xs"
+                                              data-weight="medium"
+                                            >
                                               {t("actualOutputLabel")}
                                             </p>
                                             <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border/20 bg-surface-2 p-3 text-xs text-text-main">
@@ -1743,7 +1761,9 @@ export default function EvalsTab() {
                       <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-4">
                         <div className="flex items-center justify-between gap-3 mb-3">
                           <div>
-                            <h4 className="text-sm text-text-main">{t("suiteLatestRuns")}</h4>
+                            <h4 className="ci-heading" data-size="sm">
+                              {t("suiteLatestRuns")}
+                            </h4>
                             <p className="text-xs text-text-muted">{t("suiteLatestRunsHint")}</p>
                           </div>
                         </div>
@@ -1882,7 +1902,9 @@ const HeroSection = memo(function HeroSection({
             <Icon name="science" size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl text-text-main mb-1">{t("modelEvals")}</h2>
+            <h2 className="ci-heading mb-1" data-size="xl">
+              {t("modelEvals")}
+            </h2>
             <p className="text-sm text-text-muted leading-relaxed max-w-2xl">
               {t("evalsHeroDescription")}
             </p>
@@ -2013,7 +2035,9 @@ function SuiteBuilderModal({
         <div className="rounded-xl border border-border/20 bg-surface/20 p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h4 className="text-sm text-text-main">{t("suiteBuilderCasesTitle")}</h4>
+              <h4 className="ci-heading" data-size="sm">
+                {t("suiteBuilderCasesTitle")}
+              </h4>
               <p className="text-xs text-text-muted">{t("suiteBuilderCasesHint")}</p>
             </div>
             <Button icon="add" variant="secondary" onClick={addCase}>
@@ -2031,7 +2055,7 @@ function SuiteBuilderModal({
             <Card key={draftCase.id} className="p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm text-text-main">
+                  <h4 className="ci-heading" data-size="sm">
                     {t("suiteBuilderCaseCardTitle", { index: index + 1 })}
                   </h4>
                   <p className="text-xs text-text-muted">

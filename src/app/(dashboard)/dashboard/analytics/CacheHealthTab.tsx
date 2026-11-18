@@ -81,7 +81,7 @@ function verdictVariant(v: CacheHealthVerdict) {
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs uppercase tracking-wide text-text-muted">{label}</span>
+      <span className="ci-eyebrow">{label}</span>
       <span className="text-2xl font-semibold text-text-main">{value}</span>
       {hint ? <span className="text-xs text-text-muted">{hint}</span> : null}
     </div>
@@ -91,7 +91,7 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
 function CacheWriteTiers({ data, t }: { data: CacheHealthResponse; t: Translator }) {
   return (
     <Card>
-      <h3 className="mb-3 text-sm text-text-main">
+      <h3 className="ci-heading mb-3" data-size="sm">
         {text(t, "cacheHealthWriteTiers", "Reported cache-write tiers")}
       </h3>
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
@@ -183,7 +183,7 @@ export default function CacheHealthTab() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg text-text-main">
+          <h2 className="ci-heading" data-size="lg">
             {text(t, "cacheHealthTitle", "Prompt cache health")}
           </h2>
           <Badge variant={verdictVariant(data.verdict)}>
@@ -244,7 +244,7 @@ export default function CacheHealthTab() {
           <Card>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-sm text-text-main">
+                <h3 className="ci-heading" data-size="sm">
                   {text(t, "cacheHealthConcentration", "Where the writes are concentrated")}
                 </h3>
                 <span className="text-xs text-text-muted">
@@ -280,7 +280,7 @@ export default function CacheHealthTab() {
           </Card>
 
           <Card>
-            <h3 className="mb-3 text-sm text-text-main">
+            <h3 className="ci-heading mb-3" data-size="sm">
               {text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             </h3>
             <Table

@@ -148,7 +148,7 @@ function modelVariant(status: ModelStatus) {
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-xl border border-border bg-surface/50 p-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="ci-eyebrow">{label}</p>
       <p className="mt-1 text-sm font-semibold text-text-main">{value}</p>
     </div>
   );
@@ -323,7 +323,7 @@ export default function ProviderHealthMatrixCard() {
               <Icon name="grid_view" size={18} />
             </div>
             <div>
-              <h2 className="text-lg text-text-main">
+              <h2 className="ci-heading" data-size="lg">
                 {healthText(t, "providerHealthMatrixTitle", "Provider Health Matrix")}
               </h2>
               <p className="text-sm text-text-muted">

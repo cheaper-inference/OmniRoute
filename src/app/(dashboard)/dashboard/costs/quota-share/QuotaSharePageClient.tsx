@@ -82,7 +82,7 @@ function StatCard({
           : "text-text-main";
   return (
     <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold">
+      <div className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {label}
       </div>
       <div className={`text-2xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
@@ -622,7 +622,7 @@ export default function QuotaSharePageClient() {
                   <div className="flex items-center gap-2">
                     <Icon name="folder" size={16} className="text-text-muted" />
                     <span className="text-sm font-semibold text-text-main">{g.name}</span>
-                    <span className="text-[11px] text-text-muted">({groupPools.length})</span>
+                    <span className="text-2xs text-text-muted">({groupPools.length})</span>
                   </div>
                   {groupPools.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-border bg-surface py-6 text-center">
@@ -670,7 +670,7 @@ export default function QuotaSharePageClient() {
               <div className="flex items-center gap-2">
                 <Icon name="folder_off" size={16} className="text-warning" />
                 <span className="text-sm font-semibold text-text-main">{t("ungroupedTitle")}</span>
-                <span className="text-[11px] text-text-muted">({orphanPools.length})</span>
+                <span className="text-2xs text-text-muted">({orphanPools.length})</span>
               </div>
               <p className="text-xs text-warning">{t("ungroupedHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">

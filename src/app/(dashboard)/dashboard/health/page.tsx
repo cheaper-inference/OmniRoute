@@ -356,13 +356,15 @@ function HealthSnapshot() {
                 <Icon name="database" size={18} />
               </div>
               <div>
-                <h2 className="text-lg text-text-main">{t("databaseHealth")}</h2>
+                <h2 className="ci-heading" data-size="lg">
+                  {t("databaseHealth")}
+                </h2>
                 <p className="text-sm text-text-muted">{t("databaseHealthDescription")}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
               <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("status")}</p>
+                <p className="ci-eyebrow">{t("status")}</p>
                 <p
                   className={`mt-1 text-sm font-medium ${
                     dbHealth?.isHealthy ? "text-success" : "text-warning"
@@ -372,13 +374,13 @@ function HealthSnapshot() {
                 </p>
               </div>
               <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("issues")}</p>
+                <p className="ci-eyebrow">{t("issues")}</p>
                 <p className="mt-1 text-sm font-medium text-text-main">
                   {dbHealth?.issues?.length ?? 0}
                 </p>
               </div>
               <div className="rounded-xl border border-border bg-surface/50 p-3">
-                <p className="text-xs uppercase tracking-wide text-text-muted">{t("repairs")}</p>
+                <p className="ci-eyebrow">{t("repairs")}</p>
                 <p className="mt-1 text-sm font-medium text-text-main">
                   {dbHealth?.repairedCount ?? 0}
                 </p>
@@ -467,7 +469,7 @@ function HealthSnapshot() {
             {providerSummary?.configuredCount ?? cbEntries.length}
           </p>
           <p
-            className="text-[11px] text-text-muted mt-1 inline-flex items-center gap-1"
+            className="text-2xs text-text-muted mt-1 inline-flex items-center gap-1"
             title={t("configuredProvidersHint")}
           >
             {t("configuredProvidersLabel")}
@@ -496,7 +498,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg text-text-main flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="lg">
               <Icon name="groups" size={20} className="text-primary" />
               {t("sessionActivity")}
             </h2>
@@ -550,7 +552,7 @@ function HealthSnapshot() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg text-text-main flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="lg">
               <Icon name="radar" size={20} className="text-primary" />
               {t("quotaMonitors")}
             </h2>
@@ -634,7 +636,7 @@ function HealthSnapshot() {
       {degradation && degradation.features && degradation.features.length > 0 && (
         <Card className="p-5" role="region" aria-label={t("gracefulDegradationStatus")}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg text-text-main flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="lg">
               <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
@@ -681,20 +683,20 @@ function HealthSnapshot() {
                       <span className={`w-2 h-2 rounded-full ${dot}`}></span>
                       {feat.feature}
                     </span>
-                    <span className="text-xs uppercase tracking-wider font-semibold opacity-70">
+                    <span className="ci-eyebrow opacity-70 text-inherit" data-weight="medium">
                       {feat.level}
                     </span>
                   </div>
                   <div className="text-xs text-text-muted">{feat.capability}</div>
                   {feat.reason && (
                     <div
-                      className="text-[10px] text-error mt-1 bg-error/20 p-1.5 rounded"
+                      className="text-xs text-error mt-1 bg-error/20 p-1.5 rounded"
                       title={feat.reason}
                     >
                       {feat.reason.length > 80 ? feat.reason.substring(0, 80) + "..." : feat.reason}
                     </div>
                   )}
-                  <div className="text-[10px] text-text-muted text-right mt-1">
+                  <div className="text-3xs text-text-muted text-right mt-1">
                     {t("sinceTime", {
                       time: new Date(feat.since).toLocaleTimeString(locale),
                     })}
@@ -710,7 +712,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Prompt Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="ci-heading text-text-muted mb-3 flex items-center gap-2" data-size="sm">
             <Icon name="cached" size={18} />
             {t("promptCache")}
           </h3>
@@ -740,7 +742,7 @@ function HealthSnapshot() {
 
         {/* Signature Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="ci-heading text-text-muted mb-3 flex items-center gap-2" data-size="sm">
             <Icon name="database" size={18} />
             {t("signatureCache")}
           </h3>
@@ -786,7 +788,7 @@ function HealthSnapshot() {
       {/* Provider Health */}
       <Card className="p-5" role="region" aria-label={t("providerHealthStatusAria")}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg text-text-main flex items-center gap-2">
+          <h2 className="ci-heading flex items-center gap-2" data-size="lg">
             <Icon name="health_and_safety" size={20} className="text-primary" />
             {t("providerHealth")}
           </h2>
@@ -830,7 +832,7 @@ function HealthSnapshot() {
                 {/* Unhealthy providers first */}
                 {unhealthy.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-error uppercase tracking-wide">
+                    <p className="ci-eyebrow text-error" data-weight="medium">
                       {t("issuesLabel")}
                     </p>
                     {unhealthy.map(([provider, cb]: [string, any]) => {
@@ -890,7 +892,7 @@ function HealthSnapshot() {
                 {healthy.length > 0 && (
                   <div>
                     {unhealthy.length > 0 && (
-                      <p className="text-xs font-medium text-success uppercase tracking-wide mb-2">
+                      <p className="ci-eyebrow text-success mb-2" data-weight="medium">
                         {t("operational")}
                       </p>
                     )}
@@ -961,7 +963,7 @@ function HealthSnapshot() {
           return (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg text-text-main flex items-center gap-2">
+                <h2 className="ci-heading flex items-center gap-2" data-size="lg">
                   <Icon name="speed" size={20} className="text-warning" />
                   {t("rateLimitStatus")}
                 </h2>
@@ -1014,7 +1016,7 @@ function HealthSnapshot() {
                       >
                         <div className="flex items-center gap-2.5 mb-2">
                           <div
-                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-semibold"
+                            className="size-7 rounded-md flex items-center justify-center shrink-0 text-3xs font-semibold"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
                               color: providerInfo?.color || "var(--color-text-muted)",
@@ -1027,7 +1029,7 @@ function HealthSnapshot() {
                               {displayName}
                             </p>
                             {connectionId && (
-                              <p className="text-[10px] text-text-muted font-mono truncate">
+                              <p className="text-3xs text-text-muted font-mono truncate">
                                 {connectionId.length > 12
                                   ? connectionId.slice(0, 8) + "…"
                                   : connectionId}
@@ -1060,7 +1062,7 @@ function HealthSnapshot() {
                         </div>
                         {quotaProgress != null && (
                           <div className="mb-3">
-                            <div className="mb-1 flex items-center justify-between text-[11px] text-text-muted">
+                            <div className="mb-1 flex items-center justify-between text-2xs text-text-muted">
                               <span>{t("learnedFromHeaders")}</span>
                               <span>
                                 {t("remainingOfLimit", {
@@ -1082,7 +1084,7 @@ function HealthSnapshot() {
                             />
                           </div>
                         )}
-                        <div className="flex items-center gap-3 text-[11px] text-text-muted">
+                        <div className="flex items-center gap-3 text-2xs text-text-muted">
                           <span className="flex items-center gap-1">
                             <Icon name="schedule" size={12} />
                             {t("queuedCount", { count: status.queued || 0 })}
@@ -1093,7 +1095,7 @@ function HealthSnapshot() {
                           </span>
                         </div>
                         {(learnedMinTime != null || learnedLastUpdated != null) && (
-                          <div className="mt-3 space-y-1 text-[11px] text-text-muted">
+                          <div className="mt-3 space-y-1 text-2xs text-text-muted">
                             {learnedMinTime != null && (
                               <p>{t("throttleStatus", { value: `${learnedMinTime}ms/req` })}</p>
                             )}
@@ -1119,7 +1121,7 @@ function HealthSnapshot() {
       {lockoutEntries.length > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg text-text-main flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="lg">
               <Icon name="lock" size={20} className="text-error" />
               {t("activeLockouts")}
             </h2>

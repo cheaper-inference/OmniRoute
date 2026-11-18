@@ -46,7 +46,9 @@ export default function RateLimitStatus() {
             <Icon name="lock_clock" size={20} />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg">{t("modelLockouts")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("modelLockouts")}
+            </h3>
             <p className="text-sm text-text-muted">{t("lockoutsAutoRefreshHint")}</p>
           </div>
           {data.lockouts.length > 0 && (

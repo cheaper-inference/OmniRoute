@@ -255,7 +255,7 @@ export default function TelemetryCard() {
     <Card className="p-5">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-lg text-text-main">
+          <h2 className="ci-heading flex items-center gap-2" data-size="lg">
             <Icon name="monitoring" size={20} className="text-primary" />
             {t("title")}
           </h2>
@@ -289,7 +289,7 @@ export default function TelemetryCard() {
           <div key={metric.label} className="rounded-xl border border-border bg-surface/50 p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                <p className="ci-eyebrow" data-weight="medium">
                   {metric.label}
                 </p>
                 <p className="mt-1 text-xl font-semibold text-text-main">{metric.value}</p>

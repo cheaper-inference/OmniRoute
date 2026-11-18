@@ -35,8 +35,8 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
 
   return (
     <div className="flex flex-col gap-1 min-w-0">
-      <div className="flex items-center justify-between text-[10px] text-text-muted">
-        <span className="font-semibold uppercase tracking-wide">
+      <div className="flex items-center justify-between text-3xs text-text-muted">
+        <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
           {dimension.unit} / {dimension.window}
         </span>
         <span
@@ -61,7 +61,7 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
         />
       </div>
       {countdown && (
-        <div className="text-[10px] text-text-muted">
+        <div className="text-3xs text-text-muted">
           {t("dimensionResetIn")} {countdown}
         </div>
       )}

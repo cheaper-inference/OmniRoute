@@ -191,7 +191,7 @@ export default function QuotaCutoffModal({
             <div key={w.key} className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-text-main">{w.displayName}</div>
-                <div className="text-[11px] text-text-muted">
+                <div className="text-2xs text-text-muted">
                   {tr("quotaCutoffsDefaultHint", `Default min remaining: ${resolvedDefault}%`, {
                     default: resolvedDefault,
                   })}

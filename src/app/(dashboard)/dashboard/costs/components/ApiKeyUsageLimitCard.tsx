@@ -66,7 +66,9 @@ function formatResetHint(resetAtIso: string | null, t: ReturnType<typeof useTran
 function UsageQuotaMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">{label}</p>
+      <p className="ci-eyebrow" data-weight="medium">
+        {label}
+      </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
     </div>
   );
@@ -134,7 +136,9 @@ export function ApiKeyUsageLimitCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Icon name="paid" size={18} className="text-success" />
-            <h3 className="text-sm text-text-main">{t("apiKeyUsdQuota")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("apiKeyUsdQuota")}
+            </h3>
             {payload?.key.name && (
               <Badge size="sm" className="min-w-0 truncate">
                 {payload.key.name}

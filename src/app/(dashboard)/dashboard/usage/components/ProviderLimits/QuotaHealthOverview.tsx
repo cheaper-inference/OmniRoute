@@ -125,7 +125,9 @@ function OverviewGroupHeader({
               : DISPLAY_COLORS[worst?.kind || "empty"],
         }}
       />
-      <h3 className="break-words text-sm">{label}</h3>
+      <h3 className="ci-heading break-words" data-size="sm">
+        {label}
+      </h3>
       <span className="text-xs text-text-muted">{t("accountsCount", { count })}</span>
       <HealthCounts accounts={accounts} />
     </>
@@ -396,7 +398,7 @@ function OverviewDetails({
       )}
       {selectedAccount && (
         <div id={`${id}-details`} className="max-w-2xl space-y-2">
-          <h4 className="text-sm text-text-main">
+          <h4 className="ci-heading" data-size="sm">
             {label(selectedAccount.connection)} · {t("columnDetails")}
           </h4>
           {renderCard(selectedAccount.connection)}

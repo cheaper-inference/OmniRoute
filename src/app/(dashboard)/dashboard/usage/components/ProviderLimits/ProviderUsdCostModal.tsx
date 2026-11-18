@@ -155,7 +155,7 @@ export default function ProviderUsdCostModal({
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-muted">
+                <div className="ci-eyebrow" data-size="3xs">
                   {t("used")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
@@ -163,7 +163,7 @@ export default function ProviderUsdCostModal({
                 </div>
               </div>
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-muted">
+                <div className="ci-eyebrow" data-size="3xs">
                   {t("quotaUsed")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
@@ -171,7 +171,7 @@ export default function ProviderUsdCostModal({
                 </div>
               </div>
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-muted">
+                <div className="ci-eyebrow" data-size="3xs">
                   {t("estimatedFullQuota")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
@@ -181,7 +181,7 @@ export default function ProviderUsdCostModal({
                 </div>
               </div>
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-muted">
+                <div className="ci-eyebrow" data-size="3xs">
                   {t("rows")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
@@ -244,7 +244,7 @@ export default function ProviderUsdCostModal({
                           <div className="truncate text-sm font-semibold text-text-main">
                             {row.apiKeyName}
                           </div>
-                          <div className="mt-0.5 text-[11px] text-text-muted">
+                          <div className="mt-0.5 text-2xs text-text-muted">
                             {t("requestTokenCounts", {
                               requests: row.requests.toLocaleString(),
                               tokens: row.totalTokens.toLocaleString(),
@@ -256,14 +256,12 @@ export default function ProviderUsdCostModal({
                             {formatUsd(row.costUsd)}
                           </div>
                           {row.limitUsd ? (
-                            <div className="mt-0.5 text-[11px] tabular-nums text-text-muted">
+                            <div className="mt-0.5 text-2xs tabular-nums text-text-muted">
                               {formatPercent(row.limitUsedPercent)} of {formatUsd(row.limitUsd)}
                               {row.limitPeriod ? ` ${row.limitPeriod}` : ""}
                             </div>
                           ) : (
-                            <div className="mt-0.5 text-[11px] text-text-muted">
-                              {t("noUsdLimit")}
-                            </div>
+                            <div className="mt-0.5 text-2xs text-text-muted">{t("noUsdLimit")}</div>
                           )}
                         </div>
                       </div>

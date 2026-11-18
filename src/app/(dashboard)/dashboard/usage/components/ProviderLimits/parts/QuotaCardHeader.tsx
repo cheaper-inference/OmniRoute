@@ -132,12 +132,12 @@ export default function QuotaCardHeader({
               </span>
             )}
           </div>
-          <span className="text-[11px] text-text-muted truncate" title={accountName ?? ""}>
+          <span className="text-2xs text-text-muted truncate" title={accountName ?? ""}>
             {accountName}
           </span>
           {tokenExpiryLabel && (
             <span
-              className={`text-[10px] whitespace-normal [overflow-wrap:anywhere] leading-[1.4] ${tokenCountdown ? "text-info" : "text-error"}`}
+              className={`text-3xs whitespace-normal [overflow-wrap:anywhere] leading-[1.4] ${tokenCountdown ? "text-info" : "text-error"}`}
               title={tokenExpiryTitle}
             >
               {tokenExpiryLabel}

@@ -76,15 +76,15 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
       data-testid="cursor-model-usage"
       className="flex flex-col gap-1 border-t border-border/40 pt-2"
     >
-      <div className="flex items-baseline justify-between gap-2 text-[10px] text-text-muted">
-        <span className="font-medium uppercase tracking-wide">
+      <div className="flex items-baseline justify-between gap-2 text-3xs text-text-muted">
+        <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
           {tr("cursorModelUsageTitle", "API tokens (this cycle)")}
         </span>
         <span className="italic">{tr("cursorModelUsageBilledHint", "Billed by Cursor")}</span>
       </div>
       <Table
         containerClassName="overflow-x-auto rounded-none border-0"
-        className="w-full border-collapse text-[10px] tabular-nums"
+        className="w-full border-collapse text-3xs tabular-nums"
         persistentScrollbars={false}
         scrollLabel={tr("cursorModelUsageTitle", "API tokens (this cycle)")}
       >

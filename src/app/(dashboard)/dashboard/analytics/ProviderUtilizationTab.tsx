@@ -345,7 +345,7 @@ export default function ProviderUtilizationTab() {
                       </div>
                       <div className="text-right text-xs text-text-muted">
                         <p>{formatTooltipTimestamp(point.timestamp, range)}</p>
-                        <p className="mt-1 uppercase tracking-[0.14em]">{point.windowKey}</p>
+                        <p className="ci-eyebrow mt-1">{point.windowKey}</p>
                       </div>
                     </div>
 

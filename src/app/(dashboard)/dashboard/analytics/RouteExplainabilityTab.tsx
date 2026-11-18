@@ -208,7 +208,7 @@ function getStatusVariant(status: number) {
 function RouteMetric({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border bg-surface-2 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+      <div className="ci-eyebrow flex items-center gap-2" data-weight="medium">
         <Icon name={icon} size={16} />
         {label}
       </div>
@@ -565,7 +565,7 @@ export default function RouteExplainabilityTab({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg text-text-main">
+          <h2 className="ci-heading" data-size="lg">
             {analyticsText(t, "routeTraceTitle", "Route Trace View")}
           </h2>
           <p className="mt-1 max-w-3xl text-sm text-text-muted">

@@ -163,19 +163,19 @@ export default function FileDetailModal({
       {/* Metadata */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-bg-alt border border-border">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesSizeColumn")}
           </span>
           <span className="text-sm text-text-main">{formatBytes(file.bytes)}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesPurpose")}
           </span>
           <span className="text-sm text-text-main">{file.purpose}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchDetailCreated")}
           </span>
           <span className="text-sm text-text-main">
@@ -183,7 +183,7 @@ export default function FileDetailModal({
           </span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesExpires")}
           </span>
           <span className="text-sm text-text-main">
@@ -195,7 +195,7 @@ export default function FileDetailModal({
       {/* Related batches */}
       {relatedBatches.length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase text-text-muted mb-2">
+          <h3 className="ci-eyebrow mb-2" data-size="2xs" data-weight="medium">
             {t("batchFileUsedByCount", { count: relatedBatches.length })}
           </h3>
           <div className="space-y-1.5">
@@ -230,7 +230,9 @@ export default function FileDetailModal({
       {/* Contents */}
       <div className="flex-1 flex flex-col min-h-[300px]">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs uppercase text-text-muted">{t("batchFilePreview")}</h3>
+          <h3 className="ci-eyebrow" data-weight="medium">
+            {t("batchFilePreview")}
+          </h3>
           {contents && (
             <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
               <Icon name={copied ? "check" : "content_copy"} size={14} />
@@ -250,7 +252,7 @@ export default function FileDetailModal({
             </div>
           ) : contents ? (
             <div className="h-full flex flex-col">
-              <pre className="flex-1 overflow-auto text-[11px] bg-bg rounded-lg p-4 border border-border text-text-muted font-mono leading-relaxed">
+              <pre className="flex-1 overflow-auto text-2xs bg-bg rounded-lg p-4 border border-border text-text-muted font-mono leading-relaxed">
                 {displayedLines.join("\n")}
               </pre>
               {isTruncated && (

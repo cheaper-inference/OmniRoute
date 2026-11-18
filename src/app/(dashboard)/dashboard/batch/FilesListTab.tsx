@@ -278,13 +278,13 @@ export default function FilesListTab({
                               title={related.map((b) => `${b.id} (${roleFor(b)})`).join(", ")}
                             >
                               {related.slice(0, 2).map((b) => (
-                                <span key={b.id} className="font-mono text-[10px] text-text-main">
+                                <span key={b.id} className="font-mono text-3xs text-text-main">
                                   {b.id.slice(0, 12)}…{" "}
                                   <span className="text-text-muted">({roleFor(b)})</span>
                                 </span>
                               ))}
                               {related.length > 2 && (
-                                <span className="text-[10px] text-text-muted">
+                                <span className="text-3xs text-text-muted">
                                   +{related.length - 2}
                                 </span>
                               )}

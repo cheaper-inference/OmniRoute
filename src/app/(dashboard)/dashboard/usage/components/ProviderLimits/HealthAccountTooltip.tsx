@@ -153,7 +153,7 @@ function TooltipContent({
       <div className="mb-[6px] flex items-center justify-between gap-2">
         <b>{label}</b>
         <span
-          className="shrink-0 rounded-full px-2 py-px text-[11px]"
+          className="shrink-0 rounded-full px-2 py-px text-2xs"
           style={{
             color: DISPLAY_COLORS[account.kind],
             background: `color-mix(in srgb, ${DISPLAY_COLORS[account.kind]} 13%, transparent)`,
@@ -166,7 +166,7 @@ function TooltipContent({
       <TooltipPools pools={pools} />
       <TooltipReasons account={account} />
       <TooltipCells account={account} />
-      <p className="mt-2 text-[11px] text-text-muted">
+      <p className="mt-2 text-xs text-text-muted">
         {t("healthQuotaObserved", { time: relative(account.quotaObservedAt) })} ·{" "}
         {t("healthRuntimeObserved", { time: relative(account.runtimeObservedAt) })} ·{" "}
         {t("healthDetailsHint")}

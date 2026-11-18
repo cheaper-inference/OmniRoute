@@ -133,7 +133,7 @@ export default function DiversityScoreCard() {
             <span className={`text-lg font-semibold tabular-nums ${riskColor}`}>
               {scorePercentage}%
             </span>
-            <span className="text-[9px] uppercase tracking-[0.15em] text-text-muted">
+            <span className="ci-eyebrow" data-size="3xs">
               {t("diversityScoreLabel")}
             </span>
           </div>

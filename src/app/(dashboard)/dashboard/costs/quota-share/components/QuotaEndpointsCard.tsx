@@ -330,7 +330,7 @@ export default function QuotaEndpointsCard({
           {/* Base URL line(s) */}
           <div className="mt-3 rounded-md bg-bg-subtle border border-border px-3 py-2 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+              <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                 {t("endpointsBaseUrl")}
               </span>
               <code className="text-xs text-primary font-mono">POST /v1/chat/completions</code>
@@ -341,7 +341,7 @@ export default function QuotaEndpointsCard({
             </div>
             {hasAnthropic && (
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                   {t("endpointsBaseUrl")}
                 </span>
                 <code className="text-xs text-primary font-mono">POST /v1/messages</code>
@@ -349,12 +349,12 @@ export default function QuotaEndpointsCard({
                 <code className="text-xs text-text-muted font-mono">
                   model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
                 </code>
-                <span className="text-[10px] text-text-muted">({t("endpointsAnthropicNote")})</span>
+                <span className="text-3xs text-text-muted">({t("endpointsAnthropicNote")})</span>
               </div>
             )}
             {hasResponses && (
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                   {t("endpointsBaseUrl")}
                 </span>
                 <code className="text-xs text-primary font-mono">POST /v1/responses</code>
@@ -362,12 +362,12 @@ export default function QuotaEndpointsCard({
                 <code className="text-xs text-text-muted font-mono">
                   model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
                 </code>
-                <span className="text-[10px] text-text-muted">({t("endpointsResponsesNote")})</span>
+                <span className="text-3xs text-text-muted">({t("endpointsResponsesNote")})</span>
               </div>
             )}
             {hasCodex && (
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                   {t("endpointsBaseUrl")}
                 </span>
                 <code className="text-xs text-primary font-mono">WS /v1/responses</code>
@@ -375,7 +375,7 @@ export default function QuotaEndpointsCard({
                 <code className="text-xs text-text-muted font-mono">
                   model: &quot;qtSd/&lt;group&gt;/codex/&lt;model&gt;&quot;
                 </code>
-                <span className="text-[10px] text-text-muted">({t("endpointsWsNote")})</span>
+                <span className="text-3xs text-text-muted">({t("endpointsWsNote")})</span>
               </div>
             )}
           </div>
@@ -393,7 +393,7 @@ export default function QuotaEndpointsCard({
                   <ul className="space-y-0.5">
                     {previewModels.map((m) => (
                       <li key={m}>
-                        <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
+                        <code className="text-2xs font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
                           {m}
                         </code>
                       </li>
@@ -410,20 +410,18 @@ export default function QuotaEndpointsCard({
                     <div key={group.id}>
                       <div className="flex items-center gap-1.5 mb-1">
                         <Icon name="folder" size={13} className="text-text-muted" />
-                        <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">
+                        <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                           {quotaGroupSlug(group.name)}
                         </span>
                       </div>
                       <div className="space-y-1 pl-4">
                         {entries.map(({ provider, models }) => (
                           <div key={provider} className="space-y-0.5">
-                            <span className="text-[10px] text-text-muted font-medium">
-                              {provider}
-                            </span>
+                            <span className="text-3xs text-text-muted font-medium">{provider}</span>
                             <ul className="space-y-0.5">
                               {models.map((m) => (
                                 <li key={m}>
-                                  <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
+                                  <code className="text-2xs font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
                                     {m}
                                   </code>
                                 </li>
@@ -439,7 +437,7 @@ export default function QuotaEndpointsCard({
             ) : (
               // No pools yet — show the format placeholder
               <div className="text-xs text-text-muted italic">
-                <code className="font-mono text-[11px]">
+                <code className="font-mono text-2xs">
                   qtSd/&lt;groupSlug&gt;/&lt;provider&gt;/&lt;model&gt;
                 </code>
                 {" — "}

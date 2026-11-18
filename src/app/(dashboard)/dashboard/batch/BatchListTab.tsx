@@ -535,7 +535,7 @@ export default function BatchListTab({
                             showLabels
                           />
                           {effectiveStatus(batch) === "expired_with_failures" && (
-                            <span className="text-[10px] text-warning italic">
+                            <span className="text-xs text-warning italic">
                               {t("batchListProgressPartial")}
                             </span>
                           )}

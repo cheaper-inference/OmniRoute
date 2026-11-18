@@ -154,9 +154,7 @@ export default function McpAuditTab() {
             <Card key={item.label} padding="none" className="px-4 py-3">
               <div className="mb-1 flex items-center gap-2">
                 <Icon name={item.icon} size={14} className="text-text-muted" />
-                <span className="text-xs uppercase tracking-wider text-text-muted">
-                  {item.label}
-                </span>
+                <span className="ci-eyebrow">{item.label}</span>
               </div>
               <p
                 className={

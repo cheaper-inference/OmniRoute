@@ -212,3 +212,49 @@ test('B: a quiet button is tone="muted", not text-text-muted', () => {
     []
   );
 });
+
+// ── F. Typography ───────────────────────────────────────────────────────────
+
+test("F: text below 12px uses the kit label sizes (text-2xs, text-3xs), not arbitrary pixels", () => {
+  assertClean(
+    "arbitrary sizes under the 12px floor (labels: text-2xs / text-3xs; running text: text-xs)",
+    /(?<![\w-])text-\[(?:[0-9]|1[01])(?:\.\d+)?px\]/g,
+    []
+  );
+});
+
+test("F: uppercase labels are the kit eyebrow", () => {
+  const exceptions: Exception[] = [
+    {
+      file: "costs/quota-share/components/PoolSchedulesCard.tsx",
+      fragment: "h-7 min-h-7 w-full justify-start gap-1 px-1 text-3xs uppercase",
+      why: "label of a disclosure Button: ci-eyebrow is for p/span/div/dt/label, a button keeps its control type",
+    },
+    {
+      file: "costs/quota-share/components/UsageLogCard.tsx",
+      fragment: "h-7 min-h-7 w-full justify-start gap-1 px-1 text-3xs uppercase",
+      why: "label of a disclosure Button, same as the schedules card",
+    },
+  ];
+  assertClean(
+    'hand-made uppercase labels (use className="ci-eyebrow" with data-size / data-weight)',
+    /(?<![\w:-])uppercase(?![\w-])/g,
+    exceptions
+  );
+});
+
+test("F: card and section headings take their size from ci-heading, not a text utility", () => {
+  const exceptions: Exception[] = [
+    {
+      file: "usage/components/ProviderLimits/QuotaHealthOverview.tsx",
+      fragment: 'className="text-[15px]"',
+      why: "15px is not a step of the kit heading scale (14 or 16); the health overview header keeps its size",
+    },
+  ];
+  assertNoTag(
+    'h2–h4 sized by a text-* utility (use className="ci-heading" data-size="…")',
+    "h[2-4]",
+    /(?<![\w:-])text-(?:xs|sm|base|lg|xl|2xl|\[\d)/,
+    exceptions
+  );
+});

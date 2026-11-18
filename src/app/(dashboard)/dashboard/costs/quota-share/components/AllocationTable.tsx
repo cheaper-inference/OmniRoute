@@ -26,7 +26,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
 
   if (allocations.length === 0) {
     return (
-      <div className="rounded-md bg-bg-subtle py-3 text-center text-[11px] italic text-text-muted">
+      <div className="rounded-md bg-bg-subtle py-3 text-center text-xs italic text-text-muted">
         {t("noAllocations")}
       </div>
     );
@@ -40,7 +40,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
     <Table
       scrollbarLabel={t("apiKeyColumn")}
       scrollLabel={t("apiKeyColumn")}
-      className="min-w-0 text-[11px]"
+      className="min-w-0 text-2xs"
       containerClassName="rounded-none border-0"
     >
       <TableHeader>
@@ -105,7 +105,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   <span className="text-text-muted">—</span>
                 )}
                 {fairShare !== null && (
-                  <span className="text-[9px] text-text-muted ml-1">
+                  <span className="text-3xs text-text-muted ml-1">
                     ({t("fairShareShort")}: {fairShare.toLocaleString()})
                   </span>
                 )}

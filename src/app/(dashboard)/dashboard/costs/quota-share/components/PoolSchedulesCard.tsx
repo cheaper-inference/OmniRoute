@@ -207,7 +207,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         tone="muted"
-        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] uppercase"
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-3xs uppercase"
       >
         <Icon
           name="chevron_right"
@@ -285,7 +285,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       }
                       aria-label={t("schedulesFrom")}
                     />
-                    <span className="text-[11px] text-text-muted">→</span>
+                    <span className="text-2xs text-text-muted">→</span>
                     <Input
                       type="time"
                       inputClassName={inputCls}
@@ -316,13 +316,13 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                     <div className="flex flex-col gap-1">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                          className="text-[11px] text-text-muted"
+                          className="text-2xs text-text-muted"
                           title={t("schedulesReserveHint")}
                         >
                           {t("schedulesReserve")}
                         </span>
                         {row.reserves.length === 0 && (
-                          <span className="text-[11px] text-text-muted/60 italic">
+                          <span className="text-xs text-text-muted/60 italic">
                             {t("schedulesReserveNone")}
                           </span>
                         )}
@@ -331,7 +331,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           size="sm"
                           icon="add"
                           onClick={() => addReserve(index)}
-                          className="h-7 min-h-7 px-2 text-[11px]"
+                          className="h-7 min-h-7 px-2 text-2xs"
                         >
                           {t("schedulesReserveAdd")}
                         </Button>
@@ -374,7 +374,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                             aria-label={t("schedulesReserve")}
                             inputClassName={`${inputCls} w-16`}
                           />
-                          <span className="text-[11px] text-text-muted">%</span>
+                          <span className="text-2xs text-text-muted">%</span>
                           <Button
                             variant="ghost"
                             size="icon-2xs"
@@ -394,10 +394,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                   {/* Row 2b — how much OmniRoute itself may spend */}
                   {row.mode === "allow" && (
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span
-                        className="text-[11px] text-text-muted"
-                        title={t("schedulesBudgetHint")}
-                      >
+                      <span className="text-2xs text-text-muted" title={t("schedulesBudgetHint")}>
                         {t("schedulesBudget")}
                       </span>
                       <Input
@@ -458,7 +455,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
 
                   {/* Row 3 — zone and precedence */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] text-text-muted">{t("schedulesTimezone")}</span>
+                    <span className="text-2xs text-text-muted">{t("schedulesTimezone")}</span>
                     <Input
                       type="text"
                       aria-label={t("schedulesTimezone")}
@@ -467,9 +464,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       onChange={(e) => patchRow(index, { timezone: e.target.value.trim() || null })}
                       inputClassName={`${inputCls} w-40`}
                     />
-                    <span className="ml-1 text-[11px] text-text-muted">
-                      {t("schedulesPriority")}
-                    </span>
+                    <span className="ml-1 text-2xs text-text-muted">{t("schedulesPriority")}</span>
                     <Input
                       type="number"
                       aria-label={t("schedulesPriority")}
@@ -503,7 +498,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
             {message && (
               <span
                 role="status"
-                className={`text-[11px] ${message.kind === "ok" ? "text-success" : "text-error"}`}
+                className={`text-xs ${message.kind === "ok" ? "text-success" : "text-error"}`}
               >
                 {message.text}
               </span>

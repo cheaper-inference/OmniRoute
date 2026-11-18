@@ -706,7 +706,9 @@ export default function CostOverviewTab() {
       />
 
       <Card className="p-5">
-        <h3 className="text-sm text-text-muted uppercase mb-4">{t("tokenUsage")}</h3>
+        <h3 className="ci-eyebrow mb-4" data-weight="medium">
+          {t("tokenUsage")}
+        </h3>
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <CompactMetric
             label={t("totalTokens")}
@@ -739,10 +741,12 @@ export default function CostOverviewTab() {
 
       {summary.totalRequests > 0 && (
         <Card className="p-5">
-          <h3 className="text-sm text-text-muted uppercase mb-4">{t("routingEfficiency")}</h3>
+          <h3 className="ci-eyebrow mb-4" data-weight="medium">
+            {t("routingEfficiency")}
+          </h3>
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
             <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackCount")}
               </p>
               <p className="text-lg font-semibold text-text-main mt-1">
@@ -755,7 +759,7 @@ export default function CostOverviewTab() {
               </p>
             </div>
             <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackRate")}
               </p>
               <div className="flex items-center gap-2 mt-1">
@@ -784,7 +788,7 @@ export default function CostOverviewTab() {
               </div>
             </div>
             <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
+              <p className="ci-eyebrow" data-weight="medium">
                 {t("modelCoverage")}
               </p>
               <p className="text-lg font-semibold text-text-main mt-1">
@@ -801,7 +805,9 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="trending_up" size={18} className="text-info" />
-              <h3 className="text-sm text-text-muted uppercase">{t("monthlyForecast")}</h3>
+              <h3 className="ci-eyebrow" data-weight="medium">
+                {t("monthlyForecast")}
+              </h3>
             </div>
             <div className="flex items-end gap-3">
               <p className="text-3xl font-semibold text-info">
@@ -825,7 +831,9 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="compare_arrows" size={18} className="text-chart-3" />
-              <h3 className="text-sm text-text-muted uppercase">{t("periodComparison")}</h3>
+              <h3 className="ci-eyebrow" data-weight="medium">
+                {t("periodComparison")}
+              </h3>
             </div>
             <div className="flex items-end gap-3">
               <p
@@ -1070,7 +1078,9 @@ function CostExplorerCard({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="travel_explore" size={20} className="text-success" />
-            <h3 className="text-lg text-text-main">{t("costExplorerTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("costExplorerTitle")}
+            </h3>
           </div>
           <p className="text-sm text-text-muted mt-1">{t("costExplorerDescription")}</p>
         </div>
@@ -1189,7 +1199,9 @@ function CostExplorerCard({
 function CompactMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">{label}</p>
+      <p className="ci-eyebrow" data-weight="medium">
+        {label}
+      </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
     </div>
   );
@@ -1212,7 +1224,9 @@ function ActivityHeatmap({
 }) {
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <ActivityCalendar
         ariaLabel={title}
         activityMap={activityMap}
@@ -1263,7 +1277,9 @@ function CostBreakdownTable({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <Table scrollbarLabel={title} scrollLabel={title} containerClassName="rounded-none border-0">
         <TableHeader>
           <TableRow>

@@ -107,7 +107,7 @@ function MetricBlock({
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface-2 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+      <div className="ci-eyebrow flex items-center gap-2" data-weight="medium">
         <Icon name={icon} size={16} />
         <span className="min-w-0 break-words">{label}</span>
       </div>
@@ -274,7 +274,9 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
       <div className="@container flex flex-wrap items-start justify-between gap-4 border-b border-border px-6 py-5">
         <div className="min-w-0 grow-999 basis-72">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base text-text-main">{t("comboHealthAutopilotTitle")}</h3>
+            <h3 className="ci-heading" data-size="md">
+              {t("comboHealthAutopilotTitle")}
+            </h3>
             <Badge
               variant={
                 report.status === "critical"
@@ -452,7 +454,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                   ))}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-text-muted">
+                <div className="mt-3 flex flex-wrap gap-2 text-2xs text-text-muted">
                   <span>
                     {t("comboHealthQuotaValue", {
                       value: formatPercentOrDash(target.signals.quotaRemainingPct),
@@ -511,7 +513,9 @@ function ComboHealthCard({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg text-text-main">{combo.comboName}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {combo.comboName}
+              </h3>
               <Badge variant="primary" size="sm">
                 {combo.strategy}
               </Badge>
@@ -705,7 +709,7 @@ function ComboHealthCard({
                       {target.provider}
                       {target.connectionId ? ` · ${target.connectionId.slice(0, 8)}` : ""}
                     </div>
-                    <div className="mt-1 text-[11px] text-text-muted">{target.stepId}</div>
+                    <div className="mt-1 text-2xs text-text-muted">{target.stepId}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {target.lastStatus ? (
@@ -737,7 +741,7 @@ function ComboHealthCard({
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-2xs text-text-muted">
                   <span>{t("comboHealthQuotaScope", { scope: target.quotaScope })}</span>
                   {target.quotaTrend ? (
                     <span>{t("comboHealthTrendValue", { trend: target.quotaTrend })}</span>
@@ -885,7 +889,9 @@ export default function ComboHealthTab() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg text-text-main">{t("comboHealthTitle")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("comboHealthTitle")}
+          </h2>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthIntro")}</p>
         </div>
         <div className="flex flex-col gap-3 sm:items-end">

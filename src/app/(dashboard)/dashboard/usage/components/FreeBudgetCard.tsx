@@ -291,7 +291,9 @@ function tosBadge(
 function Kpi({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
   return (
     <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
-      <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
+      <span className="ci-eyebrow" data-size="3xs">
+        {label}
+      </span>
       <span className={`text-[19px] font-semibold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
       </span>
@@ -386,13 +388,13 @@ export function FreeBudgetView({
         {freshness && (
           <span
             data-testid="catalog-freshness"
-            className="text-[10px] text-text-muted"
+            className="text-3xs text-text-muted"
             title={catalogUpdatedAt ?? undefined}
           >
             · updated {freshness}
           </span>
         )}
-        <span className="ml-auto text-[11px] text-text-muted tabular-nums">
+        <span className="ml-auto text-2xs text-text-muted tabular-nums">
           {labels.remaining(fmt(remaining), pct, fmt(steadyRecurringTokens))}
         </span>
       </div>
@@ -434,7 +436,7 @@ export function FreeBudgetView({
               );
             })}
           </div>
-          <p className="mt-1 text-[10.5px] text-text-muted">{labels.segmentHint}</p>
+          <p className="mt-1 text-2xs text-text-muted">{labels.segmentHint}</p>
         </div>
       )}
 
@@ -446,8 +448,8 @@ export function FreeBudgetView({
         >
           <div className="flex items-center gap-1.5">
             <Icon name="lock_open" size={14} className="text-success" />
-            <span className="text-[11px] font-semibold text-success">{labels.noApiKey}</span>
-            <span className="text-[10.5px] text-text-muted">
+            <span className="text-2xs font-semibold text-success">{labels.noApiKey}</span>
+            <span className="text-2xs text-text-muted">
               ({keylessModels.length}个模型 · {keylessProviders.length}个提供者)
             </span>
           </div>
@@ -455,7 +457,7 @@ export function FreeBudgetView({
             {keylessProviders.map((p) => (
               <span
                 key={p}
-                className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10.5px] text-text-muted tabular-nums"
+                className="inline-flex items-center rounded-full border px-2 py-0.5 text-2xs text-text-muted tabular-nums"
                 style={{ borderColor: providerColor.get(p) ?? "var(--color-border)" }}
               >
                 {p}
@@ -469,17 +471,17 @@ export function FreeBudgetView({
       {boostMonthlyTokens > 0 && (
         <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-1.5">
           <Icon name="bolt" size={14} className="text-success" />
-          <span className="text-[11px] text-success">{labels.boost(fmt(boostMonthlyTokens))}</span>
+          <span className="text-2xs text-success">{labels.boost(fmt(boostMonthlyTokens))}</span>
         </div>
       )}
       {uncappedProviders.length > 0 && (
         <div className="mx-3 mt-2 rounded-md border border-border bg-surface-2 px-3 py-2">
-          <span className="text-[11px] text-text-muted">{labels.uncapped}</span>
+          <span className="text-2xs text-text-muted">{labels.uncapped}</span>
           <div className="mt-1 flex flex-wrap gap-1">
             {uncappedProviders.map((p) => (
               <span
                 key={p}
-                className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-muted tabular-nums"
+                className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-2xs text-text-muted tabular-nums"
                 style={{ borderColor: providerColor.get(p) ?? "var(--color-border)" }}
               >
                 {p}
@@ -490,14 +492,12 @@ export function FreeBudgetView({
       )}
       {gatedRecurringTokens > 0 && (
         <div className="mx-3 mt-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2">
-          <span className="text-[11px] text-warning">
-            {labels.gated(fmt(gatedRecurringTokens))}
-          </span>
+          <span className="text-2xs text-warning">{labels.gated(fmt(gatedRecurringTokens))}</span>
           <div className="mt-1 flex flex-wrap gap-1">
             {gatedProviders.map((p) => (
               <span
                 key={p}
-                className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-muted tabular-nums"
+                className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-2xs text-text-muted tabular-nums"
               >
                 {p}
               </span>
@@ -510,16 +510,14 @@ export function FreeBudgetView({
       {avoidModels.length > 0 && (
         <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-1.5">
           <Icon name="warning" size={14} className="text-text-muted" />
-          <span className="text-[11px] text-warning">
-            {labels.tosRestricted(avoidModels.length)}
-          </span>
+          <span className="text-2xs text-warning">{labels.tosRestricted(avoidModels.length)}</span>
         </div>
       )}
 
       {/* Per-model table */}
       <div className="px-3 pb-3 pt-2">
         <Table
-          className="min-w-0 text-[11px] [&_td]:h-auto [&_th]:h-auto"
+          className="min-w-0 text-2xs [&_td]:h-auto [&_th]:h-auto"
           containerClassName="rounded-none border-0"
           scrollbarLabel={labels.model}
           scrollLabel={labels.model}
@@ -627,7 +625,7 @@ export default function FreeBudgetCard() {
   return (
     <div className="flex flex-col gap-2">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-2 px-1 text-[11px] text-text-muted">
+      <div className="flex flex-wrap items-center gap-2 px-1 text-2xs text-text-muted">
         <Input
           type="search"
           value={search}
@@ -636,7 +634,7 @@ export default function FreeBudgetCard() {
           aria-label={t("searchAria")}
           data-testid="budget-search-input"
           className="min-w-[160px]"
-          inputClassName="text-[11px]"
+          inputClassName="text-2xs"
         />
         <Select
           compact
@@ -658,13 +656,13 @@ export default function FreeBudgetCard() {
           checked={keylessOnly}
           onChange={(e) => setKeylessOnly(e.target.checked)}
           data-testid="budget-keyless-toggle"
-          className="text-[11px]"
+          className="text-2xs"
         />
         <Checkbox
           label={t("hideTosRestricted")}
           checked={hideAvoid}
           onChange={(e) => setHideAvoid(e.target.checked)}
-          className="text-[11px]"
+          className="text-2xs"
         />
         <span className="ml-auto inline-flex min-w-0 max-w-full items-center gap-1.5">
           {t("sort")}
