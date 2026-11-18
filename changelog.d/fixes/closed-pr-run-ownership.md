@@ -1,0 +1,1 @@
+- Revalidate the closed pull request and each workflow run before normal or forced cancellation. Incomplete discovery and ambiguous ownership preserve runs; accepted cancellation is only reported complete after same-run terminal readback within a shared deadline.
