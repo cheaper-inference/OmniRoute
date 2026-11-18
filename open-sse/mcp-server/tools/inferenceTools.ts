@@ -45,6 +45,7 @@ export async function handleRouteRequest(args: {
 
     const raw = (await omniRouteFetch("/v1/chat/completions", {
       method: "POST",
+      headers: { Accept: "application/json" },
       body: JSON.stringify(body),
       // #9717: this hop waits on an upstream provider (and on auto-combo
       // candidate probing before one is even chosen), so it must not inherit

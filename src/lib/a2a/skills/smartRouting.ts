@@ -21,7 +21,7 @@ async function routeFetch(
   const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
   const res = await fetch(url, {
     ...options,
-    headers,
+    headers: { ...headers, Accept: "application/json" },
     signal: AbortSignal.timeout(30000),
     // Never follow a redirect while carrying the caller's API key.
     redirect: "error",
