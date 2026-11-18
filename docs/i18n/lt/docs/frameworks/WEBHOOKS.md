@@ -16,21 +16,22 @@ nuolat nepavyksta pristatyti duomenų.
 
 ## Palaikomi įvykiai
 
-Tipas `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, naudojamas `src/lib/webhookDispatcher.ts`) šiuo metu apibrėžia lygiai keturis įvykius:
+`WebhookEvent` tipas (`src/lib/webhooks/eventDescriptions.ts`, vartojamas `src/lib/webhookDispatcher.ts`) šiuo metu modeliuoja aštuonis įvykius:
 
-| Įvykis              | Suaktyvinamas, kai                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------- |
-| `request.completed` | Tarpiniu serveriu perduota užklausa sėkmingai baigiama                                            |
-| `request.failed`    | Tarpiniu serveriu perduota užklausa nepavyksta po visų pakartotinių bandymų / atsarginių variantų |
-| `quota.exceeded`    | API raktas viršija biudžeto / kvotos slenkstį                                                     |
-| `test.ping`         | Testavimo galinio taško naudojamas sintetinis įvykis                                              |
+| Renginys                  | Uždega, kai                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Tarpinio serverio užklausa sėkmingai užbaigta                                                                             |
+| `request.failed`          | Tarpinio serverio užklausa nepavyksta po visų retries/fallback                                                            |
+| `quota.exceeded`          | API klavišas peržengia budget/quota slenkstį                                                                              |
+| `proxy.set_aside`         | Įgaliotųjų serverių grupės narys pašalinamas po pakartotinio atsisakymo (tik pereinant)                                   |
+| `proxy.pool.exhausted`    | Kiekvienas įgaliotojo serverio grupės narys yra atskirtas                                                                 |
+| `provider.reset_redeemed` | Automatiškai taikykite banko nustatymų atkūrimą, išpirktą iš naujo kreditą arba Claude savaitės seanso nustatymą iš naujo |
+| `provider.exhausted`      | Kiekviena paslaugų teikėjo paskyra vėsta (daugiausiai vieną kartą kas 10 minučių)                                         |
+| `test.ping`               | Sintetinis įvykis, naudojamas bandymo galutiniame taške                                                                   |
 
-Prenumeratose galima nurodyti literalą `"*"`, kad būtų gaunami visi įvykiai. Nežinomi įvykių
-pavadinimai, pateikti `events`, išsiuntimo metu ignoruojami.
+Prenumeratos priima tiesioginę `"*"`, kad gautumėte kiekvieną įvykį. Nežinomi įvykių pavadinimai `events` yra ignoruojami išsiuntimo metu.
 
-> Pastaba: dispečerio API yra prijungta, tačiau kai kurios produkcinės ne `test.ping`
-> įvykių iškvietimo vietos vis dar diegiamos. Patikrinkite `grep dispatchEvent`, kad sužinotumėte,
-> kurie keliai šiuo metu iškviečia jūsų leidimo dispečerį.
+> Pastaba: dispečerinis API yra prijungtas, bet kai kurių ne `test.ping` įvykių gamybos iškvietimo vietos vis dar nusileidžia. Patikrinkite `grep dispatchEvent` kad sužinotumėte, kurie keliai šiuo metu iškviečia dispečerį jūsų leidime.
 
 ## Architektūra
 
@@ -52,25 +53,23 @@ Kvietėjas (apdorojimo programa, tarnyba, stebėjimo priemonė)
 Kvietėjui išsiuntimas vykdomas „paleisti ir pamiršti“ principu: `Promise.allSettled` nuslopina
 atskirų žiniatinklio kablių klaidas, todėl vienas netinkamas imtuvas negali blokuoti kitų.
 
-## HMAC pasirašymas
+## HMAC Pasirašymas
 
-Kai žiniatinklio kablys turi `secret`, „OmniRoute“ pasirašo JSON turinį ir išsiunčia:
+Kai žiniatinklio kabliukas turi `secret`, OmniRoute pasirašo JSON turinį ir siunčia:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <įvykis>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<šešioliktainis HMAC-SHA256(secret, turinys)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Antraščių pavadinimuose naudojamas prefiksas `X-Webhook-*` (ne `X-OmniRoute-*`). Parašo
-> reikšmė yra `sha256=<šešioliktainė reikšmė>` — tikrinkite visą prefiksą.
+> Antraštės pavadinimuose naudojamas `X-Webhook-*` priešdėlis (ne `X-OmniRoute-*`). Parašo reikšmė yra `sha256=<hex>` — patikrinkite visą priešdėlį.
 
-Jei `createWebhook` iškviečiama be paslapties, DB modulis ją sugeneruoja
-(`whsec_<48 šešioliktainiai simboliai>`), todėl pagal numatytuosius nustatymus visi žiniatinklio kabliai yra pasirašomi.
+Jei `createWebhook` iškviečiamas be paslapties, DB modulis sukuria vieną (`whsec_<48 hex>`), todėl pagal numatytuosius nustatymus visi žiniatinklio kabliukai yra pasirašyti.
 
-### Tikrinimas imtuve
+### Tikrinama imtuve
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,7 +82,7 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Visada tikrinkite pagal **neapdorotą** užklausos turinį, prieš atlikdami bet kokį JSON analizavimą.
+Visada patikrinkite, ar nėra** neapdorotas** užklausos turinys prieš bet kokį JSON analizavimą.
 
 ## Pakartotinių bandymų ir nesėkmių politika
 
@@ -126,23 +125,22 @@ Telegram / pasirinktiniai naudingosios apkrovos transformatoriai) buvo įtraukti
 
 ## REST API
 
-Visiems galiniams taškams būtinas valdymo autentifikavimas (`requireManagementAuth`).
+Visiems galiniams taškams reikalingas valdymo autentifikavimas (`requireManagementAuth`).
 
-| Galinis taškas                  | Metodas | Aprašymas                                        |
-| ------------------------------- | ------- | ------------------------------------------------ |
-| `/api/webhooks`                 | GET     | Pateikti webhookų sąrašą (paslaptys užmaskuotos) |
-| `/api/webhooks`                 | POST    | Sukurti webhooką                                 |
-| `/api/webhooks/[id]`            | GET     | Webhooko informacija (visa paslaptis)            |
-| `/api/webhooks/[id]`            | PUT     | Atnaujinti laukus                                |
-| `/api/webhooks/[id]`            | DELETE  | Pašalinti                                        |
-| `/api/webhooks/[id]/test`       | POST    | Išsiųsti `test.ping` (be pakartotinių bandymų)   |
-| `/api/webhooks/[id]/deliveries` | GET     | Naujausi vieno webhooko pristatymo bandymai      |
-| `/api/webhooks/validate-url`    | POST    | Išankstinis URL tikrinimas (SSRF apsauga)        |
+| Galutinis taškas                | Metodas | Aprašymas                                              |
+| ------------------------------- | ------- | ------------------------------------------------------ |
+| `/api/webhooks`                 | GET     | Sąrašas žiniatinklio kabliukai (paslaptys užmaskuotos) |
+| `/api/webhooks`                 | POST    | Sukurkite „Webhook“.                                   |
+| `/api/webhooks/[id]`            | GET     | „Webhook“ detalė (visa paslaptis)                      |
+| `/api/webhooks/[id]`            | PUT     | Atnaujinti laukus                                      |
+| `/api/webhooks/[id]`            | DELETE  | Pašalinti                                              |
+| `/api/webhooks/[id]/test`       | POST    | Suaktyvinkite `test.ping` (be bandymų)                 |
+| `/api/webhooks/[id]/deliveries` | GET     | Naujausi vieno „Webhook“ pristatymo bandymai           |
+| `/api/webhooks/validate-url`    | POST    | URL patvirtinimas prieš skrydį (SSRF apsauga)          |
 
-`GET /api/webhooks` užmaskuoja paslaptį kaip `<pirmieji 10 simbolių>...`, kad ji
-nebūtų atskleista sąrašų puslapiuose. Kai iš tikrųjų reikia paslapties, naudokite `[id]` GET.
+`GET /api/webhooks` užmaskuoja `<first 10 chars>...` paslaptį, kad išvengtų nutekėjimo sąrašo puslapiuose. Naudokite `[id]` GET kai jums iš tikrųjų reikia paslapties.
 
-### Webhooko kūrimas
+### Sukurkite „Webhook“.
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,18 +154,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Jei `secret` nenurodytas, serveris sugeneruoja `whsec_<hex>` paslaptį ir grąžina
-ją atsakyme.
+Jei `secret` praleistas, serveris sukuria `whsec_<hex>` paslaptį ir grąžina ją atsakyme.
 
-### Webhooko testavimas
+### Išbandykite „Webhook“.
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Grąžina `{ delivered, status, error }`. Pakartotinai nebandoma — tai naudinga
-norint greitai patikrinti, ar gavėjas priima naudingąją apkrovą ir parašą.
+Grąžina `{ delivered, status, error }`. Nebandoma kartoti. — naudinga norint greitai patikrinti, ar imtuvas priima naudingą apkrovą ir parašą.
 
 ## Valdymo skydelis
 

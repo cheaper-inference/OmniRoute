@@ -297,7 +297,7 @@ function withdrawalEntry(i, extra = {}) {
     sha: String(i % 10).repeat(39) + "c",
     batchId: `b${i}`,
     candidateSha: sha("d"),
-    why: "batch abandoned",
+    why: "left the landing stage",
     since: "2026-11-13T12:00:00.000Z",
     attempts: 1,
     ...extra,
@@ -363,6 +363,66 @@ test("load: a malformed landWithdrawals is refused, and never saved", async () =
     );
     assert.deepEqual(gh.writes, [], what);
   }
+});
+
+test("load: landWithdrawalsOverflow is absent in older documents, and accepted up to LAND_WITHDRAWALS_LIMIT entries, one per SHA across both lists", async () => {
+  const sha = (n) => n.toString(16).padStart(40, "0");
+  const main = Array.from({ length: 20 }, (_, i) => withdrawalEntry(i, { sha: sha(i) }));
+  const overflow = Array.from({ length: 20 }, (_, i) => withdrawalEntry(i, { sha: sha(100 + i) }));
+  for (const state of [
+    withWithdrawals(main),
+    { ...withWithdrawals(main), landWithdrawalsOverflow: overflow },
+    { ...initialState(BASE), landWithdrawalsOverflow: [overflow[0]] },
+  ]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(state), sha: "s1" });
+    const loaded = (await store.load(BASE)).state;
+    assert.deepEqual(loaded.landWithdrawalsOverflow, state.landWithdrawalsOverflow);
+    assert.deepEqual(loaded.landWithdrawals, state.landWithdrawals);
+  }
+});
+
+test("load: a malformed landWithdrawalsOverflow is refused, and never saved", async () => {
+  const sha = (n) => n.toString(16).padStart(40, "0");
+  const cases = [
+    ["not an array", { sha: sha(1) }, /\(landWithdrawalsOverflow\)/],
+    [
+      "more than 20",
+      Array.from({ length: 21 }, (_, i) => withdrawalEntry(i, { sha: sha(i) })),
+      /\(landWithdrawalsOverflow\)/,
+    ],
+    ["a short sha", [withdrawalEntry(1, { sha: "abc" })], /landWithdrawalsOverflow\[0\]\.sha/],
+    [
+      "zero attempts",
+      [withdrawalEntry(1, { attempts: 0 })],
+      /landWithdrawalsOverflow\[0\]\.attempts/,
+    ],
+  ];
+  for (const [what, landWithdrawalsOverflow, pattern] of cases) {
+    const { gh, store } = setup();
+    const state = { ...initialState(BASE), landWithdrawalsOverflow };
+    gh.contents.set(KEY, { content: JSON.stringify(state), sha: "s1" });
+    await assert.rejects(store.load(BASE), pattern, what);
+    await assert.rejects(store.save(BASE, state, null, "bad"), StateError, what);
+    assert.deepEqual(gh.writes, [], what);
+  }
+  // one per SHA across both lists
+  const { gh, store } = setup();
+  const both = {
+    ...withWithdrawals([withdrawalEntry(1)]),
+    landWithdrawalsOverflow: [withdrawalEntry(2, { sha: withdrawalEntry(1).sha })],
+  };
+  gh.contents.set(KEY, { content: JSON.stringify(both), sha: "s1" });
+  await assert.rejects(store.load(BASE), /landWithdrawalsOverflow\[0\]\.sha/);
+});
+
+test("the current validator ignores a top-level field it does not know (the rule older code relies on to load landWithdrawalsOverflow)", async () => {
+  // The validators of 05b9bd4 and of release/v3.8.54 check known fields only (verified for this
+  // field when it was added); this pins that rule for the current one.
+  const { gh, store } = setup();
+  const state = { ...initialState(BASE), aFieldOfLaterCode: [{ anything: true }] };
+  gh.contents.set(KEY, { content: JSON.stringify(state), sha: "s1" });
+  assert.deepEqual((await store.load(BASE)).state.aFieldOfLaterCode, [{ anything: true }]);
 });
 
 test("save refuses an invalid state or a base mismatch without writing", async () => {

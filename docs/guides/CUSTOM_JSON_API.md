@@ -45,6 +45,13 @@ edit these nodes through the provider-node API below.
   `/models`) and, unlike other OpenAI-compatible nodes, there is no default URL. It must be
   `http(s)`, without embedded credentials or a `#fragment`, and it passes the same outbound URL
   guard as every provider node, both when the node is saved and on every request.
+- A node that sends the connection key (`authType` `bearer` or `api-key`, including the default)
+  must use `https://`. Plain `http://` is accepted only for a loopback host (`localhost`,
+  `127.0.0.0/8`, `::1`) or with `authType: "none"`, which sends no key. Private LAN addresses
+  (`10.x`, `172.16-31.x`, `192.168.x`) are not exempt: anyone on that network could read the
+  key. Saving such a node fails with `400`, and a node stored earlier fails closed on every
+  request with the same message, before any request is sent. For a keyed endpoint on a LAN,
+  put it behind TLS (for example a reverse proxy).
 - `customJson` is validated with Zod; unknown keys are rejected. Every field is optional:
 
 | Field             | Values                                | Default                                                |

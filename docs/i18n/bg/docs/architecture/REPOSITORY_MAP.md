@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Файлове в основната директория
+## Коренни файлове
 
-| Файл                                        | Предназначение                                                                                          |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Маркетингова начална страница + бърз старт + матрица на функциите (вижте също `llm.txt`)                |
-| **CHANGELOG.md**                            | Дневник на промените за всяка версия (автоматично генериран от умението `/version-bump-cc`)             |
-| **LICENSE**                                 | Текст на MIT лиценза                                                                                    |
-| **CLAUDE.md**                               | Правила на проекта за агенти на Claude Code (строги правила, конвенции, сценарии)                       |
-| **AGENTS.md**                               | Същото като CLAUDE.md, но за AI агенти, различни от Claude (Codex, Cursor и др.)                        |
-| **GEMINI.md**                               | Кратки правила за агенти, базирани на Gemini (подмножество на CLAUDE.md)                                |
-| **CONTRIBUTING.md**                         | Ръководство за сътрудници: настройване, conventional commits, тестване, процес за PR                    |
-| **SECURITY.md**                             | Политика за докладване на уязвимости, поддържани версии, модел на заплахите                             |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — очаквания за поведение в общността                                               |
-| **llm.txt**                                 | Текстова начална страница, оптимизирана за LLM обхождащи роботи (SEO за AI асистенти)                   |
-| **package.json**                            | npm манифест, скриптове, зависимости, среди за изпълнение, праг за покритие с c8                        |
-| **package-lock.json**                       | Заключено дърво на зависимостите                                                                        |
-| **tsconfig.json**                           | Основна конфигурация на TypeScript                                                                      |
-| **tsconfig.typecheck-core.json**            | Конфигурация за проверка на типовете за ядрото в `src/`                                                 |
-| **tsconfig.typecheck-noimplicit-core.json** | Строга (`noImplicitAny`) проверка на типовете                                                           |
-| **tsconfig.tsbuildinfo**                    | Кеш за инкрементално компилиране на TS (игнориран от git)                                               |
-| **next.config.mjs**                         | Конфигурация за компилиране с Next.js 16 (самостоятелен изход)                                          |
-| **next-env.d.ts**                           | Автоматично генерирани от Next.js типове за средата                                                     |
-| **eslint.config.mjs**                       | Единна конфигурация на ESLint (правила за всяка област на проекта)                                      |
-| **prettier.config.mjs**                     | Правила за форматиране с Prettier                                                                       |
-| **postcss.config.mjs**                      | Конфигурация на PostCSS за конвейера Tailwind/CSS                                                       |
-| **playwright.config.ts**                    | Конфигурация на Playwright за E2E тестове                                                               |
-| **vitest.config.ts**                        | Конфигурация на Vitest (стандартен набор)                                                               |
-| **vitest.mcp.config.ts**                    | Конфигурация на Vitest за MCP сървъра / наборите за autoCombo / кеширане                                |
-| **sonar-project.properties**                | Конфигурация на SonarQube/SonarCloud (качество на кода)                                                 |
-| **Dockerfile**                              | Многоетапно изграждане на Docker образ (builder → runner-base → runner-cli)                             |
-| **docker-compose.yml**                      | Compose конфигурация за разработка с 4 профила (base, cli, host, cliproxyapi) + redis sidecar           |
-| **docker-compose.prod.yml**                 | Compose конфигурация за продукционна среда (порт 20130, redis, именувани томове)                        |
-| **.dockerignore**                           | Файлове, изключени от контекста на Docker                                                               |
-| **fly.toml**                                | Конфигурация за внедряване във Fly.io (регион `sin`, порт 20128, том /data)                             |
-| **.env.example**                            | Шаблонен env файл (автоматично копиран в `.env` при първата инсталация)                                 |
-| **.gitignore**                              | Шаблони за игнориране от Git                                                                            |
-| **.npmignore**                              | Списък за изключване при публикуване в npm                                                              |
-| **.npmrc**                                  | Конфигурация на npm (регистър, политика за lockfile)                                                    |
-| **.node-version**                           | Фиксирана версия на Node (използвана от съвместими с nvm инструменти)                                   |
-| **.nvmrc**                                  | Фиксирана версия на Node за nvm                                                                         |
-| **eslint.complexity.config.mjs**            | Конфигурация на ESLint за контролния праг на сложността (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Конфигурация на ESLint за правилата на SonarJS (когнитивна сложност / дублиране)                        |
-| **source.config.ts**                        | Конфигурация на източника чрез `defineDocs` във Fumadocs (захранва `.source/`)                          |
-| **knip.json**                               | Конфигурация на Knip — неизползвани файлове/експорти/зависимости (захранва проверката за мъртъв код)    |
-| **stryker.conf.json**                       | Конфигурация на Stryker за мутационно тестване                                                          |
-| **.size-limit.json**                        | Конфигурация на бюджета за размера на bundle-а                                                          |
-| **promptfooconfig.yaml**                    | Конфигурация на оценките с promptfoo                                                                    |
-| **.gitleaks.toml**                          | Набор от правила на gitleaks за сканиране за тайни                                                      |
-| **.zizmor.yml**                             | Конфигурация на zizmor за проверка на сигурността на GitHub Actions                                     |
-| **socket.yml**                              | Конфигурация на Socket.dev за веригата за доставки                                                      |
-| **news.json**                               | Локализиран поток с известия за v2; елементът за стартирането на Radar се доставя неактивен             |
-| **flake.nix** / **flake.lock**              | Дефиниция и заключващ файл за средата за разработка на Nix                                              |
-| **.env**                                    | Локални тайни (игнорирани от git — генерирани от `.env.example`)                                        |
+| Файл                                        | Цел                                                                                          |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **README.md**                               | Маркетингова целева страница + бърз старт + матрица на функциите (вижте също `llm.txt`)      |
+| **CHANGELOG.md**                            | Регистър на промените за всяка версия (автоматично генериран от `/version-bump-cc` skill)    |
+| **LICENSE**                                 | лицензен текст MIT                                                                           |
+| **CLAUDE.md**                               | Правила на проекта за агенти на Claude код (твърди правила, конвенции, сценарии)             |
+| **AGENTS.md**                               | Същото като CLAUDE.md, но за не-Claude AI агенти (Codex, Cursor и т.н.)                      |
+| **GEMINI.md**                               | Кратки правила за базирани на Gemini агенти (подмножество на CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | Ръководство за сътрудници: настройка, конвенционални ангажименти, тестване, PR поток         |
+| **SECURITY.md**                             | Политика за докладване на уязвимости, поддържани версии, модел на заплахи                    |
+| **CODE_OF_CONDUCT.md**                      | Очаквания за поведение на общността на Сътрудник —                                           |
+| **llm.txt**                                 | Кацане в обикновен текст, оптимизирано за LLM роботи (SEO за AI помощници)                   |
+| **package.json**                            | npm манифест, скриптове, зависимости, двигатели, порта за покритие c8                        |
+| **package-lock.json**                       | Заключено дърво на зависимостите                                                             |
+| **tsconfig.json**                           | Основна конфигурация TypeScript                                                              |
+| **tsconfig.typecheck-core.json**            | Типова проверка на конфигурация за `src/` ядро                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | Строга (`noImplicitAny`) проверка на типа                                                    |
+| **tsconfig.tsbuildinfo**                    | TS инкрементален кеш за изграждане (gitignored)                                              |
+| **следващия.config.mjs**                    | конфигурация на изграждане на Next.js 16 (самостоятелен изход)                               |
+| **следваща среда d.ts**                     | Next.js автоматично генерирани env типове                                                    |
+| **eslint.config.mjs**                       | ESLint плоска конфигурация (правила за област на проекта)                                    |
+| **по-хубава.config.mjs**                    | Prettier правила за форматиране                                                              |
+| **postcss.config.mjs**                      | PostCSS конфигурация за Tailwind/CSS тръбопровод                                             |
+| **драматург.config.ts**                     | Playwright E2E тестова конфигурация                                                          |
+| **витест.config.ts**                        | Vitest конфигурация (пакет по подразбиране)                                                  |
+| **vitest.mcp.config.ts**                    | Vitest конфигурация за MCP сървър / autoCombo / кеш пакети                                   |
+| **sonar-project.properties**                | SonarQube/SonarCloud конфигурация (качество на кода)                                         |
+| **Докер файл**                              | Многоетапно изграждане Docker (builder → runner-base → runner-cli)                           |
+| **docker-compose.yml**                      | Разработчик композира с 4 профила (база, cli, хост, cliproxyapi) + redis sidecar             |
+| **докер-съставяне.prod.yml**                | Създаване на производство (порт 20130, redis, именувани томове)                              |
+| **.dockerignore**                           | Файлове, изключени от контекста Docker                                                       |
+| **fly.toml**                                | Конфигурация за разполагане на Fly.io (регион `sin`, порт 20128, /обем на данни)             |
+| **.env.example**                            | Шаблон env файл (автоматично копиран в `.env` при първото инсталиране)                       |
+| **.gitignore**                              | Git игнорира шаблони                                                                         |
+| **.npmignore**                              | npm публикува списък с изключения                                                            |
+| **.npmrc**                                  | npm конфигурация (регистър, политика за заключващ файл)                                      |
+| **.node-версия**                            | ПИН на версията на възела (използван от nvm-съвместими инструменти)                          |
+| **.nvmrc**                                  | ПИН версия на възел за nvm                                                                   |
+| **eslint.сложност.config.mjs**              | ESLint конфигурация за тресчотка за сложност (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint конфигурация за SonarJS правила (когнитивна сложност / дублиране)                     |
+| **източник.config.ts**                      | Fumadocs `defineDocs` изходна конфигурация (подава `.source/`)                               |
+| **knip.json**                               | Knip config — неизползван files/exports/deps (захранва вратата за мъртъв код)                |
+| **страйкър.conf.mjs**                       | Конфигурация за тестване на мутации на Stryker (изчислява `tap.testFiles` от `mutate`)       |
+| **.size-limit.json**                        | конфигурация на бюджета на пакета с ограничение на размера                                   |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                        |
+| **.gitleaks.toml**                          | набор от правила за тайно сканиране на gitleaks                                              |
+| **.zizmor.yml**                             | zizmor GitHub-Actions сигурност-lint config                                                  |
+| **socket.yml**                              | Конфигурация на веригата за доставки Socket.dev                                              |
+| **news.json**                               | Локализирана емисия за съобщения v2; Елементът за изстрелване на радар се изпраща неактивен  |
+| **люспи.nix** /** люспи.заключване**        | Nix dev-shell дефиниция + lock                                                               |
+| **.env**                                    | Локални тайни (gitignored — генериран от `.env.example`)                                     |
 
-> **Преместени извън кореновата директория във v3.8.26 (за по-добра подредба):**
+> **Преместено от корена във v3.8.26 (decutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерираният `quality-metrics.json` (игнориран от git). Вижте [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерирания `quality-metrics.json` (gitignored). Вижте [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Страница на таблото за управление на Traffic Inspector — DevTools разделена, 7 подробни раздела, 4 превключвателя на режима на заснемане, запис на сесия, оцветяване на контекста. i18n PT-BR + EN. Вижте `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                          |
 | `app/(dashboard)/dashboard/activity/`                                        | Страница с канал за активност (група B): `page.tsx` (сървър) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — вижте `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Страница за споделяне на квота (група B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Страница за конфигурация на плана на доставчика (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Конфигурационна страница на план на доставчик (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                                |
 | `app/docs/`                                                                  | Вграден преглед на документация (изобразява `docs/*.md`)                                                                                                                                                                                                                                                                   |
 | `app/landing/`                                                               | Маркетингова целева страница                                                                                                                                                                                                                                                                                               |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Страници, свързани с удостоверяване                                                                                                                                                                                                                                                                                        |
@@ -223,7 +223,7 @@ src/
 | `fallbackPolicy.ts`    | Резервно дърво на решенията                               |
 | `costRules.ts`         | Правила за изчисляване на разходите                       |
 | `lockoutPolicy.ts`     | Model/connection политика за блокиране                    |
-| `tagRouter.ts`         | Маршрутизиране на базата на етикети                       |
+| `tagRouter.ts`         | Маршрутизиране, базирано на етикети                       |
 | `comboResolver.ts`     | Комбинирана резолюция (използвана от комбиниран двигател) |
 | `modelAvailability.ts` | Проверка наличността за всеки модел                       |
 | `assessment/`          | Оценка на модела (Фаза 1 на RFC-AUTO-ASSESSMENT )         |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент на таблото API: адаптери над `packages/ui-kit` — вижте `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена на икони, използвани от екраните → Lucide компоненти (`<Icon>`)                     |
-| `constants/providers.ts`         | **381 доставчици** със Zod валидиране (източник на истината)                                          |
+| `constants/providers.ts`         | **394 доставчици** със Zod валидиране (източник на истината)                                          |
 | `constants/cliTools.ts`          | Външен регистър CLI инструменти                                                                       |
-| `constants/routingStrategies.ts` | **20 стратегии за маршрутизиране** с приоритети                                                       |
+| `constants/routingStrategies.ts` | **22 стратегии за маршрутизиране** с приоритети                                                       |
 | `constants/publicApiRoutes.ts`   | Маршрути, които изискват удостоверяване на носител (срещу управление).                                |
 | `constants/upstreamHeaders.ts`   | Списък за отказ на заглавки за заявки нагоре по веригата                                              |
 | `validation/schemas.ts`          | ~ 80 Zod схеми (единствен източник на истина за API договори)                                         |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 файла (12 обработчика + 4 помощни модула): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search и др.
-├── executors/           # 150 модула за изпълнение (класове, разширяващи BaseExecutor, + помощни модули за отделните доставчици)
+├── executors/           # 163 модула за изпълнение (класове, разширяващи BaseExecutor, + помощни модули за отделните доставчици)
 ├── translator/          # Конвертори на формати (9 за заявки, 9 за отговори, 9 помощни)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ модула за услуги (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM и др.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Външни CLI интеграции + Вътрешни OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n архитектура, добавяне на език, 67 локализации                                             |
 | `UNINSTALL.md`              | Чисти стъпки за деинсталиране                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 381 доставчици (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 394 доставчици (regen: `npm run gen:provider-reference`) |
 
 ### Подсистема за дълбоки гмуркания
 
