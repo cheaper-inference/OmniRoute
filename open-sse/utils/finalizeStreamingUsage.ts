@@ -5,7 +5,11 @@ import {
   type UsageEvidence,
 } from "./usageEvidence.ts";
 import { FORMATS } from "../translator/formats.ts";
-import { estimateInputTokens, estimateOutputTokens, type UsageLike } from "./usageTracking.ts";
+import { estimateInputTokens, estimateOutputTokens } from "./usageEstimation.ts";
+import type { UsageLike } from "./usageTracking.ts";
+
+// Streaming request bodies are fixed; release cached estimates with their request objects.
+const inputEstimates = new WeakMap<object, number>();
 
 function inputCount(usage: UsageLike): number {
   const value = usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokenCount;
@@ -17,7 +21,12 @@ function outputCount(usage: UsageLike): number {
 }
 function finalizeInput(usage: UsageLike, evidence: UsageEvidence, body: unknown): number {
   if (evidence.input.source !== "unknown") return inputCount(usage);
-  const estimate = estimateInputTokens(body);
+  if (!body || typeof body !== "object") return inputCount(usage);
+  let estimate = inputEstimates.get(body);
+  if (estimate === undefined) {
+    estimate = estimateInputTokens(body);
+    inputEstimates.set(body, estimate);
+  }
   if (estimate <= 0) return inputCount(usage);
   evidence.input = { source: "estimated", method: "request_body_heuristic" };
   return estimate;
