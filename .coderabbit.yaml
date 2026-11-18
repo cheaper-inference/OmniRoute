@@ -48,6 +48,8 @@ reviews:
     ignore_title_keywords:
       - "[skip review]"
       - "WIP"
+      # Release-train validation PRs: 400+ files, over the review file limit, never merged.
+      - "do not merge"
   path_filters:
     # 66 translated doc mirrors and the translation state are produced by the i18n waves.
     - "!docs/i18n/**"
@@ -63,6 +65,8 @@ reviews:
     - "!docs/reference/PROVIDER_REFERENCE.md"
     - "!**/*.svg"
     - "!CHANGELOG.md"
+    # Vendored CI UI Kit: fixes belong upstream, and the snapshot check rejects local edits.
+    - "!packages/ui-kit/**"
   path_instructions:
     - path: "src/app/api/**"
       instructions: >-

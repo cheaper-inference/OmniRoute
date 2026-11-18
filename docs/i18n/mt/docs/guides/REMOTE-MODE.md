@@ -46,35 +46,39 @@ il-laptop tiegħek                        OmniRoute remot (VPS)
 
 ## Konnessjoni
 
-### Bil-password tal-ġestjoni (bootstrap)
+### Bil-password amministrattiva (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Password tal-ġestjoni għal http://192.168.0.15:20128: ********
-# ✔ Konness ma’ http://192.168.0.15:20128 — kuntest '192.168.0.15' (ambitu: admin)
+# Password amministrattiva għal http://192.168.0.15:20128: ********
+# ✔ Konness ma' http://192.168.0.15:20128 — kuntest '192.168.0.15' (ambitu: admin)
 ```
 
-Il-fluss bil-password joħloq token **admin** b’mod awtomatiku (peress li għandek il-password,
-diġà għandek kontroll sħiħ). Naqqas l-ambitu b’`--scope`:
+Il-fluss tal-password joħloq token **admin** b’mod awtomatiku (inti għandek il-password, għalhekk diġà għandek kontroll sħiħ). Naqqas l-ambitu b’`--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Għażliet: `--port <p>` (meta l-host ma jkollux port), `--name <ctx>` (isem il-kuntest),
-`--scope read|write|admin`. URL sħiħ jiġi rrispettat kif inhu:
+Għażliet: `--port <p>` (meta l-host ma jkollux port), `--name <ctx>` (isem tal-kuntest),
+`--scope read|write|admin`. URL sħiħa tiġi onorata kif inhi:
 `omniroute connect https://omni.example.com`.
+
+Meta s-server ikollu l-awtentikazzjoni b’żewġ fatturi tad-dashboard attivata (Settings →
+Security), il-password waħedha tiġi rrifjutata: il-CLI mbagħad titlob il-kodiċi mill-app
+tal-awtentikatur (jew kodiċi ta’ rkupru). Għaddih minn qabel b’`--totp <code>` għall-użu
+mhux interattiv.
 
 ### B’token iġġenerat minn qabel
 
-Iġġenera token b’ambitu definit fid-dashboard (jew b’`omniroute tokens create`) u
-waħħlu — ma hemmx bżonn password:
+Iġġenera token b’ambitu speċifiku fid-dashboard (jew b’`omniroute tokens create`) u
+waħħlu — m’hemmx bżonn password:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-Is-CLI jivvalidah permezz ta’ `GET /api/cli/whoami` u jsalvah bħala l-kuntest attiv.
+Il-CLI tivvalidah permezz ta’ `GET /api/cli/whoami` u ssalvah bħala l-kuntest attiv.
 
 ---
 
@@ -437,14 +441,14 @@ omniroute contexts remove 192-168-0-15 --yes   # neħħi l-kuntest lokali (anke 
 
 ---
 
-## Endpoints tal-API (referenza)
+## Endpoint tal-API (referenza)
 
-| Metodu | Rotta                 | Awtentikazzjoni       | Ambitu                           |
-| ------ | --------------------- | --------------------- | -------------------------------- |
-| POST   | `/api/cli/connect`    | password tal-ġestjoni | — (pubbliku, protett b’password) |
-| GET    | `/api/cli/whoami`     | token tal-aċċess      | qari                             |
-| GET    | `/api/cli/tokens`     | token tal-aċċess      | amministrazzjoni                 |
-| POST   | `/api/cli/tokens`     | token tal-aċċess      | amministrazzjoni                 |
-| DELETE | `/api/cli/tokens/:id` | token tal-aċċess      | amministrazzjoni                 |
+| Metodu | Rotta                 | Awtentikazzjoni             | Ambitu                             |
+| ------ | --------------------- | --------------------------- | ---------------------------------- |
+| POST   | `/api/cli/connect`    | password; 2FA jekk attivata | — (pubbliku, protett bil-password) |
+| GET    | `/api/cli/whoami`     | token tal-aċċess            | read                               |
+| GET    | `/api/cli/tokens`     | token tal-aċċess            | admin                              |
+| POST   | `/api/cli/tokens`     | token tal-aċċess            | admin                              |
+| DELETE | `/api/cli/tokens/:id` | token tal-aċċess            | admin                              |
 
 Ara [openapi.yaml](../openapi.yaml) għall-iskemi sħaħ.

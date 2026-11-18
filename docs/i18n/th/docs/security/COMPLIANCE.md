@@ -11,55 +11,71 @@ OmniRoute บันทึกการดำเนินการของผู�
 
 การใช้งานอยู่ใน `src/lib/compliance/index.ts` (T-43 — "การควบคุมการปฏิบัติตามข้อกำหนด") และ `src/lib/compliance/providerAudit.ts` การเขียนบันทึกการตรวจสอบจะไม่โยนข้อผิดพลาด โดยเมื่อเกิดความล้มเหลวใดๆ การเรียกจะถูกละเว้นโดยไม่มีการแจ้งเตือน เพื่อไม่ให้การบันทึกการตรวจสอบขัดขวางโฟลว์คำขอหลัก
 
-## ข้อมูลที่ถูกบันทึก
+## สิ่งที่ถูกบันทึก
 
-### เหตุการณ์ตรวจสอบของผู้ดูแลระบบ (`audit_log`)
+### เหตุการณ์การตรวจสอบของผู้ดูแลระบบ (`audit_log`)
 
-ทุกการเรียก `logAuditEvent({ action, actor, target, details, ... })` จะสร้างข้อมูลหนึ่งแถว สตริงการดำเนินการใช้รูปแบบ `domain.verb` (หรือ `domain.verb.outcome`) ประเภทการดำเนินการที่ยืนยันว่ามีอยู่ในซอร์สโค้ด ได้แก่:
+การเรียกใช้ `logAuditEvent({ action, actor, target, details, ... })` แต่ละครั้งจะสร้าง
+หนึ่งแถว สตริงของ Action ใช้รูปแบบ
+`domain.verb` (หรือ `domain.verb.outcome`) ประเภท Action ที่ยืนยันแล้วในโค้ด ได้แก่:
 
-| การดำเนินการ                         | แหล่งที่มา                              |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | แหล่งที่มา                               |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-แต่ละรายการจะบันทึก `action`, `actor` (ค่าเริ่มต้นคือ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` และ `timestamp` คีย์ที่มีข้อมูลละเอียดอ่อน (`apiKey`, `accessToken`, `refreshToken`, `password`, รายการใดๆ ที่ตรงกับ `*token`/`*secret`/`*apikey` เป็นต้น) จะถูกปกปิดแบบเรียกซ้ำเป็น `"[redacted]"` ก่อนเขียนข้อมูลลงในแถว
+แต่ละรายการจะบันทึก `action`, `actor` (ค่าเริ่มต้นคือ `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` และ `timestamp` คีย์ที่มีข้อมูลอ่อนไหว (`apiKey`, `accessToken`,
+`refreshToken`, `password`, อะไรก็ตามที่ตรงกับ `*token`/`*secret`/`*apikey`
+เป็นต้น) จะถูกปกปิดซ้ำแบบเรียกซ้อนเป็น `"[redacted]"` ก่อนเขียนแถว
+
+แถว `api_key.auth.touch` จะบันทึกข้อมูลเมทาดาทาของ API key ที่สำเร็จและการอ่าน
+เพื่อค้นหา (GET/HEAD) ซึ่งไม่เคยไปถึงบันทึกคำขอ ได้แก่ คีย์ใด เวลาใด และเส้นทางที่ทำให้เป็นรูปแบบมาตรฐาน
+โดยรวมรายการที่ซ้ำกันและจำกัดไว้ที่ 1,000 แถว คีย์ที่มี `noLog` และคีย์สภาพแวดล้อมจะถูกข้าม
+ที่อยู่ IP และ user-agent ของผู้เรียกจะถูกเพิ่มเฉพาะเมื่อเปิดฟีเจอร์แฟล็ก
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` เท่านั้น (ค่าเริ่มต้นคือปิด)
 
 ### การเรียกใช้เครื่องมือ MCP (`mcp_tool_audit`)
 
-ทุกการเรียกใช้เครื่องมือ MCP จะเขียนข้อมูลหนึ่งแถวผ่าน `open-sse/mcp-server/audit.ts` สคีมา (จาก `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+การเรียกใช้เครื่องมือ MCP แต่ละครั้งจะเขียนหนึ่งแถวผ่าน
+`open-sse/mcp-server/audit.ts` สคีมา (จาก
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | คอลัมน์          | หมายเหตุ                                   |
 | ---------------- | ------------------------------------------ |
-| `id`             | เพิ่มค่าโดยอัตโนมัติ                       |
+| `id`             | เพิ่มค่าอัตโนมัติ                          |
 | `tool_name`      | ตัวระบุเครื่องมือ MCP                      |
 | `input_hash`     | sha256 ของอินพุต (ไม่มีการจัดเก็บเพย์โหลด) |
-| `output_summary` | สรุปแบบย่อที่ถูกตัดให้สั้น                 |
-| `duration_ms`    | เวลาที่ผ่านไปจริง                          |
-| `api_key_id`     | ผู้เรียก (อนุญาตให้เป็นค่าว่าง)            |
+| `output_summary` | สรุปสั้น ๆ ที่ถูกตัดทอน                    |
+| `duration_ms`    | เวลาที่ใช้จริง                             |
+| `api_key_id`     | ผู้เรียก (เป็นค่าว่างได้)                  |
 | `success`        | `1` / `0`                                  |
-| `error_code`     | รหัสข้อผิดพลาดสุดท้ายเมื่อเกิดความล้มเหลว  |
-| `created_at`     | การประทับเวลา ISO                          |
+| `error_code`     | รหัสข้อผิดพลาดสุดท้ายเมื่อไม่สำเร็จ        |
+| `created_at`     | การประทับเวลาแบบ ISO                       |
 
 ### บันทึกคำขอ / การใช้งาน
 
-ข้อมูลเหล่านี้เป็นเทเลเมทรีด้านการดำเนินงาน (ไม่ใช่การตรวจสอบของผู้ดูแลระบบโดยตรง) แต่ใช้กระบวนการเก็บรักษาข้อมูลเดียวกัน:
+สิ่งเหล่านี้คือเทเลเมทรีด้านการปฏิบัติงาน (ไม่ใช่การตรวจสอบของผู้ดูแลระบบโดยเคร่งครัด)
+แต่ใช้กระบวนการเก็บรักษาเดียวกัน:
 
 - `usage_history` — สรุปการใช้งานต่อคำขอ
-- `call_logs` — บันทึกแบบเต็มต่อคำขอ (อยู่ภายใต้ขีดจำกัดจำนวนแถว โปรดดูด้านล่าง)
-- `proxy_logs` — บันทึกทราฟฟิกพร็อกซี (อยู่ภายใต้ขีดจำกัดจำนวนแถว)
-- `request_detail_logs` — บันทึกรายละเอียดคำขอแบบเดิม (ยังคงถูกล้างข้อมูลหากมีอยู่)
+- `call_logs` — บันทึกเต็มของแต่ละคำขอ (อยู่ภายใต้การจำกัดจำนวนแถว ดูด้านล่าง)
+- `proxy_logs` — บันทึกทราฟฟิกของพร็อกซี (อยู่ภายใต้การจำกัดจำนวนแถว)
+- `request_detail_logs` — บันทึกรายละเอียดคำขอแบบเก่า (ยังคงถูกล้างหากมีอยู่)
 
 ## สคีมาพื้นที่จัดเก็บข้อมูล
 

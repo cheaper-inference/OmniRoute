@@ -1,4 +1,10 @@
-// Codex quota-snapshot parsing + reset/cooldown scheduling (pure). Verbatim from codex.ts.
+// Codex quota-snapshot parsing + reset/cooldown scheduling (pure).
+import {
+  classifyCodexQuotaWindow,
+  parseCodexFiniteNumber,
+  parseCodexLegacyReset,
+  parseCodexOfficialQuotaHeaders,
+} from "../../services/codexQuotaSignals.ts";
 
 /**
  * T03: Parsed quota snapshot from Codex response headers.
@@ -22,27 +28,45 @@ export interface CodexQuotaSnapshot {
  *   x-codex-5h-usage / x-codex-5h-limit / x-codex-5h-reset-at
  *   x-codex-7d-usage / x-codex-7d-limit / x-codex-7d-reset-at
  */
-export function parseCodexQuotaHeaders(headers: Record<string, string>): CodexQuotaSnapshot | null {
-  const usage5h = headers["x-codex-5h-usage"] ?? null;
-  const limit5h = headers["x-codex-5h-limit"] ?? null;
-  const resetAt5h = headers["x-codex-5h-reset-at"] ?? null;
-  const usage7d = headers["x-codex-7d-usage"] ?? null;
-  const limit7d = headers["x-codex-7d-limit"] ?? null;
-  const resetAt7d = headers["x-codex-7d-reset-at"] ?? null;
-
-  // Return null if none of the quota headers are present (not a quota-aware response)
-  if (!usage5h && !limit5h && !resetAt5h && !usage7d && !limit7d && !resetAt7d) {
-    return null;
-  }
-
-  return {
-    usage5h: usage5h ? parseFloat(usage5h) : 0,
-    limit5h: limit5h ? parseFloat(limit5h) : Infinity,
-    resetAt5h: resetAt5h ?? null,
-    usage7d: usage7d ? parseFloat(usage7d) : 0,
-    limit7d: limit7d ? parseFloat(limit7d) : Infinity,
-    resetAt7d: resetAt7d ?? null,
+export function parseCodexQuotaHeaders(
+  headers: Record<string, string>,
+  model?: string | null
+): CodexQuotaSnapshot | null {
+  const lower = Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [key.toLowerCase(), value])
+  );
+  const quota: CodexQuotaSnapshot = {
+    usage5h: 0,
+    limit5h: Infinity,
+    resetAt5h: null,
+    usage7d: 0,
+    limit7d: Infinity,
+    resetAt7d: null,
   };
+  const observed = new Set<"5h" | "7d">();
+  for (const window of ["5h", "7d"] as const) {
+    const prefix = `x-codex-${window}-`;
+    const usage = parseCodexFiniteNumber(lower[`${prefix}usage`]);
+    const limit = parseCodexFiniteNumber(lower[`${prefix}limit`]);
+    if (usage === null || usage < 0 || limit === null || limit <= 0) continue;
+    quota[`usage${window}`] = usage;
+    quota[`limit${window}`] = limit;
+    quota[`resetAt${window}`] = parseCodexLegacyReset(lower[`${prefix}reset-at`]);
+    observed.add(window);
+  }
+  const official = parseCodexOfficialQuotaHeaders(lower, model);
+  for (const window of official?.windows ?? []) {
+    const family = classifyCodexQuotaWindow(window);
+    const slot = family === "session" ? "5h" : family === "weekly" ? "7d" : null;
+    // This legacy DTO cannot represent arbitrary durations. Keep them in the
+    // normalized signal rather than inventing a 5h/7d identity for persistence.
+    if (!slot || observed.has(slot)) continue;
+    quota[`usage${slot}`] = window.usedPercent;
+    quota[`limit${slot}`] = 100;
+    quota[`resetAt${slot}`] = window.resetAt;
+    observed.add(slot);
+  }
+  return observed.size > 0 ? quota : null;
 }
 
 /**

@@ -118,18 +118,18 @@
 
 ---
 
-## 📖 إعداد موفّري الخدمة
+## 📖 إعداد مزوّد الخدمة
 
-لإضافة اتصالات مفاتيح API بشكل جماعي من ملف CSV أو JSON، استخدم **لوحة التحكم → موفّرو الخدمة → استيراد من ملف**. تعتمد الأعمدة على ترتيبها (`provider,name,apiKey,baseUrl,priority`)؛ ويجب أن يكون `provider` موجودًا مسبقًا كموفّر خدمة مُدار أو كعقدة متوافقة. راجع [استيراد موفّري الخدمة من ملف CSV أو JSON](../providers/CSV-IMPORT.md).
+لإضافة اتصالات مفاتيح API بشكل جماعي من ملف CSV أو JSON، استخدم **لوحة التحكم → المزوّدون → استيراد من ملف**. تكون الأعمدة موضعية (`provider,name,apiKey,baseUrl,priority`)؛ ويجب أن يكون `provider` موجودًا مسبقًا كمزوّد مُدار أو عقدة متوافقة. راجع [استيراد المزوّدين من ملف CSV أو JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 موفّرو الاشتراكات
+### 🔐 المزوّدون القائمون على الاشتراك
 
 #### Claude Code (Pro/Max)
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط Claude Code
-→ تسجيل الدخول عبر OAuth → تحديث الرمز المميز تلقائيًا
-→ تتبّع الحصة كل 5 ساعات + أسبوعيًا
+لوحة التحكم → المزوّدون → توصيل Claude Code
+→ تسجيل الدخول عبر OAuth → تحديث الرمز تلقائيًا
+→ تتبّع الحصة لمدة 5 ساعات + الحصة الأسبوعية
 
 النماذج:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**نصيحة احترافية:** استخدم Opus للمهام المعقدة وSonnet للسرعة. يتتبّع OmniRoute الحصة لكل نموذج!
+**نصيحة احترافية:** استخدم Opus للمهام المعقدة، وSonnet للسرعة. يتتبّع OmniRoute الحصة لكل نموذج!
 
-لا يوجد متصفح على مضيف OmniRoute؟ شغّل `claude setup-token` في أي مكان تم فيه تسجيل الدخول إلى Claude Code، والصق الرمز المميز الصالح لمدة عام في علامة التبويب **رمز الإعداد**. راجع [استخدام Claude Code مع رمز إعداد](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+ألا يوجد متصفح على مضيف OmniRoute؟ شغّل `claude setup-token` في أي مكان سجّلت فيه الدخول إلى Claude Code، ثم الصق الرمز الصالح لمدة عام في علامة التبويب **رمز الإعداد**. راجع [Claude Code باستخدام رمز إعداد](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-تحافظ مسارات Claude والمسارات المتوافقة مع Claude Code على مستوى جهد التفكير `max` لنماذج Opus وSonnet. لا تقبل نماذج Haiku مستوى الجهد `max`، لذا يخفض OmniRoute ذلك الطلب إلى ميزانية تفكير مرتفعة قبل إرساله إلى المزوّد الأساسي.
+تحافظ المسارات المتوافقة مع Claude وClaude Code على جهد التفكير `max` لنماذج Opus وSonnet.
+لا تقبل نماذج Haiku مستوى جهد `max`، لذلك يخفض OmniRoute ذلك
+الطلب إلى ميزانية تفكير عالية قبل إرساله إلى المزوّد الأصلي.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط Codex
+لوحة التحكم → المزوّدون → توصيل Codex
 → تسجيل الدخول عبر OAuth (المنفذ 1455)
-→ إعادة تعيين كل 5 ساعات + أسبوعيًا
+→ إعادة تعيين لمدة 5 ساعات + إعادة تعيين أسبوعية
 
 النماذج:
   cx/gpt-5.5
@@ -160,8 +162,8 @@
 #### GitHub Copilot
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط GitHub
-→ المصادقة عبر OAuth من خلال GitHub
+لوحة التحكم → المزوّدون → توصيل GitHub
+→ OAuth عبر GitHub
 → إعادة تعيين شهرية (في اليوم الأول من الشهر)
 
 النماذج:
@@ -172,54 +174,59 @@
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 موفّرو الخدمة منخفضو التكلفة
+**أرصدة الذكاء الاصطناعي (فوترة قائمة على الرموز).** عندما يبلغ GitHub عن `credits_used` للحساب، تعرض بطاقة حدود المزوّد صف **أرصدة الذكاء الاصطناعي** مع الأرصدة المستهلكة في فترة الفوترة الحالية، بما في ذلك خطط المؤسسات غير المحدودة.
+
+**الحد المحلي لأرصدة الذكاء الاصطناعي.** عدّل اتصال GitHub وحدّد **حد أرصدة الذكاء الاصطناعي لكل فترة فوترة** (`providerSpecificData.githubCreditLimit`). يؤدي ترك الحقل فارغًا إلى تعطيله؛ بينما يتخطى `0` الاتصال دائمًا. عندما تكون آخر قراءة للاستخدام مساوية للحد أو أعلى منه، يتخطى اختيار الحساب ذلك الاتصال، ويعود التوجيه إلى اتصالاتك الأخرى، بالطريقة نفسها التي يعمل بها القطع وفق سياسة الحصة. يقرأ الفحص بيانات الاستخدام التي يجمعها تحديث الحصة الدوري بالفعل — ولا يستدعي GitHub مطلقًا في مسار الطلب — كما أنه يفشل في اتجاه السماح: لا تؤدي القراءة المفقودة أو القديمة (الأقدم من 15 دقيقة، أو القادمة من فترة فوترة أُعيد تعيينها بالفعل) إلى حظر الاتصال. هذا إجراء وقائي محلي، **وليس سقفًا مضمونًا للإنفاق**: قد تتجاوز تأخيرات إعداد التقارير من GitHub، وفاصل التحديث، والطلبات قيد التنفيذ، والاستخدام خارج OmniRoute هذا الحد. استخدم عناصر التحكم بالإنفاق الخاصة بـ GitHub لوضع حد صارم.
+
+### 💰 المزوّدون منخفضو التكلفة
 
 #### GLM-4.7 (إعادة تعيين يومية، $0.6/1M)
 
-1. سجّل: [Zhipu AI](https://open.bigmodel.cn)
+1. سجّل الاشتراك: [Zhipu AI](https://open.bigmodel.cn)
 2. احصل على مفتاح API من Coding Plan
-3. لوحة التحكم → إضافة مفتاح API: موفّر الخدمة: `glm`، مفتاح API: `your-key`
+3. لوحة التحكم → إضافة مفتاح API: المزوّد: `glm`، مفتاح API: `your-key`
 
-**الاستخدام:** `glm/glm-4.7` — **نصيحة احترافية:** توفّر Coding Plan حصة أكبر 3 مرات بتكلفة تعادل 1/7! تتم إعادة التعيين يوميًا الساعة 10:00 صباحًا.
+**الاستخدام:** `glm/glm-4.7` — **نصيحة احترافية:** يوفّر Coding Plan حصة أكبر بثلاث مرات بتكلفة تبلغ 1/7! تتم إعادة التعيين يوميًا في الساعة 10:00 صباحًا.
 
 #### MiniMax M2.1 (إعادة تعيين كل 5 ساعات، $0.20/1M)
 
-1. سجّل: [MiniMax](https://www.minimax.io)
-2. احصل على مفتاح API ← لوحة التحكم ← إضافة مفتاح API
+1. سجّل الاشتراك: [MiniMax](https://www.minimax.io)
+2. احصل على مفتاح API → لوحة التحكم → إضافة مفتاح API
 
-**الاستخدام:** `minimax/MiniMax-M2.1` — **نصيحة احترافية:** الخيار الأقل تكلفة للسياق الطويل (مليون رمز مميز)!
+**الاستخدام:** `minimax/MiniMax-M2.1` — **نصيحة احترافية:** الخيار الأرخص للسياق الطويل (مليون رمز)!
 
-#### Kimi K2 (سعر ثابت $9/شهريًا)
+#### Kimi K2 ($9 شهريًا بسعر ثابت)
 
 1. اشترك: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. احصل على مفتاح API ← لوحة التحكم ← إضافة مفتاح API
+2. احصل على مفتاح API → لوحة التحكم → إضافة مفتاح API
 
-**الاستخدام:** `kimi/kimi-k2.5` — **نصيحة احترافية:** سعر ثابت قدره $9/شهريًا مقابل 10 ملايين رمز مميز = تكلفة فعلية قدرها $0.90/1M!
+**الاستخدام:** `kimi/kimi-k2.5` — **نصيحة احترافية:** $9 شهريًا بسعر ثابت مقابل 10 ملايين رمز = تكلفة فعلية قدرها $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. سجّل: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. أنشئ مفتاح API لـ Qianfan ← لوحة التحكم ← إضافة مفتاح API: موفّر الخدمة: `qianfan`
+1. سجّل الاشتراك: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. أنشئ مفتاح Qianfan API → لوحة التحكم → إضافة مفتاح API: المزوّد: `qianfan`
 
-**الاستخدام:** `qianfan/ernie-5.1` أو `qianfan/ernie-x1.1` أو معرّف نموذج آخر متوافق مع OpenAI في Qianfan.
+**الاستخدام:** `qianfan/ernie-5.1` أو `qianfan/ernie-x1.1` أو أي معرّف نموذج آخر متوافق مع OpenAI من Qianfan.
 
-### 🆓 موفّرو الخدمة المجانيون
+### 🆓 المزوّدون المجانيون
 
-يتوفر لدى موفّري الخدمة المجانيين الذين لا يتطلبون مصادقة مفتاح تبديل بجانب **لا تتطلب المصادقة** في صفحة موفّر الخدمة الخاصة بهم.
-يؤدي إيقافه إلى تعطيل موفّر الخدمة وإزالته من طرق عرض موفّري الخدمة المُهيأة/المضغوطة، كما يزيل نماذجه من `/v1/models`.
+تحتوي المزوّدات المجانية التي لا تتطلب مصادقة على مفتاح تبديل بجوار **لا تتطلب مصادقة** في صفحة المزوّد.
+يؤدي إيقاف تشغيله إلى تعطيل ذلك المزوّد، وإزالته من عرضَي المزوّدين المُهيّأين والمختصرين،
+وإزالة نماذجه من `/v1/models`.
 
 #### Qoder (9 نماذج مجانية)
 
 ```bash
-لوحة التحكم → ربط Qoder → تسجيل الدخول عبر OAuth → يخضع الوصول للحدود الحالية لموفّر الخدمة
+لوحة التحكم → توصيل Qoder → تسجيل الدخول عبر OAuth → يخضع الوصول إلى حدود المزوّد الحالية
 
 النماذج: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude مجانًا)
+#### Kiro (Claude مجاني)
 
 ```bash
-لوحة التحكم → ربط Kiro → AWS Builder ID أو Google/GitHub → نحو 50 رصيدًا/شهريًا
+لوحة التحكم → توصيل Kiro → AWS Builder ID أو Google/GitHub → نحو 50 رصيدًا شهريًا
 
 النماذج: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -334,65 +341,65 @@ codex "your prompt"
 
 ---
 
-## 🚀 النشر
+## نشر 🚀
 
-### التثبيت العام عبر npm (موصى به)
+### تثبيت npm عالمي (مستحسن)
 
 ```bash
 npm install -g omniroute
 
-# إنشاء دليل الإعدادات
+# Create config directory
 mkdir -p ~/.omniroute
 
-# إنشاء ملف .env (راجع .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# بدء تشغيل الخادم
+# Start server
 omniroute
-# أو باستخدام منفذ مخصص:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-تحمّل CLI ملف `.env` تلقائيًا من `~/.omniroute/.env` أو `./.env`.
+يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (`REQUIRE_API_KEY`، والإعدادات المحلية، والمنطقة الزمنية، وإعدادات الألوان، وليس المنافذ)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### وضع صينية النظام
+### وضع الدرج
 
-شغّل OmniRoute في صينية النظام:
+ابدأ OmniRoute في علبة النظام:
 
 ```bash
 omniroute serve --tray
 ```
 
-ينتهي الأمر بعد أن يصبح الخادم وصينية النظام جاهزين.
+يعود الأمر بعد أن يصبح الخادم والدرج جاهزين.
 
-يستمر الخادم في العمل من دون الطرفية.
+يستمر الخادم بدون المحطة.
 
-يدعم وضع صينية النظام macOS وWindows وجلسات Linux الرسومية. لا يفتح وضع صينية النظام لوحة التحكم تلقائيًا.
+يدعم وضع الدرج جلسات macOS و Windows و Linux الرسومية. وضع الدرج لا يفتح لوحة المعلومات تلقائيًا.
 
-استخدم قائمة صينية النظام لتنفيذ الإجراءات التالية:
+استخدم قائمة الدرج لتنفيذ هذه الإجراءات:
 
-- فتح لوحة التحكم.
-- فتح `/dashboard/logs`.
-- تغيير إعداد التشغيل التلقائي.
-- إيقاف OmniRoute.
+- افتح لوحة القيادة.
+- افتح `/dashboard/logs`.
+- تغيير التشغيل التلقائي.
+- توقف OmniRoute.
 
-لا تستخدم `--tray` مع الخيارات التالية:
+لا تجمع `--tray` مع هذه الخيارات:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-تتطلب هذه الأوضاع ملكية مختلفة للعملية.
+تتطلب هذه الأوضاع ملكية عملية مختلفة.
 
-فعّل التشغيل عند تسجيل الدخول التالي إلى الجهاز:
+تمكين بدء التشغيل عند تسجيل الدخول التالي للجهاز:
 
 ```bash
 omniroute autostart enable
 ```
 
-يستخدم التشغيل التلقائي وضع صينية النظام على macOS وWindows وجلسات Linux الرسومية. يستخدم Linux دون واجهة رسومية خدمة مستخدم systemd الحالية.
+يستخدم التشغيل التلقائي وضع الدرج في جلسات macOS و Windows و Linux الرسومية. يستخدم Headless Linux خدمة مستخدم systemd الموجودة.
 
-عطّل التشغيل عند تسجيل الدخول:
+تعطيل بدء التشغيل عند تسجيل الدخول:
 
 ```bash
 omniroute autostart disable
@@ -400,16 +407,16 @@ omniroute autostart disable
 
 ### إلغاء التثبيت
 
-عندما لا تعود بحاجة إلى OmniRoute، نوفر نصَّيْن برمجيَّيْن سريعين للإزالة النظيفة:
+عندما لم تعد بحاجة إلى OmniRoute، فإننا نقدم نصين سريعين للإزالة النظيفة:
 
-| الأمر                    | الإجراء                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `npm run uninstall`      | يزيل تطبيق النظام، لكنه **يحتفظ بقاعدة بياناتك وإعداداتك** في `~/.omniroute`. |
-| `npm run uninstall:full` | يزيل التطبيق **ويمحو نهائيًا جميع الإعدادات والمفاتيح وقواعد البيانات**.      |
+| يأمر                     | فعل                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `npm run uninstall`      | يزيل تطبيق النظام ولكن** يحافظ على DB والتكوينات الخاصة بك** في `~/.omniroute`. |
+| `npm run uninstall:full` | إزالة التطبيق AND نهائيا** يمحو جميع التكوينات والمفاتيح وقواعد البيانات** .    |
 
-> ملاحظة: لتشغيل هذه الأوامر، انتقل إلى مجلد مشروع OmniRoute (إذا كنت قد استنسخته) ثم شغّلها. بدلاً من ذلك، إذا كان مثبتًا بشكل عام، فيمكنك ببساطة تشغيل `npm uninstall -g omniroute`.
+> ملاحظة: لتشغيل هذه الأوامر، انتقل إلى مجلد مشروع OmniRoute (إذا قمت باستنساخه) وقم بتشغيلها. وبدلاً من ذلك، إذا تم تثبيته عالميًا، يمكنك ببساطة تشغيل `npm uninstall -g omniroute`.
 
-### النشر على VPS
+### نشر VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -425,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# أو: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### النشر باستخدام PM2 (ذاكرة منخفضة)
+### نشر PM2 (ذاكرة منخفضة)
 
-بالنسبة إلى الخوادم ذات ذاكرة RAM المحدودة، استخدم خيار حد الذاكرة:
+بالنسبة للخوادم ذات RAM المحدودة، استخدم خيار حد الذاكرة:
 
 ```bash
-# بحدّ 512MB (الافتراضي)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# أو بحد ذاكرة مخصص
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# أو باستخدام ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-أنشئ `ecosystem.config.js`:
+إنشاء `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -468,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# بناء الصورة (الافتراضي = runner-cli مع codex/claude/droid مثبتة مسبقًا)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# الوضع المحمول (موصى به)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-للوضع المتكامل مع المضيف الذي يتضمن ملفات CLI التنفيذية، راجع قسم Docker في الوثائق الرئيسية.
+بالنسبة للوضع المدمج مع المضيف مع ثنائيات CLI ، راجع قسم Docker في المستندات الرئيسية.
 
-### Void Linux (xbps-src)
+### باطلة Linux (xbps-src)
 
-يمكن لمستخدمي Void Linux تحزيم OmniRoute وتثبيته بشكل أصلي باستخدام إطار عمل الترجمة المتقاطعة `xbps-src`. يؤدي ذلك إلى أتمتة بناء الإصدار المستقل من Node.js إلى جانب روابط `better-sqlite3` الأصلية المطلوبة.
+يمكن لمستخدمي Void Linux حزم وتثبيت OmniRoute محليًا باستخدام إطار عمل التحويل البرمجي `xbps-src`. يؤدي هذا إلى أتمتة إنشاء Node.js المستقل جنبًا إلى جنب مع روابط `better-sqlite3` الأصلية المطلوبة.
 
 <details>
 <summary><b>عرض قالب xbps-src</b></summary>
 
 ```bash
-# ملف القالب الخاص بـ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -506,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# تحديد معمارية وحدة المعالجة المركزية المستهدفة لـ node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -515,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) تثبيت جميع التبعيات – مع تخطي البرامج النصية
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) بناء حزمة Next.js المستقلة
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) نسخ الأصول الثابتة إلى الحزمة المستقلة
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) ترجمة الرابط الأصلي لـ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) وضع الرابط المترجم داخل الحزمة المستقلة
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) إزالة حزم sharp الخاصة بالمعمارية
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) نسخ تبعيات وقت تشغيل pino التي أغفلها التحليل الثابت لـ Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -551,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# منع خطاف ما بعد التثبيت من إزالة أدلة موجّه تطبيق Next.js الفارغة
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -579,30 +586,30 @@ post_install() {
 
 ### متغيرات البيئة
 
-| المتغير                                 | القيمة الافتراضية                    | الوصف                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | سر توقيع JWT (**يجب تغييره في بيئة الإنتاج**)                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | كلمة مرور تسجيل الدخول الأول                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | دليل البيانات (قاعدة البيانات، والاستخدام، والسجلات)                                                               |
-| `PORT`                                  | القيمة الافتراضية لإطار العمل        | منفذ الخدمة (`20128` في الأمثلة)                                                                                   |
-| `HOSTNAME`                              | القيمة الافتراضية لإطار العمل        | المضيف الذي يتم الارتباط به (يستخدم Docker القيمة `0.0.0.0` افتراضيًا)                                             |
-| `NODE_ENV`                              | القيمة الافتراضية لبيئة التشغيل      | اضبطه على `production` عند النشر                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | عنوان URL الأساسي العام الذي يظهر في لوحة المعلومات ويُتاح للخادم (يحل محل `BASE_URL` القديم)                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | عنوان URL الأساسي لنقطة نهاية المزامنة السحابية (يحل محل `CLOUD_URL` القديم)                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | سر HMAC لمفاتيح API المُنشأة                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | فرض استخدام مفتاح API من نوع Bearer على `/v1/*`                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | السماح لمستخدمي لوحة المعلومات المصادَق عليهم بإظهار القيم الكاملة لمفاتيح API المخزنة عند الطلب                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | وتيرة تحديث بيانات حدود المزوّد المخزنة مؤقتًا من جانب الخادم؛ تظل أزرار التحديث في الواجهة تشغّل المزامنة اليدوية |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | تعطيل لقطات SQLite التلقائية قبل الكتابة/الاستيراد/الاستعادة؛ تظل النسخ الاحتياطية اليدوية متاحة                   |
-| `APP_LOG_TO_FILE`                       | `true`                               | تمكين إخراج سجلات التطبيق والتدقيق إلى القرص                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | فرض سمة `Secure` على ملف تعريف ارتباط المصادقة (خلف وكيل عكسي يستخدم HTTPS)                                        |
-| `CLOUDFLARED_BIN`                       | غير معيّن                            | استخدام ملف `cloudflared` ثنائي موجود بدلًا من التنزيل المُدار                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | بروتوكول النقل للأنفاق السريعة المُدارة (`http2` أو `quic` أو `auto`)                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | حد ذاكرة الكومة لـ Node.js بالميغابايت                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | الحد الأقصى لعدد إدخالات ذاكرة التخزين المؤقت للمطالبات                                                            |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | الحد الأقصى لعدد إدخالات ذاكرة التخزين المؤقت الدلالية                                                             |
+| عامل                                    | تقصير                    | وصف                                                                                                                                              |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(تم إنشاؤه تلقائيًا)_   | توقيع JWT السري — الذي تم إنشاؤه تلقائيًا عند التشغيل لأول مرة واستمر في `server.env`؛ قم بتعيينه بشكل صريح عندما يكون دليل البيانات سريع الزوال |
+| `INITIAL_PASSWORD`                      | _(غير محدد)_             | كلمة المرور الأولى لتسجيل الدخول. تبدأ عمليات تثبيت npm/source بـ `CHANGEME`: استبدلها. غير محدد: معالج الإعداد                                  |
+| `DATA_DIR`                              | `~/.omniroute`           | دليل البيانات (ديسيبل، الاستخدام، السجلات)                                                                                                       |
+| `PORT`                                  | الإطار الافتراضي         | منفذ الخدمة (`20128` في الأمثلة)                                                                                                                 |
+| `HOSTNAME`                              | الإطار الافتراضي         | ربط المضيف (Docker الافتراضي هو `0.0.0.0`)                                                                                                       |
+| `NODE_ENV`                              | وقت التشغيل الافتراضي    | قم بتعيين `production` للنشر                                                                                                                     |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | ظهرت قاعدة URL العامة على لوحة المعلومات وتم عرضها على الخادم (تحل محل `BASE_URL` القديم)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | قاعدة نقطة نهاية المزامنة السحابية URL (تحل محل `CLOUD_URL` القديم)                                                                              |
+| `API_KEY_SECRET`                        | _(تم إنشاؤه تلقائيًا)_   | سر HMAC لمفاتيح API التي تم إنشاؤها، تم إنشاء — تلقائيًا عند التشغيل لأول مرة واستمر في `server.env`                                             |
+| `REQUIRE_API_KEY`                       | `false`                  | فرض مفتاح Bearer API على `/v1/*`                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | السماح لمستخدمي لوحة المعلومات المصادق عليهم بالكشف عن قيم مفتاح API المخزنة بالكامل عند الطلب                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | إيقاع التحديث من جانب الخادم لبيانات حدود الموفر المخزنة مؤقتًا؛ لا تزال أزرار تحديث UI تؤدي إلى المزامنة اليدوية                                |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | تعطيل لقطات SQLite التلقائية قبل writes/import/restore؛ النسخ الاحتياطية اليدوية لا تزال تعمل                                                    |
+| `APP_LOG_TO_FILE`                       | `true`                   | تمكين إخراج سجل التطبيق والتدقيق إلى القرص                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | فرض ملف تعريف الارتباط `Secure` auth (خلف الوكيل العكسي HTTPS )                                                                                  |
+| `CLOUDFLARED_BIN`                       | غير محدد                 | استخدم ملف `cloudflared` الثنائي الحالي بدلاً من التنزيل المُدار                                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | نقل الأنفاق السريعة المُدارة (`http2` أو `quic` أو `auto`)                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | حد الكومة Node.js في MB                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | الحد الأقصى لإدخالات ذاكرة التخزين المؤقت السريعة                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | الحد الأقصى لإدخالات ذاكرة التخزين المؤقت الدلالية                                                                                               |
 
-للاطلاع على المرجع الكامل لمتغيرات البيئة، راجع [README](../README.md).
+للحصول على مرجع متغير البيئة الكامل، راجع [README](../README.md).
 
 ---
 
@@ -611,55 +618,55 @@ post_install() {
 <details>
 <summary><b>عرض جميع النماذج المتاحة</b></summary>
 
-> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرها) ديناميكيًا — للاطلاع على الكتالوج المباشر الكامل، افتح **لوحة التحكم → الموفرون → [provider] → النماذج المتاحة** أو نفّذ `GET /api/models/catalog`.
+> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرهما) ديناميكيًا — للوصول إلى الكتالوج المباشر الكامل، افتح **Dashboard → Providers → [provider] → Available Models** أو استدعِ `GET /api/models/catalog`.
 >
-> إذا كانت القائمة المدمجة لأحد الموفرين قديمة، فاستخدم **الاستيراد من /models** في تلك الصفحة (أو فعّل **المزامنة التلقائية**) لسحب الكتالوج المباشر من المصدر. تم التحقق من ذلك في الإصدار v3.8.50 لكل من LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations محدودًا من المصدر خلال جولة الاختبار نفسها.
+> إذا كانت القائمة المضمّنة لموفّر ما قديمة، فاستخدم **Import from /models** في تلك الصفحة (أو فعّل **Auto-Sync**) لجلب كتالوج المصدر المباشر. تم التحقق من ذلك في v3.8.50 لكلٍّ من LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations مقيّدًا من جهة المصدر خلال جولة الاختبار نفسها.
 
-**Claude Code (`cc/`)** — OAuth من نوع Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — مصادقة OAuth لخطي Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth من نوع Plus/Pro: `cx/gpt-5.5` (+ مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — مصادقة OAuth لخطي Plus/Pro: `cx/gpt-5.5` (+ مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — مصادقة OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth مجاني: استخدم الكتالوج المباشر المعروض ضمن **لوحة التحكم → الموفرون → Kiro → النماذج المتاحة**. يعتمد التوفر على الحساب والخطة.
+**Kiro (`kr/`)** — مصادقة OAuth مجانية: استخدم الكتالوج المباشر الظاهر ضمن **Dashboard → Providers → Kiro → Available Models**. يعتمد التوفر على الحساب والخطة.
 
-**Qoder (`if/`)** — OAuth مجاني: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
+**Qoder (`if/`)** — مصادقة OAuth مجانية: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
 
-**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
+**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — ‏$0.2–0.6/1M: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`، `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`، `minimax-cn/`)** — ‏$0.2/1M: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — $9 شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — ‏$9/شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — مفتاح API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — فائق السرعة: `groq/llama-3.3-70b-versatile`، `groq/meta-llama/llama-4-maverick-17b-128e-instruct`، `groq/qwen/qwen3-32b`، `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok الأصلي: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok أصلي: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — مُستضاف في الاتحاد الأوروبي: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/devstral-latest`، `mistral/codestral-latest`
+**Mistral (`mistral/`)** — مستضاف في الاتحاد الأوروبي: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — مدعوم بالبحث: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
+**Perplexity (`pplx/`)** — معزّز بالبحث: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
 
 **Together AI (`together/`)** — مفتوح المصدر: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (مجاني)، `together/meta-llama/Llama-Vision-Free`، `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`، `together/deepseek-ai/DeepSeek-R1`، `together/Qwen/Qwen3-235B-A22B`، `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — استدلال سريع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — بمقياس الرقاقة (Wafer-scale): `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — على نطاق الرقاقة: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — مركّز على RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — يركّز على RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/google/gemma-4-31b-it`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`، `nvidia/nvidia/nemotron-3-ultra-550b-a55b`، `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: تتم مزامنته مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. اربط مفتاحًا في **لوحة التحكم → الموفرون** ثم استخدم **النماذج المتاحة** لاستيراد الكتالوج الحالي (مثل `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: تتم المزامنة مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. صِل مفتاحًا في **Dashboard → Providers** ثم استخدم **Available Models** لاستيراد الكتالوج الحالي (مثلًا `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
 
-**موفرون متوافقون آخرون** (مختارون): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمريري)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منهم بقائمة نماذجه الخاصة في `providerRegistry.ts` ويمكن مزامنتها تلقائيًا عندما يوفّر الموفر نقطة نهاية `/models`.
+**الموفّرون الآخرون المتوافقون** (مختارون): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمرير مباشر)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منها بقائمة النماذج الخاصة به في `providerRegistry.ts`، ويمكن مزامنته تلقائيًا عندما يوفّر الموفّر نقطة نهاية `/models`.
 
-**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية خاصة بكل موفر (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقّطة لأن واجهة برمجة التطبيقات للمصدر تتوقعها بهذا الشكل. إذا لم يكن أحد النماذج مدرجًا أعلاه، فنفّذ `omniroute models --search <term>` أو اطلب `GET /api/models/catalog` للتأكد من التوفر.
+**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية للموفّرين (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقوطة لأن واجهة API المصدر تتوقعها بهذه الصيغة. إذا لم يكن النموذج مدرجًا أعلاه، فشغّل `omniroute models --search <term>` أو استدعِ `GET /api/models/catalog` للتحقق من التوفر.
 
 </details>
 
@@ -685,7 +692,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ملحوظات:
 
-- تتم إدارة موفري OpenRouter و OpenAI/Anthropic-compatible من** النماذج المتاحة** فقط. يمكنك الإضافة اليدوية والاستيراد والمزامنة التلقائية لجميع العناصر الموجودة في نفس قائمة النماذج المتاحة، لذلك لا يوجد قسم منفصل للنماذج المخصصة لهؤلاء الموفرين.
+- تتم إدارة موفري OpenRouter و OpenAI/Anthropic-compatible من** النماذج المتاحة** فقط. يمكنك إضافة كل العناصر واستيرادها ومزامنتها تلقائيًا يدويًا في نفس قائمة النماذج المتاحة، لذلك لا يوجد قسم منفصل للنماذج المخصصة لهؤلاء الموفرين.
 - ال** نماذج مخصصة** القسم مخصص للموفرين الذين لا يعرضون عمليات استيراد النماذج المتوفرة المُدارة.
 
 ### مقدمو الخدمات المتوافقون مع OpenAI المخصصون
@@ -696,14 +703,14 @@ curl -X POST http://localhost:20128/api/provider-models \
 2. **اسم** : تسمية عرض للعقدة.
 3. **بادئة** : اسم التوجيه. يطلق العملاء على النماذج اسم `<prefix>/<model>`، لذا فإن العقدة ذات البادئة `mygw` تخدم `mygw/gpt-4o-mini`. مطلوب؛ لا يوجد قيود على الأحرف.
 4. **نوع API** : عائلة نقطة النهاية التي تخدمها البوابة (إكمالات الدردشة، والردود، والتضمينات، والصوت، والصور).
-5. **قاعدة URL** : جذر API ، حتى `/v1` (على سبيل المثال `https://gateway.example.com/v1`)، وليس مسار `/chat/completions` الكامل. تم وضع البوابات ذات المسارات غير القياسية تحتها** الإعدادات المتقدمة** (مسار الدردشة، مسار النماذج).
+5. **قاعدة URL** : جذر API ، حتى `/v1` (على سبيل المثال `https://gateway.example.com/v1`)، وليس مسار `/chat/completions` الكامل. يتم وضع البوابات ذات المسارات غير القياسية تحتها** الإعدادات المتقدمة** (مسار الدردشة، مسار النماذج).
 6. ال** مفتاح API (للفحص)** الحقل يختبر الاتصال فقط. بعد إنشاء العقدة، افتحها واستخدمها** إضافة اتصال** لتخزين المفتاح الذي ستستخدمه الطلبات.
 
-تحصل العقدة على معرف داخلي للنموذج `openai-compatible-<apiType>-<uuid>`؛ لن تحتاج إلى كتابته أبدًا، البادئة هي الاسم العام.
+تحصل العقدة على معرف داخلي للنموذج `openai-compatible-<apiType>-<uuid>`؛ لن تحتاج إلى كتابته أبدًا، فالبادئة هي الاسم العام.
 
 #### البادئات المحجوزة
 
-لا يمكن أن تكون البادئة معرفًا أو اسمًا مستعارًا لموفر مضمن (على سبيل المثال `openai`, `cf`)، ولا معرف موفر متقاعد. يتحقق محلل النموذج من المعرفات والأسماء المستعارة المضمنة قبل العقد المخصصة، وبالتالي فإن العقدة التي تستخدم إحدى هذه البادئات لن تتلقى حركة مرور أبدًا: ستنتقل `<prefix>/model` إلى الموفر المدمج بدلاً من ذلك، أو تفشل في الإغلاق إذا تم تقاعد هذا الموفر. يتم رفض إنشاء عقدة أو تحريرها بهذه البادئة باستخدام:
+لا يمكن أن تكون البادئة معرفًا أو اسمًا مستعارًا لموفر مضمن (على سبيل المثال `openai`, `cf`)، ولا معرف موفر متقاعد. يتحقق محلل النموذج من المعرفات والأسماء المستعارة المضمنة قبل العقد المخصصة، وبالتالي فإن العقدة التي تستخدم إحدى هذه البادئات لن تتلقى حركة مرور أبدًا: ستنتقل `<prefix>/model` إلى الموفر المدمج بدلاً من ذلك، أو تفشل في الإغلاق إذا تم تقاعد هذا الموفر. يتم رفض إنشاء أو تحرير عقدة بهذه البادئة باستخدام:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -715,8 +722,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 تدخل هذه المفاتيح في `providerSpecificData` للاتصال (على سبيل المثال عبر `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (عدد صحيح، 1–1024) - للاتصالات المتوافقة مع تنسيق الدردشة OpenAI التي ترفض بوابتها أسماء الأدوات الطويلة. يتم إرسال الأسماء الأطول كأسماء مستعارة قصيرة ويتم استعادتها في الرد.
-- `quotaEndpoint` - نقطة نهاية quota/credits الخاصة بالبوابة، اقرأ لشريط الحصص النسبية بلوحة المعلومات والتوجيه المدرك للحصة النسبية. يعمل على كل من الاتصالات المتوافقة مع OpenAI وAnthropic؛ تم توثيق الشكل الكامل في `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (عدد صحيح، 1–1024) — للاتصالات المتوافقة مع تنسيق الدردشة OpenAI والتي ترفض بوابتها أسماء الأدوات الطويلة. يتم إرسال الأسماء الأطول كأسماء مستعارة قصيرة ويتم استعادتها في الرد. OpenAI و Azure OpenAI و Azure AI Foundry و Mistral و NVIDIA و OpenCode Zen/Go و Muse Code بالفعل أسماء مستعارة لأكثر من 64 حرفًا بدون أي إعداد. تحل قيمة الاتصال محل القيمة الافتراضية لـ Azure OpenAI / Azure AI Foundry (اتصال Azure خلف بوابة أكثر صرامة) وتقوم بتعيين الحد الأقصى للعقدة المتوافقة المخصصة؛ يحتفظ OpenAI و Mistral و NVIDIA و OpenCode Zen/Go و Muse Code بحد التسجيل الخاص بهم ويتجاهلونه.
+- `quotaEndpoint` — نقطة نهاية quota/credits الخاصة بالبوابة، اقرأ عن شريط الحصص في لوحة المعلومات والتوجيه المدرك للحصة النسبية. يعمل على كل من الاتصالات المتوافقة مع OpenAI والإنسانية؛ تم توثيق الشكل الكامل في `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -753,7 +760,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 فقط الطلبات المُرسلة إلى نظير URL المُدرج بشكل صريح في القائمة المسموح بها هي التي تتلقى رأس `X-OmniRoute-Peer-Trace`. ترفض البوابة مثيلًا متكررًا ID أو ميزانية قفزة مستنفدة مع HTTP `508 Loop Detected`؛ لا يتلقى مقدمو الخدمات الأولية العاديون أي بيانات تعريف نظير.
 
-لا يعد تسلسل الأقران تكرارًا لقاعدة البيانات أو تجاوز فشل المضيف. تحتفظ كل بوابة بحالة SQLite المستقلة وذاكرة التخزين المؤقت وعدادات الأسعار والجلسات. استخدم وكيلًا عكسيًا تم التحقق من صحته أو تجاوز فشل العميل لتوفير active/passive أو active/active ، ولا تقم مطلقًا بتحميل قاعدة بيانات SQLite واحدة في العديد من مثيلات OmniRoute قيد التشغيل.
+لا يعد تسلسل الأقران تكرارًا لقاعدة البيانات أو تجاوز فشل المضيف. تحتفظ كل بوابة بحالة SQLite المستقلة وذاكرة التخزين المؤقت وعدادات الأسعار والجلسات. استخدم وكيلًا عكسيًا تم التحقق من صحته أو تجاوز فشل العميل لتوفر active/passive أو active/active ، ولا تقم مطلقًا بتحميل قاعدة بيانات SQLite واحدة في العديد من مثيلات OmniRoute قيد التشغيل.
 
 ### طرق موفر مخصصة
 
@@ -813,8 +820,8 @@ curl http://localhost:20128/api/models/catalog
 
 ### استخبارات بوابة LLM (المرحلة 9)
 
-- **ذاكرة التخزين المؤقت الدلالية** — تخزين مؤقت تلقائي غير متدفق، استجابات درجة الحرارة = 0 (تجاوز باستخدام `X-OmniRoute-No-Cache: true`)
-- **طلب العجز** - إلغاء تكرار الطلبات خلال 5 ثوانٍ عبر رأس `Idempotency-Key` أو `X-Request-Id`
+- **ذاكرة التخزين المؤقت الدلالية** — تخزين مؤقت تلقائي غير متدفق، درجة الحرارة = 0 استجابات (تجاوز باستخدام `X-OmniRoute-No-Cache: true`)
+- **طلب العجز** — يقوم بإلغاء تكرار الطلبات خلال 5 ثوانٍ عبر رأس `Idempotency-Key` أو `X-Request-Id`
 - **تتبع التقدم** — الاشتراك في أحداث SSE `event: progress` عبر رأس `X-OmniRoute-Progress: true`
 
 ---
@@ -844,27 +851,27 @@ curl http://localhost:20128/api/models/catalog
 
 **الاستراتيجيات المرئية في لوحة المعلومات (التوجيه على مستوى الحساب):**
 
-| الإستراتيجية             | وصف                                                                                    |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| **املأ أولاً**           | يستخدم الحسابات بترتيب الأولوية — يعالج الحساب الأساسي جميع الطلبات حتى تصبح غير متاحة |
-| **جولة روبن**            | التنقل بين جميع الحسابات بحد ثابت قابل للتكوين (الافتراضي: 3 مكالمات لكل حساب)         |
-| **P2C (قوة الاختيارين)** | يختار حسابين عشوائيين ويوجهه نحو الحساب الأكثر صحة - وتمتلئ الأرصدة بالوعي بالصحة      |
-| **عشوائي**               | تحديد حساب عشوائيًا لكل طلب باستخدام خلط Fisher-Yates                                  |
-| **الأقل استخدامًا**      | توجيهات إلى الحساب بأقدم طابع زمني `lastUsedAt` ، مع توزيع حركة المرور بالتساوي        |
-| **التكلفة الأمثل**       | التوجيهات إلى الحساب ذي قيمة الأولوية الأقل، مع تحسين موفري الخدمة الأقل تكلفة         |
+| استراتيجية               | وصف                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| **املأ أولاً**           | يستخدم الحسابات بترتيب الأولوية. يتعامل الحساب الأساسي — مع جميع الطلبات حتى تصبح غير متاحة |
+| **جولة روبن**            | التنقل بين جميع الحسابات بحد ثابت قابل للتكوين (الافتراضي: 3 مكالمات لكل حساب)              |
+| **P2C (قوة الاختيارين)** | يختار حسابين عشوائيين ويوجهك إلى — أكثر صحة محملة بالوعي الصحي                              |
+| **عشوائي**               | تحديد حساب عشوائيًا لكل طلب باستخدام خلط Fisher-Yates                                       |
+| **الأقل استخدامًا**      | توجيهات إلى الحساب بأقدم طابع زمني `lastUsedAt` ، مع توزيع حركة المرور بالتساوي             |
+| **التكلفة الأمثل**       | التوجيهات إلى الحساب ذي قيمة الأولوية الأقل، مع تحسين موفري الخدمة الأقل تكلفة              |
 
 **التحرير والسرد المتقدم واستراتيجيات السيارات** (قابل للتكوين لكل مجموعة أو عبر بادئات `auto/*` — راجع [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - أمر صارم، لا يتكرر الأمر مطلقًا
-- `weighted` - تقسيم حركة المرور التناسبية حسب الأوزان لكل نموذج
-- `fill-first` - استنزاف النموذج الأول حتى تصل الحدود
+- `priority` — أمر صارم، أبدا جولة روبينز
+- `weighted` — حركة المرور النسبية مقسمة حسب الأوزان لكل نموذج
+- `fill-first` — استنزاف النموذج الأول حتى تصل الحدود
 - `round-robin` / `strict-random` / `random`
 - `p2c` (قوة الاختيارين)
 - `least-used` و `cost-optimized`
-- `auto` - تعتمد على النتيجة عبر جميع المرشحين
-- `lkgp` (آخر مزوّد جيد معروف) — يتم تثبيته على آخر مزوّد ناجح، ثم يعود إلى القواعد
-- `context-optimized` - يختار النموذج الذي يحتوي على أكبر نافذة سياقية مجانية
-- `context-relay` — سلاسل نماذج ذات سياق طويل لدورات المتابعة
+- `auto` — تعتمد على النتيجة عبر جميع المرشحين
+- `lkgp` (Last Known Good Provider) — pins to the last successful provider, then falls back to rules
+- `context-optimized` — يختار النموذج الذي يحتوي على أكبر نافذة سياقية مجانية
+- `context-relay` — سلاسل نماذج طويلة السياق لدورات المتابعة
 
 #### رأس الجلسة الثابتة الخارجية
 
@@ -940,7 +947,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 سلاسل متعددة من مقدمي الخدمة ذوي المستوى المجاني وبدون مفتاح لزيادة وقت التشغيل إلى أقصى حد دون تكاليف API.
 
-- **الإستراتيجية** : `Least Used` أو `Round Robin` (توزيع الحمل عبر الحصص)
+- **استراتيجية** : `Least Used` أو `Round Robin` (يوزع الحمل عبر الحصص)
 - **نماذج** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -971,32 +978,32 @@ omniroute combo create free-stack \
 
 تطبق OmniRoute المرونة على مستوى مقدمي الخدمة من خلال خمسة مكونات:
 
-1. **طلب قائمة الانتظار والسرعة** - تشكيل الطلب على مستوى النظام:
-   - **الطلبات في الدقيقة (RPM)** - الحد الأقصى للطلبات في الدقيقة لكل حساب
+1. **طلب قائمة الانتظار والسرعة** — تشكيل الطلب على مستوى النظام:
+   - **الطلبات في الدقيقة (RPM)** — الحد الأقصى للطلبات في الدقيقة لكل حساب
    - **الحد الأدنى من الوقت بين الطلبات** — الحد الأدنى للفجوة بالمللي ثانية بين الطلبات
-   - **الحد الأقصى للطلبات المتزامنة** - الحد الأقصى للطلبات المتزامنة لكل حساب
+   - **الحد الأقصى للطلبات المتزامنة** — الحد الأقصى للطلبات المتزامنة لكل حساب
 
-2. **تهدئة الاتصال** — التكوين لكل نوع مصادقة لاتصال واحد بعد حالات الفشل القابلة لإعادة المحاولة:
-   - **التبريد الأساسي** — نافذة التهدئة الافتراضية لحالات فشل المنبع القابلة لإعادة المحاولة
-   - **استخدم تلميحات إعادة المحاولة الأولية** — يكرم `Retry-After` الموثوقة أو تلميحات إعادة التعيين عند تقديمها
+2. **تهدئة الاتصال** تكوين — لكل نوع مصادقة لاتصال واحد بعد حالات الفشل القابلة لإعادة المحاولة:
+   - **التبريد الأساسي** — نافذة التهدئة الافتراضية لحالات الفشل الأولية القابلة لإعادة المحاولة
+   - **استخدم تلميحات إعادة المحاولة الأولية** — يكرم `Retry-After` الرسمي أو تلميحات إعادة التعيين عند تقديمها
    - **أقصى خطوات التراجع** — الحد الأقصى لمستوى التراجع الأسي للفشل المتكرر
 
-3. **قواطع دوائر المزود** - يتتبع فشل الموفر من طرف إلى طرف، ويضع علامة على الموفر المتدهور عند حد التحذير الذي تم تكوينه، ويفتح القاطع عند الوصول إلى حد الفشل الذي تم تكوينه:
+3. **قواطع دوائر المزود** — يتتبع فشل الموفر من طرف إلى طرف، ويضع علامة على الموفر المتدهور عند حد التحذير الذي تم تكوينه، ويفتح القاطع عند الوصول إلى حد الفشل الذي تم تكوينه:
    - **عتبة التدهور** — فشل الموفر المتتالي قبل الدخول إلى `DEGRADED`
    - **عتبة الفشل** — فشل الموفر المتتالي قبل الدخول إلى `OPEN`
    - **إعادة ضبط المهلة** — نافذة زمنية قبل اختبار الموفر مرة أخرى
-   - **CLOSED** (صحي) - تتدفق الطلبات بشكل طبيعي
-   - **DEGRADED** — لا تزال الطلبات تتدفق بينما يتم تعقب حالات الفشل المرتفعة
-   - **OPEN** — تم حظر الموفر مؤقتًا بعد الفشل المتكرر
-   - **HALF_OPEN** - اختبار ما إذا كان المزود قد تعافى
+   - **CLOSED** (صحي) — تتدفق الطلبات بشكل طبيعي
+   - **DEGRADED** لا تزال طلبات — تتدفق بينما يتم تعقب حالات الفشل المرتفعة
+   - **OPEN** تم حظر موفر — مؤقتًا بعد الفشل المتكرر
+   - **HALF_OPEN** اختبار — إذا تعافى الموفر
 
    تظل حدود معدل `429` على مستوى الاتصال كما هي** تهدئة الاتصال** ولا تحتسب تجاه الكسارة المزودة.
 
    يتم عرض حالة وقت تشغيل قاطع الموفر** لوحة القيادة → الصحة** فقط.
 
-4. **انتظر فترة التهدئة** — إذا كان كل اتصال مرشح في مرحلة التبريد بالفعل، فيمكن OmniRoute انتظار فترة التبريد الأولى وإعادة محاولة طلب العميل نفسه تلقائيًا.
+4. **انتظر فترة التهدئة** — إذا كان كل اتصال مرشح في حالة تبريد بالفعل، فيمكن OmniRoute انتظار فترة التبريد الأولى وإعادة محاولة طلب العميل نفسه تلقائيًا.
 
-5. **الكشف التلقائي عن حد المعدل** - عندما يعرض مقدمو الخدمات الأولية نوافذ انتظار صريحة، فإن هذه التلميحات تتجاوز فترة تباطؤ الاتصال المحلي عند تمكين الإعداد.
+5. **الكشف التلقائي عن حد المعدل** — عندما يعرض موفري الخدمة الأولية نوافذ انتظار صريحة، تتجاوز هذه التلميحات فترة تباطؤ الاتصال المحلي عند تمكين الإعداد.
 
 **نصيحة للمحترفين:** استخدم** صحة** صفحة لفحص وإعادة ضبط قواطع الموفر المباشر بعد انقطاع التيار. تقوم صفحة المرونة بتغيير التكوين فقط.
 
@@ -1042,7 +1049,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **عام**           | أدوات تخزين النظام، والسلوك الافتراضي، ورؤية نفق نقطة النهاية                                                                                                                                 |
 | **مظهر**          | عناصر التحكم في السمات (light/dark/system)، ورؤية الشريط الجانبي، وتبديل اللوحة لبطاقات نفق Cloudflare/Tailscale/ngrok                                                                        |
-| **AI**            | ميزانية التفكير (العبور / الشريط التلقائي / المخصص / التكيفي - راجع [THINKING_BUDGET.md](./THINKING_BUDGET.md) )، موجه النظام العالمي، إحصائيات ذاكرة التخزين المؤقت السريعة                  |
+| **AI**            | ميزانية التفكير (العبور / الشريط التلقائي / — المخصص / التكيفي، راجع [THINKING_BUDGET.md](./THINKING_BUDGET.md) )، موجه النظام العالمي، إحصائيات ذاكرة التخزين المؤقت السريعة                 |
 | **حماية**         | إعدادات Login/Password ، التحكم في الوصول IP ، مصادقة API لـ `/models`، حظر الموفر، حماية الحقن الفوري                                                                                        |
 | **التوجيه**       | استراتيجية التوجيه العالمية (الملء أولاً / جولة روبن / P2C / عشوائي / الأقل استخدامًا / التكلفة الأمثل)، والأسماء المستعارة لنماذج أحرف البدل، والسلاسل الاحتياطية، وافتراضيات التحرير والسرد |
 | **صمود**          | قائمة انتظار الطلبات، وفترة تباطؤ الاتصال، وتكوين قاطع الموفر، وسلوك انتظار فترة التهدئة                                                                                                      |
@@ -1059,7 +1066,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | فاتورة غير مدفوعة | غاية                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
 | **ميزانية**       | قم بتعيين حدود الإنفاق لكل مفتاح API باستخدام ميزانيات daily/weekly/monthly والتتبع في الوقت الفعلي |
-| **التسعير**       | عرض وتحرير إدخالات التسعير النموذجية - التكلفة لكل 1 ألف رمز input/output لكل مزود                  |
+| **التسعير**       | عرض وتحرير إدخالات التسعير النموذجية، تكلفة — لكل 1 ألف رمز input/output لكل مزود                   |
 
 ```bash
 # API: Set a budget
@@ -1105,7 +1112,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **تحويل النص إلى كلام (`POST /v1/audio/speech`)** مقدمي الخدمة:
 
-- `openai/` (tts-1، tts-1-hd)
+- `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (هالة)
 - `nvidia/` (العقعق TTS)
@@ -1128,7 +1135,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 تكوين موازنة لكل التحرير والسرد في** لوحة القيادة → المجموعات → Create/Edit → الإستراتيجية** .
 
-| الإستراتيجية              | وصف                                                                                            |
+| استراتيجية                | وصف                                                                                            |
 | ------------------------- | ---------------------------------------------------------------------------------------------- |
 | **جولة روبن**             | تدور من خلال النماذج بالتتابع                                                                  |
 | **أولوية**                | يحاول دائمًا النموذج الأول؛ ولا يرجع إلا على الخطأ                                             |

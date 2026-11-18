@@ -190,6 +190,20 @@ async function handleVertexApiKeyCatalog(
   });
 }
 
+/** The connection's Vertex region (`eu` lists publishers on the EU host, #18790). */
+function connectionRegion(connection: VertexDiscoveryRouteOptions["connection"]): string | null {
+  return toNonEmptyString(asRecord(connection?.providerSpecificData).region) ?? null;
+}
+
+/**
+ * A publisher list that failed with an HTTP status reports that status (a 403 from an
+ * endpoint-pinning org policy is not an empty catalog); otherwise the live catalog answered
+ * with nothing usable.
+ */
+function emptyDiscoveryFailure(discovery: { failureStatus?: number }): DiscoveryFailure {
+  return discovery.failureStatus ? { status: discovery.failureStatus } : { code: "EMPTY_CATALOG" };
+}
+
 export async function maybeHandleVertexModelDiscovery(
   options: VertexDiscoveryRouteOptions
 ): Promise<Response | null> {
@@ -239,6 +253,7 @@ export async function maybeHandleVertexModelDiscovery(
   const discovery = await discoverVertexModelsWithBearer({
     bearerToken: bearerToken as string,
     fetchImpl: vertexFetch(options.proxy),
+    region: connectionRegion(options.connection),
   });
 
   if (discovery.models.length > 0) {
@@ -264,8 +279,7 @@ export async function maybeHandleVertexModelDiscovery(
   const fallback = options.buildDiscoveryFallbackResponse({
     cacheWarning: "Vertex model catalogs unavailable — using cached catalog",
     localWarning: "Vertex model catalogs unavailable — using local catalog",
-    // The live catalog answered with nothing usable.
-    failure: { code: "EMPTY_CATALOG" },
+    failure: emptyDiscoveryFailure(discovery),
   });
   if (fallback) return fallback;
   return options.buildResponse({

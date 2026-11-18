@@ -142,6 +142,9 @@ export default function CustomModelsSection({
   // custom model record.
   const [editingTargetFormat, setEditingTargetFormat] = useState("");
   const [newTargetFormat, setNewTargetFormat] = useState("");
+  // #4125: manual context-window override on the ADD form (previously only the EDIT
+  // form had it) — free text so it can be left blank (no override).
+  const [newContextWindowOverride, setNewContextWindowOverride] = useState("");
   const [savingModelId, setSavingModelId] = useState<string | null>(null);
   const [togglingModelId, setTogglingModelId] = useState<string | null>(null);
   // #4125: manual context-window override (Feature 5004 table) — free text so the
@@ -192,6 +195,11 @@ export default function CustomModelsSection({
 
   const handleAdd = async () => {
     if (!newModelId.trim() || adding) return;
+    const contextOverride = parseContextWindowOverrideInput(newContextWindowOverride);
+    if (contextOverride.invalid) {
+      notify.error(t("contextWindowOverrideInvalid"));
+      return;
+    }
     setAdding(true);
     try {
       const res = await fetch("/api/provider-models", {
@@ -205,6 +213,9 @@ export default function CustomModelsSection({
           supportedEndpoints: newEndpoints,
           ...(newTargetFormat ? { targetFormat: newTargetFormat } : {}),
           ...(newSupportsVision ? { supportsVision: true } : {}),
+          ...(contextOverride.value != null
+            ? { contextWindowOverride: contextOverride.value }
+            : {}),
           ...(newIsFree ? { isFree: true } : {}),
         }),
       });
@@ -215,6 +226,7 @@ export default function CustomModelsSection({
         setNewEndpoints(["chat"]);
         setNewTargetFormat("");
         setNewSupportsVision(false);
+        setNewContextWindowOverride("");
         setNewIsFree(false);
         await fetchCustomModels();
         onModelsChanged?.();
@@ -449,7 +461,7 @@ export default function CustomModelsSection({
 
   return (
     <div className="mt-6 pt-6 border-t border-border">
-      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+      <h3 className="text-sm mb-3 flex items-center gap-2">
         <Icon name="tune" size={16} className="text-primary" />
         {t("customModels")}
       </h3>
@@ -521,6 +533,19 @@ export default function CustomModelsSection({
               <option value="gemini">{t("targetFormatGemini")}</option>
               <option value="antigravity">{t("targetFormatAntigravity")}</option>
             </Select>
+          </div>
+          <div className="min-w-0 lg:w-40">
+            <Input
+              id="custom-model-context-window"
+              label={t("contextWindowOverrideLabel")}
+              type="text"
+              inputMode="numeric"
+              value={newContextWindowOverride}
+              onChange={(e) => setNewContextWindowOverride(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder={t("contextWindowOverridePlaceholder")}
+              title={t("contextWindowOverrideHint")}
+            />
           </div>
           <div className="col-span-2 min-w-0 lg:flex-1">
             <span className="text-xs text-text-muted mb-1 block">
@@ -650,7 +675,7 @@ export default function CustomModelsSection({
                     {model.supportsVision === true && (
                       <CapabilityBadge
                         icon="visibility"
-                        className="bg-chart-5/15 text-chart-5"
+                        className="bg-chart-5/15 text-chart-5-ink"
                         title={t("visionCapableHint")}
                       >
                         {t("visionCapableLabel")}
@@ -662,7 +687,10 @@ export default function CustomModelsSection({
                       </span>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
-                      <CapabilityBadge icon="scatter_plot" className="bg-chart-3/15 text-chart-3">
+                      <CapabilityBadge
+                        icon="scatter_plot"
+                        className="bg-chart-3/15 text-chart-3-ink"
+                      >
                         {t("supportedEndpointEmbeddings")}
                       </CapabilityBadge>
                     )}
@@ -688,7 +716,7 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("audio-transcriptions") && (
-                      <CapabilityBadge icon="mic" className="bg-chart-2/15 text-chart-2">
+                      <CapabilityBadge icon="mic" className="bg-chart-2/15 text-chart-2-ink">
                         {t("audioTranscriptions")}
                       </CapabilityBadge>
                     )}
@@ -702,7 +730,7 @@ export default function CustomModelsSection({
                     )}
                     {anyNoPreserveCompatBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2-ink font-medium"
                         title={t("compatDoNotPreserveDeveloper")}
                       >
                         {t("compatBadgeNoPreserve")}
@@ -710,7 +738,7 @@ export default function CustomModelsSection({
                     )}
                     {anyUpstreamHeadersBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3-ink font-medium"
                         title={t("compatUpstreamHeadersLabel")}
                       >
                         {t("compatBadgeUpstreamHeaders")}
@@ -870,7 +898,13 @@ export default function CustomModelsSection({
                     providerId={providerId}
                     modelId={model.id!}
                     effectiveModelNormalize={(p) =>
-                      effectiveNormalizeForProtocol(model.id!, p, customMap, overrideMap)
+                      effectiveNormalizeForProtocol(
+                        model.id!,
+                        p,
+                        customMap,
+                        overrideMap,
+                        providerId
+                      )
                     }
                     effectiveModelPreserveDeveloper={(p) =>
                       effectivePreserveForProtocol(model.id!, p, customMap, overrideMap)
@@ -916,11 +950,11 @@ export default function CustomModelsSection({
                     />
                   )}
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon-sm"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
+                    className="size-6 min-h-6 rounded"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
                   />

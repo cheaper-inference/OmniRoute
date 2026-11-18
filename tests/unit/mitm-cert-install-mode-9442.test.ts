@@ -149,6 +149,8 @@ test("ensureSystemCertMode is a no-op when the cert is already 0644", async () =
   resetCaptured();
   const destFile = path.join(tmpRoot, "correct-mode-9442.crt");
   fs.writeFileSync(destFile, "fake-cert", { mode: 0o644 });
+  // Declare the already-correct mode even under a restrictive caller umask.
+  fs.chmodSync(destFile, 0o644);
   assert.equal(fs.statSync(destFile).mode & 0o777, 0o644);
 
   await ensureSystemCertMode(destFile, "");
@@ -162,6 +164,8 @@ test("filesystem proof: cp under umask 0077 creates mode 0600 (why the fix is ne
   const src = path.join(tmpRoot, "umask-src.crt");
   const dst = path.join(tmpRoot, "umask-dst.crt");
   fs.writeFileSync(src, "cert-body", { mode: 0o644 });
+  fs.chmodSync(src, 0o644);
+  assert.equal(fs.statSync(src).mode & 0o777, 0o644);
 
   const oldUmask = process.umask(0o077);
   try {

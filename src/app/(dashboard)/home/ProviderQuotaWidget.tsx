@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
@@ -57,6 +58,11 @@ function formatAutoRefreshCountdown(ms: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function RefreshGlyph({ refreshing, scheduled }: { refreshing: boolean; scheduled: boolean }) {
+  if (refreshing) return <Spinner decorative size="sm" />;
+  return <Icon name={scheduled ? "schedule" : "refresh"} size={16} />;
+}
+
 function QuotaRow({ quota }: { quota: any }) {
   const t = useTranslations("usage");
   const percentage = Math.round(getQuotaRemainingPercentage(quota));
@@ -71,7 +77,10 @@ function QuotaRow({ quota }: { quota: any }) {
     return (
       <div className="flex min-w-0 items-center justify-between gap-3 py-1.5">
         <span className="min-w-0 truncate text-xs font-medium text-text-main">{label}</span>
-        <span className="shrink-0 text-xs font-bold tabular-nums" style={{ color: colors.text }}>
+        <span
+          className="shrink-0 text-xs font-semibold tabular-nums"
+          style={{ color: colors.text }}
+        >
           {amount}
         </span>
       </div>
@@ -82,7 +91,10 @@ function QuotaRow({ quota }: { quota: any }) {
     <div className="flex min-w-0 flex-col gap-1 py-1.5" title={quota.modelKey || quota.name}>
       <div className="flex items-center justify-between gap-3">
         <span className="min-w-0 truncate text-xs font-medium text-text-main">{label}</span>
-        <span className="shrink-0 text-xs font-bold tabular-nums" style={{ color: colors.text }}>
+        <span
+          className="shrink-0 text-xs font-semibold tabular-nums"
+          style={{ color: colors.text }}
+        >
           {quota.unlimited
             ? "∞"
             : translateUsageOrFallback(t, "percentLeft", `${percentage}% left`, {
@@ -90,7 +102,7 @@ function QuotaRow({ quota }: { quota: any }) {
               })}
         </span>
       </div>
-      {!quota.unlimited && <QuotaMiniBar percent={percentage} />}
+      {!quota.unlimited && <QuotaMiniBar percent={percentage} label={label} />}
       {reset && <span className="text-[10px] text-text-muted">⏱ {reset}</span>}
     </div>
   );
@@ -280,9 +292,7 @@ export default function ProviderQuotaWidget({
         <div className="flex items-center gap-2">
           <Icon name="account_balance" size={20} className="text-primary" />
           <div>
-            <h2 className="text-base font-semibold text-text-main">
-              {tr("providerQuota", "Provider Quota")}
-            </h2>
+            <h2 className="text-base text-text-main">{tr("providerQuota", "Provider Quota")}</h2>
             {updatedLabel && (
               <p className="text-[11px] text-text-muted">
                 {tr("updatedShort", "Updated")} {updatedLabel}
@@ -297,11 +307,7 @@ export default function ProviderQuotaWidget({
           disabled={loading || refreshingAll}
           className="gap-1.5 text-xs"
         >
-          <Icon
-            name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-            size={16}
-            className={refreshingAll ? "animate-spin" : undefined}
-          />
+          <RefreshGlyph refreshing={refreshingAll} scheduled={autoRefreshIntervalMs > 0} />
           {refreshingAll
             ? tr("refreshing", "Refreshing")
             : autoRefreshIntervalMs > 0
@@ -313,8 +319,8 @@ export default function ProviderQuotaWidget({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
-          <Icon name="progress_activity" size={16} className="animate-spin" />
+        <div role="status" className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tr("loadingQuotas", "Loading...")}
         </div>
       ) : providerGroups.length === 0 ? (
@@ -348,7 +354,7 @@ export default function ProviderQuotaWidget({
               <div className="flex min-w-0 items-center gap-2 lg:items-start">
                 <ProviderIcon providerId={provider} size={18} />
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-text-main">
+                  <h3 className="truncate text-sm text-text-main">
                     {PROVIDER_LABEL[provider] || provider}
                   </h3>
                   <p className="text-[11px] text-text-muted">

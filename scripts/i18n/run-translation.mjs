@@ -77,6 +77,7 @@ import {
 } from "./lib/translate-backend.mjs";
 import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
+import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -567,6 +568,9 @@ export function validateTranslatedChunk(source, output) {
   if (fences[0] !== fences[1]) problems.push(`code fences ${fences[1]}/${fences[0]}`);
   const rows = [countLines(/^\s*\|/, source), countLines(/^\s*\|/, text)];
   if (rows[0] !== rows[1]) problems.push(`table rows ${rows[1]}/${rows[0]}`);
+  else problems.push(...tableCellProblems(source, text));
+  const refs = issueRefProblem(source, text);
+  if (refs) problems.push(refs);
   const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
   if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
   const lost = lostInlineCode(source, text);
@@ -580,6 +584,59 @@ export function validateTranslatedChunk(source, output) {
   const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
   if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// GitHub issue / PR references are literals a mirror test may pin (`#15281` in QUALITY_GATES.md's
+// check:cycles row): the Google engine wrote `# 15281` in six locales on #18795. The output must
+// carry the same multiset as the source; order may change with the sentence.
+const ISSUE_REF = /(?<![\w&])#\d+(?!\d)/g;
+
+function issueRefProblem(source, translated) {
+  const tally = (text) => {
+    const counts = new Map();
+    for (const [ref] of text.matchAll(ISSUE_REF)) counts.set(ref, (counts.get(ref) ?? 0) + 1);
+    return counts;
+  };
+  const before = tally(source);
+  const after = tally(translated);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((ref) => (before.get(ref) ?? 0) !== (after.get(ref) ?? 0))
+    .map((ref) => `${ref} ${after.get(ref) ?? 0}/${before.get(ref) ?? 0}`);
+  if (!changed.length) return null;
+  return `issue refs ${changed.slice(0, 4).join(", ")}${changed.length > 4 ? ` (+${changed.length - 4})` : ""}`;
+}
+
+// Cell separators of one table row: unescaped pipes outside code spans, and escaped pipes apart.
+// The row-count check alone let a row through that gained a cell, and the Google engine escapes
+// a pipe the translator writes (`or` answered the danda as `|`, shipped as `\|` on #18795), so
+// the cell count holds there and only the escaped count moves.
+function tableRowShape(row) {
+  let cells = 0;
+  let escaped = 0;
+  let tick = false;
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] === "\\" && row[i + 1] === "|") {
+      escaped++;
+      i++;
+    } else if (row[i] === "`") tick = !tick;
+    else if (row[i] === "|" && !tick) cells++;
+  }
+  return { cells, escaped };
+}
+
+function tableCellProblems(source, translated) {
+  const rowsOf = (text) => text.split("\n").filter((l) => /^\s*\|/.test(l));
+  const src = rowsOf(source);
+  const out = rowsOf(translated);
+  const bad = [];
+  for (let i = 0; i < src.length; i++) {
+    const a = tableRowShape(src[i]);
+    const b = tableRowShape(out[i] ?? "");
+    if (a.cells !== b.cells || a.escaped !== b.escaped) bad.push(i + 1);
+  }
+  if (!bad.length) return [];
+  const shown = bad.slice(0, 4).join(", ");
+  return [`table cells changed in row ${shown}${bad.length > 4 ? ` (+${bad.length - 4})` : ""}`];
 }
 
 // The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
@@ -840,9 +897,10 @@ export function joinTranslatedChunks(parts) {
 // A mirror is retranslated section by section: the state remembers a short
 // hash of every `## ` section of the source at the time of translation, and a
 // later run only sends the sections whose hash changed, splicing the untouched
-// translated sections of the mirror back in. Sections are matched by index
-// only — an inserted or removed section shifts everything after it and costs
-// a retranslation of the tail, which is acceptable.
+// translated sections of the mirror back in. While the source keeps its section
+// count, sections are matched by index (a rewritten section keeps its slot).
+// When a section is inserted or removed the two lists are lined up by hash, so
+// only the sections that are really new go to the model.
 
 // Section 0 is the preamble (text before the first `## `); every other section
 // starts with its `## ` heading line. Joining with "\n\n" reproduces the body
@@ -865,26 +923,90 @@ export function sectionHashes(sections) {
 // `null` means "no reuse possible — translate the whole body": no recorded
 // hashes, or the mirror on disk does not have the section count the hashes
 // were recorded for (a hand edit, or a mirror written by an older pipeline).
-export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
+export function planSectionReuse({
+  previousHashes,
+  previousSections = null,
+  sections,
+  mirrorSections,
+}) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
-  if (previousHashes.length !== sections.length) return null;
   const now = sectionHashes(sections);
+  // `match[i]` is the recorded section (and so the mirror section) that source section `i`
+  // lines up with, or -1 when it has no counterpart.
+  const match =
+    previousHashes.length === now.length
+      ? now.map((_, i) => i)
+      : alignSectionHashes(previousHashes, now);
+  // Count-only edits need the exact previous source of every recorded section.
+  const verifiedPrevious =
+    Array.isArray(previousSections) && previousSections.length === previousHashes.length
+      ? sectionHashes(previousSections)
+      : [];
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
+    const j = match[i];
+    if (j < 0) {
+      translate.push(i);
+      return;
+    }
     // A mirror section byte-equal to its source section is an untranslated copy (322 mirrors
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    // A changed section is reused only as a proven count-only edit of the same section.
+    const numericUpdate =
+      h !== previousHashes[j] &&
+      typeof verifiedPrevious[j] === "string" &&
+      verifiedPrevious[j] === previousHashes[j]
+        ? applyNumericSectionDelta(previousSections[j], sections[i], mirrorSections[j])
+        : null;
+    const candidate = numericUpdate ?? mirrorSections[j];
+    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(candidate);
+    const untranslated = looksUntranslated(candidate, sections[i]);
+    // A matching source hash only describes what was requested. Older adopted
+    // mirrors may still omit rows or code literals; validate reused bytes too.
+    const checked = validateTranslatedChunk(sections[i], candidate);
+    if (
+      (h === previousHashes[j] || numericUpdate !== null) &&
+      !untranslated &&
+      !leakedFrontmatter &&
+      checked.problems.length === 0
+    )
+      reuse.set(i, checked.text);
     else translate.push(i);
   });
   return { reuse, translate };
+}
+
+// Longest common subsequence of the recorded hashes and the current ones: for every current
+// section, the index of the recorded section it lines up with, or -1. Used only when the section
+// count changed. Order is preserved, so a section that merely moved is translated again; equal
+// hashes (two identical sections) pair up left to right.
+function alignSectionHashes(previous, now) {
+  const rows = previous.length + 1;
+  const cols = now.length + 1;
+  const lcs = Array.from({ length: rows }, () => new Uint32Array(cols));
+  for (let i = previous.length - 1; i >= 0; i--) {
+    for (let j = now.length - 1; j >= 0; j--) {
+      lcs[i][j] =
+        previous[i] === now[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+  const match = new Array(now.length).fill(-1);
+  let i = 0;
+  let j = 0;
+  while (i < previous.length && j < now.length) {
+    if (previous[i] === now[j]) {
+      match[j] = i;
+      i++;
+      j++;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) i++;
+    else j++;
+  }
+  return match;
 }
 
 // The mirror without the prefix this script writes in front of the translated
@@ -921,7 +1043,24 @@ export function mirrorNeedsRebuild(mirrorText, sourceText) {
   const body = extractMirrorBody(mirrorText);
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
-  return looksUntranslated(body, sourceBody); // still English
+  const checked = validateTranslatedChunk(sourceBody, body);
+  return (
+    looksUntranslated(body, sourceBody) ||
+    checked.problems.length > 0 ||
+    checked.text !== body.trim()
+  );
+}
+
+/**
+ * True when the mirror on disk no longer matches the target_hash its record holds (a hand
+ * edit such as #18659, or a scripted rewrite of the mirrors). `i18n:check` reports it as a
+ * drifted target, so the refresh has to queue it: with the source unchanged every section is
+ * reused from the mirror itself (no translation call, the edit survives) and the new hash is
+ * recorded. Skipping it left the drift in place and failed every scheduled refresh
+ * (runs 41748740681, 41786406551).
+ */
+export function mirrorEdited(record, mirrorBuf) {
+  return !!record?.target_hash && sha256(mirrorBuf) !== record.target_hash;
 }
 
 export function extractMirrorBody(mirrorText) {
@@ -1006,12 +1145,22 @@ export function mirrorLastCommitDate(mirrorRel, { cwd = ROOT } = {}) {
   }
 }
 
+const exactSourceSnapshots = new Map();
+
 async function resolveSectionPlan({ task, state, opts, sections }) {
   if (task.missingTarget || opts.force) return null;
   const recorded = state.sources[task.rel]?.locales?.[task.locale];
   let previousHashes = recorded?.section_hashes;
+  let exactOldText = null;
+  if (recorded?.source_hash) {
+    const key = `${task.rel}:${recorded.source_hash}`;
+    if (!exactSourceSnapshots.has(key)) {
+      exactSourceSnapshots.set(key, findSourceTextByHash(task.rel, recorded.source_hash));
+    }
+    exactOldText = await exactSourceSnapshots.get(key);
+  }
   if (!previousHashes && recorded?.source_hash) {
-    let oldText = await findSourceTextByHash(task.rel, recorded.source_hash);
+    let oldText = exactOldText;
     if (!oldText) {
       // `updated_at` is bumped by `--adopt`, so prefer the date of the last commit that
       // actually wrote the mirror (mirrors are only written by translation runs).
@@ -1024,7 +1173,13 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   if (!previousHashes) return null;
   const mirrorText = await fs.readFile(task.targetAbs, "utf8");
   const mirrorSections = splitSections(extractMirrorBody(mirrorText));
-  return planSectionReuse({ previousHashes, sections, mirrorSections });
+  // A timestamp fallback is not proof of the previous source. Numeric edits
+  // require both the exact source snapshot and the recorded mirror bytes.
+  const previousSections =
+    exactOldText && recorded?.target_hash === sha256(Buffer.from(mirrorText, "utf8"))
+      ? splitSections(stripTopHeading(exactOldText))
+      : undefined;
+  return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
 // A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
@@ -1043,10 +1198,6 @@ export async function translateChunk(
   backend,
   { call = callChat, label = "chunk", depth = 0 } = {}
 ) {
-  const messages = [
-    { role: "system", content: system },
-    { role: "user", content: chunk },
-  ];
   const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
   let checked;
   for (let level = 0; level < chain.length; level++) {
@@ -1055,12 +1206,30 @@ export async function translateChunk(
       model: chain[level],
       fallbackModels: chain.slice(level + 1),
     };
+    // Each model starts from the source alone; its own rejected answers come back with the
+    // validator's findings so a retry can correct them instead of repeating the same output.
+    const messages = [
+      { role: "system", content: system },
+      { role: "user", content: chunk },
+    ];
     for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
       checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
       if (checked.problems.length === 0) return checked.text;
       logWarn(
         `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
+      if (attempt < CHUNK_ATTEMPTS) {
+        messages.push(
+          { role: "assistant", content: checked.text },
+          {
+            role: "user",
+            content:
+              `The previous translation failed validation: ${checked.problems.join("; ")}. ` +
+              "Return a complete corrected translation of the original source. " +
+              "Preserve every inline code literal exactly and return only the translated markdown.",
+          }
+        );
+      }
     }
   }
   if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
@@ -1252,6 +1421,30 @@ export function mergeStateUpdates(fresh, touched, fallback) {
   return base;
 }
 
+/**
+ * Move a source-level `source_hash` to the current source hash when EVERY docs locale already
+ * records that hash — the mirrors were brought up to date outside this runner (a hand re-sync
+ * that updated only the locale records, #18824). With no unit left to translate, nothing else
+ * would ever move the source-level hash and the drift check would report `source-changed`
+ * forever (refresh run 41636350056). A locale that lags, failed or has no record blocks the
+ * heal, so a source whose locales did not all translate is never marked as done.
+ * `currentHashes` maps rel → sha256 of the source; `locales` is the full docs locale list.
+ * Mutates `state`; returns the healed rels.
+ */
+export function healSourceHashes(state, currentHashes, locales) {
+  const healed = [];
+  if (!locales.length) return healed;
+  for (const [rel, hash] of currentHashes) {
+    const entry = state?.sources?.[rel];
+    if (!entry || entry.source_hash === hash) continue;
+    if (locales.every((locale) => entry.locales?.[locale]?.source_hash === hash)) {
+      entry.source_hash = hash;
+      healed.push(rel);
+    }
+  }
+  return healed;
+}
+
 async function main() {
   const opts = parseArgs(process.argv);
   const config = await loadConfig();
@@ -1267,7 +1460,8 @@ async function main() {
   }
 
   const docsExcluded = new Set(config.docsExcluded ?? ["en"]);
-  let targetLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  const docsLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  let targetLocales = docsLocales;
   if (opts.locales) {
     targetLocales = targetLocales.filter((code) => opts.locales.includes(code));
     const missing = opts.locales.filter((c) => !config.locales.some((l) => l.code === c));
@@ -1393,17 +1587,19 @@ async function main() {
       const previous = entry.locales[locale];
       const sourceChanged = previous?.source_hash !== sourceHash;
       const missingTarget = !existsSync(targetAbs);
+      const mirrorBuf =
+        !opts.force && !sourceChanged && !missingTarget ? await fs.readFile(targetAbs) : null;
       const needsRebuild =
-        !opts.force &&
-        !sourceChanged &&
-        !missingTarget &&
-        mirrorNeedsRebuild(await fs.readFile(targetAbs, "utf8"), sourceHashes.get(rel).text);
-      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild) {
+        !!mirrorBuf && mirrorNeedsRebuild(mirrorBuf.toString("utf8"), sourceHashes.get(rel).text);
+      const edited = !!mirrorBuf && !needsRebuild && mirrorEdited(previous, mirrorBuf);
+      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild && !edited) {
         stats.skipped++;
         continue;
       }
       if (needsRebuild)
         logInfo(`${rel} → ${locale}: mirror needs a rebuild (English copy or leaked frontmatter)`);
+      if (edited)
+        logInfo(`${rel} → ${locale}: mirror edited since its last record — re-recording it`);
       tasks.push({ rel, locale, targetAbs, sourceChanged, missingTarget });
     }
   }
@@ -1451,6 +1647,13 @@ async function main() {
           } else {
             translatedBody = await translateBody(body, localeEntry, backend);
           }
+          // Check the assembled document before writing content or advancing
+          // provenance, including sections that came from the reuse cache.
+          const checked = validateTranslatedChunk(body, translatedBody);
+          if (checked.problems.length) {
+            throw new Error(`assembled document failed validation: ${checked.problems.join("; ")}`);
+          }
+          translatedBody = checked.text;
         } catch (err) {
           stats.failed++;
           failures.push({ rel: task.rel, locale: task.locale, error: err.message });
@@ -1497,7 +1700,12 @@ async function main() {
   } catch (err) {
     logWarn(`${err.message} at save time — merging into this run's snapshot instead`);
   }
-  await saveState(mergeStateUpdates(fresh, touched, state));
+  const merged = mergeStateUpdates(fresh, touched, state);
+  const currentHashes = new Map([...sourceHashes].map(([rel, { hash }]) => [rel, hash]));
+  for (const rel of healSourceHashes(merged, currentHashes, docsLocales)) {
+    logInfo(`${rel}: every locale already records the current source — source hash updated`);
+  }
+  await saveState(merged);
 
   const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
   logInfo(

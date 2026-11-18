@@ -2,7 +2,7 @@
 // Family: imagen3 | Module: imagen3 | Lines: 3670-3777 (108 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { mapImageSize } from "../../../translator/image/sizeMapper.ts";
 
 type Imagen3ImageGenArgs = {
@@ -133,4 +133,3 @@ export async function handleImagen3ImageGeneration({
     return { success: false, status: 502, error: `Image provider error: ${errMsg}` };
   }
 }
-

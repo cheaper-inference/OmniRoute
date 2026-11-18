@@ -18,7 +18,7 @@
 
 ---
 
-## Způsoby instalace
+## Metody instalace
 
 ### npm (doporučeno)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Ovládací panel se otevře na adrese `http://localhost:20128` a základní URL rozhraní API je `http://localhost:20128/v1`.
+Dashboard se otevře v `http://localhost:20128` a API base URL je `http://localhost:20128/v1`.
+
+> **Uživatelé npm:** Pokud npm varuje, že instalační skripty byly zablokovány (např. `omniroute`, `better-sqlite3`), přečtěte si [téma Odstraňování problémů — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,48 +38,48 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Uživatelé pnpm:** příznak `--allow-build` je vyžadován k povolení nativních sestavovacích skriptů pro `better-sqlite3` a `@swc/core`. Příkaz `pnpm approve-builds -g` není u globálních instalací v pnpm v11 podporován.
+> **Uživatelé pnpm:** příznak `--allow-build` je vyžadován k povolení nativních skriptů sestavení pro `better-sqlite3` a `@swc/core`. Příkaz `pnpm approve-builds -g` není podporován pro globální instalace na pnpm v11.
 
-### Arch Linux (AUR)
+### oblouk Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Balíček AUR](https://aur.archlinux.org/packages/omniroute-bin) nainstaluje OmniRoute a poskytne uživatelskou službu systemd.
+[Balíček AUR](https://aur.archlinux.org/packages/omniroute-bin) nainstaluje OmniRoute a poskytuje uživatelskou službu systemd.
 
-### Ze zdrojového kódu
+### Ze Zdroje
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Poznámka pro Windows:** Ve výchozím nastavení používá OmniRoute `%APPDATA%\omniroute`, pokud starší adresář `%USERPROFILE%\.omniroute` neexistuje. Nastavením `DATA_DIR` zvolíte jiné umístění datového adresáře.
+> **Windows poznámka:** Ve výchozím nastavení používá OmniRoute `%APPDATA%\omniroute`, když není přítomen starší adresář `%USERPROFILE%\.omniroute`. Nastavte `DATA_DIR` pro výběr jiného umístění datového adresáře.
 
-> **Poznámka:** `npm install` při prvním spuštění automaticky vygeneruje `.env` ze souboru `.env.example`. Následující instalace existující soubor `.env` nepřepíší, takže vlastní úpravy zůstanou zachovány. Chcete-li jej vygenerovat znovu, před opětovným spuštěním odstraňte `.env`.
+> **Poznámka:** `npm install` automaticky generuje `.env` ze `.env.example` při prvním spuštění. Následné instalace nepřepíší existující `.env`, takže přizpůsobení jsou zachována. Chcete-li znovu nasadit, před opětovným spuštěním smažte `.env`.
 
 ### Docker
 
-Kompletní nastavení Dockeru včetně profilů Compose a HTTPS přes Caddy najdete v [průvodci Dockerem](./DOCKER_GUIDE.md).
+Kompletní nastavení Docker včetně profilů Compose a Caddy HTTPS naleznete [v průvodci Docker](./DOCKER_GUIDE.md).
 
 ### Desktopová aplikace (Electron)
 
-OmniRoute obsahuje desktopový obal založený na Electron 41 + electron-builder 26.10. Dostupné skripty (kořenový adresář pracovního prostoru):
+OmniRoute dodává desktop wrapper postavený na Electron 41 + electron-builder 26.10. Dostupné skripty (kořen pracovního prostoru):
 
 ```bash
-npm run electron:dev          # Spustí desktopovou aplikaci s automatickým opětovným načítáním
-npm run electron:build        # Sestaví aplikaci pro aktuální OS (automaticky rozpoznaný)
-npm run electron:build:win    # Instalační program pro Windows (NSIS + přenosná verze)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Provede základní test zabaleného sestavení
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Vydání instalačních programů desktopové aplikace jsou přiložena k vydáním na GitHubu. Podrobný rozbor Electronu (podepisování, most IPC, distribuce) najdete v souboru [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(vytvořeno v pozdější fázi)_.
+Vydání desktopových instalačních programů jsou připojena k vydáním GitHub. Úplné znění Electron deep-dive (podpis, IPC bridge, distribuce) viz [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Bezobslužný server (CI/automatizace)
+### Bezhlavý server (CI/automation)
 
 Pro bezobslužná nastavení (Docker, Kubernetes, CI) použijte:
 
@@ -86,27 +88,27 @@ omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-V kombinaci s proměnnými prostředí (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` atd.) tak můžete spustit instanci OmniRoute plně ovladatelnou pomocí skriptů.
+V kombinaci s env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` atd.) vám to umožní vytvořit instanci OmniRoute plně skriptovatelnou.
 
 ### Možnosti CLI
 
-| Příkaz                  | Popis                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------ |
-| `omniroute`             | Spustí server (`PORT=20128`, API a ovládací panel na stejném portu)                        |
-| `omniroute setup`       | Průvodce úvodním nastavením hesla a prvního poskytovatele v CLI                            |
-| `omniroute doctor`      | Spustí místní kontroly stavu bez spuštění serveru                                          |
-| `omniroute providers`   | Vyhledá, vypíše, ověří a otestuje poskytovatele z CLI                                      |
-| `omniroute config`      | Konfigurace nástrojů CLI — výpis, načtení, nastavení a ověření konfigurací                 |
-| `omniroute status`      | Offline ovládací panel stavu — verze, databáze, nástroje a konfigurace                     |
-| `omniroute logs`        | Průběžně zobrazuje protokoly používání z API (podporuje `--follow`)                        |
-| `omniroute update`      | Vyhledá nebo použije aktualizace OmniRoute                                                 |
-| `omniroute provider`    | Spravuje připojení poskytovatelů — přidání, výpis, odebrání, testování a výchozí nastavení |
-| `omniroute --port 3000` | Nastaví kanonický/API port na 3000                                                         |
-| `omniroute --mcp`       | Spustí server MCP (přenos přes stdio)                                                      |
-| `omniroute --no-open`   | Neotevře automaticky prohlížeč                                                             |
-| `omniroute --help`      | Zobrazí nápovědu                                                                           |
+| Příkaz                  | Popis                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `omniroute`             | Spustit server (`PORT=20128`, API a řídicí panel na stejném portu)           |
+| `omniroute setup`       | Řízený CLI onboarding pro heslo a prvního poskytovatele                      |
+| `omniroute doctor`      | Spusťte místní kontroly stavu bez spuštění serveru                           |
+| `omniroute providers`   | Objevujte, seznamujte, ověřujte a testujte poskytovatele ze CLI              |
+| `omniroute config`      | Konfigurace nástroje CLI — seznam, získání, nastavení, ověření konfigurací   |
+| `omniroute status`      | Řídicí panel stavu offline verze —, DB, nástroje, konfigurace                |
+| `omniroute logs`        | Streamujte protokoly využití ze API (podporuje `--follow`)                   |
+| `omniroute update`      | Zkontrolujte nebo použijte aktualizace OmniRoute                             |
+| `omniroute provider`    | Správa připojení poskytovatelů — přidat, vypsat, odebrat, otestovat, výchozí |
+| `omniroute --port 3000` | Nastavte port canonical/API na 3000                                          |
+| `omniroute --mcp`       | Spustit MCP server (stdio transport)                                         |
+| `omniroute --no-open`   | Neotevírejte automaticky prohlížeč                                           |
+| `omniroute --help`      | Zobrazit nápovědu                                                            |
 
-Bezobslužné nastavení lze skriptovat pomocí příznaků nebo proměnných prostředí:
+Bezhlavé nastavení lze naskriptovat pomocí příznaků nebo proměnných prostředí:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Spusťte místní diagnostiku bez otevření ovládacího panelu:
+Spusťte místní diagnostiku bez otevření řídicího panelu:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Spravujte poskytovatele přes SSH nebo pomocí skriptů bez otevření ovládacího panelu:
+Spravujte poskytovatele ze SSH nebo skriptů bez otevření řídicího panelu:
 
 ```bash
 omniroute providers available
@@ -191,9 +193,9 @@ Podrobnou konfiguraci jednotlivých nástrojů (Claude Code, Codex CLI, Cursor, 
 
 ---
 
-## Nastavení protokolů (MCP + A2A)
+## Nastavení protokolu (MCP + A2A)
 
-### Nastavení MCP (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
 Spusťte transport MCP v režimu stdio:
 
@@ -204,28 +206,32 @@ omniroute --mcp
 Doporučený postup ověření:
 
 ```bash
-# 1. Spusťte server MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Z klienta MCP zavolejte:
-omniroute_get_health        # Mělo by vrátit stav systému
-omniroute_list_combos       # Mělo by vrátit aktivní kombinace
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Nebo spusťte úplnou sadu testů E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Konfigurace klienta MCP
 
-**Claude Code:**
+**Claude kód:**
+
+Claude Kód se připojuje přes HTTP, které `omniroute --mcp` (stdio) nespustí. Transport HTTP je standardně vypnutý: nejprve jej povolte na běžícím serveru. Když je povoleno přihlášení k řídicímu panelu, požadavek bez pověření získá `401`, takže předejte klíč API, který obsahuje `mcp:connect` (nebo `manage`); klíč bez `manage`/`admin` také potřebuje rozsah každého nástroje (viz [rozsahy nástrojů MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Přidejte do nastavení MCP:
+Přidejte do nastavení MCP (stdio, s klíčem, aby měl volající hlavní):
 
 ```json
 {
@@ -233,15 +239,22 @@ Přidejte do nastavení MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Úplná dokumentace MCP:** [README serveru MCP](../../open-sse/mcp-server/README.md) — 110 nástrojů, konfigurace IDE, klienti pro Python/TS/Go.
+Nebo, když je `mcpTransport` `streamable-http` (nastavte jej na `/dashboard/mcp` nebo pomocí `omniroute mcp enable --transport streamable-http`), nasměrujte položku vzdáleného serveru MCP klienta na `http://localhost:20128/api/mcp/stream`.
 
-### Nastavení A2A (protokol Agent-to-Agent)
+Klíč se pohybuje jako `Authorization: Bearer <api-key>` (viz [MCP Server → Vzdálený přístup](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) pro vzdálené hostitele; vzdálený klíč potřebuje `mcp:connect` plus jeho rozsahy read/write ).
+
+**Kompletní dokumentace MCP :** [MCP Server nástroje README](../../open-sse/mcp-server/README.md) — 110, konfigurace IDE, klienti Python/TS/Go. Reference operátora pro nástroje komprese CCR/dedup (značky, předpoklady, rozsahy jednotlivých nástrojů, stránkování vyhledávání, diagnostika): [Compression Engines → Předpoklady / příručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (Protokol Agent-to-Agent)
 
 Ověřte kartu agenta:
 
@@ -249,7 +262,7 @@ Ověřte kartu agenta:
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Odešlete úlohu:
+Odeslat úkol:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Úplná dokumentace A2A:** [README serveru A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, dovednosti, streamování, životní cyklus úloh.
+**Kompletní dokumentace A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, dovednosti, streamování, životní cyklus úkolů.
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Šablona pro Void Linux (xbps-src)
+## Void Linux (xbps-src) šablona
 
-Uživatelé Void Linuxu mohou sestavit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
+Pro uživatele Void Linux můžete vytvořit nativní balíček pomocí `xbps-src`. Uložte tento blok jako `srcpkgs/omniroute/template`:
 
 ```bash
-# Soubor šablony pro „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Pro každé vydání znovu vygenerujte kontrolní součet pomocí:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import CliStatusBadge from "./CliStatusBadge";
 
 import { Button, Card, ManualConfigModal, ModelSelectModal } from "@/shared/components";
@@ -377,7 +378,7 @@ export default function GrokBuildToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium">{tool.name}</h3>
+              <h3 className="text-sm">{tool.name}</h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={null}
@@ -397,8 +398,8 @@ export default function GrokBuildToolCard({
       {isExpanded && (
         <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
           {checking && (
-            <div className="flex items-center gap-2 text-text-muted">
-              <Icon name="progress_activity" className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Grok Build" })}</span>
             </div>
           )}
@@ -621,7 +622,7 @@ export default function GrokBuildToolCard({
 
           {showBackups && (
             <div className="mt-2 rounded-lg border border-border bg-surface p-3">
-              <h4 className="mb-2 flex items-center gap-1 text-xs font-semibold text-text-main">
+              <h4 className="mb-2 flex items-center gap-1 text-xs text-text-main">
                 <Icon name="history" size={14} />
                 {t("configBackups")}
               </h4>

@@ -11,6 +11,7 @@ import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
 import QuotaCardGrid from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/QuotaCardGrid";
 import { buildHealthAccount } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview";
+import { PROVIDER_LABEL } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/constants";
 
 const now = new Date("2099-01-01T00:00:00Z");
 const connections = ["a", "b"].map((id) => ({
@@ -119,4 +120,69 @@ for (const locale of ["en", "zh-CN"]) {
       expect(screen.queryByText(/usage\.health/)).toBeNull();
     });
   }
+}
+
+for (const layout of ["overview", "full", "compact"]) {
+  it(`uses provider display names without changing refresh IDs in ${layout}`, () => {
+    const branded = ["moonshot", "kimi-coding", "custom-api"].map((provider) => ({
+      id: `${provider}-account`,
+      provider,
+      email: `${provider}@example.test`,
+      isActive: true,
+      testStatus: "active",
+    }));
+    const projected = Object.fromEntries(
+      branded.map((connection) => [
+        connection.id,
+        buildHealthAccount(connection, undefined, {}, now.getTime()),
+      ])
+    );
+    const onRefresh = vi.fn();
+    const { container } = render(
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ usage: en.usage, common: en.common }}
+        now={now}
+        timeZone="UTC"
+      >
+        <QuotaCardGrid
+          connections={branded}
+          quotaData={{}}
+          accounts={projected}
+          overview={layout === "overview"}
+          compact={layout === "compact"}
+          loading={{}}
+          errors={{}}
+          lastRefreshedAt={{}}
+          emailsVisible
+          providerLabels={PROVIDER_LABEL}
+          togglingActiveId={null}
+          onRefresh={onRefresh}
+          onOpenCutoff={vi.fn()}
+          onToggleActive={vi.fn()}
+        />
+      </NextIntlClientProvider>
+    );
+
+    if (layout !== "compact") {
+      expect(screen.getByRole("heading", { name: "Kimi", exact: true })).toBeVisible();
+    }
+    for (const [index, connection] of branded.entries()) {
+      if (layout === "overview") {
+        fireEvent.click(container.querySelector(`[data-account="${connection.id}"]`)!);
+      }
+      const card = Array.from(
+        container.querySelectorAll<HTMLElement>('[style*="border-left:"]')
+      ).find((element) => element.textContent?.includes(connection.email))!;
+      expect(
+        within(card).getByText(["Kimi", "Kimi Coding", "custom-api"][index], {
+          exact: true,
+        })
+      ).toBeVisible();
+      if (connection.provider === "moonshot") {
+        fireEvent.click(within(card).getByTitle(en.usage.forceRefresh));
+      }
+    }
+    expect(onRefresh).toHaveBeenCalledExactlyOnceWith("moonshot-account", "moonshot");
+  });
 }

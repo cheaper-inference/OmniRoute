@@ -8,17 +8,20 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## உருவாக்கச் சூழல் அமைப்பு
+## மேம்பாட்டு அமைப்பு
 
 ### முன்தேவைகள்
 
-- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுவது: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுகிறது: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ பயனர்கள் (Node 24+):** `npm install`-க்குப் பிறகு, நேட்டிவ் தொகுதிகள் நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:
-> `node -e "require('better-sqlite3')"`. இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,
-> `npm approve-scripts better-sqlite3 && npm install` என்பதை இயக்கவும். மேலும் அறிய
-> [சிக்கல் தீர்த்தல்](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) என்பதைப் பார்க்கவும்.
+> **Node 24 உடன் Windows:** தற்போதைய 24 LTS patch வெளியீட்டை (குறைந்தது 24.20.0) பயன்படுத்தவும்.  
+> முந்தைய வெளியீடுகளில் `--test-force-exit` செயல்முறையை மூடிய பிறகு, வெற்றிகரமான சோதனைகளுக்குப் பின்னரும் செயல்முறை நிறுத்தப்படலாம். Node இன் [Windows libuv திருத்தம்](https://github.com/nodejs/node/pull/61999) இந்த runtime செயலிழப்பைத் தீர்க்கிறது; சோதனை assertions மற்றும் runner exit checks ஆகியவை இயக்கப்பட்ட நிலையிலேயே இருக்கட்டும்.
+
+> **npm v11+ பயனர்கள் (Node 24+):** `npm install` இயக்கிய பிறகு, native modules நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:  
+> `node -e "require('better-sqlite3')"` . இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,  
+> `npm approve-scripts better-sqlite3 && npm install` இயக்கவும்.  
+> [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) பார்க்கவும்.
 
 - **Git**
 
@@ -33,91 +36,86 @@ npm install
 ### சூழல் மாறிகள்
 
 ```bash
-# வார்ப்புருவிலிருந்து உங்கள் .env கோப்பை உருவாக்கவும்
+# உங்கள் .env கோப்பை வார்ப்புருவிலிருந்து உருவாக்கவும்
 cp .env.example .env
 
-# தேவையான இரகசியங்களை உருவாக்கவும்
+# தேவையான ரகசியங்களை உருவாக்கவும்
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-உருவாக்கத்திற்கான முக்கிய மாறிகள்:
+மேம்பாட்டிற்கான முக்கிய மாறிகள்:
 
-| மாறி                   | இயல்புநிலை உருவாக்க மதிப்பு | விளக்கம்                       |
-| ---------------------- | --------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                     | சேவையகப் போர்ட்                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | முன்பக்கத்திற்கான அடிப்படை URL |
-| `JWT_SECRET`           | (மேலே உருவாக்கவும்)         | JWT கையொப்ப இரகசியம்           |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | முதல் உள்நுழைவுக் கடவுச்சொல்   |
-| `APP_LOG_LEVEL`        | `info`                      | பதிவேட்டின் விரிவுநிலை         |
+| Variable               | Development Default      | Description                 |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | சேவையகப் போர்ட்             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend-க்கான அடிப்படை URL |
+| `JWT_SECRET`           | (மேலே உருவாக்கவும்)      | JWT கையொப்பமிடும் ரகசியம்   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | முதல் உள்நுழைவு கடவுச்சொல்  |
+| `APP_LOG_LEVEL`        | `info`                   | பதிவு விரிவாக்க நிலை        |
 
-### கட்டுப்பாட்டுப் பலகை அமைப்புகள்
+### Dashboard அமைப்புகள்
 
-சூழல் மாறிகள் வழியாகவும் உள்ளமைக்கக்கூடிய அம்சங்களுக்கான UI நிலைமாற்றிகளை கட்டுப்பாட்டுப் பலகை வழங்குகிறது:
+சூழல் மாறிகள் வழியாகவும் கட்டமைக்கக்கூடிய அம்சங்களுக்கான UI மாற்றிகளை dashboard வழங்குகிறது:
 
-| அமைவு இருப்பிடம்        | நிலைமாற்றி               | விளக்கம்                                           |
-| ----------------------- | ------------------------ | -------------------------------------------------- |
-| அமைப்புகள் → மேம்பட்டவை | பிழைத்திருத்தப் பயன்முறை | பிழைத்திருத்தக் கோரிக்கைப் பதிவுகளை இயக்குதல் (UI) |
-| அமைப்புகள் → பொது       | பக்கப்பட்டைத் தெரிவுநிலை | பக்கப்பட்டைப் பிரிவுகளைக் காட்டுதல்/மறைத்தல்       |
+| Setting Location    | Toggle             | Description                              |
+| ------------------- | ------------------ | ---------------------------------------- |
+| Settings → Advanced | Debug Mode         | debug request பதிவுகளை இயக்கவும் (UI)    |
+| Settings → General  | Sidebar Visibility | sidebar பிரிவுகளைக் காட்டவும்/மறைக்கவும் |
 
-இந்த அமைப்புகள் தரவுத்தளத்தில் சேமிக்கப்பட்டு, மறுதொடக்கங்களுக்குப் பிறகும் நீடிக்கும்; அமைக்கப்பட்டிருந்தால் சூழல் மாறிகளின் இயல்புநிலைகளை மீறும்.
+இந்த அமைப்புகள் database-ல் சேமிக்கப்பட்டு, மறுதொடக்கங்களுக்குப் பிறகும் நிலைத்திருக்கும்; அமைக்கப்பட்டபோது env var இயல்புநிலைகளை மீறுகின்றன.
 
 ### உள்ளூரில் இயக்குதல்
 
 ```bash
-# உருவாக்கப் பயன்முறை (உடனடி மறுஏற்றம்)
+# மேம்பாட்டு முறை (hot reload)
 npm run dev
 
-# தயாரிப்புக் கட்டமைப்பு
+# Production build
 npm run build    # next build → .build/next/ பின்னர் assembleStandalone → dist/
 npm run start
 
-# பங்களிப்பாளர் மாற்றங்களுக்கான வேகமான பின்தளம்/API-மட்டும் தொகுத்தல்
+# பங்களிப்பாளர்களின் மாற்றங்களுக்கான விரைவான backend/API-only compile
 npm run build:contributor
 
-# வெளியீட்டுக் கட்டமைப்பு (தூய மறுகட்டமைப்பு + HEAD காவல் குறி — பயன்படுத்தலுக்குத் தேவை)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA-ஐ எழுதுகிறது
+# Release build (சுத்தமான rebuild + HEAD sentinel — deploy-க்கு தேவை)
+npm run build:release   # rm -rf .build dist பின்னர் build + dist/BUILD_SHA எழுதுகிறது
 
-# பொதுவான போர்ட் உள்ளமைவு
+# பொதுவான போர்ட் கட்டமைப்பு
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-பங்களிப்பாளர் கட்டமைப்பு தொகுத்தல்-மட்டும் சரிபார்ப்பைச் செய்கிறது: இது தனித்தியங்கும்
-விநியோகத்தை ஒன்றுசேர்க்காது அல்லது விருப்பமான நேட்டிவ் தொகுப்பாக்கச் சொத்துகளை உருவாக்காது. அனுப்பக்கூடிய தொகுப்பைச்
-சரிபார்க்க வேண்டியபோது வழக்கமான தயாரிப்புக் கட்டமைப்பைப் பயன்படுத்தவும்.
+பங்களிப்பாளர் build compile-only சரிபார்ப்பைச் செய்கிறது: இது standalone distribution-ஐ assemble செய்யாது அல்லது விருப்ப native packaging assets-ஐ build செய்யாது. deploy செய்யக்கூடிய bundle-ஐச் சரிபார்க்க வேண்டும்போது வழக்கமான production build-ஐப் பயன்படுத்தவும்.
 
-### கட்டமைப்பு வெளியீட்டு அமைப்பு
+### Build வெளியீட்டு அமைப்பு
 
-| கோப்பகம்  | உள்ளடக்கங்கள்                                                                         | கண்காணிக்கப்படுவது |
-| --------- | ------------------------------------------------------------------------------------- | ------------------ |
-| `src/`    | பயன்பாட்டு மூலக்குறியீடு (TypeScript / TSX)                                           | ஆம்                |
-| `.build/` | இடைநிலை வெளியீடுகள் — `next build` வெளியீடு (gitignored, `distDir = .build/next`)     | இல்லை              |
-| `dist/`   | அனுப்பக்கூடிய தொகுப்பு — `assembleStandalone` மூலம் ஒன்றுசேர்க்கப்பட்டது (gitignored) | இல்லை              |
+| Directory | Contents                                                                  | Tracked |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                     | ஆம்     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | இல்லை   |
+| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | இல்லை   |
 
-கட்டமைப்புச் செயல்முறை ஒரே சுற்றில் நடைபெறுகிறது:
+Build pipeline ஒரே கட்டமாகும்:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js வெளியீடு)
-  └─ assembleStandalone()                 (தனித்தியங்கும் வெளியீடு + static + public + நேட்டிவ் சொத்துகளை நகலெடுக்கிறது)
-       └─ வெளியீடு: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (standalone + static + public + native assets-ஐ நகலெடுக்கிறது)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` கூடுதலாக முதலில் இரண்டு கோப்பகங்களையும் சுத்தம் செய்து,
-பயன்படுத்தல் ஒருமைப்பாட்டுக் காவல் குறியாக `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) என்பதை எழுதுகிறது.
+`npm run build:release` கூடுதலாக முதலில் இரு directories-ஐயும் சுத்தம் செய்து, deploy integrity sentinel ஆக  
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) எழுதுகிறது.
 
-`npm run build:contributor` பின்தளம்-மட்டும் கட்டமைப்புச் சுயவிவரத்தைப் பயன்படுத்துகிறது. கட்டமைக்கும்போது இது
-கட்டுப்பாட்டுப் பலகை UI கோப்புகளைத் தற்காலிகமாக போலியாக்கி, API வழித்தடக் கையாளிகளைத் தக்கவைத்து, கட்டமைப்புக்குப்
-பிறகு அசல் கோப்புகளை மீட்டமைக்கிறது. கட்டுப்பாட்டுப் பலகை UI-ஐப் பாதிக்கும் மாற்றங்களுக்கோ அல்லது முழுமையான
-வெளியீட்டுச் சரிபார்ப்புக்கோ `npm run build` என்பதைப் பயன்படுத்தவும்; பங்களிப்பாளர் சுயவிவரம் வெளியீட்டுக் கட்டமைப்புக்கு மாற்றாகாது.
+`npm run build:contributor` backend-only build profile-ஐப் பயன்படுத்துகிறது. Build செய்யும்போது dashboard UI கோப்புகளைத் தற்காலிகமாக stub செய்து, API route handlers-ஐ வைத்திருந்து, build முடிந்ததும் அசல் கோப்புகளை மீட்டமைக்கிறது. Dashboard UI-ஐ பாதிக்கும் மாற்றங்களுக்கு அல்லது முழுமையான release validation-க்கு `npm run build` பயன்படுத்தவும்; contributor profile, release build-க்கு மாற்றாகாது.
 
-> **VPS பயன்படுத்தல் குறிப்பு:** தொலைநிலைப் படக் கோப்பகம் `/usr/lib/node_modules/omniroute/app/`
-> மாறாமல் உள்ளது. பயன்படுத்தல் திறன்கள் `dist/`-இன் உள்ளடக்கங்களை அதில் rsync செய்கின்றன.
-> களஞ்சியத்திற்குள் உள்ள கட்டமைப்பு வெளியீட்டுப் பாதை மட்டுமே மாற்றப்பட்டுள்ளது (`app/` → `dist/`).
+> **VPS deploy குறிப்பு:** remote image directory `/usr/lib/node_modules/omniroute/app/`  
+> மாற்றமின்றி உள்ளது. deploy skills, `dist/` உள்ளடக்கங்களை அதில் rsync செய்கின்றன.  
+> repository-க்குள் உள்ள build output path மட்டும் மாற்றப்பட்டது (`app/` → `dist/`).
 
-இயல்புநிலை URL-கள்:
+இயல்புநிலை URLs:
 
-- **கட்டுப்பாட்டுப் பலகை**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -293,67 +291,67 @@ production build ஆகியவை CI-யின் பொறுப்பு —
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # டாஷ்போர்டு பக்கங்கள் (23 பிரிவுகள்)
-│   ├── api/                # API வழித்தடங்கள் (51 கோப்பகங்கள்)
-│   └── login/              # அங்கீகாரப் பக்கங்கள் (.tsx)
-├── domain/                 # கொள்கை இயந்திரம் (policyEngine, comboResolver, costRules போன்றவை)
-├── lib/                    # முதன்மை வணிகத் தர்க்கம் (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 நெறிமுறைச் சேவையகம்
-│   ├── acp/                # Agent Communication Protocol பதிவகம்
-│   ├── compliance/         # இணக்கக் கொள்கை இயந்திரம்
-│   ├── db/                 # SQLite களத் தொகுதிகள் + 130 இடமாற்றங்கள்
-│   ├── memory/             # நிலையான உரையாடல் நினைவகம்
-│   ├── oauth/              # OAuth வழங்குநர்கள், சேவைகள் மற்றும் பயன்பாட்டுக் கருவிகள்
-│   ├── skills/             # விரிவாக்கக்கூடிய திறன் கட்டமைப்பு
-│   ├── usage/              # பயன்பாட்டுக் கண்காணிப்பு மற்றும் செலவுக் கணக்கீடு
-│   └── localDb.ts          # மறு-ஏற்றுமதி அடுக்கு மட்டுமே — இங்கே ஒருபோதும் தர்க்கத்தைச் சேர்க்க வேண்டாம்
-├── middleware/              # கோரிக்கை இடைநிரல் (promptInjectionGuard)
-├── mitm/                   # MITM பதிலாள் (சான்றிதழ், DNS, இலக்கு வழிப்படுத்தல்)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React கூறுகள் (.tsx)
-│   ├── constants/          # வழங்குநர் வரையறைகள் (329), MCP நோக்கங்கள், 20 வழிப்படுத்தல் உத்திகள்
-│   ├── utils/              # சுற்று முறிப்பான், தூய்மையாக்கி, அங்கீகார உதவிகள்
-│   └── validation/         # Zod v4 திட்டவடிவங்கள்
-└── sse/                    # SSE பதிலாள் செயலாக்கத் தொடர்
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse பணியிடம்
-├── executors/              # 150 செயலாக்கி தொகுதிகள் (செயலாக்கி வகுப்புகள் + ஒவ்வொரு வழங்குநருக்குமான உதவிகள்)
-├── handlers/               # 11 கோரிக்கைக் கையாளிகள் (அரட்டை, பதில்கள், உட்பொதிவுகள், படங்கள் போன்றவை)
-├── mcp-server/             # MCP சேவையகம் (110 தனித்துவமான கருவிகள், 3 பரிமாற்ற முறைகள், 33 நோக்கங்கள்)
-├── services/               # 178 உயர்நிலைச் சேவைகள் (combo, autoCombo, rateLimitManager போன்றவை)
-├── translator/             # வடிவமைப்பு மொழிபெயர்ப்பிகள் (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API உருமாற்றி
-└── utils/                  # 22 பயன்பாட்டுக் கருவித் தொகுதிகள் (தரவு ஓட்டம், TLS, பதிலாள், பதிவாக்கம்)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron மேசைக்கணினிச் செயலி (பல தளங்களுக்கு ஏற்றது)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js சோதனை இயக்கி (1,574 சோதனைக் கோப்புகள்)
-├── integration/            # ஒருங்கிணைப்புச் சோதனைகள்
-├── e2e/                    # Playwright சோதனைகள்
-├── security/               # பாதுகாப்புச் சோதனைகள்
-├── translator/             # மொழிபெயர்ப்பிக்கான குறிப்பிட்ட சோதனைகள்
-└── load/                   # சுமைச் சோதனைகள்
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # கட்டமைப்புத் தீர்மானப் பதிவுகள்
-├── architecture/            # அமைப்புக் கட்டமைப்பு மற்றும் மீட்சித்திறன்
-├── comparison/              # OmniRoute மற்றும் மாற்றுகளின் ஒப்பீடு
-├── compression/             # சுருக்க வழிகாட்டிகள் மற்றும் விதிகள்
-├── dev/                     # உருவாக்க வழிகாட்டிகள்
-├── diagrams/                # கட்டமைப்பு வரைபடங்கள்
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # பயனர் வழிகாட்டி, Docker, அமைப்பு, சிக்கல் தீர்த்தல்
-├── i18n/                    # பன்னாட்டுமயமாக்கப்பட்ட README மொழிபெயர்ப்புகள்
-├── marketing/               # சந்தைப்படுத்தல் உள்ளடக்கங்கள்
-├── ops/                     # நிறுவல், பதிலாள், சோதனை உள்ளடக்கம், வெளியீடுகள்
-├── providers/               # வழங்குநர் சார்ந்த ஆவணங்கள்
-├── reference/               # API குறிப்பு, சூழல் மாறிகள், CLI கருவிகள், இலவச அடுக்குகள்
-├── releases/                # வெளியீட்டுக் குறிப்புகள்
-├── routing/                 # தானியங்கு-சேர்க்கை இயந்திரம், காரணவியல் மறுஇயக்கம்
-├── screenshots/             # டாஷ்போர்டு திரைப்பிடிப்புகள்
-├── security/                # பாதுகாப்புத் தடுப்புகள், இணக்கம், மறைநிலை, டோக்கன்கள்
-└── specs/                   # வடிவமைப்பு விவரக்குறிப்புகள்
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

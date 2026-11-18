@@ -13,19 +13,19 @@ OmniRoute는 모든 API 요청을 제어하는 경로 인식 권한 부여 파�
 
 > 출처: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## 두 가지 인증 방식
+## 두 가지 인증 모드
 
-### 1. API 키(Bearer)
+### 1. API 키 (Bearer)
 
-OpenAI/Anthropic/Gemini 호환 클라이언트 API와 키에 `manage` 범위가 있는 경우 일부 관리 라우트에 사용됩니다.
+OpenAI/Anthropic/Gemini 호환 클라이언트 API와 키에 `manage` 스코프가 있는 일부 관리 라우트에서 사용됩니다.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`의 `isValidApiKey()` / `extractApiKey()`에서 검증되며, `src/shared/utils/apiAuth.ts`를 통해 다시 내보내집니다. 검증기는 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 환경 변수도 영구적인 패스스루 키로 허용합니다(이슈 #1350).
+`src/sse/services/auth.ts`의 `isValidApiKey()` / `extractApiKey()`에서 검증되며, `src/shared/utils/apiAuth.ts`를 통해 다시 내보내집니다. 검증기는 영구 패스스루 키로 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 환경 변수도 허용합니다(이슈 #1350).
 
-### 2. 대시보드 세션(auth_token 쿠키)
+### 2. 대시보드 세션 (auth_token 쿠키)
 
 대시보드 페이지와 관리자 작업에 사용됩니다.
 
@@ -33,106 +33,123 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-쿠키는 JWT 검증에 성공하고 **동시에** `authenticated: true`를 포함하는 경우에만 세션으로 인정됩니다
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). 쿠키를
-사용하는 모든 구성 요소(대시보드 라우트 가드(`isDashboardSessionAuthenticated()`), 인증 파이프라인 갱신, WebSocket 핸드셰이크, 라이브
+JWT가 검증되고 **`authenticated: true`**를 포함하는 경우에만 쿠키가 세션으로 간주됩니다
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). 쿠키를 사용하는 모든 구성 요소(대시보드 라우트 가드(`isDashboardSessionAuthenticated()`), authz 파이프라인 새로 고침, WebSocket 핸드셰이크, 라이브
 서버, `/api/settings/require-login`, `/api/auth/status`)는 이 헬퍼를 거칩니다.
-`JWT_SECRET`으로 서명된 다른 JWT도 존재합니다. Cursor CLI 패스스루는
-키 보유자를 위해 `iss "omniroute" / aud "cursor-cli"` 토큰을 발급하지만, 이러한 토큰은 세션으로
-사용되지 않습니다(#13298).
+`JWT_SECRET`으로 서명된 다른 JWT도 존재합니다. Cursor CLI 패스스루는 키 보유자를 위해
+`iss "omniroute" / aud "cursor-cli"` 토큰을 발급하지만, 이러한 토큰은 세션으로 사용되지 않습니다
+(#13298).
 
-`src/shared/utils/apiAuth.ts`의 `isDashboardSessionAuthenticated()`에서 검증됩니다. 파이프라인은 30일의 유효 기간 중 남은 기간이 7일 미만이면 JWT를 자동으로 갱신합니다.
+`src/shared/utils/apiAuth.ts`의 `isDashboardSessionAuthenticated()`에서 검증됩니다. 파이프라인은 30일 수명 중 남은 기간이 7일 미만이면 JWT를 자동으로 새로 고칩니다.
 
-모든 발급자가 `mintDashboardSessionToken`을 거치며 발급 시간 `iat`와 ID `jti`를 포함하고, 검증기가 두 가지 설정을 확인하므로 세션은 30일이 지나기 전에도 종료될 수 있습니다. 첫 번째 설정인 `sessionsValidAfter`는 비밀번호 변경 시 설정되어 그 전에 발급된 모든 세션이 더 이상 검증되지 않도록 합니다(비밀번호를 변경한 브라우저에는 새 쿠키가 발급됩니다). 두 번째 설정인 `revokedDashboardSessions`에는 `POST /api/auth/logout`이 로그아웃한 세션의 `jti`를 추가합니다. 이전 릴리스에서 발급된 세션에는 두 클레임이 모두 없으며, 최초 비밀번호 변경 전까지 유효하게 유지됩니다. 설정을 읽을 수 없는 경우 세션을 신뢰하지 않습니다.
+모든 발급자가 `mintDashboardSessionToken`(발급 시간 `iat` 및 ID `jti`)을 거치고 검증기가 두 가지 설정을 확인하므로, 세션은 30일이 지나기 전에 종료될 수도 있습니다. 비밀번호 변경으로 설정되는 `sessionsValidAfter`는 해당 시점 이전에 발급된 모든 세션의 검증을 중지하며(비밀번호를 변경한 브라우저에는 새 쿠키가 발급됨), `revokedDashboardSessions`에는 `POST /api/auth/logout`이 로그아웃된 세션의 `jti`를 추가합니다. 이전 릴리스에서 발급된 세션에는 두 클레임이 모두 없으며 최초의 비밀번호 변경 시점까지 유효합니다. 설정을 읽을 수 없는 경우 세션을 신뢰하지 않습니다.
 
-일부 관리 라우트는 두 방식 **중 하나**를 허용합니다. 즉, 쿠키 또는 API 키에 `manage`(또는 `admin`) 범위가 있는 경우 `Bearer <key>`를 사용할 수 있습니다. 이를 통해 v3.8에 추가된 "API 호출을 통한 구성" 워크플로를 사용할 수 있습니다.
+일부 관리 라우트는 두 모드 중 하나를 허용합니다. API 키에 `manage` (또는 `admin`) 스코프가 있는 경우 쿠키 또는 `Bearer <key>`를 사용할 수 있습니다. 이는 v3.8에서 추가된 "API 호출을 통한 구성 가능" 워크플로를 활성화합니다.
 
-#### 선택적 OIDC 로그인 게이트(#6973)
+#### 선택적 OIDC 로그인 게이트 (#6973)
 
-대시보드 관리자 로그인은 기본 비밀번호 로그인과 함께 **옵트인 방식의** OIDC(OpenID Connect) 흐름도
-지원합니다. 비밀번호 로그인은 제거되지 않으며, OIDC가 이를 보완할 뿐입니다.
+대시보드 관리자 로그인은 기본 비밀번호 로그인과 함께 **옵트인** OIDC(OpenID Connect) 플로우도 지원합니다.
+비밀번호 로그인은 제거되지 않고 보완됩니다.
 
-- `settings.oidcEnabled === true`이고 **동시에** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret`가 모두 구성된 경우에만 활성화됩니다(설정 → 인증).
+- `settings.oidcEnabled === true` **및** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret`이 모두 구성된 경우에만 활성화됩니다(설정 → 인증).
   그렇지 않으면 `GET /api/auth/oidc/login`은 `400`을 반환합니다.
-- `GET /api/auth/oidc/login`은 발급자의
-  `/.well-known/openid-configuration`에서 `authorization_endpoint`를 검색하고
-  (실패하면 `<issuer>/authorize`로 대체), 수신 요청을 기반으로 리디렉션 URI를
-  구성하며(`x-forwarded-proto` 인식), 무작위 `state`를 `httpOnly`
-  `oidc_state` 쿠키에 저장한 뒤 IdP로 리디렉션합니다.
-- `GET /api/auth/oidc/callback`은 `state`를 검증하고, 인증 코드를 교환하며,
-  발급자의 JWKS를 통해 ID 토큰의 서명을 검증합니다
-  (`jose`의 `createRemoteJWKSet`, JWKS URI별로 캐시됨). 이때 `issuer`/`audience`
-  검사도 수행합니다. 대시보드 접근을 허용하려면 비어 있지 않은
-  `oidcAllowedSubjects` 목록이나 `oidcAdmissionClaim` 정책 또는 둘 다 필요합니다.
-  주체 목록은 `sub` 또는 `email`과 일치 여부를 확인하며,
-  `email_verified === true`인 경우에만 `email`을 사용합니다. 선택적 클레임 정책은
-  점으로 구분된 ID 토큰 클레임 경로(예: `realm_access.roles`)와 허용되는 값의
-  배열을 사용합니다. 확인된 클레임은 문자열 배열이어야 하며, 허용되는 값을
-  하나 이상 포함해야 합니다. 두 정책이 모두 구성된 경우에는 두 정책을 모두
-  통과해야 합니다. 클레임이 없거나 형식이 잘못된 경우 접근을 거부하며, 어느
-  정책도 없으면 콜백이 로그인을 거부합니다(`not_configured`). 기존의 주체 전용
-  구성은 변경 없이 계속 작동합니다.
-- Keycloak은 일반적으로 영역 역할을 ID 토큰이 아니라 액세스 토큰에 매핑합니다.
-  영역 역할 `admin`을 요구하려면 이 클라이언트의 **ID 토큰**에
-  `realm_access.roles`를 포함하는 프로토콜 매퍼를 구성한 다음,
-  `oidcAdmissionClaim`을 `{ "path": "realm_access.roles", "values": ["admin"] }`로
-  설정하십시오. 역할 전용 접근 허용을 활성화하기 전에 이 클라이언트의 실제
-  ID 토큰 클레임을 확인하십시오. 애플리케이션은 액세스 토큰의 역할을 읽지
-  않습니다. IdP 측 토큰 거부는 이 애플리케이션 측 검사를 보완할 수 있지만
-  대체하지는 못합니다.
-- 성공하면 비밀번호 로그인이 발급하는 것과 **완전히 동일한** 30일짜리
-  `auth_token` JWT를 발급하므로(`src/app/api/auth/login/route.ts`), 나머지
-  대시보드 세션 파이프라인(자동 새로 고침, 쿠키 플래그)은 변경되지 않습니다.
-  OIDC는 쿠키가 발급되는 방식만 대체할 뿐, 쿠키가 부여하는 권한은 변경하지
-  않습니다. IdP 역할/그룹을 변경해도 기존 OmniRoute 세션은 무효화되지 않으며,
-  로그아웃, 비밀번호 변경 또는 세션 만료가 계속 세션 수명을 결정합니다.
+- `GET /api/auth/oidc/login`은 issuer의 `/.well-known/openid-configuration`에서
+  `authorization_endpoint`를 검색하고(실패하면 `<issuer>/authorize`로 대체), 수신 요청에서
+  리디렉션 URI를 구성하며(`x-forwarded-proto`를 인식), 무작위 `state`를
+  `httpOnly` `oidc_state` 쿠키에 저장한 뒤 IdP로 리디렉션합니다.
+- `GET /api/auth/oidc/callback`은 `state`를 검증하고, authorization code를 교환하며,
+  issuer의 JWKS를 통해 ID 토큰의 서명을 검증합니다
+  (`jose`의 `createRemoteJWKSet`, JWKS URI별 캐시 사용). 이때 `issuer`/`audience`도
+  확인합니다. 대시보드 접근을 허용하려면 비어 있지 않은 `oidcAllowedSubjects` 목록,
+  `oidcAdmissionClaim` 정책 또는 둘 다 필요합니다. subject 목록은
+  `email_verified === true`인 경우에만 `sub` 또는 `email`과 일치합니다. 선택적 claim 정책은
+  점으로 구분된 ID 토큰 claim 경로(예: `realm_access.roles`)와 허용 값의 배열을 지정합니다.
+  확인된 claim은 문자열 배열이어야 하며, 허용된 값 중 하나 이상을 포함해야 합니다. 두 정책이
+  모두 구성된 경우 둘 다 통과해야 합니다. 누락되었거나 잘못된 claim은 안전한 거부 방식으로
+  처리되며, 어느 정책도 없으면 callback은 로그인을 거부합니다(`not_configured`).
+  기존 subject 전용 구성은 변경 없이 계속 작동합니다.
+- Keycloak은 일반적으로 realm 역할을 ID 토큰이 아닌 access token에 매핑합니다. realm 역할
+  `admin`을 요구하려면 이 클라이언트에 대한 protocol mapper를 구성하여
+  `realm_access.roles`를 **ID 토큰**에 포함한 다음, `oidcAdmissionClaim`을
+  `{ "path": "realm_access.roles", "values": ["admin"] }`으로 설정합니다.
+  역할 전용 접근 허용을 활성화하기 전에 이 클라이언트의 실제 ID 토큰 claim을 확인해야
+  합니다. 애플리케이션은 access token의 역할을 읽지 않습니다. IdP 측 토큰 거부를
+  추가로 사용할 수는 있지만, 애플리케이션 측 검사를 대체하지는 않습니다.
+- 성공하면 비밀번호 로그인에서 발급하는 **정확히 동일한** 30일 유효 기간의
+  `auth_token` JWT(`src/app/api/auth/login/route.ts`)를 발급하므로, 나머지 대시보드
+  세션 처리 파이프라인(자동 갱신, 쿠키 플래그)은 변경되지 않습니다 —
+  OIDC는 쿠키가 발급되는 방식만 대체할 뿐, 쿠키가 부여하는 권한은 변경하지 않습니다.
+  IdP 역할/그룹의 변경은 기존 OmniRoute 세션을 무효화하지 않으며, 로그아웃, 비밀번호
+  변경 또는 세션 만료가 계속해서 세션 수명을 결정합니다.
 - 모든 `oidc*` 설정(`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
   `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`)은
-  `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`)에 포함됩니다.
-  요청 본문에서 관리 비밀번호를 `currentPassword`로 전달하지 않으면
-  `PATCH /api/settings`는 `400 PASSWORD_REQUIRED`로 응답합니다
-  (비밀번호가 틀리면 `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin`은
-  비밀번호 _로그인_ (`POST /api/auth/login`)을 거부하지만 저장된 비밀번호
-  해시는 유지하며, 재인증에서도 계속 `currentPassword`를 이 해시와
-  대조합니다.
+  `SECURITY_IMPACTING_SETTINGS_KEYS`에 포함됩니다
+  (`src/shared/constants/securityImpactingSettings.ts`). 따라서
+  `PATCH /api/settings`는 본문에 관리 비밀번호가 `currentPassword`로 포함되지 않으면
+  `400 PASSWORD_REQUIRED`를 반환하며, 비밀번호가 틀리면 `401 PASSWORD_MISMATCH`를
+  반환합니다. `oidcDisablePasswordLogin`은 비밀번호 _로그인_(`POST /api/auth/login`)을
+  거부하지만 저장된 비밀번호 해시는 유지하며, 재인증 시에도 `currentPassword`를 해당
+  해시와 비교합니다.
 - `corsOrigins`와 `bruteForceProtection`도 `SECURITY_IMPACTING_SETTINGS_KEYS`에
-  포함됩니다. 둘 중 하나를 완화하면 로그인 방어가 약해지므로 동일하게
-  `currentPassword`를 사용한 재인증이 필요하며(보안 탭에서 입력 요청),
-  JSON 가져오기에서는 이 설정들이 제외됩니다.
-- 모든 보안 정책 키, 즉 `SECURITY_IMPACTING_SETTINGS_KEYS` 항목, 모든
-  `oidc*` 키 및 대시보드 세션 상태는 `PATCH /api/settings`에서 **운영자 전용**입니다.
-  `manage` 범위의 API 키 또는 `oma_` 액세스 토큰은 올바른 `currentPassword`를
-  전송하더라도 `403`으로 거부되며, 이 거부는 `reason: OPERATOR_REQUIRED`와
-  함께 `settings.update_failed`로 감사 로그에 기록됩니다
+  포함됩니다. 둘 중 하나를 완화하면 로그인 방어 기능이 약화되므로 동일한
+  `currentPassword` 재인증이 필요합니다(보안 탭에서 요청). JSON 가져오기에서는 해당
+  설정이 제거됩니다.
+- 모든 보안 정책 키 — `SECURITY_IMPACTING_SETTINGS_KEYS` 항목, 모든 `oidc*` 키 및
+  대시보드 세션 상태 — 는 `PATCH /api/settings`에서 **운영자 전용**입니다.
+  관리 범위의 API 키 또는 `oma_` 액세스 토큰은 올바른 `currentPassword`를 함께 보내더라도
+  `403`으로 거부되며, 이 거부는 `reason: OPERATOR_REQUIRED`를 포함한
+  `settings.update_failed`로 감사 기록됩니다
   (`src/lib/api/operatorCredential.ts`의 `requireOperatorCredential()`).
-  일반 설정(테마, 표시 환경설정)은 `manage` 키 또는 `admin` 액세스 토큰으로
-  계속 수정할 수 있습니다. `/api/settings` 자체 및
-  `/api/settings/require-login`의 모든 변경에는 `admin` 액세스 토큰 범위도
-  필요합니다(`src/server/authz/accessScopes.ts`의 `ADMIN_MUTATION_EXACT_PATHS`,
-  정확한 경로 일치). `GET`에는 계속 `read`가 필요하며, 그 밖의
-  `/api/settings/*` 하위 경로(프록시, 콤보 기본값, 모델 별칭, 압축, 삭제 등)는
-  메서드에서 추론된 `write` 범위를 계속 사용합니다.
-- `POST /api/settings/import-json`은 해당 재인증을 건너뛰므로 데이터를 쓰기 전에
-  `IMPORT_STRIPPED_SETTINGS_KEYS`(동일 파일)의 모든 키를 제거합니다. 여기에는
-  비밀번호와 `currentPassword`, 모든 `SECURITY_IMPACTING_SETTINGS_KEYS` 항목,
-  대시보드 세션 상태(`sessionsValidAfter`, `revokedDashboardSessions`)가
-  포함됩니다. 따라서 이전 백업을 가져오더라도 비밀번호 변경이나 로그아웃으로
-  이미 종료된 세션이 다시 활성화되지 않습니다.
+  일반 설정(테마, 표시 환경설정)은 `manage` 키 또는 `admin` 액세스 토큰으로 계속
+  수정할 수 있습니다. `/api/settings` 자체 및 `/api/settings/require-login`에 대한
+  모든 변경에는 `admin` 액세스 토큰 범위도 필요합니다
+  (`src/server/authz/accessScopes.ts`의 `ADMIN_MUTATION_EXACT_PATHS`, 정확한 경로 일치).
+  `GET`은 계속 `read` 범위를 사용하며, 기타 `/api/settings/*` 하위 경로
+  (프록시, combo 기본값, 모델 별칭, 압축, 정리 등)는 메서드에서 추론되는 `write` 범위를
+  유지합니다.
+- `POST /api/settings/import-json`은 해당 재인증을 건너뛰므로, 저장하기 전에
+  `IMPORT_STRIPPED_SETTINGS_KEYS`(동일한 파일)에 포함된 모든 키를 제거합니다.
+  여기에는 비밀번호와 `currentPassword`, 모든 `SECURITY_IMPACTING_SETTINGS_KEYS` 항목,
+  그리고 대시보드 세션 상태(`sessionsValidAfter`, `revokedDashboardSessions`)가
+  포함됩니다. 따라서 이전 백업을 가져와도 비밀번호 변경이나 로그아웃으로 이미 종료된
+  세션을 되살릴 수 없습니다.
 
-## 라우트 클래스
+#### 선택적 TOTP 2단계 로그인 (#16619)
 
-`src/server/authz/types.ts`는 세 가지 클래스를 정의합니다. 결정론적으로 분류할 수 없는 라우트는 모두 `MANAGEMENT`로 대체됩니다.
+설정 → 보안에서 등록하며, 운영자가 활성화하기 전까지는 꺼져 있습니다
+(`src/server/auth/dashboardMfa.ts`).
 
-| Class        | Description                                                                                                                                      | Auth required                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `PUBLIC`     | 명시적으로 안전한 라우트 — 로그인, 로그아웃, 상태, 초기화, 헬스 체크, 온보딩 부트스트랩.                                                         | 없음                                                           |
-| `CLIENT_API` | 모델 서빙 엔드포인트 — `/api/v1/*`, `/api/v1beta/*`, 그리고 별칭 `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | 유효한 `REQUIRE_API_KEY` 기능 플래그가 활성화된 경우 Bearer 키 |
-| `MANAGEMENT` | 대시보드 페이지, 설정, 프로바이더, 키, 관리 및 진단 엔드포인트.                                                                                  | 대시보드 세션 또는 `manage` 스코프의 Bearer                    |
+- **다루는 내용:** 비밀번호 로그인(`POST /api/auth/login`, 이후
+  `POST /api/auth/mfa/verify` 필요) 및 `omniroute connect`(`POST /api/cli/connect`,
+  비밀번호만 사용하는 교환을 거부하고 코드를 `totp`로 받음).
+- **다루지 않는 내용:** OIDC / SSO 로그인(`/api/auth/oidc/callback`)에서는
+  OmniRoute TOTP를 요청하지 않습니다. ID 공급자의 자체 2단계 인증을 사용하므로 OIDC가
+  활성화된 경우 IdP에서 MFA를 적용해야 합니다.
+- **복구**(디바이스 분실, 복구 코드가 남아 있지 않은 경우 또는 예를 들어
+  `STORAGE_ENCRYPTION_KEY`가 변경된 후처럼 더 이상 인증할 수 없는 인증 요소가 있는 경우):
+  1. `OMNIROUTE_DISABLE_MFA=true`로 서버를 다시 시작합니다.
+  2. 호스트 자체에서(루프백 피어 및 `http://localhost:20128`과 같은 루프백 `Host`) 비밀번호로
+     로그인합니다. 해당 origin에 대해서만 2단계 인증을 건너뛰며, 다른 모든 origin에서는
+     여전히 코드가 필요합니다.
+  3. 설정 → 보안 → 비활성화에서 비밀번호를 입력하고 코드는 비워 둡니다. `POST /api/auth/mfa/disable`은
+     변수가 설정되어 있고 요청이 호스트에서 온 경우에만 `code`가 없는 본문을 허용합니다. 또한
+     대시보드 세션과 현재 비밀번호를 여전히 요구하며, `auth.mfa.disabled`에
+     `secondFactor: "recovery_switch"`로 감사 기록을 남깁니다.
+  4. `OMNIROUTE_DISABLE_MFA`를 설정 해제하고 서버를 다시 시작한 다음, 필요한 경우 다시 등록합니다.
 
-일부 `MANAGEMENT` 작업은 **운영자 전용**입니다. `manage` 키만으로는 충분하지 않습니다. 저장된 자격 증명 내보내기(`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), 라이브 데이터 위에 백업 복원(`dryRun=true`를 포함한 `POST /api/db-backups/import`, ID 기준 `POST /api/db-backups` 복원, `POST /api/settings/import-json`), 복원 지점 삭제(`DELETE /api/db-backups` 정리, 그리고 `PATCH /api/db-backups` — 여기서 저장되는 보존 설정이 백업 후 자동 정리를 결정하기 때문입니다)에는 대시보드 세션, 로컬 CLI 주체, 또는 로그인 비활성화 상태가 필요합니다. 동기화 토큰 발급(`POST /api/sync/tokens`)과 `admin` CLI 액세스 토큰 발급(`POST /api/cli/tokens`)은 모든 로그인 모드에서 대시보드 세션 또는 로컬 CLI 주체가 필요합니다. 어떤 스코프의 API 키와 `oma_` 액세스 토큰도 운영자 자격 증명이 아니므로, 이런 자격 증명이 요구되는 곳에서는 항상 `403`을 받습니다. 이 검사는 `src/lib/api/operatorCredential.ts`(`resolveOperatorCredential()` / `requireOperatorCredential()`)에 있습니다. 로그인 설정 변경도 운영자 전용입니다. `POST /api/settings/require-login`(관리 비밀번호 설정, `requireLogin` 토글)은 비밀번호가 한 번 만들어진 뒤에는 이 자격 증명만 받아들입니다. 최초 실행 부트스트랩 기간(아직 비밀번호가 없는 상태)은 그대로 유지됩니다. 대시보드 세션으로 비밀번호를 교체하려면 `currentPassword`를 보내야 하며(누락되거나 틀리면 `403`, `settings.update_failed`로 감사 기록), 로컬 CLI와 로그인이 비활성화된 인스턴스는 복구 경로를 유지하여 이것 없이도 비밀번호를 설정할 수 있습니다. 둘 다 데이터 디렉터리를 소유한 호스트에 묶여 있기 때문입니다.
+## 경로 클래스
+
+`src/server/authz/types.ts` 세 가지 클래스를 정의합니다. 결정적으로 분류될 수 없는 모든 경로는 `MANAGEMENT` 로 대체됩니다.
+
+| 수업         | 설명                                                                                                                                        | 인증이 필요합니다                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUBLIC`     | 명시적으로 안전한 경로는 — 로그인, 로그아웃, 상태, 상태, 온보딩 부트스트랩입니다.                                                           | 없음                                                           |
+| `CLIENT_API` | 모델 제공 엔드포인트 — `/api/v1/*`, `/api/v1beta/*` 와 별칭 `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | 유효한 `REQUIRE_API_KEY` 기능 플래그가 활성화된 경우 베어러 키 |
+| `MANAGEMENT` | 대시보드 페이지, 설정, 공급자, 키, 관리 및 진단 엔드포인트.                                                                                 | `manage` 범위를 사용하는 대시보드 세션 OR Bearer               |
+
+몇 가지 `MANAGEMENT` 작업은 다음과 같습니다.** 운영자 전용** : `manage` 키로는 충분하지 않습니다. 저장된 자격 증명(`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) 내보내기, 라이브 데이터에 대한 백업 복원(`POST /api/db-backups/import` 포함 `dryRun=true`, ID별 `POST /api/db-backups` 복원, `POST /api/settings/import-json`), 복원 지점 삭제(`DELETE /api/db-backups` 정리 및 `PATCH /api/db-backups` 지속되는 보존으로 인해 모든 백업 후 자동 정리가 이루어지기 때문에) 대시보드 세션, 로컬 CLI 주제 또는 로그인 비활성화가 필요합니다. 동기화 토큰(`POST /api/sync/tokens`)을 발행하고 `admin` CLI 액세스 토큰(`POST /api/cli/tokens`)을 발행하려면 모든 로그인 모드에서 대시보드 세션 또는 로컬 CLI 제목이 필요합니다. 모든 범위의 API 키와 `oma_` 액세스 토큰은 운영자 자격 증명이 아닙니다. 필요할 때마다 `403` 얻습니다. 수표는 `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)에 있습니다. 로그인 설정 변경은 운영자 전용입니다. `POST /api/settings/require-login` (관리 비밀번호 설정/ `requireLogin` 전환)는 비밀번호가 존재하는 경우에만 해당 자격 증명을 허용합니다. — 첫 번째 실행 부트스트랩 창(아직 비밀번호 없음)은 변경되지 않습니다. — 및 대시보드 세션은 비밀번호를 대체하기 위해 `currentPassword` 보내야 합니다(누락되었거나 잘못된 경우 `403`, `settings.update_failed` 로 감사됨). 로컬 CLI 와 로그인이 비활성화된 인스턴스는 복구 경로를 유지하고 복구 경로 없이 비밀번호를 설정할 수 있습니다. 둘 다 데이터 디렉토리를 소유한 호스트에 바인딩되어 있기 때문입니다.
 
 ## 관로
 
@@ -163,50 +180,49 @@ Incoming request → src/proxy.ts
 
 성공적인 정책은 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` 와 함께 `AuthSubject` 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts` 의 `assertAuth(request, "CLIENT_API")` 통해 이를 읽을 수 있습니다.
 
-## 공개 라우트 목록
+## 공용 경로 목록
 
-`src/shared/constants/publicApiRoutes.ts`는 명시적인 허용 목록입니다.
+`src/shared/constants/publicApiRoutes.ts` 는 명시적인 허용 목록입니다.
 
-목록은 **형태**에 따라 나뉘며, 이 구분은 보안상 매우 중요합니다(GHSA-74g9-q8f6-793h). 접두사는 `startsWith()`로 일치 여부를 확인하므로, 선행 문자가 같은 모든 인접 경로와도 일치합니다.
-접두사로 지정된 `/api/usage/om-usage`는 `/api/usage/om-usage<anything>`을 공개로 표시했고, Next는 이를 자체 인증이 없는 핸들러인 `/api/usage/[connectionId]`로 해석합니다.
+목록은 다음과 같이 나뉩니다.** 모양** , 분할은 로드 베어링(GHSA-74g9-q8f6-793h)입니다. 접두사는 `startsWith()` 와 일치하므로 선행 문자를 공유하는 모든 인접한 경로와도 일치합니다. `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLIC 로 표시된 접두사로 사용되며 Next는 이를 자체 인증이 없는 처리기인 `/api/usage/[connectionId]` — 로 확인합니다.
 
 ```ts
-// 실제 하위 트리입니다. 모든 항목은 "/"로 끝나야 합니다(단위 테스트에서 검증됨).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify에서 CLIENT_API로 취급되며, "인증 없는 공개"로 취급되지 않음
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// 단일 라우트이며, 후행 슬래시 유무와 관계없이 정확히 일치해야 합니다.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS 출처 제한 완화도 적용되는 읽기 전용 단일 라우트입니다.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS 제한 완화가 적용되지 않는 읽기 전용 단일 라우트입니다.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-읽기 전용 라우트는 안전한 메서드에 대해서만 공개됩니다. 참고: `classifyRoute()`는 `/api/v1/*` 및 `/api/v1beta/*`를 PUBLIC 폴스루에서 제외합니다. 이들은 항상 `CLIENT_API`이므로 Bearer 키 정책이 계속 적용됩니다.
+읽기 전용 경로는 공개입니다.** 오직** 안전한 방법을 위해. 참고: `classifyRoute()` PUBLIC fall-through — 에서 `/api/v1/*` 및 `/api/v1beta/*` 제외합니다. 이들은 항상 `CLIENT_API` 이므로 Bearer-key 정책이 계속 적용됩니다.
 
 ## 새 라우트 추가하기
 
@@ -272,13 +288,13 @@ API 키는 `scopes` 배열을 가집니다 (`api_keys.scopes`에 JSON으로 저�
 
 ## 인증 필요 토글
 
-`src/shared/utils/apiAuth.ts`의 `isAuthRequired()`는 요청에 대해 **어떤** 인증이라도 강제할지 결정합니다:
+`src/shared/utils/apiAuth.ts` 의 `isAuthRequired()` 여부를 결정합니다.** 어느** 요청에 대해 인증이 시행됩니다.
 
-- `settings.requireLogin === false` → 인증이 전역적으로 비활성화됩니다. 단, 항상 보호되는 계층([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) 참조)과, 로그인이 켜져 있을 때와 같은 자격 증명이 필요한 자격 증명 발급 호출은 예외입니다. 동기화 토큰 발급, 모든 스코프의 CLI 액세스 토큰 발급, `manage`/`admin` 스코프 API 키 생성, 해당 스코프를 키에 부여하기, 그런 키를 재생성하거나 표시하기가 여기에 해당합니다(`src/lib/api/requireManagementAuth.ts`의 `requireCredentialForManagementScopedKey()`). 추론 전용 키는 계속 열려 있습니다.
-- 비밀번호가 설정되어 있지 않고 **동시에** `INITIAL_PASSWORD` 환경 변수도 없으면 → 부트스트랩 모드에서는 온보딩 마법사와 루프백 요청을 허용하지만, 외부 네트워크 요청은 여전히 자격 증명이 필요합니다.
-- 모든 DB 오류 → 닫힘(fail closed, 보안 기본값).
+- `settings.requireLogin === false` → 인증은 항상 보호되는 계층( [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) 참조)과 허용되는 자격 증명을 전달하는 호출을 제외하고 전역적으로 비활성화됩니다. 여기에는 로그인과 동일한 자격 증명이 필요합니다. 즉, 동기화 토큰 발급, 모든 범위에서 CLI 액세스 토큰 생성, `manage`/`admin` 범위로 API 키 생성, 해당 범위를 키에 부여 또는 이러한 키 재생성 또는 공개(`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). 추론 전용 키는 열려 있습니다. 보호된 기능 플래그(`REQUIRE_API_KEY`, 기타 보안 플래그 및 [기능 플래그](../reference/FEATURE_FLAGS.md#rest-api) 에 나열된 SSRF / TLS / MCP 범위 / 샌드박스 플래그)를 작성하고 PII 마스킹 설정(`PUT /api/settings/pii`)을 저장하려면 계속 자격 증명이 필요합니다.
+- 비밀번호가 구성되지 않았습니다.** 그리고** no `INITIAL_PASSWORD` env var → bootstrap 모드는 온보딩 마법사 및 루프백 요청을 허용하지만 노출된 네트워크 요청에는 여전히 자격 증명이 필요합니다. 예외: 보호된 기능 플래그를 작성하고 PII 마스킹 설정(`PUT /api/settings/pii`)을 저장하려면 루프백에서도 자격 증명이 필요하므로 루프백 자체로는 충분하지 않습니다.
+- 모든 DB 오류 → 실패하여 닫히지 않습니다(기본적으로 보안).
 
-클라이언트 API 키 강제는 `process.env.REQUIRE_API_KEY`를 직접 읽는 대신 `src/shared/utils/featureFlags.ts`의 `isRequireApiKeyEnabled()`를 사용합니다. 이는 배포된 인스턴스에서 중요합니다. 대시보드 → Feature Flags에서 `REQUIRE_API_KEY`를 전환하면 DB 오버라이드가 저장되어 즉시 `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` 및 이 헬퍼를 공유하는 다른 클라이언트 API 인증 검사에 영향을 줍니다. 기능 플래그 저장소를 읽을 수 없으면 클라이언트 API 인증은 닫힘 상태가 되어 키를 요구합니다.
+클라이언트 API 키 적용은 직접 `process.env.REQUIRE_API_KEY` 읽기가 아닌 `src/shared/utils/featureFlags.ts` 의 `isRequireApiKeyEnabled()` 사용합니다. 이는 배포된 인스턴스에 중요합니다. 대시보드 → 기능 플래그에서 `REQUIRE_API_KEY` 전환하면 DB 재정의가 저장되고 `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` 및 이 도우미를 공유하는 기타 클라이언트 API 인증 검사에 즉시 영향을 미칩니다. 기능 플래그 저장소를 읽을 수 없는 경우 클라이언트 API 인증이 실패하고 키가 필요합니다.
 
 ## 호환성을 깨는 변경 사항 — v3.8.0
 

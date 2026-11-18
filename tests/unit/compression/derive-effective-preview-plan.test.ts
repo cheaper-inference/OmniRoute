@@ -31,7 +31,7 @@ const namedCombos = {
 // which is #12063 again. Every case below pins preview == runtime, not just a literal plan.
 const SAFE_PIPELINE = [
   { engine: "session-dedup" },
-  { engine: "lite", config: { compressToolResults: false } },
+  { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
 ];
 
 function runtimePlan(config: CompressionConfig) {
@@ -145,7 +145,10 @@ test("legacy install (engines not panel-saved) => preview follows defaultMode li
   };
   const preview = deriveEffectivePreviewPlan(config, namedCombos);
   const runtime = runtimePlan(config);
-  assert.equal(runtime.mode, "lite");
+  assert.equal(runtime.mode, "stacked");
+  assert.deepEqual(runtime.stackedPipeline, [
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
   assert.equal(preview.mode, runtime.mode);
   assert.deepEqual(preview.stackedPipeline, runtime.stackedPipeline);
 });

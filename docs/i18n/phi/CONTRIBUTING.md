@@ -8,15 +8,20 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Pag-setup ng Development
+## Setup sa Pag-develop
 
 ### Mga Kinakailangan
 
 - **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (inirerekomenda: 24 LTS)
 - **npm** 10+
 
+> **Windows gamit ang Node 24:** gamitin ang kasalukuyang 24 LTS patch release (hindi bababa sa 24.20.0).
+> Maaaring mag-abort ang mga naunang release matapos ang matagumpay na mga test kapag isinasara ng `--test-force-exit` ang
+> proseso. Tinutugunan ng [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ng Node
+> ang runtime crash na ito; panatilihing naka-enable ang mga assertion ng test at mga pagsusuri sa paglabas ng runner.
+
 > **Mga gumagamit ng npm v11+ (Node 24+):** Pagkatapos ng `npm install`, tiyaking na-install ang mga native module:
-> `node -e "require('better-sqlite3')"`. Kung mabigo ito nang may `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Kung mabigo ito dahil sa `MODULE_NOT_FOUND`,
 > patakbuhin ang `npm approve-scripts better-sqlite3 && npm install`. Tingnan ang
 > [Pag-troubleshoot](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -41,79 +46,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Mahahalagang variable para sa development:
+Mga pangunahing variable para sa development:
 
-| Variable               | Default sa Development   | Paglalarawan                |
-| ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Port ng server              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL para sa frontend   |
-| `JWT_SECRET`           | (buuin sa itaas)         | Secret sa pag-sign ng JWT   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Password sa unang pag-login |
-| `APP_LOG_LEVEL`        | `info`                   | Antas ng detalye ng mga log |
+| Variable               | Default para sa Development | Paglalarawan                   |
+| ---------------------- | --------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                     | Port ng server                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Base URL para sa frontend      |
+| `JWT_SECRET`           | (bumuo sa itaas)            | Secret para sa pag-sign ng JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`                  | Password sa unang pag-login    |
+| `APP_LOG_LEVEL`        | `info`                      | Antas ng verbosity ng log      |
 
 ### Mga Setting ng Dashboard
 
-Nagbibigay ang dashboard ng mga UI toggle para sa mga feature na maaari ring i-configure sa pamamagitan ng mga environment variable:
+Nagbibigay ang dashboard ng mga UI toggle para sa mga feature na maaari ring i-configure gamit ang mga environment variable:
 
 | Lokasyon ng Setting | Toggle             | Paglalarawan                             |
 | ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | Paganahin ang mga debug request log (UI) |
+| Settings → Advanced | Debug Mode         | I-enable ang mga debug request log (UI)  |
 | Settings → General  | Sidebar Visibility | Ipakita/itago ang mga seksyon ng sidebar |
 
-Iniimbak ang mga setting na ito sa database at nananatili ang mga ito sa bawat pag-restart, na pumapalit sa mga default ng env var kapag itinakda.
+Naka-store ang mga setting na ito sa database at nananatili kahit mag-restart, at ino-override ang mga default ng env var kapag itinakda.
 
-### Lokal na Pagpapatakbo
+### Pagpapatakbo nang Lokal
 
 ```bash
 # Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/ pagkatapos ay assembleStandalone → dist/
+npm run build    # next build → .build/next/ at pagkatapos ay assembleStandalone → dist/
 npm run start
 
 # Mabilis na backend/API-only compile para sa mga pagbabago ng contributor
 npm run build:contributor
 
-# Release build (malinis na rebuild + HEAD sentinel — kinakailangan para sa pag-deploy)
-npm run build:release   # rm -rf .build dist && build + nagsusulat sa dist/BUILD_SHA
+# Release build (malinis na rebuild + HEAD sentinel — kinakailangan para sa deploy)
+npm run build:release   # rm -rf .build dist at build + nagsusulat ng dist/BUILD_SHA
 
 # Karaniwang configuration ng port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Nagsasagawa ang contributor build ng compile-only na validation: hindi nito binubuo ang standalone
-distribution o ang mga opsyonal na native packaging asset. Gamitin ang karaniwang production build kapag
-kailangan mong i-validate ang bundle na maaaring i-release.
+Nagsasagawa ang contributor build ng compile-only validation: hindi nito ina-assemble ang standalone
+distribution o bina-build ang mga opsyonal na native packaging asset. Gamitin ang regular na production build kapag
+kailangan mong i-validate ang shippable bundle.
 
-### Ayos ng Build Output
+### Layout ng Build Output
 
-| Directory | Mga Nilalaman                                                                   | Sinusubaybayan |
-| --------- | ------------------------------------------------------------------------------- | -------------- |
-| `src/`    | Source ng application (TypeScript / TSX)                                        | Oo             |
-| `.build/` | Mga intermediate — output ng `next build` (gitignored, `distDir = .build/next`) | Hindi          |
-| `dist/`   | Bundle na maaaring i-release — binuo ng `assembleStandalone` (gitignored)       | Hindi          |
+| Directory | Mga Nilalaman                                                                   | Naka-track |
+| --------- | ------------------------------------------------------------------------------- | ---------- |
+| `src/`    | Source ng application (TypeScript / TSX)                                        | Oo         |
+| `.build/` | Mga intermediate — output ng `next build` (gitignored, `distDir = .build/next`) | Hindi      |
+| `dist/`   | Shippable bundle — ina-assemble ng `assembleStandalone` (gitignored)            | Hindi      |
 
-Iisang pass ang build pipeline:
+Isang pass lamang ang build pipeline:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output ng Next.js)
-  └─ assembleStandalone()                 (kinokopya ang standalone + static + public + mga native asset)
+  └─ assembleStandalone()                 (kinokopya ang standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Nililinis din muna ng `npm run build:release` ang parehong directory at isinusulat ang
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang sentinel ng integridad ng pag-deploy.
+Nililinis din ng `npm run build:release` ang dalawang directory muna at nagsusulat ng
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang deploy integrity sentinel.
 
-Ginagamit ng `npm run build:contributor` ang backend-only na build profile. Pansamantala nitong pinapalitan
-ng mga stub ang mga dashboard UI file habang nagbu-build, pinananatili ang mga API route handler, at ibinabalik ang mga orihinal na file
-pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakaaapekto sa dashboard UI o para sa ganap na
-validation ng release; hindi pamalit sa release build ang contributor profile.
+Ginagamit ng `npm run build:contributor` ang backend-only build profile. Pansamantala nitong hina-harangan ang
+mga dashboard UI file habang nagbu-build, pinananatili ang mga API route handler, at ibinabalik ang orihinal na mga file
+pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakaaapekto sa dashboard UI o para sa buong
+release validation; hindi kapalit ng release build ang contributor profile.
 
-> **Paalala sa pag-deploy sa VPS:** hindi nagbago ang remote image directory na `/usr/lib/node_modules/omniroute/app/`.
-> Ini-rsync ng mga deploy skill ang mga nilalaman ng `dist/` papunta rito.
-> Tanging ang path ng build output sa repository ang nagbago (`app/` → `dist/`).
+> **Tala para sa VPS deploy:** hindi nagbabago ang remote image directory na `/usr/lib/node_modules/omniroute/app/`.
+> Sini-rsync ng mga deploy skill ang mga nilalaman ng `dist/` papunta rito.
+> Tanging ang build output path sa loob ng repository ang inilipat (`app/` → `dist/`).
 
 Mga default na URL:
 
@@ -289,72 +294,72 @@ Tingnan ang `open-sse/utils/stream.ts` at `open-sse/utils/streamHandler.ts` para
 
 ---
 
-## Estruktura ng Proyekto
+## Istruktura ng Proyekto
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Mga pahina ng dashboard (23 seksyon)
-│   ├── api/                # Mga ruta ng API (51 direktoryo)
-│   └── login/              # Mga pahina ng pagpapatotoo (.tsx)
-├── domain/                 # Engine ng patakaran (policyEngine, comboResolver, costRules, atbp.)
-├── lib/                    # Pangunahing lohika ng negosyo (.ts)
-│   ├── a2a/                # Server ng Agent-to-Agent v0.3 protocol
-│   ├── acp/                # Registry ng Agent Communication Protocol
-│   ├── compliance/         # Engine ng patakaran sa pagsunod
-│   ├── db/                 # Mga domain module ng SQLite + 130 migrasyon
-│   ├── memory/             # Persistent na memorya ng pag-uusap
-│   ├── oauth/              # Mga provider, serbisyo, at utility ng OAuth
-│   ├── skills/             # Napapalawak na framework ng kasanayan
-│   ├── usage/              # Pagsubaybay sa paggamit at pagkalkula ng gastos
-│   └── localDb.ts          # Re-export layer lamang — huwag kailanman magdagdag ng lohika rito
-├── middleware/              # Middleware ng request (promptInjectionGuard)
-├── mitm/                   # MITM proxy (sertipiko, DNS, pagruruta ng target)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Mga React component (.tsx)
-│   ├── constants/          # Mga depinisyon ng provider (329), MCP scope, 20 estratehiya sa pagruruta
-│   ├── utils/              # Circuit breaker, sanitizer, mga helper sa pagpapatotoo
-│   └── validation/         # Mga Zod v4 schema
-└── sse/                    # Pipeline ng SSE proxy
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 150 executor module (mga executor class + helper para sa bawat provider)
-├── handlers/               # 11 request handler (chat, responses, embeddings, images, atbp.)
-├── mcp-server/             # MCP server (110 natatanging tool, 3 transport, 33 scope)
-├── services/               # 178 nangungunang antas na serbisyo (combo, autoCombo, rateLimitManager, atbp.)
-├── translator/             # Mga tagasalin ng format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer ng Responses API
-└── utils/                  # 22 utility module (stream, TLS, proxy, logging)
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
 electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test runner (1,574 test file)
-├── integration/            # Mga integration test
-├── e2e/                    # Mga Playwright test
-├── security/               # Mga security test
-├── translator/             # Mga test na partikular sa translator
-└── load/                   # Mga load test
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Mga Talaan ng Desisyon sa Arkitektura
-├── architecture/            # Arkitektura at katatagan ng system
-├── comparison/              # OmniRoute kumpara sa mga alternatibo
-├── compression/             # Mga gabay at panuntunan sa compression
-├── dev/                     # Mga gabay sa development
-├── diagrams/                # Mga diagram ng arkitektura
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Gabay ng user, Docker, setup, troubleshooting
-├── i18n/                    # Mga internasyonal na salin ng README
-├── marketing/               # Mga materyal sa marketing
-├── ops/                     # Deployment, proxy, coverage, mga release
-├── providers/               # Dokumentasyong partikular sa provider
-├── reference/               # Sanggunian ng API, mga env var, CLI tool, mga libreng tier
-├── releases/                # Mga tala sa release
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
 ├── routing/                 # Auto-combo engine, reasoning replay
-├── screenshots/             # Mga screenshot ng dashboard
-├── security/                # Mga guardrail, pagsunod, stealth, mga token
-└── specs/                   # Mga espesipikasyon ng disenyo
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -297,7 +297,7 @@ export function buildSkillMarkdown(
  * Assembles the full file content string from frontmatter + body.
  */
 function assembleFileContent(fm: { name: string; description: string }, body: string): string {
-  return serializeFrontmatter(fm) + body;
+  return serializeFrontmatter(fm) + "\n" + body;
 }
 
 function readReferenceFile(skillDir: string, referencePath: string): string | undefined {

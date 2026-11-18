@@ -13,15 +13,20 @@ UI/UX、i18n、CLI、資料庫和建置/部署變更對應到其合約、重點�
 
 ---
 
-## 開發環境設定
+## 開發設定
 
 ### 先決條件
 
 - **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
 - **npm** 10+
 
-> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，請確認原生模組已安裝：
-> `node -e "require('better-sqlite3')"`。若執行失敗並顯示 `MODULE_NOT_FOUND`，
+> **使用 Node 24 的 Windows：** 使用目前的 24 LTS 修補版本（至少 24.20.0）。
+> 較早的版本可能會在測試成功後，由 `--test-force-exit` 關閉程序時中止。
+> Node 的 [Windows libuv 修正](https://github.com/nodejs/node/pull/61999) 可解決
+> 此執行階段當機問題；請保持測試判斷和執行器結束檢查啟用。
+
+> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，確認原生模組已安裝：
+> `node -e "require('better-sqlite3')"`。如果因 `MODULE_NOT_FOUND` 而失敗，
 > 請執行 `npm approve-scripts better-sqlite3 && npm install`。請參閱
 > [疑難排解](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
@@ -46,26 +51,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開發環境的主要變數：
+開發所需的主要變數：
 
-| 變數                   | 開發環境預設值           | 說明           |
-| ---------------------- | ------------------------ | -------------- |
-| `PORT`                 | `20128`                  | 伺服器連接埠   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL |
-| `JWT_SECRET`           | （於上方產生）           | JWT 簽署密鑰   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼   |
-| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度   |
+| 變數                   | 開發預設值               | 說明         |
+| ---------------------- | ------------------------ | ------------ |
+| `PORT`                 | `20128`                  | 伺服器連接埠 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端基礎 URL |
+| `JWT_SECRET`           | （如上方所示產生）       | JWT 簽署密鑰 |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼 |
+| `APP_LOG_LEVEL`        | `info`                   | 記錄詳細程度 |
 
 ### 儀表板設定
 
-儀表板提供可切換功能的 UI 選項，這些功能也可以透過環境變數設定：
+儀表板提供可透過環境變數設定之功能的 UI 切換開關：
 
-| 設定位置    | 切換選項     | 說明                   |
+| 設定位置    | 切換開關     | 說明                   |
 | ----------- | ------------ | ---------------------- |
-| 設定 → 進階 | 偵錯模式     | 啟用偵錯請求日誌（UI） |
+| 設定 → 進階 | 偵錯模式     | 啟用偵錯要求記錄（UI） |
 | 設定 → 一般 | 側邊欄可見性 | 顯示／隱藏側邊欄區段   |
 
-這些設定會儲存在資料庫中，並在重新啟動後持續保留；設定後會覆寫環境變數的預設值。
+這些設定儲存在資料庫中，並在重新啟動後持續生效；設定後會覆寫環境變數的預設值。
 
 ### 在本機執行
 
@@ -73,51 +78,46 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # 開發模式（熱重新載入）
 npm run dev
 
-# 正式環境建置
-npm run build    # next build → .build/next/，接著 assembleStandalone → dist/
+# 生產環境建置
+npm run build    # next build → .build/next/ 然後 assembleStandalone → dist/
 npm run start
 
-# 針對貢獻者變更的快速後端／僅 API 編譯
+# 供貢獻者變更使用的快速後端／API 專用編譯
 npm run build:contributor
 
-# 發行建置（全新重建 + HEAD 哨兵檔案——部署時必要）
-npm run build:release   # rm -rf .build dist && 建置 + 寫入 dist/BUILD_SHA
+# 發行版本建置（清除後重新建置 + HEAD 完整性標記 — 部署所需）
+npm run build:release   # rm -rf .build dist && build + 寫入 dist/BUILD_SHA
 
 # 常用連接埠設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-貢獻者建置只會執行編譯驗證：它不會組裝獨立執行版發行內容，
-也不會建置選用的原生封裝資產。需要驗證可交付套件時，
-請使用一般的正式環境建置。
+貢獻者建置會執行僅限編譯的驗證：不會組裝獨立發行版本，也不會建置選用的原生封裝資產。需要驗證可交付套件時，請使用一般的生產環境建置。
 
 ### 建置輸出配置
 
-| 目錄      | 內容                                                                | 是否追蹤 |
-| --------- | ------------------------------------------------------------------- | -------- |
-| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是       |
-| `.build/` | 中間產物——`next build` 輸出（由 git 忽略，`distDir = .build/next`） | 否       |
-| `dist/`   | 可交付套件——由 `assembleStandalone` 組裝（由 git 忽略）             | 否       |
+| 目錄      | 內容                                                                | 已追蹤 |
+| --------- | ------------------------------------------------------------------- | ------ |
+| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是     |
+| `.build/` | 中間檔案 — `next build` 輸出（gitignored，`distDir = .build/next`） | 否     |
+| `dist/`   | 可交付套件 — 由 `assembleStandalone` 組裝（gitignored）             | 否     |
 
-建置管線只會執行一輪：
+建置管線是單一流程：
 
 ```
 npm run build
   └─ next build → .build/next/standalone  （Next.js 輸出）
-  └─ assembleStandalone()                 （複製獨立執行版 + 靜態檔案 + 公開檔案 + 原生資產）
+  └─ assembleStandalone()                 （複製 standalone + static + public + native assets）
        └─ 輸出：dist/                     （server.js、.next/static/、public/、node_modules/）
 ```
 
-`npm run build:release` 還會先清除這兩個目錄，並寫入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵檔案。
+`npm run build:release` 會先額外清除兩個目錄，並寫入
+`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性標記。
 
-`npm run build:contributor` 使用僅限後端的建置設定檔。它會在建置期間暫時以替代檔案取代
-儀表板 UI 檔案、保留 API 路由處理常式，並在建置後還原原始檔案。
-若變更會影響儀表板 UI，或需要進行完整的發行驗證，請使用 `npm run build`；
-貢獻者設定檔不能取代發行建置。
+`npm run build:contributor` 使用僅限後端的建置設定檔。建置期間會暫時替換儀表板 UI 檔案，保留 API 路由處理常式，並在建置後還原原始檔案。對於會影響儀表板 UI 的變更或完整的發行版本驗證，請使用 `npm run build`；貢獻者設定檔不能取代發行版本建置。
 
-> **VPS 部署注意事項：** 遠端映像目錄 `/usr/lib/node_modules/omniroute/app/`
-> 維持不變。部署技能會使用 rsync 將 `dist/` 的內容同步至該目錄。
+> **VPS 部署注意事項：** 遠端映像檔目錄 `/usr/lib/node_modules/omniroute/app/`
+> 維持不變。部署技能會將 `dist/` 的內容 rsync 至該目錄。
 > 只有儲存庫內的建置輸出路徑有所變更（`app/` → `dist/`）。
 
 預設 URL：
@@ -292,69 +292,69 @@ npm run test:combo:live:vps:failover     # 新增真實的跨提供者容錯移�
 ## 專案結構
 
 ```
-src/                        # TypeScript（.ts / .tsx）
+src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # 儀表板頁面（23 個區段）
-│   ├── api/                # API 路由（51 個目錄）
-│   └── login/              # 驗證頁面（.tsx）
-├── domain/                 # 政策引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心商業邏輯（.ts）
-│   ├── a2a/                # Agent-to-Agent v0.3 協定伺服器
-│   ├── acp/                # Agent Communication Protocol 登錄檔
-│   ├── compliance/         # 合規政策引擎
-│   ├── db/                 # SQLite 領域模組 + 130 個遷移
-│   ├── memory/             # 持久化對話記憶
-│   ├── oauth/              # OAuth 提供者、服務與工具
-│   ├── skills/             # 可擴充的技能框架
-│   ├── usage/              # 使用量追蹤與成本計算
-│   └── localDb.ts          # 僅限重新匯出層——切勿在此新增邏輯
-├── middleware/              # 請求中介軟體（promptInjectionGuard）
-├── mitm/                   # MITM Proxy（憑證、DNS、目標路由）
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React 元件（.tsx）
-│   ├── constants/          # 提供者定義（329 個）、MCP 範圍、20 種路由策略
-│   ├── utils/              # 斷路器、清理器、驗證輔助工具
-│   └── validation/         # Zod v4 結構描述
-└── sse/                    # SSE Proxy 管線
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse 工作區
-├── executors/              # 150 個執行器模組（執行器類別 + 各提供者的輔助工具）
-├── handlers/               # 11 個請求處理常式（聊天、回應、嵌入、影像等）
-├── mcp-server/             # MCP 伺服器（110 個不重複工具、3 種傳輸方式、33 個範圍）
-├── services/               # 178 個頂層服務（combo、autoCombo、rateLimitManager 等）
-├── translator/             # 格式轉換器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
-├── transformer/            # Responses API 轉換器
-└── utils/                  # 22 個工具模組（串流、TLS、Proxy、記錄）
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron 桌面應用程式（跨平台）
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js 測試執行器（1,574 個測試檔案）
-├── integration/            # 整合測試
-├── e2e/                    # Playwright 測試
-├── security/               # 安全性測試
-├── translator/             # 轉換器專用測試
-└── load/                   # 負載測試
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # 架構決策記錄
-├── architecture/            # 系統架構與韌性
-├── comparison/              # OmniRoute 與替代方案的比較
-├── compression/             # 壓縮指南與規則
-├── dev/                     # 開發指南
-├── diagrams/                # 架構圖
-├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
-├── guides/                  # 使用者指南、Docker、設定、疑難排解
-├── i18n/                    # 國際化 README 翻譯
-├── marketing/               # 行銷資料
-├── ops/                     # 部署、Proxy、覆蓋率、版本發布
-├── providers/               # 提供者專用文件
-├── reference/               # API 參考、環境變數、CLI 工具、免費方案
-├── releases/                # 版本資訊
-├── routing/                 # 自動組合引擎、推理重播
-├── screenshots/             # 儀表板螢幕擷取畫面
-├── security/                # 防護措施、合規性、隱匿性、權杖
-└── specs/                   # 設計規格
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -120,16 +120,16 @@ Combo: "openclaw-free"
 
 ## 📖 Ρύθμιση παρόχων
 
-Για μαζική προσθήκη συνδέσεων κλειδιών API από αρχείο CSV ή JSON, χρησιμοποιήστε τη διαδρομή **Πίνακας ελέγχου → Πάροχοι → Εισαγωγή από αρχείο**. Οι στήλες είναι ταξινομημένες κατά θέση (`provider,name,apiKey,baseUrl,priority`)· το `provider` πρέπει να υπάρχει ήδη ως διαχειριζόμενος πάροχος ή συμβατός κόμβος. Δείτε την ενότητα [Εισαγωγή παρόχων από αρχείο CSV ή JSON](../providers/CSV-IMPORT.md).
+Για μαζική προσθήκη συνδέσεων με κλειδί API από αρχείο CSV ή JSON, χρησιμοποιήστε **Πίνακας ελέγχου → Πάροχοι → Εισαγωγή από αρχείο**. Οι στήλες είναι τοποθετημένες με συγκεκριμένη σειρά (`provider,name,apiKey,baseUrl,priority`)· το `provider` πρέπει να υπάρχει ήδη ως διαχειριζόμενος πάροχος ή συμβατός κόμβος. Δείτε την ενότητα [Εισαγωγή παρόχων από αρχείο CSV ή JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Συνδρομητικοί πάροχοι
+### 🔐 Πάροχοι συνδρομών
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση Claude Code
-→ Σύνδεση μέσω OAuth → Αυτόματη ανανέωση token
-→ Παρακολούθηση ορίου 5 ωρών + εβδομαδιαίου ορίου
+→ Σύνδεση OAuth → Αυτόματη ανανέωση token
+→ Παρακολούθηση ορίων 5 ωρών + εβδομαδιαίου ορίου
 
 Μοντέλα:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Combo: "openclaw-free"
   cc/claude-haiku-4-5-20251001
 ```
 
-**Επαγγελματική συμβουλή:** Χρησιμοποιήστε το Opus για σύνθετες εργασίες και το Sonnet για ταχύτητα. Το OmniRoute παρακολουθεί το όριο ανά μοντέλο!
+**Χρήσιμη συμβουλή:** Χρησιμοποιήστε το Opus για σύνθετες εργασίες και το Sonnet για ταχύτητα. Το OmniRoute παρακολουθεί το όριο ανά μοντέλο!
 
-Δεν υπάρχει πρόγραμμα περιήγησης στον κεντρικό υπολογιστή του OmniRoute; Εκτελέστε το `claude setup-token` οπουδήποτε είναι συνδεδεμένο το Claude Code και επικολλήστε το token διάρκειας ενός έτους στην καρτέλα **Setup Token**. Δείτε την ενότητα [Claude Code με setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Δεν υπάρχει πρόγραμμα περιήγησης στον υπολογιστή όπου φιλοξενείται το OmniRoute; Εκτελέστε την εντολή `claude setup-token` οπουδήποτε είναι συνδεδεμένο το Claude Code και επικολλήστε το token διάρκειας ενός έτους στην καρτέλα **Token ρύθμισης**. Δείτε την ενότητα [Claude Code με token ρύθμισης](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Οι διαδρομές που είναι συμβατές με Claude και Claude Code διατηρούν την προσπάθεια συλλογισμού `max` για τα μοντέλα Opus και Sonnet. Τα μοντέλα Haiku δεν αποδέχονται το επίπεδο προσπάθειας `max`, επομένως το OmniRoute υποβαθμίζει αυτό το αίτημα σε υψηλό προϋπολογισμό συλλογισμού πριν το στείλει στον upstream πάροχο.
+Οι διαδρομές που είναι συμβατές με Claude και Claude Code διατηρούν την προσπάθεια σκέψης `max` για τα
+μοντέλα Opus και Sonnet. Τα μοντέλα Haiku δεν αποδέχονται το επίπεδο προσπάθειας `max`, επομένως το OmniRoute υποβαθμίζει αυτό
+το αίτημα σε υψηλό προϋπολογισμό σκέψης πριν το αποστείλει upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση Codex
-→ Σύνδεση μέσω OAuth (θύρα 1455)
-→ Επαναφορά ανά 5 ώρες + εβδομαδιαία επαναφορά
+→ Σύνδεση OAuth (θύρα 1455)
+→ Επαναφορά κάθε 5 ώρες + εβδομαδιαία επαναφορά
 
 Μοντέλα:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Combo: "openclaw-free"
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση GitHub
 → OAuth μέσω GitHub
-→ Μηνιαία επαναφορά (την 1η κάθε μήνα)
+→ Μηνιαία επαναφορά (1η ημέρα του μήνα)
 
 Μοντέλα:
   gh/gpt-5.5
@@ -172,46 +174,64 @@ Combo: "openclaw-free"
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (χρέωση βάσει token).** Όταν το GitHub αναφέρει `credits_used` για τον
+λογαριασμό, η κάρτα ορίων παρόχου εμφανίζει μια γραμμή **AI Credits** με τις μονάδες
+που καταναλώθηκαν κατά την τρέχουσα περίοδο χρέωσης, ακόμη και σε απεριόριστα
+προγράμματα οργανισμών.
+
+**Τοπικό όριο AI Credits.** Επεξεργαστείτε μια σύνδεση GitHub και ορίστε το **Όριο AI Credits ανά
+περίοδο χρέωσης** (`providerSpecificData.githubCreditLimit`). Το κενό πεδίο το απενεργοποιεί· η τιμή `0`
+παρακάμπτει πάντα τη σύνδεση. Όταν η τελευταία μέτρηση χρήσης είναι ίση ή μεγαλύτερη από το όριο,
+η επιλογή λογαριασμού παρακάμπτει αυτήν τη σύνδεση και η δρομολόγηση επιστρέφει στις άλλες
+συνδέσεις σας, όπως ακριβώς συμβαίνει με μια διακοπή βάσει πολιτικής ορίου. Ο έλεγχος χρησιμοποιεί τη χρήση
+που συλλέγει ήδη η περιοδική ανανέωση ορίων — δεν καλεί ποτέ το GitHub κατά τη διαδρομή του αιτήματος —
+και λειτουργεί με ανοχή σε αποτυχίες: μια μέτρηση που λείπει ή είναι παλιά (παλαιότερη από 15 λεπτά ή από
+περίοδο χρέωσης που έχει ήδη επαναφερθεί) δεν αποκλείει τη σύνδεση. Πρόκειται για τοπική δικλείδα ασφαλείας,
+**όχι για εγγυημένο ανώτατο όριο δαπανών**: καθυστερήσεις στην αναφορά του GitHub, το διάστημα
+ανανέωσης, αιτήματα σε εξέλιξη και χρήση εκτός OmniRoute μπορούν να προκαλέσουν υπέρβαση. Για
+αυστηρό όριο, χρησιμοποιήστε τα ίδια τα εργαλεία ελέγχου δαπανών του GitHub.
+
 ### 💰 Οικονομικοί πάροχοι
 
-#### GLM-4.7 (Καθημερινή επαναφορά, $0.6/1M)
+#### GLM-4.7 (καθημερινή επαναφορά, $0.6/1M)
 
 1. Εγγραφείτε: [Zhipu AI](https://open.bigmodel.cn)
 2. Αποκτήστε κλειδί API από το Coding Plan
 3. Πίνακας ελέγχου → Προσθήκη κλειδιού API: Πάροχος: `glm`, Κλειδί API: `your-key`
 
-**Χρήση:** `glm/glm-4.7` — **Επαγγελματική συμβουλή:** Το Coding Plan προσφέρει 3× μεγαλύτερο όριο με το 1/7 του κόστους! Καθημερινή επαναφορά στις 10:00 π.μ.
+**Χρήση:** `glm/glm-4.7` — **Χρήσιμη συμβουλή:** Το Coding Plan προσφέρει 3× μεγαλύτερο όριο με το 1/7 του κόστους! Καθημερινή επαναφορά στις 10:00 π.μ.
 
-#### MiniMax M2.1 (Επαναφορά ανά 5 ώρες, $0.20/1M)
+#### MiniMax M2.1 (επαναφορά ανά 5 ώρες, $0.20/1M)
 
 1. Εγγραφείτε: [MiniMax](https://www.minimax.io)
 2. Αποκτήστε κλειδί API → Πίνακας ελέγχου → Προσθήκη κλειδιού API
 
-**Χρήση:** `minimax/MiniMax-M2.1` — **Επαγγελματική συμβουλή:** Η φθηνότερη επιλογή για μεγάλο context (1M tokens)!
+**Χρήση:** `minimax/MiniMax-M2.1` — **Χρήσιμη συμβουλή:** Η οικονομικότερη επιλογή για μεγάλο περιβάλλον συμφραζομένων (1M tokens)!
 
-#### Kimi K2 ($9/μήνα σταθερά)
+#### Kimi K2 ($9/μήνα σταθερή χρέωση)
 
-1. Εγγραφείτε σε συνδρομή: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. Εγγραφείτε: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Αποκτήστε κλειδί API → Πίνακας ελέγχου → Προσθήκη κλειδιού API
 
-**Χρήση:** `kimi/kimi-k2.5` — **Επαγγελματική συμβουλή:** Σταθερό κόστος $9/μήνα για 10M tokens = πραγματικό κόστος $0.90/1M!
+**Χρήση:** `kimi/kimi-k2.5` — **Χρήσιμη συμβουλή:** Σταθερά $9/μήνα για 10M tokens = αποτελεσματικό κόστος $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Εγγραφείτε: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Δημιουργήστε ένα κλειδί API Qianfan → Πίνακας ελέγχου → Προσθήκη κλειδιού API: Πάροχος: `qianfan`
 
-**Χρήση:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ή άλλο αναγνωριστικό μοντέλου Qianfan συμβατού με OpenAI.
+**Χρήση:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ή οποιοδήποτε άλλο αναγνωριστικό μοντέλου συμβατό με Qianfan OpenAI.
 
 ### 🆓 ΔΩΡΕΑΝ πάροχοι
 
-Οι δωρεάν πάροχοι χωρίς έλεγχο ταυτότητας διαθέτουν έναν διακόπτη δίπλα στην επιλογή **Δεν απαιτείται έλεγχος ταυτότητας** στη σελίδα του παρόχου τους.
-Η απενεργοποίησή του απενεργοποιεί τον συγκεκριμένο πάροχο, τον αφαιρεί από τις διαμορφωμένες/συμπτυγμένες προβολές των Παρόχων και αφαιρεί τα μοντέλα του από το `/v1/models`.
+Οι δωρεάν πάροχοι χωρίς έλεγχο ταυτότητας διαθέτουν έναν διακόπτη δίπλα στην επιλογή **Δεν απαιτείται έλεγχος ταυτότητας** στη σελίδα του παρόχου.
+Η απενεργοποίησή του απενεργοποιεί τον συγκεκριμένο πάροχο, τον αφαιρεί από τις προβολές «Ρυθμισμένοι πάροχοι»/συμπτυγμένη προβολή και
+αφαιρεί τα μοντέλα του από το `/v1/models`.
 
 #### Qoder (9 ΔΩΡΕΑΝ μοντέλα)
 
 ```bash
-Πίνακας ελέγχου → Σύνδεση Qoder → Σύνδεση μέσω OAuth → Η πρόσβαση υπόκειται στα τρέχοντα όρια του παρόχου
+Πίνακας ελέγχου → Σύνδεση Qoder → Σύνδεση OAuth → Η πρόσβαση υπόκειται στα τρέχοντα όρια του παρόχου
 
 Μοντέλα: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +239,7 @@ Combo: "openclaw-free"
 #### Kiro (Claude ΔΩΡΕΑΝ)
 
 ```bash
-Πίνακας ελέγχου → Σύνδεση Kiro → AWS Builder ID ή Google/GitHub → ~50 πιστώσεις/μήνα
+Πίνακας ελέγχου → Σύνδεση Kiro → AWS Builder ID ή Google/GitHub → ~50 μονάδες/μήνα
 
 Μοντέλα: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -334,65 +354,65 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Ανάπτυξη
+## Ανάπτυξη 🚀
 
-### Καθολική εγκατάσταση npm (Προτεινόμενη)
+### Καθολική εγκατάσταση npm (Συνιστάται)
 
 ```bash
 npm install -g omniroute
 
-# Δημιουργία καταλόγου ρυθμίσεων
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Δημιουργία αρχείου .env (δείτε .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Εκκίνηση διακομιστή
+# Start server
 omniroute
-# Ή με προσαρμοσμένη θύρα:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Το CLI φορτώνει αυτόματα το `.env` από `~/.omniroute/.env` ή `./.env`.
+Το CLI φορτώνει αυτόματα `.env` από `~/.omniroute/.env` ή `./.env`. Ένα `./.env` στον κατάλογο εργασίας μπορεί να ορίσει μόνο μια σύντομη λίστα επιτρεπόμενων κλειδιών (`REQUIRE_API_KEY`, τοπική ρύθμιση, ζώνη ώρας και ρυθμίσεις χρώματος, όχι τις θύρες). βάλε όλα τα άλλα στο `~/.omniroute/.env`. Δείτε [συμβόλαια εκκίνησης CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Λειτουργία δίσκου συστήματος (Tray)
+### Λειτουργία δίσκου
 
-Εκκινήστε το OmniRoute στο δίσκο συστήματος:
+Εκκινήστε OmniRoute στο δίσκο συστήματος:
 
 ```bash
 omniroute serve --tray
 ```
 
-Η εντολή επιστρέφει μετά την ετοιμότητα του διακομιστή και του δίσκου.
+Η εντολή επιστρέφει αφού ο διακομιστής και ο δίσκος είναι έτοιμοι.
 
 Ο διακομιστής συνεχίζει χωρίς το τερματικό.
 
-Η λειτουργία δίσκου υποστηρίζει macOS, Windows και γραφικές συνεδρίες Linux. Η λειτουργία δίσκου δεν ανοίγει αυτόματα το dashboard.
+Η λειτουργία δίσκου υποστηρίζει συνεδρίες macOS, Windows και γραφικά Linux. Η λειτουργία δίσκου δεν ανοίγει αυτόματα το ταμπλό.
 
 Χρησιμοποιήστε το μενού δίσκου για αυτές τις ενέργειες:
 
-- Άνοιγμα του dashboard.
-- Άνοιγμα του `/dashboard/logs`.
+- Ανοίξτε τον πίνακα ελέγχου.
+- Ανοίξτε `/dashboard/logs`.
 - Αλλαγή αυτόματης εκκίνησης.
-- Διακοπή του OmniRoute.
+- Σταματήστε OmniRoute.
 
-Μη συνδυάζετε το `--tray` με αυτές τις επιλογές:
+Μην συνδυάζετε `--tray` με αυτές τις επιλογές:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Αυτές οι λειτουργίες απαιτούν διαφορετική ιδιοκτησία διεργασίας.
+Αυτές οι λειτουργίες απαιτούν διαφορετική ιδιοκτησία διεργασιών.
 
-Ενεργοποιήστε την εκκίνηση κατά την επόμενη σύνδεση στο μηχάνημα:
+Ενεργοποίηση εκκίνησης στην επόμενη σύνδεση του μηχανήματος:
 
 ```bash
 omniroute autostart enable
 ```
 
-Η αυτόματη εκκίνηση χρησιμοποιεί λειτουργία δίσκου σε macOS, Windows και γραφικές συνεδρίες Linux. Το headless Linux χρησιμοποιεί την υπάρχουσα υπηρεσία χρήστη systemd.
+Η αυτόματη εκκίνηση χρησιμοποιεί τη λειτουργία δίσκου σε περιόδους λειτουργίας macOS, Windows και γραφικών Linux. Το Headless Linux χρησιμοποιεί την υπάρχουσα υπηρεσία χρήστη systemd.
 
-Απενεργοποιήστε την εκκίνηση κατά τη σύνδεση:
+Απενεργοποίηση εκκίνησης κατά τη σύνδεση:
 
 ```bash
 omniroute autostart disable
@@ -400,16 +420,16 @@ omniroute autostart disable
 
 ### Απεγκατάσταση
 
-Όταν δεν χρειάζεστε πλέον το OmniRoute, παρέχουμε δύο γρήγορα σενάρια για καθαρή αφαίρεση:
+Όταν δεν χρειάζεστε πλέον OmniRoute, παρέχουμε δύο γρήγορα σενάρια για καθαρή κατάργηση:
 
-| Εντολή                   | Ενέργεια                                                                                                      |
+| Εντολή                   | Δράση                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Αφαιρεί την εφαρμογή συστήματος αλλά **διατηρεί τη βάση δεδομένων και τις ρυθμίσεις σας** στο `~/.omniroute`. |
-| `npm run uninstall:full` | Αφαιρεί την εφαρμογή ΚΑΙ **διαγράφει μόνιμα όλες τις ρυθμίσεις, τα κλειδιά και τις βάσεις δεδομένων**.        |
+| `npm run uninstall`      | Καταργεί την εφαρμογή συστήματος αλλά** διατηρεί DB και τις διαμορφώσεις σας** στο `~/.omniroute`.            |
+| `npm run uninstall:full` | Καταργεί οριστικά την εφαρμογή AND** διαγράφει όλες τις διαμορφώσεις, τα κλειδιά και τις βάσεις δεδομένων** . |
 
-> Σημείωση: Για να εκτελέσετε αυτές τις εντολές, μεταβείτε στον φάκελο του έργου OmniRoute (εάν το κλωνοποιήσατε) και εκτελέστε τες. Εναλλακτικά, εάν είναι εγκατεστημένο καθολικά, μπορείτε απλώς να εκτελέσετε `npm uninstall -g omniroute`.
+> Σημείωση: Για να εκτελέσετε αυτές τις εντολές, μεταβείτε στον φάκελο του έργου OmniRoute (αν τον κλωνοποιήσατε) και εκτελέστε τις. Εναλλακτικά, εάν εγκατασταθεί καθολικά, μπορείτε απλά να εκτελέσετε `npm uninstall -g omniroute`.
 
-### Ανάπτυξη σε VPS
+### Ανάπτυξη VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -425,25 +445,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ή: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Ανάπτυξη με PM2 (Χαμηλή Μνήμη)
+### Ανάπτυξη PM2 (Χαμηλή μνήμη)
 
-Για διακομιστές με περιορισμένη RAM, χρησιμοποιήστε την επιλογή ορίου μνήμης:
+Για διακομιστές με περιορισμένο RAM, χρησιμοποιήστε την επιλογή ορίου μνήμης:
 
 ```bash
-# Με όριο 512MB (προεπιλογή)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ή με προσαρμοσμένο όριο μνήμης
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ή χρησιμοποιώντας το ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Δημιουργήστε το `ecosystem.config.js`:
+Δημιουργία `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -468,18 +488,18 @@ module.exports = {
 ### Docker
 
 ```bash
-# Κατασκευή εικόνας (προεπιλογή = runner-cli με προεγκατεστημένα codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Φορητή λειτουργία (προτεινόμενη)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Για λειτουργία ενσωματωμένη στον κεντρικό υπολογιστή με δυαδικά αρχεία CLI, δείτε την ενότητα Docker στην κύρια τεκμηρίωση.
+Για λειτουργία ενσωματωμένη στον κεντρικό υπολογιστή με δυαδικά αρχεία CLI, ανατρέξτε στην ενότητα Docker στα κύρια έγγραφα.
 
-### Void Linux (xbps-src)
+### Άκυρο Linux (xbps-src)
 
-Οι χρήστες Void Linux μπορούν να δημιουργήσουν πακέτο και να εγκαταστήσουν το OmniRoute εγγενώς χρησιμοποιώντας το πλαίσιο cross-compilation `xbps-src`. Αυτό αυτοματοποιεί τη μεμονωμένη κατασκευή Node.js μαζί με τις απαιτούμενες εγγενείς συνδέσεις `better-sqlite3`.
+Οι χρήστες Void Linux μπορούν να συσκευάσουν και να εγκαταστήσουν OmniRoute εγγενώς χρησιμοποιώντας το πλαίσιο πολλαπλής μεταγλώττισης `xbps-src`. Αυτό αυτοματοποιεί την αυτόνομη κατασκευή Node.js μαζί με τις απαιτούμενες εγγενείς συνδέσεις `better-sqlite3`.
 
 <details>
 <summary><b>Προβολή προτύπου xbps-src</b></summary>
@@ -506,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Καθορισμός αρχιτεκτονικής CPU στόχου για node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -515,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Εγκατάσταση όλων των εξαρτήσεων – παράλειψη scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Κατασκευή του μεμονωμένου bundle Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Αντιγραφή στατικών στοιχείων στο standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Μεταγλώττιση εγγενούς σύνδεσης better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Τοποθέτηση της μεταγλωττισμένης σύνδεσης στο standalone bundle
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Αφαίρεση πακέτων sharp ειδικών αρχιτεκτονικής
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Αντιγραφή εξαρτήσεων runtime pino που παραλείπει η στατική ανάλυση του Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -551,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Αποτροπή αφαίρεσης κενών καταλόγων δρομολογητή Next.js app από το hook μετά την εγκατάσταση
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -579,49 +599,49 @@ post_install() {
 
 ### Μεταβλητές Περιβάλλοντος
 
-| Μεταβλητή                               | Προεπιλογή                           | Περιγραφή                                                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Μυστικό υπογραφής JWT (**αλλάξτε σε παραγωγή**)                                                                                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Κωδικός πρόσβασης πρώτης σύνδεσης                                                                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | Κατάλογος δεδομένων (db, χρήση, αρχεία καταγραφής)                                                                                                                      |
-| `PORT`                                  | προεπιλογή framework                 | Θύρα υπηρεσίας (`20128` στα παραδείγματα)                                                                                                                               |
-| `HOSTNAME`                              | προεπιλογή framework                 | Κεντρικός υπολογιστής δέσμευσης (Docker προεπιλέγει `0.0.0.0`)                                                                                                          |
-| `NODE_ENV`                              | προεπιλογή runtime                   | Ορίστε `production` για ανάπτυξη                                                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Δημόσιο βασικό URL που εμφανίζεται στο dashboard και εκτίθεται στον διακομιστή (αντικαθιστά το παλαιό `BASE_URL`)                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Βασικό URL endpoint συγχρονισμού cloud (αντικαθιστά το παλαιό `CLOUD_URL`)                                                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Μυστικό HMAC για τα παραγόμενα κλειδιά API                                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Επιβολή κλειδιού API Bearer στο `/v1/*`                                                                                                                                 |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Επιτρέπει σε πιστοποιημένους χρήστες dashboard να αποκαλύπτουν πλήρεις αποθηκευμένες τιμές κλειδιών API κατ' απαίτηση                                                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Συχνότητα ανανέωσης από τον διακομιστή για δεδομένα Ορίων Παροχέα σε προσωρινή αποθήκευση· τα κουμπιά ανανέωσης UI εξακολουθούν να ενεργοποιούν χειροκίνητο συγχρονισμό |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Απενεργοποίηση αυτόματων στιγμιοτύπων SQLite πριν από εγγραφές/εισαγωγή/επαναφορά· τα χειροκίνητα αντίγραφα ασφαλείας εξακολουθούν να λειτουργούν                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | Ενεργοποιεί την εξαγωγή αρχείων καταγραφής εφαρμογής και ελέγχου στο δίσκο                                                                                              |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Επιβολή cookie ταυτοποίησης `Secure` (πίσω από αντίστροφο διακομιστή μεσολάβησης HTTPS)                                                                                 |
-| `CLOUDFLARED_BIN`                       | μη ορισμένο                          | Χρήση υπάρχοντος δυαδικού `cloudflared` αντί για διαχειριζόμενη λήψη                                                                                                    |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Μεταφορά για διαχειριζόμενα Quick Tunnels (`http2`, `quic` ή `auto`)                                                                                                    |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Όριο heap Node.js σε MB                                                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Μέγιστες καταχωρήσεις προσωρινής αποθήκευσης prompt                                                                                                                     |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Μέγιστες καταχωρήσεις σημασιολογικής προσωρινής αποθήκευσης                                                                                                             |
+| Μεταβλητός                              | Αθέτηση                     | Περιγραφή                                                                                                                                                                          |
+| --------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(δημιουργείται αυτόματα)_  | JWT υπογραφή μυστικού — που δημιουργήθηκε αυτόματα κατά την πρώτη εκτέλεση και συνεχίστηκε να `server.env`. ορίστε το ρητά όταν ο κατάλογος δεδομένων είναι εφήμερος               |
+| `INITIAL_PASSWORD`                      | _(unset)_                   | Πρώτος κωδικός σύνδεσης. Οι εγκαταστάσεις npm/source ξεκινούν με `CHANGEME`: αντικαταστήστε το. Unset: inboarding wizard                                                           |
+| `DATA_DIR`                              | `~/.omniroute`              | Κατάλογος δεδομένων (db, χρήση, αρχεία καταγραφής)                                                                                                                                 |
+| `PORT`                                  | προεπιλογή πλαισίου         | Θύρα εξυπηρέτησης (`20128` σε παραδείγματα)                                                                                                                                        |
+| `HOSTNAME`                              | προεπιλογή πλαισίου         | Σύνδεση κεντρικού υπολογιστή (Docker είναι από προεπιλογή `0.0.0.0`)                                                                                                               |
+| `NODE_ENV`                              | προεπιλογή χρόνου εκτέλεσης | Ρυθμίστε `production` για ανάπτυξη                                                                                                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`    | Η δημόσια βάση URL εμφανίστηκε στον πίνακα εργαλείων και εκτέθηκε στον διακομιστή (αντικαθιστά `BASE_URL` παλαιού τύπου)                                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Βάση τελικού σημείου συγχρονισμού cloud URL (αντικαθιστά `CLOUD_URL` παλαιού τύπου)                                                                                                |
+| `API_KEY_SECRET`                        | _(δημιουργείται αυτόματα)_  | HMAC μυστικό για δημιουργημένα κλειδιά API — δημιουργήθηκε αυτόματα στην πρώτη εκτέλεση και συνεχίστηκε στο `server.env`                                                           |
+| `REQUIRE_API_KEY`                       | `false`                     | Επιβολή κλειδιού API του φορέα στο `/v1/*`                                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Επιτρέψτε στους επαληθευμένους χρήστες του πίνακα εργαλείων να αποκαλύπτουν τις πλήρεις αποθηκευμένες τιμές κλειδιού API κατά παραγγελία                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Ρυθμός ανανέωσης από την πλευρά του διακομιστή για δεδομένα ορίων παρόχου προσωρινής αποθήκευσης. Τα κουμπιά ανανέωσης UI εξακολουθούν να ενεργοποιούν τον μη αυτόματο συγχρονισμό |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Απενεργοποιήστε τα αυτόματα στιγμιότυπα SQLite πριν από writes/import/restore. Τα χειροκίνητα αντίγραφα ασφαλείας εξακολουθούν να λειτουργούν                                      |
+| `APP_LOG_TO_FILE`                       | `true`                      | Ενεργοποιεί την έξοδο του αρχείου καταγραφής εφαρμογής και ελέγχου στο δίσκο                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                     | Επιβολή cookie auth `Secure` (πίσω από τον αντίστροφο διακομιστή μεσολάβησης HTTPS )                                                                                               |
+| `CLOUDFLARED_BIN`                       | απενεργοποίηση              | Χρησιμοποιήστε ένα υπάρχον δυαδικό αρχείο `cloudflared` αντί για διαχειριζόμενη λήψη                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                     | Μεταφορά για διαχειριζόμενες γρήγορες σήραγγες (`http2`, `quic` ή `auto`)                                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                       | Όριο σωρού Node.js σε MB                                                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                        | Μέγιστες καταχωρήσεις προσωρινής μνήμης                                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                       | Μέγιστες καταχωρήσεις σημασιολογικής κρυφής μνήμης                                                                                                                                 |
 
-Για την πλήρη αναφορά μεταβλητών περιβάλλοντος, δείτε το [README](../README.md).
+Για την πλήρη αναφορά της μεταβλητής περιβάλλοντος, δείτε το [README](../README.md).
 
 ---
 
-## 📊 Διαθέσιμα Μοντέλα
+## 📊 Διαθέσιμα μοντέλα
 
 <details>
 <summary><b>Προβολή όλων των διαθέσιμων μοντέλων</b></summary>
 
-> Η παρακάτω λίστα είναι επιμελημένη από το `open-sse/config/providerRegistry.ts` για την v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter, κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη ζωντανό κατάλογο ανοίξτε **Πίνακας Ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα Μοντέλα** ή καλέστε το `GET /api/models/catalog`.
+> Η παρακάτω λίστα επιμελείται από το `open-sse/config/providerRegistry.ts` για την έκδοση v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη τρέχοντα κατάλογο ανοίξτε **Πίνακας ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα μοντέλα** ή καλέστε το `GET /api/models/catalog`.
 >
-> Αν η ενσωματωμένη λίστα κάποιου παρόχου έχει αποκλίνει, χρησιμοποιήστε την **Εισαγωγή από /models** σε εκείνη τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο Συγχρονισμό**) για να ανακτήσετε τον ζωντανό κατάλογο upstream. Αυτό επαληθεύτηκε στην v3.8.50 για τα LLM7.io (`gemini-3.1-flash-lite`) και UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από τον upstream κατά τον ίδιο κύκλο δοκιμών.
+> Αν η ενσωματωμένη λίστα ενός παρόχου έχει αποκλίνει, χρησιμοποιήστε την επιλογή **Εισαγωγή από /models** σε αυτήν τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο συγχρονισμό**) για να ανακτήσετε τον τρέχοντα κατάλογο από την upstream υπηρεσία. Αυτό επαληθεύτηκε στην έκδοση v3.8.50 για το LLM7.io (`gemini-3.1-flash-lite`) και το UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από την upstream υπηρεσία κατά τον ίδιο κύκλο δοκιμών.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ επίπεδα effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ επίπεδα effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ΔΩΡΕΑΝ OAuth: χρησιμοποιήστε τον ζωντανό κατάλογο που εμφανίζεται στην ενότητα **Πίνακας Ελέγχου → Πάροχοι → Kiro → Διαθέσιμα Μοντέλα**. Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το πλάνο.
+**Kiro (`kr/`)** — ΔΩΡΕΑΝ OAuth: χρησιμοποιήστε τον τρέχοντα κατάλογο που εμφανίζεται στην ενότητα **Πίνακας ελέγχου → Πάροχοι → Kiro → Διαθέσιμα μοντέλα**. Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το πρόγραμμα.
 
 **Qoder (`if/`)** — ΔΩΡΕΑΝ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -633,33 +653,33 @@ post_install() {
 
 **DeepSeek (`ds/`)** — Κλειδί API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Εξαιρετικά ταχύ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Εξαιρετικά γρήγορο: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Εγγενές Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Φιλοξενείται στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Φιλοξενείται στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Με ενίσχυση αναζήτησης: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Ενισχυμένο με αναζήτηση: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Ανοιχτού κώδικα: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (δωρεάν), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ταχεία εξαγωγή συμπερασμάτων: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Γρήγορη εξαγωγή συμπερασμάτων: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Σε κλίμακα wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Κλίμακα wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Εστιασμένο σε RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Εταιρικό: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Για επιχειρήσεις: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από τη Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στο **Πίνακας Ελέγχου → Πάροχοι** και έπειτα χρησιμοποιήστε τα **Διαθέσιμα Μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από την Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στον **Πίνακα ελέγχου → Πάροχοι** και, στη συνέχεια, χρησιμοποιήστε τα **Διαθέσιμα μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
+**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ο καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
 
-**Σημείωση για τα ID μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή ID παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα ID περιλαμβάνουν εκδόσεις με τελείες, επειδή έτσι τα αναμένει το upstream API. Αν κάποιο μοντέλο δεν παρατίθεται παραπάνω, εκτελέστε `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
+**Σημείωση για τα αναγνωριστικά μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή αναγνωριστικά παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα αναγνωριστικά περιλαμβάνουν εκδόσεις με τελείες, επειδή έτσι τα αναμένει το upstream API. Αν ένα μοντέλο δεν αναφέρεται παραπάνω, εκτελέστε το `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
 
 </details>
 
@@ -690,12 +710,12 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### Προσαρμοσμένοι πάροχοι συμβατοί με OpenAI
 
-Οποιαδήποτε πύλη που εκφωνεί το OpenAI API (ένας αυτο-φιλοξενούμενος διακομιστής μεσολάβησης, vLLM, ένας συγκεντρωτής τρίτου μέρους) μπορεί να προστεθεί ως δικός του κόμβος παρόχου:
+Οποιαδήποτε πύλη που εκφωνεί το OpenAI API (ένας αυτο-φιλοξενούμενος διακομιστής μεσολάβησης, vLLM, ένας συναθροιστής τρίτου μέρους) μπορεί να προστεθεί ως δικός του κόμβος παρόχου:
 
 1. **Πάροχοι → Προσθήκη OpenAI Συμβατό** .
 2. **Ονομα** : μια ετικέτα εμφάνισης για τον κόμβο.
-3. **Πρόθεμα** : το όνομα δρομολόγησης. Οι πελάτες καλούν τα μοντέλα ως `<prefix>/<model>`, επομένως ένας κόμβος με πρόθεμα `mygw` εξυπηρετεί `mygw/gpt-4o-mini`. Υποχρεούμαι; δεν υπάρχει περιορισμός χαρακτήρα.
-4. **Τύπος API** : η οικογένεια τελικών σημείων που εξυπηρετεί η πύλη (Ολοκληρώσεις συνομιλίας, απαντήσεις, ενσωματώσεις, ήχος, εικόνες).
+3. **Πρόθεμα** : το όνομα δρομολόγησης. Οι πελάτες καλούν τα μοντέλα ως `<prefix>/<model>`, έτσι ένας κόμβος με πρόθεμα `mygw` εξυπηρετεί `mygw/gpt-4o-mini`. Υποχρεούμαι; δεν υπάρχει περιορισμός χαρακτήρα.
+4. **Τύπος API** : η οικογένεια τελικών σημείων που εξυπηρετεί η πύλη (Ολοκληρώσεις συνομιλίας, Απαντήσεις, Ενσωματώσεις, ήχος, εικόνες).
 5. **Βάση URL** : η ρίζα API, μέχρι και `/v1` (για παράδειγμα `https://gateway.example.com/v1`), όχι η πλήρης διαδρομή `/chat/completions`. Οι πύλες με μη τυπικές διαδρομές τις ορίζουν** Προηγμένες ρυθμίσεις** (διαδρομή συνομιλίας, διαδρομή μοντέλων).
 6. Ο** Κλειδί API (για έλεγχο)** Το πεδίο δοκιμάζει μόνο τη σύνδεση. Αφού δημιουργήσετε τον κόμβο, ανοίξτε τον και χρησιμοποιήστε τον** Προσθήκη σύνδεσης** για να αποθηκεύσετε το κλειδί που θα χρησιμοποιήσουν τα αιτήματα.
 
@@ -703,7 +723,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 #### Δεσμευμένα προθέματα
 
-Ένα πρόθεμα δεν μπορεί να είναι το αναγνωριστικό ή το ψευδώνυμο ενός ενσωματωμένου παρόχου (για παράδειγμα `openai`, `cf`), ούτε το αναγνωριστικό ενός συνταξιούχου παρόχου. Η συσκευή επίλυσης μοντέλων ελέγχει τα ενσωματωμένα αναγνωριστικά και ψευδώνυμα πριν από προσαρμοσμένους κόμβους, επομένως ένας κόμβος που χρησιμοποιεί ένα από αυτά τα προθέματα δεν θα λαμβάνει ποτέ επισκεψιμότητα: `<prefix>/model` θα πήγαινε στον ενσωματωμένο πάροχο ή θα αποτύγχανε να κλείσει εάν αυτός ο πάροχος αποσύρθηκε. Η δημιουργία ή η επεξεργασία ενός κόμβου με τέτοιο πρόθεμα απορρίπτεται με:
+Ένα πρόθεμα δεν μπορεί να είναι το αναγνωριστικό ή το ψευδώνυμο ενός ενσωματωμένου παρόχου (για παράδειγμα `openai`, `cf`), ούτε το αναγνωριστικό ενός συνταξιούχου παρόχου. Η συσκευή επίλυσης μοντέλων ελέγχει τα ενσωματωμένα αναγνωριστικά και ψευδώνυμα πριν από προσαρμοσμένους κόμβους, επομένως ένας κόμβος που χρησιμοποιεί ένα από αυτά τα προθέματα δεν θα λαμβάνει ποτέ επισκεψιμότητα: `<prefix>/model` θα πήγαινε στον ενσωματωμένο πάροχο ή θα αποτύγχανε να κλείσει εάν αυτός ο πάροχος αποσύρθηκε. Η δημιουργία ή η επεξεργασία ενός κόμβου με ένα τέτοιο πρόθεμα απορρίπτεται με:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -713,10 +733,10 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 #### Επιλογές πύλης ανά σύνδεση
 
-Αυτά τα πλήκτρα μπαίνουν στο `providerSpecificData` μιας σύνδεσης (για παράδειγμα μέσω `PUT /api/providers/{id}`):
+Αυτά τα κλειδιά μπαίνουν στο `providerSpecificData` μιας σύνδεσης (για παράδειγμα μέσω `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (ακέραιος, 1–1024) — για συνδέσεις συμβατές με μορφή συνομιλίας OpenAI των οποίων η πύλη απορρίπτει μεγάλα ονόματα εργαλείων. Τα μεγαλύτερα ονόματα αποστέλλονται ως σύντομα ψευδώνυμα και επαναφέρονται στην απάντηση.
-- `quotaEndpoint` — το τελικό σημείο quota/credits της πύλης, διαβάστε για τη λωρίδα ορίου του πίνακα εργαλείων και τη δρομολόγηση με επίγνωση ορίων. Λειτουργεί και σε συνδέσεις συμβατές με OpenAI και Anthropic. το πλήρες σχήμα τεκμηριώνεται σε `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (ακέραιος, 1–1024) — για συνδέσεις συμβατές με μορφή συνομιλίας OpenAI των οποίων η πύλη απορρίπτει μεγάλα ονόματα εργαλείων. Τα μεγαλύτερα ονόματα αποστέλλονται ως σύντομα ψευδώνυμα και επαναφέρονται στην απάντηση. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go και Muse Code έχουν ήδη ψευδώνυμα πάνω από 64 χαρακτήρες χωρίς ρύθμιση. Μια τιμή σύνδεσης αντικαθιστά την προεπιλογή του Azure OpenAI / Azure AI Foundry (μια σύνδεση Azure πίσω από μια πιο αυστηρή πύλη) και ορίζει το όριο για έναν προσαρμοσμένο συμβατό κόμβο. OpenAI, Mistral, NVIDIA, OpenCode Zen/Go και Muse Code διατηρούν το όριο μητρώου τους και το αγνοούν.
+- `quotaEndpoint` — το τελικό σημείο quota/credits της πύλης, διαβάστε για τη λωρίδα ορίου του πίνακα οργάνων και τη δρομολόγηση με επίγνωση ορίων. Λειτουργεί σε συνδέσεις συμβατές με OpenAI και Anthropic. το πλήρες σχήμα τεκμηριώνεται σε `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -731,9 +751,9 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 }
 ```
 
-### Αλυσιδώνοντας OmniRoute Peers
+### Αλυσοδεσία OmniRoute Peers
 
-Μια άλλη πύλη OmniRoute μπορεί να προστεθεί ως α** Προσαρμοσμένο OpenAI-συμβατό** προμηθευτής. Χρησιμοποιήστε τη βάση `/v1` URL του ομότιμου και ένα αποκλειστικό κλειδί API με τα λιγότερα προνόμια που εκδίδεται από αυτόν τον ομότιμο.
+Μια άλλη πύλη OmniRoute μπορεί να προστεθεί ως α** Προσαρμοσμένο OpenAI-συμβατό** προμηθευτής. Χρησιμοποιήστε τη βάση `/v1` URL του ομότιμου και ένα αποκλειστικό κλειδί API με τα λιγότερα προνόμια που εκδόθηκε από αυτόν τον ομότιμο.
 
 Για αμφίδρομες ή πολλαπλές αλυσίδες, ενεργοποιήστε το προστατευτικό βρόχου opt-in σε κάθε πύλη:
 
@@ -751,9 +771,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Μόνο τα αιτήματα που αποστέλλονται σε έναν ρητά επιτρεπόμενο ομότιμο URL λαμβάνουν την κεφαλίδα `X-OmniRoute-Peer-Trace`. Μια πύλη απορρίπτει ένα επαναλαμβανόμενο παράδειγμα ID ή εξαντλημένο προϋπολογισμό hop με HTTP `508 Loop Detected`. Οι συνηθισμένοι πάροχοι ανάντη δεν λαμβάνουν ομότιμα μεταδεδομένα.
+Μόνο τα αιτήματα που αποστέλλονται σε έναν ρητά επιτρεπόμενο ομότιμο URL λαμβάνουν την κεφαλίδα `X-OmniRoute-Peer-Trace`. Μια πύλη απορρίπτει ένα επαναλαμβανόμενο παράδειγμα ID ή εξαντλημένο προϋπολογισμό hop με HTTP `508 Loop Detected`. Οι απλοί πάροχοι ανάντη δεν λαμβάνουν ομότιμα μεταδεδομένα.
 
-Η ομότιμη αλυσίδα δεν είναι αναπαραγωγή βάσης δεδομένων ή ανακατεύθυνση κεντρικού υπολογιστή. Κάθε πύλη διατηρεί ανεξάρτητη κατάσταση SQLite, κρυφές μνήμες, μετρητές ρυθμών και περιόδους σύνδεσης. Χρησιμοποιήστε έναν ελεγμένο αντίστροφο διακομιστή μεσολάβησης ή ανακατεύθυνση προγράμματος-πελάτη για διαθεσιμότητα active/passive ή active/active και ποτέ μην προσαρτήσετε μία βάση δεδομένων SQLite σε πολλές εκτελούμενες εμφανίσεις OmniRoute.
+Η ομότιμη αλυσίδα δεν είναι αναπαραγωγή βάσης δεδομένων ή ανακατεύθυνση κεντρικού υπολογιστή. Κάθε πύλη διατηρεί ανεξάρτητη κατάσταση SQLite, κρυφές μνήμες, μετρητές ποσοστών και συνεδρίες. Χρησιμοποιήστε έναν ελεγμένο αντίστροφο διακομιστή μεσολάβησης ή ανακατεύθυνση προγράμματος-πελάτη για διαθεσιμότητα active/passive ή active/active και ποτέ μην προσαρτήσετε μία βάση δεδομένων SQLite σε πολλές εκτελούμενες εμφανίσεις OmniRoute.
 
 ### Διαδρομές αποκλειστικών παρόχων
 
@@ -783,7 +803,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Προβάδισμα:** → Ειδικό για κλειδί zqb Ειδικό για σύνθετο → Ειδικό για πάροχο → Παγκόσμιο περιβάλλον →.
+**Precedence:** Key-specific → Combo-specific → Provider-specific → Global → Environment.
 
 ### Κατάλογος μοντέλων API
 
@@ -813,15 +833,15 @@ curl http://localhost:20128/api/models/catalog
 
 ### LLM Gateway Intelligence (Φάση 9)
 
-- **Σημασιολογική κρυφή μνήμη** — Αυτόματη αποθήκευση στην κρυφή μνήμη χωρίς ροή, αποκρίσεις θερμοκρασίας = 0 (παράκαμψη με `X-OmniRoute-No-Cache: true`)
-- **Ζητήστε ανικανότητα** — Καταργεί διπλότυπα αιτήματα εντός 5 δευτερολέπτων μέσω κεφαλίδας `Idempotency-Key` ή `X-Request-Id`
+- **Σημασιολογική κρυφή μνήμη** — Αυτόματη αποθήκευση στην κρυφή μνήμη χωρίς ροή, θερμοκρασία = 0 αποκρίσεις (παράκαμψη με `X-OmniRoute-No-Cache: true`)
+- **Ζητήστε ανικανότητα** — Καταργεί διπλότυπα αιτήματα μέσα σε 5 δευτερόλεπτα μέσω κεφαλίδας `Idempotency-Key` ή `X-Request-Id`
 - **Παρακολούθηση προόδου** — Συμμετοχή σε συμβάντα SSE `event: progress` μέσω κεφαλίδας `X-OmniRoute-Progress: true`
 
 ---
 
 ### Μεταφραστής Παιδική χαρά
 
-Πρόσβαση μέσω** Μεταφραστής ταμπλό →** . Διορθώστε σφάλματα και οπτικοποιήστε πώς OmniRoute μεταφράζει τα αιτήματα API μεταξύ παρόχων.
+Πρόσβαση μέσω** Μεταφραστής ταμπλό →** . Διορθώστε σφάλματα και οπτικοποιήστε πώς OmniRoute μεταφράζει αιτήματα API μεταξύ παρόχων.
 
 | Τρόπος                    | Σκοπός                                                                                                                |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -844,27 +864,27 @@ curl http://localhost:20128/api/models/catalog
 
 **Στρατηγικές ορατές στον πίνακα ελέγχου (δρομολόγηση σε επίπεδο λογαριασμού):**
 
-| Στρατηγική                    | Περιγραφή                                                                                                                         |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Γεμίστε πρώτα**             | Χρησιμοποιεί λογαριασμούς με σειρά προτεραιότητας — ο κύριος λογαριασμός χειρίζεται όλα τα αιτήματα μέχρι να μην είναι διαθέσιμος |
-| **Round Robin**               | Κυκλοφορεί σε όλους τους λογαριασμούς με ρυθμιζόμενο σταθερό όριο (προεπιλογή: 3 κλήσεις ανά λογαριασμό)                          |
-| **P2C (Δύναμη δύο επιλογών)** | Επιλέγει 2 τυχαίους λογαριασμούς και διαδρομές προς τον πιο υγιή — εξισορροπεί το φορτίο με επίγνωση της υγείας                   |
-| **Τυχαίος**                   | Επιλέγει τυχαία έναν λογαριασμό για κάθε αίτημα χρησιμοποιώντας τη τυχαία αναπαραγωγή Fisher-Yates                                |
-| **Λιγότερο Μεταχειρισμένο**   | Διαδρομές στον λογαριασμό με την παλαιότερη χρονική σήμανση `lastUsedAt`, κατανέμοντας ομοιόμορφα την επισκεψιμότητα              |
-| **Βελτιστοποιημένο κόστος**   | Διαδρομές προς τον λογαριασμό με τη χαμηλότερη τιμή προτεραιότητας, βελτιστοποίηση για παρόχους χαμηλότερου κόστους               |
+| Στρατηγική                    | Περιγραφή                                                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Γεμίστε πρώτα**             | Χρησιμοποιεί λογαριασμούς με σειρά προτεραιότητας Ο κύριος λογαριασμός — χειρίζεται όλα τα αιτήματα μέχρι να μην είναι διαθέσιμο |
+| **Round Robin**               | Κυκλοφορεί σε όλους τους λογαριασμούς με ρυθμιζόμενο σταθερό όριο (προεπιλογή: 3 κλήσεις ανά λογαριασμό)                         |
+| **P2C (Δύναμη δύο επιλογών)** | Επιλέγει 2 τυχαίους λογαριασμούς και διαδρομές προς το πιο υγιές ένα — ισορροπεί το φορτίο με επίγνωση της υγείας                |
+| **Τυχαίος**                   | Επιλέγει τυχαία έναν λογαριασμό για κάθε αίτημα χρησιμοποιώντας τη τυχαία αναπαραγωγή Fisher-Yates                               |
+| **Λιγότερο Μεταχειρισμένο**   | Διαδρομές στον λογαριασμό με την παλαιότερη χρονική σήμανση `lastUsedAt`, κατανέμοντας ομοιόμορφα την επισκεψιμότητα             |
+| **Βελτιστοποιημένο κόστος**   | Διαδρομές προς τον λογαριασμό με τη χαμηλότερη τιμή προτεραιότητας, βελτιστοποίηση για παρόχους χαμηλότερου κόστους              |
 
 **Προηγμένες συνδυαστικές και αυτόματες στρατηγικές** (με δυνατότητα διαμόρφωσης ανά σύνθετο ή μέσω προθεμάτων `auto/*` — βλέπε [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — αυστηρή τάξη, ποτέ στρογγυλή
-- `weighted` — αναλογική επισκεψιμότητα διαιρεμένη κατά βάρη ανά μοντέλο
-- `fill-first` — στραγγίστε το πρώτο μοντέλο μέχρι να φτάσουν τα όρια
+- `weighted` — αναλογική επισκεψιμότητα χωρισμένη κατά βάρη ανά μοντέλο
+- `fill-first` — στραγγίστε το πρώτο μοντέλο μέχρι να φτάσετε τα όρια
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Δύναμη δύο επιλογών)
 - `least-used` και `cost-optimized`
-- `auto` — βάσει βαθμολογίας σε όλους τους υποψηφίους
+- `auto` — με βάση τη βαθμολογία σε όλους τους υποψηφίους
 - `lkgp` (Τελευταίος γνωστός καλός πάροχος) — καρφιτσώνει στον τελευταίο επιτυχημένο πάροχο και μετά επιστρέφει στους κανόνες
 - `context-optimized` — επιλέγει το μοντέλο με το μεγαλύτερο ελεύθερο παράθυρο περιβάλλοντος
-- `context-relay` — αλυσίδες μοντέλων μεγάλου πλαισίου για επόμενες στροφές
+- `context-relay` αλυσίδες — μοντέλα με μεγάλο πλαίσιο για επακόλουθες στροφές
 
 #### Κεφαλίδα εξωτερικής κολλητικής περιόδου λειτουργίας
 
@@ -974,29 +994,29 @@ OmniRoute εφαρμόζει ανθεκτικότητα σε επίπεδο πα
 1. **Αίτημα ουράς και βηματοδότησης** — Διαμόρφωση αιτήματος σε επίπεδο συστήματος:
    - **Αιτήματα ανά λεπτό (RPM)** — Μέγιστα αιτήματα ανά λεπτό ανά λογαριασμό
    - **Ελάχιστος χρόνος μεταξύ αιτημάτων** — Ελάχιστο κενό σε χιλιοστά του δευτερολέπτου μεταξύ των αιτημάτων
-   - **Μέγιστα ταυτόχρονα αιτήματα** — Μέγιστα ταυτόχρονα αιτήματα ανά λογαριασμό
+   - **Μέγιστα ταυτόχρονα αιτήματα** — Μέγιστες ταυτόχρονες αιτήσεις ανά λογαριασμό
 
-2. **Ψύξη σύνδεσης** — Διαμόρφωση τύπου ανά εξουσιοδότηση για μία μόνο σύνδεση μετά από αποτυχίες με δυνατότητα επανάληψης δοκιμής:
+2. **Ψύξη σύνδεσης** Διαμόρφωση τύπου — Per-auth για μία μόνο σύνδεση μετά από αποτυχίες με δυνατότητα επανάληψης δοκιμής:
    - **Ψύξη βάσης** — Προεπιλεγμένο παράθυρο ψύξης για αποτυχίες ανοδικής ροής με δυνατότητα επανάληψης δοκιμής
-   - **Χρησιμοποιήστε τις συμβουλές για επανάληψη της ροής** — Τιμά τις έγκυρες υποδείξεις `Retry-After` ή επαναφοράς όταν παρέχονται
+   - **Χρησιμοποιήστε τις συμβουλές για επανάληψη της ροής** — Τιμά έγκυρες συμβουλές `Retry-After` ή επαναφοράς όταν παρέχονται
    - **Max Backoff Steps** — Μέγιστο εκθετικό επίπεδο backoff για επαναλαμβανόμενες αποτυχίες
 
 3. **Διακόπτης κυκλώματος παρόχου** — Παρακολουθεί αποτυχίες παρόχου από άκρο σε άκρο, επισημαίνει έναν πάροχο που έχει υποβαθμιστεί στο διαμορφωμένο όριο προειδοποίησης και ανοίγει τον διακόπτη όταν επιτευχθεί το διαμορφωμένο όριο αποτυχίας:
    - **Όριο υποβάθμισης** — Διαδοχικές αποτυχίες παρόχου πριν από την είσοδο `DEGRADED`
    - **Όριο αποτυχίας** — Διαδοχικές αποτυχίες παρόχου πριν από την είσοδο `OPEN`
-   - **Επαναφορά χρονικού ορίου** — Χρονικό παράθυρο πριν ελεγχθεί ξανά ο πάροχος
+   - **Επαναφορά χρονικού ορίου** — Χρονικό παράθυρο πριν ο πάροχος δοκιμαστεί ξανά
    - **CLOSED** (Υγιεινή) — Τα αιτήματα ρέουν κανονικά
-   - **DEGRADED** — Τα αιτήματα εξακολουθούν να ρέουν ενώ παρακολουθούνται αυξημένες αστοχίες
-   - **OPEN** — Ο πάροχος είναι προσωρινά αποκλεισμένος μετά από επανειλημμένες αποτυχίες
+   - **DEGRADED** — Τα αιτήματα εξακολουθούν να ρέουν ενώ παρακολουθούνται αυξημένες αποτυχίες
+   - **OPEN** Ο πάροχος — είναι προσωρινά αποκλεισμένος μετά από επανειλημμένες αποτυχίες
    - **HALF_OPEN** — Έλεγχος εάν ο πάροχος έχει ανακτήσει
 
    Τα όρια ποσοστού `429` με εμβέλεια σύνδεσης παραμένουν εντός** Ψύξη σύνδεσης** και μην υπολογίζετε στον διακόπτη παρόχου.
 
    Η κατάσταση χρόνου εκτέλεσης του διακόπτη παροχής εμφανίζεται σε** Ταμπλό → Health** μόνο.
 
-4. **Περιμένετε για Cooldown** — Εάν κάθε υποψήφια σύνδεση κρυώνει ήδη, OmniRoute μπορεί να περιμένει για το νωρίτερο cooldown και να δοκιμάσει ξανά το ίδιο αίτημα πελάτη αυτόματα.
+4. **Περιμένετε για Cooldown** — Εάν κάθε υποψήφια σύνδεση κρυώνει ήδη, OmniRoute μπορεί να περιμένει για την νωρίτερη cooldown και να δοκιμάσει ξανά το ίδιο αίτημα πελάτη αυτόματα.
 
-5. **Αυτόματος εντοπισμός ορίου ρυθμού** — Όταν οι πάροχοι ανάντη επιστρέφουν ρητά παράθυρα αναμονής, αυτές οι υποδείξεις παρακάμπτουν την ψύξη της τοπικής σύνδεσης όταν είναι ενεργοποιημένη η ρύθμιση.
+5. **Αυτόματος εντοπισμός ορίου ρυθμού** — Όταν οι ανάντη πάροχοι επιστρέφουν ρητά παράθυρα αναμονής, αυτές οι συμβουλές παρακάμπτουν το cooldown της τοπικής σύνδεσης όταν είναι ενεργοποιημένη η ρύθμιση.
 
 **Επαγγελματική συμβουλή:** Χρησιμοποιήστε το** Υγεία** σελίδα για να επιθεωρήσετε και να επαναφέρετε τους διακόπτες ζωντανής παροχής μετά από διακοπή λειτουργίας. Η σελίδα Resilience αλλάζει μόνο τη διαμόρφωση.
 
@@ -1038,15 +1058,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Η σελίδα ρυθμίσεων είναι οργανωμένη σε** 7 καρτέλες** για εύκολη πλοήγηση:
 
-| Αυτί             | Περιεχόμενα                                                                                                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Γενικός**      | Εργαλεία αποθήκευσης συστήματος, προεπιλεγμένη συμπεριφορά, ορατότητα σήραγγας τελικού σημείου                                                                                                                |
-| **Εμφάνιση**     | Χειριστήρια θεμάτων (light/dark/system), ορατότητα πλαϊνής γραμμής, εναλλαγές πίνακα για κάρτες σήραγγας Cloudflare/Tailscale/ngrok                                                                           |
-| **AI**           | Προϋπολογισμός σκέψης (διέλευση / αυτόματη ταινία / προσαρμοσμένη / προσαρμοστική — βλέπε [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), προτροπή καθολικού συστήματος, στατιστικά προσωρινής μνήμης προτροπής |
-| **Ασφάλεια**     | Ρυθμίσεις Login/Password, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                                                                |
-| **Δρομολόγηση**  | Παγκόσμια στρατηγική δρομολόγησης (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), ψευδώνυμα μοντέλων μπαλαντέρ, εναλλακτικές αλυσίδες, σύνθετες προεπιλογές                          |
-| **Ελαστικότητα** | Ουρά αιτημάτων, ψύξη σύνδεσης, διαμόρφωση διακόπτη παρόχου και συμπεριφορά αναμονής για ψύξη                                                                                                                  |
-| **Προχωρημένος** | Καθολική διαμόρφωση διακομιστή μεσολάβησης (HTTP/SOCKS5), αντικαταστάσεις διακομιστή μεσολάβησης ανά πάροχο                                                                                                   |
+| Αυτί             | Περιεχόμενα                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Γενικός**      | Εργαλεία αποθήκευσης συστήματος, προεπιλεγμένη συμπεριφορά, ορατότητα σήραγγας τελικού σημείου                                                                                                               |
+| **Εμφάνιση**     | Χειριστήρια θεμάτων (light/dark/system), ορατότητα πλαϊνής γραμμής, εναλλαγές πίνακα για κάρτες σήραγγας Cloudflare/Tailscale/ngrok                                                                          |
+| **AI**           | Προϋπολογισμός σκέψης (διαβίβαση / αυτόματη λωρίδα / προσαρμοσμένη / προσαρμοστική — βλ. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), προτροπή καθολικού συστήματος, στατιστικά προσωρινής μνήμης προτροπής |
+| **Ασφάλεια**     | Ρυθμίσεις Login/Password, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                                                               |
+| **Δρομολόγηση**  | Παγκόσμια στρατηγική δρομολόγησης (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), ψευδώνυμα μοντέλων μπαλαντέρ, εναλλακτικές αλυσίδες, σύνθετες προεπιλογές                         |
+| **Ελαστικότητα** | Ουρά αιτημάτων, ψύξη σύνδεσης, διαμόρφωση διακόπτη παρόχου και συμπεριφορά αναμονής για ψύξη                                                                                                                 |
+| **Προχωρημένος** | Καθολική διαμόρφωση διακομιστή μεσολάβησης (HTTP/SOCKS5), αντικαταστάσεις διακομιστή μεσολάβησης ανά πάροχο                                                                                                  |
 
 Το General δεν αντιγράφει πλέον την καταγραφή μόνο για ανάγνωση και τις σημειώσεις προσωρινής αποθήκευσης. Οι ρυθμίσεις διατήρησης και βελτιστοποίησης βάσης δεδομένων διατηρούνται μέσω του `/api/settings/database`. Η μη αυτόματη εκκαθάριση της προσωρινής μνήμης χρησιμοποιεί `DELETE /api/cache`. Τα όρια σειρών καταγραφής αιτημάτων και διακομιστή μεσολάβησης ελέγχονται από `CALL_LOGS_TABLE_MAX_ROWS` και `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1056,10 +1076,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Πρόσβαση μέσω** Κόστος ταμπλό →** .
 
-| Αυτί               | Σκοπός                                                                                                           |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| **Προϋπολογισμός** | Ορίστε όρια δαπανών ανά κλειδί API με προϋπολογισμούς daily/weekly/monthly και παρακολούθηση σε πραγματικό χρόνο |
-| **Τιμολόγηση**     | Προβολή και επεξεργασία εγγραφών τιμολόγησης μοντέλου — κόστος ανά 1.000 input/output διακριτικά ανά πάροχο      |
+| Αυτί               | Σκοπός                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **Προϋπολογισμός** | Ορίστε όρια δαπανών ανά κλειδί API με προϋπολογισμούς daily/weekly/monthly και παρακολούθηση σε πραγματικό χρόνο     |
+| **Τιμολόγηση**     | Προβάλετε και επεξεργαστείτε καταχωρήσεις τιμολόγησης μοντέλου κόστος — ανά 1.000 διακριτικά input/output ανά πάροχο |
 
 ```bash
 # API: Set a budget
@@ -1137,7 +1157,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **Λιγότερο Μεταχειρισμένο**            | Διαδρομές προς το μοντέλο με τα λιγότερα πρόσφατα αιτήματα (χρησιμοποιεί συνδυαστικές μετρήσεις) |
 | **Βελτιστοποιημένο ως προς το κόστος** | Διαδρομές προς το φθηνότερο διαθέσιμο μοντέλο (χρησιμοποιεί τον πίνακα τιμολόγησης)              |
 
-Μπορούν να οριστούν καθολικές προεπιλογές συνδυασμού** Ρυθμίσεις → ταμπλό → Δρομολόγηση → Combo προεπιλογές** . Τα σύνθετα χρονικά όρια στόχων κληρονομούν το χρονικό όριο του τρέχοντος αιτήματος από προεπιλογή. Χρήση** Χρονικό όριο λήξης στόχου (δευτερόλεπτα)** σε σύνθετες προεπιλογές ή σε μεμονωμένο συνδυασμό μόνο όταν ένα μικρότερο όριο ανά στόχο θα πρέπει να ενεργοποιεί ταχύτερη εναλλακτική.
+Μπορούν να οριστούν καθολικές προεπιλογές συνδυασμού** Ρυθμίσεις → ταμπλό → Δρομολόγηση → Combo προεπιλογές** . Τα σύνθετα χρονικά όρια στόχων κληρονομούν το χρονικό όριο του τρέχοντος αιτήματος από προεπιλογή. Χρήση** Χρονικό όριο λήξης στόχου (δευτερόλεπτα)** στις σύνθετες προεπιλογές ή σε ένα μεμονωμένο συνδυασμό μόνο όταν ένα μικρότερο όριο ανά στόχο θα πρέπει να ενεργοποιεί ταχύτερη εναλλακτική.
 
 Οι συνδυαστικές βελτιστοποιήσεις μηδενικού λανθάνοντος χρόνου είναι επιλέξιμες. Αδεια** Βελτιστοποιήσεις μηδενικής καθυστέρησης** απενεργοποιήθηκε για να αποτρέψει αυτές τις δυνατότητες λανθάνοντος χρόνου από την κούρσα εναλλακτικών στόχων, την παράλειψη στόχων με βάση το ιστορικό TTFT ή τη συμπίεση εναλλακτικών αιτημάτων. Η ενεργοποίησή του επιτρέπει τη διαμορφωμένη αντιστάθμιση, τις προγνωστικές παραλείψεις TTFT και την προληπτική εναλλακτική συμπίεση για την ανταλλαγή της πιστότητας routing/request για χαμηλότερο λανθάνοντα χρόνο.
 

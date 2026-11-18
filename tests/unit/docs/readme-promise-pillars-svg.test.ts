@@ -6,6 +6,19 @@ import {
   PROMISE_PILLARS_COPY,
 } from "../../../scripts/docs/gen-readme-promise-pillars.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed six-pillar promise card must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as
 // text and declare both palettes with no literal color escaping the theme. Same staleness
@@ -13,15 +26,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed promise-pillars diagram is exactly what the generator produces", async () => {
-  const generated = await renderReadmePromisePillars();
-  const committed = readFileSync("docs/diagrams/promise-pillars.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/promise-pillars.svg is stale — regenerate with `node scripts/docs/gen-readme-promise-pillars.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/promise-pillars.svg") };
+
+test(
+  "the committed promise-pillars diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmePromisePillars();
+    const committed = readFileSync("docs/diagrams/promise-pillars.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/promise-pillars.svg is stale — regenerate with `node scripts/docs/gen-readme-promise-pillars.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the command footer, and nothing is external", async () => {
   const svg = await renderReadmePromisePillars();
@@ -45,9 +66,9 @@ test("every copy string stays in the file as text", async () => {
   }
 });
 
-test("the counts gate's own readers of this file accept the generated content (live code)", async () => {
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
   const svg = await renderReadmePromisePillars();
-  const checks = buildChecks().filter(
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
     (c) => Array.isArray(c.files) && c.files.includes("docs/diagrams/promise-pillars.svg")
   );
   assert.ok(checks.length > 0, "the counts gate no longer reads promise-pillars.svg");
@@ -59,8 +80,8 @@ test("the counts gate's own readers of this file accept the generated content (l
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderReadmePromisePillars();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
   const body = svg.slice(svg.indexOf("</style>"));
   assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

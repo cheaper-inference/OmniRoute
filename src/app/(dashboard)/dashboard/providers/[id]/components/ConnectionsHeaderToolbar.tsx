@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import ChatGptSignInButton from "@/shared/components/ChatGptSignInButton";
 
 import { ActionBar, Button, DistributeProxiesButton, Select, Toggle } from "@/shared/components";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
@@ -54,6 +55,7 @@ type ConnectionsHeaderToolbarProps = {
   onOpenCodexCliGuide: () => void;
   onOpenImportCodex: () => void;
   onOpenImportClaude: () => void;
+  onOpenImportAgy?: () => void;
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
@@ -104,6 +106,7 @@ export default function ConnectionsHeaderToolbar({
   onOpenCodexCliGuide,
   onOpenImportCodex,
   onOpenImportClaude,
+  onOpenImportAgy,
   onOpenImportGemini,
   onOpenImportGrokCli,
   t,
@@ -113,7 +116,7 @@ export default function ConnectionsHeaderToolbar({
       className={`mb-4 flex flex-col gap-3 ${providerId === "codex" ? "" : "sm:flex-row sm:items-center sm:justify-between"}`}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <h2 className="text-lg font-semibold">{t("connections")}</h2>
+        <h2 className="text-lg">{t("connections")}</h2>
         {providerId === "claude" && (
           <div
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-subtle px-2 py-1 text-xs font-medium text-text-muted"
@@ -225,7 +228,7 @@ export default function ConnectionsHeaderToolbar({
               label: providerInfo?.name || providerId,
             })
           }
-          className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs font-medium ${
+          className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs ${
             proxyConfig?.providers?.[providerId]
               ? "bg-warning/15 text-warning hover:bg-warning/25"
               : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -322,9 +325,20 @@ export default function ConnectionsHeaderToolbar({
               </>
             ) : (
               <>
-                <Button size="sm" icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                  {providerSupportsPat ? providerText(t, "addPat", "Add PAT") : t("add")}
-                </Button>
+                {providerId === "chatgpt" ? (
+                  <ChatGptSignInButton
+                    opensDialog
+                    onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                  />
+                ) : (
+                  <Button
+                    size="sm"
+                    icon="add"
+                    onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                  >
+                    {providerSupportsPat ? providerText(t, "addPat", "Add PAT") : t("add")}
+                  </Button>
+                )}
                 {(providerId === "volcengine-agent-plan" ||
                   providerId === "volcengine-coding-plan") &&
                   connectVolcengineAccount && (
@@ -395,6 +409,16 @@ export default function ConnectionsHeaderToolbar({
                     onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
                   >
                     {providerText(t, "importGrokAuth", "Import auth")}
+                  </Button>
+                )}
+                {providerId === "agy" && onOpenImportAgy && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon="upload_file"
+                    onClick={() => gateConnectionFlow(onOpenImportAgy)}
+                  >
+                    {providerText(t, "importAgyAuth", "Import auth")}
                   </Button>
                 )}
               </>

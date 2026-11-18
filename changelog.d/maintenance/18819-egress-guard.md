@@ -1,1 +1,0 @@
-- **test(setup):** an opt-in egress guard in `tests/_setup/egressGuard.ts` makes `child_process`, raw sockets, TLS, HTTP/2, WebSocket and the `wreq-js` native client throw while a test runs, with a self-test, and a #16631 test drives the Claude OAuth step on a deep-frozen body under it (#18819).

@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { handleVideoGeneration } from "@omniroute/open-sse/handlers/videoGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
@@ -117,6 +118,7 @@ async function postHandler(request, context) {
           body.model,
           body,
           {
+            prepareFalInput: getFalCompatibilityPreparer(),
             request,
             policy,
             mediaSink,
@@ -206,8 +208,9 @@ async function postHandler(request, context) {
     execute: (attemptCredentials) =>
       withApiKeyContext(() =>
         handleVideoGeneration({
+          prepareFalInput: getFalCompatibilityPreparer(),
           body,
-          credentials: attemp...als,
+          credentials: attemptCredentials,
           log,
           // #16372 — auth-gated job results are stored under this caller's owner and served
           // from the caller-facing origin (configured public URL / trusted proxy / Host).

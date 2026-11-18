@@ -157,9 +157,18 @@ function parseGeneric(data: any) {
 }
 
 function parseGithub(data: any) {
+  // The AI Credits row is an unbounded counter when no local limit is set —
+  // keep it even though it looks "unlimited & empty", and carry the figure.
   return quotaEntries(data)
-    .filter(([, quota]) => !isUnlimitedEmpty(quota))
-    .map(([name, quota]) => normalizeQuotaEntry(name, quota));
+    .filter(([, quota]) => quota?.creditsUsed !== undefined || !isUnlimitedEmpty(quota))
+    .map(([name, quota]) =>
+      quota?.creditsUsed !== undefined
+        ? normalizeQuotaEntry(name, quota, {
+            creditsUsed: Number(quota.creditsUsed) || 0,
+            unlimited: quota.unlimited === true,
+          })
+        : normalizeQuotaEntry(name, quota)
+    );
 }
 
 function parseGlmFamily(data: any) {
@@ -288,7 +297,9 @@ function parseClaude(data: any) {
     quotas: Record<string, { fractionReported?: boolean } | null> | null | undefined
   ) =>
     Object.fromEntries(
-      Object.entries(quotas ?? {}).filter(([, quota]) => quota?.fractionReported !== false)
+      Object.entries(quotas ?? {}).filter(
+        ([, quota]) => quota != null && quota.fractionReported !== false
+      )
     );
   const quotas = quotaEntries({
     quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },
@@ -538,7 +549,8 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "claude") return parseClaude(data);
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
-  if (providerId === "agentrouter") return parseAgentrouter(data);
+  // TokenRouter shares the `quotas.balance` USD credits-row shape (usage/tokenrouter.ts).
+  if (providerId === "agentrouter" || providerId === "tokenrouter") return parseAgentrouter(data);
   if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);

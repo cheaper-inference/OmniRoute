@@ -20,14 +20,17 @@ UI/UX, i18n, CLI, ಡೇಟಾಬೇಸ್ ಮತ್ತು ನಿರ್ಮಾಣ
 - **Node.js** `>=22.22.2 <23`, ಅಥವಾ `>=24.0.0 <27` (ಶಿಫಾರಸು: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ಬಳಕೆದಾರರು (Node 24+):** `npm install` ನಂತರ, ನೇಟಿವ್ ಮಾಡ್ಯೂಲ್ಗಳು ಸ್ಥಾಪನೆಯಾಗಿವೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
+> **Node 24 ಹೊಂದಿರುವ Windows:** ಪ್ರಸ್ತುತ 24 LTS ಪ್ಯಾಚ್ ಬಿಡುಗಡೆಯನ್ನು (ಕನಿಷ್ಠ 24.20.0) ಬಳಸಿ.
+> ಹಿಂದಿನ ಬಿಡುಗಡೆಗಳಲ್ಲಿ `--test-force-exit` ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಚ್ಚಿದ ನಂತರ ಯಶಸ್ವಿ ಪರೀಕ್ಷೆಗಳ ಬಳಿಕವೂ ಸ್ಥಗಿತಗೊಳ್ಳಬಹುದು.
+> Node ನ [Windows libuv ಪರಿಹಾರ](https://github.com/nodejs/node/pull/61999) ಈ ರನ್ಟೈಮ್ ಕ್ರ್ಯಾಶ್ ಅನ್ನು ಪರಿಹರಿಸುತ್ತದೆ; ಪರೀಕ್ಷಾ assertions ಮತ್ತು runner exit ಪರಿಶೀಲನೆಗಳನ್ನು ಸಕ್ರಿಯವಾಗಿಯೇ ಇರಿಸಿ.
+
+> **npm v11+ ಬಳಕೆದಾರರು (Node 24+):** `npm install` ನಂತರ, native modules ಸ್ಥಾಪಿತವಾಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
 > `node -e "require('better-sqlite3')"`. ಇದು `MODULE_NOT_FOUND` ದೋಷದೊಂದಿಗೆ ವಿಫಲವಾದರೆ,
-> `npm approve-scripts better-sqlite3 && npm install` ಅನ್ನು ಚಲಾಯಿಸಿ. ನೋಡಿ:
-> [ದೋಷನಿವಾರಣೆ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> `npm approve-scripts better-sqlite3 && npm install` ಅನ್ನು ರನ್ ಮಾಡಿ. [ಸಮಸ್ಯೆ ಪರಿಹಾರ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ನೋಡಿ.
 
 - **Git**
 
-### ಕ್ಲೋನ್ ಮತ್ತು ಸ್ಥಾಪನೆ
+### ಕ್ಲೋನ್ ಮಾಡಿ ಮತ್ತು ಇನ್ಸ್ಟಾಲ್ ಮಾಡಿ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -46,28 +49,28 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ಅಭಿವೃದ್ಧಿಗೆ ಪ್ರಮುಖ ಚರಗಳು:
+ಅಭಿವೃದ್ಧಿಗಾಗಿ ಪ್ರಮುಖ ಚರಗಳು:
 
 | ಚರ                     | ಅಭಿವೃದ್ಧಿಯ ಡೀಫಾಲ್ಟ್      | ವಿವರಣೆ                |
 | ---------------------- | ------------------------ | --------------------- |
 | `PORT`                 | `20128`                  | ಸರ್ವರ್ ಪೋರ್ಟ್         |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ಫ್ರಂಟ್ಎಂಡ್ನ ಮೂಲ URL   |
-| `JWT_SECRET`           | (ಮೇಲಿನಂತೆ ರಚಿಸಿ)         | JWT ಸಹಿ ರಹಸ್ಯ         |
+| `JWT_SECRET`           | (ಮೇಲೆ ರಚಿಸಿ)             | JWT ಸಹಿ ರಹಸ್ಯ         |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ಮೊದಲ ಲಾಗಿನ್ ಪಾಸ್ವರ್ಡ್ |
-| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವಿವರದ ಮಟ್ಟ       |
+| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವಿವರ ಮಟ್ಟ        |
 
 ### ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
 
-ಪರಿಸರ ಚರಗಳ ಮೂಲಕವೂ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪರಿಸರ ಚರಗಳ ಮೂಲಕವೂ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
 
 | ಸೆಟ್ಟಿಂಗ್ ಸ್ಥಳ         | ಟಾಗಲ್           | ವಿವರಣೆ                                    |
 | ---------------------- | --------------- | ----------------------------------------- |
 | ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸುಧಾರಿತ | ಡೀಬಗ್ ಮೋಡ್      | ಡೀಬಗ್ ವಿನಂತಿ ಲಾಗ್ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (UI) |
 | ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸಾಮಾನ್ಯ | ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ | ಸೈಡ್ಬಾರ್ ವಿಭಾಗಗಳನ್ನು ತೋರಿಸಿ/ಮರೆಮಾಡಿ       |
 
-ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಗಳ ನಂತರವೂ ಉಳಿಯುತ್ತವೆ; ಹೊಂದಿಸಿದಾಗ ಅವು ಪರಿಸರ ಚರಗಳ ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತವೆ.
+ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಗಳಾದರೂ ಉಳಿಯುತ್ತವೆ; ಹೊಂದಿಸಿದಾಗ ಇವು env var ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಮೀರಿಸುತ್ತವೆ.
 
-### ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದು
+### ಸ್ಥಳೀಯವಾಗಿ ರನ್ ಮಾಡುವುದು
 
 ```bash
 # ಅಭಿವೃದ್ಧಿ ಮೋಡ್ (ಹಾಟ್ ರೀಲೋಡ್)
@@ -77,48 +80,43 @@ npm run dev
 npm run build    # next build → .build/next/ ನಂತರ assembleStandalone → dist/
 npm run start
 
-# ಕೊಡುಗೆದಾರರ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ವೇಗವಾದ ಬ್ಯಾಕೆಂಡ್/API-ಮಾತ್ರ ಕಂಪೈಲ್
+# ಕೊಡುಗೆದಾರರ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ವೇಗದ backend/API-only ಕಂಪೈಲ್
 npm run build:contributor
 
 # ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ (ಸ್ವಚ್ಛ ಮರುಬಿಲ್ಡ್ + HEAD ಸೆಂಟಿನಲ್ — ಡಿಪ್ಲಾಯ್ಗೆ ಅಗತ್ಯ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ಅನ್ನು ಬರೆಯುತ್ತದೆ
+npm run build:release   # rm -rf .build dist ಮತ್ತು build + dist/BUILD_SHA ಬರೆಯುತ್ತದೆ
 
 # ಸಾಮಾನ್ಯ ಪೋರ್ಟ್ ಕಾನ್ಫಿಗರೇಶನ್
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ಕೊಡುಗೆದಾರರ ಬಿಲ್ಡ್ ಕಂಪೈಲ್-ಮಾತ್ರ ಮೌಲ್ಯಮಾಪನವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು ಸ್ವತಂತ್ರ
-ವಿತರಣೆಯನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ ನೇಟಿವ್ ಪ್ಯಾಕೇಜಿಂಗ್ ಅಸೆಟ್ಗಳನ್ನು ನಿರ್ಮಿಸುವುದಿಲ್ಲ. ವಿತರಿಸಬಹುದಾದ ಬಂಡಲ್ ಅನ್ನು
-ಮೌಲ್ಯೀಕರಿಸಬೇಕಾದಾಗ ಸಾಮಾನ್ಯ ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್ ಅನ್ನು ಬಳಸಿ.
+ಕೊಡುಗೆದಾರರ ಬಿಲ್ಡ್ ಕಂಪೈಲ್-ಮಾತ್ರ ಪರಿಶೀಲನೆಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು standalone distribution ಅನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ native packaging assets ಅನ್ನು ಬಿಲ್ಡ್ ಮಾಡುವುದಿಲ್ಲ. ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle ಅನ್ನು ಪರಿಶೀಲಿಸಬೇಕಾದಾಗ ನಿಯಮಿತ ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್ ಬಳಸಿ.
 
 ### ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ವಿನ್ಯಾಸ
 
-| ಡೈರೆಕ್ಟರಿ | ವಿಷಯಗಳು                                                                 | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ |
-| --------- | ----------------------------------------------------------------------- | -------------------- |
-| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                       | ಹೌದು                 |
-| `.build/` | ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (gitignored, `distDir = .build/next`) | ಇಲ್ಲ                 |
-| `dist/`   | ವಿತರಿಸಬಹುದಾದ ಬಂಡಲ್ — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (gitignored) | ಇಲ್ಲ                 |
+| ಡೈರೆಕ್ಟರಿ | ವಿಷಯಗಳು                                                                    | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ |
+| --------- | -------------------------------------------------------------------------- | -------------------- |
+| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                          | ಹೌದು                 |
+| `.build/` | ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (gitignored, `distDir = .build/next`)    | ಇಲ್ಲ                 |
+| `dist/`   | ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (gitignored) | ಇಲ್ಲ                 |
 
-ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಪಾಸ್ನಲ್ಲಿ ನಡೆಯುತ್ತದೆ:
+ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಹಂತದಲ್ಲಿ ನಡೆಯುತ್ತದೆ:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ಔಟ್ಪುಟ್)
-  └─ assembleStandalone()                 (standalone + static + public + ನೇಟಿವ್ ಅಸೆಟ್ಗಳನ್ನು ನಕಲಿಸುತ್ತದೆ)
-       └─ ಔಟ್ಪುಟ್: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets ಅನ್ನು ನಕಲಿಸುತ್ತದೆ)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಮೊದಲು ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು
-ಡಿಪ್ಲಾಯ್ ಸಮಗ್ರತೆಯ ಸೆಂಟಿನಲ್ ಆಗಿ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಬರೆಯುತ್ತದೆ.
+`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಮೊದಲು ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಡಿಪ್ಲಾಯ್ ಸಮಗ್ರತೆಯ ಸೆಂಟಿನಲ್ ಆಗಿ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಬರೆಯುತ್ತದೆ.
 
-`npm run build:contributor` ಬ್ಯಾಕೆಂಡ್-ಮಾತ್ರ ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಇದು ಬಿಲ್ಡ್ ಮಾಡುವಾಗ
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳಿಗೆ ತಾತ್ಕಾಲಿಕ ಸ್ಟಬ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ, API ರೂಟ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಿಲ್ಡ್
-ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗೆ ಅಥವಾ ಸಂಪೂರ್ಣ
-ಬಿಡುಗಡೆ ಮೌಲ್ಯಮಾಪನಕ್ಕಾಗಿ `npm run build` ಅನ್ನು ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ಗೆ ಪರ್ಯಾಯವಲ್ಲ.
+`npm run build:contributor` backend-only ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಬಿಲ್ಡ್ ಮಾಡುವಾಗ ಇದು ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ stub ಮಾಡುತ್ತದೆ, API route handlers ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಿಲ್ಡ್ ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ಅಥವಾ ಸಂಪೂರ್ಣ ಬಿಡುಗಡೆ ಪರಿಶೀಲನೆಗಾಗಿ `npm run build` ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ಗೆ ಪರ್ಯಾಯವಲ್ಲ.
 
-> **VPS ಡಿಪ್ಲಾಯ್ ಸೂಚನೆ:** ರಿಮೋಟ್ ಇಮೇಜ್ ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/`
-> ಬದಲಾಗಿಲ್ಲ. ಡಿಪ್ಲಾಯ್ ಸ್ಕಿಲ್ಗಳು `dist/` ನ ವಿಷಯಗಳನ್ನು rsync ಮೂಲಕ ಅದಕ್ಕೆ ವರ್ಗಾಯಿಸುತ್ತವೆ.
-> ರೆಪೊಸಿಟರಿಯೊಳಗಿನ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಪಥ ಮಾತ್ರ ಬದಲಾಗಿದೆ (`app/` → `dist/`).
+> **VPS ಡಿಪ್ಲಾಯ್ ಸೂಚನೆ:** ರಿಮೋಟ್ image ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/`
+> ಬದಲಾಗುವುದಿಲ್ಲ. ಡಿಪ್ಲಾಯ್ skills `dist/` ನ ವಿಷಯಗಳನ್ನು ಅದರಲ್ಲಿ rsync ಮಾಡುತ್ತವೆ.
+> ರೆಪೊಸಿಟರಿಯೊಳಗಿನ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಮಾರ್ಗ ಮಾತ್ರ ಬದಲಾಗಿದೆ (`app/` → `dist/`).
 
 ಡೀಫಾಲ್ಟ್ URLಗಳು:
 
@@ -298,67 +296,67 @@ production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟಗಳು (23 ವಿಭಾಗಗಳು)
-│   ├── api/                # API ಮಾರ್ಗಗಳು (51 ಡೈರೆಕ್ಟರಿಗಳು)
-│   └── login/              # ದೃಢೀಕರಣ ಪುಟಗಳು (.tsx)
-├── domain/                 # ನೀತಿ ಎಂಜಿನ್ (policyEngine, comboResolver, costRules, ಇತ್ಯಾದಿ)
-├── lib/                    # ಪ್ರಧಾನ ವ್ಯವಹಾರ ತರ್ಕ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ಪ್ರೋಟೋಕಾಲ್ ಸರ್ವರ್
-│   ├── acp/                # Agent Communication Protocol ರಿಜಿಸ್ಟ್ರಿ
-│   ├── compliance/         # ಅನುಸರಣೆ ನೀತಿ ಎಂಜಿನ್
-│   ├── db/                 # SQLite ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು + 130 ಮೈಗ್ರೇಶನ್ಗಳು
-│   ├── memory/             # ನಿರಂತರ ಸಂಭಾಷಣಾ ಸ್ಮರಣೆ
-│   ├── oauth/              # OAuth ಪೂರೈಕೆದಾರರು, ಸೇವೆಗಳು ಮತ್ತು ಉಪಯುಕ್ತತೆಗಳು
-│   ├── skills/             # ವಿಸ್ತರಿಸಬಹುದಾದ ಕೌಶಲ್ಯ ಫ್ರೇಮ್ವರ್ಕ್
-│   ├── usage/              # ಬಳಕೆಯ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ವೆಚ್ಚದ ಲೆಕ್ಕಾಚಾರ
-│   └── localDb.ts          # ಮರು-ರಫ್ತು ಪದರ ಮಾತ್ರ — ಇಲ್ಲಿ ಎಂದಿಗೂ ತರ್ಕವನ್ನು ಸೇರಿಸಬೇಡಿ
-├── middleware/              # ವಿನಂತಿ ಮಿಡಲ್ವೇರ್ (promptInjectionGuard)
-├── mitm/                   # MITM ಪ್ರಾಕ್ಸಿ (ಪ್ರಮಾಣಪತ್ರ, DNS, ಗುರಿ ರೂಟಿಂಗ್)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React ಕಾಂಪೊನೆಂಟ್ಗಳು (.tsx)
-│   ├── constants/          # ಪೂರೈಕೆದಾರ ವ್ಯಾಖ್ಯಾನಗಳು (329), MCP ಸ್ಕೋಪ್ಗಳು, 20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು
-│   ├── utils/              # ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್, ಸ್ಯಾನಿಟೈಸರ್, ದೃಢೀಕರಣ ಸಹಾಯಕಗಳು
-│   └── validation/         # Zod v4 ಸ್ಕೀಮಾಗಳು
-└── sse/                    # SSE ಪ್ರಾಕ್ಸಿ ಪೈಪ್ಲೈನ್
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ವರ್ಕ್ಸ್ಪೇಸ್
-├── executors/              # 150 ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕಗಳು)
-├── handlers/               # 11 ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (ಚಾಟ್, ಪ್ರತಿಕ್ರಿಯೆಗಳು, ಎಂಬೆಡಿಂಗ್ಗಳು, ಚಿತ್ರಗಳು, ಇತ್ಯಾದಿ)
-├── mcp-server/             # MCP ಸರ್ವರ್ (110 ವಿಶಿಷ್ಟ ಪರಿಕರಗಳು, 3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು)
-├── services/               # 178 ಉನ್ನತ-ಮಟ್ಟದ ಸೇವೆಗಳು (combo, autoCombo, rateLimitManager, ಇತ್ಯಾದಿ)
-├── translator/             # ಸ್ವರೂಪ ಅನುವಾದಕಗಳು (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್
-└── utils/                  # 22 ಉಪಯುಕ್ತತಾ ಮಾಡ್ಯೂಲ್ಗಳು (ಸ್ಟ್ರೀಮ್, TLS, ಪ್ರಾಕ್ಸಿ, ಲಾಗಿಂಗ್)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ಡೆಸ್ಕ್ಟಾಪ್ ಆ್ಯಪ್ (ಬಹು-ಪ್ಲಾಟ್ಫಾರ್ಮ್)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ಪರೀಕ್ಷಾ ರನ್ನರ್ (1,574 ಪರೀಕ್ಷಾ ಫೈಲ್ಗಳು)
-├── integration/            # ಏಕೀಕರಣ ಪರೀಕ್ಷೆಗಳು
-├── e2e/                    # Playwright ಪರೀಕ್ಷೆಗಳು
-├── security/               # ಭದ್ರತಾ ಪರೀಕ್ಷೆಗಳು
-├── translator/             # ಅನುವಾದಕ-ನಿರ್ದಿಷ್ಟ ಪರೀಕ್ಷೆಗಳು
-└── load/                   # ಲೋಡ್ ಪರೀಕ್ಷೆಗಳು
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ಆರ್ಕಿಟೆಕ್ಚರ್ ನಿರ್ಧಾರ ದಾಖಲೆಗಳು
-├── architecture/            # ಸಿಸ್ಟಂ ಆರ್ಕಿಟೆಕ್ಚರ್ ಮತ್ತು ಸ್ಥಿತಿಸ್ಥಾಪಕತೆ
-├── comparison/              # OmniRoute ಮತ್ತು ಪರ್ಯಾಯಗಳ ಹೋಲಿಕೆ
-├── compression/             # ಸಂಕೋಚನ ಮಾರ್ಗದರ್ಶಿಗಳು ಮತ್ತು ನಿಯಮಗಳು
-├── dev/                     # ಅಭಿವೃದ್ಧಿ ಮಾರ್ಗದರ್ಶಿಗಳು
-├── diagrams/                # ಆರ್ಕಿಟೆಕ್ಚರ್ ರೇಖಾಚಿತ್ರಗಳು
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ಬಳಕೆದಾರ ಮಾರ್ಗದರ್ಶಿ, Docker, ಸೆಟಪ್, ಸಮಸ್ಯೆ ನಿವಾರಣೆ
-├── i18n/                    # ಅಂತರರಾಷ್ಟ್ರೀಕರಿಸಿದ README ಅನುವಾದಗಳು
-├── marketing/               # ಮಾರುಕಟ್ಟೆ ಸಾಮಗ್ರಿಗಳು
-├── ops/                     # ನಿಯೋಜನೆ, ಪ್ರಾಕ್ಸಿ, ವ್ಯಾಪ್ತಿ, ಬಿಡುಗಡೆಗಳು
-├── providers/               # ಪೂರೈಕೆದಾರ-ನಿರ್ದಿಷ್ಟ ದಸ್ತಾವೇಜುಗಳು
-├── reference/               # API ಉಲ್ಲೇಖ, ಪರಿಸರ ವೇರಿಯಬಲ್ಗಳು, CLI ಪರಿಕರಗಳು, ಉಚಿತ ಹಂತಗಳು
-├── releases/                # ಬಿಡುಗಡೆ ಟಿಪ್ಪಣಿಗಳು
-├── routing/                 # ಸ್ವಯಂ-ಕಾಂಬೊ ಎಂಜಿನ್, ತಾರ್ಕಿಕ ಮರುಚಾಲನೆ
-├── screenshots/             # ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸ್ಕ್ರೀನ್ಶಾಟ್ಗಳು
-├── security/                # ರಕ್ಷಣಾ ಮಿತಿಗಳು, ಅನುಸರಣೆ, ಅದೃಶ್ಯತೆ, ಟೋಕನ್ಗಳು
-└── specs/                   # ವಿನ್ಯಾಸ ನಿರ್ದಿಷ್ಟತೆಗಳು
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

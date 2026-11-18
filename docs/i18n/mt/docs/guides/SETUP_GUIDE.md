@@ -18,7 +18,7 @@
 
 ---
 
-## Metodi ta’ Installazzjoni
+## Installa Metodi
 
 ### npm (rakkomandat)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Id-dashboard jinfetaħ fuq `http://localhost:20128` u l-URL bażi tal-API huwa `http://localhost:20128/v1`.
+Dashboard jiftaħ fi `http://localhost:20128` u API bażi URL huwa `http://localhost:20128/v1`.
+
+> **utenti npm:** Jekk npm iwissi li install scripts ġew imblukkati (eż., `omniroute`, `better-sqlite3`), ara [Issolvi l-problemi — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Utenti ta’ pnpm:** il-flag `--allow-build` huwa meħtieġ biex jippermetti l-iskripts nattivi tal-build għal `better-sqlite3` u `@swc/core`. Il-kmand `pnpm approve-builds -g` mhuwiex appoġġjat għal installazzjonijiet globali fuq pnpm v11.
+> **utenti pnpm:** il-bandiera `--allow-build` hija meħtieġa biex tippermetti skripts tal-bini indiġeni għal `better-sqlite3` u `@swc/core`. Il-kmand `pnpm approve-builds -g` mhuwiex appoġġat għal installazzjonijiet globali fuq pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-Il-[pakkett AUR](https://aur.archlinux.org/packages/omniroute-bin) jinstalla OmniRoute u jipprovdi servizz systemd għall-utent.
+Il- [pakkett AUR](https://aur.archlinux.org/packages/omniroute-bin) jinstalla OmniRoute u jipprovdi servizz għall-utent systemd.
 
-### Mill-Kodiċi Sors
+### Mis-Sors
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Nota għal Windows:** B’mod awtomatiku, OmniRoute juża `%APPDATA%\omniroute` meta d-direttorju antik `%USERPROFILE%\.omniroute` ma jkunx preżenti. Issettja `DATA_DIR` biex tagħżel post differenti għad-direttorju tad-data.
+> **Windows nota:** B'mod awtomatiku, OmniRoute juża `%APPDATA%\omniroute` meta d-direttorju `%USERPROFILE%\.omniroute` tal-legat ma jkunx preżenti. Issettja `DATA_DIR` biex tagħżel post tad-direttorju tad-dejta differenti.
 
-> **Nota:** `npm install` jiġġenera `.env` awtomatikament minn `.env.example` mal-ewwel tħaddim. Installazzjonijiet sussegwenti ma jissostitwixxux fajl `.env` eżistenti, għalhekk il-personalizzazzjonijiet jiġu ppreservati. Biex terġa’ toħloqu mill-bidu, ħassar `.env` qabel terġa’ tħaddem il-kmand.
+> **Nota:** `npm install` tiġġenera awtomatikament `.env` minn `.env.example` fl-ewwel ġirja. Installazzjonijiet sussegwenti mhux se jissostitwixxu `.env` eżistenti, għalhekk il-personalizzazzjonijiet huma ppreservati. Biex terġa 'żerriegħa, ħassar `.env` qabel ma terġa' tħaddem.
 
 ### Docker
 
-Ara l-[Gwida ta’ Docker](./DOCKER_GUIDE.md) għall-konfigurazzjoni kompleta ta’ Docker, inklużi l-profili ta’ Compose u Caddy HTTPS.
+Ara l [-Gwida Docker](./DOCKER_GUIDE.md) għal setup komplut Docker inklużi profili ta' Kompożi u Caddy HTTPS.
 
-### Applikazzjoni tad-Desktop (Electron)
+### Desktop App (Electron)
 
-OmniRoute jinkludi wrapper tad-desktop mibni fuq Electron 41 + electron-builder 26.10. Skripts disponibbli (fl-għerq tal-workspace):
+OmniRoute tibgħat tgeżwir tad-desktop mibni fuq Electron 41 + electron-builder 26.10. Skripts disponibbli (għerq tal-ispazju tax-xogħol):
 
 ```bash
-npm run electron:dev          # Ħaddem id-desktop b’hot-reload
-npm run electron:build        # Ibni għas-sistema operattiva attwali (identifikata awtomatikament)
-npm run electron:build:win    # Installatur għal Windows (NSIS + portabbli)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Wettaq smoke test fuq il-build ippakkjat
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Ir-rilaxxi tal-installaturi tad-desktop huma mehmuża mal-GitHub Releases. Għal analiżi dettaljata u kompleta ta’ Electron (iffirmar, bridge IPC, distribuzzjonijiet), ara [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(maħluq fi stadju aktar tard)_.
+Ir-rilaxxi tal-installaturi tad-desktop huma mehmuża ma' GitHub Releases. Għas Electron deep-dive sħiħa (iffirmar, IPC bridge, distros), ara [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Server headless (CI/awtomatizzazzjoni)
+### Server bla ras (CI/automation)
 
-Għal konfigurazzjonijiet mhux assistiti (Docker, Kubernetes, CI), uża:
+Għal setups waħedhom (Docker, Kubernetes, CI), uża:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Flimkien ma’ varjabbli tal-ambjent (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, eċċ.), dan jippermettilek tibda istanza ta’ OmniRoute li tista’ tiġi kkontrollata kompletament permezz ta’ skripts.
+Flimkien ma' env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, eċċ.), dan iħallik spin up istanza OmniRoute kompletament scriptable.
 
-### Għażliet tas-CLI
+### CLI Għażliet
 
-| Kmand                   | Deskrizzjoni                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| `omniroute`             | Ibda s-server (`PORT=20128`, l-API u d-dashboard fuq l-istess port)                           |
-| `omniroute setup`       | Introduzzjoni ggwidata mis-CLI għall-password u l-ewwel fornitur                              |
-| `omniroute doctor`      | Wettaq kontrolli lokali tas-saħħa mingħajr ma tibda s-server                                  |
-| `omniroute providers`   | Sib, elenka, ivvalida u ttestja l-fornituri mis-CLI                                           |
-| `omniroute config`      | Konfigurazzjoni tal-għodda CLI — elenka, aqra, issettja u vvalida configs                     |
-| `omniroute status`      | Dashboard tal-istatus offline — verżjoni, DB, għodod, konfigurazzjoni                         |
-| `omniroute logs`        | Uri l-logs tal-użu mill-API f’ħin reali (jappoġġja `--follow`)                                |
-| `omniroute update`      | Iċċekkja għal aġġornamenti ta’ OmniRoute jew applikahom                                       |
-| `omniroute provider`    | Immaniġġja l-konnessjonijiet tal-fornituri — żid, elenka, neħħi, ittestja, issettja l-default |
-| `omniroute --port 3000` | Issettja l-port kanoniku/tal-API għal 3000                                                    |
-| `omniroute --mcp`       | Ibda s-server MCP (trasport stdio)                                                            |
-| `omniroute --no-open`   | Tiftaħx il-browser awtomatikament                                                             |
-| `omniroute --help`      | Uri l-għajnuna                                                                                |
+| Kmand                   | Deskrizzjoni                                                                 |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `omniroute`             | Ibda server (`PORT=20128`, API u dashboard fuq l-istess port)                |
+| `omniroute setup`       | Iggwidata CLI onboarding għall-password u l-ewwel fornitur                   |
+| `omniroute doctor`      | Mexxi kontrolli tas-saħħa lokali mingħajr ma tibda s-server                  |
+| `omniroute providers`   | Skopri, elenka, ivvalida u ttestja l-fornituri minn CLI                      |
+| `omniroute config`      | CLI tool configuration — list, get, set, validate configs                    |
+| `omniroute status`      | Status offline dashboard verżjoni —, DB, għodod, konfigurazzjoni             |
+| `omniroute logs`        | Irrekordja zkuk tal-użu mill- API (jappoġġja `--follow`)                     |
+| `omniroute update`      | Iċċekkja għal jew applika aġġornamenti OmniRoute                             |
+| `omniroute provider`    | Immaniġġja l-konnessjonijiet tal-fornitur — żid, lista, neħħi, test, default |
+| `omniroute --port 3000` | Issettja l-port canonical/API għal 3000                                      |
+| `omniroute --mcp`       | Ibda MCP server (trasport stdio)                                             |
+| `omniroute --no-open`   | Tiftaħx il-browser awtomatikament                                            |
+| `omniroute --help`      | Uri l-għajnuna                                                               |
 
-Il-konfigurazzjoni headless tista’ tiġi awtomatizzata bi flags jew b’varjabbli tal-ambjent:
+Is-setup bla ras jista' jkun miktub b'bnadar jew varjabbli ambjentali:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Ħaddem dijanjostiċi lokali mingħajr ma tiftaħ id-dashboard:
+Mexxi dijanjostiċi lokali mingħajr ma tiftaħ id-dashboard:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Immaniġġja l-fornituri minn SSH jew minn skripts mingħajr ma tiftaħ id-dashboard:
+Immaniġġja fornituri minn SSH jew skripts mingħajr ma tiftaħ id-dashboard:
 
 ```bash
 omniroute providers available
@@ -198,41 +200,45 @@ Għal konfigurazzjoni dettaljata għal kull għodda (Claude Code, Codex CLI, Cur
 
 ---
 
-## Konfigurazzjoni tal-Protokolli (MCP + A2A)
+## Setup tal-Protokoll (MCP + A2A)
 
-### Konfigurazzjoni tal-MCP (Model Context Protocol)
+### MCP Setup (Protokoll tal-Kuntest tal-Mudell)
 
-Ibda t-trasport MCP fil-modalità stdio:
+Ibda t-trasport MCP -modalità stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Fluss ta’ validazzjoni rakkomandat:
+Fluss ta' validazzjoni rakkomandat:
 
 ```bash
-# 1. Ibda s-server MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Mill-klijent MCP tiegħek, sejjaħ:
-omniroute_get_health        # Għandu jirritorna l-istat tas-sistema
-omniroute_list_combos       # Għandu jirritorna l-combos attivi
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Jew ħaddem is-suite E2E sħiħa:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfigurazzjoni tal-Klijent MCP
+#### MCP Konfigurazzjoni tal-Klijent
 
-**Claude Code:**
+**Kodiċi Claude :**
+
+Claude Code jgħaqqad fuq HTTP, liema `omniroute --mcp` (stdio) ma jibda. It-trasport HTTP huwa mitfi awtomatikament: l-ewwel ippermettih fuq is-server li qed jaħdem. Meta l-login tad-dashboard ikun attivat, talba mingħajr kredenzjali tikseb `401`, għalhekk għaddi ċavetta API li żżomm `mcp:connect` (jew `manage`); ċavetta mingħajr `manage`/`admin` teħtieġ ukoll l-ambitu ta' kull għodda (ara [MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Żid dan mas-settings tal-MCP tiegħek:
+Żid mas-settings MCP tiegħek (stdio, biċ-ċavetta sabiex min iċempel ikollu prinċipali):
 
 ```json
 {
@@ -240,17 +246,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Dokumentazzjoni sħiħa tal-MCP:** [README tas-Server MCP](../../open-sse/mcp-server/README.md) — 110 għodod, konfigurazzjonijiet tal-IDE, klijenti Python/TS/Go.
+Jew, meta `mcpTransport` huwa `streamable-http` (issettjah fuq `/dashboard/mcp` jew bi `omniroute mcp enable --transport streamable-http`), ippunta d-dħul remot tas-server MCP tal-klijent fuq `http://localhost:20128/api/mcp/stream`.
 
-### Konfigurazzjoni tal-A2A (Agent-to-Agent Protocol)
+Iċ-ċavetta tivvjaġġa bħala `Authorization: Bearer <api-key>` (ara [MCP Server → Aċċess mill-bogħod](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) għal hosts remoti; ċavetta remota teħtieġ `mcp:connect` flimkien mal-ambiti read/write tagħha).
 
-Ivverifika l-Agent Card:
+**Dokumentazzjoni sħiħa MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 għodda, konfigurazzjonijiet IDE, klijenti Python/TS/Go. Referenza tal-operatur għall-għodod tal-kompressjoni CCR/dedup (markaturi, prerekwiżiti, ambiti għal kull għodda, paginazzjoni ta 'rkupru, dijanjostika): [Magni ta' Kompressjoni → Prerekwiżiti / gwida tal-operatur](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (Protokoll minn aġent għal aġent)
+
+Ivverifika l-Karta tal-Aġent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,10 +274,10 @@ Ibgħat kompitu:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Agħtini sommarju qasir tal-kwota."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Dokumentazzjoni sħiħa tal-A2A:** [README tas-Server A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ħiliet, streaming, ċiklu tal-ħajja tal-kompiti.
+**Dokumentazzjoni sħiħa A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ħiliet, streaming, ċiklu tal-ħajja tal-kompitu.
 
 ---
 
@@ -323,12 +336,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Mudell għal Void Linux (xbps-src)
+## Void Linux (xbps-src) Template
 
-Għall-utenti ta’ Void Linux, tista’ tibni pakkett nattiv billi tuża `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
+Għall-utenti ta' Void Linux, tista' tibni pakkett nattiv billi tuża `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
 
 ```bash
-# Fajl tal-mudell għal 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +352,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Iġġenera mill-ġdid is-somma ta’ kontroll għal kull rilaxx permezz ta’:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

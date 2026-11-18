@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { opaqueTokenFingerprint } from "../../open-sse/utils/opaqueTokenFingerprint.ts";
 import { hashClaudeCredential } from "../../open-sse/services/claudeUsageCooldown.ts";
+import { scopeHandoffSessionId } from "../../open-sse/services/combo/handoffSessionScope.ts";
 
 // Vectors computed once with node:crypto so the test never has to hash a
 // secret-looking value itself (which would re-create the CodeQL sink in tests/).
@@ -68,6 +69,11 @@ test("migrated call sites stay byte-identical to the helper", () => {
     hashClaudeCredential("sk-ant-oat01-raw-secret-token"),
     opaqueTokenFingerprint("sk-ant-oat01-raw-secret-token")
   );
+  // Persisted context_handoffs / session_model_history rows are keyed by this scoped id, so
+  // the owner prefix must stay the first 16 hex chars of the historical sha256(apiKeyId).
+  assert.equal(scopeHandoffSessionId("sess-1", "abc"), `k:${SHA256_ABC.slice(0, 16)}:sess-1`);
+  assert.equal(scopeHandoffSessionId("sess-1", null), "anon:sess-1");
+  assert.equal(scopeHandoffSessionId(null, "abc"), null);
 });
 
 // Regression guard: once a call site has moved to the helper it must not grow its own
@@ -83,6 +89,12 @@ const MIGRATED_FILES = [
   "open-sse/services/tokenRefresh/passiveCodex.ts",
   "src/sse/services/museSessionOwnership.ts",
   "src/server/authz/entra/evaluate.ts",
+  "open-sse/executors/m365ImageGeneration.ts",
+  "open-sse/services/combo/handoffSessionScope.ts",
+  // Sign in with ChatGPT (#15201): the attempt owner is a fingerprint of the dashboard session.
+  "src/app/api/oauth/chatgpt/session/route.ts",
+  "src/lib/db/agentSessions.ts",
+  "src/lib/db/proxyTraffic.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {
@@ -98,6 +110,17 @@ test("migrated call sites import the helper instead of hashing inline", () => {
       `${rel} is expected to use opaqueTokenFingerprint()`
     );
   }
+});
+
+test("fal idempotency keys and Codex auto-spend keys are derived through the helper", () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  // fal.ts keeps createHash for the request-content fingerprint; only the key lookup moves.
+  const fal = readFileSync(path.join(root, "src/lib/db/fal.ts"), "utf8");
+  assert.ok(fal.includes("opaqueTokenFingerprint(`${owner}:${idempotencyKey}`)"));
+  assert.ok(!/createHash\("sha256"\)\.update\(`\$\{owner\}:\$\{idempotencyKey\}`\)/.test(fal));
+  const credits = readFileSync(path.join(root, "src/lib/usage/codexResetCredits.ts"), "utf8");
+  assert.ok(!/createHash\(|createHmac\(/.test(credits));
+  assert.ok(credits.includes("opaqueTokenFingerprint(`auto-spend:"));
 });
 
 test("the Z Code per-key state map is keyed through the helper", () => {

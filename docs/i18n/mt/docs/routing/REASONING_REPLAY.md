@@ -24,19 +24,21 @@ Iżda l-klijenti tipiċi (Cursor, Cline, Roo Code, OpenAI SDK) istrixxu `reasoni
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Il-qbid iseħħ `open-sse/handlers/chatCore.ts` (żewġ siti, fiż-żewġ siti ta' sejħa `cacheReasoningFromAssistantMessage` ). Replay jiġri `open-sse/translator/index.ts` wara schema coercion iżda qabel id-dispaċċ.
+
+L-entrati tas-sejħa tal-għodda huma maħżuna taħt `buildToolCallCacheKey()`, diġest tal-ambitu tat-talba u l-id tas-sejħa tal-għodda, għalhekk l-istess id użata minn ċavetta jew sessjoni API oħra ma tagħżelx l-entrata. L-ambitu ġej minn `buildReasoningCacheScope()`: iċ-ċavetta API id, flimkien maċ-ċavetta tas-sessjoni meta t-talba jkollha waħda. Il-kolonna `tool_call_id` u d-dashboard għalhekk juru dan id-diġest għal dawk l-entrati.
 
 Id-dawriet sempliċi (mhux ta' sejħa ta' għodda) ta' l-assistenti huma mdaħħla b'mod differenti: `buildAssistantMessageCacheKey()` jiddiġerixxi l-ambitu tas-sessjoni flimkien mat-traskrizzjoni normalizzata tal-format OpenAI sa dik id-dawra, minħabba li DeepSeek jeħtieġ ir-raġunament ta' _kull_ dawra preċedenti ladarba `tools` ikun preżenti. Għall-miri Responses-API (per eżempju `opencode-go/deepseek-v4-flash`, routed to `/responses`) il-korp upstream iġorr `input`, mhux `messages`, għalhekk `translateRequest()` (`open-sse/translator/index.ts`) jirrapporta t-traskrizzjoni tal-pern li diġerit permezz ta 'għażla ta' callback u s-siti tal-qbid jiddiġerixxu dik l-istess traskrizzjoni. Il-pass ta' replay ta' Responses jimxi fuq il-pern OpenAI għal kull format tas-sors, għalhekk il-klijenti ta' Anthropic Messages (Claude → OpenAI → Responses) jerġgħu jintwerew ukoll.
 

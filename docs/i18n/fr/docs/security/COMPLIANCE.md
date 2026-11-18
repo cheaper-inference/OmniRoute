@@ -11,52 +11,72 @@ OmniRoute enregistre les actions administratives, les événements d’authentif
 
 L’implémentation se trouve dans `src/lib/compliance/index.ts` (T-43 — « Contrôles de conformité ») et `src/lib/compliance/providerAudit.ts`. Les écritures d’audit ne lèvent jamais d’exception : en cas d’échec, l’appel est silencieusement ignoré afin que la journalisation d’audit ne puisse pas interrompre le flux principal de la requête.
 
-## Éléments journalisés
+## Ce qui est journalisé
 
 ### Événements d’audit administratifs (`audit_log`)
 
-Chaque appel à `logAuditEvent({ action, actor, target, details, ... })` produit une ligne. Les chaînes d’action suivent un modèle `domain.verb` (ou `domain.verb.outcome`). Les types d’actions confirmés dans l’arborescence du code comprennent :
+Chaque appel à `logAuditEvent({ action, actor, target, details, ... })` produit
+une ligne. Les chaînes d’action suivent un modèle `domain.verb` (ou
+`domain.verb.outcome`). Les types d’action confirmés dans l’arborescence
+incluent :
 
-| Action                               | Source                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Chaque entrée enregistre `action`, `actor` (valeur par défaut : `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` et `timestamp`. Les clés sensibles (`apiKey`, `accessToken`, `refreshToken`, `password`, tout élément correspondant à `*token`/`*secret`/`*apikey`, etc.) sont récursivement expurgées et remplacées par `"[redacted]"` avant l’écriture de la ligne.
+Chaque entrée capture `action`, `actor` (par défaut `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` et `timestamp`. Les clés sensibles (`apiKey`, `accessToken`,
+`refreshToken`, `password`, tout ce qui correspond à `*token`/`*secret`/`*apikey`,
+etc.) sont récursivement masquées par `"[redacted]"` avant l’écriture de la
+ligne.
+
+Les lignes `api_key.auth.touch` enregistrent les métadonnées des clés API et
+les lectures de découverte réussies (GET/HEAD) qui n’atteignent jamais le
+journal des requêtes : quelle clé, à quel moment et le chemin normalisé, avec
+regroupement et plafonnement à 1 000 lignes. Les clés avec `noLog` ainsi que la
+clé d’environnement sont ignorées. L’adresse IP et l’agent utilisateur de
+l’appelant sont ajoutés uniquement lorsque l’indicateur de fonctionnalité
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` est activé (désactivé par défaut).
 
 ### Appels d’outils MCP (`mcp_tool_audit`)
 
-Chaque invocation d’un outil MCP écrit une ligne par l’intermédiaire de `open-sse/mcp-server/audit.ts`. Schéma (provenant de `src/lib/db/migrations/002_mcp_a2a_tables.sql`) :
+Chaque invocation d’un outil MCP écrit une ligne via
+`open-sse/mcp-server/audit.ts`. Schéma (issu de
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`) :
 
 | Colonne          | Remarques                                        |
 | ---------------- | ------------------------------------------------ |
-| `id`             | incrémentation automatique                       |
+| `id`             | auto-incrémentation                              |
 | `tool_name`      | identifiant de l’outil MCP                       |
 | `input_hash`     | sha256 de l’entrée (aucune charge utile stockée) |
 | `output_summary` | résumé court et tronqué                          |
 | `duration_ms`    | temps écoulé                                     |
-| `api_key_id`     | appelant (peut être nul)                         |
+| `api_key_id`     | appelant (nullable)                              |
 | `success`        | `1` / `0`                                        |
-| `error_code`     | code d’erreur terminal en cas d’échec            |
+| `error_code`     | code d’erreur final en cas d’échec               |
 | `created_at`     | horodatage ISO                                   |
 
-### Journaux des requêtes et de l’utilisation
+### Journaux des requêtes / de l’utilisation
 
-Il s’agit de données de télémétrie opérationnelle (et non, à proprement parler, d’un audit administratif), mais elles partagent le même pipeline de conservation :
+Il s’agit de données de télémétrie opérationnelle (et non strictement d’un
+audit administratif), mais elles partagent le même pipeline de conservation :
 
-- `usage_history` — agrégat d’utilisation par requête
+- `usage_history` — synthèse de l’utilisation par requête
 - `call_logs` — journal complet par requête (soumis à une limite de lignes, voir ci-dessous)
 - `proxy_logs` — journal du trafic du proxy (soumis à une limite de lignes)
 - `request_detail_logs` — ancien journal détaillé des requêtes (toujours purgé s’il est présent)

@@ -118,9 +118,9 @@
 
 ---
 
-## 📖 ಪೂರೈಕೆದಾರರ ಸೆಟಪ್
+## 📖 ಪೂರೈಕೆದಾರ ಸೆಟಪ್
 
-CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗಳನ್ನು ಒಟ್ಟಾಗಿ ಸೇರಿಸಲು, **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → ಫೈಲ್ನಿಂದ ಆಮದು ಮಾಡಿ** ಬಳಸಿ. ಕಾಲಮ್ಗಳು ಸ್ಥಾನಾಧಾರಿತವಾಗಿವೆ (`provider,name,apiKey,baseUrl,priority`); `provider` ಈಗಾಗಲೇ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರ ಅಥವಾ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ ಆಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರಬೇಕು. [CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಆಮದು ಮಾಡುವುದು](../providers/CSV-IMPORT.md) ನೋಡಿ.
+CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗಳನ್ನು ಬಲ್ಕ್-ಆಡ್ ಮಾಡಲು, **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → ಫೈಲ್ನಿಂದ ಆಮದು** ಬಳಸಿ. ಕಾಲಮ್ಗಳು ಕ್ರಮಾಧಾರಿತವಾಗಿವೆ (`provider,name,apiKey,baseUrl,priority`); `provider` ಈಗಾಗಲೇ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರವಾಗಿ ಅಥವಾ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ ಆಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರಬೇಕು. [CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಆಮದು ಮಾಡುವುದು](../providers/CSV-IMPORT.md) ನೋಡಿ.
 
 ### 🔐 ಚಂದಾದಾರಿಕೆ ಪೂರೈಕೆದಾರರು
 
@@ -128,7 +128,7 @@ CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗ�
 
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → Claude Code ಸಂಪರ್ಕಿಸಿ
-→ OAuth ಲಾಗಿನ್ → ಸ್ವಯಂಚಾಲಿತ ಟೋಕನ್ ರಿಫ್ರೆಶ್
+→ OAuth ಲಾಗಿನ್ → ಟೋಕನ್ ಸ್ವಯಂ ರಿಫ್ರೆಶ್
 → 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ಕೋಟಾ ಟ್ರ್ಯಾಕಿಂಗ್
 
 ಮಾದರಿಗಳು:
@@ -137,18 +137,21 @@ CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗ�
   cc/claude-haiku-4-5-20251001
 ```
 
-**ತಜ್ಞರ ಸಲಹೆ:** ಸಂಕೀರ್ಣ ಕಾರ್ಯಗಳಿಗೆ Opus ಮತ್ತು ವೇಗಕ್ಕಾಗಿ Sonnet ಬಳಸಿ. OmniRoute ಪ್ರತಿ ಮಾದರಿಯ ಕೋಟಾವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ!
+**ಪ್ರೊ ಟಿಪ್:** ಸಂಕೀರ್ಣ ಕಾರ್ಯಗಳಿಗೆ Opus, ವೇಗಕ್ಕಾಗಿ Sonnet ಬಳಸಿ. OmniRoute ಪ್ರತಿ ಮಾದರಿಗೆ ಕೋಟಾವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ!
 
-OmniRoute ಹೋಸ್ಟ್ನಲ್ಲಿ ಬ್ರೌಸರ್ ಇಲ್ಲವೇ? Claude Code ಲಾಗಿನ್ ಆಗಿರುವ ಯಾವುದೇ ಸ್ಥಳದಲ್ಲಿ `claude setup-token` ರನ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ವರ್ಷದ ಟೋಕನ್ ಅನ್ನು **Setup Token** ಟ್ಯಾಬ್ನಲ್ಲಿ ಅಂಟಿಸಿ. [ಸೆಟಪ್ ಟೋಕನ್ನೊಂದಿಗೆ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ನೋಡಿ.
+OmniRoute ಹೋಸ್ಟ್ನಲ್ಲಿ ಬ್ರೌಸರ್ ಇಲ್ಲವೇ? Claude Code ಲಾಗಿನ್ ಆಗಿರುವ ಯಾವುದೇ ಸ್ಥಳದಲ್ಲಿ `claude setup-token` ರನ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ವರ್ಷದ ಟೋಕನ್ ಅನ್ನು **ಸೆಟಪ್ ಟೋಕನ್** ಟ್ಯಾಬ್ಗೆ ಪೇಸ್ಟ್ ಮಾಡಿ. [ಸೆಟಪ್ ಟೋಕನ್ನೊಂದಿಗೆ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ನೋಡಿ.
 
-Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್ಗಗಳು Opus ಮತ್ತು Sonnet ಮಾದರಿಗಳಿಗಾಗಿ `max` ಚಿಂತನಾ ಪ್ರಯತ್ನವನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Haiku ಮಾದರಿಗಳು `max` ಪ್ರಯತ್ನದ ಹಂತವನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ OmniRoute ಆ ವಿನಂತಿಯನ್ನು ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ಕಳುಹಿಸುವ ಮೊದಲು ಹೆಚ್ಚಿನ ಚಿಂತನಾ ಬಜೆಟ್ಗೆ ಇಳಿಸುತ್ತದೆ.
+Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್ಗಗಳು Opus ಮತ್ತು Sonnet
+ಮಾದರಿಗಳಿಗೆ `max` ಥಿಂಕಿಂಗ್ ಪ್ರಯತ್ನವನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Haiku ಮಾದರಿಗಳು `max` ಪ್ರಯತ್ನದ
+ಟಿಯರ್ ಅನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ OmniRoute ಆ ವಿನಂತಿಯನ್ನು ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ಕಳುಹಿಸುವ ಮೊದಲು
+ಹೆಚ್ಚಿನ ಥಿಂಕಿಂಗ್ ಬಜೆಟ್ಗೆ ಇಳಿಸುತ್ತದೆ.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → Codex ಸಂಪರ್ಕಿಸಿ
 → OAuth ಲಾಗಿನ್ (ಪೋರ್ಟ್ 1455)
-→ 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ಮರುಹೊಂದಿಕೆ
+→ 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ರೀಸೆಟ್
 
 ಮಾದರಿಗಳು:
   cx/gpt-5.5
@@ -162,7 +165,7 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → GitHub ಸಂಪರ್ಕಿಸಿ
 → GitHub ಮೂಲಕ OAuth
-→ ಮಾಸಿಕ ಮರುಹೊಂದಿಕೆ (ತಿಂಗಳ 1ನೇ ದಿನ)
+→ ಮಾಸಿಕ ರೀಸೆಟ್ (ತಿಂಗಳ 1ನೇ ದಿನ)
 
 ಮಾದರಿಗಳು:
   gh/gpt-5.5
@@ -172,47 +175,63 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
   gh/gemini-3.1-pro-preview
 ```
 
+**AI ಕ್ರೆಡಿಟ್ಗಳು (ಟೋಕನ್ ಆಧಾರಿತ ಬಿಲ್ಲಿಂಗ್).** GitHub ಖಾತೆಗಾಗಿ `credits_used` ಅನ್ನು ವರದಿ ಮಾಡಿದಾಗ,
+Provider Limits ಕಾರ್ಡ್ ಪ್ರಸ್ತುತ ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಯಲ್ಲಿ ಬಳಸಲಾದ ಕ್ರೆಡಿಟ್ಗಳೊಂದಿಗೆ **AI ಕ್ರೆಡಿಟ್ಗಳು** ಸಾಲನ್ನು
+ತೋರಿಸುತ್ತದೆ; ಅನಿಯಮಿತ ಸಂಸ್ಥೆಯ ಯೋಜನೆಗಳಲ್ಲಿಯೂ ಇದು ಅನ್ವಯಿಸುತ್ತದೆ.
+
+**ಸ್ಥಳೀಯ AI ಕ್ರೆಡಿಟ್ ಮಿತಿ.** GitHub ಸಂಪರ್ಕವನ್ನು ಸಂಪಾದಿಸಿ ಮತ್ತು ಪ್ರತಿ
+ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಗೆ **AI ಕ್ರೆಡಿಟ್ಗಳ ಮಿತಿ** (`providerSpecificData.githubCreditLimit`) ಹೊಂದಿಸಿ.
+ಖಾಲಿ ಬಿಟ್ಟರೆ ಅದು ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ; `0` ಸಂಪರ್ಕವನ್ನು ಯಾವಾಗಲೂ ಬಿಟ್ಟುಹೋಗುವಂತೆ ಮಾಡುತ್ತದೆ. ಕೊನೆಯ ಬಳಕೆಯ
+ಓದು ಮಿತಿಗಿಂತ ಹೆಚ್ಚಾಗಿದ್ದರೆ ಅಥವಾ ಅದಕ್ಕೆ ಸಮನಾಗಿದ್ದರೆ, ಖಾತೆ ಆಯ್ಕೆಯು ಆ ಸಂಪರ್ಕವನ್ನು ಬಿಟ್ಟುಹೋಗುತ್ತದೆ ಮತ್ತು
+ಕೋಟಾ-ನೀತಿ ಕಟ್ಆಫ್ನಂತೆಯೇ ರೂಟಿಂಗ್ ನಿಮ್ಮ ಇತರ ಸಂಪರ್ಕಗಳಿಗೆ ಹಿಂತಿರುಗುತ್ತದೆ. ಈ ಪರಿಶೀಲನೆಯು ಆವರ್ತಕ ಕೋಟಾ
+ರಿಫ್ರೆಶ್ ಈಗಾಗಲೇ ಸಂಗ್ರಹಿಸುವ ಬಳಕೆಯ ಮಾಹಿತಿಯನ್ನು ಓದುತ್ತದೆ — ಇದು ವಿನಂತಿಯ ಮಾರ್ಗದಲ್ಲಿ GitHub ಅನ್ನು
+ಎಂದಿಗೂ ಕರೆಯುವುದಿಲ್ಲ — ಮತ್ತು ಇದು fail open ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ: ಕಾಣೆಯಾದ ಅಥವಾ ಹಳೆಯ ಓದು
+(15 ನಿಮಿಷಗಳಿಗಿಂತ ಹಳೆಯದು, ಅಥವಾ ಈಗಾಗಲೇ ರೀಸೆಟ್ ಆಗಿರುವ ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಯದ್ದು) ಸಂಪರ್ಕವನ್ನು ನಿರ್ಬಂಧಿಸುವುದಿಲ್ಲ.
+ಇದು ಸ್ಥಳೀಯ ಸುರಕ್ಷತಾ ಕ್ರಮ ಮಾತ್ರ, **ಖರ್ಚಿನ ಖಚಿತ ಗರಿಷ್ಠ ಮಿತಿ ಅಲ್ಲ**: GitHub ವರದಿ ವಿಳಂಬಗಳು, ರಿಫ್ರೆಶ್
+ಅಂತರ, ನಡೆಯುತ್ತಿರುವ ವಿನಂತಿಗಳು ಮತ್ತು OmniRoute ಹೊರಗಿನ ಬಳಕೆಯಿಂದಾಗಿ ಈ ಮಿತಿಯನ್ನು ಮೀರಬಹುದು. ಕಟ್ಟುನಿಟ್ಟಾದ
+ಮಿತಿಗಾಗಿ GitHubನ ಸ್ವಂತ ಖರ್ಚು ನಿಯಂತ್ರಣಗಳನ್ನು ಬಳಸಿ.
+
 ### 💰 ಅಗ್ಗದ ಪೂರೈಕೆದಾರರು
 
-#### GLM-4.7 (ದೈನಂದಿನ ಮರುಹೊಂದಿಕೆ, $0.6/1M)
+#### GLM-4.7 (ದೈನಂದಿನ ರೀಸೆಟ್, $0.6/1M)
 
-1. ನೋಂದಾಯಿಸಿ: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Planನಿಂದ API ಕೀ ಪಡೆಯಿರಿ
+1. ನೋಂದಣಿ ಮಾಡಿ: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan ನಿಂದ API ಕೀ ಪಡೆಯಿರಿ
 3. ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ: ಪೂರೈಕೆದಾರ: `glm`, API ಕೀ: `your-key`
 
-**ಬಳಕೆ:** `glm/glm-4.7` — **ತಜ್ಞರ ಸಲಹೆ:** Coding Plan 1/7 ವೆಚ್ಚದಲ್ಲಿ 3× ಕೋಟಾವನ್ನು ನೀಡುತ್ತದೆ! ಪ್ರತಿದಿನ ಬೆಳಿಗ್ಗೆ 10:00 ಗಂಟೆಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ.
+**ಬಳಕೆ:** `glm/glm-4.7` — **ಪ್ರೊ ಟಿಪ್:** Coding Plan 1/7 ವೆಚ್ಚದಲ್ಲಿ 3× ಕೋಟಾವನ್ನು ನೀಡುತ್ತದೆ! ಪ್ರತಿದಿನ ಬೆಳಗ್ಗೆ 10:00ಕ್ಕೆ ರೀಸೆಟ್ ಆಗುತ್ತದೆ.
 
-#### MiniMax M2.1 (5ಗಂ ಮರುಹೊಂದಿಕೆ, $0.20/1M)
+#### MiniMax M2.1 (5-ಗಂಟೆ ರೀಸೆಟ್, $0.20/1M)
 
-1. ನೋಂದಾಯಿಸಿ: [MiniMax](https://www.minimax.io)
+1. ನೋಂದಣಿ ಮಾಡಿ: [MiniMax](https://www.minimax.io)
 2. API ಕೀ ಪಡೆಯಿರಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ
 
-**ಬಳಕೆ:** `minimax/MiniMax-M2.1` — **ತಜ್ಞರ ಸಲಹೆ:** ದೀರ್ಘ ಸಂದರ್ಭಕ್ಕಾಗಿ ಅತ್ಯಂತ ಅಗ್ಗದ ಆಯ್ಕೆ (1M ಟೋಕನ್ಗಳು)!
+**ಬಳಕೆ:** `minimax/MiniMax-M2.1` — **ಪ್ರೊ ಟಿಪ್:** ದೀರ್ಘ ಕಾಂಟೆಕ್ಸ್ಟ್ಗೆ ಅತ್ಯಂತ ಅಗ್ಗದ ಆಯ್ಕೆ (1M ಟೋಕನ್ಗಳು)!
 
-#### Kimi K2 (ತಿಂಗಳಿಗೆ ನಿಗದಿತ $9)
+#### Kimi K2 ($9/ತಿಂಗಳು ಸ್ಥಿರ ಶುಲ್ಕ)
 
 1. ಚಂದಾದಾರರಾಗಿ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. API ಕೀ ಪಡೆಯಿರಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ
 
-**ಬಳಕೆ:** `kimi/kimi-k2.5` — **ತಜ್ಞರ ಸಲಹೆ:** 10M ಟೋಕನ್ಗಳಿಗೆ ತಿಂಗಳಿಗೆ ನಿಗದಿತ $9 = $0.90/1M ಪರಿಣಾಮಕಾರಿ ವೆಚ್ಚ!
+**ಬಳಕೆ:** `kimi/kimi-k2.5` — **ಪ್ರೊ ಟಿಪ್:** 10M ಟೋಕನ್ಗಳಿಗೆ ಸ್ಥಿರ $9/ತಿಂಗಳು = ಪರಿಣಾಮಕಾರಿ ವೆಚ್ಚ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. ನೋಂದಾಯಿಸಿ: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+1. ನೋಂದಣಿ ಮಾಡಿ: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Qianfan API ಕೀ ರಚಿಸಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ: ಪೂರೈಕೆದಾರ: `qianfan`
 
-**ಬಳಕೆ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ಅಥವಾ ಮತ್ತೊಂದು Qianfan OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ID.
+**ಬಳಕೆ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ಅಥವಾ ಇನ್ನೊಂದು Qianfan OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ID.
 
 ### 🆓 ಉಚಿತ ಪೂರೈಕೆದಾರರು
 
-ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲದ ಉಚಿತ ಪೂರೈಕೆದಾರರ ಪೂರೈಕೆದಾರ ಪುಟದಲ್ಲಿ **ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲ** ಎಂಬುದರ ಪಕ್ಕದಲ್ಲಿ ಸ್ವಿಚ್ ಇರುತ್ತದೆ.
-ಅದನ್ನು ಆಫ್ ಮಾಡುವುದರಿಂದ ಆ ಪೂರೈಕೆದಾರ ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ, ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ/ಸಂಕ್ಷಿಪ್ತ ಪೂರೈಕೆದಾರರ ವೀಕ್ಷಣೆಗಳಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತದೆ ಮತ್ತು
-ಅದರ ಮಾದರಿಗಳು `/v1/models` ನಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತವೆ.
+ದೃಢೀಕರಣವಿಲ್ಲದ ಉಚಿತ ಪೂರೈಕೆದಾರರ ಪೂರೈಕೆದಾರ ಪುಟದಲ್ಲಿ **ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲ** ಎಂಬುದರ ಪಕ್ಕದಲ್ಲಿ ಸ್ವಿಚ್ ಇರುತ್ತದೆ.
+ಅದನ್ನು ಆಫ್ ಮಾಡಿದರೆ ಆ ಪೂರೈಕೆದಾರ ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ, Providers configured/compact ವೀಕ್ಷಣೆಗಳಿಂದ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ ಮತ್ತು
+ಅದರ ಮಾದರಿಗಳನ್ನು `/v1/models` ನಿಂದ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ.
 
 #### Qoder (9 ಉಚಿತ ಮಾದರಿಗಳು)
 
 ```bash
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Qoder ಸಂಪರ್ಕಿಸಿ → OAuth ಲಾಗಿನ್ → ಪ್ರವೇಶವು ಪ್ರಸ್ತುತ ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Qoder ಸಂಪರ್ಕಿಸಿ → OAuth ಲಾಗಿನ್ → ಪ್ರವೇಶವು ಪ್ರಸ್ತುತ ಪೂರೈಕೆದಾರ ಮಿತಿಗಳಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ
 
 ಮಾದರಿಗಳು: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +239,7 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
 #### Kiro (Claude ಉಚಿತ)
 
 ```bash
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Kiro ಸಂಪರ್ಕಿಸಿ → AWS Builder ID ಅಥವಾ Google/GitHub → ~50 ಕ್ರೆಡಿಟ್ಗಳು/ತಿಂಗಳು
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Kiro ಸಂಪರ್ಕಿಸಿ → AWS Builder ID ಅಥವಾ Google/GitHub → ತಿಂಗಳಿಗೆ ಸುಮಾರು 50 ಕ್ರೆಡಿಟ್ಗಳು
 
 ಮಾದರಿಗಳು: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -342,73 +361,73 @@ API ಕೀ: [ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ]
 ```bash
 npm install -g omniroute
 
-# ಕಾನ್ಫಿಗ್ ಡೈರೆಕ್ಟರಿಯನ್ನು ರಚಿಸಿ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ಫೈಲ್ ರಚಿಸಿ (.env.example ನೋಡಿ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ಸರ್ವರ್ ಪ್ರಾರಂಭಿಸಿ
+# Start server
 omniroute
-# ಅಥವಾ ಕಸ್ಟಮ್ ಪೋರ್ಟ್ನೊಂದಿಗೆ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ಸ್ವಯಂಚಾಲಿತವಾಗಿ `~/.omniroute/.env` ಅಥವಾ `./.env` ನಿಂದ `.env` ಅನ್ನು ಲೋಡ್ ಮಾಡುತ್ತದೆ.
+CLI ಸ್ವಯಂಚಾಲಿತವಾಗಿ `.env` `~/.omniroute/.env` ಅಥವಾ `./.env` ನಿಂದ ಲೋಡ್ ಮಾಡುತ್ತದೆ. ವರ್ಕಿಂಗ್ ಡೈರೆಕ್ಟರಿಯಲ್ಲಿನ `./.env` ಕೀಲಿಗಳ ಕಿರು ಅನುಮತಿ ಪಟ್ಟಿಯನ್ನು ಮಾತ್ರ ಹೊಂದಿಸಬಹುದು (`REQUIRE_API_KEY`, ಲೊಕೇಲ್, ಸಮಯ ವಲಯ ಮತ್ತು ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್ಗಳು, ಪೋರ್ಟ್ಗಳಲ್ಲ); ಎಲ್ಲವನ್ನೂ `~/.omniroute/.env` ನಲ್ಲಿ ಇರಿಸಿ. [CLI ಉಡಾವಣಾ ಒಪ್ಪಂದಗಳನ್ನು](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ನೋಡಿ.
 
 ### ಟ್ರೇ ಮೋಡ್
 
-ಸಿಸ್ಟಮ್ ಟ್ರೇಯಲ್ಲಿ OmniRoute ಅನ್ನು ಪ್ರಾರಂಭಿಸಿ:
+ಸಿಸ್ಟಮ್ ಟ್ರೇನಲ್ಲಿ OmniRoute ಪ್ರಾರಂಭಿಸಿ:
 
 ```bash
 omniroute serve --tray
 ```
 
-ಸರ್ವರ್ ಮತ್ತು ಟ್ರೇ ಸಿದ್ಧವಾದ ನಂತರ ಕಮಾಂಡ್ ಹಿಂತಿರುಗುತ್ತದೆ.
+ಸರ್ವರ್ ಮತ್ತು ಟ್ರೇ ಸಿದ್ಧವಾದ ನಂತರ ಆಜ್ಞೆಯು ಹಿಂತಿರುಗುತ್ತದೆ.
 
-ಟರ್ಮಿನಲ್ ಇಲ್ಲದೆಯೂ ಸರ್ವರ್ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ.
+ಟರ್ಮಿನಲ್ ಇಲ್ಲದೆ ಸರ್ವರ್ ಮುಂದುವರಿಯುತ್ತದೆ.
 
-ಟ್ರೇ ಮೋಡ್ macOS, Windows ಮತ್ತು ಗ್ರಾಫಿಕಲ್ Linux ಸೆಷನ್ಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ. ಟ್ರೇ ಮೋಡ್ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತೆರೆಯುವುದಿಲ್ಲ.
+ಟ್ರೇ ಮೋಡ್ macOS, Windows, ಮತ್ತು ಗ್ರಾಫಿಕಲ್ Linux ಸೆಷನ್ಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ. ಟ್ರೇ ಮೋಡ್ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತೆರೆಯುವುದಿಲ್ಲ.
 
-ಈ ಕ್ರಿಯೆಗಳಿಗಾಗಿ ಟ್ರೇ ಮೆನು ಬಳಸಿ:
+ಈ ಕ್ರಿಯೆಗಳಿಗಾಗಿ ಟ್ರೇ ಮೆನುವನ್ನು ಬಳಸಿ:
 
 - ಡ್ಯಾಶ್ಬೋರ್ಡ್ ತೆರೆಯಿರಿ.
 - `/dashboard/logs` ತೆರೆಯಿರಿ.
 - ಸ್ವಯಂ-ಪ್ರಾರಂಭವನ್ನು ಬದಲಾಯಿಸಿ.
 - OmniRoute ನಿಲ್ಲಿಸಿ.
 
-ಈ ಆಯ್ಕೆಗಳೊಂದಿಗೆ `--tray` ಅನ್ನು ಸಂಯೋಜಿಸಬೇಡಿ:
+ಈ ಆಯ್ಕೆಗಳೊಂದಿಗೆ `--tray` ಸಂಯೋಜಿಸಬೇಡಿ:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ಈ ಮೋಡ್ಗಳಿಗೆ ವಿಭಿನ್ನ ಪ್ರಕ್ರಿಯೆ ಮಾಲೀಕತ್ವದ ಅಗತ್ಯವಿದೆ.
+ಈ ವಿಧಾನಗಳಿಗೆ ವಿಭಿನ್ನ ಪ್ರಕ್ರಿಯೆಯ ಮಾಲೀಕತ್ವದ ಅಗತ್ಯವಿದೆ.
 
-ಯಂತ್ರಕ್ಕೆ ಮುಂದಿನ ಬಾರಿ ಲಾಗಿನ್ ಮಾಡಿದಾಗ ಪ್ರಾರಂಭಿಸುವುದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ:
+ಮುಂದಿನ ಯಂತ್ರ ಲಾಗಿನ್ನಲ್ಲಿ ಪ್ರಾರಂಭವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ:
 
 ```bash
 omniroute autostart enable
 ```
 
-macOS, Windows ಮತ್ತು ಗ್ರಾಫಿಕಲ್ Linux ಸೆಷನ್ಗಳಲ್ಲಿ ಸ್ವಯಂ-ಪ್ರಾರಂಭವು ಟ್ರೇ ಮೋಡ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಹೆಡ್ಲೆಸ್ Linux ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ systemd ಬಳಕೆದಾರ ಸೇವೆಯನ್ನು ಬಳಸುತ್ತದೆ.
+ಸ್ವಯಂ-ಪ್ರಾರಂಭವು macOS, Windows, ಮತ್ತು ಚಿತ್ರಾತ್ಮಕ Linux ಸೆಷನ್ಗಳಲ್ಲಿ ಟ್ರೇ ಮೋಡ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. Headless Linux ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ systemd ಬಳಕೆದಾರ ಸೇವೆಯನ್ನು ಬಳಸುತ್ತದೆ.
 
-ಲಾಗಿನ್ ಸಮಯದಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವುದನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ:
+ಲಾಗಿನ್ನಲ್ಲಿ ಪ್ರಾರಂಭವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ:
 
 ```bash
 omniroute autostart disable
 ```
 
-### ಅಸ್ಥಾಪಿಸುವುದು
+### ಅನ್ಇನ್ಸ್ಟಾಲ್ ಮಾಡಲಾಗುತ್ತಿದೆ
 
-ನಿಮಗೆ ಇನ್ನು OmniRoute ಅಗತ್ಯವಿಲ್ಲದಾಗ, ಸ್ವಚ್ಛವಾಗಿ ತೆಗೆದುಹಾಕಲು ನಾವು ಎರಡು ತ್ವರಿತ ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ಒದಗಿಸುತ್ತೇವೆ:
+ನಿಮಗೆ ಇನ್ನು ಮುಂದೆ OmniRoute ಅಗತ್ಯವಿಲ್ಲದಿದ್ದಾಗ, ಕ್ಲೀನ್ ತೆಗೆದುಹಾಕುವಿಕೆಗಾಗಿ ನಾವು ಎರಡು ತ್ವರಿತ ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ಒದಗಿಸುತ್ತೇವೆ:
 
-| ಕಮಾಂಡ್                   | ಕ್ರಿಯೆ                                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | ಸಿಸ್ಟಮ್ ಆ್ಯಪ್ ಅನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ, ಆದರೆ `~/.omniroute` ನಲ್ಲಿರುವ **ನಿಮ್ಮ DB ಮತ್ತು ಕಾನ್ಫಿಗರೇಶನ್ಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ**. |
-| `npm run uninstall:full` | ಆ್ಯಪ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವುದರ ಜೊತೆಗೆ **ಎಲ್ಲಾ ಕಾನ್ಫಿಗರೇಶನ್ಗಳು, ಕೀಗಳು ಮತ್ತು ಡೇಟಾಬೇಸ್ಗಳನ್ನು ಶಾಶ್ವತವಾಗಿ ಅಳಿಸುತ್ತದೆ**.            |
+| ಆಜ್ಞೆ                    | ಕ್ರಿಯೆ                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | ಸಿಸ್ಟಮ್ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ ಆದರೆ** ನಿಮ್ಮ DB ಮತ್ತು ಕಾನ್ಫಿಗರೇಶನ್ಗಳನ್ನು ಇಡುತ್ತದೆ** `~/.omniroute` ನಲ್ಲಿ. |
+| `npm run uninstall:full` | ಅಪ್ಲಿಕೇಶನ್ AND ಶಾಶ್ವತವಾಗಿ ತೆಗೆದುಹಾಕುತ್ತದೆ** ಎಲ್ಲಾ ಕಾನ್ಫಿಗರೇಶನ್ಗಳು, ಕೀಗಳು ಮತ್ತು ಡೇಟಾಬೇಸ್ಗಳನ್ನು ಅಳಿಸುತ್ತದೆ** .       |
 
-> ಗಮನಿಸಿ: ಈ ಕಮಾಂಡ್ಗಳನ್ನು ಚಲಾಯಿಸಲು, OmniRoute ಪ್ರಾಜೆಕ್ಟ್ ಫೋಲ್ಡರ್ಗೆ ಹೋಗಿ (ನೀವು ಅದನ್ನು ಕ್ಲೋನ್ ಮಾಡಿದ್ದರೆ) ಮತ್ತು ಅವುಗಳನ್ನು ಚಲಾಯಿಸಿ. ಪರ್ಯಾಯವಾಗಿ, ಜಾಗತಿಕವಾಗಿ ಸ್ಥಾಪಿಸಿದ್ದರೆ, ನೀವು ಸರಳವಾಗಿ `npm uninstall -g omniroute` ಅನ್ನು ಚಲಾಯಿಸಬಹುದು.
+> ಗಮನಿಸಿ: ಈ ಆಜ್ಞೆಗಳನ್ನು ಚಲಾಯಿಸಲು, OmniRoute ಪ್ರಾಜೆಕ್ಟ್ ಫೋಲ್ಡರ್ಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ (ನೀವು ಅದನ್ನು ಕ್ಲೋನ್ ಮಾಡಿದರೆ) ಮತ್ತು ಅವುಗಳನ್ನು ರನ್ ಮಾಡಿ. ಪರ್ಯಾಯವಾಗಿ, ಜಾಗತಿಕವಾಗಿ ಸ್ಥಾಪಿಸಿದರೆ, ನೀವು ಸರಳವಾಗಿ `npm uninstall -g omniroute` ಚಲಾಯಿಸಬಹುದು.
 
 ### VPS ನಿಯೋಜನೆ
 
@@ -426,7 +445,7 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ಅಥವಾ: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 ನಿಯೋಜನೆ (ಕಡಿಮೆ ಮೆಮೊರಿ)
@@ -434,13 +453,13 @@ npm run start
 ಸೀಮಿತ RAM ಹೊಂದಿರುವ ಸರ್ವರ್ಗಳಿಗಾಗಿ, ಮೆಮೊರಿ ಮಿತಿ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ:
 
 ```bash
-# 512MB ಮಿತಿಯೊಂದಿಗೆ (ಡೀಫಾಲ್ಟ್)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ಅಥವಾ ಕಸ್ಟಮ್ ಮೆಮೊರಿ ಮಿತಿಯೊಂದಿಗೆ
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ಅಥವಾ ecosystem.config.js ಬಳಸಿ
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -469,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ಇಮೇಜ್ ನಿರ್ಮಿಸಿ (ಡೀಫಾಲ್ಟ್ = codex/claude/droid ಮೊದಲೇ ಸ್ಥಾಪಿಸಲಾಗಿರುವ runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ಪೋರ್ಟಬಲ್ ಮೋಡ್ (ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ಬೈನರಿಗಳೊಂದಿಗೆ ಹೋಸ್ಟ್-ಏಕೀಕೃತ ಮೋಡ್ಗಾಗಿ, ಮುಖ್ಯ ಡಾಕ್ಸ್ನಲ್ಲಿರುವ Docker ವಿಭಾಗವನ್ನು ನೋಡಿ.
+CLI ಬೈನರಿಗಳೊಂದಿಗೆ ಹೋಸ್ಟ್-ಇಂಟಿಗ್ರೇಟೆಡ್ ಮೋಡ್ಗಾಗಿ, ಮುಖ್ಯ ಡಾಕ್ಸ್ನಲ್ಲಿ Docker ವಿಭಾಗವನ್ನು ನೋಡಿ.
 
-### Void Linux (xbps-src)
+### ಶೂನ್ಯ Linux (xbps-src)
 
-Void Linux ಬಳಕೆದಾರರು `xbps-src` ಕ್ರಾಸ್-ಕಂಪೈಲೇಶನ್ ಫ್ರೇಮ್ವರ್ಕ್ ಬಳಸಿ OmniRoute ಅನ್ನು ನೇಟಿವ್ ಆಗಿ ಪ್ಯಾಕೇಜ್ ಮಾಡಿ ಸ್ಥಾಪಿಸಬಹುದು. ಇದು ಅಗತ್ಯವಿರುವ `better-sqlite3` ನೇಟಿವ್ ಬೈಂಡಿಂಗ್ಗಳೊಂದಿಗೆ Node.js ಸ್ವತಂತ್ರ ಬಿಲ್ಡ್ ಅನ್ನು ಸ್ವಯಂಚಾಲಿತಗೊಳಿಸುತ್ತದೆ.
+ಶೂನ್ಯ Linux ಬಳಕೆದಾರರು `xbps-src` ಕ್ರಾಸ್-ಕಂಪೈಲೇಶನ್ ಫ್ರೇಮ್ವರ್ಕ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು OmniRoute ಸ್ಥಳೀಯವಾಗಿ ಪ್ಯಾಕೇಜ್ ಮಾಡಬಹುದು ಮತ್ತು ಸ್ಥಾಪಿಸಬಹುದು. ಇದು ಅಗತ್ಯವಿರುವ `better-sqlite3` ಸ್ಥಳೀಯ ಬೈಂಡಿಂಗ್ಗಳ ಜೊತೆಗೆ Node.js ಸ್ವತಂತ್ರ ನಿರ್ಮಾಣವನ್ನು ಸ್ವಯಂಚಾಲಿತಗೊಳಿಸುತ್ತದೆ.
 
 <details>
-<summary><b>xbps-src ಟೆಂಪ್ಲೇಟ್ ವೀಕ್ಷಿಸಿ</b></summary>
+<summary><b>xbps-src ಟೆಂಪ್ಲೇಟ್ ಅನ್ನು ವೀಕ್ಷಿಸಿ</b></summary>
 
 ```bash
-# 'omniroute' ಗಾಗಿ ಟೆಂಪ್ಲೇಟ್ ಫೈಲ್
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -507,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp ಗಾಗಿ ಗುರಿ CPU ಆರ್ಕಿಟೆಕ್ಚರ್ ನಿರ್ಧರಿಸಿ
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ಎಲ್ಲಾ ಡಿಪೆಂಡೆನ್ಸಿಗಳನ್ನು ಸ್ಥಾಪಿಸಿ – ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js ಸ್ವತಂತ್ರ ಬಂಡಲ್ ನಿರ್ಮಿಸಿ
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) ಸ್ಥಿರ ಅಸೆಟ್ಗಳನ್ನು ಸ್ವತಂತ್ರ ಬಂಡಲ್ಗೆ ನಕಲಿಸಿ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 ನೇಟಿವ್ ಬೈಂಡಿಂಗ್ ಕಂಪೈಲ್ ಮಾಡಿ
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) ಕಂಪೈಲ್ ಮಾಡಿದ ಬೈಂಡಿಂಗ್ ಅನ್ನು ಸ್ವತಂತ್ರ ಬಂಡಲ್ನಲ್ಲಿ ಇರಿಸಿ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ಆರ್ಕಿಟೆಕ್ಚರ್-ನಿರ್ದಿಷ್ಟ sharp ಬಂಡಲ್ಗಳನ್ನು ತೆಗೆದುಹಾಕಿ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js ಸ್ಥಿರ ವಿಶ್ಲೇಷಣೆಯಿಂದ ಬಿಟ್ಟುಹೋಗಿರುವ pino ರನ್ಟೈಮ್ ಡಿಪೆಂಡೆನ್ಸಿಗಳನ್ನು ನಕಲಿಸಿ:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ಸ್ಥಾಪನೆಯ ನಂತರದ ಹೂಕ್ನಿಂದ ಖಾಲಿ Next.js ಆ್ಯಪ್ ರೂಟರ್ ಡೈರೆಕ್ಟರಿಗಳು ತೆಗೆದುಹಾಕಲ್ಪಡುವುದನ್ನು ತಡೆಯಿರಿ
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -578,51 +597,51 @@ post_install() {
 
 </details>
 
-### ಪರಿಸರ ಚರಗಳು
+### ಪರಿಸರ ವೇರಿಯಬಲ್ಸ್
 
-| ಚರ                                      | ಡೀಫಾಲ್ಟ್                             | ವಿವರಣೆ                                                                                                                                |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT ಸಹಿ ರಹಸ್ಯ (**ಪ್ರೊಡಕ್ಷನ್ನಲ್ಲಿ ಬದಲಾಯಿಸಿ**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | ಮೊದಲ ಲಾಗಿನ್ ಪಾಸ್ವರ್ಡ್                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | ಡೇಟಾ ಡೈರೆಕ್ಟರಿ (db, ಬಳಕೆ, ಲಾಗ್ಗಳು)                                                                                                    |
-| `PORT`                                  | ಫ್ರೇಮ್ವರ್ಕ್ ಡೀಫಾಲ್ಟ್                 | ಸೇವಾ ಪೋರ್ಟ್ (ಉದಾಹರಣೆಗಳಲ್ಲಿ `20128`)                                                                                                   |
-| `HOSTNAME`                              | ಫ್ರೇಮ್ವರ್ಕ್ ಡೀಫಾಲ್ಟ್                 | ಬೈಂಡ್ ಹೋಸ್ಟ್ (Docker ನಲ್ಲಿ ಡೀಫಾಲ್ಟ್ `0.0.0.0`)                                                                                        |
-| `NODE_ENV`                              | ರನ್ಟೈಮ್ ಡೀಫಾಲ್ಟ್                     | ನಿಯೋಜನೆಗಾಗಿ `production` ಹೊಂದಿಸಿ                                                                                                      |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಲ್ಲಿ ತೋರಿಸಲಾಗುವ ಮತ್ತು ಸರ್ವರ್ಗೆ ಬಹಿರಂಗಪಡಿಸಲಾಗುವ ಸಾರ್ವಜನಿಕ ಮೂಲ URL (ಹಳೆಯ `BASE_URL` ಅನ್ನು ಬದಲಿಸುತ್ತದೆ)                     |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | ಕ್ಲೌಡ್ ಸಿಂಕ್ ಎಂಡ್ಪಾಯಿಂಟ್ ಮೂಲ URL (ಹಳೆಯ `CLOUD_URL` ಅನ್ನು ಬದಲಿಸುತ್ತದೆ)                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ರಚಿಸಲಾದ API ಕೀಗಳಿಗಾಗಿ HMAC ರಹಸ್ಯ                                                                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` ನಲ್ಲಿ Bearer API ಕೀಯನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸಿ                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | ದೃಢೀಕೃತ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಬಳಕೆದಾರರು ಬೇಡಿಕೆಯ ಮೇರೆಗೆ ಸಂಗ್ರಹಿಸಲಾದ ಸಂಪೂರ್ಣ API ಕೀ ಮೌಲ್ಯಗಳನ್ನು ಬಹಿರಂಗಪಡಿಸಲು ಅನುಮತಿಸಿ                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ಕ್ಯಾಶ್ ಮಾಡಲಾದ ಪೂರೈಕೆದಾರ ಮಿತಿಗಳ ಡೇಟಾಗಾಗಿ ಸರ್ವರ್-ಬದಿಯ ರಿಫ್ರೆಶ್ ಆವರ್ತನೆ; UI ರಿಫ್ರೆಶ್ ಬಟನ್ಗಳು ಇನ್ನೂ ಹಸ್ತಚಾಲಿತ ಸಿಂಕ್ ಅನ್ನು ಪ್ರಚೋದಿಸುತ್ತವೆ  |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ಬರೆಯುವಿಕೆ/ಆಮದು/ಮರುಸ್ಥಾಪನೆಯ ಮೊದಲು ಸ್ವಯಂಚಾಲಿತ SQLite ಸ್ನ್ಯಾಪ್ಶಾಟ್ಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ; ಹಸ್ತಚಾಲಿತ ಬ್ಯಾಕಪ್ಗಳು ಇನ್ನೂ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ |
-| `APP_LOG_TO_FILE`                       | `true`                               | ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತು ಆಡಿಟ್ ಲಾಗ್ ಔಟ್ಪುಟ್ ಅನ್ನು ಡಿಸ್ಕ್ಗೆ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ                                                                  |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` ದೃಢೀಕರಣ ಕುಕಿಯನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸಿ (HTTPS ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿಯ ಹಿಂದೆ)                                                               |
-| `CLOUDFLARED_BIN`                       | ಹೊಂದಿಸಲಾಗಿಲ್ಲ                        | ನಿರ್ವಹಿತ ಡೌನ್ಲೋಡ್ ಬದಲಿಗೆ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ `cloudflared` ಬೈನರಿಯನ್ನು ಬಳಸಿ                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | ನಿರ್ವಹಿತ Quick Tunnels ಗಾಗಿ ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ (`http2`, `quic`, ಅಥವಾ `auto`)                                                             |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB ಯಲ್ಲಿ Node.js ಹೀಪ್ ಮಿತಿ                                                                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ನಮೂದುಗಳ ಗರಿಷ್ಠ ಸಂಖ್ಯೆ                                                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | ಸೆಮ್ಯಾಂಟಿಕ್ ಕ್ಯಾಶ್ ನಮೂದುಗಳ ಗರಿಷ್ಠ ಸಂಖ್ಯೆ                                                                                              |
+| ವೇರಿಯಬಲ್                                | ಡೀಫಾಲ್ಟ್                 | ವಿವರಣೆ                                                                                                                                           |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(ಸ್ವಯಂ-ರಚಿತ)_           | JWT ಸಹಿ ರಹಸ್ಯ — ಮೊದಲ ರನ್ನಲ್ಲಿ ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ ಮತ್ತು `server.env` ಗೆ ಮುಂದುವರೆಯಿತು; ಡೇಟಾ ಡೈರೆಕ್ಟರಿಯು ಅಲ್ಪಕಾಲಿಕವಾಗಿದ್ದಾಗ ಅದನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ಹೊಂದಿಸಿ |
+| `INITIAL_PASSWORD`                      | _(ಹೊಂದಿಸಲಾಗಿಲ್ಲ)_        | ಮೊದಲ ಲಾಗಿನ್ ಪಾಸ್ವರ್ಡ್. npm/source ಸ್ಥಾಪನೆಗಳು `CHANGEME` ನೊಂದಿಗೆ ಪ್ರಾರಂಭವಾಗುತ್ತವೆ : ಅದನ್ನು ಬದಲಾಯಿಸಿ. ಹೊಂದಿಸದಿರುವುದು: ಆನ್ಬೋರ್ಡಿಂಗ್ ಮಾಂತ್ರಿಕ        |
+| `DATA_DIR`                              | `~/.omniroute`           | ಡೇಟಾ ಡೈರೆಕ್ಟರಿ (ಡಿಬಿ, ಬಳಕೆ, ಲಾಗ್ಗಳು)                                                                                                             |
+| `PORT`                                  | ಫ್ರೇಮ್ವರ್ಕ್ ಡೀಫಾಲ್ಟ್     | ಸೇವಾ ಪೋರ್ಟ್ (ಉದಾಹರಣೆಗಳಲ್ಲಿ`20128` )                                                                                                              |
+| `HOSTNAME`                              | ಫ್ರೇಮ್ವರ್ಕ್ ಡೀಫಾಲ್ಟ್     | ಬೈಂಡ್ ಹೋಸ್ಟ್ (Docker ಡೀಫಾಲ್ಟ್ಗೆ `0.0.0.0`)                                                                                                       |
+| `NODE_ENV`                              | ರನ್ಟೈಮ್ ಡೀಫಾಲ್ಟ್         | ನಿಯೋಜಿಸಲು `production` ಹೊಂದಿಸಿ                                                                                                                   |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | ಸಾರ್ವಜನಿಕ ಮೂಲ URL ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗೆ ಹೊರಹೊಮ್ಮಿತು ಮತ್ತು ಸರ್ವರ್ಗೆ ತೆರೆದುಕೊಳ್ಳುತ್ತದೆ (ಪರಂಪರೆ `BASE_URL` ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ)                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | ಕ್ಲೌಡ್ ಸಿಂಕ್ ಎಂಡ್ಪಾಯಿಂಟ್ ಬೇಸ್ URL (ಲೆಗಸಿ `CLOUD_URL` ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ)                                                                        |
+| `API_KEY_SECRET`                        | _(ಸ್ವಯಂ-ರಚಿತ)_           | ರಚಿಸಿದ API ಕೀಗಳಿಗೆHMAC ರಹಸ್ಯ — ಮೊದಲ ರನ್ನಲ್ಲಿ ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ ಮತ್ತು `server.env` ಗೆ ಮುಂದುವರಿಯುತ್ತದೆ                                              |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` ನಲ್ಲಿ ಬೇರರ್ API ಕೀಯನ್ನು ಜಾರಿಗೊಳಿಸಿ                                                                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | ದೃಢೀಕೃತ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಬಳಕೆದಾರರಿಗೆ ಬೇಡಿಕೆಯ ಮೇರೆಗೆ ಪೂರ್ಣ ಸಂಗ್ರಹವಾಗಿರುವ API ಕೀ ಮೌಲ್ಯಗಳನ್ನು ಬಹಿರಂಗಪಡಿಸಲು ಅನುಮತಿಸಿ                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | ಸಂಗ್ರಹಿತ ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳ ಡೇಟಾಕ್ಕಾಗಿ ಸರ್ವರ್-ಸೈಡ್ ರಿಫ್ರೆಶ್ ಕ್ಯಾಡೆನ್ಸ್; UI ರಿಫ್ರೆಶ್ ಬಟನ್ಗಳು ಇನ್ನೂ ಹಸ್ತಚಾಲಿತ ಸಿಂಕ್ ಅನ್ನು ಪ್ರಚೋದಿಸುತ್ತವೆ            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore ಮೊದಲು ಸ್ವಯಂಚಾಲಿತ SQLite ಸ್ನ್ಯಾಪ್ಶಾಟ್ಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ; ಹಸ್ತಚಾಲಿತ ಬ್ಯಾಕಪ್ಗಳು ಇನ್ನೂ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ                 |
+| `APP_LOG_TO_FILE`                       | `true`                   | ಡಿಸ್ಕ್ಗೆ ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತು ಆಡಿಟ್ ಲಾಗ್ ಔಟ್ಪುಟ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ                                                                             |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth ಕುಕೀಯನ್ನು ಒತ್ತಾಯಿಸಿ ( HTTPS ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿ ಹಿಂದೆ)                                                                                |
+| `CLOUDFLARED_BIN`                       | ಹೊಂದಿಸಿಲ್ಲ               | ನಿರ್ವಹಿಸಲಾದ ಡೌನ್ಲೋಡ್ಗೆ ಬದಲಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ `cloudflared` ಬೈನರಿಯನ್ನು ಬಳಸಿ                                                                     |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | ನಿರ್ವಹಿಸಲಾದ ತ್ವರಿತ ಸುರಂಗಗಳಿಗೆ ಸಾರಿಗೆ (`http2`, `quic`, ಅಥವಾ `auto`)                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB ನಲ್ಲಿNode.js ರಾಶಿ ಮಿತಿ                                                                                                                        |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | ಗರಿಷ್ಠ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ನಮೂದುಗಳು                                                                                                                 |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | ಗರಿಷ್ಠ ಲಾಕ್ಷಣಿಕ ಸಂಗ್ರಹ ನಮೂದುಗಳು                                                                                                                  |
 
-ಪರಿಸರ ಚರಗಳ ಸಂಪೂರ್ಣ ಉಲ್ಲೇಖಕ್ಕಾಗಿ, [README](../README.md) ನೋಡಿ.
+ಸಂಪೂರ್ಣ ಪರಿಸರ ವೇರಿಯಬಲ್ ಉಲ್ಲೇಖಕ್ಕಾಗಿ, [README](../README.md) ನೋಡಿ.
 
 ---
 
 ## 📊 ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು
 
 <details>
-<summary><b>ಎಲ್ಲಾ ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳನ್ನು ನೋಡಿ</b></summary>
+<summary><b>ಲಭ್ಯವಿರುವ ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ</b></summary>
 
-> ಕೆಳಗಿನ ಪಟ್ಟಿಯನ್ನು v3.8.0 ಗಾಗಿ `open-sse/config/providerRegistry.ts` ನಿಂದ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ. ಕ್ಲೌಡ್ ಕ್ಯಾಟಲಾಗ್ಗಳು (Gemini, OpenRouter, ಇತ್ಯಾದಿ) ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಸಿಂಕ್ ಆಗುತ್ತವೆ — ಪೂರ್ಣ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers → [provider] → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ತೆರೆಯಿರಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಕರೆಯಿರಿ.
+> ಕೆಳಗಿನ ಪಟ್ಟಿಯನ್ನು v3.8.0 ಗಾಗಿ `open-sse/config/providerRegistry.ts` ನಿಂದ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ. ಕ್ಲೌಡ್ ಕ್ಯಾಟಲಾಗ್ಗಳು (Gemini, OpenRouter ಇತ್ಯಾದಿ) динамиಕ್ ಆಗಿ ಸಿಂಕ್ ಆಗುತ್ತವೆ — ಸಂಪೂರ್ಣ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ **Dashboard → Providers → [provider] → Available Models** ತೆರೆಯಿರಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಕರೆ ಮಾಡಿ.
 >
-> ಪ್ರೊವೈಡರ್ನ ಅಂತರ್ನಿರ್ಮಿತ ಪಟ್ಟಿಯು ಬದಲಾಗಿದ್ದರೆ, ಲೈವ್ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಪಡೆಯಲು ಆ ಪುಟದಲ್ಲಿರುವ **/models ನಿಂದ ಆಮದು ಮಾಡಿ** ಅನ್ನು ಬಳಸಿ (ಅಥವಾ **ಸ್ವಯಂ-ಸಿಂಕ್** ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ). ಇದನ್ನು v3.8.50 ನಲ್ಲಿ LLM7.io (`gemini-3.1-flash-lite`) ಮತ್ತು UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ; ಅದೇ ಪರೀಕ್ಷಾ ಹಂತದಲ್ಲಿ Pollinations ನ ಅನಾಮಧೇಯ ಪ್ರವೇಶವು ಅಪ್ಸ್ಟ್ರೀಮ್-ಸೀಮಿತವಾಗಿಯೇ ಮುಂದುವರಿದಿತು.
+> ಒದಗಿಸುವವರ ಅಂತರ್ನಿರ್ಮಿತ ಪಟ್ಟಿಯಲ್ಲಿ ವ್ಯತ್ಯಾಸ ಕಂಡುಬಂದರೆ, ಲೈವ್ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಯಾಟಲಾಗ್ ಪಡೆಯಲು ಆ ಪುಟದಲ್ಲಿರುವ **Import from /models** ಬಳಸಿ (ಅಥವಾ **Auto-Sync** ಸಕ್ರಿಯಗೊಳಿಸಿ). ಇದನ್ನು v3.8.50 ನಲ್ಲಿ LLM7.io (`gemini-3.1-flash-lite`) ಮತ್ತು UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ; ಇದೇ ಪರೀಕ್ಷಾ ಹಂತದಲ್ಲಿ Pollinations ಅನಾಮಧೇಯ ಪ್ರವೇಶವು ಅಪ್ಸ್ಟ್ರೀಮ್ ಮಿತಿಯಲ್ಲೇ ಉಳಿಯಿತು.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort ಮಟ್ಟಗಳು: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ಪ್ರಯತ್ನದ ಹಂತಗಳು: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ಉಚಿತ OAuth: **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers → Kiro → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಅಡಿಯಲ್ಲಿ ತೋರಿಸಿರುವ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಬಳಸಿ. ಲಭ್ಯತೆಯು ಖಾತೆ ಮತ್ತು ಪ್ಲ್ಯಾನ್ ಅನ್ನು ಅವಲಂಬಿಸಿರುತ್ತದೆ.
+**Kiro (`kr/`)** — ಉಚಿತ OAuth: **Dashboard → Providers → Kiro → Available Models** ಅಡಿಯಲ್ಲಿ ತೋರಿಸಲಾದ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ ಬಳಸಿ. ಲಭ್ಯತೆ ಖಾತೆ ಮತ್ತು ಯೋಜನೆಯ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿರುತ್ತದೆ.
 
 **Qoder (`if/`)** — ಉಚಿತ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,15 +649,15 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ತಿಂಗಳು ಫ್ಲಾಟ್ ಅಥವಾ ಬಳಕೆ-ಆಧಾರಿತ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ತಿಂಗಳಿಗೆ $9 ಅಥವಾ ಬಳಕೆಗೆ ಅನುಗುಣವಾಗಿ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ಕೀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ಅತಿ-ವೇಗದ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ಅತಿ ವೇಗದ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ನೇಟಿವ್: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ಸ್ಥಳೀಯ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ಯಲ್ಲಿ ಹೋಸ್ಟ್ ಮಾಡಲಾದ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-ಹೋಸ್ಟ್ ಮಾಡಲ್ಪಟ್ಟ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — ಹುಡುಕಾಟ-ವರ್ಧಿತ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
@@ -646,21 +665,21 @@ post_install() {
 
 **Fireworks AI (`fireworks/`)** — ವೇಗದ ಇನ್ಫರೆನ್ಸ್: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — ವೇಫರ್-ಸ್ಕೇಲ್: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ವೇಫರ್-ಮಟ್ಟದ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ಕೇಂದ್ರೀತ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-কೇಂದ್ರಿತ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ಎಂಟರ್ಪ್ರೈಸ್: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ಎಂಟರ್ಪ್ರೈಸ್: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ಪ್ರತಿ API ಕೀಗೆ Google ನಿಂದ ಲೈವ್ ಸಿಂಕ್ ಆಗುತ್ತದೆ — ಸ್ಥಿರ ಪಟ್ಟಿಯಿಲ್ಲ. **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers** ನಲ್ಲಿ ಕೀ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ಪ್ರಸ್ತುತ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಆಮದು ಮಾಡಿಕೊಳ್ಳಲು **ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಅನ್ನು ಬಳಸಿ (ಉದಾ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API ಕೀಯ ಆಧಾರದ ಮೇಲೆ Google ನಿಂದ ಲೈವ್ ಆಗಿ ಸಿಂಕ್ ಮಾಡಲಾಗುತ್ತದೆ — ಸ್ಥಿರ ಪಟ್ಟಿ ಇಲ್ಲ. **Dashboard → Providers** ನಲ್ಲಿ ಕೀಯನ್ನು ಸಂಪರ್ಕಿಸಿ, ನಂತರ ಪ್ರಸ್ತುತ ಕ್ಯಾಟಲಾಗ್ ಆಮದು ಮಾಡಲು **Available Models** ಬಳಸಿ (ಉದಾ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ಇತರ ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್ಗಳು** (ಆಯ್ದವು): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ಮೂಲಕ), `azure-ai`, `openrouter` (ಪಾಸ್ಥ್ರೂ ಕ್ಯಾಟಲಾಗ್), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ಪ್ರತಿಯೊಂದೂ `providerRegistry.ts` ನಲ್ಲಿ ತನ್ನದೇ ಆದ ಮಾದರಿ ಪಟ್ಟಿಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರೊವೈಡರ್ `/models` ಎಂಡ್ಪಾಯಿಂಟ್ ಅನ್ನು ಒದಗಿಸಿದಾಗ ಸ್ವಯಂ-ಸಿಂಕ್ ಮಾಡಬಹುದು.
+**ಇತರ ಹೊಂದಾಣಿಕೆಯ ಒದಗಿಸುವವರು** (ಆಯ್ದವು): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ಮೂಲಕ), `azure-ai`, `openrouter` (ಪಾಸ್ಥ್ರೂ ಕ್ಯಾಟಲಾಗ್), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ಪ್ರತಿಯೊಂದೂ `providerRegistry.ts` ನಲ್ಲಿ ತನ್ನದೇ ಮಾದರಿ ಪಟ್ಟಿಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಒದಗಿಸುವವರು `/models` ಎಂಡ್ಪಾಯಿಂಟ್ ಒದಗಿಸಿದಾಗ ಸ್ವಯಂ-ಸಿಂಕ್ ಮಾಡಬಹುದು.
 
-**ಮಾದರಿ ID ಗಳ ಬಗ್ಗೆ ಗಮನಿಸಿ:** OmniRoute ಪ್ರೊವೈಡರ್-ನೇಟಿವ್ ID ಗಳನ್ನು ಬಳಸುತ್ತದೆ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ಕೆಲವು ID ಗಳು ಚುಕ್ಕೆಯುಳ್ಳ ಆವೃತ್ತಿಗಳನ್ನು ಒಳಗೊಂಡಿರುತ್ತವೆ ಏಕೆಂದರೆ ಅಪ್ಸ್ಟ್ರೀಮ್ API ಅವುಗಳನ್ನು ಆ ರೀತಿಯಲ್ಲಿಯೇ ನಿರೀಕ್ಷಿಸುತ್ತದೆ. ಯಾವುದಾದರೂ ಮಾದರಿಯು ಮೇಲೆ ಪಟ್ಟಿ ಮಾಡಲಾಗಿಲ್ಲದಿದ್ದರೆ, ಲಭ್ಯತೆಯನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು `omniroute models --search <term>` ಅನ್ನು ಚಲಾಯಿಸಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಬಳಸಿ.
+**ಮಾದರಿ ID ಗಳ ಕುರಿತು:** OmniRoute ಒದಗಿಸುವವರ-ಸ್ಥಳೀಯ ID ಗಳನ್ನು ಬಳಸುತ್ತದೆ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ಕೆಲವು ID ಗಳಲ್ಲಿ ಚುಕ್ಕೆಗಳಿರುವ ಆವೃತ್ತಿಗಳಿವೆ, ಏಕೆಂದರೆ ಅಪ್ಸ್ಟ್ರೀಮ್ API ಅವುಗಳನ್ನು ಹೀಗೆ ನಿರೀಕ್ಷಿಸುತ್ತದೆ. ಮೇಲಿನ ಪಟ್ಟಿಯಲ್ಲಿ ಮಾದರಿ ಇಲ್ಲದಿದ್ದರೆ, ಲಭ್ಯತೆಯನ್ನು ದೃಢೀಕರಿಸಲು `omniroute models --search <term>` ರನ್ ಮಾಡಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಕರೆ ಮಾಡಿ.
 
 </details>
 
@@ -691,11 +710,11 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### ಕಸ್ಟಮ್ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರರು
 
-OpenAI API ಅನ್ನು ಮಾತನಾಡುವ ಯಾವುದೇ ಗೇಟ್ವೇ (ಸ್ವಯಂ ಹೋಸ್ಟ್ ಮಾಡಿದ ಪ್ರಾಕ್ಸಿ, vLLM, ಮೂರನೇ-ಪಕ್ಷದ ಸಂಗ್ರಾಹಕ) ತನ್ನದೇ ಆದ ಪೂರೈಕೆದಾರ ನೋಡ್ನಂತೆ ಸೇರಿಸಬಹುದು:
+OpenAI API ಅನ್ನು ಮಾತನಾಡುವ ಯಾವುದೇ ಗೇಟ್ವೇ (ಸ್ವಯಂ ಹೋಸ್ಟ್ ಮಾಡಿದ ಪ್ರಾಕ್ಸಿ, vLLM, ಮೂರನೇ ವ್ಯಕ್ತಿಯ ಸಂಗ್ರಾಹಕ) ತನ್ನದೇ ಆದ ಪೂರೈಕೆದಾರ ನೋಡ್ನಂತೆ ಸೇರಿಸಬಹುದು:
 
 1. **ಪೂರೈಕೆದಾರರು → OpenAI ಹೊಂದಾಣಿಕೆಯನ್ನು ಸೇರಿಸಿ** .
 2. **ಹೆಸರು** : ನೋಡ್ಗಾಗಿ ಪ್ರದರ್ಶನ ಲೇಬಲ್.
-3. **ಪೂರ್ವಪ್ರತ್ಯಯ** : ರೂಟಿಂಗ್ ಹೆಸರು. ಗ್ರಾಹಕರು ಮಾದರಿಗಳನ್ನು `<prefix>/<model>` ಎಂದು ಕರೆಯುತ್ತಾರೆ, ಆದ್ದರಿಂದ `mygw` ಪೂರ್ವಪ್ರತ್ಯಯವನ್ನು ಹೊಂದಿರುವ ನೋಡ್ `mygw/gpt-4o-mini` ಪೂರೈಸುತ್ತದೆ. ಅಗತ್ಯವಿದೆ; ಯಾವುದೇ ಪಾತ್ರದ ನಿರ್ಬಂಧವಿಲ್ಲ.
+3. **ಪೂರ್ವಪ್ರತ್ಯಯ** : ರೂಟಿಂಗ್ ಹೆಸರು. ಗ್ರಾಹಕರು ಮಾದರಿಗಳನ್ನು `<prefix>/<model>` ಎಂದು ಕರೆಯುತ್ತಾರೆ, ಆದ್ದರಿಂದ `mygw` ಪೂರ್ವಪ್ರತ್ಯಯದೊಂದಿಗೆ ನೋಡ್ `mygw/gpt-4o-mini` ಪೂರೈಸುತ್ತದೆ. ಅಗತ್ಯವಿದೆ; ಯಾವುದೇ ಪಾತ್ರದ ನಿರ್ಬಂಧವಿಲ್ಲ.
 4. **API ಪ್ರಕಾರ** : ಗೇಟ್ವೇ ಸೇವೆ ಸಲ್ಲಿಸುವ ಎಂಡ್ಪಾಯಿಂಟ್ ಕುಟುಂಬ (ಚಾಟ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆಗಳು, ಪ್ರತಿಕ್ರಿಯೆಗಳು, ಎಂಬೆಡಿಂಗ್ಗಳು, ಆಡಿಯೋ, ಚಿತ್ರಗಳು).
 5. **ಬೇಸ್ URL** : API ರೂಟ್, `/v1` ವರೆಗೆ ಮತ್ತು ಸೇರಿದಂತೆ (ಉದಾಹರಣೆಗೆ `https://gateway.example.com/v1`), ಪೂರ್ಣ `/chat/completions` ಮಾರ್ಗವಲ್ಲ. ಪ್ರಮಾಣಿತವಲ್ಲದ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿರುವ ಗೇಟ್ವೇಗಳು ಅವುಗಳನ್ನು ಕೆಳಗೆ ಹೊಂದಿಸಿವೆ** ಸುಧಾರಿತ ಸೆಟ್ಟಿಂಗ್ಗಳು** (ಚಾಟ್ ಮಾರ್ಗ, ಮಾದರಿಗಳ ಮಾರ್ಗ).
 6. ದಿ**API ಕೀ (ಪರಿಶೀಲನೆಗಾಗಿ)** ಕ್ಷೇತ್ರವು ಸಂಪರ್ಕವನ್ನು ಮಾತ್ರ ಪರೀಕ್ಷಿಸುತ್ತದೆ. ನೋಡ್ ಅನ್ನು ರಚಿಸಿದ ನಂತರ, ಅದನ್ನು ತೆರೆಯಿರಿ ಮತ್ತು ಬಳಸಿ** ಸಂಪರ್ಕವನ್ನು ಸೇರಿಸಿ** ವಿನಂತಿಗಳು ಬಳಸುವ ಕೀಲಿಯನ್ನು ಸಂಗ್ರಹಿಸಲು.
@@ -716,8 +735,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ಈ ಕೀಗಳು ಸಂಪರ್ಕದ `providerSpecificData` ನಲ್ಲಿ ಹೋಗುತ್ತವೆ (ಉದಾಹರಣೆಗೆ `PUT /api/providers/{id}` ಮೂಲಕ):
 
-- `toolNameMaxLength` (ಪೂರ್ಣಾಂಕ, 1–1024) — OpenAI ಚಾಟ್-ಫಾರ್ಮ್ಯಾಟ್ ಹೊಂದಾಣಿಕೆಯ ಸಂಪರ್ಕಗಳಿಗಾಗಿ, ಅದರ ಗೇಟ್ವೇ ದೀರ್ಘವಾದ ಉಪಕರಣದ ಹೆಸರುಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಉದ್ದವಾದ ಹೆಸರುಗಳನ್ನು ಸಣ್ಣ ಅಲಿಯಾಸ್ಗಳಾಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ ಮರುಸ್ಥಾಪಿಸಲಾಗುತ್ತದೆ.
-- `quotaEndpoint` — ಗೇಟ್ವೇಯ quota/credits ಎಂಡ್ಪಾಯಿಂಟ್, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕೋಟಾ ಸ್ಟ್ರಿಪ್ ಮತ್ತು ಕೋಟಾ-ಅವೇರ್ ರೂಟಿಂಗ್ಗಾಗಿ ಓದಿ. OpenAI- ಮತ್ತು ಆಂಥ್ರೊಪಿಕ್-ಹೊಂದಾಣಿಕೆಯ ಸಂಪರ್ಕಗಳೆರಡರಲ್ಲೂ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ; ಪೂರ್ಣ ಆಕಾರವನ್ನು `open-sse/services/usage/openaiCompatible.ts` ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
+- `toolNameMaxLength` (ಪೂರ್ಣಾಂಕ, 1–1024) — OpenAI ಚಾಟ್-ಫಾರ್ಮ್ಯಾಟ್ ಹೊಂದಾಣಿಕೆಯ ಸಂಪರ್ಕಗಳ ಗೇಟ್ವೇ ಉದ್ದವಾದ ಉಪಕರಣದ ಹೆಸರುಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಉದ್ದವಾದ ಹೆಸರುಗಳನ್ನು ಸಣ್ಣ ಅಲಿಯಾಸ್ಗಳಾಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ ಮರುಸ್ಥಾಪಿಸಲಾಗುತ್ತದೆ. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ಮತ್ತು ಮ್ಯೂಸ್ ಕೋಡ್ ಈಗಾಗಲೇ ಯಾವುದೇ ಸೆಟ್ಟಿಂಗ್ಗಳಿಲ್ಲದೆ 64 ಅಕ್ಷರಗಳಿಗಿಂತ ಅಲಿಯಾಸ್ ಹೆಸರುಗಳನ್ನು ಹೊಂದಿದೆ. ಸಂಪರ್ಕ ಮೌಲ್ಯವು Azure OpenAI / Azure AI ಫೌಂಡ್ರಿ ಡೀಫಾಲ್ಟ್ ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ (ಕಟ್ಟುನಿಟ್ಟಾದ ಗೇಟ್ವೇ ಹಿಂದೆ ಅಜೂರ್ ಸಂಪರ್ಕ) ಮತ್ತು ಕಸ್ಟಮ್ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ಗೆ ಮಿತಿಯನ್ನು ಹೊಂದಿಸುತ್ತದೆ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ಮತ್ತು ಮ್ಯೂಸ್ ಕೋಡ್ ತಮ್ಮ ನೋಂದಾವಣೆ ಮಿತಿಯನ್ನು ಇಟ್ಟುಕೊಳ್ಳುತ್ತವೆ ಮತ್ತು ಅದನ್ನು ನಿರ್ಲಕ್ಷಿಸಿ.
+- `quotaEndpoint` — ಗೇಟ್ವೇಯ quota/credits ಅಂತಿಮ ಬಿಂದು, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕೋಟಾ ಸ್ಟ್ರಿಪ್ ಮತ್ತು ಕೋಟಾ-ಅವೇರ್ ರೂಟಿಂಗ್ಗಾಗಿ ಓದಿ. OpenAI- ಮತ್ತು ಆಂಥ್ರೊಪಿಕ್-ಹೊಂದಾಣಿಕೆಯ ಸಂಪರ್ಕಗಳೆರಡರಲ್ಲೂ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ; ಪೂರ್ಣ ಆಕಾರವನ್ನು `open-sse/services/usage/openaiCompatible.ts` ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
 
 ```json
 {
@@ -754,7 +773,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 ಸ್ಪಷ್ಟವಾಗಿ ಅನುಮತಿಸಲಾದ ಪೀರ್ URL ಗೆ ಕಳುಹಿಸಲಾದ ವಿನಂತಿಗಳು ಮಾತ್ರ `X-OmniRoute-Peer-Trace` ಹೆಡರ್ ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತವೆ. ಗೇಟ್ವೇ ಪುನರಾವರ್ತಿತ ನಿದರ್ಶನ ID ಅಥವಾ HTTP `508 Loop Detected` ನೊಂದಿಗೆ ಖಾಲಿಯಾದ ಹಾಪ್ ಬಜೆಟ್ ಅನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ; ಸಾಮಾನ್ಯ ಅಪ್ಸ್ಟ್ರೀಮ್ ಪೂರೈಕೆದಾರರು ಯಾವುದೇ ಪೀರ್ ಮೆಟಾಡೇಟಾವನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ.
 
-ಪೀರ್ ಚೈನಿಂಗ್ ಡೇಟಾಬೇಸ್ ಪುನರಾವರ್ತನೆ ಅಥವಾ ಹೋಸ್ಟ್ ವೈಫಲ್ಯವಲ್ಲ. ಪ್ರತಿಯೊಂದು ಗೇಟ್ವೇ ಸ್ವತಂತ್ರ SQLite ಸ್ಥಿತಿ, ಸಂಗ್ರಹಗಳು, ದರ ಕೌಂಟರ್ಗಳು ಮತ್ತು ಸೆಷನ್ಗಳನ್ನು ಇರಿಸುತ್ತದೆ. active/passive ಅಥವಾ active/active ಲಭ್ಯತೆಗಾಗಿ ಆರೋಗ್ಯ-ಪರಿಶೀಲಿಸಿದ ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿ ಅಥವಾ ಕ್ಲೈಂಟ್ ವಿಫಲತೆಯನ್ನು ಬಳಸಿ, ಮತ್ತು ಒಂದು SQLite ಡೇಟಾಬೇಸ್ ಅನ್ನು ಬಹು ಚಾಲನೆಯಲ್ಲಿರುವ OmniRoute ನಿದರ್ಶನಗಳಿಗೆ ಎಂದಿಗೂ ಆರೋಹಿಸಬೇಡಿ.
+ಪೀರ್ ಚೈನಿಂಗ್ ಡೇಟಾಬೇಸ್ ಪುನರಾವರ್ತನೆ ಅಥವಾ ಹೋಸ್ಟ್ ವೈಫಲ್ಯವಲ್ಲ. ಪ್ರತಿಯೊಂದು ಗೇಟ್ವೇ ಸ್ವತಂತ್ರ SQLite ಸ್ಥಿತಿ, ಸಂಗ್ರಹಗಳು, ದರ ಕೌಂಟರ್ಗಳು ಮತ್ತು ಅವಧಿಗಳನ್ನು ಇರಿಸುತ್ತದೆ. active/passive ಅಥವಾ active/active ಲಭ್ಯತೆಗಾಗಿ ಆರೋಗ್ಯ-ಪರಿಶೀಲಿಸಿದ ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿ ಅಥವಾ ಕ್ಲೈಂಟ್ ವಿಫಲತೆಯನ್ನು ಬಳಸಿ ಮತ್ತು ಒಂದು SQLite ಡೇಟಾಬೇಸ್ ಅನ್ನು ಬಹು ಚಾಲನೆಯಲ್ಲಿರುವ OmniRoute ನಿದರ್ಶನಗಳಿಗೆ ಎಂದಿಗೂ ಆರೋಹಿಸಬೇಡಿ.
 
 ### ಮೀಸಲಾದ ಪೂರೈಕೆದಾರರ ಮಾರ್ಗಗಳು
 
@@ -766,7 +785,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-ಒದಗಿಸುವವರ ಪೂರ್ವಪ್ರತ್ಯಯವು ಕಾಣೆಯಾಗಿದ್ದರೆ ಸ್ವಯಂ-ಸೇರಿಸಲಾಗಿದೆ. ಹೊಂದಿಕೆಯಾಗದ ಮಾದರಿಗಳು `400` ಹಿಂತಿರುಗಿಸುತ್ತವೆ.
+ಒದಗಿಸುವವರ ಪೂರ್ವಪ್ರತ್ಯಯವು ಕಾಣೆಯಾಗಿದ್ದರೆ ಸ್ವಯಂ-ಸೇರಿಸಲಾಗುತ್ತದೆ. ಹೊಂದಿಕೆಯಾಗದ ಮಾದರಿಗಳು `400` ಹಿಂತಿರುಗಿಸುತ್ತವೆ.
 
 ### ನೆಟ್ವರ್ಕ್ ಪ್ರಾಕ್ಸಿ ಕಾನ್ಫಿಗರೇಶನ್
 
@@ -807,15 +826,15 @@ curl http://localhost:20128/api/models/catalog
 - ಮೊದಲು ಅಗತ್ಯವಿದ್ದಾಗ ಮಾತ್ರ `cloudflared` ಸ್ಥಾಪನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ; ನಂತರ ಪುನರಾರಂಭಗಳು ಅದೇ ನಿರ್ವಹಿಸಿದ ಬೈನರಿಯನ್ನು ಮರುಬಳಕೆ ಮಾಡುತ್ತವೆ
 - OmniRoute ಅಥವಾ ಕಂಟೇನರ್ ಮರುಪ್ರಾರಂಭದ ನಂತರ ತ್ವರಿತ ಸುರಂಗಗಳನ್ನು ಸ್ವಯಂ-ಮರುಸ್ಥಾಪಿಸಲಾಗುವುದಿಲ್ಲ; ಅಗತ್ಯವಿದ್ದಾಗ ಅವುಗಳನ್ನು ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಪುನಃ ಸಕ್ರಿಯಗೊಳಿಸಿ
 - ಸುರಂಗ URLs ಅಲ್ಪಕಾಲಿಕ ಮತ್ತು ನೀವು ಸುರಂಗವನ್ನು stop/start ಪ್ರತಿ ಬಾರಿ ಬದಲಾಯಿಸಬಹುದು
-- ನಿರ್ಬಂಧಿತ ಕಂಟೈನರ್ಗಳಲ್ಲಿ ಗದ್ದಲದ QUIC UDP ಬಫರ್ ಎಚ್ಚರಿಕೆಗಳನ್ನು ತಪ್ಪಿಸಲು HTTP/2 ಸಾರಿಗೆಗೆ ಡೀಫಾಲ್ಟ್ ಆಗಿ ನಿರ್ವಹಿಸಲಾದ ತ್ವರಿತ ಸುರಂಗಗಳು
+- ನಿರ್ಬಂಧಿತ ಕಂಟೈನರ್ಗಳಲ್ಲಿ ಗದ್ದಲದ QUIC UDP ಬಫರ್ ಎಚ್ಚರಿಕೆಗಳನ್ನು ತಪ್ಪಿಸಲು HTTP/2 ಸಾರಿಗೆಗೆ ಡೀಫಾಲ್ಟ್ ಅನ್ನು ನಿರ್ವಹಿಸಿದ ತ್ವರಿತ ಸುರಂಗಗಳು
 - ನೀವು ನಿರ್ವಹಿಸಿದ ಸಾರಿಗೆ ಆಯ್ಕೆಯನ್ನು ಅತಿಕ್ರಮಿಸಲು ಬಯಸಿದರೆ `CLOUDFLARED_PROTOCOL=quic` ಅಥವಾ `auto` ಹೊಂದಿಸಿ
 - ನಿರ್ವಹಿಸಲಾದ ಡೌನ್ಲೋಡ್ಗೆ ಬದಲಾಗಿ ಪೂರ್ವಸ್ಥಾಪಿತ `cloudflared` ಬೈನರಿಯನ್ನು ಬಳಸಲು ನೀವು ಬಯಸಿದರೆ `CLOUDFLARED_BIN` ಹೊಂದಿಸಿ
 - Cloudflare ಕ್ವಿಕ್ ಟನಲ್, Tailscale ಫನಲ್ ಮತ್ತು ngrok ಸುರಂಗ ಫಲಕಗಳನ್ನು ತೋರಿಸಬಹುದು ಅಥವಾ ಮರೆಮಾಡಬಹುದು** ಸೆಟ್ಟಿಂಗ್ಗಳು → ಗೋಚರತೆ** . ಫಲಕವನ್ನು ಮರೆಮಾಡುವುದು ಚಾಲನೆಯಲ್ಲಿರುವ ಸುರಂಗವನ್ನು ನಿಲ್ಲಿಸುವುದಿಲ್ಲ.
 
 ### LLM ಗೇಟ್ವೇ ಇಂಟೆಲಿಜೆನ್ಸ್ (ಹಂತ 9)
 
-- **ಲಾಕ್ಷಣಿಕ ಸಂಗ್ರಹ** — ಸ್ವಯಂ-ಕ್ಯಾಶ್ ಸ್ಟ್ರೀಮಿಂಗ್ ಅಲ್ಲದ, ತಾಪಮಾನ = 0 ಪ್ರತಿಕ್ರಿಯೆಗಳು ( `X-OmniRoute-No-Cache: true` ನೊಂದಿಗೆ ಬೈಪಾಸ್)
-- **ಐಡೆಂಪೊಟೆನ್ಸಿಗೆ ವಿನಂತಿಸಿ** - `Idempotency-Key` ಅಥವಾ `X-Request-Id` ಹೆಡರ್ ಮೂಲಕ 5 ಸೆಕೆಂಡುಗಳ ಒಳಗೆ ವಿನಂತಿಗಳನ್ನು ನಕಲು ಮಾಡುತ್ತದೆ
+- **ಲಾಕ್ಷಣಿಕ ಸಂಗ್ರಹ** — ಸ್ವಯಂ-ಕ್ಯಾಶ್ಗಳು ಸ್ಟ್ರೀಮಿಂಗ್ ಅಲ್ಲದ, ತಾಪಮಾನ = 0 ಪ್ರತಿಕ್ರಿಯೆಗಳು ( `X-OmniRoute-No-Cache: true` ನೊಂದಿಗೆ ಬೈಪಾಸ್)
+- **ಐಡೆಂಪೊಟೆನ್ಸಿಗೆ ವಿನಂತಿಸಿ** — 5s ಒಳಗೆ ವಿನಂತಿಗಳನ್ನು `Idempotency-Key` ಅಥವಾ `X-Request-Id` ಹೆಡರ್ ಮೂಲಕ ಡಿಡ್ಯೂಪ್ಲಿಕೇಟ್ ಮಾಡುತ್ತದೆ
 - **ಪ್ರಗತಿ ಟ್ರ್ಯಾಕಿಂಗ್** — `X-OmniRoute-Progress: true` ಹೆಡರ್ ಮೂಲಕ SSE `event: progress` ಈವೆಂಟ್ಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ
 
 ---
@@ -845,27 +864,27 @@ curl http://localhost:20128/api/models/catalog
 
 **ಡ್ಯಾಶ್ಬೋರ್ಡ್-ಗೋಚರ ತಂತ್ರಗಳು (ಖಾತೆ-ಮಟ್ಟದ ರೂಟಿಂಗ್):**
 
-| ತಂತ್ರ                         | ವಿವರಣೆ                                                                                                            |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **ಮೊದಲು ಭರ್ತಿ ಮಾಡಿ**          | ಆದ್ಯತೆಯ ಕ್ರಮದಲ್ಲಿ ಖಾತೆಗಳನ್ನು ಬಳಸುತ್ತದೆ - ಪ್ರಾಥಮಿಕ ಖಾತೆಯು ಲಭ್ಯವಿಲ್ಲದ ತನಕ ಎಲ್ಲಾ ವಿನಂತಿಗಳನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ         |
-| **ರೌಂಡ್ ರಾಬಿನ್**              | ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ಜಿಗುಟಾದ ಮಿತಿಯೊಂದಿಗೆ ಎಲ್ಲಾ ಖಾತೆಗಳ ಮೂಲಕ ಸೈಕಲ್ಗಳು (ಡೀಫಾಲ್ಟ್: ಪ್ರತಿ ಖಾತೆಗೆ 3 ಕರೆಗಳು)              |
-| **P2C (ಎರಡು ಆಯ್ಕೆಗಳ ಶಕ್ತಿ)**  | 2 ಯಾದೃಚ್ಛಿಕ ಖಾತೆಗಳನ್ನು ಮತ್ತು ಆರೋಗ್ಯಕರ ಒಂದಕ್ಕೆ ಮಾರ್ಗಗಳನ್ನು ಆರಿಸಿಕೊಳ್ಳುತ್ತದೆ - ಆರೋಗ್ಯದ ಅರಿವಿನೊಂದಿಗೆ ಬ್ಯಾಲೆನ್ಸ್ ಲೋಡ್ |
-| **ಯಾದೃಚ್ಛಿಕ**                 | ಫಿಶರ್-ಯೇಟ್ಸ್ ಷಫಲ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಪ್ರತಿ ವಿನಂತಿಗೆ ಯಾದೃಚ್ಛಿಕವಾಗಿ ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ                           |
-| **ಕಡಿಮೆ ಬಳಸಲಾಗಿದೆ**           | ಟ್ರಾಫಿಕ್ ಅನ್ನು ಸಮವಾಗಿ ವಿತರಿಸುವ, ಹಳೆಯ `lastUsedAt` ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್ನೊಂದಿಗೆ ಖಾತೆಗೆ ಮಾರ್ಗಗಳು                            |
-| **ವೆಚ್ಚ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ** | ಕಡಿಮೆ ಆದ್ಯತೆಯ ಮೌಲ್ಯದೊಂದಿಗೆ ಖಾತೆಗೆ ಮಾರ್ಗಗಳು, ಕಡಿಮೆ-ವೆಚ್ಚದ ಪೂರೈಕೆದಾರರಿಗೆ ಉತ್ತಮಗೊಳಿಸುವಿಕೆ                            |
+| ತಂತ್ರ                              | ವಿವರಣೆ                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **ಮೊದಲು ಭರ್ತಿ ಮಾಡಿ**               | ಆದ್ಯತೆಯ ಕ್ರಮದಲ್ಲಿ ಖಾತೆಗಳನ್ನು ಬಳಸುತ್ತದೆ — ಪ್ರಾಥಮಿಕ ಖಾತೆಯು ಲಭ್ಯವಿಲ್ಲದ ತನಕ ಎಲ್ಲಾ ವಿನಂತಿಗಳನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ |
+| **ರೌಂಡ್ ರಾಬಿನ್**                   | ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ಜಿಗುಟಾದ ಮಿತಿಯೊಂದಿಗೆ ಎಲ್ಲಾ ಖಾತೆಗಳ ಮೂಲಕ ಸೈಕಲ್ಗಳು (ಡೀಫಾಲ್ಟ್: ಪ್ರತಿ ಖಾತೆಗೆ 3 ಕರೆಗಳು)      |
+| **P2C (ಎರಡು ಆಯ್ಕೆಗಳ ಶಕ್ತಿ)**       | ಆರೋಗ್ಯದ ಅರಿವಿನೊಂದಿಗೆ 2 ಯಾದೃಚ್ಛಿಕ ಖಾತೆಗಳು ಮತ್ತು ಆರೋಗ್ಯಕರ ಒಂದು — ಬ್ಯಾಲೆನ್ಸ್ ಲೋಡ್ಗೆ ಮಾರ್ಗಗಳನ್ನು ಆರಿಸುತ್ತದೆ   |
+| **ಯಾದೃಚ್ಛಿಕ**                      | ಫಿಶರ್-ಯೇಟ್ಸ್ ಷಫಲ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಪ್ರತಿ ವಿನಂತಿಗೆ ಯಾದೃಚ್ಛಿಕವಾಗಿ ಖಾತೆಯನ್ನು ಆಯ್ಕೆ ಮಾಡುತ್ತದೆ                  |
+| **ಕಡಿಮೆ ಬಳಸಲಾಗಿದೆ**                | ಟ್ರಾಫಿಕ್ ಅನ್ನು ಸಮವಾಗಿ ವಿತರಿಸುವ, ಹಳೆಯ `lastUsedAt` ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್ನೊಂದಿಗೆ ಖಾತೆಗೆ ಮಾರ್ಗಗಳು                    |
+| **ವೆಚ್ಚವನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ** | ಕಡಿಮೆ ಆದ್ಯತೆಯ ಮೌಲ್ಯದೊಂದಿಗೆ ಖಾತೆಗೆ ಮಾರ್ಗಗಳು, ಕಡಿಮೆ-ವೆಚ್ಚದ ಪೂರೈಕೆದಾರರಿಗೆ ಉತ್ತಮಗೊಳಿಸುವಿಕೆ                    |
 
-**ಸುಧಾರಿತ ಕಾಂಬೊ ಮತ್ತು ಸ್ವಯಂ ತಂತ್ರಗಳು** (ಪ್ರತಿ ಕಾಂಬೊ ಅಥವಾ `auto/*` ಪೂರ್ವಪ್ರತ್ಯಯಗಳ ಮೂಲಕ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದು - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ನೋಡಿ):
+**ಸುಧಾರಿತ ಕಾಂಬೊ ಮತ್ತು ಸ್ವಯಂ ತಂತ್ರಗಳು** (ಪ್ರತಿ ಕಾಂಬೊ ಅಥವಾ `auto/*` ಪೂರ್ವಪ್ರತ್ಯಯಗಳ ಮೂಲಕ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದು — ನೋಡಿ [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - ಕಟ್ಟುನಿಟ್ಟಾದ ಕ್ರಮ, ಎಂದಿಗೂ ರೌಂಡ್-ರಾಬಿನ್ಸ್
-- `weighted` - ಪ್ರತಿ ಮಾದರಿಯ ತೂಕದಿಂದ ಅನುಪಾತದ ಸಂಚಾರ ವಿಭಜನೆ
-- `fill-first` - ಮಿತಿಗಳನ್ನು ಹೊಡೆಯುವವರೆಗೆ ಮೊದಲ ಮಾದರಿಯನ್ನು ಹರಿಸುತ್ತವೆ
+- `priority` — ಕಟ್ಟುನಿಟ್ಟಾದ ಆದೇಶ, ಎಂದಿಗೂ ರೌಂಡ್-ರಾಬಿನ್ಸ್
+- `weighted` — ಅನುಪಾತದ ಸಂಚಾರವನ್ನು ಪ್ರತಿ ಮಾದರಿಯ ತೂಕದಿಂದ ವಿಭಜಿಸಲಾಗಿದೆ
+- `fill-first` — ಮಿತಿಗಳನ್ನು ಹೊಡೆಯುವವರೆಗೆ ಮೊದಲ ಮಾದರಿಯನ್ನು ಹರಿಸುತ್ತವೆ
 - `round-robin` / `strict-random` / `random`
 - `p2c` (ಎರಡು ಆಯ್ಕೆಗಳ ಶಕ್ತಿ)
 - `least-used` ಮತ್ತು `cost-optimized`
-- `auto` - ಎಲ್ಲಾ ಅಭ್ಯರ್ಥಿಗಳಾದ್ಯಂತ ಸ್ಕೋರ್-ಚಾಲಿತ
-- `lkgp` (ಕೊನೆಯದಾಗಿ ತಿಳಿದಿರುವ ಉತ್ತಮ ಪೂರೈಕೆದಾರ) - ಕೊನೆಯ ಯಶಸ್ವಿ ಪೂರೈಕೆದಾರರಿಗೆ ಪಿನ್ಗಳು, ನಂತರ ನಿಯಮಗಳಿಗೆ ಹಿಂತಿರುಗಿ
-- `context-optimized` - ದೊಡ್ಡ ಉಚಿತ ಸಂದರ್ಭ ವಿಂಡೋದೊಂದಿಗೆ ಮಾದರಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡುತ್ತದೆ
-- `context-relay` — ಅನುಸರಣಾ ತಿರುವುಗಳಿಗಾಗಿ ಸರಪಳಿಗಳು ದೀರ್ಘ-ಸಂದರ್ಭದ ಮಾದರಿಗಳು
+- ಎಲ್ಲಾ ಅಭ್ಯರ್ಥಿಗಳಾದ್ಯಂತ `auto` — ಸ್ಕೋರ್-ಚಾಲಿತವಾಗಿದೆ
+- `lkgp` (ಕೊನೆಯದಾಗಿ ತಿಳಿದಿರುವ ಉತ್ತಮ ಪೂರೈಕೆದಾರ) — ಕೊನೆಯ ಯಶಸ್ವಿ ಪೂರೈಕೆದಾರರಿಗೆ ಪಿನ್ಗಳು, ನಂತರ ನಿಯಮಗಳಿಗೆ ಹಿಂತಿರುಗುತ್ತದೆ
+- `context-optimized` — ದೊಡ್ಡ ಉಚಿತ ಸಂದರ್ಭ ವಿಂಡೋದೊಂದಿಗೆ ಮಾದರಿಯನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ
+- `context-relay` — ಸರಪಳಿಗಳು ಫಾಲೋ-ಅಪ್ ತಿರುವುಗಳಿಗಾಗಿ ದೀರ್ಘ-ಸಂದರ್ಭದ ಮಾದರಿಗಳು
 
 #### ಬಾಹ್ಯ ಸ್ಟಿಕಿ ಸೆಷನ್ ಹೆಡರ್
 
@@ -883,7 +902,7 @@ OmniRoute ಸಹ `x_session_id` ಸ್ವೀಕರಿಸುತ್ತದೆ ಮ�
 underscores_in_headers on;
 ```
 
-#### ವೈಲ್ಡ್ಕಾರ್ಡ್ ಮಾಡೆಲ್ ಅಲಿಯಾಸ್ಗಳು
+#### ವೈಲ್ಡ್ ಕಾರ್ಡ್ ಮಾಡೆಲ್ ಅಲಿಯಾಸ್
 
 ಮಾದರಿ ಹೆಸರುಗಳನ್ನು ರೀಮ್ಯಾಪ್ ಮಾಡಲು ವೈಲ್ಡ್ಕಾರ್ಡ್ ಮಾದರಿಗಳನ್ನು ರಚಿಸಿ:
 
@@ -956,9 +975,9 @@ omniroute combo create free-stack \
 
 #### 3. ಮಲ್ಟಿಮೋಡಲ್ / ವಿಷನ್ & ಟೆಕ್ಸ್ಟ್ ಪೈಪ್ಲೈನ್
 
-ಇಮೇಜ್ ತಿಳುವಳಿಕೆ ಮತ್ತು ಕೋಡ್ ಉತ್ಪಾದನೆಯನ್ನು ಒಳಗೊಂಡಿರುವ ಕೆಲಸದ ಹರಿವುಗಳಿಗಾಗಿ ಹೆಚ್ಚಿನ ವೇಗದ ಪಠ್ಯ ಉತ್ಪಾದನೆಯೊಂದಿಗೆ ವಿಶೇಷ ದೃಷ್ಟಿ ಮಾದರಿಗಳನ್ನು ಜೋಡಿಸುವುದು.
+ಇಮೇಜ್ ತಿಳುವಳಿಕೆ ಮತ್ತು ಕೋಡ್ ಉತ್ಪಾದನೆಯನ್ನು ಒಳಗೊಂಡ ಕೆಲಸದ ಹರಿವುಗಳಿಗಾಗಿ ಹೆಚ್ಚಿನ ವೇಗದ ಪಠ್ಯ ಉತ್ಪಾದನೆಯೊಂದಿಗೆ ವಿಶೇಷ ದೃಷ್ಟಿ ಮಾದರಿಗಳನ್ನು ಜೋಡಿಸುವುದು.
 
-- **ಪ್ಯಾಟರ್ನ್** : `Priority` ಕಾಂಬೊ ಮೊದಲು ದೃಷ್ಟಿ-ಸಾಮರ್ಥ್ಯದ ಮಾದರಿಗಳನ್ನು ಮತ್ತು ಹೆಚ್ಚಿನ-ಥ್ರೂಪುಟ್ text/code ಮಾದರಿಯನ್ನು ಕೊನೆಯದಾಗಿ ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ.
+- **ಮಾದರಿ** : `Priority` ಕಾಂಬೊ ಮೊದಲು ದೃಷ್ಟಿ-ಸಾಮರ್ಥ್ಯದ ಮಾದರಿಗಳನ್ನು ಮತ್ತು ಹೆಚ್ಚಿನ-ಥ್ರೂಪುಟ್ text/code ಮಾದರಿಯನ್ನು ಕೊನೆಯದಾಗಿ ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ.
 - **ಮಾದರಿಗಳು** :
   1. `gemini/gemini-2.5-pro` (ಬಲವಾದ image/multimodal ಗ್ರಹಿಕೆ)
   2. `openai/gpt-4o` (ಸಮತೋಲಿತ ದೃಷ್ಟಿ ಮತ್ತು ಉಪಕರಣದ ಬಳಕೆ)
@@ -972,34 +991,34 @@ omniroute combo create free-stack \
 
 OmniRoute ಐದು ಘಟಕಗಳೊಂದಿಗೆ ಪೂರೈಕೆದಾರ-ಮಟ್ಟದ ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವವನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸುತ್ತದೆ:
 
-1. **ಕ್ಯೂ ಮತ್ತು ಪೇಸಿಂಗ್ ಅನ್ನು ವಿನಂತಿಸಿ** - ಸಿಸ್ಟಮ್ ಮಟ್ಟದ ವಿನಂತಿಯನ್ನು ರೂಪಿಸುವುದು:
-   - **ಪ್ರತಿ ನಿಮಿಷಕ್ಕೆ ವಿನಂತಿಗಳು (RPM)** - ಪ್ರತಿ ಖಾತೆಗೆ ನಿಮಿಷಕ್ಕೆ ಗರಿಷ್ಠ ವಿನಂತಿಗಳು
-   - **ವಿನಂತಿಗಳ ನಡುವಿನ ಕನಿಷ್ಠ ಸಮಯ** - ವಿನಂತಿಗಳ ನಡುವೆ ಮಿಲಿಸೆಕೆಂಡ್ಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಅಂತರ
-   - **ಗರಿಷ್ಠ ಏಕಕಾಲಿಕ ವಿನಂತಿಗಳು** - ಪ್ರತಿ ಖಾತೆಗೆ ಗರಿಷ್ಠ ಏಕಕಾಲಿಕ ವಿನಂತಿಗಳು
+1. **ಕ್ಯೂ ಮತ್ತು ಪೇಸಿಂಗ್ ಅನ್ನು ವಿನಂತಿಸಿ** — ಸಿಸ್ಟಂ-ಮಟ್ಟದ ವಿನಂತಿಯನ್ನು ರೂಪಿಸುವುದು:
+   - **ಪ್ರತಿ ನಿಮಿಷಕ್ಕೆ ವಿನಂತಿಗಳು (RPM)** — ಪ್ರತಿ ನಿಮಿಷಕ್ಕೆ ಪ್ರತಿ ಖಾತೆಗೆ ಗರಿಷ್ಠ ವಿನಂತಿಗಳು
+   - **ವಿನಂತಿಗಳ ನಡುವಿನ ಕನಿಷ್ಠ ಸಮಯ** — ವಿನಂತಿಗಳ ನಡುವೆ ಮಿಲಿಸೆಕೆಂಡುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಅಂತರ
+   - **ಗರಿಷ್ಠ ಏಕಕಾಲಿಕ ವಿನಂತಿಗಳು** — ಪ್ರತಿ ಖಾತೆಗೆ ಗರಿಷ್ಠ ಏಕಕಾಲಿಕ ವಿನಂತಿಗಳು
 
-2. **ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್** - ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ವೈಫಲ್ಯಗಳ ನಂತರ ಒಂದೇ ಸಂಪರ್ಕಕ್ಕಾಗಿ ಪ್ರತಿ-ದೃಢೀಕರಣ-ಮಾದರಿಯ ಕಾನ್ಫಿಗರೇಶನ್:
-   - **ಬೇಸ್ ಕೂಲ್ಡೌನ್** — ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ವೈಫಲ್ಯಗಳಿಗಾಗಿ ಡೀಫಾಲ್ಟ್ ಕೂಲ್ಡೌನ್ ವಿಂಡೋ
-   - **ಅಪ್ಸ್ಟ್ರೀಮ್ ಮರುಪ್ರಯತ್ನದ ಸುಳಿವುಗಳನ್ನು ಬಳಸಿ** — ಒದಗಿಸಿದಾಗ ಅಧಿಕೃತ `Retry-After` ಅಥವಾ ಮರುಹೊಂದಿಸುವ ಸುಳಿವುಗಳನ್ನು ಗೌರವಿಸುತ್ತದೆ
-   - **ಗರಿಷ್ಠ ಬ್ಯಾಕ್ಆಫ್ ಹಂತಗಳು** - ಪುನರಾವರ್ತಿತ ವೈಫಲ್ಯಗಳಿಗೆ ಗರಿಷ್ಠ ಘಾತೀಯ ಬ್ಯಾಕ್ಆಫ್ ಮಟ್ಟ
+2. **ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್** ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ವೈಫಲ್ಯಗಳ ನಂತರ ಒಂದೇ ಸಂಪರ್ಕಕ್ಕಾಗಿ — ಪ್ರತಿ-ದೃಢೀಕರಣ-ಮಾದರಿಯ ಸಂರಚನೆ:
+   - **ಬೇಸ್ ಕೂಲ್ಡೌನ್** ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ವೈಫಲ್ಯಗಳಿಗಾಗಿ — ಡೀಫಾಲ್ಟ್ ಕೂಲ್ಡೌನ್ ವಿಂಡೋ
+   - **ಅಪ್ಸ್ಟ್ರೀಮ್ ಮರುಪ್ರಯತ್ನದ ಸುಳಿವುಗಳನ್ನು ಬಳಸಿ** — ಅಧಿಕೃತ `Retry-After` ಗೌರವಿಸುತ್ತದೆ ಅಥವಾ ಒದಗಿಸಿದಾಗ ಸುಳಿವುಗಳನ್ನು ಮರುಹೊಂದಿಸಿ
+   - **ಗರಿಷ್ಠ ಬ್ಯಾಕ್ಆಫ್ ಹಂತಗಳು** ಪುನರಾವರ್ತಿತ ವೈಫಲ್ಯಗಳಿಗಾಗಿ — ಗರಿಷ್ಠ ಘಾತೀಯ ಬ್ಯಾಕ್ಆಫ್ ಮಟ್ಟ
 
-3. **ಪೂರೈಕೆದಾರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್** — ಎಂಡ್-ಟು-ಎಂಡ್ ಪ್ರೊವೈಡರ್ ವೈಫಲ್ಯಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ, ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಎಚ್ಚರಿಕೆಯ ಮಿತಿಯಲ್ಲಿ ಪೂರೈಕೆದಾರರು ಕೆಳಮಟ್ಟಕ್ಕಿಳಿದಿರುವುದನ್ನು ಗುರುತಿಸುತ್ತದೆ ಮತ್ತು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ವೈಫಲ್ಯದ ಮಿತಿಯನ್ನು ತಲುಪಿದಾಗ ಬ್ರೇಕರ್ ಅನ್ನು ತೆರೆಯುತ್ತದೆ:
-   - **ಅವನತಿ ಮಿತಿ** - `DEGRADED` ಪ್ರವೇಶಿಸುವ ಮೊದಲು ಸತತ ಪೂರೈಕೆದಾರರ ವೈಫಲ್ಯಗಳು
-   - **ವೈಫಲ್ಯದ ಮಿತಿ** - `OPEN` ಪ್ರವೇಶಿಸುವ ಮೊದಲು ಸತತ ಪೂರೈಕೆದಾರರ ವೈಫಲ್ಯಗಳು
-   - **ಕಾಲಾವಧಿಯನ್ನು ಮರುಹೊಂದಿಸಿ** — ಪೂರೈಕೆದಾರರನ್ನು ಮತ್ತೊಮ್ಮೆ ಪರೀಕ್ಷಿಸುವ ಮೊದಲು ಸಮಯ ವಿಂಡೋ
-   - **CLOSED** (ಆರೋಗ್ಯಕರ) - ವಿನಂತಿಗಳು ಸಾಮಾನ್ಯವಾಗಿ ಹರಿಯುತ್ತವೆ
+3. **ಪೂರೈಕೆದಾರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್** — ಎಂಡ್-ಟು-ಎಂಡ್ ಪೂರೈಕೆದಾರರ ವೈಫಲ್ಯಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ, ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಎಚ್ಚರಿಕೆಯ ಮಿತಿಯಲ್ಲಿ ಪೂರೈಕೆದಾರರನ್ನು ಕೆಳಮಟ್ಟಕ್ಕಿಳಿಸುತ್ತದೆ ಮತ್ತು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ವೈಫಲ್ಯದ ಮಿತಿಯನ್ನು ತಲುಪಿದಾಗ ಬ್ರೇಕರ್ ಅನ್ನು ತೆರೆಯುತ್ತದೆ:
+   - **ಅವನತಿ ಮಿತಿ** — `DEGRADED` ನಮೂದಿಸುವ ಮೊದಲು ಸತತ ಪೂರೈಕೆದಾರರ ವೈಫಲ್ಯಗಳು
+   - **ವೈಫಲ್ಯದ ಮಿತಿ** — `OPEN` ನಮೂದಿಸುವ ಮೊದಲು ಸತತ ಪೂರೈಕೆದಾರರ ವೈಫಲ್ಯಗಳು
+   - **ಕಾಲಾವಧಿಯನ್ನು ಮರುಹೊಂದಿಸಿ** ಪೂರೈಕೆದಾರರನ್ನು ಮತ್ತೊಮ್ಮೆ ಪರೀಕ್ಷಿಸುವ ಮೊದಲು — ಸಮಯ ವಿಂಡೋ
+   - **CLOSED** (ಆರೋಗ್ಯಕರ) — ವಿನಂತಿಗಳು ಸಾಮಾನ್ಯವಾಗಿ ಹರಿಯುತ್ತವೆ
    - **DEGRADED** — ಎಲಿವೇಟೆಡ್ ವೈಫಲ್ಯಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುವಾಗ ವಿನಂತಿಗಳು ಇನ್ನೂ ಹರಿಯುತ್ತವೆ
-   - **OPEN** - ಪುನರಾವರ್ತಿತ ವೈಫಲ್ಯಗಳ ನಂತರ ಪೂರೈಕೆದಾರರನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ
-   - **HALF_OPEN** - ಪೂರೈಕೆದಾರರು ಚೇತರಿಸಿಕೊಂಡಿದ್ದರೆ ಪರೀಕ್ಷೆ
+   - **OPEN** ಪುನರಾವರ್ತಿತ ವೈಫಲ್ಯಗಳ ನಂತರ — ಪೂರೈಕೆದಾರರನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ
+   - **HALF_OPEN** ಒದಗಿಸುವವರು ಚೇತರಿಸಿಕೊಂಡಿದ್ದರೆ — ಪರೀಕ್ಷೆ
 
    ಸಂಪರ್ಕ-ವ್ಯಾಪ್ತಿಯ `429` ದರ ಮಿತಿಗಳು ಉಳಿಯುತ್ತವೆ** ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್** ಮತ್ತು ಪೂರೈಕೆದಾರ ಬ್ರೇಕರ್ ಕಡೆಗೆ ಲೆಕ್ಕ ಹಾಕಬೇಡಿ.
 
    ಪೂರೈಕೆದಾರ ಬ್ರೇಕರ್ ರನ್ಟೈಮ್ ಸ್ಥಿತಿಯನ್ನು ತೋರಿಸಲಾಗಿದೆ** ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಆರೋಗ್ಯ** ಮಾತ್ರ.
 
-4. **ಕೂಲ್ಡೌನ್ಗಾಗಿ ನಿರೀಕ್ಷಿಸಿ** - ಪ್ರತಿ ಅಭ್ಯರ್ಥಿ ಸಂಪರ್ಕವು ಈಗಾಗಲೇ ತಣ್ಣಗಾಗುತ್ತಿದ್ದರೆ, OmniRoute ಆರಂಭಿಕ ಕೂಲ್ಡೌನ್ಗಾಗಿ ಕಾಯಬಹುದು ಮತ್ತು ಅದೇ ಕ್ಲೈಂಟ್ ವಿನಂತಿಯನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಪ್ರಯತ್ನಿಸಬಹುದು.
+4. **ಕೂಲ್ಡೌನ್ಗಾಗಿ ನಿರೀಕ್ಷಿಸಿ** — ಪ್ರತಿ ಅಭ್ಯರ್ಥಿ ಸಂಪರ್ಕವು ಈಗಾಗಲೇ ತಣ್ಣಗಾಗುತ್ತಿದ್ದರೆ, OmniRoute ಆರಂಭಿಕ ಕೂಲ್ಡೌನ್ಗಾಗಿ ಕಾಯಬಹುದು ಮತ್ತು ಅದೇ ಕ್ಲೈಂಟ್ ವಿನಂತಿಯನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಪ್ರಯತ್ನಿಸಬಹುದು.
 
-5. **ದರ ಮಿತಿ ಸ್ವಯಂ ಪತ್ತೆ** - ಅಪ್ಸ್ಟ್ರೀಮ್ ಪೂರೈಕೆದಾರರು ಸ್ಪಷ್ಟವಾದ ಕಾಯುವ ವಿಂಡೋಗಳನ್ನು ಹಿಂತಿರುಗಿಸಿದಾಗ, ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಆ ಸುಳಿವುಗಳು ಸ್ಥಳೀಯ ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್ ಅನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
+5. **ದರ ಮಿತಿ ಸ್ವಯಂ ಪತ್ತೆ** — ಅಪ್ಸ್ಟ್ರೀಮ್ ಪೂರೈಕೆದಾರರು ಸ್ಪಷ್ಟವಾದ ಕಾಯುವ ವಿಂಡೋಗಳನ್ನು ಹಿಂತಿರುಗಿಸಿದಾಗ, ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಆ ಸುಳಿವುಗಳು ಸ್ಥಳೀಯ ಸಂಪರ್ಕದ ಕೂಲ್ಡೌನ್ ಅನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
 
-**ಪ್ರೊ ಸಲಹೆ:** ಬಳಸಿ** ಆರೋಗ್ಯ** ಸ್ಥಗಿತದ ನಂತರ ಲೈವ್ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಮರುಹೊಂದಿಸಲು ಪುಟ. ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಪುಟವು ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಮಾತ್ರ ಬದಲಾಯಿಸುತ್ತದೆ.
+**ಪ್ರೊ ಸಲಹೆ:** ಬಳಸಿ** ಆರೋಗ್ಯ** ಸ್ಥಗಿತಗೊಂಡ ನಂತರ ಲೈವ್ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಮರುಹೊಂದಿಸಲು ಪುಟ. ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಪುಟವು ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಮಾತ್ರ ಬದಲಾಯಿಸುತ್ತದೆ.
 
 ---
 
@@ -1039,15 +1058,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 ಸೆಟ್ಟಿಂಗ್ಗಳ ಪುಟವನ್ನು ಆಯೋಜಿಸಲಾಗಿದೆ** 7 ಟ್ಯಾಬ್ಗಳು** ಸುಲಭ ಸಂಚರಣೆಗಾಗಿ:
 
-| ಟ್ಯಾಬ್              | ಪರಿವಿಡಿ                                                                                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ಸಾಮಾನ್ಯ**         | ಸಿಸ್ಟಮ್ ಸ್ಟೋರೇಜ್ ಪರಿಕರಗಳು, ಡೀಫಾಲ್ಟ್ ನಡವಳಿಕೆ, ಎಂಡ್ಪಾಯಿಂಟ್ ಟನಲ್ ಗೋಚರತೆ                                                                                                             |
-| **ಗೋಚರತೆ**          | ಥೀಮ್ ನಿಯಂತ್ರಣಗಳು (light/dark/system), ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ, Cloudflare/Tailscale/ngrok ಟನಲ್ ಕಾರ್ಡ್ಗಳಿಗಾಗಿ ಪ್ಯಾನಲ್ ಟಾಗಲ್ಗಳು                                                            |
-| **AI**              | ಥಿಂಕಿಂಗ್ ಬಜೆಟ್ (ಪಾಸ್ಥ್ರೂ / ಸ್ವಯಂ-ಸ್ಟ್ರಿಪ್ / ಕಸ್ಟಮ್ / ಅಡಾಪ್ಟಿವ್ — ನೋಡಿ [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ಜಾಗತಿಕ ಸಿಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್, ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಷ್ ಅಂಕಿಅಂಶಗಳು        |
-| **ಭದ್ರತೆ**          | Login/Password ಸೆಟ್ಟಿಂಗ್ಗಳು, IP ಪ್ರವೇಶ ನಿಯಂತ್ರಣ, `/models` ಗಾಗಿ API auth , ಪೂರೈಕೆದಾರರನ್ನು ನಿರ್ಬಂಧಿಸುವುದು, ಪ್ರಾಂಪ್ಟ್-ಇಂಜೆಕ್ಷನ್ ಗಾರ್ಡ್                                             |
-| **ರೂಟಿಂಗ್**         | ಗ್ಲೋಬಲ್ ರೂಟಿಂಗ್ ತಂತ್ರ (ಫಸ್ಟ್ / ರೌಂಡ್ ರಾಬಿನ್ / P2C / ಯಾದೃಚ್ಛಿಕ / ಕಡಿಮೆ ಬಳಸಿದ / ಕಾಸ್ಟ್ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ), ವೈಲ್ಡ್ಕಾರ್ಡ್ ಮಾಡೆಲ್ ಅಲಿಯಾಸ್ಗಳು, ಫಾಲ್ಬ್ಯಾಕ್ ಚೈನ್ಗಳು, ಕಾಂಬೊ ಡೀಫಾಲ್ಟ್ಗಳು |
-| **ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ** | ಕ್ಯೂ, ಕನೆಕ್ಷನ್ ಕೂಲ್ಡೌನ್, ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಕಾನ್ಫಿಗ್ ಮತ್ತು ವೇಯ್ಟ್ ಫಾರ್ ಕೂಲ್ಡೌನ್ ನಡವಳಿಕೆ                                                                                           |
-| **ಸುಧಾರಿತ**         | ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿ ಕಾನ್ಫಿಗರೇಶನ್ (HTTP/SOCKS5), ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಪ್ರಾಕ್ಸಿ ಅತಿಕ್ರಮಿಸುತ್ತದೆ                                                                                            |
+| ಟ್ಯಾಬ್              | ಪರಿವಿಡಿ                                                                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ಸಾಮಾನ್ಯ**         | ಸಿಸ್ಟಮ್ ಸ್ಟೋರೇಜ್ ಪರಿಕರಗಳು, ಡೀಫಾಲ್ಟ್ ನಡವಳಿಕೆ, ಎಂಡ್ಪಾಯಿಂಟ್ ಟನಲ್ ಗೋಚರತೆ                                                                                                      |
+| **ಗೋಚರತೆ**          | ಥೀಮ್ ನಿಯಂತ್ರಣಗಳು (light/dark/system), ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ, Cloudflare/Tailscale/ngrok ಟನಲ್ ಕಾರ್ಡ್ಗಳಿಗಾಗಿ ಪ್ಯಾನಲ್ ಟಾಗಲ್ಗಳು                                                     |
+| **AI**              | ಥಿಂಕಿಂಗ್ ಬಜೆಟ್ (ಪಾಸ್ಥ್ರೂ / ಸ್ವಯಂ-ಸ್ಟ್ರಿಪ್ / ಕಸ್ಟಮ್ / ಅಡಾಪ್ಟಿವ್ — ನೋಡಿ [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ಜಾಗತಿಕ ಸಿಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್, ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಷ್ ಅಂಕಿಅಂಶಗಳು |
+| **ಭದ್ರತೆ**          | Login/Password ಸೆಟ್ಟಿಂಗ್ಗಳು, IP ಪ್ರವೇಶ ನಿಯಂತ್ರಣ, `/models` ಗಾಗಿ API auth , ಪೂರೈಕೆದಾರರನ್ನು ನಿರ್ಬಂಧಿಸುವುದು, ಪ್ರಾಂಪ್ಟ್-ಇಂಜೆಕ್ಷನ್ ಗಾರ್ಡ್                                      |
+| **ರೂಟಿಂಗ್**         | ಗ್ಲೋಬಲ್ ರೂಟಿಂಗ್ ತಂತ್ರ (ಫಸ್ಟ್ / ರೌಂಡ್ ರಾಬಿನ್ / P2C / ಯಾದೃಚ್ಛಿಕ / ಕಡಿಮೆ ಬಳಸಿದ / ಕಾಸ್ಟ್ ಆಪ್ಟಿಮೈಸ್ಡ್), ವೈಲ್ಡ್ಕಾರ್ಡ್ ಮಾದರಿ ಅಲಿಯಾಸ್ಗಳು, ಫಾಲ್ಬ್ಯಾಕ್ ಚೈನ್ಗಳು, ಕಾಂಬೊ ಡಿಫಾಲ್ಟ್ಗಳು   |
+| **ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ** | ಕ್ಯೂ, ಕನೆಕ್ಷನ್ ಕೂಲ್ಡೌನ್, ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಕಾನ್ಫಿಗ್ ಮತ್ತು ವೇಯ್ಟ್ ಫಾರ್ ಕೂಲ್ಡೌನ್ ನಡವಳಿಕೆ                                                                                    |
+| **ಸುಧಾರಿತ**         | ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿ ಕಾನ್ಫಿಗರೇಶನ್ (HTTP/SOCKS5), ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಪ್ರಾಕ್ಸಿ ಅತಿಕ್ರಮಿಸುತ್ತದೆ                                                                                     |
 
 ಸಾಮಾನ್ಯ ಇನ್ನು ಮುಂದೆ ಓದಲು-ಮಾತ್ರ ಲಾಗಿಂಗ್ ಮತ್ತು ಕ್ಯಾಶ್ ಟಿಪ್ಪಣಿಗಳನ್ನು ನಕಲಿಸುವುದಿಲ್ಲ. ಡೇಟಾಬೇಸ್ ಧಾರಣ ಮತ್ತು ಆಪ್ಟಿಮೈಸೇಶನ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು `/api/settings/database` ಮೂಲಕ ಮುಂದುವರಿಸಲಾಗುತ್ತದೆ; ಹಸ್ತಚಾಲಿತ ಕ್ಯಾಶ್ ಕ್ಲಿಯರಿಂಗ್ `DELETE /api/cache` ಬಳಸುತ್ತದೆ. ವಿನಂತಿ ಮತ್ತು ಪ್ರಾಕ್ಸಿ ಲಾಗ್ ರೋ ಕ್ಯಾಪ್ಗಳನ್ನು `CALL_LOGS_TABLE_MAX_ROWS` ಮತ್ತು `PROXY_LOGS_TABLE_MAX_ROWS` ನಿಂದ ನಿಯಂತ್ರಿಸಲಾಗುತ್ತದೆ.
 
@@ -1057,10 +1076,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 ಮೂಲಕ ಪ್ರವೇಶ** ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ವೆಚ್ಚಗಳು** .
 
-| ಟ್ಯಾಬ್         | ಉದ್ದೇಶ                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------- |
-| **ಬಜೆಟ್**      | daily/weekly/monthly ಬಜೆಟ್ಗಳು ಮತ್ತು ನೈಜ-ಸಮಯದ ಟ್ರ್ಯಾಕಿಂಗ್ನೊಂದಿಗೆ ಪ್ರತಿ API ಕೀಗೆ ಖರ್ಚು ಮಿತಿಗಳನ್ನು ಹೊಂದಿಸಿ |
-| **ಬೆಲೆ ನಿಗದಿ** | ಮಾದರಿ ಬೆಲೆ ನಮೂದುಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಸಂಪಾದಿಸಿ — ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ 1K input/output ಟೋಕನ್ಗಳಿಗೆ ವೆಚ್ಚ   |
+| ಟ್ಯಾಬ್         | ಉದ್ದೇಶ                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| **ಬಜೆಟ್**      | daily/weekly/monthly ಬಜೆಟ್ಗಳು ಮತ್ತು ನೈಜ-ಸಮಯದ ಟ್ರ್ಯಾಕಿಂಗ್ನೊಂದಿಗೆ ಪ್ರತಿ API ಕೀಗೆ ಖರ್ಚು ಮಿತಿಗಳನ್ನು ಹೊಂದಿಸಿ      |
+| **ಬೆಲೆ ನಿಗದಿ** | ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಪ್ರತಿ 1K input/output ಟೋಕನ್ಗಳಿಗೆ — ವೆಚ್ಚದ ಮಾದರಿ ಬೆಲೆ ನಮೂದುಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಸಂಪಾದಿಸಿ |
 
 ```bash
 # API: Set a budget
@@ -1135,14 +1154,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **ಆದ್ಯತೆ**                    | ಯಾವಾಗಲೂ ಮೊದಲ ಮಾದರಿಯನ್ನು ಪ್ರಯತ್ನಿಸುತ್ತದೆ; ದೋಷದ ಮೇಲೆ ಮಾತ್ರ ಹಿಂತಿರುಗುತ್ತದೆ         |
 | **ಯಾದೃಚ್ಛಿಕ**                 | ಪ್ರತಿ ವಿನಂತಿಗಾಗಿ ಕಾಂಬೊದಿಂದ ಯಾದೃಚ್ಛಿಕ ಮಾದರಿಯನ್ನು ಆರಿಸಿಕೊಳ್ಳುತ್ತದೆ                |
 | **ತೂಕದ**                      | ಪ್ರತಿ ಮಾದರಿಗೆ ನಿಗದಿಪಡಿಸಿದ ತೂಕದ ಆಧಾರದ ಮೇಲೆ ಮಾರ್ಗಗಳು ಪ್ರಮಾಣಾನುಗುಣವಾಗಿ             |
-| **ಕಡಿಮೆ-ಬಳಸಲಾಗಿದೆ**           | ಇತ್ತೀಚಿನ ಕೆಲವು ವಿನಂತಿಗಳೊಂದಿಗೆ ಮಾದರಿಗೆ ಮಾರ್ಗಗಳು (ಕಾಂಬೊ ಮೆಟ್ರಿಕ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ) |
+| **ಕಡಿಮೆ-ಬಳಸಲಾಗಿದೆ**           | ಇತ್ತೀಚಿನ ಕಡಿಮೆ ವಿನಂತಿಗಳೊಂದಿಗೆ ಮಾದರಿಗೆ ಮಾರ್ಗಗಳು (ಕಾಂಬೊ ಮೆಟ್ರಿಕ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ) |
 | **ವೆಚ್ಚ-ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ** | ಲಭ್ಯವಿರುವ ಅಗ್ಗದ ಮಾದರಿಗೆ ಮಾರ್ಗಗಳು (ಬೆಲೆ ಪಟ್ಟಿಯನ್ನು ಬಳಸುತ್ತದೆ)                    |
 
-ಗ್ಲೋಬಲ್ ಕಾಂಬೊ ಡಿಫಾಲ್ಟ್ಗಳನ್ನು ಹೊಂದಿಸಬಹುದು** ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಸೆಟ್ಟಿಂಗ್ಗಳು → ರೂಟಿಂಗ್ → ಕಾಂಬೊ ಡಿಫಾಲ್ಟ್ಗಳು** . ಕಾಂಬೊ ಟಾರ್ಗೆಟ್ ಟೈಮ್ಔಟ್ಗಳು ಡೀಫಾಲ್ಟ್ ಆಗಿ ಪ್ರಸ್ತುತ ವಿನಂತಿಯ ಸಮಯ ಮೀರುವಿಕೆಯನ್ನು ಪಡೆದುಕೊಳ್ಳುತ್ತವೆ. ಬಳಸಿ** ಟಾರ್ಗೆಟ್ ಟೈಮ್ಔಟ್ (ಸೆಕೆಂಡ್ಗಳು)** ಕಾಂಬೊ ಡೀಫಾಲ್ಟ್ಗಳಲ್ಲಿ ಅಥವಾ ವೈಯಕ್ತಿಕ ಕಾಂಬೊದಲ್ಲಿ ಕಡಿಮೆ ಪ್ರತಿ-ಟಾರ್ಗೆಟ್ ಮಿತಿಯು ವೇಗವಾಗಿ ಫಾಲ್ಬ್ಯಾಕ್ ಅನ್ನು ಪ್ರಚೋದಿಸುತ್ತದೆ.
+ಗ್ಲೋಬಲ್ ಕಾಂಬೊ ಡಿಫಾಲ್ಟ್ಗಳನ್ನು ಹೊಂದಿಸಬಹುದು** ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಸೆಟ್ಟಿಂಗ್ಗಳು → ರೂಟಿಂಗ್ → ಕಾಂಬೊ ಡಿಫಾಲ್ಟ್ಗಳು** . ಕಾಂಬೊ ಟಾರ್ಗೆಟ್ ಟೈಮ್ಔಟ್ಗಳು ಡೀಫಾಲ್ಟ್ ಆಗಿ ಪ್ರಸ್ತುತ ವಿನಂತಿಯ ಅವಧಿ ಮೀರುವಿಕೆಯನ್ನು ಪಡೆದುಕೊಳ್ಳುತ್ತವೆ. ಬಳಸಿ** ಟಾರ್ಗೆಟ್ ಟೈಮ್ಔಟ್ (ಸೆಕೆಂಡ್ಗಳು)** ಕಾಂಬೊ ಡೀಫಾಲ್ಟ್ಗಳಲ್ಲಿ ಅಥವಾ ವೈಯಕ್ತಿಕ ಕಾಂಬೊದಲ್ಲಿ ಕಡಿಮೆ ಪ್ರತಿ-ಟಾರ್ಗೆಟ್ ಮಿತಿಯು ವೇಗವಾಗಿ ಫಾಲ್ಬ್ಯಾಕ್ ಅನ್ನು ಪ್ರಚೋದಿಸುತ್ತದೆ.
 
 ಶೂನ್ಯ-ಲೇಟೆನ್ಸಿ ಕಾಂಬೊ ಆಪ್ಟಿಮೈಸೇಶನ್ಗಳು ಆಯ್ಕೆಯಾಗಿವೆ. ಬಿಡು** ಶೂನ್ಯ-ಸುಪ್ತತೆ ಆಪ್ಟಿಮೈಸೇಶನ್ಗಳು** ರೇಸಿಂಗ್ ಫಾಲ್ಬ್ಯಾಕ್ ಟಾರ್ಗೆಟ್ಗಳು, TTFT ಇತಿಹಾಸದ ಆಧಾರದ ಮೇಲೆ ಗುರಿಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುವುದು ಅಥವಾ ಫಾಲ್ಬ್ಯಾಕ್ ವಿನಂತಿಗಳನ್ನು ಸಂಕುಚಿತಗೊಳಿಸುವುದರಿಂದ ಈ ಲೇಟೆನ್ಸಿ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ತಡೆಯಲು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ; ಇದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ ಕಡಿಮೆ ಟೈಲ್ ಲೇಟೆನ್ಸಿಗಾಗಿ routing/request ನಿಷ್ಠೆಯನ್ನು ವ್ಯಾಪಾರ ಮಾಡಲು ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ ಹೆಡ್ಜಿಂಗ್, ಪ್ರಿಡಿಕ್ಟಿವ್ TTFT ಸ್ಕಿಪ್ಗಳು ಮತ್ತು ಪೂರ್ವಭಾವಿ ಫಾಲ್ಬ್ಯಾಕ್ ಕಂಪ್ರೆಷನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ.
 
-ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ** ತಾರ್ಕಿಕ ಟೋಕನ್ ಬಫರ್** ಅಪ್ಸ್ಟ್ರೀಮ್ ಪೂರೈಕೆದಾರರಿಗೆ ಕಟ್ಟುನಿಟ್ಟಾದ `max_tokens` / `maxOutputTokens` ಮಿತಿಗಳ ಅಗತ್ಯವಿರುವಾಗ. ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಕಾಂಬೊ ರೂಟಿಂಗ್ ತಿಳಿದಿರುವ ಔಟ್ಪುಟ್ ಕ್ಯಾಪ್ ಹೊಂದಿರುವ ಮಾದರಿಗಳಿಗೆ ತಾರ್ಕಿಕ-ಮಾದರಿ ಹೆಡ್ರೂಮ್ ಅನ್ನು ಮಾತ್ರ ಸೇರಿಸುತ್ತದೆ ಮತ್ತು ಸುರಕ್ಷಿತ ಬಫರ್ಡ್ ಮೌಲ್ಯವು ಆ ಕ್ಯಾಪ್ ಅನ್ನು ಮೀರಿದಾಗ ಕ್ಲೈಂಟ್ ಟೋಕನ್ ಮಿತಿಯನ್ನು ಬದಲಾಗದೆ ಬಿಡುತ್ತದೆ. ಕ್ಲೈಂಟ್ ಮಿತಿಯು ಈಗಾಗಲೇ ತಿಳಿದಿರುವ ಕ್ಯಾಪ್ಗಿಂತ ಹೆಚ್ಚಿದ್ದರೆ, ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುವ ಮೊದಲು OmniRoute ಅದನ್ನು ಆ ಕ್ಯಾಪ್ಗೆ ಬಿಗಿಗೊಳಿಸುತ್ತದೆ.
+ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ** ತಾರ್ಕಿಕ ಟೋಕನ್ ಬಫರ್** ಅಪ್ಸ್ಟ್ರೀಮ್ ಪೂರೈಕೆದಾರರಿಗೆ ಕಟ್ಟುನಿಟ್ಟಾದ `max_tokens` / `maxOutputTokens` ಮಿತಿಗಳ ಅಗತ್ಯವಿರುವಾಗ. ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಕಾಂಬೊ ರೂಟಿಂಗ್ ತಿಳಿದಿರುವ ಔಟ್ಪುಟ್ ಕ್ಯಾಪ್ ಹೊಂದಿರುವ ಮಾದರಿಗಳಿಗೆ ತಾರ್ಕಿಕ-ಮಾದರಿ ಹೆಡ್ರೂಮ್ ಅನ್ನು ಮಾತ್ರ ಸೇರಿಸುತ್ತದೆ ಮತ್ತು ಸುರಕ್ಷಿತ ಬಫರ್ ಮೌಲ್ಯವು ಆ ಕ್ಯಾಪ್ ಅನ್ನು ಮೀರಿದಾಗ ಕ್ಲೈಂಟ್ ಟೋಕನ್ ಮಿತಿಯನ್ನು ಬದಲಾಗದೆ ಬಿಡುತ್ತದೆ. ಕ್ಲೈಂಟ್ ಮಿತಿಯು ಈಗಾಗಲೇ ತಿಳಿದಿರುವ ಕ್ಯಾಪ್ಗಿಂತ ಹೆಚ್ಚಿದ್ದರೆ, ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುವ ಮೊದಲು OmniRoute ಅದನ್ನು ಆ ಕ್ಯಾಪ್ಗೆ ಕ್ಲ್ಯಾಂಪ್ ಮಾಡುತ್ತದೆ.
 
 ---
 
@@ -1156,7 +1175,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **ಪೂರೈಕೆದಾರ ಆರೋಗ್ಯ**    | ಜಾಗತಿಕ ಪೂರೈಕೆದಾರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ ರನ್ಟೈಮ್ ಸ್ಥಿತಿ                |
 | **ದರ ಮಿತಿಗಳು**          | ಉಳಿದ ಸಮಯದೊಂದಿಗೆ ಪ್ರತಿ ಖಾತೆಗೆ ಸಕ್ರಿಯ ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್ಗಳು           |
 | **ಸಕ್ರಿಯ ಲಾಕ್ಔಟ್ಗಳು**   | ಸಕ್ರಿಯ ಮಾದರಿ-ವ್ಯಾಪ್ತಿಯ ಲಾಕ್ಔಟ್ಗಳು ಮತ್ತು ತಾತ್ಕಾಲಿಕ ಹೊರಗಿಡುವಿಕೆಗಳು |
-| **ಸಹಿ ಸಂಗ್ರಹ**          | ಡಿಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಷ್ ಅಂಕಿಅಂಶಗಳು (ಸಕ್ರಿಯ ಕೀಗಳು, ಹಿಟ್ ದರ)            |
+| **ಸಹಿ ಸಂಗ್ರಹ**          | ಡಿಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಶ್ ಅಂಕಿಅಂಶಗಳು (ಸಕ್ರಿಯ ಕೀಗಳು, ಹಿಟ್ ರೇಟ್)          |
 | **ಲೇಟೆನ್ಸಿ ಟೆಲಿಮೆಟ್ರಿ** | ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆp50/p95/p99 ಲೇಟೆನ್ಸಿ ಒಟ್ಟುಗೂಡಿಸುವಿಕೆ          |
 
 **ಪ್ರೊ ಸಲಹೆ:** ಆರೋಗ್ಯ ಪುಟವು ಪ್ರತಿ 10 ಸೆಕೆಂಡುಗಳಿಗೆ ಸ್ವಯಂ-ರಿಫ್ರೆಶ್ ಆಗುತ್ತದೆ. ಯಾವ ಪೂರೈಕೆದಾರರು ಸಮಸ್ಯೆಗಳನ್ನು ಎದುರಿಸುತ್ತಿದ್ದಾರೆ ಎಂಬುದನ್ನು ಗುರುತಿಸಲು ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ ಕಾರ್ಡ್ ಬಳಸಿ.

@@ -37,6 +37,7 @@ test("body size guard keeps dedicated upload limits as lower bounds", () => {
     getBodySizeLimit("/api/v1/chat/completions", { maxBodySizeMb: 10 }),
     MAX_BODY_BYTES_LLM_API
   );
+  assert.equal(getBodySizeLimit("/api/v1/messages", { maxBodySizeMb: 10 }), MAX_BODY_BYTES_LLM_API);
   assert.equal(
     getBodySizeLimit("/api/v1/audio/transcriptions", { maxBodySizeMb: 1 }),
     MAX_BODY_BYTES_AUDIO
@@ -274,4 +275,32 @@ test("image edit body reader does not enforce an OmniRoute media limit", async (
     getBodySizeLimit("/api/v1/images/edits", { maxBodySizeMb: 10 })
   );
   assert.deepEqual(body, new Uint8Array([1, 2, 3, 4]));
+});
+
+test("a saved limit replaces the LLM route default, up or down", () => {
+  for (const pathname of ["/api/v1/responses", "/api/v1/chat/completions"]) {
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 10, savedMaxBodySizeMb: 10 }),
+      requestBodyLimitMbToBytes(10)
+    );
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 100, savedMaxBodySizeMb: 100 }),
+      requestBodyLimitMbToBytes(100)
+    );
+    assert.equal(
+      getBodySizeLimit(pathname, { maxBodySizeMb: 10, savedMaxBodySizeMb: null }),
+      MAX_BODY_BYTES_LLM_API
+    );
+  }
+});
+
+test("a saved limit stays a lower bound for the dedicated upload routes", () => {
+  assert.equal(
+    getBodySizeLimit("/api/v1/audio/transcriptions", { maxBodySizeMb: 1, savedMaxBodySizeMb: 1 }),
+    MAX_BODY_BYTES_AUDIO
+  );
+  assert.equal(
+    getBodySizeLimit("/api/v1/files", { maxBodySizeMb: 1, savedMaxBodySizeMb: 1 }),
+    MAX_BODY_BYTES_FILE
+  );
 });

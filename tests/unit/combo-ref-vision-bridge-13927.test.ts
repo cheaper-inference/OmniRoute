@@ -63,7 +63,7 @@ test("#13927: combo-ref to a mixed-capability inner combo resolves to process", 
     name: "inner-mixed-combo-13927",
     models: [
       { providerId: "command-code", model: "gpt-5.5", weight: 1 },
-      { providerId: "mistral", model: "mistral-large-latest", weight: 1 },
+      { providerId: "mistral", model: "codestral-latest", weight: 1 },
     ],
   });
 
@@ -84,7 +84,7 @@ test("#13927: combo-ref to a mixed-capability inner combo resolves to process", 
 test("#13927: combo-ref to a zero-vision inner combo resolves to no-vision", async () => {
   await combosDb.createCombo({
     name: "inner-zero-vision-combo-13927",
-    models: [{ providerId: "mistral", model: "mistral-large-latest", weight: 1 }],
+    models: [{ providerId: "mistral", model: "codestral-latest", weight: 1 }],
   });
 
   await combosDb.createCombo({

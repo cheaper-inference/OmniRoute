@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React, { useState } from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { default: NotificationToast, toToastText } =
@@ -16,31 +16,47 @@ afterEach(() => {
   act(() => dismissToast());
 });
 
+// Since kit 0.0.87 the toast cards carry no live role: the Toaster announces each toast once
+// through two persistent live regions, assertive for errors and polite for the rest, so the
+// announcement survives a modal dialog that hides everything else.
+const announcer = (politeness: "polite" | "assertive") =>
+  document.querySelector<HTMLElement>(`[data-slot="toaster-announcer"][aria-live="${politeness}"]`);
+const toasts = () => Array.from(document.querySelectorAll<HTMLElement>(".ci-toast"));
+const toastWith = async (text: string) =>
+  waitFor(() => {
+    const card = toasts().find((el) => el.textContent?.includes(text));
+    if (!card) throw new Error(`no toast with "${text}"`);
+    return card;
+  });
+
 describe("NotificationToast → kit Toaster bridge", () => {
-  it("mirrors store notifications into kit toasts with the right role, and removes them", async () => {
+  it("mirrors store notifications into kit toasts, announces errors assertively, and removes them", async () => {
     render(<NotificationToast />);
     let id = 0;
     act(() => {
       id = useNotificationStore.getState().error("Boom", "Save failed");
     });
-    const alert = await screen.findByRole("alert");
-    expect(alert.textContent).toContain("Save failed");
-    expect(alert.textContent).toContain("Boom");
-    expect(alert.getAttribute("data-variant")).toBe("error");
-    expect(alert.closest(".ci-toaster--top-right")).not.toBeNull();
+    const card = await toastWith("Save failed");
+    expect(card.textContent).toContain("Boom");
+    expect(card.getAttribute("data-variant")).toBe("error");
+    expect(card.closest(".ci-toaster--top-right")).not.toBeNull();
+    await waitFor(() => expect(announcer("assertive")?.textContent).toContain("Save failed"));
+    expect(announcer("assertive")?.textContent).toContain("Boom");
+    expect(announcer("polite")?.textContent).toBe("");
     act(() => useNotificationStore.getState().removeNotification(id));
     await act(async () => {});
-    expect(screen.queryByRole("alert")).toBeNull();
+    expect(toasts()).toHaveLength(0);
   });
 
-  it("success uses role=status and an object message is coerced (toToastText)", async () => {
+  it("success is announced politely and an object message is coerced (toToastText)", async () => {
     render(<NotificationToast />);
     act(() => {
       useNotificationStore.getState().success({ message: "Saved" } as unknown as string);
     });
-    const status = await screen.findByRole("status");
-    expect(status.textContent).toContain("Saved");
-    expect(status.getAttribute("data-variant")).toBe("success");
+    const card = await toastWith("Saved");
+    expect(card.getAttribute("data-variant")).toBe("success");
+    await waitFor(() => expect(announcer("polite")?.textContent).toContain("Saved"));
+    expect(announcer("assertive")?.textContent).toBe("");
     expect(toToastText({ message: "x" })).toBe("x");
     expect(toToastText(null)).toBe("");
   });
@@ -56,14 +72,17 @@ describe("NotificationToast → kit Toaster bridge", () => {
         onClick,
       });
     });
-    const status = await screen.findByRole("status");
-    expect(status.getAttribute("data-variant")).toBe("info");
+    const card = await toastWith("New version available");
+    expect(card.getAttribute("data-variant")).toBe("info");
     // A store-only re-render (another notification) must not duplicate the first toast.
     act(() => {
       useNotificationStore.getState().warning("Careful");
     });
-    await act(async () => {});
-    expect(screen.getAllByRole("status")).toHaveLength(2);
+    await toastWith("Careful");
+    expect(toasts()).toHaveLength(2);
+    expect(toasts().filter((el) => el.textContent?.includes("New version available"))).toHaveLength(
+      1
+    );
     fireEvent.click(screen.getByRole("button", { name: "Open" }));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
@@ -86,14 +105,14 @@ describe("NotificationToast → kit Toaster bridge", () => {
     act(() => {
       useNotificationStore.getState().error("Save failed", "Error");
     });
-    const alert = await screen.findByRole("alert");
-    // Radix hides everything outside the dialog except live regions that exist when it opens.
-    expect(alert.closest('[aria-hidden="true"]')).toBeNull();
-    expect(alert.getAttribute("role")).toBe("alert");
+    // Radix hides everything outside the dialog except live regions that exist when it opens;
+    // the Toaster's announcers are mounted before the dialog, so they stay exposed.
+    await waitFor(() => expect(announcer("assertive")?.textContent).toContain("Save failed"));
+    expect(announcer("assertive")?.closest('[aria-hidden="true"]')).toBeNull();
     act(() => {
       useNotificationStore.getState().success("Saved");
     });
-    const status = await screen.findByRole("status");
-    expect(status.closest('[aria-hidden="true"]')).toBeNull();
+    await waitFor(() => expect(announcer("polite")?.textContent).toContain("Saved"));
+    expect(announcer("polite")?.closest('[aria-hidden="true"]')).toBeNull();
   });
 });

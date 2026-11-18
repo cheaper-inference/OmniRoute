@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Progress, type ProgressBand } from "@omniroute/ui-kit/progress";
 import { getBarColor } from "../utils";
 import { translateUsageOrFallback } from "../i18nFallback";
 import Icon from "@/shared/components/Icon";
@@ -73,6 +74,8 @@ export function buildKiloPassMeterModel({
     used: usedAmount,
     total: totalAmount,
     remaining: remainingAmount,
+    paidUsed,
+    bonusUsed,
     progressValue: Math.min(totalAmount, usedAmount),
     paidPercent: percentage(paid, totalAmount),
     bonusPercent: percentage(bonusAmount, totalAmount),
@@ -81,6 +84,29 @@ export function buildKiloPassMeterModel({
     hasPaidSegment: paid > 0,
     hasBonusSegment: bonusAmount > 0,
   };
+}
+
+function BandLegend({
+  dotClassName,
+  label,
+  amount,
+}: {
+  dotClassName: string;
+  label: string;
+  amount: number;
+}) {
+  return (
+    <div className="min-w-0 text-[11px] text-text-main">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
+        <span
+          className={`inline-block size-2 shrink-0 rounded-full ${dotClassName}`}
+          aria-hidden="true"
+        />
+        <span>{label}</span>
+      </div>
+      <span className="block pt-0.5 font-semibold tabular-nums">{formatCurrency(amount)}</span>
+    </div>
+  );
 }
 
 export default function KiloPassMeter({
@@ -103,6 +129,38 @@ export default function KiloPassMeter({
   const colors = getBarColor(
     model.total > 0 ? 100 - (model.progressValue / model.total) * 100 : 100
   );
+  const meterLabel = translateUsageOrFallback(t, "kiloPassMeterLabel", "Kilo Pass usage meter");
+  const paidLabel = translateUsageOrFallback(t, "kiloPassPaid", "Paid");
+  const bonusLabel = translateUsageOrFallback(t, "kiloPassBonus", "Available bonus");
+  // Spoken value of a band, e.g. "$12.00 of $19.00".
+  const bandUsage = (usedAmount: number, capacity: number) =>
+    translateUsageOrFallback(
+      t,
+      "kiloPassBandUsage",
+      `${formatCurrency(usedAmount)} of ${formatCurrency(capacity)}`,
+      { used: formatCurrency(usedAmount), total: formatCurrency(capacity) }
+    );
+  // Bands without capacity are dropped by the kit; with none left it draws the empty `value` bar.
+  const bands: ProgressBand[] = [
+    {
+      id: "paid",
+      label: paidLabel,
+      value: model.paidUsed,
+      max: model.paid,
+      tone: "success",
+      valueText: bandUsage(model.paidUsed, model.paid),
+      legend: <BandLegend dotClassName="bg-success" label={paidLabel} amount={model.paid} />,
+    },
+    {
+      id: "bonus",
+      label: bonusLabel,
+      value: model.bonusUsed,
+      max: model.bonus,
+      tone: "info",
+      valueText: bandUsage(model.bonusUsed, model.bonus),
+      legend: <BandLegend dotClassName="bg-info" label={bonusLabel} amount={model.bonus} />,
+    },
+  ];
   const daysUntilRenewal = calculateDaysUntil(nextBillingAt);
   const renewalDate = nextBillingAt
     ? new Date(nextBillingAt).toLocaleDateString(locale, {
@@ -119,83 +177,20 @@ export default function KiloPassMeter({
         <span className="text-[12px] font-medium text-text-main">
           {translateUsageOrFallback(t, "kiloPassUsageLabel", "This month's usage")}
         </span>
-        <span className="text-[12px] font-bold tabular-nums" style={{ color: colors.text }}>
+        <span className="text-[12px] font-semibold tabular-nums" style={{ color: colors.text }}>
           {formatCurrency(model.used)} / {formatCurrency(model.total)}
         </span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={model.total}
-          aria-valuenow={model.progressValue}
-          aria-valuetext={`${formatCurrency(model.used)} of ${formatCurrency(model.total)}`}
-          aria-label={translateUsageOrFallback(t, "kiloPassMeterLabel", "Kilo Pass usage meter")}
-          className="flex h-3 min-w-0 overflow-hidden rounded-full bg-bg-subtle ring-1 ring-inset ring-border/60"
-        >
-          {model.hasPaidSegment && (
-            <div
-              data-kilo-pass-segment="paid"
-              data-kilo-pass-boundary={model.hasBonusSegment ? "true" : undefined}
-              className={`relative min-w-0 bg-success/15 ${
-                model.hasBonusSegment ? "border-r-2 border-text-muted" : ""
-              }`}
-              style={{ width: `${model.paidPercent}%` }}
-              aria-hidden="true"
-            >
-              <div
-                className="absolute inset-y-0 left-0 bg-success transition-[width] duration-300 ease-out"
-                style={{ width: `${model.paidUsedPercent}%` }}
-              />
-            </div>
-          )}
-          {model.hasBonusSegment && (
-            <div
-              data-kilo-pass-segment="bonus"
-              className="relative min-w-0 bg-info/15"
-              style={{ width: `${model.bonusPercent}%` }}
-              aria-hidden="true"
-            >
-              <div
-                className="absolute inset-y-0 left-0 bg-info transition-[width] duration-300 ease-out"
-                style={{ width: `${model.bonusUsedPercent}%` }}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex min-w-0 items-start text-[11px] text-text-main">
-          {model.hasPaidSegment && (
-            <div className="min-w-0" style={{ width: `${model.paidPercent}%` }}>
-              <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
-                <span
-                  className="inline-block size-2 shrink-0 rounded-full bg-success"
-                  aria-hidden="true"
-                />
-                <span>{translateUsageOrFallback(t, "kiloPassPaid", "Paid")}</span>
-              </div>
-              <span className="block pt-0.5 font-semibold tabular-nums">
-                {formatCurrency(model.paid)}
-              </span>
-            </div>
-          )}
-          {model.hasBonusSegment && (
-            <div className="min-w-0" style={{ width: `${model.bonusPercent}%` }}>
-              <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
-                <span
-                  className="inline-block size-2 shrink-0 rounded-full bg-info"
-                  aria-hidden="true"
-                />
-                <span>{translateUsageOrFallback(t, "kiloPassBonus", "Available bonus")}</span>
-              </div>
-              <span className="block pt-0.5 font-semibold tabular-nums">
-                {formatCurrency(model.bonus)}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Kit Progress bands (kit #190): paid and bonus each get a track sized by their
+          capacity and their own used fill; paid credits are spent first. */}
+      <Progress
+        aria-label={meterLabel}
+        bands={bands}
+        value={model.progressValue}
+        max={model.total}
+        animate={false}
+      />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-main">
         <div className="flex items-center gap-1.5">

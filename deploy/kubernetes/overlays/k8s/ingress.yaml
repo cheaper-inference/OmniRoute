@@ -20,6 +20,7 @@ metadata:
     # src/shared/middleware/chatBodyAdmission.ts). A smaller value here makes
     # nginx return 413 for bodies the application would have accepted, and the
     # app's own 413 handling — which tells the client to compact — never runs.
+    # Saving a maxBodySizeMb above 50 MB also needs this limit raised.
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   ingressClassName: nginx

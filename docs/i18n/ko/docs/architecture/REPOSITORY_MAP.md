@@ -53,61 +53,61 @@ OmniRoute/
 
 ## 루트 파일
 
-| 파일                                        | 용도                                                                              |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| **README.md**                               | 마케팅 랜딩 페이지 + 빠른 시작 + 기능 매트릭스(`llm.txt`도 참조)                  |
-| **CHANGELOG.md**                            | 릴리스별 변경 로그(`/version-bump-cc` 스킬로 자동 생성)                           |
-| **LICENSE**                                 | MIT 라이선스 텍스트                                                               |
-| **CLAUDE.md**                               | Claude Code 에이전트를 위한 프로젝트 규칙(필수 규칙, 규약, 시나리오)              |
-| **AGENTS.md**                               | 비 Claude AI 에이전트(Codex, Cursor 등)를 위한 CLAUDE.md와 동일한 문서            |
-| **GEMINI.md**                               | Gemini 기반 에이전트를 위한 간결한 규칙(CLAUDE.md의 일부)                         |
-| **CONTRIBUTING.md**                         | 기여자 가이드: 설정, 컨벤셔널 커밋, 테스트, PR 흐름                               |
-| **SECURITY.md**                             | 취약점 보고 정책, 지원 버전, 위협 모델                                            |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — 커뮤니티 행동 지침                                         |
-| **llm.txt**                                 | LLM 크롤러에 최적화된 일반 텍스트 랜딩 페이지(AI 어시스턴트용 SEO)                |
-| **package.json**                            | npm 매니페스트, 스크립트, 의존성, 엔진, c8 커버리지 기준                          |
-| **package-lock.json**                       | 잠긴 의존성 트리                                                                  |
-| **tsconfig.json**                           | 루트 TypeScript 설정                                                              |
-| **tsconfig.typecheck-core.json**            | `src/` 코어용 타입 검사 설정                                                      |
-| **tsconfig.typecheck-noimplicit-core.json** | 엄격한(`noImplicitAny`) 타입 검사                                                 |
-| **tsconfig.tsbuildinfo**                    | TS 증분 빌드 캐시(gitignored)                                                     |
-| **next.config.mjs**                         | Next.js 16 빌드 설정(독립 실행형 출력)                                            |
-| **next-env.d.ts**                           | Next.js가 자동 생성한 환경 타입                                                   |
-| **eslint.config.mjs**                       | ESLint 플랫 설정(프로젝트 영역별 규칙)                                            |
-| **prettier.config.mjs**                     | Prettier 서식 규칙                                                                |
-| **postcss.config.mjs**                      | Tailwind/CSS 파이프라인용 PostCSS 설정                                            |
-| **playwright.config.ts**                    | Playwright E2E 테스트 설정                                                        |
-| **vitest.config.ts**                        | Vitest 설정(기본 스위트)                                                          |
-| **vitest.mcp.config.ts**                    | MCP 서버 / autoCombo / 캐시 스위트용 Vitest 설정                                  |
-| **sonar-project.properties**                | SonarQube/SonarCloud 설정(코드 품질)                                              |
-| **Dockerfile**                              | 다단계 Docker 빌드(builder → runner-base → runner-cli)                            |
-| **docker-compose.yml**                      | 4개 프로필(base, cli, host, cliproxyapi) + redis 사이드카를 포함한 개발용 compose |
-| **docker-compose.prod.yml**                 | 프로덕션용 compose(포트 20130, redis, 명명된 볼륨)                                |
-| **.dockerignore**                           | Docker 컨텍스트에서 제외되는 파일                                                 |
-| **fly.toml**                                | Fly.io 배포 설정(리전 `sin`, 포트 20128, /data 볼륨)                              |
-| **.env.example**                            | 환경 파일 템플릿(첫 설치 시 `.env`로 자동 복사)                                   |
-| **.gitignore**                              | Git 무시 패턴                                                                     |
-| **.npmignore**                              | npm 게시 제외 목록                                                                |
-| **.npmrc**                                  | npm 설정(레지스트리, 잠금 파일 정책)                                              |
-| **.node-version**                           | Node 버전 고정(nvm 호환 도구에서 사용)                                            |
-| **.nvmrc**                                  | nvm용 Node 버전 고정                                                              |
-| **eslint.complexity.config.mjs**            | 복잡도 래칫용 ESLint 설정(`scripts/check/check-complexity.mjs --config`)          |
-| **eslint.sonarjs.config.mjs**               | SonarJS 규칙용 ESLint 설정(인지 복잡도 / 중복)                                    |
-| **source.config.ts**                        | Fumadocs `defineDocs` 소스 설정(`.source/`에 제공)                                |
-| **knip.json**                               | Knip 설정 — 미사용 파일/내보내기/의존성(데드 코드 게이트에 제공)                  |
-| **stryker.conf.json**                       | Stryker 변이 테스트 설정                                                          |
-| **.size-limit.json**                        | size-limit 번들 용량 예산 설정                                                    |
-| **promptfooconfig.yaml**                    | promptfoo 평가 설정                                                               |
-| **.gitleaks.toml**                          | gitleaks 비밀 정보 스캔 규칙 세트                                                 |
-| **.zizmor.yml**                             | zizmor GitHub Actions 보안 린트 설정                                              |
-| **socket.yml**                              | Socket.dev 공급망 설정                                                            |
-| **news.json**                               | 현지화된 v2 공지 피드; Radar 출시 항목은 비활성 상태로 제공                       |
-| **flake.nix** / **flake.lock**              | Nix 개발 셸 정의 + 잠금 파일                                                      |
-| **.env**                                    | 로컬 비밀 정보(git에서 무시됨 — `.env.example`에서 생성)                          |
+| 파일                                        | 목적                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| **README.md**                               | 마케팅 랜딩 페이지 + 빠른 시작 + 기능 매트릭스( `llm.txt` 참조)                |
+| **CHANGELOG.md**                            | 릴리스별 변경 로그( `/version-bump-cc` 기술에 의해 자동 생성됨)                |
+| **LICENSE**                                 | MIT 라이센스 텍스트                                                            |
+| **CLAUDE.md**                               | Claude 코드 에이전트에 대한 프로젝트 규칙(하드 규칙, 규칙, 시나리오)           |
+| **AGENTS.md**                               | CLAUDE.md 와 동일하지만 Claude가 아닌 AI 에이전트(Codex, Cursor 등)의 경우     |
+| **GEMINI.md**                               | Gemini 기반 에이전트에 대한 간결한 규칙( CLAUDE.md 의 하위 집합)               |
+| **CONTRIBUTING.md**                         | 기여자 가이드: 설정, 기존 커밋, 테스트, PR 흐름                                |
+| **SECURITY.md**                             | 취약점 보고 정책, 지원 버전, 위협 모델                                         |
+| **CODE_OF_CONDUCT**                         | 기여자 규약 — 커뮤니티 행동 기대치                                             |
+| **llm.txt**                                 | LLM 크롤러에 최적화된 일반 텍스트 랜딩( AI 도우미의 경우 SEO )                 |
+| **package.json**                            | npm 매니페스트, 스크립트, 종속성, 엔진, c8 적용 범위 게이트                    |
+| **package-lock.json**                       | 잠긴 종속성 트리                                                               |
+| **tsconfig.json**                           | 루트 TypeScript 구성                                                           |
+| **tsconfig.typecheck-core.json**            | `src/` 코어에 대한 Typecheck 구성                                              |
+| **tsconfig.typecheck-noimplicit-core.json** | 엄격한(`noImplicitAny`) 유형 검사                                              |
+| **tsconfig.tsbuildinfo**                    | TS 증분 빌드 캐시(gitignored)                                                  |
+| **다음.config.mjs**                         | Next.js 16 빌드 구성(독립형 출력)                                              |
+| **다음 환경 d.ts**                          | Next.js 자동 생성 환경 유형                                                    |
+| **에스린트.config.mjs**                     | ESLint flat config(프로젝트 영역별 규칙)                                       |
+| **더 예뻐요.config.mjs**                    | Prettier 형식 지정 규칙                                                        |
+| **postcss.config.mjs**                      | Tailwind/CSS 파이프라인을 위한 PostCSS 구성                                    |
+| **극작가.config.ts**                        | Playwright E2E 테스트 구성                                                     |
+| **비테스트.config.ts**                      | Vitest 구성(기본 제품군)                                                       |
+| **vitest.mcp.config.ts**                    | MCP 서버/ autoCombo /캐시 제품군에 대한 Vitest 구성                            |
+| **소나-프로젝트.속성**                      | SonarQube/SonarCloud 구성(코드 품질)                                           |
+| **도커파일**                                | 다단계 Docker 빌드(빌더 → 러너 베이스 → 러너-cli)                              |
+| **docker-compose.yml**                      | 4개의 프로필(base, cli,host,cliproxyapi)을 사용하여 개발 구성 + redis 사이드카 |
+| **도커 작성.prod.yml**                      | 프로덕션 작성(포트 20130, redis, 명명된 볼륨)                                  |
+| **.dockerignore**                           | Docker 컨텍스트에서 제외된 파일                                                |
+| **fly.toml**                                | Fly.io 배포 구성(지역 `sin`, 포트 20128, /data 볼륨)                           |
+| **.env.예제**                               | 템플릿 env 파일(처음 설치 시 `.env` 에 자동 복사됨)                            |
+| **.gitignore**                              | Git 무시 패턴                                                                  |
+| **.npmignore**                              | npm 게시 제외 목록                                                             |
+| **.npmrc**                                  | npm config(레지스트리, 잠금 파일 정책)                                         |
+| **.node-버전**                              | 노드 버전 핀(nvm 호환 도구에서 사용)                                           |
+| **.nvmrc**                                  | nvm용 노드 버전 핀                                                             |
+| **eslint.complexity.config.mjs**            | 복잡성 래칫에 대한 ESLint 구성(`scripts/check/check-complexity.mjs --config`)  |
+| **eslint.sonarjs.config.mjs**               | SonarJS 규칙에 대한 ESLint 구성(인지적 복잡성/중복)                            |
+| **원천.config.ts**                          | Fumadocs `defineDocs` 소스 구성( `.source/` 피드)                              |
+| **knip.json**                               | Knip config — 사용되지 않은 files/exports/deps (데드 코드 게이트에 공급)       |
+| **스트라이커.conf.mjs**                     | Stryker 돌연변이 테스트 구성( `mutate` 에서 `tap.testFiles` 계산)              |
+| **.size-limit.json**                        | 크기 제한 번들 예산 구성                                                       |
+| **promptfooconfig.yaml**                    | 프롬프트 푸 평가 구성                                                          |
+| **.gitleaks.toml**                          | gitleaks 비밀 스캔 규칙 세트                                                   |
+| **.zizmor.yml**                             | zizmor GitHub-Actions 보안 린트 구성                                           |
+| **socket.yml**                              | Socket.dev 공급망 구성                                                         |
+| **news.json**                               | 현지화된 v2 공지 피드 레이더 발사 아이템 배송이 비활성화됨                     |
+| **flake.nix** /** 플레이크.락**             | Nix dev-shell 정의 + 잠금                                                      |
+| **.env**                                    | 로컬 비밀( `.env.example` 에서 생성된 — 무시함)                                |
 
-> **v3.8.26에서 루트 외부로 이동됨(정리):**
+> **v3.8.26의 루트에서 이동됨(정리):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(git에서 무시됨). [`## config/`](#config--static-configs--quality-gate-state)을 참조하세요.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) 참조하세요.
 
 ---
 
@@ -146,7 +146,7 @@ src/
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12개 경로(서버 제어, 에이전트 state/DNS/mappings, 우회, cert, 업스트림 CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` 참조하세요.                                                                                                                               |
 | `app/api/tools/traffic-inspector/`                                           | 트래픽 검사기 REST + WS API — 16 + 경로(요청, 세션, 호스트, 캡처 모드, 내보내기, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` 참조하세요.                                                                                                                                      |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 진입점(`POST /a2a`)                                                                                                                                                                                                                                                                         |
-| `app/.well-known/agent.json/`                                                | A2A 에이전트 카드(검색)                                                                                                                                                                                                                                                                                      |
+| `app/.well-known/agent.json/`                                                | A2A 에이전트 카드(디스커버리)                                                                                                                                                                                                                                                                                |
 | `app/(dashboard)/dashboard/`                                                 | 대시보드 UI 페이지(50개의 + 섹션, ~ 118개의 page.tsx 파일: 공급자, 콤보, 설정, 메모리, 기술, 웹후크, 평가, 감사, 배치, 캐시, 비용, 상태, 시스템, 활동 등)                                                                                                                                                    |
 | `app/(dashboard)/dashboard/search-tools/`                                    | 검색 도구 Studio UI (탭 3개: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio(계획 21): `page.tsx` (3탭 셸), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
@@ -155,7 +155,7 @@ src/
 | `app/(dashboard)/dashboard/activity/`                                        | 활동 피드 페이지(그룹 B): `page.tsx` (서버) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | 할당량 공유 페이지(그룹 B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | 공급자 계획 구성 페이지(그룹 B): `page.tsx` + `ProviderPlanConfigClient.tsx` — 연결당 할당량 크기 재정의                                                                                                                                                                                                     |
-| `app/docs/`                                                                  | 임베디드 문서 뷰어( `docs/*.md` 렌더링)                                                                                                                                                                                                                                                                      |
+| `app/docs/`                                                                  | 내장된 문서 뷰어( `docs/*.md` 렌더링)                                                                                                                                                                                                                                                                        |
 | `app/landing/`                                                               | 마케팅 랜딩 페이지                                                                                                                                                                                                                                                                                           |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | 인증 관련 페이지                                                                                                                                                                                                                                                                                             |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP 오류 페이지                                                                                                                                                                                                                                                                                             |
@@ -169,7 +169,7 @@ src/
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | A2A 프로토콜 작업 관리자, 기술(5), 스트리밍                                                                                                                                                                                                                                                                      |
 | `acp/`                                   | CLI 에이전트 레지스트리(로컬 CLI 검색 — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` 참조)                                                                                                                                                                                                                         |
-| `api/`                                   | 공유 API 도우미(`requireManagementAuth`, 유효성 검사)                                                                                                                                                                                                                                                            |
+| `api/`                                   | 공유 API 도우미(`requireManagementAuth`, 검증)                                                                                                                                                                                                                                                                   |
 | `auth/`                                  | 세션, 비밀번호 해싱, 토큰 검증                                                                                                                                                                                                                                                                                   |
 | `batches/`                               | OpenAI 배치 API 핸들러                                                                                                                                                                                                                                                                                           |
 | `catalog/`                               | 공급자 카탈로그 Zod 검증 + 기능 확인                                                                                                                                                                                                                                                                             |
@@ -238,62 +238,62 @@ src/
 
 ### `src/shared/`
 
-| 기준 치수                        | 목적                                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | 대시보드 구성 요소 API: `packages/ui-kit` — 를 통한 어댑터는 `docs/architecture/DESIGN_SYSTEM.md` 참조하세요. |
-| `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                                        |
-| `constants/providers.ts`         | **380개 제공자** Zod 검증 포함(진실의 출처)                                                                   |
-| `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                                      |
-| `constants/routingStrategies.ts` | **20가지 라우팅 전략** 우선순위가 있는                                                                        |
-| `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                                          |
-| `constants/upstreamHeaders.ts`   | 업스트림 요청에 대한 헤더 거부 목록                                                                           |
-| `validation/schemas.ts`          | ~ 80 Zod 스키마( API 계약에 대한 단일 진실 소스)                                                              |
-| `validation/helpers.ts`          | Zod 유효성 검사 도우미(`validateBody` 등)                                                                     |
-| `types/`                         | 공유 TS 유형                                                                                                  |
-| `contracts/`                     | 공개 API 계약( `package.json` 에서 `files:` 에 의해 사용됨)                                                   |
-| `utils/circuitBreaker.ts`        | 공급자 회로 차단기( `docs/architecture/RESILIENCE_GUIDE.md` 참조)                                             |
-| `utils/apiAuth.ts`               | API 키 검증, 범위 확인                                                                                        |
-| `utils/fetchTimeout.ts`          | 업스트림 가져오기를 위한 Timeout/abort 래퍼                                                                   |
-| `utils/releaseNotes.ts`          | 닫힌 v2/legacy 공지 파서, 현지화 및 ID 해제                                                                   |
+| 기준 치수                        | 목적                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `components/`                    | 대시보드 구성요소 API: `packages/ui-kit` — 를 통한 어댑터는 `docs/architecture/DESIGN_SYSTEM.md` 참조하세요. |
+| `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                                       |
+| `constants/providers.ts`         | **394개 제공자** Zod 검증 포함(진실의 출처)                                                                  |
+| `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                                     |
+| `constants/routingStrategies.ts` | **22가지 라우팅 전략** 우선순위가 있는                                                                       |
+| `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                                         |
+| `constants/upstreamHeaders.ts`   | 업스트림 요청에 대한 헤더 거부 목록                                                                          |
+| `validation/schemas.ts`          | ~ 80 Zod 스키마( API 계약에 대한 단일 진실 소스)                                                             |
+| `validation/helpers.ts`          | Zod 유효성 검사 도우미(`validateBody` 등)                                                                    |
+| `types/`                         | 공유 TS 유형                                                                                                 |
+| `contracts/`                     | 공개 API 계약( `package.json` 에서 `files:` 에 의해 사용됨)                                                  |
+| `utils/circuitBreaker.ts`        | 공급자 회로 차단기( `docs/architecture/RESILIENCE_GUIDE.md` 참조)                                            |
+| `utils/apiAuth.ts`               | API 키 검증, 범위 확인                                                                                       |
+| `utils/fetchTimeout.ts`          | 업스트림 가져오기를 위한 Timeout/abort 래퍼                                                                  |
+| `utils/releaseNotes.ts`          | 닫힌 v2/legacy 공지 파서, 현지화 및 ID 해제                                                                  |
 
 ---
 
-## `open-sse/` — 스트리밍 엔진 워크스페이스
+## `open-sse/` — 스트리밍 엔진 작업공간
 
-별도의 npm 워크스페이스(`@omniroute/open-sse`)입니다. 요청 처리 및 공급자 실행을 담당합니다.
+별도의 npm 작업공간(`@omniroute/open-sse`). 요청 처리 + 공급자 실행을 처리합니다.
 
 ```
 open-sse/
-├── handlers/            # 16개 파일(핸들러 12개 + 헬퍼 4개): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search 등
-├── executors/           # 150개 실행기 모듈(BaseExecutor를 확장하는 클래스 + 공급자별 헬퍼)
-├── translator/          # 형식 변환기(요청 9개, 응답 9개, 헬퍼 9개)
-├── transformer/         # Responses API ↔ Chat Completions(TransformStream)
-├── services/            # 약 80개 이상의 서비스 모듈(combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM 등)
-├── mcp-server/          # MCP 서버(도구 110개, 전송 방식 3개, 범위 33개)
-├── config/              # 공급자/모델 레지스트리, 헤더 구성, 모델 별칭
-├── utils/               # TLS 클라이언트, 프록시 fetch/dispatcher, 네트워크 헬퍼
-├── index.ts             # 워크스페이스 진입점
-├── package.json         # 워크스페이스 매니페스트
-├── tsconfig.json        # 워크스페이스 TS 구성
-└── types.d.ts           # 워크스페이스 타입 선언
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| 경로                        | 용도                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `server.ts`                 | MCP 서버 수명 주기(stdio + HTTP 전송 방식)                            |
-| `httpTransport.ts`          | HTTP Streamable + SSE 전송 방식(`/api/mcp/sse`, `/api/mcp/stream`)    |
-| `audit.ts`                  | `mcp_tool_audit` 테이블에 감사 로그 기록                              |
-| `scopeEnforcement.ts`       | 도구별 범위 검증                                                      |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`에 상태 하트비트 기록            |
-| `descriptionCompressor.ts`  | 컨텍스트 절약을 위해 도구 설명 메타데이터 압축                        |
-| `schemas/tools.ts`          | 36개의 기본 도구 정의 + 범위                                          |
-| `tools/advancedTools.ts`    | 고급 도구 구현                                                        |
-| `tools/memoryTools.ts`      | 3개의 메모리 도구(검색/추가/지우기)                                   |
-| `tools/skillTools.ts`       | 4개의 스킬 도구(목록/활성화/실행/실행 기록)                           |
-| `tools/compressionTools.ts` | 5개의 압축 도구                                                       |
-| `README.md`                 | 내부 MCP 서버 README(`docs/frameworks/MCP-SERVER.md`에서 상호 링크됨) |
+| 길                          | 목적                                                                     |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `server.ts`                 | MCP 서버 라이프사이클(stdio + HTTP 전송)                                 |
+| `httpTransport.ts`          | HTTP 스트리밍 가능한 + SSE 전송(`/api/mcp/sse`, `/api/mcp/stream`)       |
+| `audit.ts`                  | `mcp_tool_audit` 테이블에 대한 감사 로깅                                 |
+| `scopeEnforcement.ts`       | 도구별 범위 검증                                                         |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` 에 대한 건강 하트비트              |
+| `descriptionCompressor.ts`  | 도구 설명 메타데이터를 압축하여 컨텍스트 저장                            |
+| `schemas/tools.ts`          | 36개의 기본 도구 정의 + 범위                                             |
+| `tools/advancedTools.ts`    | 고급 도구 구현                                                           |
+| `tools/memoryTools.ts`      | 3가지 메모리 도구(search/add/clear)                                      |
+| `tools/skillTools.ts`       | 4개의 스킬 도구(list/enable/execute/executions)                          |
+| `tools/compressionTools.ts` | 5가지 압축 도구                                                          |
+| `README.md`                 | 내부 MCP 서버 README ( `docs/frameworks/MCP-SERVER.md` 에서 교차 연결됨) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가, 67개 로케일                                         |
 | `UNINSTALL.md`              | 깔끔한 제거 단계                                                              |
-| `PROVIDER_REFERENCE.md`     | **자동 생성** 380개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **자동 생성** 394개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 하위 시스템 심층 분석
 

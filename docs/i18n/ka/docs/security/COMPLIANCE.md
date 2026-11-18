@@ -17,64 +17,74 @@ OmniRoute ადმინისტრაციულ მოქმედებე
 ნებისმიერი შეცდომის შემთხვევაში გამოძახება უხმაუროდ იგნორირდება, რათა აუდიტის აღრიცხვამ ვერ შეაფერხოს
 მოთხოვნის ძირითადი ნაკადი.
 
-## რა აღირიცხება
+## რა იწერება ჟურნალში
 
 ### ადმინისტრაციული აუდიტის მოვლენები (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`-ის ყოველი გამოძახება ქმნის
-ერთ სტრიქონს. მოქმედებების სტრიქონები მიჰყვება `domain.verb` (ან `domain.verb.outcome`)
-ნიმუშს. კოდის ხეში დადასტურებული მოქმედებების ტიპებია:
+`logAuditEvent({ action, actor, target, details, ... })`-ის ყოველი გამოძახება
+ერთ სტრიქონს წარმოქმნის. მოქმედებების სტრიქონები მიჰყვება `domain.verb` (ან
+`domain.verb.outcome`) შაბლონს. კოდში დადასტურებული მოქმედებების ტიპებია:
 
-| მოქმედება                            | წყარო                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| მოქმედება                            | წყარო                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-თითოეული ჩანაწერი მოიცავს `action`-ს, `actor`-ს (ნაგულისხმევი მნიშვნელობაა `"system"`), `target`-ს,
-`details`/`metadata`-ს (JSON), `ip_address`-ს, `resource_type`-ს, `status`-ს,
-`request_id`-სა და `timestamp`-ს. სენსიტიური გასაღებები (`apiKey`, `accessToken`,
-`refreshToken`, `password`, აგრეთვე ყველაფერი, რაც ემთხვევა `*token`/`*secret`/`*apikey`-ს
-და ა.შ.) სტრიქონის ჩაწერამდე რეკურსიულად ჩანაცვლდება `"[redacted]"`-ით.
+თითოეული ჩანაწერი ინახავს `action`-ს, `actor`-ს (ნაგულისხმევად `"system"`),
+`target`-ს, `details`/`metadata`-ს (JSON), `ip_address`-ს, `resource_type`-ს,
+`status`-ს, `request_id`-ს და `timestamp`-ს. მგრძნობიარე გასაღებები
+(`apiKey`, `accessToken`, `refreshToken`, `password`, ნებისმიერი, რომელიც
+ემთხვევა `*token`/`*secret`/`*apikey`-ს და სხვ.) სტრიქონის ჩაწერამდე
+რეკურსიულად იფარება `"[redacted]"` მნიშვნელობით.
+
+`api_key.auth.touch` სტრიქონები აღრიცხავს API-გასაღების წარმატებულ მეტამონაცემებსა
+და აღმოჩენის წაკითხვებს (GET/HEAD), რომლებიც მოთხოვნების ჟურნალამდე ვერ აღწევს:
+რომელი გასაღები გამოიყენეს, როდის და ნორმალიზებული გზა; ჩანაწერები ერთიანდება და
+მათი რაოდენობა 1,000 სტრიქონით შემოიფარგლება. `noLog`-ის მქონე გასაღებები და
+გარემოს გასაღები გამოტოვებულია. გამომძახებლის IP-მისამართი და user-agent
+ემატება მხოლოდ მაშინ, როდესაც `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ფუნქციის
+ალამი ჩართულია (ნაგულისხმევად გამორთულია).
 
 ### MCP ხელსაწყოების გამოძახებები (`mcp_tool_audit`)
 
-MCP ხელსაწყოს ყოველი გამოძახება სტრიქონს
-`open-sse/mcp-server/audit.ts`-ის მეშვეობით წერს. სქემა
-(`src/lib/db/migrations/002_mcp_a2a_tables.sql`-დან):
+MCP ხელსაწყოს ყოველი გამოძახება სტრიქონს წერს
+`open-sse/mcp-server/audit.ts`-ის მეშვეობით. სქემა (აქედან
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | სვეტი            | შენიშვნები                             |
 | ---------------- | -------------------------------------- |
-| `id`             | ავტომატურად მზარდი მნიშვნელობა         |
+| `id`             | ავტოინკრემენტი                         |
 | `tool_name`      | MCP ხელსაწყოს იდენტიფიკატორი           |
-| `input_hash`     | შეყვანის sha256 (დატვირთვა არ ინახება) |
+| `input_hash`     | შეყვანის sha256 (payload არ ინახება)   |
 | `output_summary` | მოკლე, შეკვეცილი შეჯამება              |
-| `duration_ms`    | გასული სრული დრო                       |
+| `duration_ms`    | გასული დრო                             |
 | `api_key_id`     | გამომძახებელი (შეიძლება იყოს null)     |
 | `success`        | `1` / `0`                              |
-| `error_code`     | წარუმატებლობისას საბოლოო შეცდომის კოდი |
+| `error_code`     | საბოლოო შეცდომის კოდი წარუმატებლობისას |
 | `created_at`     | ISO დროის ნიშნული                      |
 
-### მოთხოვნების / გამოყენების ჟურნალები
+### მოთხოვნებისა და გამოყენების ჟურნალები
 
-ეს ოპერაციული ტელემეტრიაა (და არა მკაცრი გაგებით ადმინისტრაციული აუდიტი), თუმცა ის იმავე
-შენახვის ვადის მართვის პროცესს იყენებს:
+ესენი ოპერაციული ტელემეტრიაა (და არა მკაცრად ადმინისტრაციული აუდიტი), თუმცა
+იგივე შენახვის პროცესს იზიარებს:
 
-- `usage_history` — გამოყენების გაერთიანებული მონაცემები თითოეული მოთხოვნისთვის
-- `call_logs` — სრული ჟურნალი თითოეული მოთხოვნისთვის (ექვემდებარება სტრიქონების რაოდენობის ზღვარს, იხილეთ ქვემოთ)
-- `proxy_logs` — პროქსი-ტრაფიკის ჟურნალი (ექვემდებარება სტრიქონების რაოდენობის ზღვარს)
-- `request_detail_logs` — მოთხოვნების მოძველებული დეტალური ჟურნალი (არსებობის შემთხვევაში კვლავ იწმინდება)
+- `usage_history` — თითოეული მოთხოვნის გამოყენების აგრეგირებული ჩანაწერი
+- `call_logs` — თითოეული მოთხოვნის სრული ჟურნალი (სტრიქონების ლიმიტს ექვემდებარება; იხილეთ ქვემოთ)
+- `proxy_logs` — პროქსი-ტრაფიკის ჟურნალი (სტრიქონების ლიმიტს ექვემდებარება)
+- `request_detail_logs` — მოთხოვნის ძველი დეტალური ჟურნალი (არსებობის შემთხვევაში კვლავ იწმინდება)
 
 ## შენახვის სქემა
 

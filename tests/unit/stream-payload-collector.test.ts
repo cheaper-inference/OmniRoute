@@ -50,9 +50,7 @@ test("buildStreamSummaryFromEvents handles single event", () => {
 });
 
 test("buildStreamSummaryFromEvents handles multiple events", () => {
-  const events = [
-    { index: 0, data: { choices: [{ delta: { content: " hello" } }] } },
-  ];
+  const events = [{ index: 0, data: { choices: [{ delta: { content: " hello" } }] } }];
   const result = collector.buildStreamSummaryFromEvents(events);
   assert.ok(result !== null);
   assert.ok(typeof result === "object");
@@ -339,6 +337,7 @@ type OpenAIStreamSummary = {
 // the complete, correct response.
 test("#9315: collector.getSummary() reflects the full stream even after maxEvents truncation", () => {
   const c = collector.createStructuredSSECollector({
+    retainEvents: true,
     maxEvents: 3,
     format: "openai",
     fallbackModel: "test-model",
@@ -516,6 +515,7 @@ test("createStructuredSSECollector's live getSummary() also unwraps a pushed {ev
 
 test("push() defers cloneLogPayload until after cap check — dropped events are not deep-cloned", () => {
   const c = collector.createStructuredSSECollector({
+    retainEvents: true,
     maxEvents: 2,
     format: "openai",
     fallbackModel: "test-model",
@@ -549,7 +549,7 @@ test("push() defers cloneLogPayload until after cap check — dropped events are
 });
 
 test("push() stores a snapshot — mutating the original payload after push does not affect stored event data", () => {
-  const c = collector.createStructuredSSECollector({ maxEvents: 5 });
+  const c = collector.createStructuredSSECollector({ maxEvents: 5, retainEvents: true });
   const payload = {
     id: "chatcmpl-snap",
     choices: [{ index: 0, delta: { content: "original" } }],
@@ -688,7 +688,7 @@ test("summary snapshot isolation — Gemini: mutating payload after push() does 
 });
 
 test("getEvents() defensive-copy: mutations to returned events do not affect subsequent calls", () => {
-  const c = collector.createStructuredSSECollector({ maxEvents: 5 });
+  const c = collector.createStructuredSSECollector({ maxEvents: 5, retainEvents: true });
   c.push({ choices: [{ index: 0, delta: { content: "A" } }] });
   c.push({ choices: [{ index: 0, delta: { content: "B" } }] });
 

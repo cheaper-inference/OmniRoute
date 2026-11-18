@@ -22,11 +22,7 @@ describe("KimiComboPresetCard", () => {
     }
   });
 
-  function renderCard(props: {
-    alreadyCreated: boolean;
-    creating: boolean;
-    onCreate: () => void;
-  }) {
+  function renderCard(props: { alreadyCreated: boolean; creating: boolean; onCreate: () => void }) {
     container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -42,8 +38,10 @@ describe("KimiComboPresetCard", () => {
     expect(el.textContent).toContain("kimiPresetTitle");
     expect(el.textContent).toContain("kimiPresetDescription");
     expect(el.textContent).toContain("kimiPresetCta");
-    // Kimi-blue accent must be present on the card (KIMI_BRAND_COLOR = #1783FF).
-    expect(el.querySelector("[class*='1783FF']")).not.toBeNull();
+    // Kimi-blue tint must be present on the card (KIMI_BRAND_COLOR = #1783FF).
+    const card = el.querySelector<HTMLElement>(".ci-brand-tint");
+    expect(card).not.toBeNull();
+    expect(card?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
   });
 
   it("calls onCreate when the CTA button is clicked", () => {

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import Checkbox from "./Checkbox";
@@ -30,6 +31,7 @@ import {
 } from "./modelSelectLiveProviders";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
+import { getWebComboTargets } from "@/shared/utils/webComboTargets";
 import {
   getModelCatalogSourceLabel,
   matchesModelCatalogQuery,
@@ -39,11 +41,13 @@ import {
   OAUTH_PROVIDERS,
   NOAUTH_PROVIDERS,
   APIKEY_PROVIDERS,
+  SEARCH_PROVIDERS,
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { fetchProviderModels, type ProviderDegradation } from "./modelSelectDiscovery";
 import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
 
@@ -55,6 +59,7 @@ const PROVIDER_ORDER = [
   ...Object.keys(OAUTH_PROVIDERS),
   ...Object.keys(NOAUTH_PROVIDERS),
   ...Object.keys(APIKEY_PROVIDERS),
+  ...Object.keys(SEARCH_PROVIDERS),
 ];
 
 type ModelSelectModalProps = {
@@ -95,6 +100,8 @@ type ModelSelectModalProps = {
   multiSelect?: boolean;
   showCombos?: boolean;
   alwaysIncludeProviders?: string[] | null;
+  /** Enable native search/fetch operations only for endpoint-agnostic combo pickers. */
+  includeWebTargets?: boolean;
   /**
    * When true, picking a model does NOT auto-close the modal — the caller must close
    * explicitly. A "Done" button is rendered in the modal footer so the user has a clear
@@ -123,10 +130,12 @@ export default function ModelSelectModal({
   multiSelect = false,
   showCombos = true,
   alwaysIncludeProviders = [],
+  includeWebTargets = false,
   keepOpenOnSelect = false,
 }: ModelSelectModalProps) {
   const t = useTranslations("common");
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const resolvedTitle = title ?? t("selectModel");
   const labelOrFallback = (key: string, fallback: string, values?: Record<string, unknown>) =>
     typeof (t as { has?: (k: string) => boolean }).has === "function" &&
@@ -281,7 +290,7 @@ export default function ModelSelectModal({
   }, [isOpen, activeProviders]);
 
   const allProviders = useMemo(
-    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS }),
+    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS, ...SEARCH_PROVIDERS }),
     []
   );
   const alwaysIncludeProvidersKey = Array.isArray(alwaysIncludeProviders)
@@ -431,7 +440,13 @@ export default function ModelSelectModal({
           };
         }
       } else {
-        const systemModels = getModelsByProviderId(providerId);
+        const webTargets = includeWebTargets ? getWebComboTargets(providerId) : [];
+        const systemModels = [
+          ...getModelsByProviderId(providerId).filter(
+            (model) => !webTargets.some((target) => target.id === model.id)
+          ),
+          ...webTargets,
+        ];
 
         // Merge system models with user-added custom models
         const systemEntries = systemModels
@@ -471,6 +486,7 @@ export default function ModelSelectModal({
             alias: alias,
             color: providerInfo.color,
             models: allModels,
+            isWebOperation: webTargets.length > 0,
           };
         }
       }
@@ -485,6 +501,7 @@ export default function ModelSelectModal({
     providerNodes,
     customModels,
     fetchedModels,
+    includeWebTargets,
     hiddenModelsByProvider,
   ]);
 
@@ -572,7 +589,10 @@ export default function ModelSelectModal({
 
   // Same combo-builder gate as Select All — CLI tool cards and other single-pick
   // callers should not grow provider checkboxes / a test toolbar.
-  const showProviderTestControls = keepOpenOnSelect && !multiSelect;
+  const showProviderTestControls =
+    keepOpenOnSelect &&
+    !multiSelect &&
+    Object.values(connectionFilteredGroups).some((group) => !group.isWebOperation);
 
   const workingModelsToSelect = useMemo(
     () =>
@@ -597,7 +617,12 @@ export default function ModelSelectModal({
   );
 
   const visibleProviderIds = useMemo(
-    () => listVisibleProviderIds(connectionFilteredGroups),
+    () =>
+      listVisibleProviderIds(
+        Object.fromEntries(
+          Object.entries(connectionFilteredGroups).filter(([, group]) => !group.isWebOperation)
+        )
+      ),
     [connectionFilteredGroups]
   );
 
@@ -614,7 +639,7 @@ export default function ModelSelectModal({
   const canAddWorking = workingModelsToSelect.length > 0;
   const canRemoveWorking = workingModelsToUnselect.length > 0;
 
-  const handleToggleSelectAllVisible = () => {
+  const handleToggleSelectAllVisible = async () => {
     if (!showSelectAllToggle) return;
     if (allVisibleSelected) {
       const toRemove = visibleModels.filter(
@@ -631,11 +656,12 @@ export default function ModelSelectModal({
     // "Show configured only" off) — see modelSelectModalHelpers.ts (#8526).
     if (
       shouldConfirmSelectAll(toAdd.length) &&
-      !confirm(
-        labelOrFallback("selectAllConfirm", `Add ${toAdd.length} models to this combo?`, {
+      !(await requestConfirm({
+        message: labelOrFallback("selectAllConfirm", `Add ${toAdd.length} models to this combo?`, {
           count: toAdd.length,
-        })
-      )
+        }),
+        variant: "primary",
+      }))
     ) {
       return;
     }
@@ -655,18 +681,19 @@ export default function ModelSelectModal({
   };
 
   /** Add or remove models that passed the last Test providers run. */
-  const handleToggleWorkingModels = () => {
+  const handleToggleWorkingModels = async () => {
     if (!showSelectWorkingModels) return;
     if (canAddWorking) {
       if (
         shouldConfirmSelectAll(workingModelsToSelect.length) &&
-        !confirm(
-          labelOrFallback(
+        !(await requestConfirm({
+          message: labelOrFallback(
             "selectAllConfirm",
             `Add ${workingModelsToSelect.length} models to this combo?`,
             { count: workingModelsToSelect.length }
-          )
-        )
+          ),
+          variant: "primary",
+        }))
       ) {
         return;
       }
@@ -695,7 +722,7 @@ export default function ModelSelectModal({
     const groups: Array<[string, Array<{ value?: string | null; id?: string | null }>]> =
       Object.entries(connectionFilteredGroups).map(([providerId, group]: [string, any]) => [
         providerId,
-        Array.isArray(group?.models) ? group.models : [],
+        !group.isWebOperation && Array.isArray(group?.models) ? group.models : [],
       ]);
 
     const targets = buildProviderTestTargets({
@@ -881,7 +908,7 @@ export default function ModelSelectModal({
             className="rounded-lg border border-border bg-bg-subtle px-2.5 py-2 space-y-2"
             data-testid="model-select-provider-test-panel"
           >
-            <p className="text-[11px] text-text-muted leading-snug">
+            <p className="text-xs text-text-muted leading-snug">
               {labelOrFallback(
                 "providerTestHint",
                 "Tip: check a provider → Test → Add working (or Remove working to undo)."
@@ -923,11 +950,11 @@ export default function ModelSelectModal({
                   title={labelOrFallback("testSelectedProviders", "Test providers")}
                   className="gap-1 text-xs"
                 >
-                  <Icon
-                    name={testingProviders ? "progress_activity" : "science"}
-                    size={14}
-                    className={testingProviders ? "animate-spin" : undefined}
-                  />
+                  {testingProviders ? (
+                    <Spinner decorative size="xs" />
+                  ) : (
+                    <Icon name="science" size={14} />
+                  )}
                   <span>
                     {testingProviders && testProgress
                       ? labelOrFallback(
@@ -1030,7 +1057,7 @@ export default function ModelSelectModal({
                   providerSelected ? "ring-1 ring-inset ring-primary/35" : ""
                 }`}
               >
-                {showProviderTestControls ? (
+                {showProviderTestControls && !group.isWebOperation ? (
                   <Checkbox
                     checked={providerSelected}
                     onChange={() => handleToggleProviderForTest(providerId)}
@@ -1142,6 +1169,7 @@ export default function ModelSelectModal({
           </div>
         </div>
       )}
+      {confirmDialog}
     </Modal>
   );
 }

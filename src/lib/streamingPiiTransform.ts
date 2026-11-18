@@ -14,6 +14,7 @@ export interface PiiTransformOptions {
   windowSize?: number;
 }
 
+/** Sanitize streamed PII while preserving independent tails for each block or choice. */
 export function createPiiSseTransform(options?: PiiTransformOptions): TransformStream {
   const choiceBuffers = new Map<string, TextBuffers>();
 
@@ -92,9 +93,11 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     return toEmit;
   };
 
+  /** Finalize only the closing Claude block; other blocks may still extend a PII match. */
   const onFlush = (lastJson: any, isJsonStream = false, lastContentJson: any = null): any => {
-    // Force final redaction on all buffers
+    const closingKey = `${typeof lastJson?.index === "number" ? lastJson.index : 0}_0`;
     for (const [index, buffers] of choiceBuffers.entries()) {
+      if (lastJson?.type === "content_block_stop" && index !== closingKey) continue;
       for (const key of Object.keys(buffers)) {
         const field = key as BufferedField;
         if (buffers[field]) {
@@ -139,37 +142,51 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
       return null;
     }
 
-    // 1. Claude format
+    // 1. Claude format: one correctly typed delta per held-back field, per content block.
+    // A block stop drains that block only; message termination and EOF drain all tails.
+    // A trailing `ping` is still a Claude stream.
     if (
       typeof lastJson.type === "string" &&
-      (lastJson.type.startsWith("message") || lastJson.type.startsWith("content_block"))
+      (lastJson.type.startsWith("message") ||
+        lastJson.type.startsWith("content_block") ||
+        lastJson.type === "ping")
     ) {
-      const buffers = getBuffers("0_0");
-      const delta: any = { type: "text_delta" };
-      let hasDelta = false;
-      if (buffers.content) {
-        delta.text = buffers.content;
-        buffers.content = "";
-        hasDelta = true;
-      }
-      if (buffers.reasoning) {
-        delta.thinking = buffers.reasoning;
-        buffers.reasoning = "";
-        hasDelta = true;
-      }
-      if (buffers.partialJson) {
-        delta.partial_json = buffers.partialJson;
-        buffers.partialJson = "";
-        hasDelta = true;
-      }
-      if (hasDelta) {
-        return {
-          type: "content_block_delta",
-          index: typeof lastJson.index === "number" ? lastJson.index : 0,
-          delta,
-        };
-      }
-      return null;
+      const frames: any[] = [];
+      const drainBlock = (index: number, buffers: TextBuffers) => {
+        if (buffers.content) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "text_delta", text: buffers.content },
+          });
+          buffers.content = "";
+        }
+        const thinking = buffers.reasoning + buffers.reasoning_content;
+        if (thinking) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "thinking_delta", thinking },
+          });
+          buffers.reasoning = "";
+          buffers.reasoning_content = "";
+        }
+        if (buffers.partialJson) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "input_json_delta", partial_json: buffers.partialJson },
+          });
+          buffers.partialJson = "";
+        }
+      };
+      const entries = Array.from(choiceBuffers.entries())
+        .filter(([key]) => lastJson.type !== "content_block_stop" || key === closingKey)
+        .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
+        .sort((a, b) => a[0] - b[0]);
+      for (const [index, buffers] of entries) drainBlock(index, buffers);
+      if (!frames.length) return null;
+      return frames.length === 1 ? frames[0] : frames;
     }
 
     // 2. OpenAI Chat Completions

@@ -29,6 +29,7 @@ const core = await import("../../src/lib/db/core.ts");
 const nodesDb = await import("../../src/lib/db/providers/nodes.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const runner = await import("../../src/lib/api/modelTestRunner.ts");
+const { SELF_HOP_HEADER, isOwnListenerSelfHop } = await import("../../open-sse/utils/selfHop.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
 
 const NODE_ID = "openai-compatible-responses-13070-0000-4000-8000-000000000000";
@@ -109,6 +110,7 @@ test("buildInternalResponsesRequest targets /v1/responses with the health-check 
   assert.equal(new URL(req.url).pathname, "/v1/responses");
   assert.equal(req.method, "POST");
   assert.equal(req.headers.get("X-Internal-Test"), "combo-health-check");
+  assert.ok(isOwnListenerSelfHop(req.headers.get(SELF_HOP_HEADER)));
   assert.equal(req.headers.get("X-OmniRoute-No-Cache"), "true");
   assert.equal(req.headers.get("X-OmniRoute-Compression"), "off");
   assert.equal(req.headers.get("X-OmniRoute-Connection"), "conn-1");

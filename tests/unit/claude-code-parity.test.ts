@@ -421,6 +421,27 @@ describe("ensureCacheControlOnLastUserMessage", () => {
     assert.equal(body.messages[0].content[0].cache_control, undefined);
   });
 
+  it("counts tool breakpoints toward the limit only when the dispatch sends them", () => {
+    const marked = { cache_control: { type: "ephemeral" } };
+    const buildBody = () => ({
+      tools: [{ name: "Read", ...structuredClone(marked) }],
+      system: [{ type: "text", text: "s", ...structuredClone(marked) }],
+      messages: [
+        { role: "user", content: [{ type: "text", text: "a", ...structuredClone(marked) }] },
+        { role: "user", content: [{ type: "text", text: "b", ...structuredClone(marked) }] },
+        { role: "user", content: [{ type: "text", text: "c" }] },
+      ],
+    });
+
+    const sent = buildBody();
+    ensureCacheControlOnLastUserMessage(sent, { countTools: true });
+    assert.equal(sent.messages[2].content[0].cache_control, undefined);
+
+    const stripped = buildBody();
+    ensureCacheControlOnLastUserMessage(stripped);
+    assert.deepEqual(stripped.messages[2].content[0].cache_control, { type: "ephemeral" });
+  });
+
   it("handles body without messages without throwing", () => {
     // chatCore always provides a valid body object — test empty but non-null object
     assert.doesNotThrow(() => ensureCacheControlOnLastUserMessage({}));

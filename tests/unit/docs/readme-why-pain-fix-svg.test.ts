@@ -5,21 +5,30 @@ import {
   renderReadmeWhyPainFix,
   WHY_PAIN_FIX_COPY,
 } from "../../../scripts/docs/gen-readme-why-pain-fix.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed pain-versus-fix ledger must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal color
 // escaping the theme. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed why-pain-fix diagram is exactly what the generator produces", async () => {
-  const generated = await renderReadmeWhyPainFix();
-  const committed = readFileSync("docs/diagrams/why-pain-fix.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/why-pain-fix.svg is stale — regenerate with `node scripts/docs/gen-readme-why-pain-fix.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/why-pain-fix.svg") };
+
+test(
+  "the committed why-pain-fix diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeWhyPainFix();
+    const committed = readFileSync("docs/diagrams/why-pain-fix.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/why-pain-fix.svg is stale — regenerate with `node scripts/docs/gen-readme-why-pain-fix.mjs`"
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderReadmeWhyPainFix();
@@ -41,8 +50,8 @@ test("every copy string stays in the file as text", async () => {
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderReadmeWhyPainFix();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
   const body = svg.slice(svg.indexOf("</style>"));
   assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

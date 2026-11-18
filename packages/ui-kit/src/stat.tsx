@@ -1,8 +1,11 @@
+import { useId } from "react";
 import type { ComponentProps, ReactNode } from "react";
+import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
-export type StatTone = "default" | "positive" | "critical";
+export type StatTone = "default" | "positive" | "critical" | "warning";
+export type StatAnimateFrom = "zero" | "previous";
 export type StatFormat = "number" | "compact" | "currency" | "percent" | "text";
 export type StatLabelVariant = "default" | "eyebrow";
 
@@ -13,6 +16,10 @@ interface StatBaseProps extends ComponentProps<"div"> {
   /** Opt-in compact uppercase treatment for dashboard summary labels. */
   labelVariant?: StatLabelVariant;
   hint?: ReactNode;
+  /** Explanatory text revealed by an info icon after the label (hover or keyboard focus). */
+  info?: ReactNode;
+  /** Accessible name prefix of the info icon; the stat label is appended. Defaults to "More information". */
+  infoLabel?: string;
   suffix?: ReactNode;
   tone?: StatTone;
   currency?: string;
@@ -25,6 +32,11 @@ interface StatBaseProps extends ComponentProps<"div"> {
   animationDuration?: number;
   /** Optional NumberTicker viewport behavior override. */
   animateOnView?: boolean;
+  /**
+   * Where an animated number counts from when the value changes. `"zero"` (default) recounts
+   * from 0 every time; `"previous"` counts from the number on screen, for live counters.
+   */
+  animateFrom?: StatAnimateFrom;
 }
 
 /** Text summaries use the same card structure with wrapping, compact typography.
@@ -49,6 +61,8 @@ export function Stat({
   labelVariant = "default",
   value,
   hint,
+  info,
+  infoLabel = "More information",
   suffix,
   tone = "default",
   format = "number",
@@ -58,8 +72,14 @@ export function Stat({
   animate = false,
   animationDuration,
   animateOnView,
+  animateFrom = "zero",
   ...props
 }: StatProps) {
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const infoId = `${baseId}-info`;
+  // Slot rule: null, undefined, booleans and "" are absent, so `info={show && "..."}` renders nothing.
+  const hasInfo = info != null && typeof info !== "boolean" && info !== "";
   const options = { ...formatOptions(format, currency), ...numberFormatOptions };
   const rendered = value === null ? "—" : typeof value === "string" ? value : new Intl.NumberFormat(locale, options).format(value);
   return (
@@ -75,7 +95,10 @@ export function Stat({
             {icon}
           </span>
         ) : null}
-        <span className="ci-stat__label-text">{label}</span>
+        <span id={hasInfo ? labelId : undefined} className="ci-stat__label-text">{label}</span>
+        {hasInfo ? (
+          <InfoTooltip id={infoId} content={info} label={infoLabel} aria-labelledby={`${infoId} ${labelId}`} />
+        ) : null}
       </div>
       <div className="ci-stat__value">
         {value === null ? (
@@ -87,6 +110,7 @@ export function Stat({
             locale={locale}
             duration={animationDuration}
             animateOnView={animateOnView}
+            from={animateFrom === "previous" ? "previous" : undefined}
           />
         ) : (
           rendered

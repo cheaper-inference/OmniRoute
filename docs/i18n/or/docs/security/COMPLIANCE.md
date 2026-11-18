@@ -21,60 +21,70 @@ OmniRoute ପ୍ରଶାସନିକ କାର୍ଯ୍ୟ, ପ୍ରମାଣ�
 
 ### ପ୍ରଶାସନିକ ଅଡିଟ୍ ଘଟଣା (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`କୁ ପ୍ରତ୍ୟେକ କଲ୍
-ଗୋଟିଏ ଧାଡ଼ି ସୃଷ୍ଟି କରେ। କାର୍ଯ୍ୟ ଷ୍ଟ୍ରିଙ୍ଗଗୁଡ଼ିକ ଏକ `domain.verb` (କିମ୍ବା `domain.verb.outcome`)
-ଢାଞ୍ଚା ଅନୁସରଣ କରେ। କୋଡ୍ବେସ୍ରେ ସୁନିଶ୍ଚିତ ହୋଇଥିବା କାର୍ଯ୍ୟ ପ୍ରକାରଗୁଡ଼ିକ ହେଲା:
+`logAuditEvent({ action, actor, target, details, ... })`-ର ପ୍ରତ୍ୟେକ କଲ୍
+ଗୋଟିଏ ଧାଡ଼ି ସୃଷ୍ଟି କରେ। ଆକ୍ସନ୍ ଷ୍ଟ୍ରିଙ୍ଗ୍ଗୁଡ଼ିକ `domain.verb` (କିମ୍ବା
+`domain.verb.outcome`) ପ୍ୟାଟର୍ନ୍ ଅନୁସରଣ କରେ। ଟ୍ରିରେ ନିଶ୍ଚିତ ହୋଇଥିବା ଆକ୍ସନ୍ ପ୍ରକାରଗୁଡ଼ିକ:
 
-| କାର୍ଯ୍ୟ                              | ଉତ୍ସ                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ପ୍ରତ୍ୟେକ ଏଣ୍ଟ୍ରି `action`, `actor` (ଡିଫଲ୍ଟ ଭାବେ `"system"`), `target`,
+ପ୍ରତ୍ୟେକ ଏଣ୍ଟ୍ରିରେ `action`, `actor` (ଡିଫଲ୍ଟ ଭାବେ `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` ଏବଂ `timestamp`କୁ ସଂଗ୍ରହ କରେ। ସମ୍ବେଦନଶୀଳ କୀଗୁଡ଼ିକ (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey` ସହ ମେଳ ଖାଉଥିବା ଯେକୌଣସି କୀ,
-ଇତ୍ୟାଦି) ଧାଡ଼ିଟି ଲେଖାଯିବା ପୂର୍ବରୁ ପୁନରାବୃତ୍ତିମୂଳକ ଭାବେ `"[redacted]"` ଦ୍ୱାରା ଲୁଚାଇ ଦିଆଯାଏ।
+`request_id`, ଏବଂ `timestamp` ରହେ। ସମ୍ବେଦନଶୀଳ କୀଗୁଡ଼ିକ (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey`-ସହ ମେଳ ଖାଉଥିବା ଯେକୌଣସି
+କୀ ଇତ୍ୟାଦି) ଧାଡ଼ି ଲେଖାଯିବା ପୂର୍ବରୁ ପୁନରାବୃତ୍ତିମୂଳକ ଭାବେ `"[redacted]"` ଦ୍ୱାରା
+ଲୁଚାଯାଏ।
+
+`api_key.auth.touch` ଧାଡ଼ିଗୁଡ଼ିକ ସଫଳ API-କୀ ମେଟାଡାଟା ଏବଂ ଅନୁସନ୍ଧାନ
+ରିଡ୍ଗୁଡ଼ିକ (GET/HEAD) ରେକର୍ଡ କରେ, ଯେଉଁଗୁଡ଼ିକ ଅନୁରୋଧ ଲଗ୍ରେ କେବେ ପହଞ୍ଚେ ନାହିଁ:
+କେଉଁ କୀ, କେବେ, ଏବଂ ସାଧାରଣୀକୃତ ପଥ; ଏଗୁଡ଼ିକୁ ଏକତ୍ର କରାଯାଇ ସର୍ବାଧିକ
+1,000 ଧାଡ଼ିରେ ସୀମିତ କରାଯାଏ। `noLog` ଥିବା କୀ ଏବଂ ପରିବେଶ କୀଗୁଡ଼ିକୁ
+ଛାଡ଼ି ଦିଆଯାଏ। କଲର୍ଙ୍କ IP ଠିକଣା ଏବଂ user-agent କେବଳ
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ଫିଚର୍ ଫ୍ଲାଗ୍ ଚାଲୁ ଥିଲେ ଯୋଡ଼ାଯାଏ
+(ଡିଫଲ୍ଟ ଭାବେ ବନ୍ଦ)।
 
 ### MCP ଟୁଲ୍ କଲ୍ଗୁଡ଼ିକ (`mcp_tool_audit`)
 
-ପ୍ରତ୍ୟେକ MCP ଟୁଲ୍ ଆହ୍ୱାନ
-`open-sse/mcp-server/audit.ts` ମାଧ୍ୟମରେ ଗୋଟିଏ ଧାଡ଼ି ଲେଖେ। ସ୍କିମା (
-`src/lib/db/migrations/002_mcp_a2a_tables.sql`ରୁ):
+ପ୍ରତ୍ୟେକ MCP ଟୁଲ୍ ଆହ୍ୱାନ `open-sse/mcp-server/audit.ts` ମାଧ୍ୟମରେ ଗୋଟିଏ
+ଧାଡ଼ି ଲେଖେ। ସ୍କିମା (ଏଠାରୁ
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| ସ୍ତମ୍ଭ           | ଟିପ୍ପଣୀ                                          |
-| ---------------- | ------------------------------------------------ |
-| `id`             | ସ୍ୱୟଂ-ବୃଦ୍ଧିଶୀଳ                                  |
-| `tool_name`      | MCP ଟୁଲ୍ ପରିଚାୟକ                                 |
-| `input_hash`     | ଇନ୍ପୁଟ୍ର sha256 (କୌଣସି ପେଲୋଡ୍ ସଂରକ୍ଷିତ ହୁଏନାହିଁ) |
-| `output_summary` | ସଂକ୍ଷିପ୍ତ, କାଟଛାଟ କରାଯାଇଥିବା ସାରାଂଶ              |
-| `duration_ms`    | ବାସ୍ତବ ବିତିଥିବା ସମୟ                              |
-| `api_key_id`     | କଲ୍କାରୀ (ଶୂନ୍ୟଯୋଗ୍ୟ)                             |
-| `success`        | `1` / `0`                                        |
-| `error_code`     | ବିଫଳତା ସମୟରେ ଅନ୍ତିମ ତ୍ରୁଟି କୋଡ୍                  |
-| `created_at`     | ISO ସମୟଚିହ୍ନ                                     |
+| Column           | Notes                                       |
+| ---------------- | ------------------------------------------- |
+| `id`             | ସ୍ୱୟଂ-ବୃଦ୍ଧିଶୀଳ                             |
+| `tool_name`      | MCP ଟୁଲ୍ ପରିଚୟକର୍ତ୍ତା                       |
+| `input_hash`     | ଇନ୍ପୁଟ୍ର sha256 (ପେଲୋଡ୍ ସଂରକ୍ଷିତ ହୁଏ ନାହିଁ) |
+| `output_summary` | ସଂକ୍ଷିପ୍ତ, କାଟଛାଟ କରାଯାଇଥିବା ସାରାଂଶ         |
+| `duration_ms`    | ୱାଲ୍ ସମୟ                                    |
+| `api_key_id`     | କଲର୍ (ନଲ୍ ହୋଇପାରେ)                          |
+| `success`        | `1` / `0`                                   |
+| `error_code`     | ବିଫଳତା ସମୟର ଚୂଡ଼ାନ୍ତ ତ୍ରୁଟି କୋଡ୍            |
+| `created_at`     | ISO ଟାଇମ୍ଷ୍ଟାମ୍ପ                            |
 
 ### ଅନୁରୋଧ / ବ୍ୟବହାର ଲଗ୍ଗୁଡ଼ିକ
 
-ଏଗୁଡ଼ିକ କାର୍ଯ୍ୟକ୍ଷମ ଟେଲିମେଟ୍ରି (କଠୋର ଭାବେ ପ୍ରଶାସନିକ ଅଡିଟ୍ ନୁହେଁ), କିନ୍ତୁ ସମାନ
-ସଂରକ୍ଷଣ ପାଇପ୍ଲାଇନ୍ ବ୍ୟବହାର କରନ୍ତି:
+ଏଗୁଡ଼ିକ ପରିଚାଳନାତ୍ମକ ଟେଲିମେଟ୍ରି (କଠୋର ଭାବେ ପ୍ରଶାସନିକ ଅଡିଟ୍ ନୁହେଁ), କିନ୍ତୁ
+ସମାନ ରିଟେନ୍ସନ୍ ପାଇପ୍ଲାଇନ୍ ଅଂଶୀଦାର କରେ:
 
-- `usage_history` — ପ୍ରତ୍ୟେକ ଅନୁରୋଧର ବ୍ୟବହାର ସାରାଂଶ
-- `call_logs` — ପ୍ରତ୍ୟେକ ଅନୁରୋଧର ସମ୍ପୂର୍ଣ୍ଣ ଲଗ୍ (ଧାଡ଼ି ସୀମା ଅଧୀନରେ, ନିମ୍ନରେ ଦେଖନ୍ତୁ)
-- `proxy_logs` — ପ୍ରକ୍ସି ଟ୍ରାଫିକ୍ ଲଗ୍ (ଧାଡ଼ି ସୀମା ଅଧୀନରେ)
-- `request_detail_logs` — ପୁରୁଣା ବିସ୍ତୃତ ଅନୁରୋଧ ଲଗ୍ (ଉପସ୍ଥିତ ଥିଲେ ଏବେ ମଧ୍ୟ ଛାଟି ଦିଆଯାଏ)
+- `usage_history` — ପ୍ରତ୍ୟେକ ଅନୁରୋଧର ବ୍ୟବହାରର ସାରାଂଶ
+- `call_logs` — ପ୍ରତ୍ୟେକ ଅନୁରୋଧର ସମ୍ପୂର୍ଣ୍ଣ ଲଗ୍ (ଧାଡ଼ି-ସୀମାର ଅଧୀନ, ନିମ୍ନରେ ଦେଖନ୍ତୁ)
+- `proxy_logs` — ପ୍ରକ୍ସି ଟ୍ରାଫିକ୍ ଲଗ୍ (ଧାଡ଼ି-ସୀମାର ଅଧୀନ)
+- `request_detail_logs` — ପୁରୁଣା ବିସ୍ତୃତ ଅନୁରୋଧ ଲଗ୍ (ଉପସ୍ଥିତ ଥିଲେ ଏବେ ମଧ୍ୟ ପ୍ରୁନ୍ କରାଯାଏ)
 
 ## ସ୍ଟୋରେଜ୍ ସ୍କିମା
 

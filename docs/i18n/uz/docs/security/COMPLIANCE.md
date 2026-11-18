@@ -11,55 +11,74 @@ OmniRoute maʼmuriy amallar, autentifikatsiya hodisalari, provayder hisob maʼlu
 
 Amalga oshirish kodi `src/lib/compliance/index.ts` (T-43 — "Muvofiqlik nazorati") va `src/lib/compliance/providerAudit.ts` fayllarida joylashgan. Audit yozuvlari hech qachon istisno chiqarmaydi: har qanday nosozlik yuz berganda chaqiruv jimgina eʼtiborsiz qoldiriladi, shuning uchun audit jurnaliga yozish asosiy soʻrov oqimini buzmaydi.
 
-## Nimalar jurnalga yoziladi
+## Nimalar qayd etiladi
 
-### Maʼmuriy audit hodisalari (`audit_log`)
+### Ma’muriy audit hodisalari (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` funksiyasining har bir chaqiruvi bitta qator hosil qiladi. Amal satrlari `domain.verb` (yoki `domain.verb.outcome`) andozasiga amal qiladi. Kod bazasida tasdiqlangan amal turlariga quyidagilar kiradi:
+`logAuditEvent({ action, actor, target, details, ... })` funksiyasining har bir
+chaqiruvi bitta qator hosil qiladi. Action satrlari `domain.verb` (yoki
+`domain.verb.outcome`) andozasiga amal qiladi. Kod daraxtida tasdiqlangan action
+turlari:
 
-| Amal                                 | Manba                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Manba                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Har bir yozuv `action`, `actor` (standart qiymati `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` va `timestamp` qiymatlarini qayd etadi. Maxfiy kalitlar (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` andozalariga mos keladigan barcha kalitlar va hokazo) qator yozilishidan oldin rekursiv ravishda `"[redacted]"` qiymati bilan berkitiladi.
+Har bir yozuvda `action`, `actor` (standart qiymati `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` va `timestamp` saqlanadi. Maxfiy kalitlar (`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey` bilan mos keladigan
+istalgan qiymatlar va boshqalar) qator yozilishidan oldin rekursiv tarzda
+`"[redacted]"` bilan almashtiriladi.
 
-### MCP vositasi chaqiruvlari (`mcp_tool_audit`)
+`api_key.auth.touch` qatorlari so‘rovlar jurnaliga yetib bormaydigan muvaffaqiyatli
+API kalit metama’lumotlari va aniqlash o‘qishlarini (GET/HEAD) qayd etadi: qaysi
+kalit, qachon va me’yorlashtirilgan yo‘l. Yozuvlar birlashtiriladi va 1 000 qator
+bilan cheklanadi. `noLog` qiymatiga ega kalitlar hamda muhit kaliti o‘tkazib
+yuboriladi. Chaqiruvchining IP manzili va user-agent ma’lumotlari faqat
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` funksional bayrog‘i yoqilganida qo‘shiladi
+(standart bo‘yicha o‘chiq).
 
-Har bir MCP vositasi chaqiruvi `open-sse/mcp-server/audit.ts` orqali bitta qator yozadi. Sxema (`src/lib/db/migrations/002_mcp_a2a_tables.sql` faylidan):
+### MCP vosita chaqiruvlari (`mcp_tool_audit`)
 
-| Ustun            | Izohlar                                                    |
-| ---------------- | ---------------------------------------------------------- |
-| `id`             | avtomatik oshiriladi                                       |
-| `tool_name`      | MCP vositasi identifikatori                                |
-| `input_hash`     | kirish maʼlumotlarining sha256 xeshi (yuklama saqlanmaydi) |
-| `output_summary` | qisqa, kesilgan xulosa                                     |
-| `duration_ms`    | oʻtgan haqiqiy vaqt                                        |
-| `api_key_id`     | chaqiruvchi (null boʻlishi mumkin)                         |
-| `success`        | `1` / `0`                                                  |
-| `error_code`     | nosozlik yuz bergandagi yakuniy xato kodi                  |
-| `created_at`     | ISO vaqt belgisi                                           |
+Har bir MCP vositasi chaqiruvi `open-sse/mcp-server/audit.ts` orqali qator yozadi.
+Sxema (`src/lib/db/migrations/002_mcp_a2a_tables.sql` dan):
 
-### Soʻrov / foydalanish jurnallari
+| Ustun            | Izoh                                                          |
+| ---------------- | ------------------------------------------------------------- |
+| `id`             | avtomatik oshiriladi                                          |
+| `tool_name`      | MCP vosita identifikatori                                     |
+| `input_hash`     | kiritilgan ma’lumotlarning sha256 xeshi (yuklama saqlanmaydi) |
+| `output_summary` | qisqa, qisqartirilgan xulosa                                  |
+| `duration_ms`    | haqiqiy o‘tgan vaqt                                           |
+| `api_key_id`     | chaqiruvchi (null bo‘lishi mumkin)                            |
+| `success`        | `1` / `0`                                                     |
+| `error_code`     | xatolik yuz bergandagi yakuniy xatolik kodi                   |
+| `created_at`     | ISO vaqt belgisi                                              |
 
-Bular operatsion telemetriya maʼlumotlari (qatʼiy maʼnoda maʼmuriy audit emas), ammo ular ayni saqlash muddati konveyeridan foydalanadi:
+### So‘rov / foydalanish jurnallari
 
-- `usage_history` — har bir soʻrov boʻyicha jamlangan foydalanish maʼlumotlari
-- `call_logs` — har bir soʻrovning toʻliq jurnali (qatorlar soni chekloviga bogʻliq, quyiga qarang)
-- `proxy_logs` — proksi trafik jurnali (qatorlar soni chekloviga bogʻliq)
-- `request_detail_logs` — eski batafsil soʻrovlar jurnali (mavjud boʻlsa, hali ham tozalanadi)
+Bular operatsion telemetriya hisoblanadi (qat’iy ma’noda ma’muriy audit emas),
+ammo ayni saqlash muddatini boshqarish jarayonidan foydalanadi:
+
+- `usage_history` — har bir so‘rov bo‘yicha foydalanish jamlanmasi
+- `call_logs` — har bir so‘rovning to‘liq jurnali (qatorlar soni cheklangan, quyida ko‘ring)
+- `proxy_logs` — proksi trafigi jurnali (qatorlar soni cheklangan)
+- `request_detail_logs` — eski batafsil so‘rovlar jurnali (mavjud bo‘lsa, hali ham tozalanadi)
 
 ## Saqlash sxemasi
 

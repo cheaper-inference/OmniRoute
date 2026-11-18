@@ -15,8 +15,27 @@ import { createManagementSessionToken } from "../../../helpers/managementSession
  * off for the whole suite would hide a regression in the guard itself.
  */
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-apply-guard-data-"));
-const TEST_XDG_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-apply-guard-xdg-"));
+function createRunnerIndependentTempDir(prefix: string): string {
+  // Evidence collectors may place TMPDIR inside a bind-mounted worktree. That is
+  // persistent by definition, so it is the wrong fixture for an ephemeral-target
+  // test. Use the platform default temp root while preserving the runner's env;
+  // if that root is also bind-mounted, the real guard assertions still fail.
+  const keys = ["TMPDIR", "TMP", "TEMP"] as const;
+  const original = new Map(keys.map((key) => [key, process.env[key]]));
+  for (const key of keys) delete process.env[key];
+  try {
+    return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  } finally {
+    for (const key of keys) {
+      const value = original.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
+const TEST_DATA_DIR = createRunnerIndependentTempDir("omniroute-apply-guard-data-");
+const TEST_XDG_DIR = createRunnerIndependentTempDir("omniroute-apply-guard-xdg-");
 const originalDataDir = process.env.DATA_DIR;
 const originalXdg = process.env.XDG_CONFIG_HOME;
 // Fresh DB without a configured password → management auth is open, so these
@@ -287,11 +306,15 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     assert.strictEqual(body.success, true);
     assert.strictEqual(body.configPath, OPENCODE_CONFIG);
     assert.ok(fs.existsSync(OPENCODE_CONFIG), "host write must land");
-    assert.strictEqual(
-      fs.statSync(OPENCODE_CONFIG).mode & 0o777,
-      0o600,
-      "generated CLI config must be private"
-    );
+    // NTFS does not represent POSIX owner/group/other bits. The writer's mode
+    // requests are checked on every platform in cli-helper/private-config-file.test.ts.
+    if (process.platform !== "win32") {
+      assert.strictEqual(
+        fs.statSync(OPENCODE_CONFIG).mode & 0o777,
+        0o600,
+        "generated CLI config must be private"
+      );
+    }
     const written = fs.readFileSync(OPENCODE_CONFIG, "utf-8");
     assert.ok(written.includes(catalogBaseUrl));
   });

@@ -7,6 +7,7 @@ import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type AutopilotAction = {
   type: string;
@@ -231,6 +232,7 @@ function ProviderIssues({
 export default function ProviderHealthAutopilotCard() {
   const t = useTranslations("providerHealthAutopilot");
   const nodeMap = useProviderNodeMap();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [report, setReport] = useState<AutopilotReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -273,7 +275,11 @@ export default function ProviderHealthAutopilotCard() {
       const localizedRecommendation = issueText(issue, "recommendation", t);
       if (
         action.requiresConfirmation &&
-        !confirm(`${localizedAction}?\n\n${localizedRecommendation}`)
+        !(await requestConfirm({
+          title: `${localizedAction}?`,
+          message: localizedRecommendation,
+          confirmText: localizedAction,
+        }))
       ) {
         return;
       }
@@ -301,7 +307,7 @@ export default function ProviderHealthAutopilotCard() {
         setBusyAction(null);
       }
     },
-    [load, t]
+    [load, t, requestConfirm]
   );
 
   return (
@@ -313,7 +319,7 @@ export default function ProviderHealthAutopilotCard() {
               <Icon name="health_and_safety" size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text-main">{t("title")}</h2>
+              <h2 className="text-lg text-text-main">{t("title")}</h2>
               <p className="text-sm text-text-muted">{t("description")}</p>
             </div>
           </div>
@@ -373,7 +379,7 @@ export default function ProviderHealthAutopilotCard() {
             >
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="font-semibold text-text-main">
+                  <h3 className="text-text-main">
                     {resolveProviderName(provider.provider, nodeMap)}
                   </h3>
                   <p className="text-xs text-text-muted">
@@ -408,6 +414,7 @@ export default function ProviderHealthAutopilotCard() {
           ))}
         </div>
       )}
+      {confirmDialog}
     </Card>
   );
 }

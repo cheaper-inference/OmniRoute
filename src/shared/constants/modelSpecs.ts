@@ -4,6 +4,8 @@
  * when clients request more than the model supports.
  */
 
+export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
+
 export interface ModelSpec {
   maxOutputTokens?: number;
   contextWindow?: number;
@@ -59,6 +61,11 @@ export interface ModelSpec {
   // priority #3 and the wiring's modelDefaultAuto branch were unreachable
   // except by a test constructing the body literal directly.
   defaultReasoningEffort?: "none" | "low" | "medium" | "high" | "auto";
+  // Gemini 3+ native reasoning control. Models that expose this list use
+  // generationConfig.thinkingConfig.thinkingLevel instead of legacy numeric
+  // thinkingBudget; Google rejects mixing the two controls.
+  geminiThinkingLevels?: GeminiThinkingLevel[];
+  defaultGeminiThinkingLevel?: GeminiThinkingLevel;
 }
 
 const BEDROCK_CLAUDE_ALIASES = (...modelIds: string[]) => [
@@ -245,6 +252,19 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: false,
     supportsTools: true,
     supportsVision: true,
+  },
+
+  // Gemini 3.5 Flash-Lite uses Gemini 3 native thinking levels, not legacy
+  // numeric thinking budgets. Minimal is the upstream default and is intended
+  // for latency-sensitive, high-throughput micro tasks.
+  "gemini-3.5-flash-lite": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    geminiThinkingLevels: ["minimal", "low", "medium", "high"],
+    defaultGeminiThinkingLevel: "minimal",
   },
 
   // Gemini 3.7 Flash tiers: high 24.5k, medium 8k, low 1k thinking tokens.
@@ -640,8 +660,10 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["k3"],
   },
 
-  // ── Kimi K3.1 Pro (OpenCode Go — 1M context, 131K output, native vision) ──
-  // Separate from kimi-k3: K3.1 Pro caps output at 131072, not 1M.
+  // ── Kimi K3.1 Pro (+ Highspeed) — 1M context, native vision/video ──
+  // Separate from kimi-k3. The provider-neutral output cap is OpenCode Go's
+  // published 131072; Moonshot / Kimi Coding raise it to 1M through their
+  // registry rows (KIMI_K31_MODELS.maxOutputTokens) and the moonshot executor.
   "kimi-k3.1-pro": {
     maxOutputTokens: 131072,
     contextWindow: 1048576,
@@ -649,6 +671,8 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: true,
     supportsTools: true,
     supportsVision: true,
+    supportsVideo: true,
+    aliases: ["k3.1-pro", "kimi-k3.1-pro-highspeed", "k3.1-pro-highspeed"],
   },
 
   // ── Kimi K2.6 (Moonshot API — 262K native) ──────────────────────

@@ -4,48 +4,124 @@
 
 ---
 
-> **ಸ್ಥಿತಿ:** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ** Keak CI UI ಕಿಟ್** (`@keak/cheaper-inference-ui-kit`), ವರ್ಕ್ಸ್ಪೇಸ್ `packages/ui-kit` (`@omniroute/ui-kit`; ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ಅನ್ನು `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು `npm run check:ui-kit-snapshot` ನಿಂದ ರಕ್ಷಿಸಲಾಗಿದೆ) ಎಂದು ಮಾರಾಟ ಮಾಡಲಾಗಿದೆ. ಬೆಳಕು ಅಂಗೀಕೃತ ವಿಷಯವಾಗಿದೆ; ಪೂರ್ವನಿಯೋಜಿತ ಆದ್ಯತೆಯು `system` ಆಗಿದೆ. ಉಚ್ಚಾರಣೆಯು ಕೀಕ್ ಲೈಮ್ (`--ci-color-accent`) ಆಗಿದೆ. ಸ್ವಿಟ್ಜರ್ ಎಂಬುದು UI, ಪ್ರದರ್ಶನ ಮತ್ತು ಕೋಡ್ ಪಠ್ಯಕ್ಕಾಗಿ (`--ci-font-ui`; `--ci-font-display` ಮತ್ತು `--ci-font-mono` ಪರಿಹರಿಸಲು) ಒಂದೇ ಕುಟುಂಬವಾಗಿದೆ, ಕಿಟ್ನಿಂದ ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಲಾಗಿದೆ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ನಿಂದ ಆಮದು ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ). ಸ್ಕ್ರಿಪ್ಟ್ಗಳು ಸ್ವಿಟ್ಜರ್ನಲ್ಲಿ ಗ್ಲಿಫ್ ಮೂಲಕ ಗ್ಲಿಫ್ ಕೊರತೆಯಿದೆ (`src/app/globals.css`): ಸಿರಿಲಿಕ್, ಗ್ರೀಕ್ ಮತ್ತು ವಿಯೆಟ್ನಾಮೀಸ್ಗೆ ಇಂಟರ್ ಮತ್ತು, `html[dir="rtl"]` ಅಡಿಯಲ್ಲಿ ಮಾತ್ರ, ಅರೇಬಿಕ್ ಲಿಪಿಗಾಗಿ ವಝಿರ್ಮಟ್ನ್. ಪ್ರತಿಯೊಂದು ಐಕಾನ್ ಲೂಸಿಡ್ ಗ್ಲಿಫ್ ಆಗಿದೆ.
+> **ಸ್ಥಿತಿ:** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ಆಧರಿಸಿ ನಿರ್ಮಿಸಲಾಗಿದೆ ಮತ್ತು ಅದನ್ನು
+> ಕಾರ್ಯಸ್ಥಳ `packages/ui-kit` (`@omniroute/ui-kit`) ಆಗಿ ವೆಂಡರ್ ಮಾಡಲಾಗಿದೆ; ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ಅನ್ನು
+> `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾಗಿದ್ದು, `npm run check:ui-kit-snapshot` ಮೂಲಕ ಸಂರಕ್ಷಿಸಲಾಗಿದೆ. ಲೈಟ್ ಅಧಿಕೃತ
+> ಥೀಮ್ ಆಗಿದೆ; ಡೀಫಾಲ್ಟ್ ಆದ್ಯತೆ `system` ಆಗಿದೆ. ಡೀಫಾಲ್ಟ್ ಬಣ್ಣಸಮೂಹವು ಕಿಟ್ನ **Editions** ನೋಟವಾಗಿದೆ
+> (ಬೆಚ್ಚಗಿನ ಕಾಗದದ ತಟಸ್ಥ ಬಣ್ಣಗಳು ಮತ್ತು ತಾಮ್ರದ ಆಕ್ಸೆಂಟ್ `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); ಸೆಟ್ಟಿಂಗ್ಗಳು →
+> ಗೋಚರಿಕೆ → ಬಣ್ಣಸಮೂಹವು **Classic** ಆಯ್ಕೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ; ಇದು ಲೈಮ್ ಆಕ್ಸೆಂಟ್ ಹೊಂದಿರುವ ಕಿಟ್ನ ಮೂಲ ಟೋಕನ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ. UI,
+> ಡಿಸ್ಪ್ಲೇ ಮತ್ತು ಕೋಡ್ ಪಠ್ಯಕ್ಕೆ Switzer ಏಕೈಕ ಫಾಂಟ್ ಕುಟುಂಬವಾಗಿದೆ (`--ci-font-ui`; `--ci-font-display` ಮತ್ತು
+> `--ci-font-mono` ಅದನ್ನೇ ಬಳಸುತ್ತವೆ), ಮತ್ತು ಅದನ್ನು ಕಿಟ್ ಸ್ವತಃ ಹೋಸ್ಟ್ ಮಾಡುತ್ತದೆ (`packages/ui-kit/src/ci-fonts.css`,
+> ಇದನ್ನು `ci-tokens.css` ಆಮದು ಮಾಡುತ್ತದೆ). Switzer ಬೆಂಬಲಿಸದ ಲಿಪಿಗಳಿಗೆ ಗ್ಲಿಫ್ಗಟ್ಟಲೆ ಪರ್ಯಾಯ ಫಾಂಟ್ ಬಳಸಲಾಗುತ್ತದೆ (`src/app/globals.css`):
+> ಸಿರಿಲಿಕ್, ಗ್ರೀಕ್ ಮತ್ತು ವಿಯೆಟ್ನಾಮೀಸ್ಗೆ Inter ಹಾಗೂ `html[dir="rtl"]` ಅಡಿಯಲ್ಲಿ ಮಾತ್ರ ಅರೇಬಿಕ್ ಲಿಪಿಗೆ Vazirmatn ಬಳಸಲಾಗುತ್ತದೆ.
+> ಪ್ರತಿಯೊಂದು ಐಕಾನ್ Lucide ಗ್ಲಿಫ್ ಆಗಿದೆ.
 
-## 1. ವಸ್ತುಗಳು ಎಲ್ಲಿವೆ
+## 1. ವಿಷಯಗಳು ಇರುವ ಸ್ಥಳ
 
-- **ಕಿಟ್.** `packages/ui-kit/src` ಎಂಬುದು `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾದ ಕಮಿಟ್ನಲ್ಲಿರುವ ಅಪ್ಸ್ಟ್ರೀಮ್ `src/` ನ ಬೈಟ್ಗೆ-ಬೈಟ್ ನಕಲಾಗಿದೆ (ಇದು ಪರವಾನಗಿ ಅಧಿಕೃತೀಕರಣವನ್ನೂ ದಾಖಲಿಸುತ್ತದೆ); `PATCHES.md` ಸ್ಥಳೀಯ ಪ್ಯಾಚ್ಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಯಾವುದೂ ಇಲ್ಲ). ಇದನ್ನು ಬಿಲ್ಡ್ ಇಲ್ಲದೆ ಸೋರ್ಸ್ ಆಗಿ ಬಳಸಲಾಗುತ್ತದೆ: `next.config.mjs` ಅದನ್ನು ಟ್ರಾನ್ಸ್ಪೈಲ್ ಮಾಡುತ್ತದೆ, ಮತ್ತು `tsconfig.json` `@omniroute/ui-kit` ಅನ್ನು `packages/ui-kit/src` ಗೆ ಮತ್ತು `@omniroute/ui-kit/*` ಅನ್ನು `packages/ui-kit/src/*` ಗೆ ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ (`vitest.config.ts` ಮತ್ತು `vitest.mcp.config.ts` ಅದೇ ಅಲಿಯಾಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತವೆ). ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು ಅದರ ಸಬ್ಪಾತ್ ಮೂಲಕ ಇಂಪೋರ್ಟ್ ಮಾಡಿ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ಎಂದಿಗೂ `@omniroute/ui-kit` ಬ್ಯಾರೆಲ್ ಮೂಲಕ ಅಲ್ಲ: ಬ್ಯಾರೆಲ್ ಪ್ರತಿ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು (ಡೇಟ್ ಪಿಕರ್ ಸೇರಿದಂತೆ) ಪ್ರತಿ ಇಂಪೋರ್ಟರ್ಗೆ ಎಳೆದುಕೊಂಡು ಬರುತ್ತದೆ. ಕಿಟ್ ಸ್ಟೈಲ್ಶೀಟ್ `src/app/globals.css` ಮೂಲಕ (`@import "../../packages/ui-kit/src/ci-ui.css"`) ಪ್ರವೇಶಿಸುತ್ತದೆ.
-- **ಟೋಕನ್ಗಳು.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ಟೋಕನ್ಗಳನ್ನು ಘೋಷಿಸುತ್ತದೆ; `src/app/globals.css` ಅವುಗಳನ್ನು ಲೆಗಸಿ OmniRoute ಹೆಸರುಗಳಿಗೆ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ಬ್ರಿಜ್ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ `var(--color-*)` ಓದುವಿಕೆಗಳು ಮತ್ತು Tailwind ಯುಟಿಲಿಟಿಗಳು ಮುಂದುವರಿಯುತ್ತವೆ. ಹೊಸ ಕೋಡ್ Tailwind ಯುಟಿಲಿಟಿಗಳನ್ನು (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ಅಥವಾ ಕಿಟ್ ಕ್ಲಾಸ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ — ಎಂದಿಗೂ ಹೆಕ್ಸ್ ಮೌಲ್ಯವನ್ನು ಅಲ್ಲ (`tests/unit/design-kit-bridge.test.ts` ಬ್ರಿಜ್ ಅನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತದೆ). `text-primary` `--text-color-primary` ಮೂಲಕ `--color-primary-ink` ಗೆ ಪರಿಹರಿಸುತ್ತದೆ (ಲೈಟ್ನಲ್ಲಿ lime-800, ಡಾರ್ಕ್ನಲ್ಲಿ lime ಆಕ್ಸೆಂಟ್), ಆದ್ದರಿಂದ ಪ್ರೈಮರಿ ಟೆಕ್ಸ್ಟ್ ಓದಲು ಯೋಗ್ಯವಾಗಿರುತ್ತದೆ, ಆದರೆ `bg-primary`/`border-primary` lime ಸರ್ಫೇಸ್ ಅನ್ನು ಕಾಪಾಡುತ್ತವೆ. ಚಾರ್ಟ್ ಸರಣಿಗಳು `--color-chart-1` … `--color-chart-5` ಅನ್ನು ಬಳಸುತ್ತವೆ.
-- **ಥೀಮ್ಗಳು.** `<html className="ci-theme">` (`src/app/layout.tsx`) ಡಾಕ್ಯುಮೆಂಟ್ ಅನ್ನು ಕಿಟ್ ಥೀಮ್ಗೆ ಆಪ್ಟ್-ಇನ್ ಮಾಡುತ್ತದೆ. ಆದ್ಯತೆಯು `light`, `dark` ಅಥವಾ `system` ಆಗಿದೆ (`src/shared/constants/appConfig.ts` ನಲ್ಲಿ `THEME_CONFIG.defaultTheme = "system"`; `system` ಎಂಬುದು `prefers-color-scheme` ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ). `src/store/themeStore.ts` ನಲ್ಲಿನ `applyTheme()` (`src/app/layout.tsx` ನಲ್ಲಿನ ಇನ್ಲೈನ್ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಸ್ಕ್ರಿಪ್ಟ್ನಿಂದ ಪ್ರತಿಬಿಂಬಿತವಾಗಿದೆ, ಅದು ಹೈಡ್ರೇಶನ್ಗೆ ಮೊದಲು ರನ್ ಆಗುತ್ತದೆ) `data-theme="dark"|"light"` ಅನ್ನು ಸೆಟ್ ಮಾಡುತ್ತದೆ ಮತ್ತು `<html>` ಮೇಲಿನ `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಒಟ್ಟಿಗೆ ಟಾಗಲ್ ಮಾಡುತ್ತದೆ. ಕಿಟ್ನ ಡಾರ್ಕ್ ಟೋಕನ್ ಸೆಟ್ `data-theme="dark"` ಅನ್ನು ಆಧರಿಸಿದೆ (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ನ ಸ್ವಂತ ಡಾರ್ಕ್ ಓವರ್ರೈಡ್ಗಳು (`globals.css` ನಲ್ಲಿನ `.dark` ಬ್ಲಾಕ್) ಮತ್ತು ಲೆಗಸಿ Tailwind `dark:` ಯುಟಿಲಿಟಿಗಳು `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಆಧರಿಸಿವೆ. ಆಕ್ಸೆಂಟ್ ಬಣ್ಣದ ಪ್ರೀಸೆಟ್ಗಳಿಲ್ಲ: ಆಕ್ಸೆಂಟ್ ಯಾವಾಗಲೂ ಕಿಟ್ನಿಂದ ಬರುತ್ತದೆ, ಮತ್ತು ಹಳೆಯ ಬಿಲ್ಡ್ನಿಂದ ಸಂಗ್ರಹಿತವಾದ ಪ್ರೀಸೆಟ್ ಅನ್ನು ಸ್ಟೋರ್ ಲೋಡ್ ಆದಾಗ ಕೈಬಿಡಲಾಗುತ್ತದೆ.
-- **ಕಾಂಪೋನೆಂಟ್ಗಳು (ಅಡ್ಯಾಪ್ಟರ್ಗಳು).** `src/shared/components/index.tsx` OmniRoute ಕಾಂಪೋನೆಂಟ್ API ಅನ್ನು ಕಾಪಾಡುತ್ತದೆ (ಅದೇ ಹೆಸರುಗಳು, ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು ಮತ್ತು ಪ್ರಾಪ್ಗಳು), ಮತ್ತು ಅದರ ಹಿಂದಿನ ಪ್ರಿಮಿಟಿವ್ಗಳು ಕಿಟ್ ಮೇಲಿನ ಅಡ್ಯಾಪ್ಟರ್ಗಳಾಗಿವೆ: ಫಾರ್ಮ್ಗಳು (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ಓವರ್ಲೇಗಳು ಮತ್ತು ಫೀಡ್ಬ್ಯಾಕ್ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), ಸ್ಟ್ರಕ್ಚರ್ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ಮತ್ತು ಟೇಬಲ್ಗಳು (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ಒಂದು ಅಡ್ಯಾಪ್ಟರ್ ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು ಸಬ್ಪಾತ್ ಮೂಲಕ ಇಂಪೋರ್ಟ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಲೆಗಸಿ ಪ್ರಾಪ್ಗಳನ್ನು ಅದರ ಮೇಲೆ ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ — ಉದಾಹರಣೆಗೆ `Button variant="primary"` ಎಂಬುದು ಕಿಟ್ನ `default` ಬಟನ್ (`--ci-button-primary-*`: ಲೈಟ್ನಲ್ಲಿ ವಿಲೋಮ ಸರ್ಫೇಸ್, ಡಾರ್ಕ್ನಲ್ಲಿ ತನ್ನ `--ci-color-accent-foreground` ಇಂಕ್ ಸಹಿತ ಆಕ್ಸೆಂಟ್), `danger` ಎಂಬುದು `destructive`, ಮತ್ತು `warning` ಎಂಬುದು `outline` ಜೊತೆಗೆ `.ci-button--warning` ವಿಸ್ತರಣೆ. `globals.css` ನ ಕೊನೆಯಲ್ಲಿರುವ `.ci-button--warning` ಮತ್ತು `.ci-badge[data-tone]` ನಿಯಮಗಳು (`@layer components`) ಕಿಟ್ ಕ್ಲಾಸ್ಗಳ ಮೇಲಿನ OmniRoute ವಿಸ್ತರಣೆಗಳಾಗಿವೆ. `tests/unit/ui/adapters/*.test.tsx` ಪ್ರತಿ ಅಡ್ಯಾಪ್ಟರ್ ಅನ್ನು ಪಿನ್ ಮಾಡುತ್ತದೆ.
-- **ಶೆಲ್.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ, ಅದು `src/shared/components/layouts/DashboardShell.tsx` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ: ಕಿಟ್ `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ಜೊತೆಗೆ `src/shared/components/Sidebar.tsx` ನಲ್ಲಿ OmniRoute ನ ನ್ಯಾವಿಗೇಶನ್ ಲಾಜಿಕ್. `#main-content` ಗೆ ಹೋಗುವ "ವಿಷಯಕ್ಕೆ ಹೋಗಿ" ಲಿಂಕ್ ಮೊದಲ ಫೋಕಸ್ ಮಾಡಬಹುದಾದ ಎಲಿಮೆಂಟ್ ಆಗಿದೆ. `src/shared/components/Header.tsx` ಕಿಟ್ `SidebarTrigger` (ಶೆಲ್ನ ಏಕೈಕ ಸೈಡ್ಬಾರ್ ಟಾಗಲ್), Keak `ProductSwitcher` ಮತ್ತು ಕಮ್ಯಾಂಡ್-ಪ್ಯಾಲೆಟ್ ಓಪನರ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ; `#main-content` ಒಳಗೆ ಯಾವುದೇ ಕಿಟ್ `PageHeader` (`.ci-page-header`) ಮೌಂಟ್ ಆಗದಿದ್ದಾಗ ಮಾತ್ರ ಅದು ರೂಟ್ ಶೀರ್ಷಿಕೆಯನ್ನು ತೋರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತನ್ನ ಸ್ವಂತ `PageHeader` ಹೊಂದಿರುವ ಪೇಜ್ ಒಂದೇ `h1` ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. `src/shared/components/CommandPalette.tsx` ಒಂದು ಕಿಟ್ `Dialog` ಆಗಿದೆ.
-- **ಐಕಾನ್ಗಳು.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ಹೆಸರನ್ನು (ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ Material Symbols ಶಬ್ದಕೋಶ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ಮೂಲಕ Lucide ಗ್ಲಿಫ್ಗೆ ಪರಿಹರಿಸುತ್ತದೆ. Material Symbols ಫಾಂಟ್ ಮತ್ತು ಪ್ಯಾಕೇಜ್ ಈಗ ಇಲ್ಲ: ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರು ತಟಸ್ಥ ಪ್ಲೇಸ್ಹೋಲ್ಡರ್ ಗ್ಲಿಫ್ ಅನ್ನು (`data-icon-missing="true"`) ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಪ್ರೊಡಕ್ಷನ್ ಹೊರಗೆ ಕನ್ಸೋಲ್ ಎಚ್ಚರಿಕೆಯನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ. `npm run gen:icon-map` ಬಳಕೆಯಲ್ಲಿರುವ ಆದರೆ ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರುಗಳನ್ನು ಪ್ರಿಂಟ್ ಮಾಡುತ್ತದೆ (`tests/unit/icon-map-coverage.test.ts` Lucide ಐಕಾನ್ ಇಲ್ಲದ ಯಾವುದೇ ಹೆಸರಿನಲ್ಲಿ ಫೇಲ್ ಆಗುತ್ತದೆ; `tests/unit/icon-map-object-values.test.ts` ಲುಕಪ್ ಆಬ್ಜೆಕ್ಟ್ಗಳಲ್ಲಿ ಸಂಗ್ರಹಿತವಾದ ಹೆಸರುಗಳನ್ನು ಕವರ್ ಮಾಡುತ್ತದೆ); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ಲಿಟರಲ್ `<span className="material-symbols-outlined">` ಸ್ಪಾನ್ಗಳನ್ನು `<Icon>` ಗೆ ಪುನಃ ಬರೆಯುತ್ತದೆ.
-- **ಬ್ರಾಂಡ್.** `src/shared/components/OmniRouteLogo.tsx` ಕಿಟ್ ಅನ್ನು ರ್ಯಾಪ್ ಮಾಡುತ್ತದೆ: ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (ಇನ್ಲೈನ್ SVG, `basePath`-ಸೇಫ್) ಮತ್ತು `OmniRouteLockup` `ProductLockup product="omniroute"` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (ಆಕ್ಸೆಸಿಬಲ್ ಹೆಸರು "Keak OmniRoute") ಅಥವಾ, ವೈಟ್-ಲೇಬಲ್ ಆಪರೇಟರ್ಗಳಿಗಾಗಿ, ಅವರ ಸ್ವಂತ `name`/`logoSrc`. ಪ್ರೊಡಕ್ಟ್-ಸ್ವಿಚರ್ ಗಮ್ಯಸ್ಥಾನಗಳು `src/shared/constants/keakProducts.ts` ನಲ್ಲಿ ಇವೆ (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). ಸ್ಟ್ಯಾಂಡ್ಎಲೋನ್ ಸ್ಕ್ರೀನ್ಗಳು — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ಮತ್ತು `src/shared/components/ErrorPageScaffold.tsx` — ಲಾಕಪ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ; `tests/unit/brand-pages-static.test.ts` ಅದನ್ನು ಕಾಪಾಡುತ್ತದೆ.
+- **ಕಿಟ್.** `packages/ui-kit/src` ಎನ್ನುವುದು `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಸೂಚಿಸಲಾದ commitನ upstream `src/` ನ byte-for-byte ಪ್ರತಿಯಾಗಿದೆ (ಅದೇ ಕಡತದಲ್ಲಿ license authorization ಕೂಡ ದಾಖಲಾಗಿದೆ); ಸ್ಥಳೀಯ patchesಗಳನ್ನು `PATCHES.md` ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಯಾವುದೂ ಇಲ್ಲ). ಇದನ್ನು source ಆಗಿ, ಯಾವುದೇ build ಇಲ್ಲದೆ ಬಳಸಲಾಗುತ್ತದೆ: `next.config.mjs` ಇದನ್ನು transpile ಮಾಡುತ್ತದೆ, ಮತ್ತು `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` ಹಾಗೂ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` ಗೆ map ಮಾಡುತ್ತದೆ (`vitest.config.ts` ಮತ್ತು `vitest.mcp.config.ts` ಗಳಲ್ಲೂ ಇದೇ alias ಇದೆ). ಕಿಟ್ component ಅನ್ನು ಅದರ subpath ಮೂಲಕ import ಮಾಡಿ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ಎಂದಿಗೂ `@omniroute/ui-kit` barrel ಮೂಲಕ ಅಲ್ಲ: barrel ಪ್ರತಿಯೊಂದು importer ಒಳಗೆ ಪ್ರತಿಯೊಂದು component (date picker ಸಹಿತ) ಅನ್ನು ಎಳೆಯುತ್ತದೆ. ಕಿಟ್ stylesheet `src/app/globals.css` ಮೂಲಕ ಪ್ರವೇಶಿಸುತ್ತದೆ (`@import "../../packages/ui-kit/src/ci-styles.css"`, ಸಂಪೂರ್ಣ sheet: core `ci-ui.css` ಜೊತೆಗೆ ಪ್ರತಿಯೊಂದು pattern family).
+- **ಟೋಕನ್ಗಳು.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokens ಅನ್ನು ಘೋಷಿಸುತ್ತದೆ; `src/app/globals.css` ಅವನ್ನು legacy OmniRoute ಹೆಸರುಗಳಿಗೆ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bridge ಮಾಡುತ್ತದೆ, ಇದರಿಂದ ಈಗಿರುವ `var(--color-*)` reads ಮತ್ತು Tailwind utilities ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಲೇ ಇರುತ್ತವೆ. ಹೊಸ code Tailwind utilities (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ಅಥವಾ kit classes ಬಳಸಬೇಕು — ಎಂದಿಗೂ hex value ಅಲ್ಲ (`tests/unit/design-kit-bridge.test.ts` bridge ಅನ್ನು enforce ಮಾಡುತ್ತದೆ). `text-primary` `--text-color-primary` ಮೂಲಕ `--color-primary-ink` ಗೆ resolve ಆಗುತ್ತದೆ, ಆದ್ದರಿಂದ primary text ಓದಲು ಸುಲಭವಾಗಿರುತ್ತದೆ; ಆದರೆ `bg-primary`/`border-primary` accent surface ಅನ್ನು ಹಾಗೆಯೇ ಇಡುತ್ತವೆ: Editions ಅಡಿಯಲ್ಲಿ ಅದು kitನ `--ci-color-accent-active` ಆಗಿರುತ್ತದೆ (light ನಲ್ಲಿ ಗಾಢ copper `#99562f`, dark ನಲ್ಲಿ copper accent); Classic ಅಡಿಯಲ್ಲಿ light ನಲ್ಲಿ lime-800 ಮತ್ತು dark ನಲ್ಲಿ lime accent. Chart seriesಗಳು `--color-chart-1` … `--color-chart-8` ಅನ್ನು ಬಳಸುತ್ತವೆ; ಪ್ರತಿಯೊಂದಕ್ಕೂ text-safe `--color-chart-N-ink` ಮತ್ತು opaque `--color-chart-N-subtle` chip tint ಇರುತ್ತದೆ, ಇವುಗಳನ್ನು kit series ಕ್ರಮದಲ್ಲಿ (`ciChartSeriesOrder`) ನಿಯೋಜಿಸಲಾಗುತ್ತದೆ.
+- **ಥೀಮ್ಗಳು.** `<html className="ci-theme">` (`src/app/layout.tsx`) document ಅನ್ನು kit themeಗೆ opt in ಮಾಡುತ್ತದೆ. preference `light`, `dark` ಅಥವಾ `system` ಆಗಿರುತ್ತದೆ (`src/shared/constants/appConfig.ts` ನಲ್ಲಿ `THEME_CONFIG.defaultTheme = "system"`); `system` `prefers-color-scheme` ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ. `src/store/themeStore.ts` ನಲ್ಲಿರುವ `applyTheme()` (`src/app/layout.tsx` ನಲ್ಲಿ inline ಮಾಡಿರುವ `THEME_BOOT_SCRIPT` ಮೂಲಕ mirror ಮಾಡಲಾಗಿದೆ; ಇದು hydrationಗಿಂತ ಮೊದಲು run ಆಗುತ್ತದೆ) `data-theme="dark"|"light"` ಅನ್ನು set ಮಾಡುತ್ತದೆ ಮತ್ತು `<html>` ಮೇಲೆ `.dark` class ಅನ್ನು ಒಂದೇ ಸಮಯದಲ್ಲಿ toggle ಮಾಡುತ್ತದೆ. ಕಿಟ್ನ dark token set `data-theme="dark"` ಅನ್ನು ಆಧರಿಸಿದೆ (`packages/ui-kit/src/ci-tokens.css`); OmniRouteನ ಸ್ವಂತ dark overrides (`globals.css` ನ `.dark` block) ಮತ್ತು legacy Tailwind `dark:` utilities `.dark` class ಅನ್ನು ಆಧರಿಸಿವೆ. accent color presets ಯಾವುದೂ ಇಲ್ಲ: accent ಯಾವಾಗಲೂ kitನಿಂದ ಬರುತ್ತದೆ, ಮತ್ತು ಹಳೆಯ buildನಿಂದ ಉಳಿದಿರುವ preset store load ಆದಾಗ ಕೈಬಿಡಲಾಗುತ್ತದೆ.
+- **ಪ್ಯಾಲೆಟ್ಗಳು.** ಎರಡು ಇವೆ, ಎರಡೂ kitನಿಂದ (`src/shared/constants/appearancePalette.ts`): default ಆಗಿರುವ `editions`, ಮತ್ತು `classic`. Editions ಎಂದರೆ `<html>` ಮೇಲಿನ kitನ `data-ci-appearance="editions"` attribute; ಇದನ್ನು `ci-ui.css` import ಮಾಡುವ `ci-editions.css`, `data-theme` ಜೊತೆಗೆ ಸಂಯೋಜಿಸುತ್ತದೆ; Classic ಎಂದರೆ ಆ attribute ಇಲ್ಲದಿರುವುದು. root layout ಈ attribute ಅನ್ನು server-render ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ಏನನ್ನೂ store ಮಾಡದ (ಅಥವಾ JS ಇಲ್ಲದ) visitor ಪ್ರತಿಯೊಂದು surface — dashboard, login, `/status`, error pages, `/docs` ಮತ್ತು PWA — ಗಳಲ್ಲೂ Editions ಪಡೆಯುತ್ತಾನೆ. ಆಯ್ಕೆಯನ್ನು ಅದೇ `theme` store ನಲ್ಲಿ theme ಪಕ್ಕದಲ್ಲಿ persist ಮಾಡಲಾಗುತ್ತದೆ (`src/store/themeStore.ts` ನ `palette`, `setPalette()`, `applyPalette()`), ಮತ್ತು `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, layoutನ `<head>` ನಲ್ಲಿ inline ಮಾಡಲಾಗಿದೆ) paintಗಿಂತ ಮೊದಲು ಅದನ್ನು apply ಮಾಡುತ್ತದೆ; stored palette `"classic"` ಆಗಿದ್ದಾಗ ಮಾತ್ರ attribute ಅನ್ನು remove ಮಾಡುತ್ತದೆ; root layoutನ ಹೊರಗಿರುವ `src/app/global-error.tsx` ಅದೇ storeನಿಂದ ಇದನ್ನು apply ಮಾಡುತ್ತದೆ. `data-ci-appearance` ಅನ್ನು ಬೇರೆ ಯಾವುದೇ element ಮೇಲೆ ಇರಿಸಬೇಡಿ: kit ಇದನ್ನು `html:root:has([data-ci-appearance="editions"])` ಮೂಲಕ match ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ಒಂದು descendant ಇಡೀ document ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ. Editions `data-ci-editions-variant="landing"` variant marketing pagesಗಾಗಿ, dashboardಗಾಗಿ ಅಲ್ಲ. Browser chrome: server default, Editions ಅನ್ನು `viewport.themeColor` ನಲ್ಲಿ (ಪ್ರತಿ `prefers-color-scheme` ಗೆ ಒಂದು tag) ಮತ್ತು web manifestನಲ್ಲಿ render ಮಾಡುತ್ತದೆ — `src/shared/constants/pwaThemeColors.ts` ನ `PWA_THEME_COLORS`, Editions `--ci-color-background` (`#f3f1e9` / `#11120f`) ನ ಏಕೈಕ mirror, `tests/unit/pwa-theme-colors.test.ts` ಮೂಲಕ `ci-editions.css` ಗೆ pinned ಆಗಿದೆ. live `<meta name="theme-color">` ನಂತರ stored palette ಮತ್ತು mode ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ: `THEME_BOOT_SCRIPT` paintಗಿಂತ ಮೊದಲು tags ಅನ್ನು rewrite ಮಾಡುತ್ತದೆ ಮತ್ತು theme storeನ actions ಪ್ರತಿಯೊಂದು ಬದಲಾವಣೆಯಲ್ಲೂ ಅದನ್ನು ಮಾಡುತ್ತವೆ (`src/shared/utils/themeColorMeta.ts` ನ `resolveThemeColor()` / `applyThemeColor()`, `ciTokens` ನಿಂದ ಓದುವ `CLASSIC_PAGE_BACKGROUND` ಜೊತೆಗೆ). ಸ್ಪಷ್ಟವಾದ light/dark theme ಪ್ರತಿಯೊಂದು tag ಅನ್ನು ಆ modeಗೆ set ಮಾಡುತ್ತದೆ; `system` ಪ್ರತಿ schemeಗೆ ಒಂದು colour ಅನ್ನು ಉಳಿಸುತ್ತದೆ. manifest Editions ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ: preference ಇಲ್ಲದೆ, ಪ್ರತಿ installಗೆ ಒಮ್ಮೆ fetch ಮಾಡಲಾಗುತ್ತದೆ. Monaco ತನ್ನ colours ಅನ್ನು probe (`monacoKitTheme.ts`) ನಿಂದ ಓದುತ್ತದೆ; Editions ಅಡಿಯಲ್ಲಿ probe read ಒಂದು synchronous passಗಾಗಿ root `data-theme` ಅನ್ನು flip ಮಾಡುತ್ತದೆ, ಏಕೆಂದರೆ kit rootನಿಂದ Editions light/dark ಅನ್ನು resolve ಮಾಡುತ್ತದೆ.
+- **Components (adapters).** `src/shared/components/index.tsx` OmniRoute component API ಅನ್ನು (ಅದೇ names, default exports ಮತ್ತು props) ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ, ಮತ್ತು ಅದರ ಹಿಂದಿನ primitives kit ಮೇಲಿನ adapters ಆಗಿವೆ: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays ಮತ್ತು feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ಮತ್ತು tables (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ಒಂದು adapter kit component ಅನ್ನು subpath ಮೂಲಕ import ಮಾಡಿ, legacy props ಅನ್ನು ಅದಕ್ಕೆ map ಮಾಡುತ್ತದೆ — ಉದಾಹರಣೆಗೆ `Button variant="primary"` ಎನ್ನುವುದು kitನ `default` button (`--ci-button-primary-*`: light ನಲ್ಲಿ inverse surface, dark ನಲ್ಲಿ ಅದರ `--ci-color-accent-foreground` ink ಇರುವ accent), `danger` ಎನ್ನುವುದು `destructive`, ಮತ್ತು `warning` ಎನ್ನುವುದು kitನ `warning` button. `Badge` status variants kit tones ಆಗಿವೆ, ಮತ್ತು `<option>` children ಹೊಂದಿರುವ `Select` kitನ `NativeSelect` ಅನ್ನು render ಮಾಡುತ್ತದೆ.
+  ಎರಡು adapters indexನಿಂದ ಅಲ್ಲ, path ಮೂಲಕ import ಮಾಡಲಾಗುತ್ತವೆ: `InteractiveTableRow` (`src/shared/components/InteractiveTableRow.tsx`), `onActivate` ಮತ್ತು `selected` ಅನ್ನು ಸ್ವೀಕರಿಸುವ kit `TableRow`, ಹಾಗೂ Tab, Enter ಮತ್ತು Space ಗೆ ಪ್ರತಿಕ್ರಿಯಿಸುವುದು; ಮತ್ತು `CodePreview` (`src/shared/components/CodePreview.tsx`), copy labels ಅನುವಾದಿಸಲ್ಪಟ್ಟಿರುವ kit code block. `tests/unit/ui/adapters/*.test.tsx` ಪ್ರತಿಯೊಂದು adapter ಅನ್ನು pin ಮಾಡುತ್ತದೆ.
+- **ಶೆಲ್.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ, ಅದು
+  `src/shared/components/layouts/DashboardShell.tsx` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ: ಕಿಟ್ನ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ಜೊತೆಗೆ `src/shared/components/Sidebar.tsx` ನಲ್ಲಿ OmniRoute ನ ನ್ಯಾವಿಗೇಶನ್ ತರ್ಕ. `#main-content` ಗೆ ಹೋಗುವ "ವಿಷಯಕ್ಕೆ ತೆರಳಿ" ಲಿಂಕ್ ಮೊದಲ ಫೋಕಸ್ ಮಾಡಬಹುದಾದ
+  ಎಲಿಮೆಂಟ್ ಆಗಿದೆ. `src/shared/components/Header.tsx` ನಲ್ಲಿ ಕಿಟ್ನ `SidebarTrigger` (ಶೆಲ್ನ ಏಕೈಕ ಸೈಡ್ಬಾರ್
+  ಟಾಗಲ್), Keak ನ `ProductSwitcher` ಮತ್ತು ಕಮಾಂಡ್-ಪ್ಯಾಲೆಟ್ ಓಪನರ್ ಇವೆ; `#main-content` ಒಳಗೆ ಯಾವುದೇ ಕಿಟ್ನ
+  `PageHeader` (`.ci-page-header`) ಮೌಂಟ್ ಆಗಿರದಿದ್ದಾಗ ಮಾತ್ರ ಅದು ರೂಟ್ ಶೀರ್ಷಿಕೆಯನ್ನು ತೋರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತನ್ನದೇ
+  `PageHeader` ಹೊಂದಿರುವ ಪುಟದಲ್ಲಿ ಒಂದೇ `h1` ಇರುತ್ತದೆ. `src/shared/components/CommandPalette.tsx` ಕಿಟ್ನ `Dialog` ಆಗಿದೆ.
+- **ಐಕಾನ್ಗಳು.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ಹೆಸರನ್ನು, ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ
+  Material Symbols ಶಬ್ದಕೋಶವನ್ನು, `ICON_MAP` (`src/shared/constants/iconMap.ts`) ಮೂಲಕ Lucide ಗ್ಲಿಫ್ಗೆ ಪರಿಹರಿಸುತ್ತದೆ. Material Symbols ಫಾಂಟ್ ಮತ್ತು ಪ್ಯಾಕೇಜ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ: ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರು ತಟಸ್ಥ ಪ್ಲೇಸ್ಹೋಲ್ಡರ್ ಗ್ಲಿಫ್ (`data-icon-missing="true"`) ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಪ್ರೊಡಕ್ಷನ್ ಹೊರಗೆ ಕನ್ಸೋಲ್ ಎಚ್ಚರಿಕೆಯನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ.
+  `npm run gen:icon-map` ಬಳಕೆಯಲ್ಲಿರುವ, ಮ್ಯಾಪ್ನಲ್ಲಿ ಕಾಣೆಯಾದ ಹೆಸರುಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
+  (`tests/unit/icon-map-coverage.test.ts` ಯಾವುದೇ ಹೆಸರಿಗೆ Lucide ಐಕಾನ್ ಇಲ್ಲದಿದ್ದರೆ ವಿಫಲವಾಗುತ್ತದೆ;
+  `tests/unit/icon-map-object-values.test.ts` ಲುಕ್ಅಪ್ ಆಬ್ಜೆಕ್ಟ್ಗಳಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ ಹೆಸರುಗಳನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ಲಿಟರಲ್
+  `<span className="material-symbols-outlined">` ಸ್ಪ್ಯಾನ್ಗಳನ್ನು `<Icon>` ಗೆ ಮರುಬರೆಯುತ್ತದೆ.
+- **ಬ್ರ್ಯಾಂಡ್.** `src/shared/components/OmniRouteLogo.tsx` ಕಿಟ್ ಅನ್ನು ರ್ಯಾಪ್ ಮಾಡುತ್ತದೆ: ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"` (ಇನ್ಲೈನ್ SVG, `basePath`-ಸುರಕ್ಷಿತ) ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು
+  `OmniRouteLockup` `ProductLockup product="omniroute"` (ಪ್ರವೇಶಯೋಗ್ಯ ಹೆಸರು "Keak OmniRoute") ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಅಥವಾ, ವೈಟ್-ಲೇಬಲ್ ಆಪರೇಟರ್ಗಳಿಗಾಗಿ, ಅವರದೇ `name`/`logoSrc` ಅನ್ನು ಬಳಸುತ್ತದೆ. ಪ್ರಾಡಕ್ಟ್-ಸ್ವಿಚರ್ ಗಮ್ಯಸ್ಥಾನಗಳು
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ನಲ್ಲಿ ಇವೆ. ಸ್ವತಂತ್ರ
+  ಸ್ಕ್ರೀನ್ಗಳು — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` ಮತ್ತು `src/shared/components/ErrorPageScaffold.tsx`
+  — ಲಾಕ್ಅಪ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ; `tests/unit/brand-pages-static.test.ts` ಇದನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ.
 
 ## 2. ನಿಯಮಗಳು
 
-1. ಟೋಕನ್ಗಳು, ಎಂದಿಗೂ ಅಕ್ಷರಶಃ. ವಿನಾಯಿತಿಗಳನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಇರಿಸಲಾಗಿದೆ: ಯಾವಾಗಲೂ-ಡಾರ್ಕ್ ಕನ್ಸೋಲ್ ಟರ್ಮಿನಲ್ ಮತ್ತು `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ಅಕ್ಷರಶಃ ಹೆಕ್ಸ್ ಅಗತ್ಯವಿರುವ ಕರೆಗಾರರಿಗೆ ಕಿಟ್ ಸ್ಥಿತಿಯ ಪ್ಯಾಲೆಟ್ನ ಪರಿಹರಿಸಿದ-ಹೆಕ್ಸ್ ಮಿರರ್. ವರ್ಗೀಯ ಪ್ಯಾಲೆಟ್ಗಳು ಇದಕ್ಕೆ ಹೊರತಾಗಿಲ್ಲ: ಅವು ಕಿಟ್ನ ಐದು ಚಾರ್ಟ್ ಟೋಕನ್ಗಳಲ್ಲಿ (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` ಮೂಲಕ ಸವಾರಿ ಮಾಡುತ್ತವೆ ಮತ್ತು ರೂಟಿಂಗ್ ತಂತ್ರಗಳಿಗಾಗಿ, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ಅಂಚುಗಳು ಮತ್ತು ಆರ್ಕೆಸ್ಟ್ರೇಶನ್ ಕ್ಯಾನ್ವಾಸ್ ಥೀಮ್-ಅವೇರ್ `--orch-status-*` ವೇರಿಯೇಬಲ್ಗಳನ್ನು (`src/shared/components/flow/edgeStyles.ts`) ಓದುತ್ತದೆ.
-2. ಕೈಯಿಂದ `packages/ui-kit/src` ಎಂದಿಗೂ ಪ್ಯಾಚ್ ಮಾಡಬೇಡಿ: `scripts/dev/sync-ui-kit.sh <commit>` ನೊಂದಿಗೆ ಸಿಂಕ್ ಮಾಡಿ ; ಪ್ರಿ-ಕಮಿಟ್ ಗೇಟ್ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ಯಾವುದೇ ಬೈಟ್ನಲ್ಲಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ಅದು ಪಿನ್ ಮಾಡಲಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕಮಿಟ್ಗಿಂತ ಭಿನ್ನವಾಗಿರುತ್ತದೆ (ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಲೋನ್, `UI_KIT_CLONE` ಅಥವಾ `_references/cheaper-inference-ui-kit`, ಇಲ್ಲದಿದ್ದಾಗ ಅದು ಎಚ್ಚರಿಕೆಯೊಂದಿಗೆ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ). ಕಿಟ್ನಲ್ಲಿ ಏನಾದರೂ ಕೊರತೆಯಿದ್ದಾಗ, ಅಡಾಪ್ಟರ್ ಅಥವಾ ಪರದೆಯಲ್ಲಿ ಅದರ ಸುತ್ತಲೂ ಕೆಲಸ ಮಾಡಿ ಮತ್ತು ಅದನ್ನು ಅಪ್ಸ್ಟ್ರೀಮ್ನಲ್ಲಿ ಕೇಳಿ.
-3. ಕಿಟ್ ಪಠ್ಯ ಡೀಫಾಲ್ಟ್ಗಳು ಇಂಗ್ಲಿಷ್ (`label = "Loading"`, `loadingLabel = "Loading table"`...) — ಕಿಟ್ ಘಟಕವು ಪಠ್ಯವನ್ನು ಸಲ್ಲಿಸಿದಾಗಲೆಲ್ಲಾ `useTranslations(...)` ನಿಂದ ಅನುವಾದಿಸಿದ ತಂತಿಗಳನ್ನು ರವಾನಿಸಿ.
-4. ಟೈಲ್ವಿಂಡ್ ಉಪಯುಕ್ತತೆಗಳು ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ ತರಗತಿಗಳ ಮೇಲೆ ಗೆಲ್ಲುತ್ತವೆ (ಕಿಟ್ `@layer theme, base, components, utilities` ಮತ್ತು ಅದರ ನಿಯಮಗಳು `components` ನಲ್ಲಿ ಲೈವ್ ಎಂದು ಘೋಷಿಸುತ್ತದೆ) - ಕಿಟ್ ಘಟಕಗಳನ್ನು ಮರು-ಬಣ್ಣಗೊಳಿಸಲು ಅಲ್ಲ, ಅಂತರ ಮತ್ತು ಲೇಔಟ್ಗಾಗಿ ಉಪಯುಕ್ತತೆಗಳನ್ನು ಬಳಸಿ.
-5. ಶೀರ್ಷಿಕೆಗಳು: ಪುಟ ಮತ್ತು ವಿಭಾಗದ ಶೀರ್ಷಿಕೆಗಳಿಗಾಗಿ `.ci-heading` ; ದೋಷ-ಪುಟ ಸ್ಥಿತಿ ಕೋಡ್ನಂತಹ ದೊಡ್ಡ, ವಿರಳ ಪ್ರದರ್ಶನ ಪಠ್ಯಕ್ಕಾಗಿ ಮಾತ್ರ `.ci-dashboard-display`. ಇಬ್ಬರೂ ಸ್ವಿಟ್ಜರ್ ಅನ್ನು ಬಳಸುತ್ತಾರೆ.
-6. `tests/unit/dashboard-kit-sweep.test.ts` ಕಿಟ್ ಅಳವಡಿಕೆಯನ್ನು ಕಾಪಾಡುತ್ತದೆ: `src/app` ಅಥವಾ `src/shared/components` ಅಡಿಯಲ್ಲಿ ಯಾವುದೇ ಮೆಟೀರಿಯಲ್ ಲಿಗೇಚರ್ ಸ್ಪ್ಯಾನ್ ಇಲ್ಲ; ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮರದಲ್ಲಿ (`src/app/(dashboard)` ಮತ್ತು `src/shared/components`) ಯಾವುದೇ ಕಚ್ಚಾ `<select>`, `<textarea>` ಅಥವಾ `<table>` ಮತ್ತು ಪಟ್ಟಿ ಮಾಡಲಾದ ವಿನಾಯಿತಿಗಳ ಹೊರಗೆ ಯಾವುದೇ ಕೈಯಿಂದ ಸುತ್ತುವ `role="dialog"` ಇಲ್ಲ ( `Select` ಅಡಾಪ್ಟರ್ನ ಸ್ಥಳೀಯ ಶಾಖೆ, `RequestLoggerDetail`); ಪ್ರತಿ ಕಚ್ಚಾ `<button>` ಅಥವಾ `<input>` ಅದರ ಮೇಲೆ ಹೆಚ್ಚೆಂದರೆ 3 ಸಾಲುಗಳಲ್ಲಿ ಕೊನೆಗೊಳ್ಳುವ `kit-exception:` (ಕಾರಣದೊಂದಿಗೆ) ಹೊಂದಿರುವ ಕಾಮೆಂಟ್ ಅಗತ್ಯವಿದೆ; ಪ್ಯಾಲೆಟ್ ವರ್ಣಗಳು ಮತ್ತು `dark:` ರೂಪಾಂತರಗಳು ಪರೀಕ್ಷಾ ಪಟ್ಟಿಯಲ್ಲಿರುವ ಫೈಲ್ಗಳಲ್ಲಿ ಮಾತ್ರ.
-7. PR (ಸ್ಕ್ರೀನ್ಶಾಟ್ಗಳು) ಮೊದಲು ಎರಡೂ ಥೀಮ್ಗಳು ಮತ್ತು 390 px ವ್ಯೂಪೋರ್ಟ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ; `tests/e2e/a11y.spec.ts` ಕೊಡಲಿಯನ್ನು ನಡೆಸುತ್ತದೆ.
+1. ಲಿಟರಲ್ಗಳಲ್ಲ, ಟೋಕನ್ಗಳನ್ನು ಬಳಸಿ. ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಉಳಿಸಲಾದ ಅಪವಾದಗಳು: ಸದಾ-ಕತ್ತಲೆಯ ಕನ್ಸೋಲ್ ಟರ್ಮಿನಲ್ ಮತ್ತು
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ಲಿಟರಲ್ ಹೆಕ್ಸ್ ಅಗತ್ಯವಿರುವ ಕಾಲರ್ಗಳಿಗಾಗಿ ಕಿಟ್ನ ಸ್ಟೇಟಸ್
+   ಪ್ಯಾಲೆಟ್ನ ಪರಿಹರಿಸಲಾದ-ಹೆಕ್ಸ್ ಪ್ರತಿಬಿಂಬ. ವರ್ಗೀಕರಣ ಪ್ಯಾಲೆಟ್ಗಳು ಇನ್ನು ಅಪವಾದವಲ್ಲ:
+   ಅವು ಕಿಟ್ನ ಎಂಟು ಚಾರ್ಟ್ ಟೋಕನ್ಗಳ (`--color-chart-1..8`, ಜೊತೆಗೆ `-ink`/`-subtle`) ಮೇಲೆ, ಕಿಟ್ ಸರಣಿ ಕ್ರಮದಲ್ಲಿ,
+   `src/shared/utils/categoricalPalette.ts` ಮೂಲಕ ಮತ್ತು, ರೂಟಿಂಗ್ ಸ್ಟ್ರಾಟೆಜಿಗಳಿಗಾಗಿ,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ಮೂಲಕ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ; ReactFlow ಎಡ್ಜ್ಗಳು ಮತ್ತು
+   ಆರ್ಕೆಸ್ಟ್ರೇಶನ್ ಕ್ಯಾನ್ವಾಸ್ ಥೀಮ್-aware `--orch-status-*` ವೇರಿಯಬಲ್ಗಳನ್ನು ಓದುತ್ತವೆ
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` ಅನ್ನು ಕೈಯಾರೆ ಎಂದಿಗೂ ಪ್ಯಾಚ್ ಮಾಡಬೇಡಿ: `scripts/dev/sync-ui-kit.sh <commit>` ಮೂಲಕ ಸಿಂಕ್ ಮಾಡಿ;
+   ಪಿನ್ ಮಾಡಲಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕಮಿಟ್ನಿಂದ ಭಿನ್ನವಾಗಿರುವ ಯಾವುದೇ ಬೈಟ್ ಕಂಡುಬಂದರೆ
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ಎಂಬ ಪ್ರೀ-ಕಮಿಟ್ ಗೇಟ್ ವಿಫಲವಾಗುತ್ತದೆ (ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಲೋನ್,
+   `UI_KIT_CLONE` ಅಥವಾ `_references/cheaper-inference-ui-kit` ಇಲ್ಲದಿದ್ದಾಗ ಇದು ಎಚ್ಚರಿಕೆಯೊಂದಿಗೆ ಸ್ಕಿಪ್ ಆಗುತ್ತದೆ). ಕಿಟ್ನಲ್ಲಿ ಏನಾದರೂ ಇಲ್ಲದಿದ್ದರೆ,
+   ಅದನ್ನು ಅಡಾಪ್ಟರ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ನಲ್ಲಿ ಪರಿಹರಿಸಿ ಮತ್ತು ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ಅದನ್ನು ಕೇಳಿ.
+3. ಕಿಟ್ ಪಠ್ಯದ ಡೀಫಾಲ್ಟ್ಗಳು ಇಂಗ್ಲಿಷ್ನಲ್ಲಿವೆ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ಯಾವುದೇ ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ ಪಠ್ಯವನ್ನು ರೆಂಡರ್ ಮಾಡುವಾಗ
+   `useTranslations(...)` ನಿಂದ ಅನುವಾದಿತ ಸ್ಟ್ರಿಂಗ್ಗಳನ್ನು ಪಾಸ್ ಮಾಡಿ.
+4. Tailwind ಯುಟಿಲಿಟಿಗಳು ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ ಕ್ಲಾಸ್ಗಳಿಗಿಂತ ಮೇಲುಗೈ ಸಾಧಿಸುತ್ತವೆ (ಕಿಟ್
+   `@layer theme, base, components, utilities` ಅನ್ನು ಘೋಷಿಸುತ್ತದೆ ಮತ್ತು ಅದರ ನಿಯಮಗಳು `components` ನಲ್ಲಿ ಇರುತ್ತವೆ) — ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ಗಳಿಗೆ ಮರುಬಣ್ಣ ನೀಡಲು ಅಲ್ಲ,
+   ಸ್ಪೇಸಿಂಗ್ ಮತ್ತು ಲೇಔಟ್ಗಾಗಿ ಯುಟಿಲಿಟಿಗಳನ್ನು ಬಳಸಿ. ಟೈಪೋಗ್ರಫಿ ಅಪವಾದವಾಗಿದೆ:
+   `packages/ui-kit/src/ci-typography.css` ಅನ್ನು ಯಾವುದೇ ಲೇಯರ್ನ ಹೊರಗೆ ಇಂಪೋರ್ಟ್ ಮಾಡಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಅದರ ಟ್ಯಾಗ್ ನಿಯಮಗಳು
+   ಯುಟಿಲಿಟಿಗಳಿಗಿಂತ ಮೇಲುಗೈ ಸಾಧಿಸುತ್ತವೆ. `h1`–`h6` ಮೇಲೆ Weight, `tracking-*` ಮತ್ತು `leading-*` ಕ್ಲಾಸ್ಗಳು ಪರಿಣಾಮ ಬೀರುವುದಿಲ್ಲ, ಟೇಬಲ್ ಸೆಲ್ಗಳಲ್ಲಿ weight ಮತ್ತು
+   `tracking-*` ಪರಿಣಾಮ ಬೀರುವುದಿಲ್ಲ, ಮತ್ತು ಬಟನ್ಗಳಲ್ಲಿ weight ಪರಿಣಾಮ ಬೀರುವುದಿಲ್ಲ
+   (`tests/unit/dead-typography-classes.test.ts` ಅಲ್ಲಿ ಇವುಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ); `th`, `td`, `button`, `input` ಮತ್ತು `textarea` ಮೇಲೆ
+   `font-mono` ಪರಿಣಾಮ ಬೀರುವುದಿಲ್ಲ. Size, colour ಮತ್ತು `uppercase` ಯುಟಿಲಿಟಿಗಳು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತವೆ.
+5. ಶೀರ್ಷಿಕೆಗಳು: ಪುಟ ಮತ್ತು ವಿಭಾಗದ ಶೀರ್ಷಿಕೆಗಳಿಗಾಗಿ `.ci-heading`; ದೋಷ-ಪುಟದ ಸ್ಟೇಟಸ್ ಕೋಡ್ನಂತಹ ದೊಡ್ಡ, ವಿರಳ
+   ಡಿಸ್ಪ್ಲೇ ಪಠ್ಯಕ್ಕಾಗಿ ಮಾತ್ರ `.ci-dashboard-display`. ಎರಡೂ Switzer ಅನ್ನು ಬಳಸುತ್ತವೆ.
+6. `tests/unit/dashboard-kit-sweep.test.ts` ಕಿಟ್ ಅಳವಡಿಕೆಯನ್ನು ಕಾಪಾಡುತ್ತದೆ: `src/app` ಅಥವಾ `src/shared/components` ಅಡಿಯಲ್ಲಿ ಯಾವುದೇ Material ligature span ಇರಬಾರದು; ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಟ್ರೀನಲ್ಲಿ (`src/app/(dashboard)` ಮತ್ತು `src/shared/components`) ಯಾವುದೇ raw `<select>`, `<textarea>` ಅಥವಾ `<table>` ಇರಬಾರದು ಮತ್ತು ಪಟ್ಟಿ ಮಾಡಲಾದ ಅಪವಾದಗಳ ಹೊರತಾಗಿ ಕೈಯಾರೆ ಬರೆದ
+   `role="dialog"` ಇರಬಾರದು (`Select` ಅಡಾಪ್ಟರ್ನ native branch, `RequestLoggerDetail`); ಅಲ್ಲಿನ ಪ್ರತಿಯೊಂದು raw `<button>` ಅಥವಾ `<input>` ಗೆ ಅದರ ಮೇಲಿನ ಗರಿಷ್ಠ 3 ಸಾಲುಗಳೊಳಗೆ ಕಾರಣವನ್ನು ಒಳಗೊಂಡಿರುವ `kit-exception:` ಕಾಮೆಂಟ್ ಇರಬೇಕು; ಪ್ಯಾಲೆಟ್ ವರ್ಣಗಳು ಮತ್ತು
+   `dark:` ರೂಪಾಂತರಗಳು ಟೆಸ್ಟ್ ಪಟ್ಟಿ ಮಾಡುವ ಫೈಲ್ಗಳಲ್ಲಿ ಮಾತ್ರ ಇರಬೇಕು.
+7. PR ಗೆ ಮೊದಲು ಎರಡೂ ಥೀಮ್ಗಳನ್ನು ಮತ್ತು 390 px viewport ಅನ್ನು ಪರಿಶೀಲಿಸಿ (ಸ್ಕ್ರೀನ್ಶಾಟ್ಗಳು); `tests/e2e/a11y.spec.ts` axe ಅನ್ನು ರನ್ ಮಾಡುತ್ತದೆ.
+8. ಒಂದು colour utility `src/app/globals.css` ನ `@theme` ಬ್ಲಾಕ್ನಲ್ಲಿರುವ ಟೋಕನ್ನ ಹೆಸರನ್ನು ಹೊಂದಿರಬೇಕು: ಅಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರು (`text-text`, `bg-bg-muted`, `text-danger`…) ಯಾವುದೇ CSS ಅನ್ನು ಉತ್ಪಾದಿಸುವುದಿಲ್ಲ ಮತ್ತು ಎಲಿಮೆಂಟ್ ಆನುವಂಶಿಕವಾಗಿ ಬಂದ ಬಣ್ಣವನ್ನೇ ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ
+   (`tests/unit/theme-color-classes.test.ts`). `card` ಕ್ಲಾಸ್ ಇಲ್ಲ: `Card` ಅಡಾಪ್ಟರ್ ಬಳಸಿ
+   (`tests/unit/no-bare-card-class.test.ts`). ಚಾರ್ಟ್ ಬಣ್ಣದಲ್ಲಿ ಪಠ್ಯಕ್ಕಾಗಿ `text-chart-N-ink` ಬಳಸಿ; ಐಕಾನ್ಗಳು ಮತ್ತು ಸ್ಟ್ರೋಕ್ಗಳಿಗಾಗಿ
+   `text-chart-N` ಬಳಸಿ
+   (`tests/unit/chart-ink-for-text.test.ts`). ಪಾರದರ್ಶಕ ಬಣ್ಣವನ್ನು `color-mix` ಬಳಸಿ ನಿರ್ಮಿಸಬೇಕು; `var()` ಆಗಿರಬಹುದಾದ ಮೌಲ್ಯಕ್ಕೆ ಹೆಕ್ಸ್ ಆಲ್ಫಾವನ್ನು ಸೇರಿಸಬಾರದು
+   (`tests/unit/color-alpha-concatenation.test.ts`).
+9. ಟೇಬಲ್ಗಳು: ಪ್ರತಿಯೊಂದು ಕಿಟ್ `Table` ಸ್ಕ್ರೋಲ್ ಪ್ರದೇಶದ ಹೆಸರನ್ನು ಒಳಗೊಂಡ `scrollLabel` ಅನ್ನು ಪಾಸ್ ಮಾಡಬೇಕು ಮತ್ತು ಸ್ಥಿರ ಸ್ಕ್ರೋಲ್ಬಾರ್ ಅನ್ನು ಚಿತ್ರಿಸುವಾಗ
+   `scrollbarLabel` ಅನ್ನು ಪಾಸ್ ಮಾಡಬೇಕು
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). ಕ್ಲಿಕ್ ಮಾಡಬಹುದಾದ ಸಾಲು `onActivate` ಹೊಂದಿರುವ
+   `InteractiveTableRow` ಆಗಿರಬೇಕು; ಎಂದಿಗೂ `<TableRow onClick>` ಆಗಿರಬಾರದು
+   (`tests/unit/table-row-click-needs-keyboard.test.ts`). ಕಾರ್ಡ್ನೊಳಗಿನ ಅಥವಾ ಯಾವುದೇ ಬಾರ್ಡರ್ ಹೊಂದಿರುವ ಬಾಕ್ಸ್ನೊಳಗಿನ ಟೇಬಲ್ ತನ್ನದೇ ಫ್ರೇಮ್ ಅನ್ನು
+   `containerClassName="rounded-none border-0"` ಮೂಲಕ ತೆಗೆದುಹಾಕಬೇಕು
+   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. ಮೊತ್ತವನ್ನು ತೋರಿಸುವ ಬಾರ್ ಕಿಟ್ `Progress` ಆಗಿರಬೇಕು, ಅಥವಾ ಕಿಟ್ ಬಾರ್ ಅದನ್ನು ಚಿತ್ರಿಸಲಾಗದಾಗ ಹೆಸರು ಮತ್ತು ಮೌಲ್ಯ ಹೊಂದಿರುವ
+    `role="progressbar"` ಅನ್ನು ಹೊಂದಿರಬೇಕು
+    (`tests/unit/progress-bars-have-semantics.test.ts`). ಮೆನುಗಳು, ಪಾಪ್ಓವರ್ಗಳು ಮತ್ತು ಟೂಲ್ಟಿಪ್ಗಳು ಕಿಟ್ನಿಂದಲೇ ಬರಬೇಕು (`Popover`, `SearchableSelect`, `Tooltip` ಅಡಾಪ್ಟರ್); ಸ್ಥಳೀಯ state ಮೂಲಕ ತೆರೆಯುವ absolute-positioned ಪ್ಯಾನೆಲ್ನಿಂದ ಅಲ್ಲ
+    (`tests/unit/hand-positioned-overlays.test.ts`).
+11. `Input` ಅಡಾಪ್ಟರ್ನಲ್ಲಿ `className` ಫೀಲ್ಡ್ wrapper ಅನ್ನು ಸ್ಟೈಲ್ ಮಾಡುತ್ತದೆ; ಕಂಟ್ರೋಲ್ಗಾಗಿ ಉದ್ದೇಶಿಸಲಾದ ಕ್ಲಾಸ್ ಅನ್ನು
+    `inputClassName` ನಲ್ಲಿ ಇರಿಸಿ
+    (`tests/unit/input-adapter-classname-destination.test.ts`).
 
 ## 3. ಸ್ಕ್ರೀನ್ ಸೇರಿಸುವುದು
 
-1. ಕಿಟ್ `PageHeader` (`@omniroute/ui-kit/page-header`, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಒಳಗೆ `compact`) ನೊಂದಿಗೆ ಪುಟವನ್ನು
-   ತೆರೆಯಿರಿ — ಶೀರ್ಷಿಕೆ, ವಿವರಣೆ ಮತ್ತು `actions`. ನಂತರ ಶೆಲ್ ಹೆಡರ್ ತನ್ನದೇ ಶೀರ್ಷಿಕೆಯನ್ನು ಕೈಬಿಡುತ್ತದೆ.
-2. `@/shared/components` (ಅಡಾಪ್ಟರ್ಗಳು) ನಿಂದ ಕಂಟ್ರೋಲ್ಗಳನ್ನು ನಿರ್ಮಿಸಿ ಮತ್ತು ಅಡಾಪ್ಟರ್ ಇಲ್ಲದ ಕಡೆ
-   ಸಬ್ಪಾತ್ ಮೂಲಕ ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ಗಳನ್ನು ಬಳಸಿ (`Table`/`TableScrollArea`/`DataTableShell`, `Field`,
-   `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
-3. ಐಕಾನ್ಗಳು: `<Icon name="…" />`. ಹೊಸ ಹೆಸರು ಸೆಮ್ಯಾಂಟಿಕ್ ಆಗಿ ಹೊಂದುವ Lucide ಕಾಂಪೋನೆಂಟ್ನೊಂದಿಗೆ
-   `ICON_MAP` ಗೆ ಸೇರುತ್ತದೆ; `npm run gen:icon-map` ಇನ್ನೂ ಕಾಣೆಯಾಗಿರುವ ಹೆಸರುಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ.
-4. ಬಣ್ಣಗಳು: ಸೆಮ್ಯಾಂಟಿಕ್ ಯುಟಿಲಿಟಿಗಳು (`text-success`, `bg-warning-bg`, `border-border`…) ಮತ್ತು ಚಾರ್ಟ್
-   ಸರಣಿಗಳಿಗೆ `var(--color-chart-N)`; hex ಮೌಲ್ಯಗಳಿರಬಾರದು ಮತ್ತು ಬಣ್ಣವನ್ನು ಮಾತ್ರ ಪುನರಾವರ್ತಿಸುವ `dark:`
-   ವೇರಿಯಂಟ್ಗಳಿರಬಾರದು.
-5. ಟೆಕ್ಸ್ಟ್: ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ಗಳಿಗೆ ನೀವು ಪಾಸ್ ಮಾಡುವ ಲೇಬಲ್ಗಳು ಸೇರಿದಂತೆ ಪ್ರತಿಯೊಂದು ಸ್ಟ್ರಿಂಗ್
-   `useTranslations` ನಿಂದ ಬರುತ್ತದೆ. ಹೊಸ ಕೀಗಳು `src/i18n/messages/en.json`, `pt-BR.json` ಮತ್ತು
-   `vi.json` ಗೆ ಸೇರುತ್ತವೆ (ವಿಯೆಟ್ನಾಮೀಸ್ ಪ್ಯಾರಿಟಿ ಟೆಸ್ಟ್ ಪ್ರತಿಯೊಂದು ಇಂಗ್ಲಿಷ್ ಕೀಯನ್ನು ಪಿನ್ ಮಾಡುತ್ತದೆ);
-   ಉಳಿದ ಲೊಕೇಲ್ಗಳನ್ನು i18n ಸಿಂಕ್ ಭರ್ತಿ ಮಾಡುತ್ತದೆ.
-6. PR ಗೆ ಮೊದಲು ಗಾರ್ಡ್ಗಳನ್ನು ರನ್ ಮಾಡಿ: `tests/unit/dashboard-kit-sweep.test.ts`,
+1. ಕಿಟ್ನ `PageHeader` (`@omniroute/ui-kit/page-header`, ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಲ್ಲಿ `compact`) ಹೊಂದಿರುವ ಪುಟವನ್ನು ತೆರೆಯಿರಿ — ಶೀರ್ಷಿಕೆ, ವಿವರಣೆ ಮತ್ತು `actions`. ನಂತರ ಶೆಲ್ ಹೆಡರ್ ತನ್ನದೇ ಶೀರ್ಷಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ ಮತ್ತು 1024 px ಗಿಂತ ಕಡಿಮೆ ಅಗಲದಲ್ಲಿ ಅದು ಮರೆಮಾಡಲ್ಪಡುತ್ತದೆ; ಆದ್ದರಿಂದ `PageHeader` ಇಲ್ಲದ ರూట್ನಲ್ಲಿ ಫೋನ್ನಲ್ಲಿ ಯಾವುದೇ ಶೀರ್ಷಿಕೆ ಇರುವುದಿಲ್ಲ
+   (`tests/unit/dashboard-page-header-coverage.test.ts`). ತನ್ನದೇ ಪುಟವನ್ನು ಹೊಂದಿರದ ಪಾತ್ ಸೆಗ್ಮೆಂಟ್ `ROUTE_PREFIXES_WITHOUT_PAGE` ಗೆ
+   `src/shared/utils/breadcrumbTrail.ts` ನಲ್ಲಿ ಸೇರಬೇಕು, ಹೀಗಾಗಿ ಅದರ ಕ್ರಂಬ್ ಸತ್ತ ಲಿಂಕ್ ಆಗದೆ ಪಠ್ಯವಾಗಿರುತ್ತದೆ
+   (`tests/unit/breadcrumb-trail-routes.test.ts`).
+2. `@/shared/components` (ಅಡಾಪ್ಟರ್ಗಳು) ಬಳಸಿ ಕಂಟ್ರೋಲ್ಗಳನ್ನು ನಿರ್ಮಿಸಿ ಮತ್ತು ಯಾವುದೇ
+   ಅಡಾಪ್ಟರ್ ಇಲ್ಲದಿರುವಲ್ಲಿ ಸಬ್ಪಾತ್ ಮೂಲಕ ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ಗಳನ್ನು ಬಳಸಿ (`Table`/`TableScrollArea`/`DataTableShell`,
+   `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. ಐಕಾನ್ಗಳು: `<Icon name="…" />`. ಹೊಸ ಹೆಸರನ್ನು ಅದರ ಅರ್ಥಕ್ಕೆ ಹೊಂದುವ Lucide
+   ಕಾಂಪೊನೆಂಟ್ನೊಂದಿಗೆ `ICON_MAP` ಗೆ ಸೇರಿಸಿ; ಇನ್ನೂ ಕಾಣೆಯಾಗಿರುವ ಹೆಸರುಗಳನ್ನು `npm run gen:icon-map` ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ.
+4. ಬಣ್ಣಗಳು: ಸೆಮ್ಯಾಂಟಿಕ್ ಯುಟಿಲಿಟಿಗಳು (`text-success`, `bg-warning-bg`, `border-border`…) ಮತ್ತು
+   ಚಾರ್ಟ್ ಸರಣಿಗಳಿಗಾಗಿ `var(--color-chart-N)` ಬಳಸಿ; ಹೆಕ್ಸ್ ಮೌಲ್ಯಗಳನ್ನು ಮತ್ತು ಕೇವಲ ಬಣ್ಣವನ್ನು
+   ಪುನರಾವರ್ತಿಸುವ `dark:` ವೇರಿಯಂಟ್ಗಳನ್ನು ಬಳಸಬೇಡಿ.
+5. ಪಠ್ಯ: ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ಗಳಿಗೆ ನೀಡುವ ಲೇಬಲ್ಗಳು ಸೇರಿದಂತೆ ಪ್ರತಿಯೊಂದು ಸ್ಟ್ರಿಂಗ್ `useTranslations` ನಿಂದ ಬರಬೇಕು.
+   ಹೊಸ ಕೀಗಳನ್ನು `src/i18n/messages/en.json` ಗೆ ಮಾತ್ರ ಸೇರಿಸಿ; ರಿಲೀಸ್ ರಿಫ್ರೆಶ್ ಇತರ ಲೊಕೇಲ್ಗಳನ್ನು
+   ತುಂಬುತ್ತದೆ (`tests/_helpers/localeParityMode.ts` ಎರಡು ಮೋಡ್ಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ). ನೈಜ
+   ಇಂಗ್ಲಿಷ್ ಅಲ್ಲದ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಮೌಂಟ್ ಮಾಡುವ ಟೆಸ್ಟ್, ರನ್ಟೈಮ್ ಮಾಡುವ ರೀತಿಯಲ್ಲೇ ತನ್ನ ಮೆಸೇಜ್ಗಳನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ,
+   `src/i18n/request.ts` ನಲ್ಲಿರುವ `deepMergeFallback` ಬಳಸಿ; ಹೀಗಾಗಿ ಇನ್ನೂ ಇಂಗ್ಲಿಷ್ಗೆ ಮಾತ್ರ ಇರುವ ಕೀ
+   ಎರರ್ ಉಂಟುಮಾಡುವ ಬದಲು ಫಾಲ್ಬ್ಯಾಕ್ ಆಗುತ್ತದೆ.
+6. PR ಮೊದಲು ಗಾರ್ಡ್ಗಳನ್ನು ರನ್ ಮಾಡಿ: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (`iconMap.ts` ನಲ್ಲಿ ನಕಲಿ ಇಂಪೋರ್ಟ್ ಅನ್ನು ಹಿಡಿಯುವ ಏಕೈಕ ಚೆಕ್),
-   `npm run check:ui-icu`, ಮತ್ತು ಸ್ಕ್ರೀನ್ನ ಸ್ವಂತ ಟೆಸ್ಟ್ಗಳು.
+   `npm run check:dashboard-typecheck` (`iconMap.ts` ನಲ್ಲಿ ನಕಲಿ ಇಂಪೋರ್ಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚುವ ಏಕೈಕ ಚೆಕ್),
+   `npm run check:ui-icu`, ನಿಯಮಗಳು 4 ಮತ್ತು 8–11 ರಲ್ಲಿ ಹೆಸರಿಸಲಾದ ಗಾರ್ಡ್ಗಳು ಮತ್ತು ಸ್ಕ್ರೀನ್ನ ಸ್ವಂತ ಟೆಸ್ಟ್ಗಳು.
 
 ## 4. ಅಡಾಪ್ಟರ್ ಸೇರಿಸುವುದು ಅಥವಾ ಬದಲಾಯಿಸುವುದು
 
@@ -75,26 +151,64 @@
 
 ## 6. README ರೇಖಾಚಿತ್ರಗಳು
 
-ಮೂಲ `README.md` ಒಳಗೊಂಡಿರುವ ಹನ್ನೆರಡು ರೇಖಾಚಿತ್ರಗಳು (`docs/diagrams/*.svg`) ಸ್ಥಿರ ಚಿತ್ರಕ್ಕೆ ಅನ್ವಯಿಸಲಾದ ಕಿಟ್ ಆಗಿದ್ದು, ಅವುಗಳನ್ನು ಕೈಯಿಂದ ಬಿಡಿಸಲಾಗಿಲ್ಲ, ಬದಲಾಗಿ ರಚಿಸಲಾಗುತ್ತದೆ: `scripts/docs/gen-readme-*.mjs` ನಲ್ಲಿರುವ 13 ಜನರೇಟರ್ ಫೈಲ್ಗಳು (ಹನ್ನೆರಡು ರೇಖಾಚಿತ್ರಗಳು ಮತ್ತು `gen-readme-diagrams.mjs` ಡ್ರೈವರ್) ಹಾಗೂ `tests/unit/docs/readme-*-svg.test.ts` ನಲ್ಲಿರುವ 12 ಹಳೆಯತನ ಪರೀಕ್ಷೆಗಳು, ಪ್ರತಿ ರೇಖಾಚಿತ್ರಕ್ಕೆ ಒಂದರಂತೆ, ಇವುಗಳಲ್ಲಿ ಪ್ರತಿಯೊಂದು ಕಮಿಟ್ ಮಾಡಲಾದ ಫೈಲ್ ಅನ್ನು ಅದರ ಜನರೇಟರ್ನ ಔಟ್ಪುಟ್ನೊಂದಿಗೆ ಪ್ರತಿ ಬೈಟ್ ಹೋಲಿಕೆ ಮಾಡುತ್ತದೆ (`test-unit` ಜಾಬ್).
+ಮೂಲ `README.md` ಎಂಬೆಡ್ ಮಾಡುವ ಹನ್ನೆರಡು ರೇಖಾಚಿತ್ರಗಳು (`docs/diagrams/*.svg`) ಸ್ಥಿರ
+ಚಿತ್ರಕ್ಕೆ ಅನ್ವಯಿಸಲಾದ ಕಿಟ್ ಆಗಿವೆ ಮತ್ತು ಅವುಗಳನ್ನು ಕೈಯಿಂದ ಚಿತ್ರಿಸಲಾಗಿಲ್ಲ, ರಚಿಸಲಾಗುತ್ತವೆ: `scripts/docs/gen-readme-*.mjs` ನಲ್ಲಿ
+13 ಜನರೇಟರ್ ಫೈಲ್ಗಳು (ಹನ್ನೆರಡು ರೇಖಾಚಿತ್ರಗಳು ಹಾಗೂ `gen-readme-diagrams.mjs` ಡ್ರೈವರ್) ಮತ್ತು
+`tests/unit/docs/readme-*-svg.test.ts` ನಲ್ಲಿ 12 ಹಳೆಯತನ ಪರೀಕ್ಷೆಗಳು, ಪ್ರತಿ ರೇಖಾಚಿತ್ರಕ್ಕೆ ಒಂದು, ಇವೆ. ಇವುಗಳಲ್ಲಿ ಪ್ರತಿಯೊಂದೂ
+ಕಮಿಟ್ ಮಾಡಲಾದ ಫೈಲ್ ಅನ್ನು ಅದರ ಜನರೇಟರ್ನ ಔಟ್ಪುಟ್ನೊಂದಿಗೆ ಬೈಟ್-ಮಟ್ಟದಲ್ಲಿ ಹೋಲಿಸುತ್ತದೆ (`test-unit` ಜಾಬ್).
 
-- **ಟೋಕನ್ಗಳು.** `scripts/docs/readme-diagram-theme.mjs`, ಪ್ಯಾಲೆಟ್ ಅನ್ನು `packages/ui-kit/src/ci-tokens.css` ನಿಂದ ನಕಲಿಸುತ್ತದೆ (`tests/unit/docs/readme-diagram-theme.test.ts` ಆ ಫೈಲ್ಗೆ ಅದನ್ನು ಪಿನ್ ಮಾಡುತ್ತದೆ) ಮತ್ತು ಕಿಟ್ನ ಟೈಪ್ ಸ್ಕೇಲ್ನಲ್ಲಿ ಪಠ್ಯ ಪಾತ್ರಗಳನ್ನು ವ್ಯಾಖ್ಯಾನಿಸುತ್ತದೆ: ಕಿಟ್ನ ತೂಕಗಳಲ್ಲಿ Switzer (400/500/600, display 500 ನಲ್ಲಿ) ಮತ್ತು ಎಲ್ಲದರಿಗೂ tracking; ಆದರೆ ಕೋಡ್ ಪಾತ್ರಗಳು (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) IBM Plex Mono ಆಗಿದ್ದು, ಅವು ಕೇವಲ ಕಮಾಂಡ್ಗಳು, URLಗಳು, ಐಡೆಂಟಿಫೈಯರ್ಗಳು ಮತ್ತು ಟರ್ಮಿನಲ್ ಪರದೆಗಳಿಗಾಗಿ ಮಾತ್ರ. ಲೈಟ್ ಮೌಲ್ಯಗಳು `:root` ನಲ್ಲಿ, ಡಾರ್ಕ್ ಮೌಲ್ಯಗಳು `prefers-color-scheme: dark` ಹಿಂದೆ, ಫೈಲ್ನೊಳಗೆ ಇರುತ್ತವೆ; ಆದ್ದರಿಂದ GitHub ನಲ್ಲಿ ಪ್ರತಿಯೊಂದು ಚಿತ್ರವೂ ವೀಕ್ಷಕರ ಸ್ಕೀಮ್ ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ.
-- **ಫಾಂಟ್ಗಳು.** GitHub Markdown ಯಾವುದೇ CSS ಅನ್ನು ಸಾಗಿಸುವುದಿಲ್ಲ ಮತ್ತು camo proxy ಪ್ರತಿಯೊಂದು ಬಾಹ್ಯ fetch ಅನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಕಿಟ್ನ ಟೈಪ್ ಫೈಲ್ನೊಳಗೇ ಸಾಗಬೇಕು. ಪ್ರತಿಯೊಂದು ಜನರೇಟರ್ನ ಕೊನೆಯ ಹಂತವಾದ `scripts/docs/readme-outline.mjs`, HarfBuzz ಬಳಸಿ Switzer ಪಾತ್ರಗಳನ್ನು ಆಕಾರಗೊಳಿಸಿ ಅವುಗಳನ್ನು ವೆಕ್ಟರ್ ಔಟ್ಲೈನ್ಗಳಾಗಿ (`<defs>` paths ಮತ್ತು `<use>`) ಬಿಡಿಸುತ್ತದೆ; Switzer ಹೊಂದಿರದ ಬಾಣಗಳು ಮತ್ತು ಜ್ಯಾಮಿತೀಯ ಚಿಹ್ನೆಗಳನ್ನು ಅದರ ಸ್ವಂತ ಮೆಟ್ರಿಕ್ಗಳಲ್ಲಿ ಬಿಡಿಸಲಾಗುತ್ತದೆ. ಎಂಬೆಡ್ ಮಾಡಿದ ಫಾಂಟ್ ಎಂದಿಗೂ ಬಳಸಬೇಡಿ, ಔಟ್ಲೈನ್ಗಳನ್ನೇ ಬಳಸಿ: Switzerನ ಪರವಾನಗಿ (`packages/ui-kit/src/fonts/FFL.txt`) ಲಿಖಿತ ಅನುಮತಿಯಿಲ್ಲದೆ subsetting ಮತ್ತು format conversion ಅನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ ಮತ್ತು ವೆಕ್ಟರ್ ಚಿತ್ರಗಳಿಗೆ ಅನುಮತಿಸುತ್ತದೆ; ಆದ್ದರಿಂದ Switzer `@font-face` ಅಥವಾ `data:` URI ಅನ್ನು ಮರುಪರಿಚಯಿಸಬೇಡಿ. ಫೈಲ್ನಲ್ಲಿ ಉಳಿದಿರುವ ಏಕೈಕ ಫಾಂಟ್, ನಿಜವಾದ ಕೋಡ್ ಪಠ್ಯವಾಗಿ ಉಳಿಯುವ ಭಾಗಕ್ಕಾಗಿ ಇರುವ OFL IBM Plex Mono subset ಆಗಿದೆ (`scripts/docs/readme-fonts.mjs`), ಮತ್ತು ಅದನ್ನು ಆ ಅಕ್ಷರಗಳಿಂದ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ; ಅದು embed ಮಾಡಲಾಗದ ಯಾವುದೇ glyph ಇದ್ದರೆ ದೋಷ ಉಂಟಾಗುತ್ತದೆ.
-- **ಮರುರಚಿಸಿ.** `npm run docs:readme-diagrams`, README ಕ್ರಮದಲ್ಲಿ ಎಲ್ಲಾ ಹನ್ನೆರಡು ರೇಖಾಚಿತ್ರಗಳನ್ನು ಮರುಬರೆಯುತ್ತದೆ ಮತ್ತು ಪ್ರತಿ ಫೈಲ್ನ ಗಾತ್ರದೊಂದಿಗೆ ಒಂದು ಸಾಲನ್ನು ಮುದ್ರಿಸುತ್ತದೆ. ಒಂದೇ ಜನರೇಟರ್ ಅನ್ನು ಸ್ವತಂತ್ರವಾಗಿಯೂ ನಡೆಸಬಹುದು (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ಗೆ `node --import tsx/esm` ಅಗತ್ಯವಿದೆ, ಏಕೆಂದರೆ ಅದರ ಅಂಕಿಅಂಶಗಳು `open-sse/config/freeModelCatalog.ts` ನಲ್ಲಿರುವ live catalog loader ನಿಂದ ಬರುತ್ತವೆ; catalog ಬದಲಾವಣೆಯ CI ಪರಿಣಾಮ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ನಲ್ಲಿ ಇದೆ). ಜನರೇಟರ್ ಮತ್ತು SVG ಅನ್ನು ಒಟ್ಟಿಗೆ commit ಮಾಡಿ.
-- **ಪರಿಶೀಲನೆ.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`, GitHub ಅದನ್ನು ಸೇವೆ ನೀಡುವ ರೀತಿಯಲ್ಲಿ ಫೈಲ್ ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (ಒಂದು `<img>` ಟ್ಯಾಗ್, camo ಯ `Content-Security-Policy`, `image/svg+xml`), ಲೈಟ್ ಮತ್ತು ಡಾರ್ಕ್ ಫ್ರೇಮ್ಗಳನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ ಮತ್ತು ಪುಟ ಮಾಡಿದ ಬಾಹ್ಯ ಫಾಂಟ್ ವಿನಂತಿಗಳನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ (ಅವುಗಳ ಸಂಖ್ಯೆ 0 ಆಗಿರಬೇಕು).
-- **ಬಜೆಟ್.** ಪ್ರತಿ ಫೈಲ್ಗೆ 200 KB ಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಬೇಕು (ಪ್ರತಿ ಹಳೆಯತನ ಪರೀಕ್ಷೆಯೂ ಇದನ್ನು assert ಮಾಡುತ್ತದೆ); ಯಾವುದೇ README ಚಿತ್ರದ ಗರಿಷ್ಠ ಮಿತಿ 500 KB (SVG studio validator ನಿಯಮ).
-- **ಬದಲಾವಣೆ ಇಲ್ಲದೆ ನಕಲಿಸಿ, ಎಣಿಕೆಗಳು gate ನಿಂದ.** Rebrand ಪದಗಳನ್ನು ಬದಲಾಯಿಸದೆ ಟೈಪ್ ಮತ್ತು ಪ್ಯಾಲೆಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ: ಪ್ರತಿಯೊಂದು ಜನರೇಟರ್ ತನ್ನ ರೇಖಾಚಿತ್ರದ copy ಅನ್ನು `*_COPY` constant ನಲ್ಲಿ ಹೊಂದಿರುತ್ತದೆ (ಅಥವಾ live catalog ನಿಂದ ನಿರ್ಮಿಸುತ್ತದೆ); ಇದು ಬಿಡಿಸಲಾದ ಪಠ್ಯವೂ ಆಗಿದೆ ಮತ್ತು outlining ಹಂತದ input ಕೂಡ ಆಗಿದೆ. Canonical figures `<text>` nodes ನಲ್ಲಿ ಉಳಿಯುತ್ತವೆ (outlining ಆದ ನಂತರ `fill-opacity:0` ಕಾರಣದಿಂದ ಕಾಣಿಸುವುದಿಲ್ಲ), ಮತ್ತು ಅವುಗಳನ್ನು `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ಓದುತ್ತದೆ; reads ಅನ್ನು gate ಮಾಡುವ ರೇಖಾಚಿತ್ರಗಳ ಹಳೆಯತನ ಪರೀಕ್ಷೆಗಳು, ರಚಿಸಲಾದ ಫೈಲ್ನಲ್ಲಿ ಅದರ validators ಅನ್ನು ಸಹ ನಡೆಸುತ್ತವೆ, ಆದ್ದರಿಂದ code ನಿಂದ ಬೇರ್ಪಡುವ figure ಪರೀಕ್ಷೆಯಲ್ಲಿ ವಿಫಲವಾಗುತ್ತದೆ — generatorನಲ್ಲಿರುವ ಸಂಖ್ಯೆಯನ್ನು ಎಂದಿಗೂ ಸರಿಪಡಿಸದೆ, gate ಓದುವ source ಅನ್ನು ಸರಿಪಡಿಸಿ.
+- **ಟೋಕನ್ಗಳು.** `scripts/docs/readme-diagram-theme.mjs` Editions ಪ್ಯಾಲೆಟ್ನ್ನು (ಡೀಫಾಲ್ಟ್ ನೋಟ) `packages/ui-kit/src/ci-editions.css` ನಿಂದ
+  ನಕಲಿಸುತ್ತದೆ (`tests/unit/docs/readme-diagram-theme.test.ts` ಆ ಫೈಲ್ಗೆ ಇದನ್ನು ಪಿನ್ ಮಾಡುತ್ತದೆ; ಎರಡೂ ಸ್ಕೀಮ್ಗಳಲ್ಲಿ ಪ್ರತಿಯೊಂದು
+  ಮೇಲ್ಮೈಯಲ್ಲಿನ ಪ್ರತಿಯೊಂದು ಪಠ್ಯ ಬಣ್ಣಕ್ಕಾಗಿ WCAG AA ಅನ್ನು ಸಹ ಪರಿಶೀಲಿಸುತ್ತದೆ; ಇದಕ್ಕೆ ಒಂದು ಅಪವಾದವಿದೆ: ಲೈಟ್ `warn`, ಕಿಟ್ನ
+  ಮೌಲ್ಯವು ಕ್ಯಾನ್ವಾಸ್ನಲ್ಲಿ 4.46:1 ಆಗಿರುವುದರಿಂದ 10 % ಗಾಢಗೊಳಿಸಲಾದ ಕಿಟ್ ಎಚ್ಚರಿಕೆ) ಮತ್ತು ಕಿಟ್ನ ಟೈಪ್ ಸ್ಕೇಲ್ (`ci-tokens.css`) ನಲ್ಲಿ
+  ಪಠ್ಯ ಪಾತ್ರಗಳನ್ನು ವ್ಯಾಖ್ಯಾನಿಸುತ್ತದೆ: ಕಿಟ್ನ ತೂಕಗಳಲ್ಲಿ Switzer (400/500/600, display 500 ನಲ್ಲಿ) ಮತ್ತು ಎಲ್ಲದರಿಗೂ
+  ಟ್ರ್ಯಾಕಿಂಗ್, ಆದರೆ ಕೋಡ್ ಪಾತ್ರಗಳು (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) ಮಾತ್ರ ಇದಕ್ಕೆ
+  ವಿನಾಯಿತಿ; ಅವು IBM Plex Mono ಆಗಿದ್ದು, ಆಜ್ಞೆಗಳು, URLಗಳು, ಐಡೆಂಟಿಫೈಯರ್ಗಳು ಮತ್ತು ಟರ್ಮಿನಲ್ ಪರದೆಗಳಿಗೆ ಮಾತ್ರ.
+  ಲೈಟ್ ಮೌಲ್ಯಗಳು `:root` ನಲ್ಲಿ, ಡಾರ್ಕ್ ಮೌಲ್ಯಗಳು ಫೈಲ್ನೊಳಗೆ `prefers-color-scheme: dark` ಹಿಂದೆ ಇರುತ್ತವೆ, ಆದ್ದರಿಂದ GitHub ನಲ್ಲಿ
+  ಪ್ರತಿಯೊಂದು ಚಿತ್ರವೂ ವೀಕ್ಷಕರ ಸ್ಕೀಮ್ ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ.
+- **ಫಾಂಟ್ಗಳು.** GitHub Markdown ಯಾವುದೇ CSS ಅನ್ನು ಸಾಗಿಸುವುದಿಲ್ಲ ಮತ್ತು camo ಪ್ರಾಕ್ಸಿ ಪ್ರತಿಯೊಂದು ಬಾಹ್ಯ fetch ಅನ್ನು ತಡೆಯುತ್ತದೆ, ಆದ್ದರಿಂದ ಕಿಟ್ನ
+  ಟೈಪ್ ಫೈಲ್ನೊಳಗೇ ಇರಬೇಕು. ಪ್ರತಿಯೊಂದು ಜನರೇಟರ್ನ ಕೊನೆಯ ಹಂತವಾದ `scripts/docs/readme-outline.mjs`, HarfBuzz ಬಳಸಿ Switzer ಪಾತ್ರಗಳನ್ನು
+  ಆಕಾರಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಅವುಗಳನ್ನು ವೆಕ್ಟರ್ ಔಟ್ಲೈನ್ಗಳಾಗಿ (`<defs>` ಪಾತ್ಗಳು ಮತ್ತು `<use>`) ಬಿಡಿಸುತ್ತದೆ; Switzer ಹೊಂದಿರದ
+  ಬಾಣಗಳು ಮತ್ತು ಜ್ಯಾಮಿತೀಯ ಚಿಹ್ನೆಗಳನ್ನು ಅದರದೇ ಮೆಟ್ರಿಕ್ಗಳಲ್ಲಿ ಬಿಡಿಸಲಾಗುತ್ತದೆ. ಎಂಬೆಡ್ ಮಾಡಿದ ಫಾಂಟ್ ಎಂದಿಗೂ ಬೇಡ, ಔಟ್ಲೈನ್ಗಳೇ ಬಳಸಿ:
+  Switzerನ ಪರವಾನಗಿ (`packages/ui-kit/src/fonts/FFL.txt`) ಲಿಖಿತ ಅನುಮತಿಯಿಲ್ಲದೆ ಸಬ್ಸೆಟ್ ಮಾಡುವುದು ಮತ್ತು ಫಾರ್ಮ್ಯಾಟ್ ಪರಿವರ್ತಿಸುವುದನ್ನು
+  ನಿಷೇಧಿಸುತ್ತದೆ ಹಾಗೂ ವೆಕ್ಟರ್ ಚಿತ್ರಣಗಳಿಗೆ ಅನುಮತಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ Switzer `@font-face` ಅಥವಾ `data:` URI ಅನ್ನು ಮರುಪರಿಚಯಿಸಬೇಡಿ. ಫೈಲ್ನಲ್ಲಿ
+  ಉಳಿದಿರುವ ಏಕೈಕ ಫಾಂಟ್ ನಿಜವಾದ ಕೋಡ್ ಪಠ್ಯವಾಗಿ ಉಳಿಯುವ ಭಾಗಕ್ಕಾಗಿ ಇರುವ OFL IBM Plex Mono ಸಬ್ಸೆಟ್
+  (`scripts/docs/readme-fonts.mjs`) ಆಗಿದೆ; ಇದು ಆ ಅಕ್ಷರಗಳಿಂದ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಎಂಬೆಡ್ ಮಾಡಲಾಗದ ಯಾವುದೇ ಗ್ಲಿಫ್ ಇದ್ದರೆ
+  ದೋಷ ಎಸೆಯುತ್ತದೆ.
+- **ಮರುರಚಿಸಿ.** `npm run docs:readme-diagrams` ಎಲ್ಲಾ ಹನ್ನೆರಡನ್ನೂ README ಕ್ರಮದಲ್ಲಿ ಮರುಬರೆಯುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಯೊಂದು
+  ಫೈಲ್ನ ಗಾತ್ರದೊಂದಿಗೆ ಒಂದು ಸಾಲನ್ನು ಮುದ್ರಿಸುತ್ತದೆ. ಒಂದೇ ಜನರೇಟರ್ ಅನ್ನು ಸಹ ಸ್ವತಂತ್ರವಾಗಿ ಚಲಾಯಿಸಬಹುದು (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` ಗೆ `node --import tsx/esm` ಅಗತ್ಯವಿದೆ, ಏಕೆಂದರೆ ಅದರ ಆಕೃತಿಗಳು
+  `open-sse/config/freeModelCatalog.ts` ನಲ್ಲಿರುವ live catalog loader ನಿಂದ ಬರುತ್ತವೆ; ಕ್ಯಾಟಲಾಗ್ ಬದಲಾವಣೆಯ CI ಪರಿಣಾಮ
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ನಲ್ಲಿ ಇದೆ). ಜನರೇಟರ್ ಮತ್ತು SVG ಅನ್ನು ಒಟ್ಟಿಗೆ ಕಮಿಟ್ ಮಾಡಿ.
+  ರಿಲೀಸ್ ಮೋಡ್ನಲ್ಲಿ ಹಳೆಯ SVG ವಿಫಲವಾಗುತ್ತದೆ; feature PR ನಲ್ಲಿ, `npm run check:generated-artifacts` PR ಸಂಪಾದಿಸುವ
+  SVG ಒಂದನ್ನಷ್ಟೇ ಪರಿಶೀಲಿಸುತ್ತದೆ (`docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines").
+- **ಪರಿಶೀಲನೆ.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub ಅದನ್ನು ಹೇಗೆ ಸರ್ವ್ ಮಾಡುತ್ತದೆಯೋ ಹಾಗೆಯೇ ಫೈಲ್ ಅನ್ನು
+  ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (`<img>` ಟ್ಯಾಗ್, camo ಯ `Content-Security-Policy`, `image/svg+xml`), ಲೈಟ್ ಮತ್ತು ಡಾರ್ಕ್ ಫ್ರೇಮ್ಗಳನ್ನು
+  ಸೆರೆಹಿಡಿಯುತ್ತದೆ ಮತ್ತು ಪುಟ ಮಾಡಿದ ಬಾಹ್ಯ ಫಾಂಟ್ ವಿನಂತಿಗಳನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ (ಇದು 0 ಆಗಿರಬೇಕು).
+- **ಬಜೆಟ್.** ಪ್ರತಿ ಫೈಲ್ಗೆ 200 KB ಕ್ಕಿಂತ ಕಡಿಮೆ (ಪ್ರತಿಯೊಂದು ಹಳೆಯತನ ಪರೀಕ್ಷೆಯೂ ಇದನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ); ಯಾವುದೇ README
+  ಚಿತ್ರದ ಹಾರ್ಡ್ ಕ್ಯಾಪ್ 500 KB (SVG studio validator ನಿಯಮ).
+- **ಬದಲಾಯಿಸದೆ ನಕಲಿಸಿ, ಗೇಟ್ನಿಂದ ಎಣಿಕೆಗಳನ್ನು ಪಡೆಯಿರಿ.** ಮರುಬ್ರ್ಯಾಂಡಿಂಗ್ ಪದಗಳನ್ನು ಅಲ್ಲ, ಟೈಪ್ ಮತ್ತು ಪ್ಯಾಲೆಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ: ಪ್ರತಿಯೊಂದು
+  ಜನರೇಟರ್ ತನ್ನ ರೇಖಾಚಿತ್ರದ ನಕಲನ್ನು `*_COPY` ಸ್ಥಿರಾಂಕದಲ್ಲಿ ಹೊಂದಿರುತ್ತದೆ (ಅಥವಾ live catalog ನಿಂದ ನಿರ್ಮಿಸುತ್ತದೆ), ಮತ್ತು ಅದೇ
+  ನಕಲು ಬಿಡಿಸಿದ ಪಠ್ಯವೂ ಆಗಿದೆ ಹಾಗೂ ಔಟ್ಲೈನಿಂಗ್ ಹಂತದ ಇನ್ಪುಟ್ವೂ ಆಗಿದೆ. ಕ್ಯಾನನಿಕಲ್ ಆಕೃತಿಗಳು `<text>` ನೋಡ್ಗಳಲ್ಲಿ ಉಳಿಯುತ್ತವೆ
+  (ಔಟ್ಲೈನ್ ಮಾಡಿದ ನಂತರ ಅದೆಕಾಣದಂತೆ, `fill-opacity:0`), ಮತ್ತು ಅವುಗಳನ್ನು `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) ಓದುತ್ತದೆ; ಗೇಟ್ ಓದುವ ರೇಖಾಚಿತ್ರಗಳ ಹಳೆಯತನ ಪರೀಕ್ಷೆಗಳು ಉತ್ಪಾದಿತ ಫೈಲ್ನಲ್ಲಿ
+  ಅದರ validators ಅನ್ನು ಸಹ ಚಲಾಯಿಸುತ್ತವೆ, ಆದ್ದರಿಂದ ಕೋಡ್ನಿಂದ ಭಿನ್ನವಾಗುವ ಆಕೃತಿ ಪರೀಕ್ಷೆಯಲ್ಲಿ ವಿಫಲವಾಗುತ್ತದೆ — ಗೇಟ್ ಓದುವ
+  ಮೂಲವನ್ನು ಸರಿಪಡಿಸಿ, ಜನರೇಟರ್ನಲ್ಲಿರುವ ಸಂಖ್ಯೆಯನ್ನು ಎಂದಿಗೂ ಸರಿಪಡಿಸಬೇಡಿ.
 
 ## 7. ಉಲ್ಲೇಖ ಸೂಚ್ಯಂಕ
 
-- `src/app/globals.css` — ಟೋಕನ್ ಬ್ರిడ್ಜ್, `.dark` ಓವರ್ರೈಡ್ಗಳು, OmniRoute `@layer components` ವಿಸ್ತರಣೆಗಳು
-- `packages/ui-kit/UPSTREAM.md` — ಪಿನ್ ಮಾಡಲಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕಮిట್ ಮತ್ತು ಪರವಾನಗಿ ಅಧಿಕಾರೀಕರಣ; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/app/globals.css` — ಟೋಕನ್ ಸೇತುವೆ, `.dark` overrides, OmniRoute `@layer components` ವಿಸ್ತರಣೆಗಳು
+- `packages/ui-kit/UPSTREAM.md` — ಪಿನ್ ಮಾಡಲಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕಮಿಟ್ ಮತ್ತು ಪರವಾನಗಿ ಅನುಮತಿ; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
+  `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` ಮತ್ತು ಅದರ ಪಕ್ಕದಲ್ಲಿರುವ ಅಡಾಪ್ಟರ್ಗಳು; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
+  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
   `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -13,12 +13,17 @@ i kroków uzgadniania.
 
 ---
 
-## Konfiguracja środowiska programistycznego
+## Konfiguracja środowiska deweloperskiego
 
 ### Wymagania wstępne
 
-- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecane: 24 LTS)
+- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecana wersja: 24 LTS)
 - **npm** 10+
+
+> **Windows z Node 24:** użyj bieżącej poprawkowej wersji 24 LTS (co najmniej 24.20.0).
+> Wcześniejsze wersje mogą przerwać działanie po pomyślnym przejściu testów, gdy `--test-force-exit` zamyka
+> proces. [Poprawka Windows w bibliotece libuv](https://github.com/nodejs/node/pull/61999) dla Node.js
+> rozwiązuje ten błąd środowiska uruchomieniowego; pozostaw włączone asercje testów i kontrole wyjścia runnera.
 
 > **Użytkownicy npm v11+ (Node 24+):** Po wykonaniu `npm install` sprawdź, czy moduły natywne zostały zainstalowane:
 > `node -e "require('better-sqlite3')"`. Jeśli polecenie zakończy się błędem `MODULE_NOT_FOUND`,
@@ -46,79 +51,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Kluczowe zmienne dla środowiska programistycznego:
+Najważniejsze zmienne w środowisku deweloperskim:
 
-| Zmienna                | Wartość domyślna w środowisku programistycznym | Opis                                    |
-| ---------------------- | ---------------------------------------------- | --------------------------------------- |
-| `PORT`                 | `20128`                                        | Port serwera                            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                       | Bazowy adres URL interfejsu użytkownika |
-| `JWT_SECRET`           | (wygeneruj powyżej)                            | Sekret do podpisywania tokenów JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                                     | Hasło pierwszego logowania              |
-| `APP_LOG_LEVEL`        | `info`                                         | Poziom szczegółowości dzienników        |
+| Zmienna                | Wartość domyślna w środowisku deweloperskim | Opis                           |
+| ---------------------- | ------------------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                                     | Port serwera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                    | Bazowy URL frontendu           |
+| `JWT_SECRET`           | (wygeneruj powyżej)                         | Sekret podpisywania JWT        |
+| `INITIAL_PASSWORD`     | `CHANGEME`                                  | Hasło przy pierwszym logowaniu |
+| `APP_LOG_LEVEL`        | `info`                                      | Poziom szczegółowości logów    |
 
 ### Ustawienia panelu
 
-Panel udostępnia przełączniki interfejsu użytkownika dla funkcji, które można również skonfigurować za pomocą zmiennych środowiskowych:
+Panel udostępnia przełączniki interfejsu użytkownika dla funkcji, które można również konfigurować za pomocą zmiennych środowiskowych:
 
-| Lokalizacja ustawienia    | Przełącznik               | Opis                                           |
-| ------------------------- | ------------------------- | ---------------------------------------------- |
-| Ustawienia → Zaawansowane | Tryb debugowania          | Włącza dzienniki żądań debugowania (interfejs) |
-| Ustawienia → Ogólne       | Widoczność paska bocznego | Pokazuje/ukrywa sekcje paska bocznego          |
+| Lokalizacja ustawienia    | Przełącznik               | Opis                              |
+| ------------------------- | ------------------------- | --------------------------------- |
+| Ustawienia → Zaawansowane | Tryb debugowania          | Włącz debugowe logi żądań (UI)    |
+| Ustawienia → Ogólne       | Widoczność paska bocznego | Pokaż/ukryj sekcje paska bocznego |
 
-Ustawienia te są przechowywane w bazie danych i zachowywane po ponownym uruchomieniu, a po ich ustawieniu zastępują domyślne wartości zmiennych środowiskowych.
+Te ustawienia są przechowywane w bazie danych i zachowują się po ponownym uruchomieniu, zastępując wartości domyślne zmiennych środowiskowych, jeśli zostały ustawione.
 
 ### Uruchamianie lokalne
 
 ```bash
-# Tryb programistyczny (automatyczne przeładowywanie)
+# Tryb deweloperski (automatyczne przeładowywanie)
 npm run dev
 
 # Kompilacja produkcyjna
-npm run build    # next build → .build/next/, następnie assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Szybka kompilacja samego backendu/API do weryfikacji zmian kontrybutorów
+# Szybka kompilacja tylko backendu/API dla zmian wprowadzanych przez współtwórców
 npm run build:contributor
 
-# Kompilacja wydania (czysta ponowna kompilacja + znacznik HEAD — wymagane do wdrożenia)
-npm run build:release   # rm -rf .build dist, następnie kompilacja + zapis dist/BUILD_SHA
+# Kompilacja wydania (czysta kompilacja + znacznik HEAD — wymagane przed wdrożeniem)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Typowa konfiguracja portu
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kompilacja dla kontrybutorów wykonuje wyłącznie walidację kompilacji: nie tworzy samodzielnej
-dystrybucji ani opcjonalnych natywnych zasobów pakietu. Użyj standardowej kompilacji produkcyjnej,
-gdy musisz zweryfikować pakiet przeznaczony do dystrybucji.
+Kompilacja dla współtwórców wykonuje wyłącznie walidację kompilacji: nie składa dystrybucji standalone
+ani nie buduje opcjonalnych natywnych zasobów pakietowania. Użyj standardowej kompilacji produkcyjnej,
+jeśli chcesz zweryfikować pakiet przeznaczony do wdrożenia.
 
-### Struktura wyników kompilacji
+### Układ danych wyjściowych kompilacji
 
-| Katalog   | Zawartość                                                                            | Śledzony |
-| --------- | ------------------------------------------------------------------------------------ | -------- |
-| `src/`    | Kod źródłowy aplikacji (TypeScript / TSX)                                            | Tak      |
-| `.build/` | Pliki pośrednie — wynik `next build` (ignorowany przez git, `distDir = .build/next`) | Nie      |
-| `dist/`   | Pakiet dystrybucyjny — tworzony przez `assembleStandalone` (ignorowany przez git)    | Nie      |
+| Katalog   | Zawartość                                                                                     | Śledzony |
+| --------- | --------------------------------------------------------------------------------------------- | -------- |
+| `src/`    | Kod źródłowy aplikacji (TypeScript / TSX)                                                     | Tak      |
+| `.build/` | Pliki pośrednie — dane wyjściowe `next build` (ignorowane przez git, `distDir = .build/next`) | Nie      |
+| `dist/`   | Pakiet przeznaczony do wdrożenia — składany przez `assembleStandalone` (ignorowany przez git) | Nie      |
 
-Proces kompilacji przebiega w jednym przebiegu:
+Potok kompilacji składa się z jednego przebiegu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (wynik Next.js)
-  └─ assembleStandalone()                 (kopiuje pliki standalone + static + public + zasoby natywne)
-       └─ wynik: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (dane wyjściowe Next.js)
+  └─ assembleStandalone()                 (kopiuje standalone + static + public + zasoby natywne)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` dodatkowo najpierw czyści oba katalogi i zapisuje
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako znacznik integralności wdrożenia.
 
-`npm run build:contributor` korzysta z profilu kompilacji obejmującego wyłącznie backend. Tymczasowo zastępuje
-pliki interfejsu panelu plikami zastępczymi na czas kompilacji, zachowuje procedury obsługi tras API i przywraca oryginalne pliki
-po zakończeniu kompilacji. Użyj `npm run build` w przypadku zmian wpływających na interfejs panelu lub do pełnej
-walidacji wydania; profil dla kontrybutorów nie zastępuje kompilacji wydania.
+`npm run build:contributor` używa profilu kompilacji tylko backendu. Tymczasowo zastępuje pliki interfejsu
+panelu podczas kompilacji, zachowuje procedury obsługi tras API i przywraca oryginalne pliki
+po zakończeniu kompilacji. Użyj `npm run build` w przypadku zmian wpływających na interfejs panelu
+lub pełnej walidacji wydania; profil dla współtwórców nie zastępuje kompilacji wydania.
 
-> **Uwaga dotycząca wdrażania na VPS:** zdalny katalog obrazu `/usr/lib/node_modules/omniroute/app/`
-> pozostaje bez zmian. Narzędzia wdrożeniowe synchronizują do niego zawartość katalogu `dist/` za pomocą rsync.
-> Zmieniła się jedynie ścieżka wyników kompilacji w repozytorium (`app/` → `dist/`).
+> **Uwaga dotycząca wdrożenia na VPS:** zdalny katalog obrazów `/usr/lib/node_modules/omniroute/app/`
+> pozostaje bez zmian. Narzędzia wdrożeniowe rsyncują do niego zawartość `dist/`.
+> Zmieniono tylko ścieżkę danych wyjściowych kompilacji w repozytorium (`app/` → `dist/`).
 
 Domyślne adresy URL:
 
@@ -298,68 +303,68 @@ Przykłady zastosowania znajdują się w `open-sse/utils/stream.ts` i `open-sse/
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Router aplikacji Next.js 16
-│   ├── (dashboard)/        # Strony panelu (23 sekcje)
-│   ├── api/                # Trasy API (51 katalogów)
-│   └── login/              # Strony uwierzytelniania (.tsx)
-├── domain/                 # Silnik zasad (policyEngine, comboResolver, costRules itd.)
-├── lib/                    # Podstawowa logika biznesowa (.ts)
-│   ├── a2a/                # Serwer protokołu Agent-to-Agent v0.3
-│   ├── acp/                # Rejestr protokołu Agent Communication Protocol
-│   ├── compliance/         # Silnik zasad zgodności
-│   ├── db/                 # Moduły domenowe SQLite + 130 migracji
-│   ├── memory/             # Trwała pamięć konwersacyjna
-│   ├── oauth/              # Dostawcy, usługi i narzędzia OAuth
-│   ├── skills/             # Rozszerzalna platforma umiejętności
-│   ├── usage/              # Śledzenie użycia i obliczanie kosztów
-│   └── localDb.ts          # Wyłącznie warstwa ponownego eksportu — nigdy nie dodawaj tutaj logiki
-├── middleware/              # Oprogramowanie pośredniczące żądań (promptInjectionGuard)
-├── mitm/                   # Serwer proxy MITM (certyfikaty, DNS, trasowanie docelowe)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponenty React (.tsx)
-│   ├── constants/          # Definicje dostawców (329), zakresy MCP, 20 strategii trasowania
-│   ├── utils/              # Wyłącznik obwodu, narzędzie oczyszczające, pomocnicze funkcje uwierzytelniania
-│   └── validation/         # Schematy Zod v4
-└── sse/                    # Potok proxy SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Obszar roboczy @omniroute/open-sse
-├── executors/              # 150 modułów wykonawczych (klasy wykonawcze + funkcje pomocnicze dla poszczególnych dostawców)
-├── handlers/               # 11 procedur obsługi żądań (czat, odpowiedzi, osadzenia, obrazy itd.)
-├── mcp-server/             # Serwer MCP (110 unikalnych narzędzi, 3 transporty, 33 zakresy)
-├── services/               # 178 usług najwyższego poziomu (combo, autoCombo, rateLimitManager itd.)
-├── translator/             # Translatory formatów (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformator Responses API
-└── utils/                  # 22 moduły narzędziowe (strumienie, TLS, proxy, rejestrowanie)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Wieloplatformowa aplikacja komputerowa Electron
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Mechanizm testowy Node.js (1574 pliki testowe)
-├── integration/            # Testy integracyjne
-├── e2e/                    # Testy Playwright
-├── security/               # Testy bezpieczeństwa
-├── translator/             # Testy specyficzne dla translatora
-└── load/                   # Testy obciążeniowe
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Rejestry decyzji architektonicznych
-├── architecture/            # Architektura i odporność systemu
-├── comparison/              # OmniRoute a alternatywy
-├── compression/             # Przewodniki i reguły kompresji
-├── dev/                     # Przewodniki programistyczne
-├── diagrams/                # Diagramy architektury
-├── frameworks/              # MCP, A2A, OpenCode, pamięć, umiejętności
-├── guides/                  # Podręcznik użytkownika, Docker, konfiguracja, rozwiązywanie problemów
-├── i18n/                    # Umiędzynarodowione tłumaczenia README
-├── marketing/               # Materiały marketingowe
-├── ops/                     # Wdrażanie, proxy, pokrycie testami, wydania
-├── providers/               # Dokumentacja poszczególnych dostawców
-├── reference/               # Dokumentacja API, zmienne środowiskowe, narzędzia CLI, bezpłatne plany
-├── releases/                # Informacje o wydaniach
-├── routing/                 # Silnik automatycznego łączenia, ponowne odtwarzanie rozumowania
-├── screenshots/             # Zrzuty ekranu panelu
-├── security/                # Mechanizmy ochronne, zgodność, tryb niewykrywalny, tokeny
-└── specs/                   # Specyfikacje projektowe
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -400,22 +405,22 @@ Napisz testy jednostkowe w `tests/unit/`, obejmujące co najmniej:
 
 ---
 
-## Lista kontrolna Pull Requesta
+## Lista kontrolna żądania ściągnięcia
 
-- [ ] Testy przechodzą pomyślnie (`npm test`)
-- [ ] Lintowanie przechodzi pomyślnie (`npm run lint`)
-- [ ] Kompilacja kończy się powodzeniem (`npm run build`)
-- [ ] Dodano typy TypeScript dla nowych publicznych funkcji i interfejsów
-- [ ] Brak zakodowanych na stałe sekretów lub wartości zapasowych
-- [ ] Publiczne dane uwierzytelniające usług nadrzędnych osadzono za pomocą `resolvePublicCred()` (zobacz [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), nigdy jako literały
-- [ ] Odpowiedzi błędów są przetwarzane przez `buildErrorBody()` / `sanitizeErrorMessage()` — brak surowych śladów stosu w treści odpowiedzi (zobacz [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Polecenia powłoki (`exec` / `spawn`) przekazują wartości czasu wykonywania przez `env`, a nie przez interpolację ciągów znaków
-- [ ] Wszystkie dane wejściowe są walidowane za pomocą schematów Zod
-- [ ] Dla zmian widocznych dla użytkowników dodano **fragment** dziennika zmian w `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (zobacz [`changelog.d/README.md`](./changelog.d/README.md)) — **nie** edytuj bezpośrednio pliku `CHANGELOG.md`; fragmenty są agregowane podczas wydania i nigdy nie powodują konfliktów między Pull Requestami
-- [ ] Dokumentacja została zaktualizowana (jeśli dotyczy)
-- [ ] Nie utworzono nowych alertów CodeQL / Secret-Scanning lub każdy z nich został odrzucony z technicznym uzasadnieniem odwołującym się do odpowiedniego dokumentu w `docs/security/`
-- [ ] Trasy uruchamiające procesy podrzędne (`/api/mcp/`, `/api/cli-tools/runtime/`) sklasyfikowano jako `isLocalOnlyPath()` w `src/server/authz/routeGuard.ts` — zobacz [Twarda reguła nr 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Brak stopek `Co-authored-by` dotyczących AI/botów w komunikatach commitów (Twarda reguła nr 16) — współpracownicy będący ludźmi, których praca została ponownie wykorzystana, są wymieniani za pomocą standardowych stopek `Co-authored-by: Name <email>`
+- [ ] Testy zaliczone (`npm test`)
+- [ ] Karnety lintingowe (`npm run lint`)
+- [ ] Kompilacja zakończyła się sukcesem (`npm run build`)
+- [ ] dodano typy TypeScript dla nowych funkcji publicznych i interfejsów
+- [ ] Żadnych zakodowanych na stałe sekretów ani wartości zastępczych
+- [ ] Publiczne dane uwierzytelniające nadrzędne osadzone za pośrednictwem `resolvePublicCred()` (patrz [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), nigdy jako literały
+- [ ] Odpowiedzi na błędy przechodzą przez `buildErrorBody()` / `sanitizeErrorMessage()` — brak surowych śladów stosu w treściach odpowiedzi (patrz [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Polecenia powłoki (`exec` / `spawn`) przekazują wartości czasu wykonania przez `env`, a nie poprzez interpolację ciągów
+- [ ] Wszystkie dane wejściowe zostały zweryfikowane za pomocą schematów Zod
+- [ ] Dziennik zmian** fragment** dodano w `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` dla zmian widocznych dla użytkownika (zobacz [`changelog.d/README.md`](./changelog.d/README.md) ) — do** nie** edytuj bezpośrednio `CHANGELOG.md` ; fragmenty są agregowane w momencie wydania i nigdy nie powodują konfliktów między PRs
+- [ ] Zaktualizowano dokumentację (jeśli dotyczy)
+- [ ] Nie otwarto żadnych nowych alertów CodeQL / Secret-Scanning lub każdy z nich został odrzucony z uzasadnieniem technicznym odnoszącym się do odpowiedniego `docs/security/` ZQB
+- [ ] Trasy generujące procesy potomne (`/api/mcp/`, `/api/cli-tools/runtime/`) sklasyfikowane jako `isLocalOnlyPath()` w `src/server/authz/routeGuard.ts` — patrz [Twarda reguła #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Brak zwiastunów AI/bot `Co-authored-by` w komunikatach zatwierdzeń (twarda reguła #16) współpracownicy —, których praca jest ponownie wykorzystywana, otrzymują standardowe zwiastuny `Co-authored-by: Name <email>`
 
 ---
 

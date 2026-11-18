@@ -1,8 +1,9 @@
 /**
  * #18699: `src/lib/docsSanitizer.ts` imports jsdom, which next.config keeps external. Next's trace
- * leaves it out of the standalone tree, and the package is only a devDependency, so in a real
- * standalone install the import fails and every translated page falls back to English. It looks
- * fine from inside the repo, because Node finds the checkout's node_modules by walking up.
+ * leaves it out of the standalone tree, so in a real standalone install the import fails and every
+ * translated page falls back to English. It looks fine from inside the repo, because Node finds the
+ * checkout's node_modules by walking up. (npm installs get jsdom from `dependencies` since
+ * 2026-11-03; standalone and Docker bundles get it from this colocation step.)
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -56,7 +57,7 @@ test("a standalone bundle with translated docs gets the docs sanitizer's jsdom c
   assert.ok(fs.existsSync(path.join(standalone, "node_modules", "parse5", "index.js")));
 });
 
-test("a bundle without translated docs (Docker) does not carry jsdom", (t) => {
+test("a bundle without translated docs does not carry jsdom", (t) => {
   const { root, distDir, standalone } = makeBuild(t, { mirrors: false });
 
   assembleStandalone({ distDir, outDir: standalone, projectRoot: root, copyNatives: true });

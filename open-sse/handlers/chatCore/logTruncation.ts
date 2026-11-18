@@ -5,6 +5,7 @@ import {
   getChatLogMaxObjectKeys,
   getChatLogMaxBodyBytes,
 } from "@/lib/logEnv";
+import { createHash } from "node:crypto";
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 
 export const MEMORY_EXTRACTION_TEXT_LIMIT = 64 * 1024;
@@ -22,9 +23,30 @@ export function truncateChatLogText(value: string): string {
   return `${head}\n[...truncated ${value.length - limit} chars...]\n${tail}`;
 }
 
+/**
+ * An oversized `data:image/*;base64,...` URL would otherwise be head/tail
+ * truncated into a corrupt half-image that no viewer or decoder can read —
+ * dead weight in the persisted log. Replace it with a compact reference:
+ * mime, base64 byte count, a 16-hex sha256 fingerprint (stable identity for
+ * dedup/correlation across rows) and a 64-char head. Strings under the limit
+ * and non-image oversize strings keep their existing behavior.
+ */
+export function collapseOversizedDataUrlForLog(value: string): string | Record<string, unknown> {
+  if (value.length <= getChatLogTextLimit()) return value;
+  const match = /^data:(image\/[-\w.+/]+);base64,([\s\S]*)$/.exec(value);
+  if (!match) return truncateChatLogText(value);
+  return {
+    _omniroute_image_ref: true,
+    mime: match[1],
+    base64Bytes: match[2].length,
+    sha256: createHash("sha256").update(match[2]).digest("hex").slice(0, 16),
+    head: value.slice(0, 64),
+  };
+}
+
 export function cloneBoundedChatLogPayload(value: unknown, depth = 0): unknown {
   if (value === null || value === undefined) return value;
-  if (typeof value === "string") return truncateChatLogText(value);
+  if (typeof value === "string") return collapseOversizedDataUrlForLog(value);
   if (typeof value !== "object") return value;
   if (depth >= getChatLogMaxDepth()) return "[MaxDepth]";
 

@@ -118,42 +118,42 @@ $20 നൽകുകയും പരിധികളിൽ എത്തുകയ�
 
 ---
 
-## 📖 പ്രൊവൈഡർ സജ്ജീകരണം
+## 📖 ദാതാവ് സജ്ജീകരിക്കൽ
 
-ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽനിന്ന് API-key കണക്ഷനുകൾ കൂട്ടമായി ചേർക്കാൻ, **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → ഫയലിൽനിന്ന് ഇമ്പോർട്ട് ചെയ്യുക** ഉപയോഗിക്കുക. കോളങ്ങൾ സ്ഥാനക്രമത്തിലുള്ളവയാണ് (`provider,name,apiKey,baseUrl,priority`); `provider` ഇതിനകം ഒരു മാനേജ്ഡ് പ്രൊവൈഡറായോ അനുയോജ്യമായ നോഡായോ നിലവിലുണ്ടായിരിക്കണം. [ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽനിന്ന് പ്രൊവൈഡറുകൾ ഇമ്പോർട്ട് ചെയ്യുക](../providers/CSV-IMPORT.md) കാണുക.
+ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽ നിന്ന് API കീ കണക്ഷനുകൾ ഒരുമിച്ച് ചേർക്കാൻ **Dashboard → Providers → Import from file** ഉപയോഗിക്കുക. കോളങ്ങൾ സ്ഥാനാനുസൃതമാണ് (`provider,name,apiKey,baseUrl,priority`); `provider` ഇതിനകം മാനേജുചെയ്യുന്ന ദാതാവായോ അനുയോജ്യമായ നോഡായോ നിലവിലുണ്ടായിരിക്കണം. [ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽ നിന്ന് ദാതാക്കളെ ഇംപോർട്ട് ചെയ്യുക](../providers/CSV-IMPORT.md) കാണുക.
 
-### 🔐 സബ്സ്ക്രിപ്ഷൻ പ്രൊവൈഡറുകൾ
+### 🔐 സബ്സ്ക്രിപ്ഷൻ ദാതാക്കൾ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Claude Code കണക്റ്റ് ചെയ്യുക
-→ OAuth ലോഗിൻ → സ്വയമേവയുള്ള ടോക്കൺ പുതുക്കൽ
-→ 5 മണിക്കൂർ + പ്രതിവാര ക്വോട്ട ട്രാക്കിംഗ്
+Dashboard → Providers → Connect Claude Code
+→ OAuth login → Auto token refresh
+→ 5-hour + weekly quota tracking
 
-മോഡലുകൾ:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**പ്രോ ടിപ്പ്:** സങ്കീർണ്ണമായ ടാസ്കുകൾക്ക് Opus-ഉം വേഗതയ്ക്കായി Sonnet-ഉം ഉപയോഗിക്കുക. OmniRoute ഓരോ മോഡലിന്റെയും ക്വോട്ട പ്രത്യേകം ട്രാക്ക് ചെയ്യുന്നു!
+**പ്രോ ടിപ്പ്:** സങ്കീർണ്ണമായ ജോലികൾക്ക് Opus, വേഗതയ്ക്ക് Sonnet ഉപയോഗിക്കുക. OmniRoute ഓരോ മോഡലിനും ക്വോട്ട ട്രാക്ക് ചെയ്യുന്നു!
 
-OmniRoute ഹോസ്റ്റിൽ ബ്രൗസർ ഇല്ലേ? Claude Code ലോഗിൻ ചെയ്തിട്ടുള്ള ഏത് സ്ഥലത്തും `claude setup-token` പ്രവർത്തിപ്പിച്ച്, ഒരു വർഷത്തെ ടോക്കൺ **Setup Token** ടാബിൽ പേസ്റ്റ് ചെയ്യുക. [ഒരു setup token ഉപയോഗിച്ചുള്ള Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) കാണുക.
+OmniRoute ഹോസ്റ്റിൽ ബ്രൗസർ ഇല്ലേ? Claude Code-ൽ ലോഗിൻ ചെയ്തിരിക്കുന്ന ഏതെങ്കിലും ഇടത്ത് `claude setup-token` പ്രവർത്തിപ്പിച്ച്, ഒരു വർഷത്തേക്കുള്ള ടോക്കൺ **Setup Token** ടാബിൽ പേസ്റ്റ് ചെയ്യുക. [Setup token ഉപയോഗിച്ചുള്ള Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) കാണുക.
 
 Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടുകൾ എന്നിവ Opus, Sonnet
-മോഡലുകൾക്കുള്ള `max` thinking effort നിലനിർത്തുന്നു. Haiku മോഡലുകൾ `max` effort tier സ്വീകരിക്കാത്തതിനാൽ,
-അപ്സ്ട്രീമിലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ് OmniRoute ആ അഭ്യർത്ഥനയെ ഉയർന്ന thinking budget-ലേക്ക്
-ഡൗൺഗ്രേഡ് ചെയ്യുന്നു.
+മോഡലുകൾക്കായി `max` ചിന്താ ശ്രമം നിലനിർത്തുന്നു. Haiku മോഡലുകൾ `max` ശ്രമനില
+സ്വീകരിക്കുന്നില്ല; അതിനാൽ OmniRoute ആ അഭ്യർത്ഥന അപ്സ്ട്രീമിലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ്
+ഉയർന്ന ചിന്താ ബജറ്റിലേക്ക് താഴ്ത്തുന്നു.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Codex കണക്റ്റ് ചെയ്യുക
-→ OAuth ലോഗിൻ (പോർട്ട് 1455)
-→ 5 മണിക്കൂർ + പ്രതിവാര റീസെറ്റ്
+Dashboard → Providers → Connect Codex
+→ OAuth login (port 1455)
+→ 5-hour + weekly reset
 
-മോഡലുകൾ:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -163,11 +163,11 @@ Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടു�
 #### GitHub Copilot
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → GitHub കണക്റ്റ് ചെയ്യുക
-→ GitHub വഴിയുള്ള OAuth
-→ പ്രതിമാസ റീസെറ്റ് (മാസത്തിലെ 1-ാം തീയതി)
+Dashboard → Providers → Connect GitHub
+→ OAuth via GitHub
+→ Monthly reset (1st of month)
 
-മോഡലുകൾ:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -175,57 +175,72 @@ Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടു�
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 കുറഞ്ഞ നിരക്കിലുള്ള പ്രൊവൈഡറുകൾ
+**AI Credits (ടോക്കൺ അടിസ്ഥാനത്തിലുള്ള ബില്ലിംഗ്).** GitHub അക്കൗണ്ടിനായി `credits_used` റിപ്പോർട്ട് ചെയ്യുമ്പോൾ,
+നിലവിലെ ബില്ലിംഗ് കാലയളവിൽ ഉപയോഗിച്ച ക്രെഡിറ്റുകൾ കാണിക്കുന്ന **AI Credits** വരി Provider Limits കാർഡിൽ
+പ്രദർശിപ്പിക്കും; പരിധിയില്ലാത്ത ഓർഗനൈസേഷൻ പ്ലാനുകളിലും ഇത് ലഭ്യമാണ്.
 
-#### GLM-4.7 (ദിവസേന റീസെറ്റ്, $0.6/1M)
+**പ്രാദേശിക AI Credits പരിധി.** ഒരു GitHub കണക്ഷൻ എഡിറ്റ് ചെയ്ത് ഓരോ ബില്ലിംഗ് കാലയളവിലുമുള്ള **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`) സജ്ജമാക്കുക. ശൂന്യമായി വിട്ടാൽ ഇത് പ്രവർത്തനരഹിതമാകും; `0`
+ആണെങ്കിൽ ആ കണക്ഷൻ എല്ലായ്പ്പോഴും ഒഴിവാക്കും. ഏറ്റവും പുതിയ ഉപയോഗ വായന പരിധിക്ക് തുല്യമോ അതിലധികമോ ആയിരിക്കുമ്പോൾ,
+അക്കൗണ്ട് തിരഞ്ഞെടുക്കൽ ആ കണക്ഷൻ ഒഴിവാക്കുകയും ക്വോട്ടാ-നയ കട്ടോഫ് സംഭവിക്കുന്നതുപോലെ റൂട്ടിംഗ് നിങ്ങളുടെ മറ്റ്
+കണക്ഷനുകളിലേക്ക് പുനഃസ്ഥാപിക്കുകയും ചെയ്യും. കാലാനുസൃതമായ ക്വോട്ടാ പുതുക്കൽ ഇതിനകം ശേഖരിക്കുന്ന ഉപയോഗ ഡാറ്റയാണ് ഈ
+പരിശോധന വായിക്കുന്നത് — അഭ്യർത്ഥനാ പാതയിൽ ഇത് ഒരിക്കലും GitHub-നെ വിളിക്കില്ല — കൂടാതെ ഇത് fail open രീതിയിലാണ്:
+നഷ്ടപ്പെട്ടതോ കാലഹരണപ്പെട്ടതോ ആയ വായന (15 മിനിറ്റിൽ കൂടുതൽ പഴക്കമുള്ളത്, അല്ലെങ്കിൽ ഇതിനകം റീസെറ്റ് ചെയ്ത ബില്ലിംഗ് കാലയളവിൽ നിന്നുള്ളത്)
+കണക്ഷനെ തടയില്ല. ഇത് ഒരു പ്രാദേശിക സുരക്ഷാ സംവിധാനമാണ്, **ഉറപ്പുള്ള ചെലവ് പരിധിയല്ല**: GitHub റിപ്പോർട്ടിംഗ് വൈകലുകൾ,
+പുതുക്കൽ ഇടവേള, പുരോഗമിക്കുന്ന അഭ്യർത്ഥനകൾ, OmniRoute-ന് പുറത്തുള്ള ഉപയോഗം എന്നിവ ഇതിനെ കവിയാം. കർശനമായ പരിധിക്കായി
+GitHub-ന്റെ സ്വന്തം ചെലവ് നിയന്ത്രണങ്ങൾ ഉപയോഗിക്കുക.
+
+### 💰 കുറഞ്ഞ ചെലവിലുള്ള ദാതാക്കൾ
+
+#### GLM-4.7 (ദൈനംദിന റീസെറ്റ്, $0.6/1M)
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan-ൽനിന്ന് API key നേടുക
-3. ഡാഷ്ബോർഡ് → API Key ചേർക്കുക: പ്രൊവൈഡർ: `glm`, API Key: `your-key`
+2. Coding Plan-ൽ നിന്ന് API കീ നേടുക
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**ഉപയോഗിക്കുക:** `glm/glm-4.7` — **പ്രോ ടിപ്പ്:** Coding Plan, 1/7 ചെലവിൽ 3× ക്വോട്ട നൽകുന്നു! ദിവസേന രാവിലെ 10:00-ന് റീസെറ്റ് ചെയ്യും.
+**ഉപയോഗം:** `glm/glm-4.7` — **പ്രോ ടിപ്പ്:** Coding Plan 1/7 ചെലവിൽ 3× ക്വോട്ട നൽകുന്നു! ദിവസവും രാവിലെ 10:00-ന് റീസെറ്റ് ചെയ്യും.
 
-#### MiniMax M2.1 (5 മണിക്കൂറിൽ റീസെറ്റ്, $0.20/1M)
+#### MiniMax M2.1 (5 മണിക്കൂർ റീസെറ്റ്, $0.20/1M)
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [MiniMax](https://www.minimax.io)
-2. API key നേടുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക
+2. API കീ നേടുക → Dashboard → Add API Key
 
-**ഉപയോഗിക്കുക:** `minimax/MiniMax-M2.1` — **പ്രോ ടിപ്പ്:** ദൈർഘ്യമേറിയ കോൺടെക്സ്റ്റിനുള്ള ഏറ്റവും ചെലവുകുറഞ്ഞ ഓപ്ഷൻ (1M ടോക്കണുകൾ)!
+**ഉപയോഗം:** `minimax/MiniMax-M2.1` — **പ്രോ ടിപ്പ്:** ദീർഘമായ കോൺടെക്സ്റ്റിന് ഏറ്റവും കുറഞ്ഞ ചെലവുള്ള ഓപ്ഷൻ (1M ടോക്കണുകൾ)!
 
-#### Kimi K2 (പ്രതിമാസം $9 എന്ന സ്ഥിരനിരക്ക്)
+#### Kimi K2 ($9/മാസം സ്ഥിരനിരക്ക്)
 
 1. സബ്സ്ക്രൈബ് ചെയ്യുക: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key നേടുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക
+2. API കീ നേടുക → Dashboard → Add API Key
 
-**ഉപയോഗിക്കുക:** `kimi/kimi-k2.5` — **പ്രോ ടിപ്പ്:** 10M ടോക്കണുകൾക്ക് പ്രതിമാസം സ്ഥിരമായി $9 = ഫലപ്രദമായ ചെലവ് $0.90/1M!
+**ഉപയോഗം:** `kimi/kimi-k2.5` — **പ്രോ ടിപ്പ്:** 10M ടോക്കണുകൾക്ക് സ്ഥിരമായ $9/മാസം = ഫലപ്രദമായ $0.90/1M ചെലവ്!
 
 #### Baidu Qianfan / ERNIE
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. ഒരു Qianfan API key സൃഷ്ടിക്കുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക: പ്രൊവൈഡർ: `qianfan`
+2. ഒരു Qianfan API കീ സൃഷ്ടിക്കുക → Dashboard → Add API Key: Provider: `qianfan`
 
-**ഉപയോഗിക്കുക:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, അല്ലെങ്കിൽ മറ്റൊരു Qianfan OpenAI-അനുയോജ്യ മോഡൽ ID.
+**ഉപയോഗം:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, അല്ലെങ്കിൽ മറ്റൊരു Qianfan OpenAI-അനുയോജ്യമായ മോഡൽ ID.
 
-### 🆓 സൗജന്യ പ്രൊവൈഡറുകൾ
+### 🆓 സൗജന്യ ദാതാക്കൾ
 
-ഓതന്റിക്കേഷൻ ആവശ്യമില്ലാത്ത സൗജന്യ പ്രൊവൈഡറുകളുടെ പേജിൽ **ഓതന്റിക്കേഷൻ ആവശ്യമില്ല** എന്നതിന് സമീപം ഒരു സ്വിച്ച് ഉണ്ടായിരിക്കും.
-അത് ഓഫ് ചെയ്യുന്നത് ആ പ്രൊവൈഡറെ പ്രവർത്തനരഹിതമാക്കുകയും, പ്രൊവൈഡറുകളുടെ configured/compact കാഴ്ചകളിൽനിന്ന് നീക്കം ചെയ്യുകയും,
-അതിന്റെ മോഡലുകളെ `/v1/models`-ൽനിന്ന് നീക്കം ചെയ്യുകയും ചെയ്യും.
+ഓതന്റിക്കേഷൻ ആവശ്യമില്ലാത്ത സൗജന്യ ദാതാക്കളുടെ ദാതാവ് പേജിൽ **No authentication required** എന്നതിന് സമീപം ഒരു സ്വിച്ച് ഉണ്ട്.
+ഇത് ഓഫ് ചെയ്യുന്നത് ആ ദാതാവിനെ പ്രവർത്തനരഹിതമാക്കുകയും Providers configured/compact കാഴ്ചകളിൽ നിന്ന് നീക്കം ചെയ്യുകയും
+`/v1/models`-ൽ നിന്ന് അതിന്റെ മോഡലുകൾ നീക്കം ചെയ്യുകയും ചെയ്യും.
 
 #### Qoder (9 സൗജന്യ മോഡലുകൾ)
 
 ```bash
-ഡാഷ്ബോർഡ് → Qoder കണക്റ്റ് ചെയ്യുക → OAuth ലോഗിൻ → ആക്സസ് നിലവിലെ പ്രൊവൈഡർ പരിധികൾക്ക് വിധേയമാണ്
+Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
 
-മോഡലുകൾ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude സൗജന്യം)
 
 ```bash
-ഡാഷ്ബോർഡ് → Kiro കണക്റ്റ് ചെയ്യുക → AWS Builder ID അല്ലെങ്കിൽ Google/GitHub → പ്രതിമാസം ~50 ക്രെഡിറ്റുകൾ
+Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → ~50 credits/month
 
-മോഡലുകൾ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -340,24 +355,24 @@ API കീ: [ഡാഷ്ബോർഡിൽ നിന്ന്]
 
 ## 🚀 വിന്യാസം
 
-### ആഗോള npm ഇൻസ്റ്റാളേഷൻ (ശുപാർശ ചെയ്യുന്നത്)
+### ഗ്ലോബൽ npm ഇൻസ്റ്റാൾ ചെയ്യുക (ശുപാർശ ചെയ്യുന്നത്)
 
 ```bash
 npm install -g omniroute
 
-# കോൺഫിഗറേഷൻ ഡയറക്ടറി സൃഷ്ടിക്കുക
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ഫയൽ സൃഷ്ടിക്കുക (.env.example കാണുക)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# സെർവർ ആരംഭിക്കുക
+# Start server
 omniroute
-# അല്ലെങ്കിൽ ഇഷ്ടാനുസൃത പോർട്ടോടെ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI സ്വയമേവ `~/.omniroute/.env` അല്ലെങ്കിൽ `./.env` എന്നതിൽ നിന്ന് `.env` ലോഡ് ചെയ്യുന്നു.
+`~/.omniroute/.env` അല്ലെങ്കിൽ `./.env` ൽ നിന്ന് CLI യാന്ത്രികമായി `.env` ലോഡ് ചെയ്യുന്നു. വർക്കിംഗ് ഡയറക്ടറിയിലെ ഒരു `./.env` കീകളുടെ ഒരു ചെറിയ അനുവദനീയ പട്ടിക മാത്രമേ സജ്ജീകരിക്കൂ (`REQUIRE_API_KEY`, ലൊക്കേൽ, സമയ മേഖല, വർണ്ണ ക്രമീകരണങ്ങൾ, പോർട്ടുകൾ അല്ല); ബാക്കി എല്ലാം `~/.omniroute/.env` ൽ ഇടുക. [CLI ലോഞ്ച് കരാറുകൾ](CLI-LAUNCH-CONTRACTS.md#working-directory-env) കാണുക.
 
 ### ട്രേ മോഡ്
 
@@ -367,51 +382,51 @@ CLI സ്വയമേവ `~/.omniroute/.env` അല്ലെങ്കിൽ `./
 omniroute serve --tray
 ```
 
-സെർവറും ട്രേയും തയ്യാറായ ശേഷം കമാൻഡ് അവസാനിക്കുന്നു.
+സെർവറും ട്രേയും തയ്യാറായതിന് ശേഷം കമാൻഡ് മടങ്ങുന്നു.
 
-ടെർമിനൽ ഇല്ലാതെയും സെർവർ പ്രവർത്തനം തുടരുന്നു.
+ടെർമിനൽ ഇല്ലാതെ സെർവർ തുടരുന്നു.
 
-ട്രേ മോഡ് macOS, Windows, ഗ്രാഫിക്കൽ Linux സെഷനുകൾ എന്നിവ പിന്തുണയ്ക്കുന്നു. ട്രേ മോഡ് ഡാഷ്ബോർഡ് സ്വയമേവ തുറക്കില്ല.
+ട്രേ മോഡ് macOS, Windows, ഗ്രാഫിക്കൽ Linux സെഷനുകൾ പിന്തുണയ്ക്കുന്നു. ട്രേ മോഡ് ഡാഷ്ബോർഡ് സ്വയമേവ തുറക്കില്ല.
 
 ഈ പ്രവർത്തനങ്ങൾക്കായി ട്രേ മെനു ഉപയോഗിക്കുക:
 
 - ഡാഷ്ബോർഡ് തുറക്കുക.
 - `/dashboard/logs` തുറക്കുക.
-- സ്വയമേവ ആരംഭിക്കൽ മാറ്റുക.
+- സ്വയമേവ ആരംഭിക്കുക.
 - OmniRoute നിർത്തുക.
 
-ഈ ഓപ്ഷനുകൾക്കൊപ്പം `--tray` ഉപയോഗിക്കരുത്:
+ഈ ഓപ്ഷനുകളുമായി `--tray` സംയോജിപ്പിക്കരുത്:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ഈ മോഡുകൾക്ക് വ്യത്യസ്ത പ്രോസസ് ഉടമസ്ഥത ആവശ്യമാണ്.
+ഈ മോഡുകൾക്ക് വ്യത്യസ്ത പ്രോസസ്സ് ഉടമസ്ഥത ആവശ്യമാണ്.
 
-അടുത്ത മെഷീൻ ലോഗിനിൽ സ്റ്റാർട്ടപ്പ് പ്രവർത്തനക്ഷമമാക്കുക:
+അടുത്ത മെഷീൻ ലോഗിൻ ചെയ്യുമ്പോൾ സ്റ്റാർട്ടപ്പ് പ്രവർത്തനക്ഷമമാക്കുക:
 
 ```bash
 omniroute autostart enable
 ```
 
-macOS, Windows, ഗ്രാഫിക്കൽ Linux സെഷനുകൾ എന്നിവയിൽ സ്വയമേവ ആരംഭിക്കൽ ട്രേ മോഡ് ഉപയോഗിക്കുന്നു. ഹെഡ്ലെസ് Linux നിലവിലുള്ള systemd യൂസർ സർവീസ് ഉപയോഗിക്കുന്നു.
+ഓട്ടോ-സ്റ്റാർട്ട് macOS, Windows, ഗ്രാഫിക്കൽ Linux സെഷനുകളിൽ ട്രേ മോഡ് ഉപയോഗിക്കുന്നു. Headless Linux നിലവിലുള്ള systemd ഉപയോക്തൃ സേവനം ഉപയോഗിക്കുന്നു.
 
-ലോഗിൻ സമയത്തെ സ്റ്റാർട്ടപ്പ് പ്രവർത്തനരഹിതമാക്കുക:
+ലോഗിൻ ചെയ്യുമ്പോൾ സ്റ്റാർട്ടപ്പ് പ്രവർത്തനരഹിതമാക്കുക:
 
 ```bash
 omniroute autostart disable
 ```
 
-### അൺഇൻസ്റ്റാൾ ചെയ്യൽ
+### അൺഇൻസ്റ്റാൾ ചെയ്യുന്നു
 
-OmniRoute ഇനി ആവശ്യമില്ലാത്തപ്പോൾ, പൂർണ്ണമായി നീക്കം ചെയ്യുന്നതിനായി ഞങ്ങൾ രണ്ട് ദ്രുത സ്ക്രിപ്റ്റുകൾ നൽകുന്നു:
+നിങ്ങൾക്ക് ഇനി OmniRoute ആവശ്യമില്ലെങ്കിൽ, ഒരു വൃത്തിയുള്ള നീക്കം ചെയ്യുന്നതിനായി ഞങ്ങൾ രണ്ട് ദ്രുത സ്ക്രിപ്റ്റുകൾ നൽകുന്നു:
 
-| കമാൻഡ്                   | പ്രവർത്തനം                                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | സിസ്റ്റം ആപ്പ് നീക്കംചെയ്യുന്നു, എന്നാൽ `~/.omniroute`-ലെ **നിങ്ങളുടെ DB-യും കോൺഫിഗറേഷനുകളും നിലനിർത്തുന്നു**. |
-| `npm run uninstall:full` | ആപ്പ് നീക്കംചെയ്യുന്നതിനൊപ്പം **എല്ലാ കോൺഫിഗറേഷനുകളും കീകളും ഡാറ്റാബേസുകളും ശാശ്വതമായി മായ്ക്കുന്നു**.         |
+| കമാൻഡ്                   | ആക്ഷൻ                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | സിസ്റ്റം ആപ്പ് നീക്കം ചെയ്യുന്നു പക്ഷേ** നിങ്ങളുടെ DB യും കോൺഫിഗറേഷനുകളും സൂക്ഷിക്കുന്നു** `~/.omniroute`. |
+| `npm run uninstall:full` | ആപ്പ് AND ശാശ്വതമായി നീക്കംചെയ്യുന്നു** എല്ലാ കോൺഫിഗറേഷനുകളും കീകളും ഡാറ്റാബേസുകളും മായ്ക്കുന്നു** .       |
 
-> കുറിപ്പ്: ഈ കമാൻഡുകൾ പ്രവർത്തിപ്പിക്കാൻ, OmniRoute പ്രോജക്റ്റ് ഫോൾഡറിലേക്ക് പോകുക (നിങ്ങൾ അത് ക്ലോൺ ചെയ്തിട്ടുണ്ടെങ്കിൽ) തുടർന്ന് അവ പ്രവർത്തിപ്പിക്കുക. പകരമായി, ആഗോളമായി ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെങ്കിൽ, `npm uninstall -g omniroute` പ്രവർത്തിപ്പിച്ചാൽ മതി.
+> ശ്രദ്ധിക്കുക: ഈ കമാൻഡുകൾ പ്രവർത്തിപ്പിക്കുന്നതിന്, OmniRoute പ്രോജക്റ്റ് ഫോൾഡറിലേക്ക് നാവിഗേറ്റ് ചെയ്യുക (നിങ്ങൾ ഇത് ക്ലോൺ ചെയ്തിട്ടുണ്ടെങ്കിൽ) അവ പ്രവർത്തിപ്പിക്കുക. പകരമായി, ആഗോളതലത്തിൽ ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെങ്കിൽ, നിങ്ങൾക്ക് `npm uninstall -g omniroute` പ്രവർത്തിപ്പിക്കാം.
 
 ### VPS വിന്യാസം
 
@@ -429,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# അല്ലെങ്കിൽ: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 വിന്യാസം (കുറഞ്ഞ മെമ്മറി)
 
-പരിമിതമായ RAM ഉള്ള സെർവറുകൾക്ക്, മെമ്മറി പരിധി ഓപ്ഷൻ ഉപയോഗിക്കുക:
+പരിമിതമായ RAM ഉള്ള സെർവറുകൾക്കായി, മെമ്മറി പരിധി ഓപ്ഷൻ ഉപയോഗിക്കുക:
 
 ```bash
-# 512MB പരിധിയോടെ (ഡിഫോൾട്ട്)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# അല്ലെങ്കിൽ ഇഷ്ടാനുസൃത മെമ്മറി പരിധിയോടെ
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# അല്ലെങ്കിൽ ecosystem.config.js ഉപയോഗിച്ച്
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -472,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ഇമേജ് ബിൽഡ് ചെയ്യുക (ഡിഫോൾട്ട് = codex/claude/droid മുൻകൂട്ടി ഇൻസ്റ്റാൾ ചെയ്ത runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# പോർട്ടബിൾ മോഡ് (ശുപാർശ ചെയ്യുന്നത്)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ബൈനറികളുള്ള ഹോസ്റ്റ്-സംയോജിത മോഡിനായി, പ്രധാന ഡോക്സിലെ Docker വിഭാഗം കാണുക.
+CLI ബൈനറികളുള്ള ഹോസ്റ്റ്-ഇൻ്റഗ്രേറ്റഡ് മോഡിനായി, പ്രധാന ഡോക്സിലെ Docker വിഭാഗം കാണുക.
 
-### Void Linux (xbps-src)
+### അസാധുവായ Linux (xbps-src)
 
-Void Linux ഉപയോക്താക്കൾക്ക് `xbps-src` ക്രോസ്-കംപൈലേഷൻ ഫ്രെയിംവർക്ക് ഉപയോഗിച്ച് OmniRoute നേറ്റീവായി പാക്കേജ് ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യാം. ആവശ്യമായ `better-sqlite3` നേറ്റീവ് ബൈൻഡിങ്ങുകൾക്കൊപ്പം Node.js സ്റ്റാൻഡ്എലോൺ ബിൽഡും ഇത് സ്വയമേവ നിർവഹിക്കുന്നു.
+അസാധുവായ Linux ഉപയോക്താക്കൾക്ക് `xbps-src` ക്രോസ്-കംപൈലേഷൻ ഫ്രെയിംവർക്ക് ഉപയോഗിച്ച് OmniRoute നേറ്റീവ് ആയി പാക്കേജുചെയ്യാനും ഇൻസ്റ്റാൾ ചെയ്യാനും കഴിയും. ഇത് ആവശ്യമായ `better-sqlite3` നേറ്റീവ് ബൈൻഡിംഗുകൾക്കൊപ്പം Node.js സ്റ്റാൻഡ് എലോൺ ബിൽഡിനെ ഓട്ടോമേറ്റ് ചെയ്യുന്നു.
 
 <details>
 <summary><b>xbps-src ടെംപ്ലേറ്റ് കാണുക</b></summary>
 
 ```bash
-# 'omniroute'-നുള്ള ടെംപ്ലേറ്റ് ഫയൽ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -510,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-നുള്ള ലക്ഷ്യ CPU ആർക്കിടെക്ചർ നിർണ്ണയിക്കുക
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -519,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) എല്ലാ ഡിപ്പൻഡൻസികളും ഇൻസ്റ്റാൾ ചെയ്യുക – സ്ക്രിപ്റ്റുകൾ ഒഴിവാക്കുക
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js സ്റ്റാൻഡ്എലോൺ ബണ്ടിൽ ബിൽഡ് ചെയ്യുക
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) സ്റ്റാറ്റിക് അസറ്റുകൾ സ്റ്റാൻഡ്എലോണിലേക്ക് പകർത്തുക
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 നേറ്റീവ് ബൈൻഡിങ് കംപൈൽ ചെയ്യുക
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) കംപൈൽ ചെയ്ത ബൈൻഡിങ് സ്റ്റാൻഡ്എലോൺ ബണ്ടിലിൽ സ്ഥാപിക്കുക
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ആർക്കിടെക്ചർ-നിർദ്ദിഷ്ട sharp ബണ്ടിലുകൾ നീക്കംചെയ്യുക
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js സ്റ്റാറ്റിക് വിശകലനം ഒഴിവാക്കിയ pino റൺടൈം ഡിപ്പൻഡൻസികൾ പകർത്തുക:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -555,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# പോസ്റ്റ്-ഇൻസ്റ്റാൾ ഹുക്ക് ശൂന്യമായ Next.js ആപ്പ് റൂട്ടർ ഡയറക്ടറികൾ നീക്കംചെയ്യുന്നത് തടയുക
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -581,32 +596,32 @@ post_install() {
 
 </details>
 
-### എൻവയോൺമെന്റ് വേരിയബിളുകൾ
+### പരിസ്ഥിതി വേരിയബിളുകൾ
 
-| വേരിയബിൾ                                | ഡിഫോൾട്ട്                            | വിവരണം                                                                                                                                                   |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT സൈനിംഗ് രഹസ്യം (**പ്രൊഡക്ഷനിൽ മാറ്റുക**)                                                                                                             |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | ആദ്യ ലോഗിൻ പാസ്വേഡ്                                                                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | ഡാറ്റ ഡയറക്ടറി (db, ഉപയോഗം, ലോഗുകൾ)                                                                                                                      |
-| `PORT`                                  | ഫ്രെയിംവർക്ക് ഡിഫോൾട്ട്              | സർവീസ് പോർട്ട് (ഉദാഹരണങ്ങളിൽ `20128`)                                                                                                                    |
-| `HOSTNAME`                              | ഫ്രെയിംവർക്ക് ഡിഫോൾട്ട്              | ബൈൻഡ് ഹോസ്റ്റ് (Docker-ൽ ഡിഫോൾട്ടായി `0.0.0.0`)                                                                                                          |
-| `NODE_ENV`                              | റൺടൈം ഡിഫോൾട്ട്                      | വിന്യാസത്തിനായി `production` ആയി സജ്ജമാക്കുക                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ഡാഷ്ബോർഡിൽ പ്രദർശിപ്പിക്കുകയും സെർവറിന് ലഭ്യമാക്കുകയും ചെയ്യുന്ന പൊതു അടിസ്ഥാന URL (പഴയ `BASE_URL`-നെ മാറ്റിസ്ഥാപിക്കുന്നു)                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | ക്ലൗഡ് സിങ്ക് എൻഡ്പോയിന്റിന്റെ അടിസ്ഥാന URL (പഴയ `CLOUD_URL`-നെ മാറ്റിസ്ഥാപിക്കുന്നു)                                                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | സൃഷ്ടിക്കുന്ന API കീകൾക്കായുള്ള HMAC രഹസ്യം                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`-ൽ Bearer API കീ നിർബന്ധമാക്കുക                                                                                                                   |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | പ്രാമാണീകരിച്ച ഡാഷ്ബോർഡ് ഉപയോക്താക്കൾക്ക് ആവശ്യാനുസരണം സംഭരിച്ചിരിക്കുന്ന API കീയുടെ പൂർണ്ണ മൂല്യങ്ങൾ വെളിപ്പെടുത്താൻ അനുവദിക്കുക                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | കാഷ് ചെയ്ത Provider Limits ഡാറ്റയ്ക്കുള്ള സെർവർ-സൈഡ് പുതുക്കൽ ഇടവേള; UI പുതുക്കൽ ബട്ടണുകൾ തുടർന്നും മാനുവൽ സിങ്ക് പ്രവർത്തിപ്പിക്കും                     |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | റൈറ്റ്/ഇംപോർട്ട്/റിസ്റ്റോർ എന്നിവയ്ക്ക് മുമ്പുള്ള സ്വയമേവയുള്ള SQLite സ്നാപ്പ്ഷോട്ടുകൾ പ്രവർത്തനരഹിതമാക്കുക; മാനുവൽ ബാക്കപ്പുകൾ തുടർന്നും പ്രവർത്തിക്കും |
-| `APP_LOG_TO_FILE`                       | `true`                               | ആപ്ലിക്കേഷൻ, ഓഡിറ്റ് ലോഗ് ഔട്ട്പുട്ട് ഡിസ്കിലേക്ക് എഴുതുന്നത് പ്രവർത്തനക്ഷമമാക്കുന്നു                                                                    |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` ഓത്ത് കുക്കി നിർബന്ധമാക്കുക (HTTPS റിവേഴ്സ് പ്രോക്സിക്ക് പിന്നിൽ)                                                                               |
-| `CLOUDFLARED_BIN`                       | സജ്ജീകരിച്ചിട്ടില്ല                  | നിയന്ത്രിത ഡൗൺലോഡിന് പകരം നിലവിലുള്ള `cloudflared` ബൈനറി ഉപയോഗിക്കുക                                                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | നിയന്ത്രിത Quick Tunnels-നുള്ള ട്രാൻസ്പോർട്ട് (`http2`, `quic`, അല്ലെങ്കിൽ `auto`)                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB-യിലുള്ള Node.js ഹീപ്പ് പരിധി                                                                                                                          |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | പ്രോംപ്റ്റ് കാഷ് എൻട്രികളുടെ പരമാവധി എണ്ണം                                                                                                               |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | സെമാന്റിക് കാഷ് എൻട്രികളുടെ പരമാവധി എണ്ണം                                                                                                                |
+| വേരിയബിൾ                                | സ്ഥിരസ്ഥിതി                   | വിവരണം                                                                                                                                                                 |
+| --------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(യാന്ത്രികമായി സൃഷ്ടിച്ചത്)_ | JWT ഒപ്പിടൽ രഹസ്യം — ആദ്യ ഓട്ടത്തിൽ സ്വയമേവ സൃഷ്ടിക്കുകയും `server.env` ലേക്ക് നിലനിൽക്കുകയും ചെയ്തു; ഡാറ്റ ഡയറക്ടറി എഫെമെറൽ ആയിരിക്കുമ്പോൾ അത് വ്യക്തമായി സജ്ജമാക്കുക |
+| `INITIAL_PASSWORD`                      | _(സജ്ജീകരിച്ചിട്ടില്ല)_       | ആദ്യ ലോഗിൻ പാസ്സ്വേർഡ്. npm/source ഇൻസ്റ്റാളുകൾ `CHANGEME` ഉപയോഗിച്ച് ആരംഭിക്കുന്നു : അത് മാറ്റിസ്ഥാപിക്കുക. സജ്ജീകരിക്കാത്തത്: ഓൺബോർഡിംഗ് വിസാർഡ്                     |
+| `DATA_DIR`                              | `~/.omniroute`                | ഡാറ്റ ഡയറക്ടറി (ഡിബി, ഉപയോഗം, ലോഗുകൾ)                                                                                                                                  |
+| `PORT`                                  | ചട്ടക്കൂട് സ്ഥിരസ്ഥിതി        | സേവന പോർട്ട് (ഉദാഹരണങ്ങളിൽ `20128` )                                                                                                                                   |
+| `HOSTNAME`                              | ചട്ടക്കൂട് സ്ഥിരസ്ഥിതി        | ഹോസ്റ്റിനെ ബന്ധിപ്പിക്കുക (Docker സ്ഥിരസ്ഥിതിയായി `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | റൺടൈം ഡിഫോൾട്ട്               | വിന്യസിക്കാൻ `production` സജ്ജമാക്കുക                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | പബ്ലിക് ബേസ് URL ഡാഷ്ബോർഡിലേക്ക് പ്രത്യക്ഷപ്പെടുകയും സെർവറിലേക്ക് തുറന്നിടുകയും ചെയ്യുന്നു (ലെഗസി `BASE_URL` മാറ്റിസ്ഥാപിക്കുന്നു)                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | ക്ലൗഡ് സമന്വയ എൻഡ്പോയിൻ്റ് ബേസ് URL (ലെഗസി `CLOUD_URL` മാറ്റിസ്ഥാപിക്കുന്നു)                                                                                           |
+| `API_KEY_SECRET`                        | _(യാന്ത്രികമായി സൃഷ്ടിച്ചത്)_ | ജനറേറ്റ് ചെയ്ത API കീകൾക്കായുള്ള HMAC രഹസ്യം — ആദ്യ ഓട്ടത്തിൽ തന്നെ സ്വയമേവ സൃഷ്ടിക്കുകയും `server.env` വരെ നിലനിൽക്കുകയും ചെയ്യുന്നു                                  |
+| `REQUIRE_API_KEY`                       | `false`                       | `/v1/*` ൽ Bearer API കീ നടപ്പിലാക്കുക                                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | പൂർണ്ണമായി സംഭരിച്ചിരിക്കുന്ന API കീ മൂല്യങ്ങൾ ആവശ്യാനുസരണം വെളിപ്പെടുത്താൻ പ്രാമാണീകരിച്ച ഡാഷ്ബോർഡ് ഉപയോക്താക്കളെ അനുവദിക്കുക                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | കാഷെ ചെയ്ത പ്രൊവൈഡർ ലിമിറ്റ് ഡാറ്റയ്ക്കായുള്ള സെർവർ സൈഡ് പുതുക്കിയ കാഡൻസ്; UI പുതുക്കൽ ബട്ടണുകൾ ഇപ്പോഴും മാനുവൽ സമന്വയം ട്രിഗർ ചെയ്യുന്നു                              |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | writes/import/restore ന് മുമ്പായി സ്വയമേവയുള്ള SQLite സ്നാപ്പ്ഷോട്ടുകൾ പ്രവർത്തനരഹിതമാക്കുക; മാനുവൽ ബാക്കപ്പുകൾ ഇപ്പോഴും പ്രവർത്തിക്കുന്നു                             |
+| `APP_LOG_TO_FILE`                       | `true`                        | ഡിസ്കിലേക്കുള്ള ആപ്ലിക്കേഷനും ഓഡിറ്റ് ലോഗ് ഔട്ട്പുട്ടും പ്രവർത്തനക്ഷമമാക്കുന്നു                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | `Secure` auth കുക്കി നിർബന്ധിക്കുക ( HTTPS റിവേഴ്സ് പ്രോക്സിക്ക് പിന്നിൽ)                                                                                              |
+| `CLOUDFLARED_BIN`                       | സജ്ജീകരിക്കാത്തത്             | നിയന്ത്രിത ഡൗൺലോഡിന് പകരം നിലവിലുള്ള ഒരു `cloudflared` ബൈനറി ഉപയോഗിക്കുക                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | നിയന്ത്രിത ദ്രുത തുരങ്കങ്ങൾക്കുള്ള ഗതാഗതം (`http2`, `quic`, അല്ലെങ്കിൽ `auto`)                                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | Node.js ഹീപ്പ് പരിധി MB ൽ                                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | പരമാവധി പ്രോംപ്റ്റ് കാഷെ എൻട്രികൾ                                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | പരമാവധി സെമാൻ്റിക് കാഷെ എൻട്രികൾ                                                                                                                                       |
 
-എൻവയോൺമെന്റ് വേരിയബിളുകളുടെ പൂർണ്ണ റഫറൻസിനായി, [README](../README.md) കാണുക.
+പൂർണ്ണ പരിസ്ഥിതി വേരിയബിൾ റഫറൻസിനായി, [README](../README.md) കാണുക.
 
 ---
 
@@ -615,17 +630,17 @@ post_install() {
 <details>
 <summary><b>ലഭ്യമായ എല്ലാ മോഡലുകളും കാണുക</b></summary>
 
-> താഴെയുള്ള ലിസ്റ്റ് v3.8.0-നായി `open-sse/config/providerRegistry.ts`-ൽ നിന്ന് ക്യൂറേറ്റ് ചെയ്തതാണ്. ക്ലൗഡ് കാറ്റലോഗുകൾ (Gemini, OpenRouter മുതലായവ) ഡൈനാമിക്കായി സിങ്ക് ചെയ്യപ്പെടുന്നു — പൂർണ്ണമായ ലൈവ് കാറ്റലോഗിനായി **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → [provider] → ലഭ്യമായ മോഡലുകൾ** തുറക്കുക അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
+> താഴെയുള്ള പട്ടിക v3.8.0-നുള്ള `open-sse/config/providerRegistry.ts`-ൽ നിന്ന് തിരഞ്ഞെടുത്തതാണ്. ക്ലൗഡ് കാറ്റലോഗുകൾ (Gemini, OpenRouter മുതലായവ) ഡൈനാമിക്കായി സമന്വയിപ്പിക്കപ്പെടുന്നു — പൂർണ്ണമായ തത്സമയ കാറ്റലോഗിനായി **Dashboard → Providers → [provider] → Available Models** തുറക്കുക, അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
 >
-> ഒരു പ്രൊവൈഡറുടെ ബിൽറ്റ്-ഇൻ ലിസ്റ്റിൽ മാറ്റം വന്നിട്ടുണ്ടെങ്കിൽ, ലൈവ് അപ്സ്ട്രീം കാറ്റലോഗ് നേടാൻ ആ പേജിലെ **/models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക** ഉപയോഗിക്കുക (അല്ലെങ്കിൽ **ഓട്ടോ-സിങ്ക്** പ്രാപ്തമാക്കുക). ഇത് v3.8.50-ൽ LLM7.io (`gemini-3.1-flash-lite`), UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) എന്നിവയ്ക്കായി പരിശോധിച്ചുറപ്പിച്ചിട്ടുണ്ട്; അതേ ടെസ്റ്റ് പാസ്സിൽ Pollinations-ന്റെ അനോണിമസ് ആക്സസ് അപ്സ്ട്രീം-പരിമിതമായി തുടർന്നു.
+> ഒരു provider-ന്റെ ബിൽറ്റ്-ഇൻ പട്ടികയിൽ വ്യത്യാസം വന്നിട്ടുണ്ടെങ്കിൽ, തത്സമയ അപ്സ്ട്രീം കാറ്റലോഗ് ലഭ്യമാക്കാൻ ആ പേജിലെ **Import from /models** ഉപയോഗിക്കുക (അല്ലെങ്കിൽ **Auto-Sync** പ്രവർത്തനക്ഷമമാക്കുക). LLM7.io (`gemini-3.1-flash-lite`), UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) എന്നിവയ്ക്കായി ഇത് v3.8.50-ൽ പരിശോധിച്ചു; അതേ ടെസ്റ്റ് ഘട്ടത്തിൽ Pollinations-ന്റെ അനാമിക ആക്സസ് അപ്സ്ട്രീം പരിമിതികളിൽ തുടർന്നു.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ എഫർട്ട് ടിയറുകൾ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort tiers: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — സൗജന്യ OAuth: **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Kiro → ലഭ്യമായ മോഡലുകൾ** എന്നതിന് കീഴിൽ കാണിക്കുന്ന ലൈവ് കാറ്റലോഗ് ഉപയോഗിക്കുക. ലഭ്യത അക്കൗണ്ടിനെയും പ്ലാനിനെയും ആശ്രയിച്ചിരിക്കുന്നു.
+**Kiro (`kr/`)** — സൗജന്യ OAuth: **Dashboard → Providers → Kiro → Available Models** എന്നതിന് കീഴിൽ കാണിക്കുന്ന തത്സമയ കാറ്റലോഗ് ഉപയോഗിക്കുക. ലഭ്യത അക്കൗണ്ടും പ്ലാനും അനുസരിച്ചിരിക്കും.
 
 **Qoder (`if/`)** — സൗജന്യ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -633,37 +648,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/മാസം ഫ്ലാറ്റ് അല്ലെങ്കിൽ ഉപയോഗം അനുസരിച്ച്: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — പ്രതിമാസം $9 അല്ലെങ്കിൽ ഉപയോഗാനുസരിച്ച്: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API കീ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — അൾട്രാ-ഫാസ്റ്റ്: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — അതിവേഗം: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok നേറ്റീവ്: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ഹോസ്റ്റഡ്: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-ഹോസ്റ്റഡ്: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — സെർച്ച്-ഓഗ്മെൻ്റഡ്: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — തിരച്ചിൽ-സംയോജിതം: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ഓപ്പൺ-സോഴ്സ്: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (സൗജന്യം), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ഓപ്പൺ സോഴ്സ്: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (സൗജന്യം), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — വേഗതയേറിയ ഇൻഫറൻസ്: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ദ്രുത ഇൻഫറൻസ്: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — വേഫർ-സ്കെയിൽ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ഫോക്കസ്ഡ്: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG കേന്ദ്രീകൃതം: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — എന്റർപ്രൈസ്: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — എന്റർപ്രൈസ്: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-ൽ നിന്ന് API കീ അനുസരിച്ച് ലൈവായി സിങ്ക് ചെയ്യുന്നു — സ്റ്റാറ്റിക് ലിസ്റ്റ് ഇല്ല. **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ**-ൽ ഒരു കീ കണക്ട് ചെയ്ത ശേഷം നിലവിലെ കാറ്റലോഗ് ഇമ്പോർട്ട് ചെയ്യാൻ **ലഭ്യമായ മോഡലുകൾ** ഉപയോഗിക്കുക (ഉദാ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google-ൽ നിന്നുള്ള API കീ ഉപയോഗിച്ച് തത്സമയം സമന്വയിപ്പിക്കുന്നു — സ്ഥിര പട്ടികയില്ല. **Dashboard → Providers**-ൽ ഒരു കീ കണക്റ്റ് ചെയ്ത ശേഷം **Available Models** ഉപയോഗിച്ച് നിലവിലെ കാറ്റലോഗ് ഇറക്കുമതി ചെയ്യുക (ഉദാ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**മറ്റ് അനുയോജ്യമായ പ്രൊവൈഡറുകൾ** (തിരഞ്ഞെടുത്തവ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` വഴി), `azure-ai`, `openrouter` (പാസ്ത്രൂ കാറ്റലോഗ്), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ഓരോന്നും `providerRegistry.ts`-ൽ സ്വന്തം മോഡൽ ലിസ്റ്റ് പരിപാലിക്കുന്നു, കൂടാതെ പ്രൊവൈഡർ ഒരു `/models` എൻഡ്പോയിന്റ് നൽകുമ്പോൾ ഓട്ടോ-സിങ്ക് ചെയ്യാനും കഴിയും.
+**മറ്റ് അനുയോജ്യമായ providers** (തിരഞ്ഞെടുത്തവ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` വഴി), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ഓരോന്നും `providerRegistry.ts`-ൽ സ്വന്തമായ മോഡൽ പട്ടിക പരിപാലിക്കുന്നു; provider ഒരു `/models` endpoint ലഭ്യമാക്കുന്നുവെങ്കിൽ അവ സ്വയമേവ സമന്വയിപ്പിക്കാനും കഴിയും.
 
-**മോഡൽ ID-കളെക്കുറിച്ചുള്ള കുറിപ്പ്:** OmniRoute പ്രൊവൈഡർ-നേറ്റീവ് ID-കൾ ഉപയോഗിക്കുന്നു (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ചില ID-കളിൽ ഡോട്ടഡ് വേർഷനുകൾ ഉൾപ്പെടുന്നത് അപ്സ്ട്രീം API അവയെ ആ രീതിയിലാണ് പ്രതീക്ഷിക്കുന്നത് എന്നതിനാലാണ്. ഒരു മോഡൽ മുകളിൽ ലിസ്റ്റ് ചെയ്തിട്ടില്ലെങ്കിൽ, ലഭ്യത ഉറപ്പാക്കാൻ `omniroute models --search <term>` റൺ ചെയ്യുക അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
+**മോഡൽ ID-കളെക്കുറിച്ചുള്ള കുറിപ്പ്:** OmniRoute provider-നേറ്റീവ് ID-കൾ ഉപയോഗിക്കുന്നു (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ചില ID-കളിൽ ഡോട്ട് ഉപയോഗിച്ചുള്ള പതിപ്പുകൾ ഉൾപ്പെടുന്നു, കാരണം അപ്സ്ട്രീം API അവ അങ്ങനെ തന്നെയാണ് പ്രതീക്ഷിക്കുന്നത്. ഒരു മോഡൽ മുകളിൽ പട്ടികപ്പെടുത്തിയിട്ടില്ലെങ്കിൽ, ലഭ്യത സ്ഥിരീകരിക്കാൻ `omniroute models --search <term>` പ്രവർത്തിപ്പിക്കുക അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
 
 </details>
 
@@ -689,12 +704,12 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 കുറിപ്പുകൾ:
 
-- OpenRouter, OpenAI/Anthropic-compatible ദാതാക്കളിൽ നിന്നാണ് മാനേജ് ചെയ്യുന്നത്** ലഭ്യമായ മോഡലുകൾ** മാത്രം. ലഭ്യമായ ഒരേ മോഡൽ ലിസ്റ്റിൽ എല്ലാ ഭൂമിയും സ്വമേധയാ ചേർക്കുക, ഇറക്കുമതി ചെയ്യുക, യാന്ത്രികമായി സമന്വയിപ്പിക്കുക, അതിനാൽ ആ ദാതാക്കൾക്കായി പ്രത്യേക ഇഷ്ടാനുസൃത മോഡലുകൾ വിഭാഗമില്ല.
+- OpenRouter, OpenAI/Anthropic-compatible ദാതാക്കൾ നിയന്ത്രിക്കുന്നത്** ലഭ്യമായ മോഡലുകൾ** മാത്രം. ലഭ്യമായ ഒരേ മോഡൽ ലിസ്റ്റിൽ എല്ലാ ഭൂമിയും സ്വമേധയാ ചേർക്കുക, ഇറക്കുമതി ചെയ്യുക, യാന്ത്രികമായി സമന്വയിപ്പിക്കുക, അതിനാൽ ആ ദാതാക്കൾക്കായി പ്രത്യേക ഇഷ്ടാനുസൃത മോഡലുകൾ വിഭാഗമില്ല.
 - ദി** ഇഷ്ടാനുസൃത മോഡലുകൾ** നിയന്ത്രിത ലഭ്യമായ-മോഡൽ ഇമ്പോർട്ടുകൾ വെളിപ്പെടുത്താത്ത ദാതാക്കൾക്കായി വിഭാഗം ഉദ്ദേശിച്ചുള്ളതാണ്.
 
 ### ഇഷ്ടാനുസൃത OpenAI-അനുയോജ്യ ദാതാക്കൾ
 
-OpenAI API സംസാരിക്കുന്ന ഏതൊരു ഗേറ്റ്വേയും (സ്വയം-ഹോസ്റ്റ് ചെയ്ത പ്രോക്സി, vLLM, ഒരു മൂന്നാം കക്ഷി അഗ്രഗേറ്റർ) അതിൻ്റെ സ്വന്തം പ്രൊവൈഡർ നോഡായി ചേർക്കാവുന്നതാണ്:
+OpenAI API സംസാരിക്കുന്ന ഏതൊരു ഗേറ്റ്വേയും (സ്വയം-ഹോസ്റ്റുചെയ്ത പ്രോക്സി, vLLM, ഒരു മൂന്നാം-കക്ഷി അഗ്രഗേറ്റർ) അതിൻ്റെ സ്വന്തം പ്രൊവൈഡർ നോഡായി ചേർക്കാവുന്നതാണ്:
 
 1. **ദാതാക്കൾ → ചേർക്കുക OpenAI അനുയോജ്യം** .
 2. **പേര്** : നോഡിനായി ഒരു ഡിസ്പ്ലേ ലേബൽ.
@@ -719,7 +734,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ഈ കീകൾ ഒരു കണക്ഷൻ്റെ `providerSpecificData` യിൽ പോകുന്നു (ഉദാഹരണത്തിന് `PUT /api/providers/{id}` വഴി):
 
-- `toolNameMaxLength` (പൂർണ്ണസംഖ്യ, 1-1024) — OpenAI ചാറ്റ് ഫോർമാറ്റ് അനുയോജ്യമായ കണക്ഷനുകൾക്ക്, ഗേറ്റ്വേ നീളമുള്ള ടൂൾ പേരുകൾ നിരസിക്കുന്നു. ദൈർഘ്യമേറിയ പേരുകൾ ഹ്രസ്വ അപരനാമങ്ങളായി അയയ്ക്കുകയും പ്രതികരണത്തിൽ പുനഃസ്ഥാപിക്കുകയും ചെയ്യുന്നു.
+- `toolNameMaxLength` (പൂർണ്ണസംഖ്യ, 1–1024) — OpenAI ചാറ്റ് ഫോർമാറ്റ് അനുയോജ്യമായ കണക്ഷനുകൾക്കുള്ള ഗേറ്റ്വേ നീളമുള്ള ടൂൾ പേരുകൾ നിരസിക്കുന്നു. ദൈർഘ്യമേറിയ പേരുകൾ ഹ്രസ്വ അപരനാമങ്ങളായി അയയ്ക്കുകയും പ്രതികരണത്തിൽ പുനഃസ്ഥാപിക്കുകയും ചെയ്യുന്നു. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go, മ്യൂസ് കോഡ് എന്നിവ ഇതിനകം 64 പ്രതീകങ്ങളിൽ കൂടുതൽ ക്രമീകരണങ്ങളില്ലാതെ പേരുകൾ നൽകി. ഒരു കണക്ഷൻ മൂല്യം Azure OpenAI / Azure AI Foundry ഡിഫോൾട്ടിനെ മാറ്റിസ്ഥാപിക്കുന്നു (ഒരു കർശനമായ ഗേറ്റ്വേയ്ക്ക് പിന്നിലെ ഒരു അസൂർ കണക്ഷൻ) കൂടാതെ ഒരു ഇഷ്ടാനുസൃത അനുയോജ്യമായ നോഡിന് പരിധി സജ്ജീകരിക്കുന്നു; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go, Muse Code എന്നിവ അവയുടെ രജിസ്ട്രി പരിധി നിലനിർത്തുകയും അവഗണിക്കുകയും ചെയ്യുന്നു.
 - `quotaEndpoint` — ഗേറ്റ്വേയുടെ quota/credits അവസാന പോയിൻ്റ്, ഡാഷ്ബോർഡ് ക്വാട്ട സ്ട്രിപ്പിനും ക്വാട്ട-അവേർ റൂട്ടിംഗിനും വേണ്ടി വായിക്കുക. OpenAI-, ആന്ത്രോപിക്-അനുയോജ്യമായ കണക്ഷനുകളിൽ പ്രവർത്തിക്കുന്നു; മുഴുവൻ ആകൃതിയും `open-sse/services/usage/openaiCompatible.ts` ൽ രേഖപ്പെടുത്തിയിട്ടുണ്ട്.
 
 ```json
@@ -737,7 +752,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ### ചെയിനിംഗ് OmniRoute പിയേഴ്സ്
 
-മറ്റൊരു OmniRoute ഗേറ്റ്വേ a ആയി ചേർക്കാം** ഇഷ്ടാനുസൃത OpenAI-അനുയോജ്യമാണ്** ദാതാവ്. പിയറിൻ്റെ `/v1` ബേസ് URL ഉം ആ പിയർ നൽകുന്ന ഒരു സമർപ്പിത, കുറഞ്ഞ പ്രത്യേകാവകാശമുള്ള API കീയും ഉപയോഗിക്കുക.
+മറ്റൊരു OmniRoute ഗേറ്റ്വേ a ആയി ചേർക്കാം** ഇഷ്ടാനുസൃത OpenAI-അനുയോജ്യമാണ്** ദാതാവ്. പിയറുടെ `/v1` ബേസ് URL ഉം ആ പിയർ നൽകുന്ന ഒരു സമർപ്പിത, കുറഞ്ഞ പ്രത്യേകാവകാശമുള്ള API കീയും ഉപയോഗിക്കുക.
 
 പരസ്പരം അല്ലെങ്കിൽ മൾട്ടി-ഹോപ്പ് ചെയിനുകൾക്ക്, എല്ലാ ഗേറ്റ്വേയിലും ഓപ്റ്റ്-ഇൻ ലൂപ്പ് ഗാർഡ് പ്രവർത്തനക്ഷമമാക്കുക:
 
@@ -769,7 +784,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-നഷ്ടപ്പെട്ടാൽ പ്രൊവൈഡർ പ്രിഫിക്സ് സ്വയമേവ ചേർക്കും. പൊരുത്തമില്ലാത്ത മോഡലുകൾ `400` തിരികെ നൽകുന്നു.
+നഷ്ടപ്പെട്ടാൽ ദാതാവിൻ്റെ പ്രിഫിക്സ് സ്വയമേവ ചേർക്കും. പൊരുത്തമില്ലാത്ത മോഡലുകൾ `400` തിരികെ നൽകുന്നു.
 
 ### നെറ്റ്വർക്ക് പ്രോക്സി കോൺഫിഗറേഷൻ
 
@@ -809,17 +824,17 @@ curl http://localhost:20128/api/models/catalog
 - നിങ്ങളുടെ നിലവിലെ OpenAI-അനുയോജ്യമായ `/v1` എൻഡ് പോയിൻ്റിലേക്ക് ഫോർവേഡ് ചെയ്യുന്ന ഒരു താൽക്കാലിക `https://*.trycloudflare.com` URL സൃഷ്ടിക്കുന്നു
 - ആദ്യം ആവശ്യമുള്ളപ്പോൾ മാത്രം ഇൻസ്റ്റാളേഷൻ `cloudflared` പ്രവർത്തനക്ഷമമാക്കുക; പിന്നീട് പുനരാരംഭിക്കുമ്പോൾ അതേ നിയന്ത്രിത ബൈനറി വീണ്ടും ഉപയോഗിക്കുന്നു
 - OmniRoute അല്ലെങ്കിൽ കണ്ടെയ്നർ പുനരാരംഭിച്ചതിന് ശേഷം ദ്രുത തുരങ്കങ്ങൾ സ്വയമേവ പുനഃസ്ഥാപിക്കില്ല; ആവശ്യമുള്ളപ്പോൾ ഡാഷ്ബോർഡിൽ നിന്ന് അവ വീണ്ടും പ്രവർത്തനക്ഷമമാക്കുക
-- ടണൽ URLs എഫെമെറൽ ആണ്, നിങ്ങൾ തുരങ്കം stop/start മാറും
+- ടണൽ URLs ക്ഷണികമാണ്, നിങ്ങൾ തുരങ്കം stop/start മാറും
 - നിയന്ത്രിത കണ്ടെയ്നറുകളിലെ ശബ്ദായമാനമായ QUIC UDP ബഫർ മുന്നറിയിപ്പുകൾ ഒഴിവാക്കാൻ HTTP/2 ട്രാൻസ്പോർട്ടിലേക്ക് ഡിഫോൾട്ട് നിയന്ത്രിത ദ്രുത തുരങ്കങ്ങൾ
 - നിയന്ത്രിത ഗതാഗത ചോയ്സ് അസാധുവാക്കണമെങ്കിൽ `CLOUDFLARED_PROTOCOL=quic` അല്ലെങ്കിൽ `auto` സജ്ജമാക്കുക
 - നിയന്ത്രിത ഡൗൺലോഡിന് പകരം മുൻകൂട്ടി ഇൻസ്റ്റാൾ ചെയ്ത `cloudflared` ബൈനറി ഉപയോഗിക്കാൻ നിങ്ങൾ ആഗ്രഹിക്കുന്നുവെങ്കിൽ `CLOUDFLARED_BIN` സജ്ജമാക്കുക
-- Cloudflare ദ്രുത തുരങ്കം, Tailscale ഫണൽ, ngrok ടണൽ പാനലുകൾ എന്നിവ കാണിക്കാനോ മറയ്ക്കാനോ കഴിയും** ക്രമീകരണങ്ങൾ → രൂപഭാവം** . ഒരു പാനൽ മറയ്ക്കുന്നത് ഓടുന്ന തുരങ്കത്തെ തടയില്ല.
+- Cloudflare ദ്രുത തുരങ്കം, Tailscale ഫണൽ, ngrok ടണൽ പാനലുകൾ എന്നിവയിൽ കാണിക്കാനോ മറയ്ക്കാനോ കഴിയും** ക്രമീകരണങ്ങൾ → രൂപഭാവം** . ഒരു പാനൽ മറയ്ക്കുന്നത് ഓടുന്ന തുരങ്കത്തെ തടയില്ല.
 
 ### LLM ഗേറ്റ്വേ ഇൻ്റലിജൻസ് (ഘട്ടം 9)
 
-- **സെമാൻ്റിക് കാഷെ** — സ്ട്രീമിംഗ് അല്ലാത്ത, താപനില = 0 പ്രതികരണങ്ങൾ ( `X-OmniRoute-No-Cache: true` ഉപയോഗിച്ച് ബൈപാസ്) ഓട്ടോ-കാഷെകൾ
-- **ഐഡംപോട്ടൻസി അഭ്യർത്ഥിക്കുക** - `Idempotency-Key` അല്ലെങ്കിൽ `X-Request-Id` തലക്കെട്ട് വഴി 5 സെക്കൻഡിനുള്ളിൽ അഭ്യർത്ഥനകൾ ഡ്യൂപ്ലിക്കേറ്റ് ചെയ്യുന്നു
-- **പുരോഗതി ട്രാക്കിംഗ്** — `X-OmniRoute-Progress: true` ഹെഡർ വഴി SSE `event: progress` ഇവൻ്റുകൾ തിരഞ്ഞെടുക്കുക
+- **സെമാൻ്റിക് കാഷെ** — ഓട്ടോ-കാഷെകൾ നോൺ-സ്ട്രീമിംഗ്, താപനില = 0 പ്രതികരണങ്ങൾ ( `X-OmniRoute-No-Cache: true` ഉപയോഗിച്ച് ബൈപാസ്)
+- **ഐഡംപോട്ടൻസി അഭ്യർത്ഥിക്കുക** — `Idempotency-Key` അല്ലെങ്കിൽ `X-Request-Id` തലക്കെട്ട് വഴി 5 സെക്കൻഡിനുള്ളിൽ അഭ്യർത്ഥനകൾ ഡീഡ്യൂപ്ലിക്കേറ്റ് ചെയ്യുന്നു
+- **പുരോഗതി ട്രാക്കിംഗ്** — ഓപ്റ്റ്-ഇൻ SSE `event: progress` ഇവൻ്റുകൾ `X-OmniRoute-Progress: true` ഹെഡർ വഴി
 
 ---
 
@@ -827,7 +842,7 @@ curl http://localhost:20128/api/models/catalog
 
 വഴി പ്രവേശനം** ഡാഷ്ബോർഡ് → വിവർത്തകൻ** . ദാതാക്കൾക്കിടയിൽ API അഭ്യർത്ഥനകൾ OmniRoute എങ്ങനെ വിവർത്തനം ചെയ്യുന്നുവെന്ന് ഡീബഗ് ചെയ്ത് ദൃശ്യവൽക്കരിക്കുക.
 
-| മോഡ്                | ഉദ്ദേശം                                                                                                              |
+| മോഡ്                | ഉദ്ദേശ്യം                                                                                                            |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **കളിസ്ഥലം**        | source/target ഫോർമാറ്റുകൾ തിരഞ്ഞെടുക്കുക, ഒരു അഭ്യർത്ഥന ഒട്ടിക്കുക, വിവർത്തനം ചെയ്ത ഔട്ട്പുട്ട് തൽക്ഷണം കാണുക        |
 | **ചാറ്റ് ടെസ്റ്റർ** | പ്രോക്സി വഴി തത്സമയ ചാറ്റ് സന്ദേശങ്ങൾ അയയ്ക്കുകയും പൂർണ്ണ request/response സൈക്കിൾ പരിശോധിക്കുകയും ചെയ്യുക           |
@@ -848,27 +863,27 @@ curl http://localhost:20128/api/models/catalog
 
 **ഡാഷ്ബോർഡ് ദൃശ്യമാകുന്ന തന്ത്രങ്ങൾ (അക്കൗണ്ട് ലെവൽ റൂട്ടിംഗ്):**
 
-| തന്ത്രം                           | വിവരണം                                                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **ആദ്യം പൂരിപ്പിക്കുക**           | മുൻഗണനാ ക്രമത്തിൽ അക്കൗണ്ടുകൾ ഉപയോഗിക്കുന്നു - ലഭ്യമല്ലാത്തത് വരെ പ്രാഥമിക അക്കൗണ്ട് എല്ലാ അഭ്യർത്ഥനകളും കൈകാര്യം ചെയ്യുന്നു           |
-| **റൗണ്ട് റോബിൻ**                  | കോൺഫിഗർ ചെയ്യാവുന്ന സ്റ്റിക്കി പരിധിയുള്ള എല്ലാ അക്കൗണ്ടുകളിലൂടെയും സൈക്കിൾ ചെയ്യുന്നു (ഡിഫോൾട്ട്: ഓരോ അക്കൗണ്ടിനും 3 കോളുകൾ)          |
-| **P2C (രണ്ട് ചോയ്സുകളുടെ ശക്തി)** | 2 ക്രമരഹിതമായ അക്കൗണ്ടുകളും ആരോഗ്യകരമായ ഒന്നിലേക്കുള്ള വഴികളും തിരഞ്ഞെടുക്കുന്നു - ആരോഗ്യത്തെക്കുറിച്ചുള്ള അവബോധത്തോടൊപ്പം ബാലൻസ് ലോഡ് |
-| **ക്രമരഹിതം**                     | ഫിഷർ-യേറ്റ്സ് ഷഫിൾ ഉപയോഗിച്ച് ഓരോ അഭ്യർത്ഥനയ്ക്കും ക്രമരഹിതമായി ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുന്നു                                        |
-| **ഏറ്റവും കുറവ് ഉപയോഗിച്ചത്**     | ട്രാഫിക്ക് തുല്യമായി വിതരണം ചെയ്യുന്ന ഏറ്റവും പഴയ `lastUsedAt` ടൈംസ്റ്റാമ്പ് ഉള്ള അക്കൗണ്ടിലേക്കുള്ള റൂട്ടുകൾ                          |
-| **ചെലവ് ഒപ്റ്റിമൈസ് ചെയ്തു**      | ഏറ്റവും കുറഞ്ഞ വിലയുള്ള ദാതാക്കൾക്കായി ഒപ്റ്റിമൈസ് ചെയ്യുന്ന ഏറ്റവും കുറഞ്ഞ മുൻഗണന മൂല്യമുള്ള അക്കൗണ്ടിലേക്കുള്ള റൂട്ടുകൾ              |
+| തന്ത്രം                           | വിവരണം                                                                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **ആദ്യം പൂരിപ്പിക്കുക**           | മുൻഗണനാ ക്രമത്തിലുള്ള അക്കൗണ്ടുകൾ ഉപയോഗിക്കുന്നു — പ്രാഥമിക അക്കൗണ്ട് ലഭ്യമല്ലാത്തത് വരെ എല്ലാ അഭ്യർത്ഥനകളും കൈകാര്യം ചെയ്യുന്നു |
+| **റൗണ്ട് റോബിൻ**                  | കോൺഫിഗർ ചെയ്യാവുന്ന സ്റ്റിക്കി പരിധിയുള്ള എല്ലാ അക്കൗണ്ടുകളിലൂടെയും സൈക്കിൾ ചെയ്യുന്നു (ഡിഫോൾട്ട്: ഓരോ അക്കൗണ്ടിനും 3 കോളുകൾ)    |
+| **P2C (രണ്ട് ചോയ്സുകളുടെ ശക്തി)** | Picks 2 random accounts and routes to the healthier one — balances load with awareness of health                                 |
+| **ക്രമരഹിതം**                     | ഫിഷർ-യേറ്റ്സ് ഷഫിൾ ഉപയോഗിച്ച് ഓരോ അഭ്യർത്ഥനയ്ക്കും ക്രമരഹിതമായി ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുന്നു                                  |
+| **ഏറ്റവും കുറവ് ഉപയോഗിച്ചത്**     | ട്രാഫിക്ക് തുല്യമായി വിതരണം ചെയ്യുന്ന ഏറ്റവും പഴയ `lastUsedAt` ടൈംസ്റ്റാമ്പ് ഉള്ള അക്കൗണ്ടിലേക്കുള്ള റൂട്ടുകൾ                    |
+| **ചെലവ് ഒപ്റ്റിമൈസ് ചെയ്തു**      | ഏറ്റവും കുറഞ്ഞ വിലയുള്ള ദാതാക്കൾക്കായി ഒപ്റ്റിമൈസ് ചെയ്യുന്ന, ഏറ്റവും കുറഞ്ഞ മുൻഗണന മൂല്യമുള്ള അക്കൗണ്ടിലേക്കുള്ള റൂട്ടുകൾ       |
 
-**വിപുലമായ കോംബോ, ഓട്ടോ സ്ട്രാറ്റജികൾ** (ഓരോ കോമ്പോയിലും അല്ലെങ്കിൽ `auto/*` പ്രിഫിക്സുകൾ വഴി കോൺഫിഗർ ചെയ്യാം - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) കാണുക):
+**വിപുലമായ കോംബോ, ഓട്ടോ സ്ട്രാറ്റജികൾ** (ഓരോ കോമ്പോയിലും ക്രമീകരിക്കാവുന്നതാണ് അല്ലെങ്കിൽ `auto/*` പ്രിഫിക്സുകൾ — വഴി [AUTO-COMBO.md](../routing/AUTO-COMBO.md) കാണുക):
 
-- `priority` - കർശനമായ ക്രമം, ഒരിക്കലും റൗണ്ട് റോബിനുകൾ അല്ല
-- `weighted` - ആനുപാതിക ട്രാഫിക്ക് ഓരോ മോഡൽ വെയിറ്റിലും വിഭജിക്കുന്നു
-- `fill-first` - പരിധികൾ എത്തുന്നതുവരെ ആദ്യ മോഡൽ കളയുക
+- `priority` — കർശനമായ ക്രമം, ഒരിക്കലും റൗണ്ട് റോബിൻസ് അല്ല
+- `weighted` — ആനുപാതിക ട്രാഫിക്കിനെ ഓരോ മോഡൽ വെയിറ്റും അനുസരിച്ച് വിഭജിക്കുന്നു
+- പരിധികൾ എത്തുന്നതുവരെ`fill-first` — ആദ്യ മോഡൽ കളയുക
 - `round-robin` / `strict-random` / `random`
 - `p2c` (രണ്ട് ചോയ്സുകളുടെ ശക്തി)
 - `least-used`, `cost-optimized`
-- `auto` - എല്ലാ കാൻഡിഡേറ്റുകളിലും സ്കോർ-ഡ്രൈവിംഗ്
-- `lkgp` (അവസാനം അറിയപ്പെടുന്ന നല്ല ദാതാവ്) - അവസാനം വിജയിച്ച ദാതാവിനെ പിൻ ചെയ്യുന്നു, തുടർന്ന് നിയമങ്ങളിലേക്ക് മടങ്ങുന്നു
+- `auto` — സ്കോർ എല്ലാ ഉദ്യോഗാർത്ഥികളിലേക്കും നയിക്കപ്പെടുന്നു
+- `lkgp` (അവസാനം അറിയപ്പെടുന്ന നല്ല ദാതാവ്) — അവസാനത്തെ വിജയകരമായ ദാതാവിന് പിൻ ചെയ്യുന്നു, തുടർന്ന് നിയമങ്ങളിലേക്ക് മടങ്ങുന്നു
 - `context-optimized` — ഏറ്റവും വലിയ സൗജന്യ സന്ദർഭ വിൻഡോ ഉള്ള മോഡൽ തിരഞ്ഞെടുക്കുന്നു
-- `context-relay` — ഫോളോ-അപ്പ് ടേണുകൾക്കുള്ള ചങ്ങലകൾ നീണ്ട സന്ദർഭ മോഡലുകൾ
+- ഫോളോ-അപ്പ് ടേണുകൾക്കായി`context-relay` — ശൃംഖലകൾ നീണ്ട സന്ദർഭ മോഡലുകൾ
 
 #### ബാഹ്യ സ്റ്റിക്കി സെഷൻ ഹെഡർ
 
@@ -961,7 +976,7 @@ omniroute combo create free-stack \
 
 ഇമേജ് മനസ്സിലാക്കലും കോഡ് ജനറേഷനും ഉൾപ്പെടുന്ന വർക്ക്ഫ്ലോകൾക്കായി ഹൈ-സ്പീഡ് ടെക്സ്റ്റ് ജനറേഷനുമായി പ്രത്യേക വിഷൻ മോഡലുകൾ ജോടിയാക്കുന്നു.
 
-- **പാറ്റേൺ** : ദർശന ശേഷിയുള്ള മോഡലുകൾ ആദ്യം ലിസ്റ്റുചെയ്യുന്ന ഒരു `Priority` കോംബോയും അവസാനമായി ഉയർന്ന ത്രൂപുട്ട് text/code മോഡലും.
+- **പാറ്റേൺ** : ദർശന ശേഷിയുള്ള മോഡലുകൾ ആദ്യം ലിസ്റ്റുചെയ്യുന്ന ഒരു `Priority` കോംബോയും അവസാനത്തെ ഉയർന്ന ത്രൂപുട്ട് text/code മോഡലും.
 - **മോഡലുകൾ** :
   1. `gemini/gemini-2.5-pro` (ശക്തമായ image/multimodal ധാരണ)
   2. `openai/gpt-4o` (സന്തുലിതമായ കാഴ്ചയും ഉപകരണ ഉപയോഗവും)
@@ -973,26 +988,26 @@ omniroute combo create free-stack \
 
 വഴി കോൺഫിഗർ ചെയ്യുക** ഡാഷ്ബോർഡ് → ക്രമീകരണങ്ങൾ → റെസിലിയൻസ്** .
 
-അഞ്ച് ഘടകങ്ങളുള്ള പ്രൊവൈഡർ ലെവൽ റെസിലൻസ്OmniRoute നടപ്പിലാക്കുന്നു:
+OmniRoute അഞ്ച് ഘടകങ്ങളുള്ള ദാതാവിൻ്റെ തലത്തിലുള്ള പ്രതിരോധം നടപ്പിലാക്കുന്നു:
 
 1. **ക്യൂ & പേസിംഗ് അഭ്യർത്ഥിക്കുക** — സിസ്റ്റം-ലെവൽ അഭ്യർത്ഥന രൂപപ്പെടുത്തൽ:
-   - **മിനിറ്റിലെ അഭ്യർത്ഥനകൾ (RPM)** - ഓരോ അക്കൗണ്ടിനും മിനിറ്റിന് പരമാവധി അഭ്യർത്ഥനകൾ
-   - **അഭ്യർത്ഥനകൾക്കിടയിലുള്ള ഏറ്റവും കുറഞ്ഞ സമയം** - അഭ്യർത്ഥനകൾക്കിടയിൽ മില്ലിസെക്കൻഡിലെ ഏറ്റവും കുറഞ്ഞ വിടവ്
-   - **പരമാവധി കൺകറൻ്റ് അഭ്യർത്ഥനകൾ** - ഓരോ അക്കൗണ്ടിനും ഒരേസമയം പരമാവധി അഭ്യർത്ഥനകൾ
+   - **മിനിറ്റിലെ അഭ്യർത്ഥനകൾ (RPM)** — ഓരോ അക്കൗണ്ടിനും മിനിറ്റിന് പരമാവധി അഭ്യർത്ഥനകൾ
+   - **അഭ്യർത്ഥനകൾക്കിടയിലുള്ള ഏറ്റവും കുറഞ്ഞ സമയം** — അഭ്യർത്ഥനകൾക്കിടയിൽ മില്ലിസെക്കൻഡിലെ ഏറ്റവും കുറഞ്ഞ വിടവ്
+   - **പരമാവധി കൺകറൻ്റ് അഭ്യർത്ഥനകൾ** ഓരോ അക്കൗണ്ടിനും — പരമാവധി ഒരേസമയം അഭ്യർത്ഥനകൾ
 
-2. **കണക്ഷൻ കൂൾഡൗൺ** - വീണ്ടും ശ്രമിക്കാവുന്ന പരാജയങ്ങൾക്ക് ശേഷം ഒരൊറ്റ കണക്ഷനുള്ള പെർ-ഓത്ത്-ടൈപ്പ് കോൺഫിഗറേഷൻ:
-   - **അടിസ്ഥാന കൂൾഡൗൺ** — വീണ്ടും ശ്രമിക്കാവുന്ന അപ്സ്ട്രീം പരാജയങ്ങൾക്കുള്ള ഡിഫോൾട്ട് കൂൾഡൗൺ വിൻഡോ
-   - **അപ്സ്ട്രീം വീണ്ടും ശ്രമിക്കാനുള്ള സൂചനകൾ ഉപയോഗിക്കുക** — നൽകുമ്പോൾ ആധികാരിക `Retry-After` അല്ലെങ്കിൽ റീസെറ്റ് സൂചനകൾ ബഹുമാനിക്കുന്നു
-   - **മാക്സ് ബാക്ക്ഓഫ് ഘട്ടങ്ങൾ** - ആവർത്തിച്ചുള്ള പരാജയങ്ങൾക്കുള്ള പരമാവധി എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ് ലെവൽ
+2. **കണക്ഷൻ കൂൾഡൗൺ** വീണ്ടും ശ്രമിക്കാവുന്ന പരാജയങ്ങൾക്ക് ശേഷം ഒരൊറ്റ കണക്ഷനുള്ള — പെർ-ഓത്ത്-ടൈപ്പ് കോൺഫിഗറേഷൻ:
+   - **അടിസ്ഥാന കൂൾഡൗൺ** വീണ്ടും ശ്രമിക്കാവുന്ന അപ്സ്ട്രീം പരാജയങ്ങൾക്കായി — ഡിഫോൾട്ട് കൂൾഡൗൺ വിൻഡോ
+   - **അപ്സ്ട്രീം വീണ്ടും ശ്രമിക്കാനുള്ള സൂചനകൾ ഉപയോഗിക്കുക** — ആധികാരിക `Retry-After` ബഹുമാനിക്കുന്നു അല്ലെങ്കിൽ നൽകുമ്പോൾ സൂചനകൾ റീസെറ്റ് ചെയ്യുക
+   - **മാക്സ് ബാക്ക്ഓഫ് ഘട്ടങ്ങൾ** — ആവർത്തിച്ചുള്ള പരാജയങ്ങൾക്കുള്ള പരമാവധി എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ് ലെവൽ
 
 3. **പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ** — എൻഡ്-ടു-എൻഡ് പ്രൊവൈഡർ പരാജയങ്ങൾ ട്രാക്ക് ചെയ്യുന്നു, കോൺഫിഗർ ചെയ്ത മുന്നറിയിപ്പ് പരിധിയിൽ ഒരു ദാതാവിനെ തരംതാഴ്ത്തിയതായി അടയാളപ്പെടുത്തുന്നു, കോൺഫിഗർ ചെയ്ത പരാജയ പരിധി എത്തുമ്പോൾ ബ്രേക്കർ തുറക്കുന്നു:
-   - **ഡീഗ്രഡേഷൻ ത്രെഷോൾഡ്** - `DEGRADED` പ്രവേശിക്കുന്നതിന് മുമ്പ് തുടർച്ചയായ ദാതാവിൻ്റെ പരാജയങ്ങൾ
-   - **പരാജയ പരിധി** - `OPEN` പ്രവേശിക്കുന്നതിന് മുമ്പ് തുടർച്ചയായ ദാതാവിൻ്റെ പരാജയങ്ങൾ
-   - **സമയപരിധി പുനഃസജ്ജമാക്കുക** - ദാതാവിനെ വീണ്ടും പരീക്ഷിക്കുന്നതിന് മുമ്പുള്ള സമയ വിൻഡോ
-   - **CLOSED** (ആരോഗ്യമുള്ളത്) - അഭ്യർത്ഥനകൾ സാധാരണയായി ഒഴുകുന്നു
-   - **DEGRADED** - ഉയർന്ന പരാജയങ്ങൾ ട്രാക്ക് ചെയ്യുമ്പോൾ അഭ്യർത്ഥനകൾ ഇപ്പോഴും ഒഴുകുന്നു
-   - **OPEN** - ആവർത്തിച്ചുള്ള പരാജയങ്ങൾക്ക് ശേഷം ദാതാവിനെ താൽക്കാലികമായി തടഞ്ഞു
-   - **HALF_OPEN** - ദാതാവ് സുഖം പ്രാപിച്ചിട്ടുണ്ടോയെന്ന് പരിശോധിക്കുന്നു
+   - **ഡീഗ്രേഡേഷൻ ത്രെഷോൾഡ്** — `DEGRADED` പ്രവേശിക്കുന്നതിന് മുമ്പ് തുടർച്ചയായ ദാതാവിൻ്റെ പരാജയങ്ങൾ
+   - **പരാജയ പരിധി** — `OPEN` പ്രവേശിക്കുന്നതിന് മുമ്പ് തുടർച്ചയായ ദാതാവിൻ്റെ പരാജയങ്ങൾ
+   - **സമയപരിധി പുനഃസജ്ജമാക്കുക** ദാതാവിനെ വീണ്ടും പരിശോധിക്കുന്നതിന് മുമ്പുള്ള — ടൈം വിൻഡോ
+   - **CLOSED** (ആരോഗ്യകരമായ) — അഭ്യർത്ഥനകൾ സാധാരണയായി ഒഴുകുന്നു
+   - **DEGRADED** — ഉയർന്ന പരാജയങ്ങൾ ട്രാക്ക് ചെയ്യുമ്പോൾ അഭ്യർത്ഥനകൾ ഇപ്പോഴും ഒഴുകുന്നു
+   - **OPEN** ആവർത്തിച്ചുള്ള പരാജയങ്ങൾക്ക് ശേഷം — ദാതാവിനെ താൽക്കാലികമായി തടഞ്ഞു
+   - **HALF_OPEN** ദാതാവ് സുഖം പ്രാപിച്ചിട്ടുണ്ടെങ്കിൽ — പരിശോധന
 
    കണക്ഷൻ-സ്കോപ്പ്ഡ് `429` നിരക്ക് പരിധികൾ നിലനിൽക്കും** കണക്ഷൻ കൂൾഡൗൺ** പ്രൊവൈഡർ ബ്രേക്കറിലേക്ക് കണക്കാക്കരുത്.
 
@@ -1048,7 +1063,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **രൂപഭാവം**      | തീം നിയന്ത്രണങ്ങൾ (light/dark/system), സൈഡ്ബാർ ദൃശ്യപരത, Cloudflare/Tailscale/ngrok ടണൽ കാർഡുകൾക്കായുള്ള പാനൽ ടോഗിളുകൾ                                                                           |
 | **AI**           | ചിന്തിക്കുന്ന ബജറ്റ് (പാസ്ത്രൂ / ഓട്ടോ-സ്ട്രിപ്പ് / കസ്റ്റം / അഡാപ്റ്റീവ് — കാണുക [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ആഗോള സിസ്റ്റം പ്രോംപ്റ്റ്, പ്രോംപ്റ്റ് കാഷെ സ്ഥിതിവിവരക്കണക്കുകൾ |
 | **സുരക്ഷ**       | Login/Password ക്രമീകരണങ്ങൾ, IP ആക്സസ് കൺട്രോൾ, `/models` നുള്ള API auth, ദാതാവിനെ തടയൽ, പ്രോംപ്റ്റ്-ഇഞ്ചക്ഷൻ ഗാർഡ്                                                                              |
-| **റൂട്ടിംഗ്**    | ഗ്ലോബൽ റൂട്ടിംഗ് സ്ട്രാറ്റജി (ഫസ്റ്റ് / റൌണ്ട് റോബിൻ / P2C / റാൻഡം / ഏറ്റവും കുറവ് ഉപയോഗിച്ചത് / ഒപ്റ്റിമൈസ് ചെയ്തത്), വൈൽഡ്കാർഡ് മോഡൽ അപരനാമങ്ങൾ, ഫാൾബാക്ക് ചെയിനുകൾ, കോംബോ ഡിഫോൾട്ടുകൾ         |
+| **റൂട്ടിംഗ്**    | ഗ്ലോബൽ റൂട്ടിംഗ് സ്ട്രാറ്റജി (ഫസ്റ്റ് / റൗണ്ട് റോബിൻ / P2C / റാൻഡം / ഏറ്റവും കുറവ് ഉപയോഗിച്ചത് / ഒപ്റ്റിമൈസ് ചെയ്തത്), വൈൽഡ്കാർഡ് മോഡൽ അപരനാമങ്ങൾ, ഫാൾബാക്ക് ചെയിനുകൾ, കോംബോ ഡിഫോൾട്ടുകൾ         |
 | **പ്രതിരോധശേഷി** | ക്യൂ, കണക്ഷൻ കൂൾഡൗൺ, പ്രൊവൈഡർ ബ്രേക്കർ കോൺഫിഗറേഷൻ, വെയിറ്റ്-ഫോർ കൂൾഡൌൺ പെരുമാറ്റം എന്നിവ അഭ്യർത്ഥിക്കുക                                                                                          |
 | **വിപുലമായ**     | ഗ്ലോബൽ പ്രോക്സി കോൺഫിഗറേഷൻ (HTTP/SOCKS5), ഓരോ പ്രൊവൈഡർ പ്രോക്സി അസാധുവാക്കുന്നു                                                                                                                  |
 
@@ -1060,10 +1075,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 വഴി പ്രവേശനം** ഡാഷ്ബോർഡ് → ചെലവുകൾ** .
 
-| ടാബ്            | ഉദ്ദേശം                                                                                                      |
-| --------------- | ------------------------------------------------------------------------------------------------------------ |
-| **ബജറ്റ്**      | daily/weekly/monthly ബഡ്ജറ്റുകളും തത്സമയ ട്രാക്കിംഗും ഉപയോഗിച്ച് ഓരോ API കീയുടെയും ചെലവ് പരിധി സജ്ജീകരിക്കുക |
-| **വിലനിർണ്ണയം** | മോഡൽ വിലനിർണ്ണയ എൻട്രികൾ കാണുക, എഡിറ്റ് ചെയ്യുക - ഓരോ ദാതാവിനും 1K input/output ടോക്കണുകൾക്കുള്ള വില         |
+| ടാബ്            | ഉദ്ദേശ്യം                                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| **ബജറ്റ്**      | daily/weekly/monthly ബഡ്ജറ്റുകളും തത്സമയ ട്രാക്കിംഗും ഉപയോഗിച്ച് ഓരോ API കീയിലും ചെലവ് പരിധി സജ്ജീകരിക്കുക |
+| **വിലനിർണ്ണയം** | ഓരോ ദാതാവിനും 1K input/output ടോക്കണുകൾക്കുള്ള — വിലയുടെ മോഡൽ പ്രൈസിംഗ് എൻട്രികൾ കാണുക, എഡിറ്റ് ചെയ്യുക    |
 
 ```bash
 # API: Set a budget
@@ -1143,9 +1158,9 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ഗ്ലോബൽ കോംബോ ഡിഫോൾട്ടുകൾ സജ്ജമാക്കാൻ കഴിയും** ഡാഷ്ബോർഡ് → ക്രമീകരണങ്ങൾ → റൂട്ടിംഗ് → കോംബോ ഡിഫോൾട്ടുകൾ** . കോംബോ ടാർഗെറ്റ് ടൈംഔട്ടുകൾ ഡിഫോൾട്ടായി നിലവിലെ അഭ്യർത്ഥന ടൈംഔട്ട് അവകാശമാക്കുന്നു. ഉപയോഗിക്കുക** ടാർഗെറ്റ് ടൈംഔട്ട് (സെക്കൻഡ്)** കോംബോ ഡിഫോൾട്ടുകളിലോ വ്യക്തിഗത കോമ്പോയിലോ ഒരു ടാർഗെറ്റ് പരിധി കുറയുമ്പോൾ മാത്രം ഫാൾബാക്ക് വേഗത്തിലാക്കണം.
 
-സീറോ-ലേറ്റൻസി കോംബോ ഒപ്റ്റിമൈസേഷനുകൾ ഓപ്റ്റ്-ഇൻ ആണ്. വിടുക** സീറോ-ലേറ്റൻസി ഒപ്റ്റിമൈസേഷനുകൾ** ഫാൾബാക്ക് ടാർഗെറ്റുകൾ റേസിംഗ് ചെയ്യുന്നതിൽ നിന്നും, TTFT ചരിത്രത്തെ അടിസ്ഥാനമാക്കിയുള്ള ടാർഗെറ്റുകൾ ഒഴിവാക്കുന്നതിൽ നിന്നും അല്ലെങ്കിൽ ഫാൾബാക്ക് അഭ്യർത്ഥനകൾ കംപ്രസ്സുചെയ്യുന്നതിൽ നിന്നും ഈ ലേറ്റൻസി സവിശേഷതകൾ തടയുന്നതിന് അപ്രാപ്തമാക്കി; ഇത് പ്രാപ്തമാക്കുന്നത് കോൺഫിഗർ ചെയ്ത ഹെഡ്ജിംഗ്, പ്രെഡിക്റ്റീവ് TTFT സ്കിപ്പുകൾ, കുറഞ്ഞ ടെയിൽ ലേറ്റൻസിക്ക് വേണ്ടി routing/request ഫിഡിലിറ്റി ട്രേഡ് ചെയ്യുന്നതിനായി പ്രോആക്ടീവ് ഫാൾബാക്ക് കംപ്രഷൻ എന്നിവ അനുവദിക്കുന്നു.
+സീറോ-ലേറ്റൻസി കോംബോ ഒപ്റ്റിമൈസേഷനുകൾ ഓപ്റ്റ്-ഇൻ ആണ്. വിടുക** സീറോ-ലേറ്റൻസി ഒപ്റ്റിമൈസേഷനുകൾ** ഫാൾബാക്ക് ടാർഗെറ്റുകൾ റേസിംഗ് ചെയ്യുന്നതിൽ നിന്നും, TTFT ചരിത്രത്തെ അടിസ്ഥാനമാക്കിയുള്ള ടാർഗെറ്റുകൾ ഒഴിവാക്കുന്നതിൽ നിന്നും അല്ലെങ്കിൽ ഫാൾബാക്ക് അഭ്യർത്ഥനകൾ കംപ്രസ്സുചെയ്യുന്നതിൽ നിന്നും ഈ ലേറ്റൻസി ഫീച്ചറുകൾ തടയുന്നതിന് അപ്രാപ്തമാക്കി; ഇത് പ്രാപ്തമാക്കുന്നത് കോൺഫിഗർ ചെയ്ത ഹെഡ്ജിംഗ്, പ്രെഡിക്റ്റീവ് TTFT സ്കിപ്പുകൾ, കുറഞ്ഞ ടെയിൽ ലേറ്റൻസിക്ക് വേണ്ടി routing/request ഫിഡിലിറ്റി ട്രേഡ് ചെയ്യുന്നതിനായി പ്രോആക്ടീവ് ഫാൾബാക്ക് കംപ്രഷൻ എന്നിവ അനുവദിക്കുന്നു.
 
-പ്രവർത്തനരഹിതമാക്കുക** ന്യായവാദം ടോക്കൺ ബഫർ** അപ്സ്ട്രീം ദാതാക്കൾക്ക് കർശനമായ `max_tokens` / `maxOutputTokens` പരിധികൾ ആവശ്യമുള്ളപ്പോൾ. പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, അറിയപ്പെടുന്ന ഔട്ട്പുട്ട് ക്യാപ് ഉള്ള മോഡലുകൾക്കായി കോംബോ റൂട്ടിംഗ് റീസണിംഗ് മോഡൽ ഹെഡ്റൂം ചേർക്കുകയും സുരക്ഷിത ബഫർ ചെയ്ത മൂല്യം ആ പരിധി കവിയുമ്പോൾ ക്ലയൻ്റ് ടോക്കൺ പരിധി മാറ്റമില്ലാതെ തുടരുകയും ചെയ്യുന്നു. ക്ലയൻ്റ് പരിധി ഇതിനകം അറിയപ്പെടുന്ന ഒരു പരിധിക്ക് മുകളിലാണെങ്കിൽ, അപ്സ്ട്രീം അഭ്യർത്ഥന അയയ്ക്കുന്നതിന് മുമ്പ് OmniRoute അത് ആ തൊപ്പിയിലേക്ക് ഘടിപ്പിക്കുന്നു.
+പ്രവർത്തനരഹിതമാക്കുക** ന്യായവാദം ടോക്കൺ ബഫർ** അപ്സ്ട്രീം ദാതാക്കൾക്ക് കർശനമായ `max_tokens` / `maxOutputTokens` പരിധികൾ ആവശ്യമുള്ളപ്പോൾ. പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, അറിയപ്പെടുന്ന ഔട്ട്പുട്ട് ക്യാപ് ഉള്ള മോഡലുകൾക്കായി കോംബോ റൂട്ടിംഗ് റീസണിംഗ് മോഡൽ ഹെഡ്റൂം ചേർക്കുന്നു, കൂടാതെ സുരക്ഷിത ബഫർ ചെയ്ത മൂല്യം ആ പരിധി കവിയുമ്പോൾ ക്ലയൻ്റ് ടോക്കൺ പരിധിയിൽ മാറ്റമില്ല. ക്ലയൻ്റ് പരിധി ഇതിനകം അറിയപ്പെടുന്ന ഒരു പരിധിക്ക് മുകളിലാണെങ്കിൽ, അപ്സ്ട്രീം അഭ്യർത്ഥന അയയ്ക്കുന്നതിന് മുമ്പ് OmniRoute അത് ആ തൊപ്പിയിലേക്ക് താഴ്ത്തുന്നു.
 
 ---
 
@@ -1158,11 +1173,11 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **സിസ്റ്റം സ്റ്റാറ്റസ്** | പ്രവർത്തനസമയം, പതിപ്പ്, മെമ്മറി ഉപയോഗം, ഡാറ്റ ഡയറക്ടറി               |
 | **ദാതാവിൻ്റെ ആരോഗ്യം**   | ഗ്ലോബൽ പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ റൺടൈം നില                        |
 | **നിരക്ക് പരിധി**        | ശേഷിക്കുന്ന സമയം കൊണ്ട് ഓരോ അക്കൗണ്ടിനും സജീവമായ കണക്ഷൻ കൂൾഡൗണുകൾ    |
-| **സജീവ ലോക്കൗട്ടുകൾ**    | സജീവ മോഡൽ-സ്കോപ്പ്ഡ് ലോക്കൗട്ടുകളും താൽക്കാലിക ഒഴിവാക്കലുകളും        |
+| **സജീവ ലോക്കൗട്ടുകൾ**    | സജീവ മോഡൽ-സ്കോപ്പ് ലോക്കൗട്ടുകളും താൽക്കാലിക ഒഴിവാക്കലുകളും          |
 | **ഒപ്പ് കാഷെ**           | ഡ്യൂപ്ലിക്കേഷൻ കാഷെ സ്ഥിതിവിവരക്കണക്കുകൾ (സജീവ കീകൾ, ഹിറ്റ് നിരക്ക്) |
 | **ലേറ്റൻസി ടെലിമെട്രി**  | ഓരോ ദാതാവിനുംp50/p95/p99 ലേറ്റൻസി അഗ്രഗേഷൻ                           |
 
-**പ്രോ ടിപ്പ്:** ആരോഗ്യ പേജ് ഓരോ 10 സെക്കൻഡിലും സ്വയമേവ പുതുക്കുന്നു. ഏതൊക്കെ ദാതാക്കളാണ് പ്രശ്നങ്ങൾ നേരിടുന്നതെന്ന് തിരിച്ചറിയാൻ സർക്യൂട്ട് ബ്രേക്കർ കാർഡ് ഉപയോഗിക്കുക.
+**പ്രോ ടിപ്പ്:** ഓരോ 10 സെക്കൻഡിലും ആരോഗ്യ പേജ് സ്വയമേവ പുതുക്കുന്നു. ഏതൊക്കെ ദാതാക്കളാണ് പ്രശ്നങ്ങൾ നേരിടുന്നതെന്ന് തിരിച്ചറിയാൻ സർക്യൂട്ട് ബ്രേക്കർ കാർഡ് ഉപയോഗിക്കുക.
 
 ---
 

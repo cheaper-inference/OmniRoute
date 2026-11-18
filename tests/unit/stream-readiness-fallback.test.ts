@@ -19,6 +19,8 @@ process.env[FLAG] = "true";
 const core = await import("../../src/lib/db/core.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 
+const { getCallLogs, waitForCallLogSaves, closeCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
 const originalFetch = globalThis.fetch;
 
 const contentChunk = (content: string) =>
@@ -83,8 +85,9 @@ test.afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  await closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -124,7 +127,10 @@ test("two stalled bodies report the second failure with its own code", async () 
   }) as typeof fetch;
   const log = noopLog();
 
-  const result = (await handleChatCore(chatArgs(requestBody, log))) as {
+  const result = (await handleChatCore({
+    ...chatArgs(requestBody, log),
+    correlationId: "readiness-second-outcome",
+  })) as {
     success: boolean;
     status?: number;
     errorType?: string;
@@ -138,6 +144,17 @@ test("two stalled bodies report the second failure with its own code", async () 
     assert.equal(result.status, 502);
     assert.equal(result.errorType, "stream_early_eof");
     assert.equal(result.errorCode, "STREAM_EARLY_EOF");
+    assert.equal(await waitForCallLogSaves(20_000), true);
+    const saved = await getCallLogs({ correlationId: "readiness-second-outcome" });
+    assert.equal(saved.length, 2);
+    assert.equal(
+      saved.find((row) => row.requestType !== "upstream_http_attempt")?.upstreamHttp?.send?.ordinal,
+      2
+    );
+    assert.equal(
+      saved.find((row) => row.requestType === "upstream_http_attempt")?.upstreamHttp?.send?.ordinal,
+      1
+    );
     assert.ok(
       log.warnLines.some((line) => line.includes("retrying once")),
       `expected a fallback warn line, got: ${log.warnLines.join(" | ")}`

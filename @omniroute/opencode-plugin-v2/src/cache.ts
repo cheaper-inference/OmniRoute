@@ -14,6 +14,13 @@ import { isHttpUrl } from "./shared/index.js";
 export const DEFAULT_MODEL_CACHE_TTL_MS = 300_000 as const;
 
 /**
+ * Lower bound on the background refresh period. Keeps the loop from spinning
+ * on configurations that set a tiny TTL (the existing tests use 1 ms) and
+ * matches the v1 minimum.
+ */
+export const MIN_REFRESH_INTERVAL_MS = 60_000 as const;
+
+/**
  * Breather after a refresh whose models fetch came back empty (gateway down
  * or refusing). Transforms inside the window serve last-known-good without
  * re-firing the fetch suite. Short on purpose: it only guards the

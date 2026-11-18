@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 /**
  * ImportProgressModal — Issue #3501 Phase 1k
@@ -52,13 +53,14 @@ export default function ImportProgressModal({
         />
 
         {/* Status text */}
-        <div className="flex items-center gap-3">
+        <div role="status" className="flex items-center gap-3">
+          {" "}
           {importProgress.degraded ? (
             <Icon name="warning" className="text-warning" />
           ) : (
             <>
               {(importProgress.phase === "fetching" || importProgress.phase === "importing") && (
-                <Icon name="progress_activity" className="animate-spin text-text-muted" />
+                <Spinner decorative size="sm" className="text-text-muted" />
               )}
               {importProgress.phase === "done" && (
                 <Icon name="check_circle" className="text-success" />
@@ -81,21 +83,17 @@ export default function ImportProgressModal({
               label={`${importProgress.current} / ${importProgress.total}`}
               showValue
               animate={false}
-              className={
-                importProgress.phase === "done"
-                  ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
-                  : undefined
-              }
+              tone={importProgress.phase === "done" ? "success" : "default"}
             />
           )}
 
-        {/* Fetching indeterminate bar */}
+        {/* Fetching: no measurable progress, so the bar is indeterminate (no aria-valuenow). */}
         {importProgress.phase === "fetching" && (
-          // Decorative: the fetch has no measurable progress, so keep the bar out of the a11y
-          // tree instead of announcing a fabricated value (the kit Progress has no indeterminate mode).
-          <div aria-hidden="true" data-testid="import-fetching-bar">
-            <Progress value={60} animate={false} className="animate-pulse" />
-          </div>
+          <Progress
+            indeterminate
+            data-testid="import-fetching-bar"
+            aria-label={t("importingModelsTitle")}
+          />
         )}
 
         {/* Error message */}

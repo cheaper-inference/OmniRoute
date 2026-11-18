@@ -2,14 +2,14 @@
  * Codex Responses-over-WebSocket prompt-compression parity (#8052).
  *
  * The HTTP/SSE chat pipeline (open-sse/handlers/chatCore.ts) runs every request through the
- * modular compression pipeline (settings → strategy selection → applyCompressionAsync →
+ * modular compression pipeline (settings → plan selection → applyCompressionAsync →
  * compression_analytics/compression_engine_breakdown writes) before dispatching upstream. The
  * Codex Responses WebSocket bridge (`prepare()` in ./route.ts) never called any of that — it
  * authenticated, injected memory, applied reasoning-routing, then went straight to
  * `executor.transformRequest()`.
  *
- * This module wires the same core pipeline (settings resolution, mode selection via
- * `selectCompressionStrategy`, `applyCompressionAsync`, analytics persistence) into the WS
+ * This module wires the same core pipeline (settings resolution, plan selection via
+ * `selectCompressionPlan`, `applyCompressionAsync`, analytics persistence) into the WS
  * bridge's per-turn `prepare()` call, using `adaptBodyForCompression`'s existing Responses-API
  * (`input[]`) adapter so the same engines that already understand chat `messages[]` bodies work
  * unmodified here too. Deliberately scoped to the core pipeline (settings → mode → engines →
@@ -64,7 +64,7 @@ export async function applyResponsesWsCompression(
       return responseBody;
     }
 
-    const { selectCompressionStrategy, applyCompressionAsync } =
+    const { selectCompressionPlan, applyCompressionAsync } =
       await import("@omniroute/open-sse/services/compression/strategySelector.ts");
 
     const estimatedTokens = estimateTokens(adapter.body.messages);
@@ -74,7 +74,7 @@ export async function applyResponsesWsCompression(
       model: ctx.model,
       connectionCacheOverride: null,
     };
-    const mode = selectCompressionStrategy(
+    const plan = selectCompressionPlan(
       settings,
       null,
       estimatedTokens,
@@ -83,13 +83,21 @@ export async function applyResponsesWsCompression(
       {},
       null
     );
+    const mode = plan.mode as CompressionConfig["defaultMode"];
     if (mode === "off") return responseBody;
+    const effectiveConfig: CompressionConfig =
+      mode === "stacked"
+        ? {
+            ...settings,
+            stackedPipeline: plan.stackedPipeline as CompressionConfig["stackedPipeline"],
+          }
+        : settings;
 
     const result = await applyCompressionAsync(adapter.body, mode, {
       model: ctx.model,
       ...resolveOmniGlyphTransport(ctx.provider),
       provider: ctx.provider,
-      config: settings as CompressionConfig,
+      config: effectiveConfig,
       cachingContext,
     });
 

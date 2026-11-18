@@ -309,7 +309,7 @@ export default function MemorySkillsTab() {
             <Icon name="psychology" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("memorySkillsTitle")}</h3>
+            <h3 className="text-lg">{t("memorySkillsTitle")}</h3>
             <p className="text-sm text-text-muted">{t("memorySkillsDesc")}</p>
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function MemorySkillsTab() {
             <Icon name="memory" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("memoryTitle")}</h3>
+            <h3 className="text-lg">{t("memoryTitle")}</h3>
             <p className="text-sm text-text-muted">{t("memoryDesc")}</p>
           </div>
           {status === "saved" && (
@@ -415,7 +415,7 @@ export default function MemorySkillsTab() {
             {/* Strategy selector */}
             <RadioGroup
               aria-label={t("strategy")}
-              orientation="horizontal"
+              columns={3}
               value={config.strategy}
               onValueChange={(next) => save({ strategy: next as "recent" | "semantic" | "hybrid" })}
               disabled={loading || saving}
@@ -442,7 +442,7 @@ export default function MemorySkillsTab() {
             <Icon name="database" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("qdrantTitle")}</h3>
+            <h3 className="text-lg">{t("qdrantTitle")}</h3>
             <p className="text-sm text-text-muted">{t("qdrantDesc")}</p>
           </div>
 
@@ -698,7 +698,7 @@ export default function MemorySkillsTab() {
             <Icon name="handyman" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("skillsTitle")}</h3>
+            <h3 className="text-lg">{t("skillsTitle")}</h3>
             <p className="text-sm text-text-muted">{t("skillsDesc")}</p>
           </div>
         </div>
@@ -726,7 +726,7 @@ export default function MemorySkillsTab() {
             <Icon name="storefront" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("memorySkillsSkillsmpMarketplace")}</h3>
+            <h3 className="text-lg">{t("memorySkillsSkillsmpMarketplace")}</h3>
             <p className="text-sm text-text-muted">{t("memorySkillsSkillsmpDescription")}</p>
           </div>
           {skillsmpStatus === "saved" && (
@@ -770,7 +770,7 @@ export default function MemorySkillsTab() {
             <Icon name="hub" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("memorySkillsActiveSkillsProvider")}</h3>
+            <h3 className="text-lg">{t("memorySkillsActiveSkillsProvider")}</h3>
             <p className="text-sm text-text-muted">{t("memorySkillsActiveProviderDescription")}</p>
           </div>
           {skillsProviderStatus === "saved" && (
@@ -787,7 +787,7 @@ export default function MemorySkillsTab() {
 
         <RadioGroup
           aria-label={t("memorySkillsActiveSkillsProvider")}
-          orientation="horizontal"
+          columns={2}
           value={skillsProvider}
           onValueChange={(next) => saveSkillsProvider(next as SkillsProvider)}
           disabled={skillsProviderSaving}

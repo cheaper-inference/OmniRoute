@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
@@ -463,7 +464,7 @@ export default function ReasoningRoutingRules({
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div className="min-w-0 flex-1 space-y-2">
-            <h2 className="text-lg font-semibold text-text-main">{e("workspace")}</h2>
+            <h2 className="text-lg text-text-main">{e("workspace")}</h2>
             <p className="text-sm text-text-muted">{e("scopeHint")}</p>
           </div>
           <Button
@@ -476,6 +477,7 @@ export default function ReasoningRoutingRules({
         </div>
         <div className="mt-5 max-w-xl">
           <Select
+            native
             label={t("apiKey")}
             value={apiKeyId || "all"}
             disabled={loading || saving}
@@ -524,6 +526,7 @@ export default function ReasoningRoutingRules({
             onChange={(event) => setSearch(event.target.value)}
           />
           <Select
+            native
             label={t("filterStatus")}
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
@@ -535,6 +538,7 @@ export default function ReasoningRoutingRules({
           />
           {!apiKeyId && (
             <Select
+              native
               label={t("filterScope")}
               value={scopeFilter}
               onChange={(event) => setScopeFilter(event.target.value)}
@@ -559,7 +563,7 @@ export default function ReasoningRoutingRules({
                     size="sm"
                     ariaLabel={t("toggleAria", { name: rule.name })}
                   />
-                  <h3 className="break-words font-semibold text-text-main">{rule.name}</h3>
+                  <h3 className="break-words text-text-main">{rule.name}</h3>
                   <span className="rounded-full bg-surface px-2 py-1 text-xs text-text-muted">
                     {t(rule.enabled ? "enabled" : "disabled")}
                   </span>
@@ -658,7 +662,7 @@ export default function ReasoningRoutingRules({
                   />
                 </div>
                 <section className="space-y-4 border-t border-border pt-6">
-                  <h3 className="font-semibold text-text-main">1 · {e("when")}</h3>
+                  <h3 className="text-text-main">1 · {e("when")}</h3>
                   {!apiKeyId && (
                     <div className={grid}>
                       <Select
@@ -786,7 +790,7 @@ export default function ReasoningRoutingRules({
                   </div>
                 </section>
                 <section className="space-y-4 border-t border-border pt-6">
-                  <h3 className="font-semibold text-text-main">2 · {e("then")}</h3>
+                  <h3 className="text-text-main">2 · {e("then")}</h3>
                   <div className={grid}>
                     <Select
                       label={t("routingTarget")}
@@ -1029,14 +1033,14 @@ export default function ReasoningRoutingRules({
                 {String(warning)}
               </p>
             ))}
-            <details>
-              <summary className="cursor-pointer text-sm text-text-muted">
-                {e("technicalDetails")}
-              </summary>
-              <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs text-text-muted">
-                {JSON.stringify(simulation, null, 2)}
-              </pre>
-            </details>
+            <Disclosure>
+              <DisclosureTrigger>{e("technicalDetails")}</DisclosureTrigger>
+              <DisclosureContent keepMounted>
+                <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs text-text-muted">
+                  {JSON.stringify(simulation, null, 2)}
+                </pre>
+              </DisclosureContent>
+            </Disclosure>
           </div>
         )}
       </Card>

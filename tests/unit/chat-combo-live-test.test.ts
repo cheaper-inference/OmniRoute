@@ -16,7 +16,14 @@ const { generateSignature, invalidateBySignature, setCachedResponse, outputContr
 const { getCircuitBreaker, resetAllCircuitBreakers, STATE } =
   await import("../../src/shared/utils/circuitBreaker.ts");
 
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
+
 const originalFetch = globalThis.fetch;
+const LIVE_TEST_HEADERS = {
+  "X-Internal-Test": "combo-health-check",
+  [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+};
 
 async function flushBackgroundWork() {
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -169,9 +176,7 @@ test("combo live test bypasses connection cooldown and breaker state to perform 
   assert.equal(blockedByBreaker.status, 503);
   assert.equal(fetchCalls.length, 0);
 
-  const liveResponse = await chatRoute.POST(
-    makeRequest({ "X-Internal-Test": "combo-health-check" })
-  );
+  const liveResponse = await chatRoute.POST(makeRequest(LIVE_TEST_HEADERS));
   const liveBody = (await liveResponse.json()) as any;
 
   assert.equal(liveResponse.status, 200);
@@ -237,7 +242,7 @@ test("combo live test bypasses semantic cache and forces a fresh upstream reques
 
     const liveResponse = await chatRoute.POST(
       makeRequest({
-        "X-Internal-Test": "combo-health-check",
+        ...LIVE_TEST_HEADERS,
         "X-OmniRoute-No-Cache": "true",
         "X-Request-Id": "combo-test-cache-bypass",
       })
@@ -344,9 +349,7 @@ test("combo live test does not use cooldown-aware request retry on upstream fail
     );
   };
 
-  const liveResponse = await chatRoute.POST(
-    makeRequest({ "X-Internal-Test": "combo-health-check" })
-  );
+  const liveResponse = await chatRoute.POST(makeRequest(LIVE_TEST_HEADERS));
   const liveBody = (await liveResponse.json()) as any;
 
   assert.equal(liveResponse.status, 503);

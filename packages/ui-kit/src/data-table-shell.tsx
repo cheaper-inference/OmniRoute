@@ -1,6 +1,17 @@
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, RotateCcw } from "lucide-react";
 import { cloneElement, isValidElement } from "react";
 import type { ComponentProps, ReactNode } from "react";
+import { Button, type ButtonProps } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  type DropdownMenuAlign,
+} from "./dropdown-menu";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 import { Select, type SelectProps } from "./select";
 import { TableLoadingRegion } from "./table-loading";
@@ -17,9 +28,14 @@ export interface DataTableShellProps
   /** Cross-axis alignment for filter fields with different content heights. */
   filterAlignment?: "start" | "end";
   resultCount?: number;
-  resultLabel?: ReactNode | ((count: number) => ReactNode);
+  /** A function receives the raw count and the count formatted with `locale`. */
+  resultLabel?: ReactNode | ((count: number, formattedCount: string) => ReactNode);
+  /** Locale for formatting `resultCount`. Defaults to "en-US". */
+  locale?: Intl.LocalesArgument;
   /** Optional actions aligned to the end of the toolbar, separate from filters. */
   toolbarActions?: ReactNode;
+  /** Accessible name of the toolbar actions group. Defaults to "Table actions". */
+  toolbarActionsLabel?: string;
   children: ReactNode;
   pagination?: ReactNode;
 }
@@ -37,7 +53,9 @@ export function DataTableShell({
   filterAlignment = "end",
   resultCount,
   resultLabel,
+  locale = "en-US",
   toolbarActions,
+  toolbarActionsLabel = "Table actions",
   children,
   pagination,
   className,
@@ -45,14 +63,15 @@ export function DataTableShell({
 }: DataTableShellProps) {
   const hasToolbarActions =
     toolbarActions !== undefined && toolbarActions !== null;
+  const formattedCount = resultCount?.toLocaleString(locale) ?? "";
   const resolvedResultLabel =
     resultCount === undefined
       ? null
       : typeof resultLabel === "function"
-        ? resultLabel(resultCount)
+        ? resultLabel(resultCount, formattedCount)
         : resultLabel ?? (
             <>
-              {resultCount.toLocaleString("en-US")} {resultCount === 1 ? "result" : "results"}
+              {formattedCount} {resultCount === 1 ? "result" : "results"}
             </>
           );
 
@@ -83,7 +102,7 @@ export function DataTableShell({
                 data-slot="data-table-toolbar-actions"
                 className="ci-data-table-shell__toolbar-actions"
                 role="group"
-                aria-label="Table actions"
+                aria-label={toolbarActionsLabel}
               >
                 {toolbarActions}
               </div>
@@ -104,6 +123,97 @@ export function DataTableShell({
         )}
       </div>
     </section>
+  );
+}
+
+export interface DataTableColumnsMenuColumn {
+  key: string;
+  label: ReactNode;
+  /** Locks the column at its current state, for columns the table cannot lose. */
+  disabled?: boolean;
+}
+
+export interface DataTableColumnsMenuLabels {
+  /** The trigger's visible text. */
+  trigger: string;
+  reset: string;
+}
+
+export const defaultDataTableColumnsMenuLabels: DataTableColumnsMenuLabels = {
+  trigger: "Columns",
+  reset: "Reset columns",
+};
+
+export interface DataTableColumnsMenuProps extends Omit<ButtonProps, "asChild" | "children"> {
+  columns: readonly DataTableColumnsMenuColumn[];
+  /** Visibility by column key. A column that is missing here counts as visible. */
+  visible: Readonly<Record<string, boolean | undefined>>;
+  onVisibilityChange: (key: string, visible: boolean) => void;
+  /** Adds a reset item below the columns. Restoring the defaults is yours to do. */
+  onReset?: () => void;
+  /** Disables the reset item, for example while the columns already match the defaults. */
+  resetDisabled?: boolean;
+  labels?: Partial<DataTableColumnsMenuLabels>;
+  /** Menu alignment against the trigger. Defaults to "end". */
+  align?: DropdownMenuAlign;
+}
+
+/**
+ * Column visibility for the `DataTableShell` toolbar. Visibility stays with the consumer, and the
+ * menu stays open so several columns can change in a row. Other props go to the trigger `Button`.
+ */
+export function DataTableColumnsMenu({
+  columns,
+  visible,
+  onVisibilityChange,
+  onReset,
+  resetDisabled,
+  labels: labelOverrides,
+  align = "end",
+  variant = "outline",
+  size = "sm",
+  dir,
+  ...props
+}: DataTableColumnsMenuProps) {
+  const labels = resolveLabels(defaultDataTableColumnsMenuLabels, labelOverrides);
+  return (
+    // Non-modal: the table stays readable and scrollable while its columns change.
+    <DropdownMenu modal={false} dir={dir === "rtl" || dir === "ltr" ? dir : undefined}>
+      <DropdownMenuTrigger asChild>
+        <Button variant={variant} size={size} dir={dir} {...props}>
+          <Columns3 aria-hidden="true" />
+          {labels.trigger}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={align} scrollable>
+        {columns.map((column) => (
+          <DropdownMenuCheckboxItem
+            key={column.key}
+            checked={visible[column.key] !== false}
+            disabled={column.disabled}
+            onCheckedChange={(next) => onVisibilityChange(column.key, next)}
+            onSelect={(event) => event.preventDefault()}
+          >
+            {column.label}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {onReset ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              icon={<RotateCcw aria-hidden="true" />}
+              disabled={resetDisabled}
+              onSelect={(event) => {
+                event.preventDefault();
+                onReset();
+              }}
+            >
+              {labels.reset}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

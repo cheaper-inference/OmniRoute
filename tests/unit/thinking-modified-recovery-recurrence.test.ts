@@ -137,7 +137,7 @@ test("modified-recovery: injected blocks in an EARLIER turn are stripped (recove
     provider: "claude",
     model: ADAPTIVE_MODEL,
     connectionId: "conn-org-a",
-  })!;
+  })!.flatMap((segment) => segment.blocks);
   assert.ok(
     restored,
     "manual-thinking restore still works — used here to obtain provenance-marked blocks"
@@ -207,7 +207,7 @@ test("modified-recovery under manual thinking: an EARLIER tool_use turn injects 
     provider: "claude",
     model: "claude-sonnet-4-5",
     connectionId: "conn-org-a",
-  })!;
+  })!.flatMap((segment) => segment.blocks);
   assert.ok(restored, "restore yields provenance-marked blocks");
 
   const body = {

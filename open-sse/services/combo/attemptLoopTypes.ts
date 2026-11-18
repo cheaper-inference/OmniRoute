@@ -28,6 +28,10 @@ export type ExecuteTargetResult = { ok: boolean; response?: Response } | null;
 export type AttemptLoopState = {
   orderedTargets: ResolvedComboTarget[];
   fallbackCount: number;
+  /** Readiness-deadline failures seen this run (sub-budget counter for
+   *  OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES; only consulted when the env is
+   *  set — see clampDeadlineFailureBudget). */
+  deadlineFailures: number;
   recordedAttempts: number;
   comboErrors: ComboErrorEntry[];
   lastError: string | null;
@@ -102,6 +106,12 @@ export type AttemptLoopDeps = {
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
+  /** Shares the existing request wait limits with an inline, already-authorized retry. */
+  retryCooldownWait?: {
+    attempt: { current: number };
+    budgetLeftMs: { current: number };
+    deadline: number;
+  };
   releaseStickyPinOnFailure: (
     messageHash: string | null | undefined,
     failedConnectionId: string | null | undefined
@@ -127,7 +137,7 @@ export type AttemptLoopDeps = {
   getWeightedStepKeyForTarget?: (target: ResolvedComboTarget) => string | null;
   universalHandoffConfig?: UniversalHandoffConfig;
   sourceFormat?: string | null;
-  relayOptions?: { sessionId?: string | null } | null;
+  relayOptions?: { sessionId?: string | null; apiKeyId?: string | null } | null;
   relayConfig?: ContextRelayConfig | null;
 };
 

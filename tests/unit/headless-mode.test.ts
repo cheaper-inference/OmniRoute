@@ -204,6 +204,7 @@ test("boot: the default optional table holds the optional subsystems, not the pr
     "pricing-sync",
     "openrouter-provider-stats",
     "models-dev-sync",
+    "opencode-free-relay",
     "live-dashboard-ws",
   ]) {
     assert.ok(names.includes(expected), `optional table must include ${expected}`);

@@ -13,21 +13,25 @@ UI/UX, i18n, CLI, database, ଏବଂ build/deploy ପରିବର୍ତ୍ତ�
 
 ---
 
-## ଡେଭଲପମେଣ୍ଟ ସେଟଅପ୍
+## ବିକାଶ ସେଟଅପ୍
 
-### ପୂର୍ବାବଶ୍ୟକତା
+### ପୂର୍ବାପେକ୍ଷିତା
 
-- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିସକୃତ: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିଶ: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲଗୁଡ଼ିକ ଇନଷ୍ଟଲ୍ ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ:
-> `node -e "require('better-sqlite3')"`. ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
-> `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। ଦେଖନ୍ତୁ
-> [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **Node 24 ସହିତ Windows:** ବର୍ତ୍ତମାନର 24 LTS ପ୍ୟାଚ୍ ରିଲିଜ୍ (ଅତି କମରେ 24.20.0) ବ୍ୟବହାର କରନ୍ତୁ।
+> ପୂର୍ବରୁ ଥିବା ରିଲିଜ୍ଗୁଡ଼ିକ `--test-force-exit` ପ୍ରକ୍ରିୟା ବନ୍ଦ କରିବା ପରେ ସଫଳ ପରୀକ୍ଷଣଗୁଡ଼ିକ ପରେ
+> ବନ୍ଦ ହୋଇପାରେ। Node ର [Windows libuv ସମାଧାନ](https://github.com/nodejs/node/pull/61999) ଏହି
+> ରନ୍ଟାଇମ୍ କ୍ରାଶ୍ର ସମାଧାନ କରେ; ପରୀକ୍ଷଣ ଅସର୍ସନ୍ଗୁଡ଼ିକ ଏବଂ ରନର୍ ଏକ୍ଜିଟ୍ ଯାଞ୍ଚଗୁଡ଼ିକ ସକ୍ରିୟ ରଖନ୍ତୁ।
+
+> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ ସ୍ଥାପିତ ହୋଇଛି କି ଯାଞ୍ଚ କରନ୍ତୁ:
+> `node -e "require('better-sqlite3')"`। ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
+> `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ଦେଖନ୍ତୁ।
 
 - **Git**
 
-### କ୍ଲୋନ୍ ଏବଂ ଇନଷ୍ଟଲ୍
+### କ୍ଲୋନ୍ ଏବଂ ସ୍ଥାପନ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,87 +42,87 @@ npm install
 ### ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ
 
 ```bash
-# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କର .env ତିଆରି କରନ୍ତୁ
+# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କ .env ସୃଷ୍ଟି କରନ୍ତୁ
 cp .env.example .env
 
-# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ଜେନେରେଟ୍ କରନ୍ତୁ
+# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ସୃଷ୍ଟି କରନ୍ତୁ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ଡେଭଲପମେଣ୍ଟ ପାଇଁ ପ୍ରମୁଖ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
+ବିକାଶ ପାଇଁ ମୁଖ୍ୟ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
 
-| ଭେରିଏବଲ୍               | ଡେଭଲପମେଣ୍ଟ ଡିଫଲ୍ଟ        | ବର୍ଣ୍ଣନା                 |
+| ଭେରିଏବଲ୍               | ବିକାଶ ଡିଫଲ୍ଟ             | ବର୍ଣ୍ଣନା                 |
 | ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | ସର୍ଭର ପୋର୍ଟ              |
+| `PORT`                 | `20128`                  | ସର୍ଭର୍ ପୋର୍ଟ             |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ଫ୍ରଣ୍ଟଏଣ୍ଡ ପାଇଁ ବେସ୍ URL |
-| `JWT_SECRET`           | (ଉପରେ ଜେନେରେଟ୍ କରନ୍ତୁ)   | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
+| `JWT_SECRET`           | (ଉପରେ ସୃଷ୍ଟି କରନ୍ତୁ)     | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମ ଲଗଇନ୍ ପାସୱାର୍ଡ     |
-| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିବରଣୀ ସ୍ତର          |
+| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିସ୍ତୃତତା ସ୍ତର       |
 
 ### ଡ୍ୟାସବୋର୍ଡ ସେଟିଂସ୍
 
-ଡ୍ୟାସବୋର୍ଡ ଏପରି ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ ପାଇଁ UI ଟଗଲ୍ ପ୍ରଦାନ କରେ, ଯେଉଁଗୁଡ଼ିକୁ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ ମାଧ୍ୟମରେ ମଧ୍ୟ କନଫିଗର୍ କରାଯାଇପାରେ:
+ଡ୍ୟାସବୋର୍ଡରେ ଏପରି ବୈଶିଷ୍ଟ୍ୟ ପାଇଁ UI ଟଗଲ୍ଗୁଡ଼ିକ ରହିଛି, ଯାହାକୁ ପରିବେଶ ଭେରିଏବଲ୍ ମାଧ୍ୟମରେ ମଧ୍ୟ ବିନ୍ୟାସ କରାଯାଇପାରେ:
 
-| ସେଟିଂର ଅବସ୍ଥାନ   | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                                    |
-| ---------------- | ------------------- | ------------------------------------------- |
-| ସେଟିଂସ୍ → ଉନ୍ନତ  | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ଗୁଡ଼ିକ ସକ୍ଷମ କରନ୍ତୁ (UI) |
-| ସେଟିଂସ୍ → ସାଧାରଣ | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ      |
+| ସେଟିଂ ସ୍ଥାନ         | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                               |
+| ------------------- | ------------------- | -------------------------------------- |
+| ସେଟିଂସ୍ → ଅଡଭାନ୍ସ୍ଡ | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ ସକ୍ରିୟ କରନ୍ତୁ (UI) |
+| ସେଟିଂସ୍ → ସାଧାରଣ    | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ |
 
-ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଚାଳନ ପରେ ମଧ୍ୟ ବଜାୟ ରହେ; ସେଟ୍ କରାଯାଇଥିଲେ ଏଗୁଡ଼ିକ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଓଭରରାଇଡ୍ କରେ।
+ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଆରମ୍ଭ ପରେ ମଧ୍ୟ ରହିଥାଏ; ସେଗୁଡ଼ିକ ସେଟ୍ ହୋଇଥିଲେ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଅତିକ୍ରମ କରେ।
 
-### ସ୍ଥାନୀୟ ଭାବରେ ଚଲାଇବା
+### ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇବା
 
 ```bash
-# ଡେଭଲପମେଣ୍ଟ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
+# ବିକାଶ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
 npm run dev
 
 # ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ
-npm run build    # next build → .build/next/ ତା’ପରେ assembleStandalone → dist/
+npm run build    # next build → .build/next/ ତାପରେ assembleStandalone → dist/
 npm run start
 
-# ଅବଦାନକାରୀଙ୍କ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-ମାତ୍ର କମ୍ପାଇଲ୍
+# ଯୋଗଦାନକାରୀ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-କେବଳ କମ୍ପାଇଲ୍
 npm run build:contributor
 
 # ରିଲିଜ୍ ବିଲ୍ଡ (ପରିଷ୍କାର ପୁନଃବିଲ୍ଡ + HEAD ସେଣ୍ଟିନେଲ୍ — ଡିପ୍ଲୟ ପାଇଁ ଆବଶ୍ୟକ)
-npm run build:release   # rm -rf .build dist && ବିଲ୍ଡ + dist/BUILD_SHA ଲେଖେ
+npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ଲେଖେ
 
-# ସାଧାରଣ ପୋର୍ଟ କନଫିଗରେସନ୍
+# ସାଧାରଣ ପୋର୍ଟ ବିନ୍ୟାସ
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ଅବଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍ ସତ୍ୟାପନ କରେ: ଏହା ଷ୍ଟାଣ୍ଡଅଲୋନ୍
-ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ସଂଯୋଜନ କରେ ନାହିଁ କିମ୍ବା ଇଚ୍ଛାଧୀନ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକ ବିଲ୍ଡ କରେ ନାହିଁ। ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ସତ୍ୟାପନ
-କରିବା ଆବଶ୍ୟକ ହେଲେ ନିୟମିତ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
+ଯୋଗଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍-ଭିତ୍ତିକ ଯାଞ୍ଚ କରେ: ଏହା standalone
+ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ଏକତ୍ର କରେ ନାହିଁ କିମ୍ବା ଐଚ୍ଛିକ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକୁ ବିଲ୍ଡ କରେ ନାହିଁ। ଯେତେବେଳେ
+ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ଯାଞ୍ଚ କରିବାକୁ ଆବଶ୍ୟକ ହୁଏ, ସାଧାରଣ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
 
-### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ବିନ୍ୟାସ
+### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ଲେଆଉଟ୍
 
-| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                            | ଟ୍ରାକ୍ କରାଯାଏ |
-| ---------- | ------------------------------------------------------------------------------------ | ------------- |
-| `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                                  | ହଁ            |
-| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀ ଫାଇଲ୍ଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା            |
-| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ସଂଯୋଜିତ (gitignored)                   | ନା            |
+| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                      | ଟ୍ରାକ୍ କରାଯାଇଛି |
+| ---------- | ------------------------------------------------------------------------------ | --------------- |
+| `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                            | ହଁ              |
+| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା              |
+| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ଏକତ୍ରିତ (gitignored)             | ନା              |
 
-ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଗୋଟିଏ ପାସ୍ରେ ସମ୍ପନ୍ନ ହୁଏ:
+ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଏକକ ପାସ୍ରେ ଚାଲେ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ଆଉଟପୁଟ୍)
-  └─ assembleStandalone()                 (ଷ୍ଟାଣ୍ଡଅଲୋନ୍ + ଷ୍ଟାଟିକ୍ + ପବ୍ଲିକ୍ + ନେଟିଭ୍ ଆସେଟ୍ଗୁଡ଼ିକ କପି କରେ)
-       └─ ଆଉଟପୁଟ୍: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ଅତିରିକ୍ତ ଭାବରେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ ଡିପ୍ଲୟ ଅଖଣ୍ଡତା ସେଣ୍ଟିନେଲ୍ ଭାବେ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
+`npm run build:release` ଅତିରିକ୍ତ ଭାବେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ
+ଡିପ୍ଲୟ ଇଣ୍ଟେଗ୍ରିଟି ସେଣ୍ଟିନେଲ୍ ଭାବେ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
 
-`npm run build:contributor` କେବଳ ବ୍ୟାକଏଣ୍ଡ ପାଇଁ ଥିବା ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ କରିବା ସମୟରେ ଏହା ଅସ୍ଥାୟୀ ଭାବରେ
-ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ
-ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UIକୁ ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
-ରିଲିଜ୍ ସତ୍ୟାପନ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଅବଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ବିକଳ୍ପ ନୁହେଁ।
+`npm run build:contributor` ବ୍ୟାକଏଣ୍ଡ-କେବଳ ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ ସମୟରେ ଏହା
+ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ସାମୟିକ ଭାବେ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ
+ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UI ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ ପାଇଁ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
+ରିଲିଜ୍ ଯାଞ୍ଚ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଯୋଗଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ପରିବର୍ତ୍ତେ ବ୍ୟବହାରଯୋଗ୍ୟ ନୁହେଁ।
 
 > **VPS ଡିପ୍ଲୟ ଟିପ୍ପଣୀ:** ରିମୋଟ୍ ଇମେଜ୍ ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/`
-> ଅପରିବର୍ତ୍ତିତ ରହିଛି। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/`ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରନ୍ତି।
-> କେବଳ ରିପୋଜିଟୋରୀ ମଧ୍ୟରେ ଥିବା ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ପରିବର୍ତ୍ତିତ ହୋଇଛି (`app/` → `dist/`)।
+> ଅପରିବର୍ତ୍ତିତ ରହେ। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/` ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରେ।
+> କେବଳ ରିପୋଜିଟୋରୀ ଭିତରର ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ବଦଳିଛି (`app/` → `dist/`)।
 
 ଡିଫଲ୍ଟ URLଗୁଡ଼ିକ:
 
@@ -297,67 +301,67 @@ production build ହେଉଛି CIର ଦାୟିତ୍ୱ — ସେଗୁଡ
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ଡ୍ୟାସବୋର୍ଡ ପୃଷ୍ଠାଗୁଡ଼ିକ (23ଟି ବିଭାଗ)
-│   ├── api/                # API ରୁଟ୍ଗୁଡ଼ିକ (51ଟି ଡିରେକ୍ଟୋରୀ)
-│   └── login/              # ପ୍ରାମାଣିକରଣ ପୃଷ୍ଠାଗୁଡ଼ିକ (.tsx)
-├── domain/                 # ପଲିସି ଇଞ୍ଜିନ୍ (policyEngine, comboResolver, costRules, ଇତ୍ୟାଦି)
-├── lib/                    # ମୂଳ ବ୍ୟବସାୟିକ ତର୍କ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ପ୍ରୋଟୋକଲ୍ ସର୍ଭର୍
-│   ├── acp/                # Agent Communication Protocol ରେଜିଷ୍ଟ୍ରି
-│   ├── compliance/         # ଅନୁପାଳନ ପଲିସି ଇଞ୍ଜିନ୍
-│   ├── db/                 # SQLite ଡୋମେନ୍ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ + 130ଟି ମାଇଗ୍ରେସନ୍
-│   ├── memory/             # ସ୍ଥାୟୀ କଥୋପକଥନ ସ୍ମୃତି
-│   ├── oauth/              # OAuth ପ୍ରଦାତା, ସେବା ଏବଂ ଉପଯୋଗିତାଗୁଡ଼ିକ
-│   ├── skills/             # ବିସ୍ତାରଯୋଗ୍ୟ ଦକ୍ଷତା ଫ୍ରେମୱାର୍କ
-│   ├── usage/              # ବ୍ୟବହାର ଟ୍ରାକିଂ ଏବଂ ଖର୍ଚ୍ଚ ଗଣନା
-│   └── localDb.ts          # କେବଳ ପୁନଃ-ରପ୍ତାନି ସ୍ତର — ଏଠାରେ କେବେବି ତର୍କ ଯୋଡ଼ନ୍ତୁ ନାହିଁ
-├── middleware/              # ଅନୁରୋଧ ମିଡଲୱେର୍ (promptInjectionGuard)
-├── mitm/                   # MITM ପ୍ରକ୍ସି (ସାର୍ଟିଫିକେଟ୍, DNS, ଲକ୍ଷ୍ୟ ରାଉଟିଂ)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React କମ୍ପୋନେଣ୍ଟଗୁଡ଼ିକ (.tsx)
-│   ├── constants/          # ପ୍ରଦାତା ସଂଜ୍ଞାଗୁଡ଼ିକ (329), MCP ସ୍କୋପ୍ଗୁଡ଼ିକ, 20ଟି ରାଉଟିଂ କୌଶଳ
-│   ├── utils/              # ସର୍କିଟ୍ ବ୍ରେକର୍, ସାନିଟାଇଜର୍, ପ୍ରାମାଣିକରଣ ସହାୟକ
-│   └── validation/         # Zod v4 ସ୍କିମାଗୁଡ଼ିକ
-└── sse/                    # SSE ପ୍ରକ୍ସି ପାଇପଲାଇନ୍
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ୱର୍କସ୍ପେସ୍
-├── executors/              # 150ଟି ଏକ୍ସିକ୍ୟୁଟର୍ ମଡ୍ୟୁଲ୍ (ଏକ୍ସିକ୍ୟୁଟର୍ କ୍ଲାସ୍ + ପ୍ରତି-ପ୍ରଦାତା ସହାୟକ)
-├── handlers/               # 11ଟି ଅନୁରୋଧ ହ୍ୟାଣ୍ଡଲର୍ (ଚାଟ୍, ପ୍ରତିକ୍ରିୟା, ଏମ୍ବେଡିଂ, ପ୍ରତିଛବି, ଇତ୍ୟାଦି)
-├── mcp-server/             # MCP ସର୍ଭର୍ (110ଟି ଅନନ୍ୟ ଟୁଲ୍, 3ଟି ଟ୍ରାନ୍ସପୋର୍ଟ, 33ଟି ସ୍କୋପ୍)
-├── services/               # 178ଟି ଶୀର୍ଷ-ସ୍ତରୀୟ ସେବା (combo, autoCombo, rateLimitManager, ଇତ୍ୟାଦି)
-├── translator/             # ଫର୍ମାଟ୍ ଅନୁବାଦକଗୁଡ଼ିକ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ରୂପାନ୍ତରକ
-└── utils/                  # 22ଟି ଉପଯୋଗିତା ମଡ୍ୟୁଲ୍ (ଷ୍ଟ୍ରିମ୍, TLS, ପ୍ରକ୍ସି, ଲଗିଂ)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ଡେସ୍କଟପ୍ ଆପ୍ (ବହୁ-ପ୍ଲାଟଫର୍ମ)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ପରୀକ୍ଷା ରନର୍ (1,574ଟି ପରୀକ୍ଷା ଫାଇଲ୍)
-├── integration/            # ଇଣ୍ଟିଗ୍ରେସନ୍ ପରୀକ୍ଷାଗୁଡ଼ିକ
-├── e2e/                    # Playwright ପରୀକ୍ଷାଗୁଡ଼ିକ
-├── security/               # ସୁରକ୍ଷା ପରୀକ୍ଷାଗୁଡ଼ିକ
-├── translator/             # ଅନୁବାଦକ-ନିର୍ଦ୍ଦିଷ୍ଟ ପରୀକ୍ଷାଗୁଡ଼ିକ
-└── load/                   # ଲୋଡ୍ ପରୀକ୍ଷାଗୁଡ଼ିକ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ସ୍ଥାପତ୍ୟ ନିଷ୍ପତ୍ତି ରେକର୍ଡଗୁଡ଼ିକ
-├── architecture/            # ସିଷ୍ଟମ୍ ସ୍ଥାପତ୍ୟ ଏବଂ ସ୍ଥିତିସ୍ଥାପକତା
-├── comparison/              # OmniRoute ବନାମ ବିକଳ୍ପଗୁଡ଼ିକ
-├── compression/             # ସଙ୍କୋଚନ ମାର୍ଗଦର୍ଶିକା ଏବଂ ନିୟମଗୁଡ଼ିକ
-├── dev/                     # ବିକାଶ ମାର୍ଗଦର୍ଶିକାଗୁଡ଼ିକ
-├── diagrams/                # ସ୍ଥାପତ୍ୟ ଚିତ୍ରଗୁଡ଼ିକ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ବ୍ୟବହାରକାରୀ ମାର୍ଗଦର୍ଶିକା, Docker, ସେଟଅପ୍, ସମସ୍ୟା ସମାଧାନ
-├── i18n/                    # ଆନ୍ତର୍ଜାତୀୟକୃତ README ଅନୁବାଦଗୁଡ଼ିକ
-├── marketing/               # ବିପଣନ ସାମଗ୍ରୀ
-├── ops/                     # ନିୟୋଜନ, ପ୍ରକ୍ସି, କଭରେଜ୍, ରିଲିଜ୍
-├── providers/               # ପ୍ରଦାତା-ନିର୍ଦ୍ଦିଷ୍ଟ ଡକ୍ୟୁମେଣ୍ଟେସନ୍
-├── reference/               # API ସନ୍ଦର୍ଭ, ପରିବେଶ ଭେରିଏବଲ୍, CLI ଟୁଲ୍, ମାଗଣା ସ୍ତର
-├── releases/                # ରିଲିଜ୍ ଟିପ୍ପଣୀ
-├── routing/                 # ଅଟୋ-କମ୍ବୋ ଇଞ୍ଜିନ୍, ତର୍କ ପୁନଃଚାଳନ
-├── screenshots/             # ଡ୍ୟାସବୋର୍ଡ ସ୍କ୍ରିନ୍ଶଟ୍ଗୁଡ଼ିକ
-├── security/                # ସୁରକ୍ଷା ବ୍ୟବସ୍ଥା, ଅନୁପାଳନ, ଗୋପନୀୟତା, ଟୋକେନ୍
-└── specs/                   # ଡିଜାଇନ୍ ବିବରଣୀ
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

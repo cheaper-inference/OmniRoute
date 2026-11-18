@@ -118,17 +118,17 @@
 
 ---
 
-## 📖 제공자 설정
+## 📖 프로바이더 설정
 
-CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시보드 → 제공자 → 파일에서 가져오기**를 사용하세요. 열은 위치에 따라 구분됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 제공자 또는 호환 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 제공자 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
+CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **Dashboard → Providers → Import from file**을 사용하세요. 열은 위치에 따라 지정됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 프로바이더 또는 호환 가능한 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 프로바이더 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
 
-### 🔐 구독 제공자
+### 🔐 구독 프로바이더
 
 #### Claude Code (Pro/Max)
 
 ```bash
-대시보드 → 제공자 → Claude Code 연결
-→ OAuth 로그인 → 자동 토큰 갱신
+Dashboard → Providers → Connect Claude Code
+→ OAuth 로그인 → 토큰 자동 갱신
 → 5시간 + 주간 할당량 추적
 
 모델:
@@ -137,17 +137,20 @@ CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시�
   cc/claude-haiku-4-5-20251001
 ```
 
-**전문가 팁:** 복잡한 작업에는 Opus를, 속도가 중요할 때는 Sonnet을 사용하세요. OmniRoute는 모델별 할당량을 추적합니다!
+**Pro 팁:** 복잡한 작업에는 Opus를, 속도에는 Sonnet을 사용하세요. OmniRoute는 모델별로 할당량을 추적합니다!
 
-OmniRoute 호스트에 브라우저가 없나요? Claude Code에 로그인된 환경 어디에서든 `claude setup-token`을 실행하고 1년 유효 토큰을 **설정 토큰** 탭에 붙여 넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
+OmniRoute 호스트에 브라우저가 없나요? Claude Code가 로그인된 어느 곳에서든 `claude setup-token`을 실행한 다음, 1년 토큰을 **Setup Token** 탭에 붙여넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
 
-Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를 허용하지 않으므로 OmniRoute는 요청을 업스트림으로 보내기 전에 높은 사고 예산으로 하향 조정합니다.
+Claude 및 Claude Code 호환 라우트는 Opus 및 Sonnet
+모델에 대해 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를
+허용하지 않으므로 OmniRoute는 업스트림으로 전송하기 전에 해당 요청을 높은 사고
+예산으로 낮춥니다.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-대시보드 → 제공자 → Codex 연결
-→ OAuth 로그인(포트 1455)
+Dashboard → Providers → Connect Codex
+→ OAuth 로그인 (포트 1455)
 → 5시간 + 주간 초기화
 
 모델:
@@ -160,9 +163,9 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### GitHub Copilot
 
 ```bash
-대시보드 → 제공자 → GitHub 연결
+Dashboard → Providers → Connect GitHub
 → GitHub를 통한 OAuth
-→ 매월 초기화(매월 1일)
+→ 월간 초기화 (매월 1일)
 
 모델:
   gh/gpt-5.5
@@ -172,47 +175,49 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 저렴한 제공자
+**AI Credits(토큰 기반 청구).** GitHub가 계정에 대해 `credits_used`를 보고하면 Provider Limits 카드에 현재 청구 기간 동안 사용한 크레딧을 표시하는 **AI Credits** 행이 나타납니다. 무제한 조직 요금제에서도 표시됩니다.
+
+**로컬 AI Credits 한도.** GitHub 연결을 편집하고 **청구 기간별 AI Credits 한도**(`providerSpecificData.githubCreditLimit`)를 설정하세요. 비워 두면 비활성화되며, `0`으로 설정하면 항상 해당 연결을 건너뜁니다. 마지막 사용량 측정값이 한도 이상이면 계정 선택에서 해당 연결을 건너뛰고, 할당량 정책 차단과 동일하게 라우팅이 다른 연결로 대체됩니다. 이 확인은 주기적인 할당량 새로 고침에서 이미 수집하는 사용량을 읽으므로 요청 경로에서 GitHub를 호출하지 않습니다. 또한 fail-open 방식으로 동작합니다. 즉, 측정값이 없거나 오래된 경우(15분 초과 또는 이미 초기화된 청구 기간의 측정값)에는 연결을 차단하지 않습니다. 이는 로컬 안전장치이며, **지출 한도를 보장하는 기능이 아닙니다**. GitHub의 보고 지연, 새로 고침 간격, 진행 중인 요청 및 OmniRoute 외부에서 발생한 사용량으로 인해 한도를 초과할 수 있습니다. 확실한 상한이 필요하면 GitHub 자체 지출 제어 기능을 사용하세요.
+
+### 💰 저렴한 프로바이더
 
 #### GLM-4.7 (매일 초기화, $0.6/1M)
 
 1. 가입: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan에서 API 키 발급
-3. 대시보드 → API 키 추가: 제공자: `glm`, API 키: `your-key`
+2. Coding Plan에서 API 키 받기
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**사용:** `glm/glm-4.7` — **전문가 팁:** Coding Plan은 1/7의 비용으로 3배의 할당량을 제공합니다! 매일 오전 10시에 초기화됩니다.
+**사용:** `glm/glm-4.7` — **Pro 팁:** Coding Plan은 비용의 1/7로 3배의 할당량을 제공합니다! 매일 오전 10:00에 초기화됩니다.
 
-#### MiniMax M2.1 (5시간마다 초기화, $0.20/1M)
+#### MiniMax M2.1 (5시간 초기화, $0.20/1M)
 
 1. 가입: [MiniMax](https://www.minimax.io)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `minimax/MiniMax-M2.1` — **전문가 팁:** 긴 컨텍스트(1M 토큰)를 위한 가장 저렴한 옵션입니다!
+**사용:** `minimax/MiniMax-M2.1` — **Pro 팁:** 긴 컨텍스트(100만 토큰)에 가장 저렴한 옵션입니다!
 
 #### Kimi K2 (월 $9 정액)
 
 1. 구독: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `kimi/kimi-k2.5` — **전문가 팁:** 10M 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
+**사용:** `kimi/kimi-k2.5` — **Pro 팁:** 1,000만 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
 
 #### Baidu Qianfan / ERNIE
 
 1. 가입: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API 키 생성 → 대시보드 → API 키 추가: 제공자: `qianfan`
+2. Qianfan API 키 생성 → Dashboard → Add API Key: Provider: `qianfan`
 
 **사용:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` 또는 다른 Qianfan OpenAI 호환 모델 ID.
 
-### 🆓 무료 제공자
+### 🆓 무료 프로바이더
 
-인증이 필요 없는 무료 제공자의 제공자 페이지에는 **인증 필요 없음** 옆에 스위치가 있습니다.
-스위치를 끄면 해당 제공자가 비활성화되고, 제공자 구성됨/축약 보기에서 제거되며,
-해당 모델도 `/v1/models`에서 제거됩니다.
+인증이 필요 없는 무료 프로바이더에는 프로바이더 페이지의 **No authentication required** 옆에 전환 스위치가 있습니다. 이 스위치를 끄면 해당 프로바이더가 비활성화되고, Providers 구성/간단 보기에서 제거되며, `/v1/models`에서 해당 모델이 제거됩니다.
 
 #### Qoder (무료 모델 9개)
 
 ```bash
-대시보드 → Qoder 연결 → OAuth 로그인 → 액세스에는 현재 제공자 제한이 적용됨
+Dashboard → Connect Qoder → OAuth 로그인 → 현재 프로바이더 한도에 따라 액세스 가능
 
 모델: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +225,7 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### Kiro (Claude 무료)
 
 ```bash
-대시보드 → Kiro 연결 → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
+Dashboard → Connect Kiro → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
 
 모델: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -342,73 +347,73 @@ API 키: [대시보드에서 가져오기]
 ```bash
 npm install -g omniroute
 
-# 구성 디렉터리 생성
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env 파일 생성(.env.example 참조)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 서버 시작
+# Start server
 omniroute
-# 또는 사용자 지정 포트 사용:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI는 `~/.omniroute/.env` 또는 `./.env`에서 `.env`를 자동으로 로드합니다.
+CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다. 작업 디렉터리의 `./.env` 짧은 키 허용 목록( 포트가 아닌 `REQUIRE_API_KEY`, 로케일, 시간대 및 색상 설정)만 설정할 수 있습니다. 다른 모든 것을 `~/.omniroute/.env` 에 넣으십시오. [CLI 출시 계약을](CLI-LAUNCH-CONTRACTS.md#working-directory-env) 참조하세요.
 
 ### 트레이 모드
 
-시스템 트레이에서 OmniRoute를 시작합니다.
+시스템 트레이에서 OmniRoute 시작합니다:
 
 ```bash
 omniroute serve --tray
 ```
 
-서버와 트레이가 준비되면 명령이 반환됩니다.
+서버와 트레이가 준비된 후에 명령이 반환됩니다.
 
-터미널을 닫아도 서버는 계속 실행됩니다.
+서버는 터미널 없이 계속됩니다.
 
 트레이 모드는 macOS, Windows 및 그래픽 Linux 세션을 지원합니다. 트레이 모드에서는 대시보드가 자동으로 열리지 않습니다.
 
-트레이 메뉴에서 다음 작업을 수행할 수 있습니다.
+다음 작업에는 트레이 메뉴를 사용하세요.
 
 - 대시보드를 엽니다.
-- `/dashboard/logs`를 엽니다.
-- 자동 시작 설정을 변경합니다.
-- OmniRoute를 중지합니다.
+- `/dashboard/logs` 엽니다.
+- 자동 시작을 변경합니다.
+- OmniRoute 중지하세요.
 
-`--tray`를 다음 옵션과 함께 사용하지 마세요.
+`--tray` 다음 옵션과 결합하지 마십시오:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-이러한 모드에는 서로 다른 프로세스 소유권이 필요합니다.
+이러한 모드에는 다양한 프로세스 소유권이 필요합니다.
 
-다음 시스템 로그인 시 자동으로 시작되도록 설정합니다.
+다음 머신 로그인 시 시작을 활성화합니다.
 
 ```bash
 omniroute autostart enable
 ```
 
-자동 시작은 macOS, Windows 및 그래픽 Linux 세션에서 트레이 모드를 사용합니다. 헤드리스 Linux에서는 기존 systemd 사용자 서비스를 사용합니다.
+자동 시작은 macOS, Windows 및 그래픽 Linux 세션에서 트레이 모드를 사용합니다. 헤드리스 Linux 기존 시스템 사용자 서비스를 사용합니다.
 
-로그인 시 자동 시작을 비활성화합니다.
+로그인 시 시작 비활성화:
 
 ```bash
 omniroute autostart disable
 ```
 
-### 제거
+### 제거 중
 
-OmniRoute가 더 이상 필요하지 않은 경우, 깔끔하게 제거할 수 있도록 두 가지 빠른 스크립트를 제공합니다.
+OmniRoute 더 이상 필요하지 않은 경우 깔끔하게 제거할 수 있는 두 가지 빠른 스크립트를 제공합니다.
 
-| 명령                     | 작업                                                                     |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `npm run uninstall`      | 시스템 앱을 제거하지만 `~/.omniroute`의 **DB와 구성은 유지합니다**.      |
-| `npm run uninstall:full` | 앱을 제거하고 **모든 구성, 키 및 데이터베이스를 영구적으로 삭제합니다**. |
+| 명령                     | 행동                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `npm run uninstall`      | 시스템 앱을 제거하지만** DB 및 구성을 유지합니다.** `~/.omniroute` 에서 .     |
+| `npm run uninstall:full` | 앱 AND 영구적으로 제거합니다.** 모든 구성, 키 및 데이터베이스를 지웁니다.** . |
 
-> 참고: 이 명령을 실행하려면 OmniRoute 프로젝트 폴더로 이동한 후(복제한 경우) 실행하세요. 또는 전역으로 설치한 경우 `npm uninstall -g omniroute`를 실행하면 됩니다.
+> 참고: 이러한 명령을 실행하려면 OmniRoute 프로젝트 폴더(복제한 경우)로 이동하여 실행하십시오. 또는 전역적으로 설치된 경우 간단히 `npm uninstall -g omniroute` 실행할 수 있습니다.
 
 ### VPS 배포
 
@@ -426,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 또는: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 배포(낮은 메모리)
 
-RAM이 제한된 서버에서는 메모리 제한 옵션을 사용하세요.
+RAM 제한된 서버의 경우 메모리 제한 옵션을 사용하십시오.
 
 ```bash
-# 512MB 제한 사용(기본값)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 또는 사용자 지정 메모리 제한 사용
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 또는 ecosystem.config.js 사용
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`를 생성합니다.
+`ecosystem.config.js` 생성:
 
 ```javascript
 module.exports = {
@@ -469,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 이미지 빌드(기본값 = codex/claude/droid가 사전 설치된 runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 포터블 모드(권장)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI 바이너리를 사용하는 호스트 통합 모드에 대해서는 기본 문서의 Docker 섹션을 참조하세요.
+CLI 바이너리를 사용한 호스트 통합 모드의 경우 기본 문서의 Docker 섹션을 참조하세요.
 
-### Void Linux (xbps-src)
+### 무효 Linux (xbps-src)
 
-Void Linux 사용자는 `xbps-src` 크로스 컴파일 프레임워크를 사용하여 OmniRoute를 네이티브로 패키징하고 설치할 수 있습니다. 이 프레임워크는 필수 `better-sqlite3` 네이티브 바인딩과 함께 Node.js 독립 실행형 빌드를 자동화합니다.
+Void Linux 사용자는 `xbps-src` 크로스 컴파일 프레임워크를 사용하여 기본적으로 OmniRoute 패키징하고 설치할 수 있습니다. 이는 필수 `better-sqlite3` 기본 바인딩과 함께 Node.js 독립형 빌드를 자동화합니다.
 
 <details>
 <summary><b>xbps-src 템플릿 보기</b></summary>
 
 ```bash
-# 'omniroute'용 템플릿 파일
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -507,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp의 대상 CPU 아키텍처 결정
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 모든 의존성 설치 – 스크립트 건너뛰기
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js 독립 실행형 번들 빌드
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 정적 자산을 독립 실행형 번들로 복사
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 네이티브 바인딩 컴파일
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 컴파일된 바인딩을 독립 실행형 번들에 배치
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 아키텍처별 sharp 번들 제거
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js 정적 분석에서 누락된 pino 런타임 의존성 복사:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 설치 후 훅이 비어 있는 Next.js 앱 라우터 디렉터리를 제거하지 않도록 방지
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,30 +585,30 @@ post_install() {
 
 ### 환경 변수
 
-| 변수                                    | 기본값                               | 설명                                                                                      |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 서명 시크릿(**프로덕션 환경에서는 변경**)                                             |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 최초 로그인 비밀번호                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | 데이터 디렉터리(db, 사용량, 로그)                                                         |
-| `PORT`                                  | 프레임워크 기본값                    | 서비스 포트(예시에서는 `20128`)                                                           |
-| `HOSTNAME`                              | 프레임워크 기본값                    | 바인딩 호스트(Docker 기본값은 `0.0.0.0`)                                                  |
-| `NODE_ENV`                              | 런타임 기본값                        | 배포 시 `production`으로 설정                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 대시보드에 표시되고 서버에 노출되는 공개 기본 URL(기존 `BASE_URL` 대체)                   |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 클라우드 동기화 엔드포인트 기본 URL(기존 `CLOUD_URL` 대체)                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 생성된 API 키의 HMAC 시크릿                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`에서 Bearer API 키 사용 강제                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 인증된 대시보드 사용자가 요청 시 저장된 API 키 전체 값을 표시할 수 있도록 허용            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 캐시된 Provider Limits 데이터의 서버 측 갱신 주기. UI 새로 고침 버튼으로 수동 동기화 가능 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 쓰기/가져오기/복원 전 자동 SQLite 스냅샷 비활성화. 수동 백업은 계속 사용 가능             |
-| `APP_LOG_TO_FILE`                       | `true`                               | 애플리케이션 및 감사 로그를 디스크에 출력하도록 설정                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 인증 쿠키 강제 적용(HTTPS 리버스 프록시 사용 시)                                 |
-| `CLOUDFLARED_BIN`                       | 설정되지 않음                        | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 관리형 Quick Tunnels용 전송 프로토콜(`http2`, `quic` 또는 `auto`)                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 힙 제한(MB)                                                                       |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 최대 프롬프트 캐시 항목 수                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 최대 시맨틱 캐시 항목 수                                                                  |
+| 변하기 쉬운                             | 기본                     | 설명                                                                                                                          |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(자동 생성)_            | JWT 서명 비밀 — 처음 실행 시 자동 생성되고 `server.env` 에 유지됩니다. 데이터 디렉터리가 일시적인 경우 명시적으로 설정합니다. |
+| `INITIAL_PASSWORD`                      | _(설정되지 않음)_        | 첫 번째 로그인 비밀번호입니다. npm/source 설치는 `CHANGEME` 로 시작합니다: 교체합니다. 설정되지 않음: 온보딩 마법사           |
+| `DATA_DIR`                              | `~/.omniroute`           | 데이터 디렉터리(db, 사용량, 로그)                                                                                             |
+| `PORT`                                  | 프레임워크 기본값        | 서비스 포트(예제에서는 `20128` )                                                                                              |
+| `HOSTNAME`                              | 프레임워크 기본값        | 호스트 바인딩(Docker 의 기본값은 `0.0.0.0`)                                                                                   |
+| `NODE_ENV`                              | 런타임 기본값            | 배포용 `production` 설정                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 대시보드에 표시되고 서버에 노출되는 공개 기반 URL (레거시 `BASE_URL` 대체)                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 클라우드 동기화 엔드포인트 기반 URL (기존 `CLOUD_URL` 대체)                                                                   |
+| `API_KEY_SECRET`                        | _(자동 생성)_            | 생성된 API 키에 대한 HMAC 비밀 — 처음 실행 시 자동 생성되고 `server.env` 에 유지됩니다.                                       |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` 에 Bearer API 키 적용                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 인증된 대시보드 사용자가 요청 시 저장된 전체 API 키 값을 공개하도록 허용                                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 캐시된 공급자 제한 데이터에 대한 서버측 새로 고침 주기. UI 새로 고침 버튼은 여전히 수동 동기화를 실행합니다.                  |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore 전에 자동 SQLite 스냅샷을 비활성화합니다. 수동 백업은 여전히 작동합니다                                 |
+| `APP_LOG_TO_FILE`                       | `true`                   | 애플리케이션 및 감사 로그를 디스크에 출력할 수 있습니다.                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` 인증 쿠키 강제 적용( HTTPS 역방향 프록시 뒤)                                                                         |
+| `CLOUDFLARED_BIN`                       | 설정되지 않음            | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 관리형 빠른 터널(`http2`, `quic` 또는 `auto`)에 대한 전송                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB 의 Node.js 힙 제한                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 최대 프롬프트 캐시 항목                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 최대 의미 캐시 항목                                                                                                           |
 
-전체 환경 변수 참조는 [README](../README.md)를 확인하세요.
+전체 환경 변수 참조는 [README](../README.md) 를 참조하세요.
 
 ---
 
@@ -612,17 +617,17 @@ post_install() {
 <details>
 <summary><b>사용 가능한 모든 모델 보기</b></summary>
 
-> 아래 목록은 v3.8.0 기준 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다 — 전체 실시간 카탈로그는 **대시보드 → 프로바이더 → [provider] → 사용 가능한 모델**에서 확인하거나 `GET /api/models/catalog`를 호출하세요.
+> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 실시간 카탈로그를 보려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
 >
-> 프로바이더의 기본 내장 목록이 최신과 달라진 경우, 해당 페이지에서 **/models에서 가져오기**를 사용하거나 **자동 동기화**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`)와 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 검증되었으며, Pollinations 익명 액세스는 동일한 테스트 과정에서 업스트림 제한 상태를 유지했습니다.
+> 제공업체의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 확인되었습니다. 동일한 테스트 과정에서 Pollinations 익명 액세스는 업스트림 제한 상태로 유지되었습니다.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort 단계: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ 추론 단계: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 무료 OAuth: **대시보드 → 프로바이더 → Kiro → 사용 가능한 모델**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
+**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
 
 **Qoder (`if/`)** — 무료 OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,7 +635,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 월 $9 정액제 또는 사용량 기반: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 월 $9 정액 또는 사용량 기준: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API 키: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,29 +643,29 @@ post_install() {
 
 **xAI (`xai/`)** — Grok 네이티브: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — 검색 증강: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — 검색 보강: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — 오픈 소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — 고속 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — 웨이퍼 스케일: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — 웨이퍼 규모: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG 특화: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG 중심: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API 키별로 Google에서 실시간으로 동기화됩니다 — 정적 목록이 없습니다. **대시보드 → 프로바이더**에서 키를 연결한 후 **사용 가능한 모델**을 사용하여 현재 카탈로그를 가져오세요 (예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되며, 정적 목록은 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**기타 호환 프로바이더** (일부 선별): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` 경유), `azure-ai`, `openrouter` (패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 프로바이더는 `providerRegistry.ts`에 자체 모델 목록을 유지하며, 프로바이더가 `/models` 엔드포인트를 제공하는 경우 자동 동기화할 수 있습니다.
+**기타 호환 제공업체**(일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock`(`aws-bedrock`를 통해), `azure-ai`, `openrouter`(패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 제공업체는 `providerRegistry.ts`에서 자체 모델 목록을 관리하며, 제공업체가 `/models` 엔드포인트를 제공하는 경우 자동으로 동기화할 수 있습니다.
 
-**모델 ID 참고 사항:** OmniRoute는 프로바이더 고유 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 것은 업스트림 API가 그 형식을 요구하기 때문입니다. 위에 나열되지 않은 모델은 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`를 호출하여 사용 가능 여부를 확인하세요.
+**모델 ID 참고:** OmniRoute는 제공업체 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 이유는 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않다면 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 사용 가능 여부를 확인하세요.
 
 </details>
 
@@ -716,8 +721,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 이러한 키는 연결의 `providerSpecificData` 에 들어갑니다(예: `PUT /api/providers/{id}` 통해).
 
-- `toolNameMaxLength` (정수, 1–1024) — 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결용입니다. 더 긴 이름은 짧은 별칭으로 전송되고 응답으로 복원됩니다.
-- `quotaEndpoint` — 게이트웨이의 quota/credits 엔드포인트, 대시보드 할당량 스트립 및 할당량 인식 라우팅을 읽습니다. OpenAI 및 Anthropic 호환 연결 모두에서 작동합니다. 전체 모양은 `open-sse/services/usage/openaiCompatible.ts` 에 문서화되어 있습니다.
+- `toolNameMaxLength` (정수, 1–1024) — - 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결용. 더 긴 이름은 짧은 별칭으로 전송되고 응답으로 복원됩니다. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go 및 Muse Code는 이미 설정 없이 64자 이상의 별칭 이름을 지정했습니다. 연결 값은 Azure OpenAI / Azure AI Foundry 기본값(더 엄격한 게이트웨이 뒤에 있는 Azure 연결)을 대체하고 사용자 지정 호환 노드에 대한 제한을 설정합니다. OpenAI, Mistral, NVIDIA, OpenCode Zen/Go 및 Muse Code는 레지스트리 제한을 유지하고 이를 무시합니다.
+- `quotaEndpoint` — 게이트웨이의 quota/credits 엔드포인트, 대시보드 할당량 스트립 및 할당량 인식 라우팅을 읽어보세요. OpenAI 및 Anthropic 호환 연결 모두에서 작동합니다. 전체 모양은 `open-sse/services/usage/openaiCompatible.ts` 에 문서화되어 있습니다.
 
 ```json
 {
@@ -815,8 +820,8 @@ curl http://localhost:20128/api/models/catalog
 ### LLM 게이트웨이 인텔리전스(9단계)
 
 - **의미론적 캐시** — 비스트리밍, 온도 = 0 응답 자동 캐시( `X-OmniRoute-No-Cache: true` 로 우회)
-- **멱등성 요청** — `Idempotency-Key` 또는 `X-Request-Id` 헤더를 통해 5초 이내에 요청 중복 제거
-- **진행 상황 추적** — `X-OmniRoute-Progress: true` 헤더를 통해 SSE `event: progress` 이벤트 선택
+- **멱등성 요청** — `Idempotency-Key` 또는 `X-Request-Id` 헤더를 통해 5초 이내에 요청을 중복 제거합니다.
+- **진행 상황 추적** — 옵트인 `X-OmniRoute-Progress: true` 헤더를 통한 SSE `event: progress` 이벤트
 
 ---
 
@@ -845,27 +850,27 @@ curl http://localhost:20128/api/models/catalog
 
 **대시보드 표시 전략(계정 수준 라우팅):**
 
-| 전략                        | 설명                                                                                                       |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **먼저 채우기**             | 우선순위에 따라 계정을 사용합니다. 기본 계정은 사용할 수 없을 때까지 모든 요청을 처리합니다.               |
-| **라운드 로빈**             | 구성 가능한 고정 제한이 있는 모든 계정을 순환합니다(기본값: 계정당 3회 호출).                              |
-| **P2C (두 가지 선택의 힘)** | 2개의 무작위 계정을 선택하고 더 건강한 계정으로 라우팅합니다. 건강에 대한 인식과 부하의 균형을 유지합니다. |
-| **무작위의**                | Fisher-Yates shuffle을 사용하여 각 요청에 대해 무작위로 계정을 선택합니다.                                 |
-| **최소 사용**               | 가장 오래된 `lastUsedAt` 타임스탬프가 있는 계정으로 라우팅하여 트래픽을 균등하게 분배합니다.               |
-| **비용 최적화**             | 가장 낮은 비용의 공급자를 위해 최적화하여 우선순위 값이 가장 낮은 계정으로 라우팅합니다.                   |
+| 전략                        | 설명                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **먼저 채우기**             | 우선순위에 따라 계정을 사용합니다. — 기본 계정은 사용할 수 없을 때까지 모든 요청을 처리합니다.                        |
+| **라운드 로빈**             | 구성 가능한 고정 제한이 있는 모든 계정을 순환합니다(기본값: 계정당 3회 호출).                                         |
+| **P2C (두 가지 선택의 힘)** | 2개의 무작위 계정을 선택하고 더 건강한 계정으로 라우팅합니다. — 건강에 대한 인식을 바탕으로 부하의 균형을 유지합니다. |
+| **무작위의**                | Fisher-Yates shuffle을 사용하여 각 요청에 대해 무작위로 계정을 선택합니다.                                            |
+| **최소 사용**               | 가장 오래된 `lastUsedAt` 타임스탬프가 있는 계정으로 라우팅하여 트래픽을 균등하게 분배합니다.                          |
+| **비용 최적화**             | 우선순위 값이 가장 낮은 계정으로 라우팅하여 비용이 가장 낮은 제공업체에 맞게 최적화합니다.                            |
 
-**고급 콤보 및 자동 전략** (콤보별로 또는 `auto/*` 접두사를 통해 구성 가능 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) 참조):
+**고급 콤보 및 자동 전략** (콤보별로 또는 `auto/*` 접두사 [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — ):
 
 - `priority` — 엄격한 순서, 절대 라운드 로빈이 아님
-- `weighted` — 모델별 가중치로 분할된 비례 트래픽
+- 모델별 가중치로 분할된 `weighted` — 비례 트래픽
 - `fill-first` — 한계에 도달할 때까지 첫 번째 모델을 배출합니다.
 - `round-robin` / `strict-random` / `random`
 - `p2c` (두 가지 선택의 힘)
 - `least-used` 와 `cost-optimized`
-- `auto` — 모든 후보자의 점수 기반
-- `lkgp` (마지막으로 알려진 양호한 공급자) — 마지막으로 성공한 공급자를 고정한 다음 규칙으로 돌아갑니다.
+- 모든 후보자에 대한 `auto` — 점수 중심
+- `lkgp` (Last Known Good Provider) — 마지막으로 성공한 공급자에 고정한 다음 규칙으로 돌아갑니다.
 - `context-optimized` — 자유 컨텍스트 창이 가장 큰 모델을 선택합니다.
-- `context-relay` — 후속 턴을 위해 긴 컨텍스트 모델을 연결합니다.
+- `context-relay` — 는 후속 턴을 위해 긴 컨텍스트 모델을 연결합니다.
 
 #### 외부 고정 세션 헤더
 
@@ -977,18 +982,18 @@ OmniRoute 다섯 가지 구성 요소로 공급자 수준 복원력을 구현합
    - **요청 간 최소 시간** — 요청 간 최소 간격(밀리초)
    - **최대 동시 요청** — 계정당 최대 동시 요청 수
 
-2. **연결 쿨다운** — 재시도 가능한 실패 후 단일 연결에 대한 인증 유형별 구성:
-   - **기본 쿨다운** — 재시도 가능한 업스트림 오류에 대한 기본 휴지 기간
-   - **업스트림 재시도 힌트 사용** — 제공된 경우 권위 있는 `Retry-After` 또는 재설정 힌트를 존중합니다.
+2. **연결 쿨다운** — 재시도 실패 후 단일 연결에 대한 인증 유형별 구성:
+   - **기본 쿨다운** — 재시도 가능한 업스트림 실패에 대한 기본 휴지 기간
+   - **업스트림 재시도 힌트 사용** — 제공되는 경우 권위 있는 `Retry-After` 또는 재설정 힌트를 존중합니다.
    - **최대 백오프 단계** — 반복되는 실패에 대한 최대 지수 백오프 수준
 
-3. **공급자 회로 차단기** — 엔드 투 엔드 공급자 오류를 추적하고, 구성된 경고 임계값에서 공급자의 성능이 저하된 것으로 표시하고, 구성된 오류 임계값에 도달하면 차단기를 엽니다.
+3. **공급자 회로 차단기** — 엔드투엔드 공급자 오류를 추적하고, 구성된 경고 임계값에서 공급자의 성능이 저하된 것으로 표시하고, 구성된 오류 임계값에 도달하면 차단기를 엽니다.
    - **저하 임계값** — `DEGRADED` 에 들어가기 전 연속 공급자 실패
    - **실패 임계값** — `OPEN` 에 들어가기 전 연속 공급자 실패
-   - **시간 초과 재설정** — 공급자가 다시 테스트되기까지의 시간
-   - **CLOSED** (정상) — 요청 흐름이 정상적으로 이루어집니다.
-   - **DEGRADED** — 증가된 실패를 추적하는 동안에도 요청은 계속 흐릅니다.
-   - **OPEN** — 반복적인 실패 후 공급자가 일시적으로 차단됩니다.
+   - **시간 초과 재설정** — 공급자가 다시 테스트되기 전까지의 시간
+   - **CLOSED** (정상) — 요청이 정상적으로 흐름
+   - **DEGRADED** 증가된 실패를 추적하는 동안 — 요청은 여전히 흐름
+   - **OPEN** 반복적인 실패 후 — 공급자가 일시적으로 차단됩니다.
    - **HALF_OPEN** — 공급자가 복구되었는지 테스트
 
    연결 범위의 `429` 속도 제한은 그대로 유지됩니다.** 연결 쿨다운** 공급자 차단기에 포함되지 않습니다.
@@ -997,7 +1002,7 @@ OmniRoute 다섯 가지 구성 요소로 공급자 수준 복원력을 구현합
 
 4. **쿨다운을 기다리세요** — 모든 후보 연결이 이미 냉각 중인 경우 OmniRoute 가장 빠른 냉각을 기다리고 동일한 클라이언트 요청을 자동으로 재시도할 수 있습니다.
 
-5. **속도 제한 자동 감지** — 업스트림 공급자가 명시적인 대기 창을 반환하면 설정이 활성화되면 해당 힌트가 로컬 연결 휴지 기간을 재정의합니다.
+5. **속도 제한 자동 감지** — 업스트림 공급자가 명시적인 대기 창을 반환하면 해당 힌트는 설정이 활성화될 때 로컬 연결 휴지 기간을 재정의합니다.
 
 **전문가 팁:** 사용** 건강** 중단 후 라이브 공급자 차단기를 검사하고 재설정하는 페이지입니다. 복원력 페이지는 구성만 변경합니다.
 
@@ -1039,15 +1044,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 설정 페이지는 다음과 같이 구성됩니다.** 탭 7개** 쉬운 탐색을 위해:
 
-| 꼬리표       | 내용물                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **일반적인** | 시스템 스토리지 도구, 기본 동작, 엔드포인트 터널 가시성                                                                                    |
-| **모습**     | 테마 컨트롤(light/dark/system), 사이드바 가시성, Cloudflare/Tailscale/ngrok 터널 카드용 패널 토글                                          |
-| **AI**       | 생각하는 예산(통과/자동 제거/사용자 정의/적응 — [THINKING_BUDGET.md](./THINKING_BUDGET.md) 참조), 전역 시스템 프롬프트, 프롬프트 캐시 통계 |
-| **보안**     | Login/Password 설정, IP 액세스 제어, `/models` 에 대한 API 인증, 공급자 차단, 프롬프트 주입 가드                                           |
-| **라우팅**   | 글로벌 라우팅 전략(Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), 와일드카드 모델 별칭, 폴백 체인, 콤보 기본값    |
-| **회복력**   | 요청 대기열, 연결 휴지, 공급자 차단기 구성 및 휴지 대기 동작                                                                               |
-| **고급의**   | 전역 프록시 구성(HTTP/SOCKS5), 공급자별 프록시 재정의                                                                                      |
+| 꼬리표       | 내용물                                                                                                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **일반적인** | 시스템 스토리지 도구, 기본 동작, 엔드포인트 터널 가시성                                                                                  |
+| **모습**     | 테마 컨트롤(light/dark/system), 사이드바 가시성, Cloudflare/Tailscale/ngrok 터널 카드용 패널 토글                                        |
+| **AI**       | 예산 고려(통과/자동 제거/사용자 정의/적응형 — [THINKING_BUDGET.md](./THINKING_BUDGET.md) 참조), 전역 시스템 프롬프트, 프롬프트 캐시 통계 |
+| **보안**     | Login/Password 설정, IP 액세스 제어, `/models` 에 대한 API 인증, 공급자 차단, 프롬프트 주입 가드                                         |
+| **라우팅**   | 글로벌 라우팅 전략(Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), 와일드카드 모델 별칭, 폴백 체인, 콤보 기본값  |
+| **회복력**   | 요청 대기열, 연결 휴지, 공급자 차단기 구성 및 휴지 대기 동작                                                                             |
+| **고급의**   | 전역 프록시 구성(HTTP/SOCKS5), 공급자별 프록시 재정의                                                                                    |
 
 일반은 더 이상 읽기 전용 로깅 및 캐시 메모를 복제하지 않습니다. 데이터베이스 보존 및 최적화 설정은 `/api/settings/database` 통해 유지됩니다. 수동 캐시 지우기는 `DELETE /api/cache` 사용합니다. 요청 및 프록시 로그 행 캡은 `CALL_LOGS_TABLE_MAX_ROWS` 및 `PROXY_LOGS_TABLE_MAX_ROWS` 에 의해 제어됩니다.
 
@@ -1060,7 +1065,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | 꼬리표   | 목적                                                                    |
 | -------- | ----------------------------------------------------------------------- |
 | **예산** | daily/weekly/monthly 예산 및 실시간 추적을 통해 API 키당 지출 한도 설정 |
-| **가격** | 모델 가격 항목 보기 및 편집 - 공급자당 1,000개 input/output 토큰당 비용 |
+| **가격** | 모델 가격 항목 보기 및 편집 공급자당 1K input/output 토큰당 — 비용      |
 
 ```bash
 # API: Set a budget
@@ -1140,7 +1145,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 글로벌 콤보 기본값은 다음에서 설정할 수 있습니다.** 대시보드 → 설정 → 라우팅 → 콤보 기본값** . 콤보 대상 시간 초과는 기본적으로 현재 요청 시간 초과를 상속합니다. 사용** 대상 시간 초과(초)** 콤보 기본값 또는 개별 콤보는 대상당 제한이 짧을수록 더 빠른 폴백을 트리거해야 하는 경우에만 가능합니다.
 
-제로 레이턴시 콤보 최적화가 선택되어 있습니다. 떠나다** 지연 시간 없는 최적화** 대기 시간 기능이 폴백 대상을 경주하거나, TTFT 기록을 기반으로 대상을 건너뛰거나, 폴백 요청을 압축하는 것을 방지하기 위해 비활성화됩니다. 이를 활성화하면 구성된 헤징, 예측적 TTFT 건너뛰기 및 사전 폴백 압축을 통해 routing/request 충실도를 교환하여 더 낮은 꼬리 대기 시간을 얻을 수 있습니다.
+제로 레이턴시 콤보 최적화가 선택되어 있습니다. 떠나다** 지연 시간 없는 최적화** 대기 시간 기능이 폴백 대상을 경주하거나, TTFT 기록을 기반으로 대상을 건너뛰거나, 폴백 요청을 압축하는 것을 방지하기 위해 비활성화됩니다. 이를 활성화하면 구성된 헤징, 예측적 TTFT 건너뛰기 및 사전 대응적 폴백 압축이 가능해 routing/request 충실도를 교환하여 꼬리 지연 시간을 줄일 수 있습니다.
 
 장애를 입히다** 추론 토큰 버퍼** 업스트림 공급자가 엄격한 `max_tokens` / `maxOutputTokens` 제한을 요구하는 경우. 활성화되면 콤보 라우팅은 알려진 출력 한도가 있는 모델에 대한 추론 모델 헤드룸만 추가하고 안전한 버퍼링 값이 해당 한도를 초과하는 경우 클라이언트 토큰 제한을 변경하지 않고 그대로 둡니다. 클라이언트 제한이 이미 알려진 한도보다 높은 경우, OmniRoute 업스트림 요청을 보내기 전에 이를 해당 한도로 제한합니다.
 

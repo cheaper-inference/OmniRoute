@@ -16,7 +16,12 @@ test("unrelated candidate builds cannot replace each other's pending concurrency
 });
 
 test("superseded runs cancel only within the same workflow/ref", () => {
-  assert.equal(workflow.concurrency.group, "${{ github.workflow }}-${{ github.ref }}");
+  // A description edit on a Mergify queue draft gets a per-run suffix so it never cancels the
+  // candidate's real run (ci-mergify-candidate.test.mjs); every other run keeps workflow/ref.
+  assert.match(
+    workflow.concurrency.group,
+    /^\$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\$\{\{ \(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && .*\) && format\('-queue-edit-\{0\}', github\.run_id\) \|\| '' \}\}$/
+  );
   assert.equal(workflow.concurrency["cancel-in-progress"], true);
 });
 
@@ -24,8 +29,9 @@ test("no pull request or merge group Build reaches the self-hosted build slot", 
   // 2026-10-18: with every own-origin PR routed to the ONE omni-build runner, 18 Turbopack
   // Builds (29-58 min each) queued for up to 18 h and the release line's own push Build got
   // the slot once in 40 jobs. PR and merge_group Builds now run hosted with webpack.
-  // The self-hosted path is a pure conjunction, so these four clauses are the whole gate:
-  // a pull_request (own-origin or fork) or merge_group event can never satisfy it.
+  // The self-hosted path is a pure conjunction, so these five clauses are the whole gate:
+  // a pull_request (own-origin or fork) or merge_group event can never satisfy it, and neither
+  // can a push to an omni-queue/** merge-queue candidate (its tree carries fork code).
   const runsOn: string = workflow.jobs.build["runs-on"];
   const runnerCondition = runsOn.split(" && fromJSON(")[0];
   const clauses = runnerCondition
@@ -37,6 +43,7 @@ test("no pull request or merge group Build reaches the self-hosted build slot", 
     "vars.USE_VPS_BUILD_RUNNER == 'true'",
     "github.event_name != 'merge_group'",
     "github.event_name != 'pull_request'",
+    "!startsWith(github.ref, 'refs/heads/omni-queue/')",
   ]);
   assert.doesNotMatch(runnerCondition, /\|\|/, "no exception may re-admit a PR event");
   assert.match(runsOn, /\["self-hosted","omni-build"\]/);

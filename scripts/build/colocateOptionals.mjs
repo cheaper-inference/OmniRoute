@@ -47,7 +47,15 @@
  * fail-open, so this never throws into the install.
  */
 
-import { cpSync, existsSync, mkdirSync, readFileSync, realpathSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, sep } from "node:path";
 
@@ -113,9 +121,7 @@ export function computeDependencyClosure(nodeModulesDir, seeds = SEED_PACKAGES) 
 function isPackageIntact(targetNodeModulesDir, name) {
   if (!existsSync(join(targetNodeModulesDir, name))) return false;
   try {
-    const probe = createRequire(
-      join(targetNodeModulesDir, "__colocate_probe__.js")
-    );
+    const probe = createRequire(join(targetNodeModulesDir, "__colocate_probe__.js"));
     const resolved = probe.resolve(name);
     // A resolution that walked past the target into an ancestor tree does not
     // prove the target copy is usable.
@@ -125,6 +131,26 @@ function isPackageIntact(targetNodeModulesDir, name) {
   } catch {
     return false;
   }
+}
+
+/**
+ * `cpSync` filter for the no-clobber merge. With `verbatimSymlinks`, cpSync
+ * throws EEXIST when a link already sits at the destination, which would stop
+ * the merge halfway through a partially traced package. A link has no payload
+ * to preserve, so the traced one gives way to the source package's.
+ *
+ * @param {string} source
+ * @param {string} destination
+ * @returns {true}
+ */
+function replaceTracedSymlink(source, destination) {
+  if (
+    lstatSync(source).isSymbolicLink() &&
+    lstatSync(destination, { throwIfNoEntry: false })?.isSymbolicLink()
+  ) {
+    rmSync(destination);
+  }
+  return true;
 }
 
 /**
@@ -174,10 +200,7 @@ export function colocateLlmlinguaOptionals({
   // Check the complete closure rather than only the entry package, and judge
   // presence by entrypoint integrity — a partially traced directory (see
   // isPackageIntact) must still receive its missing files.
-  if (
-    closure.length > 0 &&
-    closure.every((name) => isPackageIntact(targetNm, name))
-  ) {
+  if (closure.length > 0 && closure.every((name) => isPackageIntact(targetNm, name))) {
     return { skipped: true, reason: "already co-located" };
   }
 
@@ -192,10 +215,16 @@ export function colocateLlmlinguaOptionals({
       // force:false merges into a partially traced directory: files the trace
       // already materialized are kept, missing ones (the package payload) are
       // filled in from the root tree.
+      // verbatimSymlinks: without it cpSync rewrites a package's relative links
+      // (global-agent's node_modules/.bin/semver) to absolute paths into this
+      // machine's root node_modules, which dangle in any shipped bundle and
+      // make the Electron web-build refuse to pack it.
       cpSync(join(rootNm, name), dest, {
         recursive: true,
         force: false,
         errorOnExist: false,
+        verbatimSymlinks: true,
+        filter: replaceTracedSymlink,
       });
       copied++;
     } catch (err) {

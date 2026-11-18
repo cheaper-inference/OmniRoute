@@ -319,14 +319,23 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    assert.equal(verdict.name, policy.profiles[profile].checkName);
-    assert.equal(verdict.if, "${{ always() }}");
+    // Requested candidates keep the required name; unrequested drafts get no PASS receipt.
+    const checkName = policy.profiles[profile].checkName;
+    const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
+    assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
+    // Classification failure still reaches always(); queue description edits remain excluded.
+    assert.match(
+      verdict.if,
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+    );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push
     // runs there were cancelled by the next merge, 24 of 24 in a day, while holding up to
     // 30 hosted slots). See tests/unit/build/push-storm-diet.test.ts.
-    assert.deepEqual(workflow.on.push.branches, ["main"]);
+    // omni-queue/** (2026-11-13): the omni-queue merge-queue candidates run the full profile
+    // on push (tests/unit/merge-queue/workflows.test.mjs).
+    assert.deepEqual(workflow.on.push.branches, ["main", "omni-queue/**"]);
     assert.ok(workflow.on.merge_group.types.includes("checks_requested"));
     for (const [id, job] of Object.entries(workflow.jobs)) {
       assert.ok(!String(job.if).includes("'hotfix'"), "a label cannot waive candidate evidence");
@@ -336,6 +345,14 @@ for (const profile of ["ci", "quality"]) {
           keepsForkCodeOffSelfHosted(job["runs-on"]),
           `${profile}:${id} must never run fork pull-request code on a self-hosted runner`
         );
+        // A push-capable self-hosted gate must also exclude omni-queue/** candidates: they are
+        // pushes whose tree carries fork code.
+        if (!job["runs-on"].includes("github.event_name == 'pull_request' &&")) {
+          assert.ok(
+            job["runs-on"].includes("!startsWith(github.ref, 'refs/heads/omni-queue/')"),
+            `${profile}:${id} must keep omni-queue/** candidates off the self-hosted runner`
+          );
+        }
       }
     }
     for (const id of ["lint-guard", "merge-integrity"]) {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Button } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { getHeaderIconProviderId, providerText } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 import type { ProviderNotice } from "@/lib/providers/catalog";
@@ -70,6 +71,9 @@ export default function ProviderPageHeader({
     "Partner link — supports OmniRoute at no extra cost to you"
   );
 
+  // The brand colour as an 8% tint behind the icon; no tint when the catalog has no colour.
+  const brandTint = providerInfo.color ? flowColorAlpha(providerInfo.color, 8) : undefined;
+
   // Resolve the API-key registration link: prefer apiKeyUrl, fall back to
   // signupUrl, hide when neither is set (#9270).
   const noticeUrl = providerInfo.notice?.apiKeyUrl || providerInfo.notice?.signupUrl;
@@ -78,8 +82,7 @@ export default function ProviderPageHeader({
       href={noticeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm font-medium underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity inline-flex items-center gap-1"
-      style={{ color: providerInfo.color }}
+      className="text-sm font-medium text-primary underline underline-offset-2 hover:text-text-main transition-colors inline-flex items-center gap-1"
     >
       <Icon name="open_in_new" size={16} />
       {t("getApiKey")}
@@ -100,9 +103,10 @@ export default function ProviderPageHeader({
       }
       title={
         <span className="inline-flex items-center gap-4">
+          {/* The brand colour is only a tint behind the icon; text uses neutral/primary tokens. */}
           <span
             className="inline-flex items-center justify-center rounded-lg"
-            style={{ backgroundColor: `${providerInfo.color}15` }}
+            style={{ backgroundColor: brandTint }}
           >
             <ProviderIcon
               providerId={getHeaderIconProviderId(
@@ -124,8 +128,7 @@ export default function ProviderPageHeader({
               href={providerInfo.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline inline-flex items-center gap-2"
-              style={{ color: providerInfo.color }}
+              className="hover:underline hover:text-primary inline-flex items-center gap-2"
               title={showPartnerNote ? kimiPartnerLinkNote : undefined}
               aria-label={
                 showPartnerNote ? `${providerInfo.name} — ${kimiPartnerLinkNote}` : undefined
@@ -153,8 +156,7 @@ export default function ProviderPageHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenTutorial}
-              className="h-auto min-h-0 px-0 text-sm font-medium underline underline-offset-2 opacity-70 hover:bg-transparent hover:opacity-100"
-              style={{ color: providerInfo.color }}
+              className="h-auto min-h-0 px-0 text-sm text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
             >
               Tutorial
             </Button>

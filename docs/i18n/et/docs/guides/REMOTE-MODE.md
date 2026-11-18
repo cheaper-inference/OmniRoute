@@ -44,31 +44,36 @@ sinu sülearvuti                          OmniRoute'i kaugserver (VPS)
 
 ---
 
-## Ühenduse loomine
+## Ühendamine
 
-### Haldusparooliga (algseadistus)
+### Haldusparooliga (algkäivitus)
 
 ```bash
 omniroute connect 192.168.0.15
 # Haldusparool aadressile http://192.168.0.15:20128: ********
-# ✔ Ühendatud aadressiga http://192.168.0.15:20128 — kontekst '192.168.0.15' (õigustase: admin)
+# ✔ Ühendatud aadressiga http://192.168.0.15:20128 — kontekst „192.168.0.15“ (ulatus: admin)
 ```
 
-Parooliga autentimine väljastab vaikimisi **admin**-tõendi (kuna sul on parool,
-on sul juba täielik kontroll). Piira õigustaset suvandiga `--scope`:
+Paroolivoog väljastab vaikimisi **admin**-märgise (kuna teil on parool, on teil
+juba täielik kontroll). Piirake ulatust võtmega `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Suvandid: `--port <p>` (kui hostil pole porti määratud), `--name <ctx>` (konteksti nimi),
+Valikud: `--port <p>` (kui hostil port puudub), `--name <ctx>` (konteksti nimi),
 `--scope read|write|admin`. Täielikku URL-i kasutatakse muutmata kujul:
 `omniroute connect https://omni.example.com`.
 
-### Eelnevalt loodud tõendiga
+Kui serveris on juhtpaneeli kahefaktoriline autentimine lubatud (Settings →
+Security), lükatakse ainult parool tagasi: CLI küsib seejärel autentimisrakenduse
+koodi (või taastamiskoodi). Mitteinteraktiivseks kasutamiseks edastage see ette
+argumendiga `--totp <code>`.
 
-Loo juhtpaneelil (või käsuga `omniroute tokens create`) piiratud õigustega tõend ja
-kleebi see — parooli pole vaja:
+### Eelnevalt loodud märgisega
+
+Looge juhtpaneelil (või käsuga `omniroute tokens create`) piiratud ulatusega märgis
+ja kleepige see siia — parooli pole vaja:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -440,12 +445,12 @@ omniroute contexts remove 192-168-0-15 --yes   # eemalda kohalik kontekst (isegi
 
 ## API lõpp-punktid (viide)
 
-| Meetod | Marsruut              | Autentimine      | Ulatus                         |
-| ------ | --------------------- | ---------------- | ------------------------------ |
-| POST   | `/api/cli/connect`    | haldusparool     | — (avalik, parooliga kaitstud) |
-| GET    | `/api/cli/whoami`     | juurdepääsutoken | lugemine                       |
-| GET    | `/api/cli/tokens`     | juurdepääsutoken | admin                          |
-| POST   | `/api/cli/tokens`     | juurdepääsutoken | admin                          |
-| DELETE | `/api/cli/tokens/:id` | juurdepääsutoken | admin                          |
+| Meetod | Marsruut              | Autentimine              | Ulatus                         |
+| ------ | --------------------- | ------------------------ | ------------------------------ |
+| POST   | `/api/cli/connect`    | parool; 2FA, kui lubatud | — (avalik, parooliga kaitstud) |
+| GET    | `/api/cli/whoami`     | juurdepääsutoken         | read                           |
+| GET    | `/api/cli/tokens`     | juurdepääsutoken         | admin                          |
+| POST   | `/api/cli/tokens`     | juurdepääsutoken         | admin                          |
+| DELETE | `/api/cli/tokens/:id` | juurdepääsutoken         | admin                          |
 
-Täielikud skeemid leiad failist [openapi.yaml](../openapi.yaml).
+Täielikud skeemid leiate failist [openapi.yaml](../openapi.yaml).

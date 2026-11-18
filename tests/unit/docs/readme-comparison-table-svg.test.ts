@@ -6,6 +6,19 @@ import {
   COMPARISON_TABLE_COPY,
 } from "../../../scripts/docs/gen-readme-comparison-table.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed comparison table must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as text
 // and declare both palettes. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
@@ -13,15 +26,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 const FILE = "docs/diagrams/comparison-table.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed comparison table is exactly what the generator produces", async () => {
-  const generated = await renderComparisonTable();
-  const committed = readFileSync(FILE, "utf8");
-  assert.equal(
-    committed,
-    generated,
-    `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-comparison-table.mjs\``
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/comparison-table.svg") };
+
+test(
+  "the committed comparison table is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderComparisonTable();
+    const committed = readFileSync(FILE, "utf8");
+    assert.equal(
+      committed,
+      generated,
+      `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-comparison-table.mjs\``
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderComparisonTable();
@@ -41,9 +62,11 @@ test("every copy string stays in the file as text", async () => {
   }
 });
 
-test("the counts gate's own readers of this file accept the generated content (live code)", async () => {
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
   const svg = await renderComparisonTable();
-  const checks = buildChecks().filter((c) => Array.isArray(c.files) && c.files.includes(FILE));
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
+    (c) => Array.isArray(c.files) && c.files.includes(FILE)
+  );
   assert.ok(checks.length > 0, `no counts-gate check reads ${FILE}`);
   for (const c of checks) {
     const r = c.validate(svg);
@@ -53,7 +76,7 @@ test("the counts gate's own readers of this file accept the generated content (l
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderComparisonTable();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
   assert.doesNotMatch(svg.slice(svg.indexOf("</style>")), /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

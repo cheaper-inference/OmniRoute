@@ -214,9 +214,10 @@ export function useLiveDashboard({
         // Subscribe to channels
         ws.send(JSON.stringify({ type: "subscribe", channels: stableChannels }));
 
-        // Heartbeat: send a periodic ping so the server (which only refreshes
-        // liveness from inbound messages) never terminates a healthy, idle
-        // connection for exceeding its inactivity timeout (#10319).
+        // Heartbeat: keep sending an application ping. Older servers refreshed
+        // liveness only from inbound messages and would otherwise terminate a
+        // healthy, idle connection (#10319). The current server counts only the
+        // protocol pong the browser sends on its own, and still answers this ping.
         stopPingHeartbeat();
         pingIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
@@ -502,6 +503,34 @@ export interface LiveComboEvent {
   latencyMs?: number;
   error?: string;
   timestamp: number;
+  /** The account that served or attempted this target, when known. */
+  connectionId?: string;
+}
+
+/**
+ * Map one `combo` channel WS frame to the event the Combo Studio reducer consumes.
+ * Returns null for any other event.
+ */
+export function toLiveComboEvent(event: WsEventPayload): LiveComboEvent | null {
+  const data = event.data as any;
+  const base = {
+    comboName: data.comboName,
+    targetIndex: data.targetIndex,
+    provider: data.provider,
+    model: data.model,
+    timestamp: event.timestamp,
+    connectionId: data.connectionId,
+  };
+  if (event.event === "combo.target.attempt") {
+    return { ...base, type: "attempt", strategy: data.strategy };
+  }
+  if (event.event === "combo.target.succeeded") {
+    return { ...base, type: "succeeded", latencyMs: data.latencyMs };
+  }
+  if (event.event === "combo.target.failed") {
+    return { ...base, type: "failed", error: data.error, latencyMs: data.latencyMs };
+  }
+  return null;
 }
 
 /**
@@ -514,42 +543,7 @@ export function useLiveComboStatus(options?: UseLiveDashboardOptions) {
   const handleEvent = useCallback((event: WsEventPayload) => {
     if (event.channel !== "combo") return;
 
-    const data = event.data as any;
-    let comboEvent: LiveComboEvent | null = null;
-
-    if (event.event === "combo.target.attempt") {
-      comboEvent = {
-        comboName: data.comboName,
-        targetIndex: data.targetIndex,
-        provider: data.provider,
-        model: data.model,
-        type: "attempt",
-        strategy: data.strategy,
-        timestamp: event.timestamp,
-      };
-    } else if (event.event === "combo.target.succeeded") {
-      comboEvent = {
-        comboName: data.comboName,
-        targetIndex: data.targetIndex,
-        provider: data.provider,
-        model: data.model,
-        type: "succeeded",
-        latencyMs: data.latencyMs,
-        timestamp: event.timestamp,
-      };
-    } else if (event.event === "combo.target.failed") {
-      comboEvent = {
-        comboName: data.comboName,
-        targetIndex: data.targetIndex,
-        provider: data.provider,
-        model: data.model,
-        type: "failed",
-        error: data.error,
-        latencyMs: data.latencyMs,
-        timestamp: event.timestamp,
-      };
-    }
-
+    const comboEvent = toLiveComboEvent(event);
     if (comboEvent) {
       setComboEvents((prev) => [comboEvent!, ...prev].slice(0, maxComboEvents));
     }

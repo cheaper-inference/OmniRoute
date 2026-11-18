@@ -94,9 +94,9 @@ async function runSyntxUpscaleJob(options: {
   const images = wantsBase64
     ? [
         {
-          b64_json: (
-            await fetchSyntxMediaBytes(url, options.fetchImpl, { signal: options.signal })
-          ).bytes.toString("base64"),
+          b64_json: (await fetchSyntxMediaBytes(url, { signal: options.signal })).bytes.toString(
+            "base64"
+          ),
         },
       ]
     : [{ url }];

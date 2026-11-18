@@ -100,7 +100,9 @@ test.describe("Advertised CLI client version card", () => {
     await gotoDashboardRoute(page, "/dashboard/providers/codex");
 
     await expect(page.getByText("Advertised CLI client version")).toBeVisible({ timeout: 20000 });
-    await expect(page.getByText(/gpt-6-astra/)).toBeVisible();
+    const versionHint = page.getByText(/OpenAI gates newer models on the Codex client version/);
+    await expect(versionHint).toBeVisible();
+    await expect(versionHint).toContainText("gpt-6-astra");
     await expect(page.getByText(/Inference caveat/)).toBeVisible();
   });
 
@@ -123,8 +125,11 @@ test.describe("Advertised CLI client version card", () => {
     await expect(input).toBeVisible({ timeout: 20000 });
     await input.fill("2.1.260");
 
-    // Scope to the editor row: the provider page has other Save buttons.
-    const saveButton = input.locator("xpath=..").getByRole("button", { name: "Save" });
+    // Scope to this card; the kit Input adds a wrapper inside the editor row.
+    const versionCard = page
+      .getByRole("heading", { name: "Advertised CLI client version", exact: true })
+      .locator("..");
+    const saveButton = versionCard.getByRole("button", { name: "Save", exact: true });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 

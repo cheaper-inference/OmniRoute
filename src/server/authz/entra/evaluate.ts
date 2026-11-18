@@ -64,12 +64,6 @@ function pruneCache(): void {
   }
 }
 
-export function invalidateSsoResolution(oid: string): void {
-  for (const [key, entry] of resolutionCache) {
-    if (entry.oid === oid) resolutionCache.delete(key);
-  }
-}
-
 export { looksLikeEntraJwt };
 
 /**

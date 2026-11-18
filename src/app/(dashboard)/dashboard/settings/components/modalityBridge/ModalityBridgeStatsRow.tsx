@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 type BridgeKind = "vision" | "audio" | "video";
 
 interface BridgeStats {
+  drilldown?: { retainedEntries: number; retainedBytes: number };
   attempts: number;
   averageLatencyMs: number;
   bridged: number;
@@ -21,9 +22,21 @@ interface ModalityBridgeStatsRowProps {
   kind: BridgeKind;
 }
 
+function parseDrilldownStats(value: unknown): Pick<BridgeStats, "drilldown"> {
+  const drilldown = value as BridgeStats["drilldown"] | undefined;
+  if (
+    typeof drilldown?.retainedEntries !== "number" ||
+    typeof drilldown?.retainedBytes !== "number"
+  ) {
+    return {};
+  }
+  return { drilldown };
+}
+
 function parseStats(value: unknown): BridgeStats | null {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
+  const drilldown = record.drilldown;
   const lastUsedAt = record.lastUsedAt;
   if (lastUsedAt !== null && typeof lastUsedAt !== "string") return null;
   if (
@@ -51,6 +64,7 @@ function parseStats(value: unknown): BridgeStats | null {
           )
         : 0;
   return {
+    ...parseDrilldownStats(drilldown),
     attempts,
     averageLatencyMs,
     bridged: record.bridged,
@@ -93,6 +107,12 @@ export default function ModalityBridgeStatsRow({ kind }: ModalityBridgeStatsRowP
 
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted" aria-live="polite">
+      {kind === "video" && stats.drilldown ? (
+        <span>
+          {t("modalityBridgeVideoDrilldownUsage")}: {stats.drilldown.retainedEntries} ·{" "}
+          {stats.drilldown.retainedBytes} B
+        </span>
+      ) : null}
       <span>
         {stats.attempts} {tRoot("requestLogger.attempts").toLowerCase()}
       </span>

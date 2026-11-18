@@ -82,6 +82,18 @@ Hata nje ya maeneo yaliyozuiwa, proksi zinafaa kwa:
 
 ---
 
+## Hali chaguo-msingi ya seva mbadala kwa akaunti mpya
+
+Katika** Mipangilio → Proksi → usanidi wa Global** , tumia** Washa proksi kwa chaguo-msingi kwa miunganisho mipya** kuchagua hali ya awali ya seva mbadala ya akaunti mpya za watoa huduma.
+
+Mipangilio mpya inadhibiti hali ya awali ya seva mbadala ya akaunti mpya za watoa huduma. Haibadilishi akaunti zilizopo au kuchukua nafasi ya swichi ya kimataifa ya wakala. Thamani yake ya awali huhifadhi tabia ya awali. Kizime mara moja ili kuunda akaunti za baadaye huku seva mbadala ikiwa imezimwa kwa chaguomsingi.
+
+Upendeleo huhifadhiwa kama `defaultNewConnectionProxyEnabled` kupitia Mipangilio iliyopo API. Inabadilika kuwa `true` ikiwa haijahifadhiwa kamwe. Kuhifadhi `false` kutaanza kutumika kwa akaunti mpya zinazofuata bila kuanzisha upya. `POST /api/providers` inakubali boolean kali ya hiari `proxyEnabled`; `true` au `false` dhahiri huchukua nafasi ya kwanza juu ya chaguo-msingi la uundaji. Kutokuwepo kwa nakala ya akaunti au OAuth kuunganisha upya huhifadhi hali ya akaunti hiyo iliyohifadhiwa. Akaunti za kibinafsi bado zinaweza kuwezeshwa au kuzimwa baadaye.
+
+Uhamisho wa watoa huduma mahususi hutumia chaguomsingi la usakinishaji lengwa kwa akaunti mpya na kuhifadhi sera lengwa wakati wa kubadilisha akaunti zilizopo. Vigezo vya seva mbadala si sehemu za uhamishaji zinazobebeka. Urejeshaji kamili wa nakala rudufu na uhamishaji wa kihistoria JSON/SQL huhifadhi semantiki zao za urejeshaji zilizopo, ikijumuisha thamani za akaunti zilizohifadhiwa na chaguomsingi za taratibu za urithi; urejeshaji kamili wa mipangilio pia unaweza kurejesha upendeleo huu.
+
+Upendeleo huu hauwakabidhi seva mbadala au kuthibitisha kuwa ni mzima au anatumika. Uelekezaji halisi bado unategemea swichi ya proksi ya kimataifa na usanidi unaotumika wa seva mbadala. Watoa huduma za syntetisk bila akaunti endelevu, trafiki OAuth kabla ya kuunda akaunti, proksi za environment/system, na uungaji mkono wa nje wa mitandao ziko nje ya upeo wake.
+
 ## Mfumo wa Proksi wa Ngazi 4
 
 OmniRoute inasaidia usanidi wa proksi katika **mawanda manne huru**, yanayotatuliwa kulingana na mpangilio wa kipaumbele:

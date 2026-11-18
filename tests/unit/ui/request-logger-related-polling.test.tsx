@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => router }));
 vi.mock("@/shared/components/RequestLoggerDetail", () => ({
   default: ({ relatedLogs, onClose }) => (
     <div>
-      <output data-testid="related">{JSON.stringify(relatedLogs.map((row) => row.id))}</output>
+      <output data-testid="related">{JSON.stringify(relatedLogs)}</output>
       <button onClick={onClose}>Close detail</button>
     </div>
   ),
@@ -103,7 +103,7 @@ async function tick() {
   });
 }
 function rows() {
-  return ref.current!.getSortedLogs();
+  return JSON.parse(container.querySelector('[data-testid="related"]')?.textContent || "[]");
 }
 function ids() {
   return rows().map((log) => log.id);
@@ -127,25 +127,16 @@ describe("related-request polling", () => {
     await open();
     await tick();
     expect(ids()).toEqual(
-      expect.arrayContaining([
-        selected.id,
-        history.id,
-        unrelated.id,
-        stillActive.id,
-        stillCompleted.id,
-        retry.id,
-      ])
+      expect.arrayContaining([selected.id, history.id, stillActive.id, stillCompleted.id, retry.id])
     );
     expect(ids()).not.toContain(active.id);
     expect(ids()).not.toContain(completed.id);
     expect(ids()).not.toContain(memory.id);
-    expect(JSON.parse(container.querySelector("output")!.textContent!)).toEqual([
-      selected.id,
-      history.id,
-      stillActive.id,
-      stillCompleted.id,
-      retry.id,
-    ]);
+    expect(
+      JSON.parse(container.querySelector("output")!.textContent!).map(
+        (row: { id: string }) => row.id
+      )
+    ).toEqual([selected.id, history.id, stillActive.id, stillCompleted.id, retry.id]);
     expect(
       fetchMock.mock.calls.filter(([url]) => String(url).startsWith("/api/usage/call-logs?limit="))
     ).toHaveLength(1);
@@ -155,7 +146,7 @@ describe("related-request polling", () => {
     poll.mockResolvedValue(Response.json([]));
     await open();
     await tick();
-    expect(ids()).toEqual([selected.id, history.id, unrelated.id]);
+    expect(ids()).toEqual([selected.id, history.id]);
   });
 
   it.each([
@@ -177,7 +168,7 @@ describe("related-request polling", () => {
     expect(rows()).toEqual(before);
     poll.mockResolvedValue(Response.json([]));
     await tick();
-    expect(ids()).toEqual([selected.id, history.id, unrelated.id]);
+    expect(ids()).toEqual([selected.id, history.id]);
   });
 
   it.each([active, completed])(
@@ -212,7 +203,7 @@ describe("related-request polling", () => {
       await ref.current!.openDetail(selected);
     });
     await tick();
-    expect(ids()).toEqual([selected.id, history.id, unrelated.id]);
+    expect(ids()).toEqual([selected.id, history.id]);
   });
 
   it("does not collapse a still-present preview into a different-ID saved retry", async () => {
@@ -220,7 +211,7 @@ describe("related-request polling", () => {
     poll.mockResolvedValue(Response.json([selected, active, retry]));
     await open();
     await tick();
-    expect(ids()).toEqual([selected.id, active.id, history.id, unrelated.id, retry.id]);
+    expect(ids()).toEqual([selected.id, active.id, history.id, retry.id]);
   });
 
   it("does not import substring-matched correlations or overwrite an unrelated ID", async () => {
@@ -233,7 +224,7 @@ describe("related-request polling", () => {
     );
     await open();
     await tick();
-    expect(rows().find((log) => log.id === unrelated.id)).toEqual(unrelated);
+    expect(ref.current!.getSortedLogs().find((log) => log.id === unrelated.id)).toEqual(unrelated);
     expect(ids()).not.toContain("foreign-preview");
   });
 

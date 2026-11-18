@@ -13,6 +13,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { isTabVisible, startVisiblePolling } from "@/shared/utils/visiblePolling";
 import Button from "./Button";
 import Icon from "./Icon";
 
@@ -36,6 +37,7 @@ export default function CloudSyncStatus({ collapsed = false }) {
   const router = useRouter();
 
   const poll = useCallback(async () => {
+    if (!isTabVisible()) return;
     try {
       const res = await fetch("/api/sync/cloud");
       if (!mountedRef.current) return;
@@ -60,9 +62,7 @@ export default function CloudSyncStatus({ collapsed = false }) {
   useEffect(() => {
     mountedRef.current = true;
 
-    // Schedule initial poll outside of effect body to avoid setState-in-effect lint
-    queueMicrotask(poll);
-    const interval = setInterval(poll, 30000);
+    const stopPolling = startVisiblePolling(poll, 30000);
 
     // Listen for immediate re-poll events from EndpointPageClient
     const handleCloudChange = () => {
@@ -72,7 +72,7 @@ export default function CloudSyncStatus({ collapsed = false }) {
 
     return () => {
       mountedRef.current = false;
-      clearInterval(interval);
+      stopPolling();
       globalThis.removeEventListener("cloud-status-changed", handleCloudChange);
     };
   }, [poll]);

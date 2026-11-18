@@ -31,45 +31,44 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 
 ---
 
-## Kratki pregled projekta
+## Projekat ukratko
 
-**OmniRoute** — objedinjeni AI proxy/usmjerivač. Jedna krajnja tačka, 375 LLM pružalaca usluga, automatski rezervni odabir.
+**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, stotine LLM provajdera, automatski fallback.
 
 - API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
-- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, ugrađivanja itd.)
-- Izvršioci — `open-sse/executors/` (HTTP otprema specifična za pružaoca usluga)
-- Prevodioci — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
+- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
+- Izvršioci — `open-sse/executors/` (HTTP slanje specifično za provajdera)
+- Prevoditelji — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
-- Servisi — `open-sse/services/` (kombinirano usmjeravanje, ograničenja brzine, keširanje itd.)
-- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 209 migracija)
-- Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog odabira)
-- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli za memoriju/vještine/GitHub/skup/gejmifikaciju/dodatke/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
-- A2A server — `src/lib/a2a/` (JSON-RPC 2.0 protokol za agente)
-- Vještine — `src/lib/skills/` (proširivi okvir za vještine); memorija — `src/lib/memory/` (trajna konverzacijska memorija)
+- Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja brzine, keširanje itd.)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, verzionisane migracije u `src/lib/db/migrations/`)
+- MCP server — `open-sse/mcp-server/` (kanonski alati + moduli za memoriju/vještine/GitHub/pool/gamifikaciju/dodatke/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; pristup zasnovan na opsegu)
+- A2A server — `src/lib/a2a/` (protokol agenata JSON-RPC 2.0)
+- Vještine — `src/lib/skills/` (proširivi okvir vještina); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
-Monorepozitorij: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor mehanizma za streaming), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+Monorepozitorij: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor streaming mehanizma), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+
+Brojevi (provajderi, migracije, MCP alati i opsezi, strategije rutiranja, faktori bodovanja, paketi načina rada) izvedene su vrijednosti: pročitajte ih pomoću `npm run facts` (jedna vrijednost: `npm run facts -- --key=providers`), a ne iz teksta. PR-ovi funkcionalnosti ih ne upisuju; `npm run release:refresh-derived` ponovo generiše dokumentaciju pri izdanju.
 
 ---
 
-## Tok obrade zahtjeva
+## Cjevovod zahtjeva
 
 ```
-Klijent → /v1/chat/completions (Next.js ruta)
-  → CORS → Zod validacija → autentifikacija? → provjera pravila → zaštita od ubrizgavanja prompta
+Client → /v1/chat/completions (Next.js route)
+  → CORS → Zod validation → auth? → policy check → prompt injection guard
   → handleChatCore() [open-sse/handlers/chatCore.ts]
-    → provjera keša → ograničenje brzine → kombinirano usmjeravanje?
-      → resolveComboTargets() → handleSingleModel() za svaki cilj
+    → cache check → rate limit → combo routing?
+      → resolveComboTargets() → handleSingleModel() per target
     → translateRequest() → getExecutor() → executor.execute()
-      → fetch() prema uzvodnom servisu → ponovni pokušaj uz postepeno čekanje
-    → prevođenje odgovora → SSE tok ili JSON
-    → Ako je Responses API: responsesTransformer.ts TransformStream
+      → fetch() upstream → retry w/ backoff
+    → response translation → SSE stream or JSON
+    → If Responses API: responsesTransformer.ts TransformStream
 ```
 
-API rute slijede dosljedan obrazac: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. Nema globalnog Next.js posredničkog softvera — presretanje je specifično za rutu.
+API rute slijede dosljedan obrazac: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. Ne postoji globalni Next.js middleware — presretanje je specifično za rutu.
 
-**Kombinirano usmjeravanje** (`open-sse/services/combo.ts`): 20 javnih strategija (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Svaki cilj poziva `handleSingleModel()` (obavija `handleChatCore()` rukovanjem greškama za svaki cilj + provjerama prekidača strujnog kola); strategija `fusion` umjesto toga paralelno šalje zahtjeve panelu modela, a model-sudija sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Bodovanje automatske kombinacije prema 16 faktora + puna tabela strategija: `docs/routing/AUTO-COMBO.md`; 3 sloja otpornosti: `docs/architecture/RESILIENCE_GUIDE.md`.
-
----
+**Usmjeravanje kombinacija** (`open-sse/services/combo.ts`): javne strategije su `ROUTING_STRATEGY_VALUES` u `src/shared/constants/routingStrategies.ts` (`quota-share` je interna). Svako odredište poziva `handleSingleModel()` (omota `handleChatCore()` s rukovanjem greškama po odredištu i provjerama prekidača kruga); strategija `fusion` umjesto toga paralelno šalje zahtjeve panelu modela, a model za procjenu sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Bodovanje automatskih kombinacija (`DEFAULT_WEIGHTS` u `open-sse/services/autoCombo/scoring.ts`) i potpuna tabela strategija: `docs/routing/AUTO-COMBO.md`; 3 sloja otpornosti: `docs/architecture/RESILIENCE_GUIDE.md`.
 
 ## Stanje runtime otpornosti
 
@@ -105,30 +104,22 @@ Pročitajte najbliži `AGENTS.md` i povezani detaljni vodič prije nego što nap
 
 ---
 
-## Smještaj datoteka i urednost korijena repozitorija
+## Smještanje datoteka i higijena korijena repozitorija
 
-- **Testne datoteke**: SVI jedinični testovi, integracijski testovi, testovi ekosistema ili Vitest datoteke MORAJU se strogo nalaziti unutar direktorija `tests/` (npr. `tests/unit/`, `tests/integration/`). NIKADA ne kreirajte testne datoteke u korijenu projekta (`/`).
-- **Skripte i pomoćni alati**: SVE skripte za održavanje, otklanjanje grešaka, generiranje ili eksperimentiranje (`.cjs`, `.mjs`, `.js`, `.ts`) MORAJU se nalaziti isključivo unutar jednog od poddirektorija direktorija `scripts/` (`build/`, `dev/`, `check/`, `docs/`, `i18n/`, `ad-hoc/`, `quality/`, `release/`, `ci/`, `ops/`, `perf/`, `research/`, `sre/`, `vps/`, `homolog/`, `packs/`, `skills/`, `test/`, `cli/`, `compression/`, `compression-eval/`, `devin-bridge/`, `docker/`, `features/`, `router-eval/`). Jednokratni ili eksperimentalni kôd smješta se u `scripts/ad-hoc/`. NIKADA ne ostavljajte samostalne skripte u korijenu projekta (`/`) ili u direktoriju najvišeg nivoa `scripts/`.
+- **Testne datoteke**: SVI jedinični testovi, integracijski testovi, testovi ekosistema ili Vitest datoteke MORAJU biti smješteni isključivo unutar direktorija `tests/` (npr. `tests/unit/`, `tests/integration/`). NIKADA ne kreirajte testne datoteke u korijenu projekta (`/`).
+- **Skripte i pomoćni alati**: SVE skripte za održavanje, otklanjanje grešaka, generisanje ili eksperimentisanje (`.cjs`, `.mjs`, `.js`, `.ts`) MORAJU biti smještene isključivo unutar jednog od poddirektorija `scripts/` (`build/`, `dev/`, `check/`, `docs/`, `i18n/`, `ad-hoc/`, `quality/`, `release/`, `ci/`, `ops/`, `perf/`, `research/`, `sre/`, `vps/`, `homolog/`, `packs/`, `skills/`, `test/`, `cli/`, `compression/`, `compression-eval/`, `devin-bridge/`, `docker/`, `features/`, `router-eval/`). Jednokratni ili eksperimentalni kod ide u `scripts/ad-hoc/`. NIKADA ne ostavljajte labave skripte u korijenu projekta (`/`) ili u direktoriju najvišeg nivoa `scripts/`.
 
-**Korijen projekta MORA sadržavati SAMO:**
+**Korijen projekta SMIJE sadržavati SAMO:**
 
 - Konfiguracijske datoteke (`vitest.config.ts`, `next.config.mjs`, `eslint.config.mjs`, `tsconfig*.json`, `playwright.config.ts`, `prettier.config.mjs`, `postcss.config.mjs`, `sonar-project.properties`, `fly.toml`, `docker-compose*.yml`, `Dockerfile`)
 - Datoteke zavisnosti (`package.json`, `package-lock.json`)
-- Datoteke dokumentacije (`README.md`, `CHANGELOG.md`, `ROADMAP.md`, `LICENSE`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `llm.txt`)
-- CI/CD datoteke i definicije za ignoriranje (`.gitignore`, `.dockerignore`, `.npmignore`, `.npmrc`, `.node-version`, `.nvmrc`, `.env.example`)
+- Dokumentacijske datoteke (`README.md`, `CHANGELOG.md`, `ROADMAP.md`, `LICENSE`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `llm.txt`)
+- CI/CD datoteke i definicije za ignorisanje (`.gitignore`, `.dockerignore`, `.npmignore`, `.npmrc`, `.node-version`, `.nvmrc`, `.env.example`)
 
-Prilikom kreiranja _bilo kojih_ validacijskih testova ili skripti s jednokratnom logikom, podrazumijevano koristite `scripts/ad-hoc/` ili `tests/unit/`, u skladu sa svojim ciljevima. Ne zatrpavajte korijenski kontekst `/`.
+Prilikom kreiranja _bilo kakvih_ validacijskih testova ili jednokratnih logičkih skripti, podrazumijevana lokacija treba biti `scripts/ad-hoc/` ili `tests/unit/`, u zavisnosti od cilja. Nemojte zagađivati kontekst korijena `/`.
 
-- **Korijenske putanje `_*` su privatne i NIKADA se ne prate** (`_tasks/`, `_references/`, `_mono_repo/`,
-  `_ideia/`, `_cache/` i sve buduće `_<name>`): postoje samo na disku, Git ih ignorira putem
-  usidrenih obrazaca `/_*/` + `/_*`, a neke su zasebni potpuni Git repozitoriji (`_tasks` →
-  privatni udaljeni repozitorij `_tasks_omniroute`). Nikada nemojte koristiti `git add` ni za šta unutar njih (obični `add` je
-  već blokiran pravilima ignoriranja; nikada nemojte koristiti `-f`) i nikada ih nemojte „čistiti“ iz glavnog repozitorija —
-  prestanak praćenja obavlja se pomoću `git rm --cached` kako bi sadržaj na disku ostao sačuvan. Kontrola
-  `check:tracked-artifacts` (pre-commit + CI) ne prolazi ako postoji BILO KOJA praćena korijenska putanja koja počinje znakom
-  `_`, sada ili u budućnosti. Za pojedinosti o direktoriju `_tasks` pogledajte strogo pravilo br. 23.
-
----
+- Putanje `_*` u korijenu su privatne i NIKADA se ne prate (`_tasks/`, `_references/`, `_mono_repo/`,
+  `_ideia/`, `_cache/` i bilo koji budući `_<name>`): postoje samo na disku, ignorisane su usidrenim obrascima `/_*/` + `/_*`, a neke su zasebni potpuni git repozitoriji (`_tasks` → privatni udaljeni repozitorij `_tasks_omniroute`). Nikada nemojte koristiti `git add` ni nad čim unutar njih (obična naredba `add` već je blokirana pravilom ignore; nikada ne koristite `-f`) i nikada ih nemojte „čistiti“ iz glavnog repozitorija — uklanjanje praćenja obavlja se pomoću `git rm --cached`, tako da sadržaj na disku ostane. Provjera `check:tracked-artifacts` (pre-commit + CI) pada za BILO KOJU praćenu putanju u korijenu koja počinje znakom `_`, sadašnju ili buduću. Pogledajte Strogo pravilo #23 za pojedinosti o `_tasks`.
 
 ## Ključne konvencije
 
@@ -171,17 +162,17 @@ Prilikom kreiranja _bilo kojih_ validacijskih testova ili skripti s jednokratnom
 
 Dokumentacija mora opisivati provjereno ponašanje, a ne vjerovatno ponašanje.
 
-1. Prije dokumentovanja naziva API-ja, krajnje tačke, putanje, CLI komande ili varijable okruženja,
-   potražite je pomoću: `rg -n "name" src/ open-sse/ bin/`. Ako nema podudaranja u izvornom kodu, nemojte
-   je dokumentovati.
-2. Izmjerite promjenjive brojeve umjesto da ih pišete po sjećanju: koristite `wc -l <file>` ili
-   komandu za brojanje specifičnu za direktorij.
-3. Kopirajte primjere koda iz funkcionalne upotrebe ili ih pokrenite. Preferirajte vezu na izvor, poput
-   `path/to/file.ts:line`, umjesto izmišljenog potpisa.
-4. Pokrenite `npm run check:docs-all` za izmjene unutar `docs/`; uključuje validaciju
-   izmišljene dokumentacije.
-
----
+1. Prije dokumentovanja naziva API-ja, krajnje tačke, putanje, CLI naredbe ili varijable okruženja,
+   pretražite je: `rg -n "name" src/ open-sse/ bin/`. Ako nema podudaranja u izvornom kodu, nemojte je
+   dokumentovati.
+2. Mjerite promjenjive brojeve umjesto da ih zapisujete po sjećanju: koristite `wc -l <file>` ili naredbu
+   za brojanje specifičnu za direktorij.
+3. Kopirajte primjere koda iz radne upotrebe ili ih pokrenite. Dajte prednost izvornoj poveznici kao što je
+   `path/to/file.ts:line` umjesto izmišljene signiture.
+4. Pokrenite `npm run check:docs-all` za izmjene u `docs/`; uključuje provjeru izmišljene dokumentacije.
+5. Uređujte samo izvorni tekst na engleskom jeziku. Nikada nemojte predavati `docs/i18n/**` ogledala,
+   `llm.txt` ogledala ili `.i18n-state.json` u funkcionalnom PR-u: talas prevođenja (`/i18n-waves`, grane
+   `docs/i18n-*`) i izdanje ih ponovo generišu (`docs/guides/I18N.md`).
 
 ## Uobičajeni scenariji izmjena
 
@@ -201,22 +192,22 @@ Potpuni detaljni postupci: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/
 
 ## Referentna dokumentacija
 
-Za svaku netrivijalnu izmjenu prvo pročitajte odgovarajući detaljni vodič:
+Za svaku netrivijalnu izmjenu prvo pročitaj odgovarajući detaljni vodič:
 
-- Navigacija repozitorijem — `docs/architecture/REPOSITORY_MAP.md` · Arhitektura — `docs/architecture/ARCHITECTURE.md` · Inženjerska referenca — `docs/architecture/CODEBASE_DOCUMENTATION.md`
-- Auto-Combo (bodovanje prema 16 faktora, 20 strategija) — `docs/routing/AUTO-COMBO.md` · Ponovno izvođenje zaključivanja — `docs/routing/REASONING_REPLAY.md`
+- Navigacija kroz repozitorij — `docs/architecture/REPOSITORY_MAP.md` · Arhitektura — `docs/architecture/ARCHITECTURE.md` · Inženjerska referenca — `docs/architecture/CODEBASE_DOCUMENTATION.md`
+- Auto-Combo (faktori bodovanja, tabela strategija) — `docs/routing/AUTO-COMBO.md` · Ponovna reprodukcija zaključivanja — `docs/routing/REASONING_REPLAY.md`
 - Otpornost (3 mehanizma + otklanjanje grešaka) — `docs/architecture/RESILIENCE_GUIDE.md`
-- Postupci izmjena — `docs/architecture/MODIFICATION_SCENARIOS.md`
+- Recepti za izmjene — `docs/architecture/MODIFICATION_SCENARIOS.md`
 - Okvir vještina — `docs/frameworks/SKILLS.md` · Radar (sloj kataloga besplatnih modela) — `docs/frameworks/RADAR.md` · Sistem memorije (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
-- Agenti u oblaku — `docs/frameworks/CLOUD_AGENT.md` · Protokoli agenata (A2A / ACP / Cloud) — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`
-- Zaštitne mjere (PII / ubacivanje naredbi / vizija) — `docs/security/GUARDRAILS.md` · Javne vjerodajnice uzvodnih usluga (Gemini/itd.) — `docs/security/PUBLIC_CREDS.md` · Sanitizacija poruka o greškama — `docs/security/ERROR_SANITIZATION.md` · Usklađenost / revizija — `docs/security/COMPLIANCE.md` · Prikrivenost (TLS / otisak) — `docs/security/STEALTH_GUIDE.md`
+- Cloud agenti — `docs/frameworks/CLOUD_AGENT.md` · Protokoli agenata (A2A / ACP / Cloud) — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`
+- Zaštitne mjere (PII / injection / vision) — `docs/security/GUARDRAILS.md` · Javne vjerodajnice uzvodnih servisa (Gemini/itd.) — `docs/security/PUBLIC_CREDS.md` · Sanitizacija poruka grešaka — `docs/security/ERROR_SANITIZATION.md` · Usklađenost / revizija — `docs/security/COMPLIANCE.md` · Prikrivenost (TLS / fingerprint) — `docs/security/STEALTH_GUIDE.md`
 - Evaluacije — `docs/frameworks/EVALS.md` · Webhookovi — `docs/frameworks/WEBHOOKS.md` · Izvoz dnevnika (dnevnici poziva → BigQuery/…) — `docs/frameworks/LOG-EXPORT.md`
-- Tok autorizacije — `docs/architecture/AUTHZ_GUIDE.md`
+- Cjevovod autorizacije — `docs/architecture/AUTHZ_GUIDE.md`
 - MCP server — `docs/frameworks/MCP-SERVER.md` · A2A server — `docs/frameworks/A2A-SERVER.md`
-- API referenca + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Katalog pružalaca usluga (automatski generiran) — `docs/reference/PROVIDER_REFERENCE.md`
-- Tuneli — `docs/ops/TUNNELS_GUIDE.md` · Tok izdavanja — `docs/ops/RELEASE_CHECKLIST.md` · Protokol radnog stabla — `docs/ops/WORKTREE_ISOLATION.md` · Detalji strogih pravila — `docs/ops/HARD_RULES_DETAIL.md` · Upozorenja pri izgradnji + otklanjanje poteškoća s Bunom — `docs/ops/BUILD_WARNINGS.md`
+- API referenca + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Katalog pružalaca usluga (automatski generisan) — `docs/reference/PROVIDER_REFERENCE.md`
+- Tuneli — `docs/ops/TUNNELS_GUIDE.md` · Tok objavljivanja — `docs/ops/RELEASE_CHECKLIST.md` · Protokol radnog stabla — `docs/ops/WORKTREE_ISOLATION.md` · Detalji strogih pravila — `docs/ops/HARD_RULES_DETAIL.md` · Upozorenja pri izgradnji + otklanjanje problema u Bun-u — `docs/ops/BUILD_WARNINGS.md`
 - Electron desktop aplikacija — `docs/guides/ELECTRON_GUIDE.md` · VS Code Copilot Chat (OmniCopilot ekstenzija) — `docs/guides/VSCODE-COPILOT.md`
-- Ugrađene usluge — `docs/frameworks/EMBEDDED-SERVICES.md` · Kontrole kvaliteta (~90 skripti, pravila liste dozvoljenih stavki) — `docs/architecture/QUALITY_GATES.md`
+- Ugrađene usluge — `docs/frameworks/EMBEDDED-SERVICES.md` · Kapije kvaliteta (~90 skripti, politika liste dozvoljenih) — `docs/architecture/QUALITY_GATES.md`
 
 ---
 
@@ -275,10 +266,10 @@ Commitujte te artefakte unutar `_tasks/` repozitorija (`git -C _tasks …`), nik
 
 ---
 
-## Git radni tok
+## Git tok rada
 
 ```bash
-# Nikada ne commitujte direktno na main
+# Nikada ne izvršavajte commit direktno na main
 git checkout -b feat/your-feature
 git commit -m "feat: describe your change"
 git push -u origin feat/your-feature
@@ -286,61 +277,49 @@ git push -u origin feat/your-feature
 
 **Prefiksi grana**: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, `chore/`
 
-**Format commita** (Conventional Commits): `feat(db): add circuit breaker` — opsezi: `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`
+**Format commit poruke** (Conventional Commits): `feat(db): add circuit breaker` — opsezi: `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`
 
 **Husky hookovi**:
 
 - **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts`
-- **commit-msg**: `check:ai-attribution` — odbija AI/bot `Co-Authored-By` završne retke i fusnote o AI generisanju u poruci (Strogo pravilo #16; ljudski koautori su dozvoljeni; također se nalazi u `quality.yml` petlji brzih provjera (PR→`release/**`) i PR-only `ci.yml` lint koraku (PR→`main`) — #14436)
-- **pre-push**: namjerno lagan (samo provjera ispravnosti PATH/npm) — `any-budget` + `tracked-artifacts` već se pokreću pri pre-commitu, a CI i dalje nameće obje provjere; njihovo ponovno pokretanje pri svakom pushu bilo je čisto dvostruko plaćanje (ranije Fase 6A.12 potpuna pre-push kontrolna tačka; objedinjeno u pre-commit u #6716).
+- **commit-msg**: `check:ai-attribution` — odbija `Co-Authored-By` dodatke i završne oznake AI-generisanja u poruci koje je dodao AI/bot (Strogo pravilo #16; ljudski koautori su dozvoljeni; takođe u brzoj petlji provjera `quality.yml` (PR→`release/**`) i koraku lintiranja `ci.yml` koji se izvršava samo za PR (PR→`main`) — #14436)
+- **pre-push**: namjerno lagan (samo provjera ispravnosti PATH/npm) — `any-budget` + `tracked-artifacts` se već izvršavaju tokom pre-commit-a, a CI i dalje provjerava oba; njihovo ponovno izvršavanje pri svakom pushu bilo je nepotrebno dvostruko plaćanje (ranije potpuna pre-push provjera Faze 6A.12; prebačena u pre-commit u #6716).
 
 ### Izolacija worktreeja (OBAVEZNA za svaki razvojni zadatak)
 
-Strogo pravilo #19: jedan worktree + namjenska grana po zadatku, uz prethodnu potvrdu bazne grane s
-operaterom (obično aktivna `release/vX.Y.Z`). Obavezni zahtjevi:
+Strogo pravilo #19: jedan worktree + namjenska grana po zadatku, pri čemu se osnovna grana prethodno potvrđuje s operaterom (obično aktivna `release/vX.Y.Z`). Obavezno:
 
-- 🔴 Worktreeji se nalaze ISKLJUČIVO unutar `.claude/worktrees/` — bilo gdje drugdje izlaze izvan tsconfig /
-  `.dockerignore` izuzimanja iz opsega builda (tsconfig `include: **/*` globovi ~70× veći od baze koda →
-  `next build` OOM, incident 2026-06-25) i rasipaju worktreeje.
-- Ponovo koristite node_modules glavnog checkouta putem **čvrstih veza** (`cp -al`), **nikada `ln -s`** —
-  Turbopack prijavljuje FATAL kada se simbolička veza razriješi izvan korijena projekta, dok typecheck/lint/testovi
-  i dalje prolaze (incident 2026-07-31, #9043).
-- Kopirajte i `.husky/_` koji git ignoriše (`cp -a <main>/.husky/_ .husky/_`) — bez toga se **nijedna
-  pre-commit kontrolna tačka ne pokreće i ništa na to ne upozorava** (59 commitova prošlo je mimo
-  `scripts/check/check-git-identity.sh`, 2026-08-29 → 09-02). Preferirajte
-  `scripts/dev/new-worktree.sh <branch> [base]`, koji obavlja sve ovo i provjerava hook.
-- Radite, commitujte, pushujte i otvorite PR — sve iz worktreeja.
-- Uklonite samo vlastiti worktree + granu, **po nazivu** (nikada `fix/*`/`feat/*` zamjenski znakovi —
-  druge sesije zadržavaju vlastite). Ne dirajte nijedan worktree koji niste kreirali.
-- Završite svaku sesiju tako da glavni checkout bude vraćen na granu na kojoj je započeo.
+- 🔴 Worktreeji se nalaze ISKLJUČIVO unutar `.claude/worktrees/` — bilo koja druga lokacija izlazi iz opsega builda koji isključuju tsconfig / `.dockerignore` (tsconfig `include: **/*` glob obrasci obuhvataju ~70× više od baze koda →
+  `next build` OOM, incident 2026-06-25) i rasipa worktreeje.
+- Ponovo koristite node_modules glavnog checkouta putem **čvrstih linkova** (`cp -al`), **nikada `ln -s`** — Turbopack završava greškom FATAL kada simbolički link pokazuje izvan korijena projekta, dok provjere tipova/lint/testovi i dalje prolaze (incident 2026-07-31, #9043).
+- Kopirajte i gitignorirani `.husky/_` (`cp -a <main>/.husky/_ .husky/_`) — bez njega **nijedna pre-commit provjera se ne izvršava i ništa na to ne upozorava** (59 commitova je zaobišlo `scripts/check/check-git-identity.sh`, 2026-08-29 → 09-02). Prednost dajte `scripts/dev/new-worktree.sh <branch> [base]`, koji sve ovo obavlja i provjerava hook.
+- Radite, izvršite commit, pošaljite promjene i otvorite PR — sve iz worktreeja.
+- Uklonite samo vlastiti worktree + granu, **prema nazivu** (nikada zamjenskim znakovima `fix/*`/`feat/*` — druge sesije zadržavaju svoje). Ostavite netaknutim svaki worktree koji niste kreirali.
+- Svaku sesiju završite tako što ćete glavni checkout vratiti na granu na kojoj je započeo.
 
 Potpuni protokol s komandama i historijom incidenata:
 [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md).
 
-### Provjera zelene baze (PR-ovi ne smiju nastati crveni)
+### Provjera osnovne grane (PR-ovi ne smiju biti kreirani s greškama)
 
-Prije kreiranja grane, spajanja baze u PR granu, masovnog preusmjeravanja PR-ova ili otvaranja
-PR-a, provjerite issue na vrhu baze `🔴 Release branch not green: <branch>` (oznaka `base-red`):
-`gh issue list --repo diegosouzapw/OmniRoute --state open --search "Release branch not green: <base> in:title"`.
-Ako je crvena: nikada ne obrađujte niti "popravljajte" naslijeđene kvarove u svojoj grani (ispravka base-red problema ima vlastiti
-PR `fix/release-vX.Y.Z-basereds` pod kontrolom zamrzavanja); PR koji se ipak otvori mora sadržavati
-`⚠️ base-red inherited: #<issue>` u svom tijelu. Potpuna procedura: `docs/ops/WORKTREE_ISOLATION.md`.
+Prije kreiranja grane, spajanja osnovne grane u PR granu, masovnog preusmjeravanja PR-ova ili otvaranja PR-a, provjerite problem `🔴 Release branch not green: <branch>` na vrhu osnovne grane (oznaka `base-red`):
+`gh issue list --repo cheaper-inference/OmniRoute --state open --search "Release branch not green: <base> in:title"`.
+Ako je crvena: nikada ne tretirajte niti „ispravljajte“ naslijeđene greške u svojoj grani (ispravka problema base-red je zaseban PR `fix/release-vX.Y.Z-basereds`, podložan zamrzavanju); PR otvoren uprkos tome u svom tijelu sadrži
+`⚠️ base-red inherited: #<issue>`. Potpuna procedura: `docs/ops/WORKTREE_ISOLATION.md`.
 
-### Sync-back integracije koriste fast-forward, nikada squash
+### Sync-back spajanja su fast-forward, nikada squash
 
-`main → release/vX+1` sync-back integriše se kao merge commit koji već jeste
-(`git push origin <head>:refs/heads/release/vX+1`), nikada squashovan — squash uklanja `main` iz
-release historije, pa sljedeći sync-back ponovo izaziva konflikte u svakoj datoteci (551 na v3.8.50 → v3.8.51).
-Nakon integracije, `git merge-base --is-ancestor origin/main origin/release/vX+1` mora biti true.
-Koraci + provjera zamrzavanja osnovne linije: `docs/ops/WORKTREE_ISOLATION.md` → "Sync-back landings".
+Sync-back `main → release/vX+1` se primjenjuje kao merge commit koji već postoji
+(`git push origin <head>:refs/heads/release/vX+1`), nikada squash — squash uklanja `main` iz
+porijekla izdanja, a sljedeći sync-back ponovo izaziva konflikte u svakoj datoteci (551 na v3.8.50 → v3.8.51).
+Nakon primjene, `git merge-base --is-ancestor origin/main origin/release/vX+1` mora biti true.
+Koraci + provjera zamrzavanja osnovne linije: `docs/ops/WORKTREE_ISOLATION.md` → „Sync-back landings“.
 
 ---
 
-## Doprinosi upstream projektu
+## Doprinosi upstreamu
 
-Ovaj checkout je fork repozitorija `diegosouzapw/OmniRoute`. Promjene namijenjene samo forku, implementaciji i ličnoj automatizaciji nemojte uključivati u upstream PR-ove. Upstream rad započnite iz aktivne zadane upstream grane, a ne iz `main` (`git fetch upstream && git switch -c <branch-name> upstream/<default-branch>`), u PR-u ciljajte tu istu granu izdanja, pripremite samo predviđene datoteke, pokrenite ciljane provjere i koristite poruku u formatu Conventional Commits (na primjer, `docs: slim AGENTS.md`).
-
----
+Ova radna kopija je kanonski repozitorij `cheaper-inference/OmniRoute` (ranije `diegosouzapw/OmniRoute`; stari naziv preusmjerava). Promjene vezane samo za deployment forka i ličnu automatizaciju držite izvan upstream PR-ova. Upstream rad započnite iz aktivne podrazumijevane grane upstreama, a ne iz grane `main` (`git fetch upstream && git switch -c <branch-name> upstream/<default-branch>`), u PR-u navedite tu istu granu izdanja kao ciljnu, dodajte samo predviđene datoteke u staging, pokrenite fokusirane provjere i koristite poruku Conventional Commit formata (na primjer, `docs: slim AGENTS.md`).
 
 ## Okruženje
 
@@ -355,70 +334,69 @@ Ovaj checkout je fork repozitorija `diegosouzapw/OmniRoute`. Promjene namijenjen
 
 ---
 
-## Kontrole kvaliteta i pragovi
+## Kontrolne tačke kvaliteta i pragovi
 
-OmniRoute ima **~90 skripti za kontrolu kvaliteta** (`scripts/check/` + `scripts/quality/`) raspoređenih u **9 poslova za pokretanje kontrola** u `.github/workflows/ci.yml`, uz posao brzih kontrola u `quality.yml` (PR→`release/**`) i 5 noćnih tokova rada za kvalitet. Potpuni inventar, pregled po poslovima i operativne procedure: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
+OmniRoute ima **oko 90 skripti za kontrolu kvaliteta** (`scripts/check/` + `scripts/quality/`) povezanih sa **9 poslova za pokretanje kontrolnih tačaka** u `.github/workflows/ci.yml`, kao i sa poslom `quality.yml` za brze kontrolne tačke (PR→`release/**`) i 5 noćnih tokova rada za kvalitet. Potpuni popis, pregled po poslovima i operativne procedure: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
 
 **Brzi pregled:**
 
-- Kontrole u poslovima `lint` + `docs-sync-strict`: kontrole pravila s rezultatom prolaz/pad —
-  ispravite kršenje ili dodajte unos na listu dozvoljenih s komentarom koji sadrži obrazloženje + povezani issue.
-- Kontrole u poslu `quality-gate`: prag — metrike (ESLint upozorenja, pokrivenost koda, dupliciranje,
-  složenost) ne smiju nazadovati u odnosu na `quality-baseline.json`. Ažurirajte pomoću
-  `npm run quality:ratchet -- --update` kada se metrika zaista poboljša.
+- Kontrolne tačke u poslovima `lint` + `docs-sync-strict`: kontrolne tačke sa pravilom prolaza/neprolaza —
+  ispravite kršenje ili dodajte unos na listu izuzetaka sa komentarom obrazloženja + zadatkom za praćenje.
+- Kontrolne tačke u poslu `quality-gate`: prag — metrike (ESLint upozorenja, pokrivenost koda, dupliranje,
+  složenost) ne smiju nazadovati u odnosu na `quality-baseline.json`. PR funkcionalnosti nikad ne knjiži
+  poboljšanje (`--update` se pokreće prilikom izdanja); regresija i dalje uzrokuje neuspjeh.
+- Generisane datoteke i izvedene osnovne vrijednosti (`docs/reference/PROVIDER_REFERENCE.md`, SVG datoteke README-a,
+  generisani `skills/*/SKILL.md` + `references/`, `config/quality/e2e-timings.json`) upisuje osvježavanje izdanja, a ne PR-ovi funkcionalnosti — `check:pr-derived-paths` označava PR koji ih sadrži. Pogledajte `docs/architecture/QUALITY_GATES.md` → „Generisane datoteke i izvedene osnovne vrijednosti“.
 - Posao `test-vitest` pokreće `npm run test:vitest` (MCP alati, autoCombo, keš) — blokirajuće.
   `test:vitest:ui` je blokirajući od PR-a #7127.
-- **Faza ubrzanog razvoja (2026-08-30 → v4.0)**: svaka numerička osnovna vrijednost ublažena je za 20%, a `--require-tighten` je savjetodavan (`quality-baseline.json` → `_policy`); noćni posao `baseline-headroom` prati koliko je budžeta preostalo u issueu "📈 Baseline headroom". Pogledajte `docs/architecture/QUALITY_GATES.md` → "Velocity phase".
+- **Faza ubrzanja (2026-08-30 → v4.0)**: svaka numerička osnovna vrijednost je ublažena za 20%, a `--require-tighten` je savjetodavan (`quality-baseline.json` → `_policy`); noćni posao `baseline-headroom` prati koliko je budžeta preostalo u zadatku „📈 Baseline headroom“. Pogledajte `docs/architecture/QUALITY_GATES.md` → „Faza ubrzanja“.
 
-**Pravila liste dozvoljenih (sažeto):** ispravite uzrok; koristite listu dozvoljenih samo za već postojeća kršenja koja ne možete ispraviti u istom PR-u (komentar s obrazloženjem + broj issuea). Zastarjele unose otkriva kontrola zastarjelosti dodana u fazi 6A.3.
-
----
+--- икәнликини
 
 ## Stroga pravila
 
-Brojevi pravila su nepromjenjivi i navode se u skriptama i dokumentaciji — nikada ih nemojte mijenjati. Ako je pravilo u nastavku
-navedeno u skraćenom obliku, njegov potpuni obavezujući tekst, obrazloženje i historija incidenata nalaze se u
+Brojevi pravila su stabilni i navode se u skriptama i dokumentaciji — nikada ih nemojte ponovo numerisati. Kada je pravilo ispod skraćeni oblik, njegov potpuni obavezujući tekst, obrazloženje i historija incidenata nalaze se u
 [`docs/ops/HARD_RULES_DETAIL.md`](docs/ops/HARD_RULES_DETAIL.md) pod istim brojem.
 
-1. Nikada ne predajite tajne ili pristupne podatke
-2. Nikada ne koristite zbirni uvoz iz `localDb.ts` — uvozite određene module iz `src/lib/db/*`
-3. Nikada ne koristite `eval()` / `new Function()` / implicitni eval
-4. Nikada ne predajite izmjene direktno na `main`
-5. Nikada ne pišite sirovi SQL u rutama — koristite module iz `src/lib/db/`
-6. Nikada nemojte prešutno zanemarivati greške u SSE tokovima
-7. Uvijek provjeravajte ulazne podatke pomoću Zod shema
-8. Uvijek uključite testove kada mijenjate produkcijski kôd
-9. Pokrivenost ne smije pasti ispod osnovne vrijednosti zamrznute u `quality-baseline.json` (mehanizam zapinjača); apsolutni minimum je 60% (naredbe/linije/funkcije/grane). Ažurirajte osnovnu vrijednost putem `npm run quality:ratchet -- --update` samo kada se pokrivenost zaista poboljša. Pogledajte `docs/architecture/QUALITY_GATES.md`.
-10. Nikada ne zaobilazite Husky hookove (`--no-verify`, `--no-gpg-sign`) bez izričitog odobrenja operatora.
-11. Nikada ne ugrađujte javni izvorni OAuth client_id/secret niti Firebase Web ključeve kao tekstualne literale — uvijek koristite `resolvePublicCred()` (`open-sse/utils/publicCreds.ts`). Pogledajte `docs/security/PUBLIC_CREDS.md`.
-12. Nikada ne vraćajte sirovi `err.stack` / `err.message` u HTTP / SSE / izvršnim odgovorima — uvijek ih usmjerite kroz `buildErrorBody()` ili `sanitizeErrorMessage()` (`open-sse/utils/error.ts`). Pogledajte `docs/security/ERROR_SANITIZATION.md`.
-13. Nikada ne umećite vanjske putanje ili vrijednosti izvršnog okruženja interpolacijom stringova u shell skripte proslijeđene funkcijama `exec()`/`spawn()` — umjesto toga ih proslijedite putem opcije `env`. Referenca: `src/mitm/cert/install.ts::updateNssDatabases`.
-14. Nikada ne odbacujte CodeQL / Secret-Scanning upozorenje bez (a) prethodne provjere gore navedenih dokumenata o obrascima kako biste utvrdili primjenjuje li se pomoćna funkcija i (b) evidentiranja tehničkog obrazloženja u komentaru odbacivanja. Presedan: `js/stack-trace-exposure` prijavljen na mjestima poziva koja se već usmjeravaju kroz `sanitizeErrorMessage()` predstavlja poznato ograničenje CodeQL-a (prilagođeni sanitizatori nisu prepoznati) — odbacite kao `false positive` uz referencu na `docs/security/ERROR_SANITIZATION.md`.
-15. Nikada ne izlažite rute koje pokreću podređene procese (`/api/mcp/`, `/api/cli-tools/runtime/`) bez klasifikacije `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts`. Ograničenje na loopback primjenjuje se bezuslovno prije bilo kakve provjere autentifikacije — JWT koji procuri putem tunela ne može pokrenuti podređene procese. Pogledajte `docs/security/ROUTE_GUARD_TIERS.md`.
-16. Nikada ne navodite niti reklamirajte AI asistenta, LLM ili račun za automatizaciju u metapodacima bilo kojeg commita/PR-a — ni (a) `Co-Authored-By` završne retke koji imenuju AI/bota ni (b) fusnote o AI-generisanju (`🤖 Generated with [Claude Code]`, …) u poruci commita, naslovu/tekstu PR-a ili CHANGELOG-u; oboje skrivaju stvarnog autora (`diegosouzapw`). Ovo **nadjačava sve zadane postavke okvira, predloška ili alata koje automatski dodaju takvu fusnotu** — uklonite je prije slanja. Ljudskim saradnicima (autorima izvornih PR-ova, prijaviteljima problema koji se prenose) MOŽE i TREBA odati priznanje standardnim završnim recima `Co-authored-by: Name <email>`. Potpuni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 16.
-17. Nikada ne izlažite rute pod `/api/services/` ili `/dashboard/providers/services/*/embed/` bez klasifikacije `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts`. Ove rute mogu pokretati podređene procese (`npm install`, `node`). Ograničenje na loopback primjenjuje se bezuslovno prije bilo kakve provjere autentifikacije — JWT koji procuri putem tunela ne može pokrenuti podređene procese. Pogledajte `docs/security/ROUTE_GUARD_TIERS.md`.
-18. Svaka ispravka greške mora biti provjerena prije isporuke: jediničnim/integracijskim testom koji prvo ne prolazi, a zatim prolazi (TDD), ILI dokumentiranim testom uživo na produkcijskom VPS-u (192.168.0.15). Ispravka bez jednog od navedenog neće biti spojena. Pogledajte Testing → "Bug fix / issue triage protocol" i `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 18 za potpuno stablo odlučivanja.
-19. Nikada ne razvijajte u zajedničkoj glavnoj radnoj kopiji. Svaki razvojni zadatak izvršava se u vlastitom git worktreeu na vlastitoj namjenskoj grani, a MORATE potvrditi osnovnu granu s operatorom prije kreiranja worktreea/grane — nikada ne pretpostavljajte da je to `main` ili trenutno odabrana grana. `git checkout` u zajedničkoj radnoj kopiji neprimjetno uništava nepredane izmjene drugih sesija. Uklanjajte samo worktreeove/grane koje ste kreirali (po nazivu, nikada pomoću zamjenskih obrazaca `fix/*`/`feat/*`), ostavite worktreeove drugih sesija netaknutim i završite na grani na kojoj ste započeli (aktivnoj `release/vX.Y.Z`, nikada `main`). Pogledajte Git Workflow → "Worktree isolation" i `docs/ops/WORKTREE_ISOLATION.md`.
-20. Redakcija/sanitizacija ličnih podataka je **opcionalna — nikada zadano uključena**. Dvije zastavice PII funkcionalnosti koje mijenjaju podatke **MORAJU** zadržati `defaultValue: "false"` u `src/shared/constants/featureFlagDefinitions.ts`: `PII_REDACTION_ENABLED` (na strani zahtjeva) i `PII_RESPONSE_SANITIZATION` (odgovor + streaming). Promjena bilo koje zadane vrijednosti na `"true"` zahtijeva izričito odobrenje operatora; uključivanje je pojedinačno za svakog operatora, nikada prešutna zadana vrijednost. Zaštita od regresije: `tests/unit/pii-opt-in-default.test.ts`. Potpuni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 20.
-21. **Zamrzavanje izdanja — ZAMRZNUTA grana izdanja pripada voditelju izdanja; razvoj se NE zaustavlja (model paralelnog ciklusa, 2026-07-04).** Prije spajanja **bilo kojeg** PR-a, svaki tok kampanje **MORA** provjeriti `gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open`. Ako je aktivno: **NIKADA ne spajajte u zamrznutu `release/vX.Y.Z`** — preusmjerite PR na **najvišu** `release/v*` (`gh pr edit <N> --base release/vX+1`, zatim PROVJERITE pomoću `gh pr view <N> --json baseRefName` — uređivanje neprimjetno ne uspijeva) i spojite na uobičajen način; **ZADRŽITE samo kada JE najviša grana release/v\* ujedno i zamrznuta grana**. **⛔ SAMO `/generate-release` smije pokrenuti zamrzavanje izdanja (faza 0a; ukida se u fazi 12c)** — nikada ga samostalno ne otvarajte, produžavajte, ponovo otvarajte niti zatvarajte (za svako drugo zamrzavanje potrebno je izričito odobrenje operatora). Potpuni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 21.
-22. **Sigurnost između sesija — na ovom repozitoriju istovremeno radi MNOGO paralelnih sesija/agenata; nikada ne ometajte tuđi rad koji je u toku.** Dvije apsolutne zabrane (oba su ponavljajući incidenti):
+1. Nikada ne objavljuj tajne ili vjerodajnice
+2. Nikada ne uvozi zbirno iz `localDb.ts` — uvozi određene module iz `src/lib/db/*`
+3. Nikada ne koristi `eval()` / `new Function()` / implicitni eval
+4. Nikada ne objavljuj direktno u `main`
+5. Nikada ne piši sirovi SQL u rutama — koristi module iz `src/lib/db/`
+6. Nikada nemoj tiho zanemariti greške u SSE tokovima
+7. Uvijek validiraj ulaze pomoću Zod shema
+8. Uvijek uključi testove kada mijenjaš produkcijski kod
+9. Pokrivenost se ne smije smanjiti ispod osnovne vrijednosti zamrznute u `quality-baseline.json` (ratchet); apsolutni minimum je 60% (iskazi/linije/funkcije/grananja). Osnovna vrijednost se pooštrava pomoću `npm run quality:ratchet -- --update` prilikom izdanja, nikada unutar PR-a za funkcionalnost. Pogledaj `docs/architecture/QUALITY_GATES.md`.
+10. Nikada nemoj zaobići Husky hookove (`--no-verify`, `--no-gpg-sign`) bez izričitog odobrenja operatora.
+11. Nikada nemoj ugrađivati javne upstream OAuth `client_id`/`secret` ili Firebase web ključeve kao string literale — uvijek koristi `resolvePublicCred()` (`open-sse/utils/publicCreds.ts`). Pogledaj `docs/security/PUBLIC_CREDS.md`.
+12. Nikada ne vraćaj sirovi `err.stack` / `err.message` u HTTP / SSE / executor odgovorima — uvijek ih usmjeri kroz `buildErrorBody()` ili `sanitizeErrorMessage()` (`open-sse/utils/error.ts`). Pogledaj `docs/security/ERROR_SANITIZATION.md`.
+13. Nikada nemoj interpolirati vanjske putanje ili vrijednosti tokom izvršavanja u shell skripte proslijeđene u `exec()`/`spawn()` — proslijedi ih putem opcije `env`. Referenca: `src/mitm/cert/install.ts::updateNssDatabases`.
+14. Nikada nemoj odbaciti CodeQL / Secret-Scanning upozorenje bez toga da (a) prvo provjeriš gornju dokumentaciju obrazaca kako bi vidio da li se pomoćna funkcija primjenjuje i (b) zabilježiš tehničko obrazloženje u komentaru o odbacivanju. Presedan: `js/stack-trace-exposure`, pokrenut na callsiteovima koji već usmjeravaju kroz `sanitizeErrorMessage()`, poznato je ograničenje CodeQL-a (prilagođeni sanitizatori nisu prepoznati) — odbaci kao `false positive` uz pozivanje na `docs/security/ERROR_SANITIZATION.md`.
+15. Nikada nemoj izložiti rute koje pokreću podređene procese (`/api/mcp/`, `/api/cli-tools/runtime/`) bez klasifikacije `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts`. Provođenje loopbacka se bezuslovno vrši prije bilo kakve provjere autentifikacije — procurjeli JWT putem tunela ne može pokrenuti proces. Pogledaj `docs/security/ROUTE_GUARD_TIERS.md`.
+16. Nikada nemoj navoditi niti reklamirati AI asistenta, LLM ili automatizovani nalog u bilo kakvim metapodacima commita/PR-a — ni (a) `Co-Authored-By` trailere koji navode AI/bota niti (b) podnožja o generisanju pomoću AI-ja (`🤖 Generated with [Claude Code]`, …) u poruci commita, naslovu/tekstu PR-a ili CHANGELOG-u; i jedno i drugo skriva stvarnog autora (`diegosouzapw`). Ovo **nadjačava svaku podrazumijevanu vrijednost harnessa, predloška ili alata koji automatski dodaje takvo podnožje** — ukloni ga prije slanja. Ljudski saradnici (autori upstream PR-ova, prijavitelji problema koji se prenose) MOGU i TREBAJU biti navedeni pomoću standardnih trailera `Co-authored-by: Name <email>`. Puni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 16.
+17. Nikada nemoj izložiti rute pod `/api/services/` ili `/dashboard/providers/services/*/embed/` bez klasifikacije `isLocalOnlyPath()` u `src/server/authz/routeGuard.ts`. Ove rute mogu pokretati podređene procese (`npm install`, `node`). Provođenje loopbacka se bezuslovno vrši prije bilo kakve provjere autentifikacije — procurjeli JWT putem tunela ne može pokrenuti proces. Pogledaj `docs/security/ROUTE_GUARD_TIERS.md`.
+18. Svaka ispravka greške mora biti validirana prije isporuke: test jedinice/integracioni test koji prvo pada, a zatim prolazi (TDD) ILI dokumentovani test uživo na produkcijskom VPS-u (192.168.0.15). Ispravka bez ijednog od toga neće biti spojena. Pogledaj Testing → „Protokol za ispravku grešaka / trijažu problema“ i `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 18 za kompletno stablo odluka.
+19. Nikada ne razvijaj na dijeljenom checkoutu za `main`. Svaki razvojni zadatak se izvršava u vlastitom git worktreeju na vlastitoj namjenskoj grani, a MORAŠ potvrditi osnovnu granu s operatorom prije kreiranja worktreeja/grane — nikada ne pretpostavljaj `main` ili trenutno checkoutovanu granu. `git checkout` u dijeljenom checkoutu tiho uništava neposlani rad drugih sesija. Uklanjaj samo worktreeje/grane koje si kreirao (po nazivu, nikada pomoću zamjenskih znakova `fix/*`/`feat/*`), ostavi worktreeje drugih sesija netaknute i završi na grani na kojoj si započeo (aktivna `release/vX.Y.Z`, nikada `main`). Pogledaj Git Workflow → „Izolacija worktreeja“ i `docs/ops/WORKTREE_ISOLATION.md`.
+20. Redigovanje/sanitizacija PII-ja je **opcionalna — nikada nije podrazumijevano uključena**. Dvije zastavice funkcionalnosti za PII koje mijenjaju podatke **MORAJU** zadržati `defaultValue: "false"` u `src/shared/constants/featureFlagDefinitions.ts`: `PII_REDACTION_ENABLED` (na strani zahtjeva) i `PII_RESPONSE_SANITIZATION` (odgovor + streaming). Promjena bilo koje od ovih podrazumijevanih vrijednosti na `"true"` zahtijeva izričito odobrenje operatora; uključivanje je po operatoru, nikada tiha podrazumijevana vrijednost. Regresiona zaštita: `tests/unit/pii-opt-in-default.test.ts`. Puni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 20.
+21. **Zamrzavanje izdanja — ZAMRZNUTA grana izdanja pripada voditelju izdanja; razvoj se NE zaustavlja (model paralelnog ciklusa, 2026-07-04).** Prije spajanja **bilo kojeg** PR-a, svaki kampanjski tok rada **MORA** provjeriti `gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open`. Ako je aktivno: **NIKADA ne spajaj u zamrznutu `release/vX.Y.Z`** — preusmjeri PR na **najvišu** granu `release/v*` (`gh pr edit <N> --base release/vX+1`, zatim PROVJERI pomoću `gh pr view <N> --json baseRefName` — izmjena ne uspijeva uz grešku koja se ne prikazuje) i normalno ga spoji; **ZADRŽI samo kada je najviša grana release/v\* ONA zamrznuta**. **⛔ SAMO `/generate-release` smije pokrenuti release-freeze (Faza 0a; ukinuto u Fazi 12c)** — nikada ga nemoj samostalno otvoriti, produžiti, ponovo otvoriti ili zatvoriti (za bilo koje drugo zamrzavanje potrebno je izričito odobrenje operatora). Puni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 21.
+22. **Sigurnost između sesija — na ovom repozitoriju ISTOVREMENO radi MNOGO paralelnih sesija/agenata; nikada ne ometaj rad druge sesije koji je u toku.** Dvije apsolutne zabrane (obje su dovele do ponavljanih incidenata):
 
-- **(a) Nikada ne koristite `git stash` / `git stash pop` — NIGDJE u ovom repozitoriju, uključujući izolovani worktree i svakog podagenta kojeg pokrenete.** `git stash` djeluje na **zajedničko spremište objekata repozitorija**, a ne na radno stablo pojedinačnog worktreeja — stash u jednoj sesiji može neprimjetno prebrisati ili vratiti necommitovane izmjene druge paralelne sesije. Umjesto toga, poredite s osnovnim refom koristeći `git show <ref>:<path>` ili `git diff <ref> -- <path>` — nikada ne sklanjajte svoje stablo u stash kako biste ga „očistili“. **U prompt svakog podagenta koji radi s gitom doslovno uključite ovu zabranu.**
-  - **(b) Nikada nemojte spajati, pushati, rebaseovati ili prisilno pushati PR / granu / worktree na kojem druga sesija aktivno radi** — uključujući PR čiji je head aktivni worktree za ispravke u `.claude/worktrees/` koji **niste** kreirali, čak i kada koristi isti `diegosouzapw` identitet: **ZAUSTAVITE SE, prepustite spajanje sesiji koja je vlasnik.** **Prije** spajanja ili pushanja bilo kojeg PR-a koji niste kreirali u _ovoj_ sesiji, pokrenite `git worktree list` i ponovo provjerite `gh pr view <N> --json state,headRefOid`. (Dodatno potvrđuje Pravilo #19.)
+- **(a) Nikada ne koristite `git stash` / `git stash pop` — BILO GDJE u ovom repozitoriju, uključujući izolirano radno stablo i bilo kojeg podagenta kojeg pokrenete.** `git stash` radi nad **zajedničkim spremištem objekata repozitorija**, a ne nad radnim stablom po radnom stablu — stash u jednoj sesiji može neprimjetno pregaziti ili vratiti necommitovane promjene druge paralelne sesije. Umjesto toga, uporedite s osnovnom referencom pomoću `git show <ref>:<path>` ili `git diff <ref> -- <path>` — nikada nemojte sklanjati svoje stablo u stash da biste ga „očistili“. **Ovu zabranu unesite doslovno u prompt svakog podagenta koji dodiruje git.**
+  - **(b) Nikada nemojte spojiti, poslati, izvršiti rebase ili force-push za PR / granu / radno stablo na kojem druga sesija aktivno radi** — uključujući PR čiji je head živo radno stablo za ispravke u `.claude/worktrees/` koje **niste vi kreirali**, čak i kada dijeli vaš `diegosouzapw` identitet: **STANITE, pustite sesiju vlasnika da ga spoji.** **Prije** spajanja ili slanja na bilo koji PR koji niste kreirali u **ovoj** sesiji, pokrenite `git worktree list` i ponovo provjerite `gh pr view <N> --json state,headRefOid`. (Dodatno učvršćuje Pravilo #19.)
 
-  Puni tekst + incidenti: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 22.
+  Cijeli tekst + incidenti: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 22.
 
-23. **Struktura `_tasks/` je NEDODIRLJIVA — dozvoljeno je samo dodavanje/uređivanje.** To je ZASEBAN git repozitorij
+23. **`_tasks/` je NEDODIRLJIV kao struktura — dozvoljeno je samo dodavanje/uređivanje.** To je zaseban git repozitorij
     (privatni remote `diegosouzapw/_tasks_omniroute`) montiran kao stvarni direktorij u korijenu
-    glavnog checkouta. Apsolutna pravila: (a) NIKADA ne premještati, preimenovati, brisati, prazniti niti
+    glavnog checkouta. Apsolutna pravila: (a) NIKADA ne premještati, preimenovati, brisati, prazniti ili
     pretvarati `_tasks` u symlink; sesije smiju samo KREIRATI ili UREĐIVATI datoteke unutar njega;
     (b) NIKADA ne pratiti `_tasks` (čak ni kao symlink) u glavnom repozitoriju — praćeni blob bio je
-    osnovni uzrok DVA brisanja (2026-08-08 i 2026-08-10); (c) nakon svakog relevantnog upisivanja,
-    `git -C _tasks add -A && git -C _tasks commit && git -C _tasks push` — često pushanje je
-    stvarna sigurnosna kopija; (d) DOSLOVNO ponoviti ovu zabranu u promptu svakog podagenta koji radi s gitom;
-    (e) ako se `_tasks` pojavi kao neispravan symlink, NE commitovati ništa — vratiti ga s remotea i
-    obavijestiti operatera. Gate `check:tracked-artifacts` (pre-commit + CI) blokira praćenje `_tasks`
-    u bilo kojem obliku. Puni tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 23.
+    osnovni uzrok DVA brisanja (2026-08-08 i 2026-08-10); (c) nakon bilo kakvog značajnog upisivanja,
+    `git -C _tasks add -A && git -C _tasks commit && git -C _tasks push` — često slanje je
+    stvarna sigurnosna kopija; (d) ponoviti ovu zabranu DOSLOVNO u promptu svakog podagenta koji dodiruje git;
+    (e) ako se `_tasks` pojavi kao neispravan symlink, NE commitovati ništa — vratiti iz remotea i
+    obavijestiti operatera. Gate `check:tracked-artifacts` (pre-commit + CI) blokira `_tasks`
+    praćen u bilo kojem obliku. Cijeli tekst: `docs/ops/HARD_RULES_DETAIL.md` → Pravilo 23.
 
 ---
 

@@ -115,7 +115,7 @@ for (const completed of [false, true]) {
       provider: "claude",
       model,
       connectionId: "conn-scope",
-    })!;
+    })!.flatMap((segment) => segment.blocks);
     assert.equal(isRestoredClaudeThinkingBlock(restored[0]), true);
     assert.equal(
       isRestoredClaudeThinkingBlock({ ...restored[0] }),

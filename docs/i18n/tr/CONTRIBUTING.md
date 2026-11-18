@@ -20,14 +20,20 @@ kapsamı ve uzlaştırma adımlarıyla eşleştirir.
 - **Node.js** `>=22.22.2 <23` veya `>=24.0.0 <27` (önerilen: 24 LTS)
 - **npm** 10+
 
+> **Node 24 ile Windows:** güncel 24 LTS yama sürümünü kullanın (en az 24.20.0).
+> Önceki sürümler, `--test-force-exit` işlemi kapattığında başarılı testlerden sonra işlemi
+> sonlandırabilir. Node'un [Windows libuv düzeltmesi](https://github.com/nodejs/node/pull/61999) bu
+> çalışma zamanı çökmesini giderir; test doğrulamalarını ve çalıştırıcı çıkış denetimlerini etkin
+> tutun.
+
 > **npm v11+ kullanıcıları (Node 24+):** `npm install` sonrasında yerel modüllerin yüklendiğini doğrulayın:
-> `node -e "require('better-sqlite3')"`. Komut `MODULE_NOT_FOUND` hatasıyla başarısız olursa
+> `node -e "require('better-sqlite3')"`. Bu komut `MODULE_NOT_FOUND` ile başarısız olursa,
 > `npm approve-scripts better-sqlite3 && npm install` komutunu çalıştırın. Bkz.
 > [Sorun Giderme](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonlama ve Yükleme
+### Klonlama ve Kurulum
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -50,22 +56,22 @@ Geliştirme için temel değişkenler:
 
 | Değişken               | Geliştirme Varsayılanı   | Açıklama                    |
 | ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Sunucu portu                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz için temel URL       |
+| `PORT`                 | `20128`                  | Sunucu bağlantı noktası     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz temel URL'si         |
 | `JWT_SECRET`           | (yukarıda oluşturun)     | JWT imzalama gizli anahtarı |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk oturum açma parolası    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk giriş parolası          |
 | `APP_LOG_LEVEL`        | `info`                   | Günlük ayrıntı düzeyi       |
 
-### Pano Ayarları
+### Kontrol Paneli Ayarları
 
-Pano, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için kullanıcı arayüzü anahtarları sağlar:
+Kontrol paneli, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için kullanıcı arayüzü geçişleri sağlar:
 
-| Ayar Konumu        | Anahtar                  | Açıklama                                            |
-| ------------------ | ------------------------ | --------------------------------------------------- |
-| Ayarlar → Gelişmiş | Hata Ayıklama Modu       | Hata ayıklama istek günlüklerini etkinleştirir (UI) |
-| Ayarlar → Genel    | Kenar Çubuğu Görünürlüğü | Kenar çubuğu bölümlerini gösterir/gizler            |
+| Ayar Konumu         | Geçiş              | Açıklama                                          |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| Settings → Advanced | Debug Mode         | Hata ayıklama istek günlüklerini etkinleştir (UI) |
+| Settings → General  | Sidebar Visibility | Kenar çubuğu bölümlerini göster/gizle             |
 
-Bu ayarlar veritabanında saklanır, yeniden başlatmalar arasında korunur ve ayarlandıklarında ortam değişkeni varsayılanlarını geçersiz kılar.
+Bu ayarlar veritabanında saklanır ve yeniden başlatmalar arasında korunur; ayarlandıklarında ortam değişkeni varsayılanlarının üzerine yazılır.
 
 ### Yerel Olarak Çalıştırma
 
@@ -74,56 +80,56 @@ Bu ayarlar veritabanında saklanır, yeniden başlatmalar arasında korunur ve a
 npm run dev
 
 # Üretim derlemesi
-npm run build    # next build → .build/next/, ardından assembleStandalone → dist/
+npm run build    # next build → .build/next/ ardından assembleStandalone → dist/
 npm run start
 
-# Katkıda bulunanların değişiklikleri için hızlı, yalnızca arka uç/API derlemesi
+# Katkıda bulunanların değişiklikleri için hızlı yalnızca arka uç/API derlemesi
 npm run build:contributor
 
-# Sürüm derlemesi (temiz yeniden derleme + HEAD doğrulama işareti — dağıtım için gereklidir)
-npm run build:release   # rm -rf .build dist && derleme + dist/BUILD_SHA dosyasını yazar
+# Sürüm derlemesi (temiz yeniden derleme + HEAD sentinel — dağıtım için gereklidir)
+npm run build:release   # rm -rf .build dist ve ardından derleme + dist/BUILD_SHA yazma
 
-# Yaygın port yapılandırması
+# Yaygın bağlantı noktası yapılandırması
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Katkıda bulunanlara yönelik derleme yalnızca derleme doğrulaması gerçekleştirir: bağımsız
-dağıtımı bir araya getirmez veya isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir
-paketi doğrulamanız gerektiğinde normal üretim derlemesini kullanın.
+Katkıda bulunan derlemesi yalnızca derleme doğrulaması gerçekleştirir: bağımsız dağıtımı birleştirmez
+ve isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir paketi doğrulamanız gerektiğinde
+normal üretim derlemesini kullanın.
 
 ### Derleme Çıktısı Düzeni
 
-| Dizin     | İçerik                                                                                           | İzleniyor |
-| --------- | ------------------------------------------------------------------------------------------------ | --------- |
-| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                                          | Evet      |
-| `.build/` | Ara çıktılar — `next build` çıktısı (git tarafından yok sayılır, `distDir = .build/next`)        | Hayır     |
-| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından birleştirilir (git tarafından yok sayılır) | Hayır     |
+| Dizin     | İçerik                                                                           | İzleniyor |
+| --------- | -------------------------------------------------------------------------------- | --------- |
+| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                          | Evet      |
+| `.build/` | Ara dosyalar — `next build` çıktısı (gitignored, `distDir = .build/next`)        | Hayır     |
+| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından birleştirilir (gitignored) | Hayır     |
 
 Derleme işlem hattı tek geçişten oluşur:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js çıktısı)
-  └─ assembleStandalone()                 (bağımsız çıktıyı + statik dosyaları + public içeriğini + yerel varlıkları kopyalar)
-       └─ çıktı: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets kopyalanır)
+       └─ çıktı: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ayrıca önce her iki dizini de temizler ve dağıtım bütünlüğü doğrulama
-işareti olarak `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
+`npm run build:release` ayrıca önce her iki dizini temizler ve dağıtım bütünlüğü için
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
 
 `npm run build:contributor`, yalnızca arka uca yönelik derleme profilini kullanır. Derleme sırasında
-pano kullanıcı arayüzü dosyalarını geçici olarak geçersiz içeriklerle değiştirir, API rota işleyicilerini
-korur ve derlemeden sonra özgün dosyaları geri yükler. Pano kullanıcı arayüzünü etkileyen değişiklikler
-veya tam sürüm doğrulaması için `npm run build` kullanın; katkıda bulunan profili, sürüm derlemesinin
-yerine geçmez.
+kontrol paneli kullanıcı arayüzü dosyalarını geçici olarak stublar, API rota işleyicilerini korur ve
+derlemeden sonra özgün dosyaları geri yükler. Kontrol paneli kullanıcı arayüzünü etkileyen
+değişiklikler veya tam sürüm doğrulaması için `npm run build` kullanın; katkıda bulunan profili,
+sürüm derlemesinin yerine geçmez.
 
-> **VPS dağıtım notu:** uzak görüntü dizini `/usr/lib/node_modules/omniroute/app/`
-> değişmemiştir. Dağıtım araçları, `dist/` içeriğini rsync ile bu dizine aktarır.
-> Yalnızca depo içindeki derleme çıktısı yolu değişmiştir (`app/` → `dist/`).
+> **VPS dağıtım notu:** uzak imaj dizini `/usr/lib/node_modules/omniroute/app/`
+> değişmeden kalır. Dağıtım becerileri `dist/` içeriğini bu dizine rsync ile aktarır.
+> Yalnızca depo içindeki derleme çıktı yolu değişti (`app/` → `dist/`).
 
 Varsayılan URL'ler:
 
-- **Pano**: `http://localhost:20128/dashboard`
+- **Kontrol Paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -294,67 +300,67 @@ Uygulanmış örnekler için `open-sse/utils/stream.ts` ve `open-sse/utils/strea
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Pano sayfaları (23 bölüm)
-│   ├── api/                # API rotaları (51 dizin)
-│   └── login/              # Kimlik doğrulama sayfaları (.tsx)
-├── domain/                 # İlke motoru (policyEngine, comboResolver, costRules vb.)
-├── lib/                    # Temel iş mantığı (.ts)
-│   ├── a2a/                # Aracıdan Aracıya v0.3 protokol sunucusu
-│   ├── acp/                # Aracı İletişim Protokolü kayıt defteri
-│   ├── compliance/         # Uyumluluk ilkesi motoru
-│   ├── db/                 # SQLite alan modülleri + 130 migrasyon
-│   ├── memory/             # Kalıcı konuşma belleği
-│   ├── oauth/              # OAuth sağlayıcıları, hizmetleri ve yardımcı araçları
-│   ├── skills/             # Genişletilebilir beceri çatısı
-│   ├── usage/              # Kullanım takibi ve maliyet hesaplama
-│   └── localDb.ts          # Yalnızca yeniden dışa aktarma katmanı — buraya asla mantık eklemeyin
-├── middleware/              # İstek ara katmanı (promptInjectionGuard)
-├── mitm/                   # MITM proxy'si (sertifika, DNS, hedef yönlendirme)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React bileşenleri (.tsx)
-│   ├── constants/          # Sağlayıcı tanımları (329), MCP kapsamları, 20 yönlendirme stratejisi
-│   ├── utils/              # Devre kesici, temizleyici, kimlik doğrulama yardımcıları
-│   └── validation/         # Zod v4 şemaları
-└── sse/                    # SSE proxy işlem hattı
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse çalışma alanı
-├── executors/              # 150 yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
-├── handlers/               # 11 istek işleyicisi (sohbet, yanıtlar, gömmeler, görseller vb.)
-├── mcp-server/             # MCP sunucusu (110 benzersiz araç, 3 aktarım yöntemi, 33 kapsam)
-├── services/               # 178 üst düzey hizmet (combo, autoCombo, rateLimitManager vb.)
-├── translator/             # Biçim dönüştürücüleri (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API dönüştürücüsü
-└── utils/                  # 22 yardımcı modül (akış, TLS, proxy, günlük kaydı)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron masaüstü uygulaması (platformlar arası)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test çalıştırıcısı (1.574 test dosyası)
-├── integration/            # Entegrasyon testleri
-├── e2e/                    # Playwright testleri
-├── security/               # Güvenlik testleri
-├── translator/             # Dönüştürücüye özel testler
-└── load/                   # Yük testleri
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Mimari Karar Kayıtları
-├── architecture/            # Sistem mimarisi ve dayanıklılık
-├── comparison/              # OmniRoute ve alternatiflerinin karşılaştırması
-├── compression/             # Sıkıştırma kılavuzları ve kuralları
-├── dev/                     # Geliştirme kılavuzları
-├── diagrams/                # Mimari diyagramları
-├── frameworks/              # MCP, A2A, OpenCode, Bellek, Beceriler
-├── guides/                  # Kullanıcı kılavuzu, Docker, kurulum, sorun giderme
-├── i18n/                    # Uluslararasılaştırılmış README çevirileri
-├── marketing/               # Pazarlama materyalleri
-├── ops/                     # Dağıtım, proxy, kapsam, sürümler
-├── providers/               # Sağlayıcıya özel belgeler
-├── reference/               # API referansı, ortam değişkenleri, CLI araçları, ücretsiz katmanlar
-├── releases/                # Sürüm notları
-├── routing/                 # Otomatik kombinasyon motoru, akıl yürütme yeniden oynatma
-├── screenshots/             # Pano ekran görüntüleri
-├── security/                # Koruma önlemleri, uyumluluk, gizlilik, belirteçler
-└── specs/                   # Tasarım özellikleri
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

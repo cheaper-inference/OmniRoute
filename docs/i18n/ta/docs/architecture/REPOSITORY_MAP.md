@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## மூலக் கோப்புகள்
+## ரூட் கோப்புகள்
 
-| கோப்பு                                      | நோக்கம்                                                                                                     |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | சந்தைப்படுத்தல் முகப்புப் பக்கம் + விரைவுத் தொடக்கம் + அம்ச ஒப்பீட்டு அட்டவணை (`llm.txt`-ஐயும் பார்க்கவும்) |
-| **CHANGELOG.md**                            | ஒவ்வொரு வெளியீட்டிற்குமான மாற்றப் பதிவு (`/version-bump-cc` skill மூலம் தானாக உருவாக்கப்படுகிறது)           |
-| **LICENSE**                                 | MIT உரிமத்தின் உரை                                                                                          |
-| **CLAUDE.md**                               | Claude Code முகவர்களுக்கான திட்ட விதிகள் (கட்டாய விதிகள், மரபுகள், சூழ்நிலைகள்)                             |
-| **AGENTS.md**                               | CLAUDE.md போன்றதே, ஆனால் Claude அல்லாத AI முகவர்களுக்கானது (Codex, Cursor போன்றவை)                          |
-| **GEMINI.md**                               | Gemini அடிப்படையிலான முகவர்களுக்கான சுருக்கமான விதிகள் (CLAUDE.md-இன் துணைத்தொகுப்பு)                       |
-| **CONTRIBUTING.md**                         | பங்களிப்பாளர் வழிகாட்டி: அமைத்தல், conventional commits, சோதனை, PR செயல்முறை                                |
-| **SECURITY.md**                             | பாதிப்புகளைப் புகாரளிக்கும் கொள்கை, ஆதரிக்கப்படும் பதிப்புகள், அச்சுறுத்தல் மாதிரி                          |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — சமூக நடத்தை குறித்த எதிர்பார்ப்புகள்                                                 |
-| **llm.txt**                                 | LLM வலைத் தேடிகளுக்காக உகப்பாக்கப்பட்ட எளிய உரை முகப்புப் பக்கம் (AI உதவியாளர்களுக்கான SEO)                 |
-| **package.json**                            | npm manifest, scripts, சார்புகள், engines, c8 coverage gate                                                 |
-| **package-lock.json**                       | பூட்டப்பட்ட சார்பு மரம்                                                                                     |
-| **tsconfig.json**                           | மூல TypeScript உள்ளமைவு                                                                                     |
-| **tsconfig.typecheck-core.json**            | `src/` core-க்கான வகைச் சரிபார்ப்பு உள்ளமைவு                                                                |
-| **tsconfig.typecheck-noimplicit-core.json** | கண்டிப்பான (`noImplicitAny`) வகைச் சரிபார்ப்பு                                                              |
-| **tsconfig.tsbuildinfo**                    | TS படிப்படியான build cache (gitignored)                                                                     |
-| **next.config.mjs**                         | Next.js 16 build உள்ளமைவு (standalone output)                                                               |
-| **next-env.d.ts**                           | Next.js தானாக உருவாக்கிய env வகைகள்                                                                         |
-| **eslint.config.mjs**                       | ESLint flat config (ஒவ்வொரு திட்டப் பகுதிக்குமான விதிகள்)                                                   |
-| **prettier.config.mjs**                     | Prettier வடிவமைப்பு விதிகள்                                                                                 |
-| **postcss.config.mjs**                      | Tailwind/CSS pipeline-க்கான PostCSS உள்ளமைவு                                                                |
-| **playwright.config.ts**                    | Playwright E2E சோதனை உள்ளமைவு                                                                               |
-| **vitest.config.ts**                        | Vitest உள்ளமைவு (இயல்புநிலைத் தொகுப்பு)                                                                     |
-| **vitest.mcp.config.ts**                    | MCP server / autoCombo / cache தொகுப்புகளுக்கான Vitest உள்ளமைவு                                             |
-| **sonar-project.properties**                | SonarQube/SonarCloud உள்ளமைவு (குறியீட்டுத் தரம்)                                                           |
-| **Dockerfile**                              | பல-கட்ட Docker build (builder → runner-base → runner-cli)                                                   |
-| **docker-compose.yml**                      | 4 profiles (base, cli, host, cliproxyapi) + redis sidecar கொண்ட மேம்பாட்டு compose                          |
-| **docker-compose.prod.yml**                 | தயாரிப்புச் சூழல் compose (port 20130, redis, பெயரிடப்பட்ட volumes)                                         |
-| **.dockerignore**                           | Docker context-இலிருந்து விலக்கப்பட்ட கோப்புகள்                                                             |
-| **fly.toml**                                | Fly.io deployment உள்ளமைவு (region `sin`, port 20128, /data volume)                                         |
-| **.env.example**                            | env கோப்பு வார்ப்புரு (முதல் நிறுவலின்போது `.env`-க்கு தானாக நகலெடுக்கப்படும்)                              |
-| **.gitignore**                              | Git புறக்கணிப்பு வடிவங்கள்                                                                                  |
-| **.npmignore**                              | npm வெளியீட்டு விலக்குப் பட்டியல்                                                                           |
-| **.npmrc**                                  | npm உள்ளமைவு (registry, lockfile கொள்கை)                                                                    |
-| **.node-version**                           | Node பதிப்பு நிலைப்படுத்தல் (nvm-இணக்கமான கருவிகளால் பயன்படுத்தப்படுகிறது)                                  |
-| **.nvmrc**                                  | nvm-க்கான Node பதிப்பு நிலைப்படுத்தல்                                                                       |
-| **eslint.complexity.config.mjs**            | complexity ratchet-க்கான ESLint உள்ளமைவு (`scripts/check/check-complexity.mjs --config`)                    |
-| **eslint.sonarjs.config.mjs**               | SonarJS விதிகளுக்கான ESLint உள்ளமைவு (cognitive complexity / duplication)                                   |
-| **source.config.ts**                        | Fumadocs `defineDocs` மூல உள்ளமைவு (`.source/`-க்கு தரவை வழங்குகிறது)                                       |
-| **knip.json**                               | Knip உள்ளமைவு — பயன்படுத்தப்படாத கோப்புகள்/exports/deps (dead-code gate-க்கு தரவை வழங்குகிறது)              |
-| **stryker.conf.json**                       | Stryker mutation-testing உள்ளமைவு                                                                           |
-| **.size-limit.json**                        | size-limit தொகுப்பின் அளவு வரம்புக் கட்டமைப்பு                                                              |
-| **promptfooconfig.yaml**                    | promptfoo மதிப்பீட்டுக் கட்டமைப்பு                                                                          |
-| **.gitleaks.toml**                          | gitleaks ரகசியத் தகவல் ஸ்கேன் விதித்தொகுப்பு                                                                |
-| **.zizmor.yml**                             | zizmor GitHub-Actions பாதுகாப்பு lint கட்டமைப்பு                                                            |
-| **socket.yml**                              | Socket.dev விநியோகச் சங்கிலிக் கட்டமைப்பு                                                                   |
-| **news.json**                               | மொழியாக்கப்பட்ட v2 அறிவிப்பு ஊட்டம்; Radar வெளியீட்டு உருப்படி செயலற்ற நிலையில் வழங்கப்படுகிறது             |
-| **flake.nix** / **flake.lock**              | Nix dev-shell வரையறை + பூட்டு                                                                               |
-| **.env**                                    | உள்ளூர் ரகசியங்கள் (gitignored — `.env.example` இலிருந்து உருவாக்கப்பட்டது)                                 |
+| கோப்பு                                      | நோக்கம்                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **README.md**                               | சந்தைப்படுத்தல் இறங்கும் பக்கம் + விரைவு தொடக்க + அம்ச அணி (மேலும் பார்க்க `llm.txt`)    |
+| **CHANGELOG.md**                            | ஒவ்வொரு வெளியீட்டிற்கும் சேஞ்ச்லாக் ( `/version-bump-cc` திறனால் தானாக உருவாக்கப்பட்டது) |
+| **LICENSE**                                 | MIT உரிம உரை                                                                             |
+| **CLAUDE.md**                               | Claude குறியீடு முகவர்களுக்கான திட்ட விதிகள் (கடினமான விதிகள், மரபுகள், காட்சிகள்)       |
+| **AGENTS.md**                               | CLAUDE.md போன்றது ஆனால் கிளாட் அல்லாத AI முகவர்களுக்கு (Codex, Cursor, முதலியன)          |
+| **GEMINI.md**                               | ஜெமினி அடிப்படையிலான முகவர்களுக்கான சுருக்கமான விதிகள் ( CLAUDE.md இன் துணைக்குழு)       |
+| **CONTRIBUTING.md**                         | பங்களிப்பாளர் வழிகாட்டி: அமைவு, வழக்கமான ஒப்பந்தங்கள், சோதனை, PR ஓட்டம்                  |
+| **SECURITY.md**                             | பாதிப்பு அறிக்கையிடல் கொள்கை, ஆதரிக்கப்படும் பதிப்புகள், அச்சுறுத்தல் மாதிரி             |
+| **CODE_OF_CONDUCT.md**                      | பங்களிப்பாளர் உடன்படிக்கை — சமூக நடத்தை எதிர்பார்ப்புகள்                                 |
+| **llm.txt**                                 | LLM கிராலர்களுக்கு உகந்த எளிய உரை தரையிறக்கம் ( AI உதவியாளர்களுக்கான SEO )               |
+| **package.json**                            | npm மேனிஃபெஸ்ட், ஸ்கிரிப்டுகள், சார்புகள், இயந்திரங்கள், c8 கவரேஜ் கேட்                  |
+| **package-lock.json**                       | பூட்டிய சார்பு மரம்                                                                      |
+| **tsconfig.json**                           | ரூட் TypeScript கட்டமைப்பு                                                               |
+| **tsconfig.typecheck-core.json**            | `src/` கோர்க்கான உள்ளமைவைத் தட்டச்சு செய்யவும்                                           |
+| **tsconfig.typecheck-noimplicit-core.json** | கடுமையான (`noImplicitAny`) தட்டச்சுச் சரிபார்ப்பு                                        |
+| **tsconfig.tsbuildinfo**                    | TS அதிகரிக்கும் உருவாக்க கேச் (ஜிடிஜினோர்டு)                                             |
+| **அடுத்தது.config.mjs**                     | Next.js 16 உருவாக்க கட்டமைப்பு (தனிப்பட்ட வெளியீடு)                                      |
+| **அடுத்த env.d.ts**                         | Next.js தானாக உருவாக்கப்பட்ட env வகைகள்                                                  |
+| **எஸ்லின்ட்.config.mjs**                    | ESLint பிளாட் கட்டமைப்பு (திட்டப் பகுதிக்கான விதிகள்)                                    |
+| **அழகான.config.mjs**                        | Prettier வடிவமைப்பு விதிகள்                                                              |
+| **postcss.config.mjs**                      | Tailwind/CSS பைப்லைனுக்கான PostCSS config                                                |
+| **நாடக ஆசிரியர்.config.ts**                 | Playwright E2E சோதனை கட்டமைப்பு                                                          |
+| **vitest.config.ts**                        | Vitest கட்டமைப்பு (இயல்புநிலை தொகுப்பு)                                                  |
+| **vitest.mcp.config.ts**                    | MCP சர்வர் / autoCombo / கேச் தொகுப்புகளுக்கான Vitest config                             |
+| **சொனார்-திட்டம்.பண்புகள்**                 | SonarQube/SonarCloud கட்டமைப்பு (குறியீடு தரம்)                                          |
+| **டோக்கர்ஃபைல்**                            | பல-நிலை Docker உருவாக்கம் (பில்டர் → ரன்னர்-பேஸ் → ரன்னர்-கிளி)                          |
+| **docker-compose.yml**                      | தேவ் 4 சுயவிவரங்களுடன் (அடிப்படை, கிளி, ஹோஸ்ட், கிளிப்ராக்ஸியாபி) + redis சைட்கார்       |
+| **டாக்கர்-இயக்க.prod.yml**                  | உற்பத்தித் தொகுப்பு (போர்ட் 20130, ரெடிஸ், பெயரிடப்பட்ட தொகுதிகள்)                       |
+| **.dockerignore**                           | Docker சூழலில் இருந்து கோப்புகள் விலக்கப்பட்டுள்ளன                                       |
+| **fly.toml**                                | Fly.io வரிசைப்படுத்தல் கட்டமைப்பு (பிராந்திய `sin`, போர்ட் 20128, /தரவு தொகுதி)          |
+| **.env.உதாரணம்**                            | டெம்ப்ளேட் env கோப்பு (முதல் நிறுவலில் `.env` க்கு தானாக நகலெடுக்கப்பட்டது)              |
+| **.gitignore**                              | Git புறக்கணிப்பு வடிவங்கள்                                                               |
+| **.npmignore**                              | npm விலக்கு பட்டியலை வெளியிடுகிறது                                                       |
+| **.npmrc**                                  | npm கட்டமைப்பு (பதிவு, லாக்ஃபைல் கொள்கை)                                                 |
+| **.நோட்-பதிப்பு**                           | முனை பதிப்பு முள் (என்விஎம்-இணக்கமான கருவிகளால் பயன்படுத்தப்படுகிறது)                    |
+| **.nvmrc**                                  | nvm க்கான முனை பதிப்பு பின்                                                              |
+| **eslint.complexity.config.mjs**            | சிக்கலான ராட்செட்டிற்கான ESLint config (`scripts/check/check-complexity.mjs --config`)   |
+| **eslint.sonarjs.config.mjs**               | SonarJS விதிகளுக்கான ESLint config (அறிவாற்றல் சிக்கலானது / நகல்)                        |
+| **ஆதாரம்.config.ts**                        | Fumadocs `defineDocs` source config (ஃபீட்ஸ் `.source/`)                                 |
+| **knip.json**                               | Knip config — பயன்படுத்தப்படாத files/exports/deps (டெட்-கோட் கேட்டை ஊட்டுகிறது)          |
+| **ஸ்ட்ரைக்கர்.conf.mjs**                    | ஸ்ட்ரைக்கர் பிறழ்வு-சோதனை கட்டமைப்பு ( `mutate` இலிருந்து `tap.testFiles` கணக்கிடுகிறது) |
+| **.size-limit.json**                        | அளவு-வரம்பு மூட்டை பட்ஜெட் கட்டமைப்பு                                                    |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                    |
+| **.gitleaks.toml**                          | gitleaks ரகசிய ஸ்கேன் விதிகள்                                                            |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                               |
+| **socket.yml**                              | Socket.dev சப்ளை-செயின் கட்டமைப்பு                                                       |
+| **news.json**                               | உள்ளூர்மயமாக்கப்பட்ட v2 அறிவிப்பு ஊட்டம்; ரேடார் ஏவுதல் பொருள் கப்பல்கள் செயலற்றவை       |
+| **flake.nix** /** flake.lock**              | நிக்ஸ் டெவ்-ஷெல் வரையறை + பூட்டு                                                         |
+| **.env**                                    | உள்ளூர் இரகசியங்கள் ( `.env.example` இலிருந்து உருவாக்கப்பட்ட gitignored — )             |
 
-> **v3.8.26-இல் மூலக் கோப்பகத்திலிருந்து வெளியே நகர்த்தப்பட்டது (ஒழுங்குபடுத்தல்):**
+> **v3.8.26 இல் ரூட்டிலிருந்து வெளியே நகர்த்தப்பட்டது (குழப்பம்):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, மற்றும் உருவாக்கப்பட்ட `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state)-ஐப் பார்க்கவும்.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, மற்றும் உருவாக்கப்பட்ட `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) பார்க்கவும்.
 
 ---
 
@@ -172,8 +172,8 @@ src/
 | `api/`                                   | பகிரப்பட்ட API உதவியாளர்கள் (`requireManagementAuth`, சரிபார்த்தல்)                                                                                                                                                                                                                                                       |
 | `auth/`                                  | அமர்வு, கடவுச்சொல் ஹாஷிங், டோக்கன் சரிபார்ப்பு                                                                                                                                                                                                                                                                            |
 | `batches/`                               | OpenAI தொகுதிகள் API கையாளுபவர்கள்                                                                                                                                                                                                                                                                                        |
-| `catalog/`                               | வழங்குநர் பட்டியல் Zod சரிபார்த்தல் + திறன் தீர்மானம்                                                                                                                                                                                                                                                                     |
-| `cloudAgent/`                            | கிளவுட் முகவர்கள் (Codex கிளவுட், Devin, Jules) — பார்க்க `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                |
+| `catalog/`                               | வழங்குநர் பட்டியல் Zod சரிபார்ப்பு + திறன் தீர்மானம்                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`                            | கிளவுட் முகவர்கள் (Codex Cloud, Devin, Jules) — பார்க்க `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                  |
 | `combos/`                                | காம்போ ரெசல்யூஷன் + உதவியாளர்களை மறுவரிசைப்படுத்தவும்                                                                                                                                                                                                                                                                     |
 | `audit/`                                 | செயல்பாட்டு ஊட்ட உதவியாளர்கள்: `highLevelActions.ts` (அனுமதிப்பட்டியல் + `isHighLevelAction()`), `activityIcons.ts` (செயல் → icon/verb வரைபடம்), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` பார்க்கவும்                                                                         |
 | `compliance/`                            | தணிக்கை பதிவு + வழங்குநர் தணிக்கை — பார்க்க `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit` — மீது அடாப்டர்கள் `docs/architecture/DESIGN_SYSTEM.md` பார்க்கவும் |
 | `constants/iconMap.ts`           | `ICON_MAP`: திரைகளால் பயன்படுத்தப்படும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                         |
-| `constants/providers.ts`         | **380 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
+| `constants/providers.ts`         | **394 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
 | `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவு                                                                                |
-| `constants/routingStrategies.ts` | **20 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
+| `constants/routingStrategies.ts` | **22 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) அங்கீகாரம் தேவைப்படும் வழிகள்                                                       |
 | `constants/upstreamHeaders.ts`   | அப்ஸ்ட்ரீம் கோரிக்கைகளுக்கான தலைப்பு மறுப்பு                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod திட்டங்கள் ( API ஒப்பந்தங்களுக்கான உண்மையின் ஒற்றை ஆதாரம்)                                        |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 கோப்புகள் (12 கையாளிகள் + 4 உதவிகள்): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search போன்றவை.
-├── executors/           # 150 இயக்கி தொகுதிகள் (BaseExecutor-ஐ நீட்டிக்கும் வகுப்புகள் + ஒவ்வொரு வழங்குநருக்குமான உதவிகள்)
+├── executors/           # 163 இயக்கி தொகுதிகள் (BaseExecutor-ஐ நீட்டிக்கும் வகுப்புகள் + ஒவ்வொரு வழங்குநருக்குமான உதவிகள்)
 ├── translator/          # வடிவமைப்பு மாற்றிகள் (9 கோரிக்கை, 9 பதில், 9 உதவிகள்)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ சேவைத் தொகுதிகள் (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM போன்றவை.)
@@ -395,26 +395,26 @@ open-sse/
 
 ### உயர்மட்ட வழிகாட்டிகள்
 
-| டாக்                        | நோக்கம்                                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | உயர் நிலை கட்டிடக்கலை, துணை அமைப்பு வரைபடம், டாஷ்போர்டு மேற்பரப்பு                              |
-| `CODEBASE_DOCUMENTATION.md` | பொறியியல் குறிப்பு: அடைவுகள், தொகுதிகள், மரபுகள்                                                |
-| `FEATURES.md`               | v3.8 சிறப்பம்சங்கள் கொண்ட அம்ச அணி                                                              |
-| `USER_GUIDE.md`             | இறுதி-பயனர் கையேடு (அமைப்பு, மாதிரிகள், காம்போஸ், CLIs, ஆடியோ போன்றவை)                          |
-| `API_REFERENCE.md`          | அங்கீகார மாதிரியுடன்API இறுதிப்புள்ளி குறிப்பு                                                  |
-| `openapi.yaml`              | OpenAPI 3.0 விவரக்குறிப்பு (121 பாதைகள்)                                                        |
-| `SETUP_GUIDE.md`            | நிறுவல் முறைகள் (npm, npx, Docker, Electron, Termux, source)                                    |
-| `ENVIRONMENT.md`            | அனைத்து env vars (~ 800 ஆவணப்படுத்தப்பட்டது, ~ 3,050 வரிகள் `.env.example`)                     |
-| `TROUBLESHOOTING.md`        | பொதுவான பிழைகள் + v3.8.0 அறியப்பட்ட சிக்கல்கள்                                                  |
-| `RELEASE_CHECKLIST.md`      | முழு வெளியீட்டு ஓட்டம் (திறன்கள், ஹஸ்கி, வழக்கமான கமிட்கள், வரிசைப்படுத்துதல்)                  |
-| `COVERAGE_PLAN.md`          | கவரேஜ் இலக்குகள் மற்றும் தற்போதைய நிலை                                                          |
-| `FREE_TIERS.md`             | க்யூரேட்டட் இலவச அடுக்கு வழங்குநர்கள் (48 + இலவச + 11 OAuth)                                    |
-| `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள் OmniRoute CLI                                              |
-| `I18N.md`                   | i18n கட்டிடக்கலை, ஒரு மொழியைச் சேர்த்தல், 67 இடங்கள்                                            |
-| `UNINSTALL.md`              | நிறுவல் நீக்குதல் படிகளை சுத்தம் செய்யவும்                                                      |
-| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்படும்** 380 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
+| டாக்                        | நோக்கம்                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | உயர் நிலை கட்டிடக்கலை, துணை அமைப்பு வரைபடம், டாஷ்போர்டு மேற்பரப்பு                               |
+| `CODEBASE_DOCUMENTATION.md` | பொறியியல் குறிப்பு: அடைவுகள், தொகுதிகள், மரபுகள்                                                 |
+| `FEATURES.md`               | v3.8 சிறப்பம்சங்கள் கொண்ட அம்ச அணி                                                               |
+| `USER_GUIDE.md`             | இறுதி-பயனர் கையேடு (அமைப்பு, மாதிரிகள், காம்போஸ், CLIs, ஆடியோ போன்றவை)                           |
+| `API_REFERENCE.md`          | அங்கீகார மாதிரியுடன்API இறுதிப்புள்ளி குறிப்பு                                                   |
+| `openapi.yaml`              | OpenAPI 3.0 ஸ்பெக் (121 பாதைகள்)                                                                 |
+| `SETUP_GUIDE.md`            | நிறுவல் முறைகள் (npm, npx, Docker, Electron, Termux, source)                                     |
+| `ENVIRONMENT.md`            | அனைத்து env vars (~ 800 ஆவணப்படுத்தப்பட்டது, ~ 3,050 வரிகள் `.env.example`)                      |
+| `TROUBLESHOOTING.md`        | பொதுவான பிழைகள் + v3.8.0 அறியப்பட்ட சிக்கல்கள்                                                   |
+| `RELEASE_CHECKLIST.md`      | முழு வெளியீட்டு ஓட்டம் (திறன்கள், ஹஸ்கி, வழக்கமான கமிட்கள், வரிசைப்படுத்துதல்)                   |
+| `COVERAGE_PLAN.md`          | கவரேஜ் இலக்குகள் மற்றும் தற்போதைய நிலை                                                           |
+| `FREE_TIERS.md`             | தொகுக்கப்பட்ட இலவச அடுக்கு வழங்குநர்கள் (48 + இலவச + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள் OmniRoute CLI                                               |
+| `I18N.md`                   | i18n கட்டிடக்கலை, ஒரு மொழியைச் சேர்த்தல், 67 இடங்கள்                                             |
+| `UNINSTALL.md`              | நிறுவல் நீக்குதல் படிகளை சுத்தம் செய்யவும்                                                       |
+| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்பட்டது** 394 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
 
-### துணை அமைப்பு ஆழமான டைவ்ஸ்
+### துணை அமைப்பு டீப்-டைவ்ஸ்
 
 | டாக்                                            | நோக்கம்                                                                             |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------- |

@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
-// Source-level invariant tests for cleanup.ts fixes.
+// Invariant tests for cleanup.ts fixes (mostly source-level; call_logs runs the cleanup).
 // These verify the critical column name fixes that were causing silent cleanup failures.
 
 const CLEANUP_PATH = path.resolve(import.meta.dirname, "../../src/lib/db/cleanup.ts");
@@ -17,7 +18,7 @@ test("cleanup: compression_analytics uses 'timestamp' column (not 'created_at')"
   // The bug: cleanup used WHERE created_at < ? but the table has 'timestamp' column.
   // This caused silent failures — 600K+ rows accumulated over 52 days.
   assert.ok(
-    source.includes("DELETE FROM compression_analytics WHERE timestamp < ?"),
+    /table: "compression_analytics",\s*column: "timestamp"/.test(source),
     "compression_analytics cleanup must use 'timestamp' column, not 'created_at'"
   );
   assert.ok(
@@ -26,16 +27,35 @@ test("cleanup: compression_analytics uses 'timestamp' column (not 'created_at')"
   );
 });
 
-test("cleanup: call_logs uses 'timestamp' column (not 'created_at')", () => {
-  // Same bug as compression_analytics.
-  assert.ok(
-    source.includes("DELETE FROM call_logs WHERE timestamp < ?"),
-    "call_logs cleanup must use 'timestamp' column"
-  );
-  assert.ok(
-    !source.includes("DELETE FROM call_logs WHERE created_at"),
-    "must NOT use created_at for call_logs (column doesn't exist)"
-  );
+test("cleanup: call_logs retention prunes by 'timestamp' (not 'created_at')", async () => {
+  // Same bug as compression_analytics. Checked by running the cleanup: call_logs
+  // has no created_at column, so a query on it would fail and report an error
+  // instead of deleting the expired row.
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cleanup-column-"));
+  process.env.DATA_DIR = dataDir;
+  const core = await import("../../src/lib/db/core.ts");
+  const { cleanupCallLogs } = await import("../../src/lib/db/cleanup.ts");
+  const { getUserDatabaseSettings } = await import("../../src/lib/db/databaseSettings.ts");
+  try {
+    const db = core.getDbInstance();
+    const days = getUserDatabaseSettings().retention.callLogs;
+    const expired = new Date(Date.now() - (days + 1) * 86_400_000).toISOString();
+    const insert = db.prepare("INSERT INTO call_logs (id, timestamp) VALUES (?, ?)");
+    insert.run("expired", expired);
+    insert.run("recent", new Date().toISOString());
+
+    assert.deepEqual(await cleanupCallLogs(), { deleted: 1, errors: 0 });
+    assert.deepEqual(
+      db
+        .prepare("SELECT id FROM call_logs")
+        .all()
+        .map((row) => row.id),
+      ["recent"]
+    );
+  } finally {
+    core.resetDbInstance();
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
 });
 
 test("cleanup: has proxy_logs cleanup function", () => {
@@ -44,7 +64,7 @@ test("cleanup: has proxy_logs cleanup function", () => {
     "must have cleanupProxyLogs function for the proxy_logs table"
   );
   assert.ok(
-    source.includes("DELETE FROM proxy_logs WHERE timestamp < ?"),
+    /table: "proxy_logs",\s*column: "timestamp"/.test(source),
     "proxy_logs cleanup must use timestamp column"
   );
 });

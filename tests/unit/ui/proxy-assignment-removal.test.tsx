@@ -119,7 +119,7 @@ describe("Removing distributed account proxy assignments", () => {
     await act(async () => root.render(<DistributeProxiesButton onDistribute={onDistribute} />));
     await click("Distribute Proxies");
     expect(onDistribute).not.toHaveBeenCalled();
-    expect(document.body.querySelector('[role="dialog"]')).toBeTruthy();
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeTruthy();
     await click("cancel");
     expect(onDistribute).not.toHaveBeenCalled();
     await click("Distribute Proxies");

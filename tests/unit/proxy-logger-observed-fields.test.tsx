@@ -2,6 +2,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
 
 // The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
@@ -145,6 +146,30 @@ describe("ProxyLogger observed fields", () => {
     expect(html).not.toContain("conn-traff");
     container.remove();
   }, 15000);
+
+  it("saves a column hidden from the columns menu, and restores it on the next mount", async () => {
+    const container = makeContainer();
+    const root = await renderLogger(container);
+    expect(container.textContent).toContain("colStatus");
+
+    const trigger = screen.getByRole("button", { name: "toggleColumns" });
+    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+    fireEvent.click(trigger);
+    const [statusColumn] = await screen.findAllByRole("menuitemcheckbox");
+    expect(statusColumn.getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(statusColumn);
+
+    const saved = window.localStorage.getItem("proxyLoggerVisibleColumns");
+    expect(JSON.parse(saved ?? "{}").status).toBe(false);
+    await act(async () => root.unmount());
+
+    const remounted = makeContainer();
+    await renderLogger(remounted);
+    expect(remounted.querySelector("th")?.textContent).not.toBe("colStatus");
+    expect(remounted.textContent).toContain("colProxy");
+    remounted.remove();
+    container.remove();
+  }, 30000);
 
   it("shows when the headers and the first chunk arrived for the attempt", async () => {
     const { default: ProxyLogDetail } = await import("@/shared/components/ProxyLogDetail");

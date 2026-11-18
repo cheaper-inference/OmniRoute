@@ -4,6 +4,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { z } from "zod";
+import { getCodexCliRsHeaders } from "../../open-sse/config/codexClient.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-agentrouter-chatcore-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -130,7 +132,7 @@ test("AgentRouter Responses requests automatically use the native Responses prot
   assert.equal("output_config" in captured.body, false);
 });
 
-test("AgentRouter OpenAI Chat requests automatically use the native Chat protocol", async () => {
+test("AgentRouter explicit OpenAI Chat selection uses the native Chat protocol", async () => {
   let captured: { url: string; headers: Headers; body: Record<string, unknown> } | null = null;
 
   globalThis.fetch = async (url, init = {}) => {
@@ -168,7 +170,7 @@ test("AgentRouter OpenAI Chat requests automatically use the native Chat protoco
     modelInfo: { provider: "agentrouter", model: "gpt-5.6-sol", extendedContext: false },
     credentials: {
       apiKey: "test-agentrouter-key",
-      providerSpecificData: {},
+      providerSpecificData: { targetFormat: "openai" },
     },
     log: noopLog(),
     clientRawRequest: {
@@ -328,7 +330,7 @@ test("AgentRouter Responses streaming stays native without a connection protocol
   assert.match(text, /"total_tokens":5/);
 });
 
-test("AgentRouter OpenAI Chat streaming stays native without a connection protocol override", async () => {
+test("AgentRouter explicit OpenAI Chat streaming stays native", async () => {
   let captured: { url: string; headers: Headers; body: Record<string, unknown> } | null = null;
 
   globalThis.fetch = async (url, init = {}) => {
@@ -376,7 +378,10 @@ test("AgentRouter OpenAI Chat streaming stays native without a connection protoc
   const result = await handleChatCore({
     body: structuredClone(body),
     modelInfo: { provider: "agentrouter", model: "gpt-5.6-sol", extendedContext: false },
-    credentials: { apiKey: "test-agentrouter-key", providerSpecificData: {} },
+    credentials: {
+      apiKey: "test-agentrouter-key",
+      providerSpecificData: { targetFormat: "openai" },
+    },
     log: noopLog(),
     clientRawRequest: {
       endpoint: "/v1/chat/completions",
@@ -462,3 +467,152 @@ test("AgentRouter Anthropic streaming stays native without a connection protocol
   assert.match(text, /content_block_delta/);
   assert.match(text, /message_stop/);
 });
+
+const responsesRequestSchema = z.looseObject({ model: z.string(), input: z.unknown().optional() });
+const chatReplySchema = z.object({
+  object: z.literal("chat.completion"),
+  choices: z.array(
+    z.object({ message: z.object({ content: z.string() }), finish_reason: z.string() })
+  ),
+});
+const chatChunkSchema = z.object({
+  object: z.literal("chat.completion.chunk"),
+  choices: z.array(
+    z.object({
+      delta: z.object({ content: z.string().optional() }),
+      finish_reason: z.string().nullable(),
+    })
+  ),
+});
+
+for (const stream of [false, true]) {
+  test(
+    stream
+      ? "#17997 AgentRouter Chat stream translates Responses events"
+      : "#17997 AgentRouter Chat input uses Responses and returns Chat JSON",
+    async () => {
+      const requests: {
+        url: string;
+        headers: Headers;
+        body: z.infer<typeof responsesRequestSchema>;
+      }[] = [];
+      const completedResponse = {
+        id: "resp_agentrouter_17997",
+        object: "response",
+        status: "completed",
+        model: "gpt-6-astra",
+        output: [
+          {
+            id: "msg_agentrouter_17997",
+            type: "message",
+            role: "assistant",
+            status: "completed",
+            content: [{ type: "output_text", text: "OK", annotations: [] }],
+          },
+        ],
+        usage: { input_tokens: 4, output_tokens: 1, total_tokens: 5 },
+      };
+      globalThis.fetch = async (url, init = {}) => {
+        const rawBody: unknown = JSON.parse(String(init.body || "{}"));
+        requests.push({
+          url: String(url),
+          headers: new Headers(init.headers),
+          body: responsesRequestSchema.parse(rawBody),
+        });
+        if (String(url) === "https://agentrouter.org/v1/chat/completions") {
+          return new Response(
+            JSON.stringify({
+              error: {
+                message:
+                  "Model gpt-6-astra does not support /v1/chat/completions, please use /v1/responses instead.",
+              },
+            }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        assert.equal(String(url), "https://agentrouter.org/v1/responses");
+        if (!stream) {
+          return new Response(JSON.stringify(completedResponse), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return createSseResponse([
+          'event: response.created\ndata: {"type":"response.created","response":{"id":"resp_agentrouter_17997","object":"response","status":"in_progress"}}',
+          'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","item_id":"msg_agentrouter_17997","output_index":0,"content_index":0,"delta":"OK"}',
+          "event: response.completed\ndata: " +
+            JSON.stringify({ type: "response.completed", response: completedResponse }),
+        ]);
+      };
+      const body = {
+        model: "agentrouter/gpt-6-astra",
+        messages: [{ role: "user", content: "Reply with exactly OK." }],
+        stream,
+      };
+      const credentials = { apiKey: "test-agentrouter-key", providerSpecificData: {} };
+      const originalCredentials = structuredClone(credentials);
+      const result = await handleChatCore({
+        body: structuredClone(body),
+        modelInfo: { provider: "agentrouter", model: "gpt-6-astra", extendedContext: false },
+        credentials,
+        log: noopLog(),
+        clientRawRequest: {
+          endpoint: "/v1/chat/completions",
+          body: structuredClone(body),
+          headers: new Headers({ accept: stream ? "text/event-stream" : "application/json" }),
+        },
+      });
+      const text = await result.response.text();
+      assert.equal(result.success, true);
+      assert.equal(result.response.ok, true);
+      assert.equal(requests.length, 1);
+      const [captured] = requests;
+      assert.ok(captured);
+      assert.equal(captured.url, "https://agentrouter.org/v1/responses");
+      assert.equal(captured.body.model, "gpt-6-astra");
+      assert.ok("input" in captured.body);
+      for (const key of ["messages", "system", "thinking", "output_config"]) {
+        assert.equal(key in captured.body, false, `${key} must not leak to Responses`);
+      }
+      assert.equal(captured.headers.get("authorization"), "Bearer test-agentrouter-key");
+      assert.equal(captured.headers.get("originator"), "codex_cli_rs");
+      assert.equal(captured.headers.get("user-agent"), getCodexCliRsHeaders()["User-Agent"]);
+      for (const header of ["x-api-key", "anthropic-version", "anthropic-beta", "x-app"]) {
+        assert.equal(captured.headers.get(header), null);
+      }
+      assert.deepEqual(credentials, originalCredentials);
+      if (!stream) {
+        const rawReply: unknown = JSON.parse(text);
+        const reply = chatReplySchema.parse(rawReply);
+        assert.equal(reply.choices[0].message.content, "OK");
+        assert.equal(reply.choices[0].finish_reason, "stop");
+        return;
+      }
+      assert.doesNotMatch(text, /event: response\.|"type":"response\./);
+      const data = text
+        .split("\n")
+        .filter((line) => line.startsWith("data: "))
+        .map((line) => line.slice(6));
+      assert.equal(data.at(-1), "[DONE]");
+      const chunks = data
+        .filter((line) => line !== "[DONE]")
+        .map((line) => {
+          const rawChunk: unknown = JSON.parse(line);
+          return chatChunkSchema.parse(rawChunk);
+        });
+      assert.equal(
+        chunks
+          .flatMap((chunk) => chunk.choices)
+          .map((choice) => choice.delta.content || "")
+          .join(""),
+        "OK"
+      );
+      assert.ok(
+        chunks.some((chunk) => chunk.choices.some((choice) => choice.finish_reason === "stop"))
+      );
+    }
+  );
+}

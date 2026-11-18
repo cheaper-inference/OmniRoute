@@ -87,7 +87,8 @@ export function pickAccount<T extends RotatableAccount>(
   accounts: T[],
   state: { nextAccountIdx: number; lastHealthyFingerprint?: string },
   isReady: (account: T) => boolean = isAccountReady,
-  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf
+  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf,
+  model?: string | null
 ): T {
   const serve = (idx: number): T => {
     const acct = accounts[idx];
@@ -95,11 +96,11 @@ export function pickAccount<T extends RotatableAccount>(
     if (isStickyDrainEnabled()) state.lastHealthyFingerprint = acct.fingerprint;
     return acct;
   };
-  const stickyIdx = stickyServeIndex(accounts, state, isReady, keyOfMember);
+  const stickyIdx = stickyServeIndex(accounts, state, isReady, keyOfMember, model);
   if (stickyIdx !== null) return serve(stickyIdx);
   for (let i = 0; i < accounts.length; i++) {
     const idx = (state.nextAccountIdx + i) % accounts.length;
-    if (isReady(accounts[idx]) && !isStoreDrained(accounts[idx], keyOfMember)) {
+    if (isReady(accounts[idx]) && !isStoreDrained(accounts[idx], keyOfMember, model)) {
       return serve(idx);
     }
   }
@@ -141,22 +142,23 @@ function stickyServeIndex<T extends RotatableAccount>(
   accounts: T[],
   state: { nextAccountIdx: number; lastHealthyFingerprint?: string },
   isReady: (account: T) => boolean,
-  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf
+  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf,
+  model?: string | null
 ): number | null {
-  if (!isStickyDrainEnabled() || !hasStoreHistory(accounts, keyOfMember)) return null;
+  if (!isStickyDrainEnabled() || !hasStoreHistory(accounts, keyOfMember, model)) return null;
   const wanted = state.lastHealthyFingerprint;
   if (!wanted) return null;
   const sticky = accounts.findIndex((a) => a.fingerprint === wanted);
   if (
     sticky === -1 ||
     !isReady(accounts[sticky]) ||
-    isStoreDrained(accounts[sticky], keyOfMember)
+    isStoreDrained(accounts[sticky], keyOfMember, model)
   ) {
     return null;
   }
   if (state.nextAccountIdx <= sticky) return null;
   const cursorIdx = state.nextAccountIdx % accounts.length;
-  if (isReady(accounts[cursorIdx]) && !isStoreDrained(accounts[cursorIdx], keyOfMember))
+  if (isReady(accounts[cursorIdx]) && !isStoreDrained(accounts[cursorIdx], keyOfMember, model))
     return null;
   return sticky;
 }
@@ -164,19 +166,21 @@ function stickyServeIndex<T extends RotatableAccount>(
 /** True when the shared store holds this member aside (direct never). */
 function isStoreDrained(
   account: RotatableAccount,
-  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf
+  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf,
+  model?: string | null
 ): boolean {
   if (!isStickyDrainEnabled()) return false;
-  return isProxyAvoided(keyOfMember(account));
+  return isProxyAvoided(keyOfMember(account), undefined, model);
 }
 
 /** True when the store holds any candidate of this fleet aside. */
 function hasStoreHistory(
   accounts: RotatableAccount[],
-  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf
+  keyOfMember: RotationEgressKeyOf = defaultRotationEgressKeyOf,
+  model?: string | null
 ): boolean {
   for (const a of accounts) {
-    if (isProxyAvoided(keyOfMember(a))) return true;
+    if (isProxyAvoided(keyOfMember(a), undefined, model)) return true;
   }
   return false;
 }

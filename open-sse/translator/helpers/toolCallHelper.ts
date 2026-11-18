@@ -58,25 +58,42 @@ function aliasOpenAIToolName(name: unknown, maxLength: number, aliases: ToolName
  * Mutates an OpenAI-compatible request so every function name satisfies a
  * provider's maximum length and `[A-Za-z0-9_-]` character constraints.
  * Returns alias → original entries for response restoration.
+ * Rejects ambiguous aliases before changing any name in the request.
  */
 export function normalizeOpenAIToolNames(body: unknown, maxLength: number): ToolNameAliases {
   const aliases: ToolNameAliases = new Map();
   const root = toRecord(body);
   if (!root || !Number.isInteger(maxLength) || maxLength < 1) return aliases;
 
-  const alias = (name: unknown): unknown => aliasOpenAIToolName(name, maxLength, aliases);
+  const updates: Array<{ target: JsonRecord; name: string }> = [];
+  const claimedNames = new Map<string, { original: string; aliased: boolean }>();
+  const planAlias = (target: JsonRecord): void => {
+    const original = target.name;
+    if (typeof original !== "string") return;
+    const name = aliasOpenAIToolName(original, maxLength, aliases);
+    if (typeof name !== "string") return;
+
+    // Response restoration also falls back to case-insensitive matching. A generated
+    // alias must not shadow another original, including an already valid short name.
+    const key = name.toLowerCase();
+    const aliased = name !== original;
+    const claimed = claimedNames.get(key);
+    if (claimed && claimed.original !== original && (claimed.aliased || aliased)) {
+      throw new Error("Tool names become ambiguous after length normalization.");
+    }
+    if (!claimed || aliased) claimedNames.set(key, { original, aliased });
+    updates.push({ target, name });
+  };
 
   if (Array.isArray(root.tools)) {
     for (const tool of root.tools) {
       const fn = toRecord(toRecord(tool)?.function);
-      if (fn && typeof fn.name === "string") fn.name = alias(fn.name);
+      if (fn) planAlias(fn);
     }
   }
 
   const toolChoiceFunction = toRecord(toRecord(root.tool_choice)?.function);
-  if (toolChoiceFunction && typeof toolChoiceFunction.name === "string") {
-    toolChoiceFunction.name = alias(toolChoiceFunction.name);
-  }
+  if (toolChoiceFunction) planAlias(toolChoiceFunction);
 
   if (Array.isArray(root.messages)) {
     for (const message of root.messages) {
@@ -85,15 +102,14 @@ export function normalizeOpenAIToolNames(body: unknown, maxLength: number): Tool
       if (Array.isArray(msg.tool_calls)) {
         for (const toolCall of msg.tool_calls) {
           const fn = toRecord(toRecord(toolCall)?.function);
-          if (fn && typeof fn.name === "string") fn.name = alias(fn.name);
+          if (fn) planAlias(fn);
         }
       }
-      if (msg.role === "tool" && typeof msg.name === "string") {
-        msg.name = alias(msg.name);
-      }
+      if (msg.role === "tool") planAlias(msg);
     }
   }
 
+  for (const { target, name } of updates) target.name = name;
   return aliases;
 }
 
@@ -388,6 +404,96 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
   }
 
   body.messages = newMessages;
+  return body;
+}
+
+/**
+ * Scan forward from `from` for response messages that resolve the turn's remaining calls,
+ * stopping at the next assistant message. Returns their indexes and removes the resolved ids
+ * from `openIds` (mutated in place — callers rely on that to know what is still open).
+ */
+function collectDisplacedResultIndexes(
+  messages: ToolMessage[],
+  from: number,
+  openIds: Set<string>
+): number[] {
+  const ahead: number[] = [];
+  for (let j = from; j < messages.length; j++) {
+    const later = messages[j];
+    if (later.role === "assistant") break;
+    const resolved = respondedToolIds(later).filter((id) => openIds.has(id));
+    if (resolved.length === 0) continue;
+    ahead.push(j);
+    for (const id of resolved) openIds.delete(id);
+    if (openIds.size === 0) break;
+  }
+  return ahead;
+}
+
+/** Move the messages at `indexes` (ascending, all after `target`) directly above `target`, in place. */
+function hoistMessagesAbove(messages: ToolMessage[], indexes: number[], target: number): void {
+  const hoisted = indexes.map((idx) => messages[idx]);
+  const hoistedSet = new Set(indexes);
+  const rebuilt: ToolMessage[] = [];
+  for (let j = 0; j < messages.length; j++) {
+    if (j === target) rebuilt.push(...hoisted);
+    if (!hoistedSet.has(j)) rebuilt.push(messages[j]);
+  }
+  messages.length = 0;
+  messages.push(...rebuilt);
+}
+
+/**
+ * Hoist displaced tool results back into their assistant turn's result run.
+ *
+ * Clients that steer mid-turn (queued user messages, task notifications) can
+ * interleave a non-tool message between an assistant tool_calls message and
+ * part of its results: [assistant(tc:c1,c2), tool(c1), user, tool(c2)]. Strict
+ * upstream validators (DeepSeek V4 thinking confirmed live) reject that with
+ * "insufficient tool messages following tool_calls message". The result
+ * belongs to the turn, so move it up to the end of the contiguous run.
+ * Stops at the next assistant message: a later assistant turn's own pairing
+ * must not be scrambled.
+ */
+export function repairDisplacedToolResults<T extends ToolCallBody>(body: T): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+  const messages = body.messages;
+
+  let turnIds: Set<string> | null = null;
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const ids = getToolCallIds(msg);
+    if (ids.length > 0) {
+      turnIds = new Set(ids);
+      continue;
+    }
+    if (!turnIds || turnIds.size === 0) continue;
+    // Stable non-null alias: `turnIds` is reassigned below, which defeats narrowing in callbacks.
+    const openIds: Set<string> = turnIds;
+
+    if (msg.role === "assistant") {
+      // A new assistant turn (without tool calls) ends the previous turn's window.
+      turnIds = null;
+      continue;
+    }
+    if (respondedToolIds(msg).some((id) => openIds.has(id))) {
+      // Contiguous member of the run — still fine where it is.
+      continue;
+    }
+    // Non-tool message inside the turn's window: hoist the later response messages that
+    // resolve the turn's remaining calls above this message.
+    const ahead = collectDisplacedResultIndexes(messages, i + 1, openIds);
+    if (ahead.length === 0) {
+      // Nothing ahead belongs to this turn; close the window at this boundary.
+      turnIds = null;
+      continue;
+    }
+    hoistMessagesAbove(messages, ahead, i);
+    // Re-scan from the same index: the hoisted results now precede msg.
+    i -= 1;
+  }
+
   return body;
 }
 

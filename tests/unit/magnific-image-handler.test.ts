@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import dns from "node:dns";
 
 import { handleImageGeneration } from "../../open-sse/handlers/imageGeneration.ts";
+import { setPinnedFetchTestOverride } from "../../src/shared/network/remoteImageFetch.ts";
 import {
   IMAGE_PROVIDERS,
   getImageProvider,
@@ -101,6 +102,8 @@ test("handleImageGeneration(magnific): async submit+poll returns b64_json payloa
 
     throw new Error(`Unexpected URL: ${u}`);
   }) as typeof fetch;
+  // The result download is DNS-pinned; route the pinned connection back to this mock.
+  setPinnedFetchTestOverride(globalThis.fetch);
 
   try {
     const result = await handleImageGeneration({
@@ -119,6 +122,7 @@ test("handleImageGeneration(magnific): async submit+poll returns b64_json payloa
     assert.equal(pollCount, 2);
   } finally {
     globalThis.fetch = originalFetch;
+    setPinnedFetchTestOverride(undefined);
   }
 });
 
@@ -218,6 +222,8 @@ test("handleImageGeneration(freepik/realism): legacy alias routes to the Magnifi
     }
     throw new Error(`Unexpected URL: ${u}`);
   }) as typeof fetch;
+  // The result download is DNS-pinned; route the pinned connection back to this mock.
+  setPinnedFetchTestOverride(globalThis.fetch);
 
   try {
     const result = await handleImageGeneration({
@@ -229,5 +235,6 @@ test("handleImageGeneration(freepik/realism): legacy alias routes to the Magnifi
     assert.equal(sawSubmit, true);
   } finally {
     globalThis.fetch = originalFetch;
+    setPinnedFetchTestOverride(undefined);
   }
 });

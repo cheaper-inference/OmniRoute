@@ -1,3 +1,4 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
 import {
   EMERGENCY_FALLBACK_CONFIG,
@@ -43,7 +44,10 @@ export function withEmergencyFallbackHeader(
       headers: response.headers,
     });
     cloned.headers.set(OMNIROUTE_RESPONSE_HEADERS.emergencyFallback, value);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 

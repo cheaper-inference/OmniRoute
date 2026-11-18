@@ -10,6 +10,8 @@ import { getBestVisionModel, getFallbackModels, recordLatency } from "./visionBr
 import { combineCredentialChecks } from "./visionBridgeKeyScope";
 import { REGISTRY } from "@omniroute/open-sse/config/providers";
 import { fetch as undiciFetch } from "undici";
+import { isModelScoped400 } from "@omniroute/open-sse/services/modelAccessDenied.ts";
+import { lockModel } from "@omniroute/open-sse/services/accountFallback.ts";
 /**
  * Provider to environment variable mapping for API key resolution.
  */
@@ -889,6 +891,19 @@ async function callVisionModelSingle(
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error");
+      if (response.status === 400 && isModelScoped400(errorText)) {
+        const connectionId = response.headers.get("x-omniroute-selected-connection-id")?.trim();
+        const separator = config.model.indexOf("/");
+        if (connectionId && separator > 0) {
+          lockModel(
+            config.model.slice(0, separator),
+            connectionId,
+            config.model.slice(separator + 1),
+            "model_capacity",
+            60 * 60 * 1000
+          );
+        }
+      }
       throw new Error(`Vision API error ${response.status}: ${errorText}`);
     }
 

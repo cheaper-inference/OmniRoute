@@ -623,7 +623,7 @@ export default function CompressionPanel() {
             <Icon name="compress" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("compressionTitle")}</h3>
+            <h3 className="text-lg">{t("compressionTitle")}</h3>
             <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
             <a
               href="https://github.com/cheaper-inference/OmniRoute/blob/main/docs/compression/COMPRESSION_GUIDE.md"
@@ -730,7 +730,8 @@ export default function CompressionPanel() {
                     value={level}
                     onChange={(e) => setEngine(id, { level: e.target.value })}
                     disabled={!config.enabled || !engine.enabled || saving}
-                    selectClassName="ci-select-native--sm w-28 text-xs"
+                    nativeSize="sm"
+                    selectClassName="w-28 text-xs"
                   >
                     {levels.map((lvl) => (
                       <option key={lvl} value={lvl}>
@@ -785,7 +786,8 @@ export default function CompressionPanel() {
               <div className="flex shrink-0 items-center gap-2">
                 <Select
                   aria-label={styleLabel}
-                  selectClassName="ci-select-native--sm w-28 text-xs"
+                  nativeSize="sm"
+                  selectClassName="w-28 text-xs"
                   data-testid={`output-style-level-${id}`}
                   value={sel?.level ?? "full"}
                   onChange={(e) =>
@@ -867,7 +869,7 @@ export default function CompressionPanel() {
 
       {/* General */}
       <div className="space-y-3 border-t border-border pt-4">
-        <h4 className="text-sm font-medium text-text-main">{t("compressionGeneral")}</h4>
+        <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm text-text-muted">{t("compressionAutoTrigger")}</span>
           <div className="flex items-center gap-2">

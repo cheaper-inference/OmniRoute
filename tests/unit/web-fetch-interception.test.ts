@@ -50,10 +50,13 @@ describe("services/webFetchInterception — prepareWebFetchFallbackBody (#7339)"
     );
   });
 
-  it("uses a flat function-tool shape for the Responses API target", () => {
+  // #18421: the tool is injected before translation, so the client (source) format
+  // picks the shape.
+  it("uses a flat function-tool shape for a Responses API client", () => {
     const body = { tools: [{ type: "web_fetch" }] };
     const { body: nextBody } = prepareWebFetchFallbackBody(body, {
       ...baseOptions,
+      sourceFormat: FORMATS.OPENAI_RESPONSES,
       targetFormat: FORMATS.OPENAI_RESPONSES,
       interceptFetchOverride: true,
     });

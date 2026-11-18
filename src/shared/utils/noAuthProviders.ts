@@ -1,5 +1,6 @@
 import {
   NOAUTH_PROVIDERS,
+  WEB_COOKIE_PROVIDERS,
   getProviderById,
   resolveProviderId,
   getProviderAlias,
@@ -9,6 +10,28 @@ type ProviderWithAlias = { alias?: string };
 type NoAuthProviderEntry = { id: string; alias?: string };
 
 const noAuthProviderEntries = Object.values(NOAUTH_PROVIDERS) as NoAuthProviderEntry[];
+
+// Entries dispatch resolves through the synthetic no-auth credential path —
+// the same map-keyed, flag-based test auth.ts uses to decide whether
+// `blockedProviders` refusal applies (providerMaps.some((map) => map[id]?.noAuth)).
+// Keyed off the maps themselves (not entry scanning) so bridge-side checks and
+// dispatch cannot drift apart if an entry moves between the maps.
+const syntheticNoAuthReferralMaps = [
+  NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean } | undefined>,
+  WEB_COOKIE_PROVIDERS as Record<string, { noAuth?: boolean } | undefined>,
+];
+
+/**
+ * True when dispatch would resolve `keys` through the synthetic no-auth
+ * credential path, i.e. when a `blockedProviders` entry makes dispatch refuse
+ * the provider outright. Callers pass canonical ids, mirroring dispatch's
+ * `map[resolvedId]` lookup.
+ */
+export function isSyntheticNoAuthPathKey(...keys: Array<string | null | undefined>): boolean {
+  return keys.some(
+    (key) => key != null && syntheticNoAuthReferralMaps.some((map) => Boolean(map[key]?.noAuth))
+  );
+}
 
 export function normalizeBlockedProviderSet(blockedProviders: unknown): Set<string> {
   const entries = blockedProviders instanceof Set ? Array.from(blockedProviders) : blockedProviders;

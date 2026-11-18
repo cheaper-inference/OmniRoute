@@ -13,6 +13,8 @@ import {
   isUnconfiguredLoopbackSearchProvider,
   SEARCH_PROVIDERS,
   getSearchCredentialFallbacks,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { buildErrorBody, errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -45,6 +47,12 @@ import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
+import type { z } from "zod";
+import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
+import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
+import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
+import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -98,15 +106,30 @@ async function resolveSearchCredentials(
       () => null
     )
   );
-  if (credentials && !isAllRateLimitedCredentials(credentials)) return credentials;
+  if (credentials && !isAllRateLimitedCredentials(credentials)) {
+    if (
+      providerId === "codex-search" &&
+      isModelLocked(providerId, credentials.connectionId, "web_search")
+    )
+      return null;
+    return credentials;
+  }
 
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
     const fallbackCredentials = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(fallbackId, null, allowedConnections).catch(
-        () => null
-      )
+      await getProviderCredentialsWithQuotaPreflight(
+        fallbackId,
+        null,
+        allowedConnections,
+        searchKeyLockModel(providerId)
+      ).catch(() => null)
     );
     if (fallbackCredentials && !isAllRateLimitedCredentials(fallbackCredentials)) {
+      if (
+        providerId === "codex-search" &&
+        isModelLocked(providerId, fallbackCredentials.connectionId, "web_search")
+      )
+        return null;
       return fallbackCredentials;
     }
     if (fallbackCredentials) return fallbackCredentials;
@@ -149,7 +172,6 @@ function buildDomainFilter(filters?: {
  * POST /v1/search — execute a web search
  */
 async function postHandler(request: Request, context: unknown) {
-  const requestStartTime = Date.now();
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -166,14 +188,38 @@ async function postHandler(request: Request, context: unknown) {
   if (body.provider === "x_search") body.provider = "x-search";
   if (body.provider === "x-search") body.search_type = "x";
 
-  // Enforce API key policies — use "search" as model identifier for consistent policy config
-  const policy = await enforceApiKeyPolicy(request, "search");
+  // Native requests keep the "search" policy; named combos use their own grant.
+  const policy = await enforceApiKeyPolicy(request, body.model || "search");
   if (policy.rejection) return policy.rejection;
   // GHSA-3w2r: provider credentials stay inside the key's connection scope.
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
   const { allowedConnections } = scope;
 
+  const settings = await getSettings().catch(() => ({}));
+  if (body.model) {
+    return runWebEndpointCombo({
+      name: body.model,
+      endpoint: "search",
+      request,
+      body,
+      policy,
+      allowedConnections,
+      settings,
+      dispatch: (provider, scopedConnections) =>
+        executeSearchBody({ ...body, model: undefined, provider }, policy, scopedConnections),
+    });
+  }
+  return executeSearchBody(body, policy, allowedConnections);
+}
+
+/** Execute a validated search body through a direct provider or named combo. */
+async function executeSearchBody(
+  body: z.infer<typeof v1SearchSchema>,
+  policy: ApiKeyPolicyResult,
+  allowedConnections: string[] | null
+): Promise<Response> {
+  const requestStartTime = Date.now();
   const settings = await getSettings().catch(() => ({}) as any);
   const blockedProviders = settings?.blockedProviders || [];
 
@@ -245,48 +291,26 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
   } else {
-    // Auto-select — try the resolved provider first, then iterate others by cost
-    const selectedCredentials = await resolveSearchExecutionCredentials(
-      providerConfig,
-      allowedConnections
-    );
-    if (isAllRateLimitedCredentials(selectedCredentials)) {
-      firstRateLimitedCredentials = {
-        providerId: providerConfig.id,
-        credentials: selectedCredentials,
-      };
-    } else {
-      credentials = selectedCredentials;
-    }
+    // Auto-select: walk the same admitted, cost-ranked candidates executeWebSearch uses
+    // (a configured SearXNG included), so /v1/search and the web_search tool agree even
+    // when two providers tie on cost. selectProvider's pick is only a seed for errors.
+    const sortedIds = autoSearchCandidates(body.search_type)
+      .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
+      .map((p) => p.id);
 
-    if (!credentials) {
-      // Sort by cost to find cheapest with credentials (fallback-only providers
-      // are reached via the last-resort step below, never the primary pick).
-      const sortedIds = Object.values(SEARCH_PROVIDERS)
-        .filter(
-          (provider) =>
-            !provider.fallbackOnly &&
-            supportsSearchType(provider, body.search_type) &&
-            !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        .sort((a, b) => a.costPerQuery - b.costPerQuery)
-        .map((p) => p.id);
-
-      for (const pid of sortedIds) {
-        if (pid === providerConfig.id) continue;
-        const altConfig = getSearchProvider(pid);
-        const altCreds = altConfig
-          ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
-          : null;
-        if (isAllRateLimitedCredentials(altCreds)) {
-          firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
-          continue;
-        }
-        if (altConfig && altCreds) {
-          providerConfig = altConfig;
-          credentials = altCreds;
-          break;
-        }
+    for (const pid of sortedIds) {
+      const altConfig = getSearchProvider(pid);
+      const altCreds = altConfig
+        ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
+        : null;
+      if (isAllRateLimitedCredentials(altCreds)) {
+        firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
+        continue;
+      }
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
+        providerConfig = altConfig;
+        credentials = altCreds;
+        break;
       }
     }
 
@@ -294,14 +318,16 @@ async function postHandler(request: Request, context: unknown) {
     // duckduckgo-free) to the primary pick so out-of-the-box search works when
     // no credentialed provider is configured at all.
     if (!credentials) {
-      const fallbackProviders = Object.values(SEARCH_PROVIDERS)
-        .filter(
+      // Cost order; Codex's subscription fallback only when opted in (#17933).
+      const fallbackProviders = orderAutoSearchFallbacks(
+        Object.values(SEARCH_PROVIDERS).filter(
           (provider) =>
             provider.fallbackOnly &&
             supportsSearchType(provider, body.search_type) &&
             !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        .sort((a, b) => a.costPerQuery - b.costPerQuery);
+        ),
+        (a, b) => a.costPerQuery - b.costPerQuery
+      );
 
       for (const fallbackProvider of fallbackProviders) {
         providerConfig = fallbackProvider;
@@ -336,15 +362,9 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
 
-    // Find alternate for failover — must bind credentials to the matched provider.
-    // Exclude fallback-only providers; they are only used by the last-resort step.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter(
-        (provider) => !provider.fallbackOnly && supportsSearchType(provider, body.search_type)
-      )
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
-      .map((p) => p.id)
-      .filter((id) => id !== providerConfig.id);
+    // Find alternate for failover — must bind credentials to the matched provider. It comes
+    // from the same unblocked candidates; the other fallback-only providers stay last-resort.
+    const otherIds = sortedIds.filter((id) => id !== providerConfig.id);
 
     for (const pid of otherIds) {
       const altConfig = getSearchProvider(pid);
@@ -352,7 +372,7 @@ async function postHandler(request: Request, context: unknown) {
         ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
         : null;
       if (isAllRateLimitedCredentials(creds)) continue;
-      if (creds) {
+      if (altConfig && admitsAutoCandidate(altConfig, creds)) {
         alternateProviderId = pid;
         alternateCredentials = creds;
         break;
@@ -363,8 +383,9 @@ async function postHandler(request: Request, context: unknown) {
     // failover so out-of-the-box search still works when no credentialed provider
     // is configured. Only used when no real alternate was found above.
     if (!alternateProviderId) {
-      for (const provider of Object.values(SEARCH_PROVIDERS)) {
+      for (const provider of orderAutoSearchFallbacks(Object.values(SEARCH_PROVIDERS))) {
         if (!provider.fallbackOnly || provider.id === providerConfig.id) continue;
+        if (isProviderBlockedByIdOrAlias(provider.id, blockedProviders)) continue;
         if (isUnconfiguredLoopbackSearchProvider(provider)) continue;
         if (!supportsSearchType(provider, body.search_type)) continue;
         const fallbackCreds = await resolveSearchExecutionCredentials(provider, allowedConnections);

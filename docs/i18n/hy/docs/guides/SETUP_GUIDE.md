@@ -18,7 +18,7 @@
 
 ---
 
-## Տեղադրման եղանակներ
+## Տեղադրման մեթոդներ
 
 ### npm (խորհուրդ է տրվում)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Կառավարման վահանակը բացվում է `http://localhost:20128` հասցեով, իսկ API-ի բազային URL-ն է՝ `http://localhost:20128/v1`։
+Վահանակը բացվում է `http://localhost:20128`, իսկ API բազան URL `http://localhost:20128/v1` է:
+
+> **npm օգտվողներ.** Եթե npm-ը նախազգուշացնում է, որ տեղադրման սկրիպտներն արգելափակված են (օրինակ՝ `omniroute`, `better-sqlite3`), տե՛ս [Խնդիրների վերացում — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) :
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-ի օգտատերերի համար․** `--allow-build` դրոշն անհրաժեշտ է՝ `better-sqlite3`-ի և `@swc/core`-ի բնիկ կառուցման սկրիպտները միացնելու համար։ `pnpm approve-builds -g` հրամանը pnpm v11-ում չի աջակցվում գլոբալ տեղադրումների համար։
+> **pnpm օգտվողներ.** `--allow-build` դրոշը պահանջվում է `better-sqlite3` և `@swc/core` համար բնօրինակ կառուցման սցենարները միացնելու համար: `pnpm approve-builds -g` հրամանը չի աջակցվում pnpm v11-ում գլոբալ տեղադրումների համար:
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR փաթեթը](https://aur.archlinux.org/packages/omniroute-bin) տեղադրում է OmniRoute-ը և տրամադրում systemd-ի օգտատիրոջ ծառայություն։
+[AUR փաթեթը](https://aur.archlinux.org/packages/omniroute-bin) տեղադրում է OmniRoute և տրամադրում է համակարգված օգտվողի ծառայություն:
 
-### Սկզբնաղբյուրից
+### Աղբյուրից
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Նշում Windows-ի համար․** Լռելյայնորեն OmniRoute-ն օգտագործում է `%APPDATA%\omniroute`-ը, եթե հին `%USERPROFILE%\.omniroute` գրացուցակը բացակայում է։ Տվյալների գրացուցակի այլ տեղադրություն ընտրելու համար սահմանեք `DATA_DIR`-ը։
+> **Windows նշում.** Լռելյայնորեն, OmniRoute օգտագործում է `%APPDATA%\omniroute` երբ ժառանգական `%USERPROFILE%\.omniroute` գրացուցակը չկա: Սահմանեք `DATA_DIR` տվյալների գրացուցակի այլ տեղ ընտրելու համար:
 
-> **Նշում․** Առաջին գործարկման ժամանակ `npm install`-ը `.env.example`-ից ինքնաշխատ ստեղծում է `.env`։ Հետագա տեղադրումները չեն վերագրի գոյություն ունեցող `.env`-ը, ուստի անհատական կարգավորումները կպահպանվեն։ Այն կրկին սկզբնական արժեքներով ստեղծելու համար ջնջեք `.env`-ը՝ նախքան կրկին գործարկելը։
+> **Նշում.** `npm install` առաջին վազքի ժամանակ ավտոմատ է ստեղծում `.env` `.env.example` ից: Հետագա տեղադրումները չեն վերագրի գոյություն ունեցող `.env`, ուստի հարմարեցումները պահպանվում են: Կրկին սերմնավորման համար ջնջեք `.env` նորից գործարկելուց առաջ:
 
 ### Docker
 
-Docker-ի ամբողջական կարգավորման, ներառյալ Compose պրոֆիլների և Caddy HTTPS-ի մասին տե՛ս [Docker-ի ուղեցույցը](./DOCKER_GUIDE.md)։
+Տես [Docker ուղեցույցը](./DOCKER_GUIDE.md) Docker ամբողջական կարգավորումների համար, ներառյալ Կազմել պրոֆիլներ և Caddy HTTPS:
 
-### Սեղանադիր հավելված (Electron)
+### Սեղանի հավելված (Electron)
 
-OmniRoute-ը տրամադրվում է Electron 41 + electron-builder 26.10-ի հիման վրա ստեղծված սեղանադիր պատյանով։ Հասանելի սկրիպտները (աշխատատարածքի արմատում)՝
+OmniRoute առաքում է աշխատասեղանի փաթաթան, որը կառուցված է Electron 41 + էլեկտրոնների կառուցման վրա 26.10. Հասանելի սցենարներ (աշխատանքային տարածքի արմատ).
 
 ```bash
-npm run electron:dev          # Գործարկել սեղանադիր հավելվածը՝ թարմ փոփոխությունների ինքնաշխատ վերաբեռնմամբ
-npm run electron:build        # Կառուցել ընթացիկ ՕՀ-ի համար (ինքնաշխատ հայտնաբերվում է)
-npm run electron:build:win    # Windows-ի տեղադրիչ (NSIS + շարժական տարբերակ)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Արագ ստուգել փաթեթավորված կառուցվածքը
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Սեղանադիր տեղադրիչների թողարկումները կցվում են GitHub Releases-ին։ Electron-ի ամբողջական մանրամասն ուղեցույցի համար (ստորագրում, IPC կամուրջ, դիստրիբուտիվներ) տե՛ս [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(ստեղծվել է ավելի ուշ փուլում)_։
+Սեղանի տեղադրողների թողարկումները կցվում են GitHub Releases-ին: Ամբողջական Electron խորը սուզման համար (ստորագրում, IPC կամուրջ, բաշխում), տես [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_:
 
-### Առանց գրաֆիկական միջերեսի սերվեր (CI/ավտոմատացում)
+### Անգլուխ սերվեր (CI/automation)
 
-Չվերահսկվող կարգավորումների համար (Docker, Kubernetes, CI) օգտագործեք՝
+Չվերահսկվող կարգավորումների համար (Docker, Kubernetes, CI) օգտագործեք.
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Միջավայրի փոփոխականների (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` և այլն) հետ համատեղ սա թույլ է տալիս գործարկել OmniRoute-ի ամբողջովին սկրիպտավորվող օրինակ։
+Համակցված env vars-ի հետ (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` և այլն), սա թույլ է տալիս պտտել OmniRoute օրինակը, որը լիովին scriptable է:
 
-### CLI-ի ընտրանքներ
+### CLI Ընտրանքներ
 
-| Հրաման                  | Նկարագրություն                                                                            |
-| ----------------------- | ----------------------------------------------------------------------------------------- |
-| `omniroute`             | Գործարկել սերվերը (`PORT=20128`, API-ն և վահանակը՝ նույն պորտում)                         |
-| `omniroute setup`       | Գաղտնաբառի և առաջին մատակարարի քայլ առ քայլ CLI կարգավորում                               |
-| `omniroute doctor`      | Կատարել տեղային աշխատունակության ստուգումներ՝ առանց սերվերը գործարկելու                   |
-| `omniroute providers`   | CLI-ից հայտնաբերել, թվարկել, վավերացնել և փորձարկել մատակարարներին                        |
-| `omniroute config`      | CLI գործիքի կարգավորում՝ թվարկել, ստանալ, սահմանել և վավերացնել կարգավորումները           |
-| `omniroute status`      | Անցանց կարգավիճակի վահանակ՝ տարբերակ, DB, գործիքներ, կարգավորում                          |
-| `omniroute logs`        | API-ից հոսքային եղանակով ստանալ օգտագործման մատյանները (աջակցում է `--follow`)            |
-| `omniroute update`      | Ստուգել կամ կիրառել OmniRoute-ի թարմացումները                                             |
-| `omniroute provider`    | Կառավարել մատակարարների կապերը՝ ավելացնել, թվարկել, հեռացնել, փորձարկել, ընտրել լռելյայնը |
-| `omniroute --port 3000` | Սահմանել հիմնական/API պորտը որպես 3000                                                    |
-| `omniroute --mcp`       | Գործարկել MCP սերվերը (stdio փոխադրում)                                                   |
-| `omniroute --no-open`   | Ինքնաշխատ չբացել դիտարկիչը                                                                |
-| `omniroute --help`      | Ցուցադրել օգնությունը                                                                     |
+| Հրաման                  | Նկարագրություն                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `omniroute`             | Սկսեք սերվերը (`PORT=20128`, API և վահանակ նույն նավահանգստում)                |
+| `omniroute setup`       | Ուղղորդված CLI մուտքագրում գաղտնաբառի և առաջին մատակարարի համար                |
+| `omniroute doctor`      | Գործարկեք տեղական առողջության ստուգումներ՝ առանց սերվերը գործարկելու           |
+| `omniroute providers`   | Բացահայտեք, ցուցակագրեք, հաստատեք և փորձարկեք մատակարարներին CLI ից            |
+| `omniroute config`      | CLI գործիքի կոնֆիգուրացիա — ցուցակ, ստանալ, սահմանել, վավերացնել կազմաձևերը    |
+| `omniroute status`      | Անցանց կարգավիճակի վահանակ — տարբերակ, DB, գործիքներ, կազմաձևում               |
+| `omniroute logs`        | Հեռարձակեք օգտագործման մատյանները API ից (աջակցում է `--follow`)               |
+| `omniroute update`      | Ստուգեք կամ կիրառեք OmniRoute թարմացումները                                    |
+| `omniroute provider`    | Կառավարեք մատակարարի կապերը — ավելացնել, ցուցակ, հեռացնել, փորձարկել, լռելյայն |
+| `omniroute --port 3000` | Սահմանեք canonical/API պորտը 3000                                              |
+| `omniroute --mcp`       | Գործարկել MCP սերվերը (stdio transport)                                        |
+| `omniroute --no-open`   | Ավտոմատ մի բացեք զննարկիչը                                                     |
+| `omniroute --help`      | Ցույց տալ օգնությունը                                                          |
 
-Առանց գրաֆիկական միջերեսի կարգավորումը կարելի է սկրիպտավորել դրոշների կամ միջավայրի փոփոխականների միջոցով՝
+Անգլուխ կարգավորումը կարող է գրվել դրոշներով կամ շրջակա միջավայրի փոփոխականներով.
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Կատարեք տեղային ախտորոշում՝ առանց կառավարման վահանակը բացելու․
+Գործարկեք տեղական ախտորոշումը առանց վահանակը բացելու.
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Կառավարեք մատակարարներին SSH-ից կամ սկրիպտներից՝ առանց կառավարման վահանակը բացելու․
+Կառավարեք մատակարարներին SSH ից կամ սկրիպտներից՝ առանց վահանակը բացելու.
 
 ```bash
 omniroute providers available
@@ -191,41 +193,45 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Արձանագրությունների կարգավորում (MCP + A2A)
+## Արձանագրության կարգավորում (MCP + A2A)
 
-### MCP-ի կարգավորում (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Գործարկեք MCP փոխադրումը stdio ռեժիմով.
+Սկսեք MCP տրանսպորտը stdio ռեժիմում.
 
 ```bash
 omniroute --mcp
 ```
 
-Առաջարկվող վավերացման ընթացքը.
+Առաջարկվող վավերացման հոսք.
 
 ```bash
-# 1. Գործարկեք MCP սերվերը
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Ձեր MCP հաճախորդից կանչեք՝
-omniroute_get_health        # Պետք է վերադարձնի համակարգի առողջական վիճակը
-omniroute_list_combos       # Պետք է վերադարձնի ակտիվ համակցությունները
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Կամ գործարկեք ամբողջական E2E թեստային փաթեթը՝
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP հաճախորդի կազմաձևում
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude Կոդ:**
+
+Claude կոդը միանում է HTTP, որը `omniroute --mcp` (stdio) չի սկսվում: HTTP տրանսպորտը լռելյայն անջատված է. նախ միացրեք այն գործող սերվերի վրա: Երբ վահանակի մուտքը միացված է, առանց հավատարմագրի հարցումը ստանում է `401`, այնպես որ փոխանցեք API ստեղնը, որը պահում է `mcp:connect` (կամ `manage`); առանց `manage`/`admin` բանալին նույնպես պետք է յուրաքանչյուր գործիքի շրջանակը (տես [MCP Server → MCP գործիքի շրջանակները](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ):
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Ավելացրեք ձեր MCP կարգավորումներին.
+Ավելացրեք ձեր MCP կարգավորումներին (stdio, ստեղնով, որպեսզի զանգահարողն ունենա հիմնական տնօրեն).
 
 ```json
 {
@@ -233,23 +239,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ի ամբողջական փաստաթղթեր:** [MCP սերվերի README](../../open-sse/mcp-server/README.md) — 110 գործիք, IDE կազմաձևեր, Python/TS/Go հաճախորդներ:
+Կամ, երբ `mcpTransport` `streamable-http` է (այն սահմանեք `/dashboard/mcp` կամ `omniroute mcp enable --transport streamable-http` վրա), ուղղեք հաճախորդի հեռավոր MCP սերվերի մուտքագրումը `http://localhost:20128/api/mcp/stream` վրա:
 
-### A2A-ի կարգավորում (գործակալից գործակալ արձանագրություն)
+Բանալին շարժվում է որպես `Authorization: Bearer <api-key>` (տե՛ս [MCP Server → Հեռակա մուտքի հնարավորություն](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) հեռավոր հոսթերների համար. հեռակառավարվող ստեղնին անհրաժեշտ է `mcp:connect` և դրա read/write շրջանակները):
 
-Ստուգեք Agent Card-ը.
+**Ամբողջական MCP փաստաթղթերը.** [MCP սերվեր README](../../open-sse/mcp-server/README.md) — 110 գործիքներ, IDE կազմաձևեր, Python/TS/Go հաճախորդներ: Օպերատորի տեղեկանք սեղմման CCR/dedup գործիքների համար (մարկերներ, նախադրյալներ, յուրաքանչյուր գործիքի շրջանակներ, որոնման էջավորում, ախտորոշում). [Կոմպրեսիոն շարժիչներ → Նախադրյալներ / օպերատորի ուղեցույց](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) :
+
+### A2A կարգավորում (գործակալից գործակալի արձանագրություն)
+
+Ստուգեք գործակալի քարտը.
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Ուղարկեք առաջադրանք.
+Ուղարկել առաջադրանք.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ի ամբողջական փաստաթղթեր:** [A2A սերվերի README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսքային փոխանցում, առաջադրանքի կենսափուլ:
+**Ամբողջական A2A փաստաթղթերը.** [A2A սերվեր README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսք, առաջադրանքի կյանքի ցիկլ:
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ի (xbps-src) ձևանմուշ
+## Void Linux (xbps-src) Կաղապար
 
-Void Linux-ի օգտատերերը կարող են ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`-ը։ Պահեք այս բլոկը որպես `srcpkgs/omniroute/template`․
+Void Linux օգտատերերի համար դուք կարող եք ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`: Պահպանեք այս բլոկը որպես `srcpkgs/omniroute/template`.
 
 ```bash
-# 'omniroute'-ի ձևանմուշային ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Յուրաքանչյուր թողարկման համար checksum-ը վերաստեղծեք հետևյալ հրամանով․
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

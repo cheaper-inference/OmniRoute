@@ -76,176 +76,180 @@ backoff exponencial `minRetryCooldownMs → maxRetryCooldownMs`. Substituições
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Proteção de regressão: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Período de arrefecimento da ligação
+## 2. Arrefecimento da conexão
 
-**Âmbito:** ligação/conta/chave individual do fornecedor.
+**Âmbito:** fornecedor único connection/account/key.
 
-**Objetivo:** ignorar uma chave com problemas enquanto as restantes ligações do mesmo fornecedor continuam a servir pedidos.
+**Finalidade:** saltar uma chave incorreta enquanto outras ligações do mesmo fornecedor continuam a servir.
 
 **Implementação:**
 
 - Marcar como indisponível: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Seleção: `getProviderCredentials*` no mesmo ficheiro
-- Cálculo do período de arrefecimento: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Definições: `src/lib/resilience/settings.ts`
+- Cálculo de arrefecimento: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Configurações: `src/lib/resilience/settings.ts`
 
 **Campos por ligação:**
 
-- `rateLimitedUntil` — carimbo de data/hora até ao fim do período de arrefecimento
+- `rateLimitedUntil` — timestamp até que o tempo de espera expire
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — contador de recuo exponencial
+- contador de espera exponencial `backoffLevel` —
 
-**Períodos de arrefecimento predefinidos:**
+**Tempos de espera padrão:**
 
-- Base OAuth: 5 s
-- Base de chave de API: 3 s
-- 429 de chave de API: prefere cabeçalhos de `Retry-After`/reposição do fornecedor/ texto de reposição analisável
-- Recuo: `baseCooldownMs * 2 ** failureIndex`
+- base OAuth : 5s
+- Base de chaves API: 3s
+- Chave API 429: prefere texto de reset upstream `Retry-After`/reset headers/parseable
+- Retirada: `baseCooldownMs * 2 ** failureIndex`
 
-**Atraso de repetição por fornecedor.** A página de detalhes do fornecedor tem uma seleção de **Atraso de repetição** (Automático, de
-15 s até 1 h). Guarda `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
-(1–21600, através de `PATCH /api/resilience`). Quando um erro de limitação de taxa não contém nenhuma indicação de repetição do fornecedor, esse valor substitui o recuo escalado para o fornecedor e repõe `backoffLevel` a 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Precedência para um erro de limitação de taxa, da mais elevada para a mais baixa: indicação de repetição do fornecedor, depois `providerSpecificData.rotationOverrides.rateLimitResetSeconds` por ligação, depois o atraso de repetição por fornecedor, depois `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` do ambiente e, por fim, o recuo escalado. O modo Automático remove o campo. Isto só afeta o motivo de limitação de taxa, nunca estados terminais.
+**Atraso de nova tentativa por parte do fornecedor.** A página de detalhes do fornecedor tem um** Atraso na nova tentativa** selecione (Auto, 15s até 1h). Ele salva `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, por meio de `PATCH /api/resilience`). Quando um erro de limite de taxa não traz nenhuma dica de nova tentativa upstream, este valor substitui a espera escalonada para o fornecedor e reinicia `backoffLevel` para 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Precedência para um erro de taxa limitada, o mais elevado primeiro: dica de nova tentativa a montante, depois `providerSpecificData.rotationOverrides.rateLimitResetSeconds` por ligação, depois o atraso de nova tentativa por fornecedor, depois env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` e, por fim, a espera escalonada. Remove automaticamente o campo. Afeta apenas o motivo do limite de taxa, nunca os estados terminais.
 
-**Proteção contra a debandada de pedidos:** impede que falhas simultâneas prolonguem excessivamente o período de arrefecimento ou incrementem `backoffLevel` duas vezes.
+**Guarda anti-rebanho trovejante:** evita que as falhas simultâneas prolonguem excessivamente o tempo de espera ou aumentem duas vezes `backoffLevel`.
 
-**Os 429 de limite de concorrência não avançam na escada de recuo.** Um `429` cujo corpo indique um limite de concorrência ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) significa que a conta está saudável, mas ocupada.
-`checkFallbackError()` devolve o motivo `concurrency_limited`: faz a passagem para a ligação seguinte imediatamente, arrefece esta ligação durante um período fixo de `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) ou durante a indicação de repetição do fornecedor, mantém `backoffLevel` inalterado e define `skipProviderBreaker`.
-Um corpo de quota explícito prevalece, pelo que um corpo que também corresponda a um padrão de quota continua a produzir um veredito de quota. Deteção: `looksLikeConcurrencyLimit()` em `src/shared/utils/classify429.ts`;
-veredito: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (o `FailureKind` do disjuntor) permanece inalterado e continua a ler `rate_limit` nestes corpos.
+**Os 429 com limite de simultaneidade não sobem a escada do backoff.** Um `429` cujo corpo reporta um limite de simultaneidade ("muitos pedidos simultâneos", "limite de simultaneidade", "limite de pedidos paralelos", GLM `并发数过高`) significa que a conta está íntegra, mas ocupada. `checkFallbackError()` retorna o motivo `concurrency_limited`: faça failover para a próxima ligação agora, arrefeça esta para um `CONCURRENCY_LIMIT_COOLDOWN_MS` fixo (1s) ou a dica de nova tentativa upstream, mantenha `backoffLevel` inalterado e defina `skipProviderBreaker`. Um órgão de quotas explícito ainda ganha, pelo que um órgão que também corresponda a um padrão de quotas continua a ser um veredicto de quotas. Detecção: `looksLikeConcurrencyLimit()` em `src/shared/utils/classify429.ts`; veredicto: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (o `FailureKind` do disjuntor) permanece inalterado e ainda lê `rate_limit` para estes corpos.
 
-**As interrupções do conteúdo do fluxo não arrefecem a conta.** Quando o watchdog de interrupção do conteúdo (`open-sse/utils/streamHandler.ts`) desiste de um fluxo que não enviou saída do modelo dentro do prazo, `markAccountUnavailable()` regista o erro na ligação, mas não define nenhum período de arrefecimento: a interrupção pertence a esse pedido, na maioria das vezes durante uma etapa longa de raciocínio sem saída ainda. Os operadores podem ativar esta opção através de `resilienceSettings.streamStallCooldown.enabled` (predefinição `false`).
+**As paragens de conteúdo de streaming não arrefecem a conta.** Quando o watchdog de content-stall (`open-sse/utils/streamHandler.ts`) desiste de um fluxo que não enviou qualquer saída de modelo a tempo, `markAccountUnavailable()` regista o erro na ligação, mas não define qualquer arrefecimento: a paragem pertence a este pedido, na maioria das vezes uma longa volta de raciocínio sem saída ainda. Os operadores podem voltar a utilizar `resilienceSettings.streamStallCooldown.enabled` (padrão `false`).
 
-**Sinal de latência opcional para a seleção de contas `p2c`.** Cada tentativa enviada regista o seu tempo até ao primeiro byte e o resultado por ligação (e por ligação + modelo) numa janela contínua em memória: as últimas 20 amostras nos últimos 15 minutos
-(`open-sse/services/connectionLatencyTracker.ts`, registadas a partir de
-`safeLogEvents()` em `src/sse/handlers/chatHelpers.ts`). Quando `resilienceSettings.p2cLatency.weight` é superior a
-`0` (intervalo 0–20, predefinição `0` = desativado), `compareP2CConnections()` em `src/sse/services/auth.ts` adiciona até `weight` pontos a cada candidato do par. Metade provém da latência, como proporção em relação ao candidato mais rápido (o dobro da lentidão corresponde à totalidade dessa metade), e a outra metade da taxa de erros contínua.
-O termo só é aplicado quando ambos os candidatos têm pelo menos 3 amostras, para que as contas novas não sejam penalizadas, e o seu limite permanece abaixo das penalizações de quota bloqueada e quota esgotada. Não adiciona nenhum circuito próprio: as contas com falhas continuam a ser tratadas pelas camadas de período de arrefecimento, bloqueio e disjuntor. Defina-o com `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Sinal de latência de ativação para seleção de conta `p2c`.** Cada tentativa despachada regista o seu tempo até ao primeiro byte e resultado por ligação (e por ligação modelo + ) numa janela contínua na memória: as últimas 20 amostras em 15 minutos (`open-sse/services/connectionLatencyTracker.ts`, registado de `safeLogEvents()` em `src/sse/handlers/chatHelpers.ts`). Quando `resilienceSettings.p2cLatency.weight` está acima de `0` (intervalo 0-20, padrão `0` = desativado), `compareP2CConnections()` em `src/sse/services/auth.ts` soma pontos `weight` para cada candidato do par. Metade disto vem da latência como proporção do candidato mais rápido (duas vezes mais lento leva a metade inteira) e metade da taxa de erro contínuo. O termo aplica-se apenas quando ambos os candidatos têm pelo menos 3 amostras, de forma a que as novas contas não sejam penalizadas e o seu teto fique abaixo das penalizações de bloqueio de quota e esgotamento de quota. Não acrescenta nenhum circuito próprio: as contas com falhas ainda são tratadas pelas camadas de arrefecimento, bloqueio e disjuntor. Defina-o com `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-**Os frames de raciocínio reiniciam o orçamento de interrupção do conteúdo.** Um modelo de raciocínio pode pensar durante minutos antes do primeiro token visível: o Claude transmite frames `thinking_delta` cujo texto de raciocínio pode estar vazio, e a Responses API transmite um item de raciocínio após outro. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) reconhece estes frames, e o watchdog reinicia o seu orçamento a cada um, em vez de cancelar a etapa. Continuam a não ser saída do modelo, pelo que uma etapa que termine apenas com raciocínio continua a ser comunicada como vazia, e uma etapa que pare o raciocínio e envie apenas heartbeats continua a acionar o watchdog.
+**Os quadros de raciocínio reiniciam o orçamento de paragem de conteúdos.** Um modelo de raciocínio pode pensar durante minutos antes do seu primeiro token visível: Claude transmite frames `thinking_delta` cujo texto de pensamento pode estar vazio, e Responses API transmite um item de raciocínio após o outro. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) reconhece estes quadros e o watchdog reinicia o seu orçamento em cada um deles, em vez de cancelar o turno. Ainda não são saída do modelo, pelo que um turno que termina apenas com raciocínio é ainda reportado como vazio, e um turno que interrompe o raciocínio e envia apenas batimentos cardíacos ainda aciona o watchdog.
 
-Os frames binários `reasoningContentEvent` do Kiro com uma assinatura não vazia preservam esta atividade de raciocínio através do executor como um delta `reasoning_content` vazio. A assinatura não é encaminhada. Metadados, frames incompletos e assinaturas vazias não reiniciam o orçamento de conteúdo; o tempo limite independente do fluxo ativo e o cancelamento pelo cliente continuam a aplicar-se (`open-sse/executors/kiro/reasoning.ts`).
+Os quadros `reasoningContentEvent` binários de Kiro com uma assinatura não vazia preservam esta atividade de raciocínio através do executor como um delta `reasoning_content` vazio. A assinatura não é reencaminhada. Metadados, frames incompletos e assinaturas vazias não reiniciam o orçamento de conteúdos; o tempo limite de fluxo ativo independente e o cancelamento do cliente ainda se aplicam (`open-sse/executors/kiro/reasoning.ts`).
 
-**Estados terminais (NÃO são períodos de arrefecimento):**
+**Estados terminais (arrefecimentos NOT ):**
 
-- `banned` — definido pela deteção de palavras-chave banidas / banimento da conta (consulte [BAN_DETECTION](../security/BAN_DETECTION.md)) e por três recusas consecutivas do fornecedor por pedido (`request_rejected`, por exemplo, 403 do OAuth da Anthropic "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); uma única recusa apenas arrefece a ligação
-- `expired` (transita para terminal após novas tentativas limitadas — `EXPIRED_RETRY_MAX = 3` com recuo exponencial — para que os erros OAuth transitórios possam recuperar automaticamente antes de a conta ser permanentemente desativada)
+- `banned` — definido pela deteção de palavra-chave banida/banimento de conta (consulte [BAN_DETECTION](../security/BAN_DETECTION.md) ). As recusas upstream por pedido (`request_rejected`, por exemplo Anthropic OAuth 403 "Pedido não permitido") nunca o definem: são contadas por ligação e modelo e retiram este modelo da rotação com um arrefecimento crescente limitado a `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) ou arrefecem a ligação quando não se conhece nenhum modelo — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (transições para o terminal após novas tentativas limitadas — `EXPIRED_RETRY_MAX = 3` com backoff exponencial — para que os erros OAuth transitórios possam auto-curar antes que a conta seja permanentemente desativada)
 - `credits_exhausted`
 
-Estes estados persistem até que as credenciais sejam alteradas ou um operador os reponha. Não substitua estados terminais por estados transitórios de período de arrefecimento.
+Persistem até que as credenciais sejam alteradas ou um operador as redefina. Não substitua os estados terminais pelo estado de arrefecimento transitório.
 
-**Recuperação lenta:** quando `rateLimitedUntil` já passou, a ligação volta a estar elegível. Após uma utilização bem-sucedida, `clearAccountError()` limpa todos os campos de erro.
+**Recuperação preguiçosa:** quando `rateLimitedUntil` passa, a ligação volta a ser elegível. Após uma utilização bem-sucedida, `clearAccountError()` limpa todos os campos de erro.
 
-### Limite de utilização do Claude OAuth: via de prioridade inferior + reposição do limite da sessão
+### parede de utilização Claude OAuth : reposição do limite de sessão + da gama de prioridade mais baixa
 
-**Âmbito:** uma ligação de subscrição Claude (OAuth). Ambas as funcionalidades são **opt-in por ligação** (Editar ligação → secção Claude → `lowPriorityMode` / `autoLimitReset` em
-`providerSpecificData`, ambas desativadas por predefinição) e refletem os comandos `/low-priority` e `/limit-reset` do Claude Code (contrato de comunicação capturado do Claude Code 2.1.263).
+**Âmbito:** uma ligação de assinatura Claude (OAuth). Ambos os recursos são** opt-in por ligação** (Editar ligação → Claude secção → `lowPriorityMode` / `autoLimitReset` em `providerSpecificData`, ambos desativados por defeito) e espelhar os comandos `/low-priority` e `/limit-reset` do código Claude (contrato de transferência capturado do código Claude 2.1.263).
 
 **Implementação:**
 
-- Máquina de estados + classificação de respostas: `open-sse/services/claudeLowPriority.ts`
-- Cliente de estado/solicitação de reposição: `open-sse/services/claudeLimitReset.ts`
-- Hook do executor (injeção de cabeçalho + nova tentativa na mesma conta): `open-sse/executors/base.ts::execute()`
-- Persistência de opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Classificação de resposta da máquina de estados + : `open-sse/services/claudeLowPriority.ts`
+- Repor cliente status/claim : `open-sse/services/claudeLimitReset.ts`
+- Gancho do executor (injeção de cabeçalho + nova tentativa na mesma conta): `open-sse/executors/base.ts::execute()`
+- Persistência de aceitação: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Acionador:** o limite de utilização de 5 horas — um `429` cujos cabeçalhos contenham
-`anthropic-ratelimit-unified-status: rejected` e, quando a conta é elegível,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Não é enviado nada antes desse primeiro `429` do limite; um `429` em rajada sem cabeçalhos unificados segue o caminho normal de cooldown.
+**Gatilho:** a parede de utilização de 5 horas — a `429` cujos cabeçalhos transportam `anthropic-ratelimit-unified-status: rejected` e, quando a conta for elegível, `anthropic-ratelimit-unified-slow-offer: treatment`. Nada é enviado antes dessa primeira parede 429; uma rajada 429 sem cabeçalhos unificados passa pelo caminho de arrefecimento normal.
 
-**Via de prioridade inferior** (`lowPriorityMode`):
+**Faixa de menor prioridade** (`lowPriorityMode`):
 
-- No `429` do limite, o executor aceita a oferta e repete imediatamente a tentativa na **mesma**
-  conta com `anthropic-usage-limit: slow`; a via permanece ativa até ao `anthropic-ratelimit-unified-reset` anunciado (+60 s de tolerância) e todos os pedidos nesse intervalo incluem o cabeçalho. O `429` intercetado nunca chega a `handleChatCore`, pelo que a ligação **não** entra em cooldown nem é rodada para outra.
-- `anthropic-ratelimit-unified-slow-status` nas respostas posteriores: `active` / `not_needed`
-  mantêm a via; `slot_busy` (429) ou um `529` aguardam o valor indicado pelo servidor em
-  `anthropic-ratelimit-unified-slow-retry-after` (predefinição de 20 s, limitado a 5–600 s, jitter de ±30%)
-  e repetem a tentativa, limitados por `anthropic-ratelimit-unified-slow-max-wait` (predefinição de 20 min, limitado a 1 min–6 h) — depois desse período, a via termina e um período de arrefecimento de 10 minutos impede uma nova aceitação. A espera é adicionalmente limitada pelo tempo restante do próprio timeout de início a montante do pedido (`resolveFetchStartTimeout`, 10 min por predefinição) menos uma margem de 5 s: sem esse limite, o `max-wait` predefinido de 20 minutos excederia a duração do pedido e o sleep seria abortado a meio da espera, apresentando um `TimeoutError` em vez do fim normal `max_wait` + período de arrefecimento.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, uma mudança da janela de 5 horas ou
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (que a termina como
-  `extra_usage` em qualquer estado, uma vez que o excesso pago passa a cobrir o limite) terminam a via; a
-  resposta segue então o caminho normal de cooldown. `budget_exhausted` é memorizado até à reposição do orçamento anunciada (≤ 8 dias).
-- A verificação do limite é executada após as novas tentativas intra-tentativa do próprio executor acionadas por 400 (edição de contexto, limites de thinking/effort, aprendizagem automática de parâmetros), pelo que um `429` do limite que só surja numa dessas novas tentativas continua a ser intercetado em vez de chegar ao caminho de cooldown.
-- O estado é mantido em memória por ligação (um reinício implica um `429` adicional do limite antes de voltar a aceitar).
+- Na parede 429 o executor aceita a oferta e tenta imediatamente novamente a** mesmo** conta com `anthropic-usage-limit: slow`; a pista permanece activa até ao `anthropic-ratelimit-unified-reset` anunciado (+ 60s grace) e cada pedido nessa janela carrega o cabeçalho. O 429 interceptado nunca chega a `handleChatCore`, pelo que a ligação é** não** colocado em cooldown e não é rodado.
+- `anthropic-ratelimit-unified-slow-status` nas respostas posteriores: `active` / `not_needed` manter a pista; `slot_busy` (429) ou um `529` aguarde o `anthropic-ratelimit-unified-slow-retry-after` do servidor (padrão 20s, limite 5–600s, ± 30% de jitter) e tente novamente, limitado por `anthropic-ratelimit-unified-slow-max-wait` (padrão 20 min, limite 1 min–6 h) — depois de a pista terminar e um arrefecimento de 10 minutos bloqueia a reaceitação. A espera é adicionalmente limitada pelo que resta do tempo limite de início do upstream do pedido (`resolveFetchStartTimeout`, 10 min por defeito) menos uma margem de 5 s: sem este limite, a espera máxima padrão de 20 minutos sobreviveria ao pedido e o sono seria abortado a meio da espera, trazendo à tona um `TimeoutError` em vez do elegante `max_wait` end + cool-off.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, um rollover de janela de 5h ou `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (que termina como `extra_usage` em qualquer estado, uma vez que o excedente pago cobre agora a parede) termina a pista; a resposta flui então para o caminho de arrefecimento normal. `budget_exhausted` é recordado até à redefinição orçamental anunciada (≤ 8 dias).
+- A verificação de parede é executada após as próprias tentativas intra-tentativas 400 do executor (edição de contexto, thinking/effort brackets , aprendizagem automática de parâmetros), de modo que uma parede 429 que apenas surge numa dessas tentativas é ainda intercetada em vez de atingir o caminho de arrefecimento.
+- O estado está na memória por ligação (uma reinicialização custa uma parede extra 429 para ser aceite novamente).
 
-**Reposição do limite da sessão** (`autoLimitReset`, tentada antes da via quando ambas estão ativas):
+**Reposição do limite de sessão** (`autoLimitReset`, tentado antes da pista quando ambos estão ligados):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → bloco
-  `juniper_tide`; quando `arm: "reset"` e `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` com
-  `{ "program": "juniper_tide" }` (UUID da organização de `providerSpecificData.organizationUUID`, com fallback de arranque).
-- `result: reset|not_limited` → o pedido é repetido à velocidade máxima (sem cabeçalho slow).
-  `already_used` / `not_offered` memorizam `next_available_at` (uma semana por predefinição); qualquer
-  falha aplica um recuo de 15 minutos. A reposição ocorre uma vez por semana e continua a contar para o limite semanal.
+- bloco `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` ; quando `arm: "reset"` e `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` com `{ "program": "juniper_tide" }` (organização UUID de `providerSpecificData.organizationUUID`, bootstrap fallback).
+- `result: reset|not_limited` → o pedido é repetido à velocidade total (sem cabeçalho lento). `already_used` / `not_offered` memoise `next_available_at` (padrão uma semana); qualquer falha recua 15 minutos. A reposição é uma vez por semana e ainda conta para o limite semanal.
 
-Proteções de regressão: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Guardas de regressão: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+
+### Aplicar as redefinições bancárias automaticamente
+
+**Âmbito:** Ligações de assinatura Codex e Claude (OAuth).** Ativar** : a configuração `bankedResetAutoApply` está desativada e no modo `dry-run` por predefinição (Definições → AI → Aplicar redefinições bancárias automaticamente).
+
+**Finalidade:** gaste redefinições bancárias por conta própria quando uma conta atinge um limite de utilização, em vez de esperar que um operador prima "Resgatar" na página Limites do fornecedor.
+
+| Tipo de crédito (`creditTypes`) | O que é resgatado                                      | Onde corre                                                            |
+| ------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| `codexCredits`                  | Codex repor créditos                                   | trabalho em segundo plano, a cada 60 s                                |
+| `claudeCredits`                 | subsídios bancários Claude (créditos `GRANT` )         | trabalho em segundo plano, a cada 60 s                                |
+| `claudeSessionReset`            | redefinição do limite de sessão semanal Claude (acima) | caminho do pedido, através da mesma política da alternância por conta |
+
+**Implementação:**
+
+- Decisão pura (um conjunto de regras para ambos os caminhos): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Trabalho em segundo plano: `src/lib/services/bankedResetAutoApply.ts` (iniciado em `src/instrumentation-node.ts`)
+- porta do caminho de pedido Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registado através de `setClaudeLimitResetPolicy()` em `open-sse/services/claudeLimitReset.ts`
+- História, limites e webhook: `src/lib/usage/bankedResetAudit.ts`
+- Histórico API: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticação de gestão)
+
+**Ordem de decisão** (a primeira regra com falha é o motivo registado):
+
+1. Recurso desativado, tipo de crédito desativado ou conta fora do âmbito (`accountScope` `all` / `selected` mais o mapa `connections` por conta).
+2. Fora do horário opcional UTC (`startHourUtc` > `endHourUtc` cruza a meia-noite).
+3. Limites nas últimas 24 horas: `maxPerAccountPerDay` (1), `maxPerDay` (3) e `minSpacingMinutes` (30) entre dois resgates quaisquer.
+4. Disparo: uma janela `session` ou `weekly` murada (lida de `getQuotaWindowStatus().reachedThreshold`, e não `isAccountQuotaExhausted()`, que apenas reporta uma conta com cada janela gasta) ou um crédito que expira dentro de `expiringCreditHours` (24) numa conta que utilizou pelo menos `expiringCreditMinUsedPercent` (50).
+5. Proteção de reinicialização natural: saltar quando a janela murada de 5 horas for reiniciada dentro de `sessionResetGuardMinutes` (90) ou a janela murada semanal dentro `weeklyResetGuardHours` (12).
+6. Piso semanal: ignore uma reposição de 5 horas quando o resto semanal estiver abaixo de `weeklyFloorPercent` (10).
+7. Modo `last-resort` : saltar enquanto outra conta no âmbito do mesmo fornecedor tiver pelo menos `poolHeadroomPercent` (10) restante em ambas as janelas. Os gatilhos de crédito expirado contornam isso.
+8. `dry-run` regista uma linha e não resgata nada; `last-resort` e `eager` resgatam.
+
+A falta de dados de quota nunca desbloqueia um resgate: um tempo de reposição desconhecido ou saltos de utilização semanal.
+
+**Reposição da sessão Claude :** com o recurso desativado ou `claudeSessionReset` desativado, a comutação `autoLimitReset` por conta decide exatamente como antes. Com ambos ativados, a funcionalidade substitui as alternâncias por conta: uma conta no âmbito pode reivindicar apenas quando a política o permite, e no modo `dry-run` não é feita nenhuma reivindicação.
+
+**Segurança:** o trabalho resgata no máximo um crédito por tick, decide antes de listar os créditos (uma conta ignorada nunca é listada), utiliza chaves de idempotência `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` e recua uma conta durante 1 h após uma listagem ou resgate com falha. Cada decisão de resgate, falha e simulação é gravada em `audit_log` (`action: "bankedReset.redeem"`, sem tokens ou IDs de crédito); os limites são contados a partir destas linhas, para que sobrevivam às reinicializações. Os resgates bem-sucedidos também acionam o webhook `provider.reset_redeemed`.
+
+Guardas de regressão: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
 
 ### Afinidade de sessão (#7274)
 
-**Âmbito:** uma sessão de cliente (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) afixada a uma ligação, para **qualquer** fornecedor.
+**Âmbito:** uma sessão de cliente (cabeçalho `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` ) fixada numa ligação, por** qualquer** provedor.
 
-**Objetivo:** manter um agente com várias interações (Claude Code, aider, agentes personalizados) na mesma conta entre pedidos, reduzindo a perda de contexto entre contas e os `429` repetidos de arranque a frio em fornecedores com estado de sessão por conta.
+**Finalidade:** manter um agente multiturno (código Claude, auxiliar, agentes personalizados) na mesma conta em todos os pedidos, reduzindo a perda de contexto entre contas e repetidos 429s de arranque a frio em fornecedores com estado de sessão por conta.
 
 **Implementação:**
 
-- Resolução do TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Seleção/criação da afixação: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Extração do cabeçalho (genérica, qualquer fornecedor): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tabela de afixações persistentes: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Definição: `sessionAffinityTtlMs` (TTL global em ms, `0` desativa) — `src/lib/db/settings.ts`. Renomeada de `codexSessionAffinityTtlMs`, exclusiva do Codex, pela migração `124_generic_session_affinity_ttl.sql`, que transfere qualquer TTL do Codex previamente configurado como o novo valor predefinido.
+- resolução TTL : `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Extração de cabeçalho (genérico, qualquer fornecedor): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tabela de pinos persistentes: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Configuração: `sessionAffinityTtlMs` ( TTL global em ms, `0` desativa) — `src/lib/db/settings.ts`. Renomeado do `codexSessionAffinityTtlMs` apenas do Codex pela migração `124_generic_session_affinity_ttl.sql`, que transporta qualquer Codex TTL previamente configurado como o novo padrão.
 
-Antes de #7274, `resolveSessionAffinityTtlMs()` terminava imediatamente com `0` para todos os fornecedores exceto `codex`, pelo que a definição de TTL (e os cabeçalhos de sessão) não tinha efeito em nenhum outro local, apesar de o mecanismo de afixação e a extração dos cabeçalhos já serem independentes do fornecedor. A correção removeu esse retorno antecipado; o TTL aplica-se agora uniformemente a todos os fornecedores quando definido globalmente acima de `0`.
+Antes do #7274, `resolveSessionAffinityTtlMs()` foi hard-bailed para `0` para todos os fornecedores, exceto `codex`, pelo que a configuração TTL (e os cabeçalhos de sessão) não teve qualquer efeito em mais lado nenhum, mesmo que o mecanismo de fixação e a extração de cabeçalhos já fossem independentes do fornecedor. A correção removeu esse retorno antecipado; o TTL aplica-se agora uniformemente a todos os fornecedores, uma vez definidos globalmente acima de `0`.
 
-Os três cabeçalhos de afinidade de sessão nunca são encaminhados para montante — os executores constroem os seus próprios cabeçalhos de montante de raiz, em vez de encaminharem os cabeçalhos do cliente, pelo que isto permanece apenas um ID de correlação interno.
+Os três cabeçalhos de afinidade de sessão nunca são encaminhados para montante. Os executores — constroem os seus próprios cabeçalhos upstream a partir do zero, em vez de passar os cabeçalhos do cliente, pelo que este permanece apenas um ID de correlação interna.
 
-### Concessões exclusivas de ligações de sessões geridas
+### Locações exclusivas de ligação de sessão gerida
 
-**Âmbito:** um único cliente/sessão HTTP gerido ativo é proprietário de uma ligação OmniRoute elegível.
+**Âmbito:** um HTTP client/session gerido ativo tem uma ligação OmniRoute elegível.
 
-**Objetivo:** fornecer uma propriedade exclusiva e duradoura da ligação para clientes que necessitam de uma
-barreira de encaminhamento rígida entre pedidos. Isto difere da afinidade de sessão, que é uma preferência
-suave de continuidade:
-um lease exclusivo persiste o estado do ciclo de vida em SQLite, impõe unicidade global do proprietário
-ativo e da ligação ativa e rejeita uma geração obsoleta antes do encaminhamento para o fornecedor.
+**Finalidade:** fornece propriedade de ligação única e durável para clientes que necessitam de uma barreira de encaminhamento rígida entre pedidos. Isto difere da afinidade de sessão, que é uma preferência de continuidade suave: uma concessão exclusiva persiste no estado do ciclo de vida em SQLite, impõe a exclusividade global do proprietário ativo e da ligação ativa e rejeita uma geração obsoleta antes do envio do fornecedor.
 
-A funcionalidade é opcional por chave de API. Uma chave gerida tem de possuir o âmbito `lease:exclusive` e uma
-lista `allowedConnections` explícita e não vazia. Qualquer cliente HTTP pode utilizar o endpoint do ciclo de vida;
-não é necessário nome de cliente, user-agent, fornecedor, método OAuth ou modelo. O lease é proprietário de uma ligação,
-não de um modelo, pelo que uma alteração de modelo mantém a associação enquanto a ligação continuar normalmente
-elegível. As regras normais de modelo, quota, estado de funcionamento, período de espera e lista de permissões
-continuam a ser autoritárias e podem transferir a mesma geração para outra ligação elegível livre.
+O recurso é opcional por chave API. Uma chave gerida deve ter o âmbito `lease:exclusive` e uma lista `allowedConnections` explícita e não vazia. Qualquer cliente HTTP pode utilizar o terminal do ciclo de vida; não é necessário nenhum nome de cliente, agente de utilizador, fornecedor, método OAuth ou modelo. O leasing tem uma ligação, não um modelo, pelo que uma alteração de modelo mantém a ligação enquanto a ligação permanece normalmente elegível. As regras normais de modelo, quota, integridade, arrefecimento e lista de permissões continuam válidas e podem fazer a transição da mesma geração para outra ligação gratuita qualificada.
 
-O ciclo de vida é `POST /api/v1/session-leases` com as ações JSON `acquire`, `renew` e `release`.
-Os pedidos de inferência geridos apresentam o valor opaco `X-OmniRoute-Lease-Owner` e o
-`X-OmniRoute-Lease-Generation` exato. O proprietário utiliza `vlo_` seguido de 43 caracteres base64url;
-apenas o respetivo hash SHA-256 é armazenado. Cada barreira de encaminhamento final associa também o ID da
-chave de API autenticada e o ID da ligação ativa. Os cabeçalhos de controlo do lease são removidos dos registos,
-das capturas de pedidos retidas e dos cabeçalhos do executor a montante.
+O ciclo de vida é `POST /api/v1/session-leases` com ações JSON `acquire`, `renew` e `release`. Os pedidos de inferência gerida apresentam o valor `X-OmniRoute-Lease-Owner` opaco e `X-OmniRoute-Lease-Generation` exato. O proprietário utiliza `vlo_` seguido de 43 caracteres base64url; apenas o seu hash SHA-256 é armazenado. Cada barreira de despacho final também liga a chave API autenticada ID e a ligação ativa ID. Os cabeçalhos de controlo de arrendamento são removidos dos registos, dos instantâneos de pedidos retidos e dos cabeçalhos do executor upstream.
 
-Se o encaminhamento normal tiver candidatos geridos elegíveis, mas todos os candidatos livres estiverem ocupados
-por um lease ativo pertencente a um terceiro, o OmniRoute devolve HTTP `429`, o código
-lease-capacity-unavailable, o estado waiting-for-capacity e um `Retry-After` limitado, derivado da expiração
-relevante mais próxima. A ausência normal de candidatos elegíveis não constitui contenção de lease e mantém a
-semântica de erro de encaminhamento existente.
+Se o encaminhamento comum tiver candidatos geridos elegíveis, mas cada candidato livre estiver ocupado por um arrendamento ativo estrangeiro, OmniRoute devolverá HTTP `429`, código de capacidade de arrendamento indisponível, um estado de espera por capacidade e um `Retry-After` limitado derivado do primeiro vencimento relevante. A elegibilidade vazia comum não é contenção de arrendamento e mantém a sua semântica de erro de encaminhamento existente.
 
-Os mecanismos relacionados continuam separados:
+Os mecanismos relacionados permanecem separados:
 
-- A ocupação de sessões OAuth é uma distribuição flexível, local ao processo, para contas OAuth.
-- Os semáforos de conta atribuem permissões de concorrência de pedidos e terminam quando um pedido é concluído.
-- Os leases exclusivos de sessão gerida são uma propriedade duradoura do ciclo de vida com uma barreira de geração.
+- A ocupação da sessão OAuth é uma distribuição local suave do processo para as contas OAuth.
+- Os semáforos de conta concedem permissões de simultaneidade de pedido e terminam quando um pedido é concluído.
+- Os alugueres exclusivos de sessões geridas são propriedade de ciclo de vida durável com limite de geração.
 
 ---
 
-## 3. Bloqueio de Modelos
+## 3. Bloqueio de modelos
 
-**Âmbito:** o triplo fornecedor + ligação + modelo.
+**Âmbito:** combinação de fornecedor + ligação + modelo.
 
-**Âmbito da chave por código de estado:** o código de estado da falha decide em que chave um bloqueio é escrito (`resolveLockoutScope()` em `open-sse/services/accountFallback/exactModelLock.ts`):
+**Âmbito por estado:** o estado que falha determina a chave na qual um bloqueio escreve
+(`resolveLockoutScope()` em `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — um sinal de quota ou de direitos de acesso — bloqueia a **família de quota**: para o codex todo o âmbito `codex` / `spark` (todos os modelos `gpt-5*` da ligação), para outros fornecedores `getQuotaScopedModelForProvider()`.
-- `404` bloqueia apenas o modelo em si (`getModelLockKey()` restringe `not_found`).
-- Qualquer outro código de estado — falhas de transporte/servidor `5xx` e o próprio `502` sintetizado pelo OmniRoute a partir da validação de qualidade — bloqueia apenas o tuplo **exato** fornecedor/ligação/modelo. Um stream defeituoso num modelo não é evidência sobre a quota da conta; antes desta regra, uma única resposta vazia em `codex/gpt-5.6-luna` removia do encaminhamento todos os modelos `gpt-5*` dessa ligação durante 2–30 min (em escalada), embora a sua quota permanecesse intacta.
-- A opção `scope` explícita de quem chama prevalece sempre (o Antigravity passa `"exact"`).
+- `429` / `403` / `402` — um sinal de quota ou entitlement — bloqueia a **família de quotas**:
+  para codex, todo o âmbito `codex` / `spark` (todos os modelos `gpt-5*` da
+  ligação); para outros fornecedores, `getQuotaScopedModelForProvider()`.
+- `404` bloqueia o modelo base (`getModelLockKey()` restringe `not_found`).
+- Qualquer outro estado — falhas de transporte/servidor `5xx` e o `502` sintetizado pelo
+  próprio OmniRoute a partir da validação de qualidade — bloqueia apenas a combinação
+  **exata** de fornecedor/ligação/modelo. Um fluxo inválido num modelo não é evidência
+  sobre a quota da conta; antes desta regra, uma resposta vazia em
+  `codex/gpt-5.6-luna` removia todos os modelos `gpt-5*` dessa ligação do encaminhamento
+  durante 2–30 min (com escalada), enquanto a quota permanecia inalterada.
+- A opção `scope` explícita do chamador prevalece sempre (Antigravity passa `"exact"`).
 
 **Objetivo:** evitar desativar uma ligação inteira quando apenas um modelo está indisponível ou limitado por quota.
 
@@ -253,81 +257,105 @@ Os mecanismos relacionados continuam separados:
 
 - Fornecedores com quota por modelo que devolvem 429
 - Fornecedores locais que devolvem 404 para um modelo em falta
-- Falhas de permissão de modo/modelo específicas do fornecedor (p. ex., modos do Grok)
+- Falhas de permissões específicas do fornecedor para modo/modelo (por exemplo, modos do Grok)
 
 **Implementação:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Painel de Cooldowns de Modelos (v3.8.0)
+### Painel de arrefecimentos de modelos (v3.8.0)
 
-IU: Definições → Cooldowns de Modelos (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+IU: Definições → Arrefecimentos de modelos (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Lista os bloqueios ativos com: fornecedor, ligação, modelo, motivo, expiresAt. Os operadores podem reativar manualmente um modelo a partir do cartão.
+Apresenta os bloqueios ativos com: fornecedor, ligação, modelo, motivo, expiresAt. Os operadores podem reativar manualmente um modelo a partir do cartão.
 
 **API REST:**
 
-- `GET /api/resilience/model-cooldowns` — lista os bloqueios ativos
-- `DELETE /api/resilience/model-cooldowns` — reativação manual. Corpo: `{provider, connection, model}`. Autenticação: management.
+- `GET /api/resilience/model-cooldowns` — listar bloqueios ativos
+- `DELETE /api/resilience/model-cooldowns` — reativação manual. Corpo: `{provider, connection, model}`. Autenticação: gestão.
 
-### Gestor de Cooldowns
+### Gestor de arrefecimentos
 
-IU: Monitorização → Gestor de Cooldowns (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+IU: Monitorização → Gestor de arrefecimentos (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Uma única página para todas as ligações que estão fora do encaminhamento por um motivo transitório, em vez de abrir a página de cada fornecedor. Lista os cooldowns de ligação, os bloqueios de modelo e os estados terminais, limpa-os por ligação, para uma seleção, ou para todas as ligações de um fornecedor, e edita as regras de cooldown mais frequentemente ajustadas: `streamStallCooldown.enabled` e o cooldown base e os passos máximos de backoff do `connectionCooldown` para OAuth / chave de API (guardados através de `PATCH /api/resilience`). Os estados terminais (`banned`, `expired`, `credits_exhausted`) são listados, mas nunca limpos aqui.
+Uma página para cada ligação que está fora do encaminhamento por um motivo transitório, em vez de
+abrir a página de cada fornecedor. Apresenta os arrefecimentos das ligações, os bloqueios de
+modelos e os estados terminais, permite limpá-los por ligação, para uma seleção ou para todas
+as ligações de um fornecedor, e edita as regras de arrefecimento mais ajustadas:
+`streamStallCooldown.enabled` e o arrefecimento base `connectionCooldown` e o número máximo
+de passos de recuo das ligações OAuth / com chave de API (guardados através de
+`PATCH /api/resilience`). Os estados terminais (`banned`, `expired`, `credits_exhausted`) são
+apresentados, mas nunca são limpos aqui.
 
-**API REST** (`src/lib/resilience/cooldownManager.ts`, autenticação: management):
+O cartão **Regras de arrefecimento de erros** na mesma página edita as regras de erro do operador
+(`settings.providerErrorRules`) e as predefinições gerais por fornecedor
+(`settings.providerErrorDefaults`) através de `PATCH /api/settings` — consulte "Regras
+declaradas pelo operador" na secção §7 para saber como são correspondidas. As durações são
+Predefinição (sem arrefecimento explícito), 30 min, 1 h, 5 h, 24 h ou um valor personalizado
+de 1 a 43 200 minutos (30 dias).
 
-- `GET /api/resilience/cooldowns[?provider=]` — ligações com estado, cooldown restante, nível de backoff, tipo do último erro e bloqueios de modelo (sem credenciais)
-- `POST /api/resilience/cooldowns` — corpo `{connectionIds: string[]}` ou `{all: true, provider?}`; devolve `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+**API REST** (`src/lib/resilience/cooldownManager.ts`, autenticação: gestão):
 
-### IU das definições de bloqueio + recuperação por decaimento com sucessos (v3.8.23)
+- `GET /api/resilience/cooldowns[?provider=]` — ligações com estado, arrefecimento restante,
+  nível de recuo, último tipo de erro e bloqueios de modelos (sem credenciais)
+- `POST /api/resilience/cooldowns` — corpo `{connectionIds: string[]}` ou
+  `{all: true, provider?}`; devolve `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-O bloqueio de modelos passou de um comportamento sempre ativo e fixado no código para uma funcionalidade totalmente configurável, de ativação explícita (opt-in), com o seu próprio cartão de definições e um percurso de recuperação com autorregeneração.
+### IU das definições de bloqueio + recuperação por redução após sucesso (v3.8.23)
 
-**Cartão de definições:** Definições → Bloqueio de Modelos
+O bloqueio de modelos passou de um comportamento codificado e sempre ativo para uma funcionalidade
+totalmente configurável e opcional, com o seu próprio cartão de definições e um processo de
+recuperação autónomo.
+
+**Cartão de definições:** Definições → Bloqueio de modelos
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Este é **distinto** do `ModelCooldownsCard` acima, apenas de leitura (que apenas
-_lista_ os bloqueios ativos) — o novo cartão _configura os parâmetros_. As
-predefinições residem em `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Este cartão é **distinto** do `ModelCooldownsCard`, apenas de leitura, acima (que apenas
+_l_lista_ os bloqueios ativos) — o novo cartão _configura os parâmetros_. As predefinições
+estão em `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Definição               | Predefinição                     | Significado                                                                       |
-| ----------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
-| `enabled`               | `false`                          | Comutador principal — o bloqueio de modelos está **desativado por predefinição**. |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Códigos de estado a montante que contam como uma falha com âmbito de modelo.      |
-| `baseCooldownMs`        | `120_000` (120 s)                | Duração inicial do bloqueio na primeira falha.                                    |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Limite superior do cooldown escalado.                                             |
-| `maxBackoffSteps`       | `10`                             | Número máximo de passos de escalada do backoff exponencial.                       |
-| `useExponentialBackoff` | `true`                           | Se as falhas repetidas escalam o cooldown exponencialmente.                       |
+| Definição               | Predefinição                     | Significado                                                                         |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Interruptor principal — o bloqueio de modelos está **desativado por predefinição**. |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Estados upstream que contam como uma falha ao nível do modelo.                      |
+| `baseCooldownMs`        | `120_000` (120 s)                | Duração inicial do bloqueio para a primeira falha.                                  |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Limite do arrefecimento escalado.                                                   |
+| `maxBackoffSteps`       | `10`                             | Número máximo de passos de escalada do recuo exponencial.                           |
+| `useExponentialBackoff` | `true`                           | Determina se as falhas repetidas aumentam exponencialmente o arrefecimento.         |
 
-As definições persistem através do armazenamento habitual de definições e são validadas através do esquema de definições de resiliência; o cartão limita os valores de `baseCooldownMs`/`maxCooldownMs`
-(com `maxCooldownMs ≥ baseCooldownMs`) e de `maxBackoffSteps`.
+As definições persistem através do armazenamento normal de definições e são validadas pelo
+esquema de definições de resiliência; o cartão limita `baseCooldownMs`/`maxCooldownMs`
+(com `maxCooldownMs ≥ baseCooldownMs`) e `maxBackoffSteps`.
 
-**Recuperação por decaimento com sucessos:** a recuperação **não** é puramente a expiração do temporizador. Uma resposta bem-sucedida faz recuar a contagem de falhas do modelo, pelo que um modelo que recuperou a meio da janela deixa de escalar (e é desbloqueado) antes de o temporizador expirar. Num alvo de combo bem-sucedido, `open-sse/services/combo.ts` chama `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), que **reduz para metade** o
-`failureCount` armazenado (`Math.floor(failureCount / 2)`); quando este chega a `0`, a entrada de bloqueio é totalmente eliminada. A contrapartida `recordModelLockoutFailure()`
-incrementa a contagem (e escala o cooldown) em falhas dentro da janela de escalada. Este decaimento com sucessos soma-se à simples expiração do temporizador — qualquer um dos percursos pode reativar um modelo.
+**Recuperação por redução após sucesso:** a recuperação **não** depende apenas da expiração do
+temporizador. Uma resposta saudável reduz progressivamente o contador de falhas do modelo, para
+que um modelo recuperado a meio da janela deixe de aumentar a escalada (e seja desbloqueado)
+antes de o seu temporizador expirar. Num alvo de combinação bem-sucedido,
+`open-sse/services/combo.ts` chama `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), que **divide por dois** o valor armazenado de
+`failureCount` (`Math.floor(failureCount / 2)`); quando chega a `0`, a entrada do bloqueio é
+eliminada por completo. O correspondente `recordModelLockoutFailure()` incrementa o contador
+(e aumenta o arrefecimento) em falhas ocorridas dentro da janela de escalada. Esta redução após
+sucesso é adicional à simples expiração do temporizador — qualquer um dos processos pode
+reativar um modelo.
 
-**Estado:** os bloqueios são mantidos **em memória** (`Map`s por processo de
-`ModelLockoutEntry` indexados por `provider:connectionId:model`, e os bloqueios de âmbito exato por
-`provider:connectionId:exact:model`), não sendo persistidos na
-base de dados — perdem-se ao reiniciar. As _definições_ são persistidas; o _estado_ de bloqueio ativo é efémero.
+**Estado:** os bloqueios são mantidos **em memória** (por `Map`s por processo de
+`ModelLockoutEntry`, indexados por `provider:connectionId:model`, e bloqueios de
+âmbito exato por `provider:connectionId:exact:model`), não persistidos na
+BD — perdem-se ao reiniciar. As _definições_ são persistidas; o _estado_ ativo
+dos bloqueios é efémero.
 
 ---
 
-## 4. Controlo de Concorrência Quota-Share (v3.8.36)
+## 4. Controlo de simultaneidade de quota-partilha (v3.8.36)
 
-As contas de subscrição (GLM, MiniMax, etc.) aceitam frequentemente apenas ~1–3 pedidos concorrentes; exceder esse limite desencadeia erros 429 e cooldowns. Isto é especialmente crítico em combos **quota-share** (`qtSd/…`), onde várias chaves API partilham uma única conta upstream. Três camadas evitam que uma conta partilhada seja inundada.
+As contas de subscrição (GLM, MiniMax, etc.) geralmente só aceitam ~ 1–3 pedidos simultâneos; exceder isso aciona 429s e cooldowns. Isto é agudo sob** quota-partilha** (`qtSd/…`) combos, em que várias chaves API partilham uma conta upstream. Três camadas evitam que uma conta partilhada seja inundada.
 
-### Limite de concorrência por ligação (`max_concurrent`)
+### Limite de simultaneidade por ligação (`max_concurrent`)
 
-Cada ligação de fornecedor pode declarar um teto `max_concurrent`
-(`provider_connections.max_concurrent`, definido no modal de ligação / API / BD).
-Deixe-o vazio para não aplicar limite. Este é o único parâmetro que alimenta a camada de serialização abaixo — defina-o para a concorrência real da conta (p. ex. GLM ~1, MiniMax ~2).
+Cada ligação de fornecedor pode declarar um tecto `max_concurrent` (`provider_connections.max_concurrent`, definido na ligação modal / API / DB). Deixe-o vazio sem limite. Este é o botão único que aciona a camada de serialização abaixo de — e a configura para a simultaneidade real da conta (por exemplo, GLM ~ 1, MiniMax ~ 2).
 
-### Limites de concorrência por modelo (`modelConcurrency`)
+### Limites de simultaneidade por modelo (`modelConcurrency`)
 
-Uma ligação pode adicionalmente declarar tetos de concorrência exatos por modelo
-dentro do seu mapa `rateLimitOverrides`:
+Uma ligação pode também declarar limites exatos de simultaneidade por modelo dentro do seu mapa `rateLimitOverrides` :
 
 ```json
 {
@@ -338,78 +366,32 @@ dentro do seu mapa `rateLimitOverrides`:
 }
 ```
 
-Defina-o no modal de ligação (**Substituições de rate limit → Limites de
-concorrência por modelo**, um `model=cap` por linha) ou através de
-`PATCH /api/providers/[id]` com a mesma estrutura JSON. Semântica das chaves:
+Defina-o no modal de ligação (** O limite de taxa substitui os limites de simultaneidade → por modelo** , um `model=cap` por linha) ou através de `PATCH /api/providers/[id]` com o mesmo formato JSON. Semântica chave:
 
-- **Âmbito da ligação vs. específico do modelo:** o `maxConcurrent` continua a
-  ser o teto partilhado ao nível da ligação. Quando ambos se aplicam, ambos os
-  gates são adquiridos atomicamente no mesmo gate composto
-  (`global → provider → account → model`); o comportamento efetivo é o do
-  limite aplicável mais restritivo.
-- **Correspondência exata da chave do modelo:** a chave é a string do modelo
-  passada ao executor após a resolução do encaminhamento — normalmente o id do
-  modelo upstream sem prefixo (`glm-5`), e não um alias `provider/model` do lado
-  do cliente (`zai/glm-5` não corresponde a `glm-5`). Os valores são tetos de
-  pedidos concorrentes em números inteiros positivos.
-- **Fila local, sem deteção:** os pedidos excedentes aguardam em fila local com
-  a semântica de fila/timeout existente (erros de admissão tipados
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). O OmniRoute não deteta nem
-  infere a política upstream — impõe exatamente os tetos que o operador
-  configurou. Um gate de modelo saturado nunca desativa o fornecedor e nunca
-  cria um bloqueio permanente do modelo; o comportamento upstream de
-  429/cooldown/fallback continua a ser a salvaguarda de erro.
-- **Âmbito por ligação e por processo:** os limites são por ligação de base de
-  dados e mantidos em memória, pelo que duas ligações que reutilizam a mesma
-  chave API upstream não se coordenam entre si.
-- **Não configurado significa inalterado:** omitir o mapa (ou deixar o campo do
-  dashboard em branco) não adiciona nenhum gate de modelo. Exemplo de
-  configuração sem afirmar qualquer limite universal do fornecedor:
+- **Em toda a ligação versus específico do modelo:** `maxConcurrent` continua a ser o teto partilhado para toda a ligação. Quando ambos se aplicam, ambas as portas são adquiridas atomicamente na mesma porta composta (`global → provider → account → model`); o comportamento efetivo é o limite aplicável mais rigoroso.
+- **Correspondência exata da chave do modelo:** a chave é a string do modelo passada ao executor após a resolução de encaminhamento — normalmente o ID do modelo upstream simples (`glm-5`), e não um alias `provider/model` do lado do cliente (`zai/glm-5` não corresponde `glm-5`). Os valores são limites máximos de pedidos simultâneos de número inteiro positivo.
+- **Enfileiramento local, sem descoberta:** os pedidos em excesso são enfileirados localmente com a semântica queue/timeout existente (erros de admissão `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` digitados). OmniRoute não descobre nem infere a política upstream. — impõe os limites exatos que o operador configurou. Um modelo saturado nunca desativa o fornecedor e nunca cria um bloqueio permanente do modelo; o comportamento a montante 429/cooldown/fallback continua a ser o backstop de erro.
+- **Âmbito por ligação e por processo:** caps são por ligação à base de dados e mantidos em memória, pelo que duas ligações que reutilizam a mesma chave API upstream não são coordenadas entre si.
+- **Não configurado significa inalterado:** omitir o mapa (ou deixar o campo do painel em branco) não acrescenta nenhuma porta de modelo. Exemplo de configuração sem declarar qualquer limite de fornecedor universal:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialização de pedidos quota-share
+### Serialização de pedido de quota partilhada
 
-Quando um despacho quota-share tem como alvo uma ligação que declara um
-`max_concurrent` positivo, os pedidos concorrentes para essa **conta** são
-serializados através de um semáforo por ligação (chave `qsconn:<connectionId>`):
-os pedidos excedentes **aguardam na fila** em vez de inundarem a conta. É
-**fail-open** — uma fila saturada ou um timeout prossegue sem um slot, em vez de
-alguma vez rejeitar um pedido despachável. Ative/desative em **Definições →
-Resiliência → Concorrência por ligação quota-share**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ativo por
-predefinição). Sem um limite `max_concurrent`, o comportamento permanece
-inalterado.
+Quando um despacho de quota partilhada tem como alvo uma ligação que declara um `max_concurrent` positivo, os pedidos simultâneos para esse** conta** são serializados através de um semáforo por ligação (chave `qsconn:<connectionId>`): excesso de pedidos** espere na fila** em vez de inundar a conta. Isso é** falha aberta** — uma fila saturada ou tempo limite prossegue sem um slot, em vez de rejeitar um pedido despachável. Ativar** Configurações → Resiliência → Simultaneidade de quota partilhada por ligação** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, padrão activado). Sem um limiar `max_concurrent` o comportamento permanece inalterado.
 
-> O gate de encaminhamento quota-share (`selectQuotaShareTarget`, DRR + P2C) é
-> ele próprio fail-open e apenas _desprioriza_ uma ligação no limite — com um
-> pool de uma única ligação não consegue impor um limite rígido, pelo que é este
-> semáforo que contém efetivamente a inundação.
+> A porta de encaminhamento de quota-partilha (`selectQuotaShareTarget`, DRR + P2C) é aberta em caso de falha e apenas _desprioriza_ uma ligação at-cap — com um pool de ligação única que não pode ser limitado, pelo que este semáforo é o que realmente contém a inundação.
 
-### Repetição ciente de cooldown em combos
+### Nova tentativa com reconhecimento de arrefecimento combinado
 
-Para cada estratégia de combo (quando ativada), um pedido que cristalizaria um
-429 por um cooldown transitório CURTO aguarda que este expire e volta a despachar
-em vez de devolver o 429 — isto cobre janelas TPM/RPM da classe Gemini (~60s de
-retry-after) em combos multi-modelo, p. ex. ambos os alvos de um combo de 2
-modelos atingirem um rate limit por modelo. Limitado por `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) em **Definições →
-Resiliência**. Nunca aguarda em caso de `quota_exhausted` (bloqueado até à
-meia-noite) ou motivos de autenticação/não encontrado.
+Para cada estratégia de combinação (quando ativada), um pedido que cristalizaria um 429 para um arrefecimento transitório SHORT espera e reenvia em vez de devolver o 429 — Isto cobre janelas TPM/RPM da classe Gemini (~ 60s retry-after) em combos de vários modelos, por exemplo, ambos os alvos de um combo de 2 modelos atingindo um limite de taxa por modelo. Delimitado por `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) em** Configurações → Resiliência** . Nunca espera por motivos `quota_exhausted` (bloqueado até à meia-noite) ou auth/not-found. Com `comboTimeoutMs` definido, uma espera que não pode terminar antes desse prazo não começa (#18998): o combo responde imediatamente com a sua resposta do terminal em vez de um `COMBO_TIMEOUT` 504.
 
-O mesmo gate cobre o caso de pré-despacho (#16319): quando todos os alvos de um
-combo são ignorados antes de qualquer tentativa porque o seu modelo se encontra
-num bloqueio transitório curto, o caminho de zero tentativas aguarda que o
-bloqueio expire sob os mesmos tetos e volta a despachar, em vez de responder com
-um `503 ALL_TARGETS_SKIPPED` sem indicação. Quando não é permitida qualquer
-espera (teto, tentativas ou orçamento esgotados, ou a funcionalidade
-desativada), a resposta terminal é promovida a `429 rate_limit_error`,
-transportando `retry_after` / `reset_at` do bloqueio transitório que expira
-primeiro; os bloqueios de quota, autenticação e não encontrado mantêm o 503 sem
-indicação.
+Um combo pode ser desativado com `config.comboCooldownWaitEnabled: false`. Apenas `false` literal desativa estas esperas combinadas partilhadas (arrefecimento pós-despacho e esperas circuit-open/model-lock pré-despacho) e a sua extensão de tempo limite de orçamento de espera. Missing ou `true` preserva a política global; `true` não pode ativar a espera desativada globalmente. Um `targetTimeoutMs` explícito ainda ganha. Esta desativação não altera a espera de pré-despacho separada do código nativo do Codex.
+
+A mesma porta cobre o caso de pré-despacho (#16319): quando cada alvo de um combo é ignorado antes de qualquer tentativa ser feita porque o seu modelo fica num bloqueio transitório curto, o caminho de tentativa zero aguarda o bloqueio sob os mesmos limites e reenvia, em vez de responder a um `503 ALL_TARGETS_SKIPPED` sem dicas. Quando não é permitida qualquer espera (teto, tentativa ou orçamento esgotados, ou recurso desativado), a resposta do terminal é atualizada para `429 rate_limit_error` transportando `retry_after` / `reset_at` a partir da primeira expiração transitória do bloqueio; Os bloqueios de quota, autenticação e não encontrado mantêm o 503 sem dicas.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -553,302 +535,329 @@ Quando ativado, um aborto pelo watchdog é aplicado apenas à tentativa upstream
 
 ---
 
-## 7. Reformulação do Estado Upstream (erros de quota com estado incorreto)
+## 7. Reafirmação do estado upstream (erros de quota incorretamente indicados)
 
-**Âmbito:** um gateway upstream que reporta esgotamento temporário de quota com o estado HTTP errado.
+**Âmbito:** um gateway upstream que comunica temporariamente o esgotamento da quota com o estado HTTP errado.
 
-**Objetivo:** corrigir um estado enganador ANTES da classificação, para que os consumidores downstream (motor de fallback, agregação de combos, a resposta exposta ao cliente) vejam a verdadeira natureza repetível da falha.
+**Objetivo:** corrigir um estado enganador ANTES da classificação, para que os consumidores a jusante (motor de fallback, agregação de combinações, resposta apresentada ao cliente) vejam a verdadeira natureza transitória da falha.
 
-Alguns gateways sinalizam esgotamento TEMPORÁRIO de quota com um estado HTTP
-não repetível. O `agentrouter.org` devolve `403` (por vezes `400`) com um corpo
-em chinês (`用户额度不足` / `额度不足`) em vez do `429` padrão. Clientes como o
-Claude Code tratam o `403` como permanente e abortam a sessão e, sem correção,
-o motor de fallback classificá-lo-ia como `AUTH_ERROR` em vez de um evento de
-quota.
+Alguns gateways sinalizam o esgotamento TEMPORÁRIO da quota com um estado HTTP não reexecutável. `agentrouter.org` devolve `403` (por vezes `400`) com um corpo em chinês
+(`用户额度不足` / `额度不足`) em vez do `429` padrão. Clientes como o Claude
+Code tratam `403` como permanente e abortam a sessão e, sem esta correção,
+o motor de fallback classificá-lo-ia como `AUTH_ERROR` em vez de um
+evento de quota.
 
 **Implementação:**
 
 - Registo + matcher: `open-sse/config/upstreamStatusRestatement.ts` — uma
   lista de regras por fornecedor (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), correspondida através de
-  `applyStatusRestatement()`.
-- Local de chamada: o bloco `providerFailure:` em `open-sse/handlers/chatCore.ts`
-  (por volta da linha 3654), logo após `parseUpstreamError()` analisar uma
-  resposta upstream com um estado HTTP de erro (`!providerResponse.ok`), e antes
-  de qualquer classificação ser executada, para que todos os consumidores
-  downstream vejam o estado corrigido. Erros embutidos num stream SSE `200`
-  seguem um caminho de análise de stream separado e posterior e **não** são
-  cobertos por este hook atualmente — uma limitação conhecida, ainda não
-  necessária para o estado incorreto do agentrouter (que surge como um estado
-  HTTP de erro).
-- Elegibilidade de repetição: `429` está em `RETRY_AFTER_ELIGIBLE_STATUSES`
+excludeMarkers, defaultRetryAfterMs}`), correspondidas através de `applyStatusRestatement()`.
+- Ponto de chamada: o bloco `providerFailure:` em `open-sse/handlers/chatCore.ts`
+  (por volta da linha 3654), imediatamente depois de `parseUpstreamError()` analisar uma
+  resposta upstream com um estado HTTP de erro (`!providerResponse.ok`) e antes de
+  ser executada qualquer classificação, para que todos os consumidores a jusante vejam o
+  estado corrigido. Os erros incorporados num fluxo SSE `200` seguem um caminho
+  separado e posterior de análise do fluxo e **não** são abrangidos por este hook atualmente —
+  uma limitação conhecida, ainda não necessária para o erro de estado do agentrouter
+  (que surge como um estado HTTP de erro).
+- Elegibilidade para nova tentativa: `429` está incluído em
+  `RETRY_AFTER_ELIGIBLE_STATUSES`
   (`open-sse/services/combo/unavailableRetryGate.ts`), pelo que um erro
-  reformulado transporta uma janela de repetição real em vez de surgir como um
-  `403` morto.
+  reafirmado transporta uma janela real para nova tentativa, em vez de surgir como um
+  `403` inerte.
 - O `defaultRetryAfterMs` sintético de `60s` (`upstreamStatusRestatement.ts`)
-  é apenas o que a resposta reformulada comunica ao **cliente**; não é, por si
-  só, a duração interna de cooldown/lockout da ligação — essa é regida
-  separadamente pelo mecanismo que efetivamente trata o erro reformulado
-  (o backoff escalonado do Connection Cooldown, §2, com base de `3s` para
-  fornecedores de chave API; ou o Model Lockout, §3, para fornecedores com
-  quota por modelo como o agentrouter). O router pode tornar-se elegível para
-  repetir internamente mais cedo do que a janela de 60s que anuncia ao cliente
-  — margem intencional, não um bug.
+  é apenas o que a resposta reafirmada comunica ao **cliente**; não é, por si só,
+  a duração interna de arrefecimento/bloqueio da ligação — esta é governada
+  separadamente pelo mecanismo que efetivamente trata o erro reafirmado
+  (o backoff crescente do Connection Cooldown, §2, com base de `3s` para
+  fornecedores de chaves API; ou o Model Lockout, §3, para fornecedores com quota por
+  modelo, como o agentrouter). O router pode tornar-se internamente elegível para uma nova
+  tentativa antes da janela de 60s que anuncia ao cliente — margem intencional,
+  não um erro.
 
-Erros permanentes (o `无权访问模型` do agentrouter — sem acesso a este modelo)
-NUNCA são reformulados: `excludeMarkers` veta a regra mesmo quando os
-`textMarkers` correspondem, pelo que o erro mantém o seu estado original e nada
-o repete para sempre. A regra de classificação de fornecedor correspondente
+Os erros permanentes (o `无权访问模型` do agentrouter — sem acesso a este modelo) **NUNCA** são reafirmados: `excludeMarkers` impede a regra mesmo quando `textMarkers` corresponde, pelo que o erro mantém o seu estado original e nada o tenta novamente indefinidamente. A regra de classificação do fornecedor correspondente
 (`agentrouter-model-access-denied` em `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, um cooldown base declarado de `6h`) é
-consultada por `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_antes_ do retorno antecipado `FORBIDDEN` genérico da categoria apikey,
-condicionada por `honorsRuleLockScope(provider)` (#10334 — atualmente exclusivo
-do agentrouter através da lista de permissões `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-em `providerErrorRules.ts`). O cooldown declarado de 6h da regra flui como
-`fallbackResult.baseCooldownMs`, mas continua a alimentar o caminho de lockout
-de quota por modelo pré-existente (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, inalterado pelo #10334 exceto quanto à origem do
-cooldown): é limitado ao `mlSettings.maxCooldownMs` do operador (predefinição
-`1_800_000ms` / 30min), como qualquer outro lockout de modelo, e a _razão de
-lockout persistida_ mantém-se o `"forbidden"` hardcoded pré-existente, não o
-`"auth_error"` da regra — apenas a duração do cooldown é honrada de ponta a
-ponta, não a string da razão. A ligação em si permanece ativa; os modelos
-irmãos na mesma ligação não são afetados.
+`reason: "auth_error"`, `scope: "model"`, um arrefecimento base declarado de
+`6h`) é consultada por `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_antes_ do retorno antecipado genérico de `FORBIDDEN` da categoria apikey, condicionado por
+`honorsRuleLockScope(provider)` (#10334 — atualmente exclusivo do agentrouter através da
+lista de permissões `HONORS_RULE_LOCK_SCOPE_PROVIDERS` em
+`providerErrorRules.ts`). O arrefecimento declarado de 6h da regra é propagado como
+`fallbackResult.baseCooldownMs`, mas continua a alimentar o caminho preexistente de
+bloqueio por modelo e quota (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, não alterado pelo #10334 exceto quanto à origem do
+arrefecimento): é reduzido ao valor de `mlSettings.maxCooldownMs` do operador
+(predefinição `1_800_000ms` / 30min), como qualquer outro bloqueio de modelo, e o
+_motivo do bloqueio persistido_ mantém-se no valor predefinido hardcoded preexistente
+`"forbidden"`, não no `"auth_error"` da regra — apenas a duração do arrefecimento é
+respeitada de ponta a ponta, não a cadeia do motivo. A própria ligação permanece ativa;
+os modelos irmãos na mesma ligação não são afetados.
 
-Os erros de quota reformulados (`额度不足`) atingem uma regra de fornecedor em
-produção (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
-`scope: "connection"`, sem cooldown declarado próprio — aplica-se a predefinição
-de backoff escalonado da camada de persistência). Desde o #10334, o `scope` em
-`ProviderErrorRuleMatch` É consumido de ponta a ponta, mas **apenas** para
-fornecedores na lista de permissões `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-(`providerErrorRules.ts` — hoje apenas `"agentrouter"`, condicionado através de
-`honorsRuleLockScope()`). Para todos os outros fornecedores, o `scope`
-permanece informativo, exatamente como antes do #10334.
-`checkFallbackError` expõe o scope da regra correspondida como
+Os erros de quota reafirmados (`额度不足`) chegam, em produção, a uma regra do fornecedor
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, sem arrefecimento declarado próprio — aplica-se o backoff predefinido
+escalado da camada de persistência). Desde o #10334, o `scope` em
+`ProviderErrorRuleMatch` É consumido de ponta a ponta, mas **apenas** para fornecedores
+incluídos na lista de permissões `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+(`providerErrorRules.ts` — atualmente apenas `"agentrouter"`, condicionado através de
+`honorsRuleLockScope()`). Para todos os outros fornecedores, `scope` continua a ser
+meramente informativo, exatamente como antes do #10334.
+`checkFallbackError` expõe o âmbito da regra correspondente como
 `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) é a guarda partilhada que confirma que um
-`ruleScope` é genuinamente seguro de honrar como um sinal à escala da ligação e
-auto-recuperável (scope `"connection"`, razão `quota_exhausted`, nunca
-`permanent`, nunca `creditsExhausted` — uma defesa contra uma regra futura que
-emparelhe o scope `"connection"` com um estado de conta permanente). Dois
-consumidores invocam-na:
+(`src/sse/services/auth.ts`) é a proteção partilhada que confirma que um
+`ruleScope` é genuinamente seguro para ser respeitado como um sinal de âmbito global da
+ligação e de autorrecuperação (âmbito `"connection"`, motivo `quota_exhausted`, nunca
+`permanent`, nunca `creditsExhausted` — uma defesa contra uma futura associação do âmbito
+`"connection"` a um estado permanente da conta). Dois consumidores chamam-no:
 
 - **Persistência** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  em vez de cair no ramo de bloqueio **por modelo** do fornecedor passthrough
-  (agentrouter é `passthroughModels: true` → `hasPerModelQuota()`
-  devolve `true`), aplica um **cooldown temporário da ligação** —
+  em vez de entrar no ramo de bloqueio **por modelo** do fornecedor passthrough
+  (agentrouter tem `passthroughModels: true` → `hasPerModelQuota()`
+  devolve `true`), aplica um **período de arrefecimento temporário da ligação** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, nunca um estado terminal
   (`credits_exhausted`/`banned`/`expired`) — para que a ligação se recupere
-  automaticamente quando o cooldown expirar, em vez de exigir uma reposição
-  manual das credenciais. Ignorado para ligações com `disableCooling: true`
-  (#2997): essa opção de exclusão passa, em alternativa, para o bloqueio por
-  modelo (um compromisso documentado — ver o comentário de código acima do
-  ramo).
-- **Encaminhamento de combos no mesmo pedido** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): a mesma verificação de
-  proteção marca a ligação no conjunto em memória `exhaustedConnections`, com
-  a chave `${provider}:${connectionId}`. Isto apenas ignora um alvo restante
-  do MESMO PEDIDO que _ele próprio já traz esse exato `connectionId`_ no seu
-  próprio objeto de alvo (`getExhaustedTargetSkipReason()`,
+  automaticamente quando o período de arrefecimento terminar, sem exigir uma
+  reposição manual das credenciais.
+  Ignorado para ligações com `disableCooling: true` (#2997): essa opção de exclusão
+  faz com que o fluxo continue para o bloqueio por modelo (um compromisso
+  documentado — consulte o comentário no código acima do ramo).
+- **Encaminhamento de combinações no mesmo pedido** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): a mesma proteção marca a
+  ligação no conjunto em memória `exhaustedConnections`, indexado por
+  `${provider}:${connectionId}`. Isto apenas ignora um destino restante do MESMO
+  PEDIDO que _já tenha esse `connectionId` exato_ no seu próprio objeto de destino
+  (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` antes da consulta a `exhaustedConnections`) — um combo
-  simples de lista de modelos, em que os alvos irmãos não trazem nenhum
-  `connectionId` fixado próprio e um só é resolvido por despacho a partir do
-  cabeçalho `X-OmniRoute-Selected-Connection-Id` da resposta, nunca atinge
-  essa correspondência de chave. Para esse caso comum, a proteção real contra
-  a reutilização da conta acabada de esgotar por uma etapa restante NÃO é
-  este Set — é a camada de persistência acima (o `rateLimitedUntil` da
-  ligação está agora no futuro), combinada com esta mesma verificação de
-  proteção a suprimir `transientRateLimitedProviders` para a falha (ver
-  "Conceção em duas fases" e o comentário de código no ramo
-  `isAgentrouterConnectionQuotaScope` em `targetExhaustion.ts`): com esse Set
-  por marcar, a permissão forçada `allowRateLimitedConnection` de `combo.ts`
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NÃO entra em ação
-  para as etapas restantes do fornecedor, pelo que o filtro `rateLimitedUntil`
-  da seleção de credenciais (`src/sse/services/auth.ts:1238`) é respeitado
-  normalmente e uma etapa restante ou escolhe uma ligação agentrouter
-  diferente e ainda elegível, ou falha sem credenciais disponíveis — não
-  força o regresso à ligação que este ramo acabou de arrefecer.
+connectionId)` antes da consulta a `exhaustedConnections`) — uma combinação simples
+  de lista de modelos, em que os destinos irmãos não têm um `connectionId`
+  associado no próprio objeto e um deles só é resolvido por despacho a partir do
+  cabeçalho `X-OmniRoute-Selected-Connection-Id` da resposta, nunca encontra essa
+  correspondência de chave. Nesse caso comum, a proteção efetiva contra uma perna
+  restante reutilizar a conta que acabou de ficar esgotada NÃO é este Set — é a
+  camada de persistência acima (o `rateLimitedUntil` da ligação está agora no
+  futuro), combinada com esta mesma proteção a suprimir
+  `transientRateLimitedProviders` para a falha (consulte "Conceção em duas etapas"
+  e o comentário no código sobre o ramo
+  `isAgentrouterConnectionQuotaScope` em `targetExhaustion.ts`): como esse Set fica
+  sem marcação, o `allowRateLimitedConnection` de permissão forçada de
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NÃO é ativado
+  para as pernas restantes do fornecedor, pelo que o filtro
+  `rateLimitedUntil` da seleção de credenciais (`src/sse/services/auth.ts:1238`)
+  é respeitado normalmente e uma perna restante seleciona outra ligação
+  agentrouter ainda elegível ou falha sem credenciais disponíveis — não força o
+  regresso à ligação que este ramo acabou de colocar em arrefecimento.
 
-### Conceção em duas fases: reformulação do estado, depois classificação
+### Conceção em duas etapas: reformulação do estado e, depois, classificação
 
-A reformulação de estado (`upstreamStatusRestatement.ts`) e as regras de
-classificação de fornecedores (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) são registos separados que usam ambos como chave o id
-do fornecedor e marcadores de texto, mas executam em locais diferentes e
-servem propósitos diferentes: a reformulação reescreve o estado HTTP no
-início de `chatCore.ts`; as regras de classificação escolhem a `reason` de
-fallback e o `scope` de bloqueio (`model` / `provider` / `connection`) dentro
-de `checkFallbackError()` (`open-sse/services/accountFallback.ts`).
+A reformulação do estado (`upstreamStatusRestatement.ts`) e as regras de
+classificação do fornecedor (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) são registos separados que usam ambos o ID do fornecedor
+e marcadores de texto como chaves, mas são executados em locais diferentes e
+servem propósitos diferentes: a reformulação reescreve antecipadamente o estado
+HTTP em `chatCore.ts`; as regras de classificação escolhem o `reason` de recurso
+e bloqueiam o `scope` (`model` / `provider` / `connection`) dentro de
+`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
 
-As regras de classificação só veem o **texto** completo do erro (necessário
-para corresponder a marcadores do corpo como `额度不足`) para fornecedores
-listados na lista de permissões `FULL_TEXT_RULE_PROVIDERS` em
+As regras de classificação só veem o **texto** completo do erro (necessário para
+corresponder a marcadores no corpo, como `额度不足`) para os fornecedores
+indicados na lista de permissões `FULL_TEXT_RULE_PROVIDERS` em
 `providerErrorRules.ts` — atualmente apenas `"agentrouter"`. Para todos os
-outros fornecedores do **catálogo integrado**, `checkFallbackError` entrega a
-`getProviderErrorRuleMatch` apenas o erro estruturado (`{code, type}`), o que
-é suficiente para regras baseadas em cabeçalho/estado/código, mas cego a
-marcadores de texto do corpo. O auxiliar `resolveRuleMatchBody()` efetua esta
-seleção: texto completo do erro para fornecedores na lista de permissões, o
-erro estruturado nos restantes casos. Adicionar um fornecedor **integrado** a
-`FULL_TEXT_RULE_PROVIDERS` é uma inclusão explícita por fornecedor — existe
-para que o caminho predefinido de cada fornecedor fora da lista permaneça
-inalterado byte a byte.
+outros fornecedores do **catálogo incorporado**, `checkFallbackError` passa a
+`getProviderErrorRuleMatch` apenas o erro estruturado (`{code, type}`), o que é
+suficiente para regras baseadas em cabeçalhos/estado/código, mas não deteta
+marcadores no texto do corpo. O auxiliar `resolveRuleMatchBody()` faz esta
+seleção: o texto completo do erro para fornecedores autorizados; o erro
+estruturado nos restantes casos. Adicionar um fornecedor **incorporado** a
+`FULL_TEXT_RULE_PROVIDERS` é uma ativação explícita por fornecedor — existe para
+que o caminho predefinido de todos os fornecedores que não constam da lista
+permaneça inalterado byte a byte.
 
-O `scope` de uma regra (`model` / `provider` / `connection`) é uma inclusão
-separada de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` apenas o expõe
-como `fallbackResult.ruleScope`, e os consumidores a jusante só o respeitam
-como algo mais do que um rótulo informativo para fornecedores na lista de
-permissões `HONORS_RULE_LOCK_SCOPE_PROVIDERS` no mesmo ficheiro (controlado
-via `honorsRuleLockScope()` — hoje apenas `"agentrouter"`). Ver "Erros de
-quota reformulados" acima para saber o que uma correspondência
-`scope: "connection"` realmente faz quando um fornecedor está nessa lista de
-permissões.
+O `scope` de uma regra (`model` / `provider` / `connection`) é uma ativação
+separada de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` apenas o expõe como
+`fallbackResult.ruleScope`, e os consumidores a jusante só o respeitam como algo
+mais do que uma etiqueta informativa para os fornecedores da lista de permissões
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` no mesmo ficheiro (controlado através de
+`honorsRuleLockScope()` — atualmente apenas `"agentrouter"`). Consulte
+"Erros de quota reformulados" acima para saber o que uma correspondência
+`scope: "connection"` faz quando um fornecedor está nessa lista de permissões.
 
-**#11104 — as regras declaradas pelo operador contornam ambas as listas de
-permissões.** Um operador pode declarar uma regra por fornecedor em tempo de
-execução via `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) sem
-editar este ficheiro. Condicionar uma regra de operador a
+**#11104 — as regras declaradas pelo operador ignoram ambas as listas de permissões.**
+Um operador pode declarar uma regra por fornecedor em tempo de execução através de
+`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+sem editar este ficheiro. Submeter uma regra do operador a
 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — listas de
-permissões destinadas a proteger o comportamento **predefinido** das regras
-do catálogo integrado — tornaria o mecanismo de definições inerte para todos
-os fornecedores exceto os já aí listados, uma vez que declarar a regra já é,
-por si só, a inclusão explícita do operador. `resolveRuleMatchBody()` e
-`honorsRuleLockScope()` verificam ambas primeiro
-`hasOperatorRuleForProvider()`: um fornecedor com uma regra de operador
-recebe o texto bruto do erro e tem o seu `scope` declarado respeitado,
-independentemente de também aparecer em qualquer uma das listas de
-permissões.
+permissões destinadas a proteger o comportamento **predefinido** das regras do
+catálogo incorporado — tornaria o mecanismo de definições inerte para todos os
+fornecedores, exceto os que já constam dessas listas, uma vez que declarar a
+regra já é a ativação explícita do operador. Tanto `resolveRuleMatchBody()` como
+`honorsRuleLockScope()` verificam primeiro
+`hasOperatorRuleForProvider()`: um fornecedor com uma regra do operador recebe o
+texto bruto do erro e tem o `scope` declarado respeitado, independentemente de
+também aparecer numa das listas de permissões.
 
-**Lacuna conhecida — `providerRuleRegistry` nunca é consultado para HTTP 400.** O ramo `BAD_REQUEST` de `checkFallbackError` classifica o estado 400
-inteiramente através dos seus próprios arrays de padrões
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, etc. em
-`accountFallback.ts`) e retorna antes de ser alcançado o ramo
-`configuredRule`/`getProviderErrorRuleMatch` acima dele. Uma regra do
-catálogo integrado (ou uma regra de operador) com `status: 400` é
-sintaticamente válida, mas nunca será acionada. Nenhuma regra existente visa
-400 atualmente, pelo que nada em produção é afetado — mas uma futura regra
-para 400 exige que este ramo seja alterado primeiro, o que constitui uma
-alteração maior do que adicionar uma regra (reclassifica o 400 para todos os
-fornecedores que já dependem do comportamento dos arrays de padrões) e está
-fora do âmbito de uma adição de regra para um único fornecedor.
+**Regras declaradas pelo operador** (`OperatorProviderErrorRule`): cada regra tem
+um `status` opcional e um `match` opcional (uma substring simples,
+não sensível a maiúsculas e minúsculas, do texto do erro, nunca um RegExp, pelo
+que não pode causar ReDoS), e tem de definir pelo menos um dos dois. Quando ambos
+estão definidos, são combinados com AND; um campo omitido corresponde a qualquer
+valor, pelo que `{match: "insufficient_quota"}` corresponde a qualquer estado
+que contenha esse código. A primeira regra correspondente é aplicada.
+`cooldownMs` aceita até 30 dias; no máximo 50 regras no total.
 
-### Adicionar um novo gateway que reporta a quota incorretamente
+**Predefinições abrangentes** (`settings.providerErrorDefaults`, opt-in, definidas através de
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+com `cooldownMs` de 1 minuto a 30 dias. Uma predefinição só se aplica quando não
+foi encontrada nenhuma regra do operador nem nenhuma regra do catálogo
+incorporado, e apenas a erros 402, 403, 408, 429 e 5xx. Os erros relacionados
+com o formato do pedido (400, 404, 409, 413, 422) e os 401 isolados mantêm o
+seu próprio tratamento. Sem um `reason` explícito, o motivo é obtido a partir do
+estado, da mesma forma que `classifyError` o faz. Declarar uma predefinição
+conta como uma regra do operador para `hasOperatorRuleForProvider()`, pelo que o
+seu `scope` (por predefinição, `"connection"`) é respeitado. O cooldown efetivo
+de uma predefinição é o mais longo entre o seu `cooldownMs` e a indicação de
+nova tentativa do próprio fornecedor (`Retry-After`,
+`x-ratelimit-reset` ou uma indicação de reinicialização no corpo, a mesma
+indicação que o motor respeita quando a definição de cooldown da ligação
+"use upstream retry hints" está ativa), pelo que uma predefinição pode prolongar
+uma indicação curta do fornecedor, mas nunca encurtar uma reinicialização real.
+Uma regra explícita do operador mantém o seu `cooldownMs` exato. Nem uma regra
+nem uma predefinição contornam as salvaguardas de cooldown da ligação em
+`markAccountUnavailable`: um cooldown ativo e mais longo nunca é encurtado e um
+estado terminal nunca é substituído. Os detetores de texto incorporados que são
+executados anteriormente em `checkFallbackError` (créditos esgotados, quota
+diária, conta desativada) continuam a ter precedência para as suas próprias
+frases.
+
+**Lacuna conhecida — `providerRuleRegistry` nunca é consultado para HTTP 400.**
+A ramificação `BAD_REQUEST` de `checkFallbackError` classifica o estado 400
+inteiramente através das suas próprias matrizes de padrões
+(`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, etc. em `accountFallback.ts`) e termina antes de
+ser alcançada a ramificação `configuredRule`/`getProviderErrorRuleMatch` acima.
+Uma regra do catálogo incorporado (ou uma regra do operador) com
+`status: 400` é sintaticamente válida, mas nunca será aplicada. Atualmente,
+nenhuma regra existente visa 400, pelo que nada em produção é afetado — mas
+uma futura regra para 400 exigirá primeiro uma alteração nesta ramificação, o
+que constitui uma mudança maior do que adicionar uma regra (reclassifica 400
+para todos os fornecedores que já dependem do comportamento das matrizes de
+padrões) e está fora do âmbito da adição de uma regra para um único fornecedor.
+
+### Adicionar um novo gateway que deturpa a quota
 
 1. Registe um array de regras em `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Mantenha os `textMarkers`
+   (`open-sse/config/upstreamStatusRestatement.ts`). Mantenha `textMarkers`
    específicos do fornecedor; nunca reutilize frases genéricas em inglês que
    colidam com `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
 2. Opcionalmente, registe regras de classificação em
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) para escolher
    o âmbito de bloqueio correto (`connection` para quota ao nível da conta,
-   `model` para erros por modelo). Este passo só produz efeito em produção para
-   fornecedores cujas regras precisam do texto completo do erro (marcadores de
-   corpo): adicione o id do fornecedor a `FULL_TEXT_RULE_PROVIDERS` no mesmo
-   ficheiro — caso contrário, o `checkFallbackError` entrega sempre à regra apenas
-   o erro estruturado `{code, type}` e uma regra baseada no texto do corpo nunca
-   corresponderá ao tráfego real. As regras que correspondem apenas com base em
-   `status`/`headers` (como as do Opencode ou do Minimax) não precisam deste
-   opt-in. Separadamente, se a regra declarar `scope: "connection"` e a intenção
-   for um arrefecimento real ao nível da ligação, mais a exclusão de combos no
-   mesmo pedido (e não apenas um rótulo informativo), adicione o id do
-   fornecedor a `HONORS_RULE_LOCK_SCOPE_PROVIDERS` no mesmo ficheiro — é isto que
-   condiciona o consumo ao estilo de `isAgentrouterConnectionQuotaScope()` em
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) e
+   `model` para erros específicos de um modelo). Este passo só tem efeito em
+   produção para fornecedores cujas regras precisam do texto completo do erro
+   (marcadores no corpo): adicione o id do fornecedor a
+   `FULL_TEXT_RULE_PROVIDERS` no mesmo ficheiro — caso contrário,
+   `checkFallbackError` só fornece à regra o erro estruturado
+   `{code, type}` e uma regra baseada no texto do corpo nunca corresponderá ao
+   tráfego real. As regras que correspondem apenas a `status`/`headers` (como as
+   de Opencode ou Minimax) não precisam desta ativação. Separadamente, se a
+   regra declarar `scope: "connection"` e a intenção for um cooldown efetivo ao
+   nível da ligação, juntamente com a omissão da combinação no mesmo pedido
+   (e não apenas uma etiqueta informativa), adicione o id do fornecedor a
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` no mesmo ficheiro — é isto que controla o
+   consumo ao estilo de `isAgentrouterConnectionQuotaScope()` em
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) e em
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); sem isso, o `scope` continua
-   a fluir através de `fallbackResult.ruleScope`, mas nada atua sobre ele.
-3. Adicione testes unitários à semelhança de `tests/unit/upstream-status-restatement.test.ts`
-   e `tests/unit/agentrouter-error-rules.test.ts` (incluindo as guardas
-   not-permanent / not-creditsExhausted e — se o fornecedor precisar da lista de
-   permissões — um teste que verifique que `resolveRuleMatchBody()` devolve o
+   (`open-sse/services/combo/targetExhaustion.ts`); sem isto, `scope`
+   continua a ser propagado através de `fallbackResult.ruleScope`, mas nada
+   atua sobre ele.
+3. Adicione testes unitários que reproduzam o padrão de
+   `tests/unit/upstream-status-restatement.test.ts`
+   e `tests/unit/agentrouter-error-rules.test.ts` (incluindo as salvaguardas
+   not-permanent / not-creditsExhausted e — se o fornecedor precisar da lista
+   de permissões — um teste que confirme que `resolveRuleMatchBody()` devolve o
    texto completo apenas para esse fornecedor).
 
-Não são necessárias alterações a `chatCore.ts`, `classifyError` ou ao combo.
+Não são necessárias alterações a `chatCore.ts`, `classifyError` ou combo.
 
-#### Bloqueio agrupado por IP de saída (#10880)
+#### Bloqueio agrupado por segmento de saída (#10880)
 
 Os fornecedores em `EGRESS_BUCKETED_LOCK_PROVIDERS` (família opencode) são
-tratados como upstream agrupado por IP (o escalão gratuito do opencode é
-agrupado por IP, não por conta — ver #9611): um status 429 classificado como
-`quota_exhausted` **ou** `rate_limit_exceeded` arrefece todas as ligações da
-família incluída na lista de permissões cujo último IP de saída conhecido
-coincida com o da ligação que falhou, antes de a rotação as poder tentar
-— evitando N-1 chamadas ao upstream garantidamente falhadas (o mesmo padrão
-de #10460/#10525).
-O `rate_limit_exceeded` é incluído deliberadamente: no caminho do
+tratados como upstream agrupado por IP (o nível gratuito do opencode é agrupado
+por IP, não por conta — consulte #9611): um estado 429 classificado como
+`quota_exhausted` **ou** `rate_limit_exceeded` inicia o cooldown de todas as
+ligações da família permitida cujo último IP de saída conhecido corresponda ao
+da ligação que falhou, antes de a rotação poder tentar essas ligações
+— evitando N-1 chamadas upstream destinadas a falhar (com a mesma forma que
+#10460/#10525). `rate_limit_exceeded` é incluído deliberadamente: no caminho de
 `markAccountUnavailable`, as regras específicas do opencode nunca correspondem
-(não são entregues cabeçalhos/corpo ao `checkFallbackError`, e o opencode não
-está em `FULL_TEXT_RULE_PROVIDERS`), pelo que um 429 cujo corpo traz o texto de
-quota de subscrição ("monthly usage limit reached") é classificado como
-`quota_exhausted` pelo fallback de texto de quota
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; arrefecimento de 1 h)
-antes de a regra `status_429` ser sequer alcançada — enquanto um 429 sem texto
-de quota (limitação de taxa simples) é classificado através da regra
-`status_429` como `rate_limit_exceeded` e ainda assim arrefece a família de
-IPs. Para um fornecedor incluído na lista de permissões, um limite de taxa
-agrupado por IP é o mesmo sinal que uma quota esgotada. Limitações honestas:
+(não são fornecidos cabeçalhos/corpo a `checkFallbackError`, e o opencode não
+está em `FULL_TEXT_RULE_PROVIDERS`), pelo que um 429 cujo corpo contenha o texto
+de quota da subscrição ("monthly usage limit
+reached") é classificado como `quota_exhausted` pelo fallback de texto de quota
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown de 1 h) antes
+de a regra `status_429` ser alcançada — enquanto um 429 sem texto de quota
+(limitação de taxa simples) é classificado através da regra `status_429` como
+`rate_limit_exceeded` e continua a aplicar o cooldown à família IP. Para um
+fornecedor permitido, uma limitação de taxa agrupada por IP é o mesmo sinal que
+uma quota esgotada. Limitações honestas:
 
-- **Melhor esforço**: o bloqueio resolve o último `egress_ip` conhecido da
-  ligação a partir de `proxy_logs` (janela de 24h, síncrono, sem cache).
-  Cache fria (IP de egresso nunca sondado) ou nenhuma linha → a ligação que
-  falhou é na mesma arrefecida pelo branch (registada como atualmente),
-  apenas não é bloqueada nenhuma irmã.
-- **Nunca terminal**: o cooldown é uma janela de quota renovável
-  (`testStatus: "unavailable"`); um estado permanente nunca é derivado de um
-  sinal ao nível do IP. As ligações `disableCooling` saltam o branch por
-  completo.
-- **A granularidade do bloqueio muda para a família abrangida pela lista de
-  permissões**: trata-se de uma alteração de âmbito, não apenas de uma
-  otimização entre irmãs. O opencode é um provider `passthroughModels`,
-  pelo que antes deste branch um 429 produzia um bloqueio por MODELO; agora
-  produz um cooldown da ligação — incluindo para um operador que execute
-  uma única ligação, sem qualquer irmã. Essa é a granularidade que a tabela
-  de regras do opencode já declara como correta (`scope: "connection"`,
-  `providerErrorRules.ts`), nunca respeitada até agora porque o opencode
-  não está em `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. O branch escreve ele
-  próprio o cooldown + `backoffLevel` da ligação que falhou, espelhando o
-  branch agentrouter de âmbito de ligação, e retorna — o bloco por modelo e
-  o caminho genérico abaixo nunca são alcançados.
-- **Combo incluído**: tal como o branch agentrouter, o âmbito ignora
-  deliberadamente o downgrade de `persistUnavailableState`/`isCombo` que um
-  chamador combo aplica a um 429. Um bloqueio por modelo não é uma forma
-  mais fraca deste âmbito, é a unidade errada: nada diz sobre o IP esgotado,
-  pelo que a rotação de combos continuaria a queimar uma chamada
-  garantidamente falhada por irmã.
-- **Segurança das irmãs**: uma irmã já terminal (banned/credits_exhausted)
-  ou já num cooldown mais longo nunca é sobrescrita.
-- **Lista de permissões exclusiva**: alargar
-  `EGRESS_BUCKETED_LOCK_PROVIDERS` é uma decisão explícita do proprietário;
-  sem cablagem genérica (padrão #10334/#10419). A consulta de irmãs vincula
-  essa mesma lista de permissões em vez de a repetir como literal SQL, pelo
-  que alargá-la continua a ser uma alteração de uma linha.
-- **Rotação do IP de egresso, em ambas as direções**: a janela de consulta
-  (24h) é muito mais ampla do que o TTL da cache de IP de egresso (5 min),
-  pelo que o "último IP conhecido" é histórico, não estado atual. Se o proxy
-  de uma ligação tiver rodado dentro da janela, o bloqueio pode **não
-  detetar** um IP genuinamente partilhado (o IP registado é o novo, ainda
-  não esgotado) — e, simetricamente, pode **arrefecer uma irmã que
-  entretanto deixou de usar** o IP esgotado. O segundo caso custa a essa
-  irmã uma janela de cooldown; ambos são limites aceites de melhor esforço
-  de uma consulta baseada em histórico.
-- **Custo**: duas varreduras limitadas de `proxy_logs` (filtradas por janela
-  através de `idx_pl_timestamp`), apenas à frequência dos 429. Sem índice
-  novo (migração 134 YAGNI). Medido numa cópia de BD de tráfego real de
-  tamanho moderado; uma instância de alto débito contém proporcionalmente
-  mais linhas na mesma janela.
+- **Melhor esforço**: o bloqueio resolve o último `egress_ip` conhecido da ligação
+  a partir de `proxy_logs` (janela de 24 h, síncrona, sem cache). Cache frio (o
+  IP de saída nunca foi sondado) ou nenhuma linha → a ligação em falha continua
+  a entrar em arrefecimento pelo ramo (registado como atualmente), apenas sem
+  bloquear nenhuma ligação irmã.
+- **Nunca terminal**: o arrefecimento é uma janela de quota renovável
+  (`testStatus: "unavailable"`); nunca é derivado um estado permanente de um
+  sinal ao nível do IP. As ligações `disableCooling` ignoram completamente o
+  ramo.
+- **A granularidade do bloqueio muda para a família allowlisted**: isto é uma
+  alteração de âmbito, não apenas uma otimização para ligações irmãs. opencode é
+  um fornecedor `passthroughModels`, pelo que, antes deste ramo, um 429 produzia
+  um bloqueio por MODELO; agora produz um arrefecimento da ligação — incluindo
+  para um operador que execute uma única ligação sem qualquer ligação irmã. Essa
+  é a granularidade que a tabela de regras do opencode já declara como correta
+  (`scope: "connection"`,
+  `providerErrorRules.ts`), nunca respeitada até agora porque opencode não está
+  em `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. O ramo escreve ele próprio o
+  arrefecimento e o `backoffLevel` da ligação em falha, imitando o ramo
+  connection-scoped do agentrouter, e retorna — o bloqueio por modelo e o
+  caminho genérico abaixo nunca são alcançados.
+- **Combo incluído**: tal como no ramo do agentrouter, o âmbito ignora
+  deliberadamente a redução `persistUnavailableState`/`isCombo` aplicada por um
+  chamador combo a um 429. Um bloqueio por modelo não é uma forma mais fraca
+  deste âmbito; é a unidade errada: não diz nada sobre o IP esgotado, pelo que a
+  rotação combo continuaria a consumir uma chamada garantidamente falhada por
+  ligação irmã.
+- **Segurança das ligações irmãs**: uma ligação irmã que já esteja num estado
+  terminal (banned/credits_exhausted) ou que já esteja num arrefecimento mais
+  longo nunca é substituída.
+- **Allowlist exclusiva**: alargar `EGRESS_BUCKETED_LOCK_PROVIDERS` é uma
+  decisão explícita do responsável; não existe ligação genérica (padrão
+  #10334/#10419). A consulta de ligações irmãs usa essa mesma allowlist em vez
+  de a repetir como literal SQL, pelo que alargá-la continua a ser uma alteração
+  de uma linha.
+- **Rotação do IP de saída, em ambas as direções**: a janela de pesquisa (24 h)
+  é muito mais ampla do que o TTL da cache do IP de saída (5 min), pelo que o
+  “último IP conhecido” é histórico, não o estado atual. Se o proxy de uma
+  ligação rodou dentro da janela, o bloqueio pode **falhar** um IP genuinamente
+  partilhado (o IP registado é o novo, ainda não esgotado) — e, simetricamente,
+  pode **arrefecer uma ligação irmã que entretanto tenha rodado para longe** do
+  IP esgotado. O segundo caso custa a essa ligação irmã uma janela de
+  arrefecimento; ambos são limites aceitáveis, de melhor esforço, de uma pesquisa
+  baseada em histórico.
+- **Custo**: duas varreduras limitadas de `proxy_logs` (filtradas pela janela
+  através de `idx_pl_timestamp`), apenas com a frequência dos 429. Nenhum índice
+  novo (migração 134 YAGNI). Medido numa cópia de uma base de dados com tráfego
+  real e tamanho moderado; uma instância de elevado débito mantém
+  proporcionalmente mais linhas na mesma janela.
 
----
+## Outros recursos de resiliência
 
-## Outras Funcionalidades de Resiliência
-
-- **20 estratégias de encaminhamento** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — consulte [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
-- **Encaminhamento sensível à reposição** (v3.8.0) — dá prioridade a ligações com base na hora de reposição da quota.
-- **Degradação do modo em segundo plano** — o `background: true` da Responses API é degradado para síncrono, com aviso.
-- **Deteção dinâmica de limites de ferramentas** — faz backoff aos fornecedores quando os limites de número de ferramentas são atingidos.
-- **Fallback de emergência** — controlado pela variável `OMNIROUTE_EMERGENCY_FALLBACK`; os operadores podem substituí-lo na página de Feature Flags sem reiniciar.
+- **22 estratégias de encaminhamento** (prioridade, ponderado, round-robin, retransmissão de contexto, preenchimento primeiro, p2c, aleatório, menos utilizado, otimizado para custos, com reconhecimento de redefinição, janela de redefinição, expiração primeiro, headroom, ponderado por quota, estrito-aleatório, automático, lkgp, otimizado para contexto, otimizado para cache, fusão, pipeline, jev) — consulte [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
+- **Encaminhamento com reconhecimento de redefinição** (v3.8.0) — prioriza as ligações por tempo de redefinição de cota.
+- **Degradação do modo de fundo** Respostas — API `background: true` degradadas para sincronizar com aviso.
+- **Detecção dinâmica de limite de ferramenta** — afasta os fornecedores quando os limites de contagem de ferramentas são atingidos.
+- **Reserva de emergência** — controlado por `OMNIROUTE_EMERGENCY_FALLBACK`; os operadores podem substituí-lo na página Feature Flags sem reiniciar.
 
 ---
 

@@ -81,6 +81,18 @@ Selv uden for blokerede regioner er proxyer nyttige til:
 
 ---
 
+## Standard proxy-tilstand for nye konti
+
+I** Indstillinger → Proxy → Global konfiguration** , brug** Aktiver proxy som standard for nye forbindelser** for at vælge den oprindelige proxy-tilstand for nyligt tilføjede udbyderkonti.
+
+Den nye indstilling styrer den indledende proxy-tilstand for nyligt tilføjede udbyderkonti. Det ændrer ikke eksisterende konti eller erstatter den globale proxy-switch. Dens startværdi bevarer den tidligere adfærd. Slå det fra én gang for at oprette fremtidige konti med proxy deaktiveret som standard.
+
+Præferencen gemmes som `defaultNewConnectionProxyEnabled` gennem de eksisterende indstillinger API. Den er som standard `true` når den aldrig bliver gemt. At gemme `false` træder i kraft for efterfølgende nye konti uden genstart. `POST /api/providers` accepterer en valgfri streng boolesk `proxyEnabled`; en eksplicit `true` eller `false` har forrang over oprettelsesstandarden. Udeladelse af en dubletkonto eller OAuth genopret forbindelse bevarer denne kontos lagrede tilstand. Individuelle konti kan stadig aktiveres eller deaktiveres efterfølgende.
+
+Selektive udbyderoverførsler bruger destinationsinstallationens standard for nye konti og bevarer destinationspolitikken, når eksisterende konti erstattes. Proxy-skift er ikke bærbare overførselsfelter. Fuld backupgendannelse og historisk JSON/SQL -migrering bevarer deres eksisterende gendannelsessemantik, inklusive gemte kontoværdier og ældre skemastandarder; en fuld gendannelse af indstillinger kan også gendanne denne præference.
+
+Denne præference tildeler ikke en proxy eller fastslår, at en er sund eller i brug. Den faktiske routing afhænger stadig af den globale proxy-switch og gældende proxy-konfiguration. Syntetiske udbydere uden en vedvarende konto, OAuth -trafik før kontooprettelse, environment/system proxyer og eksterne backends' netværk er uden for dets omfang.
+
 ## Proxysystem med 4 niveauer
 
 OmniRoute understøtter proxykonfiguration på **fire uafhængige niveauer**, som bestemmes i prioriteret rækkefølge:

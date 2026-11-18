@@ -72,11 +72,15 @@ test("stripUnsupportedParams: github strips temperature for GPT-5.4+ and GPT-6.x
     "gpt-6-astra",
     "gpt-6.0",
     "gpt-6.1-sol",
+    "gpt-6.1-terra",
     "GPT-6.10",
   ]) {
     const body: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
     stripUnsupportedParams("github", model, body);
-    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped`);
+    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped for github`);
+    const gheBody: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("ghe-copilot", model, gheBody);
+    assert.deepEqual(gheBody, { top_p: 1 }, `${model}: temperature must be stripped for ghe-copilot`);
   }
 });
 
@@ -248,9 +252,12 @@ test("STRIP_RULES is non-empty and every rule has a drop list, a clamp mechanism
       typeof rule.mapThinkingType === "object" &&
       rule.mapThinkingType !== null &&
       Object.keys(rule.mapThinkingType).length > 0;
+    // Nested output_config drops (e.g. opencode-go Claude output_config.task_budget).
+    const hasOutputConfigDrop =
+      Array.isArray(rule.dropOutputConfigFields) && rule.dropOutputConfigFields.length > 0;
     assert.ok(
-      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap,
-      "rule must either drop params (always or only when null), clamp max output, or map a thinking type"
+      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap || hasOutputConfigDrop,
+      "rule must either drop params (always or only when null), clamp max output, map a thinking type, or drop nested output_config fields"
     );
     assert.ok(typeof rule.match === "function" || rule.match instanceof RegExp);
   }

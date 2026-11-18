@@ -1,3 +1,6 @@
+import { falModelPath, falSelectionEndpoint } from "../../config/falEndpoint.ts";
+import type { PrepareFalInput } from "../fal/compatibility.ts";
+import { FalError, falTrackingUrl, normalizeFalOutput } from "../fal/client.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import {
   FetchTimeoutError,
@@ -13,6 +16,7 @@ type FalBody = Record<string, unknown>;
 type FalCredentials = {
   apiKey?: unknown;
   accessToken?: unknown;
+  connectionId?: unknown;
 };
 
 type FalProviderConfig = {
@@ -31,59 +35,6 @@ function stringValue(value: unknown): string | undefined {
 function stringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.map(stringValue).filter((value): value is string => Boolean(value));
-}
-
-/**
- * fal model ids are `<owner>/<app>[/path]`. First-party apps live under the
- * `fal-ai` owner; third-party vendors publish under their own owner namespace
- * (bytedance, alibaba, minimax, …).
- *
- * The previous code recognised only `fal-ai/`, `xai/` and `google/` as
- * already-owned and prefixed everything else with `fal-ai/`, which rewrote
- * `bytedance/seedance-2.5/text-to-video` to
- * `fal-ai/bytedance/seedance-2.5/text-to-video`. fal reads the first segment as
- * the app name, so it answered 404 “Application bytedance not found” — leaving
- * every vendor-owned model unreachable even when the registry lists the owner
- * and the account is entitled to it.
- *
- * Owners derived from fal's public video catalogue (24 namespaces, ~157 models
- * that were previously unreachable). Extend the set if fal adds a vendor.
- */
-const FAL_VENDOR_OWNERS = new Set([
-  "fal-ai",
-  "alibaba",
-  "argil",
-  "blackforestlabs",
-  "bria",
-  "bytedance",
-  "cassetteai",
-  "clarityai",
-  "creatify",
-  "decart",
-  "elevenlabs",
-  "google",
-  "lightricks",
-  "luma",
-  "minimax",
-  "mirage-api",
-  "mirelo-ai",
-  "moonvalley",
-  "nvidia",
-  "pixelcut",
-  "sonilo",
-  "topaz",
-  "veed",
-  "wan",
-  "xai",
-]);
-
-/**
- * fal expects `<owner>/<app>[/path]`. An id that already carries a vendor owner
- * is used verbatim; anything else is a first-party app that needs `fal-ai/`.
- */
-function falModelPath(resolvedModel: string): string {
-  const owner = resolvedModel.split("/")[0];
-  return FAL_VENDOR_OWNERS.has(owner) ? resolvedModel : `fal-ai/${resolvedModel}`;
 }
 
 function numberValue(value: unknown): number | undefined {
@@ -346,6 +297,12 @@ function absoluteFalUrl(value: unknown, baseUrl: string): string | undefined {
     : `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
 }
 
+/** The native path pins upstream-supplied URLs to the fal queue before sending the key. */
+function falQueueUrl(value: unknown, requestId: string, baseUrl: string, native: boolean) {
+  if (!native) return absoluteFalUrl(value, baseUrl);
+  return stringValue(value) ? falTrackingUrl(value, requestId) : undefined;
+}
+
 function getToken(credentials: FalCredentials | null | undefined): string {
   return String(credentials?.apiKey || credentials?.accessToken || "");
 }
@@ -362,6 +319,8 @@ async function runFalQueue({
   providerConfig,
   credentials,
   log,
+  signal,
+  native = false,
 }: {
   model: string;
   body: FalBody;
@@ -370,6 +329,8 @@ async function runFalQueue({
   providerConfig: FalProviderConfig;
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
+  signal?: AbortSignal | null;
+  native?: boolean;
 }) {
   const startTime = Date.now();
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
@@ -387,7 +348,7 @@ async function runFalQueue({
   const timeoutMs = getConfiguredTimeout();
   const deadline = startTime + timeoutMs;
   const resolvedModel = resolveFalModel(model, body, kind);
-  const falModel = falModelPath(resolvedModel);
+  const falModel = native ? falSelectionEndpoint(resolvedModel) : falModelPath(resolvedModel);
   const queueUrl = `${baseUrl}/${falModel}`;
 
   try {
@@ -396,6 +357,7 @@ async function runFalQueue({
       headers,
       body: JSON.stringify(body),
       timeoutMs,
+      signal,
     });
     const createPayload = await createResponse.json().catch(() => ({}));
 
@@ -425,13 +387,15 @@ async function runFalQueue({
     }
 
     const statusUrl =
-      absoluteFalUrl(createPayload.status_url, baseUrl) ||
+      falQueueUrl(createPayload.status_url, requestId, baseUrl, native) ||
       `${queueUrl}/requests/${requestId}/status`;
     const responseUrl =
-      absoluteFalUrl(createPayload.response_url, baseUrl) || `${queueUrl}/requests/${requestId}`;
+      falQueueUrl(createPayload.response_url, requestId, baseUrl, native) ||
+      `${queueUrl}/requests/${requestId}`;
 
     while (Date.now() < deadline) {
       const statusResponse = await fetchWithTimeout(statusUrl, {
+        signal,
         headers: { Authorization: `Key ${token}` },
         timeoutMs: Math.min(getConfiguredTimeout(), Math.max(1000, deadline - Date.now())),
       });
@@ -445,6 +409,7 @@ async function runFalQueue({
       const status = stringValue(statusPayload?.status);
       if (status === "COMPLETED") {
         const resultResponse = await fetchWithTimeout(responseUrl, {
+          signal,
           headers: { Authorization: `Key ${token}` },
           timeoutMs: Math.min(getConfiguredTimeout(), Math.max(1000, deadline - Date.now())),
         });
@@ -458,6 +423,9 @@ async function runFalQueue({
         }
 
         const normalized = normalizeFalMediaResult(resultPayload, kind);
+        if (native && normalized.success) {
+          Object.assign(normalized.data, normalizeFalOutput(resultPayload));
+        }
         saveCallLog({
           method: "POST",
           path: `/v1/${kind === "video" ? "videos" : "music"}/generations`,
@@ -500,28 +468,78 @@ async function runFalQueue({
   }
 }
 
-export function handleFalVideoGeneration(args: {
+type FalGenerationArgs = {
   model: string;
   provider: string;
   providerConfig: FalProviderConfig;
   body: FalBody;
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
-}) {
-  return runFalQueue({
-    ...args,
-    body: buildFalVideoRequestBody(args.body, args.model),
-    kind: "video",
-  });
+  signal?: AbortSignal | null;
+  /** FAL_NATIVE_ENABLED, injected by the routes. Null keeps the established request body. */
+  prepareFalInput?: PrepareFalInput | null;
+};
+
+function isBuiltInFalVideoModel(model: string): boolean {
+  return (
+    ["veo3.1/lite", "fal-ai/veo3.1/lite"].includes(model) ||
+    model.startsWith("xai/grok-imagine-video/") ||
+    model.startsWith("google/gemini-omni-flash")
+  );
 }
 
-export function handleFalMusicGeneration(args: {
-  model: string;
-  provider: string;
-  providerConfig: FalProviderConfig;
-  body: FalBody;
-  credentials: FalCredentials | null | undefined;
-  log?: FalLog | null;
-}) {
-  return runFalQueue({ ...args, body: buildFalMusicRequestBody(args.body), kind: "music" });
+async function runNativeFalQueue(
+  { prepareFalInput, ...args }: FalGenerationArgs & { prepareFalInput: PrepareFalInput },
+  kind: MediaKind,
+  buildBody: (() => FalBody) | null
+) {
+  try {
+    const endpoint = falSelectionEndpoint(resolveFalModel(args.model, args.body, kind));
+    const body = buildBody
+      ? buildBody()
+      : await prepareFalInput(
+          endpoint,
+          args.body,
+          args.credentials ?? {},
+          args.signal ?? undefined
+        );
+    return await runFalQueue({ ...args, body, kind, native: true });
+  } catch (error) {
+    return {
+      success: false,
+      status: error instanceof FalError ? error.status : 400,
+      error: sanitizeErrorMessage(error),
+    };
+  }
+}
+
+export async function handleFalVideoGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalVideoRequestBody(args.body, args.model);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "video" });
+  const builtIn = args.body.fal_input === undefined && isBuiltInFalVideoModel(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "video",
+    builtIn ? buildBody : null
+  );
+}
+
+export async function handleFalMusicGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalMusicRequestBody(args.body);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "music" });
+  const builtIn =
+    args.body.fal_input === undefined && ["ace-step", "fal-ai/ace-step"].includes(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "music",
+    builtIn ? buildBody : null
+  );
 }

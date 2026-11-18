@@ -44,6 +44,27 @@ import {
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 import { chatGptWebStorageStateFromCookieHeader } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { getQuotaCacheState } from "@/domain/quotaCacheState";
+import { retireUnreportedQuotaWindows } from "@/domain/quotaSnapshotPersistence";
+
+// providerSpecificData keys only server-side writers set (key rotation health, Antigravity
+// verification link, Alibaba free-tier quota state). A dashboard form loaded earlier carries
+// stale copies, so PUT keeps the stored value and ignores whatever the client sends.
+const SERVER_OWNED_PSD_KEY = /^(apiKeyHealth|verificationUrl|verificationAt|alibaba(No)?Free.*)$/;
+
+function keepServerOwnedPsd(
+  merged: Record<string, unknown>,
+  existing: Record<string, unknown>
+): void {
+  for (const key of Object.keys(merged)) {
+    if (SERVER_OWNED_PSD_KEY.test(key) && !(key in existing)) delete merged[key];
+  }
+  for (const key of Object.keys(existing)) {
+    if (SERVER_OWNED_PSD_KEY.test(key)) merged[key] = structuredClone(existing[key]);
+  }
+}
 
 function normalizeCodexLimitPolicy(
   incoming: unknown,
@@ -164,7 +185,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       perKeyProxyEnabled,
       quotaVisible,
       projectId,
-      providerSpecificData: incomingPsd,
+      providerSpecificData: rawIncomingPsd,
       rateLimitOverrides,
     } = body;
 
@@ -175,7 +196,31 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const retirementResponse = rejectRetiredCommonChatGptWebProvider(existing.provider);
     if (retirementResponse) return retirementResponse;
 
+    const m365Token = parseM365RefreshToken(existing.provider, rawIncomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    const incomingPsd = rawIncomingPsd ? { ...rawIncomingPsd } : rawIncomingPsd;
+    if (existing.provider === "copilot-m365-web" && incomingPsd) {
+      // Blank/missing input must not overwrite a legacy nested fallback during the merge.
+      delete incomingPsd.refreshToken;
+    }
+
     const updateData: Record<string, any> = {};
+    if (m365Token.data.refreshToken) updateData.refreshToken = m365Token.data.refreshToken;
     if (name !== undefined) updateData.name = name;
     if (priority !== undefined) updateData.priority = priority;
     if (globalPriority !== undefined) updateData.globalPriority = globalPriority;
@@ -297,6 +342,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         );
       }
       const mergedPsd = { ...existingPsd, ...incomingPsd };
+      keepServerOwnedPsd(mergedPsd, existingPsd);
+      if (m365Token.data.refreshToken) delete mergedPsd.refreshToken;
       delete mergedPsd.validationId;
       delete mergedPsd.runtimeKey;
 
@@ -398,6 +445,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const updated = await updateProviderConnection(id, updateData);
+
+    // A new key starts with a clean quota state: the old key's exhausted snapshot must not pause
+    // it, in this process (cache entry) or after a restart (snapshot hydration). History stays.
+    if (updated && updateData.apiKey !== undefined && updateData.apiKey !== existing.apiKey) {
+      const { cache } = getQuotaCacheState();
+      retireUnreportedQuotaWindows(id, existing.provider, {}, cache.get(id) ?? null);
+      cache.delete(id);
+    }
 
     if (isActive === true && existing.provider === "codex") {
       // Await catalog repair so the next request can use a newly enabled account.

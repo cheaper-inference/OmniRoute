@@ -310,6 +310,10 @@ const GENERIC_PROVIDER_IDS = new Set([
 ]);
 
 const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
+  chatgpt: {
+    light: "/providers/chatgpt-logo-black.svg",
+    dark: "/providers/chatgpt-logo-white.svg",
+  },
   // Kimi (Moonshot AI) official-partnership logomarks (2026-07): the official
   // rounded-square badge in Kimi's brand blue (#1783FF — see KIMI_BRAND_COLOR in
   // featuredProviders.ts) for the 3 visible Kimi-family cards. This replaces two
@@ -338,6 +342,7 @@ const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
 const PROVIDER_ICON_ALIASES: Record<string, string> = {
   "opencode-go": "opencode",
   "opencode-zen": "opencode",
+  "opencode-server": "opencode",
   "poe-web": "poe",
 };
 

@@ -113,7 +113,7 @@ export async function renderPrivacyLocal() {
     const chipW = Math.ceil(roleWidth("label-sm", chip) + 2 * CHIP_PAD);
     const chipX = RIGHT - chipW;
     const chipY = top + (ROW_H - CHIP_H) / 2;
-    // Row 1 is the "local" indicator — the one lime pill of the diagram; the others are
+    // Row 1 is the "local" indicator — the one accent pill of the diagram; the others are
     // neutral receipt chips on the subtle surface.
     const chipRect =
       i === 0

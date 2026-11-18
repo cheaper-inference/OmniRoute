@@ -7,10 +7,12 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { Request as UndiciRequest } from "undici";
 
 import {
   __getDeadlineTokenRegistrySizeForTests,
   getDeadlineController,
+  releaseDeadlineController,
   withDeadlineSignal,
   withEarlyStreamKeepalive,
   ANTHROPIC_PING_FRAME,
@@ -480,6 +482,26 @@ test("aborting the client signal stops the keepalive stream (#2544)", async () =
   })();
   const timed = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5000));
   assert.equal(await Promise.race([drained, timed]), true, "stream should close after abort");
+});
+
+test("withDeadlineSignal accepts a foreign Undici Request brand", async () => {
+  const foreign = new UndiciRequest("http://localhost/v1/responses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Test": "foreign-brand" },
+    body: JSON.stringify({ model: "foreign-model", stream: false }),
+  });
+  assert.equal(foreign instanceof Request, false, "fixture must use a different Request brand");
+
+  const { wrappedReq, deadlineController } = withDeadlineSignal(foreign as unknown as Request);
+  try {
+    assert.equal(wrappedReq.url, "http://localhost/v1/responses");
+    assert.equal(wrappedReq.method, "POST");
+    assert.equal(wrappedReq.headers.get("x-test"), "foreign-brand");
+    assert.deepEqual(await wrappedReq.json(), { model: "foreign-model", stream: false });
+    assert.equal(getDeadlineController(wrappedReq), deadlineController);
+  } finally {
+    releaseDeadlineController(deadlineController);
+  }
 });
 
 // Last-resort slow-path deadline: a handler that never resolves must not hold the

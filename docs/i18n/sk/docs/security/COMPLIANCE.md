@@ -15,51 +15,69 @@ Implementácia sa nachádza v `src/lib/compliance/index.ts` (T-43 — „Kontrol
 
 ### Administratívne auditné udalosti (`audit_log`)
 
-Každé volanie `logAuditEvent({ action, actor, target, details, ... })` vytvorí jeden riadok. Reťazce akcií používajú vzor `domain.verb` (alebo `domain.verb.outcome`). Typy akcií potvrdené v zdrojovom strome zahŕňajú:
+Každé volanie funkcie `logAuditEvent({ action, actor, target, details, ... })` vytvorí
+jeden riadok. Reťazce akcií sa riadia vzorom `domain.verb` (alebo
+`domain.verb.outcome`). Potvrdené typy akcií v strome kódu zahŕňajú:
 
-| Akcia                                | Zdroj                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Akcia                                | Zdroj                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Každý záznam obsahuje `action`, `actor` (predvolená hodnota je `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` a `timestamp`. Citlivé kľúče (`apiKey`, `accessToken`, `refreshToken`, `password`, čokoľvek zodpovedajúce vzorom `*token`/`*secret`/`*apikey` atď.) sa pred zápisom riadka rekurzívne redigujú na `"[redacted]"`.
+Každá položka zachytáva `action`, `actor` (predvolená hodnota je `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` a `timestamp`. Citlivé kľúče (`apiKey`, `accessToken`,
+`refreshToken`, `password`, všetko zodpovedajúce `*token`/`*secret`/`*apikey`,
+atď.) sa pred zápisom riadka rekurzívne nahradia hodnotou `"[redacted]"`.
+
+Riadky `api_key.auth.touch` zaznamenávajú úspešné čítania metadát kľúčov API a
+čítania na účely zisťovania (GET/HEAD), ktoré sa nikdy nedostanú do denníka
+požiadaviek: ktorý kľúč, kedy a normalizovaná cesta; záznamy sa zlučujú a ich
+počet je obmedzený na 1 000 riadkov. Kľúče s `noLog` a environmentálny kľúč sa
+preskakujú. IP adresa a user-agent volajúceho sa pridajú iba vtedy, keď je
+zapnutý príznak funkcie `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (predvolene je
+vypnutý).
 
 ### Volania nástrojov MCP (`mcp_tool_audit`)
 
-Každé vyvolanie nástroja MCP zapíše riadok prostredníctvom `open-sse/mcp-server/audit.ts`. Schéma (zo súboru `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Každé vyvolanie nástroja MCP zapíše riadok prostredníctvom
+`open-sse/mcp-server/audit.ts`. Schéma (zo súboru
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Stĺpec           | Poznámky                                    |
-| ---------------- | ------------------------------------------- |
-| `id`             | automaticky sa zvyšujúca hodnota            |
-| `tool_name`      | identifikátor nástroja MCP                  |
-| `input_hash`     | sha256 vstupu (užitočné dáta sa neukladajú) |
-| `output_summary` | krátke, skrátené zhrnutie                   |
-| `duration_ms`    | uplynutý čas                                |
-| `api_key_id`     | volajúci (môže byť null)                    |
-| `success`        | `1` / `0`                                   |
-| `error_code`     | konečný kód chyby pri zlyhaní               |
-| `created_at`     | časová pečiatka ISO                         |
+| Stĺpec           | Poznámky                            |
+| ---------------- | ----------------------------------- |
+| `id`             | automatický prírastok               |
+| `tool_name`      | identifikátor nástroja MCP          |
+| `input_hash`     | sha256 vstupu (údaje sa neukladajú) |
+| `output_summary` | krátke, skrátené zhrnutie           |
+| `duration_ms`    | uplynutý čas                        |
+| `api_key_id`     | volajúci (môže byť null)            |
+| `success`        | `1` / `0`                           |
+| `error_code`     | koncový kód chyby pri zlyhaní       |
+| `created_at`     | časová pečiatka ISO                 |
 
-### Protokoly požiadaviek/používania
+### Denníky požiadaviek / používania
 
-Ide o prevádzkovú telemetriu (nie výlučne o administratívny audit), ktorá však využíva rovnaký proces uchovávania:
+Ide o prevádzkovú telemetriu (nie striktne administratívny audit), ale využívajú
+rovnaký proces uchovávania:
 
 - `usage_history` — súhrn používania pre jednotlivé požiadavky
-- `call_logs` — úplný protokol jednotlivých požiadaviek (podlieha limitu počtu riadkov, pozri nižšie)
-- `proxy_logs` — protokol prevádzky proxy (podlieha limitu počtu riadkov)
-- `request_detail_logs` — starší podrobný protokol požiadaviek (ak existuje, naďalej sa premazáva)
+- `call_logs` — úplný denník jednotlivých požiadaviek (podlieha limitu počtu riadkov, pozri nižšie)
+- `proxy_logs` — denník prenosu cez proxy (podlieha limitu počtu riadkov)
+- `request_detail_logs` — starší podrobný denník požiadaviek (ak existuje, stále sa odstraňuje)
 
 ## Schéma úložiska
 

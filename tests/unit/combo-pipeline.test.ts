@@ -21,7 +21,6 @@ interface MockResponse {
   ok: boolean;
   status: number;
   json: () => Promise<unknown>;
-  clone: () => MockResponse;
 }
 
 /** Build a successful OpenAI-shaped response with given text. */
@@ -33,8 +32,6 @@ function okResponse(text: string): MockResponse {
     ok: true,
     status: 200,
     json: async () => body,
-    // handlePipelineChat calls res.clone().json() on intermediate steps
-    clone: () => okResponse(text),
   };
 }
 
@@ -45,7 +42,6 @@ function failResponse(status: number): MockResponse {
     ok: false,
     status,
     json: async () => body,
-    clone: () => failResponse(status),
   };
 }
 
@@ -179,6 +175,47 @@ describe("handlePipelineChat — transient retry", () => {
     // Final step result is returned directly regardless of status
     assert.equal(res.status, 502);
     assert.equal(res.ok, false);
+  });
+});
+
+describe("handlePipelineChat — intermediate body memory", () => {
+  it("parses the original intermediate body without clone and returns final response untouched", async () => {
+    const intermediate = Response.json({
+      choices: [{ message: { role: "assistant", content: "step result" } }],
+    });
+    Object.defineProperty(intermediate, "clone", {
+      value: () => {
+        throw new Error("intermediate response must not be cloned");
+      },
+    });
+    const final = new Response("data: final\n\n", {
+      headers: { "content-type": "text/event-stream" },
+    });
+    const handler = async (_body: Body, model: string): Promise<Response> =>
+      model === "provider-a/model-a" ? intermediate : final;
+    const result = await handlePipelineChat({
+      body: { messages: [{ role: "user", content: "hi" }] },
+      steps: STEPS,
+      handleSingleModel: handler as unknown as never,
+      log: noopLog as never,
+    });
+
+    assert.strictEqual(result, final);
+    assert.equal(intermediate.bodyUsed, true);
+    assert.equal(final.bodyUsed, false);
+    assert.equal(await final.text(), "data: final\n\n");
+  });
+
+  it("preserves upstream failure bodies without inspecting or cloning them", async () => {
+    const failure = new Response("rate-limited", { status: 429 });
+    const result = await handlePipelineChat({
+      body: { messages: [{ role: "user", content: "hi" }] },
+      steps: STEPS,
+      handleSingleModel: async () => failure,
+      log: noopLog as never,
+    });
+    assert.equal(result.status, 429);
+    assert.equal(failure.bodyUsed, false);
   });
 });
 

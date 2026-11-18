@@ -10,7 +10,6 @@ import {
 } from "./perplexityResearchLock.ts";
 import { parseResearchFrames } from "./perplexityResearchParse.ts";
 import { clampResearchResult } from "./perplexityResearchLimits.ts";
-import { markStreamableSessionBusy } from "../sessionActivity.ts";
 import {
   getRegisteredConnectionStore,
   type RegisteredConnectionStore,
@@ -192,7 +191,6 @@ async function runWithLock(input: {
     maxTotalMinutes: input.minutes,
   });
   if (lock === "research_busy") return failure("research_busy");
-  markStreamableSessionBusy(extra?.sessionId, true);
 
   const controller = new AbortController();
   const progress: RunProgress = { sent: false, finished: false, settled: false };
@@ -213,7 +211,6 @@ async function runWithLock(input: {
     return failure(controller.signal.aborted ? "research_aborted" : "research_failed");
   } finally {
     clearTimeout(timer);
-    markStreamableSessionBusy(extra?.sessionId, false);
     if (progress.finished || progress.settled || !progress.sent)
       releaseResearchLock(connectionId, invocationId);
     else markUpstreamUnconfirmed(connectionId, invocationId);

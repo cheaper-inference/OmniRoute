@@ -14,13 +14,25 @@ const core = await import("../../src/lib/db/core.ts");
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const route = await import("../../src/app/api/db-backups/exportAll/route.ts");
 const realExec = childProcess.execFileSync;
+const realExecFile = childProcess.execFile;
 
 function request() {
   return new Request("http://localhost/api/db-backups/exportAll");
 }
 
+/**
+ * Mock the async `execFile` the route awaits. `runTar` calls it with the
+ * callback signature, so the stub must call back rather than return.
+ */
 function mockTar(context, implementation) {
-  context.mock.method(childProcess, "execFileSync", implementation);
+  context.mock.method(childProcess, "execFile", (command, args, options, callback) => {
+    try {
+      const stdout = implementation(command, args, options);
+      callback(null, stdout ?? "", "");
+    } catch (error) {
+      callback(error);
+    }
+  });
   syncBuiltinESMExports();
 }
 
@@ -35,6 +47,7 @@ test.beforeEach(async () => {
 test.afterEach(() => {
   test.mock.restoreAll();
   childProcess.execFileSync = realExec;
+  childProcess.execFile = realExecFile;
   syncBuiltinESMExports();
   fs.rmSync(exportTemp, { recursive: true, force: true });
 });

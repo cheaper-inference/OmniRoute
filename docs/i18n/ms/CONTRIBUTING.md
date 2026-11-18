@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disyorkan: 24 LTS)
 - **npm** 10+
 
-> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan bahawa modul natif telah dipasang:
-> `node -e "require('better-sqlite3')"`. Jika arahan tersebut gagal dengan `MODULE_NOT_FOUND`,
+> **Windows dengan Node 24:** gunakan keluaran tampalan 24 LTS semasa (sekurang-kurangnya 24.20.0).
+> Keluaran terdahulu boleh berhenti selepas ujian berjaya apabila `--test-force-exit` menutup
+> proses. [Pembetulan libuv Windows](https://github.com/nodejs/node/pull/61999) Node menangani
+> ranap masa jalan ini; kekalkan penegasan ujian dan pemeriksaan keluar pelaksana didayakan.
+
+> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan modul natif telah dipasang:
+> `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
 > jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
 > [Penyelesaian Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,81 +48,81 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Pemboleh ubah utama untuk pembangunan:
 
-| Pemboleh Ubah          | Lalai Pembangunan        | Penerangan                      |
-| ---------------------- | ------------------------ | ------------------------------- |
-| `PORT`                 | `20128`                  | Port pelayan                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk bahagian hadapan |
-| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama   |
-| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log        |
+| Pemboleh ubah          | Lalai Pembangunan        | Perihalan                     |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Port pelayan                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk frontend       |
+| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama |
+| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log      |
 
 ### Tetapan Papan Pemuka
 
 Papan pemuka menyediakan togol UI untuk ciri yang juga boleh dikonfigurasikan melalui pemboleh ubah persekitaran:
 
-| Lokasi Tetapan     | Togol                 | Penerangan                              |
-| ------------------ | --------------------- | --------------------------------------- |
-| Tetapan → Lanjutan | Mod Nyahpepijat       | Dayakan log permintaan nyahpepijat (UI) |
-| Tetapan → Umum     | Keterlihatan Bar Sisi | Tunjukkan/sembunyikan bahagian bar sisi |
+| Lokasi Tetapan      | Togol              | Perihalan                               |
+| ------------------- | ------------------ | --------------------------------------- |
+| Settings → Advanced | Debug Mode         | Dayakan log permintaan nyahpepijat (UI) |
+| Settings → General  | Sidebar Visibility | Tunjukkan/sembunyikan bahagian bar sisi |
 
-Tetapan ini disimpan dalam pangkalan data dan dikekalkan selepas mula semula, serta mengatasi nilai lalai pemboleh ubah persekitaran apabila ditetapkan.
+Tetapan ini disimpan dalam pangkalan data dan kekal selepas mula semula, mengatasi lalai pemboleh ubah persekitaran apabila ditetapkan.
 
-### Menjalankan Secara Setempat
+### Menjalankan Secara Tempatan
 
 ```bash
-# Mod pembangunan (muat semula segera)
+# Mod pembangunan (muat semula panas)
 npm run dev
 
 # Binaan pengeluaran
 npm run build    # next build → .build/next/ kemudian assembleStandalone → dist/
 npm run start
 
-# Kompilasi pantas bahagian belakang/API sahaja untuk perubahan penyumbang
+# Kompilasi backend/API sahaja yang pantas untuk perubahan penyumbang
 npm run build:contributor
 
-# Binaan keluaran (binaan semula bersih + penanda sentinel HEAD — diperlukan untuk penggunaan)
-npm run build:release   # rm -rf .build dist && bina + tulis dist/BUILD_SHA
+# Binaan keluaran (binaan semula bersih + sentinel HEAD — diperlukan untuk penggunaan)
+npm run build:release   # rm -rf .build dist kemudian bina + tulis dist/BUILD_SHA
 
-# Konfigurasi port lazim
+# Konfigurasi port biasa
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Binaan penyumbang melakukan pengesahan kompilasi sahaja: ia tidak menghimpunkan
-pengedaran kendiri atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
-anda perlu mengesahkan berkas yang boleh dihantar.
+Binaan penyumbang melaksanakan pengesahan kompilasi sahaja: ia tidak memasang edaran kendiri
+atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
+anda perlu mengesahkan pakej yang sedia dihantar.
 
 ### Susun Atur Output Binaan
 
-| Direktori | Kandungan                                                                     | Dijejaki |
-| --------- | ----------------------------------------------------------------------------- | -------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                            | Ya       |
-| `.build/` | Perantaraan — output `next build` (diabaikan Git, `distDir = .build/next`)    | Tidak    |
-| `dist/`   | Berkas boleh dihantar — dihimpunkan oleh `assembleStandalone` (diabaikan Git) | Tidak    |
+| Direktori | Kandungan                                                               | Dijejaki |
+| --------- | ----------------------------------------------------------------------- | -------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                      | Ya       |
+| `.build/` | Perantaraan — output `next build` (gitignored, `distDir = .build/next`) | Tidak    |
+| `dist/`   | Pakej sedia dihantar — dipasang oleh `assembleStandalone` (gitignored)  | Tidak    |
 
 Saluran binaan ialah satu laluan:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output Next.js)
-  └─ assembleStandalone()                 (menyalin aset kendiri + statik + awam + natif)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` turut membersihkan kedua-dua direktori terlebih dahulu dan menulis
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai penanda sentinel integriti penggunaan.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integriti penggunaan.
 
-`npm run build:contributor` menggunakan profil binaan bahagian belakang sahaja. Ia menggantikan sementara
-fail UI papan pemuka dengan stub semasa pembinaan, mengekalkan pengendali laluan API dan memulihkan fail asal
-selepas binaan selesai. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau bagi
-pengesahan keluaran penuh; profil penyumbang bukan pengganti kepada binaan keluaran.
+`npm run build:contributor` menggunakan profil binaan backend sahaja. Ia mengstup fail UI
+papan pemuka buat sementara semasa membina, mengekalkan pengendali laluan API, dan memulihkan fail asal
+selepas binaan. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau untuk
+pengesahan keluaran penuh; profil penyumbang bukan pengganti binaan keluaran.
 
 > **Nota penggunaan VPS:** direktori imej jauh `/usr/lib/node_modules/omniroute/app/`
-> tidak berubah. Kemahiran penggunaan menggunakan rsync untuk menyalin kandungan `dist/` ke dalamnya.
-> Hanya laluan output binaan dalam repositori yang berubah (`app/` → `dist/`).
+> tidak berubah. Kemahiran penggunaan menyegerakkan kandungan `dist/` ke dalamnya.
+> Hanya laluan output binaan dalam repositori berubah (`app/` → `dist/`).
 
 URL lalai:
 
-- **Papan Pemuka**: `http://localhost:20128/dashboard`
+- **Papan pemuka**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -293,67 +298,67 @@ Lihat `open-sse/utils/stream.ts` dan `open-sse/utils/streamHandler.ts` untuk con
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Halaman papan pemuka (23 bahagian)
-│   ├── api/                # Laluan API (51 direktori)
-│   └── login/              # Halaman pengesahan (.tsx)
-├── domain/                 # Enjin dasar (policyEngine, comboResolver, costRules, dll.)
-├── lib/                    # Logik perniagaan teras (.ts)
-│   ├── a2a/                # Pelayan protokol Agent-to-Agent v0.3
-│   ├── acp/                # Daftar Agent Communication Protocol
-│   ├── compliance/         # Enjin dasar pematuhan
-│   ├── db/                 # Modul domain SQLite + 130 migrasi
-│   ├── memory/             # Memori perbualan kekal
-│   ├── oauth/              # Penyedia, perkhidmatan dan utiliti OAuth
-│   ├── skills/             # Rangka kerja kemahiran yang boleh diperluas
-│   ├── usage/              # Penjejakan penggunaan dan pengiraan kos
-│   └── localDb.ts          # Lapisan eksport semula sahaja — jangan sekali-kali tambah logik di sini
-├── middleware/              # Perisian tengah permintaan (promptInjectionGuard)
-├── mitm/                   # Proksi MITM (sijil, DNS, penghalaan sasaran)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponen React (.tsx)
-│   ├── constants/          # Takrif penyedia (329), skop MCP, 20 strategi penghalaan
-│   ├── utils/              # Pemutus litar, pensanitasi, pembantu pengesahan
-│   └── validation/         # Skema Zod v4
-└── sse/                    # Talian paip proksi SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Ruang kerja @omniroute/open-sse
-├── executors/              # 150 modul pelaksana (kelas pelaksana + pembantu bagi setiap penyedia)
-├── handlers/               # 11 pengendali permintaan (sembang, respons, pembenaman, imej, dll.)
-├── mcp-server/             # Pelayan MCP (110 alat unik, 3 pengangkutan, 33 skop)
-├── services/               # 178 perkhidmatan peringkat teratas (combo, autoCombo, rateLimitManager, dll.)
-├── translator/             # Penterjemah format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Pengubah Responses API
-└── utils/                  # 22 modul utiliti (strim, TLS, proksi, pengelogan)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Aplikasi desktop Electron (merentas platform)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Pelaksana ujian Node.js (1,574 fail ujian)
-├── integration/            # Ujian integrasi
-├── e2e/                    # Ujian Playwright
-├── security/               # Ujian keselamatan
-├── translator/             # Ujian khusus penterjemah
-└── load/                   # Ujian beban
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Rekod Keputusan Seni Bina
-├── architecture/            # Seni bina dan daya tahan sistem
-├── comparison/              # OmniRoute berbanding alternatif
-├── compression/             # Panduan dan peraturan pemampatan
-├── dev/                     # Panduan pembangunan
-├── diagrams/                # Rajah seni bina
-├── frameworks/              # MCP, A2A, OpenCode, Memori, Kemahiran
-├── guides/                  # Panduan pengguna, Docker, persediaan, penyelesaian masalah
-├── i18n/                    # Terjemahan README yang diantarabangsakan
-├── marketing/               # Bahan pemasaran
-├── ops/                     # Penggunaan, proksi, liputan, keluaran
-├── providers/               # Dokumentasi khusus penyedia
-├── reference/               # Rujukan API, pemboleh ubah persekitaran, alat CLI, peringkat percuma
-├── releases/                # Nota keluaran
-├── routing/                 # Enjin auto-combo, main semula penaakulan
-├── screenshots/             # Tangkapan skrin papan pemuka
-├── security/                # Pagar keselamatan, pematuhan, mod senyap, token
-└── specs/                   # Spesifikasi reka bentuk
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

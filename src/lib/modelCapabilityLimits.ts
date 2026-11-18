@@ -81,18 +81,22 @@ export function pickContextWindow(
 }
 
 /**
- * Input cap is input-only. An explicit `max_input_tokens` override wins; otherwise fall
- * back to the per-source input limits, then to the total window. The effective cap can
+ * Input cap is input-only. An explicit `max_input_tokens` override wins, then an exact
+ * persisted context-window override (it reflects the real window, so stale registry/synced
+ * input hints must not cap it); otherwise fall back to the per-source input limits, then
+ * to the total window. The effective cap can
  * never exceed the total window (input + output), so it is clamped — when the clamp
  * applies, the window's own source is what supplied the value.
  */
 export function pickMaxInputTokens(
   rows: LimitSourceRows,
   maxInputOverride: number | null,
-  contextWindow: PickedLimit
+  contextWindow: PickedLimit,
+  persistedContextWindow: number | null = null
 ): PickedLimit {
   const candidate = pickFirst([
     [maxInputOverride, "override:max_input"],
+    [persistedContextWindow, "override:context"],
     [registryNumber(rows.registryModel?.maxInputTokens), "registry"],
     [rows.authoritativeContextWindow, "static-authoritative"],
     [rows.synced?.limit_input, "synced"],

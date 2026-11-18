@@ -37,10 +37,17 @@ function isBuiltInWebFetchTool(tool: unknown): tool is JsonRecord {
   return WEB_FETCH_TOOL_TYPES.has(toolType) && !toolRecord.function;
 }
 
-function isBuiltInWebFetchToolChoice(toolChoice: unknown): boolean {
+function isBuiltInWebFetchToolChoice(toolChoice: unknown, toolNames: Set<string>): boolean {
   const choice = toRecord(toolChoice);
   const toolType = typeof choice.type === "string" ? choice.type : "";
-  return WEB_FETCH_TOOL_TYPES.has(toolType);
+  if (WEB_FETCH_TOOL_TYPES.has(toolType)) return true;
+  // Anthropic names server tools via { type: "tool", name: "web_fetch" }.
+  // Do not steal an explicit choice of a preserved custom function with that name.
+  return (
+    !toolNames.has("web_fetch") &&
+    (toolType === "tool" || toolType === "function") &&
+    (choice.name === "web_fetch" || toRecord(choice.function).name === "web_fetch")
+  );
 }
 
 function buildFallbackParameters(): JsonRecord {
@@ -66,7 +73,7 @@ function buildFallbackParameters(): JsonRecord {
   };
 }
 
-function buildFallbackTool(targetFormat?: string | null): JsonRecord {
+function buildFallbackTool(format?: string | null): JsonRecord {
   const name = OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME;
   const description = [
     "Fetch and extract the content of a specific URL.",
@@ -77,8 +84,15 @@ function buildFallbackTool(targetFormat?: string | null): JsonRecord {
   // Responses API expects FLAT function tools ({ type, name, parameters }), whereas
   // Chat Completions expects NESTED ({ type, function: { name, parameters } }) — see
   // the identical note in webSearchFallback.ts (issue #2390).
-  if (targetFormat === FORMATS.OPENAI_RESPONSES) {
+  if (format === FORMATS.OPENAI_RESPONSES) {
     return { type: "function", name, description, parameters };
+  }
+
+  // Anthropic Messages expects FLAT Anthropic tools ({ name, input_schema }), as in
+  // webSearchFallback.ts (#15118). A nested function tool in a Claude body is rejected
+  // by Anthropic and dropped by the Claude translator (#18421).
+  if (format === FORMATS.CLAUDE) {
+    return { name, description, input_schema: parameters };
   }
 
   return {
@@ -158,10 +172,12 @@ export function prepareWebFetchFallbackBody<T extends WebFetchFallbackBody>(
     return true;
   });
 
-  const isResponsesTarget = options.targetFormat === FORMATS.OPENAI_RESPONSES;
+  // chatCore calls this before translateRequest: injected tools must speak the
+  // client's format (#18421). Keep the target fallback for callers without source metadata.
+  const format = options.sourceFormat ?? options.targetFormat;
 
   if (!toolNames.has(OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME)) {
-    preservedTools.unshift(buildFallbackTool(options.targetFormat));
+    preservedTools.unshift(buildFallbackTool(format));
   }
 
   const nextBody: T = {
@@ -169,11 +185,14 @@ export function prepareWebFetchFallbackBody<T extends WebFetchFallbackBody>(
     tools: preservedTools as T["tools"],
   };
 
-  if (isBuiltInWebFetchToolChoice(body.tool_choice)) {
+  if (isBuiltInWebFetchToolChoice(body.tool_choice, toolNames)) {
+    // Match the injected source-format tool so the normal translator can convert both.
     nextBody.tool_choice = (
-      isResponsesTarget
-        ? { type: "function", name: OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME }
-        : { type: "function", function: { name: OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } }
+      format === FORMATS.CLAUDE
+        ? { type: "tool", name: OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME }
+        : format === FORMATS.OPENAI_RESPONSES
+          ? { type: "function", name: OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME }
+          : { type: "function", function: { name: OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } }
     ) as T["tool_choice"];
   }
 

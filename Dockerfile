@@ -308,6 +308,10 @@ ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 # it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
 COPY --chown=node:node --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
 
+# Next.js standalone tracing omits the root LICENSE, so the published image shipped
+# without the license text. Copy it explicitly.
+COPY --chown=node:node --from=builder /app/LICENSE ./LICENSE
+
 # Every COPY above hands its files to the baked-in `node` non-root user
 # (UID/GID 1000) at copy time. Do NOT add a `RUN chown -R node:node /app`
 # afterwards: in the overlay filesystem changing ownership rewrites every file
@@ -411,7 +415,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 # `spawn qodercli ENOENT`. Same pinning rationale as the tools above.
 # npm 12 requires an explicit allowlist for required global lifecycle scripts.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
-  npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,openclaw \
+  npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,@qoder-ai/qodercli,droid,openclaw,sharp,@google/genai,tree-sitter-bash,protobufjs \
     @openai/codex@0.165.0 \
     @anthropic-ai/claude-code@2.1.260 \
     droid@0.212.0 \

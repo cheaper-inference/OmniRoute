@@ -23,11 +23,13 @@ import { kiro } from "./kiro";
 import { cursor } from "./cursor";
 import { trae } from "./trae";
 import { kilocode } from "./kilocode";
+import { megabrain } from "./megabrain";
 import { cline } from "./cline";
-import { devinDesktop } from "./devin-desktop";
+import { devinCli, devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
+import { renderhour } from "./renderhour";
 import { codebuddyCn } from "./codebuddy-cn";
 import { freebuff } from "./freebuff";
 import { codebuddyIntl } from "./codebuddy-intl";
@@ -35,6 +37,8 @@ import { workbuddy } from "./workbuddy";
 import { zed } from "./zed";
 import { zedHosted } from "./zed-hosted";
 import { museCode } from "./muse-code";
+import { minimaxCode } from "./minimax-code";
+import { copilotM365 } from "./copilot-m365-web";
 
 export const PROVIDERS = {
   claude,
@@ -51,19 +55,21 @@ export const PROVIDERS = {
   cursor,
   trae,
   kilocode,
+  megabrain,
   cline,
   // clinepass reuses the Cline WorkOS OAuth flow 1:1 (same api.cline.bot host, same token
   // type) — it is a separate catalog entry advertising the cline-pass/* (ClinePass
   // subscription) models. See registry/clinepass/index.ts.
   clinepass: cline,
   "devin-desktop": devinDesktop,
-  // Devin CLI shares the same imported token format and upstream credential contract.
-  "devin-cli": devinDesktop,
+  // Devin CLI shares the imported token format and config, but not the browser sign-in.
+  "devin-cli": devinCli,
   // grok-cli carries BOTH the browser PKCE flow and the paste-token import flow
   // under this one entry (#7013) — see grok-cli.ts's mapTokens for the dispatch.
   "grok-cli": grokCli,
   "xai-oauth": xaiOauth,
   openference,
+  renderhour,
   "codebuddy-cn": codebuddyCn,
   freebuff,
   "codebuddy-intl": codebuddyIntl,
@@ -76,6 +82,11 @@ export const PROVIDERS = {
   zed,
   "zed-hosted": zedHosted,
   "muse-code": museCode,
+  // MiniMax Code — device-code login that writes the credential into the
+  // local MiniMax Code profile (the profile the CLI and the local agent
+  // read), so the provider itself still stores no credential.
+  "minimax-code": minimaxCode,
+  "copilot-m365-web": copilotM365,
 };
 
 export default PROVIDERS;

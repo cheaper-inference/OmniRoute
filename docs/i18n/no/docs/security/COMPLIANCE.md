@@ -15,51 +15,68 @@ Implementasjonen finnes i `src/lib/compliance/index.ts` (T-43 — «Samsvarskont
 
 ### Administrative revisjonshendelser (`audit_log`)
 
-Hvert kall til `logAuditEvent({ action, actor, target, details, ... })` oppretter én rad. Handlingsstrenger følger mønsteret `domain.verb` (eller `domain.verb.outcome`). Bekreftede handlingstyper i kodetreet inkluderer:
+Hvert kall til `logAuditEvent({ action, actor, target, details, ... })` produserer
+én rad. Handlingsstrenger følger et mønster med `domain.verb` (eller
+`domain.verb.outcome`). Bekreftede handlingstyper i treet inkluderer:
 
-| Handling                             | Kilde                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Handling                             | Kilde                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Hver oppføring registrerer `action`, `actor` (standardverdien er `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` og `timestamp`. Sensitive nøkler (`apiKey`, `accessToken`, `refreshToken`, `password`, alt som samsvarer med `*token`/`*secret`/`*apikey` osv.) maskeres rekursivt som `"[redacted]"` før raden skrives.
+Hver oppføring registrerer `action`, `actor` (standard er `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` og `timestamp`. Sensitive nøkler (`apiKey`, `accessToken`,
+`refreshToken`, `password`, alt som samsvarer med `*token`/`*secret`/`*apikey`,
+osv.) blir rekursivt maskert til `"[redacted]"` før raden skrives.
 
-### Kall til MCP-verktøy (`mcp_tool_audit`)
+Rader med `api_key.auth.touch` registrerer vellykkede API-nøkkelmetadata- og
+oppdagelseslesinger (GET/HEAD) som aldri når forespørselsloggen: hvilken nøkkel,
+når og den normaliserte banen, samordnet og begrenset til 1 000 rader. Nøkler
+med `noLog` og miljønøkkelen hoppes over. Den anropende partens IP-adresse og
+brukeragent legges bare til når funksjonsflagget
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` er aktivert (av som standard).
 
-Hvert kall til et MCP-verktøy skriver en rad via `open-sse/mcp-server/audit.ts`. Skjema (fra `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### MCP-verktøykall (`mcp_tool_audit`)
+
+Hvert MCP-verktøykall skriver en rad via
+`open-sse/mcp-server/audit.ts`. Skjema (fra
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Kolonne          | Merknader                                  |
 | ---------------- | ------------------------------------------ |
-| `id`             | automatisk økende                          |
-| `tool_name`      | identifikator for MCP-verktøy              |
+| `id`             | autoincrement                              |
+| `tool_name`      | MCP-verktøyidentifikator                   |
 | `input_hash`     | sha256 av inndata (ingen nyttelast lagres) |
 | `output_summary` | kort, avkortet sammendrag                  |
 | `duration_ms`    | medgått tid                                |
-| `api_key_id`     | innringer (kan være null)                  |
+| `api_key_id`     | anroper (kan være null)                    |
 | `success`        | `1` / `0`                                  |
-| `error_code`     | endelig feilkode ved feil                  |
+| `error_code`     | terminal feilkode ved feil                 |
 | `created_at`     | ISO-tidsstempel                            |
 
-### Forespørsels-/brukslogger
+### Forespørsels- og brukslogger
 
-Dette er driftsrelatert telemetri (ikke utelukkende administrativ revisjon), men bruker den samme oppbevaringsprosessen:
+Dette er operasjonell telemetri (ikke strengt tatt administrativ revisjon), men
+de deler samme oppbevaringspipeline:
 
-- `usage_history` — aggregert bruk per forespørsel
-- `call_logs` — fullstendig logg per forespørsel (underlagt radgrense, se nedenfor)
-- `proxy_logs` — logg over proxytrafikk (underlagt radgrense)
-- `request_detail_logs` — eldre detaljert forespørselslogg (fjernes fortsatt hvis den finnes)
+- `usage_history` — bruksoppsummering per forespørsel
+- `call_logs` — full logg per forespørsel (underlagt radbegrensning, se nedenfor)
+- `proxy_logs` — logg over proxytrafikk (underlagt radbegrensning)
+- `request_detail_logs` — eldre detaljert forespørselslogg (beskjæres fortsatt hvis den finnes)
 
 ## Lagringsskjema
 

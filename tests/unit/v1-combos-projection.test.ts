@@ -11,6 +11,7 @@ import assert from "node:assert/strict";
 
 const { projectCombo, projectComboStep } =
   await import("../../src/app/api/v1/combos/projectCombo.ts");
+const { pruneDeletedComboConnectionRefs } = await import("../../src/lib/db/comboConnectionRefs.ts");
 
 test("#2300 projectComboStep keeps model + providerId, drops connectionId/weight/label", () => {
   const out = projectComboStep({
@@ -158,6 +159,20 @@ test("#10968 an empty or non-string connectionId is not a pin", () => {
       `connectionId ${JSON.stringify(connectionId)} must not read as a pin`
     );
   }
+});
+
+test("#18954 a step whose pinned account was deleted still reports accountPinned", () => {
+  // Deleting the account keeps the pin, and the step fails closed on it. Reporting
+  // false would describe the step as free to use any account of the provider.
+  const { steps } = pruneDeletedComboConnectionRefs(
+    [{ kind: "model", model: "openai/gpt-5", providerId: "openai", connectionId: "conn_gone" }],
+    ["conn_gone"]
+  );
+
+  const out = projectComboStep(steps[0]);
+
+  assert.equal(out?.accountPinned, true);
+  assert.ok(!JSON.stringify(out).includes("conn_gone"), "connection id must not leak");
 });
 
 test("#10968 a combo-ref carries no accountPinned", () => {

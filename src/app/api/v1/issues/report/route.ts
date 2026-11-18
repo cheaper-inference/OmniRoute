@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
 const reportSchema = z.object({
@@ -21,11 +21,14 @@ const reportSchema = z.object({
  * Requires GITHUB_ISSUES_REPO (format: owner/repo) and GITHUB_ISSUES_TOKEN
  * environment variables to be set. If not configured, returns 202 (accepted but
  * logged only).
+ *
+ * It files the issue with the operator's GITHUB_ISSUES_TOKEN, so it takes the management
+ * credential like the registered-keys and limits routes — see ../../registered-keys/route.ts
+ * for why the guard is explicit here.
  */
 export async function POST(request: Request) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: { message: "Authentication required" } }, { status: 401 });
-  }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
   let rawBody: unknown;
   try {

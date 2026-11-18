@@ -1,3 +1,5 @@
+import { liveUsageEvidence } from "@/lib/usage/storedUsageEvidence";
+import { isHttpLogError } from "@/shared/utils/upstreamHttp";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -48,7 +50,7 @@ export function rowMatchesFilter(row: any, filter: Record<string, any>): boolean
   if (!filter) return true;
 
   if (filter.status === "error") {
-    if (!(Number(row?.status) >= 400 || Boolean(row?.error))) return false;
+    if (!isHttpLogError(row)) return false;
   } else if (filter.status === "ok") {
     if (!(Number(row?.status) >= 200 && Number(row?.status) < 300)) return false;
   } else if (
@@ -156,6 +158,7 @@ export function buildCallLogListRows({
       connectionId: detail.connectionId,
       duration: Math.max(0, now - detail.startedAt),
       tokens: detail.tokens || { in: 0, out: 0 },
+      ...liveUsageEvidence(detail.tokens),
       // In-memory details carry no added wait yet — null like "no wait".
       addedWaitMs: null,
       addedWaitCause: null,
@@ -217,6 +220,7 @@ export function buildCallLogListRows({
       connectionId: detail.connectionId,
       duration,
       tokens: detail.tokens || { in: 0, out: 0 },
+      ...liveUsageEvidence(detail.tokens),
       // In-memory details carry no added wait yet — null like "no wait".
       addedWaitMs: null,
       addedWaitCause: null,

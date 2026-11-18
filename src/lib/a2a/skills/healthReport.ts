@@ -5,6 +5,7 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
+import { buildSelfLoopHeaders, type A2ACallerContext } from "../selfLoopAuth";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
 type JsonRecord = Record<string, unknown>;
@@ -17,15 +18,16 @@ type ProviderHealthEntry = {
 };
 
 const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
 
-async function healthFetch(path: string): Promise<JsonRecord> {
+async function healthFetch(path: string, caller?: A2ACallerContext): Promise<JsonRecord> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-  };
-  const response = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
+  const response = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(10000),
+    // Never follow a redirect while carrying the caller's API key.
+    redirect: "error",
+  });
   if (!response.ok) {
     throw new Error(`API [${response.status}]: ${await response.text().catch(() => "error")}`);
   }
@@ -90,10 +92,13 @@ export interface HealthReportResult {
   };
 }
 
-export async function executeHealthReport(_task: A2ATask): Promise<HealthReportResult> {
+export async function executeHealthReport(
+  _task: A2ATask,
+  caller?: A2ACallerContext
+): Promise<HealthReportResult> {
   const [healthResult, telemetryResult] = await Promise.allSettled([
-    healthFetch("/api/monitoring/health"),
-    healthFetch("/api/telemetry/summary"),
+    healthFetch("/api/monitoring/health", caller),
+    healthFetch("/api/telemetry/summary", caller),
   ]);
 
   if (healthResult.status === "rejected") {

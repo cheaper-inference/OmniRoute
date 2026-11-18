@@ -128,7 +128,12 @@ const cases: Case[] = [
     method: "GET",
     expectedClass: "PUBLIC",
   },
-  { name: "/api/init is PUBLIC", path: "/api/init", method: "POST", expectedClass: "PUBLIC" },
+  {
+    name: "/api/init is MANAGEMENT (starts background jobs)",
+    path: "/api/init",
+    method: "GET",
+    expectedClass: "MANAGEMENT",
+  },
   {
     name: "/api/monitoring/health is PUBLIC",
     path: "/api/monitoring/health",

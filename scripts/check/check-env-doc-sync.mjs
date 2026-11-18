@@ -53,6 +53,10 @@ const IGNORE_FROM_CODE = new Set([
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",
   "COMPLEXITY_ESLINT_REPORT",
+  // Back-off unit (ms) between `docker buildx imagetools inspect` retries in
+  // scripts/ci/docker-image-complete.mjs (#18749). Lets tests set 0; a CI-script tuning knob
+  // with a built-in default, never OmniRoute runtime config.
+  "DOCKER_IMAGE_COMPLETE_RETRY_DELAY_MS",
   // Agent environment / system execution paths.
   "PROJECT_ROOT",
   "ARTIFACTS_DIR",
@@ -105,6 +109,10 @@ const IGNORE_FROM_CODE = new Set([
   // CI providers (set by the runner).
   "GITHUB_BASE_REF",
   "GITHUB_BASE_SHA",
+  // The ref the job checked out: the new-code gates (check-complexity-ratchets.mjs,
+  // check-dead-code.mjs) hand it to newCodeMode.resolveMergeBase to tell an omni-queue/**
+  // candidate from a PR merge ref. Runner-owned, never OmniRoute runtime config.
+  "GITHUB_REF",
   // Actions-owned output file used by scripts/ci/release-green-result.mjs.
   // A runner protocol path, not user-configurable OmniRoute environment.
   "GITHUB_OUTPUT",

@@ -13,53 +13,73 @@ L'implementazione si trova in `src/lib/compliance/index.ts` (T-43 — "Controlli
 
 ## Cosa viene registrato
 
-### Eventi di audit amministrativi (`audit_log`)
+### Eventi di audit amministrativo (`audit_log`)
 
-Ogni chiamata a `logAuditEvent({ action, actor, target, details, ... })` produce una riga. Le stringhe delle azioni seguono uno schema `domain.verb` (o `domain.verb.outcome`). I tipi di azione confermati nel codice sorgente includono:
+Ogni chiamata a `logAuditEvent({ action, actor, target, details, ... })` produce
+una riga. Le stringhe delle azioni seguono un modello
+`domain.verb` (o `domain.verb.outcome`). I tipi di azione confermati nel codice
+incluso nell'albero sono:
 
-| Azione                               | Origine                                 |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Azione                               | Origine                                  |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Ogni voce acquisisce `action`, `actor` (il valore predefinito è `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` e `timestamp`. Le chiavi sensibili (`apiKey`, `accessToken`, `refreshToken`, `password`, qualsiasi elemento corrispondente a `*token`/`*secret`/`*apikey`, ecc.) vengono oscurate ricorsivamente con `"[redacted]"` prima della scrittura della riga.
+Ogni voce registra `action`, `actor` (il valore predefinito è `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` e `timestamp`. Le chiavi sensibili (`apiKey`, `accessToken`,
+`refreshToken`, `password`, qualsiasi chiave corrispondente a
+`*token`/`*secret`/`*apikey`, ecc.) vengono oscurate ricorsivamente in
+`"[redacted]"` prima che la riga venga scritta.
+
+Le righe `api_key.auth.touch` registrano i metadati delle chiavi API riuscite e
+le letture di rilevamento (GET/HEAD) che non raggiungono il log delle richieste:
+quale chiave, quando e il percorso normalizzato, con accorpamento e un limite
+massimo di 1.000 righe. Le chiavi con `noLog` e la chiave dell'ambiente vengono
+ignorate. L'indirizzo IP e l'user agent del chiamante vengono aggiunti solo
+quando il flag di funzionalità `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` è attivo
+(disattivato per impostazione predefinita).
 
 ### Chiamate agli strumenti MCP (`mcp_tool_audit`)
 
-Ogni invocazione di uno strumento MCP scrive una riga tramite `open-sse/mcp-server/audit.ts`. Schema (da `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Ogni invocazione di uno strumento MCP scrive una riga tramite
+`open-sse/mcp-server/audit.ts`. Schema (da
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Colonna          | Note                                           |
-| ---------------- | ---------------------------------------------- |
-| `id`             | incremento automatico                          |
-| `tool_name`      | identificatore dello strumento MCP             |
-| `input_hash`     | sha256 dell'input (nessun payload memorizzato) |
-| `output_summary` | breve riepilogo troncato                       |
-| `duration_ms`    | tempo trascorso                                |
-| `api_key_id`     | chiamante (può essere null)                    |
-| `success`        | `1` / `0`                                      |
-| `error_code`     | codice di errore finale in caso di errore      |
-| `created_at`     | timestamp ISO                                  |
+| Colonna          | Note                                         |
+| ---------------- | -------------------------------------------- |
+| `id`             | autoincremento                               |
+| `tool_name`      | identificatore dello strumento MCP           |
+| `input_hash`     | sha256 dell'input (nessun payload salvato)   |
+| `output_summary` | riepilogo breve e troncato                   |
+| `duration_ms`    | tempo di esecuzione effettivo                |
+| `api_key_id`     | chiamante (nullable)                         |
+| `success`        | `1` / `0`                                    |
+| `error_code`     | codice di errore terminale in caso di errore |
+| `created_at`     | timestamp ISO                                |
 
-### Log delle richieste e dell'utilizzo
+### Log delle richieste / dell'utilizzo
 
-Si tratta di telemetria operativa (non propriamente di audit amministrativo), ma condivide la stessa pipeline di conservazione:
+Si tratta di telemetria operativa (non strettamente di audit amministrativo), ma
+condivide la stessa pipeline di conservazione:
 
-- `usage_history` — riepilogo dell'utilizzo per richiesta
-- `call_logs` — log completo per richiesta (soggetto al limite di righe, vedere sotto)
+- `usage_history` — aggregazione dell'utilizzo per richiesta
+- `call_logs` — log completo per richiesta (soggetto al limite di righe, vedi sotto)
 - `proxy_logs` — log del traffico proxy (soggetto al limite di righe)
-- `request_detail_logs` — log dettagliato delle richieste legacy (viene comunque eliminato in base ai criteri di conservazione, se presente)
+- `request_detail_logs` — log dettagliato legacy delle richieste (viene ancora eliminato se presente)
 
 ## Schema di archiviazione
 

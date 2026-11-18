@@ -81,11 +81,10 @@ updates:
       # promptfoo is an exact pin mirrored by the nightly LLM-security workflow
       # (`npx --yes promptfoo@X.Y.Z` in nightly-llm-security.yml). The contract test
       # tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts requires the workflow
-      # pin to equal package.json and rejects releases proven broken (KNOWN_BROKEN:
-      # 0.123.1 and 0.124.1, promptfoo/promptfoo#10866 — the guard-validation step exits
-      # 100 on the guard's 4xx JSON body). Dependabot only edits package.json, so every
-      # bump reds that test. Bump by hand: package.json + workflow pin together, after
-      # re-running guard-validation against the new release.
+      # pin to equal package.json, and promptfoo-guard-json-error.test.mjs runs the pinned
+      # CLI against the guard's 4xx JSON body (promptfoo/promptfoo#10866). Dependabot only
+      # edits package.json, so every bump reds the pin test. Bump by hand: package.json +
+      # workflow pin together, after re-running guard-validation against the new release.
       - dependency-name: "promptfoo"
       # fumadocs-mdx 15.4.7 imports `embedSource` from fumadocs-core/mdx-plugins/stringifier,
       # which the fumadocs-core on this branch (16.15.x) does not export yet: the Build job

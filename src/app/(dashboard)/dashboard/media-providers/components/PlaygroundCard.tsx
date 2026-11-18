@@ -66,7 +66,7 @@ export function PlaygroundCard({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="labs" size={18} className="text-text-muted" />
-          <h3 className="text-sm font-semibold">
+          <h3 className="text-sm">
             {t("exampleLabel")} · {kindLabel}
           </h3>
         </div>

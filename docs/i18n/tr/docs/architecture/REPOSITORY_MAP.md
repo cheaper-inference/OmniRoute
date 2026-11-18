@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Kök dosyalar
 
-| Dosya                                       | Amaç                                                                                                 |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Pazarlama açılış sayfası + hızlı başlangıç + özellik matrisi (ayrıca bkz. `llm.txt`)                 |
-| **CHANGELOG.md**                            | Sürüm başına değişiklik günlüğü (`/version-bump-cc` becerisi tarafından otomatik oluşturulur)        |
-| **LICENSE**                                 | MIT lisans metni                                                                                     |
-| **CLAUDE.md**                               | Claude Code aracıları için proje kuralları (katı kurallar, kurallar bütünü, senaryolar)              |
-| **AGENTS.md**                               | CLAUDE.md ile aynı, ancak Claude dışındaki yapay zekâ aracıları için (Codex, Cursor vb.)             |
-| **GEMINI.md**                               | Gemini tabanlı aracılar için özlü kurallar (CLAUDE.md'nin alt kümesi)                                |
-| **CONTRIBUTING.md**                         | Katkıda bulunanlar için kılavuz: kurulum, conventional commit'ler, test, PR akışı                    |
-| **SECURITY.md**                             | Güvenlik açığı bildirim politikası, desteklenen sürümler, tehdit modeli                              |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — topluluk davranışına ilişkin beklentiler                                      |
-| **llm.txt**                                 | LLM tarayıcıları için optimize edilmiş düz metin açılış sayfası (yapay zekâ asistanları için SEO)    |
-| **package.json**                            | npm manifestosu, betikler, bağımlılıklar, çalışma ortamları, c8 kapsam eşiği                         |
-| **package-lock.json**                       | Kilitlenmiş bağımlılık ağacı                                                                         |
-| **tsconfig.json**                           | Kök TypeScript yapılandırması                                                                        |
-| **tsconfig.typecheck-core.json**            | `src/` çekirdeği için tür denetimi yapılandırması                                                    |
-| **tsconfig.typecheck-noimplicit-core.json** | Katı (`noImplicitAny`) tür denetimi                                                                  |
-| **tsconfig.tsbuildinfo**                    | TS artımlı derleme önbelleği (git tarafından yok sayılır)                                            |
-| **next.config.mjs**                         | Next.js 16 derleme yapılandırması (bağımsız çıktı)                                                   |
-| **next-env.d.ts**                           | Next.js tarafından otomatik oluşturulan ortam türleri                                                |
-| **eslint.config.mjs**                       | ESLint düz yapılandırması (proje alanına göre kurallar)                                              |
-| **prettier.config.mjs**                     | Prettier biçimlendirme kuralları                                                                     |
-| **postcss.config.mjs**                      | Tailwind/CSS işlem hattı için PostCSS yapılandırması                                                 |
-| **playwright.config.ts**                    | Playwright E2E test yapılandırması                                                                   |
-| **vitest.config.ts**                        | Vitest yapılandırması (varsayılan paket)                                                             |
-| **vitest.mcp.config.ts**                    | MCP sunucusu / autoCombo / önbellek paketleri için Vitest yapılandırması                             |
-| **sonar-project.properties**                | SonarQube/SonarCloud yapılandırması (kod kalitesi)                                                   |
-| **Dockerfile**                              | Çok aşamalı Docker derlemesi (builder → runner-base → runner-cli)                                    |
-| **docker-compose.yml**                      | 4 profilli geliştirme compose yapılandırması (base, cli, host, cliproxyapi) + redis yan hizmeti      |
-| **docker-compose.prod.yml**                 | Üretim compose yapılandırması (20130 numaralı port, redis, adlandırılmış birimler)                   |
-| **.dockerignore**                           | Docker bağlamından hariç tutulan dosyalar                                                            |
-| **fly.toml**                                | Fly.io dağıtım yapılandırması (`sin` bölgesi, 20128 numaralı port, /data birimi)                     |
-| **.env.example**                            | Ortam dosyası şablonu (ilk kurulumda otomatik olarak `.env` dosyasına kopyalanır)                    |
-| **.gitignore**                              | Git yok sayma kalıpları                                                                              |
-| **.npmignore**                              | npm yayımlama hariç tutma listesi                                                                    |
-| **.npmrc**                                  | npm yapılandırması (kayıt deposu, kilit dosyası politikası)                                          |
-| **.node-version**                           | Node sürüm sabitlemesi (nvm uyumlu araçlar tarafından kullanılır)                                    |
-| **.nvmrc**                                  | nvm için Node sürüm sabitlemesi                                                                      |
-| **eslint.complexity.config.mjs**            | Karmaşıklık mandalı için ESLint yapılandırması (`scripts/check/check-complexity.mjs --config`)       |
-| **eslint.sonarjs.config.mjs**               | SonarJS kuralları için ESLint yapılandırması (bilişsel karmaşıklık / yineleme)                       |
-| **source.config.ts**                        | Fumadocs `defineDocs` kaynak yapılandırması (`.source/` girdisini sağlar)                            |
-| **knip.json**                               | Knip yapılandırması — kullanılmayan dosyalar/dışa aktarımlar/bağımlılıklar (ölü kod geçidini besler) |
-| **stryker.conf.json**                       | Stryker mutasyon testi yapılandırması                                                                |
-| **.size-limit.json**                        | size-limit paket bütçesi yapılandırması                                                              |
-| **promptfooconfig.yaml**                    | promptfoo değerlendirme yapılandırması                                                               |
-| **.gitleaks.toml**                          | gitleaks gizli bilgi tarama kural kümesi                                                             |
-| **.zizmor.yml**                             | zizmor GitHub Actions güvenlik lint yapılandırması                                                   |
-| **socket.yml**                              | Socket.dev tedarik zinciri yapılandırması                                                            |
-| **news.json**                               | Yerelleştirilmiş v2 duyuru akışı; Radar lansman öğesi devre dışı olarak sunulur                      |
-| **flake.nix** / **flake.lock**              | Nix geliştirme kabuğu tanımı + kilit dosyası                                                         |
-| **.env**                                    | Yerel gizli bilgiler (git tarafından yok sayılır — `.env.example` dosyasından oluşturulur)           |
+| Dosya                                                | Amaç                                                                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **README.md**                                        | Pazarlama açılış sayfası + hızlı başlangıç + özellik matrisi (ayrıca bkz. `llm.txt`)                     |
+| **CHANGELOG.md**                                     | Sürüm başına değişiklik günlüğü ( `/version-bump-cc` skill'i tarafından otomatik olarak oluşturulmuştur) |
+| **LICENSE**                                          | MIT lisans metni                                                                                         |
+| **CLAUDE.md**                                        | Claude Code aracıları için proje kuralları (katı kurallar, kurallar, senaryolar)                         |
+| **AGENTS.md**                                        | CLAUDE.md ile aynıdır ancak Claude olmayan AI aracıları için (Codex, Cursor, vb.)                        |
+| **GEMINI.md**                                        | Gemini tabanlı aracılar için kısa kurallar ( CLAUDE.md alt kümesi)                                       |
+| **CONTRIBUTING.md**                                  | Katılımcı kılavuzu: kurulum, geleneksel taahhütler, test etme, PR akışı                                  |
+| **SECURITY.md**                                      | Güvenlik açığı raporlama politikası, desteklenen sürümler, tehdit modeli                                 |
+| **CODE_OF_CONDUCT.md**                               | Contributor Covenant — topluluğunun davranış beklentileri                                                |
+| **llm.txt**                                          | LLM tarayıcıları için optimize edilmiş düz metin girişi ( AI yardımcıları için SEO )                     |
+| **package.json**                                     | npm bildirimi, komut dosyaları, bağımlılıklar, motorlar, c8 kapsama kapısı                               |
+| **package-lock.json**                                | Kilitli bağımlılık ağacı                                                                                 |
+| **tsconfig.json**                                    | Kök TypeScript yapılandırması                                                                            |
+| **tsconfig.tsconfig.typecheck-core.json**            | `src/` çekirdeği için Typecheck yapılandırması                                                           |
+| **tsconfig.tsconfig.typecheck-noimplicit-core.json** | Katı (`noImplicitAny`) yazım denetimi                                                                    |
+| **tsconfig.tsbuildinfo**                             | TS artımlı derleme önbelleği (gitignored)                                                                |
+| **Sonraki.config.mjs**                               | Next.js 16 yapı yapılandırması (bağımsız çıktı)                                                          |
+| **sonraki ortam d.ts**                               | Next.js otomatik olarak oluşturulan env türleri                                                          |
+| **Eslint.config.mjs**                                | ESLint düz yapılandırma (proje alanı başına kurallar)                                                    |
+| **daha güzel.config.mjs**                            | Prettier biçimlendirme kuralları                                                                         |
+| **postcss.config.mjs**                               | Tailwind/CSS boru hattı için PostCSS yapılandırması                                                      |
+| **oyun yazarı.config.ts**                            | Playwright E2E test yapılandırması                                                                       |
+| **vitest.config.ts**                                 | Vitest yapılandırması (varsayılan paket)                                                                 |
+| **vitest.mcp.config.ts**                             | MCP sunucusu / autoCombo / önbellek paketleri için Vitest yapılandırması                                 |
+| **sonar-proje.properties**                           | SonarQube/SonarCloud yapılandırması (kod kalitesi)                                                       |
+| **Docker dosyası**                                   | Çok aşamalı Docker yapısı (oluşturucu → runner-base → runner-cli)                                        |
+| **docker-compose.yml**                               | Geliştirici 4 profille (temel, cli, ana bilgisayar, Cliproxyapi) + redis sepetini oluşturuyor            |
+| **liman işçisi-oluştur.prod.yml**                    | Üretim oluşturma (bağlantı noktası 20130, redis, adlandırılmış birimler)                                 |
+| **.dockerignore**                                    | Docker bağlamından hariç tutulan dosyalar                                                                |
+| **fly.toml**                                         | Fly.io dağıtım yapılandırması (bölge `sin`, bağlantı noktası 20128, /data birimi)                        |
+| **.env.example**                                     | Şablon env dosyası (ilk kurulumda `.env` otomatik olarak kopyalanır)                                     |
+| **.gitignore**                                       | Git kalıpları yoksay                                                                                     |
+| **.npmignore**                                       | npm hariç tutma listesini yayınla                                                                        |
+| **.npmrc**                                           | npm yapılandırması (kayıt defteri, kilit dosyası politikası)                                             |
+| **.node-version**                                    | Düğüm sürümü pini (nvm uyumlu araçlar tarafından kullanılır)                                             |
+| **.nvmrc**                                           | Nvm için düğüm sürümü pini                                                                               |
+| **eslint.complexity.config.mjs**                     | karmaşıklık mandalı için ESLint yapılandırması (`scripts/check/check-complexity.mjs --config`)           |
+| **eslint.sonarjs.config.mjs**                        | SonarJS kuralları için ESLint yapılandırması (bilişsel karmaşıklık/çoğaltma)                             |
+| **kaynak.config.ts**                                 | Fumadocs `defineDocs` kaynak yapılandırması ( `.source/` besler)                                         |
+| **knip.json**                                        | Knip config — kullanılmayan files/exports/deps (ölü kod kapısını besler)                                 |
+| **forvet.conf.mjs**                                  | Stryker mutasyon testi yapılandırması ( `tap.testFiles` `mutate` hesaplar)                               |
+| **.size-limit.json**                                 | boyut sınırı paket bütçesi yapılandırması                                                                |
+| **promptfooconfig.yaml**                             | Promptfoo değerlendirme yapılandırması                                                                   |
+| **.gitleaks.toml**                                   | gitleaks gizli tarama kural seti                                                                         |
+| **.zizmor.yml**                                      | zizmor GitHub-Actions güvenlik-lint yapılandırması                                                       |
+| **socket.yml**                                       | Socket.dev tedarik zinciri yapılandırması                                                                |
+| **news.json**                                        | Yerelleştirilmiş v2 duyuru akışı; Radar fırlatma öğesi devre dışı olarak gönderilir                      |
+| **pul.nix** /** pul.kilit**                          | Nix dev-shell tanımı + kilidi                                                                            |
+| **.env**                                             | Yerel sırlar ( `.env.example` oluşturulan gitignored — )                                                 |
 
-> **v3.8.26 sürümünde kök dizinden taşındı (sadeleştirme):**
+> **V3.8.26'da kökün dışına taşındı (düzenleme):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (git tarafından yok sayılır). Bkz. [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (gitignored). Bkz [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook teslimatı — bkz `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tünel yöneticileri — bkz `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
 | `cloudSync.ts`, `initCloudSync.ts`       | Durumun isteğe bağlı bulut senkronizasyonu                                                                                                                                                                                                                                                                            |
-| `localDb.ts`                             | Db modülleri için yeniden dışa aktarma varili (yalnızca mantıksal — yeniden dışa aktarma yok)                                                                                                                                                                                                                         |
+| `localDb.ts`                             | Db modülleri için varili yeniden dışa aktarma (yalnızca mantıksal — yeniden dışa aktarma yok)                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | + uyumsuzluğunu önbelleğe alma isteği                                                                                                                                                                                                                                                                                 |
 | (~ 30 üst düzey dosya daha)              | Uzmanlaşmış yardımcılar (logEnv, modelsDevSync, piiSanitizer, vb.)                                                                                                                                                                                                                                                    |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Kontrol paneli bileşeni API: `packages/ui-kit` üzerindeki adaptörler — bkz. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tarafından kullanılan simge adları → Lucide bileşenleri (`<Icon>`)                          |
-| `constants/providers.ts`         | **380 sağlayıcı** Zod doğrulaması ile (gerçeğin kaynağı)                                                         |
+| `constants/providers.ts`         | **394 sağlayıcı** Zod doğrulaması ile (gerçeğin kaynağı)                                                         |
 | `constants/cliTools.ts`          | Harici CLI aracı kaydı                                                                                           |
-| `constants/routingStrategies.ts` | **20 yönlendirme stratejisi** önceliklere sahip                                                                  |
+| `constants/routingStrategies.ts` | **22 yönlendirme stratejisi** önceliklere sahip                                                                  |
 | `constants/publicApiRoutes.ts`   | Taşıyıcı (yönetim vs.) kimlik doğrulaması gerektiren rotalar                                                     |
 | `constants/upstreamHeaders.ts`   | Yukarı akış istekleri için başlık reddetme listesi                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod şemaları ( API sözleşmeleri için tek gerçek kaynak)                                                     |
@@ -265,7 +265,7 @@ Ayrı npm çalışma alanı (`@omniroute/open-sse`). İstek işleme ve sağlayı
 ```
 open-sse/
 ├── handlers/            # 16 dosya (12 işleyici + 4 yardımcı): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search vb.
-├── executors/           # 150 yürütücü modülü (BaseExecutor sınıfını genişleten sınıflar + sağlayıcı başına yardımcılar)
+├── executors/           # 163 yürütücü modülü (BaseExecutor sınıfını genişleten sınıflar + sağlayıcı başına yardımcılar)
 ├── translator/          # Biçim dönüştürücüler (9 istek, 9 yanıt, 9 yardımcı)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ hizmet modülü (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM vb.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Harici CLI entegrasyonları + Dahili OmniRoute CLI                                                      |
 | `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                               |
 | `UNINSTALL.md`              | Kaldırma adımlarını temizleyin                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Otomatik olarak oluşturuldu** 380 sağlayıcının kataloğu (yenileme: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Otomatik olarak oluşturuldu** 394 sağlayıcının kataloğu (yenileme: `npm run gen:provider-reference`) |
 
 ### Alt sistem derinlemesine incelemeleri
 

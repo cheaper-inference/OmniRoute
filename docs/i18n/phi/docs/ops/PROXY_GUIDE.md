@@ -82,6 +82,18 @@ Kahit sa labas ng mga naka-block na rehiyon, kapaki-pakinabang ang mga proxy par
 
 ---
 
+## Default na estado ng proxy para sa mga bagong account
+
+Sa** Mga setting → Proxy → Global configuration** , gamitin** Paganahin ang proxy bilang default para sa mga bagong koneksyon** upang piliin ang paunang proxy na estado ng mga bagong idinagdag na provider account.
+
+Kinokontrol ng bagong setting ang paunang estado ng proxy ng mga bagong idinagdag na provider account. Hindi nito binabago ang mga kasalukuyang account o pinapalitan ang pandaigdigang proxy switch. Pinapanatili ng paunang halaga nito ang dating gawi. I-off ito nang isang beses para gumawa ng mga account sa hinaharap na may naka-disable na proxy bilang default.
+
+Ang kagustuhan ay nakaimbak bilang `defaultNewConnectionProxyEnabled` sa pamamagitan ng umiiral na Mga Setting API. Nagde-default ito sa `true` kapag hindi na-save. Magkakabisa ang pag-save `false` para sa mga kasunod na bagong account nang hindi nagre-restart. tumatanggap `POST /api/providers` ng opsyonal na mahigpit na boolean `proxyEnabled`; inuuna ang tahasang `true` o `false` kaysa sa default ng paggawa. Ang pagtanggal sa isang duplicate na account o OAuth reconnect ay nagpapanatili sa nakaimbak na estado ng account na iyon. Maaari pa ring i-enable o i-disable ang mga indibidwal na account pagkatapos.
+
+Ginagamit ng mga piling paglilipat ng provider ang default ng pag-install ng patutunguhan para sa mga bagong account at pinapanatili ang patakaran sa patutunguhan kapag pinapalitan ang mga kasalukuyang account. Ang mga proxy toggle ay hindi mga portable transfer field. Ang buong backup na pagpapanumbalik at makasaysayang JSON/SQL migration ay nagpapanatili ng kanilang mga umiiral na semantika ng pagpapanumbalik, kabilang ang mga naka-save na halaga ng account at mga default na legacy na schema; ang isang kumpletong pag-restore ng mga setting ay maaari ding ibalik ang kagustuhang ito.
+
+Ang kagustuhang ito ay hindi nagtatalaga ng proxy o nagtatatag na ang isa ay malusog o ginagamit. Ang aktwal na pagruruta ay nakadepende pa rin sa pandaigdigang proxy switch at naaangkop na proxy configuration. Ang mga sintetikong provider na walang paulit-ulit na account, trapiko OAuth bago ang paggawa ng account, mga proxy environment/system, at networking ng mga panlabas na backend ay wala sa saklaw nito.
+
 ## 4-Level na Proxy System
 
 Sinusuportahan ng OmniRoute ang configuration ng proxy sa **apat na magkakahiwalay na saklaw**, na nireresolba ayon sa pagkakasunod-sunod ng priyoridad:

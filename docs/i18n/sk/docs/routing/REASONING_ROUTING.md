@@ -40,22 +40,17 @@ konkrétne pripojenie poskytovateľa. Môže zmeniť iba úsilie a rozpočet.
 
 ## Úsilie a rozpočet
 
-`sourceEffort` prijíma hodnoty `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` a
-`ultra`. Hodnota `missing` znamená, že požiadavka neobsahuje ani samostatnú úroveň úsilia, ani prepínač
-uvažovania, ani rozpočet na uvažovanie. Signál obsahujúci iba rozpočet sa preto zhoduje len s hodnotou `any`.
+`sourceEffort` prijíma `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` a `ultra`. `missing` znamená, že požiadavka neobsahuje ani samostatné úsilie, ani prepínač myslenia alebo rozpočet na myslenie. Signál len pre rozpočet sa preto zhoduje iba so `any`.
 
 `effortMode` má tri varianty:
 
-- `inherit` zachová úsilie klienta, pričom stále umožňuje zmenu modelu alebo kombinácie.
-- `default` nastaví `targetEffort` iba vtedy, keď nie je prítomný žiadny explicitný signál uvažovania.
-- `force` nahradí samostatnú úroveň úsilia hodnotou `targetEffort`.
+- `inherit` zachováva úsilie klienta a zároveň umožňuje zmenu modelu alebo kombinácie.
+- `default` nastavuje `targetEffort` len vtedy, keď nie je prítomný žiadny explicitný uvažovací signál.
+- `force` nahrádza diskrétne úsilie `targetEffort`.
 
-Nezávisle od toho môže mať `budgetAction` hodnotu `preserve`, `remove` alebo `set`. Hodnota `force`
-spolu s `none` odstráni všetky rozpoznané polia úsilia a rozpočtu. Kombinácia `none` s `set` je neplatná.
+Nezávisle môže byť `budgetAction` `preserve`, `remove` alebo `set`. `force` s `none` odstráni všetky rozpoznané polia úsilia a rozpočtu a potom nastaví `reasoning_effort: "none"`, pretože niektorí poskytovatelia zapnú myslenie, keď pole chýba. Poskytovatelia, ktorí odmietajú doslovné `none` sú pri odoslaní upravení v `open-sse/executors/base/reasoningEffort.ts`. Príkazový kód ho mapuje na `low`, s výnimkou požiadaviek v tvare odpovedí (`input` bez `messages`), kde ponecháva `none`. Na Cloudflare Workers AI (`cloudflare-ai`), modely, ktoré odmietajú `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), dostanú `low`; ostatné modely Workers AI ponechávajú `none`. Zrušenie poľa tam nie je možné, pretože neprítomné úsilie spustí predvolenú úroveň modelu. `none` spolu s `set` je neplatné.
 
-Požiadavky smerujúce na známe nekompatibilné modely sa odmietnu ešte pred volaním nadradenej služby.
-V prípade cieľových kombinácií sa nekompatibilné položky odstránia; ak nezostane žiadna, požiadavka vráti
-stav `400`. Neznáme údaje o schopnostiach spôsobia upozornenie a pravidlo zostane aktívne.
+Požiadavky zacielené na známe nekompatibilné modely sú odmietnuté pred odoslaním hovoru. Pre kombinované ciele sa nekompatibilné položky odstránia; ak nezostane žiadna, žiadosť vráti stav `400`. Neznáme údaje o funkciách vygenerujú varovanie a ponechajú pravidlo aktívne.
 
 ## Zabezpečenie a transporty
 
