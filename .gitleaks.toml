@@ -97,7 +97,7 @@
       # credential; the generic-api-key rule flags the long hyphenated string.
       '''omniroute-cheaperinference-sponsor-banner-dismissed-v\d+''',
       '''SunbreakWebUI1''',
-      # Feature-flag catalog key (src/shared/constants/featureFlagDefinitions.ts:643).
+      # Feature-flag catalog key (src/shared/constants/featureFlagDefinitionsMcpV2.ts).
       # The matched secret is the env var / flag identifier, not a credential.
       '''^OMNIROUTE_MCP_V2$''',
       # Uzbek dashboard catalog (#13727, src/i18n/messages/uz.json `outputTokenDesc`):

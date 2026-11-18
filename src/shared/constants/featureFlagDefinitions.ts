@@ -2,6 +2,7 @@ import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
+import { MCP_V2_FLAG } from "./featureFlagDefinitionsMcpV2";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import {
   PII_RESPONSE_SANITIZATION_MODE_FLAG,
@@ -651,19 +652,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-  {
-    key: "OMNIROUTE_MCP_V2",
-    label: "MCP v2 Sidecar",
-    description:
-      "Enable the experimental 2026-07-28 spec MCP v2 sidecar (stateless, no handshake). Off by default; v1 is untouched.",
-    descriptionI18nKey: "featureFlagOmnirouteMcpV2Description",
-    category: "runtime",
-    // Experimental surface: ships off so v1 behavior is unchanged unless an operator opts in.
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: true,
-    warningLevel: "caution",
-  },
+  MCP_V2_FLAG,
   {
     key: "OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS",
     label: "MCP Compress Descriptions",
