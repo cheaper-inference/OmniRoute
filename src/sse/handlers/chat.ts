@@ -1729,6 +1729,10 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
+  // A custom OpenAI-compatible node is one operator-selected endpoint. A transport or
+  // response failure can follow an accepted POST, so replaying it may duplicate inference.
+  const customProviderNoReplay = provider.startsWith("openai-compatible-");
+  const skipUpstreamRetry = runtimeOptions.skipUpstreamRetry === true || customProviderNoReplay;
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
@@ -1831,7 +1835,8 @@ async function handleSingleModelChat(
     resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
-    provider === "claude-web" ||
+    skipUpstreamRetry ||
+      provider === "claude-web" ||
       isCombo ||
       forceLiveComboTest ||
       runtimeOptions.emergencyFallbackTried === true ||
@@ -2361,7 +2366,7 @@ async function handleSingleModelChat(
             runtimeModelInfo: resolved.modelInfo,
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
-            skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
+            skipUpstreamRetry,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,
@@ -2493,6 +2498,7 @@ async function handleSingleModelChat(
       if (result.errorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE) {
         if (
           preferredDeadline.mayRotateOnRequestTimeout &&
+          !customProviderNoReplay &&
           !preferredFailoverUsed &&
           requestSignal?.aborted !== true
         ) {
@@ -2596,6 +2602,7 @@ async function handleSingleModelChat(
           isCombo,
           requestSignal?.aborted === true
         ) &&
+        !customProviderNoReplay &&
         !hasForcedConnection
       ) {
         streamReadinessTimeoutRetries += 1;
@@ -2621,6 +2628,7 @@ async function handleSingleModelChat(
         // the account unavailable for the early close.
         if (
           shouldRetryStreamEarlyEof(result.errorCode, streamEarlyEofRetries) &&
+          !customProviderNoReplay &&
           !hasForcedConnection &&
           // #16438 (flag-gated): never spend a retry on a client that already left, and
           // let the combo own empty_content recovery so the two layers never stack.
@@ -2665,6 +2673,7 @@ async function handleSingleModelChat(
         // not an account/quota failure. Do NOT mark the account unavailable here.
         if (
           isTerminalStreamEarlyEof &&
+          !customProviderNoReplay &&
           !hasForcedConnection &&
           !earlyEofOriginal &&
           isEarlyEofSiblingFailoverOn()
@@ -2804,7 +2813,8 @@ async function handleSingleModelChat(
       // Combo targets never emergency-hop: the combo is the operator's fallback policy
       // (target-level orchestration plus the global fallback #689 after it), and a
       // per-target hop burns extra upstream calls against exhausted providers (#1731).
-      const emergencyHopAllowed = !runtimeOptions.providerFailoverPending && !comboName;
+      const emergencyHopAllowed =
+        !customProviderNoReplay && !runtimeOptions.providerFailoverPending && !comboName;
       if (!runtimeOptions.emergencyFallbackTried && emergencyHopAllowed) {
         const fallbackDecision = await resolveEmergencyFallbackDecision(
           Number(result.status || 0),
@@ -2952,6 +2962,7 @@ async function handleSingleModelChat(
       if (
         !runtimeOptions.emergencyFallbackTried &&
         !runtimeOptions.providerFailoverPending &&
+        !customProviderNoReplay &&
         !comboName &&
         !forceLiveComboTest &&
         shouldRetrySameAccountTransport({
@@ -3046,7 +3057,7 @@ async function handleSingleModelChat(
       // to the next target — with ITS own pin. Same rule the antigravity
       // stream-readiness / pre-response-timeout and account-semaphore paths above
       // already apply.
-      if (shouldFallback && !hasForcedConnection) {
+      if (shouldFallback && !hasForcedConnection && !customProviderNoReplay) {
         if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
           lastCooldownMs = cooldownMs;
           requestRetryLastCooldownMs = cooldownMs;
