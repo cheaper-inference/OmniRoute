@@ -407,7 +407,7 @@
     "marked-terminal": "^7.3.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "next-intl": "^4.14.0",
     "next-themes": "^0.4.6",
     "node-machine-id": "^1.1.12",
@@ -461,6 +461,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@bcoe/v8-coverage": "1.0.2",
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "@eslint/compat": "^2.1.1",
     "@playwright/test": "1.62.1",

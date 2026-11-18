@@ -1,0 +1,1 @@
+- **fix(ci):** Use the exact Bun dependency installed by npm for the Linux and Windows SQLite compatibility smoke. Verify package and lockfile versions, the local executable and npm shim before running the existing smoke suite, replacing independent global and remote installers.

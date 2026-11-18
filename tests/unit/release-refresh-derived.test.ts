@@ -467,12 +467,21 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
       .join("\n");
   }
 
-  function realFixture(opts: { staleLocale?: string } = {}) {
+  function realFixture(
+    opts: {
+      staleLocale?: string;
+      preserveCoincidences?: boolean;
+      addControlledCensus?: boolean;
+    } = {}
+  ) {
     const count = Number((loadFactsSnapshot(REPO) as Record<string, unknown>).migrations);
     const doc = (rel: string) => {
       const text = realFile(rel);
       assert.ok(text.split("\n").some(isDatabaseRow), `${rel}: the database row is missing`);
-      return withoutCoincidences(text, count);
+      const content = opts.preserveCoincidences ? text : withoutCoincidences(text, count);
+      return opts.addControlledCensus
+        ? `${content}\nHistoric fixture: ${count} Dependabot PRs.\n`
+        : content;
     };
     const files: Record<string, string> = { "README.md": doc("README.md") };
     for (const l of LOCALES) files[`docs/i18n/${l}/README.md`] = doc(`docs/i18n/${l}/README.md`);
@@ -497,6 +506,26 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
     assert.ok(facts, "docs/reference/derived-facts.json is missing");
     return { ...facts, migrations: Number(facts.migrations) + 1 };
   }
+
+  it("a coincident census count survives the real migration rewrite without false manual work", async () => {
+    const root = realFixture({ preserveCoincidences: true, addControlledCensus: true });
+    const facts = await snapshotFacts();
+    const oldCount = Number(facts.migrations) - 1;
+    const census = `Historic fixture: ${oldCount} Dependabot PRs.`;
+    assert.ok(read(root, "README.md")!.includes(census));
+    const result = await refreshDerived({ root, only: ["numbers"], facts });
+    assert.deepEqual(result.manual, []);
+    assert.ok(read(root, "README.md")!.includes(`${oldCount + 1} migrations`));
+    assert.ok(read(root, "README.md")!.includes(census));
+    const state = JSON.parse(read(root, ".i18n-state.json")!).sources["README.md"];
+    for (const locale of LOCALES) {
+      assert.equal(state.locales[locale].source_hash, state.source_hash);
+      assert.equal(
+        state.locales[locale].target_hash,
+        sha256(read(root, `docs/i18n/${locale}/README.md`)!)
+      );
+    }
+  });
 
   it("migrations+1: source and every mirror carry the new count, state refreshed, no manual", async () => {
     const root = realFixture();

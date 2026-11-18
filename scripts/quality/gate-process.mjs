@@ -1,7 +1,198 @@
 import { spawn } from "node:child_process";
-import { closeSync, mkdirSync, openSync, writeFileSync, writeSync } from "node:fs";
+import {
+  closeSync,
+  mkdirSync,
+  openSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  writeSync,
+} from "node:fs";
 import { dirname } from "node:path";
 import { StringDecoder } from "node:string_decoder";
+
+function snapshotReceiptIdentity(value) {
+  if (value === undefined) return {};
+  const invalid = () => {
+    throw new TypeError("Invalid gate receipt identity");
+  };
+  const fields = (input, required, optional = []) => {
+    if (
+      !input ||
+      typeof input !== "object" ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(input))
+    )
+      invalid();
+    const descriptors = Object.getOwnPropertyDescriptors(input);
+    const keys = Reflect.ownKeys(descriptors);
+    if (
+      keys.some((key) => !required.includes(key) && !optional.includes(key)) ||
+      required.some((key) => !Object.hasOwn(descriptors, key))
+    )
+      invalid();
+    for (const key of keys) {
+      if (!Object.hasOwn(descriptors[key], "value") || !descriptors[key].enumerable) invalid();
+    }
+    return Object.fromEntries(keys.map((key) => [key, descriptors[key].value]));
+  };
+  const identity = fields(value, ["invocationId"], ["packPhase"]);
+  if (
+    typeof identity.invocationId !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      identity.invocationId
+    )
+  )
+    invalid();
+  if (Object.hasOwn(identity, "packPhase")) {
+    const phase = fields(identity.packPhase, [
+      "schemaVersion",
+      "laneId",
+      "phaseId",
+      "mode",
+      "budgetMs",
+      "preparationBudgetMs",
+      "invocationId",
+      "candidateSha",
+      "runId",
+      "runAttempt",
+      "workflowSha",
+    ]);
+    const sha = (input) => typeof input === "string" && /^[0-9a-f]{40}$/.test(input);
+    const runNumber = (input) => typeof input === "string" && /^[1-9][0-9]*$/.test(input);
+    const local = [phase.runId, phase.runAttempt, phase.workflowSha].every(
+      (entry) => entry === null
+    );
+    if (
+      phase.schemaVersion !== 1 ||
+      phase.laneId !== "pack-artifact" ||
+      !["build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(phase.phaseId) ||
+      phase.mode !== "shared" ||
+      !Number.isSafeInteger(phase.budgetMs) ||
+      phase.budgetMs <= 0 ||
+      !Number.isSafeInteger(phase.preparationBudgetMs) ||
+      phase.preparationBudgetMs < phase.budgetMs ||
+      phase.invocationId !== identity.invocationId ||
+      !sha(phase.candidateSha) ||
+      (!local &&
+        (!runNumber(phase.runId) || !runNumber(phase.runAttempt) || !sha(phase.workflowSha)))
+    )
+      invalid();
+    identity.packPhase = phase;
+  }
+  return identity;
+}
+
+function parseProcStat(statLine) {
+  const closeParen = statLine.lastIndexOf(")");
+  if (closeParen < 2 || statLine[closeParen + 1] !== " ") {
+    throw new Error("invalid /proc/<pid>/stat format");
+  }
+  const fieldsAfterComm = statLine
+    .slice(closeParen + 2)
+    .trim()
+    .split(/\s+/);
+  const startTicks = fieldsAfterComm[19];
+  const processGroup = fieldsAfterComm[2];
+  if (!/^[0-9]+$/.test(startTicks ?? "")) throw new Error("missing process start time");
+  if (!/^[0-9]+$/.test(processGroup ?? "")) throw new Error("missing process group");
+  return {
+    startTicks,
+    processGroup: Number(processGroup),
+    state: fieldsAfterComm[0],
+    threadCount: fieldsAfterComm[17],
+  };
+}
+
+function isExitedZombie(record) {
+  return record.state === "Z" && record.threadCount === "1";
+}
+
+function processScanReason(error) {
+  const knownCodes = new Set([
+    "EACCES",
+    "EPERM",
+    "EIO",
+    "EBADF",
+    "ENOENT",
+    "ESRCH",
+    "EMFILE",
+    "ENFILE",
+    "ENOTDIR",
+  ]);
+  if (knownCodes.has(error?.code)) return `PROC_STAT_${error.code}`;
+  const parseReasons = new Map([
+    ["invalid /proc/<pid>/stat format", "PROC_STAT_FORMAT_INVALID"],
+    ["missing process start time", "PROC_STAT_START_TICKS_MISSING"],
+    ["missing process group", "PROC_STAT_GROUP_MISSING"],
+  ]);
+  return parseReasons.get(error?.message) ?? "PROC_STAT_UNCLASSIFIED_ERROR";
+}
+
+function observeLinuxProcessGroup(processGroup) {
+  const members = [];
+  let unknown = false;
+  const diagnostics = {
+    schemaVersion: 1,
+    processGroup,
+    root: { pid: processGroup, kind: "NOT_LISTED" },
+    ownMembers: [],
+    unassignedErrors: {},
+  };
+  const result = () => ({
+    members,
+    unknown,
+    diagnostics: { ...diagnostics, status: unknown ? "UNKNOWN" : "COMPLETE" },
+  });
+  let entries;
+  try {
+    // Names avoid Dirent conversion racing with a PID that exits during enumeration.
+    entries = readdirSync("/proc");
+  } catch (error) {
+    unknown = true;
+    diagnostics.root.kind = "NOT_SCANNED";
+    diagnostics.directoryError = processScanReason(error);
+    return result();
+  }
+  for (const name of entries) {
+    if (!/^[0-9]+$/.test(name)) continue;
+    const pid = Number(name);
+    try {
+      const stat = parseProcStat(readFileSync(`/proc/${pid}/stat`, "utf8"));
+      if (pid === processGroup && stat.processGroup !== processGroup) {
+        diagnostics.root.kind = "GROUP_MISMATCH";
+      }
+      if (stat.processGroup === processGroup) {
+        const member = {
+          pid,
+          startTicks: stat.startTicks,
+          state: stat.state,
+          threadCount: stat.threadCount,
+          executable: !isExitedZombie(stat),
+        };
+        diagnostics.ownMembers.push(member);
+        if (pid === processGroup) diagnostics.root = { ...member, kind: "PRESENT" };
+        // A zombie leader can still have live threads. Only its single-thread
+        // exited form is non-executable and waiting for its parent to reap it.
+        if (member.executable) members.push({ pid, startTicks: stat.startTicks });
+      }
+    } catch (error) {
+      const missing = error.code === "ENOENT" || error.code === "ESRCH";
+      const reasonCode = processScanReason(error);
+      if (pid === processGroup) {
+        diagnostics.root = { pid, kind: missing ? "MISSING" : "UNKNOWN", reasonCode };
+      } else if (!missing) {
+        // Unproved membership permits category counts only, never another PID,
+        // command, environment, stat contents, or an error message containing a path.
+        diagnostics.unassignedErrors[reasonCode] =
+          (diagnostics.unassignedErrors[reasonCode] ?? 0) + 1;
+      }
+      // These two per-PID errors mean that PID disappeared; all other failures
+      // keep the observation unknown instead of silently proving an empty group.
+      if (!missing) unknown = true;
+    }
+  }
+  return result();
+}
 
 /** Run one gate without a shell; persist progress before computing its verdict. */
 export async function runGateProcess(command, args, options) {
@@ -15,7 +206,12 @@ export async function runGateProcess(command, args, options) {
     maxBuffer = 256 * 1024 * 1024,
     signal,
     onHeartbeat = () => {},
+    receiptIdentity: suppliedReceiptIdentity,
   } = options;
+  const receiptIdentity = snapshotReceiptIdentity(suppliedReceiptIdentity);
+  if (receiptIdentity.packPhase && receiptIdentity.packPhase.budgetMs !== timeout) {
+    throw new TypeError("Invalid gate receipt identity");
+  }
   if (!logPath || !Number.isFinite(timeout) || timeout <= 0) {
     throw new Error("Gate execution requires a log path and positive timeout");
   }
@@ -37,6 +233,7 @@ export async function runGateProcess(command, args, options) {
   let exitCode = null;
   let exitSignal = null;
   let cleanupError = null;
+  let processGroupObservation = null;
   let resolveDone;
   const done = new Promise((resolve) => {
     resolveDone = resolve;
@@ -114,7 +311,17 @@ export async function runGateProcess(command, args, options) {
       child.on("exit", (code, receivedSignal) => {
         exitCode = code;
         exitSignal = receivedSignal;
-        if (process.platform !== "win32" && child.pid) {
+        if (process.platform === "linux" && child.pid) {
+          try {
+            const group = observeLinuxProcessGroup(child.pid);
+            processGroupObservation = group.diagnostics;
+            if (group.unknown) terminate("CLEANUP_ERROR");
+            else if (group.members.length > 0) terminate("ORPHANED_DESCENDANTS");
+          } catch {
+            processGroupObservation = { status: "UNKNOWN", reasonCode: "PROCESS_SCAN_EXCEPTION" };
+            terminate("CLEANUP_ERROR");
+          }
+        } else if (process.platform !== "win32" && child.pid) {
           try {
             process.kill(-child.pid, 0);
             terminate("ORPHANED_DESCENDANTS");
@@ -158,6 +365,7 @@ export async function runGateProcess(command, args, options) {
           ? exitCode
           : 1;
   const receipt = {
+    ...receiptIdentity,
     schemaVersion: 1,
     startedAt,
     completedAt: new Date().toISOString(),
@@ -169,6 +377,7 @@ export async function runGateProcess(command, args, options) {
     signal: exitSignal,
     spawnError,
     cleanupError,
+    processGroupObservation,
     logPath,
   };
   const receiptPath = `${logPath}.json`;

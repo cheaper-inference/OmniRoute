@@ -1,0 +1,1 @@
+Quality gate process supervision on Linux now distinguishes exited single-thread zombies from executable descendants, preserving the gate's exit code while retaining cleanup of live descendants. Incomplete process observations fail closed and record sanitized diagnostic categories without exposing unrelated process details.

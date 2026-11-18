@@ -905,7 +905,8 @@ test("every HARD command of the pre-flight goes through withHardGateMode; drift 
   );
   assert.doesNotMatch(driftCmd, /withHardGateMode/, "drift items keep the strict (release) view");
   for (const wiring of [
-    /env: withHardGateMode\(\{ GITHUB_BASE_REF: "main" \}\)/, // test-masking
+    /env = testMaskingGateEnv\(ROOT, testMaskingBaseSha\)/, // immutable test-masking base
+    /"check:test-masking"\][\s\S]{0,80}env: withHardGateMode\(env\)/, // test-masking mode
     /env: withHardGateMode\(\{ TEST_SHARD: `\$\{shard\}\/\$\{total\}` \}\)/, // unit shards
     /runAsync\(npmCmd, g\.args, \{ timeout: g\.timeout, env: withHardGateMode\(g\.env\) \}\)/, // lanes
     /env: withHardGateMode\(step\.env\)/, // package artifact

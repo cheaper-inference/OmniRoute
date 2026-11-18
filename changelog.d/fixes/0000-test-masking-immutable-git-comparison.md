@@ -1,0 +1,1 @@
+- Compare test changes and their prior assertions against one common ancestor, include JavaScript test files, and report incomplete Git reads instead of treating them as empty scans. Retain one local comparison SHA across both Release-Green anti-masking passes so moving remote-tracking refs cannot change the result mid-run.

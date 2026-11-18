@@ -14,7 +14,9 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
+const TEST_RE = /\.(test|spec)\.(ts|tsx|js|mjs)$/;
+const COMMIT_SHA = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+const GIT_MAX_BUFFER = 16 * 1024 * 1024;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
 const PROD_SRC_RE = /\.(ts|tsx|mts|cts)$/;
 
@@ -472,7 +474,7 @@ export function partitionDeletedRenamed(nameStatusOutput) {
  * `check-test-masking-selfref-6634.test.ts`, which likewise embed tautology-pattern
  * literals as fixtures/documentation to prove this gate's own behavior.
  */
-const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.tsx?$/;
+const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.(?:tsx?|m?js)$/;
 function isSelfTestFixtureFile(file) {
   return SELF_TEST_FIXTURE_RE.test(file);
 }
@@ -553,13 +555,23 @@ export function scanBareTautologies(testFiles, readFile) {
 
 function git(args) {
   try {
-    return execFileSync("git", args, { encoding: "utf8" });
-  } catch {
-    return "";
+    return execFileSync("git", args, {
+      encoding: "utf8",
+      timeout: 30000,
+      maxBuffer: GIT_MAX_BUFFER,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, GIT_ALLOW_PROTOCOL: "", GIT_NO_LAZY_FETCH: "1" },
+    });
+  } catch (error) {
+    const reason =
+      error.code === "ENOBUFS"
+        ? "output exceeded the 16 MiB limit"
+        : `status ${error.status ?? error.code ?? error.signal ?? "unknown"}`;
+    throw new Error(`Git ${args[0]} failed (${reason}); comparison evidence is incomplete`);
   }
 }
 
-/** All git-tracked test files (`.test.ts(x)`/`.spec.ts(x)`), repo-wide — used by the
+/** All tracked TS/TSX/JS/MJS test/spec files, repo-wide — used by the
  * absolute floor scan so it also covers files untouched by the current diff/PR. */
 function listTrackedTestFiles() {
   return git(["ls-files"])
@@ -569,7 +581,12 @@ function listTrackedTestFiles() {
 }
 
 function resolveBase() {
-  if (process.env.GITHUB_BASE_SHA) return process.env.GITHUB_BASE_SHA;
+  if (process.env.GITHUB_BASE_SHA) {
+    if (!COMMIT_SHA.test(process.env.GITHUB_BASE_SHA) || /^0+$/.test(process.env.GITHUB_BASE_SHA)) {
+      throw new Error("GITHUB_BASE_SHA must be a complete nonzero commit SHA");
+    }
+    return process.env.GITHUB_BASE_SHA;
+  }
   if (process.env.GITHUB_BASE_REF) return `origin/${process.env.GITHUB_BASE_REF}`;
   return null;
 }
@@ -614,20 +631,39 @@ function main() {
     process.exit(1);
   }
 
-  const base = resolveBase();
-  if (!base) {
+  const requestedBase = resolveBase();
+  if (!requestedBase) {
     console.log(
       "[test-masking] sem base ref (não é PR) — pulando checks de diff (scan absoluto de tautologias OK)."
     );
     return;
   }
 
+  // Select and read previous contents from the same unique common ancestor.
+  // Pin both tips before diffing so a moving base ref cannot change this comparison.
+  const baseTip = git([
+    "rev-parse",
+    "--verify",
+    "--end-of-options",
+    `${requestedBase}^{commit}`,
+  ]).trim();
+  const head = git(["rev-parse", "--verify", "HEAD^{commit}"]).trim();
+  if (!COMMIT_SHA.test(baseTip) || !COMMIT_SHA.test(head)) {
+    throw new Error("Comparison tips did not resolve to complete commit SHAs");
+  }
+  const mergeBases = git(["merge-base", "--all", "--", baseTip, head]).trim().split(/\r?\n/);
+  if (mergeBases.length !== 1 || !COMMIT_SHA.test(mergeBases[0])) {
+    throw new Error("Comparison base unavailable or ambiguous; diff evidence is incomplete");
+  }
+  const [base] = mergeBases;
+  const range = `${base}..${head}`;
+
   // (6A.10 subcheck 1) Arquivos de teste deletados/renomeados via MDR filter.
   // Renames test→test são RELOCAÇÕES (substituição) e passam pela verificação de
   // redução de asserts abaixo (gutting-via-rename ainda flaga); só deleções reais
   // e renames test→não-teste contam como remoção de teste.
   const { deletedTests, renames } = partitionDeletedRenamed(
-    git(["diff", "--name-status", "-M", "--diff-filter=DR", `${base}...HEAD`])
+    git(["diff", "--name-status", "-M", "--diff-filter=DR", range])
   );
 
   const relocatedOutOfTest = [];
@@ -659,7 +695,7 @@ function main() {
   }
 
   // Arquivos de teste modificados (subcheck original + skips + extTaut)
-  const changed = git(["diff", "--name-only", "--diff-filter=M", `${base}...HEAD`])
+  const changed = git(["diff", "--name-only", "--diff-filter=M", range])
     .split("\n")
     .map((s) => s.trim())
     .filter((f) => TEST_RE.test(f) && fs.existsSync(f));
@@ -730,7 +766,7 @@ function main() {
   // instead of importing the symbol that owns it. Prod files changed in this PR
   // (added/copied/modified TS sources) are the reference corpus; each changed test
   // file is scanned against them. Warns only — it never fails the gate for now.
-  const prodChanged = git(["diff", "--name-only", "--diff-filter=ACM", `${base}...HEAD`])
+  const prodChanged = git(["diff", "--name-only", "--diff-filter=ACM", range])
     .split("\n")
     .map((s) => s.trim())
     .filter((f) => PROD_SRC_RE.test(f) && !TEST_RE.test(f) && fs.existsSync(f));
@@ -741,7 +777,7 @@ function main() {
       return "";
     }
   });
-  const changedTests = git(["diff", "--name-only", "--diff-filter=ACM", `${base}...HEAD`])
+  const changedTests = git(["diff", "--name-only", "--diff-filter=ACM", range])
     .split("\n")
     .map((s) => s.trim())
     .filter((f) => TEST_RE.test(f) && fs.existsSync(f));
@@ -802,4 +838,11 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`[test-masking] FAIL — ${error.message}`);
+    process.exitCode = 1;
+  }
+}

@@ -1,0 +1,1 @@
+- Classify the changelog event inputs, Actions workflow/job identity, and verified Next build-input requirement as explicit CI context in the environment documentation gate. Keep strict failures for undocumented product settings and mismatched environment documentation.

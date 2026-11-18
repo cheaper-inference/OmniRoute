@@ -22,6 +22,14 @@ const workflow = parse(
   jobs: Record<string, { steps: Step[] }>;
 };
 const sha = "1".repeat(40);
+const workflowSha = "3".repeat(40);
+const hostedContext = (job: string) => ({
+  GITHUB_ACTIONS: "true",
+  GITHUB_JOB: job,
+  GITHUB_WORKFLOW_SHA: workflowSha,
+  GITHUB_RUN_ID: "6101",
+  GITHUB_RUN_ATTEMPT: "2",
+});
 
 function execute(job: string, validatorExit: number, report: string, event = "schedule") {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-workflow-"));
@@ -38,9 +46,9 @@ function execute(job: string, validatorExit: number, report: string, event = "sc
     writeFileSync(outputs, "");
     const env = {
       ...process.env,
+      ...hostedContext(job),
       EVENT_NAME: event,
       GITHUB_OUTPUT: outputs,
-      GITHUB_WORKFLOW_SHA: "3".repeat(40),
       FIXTURE_EXIT: String(validatorExit),
       FIXTURE_REPORT: report,
       VALIDATED_SHA: sha,
@@ -73,16 +81,27 @@ function execute(job: string, validatorExit: number, report: string, event = "sc
   }
 }
 
-const pass = JSON.stringify({
-  schemaVersion: 1,
-  candidateSha: sha,
-  profile: "full",
-  releaseGreen: true,
-  hardFailures: [],
-  checks: [{ id: "fixture", kind: "hard", ok: true }],
-});
+const passingReport = (job: string) =>
+  JSON.stringify({
+    schemaVersion: 1,
+    candidateSha: sha,
+    observerIdentity: {
+      schemaVersion: 1,
+      candidateSha: sha,
+      workflowSha,
+      runId: "6101",
+      runAttempt: "2",
+      jobId: job,
+      phase: "validation",
+    },
+    profile: "full",
+    releaseGreen: true,
+    hardFailures: [],
+    checks: [{ id: "fixture", kind: "hard", ok: true }],
+  });
 
 for (const job of ["release-green", "main-green"]) {
+  const pass = passingReport(job);
   test(`${job}: a failed validator cannot produce a successful workflow`, () => {
     assert.notEqual(execute(job, 42, ""), 0);
   });
@@ -115,6 +134,12 @@ for (const job of ["release-green", "main-green"]) {
     const close = workflow.jobs[job].steps.find((s) => s.name?.startsWith("Close tracking issue"))!;
     const dir = mkdtempSync(join(tmpdir(), "omni-green-close-"));
     try {
+      mkdirSync(join(dir, "scripts/ci"), { recursive: true });
+      cpSync(
+        new URL("scripts/ci/release-green-result.mjs", root),
+        join(dir, "scripts/ci/release-green-result.mjs")
+      );
+      writeFileSync(join(dir, `${job}.json`), pass);
       const calls = join(dir, "gh-calls");
       for (const current of ["2".repeat(40), sha]) {
         writeFileSync(calls, "");
@@ -134,9 +159,13 @@ for (const job of ["release-green", "main-green"]) {
         `,
           ],
           {
+            cwd: dir,
             encoding: "utf8",
             env: {
               ...process.env,
+              ...hostedContext(job),
+              EVENT_NAME: "schedule",
+              GITHUB_OUTPUT: "",
               VALIDATED_SHA: sha,
               FIXTURE_CURRENT_SHA: current,
               FIXTURE_GH_CALLS: calls,

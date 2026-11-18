@@ -3,7 +3,27 @@
 import { appendFileSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventName) {
+function validObserverIdentity(identity) {
+  return (
+    identity?.schemaVersion === 1 &&
+    [identity.candidateSha, identity.workflowSha].every(
+      (value) => typeof value === "string" && /^[0-9a-f]{40}$/.test(value)
+    ) &&
+    [identity.runId, identity.runAttempt].every(
+      (value) => typeof value === "string" && /^[1-9][0-9]*$/.test(value)
+    ) &&
+    ["release-green", "main-green"].includes(identity.jobId) &&
+    identity.phase === "validation"
+  );
+}
+
+export function verifyReleaseGreenReport(
+  report,
+  exitCode,
+  candidateSha,
+  eventName,
+  expectedIdentity
+) {
   const expectedProfile =
     eventName === "push"
       ? "quick"
@@ -31,13 +51,31 @@ export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventNa
     ) &&
     report.checks.some((check) => check.kind === "hard") &&
     new Set(report.checks.map((check) => check.id)).size === report.checks.length;
-  if (!valid)
+  const identityMatches =
+    expectedIdentity === undefined ||
+    (validObserverIdentity(expectedIdentity) &&
+      validObserverIdentity(report?.observerIdentity) &&
+      expectedIdentity.candidateSha === candidateSha &&
+      Object.entries(expectedIdentity).every(
+        ([key, value]) => report.observerIdentity[key] === value
+      ));
+  if (!valid || !identityMatches)
     return {
       exit: 1,
       verdict: "UNKNOWN",
       evidenceState: "INCOMPLETE",
       reason: "Invalid or missing report/provenance",
     };
+  if (
+    report.checks.some((check) => check.kind === "hard" && check.evidenceState === "INCOMPLETE")
+  ) {
+    return {
+      exit: 1,
+      verdict: "UNKNOWN",
+      evidenceState: "INCOMPLETE",
+      reason: "Required validation has incomplete execution evidence",
+    };
+  }
   // Exit 1 from the scanner wrapper can mean missing tooling, not measured drift.
   // Legacy receipts without explicit measurement evidence cannot certify an audit.
   if (
@@ -83,7 +121,27 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   } catch {
     /* verifier fails closed below */
   }
-  const result = verifyReleaseGreenReport(report, exitCode, candidateSha, eventName);
+  // Hosted context comes from this invocation, never from the report being verified.
+  // Missing context must stay an invalid object, not opt back into local compatibility.
+  const expectedIdentity =
+    process.env.GITHUB_ACTIONS === "true"
+      ? {
+          schemaVersion: 1,
+          candidateSha,
+          workflowSha: process.env.GITHUB_WORKFLOW_SHA,
+          runId: process.env.GITHUB_RUN_ID,
+          runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+          jobId: process.env.GITHUB_JOB,
+          phase: "validation",
+        }
+      : undefined;
+  const result = verifyReleaseGreenReport(
+    report,
+    exitCode,
+    candidateSha,
+    eventName,
+    expectedIdentity
+  );
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `exit=${result.exit}\n`);
   console.log(JSON.stringify(result));
   process.exitCode = result.exit;

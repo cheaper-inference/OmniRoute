@@ -61,11 +61,11 @@ esac
 const TEST_FILE = `import assert from "node:assert/strict";
 import { test } from "node:test";
 test("keeps a", () => {
-  assert.equal(1, 1);
+  assert.equal(typeof test, "function");
 });
 test("keeps b", () => {
-  assert.ok(true);
-  assert.equal(2, 2);
+  assert.ok(assert.equal);
+  assert.equal(typeof assert.ok, "function");
 });
 `;
 
@@ -131,7 +131,7 @@ function makeRepo(mutate: (main: string) => void) {
 
 test("reports every weakening signal of a sloppy worker and exits 1", () => {
   const repo = makeRepo((main) => {
-    write(main, "tests/unit/sample.test.ts", TEST_FILE.replace("  assert.ok(true);\n", ""));
+    write(main, "tests/unit/sample.test.ts", TEST_FILE.replace("  assert.ok(assert.equal);\n", ""));
     write(
       main,
       "config/quality/eslint-suppressions.json",
@@ -170,7 +170,7 @@ test("reports every weakening signal of a sloppy worker and exits 1", () => {
   assert.match(r.stdout, /base: origin\/release\/v0\.0\.2/, "highest release/v* is the default");
   assert.match(r.stdout, /fix: weaken everything/);
   assert.match(r.stdout, /\?\? tsconfig\.x\.tmp\.json/);
-  assert.match(r.stdout, /tests\/unit\/sample\.test\.ts.*-\s*assert\.ok\(true\);/);
+  assert.match(r.stdout, /tests\/unit\/sample\.test\.ts.*-\s*assert\.ok\(assert\.equal\);/);
   assert.match(r.stdout, /src\/b\.ts.*3.*4/);
   assert.match(r.stdout, /src\/c\.ts.*0.*1/);
   assert.doesNotMatch(r.stdout, /src\/a\.ts.*1.*0/, "a count going down is not reported");
