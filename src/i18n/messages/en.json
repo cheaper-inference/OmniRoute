@@ -2148,6 +2148,7 @@
     "chartNoCostData": "No cost data",
     "chartModelUsageOverTime": "Model Usage Over Time",
     "chartNoData": "No data",
+    "chartDataPoints": "{name} data points",
     "chartWeekly": "Weekly",
     "activitySummary": "{active} active days · {tokens} tokens · {days} days",
     "activityCellTitle": "{date}: {tokens} tokens",
@@ -11335,6 +11336,8 @@
   },
   "stats": {
     "usageOverview": "Usage Overview",
+    "requestsPerMinuteTrend": "Requests per minute, last minutes: {values}",
+    "inputTokensPerMinuteTrend": "Input tokens per minute, last minutes: {values}",
     "outputTokens": "Output Tokens",
     "totalCost": "Total Cost",
     "usageByModel": "Usage by Model",
