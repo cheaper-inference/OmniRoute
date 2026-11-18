@@ -1854,7 +1854,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
 function StrategyGuidanceCard({ strategy }) {
   const t = useTranslations("combos");
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle p-2.5">
+    <Card.Section>
       <div className="text-2xs text-text-muted">
         {getI18nOrFallback(t, "strategyGuideTitle", "How to use this strategy")}
       </div>
@@ -1878,7 +1878,7 @@ function StrategyGuidanceCard({ strategy }) {
           {getStrategyGuideText(t, strategy, "example")}
         </p>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -1890,7 +1890,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
   const tips = getStrategyRecommendationText(t, strategy, "tips");
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-2.5">
+    <Card.Section>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-2xs text-text-muted">
@@ -1931,7 +1931,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
           ).replace("{strategy}", strategyLabel)}
         </div>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -3620,7 +3620,7 @@ function ComboFormModal({
         size="full"
       >
         <div className="flex flex-col gap-3">
-          <div className="rounded-lg border border-border bg-surface p-3">
+          <Card.Section>
             <div className="mb-2">
               <p className="text-xs font-semibold text-text-main">{t("endpointBehaviorTitle")}</p>
               <p className="mt-0.5 text-xs text-text-muted">{t("endpointBehaviorDescription")}</p>
@@ -3647,9 +3647,9 @@ function ComboFormModal({
                 );
               })}
             </div>
-          </div>
+          </Card.Section>
           {!isExpertMode && (
-            <div className="rounded-lg border border-border bg-bg-subtle p-3">
+            <Card.Section>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div>
                   <p className="text-xs font-semibold text-text-main">
@@ -3738,7 +3738,7 @@ function ComboFormModal({
                   );
                 })}
               </div>
-            </div>
+            </Card.Section>
           )}
 
           {showBasicsSection && (
@@ -3777,7 +3777,7 @@ function ComboFormModal({
               </Field>
 
               {!isEdit && !isExpertMode && (
-                <div className="rounded-lg border border-border bg-bg-subtle p-3">
+                <Card.Section>
                   <div className="mb-2">
                     <p className="text-xs font-medium">
                       {getI18nOrFallback(t, "templatesTitle", COMBO_TEMPLATE_FALLBACK.title)}
@@ -3823,7 +3823,7 @@ function ComboFormModal({
                       </Tile>
                     ))}
                   </div>
-                </div>
+                </Card.Section>
               )}
             </>
           )}
@@ -3931,7 +3931,7 @@ function ComboFormModal({
                 )}
               </div>
 
-              <div className="rounded-lg border border-border bg-bg-subtle p-3 mb-2">
+              <Card.Section className="mb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold text-text-main">
@@ -4199,7 +4199,7 @@ function ComboFormModal({
                     {builderError}
                   </div>
                 )}
-              </div>
+              </Card.Section>
 
               <div className="flex items-center justify-between gap-2 mb-2">
                 <ComboSortSelect
@@ -4478,7 +4478,7 @@ function ComboFormModal({
               )}
 
               {advancedConfigVisible && (
-                <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
+                <Card.Section className="flex flex-col gap-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <FieldLabelWithHelp
@@ -5060,14 +5060,14 @@ function ComboFormModal({
                     </div>
                   )}
                   {!isExpertMode && <p className="text-xs text-text-muted">{t("advancedHint")}</p>}
-                </div>
+                </Card.Section>
               )}
             </>
           )}
 
           {/* Response Validation (4985) */}
           {showStrategySection && (
-            <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
+            <Card.Section className="flex flex-col gap-2">
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon name="rule" size={14} className="text-primary" />
                 <p className="text-xs font-medium">
@@ -5079,12 +5079,12 @@ function ComboFormModal({
                 onChange={(next) => setConfig({ ...config, responseValidation: next })}
                 t={t}
               />
-            </div>
+            </Card.Section>
           )}
 
           {/* Agent Features (#399 / #401 / #454) */}
           {showStrategySection && (
-            <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
+            <Card.Section className="flex flex-col gap-2">
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon name="smart_toy" size={14} className="text-primary" />
                 <p className="text-xs font-medium">
@@ -5182,64 +5182,64 @@ function ComboFormModal({
                 t={t}
                 showHint={!isExpertMode}
               />
-            </div>
+            </Card.Section>
           )}
 
           {showReviewSection && (
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="rounded-lg border border-border bg-bg-subtle p-3">
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewName", "Name")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1 break-all">
                     {name || "—"}
                   </p>
-                </div>
-                <div className="rounded-lg border border-border bg-bg-subtle p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewStrategy", "Strategy")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">
                     {getStrategyLabel(t, strategy)}
                   </p>
-                </div>
-                <div className="rounded-lg border border-border bg-bg-subtle p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewSteps", "Steps")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{models.length}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-bg-subtle p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAccounts", "Pinned accounts")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{pinnedAccountCount}</p>
-                </div>
+                </Card.Section>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="rounded-lg border border-border bg-surface p-3">
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewProviders", "Providers")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{uniqueProviderCount}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewComboRefs", "Combo refs")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{comboRefCount}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAdvanced", "Advanced config")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">
                     {Object.keys(config || {}).length}
                   </p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-3">
+                </Card.Section>
+                <Card.Section>
                   <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAgentFlags", "Agent flags")}
                   </p>
@@ -5252,7 +5252,7 @@ function ComboFormModal({
                       ].filter(Boolean).length
                     }
                   </p>
-                </div>
+                </Card.Section>
               </div>
 
               {usesIntelligentBuilderStage && (
@@ -5308,7 +5308,7 @@ function ComboFormModal({
                 </div>
               )}
 
-              <div className="rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section>
                 <p className="text-xs font-semibold text-text-main">
                   {getI18nOrFallback(t, "reviewSequence", "Execution sequence")}
                 </p>
@@ -5343,7 +5343,7 @@ function ComboFormModal({
                     ))
                   )}
                 </div>
-              </div>
+              </Card.Section>
 
               <ComboReadinessPanel checks={readinessChecks} blockers={saveBlockers} />
             </div>

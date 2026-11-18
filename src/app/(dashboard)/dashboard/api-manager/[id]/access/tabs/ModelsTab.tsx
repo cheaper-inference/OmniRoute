@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Toggle from "@/shared/components/Toggle";
@@ -261,7 +262,7 @@ function ForcedModelSetting({
   const t = useTranslations("apiManager");
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <Input
         id="api-key-forced-model"
         label={t("forcedModel")}
@@ -278,7 +279,7 @@ function ForcedModelSetting({
           <option key={model.id} value={model.id} />
         ))}
       </datalist>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -295,7 +296,7 @@ function CatalogVisibilitySettings({
       <ApiKeyCatalogScopeSelect value={formState.catalogScope} onChange={setCatalogScope} />
 
       {/* Disable Non-Public Models Toggle */}
-      <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("disableNonPublicModels")}</p>
           <p className="text-xs text-text-muted">{t("disableNonPublicModelsDesc")}</p>
@@ -307,7 +308,7 @@ function CatalogVisibilitySettings({
           onChange={() => setDisableNonPublicModels(!formState.disableNonPublicModels)}
           ariaLabel={t("disableNonPublicModels")}
         />
-      </div>
+      </Card.Section>
     </>
   );
 }

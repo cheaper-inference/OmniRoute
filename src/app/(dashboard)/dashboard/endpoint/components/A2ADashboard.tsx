@@ -342,10 +342,10 @@ export default function A2ADashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {(["submitted", "working", "completed", "failed", "cancelled"] as A2ATaskState[]).map(
             (state) => (
-              <div key={state} className="rounded-lg border border-border p-3 bg-bg">
+              <Card.Section key={state}>
                 <p className="ci-eyebrow">{t(`state.${state}`)}</p>
                 <p className="text-2xl font-semibold mt-1">{status?.tasks?.counts?.[state] || 0}</p>
-              </div>
+              </Card.Section>
             )
           )}
         </div>
@@ -575,7 +575,7 @@ export default function A2ADashboardPage() {
             </Button>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-border p-3 bg-bg">
+            <Card.Section>
               <p className="ci-eyebrow mb-2">{t("metadata")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(
@@ -592,20 +592,20 @@ export default function A2ADashboardPage() {
                   2
                 )}
               </code>
-            </div>
-            <div className="rounded-lg border border-border p-3 bg-bg">
+            </Card.Section>
+            <Card.Section>
               <p className="ci-eyebrow mb-2">{t("events")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(selectedTask.events, null, 2)}
               </code>
-            </div>
+            </Card.Section>
           </div>
-          <div className="rounded-lg border border-border p-3 bg-bg mt-4">
+          <Card.Section className="mt-4">
             <p className="ci-eyebrow mb-2">{t("artifacts")}</p>
             <code className="text-xs break-all whitespace-pre-wrap">
               {JSON.stringify(selectedTask.artifacts, null, 2)}
             </code>
-          </div>
+          </Card.Section>
         </Card>
       )}
       {confirmDialog}
@@ -615,9 +615,9 @@ export default function A2ADashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-border bg-bg p-4">
+    <Card.Section>
       <p className="ci-eyebrow">{label}</p>
       <p className="text-xl font-semibold mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }

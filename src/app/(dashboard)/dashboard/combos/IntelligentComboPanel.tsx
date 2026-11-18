@@ -247,10 +247,7 @@ export default function IntelligentComboPanel({
                 providerScores.map((entry) => {
                   const percentage = Math.round(entry.score * 100);
                   return (
-                    <div
-                      key={entry.provider}
-                      className="rounded-lg border border-border bg-surface p-3"
-                    >
+                    <Card.Section key={entry.provider}>
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-xs font-semibold text-text-main">
@@ -285,7 +282,7 @@ export default function IntelligentComboPanel({
                           </Badge>
                         ))}
                       </div>
-                    </div>
+                    </Card.Section>
                   );
                 })
               )}
@@ -309,22 +306,22 @@ export default function IntelligentComboPanel({
             </div>
 
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-lg border border-border bg-surface p-3">
+              <Card.Section>
                 <p className="ci-eyebrow" data-size="2xs">
                   {t("modePack")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
                   {normalizedConfig.modePack}
                 </p>
-              </div>
-              <div className="rounded-lg border border-border bg-surface p-3">
+              </Card.Section>
+              <Card.Section>
                 <p className="ci-eyebrow" data-size="2xs">
                   {getI18nOrFallback(t, "explorationRateLabel", "Exploration Rate")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
                   {Math.round(normalizedConfig.explorationRate * 100)}%
                 </p>
-              </div>
+              </Card.Section>
             </div>
           </Card.Section>
         </div>

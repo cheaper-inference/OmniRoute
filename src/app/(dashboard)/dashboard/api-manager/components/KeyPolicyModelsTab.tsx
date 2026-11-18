@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -23,7 +24,7 @@ export default function KeyPolicyModelsTab() {
       <PublicModelRestriction />
 
       {/* Clear separation Section 2: /v1/models Catalog Listing Only */}
-      <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/30">
+      <Card.Section className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-semibold text-text-main">
             {t("templateCatalogListingHeading")}
@@ -35,7 +36,7 @@ export default function KeyPolicyModelsTab() {
           value={formState.catalogScope}
           onChange={(scope) => updateState((p) => ({ ...p, catalogScope: scope }))}
         />
-      </div>
+      </Card.Section>
     </div>
   );
 }
@@ -292,7 +293,7 @@ function BlockedModelPatterns() {
 function PublicModelRestriction() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/30">
+    <Card.Section className="flex flex-col gap-3">
       <ModelAccessMode />
 
       <ModelAccessSummary />
@@ -327,7 +328,7 @@ function PublicModelRestriction() {
       </div>
 
       {/* Forced Model */}
-      <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-2">
         <Input
           label={t("forcedModel")}
           hint={t("forcedModelDesc")}
@@ -335,7 +336,7 @@ function PublicModelRestriction() {
           onChange={(e) => updateState((p) => ({ ...p, forcedModel: e.target.value }))}
           placeholder={t("forcedModelPlaceholder")}
         />
-      </div>
-    </div>
+      </Card.Section>
+    </Card.Section>
   );
 }

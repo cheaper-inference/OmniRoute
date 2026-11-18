@@ -1144,7 +1144,7 @@ export default function ApiManagerPageClient() {
           </div>
 
           {/* Template Picker */}
-          <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+          <Card.Section className="flex flex-col gap-2">
             <Select
               native
               label={t("templatePickerLabel")}
@@ -1183,9 +1183,9 @@ export default function ApiManagerPageClient() {
                 </Badge>
               )}
             </div>
-          </div>
+          </Card.Section>
 
-          <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-surface/40">
+          <Card.Section className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
               <p className="text-xs text-text-muted">{t("managementAccessDesc")}</p>
@@ -1201,8 +1201,8 @@ export default function ApiManagerPageClient() {
               }}
               ariaLabel={t("managementAccess")}
             />
-          </div>
-          <div className="flex flex-col gap-3 p-3 rounded-lg border border-border bg-surface/40">
+          </Card.Section>
+          <Card.Section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">{t("selfServiceVisibility")}</p>
               <p className="text-xs text-text-muted">{t("selfServiceVisibilityDesc")}</p>
@@ -1266,10 +1266,10 @@ export default function ApiManagerPageClient() {
                 ariaLabel={t("localUsageCommand")}
               />
             </div>
-          </div>
+          </Card.Section>
 
           {/* Expandable Full 6-Tab Policy Editor */}
-          <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface/20 p-3">
+          <Card.Section className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-text-main">{t("fullPolicyEditorTitle")}</p>
@@ -1296,7 +1296,7 @@ export default function ApiManagerPageClient() {
                 />
               </div>
             )}
-          </div>
+          </Card.Section>
 
           {createError && (
             <Alert

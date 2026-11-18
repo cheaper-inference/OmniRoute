@@ -114,7 +114,7 @@ function RowShell({
 }) {
   const t = useTranslations("resilienceCooldowns");
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+    <Card.Section className="flex flex-col gap-2">
       <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">{children}</div>
       <div className="flex items-center justify-between gap-3">
         <p role="alert" className="text-xs text-error">
@@ -124,7 +124,7 @@ function RowShell({
           {t("errorRules.remove")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 

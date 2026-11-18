@@ -3,6 +3,7 @@
 import { memo, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { compareTr } from "@/shared/utils/turkishText";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import type { ProviderConnection } from "./ProviderConnectionPermissionList";
@@ -48,7 +49,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
   if (groups.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("preferredConnections")}</p>
@@ -137,7 +138,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
           </div>
         ))}
       </div>
-    </div>
+    </Card.Section>
   );
 });
 

@@ -388,3 +388,54 @@ test("E: previous/next paging is the Pager adapter", () => {
     assert.match(source, /<Pager\b/, `${file} renders the Pager adapter`);
   }
 });
+
+// ── C. Inner panels: Card.Section (the kit inset card) ──────────────────────────────────────
+
+// A neutral panel drawn by hand inside a card or a dialog: a div with a radius, a neutral
+// border, a neutral fill (or none) and one padding for the four sides. `Card.Section` is that
+// panel (flat fill, subtle border, nested radius, 16px padding); layout classes stay on it.
+// Not a panel: scroll boxes and lists (`overflow-*`, `max-h-*`, `divide-*`), floating bars
+// (`sticky`, `shadow-*`), clickable tiles (`hover:*`, `group`), dashed empty states, tinted
+// notices, and denser rows that set `px-*` and `py-*` apart.
+const PANEL = {
+  radius: /(?<![\w:-])rounded(-(sm|md|lg))?(?![\w-])/,
+  border: /(?<![\w:-])border(?![\w-])/,
+  neutralBorder: /(?<![\w:-])border-border(\/\d+)?(?![\w-])/,
+  pad: /(?<![\w:.-])p-(2\.5|3|3\.5|4|5)(?![\w.-])/,
+  notPanel:
+    /(?<![\w:-])(overflow-(y-)?auto|overflow-hidden|max-h-[\w.[\]-]+|divide-[\w-]+|sticky|shadow[\w-]*|relative|group|cursor-pointer|transition[\w-]*|border-dashed|backdrop-[\w-]+|text-center)(?![\w-])|hover:/,
+  tint: /(?<![\w:-])(bg|border)-(primary|info|success|warning|error|chart-\d)\b/,
+};
+const PANEL_KEPT: Kept[] = [];
+
+test("C: neutral inner panels are Card.Section, not hand-made bordered divs", () => {
+  const { offenders, stale } = audit(
+    TAGS.filter(({ name, tag }) => name === "div" && /className="[^"]*"/.test(tag)),
+    ({ tag }) => {
+      const cls = /className="([^"]*)"/.exec(tag)?.[1] ?? "";
+      return (
+        has(cls, PANEL.radius) &&
+        has(cls, PANEL.border) &&
+        has(cls, PANEL.neutralBorder) &&
+        has(cls, PANEL.pad) &&
+        !has(cls, PANEL.notPanel) &&
+        !has(cls, PANEL.tint)
+      );
+    },
+    PANEL_KEPT
+  );
+  assert.deepEqual(offenders, [], "use <Card.Section className={layout classes}>");
+  assert.deepEqual(stale, [], "stale PANEL_KEPT entries: remove them");
+});
+
+test("C: a Card.Section does not repeat the panel's border, fill, radius or padding", () => {
+  const offenders = TAGS.filter(({ name }) => name === "Card.Section")
+    .filter(({ tag }) =>
+      has(
+        tag,
+        /(?<![\w:-])(rounded(-\w+)?|border(-border(\/\d+)?)?|bg-(surface(-2)?|bg(-subtle)?)(\/\d+)?|p-[\d.]+)(?![\w.-])/
+      )
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, []);
+});

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Checkbox } from "@omniroute/ui-kit/checkbox";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
@@ -214,7 +215,7 @@ function SaveKeyAsTemplateForm(props: SaveFormProps) {
 function CapturedPolicySummary({ model }: { model: SaveTemplateModel }) {
   const { t, summaryBadges } = model;
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <p className="text-xs font-semibold text-text-main">{t("templateCapturedSnapshotHeading")}</p>
       <div className="flex flex-wrap gap-1.5">
         {summaryBadges.map((b) => (
@@ -224,7 +225,7 @@ function CapturedPolicySummary({ model }: { model: SaveTemplateModel }) {
         ))}
       </div>
       <p className="text-xs text-text-muted pt-1">{t("templateExclusionsNote")}</p>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -359,14 +360,14 @@ function CaptureFormFields({ model }: { model: SaveTemplateModel }) {
       />
 
       {loadingPreview && (
-        <div
-          className="flex items-center gap-2 p-4 rounded-lg border border-border bg-surface/40 text-xs text-text-muted"
+        <Card.Section
+          className="flex items-center gap-2 text-xs text-text-muted"
           role="status"
           aria-live="polite"
         >
           <Spinner size="sm" />
           <span>{t("templateLoadingPreview")}</span>
-        </div>
+        </Card.Section>
       )}
 
       {previewError && (

@@ -1,3 +1,4 @@
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -79,7 +80,7 @@ export default function GlobalModelSearchPanel({
       />
 
       {builderSelectionMode === "global" && (
-        <div className="mt-3 space-y-2.5 rounded-md border border-border bg-bg-subtle p-3">
+        <Card.Section className="mt-3 space-y-2.5">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Input
@@ -202,7 +203,7 @@ export default function GlobalModelSearchPanel({
               })
             )}
           </div>
-        </div>
+        </Card.Section>
       )}
     </>
   );

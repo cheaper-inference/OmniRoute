@@ -438,7 +438,7 @@ export default function RadarPage() {
                 <div className="w-full flex flex-col gap-3 text-left">
                   <p className="text-sm font-medium">{t("keySectionTitle")}</p>
                   {hasSupporterKey && !showKeyForm ? (
-                    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
+                    <Card.Section className="flex items-center justify-between gap-3">
                       <span className="font-mono text-sm text-text-muted">
                         {supporterKeyMasked}
                       </span>
@@ -450,7 +450,7 @@ export default function RadarPage() {
                       >
                         {t("changeKeyButton")}
                       </Button>
-                    </div>
+                    </Card.Section>
                   ) : (
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Input

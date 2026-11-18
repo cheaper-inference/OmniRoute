@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import { Progress } from "@omniroute/ui-kit/progress";
+import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
@@ -75,14 +76,14 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section>
       <div className="flex items-center gap-1.5 text-xs text-text-muted">
         <Icon name={icon} size={16} />
         <span>{label}</span>
       </div>
       <div className={`mt-3 text-2xl font-semibold tabular-nums ${accent}`}>{value}</div>
       {sub && <div className="mt-1 text-xs text-text-muted">{sub}</div>}
-    </div>
+    </Card.Section>
   );
 }
 

@@ -430,7 +430,7 @@ export default function McpDashboardPage() {
           />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="rounded-lg border border-border p-3">
+          <Card.Section>
             <h3 className="ci-heading mb-2" data-size="sm">
               {t("topTools")}
             </h3>
@@ -446,8 +446,8 @@ export default function McpDashboardPage() {
                 ))}
               </ul>
             )}
-          </div>
-          <div className="rounded-lg border border-border p-3">
+          </Card.Section>
+          <Card.Section>
             <h3 className="ci-heading mb-2" data-size="sm">
               {t("runtimeDetails")}
             </h3>
@@ -477,7 +477,7 @@ export default function McpDashboardPage() {
                 <span className="font-mono text-xs break-all">{status?.heartbeatPath || "—"}</span>
               </p>
             </div>
-          </div>
+          </Card.Section>
         </div>
       </Card>
 
@@ -486,7 +486,7 @@ export default function McpDashboardPage() {
           {t("operationalControls")}
         </h2>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("switchCombo")}</p>
             <Select
               aria-label={t("switchCombo")}
@@ -507,9 +507,9 @@ export default function McpDashboardPage() {
             >
               {selectedCombo?.isActive === false ? t("activateCombo") : t("deactivateCombo")}
             </Button>
-          </div>
+          </Card.Section>
 
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("applyResilienceProfile")}</p>
             <Select
               aria-label={t("applyResilienceProfile")}
@@ -530,9 +530,9 @@ export default function McpDashboardPage() {
             >
               {t("applyProfile")}
             </Button>
-          </div>
+          </Card.Section>
 
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("resetCircuitBreakers")}</p>
             <p className="text-xs text-text-muted">{t("resetCircuitBreakersHelp")}</p>
             <Button
@@ -543,7 +543,7 @@ export default function McpDashboardPage() {
             >
               {t("resetAllBreakers")}
             </Button>
-          </div>
+          </Card.Section>
         </div>
         {actionMessage && <p className="text-sm text-text-muted mt-3">{actionMessage}</p>}
       </Card>

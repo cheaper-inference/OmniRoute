@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
@@ -157,7 +158,7 @@ export function AllowedCombosSection({
   if (allCombos.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-text-main">{t("allowedCombos")}</p>
         <ComboAccessModeToggle
@@ -186,6 +187,6 @@ export function AllowedCombosSection({
           <PreservedComboRules rules={preservedRules} />
         </>
       )}
-    </div>
+    </Card.Section>
   );
 }

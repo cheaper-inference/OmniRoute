@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import { chaosText, type ChaosTranslator } from "../chaosI18n";
 
@@ -39,7 +40,7 @@ export function ChaosConfigActionsBar({
       </div>
 
       {/* Test Button */}
-      <div className="p-3 rounded-lg border border-border bg-bg-subtle">
+      <Card.Section>
         <p className="text-sm font-medium text-text-main mb-2">{t("testButton")}</p>
         <Button
           variant="warning"
@@ -50,7 +51,7 @@ export function ChaosConfigActionsBar({
         >
           {testing ? chaosText(t, "running", "Running...") : t("testButton")}
         </Button>
-      </div>
+      </Card.Section>
     </>
   );
 }

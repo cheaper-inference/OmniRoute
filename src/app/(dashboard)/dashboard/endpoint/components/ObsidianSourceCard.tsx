@@ -346,7 +346,7 @@ export default function ObsidianSourceCard() {
                         </Button>
                       </div>
 
-                      <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-surface-2 p-3">
+                      <Card.Section className="flex flex-col gap-2">
                         <p className="text-2xs text-text-muted font-medium">
                           {t("obsidianConfigureMobile")}
                         </p>
@@ -397,7 +397,7 @@ export default function ObsidianSourceCard() {
                         </div>
 
                         <p className="text-xs text-text-muted">{t("obsidianTailscaleHint")}</p>
-                      </div>
+                      </Card.Section>
                     </div>
                   )}
                 </div>

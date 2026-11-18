@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import { chaosText, type ChaosTranslator } from "../chaosI18n";
 
@@ -44,7 +45,7 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
   );
 
   return (
-    <div className="p-3 rounded-lg border border-border bg-surface space-y-3">
+    <Card.Section className="space-y-3">
       <h3 className="ci-heading" data-size="sm">
         {resultsTitle}
       </h3>
@@ -74,6 +75,6 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
           {model.error && <div className="mt-1 text-error">{model.error}</div>}
         </div>
       ))}
-    </div>
+    </Card.Section>
   );
 }

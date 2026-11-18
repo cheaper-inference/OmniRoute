@@ -485,7 +485,7 @@ export default function BuilderIntelligentStep({
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {Object.entries(normalizedConfig.weights).map(([weightKey, weightValue]) => (
-            <div key={weightKey} className="rounded-lg border border-border p-3">
+            <Card.Section key={weightKey}>
               <Slider
                 label={getI18nOrFallback(
                   t,
@@ -506,7 +506,7 @@ export default function BuilderIntelligentStep({
                   })
                 }
               />
-            </div>
+            </Card.Section>
           ))}
         </div>
       </CollapsibleSection>
