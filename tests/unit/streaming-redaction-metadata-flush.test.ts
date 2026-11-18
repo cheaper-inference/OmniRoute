@@ -13,6 +13,8 @@ import path from "node:path";
 // answer, and the long case (past the window) proves the tail survives the flush.
 
 const isolated = fs.mkdtempSync(path.join(os.tmpdir(), "streaming-redaction-metadata-"));
+const originalHome = process.env.HOME;
+const originalDataDir = process.env.DATA_DIR;
 process.env.HOME = isolated;
 process.env.DATA_DIR = path.join(isolated, "data");
 const originalFetch = globalThis.fetch;
@@ -20,22 +22,33 @@ globalThis.fetch = async () => {
   throw new Error("offline pipeline test forbids fetch");
 };
 
-const { assembleStreamingPipeline } = await import(
-  "../../open-sse/handlers/chatCore/streamingPipeline.ts"
-);
+const { assembleStreamingPipeline } =
+  await import("../../open-sse/handlers/chatCore/streamingPipeline.ts");
 const { createPassthroughStreamWithLogger } = await import("../../open-sse/utils/stream.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+const restoreEnv = (name: "HOME" | "DATA_DIR", value: string | undefined) => {
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
+};
 
 test.after(() => {
   resetDbInstance();
   globalThis.fetch = originalFetch;
+  restoreEnv("HOME", originalHome);
+  restoreEnv("DATA_DIR", originalDataDir);
   fs.rmSync(isolated, { recursive: true, force: true });
 });
 
 const frame = (value: unknown) => `data: ${JSON.stringify(value)}\n\n`;
 
-function parsedChunks(output: string): Array<Record<string, any>> {
-  const chunks: Array<Record<string, any>> = [];
+type ParsedChunk = {
+  choices?: Array<{ delta?: Record<string, unknown> } | null>;
+  [field: string]: unknown;
+};
+
+function parsedChunks(output: string): ParsedChunk[] {
+  const chunks: ParsedChunk[] = [];
   for (const line of output.split("\n")) {
     if (!line.startsWith("data:")) continue;
     const payload = line.slice(5).trim();
@@ -52,7 +65,10 @@ function parsedChunks(output: string): Array<Record<string, any>> {
 function contentOf(output: string): string {
   let text = "";
   for (const chunk of parsedChunks(output)) {
-    for (const choice of chunk.choices ?? []) text += choice?.delta?.content ?? "";
+    for (const choice of chunk.choices ?? []) {
+      const content = choice?.delta?.content;
+      if (typeof content === "string") text += content;
+    }
   }
   return text;
 }
@@ -161,9 +177,8 @@ test("a long answer past the redaction window keeps its tail through the flush",
 });
 
 test("a credential split across two metadata frames is still masked", async () => {
-  const { createCredentialSseTransform } = await import(
-    "../../src/lib/streamingCredentialTransform.ts"
-  );
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
   const key = "sk-" + "ABCD".repeat(12);
   const transform = createCredentialSseTransform() as TransformStream;
   const writer = transform.writable.getWriter();
@@ -172,7 +187,10 @@ test("a credential split across two metadata frames is still masked", async () =
     // Neither frame holds the key on its own; only the window across them does.
     await writer.write(
       new TextEncoder().encode(
-        frame({ choices: [{ index: 0, delta: { content: "SMOKE" } }], usage_evidence: key.slice(0, 6) })
+        frame({
+          choices: [{ index: 0, delta: { content: "SMOKE" } }],
+          usage_evidence: key.slice(0, 6),
+        })
       )
     );
     await writer.write(
@@ -204,9 +222,8 @@ test("a credential inside usage metadata is masked and the rest of the metadata 
   // Observed on the transform itself: past the transform the passthrough rebuilds the terminal
   // frame's usage from its own counters and drops metadata-only frames, so the masking property
   // is only visible here.
-  const { createCredentialSseTransform } = await import(
-    "../../src/lib/streamingCredentialTransform.ts"
-  );
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
   const key = "sk-" + "ABCD".repeat(12);
   const transform = createCredentialSseTransform() as TransformStream;
   const writer = transform.writable.getWriter();
@@ -217,7 +234,10 @@ test("a credential inside usage metadata is masked and the rest of the metadata 
         frame({
           choices: [{ index: 0, delta: { content: "SMOKE" } }],
           cost_in_usd_ticks: 64180000,
-          usage_evidence: { input: { token: key }, output: { method: "measured locally", notes: [key] } },
+          usage_evidence: {
+            input: { token: key },
+            output: { method: "measured locally", notes: [key] },
+          },
           tokens_per_second: 12.5,
         })
       )
@@ -259,9 +279,8 @@ test("a credential inside usage metadata is masked and the rest of the metadata 
 });
 
 test("a credential in a Claude frame's usage metadata is masked", async () => {
-  const { createCredentialSseTransform } = await import(
-    "../../src/lib/streamingCredentialTransform.ts"
-  );
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
   const key = "sk-" + "ABCD".repeat(12);
   const transform = createCredentialSseTransform() as TransformStream;
   const writer = transform.writable.getWriter();
@@ -279,7 +298,9 @@ test("a credential in a Claude frame's usage metadata is masked", async () => {
       )
     );
     await writer.write(
-      new TextEncoder().encode("event: message_stop\n" + frame({ type: "message_stop" }) + "data: [DONE]\n\n")
+      new TextEncoder().encode(
+        "event: message_stop\n" + frame({ type: "message_stop" }) + "data: [DONE]\n\n"
+      )
     );
     try {
       await writer.close();
@@ -301,15 +322,13 @@ test("a credential in a Claude frame's usage metadata is masked", async () => {
 });
 
 test("a credential split across two Claude frames is still masked", async () => {
-  const { createCredentialSseTransform } = await import(
-    "../../src/lib/streamingCredentialTransform.ts"
-  );
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
   const key = "sk-" + "ABCD".repeat(12);
   const transform = createCredentialSseTransform() as TransformStream;
   const writer = transform.writable.getWriter();
   const reader = transform.readable.getReader();
-  const claude = (obj: unknown) =>
-    "event: content_block_delta\n" + frame(obj);
+  const claude = (obj: unknown) => "event: content_block_delta\n" + frame(obj);
   const writing = (async () => {
     await writer.write(
       new TextEncoder().encode(
@@ -332,7 +351,9 @@ test("a credential split across two Claude frames is still masked", async () => 
       )
     );
     await writer.write(
-      new TextEncoder().encode("event: message_stop\n" + frame({ type: "message_stop" }) + "data: [DONE]\n\n")
+      new TextEncoder().encode(
+        "event: message_stop\n" + frame({ type: "message_stop" }) + "data: [DONE]\n\n"
+      )
     );
     try {
       await writer.close();
@@ -354,23 +375,17 @@ test("a credential split across two Claude frames is still masked", async () => 
 });
 
 test("an oversized metadata value hits the same byte limit as answer text", async () => {
-  const { createCredentialSseTransform } = await import(
-    "../../src/lib/streamingCredentialTransform.ts"
-  );
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
   const transform = createCredentialSseTransform({ maxBufferedBytes: 1024 }) as TransformStream;
   const writer = transform.writable.getWriter();
   const reader = transform.readable.getReader();
-  const failed = new Promise<string>((resolve) => {
-    reader.closed.catch((err: Error) => resolve(String(err?.message ?? err)));
-  });
-  const reading = (async () => {
-    try {
-      for (;;) {
-        const r = await reader.read();
-        if (r.done) break;
-      }
-    } catch {
-      /* the limit error surfaces here */
+  // Consume to the end: an enforced limit errors the stream and rejects a read; a stream that
+  // accepts the oversized value completes instead, which fails the assertion below.
+  const consumed = (async () => {
+    for (;;) {
+      const r = await reader.read();
+      if (r.done) return "completed";
     }
   })();
   // A credential prefix holds the whole value in the window, so nothing is released and the
@@ -385,7 +400,145 @@ test("an oversized metadata value hits the same byte limit as answer text", asyn
     .catch(() => {
       /* the limit error rejects the write; the assertion is on the stream error */
     });
-  const message = await failed;
-  assert.match(message, /buffer limit exceeded/);
-  await reading;
+  await writer.close().catch(() => {
+    /* already errored by the limit */
+  });
+  await assert.rejects(consumed, /buffer limit exceeded/);
+});
+
+async function runTransform(transform: TransformStream, chunks: string[]): Promise<string> {
+  const writer = transform.writable.getWriter();
+  const reader = transform.readable.getReader();
+  const writing = (async () => {
+    for (const chunk of chunks) await writer.write(new TextEncoder().encode(chunk));
+    await writer.close();
+  })();
+  const out: string[] = [];
+  for (;;) {
+    const r = await reader.read();
+    if (r.done) break;
+    out.push(new TextDecoder().decode(r.value));
+  }
+  await writing;
+  return out.join("");
+}
+
+test("a metadata-only frame does not become the envelope of the answer flush", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    frame({ choices: [{ index: 0, delta: { content: "SMOKE" } }] }),
+    frame({ usage_evidence: { provider: "openai" } }),
+    "data: [DONE]\n\n",
+  ]);
+  assert.equal(contentOf(out), "SMOKE", `client got ${JSON.stringify(out)}`);
+});
+
+test("without a metadata window, excluded metadata labels never reach the processor", async () => {
+  const { createSseTextTransform } = await import("../../src/lib/sseTextTransform.ts");
+  const seen: string[] = [];
+  const processor = (text: string) => {
+    seen.push(text);
+    return text;
+  };
+  const out = await runTransform(createSseTextTransform(processor), [
+    frame({
+      choices: [{ index: 0, delta: { content: "SMOKE" } }],
+      usage_evidence: { provider: "openai", model: "gpt-x" },
+    }),
+    "data: [DONE]\n\n",
+  ]);
+  assert.ok(!seen.includes("openai"), `provider label reached the processor: ${seen}`);
+  assert.ok(!seen.includes("gpt-x"), `model label reached the processor: ${seen}`);
+  assert.ok(out.includes('"provider":"openai"'), "the label must pass through untouched");
+});
+
+test("fields with the same name under different ancestors keep separate windows", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    frame({
+      choices: [{ index: 0, delta: { content: "SMOKE" } }],
+      // A credential-shaped start is held in its window.
+      usage_evidence: { note: "sk-proj-" },
+      // A plain label on a different path must not append to that window.
+      usage: { usage_evidence: { note: "plain label" } },
+    }),
+    "data: [DONE]\n\n",
+  ]);
+  const first = parsedChunks(out)[0] as { usage?: { usage_evidence?: { note?: unknown } } };
+  assert.equal(first.usage?.usage_evidence?.note, "plain label");
+});
+
+test("Claude blocks keep separate metadata windows", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const claude = (obj: unknown) => "event: content_block_delta\n" + frame(obj);
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    claude({
+      type: "content_block_delta",
+      index: 0,
+      delta: { type: "text_delta", text: "hello" },
+      usage_evidence: "sk-proj-",
+    }),
+    claude({
+      type: "content_block_delta",
+      index: 1,
+      delta: { type: "text_delta", text: " world" },
+      usage_evidence: "label",
+    }),
+    "event: message_stop\n" + frame({ type: "message_stop" }),
+  ]);
+  const blockOne = parsedChunks(out).find((chunk) => chunk.index === 1);
+  assert.equal(blockOne?.usage_evidence, "label");
+});
+
+test("stop-frame metadata emitted at once is not charged against the byte ceiling", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  // The answer lane holds its 512-character window; the stop frame's metadata value leaves in
+  // that same frame and is retained nowhere, so only the 512 held characters count.
+  const answer = "a".repeat(600);
+  const label = "x".repeat(600);
+  const out = await runTransform(
+    createCredentialSseTransform({ maxBufferedBytes: 1024 }) as TransformStream,
+    [
+      frame({ choices: [{ index: 0, delta: { content: answer } }] }),
+      frame({
+        choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+        usage_evidence: label,
+      }),
+      "data: [DONE]\n\n",
+    ]
+  );
+  assert.equal(contentOf(out), answer);
+  assert.ok(out.includes(label), "the stop-frame metadata should be emitted with its frame");
+});
+
+test("interleaved Responses items keep separate metadata windows", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const responses = (obj: { type: string }) => `event: ${obj.type}\n` + frame(obj);
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    responses({
+      type: "response.output_text.delta",
+      item_id: "msg_a",
+      output_index: 0,
+      content_index: 0,
+      delta: "hello",
+      usage_evidence: "sk-proj-",
+    }),
+    responses({
+      type: "response.output_text.delta",
+      item_id: "msg_b",
+      output_index: 1,
+      content_index: 0,
+      delta: " world",
+      usage_evidence: "label",
+    }),
+  ]);
+  const itemB = parsedChunks(out).find(
+    (chunk) => chunk.item_id === "msg_b" && chunk.type === "response.output_text.delta"
+  );
+  assert.equal(itemB?.usage_evidence, "label");
 });

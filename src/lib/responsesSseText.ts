@@ -1,5 +1,5 @@
 import type { FieldCategory } from "./sseTextTransform";
-import { IN_PLACE_METADATA_KEYS } from "./sseTextTransform";
+import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
 
 type JsonObject = Record<string, unknown>;
 type Processor = (
@@ -106,7 +106,10 @@ class ResponsesLaneRouter {
     this.learnIdentity(event);
     this.payload = [];
     const flushed = this.routePayload(event, type);
-    this.redactMetadata(event);
+    // Item-scoped metadata keeps a window per item: the learned identity is stable whether a
+    // later event names the item by item_id or by output_index.
+    const identity = this.identities.get(this.identityKeys(event)[0] ?? "");
+    this.redactMetadata(event, identity === undefined ? "" : `item/${identity}`);
     this.payload = [];
     return flushed;
   }
@@ -235,12 +238,26 @@ class ResponsesLaneRouter {
       const childPath = path ? `${path}/${key}` : key;
       const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
       if (typeof field !== "string") this.redactMetadata(field, childPath, metadata);
-      else if (metadata && this.options.metadata) {
-        obj[key] = this.options.metadata(field, childPath);
-      } else if (classify(key) !== null || metadata) {
-        obj[key] = this.processor(field, "content", false, "responses:snapshot", true);
-      }
+      else obj[key] = this.redactMetadataString(field, key, childPath, metadata, classify);
     }
+  }
+
+  /**
+   * A metadata string goes through the path-keyed window when one is wired in. Without one it
+   * is masked in place, except a label `classify` excludes (provider, model, id), which passes
+   * through untouched as it did before the window existed.
+   */
+  private redactMetadataString(
+    field: string,
+    key: string,
+    childPath: string,
+    metadata: boolean,
+    classify: (key: string) => FieldCategory | null
+  ): string {
+    if (metadata && this.options.metadata) return this.options.metadata(field, childPath);
+    if (classify(key) !== null || (metadata && IN_PLACE_METADATA_KEYS.has(key)))
+      return this.processor(field, "content", false, "responses:snapshot", true);
+    return field;
   }
 
   private isPayload(holder: JsonObject, key: string): boolean {
