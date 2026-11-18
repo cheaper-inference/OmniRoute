@@ -12,6 +12,7 @@ import {
 
 const config = loadConfig();
 const [GATE_CI, GATE_QUALITY, INTEGRITY] = config.requiredChecks;
+const API_TYPECHECK = "API Route Typecheck";
 const ADVISORY = config.advisoryChecks[0];
 const STARTED = "2026-11-13T10:00:00.000Z";
 const NOW = "2026-11-13T11:00:00.000Z";
@@ -47,7 +48,8 @@ function status(context, state, createdAt = NOW, overrides = {}) {
   };
 }
 
-const allRequiredGreen = () => [run(GATE_CI), run(GATE_QUALITY), run(INTEGRITY)];
+const allRequiredGreen = () => config.requiredChecks.map((name) => run(name));
+const otherRequiredGreen = (name) => allRequiredGreen().filter((check) => check.name !== name);
 const at = (minutesAfterStart) =>
   new Date(Date.parse(STARTED) + minutesAfterStart * 60000).toISOString();
 /** A completed run that started/finished at the given minutes after STARTED. */
@@ -71,6 +73,7 @@ test("the committed config names the required and advisory checks this suite ass
     "Gate / CI",
     "Gate / Quality",
     "Merge integrity (changelog + generated skills)",
+    "API Route Typecheck",
   ]);
   assert.deepEqual(config.advisoryChecks, ["Build (advisory)"]);
   assert.equal(config.checksTimeoutMinutes, 240);
@@ -141,9 +144,43 @@ test("all required success and nothing pending → green", () => {
     [GATE_CI]: "success",
     [GATE_QUALITY]: "success",
     [INTEGRITY]: "success",
+    [API_TYPECHECK]: "success",
   });
   assert.deepEqual(result.failures, []);
   assert.deepEqual(result.pending, []);
+});
+
+test("the composed candidate stays pending when API typecheck has not run", () => {
+  const result = evaluate(otherRequiredGreen(API_TYPECHECK));
+  assert.equal(result.verdict, "pending");
+  assert.equal(result.required[API_TYPECHECK], "missing");
+  assert.deepEqual(result.pending, [API_TYPECHECK]);
+});
+
+for (const [conclusion, verdict] of [
+  [null, "pending"],
+  ["skipped", "red"],
+  ["neutral", "red"],
+  ["failure", "red"],
+  ["cancelled", "red"],
+  ["success", "green"],
+]) {
+  test(`composed candidate API typecheck ${conclusion ?? "in progress"} → ${verdict}`, () => {
+    const api = run(API_TYPECHECK, conclusion);
+    const result = evaluate([...otherRequiredGreen(API_TYPECHECK), api]);
+    assert.equal(result.verdict, verdict);
+    assert.equal(result.required[API_TYPECHECK], conclusion ?? "pending");
+    assert.deepEqual(result.pending, verdict === "pending" ? [API_TYPECHECK] : []);
+    assert.deepEqual(result.failures, verdict === "red" ? [api] : []);
+  });
+}
+
+test("another app's API typecheck success does not accept the composed candidate", () => {
+  const api = run(API_TYPECHECK, "success", { appSlug: "some-other-app" });
+  const result = evaluate([...otherRequiredGreen(API_TYPECHECK), api]);
+  assert.equal(result.verdict, "pending");
+  assert.equal(result.required[API_TYPECHECK], "missing");
+  assert.deepEqual(result.pending, [API_TYPECHECK]);
 });
 
 test("advisory failure stays green but is reported", () => {
@@ -196,7 +233,7 @@ test("non-required skipped/neutral checks do not block", () => {
 test("a required check reported as skipped or neutral fails closed (red)", () => {
   for (const conclusion of ["skipped", "neutral"]) {
     const skipped = run(INTEGRITY, conclusion);
-    const result = evaluate([run(GATE_CI), run(GATE_QUALITY), skipped]);
+    const result = evaluate([...otherRequiredGreen(INTEGRITY), skipped]);
     assert.equal(result.verdict, "red", conclusion);
     assert.equal(result.required[INTEGRITY], conclusion);
     assert.deepEqual(result.failures, [skipped]);
@@ -204,7 +241,7 @@ test("a required check reported as skipped or neutral fails closed (red)", () =>
 });
 
 test("a required check not reported yet keeps the verdict pending (not green)", () => {
-  const result = evaluate([run(GATE_CI), run(GATE_QUALITY)]);
+  const result = evaluate(otherRequiredGreen(INTEGRITY));
   assert.equal(result.verdict, "pending");
   assert.equal(result.required[INTEGRITY], "missing");
   assert.deepEqual(result.pending, [INTEGRITY]);
@@ -218,13 +255,13 @@ test("anything still running (advisory included) keeps the verdict pending", () 
   assert.equal(queued.verdict, "pending");
   const advisoryRunning = evaluate([...allRequiredGreen(), run(ADVISORY, null)]);
   assert.equal(advisoryRunning.verdict, "pending");
-  const requiredRunning = evaluate([run(GATE_CI), run(GATE_QUALITY, null), run(INTEGRITY)]);
+  const requiredRunning = evaluate([...otherRequiredGreen(GATE_QUALITY), run(GATE_QUALITY, null)]);
   assert.equal(requiredRunning.verdict, "pending");
   assert.equal(requiredRunning.required[GATE_QUALITY], "pending");
 });
 
 test("undecided after checksTimeoutMinutes → timeout; just before → pending", () => {
-  const checks = [run(GATE_CI), run(GATE_QUALITY)];
+  const checks = otherRequiredGreen(INTEGRITY);
   assert.equal(evaluate(checks, AFTER_TIMEOUT).verdict, "timeout");
   const justBefore = new Date(Date.parse(AFTER_TIMEOUT) - 1000).toISOString();
   assert.equal(evaluate(checks, justBefore).verdict, "pending");
@@ -296,17 +333,16 @@ test("a pending status does not keep it pending", () => {
 });
 
 test("a success status with a required name is still missing", () => {
-  const forged = evaluateWithStatuses(
-    [run(GATE_CI), run(GATE_QUALITY)],
-    [status(INTEGRITY, "success", NOW, { creator: THIRD_PARTY })]
-  );
+  const forged = evaluateWithStatuses(otherRequiredGreen(INTEGRITY), [
+    status(INTEGRITY, "success", NOW, { creator: THIRD_PARTY }),
+  ]);
   assert.equal(forged.verdict, "pending");
   assert.equal(forged.required[INTEGRITY], "missing");
   assert.deepEqual(forged.pending, [INTEGRITY]);
   // after the timeout it is a timeout, still never green
   assert.equal(
     evaluateWithStatuses(
-      [run(GATE_CI), run(GATE_QUALITY)],
+      otherRequiredGreen(INTEGRITY),
       [status(INTEGRITY, "success", NOW, { creator: QUEUE_APP })],
       AFTER_TIMEOUT
     ).verdict,
@@ -328,10 +364,9 @@ test("a success status with a required name is still missing", () => {
 });
 
 test("a failure status with a required name neither fails that check nor hides its run", () => {
-  const failing = evaluateWithStatuses(
-    [run(GATE_CI), run(GATE_QUALITY)],
-    [status(INTEGRITY, "failure", NOW, { creator: THIRD_PARTY })]
-  );
+  const failing = evaluateWithStatuses(otherRequiredGreen(INTEGRITY), [
+    status(INTEGRITY, "failure", NOW, { creator: THIRD_PARTY }),
+  ]);
   assert.equal(failing.verdict, "pending");
   assert.equal(failing.required[INTEGRITY], "missing");
   assert.deepEqual(failing.failures, []);
@@ -343,7 +378,7 @@ test("a failure status with a required name neither fails that check nor hides i
   assert.equal(green.required[INTEGRITY], "success");
   const failedRun = run(INTEGRITY, "failure");
   const red = evaluateWithStatuses(
-    [run(GATE_CI), run(GATE_QUALITY), failedRun],
+    [...otherRequiredGreen(INTEGRITY), failedRun],
     [status(INTEGRITY, "success", NOW, { creator: THIRD_PARTY })]
   );
   assert.equal(red.verdict, "red");
@@ -352,11 +387,11 @@ test("a failure status with a required name neither fails that check nor hides i
 
 test("a required check run from another app never satisfies it", () => {
   const otherApp = run(INTEGRITY, "success", { appSlug: "some-other-app" });
-  const result = evaluate([run(GATE_CI), run(GATE_QUALITY), otherApp]);
+  const result = evaluate([...otherRequiredGreen(INTEGRITY), otherApp]);
   assert.equal(result.verdict, "pending");
   assert.equal(result.required[INTEGRITY], "missing");
   const noApp = run(GATE_CI, "success", { appSlug: null });
-  assert.equal(evaluate([noApp, run(GATE_QUALITY), run(INTEGRITY)]).required[GATE_CI], "missing");
+  assert.equal(evaluate([noApp, ...otherRequiredGreen(GATE_CI)]).required[GATE_CI], "missing");
   // but its failure still counts (fail closed)
   const failing = run(INTEGRITY, "failure", { appSlug: "some-other-app" });
   assert.equal(evaluate([...allRequiredGreen(), failing]).verdict, "red");
