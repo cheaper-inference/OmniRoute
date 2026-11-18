@@ -58,7 +58,12 @@ import { isManagedBase } from "./config.mjs";
  * @property {TimelineEvent[]} timeline
  * @property {CommitStatus[]} headStatuses   statuses on headSha (approval contexts live here)
  * @property {"success"|"failure"|"pending"|null} prGreenCheck  latest config.prGreenCheck on head
+ * @property {Object<string, PrCheckState|null>} [prChecks]  prCheckState of every name in
+ *                                      config.prChecksRequired on headSha; absent when the
+ *                                      snapshot did not read them (revalidate): never blocks then
  */
+
+/** @typedef {"success"|"failure"|"pending"} PrCheckState */
 
 /**
  * @typedef {object} EligibilityContext
@@ -66,6 +71,12 @@ import { isManagedBase } from "./config.mjs";
  * @property {{number: number, title: string, body: string}[]} freezeIssues  open release-freeze issues
  * @property {QueueState|null} state   state of the PR's base (in-flight / shadow bookkeeping)
  * @property {string} now              ISO
+ * @property {string} [lane]           the PR's lane (laneOf; the tick sets it when it builds the
+ *                                     queue): on lane "base-repair" the PR-gate rule
+ *                                     (pr-checks-not-green) does not apply; any other value,
+ *                                     or none, is ignored
+ * @property {number} [batchSize]      selectBatch only: the batch size to fill and to wait for
+ *                                     (currentBatchWindow); config.batch.maxSize when absent
  */
 
 /**
@@ -273,6 +284,168 @@ export function isBaseFrozen(base, freezeIssues) {
   });
 }
 
+/** Conclusions of a completed check run that make a required PR gate red (see prCheckState). */
+const GATE_RED_CONCLUSIONS = new Set([
+  "failure",
+  "cancelled",
+  "timed_out",
+  "action_required",
+  "startup_failure",
+  "stale",
+  "skipped",
+  "neutral",
+]);
+const GATE_RANK = { success: 0, pending: 1, failure: 2 };
+
+/** The newest run named `name` of each check suite (a run without a suite id on its own). */
+function newestGateRunBySuite(runs, name) {
+  const newestBySuite = new Map();
+  for (const run of runs ?? []) {
+    if (run?.name !== name) continue;
+    const suite = run.checkSuiteId ?? `run:${run.id}`;
+    const seen = newestBySuite.get(suite);
+    if (!seen || run.id > seen.id) newestBySuite.set(suite, run);
+  }
+  return newestBySuite;
+}
+
+/** What one gate run says: "pending", "success", "failure", or null (another app's success). */
+function gateRunState(run) {
+  if (run.status !== "completed") return "pending";
+  if (run.conclusion === "success") return run.appSlug === "github-actions" ? "success" : null;
+  return "failure";
+}
+
+/**
+ * State of the PR-level check `name` (config.prChecksRequired) from the check runs of a PR head
+ * (github.listCheckRuns):
+ *  - only runs named exactly `name` count, and of each check suite only its newest run (highest
+ *    id): a re-run of failed jobs stays in its suite and supersedes the attempt before it. A run
+ *    without a suite id counts on its own (fail closed: nothing supersedes it);
+ *  - with `suiteIsCurrent` (currentSuitePredicate), only the suites it calls current count: a
+ *    suite of an older workflow run of a workflow that ran again on the same head (a run
+ *    cancelled by a retarget, whose `if: always()` gate still concluded) no longer counts. A run
+ *    without a suite id always counts. Without it every suite is current;
+ *  - a run not `completed` yet → "pending";
+ *  - a run completed `success` → "success" only when GitHub Actions reported it (appSlug
+ *    "github-actions"); a success from any other app is ignored: it makes the gate neither green
+ *    nor red;
+ *  - any other completed conclusion → "failure": `failure`, `cancelled`, `timed_out`,
+ *    `action_required`, `startup_failure`, `stale`, and also `skipped`, `neutral` or none at all.
+ *    A skipped or neutral gate vouched for nothing, so it is never a success for a required gate.
+ * The result is the worst of the runs that count (failure > pending > success), so a job of the
+ * same name in another current suite (another workflow, another app) cannot hide a red gate; null
+ * when no run counts (no run of that name, or only another app's successes).
+ * @param {import("./checks.mjs").CheckRun[]} runs
+ * @param {string} name
+ * @param {(suiteId: number) => boolean} [suiteIsCurrent]
+ * @returns {PrCheckState|null}
+ */
+export function prCheckState(runs, name, suiteIsCurrent) {
+  let worst = null;
+  for (const run of newestGateRunBySuite(runs, name).values()) {
+    if (suiteIsCurrent && run.checkSuiteId != null && !suiteIsCurrent(run.checkSuiteId)) continue;
+    const state = gateRunState(run);
+    if (state === null) continue;
+    if (worst === null || GATE_RANK[state] > GATE_RANK[worst]) worst = state;
+  }
+  return worst;
+}
+
+/**
+ * True when prCheckState of some gate of `names` could depend on which suites are current: two
+ * or more check suites carry a run of that name and their newest runs do not all say the same
+ * thing (pending, success, failure, or another app's success). Only then does the tick list the
+ * head's workflow runs to build currentSuitePredicate; otherwise every suite is current.
+ * @param {import("./checks.mjs").CheckRun[]} runs
+ * @param {string[]} names
+ */
+export function prChecksNeedWorkflowRuns(runs, names) {
+  return (names ?? []).some((name) => {
+    const newest = [...newestGateRunBySuite(runs, name).values()];
+    return newest.length >= 2 && new Set(newest.map(gateRunState)).size > 1;
+  });
+}
+
+/**
+ * suiteIsCurrent for prCheckState, from the workflow runs of one head (github.listWorkflowRuns
+ * with headSha). The runs are grouped by (workflowId, event): a run supersedes only a run of the
+ * same workflow AND the same event, as cancellation happens inside one concurrency group
+ * (`${{ github.workflow }}-${{ github.ref }}`), and a `pull_request` run and a
+ * `workflow_dispatch` run of the same workflow on the same head never cancel each other. In each
+ * group only the run with the highest id is current, and so is its check suite; the suite of an
+ * older run of the group is not. A run whose event is missing or empty is a group of its own: it
+ * supersedes nothing and nothing supersedes it. A suite that maps to no listed run with a
+ * workflow id (another app's suite, or one the listing did not show) is current: what is unknown
+ * never turns a gate green.
+ * Known limit, not handled: two PRs that share one head SHA share their `pull_request` runs'
+ * group, so the newest `pull_request` run of either supersedes the other's.
+ * @param {{id: number, workflowId: number|null, checkSuiteId: number|null,
+ *          event?: string|null}[]} workflowRuns
+ * @returns {(suiteId: number) => boolean}
+ */
+export function currentSuitePredicate(workflowRuns) {
+  const newestByGroup = new Map();
+  const known = new Set();
+  const current = new Set();
+  for (const run of workflowRuns ?? []) {
+    if (run?.workflowId == null || run.checkSuiteId == null) continue;
+    known.add(run.checkSuiteId);
+    if (typeof run.event !== "string" || !run.event) {
+      current.add(run.checkSuiteId); // a group of its own
+      continue;
+    }
+    const group = JSON.stringify([run.workflowId, run.event]);
+    const seen = newestByGroup.get(group);
+    if (!seen || run.id > seen.id) newestByGroup.set(group, run);
+  }
+  for (const run of newestByGroup.values()) current.add(run.checkSuiteId);
+  return (suiteId) => !known.has(suiteId) || current.has(suiteId);
+}
+
+/**
+ * The batch size the next root batch fills (ctx.batchSize of selectBatch). Without
+ * config.batch.adaptive it is config.batch.maxSize. With it, the window stored in
+ * state.batchWindow, or config.batch.startSize (default maxSize) when the state has none (a new
+ * state, or one written before the window existed: a loaded state's batchWindow, when present, is
+ * a positive integer, as contracts.validateState checks); always clamped to [minSize, maxSize], so
+ * a window stored before the config was lowered never exceeds the new maxSize.
+ * @param {QueueConfig} config
+ * @param {QueueState|null} state
+ * @returns {number}
+ */
+export function currentBatchWindow(config, state) {
+  const { maxSize, minSize } = config.batch;
+  if (!config.batch.adaptive) return maxSize;
+  const stored = state?.batchWindow;
+  const start = config.batch.startSize ?? maxSize;
+  const window = Number.isSafeInteger(stored) && stored >= 1 ? stored : start;
+  return Math.min(maxSize, Math.max(minSize ?? 1, window));
+}
+
+/**
+ * The pr-checks-not-green reason of `pr`, or null: a gate of config.prChecksRequired whose state
+ * in pr.prChecks is not "success" ("failure", "pending", or missing). Only applies when the
+ * snapshot read the gates (pr.prChecks present: revalidate does not read them) and never on
+ * ctx.lane "base-repair". The detail names each gate and its state (`Gate / CI failure; Gate /
+ * Quality missing`); gate names come from the trusted config.
+ * @param {PrSnapshot} pr
+ * @param {EligibilityContext} ctx
+ * @returns {{code: "pr-checks-not-green", detail: string}|null}
+ */
+export function prGatesReason(pr, ctx) {
+  const gates = ctx.config.prChecksRequired ?? [];
+  if (pr.prChecks === undefined || !gates.length || ctx.lane === "base-repair") return null;
+  const notGreen = gates
+    .map((name) => ({ name, state: pr.prChecks?.[name] ?? null }))
+    .filter(({ state }) => state !== "success");
+  if (!notGreen.length) return null;
+  return {
+    code: "pr-checks-not-green",
+    detail: notGreen.map(({ name, state }) => `${name} ${state ?? "missing"}`).join("; "),
+  };
+}
+
 function prInFlight(state, n) {
   const f = state?.inFlight;
   if (!f) return false;
@@ -287,7 +460,11 @@ function prInFlight(state, n) {
  *  - label by a non-approver → comment once (key "not-approver"), label kept, ineligible;
  *  - head changed after the label → comment + removeLabel;
  *  - conflicting (mergeable === false) → comment + removeLabel;
- *  - approval/protected approval missing on the current head → comment once (key includes head12).
+ *  - approval/protected approval missing on the current head → comment once (key includes head12);
+ *  - a gate of config.prChecksRequired not green on the head (pr.prChecks) → pr-checks-not-green,
+ *    no action at all (label kept, no comment): the PR waits until its gates turn green. Only
+ *    applies when the snapshot read them (pr.prChecks present) and never on ctx.lane
+ *    "base-repair".
  * Actions are only emitted for an open PR that carries the queue label and is NOT in flight:
  * a closed PR needs nothing, an unlabeled one is not ours to comment on, and an in-flight PR
  * is owned by the tick (removing its label mid-run would race the candidate).
@@ -438,6 +615,9 @@ export function evaluateEligibility(pr, ctx) {
     removeQueueLabel();
   }
 
+  const gatesNotGreen = prGatesReason(pr, ctx);
+  if (gatesNotGreen) reason(gatesNotGreen.code, gatesNotGreen.detail);
+
   if (config.mode === "shadow" && ctx.state?.shadow?.processed?.[String(n)] === pr.headSha) {
     reason("shadow-processed", `head ${h12} already processed in shadow mode`);
   }
@@ -445,14 +625,80 @@ export function evaluateEligibility(pr, ctx) {
   return { eligible: reasons.length === 0, reasons, actions, approval, protectedSurface };
 }
 
+/**
+ * The lane of `pr` (contracts.QUEUE_LANES), or null: a lane label of config.lanes counts only
+ * when the PR carries it and its latest `labeled` timeline event was by an approver (as the queue
+ * label; a lane label binds no approval status, the normal approval still applies). A PR carrying
+ * both valid lane labels is a "base-repair" PR. Without config.lanes there are no lanes.
+ * @param {PrSnapshot} pr
+ * @param {{config: QueueConfig}} ctx
+ * @returns {"hotfix"|"base-repair"|null}
+ */
+export function laneOf(pr, ctx) {
+  const lanes = ctx.config.lanes;
+  if (!lanes) return null;
+  const counts = (label) =>
+    hasLabel(pr.labels, label) &&
+    isApprover(ctx.config, lastLabeledEvent(pr.timeline, label)?.actor);
+  if (counts(lanes.baseRepairLabel)) return "base-repair";
+  if (counts(lanes.hotfixLabel)) return "hotfix";
+  return null;
+}
+
+/** PrRef of an eligible candidate (the exact head that was approved). */
+function prRefOf({ pr, eligibility }) {
+  return {
+    n: pr.number,
+    head: pr.headSha,
+    title: pr.title,
+    author: pr.author,
+    labeledAt: eligibility.approval.labeledAt,
+  };
+}
+
+/**
+ * The lane batch to start before the FIFO, or null: a batch of ONE PR, never a wait
+ * (batch.maxWaitMinutes and the adaptive window do not apply). Among the eligible candidates in a
+ * lane (laneOf), the oldest approval first (ties by PR number): a hotfix PR, else a base-repair
+ * PR. With `repairOnly` (a base-red pause) only a base-repair PR. A base-repair PR whose current
+ * head is in ctx.state.repairTried (it failed like the base at that head) is never picked.
+ * @param {{pr: PrSnapshot, eligibility: Eligibility}[]} candidates   eligible ones only
+ * @param {EligibilityContext} ctx
+ * @param {{repairOnly?: boolean}} [options]
+ * @returns {{batch: PrRef[], lane: "hotfix"|"base-repair"}|null}
+ */
+export function selectLane(candidates, ctx, { repairOnly = false } = {}) {
+  if (!ctx.config.lanes) return null;
+  const tried = ctx.state?.repairTried ?? {};
+  const pool = (candidates ?? [])
+    .filter((c) => c?.eligibility?.eligible && toMs(c.eligibility.approval?.labeledAt) !== null)
+    .map((c) => ({ c, lane: laneOf(c.pr, ctx) }))
+    .filter(
+      ({ c, lane }) =>
+        lane && !(lane === "base-repair" && tried[String(c.pr.number)] === c.pr.headSha)
+    )
+    .sort(
+      (a, b) =>
+        toMs(a.c.eligibility.approval.labeledAt) - toMs(b.c.eligibility.approval.labeledAt) ||
+        a.c.pr.number - b.c.pr.number
+    );
+  for (const lane of repairOnly ? ["base-repair"] : ["hotfix", "base-repair"]) {
+    const first = pool.find((entry) => entry.lane === lane);
+    if (first) return { batch: [prRefOf(first.c)], lane };
+  }
+  return null;
+}
+
 const GREEN_RANK = { success: 0, pending: 1, failure: 2 };
 
 /**
  * Pick the next batch. Order: FIFO by approval.labeledAt (ties by PR number); with
  * config.preferGreenPrChecks, PRs whose prGreenCheck is "success" come first, then
- * null/pending, then "failure" (FIFO inside each group). Takes at most config.batch.maxSize.
- * Waits (waiting=true, batch=[]) while fewer than maxSize are eligible AND the oldest approval
- * is younger than batch.maxWaitMinutes; never returns fewer than batch.minSize.
+ * null/pending, then "failure" (FIFO inside each group). The batch size is ctx.batchSize (the
+ * adaptive window, currentBatchWindow) or config.batch.maxSize when the context has none: it
+ * takes at most that many, and waits (waiting=true, batch=[]) while fewer than that many are
+ * eligible AND the oldest approval is younger than batch.maxWaitMinutes; never returns fewer than
+ * batch.minSize.
  * @param {{pr: PrSnapshot, eligibility: Eligibility}[]} candidates   eligible ones only
  * @param {EligibilityContext} ctx
  * @returns {{batch: PrRef[], waiting: boolean, reason: string}}
@@ -460,6 +706,7 @@ const GREEN_RANK = { success: 0, pending: 1, failure: 2 };
 export function selectBatch(candidates, ctx) {
   const { config } = ctx;
   const { maxSize, minSize, maxWaitMinutes } = config.batch;
+  const size = Number.isSafeInteger(ctx.batchSize) && ctx.batchSize >= 1 ? ctx.batchSize : maxSize;
   const pool = (candidates ?? []).filter(
     (c) => c?.eligibility?.eligible && toMs(c.eligibility.approval?.labeledAt) !== null
   );
@@ -483,7 +730,7 @@ export function selectBatch(candidates, ctx) {
       reason: `${pool.length} eligible PR(s), below batch.minSize ${minSize}`,
     };
   }
-  if (pool.length < maxSize) {
+  if (pool.length < size) {
     const oldestMs = toMs(fifo[0].eligibility.approval.labeledAt);
     const nowMs = toMs(ctx.now);
     const waitedMinutes = nowMs === null ? Infinity : (nowMs - oldestMs) / 60000;
@@ -492,25 +739,21 @@ export function selectBatch(candidates, ctx) {
         batch: [],
         waiting: true,
         reason:
-          `${pool.length}/${maxSize} eligible; oldest approval waited ` +
+          `${pool.length}/${size} eligible; oldest approval waited ` +
           `${Math.max(0, Math.floor(waitedMinutes))} of ${maxWaitMinutes} min`,
       };
     }
   }
 
-  const batch = ordered.slice(0, maxSize).map(({ pr, eligibility }) => ({
-    n: pr.number,
-    head: pr.headSha,
-    title: pr.title,
-    author: pr.author,
-    labeledAt: eligibility.approval.labeledAt,
-  }));
+  const batch = ordered.slice(0, size).map(prRefOf);
   return {
     batch,
     waiting: false,
     reason:
-      pool.length > maxSize
-        ? `${batch.length} of ${pool.length} eligible (batch.maxSize ${maxSize})`
+      pool.length > size
+        ? `${batch.length} of ${pool.length} eligible (${
+            size === maxSize ? `batch.maxSize ${maxSize}` : `batch window ${size}`
+          })`
         : `${batch.length} eligible`,
   };
 }

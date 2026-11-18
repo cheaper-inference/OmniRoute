@@ -37,36 +37,36 @@ Studio met drie tabbladen waarin zoeken op het web, webscraping en vergelijking 
 
 ## Tabbladen
 
-### Zoektabblad
+### Tabblad Zoeken
 
-Breidt het bestaande `SearchForm` + `ResultsPanel` + `RerankPanel` uit tot een tabblad:
+Ontwikkelt de bestaande `SearchForm` + `ResultsPanel` + `RerankPanel` naar een tabblad:
 
-- Zoekopdracht → resultaten (titel, URL, fragment, relevantiescore).
-- Metagegevens van de provider in het Config-paneel (kosten, quotum, status).
-- Sectie voor herrangschikking: kies een model voor herrangschikking, rangschik resultaten opnieuw en toon `positionDelta`.
-- Lege status met CTA wanneer er geen zoekproviders zijn geconfigureerd.
+- Query → resultaten (titel, URL, fragment, relevantiescore).
+- Metagegevens van de provider in het configuratievenster (kosten, quota, status).
+- Sectie opnieuw rangschikken: kies een herrangschikkingsmodel, herschik de resultaten, toon `positionDelta`.
+- Lege status met CTA wanneer er geen zoekmachines zijn geconfigureerd.
 - Zoekgeschiedenis via `SearchHistory.tsx`.
-- Roept `POST /v1/search` aan (bestaand endpoint, geen wijzigingen).
+- Roept `POST /v1/search` aan (bestaand eindpunt, geen wijzigingen).
 
-### Scrapetabblad
+### Tabblad schrapen
 
-Nieuw tabblad voor het extraheren van inhoud van een URL via `POST /v1/web/fetch` (aangemaakt in plan 05):
+Nieuw tabblad voor het extraheren van inhoud uit een URL via `POST /v1/web/fetch` (aangemaakt in plan 05):
 
-- Invoer: URL + schakelaar voor volledige pagina + indelingskiezer (markdown / tekst / HTML).
-- Verzenden → ophalen → `ScrapeResult.tsx` renderen.
-- `ScrapeResult` rendert een markdownvoorbeeld + schakelaar voor onbewerkte weergave.
-- Limiet: als de responsbody groter is dan **256 KB**, toont de UI `(afgekapt, onbewerkt bekijken)` en opent deze de onbewerkte inhoud in een Monaco-modal (D21).
-- Metagegevenspaneel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentie, kosten, responsgrootte, aantal links.
-- Gebruikt de hook `useScrapeFetch.ts`.
+- Invoer: URL + volledige pagina toggle + formaatkiezer (markdown / tekst / HTML).
+- Verzend → haal → render `ScrapeResult.tsx`.
+- `ScrapeResult` geeft markdown-voorbeeld weer + raw-schakelaar.
+- Cap: als antwoordlichaam >** 256 KB** , UI toont `(truncated, view raw)` en opent rauw in een Monaco-modal (D21).
+- Metadatapaneel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latentie, kosten, responsgrootte, aantal links.
+- Maakt gebruik `useScrapeFetch.ts` haak.
 
-### Vergelijkingstabblad
+### Vergelijk Tab
 
-Voert dezelfde zoekopdracht/URL parallel uit bij maximaal **4 providers** (D22):
+Voert dezelfde query/URL uit tot** 4 aanbieders parallel** (D22):
 
 - Kolommen naast elkaar per provider.
-- Metrieken: latentie, kosten, aantal resultaten, responsgrootte.
-- Berekening van URL-overlap voor zoeken (aantal gedeelde URL's ten opzichte van het oorspronkelijke resultaat).
-- Roept per provider `POST /v1/search` (zoeken) of `POST /v1/web/fetch` (scrapen) aan.
+- Statistieken: latentie, kosten, aantal resultaten, reactiegrootte.
+- URL -overlapberekening voor zoeken (aantal gedeelde URLs versus aanvankelijk resultaat).
+- Bellen `POST /v1/search` (zoeken) of `POST /v1/web/fetch` (schrapen) per aanbieder.
 
 ---
 
@@ -99,15 +99,15 @@ Voert dezelfde zoekopdracht/URL parallel uit bij maximaal **4 providers** (D22):
 
 ---
 
-## Providercatalogus
+## Leverancierscatalogus
 
-`ProviderCatalog.tsx` toont de volledige lijst met providers van `GET /api/search/providers`
-(in F4 uitgebreid met fetchproviders):
+`ProviderCatalog.tsx` toont de volledige providerlijst van `GET /api/search/providers` (uitgebreid in F4 met ophaalproviders):
 
-| `kind` | `"search"` (20 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, scherp zoeken) |
 
-De status wordt **op het moment van de aanvraag afgeleid** door te controleren of er inloggegevens bestaan en of
-alle sleutels momenteel een afkoelperiode hebben.
+De status is** afgeleid op verzoektijdstip** door te controleren of er inloggegevens bestaan en of alle sleutels momenteel in cooldown zijn.
+
+`codex-search` (Codex Web Search) heeft geen eigen sleutel: het gebruikt een aangesloten Codex (ChatGPT)-account, dus elke zoekopdracht besteedt ChatGPT abonnementsquota en duurt ongeveer 10-40 seconden. Het wordt uitgevoerd wanneer een verzoek het een naam geeft; automatische selectie heeft de `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` -functievlag nodig (standaard uitgeschakeld).
 
 ---
 
@@ -119,18 +119,18 @@ De tijdelijke aanduiding voor de API-sleutel is altijd `$OMNIROUTE_API_KEY` (D11
 
 ---
 
-## Backendwijzigingen
+## Backend-wijzigingen
 
-Voor deze functie was slechts één backendwijziging nodig:
+Voor deze functie was slechts één wijziging in de backend nodig:
 
 ### Uitgebreide `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` is uitgebreid om:
+`src/app/api/search/providers/route.ts` werd uitgebreid naar:
 
-- Elke fetchprovider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) in de array op te nemen.
-- `kind: "search" | "fetch"` aan elk item toe te voegen.
-- `status: "configured" | "missing" | "rate_limited"` toe te voegen, afgeleid van de actuele status van de inloggegevens.
-- Achterwaartse compatibiliteit te behouden — bestaande velden (`id`, `name`, enz.) blijven ongewijzigd.
+- Neem elke ophaalprovider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) op in de array.
+- Voeg `kind: "search" | "fetch"` toe aan elk item.
+- Voeg `status: "configured" | "missing" | "rate_limited"` toe die is afgeleid van de live-referentiestatus.
+- Behoud achterwaartse compatibiliteit — bestaande velden (`id`, `name`, etc.) ongewijzigd.
 
 ---
 

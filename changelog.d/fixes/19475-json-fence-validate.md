@@ -1,1 +1,0 @@
-- **fix(chat):** JSON-mode responses no longer lose a markdown fence around text that is not JSON; only a fenced block that parses as JSON is unwrapped. ([#19475](https://github.com/cheaper-inference/OmniRoute/pull/19475))

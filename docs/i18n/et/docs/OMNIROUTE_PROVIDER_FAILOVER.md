@@ -4,10 +4,20 @@
 
 ---
 
-Tõrked klassifitseeritakse enne korduskatsete üle otsustamist.
+Ebaõnnestumised klassifitseeritakse enne uuesti proovimise otsuste tegemist.
 
-Ajutiste tõrgete, näiteks ajalõppude, võrgutõrgete, päringusageduse piirangute ja teenusepakkuja 5xx-vastuste korral võidakse üle minna teisele teenusepakkujale. Autentimistõrgete, õiguste tõrgete, vigaste päringute, kättesaamatute mudelite ja tundmatute tõrgete korral ei tehta pimesi korduskatseid.
+Mööduvad tõrked, nagu ajalõpud, võrguvead, kiiruspiirangud ja pakkuja 5xx vastused, võivad üle minna. Ammendatud kvooti või krediiti (nõutav kvoot 429 või 402 makse) ei proovita kunagi uuesti sama teenusepakkuja juures, vaid see läheb üle teisele, mille kvoot on eraldi. Autentimisvigu, lubade vigu, kehtetuid taotlusi, kättesaamatud mudeleid ja tundmatuid tõrkeid ei proovita pimesi uuesti.
 
-Vaikimisi teenusepakkujateülene poliitika lubab kuni kolme teenusepakkuja kasutamise katset, kordab päringuid päringusageduse piirangute ja ajalõppude korral ning käsitleb administratiivset keelamist ajutisest kaitselüliti olekust eraldi.
+Pakkujateülene vaikepoliitika lubab kuni kolm teenusepakkuja katset, proovide uuesti määramise piiranguid ja aegumistähtajaid, ammendatud kvoodi korral tõrketeateid ja hoiab administratiivse keelu ajutisest vooluringi olekust eraldi.
 
-Kaitselüliti olekud on `closed`, `open` ja `half_open`. Taasteooteaeg ajastab piiratud kontrollkatse; õnnestunud kontrollkatse sulgeb kaitselüliti ja ebaõnnestunud kontrollkatse avab selle uuesti.
+## Kus see kehtib
+
+- **Kombinatsioonid** ebaõnnestuvad oma sihtmärkide vahel vastavalt kombinatsiooni enda strateegiale ja seadetele.
+- **Paljas mudeli ID** (ilma `provider/` eesliideta), mida mitu aktiivset pakkujat teenindavad, ilma selle täpse nimeta kombinatsioonita, saadetakse esmalt pakkuja järelduste valikutele. Kui see katse nurjub viisil, mille korral poliitika nurjub, saadetakse sama päring järgmisele ID-d teenindavale aktiivsele pakkujale. Vastus sisaldab `x-omniroute-fallback-attempts` ja nende pakkujate arv, keda prooviti enne vastajat.
+  - Iga asendusliige on volitatud täpselt nii, nagu oleks ta järeldanud. Sihtmärk, mille API klahv blokeerib või mida ei tunnista, jäetakse vahele ilma ülesvoolu kõneta ja klient saab tõelise ülesvoolu vea, mitte poliitika tagasilükkamise sihtmärgi puhul, mida ta kunagi ei nimetanud.
+  - Ainult ebaõnnestunud vastus liigub edasi: pärast esimest voogedastatud baiti ei katke midagi.
+  - Hädaolukorra varumudeli vahetus rakendub alles pärast seda, kui kõik soovitud mudeli pakkujad on ebaõnnestunud.
+  - Ühendusele kinnitatud taotlus (`x-omniroute-connection`) jääb sellele alles.
+  - Eesliitega ID-d (`provider/model`) ei suunata kunagi ümber teisele pakkujale.
+
+Vooluahela olekud on `closed`, `open` ja `half_open`. Jahutus ajastab piiratud sondi; edukas sond sulgeb ahela ja ebaõnnestunud sond avab selle uuesti.

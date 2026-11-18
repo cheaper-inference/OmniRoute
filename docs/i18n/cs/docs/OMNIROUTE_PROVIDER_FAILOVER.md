@@ -4,10 +4,20 @@
 
 ---
 
-Selhání jsou klasifikována před rozhodnutím o opakování pokusu.
+Selhání jsou klasifikována před rozhodnutím o opakování.
 
-Při přechodných selháních, jako jsou vypršení časového limitu, síťové chyby, překročení limitu požadavků a odpovědi poskytovatele 5xx, může dojít k přepnutí na jiného poskytovatele. Chyby ověřování, chyby oprávnění, neplatné požadavky, nedostupné modely a neznámá selhání nejsou slepě opakována.
+Přechodná selhání, jako jsou časové limity, chyby sítě, rychlostní limity a odpovědi poskytovatele 5xx, mohou selhat. Vyčerpaná kvóta nebo kredit (kvóta 429 nebo 402 Je vyžadována platba) se nikdy nezkusí znovu u stejného poskytovatele, ale dojde k selhání u jiného poskytovatele, jehož kvóta je samostatná. Chyby autentizace, chyby oprávnění, neplatné požadavky, nedostupné modely a neznámá selhání nejsou slepě opakována.
 
-Výchozí zásady pro více poskytovatelů umožňují až tři pokusy u poskytovatelů, opakují pokusy při překročení limitu požadavků a vypršení časového limitu a oddělují administrativní deaktivaci od dočasného stavu jističe.
+Výchozí zásada mezi poskytovateli umožňuje až tři pokusy poskytovatelů, limity počtu opakování a časové limity, selhání při vyčerpání kvóty a udržuje zákaz správy oddělený od stavu dočasného okruhu.
 
-Stavy jističe jsou `closed`, `open` a `half_open`. Po uplynutí doby zklidnění je naplánováno omezené ověření; úspěšné ověření jistič uzavře a neúspěšné jej znovu otevře.
+## Kde platí
+
+- **Kombinace** selhání mezi jejich cíli podle vlastní strategie a nastavení komba.
+- **Holé ID modelu** (bez předpony `provider/` ), kterou obsluhuje několik aktivních poskytovatelů, bez komba tohoto přesného názvu, se nejprve odešle do výběrů odvozených poskytovatelů. Pokud tento pokus selže tak, že zásady selžou, stejný požadavek je odeslán dalšímu aktivnímu poskytovateli, který poskytuje id. Odpověď nese `x-omniroute-fallback-attempts` s počtem vyzkoušených poskytovatelů před tím, který odpověděl.
+  - Každý náhradník je autorizován přesně tak, jako by jej vybrala inference. Cíl, který klíč API zablokuje nebo nepřizná, je přeskočen bez upstream volání a klient dostane skutečnou upstream chybu, nikoli odmítnutí zásady pro cíl, který nikdy nepojmenoval.
+  - Pouze neúspěšná odpověď se posune dál: po prvním streamovaném bajtu se nic nepřeruší.
+  - Nouzová záměna záložního modelu se použije pouze v případě, že selhal každý poskytovatel požadovaného modelu.
+  - Požadavek připojený k připojení (`x-omniroute-connection`) na něm zůstane.
+  - Předpona id (`provider/model`) není nikdy přesměrována k jinému poskytovateli.
+
+Stavy obvodu jsou `closed`, `open` a `half_open`. Cooldown naplánuje ohraničenou sondu; úspěšná sonda uzavře obvod a neúspěšná sonda jej znovu otevře.

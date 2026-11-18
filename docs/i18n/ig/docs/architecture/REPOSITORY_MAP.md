@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Faịlụ mgbọrọgwụ
+## Mgbọrọgwụ faịlụ
 
-| Faịlụ                                       | Ebumnuche                                                                                            |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Ibe mbata mgbasa ozi + mmalite ngwa ngwa + matriks atụmatụ (leekwa `llm.txt`)                        |
-| **CHANGELOG.md**                            | Ndekọ mgbanwe maka mbipụta ọ bụla (`/version-bump-cc` skill na-emepụta ya na-akpaghị aka)            |
-| **LICENSE**                                 | Ederede ikikere MIT                                                                                  |
-| **CLAUDE.md**                               | Iwu ọrụ ngo maka ndị nnọchi anya Claude Code (iwu siri ike, usoro nkwekọrịta, ọnọdụ eji eme ihe)     |
-| **AGENTS.md**                               | Otu ihe ahụ dị na CLAUDE.md, mana maka ndị nnọchi anya AI na-abụghị Claude (Codex, Cursor, wdg.)     |
-| **GEMINI.md**                               | Iwu dị nkenke maka ndị nnọchi anya dabeere na Gemini (akụkụ nke CLAUDE.md)                           |
-| **CONTRIBUTING.md**                         | Nduzi maka ndị na-atụnye ụtụ: nhazi, conventional commits, nnwale, usoro PR                          |
-| **SECURITY.md**                             | Iwu maka ịkọ adịghị ike, ụdị ndị a na-akwado, ụdị iyi egwu                                           |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — atụmanya gbasara omume obodo                                                  |
-| **llm.txt**                                 | Ibe mbata ederede nkịtị ahaziri maka ndị crawler LLM (SEO maka ndị enyemaka AI)                      |
-| **package.json**                            | Manifest npm, scripts, dependencies, engines, ọnụ ụzọ coverage c8                                    |
-| **package-lock.json**                       | Osisi dependency akpọchiri akpọchi                                                                   |
-| **tsconfig.json**                           | Nhazi TypeScript mgbọrọgwụ                                                                           |
-| **tsconfig.typecheck-core.json**            | Nhazi nyocha ụdị maka isi `src/`                                                                     |
-| **tsconfig.typecheck-noimplicit-core.json** | Nnyocha ụdị siri ike (`noImplicitAny`)                                                               |
-| **tsconfig.tsbuildinfo**                    | Cache build incremental nke TS (Git na-eleghara ya anya)                                             |
-| **next.config.mjs**                         | Nhazi build Next.js 16 (output kwụụrụ onwe ya)                                                       |
-| **next-env.d.ts**                           | Ụdị env nke Next.js na-emepụta na-akpaghị aka                                                        |
-| **eslint.config.mjs**                       | Nhazi flat nke ESLint (iwu maka mpaghara ọrụ ngo ọ bụla)                                             |
-| **prettier.config.mjs**                     | Iwu nhazi ederede Prettier                                                                           |
-| **postcss.config.mjs**                      | Nhazi PostCSS maka pipeline Tailwind/CSS                                                             |
-| **playwright.config.ts**                    | Nhazi nnwale E2E nke Playwright                                                                      |
-| **vitest.config.ts**                        | Nhazi Vitest (nchịkọta nnwale ndabara)                                                               |
-| **vitest.mcp.config.ts**                    | Nhazi Vitest maka sava MCP / nchịkọta nnwale autoCombo / cache                                       |
-| **sonar-project.properties**                | Nhazi SonarQube/SonarCloud (ogo koodu)                                                               |
-| **Dockerfile**                              | Build Docker nwere ọtụtụ ọkwa (builder → runner-base → runner-cli)                                   |
-| **docker-compose.yml**                      | Compose mmepe nwere profaịlụ 4 (base, cli, host, cliproxyapi) + redis sidecar                        |
-| **docker-compose.prod.yml**                 | Compose mmepụta (ọdụ ụgbọ mmiri 20130, redis, volume nwere aha)                                      |
-| **.dockerignore**                           | Faịlụ ndị ewepụrụ na context Docker                                                                  |
-| **fly.toml**                                | Nhazi deployment Fly.io (mpaghara `sin`, ọdụ ụgbọ mmiri 20128, volume /data)                         |
-| **.env.example**                            | Faịlụ env ndebiri (a na-eṅomi ya gaa na `.env` na-akpaghị aka mgbe echichi mbụ)                      |
-| **.gitignore**                              | Ụkpụrụ Git ga-eleghara anya                                                                          |
-| **.npmignore**                              | Ndepụta ihe a ga-ewepụ na mbipụta npm                                                                |
-| **.npmrc**                                  | Nhazi npm (registry, iwu lockfile)                                                                   |
-| **.node-version**                           | Mkpọchi ụdị Node (ngwaọrụ dakọtara na nvm na-eji ya)                                                 |
-| **.nvmrc**                                  | Mkpọchi ụdị Node maka nvm                                                                            |
-| **eslint.complexity.config.mjs**            | Nhazi ESLint maka ratchet mgbagwoju anya (`scripts/check/check-complexity.mjs --config`)             |
-| **eslint.sonarjs.config.mjs**               | Nhazi ESLint maka iwu SonarJS (mgbagwoju anya nghọta / mmegharị ugboro abụọ)                         |
-| **source.config.ts**                        | Nhazi isi iyi Fumadocs `defineDocs` (na-enye `.source/` data)                                        |
-| **knip.json**                               | Nhazi Knip — faịlụ/exports/deps ndị a na-ejighị (na-enye ọnụ ụzọ dead-code data)                     |
-| **stryker.conf.json**                       | Nhazi nnwale mutation nke Stryker                                                                    |
-| **.size-limit.json**                        | Nhazi oke mmefu nha bundle                                                                           |
-| **promptfooconfig.yaml**                    | Nhazi nnwale promptfoo                                                                               |
-| **.gitleaks.toml**                          | Usoro iwu gitleaks maka nyocha ihe nzuzo                                                             |
-| **.zizmor.yml**                             | Nhazi zizmor maka nyocha nchekwa GitHub Actions                                                      |
-| **socket.yml**                              | Nhazi Socket.dev maka usoro ọkọnọ                                                                    |
-| **news.json**                               | Ndepụta ọkwa ọkwa v2 a tụgharịrị n'asụsụ mpaghara; a na-ebupụta ihe mmalite Radar ka ọ naghị arụ ọrụ |
-| **flake.nix** / **flake.lock**              | Nkọwa dev-shell Nix + mkpọchi                                                                        |
-| **.env**                                    | Ihe nzuzo mpaghara (git anaghị eso ya — a na-emepụta ya site na `.env.example`)                      |
+| Faịlụ                                       | Ebumnuche                                                                                |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **README.md**                               | Ibe ọdịda ahịa + ngwa ngwa mmalite + atụmatụ matrix (leekwa `llm.txt`)                   |
+| **CHANGELOG.md**                            | Ndekọ mgbanwe kwa-ahapụ (nke nka `/version-bump-cc` mebere na akpaghị aka)               |
+| **LICENSE**                                 | ederede ikike MIT                                                                        |
+| **CLAUDE.md**                               | Iwu oru ngo maka ndị nnọchite koodu Claude (iwu siri ike, mgbakọ, ihe ndapụta)           |
+| **AGENTS.md**                               | Otu dị ka CLAUDE.md mana maka ndị na-abụghị Claude AI (Codex, Cursor, wdg)               |
+| **GEMINI.md**                               | Iwu ndị dị nkenke maka ndị nnọchi anya Gemini (akụkụ nke CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | Ntuziaka ntinye aka: ntọlite , mmebe omenala, nnwale, mgbaba PR                          |
+| **SECURITY.md**                             | Amụma mkpesa adịghị ike, ụdị akwadoro, ụdị iyi egwu                                      |
+| **CODE_OF_CONDUCT.md**                      | Ọgbụgba ndụ onye enyemaka — atụmanya omume obodo                                         |
+| **llm.txt**                                 | Ederede dị larịị ahaziri maka ndị crawlers LLM (SEO maka ndị enyemaka AI )               |
+| **package.json**                            | npm gosipụtara, scripts, ndabere, injinia, ọnụ ụzọ mkpuchi c8                            |
+| **package-lock.json**                       | Osisi ndabere akpọchiri akpọchi                                                          |
+| **tsconfig.json**                           | Mgbọrọgwụ TypeScript config                                                              |
+| **tsconfig.typecheck-core.json**            | Nhazi typecheck maka isi `src/`                                                          |
+| **tsconfig.typecheck-noimplicit-core.json** | Mpempe akwụkwọ mpempe akwụkwọ siri ike (`noImplicitAny`).                                |
+| **tsconfig.tsbuildinfo**                    | TS agbakwunyere wuo cache (anaghị echekwa ya)                                            |
+| **Osote.config.mjs**                        | Next.js 16 wuo nhazi (mpụta nke kwụ ọtọ)                                                 |
+| **ọzọ-env.d.ts**                            | Next.js ụdị env emepụtara akpaaka                                                        |
+| **eslint.config.mjs**                       | ESLint flat config (iwu kwa mpaghara oru ngo)                                            |
+| **mara mma.config.mjs**                     | iwu nhazi Prettier                                                                       |
+| **postcss.config.mjs**                      | PostCSS nhazi maka pipeline Tailwind/CSS                                                 |
+| **odee egwu.config.ts**                     | Playwright E2E ule nhazi                                                                 |
+| **viest.config.ts**                         | Vitest config (ndabara suite)                                                            |
+| **vitest.mcp.config.ts**                    | Vitest config maka MCP nkesa / autoCombo / cache suites                                  |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (koodu àgwà)                                                 |
+| **Dockerfile**                              | Mwube Docker dị iche iche (onye nrụpụta → onye na-agba ọsọ → onye na-agba ọsọ-cli)       |
+| **docker-compose.yml**                      | Dev jiri profaịlụ 4 dee (base, cli, host, cliproxyapi) + redis sidecar                   |
+| **docker-ede.prod.yml**                     | Mepụta mmepụta (ọdụ ụgbọ mmiri 20130, redis, mpịakọta aha)                               |
+| **.dockerịpụ**                              | Ewepụrụ faịlụ na ọnọdụ Docker                                                            |
+| **fly.toml**                                | Fly.io deployment config (mpaghara `sin`, ọdụ ụgbọ mmiri 20128, /data olu)               |
+| **.env.ihe atụ**                            | Template env faịlụ (e depụtaghachiri ya na `.env` na mbụ wụnye)                          |
+| **.gitigo**                                 | Git na-eleghara ụkpụrụ anya                                                              |
+| **.npmịgharị**                              | npm bipụta ndepụta mwepu                                                                 |
+| **.npmrc**                                  | npm nhazi (ndebanye aha, amụma mkpọchi)                                                  |
+| **.node-ụdị**                               | pin ụdị node (ngwaọrụ dakọtara nvm na-eji)                                               |
+| **.nvmrc**                                  | Ụdị Node pin maka nvm                                                                    |
+| **eslint. mgbagwoju anya.config.mjs**       | nhazi ESLint maka mgbagwoju anya ratchet (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | nhazi ESLint maka iwu SonarJS (mgbagwoju anya / oyiri)                                   |
+| **isi iyi.config.ts**                       | Fumadocs `defineDocs` isi mmalite nhazi (nri `.source/`)                                 |
+| **knip.json**                               | Knip config — ejighi files/exports/deps (na-azụ ọnụ ụzọ koodu nwụrụ anwụ)                |
+| **striker.conf.mjs**                        | Stryker mutation-nnwale config (na-agbakọ `tap.testFiles` sitere na `mutate`)            |
+| **.size-limit.json**                        | nhazi mmefu ego oke-oke                                                                  |
+| **promptfooconfig.yaml**                    | Quickfoo eval nhazi                                                                      |
+| **.gitleaks.toml**                          | gitleaks nzuzo-nyocha iwu iwu                                                            |
+| **.zizmor.yml**                             | zizmor GitHub-Actions nchekwa-lint nhazi                                                 |
+| **socket.yml**                              | Socket.dev ọkọnọ-chain nhazi                                                             |
+| **news.json**                               | Nri ọkwa ọkwa v2 mpaghara; Ụgbọ mmiri mmalite nke radar adịghị arụkwa ọrụ                |
+| **flake.nix** /** flake.mkpọchi**           | Nix dev-shell nkọwa + mkpọchi                                                            |
+| **.env**                                    | Ihe nzuzo mpaghara (gitignored — sitere na `.env.example`)                               |
 
-> **E bugara ya pụọ na mgbọrọgwụ na v3.8.26 (iji belata mkpọtụ):**
+> **Ewepụrụ na mgbọrọgwụ na v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` a na-emepụta (git anaghị eso ya). Hụ [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` emepụtara (gitignored). Lee [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + ngwakọ RRF (FTS5 + vector, k = 60). Ume-ume-init, na-eweda nke ọma mgbe sqlite-vec adịghị. (Atụmatụ 21)                                                                                                                                                                 |
 | `memory/reindex.ts`                      | `runReindexBatch()` — na-ahazi ncheta yana `needs_reindex=1` n'azụ; nke a na-akpọ nke `POST /api/memory/reindex` na ndị umengwụ-ndaghachi azụ ụzọ. (Atụmatụ 21)                                                                                                                                                       |
 | `monitoring/`                            | Nyocha ahụike, metrics na-apụta                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | OAuth/import na-asọba maka modul ndị na-enye 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, traaueth, qodi-coding, zero-coding, qodi-copilot , qodi-copilot zed)                            |
+| `oauth/`                                 | OAuth/import na-asọba maka modul ndị na-enye 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, traaueth, qodi-coding, zeoder, qodi-copilot, zero-coding, qodi-copilot zed)                     |
 | `plugins/`                               | Ndekọ ngwa mgbakwunye                                                                                                                                                                                                                                                                                                 |
 | `promptCache/`                           | Ebe nkwụsịtụ ebe nchekwa ihe n'ụdị anthropic                                                                                                                                                                                                                                                                          |
 | `skills/`                                | Usoro nka (wuru na + ahịa + SkillsSH) — hụ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                                |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `components/`                    | Akụkụ dashboard API: nkwụnye n'elu `packages/ui-kit` — hụ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: akara ngosi aha nke ihuenyo na-eji → Lucide components (`<Icon>`)                  |
-| `constants/providers.ts`         | **381 ndị na-enye** ya na nkwado Zod (isi iyi nke eziokwu)                                     |
+| `constants/providers.ts`         | **394 ndị na-enye** ya na nkwado Zod (isi iyi nke eziokwu)                                     |
 | `constants/cliTools.ts`          | Ndekọ akụrụngwa CLI mpụga                                                                      |
-| `constants/routingStrategies.ts` | **20 ụzọ aghụghọ** na ihe ndị ka mkpa                                                          |
+| `constants/routingStrategies.ts` | **22 ụzọ aghụghọ** na ihe ndị ka mkpa                                                          |
 | `constants/publicApiRoutes.ts`   | Ụzọ chọrọ auth bearer (vs njikwa).                                                             |
 | `constants/upstreamHeaders.ts`   | Ndepụta nkụnye eji isi mee maka arịrịọ elu                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (otu isi iyi nke eziokwu maka nkwekọrịta API )                                |
@@ -265,7 +265,7 @@ Oghere ọrụ npm dị iche (`@omniroute/open-sse`). Ọ na-ahụ maka nhazi ar
 ```
 open-sse/
 ├── handlers/            # Faịlụ 16 (ndị njikwa 12 + ndị enyemaka 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, wdg.
-├── executors/           # Modulu mmezu 150 (klaasị ndị na-agbatị BaseExecutor + ndị enyemaka nke onye na-eweta ọ bụla)
+├── executors/           # Modulu mmezu 163 (klaasị ndị na-agbatị BaseExecutor + ndị enyemaka nke onye na-eweta ọ bụla)
 ├── translator/          # Ndị ntụgharị usoro (arịrịọ 9, nzaghachi 9, ndị enyemaka 9)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # Modulu ọrụ ~80+ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, wdg.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Mwekota CLI mpụga + OmniRoute CLI                                                             |
 | `I18N.md`                   | i18n architecture, na-agbakwunye asụsụ, mpaghara 67                                           |
 | `UNINSTALL.md`              | Hichaa usoro iwepụ                                                                            |
-| `PROVIDER_REFERENCE.md`     | **Emepụtara akpaaka** Katalọgụ nke ndị na-eweta 381 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Emepụtara akpaaka** Katalọgụ nke ndị na-eweta 394 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem miri-mikpu
 
