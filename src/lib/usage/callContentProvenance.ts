@@ -1,3 +1,4 @@
+import { hasEstimatedUsageEvidence, readUsageEvidence } from "./usageEvidence";
 /**
  * Call content presence plus usage provenance (leaf module, no open-sse imports).
  *
@@ -35,7 +36,9 @@ export function hasTokenCount(tokens: unknown): boolean {
 
 export function isOwnEstimatedUsage(tokens: unknown): boolean {
   if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return false;
-  return (tokens as Record<string, unknown>).estimated === true;
+  return (
+    (tokens as Record<string, unknown>).estimated === true || hasEstimatedUsageEvidence(tokens)
+  );
 }
 
 export function resolveUsageProvenance(options: {
@@ -45,7 +48,13 @@ export function resolveUsageProvenance(options: {
 }): UsageProvenance | null {
   if (!options.isSuccess) return null;
   if (options.usageEstimated || isOwnEstimatedUsage(options.tokens)) return "estimated";
-  if (hasTokenCount(options.tokens)) return "reported";
+  if (
+    hasTokenCount(options.tokens) ||
+    Object.values(readUsageEvidence(options.tokens) ?? {}).some(
+      (field) => field.source === "reported"
+    )
+  )
+    return "reported";
   return "absent";
 }
 

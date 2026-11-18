@@ -20,7 +20,7 @@ Ketika agen IDE (misalnya, GitHub Copilot, Cursor, Claude Code) membuat panggila
 
 Ini berarti Anda dapat:
 
-- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 381 penyedia OmniRoute.
+- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 394 penyedia OmniRoute.
 - **Terapkan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara transparan di tingkat handler.
 - **Amati semua lalu lintas agen** : setiap permintaan yang disadap dipublikasikan ke [Inspektur Lalu Lintas](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : perutean kombo, pemutus sirkuit, fallback, dan pelacakan biaya juga berfungsi untuk lalu lintas agen IDE.
@@ -547,24 +547,24 @@ Skema OpenAPI lengkap: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ## §8 Peta Jalan
 
-### Investigasi Trae
+### Investigasi lalu
 
-Trae adalah asisten pengodean AI yang relatif baru. Sebelum mengimplementasikan handler:
+Trae adalah asisten pengkodean AI yang relatif baru. Sebelum menerapkan penangan:
 
-1. Identifikasi biner/ekstensi di marketplace VS Code / JetBrains atau sebagai aplikasi mandiri
-2. Tangkap lalu lintas dengan mitmproxy untuk menemukan host API dan bentuk endpoint
-3. Tentukan mekanisme autentikasi
-4. Nilai lanjut/tidak lanjut berdasarkan TOS dan kemudahan penemuan API
+1. Identifikasi binary/extension di pasar Kode VS / JetBrains atau sebagai aplikasi mandiri
+2. Tangkap lalu lintas dengan mitmproxy untuk menemukan host API dan bentuk titik akhir
+3. Tentukan mekanisme otentikasi
+4. Menilai go/no-go berdasarkan kemampuan TOS dan API untuk ditemukan
 
-Hingga investigasi selesai, kartu Trae di dasbor menampilkan lencana "Sedang Diinvestigasi" dengan tautan "Laporkan kelayakan". Stub handler di `src/mitm/handlers/trae.ts` memunculkan error terstruktur `Belum diimplementasikan`.
+Hingga penyelidikan selesai, kartu Trae di dasbor menunjukkan lencana "Investigasi" dengan tautan "Laporkan kelayakan". Rintisan handler di `src/mitm/handlers/trae.ts` menimbulkan kesalahan `Not yet implemented` terstruktur.
 
-### Agen backlog (MITM diperlukan — tidak mendukung URL dasar kustom)
+### Agen backlog (MITM diperlukan — tidak ada dukungan URL basis khusus)
 
-Alat berikut tidak mendukung URL dasar kustom pada versi saat ini, sehingga MITM menjadi satu-satunya jalur intersepsi. Penilaian kelayakan masih tertunda:
+Alat berikut tidak mendukung URLs basis khusus dalam versinya saat ini, menjadikan MITM satu-satunya jalur intersepsi. Penilaian kelayakan masih tertunda:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — terpisah dari Kiro IDE)
-- **Cowork** (desktop Anthropic)
+- **Amp** (Sumber Grafik)
+- **Amazon Q / Kiro CLI** (AWS Batuan Dasar — terpisah dari Kiro IDE)
+- **Rekan kerja** (Anthropic desktop)
 
-Catatan: GitHub Copilot CLI ≥v1.0.19 mendukung `COPILOT_PROVIDER_BASE_URL` — gunakan konfigurasi langsung alih-alih MITM untuk alat tersebut.
+Catatan: GitHub Copilot CLI ≥ v1.0.19 mendukung `COPILOT_PROVIDER_BASE_URL` — gunakan konfigurasi langsung alih-alih MITM untuk alat itu.
