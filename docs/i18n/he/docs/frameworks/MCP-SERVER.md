@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline ולקוחות MCP תואמים.
 | `omniroute_rtk_discover`            | `read:compression`  | גלה רעשים חוזרים בדגימות פלט RTK עם הסכמה                                                                          |
 | `omniroute_rtk_learn`               | `read:compression`  | צור טיוטת מסנן RTK הניתנת לבדיקה מדגימות הסכמה                                                                     |
 
-ערכי CCR משתמשים בחנות דו-שכבתית: שכבת זיכרון חמה מגובה, בזמני ריצה מקומיים שאינם בענן, בשכבת SQLite עמידה (`ccr_blocks`, פועלת כברירת מחדל) כך שבלוק שורד פינוי או הפעלה מחדש עד שה- TTL שלו נגמר — למעט בלוקים מעל 512 KB ונשארים זמני ריצה של זיכרון בענן. כל בלוק מוגבל ל-2 MiB, כל עיקרון ל-16 MiB, והחנות העולמית ל-64 MiB. ברירת המחדל של ערכים הוא TTL של 24 שעות (מקסימום שבעה ימים). שליפה מלאה MCP מוגבלת ל-256 KiB; בלוקים גדולים יותר נשארים זמינים דרך מצבי הטווח ו-grep. אחסון, אחזור, רישום, בדיקה, מחיקה וסטטיסטיקה מבודדים על ידי מנהל מפתח ה-API המאומת. רשומות ביקורת מכילות גיבוב ומטא נתונים של גודל, אף פעם לא תוכן. פרטים הפונים למפעיל (שני הסמנים, דרישות מוקדמות ללקוח, `codemode:false`, היקפים לכל כלי, עימוד ומטריצת אבחון) מופיעים ב- [Compression Engines → Prerequisites / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+ערכי CCR משתמשים בחנות דו-שכבתית: שכבת זיכרון חמה מגובה, בזמני ריצה מקומיים שאינם ענן, על ידי שכבת SQLite עמידה (`ccr_blocks`, פועלת כברירת מחדל) כך שבלוק שורד פינוי או הפעלה מחדש עד TTL שלו נגמר — למעט חסימות של יותר מ-512 KB, אשר נשארות זמני ריצה של זיכרון `COMPRESSION_CCR_DURABLE_STORE=false`. הכתיבה העמידה היא המאמץ הטוב ביותר: היא נשמטת בזמן ש-1,000 כתיבה כבר בהמתנה, וכתיבת SQLite שנכשלה נרשמת, לא נוסתה שוב, כך שהחסימה אובדת בהפעלה מחדש. כל בלוק מוגבל ל-2 MiB, כל עיקרון ל-16 MiB, והחנות העולמית ל-64 MiB. ברירת המחדל של ערכים היא TTL של 24 שעות (מקסימום שבעה ימים). שליפה מלאה MCP מוגבלת ל-256 KiB; בלוקים גדולים יותר נשארים זמינים דרך מצבי הטווח ו-grep. אחסון, אחזור, רישום, בדיקה, מחיקה וסטטיסטיקה מבודדים על ידי מנהל מפתח ה-API המאומת. רשומות ביקורת מכילות גיבוב ומטא נתונים של גודל, אף פעם לא תוכן. פרטים הפונים למפעיל (שני הסמנים, דרישות מוקדמות ללקוח, `codemode:false`, היקפים לכל כלי, עימוד ומטריצת אבחון) מופיעים ב- [Compression Engines → Prerequisites / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` מדווח על דחיסת תיאור MCP בנפרד תחת `analytics.mcpDescriptionCompression`. ערכים אלה הם אומדני גודל מטא נתונים עבור תיאורים הניתנים לרשימה של MCP (`tools`, `prompts`, `resources` ו- `resourceTemplates`); הן אינן קבלות על שימוש של ספק ומסומנות ב- `source: "mcp_metadata_estimate"`.
 

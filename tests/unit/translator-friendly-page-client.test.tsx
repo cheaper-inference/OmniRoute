@@ -6,6 +6,11 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── i18n stub ─────────────────────────────────────────────────────────────────
+const segmentedMock = vi.hoisted(() => ({
+  value: "",
+  onChange: (_value: string) => {},
+}));
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -47,41 +52,55 @@ vi.mock("@/shared/components", () => ({
       {children}
     </span>
   ),
-  SegmentedControl: ({
-    options,
+  SegmentedTabs: ({
     value,
     onChange,
+    children,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+    children: React.ReactNode;
+  }) => {
+    segmentedMock.value = value;
+    segmentedMock.onChange = onChange;
+    return <div data-testid="segmented-tabs">{children}</div>;
+  },
+  SegmentedPanel: ({ value, children }: { value: string; children: React.ReactNode }) =>
+    value === segmentedMock.value ? <div role="tabpanel">{children}</div> : null,
+  SegmentedControl: ({
+    options,
     size,
     "aria-label": ariaLabel,
     className,
   }: {
     options: Array<{ value: string; label: string; icon?: string }>;
-    value: string;
-    onChange: (v: string) => void;
     size?: string;
     "aria-label"?: string;
     className?: string;
-  }) => (
-    <div
-      role="tablist"
-      aria-label={ariaLabel}
-      data-testid="segmented-control"
-      data-value={value}
-      className={className}
-    >
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          role="tab"
-          aria-selected={value === opt.value}
-          data-testid={`tab-${opt.value}`}
-          onClick={() => onChange(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  ),
+  }) => {
+    const { value, onChange } = segmentedMock;
+    return (
+      <div
+        role="tablist"
+        aria-label={ariaLabel}
+        data-testid="segmented-control"
+        data-value={value}
+        className={className}
+      >
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            role="tab"
+            aria-selected={value === opt.value}
+            data-testid={`tab-${opt.value}`}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+  },
   Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
     <button data-testid="button" onClick={onClick}>
       {children}

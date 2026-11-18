@@ -39,7 +39,7 @@ export default function ProvidersError({
       aria-live="assertive"
     >
       <div className="text-center space-y-4">
-        <h2 className="text-xl font-semibold text-error">
+        <h2 className="text-xl text-error">
           {providerText(t, "pageLoadErrorTitle", "Failed to load providers")}
         </h2>
         <p className="text-text-muted max-w-md">

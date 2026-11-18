@@ -68,7 +68,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
           <Icon name={icon} size={22} className={resolved.icon} />
         </div>
         <div>
-          <p className="text-lg font-bold text-text-main">{value}</p>
+          <p className="text-lg font-semibold text-text-main">{value}</p>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">{label}</p>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       {/* Events table */}
       <Card>
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-text-main mb-3">{t("recentTranslations")}</h3>
+          <h3 className="text-sm text-text-main mb-3">{t("recentTranslations")}</h3>
 
           {loading ? (
             <div role="status" className="flex items-center justify-center py-12 text-text-muted">
@@ -268,7 +268,12 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
             </div>
           ) : (
             <div data-testid="monitor-events-table">
-              <Table scrollbarLabel={t("recentTranslations")} className="text-sm">
+              <Table
+                scrollbarLabel={t("recentTranslations")}
+                scrollLabel={t("recentTranslations")}
+                className="text-sm"
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("time")}</TableHead>

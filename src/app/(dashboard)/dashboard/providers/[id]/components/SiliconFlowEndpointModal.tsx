@@ -38,12 +38,12 @@ export default function SiliconFlowEndpointModal({
             key={endpoint.id}
             variant="outline"
             onClick={() => onSelect(endpoint.baseUrl)}
-            className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
+            className="h-auto w-full justify-start whitespace-normal p-4 text-left"
           >
             <div className="flex items-start gap-3">
               <Icon name="public" className="text-primary mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold mb-1">
+                <h3 className="mb-1">
                   {providerText(
                     t,
                     endpoint.id === "siliconflow" ? "endpointGlobal" : "endpointChina",

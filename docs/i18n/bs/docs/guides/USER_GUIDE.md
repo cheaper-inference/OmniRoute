@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dozvoljenih ključeva (portovi, `REQUIRE_API_KEY`, postavke lokalizacije i boje); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dozvoljenih ključeva (`REQUIRE_API_KEY`, lokalizacija, vremenska zona i postavke boja, ne i portovi); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 
@@ -423,7 +423,7 @@ omniroute autostart disable
 
 Kada vam više ne treba OmniRoute, nudimo dvije brze skripte za čisto uklanjanje:
 
-| Zapovjedi                | Akcija                                                                                |
+| Command                  | Akcija                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------------- |
 | `npm run uninstall`      | Uklanja sistemsku aplikaciju ali** čuva vaše DB i konfiguracije** u `~/.omniroute`.   |
 | `npm run uninstall:full` | Trajno uklanja aplikaciju AND** briše sve konfiguracije, ključeve i baze podataka** . |
@@ -736,7 +736,7 @@ Odaberite poseban prefiks (`mygw`, `acme-proxy`). Ako zahtjevi prema prilagođen
 
 Ovi ključevi idu u `providerSpecificData` veze (na primjer preko `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI formatom za ćaskanje čiji gateway odbija dugačka imena alata. Duža imena se šalju kao kratki aliasi i vraćaju se u odgovoru.
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI formatom za ćaskanje čiji gateway odbija dugačka imena alata. Duža imena se šalju kao kratki aliasi i vraćaju se u odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već imaju alias imena preko 64 znaka bez podešavanja. Vrijednost veze zamjenjuje zadanu vrijednost Azure OpenAI / Azure AI Foundry (Azure veza iza strožeg gatewaya) i postavlja ograničenje za prilagođeni kompatibilni čvor; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zadržavaju svoje ograničenje registra i ignoriraju ga.
 - `quotaEndpoint` — quota/credits krajnja tačka gateway-a, pročitajte za traku kvota na kontrolnoj tabli i rutiranje s obzirom na kvote. Radi na OpenAI- i Anthropic-kompatibilnim vezama; puni oblik je dokumentiran u `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -754,7 +754,7 @@ Ovi ključevi idu u `providerSpecificData` veze (na primjer preko `PUT /api/prov
 
 ### Lanac OmniRoute Peers
 
-Drugi OmniRoute gateway se može dodati kao a** Prilagođeni OpenAI-kompatibilan** provajdera. Koristite `/v1` bazu URL i namjenski API ključ sa najmanjim privilegijama koje je izdao taj ravnopravni partner.
+Drugi OmniRoute gateway se može dodati kao a** Prilagođeni OpenAI-kompatibilan** provajdera. Koristite `/v1` bazu URL i namjenski API ključ s najmanjim privilegijama koje je izdao taj ravnopravni partner.
 
 Za recipročne ili višestruke lance, omogućite opt-in zaštitu petlje na svakom pristupniku:
 
@@ -772,13 +772,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-`X-OmniRoute-Peer-Trace` zaglavlje primaju samo zahtjevi koji se šalju na eksplicitno dozvoljenu listu ravnopravnih URL. Gateway odbija ponovljene instance ID ili iscrpljeni hop budžet sa HTTP `508 Loop Detected`; obični uzvodni provajderi ne primaju metapodatke ravnopravnih korisnika.
+`X-OmniRoute-Peer-Trace` zaglavlje primaju samo zahtjevi poslani na eksplicitno dozvoljenu listu ravnopravnih URL. Gateway odbija ponovljene instance ID ili iscrpljeni budžet skoka sa HTTP `508 Loop Detected`; obični upstream provajderi ne primaju metapodatke istovrsnih uređaja.
 
 Povezivanje ravnopravnih lanaca nije replikacija baze podataka ili prelazak na grešku hosta. Svaki gateway čuva nezavisno SQLite stanje, keš memorije, brojače brzine i sesije. Koristite provjereni obrnuti proxy ili prelazak na grešku klijenta za dostupnost active/passive ili active/active i nikada ne montirajte jednu SQLite bazu podataka u više pokrenutih OmniRoute instanci.
 
 ### Rute namjenskih dobavljača
 
-Usmjerite zahtjeve direktno do određenog provajdera s validacijom modela:
+Usmjerite zahtjeve direktno do određenog dobavljača s validacijom modela:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -834,9 +834,9 @@ Vraća modele grupisane po dobavljaču s tipovima (`chat`, `embedding`, `image`)
 
 ### LLM Gateway Intelligence (faza 9)
 
-- **Semantic Cache** — Automatsko keširanje ne-streaming, temperatura = 0 odgovora (zaobilaženje sa `X-OmniRoute-No-Cache: true`)
-- **Zahtjev za idempotencija** — Deduplikuje zahtjeve u roku od 5 s preko `Idempotency-Key` ili `X-Request-Id` zaglavlja
-- **Praćenje napretka** — Uključite SSE `event: progress` događaje preko `X-OmniRoute-Progress: true` zaglavlja
+- **Semantic Cache** — Automatski kešira ne-streaming, temperatura = 0 odgovora (zaobilaženje sa `X-OmniRoute-No-Cache: true`)
+- **Zahtjev za idempotencija** — Deduplikuje zahtjeve unutar 5s preko `Idempotency-Key` ili `X-Request-Id` zaglavlja
+- **Praćenje napretka** — Opt-in SSE `event: progress` događaji preko `X-OmniRoute-Progress: true` zaglavlja
 
 ---
 
@@ -867,25 +867,25 @@ Konfigurišite putem** Dashboard → Settings → Routing** . Kontrolna tabla pr
 
 | Strategija               | Opis                                                                                                |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
-| **Prvo popunite**        | Koristi naloge po prioritetnom redoslijedu — primarni račun obrađuje sve zahtjeve dok nije dostupan |
+| **Prvo popunite**        | Koristi naloge u prioritetnom redoslijedu — primarni račun obrađuje sve zahtjeve dok nije dostupan  |
 | **Round Robin**          | Kruži kroz sve račune s podesivim ljepljivim ograničenjem (zadano: 3 poziva po računu)              |
-| **P2C (Moć dva izbora)** | Bira 2 nasumična računa i rute do zdravijeg — balansira opterećenje i svijest o zdravlju            |
+| **P2C (Moć dva izbora)** | Bira 2 nasumična računa i puteve do zdravijeg — balansira opterećenje sa svijesti o zdravlju        |
 | **Slučajno**             | Nasumično odabire račun za svaki zahtjev koristeći Fisher-Yates nasumično                           |
 | **Najmanje korišteno**   | Rute do računa s najstarijom `lastUsedAt` vremenskom oznakom, ravnomjerno raspoređujući promet      |
 | **Optimizirana cijena**  | Ruti na račun s najnižom vrijednošću prioriteta, optimizirajući za dobavljače s najnižim troškovima |
 
-**Napredne kombinovane i automatske strategije** (podesivo po kombinaciji ili preko `auto/*` prefiksa — pogledajte [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Napredne kombinovane i automatske strategije** (podesivo po kombinaciji ili preko `auto/*` prefiksa — vidi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — strogi red, nikad kružni
-- `weighted` — proporcionalni promet podijeljen po težini po modelu
+- `priority` — strogi poredak, nikad kružni
+- `weighted` — proporcionalni promet podijeljen po težinama po modelu
 - `fill-first` — ispraznite prvi model dok ne dosegnu granice
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Moć dva izbora)
 - `least-used` i `cost-optimized`
 - `auto` — vođen rezultatom za sve kandidate
-- `lkgp` (Posljednji poznati dobar provajder) — zakači posljednjeg uspješnog provajdera, a zatim se vraća na pravila
+- `lkgp` (Posljednji poznati dobar provajder) — prikvači posljednjeg uspješnog provajdera, a zatim se vraća na pravila
 - `context-optimized` — bira model sa najvećim prozorom slobodnog konteksta
-- `context-relay` — lanci dugokontekstnih modela za naknadna skretanja
+- `context-relay` — povezuje modele dugog konteksta za naredne skretanja
 
 #### Eksterno lepljivo zaglavlje sesije
 
@@ -998,7 +998,7 @@ OmniRoute implementira otpornost na nivou provajdera sa pet komponenti:
    - **Maksimalni broj istovremenih zahtjeva** — Maksimalan broj istovremenih zahtjeva po računu
 
 2. **Hlađenje veze** — Konfiguracija tipa po autentifikaciji za jednu vezu nakon neuspjeha koji se mogu ponoviti:
-   - **Base Cooldown** — Podrazumevani prozor hlađenja za kvarove uzvodno koji se mogu ponoviti
+   - **Base Cooldown** — Podrazumevani prozor hlađenja za kvarove koji se mogu ponoviti uzvodno
    - **Koristite upstream Retry Hints** — Poštuje autoritativni `Retry-After` ili savjete za resetiranje kada su dostupni
    - **Max Backoff Steps** — Maksimalni eksponencijalni nivo odustajanja za ponovljene kvarove
 
@@ -1015,7 +1015,7 @@ OmniRoute implementira otpornost na nivou provajdera sa pet komponenti:
 
    Uključeno je stanje izvođenja prekidača dobavljača** Kontrolna tabla → Health** samo.
 
-4. **Sačekajte hlađenje** — Ako se svaka konekcija kandidata već hladi, OmniRoute može sačekati najranije hlađenje i automatski ponoviti isti zahtjev klijenta.
+4. **Sačekajte hlađenje** — Ako se svaka konekcija kandidata već hladi, OmniRoute može pričekati najranije hlađenje i automatski ponoviti isti zahtjev klijenta.
 
 5. **Auto-detekcija ograničenja brzine** — Kada upstream provajderi vrate eksplicitne prozore čekanja, ti savjeti nadjačavaju hlađenje lokalne veze kada je postavka omogućena.
 
@@ -1030,7 +1030,7 @@ Upravljajte sigurnosnim kopijama baze podataka u** Dashboard → Settings → Sy
 | Akcija                   | Opis                                                                                                                                                             |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Izvezi bazu podataka** | Preuzima trenutnu SQLite bazu podataka kao `.sqlite` datoteku                                                                                                    |
-| **Izvezi sve (.tar.gz)** | Preuzima potpunu arhivu sigurnosne kopije uključujući: bazu podataka, postavke, kombinacije, veze provajdera (bez vjerodajnica), API ključne metapodatke         |
+| **Izvezi sve (.tar.gz)** | Preuzima potpunu arhivu sigurnosne kopije uključujući: bazu podataka, postavke, kombinacije, veze provajdera (bez akreditiva), API ključne metapodatke           |
 | **Uvoz baze podataka**   | Otpremite `.sqlite` datoteku da zamijenite trenutnu bazu podataka. Sigurnosna kopija prije uvoza se automatski kreira osim ako `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
@@ -1059,15 +1059,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Stranica postavki je organizirana u** 7 tabs** za jednostavnu navigaciju:
 
-| Tab           | Sadržaj                                                                                                                                                                           |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generale**  | Sistemski alati za skladištenje, podrazumevano ponašanje, vidljivost tunela krajnje tačke                                                                                         |
-| **Izgled**    | Kontrole teme (light/dark/system), vidljivost bočne trake, prekidači panela za Cloudflare/Tailscale/ngrok kartice tunela                                                          |
-| **AI**        | Razmišljanje o budžetu (prolazni / auto-strip / prilagođeni / adaptivni — pogledajte [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt globalnog sistema, brza statistika keša |
-| **Sigurnost** | Login/Password postavke, IP kontrola pristupa, API auth za `/models`, blokiranje provajdera, zaštita prompt-injection                                                             |
-| **Routing**   | Globalna strategija usmjeravanja (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), zamjenski pseudonimi modela, zamjenski lanci, zadane kombinacije        |
-| **Otpornost** | Zahtjev za red čekanja, hlađenje veze, konfiguraciju prekidača provajdera i ponašanje čekanja na hlađenje                                                                         |
-| **Napredno**  | Globalna proxy konfiguracija (HTTP/SOCKS5), po dobavljaču proxy nadjačava                                                                                                         |
+| Tab           | Sadržaj                                                                                                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generale**  | Sistemski alati za skladištenje, podrazumevano ponašanje, vidljivost tunela krajnje tačke                                                                                  |
+| **Izgled**    | Kontrole teme (light/dark/system), vidljivost bočne trake, prekidači panela za Cloudflare/Tailscale/ngrok kartice tunela                                                   |
+| **AI**        | Razmišljanje o budžetu (passthrough / auto-strip / custom / adaptive — vidi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt globalnog sistema, brza statistika keša   |
+| **Sigurnost** | Login/Password postavke, IP kontrola pristupa, API auth za `/models`, blokiranje provajdera, zaštita prompt-injection                                                      |
+| **Routing**   | Globalna strategija usmjeravanja (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), zamjenski pseudonimi modela, zamjenski lanci, zadane kombinacije |
+| **Otpornost** | Zahtjev za red čekanja, hlađenje veze, konfiguraciju prekidača provajdera i ponašanje čekanja na hlađenje                                                                  |
+| **Napredno**  | Globalna proxy konfiguracija (HTTP/SOCKS5), po dobavljaču proxy nadjačava                                                                                                  |
 
 Općenito više ne duplira evidenciju samo za čitanje i keširanje bilješki. Postavke zadržavanja baze podataka i optimizacije se održavaju kroz `/api/settings/database`; ručno brisanje keša koristi `DELETE /api/cache`. Ograničenja redova dnevnika zahtjeva i proxyja kontroliraju `CALL_LOGS_TABLE_MAX_ROWS` i `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1080,7 +1080,7 @@ Pristup preko** Kontrolna tabla → Troškovi** .
 | Tab         | Svrha                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------- |
 | **Budžet**  | Postavite ograničenja potrošnje po API ključu sa daily/weekly/monthly budžetima i praćenjem u realnom vremenu |
-| **Pricing** | Pregledajte i uredite unose cijena modela — cijena po 1K input/output tokena po dobavljaču                    |
+| **Pricing** | Pregledajte i uredite unose cijena modela — cijene po 1K input/output tokena po dobavljaču                    |
 
 ```bash
 # API: Set a budget
@@ -1152,15 +1152,15 @@ Konfigurirajte balansiranje po kombinaciji** Kontrolna ploča → Combos → Cre
 | Strategija                 | Opis                                                                      |
 | -------------------------- | ------------------------------------------------------------------------- |
 | **Round-Robin**            | Uzastopno se rotira kroz modele                                           |
-| **Prioritet**              | Uvijek isprobava prvi model; vraća se samo zbog greške                    |
+| **Prioritet**              | Uvijek isprobava prvi model; vraća se samo u slučaju greške               |
 | **Slučajno**               | Bira nasumični model iz kombinacije za svaki zahtjev                      |
 | **Weighted**               | Rute proporcionalno zasnovane na dodijeljenim težinama po modelu          |
 | **Najmanje korišteni**     | Rute do modela s najmanje nedavnih zahtjeva (koristi kombiniranu metriku) |
 | **Optimizirano po cijeni** | Rute do najjeftinijeg dostupnog modela (koristi tablicu cijena)           |
 
-Mogu se postaviti zadane globalne kombinacije** Kontrolna tabla → Settings → Routing → Combo Defaults** . Vremenska ograničenja kombiniranog cilja nasljeđuju trenutno vremensko ograničenje zahtjeva prema zadanim postavkama. Koristi** Ciljno vremensko ograničenje (sekunde)** na zadanim kombinacijama ili pojedinačnoj kombinaciji samo kada bi kraće ograničenje po cilju trebalo pokrenuti brži povratak.
+Mogu se postaviti zadane globalne kombinacije** Kontrolna tabla → Settings → Routing → Combo Defaults** . Kombinovana ciljana vremenska ograničenja nasljeđuju trenutno vremensko ograničenje zahtjeva prema zadanim postavkama. Koristi** Ciljno vremensko ograničenje (sekunde)** na zadanim kombinacijama ili pojedinačnoj kombinaciji samo kada bi kraće ograničenje po cilju trebalo pokrenuti brži povratak.
 
-Kombinovane optimizacije sa nultom kašnjenjem su uključene. Odlazi** Optimizacije bez kašnjenja** onemogućeno kako bi se spriječilo da ove funkcije kašnjenja trkaju rezervne ciljeve, preskaču ciljeve na osnovu TTFT historije ili komprimiraju rezervne zahtjeve; omogućavajući ga, omogućava konfigurisano hedžing, prediktivno TTFT -a i proaktivnu rezervnu kompresiju za trgovinu routing/request vernosti za manje kašnjenje repa.
+Kombinovane optimizacije sa nultom kašnjenjem su uključene. Odlazi** Optimizacije bez kašnjenja** onemogućeno da bi se spriječilo da ove funkcije kašnjenja trkaju rezervne ciljeve, preskaču ciljeve na osnovu TTFT historije ili komprimiraju rezervne zahtjeve; omogućavajući ga, omogućava konfigurisano hedžing, prediktivno TTFT -a i proaktivnu rezervnu kompresiju za trgovinu routing/request vernosti za manje kašnjenje repa.
 
 Onemogući** Međuspremnik tokena za obrazloženje** kada upstream provajderi zahtijevaju stroga `max_tokens` / `maxOutputTokens` ograničenja. Kada je omogućeno, kombinovano usmjeravanje samo dodaje prostor za razmišljanje modela za modele s poznatim izlaznim ograničenjem i ostavlja ograničenje tokena klijenta nepromijenjenim kada bi vrijednost sigurnog međuspremnika premašila to ograničenje. Ako je klijentsko ograničenje već iznad poznatog ograničenja, OmniRoute ga spušta do tog ograničenja prije slanja upstream zahtjeva.
 
