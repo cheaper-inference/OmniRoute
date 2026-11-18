@@ -156,10 +156,11 @@ function SortableSection({
       <div className="flex items-center gap-1 pl-2 pr-4">
         <Button
           variant="ghost"
+          tone="muted"
           size="icon-sm"
           {...listeners}
           {...attributes}
-          className="shrink-0 cursor-grab touch-none text-text-muted active:cursor-grabbing"
+          className="shrink-0 cursor-grab touch-none active:cursor-grabbing"
           title={tSidebar("dragReorderSection")}
           aria-label={tSidebar("dragReorderSection")}
         >
@@ -247,10 +248,11 @@ function SortableChildRow({ id, children }: { id: string; children: React.ReactN
     >
       <Button
         variant="ghost"
+        tone="muted"
         size="icon-sm"
         {...listeners}
         {...attributes}
-        className="mt-2 shrink-0 cursor-grab touch-none text-text-muted active:cursor-grabbing"
+        className="mt-2 shrink-0 cursor-grab touch-none active:cursor-grabbing"
         title={tSidebar("dragReorderItem")}
         aria-label={tSidebar("dragReorderItem")}
       >

@@ -740,21 +740,19 @@ export default function ComboDefaultsTab() {
                 <div className="flex flex-col gap-0.5">
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="arrow_upward"
                     onClick={() => moveProviderOverride(provider, -1)}
                     disabled={index === 0}
-                    className="size-5 min-h-5"
                     title={t("moveUp")}
                     aria-label={t("moveUp")}
                   />
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="arrow_downward"
                     onClick={() => moveProviderOverride(provider, 1)}
                     disabled={index === Object.keys(providerOverrides).length - 1}
-                    className="size-5 min-h-5"
                     title={t("moveDown")}
                     aria-label={t("moveDown")}
                   />

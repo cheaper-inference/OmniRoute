@@ -305,3 +305,18 @@ test("A2/E: the free pool pager is the shared Pager", () => {
   assert.match(freePool, /<Pager\b/);
   assert.doesNotMatch(freePool, /buildPageRange|MAX_VISIBLE_PAGES|"ellipsis"/);
 });
+
+// B — button-dense-muted: a 24px button is `size="2xs"` / `size="icon-2xs"`, never a larger
+// size squeezed by `size-N min-h-N`; a muted ghost or outline button is `tone="muted"`, which
+// keeps the kit hover (a `text-text-muted` class stays muted on hover too).
+test("A2/B: settings buttons use the kit dense sizes and the muted tone", () => {
+  const buttons = elements(["Button"]);
+  const classed = (pattern: RegExp) =>
+    buttons
+      .filter(({ attrs }) => pattern.test(attrs.className ?? ""))
+      .map(({ file, line, attrs }) => `${file}:${line}: ${attrs.className}`);
+  assert.deepEqual(classed(/(^|\s)(size-[456]|min-h-[456]|h-[56] w-[56])(\s|$)/), []);
+  assert.deepEqual(classed(/(^|\s)text-text-muted(\s|$)/), []);
+  assert.equal(buttons.filter(({ attrs }) => attrs.size === "icon-2xs").length, 2);
+  assert.equal(buttons.filter(({ attrs }) => attrs.tone === "muted").length, 2);
+});
