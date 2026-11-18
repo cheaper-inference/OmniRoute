@@ -20,6 +20,8 @@ Eller via open-sse transport:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -126,7 +128,7 @@ Cursor, Cline och kompatibla MCP-klienter.
 | `omniroute_cache_stats` | `read:cache`  | Statistik för semantisk cache, promptcache och idempotens |
 | `omniroute_cache_flush` | `write:cache` | Töm cachen globalt eller efter signatur/modell            |
 
-## Komprimeringsverktyg (13)
+## Kompressionsverktyg (13)
 
 | Verktyg                             | Omfattningar        | Beskrivning                                                                                                                              |
 | :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
@@ -144,7 +146,7 @@ Cursor, Cline och kompatibla MCP-klienter.
 | `omniroute_rtk_discover`            | `read:compression`  | Upptäck återkommande brus i opt-in RTK -utgångsprover                                                                                    |
 | `omniroute_rtk_learn`               | `read:compression`  | Generera ett utkast till RTK -filter som går att granska från prover på opt-in                                                           |
 
-CCR -poster använder en tvåskiktsbutik: en het minnesnivå stödd, på lokala körtider som inte är moln, av en hållbar SQLite nivå (`ccr_blocks`, på som standard) så ett block överlever vräkning eller en omstart tills dess TTL tar slut — förutom block över 512 KB och förblir molnminne-runtimes. Varje block är begränsat till 2 MiB, varje princip till 16 MiB och det globala lagret till 64 MiB. Poster som standard är en 24-timmars TTL (högst sju dagar). Full MCP -hämtning är begränsad till 256 KiB; större block förblir tillgängliga via avstånds- och grep-lägena. Lagring, hämtning, listning, inspektion, radering och statistik isoleras av den autentiserade API-nyckelns principal. Granskningsposter innehåller hash- och storleksmetadata, aldrig innehåll. Operatörsvända detaljer (de två markörerna, klientförutsättningar, `codemode:false`, omfattningar per verktyg, paginering och en diagnostisk matris) finns i [Compression Engines → Prerequisites / operatörsguide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR -poster använder en tvåskiktsbutik: en het minnesnivå som backas upp, på lokala körtider som inte är moln, av en hållbar SQLite nivå (`ccr_blocks`, på som standard) så ett block överlever vräkning eller omstart tills dess TTL tar slut — förutom blockerar över 512 KB, som förblir i `COMPRESSION_CCR_DURABLE_STORE=false`, som förblir i molntid. Den hållbara skrivningen är bästa möjliga ansträngning: den släpps medan 1 000 skrivningar redan väntar, och en misslyckad SQLite skrivning loggas, görs inte om, så att blocket går förlorat vid omstart. Varje block är begränsat till 2 MiB, varje princip till 16 MiB och det globala lagret till 64 MiB. Poster som standard är en 24-timmars TTL (högst sju dagar). Full MCP hämtning är begränsad till 256 KiB; större block förblir tillgängliga via avstånds- och grep-lägena. Lagring, hämtning, listning, inspektion, radering och statistik isoleras av den autentiserade API-nyckelns principal. Granskningsposter innehåller hash- och storleksmetadata, aldrig innehåll. Operatörsvända detaljer (de två markörerna, klientförutsättningar, `codemode:false`, omfattningar per verktyg, paginering och en diagnostisk matris) finns i [Compression Engines → Prerequisites / operatörsguide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` rapporterar MCP -beskrivningskomprimering separat under `analytics.mcpDescriptionCompression`. Dessa värden är uppskattningar av metadatastorlek för MCP listbara beskrivningar (`tools`, `prompts`, `resources` och `resourceTemplates`); de är inte leverantörskvitton och är markerade med `source: "mcp_metadata_estimate"`.
 

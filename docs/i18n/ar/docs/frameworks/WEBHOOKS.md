@@ -16,21 +16,22 @@ Slack أو PagerDuty أو Datadog أو خدمات التنبيه الداخلي�
 
 ## الأحداث المدعومة
 
-يمثّل النوع `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`، ويستخدمه `src/lib/webhookDispatcher.ts`) حاليًا أربعة أحداث بالضبط:
+يقوم نوع `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`، الذي يستهلكه `src/lib/webhookDispatcher.ts`) حاليًا بنموذج ثمانية أحداث:
 
-| الحدث               | وقت الإطلاق                                               |
-| ------------------- | --------------------------------------------------------- |
-| `request.completed` | عند اكتمال طلب وكيل بنجاح                                 |
-| `request.failed`    | عند فشل طلب وكيل بعد استنفاد جميع محاولات الإعادة/البدائل |
-| `quota.exceeded`    | عند تجاوز مفتاح API حدًا للميزانية/الحصة                  |
-| `test.ping`         | حدث اصطناعي تستخدمه نقطة نهاية الاختبار                   |
+| حدث                       | حرائق عندما                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | اكتمل طلب الوكيل بنجاح                                                                                                    |
+| `request.failed`          | فشل طلب الوكيل بعد كل retries/fallback                                                                                    |
+| `quota.exceeded`          | يتجاوز مفتاح API عتبة budget/quota                                                                                        |
+| `proxy.set_aside`         | يتم استبعاد عضو تجمع الوكيل بعد الرفض المتكرر (الانتقال فقط)                                                              |
+| `proxy.pool.exhausted`    | يتم وضع كل عضو في نطاق تجمع الوكيل جانبًا                                                                                 |
+| `provider.reset_redeemed` | تم استرداد عمليات إعادة التعيين المصرفية التي يتم تطبيقها تلقائيًا برصيد إعادة تعيين أو إعادة تعيين جلسة Claude الأسبوعية |
+| `provider.exhausted`      | يتم تبريد كل حساب خاص بمزود الخدمة (مرة واحدة على الأكثر لكل مزود كل 10 دقائق)                                            |
+| `test.ping`               | الحدث الاصطناعي الذي تستخدمه نقطة نهاية الاختبار                                                                          |
 
-تقبل الاشتراكات القيمة الحرفية `"*"` لتلقّي كل حدث. تُتجاهل أسماء الأحداث
-غير المعروفة في `events` أثناء الإرسال.
+الاشتراكات تقبل `"*"` الحرفي لتلقي كل حدث. يتم تجاهل أسماء الأحداث غير المعروفة في `events` في وقت الإرسال.
 
-> ملاحظة: واجهة API الخاصة بالمرسِل موصولة، لكن مواضع الاستدعاء الإنتاجية لبعض
-> الأحداث غير التابعة لـ `test.ping` لا تزال قيد الإضافة. تحقّق من `grep dispatchEvent` لمعرفة
-> المسارات التي تستدعي المرسِل حاليًا في إصدارك.
+> ملاحظة: المرسل API سلكي، لكن مواقع استدعاء الإنتاج لبعض الأحداث التي لا تتعلق بـ `test.ping` ما زالت تعمل. تحقق من `grep dispatchEvent` لمعرفة المسارات التي تستدعي المرسل حاليًا في إصدارك.
 
 ## البنية
 
@@ -124,25 +125,24 @@ function verify(rawBody: string, signature: string, secret: string) {
 إلى العدادات المجمّعة في صف `webhooks`. أُضيفت بيانات النوع الوصفية (Slack / Discord /
 Telegram / محوّلات الحمولات المخصصة) بواسطة `070_webhooks_kind_metadata.sql`.
 
-## واجهة REST API
+## REST API
 
-تتطلب جميع نقاط النهاية مصادقة الإدارة (`requireManagementAuth`).
+تتطلب كافة نقاط النهاية مصادقة الإدارة (`requireManagementAuth`).
 
-| نقطة النهاية                    | الطريقة | الوصف                                    |
-| ------------------------------- | ------- | ---------------------------------------- |
-| `/api/webhooks`                 | GET     | سرد webhooks (مع إخفاء الأسرار)          |
-| `/api/webhooks`                 | POST    | إنشاء webhook                            |
-| `/api/webhooks/[id]`            | GET     | تفاصيل webhook (السر الكامل)             |
-| `/api/webhooks/[id]`            | PUT     | تحديث الحقول                             |
-| `/api/webhooks/[id]`            | DELETE  | إزالة                                    |
-| `/api/webhooks/[id]/test`       | POST    | إرسال `test.ping` (من دون إعادة محاولات) |
-| `/api/webhooks/[id]/deliveries` | GET     | محاولات التسليم الأخيرة لـ webhook واحد  |
-| `/api/webhooks/validate-url`    | POST    | التحقق المسبق من عنوان URL (حماية SSRF)  |
+| نقطة النهاية                    | طريقة  | وصف                                          |
+| ------------------------------- | ------ | -------------------------------------------- |
+| `/api/webhooks`                 | GET    | قائمة خطافات الويب (الأسرار المقنعة)         |
+| `/api/webhooks`                 | POST   | إنشاء خطاف على الويب                         |
+| `/api/webhooks/[id]`            | GET    | تفاصيل Webhook (السرية الكاملة)              |
+| `/api/webhooks/[id]`            | PUT    | تحديث الحقول                                 |
+| `/api/webhooks/[id]`            | DELETE | يزيل                                         |
+| `/api/webhooks/[id]/test`       | POST   | إطلاق `test.ping` (بدون إعادة المحاولة)      |
+| `/api/webhooks/[id]/deliveries` | GET    | محاولات التسليم الأخيرة لخطاف واحد على الويب |
+| `/api/webhooks/validate-url`    | POST   | التحقق من URL قبل الرحلة (حارس SSRF )        |
 
-يخفي `GET /api/webhooks` السر بصيغة `<أول 10 أحرف>...` لتجنّب تسريبه
-في صفحات القوائم. استخدم طلب GET الخاص بـ `[id]` عندما تحتاج فعليًا إلى السر.
+يخفي `GET /api/webhooks` سر `<first 10 chars>...` لتجنب التسرب على صفحات القائمة. استخدم `[id]` GET عندما تحتاج إلى السر بالفعل.
 
-### إنشاء webhook
+### إنشاء خطاف على الويب
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "تنبيهات Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-إذا حُذف `secret`، ينشئ الخادم سرًا بصيغة `whsec_<hex>` ويعيده
-في الاستجابة.
+إذا تم حذف `secret` ، يقوم الخادم بإنشاء سر `whsec_<hex>` ويعيده في الاستجابة.
 
-### اختبار webhook
+### اختبار خطاف الويب
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-يعيد `{ delivered, status, error }`. لا تُجرى أي إعادة محاولة — وهذا مفيد
-للتحقق سريعًا من أن المستقبِل يقبل الحمولة والتوقيع.
+ترجع `{ delivered, status, error }`. لا توجد محاولات لإعادة المحاولة — مفيدة للتحقق بسرعة من قبول المتلقي للحمولة والتوقيع.
 
 ## لوحة التحكم
 

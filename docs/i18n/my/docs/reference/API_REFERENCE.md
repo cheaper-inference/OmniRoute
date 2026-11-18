@@ -773,67 +773,166 @@ OpenAI နှင့် ကိုက်ညီသော batch processing။
 
 ---
 
-## API ရှာပါ။
+## ရှာဖွေမှု API
 
-Web/search ပံ့ပိုးပေးသူ abstraction (Tavily၊ Brave၊ Exa၊ Serper စသည်ဖြင့်)။
+Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.)။
 
-| နည်းလမ်း | မဂ်                    | ဖော်ပြချက်                                                                                              |
-| -------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/search`           | ပြင်ဆင်သတ်မှတ်ထားသော ရှာဖွေရေးဝန်ဆောင်မှုပေးသူများ + စွမ်းရည်များကို စာရင်းပြုစုပါ။                     |
-| POST     | `/v1/search`           | `v1SearchSchema` မှ အတည်ပြုထားသော ရှာဖွေမှု query — body ကိုဖွင့်ပါ၊ caching/coalescing ကို ပံ့ပိုးသည်။ |
-| GET      | `/v1/search/analytics` | ဝန်ဆောင်မှုပေးသူတိုင်း hit/latency/cache ကိန်းဂဏန်းများ                                                 |
+| Method | Path                   | Description                                                                                                             |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | သတ်မှတ်ထားသော ရှာဖွေမှုပေးသူများနှင့် စွမ်းဆောင်ရည်များကို စာရင်းပြုစုခြင်း                                             |
+| POST   | `/v1/search`           | ရှာဖွေမှုမေးမြန်းချက်ကို လုပ်ဆောင်ခြင်း — body ကို `v1SearchSchema` ဖြင့် အတည်ပြုပြီး caching/coalescing ကို ပံ့ပိုးသည် |
+| GET    | `/v1/search/analytics` | ပေးသူတစ်ခုချင်းစီအလိုက် hit/latency/cache စာရင်းအင်းများ                                                                |
 
-**အထောက်အထား-** ထမ်းသူ API သော့ (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေမှုမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် ပြဋ္ဌာန်းထားသည်။
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ Search policy ကို `enforceApiKeyPolicy` မှတစ်ဆင့် အတည်ပြုထားသည်။
 
-**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
+### အမည်ပေးထားသော ရှာဖွေခြင်း/ရယူခြင်း ပေါင်းစပ်မှုများ
+
+`POST /v1/search` နှင့် `POST /v1/web/fetch` နှစ်ခုစလုံးသည် သိမ်းဆည်းထားသော combo အမည်အဖြစ် `model` ကို လက်ခံသည်။
+`model` သို့မဟုတ် တိကျစွာ သတ်မှတ်ထားသော `provider` တစ်ခုခုကို အသုံးပြုပါ။ နှစ်ခုစလုံးကို ပေးပို့ပါက `400` ပြန်ပေးသည်။
+နှစ်ခုစလုံး မပါရှိပါက ရှိပြီးသား အလိုအလျောက် provider ရွေးချယ်မှုသည် မပြောင်းလဲဘဲ ဆက်လက်လုပ်ဆောင်မည်။
+
+Combo Builder နှင့် ၎င်း၏ Add Model catalog နှစ်ခုစလုံးသည် LLM model စာရင်း မရှိသည့်အခါတွင်ပင် ချိတ်ဆက်ထားသော provider များအတွက် native web-operation entry များကို ဖော်ပြပေးသည်။ Serper တွင် **Web search** ကို ပြသပြီး၊
+Tavily တွင် **Web search / Page extraction** ကို ပြသသည်။ fetch-only provider များတွင် **Page extraction** ကို ပြသသည်။
+Entry နှင့် account ကို ပုံမှန်အတိုင်း ရွေးချယ်ပါ။ Tavily entry တစ်ခုတည်းသည် web endpoint နှစ်ခုစလုံးအတွက် အသုံးပြုနိုင်သည်။
+ဤ operation entry များကို chat-only client selector များ သို့မဟုတ် chat model probe များထဲသို့ မထည့်ပါ။
+
+ဥပမာအားဖြင့် အောက်ပါအစီအစဉ်အတိုင်း target များပါဝင်သည့် `shared-free` အမည်ရှိ **priority** combo တစ်ခုကို ဖန်တီးပါ-
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+ထို့နောက် surface တစ်ခုစီတွင် အမည်တူကို အသုံးပြုပါ-
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search သည် Tavily နောက်တွင် Serper ကို စဉ်းစားပြီး၊ fetch သည် Tavily နောက်တွင် Jina Reader ကို စဉ်းစားသည်။
+chat သည် သီးခြား search/fetch provider များကို ကျော်လွှားပြီး OpenAI ကို စဉ်းစားသည်။ Compatibility သည် model အမည်ရှိ စကားလုံးများမှ မဟုတ်ဘဲ search/fetch executor registry များမှ ရရှိသည်။
+Filtering ကို credential ရွေးချယ်ခြင်းနှင့် dispatch မတိုင်မီ လုပ်ဆောင်ပြီး သိမ်းဆည်းထားသော combo ကို မည်သည့်အခါမျှ ပြင်ဆင်ခြင်းမရှိပါ။
+
+Non-chat capability route များသည် `priority`၊ `fill-first`၊ `round-robin`၊ `weighted`၊
+`random`၊ `strict-random`၊ `least-used` နှင့် `p2c` တို့ကို ပံ့ပိုးသည်။ `fusion`၊ `pipeline` နှင့် `context-relay` ကဲ့သို့သော
+chat-only synthesis strategy များကို non-chat route များတွင် ငြင်းပယ်ပြီး search သို့မဟုတ် generated media တွင်
+တိတ်တဆိတ် အသုံးချခြင်း မပြုပါ။
+ရှိပြီးသား combo engine သည် upstream quota failure များအပါအဝင် အစီအစဉ်တကျ fallback ကို ကိုင်တွယ်ပြီး step ID များ၊ account pin များ၊ step တစ်ခုချင်းစီ၏ account allowlist များ၊ nested reference များ၊
+ခေါ်ဆိုသူ၏ connection/quota scope များနှင့် combo access policy တို့ကို ထိန်းသိမ်းထားသည်။ ရလဒ်များသည် အမှန်တကယ်အသုံးပြုသည့် provider အပါအဝင်
+၎င်းတို့၏ native search/fetch schema ကို ထိန်းသိမ်းထားပြီး `X-OmniRoute-Combo-Trace` သည် routing decision ကို ဖော်ပြသည်။
+မသိရှိသော combo များသည် `404` ပြန်ပေးသည်။ inactive combo များနှင့် ကိုက်ညီသည့် target မရှိသော ပေါင်းစပ်မှုများသည် `400` ပြန်ပေးသည်။
+
+Combo ကြိုးပမ်းမှုတစ်ခုစီသည် တိကျစွာ သတ်မှတ်ထားသော provider တစ်ခုကို အသုံးပြုသည်။
+၎င်းသည် combo ၏နောက်ကွယ်ရှိ native automatic provider pool ကို ခေါ်ယူအသုံးပြု၍ မရပါ။ Explicit-provider request များသည်
+ရှိပြီးသား single-provider အပြုအမူကို ထိန်းသိမ်းထားသည်။ Dedicated search/fetch provider များကို ရည်ညွှန်းသည့် တိုက်ရိုက် chat request များသည်
+OpenAI-style executor သို့ ဆက်လက်ကျဆင်းမသွားဘဲ လုပ်ဆောင်ရန်လိုအပ်သည့် JSON `400` ကို ပြန်ပေးသည်။
+
+### စွမ်းဆောင်ရည်အလိုက် combo route များ
+
+သိမ်းဆည်းထားသော combo များတွင် API capability များကို key အဖြစ်အသုံးပြုသည့် `routes` object ပါဝင်နိုင်သည်။ Route တစ်ခုစီတွင်
+၎င်း၏ target list၊ strategy နှင့် runtime config ကို ကိုယ်ပိုင်ပိုင်ဆိုင်သည်။ အပေါ်ဆုံးအဆင့်ရှိ `models`၊ `strategy` နှင့် `config`
+တို့သည် legacy-compatible Chat plan အဖြစ် ဆက်လက်ရှိနေသည်။ `routes` မပါရှိသည့် combo အဟောင်းများသည် မည်သည့်ပြောင်းလဲမှုမျှမရှိဘဲ ဆက်လက်အလုပ်လုပ်မည်။
+
+ပံ့ပိုးထားသော route key များမှာ `chat`၊ `search`၊ `web-fetch`၊ `embeddings`၊ `rerank`၊ `images`၊
+`image-edits`၊ `videos`၊ `music`၊ `ocr`၊ `audio-speech`၊ `audio-transcriptions`၊
+`audio-translations` နှင့် `audio-generation` တို့ဖြစ်သည်။ Endpoint projection ကို credential ရွေးချယ်ခြင်း၊ scoring သို့မဟုတ် dispatch မတိုင်မီ လုပ်ဆောင်သည်။ Nested combo reference များသည်
+တူညီသော capability အတွက် child combo ၏ route ကို ရွေးချယ်သည်။
+
+`POST /v1/music/generations` နှင့် `POST /v1/ocr` တို့သည် `model` ထဲတွင် combo အမည်ကို လက်ခံသည်။ Native
+ElevenLabs-compatible `POST /v1/music` သည် `model_id` ထဲတွင် combo အမည်ကို လက်ခံသော်လည်း ထို native endpoint ရှိ အသုံးပြုနိုင်သော target တိုင်းသည် ElevenLabs music model ဖြစ်ရမည်၊ သို့မှသာ ၎င်း၏ binary response contract ကို
+ထိန်းသိမ်းနိုင်မည်။ `POST /v1/sound-generation` သည် တူညီသော native-binary ကန့်သတ်ချက်အောက်တွင် `model_id` ထဲတွင်
+`audio-generation` combo ကို လက်ခံသည်။ Music provider အမျိုးမျိုးအတွက် `/v1/music/generations` ကို အသုံးပြုပါ။
+
+**Auto-select:** `provider` မပါရှိပါက connection သတ်မှတ်ထားသော provider များထဲမှ ကုန်ကျစရိတ်အနည်းဆုံး provider ကို ပထမဆုံး လုပ်ဆောင်ပြီး နောက်ထပ် ကုန်ကျစရိတ်အနည်းဆုံး provider ကို failover အဖြစ် အသုံးပြုသည်။ Free last-resort provider (`duckduckgo-free`) များကို အခြားမည်သည့်အရာမျှ configure မလုပ်ထားသည့်အခါတွင်သာ အသုံးပြုသည်။ Self-hosted SearXNG သည် ၎င်း၏ connection တွင် catalog default `http://localhost:8888/search` မဟုတ်သော အမှန်တကယ် `baseUrl` တစ်ခုကို သိမ်းဆည်းထားသည်နှင့် configure လုပ်ထားသည်ဟု သတ်မှတ်သည်။ ထိုအခါ ၎င်းသည် keyed provider များထက် အရင်အဆင့်ရှိသော $0 provider အဖြစ် အဆင့်သတ်မှတ်ခံရပြီး SearXNG က `400`၊ `401`၊ `403` သို့မဟုတ် `404` ပြန်ပေးသည့်အခါတွင်ပင်
+ကုန်ကျစရိတ်အနည်းဆုံး keyed provider ကို failover အဖြစ် အသုံးပြုသည်။ မှန်ကန်သော `http(s)` URL မဟုတ်သော သို့မဟုတ် cloud-metadata address သို့ ညွှန်ပြသော `baseUrl` ကို configure လုပ်ထားသည်ဟု မသတ်မှတ်ပါ။ Token သိမ်းဆည်းထားသော SearXNG connection သည် `https://` သို့မဟုတ် loopback `http://` မှတစ်ဆင့်သာ ဤအဆင့်သတ်မှတ်မှုကို ရရှိသည်။ Remote plain `http://` မှတစ်ဆင့်မူ ၎င်းကို failover အဖြစ် မည်သည့်အခါမျှ အသုံးမပြုဘဲ အခြား provider မရှိသည့်အခါ သို့မဟုတ် အမည်ဖြင့် တောင်းဆိုသည့်အခါတွင်သာ နောက်ဆုံးရွေးချယ်မှုအဖြစ် အသုံးပြုသည်။ ထိုအခြေအနေနှစ်ခုတွင် token ကို cleartext ဖြင့် ပေးပို့မည်ဖြစ်သည်။
 
 ### Exa နှင့် Tavily `provider_options`
 
-Exa နှင့် Tavily တို့သည် namespaced bag တစ်ခုမှ ပံ့ပိုးပေးသူ-သတ်သတ်မှတ်မှတ်အကွက်များကို ဖတ်သည်- `provider_options.exa` (သို့မဟုတ် `provider_options["exa-search"]`) နှင့် `provider_options.tavily` (သို့မဟုတ် `provider_options["tavily-search"]`) ။ အောက်ပါသော့များကိုသာ ထပ်ဆင့်ပို့ပါသည်။ တစ်ခုစီကို `open-sse/handlers/search/providerOptionsPassthrough.ts` တွင် ၎င်း၏ကိုယ်ပိုင် Zod schema နှင့် စစ်ဆေးပြီး အမျိုးအစားမှားနေသော သော့တစ်ခု ပြုတ်ကျသွားသည်။ auth၊ base URL၊ `stream` နှင့် `outputSchema` အပါအဝင် အခြားသော့များကို လျစ်လျူရှုထားသည်။ အခြားပံ့ပိုးပေးသူများ (`cx`, `depth`, ... ) သုံးသော flat keys များသည် ယခင်အတိုင်း အလုပ်လုပ်ပါသည်။
+Exa နှင့် Tavily သည် provider-specific fields များကို namespace ပါသော bag တစ်ခုမှ ဖတ်ယူသည် -
+`provider_options.exa` (သို့မဟုတ် `provider_options["exa-search"]`) နှင့် `provider_options.tavily`
+(သို့မဟုတ် `provider_options["tavily-search"]`) တို့ဖြစ်သည်။ အောက်တွင်ဖော်ပြထားသော key များကိုသာ
+ရှေ့ဆက်ပို့ပေးသည်။ key တစ်ခုချင်းစီကို
+`open-sse/handlers/search/providerOptionsPassthrough.ts` ရှိ သက်ဆိုင်ရာ Zod schema ဖြင့်
+စစ်ဆေးပြီး type မမှန်သော key ကို ဖယ်ရှားသည်။ အခြား key အားလုံးကို auth၊ base URL၊
+`stream` နှင့် `outputSchema` အပါအဝင် လျစ်လျူရှုသည်။ အခြား provider များအသုံးပြုသည့် flat key များ
+(`cx`, `depth`, ...) သည် ယခင်အတိုင်း အလုပ်လုပ်သည်။
 
-| ပံ့ပိုးပေးသူ | ထိပ်တန်းအဆင့်နယ်ပယ်များ                                                                                                                                                                                                                                                                                                                                                   | သိုက်                                                                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ပြားချပ်ချပ် primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` မူရင်း `{ text: true, highlights: true }` တွင် ပေါင်းစပ်ထားသည်။ |
-| ဗီလီ         | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` သည် မူလ `{ text: true, highlights: true }` အပေါ်တွင် ပေါင်းစပ်ထားသည် |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
-ယေဘုယျနယ်ပယ်များသည် အမြဲတမ်းအနိုင်ရသည်- `query`၊ `max_results`၊ `filters` (ဒိုမိန်းများ), `country` နှင့် `search_type` မှ ဆင်းသက်လာသော အကြောင်းအရာ။ Exa တွင် `search_type: "news"` `category: "news"` ထိန်းသိမ်းထားသည်။ Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
+Generic field များသည် အမြဲတမ်း ဦးစားပေးအနိုင်ရသည် - `query`၊ `max_results`၊ `filters` (domains)၊
+`country` နှင့် `search_type` မှ ဆင်းသက်လာသော topic တို့ဖြစ်သည်။ Exa တွင်
+`search_type: "news"` သည် `category: "news"` ကို ဆက်လက်ထိန်းသိမ်းသည်။
+Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
 
-Firecrawl ရှာဖွေမှုကုန်ကျစရိတ်သည် ဘလော့တစ်ခုလျှင် $0.002 (ခရက်ဒစ် 2 ခု) နှင့် ခေါ်ဆိုမှုတစ်ခုလျှင် အနည်းဆုံး ဘလောက်တစ်ခု ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 ရလဒ်တန်ဖိုး $0.004 ဖြင့် မှတ်တမ်းတင်ထားသည်။
+Firecrawl search ကုန်ကျစရိတ်ကို ပြန်ပေးသော results ၁၀ ခုပါသော စတင်ထားသည့် block တစ်ခုစီအတွက်
+$0.002 (credits ၂ ခု) ဖြင့် မှတ်တမ်းတင်ပြီး၊ call တစ်ကြိမ်လျှင် အနည်းဆုံး block တစ်ခုကို
+တွက်ချက်သည် ([Firecrawl billing](https://docs.firecrawl.dev/billing)) - results ၁၁ ခုသည် $0.004
+ကုန်ကျသည်။
 
-ယေဘူယျ `time_range` ယခုအခါ ဝန်ဆောင်မှုပေးသူ နှစ်ခုစလုံးသို့ ရောက်ရှိသွားသည်- Exa သည် `startPublishedDate` (ISO timestamp) နှင့် Tavily သည် `start_date` (`YYYY-MM-DD`) ရရှိသည်။ `provider_options` တွင် ပြတ်သားသောရက်စွဲသည် မြေပုံရေးဆွဲထားသော ရက်စွဲကို အစားထိုးသည်။
+Generic `time_range` သည် ယခု provider နှစ်ခုလုံးထံ ရောက်ရှိသည် - Exa သို့
+`startPublishedDate` (ISO timestamp) နှင့် Tavily သို့ `start_date` (`YYYY-MM-DD`) အဖြစ်
+ပို့သည်။ `provider_options` ထဲရှိ ရက်စွဲကို အတိအလင်း သတ်မှတ်ထားပါက mapping လုပ်ထားသော
+ရက်စွဲအစား ၎င်းကို အသုံးပြုသည်။
 
-Exa ရလဒ်များသည် `id`, `highlights` (အလေးပေးဖော်ပြမှုတိုင်း၊ `snippet` အဖြစ်သုံးသော ပထမတစ်ခုသာမက) `highlight_scores`, `summary`, `subpages`, `entities` နှင့် `extras` တို့ကို `provider_raw` တွင် ထားရှိထားသည်။ Tavily ရလဒ်များသည် `images` နှင့် `favicon` ကို ဆက်ထားသည်။
+Exa results များသည် `id`၊ `highlights` (ပထမဆုံးတစ်ခုတည်းကိုသာ `snippet` အဖြစ် အသုံးပြုခြင်း
+မဟုတ်ဘဲ highlight အားလုံး)၊ `highlight_scores`၊ `summary`၊ `subpages`၊ `entities` နှင့်
+`extras` တို့ကို `provider_raw` ထဲတွင် ဆက်လက်ထိန်းသိမ်းထားသည်။ Tavily results များသည်
+`images` နှင့် `favicon` တို့ကို ဆက်လက်ထိန်းသိမ်းထားသည်။
 
-Linkup ရှာဖွေမှုကုန်ကျစရိတ်သည် `depth` `fast` နှင့် `standard` အတွက် $0.005 နှင့် `deep` အတွက် $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ၊ `depth` မှ `provider_options` သို့မဟုတ် ချိတ်ဆက်မှု၏ဆက်တင်များတွင်ဖြစ်စေ မှတ်တမ်းတင်ထားသည်။
+Linkup search ကုန်ကျစရိတ်ကို `depth` သည် `fast` နှင့် `standard` ဖြစ်ပါက $0.005၊ `deep`
+ဖြစ်ပါက $0.05 ဖြင့် မှတ်တမ်းတင်သည် ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing))။
+`depth` သည် `provider_options` မှလာသည်ဖြစ်စေ connection ၏ settings မှလာသည်ဖြစ်စေ
+တူညီသည်။
 
-Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ Lite၊ `additionalQueries`၊ `systemPrompt` နှင့် `contents` ကီးတိုင်းကို ဖုန်းခေါ်ဆိုမှုမပြုမီ `text` နှင့် `highlights` မှလွဲ၍ ကျန်ရှိနေပါသည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
+Exa `type: "lite"` (Exa 3.0) သည် field အစုအဝေး ပိုမိုနည်းပါးစွာကိုသာ လက်ခံပြီး အခြား field
+တစ်ခုခု သတ်မှတ်ထားပါက request တစ်ခုလုံးကို ပယ်ချသည်။ lite အတွက် `additionalQueries`၊
+`systemPrompt` နှင့် `contents` key များထဲမှ `text` နှင့် `highlights` မှလွဲ၍ အားလုံးကို
+call မပြုမီ ဖယ်ရှားသည်။ အသုံးမပြုတော့သော `subpages`၊ `subpageTarget`၊
+`highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ရှေ့ဆက်မပို့တော့ပါ။
 
-ကုန်ကျစရိတ်စာရင်းအင်းသည် Exa ၏ကိုယ်ပိုင်စျေးနှုန်းဖြင့်လိုက်နာသော Exa မှလွဲ၍ `costPerQuery`, `auto` (နှင့် အမွေအနှစ် `fast`) သို့မဟုတ် `lite` (နှင့် အမွေအနှစ် `instant`) အတွက် 10 ရလဒ်များကို လွှမ်းခြုံပေးသည့် Exa မှလွဲ၍ နောက်ထပ်ရလဒ်တစ်ခုစီအတွက် $0.001; `contents.summary` သတ်မှတ်လိုက်သောအခါ ရလဒ်တစ်ခုလျှင် $0.001။ Tavily ကို `search_depth` `basic`၊ `fast` နှင့် `ultra-fast` အတွက် 1 ခရက်ဒစ် ($0.008) နှင့် `advanced` ( [Tavily API ခရက်ဒစ်](https://docs.tavily.com/documentation/api-credits) ) အတွက် ခရက်ဒစ် 2 ခု ($0.016) ဖြင့် မှတ်တမ်းတင်ထားသည်။ Tavily အဆင့်မြှင့်တင်ထားသော `auto_parameters: true` ဖြင့်ခေါ်ဆိုမှုကို 1 ခရက်ဒစ်တွင် မှတ်တမ်းတင်ထားဆဲဖြစ်သည်။
+ကုန်ကျစရိတ်တွက်ချက်မှုသည် flat registry `costPerQuery` ဖြစ်ပြီး Exa အတွက်သာ Exa ၏ကိုယ်ပိုင်
+စျေးနှုန်းကို လိုက်နာသည် - `auto` (နှင့် legacy `fast`) အတွက် call တစ်ကြိမ်လျှင် $0.007
+သို့မဟုတ် `lite` (နှင့် legacy `instant`) အတွက် $0.004 ဖြစ်ပြီး results ၁၀ ခုအထိ အကျုံးဝင်သည်။
+ထပ်မံရရှိသော result တစ်ခုစီအတွက် $0.001 နှင့် `contents.summary` သတ်မှတ်ထားပါက ပြန်ပေးသော
+result တစ်ခုစီအတွက် $0.001 ထပ်မံကုန်ကျသည်။ Tavily ကို `search_depth` သည် `basic`၊ `fast`
+နှင့် `ultra-fast` ဖြစ်ပါက credit ၁ ခု ($0.008)၊ `advanced` ဖြစ်ပါက credit ၂ ခု ($0.016)
+ဖြင့် မှတ်တမ်းတင်သည် ([Tavily API credits](https://docs.tavily.com/documentation/api-credits))။
+`auto_parameters: true` ဖြင့် call လုပ်ပြီး Tavily က advanced သို့ အဆင့်မြှင့်တင်သွားသော်လည်း
+credit ၁ ခုဖြင့်သာ မှတ်တမ်းတင်သည်။
 
 ---
 
 ## Web Fetch API
 
-သတ်မှတ်ပြင်ဆင်ထားသော web-fetch provider (Firecrawl၊ Jina
-Reader၊ Tavily Extract၊ TinyFish Fetch၊ Nimble Extract၊ Parallel Extract) မှတစ်ဆင့် URL တစ်ခုမှ အကြောင်းအရာကို ထုတ်ယူပါ။
+စီစဉ်သတ်မှတ်ထားသော ဝဘ်-ရယူပေးသူ (Firecrawl၊ Jina
+Reader၊ Tavily Extract၊ TinyFish Fetch၊ Nimble Extract၊ Parallel Extract၊ Keenable Fetch) ကိုအသုံးပြု၍ URL တစ်ခုမှ အကြောင်းအရာကို ထုတ်ယူပါ။
 
-Parallel Extract (`parallel-search`၊ Parallel Search နှင့် API key တစ်ခုတည်းကို အသုံးပြုသည်) သည် Markdown
-သာ ပြန်ပေးသည် — အခြား `format` တန်ဖိုးများအားလုံးသည် `400` ဖြစ်သည် — ထို့အပြင် အကြောင်းအရာကို စာလုံး
-100,000 အထိသာ ကန့်သတ်ထားသည်။ ရည်ညွှန်းထားသော စာမျက်နှာကိုယ်တိုင် ထုတ်ယူ၍မရသောအခါ upstream က ၎င်းကို HTTP 200
-အတွင်း အကြောင်းကြားသည်၊ OmniRoute က ၎င်းကို သတ်မှတ်ထားသောစာသားဖြင့် `422` အဖြစ် ပြသသည်။
+Parallel Extract (`parallel-search`၊ Parallel Search နှင့် API key တူညီသည်) သည် Markdown
+သာ ပြန်ပေးသည် — အခြား `format` တန်ဖိုးမည်သည့်တန်ဖိုးမဆို `400` ဖြစ်ပြီး အကြောင်းအရာကို စာလုံးရေ 100,000 အထိသာ ကန့်သတ်ထားသည်။ ရည်ညွှန်းထားသော စာမျက်နှာကိုယ်တိုင် ထုတ်ယူ၍မရသောအခါ upstream က ၎င်းကို HTTP 200 အတွင်းတွင် အစီရင်ခံသည်၊ OmniRoute က ၎င်းကို သတ်မှတ်ထားသော မက်ဆေ့ချ်တစ်ခုဖြင့် `422` အဖြစ် ဖော်ပြသည်။
 
-| Method | Path            | Description                                                                 |
-| ------ | --------------- | --------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL ကို fetch/scrape လုပ်သည် — body ကို `v1WebFetchSchema` ဖြင့် အတည်ပြုသည် |
+Keenable Fetch (`keenable-search`) သည်လည်း Markdown
+သာ ပြန်ပေးသည် (အခြား `format` တန်ဖိုးမည်သည့်တန်ဖိုးမဆို `400` ဖြစ်သည်) နှင့် အကြောင်းအရာကို စာလုံးရေ 100,000 အထိသာ ကန့်သတ်ထားသည်။ ၎င်းကို key မပါဘဲ အသုံးပြုနိုင်သည် — connection မရှိဘဲ `provider: "keenable-search"` ကို အတိအလင်း တောင်းဆိုပါက Keenable ၏ keyless endpoint ကို အသုံးပြုသည် (IP တစ်ခုချင်းစီအလိုက် rate limit ရှိသည်)။ သတ်မှတ်ထားသော key သည် ထိုကန့်သတ်ချက်များကိုသာ ဖယ်ရှားပေးသည်၊ auto-select သည် key သတ်မှတ်ထားသည့်အခါမှသာ Keenable ကို အသုံးပြုသည်။
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ Policy ကို `enforceApiKeyPolicy` မှတစ်ဆင့် အတည်ပြုသည်။
+| Method | Path            | Description                                                               |
+| ------ | --------------- | ------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL ကို ရယူ/စကရပ်လုပ်ခြင်း — body ကို `v1WebFetchSchema` ဖြင့် အတည်ပြုသည် |
 
-**Quota-aware fallback (#8297):** တိကျသော `provider` မပေးထားပါက pool
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ မူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် အကောင်အထည်ဖော်သည်။
+
+အမည်ပေးထားသော ပေါင်းစပ်မှုများသည် [`model` လမ်းကြောင်းသတ်မှတ်မှု စည်းမျဉ်း](#named-searchfetch-combinations)
+အထက်ပါအတိုင်း အသုံးပြုပြီး fetch အတွက် သီးသန့်ရွေးချယ်စရာများနှင့် တုံ့ပြန်ချက်များကို ထိန်းသိမ်းထားသည်။
+
+**Quota-aware fallback (#8297):** `provider` နှင့် `model` နှစ်ခုလုံး မပေးထားသည့်အခါ pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) ကို သတ်မှတ်ထားသော
-ဦးစားပေးအစီအစဉ်အတိုင်း (fill-first) ဖြတ်သန်းရွေးချယ်သည် — rate limit ဖြစ်နေသော်လည်း ပြင်ဆင်သတ်မှတ်ထားသော provider ကို request ကို ရပ်တန့်မည့်အစား ကျော်သွားသည်၊ ထို့အပြင် ပြန်လည်ကြိုးစားနိုင်သော/quota ဆိုင်ရာ upstream အမှားတစ်ခု (HTTP 429 အမြဲတမ်း၊ Firecrawl/Tavily/TinyFish quota ပုံစံ free tier များအတွက် 402/403 — Jina Reader အတွက် မဟုတ်သကဲ့သို့ ရိုးရိုး 400 bad request အတွက်လည်း မဟုတ်) ဖြစ်ပါက request ပြုလုပ်ချိန်တွင် မစမ်းရသေးသော credential ပါ provider နောက်တစ်ခုသို့ ဆက်လက်ကျော်သွားသည်။ pool အတွင်းရှိ provider အားလုံး ကုန်ဆုံးသွားသောအခါ ယခင် generic `400` အစား endpoint က `Retry-After` header ပါသော တစ်ခုတည်းသော `429` ကို ပြန်ပေးသည်။ `provider` ကို တိကျစွာ တောင်းဆိုထားပါက **silent fallback မရှိပါ** — rate limit ဖြစ်နေသော သို့မဟုတ် အလုပ်မလုပ်သော explicit provider ၏ ကိုယ်ပိုင်အမှားကို ပြသသည် (rate limit ဖြစ်ပါက `429`၊ မဟုတ်ပါက upstream status)။
-
----
+`parallel-search` → `keenable-search`) ကို
+သတ်မှတ်ထားသော ဦးစားပေးအစီအစဉ် (fill-first) အတိုင်း စစ်ဆေးသွားသည် — rate limit ခံထားရသော်လည်း စီစဉ်သတ်မှတ်ထားသော provider ကို request ကို အစောပိုင်းတွင် ရပ်တန့်မည့်အစား ကျော်သွားပြီး၊ ပြန်လည်ကြိုးစားနိုင်သော/quota ဆိုင်ရာ upstream အမှား (HTTP 429 အမြဲတမ်း၊ Firecrawl/Tavily/TinyFish ၏ quota ပုံစံ free tier များအတွက် 402/403 — Jina Reader အတွက် မဟုတ်ဘဲ၊ ရိုးရိုး 400 bad request အတွက်လည်း ဘယ်တော့မျှ မဟုတ်) ဖြစ်ပါက request ပြုလုပ်ချိန်တွင် မစမ်းသပ်ရသေးသော credential ပါသည့် နောက်ထပ် provider သို့ ဆက်လက်လုပ်ဆောင်သည်။ pool ထဲရှိ provider အားလုံး ကုန်ဆုံးသွားသောအခါ endpoint သည် ယခင် generic `400` အစား `Retry-After` header ပါသော `429` တစ်ခုတည်းကို ပြန်ပေးသည်။ `provider` ကို အတိအလင်း တောင်းဆိုထားသည့်အခါတွင်တော့ တိတ်တဆိတ် fallback မရှိပါ — rate limit ခံရသော သို့မဟုတ် အလုပ်မလုပ်သော အတိအလင်း တောင်းဆိုထားသည့် provider က ၎င်း၏ကိုယ်ပိုင်အမှားကို ပြသသည် (rate limit ဖြစ်ပါက `429`၊ မဟုတ်ပါက upstream status)။
 
 ## WebSocket Streaming
 
@@ -895,30 +994,36 @@ CLI သည် `base_url + /responses` ကို WebSocket သို့ upgrade �
 
 ## Quota နှင့် ပြဿနာ အစီရင်ခံခြင်း
 
-| နည်းလမ်း | လမ်းကြောင်း         | ဖော်ပြချက်                                                                                               |
-| -------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/quotas/check`  | မှတ်ပုံတင်ထားသော key မထုတ်ပေးမီ `provider` + `accountId` အတွက် quota ကို ကြိုတင်စစ်ဆေးရန်                |
-| POST     | `/v1/issues/report` | quota/key ထုတ်ပေးမှု မအောင်မြင်ခြင်းကို GitHub သို့ အစီရင်ခံရန် (`GITHUB_ISSUES_REPO` + token လိုအပ်သည်) |
+| Method | Path                | Description                                                                                              |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | မှတ်ပုံတင်ထားသော key ကို ထုတ်ပေးမီ `provider` + `accountId` အတွက် quota ကို ကြိုတင်စစ်ဆေးရန်             |
+| POST   | `/v1/issues/report` | GitHub သို့ quota/key ထုတ်ပေးမှု မအောင်မြင်ခြင်းကို အစီရင်ခံရန် (`GITHUB_ISSUES_REPO` + token လိုအပ်သည်) |
 
-**အထောက်အထားပြခြင်း:** Bearer API key (`isAuthenticated`)။
+**Auth:** `/v1/quotas/check` သည် Bearer API key (`isAuthenticated`) ကို လက်ခံသည်။ `/v1/issues/report` သည်
+`/api/v1/registered-keys` ကဲ့သို့ management-only (`requireManagementAuth`) ဖြစ်သည်။ dashboard session၊
+local CLI token သို့မဟုတ် `manage`/`admin` scope ပါသော API key တို့ကို အသုံးပြုနိုင်သည်။ inference-only API key များသည်
+`403` ရရှိမည်ဖြစ်သည်။
 
 ### Quota session ပြန်လည်ရယူခြင်း (ရွေးချယ်အသုံးပြုနိုင်သည်)
 
-stream မပြုသော `POST /v1/chat/completions` သို့မဟုတ် `POST /v1/responses` တစ်ခုသည်
-terminal quota error (`402`/`429`/`503` — body တွင် quota သို့မဟုတ် credits ကုန်ဆုံးကြောင်း ဖော်ပြထားသောအခါ) ဖြင့်
-မအောင်မြင်ပါက error ပြန်ပေးမည့်အစား ခေတ္တသိမ်းထားပြီး နောက်ပိုင်းတွင် ပြန်လည်လုပ်ဆောင်နိုင်သည်။ ခေါ်ဆိုသူသည် request တစ်ခုချင်းစီအတွက် အောက်ပါ header သုံးခုဖြင့် ရွေးချယ်အသုံးပြုနိုင်သည်-
+Quota error (`402`/`429`/`503` ဖြစ်ပြီး body တွင် quota သို့မဟုတ် credits ကုန်ဆုံးကြောင်း ဖော်ပြထားသောအခါ) ဖြင့်
+မအောင်မြင်သော streaming မပြုသည့် `POST /v1/chat/completions` သို့မဟုတ် `POST /v1/responses` ကို error ပြန်မပေးဘဲ
+နောက်ပိုင်းတွင် ပြန်လည်လုပ်ဆောင်နိုင်ရန် သိမ်းဆည်းထားနိုင်သည်။ Caller သည် request တစ်ခုချင်းစီအတွက် အောက်ပါ header သုံးခုဖြင့်
+ဤလုပ်ဆောင်ချက်ကို ရွေးချယ်နိုင်သည်။
 
-| Header                       | တန်ဖိုး                                                 |
+| Header                       | Value                                                   |
 | ---------------------------- | ------------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                                  |
 | `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`                    |
 | `x-omniroute-recovery-turn`  | session အတွင်း ထူးခြားရမည့် turn id (တူညီသော စည်းမျဉ်း) |
 
 `stream: false` ဖြစ်ပြီး tools၊ tool history သို့မဟုတ် `previous_response_id` မပါဝင်သော turn များနှင့်
-`x-omniroute-connection` pin မပါဝင်သော turn များသာ အကျုံးဝင်သည်။ ထို့အပြင် `STORAGE_ENCRYPTION_KEY` သတ်မှတ်ထားရမည် (request ကို 24 နာရီအထိ encryption ဖြင့် သိမ်းဆည်းထားသည်)။ ထို့နောက် response သည်
-`recovery.poll` ပါသော `202` ဖြစ်လာမည်။ `GET /v1/quota-recoveries/{id}` ဖြင့် poll ပြုလုပ်နိုင်သည် (စောင့်ဆိုင်းနေစဉ် `202`၊ ပြီးဆုံးသောအခါ recovered body ပါသော `200`) သို့မဟုတ် `DELETE` ဖြင့် ပယ်ဖျက်နိုင်သည်။ Ticket များကို ၎င်းတို့ဖန်တီးခဲ့သော API key တစ်ခုတည်းကသာ မြင်နိုင်သည်။ ရလဒ်မသေချာသော replay သည် နှစ်ကြိမ်ပေးပို့ခြင်းမဖြစ်စေရန် `needs_confirmation` အခြေအနေဖြင့် အဆုံးသတ်မည်။ မူရင်းရင်းမြစ်: `src/lib/quota/quotaSessionRecovery.ts`။
-
----
+`x-omniroute-connection` pin မချိတ်ထားသော turn များသာ အကျုံးဝင်သည်။ ထို့အပြင် `STORAGE_ENCRYPTION_KEY` ကို သတ်မှတ်ထားရမည်
+(request ကို အများဆုံး 24 နာရီအထိ encryption ဖြင့် သိမ်းဆည်းထားသည်)။ ထို့နောက် response သည် `202` ဖြစ်ပြီး
+`recovery.poll` ပါဝင်မည်။ `GET /v1/quota-recoveries/{id}` ကို poll လုပ်နိုင်သည် (`pending` အခြေအနေတွင် `202`၊
+ပြီးဆုံးသောအခါ ပြန်လည်ရရှိသည့် body နှင့် `200`) သို့မဟုတ် `DELETE` ဖြင့် ပယ်ဖျက်နိုင်သည်။ Ticket များကို ၎င်းတို့ကို
+ဖန်တီးခဲ့သော API key ကသာ မြင်နိုင်သည်။ Replay ၏ ရလဒ် မသေချာပါက နှစ်ကြိမ်ပို့ခြင်းမပြုဘဲ `needs_confirmation`
+အခြေအနေဖြင့် အဆုံးသတ်မည်။ ရင်းမြစ်: `src/lib/quota/quotaSessionRecovery.ts`】【。
 
 ## ကိုယ်ပိုင်ဝန်ဆောင်မှုအသုံးပြုမှု (`/api/usage/om-usage`)
 
@@ -1672,19 +1777,23 @@ OmniRoute ဖြစ်ရပ်များ (တောင်းဆိုမှ�
 
 ---
 
-## Registered Keys (Auto-Management)
+## မှတ်ပုံတင်ထားသော Key များ (အလိုအလျောက်စီမံခန့်ခွဲမှု)
 
-နောက်ခံ provider/account တစ်ခုနှင့် ချိတ်ဆက်၍ API keys များ ထုတ်ပေးခြင်းနှင့် လဲလှယ်ခြင်းများကို auto-key management subsystem မှ လုပ်ဆောင်ရန် အသုံးပြုသည်။ နေ့စဉ်/နာရီအလိုက် quota များ ပါဝင်သည်။
+အရန် provider/account တစ်ခုနှင့် API key များကို ထုတ်ပေးခြင်းနှင့် လှည့်ပြောင်းခြင်းများ ပြုလုပ်ရန်၊ နေ့စဉ်/နာရီအလိုက် quota များနှင့်အတူ auto-key management subsystem မှ အသုံးပြုသည်။
 
-| Method | Path                                  | Description                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | စာရင်းသွင်းထားသော keys များကို စာရင်းပြုစုရန် (ဖုံးကွယ်ထားသော prefix သာ)                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | စာရင်းသွင်းထားသော key အသစ်တစ်ခု ထုတ်ပေးရန် — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`။ raw key ကို **တစ်ကြိမ်သာ** ပြန်ပေးသည်။ quota ငြင်းပယ်ခံရပါက `429` ကို ပြန်ပေးသည်။ |
-| GET    | `/api/v1/registered-keys/[id]`        | စာရင်းသွင်းထားသော key ၏ metadata ကို ရယူရန် (raw material မပါဝင်ပါ)                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | စာရင်းသွင်းထားသော key ကို ရုပ်သိမ်းရန်                                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | အတိအလင်း ရုပ်သိမ်းရန် endpoint (`DELETE` နှင့် အကျိုးသက်ရောက်မှု တူညီသည်)                                                                                                                                                       |
+| Method | Path                                  | Description                                                                                                                                                                                                              |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | မှတ်ပုံတင်ထားသော key များကို စာရင်းပြုစုရန် (ဖုံးကွယ်ထားသော prefix တစ်ခုတည်းသာ)                                                                                                                                          |
+| POST   | `/api/v1/registered-keys`             | မှတ်ပုံတင်ထားသော key အသစ် ထုတ်ပေးရန် — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`။ မူရင်း key ကို **တစ်ကြိမ်သာ** ပြန်ပေးသည်။ quota ငြင်းပယ်ခံရပါက `429` ပြန်ပေးသည်။ |
+| GET    | `/api/v1/registered-keys/[id]`        | မှတ်ပုံတင်ထားသော key ၏ metadata ကို ရယူရန် (မူရင်းအချက်အလက် မပါဝင်ပါ)                                                                                                                                                    |
+| DELETE | `/api/v1/registered-keys/[id]`        | မှတ်ပုံတင်ထားသော key ကို ရုပ်သိမ်းရန်                                                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | အတိအလင်း ရုပ်သိမ်းရန် endpoint (DELETE နှင့် အကျိုးသက်ရောက်မှုတူညီသည်)                                                                                                                                                   |
+| GET    | `/api/v1/providers/[provider]/limits` | provider ၏ ထုတ်ပေးနိုင်မှု ကန့်သတ်ချက်များကို ဖတ်ရန်                                                                                                                                                                     |
+| PUT    | `/api/v1/providers/[provider]/limits` | provider ၏ ထုတ်ပေးနိုင်မှု ကန့်သတ်ချက်များကို သတ်မှတ်ရန် — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                 |
+| GET    | `/api/v1/accounts/[id]/limits`        | account ၏ ထုတ်ပေးနိုင်မှု ကန့်သတ်ချက်များကို ဖတ်ရန်                                                                                                                                                                      |
+| PUT    | `/api/v1/accounts/[id]/limits`        | account ၏ ထုတ်ပေးနိုင်မှု ကန့်သတ်ချက်များကို သတ်မှတ်ရန် — provider route နှင့် body တူညီသည်                                                                                                                              |
 
-**Auth:** စီမံခန့်ခွဲမှု session/API key (`requireManagementAuth`) — `/api/keys` တွင် အသုံးပြုသည့် guard နှင့် တူညီသည်။ dashboard session၊ local CLI token သို့မဟုတ် `manage`/`admin` scope ပါသော API key တစ်ခု ဖြစ်နိုင်သည်။ inference-only API keys များသည် `403` ရရှိမည်။ `/v1/quotas/check` နှင့် `/v1/issues/report` ကိုလည်း ကြည့်ပါ။
+**အထောက်အထားစိစစ်ခြင်း:** management session/API key (`requireManagementAuth`) — `/api/keys` အတွက် အသုံးပြုသည့် guard နှင့် တူညီသည်။ dashboard session၊ local CLI token သို့မဟုတ် `manage`/`admin` scope ပါသော API key တစ်ခုကို အသုံးပြုနိုင်သည်။ inference-only API key များကို `403` ပြန်ပေးသည်။ `/v1/quotas/check` နှင့် `/v1/issues/report` ကိုလည်း ကြည့်ပါ။
 
 ---
 
@@ -1808,23 +1917,23 @@ API key / session တစ်ခုချင်းစီအတွက် သီး�
 
 ## MCP ဆာဗာ
 
-OmniRoute တွင် transport ၃ မျိုး (stdio၊ SSE၊ streamable-http) နှင့် scope သတ်မှတ်ထားသော tools များပါဝင်သည့် ထည့်သွင်းထားသော Model Context Protocol ဆာဗာ ပါဝင်သည်။ အောက်ပါ dashboard endpoint များသည် status/audit data များကို ဖတ်ရှုပြီး HTTP transport များအတွက် proxy အဖြစ် လုပ်ဆောင်သည်။
+OmniRoute တွင် ပေါင်းစပ်ထည့်သွင်းထားသော Model Context Protocol ဆာဗာတစ်ခု ပါဝင်ပြီး သယ်ယူပို့ဆောင်ရေးနည်းလမ်း ၃ မျိုး (stdio၊ SSE၊ streamable-http) နှင့် scope သတ်မှတ်ထားသော ကိရိယာများကို ပံ့ပိုးပေးသည်။ အောက်ပါ dashboard endpoint များသည် အခြေအနေ/စစ်ဆေးမှတ်တမ်းဒေတာများကို ဖတ်ရှုပြီး HTTP သယ်ယူပို့ဆောင်ရေးနည်းလမ်းများအတွက် proxy အဖြစ် ဆောင်ရွက်သည်။
 
-| နည်းလမ်း | လမ်းကြောင်း            | ဖော်ပြချက်                                                                                                       |                      |
-| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET      | `/api/mcp/status`      | Heartbeat၊ transport၊ online အခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ ထိပ်တန်း tools များ၊ ၂၄ နာရီအတွင်း အောင်မြင်မှုနှုန်း |
-| GET      | `/api/mcp/tools`       | `name`၊ `description`၊ `scopes`၊ `phase`၊ `auditLevel`၊ `sourceEndpoints` ပါဝင်သည့် MCP tools စာရင်း             |
-| GET      | `/api/mcp/sse`         | SSE transport အတွက် SSE stream ကို ဖွင့်ရန် (MCP ပိတ်ထားပါက သို့မဟုတ် transport မကိုက်ညီပါက `503` ပြန်ပေးသည်)    |
-| POST     | `/api/mcp/sse`         | SSE transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                                 |
-| GET      | `/api/mcp/stream`      | Streamable HTTP transport ၏ SSE ဘက်ကို ဖွင့်ရန် (ဆာဗာမှ စတင်ပေးပို့သော messages)                                 |
-| POST     | `/api/mcp/stream`      | Streamable HTTP transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                     |
-| DELETE   | `/api/mcp/stream`      | Streamable HTTP session ကို အဆုံးသတ်ရန်                                                                          |
-| GET      | `/api/mcp/audit`       | audit log ကို query လုပ်ရန် — `?limit=`၊ `?offset=`၊ `?tool=`၊ `?success=true                                    | false`၊ `?apiKeyId=` |
-| GET      | `/api/mcp/audit/stats` | စုစည်းထားသော audit စာရင်းအင်းများ (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ ထိပ်တန်း tools များ)        |
+| Method | Path | Description |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Heartbeat၊ သယ်ယူပို့ဆောင်ရေးနည်းလမ်း၊ အွန်လိုင်းအခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ အသုံးများဆုံးကိရိယာများ၊ ၂၄ နာရီအတွင်း အောင်မြင်မှုနှုန်း |
+| GET | `/api/mcp/tools` | `name`၊ `description`၊ `scopes`၊ `phase`၊ `auditLevel`၊ `sourceEndpoints` ပါဝင်သော MCP ကိရိယာများစာရင်း |
+| GET | `/api/mcp/sse` | SSE သယ်ယူပို့ဆောင်ရေးနည်းလမ်းအတွက် SSE stream ကို ဖွင့်သည် (MCP ပိတ်ထားပါက သို့မဟုတ် သယ်ယူပို့ဆောင်ရေးနည်းလမ်း မကိုက်ညီပါက `503` ပြန်ပေးသည်) |
+| POST | `/api/mcp/sse` | SSE သယ်ယူပို့ဆောင်ရေးနည်းလမ်းပေါ်တွင် JSON-RPC frame ပေးပို့သည် |
+| GET | `/api/mcp/stream` | Streamable HTTP သယ်ယူပို့ဆောင်ရေးနည်းလမ်း၏ SSE ဘက်ကို ဖွင့်သည် (ဆာဗာက စတင်ပေးပို့သော မက်ဆေ့ချ်များအတွက်) |
+| POST | `/api/mcp/stream` | Streamable HTTP သယ်ယူပို့ဆောင်ရေးနည်းလမ်းပေါ်တွင် JSON-RPC frame ပေးပို့သည် |
+| DELETE | `/api/mcp/stream` | Streamable HTTP session ကို အဆုံးသတ်သည် |
+| GET | `/api/mcp/audit` | စစ်ဆေးမှတ်တမ်းကို မေးမြန်းသည် — `?limit=`၊ `?offset=`၊ `?tool=`၊ `?success=true                                | false`၊ `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | စုစည်းထားသော စစ်ဆေးမှတ်တမ်းစာရင်းအင်းများ (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ အသုံးများဆုံးကိရိယာများ) |
 
-**အထောက်အထားပြုခြင်း:** `sse`/`stream` transport များသည် MCP-specific auth surface ( `mcp` scope ပါသော Bearer API key) ကို လိုက်နာသည်။ `status`/`tools`/`audit*` route များကို dashboard မှ ဖတ်ရှုနိုင်သည် (dashboard host သို့ ရောက်ရှိနိုင်ခြင်းအပြင် အပိုအထောက်အထားပြုရန် မလိုအပ်ပါ)။
+**အထောက်အထားစစ်ဆေးခြင်း:** `sse`/`stream` သယ်ယူပို့ဆောင်ရေးနည်းလမ်းများသည် MCP အတွက် သီးခြားအထောက်အထားစစ်ဆေးမှုမျက်နှာပြင် ( `mcp` scope ပါသော Bearer API key) ကို လိုက်နာသည်။ `status`/`tools`/`audit*` လမ်းကြောင်းများကို dashboard host သို့ ရောက်ရှိနိုင်ရုံဖြင့် dashboard မှ ဖတ်ရှုနိုင်သည် (အပိုအထောက်အထားစစ်ဆေးမှု မလိုအပ်ပါ)။
 
-> HTTP transport နှစ်ခုလုံးကို `settings.mcpEnabled` နှင့် `settings.mcpTransport` တို့ဖြင့် ထိန်းချုပ်ထားသည် — transport မကိုက်ညီပါက `400`၊ MCP ပိတ်ထားသည့်အခြေအနေဖြစ်ပါက `503` ပြန်ပေးသည်။
+> HTTP သယ်ယူပို့ဆောင်ရေးနည်းလမ်းနှစ်ခုစလုံးကို `settings.mcpEnabled` နှင့် `settings.mcpTransport` တို့ဖြင့် ထိန်းချုပ်ထားသည် — သယ်ယူပို့ဆောင်ရေးနည်းလမ်း မကိုက်ညီပါက `400` ပြန်ပေးပြီး MCP ပိတ်ထားသောအခြေအနေတွင် `503` ပြန်ပေးသည်။
 
 ---
 

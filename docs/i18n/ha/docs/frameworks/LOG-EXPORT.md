@@ -195,144 +195,145 @@ bayanin filayen da aka mayar, don haka sabon wurin aikawa ba ya buƙatar sauyin 
 
 ---
 
-## 4. Makomar BigQuery
+## 4. Wurin tura bayanai na BigQuery
 
 Maɓallan daidaitawa (`type: "bigquery"`):
 
-| Maɓalli              | Bayani                                                                              |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| `projectId`          | Aikin GCP da ke ɗauke da tarin bayanai                                              |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                     |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                     |
-| `location`           | Ana amfani da shi ne kawai idan za a ƙirƙiri tarin bayanai (tsoho `EU`)             |
-| `serviceAccountJson` | Maɓallin asusun sabis. Sirri: ana ɓoye shi yayin adanawa, ba a taɓa mayar da shi ba |
-| `autoCreate`         | Ƙirƙiri tarin bayanai da tebur a fitarwa ta farko (tsoho `true`)                    |
+| Maɓalli              | Bayani                                                                                                           |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Aikin GCP da ke ɗauke da dataset                                                                                 |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                  |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                  |
+| `location`           | Ana amfani da shi ne kawai lokacin da ake buƙatar ƙirƙirar dataset (tsoho `EU`)                                  |
+| `serviceAccountJson` | Maɓallin asusun sabis. Sirri: ana ɓoye shi yayin ajiya, ba a taɓa mayar da shi ba                                |
+| `autoCreate`         | Ƙirƙiri dataset/table da ba su wanzu ba; ƙara ginshiƙan shaidar amfani masu nullable bisa sharadi (tsoho `true`) |
 
-Asusun sabis yana buƙatar `bigquery.tables.updateData` a kan teburin da ake nufi, tare da
-`bigquery.datasets.create` / `bigquery.tables.create` idan an kunna `autoCreate`.
+Asusun sabis ɗin yana buƙatar `bigquery.tables.updateData` a kan teburin da ake nufi, sannan
+`bigquery.datasets.create` / `bigquery.tables.create` idan `autoCreate` yana kunne.
+Sabunta teburin da yake akwai domin ƙara filayen shaidar amfani guda biyu masu nullable kuma yana buƙatar
+`bigquery.tables.update`. Rashin izini guda ɗaya yana dakatar da fitar da bayanai ba tare da ciyar da cursor ɗinsa gaba ba.
 
-Rukunin da aka daidaita raka'ar **cursor** ce, ba ta HTTP ba: `send()` yana rarraba shi zuwa kiran insertAll
-masu layuka 500 aƙalla iyaka, don haka babban `batch_size` ba zai iya ƙetare iyakar buƙata ta 10 MB ta BigQuery ba.
-Ana sake gwada lambobin matsayi na wucin gadi (408/429/500/502/503/504) har sau uku tare da ƙara
-lokacin jira a ninki-ninki, ana sake amfani da insertIds iri ɗaya; gazawar tantancewa da tsarin bayanai suna jefa kuskure a yunƙurin farko maimakon
-ɓata dukkan aikin.
+Batch da aka saita raka'a ce ta **cursor**, ba ta HTTP ba: `send()` yana raba shi zuwa kiran insertAll
+wanda kowannensu bai wuce layuka 500 ba, don haka babban `batch_size` ba zai iya karya iyakar buƙatar BigQuery ta 10 MB ba.
+Ana sake gwada matsayin wucin-gadi (408/429/500/502/503/504) har sau uku tare da ƙarin tazarar lokaci a jere,
+ana sake amfani da insertIds iri ɗaya; kurakuran tantancewa da na tsari suna jefa kuskure a yunƙurin farko
+maimakon cinye aikin.
 
-Teburin da aka ƙirƙira yanzu-yanzu bai riga ya bayyana ga wurin karɓar bayanai masu gudana ba, wanda ke mayar da
-404 na wasu daƙiƙu. Ana sake gwada wannan 404, amma **sai idan wannan aikin ne ya ƙirƙiri teburin** —
-teburin da babu shi da gaske har yanzu yana gaza nan da nan. Lura cewa sake ƙirƙirar tebur da sunan da
-aka goge kwanan nan yana sa BigQuery ya ƙi shigar da bayanai masu gudana na mintuna da dama; wannan
-halayya ce ta gogewa sannan a sake ƙirƙirawa, don haka ya fi kyau a yi amfani da sabon sunan tebur maimakon gogewa da sake ƙara shi.
+Teburin da aka ƙirƙira yanzu-yanzu ba ya bayyana ga wurin karɓar streaming nan take, wanda ke mayar da
+404 na ƴan daƙiƙu. Ana sake gwada wannan 404, amma **kawai idan wannan gudu ne ya ƙirƙiri teburin** —
+teburin da bai wanzu da gaske ba har yanzu yana kasa da sauri. Ka lura cewa sake ƙirƙirar tebur da suna
+da aka share kwanan nan yana sa BigQuery ya ƙi streaming inserts na mintuna da dama; wannan halin
+sakamakon sharewa-sannan-sake-ƙirƙira ne, don haka ka fi son sabon sunan tebur maimakon sharewa da sake ƙara shi.
 
-**Gazawar wani ɓangare tana zuwa a matsayin HTTP 200 tare da `insertErrors[]` da ba komai ba.** Ana ɗaukar wannan a matsayin
-gazawa kuma yana jefa kuskure, wanda shi ne ke hana cursor ci gaba ya wuce layukan da BigQuery bai taɓa
-karɓa ba; `tests/unit/log-export-bigquery.test.ts` yana tabbatar da wannan halayya.
+**Rashin nasara na wani ɓangare yana zuwa a matsayin HTTP 200 tare da `insertErrors[]` da ba komai ba.** Ana ɗaukar
+hakan a matsayin kuskure kuma a jefa shi, wanda shi ne ke hana cursor wuce layukan da BigQuery bai karɓa ba;
+`tests/unit/log-export-bigquery.test.ts` yana tabbatar da wannan ɗabi'a.
 
-Ana jigilar bayanai ta REST kai tsaye — ana musanya shaidar RS256 da aka sanya wa hannu da kai da token na shiga a
-`https://oauth2.googleapis.com/token`, sannan layuka su tafi zuwa `tabledata.insertAll`. Ba a shigo da Google SDK
-ba. Ana adana token na shiga a ma'ajiyar wucin gadi cikin tsarin aiki bisa ga kowane (asusun sabis, iyakar izini).
+Hanyar jigilar bayanai ita ce REST kai tsaye — ana musayar tabbacin RS256 da aka sa hannu da kansa don samun
+alamar izini a `https://oauth2.googleapis.com/token`, sannan a aika layuka zuwa `tabledata.insertAll`.
+Ba a shigar da Google SDK ba. Ana adana alamun izini a cikin aikin yanzu bisa (asusun sabis, scope).
 
-Teburin da aka ƙirƙira yana da ginshiƙi ɗaya ga kowane filin shafin Logs tare da `exported_at`, kuma an tsara shi bisa
-yadda ake yin tambayoyi kan bayanan kira a zahiri:
+Teburin da aka ƙirƙira yana ɗauke da ginshiƙi ɗaya ga kowane filin shafin Logs tare da `exported_at`, kuma an tsara shi
+domin yadda ake bincika rajistan kiran waya a zahiri:
 
-- **An raba shi kashi-kashi bisa rana ta amfani da `timestamp`**, don haka tambayar da aka iyakance da kwanan wata tana bincika waɗannan ranakun kawai.
-- **An haɗa shi rukuni-rukuni bisa `api_key_name`, `provider`, `model`, `status`** (a wannan jeri), don haka tacewa bisa
-  wanda ya gudanar da shi, inda ya tafi, ko ko ya gaza yana ware tubalan da ba a buƙata a cikin kowane kashi. BigQuery
-  yana ba da damar ginshiƙan haɗa rukuni guda huɗu aƙalla iyaka kuma jerinsu yana da muhimmanci: tacewa da `api_key_name` kaɗai
-  yana ware tubalan da ba a buƙata, tacewa da `status` kaɗai ba ya yi.
-- **Zaɓin wa'adin riƙe kashi** ta hanyar `partitionExpirationDays` (0 yana riƙe komai), ana aiwatar da shi
+- **An raba shi bisa rana ta `timestamp`**, don haka tambayar da aka iyakance da kwanan wata kawai tana duba waɗannan ranakun.
+- **An haɗa shi bisa `api_key_name`, `provider`, `model`, `status`** (a wannan jere), don haka tacewa bisa
+  wanda ya gudanar da shi, inda aka aika shi, ko ko ya gaza tana rage tubalan da ake dubawa a cikin kowane bangare. BigQuery
+  yana ba da damar ginshiƙan haɗawa guda huɗu kacal, kuma jere yana da muhimmanci: tacewa bisa `api_key_name` kaɗai
+  tana rage tubalan da ake dubawa, amma tacewa bisa `status` kaɗai ba ta yin hakan.
+- **Riƙe bangare bisa zaɓi** ta hanyar `partitionExpirationDays` (0 yana riƙe komai), ana amfani da shi
   lokacin da aka ƙirƙiri teburin.
 
-Duk saitunan biyu suna aiki ne a lokacin ƙirƙirawa. Teburin da yake akwai yana riƙe da tsarin da yake da shi, don haka
-sanya makomar ta nufi sabon id na tebur idan kana son amfani da su.
+Dukkan saitunan biyu ana amfani da su ne a lokacin ƙirƙira. Teburin da yake akwai yana riƙe tsarin da yake da shi,
+don haka ka nuna wurin tura bayanai zuwa sabon `tableId` idan kana son amfani da su.
 
-`tests/unit/log-export-bigquery.test.ts` yana tabbatar da cewa mai taswirawa da tsarin tebur suna tafiya
-tare, don haka ba za a iya watsar da sabon ginshiƙin bayanan kira a ɓoye yayin fitarwa ba.
+`tests/unit/log-export-bigquery.test.ts` yana tabbatar da cewa mapper da tsarin tebur suna nan daidaitattu,
+don haka ba za a iya watsar da sabon ginshiƙin rajistan kiran waya a ɓoye yayin fitar da shi ba.
 
-Ana rarraba rukunoni bisa **duka biyun** yawan layuka da adadin bytes bayan an jera bayanan don aikawa. Yawan layuka kaɗai bai isa ba
-idan ana fitar da cikakkun bayanan saƙonni: layuka 500 masu ɗauke da umarnin shigarwa na iya kai megabytes da dama, kuma insertAll
-yana ƙin buƙatar da ta wuce 10 MB. Ana rufe gutsure idan ya kai layuka 500 ko 9 MB, duk wanda ya fara zuwa.
+Ana raba batches bisa **yawan layuka da kuma adadin bytes bayan serialisation**. Yawan layuka kaɗai bai isa ba
+da zarar ana fitar da payloads: layuka 500 masu ɗauke da prompts na iya zama megabytes da dama, kuma insertAll
+yana ƙin buƙatar da ta wuce 10 MB. Ana rufe chunks a layuka 500 ko 9 MB, duk wanda ya fara faruwa.
 
 ---
 
-## 5. Wurin aika traces na OTLP/HTTP
+## 5. Mak destination na OTLP/HTTP traces
 
-Saitin yana amfani da `type: "otlp-http"`. Wannan fitarwa ce da aka tsara lokacinta, wadda ke amfani da cursor don fitar da
-rajistar kira da aka adana, ba wurin karɓar abubuwan routing kai tsaye na ƙoƙarin-gwargwado da ke cikin
-`open-sse/services/routing/otel.ts` ba. Ba ya karanta ko sauya environment variables,
-masu ƙidayar lokaci ko buffers na wannan wurin karɓa. Kunna su duka na iya samar da nau'ikan spans guda biyu masu zaman kansu;
-yi amfani da instrumentation scope na `omniroute.log-export` don bambance waɗannan spans na rajistar kira.
+Config yana amfani da `type: "otlp-http"`. Wannan fitarwa ce da aka tsara, wadda cursor ke tallafawa, na
+rikodin kiran da aka adana, ba sink ɗin best-effort na live routing-event da ke cikin
+`open-sse/services/routing/otel.ts` ba. Ba ya karanta ko canza environment
+variables, timers ko buffers na wannan sink ɗin. Kunna duka biyun na iya samar da nau'ikan spans biyu masu zaman kansu;
+yi amfani da scope na instrumentation na `omniroute.log-export` don bambance waɗannan call-log spans.
 
-| Maɓalli                  | Tsohon ƙima / manufa                                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `endpoint`               | Ana buƙatar cikakken URL na traces na HTTP(S); ba a liƙa ƙarin `/v1/traces` a ƙarshe                           |
-| `headers`                | Layukan `Name: value` ko JSON object mai strings na zaɓi; ana ɓoye su da encryption                            |
-| `requestHeaderAllowlist` | Babu komai (a kashe); sunayen headers/farkon sunayensu na abokin ciniki da za a ɗauka a matsayin siffofin span |
-| `serviceName`            | `omniroute`; resource `service.name`                                                                           |
-| `langfuseMapping`        | `false`; yana ƙara siffofin generation/session/user na Langfuse                                                |
-| `identity`               | `pseudonymous`, `keyName`, ko `none`                                                                           |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                                        |
-| `timeoutMs`              | `30000` ga kowane yunƙurin HTTP                                                                                |
-| `environment`            | Ba a saita ba; `langfuse.environment` na zaɓi                                                                  |
+| Maɓalli                  | Default / manufa                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `endpoint`               | Cikakkiyar URL ta HTTP(S) ta traces wajibi ce; ba a ƙara suffix na `/v1/traces` ba          |
+| `headers`                | Layukan `Name: value` na zaɓi ko JSON object na strings; an ɓoye su                         |
+| `requestHeaderAllowlist` | Fanko (a kashe); sunayen/prefixes na client headers da za a kama a matsayin span attributes |
+| `serviceName`            | `omniroute`; resource `service.name`                                                        |
+| `langfuseMapping`        | `false`; yana ƙara Langfuse generation/session/user attributes                              |
+| `identity`               | `pseudonymous`, `keyName`, ko `none`                                                        |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                     |
+| `timeoutMs`              | `30000` a kowane HTTP attempt                                                               |
+| `environment`            | Ba a saita ba; `langfuse.environment` na zaɓi                                               |
 
-Dashboard na gama-gari yana nuna waɗannan filayen. `paths` yana karɓar array na API ko textarea
-mai ainihin paths da aka raba da sabbin layuka/waƙafi. Ana tsallake embeddings, rerank da sauran paths
-sai dai idan an ba su izini a sarari. Layukan da aka tsallake suna ci gaba da matsar da cursor; masu ƙidayar
-`exported`/`exportedTotal` na runner da ake da shi suna ƙirga layukan tushe da aka sarrafa, har da layukan
-da aka tace, maimakon spans da aka karɓa. Ana yin tacewar a cikin tsarin ɗan,
-ba tare da sauya yarjejeniyarsa ta IPC/cursor ba.
+Dashboard na gaba ɗaya yana nuna waɗannan filayen. `paths` yana karɓar API array ko textarea
+mai exact paths da aka raba da sabbin layi/commas. Ana tsallake embeddings, rerank da sauran paths
+sai dai idan an ba su izini a sarari. Layukan da aka tsallake har yanzu suna ci gaba da cursor; counters na
+`exported`/`exportedTotal` na runner ɗin da ke akwai suna ƙirga layukan tushen da aka sarrafa, har da
+layukan da aka tace, maimakon spans da aka karɓa. Ana yin filtering a child, ba tare da canza
+kwangilar IPC/cursor ɗinsa ba.
 
-Tantance URL yana amfani da mataimakin `parseAndValidateNonMetadataUrl` wanda ba ya buƙatar DB daga
-`src/shared/network/outboundUrlGuard.ts`: manufar `block-metadata`. Yana da binciken
-metadata/protocol/bayanan shiga da aka saka a ciki marasa sharadi iri ɗaya da na mai tantance webhook
-lokacin da aka amince da URLs masu zaman kansu, amma da gangan yana ba da damar wuraren localhost/LAN ba tare da
-override na feature-flag na duniya ba. Wannan yana ba da damar endpoints na Langfuse, Phoenix, Tempo da Collector
-da ake gudanarwa a kan na'urar kai, har da endpoints na HTTP masu zaman kansu. Kullum ana toshe hosts na cloud-metadata.
-Ba a bin redirects, don haka collector ba zai iya karkatar da bayanan shiga zuwa wani host ba.
-Kamar mai tsaron URL na lexical da ake da shi, wannan ba ya kulle DNS resolution; sai a saita
-hosts da mai gudanarwa ke sarrafawa kawai. A fifita HTTPS duk lokacin da endpoint ba ya kan hanyar sadarwa da aka amince da ita.
+Ingantawar URL tana amfani da helper ɗin `parseAndValidateNonMetadataUrl` wanda ba ya buƙatar DB daga
+`src/shared/network/outboundUrlGuard.ts`: manufar `block-metadata`. Tana da binciken metadata/protocol/embedded-credential
+iri ɗaya na tilas kamar validator na webhook, tare da ba da izinin private URLs, amma da gangan tana
+ba da damar targets na localhost/LAN ba tare da override na global feature-flag ba. Wannan yana ba da damar
+self-hosted Langfuse, Phoenix, Tempo da Collector endpoints, har da private HTTP endpoints. Cloud-metadata hosts
+ana toshe su koyaushe. Ba a bin redirects, don haka collector ba zai iya tura credentials zuwa wani host daban ba.
+Kamar lexical URL guard da ke akwai, wannan ba ya kulle DNS resolution; a saita hosts da operator ke sarrafawa kawai.
+A fi son HTTPS duk lokacin da endpoint ba ya kan trusted network.
 
 ### Payload da isarwa
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) yana ɗauke da
-span na CLIENT guda ɗaya ga kowane layi da aka amince da shi, wanda ake sa wa sunan ainihin path na buƙatarsa. Sanya suna bisa path yana bambance
-Chat Completions, Responses da Messages ba tare da saka bayanan model ko asali a cikin
-sunan span ba. Siffofin resource sun haɗa da `service.name` da `service.version` na package.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) yana ɗauke da CLIENT
+span guda ɗaya ga kowane layi da aka yarda, wanda aka sanya masa suna da exact request path ɗinsa. Sanya suna ta path
+yana bambance Chat Completions, Responses da Messages ba tare da saka bayanan model ko identity a sunan span ba.
+Resource attributes sun haɗa da `service.name` da `service.version` na package.
 
-Mai rubuta rajistar yunƙurin tattaunawa na yau da kullum (`open-sse/handlers/chatCore/attemptLogging.ts`) yana rubuta
-`duration = Date.now() - startTime` lokacin kammalawa kuma ba ya bayar da timestamp;
-`saveCallLogOperation` a cikin `src/lib/usage/callLogs.ts` yana saita timestamp zuwa lokacin rubutawa
-(kammalawa) idan ba a bayar ba. Saboda haka fitarwa tana saita ƙarshen lokaci = timestamp na layin da farkon lokaci = ƙarshen lokaci − duration
-(milliseconds, da aka juya zuwa nanoseconds na decimal). Ana kuma kiyaye timestamps na tarihi
-da mai kira ya bayar a matsayin lokacin ƙarshe; babu mai bambance farawa/kammalawa ga kowane layi.
-Duration mai null yana zama sifili. Timestamps marasa inganci/waɗanda suka ɓace suna sa batch ya gaza maimakon ƙirƙirar
-spans marasa tabbataccen sakamako. `ttftMs` na iya zama null kuma ana daidaita shi da `omniroute.ttft_ms`.
+Mai rubuta chat attempt na yau da kullum (`open-sse/handlers/chatCore/attemptLogging.ts`) yana rubuta
+`duration = Date.now() - startTime` a lokacin kammalawa kuma ba ya samar da timestamp;
+`saveCallLogOperation` a cikin `src/lib/usage/callLogs.ts` yana saita timestamp ta tsohuwa zuwa lokacin rubutawa
+(wato lokacin kammalawa). Saboda haka fitarwa tana saita end = timestamp na row, sannan start = end − duration
+(milliseconds, an mayar da su zuwa decimal nanoseconds). Timestamps na tarihi da caller ya bayar
+ana kiyaye su a matsayin end time ma; babu bambance-bambancen start/completion ga kowane row.
+Null duration yana zama zero. Timestamps marasa inganci/ɓatattu suna sa batch ɗin ya gaza maimakon samar da
+spans marasa tabbas. `ttftMs` nullable ne kuma ana mapping ɗinsa zuwa `omniroute.ttft_ms`.
 
-Siffofin sun haɗa da `gen_ai.operation.name="chat"`, mai bayarwa, model da aka nema/na amsa,
-tokens na shigarwa/fitarwa, tokens na cache-read/cache-creation/reasoning na zaɓi, matsayin HTTP,
-combo, tushen cache, alamar session da correlation id. Ƙimomin integer na OTLP da timestamps
-strings ne na decimal; strings, booleans da lambobi masu kaso suna amfani da nau'ikan ƙimar OTLP
-nasu na asali. Spans na kuskure suna da matsayin ERROR da saƙon matsayi da aka tsabtace. Rikodin
-asali ba shi da URL na upstream host, don haka ana barin `server.address` maimakon a yi kuskuren
-ɗaukar collector a matsayin sabar model. Ba a fitar da kuɗin amfani.
+Attributes sun haɗa da `gen_ai.operation.name="chat"`, provider, requested/response model,
+input/output tokens, cache-read/cache-creation/reasoning tokens na zaɓi, HTTP status,
+combo, cache source, session tag da correlation id. Integer OTLP values da timestamps su ne decimal strings;
+strings, booleans da fractional numbers suna amfani da native OTLP value variants ɗinsu. Error spans suna da
+ERROR status da sanitized status message. Canonical record ba shi da upstream host URL,
+saboda haka ana barin `server.address` ba a saka shi ba maimakon a danganta collector ba daidai ba da model server.
+Ba a fitar da cost.
 
-`includeBodies=true` kaɗai ne ke loda cikakken abun ciki. Da `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` suna ɗauke da JSON na jikin buƙata/amsa
-da aka tsabtace kamar yadda OmniRoute ya adana shi (ana mayar da shi tsarin asali idan ana iya parse ɗinsa), ba array
-na saƙonnin semconv da aka sake fasalta ba. Jikunan da aka yanke/waɗanda ba JSON ba suna nan a matsayin ɗanyen rubutu. Da `langfuseMapping=true`,
-ana fitar da jikuna ne kawai a matsayin `langfuse.observation.input` / `langfuse.observation.output`;
-ana barin siffofin `gen_ai.*.messages` don a aika kowane jiki sau ɗaya. Dukkan hanyoyin biyu
-suna gadon `maxBodyBytes` daga hanyar loda cikakken abun ciki da ake da ita;
-`omniroute.bodies_truncated=true` yana nuna yankewa.
-Wannan wurin aika bayanai ba ya ƙara wasu snapshots na pipeline ko karanta artifacts marasa tsabtacewa;
-ɗaukar request-header na zaɓi yana amfani da cikakken snapshot na abokin ciniki da ake da shi wanda aka bayyana a ƙasa.
-Yi amfani da jadawalin mintuna kamar `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` yayin fitar da
-jikuna, maimakon tara bayanan da ba a sarrafa ba na kowace awa.
+`includeBodies=true` kawai ne ke ɗora content. Idan `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` suna ɗauke da sanitized request/response
+body JSON kamar yadda OmniRoute ya adana shi (ana canonicalize shi idan ana iya parse ɗinsa), ba wani
+messages array na semconv da aka sake tsara ba. Bodies da aka yanke/waɗanda ba JSON ba suna nan a matsayin raw text.
+Idan `langfuseMapping=true`, ana fitar da bodies ne kawai a matsayin `langfuse.observation.input` /
+`langfuse.observation.output`; ana cire `gen_ai.*.messages` attributes domin a aika kowanne body sau ɗaya.
+Duka modes ɗin suna gadon `maxBodyBytes` daga hydration path da ke akwai;
+`omniroute.bodies_truncated=true` yana nuna yanke bayanai.
+Wannan destination ba ya ƙara wasu pipeline snapshots ko unsanitized artifact reads;
+optional request-header capture yana amfani da hydrated client snapshot da ke akwai wanda aka bayyana a ƙasa.
+A yi amfani da cadence na matakin minti kamar `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` yayin fitar da
+bodies, maimakon tara backlog na awa ɗaya.
 
-### Headers na buƙatar abokin ciniki na zaɓi
+### Client request headers na zaɓi
 
-Ɗaukar headers yana **a kashe bisa tsohon saiti**. Saita `requestHeaderAllowlist` a saitin wurin aika bayanai
-kuma kunna **Fitar da prompts da amsoshi** (`includeBodies: true` a wurin aika bayanai).
-Jerin izinin yana karɓar array na API ko textarea mai sunaye da aka raba da sabon layi/waƙafi:
+Kama headers yana **kashe ta tsohuwa**. Saita `requestHeaderAllowlist` a cikin config na destination
+kuma kunna **Export prompts and responses** (`includeBodies: true` a destination).
+Allowlist ɗin yana karɓar API array ko textarea mai sunaye da aka raba da sabbin layi/commas:
 
 ```json
 {
@@ -340,77 +341,31 @@ Jerin izinin yana karɓar array na API ko textarea mai sunaye da aka raba da sab
 }
 ```
 
-Sunaye suna dacewa da juna daidai ba tare da la’akari da manyan ko ƙananan haruffa ba, sai dai idan `*` guda ɗaya a ƙarshe ya zaɓi mafari
-na sunan header wanda ba fanko ba. Ana ƙin `*` shi kaɗai, alamomin maye-gurbi da aka saka a tsakiya da sunayen header na HTTP marasa inganci.
-Akwai masu zaɓe da ba su wuce 64 ba, kowannensu yana da suna/mafari da bai wuce bait 256 na ASCII ba.
-Wannan saiti ya bambanta da `headers`, wanda ke tantance mai fitarwa ga mai tarawa.
+Sunaye suna dacewa ba tare da la’akari da babban/ƙaramin harafi ba kuma daidai, sai dai idan `*` guda ɗaya a ƙarshen suna ya zaɓi prefix mara komai na sunan header. Bare `*`, wildcards da aka saka a tsakiya, da sunayen HTTP header marasa inganci ana ƙi su. Akwai selectors 64 aƙalla, kuma kowanne yana da suna/prefix mai tsawon bai wuce bytes 256 na ASCII ba. Wannan saitin ya bambanta da `headers`, wanda ke tantance exporter ga collector.
 
-Ɗaukar bayanai yana karanta `pipeline_client_request` kawai, wanda ake cika shi daga
-`clientRawRequest` na cikakken pipeline da aka adana (ko tsohon `clientRequest`). Ba ya taɓa komawa ga header na buƙatar mai samarwa.
-Dole ne an kunna cikakken rubuta rajistar pipeline lokacin da aka rubuta buƙatar. Idan an
-kashe `includeBodies`, ko JSON na hoton bayanan abokin ciniki ya ɓace, ya lalace ko an datse shi, ba a fitar da siffofin
-header. Ƙara `maxBodyBytes` na iya hana datse hoton bayanai a lokacin fitarwa;
-ba zai iya dawo da cikakkun bayanan da ba a taɓa adanawa ba. Ana watsi da hoton bayanai da ya wuce 1 MiB ko yake ɗauke da
-shigarwar header fiye da 256. Fitar da prompt/amsa da ake yi tana ci gaba da kasancewa a kunne tare da
-ɗaukar header; jerin izini ba ya samar da yanayin cika bayanai na header kaɗai.
+Capture yana karanta `pipeline_client_request` kawai, wanda aka cike daga `clientRawRequest` (ko `clientRequest` na tsohon tsarin) na cikakken pipeline da aka adana. Ba ya komawa ga request headers na provider. Dole ne a kunna cikakken pipeline logging lokacin da aka yi rikodin request ɗin. Idan an kashe `includeBodies`, ko JSON na client-snapshot ya ɓace, ya lalace ko aka yanke shi, ba a fitar da siffofin header. Ƙara `maxBodyBytes` na iya hana yanke snapshot a lokacin export; amma ba zai dawo da bayanin da ba a taɓa adanawa ba. Snapshot da ya wuce 1 MiB ko ya ƙunshi fiye da entries 256 na header ana yin watsi da shi. Fitar da prompt/response da ke akwai tana ci gaba tare da header capture; allowlist ba ya samar da yanayin hydration na headers-kawai.
 
-Ƙimomin da aka zaɓa suna zama jerin zaren OTLP na `http.request.header.<full lowercase header name>`,
-ko da zare guda ɗaya ne. Misali, `X-OmniRoute-Meta-Team: example-team` yana zama
-`http.request.header.x-omniroute-meta-team` tare da
+Zaɓaɓɓun ƙimomi suna zama OTLP string arrays na `http.request.header.<full lowercase header name>`, har ma idan string ɗaya ce. Misali, `X-OmniRoute-Meta-Team: example-team` ya zama `http.request.header.x-omniroute-meta-team` tare da
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Ana kiyaye cikakken mafari: waɗannan header ne na yau da kullum, ba tare da tantance filayen kasuwanci ko
-juyawa zuwa metadata na `omniroute.metadata.*` / Langfuse ba. `langfuseMapping` ba ya canza ma’anar
-header. Zaɓaɓɓen `User-Agent` mai ƙima guda ɗaya kuma yana saita daidaitacciyar ƙima guda ta
-`user_agent.original`. Ba a raba wakafi da ke cikin ƙima guda ɗaya. Ana haɗa bambance-bambancen manyan da ƙananan haruffa bisa
-tsarin shigarwar da aka adana; duk wani bambanci marar inganci yana sa a bar duk header ɗin. Ana tsara siffofi bisa suna mai ƙananan haruffa.
+Ana kiyaye cikakken prefix: waɗannan headers na yau da kullum ne, ba a fassara filayen kasuwanci ko a mayar da su zuwa `omniroute.metadata.*` / Langfuse metadata. `langfuseMapping` ba ya canza ma’anar headers. `User-Agent` mai ƙima guda ɗaya da aka zaɓa yana kuma saita standard scalar `user_agent.original`. Ba a raba waƙafi da ke cikin ƙima guda ɗaya. Bambance-bambancen babban/ƙaramin harafi suna haɗuwa bisa tsarin shigarwar da aka adana; idan kowane bambanci ba shi da inganci, ana cire header ɗin gaba ɗaya. Ana jera attributes bisa ƙaramin harafin suna.
 
-Koyaushe ana ware Authorization, Proxy-Authorization, Cookie, Set-Cookie, header na maɓallin API, sunayen da ke ɗauke da
-alamomin auth/token/secret/password/credential, da bayanan shaidar ƙofar shiga ta ciki,
-ko da an zaɓe su ko an rufe wani ɓangarensu a ma’ajiya. Sanannun tsare-tsaren bayanan shaida suna sake amfani da
-mai gano bayanan shaida na bai ɗaya; ana barin alamomin ɓoye bayanai, ba a fitar da su a matsayin ƙimomi masu aminci ba.
-Zare da jerin zare marasa fanko kawai ake karɓa; ba a tilasta lambobi ko abubuwa su koma zare.
-Ana watsi da sunaye marasa inganci, maɓallan prototype, haruffan sarrafawa (sai dai tab na kwance) da Unicode marar tsari
-ba tare da sa rukunin ya gaza ko nuna abubuwan da suke ɗauke da su a cikin kurakurai ba.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, headers na API-key, sunayen da ke ɗauke da alamomin auth/token/secret/password/credential, da bayanan tantancewa na ciki na gateway ana cire su koyaushe, ko da an zaɓe su ko an rufe wani ɓangare daga cikin su a ma’ajiya. Sanannun tsarin credentials suna sake amfani da shared credential detector; alamomin redaction ana cire su, ba a fitar da su a matsayin amintattun ƙimomi ba. Strings da nonempty string arrays kawai ake karɓa; ba a tilasta lambobi ko objects su zama wani nau’i ba. Sunaye marasa inganci, prototype keys, control characters (ban da horizontal tab), da Unicode marar inganci ana yin watsi da su ba tare da lalata batch ko nuna abin da suke ƙunsa a cikin kurakurai ba.
 
-Kowane span yana ɗaukar header da ba su wuce 32 ba, ƙimomi 16 ga kowane header, bait 4096 na UTF-8 ga kowace ƙima,
-da jimillar bait 16384 na UTF-8 a duk sunaye da ƙimomin header da aka ɗauka. Ana barin header da suka wuce girma ko marasa inganci
-gaba ɗaya, ba a datse su ba. Zaɓi shawarar sirri ce ta mai gudanarwa: sunayen da suke kama da masu aminci
-har yanzu suna iya ɗauke da bayanan mutum, kuma waɗannan iyakoki/masu ganowa ba kayan share PII na gama gari ba ne.
+Kowane span yana ɗaukar headers 32 aƙalla, values 16 ga kowane header, bytes 4096 na UTF-8 ga kowace ƙima, da jimillar bytes 16384 na UTF-8 a duk sunayen headers da ƙimomin da aka kama. Headers masu girma fiye da ƙa’ida ko marasa inganci ana cire su gaba ɗaya, ba a yanke su ba. Zaɓe shawarar sirrin operator ce: sunaye masu kama da aminci na iya har yanzu ƙunsar bayanan mutum, kuma waɗannan iyakoki/detectors ba janar PII scrubber ba ne.
 
 ### Iyakokin isarwa
 
-Ana iyakance buƙatu zuwa span 500 da 4 MiB na JSON na UTF-8, har da ambulan bayanai.
-Ana duba girman kowane span da aka amince da shi kafin buƙatar farko ta rukunin cursor. Idan
-span guda ɗaya ya fi iyaka girma, ba a aika kowane ɓangare na rukunin ba kuma yana gaza tare da umarnin rage
-`maxBodyBytes`; ba a jefar da shi a ɓoye ba. Binciken farko yana riƙe da manazartan rikodi da
-ƙidayar bait kawai, yana watsar da kowane span/JSON na wucin gadi; ana sake gina span don gutsattsari masu iyaka
-maimakon riƙe kwafi na biyu na rukunin da aka jera. HTTP 408/429/5xx, gazawar hanyar sadarwa da ƙarewar lokacin jira suna samun aƙalla iyakar
-yunƙuri uku, tare da jinkirin sake gwadawa na 250/500 ms mai ƙaruwa ninki-ninki. Daƙiƙun `Retry-After` ko kwanakin HTTP
-na iya tsawaita jinkiri har zuwa daƙiƙa 5. Sauran matsayin suna gaza nan take. Ƙin karɓar wani ɓangare na OTLP 2xx ma yana jefa kuskure maimakon
-tabbatar da karɓar span da ya ɓace; ana karɓar tabbacin karɓa marar komai ko mai ingantaccen JSON, tare da
-iyakar karanta amsa ta 64 KiB.
+Requests an iyakance su zuwa spans 500 da 4 MiB na JSON na UTF-8, har da envelope. Ana duba girman kowane span da aka yarda da shi kafin request na farko na cursor batch. Idan wani span guda ya fi iyakar girma, ba a aika wani ɓangare na wannan batch kuma aikin yana ƙarewa tare da umarnin rage `maxBodyBytes`; ba a zubar da shi a ɓoye ba. Preflight yana riƙe references na records da ƙididdigar bytes kawai, yana watsar da kowane span/JSON na wucin gadi; ana sake gina spans don bounded chunks maimakon riƙe wani kwafin batch da aka serialize. HTTP 408/429/5xx, gazawar network da timeouts suna samun yunƙurin aƙalla uku, tare da exponential backoff na 250/500 ms. `Retry-After` seconds ko ranakun HTTP na iya tsawaita jinkiri har zuwa seconds 5. Sauran statuses suna ƙarewa nan take. OTLP 2xx partial rejection ma yana jefa kuskure maimakon amincewa da span da ya ɓace; empty ko ingantaccen JSON acknowledgements ana karɓa, tare da iyakar karanta response na 64 KiB.
 
-Kurakurai suna ɗauke da hujjojin mai fitarwa kawai: matsayin HTTP, nau’in sake gwadawa, yunƙuri da adadin span
-da aka aika, ko tsayayyen rubutun gazawar tabbacin karɓa/hanyar sadarwa. Ba a taɓa kwafe jikin amsoshin mai tarawa,
-ƙidayar nasarar wani ɓangare da header na amsa zuwa kurakurai, rajistoci ko
-allon bayanai ba. Ba a tabbatar da karɓar rukunin da ya gaza ko aka karɓi wani ɓangarensa ba: wurin da ake aikawa yana nuna
-Gazawa tare da wannan matsayin, cursor yana tsaya a rukunin ƙarshe da aka tabbatar da karɓa, kuma gudu na gaba
-yana sake aika layuka iri ɗaya. Matsayi na dindindin suna ci gaba da gaza har sai an gyara mai tarawa ko saitin.
-Yi amfani da rajistocin mai tarawa kansa don cikakkun bayanan amsa. Taƙaitattun kurakuran rajistar kira suna riƙe da
-tsarin ɓoye bayanansu dabam.
-`prepare()` ba ya tanadar da komai; Gwaji yana aika `{"resourceSpans":[]}` daidai kuma yana ba da rahoton
-matsayin HTTP ba tare da rubuta span na rajistar kira ba.
+Kurakurai suna ƙunsar bayanan da exporter ya mallaka kawai: HTTP status, ajin retry, adadin yunƙuri da spans da aka aika, ko tsayayyen wording na acknowledgement/network failure. Ba a taɓa kwafe response bodies na collector, ƙididdigar partial-success da response headers zuwa kurakurai, logs ko dashboard ba. Batch da ya gaza ko aka karɓa wani ɓangare ba a amince da shi: destination yana nuna Failing tare da wannan status, cursor yana nan a batch na ƙarshe da aka amince da shi, kuma run na gaba zai sake aika rows ɗin nan. Permanent statuses suna ci gaba da gazawa har sai an gyara collector ko configuration. Yi amfani da logs na collector kansa don cikakkun bayanan response. Takaitattun kurakuran call-log suna riƙe redaction nasu daban.
+`prepare()` ba ya samar da komai; Test yana aika daidai `{"resourceSpans":[]}` kuma yana bayar da rahoton HTTP status ba tare da rubuta call-log spans ba.
 
-ID na trace da ID na span su ne lambobin hex 32/16 na farko na SHA-256 a kan
-`"omniroute.trace\\0" + callLogId` da `"omniroute.span\\0" + callLogId`. Sake aikawa yana ɗauke da
-ID iri ɗaya. Wannan ba garantin kawar da maimaituwa ba ne: wasu tsarin bayan fage, ciki har da karɓar bayanai na Langfuse
-v4, ba sa kawar da span masu ID iri ɗaya. Rushewa ko gazawar wani ɓangaren gutsattsari na iya
-sake aika rukunin cursor guda ɗaya da ba a tabbatar da karɓarsa ba a mafi yawa; ana iya maimaita wannan rukunin gaba ɗaya,
-ba kawai gutsattsarinsa na HTTP na ƙarshe ba. Zaɓi girman rukunin cursor tare da la’akari da wannan musaya.
+Trace ids da span ids su ne hex digits 32/16 na farko na SHA-256 bisa
+`"omniroute.trace\\0" + callLogId` da `"omniroute.span\\0" + callLogId`. Sake aikawa yana ɗauke da ids iri ɗaya. Wannan ba garantin deduplication ba ne: wasu backends, har da Langfuse v4 ingestion, ba sa deduplicate spans masu id iri ɗaya. Crash ko gazawar partial chunk na iya sake aika cursor batch guda ɗaya da ba a amince da shi ba aƙalla; ana iya maimaita wannan batch gaba ɗaya, ba HTTP chunk na ƙarshe kaɗai ba. Zaɓi girman cursor batch tare da la’akari da wannan musayar fa’ida da haɗari.
 
 ### Misalin Langfuse
 
-Saita waɗannan filaye don tsarin Langfuse da kake ɗaukar nauyinsa da kanka:
+Saita waɗannan filayen don Langfuse instance da aka self-host:
 
 ```json
 {
@@ -423,44 +378,32 @@ Saita waɗannan filaye don tsarin Langfuse da kake ɗaukar nauyinsa da kanka:
 }
 ```
 
-Gina ƙimar Authorization a na’urarka a matsayin Base64 na zaren `public-key:secret-key`
-kai tsaye (misali da `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Kada ka liƙa ainihin bayanan shaida cikin rajistoci, hotunan allo ko rahotannin matsala. Daidaitawar tana
-saita `x-langfuse-ingestion-version: 4` ta atomatik; har yanzu ana bayar da Authorization a `headers`.
-Duka header da gishirin ainihi da aka samar suna amfani da tsarin filin sirri mai ɓoyayyen bayanai
-da alamomin maye-gurbi na API da ake da su; ana buƙatar `STORAGE_ENCRYPTION_KEY`.
+Gina ƙimar Authorization a gida a matsayin Base64 na literal `public-key:secret-key`
+string (misali ta amfani da `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Kada a liƙa credentials na gaske a logs, screenshots ko issues. Mapping ɗin yana saita
+`x-langfuse-ingestion-version: 4` ta atomatik; har yanzu ana samar da Authorization a cikin `headers`.
+Dukkan headers da generated identity salt suna amfani da tsarin encrypted secret-field mechanism da API placeholders da ke akwai; ana buƙatar `STORAGE_ENCRYPTION_KEY`.
 
-Taswirantawa yana ƙara nau'i/samfurin samarwa, bayanan amfani na JSON (shigarwa/fitarwa/jimilla da maɓallan
-cache da ake da su), hotunan halin shigarwa/fitarwa na JSON, matakin ERROR/DEFAULT, saƙon matsayi da aka tsabtace,
-sunan trace, id na zama, environment na zaɓi da kuma
-`langfuse.observation.metadata.<key>` da za a iya tacewa don mai samarwa, samfurin da aka nema, hanya, combo, tushen
-cache da matsayi. `langfuse.observation.completion_start_time` yana cikin ISO 8601 a
-lokacin farawa + TTFT ne kawai idan an san TTFT kuma yana cikin tsawon lokacin. Ba a aika siffofin kuɗi.
+Taswira tana ƙara nau'in/ƙirar ƙirƙarawa, bayanan amfani da JSON (shigarwa/fitarwa/jimilla da maɓallan cache da ake da su), hotunan JSON na shigarwa/fitarwa, matakin ERROR/DEFAULT, saƙon matsayi da aka tsabtace, sunan trace, id ɗin zaman, da zaɓin yanayi da kuma
+`langfuse.observation.metadata.<key>` da za a iya tacewa don mai samarwa, ƙirar da aka nema, hanya, haɗi, tushen cache da matsayi. `langfuse.observation.completion_start_time` ISO 8601 ne a lokacin farawa + TTFT kawai idan an san TTFT kuma yana cikin tsawon lokacin. Ba a aika sifofin kuɗi.
 
-Hanyoyin tantance ainihi suna aiki a kan `langfuse.user.id`:
+Yanayin identity suna aiki da `langfuse.user.id`:
 
-- `pseudonymous` (na asali): HMAC-SHA256 na id na cikin gida na maɓallin API tare da salt na bazuwar
-  byte 32 ga kowace makoma. Ana samar da salt lokacin ƙirƙira idan babu shi, a ɓoye shi
-  a matsayin `identitySalt`, ba a taɓa mayar da shi ba, kuma ana riƙe shi yayin gyare-gyare. Ba a taɓa
-  saka id na maɓalli kai tsaye cikin siffofin span ba. Sake ƙirƙira/sauya salt na makoma yana sauya ainihi.
-- `keyName`: sunan maɓallin API da aka saita, wanda da gangan yake bayyana wannan lakabin mai gudanarwa.
-- `none`: babu id na mai amfani. Har yanzu ana fitar da alamomin zama idan suna nan; waɗannan hanyoyin ba sa
-  ɓoye ainihi a cikin duk wani abun cikin prompt ko lakabin zama/alaƙantawa da mai gudanarwa ya bayar.
+- `pseudonymous` (tsoho): HMAC-SHA256 na id ɗin cikin gida na maɓallin API tare da gishirin byte 32 na bazuwar da keɓe ga kowace makoma. Ana samar da gishirin lokacin ƙirƙira idan babu shi, ana ɓoye shi a matsayin `identitySalt`, ba a taɓa mayar da shi ba, kuma ana riƙe shi yayin gyare-gyare. Ba a taɓa saka ɗanyen id ɗin maɓalli cikin sifofin span ba. Sake ƙirƙira ko jujjuya gishirin makoma yana canza identities.
+- `keyName`: sunan maɓallin API da aka tsara, wanda da gangan yake bayyana wannan lakabin ma'aikaci.
+- `none`: babu user id. Har yanzu ana fitar da alamun zaman idan suna nan; waɗannan yanaye-yanayen ba sa ɓoye kowane irin abun ciki na prompt ko alamun zaman/haɗa da ma'aikaci ya bayar.
 
-### Farawa ba tare da cike bayanan baya ba
+### Farawa ba tare da backfill ba
 
-A lokacin ƙirƙira kawai, kunna **Fara daga matsayin yanzu (tsallake rajistocin da ke akwai)** ko aika
-`startFromCurrentPosition: true` a matakin sama na payload na API na ƙirƙira. Yana saita
-`cursor_row_id` zuwa mafi girman rowid na rajistar kira da aka adana a yanzu ta amfani da mataimakan cursor
-da ke akwai, ba tare da migration ba. Na asali shi ne false (cursor 0 da cike tarihin da aka adana).
-Wannan ba saitin sake saita cursor ba ne a lokacin sabuntawa.
+A lokacin ƙirƙira kawai, kunna **Fara daga matsayi na yanzu (tsallake rajistan ayyukan da ake da su)** ko aika
+`startFromCurrentPosition: true` a matakin sama na bayanan buƙatar API na ƙirƙira. Yana saita
+`cursor_row_id` zuwa matsakaicin rowid na rajistan kiran da aka riƙe a yanzu ta amfani da mataimakan cursor da ake da su, ba tare da ƙaura ba. Tsohon ƙima ita ce false (cursor 0 da backfill na tarihin da aka riƙe).
+Ba saitin sake saita cursor ba ne na lokacin sabuntawa.
 
-Ƙarin `ttftMs` na bai ɗaya kuma yana ƙara ginshiƙin `ttft_ms` mai iya karɓar null zuwa mapper na BigQuery
-da schema na sabon tebur: gwajin schema ɗinsa yana buƙatar kowane filin daidaitaccen rikodi ya kasance yana da
-ginshiƙi. Teburan da ke akwai suna ci gaba da fitarwa ba tare da canji ba: `prepare()` yana karanta schema na tebur kuma
-yana tsallake `ttft_ms` kawai idan wannan ginshiƙin ba ya nan. Ƙara ginshiƙin INT64 mai iya karɓar null don samun TTFT
-a gudu na gaba, ko amfani da sabon tebur. Ba a buƙatar PATCH, sauya schema ta atomatik ko ƙarin
-izini; duk sauran filayen layi suna ci gaba da bin tsauraran binciken schema.
+Ƙarin `ttftMs` na gama-gari yana ƙara ginshiƙin `ttft_ms` mai nullable ga mapper na BigQuery
+da tsarin sabon tebur: gwajin tsarin yana buƙatar kowane filin rikodin canonical ya sami ginshiƙi. Teburorin da ake da su suna ci gaba da fitarwa ba tare da canji ba: `prepare()` yana karanta tsarin tebur kuma yana cire `ttft_ms` kawai idan wannan ginshiƙin ba ya nan. Ƙara ginshiƙin INT64 mai nullable don samun TTFT
+a gudu na gaba, ko amfani da sabon tebur. Ginshiƙin TTFT na zaɓi ba ya jawo sabunta tsarin. Ginshiƙan shaidar amfani
+suna bin tsarin dacewa na sharadi, na zaɓi, da aka bayyana a ƙasa; sauran filayen layi suna riƙe tsauraran binciken tsarin.
 
 ---
 
@@ -485,15 +428,25 @@ fom ɗin dashboard duk suna karanta rajistar.
 
 ---
 
-## 7. Amfani da shi
+## 7. Aiki da shi
 
-- **Dashboard**: Haɗe-haɗe → Fitar da rajistan ayyuka. Ƙara wurin aika bayanai, gudanar da **Gwaji** don duba bayanan shiga
+- **Dashboard**: Haɗin kai → Fitar da log. Ƙara wurin aika bayanai, gudanar da **Test** don duba bayanan tantancewa
   ba tare da rubuta layuka ba, sannan kunna shi.
-- **Bayanan da ke jiran aikawa**: kowane katin wurin aika bayanai yana nuna layukan da ke jiran aikawa da alamar matsayi; `GET
-/api/log-export/status` yana dawo da waɗannan adadin tare da gudu 20 na ƙarshe na aikin.
-- **Gazawar wurin aika bayanai ɗaya ba ta sa sauran su gaza** — taƙaitaccen bayanin gudu yana rubuta matsayin kowane wurin aika bayanai
-  a cikin `last_status` / `last_error`, kuma tarihin gudun aikin yana adana jimillar sakamakon.
-- **Share wurin aika bayanai yana share alamar matsayinsa.** Sake ƙara shi yana farawa daga mafi tsufan
-  rajistan kira da aka riƙe, wanda yake sake aika layukan da watakila wurin aika bayanai ya riga ya mallaka. A BigQuery, `insertId` na kowane layi
-  yana hana wannan maimaitawar ne kawai a cikin lokacin kawar da maimaitattun bayanai na BigQuery kansa, don haka ya fi kyau a kashe
-  wurin aika bayanai maimakon a share shi.
+- **Abubuwan da suka taru**: katin kowane wurin aika bayanai yana nuna layukan da suke jira da alamar ci gaba; `GET
+/api/log-export/status` yana dawo da adadin iri ɗaya tare da gudanarwar ayyuka 20 na ƙarshe.
+- **Gazawar wani wurin aika bayanai ba ta sa sauran su gaza ba** — taƙaitaccen sakamakon gudanarwa yana adana
+  matsayi na kowane wurin aika bayanai a cikin `last_status` / `last_error`, kuma tarihin gudanarwar aiki yana riƙe da jimillar.
+- **Share wurin aika bayanai yana share alamar ci gabansa.** Sake ƙarawa yana farawa daga tsohon
+  log ɗin kira da aka adana, wanda ke sake aika layukan da wurin aika bayanan ya riga ya mallaka. A BigQuery, `insertId` na kowane layi yana hana
+  maimaitawa ne kawai a cikin wa’adin BigQuery na kansa na gano kwafi, saboda haka an fi son kashe
+  wurin aika bayanai maimakon share shi.
+
+### Daidaituwar tsarin shaidar amfani
+
+Sabbin teburin BigQuery sun haɗa da `usage_evidence` mai iya zama babu (STRING mai ɗauke da JSON) da
+`usage_estimated` (BOOL). Idan an kunna `autoCreate`, teburin da yake akwai zai iya karɓar
+waɗannan ginshiƙai masu iya zama babu da suka ɓace kawai. Mai fitarwa yana kiyaye cikakken tsarin
+da yake akwai, har da bayanan filaye, sannan yana aika PATCH mai sharaɗi ta amfani da etag da aka dawo da shi. Canjin tsarin da aka yi a lokaci guda yana sa fitarwar ta gaza maimakon ta maye gurbin
+shi; gudanarwa na gaba zai sake karanta teburin.
+
+Idan an kashe `autoCreate`, ƙara waɗannan ginshiƙai da kanku kafin fitar da bayanan da ke ɗauke da shaidar amfani. Rashin metadata na tsarin/etag ko sabuntawa da ya gaza shima yana hana saka bayanan da ke ɗauke da shaida. Alamar ci gaban fitarwar ba ta ci gaba a wannan gazawar ba, kuma ba a taɓa zubar da shaidar a ɓoye ba. Adana log na cikin gida har yanzu yana aiki yayin da aka toshe fitarwa, don haka a warware gazawar kafin layukan tushen da aka adana su ƙare.

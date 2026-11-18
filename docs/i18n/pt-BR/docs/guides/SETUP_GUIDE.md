@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-O painel é aberto em `http://localhost:20128`, e a URL base da API é `http://localhost:20128/v1`.
+O painel abre em `http://localhost:20128` e API base URL é `http://localhost:20128/v1`.
+
+> **usuários npm:** Se o npm avisar que os scripts de instalação foram bloqueados (por exemplo, `omniroute`, `better-sqlite3`), consulte [Solução de problemas — npm install-scripts bloqueados](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Usuários do pnpm:** a flag `--allow-build` é necessária para habilitar os scripts de compilação nativos de `better-sqlite3` e `@swc/core`. O comando `pnpm approve-builds -g` não é compatível com instalações globais no pnpm v11.
+> **usuários pnpm:** o sinalizador `--allow-build` é necessário para ativar scripts de construção nativos para `better-sqlite3` e `@swc/core`. O comando `pnpm approve-builds -g` não é compatível com instalações globais no pnpm v11.
 
-### Arch Linux (AUR)
+### Arco Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-O [pacote AUR](https://aur.archlinux.org/packages/omniroute-bin) instala o OmniRoute e fornece um serviço de usuário do systemd.
+O [pacote AUR](https://aur.archlinux.org/packages/omniroute-bin) instala OmniRoute e fornece um serviço de usuário systemd.
 
-### A partir do código-fonte
+### Da fonte
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Observação para Windows:** por padrão, o OmniRoute usa `%APPDATA%\omniroute` quando o diretório legado `%USERPROFILE%\.omniroute` não está presente. Defina `DATA_DIR` para escolher um local diferente para o diretório de dados.
+> **nota Windows :** Por padrão, OmniRoute usa `%APPDATA%\omniroute` quando o diretório `%USERPROFILE%\.omniroute` herdado não está presente. Configure `DATA_DIR` para escolher um local de diretório de dados diferente.
 
-> **Observação:** `npm install` gera automaticamente o `.env` a partir de `.env.example` na primeira execução. Instalações subsequentes não sobrescreverão um `.env` existente, preservando as personalizações. Para gerá-lo novamente, exclua o `.env` antes de executar o comando outra vez.
+> **Observação:** `npm install` gera automaticamente `.env` a partir de `.env.example` na primeira execução. As instalações subsequentes não substituirão um `.env` existente, portanto as personalizações serão preservadas. Para propagar novamente, exclua `.env` antes de executar novamente.
 
 ### Docker
 
-Consulte o [Guia do Docker](./DOCKER_GUIDE.md) para obter a configuração completa do Docker, incluindo perfis do Compose e HTTPS com Caddy.
+Consulte o [Guia Docker](./DOCKER_GUIDE.md) para obter a configuração completa Docker, incluindo perfis do Compose e Caddy HTTPS.
 
-### Aplicativo para desktop (Electron)
+### Aplicativo de desktop (Electron)
 
-O OmniRoute inclui um wrapper para desktop desenvolvido com Electron 41 + electron-builder 26.10. Scripts disponíveis (na raiz do workspace):
+OmniRoute fornece um wrapper de desktop construído no Electron 41 + electron-builder 26.10. Scripts disponíveis (raiz do espaço de trabalho):
 
 ```bash
-npm run electron:dev          # Executa o aplicativo para desktop com recarregamento automático
-npm run electron:build        # Compila para o sistema operacional atual (detectado automaticamente)
-npm run electron:build:win    # Instalador para Windows (NSIS + portátil)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Testa superficialmente a compilação empacotada
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-As versões dos instaladores para desktop são anexadas às Releases do GitHub. Para obter uma análise detalhada do Electron (assinatura, ponte IPC, distribuições), consulte [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
+As versões dos instaladores de desktop estão anexadas às versões GitHub. Para o aprofundamento completo Electron (assinatura, ponte IPC, distros), consulte [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Servidor sem interface gráfica (CI/automação)
+### Servidor sem cabeça (CI/automation)
 
-Para configurações não assistidas (Docker, Kubernetes, CI), use:
+Para configurações autônomas (Docker, Kubernetes, CI), use:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Combinado com variáveis de ambiente (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` etc.), isso permite iniciar uma instância do OmniRoute de forma totalmente programável.
+Combinado com env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, etc.), isso permite que você crie uma instância OmniRoute totalmente programável por script.
 
-### Opções da CLI
+### Opções CLI
 
-| Comando                 | Descrição                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `omniroute`             | Inicia o servidor (`PORT=20128`, API e painel na mesma porta)                      |
-| `omniroute setup`       | Integração guiada pela CLI para senha e primeiro provedor                          |
-| `omniroute doctor`      | Executa verificações locais de integridade sem iniciar o servidor                  |
-| `omniroute providers`   | Descobre, lista, valida e testa provedores pela CLI                                |
-| `omniroute config`      | Configuração de ferramentas CLI — lista, obtém, define e valida configurações      |
-| `omniroute status`      | Painel de status offline — versão, banco de dados, ferramentas e configuração      |
-| `omniroute logs`        | Transmite logs de uso da API (compatível com `--follow`)                           |
-| `omniroute update`      | Verifica ou aplica atualizações do OmniRoute                                       |
-| `omniroute provider`    | Gerencia conexões de provedores — adiciona, lista, remove, testa e define o padrão |
-| `omniroute --port 3000` | Define a porta canônica/da API como 3000                                           |
-| `omniroute --mcp`       | Inicia o servidor MCP (transporte stdio)                                           |
-| `omniroute --no-open`   | Não abre o navegador automaticamente                                               |
-| `omniroute --help`      | Exibe a ajuda                                                                      |
+| Comando                 | Descrição                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `omniroute`             | Iniciar servidor (`PORT=20128`, API e dashboard na mesma porta)               |
+| `omniroute setup`       | Integração guiada CLI para senha e primeiro provedor                          |
+| `omniroute doctor`      | Execute verificações de integridade locais sem iniciar o servidor             |
+| `omniroute providers`   | Descubra, liste, valide e teste provedores do CLI                             |
+| `omniroute config`      | configuração da ferramenta CLI lista —, obter, definir, validar configurações |
+| `omniroute status`      | Versão — do painel de status offline, DB, ferramentas, configuração           |
+| `omniroute logs`        | Transmitir logs de uso do API (suporta `--follow`)                            |
+| `omniroute update`      | Verifique ou aplique atualizações OmniRoute                                   |
+| `omniroute provider`    | Gerenciar conexões de provedor — adicionar, listar, remover, testar, padrão   |
+| `omniroute --port 3000` | Defina a porta canonical/API como 3000                                        |
+| `omniroute --mcp`       | Inicie o servidor MCP (transporte stdio)                                      |
+| `omniroute --no-open`   | Não abra o navegador automaticamente                                          |
+| `omniroute --help`      | Mostrar ajuda                                                                 |
 
-A configuração sem interface gráfica pode ser automatizada com flags ou variáveis de ambiente:
+A configuração headless pode ser programada com sinalizadores ou variáveis de ambiente:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Gerencie provedores via SSH ou scripts sem abrir o painel:
+Gerencie provedores de SSH ou scripts sem abrir o painel:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Código Claude :**
 
+O código Claude se conecta por meio de HTTP, que `omniroute --mcp` (stdio) não inicia. O transporte HTTP está desativado por padrão: habilite-o primeiro no servidor em execução. Quando o login do painel está habilitado, uma solicitação sem credencial obtém `401`, então passe uma chave API que contém `mcp:connect` (ou `manage`); uma chave sem `manage`/`admin` também precisa do escopo de cada ferramenta (consulte [escopos da ferramenta MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

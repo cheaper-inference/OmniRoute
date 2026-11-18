@@ -199,144 +199,162 @@ palautetuista kenttäkuvauksista, joten uusi kohde ei edellytä käyttöliittym�
 
 Asetusavaimet (`type: "bigquery"`):
 
-| Avain                | Huomautukset                                                        |
-| -------------------- | ------------------------------------------------------------------- |
-| `projectId`          | GCP-projekti, jossa tietojoukko sijaitsee                           |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                     |
-| `tableId`            | `[A-Za-z0-9_]+`                                                     |
-| `location`           | Käytetään vain, kun tietojoukko on luotava (oletus `EU`)            |
-| `serviceAccountJson` | Palvelutilin avain. Salainen: salattu levossa, ei koskaan palauteta |
-| `autoCreate`         | Luo tietojoukko ja taulu ensimmäisellä viennillä (oletus `true`)    |
+| Avain                | Huomautukset                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP-projekti, joka sisältää datasetin                                                           |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                 |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                 |
+| `location`           | Käytetään vain, kun dataset on luotava (oletus `EU`)                                            |
+| `serviceAccountJson` | Palvelutilin avain. Salainen: salattu levossa, ei koskaan palauteta                             |
+| `autoCreate`         | Luo puuttuvan datasetin/taulun; lisää ehdollisesti nullable-käyttötodistekentät (oletus `true`) |
 
-Palvelutili tarvitsee kohde­tauluun oikeuden `bigquery.tables.updateData` sekä
-oikeudet `bigquery.datasets.create` / `bigquery.tables.create`, kun `autoCreate` on käytössä.
+Palvelutili tarvitsee oikeuden `bigquery.tables.updateData` kohdetaulussa sekä oikeudet
+`bigquery.datasets.create` / `bigquery.tables.create`, kun `autoCreate` on käytössä.
+Olemassa olevan taulun päivittäminen kahden nullable-käyttötodistekentän lisäämiseksi edellyttää
+myös oikeutta `bigquery.tables.update`. Puuttuva käyttöoikeus epäonnistuttaa viennin ilman, että
+sen kursoria siirretään eteenpäin.
 
-Määritetty erä on **kohdistimen** yksikkö, ei HTTP-yksikkö: `send()` pilkkoo sen enintään
-500 rivin insertAll-kutsuiksi, joten suuri `batch_size` ei voi ylittää BigQueryn 10 Mt:n pyyntörajaa.
-Tilapäisten tilakoodien (408/429/500/502/503/504) jälkeen pyyntöä yritetään uudelleen enintään kolme kertaa
-eksponentiaalisesti kasvavalla viiveellä ja samoilla insertIds-tunnisteilla; todennus- ja skeemavirheet aiheuttavat poikkeuksen heti ensimmäisellä yrityksellä
-sen sijaan, että ajoa jatkettaisiin turhaan.
+Määritetty erä on **kursoriyksikkö**, ei HTTP-yksikkö: `send()` pilkkoo sen insertAll-kutsuiksi,
+joissa on enintään 500 riviä, joten suuri `batch_size` ei voi ylittää BigQueryn 10 Mt:n
+pyyntörajaa. Tilapäiset tilat (408/429/500/502/503/504) yritetään uudelleen enintään kolme kertaa
+eksponentiaalisella viiveellä käyttäen samoja insertId-tunnisteita; todennus- ja skeemavirheet
+aiheuttavat poikkeuksen ensimmäisellä yrityksellä sen sijaan, että ne kuluttaisivat ajon.
 
-Hetki sitten luotu taulu ei vielä näy suoratoiston päätepisteessä, joka vastaa
-muutaman sekunnin ajan koodilla 404. Tämän 404-vastauksen jälkeen pyyntöä yritetään uudelleen, mutta **vain jos taulu luotiin tämän ajon aikana** —
-aidosti puuttuva taulu aiheuttaa edelleen virheen heti. Huomaa, että taulun luominen uudelleen nimellä,
-joka poistettiin äskettäin, saa BigQueryn hylkäämään suoratoistolisäykset useiden minuuttien ajan; tämä on
-poistamisen ja uudelleenluonnin ominaisuus, joten käytä mieluummin uutta taulun nimeä kuin poista taulu ja lisää se uudelleen.
+Juuri luotu taulu ei vielä näy suoratoistopäätepisteelle, joka palauttaa muutaman sekunnin ajan
+404:n. Tämä 404 yritetään uudelleen, mutta **vain silloin, kun tämä ajo loi taulun** —
+aidosti puuttuva taulu epäonnistuu edelleen välittömästi. Huomaa, että hiljattain poistetun taulun
+luominen uudelleen samalla nimellä saa BigBigueryn estämään suoratoistolisäykset useiden minuuttien
+ajan; tämä johtuu poistamisesta ja uudelleenluomisesta, joten uuden taulun nimen käyttäminen on
+suositeltavampaa kuin taulun poistaminen ja lisääminen uudelleen.
 
-**Osittainen epäonnistuminen palautuu HTTP 200 -vastauksena, jonka `insertErrors[]` ei ole tyhjä.** Tämä käsitellään
-virheenä ja aiheuttaa poikkeuksen, mikä estää kohdistinta etenemästä niiden rivien ohi, joita BigQuery ei koskaan
-hyväksynyt; `tests/unit/log-export-bigquery.test.ts` varmistaa tämän toiminnan.
+**Osittainen epäonnistuminen saapuu HTTP 200 -vastauksena, jossa on epätyhjä `insertErrors[]`.**
+Tämä käsitellään epäonnistumisena ja aiheuttaa poikkeuksen, mikä estää kursorin etenemisen niiden
+rivien ohi, joita BigQuery ei hyväksynyt; `tests/unit/log-export-bigquery.test.ts` varmistaa tämän
+toiminnan.
 
-Tiedonsiirto käyttää pelkkää REST-rajapintaa — itse allekirjoitettu RS256-väite vaihdetaan käyttöoikeustunnukseen osoitteessa
-`https://oauth2.googleapis.com/token`, minkä jälkeen rivit lähetetään kohteeseen `tabledata.insertAll`. Googlen SDK:ta ei
-oteta mukaan. Käyttöoikeustunnukset tallennetaan prosessin sisäiseen välimuistiin kutakin (palvelutili, käyttöoikeusalue) -paria kohden.
+Siirtotapa on pelkkä REST — itse allekirjoitettu RS256-väittämä vaihdetaan käyttöoikeustunnukseen
+osoitteessa `https://oauth2.googleapis.com/token`, minkä jälkeen rivit lähetetään kohteeseen
+`tabledata.insertAll`. Google SDK:ta ei lisätä riippuvuudeksi. Käyttöoikeustunnukset välimuistitetaan
+prosessin sisällä palvelutilikohtaisesti (palvelutili, käyttöalue).
 
-Luotuun tauluun tulee yksi sarake kutakin Lokit-välilehden kenttää kohden sekä `exported_at`, ja sen rakenne vastaa
-tapaa, jolla kutsulokeja käytännössä haetaan:
+Luotu taulu sisältää yhden sarakkeen kutakin Lokit-välilehden kenttää kohti sekä sarakkeen
+`exported_at`, ja sen rakenne on suunniteltu siihen, miten kutsulokeja käytännössä kysellään:
 
-- **Päiväkohtainen osiointi kentän `timestamp` perusteella**, joten päivämäärällä rajattu kysely lukee vain kyseiset päivät.
-- **Klusterointi kenttien `api_key_name`, `provider`, `model`, `status` mukaan** (tässä järjestyksessä), joten suodatus
-  suorittajan, kohteen tai epäonnistumisen perusteella karsii luettavia lohkoja kunkin osion sisällä. BigQuery
-  sallii enintään neljä klusterointisaraketta, ja järjestyksellä on merkitystä: pelkkään `api_key_name`-kenttään kohdistuva suodatin
-  karsii lohkoja, mutta pelkkään `status`-kenttään kohdistuva suodatin ei.
-- **Valinnainen osioiden säilytysaika** asetuksella `partitionExpirationDays` (0 säilyttää kaiken), otetaan käyttöön
-  taulua luotaessa.
+- **Päivän mukaan osioitu sarakkeen `timestamp` perusteella**, joten päivämäärällä rajattu kysely
+  lukee vain kyseiset päivät.
+- **Klusteroitu sarakkeiden `api_key_name`, `provider`, `model`, `status` perusteella** (tässä
+  järjestyksessä), joten suodattaessa sen mukaan, kuka suoritti kutsun, minne se lähetettiin tai
+  epäonnistuiko se, lohkoja voidaan karsia kunkin osion sisältä. BigQuery sallii enintään neljä
+  klusterointisaraketta, ja järjestyksellä on merkitystä: pelkän `api_key_name`-sarakkeen suodatus
+  karsii lohkoja, kun taas pelkän `status`-sarakkeen suodatus ei.
+- **Valinnainen osioiden säilytys** asetuksella `partitionExpirationDays` (0 säilyttää kaiken),
+  jota sovelletaan taulua luotaessa.
 
-Molemmat asetukset tulevat voimaan luontihetkellä. Olemassa olevan taulun rakenne säilyy ennallaan, joten
-määritä kohteelle uusi taulutunniste, jos haluat ottaa ne käyttöön.
+Molemmat asetukset vaikuttavat luontihetkellä. Olemassa oleva taulu säilyttää nykyisen rakenteensa,
+joten osoita kohde uuteen taulutunnisteeseen, jos haluat ottaa ne käyttöön.
 
-`tests/unit/log-export-bigquery.test.ts` varmistaa, että kenttien muunnos ja taulun skeema pysyvät
-yhtenevinä, jotta uusi kutsulokin sarake ei voi jäädä huomaamatta pois viennistä.
+`tests/unit/log-export-bigquery.test.ts` varmistaa, että muunnin ja taulun skeema pysyvät
+yhtäpitävinä, joten uutta kutsulokin saraketta ei voida huomaamatta jättää pois viennin yhteydessä.
 
-Erät pilkotaan **sekä** rivimäärän että sarjoitetun tavumäärän perusteella. Pelkkä rivimäärä ei riitä,
-kun myös hyötykuormat viedään: 500 kehotteita sisältävää riviä voi olla kooltaan kymmeniä megatavuja, ja insertAll
-hylkää yli 10 Mt:n pyynnön. Lohko suljetaan, kun 500 riviä tai 9 Mt täyttyy sen mukaan, kumpi saavutetaan ensin.
+Erät pilkotaan **sekä rivimäärän että sarjallistettujen tavujen perusteella**. Pelkkä rivimäärä ei
+riitä, kun hyötykuormia viedään: kehotteita sisältävät 500 riviä voivat olla kymmeniä megatavuja,
+ja insertAll hylkää yli 10 Mt:n pyynnön. Osat suljetaan, kun täynnä on 500 riviä tai 9 Mt, kumpi
+tahansa täyttyy ensin.
 
 ---
 
 ## 5. OTLP/HTTP-jäljitysten kohde
 
-Asetuksissa käytetään arvoa `type: "otlp-http"`. Tämä on tallennettujen kutsulokien ajastettu,
-kursoriin perustuva vienti, ei parhaansa mukaan toimiva reaaliaikainen reititystapahtumien nielu
-tiedostossa `open-sse/services/routing/otel.ts`. Se ei lue eikä muuta kyseisen nielun
-ympäristömuuttujia, ajastimia tai puskureita. Molempien käyttöönotto voi tuottaa kahdenlaisia
-toisistaan riippumattomia spaneja; erota nämä kutsulokispanit instrumentointialueen
-`omniroute.log-export` avulla.
+Asetuksissa käytetään arvoa `type: "otlp-http"`. Kyseessä on ajastettu, kohdistimen tukema
+tallennettujen kutsulokien vienti, ei kohteessa
+`open-sse/services/routing/otel.ts` oleva parhaan yrityksen reaaliaikainen
+reititystapahtumien vastaanotin. Se ei lue vastaanottimen ympäristömuuttujia, ajastimia tai
+puskureita eikä muuta niitä. Molempien käyttöönotto voi tuottaa kahden itsenäisen tyyppisiä
+span-olioita; käytä `omniroute.log-export`-instrumentointialuetta erottaaksesi nämä
+kutsulokispan-oliot.
 
-| Avain                    | Oletusarvo / tarkoitus                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `endpoint`               | Pakollinen täydellinen HTTP(S)-jäljitys-URL; päätettä `/v1/traces` ei lisätä                      |
-| `headers`                | Valinnaiset `Name: value` -rivit tai merkkijonoja sisältävä JSON-objekti; salattu                 |
-| `requestHeaderAllowlist` | Tyhjä (pois käytöstä); span-attribuutteina tallennettavat asiakkaan otsakkeiden nimet/etuliitteet |
-| `serviceName`            | `omniroute`; resurssin `service.name`                                                             |
-| `langfuseMapping`        | `false`; lisää Langfusen generointi-/istunto-/käyttäjäattribuutit                                 |
-| `identity`               | `pseudonymous`, `keyName` tai `none`                                                              |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                           |
-| `timeoutMs`              | `30000` kutakin HTTP-yritystä kohti                                                               |
-| `environment`            | Ei asetettu; valinnainen `langfuse.environment`                                                   |
+| Avain                    | Oletus / tarkoitus                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `endpoint`               | Pakollinen täydellinen HTTP(S)-jäljitysten URL-osoite; `/v1/traces`-päätettä ei lisätä    |
+| `headers`                | Valinnaiset `Name: value` -rivit tai merkkijonoista koostuva JSON-objekti; salattu        |
+| `requestHeaderAllowlist` | Tyhjä (pois käytöstä); kerättävien asiakasotsakkeiden nimet/etuliitteet span-määritteiksi |
+| `serviceName`            | `omniroute`; resurssin `service.name`                                                     |
+| `langfuseMapping`        | `false`; lisää Langfuse-sukupolvi-/istunto-/käyttäjämääritteet                            |
+| `identity`               | `pseudonymous`, `keyName` tai `none`                                                      |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                   |
+| `timeoutMs`              | `30000` kutakin HTTP-yritystä kohden                                                      |
+| `environment`            | Asettamatta; valinnainen `langfuse.environment`                                           |
 
-Yleinen hallintanäkymä näyttää nämä kentät. `paths` hyväksyy API-taulukon tai tekstialueen,
-jossa tarkat polut erotetaan rivinvaihdoilla tai pilkuilla. Embeddings-, rerank- ja muut polut
-ohitetaan, ellei niitä ole erikseen sallittu. Myös ohitetut rivit siirtävät kursoria eteenpäin;
+Yleinen hallintapaneeli näyttää nämä kentät. `paths` hyväksyy API-taulukon tai tekstialueen,
+jossa tarkat polut on eroteltu rivinvaihdoilla/pilkuilla. Embeddings-, rerank- ja muut polut
+ohitetaan, ellei niitä sallita nimenomaisesti. Ohitetut rivit kasvattavat silti kohdistinta;
 nykyisen suorittimen `exported`/`exportedTotal`-laskurit laskevat käsitellyt lähderivit,
-myös suodatetut rivit, eivätkä hyväksyttyjä spaneja. Suodatus tehdään aliprosessissa muuttamatta
-sen IPC-/kursorisopimusta.
+mukaan lukien suodatetut rivit, eivät hyväksyttyjä span-olioita. Suodatus tehdään lapsiprosessissa
+muuttamatta sen IPC-/kohdistinsopimusta.
 
-URL-osoitteen validointi käyttää tietokannasta riippumatonta `parseAndValidateNonMetadataUrl`-apufunktiota
-tiedostosta `src/shared/network/outboundUrlGuard.ts`: käytäntöä `block-metadata`. Siinä on samat
-ehdottomat metatieto-, protokolla- ja upotettujen tunnistetietojen tarkistukset kuin webhook-validaattorissa,
-kun yksityiset URL-osoitteet on sallittu, mutta se sallii tarkoituksella localhost-/LAN-kohteet ilman
-globaalia ominaisuuslipun ohitusta. Tämä mahdollistaa itse ylläpidetyt Langfuse-, Phoenix-, Tempo- ja
-Collector-päätepisteet, myös yksityiset HTTP-päätepisteet. Pilvimetatietojen isännät estetään aina.
-Uudelleenohjauksia ei seurata, joten keräin ei voi ohjata tunnistetietoja toiselle isännälle.
-Nykyisen leksikaalisen URL-suojauksen tavoin tämä ei lukitse DNS-selvityksen tulosta; määritä vain
-ylläpitäjän hallitsemia isäntiä. Suosi HTTPS:ää aina, kun päätepiste ei ole luotetussa verkossa.
+URL-osoitteiden validoinnissa käytetään tietokannasta riippumatonta
+`parseAndValidateNonMetadataUrl`-apufunktiota tiedostosta
+`src/shared/network/outboundUrlGuard.ts`: `block-metadata`-käytäntöä. Siinä on samat
+ehdottomat metadata-, protokolla- ja upotettujen tunnistetietojen tarkistukset kuin
+webhook-validaattorissa, mutta yksityiset URL-osoitteet on sallittu ilman yleisen
+ominaisuuslipun ohitusta. Näin voidaan käyttää itse ylläpidettyjä Langfuse-, Phoenix-, Tempo-
+ja Collector-päätepisteitä, mukaan lukien yksityiset HTTP-päätepisteet.
+Pilvimetadatan isännät estetään aina.
+Uudelleenohjauksia ei seurata, joten Collector ei voi uudelleenohjata tunnistetietoja
+toiseen isäntään. Kuten nykyinen leksikaalinen URL-vartija, tämä ei lukitse DNS-resoluutiota;
+määritä vain operaattorin hallitsemia isäntiä. Suosi HTTPS:ää aina, kun päätepiste ei ole
+luotetussa verkossa.
 
 ### Hyötykuorma ja toimitus
 
 OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) sisältää yhden
-CLIENT-spanin kutakin sallittua riviä kohti, ja span nimetään sen tarkan pyyntöpolun mukaan.
-Polkuun perustuva nimeäminen erottaa Chat Completions-, Responses- ja Messages-pyynnöt toisistaan
-sisällyttämättä mallin tai identiteetin tietoja spanin nimeen. Resurssiattribuutteihin kuuluvat
-`service.name` ja paketin `service.version`.
+CLIENT-span-olion kutakin sallittua riviä kohden; span-olio nimetään tarkan pyyntöpolun mukaan.
+Polkujen nimeäminen erottaa Chat Completions-, Responses- ja Messages-pyynnöt upottamatta
+malli- tai identiteettitietoja span-olion nimeen. Resurssimääritteisiin kuuluvat `service.name`
+ja paketin `service.version`.
 
-Tavallinen chat-yritysten lokikirjain (`open-sse/handlers/chatCore/attemptLogging.ts`) kirjoittaa
-valmistumisen yhteydessä arvon `duration = Date.now() - startTime` eikä anna aikaleimaa;
-tiedoston `src/lib/usage/callLogs.ts` funktio `saveCallLogOperation` asettaa aikaleiman oletusarvoksi
-kirjoitusajan (valmistumisajan). Vienti asettaa siis loppuajaksi rivin aikaleiman ja alkuajaksi
-loppuajan − keston (millisekunteina, muunnettuna desimaalisiksi nanosekunneiksi). Myös kutsujan antamat
-historialliset aikaleimat säilytetään loppuaikana; rivikohtaista aloitus-/valmistumiserottelua ei ole.
-Null-arvoinen kesto muuttuu nollaksi. Virheelliset tai puuttuvat aikaleimat aiheuttavat erän
-epäonnistumisen sen sijaan, että luotaisiin epädeterministisiä spaneja. `ttftMs` voi olla null,
-ja se vastaa attribuuttia `omniroute.ttft_ms`.
+Tavallinen chat-yritysten kirjaaja (`open-sse/handlers/chatCore/attemptLogging.ts`) kirjoittaa
+`duration = Date.now() - startTime` suorituksen päättyessä eikä toimita aikaleimaa;
+`saveCallLogOperation` tiedostossa `src/lib/usage/callLogs.ts` käyttää aikaleimana oletusarvoisesti
+kirjoitushetkeä (suorituksen päättymisaikaa). Vienti määrittää siksi lopetusajaksi rivin
+aikaleiman ja aloitusajaksi lopetusajan vähennettynä kestolla
+(millisekunnit muunnettuna desimaalisiksi nanosekunneiksi). Kutsujan toimittamat historialliset
+aikaleimat säilytetään myös lopetusaikana; riviä kohden ei ole erottelua aloitus-/päättymisajan
+välillä. Null-arvoinen kesto tulkitaan nollaksi. Virheelliset tai puuttuvat aikaleimat
+epäonnistavat erän sen sijaan, että syntyisi epädeterministisiä span-olioita. `ttftMs` on
+nullable ja muunnetaan arvoksi `omniroute.ttft_ms`.
 
-Attribuutteihin kuuluvat `gen_ai.operation.name="chat"`, palveluntarjoaja, pyydetty/vastauksen malli,
-syöte-/tulostokenit, valinnaiset välimuistin luku-/luonti-/päättelytokenit, HTTP-tila,
-combo, välimuistin lähde, istuntotunniste ja korrelaatiotunnus. OTLP:n kokonaislukuarvot ja aikaleimat
-ovat desimaalimerkkijonoja; merkkijonot, totuusarvot ja desimaaliluvut käyttävät omia natiiveja OTLP-arvomuotojaan.
-Virhespanien tila on ERROR, ja niillä on puhdistettu tilaviesti. Kanonisessa tietueessa
-ei ole ylävirran isännän URL-osoitetta, joten `server.address` jätetään pois sen sijaan, että
-keräin tunnistettaisiin virheellisesti mallipalvelimeksi. Kustannuksia ei viedä.
+Määritteisiin kuuluvat `gen_ai.operation.name="chat"`, palveluntarjoaja, pyydetty/vastauksen
+malli, syöte-/tulostetunnukset, valinnaiset välimuistin luku-/luonti-/päättelytunnukset,
+HTTP-tila, yhdistelmä, välimuistin lähde, istuntotunniste ja korrelaatiotunnus. OTLP:n
+kokonaislukuarvot ja aikaleimat ovat desimaalimerkkijonoja; merkkijonot, totuusarvot ja
+murtoluvut käyttävät omia OTLP-arvomuunnelmiaan. Virhespan-olioiden tila on ERROR, ja
+tilaviesti on puhdistettu. Kanonisessa tietueessa ei ole ylemmän tason isäntäkoneen URL-osoitetta,
+joten `server.address` jätetään pois sen sijaan, että Collector virheellisesti tunnistettaisiin
+mallipalvelimeksi. Kustannuksia ei viedä.
 
 Vain `includeBodies=true` lataa sisällön. Kun `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` sisältävät puhdistetun pyynnön/vastauksen
-rungon JSON-muodossa sellaisena kuin OmniRoute on sen tallentanut (kanonisoituna, jos se voidaan jäsentää),
-eivätkä uudelleenmuotoiltuna semconv-viestitaulukkona. Katkaistut tai muut kuin JSON-rungot säilyvät raakatekstinä.
-Kun `langfuseMapping=true`, rungot lähetetään vain attribuutteina
-`langfuse.observation.input` / `langfuse.observation.output`;
-`gen_ai.*.messages`-attribuutit jätetään pois, jotta kukin runko lähetetään kerran. Molemmat tilat
-perivät arvon `maxBodyBytes` nykyisestä sisällön latauspolusta;
+`gen_ai.input.messages` / `gen_ai.output.messages` sisältävät OmniRouten tallentaman
+puhdistetun pyyntö-/vastausrungon JSON-muodossa (kanonisoituna, jos jäsentäminen onnistuu),
+eivät uudelleenmuotoiltua semconv-viestitaulukkoa. Katkaistut tai JSON-muotoon sopimattomat
+rungot säilyvät raakana tekstinä. Kun `langfuseMapping=true`, rungot toimitetaan vain
+määritteissä `langfuse.observation.input` / `langfuse.observation.output`;
+`gen_ai.*.messages`-määritteet jätetään pois, jotta kukin runko lähetetään kerran. Molemmat
+tilat perivät `maxBodyBytes`-arvon nykyisestä latauspolusta;
 `omniroute.bodies_truncated=true` ilmaisee katkaisun.
-Tämä kohde ei lisää ylimääräisiä käsittelyketjun tilannekuvia eikä puhdistamattomien artefaktien lukuja;
-valinnainen pyyntöotsakkeiden tallennus käyttää alla kuvattua nykyistä ladattua asiakkaan tilannekuvaa.
-Käytä runkoja vietäessä minuuttitason ajastusta, kuten `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
-sen sijaan, että kerryttäisit tunnin mittaisen jonon.
+Tämä kohde ei lisää ylimääräisiä putkiston tilannevedoksia tai puhdistamattomien artefaktien
+lukuja; valinnainen pyyntöotsakkeiden keräys käyttää alla kuvattua nykyistä ladattua
+asiakasvedosta. Käytä runkoja vietäessä minuutin tarkkuuden aikataulua, kuten
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, sen sijaan että keräisit tunnin mittaisen
+jonomäärän.
 
 ### Valinnaiset asiakkaan pyyntöotsakkeet
 
-Otsakkeiden tallennus on **oletusarvoisesti pois käytöstä**. Aseta `requestHeaderAllowlist` kohteen asetuksissa
-ja ota käyttöön **Vie kehotteet ja vastaukset** (kohteen asetus `includeBodies: true`).
-Sallittujen luettelo hyväksyy API-taulukon tai tekstialueen, jossa nimet erotetaan rivinvaihdoilla tai pilkuilla:
+Otsakkeiden keräys on **oletusarvoisesti pois käytöstä**. Määritä kohteen asetuksissa
+`requestHeaderAllowlist` ja ota käyttöön **Export prompts and responses**
+(`includeBodies: true` kohteessa).
+Sallittujen arvojen luettelo hyväksyy API-taulukon tai tekstialueen, jossa nimet on eroteltu
+rivin- tai pilkuilla:
 
 ```json
 {
@@ -344,77 +362,85 @@ Sallittujen luettelo hyväksyy API-taulukon tai tekstialueen, jossa nimet erotet
 }
 ```
 
-Nimet täsmäävät tarkasti kirjainkoosta riippumatta, paitsi jos yksi lopussa oleva `*` valitsee ei-tyhjän
-otsakenimen etuliitteen. Pelkkä `*`, nimen sisäiset jokerimerkit ja virheelliset HTTP-otsakenimet hylätään.
-Valitsimia voi olla enintään 64, ja kunkin nimi tai etuliite voi olla enintään 256 ASCII-tavua.
-Tämä asetus on erillinen `headers`-asetuksesta, jolla viejä tunnistautuu kerääjälle.
+Nimet vastaavat kirjainkoosta riippumatta ja täsmälleen, ellei yksittäinen lopussa oleva `*` valitse
+ei-tyhjää otsakenimen etuliitettä. Pelkkä `*`, upotetut jokerimerkit ja virheelliset HTTP-otsakenimet
+hylätään. Valitsimia voi olla enintään 64, ja kunkin nimi tai etuliite voi olla enintään 256 ASCII-tavua.
+Tämä asetus on erillinen `headers`-asetuksesta, joka todentaa viejän kerääjälle.
 
-Tallennus lukee vain `pipeline_client_request`-kenttää, joka täytetään tallennetun yksityiskohtaisen käsittelyketjun
-`clientRawRequest`-kentästä (tai vanhasta `clientRequest`-kentästä). Se ei koskaan käytä varavaihtoehtona palveluntarjoajan pyyntöotsakkeita.
-Käsittelyketjun yksityiskohtaisen lokituksen on täytynyt olla käytössä pyyntöä tallennettaessa. Jos
-`includeBodies` on poistettu käytöstä tai asiakkaan tilannevedoksen JSON puuttuu, on vioittunut tai on katkaistu, otsakeattribuutteja
-ei tuoteta. `maxBodyBytes`-arvon kasvattaminen voi estää tilannevedoksen katkaisun viennin aikana;
-se ei voi palauttaa tietoja, joita ei koskaan tallennettu. Yli 1 MiB:n kokoinen tai yli
-256 otsakemerkintää sisältävä tilannevedos ohitetaan. Nykyinen kehotteiden ja vastausten vienti pysyy käytössä
-otsakkeiden tallennuksen rinnalla; sallittujen luettelo ei tarjoa vain otsakkeet täydentävää tilaa.
+Kaappaus lukee vain kohteesta `pipeline_client_request`, joka täytetään tallennetun yksityiskohtaisen
+putken `clientRawRequest`- (tai vanhan `clientRequest`-) kentästä. Se ei koskaan käytä varalla
+palveluntarjoajan pyyntöotsakkeita. Yksityiskohtainen putkilokitus on täytynyt ottaa käyttöön, kun pyyntö
+tallennettiin. Kun `includeBodies` on poistettu käytöstä tai asiakasvedoksen JSON puuttuu, on vioittunut
+tai katkennut, otsakemääritteitä ei tuoteta. `maxBodyBytes`-arvon kasvattaminen voi estää vedoksen
+katkeamisen viennin aikana, mutta se ei voi palauttaa tietoja, joita ei koskaan tallennettu. Yli 1 MiB:n
+vedos tai vedos, joka sisältää yli 256 otsakemerkintää, ohitetaan. Nykyinen kehotteen ja vastauksen vienti
+säilyy käytössä otsakekaappauksen rinnalla; sallittujen luettelo ei tarjoa vain otsakkeet sisältävää
+hydratoimistilaa.
 
-Valituista arvoista tulee OTLP-merkkijonotaulukoita nimellä `http.request.header.<full lowercase header name>`,
-myös silloin, kun kyseessä on yksittäinen merkkijono. Esimerkiksi `X-OmniRoute-Meta-Team: example-team` muuttuu
-attribuutiksi `http.request.header.x-omniroute-meta-team`, jonka arvo on
+Valittujen arvojen OTLP-merkkijonotaulukot ovat muotoa
+`http.request.header.<full lowercase header name>`, myös yksittäisen merkkijonon tapauksessa.
+Esimerkiksi `X-OmniRoute-Meta-Team: example-team` muuttuu muotoon
+`http.request.header.x-omniroute-meta-team`, jonka arvo on
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Koko etuliite säilytetään: nämä ovat tavallisia otsakkeita, eikä niille tehdä liiketoimintakenttien jäsennystä tai
-`omniroute.metadata.*`- / Langfuse-metatietomuunnosta. `langfuseMapping` ei muuta otsakkeiden
-semantiikkaa. Valittu yksiarvoinen `User-Agent` asettaa myös vakioskalaarin
-`user_agent.original`. Yhden arvon sisällä olevia pilkkuja ei käytetä jakamiseen. Kirjainkokovariantit yhdistetään tallennettujen
-merkintöjen järjestyksessä; mikä tahansa virheellinen variantti johtaa koko otsakkeen pois jättämiseen. Attribuutit järjestetään pienikirjaimisen nimen mukaan.
+Koko etuliite säilytetään: nämä ovat tavallisia otsakkeita, eikä niille tehdä liiketoimintakenttien
+jäsentämistä tai `omniroute.metadata.*`- / Langfuse-metatietomuunnosta. `langfuseMapping` ei muuta
+otsakkeiden semantiikkaa. Valittu yksiarvoinen `User-Agent` asettaa lisäksi vakioarvon
+`user_agent.original`. Yhden arvon sisällä olevia pilkkuja ei jaeta. Kirjainkooltaan vaihtelevat muodot
+yhdistetään tallennettujen merkintöjen järjestyksessä; jos jokin muoto on virheellinen, koko kyseinen
+otsake jätetään pois. Määritteet järjestetään pienennetyn nimen mukaan.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-avainotsakkeet, auth/token/secret/password/credential-tunnisteita
-sisältävät nimet sekä sisäiset yhdyskäytävän tunnistetiedot jätetään aina
-pois, vaikka ne olisi valittu tai osittain peitetty tallennuksessa. Tunnettujen tunnistetietomallien tunnistukseen käytetään
-yhteistä tunnistetietojen tunnistinta; peittomerkinnät jätetään pois eikä niitä viedä turvallisina arvoina.
-Vain merkkijonot ja ei-tyhjät merkkijonotaulukot hyväksytään; numeroita tai olioita ei muunneta automaattisesti.
-Virheelliset nimet, prototyyppiavaimet, ohjausmerkit (vaakasarkainta lukuun ottamatta) ja virheellinen Unicode
-ohitetaan aiheuttamatta erän epäonnistumista tai sisällyttämättä niiden sisältöä virheisiin.
+Authorization-, Proxy-Authorization-, Cookie- ja Set-Cookie-otsakkeet, API-avainotsakkeet, nimet, jotka
+sisältävät auth-, token-, secret-, password- tai credential-ilmaisimen, sekä yhdyskäytävän sisäiset
+tunnistetiedot jätetään aina pois, vaikka ne olisi valittu tai tallennuksessa osittain peitetty.
+Tunnetuissa tunnistetietomalleissa käytetään jaettua tunnistetietojen tunnistinta; peittomerkit jätetään
+pois eikä niitä viedä turvallisina arvoina. Vain merkkijonot ja ei-tyhjät merkkijonotaulukot hyväksytään;
+numeroita tai objekteja ei muunnettu automaattisesti. Virheelliset nimet, prototyyppiavaimet,
+ohjausmerkit (vaakalukuun ottamatta) ja virheellinen Unicode ohitetaan eräajon epäonnistumatta tai
+niiden sisällön päätymättä virheilmoituksiin.
 
-Kuhunkin spaniin tallennetaan enintään 32 otsaketta, 16 arvoa otsaketta kohden, 4096 UTF-8-tavua arvoa kohden
-ja yhteensä 16384 UTF-8-tavua tallennettujen otsakkeiden nimiä ja arvoja. Ylisuuret tai virheelliset otsakkeet
-jätetään kokonaan pois, niitä ei katkaista. Valinta on ylläpitäjän tietosuojapäätös: turvallisilta vaikuttavat nimet
-voivat silti sisältää henkilötietoja, eivätkä nämä rajat ja tunnistimet ole yleiskäyttöinen henkilötietojen poistotyökalu.
+Kukin span tallentaa enintään 32 otsaketta, 16 arvoa otsaketta kohden, 4096 UTF-8-tavua arvoa kohden
+ja yhteensä 16384 UTF-8-tavua kaapattujen otsakenimien ja arvojen osalta. Liian suuret tai virheelliset
+otsakkeet jätetään kokonaan pois, eikä niitä katkaista. Valinta on operaattorin tietosuojapäätös:
+turvallisilta vaikuttavat nimet voivat silti sisältää henkilötietoja, eivätkä nämä rajat ja tunnistimet ole
+yleinen henkilötietojen poistaja.
 
 ### Toimitusrajat
 
-Pyynnöt on rajattu 500 spaniin ja 4 MiB:uun UTF-8-koodattua JSONia, mukaan lukien viestikuori.
-Jokaisen sallitun spanin koko tarkistetaan ennen kursorierän ensimmäistä pyyntöä. Jos yksittäinen
-span ylittää rajan, mitään osaa kyseisestä erästä ei lähetetä ja toiminto epäonnistuu kehottaen pienentämään
-`maxBodyBytes`-arvoa; spania ei pudoteta hiljaisesti pois. Ennakkotarkistus säilyttää vain tietueviitteet ja
-tavumäärät ja hylkää jokaisen väliaikaisen spanin ja JSONin; spanit muodostetaan uudelleen rajattuja osia varten
-sen sijaan, että erästä säilytettäisiin toinen sarjoitettu kopio. HTTP 408/429/5xx -tilanteissa, verkkovirheissä ja aikakatkaisuissa tehdään enintään
-kolme yritystä eksponentiaalisella 250/500 ms:n odotusajalla. `Retry-After`-otsakkeen sekunnit tai HTTP-päivämäärät
-voivat pidentää viivettä enintään 5 sekuntiin. Muut tilakoodit aiheuttavat välittömän epäonnistumisen. Myös OTLP:n 2xx-vastauksen osittainen hylkäys aiheuttaa poikkeuksen
-sen sijaan, että kadonnut span kuitattaisiin; tyhjät tai kelvolliset JSON-kuittaukset hyväksytään, ja
-vastauksen lukuraja on 64 KiB.
+Pyynnöt on rajoitettu 500 spaniin ja 4 MiB:n UTF-8-kokoiseen JSON:ään, ympäröivä rakenne mukaan lukien.
+Jokaisen sallitun spanin koko tarkistetaan ennen kohdistinerän ensimmäistä pyyntöä. Jos yksittäinen span
+ylittää rajan, kyseisestä erästä ei lähetetä mitään osaa ja toiminto epäonnistuu ohjeella pienentää
+`maxBodyBytes`-arvoa; sitä ei pudoteta hiljaisesti. Esitarkistus säilyttää vain tietueviittaukset ja
+tavumäärät sekä hävittää kunkin väliaikaisen spanin/JSON:n; spanit rakennetaan uudelleen rajattuja
+lohkoja varten sen sijaan, että erästä pidettäisiin toista sarjoitettua kopiota. HTTP-tilat 408/429/5xx,
+verkkovirheet ja aikakatkaisut saavat enintään kolme yritystä, ja eksponentiaalinen viive on 250/500 ms.
+`Retry-After`-sekunnit tai HTTP-päivämäärät voivat pidentää viivettä enintään 5 sekuntiin. Muut tilat
+aiheuttavat välittömän epäonnistumisen. OTLP:n 2xx-osittainen hylkäys aiheuttaa myös poikkeuksen sen
+sijaan, että kadonnut span kuitattaisiin; tyhjät tai kelvolliset JSON-kuittaukset hyväksytään, ja
+vastauksen lukeminen on rajoitettu 64 KiB:uun.
 
-Virheet sisältävät vain viejän hallitsemia tietoja: HTTP-tilan, uudelleenyritysluokan, yritysten ja lähetettyjen spanien
-määrät tai kiinteän kuittaus- tai verkkovirheen sanamuodon. Kerääjän vastausrunkoja,
-osittaisen onnistumisen määriä tai vastausotsakkeita ei koskaan kopioida virheisiin, lokeihin tai
-koontinäyttöön. Epäonnistunutta tai osittain hyväksyttyä erää ei kuitata: kohteen tilana näkyy
-Epäonnistuu kyseisellä tilakoodilla, kursori pysyy viimeisessä kuitatussa erässä ja seuraava ajo
-lähettää samat rivit uudelleen. Pysyvät virhetilat aiheuttavat epäonnistumisen, kunnes kerääjä tai määritykset
-korjataan. Katso vastausten tarkemmat tiedot kerääjän omista lokeista. Kutsulokin virheyhteenvedoissa säilyy
-niiden erillinen peittokäsittely.
-`prepare()` ei luo resursseja; Testi lähettää täsmälleen `{"resourceSpans":[]}` ja ilmoittaa
-HTTP-tilan kirjoittamatta kutsulokin spaneja.
+Virheet sisältävät vain viejän omistamia tietoja: HTTP-tilan, uudelleenyritysluokan, yritysten määrän ja
+lähetettyjen spanien määrät tai kiinteän kuittaus-/verkkovirhetekstin. Kerääjän vastausrunkoja,
+osittaisen onnistumisen määriä ja vastausotsakkeita ei koskaan kopioida virheisiin, lokeihin tai
+hallintapaneeliin. Epäonnistunutta tai osittain hyväksyttyä erää ei kuitata: kohde näyttää tilan
+Failing ja kyseisen tilan, kohdistin pysyy viimeksi kuitatussa erässä ja seuraava ajo lähettää samat rivit
+uudelleen. Pysyvät tilat aiheuttavat jatkuvan epäonnistumisen, kunnes kerääjä tai määritys korjataan.
+Käytä vastaustietojen tarkasteluun kerääjän omia lokeja. Kutsulokin virheyhteenvedot säilyttävät erillisen
+peittelynsä.
+`prepare()` ei varaa mitään; Test lähettää täsmälleen `{"resourceSpans":[]}` ja raportoi HTTP-tilan
+kirjoittamatta kutsulokin spaneja.
 
-Trace-tunnukset ja span-tunnukset ovat ensimmäiset 32/16 heksanumeroa SHA-256-tiivisteistä, jotka lasketaan lausekkeista
-`"omniroute.trace\\0" + callLogId` ja `"omniroute.span\\0" + callLogId`. Uudelleenlähetyksissä käytetään
-samoja tunnuksia. Tämä ei takaa kaksoiskappaleiden poistoa: jotkin taustajärjestelmät, kuten Langfusen
-v4-vastaanotto, eivät poista samalla tunnuksella saapuvia spanien kaksoiskappaleita. Kaatuminen tai osan epäonnistuminen voi
-aiheuttaa enintään yhden kuittaamattoman kursorierän uudelleenlähetyksen; koko kyseinen erä voi kahdentua,
-ei pelkästään sen viimeinen HTTP-osa. Valitse kursorierän koko tämä kompromissi huomioiden.
+Jäljitystunnukset ja span-tunnukset ovat SHA-256:n ensimmäiset 32/16 heksadesimaalia seuraavista
+arvoista:
+`"omniroute.trace\\0" + callLogId` ja `"omniroute.span\\0" + callLogId`. Uudelleenlähetyksissä
+käytetään samoja tunnuksia. Tämä ei takaa kaksoiskappaleiden poistamista: jotkin taustajärjestelmät,
+kuten Langfuse v4 -vastaanotto, eivät poista saman tunnuksen sisältäviä span-kaksoiskappaleita.
+Kaaduttua tai osittain epäonnistunutta lohkoa voidaan lähettää uudelleen enintään yksi kuittaamaton
+kohdistinerä; koko erä voi monistua, ei vain sen viimeinen HTTP-lohko. Valitse kohdistinerän koko tämä
+vaihtokauppa huomioiden.
 
 ### Langfuse-esimerkki
 
-Määritä nämä kentät itse ylläpidetylle Langfuse-instanssille:
+Määritä nämä kentät itse ylläpidettyä Langfuse-instanssia varten:
 
 ```json
 {
@@ -427,44 +453,45 @@ Määritä nämä kentät itse ylläpidetylle Langfuse-instanssille:
 }
 ```
 
-Muodosta Authorization-arvo paikallisesti Base64-koodaamalla kirjaimellinen `public-key:secret-key`-
-merkkijono (esimerkiksi komennolla `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Älä liitä oikeita tunnistetietoja lokeihin, kuvakaappauksiin tai ongelmaraportteihin. Muunnos
-asettaa automaattisesti otsakkeen `x-langfuse-ingestion-version: 4`; Authorization annetaan edelleen `headers`-kentässä.
-Sekä otsakkeet että luotu identiteetin suola käyttävät olemassa olevaa salattujen salaisuuskenttien
-mekanismia ja API-paikkamerkkejä; `STORAGE_ENCRYPTION_KEY` on pakollinen.
+Muodosta Authorization-arvo paikallisesti Base64-muodossa merkkijonosta `public-key:secret-key`
+(esimerkiksi lausekkeella `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Älä sijoita todellisia tunnistetietoja lokeihin, kuvakaappauksiin tai ilmoituksiin. Kuvaus asettaa
+automaattisesti arvon `x-langfuse-ingestion-version: 4`; Authorization toimitetaan edelleen
+`headers`-asetuksessa. Sekä otsakkeet että luotu identiteettisuola käyttävät olemassa olevaa salatun
+salakentän mekanismia ja API-paikkamerkkejä; `STORAGE_ENCRYPTION_KEY` vaaditaan.
 
-Määritys lisää generoinnin tyypin/mallin, käytön tiedot JSON-muodossa (syöte/tuloste/yhteensä ja käytettävissä olevat
-välimuistiavaimet), syötteen ja tulosteen tilannekuvat JSON-muodossa, ERROR/DEFAULT-tason, puhdistetun tilaviestin,
-jäljityksen nimen, istuntotunnisteen, valinnaisen ympäristön sekä suodatettavan
-`langfuse.observation.metadata.<key>`-kentän palveluntarjoajalle, pyydetylle mallille, polulle, yhdistelmälle, välimuistin
-lähteelle ja tilalle. `langfuse.observation.completion_start_time` on ISO 8601 -muotoinen ajankohta,
-joka lasketaan lisäämällä aloitusaikaan TTFT vain, kun TTFT tunnetaan eikä se ylitä kestoa. Kustannusattribuutteja ei lähetetä.
+Määritykseen lisätään generointityyppi/-malli, JSON-käytön tiedot (syöte/tuloste/yhteensä ja käytettävissä
+olevat välimuistiavaimet), JSON-syötteen/-tulosteen tilannevedokset, ERROR/DEFAULT-taso, puhdistettu tilaviesti,
+jäljen nimi, istunnon tunnus, valinnainen ympäristö sekä suodatettavat
+`langfuse.observation.metadata.<key>`-metatiedot palveluntarjoajalle, pyydetylle mallille, polulle, yhdistelmälle, välimuistin
+lähteelle ja tilalle. `langfuse.observation.completion_start_time` on ISO 8601 -aikaleima kohdassa
+aloitus + TTFT vain silloin, kun TTFT tunnetaan ja se on keston sisällä. Kustannusmääritteitä ei lähetetä.
 
-Identiteettitilat koskevat kenttää `langfuse.user.id`:
+Identiteettitilat koskevat arvoa `langfuse.user.id`:
 
-- `pseudonymous` (oletus): API-avaimen sisäisestä tunnisteesta laskettu HMAC-SHA256, jossa käytetään satunnaista
-  kohdekohtaista 32 tavun suolaa. Jos suolaa ei ole, se luodaan kohteen luonnin yhteydessä, salataan
-  kenttään `identitySalt`, eikä sitä koskaan palauteta. Se säilytetään muokkausten yhteydessä. Raakoja avaintunnisteita ei koskaan
-  lisätä span-attribuutteihin. Kohteen suolan luominen uudelleen tai vaihtaminen muuttaa identiteettejä.
-- `keyName`: määritetty API-avaimen nimi, joka tarkoituksellisesti paljastaa kyseisen ylläpitäjän antaman nimen.
-- `none`: ei käyttäjätunnistetta. Istuntotunnisteet viedään silti, jos niitä on; nämä tilat eivät
-  anonymisoi mielivaltaista kehotteen sisältöä tai ylläpitäjän antamia istunto-/korrelaatiotunnisteita.
+- `pseudonymous` (oletus): API-avaimen sisäisen tunnuksen HMAC-SHA256-arvo, joka lasketaan satunnaisella
+  määränpäähänkohtaisella 32 tavun suolalla. Suola luodaan luonnin yhteydessä, jos se puuttuu, salataan
+  nimellä `identitySalt`, sitä ei koskaan palauteta ja se säilytetään muokkauksissa. Raakoja avaintunnuksia ei koskaan
+  sijoiteta jälkimääritteisiin. Määränpään suolan luominen uudelleen tai vaihtaminen muuttaa identiteetit.
+- `keyName`: määritetty API-avaimen nimi, jolloin operaattorin tunniste paljastuu tarkoituksellisesti.
+- `none`: käyttäjätunnusta ei ole. Istuntotunnisteet viedään edelleen, jos niitä on; nämä tilat eivät
+  anonymisoi mielivaltaista kehotetekstiä tai operaattorin toimittamia istunto-/korrelaatiotunnisteita.
 
-### Aloittaminen ilman historiatietojen täydennystä
+### Aloittaminen ilman aiempien tietojen täyttöä
 
-Ota vain luonnin yhteydessä käyttöön **Aloita nykyisestä kohdasta (ohita olemassa olevat lokit)** tai välitä
-`startFromCurrentPosition: true` luontiin käytettävän API-pyynnön tietosisällön ylimmällä tasolla. Se alustaa
-`cursor_row_id`-arvoksi säilytetyn kutsulokin nykyisen suurimman rowid-arvon käyttämällä olemassa olevia kohdistimen
-aputoimintoja ilman migraatiota. Oletusarvo on false (kohdistin 0 ja säilytetyn historian täydennys).
-Kyseessä ei ole päivityksen yhteydessä käytettävä kohdistimen nollausasetus.
+Vain luonnin yhteydessä voit ottaa käyttöön **Aloita nykyisestä sijainnista (ohita olemassa olevat lokit)** tai välittää
+`startFromCurrentPosition: true` -arvon luonnin API-pyynnön ylimmällä tasolla. Se alustaa arvon
+`cursor_row_id` nykyiseen säilytettyjen kutsulokirivien enimmäisarvoon nykyisiä kohdistinkäsittelijöitä käyttäen
+ilman migraatiota. Oletusarvo on false (kohdistin 0 ja säilytetyn historian täyttö).
+Se ei ole päivityksen aikainen kohdistimen nollausasetus.
 
-Jaettu `ttftMs`-lisäys lisää myös nullable-sarakkeen `ttft_ms` BigQuery-määritykseen
-ja uuden taulun skeemaan: sen skeematesti edellyttää, että jokaisella kanonisen tietueen kentällä on
-sarake. Olemassa olevien taulujen vienti jatkuu muuttumattomana: `prepare()` lukee taulun skeeman ja
-jättää pois vain kentän `ttft_ms`, jos kyseinen sarake puuttuu. Lisää nullable-tyyppinen INT64-sarake, jotta saat TTFT:n
-seuraavalla ajokerralla, tai käytä uutta taulua. PATCH-pyyntöä, automaattista skeeman muutosta tai lisäoikeuksia
-ei tarvita; kaikkien muiden rivikenttien skeematarkistus säilyy tiukkana.
+Jaettu `ttftMs`-lisäys lisää myös BigQuery-määrittimeen ja uuden taulun skeemaan nullable-tyyppisen `ttft_ms`-sarakkeen:
+skeematesti edellyttää, että jokaisella kanonisella tietueen kentällä on sarake. Olemassa olevien taulujen vienti
+säilyy ennallaan: `prepare()` lukee taulun skeeman ja jättää pois vain `ttft_ms`-kentän, jos kyseinen sarake puuttuu.
+Lisää nullable-tyyppinen INT64-sarake saadaksesi TTFT:n mukaan seuraavalla suorituskerralla tai käytä uutta taulua.
+Valinnainen TTFT-sarake ei käynnistä skeeman päivitystä. Käytön todisteita sisältävät sarakkeet
+noudattavat alla kuvattua ehdollista, käytön erikseen sallivaa yhteensopivuusmenettelyä; muut rivikentät säilyttävät tiukan
+skeeman tarkistuksen.
 
 ---
 
@@ -491,13 +518,26 @@ Kaksi sääntöä uudelle kohteelle:
 
 ## 7. Käyttö
 
-- **Hallintapaneeli**: Integraatiot → Lokien vienti. Lisää kohde, tarkista tunnistetiedot suorittamalla **Testaa**
-  kirjoittamatta rivejä ja ota kohde sitten käyttöön.
-- **Käsittelyjono**: kunkin kohteen kortti näyttää odottavat rivit ja kohdistimen; `GET
-/api/log-export/status` palauttaa samat luvut sekä viimeiset 20 tehtäväajoa.
-- **Yhden kohteen epäonnistuminen ei aiheuta muiden epäonnistumista** — ajon yhteenveto tallentaa kohdekohtaisen
-  tilan kenttiin `last_status` / `last_error`, ja tehtäväajojen historia säilyttää koosteen.
-- **Kohteen poistaminen poistaa sen kohdistimen.** Kohteen lisääminen uudelleen aloittaa vanhimmasta säilytetystä
-  kutsulokista, jolloin rivit, jotka kohteessa saattavat jo olla, lähetetään uudelleen. BigQueryssa rivikohtainen
-  `insertId` estää tämän vain BigQueryn oman kaksoiskappaleiden poiston aikaikkunan sisällä, joten poista kohde mieluummin käytöstä
-  kuin kokonaan.
+- **Hallintapaneeli**: Integraatiot → Lokien vienti. Lisää kohde, tarkista tunnistetiedot suorittamalla **Test**  
+  ilman rivien kirjoittamista ja ota kohde sitten käyttöön.
+- **Jono**: kunkin kohdekortin yhteydessä näkyvät odottavat rivit ja kursori; `GET
+/api/log-export/status` palauttaa samat luvut sekä viimeiset 20 työajon suoritusta.
+- **Yhden kohteen epäonnistuminen ei epäonnistuta muita** — ajon yhteenveto tallentaa kohdekohtaisen
+  tilan kenttiin `last_status` / `last_error`, ja työajojen historia säilyttää koostetun tilan.
+- **Kohteen poistaminen poistaa sen kursorin.** Jos kohde lisätään uudelleen, vienti alkaa vanhimmasta
+  säilytetystä kutsulokista, jolloin lähetetään uudelleen rivejä, jotka kohteella saattavat jo olla. BigQueryssa rivikohtainen
+  `insertId` estää tämän vain BigQueryn oman kaksoiskappaleiden poistamisen ikkunan aikana, joten kohde kannattaa
+  poistaa käytöstä sen poistamisen sijaan.
+
+### Käyttöevidenssin skeemayhteensopivuus
+
+Uudet BigQuery-taulut sisältävät nullable-tyyppisen `usage_evidence`-sarakkeen (JSON-merkkijonon sisältävä STRING) ja
+`usage_estimated`-sarakkeen (BOOL). Kun `autoCreate` on käytössä, aiemmin luotuun tauluun voidaan lisätä vain
+puuttuvat nullable-tyyppiset sarakkeet. Viejä säilyttää koko olemassa olevan skeeman kenttien metatiedot mukaan lukien
+ja lähettää ehdollisen PATCH-pyynnön palautetun etagin avulla. Samanaikainen skeeman muutos epäonnistuttaa viennin sen
+ylikirjoittamisen sijaan; seuraavalla ajolla taulu luetaan uudelleen.
+
+Kun `autoCreate` ei ole käytössä, lisää nämä sarakkeet itse ennen käyttöevidenssiä sisältävien tietueiden vientiä.
+Puuttuvat skeema- tai etag-metatiedot tai epäonnistunut päivitys estävät myös evidenssiä sisältävät lisäykset. Vientikursori
+ei etene kyseisen epäonnistumisen jälkeen, eikä evidenssiä koskaan hylätä hiljaisesti. Paikallisten lokien säilytys
+jatkuu viennin ollessa estettynä, joten ratkaise ongelma ennen säilytettyjen lähderivien vanhenemista.

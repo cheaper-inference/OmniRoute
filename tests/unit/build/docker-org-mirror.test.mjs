@@ -9,6 +9,8 @@ import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import YAML from "yaml";
+
 import {
   DEFAULT_SOURCE_IMAGE,
   DEFAULT_TARGET_IMAGE,
@@ -19,14 +21,27 @@ import {
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const scriptPath = join(root, "scripts/ci/docker-org-mirror.mjs");
 
-/** Fake `docker`: records every call; `fail` decides which calls exit non-zero. */
-function fakeDocker(fail = () => false) {
+/**
+ * Fake runner: records every call; `fail` decides which calls exit non-zero. `git ls-remote`
+ * answers with `tags` (the release tags on origin); `bash` runs the real
+ * scripts/ci/should-promote-latest.sh, so the :latest recheck is the workflow's own helper.
+ */
+function fakeDocker(fail = () => false, tags = ["v3.8.53", "v3.8.54"]) {
   const calls = [];
   const run = (cmd, args, input) => {
     calls.push({ cmd, args, input });
-    return { status: fail(args) ? 1 : 0, stdout: "", stderr: "" };
+    if (fail(args)) return { status: 1, stdout: "", stderr: "" };
+    if (cmd === "git") {
+      const stdout = tags.map((t, i) => `${String(i).padStart(40, "0")}\trefs/tags/${t}\n`);
+      return { status: 0, stdout: stdout.join(""), stderr: "" };
+    }
+    if (cmd === "bash") {
+      const res = spawnSync(cmd, args, { encoding: "utf8", input });
+      return { status: res.status, stdout: res.stdout, stderr: res.stderr };
+    }
+    return { status: 0, stdout: "", stderr: "" };
   };
-  return { calls, run };
+  return { calls, run, dockerCalls: () => calls.filter((c) => c.cmd === "docker") };
 }
 
 const creds = { DOCKERHUB_ORG_USERNAME: "cheaperinference", DOCKERHUB_ORG_TOKEN: "dckr_oat_fake" };
@@ -86,7 +101,7 @@ test("with the org secrets: logs in through stdin and copies every tag from GHCR
   assert.equal(result.exitCode, 0);
   assert.equal(result.status, "mirrored");
 
-  const [login, ...rest] = docker.calls;
+  const [login, ...rest] = docker.dockerCalls();
   assert.deepEqual(login.args, ["login", "--username", "cheaperinference", "--password-stdin"]);
   assert.equal(login.input, "dckr_oat_fake");
   assert.ok(
@@ -165,11 +180,18 @@ test("CLI without the org secrets: exit 0 with the warning annotation and a summ
   const dir = mkdtempSync(join(tmpdir(), "docker-org-mirror-"));
   try {
     const summaryFile = join(dir, "summary.md");
-    const env = { PATH: process.env.PATH, VERSION: "3.8.54", GITHUB_STEP_SUMMARY: summaryFile };
+    const outputFile = join(dir, "output");
+    const env = {
+      PATH: process.env.PATH,
+      VERSION: "3.8.54",
+      GITHUB_STEP_SUMMARY: summaryFile,
+      GITHUB_OUTPUT: outputFile,
+    };
     const res = spawnSync(process.execPath, [scriptPath], { env, encoding: "utf8" });
     assert.equal(res.status, 0, res.stderr);
     assert.match(res.stdout, /::warning title=Docker Hub org mirror skipped::/);
     assert.match(readFileSync(summaryFile, "utf8"), /Docker Hub org mirror skipped/);
+    assert.equal(readFileSync(outputFile, "utf8"), "promoted=false\n");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -199,4 +221,92 @@ test("workflow wiring: docker-publish calls the mirror with optional org secrets
     /run:[^\n]*\$\{\{ inputs\./,
     "inputs reach the shell only through env"
   );
+});
+
+test("promote_latest with a prerelease VERSION is rejected before login and before any copy", () => {
+  for (const env of [
+    { VERSION: "3.8.55-rc.1", PROMOTE_LATEST: "true", ...creds },
+    { VERSION: "3.8.55-rc.1", PROMOTE_LATEST: "true" },
+  ]) {
+    const docker = fakeDocker();
+    const lines = [];
+    const result = mirrorToOrg(env, { run: docker.run, log: (l) => lines.push(l) });
+    assert.equal(result.exitCode, 1);
+    assert.equal(result.status, "failed");
+    assert.equal(docker.calls.length, 0, "no login, no tag listing, no copy");
+    assert.match(lines.join("\n"), /^::error title=Docker Hub org mirror::.*prerelease/m);
+  }
+  // Without promote_latest a prerelease is still mirrored under its own tags.
+  const docker = fakeDocker();
+  const result = mirrorToOrg({ VERSION: "3.8.55-rc.1", ...creds }, { run: docker.run, log: quiet });
+  assert.equal(result.exitCode, 0);
+  const created = docker.dockerCalls().filter((c) => c.args[2] === "create");
+  assert.ok(created.every((c) => !c.args[4].includes(":latest")));
+});
+
+test("promote_latest is rechecked against origin's tags: an older release never moves latest", () => {
+  const docker = fakeDocker(() => false, ["v3.8.53", "v3.8.54", "v3.8.55"]);
+  const lines = [];
+  const result = mirrorToOrg(
+    { VERSION: "3.8.54", PROMOTE_LATEST: "true", ...creds },
+    { run: docker.run, log: (l) => lines.push(l) }
+  );
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.status, "mirrored");
+  assert.equal(result.promoted, false);
+  const listing = docker.calls.find((c) => c.cmd === "git");
+  assert.deepEqual(listing.args, ["ls-remote", "--tags", "--refs", "origin"]);
+  const created = docker
+    .dockerCalls()
+    .filter((c) => c.args[2] === "create")
+    .map((c) => c.args[4]);
+  assert.deepEqual(created, [
+    `${DEFAULT_TARGET_IMAGE}:3.8.54`,
+    `${DEFAULT_TARGET_IMAGE}:3.8.54-web`,
+    `${DEFAULT_TARGET_IMAGE}:3.8.54-bun`,
+    `${DEFAULT_TARGET_IMAGE}:3.8.54-web-bun`,
+  ]);
+  assert.match(lines.join("\n"), /3\.8\.54 is no longer the highest stable release/);
+  assert.match(result.summary.join("\n"), /:latest` not moved/);
+});
+
+test("promote_latest recheck: the highest stable version promotes; prerelease tags do not count", () => {
+  const docker = fakeDocker(() => false, ["v3.8.9", "v3.8.54", "v3.8.55-rc.1", "v3.9.0-beta.2"]);
+  const result = mirrorToOrg(
+    { VERSION: "3.8.54", PROMOTE_LATEST: "true", ...creds },
+    { run: docker.run, log: quiet }
+  );
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.promoted, true);
+  const created = docker
+    .dockerCalls()
+    .filter((c) => c.args[2] === "create")
+    .map((c) => c.args[4]);
+  assert.ok(created.includes(`${DEFAULT_TARGET_IMAGE}:latest`));
+  assert.ok(created.includes(`${DEFAULT_TARGET_IMAGE}:latest-web`));
+});
+
+test("promote_latest recheck: a failed tag listing fails closed before login", () => {
+  const docker = fakeDocker((args) => args[0] === "ls-remote");
+  const result = mirrorToOrg(
+    { VERSION: "3.8.54", PROMOTE_LATEST: "true", ...creds },
+    { run: docker.run, log: quiet }
+  );
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.status, "failed");
+  assert.equal(docker.dockerCalls().length, 0, "no login and no copy");
+});
+
+test("workflow: one shared mirror concurrency group, and the description follows the recheck", () => {
+  const wf = YAML.parse(
+    readFileSync(join(root, ".github/workflows/docker-org-mirror.yml"), "utf8")
+  );
+  const job = wf.jobs.mirror;
+  // Not keyed by github.ref: two releases must queue behind each other, never run together.
+  assert.deepEqual(job.concurrency, { group: "docker-org-mirror", "cancel-in-progress": false });
+  const copy = job.steps.find((s) => s.run === "node scripts/ci/docker-org-mirror.mjs");
+  assert.equal(copy.id, "mirror");
+  const description = job.steps.find((s) => String(s.uses).startsWith("peter-evans/"));
+  assert.match(description.if, /steps\.mirror\.outputs\.promoted == 'true'/);
+  assert.doesNotMatch(description.if, /inputs\.promote_latest/);
 });
