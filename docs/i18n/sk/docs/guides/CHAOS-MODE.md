@@ -46,23 +46,21 @@ s `model: "auto/chaos"` na `/v1/chat/completions`:
 
 ## Nastavenie
 
-1. Otvorte **Ovládací panel → Chaos Mode** (`/dashboard/chaos`).
-2. **Zapnite ho** — Chaos Mode sa dodáva **predvolene vypnutý** (`enabled: false` v
-   `src/lib/chaos/chaosConfig.ts`). Kým je vypnutý, `POST /api/chaos/run` odpovedá
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Vyberte účastníkov a predvolené hodnoty (ukladajú sa pre každú inštanciu prostredníctvom úložiska nastavení):
+1. OTVORENÉ** Dashboard → Chaos Mode** (`/dashboard/chaos`).
+2. Otočte to** na** — lode v režime Chaos** predvolene vypnuté** (`enabled: false` v `src/lib/chaos/chaosConfig.ts`). Keď je `POST /api/chaos/run` zakázaný, odpovedá `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Vyberte účastníkov a predvolené hodnoty (pre jednotlivé inštancie pretrvávajú prostredníctvom úložiska nastavení):
 
-   | Pole                | Význam                                                                           | Predvolená hodnota/limity                      |
-   | ------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
-   | `enabled`           | Hlavný prepínač                                                                  | `false`                                        |
-   | `defaultMode`       | `parallel` alebo `collaborative` (pozri nižšie)                                  | `parallel`                                     |
-   | `providerOverrides` | Účasť jednotlivých poskytovateľov (`providerId`, voliteľné `modelId`, `enabled`) | prázdne = každý aktívny poskytovateľ, max. 200 |
-   | `systemPrompt`      | Nahradenie vstavaného systémového promptu režimu Chaos                           | voliteľné, max. 10 000 znakov                  |
-   | `timeoutMs`         | Maximálny čas jedného volania modelu                                             | `120000` (5 000–600 000)                       |
-   | `maxTokens`         | `max_tokens` pre jedno volanie modelu                                            | `4096` (256–128 000)                           |
+   | Pole                | Význam                                                                           | Predvolené / limity                                      |
+   | ------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
+   | `enabled`           | Hlavný vypínač                                                                   | `false`                                                  |
+   | `defaultMode`       | `parallel` alebo `collaborative` (pozri nižšie)                                  | `parallel`                                               |
+   | `providerOverrides` | Účasť jednotlivých poskytovateľov (`providerId`, voliteľné `modelId`, `enabled`) | prázdny = každého aktívneho poskytovateľa, maximálne 200 |
+   | `systemPrompt`      | Prepísať výzvu vstavaného systému Chaos                                          | voliteľné, maximálne 10 000 znakov                       |
+   | `timeoutMs`         | Maximálny čas na modelový hovor                                                  | `120000` (5 000–600 000)                                 |
+   | `maxTokens`         | `max_tokens` na modelový hovor                                                   | `4096` (256–128 000)                                     |
 
-4. Spustite **test priamo zo stránky** — panel výsledkov zobrazí odpoveď, stav a trvanie
-   každého poskytovateľa.
+4. Dajte každému zúčastnenému poskytovateľovi a** model** . Model poskytovateľa je `modelId` jeho povoleného prepísania na stránke Chaos Mode (vyhráva), inak** predvolený model** jeho spojenia. ID poskytovateľa sa nikdy nepoužíva ako názov modelu. Poskytovateľ s ani jedným nie je** nevolal** : vo výsledkoch sa zobrazí ako `status: "error"` so správou _"Pre tohto poskytovateľa nie je nastavený žiadny model. Nastavte preň model na stránke Režim chaosu alebo predvolený model pri pripojení."_ a prázdne `modelId`, zatiaľ čo ostatní poskytovatelia fungujú normálne. Ak žiadny vybraný poskytovateľ nemá model, spustenie zlyhá pred akoukoľvek upstream požiadavkou s _"Žiadny poskytovateľ nemá nastavený model. …"_ (HTTP 500 na oboch koncových bodoch).
+5. Spustiť a** test zo samotnej stránky** — panel výsledkov zobrazuje odpoveď, stav a trvanie každého poskytovateľa.
 
 ## Režimy vykonávania
 
@@ -74,27 +72,24 @@ s `model: "auto/chaos"` na `/v1/chat/completions`:
 
 ## API
 
-### `POST /api/chaos/run` — relácia ovládacieho panela
+### relácia dashboardu `POST /api/chaos/run` —
 
-Overenie pomocou súborov cookie (relácia správy — pozri
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); používa ho stránka ovládacieho panela.
+Overené súborom cookie (relácia správy — pozri [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); používa stránka dashboardu.
 
 ```jsonc
-// telo
+// body
 {
-  "task": "Compare approaches to X", // povinné
-  "providers": ["glm", "kimi"], // voliteľný filter
-  "mode": "parallel", // voliteľné — prepíše defaultMode
-  "systemPrompt": "…", // voliteľné prepísanie
-  "maxTokens": 4096, // voliteľné prepísanie
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — API kľúč
+### kľúč `POST /api/skills/collect/chaos` — API
 
-Variant s nosným tokenom pre externých volajúcich. Kľúč musí mať **oprávnenie pre Chaos Mode**
-(`chaosModeEnabled`), ktoré je **predvolene vypnuté** — zapnite ho pre každý kľúč v časti
-**Ovládací panel → Správca API → upraviť kľúč → oprávnenia → Chaos Mode**. Telo je rovnaké ako vyššie.
+Variant nosiča-tokenu pre externých volajúcich. Kľúč musí niesť** Povolenie režimu Chaos** (`chaosModeEnabled`), čo je** predvolene vypnuté** — to povolí na kľúč** Dashboard → API Manager → edit key → oprávnenia → Chaos Mode** . Rovnaké telo ako vyššie.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Oba koncové body vracajú rovnakú štruktúru:
+Oba koncové body vracajú rovnaký tvar:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Oba koncové body vracajú rovnakú štruktúru:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // iba v režime spolupráce
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Riešenie problémov
 
-- **`400 Chaos Mode is not enabled`** — pozrite krok 2 vyššie: globálny prepínač je vypnutý.
-- **API kľúč je na `/api/skills/collect/chaos` odmietnutý** — kľúču chýba oprávnenie
-  `chaosModeEnabled` pre daný kľúč (predvolene je vypnuté; ide o nastavenie, nie o chybu).
-- **Poskytovateľ, ktorého ste očakávali, vo výsledkoch chýba** — skontrolujte `providerOverrides` na
-  stránke Chaos Mode (vypnuté prepísanie ho vylúči) a overte, či je pripojenie poskytovateľa
-  aktívne.
+- **`400 Chaos Mode is not enabled`** — krok 2 vyššie: globálny prepínač je vypnutý.
+- **Kľúč API sa na `/api/skills/collect/chaos` odmietne** — kľúču chýba povolenie `chaosModeEnabled` na kľúč (štandardne vypnuté; ide o nastavenie, nie o chybu).
+- **Poskytovateľ zobrazuje `No model set for this provider`** — nastaví svoj model na stránke Chaos Mode alebo predvolený model na svojom pripojení (pozri Nastavenie, krok 4).
+- **Vo výsledkoch chýba poskytovateľ, ktorého ste očakávali** — skontrolujte `providerOverrides` na stránke Chaos Mode (zakázané prepísanie ho vylučuje) a či je aktívne pripojenie poskytovateľa.

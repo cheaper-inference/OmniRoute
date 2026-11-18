@@ -1,1 +1,0 @@
-- **feat(proxy):** report per-proxy and aggregate application-payload upload and download traffic, including retry attempts and incomplete transfers, without presenting payload counts as wire traffic or billing measurements ([#16455](https://github.com/diegosouzapw/OmniRoute/pull/16455)) — thanks @KiaroSama

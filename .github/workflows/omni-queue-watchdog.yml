@@ -1,0 +1,83 @@
+name: omni-queue watchdog
+
+# The queue's dead-man switch (docs/ops/OMNI_QUEUE.md). Every 30 minutes it reads each base's
+# state file on the omni-queue-state branch and keeps ONE issue,
+# "omni-queue: the queue is not making progress", open while one of its signals holds: a base that
+# ticks should be visiting (work: in flight, a pause, a stored land-status withdrawal, a labeled
+# PR) has saved no state for more than 90 minutes; a managed base that labeled PRs target has no
+# state file, and the newest update of those PRs is more than 90 minutes old; a stalled episode's
+# dashboard comment has not been posted 30 minutes after it opened; a state file cannot be read
+# (not JSON, fails validateState, or its document is for a base the queue does not manage or for a
+# base stored in another file); or the queue's config does not load or validate (then nothing else
+# is judged, the issue is never closed by that run, and the run fails); it keeps the body up to date, closes the issue once nothing holds, and reopens it
+# if something holds again within 24 hours (scripts/merge-queue/watchdog.mjs). A failed read of
+# the open labeled PRs or of a state file is not a signal: the run is partial. A partial run may
+# still open or reopen the issue for what it did establish, never closes it or rewrites its body,
+# and fails, so a read that keeps failing shows as a red run of this workflow. When the listing of
+# the state directory or the issue search fails, the run stops, writes nothing and prints one line.
+# Time: no state-file fetch starts after 150 s and no write sequence after 210 s (both make the
+# run partial); one request is bounded by the watchdog's own client limits (3 attempts of 15 s,
+# waits of at most 15 s: 75 s); the script stops the run at 240 s with one error line and exit 1.
+# That leaves this job's timeout-minutes about a minute for checkout and setup-node; only when they
+# take longer is the run killed before it prints its line.
+#
+# Deliberately separate from omni-queue.yml, so that it works when the queue's own workflow
+# cannot: no App token (a tick that dies minting it, or an uninstalled App, is what it catches),
+# no `omni-queue` environment, no secret at all. It runs with this workflow's default token,
+# limited to `contents: read` (the state files, the default branch's scripts), `issues: write`
+# (its one issue) and `pull-requests: read` (the open PRs carrying the queue label, with their
+# base). It never writes the state and never writes to a pull request.
+#
+# Security posture: no job checks out or runs PR code. The one job checks out the DEFAULT branch
+# (sparse: scripts/merge-queue + config/merge-queue only, credentials not persisted) and runs a
+# zero-dependency Node script; no npm install. Every action is pinned by commit SHA (the same
+# pins as omni-queue.yml).
+#
+# Kill switch: inert unless the repository variable OMNI_QUEUE_ENABLED is 'true', and only in
+# cheaper-inference/OmniRoute (a fork or a sandbox copy never runs it as is).
+
+on:
+  schedule:
+    # Every 30 minutes, off the busy :00 / :30 slots.
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  watchdog:
+    name: Watchdog
+    # The last clause is the scheduled-run guard every scheduled job here carries
+    # (scripts/check/check-workflows.mjs); the repository clause before it also keeps a manual run
+    # in this repository only.
+    if: >-
+      vars.OMNI_QUEUE_ENABLED == 'true'
+      && github.repository == 'cheaper-inference/OmniRoute'
+      && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # One run at a time: two overlapping runs could each open the issue.
+    concurrency:
+      group: omni-queue-watchdog
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      # The default branch's watchdog, never a PR's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/merge-queue
+            config/merge-queue
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          package-manager-cache: false
+          node-version: "24"
+      - name: Check that queue ticks are completing
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/merge-queue/watchdog.mjs

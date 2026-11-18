@@ -304,67 +304,67 @@ Lihat `open-sse/utils/stream.ts` dan `open-sse/utils/streamHandler.ts` untuk con
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Halaman dasbor (23 bagian)
-│   ├── api/                # Rute API (51 direktori)
-│   └── login/              # Halaman autentikasi (.tsx)
-├── domain/                 # Mesin kebijakan (policyEngine, comboResolver, costRules, dll.)
-├── lib/                    # Logika bisnis inti (.ts)
-│   ├── a2a/                # Server protokol Agent-to-Agent v0.3
-│   ├── acp/                # Registri Agent Communication Protocol
-│   ├── compliance/         # Mesin kebijakan kepatuhan
-│   ├── db/                 # Modul domain SQLite + 130 migrasi
-│   ├── memory/             # Memori percakapan persisten
-│   ├── oauth/              # Penyedia, layanan, dan utilitas OAuth
-│   ├── skills/             # Kerangka kerja keterampilan yang dapat diperluas
-│   ├── usage/              # Pelacakan penggunaan dan penghitungan biaya
-│   └── localDb.ts          # Hanya lapisan ekspor ulang — jangan pernah menambahkan logika di sini
-├── middleware/              # Middleware permintaan (promptInjectionGuard)
-├── mitm/                   # Proksi MITM (sertifikat, DNS, perutean target)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponen React (.tsx)
-│   ├── constants/          # Definisi penyedia (329), cakupan MCP, 20 strategi perutean
-│   ├── utils/              # Pemutus sirkuit, sanitizer, pembantu autentikasi
-│   └── validation/         # Skema Zod v4
-└── sse/                    # Pipeline proksi SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Ruang kerja @omniroute/open-sse
-├── executors/              # 150 modul eksekutor (kelas eksekutor + pembantu per penyedia)
-├── handlers/               # 11 penangan permintaan (obrolan, respons, embedding, gambar, dll.)
-├── mcp-server/             # Server MCP (110 alat unik, 3 transportasi, 33 cakupan)
-├── services/               # 178 layanan tingkat atas (combo, autoCombo, rateLimitManager, dll.)
-├── translator/             # Penerjemah format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer Responses API
-└── utils/                  # 22 modul utilitas (aliran, TLS, proksi, pencatatan)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Aplikasi desktop Electron (lintas platform)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Runner pengujian Node.js (1.574 berkas pengujian)
-├── integration/            # Pengujian integrasi
-├── e2e/                    # Pengujian Playwright
-├── security/               # Pengujian keamanan
-├── translator/             # Pengujian khusus penerjemah
-└── load/                   # Pengujian beban
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Catatan Keputusan Arsitektur
-├── architecture/            # Arsitektur & ketahanan sistem
-├── comparison/              # OmniRoute vs alternatif
-├── compression/             # Panduan & aturan kompresi
-├── dev/                     # Panduan pengembangan
-├── diagrams/                # Diagram arsitektur
-├── frameworks/              # MCP, A2A, OpenCode, Memori, Keterampilan
-├── guides/                  # Panduan pengguna, Docker, penyiapan, pemecahan masalah
-├── i18n/                    # Terjemahan README yang diinternasionalkan
-├── marketing/               # Materi pemasaran
-├── ops/                     # Deployment, proksi, cakupan, rilis
-├── providers/               # Dokumentasi khusus penyedia
-├── reference/               # Referensi API, variabel lingkungan, alat CLI, tingkat gratis
-├── releases/                # Catatan rilis
-├── routing/                 # Mesin auto-combo, pemutaran ulang penalaran
-├── screenshots/             # Tangkapan layar dasbor
-├── security/                # Pembatas, kepatuhan, mode tersamar, token
-└── specs/                   # Spesifikasi desain
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

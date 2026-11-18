@@ -53,61 +53,61 @@ OmniRoute/
 
 ## रूट फाइल्स
 
-| फाइल                                        | उद्देश                                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **README.md**                               | मार्केटिंग लँडिंग पृष्ठ + जलद प्रारंभ + वैशिष्ट्य मॅट्रिक्स (`llm.txt` देखील पाहा)        |
-| **CHANGELOG.md**                            | प्रत्येक रिलीझचा बदलनोंद (`/version-bump-cc` कौशल्याद्वारे स्वयं-निर्मित)                 |
-| **LICENSE**                                 | MIT परवान्याचा मजकूर                                                                      |
-| **CLAUDE.md**                               | Claude Code एजंट्ससाठी प्रकल्पाचे नियम (कठोर नियम, संकेतपद्धती, परिस्थिती)                |
-| **AGENTS.md**                               | CLAUDE.md प्रमाणेच, परंतु Claude व्यतिरिक्त इतर AI एजंट्ससाठी (Codex, Cursor इ.)          |
-| **GEMINI.md**                               | Gemini-आधारित एजंट्ससाठी संक्षिप्त नियम (CLAUDE.md चा उपसंच)                              |
-| **CONTRIBUTING.md**                         | योगदानकर्त्यांसाठी मार्गदर्शक: सेटअप, पारंपरिक कमिट्स, चाचणी, PR प्रक्रिया                |
-| **SECURITY.md**                             | असुरक्षा अहवाल धोरण, समर्थित आवृत्त्या, धोका मॉडेल                                        |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — समुदायातील वर्तनासंबंधी अपेक्षा                                    |
-| **llm.txt**                                 | LLM क्रॉलर्ससाठी अनुकूलित साध्या मजकुरातील लँडिंग पृष्ठ (AI सहाय्यकांसाठी SEO)            |
-| **package.json**                            | npm मॅनिफेस्ट, स्क्रिप्ट्स, अवलंबित्वे, इंजिन्स, c8 कव्हरेज गेट                           |
-| **package-lock.json**                       | लॉक केलेली अवलंबित्व संरचना                                                               |
-| **tsconfig.json**                           | मूळ TypeScript कॉन्फिगरेशन                                                                |
-| **tsconfig.typecheck-core.json**            | `src/` कोअरसाठी टाइपचेक कॉन्फिगरेशन                                                       |
-| **tsconfig.typecheck-noimplicit-core.json** | कठोर (`noImplicitAny`) टाइपचेक                                                            |
-| **tsconfig.tsbuildinfo**                    | TS वाढीव बिल्ड कॅशे (gitignored)                                                          |
-| **next.config.mjs**                         | Next.js 16 बिल्ड कॉन्फिगरेशन (स्वतंत्र आउटपुट)                                            |
-| **next-env.d.ts**                           | Next.js द्वारे स्वयं-निर्मित env प्रकार                                                   |
-| **eslint.config.mjs**                       | ESLint फ्लॅट कॉन्फिगरेशन (प्रकल्प क्षेत्रानुसार नियम)                                     |
-| **prettier.config.mjs**                     | Prettier स्वरूपन नियम                                                                     |
-| **postcss.config.mjs**                      | Tailwind/CSS पाइपलाइनसाठी PostCSS कॉन्फिगरेशन                                             |
-| **playwright.config.ts**                    | Playwright E2E चाचणी कॉन्फिगरेशन                                                          |
-| **vitest.config.ts**                        | Vitest कॉन्फिगरेशन (डीफॉल्ट संच)                                                          |
-| **vitest.mcp.config.ts**                    | MCP सर्व्हर / autoCombo / कॅशे संचांसाठी Vitest कॉन्फिगरेशन                               |
-| **sonar-project.properties**                | SonarQube/SonarCloud कॉन्फिगरेशन (कोड गुणवत्ता)                                           |
-| **Dockerfile**                              | बहु-टप्प्यांचा Docker बिल्ड (बिल्डर → रनर-बेस → रनर-CLI)                                  |
-| **docker-compose.yml**                      | 4 प्रोफाइल्स (बेस, CLI, होस्ट, cliproxyapi) + redis साइडकारसह डेव्हलपमेंट कंपोझ           |
-| **docker-compose.prod.yml**                 | प्रॉडक्शन कंपोझ (पोर्ट 20130, redis, नामित व्हॉल्यूम्स)                                   |
-| **.dockerignore**                           | Docker कॉन्टेक्स्टमधून वगळलेल्या फाइल्स                                                   |
-| **fly.toml**                                | Fly.io डिप्लॉयमेंट कॉन्फिगरेशन (प्रदेश `sin`, पोर्ट 20128, /data व्हॉल्यूम)               |
-| **.env.example**                            | env फाइलचा साचा (पहिल्या इंस्टॉलेशनवेळी `.env` मध्ये आपोआप कॉपी केला जातो)                |
-| **.gitignore**                              | Git दुर्लक्ष नमुने                                                                        |
-| **.npmignore**                              | npm प्रकाशनातून वगळण्याची यादी                                                            |
-| **.npmrc**                                  | npm कॉन्फिगरेशन (रजिस्ट्री, लॉकफाइल धोरण)                                                 |
-| **.node-version**                           | Node आवृत्ती पिन (nvm-सुसंगत साधनांद्वारे वापरले जाते)                                    |
-| **.nvmrc**                                  | nvm साठी Node आवृत्ती पिन                                                                 |
-| **eslint.complexity.config.mjs**            | गुंतागुंत रॅचेटसाठी ESLint कॉन्फिगरेशन (`scripts/check/check-complexity.mjs --config`)    |
-| **eslint.sonarjs.config.mjs**               | SonarJS नियमांसाठी ESLint कॉन्फिगरेशन (संज्ञानात्मक गुंतागुंत / पुनरावृत्ती)              |
-| **source.config.ts**                        | Fumadocs `defineDocs` स्रोत कॉन्फिगरेशन (`.source/` ला डेटा पुरवते)                       |
-| **knip.json**                               | Knip कॉन्फिगरेशन — न वापरलेल्या फाइल्स/एक्सपोर्ट्स/अवलंबित्वे (डेड-कोड गेटला डेटा पुरवते) |
-| **stryker.conf.json**                       | Stryker म्युटेशन-चाचणी कॉन्फिगरेशन                                                        |
-| **.size-limit.json**                        | size-limit बंडल बजेट कॉन्फिगरेशन                                                          |
-| **promptfooconfig.yaml**                    | promptfoo मूल्यमापन कॉन्फिगरेशन                                                           |
-| **.gitleaks.toml**                          | gitleaks गुपित-स्कॅन नियमसंच                                                              |
-| **.zizmor.yml**                             | zizmor GitHub-Actions सुरक्षा-लिंट कॉन्फिगरेशन                                            |
-| **socket.yml**                              | Socket.dev पुरवठा-साखळी कॉन्फिगरेशन                                                       |
-| **news.json**                               | स्थानिकीकरण केलेले v2 घोषणा फीड; Radar लाँच आयटम निष्क्रिय स्थितीत वितरित केला जातो       |
-| **flake.nix** / **flake.lock**              | Nix dev-shell व्याख्या + लॉक                                                              |
-| **.env**                                    | स्थानिक गुपिते (gitignored — `.env.example` वरून व्युत्पन्न केलेली)                       |
+| फाईल                                        | उद्देश                                                                             |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **README.md**                               | विपणन लँडिंग पृष्ठ + क्विक स्टार्ट + वैशिष्ट्य मॅट्रिक्स ( `llm.txt` देखील पहा)    |
+| **CHANGELOG.md**                            | प्रति-रिलीझ चेंजलॉग ( `/version-bump-cc` कौशल्याद्वारे स्वयं-व्युत्पन्न)           |
+| **LICENSE**                                 | MIT परवाना मजकूर                                                                   |
+| **CLAUDE.md**                               | Claude कोड एजंट्ससाठी प्रकल्प नियम (कठोर नियम, अधिवेशने, परिस्थिती)                |
+| **AGENTS.md**                               | CLAUDE.md प्रमाणेच परंतु नॉन-क्लॉड AI एजंटसाठी (Codex, Cursor, इ.)                 |
+| **GEMINI.md**                               | मिथुन-आधारित एजंट्ससाठी संक्षिप्त नियम ( CLAUDE.md चा उपसंच)                       |
+| **CONTRIBUTING.md**                         | योगदानकर्ता मार्गदर्शक: सेटअप, पारंपारिक प्रतिबद्धता, चाचणी, PR प्रवाह             |
+| **SECURITY.md**                             | भेद्यता अहवाल धोरण, समर्थित आवृत्त्या, धमकी मॉडेल                                  |
+| **CODE_OF_CONDUCT.md**                      | योगदानकर्ता करार — समुदाय वर्तन अपेक्षा                                            |
+| **llm.txt**                                 | प्लेन-टेक्स्ट लँडिंग LLM क्रॉलर्ससाठी ऑप्टिमाइझ केले आहे ( AI सहाय्यकांसाठीSEO )   |
+| **package.json**                            | एनपीएम मॅनिफेस्ट, स्क्रिप्ट, अवलंबन, इंजिन, सी8 कव्हरेज गेट                        |
+| **package-lock.json**                       | लॉक केलेले अवलंबित्व वृक्ष                                                         |
+| **tsconfig.json**                           | रूट TypeScript कॉन्फिगरेशन                                                         |
+| **tsconfig.typecheck-core.json**            | `src/` कोरसाठी कॉन्फिगचे टाइप चेक करा                                              |
+| **tsconfig.typecheck-noimplicit-core.json** | कठोर (`noImplicitAny`) टाइपचेक                                                     |
+| **tsconfig.tsbuildinfo**                    | TS वाढीव बिल्ड कॅशे (gitigned)                                                     |
+| **पुढील config.mjs**                        | Next.js 16 बिल्ड कॉन्फिगरेशन (स्टँडअलोन आउटपुट)                                    |
+| **पुढील-env.d.ts**                          | Next.js स्वयं-निर्मित env प्रकार                                                   |
+| **eslint config.mjs**                       | ESLint फ्लॅट कॉन्फिगरेशन (प्रकल्प क्षेत्रासाठी नियम)                               |
+| **सुंदर config.mjs**                        | Prettier स्वरूपन नियम                                                              |
+| **पोस्टसीएसएस config.mjs**                  | Tailwind/CSS पाइपलाइनसाठीPostCSS कॉन्फिगरेशन                                       |
+| **नाटककार config.ts**                       | Playwright E2E चाचणी कॉन्फिगरेशन                                                   |
+| **विटेस्ट config.ts**                       | Vitest कॉन्फिगरेशन (डिफॉल्ट सूट)                                                   |
+| **vitest.mcp.config.ts**                    | Vitest कॉन्फिगरेशन MCP सर्व्हर / autoCombo / कॅशे सूटसाठी                          |
+| **sonar-project.properties**                | SonarQube/SonarCloud कॉन्फिगरेशन (कोड गुणवत्ता)                                    |
+| **डॉकरफाइल**                                | मल्टी-स्टेज Docker बिल्ड (बिल्डर → रनर-बेस → रनर-cli)                              |
+| **docker-compose.yml**                      | देव 4 प्रोफाईल (बेस, क्ली, होस्ट, क्लिप्रोक्सीपी) + redis sidecar सह रचना करा      |
+| **डॉकर-कंपोज.prod.yml**                     | उत्पादन रचना (पोर्ट 20130, रेडिस, नामांकित खंड)                                    |
+| **.dockerignore**                           | फाइल्स Docker संदर्भातून वगळल्या आहेत                                              |
+| **fly.toml**                                | Fly.io उपयोजन कॉन्फिगरेशन (क्षेत्र `sin`, पोर्ट 20128, /डेटा खंड)                  |
+| **.env.example**                            | टेम्पलेट env फाइल (पहिल्या इंस्टॉलेशनवर `.env` वर स्वयं-कॉपी केली)                 |
+| **.gitignore**                              | Git नमुन्यांकडे दुर्लक्ष करा                                                       |
+| **.npmignore**                              | npm वगळण्याची यादी प्रकाशित करा                                                    |
+| **.npmrc**                                  | एनपीएम कॉन्फिगरेशन (नोंदणी, लॉकफाइल धोरण)                                          |
+| **.नोड-आवृत्ती**                            | नोड आवृत्ती पिन (nvm-सुसंगत साधनांद्वारे वापरलेले)                                 |
+| **.nvmrc**                                  | nvm साठी नोड आवृत्ती पिन                                                           |
+| **eslint.complexity.config.mjs**            | जटिलता रॅचेटसाठीESLint कॉन्फिगरेशन (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | SonarJS नियमांसाठीESLint कॉन्फिगरेशन (संज्ञानात्मक जटिलता / डुप्लिकेशन)            |
+| **स्रोत config.ts**                         | Fumadocs `defineDocs` सोर्स कॉन्फिगरेशन (फीड्स `.source/`)                         |
+| **knip.json**                               | Knip config — न वापरलेले files/exports/deps (डेड-कोड गेट फीड करते)                 |
+| **स्ट्रायकर conf.mjs**                      | स्ट्रायकर उत्परिवर्तन-चाचणी कॉन्फिगरेशन ( `mutate` वरून `tap.testFiles` गणना करते) |
+| **.size-limit.json**                        | आकार-मर्यादा बंडल बजेट कॉन्फिगरेशन                                                 |
+| **promptfooconfig.yaml**                    | promptfoo eval कॉन्फिगरेशन                                                         |
+| **.gitleaks.toml**                          | gitleaks गुप्त-स्कॅन नियमसेट                                                       |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint कॉन्फिगरेशन                                    |
+| **socket.yml**                              | Socket.dev सप्लाय-चेन कॉन्फिगरेशन                                                  |
+| **news.json**                               | स्थानिकीकृत v2 घोषणा फीड; रडार लाँच आयटम जहाजे निष्क्रिय                           |
+| **flake.nix** /** flake.lock**              | निक्स डेव्ह-शेल व्याख्या + लॉक                                                     |
+| **.env**                                    | स्थानिक गुपिते (gitigned — `.env.example` वरून व्युत्पन्न केलेले)                  |
 
-> **v3.8.26 मध्ये root मधून बाहेर हलवले (अव्यवस्था कमी करण्यासाठी):**
+> **v3.8.26 (डिक्लटर) मध्ये रूटच्या बाहेर हलवले:**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेली `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) पहा.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेले `quality-metrics.json` (gitigned). [`## config/`](#config--static-configs--quality-gate-state) पहा.
 
 ---
 
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook वितरण — `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | बोगदा व्यवस्थापक — `docs/ops/TUNNELS_GUIDE.md` पहा                                                                                                                                                                                                                                                              |
 | `cloudSync.ts`, `initCloudSync.ts`       | राज्याचे पर्यायी क्लाउड सिंक                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | db मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (फक्त लॉजिक — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                       |
+| `localDb.ts`                             | डीबी मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (केवळ — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                           |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | कॅशिंग + idempotency विनंती                                                                                                                                                                                                                                                                                     |
 | (~ आणखी 30 उच्च-स्तरीय फाइल्स)           | विशेष मदतनीस (logEnv, modelsDevSync, piiSanitizer, इ.)                                                                                                                                                                                                                                                          |
 
@@ -242,19 +242,19 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | डॅशबोर्ड घटक API: `packages/ui-kit` — अडॅप्टर `docs/architecture/DESIGN_SYSTEM.md` पहा |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीनद्वारे वापरलेली चिन्हांची नावे → Lucide घटक (`<Icon>`)              |
-| `constants/providers.ts`         | **381 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
+| `constants/providers.ts`         | **394 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
 | `constants/cliTools.ts`          | बाह्य CLI साधन नोंदणी                                                                  |
-| `constants/routingStrategies.ts` | **20 राउटिंग रणनीती** प्राधान्यक्रमांसह                                                |
+| `constants/routingStrategies.ts` | **22 राउटिंग धोरण** प्राधान्यक्रमांसह                                                  |
 | `constants/publicApiRoutes.ts`   | वाहक (वि व्यवस्थापन) प्रमाणीकरण आवश्यक असलेले मार्ग                                    |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम विनंत्यांसाठी हेडर नाकारण्याची सूची                                          |
-| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API करारांसाठी सत्याचा एकच स्रोत)                                    |
+| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API करारासाठी सत्याचा एकच स्रोत)                                     |
 | `validation/helpers.ts`          | Zod प्रमाणीकरण मदतनीस (`validateBody`, इ.)                                             |
 | `types/`                         | शेअर केलेले TS प्रकार                                                                  |
 | `contracts/`                     | सार्वजनिक API करार ( `package.json` मध्ये `files:` द्वारे वापरला जातो)                 |
 | `utils/circuitBreaker.ts`        | प्रदाता सर्किट ब्रेकर ( `docs/architecture/RESILIENCE_GUIDE.md` पहा)                   |
 | `utils/apiAuth.ts`               | API की प्रमाणीकरण, व्याप्ती तपासणी                                                     |
 | `utils/fetchTimeout.ts`          | अपस्ट्रीम फेचसाठीTimeout/abort रॅपर्स                                                  |
-| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानिकीकरण आणि ID डिसमिसल                                 |
+| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानिकीकरण आणि ID डिसमिस                                  |
 
 ---
 
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 फाइल्स (12 हँडलर्स + 4 सहाय्यक): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, इ.
-├── executors/           # 150 एक्झिक्युटर मॉड्यूल्स (BaseExecutor विस्तारित करणारे क्लासेस + प्रत्येक प्रदात्यासाठी सहाय्यक)
+├── executors/           # 163 एक्झिक्युटर मॉड्यूल्स (BaseExecutor विस्तारित करणारे क्लासेस + प्रत्येक प्रदात्यासाठी सहाय्यक)
 ├── translator/          # स्वरूप रूपांतरक (9 विनंती, 9 प्रतिसाद, 9 सहाय्यक)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ सेवा मॉड्यूल्स (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, इ.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकत्रीकरण + अंतर्गत OmniRoute CLI                                            |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा जोडणे, 67 लोकॅल्स                                            |
 | `UNINSTALL.md`              | विस्थापित चरण साफ करा                                                                  |
-| `PROVIDER_REFERENCE.md`     | **स्वयं-व्युत्पन्न** 381 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वयं-व्युत्पन्न** 394 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
 
 ### उपप्रणाली खोल-डाव
 
