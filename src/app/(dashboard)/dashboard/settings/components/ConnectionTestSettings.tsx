@@ -11,6 +11,25 @@ import {
   CONNECTION_TEST_PROMPT_MAX_LENGTH,
 } from "@/shared/constants/connectionTest";
 
+/** The line next to Save: what the last save did. */
+function SaveOutcome({ saved, error }: { saved: boolean; error: boolean }) {
+  const t = useTranslations("connectionTest");
+  return (
+    <>
+      {saved && (
+        <span role="status" className="text-sm text-success">
+          {t("saved")}
+        </span>
+      )}
+      {error && (
+        <span role="alert" className="text-sm text-error">
+          {t("failed")}
+        </span>
+      )}
+    </>
+  );
+}
+
 export default function ConnectionTestSettings() {
   const t = useTranslations("connectionTest");
   const [prompt, setPrompt] = useState(DEFAULT_CONNECTION_TEST_PROMPT);
@@ -79,16 +98,7 @@ export default function ConnectionTestSettings() {
         <Button loading={saving} disabled={loading || !prompt.trim()} onClick={save}>
           {t("saveMessage")}
         </Button>
-        {saved && (
-          <span role="status" className="text-sm text-success">
-            {t("saved")}
-          </span>
-        )}
-        {error && (
-          <span role="alert" className="text-sm text-error">
-            {t("failed")}
-          </span>
-        )}
+        <SaveOutcome saved={saved} error={error} />
       </div>
     </Card>
   );
