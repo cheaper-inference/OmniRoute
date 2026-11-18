@@ -81,6 +81,27 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
+test("handleImageGeneration forwards the caller's abort signal to the Codex image fetch (#19516)", async () => {
+  const seenSignals: Array<AbortSignal | null | undefined> = [];
+  globalThis.fetch = async (_url, options: RequestInit = {}) => {
+    seenSignals.push(options.signal);
+    return imagesResponse("ZmxhcmU=");
+  };
+  const controller = new AbortController();
+
+  const result = await handleImageGeneration({
+    body: { model: "codex/gpt-image-2", prompt: "a ceramic teacup" },
+    credentials: { accessToken: "codex-token" },
+    log: null,
+    signal: controller.signal,
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(seenSignals.length, 1);
+  // Without forwarding, a client disconnect could not cancel the paid upstream image call.
+  assert.equal(seenSignals[0], controller.signal);
+});
+
 test("Codex GPT Image generation posts to the dedicated Images route and forwards the model", async () => {
   const calls: Captured[] = [];
   captureFetch(calls);
@@ -343,9 +364,7 @@ test("GPT Image 2.5 forwards 16 references and rejects 17 before upstream", asyn
   assert.equal(calls[0].body.model, "gpt-image-2.5-flare");
   const forwarded = calls[0].body.images as Array<{ image_url: string }>;
   assert.equal(forwarded.length, 16);
-  assert.ok(
-    forwarded.every((image) => image.image_url.startsWith("data:image/png;base64,"))
-  );
+  assert.ok(forwarded.every((image) => image.image_url.startsWith("data:image/png;base64,")));
 
   const oversized = await imageEditRoute.POST(requestFor(17));
   assert.equal(oversized.status, 400);

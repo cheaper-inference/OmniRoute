@@ -117,9 +117,7 @@ export default function VscodeTokenAliasCard({
       <Card className={`overflow-hidden ${className}`.trim()}>
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <Icon name="key" size={14} className="text-primary" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {t("vscodeAliasTitle")}
-          </h3>
+          <h3 className="text-xs uppercase text-text-muted">{t("vscodeAliasTitle")}</h3>
           <div className="flex-1 h-px bg-border/30" />
           <Link
             href="/dashboard/cli-tools"
@@ -199,7 +197,7 @@ function CopyableEndpointRow({
   const rowClassName =
     variant === "catalog"
       ? "flex items-center gap-2 min-w-0 rounded-lg border border-border bg-surface-2 px-3 py-2.5"
-      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-background/60 px-2.5 py-2";
+      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-bg/60 px-2.5 py-2";
 
   return (
     <div className={rowClassName}>

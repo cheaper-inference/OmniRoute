@@ -222,7 +222,8 @@
       "direction": "down",
       "dedicatedGate": true,
       "_note": "oasdiff breaking-change gate (Fase 9 Onda 0). Blocks any breaking change vs base spec.",
-      "_rebaseline_2026_08_22_combo_create_min1": "0 -> 4, split 3 own + 1 inherited. Docs-only alignment of components.schemas.ComboCreate with the request contract already enforced by the API since 638fc5fbd (combo create refuses an empty model list) and d5034ea52: `model`/`nodes` were phantom properties the server never accepted, and `models` (array, minItems 1) is the real required field. OWN findings (3, caused by this commit): removed `model`, removed `nodes`, added required `models` on POST /api/combos — spec-vs-server drift, not client-facing breakage, no working client could have relied on the removed shapes. INHERITED finding (1, NOT caused by this PR's code changes — pre-existing drift already present at parent d5034ea52): PATCH /api/combos/{id} request-body-added-required; that route's patch operation declares its own inline requestBody (required: true, bare object schema, docs/openapi.yaml ~2107-2118) and does not reference ComboCreate, so this finding exists independently of the ComboCreate alignment (same own-growth vs inherited-drift convention as _rebaseline_2026_07_20_aliasresolver_hook_split_7808). No code change in this PR; follow-up tracking = this change's PR description."
+      "_rebaseline_2026_08_22_combo_create_min1": "0 -> 4, split 3 own + 1 inherited. Docs-only alignment of components.schemas.ComboCreate with the request contract already enforced by the API since 638fc5fbd (combo create refuses an empty model list) and d5034ea52: `model`/`nodes` were phantom properties the server never accepted, and `models` (array, minItems 1) is the real required field. OWN findings (3, caused by this commit): removed `model`, removed `nodes`, added required `models` on POST /api/combos — spec-vs-server drift, not client-facing breakage, no working client could have relied on the removed shapes. INHERITED finding (1, NOT caused by this PR's code changes — pre-existing drift already present at parent d5034ea52): PATCH /api/combos/{id} request-body-added-required; that route's patch operation declares its own inline requestBody (required: true, bare object schema, docs/openapi.yaml ~2107-2118) and does not reference ComboCreate, so this finding exists independently of the ComboCreate alignment (same own-growth vs inherited-drift convention as _rebaseline_2026_07_20_aliasresolver_hook_split_7808). No code change in this PR; follow-up tracking = this change's PR description.",
+      "_ack_2026_11_09_pr19311_keys_post_name": "No value change (measured 2 <= 5). PR #19311 (key policy templates, owner decision 48 of 2026-11-09) corrects the POST /api/keys request schema in docs/openapi.yaml: oasdiff reports request-property-removed `label` and new-required-request-property `name` (2 findings). Docs-only correction, not a contract change: src/app/api/keys/route.ts already validated `name` (createKeySchema) and never read `label`, so no working client could rely on the old shape."
     },
     "mutationScore.src/sse/services/auth.ts": {
       "value": 43.81,
@@ -385,6 +386,22 @@
       "eps": 0,
       "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder.",
       "_tighten_2026_10_22_kea7886": "1214 -> 843. Measured rtlPhysicalClasses=702 by scripts/check/check-rtl-ratchet.mjs on feat/new-uikit-task42 (feat/new-uikit af385849 + docs): the UI kit migration (KEA-7886) replaced physical left/right utilities across the dashboard. 843 = ceil(702 * 1.2), keeping the velocity-phase 20% headroom (_policy) instead of freezing at the live count."
+    },
+    "typeScaleSubFloorSizes": {
+      "_headroom_2026_11_10": "Tip measured 930 on 2026-11-10, up from 911 in a day while PRs landed on release/v3.8.54. +20 headroom so PRs whose CI ran before this ceiling do not turn the base red. Tighten at the release freeze.",
+      "value": 950,
+      "direction": "down",
+      "eps": 0,
+      "dedicatedGate": true,
+      "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (text-[8px]..text-[11px], fractions included, in src/): 971 on release/v3.8.54 565dda8d, 914 after the same PR moved 57 non-dense hints and empty states from text-[11px] to text-xs. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down. Enforced by the pre-commit hook and tests/unit/check-type-scale-ratchet.test.ts."
+    },
+    "typeScaleFontBold": {
+      "_tightened_2026_11_11": "#19765 replaced every font-bold with the kit bold weight (font-semibold); the tip measures 0, so font-bold cannot come back.",
+      "value": 0,
+      "direction": "down",
+      "eps": 0,
+      "dedicatedGate": true,
+      "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (font-bold in src/; the kit's bold weight is 600, font-semibold): 254 on release/v3.8.54 565dda8d. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down."
     }
   },
   "_coverage_note": "Pisos anti-flake ~2pt abaixo do real do CI mergeado MEDIDO COM os 135 testes religados (run 27247237268: statements 78.4 / lines 78.4 / functions 83.84 / branches 75.73). O religamento da 6A.1 HONESTIFICOU a regua: os ~82.5 anteriores eram inflados porque modulos nunca importados ficavam fora do denominador do c8. Apertar via --require-tighten na Fase 6A (2026-06-16).",

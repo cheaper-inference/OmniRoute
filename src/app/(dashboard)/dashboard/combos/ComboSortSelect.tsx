@@ -39,6 +39,7 @@ export function ComboSortSelect({
   const label = getI18nOrFallback(t, "combo.sort.label", "Sort by");
   return (
     <Select
+      native
       compact
       label={label}
       aria-label={label}

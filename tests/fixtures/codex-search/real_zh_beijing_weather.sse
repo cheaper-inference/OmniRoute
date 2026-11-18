@@ -1,0 +1,173 @@
+event: response.created
+data: {"type":"response.created","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652385,"status":"in_progress","access_programs":null,"background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
+
+event: response.in_progress
+data: {"type":"response.in_progress","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652385,"status":"in_progress","access_programs":null,"background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"id":"ws_00000000000000000000000000000000000000000000000002","type":"web_search_call","status":"in_progress"},"output_index":0,"sequence_number":2}
+
+event: response.web_search_call.in_progress
+data: {"type":"response.web_search_call.in_progress","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":3}
+
+event: response.web_search_call.searching
+data: {"type":"response.web_search_call.searching","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":4}
+
+event: response.web_search_call.completed
+data: {"type":"response.web_search_call.completed","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":5}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"id":"ws_00000000000000000000000000000000000000000000000002","type":"web_search_call","status":"completed","action":{"type":"search","queries":["北京 2026年10月 天气预报","Beijing October 2026 weather forecast"],"query":"北京 2026年10月 天气预报","sources":[{"type":"url","url":"https://www.tianqi.com/tianqi/beijing/202610.html"},{"type":"url","url":"https://m.tianqi.com/tianqi/beijing/202610.html"},{"type":"url","url":"https://weather33.com/weather-Beijing/month"},{"type":"url","url":"https://www.zgjia.com/lishi/beijing/202610.html"},{"type":"url","url":"https://www.travelchinaguide.com/cityguides/beijing/weather-october.htm"},{"type":"url","url":"https://www.tianqi.com/tianqi/chaoyang/202610.html"},{"type":"url","url":"https://tianqi.eastday.com/lishi/beijing/"},{"type":"url","url":"https://www.rewindweather.com/east-asia/china/beijing/long-term-weather-forecast/"},{"type":"url","url":"https://www.666yes.com/beijingtianqi/40tian/"},{"type":"url","url":"https://en.climate-data.org/asia/republik-rakyat-cina/beijing-885/r/october-10/"},{"type":"url","url":"https://weathermondo.com/china/beijing-1074643/october/"},{"type":"url","url":"https://www.accuweather.com/ja/cn/beijing/101924/october-weather/101924"},{"type":"url","url":"https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E5%B8%82"},{"type":"url","url":"https://cmalibrary.cn/amst/2024/202404/lt/202409/P020240928597080744596.pdf"},{"type":"url","url":"https://en.wikipedia.org/wiki/Beijing"},{"type":"url","url":"https://www.reddit.com/r/travelchina/comments/1wze657/weather_in_beijing/"},{"type":"url","url":"https://en.wikipedia.org/wiki/Weather_of_2026"},{"type":"url","url":"https://www.reddit.com/r/meteorology/comments/1wzqku9/winter_20262027_forecast_update_october_ecmwf/"},{"type":"url","url":"https://www.reddit.com/r/chinatravel/comments/1wzwmjb/this_itinerary_from_15th_to_30th_oct_2027/"},{"type":"url","url":"https://en.wikipedia.org/wiki/Beijing_Capital_International_Airport"},{"type":"url","url":"https://www.reddit.com/r/chinatravel/comments/1x4bmb2/please_please_help_me_decide_when_to_travel/"},{"type":"url","url":"https://www.reddit.com/r/travelchina/comments/1xahe1c/when_to_visit/"},{"type":"url","url":"https://www.reddit.com/r/travelchina/comments/1x2lg8f/beijing_end_of_nov/"},{"type":"url","url":"https://www.ynwss.gov.cn/wssrmzf/qxfw/2008107522339495936/T6zKXU7f.pdf"},{"type":"url","url":"https://es.wikipedia.org/wiki/Pek%C3%ADn"},{"type":"url","url":"https://www.reddit.com/r/UKWeather/comments/1vw2g1b/my_autmn_2026_seasonal_forecast_based_on/"},{"type":"url","url":"https://www.reddit.com/r/travelchina/comments/1w2cxnv/shanghai_china_in_october_2026_heavy_rain/"},{"type":"url","url":"https://www.shm.com.cn/szb/ytwb/paper/pc/attachment/202512/31/e9710b3b-7209-4b77-b191-2d0e4e10944d.pdf"},{"type":"url","url":"https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E9%A6%96%E9%83%BD%E5%9B%BD%E9%99%85%E6%9C%BA%E5%9C%BA"}]}},"output_index":0,"sequence_number":6}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"id":"msg_00000000000000000000000000000000000000000000000003","type":"message","status":"in_progress","content":[],"phase":"final_answer","role":"assistant"},"output_index":1,"sequence_number":7}
+
+event: response.content_part.added
+data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000003","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":8}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"{\"results\":[{\"title\":\"2026年10月","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"6s","output_index":1,"sequence_number":9}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"北京天气预报\",\"url\":\"https://www.tian","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"L","output_index":1,"sequence_number":10}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"qi.com/tianqi/beijing/202610.html\",\"description\":\"天气网提供北京","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"V6bkyEY","output_index":1,"sequence_number":11}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"2026年10月逐日天气预报及","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"z","output_index":1,"sequence_number":12}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"整月天气信息。\"},{\"title","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"Sn94QwsJwDbD6PY","output_index":1,"sequence_number":13}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"\":\"北京2026年","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"9zd6DM","output_index":1,"sequence_number":14}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"10月天气预","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"S5238Llddp","output_index":1,"sequence_number":15}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"报\",\"url\":\"https","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"M","output_index":1,"sequence_number":16}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"://m.tian","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"YjrfvFY","output_index":1,"sequence_number":17}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"qi.com/t","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"Wmj7nIfG","output_index":1,"sequence_number":18}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ianqi/beijing","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"5xN","output_index":1,"sequence_number":19}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"/202610.html\",\"","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"W","output_index":1,"sequence_number":20}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"description\":\"页面提供","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"a6FyYh86RbPUaJ","output_index":1,"sequence_number":21}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"北京2026年","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"d8UqKhisZ","output_index":1,"sequence_number":22}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"10月天气预","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"Y3hsdYwCj0","output_index":1,"sequence_number":23}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"报和十月","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"3BnqinJEm0NC","output_index":1,"sequence_number":24}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"天气概况。","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"ZlReFWDVOkZ","output_index":1,"sequence_number":25}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"\"},{\"title\":\"Be","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"A","output_index":1,"sequence_number":26}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ijing Weather in October","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"0kHsxN0t","output_index":1,"sequence_number":27}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" 2026\",\"","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"Rn4Bg2oM","output_index":1,"sequence_number":28}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"url\":\"https://","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"Gr","output_index":1,"sequence_number":29}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"www.travelchinagu","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"nR6UPaJxt5S3Lo7","output_index":1,"sequence_number":30}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ide.com/c","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"39cSShi","output_index":1,"sequence_number":31}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ityguides/be","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"mxt0","output_index":1,"sequence_number":32}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ijing/weather-oct","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"plG3nRgCBgZNlkD","output_index":1,"sequence_number":33}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ober.htm\",\"","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"ZRLat","output_index":1,"sequence_number":34}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"description\":\"介绍北京10月天气特点：气","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"vOYEY","output_index":1,"sequence_number":35}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"候凉爽、降雨","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"bRbGPQuhIO","output_index":1,"sequence_number":36}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"较少，气温可能变化，建议留","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"z9d","output_index":1,"sequence_number":37}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"意临近天气","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"4Z3wMQbkVOQ","output_index":1,"sequence_number":38}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"预报并准备","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"xna2h7n63p1","output_index":1,"sequence_number":39}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"衣物。\"},{\"","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"FD9sGPbh","output_index":1,"sequence_number":40}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"title\":\"Beijing","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"5","output_index":1,"sequence_number":41}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" — October and November","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"sHpAz0N4E","output_index":1,"sequence_number":42}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" 2026 monthly","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"B9G","output_index":1,"sequence_number":43}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" weather\",\"url","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"mB","output_index":1,"sequence_number":44}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"\":\"https://weather","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"1TPgtb9z5qxPAj","output_index":1,"sequence_number":45}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"33.com/weather-Be","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"XQNMIsdT4zKwVrb","output_index":1,"sequence_number":46}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"ijing/month\",\"","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"wq","output_index":1,"sequence_number":47}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"description\":\"提供北京","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"gEO9yIU0OnwgGz","output_index":1,"sequence_number":48}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"2026年10","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"VROal8bCA","output_index":1,"sequence_number":49}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"月的月度","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"E4hKTWSevbMm","output_index":1,"sequence_number":50}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"天气预报参考","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"o1z9Vgyidu","output_index":1,"sequence_number":51}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"。\"}]}","item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"obfuscation":"ZVMMoB5N4O6","output_index":1,"sequence_number":52}
+
+event: response.metadata
+data: {"type":"response.metadata","response_id":"resp_00000000000000000000000000000000000000000000000001","sequence_number":53,"metadata":{"openai_chatgpt_moderation_metadata":{"prompt":{"omnimod":{"protection_type":"omnimod","outputs":[{"results":[{"category_flags":{"A1":false,"A2":false,"A3":false,"C1":false,"C11":false,"C2":false,"E1":false,"E2":false,"E3":false,"H1":false,"H2":false,"H3":false,"JB1":false,"K1":false,"K2":false,"K3":false,"K4":false,"P1":false,"P2":false,"P3":false,"P4":false,"PD1":false,"PD4":false,"S1":false,"S3+":false,"S4":false,"SH":false,"TXT-C3":false,"TXT-C4":false,"V1":false,"V2+":false,"V4+":false,"REFUSED":false,"CBRN-B1+":false,"IMG-C1":false,"IMG-C11":false,"IMG-C2":false,"IMG-S1":false,"IMG-SH":false,"IMG-V1":false,"IMG-V2+":false,"IMG-V4+":false}}],"is_blocked":false}]}},"generation":{},"tool_call":{},"tool_response":{}}}}
+
+event: response.output_text.done
+data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000003","logprobs":[],"output_index":1,"sequence_number":54,"text":"{\"results\":[{\"title\":\"2026年10月北京天气预报\",\"url\":\"https://www.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"天气网提供北京2026年10月逐日天气预报及整月天气信息。\"},{\"title\":\"北京2026年10月天气预报\",\"url\":\"https://m.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"页面提供北京2026年10月天气预报和十月天气概况。\"},{\"title\":\"Beijing Weather in October 2026\",\"url\":\"https://www.travelchinaguide.com/cityguides/beijing/weather-october.htm\",\"description\":\"介绍北京10月天气特点：气候凉爽、降雨较少，气温可能变化，建议留意临近天气预报并准备衣物。\"},{\"title\":\"Beijing — October and November 2026 monthly weather\",\"url\":\"https://weather33.com/weather-Beijing/month\",\"description\":\"提供北京2026年10月的月度天气预报参考。\"}]}"}
+
+event: response.content_part.done
+data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000003","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"results\":[{\"title\":\"2026年10月北京天气预报\",\"url\":\"https://www.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"天气网提供北京2026年10月逐日天气预报及整月天气信息。\"},{\"title\":\"北京2026年10月天气预报\",\"url\":\"https://m.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"页面提供北京2026年10月天气预报和十月天气概况。\"},{\"title\":\"Beijing Weather in October 2026\",\"url\":\"https://www.travelchinaguide.com/cityguides/beijing/weather-october.htm\",\"description\":\"介绍北京10月天气特点：气候凉爽、降雨较少，气温可能变化，建议留意临近天气预报并准备衣物。\"},{\"title\":\"Beijing — October and November 2026 monthly weather\",\"url\":\"https://weather33.com/weather-Beijing/month\",\"description\":\"提供北京2026年10月的月度天气预报参考。\"}]}"},"sequence_number":55}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"id":"msg_00000000000000000000000000000000000000000000000003","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"results\":[{\"title\":\"2026年10月北京天气预报\",\"url\":\"https://www.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"天气网提供北京2026年10月逐日天气预报及整月天气信息。\"},{\"title\":\"北京2026年10月天气预报\",\"url\":\"https://m.tianqi.com/tianqi/beijing/202610.html\",\"description\":\"页面提供北京2026年10月天气预报和十月天气概况。\"},{\"title\":\"Beijing Weather in October 2026\",\"url\":\"https://www.travelchinaguide.com/cityguides/beijing/weather-october.htm\",\"description\":\"介绍北京10月天气特点：气候凉爽、降雨较少，气温可能变化，建议留意临近天气预报并准备衣物。\"},{\"title\":\"Beijing — October and November 2026 monthly weather\",\"url\":\"https://weather33.com/weather-Beijing/month\",\"description\":\"提供北京2026年10月的月度天气预报参考。\"}]}"}],"phase":"final_answer","role":"assistant"},"output_index":1,"sequence_number":56}
+
+event: response.completed
+data: {"type":"response.completed","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652385,"status":"completed","access_programs":null,"background":false,"completed_at":1792652399,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":1}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":{"input_tokens":8755,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":4352},"output_tokens":275,"output_tokens_details":{"reasoning_tokens":45},"total_tokens":9030},"user":null,"metadata":{}},"sequence_number":57}
