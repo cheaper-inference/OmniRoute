@@ -373,19 +373,19 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                         />
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving || displayName.trim().length === 0}
                           onClick={() => void saveOverride(entry)}
-                          className="h-7 px-2 text-xs text-primary"
+                          className="text-primary"
                         >
                           {t("saveModel")}
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => setEditingKey(null)}
-                          className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                          tone="muted"
                         >
                           {t("cancelEdit")}
                         </Button>
@@ -394,30 +394,30 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => beginEdit(entry)}
-                          className="h-7 px-2 text-xs text-primary"
+                          className="text-primary"
                         >
                           {t("editModel")}
                         </Button>
                         {hasOverride && (
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="2xs"
                             disabled={saving}
                             onClick={() => void resetOverride(entry)}
-                            className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                            tone="muted"
                           >
                             {t("resetModel")}
                           </Button>
                         )}
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           disabled={saving}
                           onClick={() => void setTombstone(entry.provider, entry.modelId, true)}
-                          className="h-7 px-2 text-xs text-error hover:bg-error/10"
+                          className="text-error hover:bg-error/10"
                         >
                           {t("hideModel")}
                         </Button>

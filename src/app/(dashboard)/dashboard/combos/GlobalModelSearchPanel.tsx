@@ -105,7 +105,8 @@ export default function GlobalModelSearchPanel({
                   size="icon-sm"
                   onClick={() => onGlobalSearchQueryChange("")}
                   aria-label={getI18nOrFallback(t, "clearSearch", "Clear search")}
-                  className="absolute end-1 top-1/2 -translate-y-1/2 text-text-muted"
+                  className="absolute end-1 top-1/2 -translate-y-1/2"
+                  tone="muted"
                 >
                   <Icon name="close" size={14} />
                 </Button>

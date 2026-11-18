@@ -598,9 +598,8 @@ export default function ApiEndpointsTab() {
                                     </p>
                                     <Button
                                       variant="ghost"
-                                      size="sm"
+                                      size="2xs"
                                       onClick={() => setUseManualKey(!useManualKey)}
-                                      className="h-auto min-h-0 px-1 py-0 text-[10px]"
                                     >
                                       {useManualKey ? t("switchToSelection") : t("enterManually")}
                                     </Button>

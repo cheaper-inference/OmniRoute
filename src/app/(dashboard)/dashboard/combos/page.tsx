@@ -1774,15 +1774,10 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <Button size="sm" variant="ghost" onClick={onHide} className="!h-6 px-2 text-[10px]">
+          <Button size="2xs" variant="ghost" onClick={onHide}>
             {getI18nOrFallback(t, "usageGuideHide", "Hide")}
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onHideForever}
-            className="!h-6 px-2 text-[10px]"
-          >
+          <Button size="2xs" variant="ghost" onClick={onHideForever}>
             {getI18nOrFallback(t, "usageGuideDontShowAgain", "Don't show again")}
           </Button>
         </div>
@@ -1906,7 +1901,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
           </p>
           <p className="text-[10px] text-text-muted mt-0.5">{description}</p>
         </div>
-        <Button size="sm" variant="ghost" onClick={onApply} className="!h-6 px-2 text-[10px]">
+        <Button size="2xs" variant="ghost" onClick={onApply}>
           {getI18nOrFallback(t, "applyRecommendations", "Apply recommendations")}
         </Button>
       </div>
@@ -2064,11 +2059,12 @@ function ComboCardInner({
               onDragEnd={onDragEnd}
               disabled={dragDisabled}
               data-testid={`combo-drag-handle-${combo.id}`}
+              tone="muted"
               className={cn(
                 "shrink-0",
                 dragDisabled
                   ? "cursor-not-allowed text-text-muted/40"
-                  : "cursor-grab active:cursor-grabbing text-text-muted"
+                  : "cursor-grab active:cursor-grabbing"
               )}
               title={getI18nOrFallback(t, "reorderHandle", "Drag to reorder combo")}
               aria-label={getI18nOrFallback(t, "reorderHandle", "Drag to reorder combo")}
@@ -2106,7 +2102,8 @@ function ComboCardInner({
                   e.stopPropagation();
                   onCopy(combo.name, `combo-${combo.id}`);
                 }}
-                className="text-text-muted opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                tone="muted"
                 // Named by its title only (as before): an aria-label "Copy combo name" would also
                 // match label lookups for the "Combo name" field of the editor.
                 title={t("copyComboName")}
@@ -2205,7 +2202,8 @@ function ComboCardInner({
               size="icon"
               onClick={onTest}
               disabled={testing}
-              className="text-text-muted hover:text-success"
+              className="hover:text-success"
+              tone="muted"
               title={t("testCombo")}
               aria-label={t("testCombo")}
             >
@@ -2215,7 +2213,7 @@ function ComboCardInner({
               variant="ghost"
               size="icon"
               onClick={onDuplicate}
-              className="text-text-muted"
+              tone="muted"
               title={t("duplicate")}
               aria-label={t("duplicate")}
             >
@@ -2225,7 +2223,7 @@ function ComboCardInner({
               variant="ghost"
               size="icon"
               onClick={onProxy}
-              className="text-text-muted"
+              tone="muted"
               title={t("proxyConfig")}
               aria-label={t("proxyConfig")}
             >
@@ -2235,7 +2233,7 @@ function ComboCardInner({
               variant="ghost"
               size="icon"
               onClick={onEdit}
-              className="text-text-muted"
+              tone="muted"
               title={tc("edit")}
               aria-label={tc("edit")}
             >
@@ -4301,7 +4299,7 @@ function ComboFormModal({
                           size="icon-sm"
                           onClick={() => handleMoveUp(index)}
                           disabled={index === 0}
-                          className="text-text-muted"
+                          tone="muted"
                           title={t("moveUp")}
                           aria-label={t("moveUp")}
                         >
@@ -4312,7 +4310,7 @@ function ComboFormModal({
                           size="icon-sm"
                           onClick={() => handleMoveDown(index)}
                           disabled={index === models.length - 1}
-                          className="text-text-muted"
+                          tone="muted"
                           title={t("moveDown")}
                           aria-label={t("moveDown")}
                         >
@@ -4453,7 +4451,8 @@ function ComboFormModal({
                 icon="travel_explore"
                 fullWidth
                 onClick={() => setShowModelSelect(true)}
-                className="mt-2 border-dashed text-text-muted"
+                className="mt-2 border-dashed"
+                tone="muted"
                 data-testid="combo-browse-catalog"
               >
                 {getI18nOrFallback(t, "browseLegacyCatalog", "Browse legacy model catalog")}
@@ -4471,7 +4470,8 @@ function ComboFormModal({
                   icon={showAdvanced ? "expand_less" : "expand_more"}
                   aria-expanded={showAdvanced}
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="self-start text-text-muted"
+                  className="self-start"
+                  tone="muted"
                 >
                   {t("advancedSettings")}
                 </Button>

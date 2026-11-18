@@ -65,9 +65,10 @@ function ComboOptionRow({
       size="sm"
       aria-pressed={isSelected}
       onClick={() => onToggle(combo.name)}
+      tone={isSelected ? undefined : "muted"}
       className={cn(
         "w-full justify-start gap-2 text-left text-xs",
-        isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
+        isSelected && "bg-primary/10 text-text-main"
       )}
     >
       <span

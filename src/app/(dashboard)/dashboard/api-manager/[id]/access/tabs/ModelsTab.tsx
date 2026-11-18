@@ -353,18 +353,12 @@ function SelectedModelsSummary({
         <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="2xs"
             onClick={() => selectAllModels(allModels.map((m) => m.id))}
-            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
           >
             {tc("all")}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={deselectAllModels}
-            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] text-error"
-          >
+          <Button variant="ghost" size="2xs" onClick={deselectAllModels} className="text-error">
             {t("clear")}
           </Button>
         </div>

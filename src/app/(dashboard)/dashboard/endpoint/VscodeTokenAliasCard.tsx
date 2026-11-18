@@ -207,7 +207,8 @@ function CopyableEndpointRow({
         variant="outline"
         size="icon-sm"
         onClick={() => copy(url, copyKey)}
-        className="shrink-0 text-text-muted"
+        className="shrink-0"
+        tone="muted"
         aria-label={`${label}: ${url}`}
         title={url}
         icon={copied === copyKey ? "check" : "content_copy"}

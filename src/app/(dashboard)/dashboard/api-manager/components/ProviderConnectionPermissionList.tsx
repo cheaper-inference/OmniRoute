@@ -223,7 +223,8 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
             variant="ghost"
             size="icon-sm"
             onClick={() => handleSearchChange("")}
-            className="absolute inset-y-0 right-1 my-auto text-text-muted"
+            className="absolute inset-y-0 right-1 my-auto"
+            tone="muted"
             aria-label={tc("clear")}
             icon="close"
           />
@@ -257,7 +258,8 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleToggleExpand(provider)}
-                    className="shrink-0 text-text-muted"
+                    className="shrink-0"
+                    tone="muted"
                     aria-label={providerDisplayName}
                     aria-expanded={isExpanded}
                   >
@@ -276,9 +278,9 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                     />
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="2xs"
                       onClick={() => handleToggleExpand(provider)}
-                      className="h-auto min-h-0 px-1 text-xs text-text-main truncate text-left"
+                      className="text-text-main truncate text-left"
                     >
                       {providerDisplayName}
                     </Button>
@@ -304,9 +306,10 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                           size="sm"
                           aria-pressed={isSelected}
                           onClick={() => handleToggleSingleConnection(conn.id)}
+                          tone={isSelected ? undefined : "muted"}
                           className={cn(
                             "w-full justify-start gap-2 text-left text-xs",
-                            isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
+                            isSelected && "bg-primary/10 text-text-main"
                           )}
                         >
                           <span

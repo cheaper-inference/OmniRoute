@@ -1363,7 +1363,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                       variant="outline"
                       size="icon-sm"
                       onClick={() => void copy(url, key)}
-                      className="shrink-0 text-text-muted"
+                      className="shrink-0"
+                      tone="muted"
                       aria-label={`${tc("copy")} ${label}`}
                       title={url}
                       icon={copied === key ? "check" : "content_copy"}
@@ -1391,11 +1392,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                     <Button
                       key={url}
                       variant="ghost"
-                      size="sm"
+                      size="2xs"
                       onClick={() => void copy(url, `lan_${url}`)}
                       title={t("copyUrlTitle", { url })}
                       aria-label={t("copyUrlTitle", { url })}
-                      className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] text-text-muted"
+                      tone="muted"
                     >
                       <code className="font-mono">{url.replace(/^https?:\/\//, "")}</code>
                       <Icon
@@ -1419,7 +1420,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 size="sm"
                 icon={copied === "endpoint_url" ? "check" : "content_copy"}
                 onClick={() => void copy(localApiUrl, "endpoint_url")}
-                className="shrink-0 text-text-muted"
+                className="shrink-0"
+                tone="muted"
               >
                 {copied === "endpoint_url" ? tc("copied") : tc("copy")}
               </Button>
@@ -1605,14 +1607,14 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                       {tailscaleIpUrl && (
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="2xs"
                           onClick={(e) => {
                             e.stopPropagation();
                             void copy(tailscaleIpUrl, "tailscale_ip_inline");
                           }}
                           title={`${tc("copy")} ${tailscaleIpUrl}`}
                           aria-label={`${tc("copy")} ${tailscaleIpUrl}`}
-                          className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] text-text-muted"
+                          tone="muted"
                         >
                           <code className="font-mono">
                             {tailscaleIpUrl.replace(/^https?:\/\//, "")}
@@ -2464,7 +2466,8 @@ function ProviderModelsModal({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => copy(m.id, copyKey)}
-                  className="text-text-muted opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                  className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                  tone="muted"
                   title={tc("copy")}
                   aria-label={`${tc("copy")} ${m.id}`}
                   icon={copied === copyKey ? "check" : "content_copy"}
@@ -2561,7 +2564,8 @@ function EndpointCard({
           variant="ghost"
           size="icon-sm"
           onClick={() => void copy(fullUrl, copyId)}
-          className="shrink-0 text-text-muted"
+          className="shrink-0"
+          tone="muted"
           title={t("copyUrl")}
           aria-label={`${t("copyUrl")}: ${path}`}
           icon={copied === copyId ? "check" : "content_copy"}

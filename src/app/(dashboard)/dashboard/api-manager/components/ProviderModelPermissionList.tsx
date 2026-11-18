@@ -184,7 +184,8 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
             variant="ghost"
             size="icon-sm"
             onClick={() => onSearchChange("")}
-            className="absolute inset-y-0 right-1 my-auto text-text-muted"
+            className="absolute inset-y-0 right-1 my-auto"
+            tone="muted"
             aria-label={tc("clear")}
             icon="close"
           />
@@ -245,9 +246,9 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
                     />
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="2xs"
                       onClick={() => onToggleExpand(provider)}
-                      className="h-auto min-h-0 px-1 text-xs text-text-main truncate"
+                      className="text-text-main truncate"
                     >
                       {provider}
                     </Button>
@@ -277,12 +278,11 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
                         return (
                           <Button
                             key={model.id}
-                            size="sm"
+                            size="2xs"
                             variant={isSelected ? "primary" : "outline"}
                             aria-pressed={isSelected}
                             disabled={!isToggleable}
                             onClick={() => handleToggleModel(model)}
-                            className="h-auto min-h-0 gap-1 rounded-full px-2 py-1 text-[10px] font-mono"
                             title={model.id}
                           >
                             {getModelDisplayName(model.id)}

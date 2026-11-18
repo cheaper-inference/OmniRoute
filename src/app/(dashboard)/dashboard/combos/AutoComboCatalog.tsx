@@ -98,7 +98,8 @@ function CatalogItemActions({
           size="icon-sm"
           onClick={() => onTestCombo({ name: item.id })}
           disabled={testing}
-          className="text-text-muted hover:text-success"
+          className="hover:text-success"
+          tone="muted"
           title={t("testCombo")}
           aria-label={t("testCombo")}
         >
@@ -111,7 +112,7 @@ function CatalogItemActions({
           size="icon-sm"
           onClick={() => onDuplicate(item)}
           disabled={duplicatingName !== null}
-          className="text-text-muted hover:text-text-main"
+          tone="muted"
           title={t("duplicateAutoComboTitle", { name: item.id })}
           aria-label={t("duplicateAutoComboTitle", { name: item.id })}
         >

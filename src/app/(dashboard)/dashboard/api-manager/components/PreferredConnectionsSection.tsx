@@ -59,7 +59,8 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
             variant="ghost"
             size="sm"
             onClick={onClearPreferred}
-            className="shrink-0 text-xs text-text-muted"
+            className="shrink-0 text-xs"
+            tone="muted"
           >
             {t("preferredConnectionsClear")}
           </Button>
@@ -110,25 +111,23 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     <div className="flex items-center gap-0.5 shrink-0">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
                         aria-label={tc("moveUp")}
                         title={tc("moveUp")}
                         disabled={rank === 0}
                         onClick={() => onMovePreferred(conn.id, -1)}
-                        className="h-6 w-6"
                       >
-                        <Icon name="arrow_upward" size={16} />
+                        <Icon name="arrow_upward" size={14} />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
                         aria-label={tc("moveDown")}
                         title={tc("moveDown")}
                         disabled={rank === preferredConnections.length - 1}
                         onClick={() => onMovePreferred(conn.id, 1)}
-                        className="h-6 w-6"
                       >
-                        <Icon name="arrow_downward" size={16} />
+                        <Icon name="arrow_downward" size={14} />
                       </Button>
                     </div>
                   )}

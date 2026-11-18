@@ -310,7 +310,7 @@ function ModelVisibilityCell({
         disabled={busy || !model.visibility}
         onClick={() => onToggle(model)}
         data-testid={`toggle-visibility-${model.id}`}
-        className="text-text-muted hover:text-text-main"
+        tone="muted"
       >
         <Icon
           name={hidden ? "visibility_off" : "visibility"}

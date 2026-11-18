@@ -778,7 +778,8 @@ export default function ApiManagerPageClient() {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => handleToggleKeyVisibility(key.id)}
-                            className="shrink-0 text-text-muted"
+                            className="shrink-0"
+                            tone="muted"
                             title={visibleKeys.has(key.id) ? t("hideKey") : t("showKey")}
                             aria-label={visibleKeys.has(key.id) ? t("hideKey") : t("showKey")}
                             aria-pressed={visibleKeys.has(key.id)}
@@ -788,7 +789,8 @@ export default function ApiManagerPageClient() {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => handleCopyExistingKey(key.id)}
-                            className="shrink-0 text-text-muted"
+                            className="shrink-0"
+                            tone="muted"
                             title={tc("copy")}
                             aria-label={tc("copy")}
                             icon={copied === `existing_key_${key.id}` ? "check" : "content_copy"}
@@ -987,7 +989,8 @@ export default function ApiManagerPageClient() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRegenerateKey(key.id)}
-                        className="text-text-muted hover:text-warning opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                        className="hover:text-warning opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                        tone="muted"
                         title={t("regenerateKey")}
                         aria-label={t("regenerateKey")}
                         icon="refresh"
@@ -996,7 +999,8 @@ export default function ApiManagerPageClient() {
                         variant="ghost"
                         size="icon"
                         icon="playlist_add"
-                        className="text-text-muted hover:text-primary opacity-100"
+                        className="hover:text-primary opacity-100"
+                        tone="muted"
                         title={t("saveAsTemplate")}
                         aria-label={t("saveKeyAsTemplateAria", { name: key.name })}
                         disabled={isSubmitting}

@@ -113,7 +113,8 @@ export default function ApiKeyFilterBar({
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => onSearchChange("")}
-                className="absolute inset-y-0 right-1 my-auto text-text-muted"
+                className="absolute inset-y-0 right-1 my-auto"
+                tone="muted"
                 aria-label={tc("clear")}
                 icon="close"
               />

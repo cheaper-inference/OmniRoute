@@ -196,3 +196,76 @@ test("A: the API key filters are kit ToggleChips with a tone", () => {
 // model picker (a span with a 16px ghost x that turns red on hover). The owner kept that x as it
 // is (#19620, `tests/unit/destructive-ghost-row-actions-19620.test.ts` → HOVER_ONLY_KEPT), and the
 // kit ScopeChip would replace it with its own remove button.
+
+// ── B. Buttons: kit dense sizes and muted tone ──────────────────────────────────────────────
+
+const BUTTONS = TAGS.filter((t) => t.name === "Button");
+
+// A Button squeezed to 28px or less by hand: `h-6 w-6`, `!h-6`, `h-7`, or the kit minimum
+// height reset (`min-h-0`) used to draw a 16-20px text chip. The kit sizes are `2xs` (24px
+// tall) and `icon-2xs` (24px square).
+const HAND_DENSE = /(?<![\w:-])!?(size-[4567]|min-h-[04567]|h-[4567])(?![\w.-])/;
+const DENSE_KEPT: Kept[] = [
+  ...[
+    "removeClaudeCodeDefault",
+    "blockClaudeCodeFamily(",
+    "name: provider",
+    "getModelDisplayName(modelId)",
+  ].map((marker) => ({
+    file: "api-manager/[id]/access/tabs/ModelsTab.tsx",
+    marker,
+    reason:
+      "16px x on a selection chip, kept by the owner as it is (#19620, HOVER_ONLY_KEPT in " +
+      "destructive-ghost-row-actions-19620.test.ts).",
+  })),
+  {
+    file: "api-manager/[id]/access/tabs/ModelsTab.tsx",
+    marker: "setClaudeCodeFamiliesExpanded(",
+    reason: "Expand toggle that is the label of the same selection chip (see above).",
+  },
+  ...[
+    "KeyPolicyBehaviourTab.tsx",
+    "KeyPolicyCombosTab.tsx",
+    "KeyPolicyConnectionsTab.tsx",
+    "KeyPolicyGeneralTab.tsx",
+    "KeyPolicyLimitsTab.tsx",
+    "KeyPolicyModelsTab.tsx",
+  ].map((name) => ({
+    file: `api-manager/components/${name}`,
+    marker: "removeSelection",
+    reason: "16px x on a key-policy chip, kept by the owner as it is (#19620, same list).",
+  })),
+];
+
+test('B: dense buttons use size="2xs" / "icon-2xs", not hand-made heights', () => {
+  const { offenders, stale } = audit(BUTTONS, ({ tag }) => has(tag, HAND_DENSE), DENSE_KEPT);
+  assert.deepEqual(offenders, [], 'use size="icon-2xs" (24px square) or size="2xs" (24px tall)');
+  assert.deepEqual(stale, [], "stale DENSE_KEPT entries: remove them");
+});
+
+test("B: the kit dense sizes do not carry a hand-made text size, padding or radius", () => {
+  const offenders = BUTTONS.filter(({ tag }) => /size="(icon-)?2xs"/.test(tag))
+    .filter(({ tag }) =>
+      has(
+        tag,
+        /(?<![\w:-])(text-\[\d+px\]|text-(3xs|2xs|xs|sm)|rounded(-\w+)?|p[xy]?-[\d.]+)(?![\w-])/
+      )
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, []);
+});
+
+// Muted resting ink on a quiet button is the kit `tone="muted"`; the class also pinned the ink
+// on hover, hiding the variant's hover.
+const REST_MUTED_INK = /(?<![\w:!-])text-text-muted(?![\w/-])/;
+
+// A grey x that only turns red on hover stays as the owner left it (#19620: HOVER_ONLY_KEPT in
+// destructive-ghost-row-actions-19620.test.ts lists each one).
+const HOVER_ERROR_INK = /hover:!?text-error\b/;
+
+test('B: ghost, outline and secondary buttons take muted ink from tone="muted"', () => {
+  const offenders = BUTTONS.filter(({ tag }) => /variant="(ghost|outline|secondary)"/.test(tag))
+    .filter(({ tag }) => has(tag, REST_MUTED_INK) && !has(tag, HOVER_ERROR_INK))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use tone="muted" instead of className="text-text-muted"');
+});
