@@ -1894,6 +1894,17 @@ export async function getProviderCredentials(
           sessionAffinityTtlMs
         )
       : subscriptionFirst;
+    if (admissionPool.length === 0 && subscriptionFirst.length > 0) {
+      // Configured but busy: a retryable capacity result, not "no credentials".
+      const retryAfter = new Date(Date.now() + 3000).toISOString();
+      return {
+        allRateLimited: true,
+        retryAfter,
+        retryAfterHuman: formatRetryAfter(retryAfter),
+        lastError: `All ${provider} accounts are at their new-session routing threshold`,
+        lastErrorCode: 503,
+      };
+    }
     const policyValidLeaseCandidates = options._leaseCandidateIds
       ? admissionPool.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
       : admissionPool;

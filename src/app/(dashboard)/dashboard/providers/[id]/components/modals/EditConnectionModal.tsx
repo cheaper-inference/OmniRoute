@@ -580,6 +580,8 @@ export default function EditConnectionModal({
       const rateLimit = buildRateLimitOverridesFromForm(formData, connection?.rateLimitOverrides);
       const invalid = rateLimit.invalidModelConcurrency;
       if (invalid) return setSaveError(t("rateLimitOverridesModelConcurrencyInvalid", invalid));
+      const invalidFresh = rateLimit.invalidNewSessionMaxConcurrent;
+      if (invalidFresh) return setSaveError(t("newSessionMaxConcurrentInvalid", invalidFresh));
       updates.rateLimitOverrides = rateLimit.overrides;
       if (isAntigravityFamily) {
         updates.projectId = trimmedCloudCodeProjectId || null;

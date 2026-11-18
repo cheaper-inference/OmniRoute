@@ -20,6 +20,7 @@ const { filterFreshSessionAdmission } =
 const { toProviderConnection } = await import("../../src/lib/db/providers/lazyConnectionView.ts");
 const quotaCache = await import("../../src/domain/quotaCache.ts");
 const protection = await import("../../open-sse/services/rateLimitManager/protectionState.ts");
+const { handleNoCredentials } = await import("../../src/sse/handlers/chatHelpers.ts");
 const { buildRateLimitOverridesFromForm } =
   await import("../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/rateLimitOverridesFromForm.ts");
 
@@ -124,6 +125,23 @@ test("key-scoped pool cannot escape to a forbidden sibling", async () => {
   const release = await busy();
   try {
     assert.equal((await select("scoped", [a]))?.connectionId, undefined);
+  } finally {
+    release();
+  }
+});
+test("admission exhaustion is retryable capacity, not missing credentials", async () => {
+  const release = await busy();
+  try {
+    const result = await auth.getProviderCredentials("openai", null, [a], "gpt-test", {
+      sessionKey: "exhausted",
+      sessionAffinityTtlMs: 60_000,
+    });
+    assert.ok(result && "allRateLimited" in result && result.allRateLimited === true);
+    assert.equal(result.lastErrorCode, 503);
+    assert.ok(Date.parse(String(result.retryAfter)) > Date.now());
+    const response = handleNoCredentials(result, null, "openai", "gpt-test", null, null);
+    assert.equal(response.status, 503);
+    assert.notEqual((await response.json())?.error?.code, "provider_not_configured");
   } finally {
     release();
   }
@@ -333,5 +351,28 @@ test("dashboard payload preserves and clears the threshold alongside other overr
   assert.deepEqual(
     buildRateLimitOverridesFromForm({ ...form, newSessionMaxConcurrent: "" }).overrides,
     { maxConcurrent: 3 }
+  );
+});
+
+test("dashboard payload rejects an out-of-range threshold before it reaches the API", () => {
+  const form = {
+    rpm: "",
+    rpd: "",
+    tpm: "",
+    tpd: "",
+    minTime: "",
+    maxWaitMs: "",
+    rateLimitMaxConcurrent: "",
+    modelConcurrency: "",
+  };
+  for (const value of ["-1", "1.5", "10001", "abc"]) {
+    assert.deepEqual(buildRateLimitOverridesFromForm({ ...form, newSessionMaxConcurrent: value }), {
+      overrides: null,
+      invalidNewSessionMaxConcurrent: { max: 10_000 },
+    });
+  }
+  assert.deepEqual(
+    buildRateLimitOverridesFromForm({ ...form, newSessionMaxConcurrent: "0" }).overrides,
+    { newSessionMaxConcurrent: 0 }
   );
 });

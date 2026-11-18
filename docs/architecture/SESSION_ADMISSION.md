@@ -29,8 +29,10 @@ Stored mapping counts never represent concurrent work.
 
 The filter runs after model, cooldown, key allowlist, and quota eligibility. It does
 not expand that pool. Exclusive lease policy still runs afterward. If every candidate
-is filtered, credential selection returns no credentials; existing caller fallback
-handles that outcome. It does not silently fall back to an over-threshold account.
+is filtered, credential selection returns a short `allRateLimited` capacity result
+(503 with `Retry-After`) rather than "no credentials", so a direct client sees a
+retryable busy response instead of `provider_not_configured`, and a combo target falls
+through to its next leg. It does not silently fall back to an over-threshold account.
 
 ## Scope and concurrency limitations
 
