@@ -36,7 +36,7 @@ const linkInstallDir = (target: string, linkPath: string) => {
 const installDir = isWin
   ? path.join(sandboxHome, "npm-prefix")
   : path.join(sandboxHome, ".local", "bin");
-fs.mkdirSync(sandboxHome, { recursive: true });
+fs.mkdirSync(path.dirname(installDir), { recursive: true });
 linkInstallDir(outsideDir, installDir);
 
 const realBinaryContent = "#!/bin/sh\necho fake-opencode-binary-body-padding\n";
