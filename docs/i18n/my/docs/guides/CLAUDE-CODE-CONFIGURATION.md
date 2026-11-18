@@ -80,18 +80,22 @@ Codex (`<environment_context><cwd>`) နှင့် OpenCode (`x-opencode-sessi
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` ဖော်ပြချက်သည် အဝေးထိန်း URL တွင် ထည့်သွင်းထားသော အထောက်အထားများကို ဖယ်ရှားသည်။ IDE တိုးချဲ့မှုများသည် သင့်အခွံမပါဘဲ Claude ကုဒ်ကို စတင်လိုက်သောကြောင့် ၎င်းတို့၏ ဆက်ရှင်များသည် အလုပ်လမ်းညွှန်သို့ ပြန်ရောက်သွားပါသည်။
+`sed` ဖော်ပြချက်သည် အဝေးထိန်း URL တွင် ထည့်သွင်းထားသော အထောက်အထားများ၊ မေးမြန်းချက်စာကြောင်းများနှင့် အပိုင်းအစများကို ဖယ်ရှားပြီး `ANTHROPIC_CUSTOM_HEADERS` တွင်ရှိပြီးသား ခေါင်းစီးများကို သိမ်းဆည်းထားသည်။ IDE တိုးချဲ့မှုများသည် သင့် shell မပါဘဲ Claude ကုဒ်ကို စတင်လိုက်သောကြောင့် ၎င်းတို့၏ ဆက်ရှင်များသည် အလုပ်လမ်းညွှန်သို့ ပြန်ရောက်သွားပါသည်။
 
 ---
 

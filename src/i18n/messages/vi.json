@@ -163,8 +163,8 @@
     "moreInformation": "Thông tin thêm",
     "notificationAnnouncement": "Thông báo: {message}",
     "codeCopying": "Đang sao chép…",
-    "codeCopiedAnnouncement": "Đã sao chép mã vào bộ nhớ tạm",
-    "codeCopyError": "Không thể sao chép mã. Hãy chọn mã rồi thử lại.",
+    "codeCopiedAnnouncement": "Đã sao chép mã vào bảng nhớ tạm",
+    "codeCopyError": "Không thể sao chép mã. Hãy chọn mã và thử lại.",
     "codeCopyErrorRetry": "Không thể sao chép mã. Vui lòng thử lại.",
     "codeRegionLabel": "Mã {language}",
     "modalWizardProgress": "Các bước",
@@ -1967,14 +1967,14 @@
     "trafficInspector": "Trình kiểm tra lưu lượng",
     "usage": "Mức sử dụng",
     "orchestration": "Điều phối",
-    "access": "Quyền truy cập",
+    "access": "Truy cập",
     "autoCombo": "Kết hợp tự động",
     "config": "Cấu hình",
     "connect": "Kết nối",
-    "intel": "Intel",
+    "intel": "Thông tin chuyên sâu",
     "mediaProviders": "Nhà cung cấp phương tiện",
     "offers": "Ưu đãi",
-    "onboarding": "Bắt đầu"
+    "onboarding": "Hướng dẫn bắt đầu"
   },
   "home": {
     "quickStart": "Bắt đầu nhanh",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Token đầu vào được lưu trong bộ nhớ đệm",
-    "inputTokensHint": "Không bao gồm các lượt đọc bộ nhớ đệm. Các lượt ghi bộ nhớ đệm vẫn là token đầu vào.",
+    "cachedInputTokens": "Token đầu vào được lưu vào bộ nhớ đệm",
+    "inputTokensHint": "Không bao gồm lượt đọc bộ nhớ đệm. Lượt ghi bộ nhớ đệm vẫn được tính là token đầu vào.",
     "inputSplitUnavailable": "Không thể phân tách dữ liệu đầu vào vì dữ liệu đọc từ bộ nhớ đệm không đầy đủ hoặc không nhất quán.",
-    "cachedInputTokensHint": "Chỉ báo cáo các lượt đọc bộ nhớ đệm, đã được bao gồm trong tổng số token đầu vào.",
+    "cachedInputTokensHint": "Chỉ bao gồm các lượt đọc bộ nhớ đệm được báo cáo, vốn đã được tính trong tổng dữ liệu đầu vào.",
     "title": "Phân tích",
     "usageAnalyticsTitle": "Phân tích mức sử dụng",
     "tokenDisplayCompact": "Rút gọn",
@@ -13765,7 +13765,7 @@
     "description": "Lưu lượng, độ trễ và tỷ lệ thành công theo nhà cung cấp và mô hình",
     "combo": "Combo",
     "toggleModels": "Hiện các mô hình của {provider}",
-    "modelsTable": "Các mô hình cho {provider}",
+    "modelsTable": "Các mô hình dành cho {provider}",
     "windowSince": "Kể từ {date}"
   },
   "relay": {

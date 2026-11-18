@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI خود بخود `.env` `~/.omniroute/.env` یا `./.env` سے لوڈ کرتا ہے۔ ورکنگ ڈائرکٹری میں ایک `./.env` کلیدوں کی صرف ایک مختصر اجازت کی فہرست ترتیب دے سکتا ہے (بندرگاہیں، `REQUIRE_API_KEY`، locale اور رنگ کی ترتیبات)؛ باقی سب کچھ `~/.omniroute/.env` میں ڈالیں۔ [CLI لانچ کے معاہدے](CLI-LAUNCH-CONTRACTS.md#working-directory-env) دیکھیں۔
+CLI خود بخود `.env` `~/.omniroute/.env` یا `./.env` سے لوڈ کرتا ہے۔ ورکنگ ڈائرکٹری میں ایک `./.env` کلیدوں کی صرف ایک مختصر اجازت کی فہرست ترتیب دے سکتا ہے (`REQUIRE_API_KEY`، لوکل، ٹائم زون اور رنگ کی ترتیبات، بندرگاہوں کی نہیں)؛ باقی سب کچھ `~/.omniroute/.env` میں ڈالیں۔ [CLI لانچ کے معاہدے](CLI-LAUNCH-CONTRACTS.md#working-directory-env) دیکھیں۔
 
 ### ٹرے موڈ
 
@@ -608,7 +608,7 @@ post_install() {
 | `NODE_ENV`                              | رن ٹائم ڈیفالٹ                 | تعیناتی کے لیے `production` سیٹ کریں۔                                                                                                                 |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`       | عوامی بنیاد URL ڈیش بورڈ پر آ گیا اور سرور کے سامنے آ گیا (وراثت `BASE_URL` کی جگہ لے لیتا ہے)                                                        |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | کلاؤڈ سنک اینڈ پوائنٹ بیس URL (لیگیسی `CLOUD_URL` کی جگہ لے لیتا ہے)                                                                                  |
-| `API_KEY_SECRET`                        | _(خود کار طریقے سے تیار کردہ)_ | HMAC سیکریٹ فار جنریٹڈ API کیز — پہلے رن پر خود کار طریقے سے تیار کی گئی اور `server.env` پر برقرار رہی                                               |
+| `API_KEY_SECRET`                        | _(خود کار طریقے سے تیار کردہ)_ | HMAC سیکریٹ فار جنریٹڈ API کیز — پہلے رن پر خود کار طریقے سے تیار کی گئی اور `server.env` تک برقرار رہی                                               |
 | `REQUIRE_API_KEY`                       | `false`                        | `/v1/*` پر Bearer API کلید کو نافذ کریں۔                                                                                                              |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                        | تصدیق شدہ ڈیش بورڈ صارفین کو مطالبہ پر مکمل ذخیرہ شدہ API کلیدی اقدار کو ظاہر کرنے کی اجازت دیں۔                                                      |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                           | کیشڈ پرووائیڈر لمٹس ڈیٹا کے لیے سرور سائیڈ ریفریش کیڈینس؛ UI ریفریش بٹن اب بھی دستی مطابقت پذیری کو متحرک کرتے ہیں۔                                   |
@@ -734,7 +734,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 یہ چابیاں کنکشن کے `providerSpecificData` میں جاتی ہیں (مثال کے طور پر `PUT /api/providers/{id}` کے ذریعے):
 
-- `toolNameMaxLength` (انٹیجر، 1–1024) — OpenAI چیٹ فارمیٹ کے موافق کنکشن کے لیے جن کا گیٹ وے لمبے ٹول کے ناموں کو مسترد کرتا ہے۔ لمبے ناموں کو مختصر عرف کے طور پر بھیجا جاتا ہے اور جواب میں بحال کیا جاتا ہے۔ OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go اور Muse Code پہلے سے ہی 64 حروف سے زیادہ عرفی نام بغیر کسی ترتیب کے؛ کنکشن کی قدر صرف اس وقت حد کو کم کرتی ہے جہاں فراہم کنندہ کے پاس کوئی بلٹ ان نہیں ہوتا ہے (سخت گیٹ وے کے پیچھے Azure کنکشن، یا حسب ضرورت مطابقت پذیر نوڈ)۔
+- `toolNameMaxLength` (انٹیجر، 1–1024) — OpenAI چیٹ فارمیٹ کے موافق کنکشن کے لیے جن کا گیٹ وے لمبے ٹول کے ناموں کو مسترد کرتا ہے۔ لمبے ناموں کو مختصر عرف کے طور پر بھیجا جاتا ہے اور جواب میں بحال کیا جاتا ہے۔ OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go اور Muse Code پہلے سے ہی 64 حروف سے زیادہ عرفی نام بغیر کسی ترتیب کے۔ کنکشن ویلیو Azure OpenAI / Azure AI فاؤنڈری ڈیفالٹ (ایک سخت گیٹ وے کے پیچھے ایک Azure کنکشن) کی جگہ لے لیتا ہے اور حسب ضرورت مطابقت پذیر نوڈ کی حد مقرر کرتا ہے۔ OpenAI، Mistral، NVIDIA، OpenCode Zen/Go اور Muse Code اپنی رجسٹری کی حد کو برقرار رکھتے ہیں اور اسے نظر انداز کرتے ہیں۔
 - `quotaEndpoint` — گیٹ وے کا quota/credits اختتامی نقطہ، ڈیش بورڈ کوٹہ پٹی اور کوٹہ سے آگاہ روٹنگ کے لیے پڑھیں۔ OpenAI- اور Anthropic-compatible کنکشن دونوں پر کام کرتا ہے۔ مکمل شکل `open-sse/services/usage/openaiCompatible.ts` میں دستاویزی ہے۔
 
 ```json

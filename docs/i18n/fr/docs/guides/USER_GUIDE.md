@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Le CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`. Un `./.env` dans le répertoire de travail ne peut définir qu'une courte liste autorisée de clés (ports, `REQUIRE_API_KEY`, paramètres régionaux et paramètres de couleur) ; mettez tout le reste dans `~/.omniroute/.env`. Voir [les contrats de lancement CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Le CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`. Un `./.env` dans le répertoire de travail ne peut définir qu'une courte liste d'autorisation de clés (paramètres `REQUIRE_API_KEY`, paramètres régionaux, fuseau horaire et couleur, pas les ports) ; mettez tout le reste dans `~/.omniroute/.env`. Voir [les contrats de lancement CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mode bac
 
@@ -734,7 +734,7 @@ Choisissez un préfixe distinct (`mygw`, `acme-proxy`). Si les requêtes adress�
 
 Ces clés vont dans le `providerSpecificData` d'une connexion (par exemple via `PUT /api/providers/{id}`) :
 
-- `toolNameMaxLength` (entier, 1-1024) — pour les connexions compatibles au format de chat OpenAI dont la passerelle rejette les noms d'outils longs. Les noms plus longs sont envoyés sous forme d'alias courts et restaurés dans la réponse. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go et Muse Code ont déjà des noms d'alias de plus de 64 caractères sans paramètre ; une valeur de connexion abaisse la limite uniquement lorsque le fournisseur n'en a pas de intégré (une connexion Azure derrière une passerelle plus stricte ou un nœud compatible personnalisé).
+- `toolNameMaxLength` (entier, 1-1024) — pour les connexions compatibles au format de chat OpenAI dont la passerelle rejette les noms d'outils longs. Les noms plus longs sont envoyés sous forme d'alias courts et restaurés dans la réponse. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go et Muse Code ont déjà des noms d'alias de plus de 64 caractères sans paramètre. Une valeur de connexion remplace la valeur par défaut d'Azure OpenAI / Azure AI Foundry (une connexion Azure derrière une passerelle plus stricte) et définit la limite pour un nœud compatible personnalisé ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go et Muse Code conservent leur limite de registre et l'ignorent.
 - `quotaEndpoint` — le point de terminaison quota/credits de la passerelle, à lire pour la bande de quota du tableau de bord et le routage prenant en compte les quotas. Fonctionne sur les connexions compatibles OpenAI et Anthropic ; la forme complète est documentée dans `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

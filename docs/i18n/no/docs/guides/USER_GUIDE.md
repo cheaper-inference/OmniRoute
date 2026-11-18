@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (porter, `REQUIRE_API_KEY`, lokalitet og fargeinnstillinger); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laster automatisk inn `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (`REQUIRE_API_KEY`, locale, tidssone og fargeinnstillinger, ikke portene); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Skuffmodus
 
@@ -735,7 +735,7 @@ Velg et distinkt prefiks (`mygw`, `acme-proxy`). Hvis forespørsler til en tilpa
 
 Disse tastene går i en tilkoblings `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltall, 1–1024) — for OpenAI chat-format-kompatible tilkoblinger hvis gateway avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code aliaser allerede over 64 tegn uten innstillinger; en tilkoblingsverdi senker grensen bare der leverandøren ikke har noen innebygd en (en Azure-tilkobling bak en strengere gateway, eller en tilpasset kompatibel node).
+- `toolNameMaxLength` (heltall, 1–1024) — for OpenAI chat-format-kompatible tilkoblinger hvis gateway avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code aliaser allerede over 64 tegn uten innstillinger. En tilkoblingsverdi erstatter Azure OpenAI / Azure AI Foundry-standarden (en Azure-tilkobling bak en strengere gateway) og setter grensen for en tilpasset kompatibel node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code beholder sin registergrense og ignorerer den.
 - `quotaEndpoint` — gatewayens quota/credits endepunkt, les for dashboard-kvotestripen og kvotebevisst ruting. Fungerer på både OpenAI- og Anthropic-kompatible tilkoblinger; den fullstendige formen er dokumentert i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

@@ -169,8 +169,8 @@
     "codeRegionLabel": "Code {language}",
     "modalWizardProgress": "Étapes",
     "modalWizardGoBackTo": "Revenir à",
-    "modalWizardGoTo": "Aller à",
-    "modalWizardCompleted": "Terminé",
+    "modalWizardGoTo": "Accéder à",
+    "modalWizardCompleted": "terminé",
     "toggleColumns": "Afficher/masquer les colonnes",
     "confirmTitle": "Confirmer",
     "confirmAction": "Confirmer",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Le serveur proxy a été arrêté ou est en train de redémarrer.",
     "expandSidebar": "Développer la barre latérale",
     "collapseSidebar": "Réduire la barre latérale",
-    "toggleSidebar": "Afficher/masquer la barre latérale",
+    "toggleSidebar": "Afficher ou masquer la barre latérale",
     "createTheme": "Créer un thème",
     "chooseColor": "Choisissez une couleur",
     "cliToolsShort": "Outils",
@@ -1970,11 +1970,11 @@
     "access": "Accès",
     "autoCombo": "Combinaison automatique",
     "config": "Configuration",
-    "connect": "Connecter",
-    "intel": "Intel",
+    "connect": "Connexion",
+    "intel": "Informations",
     "mediaProviders": "Fournisseurs de médias",
     "offers": "Offres",
-    "onboarding": "Premiers pas"
+    "onboarding": "Intégration"
   },
   "home": {
     "quickStart": "Démarrage rapide",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Tokens d’entrée mis en cache",
-    "inputTokensHint": "Exclut les lectures du cache. Les écritures dans le cache restent des tokens d’entrée.",
-    "inputSplitUnavailable": "La répartition des entrées est indisponible, car les données de lecture du cache sont incomplètes ou incohérentes.",
-    "cachedInputTokensHint": "Indique uniquement les lectures du cache, déjà incluses dans le total des entrées.",
+    "cachedInputTokens": "Jetons d’entrée mis en cache",
+    "inputTokensHint": "Exclut les lectures du cache. Les écritures dans le cache restent comptabilisées comme des jetons d’entrée.",
+    "inputSplitUnavailable": "La répartition des entrées n’est pas disponible, car les données de lecture du cache sont incomplètes ou incohérentes.",
+    "cachedInputTokensHint": "Uniquement les lectures du cache signalées, déjà incluses dans le total des entrées.",
     "title": "Analyse",
     "usageAnalyticsTitle": "Analyses d'utilisation",
     "tokenDisplayCompact": "Compact",
@@ -10176,7 +10176,7 @@
   "compressionStudio": {
     "noRun": "Aucune exécution de compression disponible.",
     "liveDataHint": "Les données en direct arrivent via le canal de compression WebSocket.",
-    "liveTitle": "Compression en direct",
+    "liveTitle": "Compression en temps réel",
     "cockpitView": "Vue cockpit",
     "canvas": "Canevas",
     "waterfall": "Cascade",
@@ -16675,13 +16675,13 @@
     "register": "Enregistrer un point de terminaison ou remplacer le schéma",
     "schema": "Schéma OpenAPI 3",
     "download": "Télécharger le fichier de sortie",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nouvelle génération",
+    "submissionUnknown": "SUBMISSION_UNKNOWN : la tâche en amont est peut-être toujours en cours d’exécution. Récupérez le reçu d’origine avant de lancer une autre génération.",
+    "recover": "Récupérer la soumission d’origine",
+    "recoveryRecord": "Soumission enregistrée",
+    "recoveryMismatch": "La récupération nécessite la connexion d’origine et un brouillon strictement identique après le rechargement. Aucune nouvelle requête n’a été envoyée.",
+    "recoveryHelp": "La récupération réutilise la charge utile et la clé d’origine. Après le rechargement, restaurez exactement le point de terminaison, la connexion, le transport et l’entrée. Une nouvelle génération lance une requête facturable distincte. Jusqu’à 20 reçus sont conservés dans cet onglet.",
+    "streamIncomplete": "Le flux s’est terminé sans événement final complet. L’état d’achèvement en amont est inconnu.",
+    "streamError": "Le flux en amont a signalé une erreur. Les fichiers reçus restent disponibles."
   }
 }

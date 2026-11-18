@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (porty, `REQUIRE_API_KEY`, národní prostředí a nastavení barev); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (`REQUIRE_API_KEY`, locale, časové pásmo a nastavení barev, nikoli porty); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Režim zásobníku
 
@@ -604,7 +604,7 @@ post_install() {
 | `JWT_SECRET`                            | _(automaticky vygenerováno)_ | tajné podepisování JWT — automaticky vygenerováno při prvním spuštění a přetrvává do `server.env`; nastavte jej explicitně, když je datový adresář pomíjivý |
 | `INITIAL_PASSWORD`                      | _(nenastaveno)_              | První přihlašovací heslo. instalace npm/source začínají na `CHANGEME`: nahraďte jej. Nenastaveno: průvodce pro přihlášení                                   |
 | `DATA_DIR`                              | `~/.omniroute`               | Datový adresář (db, využití, protokoly)                                                                                                                     |
-| `PORT`                                  | výchozí nastavení rámce      | Servisní port (v příkladech `20128` )                                                                                                                       |
+| `PORT`                                  | výchozí nastavení rámce      | Port služby (v příkladech `20128` )                                                                                                                         |
 | `HOSTNAME`                              | výchozí nastavení rámce      | Svázat hostitele (Docker výchozí `0.0.0.0`)                                                                                                                 |
 | `NODE_ENV`                              | výchozí runtime              | Nastavte `production` pro nasazení                                                                                                                          |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Veřejná základna URL se objevila na řídicím panelu a byla vystavena serveru (nahrazuje starší `BASE_URL`)                                                   |
@@ -735,7 +735,7 @@ Vyberte odlišnou předponu (`mygw`, `acme-proxy`). Pokud požadavky na vlastní
 
 Tyto klíče jdou do `providerSpecificData` připojení (například přes `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code již aliasové názvy delší než 64 znaků bez nastavení; hodnota připojení snižuje limit pouze tam, kde poskytovatel žádný vestavěný nemá (připojení Azure za přísnější bránou nebo vlastní kompatibilní uzel).
+- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code již aliasové názvy delší než 64 znaků bez nastavení. Hodnota připojení nahrazuje výchozí nastavení Azure OpenAI / Azure AI Foundry (připojení Azure za přísnější bránou) a nastavuje limit pro vlastní kompatibilní uzel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code zachovávají svůj limit registru a ignorují ho.
 - `quotaEndpoint` — koncový bod quota/credits brány, přečtěte si pás kvót řídicího panelu a směrování s ohledem na kvóty. Funguje na připojení kompatibilních s OpenAI i Anthropic; plný tvar je dokumentován v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

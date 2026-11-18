@@ -71,7 +71,7 @@ OMNIROUTE က သင့်အား ငွေချွေတာပြီး အ�
 
 <div align="center">
 
-|                                        |           v3.8.50           | **v3.8.51** |         `v3.8.54+`         |
+|                                        |           v3.8.50           | **v3.8.51** |         `v3.8.55+`         |
 | -------------------------------------- | :-------------------------: | :---------: | :------------------------: |
 | 🌐 Provider များ                       |             352             |   **358**   |            394             |
 | 🧠 ထူးခြားသော chat မော်ဒယ် ID များ     |            1320             |  **1374**   |            1491            |
@@ -592,7 +592,7 @@ Radar သည် opt-in ဖြစ်ပြီး GET-only ဖြစ်ပါသ�
 
 </div>
 
-> **v3.8.20 → v3.8.54** မှ မကြာသေးမီက ထည့်သွင်းထားသော အချက်များ။ မှတ်တမ်းအပြည့်အစုံကို [`CHANGELOG.md`](CHANGELOG.md) တွင် ကြည့်ရှုနိုင်သည်။
+> **v3.8.20 → v3.8.55** မှ မကြာသေးမီက ထည့်သွင်းထားသော အချက်များ။ မှတ်တမ်းအပြည့်အစုံကို [`CHANGELOG.md`](CHANGELOG.md) တွင် ကြည့်ရှုနိုင်သည်။
 
 - **⚖️ `quota-weighted` လမ်းကြောင်းရွေးချယ်မှု** — ၂၀ ခုမြောက် combo မဟာဗျူဟာသည် quota ကုန်ဆုံးနေသော account များကို ကျော်လွှားပြီး ကျန်ရှိသော quota ÷ လုပ်ဆောင်နေဆဲ load အချိုးအစားအရ ကျန် account များထဲမှ ရွေးချယ်သည်။ ရှိပြီးသား conversation များကို သက်ဆိုင်ရာ account တွင် ဆက်လက်ချိတ်ဆက်ထားသည်။ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (သို့မဟုတ် `OMNIROUTE_HEADLESS=1`) သည် `/v1/*` proxy engine တစ်ခုတည်းကိုသာ လည်ပတ်စေပြီး dashboard နှင့် dashboard အတွက်သာ သီးသန့် subsystem များကို ပိတ်ထားသည်။ → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1041,7 +1041,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` သို့မဟုတ် peer-dep warnings တွေ့ပါသလား။ [၎င်းတို့သည် အန္တရာယ်မရှိပါ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)။
-> **npm 11 သို့မဟုတ် နောက်ပိုင်းကို အသုံးပြုနေပါသလား။** ခွင့်ပြုထားခြင်းမရှိပါက npm သည် package lifecycle scripts များကို ပိတ်ဆို့နိုင်သည်။ OmniRoute ၏ `postinstall` (`node scripts/build/postinstall.mjs`) သည် ၎င်း၏ native runtime files များကို ပြင်ဆင်ရန် လိုအပ်သည်။ Global အနေဖြင့် ထည့်သွင်းသည့်အခါ npm warning တွင် ဖော်ပြထားသော package များကို ခွင့်ပြုပါ။ OmniRoute 3.8.54 က ဖော်ပြထားသော package အစုအတွက်-
+> **npm 11 သို့မဟုတ် နောက်ပိုင်းကို အသုံးပြုနေပါသလား။** ခွင့်ပြုထားခြင်းမရှိပါက npm သည် package lifecycle scripts များကို ပိတ်ဆို့နိုင်သည်။ OmniRoute ၏ `postinstall` (`node scripts/build/postinstall.mjs`) သည် ၎င်း၏ native runtime files များကို ပြင်ဆင်ရန် လိုအပ်သည်။ Global အနေဖြင့် ထည့်သွင်းသည့်အခါ npm warning တွင် ဖော်ပြထားသော package များကို ခွင့်ပြုပါ။ OmniRoute 3.8.55 က ဖော်ပြထားသော package အစုအတွက်-
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1838,7 +1838,7 @@ MIT လိုင်စင်အသေးစိတ်အတွက် [LICENSE](LI
 
 **[⬆ အပေါ်သို့ ပြန်သွားရန်](#-omniroute)** · အဖွင့်အရင်းအမြစ် AI အသိုင်းအဝိုင်းအတွက် ❤️ ဖြင့် တည်ဆောက်ထားသည်။
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> မှ ဖန်တီးသည် · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT လိုင်စင် · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> မှ ဖန်တီးသည် · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT လိုင်စင် · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- အသိုင်းအဝိုင်း၏ အမေးအဖြေများအတွက် GitHub Discussions ကို ဖွင့်ထားသည် -->

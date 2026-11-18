@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,7 +145,7 @@ curl -i \
 | `omniroute_rtk_discover`            | `read:compression`  | መርጦ መግባት RTK ውፅዓት ናሙናዎች ውስጥ ተደጋጋሚ ጫጫታ ያግኙ                                                           |
 | `omniroute_rtk_learn`               | `read:compression`  | ከመርጦ መግቢያ ናሙናዎች ሊገመገም የሚችል RTK ማጣሪያ ረቂቅ ይፍጠሩ                                                        |
 
-CCR ግቤቶች ባለ ሁለት ደረጃ ሱቅ ይጠቀማሉ፡ ሙቅ ውስጠ-ማህደረ ትውስታ ደረጃ የሚደገፍ፣ በአካባቢው ደመና ባልሆኑ የሩጫ ጊዜዎች፣ በረጅም SQLite ደረጃ (`ccr_blocks`፣ በነባሪ) ስለዚህ አንድ ብሎክ ከመባረር ወይም እንደገና እስኪጀምር TTL እስኪያልቅ ድረስ — ከ512 KB እና የደመና ሩጫ ጊዜዎች በስተቀር፣ በማስታወስ የሚቆይ። እያንዳንዱ ብሎክ በ2 MiB፣እያንዳንዱ ርእሰመምህር እስከ 16 MiB እና የአለምአቀፍ መደብር በ64 MiB የተገደበ ነው። ግቤቶች ለ24-ሰዓት TTL ነባሪ (ቢበዛ ሰባት ቀናት)። ሙሉ MCP መልሶ ማግኘት በ 256 KiB የተገደበ ነው; ትላልቅ ብሎኮች በክልል እና በግሬፕ ሁነታዎች ይገኛሉ። ማከማቻ፣ ሰርስሮ ማውጣት፣ መዘርዘር፣ ፍተሻ፣ መሰረዝ እና ስታቲስቲክስ በተረጋገጠው የኤፒአይ-ቁልፍ ርእሰ መምህር ተለይተዋል። የኦዲት መዝገቦች ሃሽ እና መጠን ሜታዳታ ይይዛሉ፣ በጭራሽ ይዘት የላቸውም። ኦፕሬተር ፊት ለፊት የተቀመጡ ዝርዝሮች (ሁለቱ ማርከሮች፣ የደንበኛ ቅድመ ሁኔታዎች፣ `codemode:false`፣ በመሳሪያ ስፔሻሊስቶች፣ ፔጅኒሽኖች እና የምርመራ ማትሪክስ) በ [Compression Engines → ቅድመ ተፈላጊዎች/ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ውስጥ ይኖራሉ።
+CCR ግቤቶች ባለ ሁለት ደረጃ ሱቅ ይጠቀማሉ፡ ሙቅ ውስጠ-ማህደረ ትውስታ ደረጃ የሚደገፍ፣ በአካባቢው ከደመና ውጭ በሚደረጉ ሩጫዎች ላይ፣ ዘላቂ በሆነ SQLite ደረጃ (`ccr_blocks`፣ በነባሪ) ስለዚህ አንድ ብሎክ ከ KB— TTL ድረስ `COMPRESSION_CCR_DURABLE_STORE=false` እንደገና እስኪጀምር ድረስ ይቀጥላል። ዘላቂው ፅሁፍ ምርጥ ጥረት ነው፡ 1,000 ፅሁፎች በመጠባበቅ ላይ እያሉ ይወድቃል፣ እና ያልተሳካ SQLite ፅሁፍ ገብቷል እንጂ እንደገና አልተሞከረም፣ ስለዚህ እንደገና ሲጀመር ብሎክ ይጠፋል። እያንዳንዱ ብሎክ በ2 MiB፣እያንዳንዱ ርእሰመምህር በ16 MiB፣እና አለምአቀፍ መደብር በ64 MiB የተገደበ ነው። ግቤቶች ነባሪ የ24-ሰዓት TTL (ቢበዛ ሰባት ቀናት)። ሙሉ MCP ሰርስሮ ማውጣት በ 256 KiB የተገደበ ነው; ትላልቅ ብሎኮች በክልል እና በግሬፕ ሁነታዎች ይገኛሉ። ማከማቻ፣ ሰርስሮ ማውጣት፣ መዘርዘር፣ ፍተሻ፣ መሰረዝ እና ስታቲስቲክስ በተረጋገጠው የኤፒአይ-ቁልፍ ርእሰ መምህር ተለይተዋል። የኦዲት መዝገቦች ሃሽ እና መጠን ሜታዳታ ይይዛሉ፣ በጭራሽ ይዘት የላቸውም። ኦፕሬተር ፊት ለፊት የተቀመጡ ዝርዝሮች (ሁለቱ ማርከሮች፣ የደንበኛ ቅድመ ሁኔታዎች፣ `codemode:false`፣ በመሳሪያ ስፔሻሊስቶች፣ ፓጂኒሽኖች እና የምርመራ ማትሪክስ) በ [Compression Engines → ቅድመ ተፈላጊዎች/ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ውስጥ ይኖራሉ።
 
 `omniroute_compression_status` MCP መግለጫ መጭመቅን በ `analytics.mcpDescriptionCompression` ስር ዘግቧል። እነዚያ እሴቶች ለ MCP ሊዘረዘሩ የሚችሉ መግለጫዎች (`tools`, `prompts`, `resources` እና `resourceTemplates`) የሜታዳታ መጠን ግምቶች ናቸው; የአቅራቢዎች መጠቀሚያ ደረሰኞች አይደሉም እና በ `source: "mcp_metadata_estimate"` ምልክት የተደረገባቸው ናቸው.
 

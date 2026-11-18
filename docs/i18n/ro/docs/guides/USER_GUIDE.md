@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei permise (porturi, `REQUIRE_API_KEY`, setări locale și de culoare); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei (`REQUIRE_API_KEY`, locale, fus orar și setări de culoare, nu porturile); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modul tavă
 
@@ -616,7 +616,7 @@ post_install() {
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Dezactivați instantaneele automate SQLite înainte de writes/import/restore; backup-urile manuale încă funcționează                                                                 |
 | `APP_LOG_TO_FILE`                       | `true`                   | Activează înregistrarea aplicației și a jurnalului de audit pe disc                                                                                                                |
 | `AUTH_COOKIE_SECURE`                    | `false`                  | Forțați cookie-ul de autentificare `Secure` (în spatele proxy-ului invers HTTPS )                                                                                                  |
-| `CLOUDFLARED_BIN`                       | dezinstalat              | Utilizați un binar `cloudflared` existent în loc de descărcare gestionată                                                                                                          |
+| `CLOUDFLARED_BIN`                       | neasezat                 | Utilizați un binar `cloudflared` existent în loc de descărcare gestionată                                                                                                          |
 | `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport pentru tuneluri rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                           |
 | `OMNIROUTE_MEMORY_MB`                   | `512`                    | limita heap Node.js în MB                                                                                                                                                          |
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Numărul maxim de intrări în cache prompte                                                                                                                                          |
@@ -735,7 +735,7 @@ Alegeți un prefix distinct (`mygw`, `acme-proxy`). Dacă cererile către un nod
 
 Aceste chei merg în `providerSpecificData` a unei conexiuni (de exemplu, prin `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code deja nume de alias de peste 64 de caractere fără nicio setare; o valoare de conexiune scade limita numai acolo unde furnizorul nu are unul încorporat (o conexiune Azure în spatele unui gateway mai strict sau un nod compatibil personalizat).
+- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code numesc deja alias de peste 64 de caractere fără nicio setare. O valoare de conexiune înlocuiește valoarea implicită Azure OpenAI / Azure AI Foundry (o conexiune Azure în spatele unui gateway mai strict) și stabilește limita pentru un nod compatibil personalizat; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code își păstrează limita de registry și o ignoră.
 - `quotaEndpoint` — punctul final quota/credits al gateway-ului, citiți pentru banda de cote din tabloul de bord și rutare în funcție de cotă. Funcționează atât pe conexiuni compatibile cu OpenAI, cât și cu Anthropic; forma completă este documentată în `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

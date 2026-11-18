@@ -371,7 +371,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ เท่านั้น (การตั้งค่าพอร์ต, `REQUIRE_API_KEY`, ภาษา และสี) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
+CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ (`REQUIRE_API_KEY` การตั้งค่าสถานที่ โซนเวลา และสี ไม่ใช่พอร์ต) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
 
 ### โหมดถาด
 
@@ -733,7 +733,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 คีย์เหล่านี้อยู่ใน `providerSpecificData` ของการเชื่อมต่อ (เช่นผ่าน `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่าแล้ว ค่าการเชื่อมต่อจะลดขีดจำกัดเฉพาะในกรณีที่ผู้ให้บริการไม่มีในตัว (การเชื่อมต่อ Azure หลังเกตเวย์ที่เข้มงวดกว่า หรือโหนดที่เข้ากันได้แบบกำหนดเอง)
+- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่า ค่าการเชื่อมต่อจะแทนที่ค่าเริ่มต้นของ Azure OpenAI / Azure AI Foundry (การเชื่อมต่อ Azure ที่อยู่หลังเกตเวย์ที่เข้มงวดกว่า) และกำหนดขีดจำกัดสำหรับโหนดที่เข้ากันได้แบบกำหนดเอง OpenAI, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code รักษาขีดจำกัดการลงทะเบียนและเพิกเฉยต่อมัน
 - `quotaEndpoint` — จุดสิ้นสุด quota/credits ของเกตเวย์ อ่านแถบโควต้าแดชบอร์ดและการกำหนดเส้นทางการรับรู้โควต้า ใช้งานได้กับทั้งการเชื่อมต่อที่เข้ากันได้กับ OpenAI และ Anthropic รูปร่างเต็มมีการบันทึกไว้ใน `open-sse/services/usage/openaiCompatible.ts`
 
 ```json

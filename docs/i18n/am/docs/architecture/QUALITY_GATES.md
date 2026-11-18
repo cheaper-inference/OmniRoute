@@ -118,28 +118,29 @@ Mergify የወረፋ ማጠቃለያውን ወደ ረቂቁ መግለጫ ይጽ�
 
 ከ `test-coverage` በኋላ ይሮጣል. እገዳዎች ውድቀት ላይ ይቀላቀላሉ.
 
-| ስክሪፕት                        | ያረጋግጣል                                                                                                                       | ማገድ                 |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `quality:collect`            | Emits `quality-metrics.json` (ESLint የማስጠንቀቂያ ብዛት፣ ከተዋሃደ የሻርድ ዘገባ ሽፋን)                                                       | አዎ (የላይኛው የአይጥ ጅረት) |
-| `quality:ratchet`            | በ `quality-baseline.json` ውስጥ ያለው እያንዳንዱ ልኬት ወደ ኋላ አልተመለሰም (ESLint ማስጠንቀቂያዎች ≤ መነሻ፣ ሽፋን ≥ መነሻ)                               | አዎ                  |
-| `check:duplication`          | የኮድ ማባዛት (jscpd@4) በ `quality-baseline.json` ውስጥ ከመሠረታዊ መስመር አይበልጥም።                                                         | አዎ                  |
-| `check:complexity`           | የፋይል ደረጃ ሳይክሎማቲክ ውስብስብነት ከካፒታው አይበልጥም (ኮር ESLint `complexity` + `max-lines-per-function`)                                    | አዎ                  |
-| `check:cognitive-complexity` | የግንዛቤ ውስብስብነት ራትቼት (`eslint-plugin-sonarjs`) — የተለየ ESLint ማለፊያ; CI ሁለቱንም እንደ ነጠላ `check:complexity-ratchets` እርምጃ ያካሂዳል     | አዎ                  |
-| `check:dead-code`            | ጥቅም ላይ ያልዋሉ ወደ ውጭ የሚላኩ / የፋይል ንክኪ (ኪኒፕ) ከመነሻ መስመር ጋር አይመለሱም።                                                                 | አዎ                  |
-| `check:compression-budget`   | የመጨመቂያ ቤንችማርክ በጀት — በእያንዳንዱ ሞተር ቶከን - ቁጠባ ወለሎች ወደ ኋላ መመለስ የለባቸውም                                                             | አዎ                  |
-| `check:type-coverage`        | በመቶኛ የተተየበው ራትቼት (`type-coverage`) ወደ ኋላ አይመለስም; በአብዛኛው `typecheck:noimplicit:core` ን ይሸፍናል                                  | አዎ                  |
-| `check:codeql-ratchet`       | ክፈት CodeQL ማንቂያ ቆጠራ ወደ ኋላ አይመለስም (በ `gh api` በኩል ይነበባል፤ ያለ ማስመሰያ ዝለል) — አድስ ቃና እና በእጅ ቀስቅሴ፡ ከታች ያለውን "CodeQL ratchet" ይመልከቱ። | አዎ                  |
+| ስክሪፕት                        | ያረጋግጣል                                                                                                                                           | ማገድ                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| `quality:collect`            | Emits `quality-metrics.json` (ESLint የማስጠንቀቂያ ብዛት፣ ከተዋሃደ የሻርድ ዘገባ ሽፋን)                                                                           | አዎ (የላይኛው የአይጥ ጅረት) |
+| `quality:ratchet`            | በ `quality-baseline.json` ውስጥ ያለው እያንዳንዱ ልኬት ወደ ኋላ አልተመለሰም (ESLint ማስጠንቀቂያዎች ≤ መነሻ፣ ሽፋን ≥ መነሻ)                                                   | አዎ                  |
+| `check:duplication`          | የኮድ ማባዛት (jscpd@4) በ `quality-baseline.json` ውስጥ ከመሠረታዊ መስመር አይበልጥም።                                                                             | አዎ                  |
+| `check:complexity`           | የፋይል ደረጃ ሳይክሎማቲክ ውስብስብነት ከካፒታው አይበልጥም (ኮር ESLint `complexity` + `max-lines-per-function`)                                                        | አዎ                  |
+| `check:cognitive-complexity` | የግንዛቤ ውስብስብነት ራትቼት (`eslint-plugin-sonarjs`) — የተለየ ESLint ማለፊያ; CI ሁለቱንም እንደ ነጠላ `check:complexity-ratchets` እርምጃ ያካሂዳል                         | አዎ                  |
+| `check:dead-code`            | ጥቅም ላይ ያልዋሉ ወደ ውጭ የሚላኩ / የፋይል ንክኪ (ኪኒፕ) ከመነሻ መስመር ጋር አይመለሱም።                                                                                     | አዎ                  |
+| `check:compression-budget`   | የመጨመቂያ ቤንችማርክ በጀት — በእያንዳንዱ ሞተር ቶከን - ቁጠባ ወለሎች ወደ ኋላ መመለስ የለባቸውም                                                                                 | አዎ                  |
+| `check:type-coverage`        | በመቶኛ የተተየበው ራትቼት (`type-coverage`) ወደ ኋላ አይመለስም; በአብዛኛው `typecheck:noimplicit:core` ን ይሸፍናል                                                      | አዎ                  |
+| `check:codeql-ratchet`       | ክፈት CodeQL ማንቂያ ቆጠራ ወደ ኋላ አይመለስም (በ `gh api` በኩል ይነበባል፤ ያለ ማስመሰያ ዝለል) — አድስ ቃና እና በእጅ ቀስቅሴ፡ ከታች ያለውን "CodeQL ratchet" ይመልከቱ።                     | አዎ                  |
+| `check:type-scale-ratchet`   | የኪት አይነት ልኬት፡ ከ12 ፒክስል በታች የሆኑ መጠኖች እና `font-bold` በ `src/` ብቻ ይወርዳሉ (`typeScaleSubFloorSizes`፣ `typeScaleFontBold`); እንዲሁም በቅድመ-ቁርጠኝነት መንጠቆ ውስጥ | አዎ                  |
 
 ### ሥራ `quality-extended`
 
-ሙሉው ሥራ አማካሪ ነው (`continue-on-error: true`)። በ npm ላይ የተመሰረቱ ራትኬቶች ለትክክለኛው ይሰራሉ; ውጫዊ ስካነሮቹ በ `gh release download` በኩል ይጭናሉ እና ሁለትዮሽ በማይኖርበት ጊዜ በራስ-ይዘለሉ (መውጫ 0)።
+የተቀላቀለ ሥራ፣ ያለ ምንም የሥራ ደረጃ `continue-on-error`: `--ratchet` የሚያልፍ እርምጃ በተለካ ሪግሬሽን vs `quality-baseline.json` ላይ ሥራውን ወድቋል። `check:circular-deps` እና ስካነር የመጫኛ ደረጃ ብቻ አማካሪ ናቸው (የደረጃ-ደረጃ `continue-on-error: true`)። ውጫዊው ስካነሮች በ `gh release download` በኩል ይጫናሉ; `check:secrets` ራስን መዝለል (መውጫ 0) gitleaks በማይኖርበት ጊዜ፣ `check:vuln-ratchet`፣ `check:workflows` እና `check:openapi-breaking` ልኬታቸው ሲጠፋ ይዘጋሉ።
 
 | ስክሪፕት                    | ያረጋግጣል                                                                                                                                                                     | ማገድ                                        |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | `check:circular-deps`    | ምንም ክብ ጥገኞች (ዲፒዲኤም)                                                                                                                                                        | **ምክር**                                    |
-| `check:bundle-size`      | የጥቅል መጠን ከካፒታው አይበልጥም።                                                                                                                                                     | **ምክር**                                    |
-| `check:secrets`          | ሚስጥራዊ ቅኝት (gitleaks) — ሁለትዮሽ ከሌለ ይዘላል                                                                                                                                      | **ምክር**                                    |
-| `check:vuln-ratchet`     | የጥገኛ ተጋላጭነቶች (osv-scanner) ወደ ኋላ አይመለሱም — `--ratchet` እንደ INCOMPLETE (መውጫ 2) ካልተመዘነ አይሳካም                                                                                  | **ምክር**                                    |
+| `check:bundle-size`      | የጥቅል መጠን ከካፒታው አይበልጥም; ሊለካ የማይችል መጠንም አይሳካም።                                                                                                                               | **በ --ratchet ማገድ**                        |
+| `check:secrets`          | ሚስጥራዊ ቅኝት (gitleaks) — ሁለትዮሽ ከሌለ ይዘላል                                                                                                                                      | **በ --ratchet ማገድ**                        |
+| `check:vuln-ratchet`     | የጥገኛ ተጋላጭነቶች (osv-scanner) ወደ ኋላ አይመለሱም — `--ratchet` እንደ INCOMPLETE (መውጫ 2) ካልተመዘነ አይሳካም                                                                                  | **በ --ratchet ማገድ**                        |
 | `check:workflows`        | የስራ ፍሰት lint (አክሽንሊንት + zizmor); missing/broken ስካነሮች፣ ልክ ያልሆኑ ሪፖርቶች ወይም የጎደሉ ratchet መነሻ መስመር እንደ INCOMPLETE አልተሳኩም። ትክክለኛ ግኝቶች የተመረጠውን strict/advisory/ratchet ፖሊሲ ይከተላሉ | ማስፈጸሚያ ያስፈልጋል; zizmor ratchet በ CI ውስጥ ማገድ |
 | `check:openapi-breaking` | በተሰካ ክስተት ላይ የህዝብ API ውል (PR ውህደት-መሰረታዊ፣ የግፋ በፊት፣ የቡድን መሰረት፣ scheduled/manual ማረጋገጫ የመጀመሪያ ወላጅ) የሚፈለገው መለኪያ አልተዘጋም።                                                        | **በ --ratchet ማገድ**                        |
 

@@ -166,7 +166,7 @@
     "codeCopiedAnnouncement": "Koda je kopirana v odložišče",
     "codeCopyError": "Kode ni bilo mogoče kopirati. Izberite jo in poskusite znova.",
     "codeCopyErrorRetry": "Kode ni bilo mogoče kopirati. Poskusite znova.",
-    "codeRegionLabel": "Koda v jeziku {language}",
+    "codeRegionLabel": "Koda za {language}",
     "modalWizardProgress": "Koraki",
     "modalWizardGoBackTo": "Nazaj na",
     "modalWizardGoTo": "Pojdi na",
@@ -1971,10 +1971,10 @@
     "autoCombo": "Samodejna kombinacija",
     "config": "Konfiguracija",
     "connect": "Poveži",
-    "intel": "Intel",
-    "mediaProviders": "Ponudniki predstavnosti",
+    "intel": "Podatki",
+    "mediaProviders": "Ponudniki medijskih vsebin",
     "offers": "Ponudbe",
-    "onboarding": "Začetno uvajanje"
+    "onboarding": "Uvajanje"
   },
   "home": {
     "quickStart": "Hitri začetek",
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "Predpomnjeni vhodni žetoni",
-    "inputTokensHint": "Izključuje branja iz predpomnilnika. Zapisi v predpomnilnik ostanejo vhodni žetoni.",
-    "inputSplitUnavailable": "Razčlenitev vhoda ni na voljo, ker so podatki o branjih iz predpomnilnika nepopolni ali nedosledni.",
-    "cachedInputTokensHint": "Poročana so samo branja iz predpomnilnika, ki so že vključena v skupni vhod.",
+    "inputTokensHint": "Ne vključuje branj iz predpomnilnika. Zapisi v predpomnilnik ostanejo vhodni žetoni.",
+    "inputSplitUnavailable": "Razdelitev vhoda ni na voljo, ker so podatki o branju iz predpomnilnika nepopolni ali neskladni.",
+    "cachedInputTokensHint": "Samo sporočena branja iz predpomnilnika, ki so že vključena v skupni vhod.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika uporabe",
     "tokenDisplayCompact": "Strnjeno",
@@ -13765,7 +13765,7 @@
     "description": "Promet, zakasnitev in stopnje uspešnosti po ponudnikih in modelih",
     "combo": "Kombinacija",
     "toggleModels": "Prikaži modele za {provider}",
-    "modelsTable": "Modeli za {provider}",
+    "modelsTable": "Modeli ponudnika {provider}",
     "windowSince": "Od {date}"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "Registriraj končno točko ali nadomestno shemo",
     "schema": "Shema OpenAPI 3",
     "download": "Prenesi izhodno datoteko",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nova generacija",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: nadrejeno opravilo se morda še vedno izvaja. Pred začetkom nove generacije obnovite prvotno potrdilo.",
+    "recover": "Obnovi prvotno oddajo",
+    "recoveryRecord": "Shranjena oddaja",
+    "recoveryMismatch": "Obnovitev zahteva prvotno povezavo in po ponovnem nalaganju popolnoma ujemajoči se osnutek. Nova zahteva ni bila poslana.",
+    "recoveryHelp": "Obnovitev znova uporabi prvotno koristno vsebino in ključ. Po ponovnem nalaganju obnovite popolnoma enake končno točko, povezavo, transport in vnos. Nova generacija začne ločeno plačljivo zahtevo. V tem zavihku se shrani do 20 potrdil.",
+    "streamIncomplete": "Tok se je končal brez popolnega končnega dogodka. Dokončanje v nadrejenem sistemu ni znano.",
+    "streamError": "Nadrejeni tok je sporočil napako. Prejete datoteke ostanejo na voljo."
   }
 }

@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
+|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Fornituri                       |            352             |   **358**   |          394          |
 | 🧠 IDs uniċi tal-mudelli taċ-chat  |            1320            |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar huwa fakultattiv u juża GET biss. Il-klijent OmniRoute ma jtellax prompts
 
 </div>
 
-> Punti ewlenin reċenti minn **v3.8.20 → v3.8.54**. L-istorja sħiħa tinsab f’[`CHANGELOG.md`](CHANGELOG.md).
+> Punti ewlenin reċenti minn **v3.8.20 → v3.8.55**. L-istorja sħiħa tinsab f’[`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` routing** — l-istrateġija kombinata numru 20 taqbeż il-kontijiet eżawriti, imbagħad tagħżel fost il-bqija fi proporzjon għal kwota li fadal ÷ tagħbija fil-proċess, filwaqt li żżomm il-konversazzjonijiet eżistenti marbuta. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Modalità headless** — `omniroute serve --headless` (jew `OMNIROUTE_HEADLESS=1`) tħaddem biss il-magna proxy `/v1/*`, bid-dashboard u s-sottosistemi esklussivi għad-dashboard mitfija. → [Modalità Headless](docs/guides/HEADLESS.md)
@@ -1039,7 +1039,7 @@ omniroute
 ```
 
 > 💡 Qed tara `npm warn ERESOLVE` jew twissijiet dwar peer dependencies? [Ma jagħmlux ħsara](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Qed tuża npm 11 jew aktar?** npm jista’ jimblokka l-iskripts taċ-ċiklu tal-ħajja tal-pakketti sakemm jiġu permessi. Il-`postinstall` ta’ OmniRoute (`node scripts/build/postinstall.mjs`) huwa meħtieġ biex jipprepara l-fajls tar-runtime nattiv tiegħu. Ħalli l-pakketti msemmija fit-twissija ta’ npm meta tinstalla globalment. Għas-sett ta’ pakketti rrappurtat minn OmniRoute 3.8.54:
+> **Qed tuża npm 11 jew aktar?** npm jista’ jimblokka l-iskripts taċ-ċiklu tal-ħajja tal-pakketti sakemm jiġu permessi. Il-`postinstall` ta’ OmniRoute (`node scripts/build/postinstall.mjs`) huwa meħtieġ biex jipprepara l-fajls tar-runtime nattiv tiegħu. Ħalli l-pakketti msemmija fit-twissija ta’ npm meta tinstalla globalment. Għas-sett ta’ pakketti rrappurtat minn OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1829,7 +1829,7 @@ Liċenzja MIT - ara [LIĊENZJA](LIĊENZJA) għad-dettalji.
 
 **[⬆ Lura fil-bidu](#-omniroute)** · Mibni b'❤️ għall-komunità tal-IA open-source.
 
-<sub>Maħluq minn <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Maħluq minn <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions attivati għall-mistoqsijiet u t-tweġibiet tal-komunità -->

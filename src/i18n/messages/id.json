@@ -163,8 +163,8 @@
     "moreInformation": "Informasi selengkapnya",
     "notificationAnnouncement": "Notifikasi: {message}",
     "codeCopying": "Menyalin…",
-    "codeCopiedAnnouncement": "Kode disalin ke clipboard",
-    "codeCopyError": "Tidak dapat menyalin kode. Pilih kode tersebut lalu coba lagi.",
+    "codeCopiedAnnouncement": "Kode disalin ke papan klip",
+    "codeCopyError": "Tidak dapat menyalin kode. Pilih kode tersebut dan coba lagi.",
     "codeCopyErrorRetry": "Tidak dapat menyalin kode. Silakan coba lagi.",
     "codeRegionLabel": "Kode {language}",
     "modalWizardProgress": "Langkah-langkah",
@@ -1968,13 +1968,13 @@
     "usage": "Penggunaan",
     "orchestration": "Orkestrasi",
     "access": "Akses",
-    "autoCombo": "Auto Combo",
+    "autoCombo": "Kombinasi Otomatis",
     "config": "Konfigurasi",
     "connect": "Hubungkan",
     "intel": "Intel",
     "mediaProviders": "Penyedia Media",
     "offers": "Penawaran",
-    "onboarding": "Orientasi"
+    "onboarding": "Orientasi Awal"
   },
   "home": {
     "quickStart": "Mulai Cepat",
@@ -2110,8 +2110,8 @@
   "analytics": {
     "cachedInputTokens": "Token Input yang Di-cache",
     "inputTokensHint": "Tidak termasuk pembacaan cache. Penulisan cache tetap dihitung sebagai token input.",
-    "inputSplitUnavailable": "Pemisahan input tidak tersedia karena data pembacaan cache tidak lengkap atau tidak konsisten.",
-    "cachedInputTokensHint": "Hanya melaporkan pembacaan cache, yang sudah termasuk dalam total input.",
+    "inputSplitUnavailable": "Rincian input tidak tersedia karena data pembacaan cache tidak lengkap atau tidak konsisten.",
+    "cachedInputTokensHint": "Hanya pembacaan cache yang dilaporkan, sudah termasuk dalam total input.",
     "title": "Analisis",
     "usageAnalyticsTitle": "Analisis Penggunaan",
     "tokenDisplayCompact": "Ringkas",
@@ -16675,13 +16675,13 @@
     "register": "Daftarkan endpoint atau skema pengganti",
     "schema": "Skema OpenAPI 3",
     "download": "Unduh berkas keluaran",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Generasi baru",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: tugas upstream mungkin masih berjalan. Pulihkan tanda terima asli sebelum memulai generasi lain.",
+    "recover": "Pulihkan pengiriman asli",
+    "recoveryRecord": "Pengiriman tersimpan",
+    "recoveryMismatch": "Pemulihan memerlukan koneksi asli dan draf yang sama persis setelah dimuat ulang. Tidak ada permintaan baru yang dikirim.",
+    "recoveryHelp": "Pemulihan menggunakan kembali payload dan kunci asli. Setelah dimuat ulang, pulihkan endpoint, koneksi, transport, dan input yang sama persis. Generasi baru memulai permintaan berbayar terpisah. Hingga 20 tanda terima disimpan di tab ini.",
+    "streamIncomplete": "Stream berakhir tanpa event final yang lengkap. Penyelesaian upstream tidak diketahui.",
+    "streamError": "Stream upstream melaporkan kesalahan. File yang diterima tetap tersedia."
   }
 }

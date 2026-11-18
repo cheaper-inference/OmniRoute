@@ -356,7 +356,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbejdsbiblioteket kan kun angive en kort tilladelsesliste med nøgler (porte, `REQUIRE_API_KEY`, lokalitet og farveindstillinger); læg alt andet i `~/.omniroute/.env`. Se [CLI lanceringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbejdsbiblioteket kan kun angive en kort tilladelsesliste med nøgler (`REQUIRE_API_KEY`, locale, tidszone og farveindstillinger, ikke portene); læg alt andet i `~/.omniroute/.env`. Se [CLI lanceringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Bakketilstand
 
@@ -582,28 +582,28 @@ post_install() {
 
 ### Miljøvariabler
 
-| Variabel                                | Misligholdelse           | Beskrivelse                                                                                                                                                        |
-| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | _(automatisk genereret)_ | JWT -signeringshemmeligheden — blev automatisk genereret ved første kørsel og blev ved med at `server.env`; indstil det eksplicit, når databiblioteket er flygtigt |
-| `INITIAL_PASSWORD`                      | _(frakoblet)_            | Første login-adgangskode. npm/source installationer starter med `CHANGEME`: udskift det. Frakoblet: onboarding-guide                                               |
-| `DATA_DIR`                              | `~/.omniroute`           | Datamappe (db, forbrug, logfiler)                                                                                                                                  |
-| `PORT`                                  | rammestandard            | Serviceport (`20128` i eksempler)                                                                                                                                  |
-| `HOSTNAME`                              | rammestandard            | Bind vært (Docker er standard til `0.0.0.0`)                                                                                                                       |
-| `NODE_ENV`                              | runtime standard         | Indstil `production` til implementering                                                                                                                            |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Offentlig base URL dukkede op til dashboardet og eksponeret for serveren (erstatter ældre `BASE_URL`)                                                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync slutpunkt base URL (erstatter ældre `CLOUD_URL`)                                                                                                        |
-| `API_KEY_SECRET`                        | _(automatisk genereret)_ | HMAC hemmelighed for genererede API nøgler — blev automatisk genereret ved første kørsel og blev ved med at `server.env`                                           |
-| `REQUIRE_API_KEY`                       | `false`                  | Gennemtving bærer API nøgle på `/v1/*`                                                                                                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Tillad autentificerede dashboardbrugere at afsløre fulde lagrede API nøgleværdier efter behov                                                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side opdateringskadence for cachelagrede Provider Limits-data; UI refresh-knapper udløser stadig manuel synkronisering                                      |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Deaktiver automatiske SQLite snapshots før writes/import/restore; manuelle sikkerhedskopier fungerer stadig                                                        |
-| `APP_LOG_TO_FILE`                       | `true`                   | Aktiverer program- og revisionslogoutput til disk                                                                                                                  |
-| `AUTH_COOKIE_SECURE`                    | `false`                  | Tving `Secure` auth-cookie (bag HTTPS omvendt proxy)                                                                                                               |
-| `CLOUDFLARED_BIN`                       | deaktiveret              | Brug en eksisterende `cloudflared` binær i stedet for administreret download                                                                                       |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport til administrerede hurtige tunneler (`http2`, `quic` eller `auto`)                                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap grænse i MB                                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maks. prompt-cache-indgange                                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantisk cache-indgange                                                                                                                                  |
+| Variabel                                | Misligholdelse           | Beskrivelse                                                                                                                                                      |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatisk genereret)_ | JWT -signeringshemmeligheden — blev automatisk genereret ved første kørsel og fortsatte med `server.env`; indstil det eksplicit, når databiblioteket er flygtigt |
+| `INITIAL_PASSWORD`                      | _(frakoblet)_            | Første login-adgangskode. npm/source installationer starter med `CHANGEME`: udskift det. Frakoblet: onboarding-guide                                             |
+| `DATA_DIR`                              | `~/.omniroute`           | Datamappe (db, forbrug, logfiler)                                                                                                                                |
+| `PORT`                                  | rammestandard            | Serviceport (`20128` i eksempler)                                                                                                                                |
+| `HOSTNAME`                              | rammestandard            | Bind vært (Docker er standard til `0.0.0.0`)                                                                                                                     |
+| `NODE_ENV`                              | runtime standard         | Indstil `production` til implementering                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Offentlig base URL dukkede op til dashboardet og eksponeret for serveren (erstatter ældre `BASE_URL`)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync slutpunkt base URL (erstatter ældre `CLOUD_URL`)                                                                                                      |
+| `API_KEY_SECRET`                        | _(automatisk genereret)_ | HMAC hemmelighed for genererede API nøgler — blev automatisk genereret ved første kørsel og blev ved med at `server.env`                                         |
+| `REQUIRE_API_KEY`                       | `false`                  | Gennemtving bærer API nøgle på `/v1/*`                                                                                                                           |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Tillad autentificerede dashboardbrugere at afsløre fulde lagrede API nøgleværdier efter behov                                                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side opdateringskadence for cachelagrede Provider Limits-data; UI refresh-knapper udløser stadig manuel synkronisering                                    |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Deaktiver automatiske SQLite snapshots før writes/import/restore; manuelle sikkerhedskopier fungerer stadig                                                      |
+| `APP_LOG_TO_FILE`                       | `true`                   | Aktiverer program- og revisionslogoutput til disk                                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Tving `Secure` auth-cookie (bag HTTPS omvendt proxy)                                                                                                             |
+| `CLOUDFLARED_BIN`                       | deaktiveret              | Brug en eksisterende `cloudflared` -binær i stedet for administreret download                                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport til administrerede hurtige tunneler (`http2`, `quic` eller `auto`)                                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap grænse i MB                                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maks. prompt-cache-indgange                                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantisk cache-indgange                                                                                                                                |
 
 For den fulde reference til miljøvariablen, se [README](../README.md).
 
@@ -718,7 +718,7 @@ Vælg et særskilt præfiks (`mygw`, `acme-proxy`). Hvis anmodninger til en brug
 
 Disse taster går i en forbindelses `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltal, 1-1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code er allerede aliaser på over 64 tegn uden indstilling; en forbindelsesværdi sænker kun grænsen, hvor udbyderen ikke har nogen indbygget en (en Azure-forbindelse bag en strengere gateway eller en tilpasset kompatibel node).
+- `toolNameMaxLength` (heltal, 1-1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go og Muse Code er allerede aliaser over 64 tegn uden indstilling. En forbindelsesværdi erstatter Azure OpenAI / Azure AI Foundry-standarden (en Azure-forbindelse bag en strengere gateway) og sætter grænsen for en tilpasset kompatibel node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code beholder deres registreringsgrænse og ignorerer den.
 - `quotaEndpoint` — gatewayens quota/credits endepunkt, læs for dashboard-kvotestriben og kvotebevidst routing. Virker på både OpenAI- og Anthropic-kompatible forbindelser; den fulde form er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

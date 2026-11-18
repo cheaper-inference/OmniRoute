@@ -164,13 +164,13 @@
     "notificationAnnouncement": "સૂચના: {message}",
     "codeCopying": "કૉપિ થઈ રહ્યું છે…",
     "codeCopiedAnnouncement": "કોડ ક્લિપબોર્ડ પર કૉપિ થયો",
-    "codeCopyError": "કોડ કૉપિ કરી શકાયો નથી. તેને પસંદ કરીને ફરી પ્રયાસ કરો.",
-    "codeCopyErrorRetry": "કોડ કૉપિ કરી શકાયો નથી. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    "codeCopyError": "કોડ કૉપિ કરી શકાયો નહીં. તેને પસંદ કરીને ફરી પ્રયાસ કરો.",
+    "codeCopyErrorRetry": "કોડ કૉપિ કરી શકાયો નહીં. કૃપા કરીને ફરી પ્રયાસ કરો.",
     "codeRegionLabel": "{language} કોડ",
     "modalWizardProgress": "પગલાં",
     "modalWizardGoBackTo": "પાછા જાઓ",
     "modalWizardGoTo": "પર જાઓ",
-    "modalWizardCompleted": "પૂર્ણ",
+    "modalWizardCompleted": "પૂર્ણ થયું",
     "toggleColumns": "કૉલમ ટૉગલ કરો",
     "confirmTitle": "પુષ્ટિ કરો",
     "confirmAction": "પુષ્ટિ કરો",
@@ -1971,10 +1971,10 @@
     "autoCombo": "ઑટો કૉમ્બો",
     "config": "રૂપરેખાંકન",
     "connect": "કનેક્ટ કરો",
-    "intel": "Intel",
+    "intel": "ઇન્ટેલ",
     "mediaProviders": "મીડિયા પ્રદાતાઓ",
-    "offers": "ઑફર્સ",
-    "onboarding": "ઑનબોર્ડિંગ"
+    "offers": "ઑફરો",
+    "onboarding": "પ્રારંભિક માર્ગદર્શન"
   },
   "home": {
     "quickStart": "ઝડપી શરૂઆત",
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "કૅશ કરેલા ઇનપુટ ટોકન્સ",
-    "inputTokensHint": "કૅશ વાંચનોને બાકાત રાખે છે. કૅશ લખાણો ઇનપુટ ટોકન્સ તરીકે જ રહે છે.",
-    "inputSplitUnavailable": "કૅશ-વાંચન ડેટા અપૂર્ણ અથવા અસંગત હોવાથી ઇનપુટ વિભાજન ઉપલબ્ધ નથી.",
-    "cachedInputTokensHint": "ફક્ત અહેવાલ કરાયેલા કૅશ વાંચનો, જે કુલ ઇનપુટમાં પહેલેથી જ સમાવિષ્ટ છે.",
+    "inputTokensHint": "કૅશ રીડને બાકાત રાખે છે. કૅશ રાઇટ હજી પણ ઇનપુટ ટોકન્સ તરીકે રહે છે.",
+    "inputSplitUnavailable": "કૅશ-રીડ ડેટા અપૂર્ણ અથવા અસંગત હોવાથી ઇનપુટનું વિભાજન ઉપલબ્ધ નથી.",
+    "cachedInputTokensHint": "માત્ર રિપોર્ટ કરાયેલા કૅશ રીડ, જે કુલ ઇનપુટમાં પહેલેથી જ સમાવિષ્ટ છે.",
     "title": "વિશ્લેષણ",
     "usageAnalyticsTitle": "વપરાશ એનાલિટિક્સ",
     "tokenDisplayCompact": "સંક્ષિપ્ત",
@@ -10176,7 +10176,7 @@
   "compressionStudio": {
     "noRun": "કોઈ કમ્પ્રેશન રન ઉપલબ્ધ નથી.",
     "liveDataHint": "લાઇવ ડેટા WebSocket કમ્પ્રેશન ચેનલ દ્વારા આવે છે.",
-    "liveTitle": "લાઇવ સંકોચન",
+    "liveTitle": "લાઇવ કમ્પ્રેશન",
     "cockpitView": "કૉકપિટ વ્યૂ",
     "canvas": "કૅનવાસ",
     "waterfall": "વૉટરફૉલ",
@@ -13765,7 +13765,7 @@
     "description": "પ્રતિ-પ્રદાતા અને પ્રતિ-મોડલ ટ્રાફિક, વિલંબ અને સફળતા દર",
     "combo": "કોમ્બો",
     "toggleModels": "{provider} માટે મોડલ્સ બતાવો",
-    "modelsTable": "{provider} માટેના મોડેલો",
+    "modelsTable": "{provider} માટેનાં મોડલ",
     "windowSince": "{date} થી"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "એન્ડપોઇન્ટ અથવા મૂળ સ્કીમાને બદલે વાપરવાની સ્કીમા નોંધાવો",
     "schema": "OpenAPI 3 સ્કીમા",
     "download": "આઉટપુટ ફાઇલ ડાઉનલોડ કરો",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "નવી જનરેશન",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: અપસ્ટ્રીમ જોબ હજી પણ ચાલી રહી હોઈ શકે છે. બીજી જનરેશન શરૂ કરતાં પહેલાં મૂળ રસીદ પુનઃપ્રાપ્ત કરો.",
+    "recover": "મૂળ સબમિશન પુનઃપ્રાપ્ત કરો",
+    "recoveryRecord": "સાચવેલું સબમિશન",
+    "recoveryMismatch": "પુનઃપ્રાપ્તિ માટે મૂળ કનેક્શન અને રીલોડ કર્યા પછી સંપૂર્ણપણે મેળ ખાતો ડ્રાફ્ટ જરૂરી છે. કોઈ નવી વિનંતી મોકલવામાં આવી નથી.",
+    "recoveryHelp": "પુનઃપ્રાપ્તિ મૂળ પેલોડ અને કીનો ફરી ઉપયોગ કરે છે. રીલોડ કર્યા પછી, ચોક્કસ એન્ડપોઇન્ટ, કનેક્શન, ટ્રાન્સપોર્ટ અને ઇનપુટ પુનઃસ્થાપિત કરો. નવી જનરેશન એક અલગ બિલપાત્ર વિનંતી શરૂ કરે છે. આ ટૅબમાં વધુમાં વધુ 20 રસીદો રાખવામાં આવે છે.",
+    "streamIncomplete": "સંપૂર્ણ અંતિમ ઇવેન્ટ વિના સ્ટ્રીમ સમાપ્ત થઈ. અપસ્ટ્રીમ પૂર્ણતા અજ્ઞાત છે.",
+    "streamError": "અપસ્ટ્રીમ સ્ટ્રીમે ભૂલની જાણ કરી. પ્રાપ્ત થયેલી ફાઇલો ઉપલબ્ધ રહે છે."
   }
 }

@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (bandari, `REQUIRE_API_KEY`, eneo na mipangilio ya rangi); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (`REQUIRE_API_KEY`, eneo, eneo la saa na mipangilio ya rangi, sio bandari); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Hali ya trei
 
@@ -734,7 +734,7 @@ Chagua kiambishi awali tofauti (`mygw`, `acme-proxy`). Ikiwa maombi ya nodi maal
 
 Vifunguo hivi huenda kwenye `providerSpecificData` ya unganisho (kwa mfano kupitia `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse tayari zina majina zaidi ya vibambo 64 bila mpangilio wowote; thamani ya muunganisho inapunguza kikomo tu pale ambapo mtoa huduma hana iliyojengewa ndani (muunganisho wa Azure nyuma ya lango kali zaidi, au nodi maalum inayoendana).
+- `toolNameMaxLength` (integer, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse tayari zina majina zaidi ya vibambo 64 bila mpangilio wowote. Thamani ya muunganisho inachukua nafasi ya chaguo-msingi la Azure OpenAI / Azure AI Foundry (muunganisho wa Azure nyuma ya lango kali zaidi) na kuweka kikomo kwa nodi maalum inayoendana; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse huweka kikomo chao cha usajili na kupuuza.
 - `quotaEndpoint` — lango la quota/credits la mwisho, soma kwa ukanda wa kiasi cha dashibodi na uelekezaji wa ufahamu wa kiasi. Inafanya kazi kwenye viunganisho vinavyoendana na OpenAI- na Anthropic; umbo kamili umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

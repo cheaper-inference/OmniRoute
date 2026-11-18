@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban található `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (portok, `REQUIRE_API_KEY`, területi és színbeállítások); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban lévő `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (`REQUIRE_API_KEY`, locale, időzóna és színbeállítások, nem a portok); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tálca mód
 
@@ -734,7 +734,7 @@ Válasszon egy külön előtagot (`mygw`, `acme-proxy`). Ha egy egyéni csomópo
 
 Ezek a billentyűk egy kapcsolat `providerSpecificData` jába kerülnek (például `PUT /api/providers/{id}` keresztül):
 
-- `toolNameMaxLength` (egész szám, 1–1024) — OpenAI chat-formátummal kompatibilis kapcsolatokhoz, amelyek átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnévként küldi el a rendszer, és visszaállítja a válaszban. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go és a Muse Code már 64 karakternél hosszabb álneveket tartalmaz beállítás nélkül; a kapcsolati érték csak akkor csökkenti a korlátot, ha a szolgáltatónak nincs beépített ilyenje (szigorúbb átjáró mögötti Azure-kapcsolat vagy egyéni kompatibilis csomópont).
+- `toolNameMaxLength` (egész szám, 1–1024) — OpenAI chat-formátummal kompatibilis kapcsolatokhoz, amelyek átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnévként küldi el a rendszer, és visszaállítja a válaszban. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go és a Muse Code már több mint 64 karakterből álló álneveket tartalmaz beállítás nélkül. A kapcsolati érték lecseréli az Azure OpenAI / Azure AI Foundry alapértelmezett értékét (szigorúbb átjáró mögötti Azure-kapcsolat), és beállítja az egyéni kompatibilis csomópontok korlátját; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go és a Muse Code megtartja a rendszerleíró adatbázis korlátját, és figyelmen kívül hagyja azt.
 - `quotaEndpoint` — az átjáró quota/credits végpontja, olvassa el az irányítópult kvótasávját és a kvóta-tudatos útválasztást. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt működik; a teljes alakzat `open-sse/services/usage/openaiCompatible.ts` van dokumentálva.
 
 ```json
@@ -823,7 +823,7 @@ A modelleket szolgáltató szerint csoportosítva adja vissza típusokkal (`chat
 - Elérhető:** Irányítópult → végpontok** Docker hez és más saját üzemeltetésű telepítésekhez
 - Létrehoz egy ideiglenes `https://*.trycloudflare.com` URL, amely továbbítja az aktuális OpenAI-kompatibilis `/v1` végponthoz
 - Az első engedélyezés csak szükség esetén telepíti `cloudflared` ; a későbbi újraindítások újra felhasználják ugyanazt a felügyelt bináris fájlt
-- A gyors alagutak nem állnak vissza automatikusan a OmniRoute vagy a tároló újraindítása után; szükség esetén újra engedélyezze őket a műszerfalról
+- A gyors alagutak nem állnak vissza automatikusan a OmniRoute vagy a tároló újraindítása után; szükség esetén újra engedélyezze őket az irányítópulton
 - Az alagút URLs múlékony, és minden alkalommal változik, amikor az alagutat stop/start
 - A felügyelt gyorsalagutak alapértelmezés szerint HTTP/2 szállítást használják, hogy elkerüljék a zajos QUIC UDP puffer figyelmeztetéseket a korlátozott tárolókban
 - Állítsa be `CLOUDFLARED_PROTOCOL=quic` vagy `auto`, ha felül szeretné bírálni a felügyelt szállítási lehetőséget
@@ -1017,7 +1017,7 @@ OmniRoute szolgáltatói szintű rugalmasságot valósít meg öt összetevőbő
 
 5. **Dóziskorlát automatikus észlelése** — Amikor az upstream szolgáltatók kifejezett várakozási ablakokat adnak vissza, ezek a tippek felülírják a helyi kapcsolat lehűlését, ha a beállítás engedélyezve van.
 
-**Profi tipp:** Használja a** Egészség** oldalon ellenőrizheti és visszaállíthatja az élő szolgáltatói megszakítókat egy kimaradás után. A Rugalmasság oldal csak a konfigurációt módosítja.
+**Pro tipp:** Használja a** Egészség** oldalon ellenőrizheti és visszaállíthatja az élő szolgáltatói megszakítókat egy kimaradás után. A Rugalmasság oldal csak a konfigurációt módosítja.
 
 ---
 
@@ -1177,7 +1177,7 @@ Hozzáférés a következőn keresztül** Irányítópult → Health** . Valós 
 | **Aláírás gyorsítótár**   | Deduplikációs gyorsítótár statisztikái (aktív kulcsok, találati arány) |
 | **Latencia telemetria**   | p50/p95/p99 késleltetési összesítés szolgáltatónként                   |
 
-**Profi tipp:** Az Egészségügyi oldal 10 másodpercenként automatikusan frissül. Használja a megszakító kártyát annak azonosítására, hogy mely szolgáltatók tapasztaltak problémákat.
+**Pro tipp:** Az Egészségügyi oldal 10 másodpercenként automatikusan frissül. Használja a megszakító kártyát annak azonosítására, hogy mely szolgáltatók tapasztaltak problémákat.
 
 ---
 

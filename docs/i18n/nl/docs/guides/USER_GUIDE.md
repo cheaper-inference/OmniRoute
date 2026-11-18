@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (poorten, `REQUIRE_API_KEY`, landinstelling en kleurinstellingen); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (`REQUIRE_API_KEY`, landinstelling, tijdzone en kleurinstellingen, niet de poorten); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Lademodus
 
@@ -735,7 +735,7 @@ Kies een duidelijk voorvoegsel (`mygw`, `acme-proxy`). Als verzoeken aan een aan
 
 Deze sleutels gaan in de `providerSpecificData` van een verbinding (bijvoorbeeld via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (geheel getal, 1–1024) — voor OpenAI -chat-compatibele verbindingen waarvan de gateway lange toolnamen afwijst. Langere namen worden als korte aliassen verzonden en in het antwoord hersteld. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go en Muse Code hebben al aliasnamen van meer dan 64 tekens zonder instelling; een verbindingswaarde verlaagt de limiet alleen als de provider geen ingebouwde verbinding heeft (een Azure-verbinding achter een strengere gateway of een aangepast compatibel knooppunt).
+- `toolNameMaxLength` (geheel getal, 1–1024) — voor OpenAI -chat-compatibele verbindingen waarvan de gateway lange toolnamen afwijst. Langere namen worden als korte aliassen verzonden en in het antwoord hersteld. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go en Muse Code hebben al aliasnamen van meer dan 64 tekens zonder instelling. Een verbindingswaarde vervangt de standaardwaarde van Azure OpenAI /Azure AI Foundry (een Azure-verbinding achter een striktere gateway) en stelt de limiet in voor een aangepast compatibel knooppunt; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go en Muse Code behouden hun registerlimiet en negeren deze.
 - `quotaEndpoint` — het quota/credits eindpunt van de gateway, lees voor de dashboardquotastrook en quotabewuste routering. Werkt op zowel OpenAI- als Anthropic-compatibele verbindingen; de volledige vorm is gedocumenteerd in `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

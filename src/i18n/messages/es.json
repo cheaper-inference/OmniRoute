@@ -1968,13 +1968,13 @@
     "usage": "Uso",
     "orchestration": "Orquestación",
     "access": "Acceso",
-    "autoCombo": "Auto Combo",
+    "autoCombo": "Combinación automática",
     "config": "Configuración",
     "connect": "Conectar",
-    "intel": "Intel",
-    "mediaProviders": "Proveedores de medios",
+    "intel": "Información",
+    "mediaProviders": "Proveedores de contenido multimedia",
     "offers": "Ofertas",
-    "onboarding": "Configuración inicial"
+    "onboarding": "Incorporación"
   },
   "home": {
     "quickStart": "Inicio rápido",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Tokens de entrada almacenados en caché",
-    "inputTokensHint": "Excluye las lecturas de caché. Las escrituras en caché siguen siendo tokens de entrada.",
-    "inputSplitUnavailable": "La división de entrada no está disponible porque los datos de lectura de caché están incompletos o son incoherentes.",
-    "cachedInputTokensHint": "Solo se informan las lecturas de caché, que ya están incluidas en el total de entrada.",
+    "cachedInputTokens": "Tokens de entrada en caché",
+    "inputTokensHint": "Excluye las lecturas de caché. Las escrituras en caché siguen contando como tokens de entrada.",
+    "inputSplitUnavailable": "El desglose de la entrada no está disponible porque los datos de lectura de caché están incompletos o son incoherentes.",
+    "cachedInputTokensHint": "Solo lecturas de caché notificadas, ya incluidas en la entrada total.",
     "title": "Analítica",
     "usageAnalyticsTitle": "Análisis de uso",
     "tokenDisplayCompact": "Compacto",
@@ -10176,7 +10176,7 @@
   "compressionStudio": {
     "noRun": "No hay ninguna ejecución de compresión disponible.",
     "liveDataHint": "Los datos en tiempo real llegan a través del canal de compresión WebSocket.",
-    "liveTitle": "Compresión en vivo",
+    "liveTitle": "Compresión en tiempo real",
     "cockpitView": "Vista de cabina",
     "canvas": "Lienzo",
     "waterfall": "Cascada",
@@ -13765,7 +13765,7 @@
     "description": "Tráfico, latencia y tasas de éxito por proveedor y por modelo",
     "combo": "Combinado",
     "toggleModels": "Mostrar modelos de {provider}",
-    "modelsTable": "Modelos para {provider}",
+    "modelsTable": "Modelos de {provider}",
     "windowSince": "Desde {date}"
   },
   "relay": {
@@ -16675,13 +16675,13 @@
     "register": "Registrar un punto de conexión o reemplazar el esquema",
     "schema": "Esquema OpenAPI 3",
     "download": "Descargar archivo de salida",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Nueva generación",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: es posible que el trabajo ascendente siga ejecutándose. Recupere el recibo original antes de iniciar otra generación.",
+    "recover": "Recuperar el envío original",
+    "recoveryRecord": "Envío guardado",
+    "recoveryMismatch": "La recuperación requiere la conexión original y un borrador que coincida exactamente después de recargar. No se envió ninguna solicitud nueva.",
+    "recoveryHelp": "La recuperación reutiliza la carga útil y la clave originales. Después de recargar, restaure exactamente el endpoint, la conexión, el transporte y la entrada. Una nueva generación inicia una solicitud facturable independiente. Se conservan hasta 20 recibos en esta pestaña.",
+    "streamIncomplete": "El flujo terminó sin un evento final completo. Se desconoce si el procesamiento ascendente se completó.",
+    "streamError": "El flujo ascendente informó de un error. Los archivos recibidos siguen estando disponibles."
   }
 }

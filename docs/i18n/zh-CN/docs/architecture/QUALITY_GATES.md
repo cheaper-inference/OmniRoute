@@ -115,28 +115,29 @@ CLI要求`--evidence-root`验证保留的证据。文件解析为`<evidence-root
 
 在`test-coverage`之后运行。失败时块合并。
 
-| 脚本                         | 验证                                                                                                               | 阻塞           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------- |
-| `quality:collect`            | 发出`quality-metrics.json` （ESLint警告计数，合并分片报告的覆盖范围）                                              | 是（棘轮上游） |
-| `quality:ratchet`            | `quality-baseline.json`中的每个指标都没有回归（ESLint警告≤基线；覆盖≥基线）                                        | 是的           |
-| `check:duplication`          | 代码重复 (jscpd@4) 不超过`quality-baseline.json`中的基线                                                           | 是的           |
-| `check:complexity`           | 文件级圈复杂度不超过上限（核心ESLint `complexity` + `max-lines-per-function`）                                     | 是的           |
-| `check:cognitive-complexity` | 认知复杂度棘轮 (`eslint-plugin-sonarjs`) —单独ESLint通行证； CI将两者合并为单个`check:complexity-ratchets`步骤运行 | 是的           |
-| `check:dead-code`            | 未使用的导出/文件棘轮（刀）与基线相比不会回归                                                                      | 是的           |
-| `check:compression-budget`   | 压缩基准预算—每引擎代币节省下限不得回归                                                                            | 是的           |
-| `check:type-coverage`        | 百分比型棘轮 (`type-coverage`) 不回归；很大程度上包含`typecheck:noimplicit:core`                                   | 是的           |
-| `check:codeql-ratchet`       | 打开CodeQL警报计数不会回归（通过`gh api`读取；无需令牌即可优雅跳过） —刷新节奏和手动触发：请参阅下面的“CodeQL棘轮” | 是的           |
+| 脚本                         | 验证                                                                                                                              | 阻塞           |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `quality:collect`            | 发出`quality-metrics.json` （ESLint警告计数，合并分片报告的覆盖范围）                                                             | 是（棘轮上游） |
+| `quality:ratchet`            | `quality-baseline.json`中的每个指标都没有回归（ESLint警告≤基线；覆盖≥基线）                                                       | 是的           |
+| `check:duplication`          | 代码重复 (jscpd@4) 不超过`quality-baseline.json`中的基线                                                                          | 是的           |
+| `check:complexity`           | 文件级圈复杂度不超过上限（核心ESLint `complexity` + `max-lines-per-function`）                                                    | 是的           |
+| `check:cognitive-complexity` | 认知复杂度棘轮 (`eslint-plugin-sonarjs`) —单独ESLint通行证； CI将两者合并为单个`check:complexity-ratchets`步骤运行                | 是的           |
+| `check:dead-code`            | 未使用的导出/文件棘轮（刀）与基线相比不会回归                                                                                     | 是的           |
+| `check:compression-budget`   | 压缩基准预算—每引擎代币节省下限不得回归                                                                                           | 是的           |
+| `check:type-coverage`        | 百分比型棘轮 (`type-coverage`) 不回归；很大程度上包含`typecheck:noimplicit:core`                                                  | 是的           |
+| `check:codeql-ratchet`       | 打开CodeQL警报计数不会回归（通过`gh api`读取；无需令牌即可优雅跳过） —刷新节奏和手动触发：请参阅下面的“CodeQL棘轮”                | 是的           |
+| `check:type-scale-ratchet`   | 套件类型比例：12 px 以下的尺寸和`src/`中的`font-bold`只会下降（`typeScaleSubFloorSizes`、 `typeScaleFontBold`）；也在预提交挂钩中 | 是的           |
 
 ### 职位： `quality-extended`
 
-整个工作都是咨询性的（`continue-on-error: true`）。基于 npm 的棘轮真正运行；当二进制文件仍然不存在时，外部扫描仪通过`gh release download`进行安装并自动跳过（退出 0）。
+混合作业，没有作业级别`continue-on-error`：通过`--ratchet`的步骤在测量回归与`quality-baseline.json`上失败。只有`check:circular-deps`和扫描仪安装步骤是建议性的（步骤级别`continue-on-error: true`）。外部扫描仪通过`gh release download`安装；当 gitleaks 不存在时， `check:secrets`会自跳过（退出 0），而`check:vuln-ratchet`、 `check:workflows`和`check:openapi-breaking`当测量缺失时会失败关闭。
 
 | 脚本                     | 验证                                                                                                                                                  | 阻塞                             |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | `check:circular-deps`    | 无循环依赖性 (dpdm)                                                                                                                                   | **咨询**                         |
-| `check:bundle-size`      | 捆绑尺寸不超过上限                                                                                                                                    | **咨询**                         |
-| `check:secrets`          | 如果二进制文件不存在，秘密扫描 (gitleaks) —会跳过                                                                                                     | **咨询**                         |
-| `check:vuln-ratchet`     | 依赖项漏洞（osv-scanner）不会回归—如果未测量， `--ratchet`会像INCOMPLETE一样失败（退出 2）                                                            | **咨询**                         |
+| `check:bundle-size`      | 捆包尺寸不超过上限；无法测量的尺寸也会失败                                                                                                            | **使用--ratchet进行阻止**        |
+| `check:secrets`          | 如果二进制文件不存在，秘密扫描 (gitleaks) —会跳过                                                                                                     | **使用--ratchet进行阻止**        |
+| `check:vuln-ratchet`     | 依赖项漏洞（osv-scanner）不会回归—如果未测量， `--ratchet`会像INCOMPLETE一样失败（退出 2）                                                            | **使用--ratchet进行阻止**        |
 | `check:workflows`        | 工作流程 lint (actionlint + zizmor)； missing/broken扫描仪、无效报告或缺少棘轮基线会因INCOMPLETE失败。有效的结果遵循选定的strict/advisory/ratchet政策 | 需要执行； zizmor 棘轮在CI中阻塞 |
 | `check:openapi-breaking` | 针对固定事件提交的公共API合约（PR merge-base、push before、merge-group base； scheduled/manual checkout 第一个父级）；所需测量失败关闭                | **使用--ratchet进行阻止**        |
 

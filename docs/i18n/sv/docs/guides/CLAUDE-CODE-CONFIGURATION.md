@@ -81,18 +81,22 @@ Båda läses endast för tillskrivning; de vidarebefordras aldrig till uppström
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` -uttrycket tar bort alla autentiseringsuppgifter som är inbäddade i fjärrkontrollen URL. IDE tillägg startar Claude -koden utan ditt skal, så deras sessioner faller tillbaka till arbetskatalogen.
+`sed` -uttrycket tar bort alla autentiseringsuppgifter, frågesträng och fragment som är inbäddade i fjärrkontrollen URL, och rubriker som redan finns i `ANTHROPIC_CUSTOM_HEADERS` behålls. IDE tillägg startar Claude Code utan ditt skal, så deras sessioner faller tillbaka till arbetskatalogen.
 
 ---
 

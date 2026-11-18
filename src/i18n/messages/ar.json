@@ -163,10 +163,10 @@
     "moreInformation": "مزيد من المعلومات",
     "notificationAnnouncement": "إشعار: {message}",
     "codeCopying": "جارٍ النسخ…",
-    "codeCopiedAnnouncement": "تم نسخ التعليمات البرمجية إلى الحافظة",
-    "codeCopyError": "تعذّر نسخ التعليمات البرمجية. حدّدها وحاول مرة أخرى.",
-    "codeCopyErrorRetry": "تعذّر نسخ التعليمات البرمجية. يُرجى المحاولة مرة أخرى.",
-    "codeRegionLabel": "تعليمات برمجية بلغة {language}",
+    "codeCopiedAnnouncement": "تم نسخ الرمز إلى الحافظة",
+    "codeCopyError": "تعذّر نسخ الرمز. حدده وحاول مرة أخرى.",
+    "codeCopyErrorRetry": "تعذّر نسخ الرمز. يُرجى المحاولة مرة أخرى.",
+    "codeRegionLabel": "رمز {language}",
     "modalWizardProgress": "الخطوات",
     "modalWizardGoBackTo": "العودة إلى",
     "modalWizardGoTo": "الانتقال إلى",
@@ -1160,7 +1160,7 @@
     "tokensPageTitle": "الرموز المميزة",
     "tokensPageDescription": "أرسل الرموز المميزة بين مفاتيح API، وشارك رموز الدعوة، واربط خوادم المجتمع.",
     "tokensServerUrlLabel": "عنوان URL للخادم",
-    "table": "جدول"
+    "table": "الجدول"
   },
   "disabled": "معطل",
   "featureFlagOmnirouteEmergencyFallbackDescription": "توجيه الطلبات التي استنفدت الميزانية إلى موفر/نموذج الاحتياط المجاني للطوارئ.",
@@ -1971,7 +1971,7 @@
     "autoCombo": "الدمج التلقائي",
     "config": "الإعدادات",
     "connect": "الاتصال",
-    "intel": "Intel",
+    "intel": "المعلومات",
     "mediaProviders": "موفرو الوسائط",
     "offers": "العروض",
     "onboarding": "الإعداد الأولي"
@@ -2109,9 +2109,9 @@
   },
   "analytics": {
     "cachedInputTokens": "رموز الإدخال المخزنة مؤقتًا",
-    "inputTokensHint": "يستثني قراءات ذاكرة التخزين المؤقت. وتظل عمليات الكتابة إلى ذاكرة التخزين المؤقت رموز إدخال.",
-    "inputSplitUnavailable": "تقسيم الإدخال غير متاح لأن بيانات القراءة من ذاكرة التخزين المؤقت غير مكتملة أو غير متسقة.",
-    "cachedInputTokensHint": "قراءات ذاكرة التخزين المؤقت المُبلَّغ عنها فقط، وهي مضمنة بالفعل في إجمالي الإدخال.",
+    "inputTokensHint": "لا يشمل قراءات ذاكرة التخزين المؤقت. تظل عمليات الكتابة إلى ذاكرة التخزين المؤقت محسوبة ضمن رموز الإدخال.",
+    "inputSplitUnavailable": "تفاصيل تقسيم الإدخال غير متاحة لأن بيانات قراءة ذاكرة التخزين المؤقت غير مكتملة أو غير متسقة.",
+    "cachedInputTokensHint": "قراءات ذاكرة التخزين المؤقت المُبلّغ عنها فقط، وهي مشمولة بالفعل في إجمالي الإدخال.",
     "title": "التحليلات",
     "usageAnalyticsTitle": "تحليلات الاستخدام",
     "tokenDisplayCompact": "مختصر",
@@ -16675,13 +16675,13 @@
     "register": "تسجيل نقطة نهاية أو مخطط بديل",
     "schema": "مخطط OpenAPI 3",
     "download": "تنزيل ملف الناتج",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "توليد جديد",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: قد تظل المهمة المصدرية قيد التشغيل. استعد الإيصال الأصلي قبل بدء توليد آخر.",
+    "recover": "استعادة الإرسال الأصلي",
+    "recoveryRecord": "إرسال محفوظ",
+    "recoveryMismatch": "تتطلب الاستعادة الاتصال الأصلي ومسودة مطابقة تمامًا بعد إعادة التحميل. لم يُرسل أي طلب جديد.",
+    "recoveryHelp": "تعيد الاستعادة استخدام الحمولة والمفتاح الأصليين. بعد إعادة التحميل، استعد نقطة النهاية والاتصال والنقل والمدخلات نفسها تمامًا. يبدأ التوليد الجديد طلبًا منفصلًا قابلًا للفوترة. يُحتفظ بما يصل إلى 20 إيصالًا في علامة التبويب هذه.",
+    "streamIncomplete": "انتهى التدفق دون حدث نهائي مكتمل. حالة الإكمال لدى المصدر غير معروفة.",
+    "streamError": "أبلغ التدفق المصدري عن خطأ. تظل الملفات المستلمة متاحة."
   }
 }

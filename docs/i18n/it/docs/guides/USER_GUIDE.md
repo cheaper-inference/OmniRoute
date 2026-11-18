@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI carica automaticamente `.env` da `~/.omniroute/.env` o `./.env`. Uno `./.env` nella directory di lavoro può impostare solo una breve lista consentita di chiavi (porte, `REQUIRE_API_KEY`, impostazioni locali e colore); metti tutto il resto in `~/.omniroute/.env`. Vedi [i contratti di lancio CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI carica automaticamente `.env` da `~/.omniroute/.env` o `./.env`. Uno `./.env` nella directory di lavoro può impostare solo una breve lista consentita di chiavi (`REQUIRE_API_KEY`, impostazioni locali, fuso orario e colore, non le porte); metti tutto il resto in `~/.omniroute/.env`. Vedi [i contratti di lancio CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modalità vassoio
 
@@ -734,7 +734,7 @@ Scegli un prefisso distinto (`mygw`, `acme-proxy`). Se le richieste a un nodo pe
 
 Queste chiavi vanno nella `providerSpecificData` di una connessione (ad esempio tramite `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (intero, 1–1024) — per connessioni compatibili con il formato chat OpenAI il cui gateway rifiuta nomi di strumenti lunghi. I nomi più lunghi vengono inviati come alias brevi e ripristinati nella risposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code hanno già nomi alias di oltre 64 caratteri senza alcuna impostazione; un valore di connessione riduce il limite solo dove il provider non ne ha uno integrato (una connessione di Azure dietro un gateway più rigido o un nodo compatibile personalizzato).
+- `toolNameMaxLength` (intero, 1–1024) — per connessioni compatibili con il formato chat OpenAI il cui gateway rifiuta nomi di strumenti lunghi. I nomi più lunghi vengono inviati come alias brevi e ripristinati nella risposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code hanno già nomi alias di oltre 64 caratteri senza alcuna impostazione. Un valore di connessione sostituisce l'impostazione predefinita di Azure OpenAI /Azure AI Foundry (una connessione di Azure dietro un gateway più rigido) e imposta il limite per un nodo compatibile personalizzato; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code mantengono il limite del registro e lo ignorano.
 - `quotaEndpoint` — l'endpoint quota/credits del gateway, leggere per la striscia di quota del dashboard e il routing in base alla quota. Funziona su connessioni compatibili sia con OpenAI che con Anthropic; la forma completa è documentata in `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। काम गर्ने डाइरेक्टरीमा रहेको `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (पोर्टहरू, `REQUIRE_API_KEY`, लोकेल र रङ सेटिङहरू); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्छ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 
@@ -410,7 +410,7 @@ omniroute serve --tray
 omniroute autostart enable
 ```
 
-macOS, Windows, र ग्राफिकल Linux सत्रहरूमा स्वतः-सुरुले ट्रे मोड प्रयोग गर्दछ। हेडलेस Linux ले अवस्थित systemd प्रयोगकर्ता सेवा प्रयोग गर्दछ।
+macOS, Windows, र ग्राफिकल Linux सत्रहरूमा स्वत: सुरुले ट्रे मोड प्रयोग गर्दछ। हेडलेस Linux ले अवस्थित systemd प्रयोगकर्ता सेवा प्रयोग गर्दछ।
 
 लगइनमा स्टार्टअप असक्षम गर्नुहोस्:
 
@@ -735,7 +735,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 यी कुञ्जीहरू जडानको `providerSpecificData` मा जान्छन् (उदाहरणका लागि `PUT /api/providers/{id}` मार्फत):
 
-- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउंड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्ण भन्दा बढी उपनाम नामहरू छन्; जडान मानले सीमालाई मात्र घटाउँछ जहाँ प्रदायकसँग कुनै अन्तर्निर्मित छैन (एक कडा गेटवे पछाडिको Azure जडान, वा अनुकूल अनुकूल नोड)।
+- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले तिनीहरूको रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्दछ।
 - `quotaEndpoint` — गेटवेको quota/credits अन्त्य बिन्दु, ड्यासबोर्ड कोटा स्ट्रिप र कोटा-सचेत मार्गका लागि पढ्नुहोस्। OpenAI- र Anthropic-compatible जडानहरूमा काम गर्दछ; पूर्ण आकार `open-sse/services/usage/openaiCompatible.ts` मा दस्तावेज गरिएको छ।
 
 ```json

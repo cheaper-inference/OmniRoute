@@ -81,18 +81,22 @@ Ikkalasi ham faqat atribut uchun o'qiladi; ular hech qachon yuqori oqim provayde
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` ifodasi masofaviy URL ichiga o'rnatilgan barcha hisobga olish ma'lumotlarini yo'q qiladi. IDE kengaytmalari Claude kodini qobiqsiz ishga tushiradi, shuning uchun ularning seanslari ishchi katalogga qaytadi.
+`sed` ifodasi har qanday hisob ma'lumotlarini, so'rovlar qatorini va masofaviy URL ichiga o'rnatilgan fragmentni o'chiradi va `ANTHROPIC_CUSTOM_HEADERS` ichidagi sarlavhalar saqlanadi. IDE kengaytmalari Claude kodini qobiqsiz ishga tushiradi, shuning uchun ularning seanslari ishchi katalogga qaytadi.
 
 ---
 

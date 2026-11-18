@@ -356,7 +356,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. `./.env` fid-direttorju tax-xogħol jista' jistabbilixxi biss lista qasira ta' ċwievet (portijiet, `REQUIRE_API_KEY`, settings tal-lokal u tal-kulur); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. A `./.env` fid-direttorju tax-xogħol jista 'jiffissa biss lista qasira ta' ċwievet (`REQUIRE_API_KEY`, lokali, żona tal-ħin u settings tal-kulur, mhux il-portijiet); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modalità trej
 
@@ -407,7 +407,7 @@ Meta m'għadx għandek bżonn OmniRoute, aħna nipprovdu żewġ skripts ta' mala
 
 | Kmand                    | Azzjoni                                                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** `~/.omniroute`.                |
+| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** fi `~/.omniroute`.             |
 | `npm run uninstall:full` | Tneħħi l-app AND b'mod permanenti** iħassar il-konfigurazzjonijiet, iċ-ċwievet u d-databases kollha** . |
 
 > Nota: Biex tmexxi dawn il-kmandi, innaviga lejn il-folder tal-proġett OmniRoute (jekk ikklonjah) u mexxihom. Inkella, jekk installat globalment, tista 'sempliċement tħaddem `npm uninstall -g omniroute`.
@@ -718,7 +718,7 @@ Agħżel prefiss distint (`mygw`, `acme-proxy`). Jekk it-talbiet lil nodu person
 
 Dawn iċ-ċwievet imorru `providerSpecificData` ta' konnessjoni (per eżempju permezz ta `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (numru sħiħ, 1–1024) — għal konnessjonijiet kompatibbli mal-format taċ-chat OpenAI li l-gateway tagħhom jirrifjuta ismijiet twal ta' għodda. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u restawrati fit-tweġiba. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go u Muse Code diġà psewdonimu ismijiet ta 'aktar minn 64 karattru mingħajr ebda setting; valur ta' konnessjoni inaqqas il-limitu biss fejn il-fornitur m'għandux wieħed inkorporat (konnessjoni Azure wara gateway aktar strett, jew node kompatibbli apposta).
+- `toolNameMaxLength` (numru sħiħ, 1–1024) — għal konnessjonijiet kompatibbli mal-format taċ-chat OpenAI li l-gateway tagħhom jirrifjuta ismijiet twal ta' għodda. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u restawrati fit-tweġiba. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go u Muse Code diġà psewdonimu ismijiet ta 'aktar minn 64 karattru mingħajr ebda setting. Valur ta 'konnessjoni jissostitwixxi l-inadempjenza ta' Azure OpenAI / Azure AI Foundry (konnessjoni Azure wara gateway aktar strett) u jistabbilixxi l-limitu għal node kompatibbli apposta; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go u Muse Code iżommu l-limitu tar-reġistru tagħhom u jinjorawh.
 - `quotaEndpoint` — l-endpoint quota/credits tal-gateway, aqra għall-istrixxa tal-kwota tad-dashboard u rotta konxja mill-kwota. Jaħdem kemm fuq konnessjonijiet kompatibbli mal-OpenAI kif ukoll mal-Antropiku; il-forma sħiħa hija dokumentata `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -867,7 +867,7 @@ Ikkonfigurat permezz** Dashboard → Settings → Routing** . Id-daxxbord jespon
 - `auto` — score-driven fil-kandidati kollha
 - `lkgp` (L-Aħħar Fornitur Tajjeb Magħruf) — jgħaqqad lill-aħħar fornitur ta' suċċess, imbagħad jaqa' lura għar-regoli
 - `context-optimized` — jagħżel il-mudell bl-akbar tieqa tal-kuntest ħieles
-- `context-relay` — ktajjen mudelli ta’ kuntest twil għal dawriet ta’ segwitu
+- `context-relay` — ktajjen mudelli ta 'kuntest twil għal dawriet ta' segwitu
 
 #### Header Esterni tas-Sessjoni Twaħħal
 

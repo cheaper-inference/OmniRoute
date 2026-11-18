@@ -166,7 +166,7 @@
     "codeCopiedAnnouncement": "Il-kodiċi ġie kkupjat fil-clipboard",
     "codeCopyError": "Ma setax jiġi kkupjat il-kodiċi. Agħżlu u erġa’ pprova.",
     "codeCopyErrorRetry": "Ma setax jiġi kkupjat il-kodiċi. Jekk jogħġbok erġa’ pprova.",
-    "codeRegionLabel": "Kodiċi ta’ {language}",
+    "codeRegionLabel": "Kodiċi {language}",
     "modalWizardProgress": "Passi",
     "modalWizardGoBackTo": "Mur lura għal",
     "modalWizardGoTo": "Mur għal",
@@ -1246,7 +1246,7 @@
     "serverDisconnectedMsg": "Is-server proxy twaqqaf jew qed jerġa’ jibda.",
     "expandSidebar": "Espandi l-istrixxa tal-ġenb",
     "collapseSidebar": "Ikkollassa l-istrixxa tal-ġenb",
-    "toggleSidebar": "Uri/aħbi l-istrixxa tal-ġenb",
+    "toggleSidebar": "Uri jew aħbi l-istrixxa tal-ġenb",
     "createTheme": "Oħloq tema",
     "chooseColor": "Agħżel kulur wieħed",
     "cliToolsShort": "Għodod",
@@ -1968,13 +1968,13 @@
     "usage": "Użu",
     "orchestration": "Orkestrazzjoni",
     "access": "Aċċess",
-    "autoCombo": "Kombinazzjoni awtomatika",
+    "autoCombo": "Kombinazzjoni Awtomatika",
     "config": "Konfigurazzjoni",
     "connect": "Ikkonnettja",
     "intel": "Intel",
-    "mediaProviders": "Fornituri tal-midja",
+    "mediaProviders": "Fornituri tal-Midja",
     "offers": "Offerti",
-    "onboarding": "Bidu ggwidat"
+    "onboarding": "Introduzzjoni"
   },
   "home": {
     "quickStart": "Bidu Malajr",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Tokens tal-input fil-cache",
-    "inputTokensHint": "Ma jinkludix qari mill-cache. Il-kitbiet fil-cache jibqgħu tokens tal-input.",
-    "inputSplitUnavailable": "It-tqassim tal-input mhuwiex disponibbli minħabba li d-dejta tal-qari mill-cache mhijiex kompluta jew konsistenti.",
-    "cachedInputTokensHint": "Qari mill-cache rrappurtat biss, diġà inkluż fl-input totali.",
+    "cachedInputTokens": "Tokens tal-Input fil-Cache",
+    "inputTokensHint": "Jeskludi l-qari mill-cache. Il-kitbiet fil-cache jibqgħu tokens tal-input.",
+    "inputSplitUnavailable": "It-tqassim tal-input mhuwiex disponibbli minħabba li d-data tal-qari mill-cache mhijiex kompluta jew hija inkonsistenti.",
+    "cachedInputTokensHint": "Qari rrappurtat mill-cache biss, diġà inkluż fit-total tal-input.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika tal-użu",
     "tokenDisplayCompact": "Kompatt",
@@ -16675,13 +16675,13 @@
     "register": "Irreġistra punt tat-tmiem jew issostitwixxi l-iskema",
     "schema": "Skema OpenAPI 3",
     "download": "Niżżel il-fajl tal-output",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Ġenerazzjoni ġdida",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: il-kompitu upstream jista' jkun għadu għaddej. Irkupra l-irċevuta oriġinali qabel tibda ġenerazzjoni oħra.",
+    "recover": "Irkupra s-sottomissjoni oriġinali",
+    "recoveryRecord": "Sottomissjoni ssejvjata",
+    "recoveryMismatch": "L-irkupru jeħtieġ il-konnessjoni oriġinali u abbozz li jaqbel eżattament wara li terġa' tittella' l-paġna. Ma ntbagħtet l-ebda talba ġdida.",
+    "recoveryHelp": "L-irkupru jerġa' juża l-payload u ċ-ċavetta oriġinali. Wara li terġa' tittella' l-paġna, irrestawra eżattament l-endpoint, il-konnessjoni, it-trasport u l-input. Ġenerazzjoni ġdida tibda talba separata bi ħlas. Sa 20 irċevuta jinżammu f'din it-tab.",
+    "streamIncomplete": "L-istrim intemm mingħajr avveniment finali komplut. Mhux magħruf jekk il-proċess upstream tlestiex.",
+    "streamError": "L-istrim upstream irrapporta żball. Il-fajls riċevuti jibqgħu disponibbli."
   }
 }

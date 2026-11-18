@@ -37,7 +37,7 @@ Lẹhin isọdi, titari ko ni beere nigbagbogbo PR. Ọrọìwòye `@mergifyio q
 
 ### Ẹri ti o ni idaduro ni idinku gbigba
 
-`scripts/quality/validate-release-acceptance.mjs` dinku eto ti a pese ati awọn ifihan rẹ; ko ṣe fi idi rẹ mulẹ pe ero naa ni wiwa opo gigun ti epo pipe. Awọn ijabọ rẹ ṣeto `releaseAcceptance: false` ni gbangba, paapaa nigba ti ero yẹn jẹ `VERIFIED`. Ṣiṣan iṣẹ ṣiṣe `release-acceptance.yml` tun nlo awọn imuduro ojiji, kii ṣe itumọ gidi, package, bata tabi awọn owo igbega.
+`scripts/quality/validate-release-acceptance.mjs` dinku eto ti a pese ati awọn ifihan rẹ; ko ṣe fi idi rẹ mulẹ pe ero naa ni wiwa opo gigun ti itusilẹ pipe. Awọn ijabọ rẹ ṣeto `releaseAcceptance: false` ni gbangba, paapaa nigba ti ero yẹn jẹ `VERIFIED`. Ṣiṣan iṣẹ ṣiṣe `release-acceptance.yml` tun nlo awọn imuduro ojiji, kii ṣe itumọ gidi, package, bata tabi awọn owo igbega.
 
 CLI naa nilo `--evidence-root` lati mọ daju ẹri ti o daduro. Awọn faili ti wa ni ipinnu bi `<evidence-root>/<artifact_id>/<member>` ati hashed bi SHA-256. Igbasilẹ PASS laisi ẹri, sonu tabi faili ti o yipada, ọna ti ko lewu tabi aami-ọna kan ṣe idilọwọ ijẹrisi. Awọn faili ti o nsọnu ko ṣe deede si awọn akọọlẹ aṣeyọri ofo. Awọn sọwedowo SHA/run/attempt ti o wa tẹlẹ wa ni ominira: awọn baiti ti o baamu ko le gba iwe-ẹri ti o duro duro. Iduroṣinṣin fáìlì kii ṣe ẹ̀rí ìfójútó ipaniyan tabi igbega artifact.
 
@@ -129,17 +129,18 @@ Abajade naa ṣe pataki nigbati o ba ṣe idajọ boya ti tẹ faili kan:** Ay�
 | `check:compression-budget`   | Isuna funmorawon ala ibi — fun-engine tokini-fifipamọ awọn ilẹ ipakà kò gbọdọ regress                                                                   | Bẹẹni                  |
 | `check:type-coverage`        | ratchet ti a tẹ ni ogorun (`type-coverage`) ko ni pada sẹhin; ibebe subsumes `typecheck:noimplicit:core`                                                | Bẹẹni                  |
 | `check:codeql-ratchet`       | Ṣiṣii kika gbigbọn CodeQL ko ṣe atunṣe (ka nipasẹ `gh api`; oore-ọfẹ laisi ami ami) — isọdọtun cadence ati okunfa afọwọṣe: wo “CodeQL ratchet” ni isalẹ | Bẹẹni                  |
+| `check:type-scale-ratchet`   | Iwọn iru kit: awọn iwọn labẹ 12 px ati `font-bold` ni `src/` nikan lọ silẹ (`typeScaleSubFloorSizes`, `typeScaleFontBold`); tun ni awọn ami-ifaramo kio | Bẹẹni                  |
 
 ### Job: `quality-extended`
 
-Gbogbo iṣẹ jẹ imọran (`continue-on-error: true`). Awọn ratchets orisun npm nṣiṣẹ fun gidi; awọn scanners ita fi sori ẹrọ nipasẹ `gh release download` ati awọn ara-skip (jade 0) nigbati a alakomeji si tun ko si.
+Iṣẹ ti o dapọ, laisi ipele-iṣẹ `continue-on-error`: igbesẹ kan ti o kọja `--ratchet` kuna iṣẹ naa lori isọdọtun ti o ni iwọn vs `quality-baseline.json`. `check:circular-deps` nikan ati igbesẹ fifi sori ẹrọ ọlọjẹ jẹ imọran (ipele-igbesẹ `continue-on-error: true`). Awọn ọlọjẹ ita ti fi sori ẹrọ nipasẹ `gh release download`; `check:secrets` ara-skips (jade 0) nigbati gitleaks ko si, nigba ti `check:vuln-ratchet`, `check:workflows` ati `check:openapi-breaking` kuna ni pipade nigbati wiwọn wọn sonu.
 
 | Iwe afọwọkọ              | Awọn ijẹrisi                                                                                                                                                                              | Ìdènà                                     |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | `check:circular-deps`    | Ko si awọn igbẹkẹle ipin (dpdm)                                                                                                                                                           | **Igbaninimoran**                         |
-| `check:bundle-size`      | Iwọn lapapo ko kọja fila                                                                                                                                                                  | **Igbaninimoran**                         |
-| `check:secrets`          | Ṣiṣayẹwo asiri (gitleaks) — fo ti alakomeji ko ba si                                                                                                                                      | **Igbaninimoran**                         |
-| `check:vuln-ratchet`     | Awọn ailagbara igbẹkẹle (osv-scanner) ko ṣe atunṣe — `--ratchet` kuna bi INCOMPLETE (jade 2) ti ko ba ni iwọn.                                                                            | **Igbaninimoran**                         |
+| `check:bundle-size`      | Iwọn lapapo ko kọja fila; iwọn ti ko ni iwọn kuna tun                                                                                                                                     | **Dina pẹlu --ratchet**                   |
+| `check:secrets`          | Ṣiṣayẹwo asiri (gitleaks) — fo ti alakomeji ko ba si                                                                                                                                      | **Dina pẹlu --ratchet**                   |
+| `check:vuln-ratchet`     | Awọn ailagbara igbẹkẹle (osv-scanner) ko ṣe atunṣe — `--ratchet` kuna bi INCOMPLETE (jade 2) ti ko ba ni iwọn.                                                                            | **Dina pẹlu --ratchet**                   |
 | `check:workflows`        | Ṣiṣan lint (actionlint + zizmor); awọn aṣayẹwo missing/broken, awọn ijabọ aitọ tabi sonu ipilẹ ratchet kuna bi INCOMPLETE. Awọn awari to wulo tẹle ilana strict/advisory/ratchet ti o yan | Ipaniyan nilo; zizmor ratchet ìdènà ni CI |
 | `check:openapi-breaking` | Adehun API ti gbogbo eniyan lodi si awọn iṣẹ iṣẹlẹ ti a pinni (PR ìpapọ-ipilẹ, titari ṣaaju, ipilẹ akojọpọ-ẹgbẹ; isanwo scheduled/manual obi akọkọ); wiwọn ti a beere kuna ni pipade      | **Dina pẹlu --ratchet**                   |
 
@@ -195,7 +196,7 @@ Awọn faili aṣoju-itọnisọna gbe** rara** kika ti ari ni gbogbo: `AGENTS.m
 
 Ni ipo `pr` awọn ẹka onkọwe le ṣatunkọ awọn iye iṣakoso: `chore/derived-*` (itura alẹ PR), `release/v*`, ati awọn igbi itumọ `docs/i18n-*` ati `chore/i18n-*` (`scripts/check/lib/derivedClaimsDiff.mjs`). Awọn ipele Queue (`merge_group`, Mergify drafts, `omni-queue/**`) ko ṣe idajọ lẹẹkansi: wọn ṣe idajọ PRs ẹnu-ọna ti o ti ṣe idajọ ni ọkọọkan.
 
-Awọn koodu ijade: `0` mọ · `1` STRICT fiseete (tabi rirọ rirọ pẹlu `--strict`) tabi irufin iye-iṣakoso · `2` amayederun — awọn otitọ koodu ko le ṣe gbigba (iwadii tsx kuna tabi ti akoko; akoko ipari jẹ `OMNIROUTE_FACTS_TIMEOUT_MS`, aiyipada 600000 ms) tabi, ni CI, ipilẹ PR ko le yanju. Ijade 2 kii ṣe iyatọ iwe rara: tun ṣiṣẹ iṣẹ naa tabi ṣatunṣe agbegbe naa.
+Awọn koodu ijade: `0` mọ · `1` STRICT fiseete (tabi rirọ rirọ pẹlu `--strict`) tabi irufin iye-iṣakoso · `2` amayederun — awọn otitọ koodu ko le ṣe gbigba (iwadii tsx kuna tabi ti akoko jade; akoko ipari jẹ `OMNIROUTE_FACTS_TIMEOUT_MS`, aiyipada 600000 ms) tabi, ni CI, ipilẹ PR ko le yanju. Ijade 2 kii ṣe iyatọ iwe rara: tun ṣiṣẹ iṣẹ naa tabi ṣatunṣe agbegbe naa.
 
 Nibo ni ipo kọọkan nṣiṣẹ:
 

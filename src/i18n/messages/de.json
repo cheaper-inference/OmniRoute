@@ -162,9 +162,9 @@
     "dismissNotification": "Benachrichtigung verwerfen",
     "moreInformation": "Weitere Informationen",
     "notificationAnnouncement": "Benachrichtigung: {message}",
-    "codeCopying": "Wird kopiert …",
+    "codeCopying": "Wird kopiert…",
     "codeCopiedAnnouncement": "Code in die Zwischenablage kopiert",
-    "codeCopyError": "Code konnte nicht kopiert werden. Markieren Sie ihn und versuchen Sie es erneut.",
+    "codeCopyError": "Code konnte nicht kopiert werden. Wählen Sie ihn aus und versuchen Sie es erneut.",
     "codeCopyErrorRetry": "Code konnte nicht kopiert werden. Bitte versuchen Sie es erneut.",
     "codeRegionLabel": "{language}-Code",
     "modalWizardProgress": "Schritte",
@@ -1968,13 +1968,13 @@
     "usage": "Nutzung",
     "orchestration": "Orchestrierung",
     "access": "Zugriff",
-    "autoCombo": "Auto-Kombination",
+    "autoCombo": "Automatische Kombination",
     "config": "Konfiguration",
     "connect": "Verbinden",
-    "intel": "Intel",
+    "intel": "Informationen",
     "mediaProviders": "Medienanbieter",
     "offers": "Angebote",
-    "onboarding": "Einrichtung"
+    "onboarding": "Einführung"
   },
   "home": {
     "quickStart": "Schnellstart",
@@ -2108,10 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
-    "cachedInputTokens": "Gecachte Eingabetoken",
-    "inputTokensHint": "Schließt Cache-Lesevorgänge aus. Cache-Schreibvorgänge bleiben Eingabetoken.",
-    "inputSplitUnavailable": "Die Aufteilung der Eingabe ist nicht verfügbar, da die Cache-Lesedaten unvollständig oder inkonsistent sind.",
-    "cachedInputTokensHint": "Nur gemeldete Cache-Lesevorgänge, bereits in der gesamten Eingabe enthalten.",
+    "cachedInputTokens": "Zwischengespeicherte Eingabe-Token",
+    "inputTokensHint": "Cache-Lesevorgänge sind ausgeschlossen. Cache-Schreibvorgänge bleiben Eingabe-Token.",
+    "inputSplitUnavailable": "Die Aufteilung der Eingabe ist nicht verfügbar, da die Daten zu Cache-Lesevorgängen unvollständig oder inkonsistent sind.",
+    "cachedInputTokensHint": "Nur gemeldete Cache-Lesevorgänge, die bereits in der Gesamteingabe enthalten sind.",
     "title": "Analytik",
     "usageAnalyticsTitle": "Nutzungsanalysen",
     "tokenDisplayCompact": "Kompakt",
@@ -16675,13 +16675,13 @@
     "register": "Endpunkt registrieren oder Schema überschreiben",
     "schema": "OpenAPI 3-Schema",
     "download": "Ausgabedatei herunterladen",
-    "newGeneration": "__MISSING__",
-    "submissionUnknown": "__MISSING__",
-    "recover": "__MISSING__",
-    "recoveryRecord": "__MISSING__",
-    "recoveryMismatch": "__MISSING__",
-    "recoveryHelp": "__MISSING__",
-    "streamIncomplete": "__MISSING__",
-    "streamError": "__MISSING__"
+    "newGeneration": "Neue Generierung",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: Der vorgelagerte Auftrag wird möglicherweise noch ausgeführt. Stellen Sie den ursprünglichen Beleg wieder her, bevor Sie eine weitere Generierung starten.",
+    "recover": "Ursprüngliche Übermittlung wiederherstellen",
+    "recoveryRecord": "Gespeicherte Übermittlung",
+    "recoveryMismatch": "Für die Wiederherstellung sind nach dem Neuladen die ursprüngliche Verbindung und ein exakt übereinstimmender Entwurf erforderlich. Es wurde keine neue Anfrage gesendet.",
+    "recoveryHelp": "Bei der Wiederherstellung werden die ursprünglichen Nutzdaten und der ursprüngliche Schlüssel wiederverwendet. Stellen Sie nach dem Neuladen den exakten Endpunkt, die Verbindung, den Transport und die Eingabe wieder her. Eine neue Generierung startet eine separate kostenpflichtige Anfrage. In diesem Tab werden bis zu 20 Belege aufbewahrt.",
+    "streamIncomplete": "Der Stream wurde ohne ein vollständiges Abschlussereignis beendet. Ob die vorgelagerte Verarbeitung abgeschlossen wurde, ist unbekannt.",
+    "streamError": "Der vorgelagerte Stream hat einen Fehler gemeldet. Empfangene Dateien bleiben verfügbar."
   }
 }

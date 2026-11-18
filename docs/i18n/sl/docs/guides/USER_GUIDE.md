@@ -360,7 +360,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (vrata, `REQUIRE_API_KEY`, področne in barvne nastavitve); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (`REQUIRE_API_KEY`, področne nastavitve, časovni pas in barvne nastavitve, ne pa vrat); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način pladnja
 
@@ -722,7 +722,7 @@ Izberite ločeno predpono (`mygw`, `acme-proxy`). Če zahteve do vozlišča po m
 
 Ti ključi gredo v `providerSpecificData` povezave (na primer prek `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celo število, 1–1024) — za povezave, združljive s formatom klepeta OpenAI, katerih prehod zavrača dolga imena orodij. Daljša imena se pošljejo kot kratki vzdevki in obnovijo v odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go in Muse Code že imena vzdevkov z več kot 64 znaki brez nastavitve; vrednost povezave zniža omejitev le, če ponudnik nima vgrajene povezave (povezava Azure za strožjim prehodom ali vozlišče, združljivo po meri).
+- `toolNameMaxLength` (celo število, 1–1024) — za povezave, združljive s formatom klepeta OpenAI, katerih prehod zavrača dolga imena orodij. Daljša imena se pošljejo kot kratki vzdevki in obnovijo v odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go in Muse Code že imajo vzdevke, ki vsebujejo več kot 64 znakov brez nastavitve. Vrednost povezave nadomesti privzeto vrednost Azure OpenAI /Azure AI Foundry (povezava Azure za strožjim prehodom) in nastavi omejitev za združljivo vozlišče po meri; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go in Muse Code ohranjajo svojo omejitev registra in jo ignorirajo.
 - `quotaEndpoint` — končna točka quota/credits prehoda, branje za trak s kvotami na nadzorni plošči in usmerjanje, ki upošteva kvote. Deluje na povezavah, združljivih z OpenAI in Anthropic; polna oblika je dokumentirana v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -851,7 +851,7 @@ Konfigurirajte prek** Nadzorna plošča → Nastavitve → Usmerjanje** . Nadzor
 
 **Strategije, vidne na nadzorni plošči (usmerjanje na ravni računa):**
 
-| Strategija                  | Opis                                                                                                    |
+| strategija                  | Opis                                                                                                    |
 | --------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Najprej izpolnite**       | Uporablja račune v prednostnem vrstnem redu — primarni račun obravnava vse zahteve, dokler ni na voljo  |
 | **Round Robin**             | Kroži skozi vse račune z nastavljivo lepljivo omejitvijo (privzeto: 3 klici na račun)                   |
@@ -947,7 +947,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 Verige več brezplačnih ponudnikov in ponudnikov brez ključa, da povečate čas delovanja brez stroškov API.
 
-- **Strategija** : `Least Used` ali `Round Robin` (razporedi obremenitev po kvotah)
+- **strategija** : `Least Used` ali `Round Robin` (razporedi obremenitev po kvotah)
 - **Modeli** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -1135,7 +1135,7 @@ Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `w
 
 Konfigurirajte uravnoteženje po kombinacijah** Nadzorna plošča → Combos → Create/Edit → strategija** .
 
-| Strategija                  | Opis                                                                           |
+| strategija                  | Opis                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------ |
 | **Round-Robin**             | Vrti se skozi modele zaporedno                                                 |
 | **Prioriteta**              | Vedno poskusi prvi model; pade nazaj le ob napaki                              |
