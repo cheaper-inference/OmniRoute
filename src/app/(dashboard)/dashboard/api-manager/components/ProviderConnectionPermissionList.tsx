@@ -323,12 +323,12 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                           >
                             {isSelected && <Icon name="check" size={10} />}
                           </span>
-                          <span className="truncate flex-1 font-mono text-[11px]" title={conn.id}>
+                          <span className="truncate flex-1 font-mono text-2xs" title={conn.id}>
                             {conn.name ||
                               (typeof conn.id === "string" ? conn.id.slice(0, 8) : "connection")}
                           </span>
                           {!conn.isActive && (
-                            <span className="text-[9px] text-error shrink-0">{tc("inactive")}</span>
+                            <span className="text-3xs text-error shrink-0">{tc("inactive")}</span>
                           )}
                         </Button>
                       );

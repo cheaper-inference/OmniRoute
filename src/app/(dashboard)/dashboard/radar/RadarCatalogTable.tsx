@@ -434,7 +434,9 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
       {hiddenModels.length > 0 && (
         <Card>
           <div className="flex flex-col gap-3">
-            <h3 className="text-sm">{t("hiddenModelsTitle")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("hiddenModelsTitle")}
+            </h3>
             {hiddenModels.map((state) => (
               <div
                 key={`${state.provider}:${state.modelId}:hidden`}

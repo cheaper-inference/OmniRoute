@@ -61,7 +61,7 @@ export default function WeightTotalBar({ models }: WeightTotalBarProps) {
           {models.map(
             (m, i) =>
               m.weight > 0 && (
-                <span key={i} className="flex items-center gap-0.5 text-[9px] text-text-muted">
+                <span key={i} className="flex items-center gap-0.5 text-3xs text-text-muted">
                   <span
                     className={`inline-block w-1.5 h-1.5 rounded-full ${WEIGHT_COLORS[i % WEIGHT_COLORS.length]}`}
                   />
@@ -78,7 +78,7 @@ export default function WeightTotalBar({ models }: WeightTotalBarProps) {
           )}
         </div>
         <span
-          className={`text-[10px] font-medium ${
+          className={`text-3xs font-medium ${
             isValid ? "text-success" : total > 100 ? "text-error" : "text-warning"
           }`}
         >

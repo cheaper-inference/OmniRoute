@@ -959,16 +959,16 @@ export default function ApiManagerPageClient() {
                         <span className="text-text-muted font-normal text-xs">{t("reqs")}</span>
                       </span>
                       {(stats?.totalRequests ?? 0) > 0 && (
-                        <span className="text-[10px] text-success tabular-nums">
+                        <span className="text-3xs text-success tabular-nums">
                           {formatUsdCost(stats?.totalCost ?? 0, locale)}
                         </span>
                       )}
                       {stats?.lastUsed ? (
-                        <span className="text-[10px] text-text-muted">
+                        <span className="text-3xs text-text-muted">
                           {t("lastUsedOn", { date: new Date(stats.lastUsed).toLocaleDateString() })}
                         </span>
                       ) : (
-                        <span className="text-[10px] text-text-muted italic">{t("neverUsed")}</span>
+                        <span className="text-3xs text-text-muted italic">{t("neverUsed")}</span>
                       )}
                     </div>
                   </TableCell>

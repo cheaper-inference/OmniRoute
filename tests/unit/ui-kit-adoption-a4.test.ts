@@ -63,7 +63,18 @@ function openingTags(): Tag[] {
       for (; i < source.length; i++) {
         const c = source[i];
         if (quote) {
-          if (c === quote) quote = null;
+          if (c === "\\") i++;
+          else if (c === quote) quote = null;
+          continue;
+        }
+        // Comments between attributes or inside `{…}`: an apostrophe in one is not a string.
+        if (c === "/" && source[i + 1] === "/") {
+          i = source.indexOf("\n", i);
+          if (i < 0) i = source.length;
+          continue;
+        }
+        if (c === "/" && source[i + 1] === "*") {
+          i = source.indexOf("*/", i) + 1;
           continue;
         }
         if (c === '"' || c === "'" || c === "`") quote = c;
@@ -268,4 +279,53 @@ test('B: ghost, outline and secondary buttons take muted ink from tone="muted"',
     .filter(({ tag }) => has(tag, REST_MUTED_INK) && !has(tag, HOVER_ERROR_INK))
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(offenders, [], 'use tone="muted" instead of className="text-text-muted"');
+});
+
+// ── F. Typography: kit size tokens, eyebrow labels, heading scale ───────────────────────────
+
+// `text-[11px]` and `text-[10px]` are the kit label tokens `text-2xs` and `text-3xs`; a sentence
+// at those sizes is `text-xs`; 8-9px is not an interface size.
+test("F: no arbitrary text size under the kit 12px floor", () => {
+  const offenders = TAGS.filter(({ tag }) =>
+    has(tag, /(?<![\w-])text-\[(?:8|9|10|11)(?:\.\d+)?px\]/)
+  ).map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use text-2xs / text-3xs on a label, text-xs on a sentence");
+});
+
+// An uppercase label drawn with utilities (size, tracking, weight, muted ink) is the kit
+// `ci-eyebrow`, with `data-size` and `data-weight`.
+const UPPERCASE = /(?<![\w:-])uppercase(?![\w-])/;
+const UPPERCASE_KEPT: Kept[] = [];
+
+test("F: uppercase labels are ci-eyebrow", () => {
+  const { offenders, stale } = audit(
+    TAGS,
+    ({ name, tag }) =>
+      /^(p|span|div|dt|dd|h[1-6])$/.test(name) &&
+      has(tag, UPPERCASE) &&
+      !has(tag, /(?<![\w-])ci-eyebrow(?![\w-])/),
+    UPPERCASE_KEPT
+  );
+  assert.deepEqual(offenders, [], 'use className="ci-eyebrow" with data-size / data-weight');
+  assert.deepEqual(stale, [], "stale UPPERCASE_KEPT entries: remove them");
+});
+
+test("F: an eyebrow does not repeat what the class already sets", () => {
+  const offenders = TAGS.filter(({ tag }) => has(tag, /(?<![\w-])ci-eyebrow(?![\w-])/))
+    .filter(({ tag }) =>
+      has(
+        tag,
+        /(?<![\w:-])(uppercase|tracking-[\w.[\]-]+|text-text-muted|font-(medium|semibold|bold))(?![\w-])/
+      )
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, []);
+});
+
+// A title in app markup takes its size from the kit heading scale: `ci-heading` + `data-size`.
+test("F: headings take their size from ci-heading data-size, not a size utility", () => {
+  const offenders = TAGS.filter(({ name }) => /^h[1-6]$/.test(name))
+    .filter(({ tag }) => has(tag, /(?<![\w:-])text-(xs|sm|base|lg|xl|2xl)(?![\w-])/))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use className="ci-heading" data-size="xs|sm|md|lg|xl"');
 });

@@ -357,7 +357,7 @@ function EndpointRestrictions() {
                 }))
               }
               label={<span className="text-xs font-medium">{cat.label}</span>}
-              description={<span className="text-[10px]">{cat.description}</span>}
+              description={<span className="text-xs">{cat.description}</span>}
             />
           ))}
         </CheckboxGroup>

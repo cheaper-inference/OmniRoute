@@ -123,7 +123,7 @@ export default function IntelligentComboPanel({
           <div>
             <div className="flex items-center gap-2">
               <Icon name="auto_awesome" size={18} className="text-primary" />
-              <h2 className="text-lg text-text-main">
+              <h2 className="ci-heading" data-size="lg">
                 {getI18nOrFallback(t, "intelligentPanelTitle", "Intelligent Routing Dashboard")}
               </h2>
             </div>
@@ -134,7 +134,7 @@ export default function IntelligentComboPanel({
                 "Real-time scoring and health status for this auto-routing combo."
               )}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs text-text-muted">
               <code className="rounded bg-bg-subtle px-2 py-1 text-text-main">{combo?.name}</code>
               <span>{t("intelligentComboCount", { count: allCombos.length })}</span>
               <span>{t("providersInScope", { count: providerScopeCount })}</span>
@@ -162,7 +162,7 @@ export default function IntelligentComboPanel({
                 </p>
               </div>
               <div className="rounded-lg bg-bg-subtle px-3 py-2 text-right">
-                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                <p className="ci-eyebrow" data-size="3xs">
                   {getI18nOrFallback(t, "candidatePoolLabel", "Candidate Pool")}
                 </p>
                 <p className="text-lg font-semibold text-text-main">{providerScopeCount}</p>
@@ -185,7 +185,7 @@ export default function IntelligentComboPanel({
                 </p>
               </div>
               {savingModePack && (
-                <span className="text-[11px] text-text-muted">
+                <span className="text-xs text-text-muted">
                   {getI18nOrFallback(t, "savingModePack", "Saving {pack}…", {
                     pack: savingModePack,
                   }).replace("{pack}", savingModePack)}
@@ -236,7 +236,7 @@ export default function IntelligentComboPanel({
 
             <div className="mt-3 flex flex-col gap-2">
               {providerScores.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border p-3 text-[11px] text-text-muted">
+                <div className="rounded-lg border border-dashed border-border p-3 text-xs text-text-muted">
                   {getI18nOrFallback(
                     t,
                     "allProvidersEvaluated",
@@ -256,7 +256,7 @@ export default function IntelligentComboPanel({
                           <p className="text-xs font-semibold text-text-main">
                             {formatProviderLabel(entry.provider, activeProviders)}
                           </p>
-                          <p className="text-[11px] text-text-muted mt-0.5">{entry.model}</p>
+                          <p className="text-2xs text-text-muted mt-0.5">{entry.model}</p>
                         </div>
                         <Badge size="sm" variant="primary">
                           {percentage}%
@@ -310,7 +310,7 @@ export default function IntelligentComboPanel({
 
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-border bg-surface p-3">
-                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+                <p className="ci-eyebrow" data-size="2xs">
                   {t("modePack")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
@@ -318,7 +318,7 @@ export default function IntelligentComboPanel({
                 </p>
               </div>
               <div className="rounded-lg border border-border bg-surface p-3">
-                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+                <p className="ci-eyebrow" data-size="2xs">
                   {getI18nOrFallback(t, "explorationRateLabel", "Exploration Rate")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">

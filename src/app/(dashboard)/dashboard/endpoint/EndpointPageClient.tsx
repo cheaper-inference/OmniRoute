@@ -1314,7 +1314,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
         {/* Endpoint Card */}
         <Card>
-          <h2 className="text-lg mb-4">{t("title")}</h2>
+          <h2 className="ci-heading mb-4" data-size="lg">
+            {t("title")}
+          </h2>
 
           {/* Cloud Status Toast */}
           {cloudStatus && (
@@ -1348,7 +1350,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {/* Active URLs bar */}
           {activeUrls.length > 0 && (
             <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
-              <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow text-primary mb-2" data-size="3xs" data-weight="medium">
                 {t("activeEndpoints")}
               </p>
               <div className="flex flex-col gap-1.5">
@@ -1430,11 +1432,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             {/* Tunnels section header */}
             <div className="flex items-center gap-2 pt-4 pb-1 border-t border-border/50">
               <Icon name="network_node" size={14} className="text-text-muted" />
-              <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+              <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
                 {t("tunnels")}
               </span>
               <div className="flex-1 h-px bg-border/50" />
-              <span className="text-[10px] text-text-muted">
+              <span className="text-3xs text-text-muted">
                 {t("activeTunnelCount", {
                   active: activeTunnelCount,
                   total: visibleTunnelCount,
@@ -1897,7 +1899,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         <Card>
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg">{t("available")}</h2>
+              <h2 className="ci-heading" data-size="lg">
+                {t("available")}
+              </h2>
               <p className="text-sm text-text-muted">
                 {modelsLoading
                   ? translateOrFallback("loadingModels", "Loading available models...")
@@ -1913,7 +1917,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="hub" className="text-sm text-primary" />
-              <h3 className="text-xs text-text-muted uppercase">{t("categoryCore")}</h3>
+              <h3 className="ci-eyebrow">{t("categoryCore")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -1972,7 +1976,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="perm_media" className="text-sm text-chart-3" />
-              <h3 className="text-xs text-text-muted uppercase">{t("categoryMedia")}</h3>
+              <h3 className="ci-eyebrow">{t("categoryMedia")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2068,7 +2072,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="travel_explore" className="text-sm text-info" />
-                <h3 className="text-xs text-text-muted uppercase">{t("categorySearch")}</h3>
+                <h3 className="ci-eyebrow">{t("categorySearch")}</h3>
                 <div className="flex-1 h-px bg-border/50" />
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2095,7 +2099,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Icon name="build" className="text-sm text-warning" />
-              <h3 className="text-xs text-text-muted uppercase">{t("categoryUtility")}</h3>
+              <h3 className="ci-eyebrow">{t("categoryUtility")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2444,7 +2448,7 @@ function ProviderModelsModal({
     if (groupModels.length === 0) return null;
     return (
       <div className="mb-4">
-        <h4 className="text-xs text-text-muted uppercase mb-2 flex items-center gap-1.5">
+        <h4 className="ci-eyebrow mb-2 flex items-center gap-1.5">
           <Icon name={icon} className="text-sm" />
           {title} ({groupModels.length})
         </h4>
@@ -2557,7 +2561,7 @@ function EndpointCard({
         </div>
       </div>
       <div className="flex items-center gap-1.5">
-        <code className="flex-1 text-[10px] font-mono text-text-muted bg-surface/80 px-2 py-1 rounded truncate">
+        <code className="flex-1 text-3xs font-mono text-text-muted bg-surface/80 px-2 py-1 rounded truncate">
           {path}
         </code>
         <Button

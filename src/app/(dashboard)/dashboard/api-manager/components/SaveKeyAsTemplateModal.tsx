@@ -223,7 +223,7 @@ function CapturedPolicySummary({ model }: { model: SaveTemplateModel }) {
           </Badge>
         ))}
       </div>
-      <p className="text-[11px] text-text-muted pt-1">{t("templateExclusionsNote")}</p>
+      <p className="text-xs text-text-muted pt-1">{t("templateExclusionsNote")}</p>
     </div>
   );
 }
@@ -243,7 +243,7 @@ function CaptureWarnings({ model }: { model: SaveTemplateModel }) {
         >
           <div className="flex items-start justify-between gap-2">
             <span className="text-xs text-text-main">{w.message}</span>
-            <code className="text-[10px] font-mono text-text-muted shrink-0">{w.code}</code>
+            <code className="text-3xs font-mono text-text-muted shrink-0">{w.code}</code>
           </div>
           {w.requiresAcknowledgement && (
             <Checkbox
@@ -321,7 +321,7 @@ function CaptureReferenceWarnings({ model }: { model: SaveTemplateModel }) {
       </p>
       {referenceIssues.map((issue) => (
         <p key={`${issue.path}-${issue.code}`} className="text-xs text-warning">
-          <code className="font-mono text-[11px]">{issue.path}</code>: {issue.message}
+          <code className="font-mono text-2xs">{issue.path}</code>: {issue.message}
         </p>
       ))}
     </div>

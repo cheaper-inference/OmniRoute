@@ -409,7 +409,7 @@ function SelectedChipGroup({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+      <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {label}
       </span>
       <div className={listClassName}>{children}</div>
@@ -433,12 +433,12 @@ function ClaudeCodeDefaultScopeChip({
 
   return (
     <div className="flex flex-col gap-1 basis-full">
-      <span className="inline-flex w-fit items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-[10px] rounded border border-primary/35">
+      <span className="inline-flex w-fit items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-3xs rounded border border-primary/35">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setClaudeCodeFamiliesExpanded((prev) => !prev)}
-          className="h-auto min-h-0 gap-1 p-0 font-mono text-[10px] text-text-main"
+          className="h-auto min-h-0 gap-1 p-0 font-mono text-3xs text-text-main"
           title={t("expandClaudeCodeFamilies")}
           aria-expanded={claudeCodeFamiliesExpanded}
         >
@@ -504,7 +504,7 @@ function ClaudeCodeFamilyChips({
         return (
           <span
             key={family.id}
-            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded border ${
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-3xs rounded border ${
               canBlock
                 ? "bg-surface text-text-main border-border"
                 : "bg-surface-2 text-text-muted border-border"
@@ -543,7 +543,7 @@ function ProviderScopeChip({
   const provider = scope.slice(0, -2);
   return (
     <span
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-[10px] rounded border border-primary/35"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-3xs rounded border border-primary/35"
       title={scope}
     >
       <span className="font-mono truncate max-w-[120px]">{provider}</span>
@@ -566,7 +566,7 @@ function SelectedModelChip({
 }: Pick<ModelsTabProps, "toggleModel"> & { modelId: string }) {
   const t = useTranslations("apiManager");
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-surface text-text-main text-[10px] rounded border border-border">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-surface text-text-main text-3xs rounded border border-border">
       <span className="font-mono truncate max-w-[120px]" title={modelId}>
         {getModelDisplayName(modelId)}
       </span>

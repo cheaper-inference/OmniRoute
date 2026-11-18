@@ -266,7 +266,7 @@ function EndpointCategoryPicker({
           checked={formState.selectedEndpoints.includes(cat.id)}
           onChange={() => toggleEndpoint(cat.id)}
           label={<span className="text-xs font-medium">{cat.label}</span>}
-          description={<span className="text-[10px]">{cat.description}</span>}
+          description={<span className="text-xs">{cat.description}</span>}
         />
       ))}
     </CheckboxGroup>

@@ -413,7 +413,7 @@ function ImageResults({ data }: { data: any }) {
             </a>
             {img.revised_prompt && (
               <p
-                className="text-[11px] text-text-muted px-2 py-1 bg-surface/80 truncate"
+                className="text-2xs text-text-muted px-2 py-1 bg-surface/80 truncate"
                 title={img.revised_prompt}
               >
                 {img.revised_prompt}
@@ -938,7 +938,9 @@ export default function MediaPageClient() {
           <Card padding="md">
             <div className="flex items-center gap-2 mb-4">
               <Icon name={config.icon} size={20} className="text-primary" />
-              <h3 className="text-sm text-text-main">{t("result")}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {t("result")}
+              </h3>
               <span className="text-xs text-text-muted ml-auto">
                 {new Date(result.timestamp).toLocaleTimeString()}
               </span>

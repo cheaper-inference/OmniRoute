@@ -72,7 +72,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
       <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
         {groups.map(([provider, conns]) => (
           <div key={provider}>
-            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider px-1 py-0.5">
+            <p className="ci-eyebrow px-1 py-0.5" data-size="3xs" data-weight="medium">
               {provider}
             </p>
             {conns.map((conn) => {
@@ -96,7 +96,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0 text-left text-xs"
                   >
                     <span
-                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-[10px] font-semibold ${
+                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-3xs font-semibold ${
                         isPreferred ? "bg-primary border-primary text-bg" : "border-border"
                       }`}
                     >
@@ -104,7 +104,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     </span>
                     <span className="truncate flex-1">{conn.name || conn.id.slice(0, 8)}</span>
                     {!conn.isActive && (
-                      <span className="text-[9px] text-error shrink-0">{tc("inactive")}</span>
+                      <span className="text-3xs text-error shrink-0">{tc("inactive")}</span>
                     )}
                   </Button>
                   {isPreferred && (

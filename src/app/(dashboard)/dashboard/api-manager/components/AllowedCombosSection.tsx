@@ -82,7 +82,7 @@ function ComboOptionRow({
       </span>
       <span className="truncate flex-1">{combo.name}</span>
       {Array.isArray(combo.models) && (
-        <span className="text-[10px] text-text-muted shrink-0">{combo.models.length} models</span>
+        <span className="text-3xs text-text-muted shrink-0">{combo.models.length} models</span>
       )}
     </Button>
   );

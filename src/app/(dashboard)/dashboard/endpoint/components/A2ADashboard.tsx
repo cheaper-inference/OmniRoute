@@ -336,12 +336,14 @@ export default function A2ADashboardPage() {
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg mb-4">{t("taskStateOverview")}</h2>
+        <h2 className="ci-heading mb-4" data-size="lg">
+          {t("taskStateOverview")}
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {(["submitted", "working", "completed", "failed", "cancelled"] as A2ATaskState[]).map(
             (state) => (
               <div key={state} className="rounded-lg border border-border p-3 bg-bg">
-                <p className="text-xs text-text-muted uppercase">{t(`state.${state}`)}</p>
+                <p className="ci-eyebrow">{t(`state.${state}`)}</p>
                 <p className="text-2xl font-semibold mt-1">{status?.tasks?.counts?.[state] || 0}</p>
               </div>
             )
@@ -351,7 +353,9 @@ export default function A2ADashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h2 className="text-lg mb-3">{t("agentCard")}</h2>
+          <h2 className="ci-heading mb-3" data-size="lg">
+            {t("agentCard")}
+          </h2>
           {status?.agent ? (
             <div className="space-y-2 text-sm">
               <p className="font-semibold">{status.agent.name}</p>
@@ -363,7 +367,7 @@ export default function A2ADashboardPage() {
                 {t("url")}: <span className="font-mono text-xs break-all">{status.agent.url}</span>
               </p>
               <div className="pt-2">
-                <p className="text-xs uppercase text-text-muted mb-1">{t("capabilities")}</p>
+                <p className="ci-eyebrow mb-1">{t("capabilities")}</p>
                 <code className="text-xs break-all">
                   {JSON.stringify(status.capabilities || {}, null, 2)}
                 </code>
@@ -375,7 +379,9 @@ export default function A2ADashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg mb-3">{t("quickValidation")}</h2>
+          <h2 className="ci-heading mb-3" data-size="lg">
+            {t("quickValidation")}
+          </h2>
           <p className="text-sm text-text-muted mb-3">{t("quickValidationDescription")}</p>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -402,7 +408,9 @@ export default function A2ADashboardPage() {
       <Card className="p-5">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-lg">{t("taskManagement")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("taskManagement")}
+            </h2>
             <p className="text-sm text-text-muted">
               {t("taskSummary", { total: tasksData.total, page: currentPage, totalPages })}
             </p>
@@ -559,14 +567,16 @@ export default function A2ADashboardPage() {
       {selectedTask && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg">{t("taskDetail")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("taskDetail")}
+            </h2>
             <Button size="sm" variant="secondary" onClick={() => setSelectedTask(null)}>
               {t("close")}
             </Button>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="rounded-lg border border-border p-3 bg-bg">
-              <p className="text-xs uppercase text-text-muted mb-2">{t("metadata")}</p>
+              <p className="ci-eyebrow mb-2">{t("metadata")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(
                   {
@@ -584,14 +594,14 @@ export default function A2ADashboardPage() {
               </code>
             </div>
             <div className="rounded-lg border border-border p-3 bg-bg">
-              <p className="text-xs uppercase text-text-muted mb-2">{t("events")}</p>
+              <p className="ci-eyebrow mb-2">{t("events")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(selectedTask.events, null, 2)}
               </code>
             </div>
           </div>
           <div className="rounded-lg border border-border p-3 bg-bg mt-4">
-            <p className="text-xs uppercase text-text-muted mb-2">{t("artifacts")}</p>
+            <p className="ci-eyebrow mb-2">{t("artifacts")}</p>
             <code className="text-xs break-all whitespace-pre-wrap">
               {JSON.stringify(selectedTask.artifacts, null, 2)}
             </code>
@@ -606,7 +616,7 @@ export default function A2ADashboardPage() {
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-lg border border-border bg-bg p-4">
-      <p className="text-xs text-text-muted uppercase tracking-wide">{label}</p>
+      <p className="ci-eyebrow">{label}</p>
       <p className="text-xl font-semibold mt-1">{value}</p>
     </div>
   );

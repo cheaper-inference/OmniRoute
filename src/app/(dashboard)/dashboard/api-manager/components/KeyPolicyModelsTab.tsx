@@ -121,7 +121,7 @@ function UnlistedModelSelections() {
   const { t, updateState, dynamicOrUnlistedModels } = useKeyPolicyEditor();
   return (
     <div className="flex flex-col gap-1.5 p-2.5 rounded border border-info/30 bg-info/5">
-      <p className="text-[11px] font-medium text-info">{t("templateDynamicModelPatternsNote")}</p>
+      <p className="text-xs font-medium text-info">{t("templateDynamicModelPatternsNote")}</p>
       <div className="flex flex-wrap gap-1">
         {dynamicOrUnlistedModels.map((pat) => (
           <span
@@ -256,7 +256,7 @@ function BlockedModelPatterns() {
   return (
     <div className="flex flex-col gap-2 pt-3 border-t border-border/60">
       <p className="text-xs font-semibold text-text-main">{t("templateBlockedModelsTitle")}</p>
-      <p className="text-[11px] text-text-muted">{t("templateBlockedModelsDesc")}</p>
+      <p className="text-xs text-text-muted">{t("templateBlockedModelsDesc")}</p>
       <AddBlockedModelPattern />
       {formState.blockedModels.length > 0 && (
         <div className="flex flex-wrap gap-1 pt-1">

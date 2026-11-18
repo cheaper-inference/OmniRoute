@@ -129,7 +129,7 @@ export default function GlobalModelSearchPanel({
 
           {/* Quick Presets */}
           <div className="flex flex-wrap items-center gap-1">
-            <span className="text-xs text-text-muted uppercase font-semibold me-1">
+            <span className="ci-eyebrow me-1" data-weight="medium">
               {getI18nOrFallback(t, "builderGlobalShortcuts", "Shortcuts:")}
             </span>
             {QUICK_PRESETS.map((preset) => (

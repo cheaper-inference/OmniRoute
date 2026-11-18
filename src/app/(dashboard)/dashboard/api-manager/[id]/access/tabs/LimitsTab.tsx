@@ -84,7 +84,7 @@ function ThrottleDelayField({
             );
           }}
         />
-        <p className="text-[10px] text-text-muted mt-1 text-right">milliseconds</p>
+        <p className="text-3xs text-text-muted mt-1 text-right">milliseconds</p>
       </div>
     </div>
   );

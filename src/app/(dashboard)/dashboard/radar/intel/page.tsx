@@ -133,7 +133,7 @@ export default function RadarIntelPage() {
         <>
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("methodology")}</p>
+              <p className="ci-eyebrow">{t("methodology")}</p>
               <p className="mt-2 font-semibold">
                 {t("eloMethod", {
                   initial: intel.methodology.initialRating,
@@ -142,7 +142,7 @@ export default function RadarIntelPage() {
               </p>
             </Card>
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("freshness")}</p>
+              <p className="ci-eyebrow">{t("freshness")}</p>
               <p className="mt-2 font-semibold">
                 {t(`freshnessValues.${intel.catalog.freshness}`)}
               </p>
@@ -151,7 +151,7 @@ export default function RadarIntelPage() {
               </p>
             </Card>
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("trend")}</p>
+              <p className="ci-eyebrow">{t("trend")}</p>
               <p className="mt-2 font-semibold">{t(`trendValues.${intel.catalog.trend}`)}</p>
               <p className="mt-1 text-sm text-text-muted">
                 {t("modelDelta", {
@@ -165,7 +165,9 @@ export default function RadarIntelPage() {
 
           <Card>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg">{t("ranking")}</h2>
+              <h2 className="ci-heading" data-size="lg">
+                {t("ranking")}
+              </h2>
               <span className="text-xs text-text-muted">{meta.version}</span>
             </div>
             {intel.rankings.length === 0 ? (

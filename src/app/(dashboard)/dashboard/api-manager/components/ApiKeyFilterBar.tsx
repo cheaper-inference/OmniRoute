@@ -138,7 +138,7 @@ export default function ApiKeyFilterBar({
         {/* STATUS + TYPE chips — single row on >=1280px, wraps below on smaller */}
         <div className="border-t border-border pt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mr-1">
+            <span className="ci-eyebrow mr-1" data-size="3xs" data-weight="medium">
               {t("filterStatus")}:
             </span>
             {statusChips.map((chip) => (
@@ -167,7 +167,7 @@ export default function ApiKeyFilterBar({
           <div aria-hidden="true" className="hidden xl:block h-6 w-px bg-border self-center" />
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mr-1">
+            <span className="ci-eyebrow mr-1" data-size="3xs" data-weight="medium">
               {t("filterType")}:
             </span>
             {typeChips.map((chip) => (

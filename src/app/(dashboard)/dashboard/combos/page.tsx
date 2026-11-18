@@ -1490,7 +1490,7 @@ function CombosPageContent() {
                   `Combo "${recentlyCreatedCombo}" ready to validate`
                 )}
               </p>
-              <code className="inline-block text-[11px] mt-0.5 px-1.5 py-0.5 rounded bg-success/15 text-success">
+              <code className="inline-block text-2xs mt-0.5 px-1.5 py-0.5 rounded bg-success/15 text-success">
                 {recentlyCreatedCombo}
               </code>
               <p className="text-xs text-text-muted mt-0.5">
@@ -1761,7 +1761,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
             <Icon name="tips_and_updates" size={16} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm">
+            <h2 className="ci-heading" data-size="sm">
               {getI18nOrFallback(t, "wizardGuideTitle", "Getting Started with Combos")}
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
@@ -1791,7 +1791,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
               className="relative rounded-lg border border-border bg-bg-subtle p-2.5"
             >
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-3xs font-semibold text-primary">
                   {step.step}
                 </span>
                 <Icon name={step.icon} size={14} className="text-primary" />
@@ -1799,7 +1799,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
               <p className="text-xs font-medium">
                 {getI18nOrFallback(t, step.titleKey, step.titleKey)}
               </p>
-              <p className="mt-1 text-[11px] leading-4 text-text-muted">
+              <p className="mt-1 text-xs leading-4 text-text-muted">
                 {getI18nOrFallback(t, step.descKey, step.descKey)}
               </p>
               {index < COMBO_WIZARD_STEPS.length - 1 && (
@@ -1813,24 +1813,24 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
       </div>
 
       <div className="mt-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-        <p className="text-[11px] font-semibold text-primary">
+        <p className="text-2xs font-semibold text-primary">
           {getI18nOrFallback(t, "usageGuideInvokeTitle", "How to call this combo")}
         </p>
-        <p className="mt-1 text-[11px] leading-4 text-text-muted">
+        <p className="mt-1 text-xs leading-4 text-text-muted">
           {getI18nOrFallback(
             t,
             "usageGuideInvokeDesc",
             'Send the combo\'s exact name as the model, e.g. model: "my-combo" (or combo/my-combo).'
           )}
         </p>
-        <p className="mt-1 text-[11px] leading-4 text-text-muted">
+        <p className="mt-1 text-xs leading-4 text-text-muted">
           {getI18nOrFallback(
             t,
             "usageGuideInvokeAutoNote",
             "auto and auto/* are a separate zero-config router that does not use your combos (unless a combo is literally named auto)."
           )}
         </p>
-        <p className="mt-1 text-[11px] leading-4 text-text-muted">
+        <p className="mt-1 text-xs leading-4 text-text-muted">
           {getI18nOrFallback(
             t,
             "usageGuideInvokeOpenrouterNote",
@@ -1843,7 +1843,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
         <Button size="sm" icon="add" onClick={onCreateCombo}>
           {getI18nOrFallback(t, "createFirstCombo", "Create Your First Combo")}
         </Button>
-        <span className="text-[10px] text-text-muted">
+        <span className="text-3xs text-text-muted">
           {getI18nOrFallback(t, "wizardGuideHint", "or click + Create Combo above")}
         </span>
       </div>
@@ -1855,10 +1855,10 @@ function StrategyGuidanceCard({ strategy }) {
   const t = useTranslations("combos");
   return (
     <div className="rounded-lg border border-border bg-bg-subtle p-2.5">
-      <div className="text-[11px] text-text-muted">
+      <div className="text-2xs text-text-muted">
         {getI18nOrFallback(t, "strategyGuideTitle", "How to use this strategy")}
       </div>
-      <div className="mt-1.5 flex flex-col gap-1.5 text-[11px]">
+      <div className="mt-1.5 flex flex-col gap-1.5 text-xs">
         <p className="text-text-main">
           <span className="font-semibold">
             {getI18nOrFallback(t, "strategyGuideWhen", "When to use")}:
@@ -1893,13 +1893,13 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
     <div className="rounded-lg border border-border bg-surface p-2.5">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[11px] text-text-muted">
+          <p className="text-2xs text-text-muted">
             {getI18nOrFallback(t, "recommendationsLabel", "Recommended setup")}
           </p>
           <p className="text-xs font-semibold text-text-main mt-0.5">
             {title} · <span className="text-primary">{strategyLabel}</span>
           </p>
-          <p className="text-[10px] text-text-muted mt-0.5">{description}</p>
+          <p className="text-xs text-text-muted mt-0.5">{description}</p>
         </div>
         <Button size="2xs" variant="ghost" onClick={onApply}>
           {getI18nOrFallback(t, "applyRecommendations", "Apply recommendations")}
@@ -1913,7 +1913,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
             className="flex items-start gap-1 rounded-md bg-bg-subtle px-1.5 py-1"
           >
             <Icon name="check" size={12} className="text-primary mt-0.5" />
-            <p className="text-[10px] text-text-main">{tip}</p>
+            <p className="text-xs text-text-main">{tip}</p>
           </div>
         ))}
       </div>
@@ -1921,7 +1921,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
       {showNudge && (
         <div
           data-testid="strategy-change-nudge"
-          className="mt-2 rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] text-primary"
+          className="mt-2 rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-xs text-primary"
         >
           {getI18nOrFallback(
             t,
@@ -1952,13 +1952,13 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
           size={14}
           className={hasBlockers ? "text-warning" : "text-success"}
         />
-        <p className="text-[11px] font-medium text-text-main">
+        <p className="text-2xs font-medium text-text-main">
           {getI18nOrFallback(t, "readinessTitle", "Ready to save?")}
         </p>
       </div>
 
       {showDescription && (
-        <p className="text-[10px] text-text-muted mt-0.5">
+        <p className="text-xs text-text-muted mt-0.5">
           {getI18nOrFallback(
             t,
             "readinessDescription",
@@ -1978,7 +1978,7 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
               size={12}
               className={check.ok ? "text-success" : "text-warning"}
             />
-            <span className="text-[10px] text-text-main">{check.label}</span>
+            <span className="text-3xs text-text-main">{check.label}</span>
           </div>
         ))}
       </div>
@@ -1988,7 +1988,7 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
           data-testid="combo-save-blockers"
           className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2 py-1.5"
         >
-          <p className="text-[10px] font-medium text-warning">
+          <p className="text-xs font-medium text-warning">
             {getI18nOrFallback(
               t,
               "saveBlockedTitle",
@@ -1997,7 +1997,7 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
           </p>
           <div className="mt-1 flex flex-col gap-0.5">
             {blockers.map((blocker, index) => (
-              <p key={`${blocker}-${index}`} className="text-[10px] text-warning">
+              <p key={`${blocker}-${index}`} className="text-xs text-warning">
                 • {blocker}
               </p>
             ))}
@@ -2121,7 +2121,7 @@ function ComboCardInner({
                   return (
                     <code
                       key={index}
-                      className="text-[10px] font-mono bg-bg-subtle px-1.5 py-0.5 rounded text-text-muted"
+                      className="text-3xs font-mono bg-bg-subtle px-1.5 py-0.5 rounded text-text-muted"
                     >
                       {formatComboEntryDisplay(entry, {
                         providerNodes,
@@ -2134,7 +2134,7 @@ function ComboCardInner({
                 })
               )}
               {models.length > 3 && (
-                <span className="text-[10px] text-text-muted">
+                <span className="text-3xs text-text-muted">
                   {t("more", { count: models.length - 3 })}
                 </span>
               )}
@@ -2142,16 +2142,16 @@ function ComboCardInner({
 
             {metrics && (
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-text-muted">
+                <span className="text-3xs text-text-muted">
                   <span className="text-success">{metrics.totalSuccesses}</span>/
                   {metrics.totalRequests} {t("reqs")}
                 </span>
-                <span className="text-[10px] text-text-muted">
+                <span className="text-3xs text-text-muted">
                   {metrics.successRate}% {t("success")}
                 </span>
-                <span className="text-[10px] text-text-muted">~{metrics.avgLatencyMs}ms</span>
+                <span className="text-3xs text-text-muted">~{metrics.avgLatencyMs}ms</span>
                 {metrics.fallbackRate > 0 && (
-                  <span className="text-[10px] text-warning">
+                  <span className="text-3xs text-warning">
                     {t("fallbackSummary", {
                       rate: metrics.fallbackRate,
                       skips: metrics.skipsPerRequest,
@@ -2171,7 +2171,7 @@ function ComboCardInner({
               onChange={onToggle}
               title={isDisabled ? t("enableCombo") : t("disableCombo")}
             />
-            <span className="text-[10px] text-text-muted md:hidden">
+            <span className="text-3xs text-text-muted md:hidden">
               {isDisabled ? "Disabled" : "Active"}
             </span>
           </div>
@@ -2293,7 +2293,7 @@ function ComboTestResultRow({
       />
       <div className="min-w-0 flex-1">
         <code className="font-mono font-medium block truncate text-text-main">{r.model}</code>
-        <div className="mt-0.5 text-[10px] text-text-muted truncate">
+        <div className="mt-0.5 text-3xs text-text-muted truncate">
           {displayLabel ? `${displayLabel} · ` : ""}
           {accountStr}
         </div>
@@ -2307,7 +2307,9 @@ function ComboTestResultRow({
       {r.latencyMs !== undefined && (
         <span className="text-text-muted shrink-0">{r.latencyMs}ms</span>
       )}
-      <span className={cn("text-[10px] uppercase font-medium shrink-0", tone)}>{r.status}</span>
+      <span data-size="3xs" data-weight="medium" className={cn("ci-eyebrow shrink-0", tone)}>
+        {r.status}
+      </span>
     </div>
   );
 }
@@ -3621,9 +3623,7 @@ function ComboFormModal({
           <div className="rounded-lg border border-border bg-surface p-3">
             <div className="mb-2">
               <p className="text-xs font-semibold text-text-main">{t("endpointBehaviorTitle")}</p>
-              <p className="mt-0.5 text-[10px] text-text-muted">
-                {t("endpointBehaviorDescription")}
-              </p>
+              <p className="mt-0.5 text-xs text-text-muted">{t("endpointBehaviorDescription")}</p>
             </div>
             <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("endpointTabsAria")}>
               {COMBO_ENDPOINTS.map((endpoint) => {
@@ -3655,7 +3655,7 @@ function ComboFormModal({
                   <p className="text-xs font-semibold text-text-main">
                     {getI18nOrFallback(t, "builderFlowTitle", "Combo Builder Flow")}
                   </p>
-                  <p className="text-[10px] text-text-muted mt-0.5">
+                  <p className="text-xs text-text-muted mt-0.5">
                     {getI18nOrFallback(
                       t,
                       "builderStagesDescription",
@@ -3663,7 +3663,7 @@ function ComboFormModal({
                     )}
                   </p>
                 </div>
-                <span className="text-[10px] uppercase tracking-wide text-text-muted">
+                <span className="ci-eyebrow" data-size="3xs">
                   {Math.max(currentStageIndex + 1, 1)}/{visibleStageMeta.length}
                 </span>
               </div>
@@ -3733,9 +3733,7 @@ function ComboFormModal({
                         stageMeta.fallbackDescription
                       )}
                     >
-                      <span className="text-xs uppercase tracking-wide text-text-muted">
-                        {stageStatus}
-                      </span>
+                      <span className="ci-eyebrow">{stageStatus}</span>
                     </Tile>
                   );
                 })}
@@ -3784,7 +3782,7 @@ function ComboFormModal({
                     <p className="text-xs font-medium">
                       {getI18nOrFallback(t, "templatesTitle", COMBO_TEMPLATE_FALLBACK.title)}
                     </p>
-                    <p className="text-[10px] text-text-muted mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {getI18nOrFallback(
                         t,
                         "templatesDescription",
@@ -3871,7 +3869,7 @@ function ComboFormModal({
               </RadioGroup>
               {strategy === "jev" && (
                 <div className="mt-2 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2">
-                  <p className="text-[10px] text-primary">
+                  <p className="text-xs text-primary">
                     {getI18nOrFallback(
                       t,
                       "jevPrivacyNote",
@@ -3882,7 +3880,7 @@ function ComboFormModal({
               )}
               {!isExpertMode && (
                 <>
-                  <p className="text-[10px] text-text-muted mt-0.5">
+                  <p className="text-xs text-text-muted mt-0.5">
                     {getStrategyDescription(t, strategy)}
                   </p>
                   <div className="mt-2">
@@ -3923,7 +3921,9 @@ function ComboFormModal({
           {showStepsSection && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <h3 className="text-sm">{t("models")}</h3>
+                <h3 className="ci-heading" data-size="sm">
+                  {t("models")}
+                </h3>
                 {strategy === "weighted" && models.length > 1 && (
                   <Button size="sm" variant="ghost" icon="balance" onClick={handleAutoBalance}>
                     {t("autoBalance")}
@@ -3938,7 +3938,7 @@ function ComboFormModal({
                       {getI18nOrFallback(t, "builderTitle", "Precision Builder")}
                     </p>
                     {!isExpertMode && (
-                      <p className="text-[10px] text-text-muted mt-0.5">
+                      <p className="text-xs text-text-muted mt-0.5">
                         {getI18nOrFallback(
                           t,
                           "builderStepsDescription",
@@ -3991,7 +3991,7 @@ function ComboFormModal({
                       </Button>
                     </div>
                     {(manualModelError || manualModelHasDuplicate) && (
-                      <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
+                      <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
                         {manualModelError ||
                           getI18nOrFallback(
                             t,
@@ -4085,7 +4085,7 @@ function ComboFormModal({
                     {builderConnectionId === COMBO_BUILDER_AUTO_CONNECTION &&
                     selectedBuilderConnections.length > 1 ? (
                       <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-text-muted mb-1.5">
+                        <p className="ci-eyebrow mb-1.5" data-weight="medium">
                           {getI18nOrFallback(
                             t,
                             "builderRestrictAccounts",
@@ -4116,7 +4116,7 @@ function ComboFormModal({
                             );
                           })}
                         </div>
-                        <p className="text-[10px] text-text-muted mt-1.5">
+                        <p className="text-xs text-text-muted mt-1.5">
                           {getI18nOrFallback(
                             t,
                             "builderRestrictAccountsHint",
@@ -4137,7 +4137,7 @@ function ComboFormModal({
                           {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
                         </Button>
                         {builderHasDuplicate && (
-                          <span className="text-[10px] text-warning">
+                          <span className="text-xs text-warning">
                             {getI18nOrFallback(
                               t,
                               "builderDuplicateExact",
@@ -4148,7 +4148,7 @@ function ComboFormModal({
                       </div>
                     ) : (
                       <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
-                        <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                        <p className="ci-eyebrow" data-size="3xs">
                           {getI18nOrFallback(t, "builderPreview", "Current step preview")}
                         </p>
                         <p className="text-xs text-text-main mt-1">
@@ -4170,7 +4170,7 @@ function ComboFormModal({
                             {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
                           </Button>
                           {builderHasDuplicate && (
-                            <span className="text-[10px] text-warning">
+                            <span className="text-xs text-warning">
                               {getI18nOrFallback(
                                 t,
                                 "builderDuplicateExact",
@@ -4195,7 +4195,7 @@ function ComboFormModal({
                 )}
 
                 {builderError && (
-                  <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
+                  <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
                     {builderError}
                   </div>
                 )}
@@ -4238,7 +4238,7 @@ function ComboFormModal({
                       />
 
                       {/* Index badge */}
-                      <span className="text-[10px] font-medium text-text-muted w-3 text-center shrink-0">
+                      <span className="text-3xs font-medium text-text-muted w-3 text-center shrink-0">
                         {index + 1}
                       </span>
 
@@ -4258,7 +4258,7 @@ function ComboFormModal({
                             />
                           )}
                         </div>
-                        <div className="text-[10px] text-text-muted truncate">
+                        <div className="text-3xs text-text-muted truncate">
                           {getComboStepKindLabel(t, entry)}
                         </div>
                       </div>
@@ -4288,7 +4288,7 @@ function ComboFormModal({
                             aria-label={getI18nOrFallback(t, "weightPercent", "Weight (%)")}
                             className="w-14 text-center"
                           />
-                          <span className="text-[10px] text-text-muted">%</span>
+                          <span className="text-3xs text-text-muted">%</span>
                         </div>
                       )}
 
@@ -4341,7 +4341,7 @@ function ComboFormModal({
 
               {strategy === "cost-optimized" && models.length > 0 && (
                 <div className="mt-2 rounded-md border border-border bg-bg-subtle px-2 py-1.5">
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div className="flex items-center justify-between text-3xs">
                     <span className="text-text-muted">
                       {getI18nOrFallback(t, "pricingCoverage", "Pricing coverage")}
                     </span>
@@ -4369,7 +4369,7 @@ function ComboFormModal({
                     />
                   </div>
                   {!isExpertMode && (
-                    <p className="text-[10px] text-text-muted mt-1">
+                    <p className="text-xs text-text-muted mt-1">
                       {getI18nOrFallback(
                         t,
                         "pricingCoverageHint",
@@ -4381,14 +4381,14 @@ function ComboFormModal({
               )}
 
               {hasNoModels && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
                   <Icon name="warning" size={12} />
                   <span>{t("noModelsYet")}</span>
                 </div>
               )}
 
               {hasInvalidWeightedTotal && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
                   <Icon name="warning" size={12} />
                   <span>
                     {t("weighted")} {weightTotal}% {"\u2260"} 100%. {t("autoBalance")}
@@ -4397,7 +4397,7 @@ function ComboFormModal({
               )}
 
               {!isExpertMode && hasRoundRobinSingleModel && (
-                <div className="mt-2 rounded-md border border-info/20 bg-info/10 px-2 py-1.5 text-[10px] text-info flex items-center gap-1">
+                <div className="mt-2 rounded-md border border-info/20 bg-info/10 px-2 py-1.5 text-xs text-info flex items-center gap-1">
                   <Icon name="info" size={12} />
                   <span>
                     {getI18nOrFallback(
@@ -4410,7 +4410,7 @@ function ComboFormModal({
               )}
 
               {hasCostOptimizedPartialPricing && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
                   <Icon name="warning" size={12} />
                   <span>
                     {typeof t.has === "function" && t.has("warningCostOptimizedPartialPricing")
@@ -4424,7 +4424,7 @@ function ComboFormModal({
               )}
 
               {hasCostOptimizedWithoutPricing && (
-                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning flex items-center gap-1">
                   <Icon name="warning" size={12} />
                   <span>
                     {getI18nOrFallback(
@@ -4942,7 +4942,7 @@ function ComboFormModal({
                       </div>
                       {!isExpertMode && (
                         <div className="md:col-span-3 rounded-md border border-chart-3/20 bg-chart-3/5 px-2 py-1.5">
-                          <p className="text-[10px] text-chart-3-ink">
+                          <p className="text-xs text-chart-3-ink">
                             {getI18nOrFallback(
                               t,
                               "contextRelayProviderNote",
@@ -5059,9 +5059,7 @@ function ComboFormModal({
                       </div>
                     </div>
                   )}
-                  {!isExpertMode && (
-                    <p className="text-[10px] text-text-muted">{t("advancedHint")}</p>
-                  )}
+                  {!isExpertMode && <p className="text-xs text-text-muted">{t("advancedHint")}</p>}
                 </div>
               )}
             </>
@@ -5093,7 +5091,7 @@ function ComboFormModal({
                   {getI18nOrFallback(t, "agentFeaturesTitle", "Agent features")}
                 </p>
                 {!isExpertMode && (
-                  <span className="text-[10px] text-text-muted">
+                  <span className="text-xs text-text-muted">
                     {getI18nOrFallback(
                       t,
                       "agentFeaturesDescription",
@@ -5191,7 +5189,7 @@ function ComboFormModal({
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="rounded-lg border border-border bg-bg-subtle p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewName", "Name")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1 break-all">
@@ -5199,7 +5197,7 @@ function ComboFormModal({
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-bg-subtle p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewStrategy", "Strategy")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">
@@ -5207,13 +5205,13 @@ function ComboFormModal({
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-bg-subtle p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewSteps", "Steps")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{models.length}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-bg-subtle p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAccounts", "Pinned accounts")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{pinnedAccountCount}</p>
@@ -5222,19 +5220,19 @@ function ComboFormModal({
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="rounded-lg border border-border bg-surface p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewProviders", "Providers")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{uniqueProviderCount}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewComboRefs", "Combo refs")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{comboRefCount}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAdvanced", "Advanced config")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">
@@ -5242,7 +5240,7 @@ function ComboFormModal({
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  <p className="ci-eyebrow" data-size="3xs">
                     {getI18nOrFallback(t, "reviewAgentFlags", "Agent flags")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">
@@ -5267,19 +5265,19 @@ function ComboFormModal({
                   </div>
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm">
                     <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+                      <dt className="ci-eyebrow" data-size="3xs">
                         {getI18nOrFallback(t, "modePackLabel", "Mode Pack")}
                       </dt>
                       <dd className="text-text-main mt-1">{intelligentConfig.modePack}</dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+                      <dt className="ci-eyebrow" data-size="3xs">
                         {getI18nOrFallback(t, "routerStrategyLabel", "Router Strategy")}
                       </dt>
                       <dd className="text-text-main mt-1">{intelligentConfig.routerStrategy}</dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+                      <dt className="ci-eyebrow" data-size="3xs">
                         {getI18nOrFallback(t, "explorationRateLabel", "Exploration Rate")}
                       </dt>
                       <dd className="text-text-main mt-1">
@@ -5287,7 +5285,7 @@ function ComboFormModal({
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+                      <dt className="ci-eyebrow" data-size="3xs">
                         {getI18nOrFallback(t, "candidatePoolLabel", "Candidate Pool")}
                       </dt>
                       <dd className="text-text-main mt-1">
@@ -5297,7 +5295,7 @@ function ComboFormModal({
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+                      <dt className="ci-eyebrow" data-size="3xs">
                         {getI18nOrFallback(t, "budgetCapLabel", "Budget Cap (USD / request)")}
                       </dt>
                       <dd className="text-text-main mt-1">
@@ -5316,7 +5314,7 @@ function ComboFormModal({
                 </p>
                 <div className="mt-2 flex flex-col gap-1.5 max-h-[260px] overflow-y-auto">
                   {models.length === 0 ? (
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {getI18nOrFallback(t, "reviewNoSteps", "No steps added yet.")}
                     </p>
                   ) : (
@@ -5326,14 +5324,14 @@ function ComboFormModal({
                         className="rounded-md border border-border bg-surface px-2.5 py-2"
                       >
                         <div className="flex items-start gap-2">
-                          <span className="text-[10px] font-semibold text-text-muted mt-0.5">
+                          <span className="text-3xs font-semibold text-text-muted mt-0.5">
                             {index + 1}
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="text-xs text-text-main truncate">
                               {formatModelDisplay(entry)}
                             </p>
-                            <p className="text-[10px] text-text-muted mt-0.5">
+                            <p className="text-3xs text-text-muted mt-0.5">
                               {getComboStepKindLabel(t, entry)}
                               {strategy === "weighted" && entry.weight > 0
                                 ? ` · ${entry.weight}%`
@@ -5390,7 +5388,7 @@ function ComboFormModal({
           )}
 
           {(isExpertMode || builderStage !== "review") && !canAdvanceFromCurrentStage && (
-            <div className="rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
+            <div className="rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-xs text-warning">
               {builderStage === "basics"
                 ? getI18nOrFallback(
                     t,

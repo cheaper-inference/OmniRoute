@@ -273,12 +273,12 @@ export default function ObsidianSourceCard() {
                   disabled={busy}
                 />
                 {baseUrl.includes(":27124") && (
-                  <div className="flex items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-[10px] text-warning">
+                  <div className="flex items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
                     <Icon name="warning" size={14} />
                     <span>{t("obsidianPortWarning")}</span>
                   </div>
                 )}
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {t("obsidianRemoteVaultHint", { defaultUrl: DEFAULT_URL })}
                 </p>
               </div>
@@ -299,7 +299,7 @@ export default function ObsidianSourceCard() {
                       {t("obsidianVaultSync")}
                     </span>
                   </div>
-                  <p className="text-[10px] text-text-muted">{t("obsidianVaultSyncDescription")}</p>
+                  <p className="text-xs text-text-muted">{t("obsidianVaultSyncDescription")}</p>
 
                   {!webdavEnabled ? (
                     <div className="flex flex-col gap-2">
@@ -331,7 +331,7 @@ export default function ObsidianSourceCard() {
                           <p className="text-xs text-info font-medium">
                             {t("obsidianWebdavEnabled")}
                           </p>
-                          <p className="text-[10px] text-info/70 font-mono truncate">
+                          <p className="text-3xs text-info/70 font-mono truncate">
                             {getWebdavUrl()}
                           </p>
                         </div>
@@ -347,42 +347,40 @@ export default function ObsidianSourceCard() {
                       </div>
 
                       <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-surface-2 p-3">
-                        <p className="text-[11px] text-text-muted font-medium">
+                        <p className="text-2xs text-text-muted font-medium">
                           {t("obsidianConfigureMobile")}
                         </p>
-                        <p className="text-[10px] text-text-muted">
-                          {t("obsidianMobileInstructions")}
-                        </p>
+                        <p className="text-xs text-text-muted">{t("obsidianMobileInstructions")}</p>
 
                         <div className="flex flex-col gap-1.5">
-                          <p className="text-[10px] text-text-muted font-medium">
+                          <p className="text-3xs text-text-muted font-medium">
                             {t("obsidianWebdavUrl")}
                           </p>
                           <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5">
-                            <code className="text-[10px] text-text-muted font-mono flex-1 break-all select-all">
+                            <code className="text-3xs text-text-muted font-mono flex-1 break-all select-all">
                               {getWebdavUrl()}
                             </code>
                           </div>
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <p className="text-[10px] text-text-muted font-medium">
+                          <p className="text-3xs text-text-muted font-medium">
                             {t("obsidianUsername")}
                           </p>
                           <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5">
-                            <code className="text-[10px] text-text-muted font-mono flex-1 select-all">
+                            <code className="text-3xs text-text-muted font-mono flex-1 select-all">
                               {webdavUsername ?? "—"}
                             </code>
                           </div>
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <p className="text-[10px] text-text-muted font-medium">
+                          <p className="text-3xs text-text-muted font-medium">
                             {t("obsidianPassword")}
                           </p>
                           <div className="flex items-center gap-1.5">
                             <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5 flex-1">
-                              <code className="text-[10px] text-text-muted font-mono flex-1 select-all">
+                              <code className="text-3xs text-text-muted font-mono flex-1 select-all">
                                 {showPassword ? (webdavPassword ?? "—") : "••••••••••••"}
                               </code>
                             </div>
@@ -398,7 +396,7 @@ export default function ObsidianSourceCard() {
                           </div>
                         </div>
 
-                        <p className="text-[10px] text-text-muted">{t("obsidianTailscaleHint")}</p>
+                        <p className="text-xs text-text-muted">{t("obsidianTailscaleHint")}</p>
                       </div>
                     </div>
                   )}

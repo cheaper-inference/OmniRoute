@@ -425,7 +425,9 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
     <div className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm text-text-main truncate">{tpl.name}</h4>
+          <h4 className="ci-heading truncate" data-size="sm">
+            {tpl.name}
+          </h4>
           <Badge size="sm" className="shrink-0 font-mono">
             v{tpl.revision}
           </Badge>

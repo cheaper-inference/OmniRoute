@@ -195,7 +195,7 @@ export default function NotionSourceCard() {
                     {translateOrFallback("notionConnect", "Connect")}
                   </Button>
                 </div>
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {translateOrFallback(
                     "notionIntegrationHelp",
                     "Create an Internal Integration at"

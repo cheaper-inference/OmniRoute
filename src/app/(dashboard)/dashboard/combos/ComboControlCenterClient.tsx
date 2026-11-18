@@ -107,7 +107,7 @@ function shortId(value: string | null | undefined, fallback: string, max = 10): 
 function metricValue(label: string, value: string, hint?: string) {
   return (
     <div className="rounded-xl border border-border bg-bg-subtle p-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="ci-eyebrow">{label}</p>
       <p className="mt-1 text-xl font-semibold text-text-main">{value}</p>
       {hint && <p className="mt-1 text-xs text-text-muted">{hint}</p>}
     </div>
@@ -271,12 +271,12 @@ function RuntimeConfigValue({ value }: { value: unknown }) {
     return (
       <div className="flex max-w-md flex-wrap justify-end gap-1">
         {visible.map((item, i) => (
-          <code key={i} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+          <code key={i} className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-main">
             {item !== null && typeof item === "object" ? JSON.stringify(item) : String(item)}
           </code>
         ))}
         {value.length > visible.length && (
-          <code className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-muted">
+          <code className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-muted">
             +{value.length - visible.length}
           </code>
         )}
@@ -288,7 +288,7 @@ function RuntimeConfigValue({ value }: { value: unknown }) {
     return (
       <div className="flex max-w-md flex-wrap justify-end gap-1">
         {entries.map(([k, v]) => (
-          <code key={k} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+          <code key={k} className="rounded bg-bg-subtle px-1.5 py-0.5 text-2xs text-text-main">
             {k}={v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}
           </code>
         ))}
@@ -394,7 +394,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
           ← {t("backToCombos")}
         </Link>
         <Card className="border border-error/20 bg-error/10 p-6">
-          <h1 className="text-lg text-error">{t("unavailable")}</h1>
+          <h1 className="ci-heading text-error" data-size="lg">
+            {t("unavailable")}
+          </h1>
           <p className="mt-2 text-sm text-error">{error}</p>
         </Card>
       </div>
@@ -454,7 +456,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       <Card className="p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-lg text-text-main">{t("overview")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("overview")}
+            </h2>
             <p className="mt-1 text-sm text-text-muted">{t("overviewDescription")}</p>
           </div>
           <SegmentedControl
@@ -469,11 +473,11 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
 
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <div className="rounded-xl border border-border bg-bg-subtle p-3">
-            <p className="text-xs uppercase tracking-wide text-text-muted">{t("strategy")}</p>
+            <p className="ci-eyebrow">{t("strategy")}</p>
             <p className="mt-1 font-semibold text-text-main">{summary.strategy}</p>
           </div>
           <div className="rounded-xl border border-border bg-bg-subtle p-3">
-            <p className="text-xs uppercase tracking-wide text-text-muted">{t("targets")}</p>
+            <p className="ci-eyebrow">{t("targets")}</p>
             <p className="mt-1 font-semibold text-text-main">
               {t("targetCounts", {
                 configured: summary.targetCount,
@@ -482,7 +486,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
             </p>
           </div>
           <div className="rounded-xl border border-border bg-bg-subtle p-3">
-            <p className="text-xs uppercase tracking-wide text-text-muted">{t("providers")}</p>
+            <p className="ci-eyebrow">{t("providers")}</p>
             <p className="mt-1 font-semibold text-text-main">{summary.providerCount}</p>
           </div>
         </div>
@@ -501,7 +505,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         <Card className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg text-text-main">{t("configuredTargets")}</h2>
+              <h2 className="ci-heading" data-size="lg">
+                {t("configuredTargets")}
+              </h2>
               <p className="mt-1 text-sm text-text-muted">{t("configuredTargetsDescription")}</p>
             </div>
           </div>
@@ -517,7 +523,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg text-text-main">{t("runtimeConfig")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("runtimeConfig")}
+          </h2>
           <p className="mt-1 text-sm text-text-muted">{t("runtimeConfigDescription")}</p>
           <div className="mt-4 space-y-2">
             {Object.keys(runtimeConfig).length === 0 ? (
@@ -538,7 +546,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg text-text-main">{t("resolvedTargets")}</h2>
+        <h2 className="ci-heading" data-size="lg">
+          {t("resolvedTargets")}
+        </h2>
         <p className="mt-1 text-sm text-text-muted">{t("resolvedTargetsDescription")}</p>
         <div className="mt-4 space-y-3">
           {resolvedTargets.length === 0 ? (
@@ -556,7 +566,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="p-5">
-          <h2 className="text-lg text-text-main">{t("quotaDistribution")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("quotaDistribution")}
+          </h2>
           <div className="mt-4 space-y-3">
             {(health?.quotaHealth?.providers || []).length === 0 ? (
               <p className="text-sm text-text-muted">{t("noQuotaSnapshots")}</p>
@@ -585,7 +597,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg text-text-main">{t("recentDecisions")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("recentDecisions")}
+          </h2>
           <p className="mt-1 text-sm text-text-muted">{t("recentDecisionsDescription")}</p>
           <div className="mt-4 space-y-2">
             {logs.length === 0 ? (
@@ -600,7 +614,9 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg text-text-main">{t("quickLinks")}</h2>
+        <h2 className="ci-heading" data-size="lg">
+          {t("quickLinks")}
+        </h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {[
             [t("comboHealth"), "/dashboard/analytics/combo-health"],
