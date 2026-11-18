@@ -715,6 +715,8 @@ export default function CacheSettingsTab() {
               suffix={t("semanticCacheMilliseconds")}
               min={MIN_TTL_MS}
               max={MAX_TTL_MS}
+              // The screen shows its own range error; the field does not replace the value.
+              clamp={false}
               step={100}
               value={fieldNumber(catalogTtl)}
               onValueChange={(value) => {

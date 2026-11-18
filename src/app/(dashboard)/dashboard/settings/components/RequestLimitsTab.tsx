@@ -117,6 +117,8 @@ export default function RequestLimitsTab() {
             suffix="MB"
             min={MIN_REQUEST_BODY_LIMIT_MB}
             max={MAX_REQUEST_BODY_LIMIT_MB}
+            // The screen shows its own range error; the field does not replace the value.
+            clamp={false}
             step={1}
             value={fieldNumber(value)}
             onValueChange={(next) => {

@@ -200,6 +200,8 @@ export default function AccessTokensTab() {
           />
           <NumberInput
             min={1}
+            // 0 or empty means "never expires": the field must not turn it into 1 day.
+            clamp={false}
             label={t("accessTokensColExpires")}
             placeholder={t("accessTokensExpiresPlaceholder")}
             value={fieldNumber(expires)}

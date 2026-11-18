@@ -117,6 +117,20 @@ test("A2/D: the numeric fields of settings go through the shared NumberInput ada
   );
 });
 
+// Three fields keep the value the person typed when it is out of range: two screens show their
+// own range error next to Save, and "0 days" on a new access token means it never expires.
+test("A2/D: fields with their own range rule do not clamp on blur", () => {
+  const unclamped = elements(["NumberInput"])
+    .filter(({ attrs }) => attrs.clamp === "{false}")
+    .map(({ file }) => file)
+    .sort();
+  assert.deepEqual(unclamped, [
+    "components/AccessTokensTab.tsx",
+    "components/CacheSettingsTab.tsx",
+    "components/RequestLimitsTab.tsx",
+  ]);
+});
+
 // D — input-mono-xs: `font-mono` does nothing on an <input> or a <textarea> (the kit typography
 // sheet wins), so code-like fields ask for the kit code font with `mono`; a dense field asks for
 // `size="xs"` instead of shrinking the text by class.
