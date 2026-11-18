@@ -228,14 +228,12 @@ export async function PUT(request: NextRequest) {
       resetSemanticCacheManager();
     }
 
-    // idempotencyWindowMs, alwaysPreserveClientCache, and semanticCacheEnabled
-    // are read from the flat general settings by the runtime (see GET) —
-    // persisting them only into the databaseSettings "cache" section leaves a
-    // stale flat setting that keeps runtime caching disabled (#20399).
+    // idempotencyWindowMs and alwaysPreserveClientCache are read from the flat
+    // general settings by the runtime (see GET) — persisting them only into the
+    // databaseSettings "cache" section would be a silent no-op for the runtime.
+    // semanticCacheEnabled is already mirrored to flat settings inside
+    // updateDatabaseSettings()'s transaction (#20399).
     const flatUpdates: Record<string, unknown> = {};
-    if (body.semanticCacheEnabled !== undefined) {
-      flatUpdates.semanticCacheEnabled = body.semanticCacheEnabled;
-    }
     if (body.idempotencyWindowMs !== undefined) {
       flatUpdates.idempotencyWindowMs = body.idempotencyWindowMs;
     }

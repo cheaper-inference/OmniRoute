@@ -457,7 +457,7 @@ const SEMANTIC_CACHE_FLAG_TTL_MS = 5_000;
 
 let semanticCacheFlagCache: { value: boolean; expiresAt: number } | null = null;
 
-function clearSemanticCacheFlagCache(): void {
+export function clearSemanticCacheFlagCache(): void {
   semanticCacheFlagCache = null;
 }
 
@@ -564,6 +564,23 @@ export function updateDatabaseSettings(
     }
     if (semanticCacheEnabled !== undefined) {
       settingsInsert.run("semanticCacheEnabled", JSON.stringify(Boolean(semanticCacheEnabled)));
+      const revisionRow = db
+        .prepare(
+          "SELECT value FROM key_value WHERE namespace = 'settings' AND key = '_settingsRevision'"
+        )
+        .get() as { value?: string } | undefined;
+      let currentRevision = 0;
+      if (revisionRow?.value) {
+        try {
+          const parsed = JSON.parse(revisionRow.value) as unknown;
+          if (typeof parsed === "number" && Number.isInteger(parsed) && parsed >= 0) {
+            currentRevision = parsed;
+          }
+        } catch {
+          currentRevision = 0;
+        }
+      }
+      settingsInsert.run("_settingsRevision", JSON.stringify(currentRevision + 1));
     }
     encryptLegacyCacheSecretCopies(db);
   });

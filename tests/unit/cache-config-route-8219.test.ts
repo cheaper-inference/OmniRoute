@@ -133,7 +133,9 @@ test("cache-config route resolves and modelCatalogCacheTtlMs round-trips", async
   await t.test(
     "PUT semanticCacheEnabled syncs flat settings, /api/cache, and runtime check (#20399)",
     async () => {
-      const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
+      const { getSettings, getSettingsRevision, updateSettings, SettingsRevisionConflictError } =
+        await import("../../src/lib/db/settings.ts");
+      const { isSemanticCacheDbEnabled } = await import("../../src/lib/db/databaseSettings.ts");
       const { isSemanticCacheEnabled } =
         await import("../../open-sse/handlers/chatCore/semanticCache.ts");
       const cacheRoute = await import("../../src/app/api/cache/route.ts");
@@ -149,14 +151,31 @@ test("cache-config route resolves and modelCatalogCacheTtlMs round-trips", async
         false,
         "cache-config GET must reflect disabled runtime when flat semanticCacheEnabled is false"
       );
+      assert.equal(isSemanticCacheDbEnabled(), false);
       assert.equal(isSemanticCacheEnabled(await getSettings(), null), false);
 
+      // Enabling via updateSettings (PATCH /api/settings path) also syncs databaseSettings
+      await updateSettings({ semanticCacheEnabled: true });
+      assert.equal(isSemanticCacheDbEnabled(), true);
+      assert.equal(isSemanticCacheEnabled(await getSettings(), null), true);
+
+      // Disable again to test PUT /api/settings/cache-config + revision bump
+      await updateSettings({ semanticCacheEnabled: false });
+      const revBeforePut = await getSettingsRevision();
+
       // Saving semanticCacheEnabled: true via cache-config must re-enable runtime,
-      // flat settings, and /api/cache.
+      // flat settings, /api/cache, and advance the settings revision.
       const enablePut = await cacheConfigRoute.PUT(
         makeJsonRequest("PUT", { semanticCacheEnabled: true }) as never
       );
       assert.equal(enablePut.status, 200);
+
+      const revAfterPut = await getSettingsRevision();
+      assert.equal(revAfterPut, revBeforePut + 1);
+      await assert.rejects(
+        () => updateSettings({ debugMode: false }, { expectedRevision: revBeforePut }),
+        SettingsRevisionConflictError
+      );
 
       const afterEnableSettings = await getSettings();
       assert.equal(afterEnableSettings.semanticCacheEnabled, true);
