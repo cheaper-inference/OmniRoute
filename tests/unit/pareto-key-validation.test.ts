@@ -55,7 +55,9 @@ before(async () => {
           return;
         }
         res.writeHead(400, { "content-type": "application/json" });
-        res.end(JSON.stringify({ error: { message: "Set stream to true.", code: "streaming_only" } }));
+        res.end(
+          JSON.stringify({ error: { message: "Set stream to true.", code: "streaming_only" } })
+        );
       });
       return;
     }
@@ -102,7 +104,11 @@ test("pareto key validation accepts a valid key refused with 400 streaming_only"
 
   assert.equal(result.valid, true, `expected a valid verdict, got ${JSON.stringify(result)}`);
   assert.equal(modelsRequests, 0);
-  assert.notEqual(lastChatBody?.stream, true, "the probe must stay non-streamed so it is never billed");
+  assert.notEqual(
+    lastChatBody?.stream,
+    true,
+    "the probe must stay non-streamed so it is never billed"
+  );
 });
 
 test("pareto key validation honors a custom validationModelId", async () => {

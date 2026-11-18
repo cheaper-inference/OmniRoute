@@ -5,9 +5,8 @@ const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers.
 const { REGISTRY: providerRegistry } = await import("../../open-sse/config/providerRegistry.ts");
 const { isValidModel } = await import("../../src/shared/constants/models.ts");
 const { DefaultExecutor, getExecutor } = await import("../../open-sse/executors/index.ts");
-const { isNamedOpenAIStyleProvider } = await import(
-  "../../src/app/api/providers/[id]/models/discovery/providerSets.ts"
-);
+const { isNamedOpenAIStyleProvider } =
+  await import("../../src/app/api/providers/[id]/models/discovery/providerSets.ts");
 
 const PARETO_CHAT_URL = "https://api.paretoinference.com/v1/chat/completions";
 const PARETO_MODELS_URL = "https://api.paretoinference.com/v1/models";
