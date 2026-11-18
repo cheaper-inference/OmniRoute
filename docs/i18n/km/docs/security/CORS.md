@@ -116,31 +116,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 អាចកំណត់នៅពេល runtime ក្នុង **Dashboard → Security → CORS Allowed Origins** ដោយមិនចាំបាច់
 ចាប់ផ្ដើមឡើងវិញ។
 
-## API key ធៀបនឹង cookie session
+## API keys vs cookie sessions
 
-- **Bearer / `x-api-key` (ផ្ទៃ inference `/v1/*`)៖** browser មិនដែលភ្ជាប់
-  ទាំងនេះដោយស្វ័យប្រវត្តិទេ។ CORS មិនមែនជារបាំងដ៏មានអត្ថន័យនៅទីនេះទេ — API key គឺជា
-  របាំង — ហើយនេះជាមូលហេតុដែលផ្ទៃនោះត្រូវបានកំណត់ដោយចេតនាឱ្យមានភាពអនុញ្ញាតខ្ពស់ ដើម្បីឱ្យ browser និង
-  client របស់ Electron អាចអាន response ដែលពួកវាមានសិទ្ធិទទួលរួចហើយ។ echo ដែលបានបន្ធូរនេះ
-  អាស្រ័យលើ key ដែលបានផ្ទៀងផ្ទាត់ មិនមែនគ្រាន់តែវត្តមានរបស់ header នោះទេ៖ នៅពេល
-  `REQUIRE_API_KEY=false` បម្រើសំណើមួយដោយអនាមិក response
-  ជោគជ័យរបស់វានៅតែរក្សាបញ្ជីអនុញ្ញាតបែប fail-closed។ ការបដិសេធការផ្ទៀងផ្ទាត់ (401)
-  នៅតែអាចអានបាន ដើម្បីឱ្យ client អាចបង្ហាញ key ដែលត្រូវបានដកហូត ឬវាយខុស (#5242)៖ 401
-  ផ្ទាល់របស់ pipeline រក្សា echo ហើយ route ដែលបដិសេធ key ដោយខ្លួនឯង បន្ទាប់ពី pipeline
-  បានបម្រើសំណើនោះជាអនាមិក (`/v1/models` និង `/v1beta/models` នៅពេលកំណត់ management auth,
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ដែលកំណត់តាមម្ចាស់ និង
-  route បេក្ខភាពរបស់ auto-combo) បន្ថែម echo ទៅ 401 នោះតាមរយៈ
-  `credentialRejectionHeaders()`។ echo អាស្រ័យលើថាតើសំណើមាន header អត្តសញ្ញាណ
-  (`Authorization`, `x-api-key`, `x-goog-api-key` ឬ cookie `auth_token`) ឬអត់ មិនមែនលើថា
-  route បានពិនិត្យមួយណាក្នុងចំណោមពួកវានោះទេ ហើយវាមិនដែលត្រូវបានផ្គូជាមួយ
-  `Access-Control-Allow-Credentials` ឡើយ។ body គឺជាស្រោមកំហុសថេរ។ route គ្រប់គ្រងនៅក្រោម
-  `/api/v1/` ដែលការពារដោយ `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) មិនបន្ថែម echo ទេ៖ ជាមួយ `REQUIRE_API_KEY=false` 401/403
-  របស់ពួកវាមិនអាចអានឆ្លងប្រភពដើមបានទេ។
-- **Cookie session (dashboard)៖** ត្រូវបានការពារដោយតម្លៃលំនាំដើមបែប fail-closed **និង**
-  ដោយអវត្តមាននៃ `Access-Control-Allow-Credentials` នៅលើ path រួម។ កុំដាក់
-  ប្រភពដើមសម្រាប់ការគ្រប់គ្រង/dashboard ក្នុង config ដែលមានភាពអនុញ្ញាតខ្ពស់ណាមួយឡើយ ពួកវាត្រូវតែរក្សាស្ថានភាព
-  fail-closed ឱ្យបានពេញលេញ។
+- **Bearer / `x-api-key` (ផ្ទៃការសន្និដ្ឋាន `/v1/*` ):** កម្មវិធីរុករកមិនដែលភ្ជាប់វាដោយស្វ័យប្រវត្តិទេ។ CORS មិនមែនជាឧបសគ្គដ៏មានន័យនៅទីនេះ — គន្លឹះ API គឺជារបាំង — ដែលជាមូលហេតុដែលផ្ទៃនោះអនុញ្ញាតដោយចេតនា ដូច្នេះកម្មវិធីរុករក និងអតិថិជន Electron អាចអានការឆ្លើយតបដែលពួកគេមានសិទ្ធិរួចហើយ។ អេកូដែលបន្ធូរបន្ថយធ្វើតាមគន្លឹះដែលមានសុពលភាព មិនមែនជាវត្តមានរបស់បឋមកថាទេ៖ នៅពេលដែល `REQUIRE_API_KEY=false` បម្រើសំណើដោយអនាមិក ការឆ្លើយតបដោយជោគជ័យរបស់វារក្សាបញ្ជីអនុញ្ញាតដែលបានបិទ។ ការបដិសេធការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ (401) នៅតែអាចអានបាន ដូច្នេះអតិថិជនអាចបង្ហាញសោដែលបានដកហូត ឬវាយបញ្ចូលខុស (#5242): 401 ផ្ទាល់របស់បំពង់បង្ហូរប្រេងរក្សាអេកូ ហើយផ្លូវដែលបដិសេធសោដោយខ្លួនវាបន្ទាប់ពីបំពង់បង្ហូរបានបម្រើវាជាអនាមិក (`/v1/models` និង `/v1beta/models` ជាមួយនឹងការគ្រប់គ្រងការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវដែលបានកំណត់រចនាសម្ព័ន្ធម្ចាស់ `/v1/files` និង `/v1/batches` `/v1/media` ផ្លូវបេក្ខជនបន្សំ `/v1/session-leases` ) បន្ថែមអេកូទៅ 401 តាមរយៈ `credentialRejectionHeaders()`។ អេកូត្រូវបានចុចនៅលើសំណើដែលមានបឋមកថាអត្តសញ្ញាណ (`Authorization`, `x-api-key`, `x-goog-api-key` ឬ `auth_token` cookie ) មិនមែននៅលើផ្លូវណាមួយដែលត្រូវបានពិនិត្យ ហើយមិនត្រូវបានផ្គូផ្គងជាមួយ `Access-Control-Allow-Credentials`; រាងកាយគឺជាស្រោមសំបុត្រដែលមានកំហុសថេរ។ ផ្លូវគ្រប់គ្រងក្រោម `/api/v1/` ការពារដោយ `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) មិនបន្ថែមអេកូ៖ ជាមួយ `REQUIRE_API_KEY=false` 401/403 របស់ពួកគេមិនអាចអានប្រភពឆ្លងបានទេ។
+- **សម័យខូឃី (ផ្ទាំងគ្រប់គ្រង):** ការពារដោយបរាជ័យបិទលំនាំដើម** និង** ដោយអវត្ដមាននៃ `Access-Control-Allow-Credentials` នៅលើផ្លូវរួមគ្នា។ រក្សាប្រភពដើម management/dashboard ចេញពីការកំណត់អនុញ្ញាតណាមួយ; ពួកគេត្រូវតែបិទយ៉ាងពិតប្រាកដ។
 
 ## handshake របស់ WebSocket (`/v1/responses`, `/v1/ws`)
 

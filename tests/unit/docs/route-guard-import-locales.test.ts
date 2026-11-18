@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
+import { announceMirrorPlan, planMirrorAssertions } from "../../_helpers/mirrorFreshness.ts";
 
 const root = resolve(import.meta.dirname, "../../..");
 const sourcePath = "docs/security/ROUTE_GUARD_TIERS.md";
@@ -21,10 +22,24 @@ const entry = state.sources[sourcePath];
 // Source freshness (does the English doc still match .i18n-state.json) is the i18n drift gate's call —
 // check-translation-drift.mjs, PR-scoped since 2026-10-20. This test pins what no gate re-checks: the
 // translated section is present in every locale and each mirror still holds the bytes its record describes.
-test("route-guard import and snapshot protection is translated in every mirror", () => {
+// Content of the translated mirrors: every locale in release mode; in PR mode only the mirrors whose
+// anchored English section is unchanged since their translation (tests/_helpers/mirrorFreshness.ts).
+// A PR that rewrites the English contract leaves its mirrors to the translation wave. The target
+// hash (provenance) is still checked for every locale in both modes.
+test("route-guard import and snapshot protection is translated in every mirror", (t) => {
   assert.equal(Object.keys(entry.locales).length, 66);
+  const plan = planMirrorAssertions({
+    root,
+    source: sourcePath,
+    state,
+    anchors: ["`/api/oauth/kiro/auto-import`", "`SPAWN_CAPABLE_PATTERN_ANCESTORS`"],
+  });
+  announceMirrorPlan(t, plan);
+  const asserted = new Set(plan.assert);
   for (const [locale, info] of Object.entries(entry.locales)) {
     const text = readFileSync(resolve(root, "docs/i18n", locale, sourcePath), "utf8");
+    assert.equal(info.target_hash, hash(text), `stale target hash: ${locale}`);
+    if (!asserted.has(locale)) continue;
     // The policy paragraph runs from the Kiro auto-import deny-list entry (#16691) to the
     // regex companion constant; the deny-list test reference sits inside it, not after it.
     const start = text.indexOf("`/api/oauth/kiro/auto-import`");
@@ -38,6 +53,5 @@ test("route-guard import and snapshot protection is translated in every mirror",
       `missing deny-list proof: ${locale}`
     );
     assert(!section.includes("The runtime snapshot loader"), `English fallback: ${locale}`);
-    assert.equal(info.target_hash, hash(text), `stale target hash: ${locale}`);
   }
 });

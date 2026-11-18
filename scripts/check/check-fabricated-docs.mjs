@@ -587,16 +587,16 @@ export function buildCodebaseIndex(root = ROOT) {
   // #17933) and suffix-named splits kept under the file-size cap
   // (featureFlagDefinitionsFal.ts, featureFlagDefinitionsCodeAssist.ts, #18060).
   function readFeatureFlagContract() {
+    // featureFlagDefinitions.ts plus the per-area modules it spreads in
+    // (featureFlagDefinitionsSystemOne.ts, searchFeatureFlagDefinitions.ts, …).
     const dir = path.join(root, "src", "shared", "constants");
-    let names = [];
+    let files = [];
     try {
-      names = fs
-        .readdirSync(dir)
-        .filter((name) => /featureflagdefinitions[a-z0-9]*\.ts$/i.test(name));
+      files = fs.readdirSync(dir).filter((name) => /featureflagdefinitions\w*\.ts$/i.test(name));
     } catch {
       /* ignore */
     }
-    for (const name of names) {
+    for (const name of files) {
       try {
         const t = fs.readFileSync(path.join(dir, name), "utf8");
         for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);

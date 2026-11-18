@@ -438,7 +438,10 @@ export default function FreePoolTab() {
             )}
           />
         ) : (
-          <Table scrollbarLabel={translateOrFallback("freePoolTab", "Free pool")}>
+          <Table
+            scrollbarLabel={translateOrFallback("freePoolTab", "Free pool")}
+            scrollLabel={translateOrFallback("freePoolTab", "Free pool")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8" />

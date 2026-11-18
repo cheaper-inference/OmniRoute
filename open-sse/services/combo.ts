@@ -9,6 +9,7 @@ import { errorResponse, errorResponseWithComboDiagnostics } from "../utils/error
 import { isProviderSafetyStopsEnabled } from "../utils/providerSafety.ts";
 import { createChaosHeaderBarrier } from "./combo/chaosHeaderBarrier.ts";
 import { runComboWithSafetyLatch } from "./combo/safetyStopLatch.ts";
+import { runComboWithNoReplayLatch } from "./combo/noReplayLatch.ts";
 
 import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
@@ -29,6 +30,7 @@ import {
 } from "./comboConfig.ts";
 import { getModelTimeoutMs } from "../config/providerModels.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
 
 import { getHiddenModelsByProvider } from "@/models";
 import { getHiddenChatModels } from "../../src/lib/hiddenChatModels";
@@ -789,13 +791,27 @@ function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): n
     : undefined;
 }
 
+/** Narrow a combo to its targets for the requested endpoint, or reject when none remain. */
+function projectComboChatOptions(
+  options: HandleComboChatOptions
+): HandleComboChatOptions | Response {
+  const endpoint = options.endpointCapability ?? "chat";
+  const projected = projectComboForEndpoint(options.combo, options.allCombos, endpoint);
+  if (options.combo.models.length > 0 && projected.combo.models.length === 0) {
+    return errorResponse(400, `Combo has no compatible targets for ${endpoint}`);
+  }
+  return { ...options, combo: projected.combo, allCombos: projected.allCombos };
+}
+
 /**
  * #10681 egress: every combo response carries the opaque trace id in an
  * `X-OmniRoute-Combo-Trace` header so a post-incident lookup of the ordered
  * per-target decisions is possible; the finalized summary is also emitted as
  * one metadata-only log line for durability across restarts.
  */
-export async function handleComboChat(options: HandleComboChatOptions): Promise<Response> {
+export async function handleComboChat(requested: HandleComboChatOptions): Promise<Response> {
+  const options = projectComboChatOptions(requested);
+  if (options instanceof Response) return options;
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;
   const traceInvocationId =
@@ -805,13 +821,16 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
       : createInvocationId());
   // PROVIDER_SAFETY_STOPS_TERMINAL (#17049, default off): latch explicit provider safety
   // stops as terminal for this invocation. Off, the combo runs exactly as before.
+  // Custom JSON API nodes: a marked business response is final, never replayed elsewhere.
+  const inner = (opts: HandleComboChatOptions) =>
+    runComboWithNoReplayLatch(opts, handleComboChatInner);
   const response = isProviderSafetyStopsEnabled()
     ? await runComboWithSafetyLatch(
         { ...options, invocationId: traceInvocationId },
         traceInvocationId,
-        handleComboChatInner
+        inner
       )
-    : await handleComboChatInner({ ...options, invocationId: traceInvocationId });
+    : await inner({ ...options, invocationId: traceInvocationId });
   response.headers.set("X-OmniRoute-Combo-Trace", traceInvocationId);
   const trace = getComboTrace(traceInvocationId);
   // A failed set can still retry; only the final response determines terminal status.
@@ -847,6 +866,7 @@ async function handleComboChatInner({
   endpointPath = null,
   requestHeaders = null,
   invocationId,
+  endpointCapability = "chat",
 }: HandleComboChatOptions): Promise<Response> {
   hiddenModelsByProvider ??= await getHiddenChatModels();
   const handleSingleModel = withComboServiceTier(dispatchSingleModel, combo);
@@ -941,7 +961,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (fusionDispatch) return fusionDispatch;
 
@@ -990,8 +1010,8 @@ async function handleComboChatInner({
         hiddenModelsByProvider,
       });
   if (pipelineDispatch) return pipelineDispatch;
-
   const runtimeUnitDispatch = await tryRuntimeUnitDispatch({
+    invocationId: traceInvocationId,
     body,
     combo,
     config,
@@ -1003,6 +1023,7 @@ async function handleComboChatInner({
     isModelAvailable,
     log,
     settings,
+    resilienceSettings,
     relayOptions,
     signal,
     apiKeyAllowedConnections,
@@ -1013,7 +1034,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (runtimeUnitDispatch) return runtimeUnitDispatch;
 
@@ -1082,6 +1103,8 @@ async function handleComboChatInner({
     allCombos,
     relayOptions,
     signal,
+    nativeTurnPin: activeNativeTurnPin,
+    deferContextOverflowWhenCompressible,
     apiKeyAllowedConnections,
     log,
     resilienceSettings,
@@ -1089,6 +1112,7 @@ async function handleComboChatInner({
     handleSingleModelWithTimeout,
     buildAutoCandidates,
     hiddenModelsByProvider,
+    traceInvocationId,
   });
   if ("earlyResponse" in targetResolution) return targetResolution.earlyResponse;
   const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap, compatRejectedTargets } =
