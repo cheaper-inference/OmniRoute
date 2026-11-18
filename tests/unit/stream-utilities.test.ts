@@ -496,6 +496,56 @@ test("createPassthroughStreamWithLogger marks pending function_call completed wh
   assert.equal(completedEvent.response.output[0].status, "completed");
 });
 
+test("createPassthroughStreamWithLogger preserves terminal output arguments in completion summary when output_item.done is omitted (#20066)", async () => {
+  let completePayload: {
+    responseBody?: {
+      choices?: Array<{
+        message?: { tool_calls?: Array<{ function: { arguments: string } }> };
+      }>;
+    };
+  } | null = null;
+  const transform = createPassthroughStreamWithLogger(
+    "codex",
+    null,
+    null,
+    "gpt-6.1-sol",
+    null,
+    { input: [] },
+    (payload) => {
+      completePayload = payload as typeof completePayload;
+    },
+    null,
+    null,
+    "openai-responses"
+  );
+
+  const writer = transform.writable.getWriter();
+  await writer.write(
+    new TextEncoder().encode(
+      [
+        'data: {"type":"response.created","response":{"id":"resp_fc_terminal_20066"}}',
+        "event: response.output_item.added",
+        'data: {"type":"response.output_item.added","response_id":"resp_fc_terminal_20066","output_index":0,"item":{"id":"fc_terminal_20066","type":"function_call","status":"in_progress","call_id":"call_terminal_20066","name":"get_weather","arguments":""}}',
+        "event: response.completed",
+        'data: {"type":"response.completed","response":{"id":"resp_fc_terminal_20066","status":"completed","output":[{"id":"fc_terminal_20066","type":"function_call","status":"completed","call_id":"call_terminal_20066","name":"get_weather","arguments":"{\\"city\\":\\"Berlin\\"}"}],"usage":{"input_tokens":8,"output_tokens":4,"total_tokens":12}}}',
+        "",
+      ].join("\n")
+    )
+  );
+  await writer.close();
+
+  const reader = transform.readable.getReader();
+  while (true) {
+    const { done } = await reader.read();
+    if (done) break;
+  }
+
+  assert.ok(completePayload, "expected onComplete payload");
+  const toolCalls = completePayload.responseBody?.choices?.[0]?.message?.tool_calls;
+  assert.ok(Array.isArray(toolCalls) && toolCalls.length === 1);
+  assert.equal(toolCalls[0].function.arguments, '{"city":"Berlin"}');
+});
+
 test("createPassthroughStreamWithLogger keeps reasoning deltas out of logged assistant content", async () => {
   let completePayload = null;
   const transform = createPassthroughStreamWithLogger(

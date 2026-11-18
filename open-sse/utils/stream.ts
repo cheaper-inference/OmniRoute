@@ -2147,7 +2147,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                     pushUniqueResponsesOutputItems(
                       passthroughResponsesOutputItems,
                       markPendingResponsesFunctionCallsCompleted(
-                        passthroughResponsesPendingFunctionCalls.values()
+                        passthroughResponsesPendingFunctionCalls.values(),
+                        passthroughResponsesOutputItems
                       )
                     );
                     passthroughResponsesPendingFunctionCalls.clear();

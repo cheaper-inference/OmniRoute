@@ -192,7 +192,8 @@ function handleResponsesTailPayload(
     pushUniqueResponsesOutputItems(
       context.passthroughResponsesOutputItems,
       markPendingResponsesFunctionCallsCompleted(
-        context.passthroughResponsesPendingFunctionCalls.values()
+        context.passthroughResponsesPendingFunctionCalls.values(),
+        context.passthroughResponsesOutputItems
       )
     );
     context.passthroughResponsesPendingFunctionCalls.clear();

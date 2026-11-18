@@ -110,7 +110,10 @@ function isPlainRecord(value: unknown): value is JsonRecord {
 function shouldReplaceResponsesOutputItem(existingItem: unknown, nextItem: unknown): boolean {
   if (!isPlainRecord(existingItem)) return true;
   if (!isPlainRecord(nextItem)) return false;
-  return !(existingItem.status === "completed" && nextItem.status === "in_progress");
+  if (existingItem.status === "completed") {
+    return nextItem.status === "completed";
+  }
+  return true;
 }
 
 function upsertResponsesOutputItem(target: unknown[], item: unknown) {
@@ -131,13 +134,26 @@ function upsertResponsesOutputItem(target: unknown[], item: unknown) {
 }
 
 export function markPendingResponsesFunctionCallsCompleted(
-  items: Iterable<JsonRecord>
+  items: Iterable<JsonRecord>,
+  existingOutputItems?: readonly unknown[]
 ): JsonRecord[] {
-  const list = [...items];
-  for (const item of list) {
+  const completedKeys = new Set<string>();
+  if (Array.isArray(existingOutputItems)) {
+    for (const existing of existingOutputItems) {
+      if (isPlainRecord(existing) && existing.status === "completed") {
+        const key = buildResponsesOutputItemKey(existing);
+        if (key) completedKeys.add(key);
+      }
+    }
+  }
+  const list: JsonRecord[] = [];
+  for (const item of items) {
+    const key = buildResponsesOutputItemKey(item);
+    if (key && completedKeys.has(key)) continue;
     if (item.status === "in_progress") {
       item.status = "completed";
     }
+    list.push(item);
   }
   return list;
 }
