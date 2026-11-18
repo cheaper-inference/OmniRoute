@@ -45,8 +45,31 @@ export function createRuntimeUnitOutcomes(): RuntimeUnitOutcomes {
   return { entries: [], failedUnitKeys: new Set() };
 }
 
-function pushOutcome(outcomes: RuntimeUnitOutcomes, unitKey: string, entry: ComboErrorEntry) {
+// Per-unit reason budget, same as the quality validator's reason slice (validateQuality.ts).
+const MAX_UNIT_REASON_LEN = 300;
+
+function collapseControlCharacters(value: string): string {
+  let out = "";
+  for (const ch of value) {
+    const code = ch.charCodeAt(0);
+    out += code < 32 || code === 127 ? " " : ch;
+  }
+  return out.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Make one unit's reason safe to join with the others. The joined message is sanitized
+ * again as a whole, and that pass keeps only the first line, caps at 4096 chars and treats
+ * a path-like span as running to the end, so one raw multi-line, HTML or oversized upstream
+ * body would otherwise swallow every later unit's reason.
+ */
+function normalizeUnitReason(reason: string): string {
+  return sanitizeErrorMessage(collapseControlCharacters(reason)).slice(0, MAX_UNIT_REASON_LEN);
+}
+
+function pushOutcome(outcomes: RuntimeUnitOutcomes, unitKey: string, raw: ComboErrorEntry) {
   outcomes.failedUnitKeys.add(unitKey);
+  const entry = { ...raw, error: normalizeUnitReason(raw.error) };
   const duplicate = outcomes.entries.some(
     (e) =>
       e.model === entry.model &&
@@ -95,6 +118,27 @@ function inheritResponseMarkers(source: Response, target: Response): Response {
   );
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+/** The JSON body, its `error` object and `error.message`, or null when any is missing. */
+async function readTerminalErrorMessage(response: Response): Promise<{
+  body: Record<string, unknown>;
+  error: Record<string, unknown>;
+  previous: string;
+} | null> {
+  let body: unknown;
+  try {
+    body = await response.clone().json();
+  } catch {
+    return null;
+  }
+  if (!isPlainObject(body) || !isPlainObject(body.error)) return null;
+  const previous = body.error.message;
+  return typeof previous === "string" ? { body, error: body.error, previous } : null;
+}
+
 /**
  * Replace the terminal response's `error.message` with every unit's reason when more than
  * one unit failed. Safety stops and context-overflow rejections keep their exact wording
@@ -106,17 +150,9 @@ export async function withRuntimeUnitOutcomes(
 ): Promise<Response> {
   if (outcomes.failedUnitKeys.size < 2 || outcomes.entries.length < 2) return response;
   if (await isSafetyRejection(response)) return response;
-  let body: unknown;
-  try {
-    body = await response.clone().json();
-  } catch {
-    return response;
-  }
-  if (!body || typeof body !== "object" || Array.isArray(body)) return response;
-  const error = (body as Record<string, unknown>).error;
-  if (!error || typeof error !== "object" || Array.isArray(error)) return response;
-  const previous = (error as Record<string, unknown>).message;
-  if (typeof previous !== "string") return response;
+  const terminal = await readTerminalErrorMessage(response);
+  if (!terminal) return response;
+  const { body, error, previous } = terminal;
   if ((response.status === 400 || response.status === 413) && isContextOverflow400(previous)) {
     return response;
   }

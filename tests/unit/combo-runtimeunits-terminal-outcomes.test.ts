@@ -91,40 +91,45 @@ async function run(args: {
 test("empty reply rejected by quality validation, then a pre-dispatch skip: both reasons reach the client", async () => {
   const { result, calls } = await run({
     name: "ru-terminal-quality-skip",
-    units: [modelUnit("claude/opus-a", "a"), modelUnit("agy/opus-b", "b")],
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
     respond: () => emptyCompletion(),
-    available: (model) => model !== "agy/opus-b",
+    available: (model) => model !== "provider-b/model-y",
   });
 
-  assert.deepEqual(calls, ["claude/opus-a"], "the skipped unit is never dispatched");
+  assert.deepEqual(calls, ["provider-a/model-x"], "the skipped unit is never dispatched");
   assert.equal(result.unit, null);
   // Status stays the last unit's (unchanged behavior); only the message is aggregated.
   assert.equal(result.response.status, 503);
   const body = (await result.response.json()) as { error: { message: string } };
   const message = body.error.message;
-  assert.match(message, /claude\/opus-a: quality validation — empty content/);
-  assert.match(message, /agy\/opus-b: skipped — Model agy\/opus-b is unavailable \(HTTP 503\)/);
-  assert.notEqual(message, "Model agy/opus-b is unavailable");
+  assert.match(message, /provider-a\/model-x: quality validation — empty content/);
+  assert.match(
+    message,
+    /provider-b\/model-y: skipped — Model provider-b\/model-y is unavailable \(HTTP 503\)/
+  );
+  assert.notEqual(message, "Model provider-b/model-y is unavailable");
 });
 
 test("two HTTP failures (500 then 429): both are listed", async () => {
   const { result } = await run({
     name: "ru-terminal-http",
-    units: [modelUnit("openai/ru-a", "a"), modelUnit("anthropic/ru-b", "b")],
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
     respond: (model) =>
-      model === "openai/ru-a" ? jsonError(500, "upstream boom") : jsonError(429, "slow down"),
+      model === "provider-a/model-x"
+        ? jsonError(500, "upstream boom")
+        : jsonError(429, "slow down"),
   });
 
   assert.equal(result.response.status, 429);
   const body = (await result.response.json()) as { error: { message: string } };
-  assert.match(body.error.message, /openai\/ru-a: provider — upstream boom \(HTTP 500\)/);
-  assert.match(body.error.message, /anthropic\/ru-b: rate limit — slow down \(HTTP 429\)/);
+  assert.match(body.error.message, /provider-a\/model-x: provider — upstream boom \(HTTP 500\)/);
+  assert.match(body.error.message, /provider-b\/model-y: rate limit — slow down \(HTTP 429\)/);
 });
 
 test("retries of one unit do not count as several units: single-unit failure is unchanged", async () => {
   const { result, calls } = await run({
     name: "ru-terminal-single",
-    units: [modelUnit("openai/ru-a", "a")],
+    units: [modelUnit("provider-a/model-x", "a")],
     respond: () => jsonError(500, "upstream boom"),
     maxRetries: 1,
   });
@@ -138,7 +143,7 @@ test("retries of one unit do not count as several units: single-unit failure is 
 test("a single unit skipped before dispatch keeps the original message", async () => {
   const { result, calls } = await run({
     name: "ru-terminal-single-skip",
-    units: [modelUnit("agy/opus-b", "b")],
+    units: [modelUnit("provider-b/model-y", "b")],
     respond: () => jsonError(500, "unused"),
     available: () => false,
   });
@@ -146,13 +151,13 @@ test("a single unit skipped before dispatch keeps the original message", async (
   assert.deepEqual(calls, []);
   assert.equal(result.response.status, 503);
   const body = (await result.response.json()) as { error: { message: string } };
-  assert.equal(body.error.message, "Model agy/opus-b is unavailable");
+  assert.equal(body.error.message, "Model provider-b/model-y is unavailable");
 });
 
 test("quota classification, error code and headers survive the message rewrite", async () => {
   const { result } = await run({
     name: "ru-terminal-quota",
-    units: [modelUnit("openai/ru-a", "a"), modelUnit("anthropic/ru-b", "b")],
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
     respond: (model) =>
       new Response(
         JSON.stringify({
@@ -177,14 +182,14 @@ test("quota classification, error code and headers survive the message rewrite",
   };
   assert.equal(body.error.code, "insufficient_quota");
   assert.equal(body.error.retry_after, 30);
-  assert.match(body.error.message, /credits exhausted on openai\/ru-a/);
-  assert.match(body.error.message, /credits exhausted on anthropic\/ru-b/);
+  assert.match(body.error.message, /credits exhausted on provider-a\/model-x/);
+  assert.match(body.error.message, /credits exhausted on provider-b\/model-y/);
 });
 
 test("the attempt-budget terminal (diagnostics) path is untouched", async () => {
   const { result } = await run({
     name: "ru-terminal-budget",
-    units: [modelUnit("openai/ru-a", "a"), modelUnit("anthropic/ru-b", "b")],
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
     respond: () => jsonError(500, "upstream boom"),
     limit: 1,
   });
@@ -201,9 +206,9 @@ test("the attempt-budget terminal (diagnostics) path is untouched", async () => 
 test("connection identifiers in a unit's error text are redacted in the aggregated message", async () => {
   const { result } = await run({
     name: "ru-terminal-redact",
-    units: [modelUnit("openai/ru-a", "a"), modelUnit("anthropic/ru-b", "b")],
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
     respond: (model) =>
-      model === "openai/ru-a"
+      model === "provider-a/model-x"
         ? jsonError(401, "invalid key for connection 0f8fad5b-d9cb-469f-a165-70867728950e")
         : jsonError(500, "upstream boom"),
   });
@@ -211,4 +216,78 @@ test("connection identifiers in a unit's error text are redacted in the aggregat
   const body = (await result.response.json()) as { error: { message: string } };
   assert.doesNotMatch(body.error.message, /0f8fad5b-d9cb-469f-a165-70867728950e/);
   assert.match(body.error.message, /conn:0f8fad5b/);
+});
+
+// Each unit's reason is collapsed to one line, sanitized and capped before the reasons are
+// joined. Without that, the whole-message sanitize pass (first line only, 4096 chars, path
+// spans run to the end) let one raw upstream body in an early unit hide every later unit.
+async function earlyReasonThenSkip(name: string, first: () => Response) {
+  const { result } = await run({
+    name,
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
+    respond: () => first(),
+    available: (model) => model !== "provider-b/model-y",
+  });
+  assert.equal(result.response.status, 503);
+  const body = (await result.response.json()) as { error: { message: string } };
+  return body.error.message;
+}
+
+const SKIPPED_LAST =
+  /provider-b\/model-y: skipped — Model provider-b\/model-y is unavailable \(HTTP 503\)/;
+
+test("a multi-line reason in an earlier unit does not hide the later units", async () => {
+  const message = await earlyReasonThenSkip("ru-terminal-multiline", () =>
+    jsonError(500, "first line of unit a\nsecond line of unit a")
+  );
+  assert.match(message, /provider-a\/model-x: provider — first line of unit a second line/);
+  assert.match(message, SKIPPED_LAST);
+  assert.doesNotMatch(message, /\n/);
+});
+
+test("an HTML 502 page in an earlier unit does not hide the later units", async () => {
+  const html =
+    "<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n" +
+    "<center><h1>502 Bad Gateway</h1></center>\r\n</body>\r\n</html>\r\n";
+  const message = await earlyReasonThenSkip(
+    "ru-terminal-html",
+    () => new Response(html, { status: 502, headers: { "content-type": "text/html" } })
+  );
+  assert.match(message, /provider-a\/model-x: .*502 Bad Gateway.*\(HTTP 502\)/);
+  assert.match(message, SKIPPED_LAST);
+  assert.doesNotMatch(message, /[\r\n]/);
+});
+
+test("a multi-line error inside a 200 body (quality reason) does not hide the later units", async () => {
+  const message = await earlyReasonThenSkip(
+    "ru-terminal-200-error",
+    () =>
+      new Response(
+        JSON.stringify({ error: { message: "Upstream overloaded.\nPlease retry later." } }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+  );
+  assert.match(
+    message,
+    /provider-a\/model-x: quality validation — upstream error in 200 body: Upstream overloaded\. Please retry later\./
+  );
+  assert.match(message, SKIPPED_LAST);
+});
+
+test("an oversized reason in an earlier unit is capped per unit", async () => {
+  const message = await earlyReasonThenSkip("ru-terminal-long", () =>
+    jsonError(500, "x".repeat(6000))
+  );
+  const first = message.split("; ")[0];
+  assert.ok(first.length < 400, `first unit entry is capped, got ${first.length} chars`);
+  assert.match(message, SKIPPED_LAST);
+});
+
+test("a path in an earlier unit's reason is redacted without swallowing the later units", async () => {
+  const message = await earlyReasonThenSkip("ru-terminal-path", () =>
+    jsonError(500, "failed reading /tmp/omniroute-test/cache.bin")
+  );
+  assert.match(message, /provider-a\/model-x: provider — failed reading <path>/);
+  assert.doesNotMatch(message, /omniroute-test/);
+  assert.match(message, SKIPPED_LAST);
 });
