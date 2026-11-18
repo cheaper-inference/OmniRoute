@@ -1,1 +1,0 @@
-- Register `gpt-image-2.6-sunburst` in the Codex image catalog so `/v1/images/edits` accepts the same model that generation already serves (#19478).

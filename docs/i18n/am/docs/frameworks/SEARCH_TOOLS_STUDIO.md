@@ -36,36 +36,36 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ## ትሮች
 
-### የፍለጋ ትር
+### ትርን ፈልግ
 
-ነባሩን `SearchForm` + `ResultsPanel` + `RerankPanel` ወደ አንድ ትር ያሳድጋል፦
+ያለውን `SearchForm` + `ResultsPanel` + `RerankPanel` ን ወደ ትር ይቀይራል፡-
 
-- መጠይቅ → ውጤቶች (ርዕስ፣ URL፣ አጭር መግለጫ፣ የተዛማጅነት ነጥብ)።
-- በConfig ፓነል ውስጥ የአቅራቢ ሜታዳታ (ወጪ፣ ኮታ፣ ሁኔታ)።
-- የዳግም ደረጃ አሰጣጥ ክፍል፦ የዳግም ደረጃ አሰጣጥ ሞዴል ይምረጡ፣ ውጤቶችን እንደገና ደርድሩ፣ `positionDelta`ን ያሳዩ።
-- ምንም የፍለጋ አቅራቢዎች ካልተዋቀሩ፣ CTA ያለው ባዶ ሁኔታ።
-- የፍለጋ ታሪክ በ`SearchHistory.tsx` በኩል።
-- `POST /v1/search`ን ይጠራል (ነባር መገልገያ ነጥብ፣ ምንም ለውጥ የለም)።
+- የጥያቄ → ውጤቶች (ርዕስ፣ URL፣ ቅንጣቢ፣ ተገቢነት ነጥብ)።
+- የአቅራቢ ዲበ ውሂብ በኮንፊግ መቃን (ዋጋ፣ ኮታ፣ ሁኔታ)።
+- የማሸጋገር ክፍል፡ የዳግም ደረጃ ሞዴል ምረጥ፣ ውጤቶችን እንደገና ይዘዙ፣ `positionDelta` አሳይ።
+- ምንም የፍለጋ አቅራቢዎች ካልተዋቀሩ CTA ጋር ባዶ ሁኔታ።
+- ታሪክን በ `SearchHistory.tsx` ፈልግ።
+- `POST /v1/search` ይደውላል (ነባር የመጨረሻ ነጥብ፣ ምንም ለውጦች የሉም)።
 
-### የመረጃ መሰብሰቢያ ትር
+### የጭረት ትር
 
-በ`POST /v1/web/fetch` (በዕቅድ 05 የተፈጠረ) አማካኝነት ከURL ይዘት ለማውጣት የሚያገለግል አዲስ ትር፦
+ይዘቱን ከ URL በ `POST /v1/web/fetch` ለማውጣት አዲስ ትር (በእቅድ 05 የተፈጠረ)
 
-- ግቤት፦ URL + የሙሉ ገጽ ማብሪያ/ማጥፊያ + የቅርጸት መምረጫ (markdown / ጽሑፍ / HTML)።
-- ያስገቡ → ያምጡ → `ScrapeResult.tsx`ን ያቅርቡ።
-- `ScrapeResult` የmarkdown ቅድመ ዕይታን + የጥሬ ይዘት ማብሪያ/ማጥፊያን ያቀርባል።
-- ገደብ፦ የምላሹ ይዘት > **256 KB** ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ይዘቱን በMonaco ሞዳል (D21) ውስጥ ይከፍታል።
-- የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)፣ መዘግየት፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
-- `useScrapeFetch.ts` hookን ይጠቀማል።
+- ግቤት URL + ባለ ሙሉ ገጽ + ቅርጸት መራጭን (ምልክት ማድረጊያ/ጽሑፍ/ HTML) ቀይር።
+- → fetch → render `ScrapeResult.tsx` አስረክብ።
+- `ScrapeResult` የማርክ ማድረጊያ ቅድመ እይታ + ጥሬ መቀያየርን ይሰጣል።
+- ካፕ: ምላሽ አካል > ከሆነ** 256 KB** ፣ UI `(truncated, view raw)` ያሳያል እና ጥሬውን በሞናኮ ሞዳል (D21) ይከፍታል።
+- የዲበ ውሂብ ፓነል፡ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search)፣ መዘግየት፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
+- `useScrapeFetch.ts` መንጠቆን ይጠቀማል።
 
-### የማነጻጸሪያ ትር
+### ትርን አወዳድር
 
-ተመሳሳዩን መጠይቅ/URL እስከ **4 በሚደርሱ አቅራቢዎች ላይ በትይዩ** ያስኬዳል (D22)፦
+እስከ ተመሳሳይ query/URL ድረስ ይሰራል** 4 አቅራቢዎች በትይዩ** (D22):
 
-- ለእያንዳንዱ አቅራቢ ጎን ለጎን የቀረቡ ዓምዶች።
-- መለኪያዎች፦ መዘግየት፣ ወጪ፣ የውጤት ብዛት፣ የምላሽ መጠን።
-- ለፍለጋ የURL መደራረብ ስሌት (ከመጀመሪያው ውጤት ጋር የሚጋሩ የURLዎች ብዛት)።
-- ለእያንዳንዱ አቅራቢ `POST /v1/search`ን (ፍለጋ) ወይም `POST /v1/web/fetch`ን (መረጃ መሰብሰብ) ይጠራል።
+- ጎን ለጎን አምዶች በአንድ አቅራቢ።
+- መለኪያዎች፡ መዘግየት፣ ወጪ፣ የውጤት ብዛት፣ የምላሽ መጠን።
+- URL መደራረብ ስሌት ለፍለጋ (የተጋራ URLs ቁጥር እና የመጀመሪያ ውጤት)።
+- በአንድ አቅራቢ `POST /v1/search` (ፍለጋ) ወይም `POST /v1/web/fetch` (scrape) ይደውላል።
 
 ---
 
@@ -98,14 +98,15 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ---
 
-## የአቅራቢዎች ካታሎግ
+## የአቅራቢ ካታሎግ
 
-`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ`GET /api/search/providers` ያቀርባል
-(fetch አቅራቢዎችን ለማካተት በF4 የተስፋፋ):
+`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ `GET /api/search/providers` ያጋልጣል (በF4 ውስጥ ተዘርግቶ አቅራቢዎችን ለማካተት)
 
-| `kind` | `"search"` (20 አቅራቢዎች) ወይም `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 አቅራቢዎች) ወይም `"fetch"` (ፋየርክራውል፣ ጂና-አንባቢ፣ ታቪሊ-ፍለጋ፣ ትንንሽ ዓሳ፣ ኒብል-ፍለጋ፣ ማንኛውም ፍለጋ-ፍለጋ፣ ትይዩ-ፍለጋ፣ ጥልቅ ፍለጋ) |
 
-ሁኔታው ማረጋገጫዎች መኖራቸውን እና ሁሉም ቁልፎች በአሁኑ ጊዜ በ cooldown ውስጥ መሆናቸውን በመፈተሽ **ጥያቄው በሚቀርብበት ጊዜ ይወሰናል**።
+ሁኔታው ነው።** በጥያቄ ጊዜ የተገኘ** ምስክርነቶች መኖራቸውን እና ሁሉም ቁልፎች በአሁኑ ጊዜ በማቀዝቀዝ ላይ መሆናቸውን በማጣራት።
+
+`codex-search` (Codex ድር ፍለጋ) የራሱ የሆነ ቁልፍ የለውም፡ የተገናኘ Codex (ChatGPT) መለያን እንደገና ይጠቀማል፣ ስለዚህ እያንዳንዱ ፍለጋ ChatGPT የደንበኝነት ምዝገባ ኮታ ያወጣል እና ከ10-40 ሰከንድ ይወስዳል። ጥያቄው ሲሰየም ይሰራል; ራስ-ሰር ምርጫ የ `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ባህሪ ባንዲራ ያስፈልገዋል (በነባሪ ጠፍቷል)።
 
 ---
 
@@ -117,18 +118,18 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ---
 
-## የባክኤንድ ለውጦች
+## የጀርባ ለውጦች
 
-ለዚህ ባህሪ ያስፈለገው አንድ የባክኤንድ ለውጥ ብቻ ነበር፦
+ለዚህ ባህሪ አንድ የኋላ ለውጥ ብቻ ያስፈልጋል፡-
 
-### የተስፋፋ `GET /api/search/providers`
+### የተራዘመ `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` የሚከተሉትን እንዲያካትት ተስፋፍቷል፦
+`src/app/api/search/providers/route.ts` ወደ፡-
 
-- እያንዳንዱን የማምጫ አቅራቢ (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`፣ `parallel-search`) በድርድሩ ውስጥ ማካተት።
-- ወደ እያንዳንዱ ንጥል `kind: "search" | "fetch"` ማከል።
-- ከቀጥታ የማረጋገጫ መረጃ ሁኔታ የተወሰደ `status: "configured" | "missing" | "rate_limited"` ማከል።
-- ከቀደሙ ስሪቶች ጋር ተኳኋኝነትን መጠበቅ — ነባር መስኮች (`id`፣ `name`፣ ወዘተ) ሳይቀየሩ ቀርተዋል።
+- በድርድር ውስጥ እያንዳንዱን አቅራቢ (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`፣ `parallel-search`፣ `keenable-search`) ያካትቱ።
+- በእያንዳንዱ ንጥል ላይ `kind: "search" | "fetch"` ጨምር።
+- ከቀጥታ ምስክርነት የተገኘ `status: "configured" | "missing" | "rate_limited"` ጨምር።
+- የኋለኛ ተኳኋኝነት — ነባር መስኮች (`id`፣ `name`፣ ወዘተ) ሳይለወጡ አቆይ።
 
 ---
 

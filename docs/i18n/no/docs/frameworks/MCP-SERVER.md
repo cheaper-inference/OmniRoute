@@ -20,6 +20,8 @@ Eller via åpen SS-transport:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -134,18 +136,18 @@ Se [MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_set_compression_engine`  | `write:compression` | Velg den aktive motoren (off/caveman/rtk/stacked) og Caveman/RTK -intensiteten                                                              |
 | `omniroute_list_compression_combos` | `read:compression`  | Liste navngitte kompresjonskombinasjoner og deres motorrørledninger                                                                         |
 | `omniroute_compression_combo_stats` | `read:compression`  | Analytics gruppert etter kompresjonskombinasjon og motor                                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | Lagre oppringer-isolert innhold i den avgrensede in-memory CCR butikken og returner en markør pluss `ccr://` referanse                      |
+| `omniroute_ccr_store`               | `write:compression` | Lagre oppringerisolert innhold i den begrensede CCR -butikken i minnet og returner en markør pluss `ccr://` referanse                       |
 | `omniroute_ccr_retrieve`            | `read:compression`  | Hent CCR innhold i sin helhet eller med hode-, hale-, linjer-, grep- og statistikkmoduser                                                   |
 | `omniroute_ccr_inspect`             | `read:compression`  | Inspiser anroper-eide CCR metadata uten å returnere innhold                                                                                 |
 | `omniroute_ccr_list`                | `read:compression`  | List paginerte metadata for anroper-eide CCR blokker                                                                                        |
 | `omniroute_ccr_delete`              | `write:compression` | Slett en anroper-eid CCR blokk                                                                                                              |
 | `omniroute_ccr_stats`               | `read:compression`  | Rapporter minnebruk med ringeromfang, livssyklustellere og lagringsgrenser                                                                  |
 | `omniroute_rtk_discover`            | `read:compression`  | Oppdag tilbakevendende støy i opt-in RTK -utgangsprøver                                                                                     |
-| `omniroute_rtk_learn`               | `read:compression`  | Generer et gjennomgåbart RTK -filterutkast fra eksempler på opt-in                                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | Generer et utkast til RTK -filter som kan gjennomgås fra eksempler på opt-in                                                                |
 
-CCR -oppføringer bruker en to-lags butikk: et varmt nivå i minnet støttet, på lokale ikke-sky-kjøretider, av et holdbart SQLite lag (`ccr_blocks`, på som standard), slik at en blokk overlever utkastelse eller en omstart til dens TTL går tom — bortsett fra blokker over 512 KB og forblir bare kjøretid på skyminnet. Hver blokk er begrenset til 2 MiB, hver hovedstol til 16 MiB, og den globale butikken til 64 MiB. Oppføringer er som standard en 24-timers TTL (maksimalt syv dager). Full MCP henting er begrenset til 256 KiB; større blokker forblir tilgjengelige gjennom ranged- og grep-modusene. Lagring, henting, oppføring, inspeksjon, sletting og statistikk isoleres av den autentiserte API-nøkkelen. Revisjonsposter inneholder hash- og størrelsesmetadata, aldri innhold. Operatørvendte detaljer (de to markørene, klientforutsetninger, `codemode:false`, omfang per verktøy, paginering og en diagnostisk matrise) finnes i [Compression Engines → Prerequisites / operatørveiledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR -oppføringer bruker en to-lags butikk: et varmt nivå i minnet støttet, på lokale ikke-sky-kjøretider, av et holdbart SQLite lag (`ccr_blocks`, på som standard), slik at en blokk overlever utkastelse eller en omstart til dens TTL går tom — bortsett fra blokkerer over 512 KB, som forblir `COMPRESSION_CCR_DURABLE_STORE=false` kjøretider, som forblir skyg-på. Den varige skrivingen er beste innsats: den blir droppet mens 1000 skrivinger allerede venter, og en mislykket SQLite skriving blir logget, ikke forsøkt på nytt, slik at blokken går tapt ved omstart. Hver blokk er begrenset til 2 MiB, hver hovedstol til 16 MiB, og den globale butikken til 64 MiB. Oppføringer er som standard en 24-timers TTL (maksimalt syv dager). Full MCP henting er begrenset til 256 KiB; større blokker forblir tilgjengelige gjennom ranged- og grep-modusene. Lagring, henting, oppføring, inspeksjon, sletting og statistikk isoleres av den autentiserte API-nøkkelen. Revisjonsposter inneholder hash- og størrelsesmetadata, aldri innhold. Operatørvendte detaljer (de to markørene, klientforutsetninger, `codemode:false`, per-verktøy-omfang, paginering og en diagnostisk matrise) finnes i [Compression Engines → Prerequisites / operatørveiledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` rapporterer MCP -beskrivelseskomprimering separat under `analytics.mcpDescriptionCompression`. Disse verdiene er metadatastørrelsesestimater for MCP listebare beskrivelser (`tools`, `prompts`, `resources` og `resourceTemplates`); de er ikke kvitteringer for leverandørbruk og er merket med `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` rapporterer MCP -beskrivelseskomprimering separat under `analytics.mcpDescriptionCompression`. Disse verdiene er metadatastørrelsesestimater for MCP listebare beskrivelser (`tools`, `prompts`, `resources` og `resourceTemplates`); de er ikke leverandørbrukskvitteringer og er merket med `source: "mcp_metadata_estimate"`.
 
 ### MCP Accessibility Tree Filter (v3.8.0)
 

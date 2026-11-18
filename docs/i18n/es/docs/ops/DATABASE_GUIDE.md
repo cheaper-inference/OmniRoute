@@ -186,29 +186,92 @@ La lista completa de más de 30 tablas se encuentra en `src/lib/db/migrations/`.
 
 ## Migraciones
 
-OmniRoute utiliza **migraciones versionadas e idempotentes** en `src/lib/db/migrations/`. Cada migración es un único archivo SQL denominado `NNN_description.sql`.
+usos OmniRoute** migraciones versionadas e idempotentes** en `src/lib/db/migrations/`. Cada migración es un único archivo SQL. Coexisten dos formatos de nombres; la versión registrada en `_omniroute_migrations` es el prefijo numérico.
 
-### Nomenclatura de las migraciones
+### Nomenclatura de migración
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formato                                            | Ejemplo                              | Utilizado para                                                                                                                                                                   |
+| -------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (exactamente 3 dígitos)      | `241_seen_models.sql`                | La antigua serie `001`–`241`. Congelado cuando llegó el formato de marca de tiempo (`240` y `241` se fusionaron justo antes): ningún archivo nuevo obtiene un número secuencial. |
+| `YYYYMMDDHHMMSS_description.sql` (14 dígitos, UTC) | `20261113120000_add_usage_index.sql` | Cada migración creada a partir del 13/11/2026 en adelante.                                                                                                                       |
+
+Por qué el cambio: con números secuenciales, PRs paralelo eligió el mismo número siguiente y todos menos uno tuvieron que volver a numerarse antes de fusionarse. Una marca de tiempo UTC le da a cada PR su propia versión.
+
+Reglas para el formato de marca de tiempo (aplicadas por `npm run check:migration-numbering`, compartidas con el generador en `scripts/check/lib/migrationNaming.mjs`):
+
+- La marca de tiempo es una fecha y hora UTC reales, no antes de `20261113000000` y no más de 10 minutos en el futuro.
+- La descripción es `snake_case` minúscula comenzando con una letra (`a-z`, `0-9`, `_` simple entre palabras), como máximo 80 caracteres.
+- Dos archivos con la misma marca de tiempo son duplicados.
+- La regla de no espacios se aplica sólo a la serie antigua: todos los números de `001` a `241` deben existir, excepto los espacios conocidos `026`, `055` y `121`. Eliminar `241` (o cualquier archivo antiguo) falla. `001` y `241` nunca se pueden agregar a la lista de permitidos `KNOWN_GAPS`. Los archivos con marca de tiempo nunca crean un espacio.
+- Cada entrada en `src/lib/db/migrations/` debe ser un archivo normal con un nombre `.sql` en minúscula válido. Un directorio, un enlace simbólico, un archivo `.SQL` o `.sql.bak`, un archivo oculto o un nombre con un espacio fallan en la puerta, porque el ejecutor lo omitiría silenciosamente o fallaría en el arranque.
+
+**Aplicar orden.** El corredor ordena por el valor numérico del prefijo, no por texto: primero los archivos antiguos `001`–`241`, luego los archivos con marca de tiempo en orden de marca de tiempo, luego cualquier directorio con espacio de nombres registrado con `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versiones como `ee-001`). Una migración pendiente es cualquier archivo cuya versión no esté en `_omniroute_migrations`, por lo que una migración desde una rama anterior que se fusiona después de una más nueva aún se aplica en las bases de datos existentes.
+
+**La marca de tiempo es el orden de creación, no el orden de fusión.** Si su migración depende de una tabla o columna creada por una migración con un** más nuevo** marca de tiempo (por ejemplo, una de otro PR que se fusionó primero), una base de datos nueva ejecutaría la suya primero y fallaría. Mientras su PR aún esté abierto, regenere el nombre del archivo con `npm run db:new-migration` para que obtenga una marca de tiempo más nueva o hágalo independiente. `npm run test:migrations:fresh` aplica cada migración a una base de datos vacía y la detecta.
+
+### Una migración fusionada nunca se elimina ni se le cambia el nombre
+
+Una vez que un archivo de migración está en una rama de lanzamiento o `main`, ya se ha ejecutado en las bases de datos de homólogos y desarrolladores, en las instalaciones VPS y en la sincronización empresarial. A partir de entonces:
+
+- **Nunca lo borres.** Las instalaciones nuevas perderían su esquema, mientras que las bases de datos actualizadas lo conservarían.
+- **Nunca le cambies el nombre.** La versión en `_omniroute_migrations` ya no coincidiría con un archivo, por lo que cada base de datos que ya la aplicara la ejecutaría nuevamente. SQL no idempotente duplica los datos o detiene el arranque.
+- **¿Necesita un esquema diferente?** Crea una nueva migración con `npm run db:new-migration`.
+
+Cambiar el nombre es seguro sólo para un archivo que aún no está fusionado, que es el caso al que se refieren las sugerencias de la puerta. Una etiqueta de lanzamiento no cambia nada aquí: cada envío a una rama `release/v*` publica la imagen Docker `:next` y se ejecuta en homolog, instalaciones VPS y Enterprise sync, por lo que se ejecuta una migración fusionada en bases de datos reales antes de que exista cualquier etiqueta `vX.Y.Z`. La puerta falla en cada eliminación de un archivo base, etiquetado o no.
+
+- **Revertir una migración fusionada.** Un `git revert` que elimina el archivo falla la puerta. Mantenga el archivo y deshaga su esquema en una nueva migración: `npm run db:new-migration -- <description>`, con `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS`, etc. Las bases de datos actualizadas y nuevas terminan con el mismo esquema.
+- **El cambio de nombre aceptado: una entrada de compatibilidad y contenido idéntico.** Si un archivo fusionado debe moverse (por ejemplo, dos archivos fusionados comparten una marca de tiempo y el ejecutor se detiene con una colisión de versiones), cambie el nombre del último sin tocar su SQL y agregue `{ fromVersion, fromName, toVersion, toName }` a `RENAMED_MIGRATION_COMPATIBILITY` en `src/lib/db/migrationRunner/constants.ts`. Las bases de datos que aplicaron la versión anterior mueven su fila `_omniroute_migrations` en lugar de ejecutar el archivo nuevamente. La puerta advierte sobre dicho cambio de nombre y siempre ejecuta la verificación de conmutación, cualquiera que sea la nueva marca de tiempo: las instalaciones nuevas aplican el archivo en su nueva posición, las bases de datos actualizadas no, así que elija una nueva marca de tiempo cerca de la anterior. La puerta no puede cambiar el nombre si el contenido cambió (un cambio de esquema aún se realiza en una nueva migración) o si el archivo de destino de la entrada no está en el disco.
+- **Nunca cambie el nombre dentro de la misma marca de tiempo.** Un cambio de nombre que mantiene la marca de tiempo y cambia solo la descripción falla en la puerta, con o sin una entrada. Con una entrada cuyo `toVersion` es igual a su `fromVersion`, el corredor elimina la antigua fila `_omniroute_migrations` y aplica el archivo nuevamente en cada base de datos que ya lo ejecutó. Sin una entrada, el ejecutor rastrea solo la versión: omite el archivo en esas bases de datos (el contenido nuevo nunca se ejecuta allí) y registra un error de renumeración en cada arranque. Utilice otra marca de tiempo más una entrada de compatibilidad o conserve el nombre.
+- **La puerta comprueba que el archivo renombrado no se vuelva a ejecutar.** Para cada cambio de nombre cubierto, la puerta pasa el nuevo nombre de archivo a la verificación de conmutación con `--must-not-apply`. La verificación inicia la base de datos actualizada con el corredor real, y si el corredor aplica ese archivo nuevamente (por ejemplo, porque la entrada tiene una versión o nombre incorrecto, o porque el analizador de texto de la puerta lee `constants.ts` de manera diferente a TypeScript), la puerta falla con `migration renomeada rodaria de novo` y le pide que verifique las versiones y nombres antiguos y nuevos de la entrada.
+
+### Lo que la puerta compara con la base
+
+Al ejecutar una solicitud de extracción y una cola de fusión, `npm run check:migration-numbering` compara `src/lib/db/migrations/` en el disco con el mismo directorio en la rama base. La base es, en este orden: `--base-latest-tag`, `--base <ref>`, la variable `MIGRATION_BASE_REF` o, cuando `GITHUB_EVENT_NAME` es `pull_request`, `pull_request_target` o `merge_group`, el primer padre de la confirmación de fusión, el `merge_group.base_sha` de la carga útil del evento o `git merge-base HEAD origin/$GITHUB_BASE_REF`. En una ejecución de solicitud de extracción o cola de fusión sin una base resoluble, la puerta falla. Fuera CI sin `--base`, imprime `comparação com a base: pulada (sem --base)` y omite estas reglas.
+
+`--base-latest-tag` se compara con la etiqueta de lanzamiento más reciente (`vX.Y.Z` en orden semver; las etiquetas con sufijos como nightlies no cuentan) que está en la historia de `HEAD`, con las mismas reglas que `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) ejecuta la puerta de esta manera, porque las ejecuciones push y programadas no tienen una base de solicitud de extracción y una combinación puede realizarse sin una nueva ejecución CI. Sin una etiqueta de liberación en el historial, la puerta falla; ejecute `git fetch --tags` (en CI, `actions/checkout` con `fetch-depth: 0` trae las etiquetas).
+
+| Cambio en la solicitud de extracción                                                                                        | Resultado                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Se cambia el nombre de un archivo que existe en la base, con una entrada `RENAMED_MIGRATION_COMPATIBILITY`                  | **Advertencia** si el contenido es idéntico y la verificación de conmutación se ejecuta cualquiera que sea la nueva marca de tiempo; falla si la nueva posición cambia el esquema final (deshacer el cambio de nombre o elegir otra nueva marca de tiempo donde conmuta) o si el corredor aplicaría el archivo renombrado nuevamente en una base de datos actualizada.** falla** si el contenido cambió. |
+| Un archivo que existe en la base cambia de nombre manteniendo su marca de tiempo (solo cambia la descripción)               | **falla** , con o sin entrada: el corredor lo volvería a aplicar (con la entrada) o lo saltaría por versión (sin). Utilice otra marca de tiempo más una entrada de compatibilidad o conserve el nombre.                                                                                                                                                                                                  |
+| Un archivo que existe en la base se elimina o se le cambia el nombre sin una entrada                                        | **falla** , ya sea que el archivo esté o no en una etiqueta de lanzamiento. Para deshacerlo, restaure el archivo con `git checkout <base> -- src/lib/db/migrations/<file>`; para revertir su esquema, agregue una nueva migración con `DROP ... IF EXISTS`.                                                                                                                                              |
+| Un archivo que existe en la base tiene contenido diferente                                                                  | **Advertencia** (una anotación `::warning` en Acciones GitHub ) y se ejecuta la verificación de conmutación. Falla si la edición cambia el esquema final, porque las bases de datos actualizadas no aplican el archivo editado nuevamente: coloque el cambio en una nueva migración. Una edición inofensiva (un comentario, `IF NOT EXISTS`) sólo advierte.                                              |
+| Se agrega un archivo con marca de tiempo con una marca de tiempo no más reciente que la más reciente de la base.            | Ejecuta la verificación de conmutación, que se describe a continuación.                                                                                                                                                                                                                                                                                                                                  |
+| Se agrega un archivo `NNN_` de formato antiguo con un número debajo del archivo de formato antiguo más reciente de la base. | **falla** , incluso si `KNOWN_GAPS` se edita en la misma solicitud de extracción: la serie anterior está congelada, cree la migración con `npm run db:new-migration`. Se aceptan archivos de formato antiguo por encima del más nuevo de la base (una solicitud de extracción de `release/v*` a `main` ).                                                                                                |
+| Un archivo desordenado, editado o renombrado contiene declaraciones `INSERT`, `UPDATE`, `DELETE` o `REPLACE`                | **Advertencia** : la verificación de conmutación no compara datos, por lo tanto, revise si el orden en que se aplican las bases de datos actualizadas y nuevas cambia el resultado.                                                                                                                                                                                                                      |
+
+Una ejecución de la verificación de conmutación cubre los archivos desordenados, editados y renombrados juntos.
+
+La verificación de conmutación (`scripts/check/migration-commutation.ts`) crea dos bases de datos temporales con la ruta de instalación real: una** actualizado** uno (arrancar con las migraciones base, luego arrancar nuevamente en el mismo archivo con las migraciones de la solicitud de extracción) y un** fresco** uno (un arranque con las migraciones de la solicitud de extracción). Compara los esquemas resultantes: tablas y columnas (ignorando el orden de las columnas), restricciones UNIQUE / PRIMARY KEY y FOREIGN KEY, el texto `CREATE TABLE` normalizado de cada tabla (que cubre restricciones CHECK, intercalaciones, columnas generadas y opciones de tabla), índices, activadores y vistas. Los datos de las filas no se comparan. Si coinciden, la puerta imprime que el archivo no está en orden, pero viaja y pasa. Si difieren, la puerta falla con la diferencia y una pista para el caso: para un archivo desordenado, regenere su nombre con `npm run db:new-migration`, lo cual es seguro porque el archivo aún no está fusionado; para un archivo base editado, restaure el contenido base y coloque el cambio en una nueva migración; para un archivo renombrado, deshaga el cambio de nombre o elija otra nueva marca de tiempo donde conmuta, nunca la misma marca de tiempo con otro nombre. Si la verificación en sí no puede ejecutarse, la puerta falla en CI y solo advierte localmente. Para un archivo base editado, la base de datos actualizada se crea con el contenido base de ese archivo y el segundo arranque lo omite porque su versión ya está registrada. Para un archivo renombrado, la base de datos actualizada se crea con el archivo con su nombre anterior y el segundo arranque mueve su fila `_omniroute_migrations` a través de la entrada de compatibilidad en lugar de ejecutarlo nuevamente; la puerta pasa el nuevo nombre con `--must-not-apply`, por lo que la verificación falla si el segundo arranque lo aplica. Si una migración de solicitud de extracción no se aplica en la ruta actualizada, es decir, después de cada migración base (ya sea que falle o no en una instalación nueva), la puerta informa `migration do PR não aplica` y le solicita que corrija el SQL con el esquema actual de la base; Si el archivo depende de otra migración de solicitud de extracción con una marca de tiempo posterior, regenere su nombre con `npm run db:new-migration`.
+
+Para ejecutar la misma comparación localmente, pase la base explícitamente, por ejemplo `npm run check:migration-numbering -- --base origin/<base-branch>` o `npm run check:migration-numbering -- --base-latest-tag` para comparar con la última versión.
+
+### Conversión de una migración `NNN` de Open PR
+
+Una solicitud de extracción abierta antes del cambio aún puede contener un archivo secuencial como `242_add_widgets.sql`. Los números antiguos por encima de `241` se rechazan, así que conviértalos antes de fusionarlos:
+
+1. **Cambie el nombre del archivo con el generador, manteniendo la descripción.** Ejecute `npm run db:new-migration -- <same description>` para obtener el nuevo nombre, mueva SQL a él y elimine el archivo `NNN_` antiguo. La descripción debe ser idéntica: la entrada de compatibilidad que aparece a continuación coincide con ella.
+2. **Agregue una entrada de compatibilidad si una base de datos persistente ejecutó el número anterior.** Si alguna base de datos que se mantiene (homóloga, VPS, instalación propia de un colaborador) ejecutó una compilación del PR con el archivo `NNN_`, agregue `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` a `RENAMED_MIGRATION_COMPATIBILITY` en `src/lib/db/migrationRunner/constants.ts`. Esto es** requerido para `237` a `241`** : esas ranuras ahora contienen los canónicos `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` y `241_seen_models.sql`, y sin la entrada dicha base de datos se salta la migración canónica para siempre y ejecuta la convertida nuevamente. También funciona para un espacio que permanece vacío, como `242`, cuando el destino es una marca de tiempo. En caso de duda, agregue la entrada. No importa dónde lo agregue en la matriz: cuando la ranura de destino de una entrada todavía contiene una fila que otra entrada aleja (por ejemplo `237` mantiene una fila PR mientras una fila `usage_history_calculated_cost` más antigua espera moverse a `237`), el corredor deja que esa entrada espere hasta que la ranura esté libre. Sólo un conflicto real, como una ranura ocupada por una fila sin movimientos de entrada, o dos entradas que intercambian ranuras, detiene el arranque con `Cannot reconcile ...`.
+3. **Mantener el SQL idempotente** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), porque la migración convertida puede encontrarse con una base de datos donde su esquema ya existe.
+4. **Mover casos especiales con clave de versión.** Si PR agregó mayúsculas y minúsculas a su número anterior en `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) o en `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), cambie la clave a la nueva marca de tiempo.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` es un ejemplo práctico de una prueba para una migración renombrada.
+
+### Backports a sucursales antes del cambio
+
+Nunca seleccione ni traslade un archivo `YYYYMMDDHHMMSS_` a una rama anterior al cambio (por ejemplo, una rama `release/v*` anterior). El corredor allí clasifica los nombres de los archivos como texto, por lo que un archivo con marca de tiempo se ejecutaría entre `201_` y `202_` en una base de datos nueva, y la puerta anterior no comprende los prefijos de 14 dígitos. En dicha rama, escriba el cambio como el siguiente archivo `NNN_` de esa rama, idempotente, por lo que no será operativo cuando la versión con marca de tiempo llegue más tarde.
 
 ### Cómo se ejecutan las migraciones
 
-Al iniciarse, `migrationRunner.ts`:
+Al inicio, `migrationRunner.ts`:
 
-1. Crea la tabla `_omniroute_migrations` si no existe
-2. Consulta las migraciones ya aplicadas
-3. Aplica las migraciones nuevas en orden, cada una dentro de una transacción
-4. Registra cada migración aplicada con una marca de tiempo
+1. Crea una tabla `_omniroute_migrations` si no existe.
+2. Consultas sobre migraciones ya aplicadas
+3. Aplica cualquier nueva migración en orden, cada una en una transacción.
+4. Registra cada migración aplicada con marca de tiempo
 
 ```ts
-// src/lib/db/migrationRunner.ts (simplificado)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotencia
 
-Las migraciones deben ser **idempotentes**: ejecutarlas dos veces no debe producir ningún cambio:
+Las migraciones deben ser** idempotente** — ejecutarlos dos veces debería ser una operación no operativa:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Utilice ampliamente las cláusulas `IF NOT EXISTS`, `IF EXISTS` y `OR IGNORE` / `OR REPLACE`.
+Utilice cláusulas `IF NOT EXISTS`, `IF EXISTS` y `OR IGNORE` / `OR REPLACE` generosamente.
 
-### Añadir una nueva migración
+### Agregar una nueva migración
 
-1. **Identifique el siguiente número**: `ls src/lib/db/migrations/ | tail -1`
-2. **Cree el archivo**: `NNN_my_change.sql`
-3. **Utilice DDL seguro**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Complete los datos con cuidado**: utilice `UPDATE ... WHERE ...` para gestionar las filas existentes
-5. **Pruébela en una copia**: nunca ejecute migraciones sin probar en producción
+1. **Crea el archivo con el generador.** : `npm run db:new-migration -- <description>` (por ejemplo `npm run db:new-migration -- add combo priority`). Escribe `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` con la hora UTC actual y un encabezado de comentario, avanza un segundo si se toma esa marca de tiempo y nunca sobrescribe un archivo. No elija un número a mano.
+2. **Utilice DDL seguro** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Rellene los datos con cuidado** : use `UPDATE ... WHERE ...` para manejar filas existentes
+4. **Consultar orden y denominación** : `npm run test:migrations:fresh` (todas las migraciones en una base de datos vacía) y `npm run check:migration-numbering`
+5. **Prueba en una copia** : nunca ejecute migraciones no probadas en producción
 
 Ejemplo:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> Los **cambios incompatibles con versiones anteriores** (p. ej., eliminar columnas) son complicados. OmniRoute NO admite la reversión a una versión anterior; una vez aplicada una migración, el cambio del esquema es permanente. Planifique en consecuencia.
+> **Cambios incompatibles con versiones anteriores** (por ejemplo, eliminar columnas) son complicados. OmniRoute admite NOT degradar — una vez que se aplica una migración, el cambio de esquema es permanente. Planifique en consecuencia.
 
 ---
 
@@ -403,52 +466,53 @@ Esto utiliza la API de copia de seguridad en línea de SQLite; es seguro ejecuta
 
 ---
 
-## Ajuste del rendimiento
+## Ajuste de rendimiento
 
 ### Modo WAL
 
-WAL está habilitado de forma predeterminada. Para cargas de trabajo con muchas escrituras, considere:
+WAL está habilitado de forma predeterminada. Para cargas de trabajo de alta escritura, considere:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Punto de control cada 1000 páginas
-PRAGMA journal_size_limit = 67108864;  -- Límite de WAL de 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute no establece `journal_size_limit`. Un punto de control mueve fotogramas WAL al archivo principal, pero el archivo WAL mantiene su tamaño asignado más grande. El `OMNIROUTE_WAL_GUARD_MAX_MB` guard sólo advierte y ejecuta `wal_checkpoint(RESTART)`; no es un límite del tamaño de un disco.
 
 ### Índices
 
-Índices clave para el rendimiento (creados automáticamente mediante migraciones):
+Índices clave para el rendimiento (creados automáticamente por migraciones):
 
-- `idx_models_provider` — búsquedas de modelos por proveedor
-- `idx_combo_targets_combo_id` — expansión de destinos combinados
-- `idx_usage_history_api_key_timestamp` — análisis de uso
-- `idx_quota_snapshots_api_key_window` — seguimiento de cuotas
-- `idx_call_logs_timestamp` — consultas de registros de llamadas
+- Búsquedas de modelos `idx_models_provider` — por proveedor
+- Expansión de objetivo combo `idx_combo_targets_combo_id` —
+- análisis de uso — `idx_usage_history_api_key_timestamp`
+- seguimiento de cuota `idx_quota_snapshots_api_key_window` —
+- consultas del registro de llamadas `idx_call_logs_timestamp` —
 
-Para añadir un índice nuevo, cree una migración:
+Para agregar un nuevo índice, cree una migración:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### E/S asignada en memoria
+### I/O mapeado en memoria
 
-Para bases de datos muy grandes (>10 GB), la asignación de memoria se puede ajustar mediante una pragma de SQLite:
+Para bases de datos muy grandes (> 10 GB), la asignación de memoria se puede ajustar mediante SQLite pragma:
 
 ```sql
--- Configurar mediante una pragma de SQLite (ajustar en core.ts o en tiempo de ejecución)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compactación
 
-Las instancias de OmniRoute que se ejecutan durante largos periodos se benefician de ejecutar `VACUUM` ocasionalmente:
+Las instancias OmniRoute de larga duración se benefician de `VACUUM` ocasional:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Ejecútelo mensualmente durante periodos de poco tráfico. (El modo WAL reduce la necesidad, pero no la elimina).
+Ejecute mensualmente durante períodos de poco tráfico. (El modo WAL reduce la necesidad, pero no la elimina).
 
 ---
 

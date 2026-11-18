@@ -310,7 +310,7 @@ MCP palvelimeen, joka paljastaa CCR työkalut, pääsee kolmella tavalla. Oletus
 CCR on a** kaksitasoinen** myymälä, ei vain muistissa:
 
 - **Kuuma muistitaso** — lohkokohtainen korkki 2 MiB, pääasiallinen 16 MiB, globaali 64 MiB. Merkintöjen oletusarvo on 24 h TTL (enintään 7 päivää). Täydellinen MCP haku muistista on rajoitettu arvoon 256 KiB; kaikki suurempi on edelleen tavoitettavissa ranged / grep -tilojen kautta.
-- **Kestävä SQLite -taso** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, oletuksena päällä) — tukee muistitasoa, jotta lohko selviytyy LRU -häätöstä, uudelleenkäynnistyksestä tai palautuksesta toiseen ilmentymään. Rivi säilyttää lohkon TTL, joten sen TTL ohi oleva lohko on poissa molemmista tasoista.
+- **Kestävä SQLite -taso** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, oletuksena päällä) — tukee muistitasoa, jotta lohko selviytyy LRU -häätöstä, uudelleenkäynnistyksestä tai palautuksesta toiseen ilmentymään. Rivi säilyttää lohkon TTL, joten sen TTL ohi oleva lohko on poissa molemmilta tasoilta.
 
 Kolme suojusta pitävät kestävän tason rajallisena — a lohko pysyy vain muistissa, kun:
 
@@ -318,7 +318,7 @@ Kolme suojusta pitävät kestävän tason rajallisena — a lohko pysyy vain mui
 2. suoritusaika on pilvikäyttöaika (ei paikallista levyä);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Joten "lohko katosi" ei ole pelkkä uudelleenkäynnistystarina: sub-512 KB -lohko paikallisessa, ei-pilvikäyttöympäristössä selviää uudelleenkäynnistyksestä kestävän tason kautta, kunnes sen TTL loppuu. Katso muuttujan [ympäristöviite](../reference/ENVIRONMENT.md).
+Joten "lohko katosi" ei ole yleinen uudelleenkäynnistystarina: sub-512 KB -lohko paikallisessa, ei-pilvikäyttöympäristössä selviää uudelleenkäynnistyksestä kestävän tason kautta, kunnes sen TTL loppuu, mikäli sen kestävä kirjoitus onnistuu. Tämä kirjoitus on paras yritys ja kulkee pois pyyntöpolulta: se hylätään, kun 1 000 pysyvää kirjoitusta on jo odottamassa, SQLite -kirjoitusvirhe kirjataan lokiin (`[ccr] durable persist failed`) eikä sitä yritetä uudelleen, ja kaatuminen ennen lykättyä kirjoitusajoa menettää myös sen. Tällainen lohko pysyy vain muistissa ja poistuu uudelleenkäynnistyksen jälkeen. Katso muuttujan [ympäristöviite](../reference/ENVIRONMENT.md).
 
 ### Kaksi merkkiä
 
@@ -333,8 +333,8 @@ Joten "lohko katosi" ei ole pelkkä uudelleenkäynnistystarina: sub-512 KB -lohk
 
 - **Avain (stdio):** stdio-soittajalla ei ole pyyntökohtaista identiteettiä, joten se todennetaan `OMNIROUTE_API_KEY` (asetettu MCP -palvelimen `env` ssä). Ilman sitä soittaja on anonyymi ja työkalut, jotka vaativat päämiehen, voivat heiketä.
 - **`tools[]` on ruiskutuksen ennakkoehto.** CCR retrieve-protocol -käsky (#8033) injektoidaan** vain** kun pyynnön mainostettu `tools[]` osoittaa, että asiakas voi todella saavuttaa `omniroute_ccr_retrieve`. Osuma on erottimella (`__`, `.`, `/`, `:`) rajattu loppuosuus, — ei koskaan paljaalla osamerkkijonolla — joten nimiavaroitu nimi, kuten `mcp__gateway__omniroute_ccr_retrieve` lasketaan silti. Puuttuva tai ei-vastaava `tools[]` tarkoittaa, että käskyä _ei_ syötetä suunnittelun mukaan.
-- **`codemode:false` (OpenCode asiakkaat).** OpenCode on oletuksena Code Mode, joka mainostaa vain alkuperäisiä työkalujaan mallille ja** ei** laita MCP työkalut alkuperäiseen `tools[]` luetteloon. Aseta `codemode: false` MCP -palvelinmerkintään, jotta `omniroute_ccr_*` työkaluja mainostetaan. Tämä on a** asiakas** asetus, ei OmniRoute. Se ei saa vielä CCR -käskyä: OpenCode nimeää työkalun `<server>_<tool>`, joten palvelin nimeltä `omniroute` paljastaa `omniroute_omniroute_ccr_retrieve`, eikä `_` ole yksi sovitetuista erottimista.
-- **Rehtorit.** Tallennus ja haku eristetään todennettua pääkäyttäjää kohti (per API -avainta). Avain näkee vain omat lohkonsa.
+- **`codemode:false` (OpenCode asiakkaat).** OpenCode on oletuksena Code Mode, joka mainostaa vain alkuperäisiä työkalujaan mallille ja** ei** laita MCP työkalut alkuperäiseen `tools[]` luetteloon. Aseta `codemode: false` MCP -palvelinmerkintään, jotta `omniroute_ccr_*` työkaluja mainostetaan. Tämä on a** asiakas** asetus, ei OmniRoute. OpenCode nimeää työkalun `<server>_<tool>`, joten palvelin nimeltä `omniroute` paljastaa `omniroute_omniroute_ccr_retrieve`; `_` on yksi sovitetuista erottimista, joten CCR -käsky syötetään tämän nimen alle, kun pyyntö sisältää CCR -merkin.
+- **Rehtorit.** Tallennus ja haku eristetään todennettua pääasiallista kohti (per API -avainta). Avain näkee vain omat lohkonsa.
 
 ### Laajuudet työkalua kohden
 
@@ -353,20 +353,20 @@ Puuttuva laajuus palauttaa an**MCP työkaluvirheen tulos** (`isError: true`, ei 
 
 ### Asiakasmatriisi
 
-| Asiakas             | Kuljetus                                       | Konfigurointi käytettäväksi                                                                                                                                                                                                               | `tools[]` mainostettu? (→ CCR -ohje syötetty)                                                                                                                                              |
-| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Claude koodi        | suoratoisto-http                               | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                         | Kyllä — MCP-yhteensopiva; pistetään.                                                                                                                                                       |
-| Cursor / Cline      | `stdio`** tai** `streamable-http`              | stdio: `omniroute --mcp` ja `OMNIROUTE_API_KEY` `env`:ssä; tai MCP -etäsyöttö, joka osoittaa `http://localhost:20128/api/mcp/stream` (katso [asennusopas → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Kyllä, — mainostaa `omniroute_ccr_*` -työkaluja.                                                                                                                                           |
-| OpenCode            | suoratoisto-http                               | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                           | Vain `codemode: false` mainostetut työkalut; ohjetta ei edelleenkään syötetä, koska `omniroute_omniroute_ccr_retrieve` ei täsmää (katso [Asiakkaan edellytykset](#client-prerequisites) ). |
-| OpenAI-yhteensopiva | OpenAI-yhteensopiva HTTP (chatin täydennykset) | tavallinen keskustelun täydennysasiakas OpenAI-yhteensopivaa päätepistettä vastaan                                                                                                                                                        | **Ei koskaan** — tavallista OpenAI-yhteensopivaa soittajaa ei koskaan käsketty soittamaan työkaluun, eikä ohjetta anneta.                                                                  |
+| Asiakas             | Kuljetus                                       | Konfigurointi käytettäväksi                                                                                                                                                                                                               | `tools[]` mainostettu? (→ CCR -ohje syötetty)                                                                                                                             |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude koodi        | suoratoisto-http                               | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                         | Kyllä — MCP-yhteensopiva; pistetään.                                                                                                                                      |
+| Cursor / Cline      | `stdio`** tai** `streamable-http`              | stdio: `omniroute --mcp` ja `OMNIROUTE_API_KEY` `env`:ssä; tai MCP -etäsyöttö, joka osoittaa `http://localhost:20128/api/mcp/stream` (katso [asennusopas → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Kyllä, — mainostaa `omniroute_ccr_*` -työkaluja.                                                                                                                          |
+| OpenCode            | suoratoisto-http                               | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                           | Vain `codemode: false` mainostetut työkalut; sitten ruiskutetaan ja nimetään `omniroute_omniroute_ccr_retrieve` (katso [Asiakkaan edellytykset](#client-prerequisites) ). |
+| OpenAI-yhteensopiva | OpenAI-yhteensopiva HTTP (chatin täydennykset) | tavallinen keskustelun täydennysohjelma OpenAI-yhteensopivaa päätepistettä vastaan                                                                                                                                                        | **Ei koskaan** — tavallista OpenAI-yhteensopivaa soittajaa ei koskaan käsketty soittamaan työkaluun, eikä ohjetta anneta.                                                 |
 
 ### Hakurajoitukset ja sivutus
 
-MCP -työkalun tekstitulokset leikataan `mcpAccessibility.maxTextChars` ympärille (oletus `50000`). Lohkon `full` -palautuksen yläraja on 256 KiB —** ei ole rajatonta täyttä hakua** . Kun lohkon `chars=N` on suuri, sivua se sen sijaan, että vedät koko jutun:
+MCP -työkalun tekstitulokset leikataan `mcpAccessibility.maxTextChars` ympärille (oletusarvo `50000`). Lohkon `full` -palautuksen yläraja on 256 KiB —** ei ole rajatonta täyttä hakua** . Kun lohkon `chars=N` on suuri, sivua se sen sijaan, että vedät koko jutun:
 
 - Nyrkkisääntö:**`chars > 40000` → käytä `mode`** , ei koskaan paljain täynnä.
 - `mode:"grep"` — regex `pattern` sovitettu rivi riviltä, jopa 1 000 vastaavaa riviä (`unique: true` drops toistaa), edullisin "etsi yksi tarvitsemani rivi".
-- `mode:"lines"` — 1-indeksoitu rivialue; tarvitsee sekä `start` että `end`.
+- `mode:"lines"` — 1-indeksoitu rivialue; vaatii sekä `start` että `end`.
 - `mode:"head"` / `mode:"tail"` — first/last `n` rivit.
 - `mode:"stats"` — rivit, merkit ja tavut laskevat ilman runkoa.
 
@@ -378,7 +378,7 @@ Hakutyökalun nimi on tällä hetkellä `omniroute_ccr_retrieve` ( `omniroute_` 
 
 ### Istunnon elinkaari
 
-Streamable-HTTP-istunnot ovat tyhjäkäynnillä ja palvelin kerää ne; tyhjäkäyntiikkuna on asetettu `OMNIROUTE_MCP_SESSION_IDLE_MS` (oletusarvo 5 minuuttia; viitataan nimellä, ei kovakoodattu arvo, joten tämä sivu ei ajaudu muuttuessaan). Käyttämättömän istunnon oire on HTTP 404 ja `Unknown Mcp-Session-Id` — Korjaustoimenpide on muodostaa yhteys uudelleen tai käynnistää istunto uudelleen,** ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen.
+Streamable-HTTP-istunnot ovat tyhjäkäynnillä ja palvelin kerää ne; tyhjäkäynnistysikkuna on asetettu `OMNIROUTE_MCP_SESSION_IDLE_MS` (oletusarvo 5 minuuttia; viitataan nimellä, ei kovakoodattu arvo, joten tämä sivu ei ajaudu, kun se muuttuu). Käyttämättömän istunnon oire on HTTP 404 ja `Unknown Mcp-Session-Id` — Korjaustoimenpide on muodostaa yhteys uudelleen tai käynnistää istunto uudelleen,** ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen.
 
 ## API-rajapinta
 

@@ -20,6 +20,8 @@ Yoki ochiq transport orqali:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -130,20 +132,20 @@ Claude Desktop, Cursor, Cline va mos MCP mijozlarini sozlash uchun [MCP mijozini
 | Asbob                               | Qo'llash sohalari   | Tavsif                                                                                                                                          |
 | :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_compression_status`      | `read:compression`  | Siqish sozlamalari, tahlil xulosasi va keshdan xabardor statistika ( `analytics.mcpDescriptionCompression` metamaʼlumotlarini oʻz ichiga oladi) |
-| `omniroute_compression_configure`   | `write:compression` | Siqish rejimini, chegara chegarasini, maqsad nisbatini, tizimni tezkor saqlashni, MCP tavsifini siqish tugmachasini sozlang                     |
+| `omniroute_compression_configure`   | `write:compression` | Siqish rejimi, chegara, maqsad nisbati, tizim tezkor saqlanishi, MCP tavsifini siqish tugmasi sozlang                                           |
 | `omniroute_set_compression_engine`  | `write:compression` | Faol dvigatelni (off/caveman/rtk/stacked) va Caveman/RTK intensivligini tanlang                                                                 |
 | `omniroute_list_compression_combos` | `read:compression`  | Nomlangan siqish kombinatsiyalarini va ularning dvigatel quvurlarini ro'yxati                                                                   |
 | `omniroute_compression_combo_stats` | `read:compression`  | Siqish kombinatsiyasi va dvigatel bo'yicha guruhlangan tahlillar                                                                                |
 | `omniroute_ccr_store`               | `write:compression` | Qo'ng'iroq qiluvchi tomonidan ajratilgan kontentni cheklangan xotiradagi CCR do'konida saqlang va marker va `ccr://` havolasini qaytaring       |
 | `omniroute_ccr_retrieve`            | `read:compression`  | CCR kontentini toʻliq yoki bosh, quyruq, chiziqlar, grep va statistika rejimlari bilan oling                                                    |
 | `omniroute_ccr_inspect`             | `read:compression`  | Kontentni qaytarmasdan qo'ng'iroq qiluvchiga tegishli CCR metama'lumotlarini tekshiring                                                         |
-| `omniroute_ccr_list`                | `read:compression`  | Qo'ng'iroq qiluvchiga tegishli CCR bloklari uchun sahifalangan metama'lumotlar ro'yxati                                                         |
+| `omniroute_ccr_list`                | `read:compression`  | Qo'ng'iroq qiluvchiga tegishli CCR bloklari uchun sahifalangan metama'lumotlarni sanab o'ting                                                   |
 | `omniroute_ccr_delete`              | `write:compression` | Qo'ng'iroq qiluvchiga tegishli CCR blokini o'chiring                                                                                            |
-| `omniroute_ccr_stats`               | `read:compression`  | Qo'ng'iroq qiluvchining xotiradan foydalanishi, hayot davri hisoblagichlari va do'kon cheklovlari haqida xabar bering                           |
+| `omniroute_ccr_stats`               | `read:compression`  | Qo'ng'iroq qiluvchining xotiradan foydalanishi, hayot aylanishi hisoblagichlari va do'kon cheklovlari haqida xabar bering                       |
 | `omniroute_rtk_discover`            | `read:compression`  | RTK chiqish namunalarida takrorlanuvchi shovqinlarni toping                                                                                     |
 | `omniroute_rtk_learn`               | `read:compression`  | Tanlangan namunalardan koʻrib chiqiladigan RTK filtri loyihasini yarating                                                                       |
 
-CCR yozuvlari ikki bosqichli do'kondan foydalanadi: mahalliy bulutli bo'lmagan ish vaqtlarida, bardoshli SQLite darajasida (`ccr_blocks`, sukut bo'yicha) tomonidan qo'llab-quvvatlanadigan issiq xotira darajasi, shuning uchun blok 512 KB va bulutda ishlaydigan bloklardan tashqari, TTL tugaguncha — quvib chiqarish yoki qayta ishga tushirishdan omon qoladi. Har bir blok 2 MiB, har bir asosiy 16 MiB va global do'kon 64 MiB bilan cheklangan. Yozuvlar sukut bo'yicha 24 soatlik TTL (maksimal etti kun). To'liq MCP olish 256 KiB bilan cheklangan; diapazonli va grep rejimlari orqali kattaroq bloklar mavjud bo'lib qoladi. Saqlash, qidirish, ro'yxatga olish, tekshirish, o'chirish va statistika autentifikatsiya qilingan API kaliti printsipi tomonidan ajratilgan. Audit yozuvlari xeshlar va o'lchamdagi metama'lumotlarni o'z ichiga oladi, hech qachon tarkibga kirmaydi. Operatorga tegishli tafsilotlar (ikkita marker, mijoz uchun zarur shartlar, `codemode:false`, har bir asbob doirasi, sahifalash va diagnostika matritsasi) [Compression Engines → Prerequisites / operator qo‘llanmasida](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) joylashgan.
+CCR yozuvlari ikki bosqichli do'kondan foydalanadi: mahalliy bulutli bo'lmagan ish vaqtlarida, bardoshli SQLite darajasida (`ccr_blocks`, sukut bo'yicha yoqilgan) qo'llab-quvvatlanadigan issiq xotira darajasi, shuning uchun blok 512 KB dan ortiq ish vaqti va bulutli `COMPRESSION_CCR_DURABLE_STORE=false` tashqari, TTL tugaguncha — quvib chiqarish yoki qayta ishga tushirishda omon qoladi. Bardoshli yozish eng yaxshi harakatdir: u 1000 ta yozish kutilayotgan paytda to'xtatiladi va muvaffaqiyatsiz SQLite yozish qayd qilinadi, qayta urinilmaydi, shuning uchun qayta ishga tushirilganda blok yo'qoladi. Har bir blok 2 MiB, har bir asosiy 16 MiB va global do'kon 64 MiB bilan cheklangan. Yozuvlar sukut bo'yicha 24 soatlik TTL (maksimal etti kun). To'liq MCP olish 256 KiB bilan cheklangan; diapazonli va grep rejimlari orqali kattaroq bloklar mavjud bo'lib qoladi. Saqlash, qidirish, ro'yxatga olish, tekshirish, o'chirish va statistika autentifikatsiya qilingan API kaliti printsipi tomonidan ajratilgan. Audit yozuvlari xeshlar va o'lchamdagi metama'lumotlarni o'z ichiga oladi, hech qachon tarkibga kirmaydi. Operatorga tegishli tafsilotlar (ikkita marker, mijoz uchun zarur shartlar, `codemode:false`, har bir asbob doirasi, sahifalash va diagnostika matritsasi) [Compression Engines → Prerequisites / operator qo‘llanmasida](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) joylashgan.
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` ostida MCP tavsifi siqishni alohida xabar qiladi. Bu qiymatlar MCP roʻyxatidagi tavsiflar (`tools`, `prompts`, `resources` va `resourceTemplates`) uchun metamaʼlumotlar oʻlchamidagi taxminlardir; ular provayderdan foydalanish cheklari emas va `source: "mcp_metadata_estimate"` bilan belgilangan.
 
@@ -153,14 +155,14 @@ Yuqoridagi siqish vositalaridan alohida, OmniRoute faylni siqib chiqaradigan baj
 
 Asosiy xatti-harakatlar:
 
-- ≥ 30 ta ketma-ket takrorlanuvchi birodarli qatorlarni bosh + quyruq xulosasiga yig‘adi
+- ≥ 30 ta ketma-ket takrorlanuvchi birodarli satrlarni bosh + quyruq xulosasiga yig‘adi
 - Playwright/computer-use tomonidan talab qilinadigan `[ref=eXX]` langarlarini saqlaydi
-- Katta oʻlchamdagi matnni (> 50 000 ta belgi) navigatsiya boʻyicha maslahat bilan qattiq qisqartiradi
+- Katta oʻlchamdagi matnni (> 50 000 ta belgi) navigatsiya koʻrsatmasi bilan qattiq qisqartiradi
 - Kutilayotgan tejash:** 60–80%** brauzer oniy tasvir yuklamalarida
 
 Konfiguratsiya: global sozlamalarda `compression.mcpAccessibility` (migratsiya 056). Amalga oshirish: `open-sse/services/compression/engines/mcpAccessibility/`. To'liq hujjatlar: [Siqish dvigatellari — MCP Maxsus imkoniyatlar daraxti filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Ushbu vositalar orqasidagi ish vaqti siqish modeli uchun [Siqish dvigatellari](../compression/COMPRESSION_ENGINES.md) va [RTK siqishni](../compression/RTK_COMPRESSION.md) qarang.
+Ushbu vositalar ortidagi ish vaqti siqish modeli uchun [Siqish dvigatellari](../compression/COMPRESSION_ENGINES.md) va [RTK siqishni](../compression/RTK_COMPRESSION.md) qarang.
 
 ## 1Proxy vositalari (3)
 

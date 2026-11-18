@@ -159,11 +159,11 @@ OmniRoute paljastaa 6 A2A -taitoa yhdistettynä `src/lib/a2a/taskExecution.ts::A
 | Älykäs reititys         | `smart-routing`      | Ohjaa kehotteen optimaalisen provider/combo läpi käyttämällä OmniRoute:n yhdistelmämoottoria + -pisteytystä                                                  | reititys, palveluntarjoajat | "Reittiä tämä kehote parhaan mallin kautta"       |
 | Kiintiöiden hallinta    | `quota-management`   | Raportoi palveluntarjoajan kiintiön tilan, auttaa soittajia päättämään, milloin throttle/switch                                                              | kiintiö, palveluntarjoajat  | "Tarkista antrooppinen kiintiö"                   |
 | Palveluntarjoajan löytö | `provider-discovery` | Luetteloi asennetut palveluntarjoajat, joilla on ominaisuudet, vapaan tason liput, OAuth tila                                                                | tarjoajat, löytö            | "Mitä palveluntarjoajia on saatavilla?"           |
-| Kustannusanalyysi       | `cost-analysis`      | Arvioi request/conversation :n kustannukset luettelon + viimeaikaisen käytön perusteella                                                                     | hinta, käyttö               | "Arvio tämän keskustelun kustannuksista"          |
-| Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajakohtaisesti                                                                                   | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
+| Kustannusanalyysi       | `cost-analysis`      | Arvio request/conversation :n hinnasta luettelon + viimeaikaisen käytön perusteella                                                                          | hinta, käyttö               | "Arvio tämän keskustelun kustannuksista"          |
+| Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajan mukaan                                                                                      | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
 | Listaa ominaisuudet     | `list-capabilities`  | Palauttaa koko 45 merkinnän Agent Skills -luettelon (23 API + 21 CLI + 1 config) merkintätaulukkona, jossa on raaka SKILL.md URLs kontekstin lisäystä varten | luettelo, löytö, taidot     | "Lista kaikki OmniRoute -ominaisuudet"            |
 
-> Agenttikortti tulee pitää linjassa reaaliaikaisen 381-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
+> Agenttikortti tulee pitää linjassa reaaliaikaisen 394-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
 
 ### `list-capabilities` Skill Detail
 

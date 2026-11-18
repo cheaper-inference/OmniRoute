@@ -808,108 +808,173 @@ Diúltaíonn `GET /v1/batches` do ghlaoiteoir gan ainm le `401` fiú nuair atá
 
 ## API Cuardaigh
 
-Astarraingt soláthraithe gréasáin/cuardaigh (Tavily, Brave, Exa, Serper, etc.).
+Astarraingt soláthraithe Gréasáin/cuardaigh (Tavily, Brave, Exa, Serper, etc.).
 
-| Modh | Conair                 | Cur síos                                                                                                         |
-| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Liosta de na soláthraithe cuardaigh cumraithe + na cumais atá acu                                                |
-| POST | `/v1/search`           | Rith fiosrúchán cuardaigh — bailíochtaítear an corp le `v1SearchSchema`, agus tacaítear le taisceadh/comhchumasc |
-| GET  | `/v1/search/analytics` | Staitisticí amas/moille/taisce in aghaidh an tsoláthraí                                                          |
+| Modh | Cosán                  | Cur síos                                                                                              |
+| ---- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Liosta de na soláthraithe cuardaigh cumraithe + cumais                                                |
+| POST | `/v1/search`           | Rith ceist chuardaigh — bailíochtaithe ag `v1SearchSchema`, le tacaíocht do thaisceadh/comhchónascadh |
+| GET  | `/v1/search/analytics` | Staitisticí amas/moille/taiscthe de réir soláthraí                                                    |
 
 **Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear an beartas cuardaigh i bhfeidhm trí `enforceApiKeyPolicy`.
 
-**Uathroghnú:** gan `provider`, ritheann an soláthraí is saoire a bhfuil nasc cumraithe aige ar
-dtús, agus is é an chéad cheann eile is saoire an soláthraí cúltaca. Ní úsáidtear soláthraithe
-saora mar rogha dheireanach (`duckduckgo-free`) ach nuair nach bhfuil aon rud eile cumraithe.
-Áirítear SearXNG féinóstáilte mar rud cumraithe a luaithe a stórálann a nasc `baseUrl` fíor (seachas
-an réamhshocrú catalóige `http://localhost:8888/search`): ansin rangaítear é mar sholáthraí $0
-roimh na soláthraithe a bhfuil eochair acu, agus is é an soláthraí is saoire a bhfuil eochair aige
-an cúltaca, lena n-áirítear nuair a fhreagraíonn SearXNG le 400, 401, 403 nó 404. Ní áirítear
-`baseUrl` nach URL bailí `http(s)` é nó a dhíríonn ar sheoladh meiteashonraí néil. Déantar nasc
-SearXNG a stórálann comhartha a rangú ar an mbealach seo ach amháin thar `https://` nó loopback
-`http://`. Thar `http://` iargúlta simplí ní úsáidtear mar chúltaca riamh é agus fanann sé ina
-rogha dheireanach, gan é a úsáid ach nuair nach bhfuil aon soláthraí eile cumraithe nó nuair a
-iarrtar é de réir ainm; mar sin seoltar an comhartha i ngnáth-théacs sa dá chás sin.
+### Comhcheangail ainmnithe cuardaigh/fála
+
+Glacann `POST /v1/search` agus `POST /v1/web/fetch` araon le `model` mar ainm teaglama shábháilte.
+Úsáid `model` nó `provider` sainráite; má sheoltar an dá cheann, seoltar `400`.
+Gan ceachtar réimse, fanann roghnú uathoibríoch an tsoláthraí atá ann cheana gan athrú.
+
+Taispeánann an Tógálaí Teaglama agus a chatalóg Cuir Múnla leis iontrálacha dúchasacha oibríochtaí Gréasáin
+do sholáthraithe nasctha, fiú mura bhfuil aon liosta samhlacha LLM acu. Taispeánann Serper **Cuardach Gréasáin**;
+taispeánann Tavily **Cuardach Gréasáin / Eastóscadh leathanaigh**, agus taispeánann soláthraithe atá in ann
+fáil amháin **Eastóscadh leathanaigh**. Roghnaigh an iontráil agus an cuntas mar is gnách. Freastalaíonn iontráil Tavily amháin
+ar an dá chríochphointe Gréasáin; ní chuirtear na hiontrálacha oibríochta seo le roghnóirí cliant comhrá amháin
+ná le taiscéalaithe samhlacha comhrá.
+
+Mar shampla, cruthaigh teaglama **tosaíochta** darb ainm `shared-free` leis na spriocanna seo in ord:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Ansin úsáid an t-ainm céanna ar gach dromchla:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Breithníonn an cuardach Tavily agus ansin Serper; breithníonn an fháil Tavily agus ansin Jina Reader;
+seachnaíonn an comhrá na soláthraithe tiomnaithe cuardaigh/fála agus breithníonn sé OpenAI. Tagann an chomhoiriúnacht
+ó chlárlanna fhorghníomhaithe an chuardaigh/fála, ní ó fhocail in ainm samhla.
+Tagann scagadh roimh roghnú dintiúr agus seoladh, agus ní athraíonn sé an teaglama sábháilte riamh.
+
+Tacaíonn bealaí cumais neamhchomhrá le `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, agus `p2c`. Diúltaítear do straitéisí sintéise comhrá amháin amhail
+`fusion`, `pipeline`, agus `context-relay` ar bhealaí neamhchomhrá seachas iad a chur i bhfeidhm go ciúin
+ar chuardach nó ar mheáin ghinte.
+Láimhseálann an t-inneall teaglama atá ann cheana cúltitimh in ord, lena n-áirítear teipeanna cuóta ón soláthraí uachtarach,
+agus coinníonn sé aitheantóirí céime, pionnaí cuntais, liostaí ceadaithe cuntas in aghaidh na céime,
+tagairtí neadaithe, scóipeanna nasc/cuóta an ghlaoiteora agus beartas rochtana an teaglama. Coinníonn na torthaí a
+scéim dhúchasach chuardaigh/fála, lena n-áirítear an soláthraí iarbhír; sainaithníonn
+`X-OmniRoute-Combo-Trace` an cinneadh ródaithe. Seolann teaglamaí anaithnide `404`; seolann teaglamaí neamhghníomhacha
+agus teaglamaí nach bhfuil aon spriocanna comhoiriúnacha acu `400`.
+
+Úsáideann gach iarracht teaglama soláthraí sainráite amháin. Ní féidir leis linn soláthraithe uathoibríoch dúchasach
+an teaglama a ghairm i ngan fhios dó. Coinníonn iarratais le soláthraí sainráite a n-iompar soláthraí aonair atá ann cheana.
+Seolann iarratais dhíreacha chomhrá a dhíríonn ar sholáthraithe tiomnaithe cuardaigh/fála JSON `400` inghníomhaithe
+seachas titim isteach i bhforghníomhaitheoir ar stíl OpenAI.
+
+### Bealaí teaglama a bhaineann go sonrach le cumas
+
+Féadfaidh teaglamaí sábháilte réad `routes` a bheith acu a bhfuil cumais API mar eochracha acu. Is leis gach bealach
+a liosta spriocanna, a straitéis agus a chumraíocht ama rite féin. Fanann na barrleibhéil `models`, `strategy`, agus `config`
+ina bplean Comhrá atá comhoiriúnach leis an leagan oidhreachta; leanann sean-teaglamaí gan `routes` ag obair gan athrú.
+
+Is iad na heochracha bealaí tacaithe `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, agus `audio-generation`. Tarlaíonn teilgean an chríochphointe roimh roghnú dintiúr,
+scóráil nó seoladh. Roghnaíonn tagairtí teaglama neadaithe bealach an teaglama linbh don chumas céanna.
+
+Glacann `POST /v1/music/generations` agus `POST /v1/ocr` le hainm teaglama in `model`. Glacann an dúchasach
+`POST /v1/music` atá comhoiriúnach le ElevenLabs le hainm teaglama in `model_id` freisin, ach ní mór do gach
+sprioc inúsáidte ar an gcríochphointe dúchasach sin a bheith ina samhail cheoil ElevenLabs ionas go gcaomhnófar a
+chonradh freagartha dhénártha. Glacann `POST /v1/sound-generation` le teaglama `audio-generation` in `model_id` faoin
+srian dúchasach dénártha céanna. Úsáid `/v1/music/generations` le haghaidh soláthraithe ceoil ilchineálacha.
+
+**Roghnú uathoibríoch:** gan `provider`, ritheann an soláthraí is saoire a bhfuil nasc cumraithe aige ar dtús
+agus is é an chéad cheann eile is saoire an teipchúltú. Ní úsáidtear soláthraithe saor in aisce mar rogha dheiridh
+(`duckduckgo-free`) ach nuair nach bhfuil aon rud eile cumraithe. Áirítear SearXNG féinóstáilte mar chumraithe a luaithe a
+stórálann a nasc `baseUrl` fíor (seachas réamhshocrú catalóige `http://localhost:8888/search`): ansin rangaithear é mar
+sholáthraí $0 roimh na cinn a bhfuil eochair acu, agus is é an soláthraí a bhfuil eochair aige agus atá is saoire an teipchúltú,
+fiú nuair a fhreagraíonn SearXNG le 400, 401, 403 nó 404. Ní áirítear `baseUrl` nach URL bailí `http(s)` é nó a dhíríonn
+ar sheoladh meiteashonraí néil. Ní rangaithear nasc SearXNG a stórálann comhartha ar an mbealach seo ach thar
+`https://` nó `http://` loopback. Thar `http://` iargúlta simplí ní bhíonn sé ina theipchúltú riamh agus fanann sé ina rogha
+dheiridh, á úsáid ach nuair nach bhfuil aon soláthraí eile cumraithe nó nuair a iarrtar é de réir ainm; dá bhrí sin seolann sé
+an comhartha i dtéacs soiléir sa dá chás sin.
 
 ### `provider_options` Exa agus Tavily
 
-Léann Exa agus Tavily réimsí a bhaineann go sonrach leis an soláthraí ó mhála ainmspáis:
+Léann Exa agus Tavily réimsí a bhaineann go sonrach leis an soláthraí ó mhála ainmnithe:
 `provider_options.exa` (nó `provider_options["exa-search"]`) agus `provider_options.tavily`
-(nó `provider_options["tavily-search"]`). Ní chuirtear ar aghaidh ach na heochracha thíos. Déantar
-gach ceann díobh a sheiceáil in aghaidh a scéimre Zod féin in
-`open-sse/handlers/search/providerOptionsPassthrough.ts`, agus baintear eochair a bhfuil an cineál
-mícheart aici. Déantar neamhaird de gach eochair eile, lena n-áirítear fíordheimhniú, URL bonn,
-`stream` agus `outputSchema`. Oibríonn na heochracha cothroma a úsáideann soláthraithe eile
-(`cx`, `depth`, ...) mar a d’oibrigh siad roimhe seo.
+(nó `provider_options["tavily-search"]`). Ní chuirtear ar aghaidh ach na heochracha thíos. Seiceáiltear gach ceann acu
+i gcoinne a scéimre Zod féin in `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+agus caitear eochair a bhfuil an cineál mícheart aici amach. Déantar neamhaird d’aon eochair eile,
+lena n-áirítear auth, URL bonn,
+`stream` agus `outputSchema`. Oibríonn na heochracha chomhréidhe a úsáideann soláthraithe eile (`cx`, `depth`, ...)
+mar a bhí roimhe seo.
 
-| Soláthraí | Réimsí barrleibhéil                                                                                                                                                                                                                                                                                                                                                       | Neadaithe                                                                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitiveanna cothroma), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` cumaiscthe thar an réamhshocrú `{ text: true, highlights: true }` |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+| Soláthraí | Réimsí barrleibhéil                                                                                                                                                                                                                                                                                                                                                       | Neadaithe                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitives chomhréidhe), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | Cumaisctear `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` thar an réamhshocrú `{ text: true, highlights: true }` |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Bíonn réimsí cineálacha i réim i gcónaí: `query`, `max_results`, `filters` (fearainn), `country`
-agus an topaic a dhíorthaítear ó `search_type`. Ar Exa, coimeádann `search_type: "news"`
-`category: "news"`. Glacann Tavily le `search_type: "finance"` freisin (`topic: "finance"`).
+Bíonn an bua i gcónaí ag na réimsí cineálacha: `query`, `max_results`, `filters` (fearainn), `country` agus an
+t-ábhar a dhíorthaítear ó `search_type`. Ar Exa, coimeádann `search_type: "news"` `category: "news"`.
+Glacann Tavily freisin le `search_type: "finance"` (`topic: "finance"`).
 
-Taifeadtar costas cuardaigh Firecrawl in aghaidh gach bloc tosaithe de 10 dtoradh a chuirtear
-ar ais, ag $0.002 (2 chreidmheas) in aghaidh an bhloic agus bloc amháin ar a laghad in aghaidh
-an ghlao
-([Billeáil Firecrawl](https://docs.firecrawl.dev/billing)): cosnaíonn 11 toradh $0.004.
+Taifeadtar costas cuardaigh Firecrawl in aghaidh gach bloc tosaithe de 10 dtoradh a chuirtear ar ais, ag $0.002 (2
+chreidmheas) in aghaidh an bhloic agus bloc amháin ar a laghad in aghaidh an ghlao
+([billeáil Firecrawl](https://docs.firecrawl.dev/billing)): cosnaíonn 11 toradh $0.004.
 
-Sroicheann an cineálach `time_range` an dá sholáthraí anois: faigheann Exa
-`startPublishedDate` (stampa ama ISO) agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn
-dáta sainráite in `provider_options` an dáta mapáilte.
+Sroicheann an cineálach `time_range` an dá sholáthraí anois: faigheann Exa `startPublishedDate` (stampa ama ISO)
+agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn dáta sainráite in `provider_options`
+an dáta mapáilte.
 
-Coinníonn torthaí Exa `id`, `highlights` (gach buaicphointe, ní hamháin an chéad cheann a úsáideadh
-mar an `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` in
+Coinníonn torthaí Exa `id`, `highlights` (gach buaicphointe, ní hamháin an chéad cheann a úsáidtear mar an
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` in
 `provider_raw`. Coinníonn torthaí Tavily `images` agus `favicon`.
 
-Taifeadtar costas cuardaigh Linkup ag $0.005 do `depth` `fast` agus `standard`, agus $0.05 do
-`deep` ([Praghsáil Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-is cuma cé acu a thagann `depth` ó `provider_options` nó ó shocruithe an naisc.
+Taifeadtar costas cuardaigh Linkup ag $0.005 le haghaidh `depth` `fast` agus `standard`, agus $0.05 le haghaidh
+`deep` ([praghsáil Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+is cuma an dtagann `depth` ó `provider_options` nó ó shocruithe an naisc.
 
-Glacann Exa `type: "lite"` (Exa 3.0) le tacar níos lú réimsí agus diúltaíonn sé don iarratas ar
-fad nuair a shocraítear aon réimse eile. Maidir le lite, baintear `additionalQueries`,
-`systemPrompt` agus gach eochair `contents` seachas `text` agus `highlights` sula ndéantar an
-glao. Ní chuirtear na réimsí atá dímholta `subpages`, `subpageTarget`, `highlights.numSentences`
-agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
+Glacann Exa `type: "lite"` (Exa 3.0) le tacar níos lú réimsí agus diúltaíonn sé don iarratas iomlán
+nuair a bhíonn aon réimse eile socraithe. Maidir le lite, caitear `additionalQueries`, `systemPrompt` agus gach eochair
+`contents` seachas `text` agus `highlights` amach roimh an nglao. Ní chuirtear na réimsí dímheasta
+`subpages`, `subpageTarget`, `highlights.numSentences` agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
 
-Déantar cuntasaíocht na gcostas de réir na clárlainne comhréidhe `costPerQuery`, ach amháin i gcás Exa, a leanann praghsáil Exa féin: $0.007 in aghaidh an ghlao le haghaidh `auto` (agus an leagain oidhreachta `fast`) nó $0.004 le haghaidh `lite` (agus an leagain oidhreachta `instant`), lena gcumhdaítear 10 dtorthaí; $0.001 do gach toradh breise; agus $0.001 in aghaidh gach toraidh a chuirtear ar ais nuair a bhíonn `contents.summary` socraithe. Taifeadtar Tavily mar 1 chreidmheas ($0.008) le haghaidh `search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh `advanced`
-([creidmheasanna API Tavily](https://docs.tavily.com/documentation/api-credits)). Taifeadtar glao le
-`auto_parameters: true` a uasghrádaíonn Tavily go `advanced` fós mar 1 chreidmheas.
+Is éard atá i gcuntasaíocht costas ná an chlárlann chomhréidh `costPerQuery`, seachas i gcás Exa, a leanann praghsáil
+a chuid féin: $0.007 in aghaidh an ghlao le haghaidh `auto` (agus an seanleagan `fast`) nó $0.004 le haghaidh `lite`
+(agus an seanleagan `instant`), lena gclúdaítear 10 dtoradh; $0.001 in aghaidh gach toraidh bhreise; agus $0.001 in
+aghaidh an toraidh a chuirtear ar ais nuair a shocraítear `contents.summary`. Taifeadtar Tavily ag 1 chreidmheas
+($0.008) le haghaidh `search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh
+`advanced` ([creidmheasanna API Tavily](https://docs.tavily.com/documentation/api-credits)). Glao le
+`auto_parameters: true` a uasghrádaíonn Tavily go advanced, taifeadtar fós é ag 1 chreidmheas.
 
 ---
 
-## API Aisghabhála Gréasáin
+## API Fetch Gréasáin
 
-Bain ábhar as URL trí sholáthraí aisghabhála gréasáin cumraithe (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Bain ábhar as URL trí sholáthraí cumraithe fetch gréasáin (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Ní sheolann Parallel Extract (`parallel-search`, an eochair API chéanna le Parallel Search)
-ach Markdown — is `400` aon `format` eile — agus cuireann sé teorainn leis an ábhar ag
-100,000 carachtar. Nuair nach féidir an spriocleathanach féin a bhaint, tuairiscíonn an
-uachtarach é taobh istigh de HTTP 200; taispeánann OmniRoute é sin mar `422` le teachtaireacht
-sheasta.
+Ní thugann Parallel Extract (`parallel-search`, an eochair API chéanna le Parallel Search) ach Markdown ar ais — is `400` é aon `format` eile — agus cuireann sé teorainn leis an ábhar ag 100,000 carachtar. Nuair nach féidir an spriocleathanach féin a bhaint, tuairiscíonn an córas réamhtheachtach é taobh istigh de HTTP 200; cuireann OmniRoute é sin i láthair mar `422` le teachtaireacht sheasta.
 
-| Method | Path            | Description                                                                    |
-| ------ | --------------- | ------------------------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | URL a aisghabháil/a scrapeáil — comhlacht bailíochtaithe ag `v1WebFetchSchema` |
+Ní thugann Keenable Fetch (`keenable-search`) ach Markdown ar ais freisin (is `400` é aon `format` eile) agus cuireann sé teorainn leis an ábhar ag 100,000 carachtar. Oibríonn sé gan eochair: úsáideann iarratas follasach `provider: "keenable-search"` gan nasc críochphointe gan eochair Keenable (teorainneacha ráta in aghaidh IP). Ní bhaineann eochair chumraithe ach na teorainneacha sin; ní úsáideann auto-select Keenable ach nuair atá eochair cumraithe.
 
-**Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear an
-beartas i bhfeidhm trí `enforceApiKeyPolicy`.
+| Modh | Conair          | Cur síos                                                     |
+| ---- | --------------- | ------------------------------------------------------------ |
+| POST | `/v1/web/fetch` | Faigh/scrios URL — bailíochtaíonn `v1WebFetchSchema` an corp |
 
-**Cúltaca feasach ar chuóta (#8297):** nuair nach dtugtar `provider` sainráite, siúileann
-an linn (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) in ord tosaíochta seasta (fill-first) — scipeáiltear soláthraí atá
-teormharaithe ach cumraithe in áit an iarratais a ghearradh amach, agus téann teip
-in-athdhéanta/cuóta ón uachtarach (HTTP 429 i gcónaí; 402/403 do shraitheanna saor in aisce
-de chineál cuóta Firecrawl/Tavily/TinyFish — ní bhaineann sé seo le Jina Reader, agus ní
-tharlaíonn sé riamh do 400 simplí mar gheall ar iarratas mícheart) ar aghaidh chuig an gcéad
-soláthraí creidiúnaithe eile nár triaileadh ag am an iarratais. Nuair a bhíonn gach soláthraí
-sa linn ídithe, seolann an críochphointe `429` amháin (le ceanntásc `Retry-After`) in áit an
-`400` cineálach roimhe seo. Nuair a iarrtar `provider` sainráite, níl aon chúltaca ciúin ann —
-taispeánann soláthraí sainráite atá teormharaithe nó ag teip a earráid féin (`429` má tá sé
-teormharaithe, nó stádas an uachtaraigh ar shlí eile).
+**Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear an beartas i bhfeidhm trí `enforceApiKeyPolicy`.
+
+Úsáideann teaglamaí ainmnithe an [chonradh ródaithe `model`](#named-searchfetch-combinations)
+thuas, agus coimeádann siad na roghanna agus na freagraí a bhaineann go sonrach le fetch.
+
+**Cúltaca feasach ar chuóta (#8297):** nuair nach dtugtar `provider` ná `model`, siúiltear an linn
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`) in ord tosaíochta seasta (líon-ar-tús) — seachnaítear soláthraí atá teoranta ó thaobh ráta de ach atá cumraithe
+seachas an t-iarratas a ghearradh gearr, agus téann teip réamhtheachtach in-athdhéanta/cuóta
+(HTTP 429 i gcónaí; 402/403 i gcás sraitheanna saor in aisce ar nós cuóta Firecrawl/Tavily/TinyFish —
+ní hamhlaidh do Jina Reader, agus ní tharlaíonn sé riamh i gcás iarratas simplí 400 neamhbhailí) ar aghaidh chuig an
+chéad soláthraí inchreidiúnaithe eile nár triaileadh ag am an iarratais. Nuair a bhíonn gach soláthraí sa
+linn ídithe, seolann an críochphointe `429` amháin (le ceanntásc `Retry-After`)
+seachas an `400` cineálach a bhí ann roimhe seo. Nuair a iarrtar `provider` follasach, níl aon chúltaca ciúin ann — taispeánann soláthraí follasach atá teoranta ó thaobh ráta de nó atá ag teip a earráid féin (`429` má tá sé teoranta ó thaobh ráta de, nó stádas an chórais réamhtheachtaigh ar shlí eile).
 
 ---
 
@@ -993,35 +1058,36 @@ comhlánú.
 
 ## Tuairisciú Cuótaí agus Saincheisteanna
 
-| Modh | Conair              | Cur síos                                                                                                |
-| ---- | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | Réamhbhailíochtaigh an cuóta do `provider` + `accountId` sula n-eisítear eochair chláraithe             |
-| POST | `/v1/issues/report` | Tuairiscigh teip ar eochair a eisiúint nó ar chuóta chuig GitHub (éilíonn `GITHUB_ISSUES_REPO` + token) |
+| Modh | Conair              | Cur síos                                                                                                             |
+| ---- | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | Réamhdheimhnigh cuóta le haghaidh `provider` + `accountId` sula n-eisítear eochair chláraithe                        |
+| POST | `/v1/issues/report` | Tuairiscigh teip maidir le cuóta/eochair a eisiúint chuig GitHub (teastaíonn `GITHUB_ISSUES_REPO` + comhartha uathu) |
 
-**Údarú:** Eochair API Bearer (`isAuthenticated`).
+**Fíordheimhniú:** glacann `/v1/quotas/check` eochair API Bearer (`isAuthenticated`). Tá
+`/v1/issues/report` teoranta do bhainistíocht (`requireManagementAuth`), cosúil le
+`/api/v1/registered-keys`: seisiún painéil, comhartha an CLI áitiúil, nó eochair API a bhfuil scóip
+`manage`/`admin` aici; faigheann eochracha API le haghaidh tátail amháin `403`.
 
-### Aisghabháil seisiúin chuóta (rogha)
+### Aisghabháil seisiúin chuóta (roghnach)
 
-Is féidir `POST /v1/chat/completions` nó `POST /v1/responses` neamh-sruthaithe a theipeann le
-hearráid chríochnaitheach chuóta (`402`/`429`/`503` a ndeir a chorp go bhfuil an cuóta nó na creidmheasanna ídithe)
-a chur ar fionraí agus a athsheinm níos déanaí seachas an earráid a thabhairt ar ais. Roghnaíonn an glaoiteoir é seo
-in aghaidh na hiarrata le trí cheanntásc:
+Is féidir `POST /v1/chat/completions` nó `POST /v1/responses` neamhshruthaithe a theipeann le
+hearráid chuóta teirminéil (`402`/`429`/`503` a ndeir a chorp go bhfuil an cuóta nó na creidmheasanna ídithe)
+a chur ar feitheamh agus a athsheinm níos déanaí in ionad an earráid a thabhairt ar ais. Roghnaíonn an glaoiteoir é seo
+do gach iarratas le trí cheanntásc:
 
-| Ceanntásc                    | Luach                                                                       |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                                                      |
-| `x-omniroute-session`        | aitheantas seisiúin, `[A-Za-z0-9._:-]{1,128}`                               |
-| `x-omniroute-recovery-turn`  | aitheantas an tsleachta atá uathúil laistigh den seisiún (an riail chéanna) |
+| Ceanntásc                    | Luach                                                                |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                               |
+| `x-omniroute-session`        | aitheantas seisiúin, `[A-Za-z0-9._:-]{1,128}`                        |
+| `x-omniroute-recovery-turn`  | aitheantas seala atá uathúil laistigh den seisiún (an riail chéanna) |
 
-Níl ach sleachta le `stream: false` gan uirlisí, stair uirlisí ná `previous_response_id`, agus gan
-phionna `x-omniroute-connection`, incháilithe, agus ní mór `STORAGE_ENCRYPTION_KEY` a bheith socraithe
-(stóráiltear an iarraidh criptithe ar feadh suas le 24 uair). Ansin is é `202` freagra na hiarrata le
-`recovery.poll`; déan `GET /v1/quota-recoveries/{id}` a cheistiú (`202` agus é ar feitheamh, `200` leis an
-gcorp aisghafa nuair a bhíonn sé críochnaithe) nó cuir ar ceal le `DELETE`. Ní bhíonn ticéid le feiceáil ach ag an
-eochair API a chruthaigh iad. Críochnaíonn athsheinm a bhfuil a thoradh éiginnte i
-`needs_confirmation` seachas é a sheoladh faoi dhó. Foinse: `src/lib/quota/quotaSessionRecovery.ts`.
-
----
+Ní bhíonn ach sealaí `stream: false` gan uirlisí, stair uirlisí ná `previous_response_id`, agus gan
+biorán `x-omniroute-connection`, incháilithe, agus ní mór `STORAGE_ENCRYPTION_KEY` a bheith socraithe (stóráiltear
+an t-iarratas criptithe ar feadh suas le 24 uair an chloig). Is é `202` an freagra ansin le
+`recovery.poll`; déan suirbhéireacht le `GET /v1/quota-recoveries/{id}` (`202` agus é ar feitheamh, `200` leis an
+gcorp aisghafa nuair a bheidh sé críochnaithe) nó cuir ar ceal le `DELETE`. Ní bhíonn ticéid le feiceáil ach ag an eochair API
+a chruthaigh iad. Críochnaíonn athsheinm nach bhfuil a thoradh cinnte le
+`needs_confirmation` in ionad é a sheoladh faoi dhó. Foinse: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Úsáid féinseirbhíse (`/api/usage/om-usage`)
 
@@ -1746,19 +1812,23 @@ Síntiúis webhook amach le haghaidh imeachtaí OmniRoute (críochnú iarratais,
 
 ---
 
-## Eochracha Cláraithe (Bainistíocht Uathoibríoch)
+## Eochracha Cláraithe (Uathbhainistiú)
 
-Úsáideann fochóras bainistíochta uathoibríoch na n-eochracha é seo chun eochracha API a eisiúint agus a rothlú i gcoinne soláthraí/cuntais thacaíochta, le cuótaí laethúla/uairiúla.
+Úsáideann fochóras bainistíochta uathoibríoch eochracha é seo chun eochracha API a eisiúint agus a rothlú i gcoinne soláthraí/cuntais thacaíochta, le cuótaí laethúla/uairiúla.
 
 | Method | Path                                  | Description                                                                                                                                                                                                                                     |
 | ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Liostaigh eochracha cláraithe (réimír chumhdaithe amháin)                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | Eisigh eochair chláraithe nua — corp: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Seoltar an eochair amh ar ais **uair amháin**. Seoltar `429` ar ais nuair a dhiúltaítear mar gheall ar chuóta. |
-| GET    | `/api/v1/registered-keys/[id]`        | Faigh meiteashonraí eochrach cláraithe (gan ábhar amh)                                                                                                                                                                                          |
+| GET    | `/api/v1/registered-keys`             | Liostaigh eochracha cláraithe (réimír chumhdaigh amháin)                                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys`             | Eisigh eochair chláraithe nua — corp: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Seolann an eochair amh ar ais **uair amháin**. Seolann `429` ar ais nuair a dhiúltaítear mar gheall ar chuóta. |
+| GET    | `/api/v1/registered-keys/[id]`        | Faigh meiteashonraí eochrach cláraithe (gan amhábhar)                                                                                                                                                                                           |
 | DELETE | `/api/v1/registered-keys/[id]`        | Cúlghair eochair chláraithe                                                                                                                                                                                                                     |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Críochphointe sainráite cúlghairme (an éifeacht chéanna le DELETE)                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Críochphointe cúlghairme sainráite (an éifeacht chéanna le DELETE)                                                                                                                                                                              |
+| GET    | `/api/v1/providers/[provider]/limits` | Léigh teorainneacha eisiúna an tsoláthraí                                                                                                                                                                                                       |
+| PUT    | `/api/v1/providers/[provider]/limits` | Socraigh teorainneacha eisiúna an tsoláthraí — corp: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                    |
+| GET    | `/api/v1/accounts/[id]/limits`        | Léigh teorainneacha eisiúna an chuntais                                                                                                                                                                                                         |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Socraigh teorainneacha eisiúna an chuntais — an corp céanna le bealach an tsoláthraí                                                                                                                                                            |
 
-**Fíordheimhniú:** seisiún/eochair API bainistíochta (`requireManagementAuth`) — an garda céanna le `/api/keys`: seisiún deais, comhartha CLI áitiúil, nó eochair API le raon feidhme `manage`/`admin`; faigheann eochracha API le haghaidh tátail amháin `403`. Féach freisin `/v1/quotas/check` agus `/v1/issues/report`.
+**Údarú:** seisiún/eochair API bainistíochta (`requireManagementAuth`) — an garda céanna le `/api/keys`: seisiún painéil, comhartha CLI áitiúil, nó eochair API le scóip `manage`/`admin`; faigheann eochracha API le haghaidh tátail amháin `403`. Féach freisin `/v1/quotas/check` agus `/v1/issues/report`.
 
 ---
 

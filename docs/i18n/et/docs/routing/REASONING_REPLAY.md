@@ -24,19 +24,21 @@ Kuid tüüpilised kliendid (Cursor, Cline, Roo Code, OpenAI SDK) eemaldavad `rea
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Jäädvustamine toimub `open-sse/handlers/chatCore.ts` (kahes kohas, kahel `cacheReasoningFromAssistantMessage` -kõne saidil). Kordus toimub `open-sse/translator/index.ts` pärast skeemi sundimist, kuid enne saatmist.
+
+Tööriistakõne kirjed salvestatakse `buildToolCallCacheKey()` alla, mis on päringu ulatuse kokkuvõte ja tööriista kutse ID, nii et sama ID, mida kasutab muu API -võti või seanss, ei vali kirjet. Ulatus pärineb `buildReasoningCacheScope()`: API -võtme ID ja seansivõti, kui päringul see on. Veerg `tool_call_id` ja armatuurlaud näitavad seetõttu nende kirjete kokkuvõtet.
 
 Lihtsad (tööriistakutsumata) assistendi pöörded on sisestatud erinevalt: `buildAssistantMessageCacheKey()` seedib seansi ulatuse ja normaliseeritud OpenAI-vormingus transkripti kuni selle pöördeni, sest DeepSeek nõuab _iga_ eelneva pöörde põhjendamist, kui `tools` on olemas. Responses-API sihtmärkide puhul (nt `opencode-go/deepseek-v4-flash`, suunatakse `/responses`-sse) kannab ülesvoolu keha `input`, mitte `messages`, nii et `translateRequest()` (`open-sse/translator/index.ts`) teatab tagasihelistamise valiku kaudu seeditava pöördetranskripti ja püüdmissaidid seedivad sama ärakirja. Vastuste korduskäik töötab OpenAI -liigendil iga allikavormingu jaoks, seega esitatakse uuesti ka Anthropic Messagesi kliente (Claude → OpenAI → vastuseid).
 

@@ -84,7 +84,7 @@ function renderPlayground(
         <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
           <div className="flex items-center gap-2 text-text-muted">
             <Icon name="image_search" size={20} />
-            <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
+            <h3 className="text-sm">{bridgeCopy.imageToText.title}</h3>
           </div>
           <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
           <Link
@@ -191,7 +191,7 @@ export default function MediaProviderPageClient({
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {connections.map((conn) => (
-              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-bg-card">
+              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-surface">
                 <span
                   className={`size-2 rounded-full shrink-0 ${
                     conn.testStatus === "active" || conn.testStatus === "success"
