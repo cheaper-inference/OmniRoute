@@ -19,12 +19,12 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "ag-project-test-secr
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const {
-  clearAntigravityProjectPersistenceInFlight,
   extractAntigravityProjectIdFromPayload,
   getStoredAntigravityProjectId,
+  markAntigravityMissingCloudCodeProject,
   persistDiscoveredAntigravityProjectId,
   preferAntigravityConnectionsWithStoredProject,
-} = await import("../../open-sse/services/antigravityProjectPersistence.ts");
+} = await import("../../open-sse/services/antigravityProjectPersist.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -33,12 +33,10 @@ async function resetStorage() {
 }
 
 test.beforeEach(async () => {
-  clearAntigravityProjectPersistenceInFlight();
   await resetStorage();
 });
 
 test.after(async () => {
-  clearAntigravityProjectPersistenceInFlight();
   await resetStorage();
 });
 
@@ -108,7 +106,7 @@ test("preferAntigravityConnectionsWithStoredProject skips confirmed-missing when
   );
 });
 
-test("persistDiscoveredAntigravityProjectId writes projectId to SQLite", async () => {
+test("persistDiscoveredAntigravityProjectId writes projectId without reactivating the row", async () => {
   const connection = await providersDb.createProviderConnection({
     provider: "antigravity",
     authType: "oauth",
@@ -120,17 +118,15 @@ test("persistDiscoveredAntigravityProjectId writes projectId to SQLite", async (
     providerSpecificData: { tier: "legacy-tier" },
     isActive: true,
     testStatus: "active",
-    errorCode: "missing_project_id",
-    lastError: "old error",
   });
 
-  persistDiscoveredAntigravityProjectId(
+  markAntigravityMissingCloudCodeProject(connection.id);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  await persistDiscoveredAntigravityProjectId(
     connection.id,
     "discovered-project-123",
     connection.providerSpecificData as Record<string, unknown>
   );
-
-  await new Promise((resolve) => setTimeout(resolve, 50));
 
   const updated = await providersDb.getProviderConnectionById(connection.id);
   assert.equal(updated?.projectId, "discovered-project-123");
@@ -138,6 +134,44 @@ test("persistDiscoveredAntigravityProjectId writes projectId to SQLite", async (
     (updated?.providerSpecificData as Record<string, unknown>)?.projectId,
     "discovered-project-123"
   );
-  assert.ok(!updated?.errorCode);
-  assert.ok(!updated?.lastError);
+  assert.equal((updated?.providerSpecificData as Record<string, unknown>)?.tier, "legacy-tier");
+  assert.equal(updated?.isActive, false, "a confirmed-missing row stays disabled");
+  assert.equal(updated?.testStatus, "unavailable");
+  assert.equal(updated?.errorCode, "missing_project_id");
+  assert.equal(updated?.lastErrorType, "oauth_missing_project_id");
+});
+
+test("persistDiscoveredAntigravityProjectId keeps metadata written after the caller snapshot", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    name: "persist-project-concurrent",
+    email: "persist-project-concurrent@example.test",
+    accessToken: "token",
+    refreshToken: "refresh",
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    providerSpecificData: { tier: "original-tier" },
+    isActive: true,
+    testStatus: "active",
+  });
+
+  const staleSnapshot = connection.providerSpecificData as Record<string, unknown>;
+
+  // A concurrent metadata write lands after the caller captured its snapshot.
+  await providersDb.updateProviderConnection(connection.id, {
+    providerSpecificData: { tier: "updated-tier", clientProfile: "desktop" },
+  });
+
+  await persistDiscoveredAntigravityProjectId(
+    connection.id,
+    "discovered-project-concurrent",
+    staleSnapshot
+  );
+
+  const updated = await providersDb.getProviderConnectionById(connection.id);
+  const psd = updated?.providerSpecificData as Record<string, unknown>;
+  assert.equal(updated?.projectId, "discovered-project-concurrent");
+  assert.equal(psd?.projectId, "discovered-project-concurrent");
+  assert.equal(psd?.tier, "updated-tier", "metadata written after the snapshot is preserved");
+  assert.equal(psd?.clientProfile, "desktop");
 });

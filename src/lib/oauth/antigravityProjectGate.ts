@@ -5,8 +5,8 @@
  *
  * Maintainer direction on #11284: do NOT reject the connect — SAVE the
  * connection but mark it degraded, so the refresh token stays stored and the
- * request-time bootstrap can self-heal it (persistDiscoveredAntigravityProjectId
- * flips the row back to active). Confirmed-BYOP accounts get disabled by
+ * request-time bootstrap can recover the project id without flipping the row
+ * back to active. Confirmed-BYOP accounts get disabled by
  * markAntigravityMissingCloudCodeProject() on the first dispatch instead.
  */
 
