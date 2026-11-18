@@ -16,10 +16,7 @@ test("default path stays in family and never steps upward", async () => {
     requestedModelId: "claude-opus-4-8",
     tiers,
     ask,
-    candidates: [
-      { modelId: "claude-sonnet-4-6" },
-      { modelId: "gpt-5.6-sol", crossFamily: true },
-    ],
+    candidates: [{ modelId: "claude-sonnet-4-6" }, { modelId: "gpt-5.6-sol", crossFamily: true }],
   });
   assert.equal("modelId" in result && result.modelId, "claude-sonnet-4-6");
 });
@@ -105,4 +102,31 @@ test("cpa run prefixes are stripped before the family check", () => {
   assert.equal(stripRunPrefix("cpa-base/claude-opus-4-8"), "claude-opus-4-8");
   assert.equal(stripRunPrefix("cpa-fast/gpt-5.6-sol"), "gpt-5.6-sol");
   assert.equal(stripRunPrefix("cpa-deep:claude-sonnet-4-6"), "claude-sonnet-4-6");
+});
+
+test("an upward in-family candidate does not hide an eligible same-model retry", async () => {
+  const result = await nextFallback({
+    requestedModelId: "claude-sonnet-4-6",
+    tiers,
+    ask,
+    candidates: [{ modelId: "claude-opus-4-8" }, { modelId: "claude-sonnet-4-6", sameModel: true }],
+  });
+  assert.equal("modelId" in result && result.modelId, "claude-sonnet-4-6");
+  assert.equal("sameModel" in result && result.sameModel, true);
+});
+
+test("a requested model without a tier entry stops before a same-model retry", async () => {
+  let calls = 0;
+  const result = await nextFallback({
+    requestedModelId: "claude-mystery",
+    tiers,
+    candidates: [{ modelId: "claude-mystery", sameModel: true }],
+    ask: () => {
+      calls += 1;
+      return "allow";
+    },
+  });
+  assert.equal(calls, 0);
+  assert.equal(result.modelId, null);
+  assert.equal("reason" in result && result.reason, "requested model has no tier entry");
 });

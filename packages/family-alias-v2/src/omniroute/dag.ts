@@ -10,33 +10,40 @@ export function validateDesiredDag(combos: DesiredCombo[], maxDepth = 6): void {
     }
   }
 
+  // Cycle detection and depth are separate: a node visited earlier still
+  // contributes its full descendant depth, cached once per node.
   const visiting = new Set<string>();
-  const visited = new Set<string>();
-  const walk = (name: string, depth: number) => {
-    if (depth > maxDepth) throw new Error(`combo depth exceeds ${maxDepth}: ${name}`);
+  const longestDepth = new Map<string, number>();
+  const depthBelow = (name: string): number => {
+    const cached = longestDepth.get(name);
+    if (cached !== undefined) return cached;
     if (visiting.has(name)) throw new Error(`combo cycle detected at ${name}`);
-    if (visited.has(name)) return;
     visiting.add(name);
-    const combo = byName.get(name)!;
-    for (const step of combo.models) {
-      if (step.kind === "combo-ref") walk(step.comboName, depth + 1);
+    let depth = 0;
+    for (const step of byName.get(name)!.models) {
+      if (step.kind === "combo-ref") depth = Math.max(depth, depthBelow(step.comboName) + 1);
     }
     visiting.delete(name);
-    visited.add(name);
+    longestDepth.set(name, depth);
+    return depth;
   };
-  for (const name of byName.keys()) walk(name, 0);
+  for (const name of byName.keys()) {
+    if (depthBelow(name) > maxDepth) throw new Error(`combo depth exceeds ${maxDepth}: ${name}`);
+  }
 }
 
 export function deletionOrder(
   live: Array<{ name: string; models?: Array<{ kind?: string; comboName?: string }> }>,
-  staleNames: Set<string>,
+  staleNames: Set<string>
 ): string[] {
   const byName = new Map(live.map((combo) => [combo.name, combo]));
   const incoming = new Map([...staleNames].map((name) => [name, 0]));
   const children = new Map<string, string[]>();
   for (const name of staleNames) {
     const refs = (byName.get(name)?.models ?? [])
-      .filter((step) => step.kind === "combo-ref" && step.comboName && staleNames.has(step.comboName))
+      .filter(
+        (step) => step.kind === "combo-ref" && step.comboName && staleNames.has(step.comboName)
+      )
       .map((step) => step.comboName!);
     children.set(name, refs);
     for (const child of refs) incoming.set(child, (incoming.get(child) ?? 0) + 1);
@@ -56,6 +63,7 @@ export function deletionOrder(
     }
     ready.sort();
   }
-  if (order.length !== staleNames.size) throw new Error("stale combo deletion graph contains cycle");
+  if (order.length !== staleNames.size)
+    throw new Error("stale combo deletion graph contains cycle");
   return order;
 }

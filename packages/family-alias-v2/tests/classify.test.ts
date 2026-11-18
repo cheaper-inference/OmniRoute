@@ -57,7 +57,7 @@ test("marks thinking/effort variants outside the base family chain", () => {
       modelId: "claude-opus-4.6-thinking-high",
       familyId: "claude/opus",
     })?.isReasoningVariant,
-    true,
+    true
   );
 });
 
@@ -77,4 +77,19 @@ test("parses hyphen-delimited generations without merging releases", () => {
   assert.deepEqual(sonnet45?.version.generation, [4, 5]);
   assert.deepEqual(sonnet41?.version.generation, [4, 1]);
   assert.notEqual(sonnet45?.version.display, sonnet41?.version.display);
+});
+
+test("branded models without metadata never merge distinct products", () => {
+  assert.equal(classifyLocalEndpoint(endpoint("gemini-3.1-pro", "gemini")), null);
+  assert.equal(classifyLocalEndpoint(endpoint("gemini-3.1-flash", "gemini")), null);
+  assert.equal(classifyLocalEndpoint(endpoint("gemini-3.1", "gemini"))?.lineage.line, "gemini");
+});
+
+test("metadata provider prefixes map to the routing owner", () => {
+  const classified = classifyLocalEndpoint(endpoint("claude-opus-4-8", "claude"), {
+    modelId: "claude-opus-4-8",
+    familyId: "anthropic/opus",
+  });
+  assert.equal(classified?.lineage.owner, "claude");
+  assert.equal(classified?.lineage.line, "opus");
 });

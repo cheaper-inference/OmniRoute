@@ -41,7 +41,7 @@ export function stripRunPrefix(modelId: string): string {
 
 function consent(headers: FallbackRequest["headers"]): boolean {
   const value = Object.entries(headers ?? {}).find(
-    ([key]) => key.toLowerCase() === "x-open-design-cross-family",
+    ([key]) => key.toLowerCase() === "x-open-design-cross-family"
   )?.[1];
   return value === "1";
 }
@@ -55,31 +55,37 @@ function lineFor(modelId: string, reason: string): string {
  * it. No candidate, a missing tier, an upward step, or a deny all stop on
  * the requested model.
  */
-export async function nextFallback(request: FallbackRequest): Promise<FallbackCandidate | FallbackStop> {
+export async function nextFallback(
+  request: FallbackRequest
+): Promise<FallbackCandidate | FallbackStop> {
   const requested = stripRunPrefix(request.requestedModelId);
   const allowed = consent(request.headers);
   const requestedTier = request.tiers.get(requested);
+  // A missing tier entry for the requested model stops every step, same-model
+  // retries included.
+  if (requestedTier === undefined) {
+    return stop(requested, allowed, "requested model has no tier entry");
+  }
 
+  // Tier eligibility is checked before the pool is chosen, so an upward or
+  // untiered in-family candidate cannot hide an eligible same-model retry.
+  const withinTier = (candidate: FallbackCandidate): boolean => {
+    if (candidate.sameModel) return true;
+    const tier = request.tiers.get(stripRunPrefix(candidate.modelId));
+    return tier !== undefined && tier <= requestedTier;
+  };
   const usable = request.candidates.filter((candidate) => {
     if (candidate.crossFamily && !allowed) return false;
-    return true;
+    return withinTier(candidate);
   });
 
   const inFamily = usable.filter((candidate) => !candidate.sameModel && !candidate.crossFamily);
   const cross = usable.filter((candidate) => candidate.crossFamily);
   const same = usable.filter((candidate) => candidate.sameModel).slice(0, 1);
-  const pool = inFamily.length > 0 ? inFamily : cross.length > 0 && allowed ? cross : same;
+  const pool = inFamily.length > 0 ? inFamily : cross.length > 0 ? cross : same;
 
-  for (const candidate of pool) {
-    const id = stripRunPrefix(candidate.modelId);
-    if (!candidate.sameModel) {
-      if (requestedTier === undefined) {
-        return stop(requested, allowed, "requested model has no tier entry");
-      }
-      const tier = request.tiers.get(id);
-      if (tier === undefined) continue;
-      if (tier > requestedTier) continue;
-    }
+  const candidate = pool[0];
+  if (candidate) {
     const answer = await request.ask(candidate);
     if (answer === "allow") return candidate;
     return stop(requested, allowed, "ask denied");

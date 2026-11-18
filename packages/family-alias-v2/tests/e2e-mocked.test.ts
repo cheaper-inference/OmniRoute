@@ -16,26 +16,32 @@ test("two installations emit only their own subscription families", () => {
   const a = buildDesiredGraph({
     enriched: enrichLocalEndpoints(
       [ep("claude-a", "claude", "claude-fable-5.2")],
-      [{ modelId: "claude-fable-5.2", familyId: "claude/fable" }],
+      [{ modelId: "claude-fable-5.2", familyId: "claude/fable" }]
     ),
     health: {},
   });
   const b = buildDesiredGraph({
     enriched: enrichLocalEndpoints(
-      [ep("qwen-b", "opencode-go", "qwen3.8-max")],
-      [{ modelId: "qwen3.8-max", familyId: "qwen/qwen" }],
+      [ep("codex-b", "codex", "gpt-6-astra")],
+      [{ modelId: "gpt-6-astra", familyId: "gpt/astra" }]
     ),
     health: {},
   });
-  assert.deepEqual(a.combos.map((c) => c.name), ["claude/fable/5.2", "claude/fable"]);
-  assert.deepEqual(b.combos.map((c) => c.name), ["qwen/qwen/3.8", "qwen/qwen"]);
+  assert.deepEqual(
+    a.combos.map((c) => c.name),
+    ["claude/fable/5.2", "claude/fable"]
+  );
+  assert.deepEqual(
+    b.combos.map((c) => c.name),
+    ["gpt/astra/6", "gpt/astra"]
+  );
 });
 
 test("second unchanged plan has zero writes", () => {
   const desired = buildDesiredGraph({
     enriched: enrichLocalEndpoints(
       [ep("claude-a", "claude", "claude-fable-5.2")],
-      [{ modelId: "claude-fable-5.2", familyId: "claude/fable" }],
+      [{ modelId: "claude-fable-5.2", familyId: "claude/fable" }]
     ),
     health: {},
   });

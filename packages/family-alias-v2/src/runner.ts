@@ -52,7 +52,11 @@ export type RunnerResult = {
   targets: Record<string, { status: string; reason?: string }>;
 };
 
-function candidates(endpoints: EnrichedEndpoint[], health: HealthCache, now: number): EnrichedEndpoint[] {
+function candidates(
+  endpoints: EnrichedEndpoint[],
+  health: HealthCache,
+  now: number
+): EnrichedEndpoint[] {
   return endpoints.filter((item) => {
     if (item.endpoint.billingClass !== "subscription" || !item.endpoint.active) return false;
     const key = endpointHealthKey(item.endpoint.connectionId, item.endpoint.modelId);
@@ -76,7 +80,14 @@ export async function runProbePass(opts: {
     budget = consumed.state;
     if (!consumed.allowed) break;
     const key = endpointHealthKey(item.endpoint.connectionId, item.endpoint.modelId);
-    const result = await opts.probe(item.endpoint);
+    // A rejected probe is a failed probe: keep the consumed budget and the
+    // results of earlier probes instead of losing the whole pass.
+    let result: ProbeResult;
+    try {
+      result = await opts.probe(item.endpoint);
+    } catch (error) {
+      result = { ok: false, error: error instanceof Error ? error.message : "probe failed" };
+    }
     const previous: HealthCacheEntry | undefined = health[key];
     health[key] = updateCacheFromProbe({ previous, key, now: opts.now, result });
     probesUsed += 1;
@@ -117,22 +128,41 @@ export async function runReconciliation(opts: {
     cpa: { status: "planned" },
   };
   if (opts.mode === "apply") {
-    const omniResult = await applyOmniRoute({
-      plan: omniroute,
-      client: opts.clients.omniroute,
-      expectedPlanHash: omniroute.planHash,
-    });
-    targets.omniroute = { status: omniResult.status, reason: omniResult.reason };
     try {
-      const cpaResult = await applyCpa({
-        plan: cpa,
-        client: opts.clients.cpa,
-        expectedPlanHash: cpa.planHash,
-        omnirouteApiKey: opts.input.omnirouteApiKey,
+      const omniResult = await applyOmniRoute({
+        plan: omniroute,
+        client: opts.clients.omniroute,
+        expectedPlanHash: omniroute.planHash,
       });
-      targets.cpa = { status: cpaResult.status, reason: cpaResult.status === "refused" ? cpaResult.reason : undefined };
+      targets.omniroute = { status: omniResult.status, reason: omniResult.reason };
     } catch (error) {
-      targets.cpa = { status: "failed", reason: error instanceof Error ? error.message : "cpa failed" };
+      targets.omniroute = {
+        status: "failed",
+        reason: error instanceof Error ? error.message : "omniroute failed",
+      };
+    }
+    if (targets.omniroute.status !== "success") {
+      // CPA aliases point at OmniRoute combos; never publish them for combos
+      // that were not applied.
+      targets.cpa = { status: "skipped", reason: "omniroute not applied" };
+    } else {
+      try {
+        const cpaResult = await applyCpa({
+          plan: cpa,
+          client: opts.clients.cpa,
+          expectedPlanHash: cpa.planHash,
+          omnirouteApiKey: opts.input.omnirouteApiKey,
+        });
+        targets.cpa = {
+          status: cpaResult.status,
+          reason: cpaResult.status === "refused" ? cpaResult.reason : undefined,
+        };
+      } catch (error) {
+        targets.cpa = {
+          status: "failed",
+          reason: error instanceof Error ? error.message : "cpa failed",
+        };
+      }
     }
   }
   makeRunReport({ mode: opts.mode, plan, targets, probesUsed: probed.probesUsed });

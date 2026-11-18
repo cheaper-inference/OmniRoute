@@ -10,10 +10,10 @@ export type EndpointState =
 
 export function evaluateEndpoint(
   endpoint: LocalEndpoint,
-  cache: HealthCacheEntry | undefined,
+  cache: HealthCacheEntry | undefined
 ): EndpointState {
   const policy = subscriptionEligibility(endpoint);
-  if (!policy.eligible) return { state: "ineligible", reason: policy.reason };
+  if (policy.eligible === false) return { state: "ineligible", reason: policy.reason };
   if (!cache) return { state: "eligible", lastKnownGood: false };
   if (cache.status === "healthy") return { state: "eligible", lastKnownGood: true };
   if (cache.status === "permanent_failure") {

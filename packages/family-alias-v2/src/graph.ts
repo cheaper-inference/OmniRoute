@@ -6,7 +6,7 @@ import { endpointHealthKey } from "./health/cache.ts";
 import { OWNER, ownershipDescription, stableHash } from "./ownership.ts";
 import { EFFORT_TOKENS, effortId, orderEndpoints, type Effort } from "./routing.ts";
 import { compareVersionNewestFirst } from "./version.ts";
-import type { ClassifiedEndpoint } from "./types.ts";
+import type { ClassifiedEndpoint, LocalEndpoint } from "./types.ts";
 
 export type DesiredModelStep = {
   id: string;
@@ -23,10 +23,7 @@ export type DesiredCombo = {
   description: string;
   strategy: "priority";
   allowedModelFamilies: string[];
-  models: Array<
-    | DesiredModelStep
-    | { id: string; kind: "combo-ref"; comboName: string; weight: 0 }
-  >;
+  models: Array<DesiredModelStep | { id: string; kind: "combo-ref"; comboName: string; weight: 0 }>;
 };
 
 export type DesiredGraph = {
@@ -53,6 +50,21 @@ function stepId(endpoint: ClassifiedEndpoint): string {
   return `fam-v2-${stableHash(endpointKey(endpoint)).slice(0, 16)}`;
 }
 
+/**
+ * Returns null when the endpoint may appear in the graph, otherwise the state
+ * that keeps it out. A temporary outage keeps a last-known-good endpoint so the
+ * graph does not churn; runtime health/cooldown decides whether it can serve now.
+ */
+function admissionFailure(endpoint: LocalEndpoint, health: HealthCache): string | null {
+  const state = evaluateEndpoint(
+    endpoint,
+    health[endpointHealthKey(endpoint.connectionId, endpoint.modelId)]
+  );
+  if (state.state === "eligible") return null;
+  if (state.state === "temporarily_unavailable" && state.preserve) return null;
+  return state.state;
+}
+
 export function buildDesiredGraph(opts: {
   enriched: EnrichedEndpoint[];
   health: HealthCache;
@@ -70,13 +82,9 @@ export function buildDesiredGraph(opts: {
       omitted.push({ modelId: item.endpoint.modelId, reason: "reasoning_variant" });
       continue;
     }
-    const health = opts.health[endpointHealthKey(item.endpoint.connectionId, item.endpoint.modelId)];
-    const state = evaluateEndpoint(item.endpoint, health);
-    if (state.state === "temporarily_unavailable" && state.preserve) {
-      // Preserve last-known-good endpoint identity to avoid destructive graph churn.
-      // Runtime health/cooldown decides whether it can serve now.
-    } else if (state.state !== "eligible") {
-      omitted.push({ modelId: item.endpoint.modelId, reason: state.state });
+    const rejected = admissionFailure(item.endpoint, opts.health);
+    if (rejected) {
+      omitted.push({ modelId: item.endpoint.modelId, reason: rejected });
       continue;
     }
     const alias = aliasOf(classified);
@@ -92,13 +100,21 @@ export function buildDesiredGraph(opts: {
     .map(([alias, versions]) => ({
       alias,
       versions: [...versions.entries()]
-        .map(([display, endpoints]) => ({
-          display,
-          version: endpoints[0].version,
-          endpoints: orderEndpoints(alias.split("/")[0], endpoints),
-        }))
+        .map(([display, endpoints]) => {
+          const ordered = orderEndpoints(alias.split("/")[0], endpoints);
+          // A version with no allowed provider must not become the newest
+          // version of its family; record its endpoints instead.
+          if (ordered.length === 0) {
+            for (const endpoint of endpoints) {
+              omitted.push({ modelId: endpoint.endpoint.modelId, reason: "no_allowed_provider" });
+            }
+          }
+          return { display, version: endpoints[0].version, endpoints: ordered };
+        })
+        .filter((version) => version.endpoints.length > 0)
         .sort((a, b) => compareVersionNewestFirst(a.version, b.version)),
-    }));
+    }))
+    .filter((family) => family.versions.length > 0);
 
   const graphHash = stableHash(
     skeleton.map((family) => ({
@@ -107,7 +123,7 @@ export function buildDesiredGraph(opts: {
         version: version.display,
         endpoints: version.endpoints.map(endpointKey),
       })),
-    })),
+    }))
   );
 
   const combos: DesiredCombo[] = [];
@@ -146,19 +162,32 @@ export function buildDesiredGraph(opts: {
     });
   }
 
-  const byModel = new Map(opts.enriched.map((item) => [item.endpoint.modelId, item]));
   const extra: DesiredCombo[] = [];
   for (const combo of combos) {
     const first = combo.models.find((step) => step.kind === "model");
     if (!first || first.kind !== "model") continue;
     for (const effort of EFFORT_TOKENS) {
       const wanted = effortId(first.model, effort as Effort);
-      const match = byModel.get(wanted);
-      if (!match || match.endpoint.providerId !== first.providerId) continue;
+      // The suffix must be served by the same connection as the first step, and
+      // that endpoint must pass the same eligibility and health rules.
+      const match = opts.enriched.find(
+        (item) =>
+          item.endpoint.modelId === wanted &&
+          item.endpoint.providerId === first.providerId &&
+          item.endpoint.connectionId === first.connectionId &&
+          admissionFailure(item.endpoint, opts.health) === null
+      );
+      if (!match) continue;
       extra.push({
         ...combo,
         name: combo.name + "/" + effort,
-        models: [{ ...first, id: stepId({ endpoint: match.endpoint } as ClassifiedEndpoint), model: wanted }],
+        models: [
+          {
+            ...first,
+            id: stepId({ endpoint: match.endpoint } as ClassifiedEndpoint),
+            model: wanted,
+          },
+        ],
       });
     }
   }

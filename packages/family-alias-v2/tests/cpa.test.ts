@@ -19,7 +19,12 @@ function graph(singleEndpoint = true): DesiredGraph {
     },
   ];
   if (!singleEndpoint) {
-    versionModels.push({ ...versionModels[0], id: "m2", connectionId: "c2", allowedConnectionIds: ["c2"] });
+    versionModels.push({
+      ...versionModels[0],
+      id: "m2",
+      connectionId: "c2",
+      allowedConnectionIds: ["c2"],
+    });
   }
   return {
     owner: "family-alias-maintainer/v2",
@@ -81,8 +86,12 @@ test("precondition mismatch refuses without write", async () => {
     expectedPlanHash: plan.planHash,
     omnirouteApiKey: "runtime-key",
     client: {
-      async getProviders() { return [manual]; },
-      async putProviders() { calls.push("put"); },
+      async getProviders() {
+        return [manual];
+      },
+      async putProviders() {
+        calls.push("put");
+      },
     },
   });
   assert.equal(result.status, "refused");
@@ -97,11 +106,40 @@ test("apply materializes secret in memory and preserves unrelated providers", as
     expectedPlanHash: plan.planHash,
     omnirouteApiKey: "runtime-key",
     client: {
-      async getProviders() { return structuredClone(rows); },
-      async putProviders(providers) { rows = structuredClone(providers); },
+      async getProviders() {
+        return structuredClone(rows);
+      },
+      async putProviders(providers) {
+        rows = structuredClone(providers);
+      },
     },
   });
   assert.equal(result.status, "success");
   assert.deepEqual(rows[0], manual);
   assert.equal(rows[1]["api-key-entries"][0]["api-key"], "runtime-key");
+});
+
+test("an edited plan body that kept the original hash is refused without a read or write", async () => {
+  const plan = makePlan();
+  const tampered = {
+    ...plan,
+    managedProvider: { ...plan.managedProvider, "base-url": "https://elsewhere.example/v1" },
+  };
+  const calls: string[] = [];
+  const result = await applyCpa({
+    plan: tampered,
+    expectedPlanHash: plan.planHash,
+    omnirouteApiKey: "runtime-key",
+    client: {
+      async getProviders() {
+        calls.push("get");
+        return [manual];
+      },
+      async putProviders() {
+        calls.push("put");
+      },
+    },
+  });
+  assert.equal(result.status, "refused");
+  assert.deepEqual(calls, []);
 });

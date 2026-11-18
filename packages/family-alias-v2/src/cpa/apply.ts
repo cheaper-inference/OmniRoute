@@ -1,9 +1,5 @@
-import {
-  CPA_MANAGED_PROVIDER,
-  cpaStateHash,
-  type CpaPlan,
-  type CpaProvider,
-} from "./plan.ts";
+import { CPA_MANAGED_PROVIDER, cpaStateHash, type CpaPlan, type CpaProvider } from "./plan.ts";
+import { stableHash } from "../ownership.ts";
 
 export type CpaApplyClient = {
   getProviders(): Promise<CpaProvider[]>;
@@ -21,6 +17,17 @@ export async function applyCpa(opts: {
 > {
   if (opts.expectedPlanHash !== opts.plan.planHash) {
     return { target: "cpa", status: "refused", reason: "plan hash mismatch" };
+  }
+  // The plan body must still produce its own hash; an edited managedProvider
+  // that kept the original planHash is refused before any read or write.
+  const body = {
+    target: opts.plan.target,
+    preconditionHash: opts.plan.preconditionHash,
+    managedProvider: opts.plan.managedProvider,
+    omitted: opts.plan.omitted,
+  };
+  if (stableHash(body) !== opts.plan.planHash) {
+    return { target: "cpa", status: "refused", reason: "plan body does not match plan hash" };
   }
   const before = await opts.client.getProviders();
   if (cpaStateHash(before) !== opts.plan.preconditionHash) {
