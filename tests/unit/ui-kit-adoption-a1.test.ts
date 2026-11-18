@@ -328,3 +328,19 @@ test("G: a plain error message box is the Notice adapter", () => {
 test("G: bars are the kit Progress, not a track and a fill drawn by hand", () => {
   assert.deepEqual(lineHits(/role=["']progressbar["']/), [], "use <Progress>");
 });
+
+// ── E. Tables: density on the table, not classes on every cell ──────────────────────────────
+
+test("E: table cells take padding, height and text size from the table `density`", () => {
+  const cells = ["TableHead", "TableCell"]
+    .flatMap((name) => openingTags(name))
+    .filter(({ tag }) =>
+      /(?<![\w:-])(h-auto|h-\d+|px-[\d.]+|py-[\d.]+|text-(xs|sm))(?![\w-])/.test(tag)
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(cells, [], 'use density="compact" on the Table');
+  const tables = openingTags("Table")
+    .filter(({ tag }) => /className="[^"]*(?<![\w:-])text-xs(?![\w-])/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(tables, [], 'a 12px table is density="compact"');
+});

@@ -261,10 +261,10 @@ export function OAuthExportImportModal({
             </div>
             {/* The kit cap scrolls the preview under a pinned header and makes it a named tab
                 stop (kit 0.0.116); the kit container border is the frame. */}
-            <Table className="text-xs" maxHeight="16rem" scrollLabel={t("oauthExportTitle")}>
+            <Table density="compact" maxHeight="16rem" scrollLabel={t("oauthExportTitle")}>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-auto px-2 py-1.5">
+                  <TableHead>
                     <Checkbox
                       aria-label={t("oauthExportSelectAll")}
                       disabled={importing}
@@ -272,17 +272,15 @@ export function OAuthExportImportModal({
                       onChange={(e) => toggleAll(e.target.checked)}
                     />
                   </TableHead>
-                  <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColEmail")}</TableHead>
-                  <TableHead className="h-auto px-2 py-1.5">
-                    {t("oauthExportColProvider")}
-                  </TableHead>
-                  <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColRefresh")}</TableHead>
+                  <TableHead>{t("oauthExportColEmail")}</TableHead>
+                  <TableHead>{t("oauthExportColProvider")}</TableHead>
+                  <TableHead>{t("oauthExportColRefresh")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {preview.map((row) => (
                   <TableRow key={row.index}>
-                    <TableCell className="h-auto px-2 py-1">
+                    <TableCell>
                       <Checkbox
                         aria-label={t("oauthExportSelectAccount", { index: row.index + 1 })}
                         disabled={importing}
@@ -290,15 +288,11 @@ export function OAuthExportImportModal({
                         onChange={() => toggleRow(row.index)}
                       />
                     </TableCell>
-                    <TableCell className="h-auto px-2 py-1 text-text-main">
+                    <TableCell className="text-text-main">
                       {row.email || t("oauthExportNoEmail")}
                     </TableCell>
-                    <TableCell className="h-auto px-2 py-1 font-mono text-text-muted">
-                      {row.provider}
-                    </TableCell>
-                    <TableCell
-                      className={`h-auto px-2 py-1 ${row.hasRefreshToken ? "text-success" : "text-warning"}`}
-                    >
+                    <TableCell className="font-mono text-text-muted">{row.provider}</TableCell>
+                    <TableCell className={row.hasRefreshToken ? "text-success" : "text-warning"}>
                       {row.hasRefreshToken ? t("oauthExportYes") : t("oauthExportNo")}
                     </TableCell>
                   </TableRow>

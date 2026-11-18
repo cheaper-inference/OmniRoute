@@ -79,7 +79,7 @@ function EntriesTable({ entries, selected, onToggleRow, onToggleAll, t }: Entrie
         {t("importFromFileSelectHint", { count: selected.size, total: entries.length })}
       </div>
       <Table
-        className="text-xs"
+        density="compact"
         maxHeight="16rem"
         scrollLabel={t("importFromFileTitle")}
         scrollbarLabel={t("importFromFileTitle")}
