@@ -96,10 +96,15 @@ function eligibleConnectionIds(
   return ids;
 }
 
+/**
+ * The active rows, through the shared connection read cache: a state read only.
+ * The probe itself goes through testSingleConnection, which defers while an
+ * exclusive session lease is active, so this pass never selects a connection.
+ */
 async function loadActiveConnections(): Promise<DailyRevalidationConnection[]> {
-  const { getProviderConnections } = await import("@/lib/db/providers");
-  const rows = await getProviderConnections({ isActive: true });
-  return (Array.isArray(rows) ? rows : []) as unknown as DailyRevalidationConnection[];
+  const { getCachedProviderConnections } = await import("@/lib/db/readCache");
+  const rows = await getCachedProviderConnections({ isActive: true });
+  return (Array.isArray(rows) ? rows : []) as DailyRevalidationConnection[];
 }
 
 /**
