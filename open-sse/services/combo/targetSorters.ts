@@ -10,7 +10,7 @@
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { secureRandomFloat, secureRandomInt } from "../../../src/shared/utils/secureRandom";
 import { getComboStepTarget, getComboStepWeight } from "../../../src/lib/combos/steps.ts";
-import { getComboMetrics } from "../comboMetrics.ts";
+import { getComboModelMetric, getComboTargetMetric } from "../comboMetrics.ts";
 import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
@@ -105,9 +105,6 @@ export async function sortTargetsByCost(targets: ResolvedComboTarget[]) {
 }
 
 export function sortTargetsByUsage(targets: ResolvedComboTarget[], comboName: string) {
-  const metrics = getComboMetrics(comboName);
-  if (!metrics) return targets;
-
   // Key on executionKey (unique per model + account) so a combo that repeats the
   // same modelStr across DISTINCT accounts distributes by per-account usage
   // instead of by the shared modelStr. The old code grouped targets under
@@ -116,20 +113,17 @@ export function sortTargetsByUsage(targets: ResolvedComboTarget[], comboName: st
   // always won — exhausting it while the others stayed idle (#7015). Per-target
   // usage lives in byTarget[executionKey]; unknown targets rank as 0.
   const withUsage = targets.map((target) => {
-    const requests = metrics.byTarget?.[target.executionKey]?.requests ?? 0;
+    const requests = getComboTargetMetric(comboName, target.executionKey)?.requests ?? 0;
     return { target, requests };
   });
   withUsage.sort((a, b) => a.requests - b.requests);
   return withUsage.map((e) => e.target);
 }
 
-function getP2CTargetScore(
-  target: ResolvedComboTarget,
-  metrics: ReturnType<typeof getComboMetrics>
-): number {
+function getP2CTargetScore(target: ResolvedComboTarget, comboName: string): number {
   const breakerState = getCircuitBreaker(target.provider)?.getStatus?.()?.state;
   if (breakerState === "OPEN") return -Infinity;
-  const modelMetric = metrics?.byModel?.[target.modelStr] || null;
+  const modelMetric = getComboModelMetric(comboName, target.modelStr) || null;
   const successRate = Number(modelMetric?.successRate);
   const avgLatency = Number(modelMetric?.avgLatencyMs);
   const successScore = Number.isFinite(successRate) ? successRate / 100 : 0.5;
@@ -141,7 +135,6 @@ function getP2CTargetScore(
 
 export function orderTargetsByPowerOfTwoChoices(targets: ResolvedComboTarget[], comboName: string) {
   if (targets.length <= 1) return targets;
-  const metrics = getComboMetrics(comboName);
   const firstIndex = secureRandomInt(targets.length);
   let secondIndex = secureRandomInt(targets.length - 1);
   if (secondIndex >= firstIndex) secondIndex++;
@@ -149,7 +142,7 @@ export function orderTargetsByPowerOfTwoChoices(targets: ResolvedComboTarget[], 
   const first = targets[firstIndex];
   const second = targets[secondIndex];
   const selectedIndex =
-    getP2CTargetScore(second, metrics) > getP2CTargetScore(first, metrics)
+    getP2CTargetScore(second, comboName) > getP2CTargetScore(first, comboName)
       ? secondIndex
       : firstIndex;
   return [targets[selectedIndex], ...targets.filter((_, index) => index !== selectedIndex)];

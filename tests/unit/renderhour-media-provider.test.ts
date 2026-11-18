@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import { handleImageGeneration } from "../../open-sse/handlers/imageGeneration.ts";
 import { handleVideoGeneration } from "../../open-sse/handlers/videoGeneration.ts";
@@ -118,6 +119,20 @@ test("OpenAI-style fields map to RenderHour's request", () => {
     "http://localhost:3210"
   );
   assert.equal(renderhourBaseUrl({}), BASE);
+});
+
+test("renderhourBaseUrl strips trailing slashes without a backtracking regex", () => {
+  // CodeQL #1246: /\/+$/ on the connection's base URL is quadratic on long slash runs.
+  assert.equal(
+    renderhourBaseUrl({ providerSpecificData: { baseUrl: "http://localhost:3210///" } }),
+    "http://localhost:3210"
+  );
+  const source = readFileSync(
+    new URL("../../open-sse/handlers/mediaGeneration/renderhour.ts", import.meta.url),
+    "utf8"
+  );
+  assert.ok(source.includes("stripTrailingSlashes(base)"));
+  assert.ok(!source.includes(".replace(/\\/+$/"));
 });
 
 test("images: references are uploaded, the job is submitted once and polled to its URLs", async () => {

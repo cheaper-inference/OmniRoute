@@ -44,7 +44,7 @@ export function CallContentProvenanceBadges({
             data-testid={`content-provenance-${key}`}
             variant="warning"
             size="sm"
-            className="font-bold"
+            className="font-semibold"
           >
             {t(key)}
           </Badge>

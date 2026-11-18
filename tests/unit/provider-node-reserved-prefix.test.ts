@@ -225,13 +225,22 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
-  // Supersonic Labs (#18838) reserves its native provider id (438 -> 439).
-  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 439 -> 440).
-  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 440 -> 442).
-  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 442 -> 444).
-  assert.equal(RESERVED_PREFIX_COUNT, 445);
+  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
+  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
+  // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
+  // two more (444 -> 446).
+  // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
+  // Supersonic Labs (#18838) reserves its native provider id (+1: 450 -> 451).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 451.
+  assert.equal(RESERVED_PREFIX_COUNT, 451);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("supersoniclabs"), true);
-  // Sign in with ChatGPT (#15201) reserves its native provider id (444 -> 445).
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
+  for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
+    assert.equal(RESERVED_PROVIDER_PREFIXES.has(id), true);
+  }
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);

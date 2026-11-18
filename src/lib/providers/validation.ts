@@ -28,6 +28,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { isCustomJsonProviderData, validateCustomJsonConnection } from "./validation/customJson";
 import { validateOpencodeProvider } from "./validation/opencode";
 import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
@@ -215,6 +216,10 @@ export async function validateProviderApiKey({
     ["decisions", "systemone"].includes(providerSpecificData.apiType)
   ) {
     return validateDecisionProvider({ provider, apiKey, providerSpecificData });
+  }
+
+  if (isOpenAICompatibleProvider(provider) && isCustomJsonProviderData(providerSpecificData)) {
+    return validateCustomJsonConnection(providerSpecificData);
   }
 
   if (isOpenAICompatibleProvider(provider)) {

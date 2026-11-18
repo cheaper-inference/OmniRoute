@@ -191,6 +191,7 @@ export default function SimpleControls({
       <div className="flex flex-col gap-1">
         <span className="text-sm font-medium text-text-main">{tr("simpleModeLabel", "Mode")}</span>
         <SegmentedControl
+          semantics="radio"
           options={modeOptions}
           value={mode}
           onChange={(v) => onModeChange(v as TranslateMode)}

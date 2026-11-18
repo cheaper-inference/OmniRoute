@@ -34,10 +34,13 @@ test("providers page mounts the leftover banner", () => {
 // from 2020 to 2010 lines; the freeze is re-pinned at the measured size.
 // KEA-7886 P8 (#18144): section-header dots moved to <CategoryDot category=…>, shrinking it
 // again from 2010 to 1989 lines; re-pinned at the measured size.
-// Native decision-provider category adds 47 lines to the previous 1989-line page.
-test("providers page stays frozen at 2036 lines", () => {
+// UI review 2026-11-15: two headings lost classes the kit typography overrides
+// (tests/unit/dead-typography-classes.test.ts) and fit on one line each, shrinking it from
+// 1989 to 1985 lines; re-pinned at the measured size.
+// Native decision-provider category (#18838) adds 47 lines to the 1985-line page: 2032.
+test("providers page stays frozen at 2032 lines", () => {
   const lines = fs.readFileSync(pagePath, "utf8").split("\n").length;
-  assert.equal(lines, 2036);
+  assert.equal(lines, 2032);
 });
 
 test("purge surfaces notify.error when POST is not ok", () => {

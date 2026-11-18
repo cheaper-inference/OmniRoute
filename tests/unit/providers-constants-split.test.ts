@@ -65,9 +65,11 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Gisoo (#18112) adds one apikey/gateways entry — 255.
 // deAPI adds one apikey/specialty-media entry — 256.
 // EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
-// Native Supersonic Labs adds one API-key provider: 258.
-// ParalonCloud adds one apikey/inference-hosts entry — 259.
-const APIKEY_PROVIDER_COUNT = 259;
+// ParalonCloud adds one apikey/inference-hosts entry — 258.
+// Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
+// apikey/inference-hosts entries — 262.
+// Native Supersonic Labs (#18838) adds one API-key provider — 263.
+const APIKEY_PROVIDER_COUNT = 263;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
