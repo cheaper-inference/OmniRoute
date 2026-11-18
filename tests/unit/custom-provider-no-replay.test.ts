@@ -7,6 +7,15 @@ import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.t
 const harness = await createChatPipelineHarness("custom-provider-no-replay");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+
+type FixtureOptions = {
+  disableCooldownRetries?: boolean;
+  cooldownBeforeDispatchMs?: number;
+  preferredResponseStartCapMs?: number;
+  responseDelayMs?: number;
+  resetAfterRequestBody?: boolean;
+};
 
 test.beforeEach(async () => {
   await harness.resetStorage();
@@ -22,14 +31,59 @@ test.after(async () => {
 
 async function runCustomProviderRequest(
   respond: http.RequestListener,
-  disableCooldownRetries = false
-): Promise<{ upstreamPosts: number; responseStatus: number }> {
+  options: FixtureOptions = {}
+): Promise<{
+  upstreamPosts: number;
+  responseStatus: number;
+  elapsedMs: number;
+  acceptedRequest?: { method: string; url: string; body: unknown };
+}> {
   const provider = "openai-compatible-chat-no-replay";
   const prefix = "custom-no-replay";
   let upstreamPosts = 0;
+  let acceptedRequest: { method: string; url: string; body: unknown } | undefined;
   const server = http.createServer((request, response) => {
     upstreamPosts += 1;
-    respond(request, response);
+    if (options.responseDelayMs !== undefined || options.resetAfterRequestBody) {
+      let body = "";
+      request.setEncoding("utf8");
+      request.on("data", (chunk: string) => {
+        body += chunk;
+      });
+      request.on("end", () => {
+        acceptedRequest = {
+          method: request.method ?? "",
+          url: request.url ?? "",
+          body: JSON.parse(body) as unknown,
+        };
+        if (options.resetAfterRequestBody) {
+          response.writeHead(200, { "content-type": "application/json" });
+          response.flushHeaders();
+          response.destroy();
+          return;
+        }
+        setTimeout(() => {
+          response.statusCode = 200;
+          response.setHeader("content-type", "application/json");
+          response.end(
+            JSON.stringify({
+              id: "chatcmpl_fixture",
+              object: "chat.completion",
+              model: "fixture-model",
+              choices: [
+                {
+                  index: 0,
+                  message: { role: "assistant", content: "fixture response" },
+                  finish_reason: "stop",
+                },
+              ],
+            })
+          );
+        }, options.responseDelayMs);
+      });
+    } else {
+      respond(request, response);
+    }
   });
 
   try {
@@ -54,15 +108,46 @@ async function runCustomProviderRequest(
       "chat-completions",
       ["chat"]
     );
-    await harness.seedConnection(provider, {
+    const primaryConnection = await harness.seedConnection(provider, {
+      rateLimitedUntil:
+        options.cooldownBeforeDispatchMs === undefined
+          ? undefined
+          : Date.now() + options.cooldownBeforeDispatchMs,
       providerSpecificData: { apiType: "chat", baseUrl },
     });
-    if (disableCooldownRetries) {
+    const connectionIds = [primaryConnection.id];
+    let authKey: string | undefined;
+    if (options.preferredResponseStartCapMs !== undefined) {
+      const siblingConnection = await harness.seedConnection(provider, {
+        providerSpecificData: { apiType: "chat", baseUrl },
+      });
+      connectionIds.push(siblingConnection.id);
+      const key = await harness.seedApiKey({ allowedConnections: connectionIds });
+      authKey = key.key;
+      await apiKeysDb.updateApiKeyPermissions(key.id, {
+        preferredConnections: [primaryConnection.id],
+      });
+      await harness.settingsDb.updateSettings({
+        resilienceSettings: {
+          preferredAccountFailover: {
+            enabled: true,
+            defaultTimeoutMs: options.preferredResponseStartCapMs,
+            providerTimeoutsMs: {},
+            modelTimeoutsMs: {},
+          },
+        },
+      });
+    }
+    if (options.disableCooldownRetries) {
       await harness.settingsDb.updateSettings({ requestRetry: 0, maxRetryIntervalSec: 0 });
+    } else if (options.cooldownBeforeDispatchMs !== undefined) {
+      await harness.settingsDb.updateSettings({ requestRetry: 1, maxRetryIntervalSec: 3 });
     }
 
+    const startedAt = Date.now();
     const response = await harness.handleChat(
       harness.buildRequest({
+        authKey,
         body: {
           model: `${prefix}/fixture-model`,
           messages: [{ role: "user", content: "one controlled request" }],
@@ -71,11 +156,18 @@ async function runCustomProviderRequest(
       })
     );
     await response.text();
-    return { upstreamPosts, responseStatus: response.status };
+    return {
+      upstreamPosts,
+      responseStatus: response.status,
+      elapsedMs: Date.now() - startedAt,
+      acceptedRequest,
+    };
   } finally {
-    await new Promise<void>((resolve, reject) =>
+    const closed = new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve()))
     );
+    server.closeAllConnections();
+    await closed;
   }
 }
 
@@ -89,8 +181,64 @@ test("custom OpenAI-compatible transport failure dispatches once", async () => {
   assert.equal(result.responseStatus, 502);
 });
 
+test("custom OpenAI-compatible request is not replayed after the fixture receives its full POST", async () => {
+  const result = await runCustomProviderRequest(() => {}, { resetAfterRequestBody: true });
+  assert.equal(result.upstreamPosts, 1);
+  assert.equal(result.responseStatus, 502);
+  assert.deepEqual(result.acceptedRequest, {
+    method: "POST",
+    url: "/v1/chat/completions",
+    body: {
+      model: "fixture-model",
+      messages: [{ role: "user", content: "one controlled request" }],
+      stream: false,
+    },
+  });
+});
+
+test("custom OpenAI-compatible route waits for cooldown before its first dispatch", async () => {
+  const result = await runCustomProviderRequest(
+    (_, response) => {
+      response.statusCode = 200;
+      response.setHeader("content-type", "application/json");
+      response.end(
+        JSON.stringify({
+          id: "chatcmpl_fixture",
+          object: "chat.completion",
+          model: "fixture-model",
+          choices: [
+            {
+              index: 0,
+              message: { role: "assistant", content: "fixture response" },
+              finish_reason: "stop",
+            },
+          ],
+        })
+      );
+    },
+    { cooldownBeforeDispatchMs: 150 }
+  );
+  assert.equal(result.upstreamPosts, 1);
+  assert.equal(result.responseStatus, 200);
+  assert.ok(
+    result.elapsedMs >= 100,
+    `expected pre-dispatch cooldown wait, got ${result.elapsedMs}ms`
+  );
+});
+
+test("custom OpenAI-compatible request keeps the ordinary deadline for its preferred connection", async () => {
+  const result = await runCustomProviderRequest(() => {}, {
+    preferredResponseStartCapMs: 500,
+    responseDelayMs: 800,
+  });
+  assert.equal(result.upstreamPosts, 1);
+  assert.equal(result.responseStatus, 200);
+});
+
 test("custom OpenAI-compatible transport failure is not replayed with cooldown disabled", async () => {
-  const result = await runCustomProviderRequest((request) => request.socket.destroy(), true);
+  const result = await runCustomProviderRequest((request) => request.socket.destroy(), {
+    disableCooldownRetries: true,
+  });
   assert.equal(
     result.upstreamPosts,
     1,
@@ -100,11 +248,14 @@ test("custom OpenAI-compatible transport failure is not replayed with cooldown d
 });
 
 test("custom OpenAI-compatible malformed response is not replayed", async () => {
-  const result = await runCustomProviderRequest((_, response) => {
-    response.statusCode = 200;
-    response.setHeader("content-type", "application/json");
-    response.end("{bad-json");
-  }, true);
+  const result = await runCustomProviderRequest(
+    (_, response) => {
+      response.statusCode = 200;
+      response.setHeader("content-type", "application/json");
+      response.end("{bad-json");
+    },
+    { disableCooldownRetries: true }
+  );
   assert.equal(
     result.upstreamPosts,
     1,

@@ -3,9 +3,11 @@ import type { ConnectGuardMode } from "./connectGuardDispatcher.ts";
 import tlsClient, { type TlsFetchOptions } from "./tlsClient.ts";
 import { isUpstreamHttp2Enabled } from "./proxyDispatcher.ts";
 import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
+export const PROXY_FETCH_NO_REPLAY = Symbol.for("omniroute.proxyFetch.noReplay");
 export type FetchWithDispatcherOptions = RequestInit & {
   dispatcher?: unknown;
   connectGuard?: ConnectGuardMode;
+  [PROXY_FETCH_NO_REPLAY]?: boolean;
 };
 export type FetchWithDispatcher = (
   input: RequestInfo | URL,
@@ -196,6 +198,7 @@ export function requestHasNonReplayableBody(
   input: RequestInfo | URL,
   options: FetchWithDispatcherOptions
 ): boolean {
+  if (options[PROXY_FETCH_NO_REPLAY] === true) return true;
   if (isStreamLikeBody(options.body as unknown)) return true;
   if (typeof Request !== "undefined" && input instanceof Request) {
     if (input.bodyUsed) return true;

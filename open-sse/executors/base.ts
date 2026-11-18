@@ -51,6 +51,10 @@ import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
+import {
+  PROXY_FETCH_NO_REPLAY,
+  type FetchWithDispatcherOptions,
+} from "../utils/proxyFetchTransportSupport.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -1597,10 +1601,11 @@ export class BaseExecutor {
           }
         }
         copilotIdentity.pin(finalHeaders);
-        const fetchOptions: RequestInit = {
+        const fetchOptions: FetchWithDispatcherOptions = {
           method: "POST",
           headers: finalHeaders,
           body: bodyString,
+          ...(skipUpstreamRetry ? { [PROXY_FETCH_NO_REPLAY]: true } : {}),
         };
 
         // OpenRouter `:free`-variant local window (#6842): record every dispatch

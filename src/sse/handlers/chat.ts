@@ -1835,7 +1835,7 @@ async function handleSingleModelChat(
     resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
-    skipUpstreamRetry ||
+    runtimeOptions.skipUpstreamRetry === true ||
       provider === "claude-web" ||
       isCombo ||
       forceLiveComboTest ||
@@ -1847,6 +1847,7 @@ async function handleSingleModelChat(
   // combo.ts's comboCooldownBudgetLeftMs. Declared outside requestAttemptLoop so
   // it persists (and only decreases) across `continue requestAttemptLoop` retries.
   let requestRetryBudgetLeftMs = retrySettings.budgetMs;
+  let upstreamDispatchMayHaveOccurred = false;
 
   if (Array.isArray(effectiveAllowedConnections) && effectiveAllowedConnections.length === 0) {
     log.debug("AUTH", `${provider}/${model} filtered out by connection-level routing constraints`);
@@ -2037,9 +2038,13 @@ async function handleSingleModelChat(
         if (!credentials?.allRateLimited && agy.earliestRetryHintAtMs !== null)
           return agyLease.buildAntigravityPoolBusyResponse(agy.earliestRetryHintAtMs);
         if (credentials?.allRateLimited) {
+          const cooldownSettings =
+            customProviderNoReplay && upstreamDispatchMayHaveOccurred
+              ? disableCooldownAwareRetry(baseRetrySettings, true)
+              : retrySettings;
           const retryDecision = getCooldownAwareRetryDecision({
             retryAfter: credentials.retryAfter,
-            settings: retrySettings,
+            settings: cooldownSettings,
             attempt: requestRetryAttempt,
             budgetLeftMs: requestRetryBudgetLeftMs,
             lastErrorCode: credentials.lastErrorCode,
@@ -2326,6 +2331,7 @@ async function handleSingleModelChat(
           hasForcedConnection ||
           runtimeOptions.managedLease ||
           museOwner ||
+          customProviderNoReplay ||
           isCombo
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
@@ -2334,6 +2340,7 @@ async function handleSingleModelChat(
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
       try {
+        upstreamDispatchMayHaveOccurred = true;
         execution = await dispatchChatWithAffinityEviction(
           {
             bypassCircuitBreaker: forceLiveComboTest || hasForcedConnection,
