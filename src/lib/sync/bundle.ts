@@ -29,6 +29,8 @@ function sanitizeSettingsForSync(settings: unknown): JsonRecord {
     password: _password,
     requireLogin: _requireLogin,
     cloudEnabled: _cloudEnabled,
+    googleClientSecret: _googleClientSecret,
+    githubClientSecret: _githubClientSecret,
     ...safeSettings
   } = record;
   return safeSettings;
