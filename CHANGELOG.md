@@ -318,6 +318,7 @@ _By commits in `6cc6965075..a9539085bd`, author identities consolidated via `.ma
 
 ### 🐛 Bug Fixes
 
+- **fix(db):** `compression_run_telemetry` is now created by a migration (`20261118120853_compression_run_telemetry`) instead of only lazily after boot, so a clean install and an upgraded install have the same tables; the timing difference stopped the npm install-upgrade proof
 - **fix(release):** the npm package no longer ships the translated `/docs` mirrors. They took about 96 MB of the packed tarball, and the registry refused 3.8.54 at 206.1 MB with `E413 Payload Too Large`. npm installs now serve `/docs` in English for every locale; Docker and Electron keep the translated pages. `check:pack-artifact` now fails any `docs/i18n` file in the tarball and any tarball over 190 MB packed, so the next size problem shows up before the publish step
 - **fix(i18n):** the provider API region picker shows its translated labels again in Finnish, Korean, Polish, Portuguese, Brazilian Portuguese and Simplified and Traditional Chinese, instead of falling back to English. ([#19226](https://github.com/cheaper-inference/OmniRoute/pull/19226))
 - **test(sse):** Distinguish malformed SSE from valid upstream error frames in the non-streaming regression suites, and verify both initial and fallback errors retain their status, diagnostic and receipt.
