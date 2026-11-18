@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox } from "@/shared/components";
+import { Badge, Button, Checkbox } from "@/shared/components";
 
 import { useState } from "react";
 import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
@@ -106,22 +106,19 @@ export default function ModelEndpointTagsEditor({
       data-testid="model-endpoint-capabilities"
     >
       {effective.map((endpoint) => (
-        <span
+        <Badge
           key={endpoint}
+          size="sm"
+          variant={adapterStatuses[endpoint] === "unavailable" ? "error" : "primary"}
           title={
             adapterStatuses[endpoint] === "unavailable"
               ? t("endpointCapabilitiesNoAdapter")
               : undefined
           }
-          className={
-            adapterStatuses[endpoint] === "unavailable"
-              ? "rounded bg-error/15 px-1 py-0.5 text-error"
-              : "rounded bg-primary/10 px-1 py-0.5 text-primary"
-          }
         >
           {endpoint}
           {adapterStatuses[endpoint] === "unavailable" ? " ⚠" : ""}
-        </span>
+        </Badge>
       ))}
       <span className="text-text-muted" title={t("supportedEndpointsLabel")}>
         {provenance}

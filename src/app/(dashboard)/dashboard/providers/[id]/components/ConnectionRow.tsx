@@ -501,19 +501,20 @@ export default function ConnectionRow({
               </>
             )}
             {discoveryFailed && discoveryAgeLabel && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-warning/15 text-warning"
+              <Badge
+                variant="warning"
+                size="sm"
+                icon={<Icon name="warning" size={11} />}
                 title={discoveryTitle}
                 data-testid="connection-discovery-state"
               >
-                <Icon name="warning" size={11} />
                 {t("discoveryDegradedStatus", { time: discoveryAgeLabel })}
                 {discoveryCause && (
                   <span className="font-mono opacity-80" data-testid="connection-discovery-cause">
                     {discoveryCause}
                   </span>
                 )}
-              </span>
+              </Badge>
             )}
             {isClaude && (
               <>
@@ -607,13 +608,15 @@ export default function ConnectionRow({
               <>
                 <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 {codexServiceTierBadge && (
-                  <span
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${codexServiceTierBadge.className}`}
+                  <Badge
+                    variant="info"
+                    tone={codexServiceTierBadge.tone}
+                    size="sm"
+                    icon={<Icon name={codexServiceTierBadge.icon} size={12} />}
                     title={codexServiceTierBadge.title}
                   >
-                    <Icon name={codexServiceTierBadge.icon} size={13} />
                     {codexServiceTierBadge.label}
-                  </span>
+                  </Badge>
                 )}
                 <Button
                   variant="ghost"

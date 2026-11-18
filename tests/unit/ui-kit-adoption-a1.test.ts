@@ -136,3 +136,48 @@ test('B: ghost and outline buttons take muted ink from tone="muted"', () => {
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(offenders, [], 'use tone="muted" instead of className="text-text-muted"');
 });
+
+// ── A. Pills: the Badge adapter ─────────────────────────────────────────────────────────────
+
+/** Opening tags of plain elements that can be dressed as a pill. */
+const plainTags = () => ["span", "div", "p", "a", "Link"].flatMap((name) => openingTags(name));
+
+const has = (tag: string, re: RegExp) => re.test(tag);
+// A tinted or bordered box with chip padding: `rounded-full`, or a 4px `rounded` chip with
+// `px-1`…`px-2` and `py-0`/`py-0.5`.
+const isHandPill = (tag: string) =>
+  has(tag, /(?<![\w:-])(bg-[\w[]|border\b)/) &&
+  ((has(tag, /(?<![\w:-])rounded-full(?![\w-])/) && has(tag, /(?<![\w:-])px-[\d.]+(?![\w-])/)) ||
+    (has(tag, /(?<![\w:-])rounded(?![\w-])/) &&
+      has(tag, /(?<![\w:-])px-(1|1\.5|2)(?![\w.-])/) &&
+      has(tag, /(?<![\w:-])py-(0|0\.5)(?![\w.-])/)));
+
+const PILLS_KEPT: Kept[] = [
+  {
+    file: "[id]/components/ModelComboBadge.tsx",
+    marker: 'href="/dashboard/combos"',
+    reason:
+      "The pill is a link. The Badge adapter does not expose the kit `asChild`, so a Badge " +
+      "cannot be the anchor.",
+  },
+];
+
+test('A: status and label pills are the Badge adapter (size="sm"), not hand-made spans', () => {
+  const { offenders, stale } = audit(plainTags(), isHandPill, PILLS_KEPT);
+  assert.deepEqual(offenders, [], 'use <Badge size="sm" variant=… | tone="chart-N">');
+  assert.deepEqual(stale, [], "stale PILLS_KEPT entries: remove them");
+});
+
+test("A: badges take their size from the kit, not from text or padding classes", () => {
+  const offenders = openingTags("Badge")
+    .filter(({ tag }) => /(?<![\w:-])(text-\[\d+px\]|px-[\d.]+|py-[\d.]+)(?![\w-])/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use size="sm" on the Badge');
+});
+
+test('A: a badge in a chart colour uses tone="chart-N"', () => {
+  const offenders = openingTags("Badge")
+    .filter(({ tag }) => /(bg|text|border)-chart-\d/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, []);
+});

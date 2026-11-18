@@ -122,21 +122,17 @@ function localizeProviderOptions(
 
 function StepPill({ active, done, label }: { active: boolean; done: boolean; label: string }) {
   return (
-    <div
-      className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-        active
-          ? "border-primary/50 bg-primary/10 text-primary"
-          : done
-            ? "border-success/30 bg-success/10 text-success"
-            : "border-border bg-bg-subtle text-text-muted"
-      }`}
+    <Badge
+      variant={active ? "primary" : done ? "success" : "default"}
+      icon={
+        <Icon
+          name={done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
+          size={14}
+        />
+      }
     >
-      <Icon
-        name={done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
-        size={16}
-      />
       {label}
-    </div>
+    </Badge>
   );
 }
 

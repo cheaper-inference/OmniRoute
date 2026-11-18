@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
-import { Button } from "@/shared/components";
+import { Badge, Button } from "@/shared/components";
 import { parseContextWindowOverrideInput, providerText } from "../providerPageHelpers";
 
 type Props = {
@@ -16,9 +16,9 @@ type Props = {
 function OutputTokenValue({ value, label }: { value?: number | null; label: string }) {
   if (typeof value !== "number") return null;
   return (
-    <span className="rounded-full bg-info/15 px-1.5 py-0.5 text-[10px] text-info" title={label}>
+    <Badge variant="info" size="sm" title={label}>
       {value.toLocaleString()}
-    </span>
+    </Badge>
   );
 }
 

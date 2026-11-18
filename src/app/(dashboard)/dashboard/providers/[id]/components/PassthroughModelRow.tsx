@@ -229,7 +229,7 @@ export default function PassthroughModelRow({
           )}
           {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
           {supportsVision === true && (
-            <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            <Badge variant="success" size="sm" className="shrink-0">
               {t("visionCapableLabel")}
             </Badge>
           )}
@@ -248,7 +248,7 @@ export default function PassthroughModelRow({
             t={t}
           />
           {isFree && (
-            <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
+            <Badge variant="success" size="sm" className="shrink-0">
               {providerText(t, "freeBadge", "Free")}
             </Badge>
           )}

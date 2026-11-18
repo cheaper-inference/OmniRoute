@@ -20,7 +20,7 @@ import {
 } from "@/shared/utils/modelCatalogSearch";
 import { providerText } from "../providerPageHelpers";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
-import { Button, Checkbox, FilterPills } from "@/shared/components";
+import { Badge, Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import {
@@ -54,31 +54,36 @@ export type ModelCompatSavePatch = {
 // ModelSourceBadge
 // ---------------------------------------------------------------------------
 
-function getModelSourceBadgeClass(source?: string): string {
+type ModelSourceBadgeTone = {
+  variant?: "default" | "info" | "success" | "warning";
+  tone?: "chart-3";
+};
+
+function getModelSourceBadgeTone(source?: string): ModelSourceBadgeTone {
   switch (normalizeModelCatalogSource(source)) {
     case "imported":
-      return "border-info/30 bg-info/10 text-info";
+      return { variant: "info" };
     case "custom":
-      return "border-success/30 bg-success/10 text-success";
+      return { variant: "success" };
     case "fallback":
-      return "border-warning/30 bg-warning/10 text-warning";
+      return { variant: "warning" };
     case "alias":
-      return "border-chart-3/30 bg-chart-3/10 text-chart-3-ink";
+      return { tone: "chart-3" };
     case "system":
     default:
-      return "border-border bg-sidebar/70 text-text-muted";
+      return { variant: "default" };
   }
 }
 
 export function ModelSourceBadge({ source }: { source?: string }) {
   return (
-    <span
-      className={`shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${getModelSourceBadgeClass(
-        source
-      )}`}
+    <Badge
+      size="sm"
+      {...getModelSourceBadgeTone(source)}
+      className="shrink-0 whitespace-nowrap uppercase"
     >
       {getModelCatalogSourceLabel(source)}
-    </span>
+    </Badge>
   );
 }
 

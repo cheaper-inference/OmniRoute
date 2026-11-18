@@ -12,7 +12,7 @@ import Icon from "@/shared/components/Icon";
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
+import { Badge, Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
 import {
   normalizeModelSupportedEndpoints,
   type ModelSupportedEndpoint,
@@ -630,13 +630,14 @@ export default function CustomModelsSection({
                       aria-label={t("copyModel")}
                     />
                     {model.apiFormat === "responses" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-info/15 text-info font-medium">
+                      <Badge variant="info" size="sm">
                         {t("responses")}
-                      </span>
+                      </Badge>
                     )}
                     {hasSyncedBase && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
+                      <Badge
+                        variant="primary"
+                        size="sm"
                         title={providerText(
                           t,
                           "overridesUpstreamModelHint",
@@ -644,15 +645,12 @@ export default function CustomModelsSection({
                         )}
                       >
                         {providerText(t, "overridesUpstreamModel", "Overrides upstream")}
-                      </span>
+                      </Badge>
                     )}
                     {model.targetFormat && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium"
-                        title={t("targetFormatHint")}
-                      >
+                      <Badge variant="success" size="sm" title={t("targetFormatHint")}>
                         {`→ ${targetFormatLabel(model.targetFormat, t)}`}
-                      </span>
+                      </Badge>
                     )}
                     {typeof model.contextWindowOverride === "number" && (
                       <CapabilityBadge
@@ -682,9 +680,9 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {model.isFree === true && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium">
+                      <Badge variant="success" size="sm">
                         {t("freeBadge")}
-                      </span>
+                      </Badge>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
                       <CapabilityBadge
@@ -721,28 +719,19 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {anyNormalizeCompatBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-subtle text-text-muted font-medium"
-                        title={t("normalizeToolCallIdLabel")}
-                      >
+                      <Badge size="sm" title={t("normalizeToolCallIdLabel")}>
                         ID×9
-                      </span>
+                      </Badge>
                     )}
                     {anyNoPreserveCompatBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2-ink font-medium"
-                        title={t("compatDoNotPreserveDeveloper")}
-                      >
+                      <Badge tone="chart-2" size="sm" title={t("compatDoNotPreserveDeveloper")}>
                         {t("compatBadgeNoPreserve")}
-                      </span>
+                      </Badge>
                     )}
                     {anyUpstreamHeadersBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3-ink font-medium"
-                        title={t("compatUpstreamHeadersLabel")}
-                      >
+                      <Badge tone="chart-3" size="sm" title={t("compatUpstreamHeadersLabel")}>
                         {t("compatBadgeUpstreamHeaders")}
-                      </span>
+                      </Badge>
                     )}
                   </div>
 
