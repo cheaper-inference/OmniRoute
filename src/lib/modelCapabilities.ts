@@ -987,7 +987,24 @@ export function getResolvedModelCapabilities(
   const persistedContextWindow = usePersistedOverrides
     ? getContextOverride(resolved, snapshot)
     : null;
-  const limitRows = { synced, registryModel, spec, authoritativeContextWindow };
+  // #20437: models.dev maps `openai` to both `openai` and `cx` (Codex), so a synced
+  // public-API context window (e.g. 1,050,000 for gpt-6.1-sol) can exceed Codex's
+  // actual OAuth window (872,000) in the provider registry. Do not let a larger
+  // synced limit override Codex's narrower registry window.
+  const effectiveSynced =
+    resolved.provider === "codex" &&
+    synced &&
+    typeof registryModel?.contextLength === "number" &&
+    typeof synced.limit_context === "number" &&
+    synced.limit_context > registryModel.contextLength
+      ? { ...synced, limit_context: null }
+      : synced;
+  const limitRows = {
+    synced: effectiveSynced,
+    registryModel,
+    spec,
+    authoritativeContextWindow,
+  };
   const contextLimit = pickContextWindow(limitRows, persistedContextWindow);
   const contextWindow = contextLimit.value;
 
