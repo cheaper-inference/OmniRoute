@@ -9,7 +9,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Card } from "@/shared/components";
+import { Badge, Button, Card, IconChip } from "@/shared/components";
 
 const NAME = "9router";
 const PAGE_SIZE = 20;
@@ -110,9 +110,9 @@ export function NinerouterModelList() {
     <Card padding="md">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-            <Icon name="list" size={20} />
-          </div>
+          <IconChip size="sm">
+            <Icon name="list" />
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="sm">
               {t("availableModels")}

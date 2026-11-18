@@ -2,7 +2,7 @@
 
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
-import { Button } from "@/shared/components";
+import { Button, Progress } from "@/shared/components";
 
 /**
  * ConnectionQuotaPanel — per-account usage/limits strip rendered under each
@@ -321,22 +321,15 @@ export default function ConnectionQuotaPanel({
                 {isCreditRow || remaining === null ? (
                   <span className="flex-1" />
                 ) : (
-                  <span
-                    role="progressbar"
+                  <Progress
+                    size="sm"
+                    semantics="meter"
+                    animate={false}
                     aria-label={row.displayName || row.name}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.min(100, Math.max(0, remaining))}
-                    className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle"
-                  >
-                    <span
-                      className="block h-full rounded-full"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, remaining))}%`,
-                        background: colors?.bar,
-                      }}
-                    />
-                  </span>
+                    value={Math.min(100, Math.max(0, remaining))}
+                    color={colors?.bar}
+                    className="flex-1"
+                  />
                 )}
                 <span
                   className="w-44 shrink-0 text-right tabular-nums text-text-muted"

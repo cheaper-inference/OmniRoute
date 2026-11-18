@@ -15,6 +15,7 @@ import {
   SegmentedTabs,
   Select,
   Textarea,
+  Notice,
 } from "@/shared/components";
 interface ImportCodexAuthModalProps {
   onClose: () => void;
@@ -454,11 +455,7 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
               />
             </div>
 
-            {singleError && (
-              <div className="rounded-lg bg-error/10 border border-error/20 px-4 py-3 text-sm text-error">
-                {singleError}
-              </div>
-            )}
+            {singleError && <Notice variant="critical">{singleError}</Notice>}
 
             <div className="flex gap-2 pt-1">
               <Button
@@ -694,12 +691,9 @@ export function ApplyCodexAuthModal({
             <li>Centralized backup history (audit trail)</li>
           </ul>
         </div>
-        <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-warning">
-          <div className="flex items-start gap-2">
-            <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-            <span>{warning}</span>
-          </div>
-        </div>
+        <Notice variant="warning" icon="warning">
+          {warning}
+        </Notice>
         <Checkbox
           label={confirmText}
           checked={confirmed}

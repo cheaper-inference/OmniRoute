@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 /**
@@ -175,12 +176,9 @@ export default function PassthroughModelRow({
     >
       <div className="flex min-w-0 items-center gap-2">
         <Icon name="smart_toy" size={16} className="text-text-muted" />
-        <code
-          className="min-w-0 truncate rounded bg-sidebar px-1.5 py-0.5 font-mono text-xs text-text-muted"
-          title={fullModel}
-        >
+        <InlineCode className="min-w-0 truncate text-text-muted" title={fullModel}>
           {fullModel}
-        </code>
+        </InlineCode>
         {onSetAlias && (
           <span className="flex min-w-0 items-center text-3xs gap-1">
             {editing ? (

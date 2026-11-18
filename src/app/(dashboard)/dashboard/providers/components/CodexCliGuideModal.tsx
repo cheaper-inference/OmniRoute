@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
@@ -83,11 +84,7 @@ const markdownComponents: Components = {
         </code>
       );
     }
-    return (
-      <code className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono text-xs text-text-main">
-        {children}
-      </code>
-    );
+    return <InlineCode>{children}</InlineCode>;
   },
   pre({ children }) {
     return (

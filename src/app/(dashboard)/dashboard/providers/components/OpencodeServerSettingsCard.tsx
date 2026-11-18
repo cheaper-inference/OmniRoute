@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
-import { Card, Input } from "@/shared/components";
+import { Card, Input, IconChip } from "@/shared/components";
 
 const DEFAULT_URL = "http://127.0.0.1:4096";
 
@@ -92,9 +92,9 @@ export default function OpencodeServerSettingsCard() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center bg-warning/10">
-          <Icon name="terminal" size={20} className="text-warning" />
-        </div>
+        <IconChip size="sm" tone="warning">
+          <Icon name="terminal" />
+        </IconChip>
         <div>
           <h3 className="ci-heading" data-size="sm">
             {t("opencodeServerConnection")}

@@ -275,3 +275,56 @@ test("D: a button that picks a file is wrapped in the kit FileTrigger", () => {
   assert.deepEqual(lineHits(/kit-exception:.*file input/i), []);
   assert.ok(openingTags("FileTrigger").length >= 3);
 });
+
+// ── G. Small pieces: InlineCode, IconChip, Notice, Progress, ItemList ───────────────────────
+
+test("G: a <code> dressed as a chip is the kit InlineCode", () => {
+  const offenders = openingTags("code")
+    .filter(
+      ({ tag }) =>
+        /(?<![\w:-])bg-[\w[]/.test(tag) &&
+        /(?<![\w:-])px-[\d.]+/.test(tag) &&
+        /(?<![\w:-])rounded/.test(tag) &&
+        // A full-width block (a path, a masked key) is not an inline chip.
+        !/(?<![\w:-])(block|flex-1)(?![\w-])/.test(tag)
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <InlineCode>");
+  assert.ok(openingTags("InlineCode").length >= 15);
+});
+
+// An icon on a tinted or bordered square or circle of a fixed size, drawn by hand.
+const isHandIconBox = (tag: string) =>
+  /(?<![\w:-])(size-(8|10|12)|w-(8|10|12) h-(8|10|12))(?![\w-])/.test(tag) &&
+  /(?<![\w:-])rounded-(lg|full)(?![\w-])/.test(tag) &&
+  /(?<![\w:-])(items-center|justify-center)(?![\w-])/.test(tag) &&
+  /(?<![\w:-])(bg-[\w[]|border\b)/.test(tag);
+
+test("G: an icon on a tinted square or circle is the IconChip adapter", () => {
+  const offenders = ["div", "span"]
+    .flatMap((name) => openingTags(name))
+    .filter(({ tag }) => isHandIconBox(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <IconChip size=… tone=… shape=…>");
+  assert.ok(openingTags("IconChip").length >= 10);
+});
+
+test("G: a plain error message box is the Notice adapter", () => {
+  // Error ink on an error tint with a border, holding only text: `<Notice variant="critical">`.
+  const offenders = ["div", "p"]
+    .flatMap((name) => openingTags(name))
+    .filter(
+      ({ tag }) =>
+        /(?<![\w:-])text-error(?![\w/-])/.test(tag) &&
+        /(?<![\w:-])bg-error\/10(?![\w-])/.test(tag) &&
+        /(?<![\w:-])border-error\/\d+/.test(tag) &&
+        /(?<![\w:-])text-sm(?![\w-])/.test(tag)
+    )
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, []);
+  assert.ok(openingTags("Notice").length >= 15);
+});
+
+test("G: bars are the kit Progress, not a track and a fill drawn by hand", () => {
+  assert.deepEqual(lineHits(/role=["']progressbar["']/), [], "use <Progress>");
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 /**
  * CustomModelsSection — Issue #3501 Phase 1e
@@ -617,9 +618,7 @@ export default function CustomModelsSection({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{model.name || model.id}</p>
                   <div className="flex items-center gap-1 mt-1 flex-wrap">
-                    <code className="text-xs text-text-muted font-mono bg-sidebar px-1.5 py-0.5 rounded">
-                      {fullModel}
-                    </code>
+                    <InlineCode className="text-text-muted">{fullModel}</InlineCode>
                     <Button
                       variant="ghost"
                       size="icon-2xs"

@@ -14,6 +14,7 @@ import {
   SegmentedPanel,
   SegmentedTabs,
   Textarea,
+  Notice,
 } from "@/shared/components";
 interface ImportClaudeAuthModalProps {
   onClose: () => void;
@@ -737,9 +738,7 @@ export function ApplyClaudeAuthModal({
             {"~/.claude/credentials-{timestamp}.bak"}
           </code>
         </div>
-        <div className="rounded bg-info/10 border border-info/20 px-3 py-2 text-xs text-info">
-          {mcpHint}
-        </div>
+        <Notice variant="info">{mcpHint}</Notice>
         <p className="text-sm text-text-muted">{warning}</p>
         <Checkbox
           label={confirmText}

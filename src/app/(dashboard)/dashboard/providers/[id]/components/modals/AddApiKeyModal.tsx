@@ -15,6 +15,7 @@ import {
   Textarea,
   Toggle,
   TALL_MODAL_PROPS,
+  Notice,
 } from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
@@ -656,12 +657,9 @@ export default function AddApiKeyModal({
         {(!bulkSupported || mode === "single") && (
           <>
             {isCcCompatible && (
-              <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
-                <div className="flex items-start gap-2">
-                  <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-                  <p>{t("ccCompatibleValidationHint")}</p>
-                </div>
-              </div>
+              <Notice variant="warning" icon="warning">
+                {t("ccCompatibleValidationHint")}
+              </Notice>
             )}
             {isCommandCode && onStartCommandCodeAuth && (
               <div className="rounded-lg border border-info/20 bg-info/10 px-3 py-3 text-sm">
@@ -970,11 +968,7 @@ export default function AddApiKeyModal({
                 {providerText(t, validationBadge.labelKey, validationBadge.fallback)}
               </Badge>
             )}
-            {saveError && (
-              <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
-                {saveError}
-              </div>
-            )}
+            {saveError && <Notice variant="critical">{saveError}</Notice>}
             {(isCcCompatible || openRouterPreset.input) && (
               <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
                 {isCcCompatible && (

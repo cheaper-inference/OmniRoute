@@ -16,6 +16,8 @@ import {
   KiroOAuthWrapper,
   OAuthModal,
   Select,
+  Notice,
+  IconChip,
 } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
@@ -220,17 +222,13 @@ function ResultSummary({
     <Card padding="lg">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <div
-            className={`flex size-12 items-center justify-center rounded-full ${
-              valid
-                ? "bg-success/10 text-success"
-                : failed
-                  ? "bg-error/10 text-error"
-                  : "bg-primary/10 text-primary"
-            }`}
+          <IconChip
+            size="lg"
+            shape="circle"
+            tone={valid ? "success" : failed ? "danger" : "accent"}
           >
-            <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} size={28} />
-          </div>
+            <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} />
+          </IconChip>
           <div>
             <h2 className="text-xl text-text-main">
               {valid
@@ -272,11 +270,7 @@ function ResultSummary({
           </div>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         <div className="flex flex-wrap gap-2">
           {(() => {
@@ -570,11 +564,7 @@ export default function ProviderOnboardingWizard() {
         />
       </div>
 
-      {status && (
-        <div className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm text-primary">
-          {status}
-        </div>
-      )}
+      {status && <Notice variant="info">{status}</Notice>}
 
       {selectedProvider && (step === "credentials" || step === "oauth") && (
         <ProviderTosNotice providerId={selectedProvider.id} />

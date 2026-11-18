@@ -6,7 +6,16 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
 import { useConnectionTestModelDraft } from "@/shared/components/useConnectionTestModelDraft";
-import { Button, Badge, Input, Modal, NumberInput, Toggle, Select } from "@/shared/components";
+import {
+  Button,
+  Badge,
+  Input,
+  Modal,
+  NumberInput,
+  Toggle,
+  Select,
+  Notice,
+} from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
@@ -1007,11 +1016,7 @@ export default function EditConnectionModal({
             hint={t("accountConcurrencyCapHint")}
           />
         </div>
-        {saveError && (
-          <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
-            {saveError}
-          </div>
-        )}
+        {saveError && <Notice variant="critical">{saveError}</Notice>}
         {!isOAuth && (
           <>
             {webSessionCredential && (
