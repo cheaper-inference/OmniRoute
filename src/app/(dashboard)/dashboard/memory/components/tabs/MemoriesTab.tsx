@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
 import EmptyState from "@/shared/components/EmptyState";
@@ -359,11 +360,7 @@ export default function MemoriesTab() {
         </div>
       </div>
 
-      {importStatus && (
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/60 text-xs text-text-muted">
-          {importStatus}
-        </div>
-      )}
+      {importStatus && <Notice>{importStatus}</Notice>}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

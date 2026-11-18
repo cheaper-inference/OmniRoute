@@ -1,6 +1,8 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { Spinner } from "@/shared/components/Loading";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/ApiTab.tsx
@@ -492,13 +494,13 @@ export default function ApiTab(_props: ApiTabProps) {
   return (
     <div className="space-y-5 p-4 overflow-y-auto">
       {/* Info Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <Icon name="science" size={20} className="text-primary mt-0.5" />
-        <div>
-          <p className="font-medium text-text-main mb-0.5">{t("title")}</p>
-          <p>{t("description")}</p>
-        </div>
-      </div>
+      <Alert
+        variant="info"
+        dismissible={false}
+        icon={<Icon name="science" size={18} />}
+        title={t("title")}
+        description={t("description")}
+      />
 
       {/* Controls */}
       <Card>
@@ -727,10 +729,9 @@ export default function ApiTab(_props: ApiTabProps) {
               </div>
             </div>
             {isTranscriptionEndpoint && (
-              <p className="text-xs text-text-muted bg-warning/10 border border-warning/20 rounded px-2 py-1.5 flex items-start gap-1">
-                <Icon name="info" size={12} className="text-warning mt-0.5" />
+              <Notice variant="warning" icon="info">
                 {t("transcriptionHint")}
-              </p>
+              </Notice>
             )}
             <div className="border border-border rounded-lg overflow-hidden">
               <Editor

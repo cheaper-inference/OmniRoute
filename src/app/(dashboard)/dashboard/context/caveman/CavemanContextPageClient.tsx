@@ -177,12 +177,8 @@ export default function CavemanContextPageClient() {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
         compact
-        title={
-          <span className="flex items-center gap-3">
-            <Icon name="compress" size={30} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="compress" className="text-primary" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <SegmentedControl

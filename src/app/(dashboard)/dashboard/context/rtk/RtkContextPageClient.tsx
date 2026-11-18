@@ -434,12 +434,8 @@ export default function RtkContextPageClient() {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
         compact
-        title={
-          <span className="flex items-center gap-3">
-            <Icon name="filter_alt" size={30} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="filter_alt" className="text-primary" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <SegmentedControl

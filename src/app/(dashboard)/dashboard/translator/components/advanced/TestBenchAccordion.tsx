@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Alert } from "@omniroute/ui-kit/alert";
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
@@ -219,13 +220,13 @@ function TestBenchContent() {
   return (
     <div className="space-y-5 min-w-0">
       {/* Info Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <Icon name="info" size={20} className="text-primary mt-0.5" />
-        <div>
-          <p className="font-medium text-text-main mb-0.5">{t("compatibilityTester")}</p>
-          <p>{t("testBenchDescription")}</p>
-        </div>
-      </div>
+      <Alert
+        variant="info"
+        dismissible={false}
+        icon={<Icon name="info" size={18} />}
+        title={t("compatibilityTester")}
+        description={t("testBenchDescription")}
+      />
 
       {/* Controls */}
       <Card>

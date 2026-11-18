@@ -3,6 +3,7 @@
 import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Badge } from "@/shared/components";
 import type { RetrievePreviewResult } from "@/shared/schemas/memory";
 
@@ -87,21 +88,15 @@ export default function RetrievePreview({ result }: Props) {
           {totalTokensUsed.toLocaleString()} / {budgetMaxTokens.toLocaleString()}{" "}
           {t("playground.tokensUsed")}
         </span>
-        <div
-          role="progressbar"
+        <Progress
+          size="sm"
+          semantics="meter"
+          animate={false}
           aria-label={t("playground.tokensUsed")}
-          aria-valuemin={0}
-          aria-valuemax={Math.max(1, budgetMaxTokens)}
-          aria-valuenow={Math.min(totalTokensUsed, Math.max(1, budgetMaxTokens))}
-          className="h-1.5 w-24 rounded-full bg-border overflow-hidden"
-        >
-          <div
-            className="h-full rounded-full bg-primary"
-            style={{
-              width: `${Math.min(100, (totalTokensUsed / Math.max(1, budgetMaxTokens)) * 100).toFixed(1)}%`,
-            }}
-          />
-        </div>
+          value={totalTokensUsed}
+          max={Math.max(1, budgetMaxTokens)}
+          className="w-24"
+        />
       </div>
     </div>
   );

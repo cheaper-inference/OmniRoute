@@ -17,6 +17,7 @@ import { useTranslations, useLocale } from "next-intl";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 import Input from "@/shared/components/Input";
 import { Skeleton } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
@@ -620,9 +621,9 @@ export default function CompressionPanel() {
       {/* Master */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-info/10 p-2 text-info">
-            <Icon name="compress" size={20} />
-          </div>
+          <IconChip tone="info">
+            <Icon name="compress" />
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("compressionTitle")}

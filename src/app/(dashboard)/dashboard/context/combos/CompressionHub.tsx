@@ -13,6 +13,7 @@ import { Alert } from "@omniroute/ui-kit/alert";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Skeleton } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
@@ -245,11 +246,7 @@ export default function CompressionHub() {
         </Button>
       </div>
 
-      {error && (
-        <p role="alert" className="rounded border border-error/40 px-3 py-2 text-xs text-error">
-          {error}
-        </p>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {/* ── Explainer ── */}
       {explainerOpen && (

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Switch } from "@omniroute/ui-kit/switch";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import IconChip from "@/shared/components/IconChip";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -257,9 +259,9 @@ export default function QdrantConfigCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
-          <Icon name="database" size={20} />
-        </div>
+        <IconChip tone="success" className="shrink-0">
+          <Icon name="database" />
+        </IconChip>
         <div className="flex-1 min-w-0">
           <h3 className="ci-heading" data-size="sm">
             {t("qdrant.title")}
@@ -308,9 +310,9 @@ export default function QdrantConfigCard() {
       </div>
 
       {/* Tier 1 vs Tier 2 guidance */}
-      <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-text-muted leading-relaxed">
+      <Notice variant="success" className="mb-4">
         {t("qdrant.banner")}
-      </div>
+      </Notice>
 
       {/* Enable toggle + test connection */}
       <Card.Section className="flex items-center justify-between mb-4">

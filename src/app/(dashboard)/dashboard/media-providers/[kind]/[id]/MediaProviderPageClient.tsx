@@ -8,6 +8,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import MediaProviderHeader from "../../components/MediaProviderHeader";
 import MediaProviderKindNav from "../../components/MediaProviderKindNav";
 import type { MediaKind } from "../../components/mediaKinds";
@@ -216,7 +217,7 @@ export default function MediaProviderPageClient({
         imageToText: {
           title: t("imageToText"),
           description: t.rich("imageToTextBridgeAvailable", {
-            code: (chunks) => <code className="rounded bg-bg-subtle px-1 font-mono">{chunks}</code>,
+            code: (chunks) => <InlineCode>{chunks}</InlineCode>,
           }),
           cta: t("imageToTextBridgeCta"),
         },

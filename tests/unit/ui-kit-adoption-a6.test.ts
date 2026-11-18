@@ -372,11 +372,6 @@ test("C: a neutral panel nested in a card is Card.Section, not a hand-made box",
       marker: "p-2 rounded bg-bg/40",
       reason: "A list of search hits (an id and a score): rows, not panels.",
     },
-    {
-      file: "memory/components/tabs/MemoriesTab.tsx",
-      marker: "p-3 rounded-lg bg-bg-subtle border border-border/60",
-      reason: "The result message of an import (a notice), not a panel.",
-    },
   ];
   assertOnlyKept(hits, kept, "use <Card.Section>");
 });
@@ -500,4 +495,123 @@ test("E: pagers are the Pager adapter", () => {
   // A hand-made pager: a button that steps the page state.
   const hits = openingTags(BUTTONS).filter(({ tag }) => /setPage\(\(?\w+\)? =>/.test(tag));
   assertOnlyKept(hits, [], "use <Pager>");
+});
+
+// ── G: small pieces ──────────────────────────────────────────────────────────────────────
+
+test("G: a tinted message box is the Notice adapter or the kit Alert", () => {
+  // A box tinted with a status colour: `border-<status>/N` with `bg-<status>/N` (or `-bg`).
+  const STATUS = "(?:primary|success|warning|error|info)";
+  const hits = lines().filter(
+    ({ tag }) =>
+      new RegExp(`(?<![\\w:-])bg-${STATUS}(?:-bg|/\\d+)(?![\\w-])`).test(tag) &&
+      new RegExp(`(?<![\\w:-])border-${STATUS}/\\d+(?![\\w-])`).test(tag)
+  );
+  const kept: Kept[] = [
+    {
+      file: "playground/components/tabs/BuildTab.tsx",
+      marker: "bg-warning/10 border border-warning/30",
+      reason: "The chat bubble of a tool message.",
+    },
+    {
+      file: "playground/components/tabs/BuildTab.tsx",
+      marker: "border border-warning/40 rounded-lg p-3 bg-warning/5",
+      reason: "A pending tool call with its result field: a form panel, not a message.",
+    },
+    {
+      file: "search-tools/components/ProviderCatalog.tsx",
+      marker: "border-primary/40 bg-primary/5",
+      reason: "The selected state of a provider tile.",
+    },
+    {
+      file: "memory/components/EmbeddingSourceSelector.tsx",
+      marker: "border-primary/50",
+      reason: "The selected state of an option tile.",
+    },
+    {
+      file: "translator/TranslatorPageClient.tsx",
+      marker: '<Card className="border-primary/10 bg-primary/5">',
+      reason: "A Card in the accent tint (the auto-features card), not a message.",
+    },
+    {
+      file: "translator/components/TranslatorConceptCard.tsx",
+      marker: '<Card className="border-primary/10 bg-primary/5">',
+      reason: "A Card in the accent tint (the concept card), not a message.",
+    },
+    ...["border-primary/30", "border-warning/30", "border-info/30"].map((marker) => ({
+      file: "translator/components/TranslateFlowDiagram.tsx",
+      marker,
+      reason: "One entry of the categorical colour map of the static flow illustration.",
+    })),
+    {
+      file: "translator/TranslatorPageClient.tsx",
+      marker: "border-warning/20 bg-warning/5",
+      reason: "One entry of the feature tiles' categorical colour map.",
+    },
+    {
+      file: "translator/TranslatorPageClient.tsx",
+      marker: "border-info/20 bg-info/5",
+      reason: "One entry of the feature tiles' categorical colour map.",
+    },
+  ];
+  assertOnlyKept(hits, kept, "use <Notice> (or the kit Alert for a banner)");
+});
+
+test("G: icon chips, code chips, meters and page-title icons are the kit pieces", () => {
+  // An icon on a tinted square or circle of 36-40px is the IconChip.
+  const chips = lines().filter(
+    ({ tag }) =>
+      /(?<![\w:-])bg-[a-z0-9-]+\/10(?![\w-])/.test(tag) &&
+      /(?<![\w:-])rounded-(?:lg|full)(?![\w-])/.test(tag) &&
+      /(?<![\w:-])(?:p-2|size-10|w-10 h-10)(?![\w.-])/.test(tag)
+  );
+  assertOnlyKept(chips, [], "use <IconChip>");
+
+  // A <code> drawn as a chip (its own fill) is the InlineCode, a one-line URL the CodePreview.
+  const codes = openingTags("code").filter(({ tag }) => /(?<![\w:-])bg-/.test(tag));
+  assertOnlyKept(
+    codes,
+    [
+      {
+        file: "playground/components/MarkdownMessage.tsx",
+        marker: "rounded bg-bg-subtle px-1 py-0.5",
+        reason: "Inline code of a rendered chat message (Markdown content).",
+      },
+    ],
+    "use <InlineCode>"
+  );
+
+  // A bar drawn by hand is the kit Progress.
+  const bars = openingTags("div").filter(({ tag }) => /role="progressbar"/.test(tag));
+  assertOnlyKept(
+    bars,
+    [
+      {
+        file: "compression/studio/WaterfallInspector.tsx",
+        marker: 't("input")',
+        reason: "A waterfall chart: the input bar of a step, on the scale of the whole run.",
+      },
+      {
+        file: "compression/studio/WaterfallInspector.tsx",
+        marker: 't("output")',
+        reason: "A waterfall chart: the output bar of a step, on the scale of the whole run.",
+      },
+    ],
+    "use <Progress>"
+  );
+
+  // The icon of a page title goes in the PageHeader `icon` slot; `title` is text.
+  const headers = openingTags("PageHeader").filter(({ tag }) => /title=\{\s*</.test(tag));
+  assertOnlyKept(
+    headers,
+    [
+      {
+        file: "media-providers/components/MediaProviderHeader.tsx",
+        marker: "providerColor",
+        reason:
+          "The provider logo on a 40px box in the provider's brand colour: the icon slot sizes a bare svg or img to the title and has no tint.",
+      },
+    ],
+    "pass the icon in the PageHeader icon prop"
+  );
 });

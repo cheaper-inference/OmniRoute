@@ -3,6 +3,7 @@
 // Direct module import: tests stub the barrel Button with a reduced prop set.
 import IconButton from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Spinner } from "@/shared/components/Loading";
 import { cn } from "@/shared/utils/cn";
 
@@ -287,10 +288,9 @@ export default function RawJsonPanel({
           <>
             {/* Error banner */}
             {errorMessage && (
-              <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-error/10 border border-error/20 text-sm text-error">
-                <Icon name="error" size={16} className="mt-0.5" />
-                <span>{errorMessage}</span>
-              </div>
+              <Notice variant="critical" icon="error">
+                {errorMessage}
+              </Notice>
             )}
 
             {/* Format Controls Bar */}

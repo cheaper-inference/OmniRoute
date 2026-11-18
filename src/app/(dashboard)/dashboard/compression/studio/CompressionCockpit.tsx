@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NodeTypes } from "@xyflow/react";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -179,11 +180,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
         <span className="ci-eyebrow" data-weight="medium">
           {run.mode}
         </span>
-        {run.comboId && (
-          <span className="text-xs text-text-muted px-1.5 py-0.5 rounded bg-border/40 font-mono">
-            {run.comboId}
-          </span>
-        )}
+        {run.comboId && <InlineCode>{run.comboId}</InlineCode>}
         <span className="text-xs text-text-muted font-mono opacity-70 truncate">
           {run.requestId}
         </span>

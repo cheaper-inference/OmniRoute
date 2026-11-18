@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { Card, Button, Input, Select } from "@/shared/components";
 import NumberInput from "@/shared/components/NumberInput";
 import RetrievePreview from "../RetrievePreview";
@@ -51,13 +53,13 @@ export default function PlaygroundTab() {
   return (
     <div className="space-y-6">
       {/* Info */}
-      <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <Icon name="science" size={20} className="text-primary mt-0.5" />
-        <div>
-          <p className="font-medium text-text-main mb-0.5">{t("playground.infoTitle")}</p>
-          <p>{t("playground.infoDesc")}</p>
-        </div>
-      </div>
+      <Alert
+        variant="info"
+        dismissible={false}
+        icon={<Icon name="science" size={18} />}
+        title={t("playground.infoTitle")}
+        description={t("playground.infoDesc")}
+      />
 
       {/* Controls */}
       <Card>
@@ -116,11 +118,7 @@ export default function PlaygroundTab() {
       </Card>
 
       {/* Error */}
-      {error && (
-        <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs text-error">
-          {error}
-        </div>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {/* Results */}
       {result && (

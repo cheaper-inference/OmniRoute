@@ -3,6 +3,7 @@
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/BuildTab.tsx
 
@@ -294,17 +295,12 @@ export default function BuildTab({ configState }: BuildTabProps) {
 
       {/* Structured output validation */}
       {validationResult != null && (
-        <div
-          className={`text-xs rounded-lg px-3 py-2 border ${
-            validationResult.valid
-              ? "border-success/40 bg-success/5 text-success"
-              : "border-error/40 bg-error/5 text-error"
-          }`}
+        <Notice
+          variant={validationResult.valid ? "success" : "critical"}
+          icon={validationResult.valid ? "check_circle" : "error"}
         >
-          {validationResult.valid
-            ? "✅ Valid JSON schema response"
-            : `❌ ${validationResult.error}`}
-        </div>
+          {validationResult.valid ? "Valid JSON schema response" : validationResult.error}
+        </Notice>
       )}
     </div>
   );

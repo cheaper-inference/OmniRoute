@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Switch } from "@omniroute/ui-kit/switch";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import type { MemorySettingsExtended } from "@/shared/schemas/memory";
@@ -60,10 +61,9 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
       {rerankEnabled && (
         <>
           {/* Latency / cost warning */}
-          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
-            <Icon name="warning" size={14} className="mt-0.5" />
-            <span>{t("rerank.warning")}</span>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {t("rerank.warning")}
+          </Notice>
 
           <Card.Section>
             <Field label={t("rerank.providerModelLabel")} htmlFor={rerankModelId}>

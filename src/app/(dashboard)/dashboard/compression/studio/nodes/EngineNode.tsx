@@ -3,6 +3,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useTranslations } from "next-intl";
 import { FlowNode, type FlowNodeStatus } from "@omniroute/ui-kit/flow-node";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
 import { categoricalSlotFor } from "@/shared/utils/categoricalPalette";
@@ -123,23 +124,16 @@ export function EngineNode({ data }: NodeProps) {
                   <span>→</span>
                   <span>{tokOut.toLocaleString()}</span>
                 </div>
-                <div
-                  role="progressbar"
+                <Progress
+                  size="sm"
+                  semantics="meter"
+                  animate={false}
                   aria-label={engine as string}
-                  aria-valuemin={0}
-                  aria-valuemax={Math.max(tokIn, tokOut, 1)}
-                  aria-valuenow={tokOut}
                   aria-valuetext={`${tokIn.toLocaleString()} → ${tokOut.toLocaleString()}`}
-                  className="relative h-1.5 rounded-full overflow-hidden bg-border"
-                >
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full"
-                    style={{
-                      width: tokIn > 0 ? `${(tokOut / tokIn) * 100}%` : "100%",
-                      backgroundColor: color,
-                    }}
-                  />
-                </div>
+                  value={tokIn > 0 ? tokOut : 1}
+                  max={Math.max(tokIn, 1)}
+                  color={color}
+                />
               </div>
             )}
             {durationMs != null && (

@@ -4,6 +4,7 @@ import Textarea from "@/shared/components/Textarea";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Spinner } from "@/shared/components/Loading";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab.tsx
@@ -483,11 +484,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           </div>
         )}
 
-        {error && (
-          <div className="text-center p-2 text-sm text-error bg-error/10 rounded border border-error/20">
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         <div ref={messagesEndRef} />
       </div>

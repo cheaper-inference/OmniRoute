@@ -14,6 +14,7 @@ import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import { cn } from "@/shared/utils/cn";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { getProviderAlias } from "@/shared/constants/providers";
@@ -524,9 +525,9 @@ export function LlmChatCard({
       >
         {messages.length === 0 ? (
           <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center">
-              <Icon name="forum" size={22} className="text-accent" />
-            </div>
+            <IconChip tone="accent" shape="circle">
+              <Icon name="forum" />
+            </IconChip>
             <p className="text-sm text-text-muted">{t("emptyConversation")}</p>
             <p className="text-xs text-text-muted/70">{t("sendHint")}</p>
           </div>

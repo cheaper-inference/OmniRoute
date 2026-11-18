@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Switch } from "@omniroute/ui-kit/switch";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
@@ -148,10 +149,9 @@ export default function EmbeddingSourceSelector({ settings, providers, onSave, s
       )}
 
       {currentSource === "transformers" && (
-        <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
-          <Icon name="info" size={14} className="mt-0.5" />
-          <span>{t("embedding.transformersWarning")}</span>
-        </div>
+        <Notice variant="warning" icon="info">
+          {t("embedding.transformersWarning")}
+        </Notice>
       )}
 
       <div className="flex flex-col gap-2">
