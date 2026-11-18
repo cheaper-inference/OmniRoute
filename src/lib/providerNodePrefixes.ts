@@ -57,6 +57,8 @@ export interface ProviderPrefixIndex {
   nodeToPrefix: Map<string, string>;
   /** public prefix → nodeId, only for uniquely-routable non-reserved winners. */
   prefixToNode: Map<string, string>;
+  /** nodeId → non-empty trimmed operator-configured node name, for every compatible node. */
+  nodeToName: Map<string, string>;
   /** Every compatible provider node id present in the node table. */
   compatibleNodeIds: Set<string>;
   /** Compatible node ids eligible for Model Overrides (unique non-reserved winners). */
@@ -78,6 +80,7 @@ export function isProviderNodePrefixReserved(value: unknown): boolean {
 
 export interface CompatibleNodeLike {
   id?: string;
+  name?: string | null;
   type?: string;
   prefix?: string | null;
 }
@@ -105,8 +108,12 @@ export async function getProviderPrefixIndex(): Promise<ProviderPrefixIndex> {
   );
 
   const compatibleNodeIds = new Set<string>();
+  const nodeToName = new Map<string, string>();
   for (const node of compatible) {
-    if (node.id) compatibleNodeIds.add(node.id);
+    if (!node.id) continue;
+    compatibleNodeIds.add(node.id);
+    const trimmedName = typeof node.name === "string" ? node.name.trim() : "";
+    if (trimmedName) nodeToName.set(node.id, trimmedName);
   }
 
   const byPrefix = new Map<string, CompatibleNodeLike[]>();
@@ -142,5 +149,5 @@ export async function getProviderPrefixIndex(): Promise<ProviderPrefixIndex> {
     eligibleNodeIds.add(winner.id);
   }
 
-  return { entries, nodeToPrefix, prefixToNode, compatibleNodeIds, eligibleNodeIds };
+  return { entries, nodeToPrefix, prefixToNode, nodeToName, compatibleNodeIds, eligibleNodeIds };
 }

@@ -30,11 +30,14 @@ export async function GET() {
   try {
     const catalog: Record<string, any> = {};
 
-    // Pre-load compatible-provider node public prefixes once (shared across the
-    // whole catalog build — never N lookups per model). Only uniquely-routable
-    // prefixes are exposed as public targets (reserved/ambiguous are not).
-    const { nodeToPrefix, prefixToNode, eligibleNodeIds, compatibleNodeIds } =
+    // Pre-load compatible-provider node public prefixes and names once (shared
+    // across the whole catalog build — never N lookups per model). Only
+    // uniquely-routable prefixes are exposed as public targets
+    // (reserved/ambiguous are not).
+    const { nodeToPrefix, prefixToNode, nodeToName, eligibleNodeIds, compatibleNodeIds } =
       await getProviderPrefixIndex();
+    const resolveCatalogProviderName = (providerId: string) =>
+      nodeToName.get(providerId) ?? providerId.charAt(0).toUpperCase() + providerId.slice(1);
 
     // ── 1. Registry models (hardcoded) ──────────────────────────────
     for (const entry of Object.values(REGISTRY)) {
@@ -44,7 +47,7 @@ export async function GET() {
       catalog[alias] = {
         id: entry.id,
         alias,
-        name: entry.id.charAt(0).toUpperCase() + entry.id.slice(1),
+        name: resolveCatalogProviderName(entry.id),
         authType: entry.authType || "unknown",
         format: entry.format || "openai",
         models: entry.models.map((m) => ({
@@ -74,7 +77,7 @@ export async function GET() {
         catalog[alias] = {
           id: providerId,
           alias,
-          name: providerId.charAt(0).toUpperCase() + providerId.slice(1),
+          name: resolveCatalogProviderName(providerId),
           authType: "unknown",
           format: "openai",
           models: [],
@@ -163,7 +166,7 @@ export async function GET() {
         catalog[providerAlias] = {
           id: providerAlias,
           alias: providerAlias,
-          name: providerAlias.charAt(0).toUpperCase() + providerAlias.slice(1),
+          name: resolveCatalogProviderName(providerAlias),
           authType: "unknown",
           format: "openai",
           models: [],

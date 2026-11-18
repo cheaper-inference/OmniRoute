@@ -34,14 +34,18 @@ after(() => {
 
 const NODE_ID = "openai-compatible-chat-02669115-2545-4896-b003-cb4dac09d441";
 const NODE_PREFIX = "vibeproxy";
+const NODE_NAME = "VibeProxy";
 const NODE_TYPE = "openai-compatible";
 
-async function seedNodeWithSyncedModel(modelId = "gpt-4o", opts: { prefix?: string | null } = {}) {
+async function seedNodeWithSyncedModel(
+  modelId = "gpt-4o",
+  opts: { prefix?: string | null; name?: string | null } = {}
+) {
   await nodes.createProviderNode({
     id: NODE_ID,
     type: NODE_TYPE,
     prefix: opts.prefix === undefined ? NODE_PREFIX : opts.prefix,
-    name: "VibeProxy",
+    name: opts.name === undefined ? NODE_NAME : opts.name,
     apiType: "chat",
     baseUrl: "https://example.com/v1",
   });
@@ -51,22 +55,71 @@ async function seedNodeWithSyncedModel(modelId = "gpt-4o", opts: { prefix?: stri
 }
 
 describe("issue #9557: model overrides expose configured provider prefix, not node UUID", () => {
-  it("pricing/models returns public displayPrefix while retaining internal node id", async () => {
+  it("pricing/models returns public displayPrefix and operator node name while retaining internal node id", async () => {
     await seedNodeWithSyncedModel();
     const response = await pricingRoute.GET();
     assert.equal(response.status, 200);
     const catalog = (await response.json()) as Record<
       string,
-      { id: string; alias: string; displayPrefix?: string; models: Array<{ id: string }> }
+      {
+        id: string;
+        alias: string;
+        name: string;
+        displayPrefix?: string;
+        models: Array<{ id: string }>;
+      }
     >;
 
     const entry = Object.values(catalog).find((provider) => provider.id === NODE_ID);
     assert.ok(entry, "compatible node must appear in the pricing catalog");
     assert.equal(entry.id, NODE_ID, "internal node id must be preserved for PricingTab");
+    assert.equal(
+      entry.name,
+      NODE_NAME,
+      "operator node name must be exposed instead of capitalized UUID"
+    );
     assert.equal(entry.displayPrefix, NODE_PREFIX, "public display prefix must be exposed");
     assert.ok(
       entry.models.some((model) => model.id === "gpt-4o"),
       "synced model must be listed under the compatible node"
+    );
+  });
+
+  it("pricing/models uses node name for custom models and falls back to capitalized id when node name is empty", async () => {
+    const customNamedNodeId = "openai-compatible-chat-97e3ec34-3375-4447-8ece-b58607f2b6ed";
+    const unnamedNodeId = "openai-compatible-chat-ffffffff-1111-4222-8333-444444444444";
+    await nodes.createProviderNode({
+      id: customNamedNodeId,
+      type: NODE_TYPE,
+      prefix: "ai-free-ds",
+      name: "AI Free DeepSeek",
+      apiType: "chat",
+      baseUrl: "https://example.com/ds/v1",
+    });
+    await models.addCustomModel(customNamedNodeId, "deepseek-v4-flash", "deepseek-v4-flash");
+
+    await nodes.createProviderNode({
+      id: unnamedNodeId,
+      type: NODE_TYPE,
+      prefix: "unnamed-ds",
+      name: "   ",
+      apiType: "chat",
+      baseUrl: "https://example.com/unnamed/v1",
+    });
+    await models.addCustomModel(unnamedNodeId, "deepseek-v4-lite", "deepseek-v4-lite");
+
+    const response = await pricingRoute.GET();
+    assert.equal(response.status, 200);
+    const catalog = (await response.json()) as Record<
+      string,
+      { id: string; name: string; displayPrefix?: string }
+    >;
+
+    assert.equal(catalog[customNamedNodeId]?.name, "AI Free DeepSeek");
+    assert.equal(catalog[customNamedNodeId]?.displayPrefix, "ai-free-ds");
+    assert.equal(
+      catalog[unnamedNodeId]?.name,
+      unnamedNodeId.charAt(0).toUpperCase() + unnamedNodeId.slice(1)
     );
   });
 
@@ -486,10 +539,17 @@ describe("issue #9557: model overrides expose configured provider prefix, not no
     const catalogRes = await pricingRoute.GET();
     const catalog = (await catalogRes.json()) as Record<
       string,
-      { id: string; displayPrefix?: string; pricingKey?: string; models: Array<{ id: string }> }
+      {
+        id: string;
+        name: string;
+        displayPrefix?: string;
+        pricingKey?: string;
+        models: Array<{ id: string }>;
+      }
     >;
     const entry = Object.values(catalog).find((provider) => provider.id === NODE_ID);
     assert.ok(entry, "pricing-only model must reconcile onto the compatible node");
+    assert.equal(entry.name, "VibeProxy");
     assert.equal(entry.displayPrefix, NODE_PREFIX);
     assert.equal(
       entry.pricingKey,
