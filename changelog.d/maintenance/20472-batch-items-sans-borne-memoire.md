@@ -1,0 +1,1 @@
+- **perf(batch):** oversized batch files are rejected before parsing instead of filling process memory ([#20472](https://github.com/cheaper-inference/OmniRoute/pull/20472)) — thanks @maxmad64bis
