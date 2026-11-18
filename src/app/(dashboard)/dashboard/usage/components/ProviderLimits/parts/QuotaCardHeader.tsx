@@ -37,6 +37,9 @@ interface Props {
   now?: number;
 }
 
+/** Ink of the active toggle at rest: muted while the quota is active (an inactive one is error ink). */
+const toggleTone = (isActive: boolean) => (isActive ? ("muted" as const) : undefined);
+
 export default function QuotaCardHeader({
   connection,
   providerLabel,
@@ -155,7 +158,7 @@ export default function QuotaCardHeader({
         <Button
           variant="ghost"
           size="icon-2xs"
-          tone={isActive ? "muted" : undefined}
+          tone={toggleTone(isActive)}
           disabled={togglingActive}
           onClick={(e) => {
             e.stopPropagation();
