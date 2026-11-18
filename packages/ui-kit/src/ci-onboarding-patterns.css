@@ -72,6 +72,11 @@
 .ci-setup-benefits li > span { color:var(--ci-color-accent); }
 .ci-setup-benefits svg { width:1.125rem; height:1.125rem; }
 .ci-setup-benefits strong { color:var(--ci-color-heading); font-size:.8125rem; font-weight:var(--ci-font-weight-medium); }
+.ci-setup-benefits__footer { display:grid; gap:var(--ci-space-4); margin-top:var(--ci-space-6); padding-top:var(--ci-space-6); border-top:1px solid var(--ci-color-border-subtle); }
+.ci-setup-benefits__footer[data-icon-aligned] { padding-inline-start:1.875rem; }
+.ci-setup-benefits__footer > p { margin:0; }
+.ci-setup-benefits__footer > .ci-button { justify-self:start; max-width:100%; white-space:normal; text-align:start; }
+
 @media(max-width:1100px) { .ci-setup-layout { grid-template-columns:1fr; } .ci-setup-layout__aside { border-left:0; border-top:1px solid var(--ci-color-border-subtle); padding:1.5rem 0 0; } }
 
 .ci-setup-layout--compact h2 { font-size:var(--ci-font-size-md); font-weight:var(--ci-font-weight-medium); }

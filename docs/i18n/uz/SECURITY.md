@@ -6,11 +6,11 @@
 
 ## Zaifliklar haqida xabar berish
 
-Agar OmniRoute’da xavfsizlik zaifligini aniqlasangiz, bu haqda mas’uliyat bilan xabar bering:
+Agar OmniRoute da xavfsizlik zaifligini aniqlasangiz, bu haqda mas'uliyat bilan xabar bering:
 
-1. Ommaviy GitHub muammosini **OCHMANG**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) xizmatidan foydalaning
-3. Quyidagilarni kiriting: tavsif, takrorlash bosqichlari va ehtimoliy ta’sir
+1. **DO NOT** ommaviy GitHub sonini oching
+2. [GitHub xavfsizlik maslahatlaridan](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) foydalaning
+3. O'z ichiga oladi: tavsif, ko'paytirish bosqichlari va potentsial ta'sir
 
 ## Javob berish muddati
 
@@ -29,14 +29,14 @@ Agar OmniRoute’da xavfsizlik zaifligini aniqlasangiz, bu haqda mas’uliyat bi
 | 3.7.x   | ✅ Xavfsizlik                                                   |
 | < 3.7.0 | ❌ Qoʻllab-quvvatlanmaydi                                       |
 
-## LTS qoʻllab-quvvatlash muddati (v3.9.x)
+## LTS qoʻllab-quvvatlash oynasi (v3.9.x)
 
-3.8.59 versiyasidan keyingi versiya **3.9.0** boʻlib, u `stable/v3` tarmogʻida uzoq muddatli qoʻllab-quvvatlash liniyasini ochadi ([`ROADMAP.md`](ROADMAP.md) → “3-bosqich — v3.9.0 LTS”ga qarang).
+3.8.59 dan keyin keyingi versiya** 3.9.0** , bu `stable/v3` filialida uzoq muddatli qo'llab-quvvatlash liniyasini ochadi (qarang: [`ROADMAP.md`](ROADMAP.md) → "3-bosqich — v3.9.0 LTS").
 
-- **`stable/v3` nimalarni oladi:** xatolarni tuzatish, xavfsizlik yamoqlari va provayder yangilanishlari. Yangi funksiyalar v4 kanaliga yuboriladi; LTS liniyasida barqarorlik birinchi oʻrinda turadi. `npm install omniroute` (`latest` dist-tegi) butun v4 sikli davomida v3 versiyasida qoladi.
-- **Qoʻllab-quvvatlash muddati:** `stable/v3` **3.9.0 chiqarilganidan keyin 12 oy davomida yoki v4.0.0 `latest` sifatida eʼlon qilinganidan keyin 90 kun oʻtguniga qadar — qaysi biri kechroq boʻlsa**, xavfsizlik tuzatishlari va jiddiy regressiya tuzatishlarini oladi. Yakuniy tugash sanasi 3.9.0 versiyasining reliz qaydlarida va reliz chiqarilganda [`ROADMAP.md`](ROADMAP.md) faylida qayd etiladi.
-- **LTS liniyasidagi zaiflik haqida xabar berish:** boshqa barcha versiyalardagi kabi bir xil kanal orqali — faqat yopiq [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new), hech qachon ommaviy muammo sifatida emas. Qaysi versiyani sinaganingizni koʻrsating (masalan, `3.9.2`); tuzatishlar `stable/v3` tarmogʻiga kiritiladi va v4 versiyasiga ham koʻchiriladi.
-- **LTS chiqarilishidagi xavfsizlik asosiy holati:** skanerning oʻlchangan holati, marshrut himoyasi va ommaviy hisob maʼlumotlariga oid dalillar [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) faylida qayd etiladi.
+- **`stable/v3` nima oladi:** xatolarni tuzatish, xavfsizlik yamoqlari va provayder yangilanishlari. Yangi funksiyalar v4 kanaliga o'tadi; LTS liniyasi birinchi navbatda barqarorlikdir. `npm install omniroute` ( `latest` dist-teg) butun v4 sikli davomida v3 da qoladi.
+- **Oyna davomiyligi:** `stable/v3` oladi** 3.9.0 kesilganidan keyin 12 oy yoki v4.0.0 `latest` — sifatida nashr etilganidan keyin 90 kungacha, qaysi biri keyinroq boʻlsa, xavfsizlik tuzatishlari va muhim regressiyalar** . Natijada tugash sanasi 3.9.0 nashri yozuvlarida va kesish sodir bo'lganda [`ROADMAP.md`](ROADMAP.md) da qayd etiladi.
+- **LTS liniyasidagi zaiflik haqida xabar berish:** boshqa har qanday versiya kabi bir xil kanal — a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), hech qachon ommaviy muammo emas. Qaysi versiyani sinab ko'rganingizni ayting (masalan, `3.9.2`); `stable/v3` -ga joylashishni tuzatadi va v4-ga oldinga yo'naltiriladi.
+- **LTS kesimida xavfsizlikning asosiy darajasi:** o'lchangan skaner holati, marshrutni qo'riqlash va ommaviy hisobga olish ma'lumotlari [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) da qayd etiladi.
 
 ---
 

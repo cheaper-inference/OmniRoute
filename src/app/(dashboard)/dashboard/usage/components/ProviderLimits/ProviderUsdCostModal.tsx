@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Slider } from "@omniroute/ui-kit/slider";
 import Modal from "@/shared/components/Modal";
 import Icon from "@/shared/components/Icon";
@@ -266,12 +267,13 @@ export default function ProviderUsdCostModal({
                           )}
                         </div>
                       </div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-sm bg-border/60">
-                        <div
-                          className="h-full rounded-sm bg-chart-1"
-                          style={{ width: `${barPercent}%` }}
-                        />
-                      </div>
+                      <Progress
+                        className="mt-2"
+                        aria-label={row.apiKeyName}
+                        aria-valuetext={formatUsd(row.costUsd)}
+                        value={barPercent}
+                        animate={false}
+                      />
                     </div>
                   );
                 })}
