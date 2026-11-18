@@ -89,6 +89,14 @@ test("upstreamHeadersRecordSchema: rejects an e-mail style header name", async (
   assert.equal(upstreamHeadersRecordSchema.safeParse({ "X-Title": "x" }).success, true);
 });
 
+test("applyCustomHeaders: skips a persisted non-token name instead of breaking the request", async () => {
+  const { applyCustomHeaders } = await import("../../open-sse/executors/default/customHeaders.ts");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  applyCustomHeaders(headers, { "admin@example.com": "secret", "X-Good": "ok" });
+  assert.deepEqual(headers, { "Content-Type": "application/json", "X-Good": "ok" });
+  assert.doesNotThrow(() => new Headers(headers));
+});
+
 test("sanitizeUpstreamHeadersMap: caps count at 16", () => {
   const raw = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`H${i}`, String(i)]));
   const out = sanitizeUpstreamHeadersMap(raw);
