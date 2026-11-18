@@ -155,7 +155,12 @@ for (const [name, attempts] of [
     );
     const result = await prepareCoverageShards(input);
     assert.equal(result.shards, 8);
-    assert.equal((await readdir(input.outputDirectory)).length, 8);
+    assert.equal(result.inputFiles, 8);
+    assert.deepEqual(await readdir(input.outputDirectory), ["coverage-merged.json"]);
+    const merged = JSON.parse(
+      await readFile(join(input.outputDirectory, "coverage-merged.json"), "utf8")
+    );
+    assert.equal(merged.result[0].functions[0].ranges[0].count, 36);
     assert.deepEqual(result.producerAttempts, attempts.map(String));
     const after = await Promise.all(
       input.selection.producers.map((producer) =>

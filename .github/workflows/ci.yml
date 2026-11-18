@@ -1419,9 +1419,8 @@ jobs:
           path: coverage-shards/
           merge-multiple: false
       - name: Merge + report + gate
-        # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
-        # keeps the V8 coverage merge incremental instead of loading every raw
-        # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # Verify and merge each raw report in order without storing a second
+        # raw copy. c8 reads the aggregate for source mapping and reporting.
         # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
         # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
         # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
@@ -1435,7 +1434,7 @@ jobs:
           if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
           mkdir -p coverage
           # Retained producers keep their original attempts. The receipt binds all
-          # eight job/artifact identities before the native c8 merge reads samples.
+          # eight job/artifact identities and the aggregate sent to c8.
           node scripts/ci/prepare-v8-coverage.mjs prepare coverage-shards coverage-shards-verified 8 "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" coverage/coverage-selection.json "$RUN_HEAD_SHA" "$GITHUB_REPOSITORY" > coverage/coverage-preparation.json
           cat coverage/coverage-preparation.json
           # Gate aligned to the project's local coverage bar: `npm run test:coverage`

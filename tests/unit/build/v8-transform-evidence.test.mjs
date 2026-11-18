@@ -280,3 +280,61 @@ for (const [field, value] of [
     assert.equal(existsSync(options.outputDirectory), false);
   });
 }
+
+test("coverage consumer bounds retained raw after generated proof and portable layout projection", async (t) => {
+  const options = await packageMatrix(t);
+  const originals = [];
+  let generatedEvidenceBytes = 0;
+  for (const [offset, manifest] of options.manifests.entries()) {
+    const artifact = join(options.directory, `coverage-shard-${runAttempt}-${offset + 1}`);
+    generatedEvidenceBytes += manifest.transformEvidence.payloadBytes;
+    for (const path of [
+      join(artifact, "manifest.json"),
+      ...manifest.inputs.map((input) => join(artifact, "raw", `${input.name}.gz`)),
+      ...manifest.transformEvidence.entries.map((entry) => join(artifact, entry.payload)),
+    ]) {
+      originals.push({ path, sha256: digest(await readFile(path)) });
+    }
+  }
+  const prepared = await prepareCoverageShards(options);
+  let materializedBytes = 0;
+  let contributedCount = 0;
+  // readFile is already used by this suite; enumerate only the owned derivative directory.
+  const { readdir } = await import("node:fs/promises");
+  for (const name of await readdir(options.outputDirectory)) {
+    const bytes = await readFile(join(options.outputDirectory, name));
+    materializedBytes += bytes.length;
+    const sample = JSON.parse(bytes.toString("utf8"));
+    assert.ok(Array.isArray(sample.result), "the c8 input directory contains only V8 derivatives");
+    for (const script of sample.result) contributedCount += script.functions[0].ranges[0].count;
+  }
+  assert.equal(prepared.inputFiles, 8);
+  assert.equal(prepared.shards, 8);
+  assert.equal(contributedCount, 8, "the projection retains each producer contribution");
+  assert.ok(generatedEvidenceBytes > 0);
+  assert.equal(prepared.generatedEvidenceBytes, generatedEvidenceBytes);
+  assert.ok(prepared.layoutProjection.projectedScriptSamples > 0);
+  for (const original of originals) {
+    assert.equal(
+      digest(await readFile(original.path)),
+      original.sha256,
+      "raw, manifests and generated proof stay immutable"
+    );
+  }
+  const largestInputBytes = Math.max(
+    ...options.manifests.flatMap((manifest) => manifest.inputs.map((input) => input.bytes))
+  );
+  assert.ok(
+    materializedBytes <= largestInputBytes * 2,
+    `proved repeated-source corpus retains ${materializedBytes} raw bytes for largest input ${largestInputBytes}`
+  );
+});
+
+test(
+  "coverage consumer enforces peak quota with portable generated-code evidence",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const { assertBoundedPreparation } = await import("./fixtures/v8-disk-quota-harness.mjs");
+    await assertBoundedPreparation(await packageMatrix(t), { expectedCount: 8, generated: true });
+  }
+);
