@@ -5,7 +5,8 @@
 // open. There is no DOM `<select>`/`<option>`, so tests that used `fireEvent.change` or
 // `select.options` go through these helpers instead. The adapter keeps the legacy values
 // reachable: each item carries `data-value`, and the kit root (`[data-slot=select]`)
-// carries the controlled `data-value`.
+// carries the controlled `data-value`. A `Select native` is a real `<select>`: the read and
+// choose helpers accept it too, so a test does not depend on which picker the screen uses.
 import { act, fireEvent } from "@testing-library/react";
 
 // Radix Select calls these on open; jsdom does not implement them.
@@ -16,6 +17,11 @@ proto.setPointerCapture ??= () => {};
 proto.scrollIntoView ??= () => {};
 
 type Root = Document | Element;
+
+function nativeSelectOf(target: Element): HTMLSelectElement | null {
+  if (target instanceof HTMLSelectElement) return target;
+  return target.querySelector<HTMLSelectElement>("select.ci-native-select__control");
+}
 
 function triggerOf(target: Element): HTMLElement {
   if (target.getAttribute("role") === "combobox") return target as HTMLElement;
@@ -35,7 +41,9 @@ export function kitSelectByLabel(label: string, root: Root = document): HTMLElem
     el.textContent?.includes(label)
   );
   const byFor = viaLabel?.htmlFor ? document.getElementById(viaLabel.htmlFor) : null;
-  if (byFor?.getAttribute("role") === "combobox") return byFor;
+  if (byFor?.getAttribute("role") === "combobox" || byFor instanceof HTMLSelectElement) {
+    return byFor as HTMLElement;
+  }
   const byAria = kitSelectTriggers(root).find((el) =>
     el.getAttribute("aria-label")?.includes(label)
   );
@@ -45,6 +53,8 @@ export function kitSelectByLabel(label: string, root: Root = document): HTMLElem
 
 /** The controlled value the adapter was rendered with (legacy `<select>.value`). */
 export function kitSelectValue(target: Element): string | null {
+  const native = nativeSelectOf(target);
+  if (native) return native.value;
   return triggerOf(target).closest("[data-slot=select]")?.getAttribute("data-value") ?? null;
 }
 
@@ -79,6 +89,15 @@ export function kitSelectItems() {
 
 /** Opens the menu, reads its items, closes it again. */
 export function kitSelectOptions(target: Element) {
+  const native = nativeSelectOf(target);
+  if (native) {
+    return Array.from(native.options).map((option) => ({
+      value: option.value,
+      label: option.text,
+      disabled: option.disabled,
+      element: option as HTMLElement,
+    }));
+  }
   openKitSelect(target);
   const items = kitSelectItems();
   closeKitSelect(target);
@@ -87,6 +106,13 @@ export function kitSelectOptions(target: Element) {
 
 /** Equivalent of `fireEvent.change(select, { target: { value } })` for a kit Select. */
 export function chooseKitSelectValue(target: Element, value: string) {
+  const native = nativeSelectOf(target);
+  if (native) {
+    act(() => {
+      fireEvent.change(native, { target: { value } });
+    });
+    return;
+  }
   openKitSelect(target);
   const item = document.querySelector<HTMLElement>(
     `[role=option][data-value="${value.replace(/["\\]/g, "\\$&")}"]`

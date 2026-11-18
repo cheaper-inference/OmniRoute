@@ -195,143 +195,117 @@ RSS ገደብ አይደለም፤ በጣም ትላልቅ ቡድኖች አሁን�
 
 ---
 
-## 4. የBigQuery መድረሻ
+## 4. BigQuery መድረሻ
 
 የውቅረት ቁልፎች (`type: "bigquery"`):
 
-| ቁልፍ                  | ማስታወሻዎች                                                       |
-| -------------------- | ------------------------------------------------------------- |
-| `projectId`          | የውሂብ ስብስቡን የያዘው የGCP ፕሮጀክት                                    |
-| `datasetId`          | `[A-Za-z0-9_]+`                                               |
-| `tableId`            | `[A-Za-z0-9_]+`                                               |
-| `location`           | የውሂብ ስብስቡ መፈጠር ሲያስፈልግ ብቻ ይጠቀማል (ነባሪው `EU`)                    |
-| `serviceAccountJson` | የአገልግሎት መለያ ቁልፍ። ሚስጥራዊ፦ በማከማቻ ላይ እያለ ይመሰጠራል፣ ፈጽሞ አይመለስም       |
-| `autoCreate`         | በመጀመሪያው ወደ ውጭ ማውጣት ጊዜ የውሂብ ስብስቡን እና ሰንጠረዡን ይፍጠር (ነባሪው `true`) |
+| ቁልፍ                  | ማስታወሻ                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `projectId`          | ዳታሴቱን የያዘው GCP ፕሮጀክት                                                               |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                    |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                    |
+| `location`           | ዳታሴቱ መፈጠር ሲኖርበት ብቻ ይጠቀማል (ነባሪው `EU`)                                               |
+| `serviceAccountJson` | የአገልግሎት መለያ ቁልፍ። ሚስጥራዊ፦ በማከማቻ ላይ ተመስጥሮ ይቀመጣል፣ በፍጹም አይመለስም                          |
+| `autoCreate`         | የጎደለውን ዳታሴት/ሠንጠረዥ ይፍጠሩ፤ በሁኔታዊ መልኩ ባዶ ሊሆኑ የሚችሉ የአጠቃቀም-ማስረጃ አምዶችን ይጨምሩ (ነባሪው `true`) |
 
-የአገልግሎት መለያው በዒላማው ሰንጠረዥ ላይ `bigquery.tables.updateData` ያስፈልገዋል፤ በተጨማሪም
-`autoCreate` ሲበራ `bigquery.datasets.create` / `bigquery.tables.create` ያስፈልጉታል።
+የአገልግሎት መለያው በታለመው ሠንጠረዥ ላይ `bigquery.tables.updateData` ፈቃድ፣ እንዲሁም
+`autoCreate` ንቁ ሲሆን `bigquery.datasets.create` / `bigquery.tables.create` ፈቃዶች ያስፈልጉታል።
+ነባር ሠንጠረዥን ሁለቱን ባዶ ሊሆኑ የሚችሉ የአጠቃቀም-ማስረጃ መስኮች ለመጨመር ማዘመንም
+`bigquery.tables.update` ይፈልጋል። የጎደለ ፈቃድ ሲኖር ኤክስፖርቱ የኩርሰሩን አቀማመጥ ሳያራምድ ይከሽፋል።
 
-የተዋቀረ ጥቅል የ**ጠቋሚ** ክፍል እንጂ የHTTP ክፍል አይደለም፦ `send()` እያንዳንዳቸው ቢበዛ 500 ረድፎች ወደሚይዙ የinsertAll
-ጥሪዎች ይከፋፍለዋል፤ ስለዚህ ትልቅ `batch_size` የBigQueryን 10 MB የጥያቄ ገደብ ሊያልፍ አይችልም።
-ጊዜያዊ ሁኔታዎች (408/429/500/502/503/504) ተመሳሳይ insertIdsን እንደገና በመጠቀም፣ በኤክስፖነንሻል እየጨመረ
-በሚሄድ የመጠበቂያ ጊዜ እስከ ሦስት ጊዜ እንደገና ይሞከራሉ፤ የማረጋገጫ እና የመዋቅር ስህተቶች ግን ሂደቱን በከንቱ ከመቀጠል ይልቅ
-በመጀመሪያው ሙከራ ላይ ስህተት ያስነሳሉ።
+የተዋቀረ ባች የ**ኩርሰር** ክፍል ነው፣ የHTTP ክፍል አይደለም፦ `send()` ባቹን ቢበዛ 500 ረድፎች ወደሚይዙ
+insertAll ጥሪዎች ይከፋፍለዋል፤ ስለዚህ ትልቅ `batch_size` የBigQueryን 10 MB የጥያቄ ገደብ ሊያልፍ አይችልም።
+ጊዜያዊ ሁኔታዎች (408/429/500/502/503/504) ተመሳሳይ insertIds እንደገና በመጠቀም በexponential
+backoff እስከ ሦስት ጊዜ ድረስ እንደገና ይሞከራሉ፤ የማረጋገጫ እና የስኪማ እክሎች ግን
+ሩጫውን ሳያባክኑ በመጀመሪያው ሙከራ ላይ ስህተት ያስነሳሉ።
 
-ከጥቂት ጊዜ በፊት የተፈጠረ ሰንጠረዥ ለዥረት ማስገቢያው የመጨረሻ ነጥብ ገና አይታይም፤ ይህም
-ለጥቂት ሰከንዶች 404 ይመልሳል። ያ 404 እንደገና ይሞከራል፣ ነገር ግን **ሰንጠረዡን የፈጠረው ይህ አፈጻጸም ሲሆን ብቻ** —
-በእውነት የሌለ ሰንጠረዥ ግን አሁንም ወዲያውኑ ይከሽፋል። በቅርቡ በተሰረዘ ስም ሰንጠረዥን
-እንደገና መፍጠር BigQuery የዥረት ማስገባቶችን ለብዙ ደቂቃዎች እንዲከለክል እንደሚያደርግ ልብ ይበሉ፤ ይህ
-ሰርዞ እንደገና የመፍጠር ባህሪ ስለሆነ፣ ሰንጠረዥን ከመሰረዝ እና እንደገና ከመጨመር ይልቅ አዲስ የሰንጠረዥ ስም ይጠቀሙ።
+አሁን የተፈጠረ ሠንጠረዥ ለstreaming endpoint ወዲያውኑ አይታይም፤ ለጥቂት ሰከንዶች
+404 ይመልሳል። ይህ 404 እንደገና ይሞከራል፣ ነገር ግን **ይህ ሩጫ ሠንጠረዡን የፈጠረው
+ሲሆን ብቻ ነው** — በእውነት የጎደለ ሠንጠረዥ ወዲያውኑ ይከሽፋል። በቅርቡ በተሰረዘ
+ስም ሠንጠረዥን እንደገና መፍጠር BigQuery የstreaming insert ጥያቄዎችን ለብዙ ደቂቃዎች
+እንዲከለክል ያደርገዋል። ይህ የመሰረዝ-ከዚያም-እንደገና-መፍጠር ባህሪ ነው፤ ስለዚህ
+አንድን ሠንጠረዥ ከመጣልና እንደገና ከመጨመር ይልቅ አዲስ የሠንጠረዥ ስም መጠቀም ይመረጣል።
 
-**ከፊል ውድቀት ባዶ ካልሆነ `insertErrors[]` ጋር እንደ HTTP 200 ይመጣል።** ይህ እንደ
-ውድቀት ተቆጥሮ ስህተት ያስነሳል፤ ይህም ጠቋሚው BigQuery ፈጽሞ ካልተቀበላቸው ረድፎች አልፎ
-እንዳይሄድ የሚያቆመው ነው፤ `tests/unit/log-export-bigquery.test.ts` ይህን ባህሪ በሙከራ ያረጋግጣል።
+**ከፊል አለመሳካት እንደ HTTP 200 ከባዶ ያልሆነ `insertErrors[]` ጋር ይደርሳል።** ይህ
+እንደ አለመሳካት ይቆጠራል እና ስህተት ያስነሳል፤ ይህም BigQuery በፍጹም ያልተቀበላቸውን
+ረድፎች አልፎ ኩርሰሩ እንዳይራመድ ያደርጋል። `tests/unit/log-export-bigquery.test.ts` ይህን
+ባህሪ ያረጋግጣል።
 
-የመረጃ ማስተላለፉ ቀጥተኛ REST ነው — በራሱ የተፈረመ RS256 ማረጋገጫ በ
-`https://oauth2.googleapis.com/token` ላይ በመዳረሻ ቶከን ይለወጣል፣ ከዚያም ረድፎች ወደ `tabledata.insertAll` ይላካሉ። ምንም የGoogle SDK
-አይጨመርም። የመዳረሻ ቶከኖች በእያንዳንዱ (የአገልግሎት መለያ፣ የፈቃድ ወሰን) ጥምረት በሂደቱ ውስጥ በመሸጎጫ ይቀመጣሉ።
+መጓጓዣው መደበኛ REST ነው — በራስ-የተፈረመ RS256 assertion በ
+`https://oauth2.googleapis.com/token` ላይ ለaccess token ይለወጣል፣ ከዚያም ረድፎቹ ወደ
+`tabledata.insertAll` ይላካሉ። ምንም Google SDK አይጨመርም። Access token ዎች በሂደት ውስጥ
+በእያንዳንዱ (service account, scope) ይሸጎጣሉ።
 
-የተፈጠረው ሰንጠረዥ ለእያንዳንዱ የምዝግብ ማስታወሻዎች ትር መስክ አንድ ዓምድ እና `exported_at` ይይዛል፤ አቀማመጡም
-የጥሪ ምዝግብ ማስታወሻዎች በተግባር እንዴት እንደሚጠየቁ የተመሠረተ ነው፦
+የተፈጠረው ሠንጠረዥ ለእያንዳንዱ የLogs ትር መስክ አንድ አምድ እና `exported_at` ይይዛል፣ እና
+የጥሪ ሎጎች በተግባር ለሚጠየቁበት መንገድ ይደራጃል፦
 
-- **በ`timestamp` ላይ በቀን የተከፋፈለ ነው**፣ ስለዚህ በቀን የተገደበ መጠይቅ እነዚያን ቀናት ብቻ ይቃኛል።
-- **በ`api_key_name`, `provider`, `model`, `status` የተመደበ ነው** (በዚህ ቅደም ተከተል)፣ ስለዚህ ማን
-  እንዳስኬደው፣ ወዴት እንደሄደ ወይም መክሸፉን በመመርኮዝ ማጣራት በእያንዳንዱ ክፍፍል ውስጥ የሚቃኙ ብሎኮችን ይቀንሳል። BigQuery
-  ቢበዛ አራት የመመደቢያ ዓምዶችን ይፈቅዳል፣ ቅደም ተከተሉም ወሳኝ ነው፦ በ`api_key_name` ብቻ የሚደረግ ማጣራት
-  የሚቃኙ ብሎኮችን ይቀንሳል፣ በ`status` ብቻ የሚደረግ ማጣራት ግን አይቀንስም።
-- በ`partitionExpirationDays` አማካይነት **አማራጭ የክፍፍል ማቆያ ጊዜ** (0 ሁሉንም ያቆያል)፣
-  ሰንጠረዡ ሲፈጠር ተግባራዊ ይሆናል።
+- **በ`timestamp` የቀን ክፍል ይከፋፈላል**፣ ስለዚህ በቀን የተገደበ ጥያቄ እነዚያን ቀናት ብቻ ይመረምራል።
+- **በ`api_key_name`, `provider`, `model`, `status` ይክላስተራል** (በዚህ ቅደም ተከተል)፣ ስለዚህ ማን
+  እንደሠራው፣ ወዴት እንደተላከው ወይም እንደከሸፈ በመለየት በእያንዳንዱ ክፍል ውስጥ ያሉ ብሎኮች
+  ይቀነሳሉ። BigQuery ቢበዛ አራት የክላስተር አምዶችን ይፈቅዳል፣ እና ቅደም ተከተሉ ጠቃሚ ነው፦
+  በ`api_key_name` ብቻ የሚደረግ ማጣሪያ ይቀንሳል፣ በ`status` ብቻ የሚደረግ ማጣሪያ ግን አይቀንስም።
+- **እንደ አማራጭ የክፍል ማቆያ** በ`partitionExpirationDays` (0 ሁሉንም ያቆያል)፣ ሠንጠረዡ ሲፈጠር ይተገበራል።
 
-ሁለቱም ቅንብሮች በመፍጠር ጊዜ ተግባራዊ ይሆናሉ። ያለ ሰንጠረዥ ቀድሞ የነበረውን አቀማመጥ ይዞ ይቀጥላል፣ ስለዚህ
-እነዚህን መጠቀም ከፈለጉ መድረሻውን ወደ አዲስ የሰንጠረዥ መለያ ያመልክቱ።
+ሁለቱም ቅንብሮች በመፍጠሪያ ጊዜ ብቻ ይተገበራሉ። ነባር ሠንጠረዥ ቀድሞ የነበረውን
+አቀማመጥ ይጠብቃል፤ ስለዚህ እነዚህን ለመጠቀም ከፈለጉ መድረሻውን ወደ አዲስ የሠንጠረዥ መለያ
+ያመልክቱ።
 
-`tests/unit/log-export-bigquery.test.ts` አዛማጁ እና የሰንጠረዡ መዋቅር ተመሳስለው መቀጠላቸውን
-ያረጋግጣል፣ ስለዚህ አዲስ የጥሪ ምዝግብ ማስታወሻ ዓምድ ወደ ውጭ በማውጣት ሂደት ሳይታወቅ ሊቀር አይችልም።
+`tests/unit/log-export-bigquery.test.ts` ካርታ ሰሪው እና የሠንጠረዡ ስኪማ በትክክል አብረው
+እንደሚሄዱ ያረጋግጣል፤ ስለዚህ አዲስ የጥሪ-ሎግ አምድ በመውጫ መንገድ ላይ በዝምታ
+ሊጠፋ አይችልም።
 
-ጥቅሎች **በሁለቱም**፣ በረድፍ ብዛት እና በተከታታይ ቅርጽ በተቀየሩ ባይቶች መጠን ይከፋፈላሉ። የውሂብ ይዘቶች ወደ ውጭ ሲወጡ
-የረድፍ ብዛት ብቻውን በቂ አይደለም፦ የግቤት መመሪያዎችን የያዙ 500 ረድፎች አስርተ ሜጋባይቶች ሊሆኑ ይችላሉ፣ insertAllም
-ከ10 MB በላይ የሆነ ጥያቄን አይቀበልም። ክፍሎች 500 ረድፎች ወይም 9 MB ሲደርሱ፣ ቀድሞ በደረሰው መሠረት ይዘጋሉ።
+ባቾች በ**ሁለቱም የረድፍ ብዛት እና በተከታታይ የተደረጉ ባይቶች** ይከፋፈላሉ። የረድፍ ብዛት
+ብቻ በቂ አይደለም፤ payload ዎች ኤክስፖርት ከተደረጉ በኋላ፣ ጥያቄዎችን የያዙ 500 ረድፎች
+እስከ አስር ሜጋባይት ሊደርሱ ይችላሉ፣ እና insertAll ከ10 MB በላይ የሆነ ጥያቄን ውድቅ
+ያደርጋል። ክፍሎች 500 ረድፎች ወይም 9 MB ላይ — የትኛው ቀድሞ ከደረሰ በእሱ ላይ — ይዘጋሉ።
 
 ---
 
-## 5. የOTLP/HTTP ዱካዎች መዳረሻ
+## 5. OTLP/HTTP የtrace መድረሻ
 
-ውቅሩ `type: "otlp-http"` ይጠቀማል። ይህ በመርሐግብር የሚከናወን፣ በጠቋሚ የሚደገፍ የተቀመጡ
-የጥሪ መዝገቦች ኤክስፖርት ነው፤ በ
-`open-sse/services/routing/otel.ts` ያለው፣ በተቻለ መጠን የሚሠራ የቀጥታ ማዘዋወሪያ ክስተት መቀበያ አይደለም። የዚያን መቀበያ የአካባቢ
-ተለዋዋጮች፣ ሰዓት ቆጣሪዎች ወይም ቋቶች አያነብም ወይም አይቀይርም። ሁለቱንም ማንቃት ሁለት ገለልተኛ የስፓን ዓይነቶችን ሊፈጥር ይችላል፤
-እነዚህን የጥሪ መዝገብ ስፓኖች ለመለየት የ`omniroute.log-export` የመለኪያ ወሰንን ይጠቀሙ።
+ውቅሩ `type: "otlp-http"` ይጠቀማል። ይህ የተቀመጡ የጥሪ ምዝገባዎችን የሚልክ በመርሐ-ግብር የሚሰራ፣ cursor-የሚደገፍ ማስወጫ ነው፤ በ
+`open-sse/services/routing/otel.ts` ውስጥ ካለው በተቻለ መጠን ብቻ የሚሰራ የቀጥታ routing-event sink ጋር
+አንድ ዓይነት አይደለም። የዚያን sink የአካባቢ ተለዋዋጮች፣ ሰዓት ቆጣሪዎች ወይም ቋቶች አያነብም እና አይቀይርም። ሁለቱንም ማንቃት ሁለት ገለልተኛ ዓይነቶች ያላቸው spans ሊያመነጭ ይችላል፤ እነዚህን የጥሪ-ምዝገባ spans ለመለየት
+`omniroute.log-export` የመሳሪያ ወሰንን ይጠቀሙ።
 
-| ቁልፍ                      | ነባሪ / ዓላማ                                                       |
-| ------------------------ | --------------------------------------------------------------- |
-| `endpoint`               | ሙሉ የHTTP(S) ዱካዎች URL ያስፈልጋል፤ የ`/v1/traces` ቅጥያ አይጨመርም           |
-| `headers`                | አማራጭ የ`Name: value` መስመሮች ወይም የሕብረቁምፊዎች JSON ኦብጀክት፤ በምስጠራ የተጠበቀ |
-| `requestHeaderAllowlist` | ባዶ (ጠፍቷል)፤ እንደ ስፓን ባህሪያት የሚያዙ የደንበኛ ራስጌ ስሞች/ቅድመ ቅጥያዎች           |
-| `serviceName`            | `omniroute`፤ የሀብት `service.name`                                |
-| `langfuseMapping`        | `false`፤ የLangfuse ማመንጨት/ክፍለ ጊዜ/ተጠቃሚ ባህሪያትን ይጨምራል               |
-| `identity`               | `pseudonymous`፣ `keyName`፣ ወይም `none`                           |
-| `paths`                  | `/v1/chat/completions`፣ `/v1/responses`፣ `/v1/messages`         |
-| `timeoutMs`              | ለእያንዳንዱ የHTTP ሙከራ `30000`                                       |
-| `environment`            | አልተዘጋጀም፤ አማራጭ `langfuse.environment`                            |
+| Key                      | Default / purpose                                                |
+| ------------------------ | ---------------------------------------------------------------- |
+| `endpoint`               | የሚያስፈልግ ሙሉ HTTP(S) traces URL፤ የ`/v1/traces` ቅጥያ አይጨመርም          |
+| `headers`                | አማራጭ `Name: value` መስመሮች ወይም የstrings JSON object፤ የተመሰጠረ        |
+| `requestHeaderAllowlist` | ባዶ (ጠፍቷል)፤ እንደ span attributes ለመያዝ የclient header ስሞች/ቅድመ-ቅጥያዎች |
+| `serviceName`            | `omniroute`፤ resource `service.name`                             |
+| `langfuseMapping`        | `false`፤ የLangfuse generation/session/user attributes ይጨምራል      |
+| `identity`               | `pseudonymous`፣ `keyName` ወይም `none`                             |
+| `paths`                  | `/v1/chat/completions`፣ `/v1/responses`፣ `/v1/messages`          |
+| `timeoutMs`              | በእያንዳንዱ HTTP ሙከራ `30000`                                         |
+| `environment`            | አልተዘጋጀም፤ አማራጭ `langfuse.environment`                             |
 
-አጠቃላይ ዳሽቦርዱ እነዚህን መስኮች ያሳያል። `paths` የAPI ድርድር ወይም ትክክለኛ ዱካዎች
-በአዲስ መስመሮች/በነጠላ ሰረዞች የተለዩበት የጽሑፍ ቦታ ይቀበላል። የኢምቤዲንግ፣ የዳግም ደረጃ አሰጣጥ እና ሌሎች ዱካዎች
-በግልጽ ካልተፈቀዱ በስተቀር ይዘለላሉ። የተዘለሉ ረድፎችም ጠቋሚውን ወደፊት ያንቀሳቅሳሉ፤ አሁን ያለው
-አስኬጅ `exported`/`exportedTotal` ቆጣሪዎች የሚቆጥሩት ተቀባይነት ያገኙ ስፓኖችን ሳይሆን፣ የተጣሩ
-ረድፎችንም ጨምሮ የተሠሩ የምንጭ ረድፎችን ነው። ማጣራቱ በልጅ ሂደቱ ውስጥ ይከናወናል፣
-የIPC/ጠቋሚ ውሉን ሳይቀይር።
+አጠቃላይ dashboard እነዚህን መስኮች ያሳያል። `paths` የAPI array ወይም ትክክለኛ paths በአዲስ መስመር/ኮማ የተለዩበት textarea ይቀበላል። Embeddings፣ rerank እና ሌሎች paths በግልጽ ካልተፈቀዱ ይዘለላሉ። የተዘለሉ ረድፎች አሁንም cursorን ያራምዳሉ፤ የነባሩ runner `exported`/`exportedTotal` counters የተሰሩ የምንጭ ረድፎችን፣ የተጣሩ ረድፎችንም ጨምሮ፣ እንጂ የተቀበሉ spansን አይቆጥሩም። ማጣራቱ በchild ውስጥ ይከናወናል፤ የIPC/cursor contractን ሳይቀይር።
 
-የURL ማረጋገጫ ከ
-`src/shared/network/outboundUrlGuard.ts` የመጣውን፣ DB የማይጠቀም `parseAndValidateNonMetadataUrl` ረዳት ይጠቀማል፦ የ`block-metadata` ፖሊሲ። የግል URLዎች
-ተፈቅደው እንዳሉበት የwebhook አረጋጋጭ ሁሉ፣ ተመሳሳይ ያለቅድመ ሁኔታ የሜታዳታ/ፕሮቶኮል/የተካተቱ ማረጋገጫዎች ፍተሻዎች አሉት፤
-ነገር ግን ዓለም አቀፍ የባህሪ ማብሪያ መሻሪያ ሳያስፈልግ localhost/LAN ዒላማዎችን ሆን ብሎ ይፈቅዳል። ይህ በራስ የሚስተናገዱ የLangfuse፣ Phoenix፣ Tempo እና Collector
-መጨረሻ ነጥቦችን፣ የግል HTTP መጨረሻ ነጥቦችንም ጨምሮ፣ ይፈቅዳል። የደመና ሜታዳታ አስተናጋጆች ሁልጊዜ ይታገዳሉ።
-ማዞሪያዎች አይከተሉም፣ ስለዚህ ሰብሳቢ የማረጋገጫ መረጃዎችን ወደ ሌላ አስተናጋጅ ማዞር አይችልም።
-አሁን እንዳለው በጽሑፍ ቅርጽ የሚመረመር የURL መከላከያ፣ ይህም የDNS መፍታትን አይቆልፍም፤
-በኦፕሬተሩ ቁጥጥር ሥር ያሉ አስተናጋጆችን ብቻ ያዋቅሩ። መጨረሻ ነጥቡ በታመነ አውታረ መረብ ላይ በማይገኝበት ጊዜ ሁሉ HTTPSን ይምረጡ።
+የURL ማረጋገጫ ከDB ነፃ የሆነውን `parseAndValidateNonMetadataUrl` helper ከ
+`src/shared/network/outboundUrlGuard.ts` ይጠቀማል፦ `block-metadata` policy። ከwebhook validator ጋር ተመሳሳይ ያልተቋረጠ የmetadata/protocol/embedded-credential ምርመራ አለው፤ ነገር ግን private URLs ተፈቅደውለታል፣ እና ያለ global feature-flag override localhost/LAN targetsን ሆን ብሎ ይፈቅዳል። ይህ self-hosted Langfuse፣ Phoenix፣ Tempo እና Collector endpointsን፣ private HTTP endpointsንም ጨምሮ፣ እንዲጠቀሙ ያስችላል። Cloud-metadata hosts ሁልጊዜ ይታገዳሉ። Redirects አይከተሉም፤ ስለዚህ collector ምስጢራዊ መረጃዎችን ወደ ሌላ host ማዞር አይችልም። እንደ ነባሩ lexical URL guard፣ ይህ የDNS resolutionን አያስቀምጥም፤ ስለዚህ operator በሚቆጣጠራቸው hosts ብቻ ያዋቅሩ። endpoint በታመነ ኔትወርክ ላይ ካልሆነ HTTPSን ይመርጡ።
 
-### የውሂብ ጭነት እና አቅርቦት
+### Payload እና ማድረስ
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`፣ `Content-Type: application/json`) ለእያንዳንዱ
-የተፈቀደ ረድፍ አንድ CLIENT ስፓን ይይዛል፣ ስሙም ትክክለኛው የጥያቄ ዱካ ይሆናል። በዱካ መሰየም
-የሞዴል ወይም የማንነት ውሂብን በስፓን ስም ውስጥ ሳያካትት Chat Completions፣ Responses እና Messagesን
-ይለያል። የሀብት ባህሪያት `service.name` እና የፓኬጁን `service.version` ያካትታሉ።
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ለእያንዳንዱ የተፈቀደ ረድፍ አንድ
+CLIENT span ይይዛል፤ ስሙም ትክክለኛው request path ነው። የpath ስያሜ Chat Completions፣ Responses እና Messagesን ይለያል፤ የmodel ወይም identity መረጃን በspan ስም ውስጥ ሳያስገባ። Resource attributes `service.name` እና የpackageውን `service.version` ያካትታሉ።
 
-መደበኛው የውይይት ሙከራ መዝጋቢ (`open-sse/handlers/chatCore/attemptLogging.ts`) ሲጠናቀቅ
-`duration = Date.now() - startTime` ይጽፋል፣ የጊዜ ማህተም ግን አያቀርብም፤
-በ`src/lib/usage/callLogs.ts` ያለው `saveCallLogOperation` የጊዜ ማህተሙን በነባሪ
-የመጻፍ (የማጠናቀቅ) ጊዜ ያደርገዋል። ስለዚህ ኤክስፖርቱ መጨረሻ = የረድፍ የጊዜ ማህተም፣ መጀመሪያ = መጨረሻ − ቆይታ
-(ሚሊሰከንዶች፣ ወደ አስርዮሽ ናኖሰከንዶች የተቀየሩ) ብሎ ያዘጋጃል። በጠሪው የቀረቡ ታሪካዊ የጊዜ ማህተሞችም
-እንደ መጨረሻ ጊዜ ይጠበቃሉ፤ ለእያንዳንዱ ረድፍ የመጀመሪያ/የማጠናቀቂያ መለያ የለም።
-null የሆነ ቆይታ ዜሮ ይሆናል። ልክ ያልሆኑ/የጎደሉ የጊዜ ማህተሞች የማይወሰኑ ስፓኖችን ከመፍጠር ይልቅ
-ቡድኑን እንዲሳካ ያደርጋሉ። `ttftMs` null ሊሆን ይችላል፣ እና ወደ `omniroute.ttft_ms` ይመደባል።
+መደበኛው chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) ሲጠናቀቅ
+`duration = Date.now() - startTime` ይጽፋል፤ timestamp ግን አያቀርብም።
+`src/lib/usage/callLogs.ts` ውስጥ ያለው `saveCallLogOperation` timestampን በመጻፍ
+(በመጠናቀቂያ) ጊዜ ላይ በነባሪ ያደርገዋል። ስለዚህ export endን ከረድፉ timestamp እና startን ደግሞ end − duration
+( milliseconds ወደ decimal nanoseconds ተቀይሮ) ያዘጋጃል። በcaller የቀረቡ ታሪካዊ timestampsም እንዲሁ እንደ end time ይጠበቃሉ፤ በእያንዳንዱ ረድፍ start/completion ለመለየት የሚያስችል መረጃ የለም። Null duration ወደ ዜሮ ይቀየራል። ልክ ያልሆኑ/የጎደሉ timestamps batchን ያሳጥራሉ፤ ያልተወሰኑ spans አይፈጠሩም። `ttftMs` nullable ነው እና ወደ `omniroute.ttft_ms` ይተረጎማል።
 
-ባህሪያቱ `gen_ai.operation.name="chat"`፣ አቅራቢ፣ የተጠየቀ/የምላሽ ሞዴል፣
-የግቤት/የውጤት ቶከኖች፣ አማራጭ የመሸጎጫ ንባብ/የመሸጎጫ ፍጠራ/የማመዛዘን ቶከኖች፣ የHTTP ሁኔታ፣
-ጥምረት፣ የመሸጎጫ ምንጭ፣ የክፍለ ጊዜ መለያ እና የትስስር መለያ ያካትታሉ። የኢንቲጀር OTLP እሴቶች እና የጊዜ ማህተሞች
-አስርዮሽ ሕብረቁምፊዎች ናቸው፤ ሕብረቁምፊዎች፣ ቡሊያኖች እና ክፍልፋይ ቁጥሮች የራሳቸውን የOTLP እሴት
-ዓይነቶች ይጠቀማሉ። የስህተት ስፓኖች ERROR ሁኔታ እና የተጣራ የሁኔታ መልዕክት አላቸው። መደበኛው
-መዝገብ የላይኛው አስተናጋጅ URL የለውም፣ ስለዚህ ሰብሳቢውን በስህተት እንደ ሞዴል አገልጋይ
-ከመለየት ይልቅ `server.address` ይቀራል። ወጪ ኤክስፖርት አይደረግም።
+Attributes `gen_ai.operation.name="chat"`፣ provider፣ requested/response model፣ input/output tokens፣ አማራጭ cache-read/cache-creation/reasoning tokens፣ HTTP status፣ combo፣ cache source፣ session tag እና correlation id ያካትታሉ። Integer OTLP values እና timestamps እንደ decimal strings ይቀመጣሉ፤ strings፣ booleans እና fractional numbers ደግሞ የተፈጥሮ OTLP value variantsን ይጠቀማሉ። Error spans ERROR status እና የተጣራ status message አላቸው። የcanonical record upstream host URL ስለሌለው፣ collectorን በስህተት እንደ model server ከመለየት ይልቅ `server.address` አይካተትም። Cost አይላክም።
 
-ይዘትን የሚሞላው `includeBodies=true` ብቻ ነው። `langfuseMapping=false` ሲሆን፣
-`gen_ai.input.messages` / `gen_ai.output.messages` በOmniRoute እንደተቀመጠው የተጣራ የጥያቄ/የምላሽ
-አካል JSON (ሊተነተን ሲችል ወደ መደበኛ ቅርጽ የተቀየረ) ይይዛሉ፣ እንጂ ዳግም ቅርጽ የተሰጠው የsemconv
-መልዕክቶች ድርድር አይደለም። የተቆረጡ/JSON ያልሆኑ አካላት ጥሬ ጽሑፍ ሆነው ይቆያሉ። `langfuseMapping=true` ሲሆን፣
-አካላት እንደ `langfuse.observation.input` / `langfuse.observation.output` ብቻ ይወጣሉ፤
-እያንዳንዱ አካል አንድ ጊዜ ብቻ እንዲላክ የ`gen_ai.*.messages` ባህሪያት ይቀራሉ። ሁለቱም ሁነታዎች
-ከነባሩ የይዘት ሙሌት መንገድ `maxBodyBytes`ን ይወርሳሉ፤
-`omniroute.bodies_truncated=true` መቆረጥን ያመለክታል።
-ይህ መዳረሻ ተጨማሪ የፓይፕላይን ቅጽበታዊ ቅጂዎችን ወይም ያልተጣሩ የአርቲፋክት ንባቦችን አይጨምርም፤
-አማራጭ የጥያቄ ራስጌ መያዣ ከዚህ በታች የተገለጸውን ነባር፣ በይዘት የተሞላ የደንበኛ ቅጽበታዊ ቅጂ ይጠቀማል።
-አካላትን ኤክስፖርት ሲያደርጉ በሰዓት የሚጠራቀም ያልተሠራ ሥራ ከመፍጠር ይልቅ፣
-እንደ `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` ያለ በደቂቃ ደረጃ የሚደጋገም መርሐግብር ይጠቀሙ።
+`includeBodies=true` ብቻ contentን ያስገባል። ከ
+`langfuseMapping=false` ጋር፣ `gen_ai.input.messages` / `gen_ai.output.messages` በOmniRoute እንደተቀመጠው የተጣራ request/response body JSONን ይይዛሉ (ሊተነተን ከቻለ canonicalized ይሆናል)፤ እንደገና የተቀረጸ semconv messages array አይደሉም። Clipped/non-JSON bodies እንደ raw text ይቀራሉ። `langfuseMapping=true` ሲሆን bodies እንደ `langfuse.observation.input` / `langfuse.observation.output` ብቻ ይላካሉ፤ እያንዳንዱ body አንድ ጊዜ ብቻ እንዲላክ `gen_ai.*.messages` attributes አይካተቱም። ሁለቱም modes ከነባሩ hydration path `maxBodyBytes`ን ይወርሳሉ፤
+`omniroute.bodies_truncated=true` መቆረጡን ያመለክታል። በዚህ destination ምክንያት ተጨማሪ pipeline snapshots ወይም ያልተጣሩ artifact reads አይጨመሩም፤ አማራጭ request-header capture ከታች የተገለጸውን ነባር hydrated client snapshot ይጠቀማል። bodiesን በምትልኩበት ጊዜ የሰዓት በየሰዓቱ የሚሰበሰብ backlog ከመፍጠር ይልቅ እንደ `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` ያለ የደቂቃ ደረጃ cadence ይጠቀሙ።
 
-### አማራጭ የደንበኛ ጥያቄ ራስጌዎች
+### አማራጭ የclient request headers
 
-የራስጌ መያዣ **በነባሪ ጠፍቷል**። በመዳረሻ ውቅሩ ውስጥ `requestHeaderAllowlist`ን ያዘጋጁ
-እና **ጥያቄዎችን እና ምላሾችን ኤክስፖርት አድርግ**ን ያንቁ (በመዳረሻው ላይ `includeBodies: true`)።
-የፈቃድ ዝርዝሩ የAPI ድርድር ወይም በአዲስ መስመር/በነጠላ ሰረዝ የተለዩ ስሞች ያሉበት የጽሑፍ ቦታ ይቀበላል፦
+Header capture **በነባሪ ጠፍቷል**። በdestination config ውስጥ `requestHeaderAllowlist`ን ያዘጋጁ እና **Export prompts and responses**ን ያንቁ
+(`includeBodies: true` በdestination ላይ)። የallowlist የAPI array ወይም በአዲስ መስመር/ኮማ የተለዩ ስሞች ያሉበት textarea ይቀበላል፦
 
 ```json
 {
@@ -339,77 +313,61 @@ null የሆነ ቆይታ ዜሮ ይሆናል። ልክ ያልሆኑ/የጎደሉ
 }
 ```
 
-አንድ በመጨረሻ ያለ `*` ባዶ ያልሆነ የራስጌ ስም ቅድመ ቅጥያ ካልመረጠ በስተቀር፣ ስሞች የትልቅና የትንሽ ፊደል ልዩነትን ሳያገናዝቡ በትክክል ይዛመዳሉ።
-ብቻውን ያለ `*`፣ በመሃል የገቡ ሁለገብ ምልክቶች እና ልክ ያልሆኑ የHTTP ራስጌ ስሞች ውድቅ ይደረጋሉ።
-ቢበዛ 64 መራጮች ሊኖሩ ይችላሉ፤ የእያንዳንዳቸው ስም/ቅድመ ቅጥያ ቢበዛ 256 ASCII ባይቶች ይሆናል።
-ይህ ቅንብር ላኪውን ለሰብሳቢው ከሚያረጋግጠው `headers` የተለየ ነው።
+ስሞች የፊደል ማስቀመጫን ሳይለዩ እና በትክክል ይዛመዳሉ፤ ነገር ግን አንድ የመጨረሻ `*` ያልባዶ
+የheader-name ቅድመ ቅጥያን ሊመርጥ ይችላል። ባዶ `*`፣ በመሃል የተገጠሙ wildcards እና ልክ ያልሆኑ የHTTP header ስሞች ውድቅ ይደረጋሉ።
+ቢበዛ 64 selectors አሉ፤ እያንዳንዱም ስም/ቅድመ ቅጥያ ቢበዛ 256 ASCII bytes ሊኖረው ይችላል።
+ይህ ቅንብር ላኪውን በcollector ላይ ከማረጋገጥ ከሚጠቀምበት `headers` የተለየ ነው።
 
-መያዙ ከተቀመጠው ዝርዝር የሂደት ሰንሰለት `clientRawRequest` (ወይም የቀድሞው `clientRequest`) የሚሞላውን
-`pipeline_client_request` ብቻ ያነባል። በምትኩ የአቅራቢውን የጥያቄ ራስጌዎች ፈጽሞ አይጠቀምም።
-ጥያቄው ሲመዘገብ ዝርዝር የሂደት ሰንሰለት ምዝገባ ነቅቶ መሆን አለበት።
-`includeBodies` ከተሰናከለ፣ ወይም የደንበኛው ቅጽበታዊ ቅጂ JSON ከጠፋ፣ ከተበላሸ ወይም ከተቆረጠ፣ ምንም የራስጌ
-ባህሪያት አይወጡም። `maxBodyBytes` መጨመር በመላክ ጊዜ የቅጽበታዊ ቅጂውን መቆረጥ ሊያስወግድ ይችላል፤
-ፈጽሞ ያልተቀመጠ ዝርዝር ግን መመለስ አይችልም። ከ1 MiB በላይ የሆነ ወይም ከ256 በላይ
-የራስጌ ግቤቶችን የያዘ ቅጽበታዊ ቅጂ ችላ ይባላል። ነባሩ የግቤት መልዕክት/ምላሽ መላክ ከራስጌ
-መያዝ ጋር አብሮ እንደነቃ ይቀጥላል፤ የፍቃድ ዝርዝሩ ራስጌዎችን ብቻ የሚሞላ ሁነታ አያቀርብም።
+Capture የሚያነበው ከተቀመጠው detailed pipeline `clientRawRequest` (ወይም የቆየው `clientRequest`) የተሞላውን `pipeline_client_request` ብቻ ነው። ወደ provider request headers ፈጽሞ አይመለስም።
+ጥያቄው በተመዘገበበት ጊዜ detailed pipeline logging መነቃቃት ነበረበት።
+`includeBodies` ከተሰናከለ፣ ወይም የclient-snapshot JSON ከጠፋ፣ ከተበላሸ ወይም ከተቆረጠ፣ ምንም header attributes አይላኩም።
+`maxBodyBytes` መጨመር በexport ጊዜ የሚከሰተውን snapshot መቆረጥ ሊከላከል ይችላል፤ ነገር ግን ፈጽሞ ያልተቀመጠ ዝርዝርን መመለስ አይችልም።
+ከ1 MiB በላይ የሆነ ወይም ከ256 በላይ header entries የያዘ snapshot ችላ ይባላል። ነባሩ prompt/response export ከheader capture ጎን ለጎን እንደነበረ ይቀጥላል፤ allowlist የheaders-only hydration mode አያቀርብም።
 
-የተመረጡ እሴቶች አንድ ሕብረቁምፊ ብቻ ቢሆኑም እንኳ፣ `http.request.header.<full lowercase header name>` የሚባሉ የOTLP ሕብረቁምፊ ድርድሮች ይሆናሉ።
-ለምሳሌ፣ `X-OmniRoute-Meta-Team: example-team` ወደ
-`http.request.header.x-omniroute-meta-team` ይቀየራል፣ እሴቱም
+የተመረጡ እሴቶች ወደ `http.request.header.<full lowercase header name>` OTLP string arrays ይቀየራሉ፤ አንድ ብቻ string ቢሆንም እንኳ። ለምሳሌ፣
+`X-OmniRoute-Meta-Team: example-team` ወደ
+`http.request.header.x-omniroute-meta-team` ይቀየራል፣ ይህም
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` ይሆናል።
-ሙሉው ቅድመ ቅጥያ ይጠበቃል፤ እነዚህ ተራ ራስጌዎች ናቸው፣ የንግድ መስክ ትንተና ወይም
-`omniroute.metadata.*` / Langfuse ሜታዳታ ልወጣ አይደረግባቸውም። `langfuseMapping` የራስጌዎችን
-ትርጉም አይቀይርም። የተመረጠ አንድ እሴት ያለው `User-Agent` መደበኛውን ነጠላ እሴት
-`user_agent.original` ጭምር ያዘጋጃል። በአንድ እሴት ውስጥ ያሉ ኮማዎች አይከፋፈሉም። በፊደል መጠን የሚለያዩ ቅጾች በተቀመጡበት
-የግቤት ቅደም ተከተል ይዋሃዳሉ፤ ማንኛውም ልክ ያልሆነ ቅጽ ያንን ሙሉ ራስጌ ያስቀራል። ባህሪያቱ በትንሽ ፊደል ስም ቅደም ተከተል ይደረደራሉ።
+ሙሉ ቅድመ ቅጥያው ይጠበቃል፤ እነዚህ መደበኛ headers ናቸው፣ የbusiness-field parsing ወይም የ`omniroute.metadata.*` / Langfuse metadata conversion አይደረግባቸውም።
+`langfuseMapping` የheader semantics አይቀይርም። አንድ እሴት ብቻ ያለው `User-Agent` ከተመረጠ መደበኛውን scalar `user_agent.original` ይወስናል። በአንድ እሴት ውስጥ ያሉ commas አይከፈሉም። የcase ልዩነት ያላቸው ቅርጾች በተቀመጡበት entry order ይዋሃዳሉ፤ ልክ ያልሆነ variant ካለ ግን ያ header በሙሉ አይካተትም። Attributes በlowercase ስም ቅደም ተከተል ይደራጃሉ።
 
-Authorization፣ Proxy-Authorization፣ Cookie፣ Set-Cookie፣ የAPI ቁልፍ ራስጌዎች፣
-auth/token/secret/password/credential አመልካቾችን የያዙ ስሞች እና የውስጥ መግቢያ ማረጋገጫዎች ሁልጊዜ
-ይገለላሉ፣ ቢመረጡም ወይም በማከማቻ ውስጥ በከፊል ቢሸፈኑም እንኳ። የታወቁ የማረጋገጫ ቅጦች
-የጋራውን የማረጋገጫ መለያ ይጠቀማሉ፤ የመሸፈኛ ምልክቶች ይቀራሉ እንጂ እንደ ደህንነታቸው የተጠበቀ እሴቶች አይላኩም።
-ሕብረቁምፊዎች እና ባዶ ያልሆኑ የሕብረቁምፊ ድርድሮች ብቻ ይቀበላሉ፤ ቁጥሮች ወይም ነገሮች በግድ አይለወጡም።
-ልክ ያልሆኑ ስሞች፣ የፕሮቶታይፕ ቁልፎች፣ የቁጥጥር ቁምፊዎች (ከአግድም ታብ በስተቀር) እና የተበላሸ Unicode
-ጥቅሉን ሳያስተጓጉሉ ወይም ይዘታቸውን በስህተቶች ውስጥ ሳያሳዩ ችላ ይባላሉ።
+Authorization፣ Proxy-Authorization፣ Cookie፣ Set-Cookie፣ API-key headers፣ auth/token/secret/password/credential markers የያዙ ስሞች እና የውስጥ gateway credentials ሁልጊዜ ይገለላሉ፤ ቢመረጡ ወይም በstorage ውስጥ በከፊል masked ቢሆኑም እንኳ።
+የታወቁ credential patterns የጋራ credential detector ን እንደገና ይጠቀማሉ፤ redaction markers ይወገዳሉ እንጂ እንደደህና እሴቶች አይላኩም።
+strings እና ባዶ ያልሆኑ string arrays ብቻ ይቀበላሉ፤ numbers ወይም objects ወደ ሌላ አይነት አይቀየሩም።
+ልክ ያልሆኑ ስሞች፣ prototype keys፣ control characters (ከhorizontal tab በስተቀር) እና የተበላሸ Unicode በbatch ሳይሳካ ወይም ይዘታቸው በerrors ውስጥ ሳይንጸባረቅ ችላ ይባላሉ።
 
-እያንዳንዱ ስፓን ቢበዛ 32 ራስጌዎችን፣ በእያንዳንዱ ራስጌ 16 እሴቶችን፣ በእያንዳንዱ እሴት 4096 UTF-8 ባይቶችን፣
-እና በተያዙ የራስጌ ስሞችና እሴቶች በአጠቃላይ 16384 UTF-8 ባይቶችን ይይዛል። መጠናቸው ያለፈ/ልክ ያልሆኑ ራስጌዎች
-ሙሉ በሙሉ ይቀራሉ እንጂ አይቆረጡም። ምርጫው የኦፕሬተሩ የግላዊነት ውሳኔ ነው፤ ደህንነታቸው የተጠበቀ የሚመስሉ ስሞችም
-የግል ውሂብ ሊይዙ ይችላሉ፣ እነዚህ ገደቦች/መለያዎችም አጠቃላይ የPII ማጽጃ አይደሉም።
+እያንዳንዱ span ቢበዛ 32 headers፣ በእያንዳንዱ header 16 values፣ ለእያንዳንዱ value 4096 UTF-8 bytes፣ እና በተያዙ header ስሞችና እሴቶች ሁሉ ድምር 16384 UTF-8 bytes ይይዛል።
+መጠናቸውን ያለፉ/ልክ ያልሆኑ headers ሙሉ በሙሉ ይወገዳሉ፤ አይቆረጡም።
+Selection የoperator privacy ውሳኔ ነው፤ ደህና የሚመስሉ ስሞች እንኳ የግል መረጃ ሊይዙ ይችላሉ፣ እነዚህም bounds/detectors አጠቃላይ PII scrubber አይደሉም።
 
 ### የማድረስ ገደቦች
 
-ጥያቄዎች መጠቅለያውን ጨምሮ በ500 ስፓኖች እና በ4 MiB UTF-8 JSON ይገደባሉ።
-እያንዳንዱ የተፈቀደ ስፓን የጠቋሚ ጥቅሉ የመጀመሪያ ጥያቄ ከመላኩ በፊት መጠኑ ይፈተሻል። አንድ
-ስፓን ከገደቡ በላይ ከሆነ፣ የዚያን ጥቅል ምንም ክፍል ሳይልክ `maxBodyBytes` እንዲቀነስ
-በሚመክር ስህተት ይቋረጣል፤ በዝምታ አይጣልም። ቅድመ ፍተሻው የመዝገብ ማጣቀሻዎችን እና
-የባይት ብዛቶችን ብቻ ያቆያል፣ እያንዳንዱን ጊዜያዊ ስፓን/JSON ይጥላል፤ ስፓኖች ሁለተኛ ተከታታይ ቅጂ
-ከመያዝ ይልቅ ለተገደቡ ክፍሎች እንደገና ይገነባሉ። HTTP 408/429/5xx፣ የአውታረ መረብ ብልሽቶች እና የጊዜ ማብቂያዎች ቢበዛ
-ሦስት ሙከራዎችን ያገኛሉ፣ በ250/500 ms እየጨመረ በሚሄድ መጠበቂያ። የ`Retry-After` ሰከንዶች ወይም የHTTP ቀኖች
-መዘግየቱን እስከ 5 ሰከንዶች ሊያራዝሙት ይችላሉ። ሌሎች ሁኔታዎች ወዲያውኑ ይቋረጣሉ። የOTLP 2xx ከፊል እምቢታም
-የጠፋ ስፓን መቀበሉን ከማረጋገጥ ይልቅ ስህተት ያስነሳል፤ ባዶ ወይም ልክ የሆኑ የJSON ማረጋገጫዎች ይቀበላሉ፣ ምላሽ
-የማንበብ ገደቡም 64 KiB ነው።
+Requests ወደ 500 spans እና 4 MiB UTF-8 JSON ይገደባሉ፤ envelope ጨምሮ።
+እያንዳንዱ allowed span ከcursor batch የመጀመሪያ request በፊት የመጠን ምርመራ ያልፋል።
+ከግደቡ የሚበልጥ አንድ span የዚያን batch ክፍል ሳይልክ ይቀራል እና `maxBodyBytes` እንዲቀነስ መመሪያ ያለው ስህተት ይፈጥራል፤ በዝምታ አይጣልም።
+Preflight የrecord references እና byte counts ብቻ ይይዛል፤ እያንዳንዱን temporary span/JSON ይሰርዛል። spans የbatch ሁለተኛ የተከተበ ቅጂ ሳይያዝ ለተወሰኑ bounded chunks እንደገና ይገነባሉ። HTTP 408/429/5xx፣ network failures እና timeouts ቢበዛ
+ሶስት attempts ያገኛሉ፣ በ250/500 ms exponential backoff። `Retry-After` seconds ወይም HTTP dates
+delay እስከ 5 seconds ሊያራዝሙ ይችላሉ። ሌሎች statuses ወዲያውኑ ይሳካሉ። OTLP 2xx partial rejection እንዲሁ ከacknowledge
+ሳይደረግ የጠፋ span ስለሚያመለክት ስህተት ይጥላል፤ ባዶ ወይም ልክ ያለው JSON acknowledgements ይቀበላሉ፣ የresponse-read ገደቡም
+64 KiB ነው።
 
-ስህተቶች በላኪው ብቻ የሚታወቁ እውነታዎችን ይይዛሉ፦ የHTTP ሁኔታ፣ የድጋሚ ሙከራ ምድብ፣ የሙከራዎች እና የተላኩ ስፓኖች
-ብዛት፣ ወይም ቋሚ የማረጋገጫ/የአውታረ መረብ ብልሽት መልዕክቶች። የሰብሳቢው ምላሽ አካላት፣
-የከፊል ስኬት ቆጠራዎች እና የምላሽ ራስጌዎች ወደ ስህተቶች፣ መዝገቦች ወይም
-ዳሽቦርዱ ፈጽሞ አይቀዱም። የከሸፈ ወይም በከፊል የተቀበለ ጥቅል መቀበሉ አይረጋገጥም፤ መድረሻው
-በዚያ ሁኔታ ላይ እየከሸፈ መሆኑን ያሳያል፣ ጠቋሚው በመጨረሻ መቀበሉ በተረጋገጠው ጥቅል ላይ ይቆያል፣ ቀጣዩ አፈጻጸምም
-እነዚያኑ ረድፎች እንደገና ይልካል። ቋሚ ሁኔታዎች ሰብሳቢው ወይም ውቅሩ
-እስኪስተካከል ድረስ መክሸፋቸውን ይቀጥላሉ። ለምላሽ ዝርዝሮች የሰብሳቢውን የራሱን መዝገቦች ይጠቀሙ። የጥሪ መዝገብ የስህተት ማጠቃለያዎች
-የተለየ የመሸፈኛ ሂደታቸውን ያቆያሉ።
-`prepare()` ምንም አያዘጋጅም፤ ሙከራ በትክክል `{"resourceSpans":[]}` ይልካል እና
-የጥሪ መዝገብ ስፓኖችን ሳይጽፍ የHTTP ሁኔታን ያሳያል።
+Errors የላኪው ባለቤትነት ያላቸውን እውነታዎች ብቻ ይይዛሉ፦ HTTP status፣ retry class፣ attempts እና sent span counts፣ ወይም ቋሚ የacknowledgement/network failure አገላለጽ።
+የCollector response bodies፣ partial-success counts እና response headers በerrors፣ logs ወይም dashboard ውስጥ ፈጽሞ አይቀዱም።
+የተሳካ ያልሆነ ወይም በከፊል የተቀበለ batch acknowledge አይደረግም፤ destination በዚያ status `Failing` ይሆናል፣ cursor በመጨረሻ በተቀበለው batch ላይ ይቆያል፣ እና ቀጣዩ run ተመሳሳይ rows እንደገና ይልካል።
+Permanent statuses collector ወይም configuration እስኪስተካከል ድረስ መሳካታቸውን ይቀጥላሉ። ለresponse details የcollector የራሱን logs ይጠቀሙ።
+የCall-log error summaries የራሳቸውን የredaction ሂደት ይጠብቃሉ።
+`prepare()` ምንም ነገር አያዘጋጅም፤ Test በትክክል `{"resourceSpans":[]}` ይልካል እና
+HTTP status ያሳያል፣ call-log spans ሳይጽፍ።
 
-የክትትል መለያዎች እና የስፓን መለያዎች በቅደም ተከተል በ
-`"omniroute.trace\\0" + callLogId` እና `"omniroute.span\\0" + callLogId` ላይ ከተሰላው SHA-256 የመጀመሪያዎቹ 32/16 የአስራ ስድስትዮሽ አሃዞች ናቸው። ድጋሚ መላኮች
-ተመሳሳይ መለያዎችን ይይዛሉ። ይህ የተደጋጋሚ ማስወገድ ዋስትና አይደለም፤ የLangfuse
-v4 ቅበላን ጨምሮ አንዳንድ የጀርባ ስርዓቶች ተመሳሳይ መለያ ያላቸውን ስፓኖች አያስወግዱም። ብልሽት ወይም የከፊል ቁራጭ መክሸፍ
-ቢበዛ መቀበሉ ያልተረጋገጠውን አንድ የጠቋሚ ጥቅል እንደገና ሊልክ ይችላል፤ ያ ሙሉ ጥቅል ሊደገም ይችላል፣
-የመጨረሻው የHTTP ክፍሉ ብቻ አይደለም። ይህን መደራደር በአእምሮ በመያዝ የጠቋሚ ጥቅሉን መጠን ይምረጡ።
+Trace ids እና span ids የSHA-256 የመጀመሪያ 32/16 hex digits ናቸው፤ ይህም በ
+`"omniroute.trace\\0" + callLogId` እና `"omniroute.span\\0" + callLogId` ላይ ይሰላል። እንደገና የሚላኩት
+identical ids ይይዛሉ። ይህ የdeduplication ዋስትና አይደለም፤ Langfuse
+v4 ingestionን ጨምሮ አንዳንድ backends ተመሳሳይ-id spans አያጣምሩም። አንድ crash ወይም partial chunk failure
+ቢከሰት እንደገና ሊላክ የሚችለው ቢበዛ ያልተቀበለው cursor batch ብቻ ነው፤ ያ ሙሉ batch ሊደገም ይችላል እንጂ የመጨረሻው HTTP chunk ብቻ አይደለም። የcursor batch size ሲመርጡ ይህን ልውውጥ በአሳብ ያስገቡ።
 
 ### የLangfuse ምሳሌ
 
-በራስዎ ለሚያስተናግዱት የLangfuse አገልግሎት እነዚህን መስኮች ያዋቅሩ፦
+በራስዎ በሚያስተዳድሩት Langfuse instance እነዚህን fields ያዋቅሩ፦
 
 ```json
 {
@@ -422,44 +380,33 @@ v4 ቅበላን ጨምሮ አንዳንድ የጀርባ ስርዓቶች ተመሳ
 }
 ```
 
-የAuthorization እሴቱን በአካባቢዎ የቀጥተኛው `public-key:secret-key`
-ሕብረቁምፊ Base64 አድርገው ይገንቡ (ለምሳሌ በ`Buffer.from(publicKey + ":" + secretKey).toString("base64")`)።
-እውነተኛ ማረጋገጫዎችን ወደ መዝገቦች፣ የማያ ገጽ ቅጂዎች ወይም የችግር ሪፖርቶች አይለጥፉ። ማዛመዱ በራስ-ሰር
-`x-langfuse-ingestion-version: 4` ያዘጋጃል፤ Authorization አሁንም በ`headers` ውስጥ ይቀርባል።
-ሁለቱም ራስጌዎች እና የሚፈጠረው የማንነት ሶልት ነባሩን የተመሰጠረ የሚስጥር መስክ
-ዘዴ እና የAPI ቦታ ያዦችን ይጠቀማሉ፤ `STORAGE_ENCRYPTION_KEY` ያስፈልጋል።
+የAuthorization እሴቱን በአካባቢዎ የliteral `public-key:secret-key`
+string ወደ Base64 በመቀየር ይገንቡ፤ ለምሳሌ `Buffer.from(publicKey + ":" + secretKey).toString("base64")` በመጠቀም።
+እውነተኛ credentials በlogs፣ screenshots ወይም issues ውስጥ አያስገቡ። Mapping በራስ-ሰር
+`x-langfuse-ingestion-version: 4` ያዘጋጃል፤ Authorization ግን አሁንም በ`headers` ውስጥ መቅረብ አለበት።
+ሁለቱም headers እና የተፈጠረው identity salt ነባሩን encrypted secret-field mechanism እና API placeholders ይጠቀማሉ፤ `STORAGE_ENCRYPTION_KEY` ያስፈልጋል።
 
-ማዛመዱ የማመንጨት ዓይነት/ሞዴል፣ የJSON አጠቃቀም ዝርዝሮችን (ግቤት/ውጤት/ጠቅላላ እና ያሉ
-የመሸጎጫ ቁልፎች)፣ የJSON ግቤት/ውጤት ቅጽበታዊ ቅጂዎችን፣ ERROR/DEFAULT ደረጃን፣ የተጣራ የሁኔታ መልዕክትን፣
-የክትትል ስምን፣ የክፍለ ጊዜ መለያን፣ አማራጭ አካባቢን እና ለአቅራቢ፣ ለተጠየቀው ሞዴል፣ ለዱካ፣ ለጥምረት፣ ለመሸጎጫ
-ምንጭ እና ሁኔታ ሊጣራ የሚችል
-`langfuse.observation.metadata.<key>` ይጨምራል። `langfuse.observation.completion_start_time`፣ TTFT ሲታወቅ እና በቆይታው ውስጥ ሲሆን ብቻ፣
-የመጀመሪያ ጊዜ + TTFT በISO 8601 ቅርጸት ይሆናል። ምንም የወጪ ባህሪያት አይላኩም።
+Mapping የማመንጨት አይነት/ሞዴል፣ የJSON አጠቃቀም ዝርዝሮች (ግብዓት/ውጤት/ጠቅላላ እና የሚገኙ
+የመሸጎጫ ቁልፎች)፣ የJSON ግብዓት/ውጤት ቅጽበታዊ ምስሎች፣ ERROR/DEFAULT ደረጃ፣ የተጣራ
+የሁኔታ መልዕክት፣ የtrace ስም፣ የsession መለያ፣ እንዲሁም እንደ provider፣ የተጠየቀ ሞዴል፣ path፣ combo፣ የመሸጎጫ
+ምንጭ እና ሁኔታ ያሉ መረጃዎችን የሚያመለክቱ አማራጭ አካባቢ እና ማጣሪያ ሊደረግበት የሚችል
+`langfuse.observation.metadata.<key>` ይጨምራል። `langfuse.observation.completion_start_time` በመጀመሪያ ጊዜ የISO 8601 ቅርጸት ነው፤
+TTFT የሚታወቅ እና በቆይታው ውስጥ ብቻ ሲሆን ከTTFT ጋር ይጨመራል። ምንም የወጪ ባህሪያት አይላኩም።
 
-የማንነት ሁነታዎች በ`langfuse.user.id` ላይ ይተገበራሉ፦
+የማንነት ሁነታዎች ለ`langfuse.user.id` ይተገበራሉ፦
 
-- `pseudonymous` (ነባሪ)፦ ለእያንዳንዱ መዳረሻ በዘፈቀደ ከሚፈጠር
-  ባለ32-ባይት ሶልት ጋር የAPI ቁልፉ ውስጣዊ መለያ HMAC-SHA256። ሶልቱ ከሌለ በመፍጠር ጊዜ ይመነጫል፣
-  እንደ `identitySalt` ይመሰጠራል፣ ፈጽሞ ተመልሶ አይሰጥም፣ እና በአርትዖት ጊዜ ይቆያል። ጥሬ የቁልፍ መለያዎች
-  በስፓን ባህሪያት ውስጥ ፈጽሞ አይገቡም። የመዳረሻን ሶልት እንደገና መፍጠር/ማደስ ማንነቶችን ይለውጣል።
-- `keyName`፦ የተዋቀረው የAPI ቁልፍ ስም፣ ያንን የኦፕሬተር መለያ ሆን ተብሎ ያሳያል።
-- `none`፦ የተጠቃሚ መለያ የለም። የክፍለ ጊዜ መለያ ምልክቶች ሲኖሩ አሁንም ወደ ውጭ ይላካሉ፤ እነዚህ ሁነታዎች
-  የዘፈቀደ የፕሮምፕት ይዘትን ወይም በኦፕሬተር የቀረቡ የክፍለ ጊዜ/የተዛማጅነት መለያዎችን ማንነት አልባ አያደርጉም።
+- `pseudonymous` (ነባሪ)፦ የAPI ቁልፉ የውስጥ መለያ ከየመድረሻው ጋር ብቻ በሚያገለግል የ32-ባይት የዘፈቀደ ጨው HMAC-SHA256 ይሆናል። ጨዉ ከሌለ በመፍጠር ጊዜ ይመነጫል፣ እንደ `identitySalt` ይመሰጠራል፣ በፍጹም አይመለስም፣ እና በማስተካከያዎች ወቅት ይጠበቃል። ጥሬ የቁልፍ መለያዎች በspan ባህሪያት ውስጥ በፍጹም አይገቡም። የመድረሻውን ጨው እንደገና መፍጠር/መቀየር ማንነቶችን ይቀይራል።
+- `keyName`፦ የተዋቀረው የAPI ቁልፍ ስም፣ ይህም የኦፕሬተሩን መለያ ሆን ተብሎ ያሳያል።
+- `none`፦ ምንም የተጠቃሚ መለያ የለም። የsession መለያ ምልክቶች ሲኖሩ አሁንም ይላካሉ፤ እነዚህ ሁነታዎች የዘፈቀደ የጥያቄ ይዘትን ወይም በኦፕሬተር የቀረቡ የsession/ትስስር መለያዎችን ስም-አልባ አያደርጉም።
 
-### ያለ ታሪካዊ ውሂብ ዳግም ሙሌት መጀመር
+### ያለ backfill መጀመር
 
-በመፍጠር ጊዜ ብቻ፣ **ከአሁኑ ቦታ ጀምር (ያሉትን መዝገቦች ዝለል)** ያንቁ ወይም
-`startFromCurrentPosition: true` በመፍጠሪያ API የውሂብ ጥቅል የላይኛው ደረጃ ላይ ያስተላልፉ። ይህ ያሉትን የጠቋሚ
-አጋዥ ተግባራት በመጠቀም፣ ያለ ማዛወር፣ `cursor_row_id`ን በአሁኑ ጊዜ ተጠብቆ ካለው የጥሪ መዝገብ ከፍተኛው rowid
-ያስጀምረዋል። ነባሪው false ነው (ጠቋሚ 0 እና የተጠበቀውን ታሪክ ዳግም መሙላት)።
-ይህ በማዘመን ጊዜ ጠቋሚን እንደገና የማስጀመር ቅንብር አይደለም።
+በመፍጠር ጊዜ ብቻ **ከአሁኑ ቦታ ጀምር (ያሉ ምዝገባዎችን ዝለል)** ን ያንቁ ወይም
+በcreate API payload ከላይኛው ደረጃ `startFromCurrentPosition: true` ያስተላልፉ። ይህ ያለ migration የአሁኑን ከፍተኛ የተጠበቀ የcall-log rowid
+በነባር cursor helpers በመጠቀም `cursor_row_id` ውስጥ ያስጀምራል። ነባሪው false ነው (cursor 0 እና የተጠበቀ ታሪክ backfill)።
+ይህ በማዘመን ጊዜ የcursor ዳግም ማስጀመሪያ ቅንብር አይደለም።
 
-የጋራው `ttftMs` ጭማሪ በBigQuery ማዛመጃ
-እና በአዲስ ሰንጠረዥ ስኪማ ላይ null ሊሆን የሚችል `ttft_ms` ዓምድ ይጨምራል፤ የስኪማ ሙከራው እያንዳንዱ መደበኛ የመዝገብ መስክ
-ዓምድ እንዲኖረው ይጠይቃል። ያሉ ሰንጠረዦች ሳይለወጡ ወደ ውጭ መላካቸውን ይቀጥላሉ፦ `prepare()` የሰንጠረዡን ስኪማ ያነባል እና
-ያ ዓምድ በሌለበት ጊዜ `ttft_ms`ን ብቻ ይተዋል። በሚቀጥለው ሂደት TTFT ለማግኘት
-null ሊሆን የሚችል INT64 ዓምድ ያክሉ፣ ወይም አዲስ ሰንጠረዥ ይጠቀሙ። PATCH፣ ራስ-ሰር የስኪማ ለውጥ ወይም ተጨማሪ
-ፈቃዶች አያስፈልጉም፤ ሌሎቹ ሁሉም የረድፍ መስኮች ጥብቅ የስኪማ ማረጋገጫን ይቀጥላሉ።
+የጋራው `ttftMs` መጨመር በBigQuery mapper እና በአዲሱ የሰንጠረዥ ስኪማ ላይ nullable `ttft_ms` ኮለም ይጨምራል፤ የስኪማ ሙከራውም እያንዳንዱ የcanonical መዝገብ መስክ ኮለም እንዲኖረው ይጠይቃል። ያሉ ሰንጠረዦች ለውጥ ሳይደረግባቸው መላክን ይቀጥላሉ፦ `prepare()` የሰንጠረዡን ስኪማ ያነባል እና ያ ኮለም ከሌለ ብቻ `ttft_ms` ን ያስወግዳል። TTFT በሚቀጥለው ሩጫ እንዲካተት nullable INT64 ኮለሙን ይጨምሩ ወይም አዲስ ሰንጠረዥ ይጠቀሙ። አማራጩ የTTFT ኮለም የስኪማ ማዘመኛን አያስነሳም። የአጠቃቀም-ማስረጃ ኮለሞች ከታች ያለውን ሁኔታዊ፣ በፈቃደኝነት የሚነቃ የተኳኋኝነት ሂደት ይከተላሉ፤ ሌሎች የረድፍ መስኮች ግን ጥብቅ የስኪማ ምርመራን ይጠብቃሉ።
 
 ---
 
@@ -484,15 +431,17 @@ null ሊሆን የሚችል INT64 ዓምድ ያክሉ፣ ወይም አዲስ ሰ
 
 ---
 
-## 7. ማስኬድ
+## 7. እሱን መጠቀም
 
-- **ዳሽቦርድ**፦ ውህደቶች → የምዝግብ ወደ ውጭ መላክ። መዳረሻ ያክሉ፣ ረድፎችን ሳይጽፉ የመግቢያ ማረጋገጫ መረጃዎችን ለማጣራት **ሙከራ**ን ያስኪዱ፣
+- **ዳሽቦርድ**: Integrations → Log export። መድረሻ ያክሉ፣ ማረጋገጫዎቹን ረድፎች ሳይጽፉ ለመፈተሽ **Test** ያስኪዱ፣
   ከዚያም ያንቁት።
-- **በመጠባበቅ ላይ ያለ ክምችት**፦ እያንዳንዱ የመዳረሻ ካርድ በመጠባበቅ ላይ ያሉ ረድፎችን እና ጠቋሚውን ያሳያል፤ `GET
-/api/log-export/status` እነዚሁኑ አሃዞች ከመጨረሻዎቹ 20 የሥራ ሂደቶች ጋር ይመልሳል።
-- **የአንድ መዳረሻ አለመሳካት ሌሎቹን አያስከሽፍም** — የሂደቱ ማጠቃለያ የእያንዳንዱን መዳረሻ
-  ሁኔታ በ`last_status` / `last_error` ውስጥ ይመዘግባል፣ የሥራ ሂደት ታሪኩም አጠቃላይ ውጤቱን ይይዛል።
-- **መዳረሻን መሰረዝ ጠቋሚውንም ይሰርዛል።** እንደገና ማከል ከተያዘው እጅግ አሮጌ
-  የጥሪ ምዝግብ ይጀምራል፤ ይህም መዳረሻው አስቀድሞ የያዛቸውን ረድፎች እንደገና ይልካል። በBigQuery ላይ የእያንዳንዱ ረድፍ
-  `insertId` ይህን ድግግሞሽ የሚያስወግደው በBigQuery የራሱ ድግግሞሽ ማስወገጃ የጊዜ ገደብ ውስጥ ብቻ ነው፤ ስለዚህ
-  መዳረሻን ከመሰረዝ ይልቅ ማሰናከልን ይምረጡ።
+- **የተጠባባቂ ሥራ**: እያንዳንዱ የመድረሻ ካርድ በመጠባበቅ ላይ ያሉ ረድፎችን እና ጠቋሚውን ያሳያል፤ `GET
+/api/log-export/status` ተመሳሳይ አሃዞችን ከመጨረሻዎቹ 20 የሥራ ማስኬጃዎች ጋር ይመልሳል።
+- **አንድ ያልተሳካ መድረሻ ሌሎቹን አያስከፍልም** — የማስኬጃ ማጠቃለያው በ`last_status` / `last_error` ውስጥ የእያንዳንዱን መድረሻ ሁኔታ ይመዘግባል፣ እና የሥራ ማስኬጃ ታሪኩ ድምር ውጤቱን ይይዛል።
+- **መድረሻን መሰረዝ ጠቋሚውን ይሰርዛል።** እንደገና ሲጨመር ከቆዩት የጥሪ ሎጎች ውስጥ ከአሮጌው ጀምሮ ይጀምራል፤ ይህም መድረሻው አስቀድሞ የያዛቸውን ረድፎች እንደገና እንዲልክ ሊያደርገው ይችላል። በBigQuery ላይ በየረድፉ ያለው `insertId` ይህንን የሚያስተናግደው በBigQuery የራሱ የድግግሞሽ ማስወገጃ ጊዜ መስኮት ውስጥ ብቻ ስለሆነ፣ መድረሻን ከመሰረዝ ይልቅ ማሰናከል ይመረጣል።
+
+### የአጠቃቀም-ማስረጃ የስኪማ ተኳኋኝነት
+
+አዲስ BigQuery ሰንጠረዦች አማራጭ `usage_evidence` (JSON የያዘ STRING) እና `usage_estimated` (BOOL) ያካትታሉ። `autoCreate` ከነቃ፣ ነባር ሰንጠረዥ እነዚህ የጎደሉ አማራጭ አምዶችን ብቻ ሊቀበል ይችላል። ላኪው የመስክ ሜታዳታን ጨምሮ ሙሉውን ነባር ስኪማ ይጠብቃል፣ እና በተመለሰው etag በመጠቀም ሁኔታዊ PATCH ያቀርባል። በተመሳሳይ ጊዜ የሚደረግ የስኪማ ለውጥ ኤክስፖርቱ እንዲሳካ አያደርግም እንጂ ያለውን አይተካም፤ በሚቀጥለው ማስኬጃ ሰንጠረዡ እንደገና ይነበባል።
+
+`autoCreate` ከተሰናከለ፣ የአጠቃቀም ማስረጃ ያላቸውን መዝገቦች ከመላክዎ በፊት እነዚህን አምዶች እርስዎ ያክሉ። የጎደለ የስኪማ/etag ሜታዳታ ወይም ያልተሳካ ዝመና ማስረጃ ያላቸው ገቢዎችንም ይከላከላል። በዚህ ውድቀት ላይ የኤክስፖርት ጠቋሚው አይራመድም፣ እና ማስረጃው በዝምታ አይጠፋም። ኤክስፖርቱ በታገደበት ጊዜም የአካባቢያዊ ሎግ ማቆያ ደንቡ ተፈጻሚ ስለሚሆን፣ የቆዩት የምንጭ ረድፎች ከመጥፋታቸው በፊት ውድቀቱን ይፍቱ።

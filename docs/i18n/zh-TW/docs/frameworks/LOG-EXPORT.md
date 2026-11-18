@@ -197,140 +197,136 @@ Telegram webhook 採用相同的防護機制）。
 
 ## 4. BigQuery 目的地
 
-設定鍵（`type: "bigquery"`）：
+設定金鑰（`type: "bigquery"`）：
 
-| 鍵                   | 說明                                             |
-| -------------------- | ------------------------------------------------ |
-| `projectId`          | 存放資料集的 GCP 專案                            |
-| `datasetId`          | `[A-Za-z0-9_]+`                                  |
-| `tableId`            | `[A-Za-z0-9_]+`                                  |
-| `location`           | 僅在需要建立資料集時使用（預設為 `EU`）          |
-| `serviceAccountJson` | 服務帳戶金鑰。機密資訊：靜態儲存時加密，絕不傳回 |
-| `autoCreate`         | 首次匯出時建立資料集與資料表（預設為 `true`）    |
+| 金鑰                 | 備註                                                                            |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `projectId`          | 持有資料集的 GCP 專案                                                           |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                 |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                 |
+| `location`           | 僅在需要建立資料集時使用（預設為 `EU`）                                         |
+| `serviceAccountJson` | 服務帳戶金鑰。秘密：靜態加密，絕不回傳                                          |
+| `autoCreate`         | 建立缺少的資料集／資料表；有條件地新增可為 null 的使用證據欄位（預設為 `true`） |
 
-服務帳戶需要目標資料表的 `bigquery.tables.updateData` 權限，且在
-啟用 `autoCreate` 時，還需要 `bigquery.datasets.create` / `bigquery.tables.create` 權限。
+服務帳戶需要對目標資料表具備 `bigquery.tables.updateData` 權限，並在啟用
+`autoCreate` 時具備 `bigquery.datasets.create`／`bigquery.tables.create` 權限。
+更新現有資料表以新增兩個可為 null 的使用證據欄位時，也需要
+`bigquery.tables.update` 權限。缺少任何必要權限都會使匯出失敗，且不會推進其游標。
 
-設定的批次是以**游標**為單位，而非以 HTTP 為單位：`send()` 會將其分割成每次最多 500 列的 insertAll
-呼叫，因此較大的 `batch_size` 不會觸及 BigQuery 的 10 MB 請求上限。
-暫時性狀態碼（408/429/500/502/503/504）會採用指數
-退避策略重試最多三次，並重複使用相同的 insertIds；驗證與結構定義失敗則會在第一次嘗試時擲出例外，而不會
-白白耗費整次執行。
+一個已設定的批次是**游標**單位，而非 HTTP 單位：`send()` 會將其分割成每次最多
+500 列的 insertAll 呼叫，因此較大的 `batch_size` 不會觸發 BigQuery 的 10 MB 要求上限。
+暫時性狀態（408/429/500/502/503/504）最多會以指數
+退避重試三次，並重複使用相同的 insertIds；驗證和結構描述錯誤會在第一次嘗試時擲出，
+而不會消耗此次執行。
 
-剛建立的資料表尚無法被串流端點看見，因此端點會在幾秒內回應
-404。此 404 會觸發重試，但**僅限於資料表是在本次執行中建立的情況** —
-若資料表確實不存在，仍會快速失敗。請注意，若以最近才刪除的資料表名稱
-重新建立資料表，BigQuery 會在數分鐘內拒絕串流插入；這是
-先刪除再重建的固有行為，因此請優先使用新的資料表名稱，而非刪除後再以原名稱新增。
+剛建立不久的資料表尚未能被串流端點看見，因此會在幾秒內回應 404。
+該 404 會重試，但**僅限於此執行建立了資料表的情況** — 真正缺少的資料表仍會立即失敗。
+請注意，使用近期刪除過的名稱重新建立資料表，會使 BigQuery 拒絕串流插入數分鐘；
+這是先刪除再重新建立的特性，因此相比刪除並重新新增資料表，建議使用新的資料表名稱。
 
-**部分失敗會以 HTTP 200 回應，並包含非空的 `insertErrors[]`。** 這會被視為
-失敗並擲出例外，藉此防止游標越過 BigQuery 從未
-接受的資料列；`tests/unit/log-export-bigquery.test.ts` 會確保此行為維持不變。
+**部分失敗會以 HTTP 200 且 `insertErrors[]` 非空的形式抵達。** 這會被視為
+失敗並擲出錯誤，藉此阻止游標越過 BigQuery 從未接受的資料列；
+`tests/unit/log-export-bigquery.test.ts` 固定了此行為。
 
-傳輸採用純 REST — 先以自行簽署的 RS256 宣告在
-`https://oauth2.googleapis.com/token` 換取存取權杖，再將資料列傳送至 `tabledata.insertAll`。不會
-引入 Google SDK。存取權杖會在處理程序內依（服務帳戶、範圍）組合快取。
+傳輸使用純 REST — 自簽署的 RS256 assertion 會在
+`https://oauth2.googleapis.com/token` 交換存取權杖，接著資料列會傳送至
+`tabledata.insertAll`。不會引入任何 Google SDK。存取權杖會在程序內依
+（服務帳戶、範圍）快取。
 
-建立的資料表會為「記錄」分頁中的每個欄位各設一個資料欄，另加上 `exported_at`，並依照
-實際查詢呼叫記錄的方式配置：
+建立的資料表會為 Logs 分頁的每個欄位各建立一個欄，另加上 `exported_at`，並針對
+實際查詢通話記錄的方式進行配置：
 
-- **依 `timestamp` 按日分割**，因此以日期限定範圍的查詢只會掃描指定的日期。
-- **依 `api_key_name`、`provider`、`model`、`status` 分群**（依此順序），因此依
-  執行者、傳送目的地或是否失敗進行篩選時，可排除各分割區內不相關的區塊。BigQuery
-  最多允許四個分群欄，且順序很重要：僅依 `api_key_name` 篩選
-  即可排除區塊，但僅依 `status` 篩選則無法。
-- **可選的分割區保留期限**，透過 `partitionExpirationDays` 設定（0 表示保留所有資料），於
-  建立資料表時套用。
+- **依 `timestamp` 按日分割**，因此以日期限定範圍的查詢只會掃描那些日期。
+- **依 `api_key_name`、`provider`、`model`、`status` 叢集**（依此順序），因此依
+  執行者、目的地或是否失敗進行篩選時，可以修剪每個分割區內的區塊。BigQuery
+  最多允許四個叢集欄位，且順序很重要：僅篩選 `api_key_name` 會進行修剪，而僅篩選
+  `status` 則不會。
+- 建立資料表時可透過 `partitionExpirationDays` 設定**選用的分割區保留期限**
+  （0 代表永久保留）。
 
-這兩項設定都會在建立時套用。既有資料表會保留原有配置，因此
-若要採用這些設定，請將目的地指向新的資料表 ID。
+這兩項設定只會在建立時套用。現有資料表會保留其既有配置，因此若要採用這些設定，
+請將目的地指向新的資料表 ID。
 
-`tests/unit/log-export-bigquery.test.ts` 會斷言對應器與資料表結構定義保持
-同步，確保新的呼叫記錄欄位不會在匯出過程中遭到無聲捨棄。
+`tests/unit/log-export-bigquery.test.ts` 會斷言對映器與資料表結構描述保持同步，因此
+新的通話記錄欄位不會在匯出過程中無聲無息地遺失。
 
-批次會**同時**依資料列數與序列化後的位元組數分割成區塊。一旦匯出包含酬載，
-僅考量資料列數便不足以控制大小：含有提示詞的 500 列資料可能達數十 MB，而 insertAll
-會拒絕超過 10 MB 的請求。區塊會在達到 500 列或 9 MB 時結束，以先達到者為準。
+批次會同時依**資料列數和序列化後的位元組數**進行分割。僅依資料列數並不足夠，
+因為匯出承載內容後：包含提示的 500 列可能達到數十 MB，而 insertAll
+會拒絕超過 10 MB 的要求。分塊會在 500 列或 9 MB 時關閉，以先達到者為準。
 
 ---
 
-## 5. OTLP/HTTP 追蹤資料目的地
+## 5. OTLP/HTTP traces 目的地
 
-設定使用 `type: "otlp-http"`。這是以游標為基礎、定期匯出已持久化呼叫記錄的機制，
-並非 `open-sse/services/routing/otel.ts` 中盡力而為的即時路由事件接收端。
-它不會讀取或變更該接收端的環境變數、計時器或緩衝區。同時啟用兩者可能產生兩種獨立的 span；
-請使用 `omniroute.log-export` 插樁範圍來區分這些呼叫記錄 span。
+設定使用 `type: "otlp-http"`。這是對已持久化呼叫記錄進行排程、由游標支援的匯出，
+並非 `open-sse/services/routing/otel.ts` 中盡力而為的即時路由事件接收器。它不會讀取或變更該接收器的環境
+變數、計時器或緩衝區。同時啟用兩者可能產生兩種彼此獨立的 span；
+請使用 `omniroute.log-export` instrumentation scope 來區分這些呼叫記錄 span。
 
-| 索引鍵                   | 預設值 / 用途                                               |
-| ------------------------ | ----------------------------------------------------------- |
-| `endpoint`               | 必填的完整 HTTP(S) 追蹤資料 URL；不會附加 `/v1/traces` 後綴 |
-| `headers`                | 選填的 `Name: value` 行或由字串組成的 JSON 物件；會加密     |
-| `requestHeaderAllowlist` | 空白（關閉）；要擷取為 span 屬性的用戶端標頭名稱／前綴      |
-| `serviceName`            | `omniroute`；資源的 `service.name`                          |
-| `langfuseMapping`        | `false`；新增 Langfuse 生成／工作階段／使用者屬性           |
-| `identity`               | `pseudonymous`、`keyName` 或 `none`                         |
-| `paths`                  | `/v1/chat/completions`、`/v1/responses`、`/v1/messages`     |
-| `timeoutMs`              | 每次 HTTP 嘗試為 `30000`                                    |
-| `environment`            | 未設定；選填的 `langfuse.environment`                       |
+| Key                      | Default / purpose                                         |
+| ------------------------ | --------------------------------------------------------- |
+| `endpoint`               | 必要的完整 HTTP(S) traces URL；不會附加 `/v1/traces` 後綴 |
+| `headers`                | 選用的 `Name: value` 行或字串 JSON 物件；已加密           |
+| `requestHeaderAllowlist` | 空白（停用）；要擷取為 span 屬性的用戶端標頭名稱／前綴    |
+| `serviceName`            | `omniroute`；資源 `service.name`                          |
+| `langfuseMapping`        | `false`；新增 Langfuse generation/session/user 屬性       |
+| `identity`               | `pseudonymous`、`keyName` 或 `none`                       |
+| `paths`                  | `/v1/chat/completions`、`/v1/responses`、`/v1/messages`   |
+| `timeoutMs`              | 每次 HTTP 嘗試為 `30000`                                  |
+| `environment`            | 未設定；選用的 `langfuse.environment`                     |
 
-通用儀表板會呈現這些欄位。`paths` 接受 API 陣列，或在文字區域中以換行／逗號
-分隔的精確路徑。除非明確允許，否則會略過嵌入、重新排序及其他路徑。
-略過的資料列仍會推進游標；現有執行器的 `exported`/`exportedTotal` 計數器
-計算的是已處理的來源資料列（包含已篩除的資料列），而非已接受的 span。
-篩選會在子程序中執行，不會變更其 IPC／游標契約。
+一般儀表板會呈現這些欄位。`paths` 接受 API 陣列，或以換行／逗號分隔精確路徑的文字區域。
+除非明確允許，否則會略過 Embeddings、rerank 及其他路徑。略過的列仍會推進游標；現有 runner 的
+`exported`／`exportedTotal` 計數器會計算已處理的來源列，包括已篩選的列，而不是已接受的 span。
+篩選會在子程序中完成，不會變更其 IPC／游標合約。
 
-URL 驗證使用 `src/shared/network/outboundUrlGuard.ts` 中不依賴資料庫的
-`parseAndValidateNonMetadataUrl` 輔助函式，也就是 `block-metadata` 原則。
-它與已允許私人 URL 的 webhook 驗證器一樣，會無條件檢查中繼資料／通訊協定／內嵌認證資訊，
-但刻意允許 localhost／LAN 目標，而不需要全域功能旗標覆寫。
-這讓自行託管的 Langfuse、Phoenix、Tempo 和 Collector 端點得以使用，包括私人 HTTP 端點。
-雲端中繼資料主機一律會遭到封鎖。
-不會跟隨重新導向，因此收集器無法將認證資訊重新導向至其他主機。
-如同現有的詞彙式 URL 防護機制，這不會固定 DNS 解析結果；請只設定由營運者控制的主機。
-只要端點不在受信任的網路上，就應優先使用 HTTPS。
+URL 驗證使用來自 `src/shared/network/outboundUrlGuard.ts` 的不依賴 DB 的
+`parseAndValidateNonMetadataUrl` helper：`block-metadata` 政策。它具有與 webhook 驗證器相同的
+無條件 metadata／protocol／embedded-credential 檢查，並允許 private URL，但刻意允許 localhost／LAN
+目標，而不需要全域 feature flag 覆寫。這可支援自架的 Langfuse、Phoenix、Tempo 與 Collector
+端點，包括 private HTTP 端點。Cloud-metadata 主機一律會被封鎖。
+不會跟隨重新導向，因此 collector 無法將認證資訊重新導向至不同主機。
+如同現有的 lexical URL guard，這不會固定 DNS 解析；只能設定由操作人員控制的主機。
+只要端點不在受信任的網路上，便優先使用 HTTPS。
 
-### 承載資料與傳遞
+### Payload 與傳遞
 
-OTLP/HTTP JSON（`ExportTraceServiceRequest`、`Content-Type: application/json`）會為每個
-允許的資料列傳送一個 CLIENT span，並以其精確的請求路徑命名。以路徑命名可區分
-Chat Completions、Responses 和 Messages，而不會將模型或身分資料嵌入 span 名稱。
-資源屬性包含 `service.name` 和套件的 `service.version`。
+OTLP/HTTP JSON（`ExportTraceServiceRequest`、`Content-Type: application/json`）會為每個允許的列
+攜帶一個 CLIENT span，其名稱取自精確的請求路徑。路徑命名可區分 Chat Completions、Responses 與
+Messages，而不會將模型或身分資料嵌入 span 名稱。資源屬性包含 `service.name` 與套件的
+`service.version`。
 
 一般聊天嘗試記錄器（`open-sse/handlers/chatCore/attemptLogging.ts`）會在完成時寫入
-`duration = Date.now() - startTime`，但不提供時間戳記；
-`src/lib/usage/callLogs.ts` 中的 `saveCallLogOperation` 預設會將時間戳記設為寫入
-（完成）時間。因此，匯出時會將結束時間設為資料列時間戳記，開始時間設為結束時間減去持續時間
-（以毫秒為單位，轉換為十進位奈秒）。呼叫端提供的歷史時間戳記
-也會保留為結束時間；並沒有逐列區分開始／完成時間的標記。
-空值持續時間會變成零。無效或缺少的時間戳記會導致整批失敗，而不是建立
-非確定性的 span。`ttftMs` 可為空值，並對應至 `omniroute.ttft_ms`。
+`duration = Date.now() - startTime`，且不提供時間戳記；
+`src/lib/usage/callLogs.ts` 中的 `saveCallLogOperation` 會將時間戳記預設為寫入
+（完成）時間。因此，匯出會將結束時間設為列的時間戳記，並將開始時間設為結束時間減去 duration
+（毫秒，再轉換為十進位奈秒）。呼叫端提供的歷史時間戳記同樣會保留為結束時間；每列沒有開始／完成的區分資訊。
+null duration 會變成零。無效／遺失的時間戳記會使批次失敗，而不是建立非確定性的 span。
+`ttftMs` 可為 nullable，並會對應至 `omniroute.ttft_ms`。
 
-屬性包含 `gen_ai.operation.name="chat"`、提供者、請求／回應模型、
-輸入／輸出權杖數、選填的快取讀取／快取建立／推理權杖數、HTTP 狀態、
-組合、快取來源、工作階段標籤及關聯識別碼。OTLP 整數值與時間戳記
-使用十進位字串；字串、布林值及小數則使用其原生 OTLP 值變體。
-錯誤 span 的狀態為 ERROR，並帶有經清理的狀態訊息。標準記錄
-沒有上游主機 URL，因此會省略 `server.address`，而非錯誤地
-將收集器識別為模型伺服器。不會匯出費用。
+屬性包含 `gen_ai.operation.name="chat"`、provider、請求／回應模型、輸入／輸出 token、選用的
+cache-read／cache-creation／reasoning token、HTTP 狀態、combo、快取來源、session tag 與 correlation id。
+整數 OTLP 值與時間戳記為十進位字串；字串、布林值與小數會使用其原生 OTLP 值變體。
+錯誤 span 具有 ERROR 狀態與經過清理的狀態訊息。規範記錄沒有上游主機 URL，因此會省略
+`server.address`，而不會錯誤地將 collector 識別為模型伺服器。Cost 不會匯出。
 
 只有 `includeBodies=true` 才會載入內容。當 `langfuseMapping=false` 時，
-`gen_ai.input.messages` / `gen_ai.output.messages` 會承載 OmniRoute 所儲存、經清理的請求／回應
-主體 JSON（可解析時會正規化），而非重新塑形的 semconv
-訊息陣列。遭截斷／非 JSON 的主體會保留為原始文字。當 `langfuseMapping=true` 時，
-主體只會以 `langfuse.observation.input` / `langfuse.observation.output` 輸出；
-會省略 `gen_ai.*.messages` 屬性，讓每個主體只傳送一次。兩種模式
-皆從現有的內容載入流程繼承 `maxBodyBytes`；
-`omniroute.bodies_truncated=true` 表示內容遭截斷。
-此目的地不會新增額外的管線快照，也不會讀取未經清理的產物；
-選用的請求標頭擷取功能會使用下方所述、現有已載入的用戶端快照。
-匯出主體時，請使用分鐘級的排程間隔，例如 `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`，
-而非累積每小時的待處理資料。
+`gen_ai.input.messages`／`gen_ai.output.messages` 會攜帶由 OmniRoute 儲存的經過清理之請求／回應
+body JSON（可解析時會進行規範化），而不是重新塑形的 semconv messages 陣列。
+遭截斷／非 JSON 的 body 會保留為原始文字。當 `langfuseMapping=true` 時，
+body 僅會以 `langfuse.observation.input`／`langfuse.observation.output` 發出；
+`gen_ai.*.messages` 屬性會省略，以便每個 body 只傳送一次。兩種模式都會沿用現有載入路徑中的
+`maxBodyBytes`；`omniroute.bodies_truncated=true` 會標示截斷。
+此目的地不會新增額外的 pipeline snapshots 或未經清理的 artifact 讀取；
+選用的請求標頭擷取會使用下方所述現有的 hydrated client snapshot。
+匯出 body 時，請使用每分鐘級別的頻率，例如 `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`，
+而不要累積每小時的待處理項目。
 
 ### 選用的用戶端請求標頭
 
-標頭擷取**預設為關閉**。請在目的地設定中指定 `requestHeaderAllowlist`，
-並啟用**匯出提示與回應**（目的地上的 `includeBodies: true`）。
-允許清單接受 API 陣列，或在文字區域中以換行／逗號分隔的名稱：
+標頭擷取預設為**關閉**。在目的地設定中設定 `requestHeaderAllowlist`，
+並啟用**Export prompts and responses**（目的地上的 `includeBodies: true`）。
+allowlist 接受 API 陣列，或以換行／逗號分隔名稱的文字區域：
 
 ```json
 {
@@ -338,77 +334,67 @@ Chat Completions、Responses 和 Messages，而不會將模型或身分資料嵌
 }
 ```
 
-名稱比對不區分大小寫，且必須完全相符；但若結尾有單一 `*`，則會選取符合非空標頭名稱前綴的項目。
-不接受單獨的 `*`、嵌入式萬用字元及無效的 HTTP 標頭名稱。
-最多可設定 64 個選取器，每個名稱／前綴最多為 256 個 ASCII 位元組。
-此設定與 `headers` 分開，後者用於讓匯出器向收集器進行驗證。
+名稱會以不區分大小寫且完全相符的方式比對，除非結尾的單一 `*` 用於選取非空的標頭名稱前綴。裸露的 `*`、嵌入式萬用字元和無效的 HTTP 標頭名稱都會被拒絕。
+最多可有 64 個選取器，每個選取器的名稱／前綴最多 256 個 ASCII 位元組。
+此設定與 `headers` 分離，後者用於向收集器驗證 exporter 身分。
 
-擷取作業僅讀取 `pipeline_client_request`，其內容來自已儲存的詳細管線中的
-`clientRawRequest`（或舊版的 `clientRequest`）。它絕不會退而使用提供者的請求標頭。
-記錄請求時，必須已啟用詳細管線記錄。若停用
-`includeBodies`，或用戶端快照 JSON 遺失、損毀或遭截斷，則不會輸出任何標頭
-屬性。增加 `maxBodyBytes` 可避免匯出時截斷快照；
-但無法還原從未儲存的詳細資料。超過 1 MiB 或包含超過
-256 個標頭項目的快照會被忽略。既有的提示／回應匯出功能會與
-標頭擷取一併保持啟用；允許清單不提供僅載入標頭的模式。
+Capture 僅讀取 `pipeline_client_request`，其內容來自已儲存的詳細 pipeline 中的
+`clientRawRequest`（或舊版的 `clientRequest`）。它不會回退到 provider request headers。
+記錄請求時必須已啟用詳細 pipeline 記錄。停用 `includeBodies`，或 client-snapshot JSON
+遺失、損毀或遭截斷時，都不會發出標頭屬性。提高 `maxBodyBytes` 可以避免匯出時的快照截斷；
+但無法恢復從未儲存的詳細資料。超過 1 MiB 或包含超過 256 個標頭項目的快照會被忽略。
+現有的提示／回應匯出仍會與標頭擷取一併啟用；允許清單不會提供僅標頭的 hydration 模式。
 
 選取的值會成為 `http.request.header.<full lowercase header name>` OTLP 字串陣列，
-即使只有單一字串也一樣。例如，`X-OmniRoute-Meta-Team: example-team` 會成為
-`http.request.header.x-omniroute-meta-team`，其值為
+即使只有單一字串也是如此。例如，`X-OmniRoute-Meta-Team: example-team` 會成為
+`http.request.header.x-omniroute-meta-team`，其內容為
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`。
-完整前綴會予以保留：這些是一般標頭，不會進行業務欄位剖析，也不會
-轉換為 `omniroute.metadata.*` / Langfuse 中繼資料。`langfuseMapping` 不會改變標頭
-語意。選取的單值 `User-Agent` 也會設定標準純量屬性
-`user_agent.original`。單一值中的逗號不會用來分割值。大小寫不同的項目會依儲存的
-項目順序合併；只要其中任一變體無效，就會略過整個標頭。屬性依小寫名稱排序。
+完整前綴會被保留：這些是一般標頭，不會進行業務欄位解析，也不會轉換為
+`omniroute.metadata.*`／Langfuse 中繼資料。`langfuseMapping` 不會改變標頭語意。選取的單值
+`User-Agent` 也會設定標準純量 `user_agent.original`。單一值中的逗號不會被分割。
+大小寫變體會依儲存的項目順序合併；任何無效變體都會使整個標頭被省略。屬性會依小寫名稱排序。
 
-Authorization、Proxy-Authorization、Cookie、Set-Cookie、API 金鑰標頭、名稱含有
-auth/token/secret/password/credential 標記的標頭，以及內部閘道憑證，一律會被
-排除，即使已選取或在儲存時已部分遮罩也一樣。已知憑證模式會重用
-共用的憑證偵測器；遮蔽標記會被略過，而不會當作安全值匯出。
-僅接受字串與非空的字串陣列；不會強制轉換數字或物件。
-無效名稱、原型鍵、控制字元（水平定位字元除外）及格式錯誤的 Unicode
-會被忽略，不會導致整批失敗，也不會在錯誤中呈現其內容。
+`Authorization`、`Proxy-Authorization`、`Cookie`、`Set-Cookie`、API 金鑰標頭、名稱中包含
+auth/token/secret/password/credential 標記的標頭，以及內部 gateway 憑證，即使已被選取或在儲存中部分遮罩，
+也一律會被排除。已知的憑證模式會重用共用的憑證偵測器；遮蔽標記會被省略，不會以安全值匯出。
+只接受字串和非空字串陣列；不會強制轉換數字或物件。無效名稱、原型鍵、控制字元（水平定位字元除外）
+以及格式錯誤的 Unicode 會被忽略，不會使批次失敗，也不會在錯誤中反映其內容。
 
-每個 span 最多擷取 32 個標頭，每個標頭最多 16 個值，每個值最多 4096 個 UTF-8 位元組，
-且所擷取的標頭名稱與值合計最多 16384 個 UTF-8 位元組。過大／無效的標頭
-會整個略過，而非截斷。選取哪些標頭是操作人員的隱私決策：看似安全的名稱
-仍可能包含個人資料，這些限制／偵測器並非通用的個人識別資訊清除工具。
+每個 span 最多擷取 32 個標頭、每個標頭 16 個值、每個值 4096 個 UTF-8 位元組，
+以及所有已擷取標頭名稱和值合計 16384 個 UTF-8 位元組。過大／無效的標頭會整個省略，不會被截斷。
+選取是操作員的隱私決策：看似安全的名稱仍可能包含個人資料，而這些上限／偵測器並非通用的 PII 清理器。
 
 ### 傳送限制
 
-每個請求上限為 500 個 span，以及包含封裝在內的 4 MiB UTF-8 JSON。
-游標批次的第一個請求送出前，會先檢查每個允許的 span 的大小。若個別
-span 超過限制，該批次的任何部分都不會送出，並會回報失敗，提示降低
-`maxBodyBytes`；不會默默將其捨棄。預先檢查只保留記錄參照與
-位元組計數，並捨棄每個暫存的 span／JSON；系統會針對大小受限的區塊重建 span，
-而非保留整批資料的第二份序列化副本。HTTP 408/429/5xx、網路失敗及逾時最多會
-嘗試三次，並採用 250/500 ms 的指數退避。`Retry-After` 的秒數或 HTTP 日期
-可將延遲延長至最多 5 秒。其他狀態會立即失敗。OTLP 2xx 部分拒絕也會擲出錯誤，而非
-將遺失的 span 視為已確認；接受空白或有效 JSON 的確認回應，
+請求受限於 500 個 span 和 4 MiB 的 UTF-8 JSON，其中包括封套。
+每個允許的 span 都會在 cursor 批次的第一個請求之前進行大小檢查。個別
+span 若大於限制，該批次不會傳送任何部分，並會失敗，同時提供降低
+`maxBodyBytes` 的指引；不會靜默丟棄。預檢只保留記錄參照
+和位元組計數，並捨棄每個暫存 span／JSON；span 會針對受限大小的區塊重新建立，
+而不是保留批次的第二份序列化副本。HTTP 408/429/5xx、網路失敗和逾時最多會
+重試三次，並採用 250/500 毫秒的指數退避。`Retry-After` 秒數或 HTTP 日期
+可以將延遲延長至最多 5 秒。其他狀態會立即失敗。OTLP 2xx 部分拒絕也會擲出錯誤，而不是
+確認已遺失的 span；空白或有效的 JSON 確認會被接受，且
 回應讀取上限為 64 KiB。
 
-錯誤僅包含匯出器自身掌握的資訊：HTTP 狀態、重試類別、嘗試次數及已傳送的 span
-數量，或固定的確認回應／網路失敗訊息。收集器的回應本文、
-部分成功計數及回應標頭絕不會複製到錯誤、記錄或
-儀表板中。失敗或部分接受的批次不會被確認：目的地會顯示
-失敗及該狀態，游標會停留在最後一個已確認的批次，而下次執行
-會重新傳送相同的資料列。永久性狀態會持續造成失敗，直到收集器或設定
-修正為止。請使用收集器本身的記錄查看回應詳細資訊。呼叫記錄的錯誤摘要會保留
-其獨立的遮蔽處理。
-`prepare()` 不會佈建任何資源；測試會精確地 POST `{"resourceSpans":[]}`，並回報
-HTTP 狀態，不會寫入呼叫記錄 span。
+錯誤僅包含 exporter 自有的事實：HTTP 狀態、重試類別、嘗試次數和已傳送的 span
+數量，或固定的確認／網路失敗文字。收集器回應本文、部分成功計數和回應標頭絕不會被複製到錯誤、
+日誌或儀表板。失敗或部分接受的批次不會被確認：目的地會顯示帶有該狀態的
+Failing，cursor 會停留在最後一個已確認的批次，而下一次執行會
+重新傳送相同的資料列。永久狀態會持續失敗，直到收集器或設定被修正。請使用收集器自己的
+日誌查看回應詳細資料。呼叫日誌錯誤摘要保留其獨立的遮蔽處理。
+`prepare()` 不會佈建任何內容；Test 只會發出 `{"resourceSpans":[]}`，並回報
+HTTP 狀態，而不寫入呼叫日誌 span。
 
-追蹤 ID 與 span ID 分別是對
-`"omniroute.trace\\0" + callLogId` 與 `"omniroute.span\\0" + callLogId` 計算 SHA-256 後，取前 32/16 個十六進位數字。重新傳送時會使用
-相同的 ID。這不保證去重：某些後端（包括 Langfuse
-v4 資料擷取）不會對相同 ID 的 span 去重。當機或部分區塊失敗時，
-最多可能重新傳送一個尚未確認的游標批次；整個批次都可能重複，
-而不只是最後一個 HTTP 區塊。選擇游標批次大小時，請考量此取捨。
+Trace id 和 span id 分別是對
+`"omniroute.trace\\0" + callLogId` 和 `"omniroute.span\\0" + callLogId` 執行 SHA-256 後的前 32／16 個十六進位字元。
+重新傳送時會攜帶相同的 id。這並不保證去重：包括 Langfuse
+v4 ingestion 在內的某些後端，不會對相同 id 的 span 去重。當機或部分區塊失敗時，最多會重新傳送一個未確認的 cursor 批次；
+整個批次都可能重複，而不只是其最後一個 HTTP 區塊。請在選擇 cursor 批次大小時將此取捨納入考量。
 
 ### Langfuse 範例
 
-為自行託管的 Langfuse 執行個體設定下列欄位：
+為自架的 Langfuse 執行個體設定以下欄位：
 
 ```json
 {
@@ -421,44 +407,34 @@ v4 資料擷取）不會對相同 ID 的 span 去重。當機或部分區塊失�
 }
 ```
 
-在本機將字面值 `public-key:secret-key`
-字串以 Base64 編碼，建立 Authorization 值（例如使用 `Buffer.from(publicKey + ":" + secretKey).toString("base64")`）。
-請勿將真實憑證貼到記錄、螢幕擷取畫面或議題中。此對應會自動
-設定 `x-langfuse-ingestion-version: 4`；Authorization 仍透過 `headers` 提供。
-標頭與產生的身分識別鹽值皆使用既有的加密機密欄位
-機制與 API 預留位置；必須設定 `STORAGE_ENCRYPTION_KEY`。
+在本機將 Authorization 值建立為文字 `public-key:secret-key` 的 Base64
+（例如使用 `Buffer.from(publicKey + ":" + secretKey).toString("base64")`）。
+請勿將真實憑證貼入日誌、螢幕擷取畫面或問題回報中。此對應會自動
+設定 `x-langfuse-ingestion-version: 4`；Authorization 仍需在 `headers` 中提供。
+標頭和產生的 identity salt 都會使用現有的加密秘密欄位機制和 API 佔位符；
+必須設定 `STORAGE_ENCRYPTION_KEY`。
 
-對應會新增生成類型／模型、JSON 用量詳細資訊（輸入／輸出／總計及可用的
-快取鍵）、JSON 輸入／輸出快照、ERROR/DEFAULT 層級、經清理的狀態訊息、
-追蹤名稱、工作階段 ID、選用的環境，以及可篩選的
-`langfuse.observation.metadata.<key>`，用於提供者、請求的模型、路徑、組合、快取
-來源及狀態。只有在 TTFT 已知且位於持續時間範圍內時，才會將 `langfuse.observation.completion_start_time` 設為
-開始時間 + TTFT，並採用 ISO 8601 格式。不會傳送任何費用屬性。
+映射新增生成類型/模型、JSON 使用詳細資料（input/output/total 與可用的快取金鑰）、JSON 輸入/輸出快照、ERROR/DEFAULT 層級、經清理的狀態訊息、追蹤名稱、工作階段 ID、選用的環境，以及可篩選的
+`langfuse.observation.metadata.<key>`，用於提供者、要求的模型、路徑、組合、快取
+來源和狀態。`langfuse.observation.completion_start_time` 是 ISO 8601 格式，僅在已知 TTFT
+且其值落在持續時間內時，才會設為開始時間 + TTFT。不會傳送任何成本屬性。
 
-身分識別模式適用於 `langfuse.user.id`：
+身分模式套用至 `langfuse.user.id`：
 
-- `pseudonymous`（預設）：使用每個目的地專屬的隨機
-  32 位元組鹽值，對 API 金鑰的內部 ID 進行 HMAC-SHA256 運算。若建立時未提供鹽值，則會產生鹽值，並加密
-  儲存為 `identitySalt`，絕不回傳，且在編輯時保留。原始金鑰 ID 絕不會
-  放入 span 屬性中。重新建立／輪替目的地的鹽值會改變身分識別結果。
-- `keyName`：設定的 API 金鑰名稱，會刻意揭露該操作人員標籤。
-- `none`：不提供使用者 ID。若有工作階段標籤，仍會匯出；這些模式不會
-  將任意提示內容或操作人員提供的工作階段／關聯標籤匿名化。
+- `pseudonymous`（預設）：使用隨機產生、每個目的地各自獨有的 32 位元組 salt，對 API 金鑰的內部 ID 進行 HMAC-SHA256。若建立時沒有 salt，系統會產生該 salt，並以 `identitySalt` 加密；它不會被傳回，且在編輯期間保留。原始金鑰 ID 絕不會放入 span 屬性中。重新建立或輪替目的地的 salt 會變更身分。
+- `keyName`：已設定的 API 金鑰名稱，會刻意揭露該操作員標籤。
+- `none`：不使用使用者 ID。若工作階段標籤存在，仍會匯出；這些模式不會將任意提示內容或操作員提供的工作階段/關聯標籤匿名化。
 
-### 不回填歷史資料直接開始
+### 不使用回填開始
 
-僅在建立時，啟用 **從目前位置開始（略過現有日誌）**，或在
-建立 API 的負載最上層傳入 `startFromCurrentPosition: true`。這會使用現有的游標
-輔助函式，將 `cursor_row_id` 初始化為目前保留的呼叫日誌中最大的 rowid，
-不需進行遷移。預設為 false（游標為 0，並回填保留的歷史資料）。
+僅在建立時，啟用 **從目前位置開始（略過現有記錄）**，或在建立 API payload 的頂層傳入
+`startFromCurrentPosition: true`。這會使用現有的游標輔助程式，將
+`cursor_row_id` 初始化為目前保留呼叫記錄的最大 rowid，而不進行遷移。預設值為 false（游標為 0，並回填保留的歷史記錄）。
 這不是更新時用來重設游標的設定。
 
-共用的 `ttftMs` 新增項目也會在 BigQuery 對應器
-和新資料表結構中新增可為 null 的 `ttft_ms` 欄位：其結構測試要求每個標準記錄欄位都有
-對應的資料表欄位。現有資料表會維持原樣繼續匯出：`prepare()` 會讀取資料表結構，
-並僅在缺少 `ttft_ms` 欄位時省略該欄位。新增可為 null 的 INT64 欄位，即可在下次執行時取得 TTFT，
-或改用新資料表。不需要 PATCH、自動變更結構或額外
-權限；所有其他資料列欄位仍會進行嚴格的結構檢查。
+共用的 `ttftMs` 新增功能也會在 BigQuery mapper 和新資料表 schema 中新增可為 null 的 `ttft_ms` 欄位：
+其 schema 測試要求每個標準記錄欄位都必須有對應的欄位。現有資料表會維持原樣匯出：
+`prepare()` 會讀取資料表 schema，並僅在該欄位不存在時省略 `ttft_ms`。新增可為 null 的 INT64 欄位即可在下一次執行時取得 TTFT，或使用新的資料表。選用的 TTFT 欄位不會觸發 schema 更新。使用量證據欄位則遵循下方的條件式、選擇加入的相容性流程；其他資料列欄位仍會進行嚴格的 schema 檢查。
 
 ---
 
@@ -485,13 +461,22 @@ v4 資料擷取）不會對相同 ID 的 span 去重。當機或部分區塊失�
 
 ## 7. 操作方式
 
-- **儀表板**：整合 → 日誌匯出。新增目的地，執行**測試**以檢查憑證
-  而不寫入資料列，然後啟用目的地。
-- **待處理資料**：每張目的地卡片都會顯示待處理的資料列和游標；`GET
-/api/log-export/status` 會回傳相同的數據，以及最近 20 次工作執行記錄。
-- **某個目的地失敗不會導致其他目的地失敗** — 執行摘要會在 `last_status` / `last_error` 中記錄各目的地的
-  狀態，而工作執行歷史記錄則會保留彙總資訊。
-- **刪除目的地也會刪除其游標。** 重新新增時，會從保留的最舊
-  呼叫日誌開始，因此會重新傳送目的地可能已擁有的資料列。在 BigQuery 上，每列的
-  `insertId` 只有在 BigQuery 本身的去重複時間範圍內才能消除這類重複，因此應優先選擇停用
-  目的地，而不是刪除它。
+- **儀表板**：整合 → 日誌匯出。新增目的地，執行 **測試** 以檢查認證資訊
+  而不寫入資料列，然後啟用它。
+- **待處理項目**：每張目的地卡片會顯示待處理資料列和游標；`GET
+/api/log-export/status` 會傳回相同數值，以及最近 20 次工作執行記錄。
+- **某個失敗的目的地不會導致其他目的地失敗** — 執行摘要會在 `last_status` / `last_error` 中記錄每個目的地的
+  狀態，而工作執行記錄會保留彙總結果。
+- **刪除目的地會刪除其游標。** 重新新增該目的地時，會從最舊的保留
+  呼叫記錄開始，因此會重新傳送目的地可能已持有的資料列。在 BigQuery 中，每列的
+  `insertId` 只能在 BigQuery 自身的去重視窗內吸收這種情況，因此建議停用
+  目的地，而不要刪除它。
+
+### 使用量證據結構相容性
+
+新的 BigQuery 資料表包含可為 Null 的 `usage_evidence`（包含 JSON 的 STRING）和
+`usage_estimated`（BOOL）。啟用 `autoCreate` 後，現有資料表只能接收這些缺少的可為 Null 欄位。匯出程式會保留完整的現有
+結構，包括欄位中繼資料，並使用傳回的 etag 提交條件式 PATCH。並行的結構變更會使匯出失敗，而不會覆寫
+資料表；下一次執行時會再次讀取資料表。
+
+停用 `autoCreate` 時，請先自行新增這些欄位，再匯出包含使用量證據的記錄。缺少結構描述／etag 中繼資料或更新失敗，也會阻止包含證據的插入作業。匯出游標不會因該失敗而前進，且證據永遠不會遭到靜默捨棄。匯出遭到阻擋時，本機記錄保留政策仍會套用，因此請在保留的來源資料列過期前解決該失敗。

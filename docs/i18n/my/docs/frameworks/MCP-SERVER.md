@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,7 +145,7 @@ Claude Desktop၊ Cursor၊ Cline နှင့် ကိုက်ညီသော
 | `omniroute_rtk_discover`            | `read:compression`  | ရွေးချယ်မှုတွင် RTK အထွက်နမူနာများတွင် ထပ်တလဲလဲ ဆူညံသံများကို ရှာဖွေပါ။                                                                                  |
 | `omniroute_rtk_learn`               | `read:compression`  | ရွေးချယ်နိုင်သောနမူနာများမှ ပြန်လည်သုံးသပ်နိုင်သော RTK စစ်ထုတ်မှုမူကြမ်းကို ဖန်တီးပါ။                                                                    |
 
-CCR ထည့်သွင်းမှုများသည် နှစ်ဆင့်စတိုးကို အသုံးပြုသည်- 512 SQLite နှင့် cloud memory ပိတ်ဆို့ခြင်းများမှလွဲ၍ ကျန်ရှိသော 512 KB နှင့် cloud memory-runtimes မှလွဲ၍ TTL မကုန်နိုင်သော hot in-memory အဆင့်တွင် ကျောထောက်နောက်ခံပြုထားသော၊ စက်တွင်းမဟုတ်သောအဆင့်များတွင်၊`ccr_blocks` ထည့်သွင်းမှုများတွင် နှစ် — တိုးကို အသုံးပြုပါသည်။ ဘလောက်တစ်ခုစီသည် 2 MiB၊ တစ်ခုစီတွင် 16 MiB နှင့် ကမ္ဘာ့စတိုးဆိုင်ကို 64 MiB အထိကန့်သတ်ထားသည်။ 24 နာရီ TTL (အမြင့်ဆုံး ခုနစ်ရက်) သို့ ပုံသေထည့်သွင်းထားသည်။ MCP အပြည့်အစုံကို 256 KiB တွင် ကန့်သတ်ထားသည်။ အကွာအဝေးနှင့် grep မုဒ်များမှတစ်ဆင့် ပိုမိုကြီးမားသော ပိတ်ဆို့မှုများကို ဆက်လက်ရရှိနိုင်ပါသည်။ သိမ်းဆည်းခြင်း၊ ပြန်လည်ရယူခြင်း၊ စာရင်းသွင်းခြင်း၊ စစ်ဆေးခြင်း၊ ဖျက်ခြင်း နှင့် ကိန်းဂဏာန်းများကို စစ်မှန်ကြောင်းသက်သေပြထားသော API သော့ကျောင်းအုပ်မှ သီးခြားခွဲထားသည်။ စာရင်းစစ်မှတ်တမ်းများတွင် ဟက်ရှ်နှင့် အရွယ်အစား မက်တာဒေတာပါ၀င်သည်၊ မည်သည့်အကြောင်းအရာမှ ပါဝင်မည်မဟုတ်ပါ။ အော်ပရေတာမျက်နှာစာအသေးစိတ်များ (အမှတ်အသားနှစ်ခု၊ ကလိုင်းယင့်ကြိုတင်လိုအပ်ချက်များ၊ `codemode:false`၊ ကိရိယာတစ်ခုစီအတိုင်းအတာများ၊ pagination နှင့် ရောဂါရှာဖွေရေးမက်ထရစ်) သည် [Compression Engines → ကြိုတင်လိုအပ်ချက်များ/အော်ပရေတာလမ်းညွှန်](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) တွင် နေထိုင်ပါသည်။
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB, cloud runtimes and `COMPRESSION_CCR_DURABLE_STORE=false`, which stay memory-only. The durable write is best effort: it is dropped while 1,000 writes are already pending, and a failed SQLite write is logged, not retried, so that block is lost on restart. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` MCP ဖော်ပြချက်ချုံ့မှုကို `analytics.mcpDescriptionCompression` အောက်တွင် သီးခြားစီဖော်ပြသည်။ ထိုတန်ဖိုးများသည် MCP စာရင်းဝင်ဖော်ပြချက်များအတွက် မက်တာဒေတာအရွယ်အစား ခန့်မှန်းချက်များ (`tools`၊ `prompts`၊ `resources`၊ နှင့် `resourceTemplates`); ၎င်းတို့သည် ဝန်ဆောင်မှုပေးသူအသုံးပြုမှုပြေစာများမဟုတ်သည့်အပြင် `source: "mcp_metadata_estimate"` ဖြင့် အမှတ်အသားပြုထားသည်။
 
@@ -158,9 +160,9 @@ CCR ထည့်သွင်းမှုများသည် နှစ်ဆင
 - လမ်းကြောင်းပြမှု အရိပ်အမြွက်ဖြင့် ကြီးကြီးကျယ်ကျယ် စာသား (> 50,000) ကို ခက်ခက်ခဲခဲ ဖြတ်တောက်ပေးသည်
 - မျှော်လင့်ထားသော စုဆောင်းငွေ-** 60-80%** ဘရောက်ဆာ snapshot payloads ပေါ်တွင်
 
-ဖွဲ့စည်းမှု- ကမ္ဘာလုံးဆိုင်ရာ ဆက်တင်များတွင် `compression.mcpAccessibility` (migration 056)။ အကောင်အထည်ဖော်မှု- `open-sse/services/compression/engines/mcpAccessibility/` စာရွက်စာတမ်းအပြည့်အစုံ- [Compression Engines — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ။
+စီစဉ်သတ်မှတ်ခြင်း- ကမ္ဘာလုံးဆိုင်ရာဆက်တင်များတွင် `compression.mcpAccessibility` (migration 056)။ အကောင်အထည်ဖော်မှု- `open-sse/services/compression/engines/mcpAccessibility/` စာရွက်စာတမ်းအပြည့်အစုံ- [Compression Engines — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ။
 
-ဤကိရိယာများ၏နောက်ကွယ်ရှိ runtime compression model အတွက် [Compression Engines](../compression/COMPRESSION_ENGINES.md) နှင့် [RTK Compression ကို](../compression/RTK_COMPRESSION.md) ကြည့်ပါ။
+ဤကိရိယာများနောက်ကွယ်ရှိ runtime compression model အတွက် [Compression Engines](../compression/COMPRESSION_ENGINES.md) နှင့် [RTK Compression ကို](../compression/RTK_COMPRESSION.md) ကြည့်ပါ။
 
 ## 1Proxy ကိရိယာများ (3)
 

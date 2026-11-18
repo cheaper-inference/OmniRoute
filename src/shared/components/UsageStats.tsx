@@ -193,10 +193,12 @@ export default function UsageStats() {
     <div className="flex flex-col gap-6">
       {/* Header with Auto Refresh Toggle and View Toggle */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{t("usageOverview")}</h2>
+        <h2 className="text-xl">{t("usageOverview")}</h2>
         <div className="flex items-center gap-2">
           {/* View Toggle */}
           <SegmentedControl
+            semantics="radio"
+            aria-label={t("usageOverview")}
             size="sm"
             value={viewMode}
             onChange={(next) => setViewMode(next as typeof viewMode)}
@@ -236,13 +238,13 @@ export default function UsageStats() {
                   key={`${req.model}-${req.provider}-${req.account}`}
                   className="px-3 py-1.5 rounded-md bg-bg-subtle border border-primary/20 text-xs font-mono shadow-sm"
                 >
-                  <span className="text-primary font-bold">{req.model}</span>
+                  <span className="text-primary font-semibold">{req.model}</span>
                   <span className="mx-1 text-text-muted">|</span>
                   <span className="text-text-main">{req.provider}</span>
                   <span className="mx-1 text-text-muted">|</span>
                   <span className="text-text-main font-medium">{req.account}</span>
                   {req.count > 1 && (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-accent-foreground font-bold">
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-accent-foreground font-semibold">
                       x{req.count}
                     </span>
                   )}
@@ -258,9 +260,14 @@ export default function UsageStats() {
       {/* {t("usageByModel")} Table */}
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-border bg-bg-subtle/50">
-          <h3 className="font-semibold">{t("usageByModel")}</h3>
+          <h3>{t("usageByModel")}</h3>
         </div>
-        <Table containerClassName="rounded-none border-0" className="text-sm text-left">
+        <Table
+          scrollLabel={t("usageByModel")}
+          scrollbarLabel={t("usageByModel")}
+          containerClassName="rounded-none border-0"
+          className="text-sm text-left"
+        >
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -388,7 +395,7 @@ export default function UsageStats() {
             {sortedModels.map((data) => (
               <TableRow key={data.key}>
                 <TableCell
-                  className={`px-6 py-3 font-medium transition-colors ${
+                  className={`px-6 py-3 transition-colors ${
                     data.pending > 0 ? "text-primary" : ""
                   }`}
                 >
@@ -415,9 +422,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium">
-                      {fmt(data.totalTokens)}
-                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right">{fmt(data.totalTokens)}</TableCell>
                   </>
                 ) : (
                   <>
@@ -427,7 +432,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmtCost(data.outputCost)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                    <TableCell className="px-6 py-3 text-right text-warning">
                       {fmtCost(data.totalCost)}
                     </TableCell>
                   </>
@@ -448,9 +453,14 @@ export default function UsageStats() {
       {/* {t("usageByAccount")} Table */}
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-border bg-bg-subtle/50">
-          <h3 className="font-semibold">{t("usageByAccount")}</h3>
+          <h3>{t("usageByAccount")}</h3>
         </div>
-        <Table containerClassName="rounded-none border-0" className="text-sm text-left">
+        <Table
+          scrollLabel={t("usageByAccount")}
+          scrollbarLabel={t("usageByAccount")}
+          containerClassName="rounded-none border-0"
+          className="text-sm text-left"
+        >
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -588,7 +598,7 @@ export default function UsageStats() {
             {sortedAccounts.map((data) => (
               <TableRow key={data.key}>
                 <TableCell
-                  className={`px-6 py-3 font-medium transition-colors ${
+                  className={`px-6 py-3 transition-colors ${
                     data.pending > 0 ? "text-primary" : ""
                   }`}
                 >
@@ -625,9 +635,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium">
-                      {fmt(data.totalTokens)}
-                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right">{fmt(data.totalTokens)}</TableCell>
                   </>
                 ) : (
                   <>
@@ -637,7 +645,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmtCost(data.outputCost)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                    <TableCell className="px-6 py-3 text-right text-warning">
                       {fmtCost(data.totalCost)}
                     </TableCell>
                   </>

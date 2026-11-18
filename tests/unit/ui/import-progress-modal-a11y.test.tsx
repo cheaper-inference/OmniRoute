@@ -3,9 +3,10 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, afterEach } from "vitest";
 
-// KEA-7886 lote 2a review: the "fetching" phase has no measurable progress, so its bar must
-// stay out of the accessibility tree instead of announcing a fabricated 60 %. The determinate
-// "importing" bar keeps its real progressbar semantics.
+// KEA-7886 lote 2a review: the "fetching" phase has no measurable progress, so its bar must not
+// announce a fabricated 60 %. Since kit 0.0.116 the Progress has an indeterminate mode, so the bar
+// is exposed as a named progressbar without a value (UI review 2026-11-15, defect 13). The
+// determinate "importing" bar keeps its real progressbar semantics.
 
 const { default: ImportProgressModal } =
   await import("../../../src/app/(dashboard)/dashboard/providers/[id]/components/ImportProgressModal");
@@ -59,7 +60,12 @@ describe("ImportProgressModal progress semantics", () => {
     expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
     const exposed = exposedProgressbars();
     expect(exposed.some((node) => node.getAttribute("aria-valuenow") === "60")).toBe(false);
-    expect(exposed).toHaveLength(0);
+    expect(exposed).toHaveLength(1);
+    const bar = exposed[0];
+    expect(bar.hasAttribute("aria-valuenow")).toBe(false);
+    expect(bar.getAttribute("aria-label")).toBe("importingModelsTitle");
+    expect(bar.closest(".ci-progress")?.getAttribute("data-state")).toBe("indeterminate");
+    expect(document.body.querySelector('[aria-hidden="true"] [role="progressbar"]')).toBeNull();
   });
 
   it("keeps the determinate bar exposed with its real value while importing", () => {

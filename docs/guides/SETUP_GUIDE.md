@@ -230,8 +230,16 @@ npm run test:protocols:e2e
 
 **Claude Code:**
 
+Claude Code connects over HTTP, which `omniroute --mcp` (stdio) does not start. The HTTP transport
+is off by default: enable it on the running server first. When dashboard login is enabled, a
+request without a credential gets `401`, so pass an API key that holds `mcp:connect` (or
+`manage`); a key without `manage`/`admin` also needs each tool's scope (see
+[MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes)).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
