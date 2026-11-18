@@ -239,6 +239,19 @@ function resolveCombosOnly(
 const launchRetriedRequests = new WeakSet<Request>();
 
 /**
+ * True, once per request, when `err` reports a launch session that changed under the build:
+ * marks the request as retried and forgets its memoized session so the retry re-resolves it.
+ */
+function claimLaunchSessionRetry(err: unknown, request: Request): boolean {
+  if (!(err instanceof LaunchSessionChangedError) || launchRetriedRequests.has(request)) {
+    return false;
+  }
+  launchRetriedRequests.add(request);
+  forgetLaunchSessionForRequest(request);
+  return true;
+}
+
+/**
  * Build unified OpenAI-compatible model catalog response.
  * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
  *
@@ -311,9 +324,7 @@ export async function getUnifiedModelsResponse(
     // parent's entry ran: that build was discarded. Retry once from the top, so the auth
     // gate sees the current session (a revoked token gets its 401) and any joiner (the
     // parent, another session) gets a clean build instead of a 500.
-    if (err instanceof LaunchSessionChangedError && !launchRetriedRequests.has(request)) {
-      launchRetriedRequests.add(request);
-      forgetLaunchSessionForRequest(request);
+    if (claimLaunchSessionRetry(err, request)) {
       return getUnifiedModelsResponse(request, corsHeaders, options);
     }
     // Hard rule #12: never put a raw err.message/err.stack in a response body.

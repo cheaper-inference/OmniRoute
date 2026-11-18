@@ -78,22 +78,26 @@ function safeStringify(value: unknown): string {
   }
 }
 
+/** A `functionCall` (`args`) or `functionResponse` (`response`): its name plus its payload. */
+function namedPayloadTokens(
+  record: unknown,
+  payloadKey: "args" | "response",
+  ctx: TokenizerContext
+): number {
+  if (!isRecord(record)) return 0;
+  let tokens = 0;
+  if (typeof record.name === "string") tokens += countTextTokens(record.name, ctx);
+  const payload = record[payloadKey];
+  if (payload !== undefined) tokens += countTextTokens(safeStringify(payload), ctx);
+  return tokens;
+}
+
 function estimatePartTokens(part: unknown, ctx: TokenizerContext): number {
   if (!isRecord(part)) return 0;
   let tokens = 0;
   if (typeof part.text === "string") tokens += countTextTokens(part.text, ctx);
-  if (isRecord(part.functionCall)) {
-    const call = part.functionCall;
-    if (typeof call.name === "string") tokens += countTextTokens(call.name, ctx);
-    if (call.args !== undefined) tokens += countTextTokens(safeStringify(call.args), ctx);
-  }
-  if (isRecord(part.functionResponse)) {
-    const response = part.functionResponse;
-    if (typeof response.name === "string") tokens += countTextTokens(response.name, ctx);
-    if (response.response !== undefined) {
-      tokens += countTextTokens(safeStringify(response.response), ctx);
-    }
-  }
+  tokens += namedPayloadTokens(part.functionCall, "args", ctx);
+  tokens += namedPayloadTokens(part.functionResponse, "response", ctx);
   if (isRecord(part.executableCode) && typeof part.executableCode.code === "string") {
     tokens += countTextTokens(part.executableCode.code, ctx);
   }

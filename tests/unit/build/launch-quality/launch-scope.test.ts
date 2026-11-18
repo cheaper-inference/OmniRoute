@@ -3,9 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-import { filterScope, globToRegExp, resolveScope } from "../../../scripts/quality/launch-scope.mjs";
+import {
+  filterScope,
+  globToRegExp,
+  resolveScope,
+} from "../../../../scripts/quality/launch-scope.mjs";
 
-const ROOT = path.resolve(import.meta.dirname, "../../..");
+const ROOT = path.resolve(import.meta.dirname, "../../../..");
 const cfg = JSON.parse(
   fs.readFileSync(path.join(ROOT, "config/quality/launch-gates.json"), "utf8")
 );

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { computeHalstead, listFunctions } from "../../../scripts/quality/launch-halstead.mjs";
+import { computeHalstead, listFunctions } from "../../../../scripts/quality/launch-halstead.mjs";
 
 // Hand counts. Operators are keywords and punctuators; operands are identifiers and literals.
 //

@@ -311,7 +311,7 @@ export async function applyCatalogPostFilters(
   const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
   // A launch view lists raw ids the launcher already selected; claude/ mirrors are never
   // added to it, so the mirror pass is skipped (the intersect below would drop them anyway).
-  if (ctx.allowCcDiscoveryAliases !== false && !ctx.launchView) {
+  if (allowsCcMirrorPass(ctx)) {
     finalModels = appendCcMirrorsWhenEnabled(
       finalModels,
       mirrorRefinements,
@@ -382,10 +382,17 @@ export async function applyCatalogPostFilters(
   // pair survives. Independent of MODELS_CATALOG_PREFIX_MODE; runs as the final guard.
   finalModels = dedupeExactCatalogIds(finalModels);
 
-  // Launch view LAST: intersect(authorized rows, view ids) in view order. Only ever drops.
-  if (ctx.launchView) finalModels = applyLaunchView(finalModels, ctx.launchView);
+  // Launch view LAST: intersect(authorized rows, view ids) in view order. Only ever drops;
+  // without a view (null/undefined) applyLaunchView returns the rows unchanged.
+  return applyLaunchView(finalModels, ctx.launchView);
+}
 
-  return finalModels;
+/** The claude/ mirror pass runs when the key allows it and no launch view narrows the list. */
+function allowsCcMirrorPass(ctx: {
+  allowCcDiscoveryAliases?: boolean;
+  launchView?: CatalogLaunchView | null;
+}): boolean {
+  return ctx.allowCcDiscoveryAliases !== false && !ctx.launchView;
 }
 
 /**

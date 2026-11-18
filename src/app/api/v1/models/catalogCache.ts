@@ -311,9 +311,17 @@ function buildCatalogCacheKey(
   // Launch session (`olx_` bearer, catalogLaunchView.ts): keyed on its PARENT credential, so
   // every session of a parent reuses the parent's build; the view suffix ("" without a view)
   // separates a session whose view narrows it. Null for every other bearer.
-  const auth = catalogAuthDimension(apiKey, launch?.credential);
-  const launchView = launch?.viewSuffix ?? "";
+  const { auth, launchView } = catalogCacheKeyIdentity(apiKey, launch);
   return `${prefix}|${isCodex}|${auth}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${launchView}`;
+}
+
+/** The credential dimension plus the launch view suffix ("" without a launch session). */
+function catalogCacheKeyIdentity(
+  apiKey: string,
+  launch: LaunchCatalogCacheIdentity | null
+): { auth: string; launchView: string } {
+  if (!launch) return { auth: catalogAuthDimension(apiKey), launchView: "" };
+  return { auth: catalogAuthDimension(apiKey, launch.credential), launchView: launch.viewSuffix };
 }
 
 /**

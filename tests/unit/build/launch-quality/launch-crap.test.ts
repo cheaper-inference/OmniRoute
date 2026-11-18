@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { crapScore } from "../../../scripts/quality/launch-quality.mjs";
+import { crapScore } from "../../../../scripts/quality/launch-quality.mjs";
 
 // CRAP = cc^2 * (1 - coverage)^3 + cc
 

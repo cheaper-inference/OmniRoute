@@ -103,7 +103,7 @@ was wrong in both directions (for example `selectView` callbacks at 0% that ever
 runs, and `launchViewCacheKeySuffix` at 100% with its `catch` never taken). Serving the files
 untransformed makes the test processes exact, and converting per process keeps any remaining
 transformed load (a child that imports tsx itself) from mixing with native ones. The
-regression test `tests/unit/quality/launch-coverage.test.ts` drives a fixture with a lazy
+regression test `tests/unit/build/launch-quality/launch-coverage.test.ts` drives a fixture with a lazy
 `import()` above a fully exercised function (plus a native child that loads it): it reads
 100% here and 60% through plain `c8`.
 

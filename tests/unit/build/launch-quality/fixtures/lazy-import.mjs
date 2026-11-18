@@ -1,4 +1,4 @@
-// Fixture for tests/unit/quality/launch-coverage.test.ts: a lazy import() near the top (tsx
+// Fixture for tests/unit/build/launch-quality/launch-coverage.test.ts: a lazy import() near the top (tsx
 // appends an interop wrapper to it, which shifts every offset after it) and functions below
 // whose coverage is known. Never imported by production code.
 export async function loadSep() {

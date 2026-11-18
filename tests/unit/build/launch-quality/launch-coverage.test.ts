@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { coverageByFunction, runCoverage } from "../../../scripts/quality/launch-quality.mjs";
+import { coverageByFunction, runCoverage } from "../../../../scripts/quality/launch-quality.mjs";
 
-const FIXTURE = "tests/unit/quality/fixtures/lazy-import.mjs";
-const DRIVER = "tests/unit/quality/fixtures/lazy-import.driver.mjs";
+const FIXTURE = "tests/unit/build/launch-quality/fixtures/lazy-import.mjs";
+const DRIVER = "tests/unit/build/launch-quality/fixtures/lazy-import.driver.mjs";
 
 test("crap coverage: a function below a lazy import() that its test fully calls is 100%", async () => {
   const { coverage, testsFailed } = await runCoverage({ tests: [DRIVER], files: [FIXTURE] });

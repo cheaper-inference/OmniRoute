@@ -1,4 +1,4 @@
-// Driver test for tests/unit/quality/launch-coverage.test.ts (run by it through the launch
+// Driver test for tests/unit/build/launch-quality/launch-coverage.test.ts (run by it through the launch
 // coverage runner, not by the unit suite). The parent process loads the fixture through the
 // runner's loaders and calls classify() on every branch; a native child process (as launch
 // tests spawn) also loads it without calling anything, so its V8 data for the same file has
