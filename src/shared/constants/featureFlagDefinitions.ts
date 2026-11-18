@@ -1344,6 +1344,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "QUOTA_DAILY_REVALIDATION",
+    label: "Resilience: Revalidate Long Quota Locks Daily",
+    description:
+      "Let the credential health sweep re-probe a model that a quota failure parked for more than a day, at most once a day per lock and 5 per sweep, so a quota that resets early (or a lock derived from a bad parse) stops parking the model until the announced window ends. Off by default: a long quota lock lasts exactly the window it announced, and no extra upstream request is made (#20343).",
+    descriptionI18nKey: "featureFlagQuotaDailyRevalidationDescription",
+    category: "health",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY",
     label: "Credential Gate: Auth Diagnoses Only",
     description:

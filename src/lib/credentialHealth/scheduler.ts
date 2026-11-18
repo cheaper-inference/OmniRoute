@@ -24,6 +24,7 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { setCredentialHealth, initCredentialCache } from "@/lib/credentialHealth/cache";
 import { runAutoDisabledRevalidation } from "@/lib/credentialHealth/autoDisabledRevalidation";
+import { runDailyQuotaRevalidation } from "@/lib/credentialHealth/quotaDailyRevalidationRunner";
 import {
   DEFAULT_SWEEP_INTERVAL_MS,
   isCredentialProbeInconclusive,
@@ -326,6 +327,28 @@ export async function sweep(): Promise<void> {
       globalIntervalMs = resolveCredentialHealthSweepInterval(settings);
     } catch {
       globalIntervalMs = resolveCredentialHealthSweepInterval(null);
+    }
+
+    // #20343: a quota lock that outlives a day gets one probe a day (opt-in), so
+    // an early upstream reset — or a lock derived from a bad parse — stops parking
+    // the model until the announced window ends. Runs before the active pass so a
+    // recovered model is already unlocked when that pass builds its candidate list.
+    try {
+      const quotaRevalidation = await runDailyQuotaRevalidation();
+      if (quotaRevalidation.recovered > 0) {
+        console.log(
+          LOG_PREFIX,
+          `♻️ Quota revalidation cleared ${quotaRevalidation.recovered} lock(s) that recovered early`
+        );
+      }
+    } catch (error) {
+      // Never let this pass break the sweep: the locks simply stay as they were.
+      console.warn(
+        LOG_PREFIX,
+        `Quota revalidation skipped (non-fatal): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // #16190: connections the gateway switched off by itself get a slow, capped
