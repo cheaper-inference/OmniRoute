@@ -122,8 +122,8 @@ test("matching quota token keeps the original workspace header and usage respons
     });
     assert.equal(accountHeader, "personal");
     assert.equal(result.plan, "plus");
-    assert.equal(result.quotas.session?.used, 2);
-    assert.equal(result.quotas.weekly?.used, 11);
+    assert.equal(result.quotas?.session?.used, 2);
+    assert.equal(result.quotas?.weekly?.used, 11);
   } finally {
     setCodexUsageFetchForTests(null);
   }
