@@ -11,6 +11,25 @@ const MAGIC = "ORPSYNC1";
 const CONFIG_NAME = "remote-sync.json";
 const SAFE_TARGET = /^[A-Za-z0-9._/:@-]+$/;
 const DEFAULT_INTERVAL_MS = 60_000;
+const MIN_INTERVAL_MS = 1_000;
+// setTimeout uses a signed 32-bit delay; larger values wrap into an immediate poll.
+const MAX_INTERVAL_MS = 2_147_483_647;
+
+/** Validate the daemon poll interval before it reaches setTimeout. */
+export function parseIntervalMs(value = DEFAULT_INTERVAL_MS) {
+  const interval = Number(value);
+  if (!Number.isInteger(interval) || interval < MIN_INTERVAL_MS || interval > MAX_INTERVAL_MS) {
+    throw new Error(
+      `--interval must be an integer between ${MIN_INTERVAL_MS} and ${MAX_INTERVAL_MS} ms`
+    );
+  }
+  return interval;
+}
+
+/** True when a remote target that used to hold a backup has disappeared. */
+export function shouldRepublishMissingTarget(state, remoteVersionValue) {
+  return remoteVersionValue === null && Boolean(state.lastPushedVersion);
+}
 
 function configPath() {
   return join(resolveDataDir(), CONFIG_NAME);
@@ -314,12 +333,33 @@ export async function runSyncRemotePull(options = {}) {
     const snapshotCode = await runSyncExportSqlite(snapshot, opts);
     if (snapshotCode !== 0) throw new Error("pre-restore snapshot failed; aborting pull");
     console.log(`Pre-restore snapshot: ${snapshot}`);
+    // Re-check the live DB immediately before replacing it. A write that lands
+    // between the daemon's hash and this import must not be silently discarded.
+    if (opts.expectedLocalHash) {
+      const currentHash = await localDatabaseHash(opts);
+      if (currentHash !== opts.expectedLocalHash) {
+        throw new Error("local database changed during remote pull; refusing to replace it");
+      }
+    }
     const code = await runSyncImport(sqlite, {}, opts);
     if (code === 0) {
       writeState({ ...readState(), lastPushedVersion: version });
       console.log(`Restored encrypted backup (version ${version.slice(0, 12)}).`);
     }
     return code;
+  } finally {
+    rmSync(staging, { recursive: true, force: true });
+  }
+}
+
+/** Export the live database and hash it; used to detect writes during a remote pull. */
+async function localDatabaseHash(opts) {
+  const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
+  try {
+    const sqlite = join(staging, "storage.sqlite");
+    const code = await runSyncExportSqlite(sqlite, opts);
+    if (code !== 0) throw new Error("local database export failed during sync check");
+    return fileHash(sqlite);
   } finally {
     rmSync(staging, { recursive: true, force: true });
   }
@@ -341,7 +381,7 @@ function remoteVersion(config) {
 export async function runSyncRemoteDaemon(options = {}) {
   const opts = options.opts || {};
   const passphrase = await passwordFrom(opts);
-  const interval = Number(opts.interval) || DEFAULT_INTERVAL_MS;
+  const interval = parseIntervalMs(opts.interval ?? DEFAULT_INTERVAL_MS);
   console.log("Remote sync daemon starting. Restoring from remote first...");
 
   let baseline = false;
@@ -374,7 +414,13 @@ export async function runSyncRemoteDaemon(options = {}) {
       if (localHash !== state.lastPushedVersion) {
         await runSyncRemotePush({ opts: { ...opts, password: passphrase } });
       } else if (remote && remote !== state.lastPushedVersion) {
-        await runSyncRemotePull({ opts: { ...opts, password: passphrase } });
+        await runSyncRemotePull({
+          opts: { ...opts, password: passphrase, expectedLocalHash: localHash },
+        });
+      } else if (shouldRepublishMissingTarget(state, remote)) {
+        // The configured file was deleted remotely: re-establish the backup
+        // from local state instead of silently running without one.
+        await runSyncRemotePush({ opts: { ...opts, password: passphrase } });
       }
     } catch (err) {
       console.error(`sync daemon: ${err instanceof Error ? err.message : String(err)}`);
