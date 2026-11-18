@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 
 export default function RateLimitStatus() {
@@ -49,9 +50,7 @@ export default function RateLimitStatus() {
             <p className="text-sm text-text-muted">{t("lockoutsAutoRefreshHint")}</p>
           </div>
           {data.lockouts.length > 0 && (
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
-              {t("lockedCount", { count: data.lockouts.length })}
-            </span>
+            <Badge variant="warning">{t("lockedCount", { count: data.lockouts.length })}</Badge>
           )}
         </div>
 

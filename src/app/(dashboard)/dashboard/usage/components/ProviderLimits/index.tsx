@@ -15,6 +15,7 @@ import {
   compareQuotaConnections,
   quotaStatusLevel,
 } from "./utils";
+import { ToggleChip } from "@omniroute/ui-kit/toggle-chip";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
@@ -196,28 +197,23 @@ interface ProviderLimitsProps {
   autoRefreshInterval?: number;
 }
 
-/** Toggle chip for the quota filters (purchase type / tier / env) on the kit Button. */
+/** Toggle chip for the quota filters (purchase type / tier / env): the kit ToggleChip. */
 function FilterChip({
   active,
   onClick,
+  count,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  /** Accounts behind the filter; part of the chip's accessible name. */
+  count: number;
   children: React.ReactNode;
 }) {
   return (
-    <Button
-      variant={active ? "secondary" : "outline"}
-      size="sm"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
-        active ? "border-primary text-text-main" : "text-text-muted"
-      }`}
-    >
+    <ToggleChip size="sm" pressed={active} count={count} onClick={onClick}>
       {children}
-    </Button>
+    </ToggleChip>
   );
 }
 
@@ -930,10 +926,10 @@ export default function ProviderLimits({
                 <FilterChip
                   key={type.key}
                   active={active}
+                  count={count}
                   onClick={() => handleSetPurchaseFilter(type.key)}
                 >
-                  <span>{tr(type.labelKey, type.fallback)}</span>
-                  <span className="opacity-85">{count}</span>
+                  {tr(type.labelKey, type.fallback)}
                 </FilterChip>
               );
             })}
@@ -948,9 +944,13 @@ export default function ProviderLimits({
               if (tier.key !== "all" && !tierCounts[tier.key]) return null;
               const active = tierFilter === tier.key;
               return (
-                <FilterChip key={tier.key} active={active} onClick={() => setTierFilter(tier.key)}>
-                  <span>{tier.label || t(tier.labelKey!)}</span>
-                  <span className="opacity-85">{tierCounts[tier.key] || 0}</span>
+                <FilterChip
+                  key={tier.key}
+                  active={active}
+                  count={tierCounts[tier.key] || 0}
+                  onClick={() => setTierFilter(tier.key)}
+                >
+                  {tier.label || t(tier.labelKey!)}
                 </FilterChip>
               );
             })}
@@ -996,9 +996,13 @@ export default function ProviderLimits({
                 const active = envFilter === tag;
                 const label = tag === "all" ? tr("filterEnvAll", "All") : tag;
                 return (
-                  <FilterChip key={tag} active={active} onClick={() => handleSetEnvFilter(tag)}>
-                    <span>{label}</span>
-                    <span className="opacity-85">{count}</span>
+                  <FilterChip
+                    key={tag}
+                    active={active}
+                    count={count}
+                    onClick={() => handleSetEnvFilter(tag)}
+                  >
+                    {label}
                   </FilterChip>
                 );
               })}

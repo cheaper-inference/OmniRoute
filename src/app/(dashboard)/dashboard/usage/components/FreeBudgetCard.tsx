@@ -8,6 +8,7 @@ import Select from "@/shared/components/Select";
 import Input from "@/shared/components/Input";
 import Checkbox from "@/shared/components/Checkbox";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import {
   Table,
@@ -305,17 +306,15 @@ function Kpi({ label, value, valueClass }: { label: string; value: string; value
 function FreeTypeBadge({ freeType, label }: { freeType: string; label: string }) {
   const isKeyless = freeType === "keyless";
   return (
-    <span
+    <Badge
       data-testid="free-type-badge"
-      className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap ${
-        isKeyless
-          ? "border-success/40 bg-success/10 text-success"
-          : "border-border bg-surface-2 text-text-muted"
-      }`}
+      size="sm"
+      variant={isKeyless ? "success" : "default"}
+      icon={isKeyless ? <Icon name="lock_open" size={12} /> : undefined}
+      className="whitespace-nowrap"
     >
-      {isKeyless && <Icon name="lock_open" size={10} />}
       {label}
-    </span>
+    </Badge>
   );
 }
 

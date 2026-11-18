@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 
 interface DiversityProviderStat {
@@ -97,17 +98,12 @@ export default function DiversityScoreCard() {
               mins: Math.round(data.ttlMs / 60000),
             })}
           </span>
-          <span
-            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-              scorePercentage < 40
-                ? "bg-error/10 text-error"
-                : scorePercentage < 70
-                  ? "bg-warning/10 text-warning"
-                  : "bg-success/10 text-success"
-            }`}
+          <Badge
+            variant={scorePercentage < 40 ? "error" : scorePercentage < 70 ? "warning" : "success"}
+            className="shrink-0"
           >
             {t("diversityShannonEntropy")}
-          </span>
+          </Badge>
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Badge from "@/shared/components/Badge";
 import { Button, Card, Input, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
@@ -135,9 +136,9 @@ export function ApiKeyUsageLimitCard({
             <Icon name="paid" size={18} className="text-success" />
             <h3 className="text-sm text-text-main">{t("apiKeyUsdQuota")}</h3>
             {payload?.key.name && (
-              <span className="truncate rounded bg-bg-subtle px-2 py-0.5 text-xs text-text-muted">
+              <Badge size="sm" className="min-w-0 truncate">
                 {payload.key.name}
-              </span>
+              </Badge>
             )}
           </div>
           <p className="mt-1 text-xs text-text-muted">{t("apiKeyUsdQuotaDescription")}</p>

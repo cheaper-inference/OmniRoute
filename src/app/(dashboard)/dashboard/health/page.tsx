@@ -8,6 +8,7 @@ import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
 import { Progress } from "@omniroute/ui-kit/progress";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -49,10 +50,10 @@ function formatRelativeTime(timestamp) {
 }
 
 const CB_STYLES = {
-  CLOSED: { bg: "bg-success/10", text: "text-success", labelKey: "healthy" },
-  OPEN: { bg: "bg-error/10", text: "text-error", labelKey: "down" },
-  HALF_OPEN: { bg: "bg-warning/10", text: "text-warning", labelKey: "recovering" },
-};
+  CLOSED: { bg: "bg-success/10", badge: "success", labelKey: "healthy" },
+  OPEN: { bg: "bg-error/10", badge: "error", labelKey: "down" },
+  HALF_OPEN: { bg: "bg-warning/10", badge: "warning", labelKey: "recovering" },
+} as const;
 
 export default function HealthPage() {
   return <HealthSnapshot />;
@@ -637,19 +638,19 @@ function HealthSnapshot() {
               <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
-            <div className="flex items-center gap-3 text-xs text-text-muted font-medium">
-              <span className="px-2 py-0.5 rounded bg-success/10 text-success">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge size="sm" variant="success">
                 {t("degradationFull")}: {degradation.summary.full}
-              </span>
-              <span className="px-2 py-0.5 rounded bg-warning/10 text-warning">
+              </Badge>
+              <Badge size="sm" variant="warning">
                 {t("degradationReduced")}: {degradation.summary.reduced}
-              </span>
-              <span className="px-2 py-0.5 rounded bg-warning/10 text-warning">
+              </Badge>
+              <Badge size="sm" variant="warning">
                 {t("degradationMinimal")}: {degradation.summary.minimal}
-              </span>
-              <span className="px-2 py-0.5 rounded bg-error/10 text-error">
+              </Badge>
+              <Badge size="sm" variant="error">
                 {t("degradationDefault")}: {degradation.summary.default}
-              </span>
+              </Badge>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -858,11 +859,9 @@ function HealthSnapshot() {
                               <span className="text-sm font-medium text-text-main truncate">
                                 {displayName}
                               </span>
-                              <span
-                                className={`text-xs font-semibold px-1.5 py-0.5 rounded ${style.bg} ${style.text}`}
-                              >
+                              <Badge size="sm" variant={style.badge}>
                                 {t(style.labelKey)}
-                              </span>
+                              </Badge>
                             </div>
                             <div className="text-xs text-text-muted mt-0.5">
                               {cb.failures === 1
@@ -1038,16 +1037,17 @@ function HealthSnapshot() {
                               </p>
                             )}
                           </div>
-                          <span
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          <Badge
+                            size="sm"
+                            variant={
                               exhausted
-                                ? "bg-error/15 text-error"
+                                ? "error"
                                 : isQueued || lowRemaining
-                                  ? "bg-warning/15 text-warning"
+                                  ? "warning"
                                   : isActive
-                                    ? "bg-info/15 text-info"
-                                    : "bg-success/10 text-success"
-                            }`}
+                                    ? "info"
+                                    : "success"
+                            }
                           >
                             {exhausted
                               ? t("limitExhausted")
@@ -1056,7 +1056,7 @@ function HealthSnapshot() {
                                 : isActive
                                   ? tc("active")
                                   : t("ok")}
-                          </span>
+                          </Badge>
                         </div>
                         {quotaProgress != null && (
                           <div className="mb-3">

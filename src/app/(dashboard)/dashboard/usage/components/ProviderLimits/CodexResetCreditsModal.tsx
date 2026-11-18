@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
@@ -334,9 +335,9 @@ function CreditSummary({
           {getResetCreditWindowTitle(provider, credit, tr)}
         </span>
         {recommended && (
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+          <Badge size="sm" variant="primary">
             {tr("resetCreditExpiresFirst", "Expires first")}
-          </span>
+          </Badge>
         )}
       </div>
       {credit.description && (

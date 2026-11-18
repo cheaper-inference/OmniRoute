@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
+import FilterPills from "@/shared/components/FilterPills";
 import {
   Card,
   Button,
@@ -130,31 +132,44 @@ function projectEndOfMonth(monthlyCost: number, now = new Date()): number {
   return burnRate * daysInMonth;
 }
 
-const STATUS_META: Record<StatusKey, { tone: string; bg: string; dot: string }> = {
-  all: { tone: "text-text-main", bg: "bg-bg-subtle", dot: "var(--color-text-muted)" },
+// `badge` is the Badge variant of the row's status tag, `chip` the kit tone of the pressed filter.
+const STATUS_META: Record<
+  StatusKey,
+  {
+    tone: string;
+    badge: "default" | "success" | "warning" | "error";
+    chip?: "success" | "warning" | "danger";
+    dot: string;
+  }
+> = {
+  all: { tone: "text-text-main", badge: "default", dot: "var(--color-text-muted)" },
   blocked: {
     tone: "text-error",
-    bg: "bg-error/10 border-error/30",
+    badge: "error",
+    chip: "danger",
     dot: "var(--color-error)",
   },
   alerting: {
     tone: "text-warning",
-    bg: "bg-warning/10 border-warning/30",
+    badge: "warning",
+    chip: "warning",
     dot: "color-mix(in srgb, var(--color-warning) 55%, var(--color-error))",
   },
   warning: {
     tone: "text-warning",
-    bg: "bg-warning/10 border-warning/30",
+    badge: "warning",
+    chip: "warning",
     dot: "var(--color-warning)",
   },
   safe: {
     tone: "text-success",
-    bg: "bg-success/10 border-success/30",
+    badge: "success",
+    chip: "success",
     dot: "var(--color-success)",
   },
   "no-limit": {
     tone: "text-text-muted",
-    bg: "bg-bg-subtle border-border",
+    badge: "default",
     dot: "var(--color-text-muted)",
   },
 };
@@ -528,34 +543,18 @@ export default function BudgetTab() {
           </Select>
         </div>
 
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {(["all", "blocked", "alerting", "warning", "safe", "no-limit"] as StatusKey[]).map(
-            (key) => {
-              const meta = STATUS_META[key];
-              const active = statusFilter === key;
-              const count = statusCounts[key] || 0;
-              if (key !== "all" && count === 0) return null;
-              return (
-                <Button
-                  key={key}
-                  variant="outline"
-                  size="sm"
-                  aria-pressed={active}
-                  onClick={() => setStatusFilter(key)}
-                  className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
-                    active ? meta.bg + " " + meta.tone : "text-text-muted"
-                  }`}
-                >
-                  {key !== "all" && (
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.dot }} />
-                  )}
-                  <span>{t(`budgetStatus.${key}`)}</span>
-                  <span className="opacity-70">{count}</span>
-                </Button>
-              );
-            }
-          )}
-        </div>
+        <FilterPills
+          value={statusFilter}
+          onChange={(key) => setStatusFilter(key as StatusKey)}
+          options={(["all", "blocked", "alerting", "warning", "safe", "no-limit"] as StatusKey[])
+            .filter((key) => key === "all" || (statusCounts[key] || 0) > 0)
+            .map((key) => ({
+              value: key,
+              label: t(`budgetStatus.${key}`),
+              count: statusCounts[key] || 0,
+              tone: STATUS_META[key].chip,
+            }))}
+        />
 
         {templates.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
@@ -821,11 +820,9 @@ function BudgetRow({
           )}
         </div>
         <div className="text-center">
-          <span
-            className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold border ${meta.bg} ${meta.tone}`}
-          >
-            {t(`budgetStatus.${status}`).toUpperCase()}
-          </span>
+          <Badge size="sm" variant={meta.badge}>
+            {t(`budgetStatus.${status}`)}
+          </Badge>
         </div>
       </div>
 

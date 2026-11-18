@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Field } from "@omniroute/ui-kit/field";
 import { Progress } from "@omniroute/ui-kit/progress";
+import Badge from "@/shared/components/Badge";
 import {
   Card,
   Button,
@@ -1451,29 +1452,24 @@ export default function EvalsTab() {
                         <p className="text-sm font-medium text-text-main">
                           {suite.name || suite.id}
                         </p>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
-                            suite.source === "custom"
-                              ? "bg-info/10 text-info"
-                              : "bg-text-muted/10 text-text-muted"
-                          }`}
-                        >
+                        <Badge size="sm" variant={suite.source === "custom" ? "info" : "default"}>
                           {suite.source === "custom"
                             ? t("suiteBuilderCustomBadge")
                             : t("suiteBuilderBuiltInBadge")}
-                        </span>
+                        </Badge>
                         {typeof latestScore === "number" && (
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          <Badge
+                            size="sm"
+                            variant={
                               latestScore === 100
-                                ? "bg-success/10 text-success"
+                                ? "success"
                                 : latestScore >= 80
-                                  ? "bg-warning/10 text-warning"
-                                  : "bg-error/10 text-error"
-                            }`}
+                                  ? "warning"
+                                  : "error"
+                            }
                           >
                             {latestScore}% {t("passSuffix")}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <p className="text-xs text-text-muted">
@@ -1625,9 +1621,9 @@ export default function EvalsTab() {
                                   {t("historyLatency", { value: run.avgLatencyMs })}
                                 </p>
                               </div>
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                              <Badge variant="primary">
                                 {run.summary.passRate}% {t("passSuffix")}
-                              </span>
+                              </Badge>
                             </div>
 
                             <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-surface/30 border border-border/20">
@@ -1681,21 +1677,18 @@ export default function EvalsTab() {
                                             <span className="truncate text-sm font-medium text-text-main">
                                               {result.caseName || result.caseId || "—"}
                                             </span>
-                                            <span
-                                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                                                result.passed
-                                                  ? "bg-success/10 text-success"
-                                                  : "bg-error/10 text-error"
-                                              }`}
+                                            <Badge
+                                              size="sm"
+                                              variant={result.passed ? "success" : "error"}
                                             >
                                               {result.passed
                                                 ? t("resultPassed")
                                                 : t("resultFailed")}
-                                            </span>
+                                            </Badge>
                                             {result.error ? (
-                                              <span className="rounded-full bg-error/10 px-2 py-0.5 text-[10px] font-semibold text-error">
+                                              <Badge size="sm" variant="error">
                                                 {t("errorBadge")}
-                                              </span>
+                                              </Badge>
                                             ) : null}
                                           </div>
                                           <p className="mt-1 truncate text-xs text-text-muted">

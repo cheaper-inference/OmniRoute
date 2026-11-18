@@ -118,11 +118,7 @@ export default function CompressionLogTab() {
               {stats.rulesApplied && stats.rulesApplied.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {stats.rulesApplied.map((rule) => (
-                    <Badge
-                      key={rule}
-                      size="sm"
-                      className="border-chart-3/20 bg-chart-3/10 text-chart-3-ink"
-                    >
+                    <Badge key={rule} size="sm" tone="chart-3">
                       {rule.replace(/_/g, " ")}
                     </Badge>
                   ))}

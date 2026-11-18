@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
@@ -68,10 +69,10 @@ const STATUS_STYLES: Record<AutopilotReport["status"], string> = {
   critical: "bg-error/10 text-error border-error/20",
 };
 
-const SEVERITY_STYLES: Record<AutopilotIssue["severity"], string> = {
-  info: "bg-info/10 text-info border-info/20",
-  warning: "bg-warning/10 text-warning border-warning/20",
-  critical: "bg-error/10 text-error border-error/20",
+const SEVERITY_BADGE: Record<AutopilotIssue["severity"], "info" | "warning" | "error"> = {
+  info: "info",
+  warning: "warning",
+  critical: "error",
 };
 
 const SEVERITY_RANK: Record<AutopilotIssue["severity"], number> = {
@@ -188,11 +189,9 @@ function ProviderIssues({
             <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${SEVERITY_STYLES[issue.severity]}`}
-                  >
+                  <Badge size="sm" variant={SEVERITY_BADGE[issue.severity]}>
                     {t(`severity.${issue.severity}`)}
-                  </span>
+                  </Badge>
                   <p className="text-sm font-medium text-text-main">
                     {issueText(issue, "title", t)}
                   </p>
@@ -392,17 +391,18 @@ export default function ProviderHealthAutopilotCard() {
                     })}
                   </p>
                 </div>
-                <span
-                  className={`w-fit rounded-full border px-2 py-1 text-xs font-medium ${
+                <Badge
+                  variant={
                     provider.state === "down"
-                      ? "border-error/20 bg-error/10 text-error"
+                      ? "error"
                       : provider.state === "degraded"
-                        ? "border-warning/20 bg-warning/10 text-warning"
-                        : "border-success/20 bg-success/10 text-success"
-                  }`}
+                        ? "warning"
+                        : "success"
+                  }
+                  className="w-fit"
                 >
                   {t(`providerState.${provider.state}`)}
-                </span>
+                </Badge>
               </div>
 
               <ProviderIssues

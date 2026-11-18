@@ -10,6 +10,7 @@ import {
   type RecentSessionForDashboard,
 } from "@/lib/sessionObservability";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 import {
   Table,
@@ -142,9 +143,9 @@ export default function SessionsTab() {
                         {s.sessionId.slice(0, 12)}…
                       </span>
                       {leaseBacked && s.active && (
-                        <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border text-success border-success/30 bg-success/10">
+                        <Badge size="sm" variant="success">
                           {tCommon("active")}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </TableCell>

@@ -77,7 +77,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                     <Badge
                       size="sm"
                       variant="warning"
-                      className="shrink-0 text-[9px] font-semibold"
+                      className="shrink-0"
                       title={t("borrowingIndicator")}
                     >
                       {t("borrowingIndicator")}
@@ -120,7 +120,6 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                         ? "warning"
                         : "success"
                   }
-                  className="text-[9px] font-semibold"
                 >
                   {t(`policy${alloc.policy[0].toUpperCase()}${alloc.policy.slice(1)}`)}
                 </Badge>
