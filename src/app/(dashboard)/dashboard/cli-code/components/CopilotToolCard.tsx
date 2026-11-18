@@ -17,6 +17,7 @@ import { cn } from "@/shared/utils/cn";
 import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
 
 /**
  * GitHub Copilot Configuration Generator
@@ -205,10 +206,9 @@ export default function CopilotToolCard({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-sm">{tool.name}</h3>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-info/10 text-info">
-                <span className="size-1.5 rounded-full bg-info" />
+              <Badge variant="info" size="sm" dot>
                 {t("guide")}
-              </span>
+              </Badge>
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.copilot")}</p>
           </div>

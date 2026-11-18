@@ -16,6 +16,7 @@ import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
 import type { OmniSkill } from "./OmniSkillCard";
 import type { JSX } from "react";
+import Badge from "@/shared/components/Badge";
 
 interface SkillDetail extends OmniSkill {
   schema?: {
@@ -132,20 +133,15 @@ export function SkillInspectorPane({
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded ${
-              effectiveMode === "on"
-                ? "bg-success/10 text-success"
-                : effectiveMode === "auto"
-                  ? "bg-warning/10 text-warning"
-                  : "bg-surface-2 text-text-muted"
-            }`}
+          <Badge
+            variant={
+              effectiveMode === "on" ? "success" : effectiveMode === "auto" ? "warning" : "default"
+            }
+            size="sm"
           >
             {t("mode")}: {effectiveMode}
-          </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 text-text-muted">
-            {(skill.sourceProvider || "local").toUpperCase()}
-          </span>
+          </Badge>
+          <Badge size="sm">{(skill.sourceProvider || "local").toUpperCase()}</Badge>
         </div>
       </div>
 
@@ -225,17 +221,18 @@ export function SkillInspectorPane({
                   {executions.map((exec) => (
                     <TableRow key={exec.id}>
                       <TableCell>
-                        <span
-                          className={`px-1.5 py-0.5 rounded ${
+                        <Badge
+                          variant={
                             exec.status === "success"
-                              ? "bg-success/10 text-success"
+                              ? "success"
                               : exec.status === "error"
-                                ? "bg-error/10 text-error"
-                                : "bg-warning/10 text-warning"
-                          }`}
+                                ? "error"
+                                : "warning"
+                          }
+                          size="sm"
                         >
                           {exec.status}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
                       <TableCell className="text-text-muted">

@@ -26,6 +26,7 @@ import {
   resolveProviderName,
   type ProviderNodeEntry,
 } from "@/lib/display/useProviderNodeMap";
+import Badge from "@/shared/components/Badge";
 
 type KnownBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN" | "DEGRADED";
 type BreakerState = KnownBreakerState | (string & {});
@@ -1109,6 +1110,14 @@ function SectionHeader({
   );
 }
 
+const LAYER_BADGE_VARIANT = {
+  red: "error",
+  amber: "warning",
+  orange: "warning",
+  green: "success",
+  blue: "info",
+} as const;
+
 function LayerSection({
   id,
   title,
@@ -1124,29 +1133,6 @@ function LayerSection({
   badgeTone: "red" | "amber" | "green" | "blue" | "orange";
   children: React.ReactNode;
 }) {
-  const toneMap = {
-    red: {
-      bg: "color-mix(in srgb, var(--color-error) 10%, transparent)",
-      text: "var(--color-error)",
-    },
-    amber: {
-      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
-      text: "var(--color-warning)",
-    },
-    green: {
-      bg: "color-mix(in srgb, var(--color-success) 10%, transparent)",
-      text: "var(--color-success)",
-    },
-    blue: {
-      bg: "color-mix(in srgb, var(--color-info) 10%, transparent)",
-      text: "var(--color-info)",
-    },
-    orange: {
-      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
-      text: "var(--color-warning)",
-    },
-  } as const;
-  const tone = toneMap[badgeTone];
   return (
     <div className="mt-4 border-t border-border/40 pt-3 first-of-type:border-t-0 first-of-type:pt-0">
       <div className="flex items-center justify-between gap-2 mb-2">
@@ -1156,12 +1142,9 @@ function LayerSection({
           </span>
           <h3 className="text-[13px] text-text-main">{title}</h3>
         </div>
-        <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded-full tabular-nums"
-          style={{ background: tone.bg, color: tone.text }}
-        >
+        <Badge variant={LAYER_BADGE_VARIANT[badgeTone]} size="sm" className="tabular-nums">
           {badge}
-        </span>
+        </Badge>
       </div>
       <p className="text-xs text-text-muted mb-2">{description}</p>
       {children}

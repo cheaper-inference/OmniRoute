@@ -6,6 +6,7 @@ import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
 
 interface Role {
   id: string;
@@ -372,12 +373,12 @@ export default function HermesAgentToolCard({
                 )}
               </h3>
               {(Object.keys(displayRoles).length > 0 || Object.keys(selections).length > 0) && (
-                <span className="text-[10px] px-1.5 py-px rounded bg-success/10 text-success">
+                <Badge variant="success" size="sm">
                   {t("hermesConfiguredRoles", {
                     configured: configuredRolesCount,
                     total: HERMES_ROLES.length,
                   })}
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.hermes-agent")}</p>
@@ -493,16 +494,14 @@ export default function HermesAgentToolCard({
                     )}
 
                     {badge && (
-                      <div
-                        className={`text-[10px] px-1.5 py-px rounded shrink-0 ${
-                          badge.outsideOmniRoute
-                            ? "bg-warning/10 text-warning"
-                            : "bg-success/10 text-success"
-                        }`}
+                      <Badge
+                        variant={badge.outsideOmniRoute ? "warning" : "success"}
+                        size="sm"
+                        className="shrink-0"
                       >
                         {badge.label}
                         {badge.pending ? " *" : ""}
-                      </div>
+                      </Badge>
                     )}
 
                     <Button

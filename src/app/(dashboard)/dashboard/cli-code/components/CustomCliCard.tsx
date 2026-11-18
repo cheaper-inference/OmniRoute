@@ -16,6 +16,7 @@ import {
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
 
 interface ModelOption {
   value: string;
@@ -137,10 +138,9 @@ export default function CustomCliCard({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-sm">{tool.name}</h3>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-success/10 text-success">
-                <span className="size-1.5 rounded-full bg-success" />
+              <Badge variant="success" size="sm" dot>
                 {translateOrFallback("custom", "Custom")}
-              </span>
+              </Badge>
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.custom")}</p>
           </div>

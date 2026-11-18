@@ -12,6 +12,7 @@ import {
 import Button from "@/shared/components/Button";
 import { Card } from "@/shared/components";
 import type { JSX } from "react";
+import Badge from "@/shared/components/Badge";
 
 interface Execution {
   id: string;
@@ -64,17 +65,18 @@ export function OmniExecutionsTab({
               <TableRow key={exec.id}>
                 <TableCell>{exec.skillName}</TableCell>
                 <TableCell>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
+                  <Badge
+                    variant={
                       exec.status === "success"
-                        ? "bg-success/10 text-success"
+                        ? "success"
                         : exec.status === "error"
-                          ? "bg-error/10 text-error"
-                          : "bg-warning/10 text-warning"
-                    }`}
+                          ? "error"
+                          : "warning"
+                    }
+                    size="sm"
                   >
                     {exec.status}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
                 <TableCell className="text-text-muted">

@@ -176,3 +176,38 @@ test("E: table cells use numeric, action and align instead of alignment and px c
   );
   assert.equal(offenders.length, 0, `use numeric / action / align="end":\n${where(offenders)}`);
 });
+
+// ── A. Pills: the Badge adapter at the kit small size ────────────────────────────────────────
+
+/** A status tint or a chart colour used as a background. */
+const TINT =
+  /(?<![\w:-])bg-(?:success|error|warning|info|primary|surface-2|chart-\d)(?:\/\d+)?(?![\w-])/;
+/** The box of a pill: inline padding, a hairline of block padding and a radius. */
+const PILL_BOX = [
+  /(?<![\w:-])px-(?:1\.5|2|2\.5)(?![\w.-])/,
+  /(?<![\w:-])py-(?:px|0\.5|1)(?![\w.-])/,
+  /(?<![\w:-])rounded(?:-full|-md|-sm)?(?![\w-])/,
+];
+
+const PILL_EXCEPTIONS: Exception[] = [
+  {
+    file: "conductor/FaroChat.tsx",
+    marker: 'm.role === "user"',
+    reason: "Chat message bubble: it holds the whole message text, not a status label.",
+  },
+];
+
+test('A: status pills are the Badge adapter with size="sm"', () => {
+  const offenders = openingTags("span|div").filter(
+    (t) =>
+      TINT.test(t.tag) && PILL_BOX.every((re) => re.test(t.tag)) && !isException(PILL_EXCEPTIONS, t)
+  );
+  assert.equal(offenders.length, 0, `use <Badge size="sm">:\n${where(offenders)}`);
+});
+
+test("A: a Badge takes its text size from the kit", () => {
+  const offenders = openingTags("Badge").filter((t) =>
+    /(?<![\w:-])text-(?:\[\d+px\]|xs|sm)(?![\w-])/.test(t.tag)
+  );
+  assert.equal(offenders.length, 0, `drop the text size class:\n${where(offenders)}`);
+});

@@ -16,6 +16,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
 import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
 
 export default function DefaultToolCard({
   toolId,
@@ -727,34 +728,30 @@ export default function DefaultToolCard({
 
                 if (isGuide) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-info/10 text-info">
-                      <span className="size-1.5 rounded-full bg-info" />
+                    <Badge variant="info" size="sm" dot>
                       {t("guide")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isDetected) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-success/10 text-success">
-                      <span className="size-1.5 rounded-full bg-success" />
+                    <Badge variant="success" size="sm" dot>
                       {t("detected")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isInstalled === false && (rs || bs)) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface-2/10 text-text-muted">
-                      <span className="size-1.5 rounded-full bg-surface-2" />
+                    <Badge variant="default" size="sm" dot>
                       {t("notInstalled")}
-                    </span>
+                    </Badge>
                   );
                 }
                 if (isInstalled && !isDetected && (rs || bs)) {
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-warning/10 text-warning">
-                      <span className="size-1.5 rounded-full bg-warning" />
+                    <Badge variant="warning" size="sm" dot>
                       {t("notReady")}
-                    </span>
+                    </Badge>
                   );
                 }
                 return null;

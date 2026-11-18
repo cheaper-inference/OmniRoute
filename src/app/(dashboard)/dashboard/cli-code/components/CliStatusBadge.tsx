@@ -65,7 +65,7 @@ export default function CliStatusBadge({
   return (
     <>
       {badge && (
-        <Badge variant={badge.variant} size="sm" dot className="text-[11px]">
+        <Badge variant={badge.variant} size="sm" dot>
           {badge.text}
         </Badge>
       )}
