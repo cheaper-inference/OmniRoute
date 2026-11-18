@@ -3,6 +3,7 @@ import {
   readStreamActiveTimeoutOverrideMs,
 } from "@/shared/utils/runtimeTimeouts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
+import { resolveInfCodeAuthBase, secureInfCodeUrl } from "./infCodeUrls.ts";
 import type { LegacyProvider } from "./providerRegistry.ts";
 import { loadProviderCredentials } from "./credentialLoader.ts";
 import { generateLegacyProviders } from "./providerRegistry.ts";
@@ -144,9 +145,7 @@ export const ANTIGRAVITY_DEFAULT_SYSTEM =
   "**Proactiveness**";
 
 // OAuth endpoints
-const INF_CODE_AUTH_BASE = (
-  process.env.INF_CODE_OAUTH_BASE_URL || "https://www.tokensinfinity.com"
-).replace(/\/+$/, "");
+const INF_CODE_AUTH_BASE = resolveInfCodeAuthBase();
 
 export const OAUTH_ENDPOINTS = {
   google: {
@@ -182,8 +181,14 @@ export const OAUTH_ENDPOINTS = {
     // exchange (src/lib/oauth/constants/oauth.ts), so it must not be read here, and
     // the base has to match the one login used or a private instance's refresh
     // token would be posted to the public SaaS.
-    token: process.env.INF_CODE_OAUTH_REFRESH_URL || `${INF_CODE_AUTH_BASE}/acode/v1/refresh_token`,
-    auth: process.env.INF_CODE_OAUTH_AUTHORIZE_URL || `${INF_CODE_AUTH_BASE}/infcode/login`,
+    token: secureInfCodeUrl(
+      process.env.INF_CODE_OAUTH_REFRESH_URL,
+      `${INF_CODE_AUTH_BASE}/acode/v1/refresh_token`
+    ),
+    auth: secureInfCodeUrl(
+      process.env.INF_CODE_OAUTH_AUTHORIZE_URL,
+      `${INF_CODE_AUTH_BASE}/infcode/login`
+    ),
     clientId: process.env.INF_CODE_OAUTH_CLIENT_ID || resolvePublicCred("infcode_id"),
   },
   renderhour: {

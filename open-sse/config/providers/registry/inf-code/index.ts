@@ -1,4 +1,9 @@
 import { resolvePublicCred, type RegistryEntry } from "../../shared.ts";
+import {
+  DEFAULT_INF_CODE_BASE,
+  resolveInfCodeAuthBase,
+  secureInfCodeUrl,
+} from "../../../infCodeUrls.ts";
 
 /**
  * InfCode — Token Infinity's enterprise AI coding platform
@@ -22,9 +27,6 @@ import { resolvePublicCred, type RegistryEntry } from "../../shared.ts";
  * a code change. Defaults are the public Token Infinity SaaS.
  */
 
-/** Default Token Infinity SaaS API/auth base. */
-const DEFAULT_INF_CODE_BASE = "https://www.tokensinfinity.com";
-
 /** Resolve the configured API/auth base (env override wins). */
 export function resolveInfCodeBase(): string {
   const fromEnv = process.env.INF_CODE_API_BASE?.trim();
@@ -32,16 +34,14 @@ export function resolveInfCodeBase(): string {
   return DEFAULT_INF_CODE_BASE;
 }
 
-/** Resolve the login/refresh base, which is separate from the inference base. */
-function resolveInfCodeAuthBase(): string {
-  const fromEnv = process.env.INF_CODE_OAUTH_BASE_URL?.trim();
-  return fromEnv ? fromEnv.replace(/\/+$/, "") : DEFAULT_INF_CODE_BASE;
-}
-
-/** Refresh endpoint. INF_CODE_OAUTH_TOKEN_URL names the auth-code exchange, not this. */
+/**
+ * Refresh endpoint. INF_CODE_OAUTH_TOKEN_URL names the auth-code exchange, not this. The login/
+ * refresh base (resolveInfCodeAuthBase) is separate from the inference base and, like every
+ * INF_CODE_OAUTH_* override, must be https (http only on loopback).
+ */
 function resolveInfCodeRefreshUrl(): string {
-  return (
-    process.env.INF_CODE_OAUTH_REFRESH_URL?.trim() ||
+  return secureInfCodeUrl(
+    process.env.INF_CODE_OAUTH_REFRESH_URL,
     resolveInfCodeAuthBase() + "/acode/v1/refresh_token"
   );
 }
@@ -72,9 +72,10 @@ export const inf_codeProvider: RegistryEntry = {
     clientIdEnv: "INF_CODE_OAUTH_CLIENT_ID",
     clientIdDefault: resolvePublicCred("infcode_id"),
     tokenUrl: resolveInfCodeRefreshUrl(),
-    authUrl:
-      process.env.INF_CODE_OAUTH_AUTHORIZE_URL?.trim() ||
-      resolveInfCodeAuthBase() + "/infcode/login",
+    authUrl: secureInfCodeUrl(
+      process.env.INF_CODE_OAUTH_AUTHORIZE_URL,
+      resolveInfCodeAuthBase() + "/infcode/login"
+    ),
     refreshUrl: resolveInfCodeRefreshUrl(),
   },
   models: [
