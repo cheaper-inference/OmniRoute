@@ -364,7 +364,7 @@ omniroute
 omniroute --port 3000
 ```
 
-Der CLI lädt `.env` automatisch von `~/.omniroute/.env` oder `./.env`. Ein `./.env` im Arbeitsverzeichnis darf nur eine kurze Zulassungsliste von Schlüsseln festlegen (Ports, `REQUIRE_API_KEY`, Gebietsschema und Farbeinstellungen); füge alles andere in `~/.omniroute/.env`. Siehe [CLI Startverträge](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+Der CLI lädt `.env` automatisch von `~/.omniroute/.env` oder `./.env`. Ein `./.env` im Arbeitsverzeichnis darf nur eine kurze Zulassungsliste von Schlüsseln festlegen (`REQUIRE_API_KEY`, Gebietsschema, Zeitzone und Farbeinstellungen, nicht die Ports); füge alles andere in `~/.omniroute/.env`. Siehe [CLI Startverträge](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Fachmodus
 
@@ -598,9 +598,9 @@ post_install() {
 | `PORT`                                  | Framework-Standard        | Service-Port (`20128` in Beispielen)                                                                                                                                                |
 | `HOSTNAME`                              | Framework-Standard        | Host binden (Docker ist standardmäßig `0.0.0.0`)                                                                                                                                    |
 | `NODE_ENV`                              | Laufzeitstandard          | Legen Sie `production` für die Bereitstellung fest                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Die öffentliche Basis URL wird im Dashboard angezeigt und dem Server zugänglich gemacht (ersetzt das alte `BASE_URL`).                                                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Basis URL für den Cloud-Synchronisierungsendpunkt (ersetzt Legacy- `CLOUD_URL`)                                                                                                     |
-| `API_KEY_SECRET`                        | _(automatisch generiert)_ | HMAC -Geheimnis für generierte API Schlüssel — wird beim ersten Start automatisch generiert und auf `server.env` gespeichert                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Die öffentliche Basis- URL wird im Dashboard angezeigt und dem Server zugänglich gemacht (ersetzt die alte `BASE_URL`).                                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud-Synchronisierungsendpunkt-Basis URL (ersetzt Legacy- `CLOUD_URL`)                                                                                                             |
+| `API_KEY_SECRET`                        | _(automatisch generiert)_ | HMAC -Geheimnis für generierte API Schlüssel — wird bei der ersten Ausführung automatisch generiert und auf `server.env` gespeichert                                                |
 | `REQUIRE_API_KEY`                       | `false`                   | Erzwingen Sie den Bearer- API -Schlüssel auf `/v1/*`                                                                                                                                |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                   | Ermöglichen Sie authentifizierten Dashboard-Benutzern, bei Bedarf vollständig gespeicherte API -Schlüsselwerte anzuzeigen                                                           |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Serverseitige Aktualisierungsfrequenz für zwischengespeicherte Provider-Limit-Daten; UI Aktualisierungsschaltflächen lösen weiterhin eine manuelle Synchronisierung aus             |
@@ -708,7 +708,7 @@ Jedes Gateway, das OpenAI API spricht (ein selbstgehosteter Proxy, vLLM, ein Agg
 3. **Präfix** : der Routing-Name. Clients nennen Modelle `<prefix>/<model>`, sodass ein Knoten mit dem Präfix `mygw` `mygw/gpt-4o-mini` bedient. Erforderlich; Es gibt keine Zeichenbeschränkung.
 4. **API Typ** : die Endpunktfamilie, die das Gateway bedient (Chat-Abschlüsse, Antworten, Einbettungen, Audio, Bilder).
 5. **Basis URL** : das API Stammverzeichnis bis einschließlich `/v1` (z. B. `https://gateway.example.com/v1`), nicht der vollständige `/chat/completions` Pfad. Gateways mit nicht standardmäßigen Pfaden legen sie fest** Erweiterte Einstellungen** (Chatpfad, Modellpfad).
-6. Der**API -Schlüssel (zur Überprüfung)** Das Feld testet nur die Verbindung. Nachdem Sie den Knoten erstellt haben, öffnen Sie ihn und verwenden Sie ihn** Verbindung hinzufügen** um den Schlüssel zu speichern, den Anfragen verwenden.
+6. Der**API -Schlüssel (zur Prüfung)** Das Feld testet nur die Verbindung. Nachdem Sie den Knoten erstellt haben, öffnen Sie ihn und verwenden Sie ihn** Verbindung hinzufügen** um den Schlüssel zu speichern, den Anfragen verwenden.
 
 Der Knoten erhält eine interne ID der Form `openai-compatible-<apiType>-<uuid>`; Sie müssen es nie eingeben, das Präfix ist der öffentliche Name.
 
@@ -726,8 +726,8 @@ Wählen Sie ein eindeutiges Präfix (`mygw`, `acme-proxy`). Wenn Anfragen an ein
 
 Diese Schlüssel gehen in den `providerSpecificData` einer Verbindung (zum Beispiel über `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (Ganzzahl, 1–1024) – für OpenAI -Chat-Format kompatible Verbindungen, deren Gateway lange Tool-Namen ablehnt. Längere Namen werden als kurze Aliase gesendet und in der Antwort wiederhergestellt.
-- `quotaEndpoint` – der quota/credits Endpunkt des Gateways, gelesen für den Dashboard-Kontingentstreifen und das kontingentbewusste Routing. Funktioniert sowohl mit OpenAI- als auch mit Anthropic-kompatiblen Verbindungen; Die vollständige Form ist in `open-sse/services/usage/openaiCompatible.ts` dokumentiert.
+- `toolNameMaxLength` (Ganzzahl, 1–1024) — für OpenAI -Chat-Format kompatible Verbindungen, deren Gateway lange Tool-Namen ablehnt. Längere Namen werden als kurze Aliase gesendet und in der Antwort wiederhergestellt. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go und Muse Code haben bereits Aliasnamen mit mehr als 64 Zeichen ohne Einstellung. Ein Verbindungswert ersetzt den Azure OpenAI /Azure AI Foundry-Standard (eine Azure-Verbindung hinter einem strengeren Gateway) und legt den Grenzwert für einen benutzerdefinierten kompatiblen Knoten fest; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go und Muse Code behalten ihr Registrierungslimit und ignorieren es.
+- `quotaEndpoint` — Der quota/credits Endpunkt des Gateways, gelesen für den Dashboard-Kontingentstreifen und das kontingentbewusste Routing. Funktioniert sowohl mit OpenAI- als auch mit Anthropic-kompatiblen Verbindungen; Die vollständige Form ist in `open-sse/services/usage/openaiCompatible.ts` dokumentiert.
 
 ```json
 {
@@ -824,9 +824,9 @@ Gibt nach Anbieter gruppierte Modelle mit Typen (`chat`, `embedding`, `image`) z
 
 ### LLM Gateway Intelligence (Phase 9)
 
-- **Semantischer Cache** — Automatisches Zwischenspeichern von Nicht-Streaming- und Temperatur =-0-Antworten (Umgehung mit `X-OmniRoute-No-Cache: true`)
-- **Fordern Sie Idempotenz an** – Dedupliziert Anfragen innerhalb von 5 Sekunden über `Idempotency-Key` oder `X-Request-Id` -Header
-- **Fortschrittsverfolgung** – Melden Sie sich für SSE `event: progress` Ereignisse über den `X-OmniRoute-Progress: true` Header an
+- **Semantischer Cache** — speichert automatisch Nicht-Streaming- und Temperatur-=-0-Antworten im Cache (mit `X-OmniRoute-No-Cache: true` umgehen)
+- **Fordern Sie Idempotenz an** — Dedupliziert Anfragen innerhalb von 5 Sekunden über `Idempotency-Key` oder `X-Request-Id` Header
+- **Fortschrittsverfolgung** — Opt-in für SSE `event: progress` Ereignisse über `X-OmniRoute-Progress: true` Header
 
 ---
 
@@ -855,27 +855,27 @@ Konfigurieren über** Dashboard → -Einstellungen → Routing** . Das Dashboard
 
 **Im Dashboard sichtbare Strategien (Routing auf Kontoebene):**
 
-| Strategie                                | Beschreibung                                                                                                                      |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Zuerst füllen**                        | Verwendet Konten in der Reihenfolge ihrer Priorität – das primäre Konto bearbeitet alle Anfragen, bis es nicht mehr verfügbar ist |
-| **Round Robin**                          | Durchläuft alle Konten mit einem konfigurierbaren Sticky-Limit (Standard: 3 Anrufe pro Konto)                                     |
-| **P2C (Macht zweier Wahlmöglichkeiten)** | Wählt zwei zufällige Konten aus und leitet sie an das gesündere weiter – gleicht Belastung und Gesundheitsbewusstsein aus         |
-| **Zufällig**                             | Wählt für jede Anfrage per Fisher-Yates-Shuffle zufällig ein Konto aus                                                            |
-| **Am wenigsten genutzt**                 | Leitet zum Konto mit dem ältesten `lastUsedAt` Zeitstempel weiter und verteilt den Datenverkehr gleichmäßig                       |
-| **Kostenoptimiert**                      | Leitet zum Konto mit dem niedrigsten Prioritätswert weiter und optimiert so für Anbieter mit den niedrigsten Kosten               |
+| Strategie                                | Beschreibung                                                                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Zuerst füllen**                        | Verwendet Konten in der Reihenfolge ihrer Priorität. Das primäre — -Konto bearbeitet alle Anfragen, bis sie nicht mehr verfügbar sind |
+| **Round Robin**                          | Durchläuft alle Konten mit einem konfigurierbaren Sticky-Limit (Standard: 3 Anrufe pro Konto)                                         |
+| **P2C (Macht zweier Wahlmöglichkeiten)** | Wählt zwei zufällige Konten aus und leitet sie an das gesündere weiter. — gleicht Last mit Gesundheitsbewusstsein aus                 |
+| **Zufällig**                             | Wählt für jede Anfrage per Fisher-Yates-Shuffle zufällig ein Konto aus                                                                |
+| **Am wenigsten genutzt**                 | Leitet zum Konto mit dem ältesten `lastUsedAt` Zeitstempel weiter und verteilt den Datenverkehr gleichmäßig                           |
+| **Kostenoptimiert**                      | Leitet zum Konto mit dem niedrigsten Prioritätswert weiter und optimiert so für Anbieter mit den niedrigsten Kosten                   |
 
-**Erweiterte Combo- und Auto-Strategien** (konfigurierbar per Combo oder über `auto/*` Präfixe – siehe [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Erweiterte Combo- und Auto-Strategien** (konfigurierbar per Combo oder über `auto/*` -Präfixe — siehe [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` – strenge Reihenfolge, niemals Round-Robins
-- `weighted` – proportionale Verkehrsaufteilung nach Modellgewichten
-- `fill-first` – Entleeren Sie das erste Modell, bis die Grenzen erreicht sind
+- `priority` — strikte Reihenfolge, niemals Round-Robins
+- `weighted` — proportionale Verkehrsaufteilung nach Gewichtungen pro Modell
+- `fill-first` — Entleeren Sie das erste Modell, bis die Grenzen erreicht sind
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Macht zweier Wahlmöglichkeiten)
 - `least-used` und `cost-optimized`
-- `auto` – punktzahlgesteuert für alle Kandidaten
-- `lkgp` (Last Known Good Provider) – heftet sich an den letzten erfolgreichen Anbieter und greift dann auf die Regeln zurück
-- `context-optimized` – wählt das Modell mit dem größten freien Kontextfenster aus
-- `context-relay` – verkettet Modelle mit langem Kontext für Folgerunden
+- `auto` — punktzahlgesteuert für alle Kandidaten
+- `lkgp` (Last Known Good Provider) — heftet sich an den letzten erfolgreichen Anbieter und greift dann auf die Regeln zurück
+- `context-optimized` — wählt das Modell mit dem größten freien Kontextfenster aus
+- `context-relay` — verkettet Modelle mit langem Kontext für Folgerunden
 
 #### Externer Sticky-Session-Header
 
@@ -982,32 +982,32 @@ Konfigurieren über** Dashboard → -Einstellungen → Resilienz** .
 
 OmniRoute implementiert Resilienz auf Anbieterebene mit fünf Komponenten:
 
-1. **Anforderungswarteschlange und Taktung** – Anforderungsgestaltung auf Systemebene:
+1. **Anforderungswarteschlange und Taktung** — Anforderungsgestaltung auf Systemebene:
    - **Anfragen pro Minute (RPM)** — Maximale Anfragen pro Minute und Konto
-   - **Mindestzeit zwischen Anfragen** – Mindestlücke in Millisekunden zwischen Anfragen
+   - **Mindestzeit zwischen Anfragen** — Minimale Lücke in Millisekunden zwischen Anfragen
    - **Max. gleichzeitige Anfragen** — Maximale gleichzeitige Anfragen pro Konto
 
-2. **Abklingzeit der Verbindung** – Konfiguration pro Authentifizierungstyp für eine einzelne Verbindung nach wiederholbaren Fehlern:
-   - **Basis-Abklingzeit** – Standard-Abklingzeitfenster für wiederholbare Upstream-Fehler
-   - **Verwenden Sie Upstream-Wiederholungshinweise** – Berücksichtigt maßgebliche `Retry-After` oder Reset-Hinweise, sofern bereitgestellt
-   - **Max. Backoff-Schritte** — Maximales exponentielles Backoff-Niveau bei wiederholten Ausfällen
+2. **Abklingzeit der Verbindung** — Per-Auth-Konfiguration für eine einzelne Verbindung nach wiederholbaren Fehlern:
+   - **Basis-Abklingzeit** — Standard-Abklingzeitfenster für wiederholbare Upstream-Fehler
+   - **Verwenden Sie Upstream-Wiederholungshinweise** — Würdigt maßgebliche `Retry-After` oder Reset-Hinweise, sofern bereitgestellt
+   - **Max. Backoff-Schritte** — Maximaler exponentieller Backoff-Level für wiederholte Fehler
 
-3. **Leistungsschalter des Anbieters** – Verfolgt Ausfälle von End-to-End-Anbietern, markiert einen Anbieter als beeinträchtigt, wenn der konfigurierte Warnschwellenwert erreicht ist, und öffnet den Leistungsschalter, wenn der konfigurierte Fehlerschwellenwert erreicht ist:
-   - **Abbauschwelle** – Aufeinanderfolgende Ausfälle des Anbieters vor dem Eintritt in `DEGRADED`
-   - **Fehlerschwelle** – Aufeinanderfolgende Ausfälle des Anbieters vor dem Eintritt in `OPEN`
+3. **Leistungsschalter des Anbieters** — Verfolgt Ausfälle von End-to-End-Anbietern, markiert einen Anbieter, der beim konfigurierten Warnschwellenwert beeinträchtigt ist, und öffnet den Leistungsschalter, wenn der konfigurierte Fehlerschwellenwert erreicht ist:
+   - **Abbauschwelle** — Aufeinanderfolgende Anbieterausfälle vor der Eingabe von `DEGRADED`
+   - **Fehlerschwelle** — Aufeinanderfolgende Anbieterausfälle vor der Eingabe von `OPEN`
    - **Timeout zurücksetzen** — Zeitfenster, bevor der Anbieter erneut getestet wird
-   - **CLOSED** (Gesund) – Anfragen fließen normal
-   - **DEGRADED** – Anfragen werden weiterhin weitergeleitet, während erhöhte Fehler nachverfolgt werden
-   - **OPEN** — Provider wird nach wiederholten Ausfällen vorübergehend gesperrt
-   - **HALF_OPEN** — Testen, ob sich der Anbieter erholt hat
+   - **CLOSED** (Gesund) — -Anfragen fließen normal
+   - **DEGRADED** — Anfragen fließen weiterhin, während erhöhte Fehler verfolgt werden
+   - **OPEN** Der — Provider wird nach wiederholten Ausfällen vorübergehend blockiert
+   - **HALF_OPEN** — Testet, ob sich der Anbieter erholt hat
 
    Verbindungsbezogene `429` -Ratenbegrenzungen bleiben bestehen** Abklingzeit der Verbindung** und zählen nicht zum Provider Breaker.
 
    Der Laufzeitstatus des Provider-Breakers wird angezeigt** Dashboard → Gesundheit** nur.
 
-4. **Warten Sie auf die Abklingzeit** — Wenn jede Kandidatenverbindung bereits abgekühlt ist, kann OmniRoute auf die früheste Abkühlung warten und dieselbe Client-Anfrage automatisch erneut versuchen.
+4. **Warten Sie auf die Abklingzeit** — Wenn jede Kandidatenverbindung bereits abkühlt, kann OmniRoute auf die früheste Abkühlung warten und dieselbe Client-Anfrage automatisch erneut versuchen.
 
-5. **Automatische Erkennung der Ratenbegrenzung** – Wenn Upstream-Anbieter explizite Wartefenster zurückgeben, überschreiben diese Hinweise die Abklingzeit der lokalen Verbindung, wenn die Einstellung aktiviert ist.
+5. **Automatische Erkennung der Ratenbegrenzung** — Wenn Upstream-Anbieter explizite Wartefenster zurückgeben, überschreiben diese Hinweise die Abklingzeit der lokalen Verbindung, wenn die Einstellung aktiviert ist.
 
 **Profi-Tipp:** Benutzen Sie die** Gesundheit** Seite zum Überprüfen und Zurücksetzen von Leistungsschaltern des Live-Anbieters nach einem Ausfall. Auf der Seite „Resilienz“ wird nur die Konfiguration geändert.
 
@@ -1047,19 +1047,19 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 ### Einstellungs-Dashboard
 
-Die Einstellungsseite ist unterteilt in** 7 Registerkarten** zur einfachen Navigation:
+Die Einstellungsseite ist unterteilt in:** 7 Registerkarten** zur einfachen Navigation:
 
-| Tab                      | Inhalt                                                                                                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Allgemein**            | Systemspeicher-Tools, Standardverhalten, Sichtbarkeit des Endpunkttunnels                                                                                                                                    |
-| **Aussehen**             | Theme-Steuerelemente (light/dark/system), Sichtbarkeit der Seitenleiste, Panel-Umschaltung für Cloudflare/Tailscale/ngrok -Tunnelkarten                                                                      |
-| **AI**                   | Denken Sie an Budget (Passthrough / Auto-Strip / Benutzerdefiniert / Adaptiv – siehe [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale Systemeingabeaufforderung, Eingabeaufforderungs-Cache-Statistiken |
-| **Sicherheit**           | Login/Password Einstellungen, IP -Zugriffskontrolle, API -Authentifizierung für `/models`, Provider-Blockierung, Prompt-Injection-Guard                                                                      |
-| **Routenführung**        | Globale Routing-Strategie (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), Wildcard-Modell-Aliase, Fallback-Ketten, Combo-Standardwerte                                              |
-| **Widerstandsfähigkeit** | Anforderungswarteschlange, Verbindungsabklingzeit, Anbieterunterbrechungskonfiguration und Verhalten beim Warten auf die Abklingzeit                                                                         |
-| **Fortschrittlich**      | Globale Proxy-Konfiguration (HTTP/SOCKS5), Proxy-Überschreibungen pro Anbieter                                                                                                                               |
+| Tab                      | Inhalt                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Allgemein**            | Systemspeicher-Tools, Standardverhalten, Sichtbarkeit des Endpunkttunnels                                                                                                                                        |
+| **Aussehen**             | Theme-Steuerelemente (light/dark/system), Sichtbarkeit der Seitenleiste, Panel-Umschaltung für Cloudflare/Tailscale/ngrok -Tunnelkarten                                                                          |
+| **AI**                   | Denken Sie an Budget (Passthrough / Auto-Strip / benutzerdefiniertes / adaptives — siehe [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale Systemeingabeaufforderung, Eingabeaufforderungs-Cache-Statistiken |
+| **Sicherheit**           | Login/Password Einstellungen, IP -Zugriffskontrolle, API -Authentifizierung für `/models`, Provider-Blockierung, Prompt-Injection-Guard                                                                          |
+| **Routenführung**        | Globale Routing-Strategie (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), Wildcard-Modell-Aliase, Fallback-Ketten, Combo-Standardwerte                                                  |
+| **Widerstandsfähigkeit** | Anforderungswarteschlange, Verbindungsabklingzeit, Anbieterunterbrechungskonfiguration und Verhalten beim Warten auf die Abklingzeit                                                                             |
+| **Fortschrittlich**      | Globale Proxy-Konfiguration (HTTP/SOCKS5), Proxy-Überschreibungen pro Anbieter                                                                                                                                   |
 
-Allgemein dupliziert keine schreibgeschützte Protokollierung und Cache-Notizen mehr. Die Einstellungen zur Datenbankaufbewahrung und -optimierung werden über `/api/settings/database` beibehalten. Das manuelle Löschen des Caches verwendet `DELETE /api/cache`. Die Obergrenzen für Anforderungs- und Proxy-Protokollzeilen werden von `CALL_LOGS_TABLE_MAX_ROWS` und `PROXY_LOGS_TABLE_MAX_ROWS` gesteuert.
+Allgemein dupliziert keine schreibgeschützte Protokollierung und Cache-Notizen mehr. Die Einstellungen zur Datenbankaufbewahrung und -optimierung werden über `/api/settings/database` beibehalten. Das manuelle Löschen des Caches verwendet `DELETE /api/cache`. Die Obergrenzen für Anforderungs- und Proxy-Protokollzeilen werden durch `CALL_LOGS_TABLE_MAX_ROWS` und `PROXY_LOGS_TABLE_MAX_ROWS` gesteuert.
 
 ---
 
@@ -1070,7 +1070,7 @@ Zugriff über** Dashboard- → Kosten** .
 | Tab        | Zweck                                                                                                    |
 | ---------- | -------------------------------------------------------------------------------------------------------- |
 | **Budget** | Legen Sie mit daily/weekly/monthly Budgets und Echtzeitverfolgung Ausgabenlimits pro API -Schlüssel fest |
-| **Preise** | Modellpreiseinträge anzeigen und bearbeiten – Kosten pro 1.000 input/output Tokens pro Anbieter          |
+| **Preise** | Modellpreiseinträge anzeigen und bearbeiten. — -Kosten pro 1.000 input/output -Token pro Anbieter        |
 
 ```bash
 # API: Set a budget
@@ -1152,7 +1152,7 @@ Es können globale Combo-Standardwerte festgelegt werden** Dashboard → -Einste
 
 Kombinationsoptimierungen ohne Latenz sind optional. Verlassen** Optimierungen ohne Latenz** deaktiviert, um zu verhindern, dass diese Latenzfunktionen Fallback-Ziele beschleunigen, Ziele basierend auf dem TTFT Verlauf überspringen oder Fallback-Anfragen komprimieren; Die Aktivierung ermöglicht konfiguriertes Hedging, prädiktive TTFT Sprünge und proaktive Fallback-Komprimierung, um routing/request Treue gegen eine geringere Tail-Latenz einzutauschen.
 
-Deaktivieren** Begründungstokenpuffer** wenn Upstream-Anbieter strenge `max_tokens` / `maxOutputTokens` Grenzwerte verlangen. Wenn diese Option aktiviert ist, erhöht das Combo-Routing den Spielraum des Reasoning-Modells nur für Modelle mit einer bekannten Ausgabeobergrenze und lässt das Client-Token-Limit unverändert, wenn der sicher gepufferte Wert diese Obergrenze überschreiten würde. Wenn das Client-Limit bereits über einer bekannten Obergrenze liegt, begrenzt OmniRoute es auf diese Obergrenze, bevor die Upstream-Anfrage gesendet wird.
+Deaktivieren** Begründungstokenpuffer** wenn Upstream-Anbieter strenge `max_tokens` / `maxOutputTokens` Grenzwerte verlangen. Wenn die Kombinationsweiterleitung aktiviert ist, erhöht sie den Spielraum des Reasoning-Modells nur für Modelle mit einer bekannten Ausgabeobergrenze und lässt das Client-Token-Limit unverändert, wenn der sichere gepufferte Wert diese Obergrenze überschreiten würde. Wenn das Client-Limit bereits über einer bekannten Obergrenze liegt, begrenzt OmniRoute es auf diese Obergrenze, bevor die Upstream-Anfrage gesendet wird.
 
 ---
 
@@ -1164,7 +1164,7 @@ Zugriff über** Dashboard → Gesundheit** . Echtzeit-Übersicht über den Syste
 | ---------------------------- | ---------------------------------------------------------------------- |
 | **Systemstatus**             | Betriebszeit, Version, Speichernutzung, Datenverzeichnis               |
 | **Gesundheit des Anbieters** | Laufzeitstatus des Leistungsschalters des globalen Anbieters           |
-| **Ratenbegrenzungen**        | Aktive Verbindungsabklingzeiten pro Konto mit verbleibender Zeit       |
+| **Ratenbeschränkungen**      | Aktive Verbindungsabklingzeiten pro Konto mit verbleibender Zeit       |
 | **Aktive Sperren**           | Aktive modellbezogene Sperren und vorübergehende Ausschlüsse           |
 | **Signatur-Cache**           | Statistiken zum Deduplizierungs-Cache (aktive Schlüssel, Trefferquote) |
 | **Latenztelemetrie**         | p50/p95/p99 -Latenzaggregation pro Anbieter                            |

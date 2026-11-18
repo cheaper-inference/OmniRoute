@@ -20,7 +20,7 @@ IDE නියෝජිතයෙකු (උදා, GitHub Copilot, Cursor, Claude
 
 මෙයින් අදහස් කරන්නේ ඔබට කළ හැක්කේ:
 
-- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 381 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
+- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 394 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
 - **ආකෘති සිතියම්කරණය යොදන්න** : `gemini-3-flash` → `claude-sonnet-4.7` හසුරුවන්න මට්ටමේ විනිවිද පෙනෙන ලෙස.
 - **සියලුම නියෝජිත ගමනාගමනය නිරීක්ෂණය කරන්න** : බාධා කරන ලද සෑම ඉල්ලීමක්ම [රථවාහන පරීක්ෂක](./TRAFFIC_INSPECTOR.md) වෙත ප්‍රකාශ කරනු ලැබේ.
 - **OmniRoute ඔරොත්තු දීමේ හැකියාව යොදන්න** : combo routing, circuit Breakers, Fallbacks, and cost tracking work for IDE agent traffic සඳහාද.
@@ -542,24 +542,24 @@ AgentBridge ඉල්ලීම් අන්තර්ග්රහණය කළත
 
 ## §8 මාර්ග සිතියම
 
-### Trae විමර්ශනය
+### ට්රේ විමර්ශනය
 
-Trae යනු සාපේක්ෂව නව AI කේතකරණ සහායකයකි. handler එකක් ක්රියාත්මක කිරීමට පෙර:
+Trae යනු සාපේක්ෂව නව AI කේතීකරණ සහායකයෙකි. හසුරුව ක්රියාත්මක කිරීමට පෙර:
 
-1. VS Code / JetBrains marketplaces තුළ හෝ ස්වාධීන යෙදුමක් ලෙස binary/extension එක හඳුනා ගන්න
-2. API hosts සහ endpoint ආකෘති සොයා ගැනීම සඳහා mitmproxy භාවිතයෙන් traffic ග්රහණය කර ගන්න
-3. authentication යාන්ත්රණය තීරණය කරන්න
-4. TOS සහ API සොයාගත හැකි බව මත පදනම්ව ඉදිරියට යා යුතුද නැද්ද යන්න තක්සේරු කරන්න
+1. VS කේතය / JetBrains වෙළඳපලවල හෝ ස්වාධීන යෙදුමක් ලෙස binary/extension හඳුනා ගන්න
+2. API ධාරක සහ අන්ත ලක්ෂ්‍ය හැඩයන් සොයා ගැනීමට mitmproxy සමඟ ගමනාගමනය ග්‍රහණය කරන්න
+3. සත්‍යාපන යාන්ත්‍රණය නිර්ණය කරන්න
+4. TOS සහ API සොයාගැනීමේ හැකියාව මත පදනම්ව go/no-go තක්සේරු කරන්න
 
-විමර්ශනය සම්පූර්ණ වන තෙක්, dashboard එකෙහි Trae card එක "විමර්ශනය කරමින් පවතී" badge එකක් සහ "ශක්යතාව වාර්තා කරන්න" link එකක් පෙන්වයි. `src/mitm/handlers/trae.ts` හි ඇති handler stub එක ව්යූහගත `තවම ක්රියාත්මක කර නොමැත` error එකක් නිකුත් කරයි.
+විමර්ශනය අවසන් වන තුරු, උපකරණ පුවරුවේ ඇති Trae කාඩ්පත "වාර්තා ශක්‍යතා" සබැඳියක් සහිත "පරීක්ෂණ" ලාංඡනයක් පෙන්වයි. `src/mitm/handlers/trae.ts` හි හසුරුවන්නා විසින් ව්‍යුහගත `Not yet implemented` දෝෂයක් ඇති කරයි.
 
-### Backlog agents (MITM අවශ්යයි — custom base URL සඳහා සහාය නැත)
+### බැක්ලොග් නියෝජිතයන් (MITM අවශ්‍ය — අභිරුචි පදනමක් නැත URL සහාය)
 
-පහත tools ඒවායේ වත්මන් versions තුළ custom base URLs සඳහා සහාය නොදක්වන බැවින්, interception සඳහා ඇති එකම මාර්ගය MITM වේ. ශක්යතා තක්සේරුව තවමත් සිදු කිරීමට ඇත:
+පහත මෙවලම් ඔවුන්ගේ වත්මන් අනුවාදවල අභිරුචි පාදක URLs සඳහා සහය නොදක්වයි, MITM එකම අතුරු මාර්ගය බවට පත් කරයි. ශක්‍යතා තක්සේරුව පොරොත්තු වේ:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE වෙතින් වෙනස්)
-- **Cowork** (Anthropic desktop)
+- **ඇම්ප්** (මූලාශ්‍ර සටහන)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE වලින් වෙන්ව)
+- **සහකාර වැඩ** (Anthropic ඩෙස්ක්ටොප්)
 
-සටහන: GitHub Copilot CLI ≥v1.0.19 විසින් `COPILOT_PROVIDER_BASE_URL` සඳහා සහාය දක්වයි — එම tool එක සඳහා MITM වෙනුවට direct config භාවිත කරන්න.
+සටහන: GitHub Copilot CLI ≥ v1.0.19 `COPILOT_PROVIDER_BASE_URL` — එම මෙවලම සඳහා MITM වෙනුවට direct config භාවිතා කිරීමට සහය දක්වයි.

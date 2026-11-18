@@ -20,7 +20,7 @@ Apabila ejen IDE (cth, GitHub Copilot, Cursor, Claude Code) membuat panggilan AP
 
 Ini bermakna anda boleh:
 
-- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 381 OmniRoute.
+- **Halakan semula mana-mana ejen kepada mana-mana pembekal** : Copilot bercakap dengan OpenAI? Ubah hala ke Anthropic Claude, Gemini, atau mana-mana pembekal 394 OmniRoute.
 - **Gunakan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara telus di peringkat pengendali.
 - **Perhatikan semua trafik ejen** : setiap permintaan yang dipintas diterbitkan kepada [Pemeriksa Trafik](./TRAFFIC_INSPECTOR.md).
 - **Terapkan ketahanan OmniRoute** : penghalaan kombo, pemutus litar, sandaran dan kerja pengesanan kos untuk trafik ejen IDE juga.
@@ -543,26 +543,26 @@ Skema OpenAPI penuh: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ---
 
-## §8 Hala Tuju
+## §8 Pelan Hala Tuju
 
 ### Siasatan Trae
 
 Trae ialah pembantu pengekodan AI yang agak baharu. Sebelum melaksanakan pengendali:
 
-1. Kenal pasti binari/sambungan dalam gedung VS Code / JetBrains atau sebagai aplikasi kendiri
-2. Tangkap trafik dengan mitmproxy untuk mengenal pasti hos API dan bentuk titik akhir
+1. Kenal pasti binary/extension dalam Kod VS / pasaran JetBrains atau sebagai apl kendiri
+2. Tangkap trafik dengan mitmproxy untuk menemui hos API dan bentuk titik akhir
 3. Tentukan mekanisme pengesahan
-4. Nilai teruskan/hentikan berdasarkan TOS dan kebolehkesanan API
+4. Menilai go/no-go berdasarkan kebolehtemuan TOS dan API
 
-Sehingga siasatan selesai, kad Trae dalam papan pemuka memaparkan lencana "Sedang Disiasat" dengan pautan "Laporkan kebolehlaksanaan". Rangka pengendali di `src/mitm/handlers/trae.ts` melontarkan ralat berstruktur `Belum dilaksanakan`.
+Sehingga siasatan selesai, kad Trae dalam papan pemuka menunjukkan lencana "Menyiasat" dengan pautan "Laporkan daya maju". Rintisan pengendali pada `src/mitm/handlers/trae.ts` melemparkan ralat `Not yet implemented` berstruktur.
 
-### Ejen tertunggak (MITM diperlukan — tiada sokongan URL asas tersuai)
+### Ejen backlog (MITM memerlukan — tiada sokongan URL asas tersuai)
 
-Alat berikut tidak menyokong URL asas tersuai dalam versi semasa, menjadikan MITM satu-satunya laluan pemintasan. Penilaian kebolehlaksanaan masih belum selesai:
+Alat berikut tidak menyokong URLs asas tersuai dalam versi semasanya, menjadikan MITM satu-satunya laluan pemintas. Penilaian daya maju belum selesai:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — berasingan daripada Kiro IDE)
-- **Cowork** (desktop Anthropic)
+- **Amp** (Sumber)
+- **Amazon Q / Kiro CLI** (AWS Batuan dasar — berasingan daripada Kiro IDE)
+- **Kerja bersama** ( desktop Anthropic )
 
-Nota: GitHub Copilot CLI ≥v1.0.19 menyokong `COPILOT_PROVIDER_BASE_URL` — gunakan konfigurasi langsung dan bukannya MITM untuk alat tersebut.
+Nota: GitHub Copilot CLI ≥ v1.0.19 menyokong `COPILOT_PROVIDER_BASE_URL` — menggunakan konfigurasi langsung dan bukannya MITM untuk alat itu.
