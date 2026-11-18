@@ -2,15 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Badge,
-  Button,
-  Card,
-  Collapsible,
-  Input,
-  ModelSelectField,
-  Toggle,
-} from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Button, Card, Collapsible, Input, ModelSelectField, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
 export default function BackgroundDegradationTab() {
@@ -222,18 +215,16 @@ export default function BackgroundDegradationTab() {
             {/* Existing patterns */}
             <div className="flex flex-wrap gap-2">
               {(config.detectionPatterns || []).map((pattern, idx) => (
-                <Badge key={idx} variant="info" className="gap-1 pe-0.5">
+                <ScopeChip
+                  key={idx}
+                  tone="info"
+                  onRemove={() => {
+                    if (!saving) removePattern(idx);
+                  }}
+                  removeLabel={`${t("remove")} ${pattern}`}
+                >
                   {pattern}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    icon="close"
-                    onClick={() => removePattern(idx)}
-                    disabled={saving}
-                    className="size-5 min-h-5"
-                    aria-label={`${t("remove")} ${pattern}`}
-                  />
-                </Badge>
+                </ScopeChip>
               ))}
             </div>
           </Collapsible>

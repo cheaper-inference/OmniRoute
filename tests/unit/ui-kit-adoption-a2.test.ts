@@ -206,9 +206,6 @@ test("A2/F: settings has no pixel text sizes under 12px", () => {
     // A link drawn as a chip: the Badge adapter has no `asChild`, so it cannot wrap the Link.
     "components/CompressionTokenSaverCard.tsx|rounded border border-border bg-bg-subtle px-1.5":
       "link chip",
-    // Hand-made pills, replaced by Badge size=\"sm\" in the pills mapping (A).
-    "components/PricingTab.tsx|px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px]": "pill",
-    "components/PricingTab.tsx|px-1.5 py-0.5 rounded text-[9px]": "pill",
   });
   assert.deepEqual(left, []);
   assert.deepEqual(stale, []);
@@ -221,10 +218,7 @@ test("A2/F: an uppercase label in settings is a ci-eyebrow", () => {
       return /\buppercase\b/.test(classes) && !/\bci-eyebrow\b/.test(classes);
     })
     .map(({ file, attrs }) => `${file}: ${attrs.className}`);
-  assert.deepEqual(handMade, [
-    // A hand-made pill, replaced by Badge size="sm" in the pills mapping (A).
-    "components/PricingTab.tsx: px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px] rounded uppercase font-semibold shrink-0",
-  ]);
+  assert.deepEqual(handMade, []);
   const eyebrows = elements(TEXT_TAGS).filter(({ attrs }) =>
     /\bci-eyebrow\b/.test(attrs.className ?? "")
   );
@@ -248,4 +242,35 @@ test("A2/F: settings headings take their size from ci-heading data-size", () => 
     ({ attrs }) => /\bci-heading\b/.test(attrs.className ?? "") && "data-size" in attrs
   );
   assert.ok(kitSized.length >= 65, `expected the migrated headings, found ${kitSized.length}`);
+});
+
+// A — badge-size-tones: a removable chip (blocked IP, banned keyword, error code, pattern) is
+// the kit `ScopeChip` with a `tone` and `onRemove`, not a Badge with a hand-sized Button inside;
+// a small pill is `Badge size="sm"`, with `tone="chart-N"` when it names a series.
+test("A2/A: settings chips are ScopeChip and pills are Badge", () => {
+  const chips = elements(["ScopeChip"]);
+  assert.equal(chips.length, 5);
+  for (const chip of chips) {
+    assert.ok(chip.attrs.tone, `${chip.file}:${chip.line} names its tone`);
+    assert.ok(chip.attrs.removeLabel, `${chip.file}:${chip.line} names its remove button`);
+  }
+  // No Badge carries a remove button any more.
+  const withButton = FILES.filter(({ text }) =>
+    /<Badge\b[^>]*className="[^"]*\bgap-1 p[re]-(0\.5|1)\b/.test(text)
+  ).map(({ file }) => file);
+  assert.deepEqual(withButton, []);
+  // No span draws a pill by hand: padding + radius + a tint or text size of its own.
+  const pills = elements(["span"])
+    .filter(({ attrs }) => {
+      const tokens = (attrs.className ?? "").split(/\s+/);
+      const has = (pattern: RegExp) => tokens.some((token) => pattern.test(token));
+      return (
+        has(/^px-(1\.5|2|2\.5)$/) &&
+        has(/^py-(0\.5|1)$/) &&
+        has(/^rounded(-(sm|md|full))?$/) &&
+        !has(/^font-mono$/)
+      );
+    })
+    .map(({ file, attrs }) => `${file}: ${attrs.className}`);
+  assert.deepEqual(pills, []);
 });

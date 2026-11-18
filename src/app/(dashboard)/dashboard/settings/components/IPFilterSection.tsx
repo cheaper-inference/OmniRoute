@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Card, Button, Input, Badge } from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Card, Button, Input } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 
 const MODES = [
@@ -152,18 +153,15 @@ export default function IPFilterSection() {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {config.blacklist.map((ip) => (
-                  <Badge key={ip} variant="error" className="gap-1 pr-1 font-mono">
+                  <ScopeChip
+                    key={ip}
+                    tone="danger"
+                    className="font-mono"
+                    onRemove={() => removeIP(ip, "blacklist")}
+                    removeLabel={`${t("remove")} ${ip}`}
+                  >
                     {ip}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-5"
-                      onClick={() => removeIP(ip, "blacklist")}
-                      aria-label={`${t("remove")} ${ip}`}
-                    >
-                      <Icon name="close" size={14} />
-                    </Button>
-                  </Badge>
+                  </ScopeChip>
                 ))}
               </div>
             </div>
@@ -177,18 +175,15 @@ export default function IPFilterSection() {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {config.whitelist.map((ip) => (
-                  <Badge key={ip} variant="success" className="gap-1 pr-1 font-mono">
+                  <ScopeChip
+                    key={ip}
+                    tone="success"
+                    className="font-mono"
+                    onRemove={() => removeIP(ip, "whitelist")}
+                    removeLabel={`${t("remove")} ${ip}`}
+                  >
                     {ip}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-5"
-                      onClick={() => removeIP(ip, "whitelist")}
-                      aria-label={`${t("remove")} ${ip}`}
-                    >
-                      <Icon name="close" size={14} />
-                    </Button>
-                  </Badge>
+                  </ScopeChip>
                 ))}
               </div>
             </div>

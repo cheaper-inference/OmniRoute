@@ -58,18 +58,12 @@ const FIELD_LABEL_KEYS: Record<(typeof PRICING_FIELDS)[number], string> = {
 
 type PricingField = (typeof PRICING_FIELDS)[number];
 
-function getSourceTone(source: PricingSource): string {
-  switch (source) {
-    case "user":
-      return "bg-warning/15 text-warning border border-warning/25";
-    case "modelsDev":
-      return "bg-info/15 text-info border border-info/25";
-    case "litellm":
-      return "bg-success/15 text-success border border-success/25";
-    default:
-      return "bg-bg-subtle text-text-muted border border-border/40";
-  }
-}
+// Badge variant that names where a price came from; anything else is the neutral badge.
+const SOURCE_BADGE_VARIANT: Partial<Record<PricingSource, "warning" | "info" | "success">> = {
+  user: "warning",
+  modelsDev: "info",
+  litellm: "success",
+};
 
 export default function PricingTab() {
   const [catalog, setCatalog] = useState<Record<string, PricingCatalogProvider>>({});
@@ -956,9 +950,9 @@ function ProviderSection({
           >
             {authBadge}
           </Badge>
-          <span className="px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px] rounded uppercase font-semibold shrink-0">
+          <Badge size="sm" className="shrink-0 uppercase">
             {provider.format}
-          </span>
+          </Badge>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {sourceCounts.user > 0 && (
@@ -1102,9 +1096,9 @@ function ModelRow({
               {t("custom")}
             </Badge>
           )}
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${getSourceTone(source)}`}>
+          <Badge size="sm" variant={SOURCE_BADGE_VARIANT[source] ?? "default"}>
             {getSourceLabel(source)}
-          </span>
+          </Badge>
           <span className="text-text-muted text-3xs opacity-0 group-hover:opacity-100 transition-opacity">
             {model.id}
           </span>

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import { Badge, Button, Card, Input, NumberInput, Toggle, whenNumber } from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Button, Card, Input, NumberInput, Toggle, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -353,17 +354,14 @@ export default function ModelLockoutCard() {
             {draft.errorCodes.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
                 {draft.errorCodes.map((code) => (
-                  <Badge key={code} variant="primary" className="gap-1 pe-0.5">
+                  <ScopeChip
+                    key={code}
+                    tone="accent"
+                    onRemove={() => removeErrorCode(code)}
+                    removeLabel={t("removeErrorCode", { code })}
+                  >
                     {code}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      icon="close"
-                      onClick={() => removeErrorCode(code)}
-                      className="size-5 min-h-5"
-                      aria-label={t("removeErrorCode", { code })}
-                    />
-                  </Badge>
+                  </ScopeChip>
                 ))}
               </div>
             )}

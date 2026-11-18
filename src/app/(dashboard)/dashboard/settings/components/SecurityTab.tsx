@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Card, Button, Input, Toggle, Modal, Badge } from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Card, Button, Input, Toggle, Modal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -448,18 +449,14 @@ export default function SecurityTab() {
           {customBannedSignals.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {customBannedSignals.map((keyword, index) => (
-                <Badge key={index} variant="error" className="gap-1 pr-1">
+                <ScopeChip
+                  key={index}
+                  tone="danger"
+                  onRemove={() => removeBannedKeyword(index)}
+                  removeLabel={`${getSettingsLabel("remove", "Remove")} ${keyword}`}
+                >
                   {keyword}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="size-5"
-                    onClick={() => removeBannedKeyword(index)}
-                    aria-label={`${getSettingsLabel("remove", "Remove")} ${keyword}`}
-                  >
-                    <Icon name="close" size={12} />
-                  </Button>
-                </Badge>
+                </ScopeChip>
               ))}
             </div>
           ) : (

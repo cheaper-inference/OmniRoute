@@ -10,26 +10,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, EmptyState, Skeleton } from "@/shared/components";
+import { Badge, Card, Button, Input, EmptyState, Skeleton } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
-// Chain position colours are data series (1st, 2nd, … provider), so they come from the
-// kit chart palette and cycle through its five steps. The palette is tuned for fills, not
-// text (chart-1 is ≈2.3:1 on a light tint), so the label stays on the text token and the
-// series colour sits on the border and a leading dot.
-const CHAIN_COLOR_COUNT = 5;
-function chainColor(index: number): string {
-  return `var(--color-chart-${(index % CHAIN_COLOR_COUNT) + 1})`;
-}
-function chainChipStyle(index: number): React.CSSProperties {
-  const color = chainColor(index);
-  return {
-    color: "var(--color-text-main)",
-    backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
-    border: `1px solid color-mix(in srgb, ${color} 60%, transparent)`,
-  };
+// Chain position colours are data series (1st, 2nd, … provider), so each chip is a Badge in a
+// kit chart tone (the series ink on its tint, which keeps the label readable), cycling through
+// the first five steps of the palette.
+const CHAIN_TONES = ["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"] as const;
+function chainTone(index: number) {
+  return CHAIN_TONES[index % CHAIN_TONES.length];
 }
 
 async function fetchChainsData() {
@@ -207,18 +198,9 @@ export default function FallbackChainsEditor() {
                   <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   <div className="flex gap-1.5 flex-wrap">
                     {(Array.isArray(chain) ? chain : []).map((entry, i) => (
-                      <span
-                        key={`${entry.provider}-${i}`}
-                        className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={chainChipStyle(i)}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="size-1.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: chainColor(i) }}
-                        />
+                      <Badge key={`${entry.provider}-${i}`} size="sm" tone={chainTone(i)} dot>
                         {i + 1}. {entry.provider}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
