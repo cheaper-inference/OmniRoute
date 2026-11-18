@@ -2,7 +2,7 @@
 
 import Icon from "@/shared/components/Icon";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useId, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
   Table,
@@ -88,6 +88,7 @@ export default function ProxyLogger() {
   // one the line detail uses too.
   const tProxyLog = useTranslations("proxyLog");
   const { emailsVisible } = useEmailPrivacyStore();
+  const rowKeysHintId = useId();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recording, setRecording] = useState(true);
@@ -521,6 +522,9 @@ export default function ProxyLogger() {
             containerClassName="rounded-none border-0 bg-surface"
             maxHeight="calc(100vh - 320px)"
             scrollLabel={t("tableLabel")}
+            // One tab stop for the rows; the arrow keys move between them (the hint below says so).
+            rowFocus="roving"
+            aria-describedby={rowKeysHintId}
             className="text-left text-xs"
           >
             <TableHeader>
@@ -576,6 +580,7 @@ export default function ProxyLogger() {
                   <TableRow
                     key={log.id}
                     onActivate={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
+                    selected={selectedLog?.id === log.id}
                     className={cn(
                       "cursor-pointer hover:bg-info/10 transition-colors",
                       isError && "bg-error/5"
@@ -724,6 +729,11 @@ export default function ProxyLogger() {
           </Table>
         )}
       </DataTableShell>
+      {sortedLogs.length > 0 && (
+        <p id={rowKeysHintId} className="text-xs text-text-muted">
+          {tCommon("tableRowKeysHint")}
+        </p>
+      )}
       {/* Detail Panel */}
       {selectedLog && <ProxyLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} />}
     </div>

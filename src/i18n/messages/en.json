@@ -1162,6 +1162,7 @@
     "tokensServerUrlLabel": "Server URL",
     "table": "Table",
     "tableScrollbarLabel": "Top {name} horizontal scrollbar",
+    "tableRowKeysHint": "Use the Up and Down arrow keys to move between rows, and Enter to open one.",
     "previous": "Previous",
     "goToPage": "Go to page {page}",
     "morePages": "More pages",

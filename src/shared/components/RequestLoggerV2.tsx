@@ -8,6 +8,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useId,
   useMemo,
   useRef,
   forwardRef,
@@ -181,6 +182,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     const [selectedApiKey, setSelectedApiKey] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [selectedLog, setSelectedLog] = useState(null);
+    const rowKeysHintId = useId();
     const [relatedRows, setRelatedRows] = useState<typeof logs>([]);
     const [correlationIdFilter, setCorrelationIdFilter] = useState(
       () => initialCorrelationId ?? ""
@@ -1314,6 +1316,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
               ref={tableRef}
               scrollbarLabel={t("tableLabel")}
               scrollLabel={t("tableLabel")}
+              // One tab stop for the rows; the arrow keys move between them (the hint below says
+              // so). The "load more" row has no onActivate, so its button stays a normal stop.
+              rowFocus="roving"
+              aria-describedby={rowKeysHintId}
               // The table container is the scroll viewport: infinite scroll, the sticky header
               // and the user's resize all act on it (opaque bg-surface, #4233).
               containerClassName="min-h-[460px] resize-y overflow-auto rounded-none border-0 bg-surface"
@@ -1387,6 +1393,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                     <TableRow
                       key={log.id}
                       onActivate={() => openDetail(log)}
+                      selected={selectedLog?.id === log.id}
                       data-cid={log.correlationId || undefined}
                       onMouseEnter={() => log.correlationId && setHoveredCid(log.correlationId)}
                       onMouseLeave={() => setHoveredCid(null)}
@@ -1711,6 +1718,11 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             </Table>
           )}
         </DataTableShell>
+        {sortedLogs.length > 0 && (
+          <p id={rowKeysHintId} className="text-xs text-text-muted">
+            {tCommon("tableRowKeysHint")}
+          </p>
+        )}
         <div className="text-[10px] text-text-muted italic">
           {t("callLogsInfo", {
             dataDir: "{DATA_DIR}/call_logs/",
