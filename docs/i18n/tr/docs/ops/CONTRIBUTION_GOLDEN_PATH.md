@@ -29,69 +29,61 @@ değişiklik türünü ilgili sözleşmeler, odaklı kontroller ve CI kapsamıyl
 6. **Kanıtları kaydedin.** PR şablonunda çalıştırılan komutları, eklenen veya değiştirilen tüm test dosyalarını,
    geçişleri ya da özellik bayraklarını ve yalnızca CI üzerinde yapılacak, hâlâ bekleyen doğrulamaları listeleyin.
 
-## Değişiklik türüne göre ideal yollar
+## Değişiklik türüne göre altın yollar
 
-Aşağıdaki komutlar gerekli en küçük odaklı kontrollerdir; değiştirdiğiniz davranışı doğrudan kapsayan bir
-testi atlama izni vermezler.
+Aşağıdaki komutlar minimum odaklı kontrollerdir; değiştirdiğiniz davranışı doğrudan kapsayan bir testi atlama izni değildir.
 
-### Sağlayıcı
+### sağlayıcı
 
 **Sözleşmeler**
 
-- `src/shared/constants/providers/` içindeki sağlayıcı tanımı ve bunun
-  `src/shared/constants/providers.ts` içindeki bileşimi.
-- `open-sse/config/providerRegistry.ts` veya buradan ayrıştırılmış kayıt defteri dosyalarındaki modeller ve yetenekler.
-- Uygulanabildiği durumlarda yürütücü/çevirici seçimi, OAuth veya API anahtarı yapılandırması, pano varlıkları ve oluşturulan
-  sağlayıcı referansı.
-- Genel kimlik bilgileri `resolvePublicCred()` kullanmalıdır; hata yanıtları, paylaşılan ve hassas bilgileri ayıklayan
-  hata yardımcılarını kullanmalıdır. `docs/security/PUBLIC_CREDS.md` (git'te bulunur; `/docs` içine derlenmez) ve
-  [Hata Ayıklama](../security/ERROR_SANITIZATION.md) belgelerine bakın.
+- `src/shared/constants/providers/` sağlayıcı tanımı ve `src/shared/constants/providers.ts` bileşimi.
+- `open-sse/config/providerRegistry.ts` veya çıkartılan kayıt defteri dosyalarındaki modeller ve yetenekler.
+- Executor/translator seçimi, OAuth veya API anahtarı yapılandırması ve kontrol paneli varlıkları. Yenilenen `docs/reference/PROVIDER_REFERENCE.md` veya README diyagramlarını işleme koymayın: sürüm yenileme bunları yeniden yazar (`check:pr-derived-paths` bunları taşıyan bir PR özelliğinde başarısız olur).
+- Genel kimlik bilgileri `resolvePublicCred()` kullanmalıdır; hata yanıtları, paylaşılan, arındırılmış hata yardımcılarını kullanmalıdır. `docs/security/PUBLIC_CREDS.md` (git; `/docs` olarak derlenmemiş) ve [Error Temizleme'ye](../security/ERROR_SANITIZATION.md) bakın.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # katalog değiştiğinde; oluşturulan farkı commit edin
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Etkilenen her istek ailesini de test edin: sohbet, Responses, görseller, embedding'ler, ses veya video.
-Oluşturulan katalog ve golden farklarını sözleşme değişiklikleri olarak inceleyin; bunları körü körüne kabul etmeyin.
+Ayrıca etkilenen tüm istek ailelerini de test edin: sohbet, Yanıtlar, resimler, yerleştirmeler, ses veya video. Sözleşme değiştikçe oluşturulan kataloğu ve altın farkları inceleyin; bunları körü körüne kabul etmeyin.
 
 ### Yönlendirme
 
 **Sözleşmeler**
 
-- `src/shared/constants/routingStrategies.ts` içindeki genel strateji değerleri ve kullanıcı arayüzü meta verileri.
-- `open-sse/services/combo.ts` ve `open-sse/services/combo/` altındaki dağıtım ve sıralama.
-- Combo şemaları, kalıcılık, dayanıklılık durumu, model yetenekleri ve API/kullanıcı arayüzü denetimleri.
-- Davranış değiştiğinde [Auto-Combo Motoru](../routing/AUTO-COMBO.md) ve dayanıklılık belgeleri.
+- `src/shared/constants/routingStrategies.ts` genel strateji değerleri ve UI meta verileri.
+- `open-sse/services/combo.ts` ve `open-sse/services/combo/` kapsamında gönderim ve sipariş.
+- Birleşik şemalar, kalıcılık, dayanıklılık durumu, model yetenekleri ve API/UI kontrolleri.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) ve davranış değiştiğinde esneklik belgeleri.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strateji veya dağıtım değişiklikleri
-npm run check:known-symbols      # strateji kaydı değişiklikleri
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Yerel olarak deterministik, üst servisi taklit eden testler kullanın. Canlı combo duman testleri kimlik bilgileri gerektirir ve
-manuel olarak çalıştırılır; CI testlerinin yerine geçmezler.
+Yerel olarak deterministik sahte yukarı akış testlerini kullanın. Canlı kombo dumanlar kimlik bilgileri gerektirir ve CI yerine geçmez, manueldir.
 
-### Kullanıcı Arayüzü / Kullanıcı Deneyimi
+### UI / UX
 
 **Sözleşmeler**
 
-- `src/app/` ve `src/shared/components/` altındaki Next.js rota/sayfa ve paylaşılan bileşen sınırları.
-- API yanıt biçimleri, yükleme/boş/hata durumları, klavye ve ekran okuyucu davranışı,
-  duyarlı düzen, tema ve yerel ayar genişletmesi.
-- `src/i18n/messages/en.json` içindeki İngilizce kullanıcı arayüzü kaynak dizgeleri; kullanıcıya gösterilen yeni metinleri doğrudan kodun içine yazmayın.
+- Next.js route/page ve `src/app/` ve `src/shared/components/` kapsamında paylaşılan bileşen sınırları.
+- API yanıt şekilleri, loading/empty/error durumları, klavye ve ekran okuyucu davranışı, duyarlı düzen, tema ve yerel ayar genişletme.
+- `src/i18n/messages/en.json` İngilizce UI kaynak dizeleri; Kullanıcıya yönelik yeni kopyayı sabit kodlamayın.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -100,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Etkileşim veya görsel değişiklikler için uygulamayı çalıştırın ve hem dar hem de geniş görünüm alanlarını kontrol edin. CI,
-üretim derlemesini ve daha geniş test paketlerini çalıştırır; görsel davranış için yine de değişikliğe uygun odaklı bir bileşen testi,
-Playwright testi veya belgelenmiş manuel kontrol gerekir.
+Etkileşim veya görsel değişiklikler için uygulamayı çalıştırın ve hem dar hem de geniş görünüm pencerelerini kontrol edin. CI üretim yapısını ve daha geniş paketleri yönetiyor; görsel davranış hâlâ odaklanmış bir bileşene, Playwright veya değişikliğe uygun belgelenmiş manuel kontrole ihtiyaç duyuyor.
 
 ### i18n
 
 **Sözleşmeler**
 
-- `src/i18n/messages/en.json` kullanıcı arayüzü kaynağıdır; `config/i18n.json` ise yerel ayar kaynağıdır.
-- CLI katalogları ayrı olarak `bin/cli/locales/` altında bulunur.
-- ICU yer tutucularını ve etiketlerini tam olarak koruyun. Ürün/sağlayıcı/model adlarını,
-  protokol ve başlık adlarını, komutları, kod/JSON tanımlayıcılarını, URL'leri, ortam değişkenlerini veya
-  `OmniRoute`, `OAuth`, `MCP` ve `A2A` gibi korunan terimleri çevirmeyin. Güncel kaynak listesi
-  `scripts/i18n/glossary/protected-terms.json` dosyasındadır.
+- `src/i18n/messages/en.json` UI kaynağıdır; `config/i18n.json` yerel ayar kaynağıdır.
+- CLI katalogları `bin/cli/locales/` altında ayrı olarak yayınlanır.
+- ICU yer tutucularını ve etiketlerini tam olarak koruyun. product/provider/model adlarını, protokol ve başlık adlarını, komutları, code/JSON tanımlayıcılarını, URLs, ortam değişkenlerini veya `OmniRoute`, `OAuth`, `MCP` ve `A2A` gibi korumalı terimleri çevirmeyin. Geçerli kaynak listesi `scripts/i18n/glossary/protected-terms.json`.
 
-**Odaklı döngü**
+Bir PR özelliği yalnızca `src/i18n/messages/en.json` düzenler (CLI: `bin/cli/locales/en.json`); diğer yerel ayarlar, sürüm yenileme veya çeviri dalgasıyla sürüm başına bir kez tamamlanır (`docs/guides/I18N.md` → "Yalnızca PRs touch `en.json` özelliği"). `npm run check:pr-derived-paths` başka bir yerel ayar kataloğunu düzenleyen PR özelliğinde başarısız oluyor.
+
+**Odaklanmış döngü**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI dizgeleri/katalogları değiştiğinde
 npm run lint
 ```
 
-Bu, mevcut sistem için bir kılavuzdur; araçlarını veya anahtar modelini genişletme çağrısı değildir.
-Yerine geçecek sistem tasarlanırken i18n yamalarını hedefli ve sınırlı tutun. Görev açıkça oluşturulmuş çeviriler
-gerektirmediği ve ortaya çıkan farkı incelemediğiniz sürece harici servisleri çağıran çeviri
-komutlarını çalıştırmayın.
+`--mode=pr` olmadan bu kapılar yerel olarak serbest bırakma modunda çalışır ve döngünün `en.json` eklediği veya yeniden yazdığı her anahtarı rapor eder; bu sizin PR değil, sürüm yenilemenin işidir.
+
+Bu, mevcut sistem için bir kılavuzdur, araçlarını veya temel modelini genişletmeye yönelik bir davet değildir. Değiştirme sistemi tasarlanırken i18n yamalarını cerrahi olarak tutun. Görev açıkça oluşturulan çevirileri gerektirmediği ve ortaya çıkan farkı incelemediğiniz sürece, harici hizmetleri çağıran çeviri komutlarını çalıştırmayın.
 
 ### CLI
 
 **Sözleşmeler**
 
-- `bin/cli/` içindeki genel kullanıma açık komutlar ve bayraklar, oluşturulan API komutları, çıkış kodları, stdout/stderr ve
-  JSON çıktı biçimleri, yapılandırma/ortam davranışı ve paketlenmiş dosyalar.
-- CLI'nin kullanıcıya yönelik metinleri CLI i18n katmanını kullanmalı ve `en`/`pt-BR` katalogları birbiriyle uyumlu tutulmalıdır.
-- Desteklenen çalışma zamanı olarak Node'u ve yayımlanan ikili dosya sözleşmesini koruyun.
+- `bin/cli/` genel komutlar ve işaretler, oluşturulan API komutları, çıkış kodları, stdout/stderr ve JSON çıktı şekilleri, config/environment davranışı ve paketlenmiş dosyalar.
+- CLI kullanıcıya yönelik dizeler, CLI i18n katmanını ( `bin/cli/locales/en.json` bulunan `t()` anahtarları) kullanmalıdır. Bir PR özelliği yalnızca `en.json` düzenler; `pt-BR` ve diğer yerel ayarlar yayınlandığında tamamlanır.
+- Düğümü desteklenen çalışma zamanı ve yayınlanan ikili sözleşme olarak koruyun.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # oluşturulan/paketlenen CLI değişiklikleri
-npm run check:pack-policy     # paket yüzeyi değişiklikleri
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Davranış ayrıştırmaya, dosyalara veya çıkış durumuna bağlı olduğunda tam komutu geçici bir veri dizininde kullanın. CI, daha kapsamlı paket yapıtı ve ekosistem kontrollerini gerçekleştirir.
+Davranış ayrıştırmaya, dosyalara veya çıkış durumuna bağlı olduğunda geçici bir veri dizininde tam komutu kullanın. CI daha geniş paket yapısı ve ekosistem kontrollerini gerçekleştirir.
 
 ### Veritabanı
 
 **Sözleşmeler**
 
-- `src/lib/db/` altındaki etki alanı modülleri; belirli modülleri doğrudan içe aktarın (eski `localDb.ts` yeniden dışa aktarma katmanı kaldırıldı).
-- `src/lib/db/migrations/` altındaki numaralandırılmış ve eş etkili SQL geçişleri, işlem güvenliği, yükseltme
-  davranışı, indeksler ve şemadan etkilenen tüm çağıranlar.
-- Rotalar ve işleyiciler hiçbir zaman doğrudan ham SQL çalıştırmaz.
+- `src/lib/db/` kapsamındaki alan adı modülleri; belirli modülleri doğrudan içe aktarın (eski `localDb.ts` yeniden dışa aktarma katmanı kaldırıldı).
+- `src/lib/db/migrations/` kapsamında numaralandırılmış, bağımsız SQL geçişleri, işlem güvenliği, yükseltme davranışı, dizinler ve şemadan etkilenen her arayan.
+- Rotalar ve işleyiciler hiçbir zaman doğrudan ham SQL yayınlamaz.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 npm run check:migration-numbering
@@ -171,28 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Bir geçiş eklerken hem yeni bir veritabanını hem de önceki şemadan yükseltmeyi test edin. Veritabanı testleri tanıtıcıları kapatmalı ve temizlik sırasında `resetDbInstance()` çağrısını yapmalıdır. `npm run test:bun:db` komutunu yalnızca en iyi çaba esaslı Bun bağdaştırıcısı yolu değiştiğinde çalıştırın; Node belirleyici olmaya devam eder.
+Geçiş eklerken hem yeni bir veritabanını test edin hem de önceki şemadan yükseltme yapın. Veritabanı testleri, temizleme sırasında tanıtıcıları kapatmalı ve `resetDbInstance()` çağırmalıdır. `npm run test:bun:db` yalnızca en iyi çaba gerektiren Bun bağdaştırıcısı yolu değiştiğinde çalıştırın; Düğüm yetkili kalır.
 
-### Derleme / dağıtım
+### Derle / dağıt
 
 **Sözleşmeler**
 
-- Kök ve çalışma alanı bildirimleri/kilit dosyası, `scripts/build/`, Next.js bağımsız derleme oluşturma süreci, `dist/`
-  paket içerikleri, Electron platform meta verileri, CI iş akışları ve dağıtım gözcüleri.
-- Desteklenen Node aralıkları ve `CLAUDE.md` içindeki izin verilenler listesindeki Bun kullanımı olduğu gibi korunmalıdır.
-- Derleme yapıtları izlenmemelidir; bağımlılık, lisans, iş akışı ve paket politikaları geçerlidir.
+- Kök ve çalışma alanı manifests/lockfile, `scripts/build/`, Next.js bağımsız derlemesi, `dist/` paket içerikleri, Electron platform meta verileri, CI iş akışları ve dağıtım nöbetçileri.
+- Desteklenen Düğüm aralıkları ve `CLAUDE.md` izin verilenler listesindeki Bun kullanımı bozulmadan kalmalıdır.
+- Yapı eserleri takip edilmeden kalır; bağımlılık, lisans, iş akışı ve paket politikaları geçerlidir.
 
-**Odaklı döngü**
+**Odaklanmış döngü**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # bağımlılık veya kilit dosyası değişiklikleri
-npm run check:pack-policy      # yayımlanan paket yüzeyi değişiklikleri
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Değişiklik yalnızca derlemeyi, bağımsız derleme oluşturma sürecini, varlıkları veya çalışma zamanı paketlemesini etkilediğinde yerel olarak `npm run build` kullanın. `npm run build:release` komutunu yalnızca sürüm/dağıtım doğrulaması için kullanın. CI derlemesi, platformlar arası nihai sinyaldir; platforma özgü Electron değişiklikleri, ilgili odaklı derleme veya duman testi kanıtı gerektirir.
+`npm run build` yalnızca değişiklik derlemeyi, bağımsız derlemeyi, varlıkları veya çalışma zamanı paketlemeyi etkilediğinde yerel olarak kullanın. `npm run build:release` yalnızca release/deploy doğrulaması için kullanın. CI yapısı platformlar arası son sinyaldir; platforma özgü Electron değişiklikleri, eşleşen odaklı yapıya veya duman kanıtlarına ihtiyaç duyar.
 
 ## Paylaşılan bir makine için geliştirici betikleri
 

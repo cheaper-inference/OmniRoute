@@ -14,23 +14,24 @@ Dispetçer hər çatdırılmanı HMAC-SHA256 ilə imzalayır, müvəqqəti
 xətalar zamanı yenidən cəhd edir, hər webhook üzrə çatdırılma vəziyyətini izləyir və
 davamlı olaraq uğursuz olan son nöqtələri avtomatik deaktiv edir.
 
-## Dəstəklənən hadisələr
+## Dəstəklənən Hadisələr
 
-`WebhookEvent` tipi (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tərəfindən istifadə olunur) hazırda dəqiq olaraq dörd hadisəni modelləşdirir:
+`WebhookEvent` növü (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tərəfindən istehlak olunur) hazırda səkkiz hadisəni modelləşdirir:
 
-| Hadisə              | İşə düşmə şərti                                                                     |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| `request.completed` | Proksi edilmiş sorğu uğurla tamamlanır                                              |
-| `request.failed`    | Proksi edilmiş sorğu bütün təkrar cəhdlərdən/ehtiyat keçidlərdən sonra uğursuz olur |
-| `quota.exceeded`    | API açarı büdcə/kvota həddini keçir                                                 |
-| `test.ping`         | Test son nöqtəsinin istifadə etdiyi sintetik hadisə                                 |
+| Hadisə                    | Nə vaxt yanır                                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Proksiləşdirilmiş sorğu uğurla tamamlanır                                                                         |
+| `request.failed`          | Proksiləşdirilmiş sorğu bütün retries/fallback sonra uğursuz olur                                                 |
+| `quota.exceeded`          | API açarı budget/quota həddini keçir                                                                              |
+| `proxy.set_aside`         | Proksi hovuz üzvü təkrar imtinalardan sonra kənara qoyulur (yalnız keçid)                                         |
+| `proxy.pool.exhausted`    | Proksi hovuz dairəsinin hər bir üzvü bir kənara qoyulur                                                           |
+| `provider.reset_redeemed` | Banklaşdırılmış sıfırlamaları avtomatik tətbiq edin, sıfırlanmış kredit və ya Claude həftəlik sessiya sıfırlaması |
+| `provider.exhausted`      | Provayderin hər hesabı soyuyur (hər provayderə ən çoxu 10 dəqiqədə bir dəfə)                                      |
+| `test.ping`               | Testin son nöqtəsi tərəfindən istifadə edilən sintetik hadisə                                                     |
 
-Abunəliklər bütün hadisələri qəbul etmək üçün hərfi `"*"` dəyərini qəbul edir. `events` daxilindəki naməlum hadisə
-adları göndərmə zamanı nəzərə alınmır.
+Abunələr hər hadisəni almaq üçün hərfi `"*"` qəbul edir. `events` -də naməlum hadisə adları göndərilmə zamanı nəzərə alınmır.
 
-> Qeyd: dispetçer API-si qoşulub, lakin bəzi
-> `test.ping` olmayan hadisələr üçün istehsal mühitindəki çağırış nöqtələri hələ də əlavə olunur. Buraxılışınızda
-> hazırda hansı yolların dispetçeri çağırdığını görmək üçün `grep dispatchEvent` yoxlayın.
+> Qeyd: dispetçer API simlidir, lakin bəzi qeyri-`test.ping` hadisələri üçün istehsal zəng saytları hələ də eniş edir. Hazırda buraxılışınızda hansı yolların dispetçeri işə saldığını görmək üçün `grep dispatchEvent` yoxlayın.
 
 ## Arxitektura
 

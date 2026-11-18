@@ -181,13 +181,17 @@ async function terminatePids(allPids, { kill, running, wait, identify }) {
   // A listener on the port is only stopped when its command line names OmniRoute (same proof
   // as the pid-file path). A foreign or unreadable one is someone else's server: leave it alone
   // and do not report the port free.
+  // A "gone" pid had no process behind it when classified: nothing to signal.
   const pids = [];
+  let skipped = 0;
   for (const p of allPids) {
     const identity = identify(p);
-    if (identity === "ours" || identity === "gone") pids.push(p);
-    else console.error(`Skipped PID ${p} on the port: it does not look like an OmniRoute process.`);
+    if (identity === "ours") pids.push(p);
+    else if (identity !== "gone") {
+      skipped++;
+      console.error(`Skipped PID ${p} on the port: it does not look like an OmniRoute process.`);
+    }
   }
-  const skipped = allPids.length - pids.length;
   if (pids.length === 0) return skipped === 0;
   for (const p of pids) {
     try {
@@ -195,11 +199,23 @@ async function terminatePids(allPids, { kill, running, wait, identify }) {
     } catch {}
   }
   await wait(1000);
+  // A pid that exited during the wait can already belong to another process: prove it is still
+  // OmniRoute before SIGKILL. A foreign or gone survivor means ours exited; an unproven one
+  // cannot be counted as stopped.
+  const escalated = [];
+  let unproven = false;
   for (const p of pids) {
-    try {
-      if (running(p)) kill(p, "SIGKILL");
-    } catch {}
+    if (!running(p)) continue;
+    const identity = identify(p);
+    if (identity === "ours") {
+      try {
+        kill(p, "SIGKILL");
+      } catch {}
+      escalated.push(p);
+    } else if (identity === "unknown") {
+      unproven = true;
+    }
   }
-  // Confirm the port is free: any PID still alive means we failed.
-  return skipped === 0 && pids.every((p) => !running(p));
+  // Confirm the port is free: any OmniRoute PID still alive means we failed.
+  return skipped === 0 && !unproven && escalated.every((p) => !running(p));
 }

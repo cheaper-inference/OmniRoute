@@ -683,8 +683,7 @@ for (const relativePath of APP_STAGING_REMOVAL_PATHS) {
 // tarball gate, the staged dist/ legitimately contains node_modules (the
 // standalone server's runtime deps, including Turbopack-hashed packages whose
 // wasm files DB init requires). The allowlist prefixes above are the contract.
-// The path matchers keep the translated docs mirrors the /docs route reads (they arrive
-// with the standalone's docs/ copy) and drop every other docs/i18n file.
+// docs/i18n never reaches this point: Step 10.6 removes the whole tree (2026-11-17, npm 413).
 const stagedFiles = walkFiles(DIST_DIR);
 const unexpectedStagedFiles = findUnexpectedArtifactPaths(stagedFiles, {
   exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
