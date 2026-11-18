@@ -1,1 +1,1 @@
-- **auto-combo**: Bound repeat patterns in `detectCodeComplexity` and `detectReasoningDepth` regexes (`import`, `SELECT`, `${...}`, `if...then`) to eliminate quadratic backtracking on long lines (#19881)
+- **auto-combo**: Count the `import … from`, `SELECT … FROM` and `${…}` code indicators in `detectCodeComplexity` with a linear scan, and stop the `if … then` pattern in `detectReasoningDepth` from backtracking across long whitespace runs, eliminating quadratic backtracking on long lines without dropping long valid spans (#19881)
