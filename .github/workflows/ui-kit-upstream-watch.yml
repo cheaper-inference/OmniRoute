@@ -175,10 +175,11 @@ jobs:
                 echo "The sync step didn't finish; see $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
               fi
               echo
-              echo "To sync by hand from the main checkout:"
+              echo "To sync by hand, first confirm the target has no release freeze and the base is green. Then use an isolated worktree:"
               echo
               echo '```'
-              echo 'git -C _references/cheaper-inference-ui-kit fetch --tags'
+              echo "scripts/dev/new-worktree.sh chore/ui-kit-sync-v${LATEST} '${BASE}'"
+              echo "cd .claude/worktrees/ui-kit-sync-v${LATEST}"
               echo 'scripts/dev/sync-ui-kit.sh latest'
               echo '```'
               echo

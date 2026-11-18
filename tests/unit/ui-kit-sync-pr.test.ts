@@ -474,7 +474,10 @@ function runStep(
 const RESOLVE = "Resolve the target release branch";
 const TRACK = "Open, update or close the tracking issue";
 const TRACKER = { number: 5, title: "UI kit: a newer upstream release is available" };
-const trackWrites = (calls: string[]) => calls.filter((c) => !c.startsWith("issue list"));
+// Credential lookup is a read used by the workflow's log masking. Keep all
+// other unexpected commands visible to the assertions about mutations.
+const trackWrites = (calls: string[]) =>
+  calls.filter((c) => !c.startsWith("issue list") && c !== "auth token");
 
 test("workflow: the target is the highest release by version, not by text order", (t) => {
   const run = runStep(t, RESOLVE, {

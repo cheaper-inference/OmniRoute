@@ -135,7 +135,10 @@ function runStep(
   };
 }
 
-const writes = (run: StepRun) => run.calls.filter((c) => !c.startsWith("issue list"));
+// The workflow reads the credential once to register its log mask. Every other
+// non-list command still counts as a write, including unexpected commands.
+const writes = (run: StepRun) =>
+  run.calls.filter((c) => !c.startsWith("issue list") && c !== "auth token");
 const NO_TOKEN = m.describeUnknown({ tokenSet: false, listingFailed: true });
 const LISTING_FAILED = m.describeUnknown({ tokenSet: true, listingFailed: true });
 const NO_TAGS = m.describeUnknown({ tokenSet: true, listingFailed: false });
