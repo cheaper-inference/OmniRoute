@@ -445,7 +445,7 @@ export default function ConnectionRow({
               size="sm"
               icon="shield"
               onClick={() => onToggleRateLimit(!rateLimitEnabled)}
-              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                 rateLimitShielded
                   ? "bg-success/15 text-success hover:bg-success/25"
                   : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -478,7 +478,7 @@ export default function ConnectionRow({
                   icon="sync"
                   onClick={() => onToggleAutoSync?.(!autoSyncEnabled)}
                   disabled={connection.isActive === false}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
                     autoSyncEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -523,7 +523,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleClaudeExtraUsage?.(!claudeBlockExtraUsageEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     !claudeBlockExtraUsageEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -543,7 +543,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleCodexPaidCredits(!codexPaidCreditsEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexPaidCreditsEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -620,7 +620,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="timer"
                   onClick={() => onToggleCodex5h?.(!codex5hEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codex5hEnabled
                       ? "bg-info/15 text-info hover:bg-info/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -634,9 +634,9 @@ export default function ConnectionRow({
                   size="sm"
                   icon="date_range"
                   onClick={() => onToggleCodexWeekly?.(!codexWeeklyEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexWeeklyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={t("codexWeeklyToggleTitle")}
@@ -654,7 +654,7 @@ export default function ConnectionRow({
                   icon="vpn_lock"
                   onClick={() => onToggleProxyEnabled(!proxyEnabled)}
                   aria-label={proxyEnabled ? t("proxyEnabledTitle") : t("proxyDisabledTitle")}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     proxyEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -678,9 +678,9 @@ export default function ConnectionRow({
                       ? t("perKeyProxyEnabledTitle")
                       : t("perKeyProxyDisabledTitle")
                   }
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     perKeyProxyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={
@@ -720,7 +720,7 @@ export default function ConnectionRow({
                       icon="vpn_lock"
                       onClick={onProxy}
                       disabled={!onProxy}
-                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium ${colorClass}`}
+                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs ${colorClass}`}
                       title={t("proxyConfiguredBySource", {
                         source: label,
                         host: proxyHost || t("configured"),

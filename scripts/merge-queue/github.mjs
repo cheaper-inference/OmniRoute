@@ -49,7 +49,11 @@ export class GitHubError extends Error {
  * @property {string} headSha
  * @property {string|null} headBranch    branch (or tag) whose event started the run
  * @property {string} event              "push" | "pull_request" | "workflow_dispatch" | ...
+ * @property {number|null} workflowId    the workflow (file) this is a run of: a new run of it on
+ *                                       the same head has a higher id and its own check suite
  * @property {number|null} checkSuiteId  the check suite holding this run's check runs
+ * @property {number|null} runAttempt    1 for the first attempt, 2 after a re-run, ... (null when
+ *                                       the payload has none)
  */
 
 /**
@@ -129,10 +133,21 @@ export class GitHubError extends Error {
  * @property {(q: {branch?: string, headSha?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowRuns   GET /actions/runs filtered by branch /
  *            head_sha / event (at most 10 pages)
+ * @property {(runId: number) => Promise<WorkflowJob[]>} listWorkflowRunJobs   GET
+ *            /actions/runs/{runId}/jobs?filter=all (every page): the jobs of every attempt of the
+ *            run, each with the id of its check run (checkRunId, read from check_run_url)
  * @property {(workflowFile: string, q: {branch?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
+ * @property {(runId: number) => Promise<void>} rerunFailedJobs   POST
+ *            /actions/runs/{runId}/rerun-failed-jobs: GitHub re-runs the run's failed jobs (and
+ *            the jobs that need them) as its next attempt; needs the Actions write permission.
+ *            Refusals (403 running already or no permission, 404, 422) throw GitHubError
+ * @property {(branch: string) => Promise<{type: string, rulesetId: number|null}[]>} getBranchRules
+ *            the ACTIVE rules that apply to a branch name (GET /rules/branches/<branch>, every
+ *            page, every ruleset that matches the name, organization ones included); GitHub
+ *            matches by name pattern, so a branch that does not exist yet gets its rules too
  * @property {() => Promise<object[]>} listRulesets
  * @property {(id: number) => Promise<object>} getRuleset
  * @property {(body: object) => Promise<object>} createRuleset
@@ -163,6 +178,17 @@ export function parseLinkHeader(header) {
     if (m) for (const rel of m[2].split(/\s+/)) out[rel] = m[1];
   }
   return out;
+}
+
+/**
+ * `error` with `rateLimited: true` when the client classified its answer as a rate limit
+ * (isRateLimited: a 429, or a 403 with a Retry-After header, `x-ratelimit-remaining: 0` or the
+ * words "rate limit"), whether it gave up at once (a wait over the cap) or after its retries;
+ * unchanged otherwise. Callers that stop at a rate limit read it.
+ */
+function markRateLimited(error, rateLimited) {
+  if (rateLimited) error.rateLimited = true;
+  return error;
 }
 
 /**
@@ -336,7 +362,36 @@ export function normalizeWorkflowRun(raw) {
     headSha: raw.head_sha ?? "",
     headBranch: typeof raw.head_branch === "string" && raw.head_branch ? raw.head_branch : null,
     event: String(raw.event ?? ""),
+    workflowId: raw.workflow_id ?? null,
     checkSuiteId: raw.check_suite_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+  };
+}
+
+/**
+ * @typedef {object} WorkflowJob  normalized by github.listWorkflowRunJobs
+ * @property {number} id
+ * @property {number|null} runId
+ * @property {number|null} runAttempt
+ * @property {string} name
+ * @property {string} status
+ * @property {string|null} conclusion
+ * @property {number|null} checkRunId  the id of the job's check run: the last path segment of its
+ *                                     `check_run_url`; null when the payload has none
+ */
+
+/** @returns {WorkflowJob} */
+export function normalizeWorkflowJob(raw) {
+  const match = /\/check-runs\/(\d+)\/?$/.exec(String(raw.check_run_url ?? ""));
+  const checkRunId = match ? Number(match[1]) : null;
+  return {
+    id: raw.id,
+    runId: raw.run_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+    name: String(raw.name ?? ""),
+    status: String(raw.status ?? ""),
+    conclusion: raw.conclusion ?? null,
+    checkRunId: Number.isSafeInteger(checkRunId) ? checkRunId : null,
   };
 }
 
@@ -472,8 +527,8 @@ export function createGitHubClient(options) {
         return { status, data, headers: res.headers };
       }
       // A rate-limited request was not processed, so it is always safe to replay.
-      const retryable =
-        (status >= 500 && retryServerErrors) || isRateLimited(status, res.headers, data);
+      const rateLimited = isRateLimited(status, res.headers, data);
+      const retryable = (status >= 500 && retryServerErrors) || rateLimited;
       if (retryable && attempt < maxRetries) {
         const delay = retryDelayMs(attempt, res.headers, {
           baseDelayMs,
@@ -485,18 +540,24 @@ export function createGitHubClient(options) {
           // adds rate-limit pressure. Fail now; the next tick tries again.
           const wait = Math.ceil(delay / 1000);
           const why = redact(errorMessage(data, res.statusText));
-          throw new GitHubError(
-            status,
-            method,
-            shown,
-            `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+          throw markRateLimited(
+            new GitHubError(
+              status,
+              method,
+              shown,
+              `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+            ),
+            rateLimited
           );
         }
         log(`${method} ${shown} → ${status}; retry ${attempt + 1}/${maxRetries} in ${delay} ms`);
         await sleep(delay);
         continue;
       }
-      throw new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText)));
+      throw markRateLimited(
+        new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText))),
+        rateLimited
+      );
     }
   }
 
@@ -863,6 +924,15 @@ export function createGitHubClient(options) {
       return runs.map(normalizeWorkflowRun);
     },
 
+    async listWorkflowRunJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`listWorkflowRunJobs: invalid workflow run id: ${runId}`);
+      }
+      // filter=all: the jobs of every attempt, so a re-run's attempt keeps the jobs before it.
+      const jobs = await paginate(r(`/actions/runs/${runId}/jobs`), { filter: "all" });
+      return jobs.map(normalizeWorkflowJob);
+    },
+
     async listWorkflowFileRuns(workflowFile, { branch, event } = {}) {
       const query = { ...(branch ? { branch } : {}), ...(event ? { event } : {}) };
       const path = r(`/actions/workflows/${encodeURIComponent(workflowFile)}/runs`);
@@ -878,6 +948,23 @@ export function createGitHubClient(options) {
           body: { ref, inputs },
         }
       );
+    },
+
+    async rerunFailedJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`rerunFailedJobs: invalid workflow run id: ${runId}`);
+      }
+      await request("POST", r(`/actions/runs/${runId}/rerun-failed-jobs`));
+    },
+
+    async getBranchRules(branch) {
+      const name = String(branch ?? "");
+      if (!name) throw new Error("getBranchRules: a branch name is required");
+      const rules = await paginate(r(`/rules/branches/${encodePath(name)}`));
+      return rules.map((rule) => ({
+        type: String(rule?.type ?? ""),
+        rulesetId: rule?.ruleset_id ?? null,
+      }));
     },
 
     async listRulesets() {

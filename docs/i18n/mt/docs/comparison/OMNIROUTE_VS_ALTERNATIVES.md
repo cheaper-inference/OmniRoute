@@ -4,42 +4,41 @@
 
 ---
 
-Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
+Paragun tal-karatteristiċi oġġettivi vs routers AI open-source popolari.
 
-> **Metodoloġija**: Repos pubbliċi awditjati fl-2026-Q2. Verżjonijiet kif elenkati.
-> Ibgħat korrezzjonijiet permezz ta' PR — irridu li dan ikun preċiż.
+> **Metodoloġija** : Repos pubbliċi vverifikati 2026-Q2. Verżjonijiet kif elenkati. Ibgħat korrezzjonijiet permezz ta' PR — irridu li dan ikun preċiż.
 
-| Karatteristika                                          |                   OmniRoute 3.8                   |     LiteLLM 1.x      | OpenRouter (SaaS) |   Portkey    |
-| ------------------------------------------------------- | :-----------------------------------------------: | :------------------: | :---------------: | :----------: |
-| **Fornituri**                                           |                      **329**                      |         ~100         |        ~50        |     ~30      |
-| **Entries tal-katalogu b'xejn/bla auth**                |                      **155**                      |         n/a          |    passthrough    |     n/a      |
-| **Ospitabbli b'mod proprju**                            |                        ✅                         |          ✅          |        ❌         |  ⚠ bi ħlas   |
-| **Entries tal-katalogu OAuth**                          |                      **23**                       |       parzjali       |        ❌         |      ❌      |
-| **Kombinazzjonijiet ta' fallback awtomatiku**           |                 **20 strateġija**                 | bbażat fuq prijorità | bbażat fuq tiers  | bim-piżijiet |
-| **Fusion (panel parallel + sintesi tal-ġudikant)**      |                        ✅                         |          ❌          |        ❌         |      ❌      |
-| **Fallback Tier 1/2/3 (abbonament→irħis→b'xejn)**       |                      ✅ + UI                      |       manwali        |        n/a        |   manwali    |
-| **Kompressjoni tat-tokens**                             | Stack ta' 12-il magna (RTK + Caveman + LLMLingua) |        l-ebda        |      l-ebda       |    l-ebda    |
-| **Ġenerazzjoni multimodali (diskors/mużika/video)**     |                        ✅                         |          ❌          |    passthrough    |      ❌      |
-| **Server MCP inkorporat**                               |             ✅ 110 għodod, 33 ambitu              |          ❌          |        ❌         |      ❌      |
-| **Protokoll A2A**                                       |                    ✅ 6 ħiliet                    |          ❌          |        ❌         |      ❌      |
-| **Memorja (FTS5 + vettur)**                             |                        ✅                         |          ❌          |        ❌         |      ❌      |
-| **Guardrails (PII, injezzjoni, viżjoni)**               |                        ✅                         |       parzjali       |        ❌         |  ✅ bi ħlas  |
-| **Integrazzjonijiet ma' aġenti fil-cloud**              |            Codex, Cursor, Devin, Jules            |          ❌          |        ❌         |      ❌      |
-| **Circuit breaker għal kull fornitur**                  |              ✅ 3 stati, rkupru lazy              |        bażiku        |        ❌         |      ✅      |
-| **Stealth tal-fingerprint TLS (JA3/JA4)**               |                    ✅ wreq-js                     |          ❌          |        ❌         |      ❌      |
-| **Framework ta' evalwazzjoni**                          |                   ✅ inkorporat                   |          ❌          |        ❌         |  ⚠ bi ħlas   |
-| **Proxy MITM (jinterċetta Cursor/Antigravity)**         |               ✅ multi-pjattaforma                |          ❌          |        ❌         |      ❌      |
-| **CLI b'system tray (bla Electron)**                    |                        ✅                         |          ❌          |        n/a        |     n/a      |
-| **Auto-auth tal-CLI b'machine-ID**                      |                        ✅                         |          ❌          |        n/a        |     n/a      |
-| **Dashboard**                                           |                    Next.js 16                     |        bażiku        |   proprjetarju    | proprjetarju |
-| **i18n**                                                |                   **67 locale**                   |          ❌          |        ❌         |      ⚠       |
-| **Ħiliet pubbliċi tal-aġenti (SKILL.md)**               |                       ✅ 45                       |          ❌          |        ❌         |      ❌      |
-| **Appoġġ għal tunnels (Cloudflared, Tailscale, Ngrok)** |                        ✅                         |          ❌          |        n/a        |     n/a      |
-| **Liċenzja**                                            |                        MIT                        |         MIT          |   proprjetarju    | proprjetarju |
+| Karatteristika                                          |                    OmniRoute 3.8                    |       LiteLLM 1.x        | OpenRouter (SaaS) |   Portkey    |
+| ------------------------------------------------------- | :-------------------------------------------------: | :----------------------: | :---------------: | :----------: |
+| **Fornituri**                                           |                       **329**                       |           ~100           |        ~50        |     ~30      |
+| **Free/no-auth entrati fil-katalgu**                    |                       **155**                       |           n/a            |    passthrough    |     n/a      |
+| **Awto-hostable**                                       |                         ✅                          |            ✅            |        ❌         |  ⚠ mhallsa   |
+| **OAuth entrati fil-katalgu**                           |                       **23**                        |         parzjali         |        ❌         |      ❌      |
+| **Auto-fallback combos**                                |                  **22 strateġija**                  | ibbażat fuq il-prijorità | ibbażat fuq saff  |    peżati    |
+| **Fusion (sinteżi tal-imħallef tal-panel parallel + )** |                         ✅                          |            ❌            |        ❌         |      ❌      |
+| **Tier 1/2/3 fallback (abbonament → cheap → free)**     |                       ✅ + UI                       |          manwal          |        n/a        |    manwal    |
+| **Kompressjoni tat-token**                              | Munzell ta' 12-il magna (RTK + Caveman + LLMLingua) |           xejn           |       xejn        |     xejn     |
+| **Ġenerazzjoni multimodali (speech/music/video)**       |                         ✅                          |            ❌            |    passthrough    |      ❌      |
+| **Server MCP mibni**                                    |              ✅ 110 għodda, 33 ambiti               |            ❌            |        ❌         |      ❌      |
+| **A2A protokoll**                                       |                     ✅ 6 ħiliet                     |            ❌            |        ❌         |      ❌      |
+| **Memorja (FTS5 + vector)**                             |                         ✅                          |            ❌            |        ❌         |      ❌      |
+| **Guardrails (PII, injezzjoni, viżjoni)**               |                         ✅                          |         parzjali         |        ❌         |  ✅ mhallsa  |
+| **Integrazzjonijiet tal-aġenti tal-cloud**              |             Codex, Cursor, Devin, Jules             |            ❌            |        ❌         |      ❌      |
+| **Circuit breaker għal kull fornitur**                  |            ✅ 3-state, irkupru għażżien             |          bażiku          |        ❌         |      ✅      |
+| **TLS fingerprint stealth (JA3/JA4)**                   |                     ✅ wreq-js                      |            ❌            |        ❌         |      ❌      |
+| **Qafas ta' evalwazzjoni**                              |                     ✅ built-in                     |            ❌            |        ❌         |  ⚠ mhallsa   |
+| **prokura MITM (interċetta Cursor/Antigravity)**        |                  ✅ cross-platform                  |            ❌            |        ❌         |      ❌      |
+| **CLI bi trej tas-sistema (mhux Electron)**             |                         ✅                          |            ❌            |        n/a        |     n/a      |
+| **CLI machine-ID auto-auth**                            |                         ✅                          |            ❌            |        n/a        |     n/a      |
+| **Daxxbord**                                            |                     Next.js 16                      |          bażiku          |   proprjetarja    | proprjetarja |
+| **i18n**                                                |                    **67 lokal**                     |            ❌            |        ❌         |      ⚠       |
+| **Ħiliet ta' aġent pubbliku (SKILL.md)**                |                        ✅ 45                        |            ❌            |        ❌         |      ❌      |
+| **Appoġġ tal-mina (Cloudflared, Tailscale, Ngrok)**     |                         ✅                          |            ❌            |        n/a        |     n/a      |
+| **Liċenzja**                                            |                         MIT                         |           MIT            |   proprjetarja    | proprjetarja |
 
 ## Meta tagħżel OmniRoute
 
-- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (381 fornitur, 155 entrati fil-katalgu free/no-auth )
+- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (394 fornitur, 155 entrati fil-katalgu free/no-auth )
 - Għandek bżonn a** server MCP mibni** (għodod LLM, memorja, ħiliet esposti bħala għodda)
 - Għandek bżonn**A2A protokoll** għal flussi tax-xogħol minn aġent għal aġent
 - Trid** stealth tal-marki tas-swaba'** (JA3/JA4) biex tevita skoperta minn upstream CAPTCHAs

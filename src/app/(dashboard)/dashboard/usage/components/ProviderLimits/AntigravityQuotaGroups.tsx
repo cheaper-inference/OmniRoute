@@ -148,7 +148,14 @@ function QuotaWindowRow({
         <span>{label}</span>
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={remaining}
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
+      >
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${remaining}%`, backgroundColor: getBarColor(remaining).bar }}
@@ -219,7 +226,7 @@ export default function AntigravityQuotaGroups({
             className="rounded-md border border-border/60 bg-bg-subtle/40 p-2"
           >
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h4 className="text-xs font-semibold text-text-main">{group.displayName}</h4>
+              <h4 className="text-xs text-text-main">{group.displayName}</h4>
               {onHideGroup && (
                 <button
                   type="button"

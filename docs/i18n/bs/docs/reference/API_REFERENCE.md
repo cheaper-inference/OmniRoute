@@ -840,72 +840,179 @@ pozivaocu koji nije sesija (dohvatanje, brisanje, otkazivanje i provjera `input_
 
 ---
 
-## Search API
+## API za pretragu
 
-apstrakcija Web/search provajdera (Tavily, Brave, Exa, Serper, itd.).
+Apstrakcija pružaoca web/pretrage (Tavily, Brave, Exa, Serper itd.).
 
-| Metoda | Put                    | Opis                                                                                           |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Navedite mogućnosti konfiguriranih provajdera pretraživanja +                                  |
-| POST   | `/v1/search`           | Pokrenite upit za pretragu — tijelo potvrđeno od `v1SearchSchema`, podržava caching/coalescing |
-| GET    | `/v1/search/analytics` | hit/latency/cache statistika po provajderu                                                     |
+| Metoda | Putanja                | Opis                                                                                      |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Navodi konfigurisane pružaoce pretrage i njihove mogućnosti                               |
+| POST   | `/v1/search`           | Pokreće upit za pretragu — tijelo potvrđuje `v1SearchSchema`, podržava keširanje/spajanje |
+| GET    | `/v1/search/analytics` | Statistika pogodaka/latencije/keša po pružaocu                                            |
 
-**Auth:** Nosilac API ključa (`extractApiKey` + `isValidApiKey`). Politika pretraživanja nametnuta preko `enforceApiKeyPolicy`.
+**Autentifikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Pravila pretrage primjenjuju se putem `enforceApiKeyPolicy`.
 
-**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
+### Imenovane kombinacije pretrage/dohvatanja
 
-### Exa i Tavily `provider_options`
+I `POST /v1/search` i `POST /v1/web/fetch` prihvataju `model` kao ime sačuvane kombinacije.
+Koristite ili `model` ili eksplicitni `provider`; slanje oba vraća `400`.
+Bez ijednog od ova dva polja, postojeći automatski odabir pružaoca ostaje nepromijenjen.
 
-Exa i Tavily čitaju polja specifična za dobavljača iz vrećice s prostorom imena: `provider_options.exa` (ili `provider_options["exa-search"]`) i `provider_options.tavily` (ili `provider_options["tavily-search"]`). Samo donji ključevi se prosljeđuju. Svaki se provjerava u odnosu na vlastitu Zod šemu u `open-sse/handlers/search/providerOptionsPassthrough.ts`, a ključ pogrešnog tipa se ispušta. Bilo koji drugi ključ se zanemaruje, uključujući auth, bazu URL, `stream` i `outputSchema`. Ravni ključevi koje koriste drugi provajderi (`cx`, `depth`, ...) rade kao i prije.
+I Combo Builder i njegov katalog Add Model izlažu izvorne unose za web-operacije
+povezanih pružalaca, čak i kada nemaju listu LLM modela. Serper prikazuje
+**Web pretraga**; Tavily prikazuje **Web pretraga / Ekstrakcija stranice**, a pružaoci koji podržavaju
+samo dohvatanje prikazuju **Ekstrakcija stranice**.
+Odaberite unos i nalog kao i obično. Jedan Tavily unos služi za obje web krajnje tačke;
+ovi operativni unosi ne dodaju se u selektore klijenata koji podržavaju samo chat niti u provjere chat modela.
 
-| Provajder | Polja najvišeg nivoa                                                                                                                                                                                                                                                                                                                                                      | Nested                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ravni primitivi), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` spojen preko zadanog `{ text: true, highlights: true }` |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+Na primjer, kreirajte kombinaciju **priority** pod nazivom `shared-free` sa sljedećim poredanim ciljevima:
 
-Generička polja uvijek pobjeđuju: `query`, `max_results`, `filters` (domene), `country` i tema izvedena iz `search_type`. Na Exa, `search_type: "news"` zadržava `category: "news"`. Tavily također prihvata `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Trošak Firecrawl pretraživanja se bilježi po započetom bloku od 10 vraćenih rezultata, po 0,002 USD (2 kredita) po bloku i najmanje jednom bloku po pozivu ( [Firecrawl naplata](https://docs.firecrawl.dev/billing) ): 11 rezultata košta 0,004 USD.
+Zatim koristite isto ime na svakoj površini:
 
-Generički `time_range` sada stiže do oba provajdera: Exa dobija `startPublishedDate` (ISO vremenska oznaka), a Tavily dobija `start_date` (`YYYY-MM-DD`). Eksplicitni datum u `provider_options` nadjačava mapirani.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa rezultati zadržavaju `id`, `highlights` (svako istaknuto, a ne samo prvo koje se koristi kao `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` i `extras` u `provider_raw`. Tavily rezultati zadržavaju `images` i `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Trošak pretraživanja veze se bilježi na 0,005 USD za `depth` `fast` i `standard` i 0,05 USD za `deep` ( [cijene povezivanja](https://docs.linkup.so/pages/documentation/development/pricing) ), bez obzira da li `depth` dolazi iz `provider_options` ili postavki veze.
+Pretraga razmatra Tavily, a zatim Serper; dohvatanje razmatra Tavily, a zatim Jina Reader;
+chat preskače namjenske pružaoce za pretragu/dohvatanje i razmatra OpenAI. Kompatibilnost
+proizlazi iz registara izvršilaca za pretragu/dohvatanje, a ne iz riječi u imenu modela.
+Filtriranje prethodi odabiru vjerodajnica i slanju te nikada ne mijenja sačuvanu kombinaciju.
 
-Exa `type: "lite"` (Exa 3.0) prihvata manji skup polja i odbija cijeli zahtjev kada se postavi bilo koje drugo polje. Za lite, `additionalQueries`, `systemPrompt` i svaki `contents` ključ osim `text` i `highlights` se ispuštaju prije poziva. Zastarjeli `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` se više ne prosljeđuju.
+Rute za mogućnosti koje nisu chat podržavaju `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` i `p2c`. Strategije sinteze namijenjene samo chatu, kao što su
+`fusion`, `pipeline` i `context-relay`, odbacuju se na rutama koje nisu chat, umjesto da se
+nečujno primijene na pretragu ili generisane medije.
+Postojeći mehanizam kombinacija obrađuje rezervno prebacivanje po poretku, uključujući neuspjehe
+kvote uzvodnog sistema, i zadržava ID-ove koraka, vezivanja naloga, liste dozvoljenih naloga po koraku,
+ugniježđene reference, opsege veza/kvota pozivaoca i pravila pristupa kombinaciji. Rezultati zadržavaju
+svoju izvornu šemu pretrage/dohvatanja, uključujući stvarnog pružaoca; `X-OmniRoute-Combo-Trace` identifikuje
+odluku o rutiranju. Nepoznate kombinacije vraćaju `404`; neaktivne kombinacije i kombinacije
+bez kompatibilnih ciljeva vraćaju `400`.
 
-Računovodstvo troškova je ravni registar `costPerQuery`, osim za Exa, koji slijedi Exa-e vlastite cijene: 0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni `instant`), pokrivajući 10 rezultata; 0,001 $ za svaki dalji rezultat; i 0,001 $ po vraćenom rezultatu kada je postavljen `contents.summary`. Tavily je zabilježen na 1 kredit (0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast`, i 2 kredita (0,016 USD) za `advanced` ( [Tavily API krediti](https://docs.tavily.com/documentation/api-credits) ). Poziv sa `auto_parameters: true` koji Tavily nadogradi na napredni i dalje se snima na 1 kredit.
+Svaki pokušaj kombinacije koristi jednog eksplicitnog pružaoca. Ne može iza kulisa pozvati izvorni
+automatski skup pružalaca kombinacije. Zahtjevi sa eksplicitnim pružaocem zadržavaju postojeće
+ponašanje sa jednim pružaocem. Direktni chat zahtjevi koji ciljaju namjenske pružaoce za pretragu/dohvatanje
+vraćaju praktičan JSON `400` umjesto da se proslijede izvršiocu u stilu OpenAI-ja.
 
----
+### Rute kombinacija specifične za mogućnost
+
+Sačuvane kombinacije mogu sadržavati objekat `routes` čiji su ključevi API mogućnosti. Svaka ruta posjeduje
+vlastitu listu ciljeva, strategiju i konfiguraciju tokom izvršavanja. Vrhunski `models`, `strategy` i `config`
+ostaju plan za Chat kompatibilan sa starijom verzijom; stare kombinacije bez `routes` nastavljaju raditi nepromijenjeno.
+
+Podržani ključevi ruta su `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` i `audio-generation`. Projekcija krajnje tačke odvija se prije odabira vjerodajnica,
+bodovanja ili slanja. Ugniježđene reference kombinacija odabiru rutu podređene kombinacije za istu mogućnost.
+
+`POST /v1/music/generations` i `POST /v1/ocr` prihvataju ime kombinacije u polju `model`. Izvorna
+krajnja tačka kompatibilna sa ElevenLabsom, `POST /v1/music`, takođe prihvata ime kombinacije u polju
+`model_id`, ali svaki upotrebljivi cilj na toj izvornoj krajnjoj tački mora biti muzički model ElevenLabs,
+kako bi se očuvao njen ugovor binarnog odgovora. `POST /v1/sound-generation` prihvata kombinaciju
+`audio-generation` u polju `model_id` pod istim ograničenjem izvornog binarnog odgovora. Za heterogene
+pružaoce muzike koristite `/v1/music/generations`.
+
+**Automatski odabir:** bez `provider`, najjeftiniji pružalac sa konfigurisanim povezivanjem pokreće se
+prvi, a sljedeći najjeftiniji je rezervni. Besplatni pružaoci za krajnji slučaj (`duckduckgo-free`) koriste
+se samo kada ništa drugo nije konfigurisano. SearXNG koji se samostalno hostuje smatra se konfigurisanim
+kada njegovo povezivanje čuva stvarni `baseUrl` (a ne podrazumijevanu vrijednost kataloga
+`http://localhost:8888/search`): tada se rangira kao pružalac od $0 ispred onih koji koriste ključeve, a
+najjeftiniji pružalac sa ključem je rezervni, uključujući slučajeve kada SearXNG odgovori sa 400, 401, 403
+ili 404. `baseUrl` koji nije važeći `http(s)` URL ili pokazuje na adresu metapodataka oblaka ne računa se.
+SearXNG povezivanje koje čuva token rangira se na ovaj način samo preko `https://` ili povratne `http://`
+adrese. Preko udaljenog običnog `http://` nikada nije rezervni pružalac i ostaje krajnja opcija, koristi
+se samo kada nijedan drugi pružalac nije konfigurisana ili kada se zatraži po imenu, pa u ta dva slučaja
+šalje token u čistom tekstu.
+
+### `provider_options` za Exa i Tavily
+
+Exa i Tavily čitaju polja specifična za dobavljača iz imenovanog spremnika:
+`provider_options.exa` (ili `provider_options["exa-search"]`) i `provider_options.tavily`
+(ili `provider_options["tavily-search"]`). Prosljeđuju se samo ključevi navedeni u nastavku. Svaki
+od njih provjerava se u vlastitoj Zod shemi u `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+a ključ s pogrešnim tipom se odbacuje. Svi drugi ključevi se zanemaruju, uključujući autentikaciju,
+osnovni URL, `stream` i `outputSchema`. Ravni ključevi koje koriste drugi dobavljači (`cx`, `depth`, ...)
+rade kao i prije.
+
+| Dobavljač | Polja najvišeg nivoa                                                                                                                                                                                                                                                                                                                                                      | Ugniježđeno                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ravne primitivne vrijednosti), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` spojeno preko zadane vrijednosti `{ text: true, highlights: true }` |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
+
+Generička polja uvijek imaju prednost: `query`, `max_results`, `filters` (domene), `country` i
+tema izvedena iz `search_type`. Kod Exa, `search_type: "news"` zadržava `category: "news"`.
+Tavily također prihvata `search_type: "finance"` (`topic: "finance"`).
+
+Trošak Firecrawl pretrage evidentira se po započetom bloku od 10 vraćenih rezultata, po cijeni od
+0,002 USD (2 kredita) po bloku, uz najmanje jedan blok po pozivu
+([Firecrawl naplata](https://docs.firecrawl.dev/billing)): 11 rezultata košta 0,004 USD.
+
+Generičko polje `time_range` sada stiže do oba dobavljača: Exa dobija `startPublishedDate` (ISO
+vremenska oznaka), a Tavily `start_date` (`YYYY-MM-DD`). Eksplicitni datum u `provider_options`
+nadjačava mapirani datum.
+
+Exa rezultati zadržavaju `id`, `highlights` (svako isticanje, a ne samo prvo koje se koristi kao
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` i `extras` u
+`provider_raw`. Tavily rezultati zadržavaju `images` i `favicon`.
+
+Trošak Linkup pretrage evidentira se kao 0,005 USD za `depth` `fast` i `standard`, a 0,05 USD za
+`deep` ([Linkup cjenovnik](https://docs.linkup.so/pages/documentation/development/pricing)),
+bez obzira na to da li `depth` dolazi iz `provider_options` ili iz postavki veze.
+
+Exa `type: "lite"` (Exa 3.0) prihvata manji skup polja i odbija cijeli zahtjev kada je postavljeno
+bilo koje drugo polje. Za lite se `additionalQueries`, `systemPrompt` i svaki ključ u
+`contents`, osim `text` i `highlights`, odbacuju prije poziva. Zastarjeli
+`subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` više se ne
+prosljeđuju.
+
+Obračun troškova koristi ravni registar `costPerQuery`, osim za Exa, koji prati Exa cjenovnik:
+0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni
+`instant`), što obuhvata 10 rezultata; 0,001 USD za svaki dodatni rezultat; i 0,001 USD po
+vraćenom rezultatu kada je postavljeno `contents.summary`. Tavily se evidentira kao 1 kredit
+(0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast`, te 2 kredita (0,016 USD) za
+`advanced` ([Tavily API krediti](https://docs.tavily.com/documentation/api-credits)). Poziv s
+`auto_parameters: true` koji Tavily nadogradi na advanced i dalje se evidentira kao 1 kredit.
 
 ## Web Fetch API
 
-Izdvojite sadržaj s URL-a putem konfigurisanog dobavljača za dohvat s weba (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Izdvojite sadržaj s URL-a putem konfigurisanog pružaoca web-preuzimanja (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, isti API ključ kao za Parallel Search) vraća samo Markdown
-— bilo koji drugi `format` uzrokuje grešku `400` — i ograničava sadržaj na 100.000 znakova. Kada ciljna
-stranica ne može biti izdvojena, upstream to prijavljuje unutar HTTP 200 odgovora;
+Parallel Extract (`parallel-search`, s istim API ključem kao Parallel Search) vraća samo Markdown — bilo koja druga vrijednost za `format` rezultira greškom `400` — i ograničava sadržaj na 100.000 znakova. Kada ciljnu stranicu nije moguće izdvojiti, upstream to prijavljuje unutar HTTP odgovora `200`;
 OmniRoute to izlaže kao `422` s fiksnom porukom.
 
-| Metoda | Putanja         | Opis                                                     |
-| ------ | --------------- | -------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Dohvata/izdvaja URL — tijelo validira `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) također vraća samo Markdown (bilo koja druga vrijednost za `format` rezultira greškom `400`) i ograničava sadržaj na 100.000 znakova. Funkcioniše bez ključa: eksplicitni zahtjev `provider: "keenable-search"` bez konekcije koristi Keenableovu krajnju tačku bez ključa
+(ograničenja stope po IP adresi). Konfigurisan ključ samo uklanja ta ograničenja; automatski odabir koristi Keenable samo kada je ključ konfigurisan.
 
-**Autentifikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Pravila se primjenjuju putem `enforceApiKeyPolicy`.
+| Metoda | Putanja         | Opis                                                                |
+| ------ | --------------- | ------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Preuzimanje/izdvajanje URL-a — tijelo provjerava `v1WebFetchSchema` |
 
-**Fallback uz praćenje kvote (#8297):** kada nije naveden eksplicitni `provider`, kroz skup
+**Autentikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Pravila se primjenjuju putem `enforceApiKeyPolicy`.
+
+Imenovane kombinacije koriste [ugovor usmjeravanja `model`](#named-searchfetch-combinations)
+iznad, uz očuvanje opcija i odgovora specifičnih za preuzimanje.
+
+**Fallback svjestan kvote (#8297):** kada nisu navedeni ni `provider` ni `model`, bazen
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) prolazi se fiksnim redoslijedom
-prioriteta (popunjavanje prvo) — dobavljač koji je ograničen stopom, ali je konfigurisan, preskače se
-umjesto da se zahtjev prekine, a ponovljiva greška upstreama/greška zbog kvote (HTTP 429 uvijek;
-402/403 za Firecrawl/Tavily/TinyFish besplatne kvote — ne za Jina Reader i nikada za običan 400 neispravan zahtjev)
-prelazi na sljedeći neisprobani dobavljač s vjerodajnicama u trenutku zahtjeva. Kada su svi dobavljači
-u skupu iscrpljeni, krajnja tačka vraća jedan `429` (sa zaglavljem `Retry-After`)
-umjesto prethodnog generičkog `400`. Kada se zatraži eksplicitni `provider`, nema tihog fallbacka —
-dobavljač koji je ograničen stopom ili neuspješan izlaže vlastitu grešku (`429` ako je ograničen stopom,
-inače status upstreama).
+`parallel-search` → `keenable-search`) obilazi se po fiksnom
+redoslijedu prioriteta (popunjavajući prvo) — pružalac s ograničenom stopom, ali konfigurisan, preskače se
+umjesto prekidanja zahtjeva, a ponovljivi/uzvodni neuspjeh zbog kvote
+(HTTP `429` uvijek; `402`/`403` za Firecrawl/Tavily/TinyFish besplatne nivoe u stilu kvote —
+ne za Jina Reader i nikada za običan neispravan zahtjev `400`) prelazi na
+sljedeći nekorišteni pružalac s vjerodajnicama u trenutku zahtjeva. Kada se iscrpe svi pružaoci u bazenu,
+krajnja tačka vraća jedan `429` (sa zaglavljem `Retry-After`)
+umjesto prethodnog generičkog `400`. Kada se zatraži eksplicitni `provider`, nema
+tihog fallbacka — ograničeni ili neuspješni eksplicitni pružalac prikazuje vlastitu grešku (`429` ako je ograničena stopa, inače upstream status).
 
 ---
 
@@ -981,19 +1088,21 @@ CLI nadograđuje `base_url + /responses` na WebSocket, a OmniRoute ga tunelira d
 
 ## Izvještavanje o kvotama i problemima
 
-| Metoda | Putanja             | Opis                                                                                       |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------ |
-| GET    | `/v1/quotas/check`  | Unaprijed provjeri kvotu za `provider` + `accountId` prije izdavanja registrovanog ključa  |
-| POST   | `/v1/issues/report` | Prijavi neuspjeh izdavanja kvote/ključa na GitHub (zahtijeva `GITHUB_ISSUES_REPO` + token) |
+| Metoda | Putanja             | Opis                                                                                             |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Prethodno provjerava kvotu za `provider` + `accountId` prije izdavanja registrovanog ključa      |
+| POST   | `/v1/issues/report` | Prijavljuje neuspješno izdavanje kvote/ključa na GitHub (zahtijeva `GITHUB_ISSUES_REPO` + token) |
 
-**Autentifikacija:** Bearer API ključ (`isAuthenticated`).
+**Autentikacija:** `/v1/quotas/check` prihvata Bearer API ključ (`isAuthenticated`). `/v1/issues/report` je
+dostupan samo za upravljanje (`requireManagementAuth`), kao i `/api/v1/registered-keys`: sesija
+kontrolne table, lokalni CLI token ili API ključ sa opsegom `manage`/`admin`; API ključevi samo za
+inferencu dobijaju `403`.
 
-### Oporavak sesije kvote (opcionalno uključivanje)
+### Oporavak sesije kvote (opcionalno)
 
-Ne-streaming `POST /v1/chat/completions` ili `POST /v1/responses` koji ne uspije s
-terminalnom greškom kvote (`402`/`429`/`503`, čije tijelo navodi da su kvota ili krediti iscrpljeni)
-može se privremeno pohraniti i ponovo reproducirati kasnije umjesto vraćanja greške. Pozivalac uključuje
-ovu opciju za svaki zahtjev pomoću tri zaglavlja:
+Ne-streaming `POST /v1/chat/completions` ili `POST /v1/responses` koji ne uspije sa
+konačnom greškom kvote (`402`/`429`/`503` čije tijelo navodi da su kvota ili krediti iscrpljeni)
+može se privremeno sačuvati i kasnije ponoviti umjesto vraćanja greške. Pozivalac se uključuje po zahtjevu pomoću tri zaglavlja:
 
 | Zaglavlje                    | Vrijednost                                        |
 | ---------------------------- | ------------------------------------------------- |
@@ -1001,15 +1110,13 @@ ovu opciju za svaki zahtjev pomoću tri zaglavlja:
 | `x-omniroute-session`        | ID sesije, `[A-Za-z0-9._:-]{1,128}`               |
 | `x-omniroute-recovery-turn`  | ID poteza jedinstven unutar sesije (isto pravilo) |
 
-Samo potezi sa `stream: false`, bez alata, historije alata ili `previous_response_id`, te bez
-`x-omniroute-connection` fiksiranja, ispunjavaju uslove, a `STORAGE_ENCRYPTION_KEY` mora biti postavljen
-(zahtjev se pohranjuje šifrovano do 24 sata). Odgovor je tada `202` sa
-`recovery.poll`; izvršite anketiranje pomoću `GET /v1/quota-recoveries/{id}` (`202` dok je na čekanju, `200` sa
-oporavljenim tijelom po završetku) ili otkažite pomoću `DELETE`. Ulaznice su vidljive samo API
-ključu koji ih je kreirao. Reprodukcija čiji je ishod neizvjestan završava u stanju
-`needs_confirmation` umjesto da bude poslana dvaput. Izvor: `src/lib/quota/quotaSessionRecovery.ts`.
-
----
+Samo potezi sa `stream: false`, bez alata, historije alata ili `previous_response_id`, i bez
+`x-omniroute-connection` pina, ispunjavaju uslove, a `STORAGE_ENCRYPTION_KEY` mora biti postavljen
+(zahtjev se čuva šifrovan do 24 sata). Odgovor je zatim `202` sa
+`recovery.poll`; provjerite stanje pomoću `GET /v1/quota-recoveries/{id}` (`202` dok je na čekanju, `200` sa
+oporavljenim tijelom kada se završi) ili otkažite pomoću `DELETE`. Karte su vidljive samo API
+ključu koji ih je kreirao. Ponovljena obrada čiji je ishod neizvjestan završava u stanju
+`needs_confirmation` umjesto da se pošalje dva puta. Izvor: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Samouslužna upotreba (`/api/usage/om-usage`)
 
@@ -1740,17 +1847,21 @@ Izlazne webhook pretplate za OmniRoute događaje (dovršavanje zahtjeva, iscrplj
 
 ## Registrovani ključevi (automatsko upravljanje)
 
-Koristi ih podsistem za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema pozadinskom pružaocu/nalogu, uz dnevne/satne kvote.
+Koristi ih podsistem za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema pratećem provajderu/nalogu, uz dnevne/satne kvote.
 
 | Method | Path                                  | Description                                                                                                                                                                                                      |
 | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Izlistaj registrovane ključeve (samo maskirani prefiks)                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Izdaj novi registrovani ključ — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća neobrađeni ključ **samo jednom**. Vraća `429` pri odbijanju zbog kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Preuzmi metapodatke registrovanog ključa (bez neobrađenog materijala)                                                                                                                                            |
+| GET    | `/api/v1/registered-keys`             | Prikaži registrovane ključeve (samo maskirani prefiks)                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Izdaj novi registrovani ključ — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća sirovi ključ **jednom**. Vraća `429` ako je zahtjev odbijen zbog kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Preuzmi metapodatke registrovanog ključa (bez sirovog materijala)                                                                                                                                                |
 | DELETE | `/api/v1/registered-keys/[id]`        | Opozovi registrovani ključ                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja tačka za opoziv (isti učinak kao DELETE)                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja tačka za opoziv (isti efekat kao DELETE)                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | Pročitaj ograničenja izdavanja za provajdera                                                                                                                                                                     |
+| PUT    | `/api/v1/providers/[provider]/limits` | Postavi ograničenja izdavanja za provajdera — tijelo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET    | `/api/v1/accounts/[id]/limits`        | Pročitaj ograničenja izdavanja za nalog                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Postavi ograničenja izdavanja za nalog — isto tijelo kao kod rute za provajdera                                                                                                                                  |
 
-**Autentikacija:** sesija/ključ API-ja za upravljanje (`requireManagementAuth`) — ista zaštita kao za `/api/keys`: sesija kontrolne table, lokalni CLI token ili ključ API-ja sa opsegom `manage`/`admin`; API ključevi samo za izvođenje dobijaju `403`. Pogledajte i `/v1/quotas/check` i `/v1/issues/report`.
+**Autentikacija:** sesija/ključ API-ja za upravljanje (`requireManagementAuth`) — ista zaštita kao za `/api/keys`: sesija kontrolne table, lokalni CLI token ili ključ API-ja sa opsegom `manage`/`admin`; ključevi API-ja samo za zaključivanje dobijaju `403`. Pogledajte i `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 
@@ -1874,23 +1985,23 @@ Trajno spremište konverzacijskih/činjeničnih podataka, ograničeno na API klj
 
 ## MCP server
 
-OmniRoute isporučuje ugrađeni server Model Context Protocola s 3 transporta (stdio, SSE, streamable-http) i alatima s ograničenim opsegom. Krajnje tačke nadzorne ploče u nastavku čitaju podatke o statusu i reviziji te prosljeđuju HTTP transporte.
+OmniRoute isporučuje ugrađeni server Model Context Protocol-a s 3 transporta (stdio, SSE, streamable-http) i alatima s opsezima. Krajnje tačke nadzorne ploče u nastavku čitaju podatke o statusu i reviziji te prosljeđuju HTTP transporte.
 
-| Metoda | Putanja                | Opis                                                                                                                        | ------------------------------------------------------------------------------------------------ |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| GET    | `/api/mcp/status`      | Otkucaj srca, transport, stanje dostupnosti, posljednji poziv, najčešće korišteni alati, stopa uspjeha u posljednja 24 sata |
-| GET    | `/api/mcp/tools`       | Lista MCP alata s elementima `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                      |
-| GET    | `/api/mcp/sse`         | Otvaranje SSE toka za SSE transport (vraća `503` ako je MCP onemogućen ili ako se transporti ne podudaraju)                 |
-| POST   | `/api/mcp/sse`         | Slanje JSON-RPC okvira putem SSE transporta                                                                                 |
-| GET    | `/api/mcp/stream`      | Otvaranje SSE strane Streamable HTTP transporta (poruke koje pokreće server)                                                |
-| POST   | `/api/mcp/stream`      | Slanje JSON-RPC okvira putem Streamable HTTP transporta                                                                     |
-| DELETE | `/api/mcp/stream`      | Završetak Streamable HTTP sesije                                                                                            |
-| GET    | `/api/mcp/audit`       | Upit dnevnika revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                    | false`, `?apiKeyId=`                                                                             |
-| GET    | `/api/mcp/audit/stats` | Zbirna statistika revizije (ukupni broj, stopa uspjeha, prosječno trajanje, najčešće korišteni alati)                       |
+| Metoda | Putanja | Opis |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Signal aktivnosti, transport, stanje dostupnosti, posljednji poziv, najčešće korišteni alati, stopa uspjeha u posljednja 24 sata |
+| GET | `/api/mcp/tools` | Lista MCP alata sa stavkama `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | Otvara SSE tok za SSE transport (vraća `503` ako je MCP onemogućen ili se transport ne podudara) |
+| POST | `/api/mcp/sse` | Šalje JSON-RPC okvir putem SSE transporta |
+| GET | `/api/mcp/stream` | Otvara SSE stranu Streamable HTTP transporta (poruke koje pokreće server) |
+| POST | `/api/mcp/stream` | Šalje JSON-RPC okvir putem Streamable HTTP transporta |
+| DELETE | `/api/mcp/stream` | Završava Streamable HTTP sesiju |
+| GET | `/api/mcp/audit` | Pretražuje zapis revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Zbirna statistika revizije (ukupne vrijednosti, stopa uspjeha, prosječno trajanje, najčešće korišteni alati) |
 
-**Autentifikacija:** transporti `sse`/`stream` koriste MCP-specifičnu površinu za autentifikaciju (Bearer ključ API-ja s opsegom `mcp`); rute `status`/`tools`/`audit*` dostupne su za čitanje s nadzorne ploče (nije potrebna dodatna autentifikacija osim pristupa hostu nadzorne ploče).
+**Autentifikacija:** transporti `sse`/`stream` poštuju površinu autentifikacije specifičnu za MCP (Bearer API ključ s opsegom `mcp`); rute `status`/`tools`/`audit*` dostupne su za čitanje s nadzorne ploče (nije potrebna dodatna autentifikacija osim pristupa hostu nadzorne ploče).
 
-> Oba HTTP transporta kontroliraju `settings.mcpEnabled` i `settings.mcpTransport` — nepodudaranje transporta vraća `400`, dok onemogućeno stanje MCP-a vraća `503`.
+> Oba HTTP transporta kontroliraju `settings.mcpEnabled` i `settings.mcpTransport` — nepodudaranje transporta vraća `400`, dok onemogućeno MCP stanje vraća `503`.
 
 ---
 

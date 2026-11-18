@@ -21,7 +21,8 @@
     },
     {
       "alias": "check:codeql-ratchet",
-      "reason": "Reads remote CodeQL state and requires hosted security permissions."
+      "reason": "Reads remote CodeQL state and requires hosted security permissions.",
+      "externalState": true
     },
     {
       "alias": "check:pr-derived-paths",
@@ -261,6 +262,13 @@
       "command": "bun scripts/check/check-compression-budget.ts"
     },
     {
+      "id": "check:type-scale-ratchet",
+      "job": "quality-gate",
+      "args": ["run", "check:type-scale-ratchet", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-type-scale-ratchet.mjs"
+    },
+    {
       "id": "check:circular-deps",
       "job": "quality-extended",
       "args": ["run", "check:circular-deps"],
@@ -286,6 +294,7 @@
       "job": "quality-extended",
       "args": ["run", "check:vuln-ratchet", "--", "--ratchet"],
       "kind": "hard",
+      "externalState": true,
       "command": "node scripts/check/check-vuln-ratchet.mjs"
     },
     {
@@ -358,7 +367,7 @@
       "id": "i18n:check",
       "job": "docs-sync-strict",
       "args": ["run", "i18n:check"],
-      "kind": "hard",
+      "kind": "drift",
       "command": "node scripts/i18n/check-translation-drift.mjs"
     },
     {
@@ -429,6 +438,7 @@
       "job": "lint",
       "args": ["run", "audit:deps"],
       "kind": "hard",
+      "externalState": true,
       "command": "node scripts/quality/audit-dependencies.mjs"
     },
     {

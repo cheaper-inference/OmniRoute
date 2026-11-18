@@ -14,9 +14,7 @@ export default function ModalityBridgeMovedCard() {
       <div className="flex items-start gap-3">
         <Icon name="image_search" size={20} className="text-primary" />
         <div className="min-w-0 flex-1">
-          <h4 className="text-base font-semibold text-text-main">
-            {t("modalityBridgeMovedTitle")}
-          </h4>
+          <h4 className="text-base text-text-main">{t("modalityBridgeMovedTitle")}</h4>
           <p className="mt-1 text-sm text-text-muted">{t("modalityBridgeMovedBody")}</p>
         </div>
       </div>

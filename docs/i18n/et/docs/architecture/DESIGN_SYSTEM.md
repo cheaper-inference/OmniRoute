@@ -16,153 +16,39 @@
 > kirillitsa, kreeka ja vietnami kirja jaoks kasutatakse Interit ning ainult `html[dir="rtl"]` all araabia kirja jaoks Vazirmatni.
 > Iga ikoon on Lucide’i glüüf.
 
-## 1. Kus asjad asuvad
+## 1. Kus asjad elavad
 
-- **Komplekt.** `packages/ui-kit/src` on bait-baidilt koopia ülesvoolu `src/` kataloogist commiti juures, mis on fikseeritud failis
-  `packages/ui-kit/UPSTREAM.md` (kus on kirjas ka litsentsi autoriseering); `PATCHES.md` loetleb kohalikud
-  paigad (neid pole). Seda kasutatakse lähtekoodina ilma koostamiseta: `next.config.mjs` transpileerib selle ning
-  `tsconfig.json` vastendab `@omniroute/ui-kit` → `packages/ui-kit/src` ja `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` ja `vitest.mcp.config.ts` sisaldavad sama aliast). Impordi
-  komplekti komponent selle alamtee kaudu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), mitte kunagi
-  `@omniroute/ui-kit` koondmooduli kaudu: koondmoodul tõmbab igasse importijasse kõik komponendid (sealhulgas kuupäevavalija).
-  Komplekti laaditabel kaasatakse faili `src/app/globals.css` kaudu
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, täielik laaditabel: põhiline `ci-ui.css` koos kõigi mustriperekondadega).
-- **Tokenid.** `packages/ui-kit/src/ci-tokens.css` deklareerib `--ci-*` tokenid; `src/app/globals.css`
-  seob need pärandiks olevate OmniRoute'i nimedega (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), et olemasolevad `var(--color-*)` viited ja Tailwindi
-  utiliidid töötaksid edasi. Uus kood kasutab Tailwindi utiliite (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) või komplekti klasse — mitte kunagi kuueteistkümnendväärtust
-  (`tests/unit/design-kit-bridge.test.ts` jõustab selle seose). `text-primary` laheneb
-  tokeniks `--color-primary-ink` muutuja `--text-color-primary` kaudu, nii et põhitekst jääb loetavaks, samal ajal kui
-  `bg-primary`/`border-primary` säilitavad aktsentpinna: Editionsi korral on see komplekti
-  `--ci-color-accent-active` (heleduse korral sügav vasekarva `#99562f`, tumeduse korral vasekarva aktsent); Classici korral
-  heleduse puhul lime-800 ja tumeduse puhul laimikarva aktsent. Diagrammide seeriad kasutavad
-  `--color-chart-1` … `--color-chart-8`, millest igaühel on teksti jaoks ohutu `--color-chart-N-ink` ja läbipaistmatu
-  `--color-chart-N-subtle` sildi toon, mis määratakse komplekti seeriajärjestuses (`ciChartSeriesOrder`).
-- **Teemad.** `<html className="ci-theme">` (`src/app/layout.tsx`) lülitab dokumendi komplekti teemale.
-  Eelistus on `light`, `dark` või `system` (`THEME_CONFIG.defaultTheme = "system"` failis
-  `src/shared/constants/appConfig.ts`; `system` järgib sätet `prefers-color-scheme`). Funktsioon `applyTheme()` failis
-  `src/store/themeStore.ts` (mida peegeldab enne hüdratatsiooni käivitatav ja faili `src/app/layout.tsx` manustatud
-  `THEME_BOOT_SCRIPT`) määrab koos `data-theme="dark"|"light"` ning lülitab elemendil `<html>` klassi `.dark`.
-  Komplekti tumedate tokenite kogum põhineb väärtusel `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute'i enda tumedad ülekirjutused (`.dark` plokk failis `globals.css`) ja pärandiks olevad Tailwindi `dark:`
-  utiliidid põhinevad klassil `.dark`. Aktsentvärvide eelseadistusi pole: aktsent pärineb alati
-  komplektist ning vanemast järgust säilinud eelseadistus eemaldatakse salvesti laadimisel.
-- **Paletid.** Neid on kaks ja mõlemad pärinevad komplektist (`src/shared/constants/appearancePalette.ts`): vaikimisi
-  `editions` ja `classic`. Editions on komplekti atribuut `data-ci-appearance="editions"` elemendil `<html>`, mille
-  `ci-editions.css` (imporditud failiga `ci-ui.css`) ühendab atribuudiga `data-theme`; Classic tähendab selle atribuudi
-  puudumist. Juurpaigutus renderdab atribuudi serveris, seega saab külastaja, kellel pole midagi salvestatud (või kellel puudub JS),
-  Editionsi kõigil pindadel — töölaual, sisselogimislehel, lehel `/status`, vealehtedel, lehel `/docs` ja PWA-s. Valik
-  säilitatakse teema kõrval samas `theme` salvestis (`palette`, `setPalette()`, `applyPalette()` failis
-  `src/store/themeStore.ts`) ning rakendatakse enne kuvamist skripti `THEME_BOOT_SCRIPT` abil
-  (`src/shared/utils/themeBootScript.ts`, mis on manustatud paigutuse elementi `<head>`); atribuut eemaldatakse
-  ainult siis, kui salvestatud palett on `"classic"`; juurpaigutusest väljaspool asuv `src/app/global-error.tsx` rakendab
-  selle sama salvesti põhjal. Ära lisa atribuuti `data-ci-appearance` ühelegi teisele elemendile: komplekt otsib seda selektoriga
-  `html:root:has([data-ci-appearance="editions"])`, mistõttu lülitaks üksainus järeltulija ümber kogu dokumendi.
-  Editionsi variant `data-ci-editions-variant="landing"` on mõeldud turunduslehtedele, mitte töölauale.
-  Brauseri kasutajaliides: server renderdab vaikeväärtuse Editions võtmes `viewport.themeColor` (üks silt iga
-  `prefers-color-scheme` kohta) ja veebimanifestis — `PWA_THEME_COLORS` failis
-  `src/shared/constants/pwaThemeColors.ts`, mis on ainus Editionsi `--ci-color-background` peegeldus
-  (`#f3f1e9` / `#11120f`) ja on failiga `ci-editions.css` seostatud testi `tests/unit/pwa-theme-colors.test.ts` kaudu. Aktiivne
-  `<meta name="theme-color">` järgib seejärel salvestatud paletti ja režiimi: `THEME_BOOT_SCRIPT` kirjutab
-  sildid enne kuvamist ümber ning teemasalve toimingud teevad seda iga muudatuse korral (`resolveThemeColor()` /
-  `applyThemeColor()` failis `src/shared/utils/themeColorMeta.ts`, kus `CLASSIC_PAGE_BACKGROUND` loetakse
-  komplekti objektist `ciTokens`). Konkreetne hele või tume teema määrab kõik sildid sellele režiimile; `system` säilitab ühe
-  värvi iga skeemi kohta. Manifest jääb Editionsiks: see laaditakse iga installi kohta üks kord, eelistust arvestamata.
-  Monaco loeb oma värvid prooviala kaudu (`monacoKitTheme.ts`);
-  Editionsi korral muudab prooviala lugemine üheks sünkroonseks läbimiseks juure atribuuti `data-theme`, sest komplekt
-  tuletab Editionsi heleda või tumeda variandi juurelemendist.
-- **Komponendid (adapterid).** `src/shared/components/index.tsx` säilitab OmniRoute'i komponentide API (samad
-  nimed, vaikeekspordid ja omadused) ning selle taga olevad primitiivid on komplekti adapterid: vormid
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ülekatted ja tagasiside
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  struktuur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ja tabelid
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter impordib komplekti
-  komponendi alamtee kaudu ja vastendab pärandiks olevad omadused sellele — näiteks `Button variant="primary"` on komplekti
-  nupp `default` (`--ci-button-primary-*`: heleduse puhul pöördpind, tumeduse puhul aktsent koos selle
-  `--ci-color-accent-foreground` tekstivärviga), `danger` on `destructive` ning `warning` on komplekti `warning`
-  nupp. Komponendi `Badge` olekuvariandid on komplekti toonid ning `Select` koos `<option>` järeltulijatega renderdab komplekti
-  komponendi `NativeSelect`.
-  `tests/unit/ui/adapters/*.test.tsx` fikseerivad iga adapteri.
-- **Kest.** `src/app/(dashboard)/layout.tsx` renderdab komponendi `DashboardLayout`, mis renderdab
-  `src/shared/components/layouts/DashboardShell.tsx`: komponendikogu `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) koos OmniRoute'i navigeerimisloogikaga failis
-  `src/shared/components/Sidebar.tsx`. „Liigu sisu juurde“ link sihtmärgile `#main-content` on esimene
-  fookustatav element. `src/shared/components/Header.tsx` sisaldab komponendikogu elementi `SidebarTrigger`
-  (kesta ainus külgriba lüliti), Keaki elementi `ProductSwitcher` ja käsupaleti avajat; marsruudi pealkirja
-  kuvatakse ainult siis, kui komponendikogu elementi `PageHeader` (`.ci-page-header`) pole elemendis
-  `#main-content` ühendatud, mistõttu oma elemendiga `PageHeader` lehel on ainult üks `h1`.
-  `src/shared/components/CommandPalette.tsx` on komponendikogu `Dialog`.
-- **Ikoonid.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) teisendab nime (kuvadel
-  kasutatava Material Symbolsi sõnavara) objekti `ICON_MAP` (`src/shared/constants/iconMap.ts`) kaudu
-  Lucide'i glüüfiks. Material Symbolsi font ja pakett on eemaldatud: kaardistuseta nime korral renderdatakse
-  neutraalne asendusglüüf (`data-icon-missing="true"`) ning väljaspool tootmiskeskkonda logitakse konsooli
-  hoiatus. `npm run gen:icon-map` väljastab kasutusel olevad nimed, mis kaardistusest puuduvad
-  (`tests/unit/icon-map-coverage.test.ts` nurjub iga nime puhul, millel pole Lucide'i ikooni;
-  `tests/unit/icon-map-object-values.test.ts` hõlmab otsinguobjektides talletatud nimesid);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` kirjutab literaalsed
-  `<span className="material-symbols-outlined">` elemendid ümber elementideks `<Icon>`.
-- **Bränd.** `src/shared/components/OmniRouteLogo.tsx` mähistab komponendikogu: vaikeeksport `OmniRouteLogo`
-  renderdab `ProductIcon product="omniroute" variant="glyph"` (tekstisisene SVG, `basePath`-iga ühilduv) ning
-  `OmniRouteLockup` renderdab `ProductLockup product="omniroute"` (hõlbustusnimi „Keak OmniRoute“) või
-  valge sildi operaatorite korral nende enda `name`/`logoSrc`. Tootelüliti sihtkohad asuvad failis
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Eraldiseisvad
-  kuvad — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` ja `src/shared/components/ErrorPageScaffold.tsx`
-  — kuvavad logosõnamärki; `tests/unit/brand-pages-static.test.ts` tagab selle.
+- **komplekt.** `packages/ui-kit/src` on bait-baitiline koopia ülesvoolu `src/` -st `packages/ui-kit/UPSTREAM.md` kinnitatud kohustuse juures (mis salvestab ka litsentsi volituse); `PATCHES.md` loetleb kohalikud paigad (puudub). Seda kasutatakse allikana ilma ehitamiseta: `next.config.mjs` edastab selle ja `tsconfig.json` kaardistab `@omniroute/ui-kit` → `packages/ui-kit/src` ja `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ja `vitest.mcp.config.ts` kannavad sama varjunime). Importige komplekti komponent selle alamtee (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) järgi, mitte kunagi läbi `@omniroute/ui-kit` silindri: tünn tõmbab iga komponendi (sh kuupäevavalija) igasse importijasse. Komplekti laadileht siseneb `src/app/globals.css` kaudu (`@import "../../packages/ui-kit/src/ci-styles.css"`, täielik leht: tuum `ci-ui.css` pluss iga mustriperekond).
+- **Tokenid.** `packages/ui-kit/src/ci-tokens.css` deklareerib `--ci-*` märgid; `src/app/globals.css` ühendab need pärandnimedega OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), nii et olemasolev `var(--color-*)` loeb ja Tailwind utiliidid töötavad edasi. Uus kood kasutab utiliite Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) või komplekti klasse — ei kasuta kunagi kuueteistkümnendväärtust (`tests/unit/design-kit-bridge.test.ts` jõustab silda). `text-primary` lahendab `--color-primary-ink` kuni `--text-color-primary`, nii et esmane tekst jääb loetavaks, samas kui `bg-primary`/`border-primary` säilitab rõhuasetuse pinna: väljaannete all on see komplekti `--ci-color-accent-active` (sügav vask `#99562f` valguses, vask aktsent pimedas); Classic all, lime-800 heledas ja laimi aktsent pimedas. Diagrammiseeriad kasutavad `--color-chart-1` … `--color-chart-8`, millest igaühel on tekstikindel `--color-chart-N-ink` ja läbipaistmatu `--color-chart-N-subtle` kiibi toon, mis on määratud komplekti seeria järjekorras (`ciChartSeriesOrder`).
+- **Teemad.** `<html className="ci-theme">` (`src/app/layout.tsx`) valib dokumendi komplekti teemaks. Eelistus on `light`, `dark` või `system` (`THEME_CONFIG.defaultTheme = "system"` in `src/shared/constants/appConfig.ts`; `system` järgneb `prefers-color-scheme`). `applyTheme()` in `src/store/themeStore.ts` (peegeldatud `THEME_BOOT_SCRIPT`, sees `src/app/layout.tsx`, mis jookseb enne hüdratatsiooni) seab `data-theme="dark"|"light"` ja lülitab `<html>` -s `.dark` klassi koos. Komplekti tumedate märkide komplekt on võtmega `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute enda tumedad alistamised ( `.dark` -plokk `globals.css`) ja `.dark` klassi utiliidide pärandklahv Tailwind `dark:`. Aktsentvärvide eelseadistused puuduvad: aktsent pärineb alati komplektist ja vanema järgu püsiv eelseade jäetakse poe laadimisel välja.
+- **Paletid.** Kaks, mõlemad komplektist (`src/shared/constants/appearancePalette.ts`): `editions`, vaikeseade ja `classic`. Väljaanded on komplekti `data-ci-appearance="editions"` atribuut `<html>`, mille `ci-editions.css` (impordib `ci-ui.css`) kombineerib atribuudiga `data-theme`; Klassika on atribuudi puudumine. Juurpaigutuse server renderdab atribuudi, nii et külastaja, kellel pole midagi salvestatud (või JS puudub), saab väljaanded igal pinnal — armatuurlaual, sisselogimisel, `/status`, vealehtedel, `/docs` ja PWA. Valik säilib teema kõrval samas `theme` poes (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) ja enne värvi rakendab `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, küljenduses `<head>`), mis eemaldab atribuudi ainult siis, kui salvestatud palett on `"classic"`; `src/app/global-error.tsx`, väljaspool juurpaigutust, rakendab seda samast poest. Ärge pange `data-ci-appearance` ühelegi teisele elemendile: komplekt sobib selle elemendiga `html:root:has([data-ci-appearance="editions"])`, nii et üks järeltulija vahetab kogu dokumendi. Väljaannete `data-ci-editions-variant="landing"` variant on mõeldud turunduslehtedele, mitte armatuurlauale. Brauseri kroom: server renderdab vaikeväljaande Editions `viewport.themeColor` (üks silt `prefers-color-scheme` kohta) ja veebimanifesti — `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts`, mis on väljaannete `--ci-color-background` (`#f3f1e9` / `#11120f`) üks peegel, mille `tests/unit/pwa-theme-colors.test.ts` kinnitas `ci-editions.css` -le. Seejärel järgib reaalajas `<meta name="theme-color">` salvestatud paletti ja režiimi: `THEME_BOOT_SCRIPT` kirjutab sildid enne värvimist ümber ja teemapoe toimingud teevad seda iga muudatuse korral (`resolveThemeColor()` / `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, `CLASSIC_PAGE_BACKGROUND` loetakse komplekti `ciTokens`). Eksplitsiitne light/dark -teema seab iga sildi sellesse režiimi; `system` säilitab ühe värvi skeemi kohta. Manifest jääb väljaanneteks: see tuuakse üks kord installimise kohta ilma eelistusteta. Monaco loeb oma värve sondilt (`monacoKitTheme.ts`); Väljaannete all pöörab proovilugeja juur `data-theme` ühe sünkroonse käigu jaoks, kuna komplekt lahendab väljaanded light/dark juurtest.
+- **Komponendid (adapterid).** `src/shared/components/index.tsx` säilitab OmniRoute komponendi API (samad nimed, vaikeekspordid ja rekvisiidid) ning selle taga olevad primitiivid on komplekti adapterid: vormid (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ülekatted (`Modal`/`ConfirmModal` ja /z ) `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`), struktuuri (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`) ja tabeleid (`DataTable`, `FilterBar`, `ColumnToggle` `FilterPills` `Avatar` `PresetSlider`). Adapter impordib komplekti komponendi alamtee järgi ja kaardistab sellele pärandrekvisiidid — näiteks `Button variant="primary"` on komplekti `default` nupp (`--ci-button-primary-*`: pöördpind valguses, aktsent selle `--ci-color-accent-foreground` tindiga pimedas), `danger` on `destructive` ja `warning` on komplekt `warning`. `Badge` oleku variandid on komplekti toonid ja `Select` koos `<option>` lastega renderdab komplekti `NativeSelect`. Kaks adapterit imporditakse tee järgi, mitte indeksist: `InteractiveTableRow` (`src/shared/components/InteractiveTableRow.tsx`), komplekt `TableRow`, mis võtab `onActivate` ja `selected` ning vastab Tab, Enter ja Space ning `CodePreview` (`src/shared/components/CodePreview.tsx`), komplekti koodiplokk, mille koopiasildid on tõlgitud. `tests/unit/ui/adapters/*.test.tsx` pin iga adapter.
+- **Kest.** `src/app/(dashboard)/layout.tsx` renderdab `DashboardLayout`, mis renderdab `src/shared/components/layouts/DashboardShell.tsx`: komplekti `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute navigeerimisloogikaga keeles `src/shared/components/Sidebar.tsx`. "Sisu vahelejätmise" link `#main-content` -le on esimene fokuseeritav element. `src/shared/components/Header.tsx` sisaldab komplekti `SidebarTrigger` (kesta ainus külgriba lüliti), Keak `ProductSwitcher` ja käsupaleti avaja; see näitab ainult marsruudi pealkirja, kui `#main-content` sisse pole paigaldatud ühtegi komplekti `PageHeader` (`.ci-page-header`), seega on lehel oma `PageHeader` üks `h1`. `src/shared/components/CommandPalette.tsx` on komplekt `Dialog`.
+- **Ikoonid.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) lahendab nime (materjalide sümbolite sõnavara, mida ekraanid kasutavad) läbi `ICON_MAP` (`src/shared/constants/iconMap.ts`) Lucide'i glüüfiks. Materjali sümbolite font ja pakett on kadunud: kaardil puuduv nimi muudab neutraalse kohatäite glüüfi (`data-icon-missing="true"`) ja logib konsooli hoiatuse väljaspool tootmist. `npm run gen:icon-map` prindib kasutatavad nimed, mis kaardil puuduvad (`tests/unit/icon-map-coverage.test.ts` nurjub mis tahes nime puhul ilma Lucide'i ikoonita; `tests/unit/icon-map-object-values.test.ts` katab otsinguobjektidesse salvestatud nimed); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` kirjutab sõnasõnalised `<span className="material-symbols-outlined">` ulatused ümber `<Icon>`.
+- **Kaubamärk.** `src/shared/components/OmniRouteLogo.tsx` pakib komplekti: vaikeekspordi `OmniRouteLogo` renderdab `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) ja `OmniRouteLockup` renderdab `ProductLockup product="omniroute"` (juurdepääsetav nimi "Keak OmniRoute") või valge sildi operaatorite jaoks oma `name`/`logoSrc`. Tootevahetuse sihtkohad asuvad `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Eraldiseisvad ekraanid — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ja `src/shared/components/ErrorPageScaffold.tsx` — näitavad lukustamist; `tests/unit/brand-pages-static.test.ts` valvab seda.
 
 ## 2. Reeglid
 
-1. Kasutage tokeneid, mitte kunagi literaale. Tahtlikult säilitatud erandid: alati tumeda kujundusega konsooliterminal ja
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), komplekti olekupaleti lahendatud kuueteistkümnendväärtustega
-   peegel neile kasutajatele, kes vajavad literaalset kuueteistkümnendväärtust. Kategooriapaletid ei ole enam erand:
-   need kasutavad komplekti kaheksat diagrammitokenit (`--color-chart-1..8`, millele lisanduvad `-ink`/`-subtle`) komplekti
-   seeriajärjestuses failis
-   `src/shared/utils/categoricalPalette.ts` ja marsruutimisstrateegiate puhul failis
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow servad ja orkestreerimislõuend
-   loevad teemateadlikke muutujaid `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
-2. Ärge kunagi muutke kataloogi `packages/ui-kit/src` käsitsi: sünkroonige käsuga `scripts/dev/sync-ui-kit.sh <commit>`;
-   commit'i-eelne kontroll `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ebaõnnestub iga baidina esineva
-   erinevuse korral võrreldes fikseeritud ülesvoolu commit'iga (kontroll jäetakse hoiatusega vahele, kui ülesvoolu kloon
-   `UI_KIT_CLONE` või `_references/cheaper-inference-ui-kit` puudub). Kui komplektist midagi puudub,
-   lahendage see adapteris või kuval ja taotlege selle lisamist ülesvoolu projektis.
-3. Komplekti teksti vaikeväärtused on ingliskeelsed (`label = "Loading"`, `loadingLabel = "Loading table"`…) — edastage
-   tõlgitud stringid funktsioonist `useTranslations(...)` alati, kui komplekti komponent kuvab teksti.
-4. Tailwindi utiliidid alistavad komplekti komponendiklassid (komplekt deklareerib
-   `@layer theme, base, components, utilities` ja selle reeglid asuvad kihis `components`) — kasutage utiliite
-   vahede ja paigutuse jaoks, mitte komplekti komponentide värvide muutmiseks.
-5. Pealkirjad: `.ci-heading` lehe- ja jaotisepealkirjade jaoks; `.ci-dashboard-display` ainult suure, hõreda
-   kuvateksti jaoks, näiteks vealehe olekukood. Mõlemad kasutavad fonti Switzer.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kontrollib komplekti kasutuselevõttu: kataloogides
-   `src/app` ja `src/shared/components` ei tohi olla Materiali ligatuuriga span-elementi; töölaua puus
-   (`src/app/(dashboard)` ja `src/shared/components`) ei tohi olla töötlemata `<select>`, `<textarea>` ega `<table>`
-   ning käsitsi loodud `role="dialog"` ei ole lubatud väljaspool loetletud erandeid (`Select`-adapteri omaplatvormi haru,
-   `RequestLoggerDetail`); iga sealne töötlemata `<button>` või `<input>` vajab põhjust sisaldavat kommentaari
-   `kit-exception:`, mis lõpeb sellest kuni 3 rida ülalpool; paletitoonid ja `dark:`-variandid on lubatud
-   ainult testi loetletud failides.
-7. Kontrollige enne PR-i mõlemat teemat ja 390 px vaateava (ekraanipiltidega); `tests/e2e/a11y.spec.ts` käivitab
-   axe'i.
+1. Märgid, mitte kunagi literaalid. Erandid on sihilikult hoitud: alati tume konsooliterminal ja `STATUS_HEX` (`src/shared/constants/statusColors.ts`), komplekti olekupaleti lahendatud kuueteistkümnendkujuline peegel helistajatele, kes vajavad sõnasõnalist kuueteistkümnendikku. Kategoorilised paletid pole enam erand: need sõidavad komplekti kaheksal diagrammimärgil (`--color-chart-1..8`, pluss `-ink`/`-subtle`), komplekti seeria järjekorras kuni `src/shared/utils/categoricalPalette.ts` ja marsruutimisstrateegiate puhul `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow servad ja orkestratsioonilõuend loevad teemateadlikke `--orch-status-*` muutujaid (`src/shared/components/flow/edgeStyles.ts`).
+2. Ärge kunagi lapige `packages/ui-kit/src` käsitsi: sünkroonige `scripts/dev/sync-ui-kit.sh <commit>` ga ; pre-commit värav `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ebaõnnestub mis tahes baidil, mis erineb kinnitatud ülesvoolu kinnipidamisest (see jätab vahele hoiatusega, kui ülesvoolu kloon `UI_KIT_CLONE` või `_references/cheaper-inference-ui-kit` puudub). Kui komplektis on midagi puudu, liikuge sellest adapteris või ekraanil ümber ja küsige seda ülesvoolu.
+3. Komplekti teksti vaikeseaded on inglise keel (`label = "Loading"`, `loadingLabel = "Loading table"`…) — edastab `useTranslations(...)` tõlgitud stringid alati, kui komplekti komponent teksti renderdab.
+4. Tailwind utiliidid võidavad komplekti komponentide klassid (komplekt deklareerib `@layer theme, base, components, utilities` ja selle reeglid kehtivad `components`) — kasutavad utiliite vahede ja paigutuse jaoks, mitte komplekti komponentide värvimiseks. Erandiks on tüpograafia: `packages/ui-kit/src/ci-typography.css` imporditakse väljaspool mis tahes kihti, nii et selle sildireeglid ületavad utiliite. Klassid Weight, `tracking-*` ja `leading-*` ei mõjuta `h1`-d –`h6`, kaal ja `tracking-*` pole tabeli lahtrites ning kaal pole nuppudel (`tests/unit/dead-typography-classes.test.ts` lükkab need seal tagasi); `font-mono` ei mõjuta `th`, `td`, `button`, `input` ja `textarea`. Suuruse, värvi ja `uppercase` utiliidid kehtivad endiselt.
+5. Pealkirjad: `.ci-heading` lehtede ja jaotiste pealkirjade jaoks; `.ci-dashboard-display` ainult suure ja hõreda kuvatava teksti jaoks, näiteks vealehe olekukood. Mõlemad kasutavad Switzerit.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kaitseb komplekti kasutuselevõttu: `src/app` või `src/shared/components` all pole materjali ligatuuri ulatust; armatuurlaua puus (`src/app/(dashboard)` ja `src/shared/components`) ei ole töötlemata `<select>`, `<textarea>` või `<table>` ega käsitsi rullitud `role="dialog"` väljaspool loetletud erandeid ( `Select` adapteri algne haru `RequestLoggerDetail`); iga töötlemata `<button>` või `<input>` vajab kommentaari, mis sisaldab `kit-exception:` (koos põhjusega), mis lõpeb maksimaalselt 3 rida selle kohal; paleti toonid ja `dark:` variandid ainult testiloendites.
+7. Enne PR (ekraanipildid) kontrollige nii teemasid kui ka 390 px vaateava; `tests/e2e/a11y.spec.ts` jookseb kirvest.
+8. Värviutiliit peab nimetama `@theme` ploki märgi `src/app/globals.css`: nimi, mida seal pole (`text-text`, `bg-bg-muted`, `text-danger`…), CSS ei genereeri ja element säilitab päritud värvi (`tests/unit/theme-color-classes.test.ts`). `card` klassi pole: kasutage `Card` adapterit (`tests/unit/no-bare-card-class.test.ts`). Diagrammi värvi tekst kasutab `text-chart-N-ink`; `text-chart-N` on ikoonide ja tõmmete jaoks (`tests/unit/chart-ink-for-text.test.ts`). Poolläbipaistev värv luuakse `color-mix` iga, mitte kunagi ei lisata väärtusele, mis võib olla `var()` (`tests/unit/color-alpha-concatenation.test.ts`), kuueteistkümnend-alfa.
+9. Tabelid: iga komplekt `Table` läbib püsiva kerimisriba (`tests/unit/kit-tables-have-accessible-name.test.ts`) joonistamisel `scrollLabel`, oma kerimispiirkonna nime ja `scrollbarLabel`. Klõpsatav rida on `InteractiveTableRow` koos `onActivate`, mitte kunagi `<TableRow onClick>` (`tests/unit/table-row-click-needs-keyboard.test.ts`). Kaardi sees või mis tahes ääristatud kasti sees olev tabel kukutab oma raami `containerClassName="rounded-none border-0"` (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. Riba, mis näitab summat, on komplekt `Progress` ehk kannab `role="progressbar"` koos nime ja väärtusega, kui komplekti riba ei suuda seda joonistada (`tests/unit/progress-bars-have-semantics.test.ts`). Menüüd, hüpikaknad ja tööriistavihjed pärinevad komplektist (`Popover`, `SearchableSelect`, `Tooltip` -adapter), mitte absoluutselt paigutatud paneelilt, mille avab kohalik riik (`tests/unit/hand-positioned-overlays.test.ts`).
+11. `Input` adapteril kujundab `className` välja ümbrist; kontrolli jaoks mõeldud klass läheb `inputClassName` sse (`tests/unit/input-adapter-classname-destination.test.ts`).
 
 ## 3. Ekraani lisamine
 
-1. Ava leht kiti `PageHeader`-iga (`@omniroute/ui-kit/page-header`, dashboard'i sees `compact`) —
-   pealkiri, kirjeldus ja `actions`. Shelli päis jätab seejärel oma pealkirja ära.
-2. Ehita juhtelemendid `@/shared/components` põhjal (adapterid) ja kasuta kiti komponente alamteede
-   kaudu seal, kus adapter puudub (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
-   `RadioGroup`, `Slider`…).
-3. Ikoonid: `<Icon name="…" />`. Uus nimi lisatakse `ICON_MAP`-i koos semantiliselt sobiva Lucide'i
-   komponendiga; `npm run gen:icon-map` loetleb veel puuduvad nimed.
-4. Värvid: semantilised utiliitklassid (`text-success`, `bg-warning-bg`, `border-border`…) ja
-   `var(--color-chart-N)` diagrammiseeriate jaoks; mitte heksväärtusi ega `dark:` variante, mis
-   lihtsalt kordavad värvi.
-5. Tekst: iga string, sealhulgas sildid, mille kiti komponentidele edastad, peab tulema
-   `useTranslations`-ist. Uued võtmed lisatakse failidesse `src/i18n/messages/en.json`, `pt-BR.json` ja
-   `vi.json` (vietnami paarsustest kinnitab iga ingliskeelse võtme); ülejäänud lokaadid täidab i18n-i
-   sünkroniseerimine.
-6. Käivita valvekontrollid enne PR-i: `tests/unit/dashboard-kit-sweep.test.ts`,
-   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (ainus kontroll, mis tabab `iconMap.ts`-is dubleeritud impordi),
-   `npm run check:ui-icu` ja ekraani enda testid.
+1. Avage leht komplektiga `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` armatuurlaua sees) — pealkiri, kirjeldus ja `actions`. Shelli päis jätab seejärel oma pealkirja ja see on peidetud alla 1024 px, nii et marsruudil ilma `PageHeader` pole telefonis pealkirja (`tests/unit/dashboard-page-header-coverage.test.ts`). Teelõik, millel pole oma lehte, läheb `src/shared/utils/breadcrumbTrail.ts`-s `ROUTE_PREFIXES_WITHOUT_PAGE` sse, seega on selle killustik tekst, mitte surnud link (`tests/unit/breadcrumb-trail-routes.test.ts`).
+2. Ehitage juhtelemente `@/shared/components` (adapterite) põhjal ja kasutage komplekti komponente alamtee järgi, kui adapterit pole (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`...).
+3. Ikoonid: `<Icon name="…" />`. Uus nimi läheb `ICON_MAP` koos semantiliselt sobiva Lucide komponendiga; `npm run gen:icon-map` loetleb veel puuduolevad nimed.
+4. Värvid: semantilised utiliidid (`text-success`, `bg-warning-bg`, `border-border`…) ja `var(--color-chart-N)` diagrammisarjade jaoks; ei mingeid hex väärtusi ega `dark:` variante, mis ainult kordavad värvi.
+5. Tekst: iga string, sealhulgas komplekti komponentidele edastatavad sildid, pärineb saidilt `useTranslations`. Uued võtmed lähevad ainult `src/i18n/messages/en.json` sse; väljalaske värskendamine täidab teised lokaadid (`tests/_helpers/localeParityMode.ts` kirjeldab kahte režiimi). Test, mis ühendab tõelise mitteingliskeelse kataloogi, koostab oma sõnumid samamoodi nagu käitusaeg, kasutades `deepMergeFallback` alates `src/i18n/request.ts`, nii et võti, mis on endiselt ainult ingliskeelne, langeb viskamise asemel tagasi.
+6. Käivitage valvurid enne PR: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (ainuke kontroll, mis tabab dubleeritud impordi `iconMap.ts`), `npm run check:ui-icu`, reeglites 4 ja 8–11 nimetatud valvurid ning ekraani enda testid.
 
 ## 4. Adapteri lisamine või muutmine
 
@@ -188,46 +74,14 @@ Töövoog kasutab kahte saladust:
 
 ## 6. README diagrammid
 
-Kaksteist diagrammi, mille juurfail `README.md` manustab (`docs/diagrams/*.svg`), kujutavad staatilisele
-pildile rakendatud komplekti ning need genereeritakse, mitte ei joonistata käsitsi: 13 generaatorifaili asukohas `scripts/docs/gen-readme-*.mjs`
-(kaksteist diagrammi ja draiver `gen-readme-diagrams.mjs`) ning 12 aegumiskontrolli asukohas
-`tests/unit/docs/readme-*-svg.test.ts`, üks iga diagrammi kohta, millest igaüks võrdleb kinnistatud faili baidikaupa selle
-generaatori väljundiga (töö `test-unit`).
+Kaksteist skeemi, mille juur `README.md` manustab (`docs/diagrams/*.svg`), on komplekt, mida rakendatakse staatilisele kujutisele ja need genereeritakse, mitte ei joonista käsitsi: 13 generaatorifaili `scripts/docs/gen-readme-*.mjs` (kaksteist diagrammi pluss `gen-readme-diagrams.mjs` draiver) ja 12 aegumise testi `tests/unit/docs/readme-*-svg.test.ts`, üks diagrammi kohta, iga baits-faili koos väljundi `test-unit` genereerimisega.
 
-- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib Editionsi paleti (vaikimisi välimuse) failist
-  `packages/ui-kit/src/ci-editions.css` (selle failiga seob selle
-  `tests/unit/docs/readme-diagram-theme.test.ts`, mis kontrollib mõlemas skeemis ka WCAG AA nõuetele vastavust iga tekstivärvi ja iga
-  pinna kombinatsiooni puhul; ainus erand, heleda teema `warn`, on komplekti hoiatusvärv, mida on tumendatud 10 %, sest komplekti
-  väärtuse kontrastsus lõuendil on 4.46:1), ning määratleb tekstirollid komplekti kirjasuuruste skaalal (`ci-tokens.css`): Switzer komplekti kirjapaksustega (400/500/600, esiletõstetekst 500) ja tähevahedega
-  kõige jaoks, välja arvatud koodirollid (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), mis
-  kasutavad IBM Plex Monot ning on mõeldud ainult käskude, URL-ide, identifikaatorite ja terminalikuvade jaoks.
-  Heleda teema väärtused asuvad failis selektoris `:root`, tumeda teema väärtused päringu `prefers-color-scheme: dark` taga, et iga
-  pilt järgiks GitHubis vaataja värviskeemi.
-- **Fondid.** GitHub Markdown ei edasta CSS-i ja camo-puhverserver blokeerib kõik välised päringud, seega peab komplekti kirjatüüp
-  asuma failis endas. `scripts/docs/readme-outline.mjs`, iga generaatori viimane etapp, vormib
-  Switzeri rollid HarfBuzziga ja joonistab need vektorkontuuridena (`<defs>`-i rajad ja `<use>`), kusjuures nooled
-  ja geomeetrilised sümbolid, mis Switzeris puuduvad, joonistatakse selle enda mõõdikute järgi. Kasutage kontuure, mitte kunagi manustatud fonti: Switzeri
-  litsents (`packages/ui-kit/src/fonts/FFL.txt`) keelab ilma kirjaliku
-  nõusolekuta alamhulga loomise ja vormingu teisendamise, kuid lubab vektorjooniseid, seega ärge lisage Switzeri `@font-face`-i ega `data:` URI-d uuesti. Ainus
-  faili jääv font on OFL-litsentsiga IBM Plex Mono alamhulk teksti jaoks, mis jääb tegelikuks kooditekstiks
-  (`scripts/docs/readme-fonts.mjs`) ja mis koostatakse nendest märkidest; kui mõnda glüüfi ei saa manustada, väljastatakse erind.
-- **Taasgenereerimine.** `npm run docs:readme-diagrams` kirjutab kõik kaksteist diagrammi README järjekorras uuesti ja väljastab iga
-  faili kohta ühe rea koos selle suurusega. Üksikut generaatorit saab käitada ka eraldi (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` vajab käsku `node --import tsx/esm`, sest selle arvud pärinevad reaalajas kataloogilaadurist failis
-  `open-sse/config/freeModelCatalog.ts`; kataloogimuudatuse mõju CI-le on kirjeldatud failis
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Kinnistage generaator ja SVG koos.
-- **Kontroll.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderdab faili nii, nagu GitHub seda serveerib
-  (`<img>`-silt, camo `Content-Security-Policy`, `image/svg+xml`), jäädvustab heleda ja tumeda kaadri
-  ning teatab lehe tehtud välistest fondipäringutest (neid peab olema 0).
-- **Mahupiirang.** Alla 200 KB faili kohta (iga aegumiskontroll kinnitab seda); 500 KB on iga README
-  pildi range ülempiir (SVG-stuudio validaatori reegel).
-- **Tekst muutmata, arvud kontrollväravast.** Brändiuuendus muutis kirjatüüpi ja paletti, mitte sõnu: iga generaator
-  hoiab oma diagrammi teksti konstandis `*_COPY` (või koostab selle reaalajas kataloogist), mis on ühtaegu nii
-  joonistatav tekst kui ka kontuurimise etapi sisend. Kanoonilised arvud jäävad `<text>`-sõlmedesse (pärast
-  kontuurimist nähtamatud, `fill-opacity:0`) ning neid loeb `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); diagrammide aegumiskontrollid, mida see kontrollvärav kontrollib, käitavad
-  selle validaatoreid ka genereeritud failil, seega kukub koodist erinev arv testis läbi — parandage
-  allikat, mida kontrollvärav loeb, mitte generaatoris olevat arvu.
+- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib väljaannete paleti (vaikimisi välimus) failist `packages/ui-kit/src/ci-editions.css` (selle faili külge kinnitas `tests/unit/docs/readme-diagram-theme.test.ts`, mis kontrollib ka WCAG AA iga tekstivärvi jaoks mõlemas skeemis igal pinnal; ainuke erand, hele `warn`, on komplekti hoiatus tumenenud 10%, kuna komplekti väärtus on 4,46:1 skaalal (komplekti teksti tüüp)`ci-tokens.css`): Switzer komplekti kaalude järgi (400/500/600, ekraan 500) ja jälgimine kõige jaoks, välja arvatud koodirollid (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), mis on IBM Plex Mono ja on mõeldud ainult käskude, terminalide ja URLs käskude jaoks. Heledad väärtused asuvad failis `:root`, tumedad väärtused `prefers-color-scheme: dark` taga, nii et iga pilt järgib vaataja skeemi GitHub.
+- **Fondid.** GitHub Markdown ei sisalda CSS ja kamopuhverserver blokeerib iga välise toomise, seega peab komplekti tüüp liikuma faili sees. `scripts/docs/readme-outline.mjs`, iga generaatori viimane samm, kujundab Switzeri rollid HarfBuzz ja joonistab need vektorkontuuridena (`<defs>` paths ja `<use>`), kusjuures nooled ja geomeetrilised sümbolid puuduvad Switzeril enda mõõdikute põhjal. Piirjooned, mitte kunagi manustatud font: Šveitsi litsents (`packages/ui-kit/src/fonts/FFL.txt`) keelab alamkomplekti ja vormingu teisendamise ilma kirjaliku nõusolekuta ning lubab vektorjoonistusi, seega ärge taaskehtege Switzeri `@font-face` või `data:` URI. Üks faili jäetud font on OFL IBM Plex Mono alamhulk selle jaoks, mis jääb tegelikuks kooditekstiks (`scripts/docs/readme-fonts.mjs`), mis on ehitatud nendest tähemärkidest; mis tahes glüüfi see ei saa viskeid manustada.
+- **Regenereerida.** `npm run docs:readme-diagrams` kirjutab kõik kaksteist ümber README järjekorras ja prindib ühe rea faili kohta koos selle suurusega. Üks generaator töötab ka iseseisvalt (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vajab `node --import tsx/esm` kuna selle arvud pärinevad reaalajas kataloogilaadurist `open-sse/config/freeModelCatalog.ts`; kataloogi muutmise CI tagajärg on `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Ühendage generaator ja SVG koos. Vananenud SVG ebaõnnestub vabastamisrežiimis; funktsioonis PR hindab `npm run check:generated-artifacts` ainult SVG PR muudatusi (`docs/architecture/QUALITY_GATES.md` → "Loodud failid ja tuletatud lähtejooned").
+- **Tõestus.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderdab faili nii, nagu GitHub seda teenindab ( `<img>` silt, camo's `Content-Security-Policy`, `image/svg+xml`), jäädvustab heleda ja tumeda raami ning teatab välise fondi päringutest lehe tehtud (peab olema 0).
+- **Eelarve.** Alla 200 KB faili kohta (iga aegumise test kinnitab seda); 500 KB on mis tahes README kujutise kõvapiir ( SVG studio validaatori reegel).
+- **Kopeeri muutmata kujul, loeb väravast.** Rebränd muutis tüüpi ja paletti, mitte sõnu: iga generaator kannab oma diagrammi koopiat `*_COPY` konstandis (või koostab selle reaalajas kataloogist), mis on nii joonistatud tekst kui ka kontuurietapi sisend. Kanoonilised figuurid jäävad `<text>` sõlmedesse (nähtamatud, kui need on välja toodud, `fill-opacity:0`), loetakse `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Gate loetud diagrammide vananemise testid käivitavad ka oma validaatorid loodud failis, nii et koodist triiviv näitaja ebaõnnestub testis — parandage värav loetud allikas, mitte kunagi generaatoris olev number.
 
 ## 7. Viidete register
 

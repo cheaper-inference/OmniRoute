@@ -233,7 +233,7 @@ function QuotaDetailRow({
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-semibold leading-none tabular-nums"
+          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && <Spinner decorative size="xs" />}
@@ -309,7 +309,7 @@ function QuotaDetailRow({
           </Button>
         )}
       </div>
-      {!q.unlimited && <QuotaMiniBar percent={pct} size="sm" />}
+      {!q.unlimited && <QuotaMiniBar percent={pct} label={label} size="sm" />}
       <div className="flex items-center justify-between gap-2 text-[10px] text-text-muted tabular-nums">
         <span>
           {showUsage ? (
@@ -479,7 +479,7 @@ export default function QuotaCardExpanded({
                 e.stopPropagation();
                 onShowQuota?.(q);
               }}
-              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] font-normal"
+              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
               title={translateUsageOrFallback(t, "showQuotaRow", "Show this quota row")}
             >
               {q.displayName || formatQuotaLabel(q.name)}

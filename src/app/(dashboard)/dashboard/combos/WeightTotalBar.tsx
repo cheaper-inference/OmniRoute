@@ -35,8 +35,16 @@ export default function WeightTotalBar({ models }: WeightTotalBarProps) {
 
   return (
     <div className="mt-1.5">
-      {/* Visual bar */}
-      <div className="h-1.5 rounded-full bg-bg-subtle overflow-hidden flex">
+      {/* Visual bar: one segment per weighted target; the spoken value is the weight total. */}
+      <div
+        role="progressbar"
+        aria-label={t("weightPercent")}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.min(Math.max(total, 0), 100)}
+        aria-valuetext={`${total}%`}
+        className="h-1.5 rounded-full bg-bg-subtle overflow-hidden flex"
+      >
         {models.map((m, i) => {
           if (!m.weight) return null;
           return (

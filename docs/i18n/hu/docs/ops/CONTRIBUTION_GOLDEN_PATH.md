@@ -29,70 +29,61 @@ módosítástípust összekapcsol a hozzá tartozó szerződésekkel, célzott e
 6. **Rögzítse a bizonyítékokat.** A PR-sablonban sorolja fel a futtatott parancsokat, minden hozzáadott vagy módosított tesztfájlt,
    a migrációkat vagy funkciójelzőket, valamint minden még függőben lévő, csak CI-ben végrehajtható ellenőrzést.
 
-## Bevált eljárások módosítástípusonként
+## Arany utak a változás típusa szerint
 
-Az alábbi parancsok a minimális célzott ellenőrzések; nem jelentenek engedélyt az Ön által módosított
-működést közvetlenül lefedő teszt kihagyására.
+Az alábbi parancsok minimálisan célzott ellenőrzések, nem engedik átugrani azokat a teszteket, amelyek közvetlenül lefedik a megváltoztatott viselkedést.
 
 ### Szolgáltató
 
 **Szerződések**
 
-- A szolgáltató definíciója a `src/shared/constants/providers/` alatt, valamint annak összeállítása a
-  `src/shared/constants/providers.ts` fájlban.
-- Modellek és képességek az `open-sse/config/providerRegistry.ts` fájlban vagy annak különálló rendszerleíró fájljaiban.
-- Végrehajtó-/fordítóválasztás, OAuth- vagy API-kulcs-konfiguráció, vezérlőpulti elemek és adott esetben a generált
-  szolgáltatói referencia.
-- A nyilvános hitelesítő adatoknak a `resolvePublicCred()` függvényt kell használniuk; a hibaválaszoknak a megosztott, megtisztított
-  hibakezelő segédfüggvényeket kell használniuk. Lásd: `docs/security/PUBLIC_CREDS.md` (git; nincs beépítve a `/docs` könyvtárba) és
-  [Hibák megtisztítása](../security/ERROR_SANITIZATION.md).
+- Szolgáltató definíciója `src/shared/constants/providers/` -ban és összetétele `src/shared/constants/providers.ts`-ben.
+- Modellek és képességek `open-sse/config/providerRegistry.ts` ban vagy annak kicsomagolt rendszerleíró fájljaiban.
+- Executor/translator kiválasztása, OAuth vagy API-kulcs konfigurációja és irányítópult-elemei. Ne véglegesítse az újragenerált `docs/reference/PROVIDER_REFERENCE.md` vagy README diagramokat: a kiadás frissítése újraírja őket (`check:pr-derived-paths` meghibásodik egy PR szolgáltatásban, amely azokat hordozza).
+- A nyilvános hitelesítő adatoknak `resolvePublicCred()` kell használniuk; a hibaválaszoknak a megosztott, megtisztított hibasegédeket kell használniuk. Lásd: `docs/security/PUBLIC_CREDS.md` (git; nincs `/docs`-be fordítva) és [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # amikor a katalógus módosul; commitolja a generált diffet
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Teszteljen minden érintett kéréstípust is: chat, Responses, képek, beágyazások, hang vagy videó.
-A generált katalógus- és golden diffeket szerződésmódosításként vizsgálja felül; ne fogadja el őket vakon.
+Teszteljen továbbá minden érintett kérelmet: csevegés, válaszok, képek, beágyazások, hang vagy videó. Tekintse át a generált katalógust és az aranydiff-eket a szerződésmódosítások esetén; ne fogadd el őket vakon.
 
 ### Útválasztás
 
 **Szerződések**
 
-- Nyilvános stratégiaértékek és felhasználóifelület-metaadatok a `src/shared/constants/routingStrategies.ts` fájlban.
-- Elosztás és sorrendezés az `open-sse/services/combo.ts` fájlban és az `open-sse/services/combo/` alatt.
-- Combo-sémák, perzisztencia, rezilienciaállapot, modellképességek, valamint API-/felhasználóifelület-vezérlők.
-- Az [Auto-Combo Engine](../routing/AUTO-COMBO.md) és a rezilienciadokumentáció, amikor a működés módosul.
+- Nyilvános stratégiai értékek és UI metaadatok `src/shared/constants/routingStrategies.ts`-ben.
+- Kiszállítás és rendelés `open-sse/services/combo.ts` és `open-sse/services/combo/` alatt.
+- Kombinált sémák, tartósság, rugalmassági állapot, modellképességek és API/UI -vezérlők.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) és rugalmassági dokumentáció, amikor a viselkedés megváltozik.
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # stratégia- vagy elosztásmódosítások
-npm run check:known-symbols      # a stratégia regisztrációjának módosításai
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Helyben determinisztikus, mockolt upstreamet használó teszteket alkalmazzon. Az élő combo füsttesztek hitelesítő adatokat igényelnek, és
-manuálisak; nem helyettesítik a CI-t.
+Használjon determinisztikus gúnyolt upstream teszteket helyileg. Az élő kombinált dohányzáshoz hitelesítési adatok szükségesek, és manuálisan használhatók, nem helyettesítik CI.
 
 ### UI / UX
 
 **Szerződések**
 
-- Next.js-útvonalak/-oldalak és megosztott komponenshatárok a `src/app/` és
-  `src/shared/components/` alatt.
-- API-válaszformák, betöltési/üres/hibaállapotok, billentyűzetes és képernyőolvasós működés,
-  reszponzív elrendezés, témakezelés és területi beállítások bővítése.
-- Angol felhasználóifelület-forrásszövegek a `src/i18n/messages/en.json` fájlban; ne kódoljon közvetlenül új, felhasználóknak szóló szöveget.
+- Next.js route/page és megosztott komponenshatárok `src/app/` és `src/shared/components/` alatt.
+- API válaszformák, loading/empty/error állapotok, billentyűzet és képernyőolvasó viselkedése, érzékeny elrendezés, tematika és terület-kiterjesztés.
+- angol UI forrás karakterláncok `src/i18n/messages/en.json` ben ; ne kódoljon keményen új, felhasználónak szánt példányt.
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interakciós vagy vizuális módosítások esetén futtassa az alkalmazást, és ellenőrizze keskeny és széles nézetablakban egyaránt. A CI futtatja az
-éles buildet és a szélesebb körű tesztcsomagokat; a vizuális működéshez továbbra is szükség van a módosításnak megfelelő célzott komponens- vagy Playwright-tesztre,
-illetve dokumentált manuális ellenőrzésre.
+Futtassa az alkalmazást interakcióhoz vagy vizuális változásokhoz, és ellenőrizze a keskeny és a széles nézetablakot. CI futtatja a termelési összeállítást és a szélesebb csomagokat; a vizuális viselkedéshez továbbra is szükség van egy fókuszált komponensre, Playwright vagy a változásnak megfelelő dokumentált kézi ellenőrzésre.
 
 ### i18n
 
 **Szerződések**
 
-- A `src/i18n/messages/en.json` a felhasználói felület forrása; a `config/i18n.json` a területi beállítások forrása.
-- A CLI-katalógusok külön, a `bin/cli/locales/` alatt találhatók.
-- Az ICU-helyőrzőket és -címkéket pontosan őrizze meg. Ne fordítsa le a termék-/szolgáltató-/modellneveket,
-  a protokoll- és fejlécneveket, a parancsokat, a kód-/JSON-azonosítókat, az URL-eket, a környezeti változókat vagy
-  az olyan védett kifejezéseket, mint az `OmniRoute`, `OAuth`, `MCP` és `A2A`. Az aktuális forráslista:
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` a UI forrás; `config/i18n.json` a területi forrás.
+- CLI katalógusok külön élnek `bin/cli/locales/` alatt.
+- Pontosan őrizze meg ICU helyőrzőket és címkéket. Ne fordítson le product/provider/model neveket, protokoll- és fejlécneveket, parancsokat, code/JSON azonosítókat, URLs, környezeti változókat vagy védett kifejezéseket, például `OmniRoute`, `OAuth`, `MCP` és `A2A`. A jelenlegi forráslista a `scripts/i18n/glossary/protected-terms.json`.
 
-**Célzott ciklus**
+A PR jellemző csak `src/i18n/messages/en.json` szerkeszti (CLI: `bin/cli/locales/en.json`); a többi területi beállítást kiadásonként egyszer egészíti ki a kiadás frissítése vagy egy fordítási hullám (`docs/guides/I18N.md` → "Csak PRs touch `en.json` funkcióval"). `npm run check:pr-derived-paths` meghibásodik a PR szolgáltatásban, amely egy másik területi katalógust szerkeszt.
+
+**Fókuszált hurok**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # amikor a CLI-szövegek/-katalógusok módosulnak
 npm run lint
 ```
 
-Ez a meglévő rendszerhez nyújt útmutatást, nem pedig felhívás az eszközkészlet vagy a kulcsmodell bővítésére.
-Amíg a helyettesítő rendszert tervezik, az i18n-javításokat tartsa célzottnak és minimálisnak. Ne futtasson külső szolgáltatásokat
-hívó fordítási parancsokat, kivéve, ha a feladat kifejezetten generált fordításokat igényel, és Ön
-áttekintette az így létrejött diffet.
+`--mode=pr` nélkül ezek a kapuk feloldási módban futnak helyben, és minden kulcsot jelentenek a `en.json` ben hozzáadott vagy újraírt ciklusról; ez a kiadás frissítése, nem a PR-é.
+
+Ez útmutatás a meglévő rendszer számára, nem pedig felhívás eszközeinek vagy kulcsmodelljének bővítésére. Tartsa az i18n javításokat sebészeti állapotban, amíg a csererendszert tervezik. Ne futtasson külső szolgáltatásokat hívó fordítási parancsokat, hacsak a feladat kifejezetten nem igényel generált fordításokat, és áttekintette az eredményül kapott különbséget.
 
 ### CLI
 
 **Szerződések**
 
-- Nyilvános parancsok és kapcsolók a `bin/cli/` könyvtárban, generált API-parancsok, kilépési kódok, stdout/stderr és
-  JSON-kimeneti struktúrák, konfigurációs/környezeti viselkedés, valamint a csomagolt fájlok.
-- A CLI felhasználóknak szánt szövegeinek a CLI i18n rétegét kell használniuk, az `en`/`pt-BR` katalógusokat pedig szinkronban kell tartani.
-- Őrizd meg a Node-ot támogatott futtatókörnyezetként, valamint a közzétett bináris szerződést.
+- Nyilvános parancsok és jelzők `bin/cli/` ban, generált API parancsok, kilépési kódok, stdout/stderr és JSON kimeneti alakzatok, config/environment viselkedés és csomagolt fájlok.
+- CLI felhasználónak szánt karakterláncoknak a CLI i18n réteget kell használniuk ( `bin/cli/locales/en.json`-ben létező `t()` kulcsok). A PR szolgáltatás csak `en.json` szerkeszti; `pt-BR` és a többi területi beállítás a kiadáskor elkészül.
+- A Node megőrzése támogatott futási környezetként és közzétett bináris szerződésként.
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # generált/csomagolt CLI-módosítások
-npm run check:pack-policy     # a csomag publikus felületének módosításai
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Ha a viselkedés az értelmezéstől, fájloktól vagy a kilépési állapottól függ, használd a pontos parancsot egy ideiglenes adatkönyvtárban. A CI végzi el a csomagtermékek és az ökoszisztéma átfogóbb ellenőrzéseit.
+Használja a pontos parancsot egy ideiglenes adatkönyvtárban, ha a viselkedés az elemzéstől, a fájloktól vagy a kilépési állapottól függ. CI elvégzi a szélesebb körű csomagtermék- és ökoszisztéma-ellenőrzéseket.
 
 ### Adatbázis
 
 **Szerződések**
 
-- Tartománymodulok a `src/lib/db/` alatt; közvetlenül az adott modulokat importáld (a régi `localDb.ts` újraexportálási réteg el lett távolítva).
-- Számozott, idempotens SQL-migrációk a `src/lib/db/migrations/` alatt, tranzakcióbiztonság, frissítési
-  viselkedés, indexek, valamint a séma által érintett összes hívó.
-- Az útvonalak és kezelők soha nem hajtanak végre közvetlenül nyers SQL-t.
+- Domain modulok `src/lib/db/` alatt ; konkrét modulok közvetlen importálása (a régi `localDb.ts` reexport réteget eltávolították).
+- Számozott, idempotens SQL migráció `src/lib/db/migrations/` alatt, tranzakcióbiztonság, frissítési viselkedés, indexek és a séma által érintett minden hívó.
+- Az útvonalak és kezelők soha nem adnak ki közvetlenül nyers SQL.
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 npm run check:migration-numbering
@@ -172,28 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migráció hozzáadásakor tesztelj új adatbázissal és az előző sémáról történő frissítéssel is. Az adatbázisteszteknek a takarítás során le kell zárniuk a leírókat, és meg kell hívniuk a `resetDbInstance()` függvényt. Az `npm run test:bun:db` parancsot csak akkor futtasd, ha a legjobb szándék szerint támogatott Bun-adapter útvonala változik; továbbra is a Node a mérvadó.
+Az áttelepítés hozzáadásakor teszteljen egy friss adatbázist és frissítsen a korábbi sémáról. Az adatbázisteszteknek le kell zárniuk a fogantyúkat, és meg kell hívniuk `resetDbInstance()` a tisztítás során. Csak akkor futtassa `npm run test:bun:db`, ha a legjobb Bun adapter elérési útja megváltozik; Node továbbra is mérvadó.
 
-### Build / telepítés
+### Építsd / telepítsd
 
 **Szerződések**
 
-- Gyökér- és munkaterületi manifestek/zárolási fájl, `scripts/build/`, Next.js önálló összeállítás, a `dist/`
-  csomag tartalma, Electron-platformmetaadatok, CI-munkafolyamatok és telepítési jelzők.
-- A támogatott Node-verziótartományoknak és a Bun `CLAUDE.md` fájlban engedélyezési listán szereplő használatának változatlanul meg kell maradnia.
-- A buildtermékek nem kerülhetnek verziókövetés alá; a függőségi, licencelési, munkafolyamat- és csomagszabályzatok érvényesek.
+- Gyökér és munkaterület manifests/lockfile, `scripts/build/`, Next.js önálló összeállítás, `dist/` csomag tartalma, Electron platform metaadatok, CI munkafolyamatok és telepítési őrszemek.
+- A támogatott csomópont-tartományoknak és az engedélyezett Bun használatnak `CLAUDE.md` ben érintetleneknek kell maradniuk.
+- Az építési műtermékek nem követhetők nyomon; függőségi, licenc-, munkafolyamat- és csomagszabályzat érvényes.
 
-**Célzott ciklus**
+**Fókuszált hurok**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # függőség- vagy zárolásifájl-módosítások
-npm run check:pack-policy      # a közzétett csomag felületének módosításai
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Az `npm run build` parancsot helyben csak akkor használd, ha a módosítás érinti a fordítást, az önálló összeállítást, az erőforrásokat vagy a futásidejű csomagolást. Az `npm run build:release` parancsot csak kiadási/telepítési ellenőrzéshez használd. A CI buildje a végső, platformokon átívelő visszajelzés; a platformspecifikus Electron-módosításokhoz a megfelelő célzott build vagy füstteszt bizonyítéka szükséges.
+`npm run build` csak akkor használja helyileg, ha a változás a fordítást, az önálló összeállítást, az eszközöket vagy a futásidejű kötegelést érinti. `npm run build:release` csak release/deploy érvényesítéséhez használja. CI buildje a végső keresztplatformos jel; A platform-specifikus Electron változtatásokhoz a megfelelő fókuszált felépítésre vagy füstölésre van szükség.
 
 ## Fejlesztői szkriptek megosztott géphez
 
