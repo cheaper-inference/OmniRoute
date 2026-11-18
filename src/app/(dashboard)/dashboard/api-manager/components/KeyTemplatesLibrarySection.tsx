@@ -9,6 +9,7 @@ import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import { Spinner } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
 import type { UnreadableKeyTemplate } from "@/shared/types/keyTemplates";
 import { anchorReferenceIssues, clearFieldValidationIssues } from "../keyTemplateReferenceIssues";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -425,9 +426,9 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <h4 className="text-sm text-text-main truncate">{tpl.name}</h4>
-          <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-mono shrink-0">
+          <Badge size="sm" className="shrink-0 font-mono">
             v{tpl.revision}
-          </span>
+          </Badge>
         </div>
         {tpl.description && (
           <p className="text-xs text-text-muted line-clamp-2 mt-0.5">{tpl.description}</p>
@@ -484,23 +485,9 @@ function TemplateCards({ model }: { model: LibraryModel }) {
 
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {badges.map((b) => (
-                  <span
-                    key={b.id}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                      b.tone === "success"
-                        ? "bg-success/10 text-success"
-                        : b.tone === "warning"
-                          ? "bg-warning/10 text-warning"
-                          : b.tone === "error"
-                            ? "bg-error/10 text-error"
-                            : b.tone === "info"
-                              ? "bg-info/10 text-info"
-                              : "bg-surface-2 text-text-muted"
-                    }`}
-                  >
-                    <Icon name={b.icon} size={12} />
+                  <Badge key={b.id} size="sm" variant={b.tone} icon={b.icon}>
                     {b.label}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>

@@ -258,9 +258,9 @@ export default function IntelligentComboPanel({
                           </p>
                           <p className="text-[11px] text-text-muted mt-0.5">{entry.model}</p>
                         </div>
-                        <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
+                        <Badge size="sm" variant="primary">
                           {percentage}%
-                        </span>
+                        </Badge>
                       </div>
 
                       <div
@@ -279,13 +279,10 @@ export default function IntelligentComboPanel({
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {Object.entries(entry.factors).map(([factorKey, factorValue]) => (
-                          <span
-                            key={`${entry.provider}-${factorKey}`}
-                            className="rounded-full bg-bg-subtle px-2 py-1 text-[10px] text-text-muted"
-                          >
+                          <Badge key={`${entry.provider}-${factorKey}`} size="sm">
                             {FACTOR_LABELS[factorKey as keyof typeof FACTOR_LABELS]}{" "}
                             {Math.round(Number(factorValue) * 100)}%
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     </div>

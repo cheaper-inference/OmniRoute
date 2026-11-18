@@ -333,9 +333,9 @@ export default function ApiEndpointsTab() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base">{catalog.info.title || "API"}</h2>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono font-semibold">
+                  <Badge size="sm" variant="primary" className="font-mono">
                     {catalog.info.version}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-xs text-text-muted mt-0.5">
                   {t("catalogStats", {
@@ -706,18 +706,13 @@ export default function ApiEndpointsTab() {
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="data_object" size={14} className="text-primary" />
                 <h3 className="text-xs uppercase text-text-muted">{t("dataSchemas")}</h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-muted">
-                  {catalog.schemas.length}
-                </span>
+                <Badge size="sm">{catalog.schemas.length}</Badge>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {catalog.schemas.map((schema) => (
-                  <span
-                    key={schema}
-                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3-ink font-mono"
-                  >
+                  <Badge key={schema} size="sm" tone="chart-3" className="font-mono">
                     {schema}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </Card>

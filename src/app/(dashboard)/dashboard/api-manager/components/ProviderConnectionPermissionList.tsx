@@ -7,6 +7,7 @@ import { getProviderDisplayName } from "@/lib/display/names";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import Badge from "@/shared/components/Badge";
 import { cn } from "@/shared/utils/cn";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 
@@ -281,14 +282,14 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                     >
                       {providerDisplayName}
                     </Button>
-                    <span className="text-[10px] text-text-muted bg-surface px-1 py-0.5 rounded shrink-0">
+                    <Badge size="sm" className="shrink-0">
                       {totalCount}
-                    </span>
+                    </Badge>
                   </div>
                   {selectedInProvider > 0 && (
-                    <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                    <Badge size="sm" variant="primary" className="shrink-0">
                       {selectedInProvider}
-                    </span>
+                    </Badge>
                   )}
                 </div>
 

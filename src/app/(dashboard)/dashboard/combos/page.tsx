@@ -134,7 +134,7 @@ import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias
 import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
-import { strategyBadgeClass } from "./strategyPalette";
+import { strategyBadgeTone } from "./strategyPalette";
 import {
   COMBO_ENDPOINTS,
   COMBO_NON_CHAT_STRATEGIES,
@@ -684,10 +684,6 @@ function getStrategyDescription(t, strategy) {
 }
 
 // Strategy badge colour: one shared palette on the kit chart tokens (strategyPalette.ts, P8).
-function getStrategyBadgeClass(strategy) {
-  return strategyBadgeClass(strategy);
-}
-
 function moveArrayItem(items, fromIndex, toIndex) {
   const nextItems = [...items];
   const [movedItem] = nextItems.splice(fromIndex, 1);
@@ -2088,13 +2084,9 @@ function ComboCardInner({
             <div className="flex items-center gap-2">
               <code className="text-sm font-medium font-mono truncate">{combo.name}</code>
               <Tooltip content={strategyDescription}>
-                <span
-                  className={`text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded-full ${getStrategyBadgeClass(
-                    strategy
-                  )}`}
-                >
+                <Badge size="sm" tone={strategyBadgeTone(strategy)}>
                   {getStrategyLabel(t, strategy)}
-                </span>
+                </Badge>
               </Tooltip>
               {hasProxy && (
                 <Badge

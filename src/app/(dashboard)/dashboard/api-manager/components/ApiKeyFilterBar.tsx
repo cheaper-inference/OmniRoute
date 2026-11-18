@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ToggleChip, type ToggleChipProps } from "@omniroute/ui-kit/toggle-chip";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Toggle from "@/shared/components/Toggle";
-import ApiKeyFilterChip from "./ApiKeyFilterChip";
 import type { KeyStatus, KeyType, ApiKeyCounts } from "../apiManagerPageUtils";
 
 interface ApiKeyFilterBarProps {
@@ -37,32 +37,32 @@ export default function ApiKeyFilterBar({
   const statusChips: Array<{
     value: KeyStatus | null;
     label: string;
-    dotColor: string | null;
+    tone?: ToggleChipProps["tone"];
     count: number;
   }> = [
-    { value: null, label: t("filterAll"), dotColor: null, count: counts.total },
+    { value: null, label: t("filterAll"), count: counts.total },
     {
       value: "active",
       label: t("filterStatusActive"),
-      dotColor: "bg-success",
+      tone: "success",
       count: counts.active,
     },
     {
       value: "disabled",
       label: t("filterStatusDisabled"),
-      dotColor: "bg-text-muted",
+      tone: "neutral",
       count: counts.disabled,
     },
     {
       value: "banned",
       label: t("filterStatusBanned"),
-      dotColor: "bg-error",
+      tone: "danger",
       count: counts.banned,
     },
     {
       value: "expired",
       label: t("filterStatusExpired"),
-      dotColor: "bg-warning",
+      tone: "warning",
       count: counts.expired,
     },
   ];
@@ -70,26 +70,26 @@ export default function ApiKeyFilterBar({
   const typeChips: Array<{
     value: KeyType | null;
     label: string;
-    dotColor: string | null;
+    tone?: ToggleChipProps["tone"];
     count: number;
   }> = [
-    { value: null, label: t("filterAll"), dotColor: null, count: counts.total },
+    { value: null, label: t("filterAll"), count: counts.total },
     {
       value: "standard",
       label: t("filterTypeStandard"),
-      dotColor: "bg-text-muted",
+      tone: "neutral",
       count: counts.standard,
     },
     {
       value: "manage",
       label: t("filterTypeManage"),
-      dotColor: "bg-error",
+      tone: "danger",
       count: counts.manage,
     },
     {
       value: "restricted",
       label: t("filterTypeRestricted"),
-      dotColor: "bg-warning",
+      tone: "warning",
       count: counts.restricted,
     },
   ];
@@ -141,15 +141,15 @@ export default function ApiKeyFilterBar({
               {t("filterStatus")}:
             </span>
             {statusChips.map((chip) => (
-              <ApiKeyFilterChip
+              <ToggleChip
                 key={chip.value ?? "all"}
-                label={chip.label}
+                size="sm"
+                tone={chip.tone}
                 count={chip.count}
-                isActive={
+                pressed={
                   statusFilter === chip.value ||
                   (chip.value === "active" && activeOnly && statusFilter === null)
                 }
-                dotColor={chip.dotColor}
                 onClick={() => {
                   onStatusChange(chip.value);
                   // If user picks a non-active status chip while activeOnly is on, turn off activeOnly
@@ -157,7 +157,9 @@ export default function ApiKeyFilterBar({
                     onActiveOnlyChange(false);
                   }
                 }}
-              />
+              >
+                {chip.label}
+              </ToggleChip>
             ))}
           </div>
 
@@ -168,14 +170,16 @@ export default function ApiKeyFilterBar({
               {t("filterType")}:
             </span>
             {typeChips.map((chip) => (
-              <ApiKeyFilterChip
+              <ToggleChip
                 key={chip.value ?? "all"}
-                label={chip.label}
+                size="sm"
+                tone={chip.tone}
                 count={chip.count}
-                isActive={typeFilter === chip.value}
-                dotColor={chip.dotColor}
+                pressed={typeFilter === chip.value}
                 onClick={() => onTypeChange(chip.value)}
-              />
+              >
+                {chip.label}
+              </ToggleChip>
             ))}
           </div>
         </div>

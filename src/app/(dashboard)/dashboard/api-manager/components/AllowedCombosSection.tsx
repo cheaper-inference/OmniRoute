@@ -2,6 +2,7 @@
 
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { cn } from "@/shared/utils/cn";
 
 import { useMemo } from "react";
@@ -98,16 +99,11 @@ function PreservedComboRules({ rules }: { rules: string[] }) {
       <p className="text-xs text-text-muted">{t("preservedComboRules", { count: rules.length })}</p>
       <div className="flex flex-wrap gap-1">
         {rules.map((rule, index) => (
-          <span
-            key={`${rule}-${index}`}
-            title={t("preservedComboRuleHint")}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-surface text-[11px] text-text-muted"
-          >
-            <Icon name="lock" size={12} />
+          <Badge key={`${rule}-${index}`} size="sm" icon="lock" title={t("preservedComboRuleHint")}>
             <span data-testid="preserved-combo-rule" className="truncate max-w-[16rem]">
               {rule}
             </span>
-          </span>
+          </Badge>
         ))}
       </div>
     </div>

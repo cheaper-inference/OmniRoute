@@ -4,6 +4,7 @@ import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Toggle from "@/shared/components/Toggle";
+import Badge from "@/shared/components/Badge";
 import { formatProviderModelPermissionSummary } from "../apiManagerPageUtils";
 import {
   CLAUDE_CODE_DEFAULT_MODEL_ID,
@@ -27,9 +28,7 @@ export default function KeyPolicyModelsTab() {
           <p className="text-sm font-semibold text-text-main">
             {t("templateCatalogListingHeading")}
           </p>
-          <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-semibold">
-            {t("templateListingOnlyBadge")}
-          </span>
+          <Badge size="sm">{t("templateListingOnlyBadge")}</Badge>
         </div>
         <p className="text-xs text-text-muted">{t("templateCatalogListingDesc")}</p>
         <ApiKeyCatalogScopeSelect
@@ -308,9 +307,9 @@ function PublicModelRestriction() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5">
             <p className="text-sm font-medium text-text-main">{t("disableNonPublicModels")}</p>
-            <span className="px-1.5 py-0.5 rounded bg-warning/20 text-warning text-[10px] font-semibold">
+            <Badge size="sm" variant="warning">
               {t("templateExecAndListingBadge")}
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-text-muted">{t("disableNonPublicModelsDesc")}</p>
         </div>

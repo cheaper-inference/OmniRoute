@@ -16,6 +16,7 @@ import {
 } from "@/lib/radar/offersFeedSchema";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
+import Badge from "@/shared/components/Badge";
 
 interface OffersMeta {
   version: string;
@@ -218,13 +219,9 @@ export default function RadarOffersPage() {
                     </p>
                     <h2 className="text-lg">{localizeRadarOfferText(offer.title, locale)}</h2>
                   </div>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      offer.partner ? "bg-primary/15 text-primary" : "bg-success/15 text-success"
-                    }`}
-                  >
+                  <Badge variant={offer.partner ? "primary" : "success"}>
                     {offer.partner ? t("partnerBadge") : t("officialBadge")}
-                  </span>
+                  </Badge>
                 </div>
 
                 <p className="text-2xl font-semibold text-primary">

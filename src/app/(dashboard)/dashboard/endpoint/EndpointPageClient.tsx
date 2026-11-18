@@ -1407,10 +1407,13 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   ))}
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 border border-success/30 text-success shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+              <Badge variant="outline" shape="pill" tone="success" className="shrink-0">
+                <span
+                  aria-hidden="true"
+                  className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"
+                />
                 {t("statusRunning")}
-              </span>
+              </Badge>
               <Button
                 variant="outline"
                 size="sm"
@@ -1458,18 +1461,18 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   </span>
                 </p>
               </div>
-              <span
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border shrink-0 ${
-                  cloudEnabled
-                    ? "bg-success/10 border-success/30 text-success"
-                    : "bg-surface border-border/70 text-text-muted"
-                }`}
+              <Badge
+                variant="outline"
+                shape="pill"
+                tone={cloudEnabled ? "success" : undefined}
+                className="shrink-0"
               >
                 <span
+                  aria-hidden="true"
                   className={`w-1.5 h-1.5 rounded-full shrink-0 ${cloudEnabled ? "bg-success animate-pulse" : "bg-text-muted"}`}
                 />
                 {cloudEnabled ? tc("active") : tc("disabled")}
-              </span>
+              </Badge>
               {cloudEnabled ? (
                 <Button
                   size="sm"
@@ -1493,9 +1496,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   {t("enableCloud")}
                 </Button>
               ) : (
-                <span className="text-xs text-text-muted shrink-0 px-2 py-1 rounded border border-border/70 bg-surface">
+                <Badge variant="outline" shape="pill" className="shrink-0">
                   {tc("notConfigured")}
-                </span>
+                </Badge>
               )}
             </div>
 
@@ -2453,9 +2456,9 @@ function ProviderModelsModal({
               >
                 <code className="text-sm font-mono flex-1 truncate">{m.id}</code>
                 {m.custom && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                  <Badge size="sm" variant="secondary" shape="pill" tone="accent">
                     {t("custom")}
-                  </span>
+                  </Badge>
                 )}
                 <Button
                   variant="ghost"
@@ -2536,9 +2539,9 @@ function EndpointCard({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-semibold text-xs leading-tight">{title}</span>
             {badge && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full border border-border/60 text-text-muted font-medium uppercase tracking-wider leading-none">
+              <Badge size="sm" variant="outline" shape="pill">
                 {badge}
-              </span>
+              </Badge>
             )}
           </div>
           <span className="text-xs text-text-muted mt-0.5 block">

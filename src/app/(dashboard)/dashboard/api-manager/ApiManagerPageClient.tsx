@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
@@ -807,23 +808,25 @@ export default function ApiManagerPageClient() {
                     <div className="flex flex-col items-start gap-1">
                       {/* QUOTA differentiation chips — prepended before existing badges */}
                       {keyIsQuota && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
+                        <Badge size="sm" tone="chart-3">
                           {t("quotaModeOnly")}
-                        </span>
+                        </Badge>
                       )}
                       {keyIsQuota &&
                         visibleGroups.map((groupName) => (
-                          <span
+                          <Badge
+                            size="sm"
+                            variant="info"
                             key={groupName}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-info/10 text-info text-[11px] font-medium truncate max-w-full"
+                            className="truncate max-w-full"
                           >
                             {groupName}
-                          </span>
+                          </Badge>
                         ))}
                       {keyIsQuota && extraGroupCount > 0 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-info/10 text-info text-[11px] font-medium">
+                        <Badge size="sm" variant="info">
                           +{extraGroupCount}
-                        </span>
+                        </Badge>
                       )}
                       {/* Existing badges */}
                       {isModelRestricted ? (
@@ -871,90 +874,79 @@ export default function ApiManagerPageClient() {
                         </Link>
                       )}
                       {noLogEnabled && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
-                          <Icon name="visibility_off" size={12} />
+                        <Badge size="sm" tone="chart-3" icon="visibility_off">
                           No-Log
-                        </span>
+                        </Badge>
                       )}
                       {key.autoResolve && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-info/10 text-info text-[11px] font-medium">
-                          <Icon name="auto_fix_high" size={12} />
+                        <Badge size="sm" variant="info" icon="auto_fix_high">
                           Auto-Resolve
-                        </span>
+                        </Badge>
                       )}
                       {hasJsonStreamDefault && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-info/10 text-info text-[11px] font-medium">
-                          <Icon name="data_object" size={12} />
+                        <Badge size="sm" variant="info" icon="data_object">
                           {t("streamDefaultBadge")}
-                        </span>
+                        </Badge>
                       )}
                       {hasLocalUsageCommand && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-2 text-text-muted text-[11px] font-medium">
-                          <Icon name="terminal" size={12} />
+                        <Badge size="sm" icon="terminal">
                           {t("localUsageCommandBadge")}
-                        </span>
+                        </Badge>
                       )}
                       {key.usageLimitEnabled === true && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/10 text-success text-[11px] font-medium">
-                          <Icon name="paid" size={12} />
+                        <Badge size="sm" variant="success" icon="paid">
                           USD quota
-                        </span>
+                        </Badge>
                       )}
                       {hasProviderQuotaBypass && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-[11px] font-medium">
-                          <Icon name="alt_route" size={12} />
+                        <Badge size="sm" variant="warning" icon="alt_route">
                           Bypass quota policy
-                        </span>
+                        </Badge>
                       )}
                       {hasSessionLimit && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
-                          <Icon name="group" size={12} />
+                        <Badge size="sm" tone="chart-3" icon="group">
                           Sessions: {activeSessions}/{maxSessions}
-                        </span>
+                        </Badge>
                       )}
                       {deviceCount > 0 && (
-                        <span
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-info/10 text-info text-[11px] font-medium"
+                        <Badge
+                          size="sm"
+                          variant="info"
+                          icon="devices"
                           title={t("devicesTooltip", { count: deviceCount })}
                         >
-                          <Icon name="devices" size={12} />
                           {t("devicesCount", { count: deviceCount })}
-                        </span>
+                        </Badge>
                       )}
                       {hasThrottle && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-[11px] font-medium">
-                          <Icon name="speed" size={12} />+{throttleDelayMs}ms
-                        </span>
+                        <Badge size="sm" variant="warning" icon="speed">
+                          +{throttleDelayMs}ms
+                        </Badge>
                       )}
                       {hasManageScope && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-medium">
-                          <Icon name="admin_panel_settings" size={12} />
+                        <Badge size="sm" variant="error" icon="admin_panel_settings">
                           manage
-                        </span>
+                        </Badge>
                       )}
                       {!keyIsActive && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-medium">
-                          <Icon name="block" size={12} />
+                        <Badge size="sm" variant="error" icon="block">
                           {t("disabled")}
-                        </span>
+                        </Badge>
                       )}
                       {hasSchedule && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-[11px] font-medium">
-                          <Icon name="schedule" size={12} />
+                        <Badge size="sm" variant="warning" icon="schedule">
                           {t("scheduleActive")}
-                        </span>
+                        </Badge>
                       )}
                       {key.isBanned && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-semibold animate-pulse">
-                          <Icon name="gavel" size={12} />
+                        <Badge size="sm" variant="error" icon="gavel" className="animate-pulse">
                           BANNED
-                        </span>
+                        </Badge>
                       )}
                       {key.expiresAt && new Date(key.expiresAt).getTime() < Date.now() && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-2 text-text-muted text-[11px] font-medium">
-                          <Icon name="event_busy" size={12} />
+                        <Badge size="sm" icon="event_busy">
                           EXPIRED
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
@@ -1055,9 +1047,7 @@ export default function ApiManagerPageClient() {
                       <span className="text-sm font-medium text-text-main">
                         {t("normalKeysSection")}
                       </span>
-                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-surface/80 border border-border text-[11px] font-semibold text-text-muted">
-                        {normalKeys.length}
-                      </span>
+                      <Badge size="sm">{normalKeys.length}</Badge>
                     </div>
                     <Table
                       scrollbarLabel={t("normalKeysSection")}
@@ -1076,12 +1066,10 @@ export default function ApiManagerPageClient() {
                       <span className="text-sm font-medium text-text-main">
                         {t("quotaKeysSection")}
                       </span>
-                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-surface/80 border border-border text-[11px] font-semibold text-text-muted">
-                        {quotaKeys.length}
-                      </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-chart-3/10 text-chart-3-ink text-[11px] font-semibold">
+                      <Badge size="sm">{quotaKeys.length}</Badge>
+                      <Badge size="sm" tone="chart-3">
                         {t("quotaPill")}
-                      </span>
+                      </Badge>
                     </div>
                     <Table
                       scrollbarLabel={t("quotaKeysSection")}
@@ -1176,24 +1164,19 @@ export default function ApiManagerPageClient() {
             )}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               {summarizeKeyTemplatePolicy(draftCreatePolicy, t).map((badge) => (
-                <span
-                  key={badge.id}
-                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-2 border border-border/60 text-[11px] font-medium text-text-muted"
-                >
+                <Badge size="sm" key={badge.id}>
                   {badge.label}
-                </span>
+                </Badge>
               ))}
               {selectedTemplateRef && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-medium">
-                  <Icon name="layers" size={12} />
+                <Badge size="sm" variant="primary" icon="layers">
                   {t("templateSnapshotBadge", { revision: selectedTemplateRef.revision })}
-                </span>
+                </Badge>
               )}
               {isCreatePolicyDirty && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-[11px] font-medium">
-                  <Icon name="edit_note" size={12} />
+                <Badge size="sm" variant="warning" icon="edit_note">
                   {t("policyCustomizedBadge")}
-                </span>
+                </Badge>
               )}
             </div>
           </div>

@@ -112,24 +112,16 @@ function budgetLabel(entry: RadarMergedEntry): string {
 function capabilityBadge(
   label: string,
   value: boolean | null | undefined,
-  trueClass: string,
+  trueVariant: "primary" | "info" | "warning",
   unknownHelp: string
 ) {
   const state = value === true ? "✓" : value === false ? "✕" : "?";
-  const stateClass =
-    value === true
-      ? trueClass
-      : value === false
-        ? "bg-error/10 text-error"
-        : "bg-surface-2/10 text-text-muted";
+  const variant = value === true ? trueVariant : value === false ? "error" : "default";
   const unknown = value !== true && value !== false;
   return (
-    <span
-      className={`text-[10px] px-1.5 py-0.5 rounded ${stateClass}`}
-      {...(unknown ? { title: unknownHelp } : {})}
-    >
+    <Badge size="sm" variant={variant} {...(unknown ? { title: unknownHelp } : {})}>
       {label} {state}
-    </span>
+    </Badge>
   );
 }
 
@@ -326,44 +318,47 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                       {capabilityBadge(
                         t("capTools"),
                         entry.capabilities?.tools,
-                        "bg-info/10 text-info",
+                        "info",
                         t("capabilityUnknownHelp")
                       )}
                       {capabilityBadge(
                         t("capVision"),
                         entry.capabilities?.vision,
-                        "bg-primary/10 text-primary",
+                        "primary",
                         t("capabilityUnknownHelp")
                       )}
                       {capabilityBadge(
                         t("capThinking"),
                         entry.capabilities?.thinking,
-                        "bg-warning/10 text-warning",
+                        "warning",
                         t("capabilityUnknownHelp")
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
+                    <Badge
+                      size="sm"
+                      variant={
                         entry.tos === "ok"
-                          ? "bg-success/10 text-success"
+                          ? "success"
                           : entry.tos === "caution"
-                            ? "bg-warning/10 text-warning"
+                            ? "warning"
                             : entry.tos === "avoid"
-                              ? "bg-error/10 text-error"
-                              : "bg-surface-2/10 text-text-muted"
-                      }`}
+                              ? "error"
+                              : "default"
+                      }
                     >
                       {entry.tos}
-                    </span>
+                    </Badge>
                     {entry.trainsOnPrompts === true && (
-                      <span
-                        className="ml-1 text-xs px-2 py-1 rounded bg-warning/10 text-warning"
+                      <Badge
+                        size="sm"
+                        variant="warning"
+                        className="ml-1"
                         title={t("trainsOnPromptsHelp")}
                       >
                         {t("trainsOnPrompts")}
-                      </span>
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="pl-3">

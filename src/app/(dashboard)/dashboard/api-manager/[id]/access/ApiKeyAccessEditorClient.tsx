@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -482,13 +483,10 @@ function AccessTabBar({ context }: { context: AccessFormContext }) {
                     white space between flex items is not rendered. */}
             {errorCount > 0 && " "}
             {errorCount > 0 && (
-              <span
-                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
-                title={t("errorBadgeLabel", { count: errorCount })}
-              >
+              <Badge size="sm" variant="error" title={t("errorBadgeLabel", { count: errorCount })}>
                 <span aria-hidden="true">{errorCount}</span>
                 <span className="sr-only">{t("errorBadgeLabel", { count: errorCount })}</span>
-              </span>
+              </Badge>
             )}
           </TabsTrigger>
         );

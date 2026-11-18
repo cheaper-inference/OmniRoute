@@ -4,6 +4,7 @@ import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
+import Badge from "@/shared/components/Badge";
 
 export interface ChaosProviderInfo {
   id: string;
@@ -95,10 +96,10 @@ function ChaosAvailableProvidersHint({
       </DisclosureTrigger>
       <DisclosureContent keepMounted className="mt-1 flex flex-wrap gap-1">
         {availableProviders.map((p) => (
-          <span key={p.id} className="px-1.5 py-0.5 rounded bg-bg-subtle">
+          <Badge key={p.id} size="sm">
             {p.provider}
             {p.defaultModel && <span className="opacity-60 ml-1">({p.defaultModel})</span>}
-          </span>
+          </Badge>
         ))}
       </DisclosureContent>
     </Disclosure>

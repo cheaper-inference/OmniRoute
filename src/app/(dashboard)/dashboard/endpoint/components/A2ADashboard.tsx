@@ -12,6 +12,7 @@ import {
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
+import Badge from "@/shared/components/Badge";
 import { useTranslations } from "next-intl";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
@@ -85,12 +86,12 @@ const TASK_STATES: Array<"all" | A2ATaskState> = [
   "cancelled",
 ];
 
-function stateClass(state: A2ATaskState) {
-  if (state === "completed") return "bg-success/15 text-success";
-  if (state === "failed") return "bg-error/15 text-error";
-  if (state === "working") return "bg-warning/15 text-warning";
-  if (state === "cancelled") return "bg-surface-2 text-text-muted";
-  return "bg-info/15 text-info";
+function stateVariant(state: A2ATaskState) {
+  if (state === "completed") return "success";
+  if (state === "failed") return "error";
+  if (state === "working") return "warning";
+  if (state === "cancelled") return "default";
+  return "info";
 }
 
 export default function A2ADashboardPage() {
@@ -464,37 +465,36 @@ export default function A2ADashboardPage() {
                 {tasksData.tasks.map((task) => {
                   const fsmPhase =
                     task.metadata?.fsmPhase || (task.metadata?.workflowFSM as any)?.currentPhase;
-                  let fsmBadgeColor = "bg-surface-2 text-text-muted";
-                  if (fsmPhase === "plan" || fsmPhase === "plan_review")
-                    fsmBadgeColor = "bg-chart-3/15 text-chart-3-ink";
-                  else if (fsmPhase === "execute") fsmBadgeColor = "bg-info/15 text-info";
+                  let fsmVariant: "default" | "info" | "warning" | "success" | "error" = "default";
+                  const fsmPlanning = fsmPhase === "plan" || fsmPhase === "plan_review";
+                  if (fsmPhase === "execute") fsmVariant = "info";
                   else if (
                     ["code_review", "quality_review", "security", "test", "output_review"].includes(
                       fsmPhase
                     )
                   )
-                    fsmBadgeColor = "bg-warning/15 text-warning";
-                  else if (fsmPhase === "done") fsmBadgeColor = "bg-success/15 text-success";
-                  else if (fsmPhase === "failed") fsmBadgeColor = "bg-error/15 text-error";
+                    fsmVariant = "warning";
+                  else if (fsmPhase === "done") fsmVariant = "success";
+                  else if (fsmPhase === "failed") fsmVariant = "error";
 
                   return (
                     <TableRow key={task.id}>
                       <TableCell className="font-mono">{task.id}</TableCell>
                       <TableCell>{task.skill}</TableCell>
                       <TableCell>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${stateClass(task.state)}`}
-                        >
+                        <Badge size="sm" variant={stateVariant(task.state)}>
                           {t(`state.${task.state}`)}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         {fsmPhase ? (
-                          <span
-                            className={`text-xs px-2 py-1 rounded border border-current/20 font-medium ${fsmBadgeColor}`}
+                          <Badge
+                            size="sm"
+                            variant={fsmVariant}
+                            tone={fsmPlanning ? "chart-3" : undefined}
                           >
                             {fsmPhase}
-                          </span>
+                          </Badge>
                         ) : (
                           <span className="text-xs text-text-muted">—</span>
                         )}
