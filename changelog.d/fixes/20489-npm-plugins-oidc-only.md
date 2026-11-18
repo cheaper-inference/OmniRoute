@@ -1,0 +1,1 @@
+- **fix(ci):** the OpenCode plugins and the staged release mode publish to npm through Trusted Publishing (OIDC) only; the expired long-lived `NPM_TOKEN` is left solely on the DIRECT emergency fallback ([#20489](https://github.com/cheaper-inference/OmniRoute/pull/20489))
