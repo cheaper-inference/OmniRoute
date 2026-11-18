@@ -29,7 +29,7 @@ export default function MitmProxyMovedPage() {
         variant="warning"
         className="w-full max-w-md"
         icon={<Icon name="info" size={20} />}
-        title={<h1 className="text-lg font-semibold">{t("title")}</h1>}
+        title={<h1 className="text-lg">{t("title")}</h1>}
         description={t("message")}
         dismissLabel={tc("close")}
         actions={

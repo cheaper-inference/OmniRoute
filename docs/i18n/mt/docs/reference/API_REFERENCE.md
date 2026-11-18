@@ -792,66 +792,168 @@ Ipproċessar ta’ lottijiet kompatibbli ma’ OpenAI.
 
 ---
 
-## Fittex API
+## API tat-Tiftix
 
-Web/search fornitur estrazzjoni (Tavily, Brave, Exa, Serper, eċċ.).
+Astraat tal-fornituri tat-tiftix fuq il-web (Tavily, Brave, Exa, Serper, eċċ.).
 
-| Metodu | Mogħdija               | Deskrizzjoni                                                                                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati + kapaċitajiet                                          |
-| POST   | `/v1/search`           | Mexxi mistoqsija ta' tfittxija — body validat minn `v1SearchSchema`, jappoġġja caching/coalescing |
-| GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                              |
+| Metodu | Mogħdija               | Deskrizzjoni                                                                                                  |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Jelenka l-fornituri tat-tiftix ikkonfigurati + il-kapaċitajiet                                                |
+| POST   | `/v1/search`           | Iħaddem mistoqsija ta’ tiftix — il-korp jiġi vvalidat minn `v1SearchSchema`, u jappoġġja l-caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistika tal-hits/latency/cache skont il-fornitur                                                           |
 
-**Awth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Politika ta' tfittxija infurzata permezz `enforceApiKeyPolicy`.
+**Awtentikazzjoni:** Ċavetta API Bearer (`extractApiKey` + `isValidApiKey`). Il-politika tat-tiftix tiġi infurzata permezz ta’ `enforceApiKeyPolicy`.
 
-**Agħżel awtomatikament:** mingħajr `provider`, l-orħos fornitur b'konnessjoni kkonfigurata jaħdem l-ewwel u l-irħas li jmiss huwa l-failover. Fornituri tal-aħħar riżors b'xejn (`duckduckgo-free`) jintużaw biss meta xejn ieħor ma jkun ikkonfigurat. SearXNG self-hosted jgħodd bħala kkonfigurat ladarba l-konnessjoni tiegħu taħżen `baseUrl` reali (mhux il-katalgu default `http://localhost:8888/search`): imbagħad jikklassifika bħala fornitur ta '$0 qabel dawk b'keyed, bl-orħos fornitur keyed bħala failover, inkluż meta SearXNG iwieġeb 400, 401, 403 jew 403 jew URL `baseUrl` li ma jkunx validu `http(s)` jew 404. punti f'indirizz ta' metadata ta' cloud ma jgħoddux. Konnessjoni SearXNG li taħżen token tikklassifika b'dan il-mod biss fuq `https://` jew loopback `http://`. Fuq `http://` sempliċi remot qatt ma huwa failover u jibqa 'l-aħħar għażla, użat biss meta l-ebda fornitur ieħor ma jkun ikkonfigurat jew meta mitlub b'isem, għalhekk jibgħat it-token f'test ċar f'dawk iż-żewġ każijiet.
+### Kombinazzjonijiet imsemmija ta’ tiftix/ġbir
 
-### Exa u Tavily `provider_options`
+Kemm `POST /v1/search` kif ukoll `POST /v1/web/fetch` jaċċettaw `model` bħala isem ta’ kombinazzjoni ssejvjata.
+Uża jew `model` jew `provider` espliċitu; jekk tibgħat it-tnejn, jintbagħat `400`.
+Mingħajr l-ebda wieħed minn dawn il-kampijiet, l-għażla awtomatika eżistenti tal-fornitur tibqa’ l-istess.
 
-Exa u Tavily jaqraw oqsma speċifiċi għall-fornitur minn borża spazjata bl-isem: `provider_options.exa` (jew `provider_options["exa-search"]`) u `provider_options.tavily` (jew `provider_options["tavily-search"]`). Iċ-ċwievet ta' hawn taħt biss jintbagħtu. Kull wieħed huwa ċċekkjat mal-iskema Zod tiegħu stess `open-sse/handlers/search/providerOptionsPassthrough.ts`, u ċavetta bit-tip ħażin tinżel. Kwalunkwe ċavetta oħra tiġi injorata, inklużi auth, base URL, `stream` u `outputSchema`. Iċ-ċwievet ċatti użati minn fornituri oħra (`cx`, `depth`, ...) jaħdmu bħal qabel.
+Kemm il-Combo Builder kif ukoll il-katalgu Add Model tiegħu jesponu entrati ta’ operazzjonijiet nattivi tal-web għall-fornituri konnessi, anki meta ma jkollhom l-ebda lista ta’ mudelli LLM. Serper juri **Tiftix fuq il-web**;
+Tavily juri **Tiftix fuq il-web / Estrazzjoni tal-paġni**, u l-fornituri li jappoġġjaw il-ġbir biss juru **Estr bezzjoni tal-paġni**.
+Agħżel l-entrata u l-kont bħas-soltu. Entrata waħda ta’ Tavily tintuża għaż-żewġ endpoints tal-web;
+dawn l-entrati tal-operazzjonijiet ma jiżdiedux mas-seletturi tal-klijenti li jappoġġjaw iċ-chat biss jew mal-probes tal-mudelli taċ-chat.
 
-| Fornitur | Oqsma tal-ogħla livell                                                                                                                                                                                                                                                                                                                                                    | Nedjati                                                                                                                               |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` magħquda fuq `{ text: true, highlights: true }` default |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+Pereżempju, oħloq kombinazzjoni ta’ **prijorità** bl-isem `shared-free` b’dawn il-miri f’din l-ordni:
 
-L-oqsma ġeneriċi dejjem jirbħu: `query`, `max_results`, `filters` (dominji), `country` u s-suġġett derivat minn `search_type`. Fuq Exa, `search_type: "news"` iżomm `category: "news"`. Tavily jaċċetta wkoll `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-L-ispiża tat-tfittxija Firecrawl hija rreġistrata għal kull blokka mibdija ta '10 riżultati rritornati, għal $0.002 (2 krediti) blokka u mill-inqas blokka waħda għal kull sejħa ( [Billing Firecrawl](https://docs.firecrawl.dev/billing) ): 11-il riżultat jiswew $0.004.
+Imbagħad uża l-istess isem fuq kull wiċċ:
 
-Iż- `time_range` ġeneriku issa jilħaq iż-żewġ fornituri: Exa gets `startPublishedDate` (ISO timestamp ) u Tavily gets `start_date` (`YYYY-MM-DD`). Data espliċita `provider_options` tipprevali dik mappata.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Ir-riżultati Exa jżommu `id`, `highlights` (kull enfasi, mhux biss l-ewwel wieħed użat bħala l- `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` u `extras` fi `provider_raw`. Ir-riżultati tavily iżommu `images` u `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-L-ispiża tat-tfittxija tal-linkup hija rreġistrata għal $0.005 għal `depth` `fast` u `standard` u $0.05 għal `deep` ( [prezzijiet tal-Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kemm jekk `depth` ġej minn `provider_options` jew mis-settings tal-konnessjoni.
+It-tiftix jikkunsidra Tavily u mbagħad Serper; il-ġbir jikkunsidra Tavily u mbagħad Jina Reader;
+iċ-chat jaqbeż il-fornituri ddedikati għat-tiftix/ġbir u jikkunsidra OpenAI. Il-kompatibbiltà
+ġejja mir-reġistri tal-eżekuturi tat-tiftix/ġbir, mhux mill-kliem f’isem mudell.
+Il-filtrazzjoni ssir qabel l-għażla tal-kredenzjali u d-dispaċċ, u qatt ma timmodifika l-kombinazzjoni ssejvjata.
 
-Exa `type: "lite"` (Exa 3.0) jaċċetta sett iżgħar ta' oqsma u jirrifjuta t-talba kollha meta jkun issettjat kwalunkwe qasam ieħor. Għal lite, `additionalQueries`, `systemPrompt` u kull ċavetta `contents` ħlief `text` u `highlights` jintefgħu qabel is-sejħa. `subpages`, `subpageTarget`, `highlights.numSentences` u `highlights.highlightsPerUrl` deprecati m'għadhomx jintbagħtu.
+Ir-rotot tal-kapaċitajiet li mhumiex taċ-chat jappoġġjaw `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, u `p2c`. Strateġiji ta’ sinteżi ddedikati għaċ-chat biss, bħal
+`fusion`, `pipeline`, u `context-relay`, jiġu rifjutati fuq rotot li mhumiex taċ-chat minflok ma jiġu applikati
+mingħajr avviż għat-tiftix jew għall-midja ġġenerata.
+Il-magna eżistenti tal-kombinazzjonijiet tieħu ħsieb il-fallback ordnat, inklużi l-fallimenti tal-kwota upstream,
+u żżomm l-IDs tal-passi, il-pins tal-kontijiet, il-listi ta’ kontijiet permessi għal kull pass, ir-referenzi nested,
+l-ambiti tal-konnessjoni/kwota ta’ min jagħmel it-talba u l-politika tal-aċċess għall-kombinazzjoni. Ir-riżultati jżommu
+l-iskema nattiva tat-tiftix/ġbir tagħhom, inkluż il-fornitur attwali; `X-OmniRoute-Combo-Trace` jidentifika
+d-deċiżjoni tar-routing. Kombinazzjonijiet mhux magħrufa jirritornaw `404`; kombinazzjonijiet inattivi u kombinazzjonijiet
+mingħajr miri kompatibbli jirritornaw `400`.
 
-Il-kontabilità tal-ispejjeż hija r-reġistru ċatt `costPerQuery`, ħlief għal Exa, li jsegwi l-ipprezzar ta 'Exa stess: $0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopri 10 riżultati; $0.001 għal kull riżultat ieħor; u $0.001 għal kull riżultat ritornat meta `contents.summary` huwa stabbilit. Tavily huwa rreġistrat f'kreditu 1 ($0.008) għal `search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced` ( [krediti Tavily API](https://docs.tavily.com/documentation/api-credits) ). Sejħa `auto_parameters: true` li Tavily jaġġorna għal avvanzat għadha rreġistrata bi kreditu 1.
+Kull tentattiv ta’ kombinazzjoni juża fornitur espliċitu wieħed.
+Ma jistax jinvoka l-grupp nattiv awtomatiku tal-fornituri minn wara dahar il-kombinazzjoni. It-talbiet b’fornitur espliċitu
+jżommu l-imġiba eżistenti tagħhom ta’ fornitur wieħed. Talbiet diretti taċ-chat li jimmiraw lejn fornituri ddedikati
+għat-tiftix/ġbir jirritornaw `400` JSON li jindika x’għandu jsir, minflok ma jaqgħu lura għal eżekutur stil OpenAI.
+
+### Rotot ta’ kombinazzjonijiet speċifiċi għall-kapaċità
+
+Il-kombinazzjonijiet ssejvjati jista’ jkun fihom oġġett `routes` li ċ-ċwievet tiegħu huma kapaċitajiet tal-API. Kull rotta għandha
+l-lista tal-miri, l-istrateġija u l-konfigurazzjoni runtime tagħha. L-`models`, `strategy` u `config` tal-ogħla livell
+jibqgħu l-pjan taċ-Chat kompatibbli mal-verżjonijiet preċedenti; kombinazzjonijiet qodma mingħajr `routes` jibqgħu jaħdmu mingħajr tibdil.
+
+Iċ-ċwievet tar-rotot appoġġjati huma `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, u `audio-generation`. Il-projezzjoni tal-endpoint issir qabel l-għażla tal-kredenzjali, il-punteġġjar
+jew id-dispaċċ. Referenzi nested għal kombinazzjonijiet jagħżlu r-rotta tal-kombinazzjoni tfal għall-istess kapaċità.
+
+`POST /v1/music/generations` u `POST /v1/ocr` jaċċettaw isem ta’ kombinazzjoni f’`model`. Il-
+`POST /v1/music` nattiv kompatibbli ma’ ElevenLabs jaċċetta wkoll isem ta’ kombinazzjoni f’`model_id`, iżda kull mira li tista’ tintuża fuq dak l-endpoint nattiv trid tkun mudell tal-mużika ElevenLabs sabiex jiġi ppreservat il-kuntratt tar-rispons binarju tiegħu. `POST /v1/sound-generation` jaċċetta kombinazzjoni `audio-generation` f’`model_id` taħt l-istess restrizzjoni nattiva binarja. Uża `/v1/music/generations` għal fornituri tal-mużika eteroġenji.
+
+**Għażla awtomatika:** mingħajr `provider`, l-ewwel jaħdem il-fornitur bl-inqas spiża li għandu konnessjoni kkonfigurata, u t-tieni l-irħas wieħed jintuża bħala failover. Il-fornituri b’xejn tal-aħħar għażla (`duckduckgo-free`) jintużaw biss meta ma jkun ikkonfigurat xejn ieħor. SearXNG ospitat waħdu jitqies ikkonfigurat ladarba l-konnessjoni tiegħu taħżen `baseUrl` reali (mhux il-default tal-katalgu `http://localhost:8888/search`): imbagħad jiġi kklassifikat bħala fornitur ta’ $0 qabel dawk li jeħtieġu ċavetta, bil-fornitur bl-inqas spiża li jeħtieġ ċavetta bħala failover, anki meta SearXNG jirrispondi b’400, 401, 403 jew 404. `baseUrl` li mhuwiex URL `http(s)` validu jew li jindika indirizz tal-metadejta tal-cloud ma jgħoddx. Konnessjoni ta’ SearXNG li taħżen token tiġi kklassifikata b’dan il-mod biss fuq `https://` jew loopback `http://`. Fuq `http://` remot sempliċi qatt ma tintuża bħala failover u tibqa’ tal-aħħar għażla, u tintuża biss meta ma jkun ikkonfigurat l-ebda fornitur ieħor jew meta tintalab bl-isem; għalhekk tibgħat it-token f’test sempliċi f’dawk iż-żewġ każijiet.
+
+### `provider_options` ta’ Exa u Tavily
+
+Exa u Tavily jaqraw oqsma speċifiċi għall-fornitur minn borża namespaced:
+`provider_options.exa` (jew `provider_options["exa-search"]`) u `provider_options.tavily`
+(jew `provider_options["tavily-search"]`). Huma jgħaddu biss iċ-ċwievet hawn taħt. Kull waħda tiġi
+ċċekkjata kontra l-iskema Zod tagħha stess f’`open-sse/handlers/search/providerOptionsPassthrough.ts`,
+u ċavetta bit-tip żbaljat titneħħa. Kwalunkwe ċavetta oħra tiġi injorata, inklużi l-awtentikazzjoni,
+il-URL bażi, `stream` u `outputSchema`. Iċ-ċwievet ċatti użati minn fornituri oħra (`cx`, `depth`, ...)
+jaħdmu bħal qabel.
+
+| Fornitur | Oqsma tal-ogħla livell                                                                                                                                                                                                                                                                                                                                                    | Imnaddfa                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitivi ċatti), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` magħquda fuq l-inadempjenza `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
+
+L-oqsma ġeneriċi dejjem għandhom prijorità: `query`, `max_results`, `filters` (dominji), `country` u s-suġġett
+derivat minn `search_type`. F’Exa, `search_type: "news"` iżomm `category: "news"`.
+Tavily jaċċetta wkoll `search_type: "finance"` (`topic: "finance"`).
+
+L-ispiża tat-tfittxija ta’ Firecrawl tiġi rreġistrata għal kull blokka ta’ 10 riżultati rritornati li tinbeda, bi $0.002 (2
+krediti) għal kull blokka u mill-inqas blokka waħda għal kull sejħa
+([kontijiet ta’ Firecrawl](https://docs.firecrawl.dev/billing)): 11-il riżultat jiswew $0.004.
+
+Il-`time_range` ġeneriku issa jasal għand iż-żewġ fornituri: Exa jirċievi `startPublishedDate` (timbru taż-żmien ISO) u Tavily jirċievi `start_date` (`YYYY-MM-DD`). Data espliċita f’`provider_options`
+tissostitwixxi dik immappjata.
+
+Ir-riżultati ta’ Exa jżommu `id`, `highlights` (kull highlight, mhux biss l-ewwel wieħed użat bħala
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` u `extras` f’`provider_raw`. Ir-riżultati ta’ Tavily jżommu `images` u `favicon`.
+
+L-ispiża tat-tfittxija ta’ Linkup tiġi rreġistrata bħala $0.005 għal `depth` `fast` u `standard` u $0.05 għal
+`deep` ([ipprezzar ta’ Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+kemm jekk `depth` ġej minn `provider_options` kif ukoll mis-settings tal-konnessjoni.
+
+Exa `type: "lite"` (Exa 3.0) jaċċetta sett iżgħar ta’ oqsma u jirrifjuta t-talba kollha
+meta jkun issettjat kwalunkwe qasam ieħor. Għal lite, `additionalQueries`, `systemPrompt` u kull ċavetta ta’
+`contents` ħlief `text` u `highlights` jitneħħew qabel is-sejħa. `subpages`, `subpageTarget`,
+`highlights.numSentences` u `highlights.highlightsPerUrl` li m’għadhomx rakkomandati ma
+jgħaddux aktar.
+
+Il-kontabilità tal-ispejjeż tuża r-reġistru ċatt `costPerQuery`, ħlief għal Exa, li jsegwi l-ipprezzar tiegħu stess:
+$0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopru 10 riżultati; $0.001 għal kull riżultat addizzjonali; u $0.001 għal kull
+riżultat rritornat meta jiġi ssettjat `contents.summary`. Tavily jiġi rreġistrat bħala kreditu 1 ($0.008) għal
+`search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced`
+([krediti tal-API ta’ Tavily](https://docs.tavily.com/documentation/api-credits)). Sejħa b’
+`auto_parameters: true` li fiha Tavily jaġġorna għal advanced xorta tiġi rreġistrata bħala kreditu 1.
 
 ---
 
-## API ta’ Ġbir mill-Web
+## API tal-Ġbir mill-Web
 
-Estratt kontenut minn URL permezz ta’ fornitur ikkonfigurat għall-ġbir mill-web (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Estratt kontenut minn URL permezz ta' provider ikkonfigurat għall-ġbir mill-web (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, l-istess ċavetta API bħal Parallel Search) jirritorna Markdown
-biss — kwalunkwe `format` ieħor jirriżulta f’`400` — u jillimita l-kontenut għal 100,000 karattru. Meta l-paġna fil-mira nnifisha ma tkunx tista’ tiġi estratta, is-servizz upstream jirrapporta dan ġewwa HTTP 200;
-OmniRoute jesponi dan bħala `422` b’messaġġ fiss.
+Parallel Extract (`parallel-search`, bl-istess ċavetta API bħal Parallel Search) jirritorna Markdown
+biss — kwalunkwe `format` ieħor jikkawża `400` — u jillimita l-kontenut għal 100,000 karattru. Meta
+l-paġna fil-mira nnifisha ma tkunx tista' tiġi estratta, is-servizz upstream jirrapporta dan fi
+ħdan HTTP 200; OmniRoute jippreżentah bħala `422` b'messaġġ fiss.
 
-| Metodu | Mogħdija        | Deskrizzjoni                                                       |
-| ------ | --------------- | ------------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | Iġbor/estratta URL — il-body jiġi vvalidat minn `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) jirritorna wkoll Markdown biss (kwalunkwe `format` ieħor jikkawża
+`400`) u jillimita l-kontenut għal 100,000 karattru. Jaħdem mingħajr ċavetta: talba esplicita b'
+`provider: "keenable-search"` mingħajr konnessjoni tuża l-endpoint ta' Keenable mingħajr ċavetta
+(limiti tar-rata għal kull IP). Ċavetta kkonfigurata tneħħi biss dawn il-limiti; l-għażla awtomatika
+tuża Keenable biss meta tkun ikkonfigurata ċavetta.
 
-**Awtentikazzjoni:** Ċavetta API Bearer (`extractApiKey` + `isValidApiKey`). Il-politika tiġi infurzata permezz ta’ `enforceApiKeyPolicy`.
+| Metodu | Mogħdija        | Deskrizzjoni                                                    |
+| ------ | --------------- | --------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Iġbor/aqla' URL — il-korp jiġi vvalidat minn `v1WebFetchSchema` |
 
-**Fall-back konxju tal-kwota (#8297):** meta ma jingħata l-ebda `provider` espliċitu, il-pool
+**Awtentikazzjoni:** Ċavetta API Bearer (`extractApiKey` + `isValidApiKey`). Il-politika tiġi infurzata permezz ta'
+`enforceApiKeyPolicy`.
+
+Il-kombinazzjonijiet imsemmija jużaw il-[kuntratt tar-routing ta' `model`](#named-searchfetch-combinations)
+hawn fuq, filwaqt li jippreservaw l-għażliet u r-risposti speċifiċi għall-ġbir.
+
+**Fallback konxju tal-kwota (#8297):** meta la `provider` u lanqas `model` ma jingħataw, il-pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) jiġi
-eżaminat f’ordni ta’ prijorità fissa (fill-first) — fornitur ikkonfigurat iżda limitat mir-rata jinqabeż
-minflok ma t-talba tieqaf hemm, u falliment upstream li jista’ jerġa’ jintuża/relatat mal-kwota (HTTP 429 dejjem; 402/403 għal livelli b’kwota b’xejn ta’ Firecrawl/Tavily/TinyFish —
-mhux għal Jina Reader, u qatt għal talba sempliċi 400 mhux valida) jgħaddi għall-fornitur kredenzjali li jmiss u li għadu ma ġiex ippruvat fil-ħin tat-talba. Meta kull fornitur fil-pool ikun eżawrit, l-endpoint jirritorna `429` wieħed (b’header `Retry-After`) minflok il-`400` ġeneriku preċedenti. Meta jintalab `provider` espliċitu, m’hemm **l-ebda fall-back sieket** — fornitur espliċitu limitat mir-rata jew li jfalli jesponi l-iżball tiegħu stess (`429` jekk ikun limitat mir-rata, inkella l-istatus upstream).
+`parallel-search` → `keenable-search`) jiġi
+eżaminat f'ordni ta' prijorità fissa (timla l-ewwel) — provider li jkun ikkonfigurat iżda limitat mir-rata jinqabeż
+minflok ma t-talba tieqaf, u falliment upstream li jista' jerġa' jiġi ppruvat/relatat mal-kwota
+(HTTP 429 dejjem; 402/403 għal-livelli b'xejn ta' Firecrawl/Tavily/TinyFish bi stil ta' kwota —
+mhux għal Jina Reader, u qatt għal talba sempliċi 400 invalida) jgħaddi għand il-provider li jmiss
+b'kredenzjali li għadu ma ġiex ippruvat fil-ħin tat-talba. Meta kull provider fil-pool ikun eżawrit,
+l-endpoint jirritorna `429` wieħed (b'header `Retry-After`) minflok il-`400` ġeneriku ta' qabel. Meta
+jintalab `provider` b'mod esplicitu, ma jkun hemm **ebda fallback sieket** — provider esplicitu limitat
+mir-rata jew li jfalli juri l-iżball tiegħu stess (`429` jekk ikun limitat mir-rata, inkella l-istatus upstream).
 
 ---
 
@@ -919,28 +1021,31 @@ Il-CLI jaġġorna `base_url + /responses` għal WebSocket u OmniRoute jibgħatha
 
 ---
 
-## Rappurtar tal-Kwoti u l-Kwistjonijiet
+## Rappurtar tal-Kwoti u l-Problemi
 
 | Metodu | Mogħdija            | Deskrizzjoni                                                                                      |
 | ------ | ------------------- | ------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Ivvalida minn qabel il-kwota għal `provider` + `accountId` qabel tinħareġ ċavetta rreġistrata     |
+| GET    | `/v1/quotas/check`  | Ivvalida minn qabel il-kwota għal `provider` + `accountId` qabel toħroġ ċavetta rreġistrata       |
 | POST   | `/v1/issues/report` | Irrapporta falliment fil-ħruġ ta’ kwota/ċavetta lil GitHub (jeħtieġ `GITHUB_ISSUES_REPO` + token) |
 
-**Awtentikazzjoni:** Ċavetta API Bearer (`isAuthenticated`).
+**Awtentikazzjoni:** `/v1/quotas/check` jaċċetta ċavetta API Bearer (`isAuthenticated`). `/v1/issues/report` huwa
+disponibbli biss għall-immaniġġjar (`requireManagementAuth`), bħal `/api/v1/registered-keys`: sessjoni tad-dashboard,
+it-token lokali tas-CLI, jew ċavetta API bl-ambitu `manage`/`admin`; iċ-ċwievet API għall-inferenza biss jiksbu `403`.
 
-### Irkupru tas-sessjoni tal-kwota (opt-in)
+### Irkupru tas-sessjoni tal-kwota (attivazzjoni fakultattiva)
 
-`POST /v1/chat/completions` jew `POST /v1/responses` mingħajr streaming li jfalli bi żball terminali tal-kwota (`402`/`429`/`503` li l-kontenut tiegħu jgħid li l-kwota jew il-krediti huma eżawriti) jista’ jitqiegħed fil-kju u jerġa’ jiġi eżegwit aktar tard minflok ma jirritorna l-iżball. Min jagħmel is-sejħa jagħżel din l-għażla għal kull talba bi tliet headers:
+Talba `POST /v1/chat/completions` jew `POST /v1/responses` mhux streaming li tfalli bi
+żball terminali tal-kwota (`402`/`429`/`503` li l-korp tiegħu jgħid li l-kwota jew il-krediti huma eżawriti)
+tista’ titpoġġa fil-kju u terġa’ tintbagħat aktar tard minflok ma jiġi rritornat l-iżball. Min jagħmel it-talba jattiva din l-għażla għal kull talba bi tliet headers:
 
-| Header                       | Valur                                            |
-| ---------------------------- | ------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                           |
-| `x-omniroute-session`        | id tas-sessjoni, `[A-Za-z0-9._:-]{1,128}`        |
-| `x-omniroute-recovery-turn`  | id tat-turn uniku fis-sessjoni (l-istess regola) |
+| Header                       | Valur                                             |
+| ---------------------------- | ------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                            |
+| `x-omniroute-session`        | ID tas-sessjoni, `[A-Za-z0-9._:-]{1,128}`         |
+| `x-omniroute-recovery-turn`  | ID tad-dawra uniku fis-sessjoni (l-istess regola) |
 
-Huma eliġibbli biss it-turns bi `stream: false` mingħajr għodod, storja tal-għodod jew `previous_response_id`, u mingħajr pin ta’ `x-omniroute-connection`, u `STORAGE_ENCRYPTION_KEY` irid ikun issettjat (it-talba tinħażen kriptata sa 24 siegħa). Ir-rispons imbagħad ikun `202` b’`recovery.poll`; staqsi l-istatus b’`GET /v1/quota-recoveries/{id}` (`202` waqt li jkun pendenti, `200` bil-kontenut irkuprat meta jitlesta) jew ikkanċella b’`DELETE`. It-tickets huma viżibbli biss għaċ-ċavetta API li ħolqothom. Replay li r-riżultat tiegħu mhuwiex ċert jispiċċa fi `needs_confirmation` minflok ma jintbagħat darbtejn. Sors: `src/lib/quota/quotaSessionRecovery.ts`.
-
----
+Dawriet biss b’`stream: false` mingħajr għodod, storja tal-għodod jew `previous_response_id`, u mingħajr
+pin ta’ `x-omniroute-connection`, huma eliġibbli, u `STORAGE_ENCRYPTION_KEY` irid ikun issettjat (it-talba tinħażen kriptata sa 24 siegħa). Ir-rispons ikun imbagħad `202` b’`recovery.poll`; interroga `GET /v1/quota-recoveries/{id}` (`202` waqt li jkun pendenti, `200` bil-korp irkuprat meta jitlesta) jew ikkanċella bi `DELETE`. It-tickets jidhru biss għaċ-ċavetta API li ħolqithom. Replay li r-riżultat tiegħu jkun inċert jispiċċa fi `needs_confirmation` minflok ma jintbagħat darbtejn. Sors: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Użu self-service (`/api/usage/om-usage`)
 
@@ -1686,19 +1791,23 @@ Abbonamenti għal webhooks ħerġin għall-avvenimenti ta' OmniRoute (tlestija t
 
 ---
 
-## Ċwievet Reġistrati (Ġestjoni Awtomatika)
+## Ċwievet Irreġistrati (Ġestjoni Awtomatika)
 
-Użati mis-sottosistema tal-ġestjoni awtomatika taċ-ċwievet biex toħroġ u ddawwar iċ-ċwievet API kontra fornitur/kont ta' appoġġ, bi kwoti ta' kuljum/kull siegħa.
+Użati mis-sottosistema tal-ġestjoni awtomatika taċ-ċwievet biex toħroġ u ddawwar iċ-ċwievet tal-API kontra fornitur/kont ta' appoġġ, bi kwoti ta' kuljum/kull siegħa.
 
-| Metodu | Mogħdija                              | Deskrizzjoni                                                                                                                                                                                                                             |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Elenka ċ-ċwievet reġistrati (il-prefiss mgħotti biss)                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys`             | Oħroġ ċavetta reġistrata ġdida — korp: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tirritorna ċ-ċavetta mhux ipproċessata **darba waħda**. Tirritorna `429` meta l-kwota tiġi rrifjutata. |
-| GET    | `/api/v1/registered-keys/[id]`        | Irkupra l-metadejta taċ-ċavetta reġistrata (l-ebda materjal mhux ipproċessat)                                                                                                                                                            |
-| DELETE | `/api/v1/registered-keys/[id]`        | Irrivoka ċavetta reġistrata                                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Punt tat-tmiem tar-revoka espliċitu (l-istess effett bħal DELETE)                                                                                                                                                                        |
+| Method | Path                                  | Description                                                                                                                                                                                                                                         |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Elenka ċ-ċwievet irreġistrati (il-prefiss moħbi biss)                                                                                                                                                                                               |
+| POST   | `/api/v1/registered-keys`             | Oħroġ ċavetta irreġistrata ġdida — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tirritorna ċ-ċavetta mhux ipproċessata **darba waħda**. Tirritorna `429` meta tiġi rrifjutata minħabba l-kwota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Irkupra l-metadata ta' ċavetta irreġistrata (l-ebda materjal mhux ipproċessat)                                                                                                                                                                      |
+| DELETE | `/api/v1/registered-keys/[id]`        | Irrivoka ċavetta irreġistrata                                                                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint espliċitu għall-irtirar (l-istess effett bħal DELETE)                                                                                                                                                                                      |
+| GET    | `/api/v1/providers/[provider]/limits` | Aqra l-limiti tal-ħruġ tal-fornitur                                                                                                                                                                                                                 |
+| PUT    | `/api/v1/providers/[provider]/limits` | Issettja l-limiti tal-ħruġ tal-fornitur — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | Aqra l-limiti tal-ħruġ tal-kont                                                                                                                                                                                                                     |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Issettja l-limiti tal-ħruġ tal-kont — l-istess body bħar-rotta tal-fornitur                                                                                                                                                                         |
 
-**Awtentikazzjoni:** sessjoni ta' ġestjoni/ċavetta API (`requireManagementAuth`) — l-istess kontroll bħal `/api/keys`: sessjoni tad-dashboard, token CLI lokali, jew ċavetta API bl-ambitu `manage`/`admin`; iċ-ċwievet API għall-inferenza biss jirċievu `403`. Ara wkoll `/v1/quotas/check` u `/v1/issues/report`.
+**Awtentikazzjoni:** sessjoni/ċavetta tal-API tal-ġestjoni (`requireManagementAuth`) — l-istess kontroll bħal `/api/keys`: sessjoni tad-dashboard, it-token lokali tas-CLI, jew ċavetta tal-API bl-iskop `manage`/`admin`; iċ-ċwievet tal-API għall-inferenza biss jiksbu `403`. Ara wkoll `/v1/quotas/check` u `/v1/issues/report`.
 
 ---
 
@@ -1822,21 +1931,21 @@ Qafas tal-ħiliet biex testendi OmniRoute b’handlers eżegwibbli personalizzat
 
 ## Server MCP
 
-OmniRoute jiġi ma’ server inkorporat tal-Model Context Protocol bi 3 trasporti (stdio, SSE, streamable-http) u għodod skopati. L-endpoints tad-dashboard hawn taħt jaqraw id-dejta tal-istatus/awditjar u jagħmlu proxy għat-trasporti HTTP.
+OmniRoute jiġi ma’ server inkorporat tal-Model Context Protocol bi 3 trasporti (stdio, SSE, streamable-http) u għodod b’ambiti. L-endpoints tad-dashboard hawn taħt jaqraw id-dejta tal-istatus u tal-awditjar u jgħaddu t-trasporti HTTP.
 
-| Metodu | Mogħdija | Deskrizzjoni | | -------------------- |
+| Metodu | Mogħdija | Deskrizzjoni |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Taħbit tal-qalb, trasport, stat online, l-aħħar sejħa, l-aqwa għodod, rata ta’ suċċess ta’ 24 siegħa |
-| GET | `/api/mcp/tools` | Lista ta’ għodod MCP b’`name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/status` | Sinjal ta’ ħajja, trasport, stat online, l-aħħar sejħa, l-aqwa għodod, rata ta’ suċċess ta’ 24 siegħa |
+| GET | `/api/mcp/tools` | Lista tal-għodod MCP b’`name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
 | GET | `/api/mcp/sse` | Iftaħ fluss SSE għat-trasport SSE (jirritorna `503` jekk MCP ikun diżattivat jew ikun hemm nuqqas ta’ qbil fit-trasport) |
 | POST | `/api/mcp/sse` | Ibgħat frame JSON-RPC fuq it-trasport SSE |
 | GET | `/api/mcp/stream` | Iftaħ in-naħa SSE tat-trasport Streamable HTTP (messaġġi mibdija mis-server) |
 | POST | `/api/mcp/stream` | Ibgħat frame JSON-RPC fuq it-trasport Streamable HTTP |
 | DELETE | `/api/mcp/stream` | Temm sessjoni Streamable HTTP |
-| GET | `/api/mcp/audit` | Agħmel mistoqsija fir-reġistru tal-awditjar — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit` | Fittex fil-log tal-awditjar — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
 | GET | `/api/mcp/audit/stats` | Statistika aggregata tal-awditjar (totali, rata ta’ suċċess, tul medju, l-aqwa għodod) |
 
-**Awtentikazzjoni:** it-trasporti `sse`/`stream` jirrispettaw il-wiċċ tal-awtentikazzjoni speċifiku għall-MCP (ċavetta API Bearer bl-iskop `mcp`); ir-rotot `status`/`tools`/`audit*` jistgħu jinqraw mid-dashboard (l-ebda awtentikazzjoni addizzjonali mhija meħtieġa lil hinn mill-aċċess għall-host tad-dashboard).
+**Awtentikazzjoni:** it-trasporti `sse`/`stream` jirrispettaw il-wiċċ tal-awtentikazzjoni speċifiku għal MCP (ċavetta API Bearer bl-ambitu `mcp`); ir-rotot `status`/`tools`/`audit*` jistgħu jinqraw mid-dashboard (mhi meħtieġa ebda awtentikazzjoni addizzjonali lil hinn milli jintlaħaq il-host tad-dashboard).
 
 > Iż-żewġ trasporti HTTP huma kkontrollati minn `settings.mcpEnabled` u `settings.mcpTransport` — nuqqas ta’ qbil fit-trasport jirritorna `400`, filwaqt li stat fejn MCP ikun diżattivat jirritorna `503`.
 

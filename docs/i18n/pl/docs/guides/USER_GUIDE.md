@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatycznie ładuje `.env` z `~/.omniroute/.env` lub `./.env`. `./.env` w katalogu roboczym może ustawić tylko krótką listę dozwolonych kluczy (porty, `REQUIRE_API_KEY`, ustawienia regionalne i kolory); umieść wszystko inne w `~/.omniroute/.env`. Zobacz [kontrakty na uruchomienie CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatycznie ładuje `.env` z `~/.omniroute/.env` lub `./.env`. `./.env` w katalogu roboczym może ustawić tylko krótką listę dozwolonych kluczy (`REQUIRE_API_KEY`, ustawienia regionalne, strefa czasowa i ustawienia kolorów, a nie porty); umieść wszystko inne w `~/.omniroute/.env`. Zobacz [kontrakty na uruchomienie CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tryb tacy
 
@@ -607,7 +607,7 @@ post_install() {
 | `HOSTNAME`                              | domyślne ramy                  | Powiąż hosta (domyślnie Docker to `0.0.0.0`)                                                                                                                      |
 | `NODE_ENV`                              | domyślne środowisko wykonawcze | Ustaw `production` do wdrożenia                                                                                                                                   |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`       | Publiczna baza URL pojawiła się na pulpicie nawigacyjnym i udostępniona serwerowi (zastępuje starsze `BASE_URL`)                                                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | Baza punktu końcowego synchronizacji w chmurze URL (zastępuje starszą wersję `CLOUD_URL`)                                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | Podstawowy punkt końcowy synchronizacji w chmurze URL (zastępuje starsze `CLOUD_URL`)                                                                             |
 | `API_KEY_SECRET`                        | _(wygenerowane automatycznie)_ | Sekret HMAC dla wygenerowanych kluczy API — wygenerowany automatycznie przy pierwszym uruchomieniu i utrwalony w `server.env`                                     |
 | `REQUIRE_API_KEY`                       | `false`                        | Wymuś klucz Bearer API na `/v1/*`                                                                                                                                 |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                        | Zezwalaj uwierzytelnionym użytkownikom pulpitu nawigacyjnego na ujawnianie na żądanie pełnych zapisanych wartości kluczy API                                      |
@@ -621,7 +621,7 @@ post_install() {
 | `PROMPT_CACHE_MAX_SIZE`                 | `50`                           | Maksymalna liczba wpisów w pamięci podręcznej monitów                                                                                                             |
 | `SEMANTIC_CACHE_MAX_SIZE`               | `100`                          | Maksymalna liczba wpisów w semantycznej pamięci podręcznej                                                                                                        |
 
-Aby zapoznać się z pełnym odwołaniem do zmiennych środowiskowych, zobacz [README](../README.md).
+Aby zapoznać się z pełnym odwołaniem do zmiennej środowiskowej, zobacz [README](../README.md).
 
 ---
 
@@ -734,8 +734,8 @@ Wybierz odrębny przedrostek (`mygw`, `acme-proxy`). Jeśli żądania kierowane 
 
 Te klucze trafiają do `providerSpecificData` połączenia (na przykład poprzez `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi.
-- `quotaEndpoint` — punkt końcowy quota/credits bramy, odczyt dotyczący paska przydziału pulpitu nawigacyjnego i routingu uwzględniającego przydziały. Działa zarówno na połączeniach kompatybilnych z OpenAI, jak i Anthropic; pełny kształt jest udokumentowany w `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code mają już aliasy o długości ponad 64 znaków bez ustawień. Wartość połączenia zastępuje wartość domyślną platformy Azure OpenAI / Azure AI Foundry (połączenie platformy Azure za bardziej rygorystyczną bramą) i ustawia limit dla niestandardowego zgodnego węzła; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zachowują limit rejestru i ignorują go.
+- `quotaEndpoint` — punkt końcowy quota/credits bramy, odczytaj pasek przydziałów w panelu kontrolnym i routing uwzględniający przydziały. Działa zarówno na połączeniach kompatybilnych z OpenAI, jak i Anthropic; pełny kształt jest udokumentowany w `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -832,7 +832,7 @@ Zwraca modele pogrupowane według dostawców z typami (`chat`, `embedding`, `ima
 
 ### Inteligencja bramy LLM (faza 9)
 
-- **Pamięć podręczna semantyczna** — Automatyczne buforowanie bez przesyłania strumieniowego, temperatura = 0 odpowiedzi (obejście z `X-OmniRoute-No-Cache: true`)
+- **Pamięć podręczna semantyczna** — Automatyczne buforowanie bez przesyłania strumieniowego, temperatura = 0 odpowiedzi (obejście za pomocą `X-OmniRoute-No-Cache: true`)
 - **Poproś o Idempotencję** — Deduplikuje żądania w ciągu 5 sekund poprzez nagłówek `Idempotency-Key` lub `X-Request-Id`
 - **Śledzenie postępu** — Włącz zdarzenia SSE `event: progress` poprzez nagłówek `X-OmniRoute-Progress: true`
 
@@ -865,23 +865,23 @@ Skonfiguruj przez** Pulpit nawigacyjny → Ustawienia → Routing** . Pulpit naw
 
 | Strategia                   | Opis                                                                                                                 |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Najpierw wypełnij**       | Używa kont w kolejności priorytetów — konto główne obsługuje wszystkie żądania, dopóki nie będą niedostępne          |
+| **Najpierw wypełnij**       | Używa kont w kolejności priorytetowej. Konto główne — obsługuje wszystkie żądania, dopóki nie będą dostępne          |
 | **Okrągły Robin**           | Przełącza cyklicznie pomiędzy wszystkimi kontami z konfigurowalnym limitem stałym (domyślnie: 3 połączenia na konto) |
-| **P2C (moc dwóch wyborów)** | Wybiera 2 losowe konta i ścieżki do zdrowszego — równoważy obciążenie świadomością zdrowia                           |
+| **P2C (moc dwóch wyborów)** | Wybiera 2 losowe konta i trasy do zdrowszego — równoważy obciążenie świadomością zdrowia                             |
 | **Losowy**                  | Losowo wybiera konto dla każdego żądania za pomocą tasowania Fishera-Yatesa                                          |
 | **Najrzadziej używany**     | Trasuje do konta z najstarszym znacznikiem czasu `lastUsedAt`, równomiernie rozprowadzając ruch                      |
 | **Optymalizacja kosztów**   | Kieruje do konta o najniższej wartości priorytetu, optymalizując pod kątem dostawców o najniższych kosztach          |
 
-**Zaawansowane kombinacje i strategie automatyczne** (konfigurowalne przez kombinację lub poprzez prefiksy `auto/*` — zobacz [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Zaawansowane kombinacje i strategie automatyczne** (konfigurowalne przez kombinację lub poprzez prefiksy `auto/*` — patrz [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — ścisły porządek, nigdy okrężny
+- `priority` — ścisła kolejność, nigdy system okrężny
 - `weighted` — proporcjonalny podział ruchu według wag poszczególnych modeli
 - `fill-first` — opróżnij pierwszy model, aż osiągną limity
 - `round-robin` / `strict-random` / `random`
 - `p2c` (moc dwóch wyborów)
 - `least-used` i `cost-optimized`
 - `auto` — na podstawie wyników u wszystkich kandydatów
-- `lkgp` (Ostatni znany dobry dostawca) — przypina ostatniego dobrego dostawcę, a następnie powraca do reguł
+- `lkgp` (ostatni znany dobry dostawca) — przypina do ostatniego skutecznego dostawcy, a następnie powraca do zasad
 - `context-optimized` — wybiera model z największym oknem swobodnego kontekstu
 - `context-relay` — łączy modele o długim kontekście dla kolejnych tur
 
@@ -992,22 +992,22 @@ OmniRoute wdraża odporność na poziomie dostawcy za pomocą pięciu komponent�
 
 1. **Kolejka żądań i tempo** — Kształtowanie żądań na poziomie systemu:
    - **Żądania na minutę (RPM)** — Maksymalna liczba żądań na minutę na konto
-   - **Min. czas między żądaniami** — Minimalna przerwa w milisekundach między żądaniami
+   - **Min. czas między żądaniami** — Minimalna przerwa w milisekundach pomiędzy żądaniami
    - **Maksymalna liczba jednoczesnych żądań** — Maksymalna liczba jednoczesnych żądań na konto
 
-2. **Czas odnowienia połączenia** — Konfiguracja typu per-auth dla pojedynczego połączenia po niepowodzeniach możliwych do powtórzenia:
+2. **Czas odnowienia połączenia** — Konfiguracja typu per-auth dla pojedynczego połączenia po nieudanych próbach:
    - **Podstawowy czas odnowienia** — Domyślne okno odnowienia dla możliwych do ponowienia błędów przesyłania danych
    - **Skorzystaj ze wskazówek dotyczących ponownej próby przesłania** — Honoruje autorytatywne wskazówki `Retry-After` lub resetowania, jeśli są dostępne
-   - **Maksymalne kroki wycofywania** — Maksymalny wykładniczy poziom zwrotu w przypadku powtarzających się awarii
+   - **Maksymalne kroki wycofywania** — Maksymalny wykładniczy poziom wycofywania się w przypadku powtarzających się awarii
 
 3. **Wyłącznik automatyczny dostawcy** — Śledzi kompleksowe awarie dostawców, oznacza dostawcę zdegradowanego przy skonfigurowanym progu ostrzegawczym i otwiera wyłącznik po osiągnięciu skonfigurowanego progu awarii:
-   - **Próg degradacji** — Kolejne awarie dostawców przed wejściem `DEGRADED`
-   - **Próg niepowodzenia** — Kolejne awarie dostawców przed wejściem `OPEN`
+   - **Próg degradacji** — Kolejne awarie dostawcy przed wejściem `DEGRADED`
+   - **Próg niepowodzenia** — Kolejne awarie dostawcy przed wejściem `OPEN`
    - **Zresetuj limit czasu** — Okno czasowe, zanim dostawca zostanie ponownie przetestowany
    - **CLOSED** (Zdrowy) — Żądania przebiegają normalnie
    - **DEGRADED** — Żądania nadal płyną, podczas gdy śledzone są podwyższone awarie
    - **OPEN** — Dostawca jest tymczasowo blokowany po powtarzających się awariach
-   - **HALF_OPEN** — Sprawdzanie, czy dostawca powrócił do zdrowia
+   - **HALF_OPEN** — Sprawdzanie, czy dostawca odzyskał siły
 
    Limity szybkości `429` obejmujące zasięg połączenia pozostają niezmienione** Czas odnowienia połączenia** i nie wliczają się do wyłącznika dostawcy.
 
@@ -1015,7 +1015,7 @@ OmniRoute wdraża odporność na poziomie dostawcy za pomocą pięciu komponent�
 
 4. **Poczekaj na ochłodzenie** — Jeśli każde połączenie kandydujące już się schładza, OmniRoute może poczekać na najwcześniejszy czas odnowienia i automatycznie ponowić to samo żądanie klienta.
 
-5. **Automatyczne wykrywanie limitu dawki** — Gdy dostawcy wyższego szczebla zwracają wyraźne okna oczekiwania, wskazówki te zastępują czas oczekiwania na połączenie lokalne, gdy ustawienie jest włączone.
+5. **Automatyczne wykrywanie limitu dawki** — Kiedy dostawcy wyższego szczebla zwracają wyraźne okna oczekiwania, te wskazówki zastępują czas oczekiwania na połączenie lokalne, gdy ustawienie jest włączone.
 
 **Wskazówka dla profesjonalistów:** Skorzystaj z** Zdrowie** strona do sprawdzania i resetowania wyłączników dostawcy usług na żywo po awarii. Strona Odporność zmienia jedynie konfigurację.
 
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Strona ustawień jest zorganizowana w** 7 zakładek** dla łatwej nawigacji:
 
-| Patka              | Zawartość                                                                                                                                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ogólny**         | Narzędzia pamięci systemowej, zachowanie domyślne, widoczność tunelu punktu końcowego                                                                                                                       |
-| **Wygląd**         | Sterowanie motywem (light/dark/system), widoczność paska bocznego, przełączniki panelu dla kart tunelu Cloudflare/Tailscale/ngrok                                                                           |
-| **AI**             | Przemyślany budżet (przejściowy / automatyczny / niestandardowy / adaptacyjny — zobacz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalny monit systemowy, natychmiastowe statystyki pamięci podręcznej |
-| **Bezpieczeństwo** | ustawienia Login/Password, kontrola dostępu IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed natychmiastowym wstrzyknięciem                                                      |
-| **Rozgromienie**   | Globalna strategia routingu (Fill First / Round Robin / P2C / Random / Najrzadziej używane / Optymalizacja kosztowa), aliasy modeli z symbolami wieloznacznymi, łańcuchy rezerwowe, domyślne kombinacje     |
-| **Odporność**      | Kolejka żądań, czas oczekiwania na połączenie, konfiguracja wyłącznika dostawcy i zachowanie oczekiwania na ochłodzenie                                                                                     |
-| **Zaawansowany**   | Globalna konfiguracja proxy (HTTP/SOCKS5), zastąpienia proxy dla poszczególnych dostawców                                                                                                                   |
+| Patka              | Zawartość                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Ogólny**         | Narzędzia pamięci systemowej, zachowanie domyślne, widoczność tunelu punktu końcowego                                                                                                                  |
+| **Wygląd**         | Sterowanie motywem (light/dark/system), widoczność paska bocznego, przełączniki panelu dla kart tunelu Cloudflare/Tailscale/ngrok                                                                      |
+| **AI**             | Myślący budżet (przejściowy / automatyczny / niestandardowy / adaptacyjny — patrz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalny monit systemowy, natychmiastowe statystyki pamięci podręcznej |
+| **Bezpieczeństwo** | ustawienia Login/Password, kontrola dostępu IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed natychmiastowym wstrzyknięciem                                                 |
+| **Rozgromienie**   | Globalna strategia routingu (Fill First / Round Robin / P2C / Random / Najrzadziej używane / Optymalizacja kosztowa), aliasy modeli wieloznacznych, łańcuchy rezerwowe, domyślne kombinacje            |
+| **Odporność**      | Kolejka żądań, czas oczekiwania na połączenie, konfiguracja wyłącznika dostawcy i zachowanie oczekiwania na ochłodzenie                                                                                |
+| **Zaawansowany**   | Globalna konfiguracja serwera proxy (HTTP/SOCKS5), zastąpienie serwera proxy dla każdego dostawcy                                                                                                      |
 
 Ogólne nie duplikuje już notatek rejestrowania i pamięci podręcznej w trybie tylko do odczytu. Ustawienia przechowywania i optymalizacji bazy danych są zachowywane poprzez `/api/settings/database`; ręczne czyszczenie pamięci podręcznej wykorzystuje `DELETE /api/cache`. Limity wierszy żądań i dzienników proxy są kontrolowane przez `CALL_LOGS_TABLE_MAX_ROWS` i `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1078,7 +1078,7 @@ Dostęp przez** Pulpit nawigacyjny → Koszty** .
 | Patka      | Zamiar                                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------------------ |
 | **Budżet** | Ustaw limity wydatków na klucz API za pomocą budżetów daily/weekly/monthly i śledzenia w czasie rzeczywistym |
-| **Wycena** | Przeglądaj i edytuj wpisy dotyczące cen modelu — koszt za 1 tys. tokenów input/output na dostawcę            |
+| **Wycena** | Przeglądaj i edytuj wpisy dotyczące cen modelu Koszt — na 1 tys. tokenów input/output na dostawcę            |
 
 ```bash
 # API: Set a budget
@@ -1156,11 +1156,11 @@ Skonfiguruj równoważenie poszczególnych kombinacji** Pulpit nawigacyjny → C
 | **Najrzadziej używany**   | Trasy do modelu z najmniejszą liczbą ostatnich żądań (wykorzystuje metryki kombi) |
 | **Optymalizacja kosztów** | Trasy do najtańszego dostępnego modelu (korzysta z tabeli cen)                    |
 
-Można ustawić globalne domyślne kombinacje** Pulpit nawigacyjny → Ustawienia → Routing → Domyślne ustawienia kombinacji** . Limity czasu docelowego kombinacji domyślnie dziedziczą limit czasu bieżącego żądania. Używać** Docelowy limit czasu (sekundy)** w przypadku domyślnych kombinacji lub pojedynczej kombinacji tylko wtedy, gdy krótszy limit na cel powinien wywołać szybszy powrót.
+Można ustawić globalne domyślne kombinacje** Pulpit nawigacyjny → Ustawienia → Routing → Domyślne ustawienia kombinacji** . Limity czasu docelowego kombinacji domyślnie dziedziczą limit czasu bieżącego żądania. Używać** Docelowy limit czasu (sekundy)** na domyślnych kombinacjach lub na pojedynczej kombinacji tylko wtedy, gdy krótszy limit na cel powinien wywołać szybszy powrót.
 
-Optymalizacje kombinacji z zerowym opóźnieniem są opcjonalne. Wyjechać** Optymalizacje z zerowym opóźnieniem** wyłączone, aby uniemożliwić tym funkcjom opóźnienia ściganie się z celami zastępczymi, pomijanie celów w oparciu o historię TTFT lub kompresowanie żądań zastępczych; włączenie tej opcji umożliwia skonfigurowanie zabezpieczeń, predykcyjnych pominięć TTFT i proaktywną kompresję awaryjną w celu zamiany wierności routing/request na mniejsze opóźnienia.
+Optymalizacje kombinacji z zerowym opóźnieniem są opcjonalne. Wyjechać** Optymalizacje z zerowym opóźnieniem** wyłączone, aby uniemożliwić tym funkcjom opóźnienia ściganie się z celami zastępczymi, pomijanie celów w oparciu o historię TTFT lub kompresowanie żądań zastępczych; włączenie tej opcji umożliwia skonfigurowanie zabezpieczeń, predykcyjnych pominięć TTFT i proaktywną kompresję rezerwową w celu zamiany wierności routing/request na mniejsze opóźnienia.
 
-Wyłączyć** Bufor tokenów rozumowania** gdy dostawcy wyższego szczebla wymagają ścisłych limitów `max_tokens` / `maxOutputTokens`. Po włączeniu routing kombinowany dodaje zapas modelu rozumowania tylko dla modeli ze znanym limitem wyjściowym i pozostawia limit tokenów klienta niezmieniony, gdy wartość bezpiecznego buforowania przekroczy ten limit. Jeśli limit klienta jest już powyżej znanego limitu, OmniRoute ogranicza go do tego limitu przed wysłaniem żądania nadrzędnego.
+Wyłączyć** Bufor tokenów rozumowania** gdy dostawcy wyższego szczebla wymagają ścisłych limitów `max_tokens` / `maxOutputTokens`. Po włączeniu routing kombinowany dodaje rezerwę modelu wnioskowania tylko dla modeli ze znanym limitem wyjściowym i pozostawia limit tokenów klienta niezmieniony, gdy wartość bezpiecznego buforowania przekroczy ten limit. Jeśli limit klienta jest już powyżej znanego limitu, OmniRoute ogranicza go do tego limitu przed wysłaniem żądania nadrzędnego.
 
 ---
 

@@ -20,14 +20,16 @@
 
 ## ස්ථාපන ක්රම
 
-### npm (නිර්දේශිතයි)
+### npm (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API මූලික URL එක `http://localhost:20128/v1` වේ.
+උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API පාදය URL `http://localhost:20128/v1` වේ.
+
+> **npm භාවිතා කරන්නන්:** ස්ථාපන ස්ක්‍රිප්ට් අවහිර කර ඇති බවට npm අනතුරු අඟවන්නේ නම් (උදා, `omniroute`, `better-sqlite3`), [දෝශ නිරාකරණය බලන්න — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,9 +38,9 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm පරිශීලකයින්:** `better-sqlite3` සහ `@swc/core` සඳහා ස්වදේශීය ගොඩනැඟීම් ස්ක්රිප්ට් සක්රීය කිරීමට `--allow-build` ධජය අවශ්ය වේ. pnpm v11 හි ගෝලීය ස්ථාපන සඳහා `pnpm approve-builds -g` විධානය සහාය නොදක්වයි.
+> **pnpm භාවිතා කරන්නන්:** `better-sqlite3` සහ `@swc/core` සඳහා ස්වදේශීය ගොඩනැගීමේ ස්ක්‍රිප්ට් සක්‍රීය කිරීමට `--allow-build` ධජය අවශ්‍ය වේ. pnpm v11 මත ගෝලීය ස්ථාපනයන් සඳහා `pnpm approve-builds -g` විධානය සහය නොදක්වයි.
 
-### Arch Linux (AUR)
+### ආරුක්කු Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
@@ -47,66 +49,66 @@ systemctl --user enable --now omniroute.service
 
 [AUR පැකේජය](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ස්ථාපනය කර systemd පරිශීලක සේවාවක් සපයයි.
 
-### මූලාශ්රයෙන්
+### මූලාශ්‍රයෙන්
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows සටහන:** පැරණි `%USERPROFILE%\.omniroute` නාමාවලිය නොමැති විට, පෙරනිමියෙන් OmniRoute `%APPDATA%\omniroute` භාවිත කරයි. වෙනත් දත්ත-නාමාවලි ස්ථානයක් තෝරා ගැනීමට `DATA_DIR` සකසන්න.
+> **Windows සටහන:** පෙරනිමියෙන්, උරුම `%USERPROFILE%\.omniroute` නාමාවලිය නොමැති විට OmniRoute `%APPDATA%\omniroute` භාවිතා කරයි. වෙනස් දත්ත නාමාවලි ස්ථානයක් තෝරා ගැනීමට `DATA_DIR` සකසන්න.
 
-> **සටහන:** පළමු ධාවනයේදී `npm install` විසින් `.env.example` වෙතින් `.env` ස්වයංක්රීයව ජනනය කරයි. පසුව සිදුකරන ස්ථාපන පවතින `.env` ගොනුවක් උඩින් නොලියන බැවින් අභිරුචිකරණ සුරැකේ. නැවත ආරම්භක අගයන් යෙදීමට, නැවත ධාවනය කිරීමට පෙර `.env` මකන්න.
+> **සටහන:** `npm install` පළමු ධාවනයේදී `.env.example` වෙතින් `.env` ස්වයංක්‍රීයව ජනනය කරයි. පසුකාලීන ස්ථාපනයන් පවතින `.env` එකක් උඩින් ලියන්නේ නැත, එබැවින් අභිරුචිකරණයන් සුරැකේ. නැවත සීඩ් කිරීමට, නැවත ධාවනය කිරීමට පෙර `.env` මකන්න.
 
 ### Docker
 
-Compose පැතිකඩ සහ Caddy HTTPS ඇතුළු සම්පූර්ණ Docker පිහිටුවීම සඳහා [Docker මාර්ගෝපදේශය](./DOCKER_GUIDE.md) බලන්න.
+Compose profiles සහ Caddy HTTPS ඇතුළු සම්පූර්ණ Docker සැකසුම සඳහා [Docker මාර්ගෝපදේශය](./DOCKER_GUIDE.md) බලන්න.
 
 ### ඩෙස්ක්ටොප් යෙදුම (Electron)
 
-OmniRoute සමඟ Electron 41 + electron-builder 26.10 මත ගොඩනඟන ලද ඩෙස්ක්ටොප් ආවරණයක් නිකුත් කෙරේ. ලබාගත හැකි ස්ක්රිප්ට් (වැඩබිමේ මූලය):
+OmniRoute විසින් Electron 41 + ඉලෙක්ට්‍රෝන-බිල්ඩර් 26.10 මත ගොඩනගා ඇති ඩෙස්ක්ටොප් දවටනයක් යවයි. පවතින ස්ක්‍රිප්ට් (වැඩ ඉඩ මූල):
 
 ```bash
-npm run electron:dev          # උණුසුම්-නැවත පූරණය සමඟ ඩෙස්ක්ටොප් එක ධාවනය කරන්න
-npm run electron:build        # වත්මන් OS සඳහා ගොඩනඟන්න (ස්වයංක්රීයව හඳුනා ගැනේ)
-npm run electron:build:win    # Windows ස්ථාපකය (NSIS + ගෙන යා හැකි)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # ඇසුරුම් කළ ගොඩනැඟීම දුම්-පරීක්ෂා කරන්න
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-ඩෙස්ක්ටොප් ස්ථාපකවල නිකුතු GitHub Releases වෙත අමුණා ඇත. සම්පූර්ණ Electron ගැඹුරු විස්තරය (අත්සන් කිරීම, IPC සම්බන්ධකය, බෙදාහැරීම්) සඳහා, [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) බලන්න _(පසු අදියරකදී සාදන ලදී)_.
+ඩෙස්ක්ටොප් ස්ථාපකවල නිකුතු GitHub නිකුතු වෙත අමුණා ඇත. සම්පූර්ණ Electron ගැඹුරු කිමිදීම සඳහා (අත්සන් කිරීම, IPC පාලම, බෙදා හැරීම), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ බලන්න.
 
-### හිස රහිත සේවාදායකය (CI/ස්වයංක්රීයකරණය)
+### හිස් රහිත සේවාදායකය (CI/automation)
 
-පරිශීලක මැදිහත්වීමක් නොමැති පිහිටුවීම් සඳහා (Docker, Kubernetes, CI), භාවිත කරන්න:
+නොපැමිණි සැකසුම් සඳහා (Docker, Kubernetes, CI), භාවිතා කරන්න:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-පරිසර විචල්ය (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, ආදිය) සමඟ ඒකාබද්ධ කළ විට, මෙය සම්පූර්ණයෙන්ම ස්ක්රිප්ට් කළ හැකි OmniRoute අවස්ථාවක් ක්රියාත්මක කිරීමට ඔබට ඉඩ දෙයි.
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, ආදිය) සමඟ ඒකාබද්ධව, මෙය ඔබට OmniRoute අවස්ථාවක් සම්පූර්ණයෙන්ම ස්ක්‍රිප්ට් කළ හැකි ලෙස කරකැවීමට ඉඩ සලසයි.
 
 ### CLI විකල්ප
 
-| විධානය                  | විස්තරය                                                                                                        |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | සේවාදායකය ආරම්භ කරන්න (`PORT=20128`, API සහ උපකරණ පුවරුව එකම පෝට් එකේ)                                         |
-| `omniroute setup`       | මුරපදය සහ පළමු සැපයුම්කරු සඳහා මඟපෙන්වන CLI ආරම්භක සැකසුම                                                      |
-| `omniroute doctor`      | සේවාදායකය ආරම්භ නොකර දේශීය සෞඛ්ය පරීක්ෂණ ධාවනය කරන්න                                                           |
-| `omniroute providers`   | CLI වෙතින් සැපයුම්කරුවන් සොයන්න, ලැයිස්තුගත කරන්න, වලංගු කරන්න සහ පරීක්ෂා කරන්න                                |
-| `omniroute config`      | CLI මෙවලම් වින්යාසය — වින්යාස ලැයිස්තුගත කරන්න, ලබාගන්න, සකසන්න සහ වලංගු කරන්න                                 |
-| `omniroute status`      | නොබැඳි තත්ත්ව උපකරණ පුවරුව — අනුවාදය, DB, මෙවලම්, වින්යාසය                                                     |
-| `omniroute logs`        | API වෙතින් භාවිත ලොග් ප්රවාහ කරන්න (`--follow` සඳහා සහාය දක්වයි)                                               |
-| `omniroute update`      | OmniRoute යාවත්කාලීන පරීක්ෂා කරන්න හෝ යොදන්න                                                                   |
-| `omniroute provider`    | සැපයුම්කරු සම්බන්ධතා කළමනාකරණය කරන්න — එක් කරන්න, ලැයිස්තුගත කරන්න, ඉවත් කරන්න, පරීක්ෂා කරන්න, පෙරනිමිය සකසන්න |
-| `omniroute --port 3000` | ප්රධාන/API පෝට් එක 3000 ලෙස සකසන්න                                                                             |
-| `omniroute --mcp`       | MCP සේවාදායකය ආරම්භ කරන්න (stdio ප්රවාහනය)                                                                     |
-| `omniroute --no-open`   | බ්රවුසරය ස්වයංක්රීයව විවෘත නොකරන්න                                                                             |
-| `omniroute --help`      | උදව් පෙන්වන්න                                                                                                  |
+| විධානය                  | විස්තරය                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `omniroute`             | සේවාදායකය අරඹන්න (`PORT=20128`, API සහ උපකරණ පුවරුව එකම වරායේ)                                                |
+| `omniroute setup`       | මුරපදය සහ පළමු සපයන්නා සඳහා මාර්ගෝපදේශක CLI ඇතුල්වීම                                                          |
+| `omniroute doctor`      | සේවාදායකය ආරම්භ නොකර දේශීය සෞඛ්‍ය පරීක්‍ෂණ ක්‍රියාත්මක කරන්න                                                  |
+| `omniroute providers`   | CLI වෙතින් සපයන්නන් සොයා ගන්න, ලැයිස්තුගත කරන්න, වලංගු කරන්න, සහ පරීක්ෂා කරන්න                                |
+| `omniroute config`      | CLI මෙවලම් වින්‍යාස — ලැයිස්තුව, ලබා ගන්න, සකසන්න, වින්‍යාසය වලංගු කරන්න                                      |
+| `omniroute status`      | නොබැඳි තත්ව උපකරණ පුවරුව — අනුවාදය, DB, මෙවලම්, වින්‍යාසය                                                     |
+| `omniroute logs`        | API වෙතින් භාවිත ලොග ප්‍රවාහ කරන්න ( `--follow` සඳහා සහය දක්වයි)                                              |
+| `omniroute update`      | OmniRoute යාවත්කාලීන සඳහා පරීක්ෂා කරන්න හෝ අයදුම් කරන්න                                                       |
+| `omniroute provider`    | සැපයුම්කරු සම්බන්ධතා කළමනාකරණය කරන්න — එකතු කරන්න, ලැයිස්තුගත කරන්න, ඉවත් කරන්න, පරීක්ෂා කරන්න, පෙරනිමි කරන්න |
+| `omniroute --port 3000` | canonical/API port 3000 ට සකසන්න                                                                              |
+| `omniroute --mcp`       | MCP සේවාදායකය ආරම්භ කරන්න (stdio ප්‍රවාහනය)                                                                   |
+| `omniroute --no-open`   | බ්‍රවුසරය ස්වයංක්‍රීයව විවෘත නොකරන්න                                                                          |
+| `omniroute --help`      | උදව් පෙන්වන්න                                                                                                 |
 
-හිස රහිත පිහිටුවීම ධජ හෝ පරිසර විචල්ය මඟින් ස්ක්රිප්ට් කළ හැකිය:
+හිස රහිත සැකසුම කොඩි හෝ පරිසර විචල්‍යයන් සමඟ ස්ක්‍රිප්ට් කළ හැක:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-උපකරණ පුවරුව විවෘත නොකර SSH හෝ ස්ක්රිප්ට් වෙතින් සැපයුම්කරුවන් කළමනාකරණය කරන්න:
+උපකරණ පුවරුව විවෘත නොකර SSH හෝ ස්ක්‍රිප්ට් වලින් සපයන්නන් කළමනාකරණය කරන්න:
 
 ```bash
 omniroute providers available
@@ -225,8 +227,12 @@ npm run test:protocols:e2e
 
 **Claude කේතය:**
 
+Claude කේතය HTTP හරහා සම්බන්ධ වන අතර, එය `omniroute --mcp` (stdio) ආරම්භ නොවේ. HTTP ප්‍රවාහනය පෙරනිමියෙන් ක්‍රියා විරහිත කර ඇත: එය ප්‍රථමයෙන් ධාවනය වන සේවාදායකයේ සක්‍රීය කරන්න. උපකරණ පුවරු ප්‍රවේශය සක්‍රීය කර ඇති විට, අක්තපත්‍රයක් නොමැතිව ඉල්ලීමක් `401` ලබා ගනී, එබැවින් `mcp:connect` (හෝ `manage`) තබා ඇති API යතුරක් පසු කරන්න. `manage`/`admin` නොමැති යතුරකට ද එක් එක් මෙවලම් විෂය පථය අවශ්‍ය වේ ( [MCP Server → MCP මෙවලම් විෂය පථ](../frameworks/MCP-SERVER.md#mcp-tool-scopes) බලන්න).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

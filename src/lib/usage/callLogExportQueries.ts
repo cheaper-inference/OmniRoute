@@ -1,3 +1,4 @@
+import { storedUsageEvidence } from "./storedUsageEvidence";
 /**
  * Call-log source for the log-export pipeline.
  *
@@ -26,6 +27,8 @@ export const DEFAULT_MAX_BODY_BYTES = 262_144;
 const RESOLVED_ACCOUNT_SQL = "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
 
 type ExportSourceRow = {
+  usage_evidence?: string | null;
+  usage_provenance?: string | null;
   row_id: number;
   id: string;
   timestamp: string | null;
@@ -77,6 +80,7 @@ function toNumberOrNull(value: unknown): number | null {
 function mapExportRow(row: ExportSourceRow): LogExportRecord {
   const provider = row.provider;
   return {
+    ...storedUsageEvidence(row),
     id: row.id,
     timestamp: row.timestamp,
     method: row.method,
