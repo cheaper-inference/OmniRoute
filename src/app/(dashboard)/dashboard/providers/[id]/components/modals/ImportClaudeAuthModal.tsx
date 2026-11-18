@@ -5,7 +5,16 @@ import { useState } from "react";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import { Button, Checkbox, Input, Modal, SegmentedControl, Textarea } from "@/shared/components";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Modal,
+  SegmentedControl,
+  SegmentedPanel,
+  SegmentedTabs,
+  Textarea,
+} from "@/shared/components";
 interface ImportClaudeAuthModalProps {
   onClose: () => void;
   onSuccess: () => void;
@@ -370,85 +379,94 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
     <Modal isOpen onClose={onClose} title={modalTitle}>
       <div className="flex flex-col gap-4">
         {/* Top tabs */}
-        <SegmentedControl
-          size="sm"
+        <SegmentedTabs
           value={topTab}
           onChange={(next) => setTopTab(next as ClaudeImportTopTab)}
-          options={(["single", "bulk"] as ClaudeImportTopTab[]).map((tab) => ({
-            value: tab,
-            label: tabLabels[tab],
-          }))}
-        />
+          className="gap-4"
+        >
+          <SegmentedControl
+            semantics="tabs"
+            size="sm"
+            options={(["single", "bulk"] as ClaudeImportTopTab[]).map((tab) => ({
+              value: tab,
+              label: tabLabels[tab],
+            }))}
+          />
 
-        {topTab === "single" && (
-          <div className="flex flex-col gap-3">
+          <SegmentedPanel value="single" className="flex flex-col gap-3">
             {/* Sub-tabs */}
-            <SegmentedControl
-              size="sm"
+            <SegmentedTabs
               value={singleSubTab}
               onChange={(next) => setSingleSubTab(next as "upload" | "paste")}
-              options={[
-                {
-                  value: "upload",
-                  label:
-                    typeof t.has === "function" && t.has("claudeImportTabUpload")
-                      ? t("claudeImportTabUpload")
-                      : "Upload file",
-                },
-                {
-                  value: "paste",
-                  label:
-                    typeof t.has === "function" && t.has("claudeImportTabPaste")
-                      ? t("claudeImportTabPaste")
-                      : "Paste JSON",
-                },
-              ]}
-            />
-            {singleSubTab === "upload" ? (
-              <div>
-                <Input
+              className="gap-3"
+            >
+              <SegmentedControl
+                semantics="tabs"
+                size="sm"
+                options={[
+                  {
+                    value: "upload",
+                    label:
+                      typeof t.has === "function" && t.has("claudeImportTabUpload")
+                        ? t("claudeImportTabUpload")
+                        : "Upload file",
+                  },
+                  {
+                    value: "paste",
+                    label:
+                      typeof t.has === "function" && t.has("claudeImportTabPaste")
+                        ? t("claudeImportTabPaste")
+                        : "Paste JSON",
+                  },
+                ]}
+              />
+              <SegmentedPanel value="upload">
+                <div>
+                  <Input
+                    label={
+                      typeof t.has === "function" && t.has("claudeImportFileLabel")
+                        ? t("claudeImportFileLabel")
+                        : "Choose .credentials.json"
+                    }
+                    type="file"
+                    accept=".json"
+                    onChange={handleSingleFileChange}
+                    inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
+                  />
+                  {singleJson && previewClaudeJson(singleJson).valid && (
+                    <p className="mt-1 text-xs text-success">
+                      {t("providerDetailValidClaudeCredentialsFile")}
+                    </p>
+                  )}
+                  {singleJson && !previewClaudeJson(singleJson).valid && (
+                    <p className="mt-1 text-xs text-error">
+                      {typeof t.has === "function" && t.has("claudeImportInvalidShape")
+                        ? t("claudeImportInvalidShape")
+                        : "The file is not a valid .credentials.json"}
+                    </p>
+                  )}
+                </div>
+              </SegmentedPanel>
+              <SegmentedPanel value="paste">
+                <Field
+                  htmlFor="claude-import-single-paste"
                   label={
-                    typeof t.has === "function" && t.has("claudeImportFileLabel")
-                      ? t("claudeImportFileLabel")
-                      : "Choose .credentials.json"
+                    typeof t.has === "function" && t.has("claudeImportPasteLabel")
+                      ? t("claudeImportPasteLabel")
+                      : "Paste the JSON content"
                   }
-                  type="file"
-                  accept=".json"
-                  onChange={handleSingleFileChange}
-                  inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
-                />
-                {singleJson && previewClaudeJson(singleJson).valid && (
-                  <p className="mt-1 text-xs text-success">
-                    {t("providerDetailValidClaudeCredentialsFile")}
-                  </p>
-                )}
-                {singleJson && !previewClaudeJson(singleJson).valid && (
-                  <p className="mt-1 text-xs text-error">
-                    {typeof t.has === "function" && t.has("claudeImportInvalidShape")
-                      ? t("claudeImportInvalidShape")
-                      : "The file is not a valid .credentials.json"}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <Field
-                htmlFor="claude-import-single-paste"
-                label={
-                  typeof t.has === "function" && t.has("claudeImportPasteLabel")
-                    ? t("claudeImportPasteLabel")
-                    : "Paste the JSON content"
-                }
-              >
-                <Textarea
-                  id="claude-import-single-paste"
-                  value={singlePasteText}
-                  onChange={(e) => setSinglePasteText(e.target.value)}
-                  rows={6}
-                  className="font-mono text-xs"
-                  placeholder='{ "claudeAiOauth": { ... } }'
-                />
-              </Field>
-            )}
+                >
+                  <Textarea
+                    id="claude-import-single-paste"
+                    value={singlePasteText}
+                    onChange={(e) => setSinglePasteText(e.target.value)}
+                    rows={6}
+                    className="font-mono text-xs"
+                    placeholder='{ "claudeAiOauth": { ... } }'
+                  />
+                </Field>
+              </SegmentedPanel>
+            </SegmentedTabs>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div>
                 <Input
@@ -495,106 +513,109 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                 ? t("claudeImportSubmit")
                 : "Import"}
             </Button>
-          </div>
-        )}
+          </SegmentedPanel>
 
-        {topTab === "bulk" && (
-          <div className="flex flex-col gap-3">
+          <SegmentedPanel value="bulk" className="flex flex-col gap-3">
             {/* Sub-mode tabs */}
-            <SegmentedControl
-              size="sm"
+            <SegmentedTabs
               value={bulkSubMode}
               onChange={(next) => {
                 setBulkSubMode(next as ClaudeBulkSubMode);
                 setBulkEntries([]);
               }}
-              options={(["upload", "paste", "zip"] as ClaudeBulkSubMode[]).map((mode) => ({
-                value: mode,
-                label:
-                  mode === "upload"
-                    ? typeof t.has === "function" && t.has("claudeImportBulkModeUpload")
-                      ? t("claudeImportBulkModeUpload")
-                      : "Upload files"
-                    : mode === "paste"
-                      ? typeof t.has === "function" && t.has("claudeImportBulkModePaste")
-                        ? t("claudeImportBulkModePaste")
-                        : "Paste JSON array"
-                      : typeof t.has === "function" && t.has("claudeImportBulkModeZip")
-                        ? t("claudeImportBulkModeZip")
-                        : "Upload ZIP",
-              }))}
-            />
+              className="gap-3"
+            >
+              <SegmentedControl
+                semantics="tabs"
+                size="sm"
+                options={(["upload", "paste", "zip"] as ClaudeBulkSubMode[]).map((mode) => ({
+                  value: mode,
+                  label:
+                    mode === "upload"
+                      ? typeof t.has === "function" && t.has("claudeImportBulkModeUpload")
+                        ? t("claudeImportBulkModeUpload")
+                        : "Upload files"
+                      : mode === "paste"
+                        ? typeof t.has === "function" && t.has("claudeImportBulkModePaste")
+                          ? t("claudeImportBulkModePaste")
+                          : "Paste JSON array"
+                        : typeof t.has === "function" && t.has("claudeImportBulkModeZip")
+                          ? t("claudeImportBulkModeZip")
+                          : "Upload ZIP",
+                }))}
+              />
 
-            {bulkSubMode === "upload" && (
-              <div>
-                <p className="text-xs text-text-muted mb-1">
-                  {typeof t.has === "function" && t.has("claudeImportBulkUploadHint")
-                    ? t("claudeImportBulkUploadHint")
-                    : "Drop or pick up to 50 .credentials.json files (256KB each, 10MB total)."}
-                </p>
-                <Input
-                  type="file"
-                  accept=".json"
-                  multiple
-                  aria-label={
-                    typeof t.has === "function" && t.has("claudeImportBulkModeUpload")
-                      ? t("claudeImportBulkModeUpload")
-                      : "Upload files"
-                  }
-                  onChange={handleBulkFilesChange}
-                  inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
-                />
-              </div>
-            )}
-            {bulkSubMode === "paste" && (
-              <div>
-                <p className="text-xs text-text-muted mb-1">
-                  {typeof t.has === "function" && t.has("claudeImportBulkPasteHint")
-                    ? t("claudeImportBulkPasteHint")
-                    : "Paste an array of objects: [{ json, name?, email? }, ...]"}
-                </p>
-                <Textarea
-                  value={bulkPasteText}
-                  onChange={(e) => handleBulkPasteChange(e.target.value)}
-                  rows={6}
-                  aria-label={
-                    typeof t.has === "function" && t.has("claudeImportBulkModePaste")
-                      ? t("claudeImportBulkModePaste")
-                      : "Paste JSON array"
-                  }
-                  className="font-mono text-xs"
-                  placeholder="[{ ... }, { ... }]"
-                />
-              </div>
-            )}
-            {bulkSubMode === "zip" && (
-              <div>
-                <p className="text-xs text-text-muted mb-1">
-                  {typeof t.has === "function" && t.has("claudeImportBulkZipHint")
-                    ? t("claudeImportBulkZipHint")
-                    : "ZIP containing .json entries. Max 50 entries, 10MB unpacked."}
-                </p>
-                {zipExtracting ? (
-                  <p className="text-xs text-text-muted animate-pulse">
-                    {typeof t.has === "function" && t.has("claudeImportBulkZipExtracting")
-                      ? t("claudeImportBulkZipExtracting")
-                      : "Extracting ZIP…"}
+              <SegmentedPanel value="upload">
+                <div>
+                  <p className="text-xs text-text-muted mb-1">
+                    {typeof t.has === "function" && t.has("claudeImportBulkUploadHint")
+                      ? t("claudeImportBulkUploadHint")
+                      : "Drop or pick up to 50 .credentials.json files (256KB each, 10MB total)."}
                   </p>
-                ) : (
                   <Input
                     type="file"
-                    accept=".zip"
+                    accept=".json"
+                    multiple
                     aria-label={
-                      typeof t.has === "function" && t.has("claudeImportBulkModeZip")
-                        ? t("claudeImportBulkModeZip")
-                        : "Upload ZIP"
+                      typeof t.has === "function" && t.has("claudeImportBulkModeUpload")
+                        ? t("claudeImportBulkModeUpload")
+                        : "Upload files"
                     }
-                    onChange={handleZipUpload}
+                    onChange={handleBulkFilesChange}
                     inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
                   />
-                )}
-              </div>
-            )}
+                </div>
+              </SegmentedPanel>
+              <SegmentedPanel value="paste">
+                <div>
+                  <p className="text-xs text-text-muted mb-1">
+                    {typeof t.has === "function" && t.has("claudeImportBulkPasteHint")
+                      ? t("claudeImportBulkPasteHint")
+                      : "Paste an array of objects: [{ json, name?, email? }, ...]"}
+                  </p>
+                  <Textarea
+                    value={bulkPasteText}
+                    onChange={(e) => handleBulkPasteChange(e.target.value)}
+                    rows={6}
+                    aria-label={
+                      typeof t.has === "function" && t.has("claudeImportBulkModePaste")
+                        ? t("claudeImportBulkModePaste")
+                        : "Paste JSON array"
+                    }
+                    className="font-mono text-xs"
+                    placeholder="[{ ... }, { ... }]"
+                  />
+                </div>
+              </SegmentedPanel>
+              <SegmentedPanel value="zip">
+                <div>
+                  <p className="text-xs text-text-muted mb-1">
+                    {typeof t.has === "function" && t.has("claudeImportBulkZipHint")
+                      ? t("claudeImportBulkZipHint")
+                      : "ZIP containing .json entries. Max 50 entries, 10MB unpacked."}
+                  </p>
+                  {zipExtracting ? (
+                    <p className="text-xs text-text-muted animate-pulse">
+                      {typeof t.has === "function" && t.has("claudeImportBulkZipExtracting")
+                        ? t("claudeImportBulkZipExtracting")
+                        : "Extracting ZIP…"}
+                    </p>
+                  ) : (
+                    <Input
+                      type="file"
+                      accept=".zip"
+                      aria-label={
+                        typeof t.has === "function" && t.has("claudeImportBulkModeZip")
+                          ? t("claudeImportBulkModeZip")
+                          : "Upload ZIP"
+                      }
+                      onChange={handleZipUpload}
+                      inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
+                    />
+                  )}
+                </div>
+              </SegmentedPanel>
+            </SegmentedTabs>
 
             {bulkEntries.length > 0 && (
               <div className="rounded border border-border bg-bg-subtle px-2 py-1.5 max-h-36 overflow-y-auto">
@@ -647,8 +668,8 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                 ? t("claudeImportBulkSubmit")
                 : "Import all"}
             </Button>
-          </div>
-        )}
+          </SegmentedPanel>
+        </SegmentedTabs>
       </div>
     </Modal>
   );

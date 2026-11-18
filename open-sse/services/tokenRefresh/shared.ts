@@ -31,15 +31,25 @@ export function buildFormParams(entries: Record<string, unknown>): URLSearchPara
  * Deliberately EXCLUDES transient codes (server_error, temporarily_unavailable,
  * slow_down) so we never deactivate an account over a recoverable blip.
  */
+const TERMINAL_REFRESH_GRANT_ERROR_CODES = new Set([
+  "refresh_token_reused",
+  "refresh_token_expired",
+  "refresh_token_invalidated",
+  "token_revoked",
+  "invalid_token",
+  "expired_token",
+]);
+
 const UNRECOVERABLE_OAUTH_ERROR_CODES = new Set([
   "invalid_grant",
   "invalid_request",
-  "refresh_token_reused",
-  "invalid_token",
-  "expired_token",
-  "unauthorized_client",
+  ...TERMINAL_REFRESH_GRANT_ERROR_CODES,
   "access_denied",
 ]);
+
+function canonicalOAuthErrorCode(code: string): string {
+  return TERMINAL_REFRESH_GRANT_ERROR_CODES.has(code) ? "invalid_grant" : code;
+}
 
 /**
  * Matches a known unrecoverable code EMBEDDED in a human-readable message, on
@@ -72,9 +82,11 @@ const EMBEDDED_OAUTH_ERROR_CODE_RE = new RegExp(
  * rotating providers) never ran, so the token was retried forever and every
  * request routed to that connection 401'd with no actionable signal.
  *
- * Returns the matched code (only if it is in UNRECOVERABLE_OAUTH_ERROR_CODES)
- * or null. Matching stays conservative: a known code is accepted only as a bare
- * code string, as the value of an `"error"`/`"error_code"` field, or as a
+ * Returns the matched code, normalized to `invalid_grant` for terminal refresh
+ * grants so every provider caller uses the existing unrecoverable sentinel.
+ * Returns null for transient errors and client configuration errors. Matching
+ * stays conservative: a known code is accepted only as a bare code string, as
+ * the value of an `"error"`/`"error_code"` field, or as a
  * word-delimited token inside such a value — so a `server_error` body or a 502
  * HTML page still classifies as null. The deliberate trade-off is that a
  * message which merely MENTIONS a dead-token code is treated as unrecoverable;
@@ -87,7 +99,7 @@ export function extractOAuthErrorCode(raw: unknown, depth = 0): string | null {
   if (typeof raw === "string") {
     const s = raw.trim();
     if (!s) return null;
-    if (UNRECOVERABLE_OAUTH_ERROR_CODES.has(s)) return s;
+    if (UNRECOVERABLE_OAUTH_ERROR_CODES.has(s)) return canonicalOAuthErrorCode(s);
     // The string may itself be JSON (a double-encoded body, or the raw text).
     if (s[0] === "{" || s[0] === "[" || s[0] === '"') {
       try {
@@ -100,11 +112,13 @@ export function extractOAuthErrorCode(raw: unknown, depth = 0): string | null {
     // Safety net: a known code appearing as the value of an "error"/"error_code"
     // field inside otherwise-unparsed text. Scoped to avoid false positives.
     const m = s.match(/"error(?:_code)?"\s*:\s*"([a-z_]+)"/i);
-    if (m && UNRECOVERABLE_OAUTH_ERROR_CODES.has(m[1])) return m[1];
+    if (m && UNRECOVERABLE_OAUTH_ERROR_CODES.has(m[1])) {
+      return canonicalOAuthErrorCode(m[1]);
+    }
     // Last resort: the code carried inside a message rather than returned bare
     // (Cline: "failed to refresh token: invalid_grant").
     const embedded = s.match(EMBEDDED_OAUTH_ERROR_CODE_RE);
-    if (embedded) return embedded[1].toLowerCase();
+    if (embedded) return canonicalOAuthErrorCode(embedded[1].toLowerCase());
     return null;
   }
 
@@ -157,7 +171,7 @@ export function isUnrecoverableRefreshError(result) {
     result &&
     typeof result === "object" &&
     (result.error === "unrecoverable_refresh_error" ||
-      result.error === "refresh_token_reused" ||
+      TERMINAL_REFRESH_GRANT_ERROR_CODES.has(result.error) ||
       result.error === "invalid_request" ||
       result.error === "invalid_grant" ||
       result.error === "no_refresh_needed")

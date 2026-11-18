@@ -47,9 +47,7 @@ export async function GET(request: Request) {
       category,
       query,
       limit: paginationParams.limit,
-      offset:
-        offset ??
-        (offset === undefined ? undefined : (paginationParams.page - 1) * paginationParams.limit),
+      offset: offset ?? (paginationParams.page - 1) * paginationParams.limit,
     });
 
     // Total tokens across all memories (computed in SQL inside the domain module

@@ -13,6 +13,11 @@
  * meantime. The cooldown honors a bounded `Retry-After` /
  * `anthropic-ratelimit-*-reset` hint (see `computeClaudeUsageRetryMs`).
  *
+ * The ceiling must stay above the window Anthropic actually asks for: it answers
+ * with `retry-after` of about an hour, and a poll sent before that hour is over
+ * is refused again and restarts the window. A 30-minute ceiling kept a token
+ * refused for days and the dashboard on its last known quota.
+ *
  * Map keys are a SHA-256 of the access token, never the raw token.
  *
  * Pure helpers (no fetch, no timers) keep this TDD-friendly.
@@ -23,7 +28,7 @@
 import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 
 export const OAUTH_USAGE_429_COOLDOWN_MS = 180_000; // 3 minutes (floor + default)
-export const OAUTH_USAGE_429_MAX_COOLDOWN_MS = 30 * 60_000; // 30 minutes (ceiling)
+export const OAUTH_USAGE_429_MAX_COOLDOWN_MS = 6 * 60 * 60_000; // 6 hours (ceiling; guards against garbage hints)
 
 /** Largest valid JS Date value (ms) — anything above is a garbage header. */
 const MAX_DATE_MS = 8.64e15;
