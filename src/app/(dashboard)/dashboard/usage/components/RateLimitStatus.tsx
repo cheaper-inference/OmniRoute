@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 
@@ -42,9 +44,9 @@ export default function RateLimitStatus() {
       {/* {t("modelLockouts")} */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-warning/10 text-warning">
+          <IconChip tone="warning">
             <Icon name="lock_clock" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
             <h3 className="ci-heading" data-size="lg">
               {t("modelLockouts")}

@@ -8,6 +8,8 @@ import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
 import { Progress } from "@omniroute/ui-kit/progress";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import Card from "@/shared/components/Card";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
@@ -421,9 +423,9 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent" size="sm">
               <Icon name="timer" size={18} />
-            </div>
+            </IconChip>
             <span className="text-sm text-text-muted">{t("uptime")}</span>
           </div>
           <p className="text-xl font-semibold text-text-main">{formatUptime(system.uptime)}</p>
@@ -431,9 +433,9 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-info/10 text-info">
+            <IconChip tone="info" size="sm">
               <Icon name="info" size={18} />
-            </div>
+            </IconChip>
             <span className="text-sm text-text-muted">{t("version")}</span>
           </div>
           <p className="text-xl font-semibold text-text-main">v{system.version}</p>
@@ -444,9 +446,9 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-chart-3/10 text-chart-3">
+            <IconChip tone="chart-3" size="sm">
               <Icon name="memory" size={18} />
-            </div>
+            </IconChip>
             <span className="text-sm text-text-muted">{t("memoryRss")}</span>
           </div>
           <p className="text-xl font-semibold text-text-main">
@@ -460,9 +462,9 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-warning/10 text-warning">
+            <IconChip tone="warning" size="sm">
               <Icon name="dns" size={18} />
-            </div>
+            </IconChip>
             <span className="text-sm text-text-muted">{t("providers")}</span>
           </div>
           <p className="text-xl font-semibold text-text-main">

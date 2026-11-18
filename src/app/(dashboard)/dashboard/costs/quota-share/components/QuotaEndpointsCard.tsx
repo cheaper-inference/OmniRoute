@@ -6,7 +6,9 @@ import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
+
 import Select from "@/shared/components/Select";
 import {
   quotaModelName,
@@ -393,9 +395,7 @@ export default function QuotaEndpointsCard({
                   <ul className="space-y-0.5">
                     {previewModels.map((m) => (
                       <li key={m}>
-                        <code className="text-2xs font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
-                          {m}
-                        </code>
+                        <InlineCode>{m}</InlineCode>
                       </li>
                     ))}
                   </ul>
@@ -421,9 +421,7 @@ export default function QuotaEndpointsCard({
                             <ul className="space-y-0.5">
                               {models.map((m) => (
                                 <li key={m}>
-                                  <code className="text-2xs font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
-                                    {m}
-                                  </code>
+                                  <InlineCode>{m}</InlineCode>
                                 </li>
                               ))}
                             </ul>

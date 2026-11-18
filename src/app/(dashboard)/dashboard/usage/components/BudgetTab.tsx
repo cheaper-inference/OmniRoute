@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
+
 import Badge from "@/shared/components/Badge";
 import FilterPills from "@/shared/components/FilterPills";
 import NumberInput from "@/shared/components/NumberInput";
@@ -699,18 +701,7 @@ function ProgressBarTinyColored({
         : pct >= 50
           ? STATUS_META.warning.dot
           : STATUS_META.safe.dot;
-  return (
-    <div
-      role="progressbar"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(pct)}
-      className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden"
-    >
-      <div className="h-full" style={{ width: `${pct}%`, background: color }} />
-    </div>
-  );
+  return <Progress value={pct} size="xs" color={color} animate={false} aria-label={label} />;
 }
 
 function BudgetRow({
@@ -939,19 +930,13 @@ function BudgetRowExpanded({
               {breakdown.slice(0, 5).map((b) => (
                 <div key={b.provider} className="flex items-center gap-2 text-2xs">
                   <span className="font-medium text-text-main w-24 truncate">{b.provider}</span>
-                  <div
-                    role="progressbar"
+                  <Progress
+                    value={b.pct}
+                    size="sm"
+                    animate={false}
                     aria-label={b.provider}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(Math.min(b.pct, 100))}
-                    className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden"
-                  >
-                    <div
-                      className="h-full bg-primary rounded-sm"
-                      style={{ width: `${Math.min(b.pct, 100)}%` }}
-                    />
-                  </div>
+                    className="flex-1"
+                  />
                   <span className="text-text-muted tabular-nums w-16 text-right">
                     {formatCurrency(b.cost)}
                   </span>

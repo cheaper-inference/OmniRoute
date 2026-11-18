@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
+
 import { formatCountdown, getBarColor } from "./utils";
 import Button from "@/shared/components/Button";
 
@@ -146,19 +148,13 @@ function QuotaWindowRow({
         <span>{label}</span>
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
-      <div
-        role="progressbar"
+      <Progress
+        value={remaining}
+        size="sm"
+        color={getBarColor(remaining).bar}
+        animate={false}
         aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={remaining}
-        className="h-1.5 overflow-hidden rounded-full bg-muted"
-      >
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${remaining}%`, backgroundColor: getBarColor(remaining).bar }}
-        />
-      </div>
+      />
       {countdown ? <span className="text-3xs text-text-muted">Resets in {countdown}</span> : null}
     </div>
   );

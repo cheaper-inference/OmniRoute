@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
+
 import { useTranslations } from "next-intl";
 import type { QuotaDimension } from "@/lib/quota/dimensions";
 
@@ -28,7 +30,7 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
   const [now] = useState(() => Date.now());
   const usedPct = dimension.limit > 0 ? Math.min((consumedTotal / dimension.limit) * 100, 100) : 0;
 
-  const barColor = usedPct >= 90 ? "bg-error" : usedPct >= 70 ? "bg-warning" : "bg-primary";
+  const barTone = usedPct >= 90 ? "danger" : usedPct >= 70 ? "warning" : "default";
 
   const resetMs = resetAt ? new Date(resetAt).getTime() - now : null;
   const countdown = resetMs !== null && resetMs > 0 ? fmtCountdown(resetMs) : null;
@@ -47,19 +49,13 @@ export default function DimensionBar({ dimension, consumedTotal, resetAt }: Dime
           {Math.round(usedPct)}%
         </span>
       </div>
-      <div
-        role="progressbar"
+      <Progress
+        value={usedPct}
+        size="sm"
+        tone={barTone}
+        animate={false}
         aria-label={`${dimension.unit} / ${dimension.window}`}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(usedPct)}
-        className="h-1.5 overflow-hidden rounded-sm bg-border/60"
-      >
-        <div
-          className={`h-full rounded-sm transition-all ${barColor}`}
-          style={{ width: `${usedPct}%` }}
-        />
-      </div>
+      />
       {countdown && (
         <div className="text-3xs text-text-muted">
           {t("dimensionResetIn")} {countdown}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import EmptyState from "@/shared/components/EmptyState";
+
 import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
@@ -264,10 +266,12 @@ export default function FileDetailModal({
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full py-12 rounded-lg border border-dashed border-border text-text-muted">
-              <Icon name="find_in_page" size={40} className="mb-2 opacity-20" />
-              <p className="text-sm">{t("batchFileDetailFailedToLoad")}</p>
-            </div>
+            <EmptyState
+              icon="find_in_page"
+              border="dashed"
+              title={t("batchFileDetailFailedToLoad")}
+              className="h-full"
+            />
           )}
         </div>
       </div>

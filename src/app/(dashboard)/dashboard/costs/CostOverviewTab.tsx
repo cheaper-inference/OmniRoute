@@ -7,7 +7,9 @@ import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProvid
 import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
 import { MetricCard } from "@omniroute/ui-kit/metric-card";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
 import type { StatProps } from "@omniroute/ui-kit/stat";
+
 import {
   Table,
   TableBody,
@@ -1107,13 +1109,11 @@ function CostExplorerCard({
       </div>
 
       {rows.length === 0 ? (
-        <Card.Section>
-          <EmptyState
-            icon="manage_search"
-            title={t("noMatchingCostRows")}
-            description={t("noMatchingCostRowsDescription")}
-          />
-        </Card.Section>
+        <EmptyState
+          icon="manage_search"
+          title={t("noMatchingCostRows")}
+          description={t("noMatchingCostRowsDescription")}
+        />
       ) : (
         <>
           <Table
@@ -1167,20 +1167,15 @@ function CostExplorerCard({
                   </TableCell>
                   <TableCell numeric>
                     <div className="flex items-center justify-end gap-2">
-                      <div
-                        role="progressbar"
+                      <Progress
+                        value={row.sharePct}
+                        size="sm"
+                        tone="success"
+                        animate={false}
                         aria-label={row.name}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.min(Math.max(row.sharePct, 0), 100)}
                         aria-valuetext={`${row.sharePct.toFixed(1)}%`}
-                        className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60"
-                      >
-                        <div
-                          className="h-full rounded-full bg-success"
-                          style={{ width: `${Math.min(Math.max(row.sharePct, 0), 100)}%` }}
-                        />
-                      </div>
+                        className="w-16"
+                      />
                       <span className="w-12 font-mono text-text-muted">
                         {row.sharePct.toFixed(1)}%
                       </span>

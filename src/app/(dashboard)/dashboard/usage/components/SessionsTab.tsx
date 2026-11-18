@@ -10,6 +10,8 @@ import {
   type RecentSessionForDashboard,
 } from "@/lib/sessionObservability";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 import {
@@ -80,9 +82,9 @@ export default function SessionsTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-info/10 text-info">
+        <IconChip tone="info">
           <Icon name="fingerprint" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
           <h3 className="ci-heading" data-size="lg">
             {t("activeSessions")}

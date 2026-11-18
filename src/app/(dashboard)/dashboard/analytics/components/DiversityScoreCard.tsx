@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
+
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
@@ -63,16 +65,16 @@ export default function DiversityScoreCard() {
   const scorePercentage = Math.round((data.score || 0) * 100);
 
   let riskColor = "text-success";
-  let gaugeColor = "bg-success";
+  let riskTone: "success" | "warning" | "danger" = "success";
   let riskLabel = t("diversityHealthy");
 
   if (scorePercentage < 40) {
     riskColor = "text-error";
-    gaugeColor = "bg-error";
+    riskTone = "danger";
     riskLabel = t("diversityRiskHigh");
   } else if (scorePercentage < 70) {
     riskColor = "text-warning";
-    gaugeColor = "bg-warning";
+    riskTone = "warning";
     riskLabel = t("diversityRiskModerate");
   }
 
@@ -166,19 +168,13 @@ export default function DiversityScoreCard() {
                       {Math.round(stat.share * 100)}%
                     </span>
                   </div>
-                  <div
-                    role="progressbar"
+                  <Progress
+                    value={stat.share * 100}
+                    size="sm"
+                    tone={riskTone}
+                    animate={false}
                     aria-label={provider}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(stat.share * 100)}
-                    className="h-1.5 rounded-full bg-surface/50 overflow-hidden"
-                  >
-                    <div
-                      className={`h-full rounded-full ${gaugeColor}`}
-                      style={{ width: `${Math.round(stat.share * 100)}%` }}
-                    />
-                  </div>
+                  />
                 </div>
               ))}
             </div>

@@ -3,6 +3,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { Card } from "@/shared/components";
+import EmptyState from "@/shared/components/EmptyState";
+
 import { useConcurrencySnapshot } from "./useConcurrencySnapshot";
 
 interface GateRow {
@@ -67,9 +69,7 @@ function QueueSection({ title, rows }: { title: string; rows: GateRow[] }) {
             ))}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed border-border p-3 text-sm text-text-muted">
-          {t("queuesEmpty")}
-        </p>
+        <EmptyState layout="inline" border="dashed" title={t("queuesEmpty")} />
       )}
     </section>
   );

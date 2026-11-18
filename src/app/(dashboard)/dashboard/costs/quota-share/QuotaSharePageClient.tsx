@@ -437,12 +437,8 @@ export default function QuotaSharePageClient() {
       {/* Header */}
       <PageHeader
         compact
-        title={
-          <span className="flex items-center gap-2">
-            <Icon name="pie_chart" size={24} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="pie_chart" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <Button variant="primary" size="sm" icon="add" onClick={() => setCreateOpen(true)}>
@@ -601,18 +597,16 @@ export default function QuotaSharePageClient() {
       ) : (
         <>
           {groupsToRender.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface py-10 text-center">
-              <p className="text-sm text-text-muted">{t("emptyDescription")}</p>
-              <Button
-                variant="primary"
-                size="sm"
-                className="mt-3"
-                icon="add"
-                onClick={() => setCreateOpen(true)}
-              >
-                {t("newPool")}
-              </Button>
-            </div>
+            <EmptyState
+              layout="inline"
+              border="dashed"
+              title={t("emptyDescription")}
+              actions={
+                <Button variant="primary" size="sm" icon="add" onClick={() => setCreateOpen(true)}>
+                  {t("newPool")}
+                </Button>
+              }
+            />
           ) : (
             groupsToRender.map((g) => {
               const groupPools = pools.filter(
@@ -627,18 +621,21 @@ export default function QuotaSharePageClient() {
                     <span className="text-2xs text-text-muted">({groupPools.length})</span>
                   </div>
                   {groupPools.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-border bg-surface py-6 text-center">
-                      <p className="text-sm text-text-muted">{t("emptyDescription")}</p>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="mt-3"
-                        icon="add"
-                        onClick={() => setCreateOpen(true)}
-                      >
-                        {t("newPool")}
-                      </Button>
-                    </div>
+                    <EmptyState
+                      layout="inline"
+                      border="dashed"
+                      title={t("emptyDescription")}
+                      actions={
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          icon="add"
+                          onClick={() => setCreateOpen(true)}
+                        >
+                          {t("newPool")}
+                        </Button>
+                      }
+                    />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                       {groupPools.map((pool) => (

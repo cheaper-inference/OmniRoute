@@ -431,19 +431,13 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                           +{factor.contribution.toFixed(3)}
                         </span>
                       </div>
-                      <div
-                        role="progressbar"
+                      <Progress
+                        value={factor.value * 100}
+                        size="sm"
+                        animate={false}
                         aria-label={t(`comboHealthFactor.${factor.key}`)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(Math.max(0, Math.min(100, factor.value * 100)))}
-                        className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/60"
-                      >
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{ width: `${Math.max(0, Math.min(100, factor.value * 100))}%` }}
-                        />
-                      </div>
+                        className="mt-1"
+                      />
                     </div>
                   ))}
                 </div>

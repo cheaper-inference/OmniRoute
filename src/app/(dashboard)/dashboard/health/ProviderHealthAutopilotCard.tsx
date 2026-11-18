@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import Card from "@/shared/components/Card";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -314,9 +316,9 @@ export default function ProviderHealthAutopilotCard() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="health_and_safety" size={18} />
-            </div>
+            </IconChip>
             <div>
               <h2 className="ci-heading" data-size="lg">
                 {t("title")}

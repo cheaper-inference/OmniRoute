@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -319,9 +321,9 @@ export default function ProviderHealthMatrixCard() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="grid_view" size={18} />
-            </div>
+            </IconChip>
             <div>
               <h2 className="ci-heading" data-size="lg">
                 {healthText(t, "providerHealthMatrixTitle", "Provider Health Matrix")}

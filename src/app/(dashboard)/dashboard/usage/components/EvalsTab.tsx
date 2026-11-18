@@ -18,6 +18,8 @@ import {
 } from "@/shared/components";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
 import { FileTrigger } from "@/shared/components/FileInput";
 
 import { useNotificationStore } from "@/store/notificationStore";
@@ -1055,9 +1057,9 @@ export default function EvalsTab() {
 
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+          <IconChip tone="accent">
             <Icon name="route" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("evalControlsTitle")}
@@ -1123,9 +1125,9 @@ export default function EvalsTab() {
       {scorecard && (
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-success/10 text-success">
+            <IconChip tone="success">
               <Icon name="analytics" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("scorecardTitle")}
@@ -1180,9 +1182,9 @@ export default function EvalsTab() {
           className="h-auto min-h-0 w-full justify-between rounded-none px-6 py-4 text-left whitespace-normal"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+            <IconChip tone="accent">
               <Icon name="help" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="sm">
                 {t("howItWorks")}
@@ -1258,9 +1260,9 @@ export default function EvalsTab() {
 
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-info/10 text-info">
+          <IconChip tone="info">
             <Icon name="history" size={20} />
-          </div>
+          </IconChip>
           <div>
             <h3 className="ci-heading" data-size="lg">
               {t("recentRunsTitle")}
@@ -1323,9 +1325,9 @@ export default function EvalsTab() {
       <Card className="p-6">
         <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-chart-3/10 text-chart-3">
+            <IconChip tone="chart-3">
               <Icon name="science" size={20} />
-            </div>
+            </IconChip>
             <div>
               <h3 className="ci-heading" data-size="lg">
                 {t("evalSuites")}
@@ -1876,9 +1878,9 @@ const HeroSection = memo(function HeroSection({
         }}
       >
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-chart-3/10 text-chart-3">
+          <IconChip tone="chart-3" size="lg">
             <Icon name="science" size={28} />
-          </div>
+          </IconChip>
           <div className="flex-1">
             <h2 className="ci-heading mb-1" data-size="xl">
               {t("modelEvals")}

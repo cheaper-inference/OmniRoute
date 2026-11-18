@@ -417,3 +417,86 @@ test('D: a 32px field is size="xs", not height and text classes', () => {
 test("D: a file is picked through the kit FileInput or FileTrigger, not a hidden input", () => {
   assertNoTag("hidden native file inputs (use FileTrigger)", "input|Input", /\btype="file"/, []);
 });
+
+// ── G. Small pieces ─────────────────────────────────────────────────────────
+
+test("G: a bar is the kit Progress, not a track and a fill drawn by hand", () => {
+  assertNoTag('hand-made bars (use <Progress size="xs|sm">)', "div|span", /\brole="progressbar"/, [
+    {
+      file: "costs/teams/TeamBudgetCard.tsx",
+      fragment: 'aria-label={t("budgetTitle")}',
+      why: "with partial or unpriced usage the bar is drawn but has no aria-valuenow; the kit Progress without a value is the indeterminate sweep",
+    },
+    {
+      file: "usage/components/FreeBudgetCard.tsx",
+      fragment: 'data-testid="budget-bar"',
+      why: "12px stacked bar whose segments carry a title and a test id each; the kit segments take neither",
+    },
+    {
+      file: "costs/quota-share/components/StackedAllocationBar.tsx",
+      fragment: 'aria-label={t("stackedBarTitle")}',
+      why: "12px stacked bar whose segments carry a per-key tooltip and name; the kit segments take neither",
+    },
+  ]);
+});
+
+test("G: a tinted icon square is IconChip", () => {
+  assertClean("icon squares drawn by hand (use <IconChip tone=…>)", CLASS_STRING, [], (m, text) => {
+    const classes = classesOf(m);
+    return (
+      tagAt(text, m.index) === "div" &&
+      has(classes, /(^|\s)(p-[23]|size-[89])(\s|$)/) &&
+      has(classes, /(^|\s)rounded-(lg|xl)(\s|$)/) &&
+      has(classes, /(^|\s)bg-(primary|info|success|warning|error|chart-\d)\/(10|20)(\s|$)/) &&
+      has(classes, /(^|\s)text-(primary|info|success|warning|error|chart-\d)(\s|$)/) &&
+      !has(classes, /(^|\s)(border|flex-col|gap-\d)(\s|$)/)
+    );
+  });
+});
+
+test("G: a code chip is the kit InlineCode", () => {
+  assertNoTag(
+    "<code> styled as a chip (use <InlineCode>)",
+    "code",
+    /className="[^"]*(?<![\w:-])bg-[^"]*"/,
+    []
+  );
+});
+
+test("G: a PageHeader title is text, with its icon in the icon slot", () => {
+  assertNoTag(
+    "PageHeader with JSX in the title (use the icon prop)",
+    "PageHeader",
+    /\btitle=\{\s*</,
+    []
+  );
+});
+
+test("G: an empty box with a dashed border is the EmptyState adapter", () => {
+  assertClean('dashed boxes drawn by hand (use <EmptyState border="dashed">)', /border-dashed/g, [
+    {
+      file: "usage/components/ProviderLimits/QuotaHealthOverview.tsx",
+      fragment: "CAPSULE_CLASS",
+      why: "the outline of an empty account capsule in the health overview, not an empty state",
+    },
+    {
+      file: "usage/components/ProviderLimits/HealthOverviewChrome.tsx",
+      fragment: "CAPSULE_CLASS",
+      why: "the same capsule in the legend",
+    },
+    {
+      file: "health/ProviderHealthMatrixCard.tsx",
+      fragment: "rounded-lg border border-dashed border-border px-3 py-2 text-xs text-text-muted",
+      why: 'the "+N more models" note that closes a list, not an empty state',
+    },
+  ]);
+});
+
+test("G: the compression KPI tiles are the compact kit Stat fed with numbers", () => {
+  const text = fs.readFileSync(
+    path.join(DASHBOARD, "analytics/CompressionAnalyticsTab.tsx"),
+    "utf8"
+  );
+  assert.doesNotMatch(text, /format="text"/);
+  assert.match(text, /<StatRow size="sm"/);
+});
