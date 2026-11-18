@@ -154,7 +154,8 @@ export default function QuotaCardHeader({
         />
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone={isActive ? "muted" : undefined}
           disabled={togglingActive}
           onClick={(e) => {
             e.stopPropagation();
@@ -163,7 +164,7 @@ export default function QuotaCardHeader({
           }}
           title={toggleActiveLabel}
           aria-label={toggleActiveLabel}
-          className={`size-6 min-h-6 ${isActive ? "text-text-muted" : "text-error"}`}
+          className={isActive ? undefined : "text-error"}
         >
           <Icon name={isActive ? "toggle_on" : "toggle_off"} size={14} />
         </Button>

@@ -92,6 +92,49 @@ function tagAt(text: string, index: number): string {
   return tags ? tags[tags.length - 1].slice(1) : "";
 }
 
+/** Opening tag of every `<Name …>` element (JSX braces balanced), with its line. */
+function openingTags(text: string, names: string): Array<{ index: number; tag: string }> {
+  const out: Array<{ index: number; tag: string }> = [];
+  const re = new RegExp(`<(?:${names})\\b`, "g");
+  for (let m = re.exec(text); m; m = re.exec(text)) {
+    let depth = 0;
+    let quote: string | null = null;
+    let i = m.index + 1;
+    for (; i < text.length; i++) {
+      const c = text[i];
+      if (quote) {
+        if (c === quote) quote = null;
+      } else if (depth === 0 && (c === '"' || c === "'")) quote = c;
+      else if (c === "{") depth++;
+      else if (c === "}") depth--;
+      else if (c === ">" && depth === 0) break;
+    }
+    out.push({ index: m.index, tag: text.slice(m.index, i + 1) });
+  }
+  return out;
+}
+
+/** Opening tags of `names` that match `bad`, minus the listed exceptions. */
+function assertNoTag(what: string, names: string, bad: RegExp, exceptions: Exception[]) {
+  const hits: Hit[] = [];
+  const used = new Set<Exception>();
+  for (const { rel, text } of sources()) {
+    for (const { index, tag } of openingTags(text, names)) {
+      if (!bad.test(tag)) continue;
+      const exception = exceptions.find((e) => e.file === rel && tag.includes(e.fragment));
+      if (exception) used.add(exception);
+      else
+        hits.push({ rel, line: lineOf(text, index), text: tag.replace(/\s+/g, " ").slice(0, 200) });
+    }
+  }
+  assert.equal(hits.length, 0, `${what}:\n${report(hits)}`);
+  assert.deepEqual(
+    exceptions.filter((e) => !used.has(e)).map((e) => `${e.file}: ${e.fragment}`),
+    [],
+    `exceptions that no longer match anything (remove them)`
+  );
+}
+
 // ── A. Pills ────────────────────────────────────────────────────────────────
 
 test("A: status pills are the Badge adapter, not a hand-made span", () => {
@@ -147,5 +190,25 @@ test("A: quota and budget filter chips are the kit ToggleChip", () => {
     CLASS_STRING,
     [],
     (m) => has(classesOf(m), /(^|\s)rounded-full(\s|$)/) && has(classesOf(m), /(^|\s)min-h-7(\s|$)/)
+  );
+});
+
+// ── B. Buttons ──────────────────────────────────────────────────────────────
+
+test("B: 24px buttons use the kit dense sizes, not size-6 / min-h-6 classes", () => {
+  assertNoTag(
+    'buttons sized by hand below 28px (use size="icon-2xs" or size="2xs")',
+    "Button|GuardedAction",
+    /(?<![\w:-])(?:size-[3-6]|min-h-[3-6]|h-[3-6])(?![\w.-])/,
+    []
+  );
+});
+
+test('B: a quiet button is tone="muted", not text-text-muted', () => {
+  assertNoTag(
+    'muted ink written by hand on a button (use tone="muted")',
+    "Button|GuardedAction",
+    /(?<![\w:-])text-text-muted(?![\w/-])/,
+    []
   );
 });

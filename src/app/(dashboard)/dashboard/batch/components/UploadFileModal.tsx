@@ -146,7 +146,8 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
               setFile(null);
               setError(null);
             }}
-            className="shrink-0 text-xs text-text-muted hover:text-error hover:border-error/40"
+            tone="muted"
+            className="shrink-0 text-xs hover:text-error hover:border-error/40"
           >
             {t("uploadFileModalRemove")}
           </Button>

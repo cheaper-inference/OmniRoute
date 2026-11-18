@@ -215,7 +215,8 @@ function BatchRowActions({
           disabled={actions.cancelling}
           title={t("batchActionCancel")}
           aria-label={t("batchActionCancel")}
-          className="size-7 text-text-muted hover:text-warning hover:bg-warning/10"
+          tone="muted"
+          className="size-7 hover:text-warning hover:bg-warning/10"
         >
           <Icon name={actions.cancelling ? "hourglass_empty" : "block"} size={13} />
         </Button>
@@ -280,7 +281,8 @@ function BatchRowActions({
           disabled={actions.retrying}
           title={t("batchActionRetry")}
           aria-label={t("batchActionRetry")}
-          className="size-7 text-text-muted hover:text-info hover:bg-info/10"
+          tone="muted"
+          className="size-7 hover:text-info hover:bg-info/10"
         >
           <Icon name={actions.retrying ? "hourglass_empty" : "replay"} size={13} />
         </Button>

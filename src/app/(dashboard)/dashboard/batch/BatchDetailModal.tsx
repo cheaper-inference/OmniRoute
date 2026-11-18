@@ -301,11 +301,11 @@ export default function BatchDetailModal({
         <p className="text-xs text-text-muted font-mono">{batch.id}</p>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone="muted"
           onClick={() => {
             navigator.clipboard.writeText(batch.id);
           }}
-          className="size-6 text-text-muted hover:text-text-main"
           title={t("batchDetailCopyId")}
           aria-label={t("batchDetailCopyId")}
         >

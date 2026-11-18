@@ -121,7 +121,7 @@ export default function PoolCard({
             onClick={onEdit}
             title={t("editAllocations")}
             aria-label={t("editAllocations")}
-            className="text-text-muted"
+            tone="muted"
           >
             <Icon name="edit" size={16} />
           </Button>

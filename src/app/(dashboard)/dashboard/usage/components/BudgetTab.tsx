@@ -777,12 +777,12 @@ function BudgetRow({
         {/* Expand chevron (clickable trigger) */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone="muted"
           icon={isExpanded ? "expand_more" : "chevron_right"}
           onClick={onToggleExpand}
           aria-expanded={isExpanded}
           aria-label={isExpanded ? t("cardCollapse") : t("cardExpand")}
-          className="size-6 min-h-6 text-text-muted"
         />
 
         {/* Key info */}

@@ -206,7 +206,8 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
         size="sm"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] uppercase tracking-wide text-text-muted"
+        tone="muted"
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] uppercase"
       >
         <Icon
           name="chevron_right"
@@ -261,13 +262,12 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         <Button
                           key={day}
                           variant={row.days.includes(day) ? "secondary" : "ghost"}
-                          size="icon-sm"
+                          size="icon-2xs"
+                          tone={row.days.includes(day) ? undefined : "muted"}
                           onClick={() => toggleDay(index, day)}
                           aria-pressed={row.days.includes(day)}
                           title={initial}
-                          className={`size-6 min-h-6 text-[10px] ${
-                            row.days.includes(day) ? "text-primary" : "text-text-muted"
-                          }`}
+                          className={row.days.includes(day) ? "text-primary" : undefined}
                         >
                           {initial}
                         </Button>
@@ -377,11 +377,12 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           <span className="text-[11px] text-text-muted">%</span>
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon-2xs"
+                            tone="muted"
                             onClick={() => patchReserve(index, ruleIndex, null)}
                             title={t("schedulesReserveRemove")}
                             aria-label={t("schedulesReserveRemove")}
-                            className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                            className="hover:bg-error/10 hover:text-error"
                           >
                             <Icon name="close" size={13} />
                           </Button>

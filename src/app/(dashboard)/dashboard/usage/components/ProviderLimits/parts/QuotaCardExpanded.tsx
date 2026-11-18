@@ -223,14 +223,14 @@ function QuotaDetailRow({
         </span>
         <Button
           variant="ghost"
-          size="sm"
+          size="2xs"
           disabled={!onOpenResetCredits || loadingResetCredits}
           onClick={(event) => {
             event.stopPropagation();
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] leading-none tabular-nums"
+          className="shrink-0 tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && <Spinner decorative size="xs" />}
@@ -293,12 +293,13 @@ function QuotaDetailRow({
         {canHide && (
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             onClick={(e) => {
               e.stopPropagation();
               onHideQuota?.(q);
             }}
-            className="size-5 min-h-5 shrink-0 text-text-muted"
+            className="shrink-0"
             title={translateUsageOrFallback(t, "hideQuotaRow", "Hide this quota row")}
             aria-label={translateUsageOrFallback(t, "hideQuotaRow", "Hide this quota row")}
           >
@@ -463,12 +464,11 @@ export default function QuotaCardExpanded({
             <Button
               key={getQuotaVisibilityKey(q)}
               variant="outline"
-              size="sm"
+              size="2xs"
               onClick={(e) => {
                 e.stopPropagation();
                 onShowQuota?.(q);
               }}
-              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
               title={translateUsageOrFallback(t, "showQuotaRow", "Show this quota row")}
             >
               {q.displayName || formatQuotaLabel(q.name)}

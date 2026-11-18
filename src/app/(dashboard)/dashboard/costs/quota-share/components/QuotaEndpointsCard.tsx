@@ -318,7 +318,7 @@ export default function QuotaEndpointsCard({
             title={collapsed ? t("endpointsExpand") : t("endpointsCollapse")}
             aria-label={collapsed ? t("endpointsExpand") : t("endpointsCollapse")}
             aria-expanded={!collapsed}
-            className="text-text-muted"
+            tone="muted"
           >
             <Icon name={collapsed ? "expand_more" : "expand_less"} size={18} />
           </Button>

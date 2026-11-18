@@ -811,10 +811,11 @@ export default function PoolWizard({
                     />
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
+                      tone="muted"
                       onClick={() => removeDimension(i)}
                       aria-label={t("wizardRemoveDimension")}
-                      className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                      className="hover:bg-error/10 hover:text-error"
                     >
                       <Icon name="close" size={16} />
                     </Button>
@@ -899,10 +900,11 @@ export default function PoolWizard({
                       </Select>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
+                        tone="muted"
                         onClick={() => removeAllocation(a.apiKeyId)}
                         aria-label={t("wizardRemoveKey")}
-                        className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
+                        className="hover:bg-error/10 hover:text-error"
                       >
                         <Icon name="close" size={16} />
                       </Button>
