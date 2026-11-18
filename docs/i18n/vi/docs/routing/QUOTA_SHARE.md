@@ -279,15 +279,15 @@ Các hook của trang:
 
 ## Biến môi trường
 
-| Biến                               | Mặc định  | Mô tả                                                      |
-| ---------------------------------- | --------- | ---------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Trình điều khiển cần dùng: `sqlite` hoặc `redis`           |
-| `QUOTA_STORE_REDIS_URL`            | _(trống)_ | URL Redis, ví dụ: `redis://localhost:6379`                 |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= ngưỡng` kích hoạt chế độ nghiêm ngặt             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; hệ số nhân cho điểm kết hợp của chính sách mềm       |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Số ngày trước khi GC xóa các bucket `quota_consumption` cũ |
+| Biến                               | Mặc định  | Sự miêu tả                                                    |
+| ---------------------------------- | --------- | ------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Driver sử dụng: `sqlite` hoặc `redis`                         |
+| `QUOTA_STORE_REDIS_URL`            | _(trống)_ | Redis URL, ví dụ `redis://localhost:6379`                     |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` kích hoạt chế độ nghiêm ngặt             |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; hệ số nhân cho điểm kết hợp chính sách mềm              |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Vài ngày trước khi GC loại bỏ các nhóm `quota_consumption` cũ |
 
-Các cài đặt DB (`quotaStore.*`) ghi đè các biến môi trường.
+cài đặt DB (`quotaStore.*`) ghi đè các vars env.
 
 ---
 
@@ -343,17 +343,16 @@ xuất hiện dưới dạng tùy chọn mà người dùng có thể chọn tro
 
 ---
 
-## Phạm vi kiểm thử
+## Phạm vi kiểm tra
 
-Công cụ quota-share đi kèm hai lớp kiểm thử tự động:
+Hai lớp bảo hiểm tự động được cung cấp với công cụ chia sẻ hạn ngạch:
 
-| Bộ kiểm thử          | Lệnh                                                                   | Phạm vi kiểm thử                                                                                                                                                                                                               |
-| :------------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Đơn vị (29 kiểm thử) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Bộ lập lịch DRR, cơ chế chặn khi bão hòa, giới hạn đồng thời, phép tính fairShare, xếp hàng backlog                                                                                                                            |
-| Ma trận tích hợp     | `npm run test:combo:matrix`                                            | Quyết định định tuyến đầu cuối thông qua pipeline tổ hợp thực tế; tính công bằng DRR + giảm ưu tiên khi bão hòa thông qua các điểm nối trực tiếp (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                    | Yêu cầu                                                                | Nó bao gồm những gì                                                                                                                                                                                                       |
+| :----------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Đơn vị (29 bài kiểm tra) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | công cụ lập lịch DRR, đo bão hòa, giới hạn đồng thời, toán fairShare, xếp hàng tồn đọng                                                                                                                                   |
+| Ma trận tích hợp         | `npm run test:combo:matrix`                                            | Quyết định định tuyến từ đầu đến cuối thông qua đường ống kết hợp thực sự; DRR công bằng + khử độ bão hòa thông qua các đường nối trực tiếp (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Ma trận tích hợp chạy trong CI cùng với toàn bộ 19 chiến lược công khai. Bộ kiểm thử đơn vị
-có thể chạy độc lập.
+Ma trận tích hợp chạy trong CI cùng với tất cả 22 chiến lược công khai. Bộ đơn vị có thể chạy độc lập.
 
 ---
 
