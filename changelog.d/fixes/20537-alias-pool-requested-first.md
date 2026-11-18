@@ -1,0 +1,1 @@
+- **fix(sse):** `fill-first` and `priority` keep the requested provider id's accounts first for OAuth alias pools too (`antigravity` + `agy`), so another alias's priority 1 no longer beats the requested id's priority 2 ([#20537](https://github.com/cheaper-inference/OmniRoute/pull/20537)) — thanks @kambleakash0
