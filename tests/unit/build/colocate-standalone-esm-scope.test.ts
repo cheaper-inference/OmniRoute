@@ -6,7 +6,9 @@ import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 
 import {
+  REQUIRED_STANDALONE_WORKERS,
   bundleOptionalWorker,
+  verifyColocatedStandaloneWorkers,
   writeEsmWorkerScopes,
 } from "../../../scripts/build/colocate-standalone.mjs";
 
@@ -178,6 +180,29 @@ test("colocate-standalone bundles the required compression worker", () => {
     const workerDir = join(root, "open-sse", "services", "compression");
     assert.equal(existsSync(join(workerDir, "compressionWorker.js")), true);
     assert.equal(JSON.parse(readFileSync(join(workerDir, "package.json"), "utf8")).type, "module");
+  } finally {
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("colocate-standalone respects NEXT_DIST_DIR and verifies all required workers", () => {
+  const root = mkdtempSync(join(tmpdir(), "colocate-verify-workers-"));
+  try {
+    writeFileSync(join(root, "server.js"), "module.exports = {};\n");
+    execFileSync(process.execPath, ["scripts/build/colocate-standalone.mjs"], {
+      cwd: join(import.meta.dirname, "..", "..", ".."),
+      env: { ...process.env, OMNIROUTE_STANDALONE_DIR: root },
+      stdio: "pipe",
+    });
+    assert.doesNotThrow(() => verifyColocatedStandaloneWorkers(root));
+
+    // Removing the call-log artifact worker must fail the postbuild check loudly.
+    rmSync(join(root, "src", "lib", "usage", "callLogArtifactWorker.js"));
+    assert.throws(
+      () => verifyColocatedStandaloneWorkers(root),
+      /missing worker: src\/lib\/usage\/callLogArtifactWorker\.js/
+    );
+    assert.ok(REQUIRED_STANDALONE_WORKERS.includes("src/lib/usage/callLogArtifactWorker.js"));
   } finally {
     rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
