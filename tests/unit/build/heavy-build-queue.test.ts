@@ -16,11 +16,11 @@ test("unrelated candidate builds cannot replace each other's pending concurrency
 });
 
 test("superseded runs cancel only within the same workflow/ref", () => {
-  // A description edit on a Mergify queue draft gets a per-run suffix so it never cancels the
+  // A title/body edit on any PR gets a per-run suffix so it never cancels the
   // candidate's real run (ci-mergify-candidate.test.mjs); every other run keeps workflow/ref.
   assert.match(
     workflow.concurrency.group,
-    /^\$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\$\{\{ \(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && .*\) && format\('-queue-edit-\{0\}', github\.run_id\) \|\| '' \}\}$/
+    /^\$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\$\{\{ \(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && .*\) && format\('-metadata-edit-\{0\}', github\.run_id\) \|\| '' \}\}$/
   );
   assert.equal(workflow.concurrency["cancel-in-progress"], true);
 });
