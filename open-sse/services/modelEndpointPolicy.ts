@@ -164,6 +164,20 @@ export function declaresOnlyNonChatEndpoints(supportedEndpoints: unknown): boole
   return classifyExplicitEndpoints(endpoints)?.chatSelectable === false;
 }
 
+/**
+ * True when the provider's own policy excludes the model from every endpoint
+ * OmniRoute serves (OpenRouter's Batch-API-only `:batch` variants). Unlike a
+ * provider-policy media decision (an OpenAI image, video or embedding model),
+ * such a model must not be imported on any surface.
+ */
+export function isProviderExcludedModel(
+  provider: string | null | undefined,
+  model: EndpointAwareModel
+): boolean {
+  const decision = getModelEndpointDecision(provider, model.id, model.supportedEndpoints);
+  return decision.reason === "provider-policy" && decision.kind === "non-chat";
+}
+
 export function isChatSelectableModel(
   provider: string | null | undefined,
   model: EndpointAwareModel

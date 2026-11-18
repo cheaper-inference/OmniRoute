@@ -5,7 +5,7 @@
 If you discover a security vulnerability in OmniRoute, please report it responsibly:
 
 1. **DO NOT** open a public GitHub issue
-2. Use [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Use [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Include: description, reproduction steps, and potential impact
 
 ## Response Timeline
@@ -38,7 +38,7 @@ After 3.8.59 the next version is **3.9.0**, which opens the long-term support li
   whichever is later**. The resulting end date is recorded in the 3.9.0 release notes and in
   [`ROADMAP.md`](ROADMAP.md) when the cut happens.
 - **Reporting a vulnerability in the LTS line:** same channel as any other version —
-  a private [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   never a public issue. Say which version you tested (for example `3.9.2`); fixes land on
   `stable/v3` and are forward-ported to v4.
 - **Security baseline at the LTS cut:** measured scanner state, route-guard and
