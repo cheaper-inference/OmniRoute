@@ -2374,6 +2374,7 @@ async function handleSingleModelChat(
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry,
+            nonReplayableRequest: customProviderNoReplay,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,

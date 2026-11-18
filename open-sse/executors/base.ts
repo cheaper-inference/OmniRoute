@@ -241,6 +241,8 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
+  /** Custom-provider POST may have been accepted; transport recovery must not replay it. */
+  nonReplayableRequest?: boolean;
   /** In-process capability; never accepted from an HTTP body or client header. */
   validationDispatch?: StrictValidationDispatch;
   /** Request-scoped id for log attribution; absent off the chat path, never fabricated. */
@@ -779,6 +781,7 @@ export class BaseExecutor {
       upstreamExtraHeaders,
       clientHeaders,
       skipUpstreamRetry = false,
+      nonReplayableRequest = false,
       onCredentialsRefreshed,
       contextEditing,
     } = input;
@@ -1605,7 +1608,7 @@ export class BaseExecutor {
           method: "POST",
           headers: finalHeaders,
           body: bodyString,
-          ...(skipUpstreamRetry ? { [PROXY_FETCH_NO_REPLAY]: true } : {}),
+          ...(nonReplayableRequest ? { [PROXY_FETCH_NO_REPLAY]: true } : {}),
         };
 
         // OpenRouter `:free`-variant local window (#6842): record every dispatch
