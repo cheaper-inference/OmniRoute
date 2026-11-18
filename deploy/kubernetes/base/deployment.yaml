@@ -43,7 +43,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: omniroute
-          image: diegosouzapw/omniroute:latest
+          image: cheaperinference/omniroute:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

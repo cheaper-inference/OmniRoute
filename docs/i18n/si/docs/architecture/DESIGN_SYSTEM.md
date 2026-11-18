@@ -16,45 +16,96 @@
 > සිරිලික්, ග්රීක සහ වියට්නාම සඳහා Inter ද, `html[dir="rtl"]` යටතේ පමණක් අරාබි ලිඛිතය සඳහා Vazirmatn ද භාවිත වේ.
 > සෑම නිරූපකයක්ම Lucide ග්ලයිෆයකි.
 
-## 1. දේවල් ජීවත් වන තැන
+## 1. දේවල් තිබෙන ස්ථාන
 
-- **කට්ටලය.** `packages/ui-kit/src` යනු `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති (බලපත්‍ර අවසරය ද වාර්තා කරන) කැපවීමේදී උඩුගං `src/` හි බයිට් සඳහා බයිට් පිටපතකි; `PATCHES.md` දේශීය පැච් ලැයිස්තුගත කරයි (කිසිවක් නැත). එය කිසිදු ගොඩනැගීමකින් තොරව ප්‍රභවයක් ලෙස පරිභෝජනය කරයි: `next.config.mjs` එය සම්ප්‍රේෂණය කරයි, සහ `tsconfig.json` සිතියම් `@omniroute/ui-kit` → `packages/ui-kit/src` සහ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` සහ `vitest.mcp.config.ts` එකම අන්වර්ථය දරයි). කට්ටල සංරචකයක් එහි උප මාර්ගයෙන් ආයාත කරන්න (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), කිසි විටෙකත් `@omniroute/ui-kit` බැරලය හරහා නොවේ: බැරලය සෑම සංරචකයක්ම (දින පිකර් ඇතුළුව) එක් එක් ආනයනකරු වෙතට ඇද දමයි. කට්ටල මෝස්තර පත්‍රය `src/app/globals.css` හරහා ඇතුල් වේ (`@import "../../packages/ui-kit/src/ci-styles.css"`, සම්පූර්ණ පත්‍රය: හරය `ci-ui.css` සහ සෑම රටා පවුලක්ම).
-- **ටෝකන.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ටෝකන ප්‍රකාශ කරයි; `src/app/globals.css` ඒවා ලෙගසි OmniRoute නම් (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) වෙත පාලම් කරයි, එබැවින් පවතින `var(--color-*)` කියවන අතර Tailwind උපයෝගිතා දිගටම ක්‍රියා කරයි. නව කේතය Tailwind උපයෝගිතා භාවිතා කරයි (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) හෝ කට්ටල පන්ති — කිසි විටෙක හෙක්ස් අගයක් නොවේ (`tests/unit/design-kit-bridge.test.ts` පාලම බලාත්මක කරයි). `text-primary` `--text-color-primary` හරහා `--color-primary-ink` වෙත නිරාකරණය කරයි, එබැවින් `bg-primary`/`border-primary` උච්චාරණ මතුපිට තබා ගන්නා අතරතුර ප්‍රාථමික පෙළ කියවිය හැකි වේ: සංස්කරණ යටතේ එය කට්ටලයේ `--ci-color-accent-active` වේ (ආලෝකයේ ගැඹුරු තඹ `#99562f`, අඳුරේ තඹ උච්චාරණය); Classic යටතේ, ආලෝකයේ lime-800 සහ අඳුරේ දෙහි උච්චාරණය. ප්‍රස්ථාර ශ්‍රේණි භාවිතා කරන්නේ `--color-chart-1`... `--color-chart-8`, එක් එක් පෙළ-ආරක්ෂිත `--color-chart-N-ink` සහ පාරාන්ධ `--color-chart-N-subtle` චිප් ටින්ට්, කට්ටල ශ්‍රේණි අනුපිළිවෙලට පවරා ඇත (`ciChartSeriesOrder`).
-- **තේමා.** `<html className="ci-theme">` (`src/app/layout.tsx`) ලේඛනය කට්ටල තේමාවට තෝරා ගනී. මනාපය `light`, `dark` හෝ `system` ( `src/shared/constants/appConfig.ts` හි`THEME_CONFIG.defaultTheme = "system"` ; `system` `prefers-color-scheme` අනුගමනය කරයි). `src/store/themeStore.ts` හි `applyTheme()` ( `THEME_BOOT_SCRIPT` මගින් දර්පණය කර ඇත, `src/app/layout.tsx` හි පේළිගත කර ඇත, එය සජලනය වීමට පෙර ධාවනය වේ) `data-theme="dark"|"light"` සකසා `.dark` පන්තිය `<html>` මත ටොගල් කරයි. කට්ටලයේ අඳුරු සංකේත කට්ටලය `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) මත යතුරු කර ඇත; OmniRoute ගේම අඳුරු අභිබවා යාම ( `globals.css` හි `.dark` බ්ලොක්) සහ `.dark` පන්තියේ ලෙගසි Tailwind `dark:` උපයෝගිතා යතුර. උච්චාරණ වර්ණ පෙරසිටුවීම් නොමැත: උච්චාරණය සෑම විටම කට්ටලයෙන් පැමිණේ, සහ ගබඩාව පූරණය වන විට පැරණි ගොඩනැගීමේ සිට පවතින පෙරසිටුවක් පහත වැටේ.
-- **පැලට්.** දෙක, කට්ටලයෙන් දෙකම (`src/shared/constants/appearancePalette.ts`): `editions`, පෙරනිමිය සහ `classic`. සංස්කරණ යනු `<html>` හි කට්ටලයේ `data-ci-appearance="editions"` ගුණාංගය වන අතර, `ci-editions.css` ( `ci-ui.css` මගින් ආනයනය කරන ලද) `data-theme` සමඟ ඒකාබද්ධ වේ; ක්ලැසික් යනු ගුණාංගයේ නොපැවතීමයි. මූල පිරිසැලසුම සේවාදායකය - ගුණාංගය ලබා දෙයි, එබැවින් කිසිවක් ගබඩා කර නොමැති (හෝ JS) ආගන්තුකයෙකුට සෑම මතුපිට — උපකරණ පුවරුව, පිවිසීම, `/status`, දෝෂ පිටු, `/docs` සහ PWA මත සංස්කරණ ලැබේ. තේරීම එකම `theme` ගබඩාවේ (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) තේමාවට යාබදව පවතින අතර `THEME_BOOT_SCRIPT` මගින් තීන්තයට පෙර යොදනු ලැබේ (`src/shared/utils/themeBootScript.ts`, පිරිසැලසුමේ `<head>` හි පේළිගත කර ඇත), එය ගබඩා කර ඇති palette `"classic"` වූ විට පමණක් ගුණාංගය ඉවත් කරයි; `src/app/global-error.tsx`, මූල පිරිසැලසුමෙන් පිටත, එය එකම ගබඩාවෙන් අදාළ වේ. වෙනත් කිසිදු මූලද්‍රව්‍යයක් මත `data-ci-appearance` නොතබන්න: කට්ටලය එය `html:root:has([data-ci-appearance="editions"])` සමඟ ගැලපේ, එබැවින් එක් පරම්පරාවක් මුළු ලේඛනයම මාරු කරනු ඇත. සංස්කරණ `data-ci-editions-variant="landing"` ප්‍රභේදය අලෙවිකරණ පිටු සඳහා මිස උපකරණ පුවරුව සඳහා නොවේ. බ්‍රවුසරය ක්‍රෝම්: සේවාදායකය පෙරනිමි, සංස්කරණ, `viewport.themeColor` ( `prefers-color-scheme` එකකට ටැග් එකක්) සහ වෙබ් මැනිෆෙස්ට් — `PWA_THEME_COLORS` `src/shared/constants/pwaThemeColors.ts` හිදී ලබා දෙයි, සංස්කරණවල එක් කැඩපත වන `--ci-color-background` (`#f3f1e9` / `#11120f`), `ci-editions.css` ට පින් කර `tests/unit/pwa-theme-colors.test.ts`. සජීවී `<meta name="theme-color">` පසුව ගබඩා කර ඇති තලය සහ මාදිලිය අනුගමනය කරයි: `THEME_BOOT_SCRIPT` තීන්ත ආලේප කිරීමට පෙර ටැග් නැවත ලියන අතර තේමා ගබඩාවේ ක්‍රියාවන් සෑම වෙනස්කමකදීම එය කරයි (`resolveThemeColor()` / `applyThemeColor()` `src/shared/utils/themeColorMeta.ts`, කට්ටලයේ `ciTokens` වෙතින් `CLASSIC_PAGE_BACKGROUND` කියවීම සමඟ). පැහැදිලි light/dark තේමාවක් සෑම ටැගයක්ම එම මාදිලියට සකසයි; `system` එක් යෝජනා ක්‍රමයකට එක් වර්ණයක් තබා ගනී. මැනිෆෙස්ටය සංස්කරණ රැඳී සිටියි: එය එක් ස්ථාපනයකට වරක්, මනාපයකින් තොරව ලබා ගනී. මොනාකෝ පරීක්ෂණයකින් (`monacoKitTheme.ts`) එහි වර්ණ කියවයි; සංස්කරණ යටතේ ප්‍රොබ් රීඩ් එක් සමමුහුර්ත අවසරයක් සඳහා මූල `data-theme` පෙරළයි, මන්ද කට්ටලය මූලයෙන් සංස්කරණ light/dark විසඳයි.
-- **සංරචක (ඇඩප්ටර්).** `src/shared/components/index.tsx` OmniRoute සංරචකය API (එකම නම්, පෙරනිමි අපනයන සහ මුක්කු) තබා ගන්නා අතර, එය පිටුපස ඇති ප්‍රාථමිකයන් කට්ටලයට ඉහළින් ඇති ඇඩප්ටර වේ: ආකෘති (`Button` `Loading` `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `NotificationToast` `ConfirmModal` `Modal` `Tooltip` `InfoTooltip` `EmptyState` `Card` ව්යුහය (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Avatar` `Breadcrumbs` සහ වගු (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ඇඩැප්ටරයක් උපපථය මඟින් කට්ටල සංරචකය ආයාත කර එයට උරුම මුක්කු සිතියම්ගත කරයි — උදාහරණයක් ලෙස `Button variant="primary"` යනු kit `default` බොත්තමයි (`--ci-button-primary-*`: ආලෝකයේ ප්‍රතිලෝම පෘෂ්ඨය, එහි `--ci-color-accent-foreground` තීන්ත අඳුරේ ඇති උච්චාරණය), `danger` යනු `destructive`, සහ `warning` යනු k `warning` k. `Badge` තත්ත්‍ව ප්‍රභේද කිට් ටෝන වන අතර, `<option>` ළමුන් සමඟ `Select` කට්ටලය `NativeSelect` විදැහුම් කරයි. `tests/unit/ui/adapters/*.test.tsx` එක් එක් ඇඩප්ටරය pin.
-- **ෂෙල්.** `src/app/(dashboard)/layout.tsx` විදැහුම්කරණය `DashboardLayout`, එය `src/shared/components/layouts/DashboardShell.tsx` විදැහුම් කරයි: කට්ටලය `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), `src/shared/components/Sidebar.tsx` හි OmniRoute හි සංචාලන තර්කනය සමඟ. `#main-content` වෙත "අන්තර්ගතයට පනින්න" සබැඳියක් නාභිගත කළ හැකි පළමු මූලද්‍රව්‍යය වේ. `src/shared/components/Header.tsx` කිට් `SidebarTrigger` (කවචයේ එකම පැති තීරුව ටොගලය), Keak `ProductSwitcher` සහ විධාන-පටල විවෘත කරන්නා; `#main-content` ඇතුළත `PageHeader` (`.ci-page-header`) කට්ටලයක් සවි කර නොමැති අතර එය මාර්ග මාතෘකාව පමණක් පෙන්වයි, එබැවින් එහිම `PageHeader` සහිත පිටුවකට තනි `h1` ඇත. `src/shared/components/CommandPalette.tsx` යනු `Dialog` කට්ටලයකි.
-- **අයිකන.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) නම (තිර භාවිතා කරන ද්‍රව්‍ය සංකේත වචන මාලාව) `ICON_MAP` (`src/shared/constants/iconMap.ts`) හරහා Lucide glyph එකක් දක්වා විසඳයි. ද්‍රව්‍ය සංකේත අකුරු සහ පැකේජය නැති වී ඇත: සිතියමේ නැති නමක් මධ්‍යස්ථ ස්ථාන දරණ ග්ලයිෆ් (`data-icon-missing="true"`) ලබා දෙන අතර නිෂ්පාදනයෙන් පිටත කොන්සෝල අනතුරු ඇඟවීමක් ලොග් කරයි. `npm run gen:icon-map` සිතියමේ නැති භාවිතයේ ඇති නම් මුද්‍රණය කරයි (Lucide නිරූපකයක් නොමැතිව ඕනෑම නමක `tests/unit/icon-map-coverage.test.ts` අසමත් වේ; `tests/unit/icon-map-object-values.test.ts` සෙවුම් වස්තූන් තුළ ගබඩා කර ඇති නම් ආවරණය කරයි); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` වචනාර්ථයෙන් `<span className="material-symbols-outlined">` spans `<Icon>` වෙත නැවත ලියයි.
-- **වෙළඳ නාමය.** `src/shared/components/OmniRouteLogo.tsx` කට්ටලය ආවරණය කරයි: පෙරනිමි අපනයන `OmniRouteLogo` මඟින් `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) සහ `OmniRouteLockup` විදැහුම්කරණය `ProductLockup product="omniroute"` (ප්‍රවේශ විය හැකි නම "Keak OmniRoute") හෝ, සුදු ලේබල් ක්‍රියාකරුවන් සඳහා, ඔවුන්ගේම `name`/`logoSrc`. නිෂ්පාදන-ස්විචර ගමනාන්ත `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) හි ජීවත් වේ. ස්වාධීන තිර — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` සහ `src/shared/components/ErrorPageScaffold.tsx` — අගුලු දැමීම පෙන්වයි; `tests/unit/brand-pages-static.test.ts` එය ආරක්ෂා කරයි.
+- **Kit.** `packages/ui-kit/src` යනු
+  `packages/ui-kit/UPSTREAM.md` හි සඳහන් commit එකේ upstream `src/` හි byte-for-byte පිටපතකි
+  (එම ගොනුවේ බලපත්ර අවසරයද සටහන් කර ඇත); `PATCHES.md` හි දේශීය patches ලැයිස්තුගත කර ඇත (කිසිවක් නැත). මෙය build කිරීමකින් තොරව source ලෙස භාවිත වේ: `next.config.mjs` එය transpile කරන අතර, `tsconfig.json` මඟින් `@omniroute/ui-kit` → `packages/ui-kit/src` සහ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` ලෙස map කර ඇත (`vitest.config.ts` සහ `vitest.mcp.config.ts` තුළද එම alias එකම ඇත). Kit component එකක් එහි subpath එක මඟින් import කරන්න (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…); කිසිවිටෙක `@omniroute/ui-kit` barrel එක හරහා නොකරන්න: barrel එක සෑම component එකක්ම (date picker එකද ඇතුළුව) සෑම importer එකකටම ඇතුළත් කරයි. Kit stylesheet එක `src/app/globals.css` හරහා ඇතුළත් වේ (`@import "../../packages/ui-kit/src/ci-styles.css"`, සම්පූර්ණ sheet එක: මූලික `ci-ui.css` සහ සෑම pattern family එකක්ම).
+- **ටෝකන.** `packages/ui-kit/src/ci-tokens.css` තුළ `--ci-*` tokens ප්රකාශ කර ඇත; `src/app/globals.css`
+  ඒවා legacy OmniRoute නම්වලට (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) සම්බන්ධ කරයි. එබැවින් දැනට පවතින `var(--color-*)` reads සහ Tailwind utilities ක්රියාත්මක වේ. නව code එකේ Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) හෝ kit classes භාවිත කරන්න — කිසිවිටෙක hex අගයක් භාවිත නොකරන්න (`tests/unit/design-kit-bridge.test.ts` මඟින් bridge එක enforce කරයි). `text-primary` මඟින් `--text-color-primary` හරහා `--color-primary-ink` resolve වන නිසා primary text එක කියවිය හැකි ලෙස පවතී. ඒ අතර `bg-primary`/`border-primary` accent surface එකම පවත්වා ගනී: Editions යටතේ එය kit හි `--ci-color-accent-active` වේ (light හි ගැඹුරු copper `#99562f`, dark හි copper accent); Classic යටතේ light හි lime-800 සහ dark හි lime accent වේ. Chart series `--color-chart-1` … `--color-chart-8` භාවිත කරයි; සෑම එකකටම text-safe `--color-chart-N-ink` එකක් සහ opaque `--color-chart-N-subtle` chip tint එකක් ඇත. ඒවා kit series අනුපිළිවෙළට (`ciChartSeriesOrder`) පවරා ඇත.
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) මඟින් document එක kit theme එකට ඇතුළත් කරයි.
+  preference එක `light`, `dark` හෝ `system` වේ (`src/shared/constants/appConfig.ts` හි `THEME_CONFIG.defaultTheme = "system"`); `system` මඟින් `prefers-color-scheme` අනුගමනය කරයි. `src/store/themeStore.ts` හි `applyTheme()` (hydration ට පෙර ක්රියාත්මක වන, `src/app/layout.tsx` තුළ inline කර ඇති `THEME_BOOT_SCRIPT` මඟින් mirror කර ඇත) `data-theme="dark"|"light"` සකසා `<html>` මත `.dark` class එක එකවර toggle කරයි. Kit හි dark token set එක `data-theme="dark"` මත පදනම් වේ (`packages/ui-kit/src/ci-tokens.css`); OmniRoute හිම dark overrides (`globals.css` හි `.dark` block එක) සහ legacy Tailwind `dark:` utilities `.dark` class එක මත පදනම් වේ. Accent color presets නොමැත: accent එක සැමවිටම kit එකෙන් පැමිණෙන අතර, පැරණි build එකකින් persist වූ preset එකක් store එක load වන විට ඉවත් කරනු ලැබේ.
+- **Palettes.** දෙකක් ඇත, දෙකම kit එකෙන් (`src/shared/constants/appearancePalette.ts`): default එක වන `editions` සහ `classic`. Editions යනු `<html>` මත ඇති kit හි `data-ci-appearance="editions"` attribute එකයි. `ci-ui.css` මඟින් import කරන `ci-editions.css`, එය `data-theme` සමඟ ඒකාබද්ධ කරයි; Classic යනු එම attribute එක නොමැති වීමයි. Root layout එක attribute එක server-render කරන බැවින්, කිසිවක් store කර නොමැති (හෝ JS නොමැති) visitor කෙනෙකුට dashboard, login, `/status`, error pages, `/docs` සහ PWA යන සෑම surface එකකම Editions ලැබේ. තේරීම එම `theme` store එකේම theme එක අසල persist වේ (`palette`, `setPalette()`, `applyPalette()` in
+  `src/store/themeStore.ts`) සහ paint කිරීමට පෙර `THEME_BOOT_SCRIPT` මඟින් apply කරයි
+  (`src/shared/utils/themeBootScript.ts`, layout හි `<head>` තුළ inline කර ඇත). එය attribute එක ඉවත් කරන්නේ stored palette එක `"classic"` වූ විට පමණි; root layout එකෙන් පිටත ඇති `src/app/global-error.tsx` එක එය එම store එකෙන් apply කරයි. වෙනත් කිසිදු element එකක `data-ci-appearance` නොතබන්න: kit එක එය `html:root:has([data-ci-appearance="editions"])` සමඟ match කරන බැවින්, එක් descendant එකක් පමණක් තිබුණද සම්පූර්ණ document එක මාරු වේ. Editions `data-ci-editions-variant="landing"` variant එක marketing pages සඳහා වන අතර dashboard සඳහා නොවේ. Browser chrome සම්බන්ධයෙන්: server එක default එක වන Editions, `viewport.themeColor` (එක් `prefers-color-scheme` එකකට එක් tag එකක්) සහ web manifest තුළ render කරයි — `src/shared/constants/pwaThemeColors.ts` හි `PWA_THEME_COLORS`, එනම් Editions `--ci-color-background` (`#f3f1e9` / `#11120f`) හි එකම mirror එක, `tests/unit/pwa-theme-colors.test.ts` මඟින් `ci-editions.css` වෙත pinned කර ඇත. පසුව live `<meta name="theme-color">` stored palette සහ mode එක අනුගමනය කරයි: `THEME_BOOT_SCRIPT` paint කිරීමට පෙර tags නැවත ලියන අතර theme store හි actions සෑම වෙනසකදීම එය සිදු කරයි (`src/shared/utils/themeColorMeta.ts` හි `resolveThemeColor()` / `applyThemeColor()`, `ciTokens` වෙතින් කියවන `CLASSIC_PAGE_BACKGROUND` සමඟ). Explicit light/dark theme එකක් සෑම tag එකක්ම එම mode එකට සකසයි; `system` මඟින් scheme එකකට එක් colour එකක් පවත්වා ගනී. Manifest එක Editions ලෙසම පවතී: එය preference එකකින් තොරව, install එකකට එක් වරක් fetch කරයි. Monaco එහි colours probe එකකින් කියවයි (`monacoKitTheme.ts`); Editions යටතේ probe read එක synchronous pass එකක් සඳහා root `data-theme` flip කරයි, මන්ද kit එක Editions light/dark root එකෙන් resolve කරන බැවිනි.
+- **Components (adapters).** `src/shared/components/index.tsx` මඟින් OmniRoute component API එක (එම names, default exports සහ props) පවත්වා ගන්නා අතර, එයට පිටුපස ඇති primitives kit එක මත පදනම් වූ adapters වේ: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays සහ feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) සහ tables (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter එකක් kit component එක subpath එකෙන් import කර legacy props එයට map කරයි — උදාහරණයක් ලෙස `Button variant="primary"` යනු kit හි `default` button එකයි (`--ci-button-primary-*`: light හි inverse surface එක, dark හි එහි `--ci-color-accent-foreground` ink සහිත accent එක), `danger` යනු `destructive` වන අතර `warning` යනු kit හි `warning` button එකයි. `Badge` status variants kit tones වන අතර, `<option>` children සහිත `Select` එක kit හි `NativeSelect` render කරයි.
+  Adapters දෙකක් index එකෙන් නොව path එකෙන් import කරයි: `InteractiveTableRow`
+  (`src/shared/components/InteractiveTableRow.tsx`), `onActivate` සහ `selected` ලබා ගන්නා kit `TableRow` එකක් වන අතර Tab, Enter සහ Space සඳහා ප්රතිචාර දක්වයි; සහ `CodePreview`
+  (`src/shared/components/CodePreview.tsx`), එහි copy labels පරිවර්තනය කර ඇති kit code block එකයි.
+  `tests/unit/ui/adapters/*.test.tsx` මඟින් සෑම adapter එකක්ම pin කර ඇත.
+- **ෂෙල්.** `src/app/(dashboard)/layout.tsx` මඟින් `DashboardLayout` render කරන අතර, එය `src/shared/components/layouts/DashboardShell.tsx` render කරයි: kit හි `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), සහ OmniRoute හි navigation logic `src/shared/components/Sidebar.tsx` තුළ ඇත. "අන්තර්ගතයට යන්න" සබැඳිය `#main-content` වෙත යොමු වන අතර, එය focus කළ හැකි පළමු element එකයි. `src/shared/components/Header.tsx` තුළ kit හි `SidebarTrigger` (shell හි එකම sidebar toggle එක), Keak හි `ProductSwitcher` සහ command-palette opener අඩංගු වේ; `#main-content` ඇතුළත kit හි `PageHeader` (`.ci-page-header`) mount කර නොමැති විට පමණක් එය route title පෙන්වයි. එබැවින් තමන්ගේම `PageHeader` සහිත පිටුවක ඇත්තේ එක් `h1` එකකි. `src/shared/components/CommandPalette.tsx` යනු kit හි `Dialog` එකකි.
+- **අයිකන.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) මඟින් screens භාවිත කරන Material Symbols vocabulary හි නම `ICON_MAP` (`src/shared/constants/iconMap.ts`) හරහා Lucide glyph එකකට resolve කරයි. Material Symbols font සහ package ඉවත් කර ඇත: map එකෙන් නමක් නොමැති විට neutral placeholder glyph එකක් (`data-icon-missing="true"`) render වන අතර production නොවන අවස්ථාවල console warning එකක් log කරයි. `npm run gen:icon-map` මඟින් භාවිතයේ ඇති නමුත් map එකෙන් අස්ථානගත නම් මුද්රණය කරයි (`tests/unit/icon-map-coverage.test.ts` මඟින් Lucide icon එකක් නොමැති ඕනෑම නමකට fail වන අතර, `tests/unit/icon-map-object-values.test.ts` මඟින් lookup objects තුළ ගබඩා කර ඇති නම් ආවරණය කරයි); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` මඟින් literal `<span className="material-symbols-outlined">` spans `<Icon>` වෙත rewrite කරයි.
+- **වෙළඳ නාමය.** `src/shared/components/OmniRouteLogo.tsx` මඟින් kit wrap කරයි: default export එක වන `OmniRouteLogo`, `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath`-safe) render කරන අතර, `OmniRouteLockup` මඟින් `ProductLockup product="omniroute"` (ප්රවේශ විය හැකි නම "Keak OmniRoute") හෝ white-label operators සඳහා ඔවුන්ගේම `name`/`logoSrc` render කරයි. Product-switcher destinations `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) තුළ ඇත. standalone screens — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` සහ `src/shared/components/ErrorPageScaffold.tsx` — lockup පෙන්වයි; `tests/unit/brand-pages-static.test.ts` එය ආරක්ෂා කරයි.
 
 ## 2. රීති
 
-1. ටෝකන, කිසි විටෙකත් වචනාර්ථයෙන් නොවේ. ව්‍යතිරේක අරමුණු මත තබා ඇත: සැමවිටම අඳුරු කොන්සෝල පර්යන්තය සහ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), වචනාර්ථයෙන් හෙක්ස් අවශ්‍ය ඇමතුම්කරුවන් සඳහා කට්ටල තත්ත්‍වයේ නිරාකරණය වූ හෙක්ස් දර්පණය. වර්ගීකරණ තලයන් තවදුරටත් ව්‍යතිරේකයක් නොවේ: ඒවා කට්ටලයේ ප්‍රස්ථාර ටෝකන අටක් (`--color-chart-1..8`, plus `-ink`/`-subtle`), කට්ටල ශ්‍රේණියේ අනුපිළිවෙලින්, `src/shared/utils/categoricalPalette.ts` හරහා සහ, මාර්ගගත කිරීමේ උපාය මාර්ග සඳහා, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow දාර සහ වාද්‍ය වෘන්ද කැන්වසය තේමා-දැනුවත් `--orch-status-*` විචල්‍ය (`src/shared/components/flow/edgeStyles.ts`) කියවයි.
-2. කිසිවිටෙක අතින් `packages/ui-kit/src` පැච් නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ සමමුහුර්ත කරන්න ; පූර්ව-විධිමත් ද්වාරය `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) අමුණන ලද උඩු ගංඟා කැපවීමෙන් වෙනස් වන ඕනෑම බයිටයක් මත අසමත් වේ (එය upstream clone, `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට අනතුරු ඇඟවීමක් සමඟ මඟ හැරේ). කට්ටලයට යමක් නොමැති විට, එය ඇඩැප්ටරයේ හෝ තිරයේ වැඩ කර එය උඩුගත කරන්න.
-3. කට්ටල පෙළ පෙරනිමිය ඉංග්‍රීසි (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pass පරිවර්තිත තන්තු `useTranslations(...)` වෙතින් කට්ටල සංරචකයක් පෙළ විදැහුම් කරන විට.
-4. Tailwind උපයෝගිතා කට්ටල සංරචක පන්ති (කට්ටලය ප්‍රකාශ කරයි `@layer theme, base, components, utilities` සහ එහි නීති `components`) — භාවිතා කරන්නේ පරතරය සහ පිරිසැලසුම සඳහා මිස කට්ටල සංරචක නැවත වර්ණ ගැන්වීම සඳහා නොවේ.
-5. ශීර්ෂයන්: පිටු සහ කොටස් මාතෘකා සඳහා `.ci-heading` ; `.ci-dashboard-display` දෝෂ පිටු තත්ව කේතය වැනි විශාල, විරල සංදර්ශක පෙළ සඳහා පමණි. දෙදෙනාම ස්විට්සර් භාවිතා කරයි.
-6. `tests/unit/dashboard-kit-sweep.test.ts` කට්ටලය දරුකමට හදා ගැනීම ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ ද්‍රව්‍ය බන්ධන පරාසයක් නොමැත; උපකරණ පුවරුවේ ගසෙහි (`src/app/(dashboard)` සහ `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` සහ ලැයිස්තුගත ව්‍යතිරේකවලින් පිටත අතින් රෝල් කරන ලද `role="dialog"` නොමැත ( `Select` ඇඩැප්ටරයේ ස්වදේශික ශාඛාව, `RequestLoggerDetail`); සෑම raw `<button>` හෝ `<input>` එකකටම `kit-exception:` අඩංගු විවරණයක් අවශ්‍ය වේ (හේතුව සමඟ) ඊට ඉහලින් පේළි 3කින් අවසන් වේ; palette hues සහ `dark:` ප්‍රභේද පරීක්ෂණ ලැයිස්තුගත කරන ගොනු වල පමණි.
-7. PR (තිරපිටපත්) ට පෙර තේමාවන් සහ 390 px දර්ශන තොටුපළ දෙකම තහවුරු කරන්න; `tests/e2e/a11y.spec.ts` දුවන්නේ axe.
+1. කිසිවිටෙකත් literal නොව tokens භාවිත කරන්න. අරමුණින්ම තබා ඇති ව්යතිරේක: සෑමවිටම අඳුරු console terminal එක සහ
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex අගයක් අවශ්ය callers සඳහා kit status
+   palette හි resolved-hex mirror එක. Categorical palettes තවදුරටත් ව්යතිරේකයක් නොවේ:
+   ඒවා kit හි chart tokens අට (`--color-chart-1..8`, සහ `-ink`/`-subtle`) මත, kit series අනුපිළිවෙළට,
+   `src/shared/utils/categoricalPalette.ts` හරහාත්, routing strategies සඳහා
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` හරහාත් ක්රියා කරයි; ReactFlow edges සහ orchestration
+   canvas එක theme-aware `--orch-status-*` variables කියවයි (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` අතින් කිසිවිටෙකත් patch නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ sync කරන්න;
+   upstream commit එකට pin කර ඇති අගයෙන් වෙනස් වන ඕනෑම byte එකකදී pre-commit gate
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) අසමත් වේ (upstream clone එක,
+   `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට warning එකක් සමඟ එය skip කරයි). Kit හි යම් දෙයක් නොමැති
+   විට, adapter එකේ හෝ screen එකේ workaround එකක් යොදා upstream වෙතින් එය ඉල්ලා සිටින්න.
+3. Kit text defaults ඉංග්රීසි වේ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component එකක් text render කරන
+   සෑම අවස්ථාවකම `useTranslations(...)` වෙතින් පරිවර්තනය කළ strings pass කරන්න.
+4. Tailwind utilities kit component classes වලට වඩා ප්රමුඛ වේ (kit එක
+   `@layer theme, base, components, utilities` declare කරන අතර එහි rules `components` තුළ පවතී) — kit components නැවත
+   වර්ණ ගැන්වීම සඳහා නොව, spacing සහ layout සඳහා utilities භාවිත කරන්න. Typography මෙහි ව්යතිරේකයකි:
+   `packages/ui-kit/src/ci-typography.css` කිසිදු layer එකකට පිටතින් import කර ඇති බැවින්, එහි tag rules
+   utilities අභිබවා යයි. Weight, `tracking-*` සහ `leading-*` classes `h1`–`h6` මත කිසිදු බලපෑමක් නොකරයි, table cells මත
+   weight සහ `tracking-*` කිසිදු බලපෑමක් නොකරයි, buttons මත weight කිසිදු බලපෑමක් නොකරයි
+   (`tests/unit/dead-typography-classes.test.ts` ඒවා එම ස්ථානවල ප්රතික්ෂේප කරයි); `font-mono` හි `th`, `td`, `button`, `input`
+   සහ `textarea` මත කිසිදු බලපෑමක් නොමැත. Size, colour සහ `uppercase` utilities තවමත් ක්රියාත්මක වේ.
+5. Headings: page සහ section titles සඳහා `.ci-heading`; error-page status code වැනි විශාල, හිස් ඉඩ සහිත
+   display text සඳහා පමණක් `.ci-dashboard-display`. දෙකම Switzer භාවිත කරයි.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kit adoption ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ Material ligature span එකක් නොතිබිය යුතුය; dashboard tree එකේ (`src/app/(dashboard)` සහ `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` නොතිබිය යුතු අතර, ලැයිස්තුගත ව්යතිරේකවලින්
+   පිටත අතින් සාදන ලද `role="dialog"` ද නොතිබිය යුතුය (`Select` adapter හි native branch,
+   `RequestLoggerDetail`); එහි ඇති සෑම raw `<button>` හෝ `<input>` එකකටම, එයට ඉහළින් උපරිම පේළි 3ක් ඇතුළත
+   අවසන් වන, හේතුව අඩංගු `kit-exception:` comment එකක් අවශ්ය වේ; palette hues සහ `dark:` variants
+   තිබිය හැක්කේ test එක ලැයිස්තුගත කරන files තුළ පමණි.
+7. PR එකකට පෙර themes දෙකම සහ 390 px viewport එක verify කරන්න (screenshots); `tests/e2e/a11y.spec.ts` axe ක්රියාත්මක කරයි.
+8. Colour utility එකක් `src/app/globals.css` හි `@theme` block එකේ token එකක් නම් කළ යුතුය: එහි නොමැති නමක්
+   (`text-text`, `bg-bg-muted`, `text-danger`…) කිසිදු CSS එකක් generate නොකරන අතර element එක inherited colour එක තබා ගනී
+   (`tests/unit/theme-color-classes.test.ts`). `card` class එකක් නොමැත: `Card` adapter එක භාවිත කරන්න
+   (`tests/unit/no-bare-card-class.test.ts`). Chart colour එකක text සඳහා `text-chart-N-ink` භාවිත කරන්න;
+   `text-chart-N` icons සහ strokes සඳහා වේ
+   (`tests/unit/chart-ink-for-text.test.ts`). Translucent colour එකක් `color-mix` සමඟ සාදන්න; `var()` විය හැකි value එකකට
+   hex alpha එකක් append කිරීමෙන් කිසිවිටෙකත් සාදන්න එපා
+   (`tests/unit/color-alpha-concatenation.test.ts`).
+9. Tables: සෑම kit `Table` එකක්ම එහි scroll region එකේ නම වන `scrollLabel` එකත්, persistent scrollbar එක draw කරන විට
+   `scrollbarLabel` එකත් pass කළ යුතුය
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). Click කළ හැකි row එකක් `onActivate` සහිත
+   `InteractiveTableRow` එකක් විය යුතු අතර, කිසිවිටෙකත් `<TableRow onClick>` නොවිය යුතුය
+   (`tests/unit/table-row-click-needs-keyboard.test.ts`). Card එකක් තුළ හෝ bordered box එකක් තුළ ඇති table එකක්
+   `containerClassName="rounded-none border-0"` සමඟ තමන්ගේ frame එක ඉවත් කළ යුතුය
+   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. Amount එකක් පෙන්වන bar එක kit `Progress` විය යුතුය, නැතහොත් kit bar එකට එය draw කළ නොහැකි විට name එකක් සහ
+    value එකක් සහිත `role="progressbar"` රැගෙන යා යුතුය (`tests/unit/progress-bars-have-semantics.test.ts`). Menus,
+    popovers සහ tooltips kit එකෙන් (`Popover`, `SearchableSelect`, `Tooltip` adapter) පැමිණිය යුතු අතර, local state මඟින්
+    විවෘත කරන, absolutely positioned panel එකකින් නොපැමිණිය යුතුය
+    (`tests/unit/hand-positioned-overlays.test.ts`).
+11. `Input` adapter එකේ `className` field wrapper එක style කරයි; control එක සඳහා අදහස් කරන class එක
+    `inputClassName` තුළ යෙදිය යුතුය (`tests/unit/input-adapter-classname-destination.test.ts`).
 
-## 3. තිරයක් එකතු කිරීම
+## 3. තිරයක් එක් කිරීම
 
-1. පිටුව kit `PageHeader` (`@omniroute/ui-kit/page-header`, dashboard එක තුළ `compact`) සමඟ ආරම්භ
-   කරන්න — title, description සහ `actions`. එවිට shell header එක තමන්ගේම title එක ඉවත් කරයි.
-2. Controls `@/shared/components` (adapters) වෙතින් ගොඩනගා, adapter එකක් නොමැති තැන subpath මඟින්
-   kit components භාවිත කරන්න (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`,
-   `Tabs`, `RadioGroup`, `Slider`…).
-3. Icons: `<Icon name="…" />`. නව නමක් අර්ථාන්විත වශයෙන් ගැලපෙන Lucide component එක සමඟ
-   `ICON_MAP` එකට යයි; තවම නොමැති නම් `npm run gen:icon-map` ලැයිස්තුගත කරයි.
-4. වර්ණ: semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) සහ chart series
-   සඳහා `var(--color-chart-N)`; hex අගයන් නොමැත, වර්ණයක් පමණක් නැවත කියන `dark:` variants ද නොමැත.
-5. Text: kit components වලට ඔබ ලබා දෙන labels ඇතුළුව සෑම string එකක්ම `useTranslations` වෙතින්
-   එයි. නව keys `src/i18n/messages/en.json`, `pt-BR.json` සහ `vi.json` වෙත යයි (Vietnamese
-   parity test එක සෑම English key එකක්ම pin කරයි); අනෙක් locales i18n sync එකෙන් පුරවනු ලැබේ.
+1. kit හි `PageHeader` (`@omniroute/ui-kit/page-header`, ඩෑෂ්බෝඩය තුළ `compact`) සමඟ පිටුව විවෘත කරන්න — මාතෘකාව, විස්තරය සහ `actions`. ඉන්පසු shell ශීර්ෂය එහිම මාතෘකාව ඉවත් කරන අතර, එය 1024 px ට අඩු ප්රමාණවලදී සඟවනු ලැබේ. එබැවින් `PageHeader` නොමැති මාර්ගයකට දුරකථනයක මාතෘකාවක් නොමැත
+   (`tests/unit/dashboard-page-header-coverage.test.ts`). තමන්ගේම පිටුවක් නොමැති path segment එකක් `src/shared/utils/breadcrumbTrail.ts` හි `ROUTE_PREFIXES_WITHOUT_PAGE` වෙත ඇතුළත් කරන්න. එවිට එහි crumb එක ක්ලික් කළ නොහැකි සබැඳියක් නොව, පෙළක් වේ (`tests/unit/breadcrumb-trail-routes.test.ts`).
+2. `@/shared/components` (adapters) වෙතින් පාලන සාදන්න. adapter එකක් නොමැති විට subpath මඟින් kit components භාවිත කරන්න (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. අයිකන: `<Icon name="…" />`. නව නාමයක් අර්ථානුකූලව ගැළපෙන Lucide component සමඟ `ICON_MAP` වෙත එක් කරන්න; තවමත් අඩු නාම ලැයිස්තුගත කිරීමට `npm run gen:icon-map` ධාවනය කරන්න.
+4. වර්ණ: semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) සහ chart series සඳහා `var(--color-chart-N)` භාවිත කරන්න; hex අගයන් සහ වර්ණයක් පමණක් නැවත නැවත යොදන `dark:` variants භාවිත නොකරන්න.
+5. පෙළ: kit components වෙත ලබාදෙන labels ඇතුළුව සෑම string එකක්ම `useTranslations` වෙතින් ලබාගත යුතුය. නව keys `src/i18n/messages/en.json` වෙත පමණක් එක් කරන්න; වෙනත් locales release refresh මඟින් පුරවනු ලැබේ
+   (`tests/_helpers/localeParityMode.ts` මඟින් modes දෙක විස්තර කරයි). සැබෑ ඉංග්රීසි නොවන catalog එකක් mount කරන test එකක්, runtime එක ක්රියා කරන ආකාරයටම, `src/i18n/request.ts` හි `deepMergeFallback` සමඟ messages සාදයි. එබැවින් තවමත් ඉංග්රීසි භාෂාවට පමණක් සීමා වූ key එකක් දෝෂයක් ඇති කරනවා වෙනුවට fallback වෙත යොමු වේ.
 6. PR එකට පෙර guards ධාවනය කරන්න: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (`iconMap.ts` හි duplicated import එකක් අල්ලා ගන්නා එකම
-   check එක), `npm run check:ui-icu`, සහ තිරයේම tests.
+   `npm run check:dashboard-typecheck` (`iconMap.ts` හි duplicated import එකක් හඳුනාගන්නා එකම check එක), `npm run check:ui-icu`, rules 4 සහ 8–11 හි නම් කර ඇති guards, සහ තිරයටම අදාළ tests.
 
 ## 4. ඇඩැප්ටරයක් එක් කිරීම හෝ වෙනස් කිරීම
 
@@ -82,50 +133,23 @@ PR විවෘත කළ නොහැකි වූ විට (ඉලක්ක �
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` එම කැපවීමේදී upstream `src/` (`latest` = නවතම `v*` ටැගය) `packages/ui-kit/src` වෙත පිටපත් කරයි, තනි අවසර ලත් පරිවර්තනය යොදයි (එය සාපේක්ෂ ආයාතවලින් `.js` උපසර්ගය පහත දමයි), සහ `packages/ui-kit/package.json` සහ `package-lock.json` හි වැඩ අවකාශය අනුවාදය උඩුගං බලා සකසයි. ඉන්පසු: `git diff packages/ui-kit` සමාලෝචනය කරන්න, තේමා දෙකෙහිම සපයන්නන්, සැකසීම්, සංයෝජන, භාවිතය සහ අන්ත ලක්ෂ්‍යය පිළිබඳ දෘශ්‍ය ප්‍රවේශයක් කරන්න, `npm run check:ui-kit-snapshot` සහ `npm run test:vitest:ui` ධාවනය කරන්න, සහ upstream changelog සමඟ PR විවෘත කරන්න.
 
-## 6. README රූපසටහන්
+## 6. README රූප සටහන්
 
-මූල `README.md` තුළ ඇතුළත් කර ඇති රූපසටහන් දොළහ (`docs/diagrams/*.svg`) ස්ථිතික රූපයකට යෙදූ කට්ටලය වන
-අතර, ඒවා අතින් අඳින ලද ඒවා නොව ජනනය කරන ලද ඒවාය: `scripts/docs/gen-readme-*.mjs` හි ජනක ගොනු 13ක්
-(රූපසටහන් දොළහ සහ `gen-readme-diagrams.mjs` ධාවකය) සහ
-`tests/unit/docs/readme-*-svg.test.ts` හි යල්පැනීමේ පරීක්ෂණ 12ක් ඇත; එක් රූපසටහනකට එක බැගින් වන ඒ සෑම
-පරීක්ෂණයක්ම භාර දී ඇති ගොනුව එහි ජනකයේ ප්රතිදානය සමඟ බයිටයෙන් බයිටය සංසන්දනය කරයි (`test-unit` කාර්යය).
+මූලයේ `README.md` තුළ embed කර ඇති රූප සටහන් දොළහ (`docs/diagrams/*.svg`) ස්ථිතික
+රූපයකට යෙදූ kit එක වන අතර, ඒවා අතින් අඳින ලද ඒවා නොව උත්පාදනය කරන ලද ඒවාය: `scripts/docs/gen-readme-*.mjs`
+හි generator ගොනු 13ක් (රූප සටහන් දොළහ සහ `gen-readme-diagrams.mjs` driver එක) සහ
+`tests/unit/docs/readme-*-svg.test.ts` හි staleness පරීක්ෂණ 12ක් ඇත. සෑම රූප සටහනකටම එකක් බැගින් ඇති ඒවා
+commit කර ඇති ගොනුව එහි generator එකේ ප්රතිදානය සමඟ byte-සමීක්ෂණය කරයි (`test-unit` job).
 
-- **ටෝකන.** `scripts/docs/readme-diagram-theme.mjs`, Editions වර්ණ මාලාව (පෙරනිමි පෙනුම)
-  `packages/ui-kit/src/ci-editions.css` වෙතින් පිටපත් කරයි (එම ගොනුවට එරෙහිව
-  `tests/unit/docs/readme-diagram-theme.test.ts` මඟින් ස්ථිර කර ඇත; එම පරීක්ෂණය යෝජනා ක්රම දෙකෙහිම සෑම
-  මතුපිටක් මත ඇති සෑම පෙළ වර්ණයක් සඳහාම WCAG AA ද පරීක්ෂා කරයි; එකම ව්යතිරේකය වන සැහැල්ලු `warn`, කැන්වසය
-  මත කට්ටල අගය 4.46:1 වන බැවින් 10 %කින් අඳුරු කළ කට්ටල අනතුරු ඇඟවීමයි) සහ කට්ටලයේ අක්ෂර පරිමාණය (`ci-tokens.css`) මත පෙළ භූමිකා නිර්වචනය කරයි: කට්ටලයේ බරවලින් (400/500/600, දර්ශන පෙළ 500න්) Switzer සහ
-  සෑම දෙයක් සඳහාම අක්ෂර පරතරය, නමුත් විධාන, URLs, හඳුන්වනයන් සහ ටර්මිනල් තිර සඳහා පමණක් භාවිත වන
-  IBM Plex Mono යොදන කේත භූමිකා (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) හැර.
-  සැහැල්ලු අගයන් `:root` මත ද, අඳුරු අගයන් ගොනුව තුළ `prefers-color-scheme: dark` පිටුපස ද ඇති බැවින්, සෑම
-  රූපයක්ම GitHub හි නරඹන්නාගේ යෝජනා ක්රමය අනුගමනය කරයි.
-- **අකුරු රටා.** GitHub Markdown සමඟ CSS නොලැබෙන අතර camo ප්රොක්සිය සෑම බාහිර ලබාගැනීමක්ම අවහිර කරන බැවින්,
-  කට්ටලයේ අක්ෂර රටාව ගොනුව තුළම ගෙන යා යුතුය. සෑම ජනකයකම අවසාන පියවර වන
-  `scripts/docs/readme-outline.mjs`, HarfBuzz භාවිතයෙන් Switzer භූමිකා හැඩගස්වා ඒවා දෛශික බාහිර රේඛා
-  (`<defs>` මාර්ග සහ `<use>`) ලෙස අඳින අතර, Switzer හි නොමැති ඊතල සහ ජ්යාමිතික සංකේත එහිම මිනුම් අනුව අඳියි.
-  කාවැද්දූ අකුරු රටාවක් නොව, සෑම විටම බාහිර රේඛා භාවිත කරන්න: Switzer බලපත්රය
-  (`packages/ui-kit/src/fonts/FFL.txt`) ලිඛිත අනුමැතියකින් තොරව උපකොටස් සෑදීම සහ ආකෘති පරිවර්තනය තහනම්
-  කරන අතර දෛශික ඇඳීම් සඳහා අවසර දෙයි; එබැවින් Switzer `@font-face` හෝ `data:` URI එකක් නැවත හඳුන්වා නොදෙන්න.
-  ගොනුවක ඉතිරි කර ඇති එකම අකුරු රටාව සැබෑ කේත පෙළ ලෙස පවතින දෑ සඳහා වන OFL IBM Plex Mono උපකොටසයි
-  (`scripts/docs/readme-fonts.mjs`), එය එම අක්ෂරවලින් සාදා ඇත; එයට කාවැද්දිය නොහැකි ඕනෑම ග්ලයිෆයක් දෝෂයක් නිකුත් කරයි.
-- **නැවත ජනනය කිරීම.** `npm run docs:readme-diagrams`, README අනුපිළිවෙළට සියලුම රූපසටහන් දොළහ නැවත ලියා,
-  එක් එක් ගොනුව සඳහා එහි ප්රමාණය සහිත එක් පේළියක් මුද්රණය කරයි. තනි ජනකයක් ද ස්වාධීනව ධාවනය කළ හැක
-  (`node scripts/docs/gen-readme-<name>.mjs`; එහි සංඛ්යා
-  `open-sse/config/freeModelCatalog.ts` හි සජීවී නාමාවලි පූරකයෙන් ලැබෙන බැවින් `free-tier-budget` සඳහා
-  `node --import tsx/esm` අවශ්ය වේ; නාමාවලි වෙනස්කමක CI ප්රතිවිපාකය
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` හි ඇත). ජනකය සහ SVG එකට භාර දෙන්න.
-- **සාක්ෂිය.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`, GitHub ගොනුව සපයන ආකාරයටම
-  එය විදැහුම් කරයි (`<img>` ටැගයක්, camo හි `Content-Security-Policy`, `image/svg+xml`), සැහැල්ලු සහ අඳුරු රාමු
-  ග්රහණය කර, පිටුව සිදු කළ බාහිර අකුරු රටා ඉල්ලීම් වාර්තා කරයි (ඒවා 0 විය යුතුය).
-- **සීමාව.** එක් ගොනුවකට 200 KBට අඩු විය යුතුය (සෑම යල්පැනීමේ පරීක්ෂණයක්ම එය තහවුරු කරයි); ඕනෑම README
-  රූපයක් සඳහා අනිවාර්ය උපරිම සීමාව 500 KB වේ (SVG studio වලංගුකාරකයේ රීතිය).
-- **පිටපත නොවෙනස්ව, ගණන් දොරටුවෙන්.** නැවත සන්නාමකරණය අක්ෂර රටාව සහ වර්ණ මාලාව වෙනස් කළ නමුත් වචන
-  වෙනස් කළේ නැත: සෑම ජනකයක්ම තම රූපසටහනේ පිටපත `*_COPY` නියතයක රඳවා ගනී (නැතහොත් සජීවී නාමාවලියෙන්
-  එය සාදයි); එය ඇඳෙන පෙළ මෙන්ම බාහිර රේඛා නිර්මාණ පියවරේ ආදානය ද වේ. සම්මත සංඛ්යා `<text>` නෝඩ් තුළ
-  පවතින අතර (බාහිර රේඛා බවට පත් කළ පසු අදෘශ්යයි, `fill-opacity:0`), ඒවා `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) මඟින් කියවනු ලැබේ; එම දොරටුව කියවන රූපසටහන්වල යල්පැනීමේ
-  පරීක්ෂණ ද ජනනය කළ ගොනුව මත එහි වලංගුකාරක ධාවනය කරයි. එබැවින් සංඛ්යාවක් කේතයෙන් වෙනස් වුවහොත් පරීක්ෂණය
-  අසමත් වේ — ජනකයේ සංඛ්යාව නොව, දොරටුව කියවන මූලාශ්රය නිවැරදි කරන්න.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` Editions palette එක (පෙරනිමි පෙනුම) `packages/ui-kit/src/ci-editions.css` වෙතින් පිටපත් කරයි. එය
+  `tests/unit/docs/readme-diagram-theme.test.ts` මඟින් එම ගොනුවට pinned කර ඇති අතර, schemes දෙකෙහි සෑම surface එකකම සෑම text colour එකක් සඳහාම WCAG AA ද පරීක්ෂා කරයි; එකම exception එක වන light `warn` යනු kit warning එක 10%කින් අඳුරු කළ අගයයි, මන්ද canvas එක මත kit අගය 4.46:1 වන බැවිනි. එම ගොනුව kit හි type scale (`ci-tokens.css`) මත text roles නිර්වචනය කරයි: සියල්ල සඳහා kit හි weights (400/500/600, display සඳහා 500) සහ tracking සහිත Switzer භාවිත වන අතර, code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) සඳහා පමණක් IBM Plex Mono භාවිත වේ; ඒවා commands, URLs, identifiers සහ terminal screens සඳහා පමණි.
+  Light values `:root` මතද, dark values ගොනුව තුළ `prefers-color-scheme: dark` පිටුපසද ඇත. එබැවින් GitHub හි සෑම රූපයක්ම viewer ගේ scheme එක අනුගමනය කරයි.
+- **Fonts.** GitHub Markdown CSS රැගෙන නොයන අතර camo proxy එක සෑම බාහිර fetch එකක්ම අවහිර කරයි. එබැවින් kit type එක ගොනුව තුළම රැගෙන යා යුතුය. සෑම generator එකකම අවසන් පියවර වන `scripts/docs/readme-outline.mjs`, HarfBuzz භාවිතයෙන් Switzer roles හැඩගස්වා ඒවා vector outlines (`<defs>` paths සහ `<use>`) ලෙස අඳියි. Switzer හි නොමැති arrows සහ geometric symbols ද එහිම metrics භාවිතයෙන් අඳිනු ලැබේ. Embedded font එකක් නොව outlines භාවිත කරන්න: Switzer හි licence (`packages/ui-kit/src/fonts/FFL.txt`) මඟින් ලිඛිත අනුමැතියකින් තොරව subsetting සහ format conversion තහනම් කරන අතර vector drawings සඳහා අවසර දෙයි. එබැවින් Switzer `@font-face` හෝ `data:` URI එකක් නැවත හඳුන්වා නොදෙන්න. ගොනුවක ඉතිරි වන එකම font එක සැබෑ code text ලෙස පවතින දේ සඳහා වන OFL IBM Plex Mono subset එකයි (`scripts/docs/readme-fonts.mjs`); එය එම characters වලින් ගොඩනඟනු ලබන අතර embed කළ නොහැකි ඕනෑම glyph එකක් error එකක් ඇති කරයි.
+- **Regenerate.** `npm run docs:readme-diagrams` මඟින් README අනුපිළිවෙළට සියල්ල දොළහ නැවත ලියා, සෑම ගොනුවක් සඳහාම එහි size එක සහිත එක් පේළියක් මුද්රණය කරයි. තනි generator එකක්ද ස්වාධීනව ක්රියාත්මක කළ හැක (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` සඳහා `node --import tsx/esm` අවශ්ය වේ, මන්ද එහි figures ලැබෙන්නේ `open-sse/config/freeModelCatalog.ts` හි live catalog loader එකෙනි; catalog වෙනසක CI ප්රතිවිපාකය `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` හි ඇත). Generator එක සහ SVG එක එකට commit කරන්න.
+  Release mode එකේ stale SVG එකක් අසමත් වේ; feature PR එකකදී `npm run check:generated-artifacts` මඟින් පරීක්ෂා කරන්නේ PR එක සංස්කරණය කරන SVG එක පමණි (`docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines").
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` මඟින් GitHub එය සේවය කරන ආකාරයට ගොනුව render කරයි (`<img>` tag එකක්, camo හි `Content-Security-Policy`, `image/svg+xml`), light සහ dark frame එක බැගින් capture කර, page එක කළ external font requests වාර්තා කරයි (එය 0 විය යුතුය).
+- **Budget.** එක් ගොනුවකට 200 KB ට අඩුවෙන් තිබිය යුතුය (සෑම staleness test එකක්ම මෙය assert කරයි); ඕනෑම README image එකක් සඳහා 500 KB hard cap එකයි (SVG studio validator හි rule එක).
+- **Copy unchanged, counts from the gate.** Rebrand එකෙන් වෙනස් වූයේ type සහ palette පමණි, වචන නොවේ: සෑම generator එකක්ම තම රූප සටහනේ copy එක `*_COPY` constant එකක රැගෙන යයි (හෝ live catalog එකෙන් එය ගොඩනඟයි). එය ඇඳූ text එකත් outlining පියවරේ input එකත් වේ. Canonical figures `<text>` nodes තුළම පවතී (outlined වූ පසු නොපෙනෙන ලෙස `fill-opacity:0`), ඒවා `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) මඟින් කියවනු ලැබේ; reads gate කරන රූප සටහන්වල staleness tests, generated file එක මත එහි validators ද ක්රියාත්මක කරයි. එබැවින් code එකෙන් වෙනස් වූ figure එකක් test එක අසමත් කරයි — generator එකේ ඇති number එක කිසිවිටෙක නිවැරදි නොකර, gate එක කියවන source එක නිවැරදි කරන්න.
 
 ## 7. යොමු දර්ශකය
 

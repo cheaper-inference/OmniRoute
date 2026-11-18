@@ -18,95 +18,97 @@
 
 ---
 
-## Начини инсталације
+## Методе инсталације
 
-### npm (препоручено)
+### нпм (препоручено)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Контролна табла се отвара на `http://localhost:20128`, а основни URL API-ја је `http://localhost:20128/v1`.
+Контролна табла се отвара на `http://localhost:20128` и API база URL је `http://localhost:20128/v1`.
 
-### pnpm
+> **нпм корисници:** Ако нпм упозорава да су инсталационе скрипте блокиране (нпр. `omniroute`, `better-sqlite3`), погледајте [Решавање проблема — нпм инсталационе скрипте су блокиране](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
+### пнпм
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **Корисници pnpm-а:** опција `--allow-build` је неопходна да би се омогућиле изворне скрипте за изградњу за `better-sqlite3` и `@swc/core`. Команда `pnpm approve-builds -g` није подржана за глобалне инсталације у pnpm v11.
+> **пнпм корисници:** `--allow-build` заставица је потребна да би се омогућиле изворне скрипте за прављење `better-sqlite3` и `@swc/core`. Команда `pnpm approve-builds -g` није подржана за глобалне инсталације на пнпм в11.
 
-### Arch Linux (AUR)
+### Арцх Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR пакет](https://aur.archlinux.org/packages/omniroute-bin) инсталира OmniRoute и обезбеђује systemd кориснички сервис.
+[AUR пакет](https://aur.archlinux.org/packages/omniroute-bin) инсталира OmniRoute и пружа системски кориснички сервис.
 
-### Из изворног кода
+### Фром Соурце
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Напомена за Windows:** OmniRoute подразумевано користи `%APPDATA%\omniroute` када стари директоријум `%USERPROFILE%\.omniroute` не постоји. Подесите `DATA_DIR` да бисте изабрали другу локацију директоријума са подацима.
+> **Windows напомена:** Подразумевано, OmniRoute користи `%APPDATA%\omniroute` када стари `%USERPROFILE%\.omniroute` директоријум није присутан. Подесите `DATA_DIR` да изабере другу локацију директоријума података.
 
-> **Напомена:** `npm install` аутоматски генерише `.env` из `.env.example` при првом покретању. Наредне инсталације неће преписати постојећу датотеку `.env`, па се прилагођавања чувају. Да бисте је поново генерисали, избришите `.env` пре поновног покретања.
+> **Напомена:** `npm install` аутоматски генерише `.env` из `.env.example` при првом покретању. Наредне инсталације неће преписати постојећи `.env`, тако да су прилагођавања сачувана. Да бисте поново започели, избришите `.env` пре поновног покретања.
 
 ### Docker
 
-Погледајте [Водич за Docker](./DOCKER_GUIDE.md) за комплетно подешавање Docker-а, укључујући Compose профиле и Caddy HTTPS.
+Погледајте [водич Docker](./DOCKER_GUIDE.md) за комплетно подешавање Docker укључујући Цомпосе профиле и Цадди HTTPS.
 
-### Десктоп апликација (Electron)
+### Апликација за рачунар (Electron)
 
-OmniRoute долази са десктоп омотачем изграђеним на Electron 41 + electron-builder 26.10. Доступне скрипте (корен радног простора):
+OmniRoute испоручује десктоп омот направљен на Electron 41 + елецтрон-буилдер 26.10. Доступне скрипте (основни радни простор):
 
 ```bash
-npm run electron:dev          # Покрени десктоп апликацију са аутоматским поновним учитавањем
-npm run electron:build        # Изгради за тренутни ОС (аутоматски откривен)
-npm run electron:build:win    # Windows инсталатер (NSIS + преносива верзија)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Основно тестирање упаковане верзије
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Издања десктоп инсталатера приложена су уз GitHub Releases. За детаљан водич о Electron-у (потписивање, IPC мост, дистрибуције) погледајте [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(направљено у каснијој фази)_.
+Издања десктоп инсталационих програма су приложена уз GitHub издања. За комплетан Electron дееп-диве (потписивање, IPC бридге, дистрос), погледајте [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(цриадо ем фасе постериор)_.
 
-### Сервер без графичког интерфејса (CI/аутоматизација)
+### Сервер без главе (CI/automation)
 
-За подешавања без надзора (Docker, Kubernetes, CI), користите:
+За подешавања без надзора (Docker, Кубернетес, CI), користите:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-У комбинацији са променљивама окружења (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` итд.), ово вам омогућава да покренете OmniRoute инстанцу која се у потпуности може аутоматизовати скриптама.
+У комбинацији са енв варс-има (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, итд.), ово вам омогућава да покренете OmniRoute инстанцу која је потпуно скриптована.
 
-### CLI опције
+### CLI Опције
 
-| Команда                 | Опис                                                                        |
-| ----------------------- | --------------------------------------------------------------------------- |
-| `omniroute`             | Покрени сервер (`PORT=20128`, API и контролна табла на истом порту)         |
-| `omniroute setup`       | Вођено CLI почетно подешавање лозинке и првог добављача                     |
-| `omniroute doctor`      | Покрени локалне здравствене провере без покретања сервера                   |
-| `omniroute providers`   | Откриј, прикажи, провери и тестирај добављаче преко CLI-ја                  |
-| `omniroute config`      | Конфигурација CLI алата — прикажи, преузми, постави и провери поставке      |
-| `omniroute status`      | Контролна табла статуса ван мреже — верзија, база, алати, конфигурација     |
-| `omniroute logs`        | Стримуј евиденцију коришћења из API-ја (подржава `--follow`)                |
-| `omniroute update`      | Провери или примени ажурирања за OmniRoute                                  |
-| `omniroute provider`    | Управљај везама добављача — додај, прикажи, уклони, тестирај, подразумевано |
-| `omniroute --port 3000` | Постави канонски/API порт на 3000                                           |
-| `omniroute --mcp`       | Покрени MCP сервер (stdio транспорт)                                        |
-| `omniroute --no-open`   | Не отварај прегледач аутоматски                                             |
-| `omniroute --help`      | Прикажи помоћ                                                               |
+| Цомманд                 | Опис                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `omniroute`             | Покрените сервер (`PORT=20128`, API и контролна табла на истом порту)                      |
+| `omniroute setup`       | Вођени CLI онбоардинг за лозинку и првог провајдера                                        |
+| `omniroute doctor`      | Покрените локалне здравствене провере без покретања сервера                                |
+| `omniroute providers`   | Откријте, наведите, потврдите и тестирајте добављаче из CLI                                |
+| `omniroute config`      | конфигурација CLI алата — листа, добијање, подешавање, провера конфигурација               |
+| `omniroute status`      | Контролна табла статуса ван мреже — верзија, DB, алати, конфигурација                      |
+| `omniroute logs`        | Стреам евиденције коришћења из API (подржава `--follow`)                                   |
+| `omniroute update`      | Проверите или примените OmniRoute ажурирања                                                |
+| `omniroute provider`    | Управљајте конекцијама провајдера — додајте, листајте, уклоните, тестирајте, подразумевано |
+| `omniroute --port 3000` | Поставите canonical/API порт на 3000                                                       |
+| `omniroute --mcp`       | Покрените MCP сервер (стдио транспорт)                                                     |
+| `omniroute --no-open`   | Немојте аутоматски отварати претраживач                                                    |
+| `omniroute --help`      | Покажи помоћ                                                                               |
 
-Подешавање без графичког интерфејса може се аутоматизовати опцијама или променљивама окружења:
+Подешавање без главе може бити скриптовано са заставицама или променљивим окружења:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Управљајте добављачима преко SSH-а или скрипти без отварања контролне табле:
+Управљајте провајдерима из SSH или скрипти без отварања контролне табле:
 
 ```bash
 omniroute providers available
@@ -136,47 +138,46 @@ omniroute providers validate
 
 ---
 
-## Конфигурација CLI алата
+## Конфигурација алата CLI
 
 ### 1) Повежите добављаче и креирајте API кључ
 
-1. Отворите контролну таблу → `Добављачи` и повежите бар једног добављача (OAuth или API кључ).
-2. Отворите контролну таблу → `Крајње тачке` и креирајте API кључ.
-3. (Опционално) Отворите контролну таблу → `Комбинације` и подесите резервни ланац.
+1. Отворите Дасхбоард → `Providers` и повежите најмање једног провајдера (OAuth или API кључ).
+2. Отворите Дасхбоард → `Endpoints` и креирајте API кључ.
+3. (Опционално) Отворите Дасхбоард → `Combos` и поставите резервни ланац.
 
-### 2) Усмерите свој алат за програмирање
-
-```txt
-Основни URL: http://localhost:20128/v1
-API кључ:    [копирајте са странице крајње тачке]
-Модел:       if/qwen3.8-max-preview (или било који префикс добављача/модела)
-```
-
-Ако ваш уређивач не може да пошаље `Authorization: Bearer ...`, уместо тога користите токенизовану основну адресу за компатибилност:
+### 2) Усмерите свој алат за кодирање
 
 ```txt
-Основни URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL модела: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL ћаскања: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL Ollama ознака: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Endpoint page]
+Model:    if/qwen3.8-max-preview (or any provider/model prefix)
 ```
 
-Ради са Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode и SDK-овима компатибилним са OpenAI-јем.
+Ако ваш уређивач не може да пошаље `Authorization: Bearer ...`, уместо тога користите токенизовану базу компатибилности:
 
-#### Аутоматска конфигурација помоћу `setup-*`
+```txt
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Уместо ручног уношења основног URL-а и кључа, дозволите OmniRoute-у да упише сопствену
-конфигурацију сваког алата на основу активног каталога модела. Једна команда по алату:
+Ради са Claude Цоде, Codex CLI, Cursor, Cline, OpenClaw, OpenCode и SDKs компатибилним са ОпенАИ.
+
+#### Аутоматско конфигурисање помоћу `setup-*`
+
+Уместо да ручно лепите основни URL и кључ, нека OmniRoute напише сопствену конфигурацију сваког алата из каталога модела уживо. Једна команда по алату:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml профили
+omniroute setup-codex        # ~/.codex/<name>.config.toml profiles
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (компатибилно са OpenAI-јем)
-omniroute setup-cline        # Cline CLI + подешавања VS Code проширења
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-compatible)
+omniroute setup-cline        # Cline CLI + VS Code extension settings
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # приказује кораке унутар апликације Cursor
-omniroute setup-roo          # увоз за Roo Code + показивач autoImport
+omniroute setup-cursor       # prints Cursor's in-app steps
+omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
 omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
@@ -184,17 +185,11 @@ omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Свака команда прихвата `--remote <url> --api-key <key>` за конфигурисање локалног алата за рад са
-**удаљеним** OmniRoute-ом, као и `--dry-run` за преглед. Да бисте покренули CLI са исправно
-уметнутим променљивама окружења, без икаквог уписивања конфигурације, користите генерички покретач
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-ранији покретачи за појединачне алате `omniroute launch` (Claude Code) и
-`omniroute launch-codex` (Codex) остају доступни.
+Сваки прихвата `--remote <url> --api-key <key>` да конфигурише локални алат против а** даљински** OmniRoute, плус `--dry-run` за преглед. Да бисте покренули CLI са убаченим правим енв-ом и без написане конфигурације, користите генерички покретач `omniroute run <target>` (цлауде, цодек, аидер, гоосе, опенцоде, квен, гемини); застарели покретачи по алату `omniroute launch` (Claude код) и `omniroute launch-codex` (Codex) остају доступни.
 
-Комплетну табелу (шта свака команда уписује, све опције, локални у односу на удаљени режим, конвенције основног URL-а
-`/v1`) погледајте у одељку **[CLI интеграције](./CLI-INTEGRATIONS.md)**.
+За пуну табелу (шта свака команда пише, сваку заставицу, локалне против удаљене, `/v1` конвенције о основном УРЛ-у), погледајте** [CLI Интегратионс](./CLI-INTEGRATIONS.md)** .
 
-За детаљну конфигурацију појединачних алата (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot и других), погледајте наменски **[Водич за CLI алате](../reference/CLI-TOOLS.md)**.
+За детаљну конфигурацију по алату (Claude Цоде, Codex CLI, Cursor, Cline, OpenClaw, Кило Цоде, Copilot, и више), погледајте** [CLI Водич за алате](../reference/CLI-TOOLS.md)** .
 
 ---
 
@@ -226,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude код:**
 
+Claude код се повезује преко HTTP, који `omniroute --mcp` (стдио) не покреће. HTTP транспорт је подразумевано искључен: прво га омогућите на покренутом серверу. Када је пријава на контролну таблу омогућена, захтев без акредитива добија `401`, па проследите API кључ који држи `mcp:connect` (или `manage`); кључу без `manage`/`admin` такође је потребан опсег сваке алатке (погледајте [MCP Сервер → MCP опсег алата](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

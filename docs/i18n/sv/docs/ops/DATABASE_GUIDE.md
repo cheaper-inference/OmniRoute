@@ -184,31 +184,94 @@ Den fullständiga listan med cirka 30+ tabeller finns i `src/lib/db/migrations/`
 
 ---
 
-## Migreringar
+## Migrationer
 
-OmniRoute använder **versionshanterade, idempotenta migreringar** i `src/lib/db/migrations/`. Varje migrering är en enskild SQL-fil med namnet `NNN_description.sql`.
+OmniRoute använder** versionerade, idempotenta migrationer** i `src/lib/db/migrations/`. Varje migrering är en enda SQL fil. Två namngivningsformat samexisterar; versionen registrerad i `_omniroute_migrations` är det numeriska prefixet.
 
-### Namngivning av migreringar
+### Migration Namngivning
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formatera                                          | Exempel                              | Används för                                                                                                                                                  |
+| -------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NNN_description.sql` (exakt 3 siffror)            | `241_seen_models.sql`                | Den gamla serien `001`–`241`. Fryst när tidsstämpelformatet landade (`240` och `241` slogs ihop precis innan det): ingen ny fil får ett sekventiellt nummer. |
+| `YYYYMMDDHHMMSS_description.sql` (14 siffror, UTC) | `20261113120000_add_usage_index.sql` | Varje migrering skapad från 2026-11-13 och framåt.                                                                                                           |
 
-### Så körs migreringar
+Varför ändringen: med sekventiella nummer valde parallell PRs samma nästa nummer och alla utom en var tvungna att numrera om innan de slogs samman. En UTC tidsstämpel ger varje PR sin egen version.
 
-Vid uppstart gör `migrationRunner.ts` följande:
+Regler för tidsstämpelformatet (tillämpas av `npm run check:migration-numbering`, delas med generatorn i `scripts/check/lib/migrationNaming.mjs`):
 
-1. Skapar tabellen `_omniroute_migrations` om den inte finns
-2. Hämtar redan tillämpade migreringar
-3. Tillämpar eventuella nya migreringar i ordning, var och en i en transaktion
-4. Registrerar varje tillämpad migrering med en tidsstämpel
+- Tidsstämpeln är ett riktigt UTC datum och -tid, inte tidigare än `20261113000000` och inte mer än 10 minuter i framtiden.
+- Beskrivningen är gemen `snake_case` som börjar med en bokstav (`a-z`, `0-9`, enkel `_` mellan ord), högst 80 tecken.
+- Två filer med samma tidsstämpel är en dubblett.
+- No-gap-regeln gäller bara för den gamla serien: varje tal från `001` till `241` måste finnas, förutom de kända luckorna `026`, `055` och `121`. Att ta bort `241` (eller någon gammal fil) misslyckas med porten. `001` och `241` kan aldrig läggas till i `KNOWN_GAPS` -godkännandelistan. Tidsstämplade filer skapar aldrig en lucka.
+- Varje post i `src/lib/db/migrations/` måste vara en vanlig fil med ett giltigt `.sql` namn med små bokstäver. En katalog, en symbollänk, en `.SQL` eller `.sql.bak` -fil, en dold fil eller ett namn med ett mellanslag misslyckas med grinden, eftersom löparen skulle hoppa över den tyst eller krascha vid start.
+
+**Tillämpa beställning.** Löparen sorterar efter det numeriska värdet för prefixet, inte efter text: de gamla `001`–`241` filerna först, sedan de tidsstämplade filerna i tidsstämpelordning, sedan eventuella namnavgränsade kataloger registrerade med `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versioner som `ee-001`). En pågående migrering är vilken fil som helst vars version inte är i `_omniroute_migrations`, så en migrering från en äldre gren som slås samman efter en nyare gäller fortfarande på befintliga databaser.
+
+**Tidsstämpeln är skapande ordning, inte sammanslagningsordning.** Om din migrering beror på en tabell eller kolumn skapad av en migrering med en** nyare** tidsstämpel (till exempel en från en annan PR som slogs samman först), skulle en ny databas köra din först och misslyckas. Medan din PR fortfarande är öppen, generera om filnamnet med `npm run db:new-migration` så att den får en nyare tidsstämpel, eller gör den oberoende. `npm run test:migrations:fresh` tillämpar varje migrering till en tom databas och fångar upp detta.
+
+### En sammanslagen migrering tas aldrig bort eller byter namn
+
+När en migreringsfil väl finns på en releasegren eller `main`, har den redan körts på homolog- och utvecklardatabaser, på VPS installationer och i Enterprise-sync. Från och med då:
+
+- **Ta aldrig bort det.** Nyinstallationer skulle förlora sitt schema medan uppgraderade databaser behåller det.
+- **Byt aldrig namn på den.** Versionen i `_omniroute_migrations` skulle inte längre matcha en fil, så varje databas som redan använde den skulle köra den igen. Icke-idempotent SQL duplicerar sedan data eller stoppar uppstarten.
+- **Behöver du ett annat schema?** Skapa en ny migrering med `npm run db:new-migration`.
+
+Att byta namn är säkert endast för en fil som inte är sammanfogad ännu, vilket är fallet som portens tips hänvisar till. En release-tagg ändrar ingenting här: varje push till en `release/v*` -gren publicerar Docker `:next` avbildningen och körs på homolog, VPS installationer och Enterprise sync, så en sammanslagen migrering har körts på riktiga databaser innan någon `vX.Y.Z` tagg existerar. Gaten misslyckas varje borttagning av en basfil, taggad eller inte.
+
+- **Återställer en sammanslagen migrering.** En `git revert` som tar bort filen misslyckas med porten. Behåll filen och ångra dess schema i en ny migrering: `npm run db:new-migration -- <description>`, med `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` och så vidare. Uppgraderade och färska databaser slutar sedan med samma schema.
+- **Den accepterade byta namn: en kompatibilitetspost och identiskt innehåll.** Om en sammanslagen fil måste flyttas (till exempel två sammanslagna filer delar en tidsstämpel och löparen slutar med en versionskollision), byt namn på den senare utan att röra dess SQL och lägg till `{ fromVersion, fromName, toVersion, toName }` till `RENAMED_MIGRATION_COMPATIBILITY` i `src/lib/db/migrationRunner/constants.ts`. Databaser som tillämpade den gamla versionen får sin `_omniroute_migrations` rad flyttad istället för att köra filen igen. Porten varnar för ett sådant byte av namn och kör alltid kommuteringskontrollen på den, oavsett den nya tidsstämpeln: nya installationer tillämpar filen på sin nya position, uppgraderade databaser gör det inte, så välj en ny tidsstämpel nära den gamla. Gaten misslyckas med att byta namn om innehållet ändras (en schemaändring går fortfarande i en ny migrering), eller om postens målfil inte finns på disken.
+- **Byt aldrig namn inom samma tidsstämpel.** Ett bytenamn som behåller tidsstämpeln och endast ändrar beskrivningen misslyckas med porten, med eller utan en post. Med en post vars `toVersion` är lika med dess `fromVersion`, tar löparen bort den gamla `_omniroute_migrations` raden och tillämpar filen igen på varje databas som redan körde den. Utan en post spårar löparen endast versionen: den hoppar över filen på dessa databaser (nytt innehåll körs aldrig där) och loggar ett omnumreringsfel vid varje start. Använd en annan tidsstämpel plus en kompatibilitetspost, eller behåll namnet.
+- **Gaten kontrollerar att den omdöpta filen inte körs igen.** För varje täckt byte namn skickar grinden det nya filnamnet till kommuteringskontrollen med `--must-not-apply`. Kontrollen startar upp den uppgraderade databasen med den riktiga löparen, och om löparen applicerar den filen igen (till exempel för att posten har fel version eller namn, eller för att grindens textparser läste `constants.ts` annorlunda än TypeScript), misslyckas grinden med `migration renomeada rodaria de novo` och ber dig kontrollera postens gamla och nya versioner och namn.
+
+### Vad grinden kontrollerar mot basen
+
+Vid pull-begäran och sammanslagningskökörningar jämför `npm run check:migration-numbering` `src/lib/db/migrations/` på disk med samma katalog i basgrenen. Basen är, i denna ordning: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` variabeln, eller, när `GITHUB_EVENT_NAME` är `pull_request`, `pull_request_target` eller `merge_group`, den första föräldern för sammanslagningscommiten, `merge_group.base_sha` för händelsens nyttolast, eller `git merge-base HEAD origin/$GITHUB_BASE_REF`. I en pull-begäran eller en sammanslagningskökörning utan någon lösbar bas misslyckas grinden. Utanför CI utan `--base` skriver den ut `comparação com a base: pulada (sem --base)` och hoppar över dessa regler.
+
+`--base-latest-tag` jämförs med den senaste release-taggen (`vX.Y.Z` i semver-ordning; taggar med tillägg som nightlies räknas inte) som finns i historien om `HEAD`, med samma regler som `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) kör porten på det här sättet, eftersom push och schemalagda körningar inte har någon pull-begäranbas och en sammanslagning kan landa utan en ny CI körning. Utan någon release-tagg i historien misslyckas porten; kör `git fetch --tags` (i CI `actions/checkout` med `fetch-depth: 0` taggarna).
+
+| Ändra på pull-begäran                                                                                               | Resultat                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| En fil som finns på basen döps om, med en `RENAMED_MIGRATION_COMPATIBILITY` post                                    | **Varning** om innehållet är identiskt och kommuteringskontrollen körs oavsett den nya tidsstämpeln; den misslyckas om den nya positionen ändrar det slutliga schemat (ångra namnbytet, eller välj en annan ny tidsstämpel där den pendlar) eller om löparen skulle tillämpa den omdöpta filen igen på en uppgraderad databas.** Misslyckas** om innehållet ändrats. |
+| En fil som finns på basen döps om med sin tidsstämpel (endast beskrivningen ändras)                                 | **Misslyckas** , med eller utan en post: löparen skulle tillämpa den igen (med posten) eller hoppa över den efter version (utan en). Använd en annan tidsstämpel plus en kompatibilitetspost, eller behåll namnet.                                                                                                                                                   |
+| En fil som finns på basen raderas eller byter namn utan en post                                                     | **Misslyckas** , oavsett om filen är i en release-tagg eller inte. För att ångra det, återställ filen med `git checkout <base> -- src/lib/db/migrations/<file>`; för att återställa dess schema, lägg till en ny migrering med `DROP ... IF EXISTS`.                                                                                                                 |
+| En fil som finns på basen har ett annat innehåll                                                                    | **Varning** (en `::warning` -anteckning i GitHub Actions), och kommuteringskontrollen körs. Det misslyckas om redigeringen ändrar det slutliga schemat, eftersom uppgraderade databaser inte tillämpar den redigerade filen igen: lägg ändringen i en ny migrering. En ofarlig redigering (en kommentar, `IF NOT EXISTS`) varnar bara.                               |
+| En tidsstämplad fil läggs till med en tidsstämpel som inte är nyare än basens senaste                               | Kör kommuteringskontrollen, som beskrivs nedan.                                                                                                                                                                                                                                                                                                                      |
+| En `NNN_` fil i gammalt format läggs till med ett nummer under basens senaste fil i gammalt format                  | **Misslyckas** , även om `KNOWN_GAPS` redigeras i samma pull-begäran: den gamla serien är frusen, skapa migreringen med `npm run db:new-migration`. Filer i gammalt format ovanför basens senaste (en `release/v*` till `main` pull begäran) accepteras.                                                                                                             |
+| En fil som inte fungerar, redigerad eller bytt namn innehåller `INSERT`, `UPDATE`, `DELETE` eller `REPLACE` -satser | **Varning** : kommuteringskontrollen jämför inte data, så kontrollera om ordningen i vilken uppgraderade och färska databaser tillämpar den ändrar resultatet.                                                                                                                                                                                                       |
+
+En körning av kommuteringskontrollen täcker de out-of-order, de redigerade och de omdöpta filerna tillsammans.
+
+Kommuteringskontrollen (`scripts/check/migration-commutation.ts`) bygger två temporära databaser med den verkliga installationssökvägen: an** uppgraderas** en (starta med basmigreringarna, starta sedan igen på samma fil med pull-begärans migrering) och en** färsk** en (en start med pull-begärans migrering). Den jämför de resulterande schemana: tabeller och kolumner (ignorerar kolumnordning), UNIQUE / PRIMARY KEY och FOREIGN KEY -begränsningar, den normaliserade `CREATE TABLE` texten för varje tabell (som täcker CHECK begränsningar, sammanställningar, genererade kolumner och tabellalternativ), index, utlösare och vyer. Raddata jämförs inte. Om de matchar, skriver porten ut att filen är ur funktion men pendlar och passerar. Om de skiljer sig, misslyckas porten med skillnaden och en ledtråd för fallet: för en fil som inte fungerar, återskapa dess namn med `npm run db:new-migration`, vilket är säkert eftersom filen inte är sammanfogad ännu; för en redigerad basfil, återställ basinnehållet och lägg ändringen i en ny migrering; för en omdöpt fil, ångra bytet namn eller välj en annan ny tidsstämpel där den pendlar, aldrig samma tidsstämpel med ett annat namn. Om själva kontrollen inte kan köras, misslyckas grinden i CI och varnar endast lokalt. För en redigerad basfil byggs den uppgraderade databasen med basens innehåll i den filen, och den andra uppstarten hoppar över den eftersom dess version redan är inspelad. För en omdöpt fil byggs den uppgraderade databasen med filen under sitt gamla namn, och den andra uppstarten flyttar sin `_omniroute_migrations` rad genom kompatibilitetsposten istället för att köra den igen; grinden skickar det nya namnet med `--must-not-apply`, så kontrollen misslyckas om den andra uppstarten tillämpar den. Om en migrering av pull-begäran inte kan tillämpas på den uppgraderade sökvägen, det vill säga efter varje basmigrering (oavsett om den också misslyckas vid en ny installation eller inte), rapporterar porten `migration do PR não aplica` och ber dig fixa SQL mot basens nuvarande schema; om filen är beroende av en annan migrering av pull-begäran med en senare tidsstämpel, återskapa dess namn med `npm run db:new-migration`.
+
+För att köra samma jämförelse lokalt, skicka basen explicit, till exempel `npm run check:migration-numbering -- --base origin/<base-branch>`, eller `npm run check:migration-numbering -- --base-latest-tag` för att jämföra med den senaste versionen.
+
+### Konvertera en öppen PR `NNN` -migrering
+
+En pull-begäran som öppnas innan switchen kan fortfarande innehålla en sekventiell fil som `242_add_widgets.sql`. Gamla tal över `241` avvisas, så konvertera det innan du slår samman:
+
+1. **Byt namn på filen med generatorn, behåll beskrivningen.** Kör `npm run db:new-migration -- <same description>` för att få det nya namnet, flytta SQL till den och ta bort den gamla `NNN_` filen. Beskrivningen måste förbli identisk: kompatibilitetsposten nedan matchar den.
+2. **Lägg till en kompatibilitetspost om en beständig databas körde det gamla numret.** Om någon databas som hålls (homolog, en VPS, en bidragsgivares egen installation) körde en build av PR med `NNN_` filen, lägg till `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` till `RENAMED_MIGRATION_COMPATIBILITY` i `src/lib/db/migrationRunner/constants.ts`. Detta är** krävs för `237` till `241`** : dessa platser innehåller nu de kanoniska `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` och `241_seen_models.sql`, och utan posten hoppar en sådan databas över den kanoniska migreringen för alltid och kör den konverterade igen. Det fungerar också för en plats som förblir tom, till exempel `242`, när destinationen är en tidsstämpel. Om du är osäker, lägg till posten. Var du lägger till det i arrayen spelar ingen roll: när en posts målplats fortfarande innehåller en rad som en annan post flyttas bort (till exempel `237` som håller en PR rad medan en äldre `usage_history_calculated_cost` rad väntar på att flytta in i `237`), låter löparen den posten vänta tills luckan är ledig. Endast en verklig konflikt, såsom en lucka som hålls av en rad no entry flyttar, eller två poster som byter luckor, stoppar uppstarten med `Cannot reconcile ...`.
+3. **Håll SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), eftersom den konverterade migreringen kan möta en databas där dess schema redan finns.
+4. **Flytta versionsnycklade specialfall.** Om PR lagt till ett skiftläge för sitt gamla nummer i `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) eller i `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), ändra nyckeln till den nya tidsstämpeln.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` är ett fungerande exempel på ett test för en omdöpt migrering.
+
+### Backportar till grenar före bytet
+
+Välj eller backportera aldrig en `YYYYMMDDHHMMSS_` fil till en gren som föregår växlingen (till exempel en äldre `release/v*` -gren). Löparen där sorterar filnamn som text, så en tidsstämplad fil skulle köras mellan `201_` och `202_` på en ny databas, och den gamla porten där förstår inte 14-siffriga prefix. På en sådan gren, skriv ändringen som den grenens egen nästa `NNN_` fil, idempotent, så det är en no-op när den tidsstämplade versionen kommer senare.
+
+### Hur migrationer går
+
+Vid start, `migrationRunner.ts`:
+
+1. Skapar `_omniroute_migrations` tabell om den inte finns
+2. Frågor om redan tillämpade migreringar
+3. Tillämpar alla nya migreringar i ordning, var och en i en transaktion
+4. Registrerar varje tillämpad migrering med tidsstämpel
 
 ```ts
-// src/lib/db/migrationRunner.ts (förenklad)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotens
 
-Migreringar måste vara **idempotenta** — att köra dem två gånger ska inte ha någon effekt:
+Migrationer måste vara** idempotent** — att köra dem två gånger borde vara en no-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Använd satserna `IF NOT EXISTS`, `IF EXISTS` och `OR IGNORE` / `OR REPLACE` frikostigt.
+Använd satserna `IF NOT EXISTS`, `IF EXISTS` och `OR IGNORE` / `OR REPLACE` rikligt.
 
-### Lägga till en ny migrering
+### Lägger till en ny migrering
 
-1. **Identifiera nästa nummer**: `ls src/lib/db/migrations/ | tail -1`
-2. **Skapa filen**: `NNN_my_change.sql`
-3. **Använd säker DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Fyll i befintliga data varsamt**: använd `UPDATE ... WHERE ...` för att hantera befintliga rader
-5. **Testa på en kopia**: kör aldrig otestade migreringar i produktion
+1. **Skapa filen med generatorn** : `npm run db:new-migration -- <description>` (till exempel `npm run db:new-migration -- add combo priority`). Den skriver `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` med den aktuella UTC tiden och en kommentarshuvud, går framåt en sekund om den tidsstämpeln tas och skriver aldrig över en fil. Välj inte ett nummer för hand.
+2. **Använd säker DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Fyll i data noggrant** : använd `UPDATE ... WHERE ...` för att hantera befintliga rader
+4. **Kontrollera ordning och namn** : `npm run test:migrations:fresh` (alla migreringar på en tom databas) och `npm run check:migration-numbering`
+5. **Testa på en kopia** : kör aldrig oprövade migreringar på produktion
 
 Exempel:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Bakåtinkompatibla ändringar** (t.ex. att ta bort kolumner) är komplicerade. OmniRoute stöder INTE nedgradering — när en migrering väl har tillämpats är schemaändringen permanent. Planera därefter.
+> **Bakåt-inkompatibla ändringar** (t.ex. att ta bort kolumner) är knepigt. OmniRoute stöder NOT nedgradering av — när en migrering väl har tillämpats är schemaändringen permanent. Planera därefter.
 
 ---
 
@@ -403,28 +466,29 @@ Detta använder SQLite:s API för säkerhetskopiering online – säkert att kö
 
 ---
 
-## Prestandajustering
+## Performance Tuning
 
-### WAL-läge
+### WAL läge
 
-WAL är aktiverat som standard. För arbetslaster med många skrivningar kan du överväga:
+WAL är aktiverat som standard. För högskrivande arbetsbelastningar, överväg:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrollpunkt var 1000:e sida
-PRAGMA journal_size_limit = 67108864;  -- WAL-gräns på 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ställer inte in `journal_size_limit`. En kontrollpunkt flyttar WAL ramar till huvudfilen, men WAL filen behåller sin största allokerade storlek. `OMNIROUTE_WAL_GUARD_MAX_MB` vakten varnar bara och kör `wal_checkpoint(RESTART)`; det är inte ett lock i diskstorlek.
 
 ### Index
 
-Viktiga index för prestanda (skapas automatiskt av migreringar):
+Nyckelindex för prestanda (som skapas automatiskt av migrering):
 
-- `idx_models_provider` — modellsökningar efter leverantör
-- `idx_combo_targets_combo_id` — expansion av kombinationsmål
+- `idx_models_provider` — -modellsökningar efter leverantör
+- `idx_combo_targets_combo_id` — combo målexpansion
 - `idx_usage_history_api_key_timestamp` — användningsanalys
 - `idx_quota_snapshots_api_key_window` — kvotspårning
-- `idx_call_logs_timestamp` — frågor mot anropsloggen
+- `idx_call_logs_timestamp` — samtalsloggfrågor
 
-Skapa en migrering för att lägga till ett nytt index:
+För att lägga till ett nytt index, skapa en migrering:
 
 ```sql
 -- 023_add_my_index.sql
@@ -433,22 +497,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Minnesmappad I/O
 
-För mycket stora databaser (>10 GB) kan minnesmappningen justeras via ett SQLite-pragma:
+För mycket stora databaser (> 10GB) kan minnesmapping justeras via SQLite pragma:
 
 ```sql
--- Ange via SQLite-pragma (justera i core.ts eller vid körning)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Komprimering
+### Packning
 
-OmniRoute-instanser som körs under lång tid har nytta av att `VACUUM` körs ibland:
+Långvariga OmniRoute instanser drar nytta av enstaka `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Kör detta varje månad under perioder med låg trafik. (WAL-läget minskar behovet, men eliminerar det inte.)
+Kör varje månad under fönster med låg trafik. (WAL läget minskar behovet, men eliminerar det inte.)
 
 ---
 
