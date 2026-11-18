@@ -1,1 +1,0 @@
-- **fix(network):** the default outbound guard now checks the addresses a host name resolves to, not only its spelling; private and LAN hosts keep working

@@ -111,31 +111,10 @@ Origins लाई case-insensitive रूपमा मिलाइन्छ र 
 restart नगरी runtime मा **Dashboard → Security → CORS Allowed Origins** मा सेट गर्न
 सकिन्छ।
 
-## API keys र cookie sessions बीचको भिन्नता
+## API कुकीहरू बनाम कुकी सत्रहरू
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface):** browsers ले यिनलाई कहिल्यै
-  स्वचालित रूपमा संलग्न गर्दैनन्। यहाँ CORS अर्थपूर्ण अवरोध होइन — API key नै
-  अवरोध हो — त्यसैले browser र Electron clients ले आफूलाई पहिले नै अधिकार भएको
-  responses पढ्न सकून् भनेर यो surface लाई जानाजानी permissive बनाइएको छ।
-  खुकुलो पारिएको echo header को उपस्थितिमा मात्र होइन, प्रमाणित key मा आधारित हुन्छ:
-  `REQUIRE_API_KEY=false` ले कुनै request लाई अज्ञात रूपमा सेवा दिँदा, त्यसको सफल
-  response ले fail-closed अनुमति-सूची कायम राख्छ। प्रमाणीकरण अस्वीकृतिहरू (401) पढ्न
-  मिल्ने रहन्छन्, ताकि clients ले रद्द गरिएको वा गलत टाइप गरिएको key देखाउन सकून् (#5242):
-  pipeline को आफ्नै 401 ले echo कायम राख्छ, र pipeline ले request लाई अज्ञात रूपमा सेवा
-  दिएपछि आफैं key अस्वीकार गर्ने route (management auth कन्फिगर गरिएको अवस्थामा
-  `/v1/models` र `/v1beta/models`, owner-scoped `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` र auto-combo candidate routes) ले `credentialRejectionHeaders()`
-  मार्फत त्यो 401 मा echo थप्छ। echo, route ले तीमध्ये कुन जाँच्यो भन्नेमा होइन, request
-  मा credential header (`Authorization`, `x-api-key`, `x-goog-api-key` वा `auth_token`
-  cookie) छ कि छैन भन्नेमा आधारित हुन्छ, र यसलाई कहिल्यै
-  `Access-Control-Allow-Credentials` सँग जोडिँदैन; body एउटा निश्चित error envelope हो।
-  `requireManagementAuth()` द्वारा सुरक्षित `/api/v1/` अन्तर्गतका management routes
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) ले echo थप्दैनन्:
-  `REQUIRE_API_KEY=false` हुँदा तिनका 401/403 cross-origin बाट पढ्न सकिँदैन।
-- **Cookie session (dashboard):** fail-closed default **र**
-  साझा path मा `Access-Control-Allow-Credentials` को अनुपस्थिति दुवैद्वारा सुरक्षित हुन्छ।
-  management/dashboard origins लाई कुनै पनि permissive config बाट बाहिर राख्नुहोस्; तिनीहरू
-  ठ्याक्कै fail-closed नै रहनुपर्छ।
+- **वाहक / `x-api-key` ( `/v1/*` अनुमान सतह):** ब्राउजरहरूले यसलाई स्वचालित रूपमा संलग्न गर्दैनन्। CORS यहाँ अर्थपूर्ण बाधा होइन — API कुञ्जी बाधा — हो जसले गर्दा त्यो सतह जानाजानी अनुमति दिइन्छ त्यसैले ब्राउजर र Electron क्लाइन्टहरूले प्रतिक्रियाहरू पढ्न सक्छन् जुन तिनीहरू पहिले नै हकदार छन्। आरामदायी प्रतिध्वनिले प्रमाणित कुञ्जीलाई पछ्याउँछ, हेडरको उपस्थिति मात्र होइन: जब `REQUIRE_API_KEY=false` गुमनाम रूपमा अनुरोध गर्दछ, यसको सफल प्रतिक्रियाले असफल-बन्द अनुमति सूची राख्छ। प्रमाण अस्वीकृतिहरू (401) पढ्न योग्य रहन्छन् ताकि ग्राहकहरूले खारेज वा गलत टाइप गरिएको कुञ्जी (#5242) देखाउन सक्छन् : पाइपलाइनको आफ्नै 401 ले प्रतिध्वनि राख्छ, र पाइपलाइनले यसलाई बेनामी रूपमा सेवा गरेपछि कुञ्जीलाई अस्वीकार गर्ने मार्ग (`/v1/models` र `/v1beta/models` व्यवस्थापन प्रमाणीकरण कन्फिगर गरिएको, मालिक- `/v1/files`, `/v1/batches`, `/v1/media` `/v1/session-leases` र auto-combo उम्मेद्वार मार्गहरू) ले `credentialRejectionHeaders()` मार्फत 401 मा प्रतिध्वनि थप्छ। इको प्रमाण पत्र हेडर (`Authorization`, `x-api-key`, `x-goog-api-key` वा `auth_token` कुकी) बोक्ने अनुरोधमा कुञ्जी राखिएको छ, ती मध्ये कुन मार्गमा जाँच गरिएको छैन, र `Access-Control-Allow-Credentials` सँग कहिल्यै जोडिएको छैन; शरीर एक निश्चित त्रुटि खाम हो। `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) द्वारा संरक्षित `/api/v1/` अन्तर्गत व्यवस्थापन मार्गहरूले इको थप्दैनन्: `REQUIRE_API_KEY=false` सँग तिनीहरूको 401/403 क्रस-ओरिजिन पढ्न योग्य छैन।
+- **कुकी सत्र (ड्यासबोर्ड):** असफल-बंद पूर्वनिर्धारित द्वारा सुरक्षित** र** साझा मार्गमा `Access-Control-Allow-Credentials` को अनुपस्थिति द्वारा। management/dashboard को कुनै पनि अनुमति कन्फिगरेसन बाहिर राख्नुहोस्; तिनीहरू ठ्याक्कै असफल बन्द रहनु पर्छ।
 
 ## WebSocket ह्यान्डसेकहरू (`/v1/responses`, `/v1/ws`)
 

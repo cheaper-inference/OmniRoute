@@ -843,99 +843,177 @@ serta pemeriksaan `input_file_id` saat pembuatan). `GET /v1/batches` menolak pem
 
 ## API Pencarian
 
-Abstraksi penyedia web/pencarian (Tavily, Brave, Exa, Serper, dll.).
+Abstraksi penyedia web/pencarian (Tavily, Brave, Exa, Serper, dan lainnya).
 
-| Metode | Path                   | Deskripsi                                                                                        |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Mencantumkan penyedia pencarian yang dikonfigurasi + kapabilitas                                 |
-| POST   | `/v1/search`           | Menjalankan kueri pencarian — isi divalidasi oleh `v1SearchSchema`, mendukung caching/coalescing |
-| GET    | `/v1/search/analytics` | Statistik hit/latensi/cache per penyedia                                                         |
+| Method | Path                   | Description                                                                                       |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Menampilkan penyedia pencarian yang dikonfigurasi + kapabilitas                                   |
+| POST   | `/v1/search`           | Menjalankan kueri pencarian — body divalidasi oleh `v1SearchSchema`, mendukung caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistik hit/latensi/cache per penyedia                                                          |
 
-**Autentikasi:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Kebijakan pencarian diterapkan melalui `enforceApiKeyPolicy`.
+**Auth:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Kebijakan pencarian diberlakukan melalui `enforceApiKeyPolicy`.
 
-**Pemilihan otomatis:** tanpa `provider`, penyedia termurah dengan koneksi yang dikonfigurasi akan digunakan
-terlebih dahulu dan penyedia termurah berikutnya menjadi failover. Penyedia gratis sebagai pilihan terakhir (`duckduckgo-free`) hanya
-digunakan ketika tidak ada penyedia lain yang dikonfigurasi. SearXNG yang di-host sendiri dihitung sebagai telah dikonfigurasi setelah
-koneksinya menyimpan `baseUrl` yang sebenarnya (bukan default katalog `http://localhost:8888/search`): penyedia ini
-kemudian diperingkatkan sebagai penyedia $0 di atas penyedia yang menggunakan kunci, dengan penyedia berkunci termurah sebagai failover,
-termasuk ketika SearXNG menjawab 400, 401, 403, atau 404. `baseUrl` yang bukan URL `http(s)` valid
-atau yang mengarah ke alamat metadata cloud tidak dihitung. Koneksi SearXNG yang menyimpan token
-diperingkatkan dengan cara ini hanya melalui `https://` atau `http://` loopback. Melalui `http://` plain jarak jauh,
-koneksi tersebut tidak pernah menjadi failover dan tetap menjadi pilihan terakhir, hanya digunakan ketika tidak ada
-penyedia lain yang dikonfigurasi atau ketika diminta berdasarkan nama, sehingga token memang dikirim dalam teks biasa pada
-kedua kasus tersebut.
+### Kombinasi pencarian/fetch bernama
+
+Baik `POST /v1/search` maupun `POST /v1/web/fetch` menerima `model` sebagai nama kombinasi tersimpan.
+Gunakan `model` atau `provider` eksplisit; mengirim keduanya akan menghasilkan `400`.
+Tanpa salah satu field tersebut, pemilihan penyedia otomatis yang ada tetap tidak berubah.
+
+Baik Combo Builder maupun katalog Add Model-nya menampilkan entri operasi web native
+untuk penyedia yang terhubung, meskipun penyedia tersebut tidak memiliki daftar model LLM.
+Serper menampilkan **Web search**;
+Tavily menampilkan **Web search / Page extraction**, dan penyedia yang hanya mendukung fetch menampilkan **Page extraction**.
+Pilih entri dan akun seperti biasa. Satu entri Tavily digunakan oleh kedua endpoint web;
+entri operasi ini tidak ditambahkan ke pemilih klien yang hanya mendukung chat atau probe model chat.
+
+Sebagai contoh, buat kombinasi **priority** bernama `shared-free` dengan target berurutan berikut:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Kemudian gunakan nama yang sama di setiap permukaan:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Pencarian mempertimbangkan Tavily lalu Serper; fetch mempertimbangkan Tavily lalu Jina Reader;
+chat melewati penyedia pencarian/fetch khusus dan mempertimbangkan OpenAI. Kompatibilitas
+berasal dari registry executor pencarian/fetch, bukan dari kata-kata dalam nama model.
+Pemfilteran dilakukan sebelum pemilihan kredensial dan dispatch, serta tidak pernah mengubah kombinasi tersimpan.
+
+Rute kapabilitas non-chat mendukung `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, dan `p2c`. Strategi sintesis yang hanya tersedia untuk chat, seperti
+`fusion`, `pipeline`, dan `context-relay`, ditolak pada rute non-chat, bukan
+diterapkan secara diam-diam pada pencarian atau media yang dihasilkan.
+Mesin kombinasi yang ada menangani fallback berurutan, termasuk kegagalan kuota upstream,
+serta mempertahankan ID langkah, pin akun, allowlist akun per langkah, referensi bertingkat,
+cakupan koneksi/kuota pemanggil, dan kebijakan akses kombinasi. Hasil tetap menggunakan
+skema pencarian/fetch native-nya, termasuk penyedia yang sebenarnya; `X-OmniRoute-Combo-Trace` mengidentifikasi
+keputusan routing. Kombinasi yang tidak dikenal menghasilkan `404`; kombinasi yang tidak aktif dan kombinasi
+tanpa target yang kompatibel menghasilkan `400`.
+
+Setiap percobaan kombinasi menggunakan satu penyedia eksplisit.
+Percobaan tersebut tidak dapat memanggil kumpulan penyedia otomatis native di balik kombinasi.
+Permintaan dengan penyedia eksplisit mempertahankan perilaku satu penyedia yang ada. Permintaan chat langsung
+yang menargetkan penyedia pencarian/fetch khusus menghasilkan JSON `400` yang memberikan tindakan yang dapat dilakukan,
+alih-alih diteruskan ke executor bergaya OpenAI.
+
+### Rute kombinasi khusus kapabilitas
+
+Kombinasi tersimpan dapat berisi objek `routes` yang kuncinya merupakan kapabilitas API. Setiap rute memiliki
+daftar target, strategi, dan konfigurasi runtime sendiri. `models`, `strategy`, dan `config` tingkat teratas
+tetap menjadi rencana Chat yang kompatibel dengan versi lama; kombinasi lama tanpa `routes` terus bekerja tanpa perubahan.
+
+Kunci rute yang didukung adalah `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, dan `audio-generation`. Proyeksi endpoint dilakukan sebelum pemilihan kredensial,
+penilaian, atau dispatch. Referensi kombinasi bertingkat memilih rute kombinasi turunan untuk kapabilitas yang sama.
+
+`POST /v1/music/generations` dan `POST /v1/ocr` menerima nama kombinasi dalam `model`. Endpoint
+native yang kompatibel dengan ElevenLabs, `POST /v1/music`, juga menerima nama kombinasi dalam `model_id`, tetapi setiap
+target yang dapat digunakan pada endpoint native tersebut harus berupa model musik ElevenLabs agar kontrak respons biner
+tetap dipertahankan. `POST /v1/sound-generation` menerima kombinasi `audio-generation` dalam `model_id` dengan
+batasan biner native yang sama. Gunakan `/v1/music/generations` untuk penyedia musik yang heterogen.
+
+**Pemilihan otomatis:** tanpa `provider`, penyedia termurah dengan koneksi yang dikonfigurasi akan dijalankan
+terlebih dahulu dan penyedia termurah berikutnya menjadi failover. Penyedia pilihan terakhir gratis (`duckduckgo-free`)
+hanya digunakan ketika tidak ada hal lain yang dikonfigurasi. SearXNG yang di-host sendiri dianggap telah dikonfigurasi
+setelah koneksinya menyimpan `baseUrl` nyata (bukan default katalog `http://localhost:8888/search`): penyedia tersebut
+kemudian diberi peringkat sebagai penyedia $0 di atas penyedia yang menggunakan kunci, dengan penyedia ber-kunci termurah
+sebagai failover, termasuk ketika SearXNG merespons 400, 401, 403, atau 404. `baseUrl` yang bukan URL `http(s)` valid
+atau yang mengarah ke alamat metadata cloud tidak dihitung. Koneksi SearXNG yang menyimpan token hanya diberi peringkat
+seperti ini untuk `https://` atau `http://` loopback. Untuk `http://` jarak jauh biasa, koneksi tersebut tidak pernah
+menjadi failover dan tetap menjadi pilihan terakhir, digunakan hanya ketika tidak ada penyedia lain yang dikonfigurasi
+atau ketika diminta berdasarkan nama, sehingga token memang dikirim dalam teks biasa dalam kedua kasus tersebut.
 
 ### `provider_options` Exa dan Tavily
 
-Exa dan Tavily membaca bidang khusus penyedia dari bag bernamespace:
+Exa dan Tavily membaca kolom khusus provider dari bag bernamespace:
 `provider_options.exa` (atau `provider_options["exa-search"]`) dan `provider_options.tavily`
-(atau `provider_options["tavily-search"]`). Hanya kunci di bawah ini yang diteruskan. Masing-masing
+(atau `provider_options["tavily-search"]`). Hanya kunci di bawah yang diteruskan. Masing-masing
 diperiksa terhadap skema Zod-nya sendiri di `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-dan kunci dengan tipe yang salah akan dihapus. Kunci lainnya diabaikan, termasuk autentikasi, URL dasar,
-`stream`, dan `outputSchema`. Kunci datar yang digunakan penyedia lain (`cx`, `depth`, ...) tetap berfungsi
-seperti sebelumnya.
+dan kunci dengan tipe yang salah akan dihapus. Kunci lainnya diabaikan, termasuk auth, base URL,
+`stream`, dan `outputSchema`. Kunci datar yang digunakan provider lain (`cx`, `depth`, ...) tetap
+berfungsi seperti sebelumnya.
 
-| Penyedia | Bidang tingkat atas                                                                                                                                                                                                                                                                                                                                                       | Bersarang                                                                                                                                    |
+| Provider | Kolom tingkat atas                                                                                                                                                                                                                                                                                                                                                        | Bertingkat                                                                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif datar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` digabungkan di atas default `{ text: true, highlights: true }` |
 | Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
-Bidang generik selalu diutamakan: `query`, `max_results`, `filters` (domain), `country`, dan
-topik yang diturunkan dari `search_type`. Pada Exa, `search_type: "news"` mempertahankan
+Kolom generik selalu menang: `query`, `max_results`, `filters` (domain), `country`, dan topik
+yang diturunkan dari `search_type`. Pada Exa, `search_type: "news"` mempertahankan
 `category: "news"`. Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
 
-Biaya pencarian Firecrawl dicatat untuk setiap blok 10 hasil yang dikembalikan dan dimulai, sebesar $0.002 (2
-kredit) per blok dan setidaknya satu blok per panggilan
-([penagihan Firecrawl](https://docs.firecrawl.dev/billing)): 11 hasil berbiaya $0.004.
+Biaya pencarian Firecrawl dicatat per blok 10 hasil yang dikembalikan dan telah dimulai, sebesar $0.002 (2
+kredit) per blok, serta minimal satu blok per panggilan
+([penagihan Firecrawl](https://docs.firecrawl.dev/billing)): 11 hasil dikenai biaya $0.004.
 
-`time_range` generik kini diteruskan ke kedua penyedia: Exa mendapatkan `startPublishedDate` (stempel waktu
-ISO) dan Tavily mendapatkan `start_date` (`YYYY-MM-DD`). Tanggal eksplisit dalam `provider_options`
-menggantikan tanggal yang dipetakan.
+`time_range` generik kini diteruskan ke kedua provider: Exa mendapatkan `startPublishedDate` (stempel
+waktu ISO), sedangkan Tavily mendapatkan `start_date` (`YYYY-MM-DD`). Tanggal eksplisit di `provider_options`
+akan menggantikan tanggal yang dipetakan.
 
-Hasil Exa mempertahankan `id`, `highlights` (setiap highlight, bukan hanya yang pertama yang digunakan sebagai
-`snippet`), `highlight_scores`, `summary`, `subpages`, `entities`, dan `extras` dalam
-`provider_raw`. Hasil Tavily mempertahankan `images` dan `favicon`.
+Hasil Exa tetap menyimpan `id`, `highlights` (setiap highlight, bukan hanya yang pertama yang digunakan sebagai
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities`, dan `extras` di
+`provider_raw`. Hasil Tavily tetap menyimpan `images` dan `favicon`.
 
 Biaya pencarian Linkup dicatat sebesar $0.005 untuk `depth` `fast` dan `standard`, serta $0.05 untuk
 `deep` ([harga Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-baik ketika `depth` berasal dari `provider_options` maupun dari pengaturan koneksi.
+baik `depth` berasal dari `provider_options` maupun dari pengaturan koneksi.
 
-Exa `type: "lite"` (Exa 3.0) menerima kumpulan bidang yang lebih kecil dan menolak seluruh permintaan
-ketika bidang lain apa pun ditetapkan. Untuk lite, `additionalQueries`, `systemPrompt`, dan setiap kunci
-`contents` kecuali `text` dan `highlights` dihapus sebelum panggilan. `subpages`, `subpageTarget`,
+Exa `type: "lite"` (Exa 3.0) menerima kumpulan kolom yang lebih kecil dan menolak seluruh permintaan
+jika kolom lain disetel. Untuk lite, `additionalQueries`, `systemPrompt`, dan setiap kunci `contents`
+kecuali `text` dan `highlights` dihapus sebelum pemanggilan. `subpages`, `subpageTarget`,
 `highlights.numSentences`, dan `highlights.highlightsPerUrl` yang sudah tidak digunakan lagi tidak lagi
 diteruskan.
 
-Pencatatan biaya menggunakan registri tetap `costPerQuery`, kecuali untuk Exa, yang mengikuti
-harga milik Exa sendiri: $0.007 per panggilan untuk `auto` (dan `fast` lama) atau $0.004 untuk
-`lite` (dan `instant` lama), yang mencakup 10 hasil; $0.001 untuk setiap hasil tambahan; dan
-$0.001 per hasil yang dikembalikan ketika `contents.summary` ditetapkan. Tavily dicatat sebagai
-1 kredit ($0.008) untuk `search_depth` `basic`, `fast`, dan `ultra-fast`, serta 2 kredit ($0.016)
-untuk `advanced` ([kredit API Tavily](https://docs.tavily.com/documentation/api-credits)). Panggilan dengan
-`auto_parameters: true` yang menyebabkan Tavily meningkatkan ke advanced tetap dicatat sebagai 1 kredit.
+Penghitungan biaya menggunakan registri datar `costPerQuery`, kecuali Exa, yang mengikuti harga Exa
+sendiri: $0.007 per panggilan untuk `auto` (dan `fast` lama) atau $0.004 untuk `lite` (dan
+`instant` lama), mencakup 10 hasil; $0.001 untuk setiap hasil tambahan; dan $0.001 per
+hasil yang dikembalikan jika `contents.summary` disetel. Tavily dicatat sebesar 1 kredit ($0.008) untuk
+`search_depth` `basic`, `fast`, dan `ultra-fast`, serta 2 kredit ($0.016) untuk `advanced`
+([kredit API Tavily](https://docs.tavily.com/documentation/api-credits)). Panggilan dengan
+`auto_parameters: true` yang ditingkatkan Tavily menjadi advanced tetap dicatat sebagai 1 kredit.
 
 ---
 
 ## API Pengambilan Web
 
-Ekstrak konten dari URL melalui penyedia web-fetch yang dikonfigurasi (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Ekstrak konten dari URL melalui penyedia pengambilan web yang dikonfigurasi (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, kunci API yang sama dengan Parallel Search) hanya mengembalikan Markdown — `format` lainnya menghasilkan `400` — dan membatasi konten hingga 100.000 karakter. Jika halaman target itu sendiri tidak dapat diekstrak, upstream melaporkannya di dalam HTTP 200; OmniRoute menampilkannya sebagai `422` dengan pesan tetap.
+Parallel Extract (`parallel-search`, menggunakan kunci API yang sama dengan Parallel Search) hanya mengembalikan Markdown — `format` lain apa pun menghasilkan `400` — dan membatasi konten hingga 100.000 karakter. Jika halaman target itu sendiri tidak dapat diekstrak, upstream melaporkannya di dalam HTTP 200;
+OmniRoute menampilkannya sebagai `422` dengan pesan tetap.
 
-| Metode | Path            | Deskripsi                                                        |
-| ------ | --------------- | ---------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Mengambil/mengikis URL — body divalidasi oleh `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) juga hanya mengembalikan Markdown (apa pun selain `format` menghasilkan
+`400`) dan membatasi konten hingga 100.000 karakter. Ini berfungsi tanpa kunci: permintaan eksplisit
+`provider: "keenable-search"` tanpa koneksi menggunakan endpoint tanpa kunci milik Keenable
+(batas laju per-IP). Kunci yang dikonfigurasi hanya menghapus batas tersebut; pemilihan otomatis menggunakan Keenable hanya jika kunci dikonfigurasi.
 
-**Autentikasi:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Kebijakan diberlakukan melalui `enforceApiKeyPolicy`.
+| Metode | Jalur           | Deskripsi                                                       |
+| ------ | --------------- | --------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Mengambil/mengikis URL — isi divalidasi oleh `v1WebFetchSchema` |
 
-**Fallback yang memperhatikan kuota (#8297):** ketika tidak ada `provider` eksplisit, pool
+**Autentikasi:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Kebijakan diterapkan melalui `enforceApiKeyPolicy`.
+
+Kombinasi bernama menggunakan [kontrak perutean `model`](#named-searchfetch-combinations)
+di atas, dengan mempertahankan opsi dan respons khusus pengambilan.
+
+**Fallback yang memperhatikan kuota (#8297):** ketika `provider` maupun `model` tidak diberikan, pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) akan
-ditelusuri dalam urutan
-prioritas tetap (fill-first) — penyedia yang dibatasi laju tetapi telah dikonfigurasi dilewati
-alih-alih langsung menghentikan permintaan, dan kegagalan upstream yang dapat dicoba ulang/terkait kuota (HTTP 429 selalu; 402/403 untuk tingkat gratis bergaya kuota Firecrawl/Tavily/TinyFish —
-tidak untuk Jina Reader, dan tidak pernah untuk permintaan buruk 400 biasa) diteruskan ke kredensial berikutnya yang belum dicoba pada saat permintaan dibuat. Ketika setiap penyedia dalam pool telah habis, endpoint mengembalikan satu `429` (dengan header `Retry-After`) alih-alih `400` generik sebelumnya. Ketika `provider` eksplisit diminta, **tidak ada fallback diam-diam** — penyedia eksplisit yang dibatasi laju atau gagal menampilkan error-nya sendiri (`429` jika dibatasi laju, selain itu status upstream).
+`parallel-search` → `keenable-search`) ditelusuri dalam urutan prioritas tetap (isi terlebih dahulu) — penyedia yang dibatasi lajunya tetapi telah dikonfigurasi dilewati
+alih-alih menghentikan permintaan, dan kegagalan upstream yang dapat dicoba kembali/terkait kuota
+(HTTP 429 selalu; 402/403 untuk tingkat gratis Firecrawl/Tavily/TinyFish bergaya kuota —
+tidak untuk Jina Reader, dan tidak pernah untuk permintaan buruk 400 biasa) diteruskan ke
+penyedia berikutnya yang memiliki kredensial dan belum dicoba saat permintaan berlangsung. Ketika setiap penyedia di dalam pool telah habis, endpoint mengembalikan satu
+`429` (dengan header `Retry-After`) alih-alih `400` generik sebelumnya. Ketika `provider` eksplisit diminta, tidak ada fallback diam-diam — penyedia eksplisit yang dibatasi lajunya atau gagal menampilkan kesalahannya sendiri (`429` jika dibatasi lajunya, jika tidak, status upstream).
 
 ---
 
@@ -1001,31 +1079,33 @@ CLI meng-upgrade `base_url + /responses` menjadi WebSocket dan OmniRoute menerus
 
 ## Pelaporan Kuota & Masalah
 
-| Metode | Path                | Deskripsi                                                                                            |
+| Method | Path                | Description                                                                                          |
 | ------ | ------------------- | ---------------------------------------------------------------------------------------------------- |
 | GET    | `/v1/quotas/check`  | Memvalidasi kuota terlebih dahulu untuk `provider` + `accountId` sebelum menerbitkan kunci terdaftar |
 | POST   | `/v1/issues/report` | Melaporkan kegagalan penerbitan kuota/kunci ke GitHub (memerlukan `GITHUB_ISSUES_REPO` + token)      |
 
-**Auth:** Kunci API Bearer (`isAuthenticated`).
+**Autentikasi:** `/v1/quotas/check` menerima kunci API Bearer (`isAuthenticated`). `/v1/issues/report` hanya untuk manajemen (`requireManagementAuth`), seperti `/api/v1/registered-keys`: sesi dasbor,
+token CLI lokal, atau kunci API dengan cakupan `manage`/`admin`; kunci API khusus inferensi mendapatkan
+`403`.
 
 ### Pemulihan sesi kuota (opsional)
 
 `POST /v1/chat/completions` atau `POST /v1/responses` non-streaming yang gagal dengan
-kesalahan kuota terminal (`402`/`429`/`503` yang isi responsnya menyatakan bahwa kuota atau kredit
-telah habis) dapat ditangguhkan dan diputar ulang nanti, alih-alih mengembalikan kesalahan tersebut. Pemanggil memilih
-fitur ini untuk setiap permintaan menggunakan tiga header berikut:
+kesalahan kuota terminal (`402`/`429`/`503` yang isi responsnya menyatakan bahwa kuota atau kredit telah habis)
+dapat ditangguhkan dan diputar ulang nanti alih-alih mengembalikan kesalahan tersebut. Pemanggil memilih ikut serta per
+permintaan dengan tiga header:
 
-| Header                       | Nilai                                              |
+| Header                       | Value                                              |
 | ---------------------------- | -------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                             |
 | `x-omniroute-session`        | id sesi, `[A-Za-z0-9._:-]{1,128}`                  |
 | `x-omniroute-recovery-turn`  | id giliran yang unik dalam sesi (aturan yang sama) |
 
-Hanya giliran dengan `stream: false` tanpa tools, riwayat tool, atau `previous_response_id`, serta tanpa
-pin `x-omniroute-connection`, yang memenuhi syarat, dan `STORAGE_ENCRYPTION_KEY` harus ditetapkan
-(permintaan disimpan dalam keadaan terenkripsi hingga 24 jam). Respons kemudian berupa `202` dengan
-`recovery.poll`; lakukan polling ke `GET /v1/quota-recoveries/{id}` (`202` saat masih menunggu, `200` dengan
-isi yang dipulihkan saat selesai) atau batalkan dengan `DELETE`. Tiket hanya terlihat oleh kunci API
+Hanya giliran `stream: false` tanpa alat, riwayat alat, atau `previous_response_id`, dan tanpa
+pin `x-omniroute-connection`, yang memenuhi syarat, serta `STORAGE_ENCRYPTION_KEY` harus ditetapkan (permintaan
+disimpan secara terenkripsi hingga 24 jam). Respons kemudian menjadi `202` dengan
+`recovery.poll`; lakukan polling `GET /v1/quota-recoveries/{id}` (`202` saat masih tertunda, `200` dengan
+isi yang dipulihkan setelah selesai) atau batalkan dengan `DELETE`. Tiket hanya dapat dilihat oleh kunci API
 yang membuatnya. Pemutaran ulang yang hasilnya tidak pasti berakhir dalam status `needs_confirmation`
 alih-alih dikirim dua kali. Sumber: `src/lib/quota/quotaSessionRecovery.ts`.
 
@@ -1782,17 +1862,21 @@ Langganan webhook keluar untuk peristiwa OmniRoute (penyelesaian permintaan, kuo
 
 ## Kunci Terdaftar (Manajemen Otomatis)
 
-Digunakan oleh subsistem manajemen kunci otomatis untuk menerbitkan dan merotasi kunci API pada provider/akun pendukung, dengan kuota harian/jam.
+Digunakan oleh subsistem manajemen kunci otomatis untuk menerbitkan dan merotasi kunci API terhadap penyedia/akun backend, dengan kuota harian/jam.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                   |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Menampilkan daftar kunci terdaftar (hanya awalan yang disamarkan)                                                                                                                                                             |
-| POST   | `/api/v1/registered-keys`             | Menerbitkan kunci terdaftar baru — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali**. Mengembalikan `429` jika kuota menolak permintaan. |
-| GET    | `/api/v1/registered-keys/[id]`        | Mengambil metadata kunci terdaftar (tanpa materi mentah)                                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Mencabut kunci terdaftar                                                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint pencabutan eksplisit (efeknya sama seperti DELETE)                                                                                                                                                                   |
+| Method | Path                                  | Description                                                                                                                                                                                                      |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Daftar kunci terdaftar (hanya prefiks yang disamarkan)                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Terbitkan kunci terdaftar baru — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali**. Mengembalikan `429` jika kuota ditolak. |
+| GET    | `/api/v1/registered-keys/[id]`        | Ambil metadata kunci terdaftar (tanpa material mentah)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Cabut kunci terdaftar                                                                                                                                                                                            |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint pencabutan eksplisit (efeknya sama seperti DELETE)                                                                                                                                                      |
+| GET    | `/api/v1/providers/[provider]/limits` | Baca batas penerbitan penyedia                                                                                                                                                                                   |
+| PUT    | `/api/v1/providers/[provider]/limits` | Tetapkan batas penerbitan penyedia — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | Baca batas penerbitan akun                                                                                                                                                                                       |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Tetapkan batas penerbitan akun — body sama seperti rute penyedia                                                                                                                                                 |
 
-**Autentikasi:** sesi/kunci API manajemen (`requireManagementAuth`) — pengaman yang sama seperti `/api/keys`: sesi dasbor, token CLI lokal, atau kunci API dengan cakupan `manage`/`admin`; kunci API khusus inferensi mendapatkan `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
+**Autentikasi:** sesi/kunci API manajemen (`requireManagementAuth`) — guard yang sama seperti `/api/keys`: sesi dasbor, token CLI lokal, atau kunci API dengan cakupan `manage`/`admin`; kunci API khusus inferensi mendapatkan `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
 
 ---
 

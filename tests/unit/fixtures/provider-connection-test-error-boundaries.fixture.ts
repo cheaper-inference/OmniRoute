@@ -30,6 +30,8 @@ const originalArgv = process.argv;
 const originalExecArgv = process.execArgv;
 const originalNodeEnv = process.env.NODE_ENV;
 const originalVitest = process.env.VITEST;
+const originalTestContext = process.env.NODE_TEST_CONTEXT;
+const originalJestWorker = process.env.JEST_WORKER_ID;
 process.argv = [
   process.execPath,
   path.join(process.cwd(), "scripts/ad-hoc/omniroute-boundary-harness.mjs"),
@@ -37,6 +39,8 @@ process.argv = [
 process.execArgv = [];
 process.env.NODE_ENV = "development";
 delete process.env.VITEST;
+delete process.env.NODE_TEST_CONTEXT;
+delete process.env.JEST_WORKER_ID;
 
 const hostileValidationMessage =
   "Jules failed access_token=jules-boundary-secret at /srv/private/validator.ts\n" +
@@ -77,6 +81,16 @@ function readArtifact(relativePath: string | null): Record<string, unknown> {
   return JSON.parse(fs.readFileSync(absolutePath, "utf8")) as Record<string, unknown>;
 }
 
+// node:test reads its child context lazily when the first test is registered. Preserve it for
+// reporter setup, then clear runner signals only while exercising the production boundaries.
+if (originalTestContext !== undefined) process.env.NODE_TEST_CONTEXT = originalTestContext;
+test.beforeEach(() => {
+  delete process.env.NODE_TEST_CONTEXT;
+});
+test.afterEach(() => {
+  if (originalTestContext !== undefined) process.env.NODE_TEST_CONTEXT = originalTestContext;
+});
+
 test.after(async () => {
   await closeCallLogSaves(2_000);
   flushProxyLogsSync();
@@ -87,6 +101,10 @@ test.after(async () => {
   else process.env.NODE_ENV = originalNodeEnv;
   if (originalVitest === undefined) delete process.env.VITEST;
   else process.env.VITEST = originalVitest;
+  if (originalTestContext === undefined) delete process.env.NODE_TEST_CONTEXT;
+  else process.env.NODE_TEST_CONTEXT = originalTestContext;
+  if (originalJestWorker === undefined) delete process.env.JEST_WORKER_ID;
+  else process.env.JEST_WORKER_ID = originalJestWorker;
   if (originalPluginsDir === undefined) delete process.env.OMNIROUTE_PLUGINS_DIR;
   else process.env.OMNIROUTE_PLUGINS_DIR = originalPluginsDir;
   await core.shutdownDbInstance();

@@ -391,17 +391,16 @@ test("readBaselineVulnValue: JSON inválido retorna null (não lança)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// --ratchet end-to-end: binary-absent SKIP exits 0 (a missing measurement never
-// blocks). Runs the script with an empty PATH so osv-scanner is unresolvable.
+// --ratchet end-to-end: a missing required measurement is incomplete and blocks. Runs the script with an empty PATH so osv-scanner is unresolvable.
 // ---------------------------------------------------------------------------
 
-test("--ratchet com osv-scanner ausente (PATH vazio) faz SKIP e sai 0", () => {
+test("--ratchet com osv-scanner ausente reporta INCOMPLETE e sai 2", () => {
   const res = spawnSync(process.execPath, [SCRIPT_PATH, "--ratchet", "--quiet"], {
     encoding: "utf8",
     // Empty PATH → `which`/`osv-scanner` unresolvable → findOsvScanner() returns null.
     env: { ...process.env, PATH: "/nonexistent-bin-dir" },
     timeout: 30_000,
   });
-  assert.equal(res.status, 0, "binary-absent SKIP must exit 0 even with --ratchet");
-  assert.match(res.stdout, /vulnCount=SKIP reason=binary-absent/);
+  assert.equal(res.status, 2, "required scanner evidence must be complete");
+  assert.match(res.stdout, /vulnCount=INCOMPLETE reason=binary-absent/);
 });

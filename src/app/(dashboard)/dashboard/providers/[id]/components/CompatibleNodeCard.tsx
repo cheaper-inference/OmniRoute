@@ -60,7 +60,7 @@ export default function CompatibleNodeCard({
             />
           )}
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg">
               {isCcCompatible
                 ? t("ccCompatibleDetailsTitle")
                 : isAnthropicCompatible

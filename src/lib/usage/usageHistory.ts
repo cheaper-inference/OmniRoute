@@ -1,3 +1,4 @@
+import type { PendingUsageTokens } from "./storedUsageEvidence";
 /**
  * Usage History — extracted from usageDb.js (T-15)
  *
@@ -8,6 +9,8 @@
  */
 
 import { getDbInstance } from "../db/core";
+import type { UsageEntry } from "./usageEntry";
+export type { UsageEntry } from "./usageEntry";
 import { normalizePayloadForLog, protectPayloadForLog } from "../logPayloads";
 import {
   redactUrlQuerySecrets,
@@ -60,14 +63,7 @@ export type PendingRequestMetadata = {
   sessionTag?: string | null;
 };
 export type PendingRequestDetail = {
-  tokens?: {
-    in: number;
-    out: number;
-    cacheRead: number | null;
-    cacheCreation: number | null;
-    reasoning: number | null;
-    compressed: number | null;
-  };
+  tokens?: PendingUsageTokens;
   id: string;
   /** Actual durable ID, assigned only after a successful insert. */
   persistedLogId?: string;
@@ -940,50 +936,6 @@ export async function getUsageDb(sinceIso?: string | null, limit?: number, curso
 }
 
 // ──────────────── Save Request Usage ────────────────
-
-/**
- * DB-entity-mapped shape accepted by {@link saveRequestUsage}, mirroring the
- * `usage_history` table columns 1:1 (see `src/lib/db/migrations/`). Convention
- * (#3512): every `usage_history` writer should type its entry against this
- * interface instead of an inline anonymous object or `any` — call sites are
- * intentionally permissive (fields optional/nullable) because rows are built
- * incrementally across several extraction points (chatCore success/failure
- * paths, rejected-request accounting, the Codex Responses WS bridge).
- *
- * `tokens` stays `unknown` on purpose: callers pass either the raw
- * provider-shaped usage object (OpenAI `prompt_tokens`/`completion_tokens`,
- * Anthropic `input_tokens`/`cache_read_input_tokens`, …) or the already
- * normalized `{ input, output, cacheRead, cacheCreation, reasoning }` shape —
- * `getLoggedInputTokens`/`getLoggedOutputTokens`/`getPromptCache*Tokens` in
- * `./tokenAccounting` accept both and extract the right fields.
- */
-export interface UsageEntry {
-  provider?: string | null;
-  model?: string | null;
-  /** Raw or normalized token usage — see the interface doc above. */
-  tokens?: unknown;
-  status?: string | null;
-  success?: boolean;
-  latencyMs?: number;
-  timeToFirstTokenMs?: number;
-  errorCode?: string | null;
-  /** ISO timestamp; defaults to `new Date().toISOString()` when omitted. */
-  timestamp?: string;
-  connectionId?: string | null;
-  apiKeyId?: string | null;
-  apiKeyName?: string | null;
-  serviceTier?: string | null;
-  /** @deprecated legacy snake_case fallback, read only if `serviceTier` is unset. */
-  service_tier?: string | null;
-  comboStrategy?: string | null;
-  /** @deprecated legacy snake_case fallback, read only if `comboStrategy` is unset. */
-  combo_strategy?: string | null;
-  endpoint?: string | null;
-  /** Opaque CLIProxyAPI auth_index. Never a label, path, token, or email. */
-  cpaAuthIndex?: string | null;
-  /** Coding-agent session and project of the request; attributes the row to an agent session. */
-  agentContext?: sessions.AgentContext | null;
-}
 
 /**
  * Controls the legacy natural-key guard for one usage write.

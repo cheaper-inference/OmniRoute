@@ -24,6 +24,10 @@ const ALLOWED_JWT_VERIFY_FILES = [
   "src/app/api/auth/oidc/callback/route.ts",
   // Entra ID tokens on /v1/* (#14665): RS256 against Microsoft's JWKS, never the auth_token cookie.
   "src/server/authz/entra/verifyToken.ts",
+  // Sign in with ChatGPT ID tokens (#15201, owner decision 51): RS256 against OpenAI's official
+  // JWKS (https://auth.openai.com/.well-known/jwks.json), issuer and audience pinned, never the
+  // auth_token cookie.
+  "src/lib/oauth/chatgptProtocol.ts",
 ];
 
 for (const rel of VERIFIERS) {

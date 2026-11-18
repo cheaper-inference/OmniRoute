@@ -84,3 +84,15 @@ test("the global system prompt is operator-only: a write token cannot rewrite it
   // Exact path only: the other settings sub-routes keep the method-inferred scope.
   assert.equal(inferRequiredScope("PUT", "/api/settings/combo-defaults"), "write");
 });
+
+test("key template writes require admin while reads and unrelated routes retain their scopes", () => {
+  for (const method of ["POST", "PATCH", "DELETE"]) {
+    assert.equal(inferRequiredScope(method, "/api/key-templates"), "admin");
+    assert.equal(inferRequiredScope(method, "/api/key-templates/template-id"), "admin");
+    assert.equal(inferRequiredScope(method, "/api/key-templates-catalog"), "write");
+  }
+  for (const method of ["GET", "HEAD", "OPTIONS"]) {
+    assert.equal(inferRequiredScope(method, "/api/key-templates"), "read");
+    assert.equal(inferRequiredScope(method, "/api/key-templates/template-id"), "read");
+  }
+});

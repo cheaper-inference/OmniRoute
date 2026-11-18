@@ -55,11 +55,27 @@ function buildIngestEntry(opts) {
   return entry;
 }
 
+// Failed posts since start. Without a count, a broken capture path looks like an empty capture.
+let ingestFailures = 0;
+
+function recordIngestFailure(reason) {
+  ingestFailures += 1;
+  if (ingestFailures === 1 || ingestFailures % 100 === 0) {
+    console.error(`[MITM] Inspector ingest failed (${reason}); failures so far: ${ingestFailures}`);
+  }
+}
+
+function getIngestFailureCount() {
+  return ingestFailures;
+}
+
 /**
  * Fire-and-forget POST of a captured entry to the ingest endpoint. NEVER throws
  * and NEVER rejects — inspector capture must not be able to break proxy
- * traffic. Returns true only on a 2xx response (used by tests); false on a
- * missing token/base/fetch, a non-2xx, or any network error.
+ * traffic. Returns true only on a 2xx response; false on a missing token/base/fetch
+ * (capture off, not a failure), a non-2xx, or any network error. The last two are
+ * counted and logged (first one, then every 100th) so a broken capture path does not
+ * look like an empty capture.
  */
 async function postIngestEntry(baseUrl, token, entry, fetchImpl) {
   const doFetch = fetchImpl || globalThis.fetch;
@@ -73,10 +89,13 @@ async function postIngestEntry(baseUrl, token, entry, fetchImpl) {
       },
       body: JSON.stringify(entry),
     });
-    return !!(res && res.ok === true);
-  } catch {
+    if (res && res.ok === true) return true;
+    recordIngestFailure(`HTTP ${res && res.status ? res.status : "unknown"}`);
+    return false;
+  } catch (err) {
+    recordIngestFailure(err && err.message ? err.message : "network error");
     return false;
   }
 }
 
-module.exports = { buildIngestEntry, postIngestEntry, INGEST_PATH };
+module.exports = { buildIngestEntry, postIngestEntry, getIngestFailureCount, INGEST_PATH };
