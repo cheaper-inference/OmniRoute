@@ -13,7 +13,18 @@ export type {
   FileDropZoneProps,
   FileInputProps,
   FileRejection,
+  FileTriggerProps,
 } from "@omniroute/ui-kit/file-input";
+
+/**
+ * FileTrigger — the kit wrapper that opens the native file picker from one child control,
+ * usually the `Button` adapter, for an action that starts as soon as a file is picked (a toolbar
+ * "Import"). It draws nothing of its own, so it has no text to translate and is re-exported as
+ * is. It takes the filtering of `FileInput` (`accept`, `maxSize`, `multiple`, `onFilesChange`,
+ * `onFilesRejected`); the ref and any `data-*` attribute go to the hidden native input. Use it
+ * instead of a hidden `<input type="file">` clicked through a ref.
+ */
+export { FileTrigger } from "@omniroute/ui-kit/file-input";
 
 /**
  * FileInput — the kit file picker (`@omniroute/ui-kit/file-input`) with translated text
