@@ -83,3 +83,34 @@ test("estimateInputTokens and sanitizeProviderUsageForRequest handle primitives 
   const passThrough = sanitizeProviderUsageForRequest(usage, null, FORMATS.CLAUDE);
   assert.equal(passThrough, usage);
 });
+
+test("repeated 0-input chunks walk the request body only once (#20086)", () => {
+  let messageReads = 0;
+  const messages = [
+    { role: "user", content: "Count how often the body is serialized. ".repeat(50) },
+  ];
+  const body: Record<string, unknown> = { model: "claude-opus-5-5" };
+  Object.defineProperty(body, "messages", {
+    enumerable: true,
+    get() {
+      messageReads += 1;
+      return messages;
+    },
+  });
+
+  const zeroUsageChunk = { input_tokens: 0, output_tokens: 1 };
+  const first = sanitizeProviderUsageForRequest(zeroUsageChunk, body, FORMATS.CLAUDE);
+  assert.ok(first && first.input_tokens > 0, "a 0-input chunk on a real body is repaired");
+  const readsAfterFirstChunk = messageReads;
+  assert.ok(readsAfterFirstChunk > 0, "the first chunk inspects the body");
+
+  for (let i = 0; i < 50; i++) {
+    const sanitized = sanitizeProviderUsageForRequest(zeroUsageChunk, body, FORMATS.CLAUDE);
+    assert.equal(sanitized.input_tokens, first.input_tokens);
+  }
+  assert.equal(
+    messageReads,
+    readsAfterFirstChunk,
+    "later chunks reuse the cached body size and token estimate"
+  );
+});
