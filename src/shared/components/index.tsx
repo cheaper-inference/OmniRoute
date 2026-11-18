@@ -4,6 +4,7 @@ export { default as GuardedAction } from "./GuardedAction";
 export { default as Icon } from "./Icon";
 export { default as IconChip } from "./IconChip";
 export { default as Input } from "./Input";
+export { default as NumberInput, whenNumber } from "./NumberInput";
 export { default as Select } from "./Select";
 export { default as Checkbox } from "./Checkbox";
 export { default as Textarea } from "./Textarea";

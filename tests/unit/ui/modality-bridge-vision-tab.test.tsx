@@ -10,6 +10,7 @@ import ModalityBridgeVisionTab from "@/app/(dashboard)/dashboard/settings/compon
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
 type MountedRoot = { root: Root; el: HTMLDivElement };

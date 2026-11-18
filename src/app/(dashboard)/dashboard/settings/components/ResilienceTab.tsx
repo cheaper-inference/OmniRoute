@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, Card, Select } from "@/shared/components";
+import { Button, Card, NumberInput, Select, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import AutoDisableCard from "./AutoDisableCard";
 import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
-import { NumberField, BooleanField } from "./ResilienceFields";
+import { BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
 import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
@@ -254,51 +254,56 @@ function RequestQueueCard({
                 setDraft((prev) => ({ ...prev, autoEnableApiKeyProviders }))
               }
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceRequestsPerMinute")}
               value={draft.requestsPerMinute}
               min={1}
-              onChange={(requestsPerMinute) => setDraft((prev) => ({ ...prev, requestsPerMinute }))}
+              onValueChange={whenNumber((requestsPerMinute) =>
+                setDraft((prev) => ({ ...prev, requestsPerMinute }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMinTimeBetweenRequests")}
               value={draft.minTimeBetweenRequestsMs}
+              min={0}
               suffix="ms"
-              onChange={(minTimeBetweenRequestsMs) =>
+              onValueChange={whenNumber((minTimeBetweenRequestsMs) =>
                 setDraft((prev) => ({ ...prev, minTimeBetweenRequestsMs }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceConnectionScopeConcurrentRequests")}
               value={draft.concurrentRequests}
               min={1}
-              onChange={(concurrentRequests) =>
+              onValueChange={whenNumber((concurrentRequests) =>
                 setDraft((prev) => ({ ...prev, concurrentRequests }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceGlobalConcurrentRequests")}
               value={draft.globalConcurrentRequests}
               min={0}
-              onChange={(globalConcurrentRequests) =>
+              onValueChange={whenNumber((globalConcurrentRequests) =>
                 setDraft((prev) => ({ ...prev, globalConcurrentRequests }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxQueueWait")}
               value={draft.maxWaitMs}
               min={1}
               suffix="ms"
-              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+              onValueChange={whenNumber((maxWaitMs) =>
+                setDraft((prev) => ({ ...prev, maxWaitMs }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxExecutionWait")}
               value={draft.executionMaxWaitMs}
               min={1}
               suffix="ms"
-              onChange={(executionMaxWaitMs) =>
+              onValueChange={whenNumber((executionMaxWaitMs) =>
                 setDraft((prev) => ({ ...prev, executionMaxWaitMs }))
-              }
+              )}
             />
           </>
         ) : (
@@ -383,14 +388,14 @@ function ConnectionCooldownCard({
       <ProfileColumn title={title} icon={icon}>
         {editing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceBaseCooldown")}
               value={current.baseCooldownMs}
               min={0}
               suffix="ms"
-              onChange={(baseCooldownMs) =>
+              onValueChange={whenNumber((baseCooldownMs) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], baseCooldownMs } }))
-              }
+              )}
             />
             <BooleanField
               label={t("resilienceUseUpstreamRetryHints")}
@@ -437,13 +442,13 @@ function ConnectionCooldownCard({
                 { value: "off", label: t("resilienceAlwaysOff") },
               ]}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxBackoffSteps")}
               value={current.maxBackoffSteps}
               min={0}
-              onChange={(maxBackoffSteps) =>
+              onValueChange={whenNumber((maxBackoffSteps) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], maxBackoffSteps } }))
-              }
+              )}
             />
           </>
         ) : (
@@ -563,30 +568,30 @@ function ProviderBreakerCard({
       <ProfileColumn title={title} icon={icon}>
         {editing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceFailureThreshold")}
               value={current.failureThreshold}
               min={1}
-              onChange={(failureThreshold) =>
+              onValueChange={whenNumber((failureThreshold) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], failureThreshold } }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceDegradationThreshold")}
               value={current.degradationThreshold}
               min={1}
-              onChange={(degradationThreshold) =>
+              onValueChange={whenNumber((degradationThreshold) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], degradationThreshold } }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceResetTime")}
               value={current.resetTimeoutMs}
               min={1000}
               suffix="ms"
-              onChange={(resetTimeoutMs) =>
+              onValueChange={whenNumber((resetTimeoutMs) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], resetTimeoutMs } }))
-              }
+              )}
             />
           </>
         ) : (
@@ -707,18 +712,22 @@ function WaitForCooldownCard({
               checked={draft.enabled}
               onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxAttempts")}
               value={draft.maxRetries}
               min={0}
-              onChange={(maxRetries) => setDraft((prev) => ({ ...prev, maxRetries }))}
+              onValueChange={whenNumber((maxRetries) =>
+                setDraft((prev) => ({ ...prev, maxRetries }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxWaitPerAttempt")}
               value={draft.maxRetryWaitSec}
               min={0}
               suffix="sec"
-              onChange={(maxRetryWaitSec) => setDraft((prev) => ({ ...prev, maxRetryWaitSec }))}
+              onValueChange={whenNumber((maxRetryWaitSec) =>
+                setDraft((prev) => ({ ...prev, maxRetryWaitSec }))
+              )}
             />
           </>
         ) : (
@@ -806,25 +815,29 @@ function ComboCooldownWaitCard({
               checked={draft.enabled}
               onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceComboCooldownMaxWaitMs")}
               value={draft.maxWaitMs}
               min={0}
               suffix="ms"
-              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+              onValueChange={whenNumber((maxWaitMs) =>
+                setDraft((prev) => ({ ...prev, maxWaitMs }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxAttempts")}
               value={draft.maxAttempts}
               min={0}
-              onChange={(maxAttempts) => setDraft((prev) => ({ ...prev, maxAttempts }))}
+              onValueChange={whenNumber((maxAttempts) =>
+                setDraft((prev) => ({ ...prev, maxAttempts }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceComboCooldownBudgetMs")}
               value={draft.budgetMs}
               min={0}
               suffix="ms"
-              onChange={(budgetMs) => setDraft((prev) => ({ ...prev, budgetMs }))}
+              onValueChange={whenNumber((budgetMs) => setDraft((prev) => ({ ...prev, budgetMs })))}
             />
           </>
         ) : (
@@ -989,25 +1002,25 @@ export function ProviderCooldownCard({
               checked={editing.enabled}
               onChange={(enabled) => setEditing((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceProviderCooldownMin")}
               value={editing.minRetryCooldownMs}
               min={0}
               max={300000}
               suffix="ms"
-              onChange={(minRetryCooldownMs) =>
+              onValueChange={whenNumber((minRetryCooldownMs) =>
                 setEditing((prev) => ({ ...prev, minRetryCooldownMs }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceProviderCooldownMax")}
               value={editing.maxRetryCooldownMs}
               min={0}
               max={3600000}
               suffix="ms"
-              onChange={(maxRetryCooldownMs) =>
+              onValueChange={whenNumber((maxRetryCooldownMs) =>
                 setEditing((prev) => ({ ...prev, maxRetryCooldownMs }))
-              }
+              )}
             />
           </>
         ) : (
@@ -1094,13 +1107,15 @@ function CredentialHealthCheckCard({
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {isEditing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceCredentialHealthInterval")}
               value={editing.intervalMinutes}
               min={0}
               max={1440}
               suffix="min"
-              onChange={(intervalMinutes) => setEditing((prev) => ({ ...prev, intervalMinutes }))}
+              onValueChange={whenNumber((intervalMinutes) =>
+                setEditing((prev) => ({ ...prev, intervalMinutes }))
+              )}
             />
             <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
               {t("resilienceCredentialHealthHint")}

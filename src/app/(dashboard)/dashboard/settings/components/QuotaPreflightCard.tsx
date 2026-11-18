@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Toggle } from "@/shared/components";
+import { Card, NumberInput, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
-import { NumberField } from "./ResilienceFields";
 
 type QuotaPreflightSettings = {
   enabled: boolean;
@@ -33,6 +32,8 @@ export default function QuotaPreflightCard() {
 
   const [value, setValue] = useState<QuotaPreflightSettings | null>(null);
   const [saving, setSaving] = useState(false);
+  // The cutoff being typed: `undefined` follows the saved value, `null` is an empty field.
+  const [cutoffDraft, setCutoffDraft] = useState<number | null | undefined>(undefined);
   const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
@@ -85,6 +86,18 @@ export default function QuotaPreflightCard() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Saves once when the edit ends (blur or Enter), not on every keystroke; the field then goes
+  // back to the saved value, which also undoes a rejected or failed save.
+  const commitCutoff = async (next: number | null) => {
+    try {
+      if (next !== null && value && next !== value.defaultThresholdPercent) {
+        await save({ defaultThresholdPercent: next });
+      }
+    } finally {
+      setCutoffDraft(undefined);
     }
   };
 
@@ -155,16 +168,14 @@ export default function QuotaPreflightCard() {
                 </p>
               </div>
               <div className="w-24 shrink-0">
-                <NumberField
-                  label=""
-                  value={value.defaultThresholdPercent}
+                <NumberInput
+                  aria-label={tx("quotaPreflightCutoff", "Global cutoff (min remaining %)")}
+                  value={cutoffDraft === undefined ? value.defaultThresholdPercent : cutoffDraft}
                   suffix="%"
                   min={0}
                   max={99}
-                  onChange={(next) => {
-                    if (next === value.defaultThresholdPercent) return;
-                    save({ defaultThresholdPercent: next });
-                  }}
+                  onValueChange={setCutoffDraft}
+                  onValueCommit={(next) => void commitCutoff(next)}
                 />
               </div>
             </div>

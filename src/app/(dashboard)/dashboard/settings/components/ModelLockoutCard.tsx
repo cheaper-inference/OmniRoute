@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import { Badge, Button, Card, Input, Toggle } from "@/shared/components";
+import { Badge, Button, Card, Input, NumberInput, Toggle, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -84,46 +84,6 @@ function playNotifyChime(contextRef: { current: AudioContext | null }): void {
   } catch {
     // Sound is optional and must never block a settings change.
   }
-}
-
-function NumberField({
-  label,
-  value,
-  suffix,
-  min = 0,
-  max,
-  hint,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  suffix?: string;
-  min?: number;
-  max?: number;
-  hint?: string;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="flex items-end gap-2">
-      <Input
-        type="number"
-        label={label}
-        hint={hint}
-        min={min}
-        max={max}
-        value={value}
-        onChange={(event) => {
-          if (event.target.value === "") return;
-          const nextValue = Number(event.target.value);
-          if (Number.isFinite(nextValue)) {
-            onChange(nextValue);
-          }
-        }}
-        className="min-w-0 flex-1"
-      />
-      {suffix ? <span className="pb-2.5 text-xs text-text-muted">{suffix}</span> : null}
-    </div>
-  );
 }
 
 export default function ModelLockoutCard() {
@@ -459,14 +419,16 @@ export default function ModelLockoutCard() {
         {/* Cooldowns - grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-border bg-bg-subtle p-4">
-            <NumberField
+            <NumberInput
               label={t("modelLockoutBaseCooldown")}
               value={draft.baseCooldownMs}
               min={5000}
               max={600000}
               suffix="ms"
               hint="5,000ms — 600,000ms"
-              onChange={(baseCooldownMs) => setDraft((prev) => ({ ...prev, baseCooldownMs }))}
+              onValueChange={whenNumber((baseCooldownMs) =>
+                setDraft((prev) => ({ ...prev, baseCooldownMs }))
+              )}
             />
             <p className="mt-1.5 text-xs text-text-muted">
               {t("modelLockoutBaseCooldownDescription")}
@@ -474,14 +436,16 @@ export default function ModelLockoutCard() {
           </div>
 
           <div className="rounded-lg border border-border bg-bg-subtle p-4">
-            <NumberField
+            <NumberInput
               label={t("modelLockoutMaxCooldown")}
               value={draft.maxCooldownMs}
               min={draft.baseCooldownMs}
               max={3600000}
               suffix="ms"
               hint={t("modelLockoutMaxCooldownHint")}
-              onChange={(maxCooldownMs) => setDraft((prev) => ({ ...prev, maxCooldownMs }))}
+              onValueChange={whenNumber((maxCooldownMs) =>
+                setDraft((prev) => ({ ...prev, maxCooldownMs }))
+              )}
             />
             <p className="mt-1.5 text-xs text-text-muted">
               {t("modelLockoutMaxCooldownDescription")}
@@ -507,11 +471,13 @@ export default function ModelLockoutCard() {
 
         {/* Max backoff steps */}
         <div className="rounded-lg border border-border bg-bg-subtle p-4">
-          <NumberField
+          <NumberInput
             label={t("modelLockoutMaxBackoffSteps")}
             value={draft.maxBackoffSteps}
             min={0}
-            onChange={(maxBackoffSteps) => setDraft((prev) => ({ ...prev, maxBackoffSteps }))}
+            onValueChange={whenNumber((maxBackoffSteps) =>
+              setDraft((prev) => ({ ...prev, maxBackoffSteps }))
+            )}
           />
           <p className="mt-1.5 text-xs text-text-muted">
             {t("modelLockoutMaxBackoffStepsDescription")}

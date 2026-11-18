@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Select } from "@/shared/components";
+import { Button, Card, NumberInput, Select, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import type {
   TokenRefreshBreakerScope,
   TokenRefreshBreakerSettings,
 } from "@/lib/resilience/settings";
-import { NumberField } from "./ResilienceFields";
 
 // Alias of the canonical settings shape so the host re-export stays consumed.
 export type TokenRefreshBreakerValue = TokenRefreshBreakerSettings;
@@ -96,20 +95,22 @@ function EditFields({
           { value: "connection", label: t("resilienceTokenRefreshScopeConnection") },
         ]}
       />
-      <NumberField
+      <NumberInput
         label={t("resilienceTokenRefreshThreshold")}
         value={editing.failureThreshold}
         min={1}
         max={100}
-        onChange={(failureThreshold) => onChange({ ...editing, failureThreshold })}
+        onValueChange={whenNumber((failureThreshold) => onChange({ ...editing, failureThreshold }))}
       />
-      <NumberField
+      <NumberInput
         label={t("resilienceTokenRefreshCooldown")}
         value={cooldownMinutes}
         min={1}
         max={1440}
         suffix="min"
-        onChange={(minutes) => onChange({ ...editing, cooldownMs: minutes * 60000 })}
+        onValueChange={whenNumber((minutes) =>
+          onChange({ ...editing, cooldownMs: minutes * 60000 })
+        )}
       />
     </>
   );
