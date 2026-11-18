@@ -22,6 +22,8 @@ import { readAttemptFailure } from "./attemptFailure.ts";
 import {
   classifyComboOutcome,
   formatComboOutcomes,
+  isFreeTierRefusalOutcome,
+  redactConnectionLabel,
   type ComboErrorEntry,
 } from "./comboErrorAggregation.ts";
 import { isContextOverflow400 } from "./comboPredicates.ts";
@@ -57,25 +59,41 @@ function collapseControlCharacters(value: string): string {
   return out.replace(/\s+/g, " ").trim();
 }
 
+/** Cut to the budget without leaving half of a surrogate pair at the end. */
+function capUnitReason(value: string): string {
+  const cut = value.slice(0, MAX_UNIT_REASON_LEN);
+  const last = cut.charCodeAt(cut.length - 1);
+  return (last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut).trimEnd();
+}
+
 /**
  * Make one unit's reason safe to join with the others. The joined message is sanitized
  * again as a whole, and that pass keeps only the first line, caps at 4096 chars and treats
  * a path-like span as running to the end, so one raw multi-line, HTML or oversized upstream
- * body would otherwise swallow every later unit's reason.
+ * body would otherwise swallow every later unit's reason. Connection identifiers are
+ * redacted before the cap: an identifier cut in half no longer matches the redaction.
  */
 function normalizeUnitReason(reason: string): string {
-  return sanitizeErrorMessage(collapseControlCharacters(reason)).slice(0, MAX_UNIT_REASON_LEN);
+  const sanitized = sanitizeErrorMessage(collapseControlCharacters(reason));
+  // An empty reason stays empty (the formatter shows "HTTP <status>" for it).
+  return sanitized ? capUnitReason(redactConnectionLabel(sanitized)) : sanitized;
 }
 
 function pushOutcome(outcomes: RuntimeUnitOutcomes, unitKey: string, raw: ComboErrorEntry) {
   outcomes.failedUnitKeys.add(unitKey);
-  const entry = { ...raw, error: normalizeUnitReason(raw.error) };
+  // The free-tier check reads the full reason; the signal can sit past the display cap.
+  const entry: ComboErrorEntry = {
+    ...raw,
+    error: normalizeUnitReason(raw.error),
+    ...(isFreeTierRefusalOutcome(raw) ? { freeTierRefusal: true } : {}),
+  };
   const duplicate = outcomes.entries.some(
     (e) =>
       e.model === entry.model &&
       e.status === entry.status &&
       e.error === entry.error &&
-      e.kind === entry.kind
+      e.kind === entry.kind &&
+      e.freeTierRefusal === entry.freeTierRefusal
   );
   if (!duplicate) outcomes.entries.push(entry);
 }

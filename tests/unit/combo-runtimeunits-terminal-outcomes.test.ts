@@ -291,3 +291,68 @@ test("a path in an earlier unit's reason is redacted without swallowing the late
   assert.doesNotMatch(message, /omniroute-test/);
   assert.match(message, SKIPPED_LAST);
 });
+
+// Connection identifiers are redacted before each reason is capped: an identifier cut in
+// half at the cap no longer matches the redaction and would leak most of its characters.
+async function twoUnitMessage(name: string, firstStatus: number, firstReason: string) {
+  const { result } = await run({
+    name,
+    units: [modelUnit("provider-a/model-x", "a"), modelUnit("provider-b/model-y", "b")],
+    respond: (model) =>
+      model === "provider-a/model-x"
+        ? jsonError(firstStatus, firstReason)
+        : jsonError(503, "second unit down"),
+  });
+  const body = (await result.response.json()) as { error: { message: string } };
+  return body.error.message;
+}
+
+const SECOND_DOWN = /provider-b\/model-y: provider — second unit down \(HTTP 503\)$/;
+
+test("a connection UUID that straddles the per-unit cap is still redacted", async () => {
+  const message = await twoUnitMessage(
+    "ru-terminal-uuid-cap",
+    500,
+    "p".repeat(259) + " conn 0f8fad5b-d9cb-469f-a165-70867728950e x"
+  );
+  assert.doesNotMatch(message, /0f8fad5b-d9cb/);
+  assert.match(message, /conn conn:0f8fad5b/);
+  assert.match(message, SECOND_DOWN);
+});
+
+test("a long hex identifier that straddles the per-unit cap is still redacted", async () => {
+  const message = await twoUnitMessage(
+    "ru-terminal-hex-cap",
+    500,
+    "p".repeat(280) + " acct 9a8b7c6d5e4f30211a2b3c4d5e6f7081 x"
+  );
+  assert.doesNotMatch(message, /9a8b7c6d5e/);
+  assert.match(message, /acct conn:9a8b7c6d/);
+  assert.match(message, SECOND_DOWN);
+});
+
+test("a free-tier refusal whose signal sits past the per-unit cap keeps its label", async () => {
+  const { result } = await run({
+    name: "ru-terminal-free-tier-late",
+    units: [modelUnit("opencode/model-x", "a"), modelUnit("provider-b/model-y", "b")],
+    respond: (model) =>
+      model === "opencode/model-x"
+        ? jsonError(403, "Request refused. " + "w".repeat(320) + " FreeTierError")
+        : jsonError(503, "second unit down"),
+  });
+  const body = (await result.response.json()) as { error: { message: string } };
+  assert.match(body.error.message, /^opencode\/model-x: access restriction — Request refused\./);
+  assert.doesNotMatch(body.error.message, /FreeTierError/);
+  assert.match(body.error.message, SECOND_DOWN);
+});
+
+test("the per-unit cap does not split a character in half", async () => {
+  const message = await twoUnitMessage(
+    "ru-terminal-surrogate-cap",
+    500,
+    "x".repeat(299) + "😀😀😀"
+  );
+  assert.doesNotMatch(message, /[\ud800-\udbff](?![\udc00-\udfff])/);
+  assert.match(message, /provider-a\/model-x: provider — x+ \(HTTP 500\)/);
+  assert.match(message, SECOND_DOWN);
+});
