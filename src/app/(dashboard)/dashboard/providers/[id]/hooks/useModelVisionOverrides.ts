@@ -29,6 +29,15 @@ async function readVisionOverrides(provider: string): Promise<Record<string, boo
   }
 }
 
+function saveErrorMessage(
+  error: unknown,
+  t: (key: string, values?: Record<string, unknown>) => string
+): string {
+  return error instanceof Error && error.message
+    ? error.message
+    : providerText(t, "failedSaveModelEndpointSettings", "Failed to save model endpoint settings");
+}
+
 type OverrideState = { provider: string; values: Record<string, boolean> };
 
 function applyVisionOverride(
@@ -104,15 +113,7 @@ export function useModelVisionOverrides(
         return true;
       } catch (error) {
         if (!isCurrent()) return false;
-        notify.error(
-          error instanceof Error && error.message
-            ? error.message
-            : providerText(
-                t,
-                "failedSaveModelEndpointSettings",
-                "Failed to save model endpoint settings"
-              )
-        );
+        notify.error(saveErrorMessage(error, t));
         return false;
       } finally {
         if (isCurrent()) {

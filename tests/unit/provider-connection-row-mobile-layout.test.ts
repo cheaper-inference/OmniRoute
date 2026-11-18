@@ -151,8 +151,17 @@ test("toggle thumb is vertically centred in its track", () => {
   assert.match(toggle, /size=\{size === "xs" \|\| size === "sm" \? "sm" : "default"\}/);
 });
 
-test("provider models use the symmetric AutoGrid", () => {
-  assert.match(read(`${providerComponents}/ProviderModelsSection.tsx`), /<AutoGrid>/);
+test("provider models use the same card grid as passthrough and compatible models", () => {
+  // #19947 unified the catalog rows onto the passthrough/compatible card grid.
+  const cardGrid = /<div className="grid grid-cols-1 gap-3 xl:grid-cols-2">/;
+  for (const section of [
+    "ProviderModelsSection",
+    "PassthroughModelsSection",
+    "CompatibleModelsSection",
+  ]) {
+    assert.match(read(`${providerComponents}/${section}.tsx`), cardGrid);
+  }
+  assert.doesNotMatch(read(`${providerComponents}/ProviderModelsSection.tsx`), /<AutoGrid>/);
   assert.match(
     read("src/shared/components/AutoGrid.tsx"),
     /repeat\(auto-fill,minmax\(var\(--auto-grid-min\),1fr\)\)/
