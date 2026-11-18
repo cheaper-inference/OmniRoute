@@ -365,14 +365,23 @@ async function localDatabaseHash(opts) {
   }
 }
 
+/** Only a genuinely missing remote object may trigger a republish. */
+export function isMissingRemoteError(error) {
+  const text = String(error?.message ?? error ?? "").toLowerCase();
+  return /404|not found|no such file|does not exist|file not found/.test(text);
+}
+
 function remoteVersion(config) {
   const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
   try {
     const envelopePath = join(staging, "envelope.json");
     download(config, envelopePath);
     return JSON.parse(readFileSync(envelopePath, "utf8")).version || null;
-  } catch {
-    return null;
+  } catch (error) {
+    if (isMissingRemoteError(error)) return null;
+    // Auth/network/parse failures must not be read as "backup deleted" or the
+    // daemon would push local state over an existing remote backup.
+    throw error;
   } finally {
     rmSync(staging, { recursive: true, force: true });
   }

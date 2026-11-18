@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  isMissingRemoteError,
   parseIntervalMs,
   shouldRepublishMissingTarget,
 } from "../../bin/cli/commands/sync-remote.mjs";
@@ -21,4 +22,12 @@ test("sync remote daemon republishes a target that disappeared remotely", () => 
   assert.equal(shouldRepublishMissingTarget({ lastPushedVersion: "abc" }, null), true);
   assert.equal(shouldRepublishMissingTarget({}, null), false);
   assert.equal(shouldRepublishMissingTarget({ lastPushedVersion: "abc" }, "def"), false);
+});
+
+test("only a missing remote object is treated as a deleted backup", () => {
+  assert.equal(isMissingRemoteError(new Error("gh: Not Found (HTTP 404)")), true);
+  assert.equal(isMissingRemoteError(new Error("rclone: File not found")), true);
+  assert.equal(isMissingRemoteError(new Error("gh: HTTP 500")), false);
+  assert.equal(isMissingRemoteError(new Error("authentication failed")), false);
+  assert.equal(isMissingRemoteError(new Error("network timeout")), false);
 });
