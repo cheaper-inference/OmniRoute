@@ -125,3 +125,122 @@ for (const bad of [
   test("unavailable or malformed audit data cannot pass", () =>
     assert.equal(evaluateAuditResult(bad).state, "INCOMPLETE"));
 }
+
+for (const [errorCode, reason, signal] of [
+  ["ETIMEDOUT", "execution-timeout", "SIGTERM"],
+  ["ENOENT", "execution-error", null],
+  ["ENOBUFS", "execution-output-limit", "SIGTERM"],
+]) {
+  test(`returned ${errorCode} is classified before parsing empty stdout`, () => {
+    const measured = evaluateAuditResult({
+      stdout: "",
+      stderr: "fixture-private-diagnostic",
+      status: null,
+      signal,
+      error: { code: errorCode, message: "fixture-private-diagnostic" },
+    });
+    assert.equal(measured.state, "INCOMPLETE");
+    assert.equal(measured.reason, reason);
+    assert.equal(measured.errorCode, errorCode);
+    assert.equal(measured.signal, signal);
+    assert.equal(measured.exitCode, null);
+    assert.equal(measured.counts, undefined);
+    assert.equal(measured.report, undefined);
+    assert.doesNotMatch(JSON.stringify(measured), /fixture-private-diagnostic/);
+  });
+}
+
+test("a signalled audit cannot classify a valid JSON report as measured findings", () => {
+  const measured = evaluateAuditResult({ ...result({ critical: 1 }), signal: "SIGKILL" });
+  assert.equal(measured.state, "INCOMPLETE");
+  assert.equal(measured.reason, "execution-signal");
+  assert.equal(measured.errorCode, null);
+  assert.equal(measured.signal, "SIGKILL");
+  assert.equal(measured.exitCode, 1);
+  assert.equal(measured.counts, undefined);
+  assert.equal(measured.report, undefined);
+});
+
+test("invalid JSON without an execution failure remains a parsing failure", () => {
+  const measured = evaluateAuditResult({ status: 0, stdout: "not-json", signal: null });
+  assert.equal(measured.state, "INCOMPLETE");
+  assert.equal(measured.reason, "invalid-json");
+  assert.equal(measured.counts, undefined);
+});
+
+test("execution metadata accepts only known codes, signals and numeric exit codes", () => {
+  const measured = evaluateAuditResult({
+    stdout: "",
+    stderr: "fixture-private-diagnostic",
+    status: "fixture-private-diagnostic",
+    signal: "fixture-private-diagnostic",
+    error: {
+      code: "fixture-private-diagnostic",
+      message: "fixture-private-diagnostic",
+      env: { TOKEN: "fixture-private-diagnostic" },
+    },
+  });
+  assert.equal(measured.state, "INCOMPLETE");
+  assert.equal(measured.reason, "execution-error");
+  assert.equal(measured.errorCode, "UNKNOWN");
+  assert.equal(measured.signal, "UNKNOWN");
+  assert.equal(measured.exitCode, null);
+  assert.doesNotMatch(JSON.stringify(measured), /fixture-private-diagnostic|TOKEN/);
+});
+
+test("a returned timeout preserves scope metadata and the four other audit results", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "dependency-audit-timeout-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  for (const scope of AUDIT_SCOPES) {
+    mkdirSync(join(root, scope), { recursive: true });
+    writeFileSync(join(root, scope, "package-lock.json"), "{}");
+  }
+  const report = auditDependencies({
+    root,
+    run: (_cmd, _args, options) =>
+      options.cwd === root
+        ? {
+            stdout: "",
+            stderr: "fixture-private-diagnostic",
+            status: null,
+            signal: "SIGTERM",
+            error: { code: "ETIMEDOUT", message: "fixture-private-diagnostic" },
+          }
+        : result(),
+  });
+  assert.equal(report.complete, false);
+  assert.equal(report.ok, false);
+  assert.equal(report.results.length, AUDIT_SCOPES.length);
+  assert.equal(report.results.filter((scope) => scope.state === "PASS").length, 4);
+  const failed = report.results.find((scope) => scope.scope === ".");
+  assert.equal(failed.state, "INCOMPLETE");
+  assert.equal(failed.reason, "execution-timeout");
+  assert.equal(failed.errorCode, "ETIMEDOUT");
+  assert.equal(failed.signal, "SIGTERM");
+  assert.equal(failed.exitCode, null);
+  assert.match(failed.lockSha256, /^[a-f0-9]{64}$/);
+  assert.doesNotMatch(JSON.stringify(report), /fixture-private-diagnostic/);
+});
+
+test("thrown invocation failures retain only allowlisted metadata", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "dependency-audit-invocation-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  writeFileSync(join(root, "package-lock.json"), "{}");
+  const report = auditDependencies({
+    root,
+    scopes: ["."],
+    run: () => {
+      throw Object.assign(new Error("fixture-private-diagnostic"), {
+        code: "fixture-private-diagnostic",
+      });
+    },
+  });
+  assert.equal(report.complete, false);
+  assert.equal(report.ok, false);
+  assert.equal(report.results[0].state, "INCOMPLETE");
+  assert.equal(report.results[0].reason, "audit-invocation-failed");
+  assert.equal(report.results[0].errorCode, "UNKNOWN");
+  assert.equal(report.results[0].signal, null);
+  assert.equal(report.results[0].exitCode, null);
+  assert.doesNotMatch(JSON.stringify(report), /fixture-private-diagnostic/);
+});

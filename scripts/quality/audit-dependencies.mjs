@@ -3,6 +3,7 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { constants } from "node:os";
 import { pathToFileURL } from "node:url";
 
 export const AUDIT_SCOPES = [
@@ -13,8 +14,40 @@ export const AUDIT_SCOPES = [
   "@omniroute/opencode-provider",
 ];
 const SEVERITIES = ["info", "low", "moderate", "high", "critical"];
+const EXECUTION_ERROR_CODES = new Set([
+  ...Object.keys(constants.errno),
+  "ERR_CHILD_PROCESS_STDIO_MAXBUFFER",
+]);
+const EXECUTION_SIGNALS = new Set(Object.keys(constants.signals));
+
+function executionMetadata(result) {
+  const errorCode = result.error?.code;
+  return {
+    errorCode: result.error ? (EXECUTION_ERROR_CODES.has(errorCode) ? errorCode : "UNKNOWN") : null,
+    signal: result.signal
+      ? EXECUTION_SIGNALS.has(result.signal)
+        ? result.signal
+        : "UNKNOWN"
+      : null,
+    exitCode: Number.isSafeInteger(result.status) ? result.status : null,
+  };
+}
 
 export function evaluateAuditResult(result) {
+  // spawnSync returns execution faults instead of throwing them. Inspect those
+  // before parsing stdout: an interrupted audit has no completed measurement.
+  if (result.error || result.signal) {
+    const metadata = executionMetadata(result);
+    const reason =
+      metadata.errorCode === "ETIMEDOUT"
+        ? "execution-timeout"
+        : ["ENOBUFS", "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"].includes(metadata.errorCode)
+          ? "execution-output-limit"
+          : result.error
+            ? "execution-error"
+            : "execution-signal";
+    return { state: "INCOMPLETE", reason, ...metadata };
+  }
   let report;
   try {
     report = JSON.parse(result.stdout);
@@ -23,8 +56,6 @@ export function evaluateAuditResult(result) {
   }
   const counts = report?.metadata?.vulnerabilities;
   if (
-    result.error ||
-    result.signal ||
     ![0, 1].includes(result.status) ||
     report?.error ||
     report?.auditReportVersion !== 2 ||
@@ -71,7 +102,7 @@ export function auditDependencies({
         finishedAt: new Date().toISOString(),
         state: "INCOMPLETE",
         reason: "audit-invocation-failed",
-        errorCode: typeof error?.code === "string" ? error.code : "UNKNOWN",
+        ...executionMetadata({ error }),
       };
     }
     const evaluated = evaluateAuditResult(result);
@@ -90,7 +121,7 @@ export function auditDependencies({
       lockSha256,
       startedAt,
       finishedAt: new Date().toISOString(),
-      exitCode: result.status,
+      ...executionMetadata(result),
       ...summary,
       ...(reportPath ? { reportPath } : {}),
     };
