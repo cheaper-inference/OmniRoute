@@ -252,7 +252,7 @@ function AdaptiveContextBudgetDial({
   // the panel has no selected-model context here; 200k is Claude-class default.
   const target = getAdaptiveTargetSummary(contextBudget, 200000);
   return (
-    <div className="mb-4 space-y-2 rounded-md border border-border bg-bg-subtle px-3 py-2">
+    <Card.Section className="mb-4 space-y-2">
       <Select
         compact
         label={t("compressionAdaptiveMode")}
@@ -301,7 +301,7 @@ function AdaptiveContextBudgetDial({
             })
           : t("compressionAdaptiveOff")}
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -661,9 +661,9 @@ export default function CompressionPanel() {
       </div>
 
       {/* Derived pipeline preview */}
-      <div
+      <Card.Section
         data-testid="derived-pipeline-preview"
-        className="mb-4 space-y-1 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
+        className="mb-4 space-y-1 text-xs text-text-muted"
       >
         <div>
           <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
@@ -677,7 +677,7 @@ export default function CompressionPanel() {
             {derivedPreviewText(autoTriggerDerived, t)}
           </div>
         )}
-      </div>
+      </Card.Section>
 
       {/* Adaptive context-budget dial — mode/policy persist via PUT contextBudget */}
       <AdaptiveContextBudgetDial

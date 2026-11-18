@@ -122,7 +122,7 @@ function RtkTomlEditor({
 function RtkTomlResult({ result }: { result: ImportResult }) {
   const t = useTranslations("contextRtk");
   return (
-    <div className="mt-4 rounded-lg border border-border bg-bg p-3" data-testid="rtk-toml-result">
+    <Card.Section className="mt-4" data-testid="rtk-toml-result">
       <p className="text-xs font-medium text-text-main">
         {result.installedPath
           ? t("tomlInstalled", { path: result.installedPath })
@@ -168,7 +168,7 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
           ))}
         </ul>
       )}
-    </div>
+    </Card.Section>
   );
 }
 

@@ -284,3 +284,99 @@ test("F: section headings take their size from ci-heading data-size", () => {
     assert.match(tag, /ci-heading|ci-eyebrow/, `${file}:${line} names a kit heading class`);
   }
 });
+
+// ── C: nested panels ─────────────────────────────────────────────────────────────────────
+
+test("C: a neutral panel nested in a card is Card.Section, not a hand-made box", () => {
+  // A box drawn by hand: a border, a neutral fill and a radius on one element. Nested in a card
+  // or a dialog it is `Card.Section` (the kit inset card). What stays is a surface of its own.
+  const hits = openingTags("div|section|aside|article|li|form|Field").filter(
+    ({ tag }) =>
+      /(?<![\w:-])border(?![\w-])|(?<![\w:-])border-border(?![\w-])/.test(tag) &&
+      /(?<![\w:-])bg-(?:bg|bg-subtle|bg-alt|surface)(?:\/\d+)?(?![\w-])/.test(tag) &&
+      /(?<![\w:-])rounded(?:-(?:sm|md|lg|xl|2xl))?(?![\w-])/.test(tag)
+  );
+  const TOP_LEVEL = "A surface of the screen itself (it is not nested in a card).";
+  const kept: Kept[] = [
+    ...(
+      [
+        ["webhooks/components/HowItWorksSidebar.tsx", "<aside"],
+        ["webhooks/components/WebhookCard.tsx", "rounded-xl border border-border bg-surface"],
+        ["media-providers/components/LlmChatCard.tsx", '"flex flex-col gap-3"'],
+        ["compression/studio/CompressionCockpit.tsx", "px-3 py-2 rounded-lg"],
+        ["compression/studio/CompressionCockpit.tsx", "flex-1 min-h-0 overflow-auto"],
+        ["compression/studio/CompressionCockpit.tsx", "px-3 py-1.5 rounded-lg"],
+        ["search-tools/components/RerankPanel.tsx", "rounded-lg overflow-hidden"],
+        ["search-tools/components/ScrapeResult.tsx", "flex flex-wrap justify-between"],
+        ["search-tools/components/ScrapeResult.tsx", "p-3 bg-surface border"],
+        ["search-tools/components/SearchConceptCard.tsx", 'data-testid="search-concept-card"'],
+        ["search-tools/components/tabs/CompareTab.tsx", "rounded-lg p-4 space-y-3"],
+        ["search-tools/components/tabs/CompareTab.tsx", 'data-testid="compare-results"'],
+        ["search-tools/components/tabs/CompareTab.tsx", "min-w-[280px]"],
+        ["search-tools/components/tabs/ScrapeTab.tsx", "rounded-lg p-4 space-y-3"],
+        ["orchestration/OrchestrationToolbar.tsx", "flex flex-wrap items-center gap-3"],
+      ] as const
+    ).map(([file, marker]) => ({ file, marker, reason: TOP_LEVEL })),
+    {
+      file: "media-providers/[kind]/page.tsx",
+      marker: "cursor-pointer",
+      reason: "A tile that is a link to the provider kind: an interactive card, not a panel.",
+    },
+    {
+      file: "search-tools/components/ProviderCatalog.tsx",
+      marker: "transition-colors",
+      reason: "A selectable provider tile (selected and hover states), not a panel.",
+    },
+    {
+      file: "orchestration/tabs/OverviewTab.tsx",
+      marker: "data-orch-card",
+      reason: "A card that opens the drawer (role=button), not a panel.",
+    },
+    {
+      file: "playground/components/tabs/ChatTab.tsx",
+      marker: "rounded-tr-sm",
+      reason: "A chat bubble.",
+    },
+    {
+      file: "playground/components/tabs/ChatTab.tsx",
+      marker: 'role="status"',
+      reason: "The typing bubble of the chat.",
+    },
+    {
+      file: "playground/components/tabs/BuildTab.tsx",
+      marker: "max-w-[80%]",
+      reason: "A chat bubble.",
+    },
+    {
+      file: "media-providers/components/LlmChatCard.tsx",
+      marker: "ref={scrollRef}",
+      reason: "The scroll viewport of the chat transcript: it owns its height and has no padding.",
+    },
+    {
+      file: "media-providers/components/PlaygroundCard.tsx",
+      marker: "overflow-auto max-h-64",
+      reason: "The scroll viewport of the response: it owns its height and has no padding.",
+    },
+    {
+      file: "search-tools/components/ScrapeResult.tsx",
+      marker: 'data-testid="markdown-preview"',
+      reason: "The reading surface of the scraped page (prose).",
+    },
+    {
+      file: "memory/components/MemoryEngineStatus.tsx",
+      marker: "flex items-start gap-3 p-3",
+      reason: "A list of status rows (a chip, a title, a reason): rows, not panels.",
+    },
+    {
+      file: "memory/components/QdrantConfigCard.tsx",
+      marker: "p-2 rounded bg-bg/40",
+      reason: "A list of search hits (an id and a score): rows, not panels.",
+    },
+    {
+      file: "memory/components/tabs/MemoriesTab.tsx",
+      marker: "p-3 rounded-lg bg-bg-subtle border border-border/60",
+      reason: "The result message of an import (a notice), not a panel.",
+    },
+  ];
+  assertOnlyKept(hits, kept, "use <Card.Section>");
+});

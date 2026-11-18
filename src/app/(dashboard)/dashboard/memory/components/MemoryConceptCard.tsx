@@ -37,11 +37,11 @@ export default function MemoryConceptCard() {
             />
           </Button>
           {open && (
-            <div className="mt-3 p-3 rounded-lg bg-surface/50 border border-border/60 text-xs text-text-muted leading-relaxed space-y-1.5">
+            <Card.Section className="mt-3 text-xs text-text-muted leading-relaxed space-y-1.5">
               {(t("concept.howWorksContent") as string).split("\n").map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
-            </div>
+            </Card.Section>
           )}
         </div>
       </div>

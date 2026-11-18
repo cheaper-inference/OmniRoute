@@ -593,7 +593,7 @@ export default function RtkContextPageClient() {
       >
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {Object.entries(groupedFilters).map(([category, items]) => (
-            <div key={category} className="rounded-lg border border-border bg-bg p-3">
+            <Card.Section key={category}>
               <h3 className="ci-heading capitalize" data-size="xs">
                 {category}
               </h3>
@@ -622,7 +622,7 @@ export default function RtkContextPageClient() {
                   );
                 })}
               </div>
-            </div>
+            </Card.Section>
           ))}
         </div>
       </Collapsible>

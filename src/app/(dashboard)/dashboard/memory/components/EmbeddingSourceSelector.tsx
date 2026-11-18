@@ -6,6 +6,7 @@ import { Field } from "@omniroute/ui-kit/field";
 import { Switch } from "@omniroute/ui-kit/switch";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { cn } from "@/shared/utils/cn";
@@ -90,62 +91,60 @@ export default function EmbeddingSourceSelector({ settings, providers, onSave, s
       </div>
 
       {currentSource === "remote" && (
-        <Field
-          label={t("embedding.providerModelLabel")}
-          htmlFor={providerModelId}
-          className="p-3 rounded-lg bg-bg-subtle border border-border/60"
-        >
-          {remoteProviders.length === 0 ? (
-            <p className="text-xs text-warning flex items-center gap-1">
-              <Icon name="warning" size={12} />
-              {t("embedding.noRemoteProviders")}
-            </p>
-          ) : (
-            <>
-              <Select
-                id={providerModelId}
-                value={
-                  remoteProviders.some((p) => p.models.some((m) => m.id === currentProviderModel))
-                    ? currentProviderModel
-                    : ""
-                }
-                onChange={(e) => handleProviderModelChange(e.target.value)}
-                disabled={saving}
-                data-testid="embedding-provider-model-select"
-              >
-                <option value="">{t("embedding.selectProviderModel")}</option>
-                {remoteProviders.map((p) =>
-                  p.models.length > 0 ? (
-                    p.models.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name} ({m.dimensions ? `${m.dimensions}d` : "?"})
-                      </option>
-                    ))
-                  ) : (
-                    <optgroup key={p.provider} label={p.provider}>
-                      <option value="">{`— ${p.provider} (no curated models)`}</option>
-                    </optgroup>
-                  )
-                )}
-              </Select>
-              {/* Free-text override: the runtime accepts any configured provider's
+        <Card.Section>
+          <Field label={t("embedding.providerModelLabel")} htmlFor={providerModelId}>
+            {remoteProviders.length === 0 ? (
+              <p className="text-xs text-warning flex items-center gap-1">
+                <Icon name="warning" size={12} />
+                {t("embedding.noRemoteProviders")}
+              </p>
+            ) : (
+              <>
+                <Select
+                  id={providerModelId}
+                  value={
+                    remoteProviders.some((p) => p.models.some((m) => m.id === currentProviderModel))
+                      ? currentProviderModel
+                      : ""
+                  }
+                  onChange={(e) => handleProviderModelChange(e.target.value)}
+                  disabled={saving}
+                  data-testid="embedding-provider-model-select"
+                >
+                  <option value="">{t("embedding.selectProviderModel")}</option>
+                  {remoteProviders.map((p) =>
+                    p.models.length > 0 ? (
+                      p.models.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.dimensions ? `${m.dimensions}d` : "?"})
+                        </option>
+                      ))
+                    ) : (
+                      <optgroup key={p.provider} label={p.provider}>
+                        <option value="">{`— ${p.provider} (no curated models)`}</option>
+                      </optgroup>
+                    )
+                  )}
+                </Select>
+                {/* Free-text override: the runtime accepts any configured provider's
                 OpenAI-compatible model id, including ones without a curated
                 registry entry (e.g. groq/, mistral/, cf/...). */}
-              <Input
-                type="text"
-                value={currentProviderModel}
-                onChange={(e) => handleProviderModelChange(e.target.value)}
-                disabled={saving}
-                placeholder="provider/model — e.g. mistral/mistral-embed"
-                aria-label={t("embedding.providerModelLabel")}
-                data-testid="embedding-provider-model-input"
-                className="mt-2"
-                inputClassName="font-mono"
-              />
-            </>
-          )}
-          <CustomEmbeddingEndpointFields settings={settings} onSave={onSave} saving={saving} />
-        </Field>
+                <Input
+                  type="text"
+                  value={currentProviderModel}
+                  onChange={(e) => handleProviderModelChange(e.target.value)}
+                  disabled={saving}
+                  placeholder="provider/model — e.g. mistral/mistral-embed"
+                  aria-label={t("embedding.providerModelLabel")}
+                  data-testid="embedding-provider-model-input"
+                  className="mt-2"
+                  inputClassName="font-mono"
+                />
+              </>
+            )}
+            <CustomEmbeddingEndpointFields settings={settings} onSave={onSave} saving={saving} />
+          </Field>
+        </Card.Section>
       )}
 
       {currentSource === "transformers" && (

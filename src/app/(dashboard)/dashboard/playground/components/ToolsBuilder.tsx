@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
@@ -205,7 +206,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
       )}
 
       {/* Add tool form */}
-      <div className="border border-border rounded-lg p-3 flex flex-col gap-2 bg-surface">
+      <Card.Section className="flex flex-col gap-2">
         <span className="ci-eyebrow" data-weight="medium">
           {t("addTool")}
         </span>
@@ -246,7 +247,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
         <Button size="sm" icon="add" onClick={handleAdd} className="self-start">
           {t("addTool")}
         </Button>
-      </div>
+      </Card.Section>
     </div>
   );
 }

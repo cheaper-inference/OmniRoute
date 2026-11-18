@@ -253,7 +253,7 @@ export default function CompressionHub() {
 
       {/* ── Explainer ── */}
       {explainerOpen && (
-        <div className="rounded-lg border border-border bg-bg p-4 text-sm text-text-muted">
+        <Card.Section className="text-sm text-text-muted">
           <p className="mb-2">
             {t.rich("explanationIntro", {
               strong: (chunks) => <strong className="text-text-main">{chunks}</strong>,
@@ -281,11 +281,11 @@ export default function CompressionHub() {
               })}
             </li>
           </ol>
-        </div>
+        </Card.Section>
       )}
 
       {/* ── Active profile ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Select
           id="active-profile"
           label={t("activeProfile")}
@@ -319,14 +319,14 @@ export default function CompressionHub() {
             </span>
           )}
         </div>
-      </div>
+      </Card.Section>
 
       {/* ── Provider-delegated compression ── */}
       <div className="flex flex-col gap-3">
         <h2 className="ci-heading" data-size="sm">
           {t("providerDelegated")}
         </h2>
-        <div className="flex items-center gap-3 rounded-lg border border-border bg-bg p-4">
+        <Card.Section className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-text-main">{t("contextEditingClaude")}</p>
             <p className="text-xs text-text-muted">{t("contextEditingDescription")}</p>
@@ -338,7 +338,7 @@ export default function CompressionHub() {
             }
             ariaLabel={t("contextEditingAria")}
           />
-        </div>
+        </Card.Section>
         <Alert
           variant="warning"
           icon={<Icon name="info" size={16} />}

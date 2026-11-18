@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 // src/app/(dashboard)/dashboard/playground/components/StructuredOutputEditor.tsx
 
 import Button from "@/shared/components/Button";
@@ -79,7 +80,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
 
       {/* Schema editor (shown only when enabled) */}
       {enabled && (
-        <div className="flex flex-col gap-2 border border-border rounded-lg p-3 bg-surface">
+        <Card.Section className="flex flex-col gap-2">
           {/* Schema name */}
           <Input
             label={t("schemaName")}
@@ -116,7 +117,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
           <Button variant="outline" size="sm" onClick={handleValidate} className="self-start">
             {t("validateSchema")}
           </Button>
-        </div>
+        </Card.Section>
       )}
     </div>
   );

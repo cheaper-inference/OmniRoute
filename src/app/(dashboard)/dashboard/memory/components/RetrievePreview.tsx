@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { Badge } from "@/shared/components";
@@ -23,7 +24,7 @@ export default function RetrievePreview({ result }: Props) {
   return (
     <div className="space-y-4">
       {/* Resolution panel */}
-      <div className="p-3 rounded-lg bg-surface/30 border border-border/60 text-xs text-text-muted space-y-1">
+      <Card.Section className="text-xs text-text-muted space-y-1">
         <p className="font-medium text-text-main text-sm">{t("playground.resolutionTitle")}</p>
         <p>
           {t("playground.resolutionEmbedding")}:{" "}
@@ -51,7 +52,7 @@ export default function RetrievePreview({ result }: Props) {
             {t("playground.fallback")}: {resolution.fallbackReason}
           </p>
         )}
-      </div>
+      </Card.Section>
 
       {/* Results list */}
       {memories.length === 0 ? (
@@ -59,10 +60,7 @@ export default function RetrievePreview({ result }: Props) {
       ) : (
         <div className="space-y-2">
           {memories.map((m) => (
-            <div
-              key={m.id}
-              className="p-3 rounded-lg border border-border/60 bg-surface/30 space-y-1"
-            >
+            <Card.Section key={m.id} className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant={TIER_VARIANT[m.tier] ?? "default"} size="sm">
                   {m.tier}
@@ -78,7 +76,7 @@ export default function RetrievePreview({ result }: Props) {
                 {m.vecScore !== null && <span>vec: {m.vecScore.toFixed(3)}</span>}
                 {m.ftsScore !== null && <span>fts: {m.ftsScore.toFixed(3)}</span>}
               </div>
-            </div>
+            </Card.Section>
           ))}
         </div>
       )}
