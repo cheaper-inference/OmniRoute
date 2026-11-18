@@ -98,17 +98,22 @@ export async function getRequestedModelEndpointMismatch(
   fullModelId: string,
   requested: RequestedEndpoint
 ): Promise<string | null> {
-  if (typeof fullModelId === "string" && fullModelId.startsWith("rosebud/") && requested === "chat")
-    return "Rosebud generates assets and does not support chat completions.";
-  if (typeof fullModelId !== "string" || !isModelEndpointCapabilityGateEnabled()) return null;
+  if (typeof fullModelId !== "string") return null;
+  const rosebudChat = fullModelId.startsWith("rosebud/") && requested === "chat";
+  if (!rosebudChat && !isModelEndpointCapabilityGateEnabled()) return null;
   const slash = fullModelId.indexOf("/");
   if (slash <= 0 || slash >= fullModelId.length - 1) return null;
   const provider = fullModelId.slice(0, slash);
   const modelId = fullModelId.slice(slash + 1);
   try {
-    const catalog = await getActiveSyncedCatalog(provider);
-    const model = catalog.models.find((row) => row.id === modelId);
-    const rejection = getModelEndpointMismatchMessage(fullModelId, model, requested);
+    let rejection: string | null;
+    if (rosebudChat) {
+      rejection = "Rosebud generates assets and does not support chat completions.";
+    } else {
+      const catalog = await getActiveSyncedCatalog(provider);
+      const model = catalog.models.find((row) => row.id === modelId);
+      rejection = getModelEndpointMismatchMessage(fullModelId, model, requested);
+    }
     if (!rejection) return null;
     // An exact stored combo wins over a provider-shaped name collision.
     if (await getComboByName(fullModelId)) return null;

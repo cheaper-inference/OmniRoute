@@ -122,7 +122,7 @@ test("CLI unknown outcomes and trapped termination exits stay uncertain", async 
 });
 
 test(
-  "POSIX SIGTERM handler exits are classified as uncertain",
+  "a POSIX CLI timeout stays uncertain after the SIGTERM handler exits normally",
   { skip: process.platform === "win32" },
   async () => {
     const root = await mkdtemp(join(tmpdir(), "rosebud-signal-"));
@@ -133,10 +133,11 @@ test(
     process.env.ROSEBUD_CLI_SCRIPT = script;
     await writeFile(
       script,
-      `process.on("SIGTERM",()=>{process.stderr.write(JSON.stringify({error:{code:"interrupted",outcome:"unknown"}}));process.exit(143);});setInterval(()=>{},1000);`
+      `process.on("SIGTERM",()=>{process.stderr.write(JSON.stringify({error:{code:"interrupted"}}));process.exit(1);});setInterval(()=>{},1000);`
     );
     try {
-      await assert.rejects(runRosebud("one", ["assets", "create"], 250), (error: unknown) => {
+      await assert.rejects(runRosebud("one", ["assets", "create"], 1000), (error: unknown) => {
+        assert.match(String(error), /interrupted/);
         assert.equal((error as { uncertain: boolean }).uncertain, true);
         return true;
       });

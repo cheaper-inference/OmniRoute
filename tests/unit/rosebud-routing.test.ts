@@ -56,11 +56,20 @@ test("only the Rosebud-aware image route can reach the CLI runner", () => {
 });
 
 test("both MCP HTTP routes supply the trusted peer verdict before serving a request", () => {
-  for (const route of ["src/app/api/mcp/stream/route.ts", "src/app/api/mcp/sse/route.ts"]) {
-    const text = source(route);
-    const marks = text.match(/markMcpPeerLocality\(request, getRequestPeerLocality\(request\)\);/g);
-    const serves = text.match(/return handleMcp\w+\(request\);/g);
-    assert.ok(serves?.length);
-    assert.equal(marks?.length, serves?.length, route);
+  for (const [transport, methods] of [
+    ["stream", ["POST", "GET", "DELETE"]],
+    ["sse", ["GET", "POST"]],
+  ] as const) {
+    const handlers = source(`src/app/api/mcp/${transport}/route.ts`).split(
+      "export async function "
+    );
+    for (const method of methods) {
+      const handler = handlers.find((text) => text.startsWith(method + "("));
+      assert.ok(handler, `${transport} ${method} handler`);
+      assert.match(
+        handler,
+        /markMcpPeerLocality\(request, getRequestPeerLocality\(request\)\);\s+return handleMcp\w+\(request\);/
+      );
+    }
   }
 });

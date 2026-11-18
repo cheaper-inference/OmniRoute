@@ -95,7 +95,7 @@ Actions: `connect`, `authorize`, `account`, `models`, `quote`, `generate`, `stat
 succeeded. Download returns validated Base64, MIME type and SHA-256, never a
 server filesystem path. Job IDs are bound to the account profile. A started request never rotates to a different Rosebud account. Keep job IDs
 and idempotency keys to resume after a timeout. A different payload using the
-same idempotency key returns 409.
+same idempotency key returns 409. Reusing a generation key with another account also returns 409.
 
 MCP tools (management scope required): `rosebud_models`, `rosebud_account`,
 `rosebud_quote`, `rosebud_generate_image`, `rosebud_generate_sprite`,
@@ -179,7 +179,9 @@ Definitively unpaid transient failures may be retried with the same key.
 Every Rosebud HTTP operation requires authenticated management access even when
 ordinary dashboard login is disabled. Management API keys must also include the
 requested connection in their connection scope. HTTP MCP calls inherit that same
-check. Dashboard administrators retain their normal management authority. The
+check. Dashboard administrators retain their normal management authority. Use a
+dashboard session or management API key for these operations. CLI management
+access tokens (`oma_`) receive HTTP 403. The
 upstream CLI independently enforces asset and game-publishing authorization scopes.
 
 After an uncertain publish, use `rosebud_game_status` to inspect the original game.

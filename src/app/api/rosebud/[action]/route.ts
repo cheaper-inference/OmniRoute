@@ -148,9 +148,12 @@ export async function POST(request: Request, context: { params: Promise<{ action
     const parsed = requestSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) throw parsed.error;
     const args = parsed.data;
-    const denied = await requireRosebudAccess(request, args.connectionId);
-    if (denied) return denied;
     const { action } = await context.params;
+    const denied = await requireRosebudAccess(
+      request,
+      action === "connect" ? undefined : args.connectionId
+    );
+    if (denied) return denied;
     if (action === "connect")
       return Response.json(await connectRosebud(args.name || "OmniRoute Rosebud"));
     if (!args.connectionId) return errorResponse(400, "connectionId required");

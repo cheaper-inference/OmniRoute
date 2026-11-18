@@ -15,7 +15,7 @@ function canonical(value: unknown): unknown {
 }
 
 /** Publish a binding atomically; when another request won the race, its binding stands. */
-async function writeBinding(folder: string, file: string, binding: Record<string, string>) {
+export async function writeBinding(folder: string, file: string, binding: Record<string, string>) {
   await mkdir(folder, { recursive: true, mode: 0o700 });
   const temporary = file + "." + randomUUID();
   await writeFile(temporary, JSON.stringify(binding), { mode: 0o600 });
@@ -28,7 +28,7 @@ async function writeBinding(folder: string, file: string, binding: Record<string
   }
 }
 
-async function readBinding(file: string) {
+export async function readBinding(file: string) {
   try {
     return JSON.parse(await readFile(file, "utf8"));
   } catch (error) {

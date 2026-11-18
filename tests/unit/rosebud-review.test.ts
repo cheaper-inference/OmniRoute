@@ -147,6 +147,83 @@ test("Rosebud requires authenticated management access even in open mode and res
     assert.equal(await requireRosebudAccess(request, "a"), null);
     assert.equal((await requireRosebudAccess(request, "b"))?.status, 403);
     assert.equal((await requireRosebudAccess(request))?.status, 403);
+    const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
+    const connection = await createProviderConnection({
+      provider: "rosebud",
+      authType: "none",
+      name: "Rosebud fixture",
+      isActive: false,
+      providerSpecificData: { rosebudProfile: "fixture" },
+    });
+    assert.ok(connection);
+    const scoped = await createApiKey("rosebud-fixture-scoped", "test-machine", ["manage"], {
+      allowedConnections: [connection.id],
+    });
+    const { createAccessToken } = await import("../../src/lib/db/accessTokens.ts");
+    const { requireManagementAuth } = await import("../../src/lib/api/requireManagementAuth.ts");
+    const token = createAccessToken({ name: "Rosebud fixture", scope: "admin" });
+    const accessRequest = new Request("http://localhost/api/rosebud/account", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token.secret },
+    });
+    assert.equal(await requireManagementAuth(accessRequest), null);
+    const denied = await requireRosebudAccess(accessRequest, "a");
+    assert.equal(denied?.status, 403);
+    assert.match(await denied!.text(), /dashboard session or a management API key/);
+
+    const { POST: rosebudPost } = await import("../../src/app/api/rosebud/[action]/route.ts");
+    const connectResponse = await rosebudPost(
+      new Request("http://localhost/api/rosebud/connect", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + scoped.key },
+        body: JSON.stringify({ connectionId: connection.id }),
+      }),
+      { params: Promise.resolve({ action: "connect" }) }
+    );
+    assert.equal(connectResponse.status, 403);
+
+    const { POST: batchPost } = await import("../../src/app/api/providers/test-batch/route.ts");
+    const batchResponse = await batchPost(
+      new Request("http://localhost/api/providers/test-batch", {
+        method: "POST",
+        headers: request.headers,
+        body: JSON.stringify({ mode: "selected", connectionIds: [connection.id] }),
+      })
+    );
+    assert.equal(batchResponse.status, 200);
+    assert.deepEqual((await batchResponse.json()).results, []);
+
+    const tokenRoutes = [
+      ["models", "GET", (await import("../../src/app/api/providers/[id]/models/route.ts")).GET],
+      [
+        "sync-models",
+        "POST",
+        (await import("../../src/app/api/providers/[id]/sync-models/route.ts")).POST,
+      ],
+      ["test", "POST", (await import("../../src/app/api/providers/[id]/test/route.ts")).POST],
+    ] as const;
+    for (const [path, method, handler] of tokenRoutes) {
+      const tokenRequest = new Request(`http://localhost/api/providers/${connection.id}/${path}`, {
+        method,
+        headers: accessRequest.headers,
+      });
+      const response = await handler(tokenRequest, {
+        params: Promise.resolve({ id: connection.id }),
+      });
+      assert.equal(response.status, 403);
+      assert.match(await response.text(), /dashboard session or a management API key/);
+    }
+
+    const { createCombo } = await import("../../src/lib/db/combos.ts");
+    const { getRequestedModelEndpointMismatch } =
+      await import("../../src/lib/providerModels/modelEndpointGuard.ts");
+    const modelId = "rosebud/test";
+    assert.match(
+      (await getRequestedModelEndpointMismatch(modelId, "chat")) ?? "",
+      /generates assets/
+    );
+    await createCombo({ name: modelId, strategy: "priority", models: ["openai/gpt-4o"] });
+    assert.equal(await getRequestedModelEndpointMismatch(modelId, "chat"), null);
   } finally {
     resetDbInstance();
     if (previousSecret === undefined) delete process.env.API_KEY_SECRET;

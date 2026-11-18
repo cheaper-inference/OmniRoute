@@ -97,19 +97,20 @@ function cliErrorStatus(name: string) {
 }
 
 /** Translate a failed CLI result without exposing its stderr to callers. */
-function cliFailure(result: JsonObject, code: number | null, signal: NodeJS.Signals | null) {
+function cliFailure(result: JsonObject, code: number | null, interrupted: boolean) {
   const error =
     result.error && typeof result.error === "object" ? (result.error as JsonObject) : result;
   const name =
     typeof error.code === "string" && /^[a-z_]{1,80}$/.test(error.code) ? error.code : "cli_failed";
   const outcomeUnknown =
-    code === 4 || code === 130 || code === 143 || Boolean(signal) || error.outcome === "unknown";
+    interrupted || code === 4 || code === 130 || code === 143 || error.outcome === "unknown";
   return new RosebudError(name, cliErrorStatus(name), outcomeUnknown);
 }
 
 function parseCliOutput(
   output: { code: number | null; signal: NodeJS.Signals | null; stdout: string; stderr: string },
-  exceeded: boolean
+  exceeded: boolean,
+  timedOut: boolean
 ): JsonObject {
   let result: JsonObject;
   try {
@@ -118,7 +119,7 @@ function parseCliOutput(
     throw new RosebudError(exceeded ? "output_too_large" : "invalid_cli_response", 502, true);
   }
   if (output.code === 0 && !output.signal) return result;
-  throw cliFailure(result, output.code, output.signal);
+  throw cliFailure(result, output.code, timedOut || exceeded || Boolean(output.signal));
 }
 
 const MAX_CLI_OUTPUT_CHARS = 8 * 1024 * 1024;
@@ -141,9 +142,11 @@ function runCliProcess(
     child.stderr.setEncoding("utf8");
     let stdout = "",
       stderr = "",
-      exceeded = false;
+      exceeded = false,
+      timedOut = false;
     let killTimer: ReturnType<typeof setTimeout> | undefined;
     const timer = setTimeout(() => {
+      timedOut = true;
       child.kill("SIGTERM");
       killTimer = setTimeout(() => child.kill("SIGKILL"), 5000);
     }, timeoutMs);
@@ -166,7 +169,7 @@ function runCliProcess(
       clearTimeout(timer);
       if (killTimer) clearTimeout(killTimer);
       try {
-        accept(parseCliOutput({ code, signal, stdout, stderr }, exceeded));
+        accept(parseCliOutput({ code, signal, stdout, stderr }, exceeded, timedOut));
       } catch (error) {
         reject(error);
       }

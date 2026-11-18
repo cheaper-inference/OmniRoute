@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 import { RosebudRuntime } from "../../open-sse/services/rosebud/runtime.ts";
 import { RosebudError, type RosebudRunner } from "../../open-sse/services/rosebud/cli.ts";
 import {
@@ -75,6 +76,22 @@ test("durable jobs reuse a paid submission, bind account, and reject changed inp
       false
     );
     await assert.rejects(runtime.read("account-b", first.id), /job_not_found/);
+    await assert.rejects(runtime.generate("account-b", request), /idempotency_profile_conflict/);
+    // Exercise migration from the original profile-scoped job layout.
+    await mkdir(join(dir, "accounts", "account-a"), { recursive: true });
+    await rm(join(dir, "generation-bindings"), { recursive: true });
+    await assert.rejects(runtime.generate("account-b", request), /idempotency_profile_conflict/);
+    assert.equal((await runtime.generate("account-a", request)).id, first.id);
+    const claim = createHash("sha256")
+      .update(JSON.stringify(["account-a", "test-image", request.input]))
+      .digest("hex");
+    const claimPath = join(dir, "pending", claim);
+    await writeFile(claimPath, first.id);
+    assert.equal((await runtime.recover("account-a", first.id)).status, "succeeded");
+    await assert.rejects(readFile(claimPath), { code: "ENOENT" });
+    await writeFile(claimPath, "another-job");
+    await runtime.recover("account-a", first.id);
+    assert.equal(await readFile(claimPath, "utf8"), "another-job");
     await assert.rejects(
       runtime.generate("account-a", { ...request, input: { prompt: "different" } }),
       /idempotency_conflict/

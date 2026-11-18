@@ -8,11 +8,14 @@ import { getRequestPeerLocality, isDashboardSessionAuthenticated } from "@/share
 import { extractApiKey } from "@/sse/services/auth";
 import { getApiKeyMetadata } from "@/lib/db/apiKeys";
 import { resolveKeyConnectionScope } from "@/sse/services/keyConnectionScope";
+import { ACCESS_TOKEN_PREFIX, extractBearer } from "@/server/authz/accessTokenAuth";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 
 export async function requireRosebudAccess(request: Request, connectionId?: string) {
   const denied = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (denied) return denied;
+  if (extractBearer(request)?.startsWith(ACCESS_TOKEN_PREFIX))
+    return errorResponse(403, "Rosebud requires a dashboard session or a management API key");
   const key = extractApiKey(request, { allowUrl: false });
   if (!key) {
     // The internal hop proves only the transport, so a forwarded cookie must prove a real session.

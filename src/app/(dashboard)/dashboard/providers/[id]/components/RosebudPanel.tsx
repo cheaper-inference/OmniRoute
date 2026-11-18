@@ -79,7 +79,7 @@ export default function RosebudPanel({
   }
   return (
     <Card className="p-4 space-y-3">
-      <h2 className="font-semibold">{t("title")}</h2>
+      <h2>{t("title")}</h2>
       <p>{t("description")}</p>
       <Button disabled={busy} onClick={() => call("connect")}>
         {t("connect")}
