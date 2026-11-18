@@ -20,7 +20,7 @@ Când un agent IDE (de exemplu, GitHub Copilot, Cursor, Claude Code) efectuează
 
 Aceasta înseamnă că puteți:
 
-- **Redirecționați orice agent către orice furnizor** : Copilot vorbesc cu OpenAI? Redirecționați-l către Anthropic Claude, Gemini sau către oricare dintre cei 381 de furnizori ai OmniRoute.
+- **Redirecționați orice agent către orice furnizor** : Copilot vorbesc cu OpenAI? Redirecționați-l către Anthropic Claude, Gemini sau către oricare dintre cei 394 de furnizori ai OmniRoute.
 - **Aplicați mapările modelului** : `gemini-3-flash` → `claude-sonnet-4.7` transparent la nivelul handlerului.
 - **Observați tot traficul de agenți** : fiecare cerere interceptată este publicată la [Inspectorul de Trafic](./TRAFFIC_INSPECTOR.md).
 - **Aplicați rezistența OmniRoute** : rutarea combinată, întreruptoarele de circuit, alternativele și urmărirea costurilor funcționează și pentru traficul agentului IDE.
@@ -543,26 +543,26 @@ Scheme OpenAPI complete: `docs/openapi.yaml` → eticheta `AgentBridge`.
 
 ---
 
-## §8 Foaie de parcurs
+## §8 Foaia de parcurs
 
-### Investigarea Trae
+### Ancheta Trae
 
-Trae este un asistent de programare cu IA relativ nou. Înainte de implementarea unui handler:
+Trae este un asistent de codare AI relativ nou. Înainte de a implementa un handler:
 
-1. Identificați binarul/extensia în marketplace-urile VS Code / JetBrains sau ca aplicație autonomă
-2. Capturați traficul cu mitmproxy pentru a descoperi gazdele API și structura endpoint-urilor
+1. Identificați binary/extension în piețele VS Code / JetBrains sau ca aplicație independentă
+2. Capturați trafic cu mitmproxy pentru a descoperi gazdele API și formele punctelor finale
 3. Determinați mecanismul de autentificare
-4. Evaluați decizia de continuare sau renunțare pe baza TOS și a posibilității de descoperire a API-ului
+4. Evaluați go/no-go pe baza descoperirii TOS și API
 
-Până la finalizarea investigației, cardul Trae din tabloul de bord afișează o insignă „În curs de investigare” cu un link „Raportați viabilitatea”. Stub-ul handlerului din `src/mitm/handlers/trae.ts` generează o eroare structurată `Neimplementat încă`.
+Până la finalizarea investigației, cardul Trae din tabloul de bord arată o insignă „Investigare” cu un link „Raportați viabilitatea”. Stub-ul de gestionare de la `src/mitm/handlers/trae.ts` aruncă o eroare `Not yet implemented` structurată.
 
-### Agenți din backlog (MITM obligatoriu — fără suport pentru un URL de bază personalizat)
+### Agenți de backlog (MITM necesar — fără suport personalizat URL )
 
-Următoarele instrumente nu acceptă URL-uri de bază personalizate în versiunile lor actuale, ceea ce face ca MITM să fie singura metodă de interceptare. Evaluarea viabilității este în așteptare:
+Următoarele instrumente nu acceptă baza personalizată URLs în versiunile lor actuale, făcând MITM singura cale de interceptare. Evaluarea viabilității este în așteptare:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — separat de Kiro IDE)
-- **Cowork** (aplicația desktop Anthropic)
+- **Cowork** ( desktop Anthropic )
 
-Notă: GitHub Copilot CLI ≥v1.0.19 acceptă `COPILOT_PROVIDER_BASE_URL` — utilizați configurarea directă în locul MITM pentru acest instrument.
+Notă: GitHub Copilot CLI ≥ v1.0.19 acceptă `COPILOT_PROVIDER_BASE_URL` — use direct config în loc de MITM pentru acel instrument.

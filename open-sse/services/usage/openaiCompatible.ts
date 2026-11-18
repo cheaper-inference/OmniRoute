@@ -1,6 +1,6 @@
 /**
  * usage/openaiCompatible.ts — a provider-agnostic quota fetcher for
- * `openai-compatible-*` connections (#13616).
+ * `openai-compatible-*` and `anthropic-compatible-*` connections (#13616).
  *
  * Every other fetcher in this directory hard-codes one upstream's URL, auth and
  * response shape. That works because those providers are known. An
@@ -32,6 +32,8 @@
  * reads 0/0 looks exhausted, and an operator would reasonably act on that.
  */
 
+import { assertDispatchUrlAllowed, dispatchGuarded } from "../../executors/dispatchPin.ts";
+import { isConnectGuardRefusal } from "../../utils/connectGuardDispatcher.ts";
 import { type UsageQuota, createQuotaFromUsage } from "./quota.ts";
 
 /**
@@ -41,6 +43,14 @@ import { type UsageQuota, createQuotaFromUsage } from "./quota.ts";
  * Provider Limits sync.
  */
 const QUOTA_ENDPOINT_TIMEOUT_MS = 15_000;
+
+/**
+ * Provider id handed to the dispatch guard. Compatible nodes are never local or
+ * self-hosted providers, so the guard applies the operator's provider URL policy
+ * exactly as it does for their chat dispatch.
+ */
+const QUOTA_GUARD_PROVIDER = "openai-compatible-quota";
+const QUOTA_ENDPOINT_BLOCKED_MESSAGE = "Quota endpoint blocked by the outbound URL policy.";
 
 export interface OpenAiCompatibleQuotaMapping {
   used?: string;
@@ -148,20 +158,38 @@ export async function getOpenAiCompatibleUsage(
     return { message: "Quota endpoint configured without a `quotas` mapping." };
   }
 
+  // Same SSRF policy as every other provider outbound call (the dispatch guard in
+  // `executors/dispatchPin.ts`): local/LAN hosts follow the operator's setting and
+  // cloud-metadata is always refused, by host name here and again at connect time.
+  try {
+    assertDispatchUrlAllowed(QUOTA_GUARD_PROVIDER, endpoint.url);
+  } catch {
+    // Deliberately not echoing the error: it carries the operator-supplied URL.
+    return { message: QUOTA_ENDPOINT_BLOCKED_MESSAGE };
+  }
+
   let body: unknown;
   try {
-    const response = await fetch(endpoint.url, {
-      method: endpoint.method ?? "GET",
-      headers: buildAuthHeaders(endpoint, apiKey),
-      signal: AbortSignal.timeout(QUOTA_ENDPOINT_TIMEOUT_MS),
-    });
+    const response = await dispatchGuarded(
+      QUOTA_GUARD_PROVIDER,
+      endpoint.url,
+      {
+        method: endpoint.method ?? "GET",
+        headers: buildAuthHeaders(endpoint, apiKey),
+        signal: AbortSignal.timeout(QUOTA_ENDPOINT_TIMEOUT_MS),
+        // A redirect is never followed, so it cannot carry the API key to another host.
+        redirect: "manual",
+      },
+      { providerSpecificData: { baseUrl: endpoint.url } }
+    );
     if (!response.ok) {
       return { message: `Quota endpoint returned HTTP ${response.status}.` };
     }
     body = await response.json();
-  } catch {
+  } catch (error) {
     // Deliberately not echoing the error: the URL is operator-supplied and the
     // message can carry it (and any query string) into the dashboard.
+    if (isConnectGuardRefusal(error)) return { message: QUOTA_ENDPOINT_BLOCKED_MESSAGE };
     return { message: "Quota endpoint unreachable." };
   }
 

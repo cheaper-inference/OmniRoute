@@ -212,6 +212,17 @@ function hasForbiddenMuseHistory(body: Record<string, unknown>, references: Set<
   );
 }
 
+/**
+ * Request state that is bound to the provider session that served it: opaque
+ * reasoning, item references, a response id, or items no session could adopt.
+ * Plain tool history (calls carrying a `call_id`) is NOT bound, so it stays
+ * adoptable and can still fail over. Same boundary the ownership claim uses.
+ */
+export function bodyCarriesBoundContinuation(body: Record<string, unknown>): boolean {
+  if (!body || typeof body !== "object") return false;
+  return hasForbiddenMuseHistory(body, continuationIds(body));
+}
+
 function assertKeptOwnerUsable(
   owner: Owner,
   current: Connection | null | undefined,

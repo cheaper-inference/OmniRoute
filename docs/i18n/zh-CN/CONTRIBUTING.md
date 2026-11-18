@@ -300,69 +300,69 @@ CI 负责——在本地运行这些项目不会提供 PR 检查之外的额外�
 ## 项目结构
 
 ```
-src/                        # TypeScript（.ts / .tsx）
+src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # 仪表板页面（23 个分区）
-│   ├── api/                # API 路由（51 个目录）
-│   └── login/              # 身份验证页面（.tsx）
-├── domain/                 # 策略引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心业务逻辑（.ts）
-│   ├── a2a/                # Agent-to-Agent v0.3 协议服务器
-│   ├── acp/                # Agent Communication Protocol 注册表
-│   ├── compliance/         # 合规策略引擎
-│   ├── db/                 # SQLite 领域模块 + 130 个迁移
-│   ├── memory/             # 持久化对话记忆
-│   ├── oauth/              # OAuth 提供者、服务和实用工具
-│   ├── skills/             # 可扩展技能框架
-│   ├── usage/              # 使用量跟踪和成本计算
-│   └── localDb.ts          # 仅限重新导出层——切勿在此添加逻辑
-├── middleware/              # 请求中间件（promptInjectionGuard）
-├── mitm/                   # MITM 代理（证书、DNS、目标路由）
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React 组件（.tsx）
-│   ├── constants/          # 提供者定义（329 个）、MCP 作用域、20 种路由策略
-│   ├── utils/              # 熔断器、清理器、身份验证辅助工具
-│   └── validation/         # Zod v4 模式
-└── sse/                    # SSE 代理管道
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse 工作区
-├── executors/              # 150 个执行器模块（执行器类 + 各提供者辅助工具）
-├── handlers/               # 11 个请求处理器（聊天、响应、嵌入、图像等）
-├── mcp-server/             # MCP 服务器（110 个独立工具、3 种传输方式、33 个作用域）
-├── services/               # 178 个顶层服务（combo、autoCombo、rateLimitManager 等）
-├── translator/             # 格式转换器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
-├── transformer/            # Responses API 转换器
-└── utils/                  # 22 个实用工具模块（流、TLS、代理、日志记录）
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron 桌面应用（跨平台）
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js 测试运行器（1,574 个测试文件）
-├── integration/            # 集成测试
-├── e2e/                    # Playwright 测试
-├── security/               # 安全测试
-├── translator/             # 转换器专项测试
-└── load/                   # 负载测试
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # 架构决策记录
-├── architecture/            # 系统架构与弹性
-├── comparison/              # OmniRoute 与替代方案的比较
-├── compression/             # 压缩指南与规则
-├── dev/                     # 开发指南
-├── diagrams/                # 架构图
-├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
-├── guides/                  # 用户指南、Docker、设置、故障排除
-├── i18n/                    # 国际化 README 翻译
-├── marketing/               # 营销材料
-├── ops/                     # 部署、代理、覆盖率、发布
-├── providers/               # 提供者专项文档
-├── reference/               # API 参考、环境变量、CLI 工具、免费套餐
-├── releases/                # 发布说明
-├── routing/                 # 自动组合引擎、推理重放
-├── screenshots/             # 仪表板截图
-├── security/                # 防护措施、合规、隐匿、令牌
-└── specs/                   # 设计规范
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

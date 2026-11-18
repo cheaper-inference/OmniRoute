@@ -43,6 +43,12 @@ test("OpenAI-compatible legacy providers honor providerSpecificData.apiType", ()
   );
 });
 
+test("getTargetFormat ignores a providerSpecificData value that is not an object", () => {
+  // connection.providerSpecificData is untyped DB JSON; a stray string must not select a lane.
+  assert.equal(getTargetFormat("openai-compatible-sp-openai", "responses"), "openai");
+  assert.equal(getTargetFormat("openai-compatible-sp-openai", null), "openai");
+});
+
 test("Anthropic-compatible Claude Code providers use the Claude Code URL and headers", () => {
   const url = buildProviderUrl("anthropic-compatible-cc-demo", "claude-sonnet-4-6", false, {
     baseUrl: "https://proxy.example.com/v1/messages?beta=true",

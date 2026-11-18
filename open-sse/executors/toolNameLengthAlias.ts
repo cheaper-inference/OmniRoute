@@ -68,9 +68,22 @@ export function applyRegistryToolNameLengthAliases(
 }
 
 /**
+ * Limits for providers that have no registry entry to declare `toolNameMaxLength` on:
+ * Azure OpenAI and Azure AI Foundry are keyed connections handled by their own executors
+ * (`azure-openai`, `azure-ai`), and both speak the OpenAI Chat Completions schema, which
+ * rejects a function name over 64 chars.
+ */
+const BUILT_IN_TOOL_NAME_MAX_LENGTH: Readonly<Record<string, number>> = {
+  "azure-openai": 64,
+  "azure-ai": 64,
+};
+
+/**
  * The registry `toolNameMaxLength`, else the connection's
- * `providerSpecificData.toolNameMaxLength`: custom OpenAI chat-format compatible nodes never
- * have a registry entry, so this is how they opt in for a stricter upstream.
+ * `providerSpecificData.toolNameMaxLength`, else a built-in limit for registry-less
+ * providers. Custom OpenAI chat-format compatible nodes never have a registry entry, so the
+ * connection value is how they opt in for a stricter upstream; it also lowers the built-in
+ * limit of an Azure connection sitting behind a stricter gateway.
  */
 export function resolveToolNameMaxLength(
   provider: string,
@@ -79,7 +92,11 @@ export function resolveToolNameMaxLength(
   const connectionLimit = isRecord(providerSpecificData)
     ? providerSpecificData.toolNameMaxLength
     : undefined;
-  return getRegistryEntry(provider)?.toolNameMaxLength ?? (connectionLimit as number | undefined);
+  return (
+    getRegistryEntry(provider)?.toolNameMaxLength ??
+    (connectionLimit as number | undefined) ??
+    BUILT_IN_TOOL_NAME_MAX_LENGTH[provider]
+  );
 }
 
 /**

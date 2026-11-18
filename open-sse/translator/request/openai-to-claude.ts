@@ -1,7 +1,6 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 // CLAUDE_SYSTEM_PROMPT import removed — no longer injected unconditionally (#1966/#2130)
-import { supportsClaudeMaxEffort, supportsXHighEffort } from "../../config/providerModels.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { normalizeClaudeToolInputSchema, sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { safeParseJSON } from "../helpers/jsonUtil.ts";
@@ -11,11 +10,8 @@ import {
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
-import {
-  getDefaultThinkingBudget,
-  isAdaptiveThinkingOnly,
-} from "../../../src/shared/constants/modelSpecs.ts";
 import { fitThinkingToMaxTokens } from "./openai-to-claude/thinkingBudget.ts";
+import { claudeThinkingFromOpenAIRequest } from "./openai-to-claude/thinkingConfig.ts";
 import { enforceToolResultAdjacency } from "./openai-to-claude/toolResultAdjacency.ts";
 import { unwrapOpenAIToolDefinition } from "./openai-to-claude/unwrapToolDefinition.ts";
 import { resolveToolResultId } from "./openai-to-claude/sanitizeToolResultId.ts";
@@ -23,16 +19,6 @@ import {
   openAiImagePartToClaudeBlock,
   normalizeToolResultImages,
 } from "./openai-to-claude/imageBlocks.ts";
-
-// Reasoning-effort levels Anthropic accepts on `output_config.effort`. Used to steer
-// adaptive-only Claude models (Opus 4.7+/Fable 5) without ever emitting a manual budget.
-const ADAPTIVE_EFFORT_LEVELS = new Set(["low", "medium", "high", "xhigh", "max"]);
-
-// Safe manual budget when `thinking:{type:"adaptive"}` must be downgraded to the
-// compatible manual `type:"enabled"` form for a model that does not support adaptive
-// thinking (#10119). 1024 is both Anthropic's MIN thinking budget (thinkingBudget.ts)
-// and the `low` effort bucket — conservative for small-context models like Haiku.
-const ADAPTIVE_DOWNGRADE_BUDGET = 1024;
 
 // Prefix for Claude OAuth tool names to avoid conflicts
 // Can be disabled per-request via body._disableToolPrefix = true
@@ -238,75 +224,11 @@ export function openaiToClaudeRequest(
   // `result.messages`/`toolNameMap`, so moving it earlier is safe.
   if (isKimiCoding) {
     applyKimiCodingThinking(result, body);
-  } else if (body.thinking) {
-    const thinkingType = body.thinking.type || "enabled";
-    if (thinkingType === "adaptive" && !isAdaptiveThinkingOnly(model)) {
-      // Downgrade guard (#10119): a request can carry `thinking:{type:"adaptive"}` — the
-      // shape built for an adaptive-only sibling (Opus 4.7+/Sonnet-5) in a combo — and be
-      // re-routed by combo/fallback to a model that only accepts manual extended thinking
-      // (e.g. claude-haiku-4-5-20251001). Anthropic rejects `adaptive` on those models with
-      // "adaptive thinking is not supported on this model". Convert to the compatible manual
-      // `enabled` form with a safe budget instead of forwarding an incompatible type.
-      const callerBudget = Number(body.thinking.budget_tokens);
-      const safeBudget =
-        (Number.isFinite(callerBudget) && callerBudget > 0 ? callerBudget : 0) ||
-        getDefaultThinkingBudget(model) ||
-        ADAPTIVE_DOWNGRADE_BUDGET;
-      result.thinking = { type: "enabled", budget_tokens: safeBudget };
-    } else {
-      result.thinking = {
-        type: thinkingType,
-        ...(body.thinking.budget_tokens && { budget_tokens: body.thinking.budget_tokens }),
-        ...(body.thinking.max_tokens && { max_tokens: body.thinking.max_tokens }),
-      };
-    }
-  } else if (body.reasoning_effort) {
-    // Convert OpenAI reasoning_effort to Claude thinking format (#627)
-    // Clients like OpenCode send reasoning_effort via @ai-sdk/openai-compatible
-    const requestedEffort = String(body.reasoning_effort).toLowerCase();
-    const normalizedEffort =
-      requestedEffort === "max" && !supportsClaudeMaxEffort(model)
-        ? "high"
-        : requestedEffort === "xhigh" && !supportsXHighEffort("claude", model)
-          ? "high"
-          : requestedEffort;
-    if (isAdaptiveThinkingOnly(model)) {
-      // Opus 4.7+/Fable 5 removed manual extended thinking: a fixed `budget_tokens`
-      // (or `type:"enabled"`) is a hard 400. Steer EVERY level via adaptive +
-      // output_config.effort instead of the budget buckets below. Unrecognized levels
-      // leave thinking unset so the model keeps its adaptive default rather than 400ing
-      // on an invalid effort value.
-      if (ADAPTIVE_EFFORT_LEVELS.has(normalizedEffort)) {
-        result.thinking = {
-          type: "adaptive",
-        };
-        result.output_config = {
-          ...(result.output_config || {}),
-          effort: normalizedEffort,
-        };
-      }
-    } else if (normalizedEffort === "max" || normalizedEffort === "xhigh") {
-      result.thinking = {
-        type: "adaptive",
-      };
-      result.output_config = {
-        ...(result.output_config || {}),
-        effort: normalizedEffort,
-      };
-    } else {
-      const effortBudgetMap: Record<string, number> = {
-        low: 1024,
-        medium: 10240,
-        high: 131072,
-        max: 131072,
-      };
-      const budget = effortBudgetMap[normalizedEffort];
-      if (budget !== undefined && budget > 0) {
-        result.thinking = {
-          type: "enabled",
-          budget_tokens: budget,
-        };
-      }
+  } else {
+    const mapped = claudeThinkingFromOpenAIRequest(body, model);
+    if (mapped.thinking) result.thinking = mapped.thinking;
+    if (mapped.effort) {
+      result.output_config = { ...(result.output_config || {}), effort: mapped.effort };
     }
   }
 

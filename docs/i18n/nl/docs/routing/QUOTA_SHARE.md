@@ -279,15 +279,15 @@ De hooks van de pagina:
 
 ## Omgevingsvariabelen
 
-| Variabele                          | Standaard | Beschrijving                                                                  |
-| ---------------------------------- | --------- | ----------------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Te gebruiken driver: `sqlite` of `redis`                                      |
-| `QUOTA_STORE_REDIS_URL`            | _(leeg)_  | Redis-URL, bijvoorbeeld `redis://localhost:6379`                              |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= drempelwaarde` activeert de strikte modus                           |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; vermenigvuldigingsfactor voor de combinatiescore van het soepele beleid |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Aantal dagen voordat GC oude `quota_consumption`-buckets verwijdert           |
+| Variabel                           | Standaard | Beschrijving                                                |
+| ---------------------------------- | --------- | ----------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Te gebruiken stuurprogramma: `sqlite` of `redis`            |
+| `QUOTA_STORE_REDIS_URL`            | _(leeg)_  | Redis URL, bijv `redis://localhost:6379`                    |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` activeert de strikte modus             |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; vermenigvuldiger voor comboscore voor zacht beleid    |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Dagen voordat GC oude `quota_consumption` emmers verwijdert |
 
-DB-instellingen (`quotaStore.*`) overschrijven omgevingsvariabelen.
+DB -instellingen (`quotaStore.*`) overschrijven env vars.
 
 ---
 
@@ -341,14 +341,14 @@ Als beide voorwaarden waar zijn, wordt elke verouderde pool in een batch naar `P
 
 ## Testdekking
 
-De quota-share-engine wordt geleverd met twee lagen geautomatiseerde testdekking:
+Twee lagen van geautomatiseerde dekking worden geleverd met de quota-share-engine:
 
-| Suite            | Opdracht                                                               | Wat wordt getest                                                                                                                                                                                                           |
-| :--------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (29 tests)  | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR-planner, verzadigingsbewaking, gelijktijdigheidslimieten, fairShare-berekening, wachtrijvorming van achterstallige taken                                                                                               |
-| Integratiematrix | `npm run test:combo:matrix`                                            | End-to-end-routeringsbeslissing via de echte combinatiepipeline; DRR-eerlijkheid + lagere prioriteit bij verzadiging via live-aansluitpunten (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite              | Commando                                                               | Wat het omvat                                                                                                                                                                                          |
+| :----------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eenheid (29 tests) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR planner, verzadigingspoort, gelijktijdigheidslimieten, fairShare wiskunde, wachtrijen voor achterstanden                                                                                           |
+| Integratiematrix   | `npm run test:combo:matrix`                                            | End-to-end routeringsbeslissing via de echte combo-pijplijn; DRR eerlijkheid + verzadiging deprioritering via live naden (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-De integratiematrix wordt in CI uitgevoerd naast alle 19 openbare strategieën. De unitsuite kan zelfstandig worden uitgevoerd.
+De integratiematrix loopt in CI naast alle 22 publieke strategieën. De unitsuite kan standalone worden uitgevoerd.
 
 ---
 
