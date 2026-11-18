@@ -344,3 +344,22 @@ test("E: table cells take padding, height and text size from the table `density`
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(tables, [], 'a 12px table is density="compact"');
 });
+
+// ── C. Inner panels: Card.Section ───────────────────────────────────────────────────────────
+
+// The neutral panel nested in a card or dialog, drawn by hand: border, subtle fill, 12-16px
+// padding. Chips and scroll boxes that share the colours are not panels.
+const isHandPanel = (tag: string) =>
+  /(?<![\w:-])border-border(?![\w/-])/.test(tag) &&
+  /(?<![\w:-])bg-bg-subtle(?![\w/-])/.test(tag) &&
+  /(?<![\w:-])rounded-lg(?![\w-])/.test(tag) &&
+  /(?<![\w:-])p-(3|4)(?![\w.-])/.test(tag) &&
+  !/(?<![\w:-])(inline-flex|size-\d+|max-h-[\w[\]().-]+|overflow-[\w-]+)(?![\w-])/.test(tag);
+
+test("C: a neutral panel inside a card or dialog is Card.Section", () => {
+  const offenders = openingTags("div")
+    .filter(({ tag }) => isHandPanel(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use <Card.Section> (layout classes stay on it)");
+  assert.ok(openingTags("Card\\.Section").length >= 20);
+});

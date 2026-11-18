@@ -4,6 +4,7 @@
 // ModelCompatPopover and its local helper (recordToHeaderRows) moved out of
 // ProviderDetailPageClient.tsx. Leaf deps: @/shared + providerPageHelpers.
 
+import Card from "@/shared/components/Card";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
@@ -598,7 +599,7 @@ export default function ModelCompatPopover({
               </div>
             </div>
 
-            <div className="mt-4 rounded-lg border-2 border-border bg-bg-subtle p-3">
+            <Card.Section className="mt-4">
               <p className="block text-2xs font-semibold text-text-main mb-1">
                 {t("compatUpstreamHeadersLabel")}
               </p>
@@ -687,7 +688,7 @@ export default function ModelCompatPopover({
               >
                 {t("compatUpstreamAddRow")}
               </Button>
-            </div>
+            </Card.Section>
           </div>
         </PopoverContent>
       )}

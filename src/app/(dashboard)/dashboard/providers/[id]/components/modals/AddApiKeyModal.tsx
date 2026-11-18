@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -819,7 +820,7 @@ export default function AddApiKeyModal({
                 );
               })()}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
                   <p className="mt-1 text-xs text-text-muted">{t("codexTunnelDescription")}</p>
@@ -885,7 +886,7 @@ export default function AddApiKeyModal({
                         : t("check")}
                   </Button>
                 </div>
-              </div>
+              </Card.Section>
             )}
             {isModal && (
               <Input
@@ -970,7 +971,7 @@ export default function AddApiKeyModal({
             )}
             {saveError && <Notice variant="critical">{saveError}</Notice>}
             {(isCcCompatible || openRouterPreset.input) && (
-              <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+              <Card.Section className="flex flex-col gap-4">
                 {isCcCompatible && (
                   <CcCompatibleRequestDefaultsFields
                     values={formData}
@@ -978,7 +979,7 @@ export default function AddApiKeyModal({
                   />
                 )}
                 {openRouterPreset.input}
-              </div>
+              </Card.Section>
             )}
             {freeModelsToggle}
             <QuotaScrapingFields

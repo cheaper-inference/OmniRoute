@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 /**
@@ -735,7 +736,7 @@ export default function CustomModelsSection({
                   </div>
 
                   {editingModelId === model.id && (
-                    <div className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-bg-subtle p-3">
+                    <Card.Section className="mt-3 min-w-0 max-w-full">
                       <div className={FORMAT_FIELDS_GRID}>
                         <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
                           <Select
@@ -868,7 +869,7 @@ export default function CustomModelsSection({
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    </Card.Section>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">

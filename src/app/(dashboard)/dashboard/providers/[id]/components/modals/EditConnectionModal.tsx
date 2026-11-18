@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 import { useState } from "react";
@@ -901,7 +902,7 @@ export default function EditConnectionModal({
           />
         )}
         {(isCcCompatible || openRouterPreset.input) && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             {isCcCompatible && (
               <CcCompatibleRequestDefaultsFields
                 values={formData}
@@ -909,9 +910,9 @@ export default function EditConnectionModal({
               />
             )}
             {openRouterPreset.input}
-          </div>
+          </Card.Section>
         )}
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+        <Card.Section className="flex flex-col gap-4">
           {showFreeModelsToggle && (
             <Toggle
               checked={formData.importFreeModelsOnly}
@@ -945,7 +946,7 @@ export default function EditConnectionModal({
               {formatPeakHourSummary(formData.peakHourProtection)}
             </p>
           )}
-        </div>
+        </Card.Section>
         <QuotaScrapingFields
           provider={provider}
           values={formData}
@@ -954,7 +955,7 @@ export default function EditConnectionModal({
           editMode
         />
         {isAntigravityFamily && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+          <Card.Section className="flex flex-col gap-4">
             <Select
               label={t("antigravityClientProfileLabel")}
               value={formData.antigravityClientProfile}
@@ -975,7 +976,7 @@ export default function EditConnectionModal({
               hint={t("antigravityProjectIdHint")}
               inputClassName="text-xs"
             />
-          </div>
+          </Card.Section>
         )}
         {isOAuth && <ConnectionEmailCard email={connection.email} label={t("email")} />}
         <NumberInput
@@ -1069,7 +1070,7 @@ export default function EditConnectionModal({
               </div>
             )}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section className="space-y-3">
                 <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
                 <Input
                   label={t("tunnelIdLabel")}
@@ -1144,7 +1145,7 @@ export default function EditConnectionModal({
                     )}
                   </div>
                 )}
-              </div>
+              </Card.Section>
             )}
             {isGooglePse && (
               <Input

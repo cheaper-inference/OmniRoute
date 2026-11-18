@@ -250,7 +250,7 @@ function ResultSummary({
         </div>
 
         {testResult && (
-          <div className="rounded-lg border border-border bg-bg-subtle p-3 text-sm text-text-muted">
+          <Card.Section className="text-sm text-text-muted">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={valid ? "success" : "error"}>
                 {valid
@@ -267,7 +267,7 @@ function ResultSummary({
                 {testResult.error || testResult.warning || testResult.diagnosis?.message}
               </p>
             )}
-          </div>
+          </Card.Section>
         )}
 
         {error && <Notice variant="critical">{error}</Notice>}
@@ -878,12 +878,12 @@ export default function ProviderOnboardingWizard() {
                 {text("onboardingChangeProvider", "Change provider")}
               </Button>
             </div>
-            <div className="rounded-lg border border-border bg-bg-subtle p-4 text-sm text-text-muted">
+            <Card.Section className="text-sm text-text-muted">
               {text(
                 "onboardingOAuthFlowDescription",
                 "OmniRoute will open the existing OAuth flow for this provider. After login, the wizard reloads the saved connection and runs the same connection test as the provider page."
               )}
-            </div>
+            </Card.Section>
             <div className="flex flex-wrap gap-2">
               <Button onClick={openOAuth} disabled={submitting}>
                 {text("onboardingStartOAuthFlow", "Start OAuth flow")}
