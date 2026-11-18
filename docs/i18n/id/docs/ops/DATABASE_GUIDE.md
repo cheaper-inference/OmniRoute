@@ -186,29 +186,92 @@ Daftar lengkap sekitar 30+ tabel tersedia di `src/lib/db/migrations/`.
 
 ## Migrasi
 
-OmniRoute menggunakan **migrasi berversi dan idempoten** di `src/lib/db/migrations/`. Setiap migrasi merupakan satu file SQL bernama `NNN_description.sql`.
+OmniRoute menggunakan** berversi, migrasi idempoten** di `src/lib/db/migrations/`. Setiap migrasi adalah satu file SQL. Dua format penamaan hidup berdampingan; versi yang direkam dalam `_omniroute_migrations` adalah awalan numerik.
 
 ### Penamaan Migrasi
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                           | Contoh                               | Digunakan untuk                                                                                                                                                    |
+| ------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NNN_description.sql` (tepatnya 3 digit)         | `241_seen_models.sql`                | Seri lama `001`–`241`. Dibekukan ketika format stempel waktu muncul (`240` dan `241` digabungkan tepat sebelum itu): tidak ada file baru yang mendapat nomor urut. |
+| `YYYYMMDDHHMMSS_description.sql` (14 digit, UTC) | `20261113120000_add_usage_index.sql` | Setiap migrasi dibuat mulai tanggal 13-11-2026 dan seterusnya.                                                                                                     |
 
-### Cara Migrasi Dijalankan
+Mengapa berubah: dengan nomor urut, PRs paralel mengambil nomor berikutnya yang sama dan semua kecuali satu harus memberi nomor ulang sebelum digabungkan. Stempel waktu UTC memberikan setiap PR versinya sendiri.
 
-Saat aplikasi dimulai, `migrationRunner.ts`:
+Aturan untuk format stempel waktu (diberlakukan oleh `npm run check:migration-numbering`, dibagikan dengan generator di `scripts/check/lib/migrationNaming.mjs`):
 
-1. Membuat tabel `_omniroute_migrations` jika belum ada
-2. Mencari migrasi yang sudah diterapkan
-3. Menerapkan setiap migrasi baru secara berurutan, masing-masing dalam satu transaksi
-4. Mencatat setiap migrasi yang diterapkan beserta stempel waktunya
+- Stempel waktu adalah tanggal dan waktu UTC yang sebenarnya, tidak lebih awal dari `20261113000000` dan tidak lebih dari 10 menit ke depan.
+- Deskripsinya berupa huruf kecil `snake_case` yang diawali dengan huruf (`a-z`, `0-9`, `_` tunggal antar kata), maksimal 80 karakter.
+- Dua file dengan stempel waktu yang sama adalah duplikat.
+- Aturan tanpa celah hanya berlaku pada deret lama: setiap bilangan dari `001` hingga `241` harus ada, kecuali celah yang diketahui `026`, `055` dan `121`. Menghapus `241` (atau file lama apa pun) akan menggagalkan gerbang. `001` dan `241` tidak pernah dapat ditambahkan ke daftar `KNOWN_GAPS` yang diizinkan. File yang diberi stempel waktu tidak pernah membuat celah.
+- Setiap entri di `src/lib/db/migrations/` harus berupa file biasa dengan nama `.sql` huruf kecil yang valid. Direktori, symlink, file `.SQL` atau `.sql.bak`, file tersembunyi atau nama dengan spasi gagal dalam gerbang, karena runner akan melewatkannya secara diam-diam atau crash saat boot.
+
+**Terapkan pesanan.** Pelari mengurutkan berdasarkan nilai numerik dari awalan, bukan berdasarkan teks: file `001`–`241` yang lama terlebih dahulu, lalu file yang diberi stempel waktu dalam urutan stempel waktu, lalu direktori dengan spasi nama apa pun yang terdaftar `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versi seperti `ee-001`). Migrasi yang tertunda adalah file apa pun yang versinya tidak ada di `_omniroute_migrations`, sehingga migrasi dari cabang lama yang digabungkan setelah cabang yang lebih baru masih berlaku pada database yang sudah ada.
+
+**Stempel waktu adalah urutan pembuatan, bukan urutan penggabungan.** Jika migrasi Anda bergantung pada tabel atau kolom yang dibuat oleh migrasi dengan a** lebih baru** stempel waktu (misalnya, satu dari PR lain yang digabungkan terlebih dahulu), database baru akan menjalankan database Anda terlebih dahulu dan gagal. Saat PR Anda masih terbuka, buat ulang nama file dengan `npm run db:new-migration` sehingga mendapat stempel waktu yang lebih baru, atau jadikan independen. `npm run test:migrations:fresh` menerapkan setiap migrasi ke database kosong dan menangkapnya.
+
+### Migrasi yang Digabung Tidak Pernah Dihapus atau Diganti Namanya
+
+Setelah file migrasi berada di cabang rilis atau `main`, file tersebut sudah berjalan di database homolog dan pengembang, di instalasi VPS, dan di sinkronisasi Perusahaan. Sejak saat itu:
+
+- **Jangan pernah menghapusnya.** Instalasi baru akan kehilangan skemanya sementara database yang ditingkatkan akan mempertahankannya.
+- **Jangan pernah mengganti namanya.** Versi di `_omniroute_migrations` tidak lagi cocok dengan file, jadi setiap database yang sudah menerapkannya akan menjalankannya lagi. SQL non-idempoten kemudian menggandakan data atau menghentikan boot.
+- **Butuh skema yang berbeda?** Buat migrasi baru dengan `npm run db:new-migration`.
+
+Mengganti nama hanya aman untuk file yang belum digabungkan, yang merupakan petunjuk gerbang. Tag rilis tidak mengubah apa pun di sini: setiap dorongan ke cabang `release/v*` menerbitkan gambar Docker `:next` dan berjalan pada homolog, instalasi VPS, dan sinkronisasi Perusahaan, sehingga migrasi gabungan telah berjalan di database nyata sebelum tag `vX.Y.Z` ada. Gerbang gagal setiap penghapusan file dasar, diberi tag atau tidak.
+
+- **Mengembalikan migrasi gabungan.** `git revert` yang menghapus file gagal melewati gerbang. Simpan file dan batalkan skemanya dalam migrasi baru: `npm run db:new-migration -- <description>`, dengan `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` dan seterusnya. Basis data yang ditingkatkan dan baru kemudian diakhiri dengan skema yang sama.
+- **Yang menerima penggantian nama: entri kompatibilitas dan konten yang identik.** Jika file yang digabungkan harus dipindahkan (misalnya, dua file yang digabungkan berbagi stempel waktu dan pelari berhenti dengan tabrakan versi), ganti nama file berikutnya tanpa menyentuh SQL -nya dan tambahkan `{ fromVersion, fromName, toVersion, toName }` ke `RENAMED_MIGRATION_COMPATIBILITY` di `src/lib/db/migrationRunner/constants.ts`. Basis data yang menerapkan versi lama akan memindahkan baris `_omniroute_migrations` -nya alih-alih menjalankan file lagi. Gerbang memperingatkan tentang penggantian nama seperti itu dan selalu menjalankan pemeriksaan pergantian, apa pun stempel waktu yang baru: instalasi baru menerapkan file pada posisi barunya, basis data yang ditingkatkan tidak, jadi pilih stempel waktu baru di dekat yang lama. Gerbang gagal mengganti nama jika konten diubah (perubahan skema masih terjadi pada migrasi baru), atau jika file target entri tidak ada di disk.
+- **Jangan pernah mengganti nama dalam stempel waktu yang sama.** Penggantian nama yang menyimpan stempel waktu dan hanya mengubah deskripsi akan gagal, dengan atau tanpa entri. Dengan entri yang `toVersion` sama dengan `fromVersion` nya, pelari menghapus baris `_omniroute_migrations` lama dan menerapkan kembali file tersebut pada setiap database yang sudah menjalankannya. Tanpa entri, runner hanya melacak versinya: ia melewatkan file di database tersebut (konten baru tidak pernah berjalan di sana) dan mencatat kesalahan penomoran ulang pada setiap boot. Gunakan stempel waktu lain ditambah entri kompatibilitas, atau pertahankan namanya.
+- **Gerbang memeriksa bahwa file yang diubah namanya tidak berjalan lagi.** Untuk setiap penggantian nama yang tercakup, gerbang meneruskan nama file baru ke pemeriksaan pergantian dengan `--must-not-apply`. Pemeriksaan mem-boot database yang ditingkatkan dengan pelari sebenarnya, dan jika pelari menerapkan file itu lagi (misalnya, karena entri memiliki versi atau nama yang salah, atau karena pengurai teks gerbang membaca `constants.ts` berbeda dari TypeScript), gerbang gagal dengan `migration renomeada rodaria de novo` dan meminta Anda memeriksa versi dan nama entri yang lama dan baru.
+
+### Apa yang Diperiksa Gerbang Terhadap Pangkalan
+
+Saat permintaan tarik dan antrian penggabungan berjalan, `npm run check:migration-numbering` membandingkan `src/lib/db/migrations/` pada disk dengan direktori yang sama di cabang dasar. Basisnya adalah, dalam urutan ini: `--base-latest-tag`, `--base <ref>`, variabel `MIGRATION_BASE_REF`, atau, jika `GITHUB_EVENT_NAME` adalah `pull_request`, `pull_request_target` atau `merge_group`, induk pertama dari komit penggabungan, `merge_group.base_sha` dari muatan peristiwa, atau `git merge-base HEAD origin/$GITHUB_BASE_REF`. Dalam permintaan tarik atau antrian penggabungan yang dijalankan tanpa basis yang dapat diselesaikan, gerbang gagal. Di luar CI tanpa `--base` ia mencetak `comparação com a base: pulada (sem --base)` dan melewatkan aturan ini.
+
+`--base-latest-tag` membandingkan dengan tag rilis terbaru (`vX.Y.Z` dalam urutan semver; tag bersufiks seperti nightlies tidak dihitung) yang ada dalam sejarah `HEAD`, dengan aturan yang sama seperti `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) menjalankan gerbang dengan cara ini, karena proses push dan terjadwal tidak memiliki basis permintaan tarik dan penggabungan dapat dilakukan tanpa proses CI baru. Tanpa tag rilis dalam riwayat, gerbang gagal; jalankan `git fetch --tags` (dalam CI, `actions/checkout` dengan `fetch-depth: 0` membawa tag).
+
+| Ubah pada permintaan tarik                                                                                             | Hasil                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File yang ada di pangkalan diganti namanya, dengan entri `RENAMED_MIGRATION_COMPATIBILITY`                             | **Peringatan** jika kontennya identik, dan pemeriksaan pergantian berjalan apa pun stempel waktu yang baru; gagal jika posisi baru mengubah skema akhir (membatalkan penggantian nama, atau memilih stempel waktu baru lainnya di mana ia berpindah) atau jika pelari akan menerapkan kembali file yang diubah namanya pada database yang ditingkatkan.** Gagal** jika isinya berubah. |
+| File yang ada di pangkalan diganti namanya dengan tetap mempertahankan stempel waktunya (hanya deskripsi yang berubah) | **Gagal** , dengan atau tanpa entri: pelari akan menerapkannya lagi (dengan entri) atau melewatinya berdasarkan versi (tanpa entri). Gunakan stempel waktu lain ditambah entri kompatibilitas, atau pertahankan namanya.                                                                                                                                                               |
+| File yang ada di pangkalan dihapus, atau diganti namanya tanpa entri                                                   | **Gagal** , apakah file tersebut ada dalam tag rilis atau tidak. Untuk membatalkannya, pulihkan file dengan `git checkout <base> -- src/lib/db/migrations/<file>`; untuk mengembalikan skemanya, tambahkan migrasi baru dengan `DROP ... IF EXISTS`.                                                                                                                                   |
+| File yang ada di pangkalan memiliki konten yang berbeda                                                                | **Peringatan** (anotasi `::warning` di Tindakan GitHub ), dan pemeriksaan pergantian berjalan. Gagal jika pengeditan mengubah skema akhir, karena database yang ditingkatkan tidak menerapkan lagi file yang diedit: masukkan perubahan ke dalam migrasi baru. Pengeditan yang tidak berbahaya (komentar, `IF NOT EXISTS`) hanya memperingatkan.                                       |
+| File yang diberi stempel waktu ditambahkan dengan stempel waktu yang tidak lebih baru dari yang terbaru dari basis     | Menjalankan pemeriksaan pergantian, dijelaskan di bawah.                                                                                                                                                                                                                                                                                                                               |
+| File `NNN_` format lama ditambahkan dengan nomor di bawah file format lama terbaru basis                               | **Gagal** , meskipun `KNOWN_GAPS` diedit dalam permintaan tarik yang sama: seri lama dibekukan, buat migrasi dengan `npm run db:new-migration`. File format lama di atas yang terbaru dari basis (permintaan tarik `release/v*` ke `main` ) diterima.                                                                                                                                  |
+| File yang rusak, diedit atau diganti namanya berisi pernyataan `INSERT`, `UPDATE`, `DELETE` atau `REPLACE`             | **Peringatan** : pemeriksaan pergantian tidak membandingkan data, jadi tinjau apakah urutan penerapan database yang ditingkatkan dan baru akan mengubah hasilnya.                                                                                                                                                                                                                      |
+
+Satu kali pemeriksaan pergantian mencakup file yang rusak, file yang diedit, dan file yang diganti namanya secara bersamaan.
+
+Pemeriksaan pergantian (`scripts/check/migration-commutation.ts`) membangun dua database sementara dengan jalur instalasi sebenarnya: an** ditingkatkan** satu (boot dengan migrasi dasar, lalu boot lagi pada file yang sama dengan migrasi permintaan tarik) dan a** segar** satu (satu boot dengan migrasi permintaan tarik). Ini membandingkan skema yang dihasilkan: tabel dan kolom (mengabaikan urutan kolom), batasan UNIQUE / PRIMARY KEY dan FOREIGN KEY, teks `CREATE TABLE` yang dinormalisasi dari setiap tabel (yang mencakup batasan CHECK, susunan, kolom yang dihasilkan dan opsi tabel), indeks, pemicu dan tampilan. Data baris tidak dibandingkan. Jika cocok, gerbang akan mencetak bahwa file tersebut rusak tetapi bolak-balik, dan lolos. Jika berbeda, gerbang gagal dengan perbedaan dan petunjuk untuk kasus ini: untuk file yang rusak, buat ulang namanya dengan `npm run db:new-migration`, yang aman karena file belum digabungkan; untuk file dasar yang diedit, pulihkan konten dasar dan masukkan perubahan ke dalam migrasi baru; untuk file yang diganti namanya, batalkan penggantian nama atau pilih stempel waktu baru lainnya yang akan diubah, jangan pernah stempel waktu yang sama dengan nama lain. Jika pemeriksaan itu sendiri tidak dapat dijalankan, gerbang gagal di CI dan hanya memperingatkan secara lokal. Untuk file dasar yang diedit, database yang ditingkatkan dibuat dengan konten dasar file tersebut, dan boot kedua melewatkannya karena versinya sudah direkam. Untuk file yang diganti namanya, database yang ditingkatkan dibuat dengan file tersebut dengan nama lamanya, dan boot kedua memindahkan baris `_omniroute_migrations` melalui entri kompatibilitas alih-alih menjalankannya lagi; gerbang melewati nama baru dengan `--must-not-apply`, jadi pemeriksaan gagal jika boot kedua menerapkannya. Jika migrasi permintaan tarik gagal diterapkan pada jalur yang ditingkatkan, yaitu, setelah setiap migrasi basis (baik gagal pada instalasi baru atau tidak), gerbang melaporkan `migration do PR não aplica` dan meminta Anda untuk memperbaiki SQL terhadap skema basis saat ini; jika file bergantung pada migrasi permintaan tarik lainnya dengan stempel waktu yang lebih baru, buat ulang namanya dengan `npm run db:new-migration`.
+
+Untuk menjalankan perbandingan yang sama secara lokal, teruskan basis secara eksplisit, misalnya `npm run check:migration-numbering -- --base origin/<base-branch>`, atau `npm run check:migration-numbering -- --base-latest-tag` untuk membandingkan dengan rilis terbaru.
+
+### Mengonversi Migrasi `NNN` Open PR
+
+Permintaan tarik yang dibuka sebelum peralihan mungkin masih membawa file berurutan seperti `242_add_widgets.sql`. Angka lama di atas `241` ditolak, jadi konversikan sebelum menggabungkan:
+
+1. **Ganti nama file dengan generator, pertahankan deskripsinya.** Jalankan `npm run db:new-migration -- <same description>` untuk mendapatkan nama baru, pindahkan SQL ke dalamnya, dan hapus file `NNN_` yang lama. Deskripsinya harus tetap sama: entri kompatibilitas di bawah cocok dengan deskripsi tersebut.
+2. **Tambahkan entri kompatibilitas jika database persisten menjalankan nomor lama.** Jika ada database yang disimpan (homolog, a VPS, instalasi milik kontributor) menjalankan build PR dengan file `NNN_`, tambahkan `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` ke `RENAMED_MIGRATION_COMPATIBILITY` di `src/lib/db/migrationRunner/constants.ts`. Ini** diperlukan untuk `237` ke `241`** : slot tersebut sekarang menampung kanonik `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` dan `241_seen_models.sql`, dan tanpa entri, database tersebut akan melewatkan migrasi kanonik selamanya dan menjalankan migrasi yang telah dikonversi lagi. Ini juga berfungsi untuk slot yang tetap kosong, seperti `242`, ketika tujuannya adalah stempel waktu. Jika ragu, tambahkan entri. Tempat Anda menambahkannya ke dalam larik tidak menjadi masalah: ketika slot target entri masih berisi baris yang dipindahkan entri lain (misalnya `237` menahan baris PR sementara baris `usage_history_calculated_cost` yang lebih lama menunggu untuk dipindahkan ke `237`), pelari membiarkan entri tersebut menunggu hingga slotnya kosong. Hanya konflik nyata, seperti slot yang dipegang oleh satu baris tanpa entri bergerak, atau dua entri yang bertukar slot, menghentikan booting dengan `Cannot reconcile ...`.
+3. **Jaga agar SQL idempoten** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), karena migrasi yang dikonversi mungkin bertemu dengan database yang skemanya sudah ada.
+4. **Pindahkan kasus khusus dengan kunci versi.** Jika PR menambahkan huruf besar/kecil untuk nomor lamanya di `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) atau di `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), ubah kunci ke stempel waktu yang baru.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` adalah contoh pengujian yang berfungsi untuk migrasi yang diganti namanya.
+
+### Backport ke Cabang Sebelum Switch
+
+Jangan pernah memilih atau mem-backport file `YYYYMMDDHHMMSS_` ke cabang yang sudah ada sebelum peralihan (misalnya cabang `release/v*` yang lebih lama). Pelari di sana mengurutkan nama file sebagai teks, sehingga file yang diberi stempel waktu akan dijalankan antara `201_` dan `202_` pada database baru, dan gerbang lama di sana tidak memahami awalan 14 digit. Pada cabang seperti itu, tulis perubahan sebagai file `NNN_` berikutnya milik cabang itu, idempoten, sehingga tidak boleh dilakukan ketika versi yang diberi stempel waktu tiba nanti.
+
+### Bagaimana Migrasi Dijalankan
+
+Saat memulai, `migrationRunner.ts`:
+
+1. Membuat tabel `_omniroute_migrations` jika tidak ada
+2. Kueri untuk migrasi yang sudah diterapkan
+3. Menerapkan migrasi baru apa pun secara berurutan, masing-masing dalam suatu transaksi
+4. Catat setiap migrasi yang diterapkan dengan stempel waktu
 
 ```ts
-// src/lib/db/migrationRunner.ts (disederhanakan)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotensi
 
-Migrasi harus **idempoten** — menjalankannya dua kali seharusnya tidak melakukan apa pun:
+Migrasi harus dilakukan** idempoten** — menjalankannya dua kali seharusnya tidak dilakukan:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Gunakan klausa `IF NOT EXISTS`, `IF EXISTS`, dan `OR IGNORE` / `OR REPLACE` secara luas.
+Gunakan klausa `IF NOT EXISTS`, `IF EXISTS`, dan `OR IGNORE` / `OR REPLACE` secara bebas.
 
 ### Menambahkan Migrasi Baru
 
-1. **Identifikasi nomor berikutnya**: `ls src/lib/db/migrations/ | tail -1`
-2. **Buat file**: `NNN_my_change.sql`
-3. **Gunakan DDL yang aman**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Isi ulang data dengan hati-hati**: gunakan `UPDATE ... WHERE ...` untuk menangani baris yang sudah ada
-5. **Uji pada salinan**: jangan pernah menjalankan migrasi yang belum diuji di lingkungan produksi
+1. **Buat file dengan generator** : `npm run db:new-migration -- <description>` (misalnya `npm run db:new-migration -- add combo priority`). Ia menulis `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` dengan waktu UTC saat ini dan header komentar, bergerak maju satu detik jika stempel waktu tersebut digunakan, dan tidak pernah menimpa file. Jangan memilih nomor dengan tangan.
+2. **Gunakan DDL yang aman** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Isi ulang data dengan hati-hati** : gunakan `UPDATE ... WHERE ...` untuk menangani baris yang ada
+4. **Periksa pesanan dan penamaan** : `npm run test:migrations:fresh` (semua migrasi pada database kosong) dan `npm run check:migration-numbering`
+5. **Uji pada salinan** : jangan pernah menjalankan migrasi yang belum teruji pada produksi
 
 Contoh:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Perubahan yang tidak kompatibel dengan versi sebelumnya** (misalnya, menghapus kolom) cukup rumit. OmniRoute TIDAK mendukung penurunan versi — setelah suatu migrasi diterapkan, perubahan skema tersebut bersifat permanen. Rencanakan dengan tepat.
+> **Perubahan yang tidak kompatibel ke belakang** (misalnya, menjatuhkan kolom) itu rumit. OmniRoute apakah NOT mendukung penurunan versi — setelah migrasi diterapkan, perubahan skema bersifat permanen. Rencanakan dengan tepat.
 
 ---
 
@@ -403,25 +466,26 @@ Perintah ini menggunakan API pencadangan online SQLite — aman dijalankan saat 
 
 ---
 
-## Penyetelan Performa
+## Penyetelan Kinerja
 
-### Mode WAL
+### Modus WAL
 
-WAL diaktifkan secara default. Untuk beban kerja dengan operasi tulis tinggi, pertimbangkan:
+WAL diaktifkan secara default. Untuk beban kerja tulis tinggi, pertimbangkan:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint setiap 1000 halaman
-PRAGMA journal_size_limit = 67108864;  -- Batas WAL 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute tidak menyetel `journal_size_limit`. Sebuah pos pemeriksaan memindahkan frame WAL ke dalam file utama, tetapi file WAL mempertahankan ukuran alokasi terbesarnya. Penjaga `OMNIROUTE_WAL_GUARD_MAX_MB` hanya memperingatkan dan menjalankan `wal_checkpoint(RESTART)`; ini bukan batasan ukuran disk.
 
 ### Indeks
 
-Indeks utama untuk performa (dibuat secara otomatis oleh migrasi):
+Indeks utama untuk kinerja (dibuat secara otomatis oleh migrasi):
 
-- `idx_models_provider` — pencarian model berdasarkan penyedia
-- `idx_combo_targets_combo_id` — ekspansi target combo
-- `idx_usage_history_api_key_timestamp` — analitik penggunaan
-- `idx_quota_snapshots_api_key_window` — pelacakan kuota
+- pencarian model `idx_models_provider` — berdasarkan penyedia
+- perluasan target kombo `idx_combo_targets_combo_id` —
+- analisis penggunaan `idx_usage_history_api_key_timestamp` —
+- pelacakan kuota `idx_quota_snapshots_api_key_window` —
 - `idx_call_logs_timestamp` — kueri log panggilan
 
 Untuk menambahkan indeks baru, buat migrasi:
@@ -431,24 +495,24 @@ Untuk menambahkan indeks baru, buat migrasi:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O yang Dipetakan ke Memori
+### I/O yang Dipetakan Memori
 
-Untuk basis data yang sangat besar (>10GB), pemetaan memori dapat disesuaikan melalui pragma SQLite:
+Untuk database yang sangat besar (> 10GB), pemetaan memori dapat disesuaikan melalui SQLite pragma:
 
 ```sql
--- Tetapkan melalui pragma SQLite (sesuaikan di core.ts atau saat runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Pemadatan
 
-Instans OmniRoute yang berjalan dalam jangka panjang akan mendapat manfaat dari menjalankan `VACUUM` sesekali:
+Instans OmniRoute yang sudah berjalan lama mendapat manfaat dari `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Jalankan setiap bulan pada periode dengan lalu lintas rendah. (Mode WAL mengurangi kebutuhan tersebut, tetapi tidak menghilangkannya.)
+Jalankan setiap bulan selama periode lalu lintas rendah. (Mode WAL mengurangi kebutuhan, namun tidak menghilangkannya.)
 
 ---
 

@@ -29,70 +29,61 @@ uri ng pagbabago sa mga contract, nakatuong pagsusuri, at saklaw ng CI nito.
 6. **Itala ang ebidensya.** Sa PR template, ilista ang mga command na pinatakbo, bawat test file na idinagdag o binago,
    mga migration o feature flag, at anumang CI-only validation na nakabinbin pa.
 
-## Mga pangunahing landas ayon sa uri ng pagbabago
+## Mga gintong landas ayon sa uri ng pagbabago
 
-Ang mga command sa ibaba ay mga pinakamababang nakatuong pagsusuri, hindi pahintulot na laktawan ang isang test na direktang sumasaklaw sa
-behavior na binago mo.
+Ang mga utos sa ibaba ay mga minimum na nakatutok na pagsusuri, hindi pahintulot na laktawan ang isang pagsubok na direktang sumasaklaw sa gawi na binago mo.
 
 ### Provider
 
-**Mga contract**
+**Mga kontrata**
 
-- Depinisyon ng provider sa `src/shared/constants/providers/` at ang composition nito sa
-  `src/shared/constants/providers.ts`.
-- Mga model at capability sa `open-sse/config/providerRegistry.ts` o sa mga nakahiwalay nitong registry file.
-- Pagpili ng executor/translator, configuration ng OAuth o API key, mga dashboard asset, at generated
-  provider reference kapag naaangkop.
-- Dapat gamitin ng mga public credential ang `resolvePublicCred()`; dapat gamitin ng mga error response ang mga shared sanitized
-  error helper. Tingnan ang `docs/security/PUBLIC_CREDS.md` (git; hindi kino-compile sa `/docs`) at
-  [Pag-sanitize ng Error](../security/ERROR_SANITIZATION.md).
+- Depinisyon ng provider sa `src/shared/constants/providers/` at ang komposisyon nito sa `src/shared/constants/providers.ts`.
+- Mga modelo at kakayahan sa `open-sse/config/providerRegistry.ts` o ang mga na-extract na registry file nito.
+- pagpili ng Executor/translator, configuration OAuth o API-key at mga asset ng dashboard. Huwag i-commit ang mga regenerated `docs/reference/PROVIDER_REFERENCE.md` o README diagram: isinusulat muli ng release refresh ang mga ito ( nabigo `check:pr-derived-paths` sa isang feature PR na nagdadala sa kanila).
+- Ang mga pampublikong kredensyal ay dapat gumamit `resolvePublicCred()`; dapat gamitin ng mga tugon sa error ang mga shared sanitized error helper. Tingnan ang `docs/security/PUBLIC_CREDS.md` (git; hindi pinagsama sa `/docs`) at [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kapag nagbago ang catalog; i-commit ang generated diff
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-I-test din ang bawat apektadong request family: chat, Responses, images, embeddings, audio, o video.
-Suriin ang mga generated catalog at golden diff bilang mga pagbabago sa contract; huwag tanggapin ang mga ito nang hindi sinusuri.
+Subukan din ang bawat apektadong pamilya ng kahilingan: chat, Mga tugon, larawan, embed, audio, o video. Suriin ang nabuong catalog at golden diffs habang nagbabago ang kontrata; huwag tanggapin ang mga ito nang walang taros.
 
-### Routing
+### Pagruruta
 
-**Mga contract**
+**Mga kontrata**
 
-- Mga public strategy value at UI metadata sa `src/shared/constants/routingStrategies.ts`.
-- Dispatch at ordering sa ilalim ng `open-sse/services/combo.ts` at `open-sse/services/combo/`.
-- Mga combo schema, persistence, resilience state, model capability, at API/UI control.
-- [Auto-Combo Engine](../routing/AUTO-COMBO.md) at dokumentasyon ng resilience kapag nagbabago ang behavior.
+- Mga halaga ng pampublikong diskarte at UI metadata sa `src/shared/constants/routingStrategies.ts`.
+- Pagpapadala at pag-order sa ilalim ng `open-sse/services/combo.ts` at `open-sse/services/combo/`.
+- Combo schema, persistence, resilience state, mga kakayahan ng modelo, at API/UI controls.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) at dokumentasyon ng katatagan kapag nagbago ang gawi.
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # mga pagbabago sa strategy o dispatch
-npm run check:known-symbols      # mga pagbabago sa pagpaparehistro ng strategy
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Gumamit ng mga deterministic mocked-upstream test nang lokal. Nangangailangan ng mga credential ang mga live combo smoke test at
-manual ang mga ito, hindi mga pamalit sa CI.
+Gumamit ng mga deterministikong mocked-upstream na pagsusulit nang lokal. Ang mga live na combo smoke ay nangangailangan ng mga kredensyal at ito ay manu-mano, hindi CI na kapalit.
 
 ### UI / UX
 
-**Mga contract**
+**Mga kontrata**
 
-- Next.js route/page at mga shared component boundary sa ilalim ng `src/app/` at
-  `src/shared/components/`.
-- Mga hugis ng API response, loading/empty/error state, behavior ng keyboard at screen reader,
-  responsive layout, theming, at pagpapalawak ng locale.
-- Mga English UI source string sa `src/i18n/messages/en.json`; huwag mag-hard-code ng bagong text na nakikita ng user.
+- Next.js route/page at nakabahaging mga hangganan ng bahagi sa ilalim ng `src/app/` at `src/shared/components/`.
+- API response shapes, loading/empty/error states, keyboard at screen-reader behavior, responsive na layout, theming, at locale expansion.
+- English UI source strings sa `src/i18n/messages/en.json`; huwag mag-hard-code ng bagong kopya na nakaharap sa gumagamit.
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Patakbuhin ang app para sa mga pagbabago sa interaction o visual at suriin ang parehong makitid at malapad na viewport. Pinapatakbo ng CI ang
-production build at mas malalawak na suite; kailangan pa rin ng visual behavior ng nakatuong component test, Playwright test,
-o dokumentadong manual na pagsusuring angkop sa pagbabago.
+Patakbuhin ang app para sa pakikipag-ugnayan o mga visual na pagbabago at tingnan ang makitid at malalawak na viewport. pinapatakbo ng CI ang production build at mas malawak na suite; Ang visual na gawi ay nangangailangan pa rin ng nakatutok na bahagi, Playwright, o nakadokumentong manu-manong pagsusuri na naaangkop sa pagbabago.
 
 ### i18n
 
-**Mga contract**
+**Mga kontrata**
 
-- Ang `src/i18n/messages/en.json` ang UI source; ang `config/i18n.json` ang locale source.
-- Hiwalay na matatagpuan ang mga CLI catalog sa ilalim ng `bin/cli/locales/`.
-- Panatilihin nang eksakto ang mga ICU placeholder at tag. Huwag isalin ang mga pangalan ng product/provider/model,
-  mga pangalan ng protocol at header, command, code/JSON identifier, URL, environment variable, o
-  mga protektadong termino gaya ng `OmniRoute`, `OAuth`, `MCP`, at `A2A`. Ang kasalukuyang source list ay
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` ay ang UI source; `config/i18n.json` ay ang lokal na pinagmulan.
+- Ang mga katalogo CLI ay nakatira nang hiwalay sa ilalim `bin/cli/locales/`.
+- Panatilihin ang mga placeholder at tag ICU nang eksakto. Huwag isalin product/provider/model na pangalan, protocol at mga pangalan ng header, command, code/JSON identifier, URLs, environment variable, o protektadong termino gaya ng `OmniRoute`, `OAuth`, `MCP`, at `A2A`. Ang kasalukuyang listahan ng pinagmulan ay `scripts/i18n/glossary/protected-terms.json`.
 
-**Nakatuong loop**
+Ang isang tampok PR ay nag-e-edit lamang ng `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); ang iba pang mga lokal ay nakumpleto nang isang beses bawat release sa pamamagitan ng release refresh o isang translation wave (`docs/guides/I18N.md` → "Feature PRs touch `en.json` only"). nabigo `npm run check:pr-derived-paths` sa isang feature PR na nag-e-edit ng isa pang locale catalog.
+
+**Nakatuon na loop**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kapag nagbago ang mga CLI string/catalog
 npm run lint
 ```
 
-Gabay ito para sa kasalukuyang system, hindi isang paanyayang palawakin ang tooling o key model nito.
-Panatilihing limitado at tiyak ang mga i18n patch habang idinidisenyo ang kapalit na system. Huwag magpatakbo ng mga translation
-command na tumatawag sa mga external service maliban kung tahasang nangangailangan ang task ng mga generated translation at
-nasuri mo na ang nagresultang diff.
+Kung walang `--mode=pr` ang mga gate na ito ay tumatakbo sa release mode nang lokal at iulat ang bawat key na idinagdag o muling isinulat ang cycle sa `en.json`; iyon ang gawa ng release refresh, hindi ng iyong PR.
+
+Ito ay gabay para sa kasalukuyang system, hindi isang imbitasyon upang palawakin ang tooling o pangunahing modelo nito. Panatilihing surgical ang mga patch ng i18n habang idinisenyo ang kapalit na sistema. Huwag patakbuhin ang mga utos ng pagsasalin na tumatawag sa mga panlabas na serbisyo maliban kung ang gawain ay tahasang nangangailangan ng mga nabuong pagsasalin at nasuri mo ang resultang pagkakaiba.
 
 ### CLI
 
-**Mga contract**
+**Mga kontrata**
 
-- Mga pampublikong command at flag sa `bin/cli/`, mga nabuong API command, exit code, stdout/stderr at
-  mga hugis ng JSON output, gawi ng config/environment, at mga naka-package na file.
-- Dapat gamitin ng mga string na nakikita ng user sa CLI ang CLI i18n layer at panatilihing magkakatugma ang mga catalog na `en`/`pt-BR`.
-- Panatilihin ang Node bilang sinusuportahang runtime at ang kontrata ng nai-publish na binary.
+- Mga pampublikong command at flag sa `bin/cli/`, nabuong mga API command, exit code, stdout/stderr at JSON na mga hugis ng output, config/environment na gawi, at mga naka-package na file.
+- CLI user-facing string ay dapat gumamit ng CLI i18n layer (`t()` keys na umiiral sa `bin/cli/locales/en.json`). Ang isang tampok PR ay nag-edit lamang ng `en.json`; `pt-BR` at ang iba pang mga lokal ay nakumpleto sa paglabas.
+- Panatilihin ang Node bilang sinusuportahang runtime at ang na-publish na binary na kontrata.
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # mga pagbabago sa nabuo/naka-bundle na CLI
-npm run check:pack-policy     # mga pagbabago sa package surface
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Gamitin ang eksaktong command sa isang pansamantalang data directory kapag nakadepende ang gawi sa pag-parse, mga file, o exit
-status. Isinasagawa ng CI ang mas malawak na pagsusuri sa package artifact at ecosystem.
+Gamitin ang eksaktong command sa isang pansamantalang direktoryo ng data kapag nakadepende ang gawi sa pag-parse, mga file, o katayuan sa paglabas. Ginagawa CI ang mas malawak na package artifact at mga pagsusuri sa ecosystem.
 
 ### Database
 
 **Mga kontrata**
 
-- Mga domain module sa ilalim ng `src/lib/db/`; direktang mag-import ng mga partikular na module (inalis na ang lumang re-export layer na `localDb.ts`).
-- Mga may numerong idempotent na SQL migration sa ilalim ng `src/lib/db/migrations/`, kaligtasan ng transaksyon, gawi ng pag-upgrade,
-  mga index, at bawat caller na apektado ng schema.
-- Hindi kailanman direktang nagpapatakbo ng raw SQL ang mga route at handler.
+- Mga module ng domain sa ilalim ng `src/lib/db/`; direktang mag-import ng mga partikular na module (ang lumang `localDb.ts` re-export na layer ay inalis).
+- May numero, idempotent na mga paglilipat SQL sa ilalim ng `src/lib/db/migrations/`, kaligtasan ng transaksyon, gawi sa pag-upgrade, mga index, at bawat tumatawag na apektado ng schema.
+- Ang mga ruta at handler ay hindi kailanman direktang naglalabas ng hilaw SQL.
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Subukan ang parehong bagong database at pag-upgrade mula sa naunang schema kapag nagdaragdag ng migration. Dapat
-isara ng mga database test ang mga handle at tawagin ang `resetDbInstance()` habang naglilinis. Patakbuhin lamang ang `npm run test:bun:db` kapag
-nagbabago ang best-effort Bun adapter path; nananatiling awtoritatibo ang Node.
+Subukan ang parehong bagong database at mag-upgrade mula sa naunang schema kapag nagdaragdag ng migration. Dapat isara ng mga pagsubok sa database ang mga handle at tawagan `resetDbInstance()` sa panahon ng paglilinis. Patakbuhin lang ang `npm run test:bun:db` kapag nagbago ang best-effort Bun adapter path; Nananatiling may awtoridad ang node.
 
-### Build / deploy
+### Bumuo / i-deploy
 
 **Mga kontrata**
 
-- Mga root at workspace manifest/lockfile, `scripts/build/`, standalone assembly ng Next.js, mga nilalaman ng package na `dist/`,
-  metadata ng Electron platform, mga CI workflow, at mga deployment sentinel.
-- Dapat manatiling buo ang mga sinusuportahang Node range at ang pinahihintulutang paggamit ng Bun sa `CLAUDE.md`.
-- Mananatiling hindi sinusubaybayan ang mga build artifact; nalalapat ang mga patakaran sa dependency, lisensya, workflow, at package.
+- Root at workspace manifests/lockfile, `scripts/build/`, Next.js standalone assembly, `dist/` package contents, Electron platform metadata, CI workflows, at deployment sentinel.
+- Ang mga sinusuportahang hanay ng Node at ang pinapayagang nakalistang Bun na paggamit sa `CLAUDE.md` ay dapat manatiling buo.
+- Bumuo ng mga artifact ay manatiling hindi sinusubaybayan; nalalapat ang dependency, lisensya, daloy ng trabaho, at mga patakaran sa package.
 
-**Nakatuong loop**
+**Nakatuon na loop**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # mga pagbabago sa dependency o lockfile
-npm run check:pack-policy      # mga pagbabago sa surface ng nai-publish na package
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Gamitin lamang ang `npm run build` nang lokal kapag nakaaapekto ang pagbabago sa compilation, standalone assembly, mga asset,
-o runtime bundling. Gamitin lamang ang `npm run build:release` para sa release/deploy validation. Ang build ng CI ang
-panghuling cross-platform na batayan; kailangan ng mga pagbabagong partikular sa platform ng Electron ang katugmang nakatuong build
-o ebidensya mula sa smoke test.
+Gamitin lang `npm run build` nang lokal kapag naapektuhan ng pagbabago ang compilation, standalone assembly, asset, o runtime bundling. Gamitin lang `npm run build:release` para sa pagpapatunay release/deploy. Ang build ng CI ay ang huling cross-platform signal; Ang mga pagbabago Electron na partikular sa platform ay nangangailangan ng tumutugmang nakatutok na build o katibayan ng usok.
 
 ## Mga developer script para sa isang shared machine
 
