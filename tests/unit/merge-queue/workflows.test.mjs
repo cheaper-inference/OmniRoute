@@ -7,7 +7,15 @@
 // `runs-on:` against concrete event contexts. It never executes workflow text as code.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -196,6 +204,17 @@ const FUNCTIONS = {
   hashFiles: () => "",
 };
 
+/**
+ * The key of `obj` named `key`, compared as GitHub compares property names (case-insensitively),
+ * or null. An exact match first (a Proxy context answers any name).
+ */
+function keyOf(obj, key) {
+  if (typeof key !== "string") return key in obj ? key : null;
+  if (key in obj) return key;
+  const lower = key.toLowerCase();
+  return Object.keys(obj).find((k) => k.toLowerCase() === lower) ?? null;
+}
+
 function evaluate(node, ctx) {
   switch (node.k) {
     case "lit":
@@ -218,17 +237,23 @@ function evaluate(node, ctx) {
       const [x, y] = [toNumber(a), toNumber(b)];
       return { "<": x < y, ">": x > y, "<=": x <= y, ">=": x >= y }[node.op];
     }
-    case "ctx":
-      assert.ok(Object.hasOwn(ctx, node.name), `unknown context root: ${node.name}`);
-      return ctx[node.name];
+    case "ctx": {
+      const root = keyOf(ctx, node.name);
+      assert.ok(root !== null, `unknown context root: ${node.name}`);
+      return ctx[root];
+    }
     case "prop": {
       const obj = evaluate(node.e, ctx);
       const key = evaluate(node.key, ctx);
       if (obj === null || typeof obj !== "object") return null;
       if (key === "*") return filtered(Array.isArray(obj) ? [...obj] : Object.values(obj));
-      if (obj[FILTERED])
-        return filtered(obj.filter((x) => isRecord(x) && key in x).map((x) => x[key]));
-      return key in obj ? (obj[key] ?? null) : null;
+      if (obj[FILTERED]) {
+        return filtered(
+          obj.filter((x) => isRecord(x) && keyOf(x, key) !== null).map((x) => x[keyOf(x, key)])
+        );
+      }
+      const own = keyOf(obj, key);
+      return own === null ? null : (obj[own] ?? null);
     }
     case "call": {
       if (node.name === "always") return true;
@@ -907,8 +932,9 @@ test("the label names in the queue's job filters are the ones in config.json", (
   // A workflow `if:` cannot read config/merge-queue/config.json, so omni-queue.yml repeats the
   // label names as literals. Renaming a label in one place only would silently stop approvals
   // (or ticks) from starting: both must change together.
-  const { label, protectedApprovalLabel, blockLabels } = queueConfig;
-  const names = [label, protectedApprovalLabel, ...blockLabels];
+  const { label, protectedApprovalLabel, blockLabels, lanes } = queueConfig;
+  const laneLabels = [lanes.hotfixLabel, lanes.baseRepairLabel];
+  const names = [label, protectedApprovalLabel, ...blockLabels, ...laneLabels];
   assert.ok(names.every((n) => typeof n === "string" && n.length > 0));
   assert.equal(new Set(names.map((n) => n.toLowerCase())).size, names.length, "distinct labels");
   assert.deepEqual(labelLiterals(queue.jobs.approval.if), {
@@ -919,6 +945,32 @@ test("the label names in the queue's job filters are the ones in config.json", (
     eventLabel: [...names].sort(),
     prLabels: [label],
   });
+});
+
+test("the lane labels in the tick filter are the ones in config.json", () => {
+  // Applying or removing a lane label changes what the queue does next (a hotfix goes first, a
+  // base repair is the only thing a base-red pause composes): it wakes the tick, never the
+  // approval job (a lane label binds no approval: it counts when an approver applied it).
+  const { label: queueLabel, lanes } = queueConfig;
+  const laneLabels = [lanes.hotfixLabel, lanes.baseRepairLabel];
+  assert.deepEqual(laneLabels, ["omni-queue-hotfix", "omni-queue-base-repair"]);
+  const literals = labelLiterals(queue.jobs.tick.if).eventLabel;
+  for (const name of laneLabels) assert.ok(literals.includes(name), name);
+  assert.ok(!labelLiterals(queue.jobs.approval.if).eventLabel.some((n) => laneLabels.includes(n)));
+  for (const action of ["labeled", "unlabeled"]) {
+    for (const name of laneLabels) {
+      for (const prLabels of [[], [queueLabel, name]]) {
+        assert.deepEqual(
+          scheduledJobs(
+            queue,
+            queueContext("pull_request_target", { action, label: name, prLabels })
+          ),
+          { approval: false, tick: true },
+          `${action} ${name}`
+        );
+      }
+    }
+  }
 });
 
 test("one global tick at a time, never cancelled; approvals outside that group", () => {
@@ -962,7 +1014,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     );
   for (const id of ["approval", "tick"]) {
     const w = appStep(id);
-    assert.equal(w["app-id"], "${{ secrets.OMNI_QUEUE_APP_ID }}");
+    assert.equal(w["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}");
     assert.equal(w["private-key"], "${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}");
     assert.equal(w.owner, undefined);
     assert.equal(w.repositories, undefined, "token limited to this repository");
@@ -982,15 +1034,38 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     // The land status (config.landing.statusContext) on a candidate, a PR head or a bless.
     statuses: "write",
     checks: "read",
-    actions: "read",
+    // POST /actions/runs/{id}/rerun-failed-jobs: a red candidate's failed jobs re-run once.
+    actions: "write",
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [
-    "OMNI_QUEUE_APP_ID",
+    "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
+});
+
+test("omni-queue.yml: both jobs mint the token with client-id from OMNI_QUEUE_APP_CLIENT_ID, never app-id", () => {
+  // actions/create-github-app-token deprecates its `app-id` input: `client-id` (the App's
+  // Client ID, `Iv…`) is the supported one. The numeric App id stays an operator-side value of
+  // scripts/merge-queue/apply-ruleset.mjs, never a secret of this workflow.
+  const rawText = readText(".github/workflows/omni-queue.yml");
+  assert.doesNotMatch(rawText, /^\s*app-id\s*:/m, "no step passes the deprecated app-id input");
+  assert.doesNotMatch(queueText, /"app-id":/, "no mapping carries an app-id key");
+  assert.doesNotMatch(
+    queueText,
+    /OMNI_QUEUE_APP_ID\b/,
+    "the numeric App id is not a workflow secret"
+  );
+  for (const id of ["approval", "tick"]) {
+    const steps = queue.jobs[id].steps.filter((s) =>
+      String(s.uses ?? "").startsWith("actions/create-github-app-token@")
+    );
+    assert.equal(steps.length, 1, `${id} mints exactly one App token`);
+    assert.equal(steps[0].with["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}", id);
+    assert.equal(steps[0].with["app-id"], undefined, id);
+  }
 });
 
 test("omni-queue.yml: both jobs run in the omni-queue environment", () => {
@@ -1159,6 +1234,97 @@ test("every module the queue runs resolves inside its sparse checkout", () => {
   }
 });
 
+// ───────────────────────────── omni-queue-watchdog.yml ─────────────────────────────
+
+const watchdogText = readText(".github/workflows/omni-queue-watchdog.yml");
+const watchdog = load(watchdogText);
+
+function watchdogContext(
+  eventName,
+  { repository = "cheaper-inference/OmniRoute", enabled = "true" } = {}
+) {
+  return {
+    github: {
+      event_name: eventName,
+      repository,
+      ref: "refs/heads/release/v3.8.54",
+      event: { repository: { default_branch: "release/v3.8.54" } },
+    },
+    vars: { OMNI_QUEUE_ENABLED: enabled },
+    needs: {},
+    secrets: anyVar("***"),
+    inputs: {},
+    steps: anyStep,
+  };
+}
+
+test("omni-queue-watchdog.yml: every 30 minutes, in the production repository only, behind the kill switch", () => {
+  const on = triggers(watchdog);
+  assert.deepEqual(Object.keys(on).sort(), ["schedule", "workflow_dispatch"]);
+  assert.deepEqual(on.schedule, [{ cron: "17,47 * * * *" }]);
+  assert.deepEqual(Object.keys(watchdog.jobs), ["watchdog"]);
+  const job = watchdog.jobs.watchdog;
+  for (const event of ["schedule", "workflow_dispatch"]) {
+    assert.equal(condition(job.if, watchdogContext(event)), true, event);
+    for (const repository of ["someone/OmniRoute", "cheaper-inference/omni-queue-sandbox"]) {
+      assert.equal(condition(job.if, watchdogContext(event, { repository })), false, repository);
+    }
+    for (const enabled of ["", "false", "TRUE ", "1"]) {
+      assert.equal(condition(job.if, watchdogContext(event, { enabled })), false, enabled);
+    }
+  }
+});
+
+test("omni-queue-watchdog.yml: the default token with exactly contents read, issues write and pull-requests read, no App secret", () => {
+  assert.deepEqual(watchdog.permissions, {});
+  const job = watchdog.jobs.watchdog;
+  // pull-requests: read lists the labeled PRs with their base; nothing PR-related is written.
+  assert.deepEqual(job.permissions, {
+    contents: "read",
+    issues: "write",
+    "pull-requests": "read",
+  });
+  assert.equal(job.environment, undefined, "no environment: the App's credentials stay out");
+  assert.doesNotMatch(watchdogText, /secrets\./, "no secret at all, so none of the App's");
+  assert.doesNotMatch(watchdogText, /create-github-app-token|OMNI_QUEUE_APP|OMNI_QUEUE_LAND/);
+  const runs = job.steps.filter((s) => s.run !== undefined);
+  assert.equal(runs.length, 1);
+  assert.equal(String(runs[0].run).trim(), "node scripts/merge-queue/watchdog.mjs");
+  assert.deepEqual(runs[0].env, { GITHUB_TOKEN: "${{ github.token }}" });
+  assert.deepEqual(job.concurrency, { group: "omni-queue-watchdog", "cancel-in-progress": false });
+  assert.ok(Number(job["timeout-minutes"]) <= 10);
+});
+
+test("omni-queue-watchdog.yml: a sparse checkout of the default branch, pinned actions, no PR code", () => {
+  const job = watchdog.jobs.watchdog;
+  const checkouts = job.steps.filter((s) => String(s.uses ?? "").startsWith("actions/checkout@"));
+  assert.equal(checkouts.length, 1);
+  const w = checkouts[0].with;
+  assert.equal(w.ref, "${{ github.event.repository.default_branch }}");
+  assert.equal(w.repository, undefined);
+  assert.equal(w.token, undefined);
+  assert.equal(w["persist-credentials"], false);
+  assert.deepEqual(String(w["sparse-checkout"]).trim().split("\n"), [
+    "scripts/merge-queue",
+    "config/merge-queue",
+  ]);
+  const queuePins = new Set(
+    Object.values(queue.jobs).flatMap((j) => j.steps.map((s) => s.uses).filter(Boolean))
+  );
+  for (const step of job.steps) {
+    if (step.uses) {
+      assert.match(step.uses, SHA_PIN);
+      assert.ok(queuePins.has(step.uses), `${step.uses}: the same pin as omni-queue.yml`);
+    }
+    assert.doesNotMatch(String(step.run ?? ""), /\$\{\{/, "no expression inside a run body");
+    assert.doesNotMatch(String(step.run ?? ""), /\bnpm\s+(ci|install|i)\b|\bnpx\b/);
+  }
+  const [setup] = job.steps.filter((s) => String(s.uses ?? "").startsWith("actions/setup-node@"));
+  assert.equal(String(setup.with["node-version"]), "24");
+  assert.equal(setup.with["package-manager-cache"], false);
+  assert.doesNotMatch(JSON.stringify(watchdog), /pull_request|head_ref|workflow_run/);
+});
+
 function writeFake(dir, name, body) {
   const path = join(dir, name);
   writeFileSync(path, `#!/usr/bin/env bash\n${body}\n`);
@@ -1173,7 +1339,14 @@ function runStep(t, step, env) {
   spawnSync("mkdir", [bin]);
   writeFake(bin, "node", `printf '%s\\n' "$@" > "$FAKE_ARGS"`);
   writeFake(bin, "gh", `printf '%s\\n' "$@" > "$FAKE_GH_ARGS"; printf '%s\\n' "$FAKE_GH_OUT"`);
-  writeFake(bin, "npm", `printf '%s\\n' "$@" >> "$FAKE_NPM_ARGS"; exit "\${FAKE_NPM_RC:-0}"`);
+  // FAKE_NPM_FAIL=<script>: only `npm run <script>` fails (exit 1); FAKE_NPM_RC applies to all.
+  writeFake(
+    bin,
+    "npm",
+    `printf '%s\\n' "$@" >> "$FAKE_NPM_ARGS"
+[ -n "\${FAKE_NPM_FAIL:-}" ] && [ "$2" = "$FAKE_NPM_FAIL" ] && exit 1
+exit "\${FAKE_NPM_RC:-0}"`
+  );
   writeFake(bin, "git", "exit 0");
   const script = join(dir, "step.sh");
   writeFileSync(script, step.run);
@@ -1838,4 +2011,954 @@ test("ci.yml: the Coverage job gets a longer ceiling on a candidate, the same on
   assert.equal(minutes(pushContext("refs/heads/main")), 60, "push to main");
   assert.equal(minutes(prContext("fix/x")), 60, "pull request");
   assert.equal(minutes(pushContext("refs/heads/main", { eventName: "merge_group" })), 60);
+});
+
+// ───────────────────────────── one check profile: candidates and Release-Green ─────────────────────────────
+//
+// config/quality/release-green-static-profile.json is the one list. What Release-Green holds as a
+// hard requirement runs on a candidate push. A gate marked "externalState" reads state outside the
+// tested commit (an advisory database, the repository's open code-scanning alerts): on a candidate
+// it is advisory, so an advisory published during a batch's CI cannot throw the batch out; on a
+// pull request, on main and on every other event it keeps its verdict.
+
+const RELEASE_GREEN = JSON.parse(readText("config/quality/release-green-static-profile.json"));
+const PROFILE_ENTRIES = [...RELEASE_GREEN.gates, ...RELEASE_GREEN.exclusions];
+const aliasOf = (entry) => entry.alias ?? entry.args[1];
+const EXTERNAL_STATE = new Set(
+  PROFILE_ENTRIES.filter((entry) => entry.externalState === true).map(aliasOf)
+);
+// A candidate is a push the queue made: a dispatch on such a ref is not one (gateMode.mjs agrees).
+const CANDIDATE_ADVISORY =
+  "${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}";
+const QUALITY_BAG = "Quality gates (all, non-fail-fast)";
+// Where the external-state gates run as their own step (the quality bag aside).
+const EXTERNAL_SITES = [
+  ["ci.yml", "lint", "npm run audit:deps"],
+  ["ci.yml", "quality-gate", "npm run check:codeql-ratchet"],
+  ["ci.yml", "quality-extended", "npm run check:vuln-ratchet -- --ratchet"],
+  ["quality.yml", "lint-guard", "npm run check:codeql-ratchet"],
+];
+
+const stepEnv = (step, ctx) =>
+  Object.fromEntries(
+    Object.entries(step.env ?? {}).map(([key, value]) => [key, String(render(value, ctx) ?? "")])
+  );
+const words = (line) =>
+  line
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.replace(/^"|"$/g, ""));
+
+/**
+ * The words of a command line from its command on: the prefixes that change nothing about what
+ * runs (`exec`, `time`, `VAR=value` assignments) dropped. Null for a line with a `#` after its
+ * start (a comment there can hide the arguments, or the line is `exit 0 # npm run …`).
+ */
+function commandWords(line) {
+  if (/\s#/.test(line) || line.trim().startsWith("#")) return null;
+  const w = words(line);
+  let i = 0;
+  while (i < w.length && (w[i] === "exec" || w[i] === "time" || /^[A-Za-z_]\w*=/.test(w[i]))) i++;
+  return w.slice(i);
+}
+
+/**
+ * Whether a command line runs `gate` (by alias, or by its script command) with its arguments: the
+ * command must START the line (commandWords), so a line that only mentions it (`echo "npm run
+ * …"`, `: npm run …`) does not count.
+ */
+function invokes(line, gate) {
+  const w = commandWords(line);
+  if (!w) return false;
+  const starts = (seq) => seq.length > 0 && seq.every((s, j) => w[j] === s);
+  const head =
+    starts(["npm", "run", gate.args[1]]) ||
+    (typeof gate.command === "string" &&
+      !gate.command.includes("&&") &&
+      starts(words(gate.command)));
+  return head && gate.args.slice(2).every((arg) => arg === "--" || w.includes(arg));
+}
+
+/**
+ * Why a counted step cannot be judged from the workflow alone, or null: an `if:` or a
+ * `continue-on-error` (the step's or its job's) that reads `env.*`, `matrix.*` or
+ * `head_commit` (values the evaluator does not know on a candidate), or a shell other than none
+ * or bash (step, job or workflow default).
+ */
+function unjudgeable(wf, job, step) {
+  const conditions = [step.if, step["continue-on-error"], job.if, job["continue-on-error"]];
+  for (const value of conditions) {
+    const text = typeof value === "string" ? value : "";
+    if (/\benv\s*\.|\bmatrix\s*\.|head_commit/i.test(text)) return `reads ${text.trim()}`;
+  }
+  const shell = step.shell ?? job.defaults?.run?.shell ?? wf.defaults?.run?.shell;
+  if (shell !== undefined && shell !== "bash") return `runs in ${shell}`;
+  return null;
+}
+
+let candidateRunsCache = null;
+const bagRuns = new Map();
+const loadProfileWorkflows = () =>
+  Object.fromEntries(Object.values(PROFILES).map((file) => [file, loadWorkflow(file)]));
+const PROFILE_OF = Object.fromEntries(Object.entries(PROFILES).map(([name, file]) => [file, name]));
+/**
+ * Jobs whose failure reds the workflow's Gate: in its admission-verdict `needs` AND `required` in
+ * config/quality/admission-policy.json (scripts/quality/admission-verdict.mjs skips a job whose
+ * `disposition` is "advisory").
+ */
+const adjudicated = (file, wf) => {
+  const rules = policy.profiles[PROFILE_OF[file]]?.jobs ?? {};
+  return new Set(
+    [wf.jobs["admission-verdict"]?.needs ?? []]
+      .flat()
+      .filter((id) => rules[id]?.disposition === "required")
+  );
+};
+// A command line that is the step's whole `run:`: no conditional, chain, pipe, substitution,
+// background `&` (not `&&`, not a redirection) or leading `!` can keep its exit status from
+// failing the step. Accepted limit: a script the line calls can still hide `|| true` inside.
+const SHELL_SHAPE =
+  /&&|\|\||[;|`]|\$\(|(?<![&<>])&(?![&>])|^\s*!|^\s*(if|then|else|elif|fi|for|while|until|case|do|done)\b/;
+
+/**
+ * Every command a candidate push runs where it can turn the workflow's Gate red: jobs the
+ * `admission-verdict` job of that workflow reads, scheduled by the evaluator, steps whose `if:`
+ * holds. Each site says whether its failure is advisory there and whether its shape is accepted
+ * as blocking: the step's whole `run:` is that one command, or the command is an entry of the
+ * quality bag, which is executed (fake npm) green, then with every gate red to read which
+ * failures it counts. Comment lines are not sites. `workflows` (file → parsed workflow) lets a
+ * test probe an in-memory mutation.
+ */
+function candidateRuns(t, workflows = null) {
+  if (!workflows && candidateRunsCache) return candidateRunsCache;
+  // Every repository variable on, then every one off (unset reads as ""): a site counts as
+  // blocking only where it blocks under both.
+  const on = candidateRunsWith(t, workflows, anyVar("true"));
+  const off = candidateRunsWith(t, workflows, anyVar(""));
+  const key = (r) => `${r.where}\0${r.line}`;
+  const offBy = new Map(off.map((r) => [key(r), r]));
+  const runs = on.map((r) => {
+    const other = offBy.get(key(r));
+    if (!other) return { ...r, accepted: false, refused: "does not run with the variables off" };
+    return { ...r, advisory: r.advisory || other.advisory, accepted: r.accepted && other.accepted };
+  });
+  if (!workflows) candidateRunsCache = runs;
+  return runs;
+}
+
+function candidateRunsWith(t, workflows, vars) {
+  const runs = [];
+  for (const [file, wf] of Object.entries(workflows ?? loadProfileWorkflows())) {
+    const ctx = withChanges(pushContext(CANDIDATE_REF, { vars }));
+    const scheduled = scheduledJobs(wf, ctx);
+    const gate = adjudicated(file, wf);
+    assert.ok(gate.size > 0, `${file}: admission-verdict needs`);
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      if (!scheduled[id] || !gate.has(id)) continue;
+      const jobAdvisory = truthy(render(job["continue-on-error"] ?? false, ctx));
+      for (const step of job.steps ?? []) {
+        const stepCtx = { ...ctx, __success: true };
+        if (typeof step.run !== "string" || !condition(step.if, stepCtx)) continue;
+        const where = `${file}:${id}:${step.name ?? step.run.split("\n")[0]}`;
+        const advisory = jobAdvisory || truthy(render(step["continue-on-error"] ?? false, stepCtx));
+        const refused = unjudgeable(wf, job, step);
+        if (!step.run.includes('"check:$g"')) {
+          const lines = step.run
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line && !line.startsWith("#"));
+          const accepted = !refused && lines.length === 1 && !SHELL_SHAPE.test(lines[0]);
+          for (const line of lines) {
+            runs.push({ where, line, advisory, accepted, step, stepCtx, refused });
+          }
+          continue;
+        }
+        const env = stepEnv(step, stepCtx);
+        const key = `${step.run}\0${JSON.stringify(env)}`;
+        if (!bagRuns.has(key)) {
+          const green = runStep(t, step, env);
+          assert.equal(green.code, 0, `${where}: ${green.stderr}`);
+          // Every gate red at once: the loop's closing error names each one that counted.
+          const red = runStep(t, step, { ...env, FAKE_NPM_RC: "1" });
+          const counted = /gate\(s\) failed: (.*)/.exec(red.stdout)?.[1].split(" ") ?? [];
+          bagRuns.set(key, { npmArgs: green.npmArgs, counted });
+        }
+        const { npmArgs, counted } = bagRuns.get(key);
+        for (const [script, args] of npmRuns(npmArgs)) {
+          const blocks =
+            counted.includes(script) || counted.includes(script.replace(/^check:/, ""));
+          const line = ["npm", "run", script, ...args].join(" ");
+          runs.push({ where, line, advisory: advisory || !blocks, accepted: !refused, refused });
+        }
+      }
+    }
+  }
+  return runs;
+}
+
+// A hard gate whose only blocking site on a candidate has a shape the check does not accept
+// (a multi-line script) is named here: where it runs and why that still blocks. An entry is
+// refused once the gate has an accepted blocking site.
+const CANDIDATE_HARD_GATE_EXCEPTIONS = new Map([
+  [
+    "check:boundary:ratchet",
+    {
+      // `if [ -n "$PR_BASE_SHA" ]; then npm run check:boundary:ratchet -- --base-ref …; else
+      // npm run check:boundary:ratchet; fi`: both branches run the gate as the step's last
+      // command under `bash -e`, so its exit status is the step's (base-relative on a candidate,
+      // pinned by "ci.yml: the boundary ratchet is base-relative on a candidate, absolute on
+      // main"). The same script also blocks in the quality bag as `check:boundary -- --ratchet`.
+      where: "ci.yml:lint:Boundary ratchet (open-sse → src)",
+    },
+  ],
+]);
+
+/** What keeps the profile's hard gates from making a candidate red: [] when nothing does. */
+function hardGateFindings(t, runs) {
+  const findings = [];
+  for (const gate of RELEASE_GREEN.gates.filter((g) => g.kind === "hard")) {
+    const found = runs.filter((r) => invokes(r.line, gate));
+    const accepted = found.filter((r) => r.accepted);
+    const exception = CANDIDATE_HARD_GATE_EXCEPTIONS.get(gate.id);
+    if (exception) {
+      const site = found.find((r) => r.where === exception.where && !r.advisory);
+      if (accepted.some((r) => !r.advisory))
+        findings.push(`${gate.id}: has an accepted blocking site, drop its exception`);
+      else if (!site) findings.push(`${gate.id}: does not block at ${exception.where}`);
+      else findings.push(...exceptionBehaviour(t, gate, site));
+      continue;
+    }
+    if (!accepted.length) findings.push(`${gate.id}: never runs on a candidate push`);
+    else if (!EXTERNAL_STATE.has(gate.args[1]) && !accepted.some((r) => !r.advisory))
+      findings.push(`${gate.id}: never blocks a candidate push`);
+  }
+  return findings;
+}
+
+/**
+ * What every exception entry must also pass, by behaviour: its step, run on the candidate
+ * context with the fake npm, exits zero with the gate green and non-zero with the gate red.
+ */
+function exceptionBehaviour(t, gate, site) {
+  const env = stepEnv(site.step, site.stepCtx);
+  const green = runStep(t, site.step, env);
+  // Only the gate's own script fails: another npm call failing must not pass for the gate's.
+  const red = runStep(t, site.step, { ...env, FAKE_NPM_FAIL: gate.args[1] });
+  const ran = npmRuns(red.npmArgs).has(gate.args[1]);
+  return [
+    ...(green.code === 0 ? [] : [`${gate.id}: its exception step fails with the gate green`]),
+    ...(red.code !== 0 && ran ? [] : [`${gate.id}: its exception step passes with the gate red`]),
+  ];
+}
+
+// Steps advisory before this task, for their own reasons, on every event (literal `true`).
+const PRE_EXISTING_ADVISORY = new Map([
+  // The coverage artifact is absent when a flaky shard skipped Coverage; --allow-missing follows.
+  ["ci.yml:quality-gate:actions/download-artifact", "coverage-report download"],
+  // check:circular-deps is a drift item of the profile, never blocking.
+  ["ci.yml:quality-extended:Circular deps (dpdm; advisory)", "drift gate"],
+  // A failed install surfaces as INCOMPLETE in the ratchets after it (a red step), never a pass.
+  ["ci.yml:quality-extended:Install advisory security scanners (gitleaks/osv/oasdiff)", "install"],
+  // Prose lint, warning-first (docs-lint is advisory as a job too).
+  ["ci.yml:docs-lint:Vale prose lint (Microsoft style, advisory)", "prose lint"],
+  // #7336: hardening the heavy Windows prebuild check.
+  [
+    "ci.yml:electron-package-smoke:Prepare Electron standalone (Windows prebuild verification)",
+    "#7336",
+  ],
+  // Third-party uploads and artifacts that may legitimately be absent: reporting only.
+  ["ci.yml:test-vitest:Upload test results to Trunk (advisory)", "upload"],
+  ["ci.yml:test-coverage:Upload coverage to Codecov (informational)", "upload"],
+  ["ci.yml:coverage-pr-comment:Download coverage artifact", "artifact"],
+  ["ci.yml:test-e2e:Upload test results to Trunk (advisory)", "upload"],
+  ["ci.yml:ci-summary:Download i18n results", "artifact"],
+  // Same install as ci.yml; the required workflow scanners have their own verified install.
+  ["quality.yml:fast-gates:Install security scanners (gitleaks/osv/oasdiff)", "install"],
+  // TS7 shadow: the 6.x typecheck and the TS7 ratchet in the bag stay authoritative.
+  ["quality.yml:fast-gates:Typecheck (core) — TS7 native shadow (advisory)", "shadow"],
+]);
+// Jobs advisory before this task, for their own reasons, on every event (literal `true`).
+const PRE_EXISTING_ADVISORY_JOBS = new Map([
+  // Prose lint, warning-first.
+  ["ci.yml:docs-lint", "prose lint"],
+  // i18n drift: the admission policy holds the job advisory too.
+  ["ci.yml:i18n", "i18n drift"],
+  // #10049: the protocol E2E suite is advisory.
+  ["ci.yml:test-protocols-e2e", "#10049"],
+]);
+const stepKey = (file, id, step) =>
+  `${file}:${id}:${step.name ?? String(step.uses ?? step.run).split("@")[0]}`;
+/** The event contexts a candidate must be told apart from. */
+const nonCandidateContexts = () => [
+  ...baseRelativeContexts().filter((c) => c.name !== "candidate push"),
+  {
+    name: "workflow_dispatch of an omni-queue ref",
+    ctx: withChanges(pushContext("refs/heads/omni-queue/x", { eventName: "workflow_dispatch" })),
+  },
+];
+
+/**
+ * Step-level continue-on-error, for both files. A literal `true` is a pre-existing advisory step
+ * (named above). An expression true on ANY modelled context is a finding, unless it is exactly
+ * the candidate expression on a step that runs only external-state gates.
+ */
+function advisoryFindings(workflows) {
+  const findings = [];
+  const contexts = [
+    { name: "candidate push", ctx: withChanges(pushContext(CANDIDATE_REF)) },
+    ...nonCandidateContexts(),
+  ];
+  const seen = new Set();
+  for (const [file, wf] of Object.entries(workflows)) {
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      // The same rule for a job-level continue-on-error (T13-d): a literal `true` is a named
+      // pre-existing advisory job; an expression true on ANY modelled context is a finding.
+      const jobCoe = job["continue-on-error"];
+      const jobKey = `${file}:${id}`;
+      if (PRE_EXISTING_ADVISORY_JOBS.has(jobKey)) {
+        seen.add(jobKey);
+        if (jobCoe !== true) findings.push(`${jobKey}: pre-existing advisory job changed`);
+      } else if (jobCoe !== undefined) {
+        const on = contexts.filter(({ ctx }) => truthy(render(jobCoe, ctx))).map((c) => c.name);
+        if (on.length) findings.push(`${jobKey}: job advisory on ${on.join(", ")}`);
+      }
+      for (const step of job.steps ?? []) {
+        const coe = step["continue-on-error"];
+        if (coe === undefined) continue;
+        const key = stepKey(file, id, step);
+        if (PRE_EXISTING_ADVISORY.has(key)) {
+          seen.add(key);
+          if (coe !== true) findings.push(`${key}: pre-existing advisory step changed`);
+          continue;
+        }
+        const on = contexts.filter(({ ctx }) => truthy(render(coe, ctx))).map((c) => c.name);
+        if (!on.length) continue;
+        if (coe !== CANDIDATE_ADVISORY) {
+          findings.push(`${key}: advisory on ${on.join(", ")}`);
+          continue;
+        }
+        const aliases = [...String(step.run ?? "").matchAll(/\bnpm run ([a-z][\w:-]*)/g)];
+        if (!aliases.length) findings.push(`${key}: advisory on a candidate, runs no gate`);
+        for (const [, alias] of aliases) {
+          if (!EXTERNAL_STATE.has(alias)) findings.push(`${key}: ${alias} is not external state`);
+        }
+      }
+    }
+  }
+  for (const key of [...PRE_EXISTING_ADVISORY.keys(), ...PRE_EXISTING_ADVISORY_JOBS.keys()]) {
+    if (!seen.has(key)) findings.push(`${key}: stale pre-existing advisory entry`);
+  }
+  return findings;
+}
+
+/** In-memory copy of the two workflows with `mutate(ci, quality)` applied. */
+function mutatedWorkflows(mutate) {
+  const copy = loadProfileWorkflows();
+  mutate(copy["ci.yml"], copy["quality.yml"]);
+  return copy;
+}
+const stepRunning = (job, run) => {
+  const index = job.steps.findIndex((s) => s.run === run);
+  assert.ok(index >= 0, `step "${run}"`);
+  return index;
+};
+const ROUTE_VALIDATION = "npm run check:route-validation:t06";
+const TLA_ORDER = "npm run check:test-tla-order";
+
+// Git's location variables (the ruled list plus the ones scripts/merge-queue/compose.mjs clears):
+// set by git around a hook, they would aim any git call of a fixture at the caller's repository.
+const GIT_LOCATION_VARS = [
+  "GIT_DIR",
+  "GIT_WORK_TREE",
+  "GIT_INDEX_FILE",
+  "GIT_OBJECT_DIRECTORY",
+  "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+  "GIT_COMMON_DIR",
+  "GIT_NAMESPACE",
+  "GIT_PREFIX",
+  "GIT_CEILING_DIRECTORIES",
+  "GIT_QUARANTINE_PATH",
+  "GIT_SHALLOW_FILE",
+  "GIT_GRAFT_FILE",
+  "GIT_REPLACE_REF_BASE",
+];
+// Configuration git reads from the environment besides its files: `-c` pairs passed down by a
+// caller (GIT_CONFIG_COUNT with GIT_CONFIG_KEY_n / GIT_CONFIG_VALUE_n, GIT_CONFIG_PARAMETERS) and
+// the template directory of `git init` (hooks): a hook or a signing key there would run inside a
+// fixture (T13-f).
+const GIT_CONFIG_ENV_RE = /^GIT_CONFIG_(COUNT|KEY_\d+|VALUE_\d+|PARAMETERS)$|^GIT_TEMPLATE_DIR$/;
+/**
+ * The environment of every real git call of a fixture: no inherited location, no user config, no
+ * configuration or template passed down through the environment.
+ */
+const PROBE_GIT_ENV = () => ({
+  ...Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([key]) =>
+        !key.startsWith("GITHUB_") &&
+        !GIT_LOCATION_VARS.includes(key) &&
+        !GIT_CONFIG_ENV_RE.test(key)
+    )
+  ),
+  GIT_CONFIG_GLOBAL: "/dev/null",
+  GIT_CONFIG_NOSYSTEM: "1",
+  GIT_AUTHOR_NAME: "probe",
+  GIT_AUTHOR_EMAIL: "probe@example.invalid",
+  GIT_COMMITTER_NAME: "probe",
+  GIT_COMMITTER_EMAIL: "probe@example.invalid",
+});
+
+/** check-test-masking.mjs in a throwaway repository whose head drops one assert of its base. */
+function maskingProbe(t) {
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-masking-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  // One environment for the git calls and the script: the probe's own repository, named
+  // explicitly, whatever GIT_* location the caller (a git hook) left in process.env.
+  const env = { ...PROBE_GIT_ENV(), GIT_DIR: join(dir, ".git"), GIT_WORK_TREE: dir };
+  // No hook and no signing, whatever the caller's configuration says (T13-f).
+  const git = (...args) => {
+    const res = spawnSync(
+      "git",
+      ["-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "-C", dir, ...args],
+      { cwd: dir, encoding: "utf8", env }
+    );
+    assert.equal(res.status, 0, res.stderr);
+    return res.stdout.trim();
+  };
+  git("init", "-q");
+  writeFileSync(join(dir, "a.test.ts"), "assert.ok(a);\nassert.ok(b);\n");
+  git("add", "a.test.ts");
+  git("commit", "-q", "-m", "base");
+  const base = git("rev-parse", "HEAD");
+  writeFileSync(join(dir, "a.test.ts"), "assert.ok(a);\n");
+  git("commit", "-q", "-am", "head");
+  const script = new URL("scripts/check/check-test-masking.mjs", ROOT).pathname;
+  const run = (extra) =>
+    spawnSync(process.execPath, [script], {
+      cwd: dir,
+      encoding: "utf8",
+      env: { ...env, ...extra },
+    });
+  return { base, run };
+}
+
+test("ci.yml: check:test-masking runs on a candidate against the candidate base, not on main pushes", (t) => {
+  const wf = loadWorkflow("ci.yml");
+  const lint = wf.jobs.lint;
+  assertBaseAvailable(lint, "lint");
+  const found = lint.steps.filter((s) => s.run === "npm run check:test-masking");
+  assert.equal(found.length, 1, "one test-masking step in lint");
+  const [step] = found;
+  assert.equal(step["continue-on-error"], undefined, "it blocks the candidate");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const candidate = name === "candidate push";
+    assert.equal(condition(step.if, ctx), candidate, `lint test-masking step on ${name}`);
+    if (candidate) assert.equal(render(step.env.GITHUB_BASE_SHA, ctx), base, "the candidate base");
+  }
+  const cand = withChanges(pushContext(CANDIDATE_REF));
+  assert.equal(scheduledJobs(wf, cand).lint, true);
+  const res = runStep(t, step, stepEnv(step, cand));
+  assert.equal(res.code, 0, res.stderr);
+  assert.deepEqual(res.npmArgs, ["run", "check:test-masking"]);
+  // The script diffs against GITHUB_BASE_SHA, ahead of any GITHUB_BASE_REF: in a throwaway
+  // repository whose head drops one assert, the SHA alone (next to an unresolvable ref) finds it.
+  const probe = maskingProbe(t);
+  const withSha = probe.run({ GITHUB_BASE_SHA: probe.base, GITHUB_BASE_REF: "no-such-branch" });
+  assert.equal(withSha.status, 1, withSha.stdout + withSha.stderr);
+  assert.match(withSha.stderr, /a\.test\.ts: asserts 2 → 1/);
+  const noBase = probe.run({});
+  assert.equal(noBase.status, 0, noBase.stdout + noBase.stderr);
+  assert.match(noBase.stdout, /sem base ref/);
+  // Pull requests keep their own step in PR Test Policy, untouched; it never runs on a push.
+  const policy = wf.jobs["pr-test-policy"];
+  const prStep = policy.steps.find((s) => s.name === "Detect test-masking (weakened assertions)");
+  assert.equal(prStep.run, "npm run check:test-masking");
+  assert.equal(prStep.env, undefined);
+  assert.equal(scheduledJobs(wf, withChanges(prContext("fix/x")))["pr-test-policy"], true);
+  assert.equal(scheduledJobs(wf, cand)["pr-test-policy"], false);
+  assert.equal(
+    scheduledJobs(wf, withChanges(pushContext("refs/heads/main")))["pr-test-policy"],
+    false
+  );
+});
+
+test("external-state gates are advisory on a candidate, blocking on a pull request and on main", (t) => {
+  // The classification (evidence per gate in the task report): npm audit reads the registry's
+  // advisory database, osv-scanner the OSV database, the CodeQL ratchet the repository's open
+  // code-scanning alerts. check:deps, check:provider-asset-provenance and
+  // check:free-catalog-evidence read only the tree and the clone's history: not external.
+  assert.deepEqual([...EXTERNAL_STATE].sort(), [
+    "audit:deps",
+    "check:codeql-ratchet",
+    "check:vuln-ratchet",
+  ]);
+  for (const [file, id, run] of EXTERNAL_SITES) {
+    const job = loadWorkflow(file).jobs[id];
+    const found = job.steps.filter((s) => s.run === run);
+    assert.equal(found.length, 1, `${file}:${id}: one "${run}" step`);
+    const [step] = found;
+    assert.equal(job["continue-on-error"], undefined, `${file}:${id}: the job keeps its verdict`);
+    assert.equal(step["continue-on-error"], CANDIDATE_ADVISORY, `${file}:${id}: ${run}`);
+    for (const { name, ctx } of baseRelativeContexts()) {
+      const advisory = truthy(render(step["continue-on-error"], ctx));
+      assert.equal(advisory, name === "candidate push", `${file}:${id}: ${run} on ${name}`);
+    }
+  }
+  // The quality bag runs the OSV ratchet inside its non-fail-fast loop: there the list of
+  // external-state gates is the step's own, filled on a candidate only.
+  const step = loadWorkflow("quality.yml").jobs["fast-gates"].steps.find(
+    (s) => s.name === QUALITY_BAG
+  );
+  for (const { name, ctx } of baseRelativeContexts()) {
+    const env = stepEnv(step, ctx);
+    const res = runStep(t, step, { ...env, FAKE_NPM_FAIL: "check:vuln-ratchet" });
+    if (name === "candidate push") {
+      assert.equal(res.code, 0, `${name}: ${res.stderr}`);
+      assert.match(res.stdout, /::warning::check:vuln-ratchet failed/);
+      assert.doesNotMatch(res.stdout, /gate\(s\) failed/);
+    } else {
+      assert.equal(res.code, 1, `the OSV ratchet blocks on ${name}`);
+      assert.match(res.stdout, /1 gate\(s\) failed: vuln-ratchet/, name);
+    }
+    // Control: a gate that reads only the tree blocks everywhere, the candidate included.
+    const deps = runStep(t, step, { ...env, FAKE_NPM_FAIL: "check:deps" });
+    assert.equal(deps.code, 1, `check:deps blocks on ${name}`);
+  }
+});
+
+test("every hard gate of the Release-Green profile runs on a candidate push", (t) => {
+  const runs = candidateRuns(t);
+  const hard = RELEASE_GREEN.gates.filter((gate) => gate.kind === "hard");
+  assert.ok(hard.length >= 50, `the real profile (${hard.length} hard gates)`);
+  // Every hard gate has an accepted site in a job Gate / CI or Gate / Quality reads, and one that
+  // blocks unless the gate reads external state; a named exception blocks where it says.
+  assert.deepEqual(
+    hardGateFindings(t, runs),
+    [],
+    "hard Release-Green gates a candidate cannot fail"
+  );
+  for (const id of CANDIDATE_HARD_GATE_EXCEPTIONS.keys()) {
+    assert.ok(
+      hard.some((gate) => gate.id === id),
+      `exception ${id} names a hard gate`
+    );
+  }
+  // An exception is refused once its gate has an accepted blocking site.
+  const accepted = { where: "ci.yml:lint:x", advisory: false, accepted: true };
+  assert.deepEqual(
+    hardGateFindings(t, [...runs, { ...accepted, line: "npm run check:boundary:ratchet" }]),
+    ["check:boundary:ratchet: has an accepted blocking site, drop its exception"]
+  );
+  // Controls: the matcher needs the profile's arguments, and an unknown gate is never found.
+  const glossary = hard.find((gate) => gate.id === "i18n:check-glossary:zh-CN");
+  assert.ok(runs.some((r) => invokes(r.line, glossary)));
+  assert.ok(!runs.some((r) => invokes(r.line, { ...glossary, args: [...glossary.args, "--x"] })));
+  assert.ok(!runs.some((r) => invokes(r.line, { args: ["run", "check:not-a-gate"] })));
+  const masking = runs.filter((r) => invokes(r.line, { args: ["run", "check:test-masking"] }));
+  assert.deepEqual(
+    masking.map((r) => [r.where, r.advisory, r.accepted]),
+    [["ci.yml:lint:Detect test-masking against the omni-queue candidate base", false, true]]
+  );
+});
+
+test("every externalState gate of the profile is advisory on the candidate", (t) => {
+  // The mark is a boolean that only ever says `true`; a gate without it reads only the tree.
+  for (const entry of PROFILE_ENTRIES) {
+    assert.ok([undefined, true].includes(entry.externalState), `${aliasOf(entry)}: externalState`);
+  }
+  assert.ok(EXTERNAL_STATE.size > 0, "the profile marks its external-state gates");
+  const runs = candidateRuns(t);
+  for (const alias of EXTERNAL_STATE) {
+    const found = runs.filter((r) => invokes(r.line, { args: ["run", alias] }));
+    assert.ok(found.length > 0, `${alias} runs on a candidate push`);
+    for (const r of found)
+      assert.equal(r.advisory, true, `${alias} blocks a candidate at ${r.where}`);
+  }
+  // Converse: a step advisory on a candidate is advisory on no other event, and only around
+  // external-state gates (the steps advisory everywhere before this task are named apart).
+  assert.deepEqual(advisoryFindings(loadProfileWorkflows()), []);
+  const cand = withChanges(pushContext(CANDIDATE_REF));
+  const exempted = [];
+  for (const [file, wf] of Object.entries(loadProfileWorkflows())) {
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      for (const step of job.steps ?? []) {
+        if (step["continue-on-error"] === CANDIDATE_ADVISORY) exempted.push([file, id, step.run]);
+      }
+    }
+  }
+  assert.deepEqual(exempted, EXTERNAL_SITES, "the step-level exemptions");
+  const bag = loadWorkflow("quality.yml").jobs["fast-gates"].steps.find(
+    (s) => s.name === QUALITY_BAG
+  );
+  const listed = String(render(bag.env.EXTERNAL_STATE_GATES, cand)).split(/\s+/).filter(Boolean);
+  assert.ok(listed.length > 0, "the quality bag lists its external-state gates on a candidate");
+  for (const name of listed) assert.ok(EXTERNAL_STATE.has(`check:${name}`), name);
+  for (const { name, ctx } of nonCandidateContexts()) {
+    assert.equal(render(bag.env.EXTERNAL_STATE_GATES, ctx), "", `empty on ${name}`);
+  }
+});
+
+test("a hard gate counts only where it can make the candidate red", (t) => {
+  assert.deepEqual(hardGateFindings(t, candidateRuns(t)), [], "the real workflows");
+  const at = (ci) => ci.jobs.lint.steps[stepRunning(ci.jobs.lint, ROUTE_VALIDATION)];
+  const tla = (ci) => ci.jobs.lint.steps[stepRunning(ci.jobs.lint, TLA_ORDER)];
+  const boundary = (ci) =>
+    ci.jobs.lint.steps.find((s) => s.name === "Boundary ratchet (open-sse → src)");
+  // [gate the mutation must surface, mutation of the parsed ci.yml]
+  const cases = {
+    // Runs on a candidate, in a job that Gate / CI does not read.
+    "moved to ci-summary": [
+      "check:route-validation:t06",
+      (ci) => {
+        const [step] = ci.jobs.lint.steps.splice(stepRunning(ci.jobs.lint, ROUTE_VALIDATION), 1);
+        ci.jobs["ci-summary"].steps.unshift(step);
+      },
+    ],
+    "behind a shell conditional": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run =
+          `if [ "$GITHUB_EVENT_NAME" = pull_request ]; then\n  ${ROUTE_VALIDATION}\nfi\n`;
+      },
+    ],
+    "a comment line": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `# ${ROUTE_VALIDATION}\ntrue\n`;
+      },
+    ],
+    "pull-request only": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "github.event_name == 'pull_request'";
+      },
+    ],
+    // P1b, P2b: a single command whose exit status cannot fail the step.
+    "in the background": [
+      "check:test-tla-order",
+      (ci) => {
+        tla(ci).run = `${TLA_ORDER} &`;
+      },
+    ],
+    negated: [
+      "check:test-tla-order",
+      (ci) => {
+        tla(ci).run = `! ${TLA_ORDER}`;
+      },
+    ],
+    // P25: in Gate / CI's needs, but a job the admission policy holds advisory (i18n).
+    "moved to a job the admission policy holds advisory": [
+      "check:test-tla-order",
+      (ci) => {
+        const [step] = ci.jobs.lint.steps.splice(stepRunning(ci.jobs.lint, TLA_ORDER), 1);
+        delete ci.jobs.i18n["continue-on-error"];
+        ci.jobs.i18n.steps.unshift(step);
+      },
+    ],
+    // P5: the named exception's step can no longer fail.
+    "the boundary exception made unfailable": [
+      "check:boundary:ratchet",
+      (ci) => {
+        boundary(ci).run = boundary(ci).run.replace(
+          /(npm run check:boundary:ratchet[^\n]*)/g,
+          "$1 || true"
+        );
+      },
+    ],
+    // T13-c: unfailable, followed by another npm call that fails when every npm call fails.
+    "the boundary exception unfailable before another npm call": [
+      "check:boundary:ratchet",
+      (ci) => {
+        boundary(ci).run = "npm run check:boundary:ratchet || true\nnpm run check:other\n";
+      },
+    ],
+    // T13-a: a line that only mentions the gate.
+    "only echoed": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `echo "${ROUTE_VALIDATION}"`;
+      },
+    ],
+    "after exit 0, in a comment": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `exit 0 # ${ROUTE_VALIDATION}`;
+      },
+    ],
+    "after the null command": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `: ${ROUTE_VALIDATION}`;
+      },
+    ],
+    // T13-b: what the evaluator cannot know, and what it reads.
+    "gated on an env value": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "env.SKIP_ROUTE_VALIDATION != 'true'";
+      },
+    ],
+    "advisory on a matrix value": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci)["continue-on-error"] = "${{ matrix.experimental }}";
+      },
+    ],
+    "gated on the head commit": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "!contains(github.event.head_commit.message, '[skip routes]')";
+      },
+    ],
+    "gated on a repository variable": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "vars.ROUTE_VALIDATION_ENABLED == 'true'";
+      },
+    ],
+    "in another shell": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).shell = "pwsh";
+      },
+    ],
+    "a property name in another case": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "github.Event_Name != 'push'";
+      },
+    ],
+  };
+  const survivors = Object.entries(cases)
+    .filter(([, [gate, mutate]]) => {
+      const findings = hardGateFindings(t, candidateRuns(t, mutatedWorkflows(mutate)));
+      return !findings.some((f) => f.startsWith(`${gate}: `));
+    })
+    .map(([name]) => name);
+  assert.deepEqual(survivors, [], "mutations the check does not see");
+});
+
+test("a step advisory on a candidate is advisory on no other event", () => {
+  assert.deepEqual(advisoryFindings(loadProfileWorkflows()), [], "the real workflows");
+  const vuln = "npm run check:vuln-ratchet -- --ratchet";
+  const lintStep = (ci) => ci.jobs.lint.steps[stepRunning(ci.jobs.lint, ROUTE_VALIDATION)];
+  const cases = {
+    "the OSV ratchet also advisory on pull requests": (ci) => {
+      const job = ci.jobs["quality-extended"];
+      job.steps[stepRunning(job, vuln)]["continue-on-error"] =
+        "${{ startsWith(github.ref, 'refs/heads/omni-queue/') || github.event_name == 'pull_request' }}";
+    },
+    "a tree-only gate advisory everywhere": (ci) => {
+      lintStep(ci)["continue-on-error"] = true;
+    },
+    "a tree-only gate advisory on a candidate": (ci) => {
+      lintStep(ci)["continue-on-error"] = CANDIDATE_ADVISORY;
+    },
+    // P23: an expression that is never true on a candidate is still advisory somewhere.
+    "a tree-only gate advisory on main only": (ci) => {
+      lintStep(ci)["continue-on-error"] = "${{ github.ref == 'refs/heads/main' }}";
+    },
+    // T13-d: the same rule for a job-level continue-on-error.
+    "a gate job advisory on main only": (ci) => {
+      ci.jobs.lint["continue-on-error"] = "${{ github.ref == 'refs/heads/main' }}";
+    },
+    "a gate job advisory everywhere": (ci) => {
+      ci.jobs.lint["continue-on-error"] = true;
+    },
+  };
+  const survivors = Object.entries(cases)
+    .filter(([, mutate]) => advisoryFindings(mutatedWorkflows(mutate)).length === 0)
+    .map(([name]) => name);
+  assert.deepEqual(survivors, [], "mutations the check does not see");
+});
+
+test("a workflow_dispatch of an omni-queue ref is not a candidate", (t) => {
+  // The queue only ever pushes its candidates; a dispatch on such a ref is someone's manual run.
+  const ctx = withChanges(
+    pushContext("refs/heads/omni-queue/x", { eventName: "workflow_dispatch" })
+  );
+  for (const [file, id, run] of EXTERNAL_SITES) {
+    const job = loadWorkflow(file).jobs[id];
+    const step = job.steps[stepRunning(job, run)];
+    assert.equal(truthy(render(step["continue-on-error"], ctx)), false, `${file}:${id}: ${run}`);
+  }
+  const lint = loadWorkflow("ci.yml").jobs.lint;
+  const masking = lint.steps[stepRunning(lint, "npm run check:test-masking")];
+  assert.equal(condition(masking.if, ctx), false, "the candidate-only test-masking step");
+  const bag = loadWorkflow("quality.yml").jobs["fast-gates"].steps.find(
+    (s) => s.name === QUALITY_BAG
+  );
+  const env = stepEnv(bag, ctx);
+  assert.equal(env.EXTERNAL_STATE_GATES, "");
+  const res = runStep(t, bag, { ...env, FAKE_NPM_FAIL: "check:vuln-ratchet" });
+  assert.equal(res.code, 1, "the OSV ratchet blocks a dispatch");
+});
+
+test("ci.yml and quality.yml install the same pinned gitleaks, osv-scanner and oasdiff", () => {
+  // A scanner release during a batch's CI must not red check:secrets / check:openapi-breaking on
+  // the candidate (those gates judge the tree), nor give one gate two verdicts on one candidate.
+  const TOOLS = { "gitleaks/gitleaks": "gitleaks", "google/osv-scanner": "osv-scanner" };
+  const toolOf = (repo) => TOOLS[repo] ?? (/\/oasdiff$/i.test(repo) ? "oasdiff" : null);
+  const installs = {};
+  for (const file of Object.values(PROFILES)) {
+    for (const [id, job] of Object.entries(loadWorkflow(file).jobs)) {
+      for (const step of job.steps ?? []) {
+        const run = String(step.run ?? "");
+        const vars = Object.fromEntries(
+          [...run.matchAll(/^\s*([A-Z_]+_VERSION)=(\S+)\s*$/gm)].map((m) => [m[1], m[2]])
+        );
+        for (const [, args] of run.matchAll(/gh release download ([^\n]*)/g)) {
+          const w = words(args);
+          const tool = toolOf(w[w.indexOf("--repo") + 1]);
+          if (!tool) continue;
+          // `gh release download --repo …` without a tag downloads the latest release.
+          const tag = w[0].startsWith("--") ? "latest" : (vars[w[0].replace(/^\$/, "")] ?? w[0]);
+          (installs[tool] ??= []).push([`${file}:${id}`, tag]);
+        }
+      }
+    }
+  }
+  assert.deepEqual(Object.keys(installs).sort(), ["gitleaks", "oasdiff", "osv-scanner"]);
+  for (const [tool, sites] of Object.entries(installs)) {
+    assert.deepEqual(
+      sites.map(([where]) => where.split(":")[0]).sort(),
+      ["ci.yml", "quality.yml"],
+      `${tool}: installed once in each workflow`
+    );
+    for (const [where, tag] of sites) {
+      assert.match(tag, /^v\d+\.\d+\.\d+$/, `${tool} at ${where} is pinned, not ${tag}`);
+    }
+    assert.equal(new Set(sites.map(([, tag]) => tag)).size, 1, `${tool}: ${JSON.stringify(sites)}`);
+  }
+});
+
+test("the test-masking probe ignores an inherited GIT_DIR / GIT_INDEX_FILE (suite run from a git hook)", (t) => {
+  // A decoy repository of its own, in a temp directory, built with a clean environment.
+  const decoy = mkdtempSync(join(tmpdir(), "omni-queue-masking-decoy-"));
+  t.after(() => rmSync(decoy, { recursive: true, force: true }));
+  const inDecoy = (...args) => {
+    const res = spawnSync("git", ["-C", decoy, ...args], {
+      encoding: "utf8",
+      env: PROBE_GIT_ENV(),
+    });
+    assert.equal(res.status, 0, `git ${args.join(" ")}: ${res.stderr}`);
+    return res.stdout.trim();
+  };
+  inDecoy("init", "-q");
+  writeFileSync(join(decoy, "d.txt"), "decoy\n");
+  inDecoy("add", "d.txt");
+  inDecoy("commit", "-q", "-m", "decoy");
+  const head = inDecoy("rev-parse", "HEAD");
+  const index = join(decoy, "inherited-index");
+
+  const saved = { GIT_DIR: process.env.GIT_DIR, GIT_INDEX_FILE: process.env.GIT_INDEX_FILE };
+  const restore = () => {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  };
+  t.after(restore);
+  process.env.GIT_DIR = join(decoy, ".git");
+  process.env.GIT_INDEX_FILE = index;
+  try {
+    const probe = maskingProbe(t);
+    const withSha = probe.run({ GITHUB_BASE_SHA: probe.base });
+    assert.equal(withSha.status, 1, withSha.stdout + withSha.stderr);
+    assert.match(withSha.stderr, /a\.test\.ts: asserts 2 → 1/);
+  } finally {
+    restore();
+  }
+  assert.equal(inDecoy("rev-parse", "HEAD"), head, "no commit landed in the decoy");
+  assert.equal(inDecoy("rev-list", "--count", "HEAD"), "1");
+  assert.equal(inDecoy("status", "--porcelain"), "", "the decoy's index and tree are unchanged");
+  assert.equal(existsSync(index), false, "the inherited index was never written");
+});
+
+test("T13-f: the test-masking probe ignores git configuration and templates passed down through the environment", (t) => {
+  // What a caller (a git hook running the suite, a CI step) can pass down: `-c` pairs through
+  // GIT_CONFIG_COUNT / GIT_CONFIG_KEY_n / GIT_CONFIG_VALUE_n and GIT_CONFIG_PARAMETERS, and a
+  // template directory whose hooks `git init` copies. Each would make the probe's commits fail.
+  const hostile = mkdtempSync(join(tmpdir(), "omni-queue-masking-hostile-"));
+  t.after(() => rmSync(hostile, { recursive: true, force: true }));
+  for (const dir of ["hooks", join("template", "hooks")]) {
+    spawnSync("mkdir", ["-p", join(hostile, dir)]);
+    writeFake(join(hostile, dir), "pre-commit", "echo 'hostile hook ran' >&2; exit 1");
+  }
+  const vars = {
+    GIT_CONFIG_COUNT: "2",
+    GIT_CONFIG_KEY_0: "core.hooksPath",
+    GIT_CONFIG_VALUE_0: join(hostile, "hooks"),
+    GIT_CONFIG_KEY_1: "commit.gpgsign",
+    GIT_CONFIG_VALUE_1: "true",
+    GIT_CONFIG_PARAMETERS: "'user.signingkey'='no-such-key'",
+    GIT_TEMPLATE_DIR: join(hostile, "template"),
+  };
+  const saved = Object.fromEntries(Object.keys(vars).map((key) => [key, process.env[key]]));
+  const restore = () => {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  };
+  t.after(restore);
+  Object.assign(process.env, vars);
+  try {
+    for (const key of Object.keys(vars)) {
+      assert.equal(PROBE_GIT_ENV()[key], undefined, `${key} is not passed to the fixture`);
+    }
+    const probe = maskingProbe(t);
+    const result = probe.run({ GITHUB_BASE_SHA: probe.base });
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stderr, /a\.test\.ts: asserts 2 → 1/);
+    assert.doesNotMatch(result.stderr, /hostile hook ran/);
+  } finally {
+    restore();
+  }
+});
+
+test("the contexts these tests model are the workflows' real triggers", () => {
+  // Every expression above is judged on: a candidate push, a pull request, a push to main, a
+  // merge group, a dispatch, a dispatch of an omni-queue ref. A new trigger (or push branch)
+  // starts runs none of them models: add a context for it in baseRelativeContexts() /
+  // nonCandidateContexts() before widening this list.
+  const modelled = [
+    ...baseRelativeContexts().map((c) => c.ctx),
+    ...nonCandidateContexts().map((c) => c.ctx),
+  ];
+  const events = [...new Set(modelled.map((ctx) => ctx.github.event_name))].sort();
+  const pushRefs = new Set(
+    modelled.filter((ctx) => ctx.github.event_name === "push").map((ctx) => ctx.github.ref)
+  );
+  const advice =
+    "add a context for it in baseRelativeContexts() / nonCandidateContexts() before widening " +
+    "this list";
+  for (const file of Object.values(PROFILES)) {
+    const on = triggers(loadWorkflow(file));
+    assert.deepEqual(
+      Object.keys(on).sort(),
+      events,
+      `${file}: triggers vs modelled events: a new trigger starts runs no test models; ${advice}`
+    );
+    // `push` filters by branch only: a paths, paths-ignore or tags filter would decide which
+    // candidates run CI at all, and no context models that (T13-e).
+    assert.deepEqual(
+      Object.keys(on.push ?? {}),
+      ["branches"],
+      `${file}: on.push filters by branches only; a new filter needs a context: ${advice}`
+    );
+    assert.deepEqual(
+      on.push.branches,
+      ["main", "omni-queue/**"],
+      `${file}: push branches: a new push branch starts runs no test models; ${advice}`
+    );
+    for (const branch of on.push.branches) {
+      assert.ok(
+        [...pushRefs].some((ref) =>
+          branchFilterMatches({ branches: [branch] }, ref.replace(/^refs\/heads\//, ""))
+        ),
+        `${file}: push to ${branch} has a modelled context; ${advice}`
+      );
+    }
+  }
 });

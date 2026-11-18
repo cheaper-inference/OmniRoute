@@ -294,72 +294,72 @@ npm run test:combo:live:vps:failover     # เพิ่มสถานการ�
 
 ---
 
-## โครงสร้างโปรเจกต์
+## โครงสร้างโครงการ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # หน้าแดชบอร์ด (23 ส่วน)
-│   ├── api/                # เส้นทาง API (51 ไดเรกทอรี)
-│   └── login/              # หน้าการยืนยันตัวตน (.tsx)
-├── domain/                 # กลไกนโยบาย (policyEngine, comboResolver, costRules ฯลฯ)
-├── lib/                    # ตรรกะธุรกิจหลัก (.ts)
-│   ├── a2a/                # เซิร์ฟเวอร์โปรโตคอล Agent-to-Agent v0.3
-│   ├── acp/                # รีจิสทรี Agent Communication Protocol
-│   ├── compliance/         # กลไกนโยบายการปฏิบัติตามข้อกำหนด
-│   ├── db/                 # โมดูลโดเมน SQLite + การย้ายฐานข้อมูล 130 รายการ
-│   ├── memory/             # หน่วยความจำการสนทนาแบบถาวร
-│   ├── oauth/              # ผู้ให้บริการ บริการ และยูทิลิตี OAuth
-│   ├── skills/             # เฟรมเวิร์กทักษะที่ขยายได้
-│   ├── usage/              # การติดตามการใช้งานและการคำนวณต้นทุน
-│   └── localDb.ts          # ชั้น re-export เท่านั้น — ห้ามเพิ่มตรรกะที่นี่
-├── middleware/              # มิดเดิลแวร์คำขอ (promptInjectionGuard)
-├── mitm/                   # พร็อกซี MITM (ใบรับรอง, DNS, การกำหนดเส้นทางเป้าหมาย)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # คอมโพเนนต์ React (.tsx)
-│   ├── constants/          # นิยามผู้ให้บริการ (329), ขอบเขต MCP, กลยุทธ์การกำหนดเส้นทาง 20 รายการ
-│   ├── utils/              # เซอร์กิตเบรกเกอร์, ตัวทำความสะอาดข้อมูล, ตัวช่วยการยืนยันตัวตน
-│   └── validation/         # สคีมา Zod v4
-└── sse/                    # ไปป์ไลน์พร็อกซี SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # เวิร์กสเปซ @omniroute/open-sse
-├── executors/              # โมดูลตัวดำเนินการ 150 รายการ (คลาสตัวดำเนินการ + ตัวช่วยสำหรับผู้ให้บริการแต่ละราย)
-├── handlers/               # ตัวจัดการคำขอ 11 รายการ (แชต, การตอบกลับ, embeddings, รูปภาพ ฯลฯ)
-├── mcp-server/             # เซิร์ฟเวอร์ MCP (เครื่องมือที่ไม่ซ้ำกัน 110 รายการ, การขนส่ง 3 รูปแบบ, ขอบเขต 33 รายการ)
-├── services/               # บริการระดับบนสุด 178 รายการ (combo, autoCombo, rateLimitManager ฯลฯ)
-├── translator/             # ตัวแปลรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # ตัวแปลง Responses API
-└── utils/                  # โมดูลยูทิลิตี 22 รายการ (สตรีม, TLS, พร็อกซี, การบันทึกล็อก)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # แอปเดสก์ท็อป Electron (ข้ามแพลตฟอร์ม)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # ตัวรันการทดสอบ Node.js (ไฟล์ทดสอบ 1,574 ไฟล์)
-├── integration/            # การทดสอบการทำงานร่วมกัน
-├── e2e/                    # การทดสอบ Playwright
-├── security/               # การทดสอบความปลอดภัย
-├── translator/             # การทดสอบเฉพาะตัวแปล
-└── load/                   # การทดสอบโหลด
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # บันทึกการตัดสินใจด้านสถาปัตยกรรม
-├── architecture/            # สถาปัตยกรรมระบบและความยืดหยุ่น
-├── comparison/              # การเปรียบเทียบ OmniRoute กับทางเลือกอื่น
-├── compression/             # คู่มือและกฎการบีบอัด
-├── dev/                     # คู่มือการพัฒนา
-├── diagrams/                # แผนภาพสถาปัตยกรรม
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # คู่มือผู้ใช้, Docker, การตั้งค่า, การแก้ไขปัญหา
-├── i18n/                    # คำแปล README เป็นภาษาต่างๆ
-├── marketing/               # สื่อการตลาด
-├── ops/                     # การปรับใช้, พร็อกซี, ความครอบคลุม, การเผยแพร่
-├── providers/               # เอกสารเฉพาะผู้ให้บริการ
-├── reference/               # เอกสารอ้างอิง API, ตัวแปรสภาพแวดล้อม, เครื่องมือ CLI, ระดับบริการฟรี
-├── releases/                # บันทึกประจำรุ่น
-├── routing/                 # กลไก auto-combo, การเล่นซ้ำกระบวนการให้เหตุผล
-├── screenshots/             # ภาพหน้าจอแดชบอร์ด
-├── security/                # มาตรการป้องกัน, การปฏิบัติตามข้อกำหนด, การพรางตัว, โทเค็น
-└── specs/                   # ข้อกำหนดการออกแบบ
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

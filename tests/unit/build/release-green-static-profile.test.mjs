@@ -152,6 +152,22 @@ test("declared required policy cannot be weakened by an old curated drift bucket
   assert.equal(fullCiKindFor("check:circular-deps", [], "drift"), "drift");
 });
 
+test("i18n docs drift is a DRIFT item: mirrors are refreshed by the release wave", () => {
+  // Plan "derived numbers and texts resolved only at release" (2026-11-13): feature PRs no
+  // longer ship docs mirrors, the translation wave refreshes them at release, so between
+  // releases they are stale by design. The strict verdict stays visible as drift (it runs
+  // without the pr gate mode the HARD bucket gets) and never opens a base-red; the release
+  // cut keeps it blocking.
+  const gate = loadFullCiProfile(root, fixedBase).find((g) => g.id === "i18n:check");
+  assert.equal(gate.kind, "drift");
+  assert.deepEqual(gate.args, ["run", "i18n:check"], "same strict command, no --warn");
+  assert.equal(fullCiKindFor("i18n:check", [], gate.kind), "drift");
+  for (const id of ["i18n:check-ui-coverage", "check:ui-icu", "i18n:check-ratio"]) {
+    const other = loadFullCiProfile(root, fixedBase).find((g) => g.id === id);
+    assert.equal(other.kind, "hard", `${id} stays HARD`);
+  }
+});
+
 test("test-masking receives a fixed base SHA in the full profile", () => {
   resolvedRefs.length = 0;
   const gate = loadFullCiProfile(root, fixedBase).find((g) => g.id === "check:test-masking");
