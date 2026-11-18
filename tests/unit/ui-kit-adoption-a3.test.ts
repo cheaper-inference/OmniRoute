@@ -122,3 +122,30 @@ test('B: ghost and outline buttons use tone="muted" for the muted resting ink', 
   );
   assert.equal(offenders.length, 0, `use tone="muted":\n${where(offenders)}`);
 });
+
+// ── D. Fields: kit xs size, code font, NumberInput and FileTrigger ───────────────────────────
+
+test("D: fields take their size and their code font from the kit props", () => {
+  const offenders = openingTags("Input|Textarea|Select|NumberInput").filter(
+    (t) =>
+      /(?<![\w:-])font-mono(?![\w-])/.test(t.tag) ||
+      /(?:inputClassName|selectClassName)="[^"]*(?<![\w:-])(?:text-xs|text-\[\d+px\]|h-\d+)(?![\w-])/.test(
+        t.tag
+      )
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `use size="xs" (Select: nativeSize="xs") and mono:\n${where(offenders)}`
+  );
+});
+
+test("D: numeric fields are the NumberInput adapter", () => {
+  const offenders = openingTags("Input|input").filter((t) => /type="number"/.test(t.tag));
+  assert.equal(offenders.length, 0, `use NumberInput:\n${where(offenders)}`);
+});
+
+test("D: a file picker opened from a button is the kit FileTrigger", () => {
+  const offenders = openingTags("Input|input").filter((t) => /type="file"/.test(t.tag));
+  assert.equal(offenders.length, 0, `wrap the button in FileTrigger:\n${where(offenders)}`);
+});

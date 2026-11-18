@@ -397,7 +397,7 @@ export default function DroidToolCard({
                     placeholder={t("baseUrlPlaceholder")}
                     aria-label={t("baseUrl")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
                     <Button
@@ -425,7 +425,7 @@ export default function DroidToolCard({
                       onChange={(e) => setSelectedApiKeyId(e.target.value)}
                       aria-label={t("apiKey")}
                       className="min-w-0 w-auto flex-1"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
@@ -486,7 +486,7 @@ export default function DroidToolCard({
                         placeholder={t("providerModelPlaceholder")}
                         aria-label={t("model")}
                         className="min-w-0 w-auto flex-1"
-                        inputClassName="text-xs"
+                        size="xs"
                       />
                       <Button
                         variant="outline"

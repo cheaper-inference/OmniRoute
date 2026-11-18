@@ -546,7 +546,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     placeholder={t("baseUrlPlaceholder")}
                     aria-label={t("baseUrl")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {customBaseUrl && getDisplayUrl() !== normalizeCodexBaseUrl(baseUrl, wireApi) && (
                     <Button
@@ -574,7 +574,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       onChange={(e) => setSelectedApiKey(e.target.value)}
                       aria-label={t("apiKey")}
                       className="min-w-0 w-auto flex-1"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
@@ -613,7 +613,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     placeholder="gpt-5.6-sol"
                     aria-label={t("model")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {selectedModel && (
                     <Button
@@ -640,7 +640,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     onChange={(e) => setReasoningEffort(e.target.value)}
                     aria-label={t("reasoningEffort")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     <option value="none">{t("effortNone")}</option>
                     <option value="low">{t("effortLow")}</option>
@@ -663,7 +663,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     onChange={(e) => setWireApi(e.target.value)}
                     aria-label={t("wireApi")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     <option value="chat">{t("wireApiChatCompletions")}</option>
                     <option value="responses">{t("wireApiResponses")}</option>
@@ -714,7 +714,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       placeholder={t("routeModelPlaceholder", { model: defaultModel })}
                       aria-label={defaultModel}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     {modelMappings[defaultModel] && (
                       <Button
@@ -863,7 +863,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       placeholder={t("profileNamePlaceholder")}
                       aria-label={t("profileNamePlaceholder")}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                       onKeyDown={(e) => e.key === "Enter" && handleSaveProfile()}
                     />
                     <Button

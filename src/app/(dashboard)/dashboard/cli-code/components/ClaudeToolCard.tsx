@@ -441,7 +441,7 @@ export default function ClaudeToolCard({
                     placeholder={t("baseUrlPlaceholder")}
                     aria-label={t("baseUrl")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
                     <Button
@@ -469,7 +469,7 @@ export default function ClaudeToolCard({
                       onChange={(e) => setSelectedApiKey(e.target.value)}
                       aria-label={t("apiKey")}
                       className="min-w-0 w-auto flex-1"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
@@ -506,7 +506,7 @@ export default function ClaudeToolCard({
                       placeholder={t("providerModelPlaceholder")}
                       aria-label={model.name}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     {modelMappings[model.alias] && (
                       <Button

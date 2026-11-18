@@ -350,7 +350,7 @@ export default function AntigravityToolCard({
                     onChange={(e) => setSelectedApiKeyId(e.target.value)}
                     aria-label={t("apiKey")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     {apiKeys.map((key) => (
                       <option key={key.id} value={key.id}>
@@ -379,7 +379,7 @@ export default function AntigravityToolCard({
                       placeholder={t("modelPlaceholder")}
                       aria-label={model.name}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Select
                       value={entry.reasoningEffort || ""}
@@ -387,7 +387,7 @@ export default function AntigravityToolCard({
                       title={t("reasoningEffortHint")}
                       aria-label={t("reasoningEffort", { model: model.name })}
                       className="w-28 shrink-0"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {REASONING_EFFORT_OPTIONS.map((tier) => (
                         <option key={tier || "default"} value={tier}>

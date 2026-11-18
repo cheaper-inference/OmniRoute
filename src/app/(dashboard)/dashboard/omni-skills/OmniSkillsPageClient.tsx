@@ -328,7 +328,8 @@ export function OmniSkillsPageClient(): JSX.Element {
           onChange={(e) => setInstallJson(e.target.value)}
           placeholder={t("installJsonPlaceholder")}
           aria-label={t("installSkillModalTitle")}
-          className="h-48 resize-none font-mono text-sm"
+          mono
+          className="h-48 resize-none text-sm"
         />
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <FileInput

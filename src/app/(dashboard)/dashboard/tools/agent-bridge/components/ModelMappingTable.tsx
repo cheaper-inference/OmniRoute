@@ -101,7 +101,8 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
                       onChange={(e) => updateSource(i, e.target.value)}
                       aria-label={t("sourceModel") || "Source model (agent native)"}
                       placeholder={t("mappingSourcePlaceholder")}
-                      inputClassName="font-mono text-xs"
+                      size="xs"
+                      mono
                     />
                   </TableCell>
                   <TableCell>

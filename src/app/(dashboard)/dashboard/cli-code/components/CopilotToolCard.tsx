@@ -7,6 +7,7 @@ import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button } from "@/shared/components";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 import Select from "@/shared/components/Select";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -347,17 +348,17 @@ export default function CopilotToolCard({
               <DisclosureTrigger>{t("advancedOptions")}</DisclosureTrigger>
               {/* keepMounted: the fields keep their state while collapsed, as in the old details element. */}
               <DisclosureContent keepMounted className="mt-3 grid grid-cols-2 gap-3 pl-6">
-                <Input
+                <NumberInput
                   label={t("copilotMaxInputTokens")}
-                  type="number"
+                  min={0}
                   value={maxInputTokens}
-                  onChange={(e) => setMaxInputTokens(Number(e.target.value) || 128000)}
+                  onValueChange={(value) => setMaxInputTokens(value || 128000)}
                 />
-                <Input
+                <NumberInput
                   label={t("copilotMaxOutputTokens")}
-                  type="number"
+                  min={0}
                   value={maxOutputTokens}
-                  onChange={(e) => setMaxOutputTokens(Number(e.target.value) || 16000)}
+                  onValueChange={(value) => setMaxOutputTokens(value || 16000)}
                 />
                 <Checkbox
                   checked={toolCalling}

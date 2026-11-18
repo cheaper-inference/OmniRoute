@@ -440,7 +440,7 @@ export default function GrokBuildToolCard({
               id="grok-build-endpoint"
               aria-labelledby="grok-build-endpoint-label"
               className="min-w-0 w-auto flex-1"
-              selectClassName="text-xs"
+              nativeSize="xs"
               value={selectedEndpoint}
               onChange={(event) => setSelectedEndpoint(event.target.value)}
             >
@@ -458,7 +458,7 @@ export default function GrokBuildToolCard({
               <Input
                 aria-label={t("customEndpointAria")}
                 className="min-w-0 w-auto flex-1"
-                inputClassName="text-xs"
+                size="xs"
                 type="url"
                 value={customEndpoint}
                 onChange={(event) => setCustomEndpoint(event.target.value)}
@@ -476,7 +476,7 @@ export default function GrokBuildToolCard({
               id="grok-build-api-key"
               aria-labelledby="grok-build-api-key-label"
               className="min-w-0 w-auto flex-1"
-              selectClassName="text-xs"
+              nativeSize="xs"
               value={effectiveKeyId}
               onChange={(event) => setSelectedKeyId(event.target.value)}
             >
@@ -503,7 +503,7 @@ export default function GrokBuildToolCard({
             <Input
               aria-label={t("mainModelAria")}
               className="min-w-0 w-auto flex-1"
-              inputClassName="text-xs"
+              size="xs"
               value={model}
               onChange={(event) => setModel(event.target.value)}
               placeholder={availableModels[0]?.value || "provider/model-id"}
@@ -547,7 +547,7 @@ export default function GrokBuildToolCard({
               <Input
                 aria-label={`${modelLabel(type)} model`}
                 className="min-w-0 w-auto flex-1"
-                inputClassName="text-xs"
+                size="xs"
                 value={subagentModels[type] ?? ""}
                 onChange={(event) =>
                   setSubagentModels((current) => ({ ...current, [type]: event.target.value }))

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Button, Card, Input, Modal } from "@/shared/components";
+import { FileTrigger } from "@/shared/components/FileInput";
 import Icon from "@/shared/components/Icon";
 import {
   runDiagnose,
@@ -69,7 +70,6 @@ export function AgentBridgeMaintenanceCard({
   >(null);
   const [sudoPassword, setSudoPassword] = useState("");
   const [passwordModalError, setPasswordModalError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const canRunWithoutPassword = isWin || hasCachedPassword || !needsSudoPassword;
 
@@ -163,10 +163,7 @@ export function AgentBridgeMaintenanceCard({
       downloadJson(config, `agent-bridge-config-${Date.now()}.json`);
     });
 
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-selecting the same file
-    if (!file) return;
+  const handleImportFile = async (file: File) => {
     await run("import", async () => {
       let parsed: unknown;
       try {
@@ -297,27 +294,20 @@ export function AgentBridgeMaintenanceCard({
               : t("exportConfig") || "Export config"}
           </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            icon="upload"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={busy !== null}
-          >
-            {busy === "import"
-              ? t("importing") || "Importing…"
-              : t("importConfig") || "Import config"}
-          </Button>
-          {/* kit-exception: Hidden native file picker driven by the Import button above (no visible control). */}
-          <input
-            ref={fileInputRef}
-            type="file"
+          <FileTrigger
             accept="application/json,.json"
-            onChange={handleImportFile}
-            className="hidden"
-            aria-hidden="true"
-            tabIndex={-1}
-          />
+            disabled={busy !== null}
+            onFilesChange={(files) => void handleImportFile(files[0])}
+            onFilesRejected={() =>
+              onError(t("importInvalidJson") || "The selected file is not valid JSON.")
+            }
+          >
+            <Button size="sm" variant="outline" icon="upload">
+              {busy === "import"
+                ? t("importing") || "Importing…"
+                : t("importConfig") || "Import config"}
+            </Button>
+          </FileTrigger>
         </div>
 
         {/* Success notice */}
