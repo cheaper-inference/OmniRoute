@@ -34,6 +34,11 @@ function estimateTokenCount(text: unknown) {
   return cjkCount + estimatedNonCJK;
 }
 
+// The streaming usage path re-estimates the same request body on every SSE chunk; a
+// 290k-token body made each estimate ~1 s of regex work and stalled the event loop for
+// minutes. One estimate per body object is enough (bodies are not mutated mid-stream).
+const inputEstimateCache = new WeakMap<object, number>();
+
 /**
  * Estimate input tokens from request body.
  * Separates tool definitions (JSON schemas) from message content
@@ -42,8 +47,15 @@ function estimateTokenCount(text: unknown) {
  */
 export function estimateInputTokens(body: unknown) {
   if (!body || typeof body !== "object") return 0;
-  const record = body as Record<string, unknown>;
+  let estimate = inputEstimateCache.get(body);
+  if (estimate === undefined) {
+    estimate = computeInputTokens(body as Record<string, unknown>);
+    inputEstimateCache.set(body, estimate);
+  }
+  return estimate;
+}
 
+function computeInputTokens(record: Record<string, unknown>) {
   try {
     let toolTokens = 0;
     let messageTokens = 0;
