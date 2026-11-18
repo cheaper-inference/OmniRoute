@@ -115,6 +115,27 @@ test("resolveNativeGeminiThinking routes xhigh and max to xhigh for gemini-4-hyd
   assert.deepEqual(defaultResult, { thinkingLevel: "high", includeThoughts: true });
 });
 
+test("resolveNativeGeminiThinking maps none/minimal effort to low on gemini-4-hydrogen (no minimal level)", () => {
+  // Hydrogen has no `minimal` level: an explicit opt-out must not fall through to
+  // the `high` default with thoughts enabled.
+  const noneResult = resolveNativeGeminiThinking("gemini-4-hydrogen", {
+    reasoning_effort: "none",
+  });
+  assert.deepEqual(noneResult, { thinkingLevel: "low", includeThoughts: false });
+
+  const minimalResult = resolveNativeGeminiThinking("gemini-4-hydrogen", {
+    reasoning_effort: "minimal",
+  });
+  assert.deepEqual(minimalResult, { thinkingLevel: "low", includeThoughts: true });
+});
+
+test("resolveNativeGeminiThinking keeps minimal for none effort when the model supports it", () => {
+  const result = resolveNativeGeminiThinking("gemini-3.5-flash-lite", {
+    reasoning_effort: "none",
+  });
+  assert.deepEqual(result, { thinkingLevel: "minimal", includeThoughts: false });
+});
+
 test("resolveNativeGeminiThinking clamps xhigh to high for models without xhigh", () => {
   const result = resolveNativeGeminiThinking("gemini-3.5-flash-lite", {
     reasoning_effort: "xhigh",

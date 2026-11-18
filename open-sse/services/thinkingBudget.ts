@@ -167,6 +167,11 @@ function nativeGeminiEffort(
   if (typeof rawEffort !== "string") return null;
   const effort = rawEffort.trim().toLowerCase();
   let thinkingLevel = NATIVE_GEMINI_EFFORT_LEVELS.get(effort);
+  // Models without `minimal` (e.g. Gemini 4 Hydrogen) take their lowest level, so an
+  // explicit opt-out never falls through to a higher configured default.
+  if (thinkingLevel === "minimal" && !supported.includes("minimal") && supported.includes("low")) {
+    thinkingLevel = "low";
+  }
   if (thinkingLevel === "xhigh" && !supported.includes("xhigh") && supported.includes("high")) {
     thinkingLevel = "high";
   }
