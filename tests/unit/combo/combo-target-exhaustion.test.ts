@@ -1092,7 +1092,7 @@ test("grok-cli 402 marks only the empty connection, not the whole provider", () 
 });
 
 for (const provider of ["grok-web", "xai-oauth"] as const) {
-  test(`${provider} 402 with empty body marks only that connection`, () => {
+  test(`${provider} 402 with empty body does not exhaust the connection`, () => {
     const s = sets();
     const empty = target({
       provider,
@@ -1107,8 +1107,8 @@ for (const provider of ["grok-web", "xai-oauth"] as const) {
       rawModel: "m",
       sets: s,
     });
-    assert.equal(exhausted, true);
-    assert.ok(s.exhaustedConnections.has(`${provider}:empty`));
+    assert.equal(exhausted, false);
+    assert.equal(s.exhaustedConnections.has(`${provider}:empty`), false);
     assert.equal(s.exhaustedProviders.has(provider), false);
   });
 }

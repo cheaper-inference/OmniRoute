@@ -1,7 +1,7 @@
-// Grok Build, grok.com cookie sessions and xAI OAuth bill every surface against one shared wallet, so
-// their 402 must not take the model-only lockout path. A 402 from one of those providers counts as a
-// shared-wallet credit exhaustion when the body is empty or carries the usage-balance signal, and the
-// generic credit check also accepts the signal next to the caller's own signals.
+// Grok Build, grok.com cookie sessions and xAI OAuth bill every surface against one shared wallet.
+// A 402 from those providers qualifies as shared-wallet credit exhaustion only when it carries the
+// usage-balance signal; an empty body takes the per-model path. The generic credit check also accepts
+// the signal next to the caller's own signals.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
@@ -22,9 +22,9 @@ test("the usage balance signal is matched in an already lowercased body", () => 
   assert.equal(matchesSharedWalletCreditsBody(""), false);
 });
 
-test("only a 402 from a shared-wallet provider can qualify", () => {
+test("a 402 without the wallet signal or from an out-of-scope request never qualifies", () => {
   for (const provider of ["grok-cli", "grok-web", "xai-oauth"]) {
-    assert.equal(isSharedWalletCredits402(provider, 402), true, provider);
+    assert.equal(isSharedWalletCredits402(provider, 402), false, provider);
   }
   assert.equal(isSharedWalletCredits402("openai", 402), false);
   assert.equal(isSharedWalletCredits402("grok-cli", 429), false);
@@ -36,11 +36,12 @@ test("a missing provider never qualifies", () => {
   assert.equal(isSharedWalletCredits402(undefined, 402), false);
 });
 
-test("an empty or blank body from a shared-wallet provider qualifies", () => {
-  assert.equal(isSharedWalletCredits402("xai-oauth", 402, null), true);
-  assert.equal(isSharedWalletCredits402("xai-oauth", 402, undefined), true);
-  assert.equal(isSharedWalletCredits402("xai-oauth", 402, ""), true);
-  assert.equal(isSharedWalletCredits402("xai-oauth", 402, "   \n"), true);
+test("an empty or blank body from a shared-wallet provider does not qualify", () => {
+  assert.equal(isSharedWalletCredits402("xai-oauth", 402, null), false);
+  assert.equal(isSharedWalletCredits402("xai-oauth", 402, undefined), false);
+  assert.equal(isSharedWalletCredits402("xai-oauth", 402, ""), false);
+  assert.equal(isSharedWalletCredits402("xai-oauth", 402, "   \n"), false);
+  assert.equal(isSharedWalletCredits402("grok-web", 402, ""), false);
 });
 
 test("a body qualifies only when it carries the usage balance signal, in any case", () => {

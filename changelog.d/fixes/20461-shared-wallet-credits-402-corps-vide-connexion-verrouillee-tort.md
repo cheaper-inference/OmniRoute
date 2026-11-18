@@ -1,0 +1,1 @@
+- **fix(sse):** a 402 with no body no longer parks the whole grok connection ([#20461](https://github.com/cheaper-inference/OmniRoute/pull/20461)) — thanks @maxmad64bis

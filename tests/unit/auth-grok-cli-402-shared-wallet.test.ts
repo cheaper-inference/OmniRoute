@@ -1,10 +1,10 @@
 // Grok Build (`grok-cli`) bills Chat/Imagine/Voice/Build/API against one
 // weekly credit pool. A 402 "Grok Build usage balance exhausted" is therefore
 // a connection-wide wallet signal, not a per-model billing miss. The
-// passthroughModels flag still stands for catalog/404 behaviour; it must not
-// route this 402 through the #12242 model-only lockout, or a combo of five
-// grok-4.6 steps parks the first empty account and then skips the four
-// remaining live accounts as "model locked".
+// passthroughModels flag still stands for catalog/404 behaviour. A 402 without
+// that signal is a per-model failure: it locks only the failing model, so a
+// combo of five grok-4.6 steps does not park the first account and skip the
+// four remaining live accounts as "model locked".
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -38,9 +38,7 @@ async function seedSharedWallet(provider: string, name: string) {
     authType: oauth ? "oauth" : "apikey",
     name,
     email: name,
-    ...(oauth
-      ? { accessToken: `${provider}-${name}` }
-      : { apiKey: `${provider}-${name}` }),
+    ...(oauth ? { accessToken: `${provider}-${name}` } : { apiKey: `${provider}-${name}` }),
     isActive: true,
     testStatus: "active",
   });
@@ -106,7 +104,7 @@ test("grok-cli 402 still parks the connection when disableCooling is set", async
   assert.equal(after.testStatus, "credits_exhausted");
 });
 
-test("passthrough 402 on ollama-cloud still locks only the paid model (#12242)", async () => {
+test("passthrough 402 on ollama-cloud still locks only the paid model", async () => {
   await resetStorage();
   const conn = await providersDb.createProviderConnection({
     provider: "ollama-cloud",
@@ -150,10 +148,7 @@ test("a grok-cli 402 with an unrelated body does not park the connection", async
   );
   const after = await providersDb.getProviderConnectionById(id);
   assert.equal(after.testStatus, "active");
-  assert.equal(
-    accountFallback.getModelLockoutInfo("grok-cli", id, "grok-4.6")?.reason,
-    "credits"
-  );
+  assert.equal(accountFallback.getModelLockoutInfo("grok-cli", id, "grok-4.6")?.reason, "credits");
 });
 
 for (const provider of ["grok-web", "xai-oauth"] as const) {
@@ -175,12 +170,12 @@ for (const provider of ["grok-web", "xai-oauth"] as const) {
   });
 }
 
-test("a grok-cli 402 with empty body parks the connection as credits_exhausted", async () => {
+test("a grok-cli 402 with empty body leaves the connection active and locks only the model", async () => {
   await resetStorage();
   const conn = await seedGrokCli("empty-nobody@qq.com");
   const id = (conn as { id: string }).id;
   await auth.markAccountUnavailable(id, 402, "", "grok-cli", "grok-4.6");
   const after = await providersDb.getProviderConnectionById(id);
-  assert.equal(after.testStatus, "credits_exhausted");
-  assert.equal(accountFallback.getModelLockoutInfo("grok-cli", id, "grok-4.6"), null);
+  assert.equal(after.testStatus, "active");
+  assert.equal(accountFallback.getModelLockoutInfo("grok-cli", id, "grok-4.6")?.reason, "credits");
 });
