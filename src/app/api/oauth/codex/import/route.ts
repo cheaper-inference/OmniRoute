@@ -202,7 +202,7 @@ async function updateExistingCodexImportMetadata(
 
 const bodySchema = z.object({
   accounts: z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())], {
-    errorMap: () => ({ message: "accounts must be an object or an array of objects" }),
+    error: "accounts must be an object or an array of objects",
   }),
 });
 
@@ -221,7 +221,7 @@ async function importOneCodexRecord(
   index: number
 ): Promise<CodexImportRecordResult> {
   const norm = normalizeCodexImportRecord(record);
-  if (!norm.ok) return { index, ok: false, error: norm.error };
+  if (norm.ok === false) return { index, ok: false, error: norm.error };
 
   try {
     // Fetched per record: an earlier record in this batch may have just created
@@ -285,15 +285,15 @@ export async function POST(request: Request) {
   }
 
   const parsed = bodySchema.safeParse(rawBody);
-  if (!parsed.success) {
+  if (parsed.success === false) {
     return NextResponse.json(
-      { error: parsed.error.errors[0]?.message ?? "Invalid request body" },
+      { error: parsed.error.issues[0]?.message ?? "Invalid request body" },
       { status: 400 }
     );
   }
 
   const flat = flattenCodexImportPayload(parsed.data.accounts);
-  if (!flat.ok) {
+  if (flat.ok === false) {
     return NextResponse.json({ error: flat.error }, { status: 400 });
   }
   if (flat.records.length === 0) {

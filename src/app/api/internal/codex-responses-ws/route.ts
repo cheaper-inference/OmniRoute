@@ -1,3 +1,4 @@
+import { isSelectedProviderCredentials } from "@/sse/services/credentialSentinel";
 import { NextResponse } from "next/server";
 import { newestChromeProfile } from "@omniroute/open-sse/utils/browserProfiles.ts";
 import {
@@ -464,9 +465,12 @@ async function resolveCodexCredentials(
       model,
       { excludeConnectionIds: excludedConnectionIds }
     );
-    if (!credentials || "allRateLimited" in credentials || !credentials.connectionId) break;
+    if (!isSelectedProviderCredentials(credentials) || !credentials.connectionId) break;
 
-    const leaseId = await acquireCodexWsLease(credentials.connectionId, credentials.maxConcurrent);
+    const leaseId = await acquireCodexWsLease(
+      credentials.connectionId,
+      "maxConcurrent" in credentials ? credentials.maxConcurrent : null
+    );
     if (!leaseId) {
       excludedConnectionIds.push(credentials.connectionId);
       continue;
@@ -515,7 +519,7 @@ async function resolveCodexRequestContext(
     };
   }
   const authResponse = await authenticate(body);
-  if (!authResponse.ok) return { error: authResponse };
+  if (authResponse.ok === false) return { error: authResponse };
 
   const authRequest = getAuthRequest(body);
   const apiKey = extractWsTokenFromRequest(authRequest);
@@ -826,7 +830,7 @@ export async function POST(request: Request) {
   let body: JsonRecord;
   try {
     const parsed = bridgePayloadSchema.safeParse(await request.json());
-    if (!parsed.success) {
+    if (parsed.success === false) {
       return jsonError(400, "invalid_json", "Request body must be a JSON object");
     }
     body = parsed.data as JsonRecord;

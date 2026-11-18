@@ -339,7 +339,7 @@ async function runFalQueue({
   // The standalone falHandler.ts this module superseded (#9982/#10198 over
   // #9969) returned this local 401; preserve that contract.
   if (!token) {
-    return { success: false, status: 401, error: "Fal API key is required" };
+    return { success: false as const, status: 401, error: "Fal API key is required" };
   }
   const headers = {
     Authorization: `Key ${token}`,
@@ -376,7 +376,7 @@ async function runFalQueue({
         duration: Date.now() - startTime,
         error,
       }).catch(() => {});
-      return { success: false, status: createResponse.status, error };
+      return { success: false as const, status: createResponse.status, error };
     }
 
     const requestId = stringValue(createPayload?.request_id);
@@ -403,7 +403,7 @@ async function runFalQueue({
 
       if (!statusResponse.ok) {
         const error = JSON.stringify(statusPayload).slice(0, 500);
-        return { success: false, status: statusResponse.status, error };
+        return { success: false as const, status: statusResponse.status, error };
       }
 
       const status = stringValue(statusPayload?.status);
@@ -416,7 +416,7 @@ async function runFalQueue({
         const resultPayload = await resultResponse.json().catch(() => ({}));
         if (!resultResponse.ok) {
           return {
-            success: false,
+            success: false as const,
             status: resultResponse.status,
             error: JSON.stringify(resultPayload).slice(0, 500),
           };
@@ -440,7 +440,7 @@ async function runFalQueue({
 
       if (status && !["IN_QUEUE", "IN_PROGRESS"].includes(status)) {
         return {
-          success: false,
+          success: false as const,
           status: 502,
           error: `Fal ${kind} generation ended with status ${status}`,
         };
@@ -450,7 +450,7 @@ async function runFalQueue({
     }
 
     return {
-      success: false,
+      success: false as const,
       status: 504,
       error: `Fal ${kind} generation timed out after ${timeoutMs}ms`,
     };
@@ -461,7 +461,7 @@ async function runFalQueue({
     const status = isTimeout ? 504 : 502;
     log?.error?.("MEDIA", `${provider} ${kind} request failed: ${sanitizeErrorMessage(message)}`);
     return {
-      success: false,
+      success: false as const,
       status,
       error: `Fal ${kind} provider error: ${sanitizeErrorMessage(message)}`,
     };
@@ -506,7 +506,7 @@ async function runNativeFalQueue(
     return await runFalQueue({ ...args, body, kind, native: true });
   } catch (error) {
     return {
-      success: false,
+      success: false as const,
       status: error instanceof FalError ? error.status : 400,
       error: sanitizeErrorMessage(error),
     };

@@ -104,7 +104,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     let extraHeaders: Record<string, string> = {};
 
     if (kind === "slack") {
-      payloadSent = buildSlackPayload("test.ping", testData) as Record<string, unknown>;
+      payloadSent = { ...buildSlackPayload("test.ping", testData) };
       fetchUrl = webhook.url;
     } else if (kind === "discord") {
       payloadSent = buildDiscordPayload("test.ping", testData) as Record<string, unknown>;
@@ -116,10 +116,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
         return NextResponse.json({ error: "Missing Telegram botToken" }, { status: 422 });
       }
       fetchUrl = buildTelegramUrl(botToken);
-      payloadSent = buildTelegramPayload("test.ping", testData, webhook.url) as Record<
-        string,
-        unknown
-      >;
+      payloadSent = { ...buildTelegramPayload("test.ping", testData, webhook.url) };
     } else {
       payloadSent = testPayload as Record<string, unknown>;
       fetchUrl = webhook.url;

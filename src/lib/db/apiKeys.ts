@@ -239,6 +239,7 @@ interface ApiKeysStatements {
 }
 
 interface ApiKeyView extends JsonRecord {
+  key?: string | null;
   id?: string;
   modelAccessMode: ModelAccessMode;
   allowedModels: string[];

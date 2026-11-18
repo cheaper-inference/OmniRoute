@@ -35,7 +35,7 @@ async function checkAuth(request: Request): Promise<Response | null> {
 
 function validateId(id: unknown): { valid: true; id: string } | { valid: false; error: Response } {
   const result = z.string().uuid().safeParse(id);
-  if (!result.success) {
+  if (result.success === false) {
     return {
       valid: false,
       error: errorResp(HTTP_STATUS.BAD_REQUEST, "Invalid preset id: must be a valid UUID"),
@@ -61,7 +61,7 @@ export async function GET(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.valid === false) return validation.error;
   const { id } = validation;
 
   try {
@@ -95,7 +95,7 @@ export async function PUT(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.valid === false) return validation.error;
   const { id } = validation;
 
   // Parse JSON body
@@ -108,7 +108,7 @@ export async function PUT(
 
   // Validate body (Hard Rule #7)
   const parsed = PlaygroundPresetUpdateSchema.safeParse(rawBody);
-  if (!parsed.success) {
+  if (parsed.success === false) {
     const firstIssue = parsed.error.issues[0];
     const message = firstIssue
       ? `${firstIssue.path.join(".") || "body"}: ${firstIssue.message}`
@@ -155,7 +155,7 @@ export async function DELETE(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.valid === false) return validation.error;
   const { id } = validation;
 
   try {

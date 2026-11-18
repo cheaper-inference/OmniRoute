@@ -13,7 +13,7 @@ import { volcenginePlanIdentitySchema } from "@/shared/validation/schemas/volcen
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
-): Promise<NextResponse> {
+): Promise<Response> {
   const auth = await requireManagementAuth(request);
   if (auth) return auth;
 
@@ -30,9 +30,8 @@ export async function POST(
   const { index, timeout } = validation.data;
 
   try {
-    const { volcengineConsoleAutoLoginService } = await import(
-      "@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts"
-    );
+    const { volcengineConsoleAutoLoginService } =
+      await import("@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts");
 
     if (!volcengineConsoleAutoLoginService.getStatus(sessionId)) {
       return NextResponse.json(

@@ -15,7 +15,7 @@ import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptW
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
 import { backupDbFile } from "./backup";
 import { encryptConnectionFields, decryptConnectionFields } from "./encryption";
-import { createLazyRowProxy } from "./providers/lazyConnectionView";
+import { createLazyRowProxy, type ProviderConnectionRecord } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
@@ -318,7 +318,9 @@ export function getProviderConnectionsCount(filter: JsonRecord = {}): number {
   return row.cnt;
 }
 
-export async function getProviderConnectionById(id: string) {
+export async function getProviderConnectionById(
+  id: string
+): Promise<ProviderConnectionRecord | null> {
   const db = getDbInstance() as unknown as DbLike;
   ensureProviderSpecificDataSecretsEncrypted(db);
   const row = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
@@ -333,7 +335,7 @@ export async function getProviderConnectionById(id: string) {
       ),
       camelRow
     )
-  );
+  ) as ProviderConnectionRecord;
 }
 
 export interface ProviderConnectionDisplayMetadata {
@@ -689,10 +691,13 @@ export async function createProviderConnection(data: JsonRecord) {
       isCommonChatGptWebRetiredProviderId(merged.provider)
     ) {
       invalidateDbCache("connections");
-      return (await getProviderConnectionById(existingId)) ?? returnedConnection;
+      return (
+        (await getProviderConnectionById(existingId)) ??
+        (returnedConnection as ProviderConnectionRecord)
+      );
     }
 
-    return returnedConnection;
+    return returnedConnection as ProviderConnectionRecord;
   }
 
   // Generate name: prefer explicit name, then email, then a stable short-ID label.
@@ -825,10 +830,13 @@ export async function createProviderConnection(data: JsonRecord) {
     isRuntimeRetiredProviderId(providerId) ||
     isCommonChatGptWebRetiredProviderId(providerId)
   ) {
-    return (await getProviderConnectionById(String(connection.id))) ?? returnedConnection;
+    return (
+      (await getProviderConnectionById(String(connection.id))) ??
+      (returnedConnection as ProviderConnectionRecord)
+    );
   }
 
-  return returnedConnection;
+  return returnedConnection as ProviderConnectionRecord;
 }
 
 function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
@@ -1166,10 +1174,12 @@ export async function updateProviderConnection(
     isRuntimeRetiredProviderId(merged.provider) ||
     isCommonChatGptWebRetiredProviderId(merged.provider)
   ) {
-    return (await getProviderConnectionById(id)) ?? returnedConnection;
+    return (
+      (await getProviderConnectionById(id)) ?? (returnedConnection as ProviderConnectionRecord)
+    );
   }
 
-  return returnedConnection;
+  return returnedConnection as ProviderConnectionRecord;
 }
 
 export { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";

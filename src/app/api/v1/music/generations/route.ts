@@ -94,7 +94,7 @@ async function dispatchMusicModel(
     log,
     signal: request.signal,
   });
-  if (!result.success) {
+  if (result.success === false) {
     return failedMediaGenerationResponse(result, "Music generation provider error");
   }
   await clearRecoveredProviderState(credentials);

@@ -12,6 +12,8 @@
  *   const settings = await dbCache.getSettings();
  */
 
+import type { ProviderConnectionRecord } from "./providers/lazyConnectionView";
+
 type CacheEntry<T> = {
   value: T;
   expiresAt: number;
@@ -160,7 +162,7 @@ export async function getCachedRawProviderConnections(
   });
 }
 
-const connectionByIdCache = new TTLCache<Record<string, unknown> | null>(
+const connectionByIdCache = new TTLCache<ProviderConnectionRecord | null>(
   CONNECTIONS_TTL_MS,
   10_000
 );
@@ -173,7 +175,7 @@ const nodesCache = new TTLCache<(Record<string, unknown> | null)[]>(CONNECTIONS_
  */
 export async function getCachedProviderConnectionById(
   id: string
-): Promise<Record<string, unknown> | null> {
+): Promise<ProviderConnectionRecord | null> {
   if (!id) return null;
   return connectionByIdCache.load(id, async () => {
     const { getProviderConnectionById } = await import("@/lib/db/providers");

@@ -18,7 +18,7 @@ const IMAGE = process.env.OMNIROUTE_REDIS_IMAGE || "docker.io/redis:7-alpine";
 
 export async function POST() {
   const guard = isLocalRequestAllowed();
-  if (!guard.allowed) {
+  if (guard.allowed === false) {
     return NextResponse.json({ error: guard.reason }, { status: 403 });
   }
 

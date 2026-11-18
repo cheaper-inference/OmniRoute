@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const validation = validateBody(actionSchema, rawBody);
-    if (!validation.success) {
+    if (validation.success === false) {
       return NextResponse.json({ error: { message: validation.error } }, { status: 400 });
     }
 

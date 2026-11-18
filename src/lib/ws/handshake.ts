@@ -71,7 +71,7 @@ export function extractWsTokenFromRequest(request: Request): string | null {
 }
 
 export async function getWsRuntimeConfig(): Promise<WsRuntimeConfig> {
-  const settings = await getSettings().catch(() => ({}));
+  const settings = await getSettings().catch((): Record<string, unknown> => ({}));
   return {
     wsAuth: settings.wsAuth === true,
     wsPath: DEFAULT_WS_PATH,

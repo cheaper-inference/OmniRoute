@@ -101,7 +101,7 @@ Deno.serve(async (request) => {
   }
   const relayPath = request.headers.get("x-relay-path") || "/";
   const resolved = resolveRelayTarget(target, relayPath);
-  if (!resolved.ok) {
+  if (resolved.ok === false) {
     return new Response(resolved.reason, { status: resolved.status });
   }
   const headers = new Headers(request.headers);
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (!createRes.ok) {
+    if (createRes.ok === false) {
       let upstreamMessage = "Deno Deploy API rejected the create-app call";
       try {
         const parsed = (await createRes.json().catch(() => null)) as {
@@ -259,7 +259,7 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (!deployRes.ok) {
+    if (deployRes.ok === false) {
       // Best-effort cleanup so a failed deploy does not leave an empty app
       // behind. Mirrors the upstream PR-1437 behaviour.
       await fetch(`${DENO_API_BASE}/apps/${app.id}`, {

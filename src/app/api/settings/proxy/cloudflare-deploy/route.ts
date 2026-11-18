@@ -85,10 +85,10 @@ export async function POST(request: Request) {
     const uploadRes = await fetch(workerScriptUrl, {
       method: "PUT",
       headers: { Authorization: `Bearer ${apiToken}`, ...uploadHeaders },
-      body: uploadBody,
+      body: new Uint8Array(uploadBody),
     });
 
-    if (!uploadRes.ok) {
+    if (uploadRes.ok === false) {
       // Surface only the canonical Cloudflare error message; never forward raw
       // response text (may carry internal IDs / token hints).
       let upstreamMessage = "Cloudflare API rejected the Worker upload";

@@ -658,7 +658,7 @@ async function applyConnectionItem(
   };
   if (action === "add") {
     const created = (await createProviderConnection({ ...source, isActive: true })) || {};
-    const merged = existingConnectionIds.has(String(created.id));
+    const merged = existingConnectionIds.has(String("id" in created ? created.id : ""));
     result.writes.push({ outcome: merged ? "updated" : "created", connection: created });
     result.items.push({ key: item.key, outcome: merged ? "merged" : "added" });
   } else if (action === "replace" && item.targetId) {

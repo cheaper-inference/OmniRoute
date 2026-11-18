@@ -499,9 +499,9 @@ export function getDatabaseSettings(): DatabaseSettings {
   };
 }
 
-export function updateDatabaseSettings(
-  updates: Partial<UserDatabaseSettings>
-): UserDatabaseSettings {
+export function updateDatabaseSettings(updates: {
+  [K in keyof UserDatabaseSettings]?: Partial<UserDatabaseSettings[K]>;
+}): UserDatabaseSettings {
   const nextSettings = getUserDatabaseSettings();
   assertCacheCredentialEndpoint(nextSettings.cache, updates.cache);
   const optimizationUpdated = updates.optimization !== undefined;

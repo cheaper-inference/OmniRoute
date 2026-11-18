@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const rawBody = await request.json();
     const validation = validateBody(copilotRequestSchema, rawBody);
     if (isValidationFailure(validation)) {
-      return NextResponse.json(buildErrorBody(400, validation.error), { status: 400 });
+      return NextResponse.json(buildErrorBody(400, validation.error.message), { status: 400 });
     }
 
     const response = await processCopilotChat(validation.data);

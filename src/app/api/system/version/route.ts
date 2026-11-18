@@ -59,7 +59,8 @@ async function sendRestartStep(send: (data: Record<string, unknown>) => void): P
 
 async function getNews() {
   try {
-    const res = await fetch(NEWS_JSON_URL, { next: { revalidate: 3600 } });
+    const options: RequestInit & { next: { revalidate: number } } = { next: { revalidate: 3600 } };
+    const res = await fetch(NEWS_JSON_URL, options);
     if (!res.ok) return null;
     const data = await res.json();
     return parseActiveNewsPayload(data);

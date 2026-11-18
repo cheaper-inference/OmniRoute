@@ -202,7 +202,7 @@ async function refreshOAuthToken(connection: any) {
       if (refreshed.expiresAt) {
         update.expiresAt = refreshed.expiresAt;
         update.tokenExpiresAt = refreshed.expiresAt;
-      } else if (refreshed.expiresIn) {
+      } else if (typeof refreshed.expiresIn === "number" && Number.isFinite(refreshed.expiresIn)) {
         const expiresAt = new Date(Date.now() + refreshed.expiresIn * 1000).toISOString();
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
@@ -219,7 +219,11 @@ async function refreshOAuthToken(connection: any) {
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
       }
-      if (refreshed.providerSpecificData) {
+      if (
+        refreshed.providerSpecificData &&
+        typeof refreshed.providerSpecificData === "object" &&
+        !Array.isArray(refreshed.providerSpecificData)
+      ) {
         update.providerSpecificData = {
           ...(connection.providerSpecificData || {}),
           ...refreshed.providerSpecificData,

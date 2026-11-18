@@ -93,7 +93,7 @@ async function listPublicOverrides(
 
 const reasoningEffortsValueSchema = z.string().transform((value, context) => {
   const parsed = parseReasoningEffortsOverride(value);
-  if (!parsed.ok) {
+  if (parsed.ok === false) {
     context.addIssue({ code: "custom", message: parsed.error });
     return z.NEVER;
   }
@@ -186,7 +186,7 @@ export async function PATCH(request: Request) {
   }
 
   const parsed = upsertOverrideSchema.safeParse(rawBody);
-  if (!parsed.success) {
+  if (parsed.success === false) {
     return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
   }
 
@@ -199,7 +199,7 @@ export async function PATCH(request: Request) {
     compatibleNodeIds,
     eligibleNodeIds
   );
-  if (!canonical.ok) {
+  if (canonical.ok === false) {
     return NextResponse.json(
       { error: "Invalid or ambiguous model capability override target" },
       { status: 400 }
@@ -242,7 +242,7 @@ export async function DELETE(request: Request) {
     eligibleNodeIds
   );
 
-  if (!canonical.ok || !parsedKey.success) {
+  if (canonical.ok === false || parsedKey.success === false) {
     return NextResponse.json(
       { error: "target and key are required; target must be a valid model override target" },
       { status: 400 }

@@ -142,7 +142,7 @@ const omitApiKeys = (settings: ReturnType<typeof parseGrokBuildConfig>) => ({
   >,
 });
 
-const hasOmniRouteConfig = (settings: GrokBuildSettings): boolean =>
+const hasOmniRouteConfig = (settings: ReturnType<typeof parseGrokBuildConfig>): boolean =>
   settings.default === "omniroute" &&
   settings.model?.base_url !== null &&
   settings.model?.api_backend === "chat_completions";
@@ -192,7 +192,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const validation = grokBuildConfigSchema.safeParse(rawBody);
-  if (!validation.success) {
+  if (validation.success === false) {
     return NextResponse.json(
       { error: { message: "Invalid request", details: validation.error.issues } },
       { status: 400 }

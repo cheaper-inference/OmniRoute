@@ -130,8 +130,16 @@ function resolveModePackName(config: Record<string, unknown>): string | null {
 /** Resolves an explicit, validated `weights` object from the config, if present. */
 function resolveExplicitWeights(config: Record<string, unknown>): ScoringWeights | undefined {
   if (!isRecord(config.weights)) return undefined;
-  const explicitWeights = config.weights as ScoringWeights;
-  if (validateWeights(explicitWeights)) return explicitWeights;
+  const explicitWeights = config.weights as Partial<ScoringWeights>;
+  if (
+    Object.keys(normalizeScoringWeights({})).every((key) => Object.hasOwn(explicitWeights, key)) &&
+    Object.keys(explicitWeights).length === Object.keys(normalizeScoringWeights({})).length &&
+    Object.values(explicitWeights).every(
+      (value) => typeof value === "number" && Number.isFinite(value)
+    ) &&
+    validateWeights(explicitWeights as ScoringWeights)
+  )
+    return explicitWeights as ScoringWeights;
   const normalized = normalizeScoringWeights(config.weights as Partial<ScoringWeights>);
   return validateWeights(normalized) ? normalized : undefined;
 }
@@ -194,6 +202,7 @@ function buildEmptyAutopilotReport(options: ComboScoringInspectorOptions): Combo
       degradedCount: 0,
       downCount: 0,
       issueCount: 0,
+      suggestionCount: 0,
       actionableCount: 0,
     },
     combos: [],

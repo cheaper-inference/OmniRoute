@@ -14,11 +14,11 @@ const querySchema = z.object({
   includeHealthy: z
     .enum(["true", "false"])
     .transform((value) => value === "true")
-    .default("false"),
+    .default(false),
   includeActions: z
     .enum(["true", "false"])
     .transform((value) => value === "true")
-    .default("true"),
+    .default(true),
 });
 
 export async function GET(request: Request) {
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       includeActions: searchParams.get("includeActions") || undefined,
     });
 
-    if (!parsed.success) {
+    if (parsed.success === false) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Invalid query parameters" },
         { status: 400 }

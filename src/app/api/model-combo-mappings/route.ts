@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
   try {
     const parsed = await validatedJsonBody(request, createMappingSchema);
-    if (!parsed.success) {
+    if (parsed.success === false) {
       return parsed.response;
     }
 

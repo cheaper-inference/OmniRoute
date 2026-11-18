@@ -1,3 +1,4 @@
+import { isSelectedProviderCredentials } from "@/sse/services/credentialSentinel";
 import {
   handleOcr,
   resolveVertexOcrAccessToken,
@@ -98,6 +99,9 @@ async function dispatchOcrModel(
     return rateLimitedProviderResponse(resolvedProvider, credentials);
   }
 
+  if (!isSelectedProviderCredentials(credentials)) {
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Provider credentials unavailable");
+  }
   const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
   const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
   const response = await handleOcr({

@@ -584,7 +584,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
     const payloadError = getErrorMessageFromPayload(modelsData);
 
-    if (!modelsRes.ok || parseError) {
+    if (modelsRes.ok === false || parseError) {
       const responseStatus = modelsRes.ok ? 502 : modelsRes.status;
       const logError = payloadError || parseError || `HTTP ${modelsRes.status}`;
       const responseError = payloadError || parseError || "Failed to fetch models";
@@ -660,7 +660,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    const allFetchedModels = modelsData.models || [];
+    const allFetchedModels = Array.isArray(modelsData.models)
+      ? modelsData.models.filter(
+          (model): model is { id: string } =>
+            !!model && typeof model === "object" && typeof model.id === "string"
+        )
+      : [];
     const importFreeOnly = Boolean(
       (connection.providerSpecificData as Record<string, unknown> | undefined)?.importFreeModelsOnly
     );

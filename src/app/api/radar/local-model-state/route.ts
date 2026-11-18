@@ -119,9 +119,9 @@ export async function PATCH(request: Request): Promise<NextResponse> {
   if (authError) return authError;
 
   const body = await readJson(request);
-  if (!body.ok) return error(body.status, body.message);
+  if (body.ok === false) return error(body.status, body.message);
   const parsed = overrideSchema.safeParse(body.value);
-  if (!parsed.success) return error(400, "Invalid Radar local override");
+  if (parsed.success === false) return error(400, "Invalid Radar local override");
 
   try {
     const { provider, modelId, displayName, enabled } = parsed.data;
@@ -144,9 +144,9 @@ export async function PUT(request: Request): Promise<NextResponse> {
   if (authError) return authError;
 
   const body = await readJson(request);
-  if (!body.ok) return error(body.status, body.message);
+  if (body.ok === false) return error(body.status, body.message);
   const parsed = tombstoneSchema.safeParse(body.value);
-  if (!parsed.success) return error(400, "Invalid Radar tombstone");
+  if (parsed.success === false) return error(400, "Invalid Radar tombstone");
 
   try {
     const { provider, modelId, tombstoned } = parsed.data;
@@ -168,7 +168,7 @@ export async function DELETE(request: Request): Promise<NextResponse> {
     provider: url.searchParams.get("provider"),
     modelId: url.searchParams.get("modelId"),
   });
-  if (!parsed.success) return error(400, "provider and modelId are required");
+  if (parsed.success === false) return error(400, "provider and modelId are required");
 
   try {
     if (!clearRadarLocalModelOverride(parsed.data.provider, parsed.data.modelId)) {

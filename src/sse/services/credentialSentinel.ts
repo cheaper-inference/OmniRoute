@@ -23,3 +23,31 @@ export function isCredentialDiagnosticSentinel(value: unknown): boolean {
     record.leaseConnectionMismatch
   );
 }
+
+import type { getProviderCredentials } from "./auth";
+
+/** A selection refusal is not a credential; do not send it upstream. */
+export type SelectedProviderCredentials = Extract<
+  NonNullable<Awaited<ReturnType<typeof getProviderCredentials>>>,
+  { apiKey: unknown; accessToken: unknown }
+>;
+
+export function isSelectedProviderCredentials(
+  value: unknown
+): value is SelectedProviderCredentials {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  if (
+    isCredentialDiagnosticSentinel(record) ||
+    record.waitingForCapacity ||
+    record.leaseFenceStale ||
+    record.leaseRequired
+  )
+    return false;
+  return (
+    Object.hasOwn(record, "apiKey") &&
+    Object.hasOwn(record, "accessToken") &&
+    (record.apiKey === null || typeof record.apiKey === "string") &&
+    (record.accessToken === null || typeof record.accessToken === "string")
+  );
+}

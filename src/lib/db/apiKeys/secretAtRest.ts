@@ -50,7 +50,8 @@ export function encryptApiKeySecret(rawKey: string): string {
  * unchanged; an envelope that cannot be decrypted (changed STORAGE_ENCRYPTION_KEY) yields null,
  * so callers treat the secret as absent instead of handing out the ciphertext.
  */
-export function decryptApiKeySecret(stored: unknown): unknown {
+export function decryptApiKeySecret(stored: unknown): string | null {
+  if (typeof stored !== "string") return null;
   if (!looksEncrypted(stored)) return stored;
   return decrypt(stored as string) ?? null;
 }

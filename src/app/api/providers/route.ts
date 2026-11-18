@@ -94,7 +94,7 @@ function projectCodexAccountPoolWithRoutingQuota(
   cachedUsage?: Parameters<typeof projectCodexAccountPool>[2]
 ) {
   const projection = projectCodexAccountPool(connection, now, cachedUsage);
-  const children = projection.children.map((child) => {
+  const projectChild = (child: (typeof projection.children)[number]) => {
     const fiveHourWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_SESSION : "session";
     const weeklyWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_WEEKLY : "weekly";
     const fiveHour = getQuotaWindowObservation(connection.id, fiveHourWindow);
@@ -126,7 +126,11 @@ function projectCodexAccountPoolWithRoutingQuota(
         },
       },
     };
-  }) as typeof projection.children;
+  };
+  const children: typeof projection.children = [
+    projectChild(projection.children[0]),
+    projectChild(projection.children[1]),
+  ];
 
   return { ...projection, children };
 }
@@ -291,7 +295,7 @@ export async function POST(request: Request) {
     let persistedApiKey = apiKey;
 
     const m365Token = parseM365RefreshToken(provider, incomingPsd);
-    if (!m365Token.success) {
+    if (m365Token.success === false) {
       return NextResponse.json(
         {
           error: {

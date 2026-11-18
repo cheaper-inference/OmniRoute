@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       getIdempotencyStats(),
       history ? history.body.promptCache : getCacheMetrics(),
       history ? history.body.trend : getCacheTrend(trendHours),
-      getCachedSettings().catch(() => ({})),
+      getCachedSettings().catch((): Record<string, unknown> => ({})),
     ]);
 
     const response = NextResponse.json({

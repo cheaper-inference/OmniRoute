@@ -239,8 +239,8 @@ export async function POST(request) {
         return NextResponse.json({
           valid: !!result.valid,
           error: result.valid ? null : result.error || "Invalid API key",
-          warning: result.warning || null,
-          method: result.method || null,
+          warning: "warning" in result ? result.warning || null : null,
+          method: "method" in result ? result.method || null : null,
         });
       }
 

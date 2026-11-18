@@ -1,3 +1,5 @@
+import { isSelectedProviderCredentials } from "@/sse/services/credentialSentinel";
+import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import { errorResponse, unavailableResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
@@ -93,7 +95,7 @@ export async function POST(request, { params }) {
   if (isKeyScopeBlockedCredentials(credentials)) {
     return keyScopeBlockedResponse(rawProvider, credentials);
   }
-  if (credentials.allRateLimited) {
+  if (isAllRateLimitedCredentials(credentials)) {
     return unavailableResponse(
       HTTP_STATUS.RATE_LIMITED,
       `[${rawProvider}] All accounts rate limited`,
@@ -102,6 +104,9 @@ export async function POST(request, { params }) {
     );
   }
 
+  if (!isSelectedProviderCredentials(credentials)) {
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Provider credentials unavailable");
+  }
   const result = await handleEmbedding({
     body,
     credentials: await ensureCopilotEmbeddingToken(

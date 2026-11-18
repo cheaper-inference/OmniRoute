@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     for (const item of items) {
       try {
-        const result = await upsertProxy(item);
+        const result = await upsertProxy({ ...item, type: item.type ?? "http" });
         if (result.proxy) {
           if (result.action === "created") created++;
           else updated++;
