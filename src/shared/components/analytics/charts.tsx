@@ -80,7 +80,7 @@ export function StatCard({
 
   return (
     <Card className="px-4 py-3 flex flex-col gap-1 min-w-0">
-      <div className="flex items-center gap-1.5 text-text-muted text-[11px] uppercase font-semibold tracking-wide min-w-0">
+      <div className="flex items-center gap-1.5 text-text-muted text-2xs uppercase font-semibold tracking-wide min-w-0">
         <Icon name={icon} size={14} />
         <span className="truncate">{label}</span>
       </div>
@@ -121,7 +121,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
         {sections.map((section, si) => (
           <div key={si}>
             {si > 0 && <div className="border-t border-border mb-3" />}
-            <div className="text-[10px] uppercase font-semibold tracking-widest text-text-muted mb-2">
+            <div className="text-3xs uppercase font-semibold tracking-widest text-text-muted mb-2">
               {section.title}
             </div>
             <div
@@ -149,7 +149,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
                     >
                       <Icon name={stat.icon} size={14} className="text-text-muted" />
                       <span
-                        className={`text-[11px] uppercase font-semibold tracking-wide text-text-muted ${section.wideValues ? "whitespace-nowrap" : "truncate"}`}
+                        className={`text-2xs uppercase font-semibold tracking-wide text-text-muted ${section.wideValues ? "whitespace-nowrap" : "truncate"}`}
                       >
                         {stat.label}
                       </span>
@@ -584,7 +584,7 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
         <h3 className="text-sm text-text-muted uppercase">
           {translateCostText(t, "serviceTierBreakdownTitle", "Service Tier")}
         </h3>
-        <span className="text-[11px] text-text-muted">
+        <span className="text-2xs text-text-muted">
           {translateCostText(t, "serviceTierBreakdownSubtitle", "Fast / Flex / Standard split")}
         </span>
       </div>

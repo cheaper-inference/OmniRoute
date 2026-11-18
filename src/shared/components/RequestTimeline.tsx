@@ -573,7 +573,7 @@ export default function RequestTimeline({
       >
         <div className="flex items-center gap-3">
           <h2 className="text-sm text-text-main">{t("title")}</h2>
-          <span className="text-[10px] text-text-muted font-mono">
+          <span className="text-3xs text-text-muted font-mono">
             {t("visibleCount", { visible: visibleLogs.length, total: logs.length })}
           </span>
         </div>
@@ -589,7 +589,7 @@ export default function RequestTimeline({
                 aria-pressed={mode === m}
                 onClick={() => handleModeChange(m)}
                 title={t(`modes.${MODE_META[m].descriptionKey}`)}
-                className="h-7 min-h-7 px-2.5 text-[11px]"
+                className="h-7 min-h-7 px-2.5 text-2xs"
               >
                 {t(`modes.${MODE_META[m].labelKey}`)}
               </Button>
@@ -600,7 +600,7 @@ export default function RequestTimeline({
             size="sm"
             onClick={handleReset}
             title={t("jumpToNow", { position: Math.round(nowLineX) })}
-            className="h-7 min-h-7 px-2 text-[11px]"
+            className="h-7 min-h-7 px-2 text-2xs"
           >
             {t("reset")}
           </Button>
@@ -625,7 +625,7 @@ export default function RequestTimeline({
           {/* Conversation lane-reuse window: how long a lane stays reserved
               for its conversation before falling back to normal packing. */}
           <div
-            className="flex items-center gap-1 whitespace-nowrap text-[11px] text-text-muted"
+            className="flex items-center gap-1 whitespace-nowrap text-2xs text-text-muted"
             title={t("laneReuseHint")}
           >
             <span aria-hidden="true">{t("laneReuse")}</span>
@@ -643,13 +643,13 @@ export default function RequestTimeline({
                 } catch {}
               }}
               className="w-auto min-w-0 shrink-0"
-              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-[11px]"
+              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-2xs"
             />
             <span aria-hidden="true">{t("laneReuseUnit")}</span>
           </div>
           {/* How often the timeline re-polls /api/usage/call-logs for new rows. */}
           <div
-            className="flex items-center gap-1 whitespace-nowrap text-[11px] text-text-muted"
+            className="flex items-center gap-1 whitespace-nowrap text-2xs text-text-muted"
             title={t("autoRefreshHint")}
           >
             <span aria-hidden="true">{t("autoRefresh")}</span>
@@ -667,7 +667,7 @@ export default function RequestTimeline({
                 } catch {}
               }}
               className="w-auto min-w-0 shrink-0"
-              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-[11px]"
+              inputClassName="h-7 min-h-7 w-12 px-1 text-center font-mono text-2xs"
             />
             <span aria-hidden="true">{t("autoRefreshUnit")}</span>
           </div>
@@ -682,7 +682,7 @@ export default function RequestTimeline({
             >
               <span aria-hidden="true">-</span>
             </Button>
-            <span className="min-w-[36px] px-1 text-center font-mono text-[10px] text-text-muted">
+            <span className="min-w-[36px] px-1 text-center font-mono text-3xs text-text-muted">
               {zoom >= 1 ? `${zoom}x` : `${zoom * 100}%`}
             </span>
             <Button
@@ -726,7 +726,7 @@ export default function RequestTimeline({
             {axisTicks.map((axisTick, i) => (
               <div key={i} className="absolute" style={{ left: `${axisTick.pct}%`, top: 0 }}>
                 <div className="w-px h-3 bg-border -translate-x-1/2" />
-                <span className="block text-[9px] text-text-muted font-mono mt-0.5 whitespace-nowrap -translate-x-1/2 text-center">
+                <span className="block text-3xs text-text-muted font-mono mt-0.5 whitespace-nowrap -translate-x-1/2 text-center">
                   {axisTick.label}
                 </span>
               </div>
@@ -768,7 +768,7 @@ export default function RequestTimeline({
               <div className="w-full h-full flex items-center px-1.5 overflow-hidden">
                 {/* text-bg inverts with the theme: light ink on the deep light-mode fills, dark ink
                     on the pastel dark-mode fills (white on the pastels is ~1.5:1). */}
-                <span className="text-[11px] font-mono text-bg truncate whitespace-nowrap">
+                <span className="text-2xs font-mono text-bg truncate whitespace-nowrap">
                   {truncateModel(log.model)}
                 </span>
               </div>
@@ -827,7 +827,7 @@ export default function RequestTimeline({
           }}
         >
           <div className="w-px h-full bg-error shadow-[0_0_8px_var(--color-error)] -translate-x-1/2" />
-          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-semibold tracking-wider">
+          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-3xs font-mono px-1.5 py-0.5 rounded-b-sm font-semibold tracking-wider">
             NOW
           </div>
         </div>
@@ -866,7 +866,7 @@ export default function RequestTimeline({
               className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: getTimelineBarColor(hoveredLog) }}
             />
-            <span className="text-[11px] font-semibold text-text-main">
+            <span className="text-2xs font-semibold text-text-main">
               {hoveredLog.kind === "mcp"
                 ? hoveredLog.toolName || t("mcpTool")
                 : hoveredLog.model || t("unknownModel")}
@@ -874,13 +874,13 @@ export default function RequestTimeline({
             {hoveredLog.active && (
               <Badge
                 size="sm"
-                className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3-ink"
+                className="border-chart-3/30 bg-chart-3/20 text-3xs text-chart-3-ink"
               >
                 {t("active")}
               </Badge>
             )}
           </div>
-          <div className="space-y-0.5 text-[10px] text-text-muted font-mono">
+          <div className="space-y-0.5 text-3xs text-text-muted font-mono">
             <div className="flex justify-between gap-4">
               <span>{t("started")}</span>
               <span>
@@ -947,14 +947,14 @@ export default function RequestTimeline({
               </>
             )}
             {hoveredLog.error && (
-              <div className="mt-1 text-error text-[9px] break-all">{hoveredLog.error}</div>
+              <div className="mt-1 text-error text-3xs break-all">{hoveredLog.error}</div>
             )}
           </div>
         </div>
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-3 px-4 py-1.5 border-t border-border text-[9px] shrink-0">
+      <div className="flex items-center gap-3 px-4 py-1.5 border-t border-border text-3xs shrink-0">
         <div className="flex items-center gap-1">
           <div
             className="w-2.5 h-2.5 rounded-sm"

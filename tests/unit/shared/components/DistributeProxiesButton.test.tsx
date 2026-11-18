@@ -206,7 +206,8 @@ describe("DistributeProxiesButton", () => {
     const button = container.querySelector("button") as HTMLButtonElement;
     expect(button.className).toContain("px-2");
     expect(button.className).toContain("py-1");
-    expect(button.className).toContain("text-[11px]");
+    // The kit's 11px label size (was the arbitrary text-[11px]).
+    expect(button.className).toContain("text-2xs");
   });
 
   it("applies md size classes by default", async () => {

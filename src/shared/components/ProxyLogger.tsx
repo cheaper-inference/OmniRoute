@@ -452,7 +452,7 @@ export default function ProxyLogger() {
             <span aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
           )}
 
-          <span className="mr-1 text-[10px] uppercase tracking-wider text-text-muted">
+          <span className="mr-1 text-3xs uppercase tracking-wider text-text-muted">
             {t("filterSource")}
           </span>
           {sourceFilters.map((f) => (
@@ -598,7 +598,7 @@ export default function ProxyLogger() {
                       </TableCell>
                     )}
                     {visibleColumns.proxy && (
-                      <TableCell className="px-3 py-2 font-mono text-[11px] text-primary">
+                      <TableCell className="px-3 py-2 font-mono text-2xs text-primary">
                         {log.proxy ? log.proxy.name || `${log.proxy.host}:${log.proxy.port}` : "—"}
                       </TableCell>
                     )}
@@ -608,20 +608,20 @@ export default function ProxyLogger() {
                           <Badge
                             size="sm"
                             variant="info"
-                            className="text-[9px] font-semibold uppercase"
+                            className="text-3xs font-semibold uppercase"
                             title={t("tlsFingerprint")}
                           >
                             <span aria-hidden="true">🔒</span> TLS
                           </Badge>
                         ) : (
-                          <span className="text-[10px] text-text-muted">—</span>
+                          <span className="text-3xs text-text-muted">—</span>
                         )}
                       </TableCell>
                     )}
                     {visibleColumns.type && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-3xs font-semibold uppercase"
                           style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
                         >
                           {typeColor.label}
@@ -631,7 +631,7 @@ export default function ProxyLogger() {
                     {visibleColumns.level && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-3xs font-semibold uppercase"
                           style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
                         >
                           {levelColor.label}
@@ -642,7 +642,7 @@ export default function ProxyLogger() {
                       <TableCell className="px-3 py-2">
                         {log.provider ? (
                           <span
-                            className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
+                            className="inline-block rounded px-2 py-0.5 text-3xs font-semibold uppercase"
                             style={{
                               backgroundColor: providerColor.bg,
                               color: providerColor.text,
@@ -651,7 +651,7 @@ export default function ProxyLogger() {
                             {providerColor.label}
                           </span>
                         ) : (
-                          <span className="text-[10px] text-text-muted">—</span>
+                          <span className="text-3xs text-text-muted">—</span>
                         )}
                       </TableCell>
                     )}
@@ -661,7 +661,7 @@ export default function ProxyLogger() {
                       </TableCell>
                     )}
                     {visibleColumns.egress && (
-                      <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
+                      <TableCell className="px-3 py-2 font-mono text-2xs text-success">
                         {egressAddress ? (
                           <>
                             {maskSegment(egressAddress.address)}
@@ -679,7 +679,7 @@ export default function ProxyLogger() {
                       </TableCell>
                     )}
                     {visibleColumns.correlation && (
-                      <TableCell className="px-3 py-2 font-mono text-[11px]">
+                      <TableCell className="px-3 py-2 font-mono text-2xs">
                         {log.correlationId ? (
                           <a
                             href={`/dashboard/logs?correlationId=${encodeURIComponent(log.correlationId)}`}
@@ -690,18 +690,18 @@ export default function ProxyLogger() {
                             {log.correlationId.slice(0, 12)}…
                           </a>
                         ) : (
-                          <span className="text-[10px] text-text-muted">—</span>
+                          <span className="text-3xs text-text-muted">—</span>
                         )}
                       </TableCell>
                     )}
                     {visibleColumns.servedBy && (
-                      <TableCell className="px-3 py-2 font-mono text-[11px] text-text-muted">
+                      <TableCell className="px-3 py-2 font-mono text-2xs text-text-muted">
                         {maskAccount(log.rotationAccount ?? log.account, emailsVisible) || "—"}
                       </TableCell>
                     )}
                     {visibleColumns.target && (
                       <TableCell
-                        className="max-w-[200px] truncate px-3 py-2 font-mono text-[10px] text-text-muted"
+                        className="max-w-[200px] truncate px-3 py-2 font-mono text-3xs text-text-muted"
                         title={log.targetUrl}
                       >
                         {truncateUrl(log.targetUrl)}
@@ -713,7 +713,7 @@ export default function ProxyLogger() {
                       </TableCell>
                     )}
                     {visibleColumns.ip && (
-                      <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
+                      <TableCell className="px-3 py-2 font-mono text-2xs text-success">
                         {log.clientIp || "—"}
                       </TableCell>
                     )}
