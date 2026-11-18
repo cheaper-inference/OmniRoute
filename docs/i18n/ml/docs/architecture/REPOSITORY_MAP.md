@@ -53,61 +53,61 @@ OmniRoute/
 
 ## റൂട്ട് ഫയലുകൾ
 
-| ഫയൽ                                         | ഉദ്ദേശ്യം                                                                                          |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **README.md**                               | മാർക്കറ്റിംഗ് ലാൻഡിംഗ് പേജ് + ദ്രുതാരംഭം + ഫീച്ചർ മാട്രിക്സ് (`llm.txt` കൂടി കാണുക)                |
-| **CHANGELOG.md**                            | ഓരോ റിലീസിനുമുള്ള മാറ്റങ്ങളുടെ രേഖ (`/version-bump-cc` skill സ്വയമേവ സൃഷ്ടിക്കുന്നത്)              |
-| **LICENSE**                                 | MIT ലൈസൻസ് ടെക്സ്റ്റ്                                                                              |
-| **CLAUDE.md**                               | Claude Code ഏജന്റുമാർക്കുള്ള പ്രോജക്റ്റ് നിയമങ്ങൾ (കർശന നിയമങ്ങൾ, കൺവെൻഷനുകൾ, സാഹചര്യങ്ങൾ)         |
-| **AGENTS.md**                               | CLAUDE.md-ന് സമാനം, എന്നാൽ Claude ഇതര AI ഏജന്റുമാർക്കായി (Codex, Cursor മുതലായവ)                   |
-| **GEMINI.md**                               | Gemini അധിഷ്ഠിത ഏജന്റുമാർക്കുള്ള സംക്ഷിപ്ത നിയമങ്ങൾ (CLAUDE.md-ന്റെ ഉപഗണം)                         |
-| **CONTRIBUTING.md**                         | കോൺട്രിബ്യൂട്ടർ ഗൈഡ്: സജ്ജീകരണം, കൺവെൻഷണൽ കമ്മിറ്റുകൾ, ടെസ്റ്റിംഗ്, PR പ്രവാഹം                     |
-| **SECURITY.md**                             | ദുർബലത റിപ്പോർട്ടിംഗ് നയം, പിന്തുണയ്ക്കുന്ന പതിപ്പുകൾ, ഭീഷണി മോഡൽ                                  |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — കമ്മ്യൂണിറ്റി പെരുമാറ്റത്തെക്കുറിച്ചുള്ള പ്രതീക്ഷകൾ                         |
-| **llm.txt**                                 | LLM ക്രോളറുകൾക്കായി ഒപ്റ്റിമൈസ് ചെയ്ത പ്ലെയിൻ-ടെക്സ്റ്റ് ലാൻഡിംഗ് (AI അസിസ്റ്റന്റുകൾക്കായുള്ള SEO) |
-| **package.json**                            | npm മാനിഫെസ്റ്റ്, സ്ക്രിപ്റ്റുകൾ, ഡിപ്പൻഡൻസികൾ, എഞ്ചിനുകൾ, c8 കവറേജ് ഗേറ്റ്                        |
-| **package-lock.json**                       | ലോക്ക് ചെയ്ത ഡിപ്പൻഡൻസി ട്രീ                                                                       |
-| **tsconfig.json**                           | റൂട്ട് TypeScript കോൺഫിഗ്                                                                          |
-| **tsconfig.typecheck-core.json**            | `src/` കോറിനായുള്ള ടൈപ്പ്ചെക്ക് കോൺഫിഗ്                                                            |
-| **tsconfig.typecheck-noimplicit-core.json** | കർശനമായ (`noImplicitAny`) ടൈപ്പ്ചെക്ക്                                                             |
-| **tsconfig.tsbuildinfo**                    | TS ഇൻക്രിമെന്റൽ ബിൽഡ് കാഷെ (gitignored)                                                            |
-| **next.config.mjs**                         | Next.js 16 ബിൽഡ് കോൺഫിഗറേഷൻ (സ്റ്റാൻഡ്എലോൺ ഔട്ട്പുട്ട്)                                            |
-| **next-env.d.ts**                           | Next.js സ്വയമേവ സൃഷ്ടിക്കുന്ന env ടൈപ്പുകൾ                                                         |
-| **eslint.config.mjs**                       | ESLint ഫ്ലാറ്റ് കോൺഫിഗ് (ഓരോ പ്രോജക്റ്റ് മേഖലയ്ക്കുമുള്ള നിയമങ്ങൾ)                                 |
-| **prettier.config.mjs**                     | Prettier ഫോർമാറ്റിംഗ് നിയമങ്ങൾ                                                                     |
-| **postcss.config.mjs**                      | Tailwind/CSS പൈപ്പ്ലൈനിനായുള്ള PostCSS കോൺഫിഗ്                                                     |
-| **playwright.config.ts**                    | Playwright E2E ടെസ്റ്റ് കോൺഫിഗ്                                                                    |
-| **vitest.config.ts**                        | Vitest കോൺഫിഗ് (ഡിഫോൾട്ട് സ്യൂട്ട്)                                                                |
-| **vitest.mcp.config.ts**                    | MCP സർവർ / autoCombo / കാഷെ സ്യൂട്ടുകൾക്കായുള്ള Vitest കോൺഫിഗ്                                     |
-| **sonar-project.properties**                | SonarQube/SonarCloud കോൺഫിഗ് (കോഡ് ഗുണനിലവാരം)                                                     |
-| **Dockerfile**                              | മൾട്ടി-സ്റ്റേജ് Docker ബിൽഡ് (builder → runner-base → runner-cli)                                  |
-| **docker-compose.yml**                      | 4 പ്രൊഫൈലുകളുള്ള ഡെവ് compose (base, cli, host, cliproxyapi) + redis സൈഡ്കാർ                       |
-| **docker-compose.prod.yml**                 | പ്രൊഡക്ഷൻ compose (പോർട്ട് 20130, redis, നാമകരണം ചെയ്ത വോള്യങ്ങൾ)                                  |
-| **.dockerignore**                           | Docker കോൺടെക്സ്റ്റിൽ നിന്ന് ഒഴിവാക്കിയ ഫയലുകൾ                                                     |
-| **fly.toml**                                | Fly.io വിന്യാസ കോൺഫിഗ് (മേഖല `sin`, പോർട്ട് 20128, /data വോള്യം)                                   |
-| **.env.example**                            | മാതൃകാ env ഫയൽ (ആദ്യ ഇൻസ്റ്റാളിൽ `.env`-ലേക്ക് സ്വയമേവ പകർത്തുന്നു)                                |
-| **.gitignore**                              | Git അവഗണനാ പാറ്റേണുകൾ                                                                              |
-| **.npmignore**                              | npm പ്രസിദ്ധീകരണത്തിൽ നിന്ന് ഒഴിവാക്കുന്നവയുടെ പട്ടിക                                              |
-| **.npmrc**                                  | npm കോൺഫിഗ് (രജിസ്ട്രി, lockfile നയം)                                                              |
-| **.node-version**                           | Node പതിപ്പ് പിൻ (nvm-അനുയോജ്യ ടൂളുകൾ ഉപയോഗിക്കുന്നത്)                                             |
-| **.nvmrc**                                  | nvm-നുള്ള Node പതിപ്പ് പിൻ                                                                         |
-| **eslint.complexity.config.mjs**            | കോംപ്ലക്സിറ്റി റാച്ചറ്റിനായുള്ള ESLint കോൺഫിഗ് (`scripts/check/check-complexity.mjs --config`)     |
-| **eslint.sonarjs.config.mjs**               | SonarJS നിയമങ്ങൾക്കായുള്ള ESLint കോൺഫിഗ് (കോഗ്നിറ്റീവ് കോംപ്ലക്സിറ്റി / ഡ്യൂപ്ലിക്കേഷൻ)            |
-| **source.config.ts**                        | Fumadocs `defineDocs` സോഴ്സ് കോൺഫിഗ് (`.source/`-ലേക്ക് നൽകുന്നു)                                  |
-| **knip.json**                               | Knip കോൺഫിഗ് — ഉപയോഗിക്കാത്ത ഫയലുകൾ/എക്സ്പോർട്ടുകൾ/ഡിപ്പൻഡൻസികൾ (ഡെഡ്-കോഡ് ഗേറ്റിലേക്ക് നൽകുന്നു)  |
-| **stryker.conf.json**                       | Stryker മ്യൂട്ടേഷൻ-ടെസ്റ്റിംഗ് കോൺഫിഗ്                                                             |
-| **.size-limit.json**                        | size-limit ബണ്ടിൽ ബജറ്റ് കോൺഫിഗറേഷൻ                                                                |
-| **promptfooconfig.yaml**                    | promptfoo മൂല്യനിർണ്ണയ കോൺഫിഗറേഷൻ                                                                  |
-| **.gitleaks.toml**                          | gitleaks രഹസ്യ-സ്കാൻ നിയമസഞ്ചയം                                                                    |
-| **.zizmor.yml**                             | zizmor GitHub-Actions സുരക്ഷാ-ലിന്റ് കോൺഫിഗറേഷൻ                                                    |
-| **socket.yml**                              | Socket.dev സപ്ലൈ-ചെയിൻ കോൺഫിഗറേഷൻ                                                                  |
-| **news.json**                               | പ്രാദേശികവൽക്കരിച്ച v2 പ്രഖ്യാപന ഫീഡ്; Radar ലോഞ്ച് ഇനം നിഷ്ക്രിയമായി വിതരണം ചെയ്യുന്നു            |
-| **flake.nix** / **flake.lock**              | Nix dev-shell നിർവചനം + ലോക്ക്                                                                     |
-| **.env**                                    | പ്രാദേശിക രഹസ്യങ്ങൾ (gitignored — `.env.example`-ൽ നിന്ന് സൃഷ്ടിച്ചത്)                             |
+| ഫയൽ                                         | ഉദ്ദേശം                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **README.md**                               | മാർക്കറ്റിംഗ് ലാൻഡിംഗ് പേജ് + ദ്രുത ആരംഭ + ഫീച്ചർ മാട്രിക്സ് ( `llm.txt` ഇതും കാണുക)              |
+| **CHANGELOG.md**                            | ഓരോ-റിലീസ് ചേഞ്ച്ലോഗ് ( `/version-bump-cc` നൈപുണ്യത്താൽ സ്വയമേവ സൃഷ്ടിച്ചത്)                      |
+| **LICENSE**                                 | MIT ലൈസൻസ് ടെക്സ്റ്റ്                                                                             |
+| **CLAUDE.md**                               | Claude കോഡ് ഏജൻ്റുമാർക്കുള്ള പ്രോജക്റ്റ് നിയമങ്ങൾ (ഹാർഡ് നിയമങ്ങൾ, കൺവെൻഷനുകൾ, സാഹചര്യങ്ങൾ)       |
+| **AGENTS.md**                               | CLAUDE.md പോലെ തന്നെ എന്നാൽ ക്ലോഡ് അല്ലാത്ത AI ഏജൻ്റുകൾക്ക് (Codex, Cursor, മുതലായവ)              |
+| **GEMINI.md**                               | ജെമിനി അടിസ്ഥാനമാക്കിയുള്ള ഏജൻ്റുമാർക്കുള്ള സംക്ഷിപ്ത നിയമങ്ങൾ ( CLAUDE.md യുടെ ഉപവിഭാഗം)         |
+| **CONTRIBUTING.md**                         | കോൺട്രിബ്യൂട്ടർ ഗൈഡ്: സജ്ജീകരണം, പരമ്പരാഗത കമ്മിറ്റുകൾ, ടെസ്റ്റിംഗ്, PR ഫ്ലോ                      |
+| **SECURITY.md**                             | ദുർബലതാ റിപ്പോർട്ടിംഗ് നയം, പിന്തുണയ്ക്കുന്ന പതിപ്പുകൾ, ഭീഷണി മോഡൽ                                |
+| **CODE_OF_CONDUCT.md**                      | സംഭാവക ഉടമ്പടി — കമ്മ്യൂണിറ്റി പെരുമാറ്റ പ്രതീക്ഷകൾ                                               |
+| **llm.txt**                                 | LLM ക്രാളറുകൾക്കായി ഒപ്റ്റിമൈസ് ചെയ്ത പ്ലെയിൻ-ടെക്സ്റ്റ് ലാൻഡിംഗ് ( AI അസിസ്റ്റൻ്റുകൾക്ക്SEO )    |
+| **package.json**                            | npm മാനിഫെസ്റ്റ്, സ്ക്രിപ്റ്റുകൾ, ഡിപൻഡൻസികൾ, എഞ്ചിനുകൾ, c8 കവറേജ് ഗേറ്റ്                         |
+| **package-lock.json**                       | പൂട്ടിയ ആശ്രിത മരം                                                                                |
+| **tsconfig.json**                           | റൂട്ട് TypeScript കോൺഫിഗറേഷൻ                                                                      |
+| **tsconfig.typecheck-core.json**            | `src/` കോറിനായി ടൈപ്പ് ചെക്ക് കോൺഫിഗറേഷൻ                                                          |
+| **tsconfig.typecheck-noimplicit-core.json** | കർശനമായ (`noImplicitAny`) ടൈപ്പ് ചെക്ക്                                                           |
+| **tsconfig.tsbuildinfo**                    | TS ഇൻക്രിമെൻ്റൽ ബിൽഡ് കാഷെ (ജിറ്റിനോർഡ്)                                                          |
+| **അടുത്തത്.config.mjs**                     | Next.js 16 ബിൽഡ് കോൺഫിഗറേഷൻ (സ്റ്റാൻഡലോൺ ഔട്ട്പുട്ട്)                                             |
+| **അടുത്തത്-env.d.ts**                       | Next.js സ്വയമേവ ജനറേറ്റഡ് എൻവി തരങ്ങൾ                                                             |
+| **എസ്ലിൻ്റ്.config.mjs**                    | ESLint ഫ്ലാറ്റ് കോൺഫിഗറേഷൻ (പ്രോജക്റ്റ് ഏരിയയിലെ നിയമങ്ങൾ)                                        |
+| **കൂടുതൽ മനോഹരം.config.mjs**                | Prettier ഫോർമാറ്റിംഗ് നിയമങ്ങൾ                                                                    |
+| **postcss.config.mjs**                      | Tailwind/CSS പൈപ്പ്ലൈനിനായുള്ള PostCSS കോൺഫിഗറേഷൻ                                                 |
+| **നാടകകൃത്ത്.config.ts**                    | Playwright E2E ടെസ്റ്റ് കോൺഫിഗറേഷൻ                                                                |
+| **vitest.config.ts**                        | Vitest കോൺഫിഗറേഷൻ (ഡിഫോൾട്ട് സ്യൂട്ട്)                                                            |
+| **vitest.mcp.config.ts**                    | MCP സെർവർ / autoCombo / കാഷെ സ്യൂട്ടുകൾക്കായുള്ള Vitest കോൺഫിഗറേഷൻ                                |
+| **സോണാർ-പ്രോജക്ട്.പ്രോപ്പർട്ടീസ്**          | SonarQube/SonarCloud കോൺഫിഗറേഷൻ (കോഡ് നിലവാരം)                                                    |
+| **ഡോക്കർഫിൽ**                               | മൾട്ടി-സ്റ്റേജ് Docker ബിൽഡ് (ബിൽഡർ → റണ്ണർ-ബേസ് → റണ്ണർ-ക്ലി)                                    |
+| **docker-compose.yml**                      | ദേവ് 4 പ്രൊഫൈലുകൾ (ബേസ്, ക്ലി, ഹോസ്റ്റ്, ക്ലിപ്രോക്സിയാപി) + redis സൈഡ്കാർ ഉപയോഗിച്ച് രചിക്കുന്നു |
+| **ഡോക്കർ-രചന.prod.yml**                     | പ്രൊഡക്ഷൻ കമ്പോസ് (പോർട്ട് 20130, റെഡിസ്, പേരുള്ള വോള്യങ്ങൾ)                                      |
+| **.ഡോക്കറിഗ്നോർ**                           | Docker സന്ദർഭത്തിൽ നിന്ന് ഫയലുകൾ ഒഴിവാക്കി                                                        |
+| **fly.toml**                                | Fly.io വിന്യാസ കോൺഫിഗറേഷൻ (മേഖല `sin`, പോർട്ട് 20128, /ഡാറ്റ വോളിയം)                              |
+| **.env.ഉദാഹരണം**                            | ടെംപ്ലേറ്റ് env ഫയൽ (ആദ്യ ഇൻസ്റ്റാളിൽ `.env` ലേക്ക് സ്വയമേവ പകർത്തി)                              |
+| **.ജിറ്റിഗ്നോർ**                            | Git അവഗണിക്കുന്ന പാറ്റേണുകൾ                                                                       |
+| **.npmignore**                              | npm ഒഴിവാക്കൽ പട്ടിക പ്രസിദ്ധീകരിക്കുക                                                            |
+| **.npmrc**                                  | npm കോൺഫിഗറേഷൻ (രജിസ്ട്രി, ലോക്ക് ഫയൽ പോളിസി)                                                     |
+| **.നോഡ്-പതിപ്പ്**                           | നോഡ് പതിപ്പ് പിൻ (nvm-അനുയോജ്യമായ ഉപകരണങ്ങൾ ഉപയോഗിക്കുന്നു)                                       |
+| **.nvmrc**                                  | nvm-നുള്ള നോഡ് പതിപ്പ് പിൻ                                                                        |
+| **eslint.complexity.config.mjs**            | സങ്കീർണ്ണത റാറ്റ്ചെറ്റിനുള്ള ESLint കോൺഫിഗറേഷൻ (`scripts/check/check-complexity.mjs --config`)    |
+| **eslint.sonarjs.config.mjs**               | SonarJS നിയമങ്ങൾക്കായുള്ള ESLint കോൺഫിഗറേഷൻ (കോഗ്നിറ്റീവ് കോംപ്ലക്സിറ്റി / ഡ്യൂപ്ലിക്കേഷൻ)        |
+| **ഉറവിടം.config.ts**                        | Fumadocs `defineDocs` ഉറവിട കോൺഫിഗറേഷൻ (ഫീഡുകൾ `.source/`)                                        |
+| **knip.json**                               | Knip config — ഉപയോഗിക്കാത്ത files/exports/deps (ഡെഡ്-കോഡ് ഗേറ്റ് ഫീഡ് ചെയ്യുന്നു)                 |
+| **സ്ട്രൈക്കർ.conf.mjs**                     | സ്ട്രൈക്കർ മ്യൂട്ടേഷൻ-ടെസ്റ്റിംഗ് കോൺഫിഗറേഷൻ ( `mutate` ൽ നിന്ന് `tap.testFiles` കണക്കാക്കുന്നു)  |
+| **.size-limit.json**                        | വലുപ്പ പരിധി ബണ്ടിൽ ബജറ്റ് കോൺഫിഗറേഷൻ                                                             |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                             |
+| **.gitleaks.toml**                          | gitleaks രഹസ്യ-സ്കാൻ നിയമങ്ങൾ                                                                     |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                        |
+| **socket.yml**                              | Socket.dev സപ്ലൈ-ചെയിൻ കോൺഫിഗറേഷൻ                                                                 |
+| **news.json**                               | പ്രാദേശികവൽക്കരിക്കപ്പെട്ട v2 അറിയിപ്പ് ഫീഡ്; റഡാർ ലോഞ്ച് ഐറ്റം ഷിപ്പുകൾ പ്രവർത്തനരഹിതമാണ്        |
+| **flake.nix** /** flake.lock**              | Nix dev-shell നിർവചനം + ലോക്ക്                                                                    |
+| **.env**                                    | പ്രാദേശിക രഹസ്യങ്ങൾ ( `.env.example` ൽ നിന്ന് സൃഷ്ടിച്ച gitignored — )                            |
 
-> **v3.8.26-ൽ റൂട്ടിന് പുറത്തേക്ക് മാറ്റി (ക്രമീകരണം ലളിതമാക്കാൻ):**
+> **v3.8.26-ൽ റൂട്ടിൽ നിന്ന് നീക്കി (ഡിക്ലട്ടർ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, കൂടാതെ സൃഷ്ടിച്ച `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) കാണുക.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, കൂടാതെ ജനറേറ്റഡ് `quality-metrics.json` (ജിറ്റിഗ്നോർഡ്) [`## config/`](#config--static-configs--quality-gate-state) കാണുക.
 
 ---
 
@@ -207,13 +207,13 @@ src/
 
 ### `src/lib/db/` — ഡാറ്റാബേസ് (147 മൊഡ്യൂളുകൾ + 208 മൈഗ്രേഷനുകൾ)
 
-| സബ്ദിർ                    | ഉദ്ദേശം                                                                                                                                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL ജേണലിംഗ് ഉള്ള `getDbInstance()` singleton                                                                                                                                                            |
-| `db/migrations/`          | പതിപ്പ് ചെയ്ത SQL ഫയലുകൾ (idempotent, ഇടപാട്). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` കോളം ചേർക്കുന്നു (പ്ലാൻ 21).                                                                     |
-| `db/playgroundPresets.ts` | പ്ലേഗ്രൗണ്ട് സ്റ്റുഡിയോ പ്രീസെറ്റുകൾക്കുള്ള CRUD മൊഡ്യൂൾ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                  |
-| `db/memoryVec.ts`         | `memory_vec_meta` നുള്ള CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, മുതലായവ (പ്ലാൻ 21)                                        |
-| `db/<domain>.ts`          | ഓരോ ഡൊമെയ്നിനും ഒരു മൊഡ്യൂൾ: ദാതാക്കൾ, കോമ്പോകൾ, apiKeys, ഉപയോക്താക്കൾ, സെഷനുകൾ, ഉപയോഗം, ഓഡിറ്റ് ലോഗ്, വെബ്ഹുക്കുകൾ, കഴിവുകൾ, memory_entries, cloud_agent_tasks, evals* \* , reasoning_cache, തുടങ്ങിയവ. |
+| സബ്ദിർ                    | ഉദ്ദേശം                                                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `db/core.ts`              | WAL ജേണലിംഗ് ഉള്ള `getDbInstance()` singleton                                                                                                                                                          |
+| `db/migrations/`          | പതിപ്പ് ചെയ്ത SQL ഫയലുകൾ (idempotent, ഇടപാട്). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` കോളം ചേർക്കുന്നു (പ്ലാൻ 21).                                                                   |
+| `db/playgroundPresets.ts` | പ്ലേഗ്രൗണ്ട് സ്റ്റുഡിയോ പ്രീസെറ്റുകൾക്കുള്ള CRUD മൊഡ്യൂൾ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                |
+| `db/memoryVec.ts`         | `memory_vec_meta` നുള്ള CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, മുതലായവ (പ്ലാൻ 21)                                      |
+| `db/<domain>.ts`          | ഓരോ ഡൊമെയ്നിനും ഒരു മൊഡ്യൂൾ: ദാതാക്കൾ, കോമ്പോകൾ, apiKeys, ഉപയോക്താക്കൾ, സെഷനുകൾ, ഉപയോഗം, ഓഡിറ്റ് ലോഗ്, വെബ്ഹുക്കുകൾ, കഴിവുകൾ, memory_entries, cloud_agent_tasks, evals* \* , reasoning_cache, മുതലായവ. |
 
 ### `src/domain/`
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ഡാഷ്ബോർഡ് ഘടകം API: `packages/ui-kit` ക്ക് മുകളിലുള്ള അഡാപ്റ്ററുകൾ — `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: സ്ക്രീനുകൾ ഉപയോഗിക്കുന്ന ഐക്കൺ പേരുകൾ → ലൂസൈഡ് ഘടകങ്ങൾ (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 ദാതാക്കൾ** Zod മൂല്യനിർണ്ണയത്തോടെ (സത്യത്തിൻ്റെ ഉറവിടം)                                             |
+| `constants/providers.ts`         | **394 ദാതാക്കൾ** Zod മൂല്യനിർണ്ണയത്തോടെ (സത്യത്തിൻ്റെ ഉറവിടം)                                             |
 | `constants/cliTools.ts`          | ബാഹ്യ CLI ടൂൾ രജിസ്ട്രി                                                                                   |
-| `constants/routingStrategies.ts` | **20 റൂട്ടിംഗ് തന്ത്രങ്ങൾ** മുൻഗണനകളോടെ                                                                   |
+| `constants/routingStrategies.ts` | **22 റൂട്ടിംഗ് തന്ത്രങ്ങൾ** മുൻഗണനകളോടെ                                                                   |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) ഓത്ത് ആവശ്യമുള്ള റൂട്ടുകൾ                                                          |
 | `constants/upstreamHeaders.ts`   | അപ്സ്ട്രീം അഭ്യർത്ഥനകൾക്കുള്ള തലക്കെട്ട് നിരാകരണം                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod സ്കീമകൾ ( API കരാറുകൾക്കുള്ള സത്യത്തിൻ്റെ ഏക ഉറവിടം)                                             |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 ഫയലുകൾ (12 ഹാൻഡ്ലറുകൾ + 4 ഹെൽപ്പറുകൾ): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search തുടങ്ങിയവ.
-├── executors/           # 150 എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (BaseExecutor വിപുലീകരിക്കുന്ന ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹെൽപ്പറുകൾ)
+├── executors/           # 163 എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (BaseExecutor വിപുലീകരിക്കുന്ന ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹെൽപ്പറുകൾ)
 ├── translator/          # ഫോർമാറ്റ് കൺവെർട്ടറുകൾ (9 അഭ്യർത്ഥന, 9 പ്രതികരണം, 9 ഹെൽപ്പറുകൾ)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ സർവീസ് മൊഡ്യൂളുകൾ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM തുടങ്ങിയവ.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ബാഹ്യ CLI സംയോജനങ്ങൾ + ആന്തരിക OmniRoute CLI                                                |
 | `I18N.md`                   | i18n ആർക്കിടെക്ചർ, ഒരു ഭാഷ ചേർക്കുന്നു, 67 ലൊക്കേലുകൾ                                       |
 | `UNINSTALL.md`              | അൺഇൻസ്റ്റാൾ ഘട്ടങ്ങൾ വൃത്തിയാക്കുക                                                          |
-| `PROVIDER_REFERENCE.md`     | **സ്വയമേവ സൃഷ്ടിച്ചത്** 381 ദാതാക്കളുടെ കാറ്റലോഗ് (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **സ്വയമേവ സൃഷ്ടിച്ചത്** 394 ദാതാക്കളുടെ കാറ്റലോഗ് (regen: `npm run gen:provider-reference`) |
 
 ### സബ്സിസ്റ്റം ആഴത്തിലുള്ള ഡൈവുകൾ
 

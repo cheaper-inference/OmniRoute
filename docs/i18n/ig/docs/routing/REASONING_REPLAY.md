@@ -24,19 +24,21 @@ Mana ndị ahịa na-ahụkarị (Cursor, Cline, Roo Code, OpenAI SDK) wepụ `r
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Njide na-eme na `open-sse/handlers/chatCore.ts` (saịtị abụọ, na saịtị oku `cacheReasoningFromAssistantMessage` abụọ). Mkpọgharị na-eme na `open-sse/translator/index.ts` ka mmanye schema gachara mana tupu izipu ya.
+
+A na-echekwa ndenye ọkpụkpọ oku n'okpuru `buildToolCallCacheKey()`, mgbari nke oke arịrịọ yana id oku ngwaọrụ, yabụ otu id ejiri igodo API ọzọ ma ọ bụ nnọkọ anaghị ahọrọ ntinye. Oke ahụ sitere na `buildReasoningCacheScope()`: id igodo API, gbakwunyere igodo nnọkọ mgbe arịrịọ ahụ nwere otu. Kọlụm `tool_call_id` na dashboard gosipụtara mgbari a maka ndenye ndị ahụ.
 
 A na-atụgharị ntụgharị enyemaka dị larịị (na-abụghị ọkpụkpọ oku) n'ụzọ dị iche: `buildAssistantMessageCacheKey()` na-agbari oge nnọkọ yana gbakwunyere transcript nke OpenAI-format emeziri ruo n'akụkụ ahụ, n'ihi na DeepSeek chọrọ echiche nke _ọ bụla_ tupu oge `tools` dị. Maka azịza-API lekwasịrị anya (dịka ọmụmaatụ `opencode-go/deepseek-v4-flash`, gafere `/responses`) ahụ dị n'elu na-ebu `input`, ọ bụghị `messages`, yabụ `translateRequest()` (`open-sse/translator/index.ts`) na-akọ transcript pivot ọ gbarie site na nhọrọ ịkpọghachi ma saịtị weghara na-agbari otu transcript ahụ. Nkwụghachi nzaghachi nzaghachi na-agba na pivot OpenAI maka usoro isi mmalite ọ bụla, yabụ a na-emegharịkwa ndị ahịa Anthropic Message (Claude → OpenAI → Responses) kwa.
 

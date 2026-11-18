@@ -220,6 +220,52 @@ test("auth headers: bearer, named api-key header, none; a key is required unless
   );
 });
 
+// CWE-319 (CodeRabbit R17 on #19191): a node that sends a key never sends it over plain
+// http:// to a non-loopback host — private LAN addresses are not exempt.
+test("a keyed node needs https:// unless the host is loopback; authType none may use http://", () => {
+  const plaintext = [
+    "http://api.example.com/v1/answer",
+    "http://192.168.1.20:8080/answer",
+    "http://10.0.0.5/answer",
+    "http://172.16.4.2/answer",
+    "http://127.example.com/answer",
+    "http://localhost.evil.test/answer",
+  ];
+  for (const url of plaintext) {
+    for (const authType of ["bearer", "api-key"]) {
+      assert.throws(
+        () => normalizeCustomJsonConfig(config({ authType, authHeader: "X-Service-Key" }), url),
+        (error: Error) =>
+          error.name === "CustomJsonError" &&
+          /https:\/\//.test(error.message) &&
+          /loopback/.test(error.message) &&
+          /private LAN/.test(error.message) &&
+          /authType "none"/.test(error.message),
+        `${authType} over ${url} must be refused`
+      );
+    }
+    // No key is attached, so plain HTTP stays available.
+    assert.equal(normalizeCustomJsonConfig(config({ authType: "none" }), url).authType, "none");
+  }
+  // The default authType is bearer, so an empty config is keyed too.
+  assert.throws(() => normalizeCustomJsonConfig({}, "http://api.example.com/run"), /https:\/\//);
+
+  const loopback = [
+    "http://localhost:8080/answer",
+    "http://LOCALHOST/answer",
+    "http://127.0.0.1:9000/answer",
+    "http://127.10.20.30/answer",
+    "http://[::1]:8080/answer",
+  ];
+  for (const url of loopback) {
+    assert.equal(normalizeCustomJsonConfig(config(), url).authType, "bearer", url);
+  }
+  assert.equal(
+    normalizeCustomJsonConfig(config(), "https://192.168.1.20/answer").authType,
+    "bearer"
+  );
+});
+
 test("isCustomJsonProviderData only matches the custom-json apiType", () => {
   assert.equal(isCustomJsonProviderData({ apiType: "custom-json" }), true);
   assert.equal(isCustomJsonProviderData({ apiType: "chat" }), false);

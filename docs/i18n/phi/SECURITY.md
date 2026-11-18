@@ -4,13 +4,13 @@
 
 ---
 
-## Pag-uulat ng mga Kahinaan
+## Pag-uulat ng Mga Kahinaan
 
-Kung makatuklas ka ng kahinaan sa seguridad ng OmniRoute, mangyaring iulat ito nang responsable:
+Kung matuklasan mo ang isang kahinaan sa seguridad sa OmniRoute, mangyaring iulat ito nang responsable:
 
-1. **HUWAG** magbukas ng pampublikong GitHub issue
-2. Gamitin ang [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Isama ang: paglalarawan, mga hakbang sa muling paglikha, at posibleng epekto
+1. **DO NOT** magbukas ng pampublikong GitHub na isyu
+2. Gumamit ng [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Isama ang: paglalarawan, mga hakbang sa pagpaparami, at potensyal na epekto
 
 ## Takdang Panahon ng Pagtugon
 
@@ -29,25 +29,14 @@ Kung makatuklas ka ng kahinaan sa seguridad ng OmniRoute, mangyaring iulat ito n
 | 3.7.x   | ✅ Seguridad                                            |
 | < 3.7.0 | ❌ Hindi sinusuportahan                                 |
 
-## Panahon ng suporta ng LTS (v3.9.x)
+## LTS support window (v3.9.x)
 
-Pagkatapos ng 3.8.59, ang susunod na bersyon ay **3.9.0**, na nagbubukas sa linya ng pangmatagalang suporta sa
-branch na `stable/v3` (tingnan ang [`ROADMAP.md`](ROADMAP.md) → "Yugto 3 — v3.9.0 LTS").
+Pagkatapos ng 3.8.59 ang susunod na bersyon ay** 3.9.0** , na nagbubukas ng pangmatagalang linya ng suporta sa `stable/v3` branch (tingnan [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
 
-- **Ano ang natatanggap ng `stable/v3`:** mga pag-aayos ng bug, mga patch sa seguridad, at mga update sa provider. Ang mga bagong
-  feature ay mapupunta sa channel na v4; inuuna ng linya ng LTS ang katatagan. Ang `npm install omniroute`
-  (ang dist-tag na `latest`) ay mananatili sa v3 sa buong cycle ng v4.
-- **Tagal ng panahon:** makakatanggap ang `stable/v3` ng **mga pag-aayos sa seguridad at kritikal na regression sa loob ng
-  12 buwan pagkatapos ilabas ang 3.9.0, o hanggang 90 araw matapos ilathala ang v4.0.0 bilang `latest` —
-  alinman ang mas huli**. Itatala ang magiging petsa ng pagtatapos sa mga tala sa paglabas ng 3.9.0 at sa
-  [`ROADMAP.md`](ROADMAP.md) kapag naganap ang paglabas.
-- **Pag-uulat ng kahinaan sa linya ng LTS:** gamitin ang parehong channel gaya ng para sa anumang ibang bersyon —
-  isang pribadong [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  at hindi kailanman isang pampublikong issue. Sabihin kung aling bersyon ang sinubukan mo (halimbawa, `3.9.2`); ang mga pag-aayos ay ilalapat sa
-  `stable/v3` at ipa-forward-port sa v4.
-- **Baseline ng seguridad sa paglabas ng LTS:** itinatala ang nasukat na estado ng scanner, route-guard, at
-  mga patunay ng pampublikong kredensyal sa
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Ano ang natatanggap ng `stable/v3` :** mga pag-aayos ng bug, mga patch ng seguridad at mga update ng provider. Ang mga bagong feature ay napupunta sa v4 channel; ang linya LTS ay stability-first. `npm install omniroute` (ang `latest` dist-tag) ay nananatili sa v3 sa buong v4 cycle.
+- **Tagal ng window:** natatanggap ni `stable/v3`** mga pag-aayos sa seguridad at kritikal na regression sa loob ng 12 buwan pagkatapos ng 3.9.0 cut, o hanggang 90 araw pagkatapos ma-publish ang v4.0.0 bilang `latest` — alinman ang mas huli** . Ang resultang petsa ng pagtatapos ay naitala sa 3.9.0 na mga tala sa paglabas at sa [`ROADMAP.md`](ROADMAP.md) kapag nangyari ang pagputol.
+- **Pag-uulat ng kahinaan sa linya LTS :** parehong channel tulad ng anumang iba pang bersyon — isang pribadong [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), hindi kailanman isang pampublikong isyu. Sabihin kung aling bersyon ang iyong sinubukan (halimbawa `3.9.2`); inaayos ang lupa sa `stable/v3` at ini-forward-port sa v4.
+- **Baseline ng seguridad sa LTS cut:** Ang sinusukat na estado ng scanner, ang mga patunay ng ruta-guard at pampublikong kredensyal ay naitala sa [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

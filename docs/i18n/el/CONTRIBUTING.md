@@ -299,67 +299,67 @@ npm run test:combo:live:vps:failover     # προσθέτει ένα πραγμ�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Σελίδες πίνακα ελέγχου (23 ενότητες)
-│   ├── api/                # Διαδρομές API (51 κατάλογοι)
-│   └── login/              # Σελίδες ελέγχου ταυτότητας (.tsx)
-├── domain/                 # Μηχανή πολιτικών (policyEngine, comboResolver, costRules, κ.λπ.)
-├── lib/                    # Βασική επιχειρησιακή λογική (.ts)
-│   ├── a2a/                # Διακομιστής πρωτοκόλλου Agent-to-Agent v0.3
-│   ├── acp/                # Μητρώο Agent Communication Protocol
-│   ├── compliance/         # Μηχανή πολιτικών συμμόρφωσης
-│   ├── db/                 # Αρθρώματα τομέα SQLite + 130 μεταναστεύσεις
-│   ├── memory/             # Μόνιμη μνήμη συνομιλιών
-│   ├── oauth/              # Πάροχοι, υπηρεσίες και βοηθητικά εργαλεία OAuth
-│   ├── skills/             # Επεκτάσιμο πλαίσιο δεξιοτήτων
-│   ├── usage/              # Παρακολούθηση χρήσης και υπολογισμός κόστους
-│   └── localDb.ts          # Μόνο επίπεδο επανεξαγωγής — μην προσθέτετε ποτέ λογική εδώ
-├── middleware/              # Ενδιάμεσο λογισμικό αιτημάτων (promptInjectionGuard)
-├── mitm/                   # Διακομιστής μεσολάβησης MITM (πιστοποιητικό, DNS, δρομολόγηση προορισμού)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Στοιχεία React (.tsx)
-│   ├── constants/          # Ορισμοί παρόχων (329), εμβέλειες MCP, 20 στρατηγικές δρομολόγησης
-│   ├── utils/              # Αυτόματος διακόπτης κυκλώματος, εξυγιαντής, βοηθητικά εργαλεία ελέγχου ταυτότητας
-│   └── validation/         # Σχήματα Zod v4
-└── sse/                    # Ροή διακομιστή μεσολάβησης SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Χώρος εργασίας @omniroute/open-sse
-├── executors/              # 150 αρθρώματα εκτέλεσης (κλάσεις εκτέλεσης + βοηθητικά εργαλεία ανά πάροχο)
-├── handlers/               # 11 χειριστές αιτημάτων (συνομιλία, αποκρίσεις, ενσωματώσεις, εικόνες, κ.λπ.)
-├── mcp-server/             # Διακομιστής MCP (110 μοναδικά εργαλεία, 3 μεταφορές, 33 εμβέλειες)
-├── services/               # 178 υπηρεσίες ανώτατου επιπέδου (combo, autoCombo, rateLimitManager, κ.λπ.)
-├── translator/             # Μετατροπείς μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Μετασχηματιστής Responses API
-└── utils/                  # 22 αρθρώματα βοηθητικών εργαλείων (ροή, TLS, διακομιστής μεσολάβησης, καταγραφή)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Εφαρμογή επιφάνειας εργασίας Electron (πολλαπλών πλατφορμών)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Εκτελεστής δοκιμών Node.js (1,574 αρχεία δοκιμών)
-├── integration/            # Δοκιμές ενσωμάτωσης
-├── e2e/                    # Δοκιμές Playwright
-├── security/               # Δοκιμές ασφαλείας
-├── translator/             # Δοκιμές ειδικά για τον μετατροπέα
-└── load/                   # Δοκιμές φόρτου
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Αρχεία Αποφάσεων Αρχιτεκτονικής
-├── architecture/            # Αρχιτεκτονική συστήματος και ανθεκτικότητα
-├── comparison/              # OmniRoute έναντι εναλλακτικών
-├── compression/             # Οδηγοί και κανόνες συμπίεσης
-├── dev/                     # Οδηγοί ανάπτυξης
-├── diagrams/                # Διαγράμματα αρχιτεκτονικής
-├── frameworks/              # MCP, A2A, OpenCode, Μνήμη, Δεξιότητες
-├── guides/                  # Οδηγός χρήστη, Docker, ρύθμιση, αντιμετώπιση προβλημάτων
-├── i18n/                    # Διεθνοποιημένες μεταφράσεις README
-├── marketing/               # Υλικό μάρκετινγκ
-├── ops/                     # Ανάπτυξη, διακομιστής μεσολάβησης, κάλυψη, εκδόσεις
-├── providers/               # Τεκμηρίωση ειδική για κάθε πάροχο
-├── reference/               # Αναφορά API, μεταβλητές περιβάλλοντος, εργαλεία CLI, δωρεάν βαθμίδες
-├── releases/                # Σημειώσεις έκδοσης
-├── routing/                 # Μηχανή αυτόματων συνδυασμών, επανάληψη συλλογισμού
-├── screenshots/             # Στιγμιότυπα οθόνης πίνακα ελέγχου
-├── security/                # Προστατευτικά όρια, συμμόρφωση, απόκρυψη, διακριτικά
-└── specs/                   # Προδιαγραφές σχεδιασμού
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

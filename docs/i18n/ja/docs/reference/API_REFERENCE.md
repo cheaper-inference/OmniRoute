@@ -747,64 +747,177 @@ OpenAI 互換のバッチ処理。
 
 ---
 
-## API検索
+## Search API
 
-Web/searchプロバイダーの抽象化 (Tavily、Brave、Exa、Serper など)。
+Web/検索プロバイダーの抽象化（Tavily、Brave、Exa、Serper など）。
 
-| 方法 | パス                   | 説明                                                                                                    |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | 構成された検索プロバイダーの+機能をリストする                                                           |
-| POST | `/v1/search`           | 検索クエリを実行します。 —本体は`v1SearchSchema`によって検証され、 caching/coalescingをサポートします。 |
-| GET  | `/v1/search/analytics` | プロバイダーごとのhit/latency/cache統計                                                                 |
+| Method | Path                   | Description                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | 構成済みの検索プロバイダーと機能の一覧                                                           |
+| POST   | `/v1/search`           | 検索クエリを実行 — 本文は `v1SearchSchema` によって検証され、キャッシュ/リクエスト統合をサポート |
+| GET    | `/v1/search/analytics` | プロバイダーごとのヒット数/レイテンシー/キャッシュ統計                                           |
 
-**認証:**ベアラーAPIキー (`extractApiKey` + `isValidApiKey`)。検索ポリシーは`enforceApiKeyPolicy`経由で適用されます。
+**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。検索ポリシーは `enforceApiKeyPolicy` によって適用されます。
 
-**自動選択:** `provider`使用しない場合、接続が構成されている最も安価なプロバイダーが最初に実行され、次に安価なプロバイダーがフェイルオーバーになります。無料の最終手段プロバイダー (`duckduckgo-free`) は、他に何も構成されていない場合にのみ使用されます。セルフホストSearXNG 、その接続が実際の`baseUrl` (カタログのデフォルトの`http://localhost:8888/search`ではない) を保存すると、設定済みとしてカウントされます。その後、 SearXNG 400、401、403、または 404 で応答した場合を含め、最も安価なキー付きプロバイダーをフェイルオーバーとして、キー付きプロバイダーよりも $0 プロバイダーとしてランク付けされます。有効な`http(s)` URLではない、またはクラウド メタデータ アドレスをポイントする`baseUrl` 、数えません。トークンを保存するSearXNG接続は、 `https://`またはループバック`http://`よりもこのようにランク付けされます。リモートのプレーン`http://`では、これはフェイルオーバーではなく最後の手段であり、他のプロバイダーが構成されていない場合、または名前で要求された場合にのみ使用されます。そのため、これら 2 つのケースではトークンをクリアテキストで送信します。
+### 名前付き検索/取得の組み合わせ
 
-### エクサとタヴィリー`provider_options`
+`POST /v1/search` と `POST /v1/web/fetch` はどちらも、保存済みの組み合わせ名を `model` として受け付けます。
+`model` または明示的な `provider` のいずれかを使用してください。両方を送信すると `400` が返されます。
+どちらのフィールドも指定しない場合、既存の自動プロバイダー選択が変更されずに維持されます。
 
-Exa と Tavily は、名前空間バッグからプロバイダー固有のフィールドを読み取ります: `provider_options.exa` (または`provider_options["exa-search"]`) および`provider_options.tavily` (または`provider_options["tavily-search"]`)。以下のキーのみが転送されます。それぞれが`open-sse/handlers/search/providerOptionsPassthrough.ts`内の独自のZodスキーマに対してチェックされ、間違ったタイプのキーは削除されます。 auth、base URL、 `stream` 、 `outputSchema`などの他のキーは無視されます。他のプロバイダー (`cx`、 `depth`) で使用されるフラット キーは以前と同様に機能します。
+Combo Builder とその Add Model カタログは、LLM モデル一覧を持たない接続済みプロバイダーについても、
+ネイティブの Web 操作用エントリを公開します。Serper には **Web search**、
+Tavily には **Web search / Page extraction** が表示され、取得専用プロバイダーには **Page extraction** が表示されます。
+通常どおりエントリとアカウントを選択してください。1 つの Tavily エントリが両方の Web エンドポイントに対応します。
+これらの操作エントリは、チャット専用クライアントのセレクターやチャットモデルのプローブには追加されません。
 
-| プロバイダー | 最上位フィールド                                                                                                                                                                                                                                                                                                                                                          | 入れ子になった                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| エクサ       | `type`、 `category`、 `userLocation`、 `moderation`、 `additionalQueries`、 `objective`、 `systemPrompt`、 `compliance` (フラット プリミティブ)、 `startPublishedDate`、 `endPublishedDate`                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`デフォルトの`{ text: true, highlights: true }`上にマージされました |
-| タヴィリー   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+たとえば、次の順序付きターゲットを持つ **priority** 組み合わせ `shared-free` を作成します。
 
-汎用フィールドが常に優先されます: `query`、 `max_results`、 `filters` (ドメイン)、 `country` 、および`search_type`から派生したトピック。 Exa では、 `search_type: "news"` `category: "news"`を保持します。 Tavily は`search_type: "finance"` (`topic: "finance"`) も受け入れます。
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl の検索コストは、返された 10 件の結果の開始ブロックごとに記録され、1 ブロックあたり 0.002 ドル (2 クレジット)、呼び出しごとに少なくとも 1 つのブロック ( [Firecrawl の請求](https://docs.firecrawl.dev/billing)): 11 件の結果の費用は 0.004 ドルです。
+その後、各サーフェスで同じ名前を使用します。
 
-汎用`time_range`両方のプロバイダーに到達するようになりました。Exa は`startPublishedDate` (ISOタイムスタンプ) を取得し、Tavily は`start_date` (`YYYY-MM-DD`) を取得します。 `provider_options`内の明示的な日付は、マップされた日付をオーバーライドします。
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa の結果は、 `id`、 `highlights` ( `snippet`として使用される最初のハイライトだけでなく、すべてのハイライト)、 `highlight_scores`、 `summary`、 `subpages`、 `entities`および`extras`を`provider_raw`に保持します。 Tavily の結果では`images`と`favicon`が維持されます。
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
+検索では Tavily、次に Serper が検討されます。取得では Tavily、次に Jina Reader が検討されます。
+チャットでは専用の検索/取得プロバイダーをスキップし、OpenAI が検討されます。互換性はモデル名に含まれる単語ではなく、
+検索/取得エグゼキューターのレジストリによって決まります。
+フィルタリングは認証情報の選択とディスパッチに先行し、保存済みの組み合わせを編集することはありません。
 
-Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを受け入れ、他のフィールドが設定されている場合はリクエスト全体を拒否します。 lite の場合、 `additionalQueries`、 `systemPrompt` 、および`text`と`highlights`を除くすべての`contents`キーは呼び出し前に削除されます。非推奨の`subpages`、 `subpageTarget`、 `highlights.numSentences`および`highlights.highlightsPerUrl`は転送されなくなりました。
+非チャット機能のルートでは、`priority`、`fill-first`、`round-robin`、`weighted`、
+`random`、`strict-random`、`least-used`、`p2c` がサポートされます。`fusion`、
+`pipeline`、`context-relay` などのチャット専用合成戦略は、非チャットルートでは拒否され、
+検索や生成メディアに暗黙的に適用されることはありません。
+既存の組み合わせエンジンは、上流のクォータ超過エラーを含む順序付きフォールバックを処理し、
+ステップ ID、アカウントの固定指定、ステップごとのアカウント許可リスト、ネストされた参照、
+呼び出し元の接続/クォータスコープ、および組み合わせのアクセスポリシーを保持します。
+結果は実際のプロバイダーを含め、ネイティブの検索/取得スキーマを保持します。
+`X-OmniRoute-Combo-Trace` はルーティングの判断を識別します。
+不明な組み合わせには `404` が返されます。無効な組み合わせ、および互換性のあるターゲットがない組み合わせには `400` が返されます。
 
-原価計算はフラット レジストリ`costPerQuery`です。ただし Exa は Exa 独自の価格設定に従います。 `auto` (および従来の`fast`) の場合は呼び出しごとに 0.007 ドル、 `lite` (および従来の`instant`) の場合は 0.004 ドルで、10 件の結果がカバーされます。その後の結果ごとに 0.001 ドル。 `contents.summary`が設定されている場合は、返された結果ごとに $0.001 がかかります。 Tavily は、 `search_depth` `basic`、 `fast`および`ultra-fast`の場合は 1 クレジット ($0.008)、 `advanced` ( [Tavily APIクレジット](https://docs.tavily.com/documentation/api-credits)) の場合は 2 クレジット ($0.016) で記録されます。 Tavily がアドバンストにアップグレードした`auto_parameters: true`との通話は、引き続き 1 クレジットで記録されます。
+各組み合わせの試行では、1 つの明示的なプロバイダーが使用されます。
+組み合わせの背後にあるネイティブの自動プロバイダープールを呼び出すことはできません。
+明示的なプロバイダーを指定したリクエストでは、既存の単一プロバイダー動作が維持されます。
+専用の検索/取得プロバイダーを対象とする直接チャットリクエストには、OpenAI 形式のエグゼキューターにフォールスルーする代わりに、
+対処方法を示す JSON の `400` が返されます。
 
----
+### 機能固有の組み合わせルート
+
+保存済みの組み合わせには、API 機能をキーとする `routes` オブジェクトを含めることができます。各ルートは、
+独自のターゲットリスト、戦略、実行時設定を持ちます。トップレベルの `models`、`strategy`、`config` は
+従来互換の Chat プランとして引き続き使用されます。`routes` のない古い組み合わせも、変更されずに動作し続けます。
+
+サポートされるルートキーは、`chat`、`search`、`web-fetch`、`embeddings`、`rerank`、`images`、
+`image-edits`、`videos`、`music`、`ocr`、`audio-speech`、`audio-transcriptions`、
+`audio-translations`、`audio-generation` です。エンドポイントへの投影は、認証情報の選択、スコアリング、
+ディスパッチより前に行われます。ネストされた組み合わせ参照では、同じ機能に対応する子組み合わせのルートが選択されます。
+
+`POST /v1/music/generations` と `POST /v1/ocr` は、`model` で組み合わせ名を受け付けます。ネイティブの
+ElevenLabs 互換 `POST /v1/music` も `model_id` で組み合わせ名を受け付けますが、このネイティブエンドポイントで使用可能な
+すべてのターゲットは ElevenLabs の音楽モデルでなければならず、バイナリレスポンスの契約が維持される必要があります。
+`POST /v1/sound-generation` は、同じネイティブバイナリ制約のもとで、`model_id` に `audio-generation` の組み合わせを受け付けます。
+異種の音楽プロバイダーには `/v1/music/generations` を使用してください。
+
+**自動選択:** `provider` を指定しない場合、接続が構成されている中で最も安価なプロバイダーが最初に実行され、
+次に安価なプロバイダーがフェイルオーバーになります。無料の最終手段プロバイダー（`duckduckgo-free`）は、
+他に何も構成されていない場合にのみ使用されます。セルフホスト型 SearXNG は、その接続に実際の
+`baseUrl`（カタログのデフォルト `http://localhost:8888/search` ではない）が保存されると構成済みとして扱われます。
+その場合、キー付きプロバイダーより前の $0 プロバイダーとしてランク付けされ、最も安価なキー付きプロバイダーがフェイルオーバーになります。
+これは、SearXNG が 400、401、403、または 404 を返した場合も同様です。`baseUrl` が有効な `http(s)` URL でない場合、
+またはクラウドメタデータアドレスを指している場合は、構成済みとはみなされません。トークンを保存している SearXNG 接続は、
+`https://` またはループバックの `http://` に対してのみ、この方法でランク付けされます。リモートの平文 `http://` では、
+フェイルオーバーとして使用されることはなく、他のプロバイダーが構成されていない場合、または名前で要求された場合にのみ
+最終手段として使用されます。そのため、この 2 つの場合にはトークンが平文で送信されます。
+
+### Exa と Tavily の `provider_options`
+
+Exa と Tavily は、名前空間付きのバッグからプロバイダー固有のフィールドを読み取ります：
+`provider_options.exa`（または `provider_options["exa-search"]`）および `provider_options.tavily`
+（または `provider_options["tavily-search"]`）。以下のキーのみが転送されます。それぞれ
+`open-sse/handlers/search/providerOptionsPassthrough.ts` 内の独自の Zod スキーマに対して
+チェックされ、型が正しくないキーは破棄されます。その他のキーは、認証情報、ベース URL、
+`stream`、`outputSchema` を含め、すべて無視されます。他のプロバイダーで使用されるフラットな
+キー（`cx`、`depth` など）は、これまでどおり機能します。
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（フラットなプリミティブ）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` をデフォルトの `{ text: true, highlights: true }` にマージ |
+| Tavily   | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                        |
+
+汎用フィールドは常に優先されます：`query`、`max_results`、`filters`（ドメイン）、`country`、
+および `search_type` から導出されるトピック。Exa では、`search_type: "news"` により
+`category: "news"` が維持されます。Tavily は `search_type: "finance"`（`topic: "finance"`）
+も受け付けます。
+
+Firecrawl の検索コストは、返された結果 10 件ごとの開始ブロック単位で、1 ブロックあたり
+$0.002（2 クレジット）として記録され、1 回の呼び出しにつき少なくとも 1 ブロックが
+課金されます（[Firecrawl の課金](https://docs.firecrawl.dev/billing)）：結果 11 件の場合は
+$0.004 です。
+
+汎用の `time_range` は現在、両方のプロバイダーに渡されます：Exa には
+`startPublishedDate`（ISO タイムスタンプ）、Tavily には `start_date`（`YYYY-MM-DD`）が
+設定されます。`provider_options` に明示的な日付がある場合は、マッピングされた日付より
+優先されます。
+
+Exa の結果では、`id`、`highlights`（`snippet` に使用される最初のものだけでなく、すべての
+ハイライト）、`highlight_scores`、`summary`、`subpages`、`entities`、`extras` が
+`provider_raw` に保持されます。Tavily の結果では、`images` と `favicon` が保持されます。
+
+Linkup の検索コストは、`depth` が `fast` および `standard` の場合は $0.005、`deep` の
+場合は $0.05 として記録されます（[Linkup の料金](https://docs.linkup.so/pages/documentation/development/pricing)）。
+`depth` の値が `provider_options` に由来する場合でも、接続の設定に由来する場合でも同じです。
+
+Exa の `type: "lite"`（Exa 3.0）は、より少ないフィールドセットを受け付け、その他の
+フィールドが 1 つでも設定されている場合はリクエスト全体を拒否します。lite の場合、
+`additionalQueries`、`systemPrompt`、および `text` と `highlights` 以外のすべての
+`contents` キーは呼び出し前に破棄されます。非推奨の `subpages`、`subpageTarget`、
+`highlights.numSentences`、`highlights.highlightsPerUrl` は、以降転送されません。
+
+コスト計算は、Exa を除き、フラットなレジストリ `costPerQuery` に基づきます。Exa は
+独自の料金体系に従います：`auto`（および従来の `fast`）は呼び出し 1 回あたり $0.007、
+`lite`（および従来の `instant`）は $0.004 で、いずれも結果 10 件をカバーします。追加の
+結果には 1 件ごとに $0.001 がかかり、`contents.summary` が設定されている場合は返された
+結果 1 件ごとに $0.001 がかかります。Tavily は、`search_depth` が `basic`、`fast`、
+`ultra-fast` の場合は 1 クレジット（$0.008）、`advanced` の場合は 2 クレジット
+（$0.016）として記録されます（[Tavily API クレジット](https://docs.tavily.com/documentation/api-credits)）。
+`auto_parameters: true` を指定した呼び出しで、Tavily が `advanced` にアップグレードした
+場合でも、1 クレジットとして記録されます。
 
 ## Web Fetch API
 
 設定済みの Web Fetch プロバイダー（Firecrawl、Jina
-Reader、Tavily Extract、TinyFish Fetch、Nimble Extract、Parallel Extract）を介して、URL からコンテンツを抽出します。
+Reader、Tavily Extract、TinyFish Fetch、Nimble Extract、Parallel Extract、Keenable Fetch）を介して、URL からコンテンツを抽出します。
 
-Parallel Extract（`parallel-search`、Parallel Search と同じ API キー）は Markdown
-のみを返します — その他の `format` は `400` になります — また、コンテンツは 100,000 文字に制限されます。対象ページ自体を抽出できない場合、アップストリームはそれを HTTP 200 内で報告しますが、OmniRoute は固定メッセージとともに `422` として返します。
+Parallel Extract（Parallel Search と同じ API キーを使用する `parallel-search`）は Markdown
+のみを返します。他の `format` はすべて `400` になり、コンテンツは 100,000 文字に制限されます。対象ページ自体を抽出できない場合、上流サービスはそれを HTTP 200 内で報告し、OmniRoute は固定メッセージとともに `422` として返します。
 
-| Method | Path            | Description                                                          |
-| ------ | --------------- | -------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL を取得／スクレイピング — `v1WebFetchSchema` によってボディを検証 |
+Keenable Fetch（`keenable-search`）も Markdown のみを返します（他の `format` はすべて
+`400`）し、コンテンツは 100,000 文字に制限されます。キーなしでも動作します。明示的な
+`provider: "keenable-search"` リクエストで接続が指定されていない場合、Keenable のキーなしエンドポイントが使用されます（IP ごとのレート制限）。設定済みのキーはこれらの制限を解除するだけです。自動選択では、キーが設定されている場合にのみ Keenable が使用されます。
 
-**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。ポリシーは `enforceApiKeyPolicy` によって適用されます。
+| メソッド | パス            | 説明                                                               |
+| -------- | --------------- | ------------------------------------------------------------------ |
+| POST     | `/v1/web/fetch` | URL を取得・スクレイピング — `v1WebFetchSchema` によりボディを検証 |
 
-**クォータ対応フォールバック (#8297):** 明示的な `provider` が指定されていない場合、プール
+**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。ポリシーは
+`enforceApiKeyPolicy` により適用されます。
+
+名前付きの組み合わせでは、上記の [`model` ルーティング契約](#named-searchfetch-combinations)
+を使用し、Fetch 固有のオプションとレスポンスを維持します。
+
+**クォータ対応フォールバック（#8297）:** `provider` も `model` も指定されていない場合、プール
 （`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`）は
-固定された
-優先順位（fill-first）で走査されます — レート制限されているものの設定済みのプロバイダーは、リクエストをそこで打ち切るのではなくスキップされます。また、再試行可能な／クォータ超過のアップストリームエラー（HTTP 429 は常に、Firecrawl／Tavily／TinyFish のクォータ形式の無料ティアでは 402/403 — Jina Reader では対象外で、通常の 400 不正リクエストでは決して対象外）は、リクエスト時点でまだ試行されていない認証済みプロバイダーへフォールスルーします。プール内のすべてのプロバイダーを使い切った場合、エンドポイントは以前の汎用的な `400` の代わりに、`Retry-After` ヘッダー付きの単一の `429` を返します。明示的な `provider` が要求された場合、サイレントフォールバックは行われません — レート制限または障害が発生した明示的なプロバイダー自身のエラー（レート制限時は `429`、それ以外はアップストリームのステータス）が返されます。
+`parallel-search` → `keenable-search`）は
+固定された優先順位（fill-first）で走査されます。レート制限されているものの設定済みのプロバイダーは、リクエストをショートサーキットせずにスキップされます。また、再試行可能な上流障害／クォータ上流障害（HTTP 429 は常に対象。Firecrawl/Tavily/TinyFish のクォータ形式の無料ティアでは 402/403 も対象。ただし Jina Reader は対象外で、通常の 400 の不正なリクエストは決して対象外）は、リクエスト時に、まだ試行されていない次の認証済みプロバイダーへフォールスルーします。プール内のすべてのプロバイダーを使い果たした場合、エンドポイントは従来の汎用 `400` ではなく、`Retry-After` ヘッダー付きの単一の `429` を返します。明示的な `provider` がリクエストされた場合、サイレントフォールバックは行われません。レート制限または障害が発生した明示的なプロバイダーは、そのプロバイダー固有のエラー（レート制限時は `429`、それ以外は上流のステータス）を返します。
 
 ---
 
@@ -869,11 +982,15 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 | GET    | `/v1/quotas/check`  | 登録済みキーを発行する前に、`provider` + `accountId` のクォータを事前検証する             |
 | POST   | `/v1/issues/report` | クォータまたはキー発行の失敗を GitHub に報告する（`GITHUB_ISSUES_REPO` + トークンが必要） |
 
-**認証:** Bearer API キー（`isAuthenticated`）。
+**認証:** `/v1/quotas/check` は Bearer API キー（`isAuthenticated`）を受け付けます。`/v1/issues/report` は
+`/api/v1/registered-keys` と同様に管理専用（`requireManagementAuth`）です。ダッシュボードセッション、
+ローカル CLI トークン、または `manage`/`admin` スコープを持つ API キーを使用できます。推論専用の API キーでは `403` が返されます。
 
 ### クォータセッションの復旧（オプトイン）
 
-非ストリーミングの `POST /v1/chat/completions` または `POST /v1/responses` が、終端クォータエラー（本文がクォータまたはクレジットの枯渇を示す `402`/`429`/`503`）で失敗した場合、エラーを返す代わりに保留して後で再実行できます。呼び出し元は、以下の 3 つのヘッダーを使用してリクエストごとにオプトインします。
+非ストリーミングの `POST /v1/chat/completions` または `POST /v1/responses` が、
+クォータの最終エラー（本文にクォータまたはクレジットが使い果たされたことが記載された
+`402`/`429`/`503`）で失敗した場合、エラーを返す代わりに保留して後で再実行できます。呼び出し元は、リクエストごとに次の 3 つのヘッダーでオプトインします。
 
 | Header                       | Value                                       |
 | ---------------------------- | ------------------------------------------- |
@@ -881,9 +998,11 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 | `x-omniroute-session`        | セッション ID、`[A-Za-z0-9._:-]{1,128}`     |
 | `x-omniroute-recovery-turn`  | セッション内で一意のターン ID（同じルール） |
 
-`stream: false` で、ツール、ツール履歴、`previous_response_id` がなく、`x-omniroute-connection` による固定もないターンのみが対象となります。また、`STORAGE_ENCRYPTION_KEY` が設定されている必要があります（リクエストは最大 24 時間、暗号化して保存されます）。その後、レスポンスは `202` と `recovery.poll` になります。`GET /v1/quota-recoveries/{id}` をポーリングすると（保留中は `202`、完了時は復旧した本文とともに `200`）、または `DELETE` でキャンセルできます。チケットを参照できるのは、作成した API キーのみです。結果が不確実な再実行は、二重送信を避けるため `needs_confirmation` で終了します。ソース: `src/lib/quota/quotaSessionRecovery.ts`。
-
----
+`stream: false` のターンで、ツール、ツール履歴、`previous_response_id` がなく、
+`x-omniroute-connection` の固定もない場合のみ対象となり、`STORAGE_ENCRYPTION_KEY` も設定されている必要があります
+（リクエストは最大 24 時間、暗号化された状態で保存されます）。その後、レスポンスは
+`recovery.poll` を含む `202` になります。`GET /v1/quota-recoveries/{id}` をポーリングすると
+（保留中は `202`、完了時は復旧した本文とともに `200`）、または `DELETE` でキャンセルできます。チケットを確認できるのは、作成した API キーのみです。結果が不確かな再実行は、2 回送信されるのを防ぐため、送信される代わりに `needs_confirmation` で終了します。ソース: `src/lib/quota/quotaSessionRecovery.ts`。
 
 ## セルフサービスの使用 (`/api/usage/om-usage`)
 
@@ -1517,10 +1636,10 @@ GET /api/telemetry/summary
 ## 予算
 
 ```bash
-# Get budget status for all API keys
+# すべての API キーの予算ステータスを取得
 GET /api/usage/budget
 
-# Set or update a budget
+# 予算を設定または更新
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1534,7 +1653,7 @@ Content-Type: application/json
 }
 ```
 
-> **スキーマノート**(`setBudgetSchema`): `apiKeyId`は必須です。 `dailyLimitUsd`、 `weeklyLimitUsd`、または`monthlyLimitUsd`の少なくとも 1 つはゼロより大きくなければなりません。オプションのフィールド: `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。従来の`{keyId, limit, period}`シェイプは`400 Bad Request`を返します。
+> **スキーマに関する注意** (`setBudgetSchema`): `apiKeyId` は必須です。`dailyLimitUsd`、`weeklyLimitUsd`、または `monthlyLimitUsd` の少なくとも1つは0より大きい値である必要があります。オプションフィールド: `warningThreshold` (0–1)、`resetInterval` (`daily` | `weekly` | `monthly`)、`resetTime` (`HH:MM`)。従来の `{keyId, limit, period}` 形式では `400 Bad Request` が返されます。
 
 ## トークン制限
 
@@ -1615,17 +1734,21 @@ OmniRoute のイベント（リクエスト完了、クォータ超過、キー�
 
 ## 登録済みキー（自動管理）
 
-自動キー管理サブシステムが、バックエンドのプロバイダー/アカウントに対して API キーを発行・ローテーションするために使用します。日次/時間単位のクォータに対応しています。
+自動キー管理サブシステムが、バックエンドのプロバイダー／アカウントに対して API キーを発行・ローテーションし、日次／時間単位のクォータを適用するために使用します。
 
-| メソッド | パス                                  | 説明                                                                                                                                                                                                          |
-| -------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET      | `/api/v1/registered-keys`             | 登録済みキーを一覧表示（マスクされたプレフィックスのみ）                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys`             | 新しい登録済みキーを発行 — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。生のキーを**一度だけ**返します。クォータにより拒否された場合は `429` を返します。 |
-| GET      | `/api/v1/registered-keys/[id]`        | 登録済みキーのメタデータを取得（生のキー情報は含まれません）                                                                                                                                                  |
-| DELETE   | `/api/v1/registered-keys/[id]`        | 登録済みキーを失効させる                                                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys/[id]/revoke` | 明示的な失効エンドポイント（DELETE と同じ効果）                                                                                                                                                               |
+| Method | Path                                  | Description                                                                                                                                                                                           |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 登録済みキーを一覧表示（マスクされたプレフィックスのみ）                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | 新しい登録済みキーを発行 — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。未加工のキーは**一度だけ**返されます。クォータ拒否時は `429` を返します。 |
+| GET    | `/api/v1/registered-keys/[id]`        | 登録済みキーのメタデータを取得（未加工のキー情報は含まれません）                                                                                                                                      |
+| DELETE | `/api/v1/registered-keys/[id]`        | 登録済みキーを失効させる                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 明示的な失効エンドポイント（DELETE と同じ効果）                                                                                                                                                       |
+| GET    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を読み取る                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を設定 — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                          |
+| GET    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限を読み取る                                                                                                                                                                        |
+| PUT    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限を設定 — プロバイダールートと同じ body                                                                                                                                            |
 
-**認証:** 管理セッション/API キー（`requireManagementAuth`） — `/api/keys` と同じガードです。ダッシュボードセッション、ローカル CLI トークン、または `manage`/`admin` スコープを持つ API キーを使用できます。推論専用 API キーでは `403` が返されます。`/v1/quotas/check` および `/v1/issues/report` も参照してください。
+**認証:** 管理セッション／API キー（`requireManagementAuth`）— `/api/keys` と同じガードで、ダッシュボードセッション、ローカル CLI トークン、または `manage`／`admin` スコープを持つ API キーが使用できます。推論専用の API キーには `403` が返されます。`/v1/quotas/check` および `/v1/issues/report` も参照してください。
 
 ---
 
