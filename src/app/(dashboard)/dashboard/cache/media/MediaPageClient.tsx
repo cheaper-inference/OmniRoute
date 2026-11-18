@@ -971,7 +971,7 @@ export default function MediaPageClient() {
                       {t("wordTimestamps", { count: result.data.words.length })}
                     </DisclosureTrigger>
                     <DisclosureContent keepMounted>
-                      <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
+                      <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48">
                         {JSON.stringify(result.data.words, null, 2)}
                       </pre>
                     </DisclosureContent>
@@ -979,7 +979,7 @@ export default function MediaPageClient() {
                 )}
               </div>
             ) : (
-              <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96 custom-scrollbar">
+              <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96">
                 {JSON.stringify(result.data, null, 2)}
               </pre>
             )}

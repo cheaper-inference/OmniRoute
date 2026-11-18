@@ -655,7 +655,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="custom-scrollbar">
+      <SidebarContent>
         {/* Search at the top of the content (spec §3.7), sticky: SidebarContent is the scroll
             container, so the box stays in view while the 100+ items scroll under it. */}
         {!collapsed && (

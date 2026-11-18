@@ -40,7 +40,10 @@ lastUpdated: 2026-11-03
   lime-800 in light and the lime accent in dark. Chart series use
   `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
   `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
-- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
+- **Themes.** `<html className="ci-theme ci-scrollbars">` (`src/app/layout.tsx`) opts the document into
+  the kit theme and into the kit scrollbars (`--ci-scrollbar-*` tokens; `globals.css` has no scrollbar
+  rule of its own, and an element must not set `scrollbar-width` or `scrollbar-color`, which would drop
+  the kit styling in Chromium and Safari; `tests/unit/design-kit-bridge.test.ts` guards both).
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
   `src/store/themeStore.ts` (mirrored by `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, which runs

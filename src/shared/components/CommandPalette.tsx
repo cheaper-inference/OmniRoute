@@ -333,7 +333,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
               </>
             }
           />
-          <CommandList aria-label={t("commandPalette.title")} className="custom-scrollbar">
+          <CommandList aria-label={t("commandPalette.title")}>
             {grouped.map((group) => (
               <CommandGroup key={group.sectionId} heading={group.sectionLabel}>
                 {group.subgroups.map((subgroup) => {

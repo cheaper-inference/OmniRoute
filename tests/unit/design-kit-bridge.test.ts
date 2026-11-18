@@ -295,7 +295,45 @@ test("STATUS_HEX mirrors the kit status palette (ReactFlow/SVG need hex)", async
 });
 
 test("<html> opts into the kit theme surface", () => {
-  assert.match(read("src/app/layout.tsx"), /<html[^>]*className="ci-theme"/);
+  assert.match(read("src/app/layout.tsx"), /<html[^>]*className="ci-theme ci-scrollbars"/);
+});
+
+// Scrollbars are the kit's opt-in `ci-scrollbars` (tokens `--ci-scrollbar-*`, 8px, forced-colours
+// aware). The kit rule sits in `@layer base`: a host rule outside any layer would beat it, and in
+// Chromium and Safari an element that sets `scrollbar-width` or `scrollbar-color` itself drops the
+// kit's `::-webkit-scrollbar` styling and shows the browser's colours.
+test("scrollbars come from the kit's ci-scrollbars class, with no host rule on top", () => {
+  const kit = read("packages/ui-kit/src/ci-ui.css");
+  assert.match(kit, /\.ci-scrollbars \*::-webkit-scrollbar-thumb \{/, "the kit ships the class");
+
+  for (const root of ["src/app/layout.tsx", "src/app/global-error.tsx"]) {
+    const html = read(root).match(/<html[\s\S]*?>/)?.[0] ?? "";
+    assert.match(html, /\bci-theme\b/, `${root}: <html> keeps ci-theme`);
+    assert.match(html, /\bci-scrollbars\b/, `${root}: <html> opts into the kit scrollbars`);
+  }
+
+  assert.doesNotMatch(css, /::-webkit-scrollbar/, "globals.css restyles the scrollbar parts");
+  assert.doesNotMatch(css, /scrollbar-(width|color)\s*:/, "globals.css sets scrollbar-width/color");
+
+  const offenders: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walk(rel);
+      else if (/\.(tsx?|css)$/.test(entry.name) && rel !== "src/app/globals.css") {
+        const text = read(rel);
+        // `custom-scrollbar` was the host alias for the removed rules: it styles nothing now.
+        for (const m of text.matchAll(
+          /custom-scrollbar|scrollbar-(?:width|color)\s*:|scrollbar(?:Width|Color)\s*:|::-webkit-scrollbar/g
+        )) {
+          offenders.push(`${rel}:${text.slice(0, m.index).split("\n").length} ${m[0]}`);
+        }
+      }
+    }
+  };
+  walk("src/app");
+  walk("src/shared");
+  assert.deepEqual(offenders, []);
 });
 
 // Guards kept from design-grid-background.test.ts that are still true after the bridge

@@ -500,7 +500,7 @@ export default function ModelCompatPopover({
               {t("compatProtocolHint")}
             </p>
           </div>
-          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-surface p-3 [scrollbar-gutter:stable] [scrollbar-width:thin]">
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-surface p-3 [scrollbar-gutter:stable]">
             <Select
               label={t("compatProtocolLabel")}
               value={protocol}
