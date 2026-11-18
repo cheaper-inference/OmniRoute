@@ -73,3 +73,28 @@ export async function resolvePoolCosts(
   const neutral = priced.length > 0 ? median(priced.map((e) => e[1])) : NO_PRICING_FALLBACK;
   return new Map(entries.map(([key, cost]) => [key, cost ?? neutral]));
 }
+
+/**
+ * RAW blended $/1M per `provider/model`, with `null` for a model that has no
+ * pricing row.
+ *
+ * `resolvePoolCosts` deliberately replaces an unpriced model with the pool median
+ * so it neither wins nor loses on cost — which is right for SCORING and wrong for
+ * a price-jump guard, where "unpriced" must fail closed rather than read as
+ * "about average". This variant keeps the `null` so the guard can refuse to
+ * promote a model whose cost it cannot verify.
+ */
+export async function resolveRawPoolCosts(
+  items: CostKey[],
+  getPricing: PricingLookup
+): Promise<Map<string, number | null>> {
+  const unique = new Map<string, CostKey>();
+  for (const item of items) unique.set(costKey(item.provider, item.model), item);
+  const entries = await Promise.all(
+    [...unique.entries()].map(
+      async ([key, item]) =>
+        [key, await lookupBlended(item.provider, item.model, getPricing)] as const
+    )
+  );
+  return new Map(entries);
+}

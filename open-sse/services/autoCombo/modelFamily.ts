@@ -11,7 +11,12 @@
  *
  * Kept as a pure, dependency-free module so `detectModelFamily` is unit-testable
  * in isolation without touching the DB/registry-backed virtual factory.
+ *
+ * The model-id prefix table itself lives in `modelGeneration.ts` and is imported
+ * here, so `auto/<family>` detection and newest-generation parsing share ONE
+ * canonical table instead of two that can drift.
  */
+import { MODEL_FAMILY_PREFIXES, parseModelGeneration } from "./modelGeneration";
 
 export type ModelFamily =
   | "glm"
@@ -25,9 +30,14 @@ export type ModelFamily =
   | "qwen"
   | "deepseek"
   | "gpt"
+  // GPT capability tiers. `auto/gpt` still matches every `gpt-*` model; these two
+  // ids narrow to one tier so `auto/gpt-sol` never routes an Astra/Terra model.
+  | "gpt-astra"
+  | "gpt-sol"
   | "claude-opus"
   | "claude-sonnet"
-  | "claude-haiku";
+  | "claude-haiku"
+  | "claude-fable";
 
 export const MODEL_FAMILIES: readonly ModelFamily[] = [
   "glm",
@@ -41,32 +51,33 @@ export const MODEL_FAMILIES: readonly ModelFamily[] = [
   "qwen",
   "deepseek",
   "gpt",
+  "gpt-astra",
+  "gpt-sol",
   "claude-opus",
   "claude-sonnet",
   "claude-haiku",
+  "claude-fable",
 ];
 
 const MODEL_FAMILY_SET: ReadonlySet<string> = new Set(MODEL_FAMILIES);
 
 /** Model-id prefix → family. Matched against the bare model id (provider prefix, if
  * any, stripped) so both `glm-5.2` and `zai/glm-5.2` resolve the same way. */
-const FAMILY_ID_PATTERNS: ReadonlyArray<{ family: ModelFamily; pattern: RegExp }> = [
-  { family: "glm", pattern: /^glm-/i },
-  { family: "minimax", pattern: /^minimax-/i },
-  { family: "mimo", pattern: /^mimo-/i },
-  { family: "gemma", pattern: /^gemma-/i },
-  { family: "llama", pattern: /^llama-/i },
-  { family: "gemini", pattern: /^gemini-/i },
-  { family: "kimi", pattern: /^kimi-/i },
-  { family: "qwen", pattern: /^qwen/i },
-  { family: "deepseek", pattern: /^deepseek-/i },
-  { family: "gpt", pattern: /^gpt-/i },
-  // #15675: Claude tiers. Matches `claude-opus-4-8`, `claude-4.6-opus-high` and
-  // Bedrock-style `us.anthropic.claude-opus-4-v1:0` (the `.`-separated prefix).
-  { family: "claude-opus", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?opus/i },
-  { family: "claude-sonnet", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?sonnet/i },
-  { family: "claude-haiku", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?haiku/i },
-];
+const FAMILY_ID_PATTERNS = MODEL_FAMILY_PREFIXES as ReadonlyArray<{
+  family: ModelFamily;
+  pattern: RegExp;
+}>;
+
+/**
+ * Families that are a TIER of a broader prefix family rather than a prefix of
+ * their own: `gpt-6.2-sol` still detects as base family `gpt` (so `auto/gpt`
+ * keeps matching every GPT model), while `auto/gpt-sol` narrows by the parsed
+ * tier key. Claude tiers need no entry — their base family IS the tier.
+ */
+const TIER_SCOPED_FAMILIES: ReadonlySet<ModelFamily> = new Set<ModelFamily>([
+  "gpt-astra",
+  "gpt-sol",
+]);
 
 /**
  * `zai` is deliberately NOT a model-id prefix rule: Zhipu's z.ai hosted API serves
@@ -101,6 +112,15 @@ export function detectModelFamily(modelId: string | null | undefined): ModelFami
   return null;
 }
 
+/**
+ * Tier-scoped family key for a model id (`gpt-6.2-sol` → `gpt-sol`), or `null`
+ * when the id is unrecognized. Used by the tier-scoped `auto/<family>` filters
+ * and by newest-generation promotion.
+ */
+export function detectTierFamilyKey(modelId: string | null | undefined): string | null {
+  return parseModelGeneration(modelId)?.tierFamilyKey ?? null;
+}
+
 interface FamilyPoolCandidate {
   provider: string;
   model: string;
@@ -118,6 +138,9 @@ export function buildFamilyCandidateFilter(
   const providerOverride = FAMILY_PROVIDER_OVERRIDE[family];
   if (providerOverride) {
     return (candidate) => candidate.provider === providerOverride;
+  }
+  if (TIER_SCOPED_FAMILIES.has(family)) {
+    return (candidate) => detectTierFamilyKey(candidate.model) === family;
   }
   return (candidate) => {
     if (detectModelFamily(candidate.model) === family) return true;

@@ -3,7 +3,7 @@ import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilities"
 import type { AutoVariant } from "./autoPrefix";
 import { VALID_VARIANTS } from "./autoPrefix";
 import type { AutoComboSpec, PreparedVirtualAutoComboInputs } from "./virtualFactory";
-import { parseAutoSuffix, type AutoCategory, type AutoTier } from "./suffixComposition";
+import { parseAutoSuffix, AUTO_TIERS, type AutoCategory, type AutoTier } from "./suffixComposition";
 import { isValidModelFamily, AUTO_FAMILY_IDS, type ModelFamily } from "./modelFamily";
 
 export { AUTO_FAMILY_IDS };
@@ -107,8 +107,31 @@ export function isRecognizedBuiltinAuto(modelStr: string, suffix: string): boole
   return (
     resolveAutoVariant(modelStr, suffix).recognized ||
     parseAutoSuffix(suffix).valid ||
-    isValidModelFamily(suffix)
+    isValidModelFamily(suffix) ||
+    parseFamilyTierSuffix(suffix) !== null
   );
+}
+
+/**
+ * Parse `auto/<family>:<tier>` (e.g. `auto/gpt-sol:subscription`,
+ * `auto/claude-opus:thrifty`).
+ *
+ * Category-before-family precedence is preserved by the caller: `parseAutoSuffix`
+ * is consulted first, and the two head sets are disjoint (no category is also a
+ * model family), so a suffix can never resolve both ways. An unknown family or an
+ * unknown tier returns `null` — the id is then rejected as unrecognized instead of
+ * materializing an unfiltered pool.
+ */
+export function parseFamilyTierSuffix(
+  suffix: string | null | undefined
+): { family: ModelFamily; tier: AutoTier } | null {
+  if (typeof suffix !== "string" || suffix.length === 0) return null;
+  const parts = suffix.split(":");
+  if (parts.length !== 2) return null;
+  const [family, tier] = parts;
+  if (!isValidModelFamily(family)) return null;
+  if (!(AUTO_TIERS as readonly string[]).includes(tier)) return null;
+  return { family, tier: tier as AutoTier };
 }
 
 /**
@@ -141,7 +164,7 @@ export function isPaidTierAutoId(autoId: string): boolean {
 export type BuiltinAutoSpec =
   | { variant: AutoVariant | undefined }
   | { category: AutoCategory; tier?: AutoTier }
-  | { family: ModelFamily };
+  | { family: ModelFamily; tier?: AutoTier };
 
 /**
  * Vision-flavored flat ids that MUST resolve to the `vision` category (candidate
@@ -178,6 +201,11 @@ export function resolveBuiltinAutoSpec(modelStr: string, suffix: string): Builti
       ...(parsed.tier ? { tier: parsed.tier } : {}),
     };
   }
+
+  // `auto/<family>:<tier>` — family + ladder-tier composition. Checked AFTER the
+  // category parse so category-before-family precedence is unchanged.
+  const familyTier = parseFamilyTierSuffix(suffix);
+  if (familyTier) return { family: familyTier.family, tier: familyTier.tier };
 
   return { variant: undefined };
 }
@@ -239,7 +267,10 @@ export function resolveBuiltinAutoMaterialization(
   if (parsed.valid) {
     return { variant: undefined, spec: { category: parsed.category, tier: parsed.tier } };
   }
-  return { variant: undefined, spec: { family: spec.family } };
+  return {
+    variant: undefined,
+    spec: { family: spec.family, ...(spec.tier ? { tier: spec.tier } : {}) },
+  };
 }
 
 /**

@@ -96,9 +96,12 @@ describe("detectModelFamily (pure)", () => {
       "qwen",
       "deepseek",
       "gpt",
+      "gpt-astra",
+      "gpt-sol",
       "claude-opus",
       "claude-sonnet",
       "claude-haiku",
+      "claude-fable",
     ]) {
       assert.equal(isValidModelFamily(family), true);
     }
@@ -108,6 +111,7 @@ describe("detectModelFamily (pure)", () => {
 
   it("advertises exactly one auto/<family> catalog id per family", () => {
     assert.deepEqual([...AUTO_FAMILY_IDS].sort(), [
+      "auto/claude-fable",
       "auto/claude-haiku",
       "auto/claude-opus",
       "auto/claude-sonnet",
@@ -116,6 +120,8 @@ describe("detectModelFamily (pure)", () => {
       "auto/gemma",
       "auto/glm",
       "auto/gpt",
+      "auto/gpt-astra",
+      "auto/gpt-sol",
       "auto/kimi",
       "auto/llama",
       "auto/mimo",
@@ -391,7 +397,7 @@ describe("additional auto-routing families (#13214)", () => {
       assert.equal(detectModelFamily(model), family, model);
     }
     // Non-tier Claude ids and unrelated models must not match any Claude family.
-    assert.equal(detectModelFamily("claude-fable-5"), null);
+    assert.equal(detectModelFamily("claude-fable-5"), "claude-fable");
     assert.equal(detectModelFamily("aion-3.0"), null);
     // The \b boundary keeps substring lookalikes out.
     assert.equal(detectModelFamily("octopus-v2"), null);
@@ -433,5 +439,69 @@ describe("additional auto-routing families (#13214)", () => {
       combo.models.some((m) => m.providerId === "claude"),
       "the connected Claude provider must contribute opus candidates"
     );
+  });
+});
+
+describe("tier-scoped families and family:tier composition", () => {
+  it("auto/gpt still matches every GPT model while auto/gpt-sol narrows to Sol", () => {
+    const allGpt = buildFamilyCandidateFilter("gpt");
+    const sol = buildFamilyCandidateFilter("gpt-sol");
+    const astra = buildFamilyCandidateFilter("gpt-astra");
+
+    for (const model of ["gpt-6.2-sol", "gpt-6-astra", "gpt-6-terra", "gpt-4o"]) {
+      assert.equal(allGpt({ provider: "openai", model }), true, model);
+    }
+    assert.equal(sol({ provider: "openai", model: "gpt-6.2-sol" }), true);
+    assert.equal(sol({ provider: "openai", model: "gpt-6-sol" }), true);
+    assert.equal(sol({ provider: "openai", model: "gpt-6-astra" }), false);
+    assert.equal(sol({ provider: "openai", model: "gpt-6-terra" }), false);
+    assert.equal(astra({ provider: "openai", model: "gpt-6.2-astra" }), true);
+    assert.equal(astra({ provider: "openai", model: "gpt-6.2-sol" }), false);
+  });
+
+  it("auto/claude-fable selects only Fable models and is excluded from the other Claude tiers", () => {
+    const fable = buildFamilyCandidateFilter("claude-fable");
+    assert.equal(fable({ provider: "claude", model: "claude-fable-5-2" }), true);
+    assert.equal(fable({ provider: "claude", model: "claude-opus-5-5" }), false);
+    for (const family of ["claude-opus", "claude-sonnet", "claude-haiku"] as const) {
+      assert.equal(
+        buildFamilyCandidateFilter(family)({ provider: "claude", model: "claude-fable-5-2" }),
+        false,
+        family
+      );
+    }
+  });
+
+  it("recognizes auto/<family>:<tier> and rejects unknown families or tiers", () => {
+    for (const id of [
+      "auto/gpt-sol:subscription",
+      "auto/gpt-sol:thrifty",
+      "auto/claude-opus:subscription",
+      "auto/glm:thrifty",
+    ]) {
+      const suffix = id.slice("auto/".length);
+      assert.equal(builtinCatalog.isRecognizedBuiltinAuto(id, suffix), true, id);
+    }
+    for (const id of ["auto/unknownfam:subscription", "auto/gpt-sol:badtier"]) {
+      const suffix = id.slice("auto/".length);
+      assert.equal(builtinCatalog.isRecognizedBuiltinAuto(id, suffix), false, id);
+      assert.equal(builtinCatalog.resolveBuiltinAutoMaterialization(id, suffix), null, id);
+    }
+  });
+
+  it("resolves auto/<family>:<tier> to a family spec carrying the tier", () => {
+    assert.deepEqual(
+      builtinCatalog.resolveBuiltinAutoSpec("auto/gpt-sol:subscription", "gpt-sol:subscription"),
+      { family: "gpt-sol", tier: "subscription" }
+    );
+    assert.deepEqual(
+      builtinCatalog.resolveBuiltinAutoMaterialization("auto/gpt-sol:thrifty", "gpt-sol:thrifty"),
+      { variant: undefined, spec: { family: "gpt-sol", tier: "thrifty" } }
+    );
+    // Category-before-family precedence is unchanged: a category suffix still wins.
+    assert.deepEqual(builtinCatalog.resolveBuiltinAutoSpec("auto/coding:fast", "coding:fast"), {
+      category: "coding",
+      tier: "fast",
+    });
   });
 });

@@ -307,17 +307,32 @@ function evaluateConnections(
 }
 
 /** Rewrite a candidate's connection allowlist to the verified subset, keeping
- * the identity-when-nothing-changed contract the sibling filters hold. */
-function withVerifiedConnections<T extends LadderCandidate>(
-  candidate: T,
-  connectionIds: string[]
-): { candidate: T; changed: boolean } {
+ * the identity-when-nothing-changed contract the sibling filters hold. */ function withVerifiedConnections<
+  T extends LadderCandidate,
+>(candidate: T, connectionIds: string[]): { candidate: T; changed: boolean } {
   if (candidate.connectionId !== null) return { candidate, changed: false };
   const original = candidate.allowedConnectionIds ?? [];
   const isSameSet =
     original.length === connectionIds.length && connectionIds.every((id) => original.includes(id));
   if (isSameSet) return { candidate, changed: false };
   return { candidate: { ...candidate, allowedConnectionIds: connectionIds }, changed: true };
+}
+
+/**
+ * The rung a candidate would actually be served from right now, or `null` when
+ * none of its connections is usable.
+ *
+ * `orderPoolByRung` sorts by this internally but only returns the pool; callers
+ * that need the rung itself (newest-generation promotion buckets by it, so a
+ * newer generation can never cross a rung boundary) read it here instead of
+ * re-deriving the billing classification.
+ */
+export function resolveCandidateRung(
+  candidate: LadderCandidate,
+  options: LadderOptions
+): LadderRung | null {
+  if (!options.enabled) return null;
+  return evaluateConnections(candidate, options, () => true)?.rung ?? null;
 }
 
 /**

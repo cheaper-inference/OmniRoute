@@ -251,6 +251,13 @@ export type ResolvedComboTarget = {
    * were pinned to one specific account.
    */
   pinnedFingerprint?: string;
+  /**
+   * Subscription-ladder rung carried from a built-in auto materialization
+   * (`auto/subscription`, `auto/thrifty`, `auto/<family>:thrifty`). Newest-generation
+   * promotion buckets by it so a newer generation never crosses a rung boundary.
+   * Transient: never persisted.
+   */
+  ladderRung?: string;
 };
 
 export type ShadowRoutingConfig = {

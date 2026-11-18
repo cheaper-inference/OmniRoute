@@ -166,6 +166,9 @@ function normalizeRuntimeStep(
     ...(step.kind === "model" && step.fallbackOnlyOnQuotaExhaustion
       ? { fallbackOnlyOnQuotaExhaustion: true }
       : {}),
+    // Transient built-in-auto routing metadata: preserved so newest-generation
+    // promotion can bucket by ladder rung, never persisted.
+    ...(step.kind === "model" && step.ladderRung ? { ladderRung: step.ladderRung } : {}),
   } satisfies ResolvedComboTarget;
 }
 

@@ -26,6 +26,14 @@ export interface ComboModelStep {
   prompt?: string | null;
   tags?: string[];
   fallbackOnlyOnQuotaExhaustion?: boolean;
+  /**
+   * Subscription-ladder rung this step was placed on by the built-in auto
+   * materializer (`auto/subscription`, `auto/thrifty`, `auto/<family>:thrifty`).
+   * Transient routing metadata: it is preserved through normalization so
+   * newest-generation promotion can bucket by rung, and stripped before a combo
+   * is persisted or duplicated.
+   */
+  ladderRung?: string;
 }
 
 export interface ComboRefStep {
@@ -432,6 +440,7 @@ export function normalizeComboStep(
         .map((connId) => toTrimmedString(connId))
         .filter((connId): connId is string => !!connId)
     : undefined;
+  const ladderRung = toTrimmedString(value.ladderRung);
 
   return {
     id:
@@ -447,6 +456,7 @@ export function normalizeComboStep(
     ...(tags && tags.length > 0 ? { tags } : {}),
     ...(allowedConnectionIds && allowedConnectionIds.length > 0 ? { allowedConnectionIds } : {}),
     ...(fallbackOnlyOnQuotaExhaustion ? { fallbackOnlyOnQuotaExhaustion: true } : {}),
+    ...(ladderRung ? { ladderRung } : {}),
   };
 }
 

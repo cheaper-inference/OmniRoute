@@ -24,6 +24,7 @@ import { parseAutoConfig } from "./autoConfig.ts";
 import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
 import { restoreIncomingOrder } from "./rungOrder.ts";
+import { promoteNewestGenerationTargets } from "./newestGenerationPromotion.ts";
 import {
   getModelContextLimitForModelString,
   providerSupportsEmulatedToolCalling,
@@ -52,6 +53,18 @@ import type {
 } from "./types.ts";
 import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
 import { firstAccountPreferenceTier, orderAccountPreferences } from "./accountPreferences.ts";
+
+const NEWEST_SKIP_LOG_TTL_MS = 5 * 60_000;
+const NEWEST_SKIP_LOG_CACHE = new Map<string, number>();
+
+function shouldLogNewestSkip(comboKey: string, skip: string, now = Date.now()): boolean {
+  const key = `${comboKey}\u0000${skip}`;
+  const prev = NEWEST_SKIP_LOG_CACHE.get(key);
+  if (prev !== undefined && now - prev < NEWEST_SKIP_LOG_TTL_MS) return false;
+  if (NEWEST_SKIP_LOG_CACHE.size > 500) NEWEST_SKIP_LOG_CACHE.clear();
+  NEWEST_SKIP_LOG_CACHE.set(key, now);
+  return true;
+}
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -582,7 +595,7 @@ export async function resolveAutoStrategyOrder(
         .map((entry) => entry.target),
       accountPreferences
     );
-    const selectedTarget =
+    let selectedTarget =
       rankedTargets.find((target) => {
         const parsed = parseModel(target.modelStr);
         const modelId = parsed.model || target.modelStr;
@@ -630,6 +643,56 @@ export async function resolveAutoStrategyOrder(
         "COMBO",
         `Account preferences: ${orderedTargets.length} concrete targets ordered preferred → normal → reserve; excluded accounts removed`
       );
+    }
+
+    // Opt-in newest-generation preference: built-in `auto` / `auto/*` routes only.
+    // Explicit model ids never reach this function, and a user-created combo that
+    // merely uses the `auto` strategy is not marked `isBuiltinAuto`, so neither is
+    // rewritten. Default OFF — legacy score order is untouched unless the operator
+    // enables `autoPreferNewestInFamily`.
+    const autoSettings = settings as
+      | { autoPreferNewestInFamily?: unknown; autoNewestMaxPriceMultiplier?: unknown }
+      | null
+      | undefined;
+    const isBuiltinAuto =
+      (combo as { autoConfig?: { isBuiltinAuto?: unknown } })?.autoConfig?.isBuiltinAuto === true;
+    if (autoSettings?.autoPreferNewestInFamily === true && isBuiltinAuto) {
+      try {
+        const { getPricingForModel } = await import("@/lib/db/settings");
+        const promotion = await promoteNewestGenerationTargets({
+          orderedTargets,
+          // Full candidate list, not `routableCandidates`: a quota-cutoff-blocked
+          // target must keep its own bucket so it can never be promoted into the head.
+          candidates,
+          maxPriceMultiplier: autoSettings.autoNewestMaxPriceMultiplier,
+          clampPriceMultiplierToOne: preserveRungOrder,
+          accountPreferences,
+          getPricing: getPricingForModel,
+        });
+        if (promotion.promoted) {
+          orderedTargets = promotion.orderedTargets;
+          selectedTarget = orderedTargets[0];
+          const parsedPrimary = parseModel(selectedTarget.modelStr);
+          selectedProvider =
+            selectedTarget.provider ||
+            parsedPrimary.provider ||
+            parsedPrimary.providerAlias ||
+            "unknown";
+          selectedModel = parsedPrimary.model || selectedTarget.modelStr;
+          selectedConnectionId = selectedTarget.connectionId ?? null;
+          selectionReason = `${selectionReason} | ${promotion.reason}`;
+          log.info("COMBO", `Auto newest-generation promotion: ${promotion.reason}`);
+        }
+        const comboLogKey = String(combo.id || combo.name || "auto");
+        for (const skip of promotion.skippedReasons) {
+          if (shouldLogNewestSkip(comboLogKey, skip)) {
+            log.info("COMBO", skip);
+          }
+        }
+      } catch (err) {
+        // Never fail the request over a ranking preference: keep score order.
+        log.warn("COMBO", "Auto newest-generation promotion failed; keeping score order", { err });
+      }
     }
 
     log.info(
