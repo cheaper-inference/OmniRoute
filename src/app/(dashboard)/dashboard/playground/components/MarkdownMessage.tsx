@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import { useTranslations } from "next-intl";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -17,6 +18,22 @@ import type { Components } from "react-markdown";
 interface MarkdownMessageProps {
   content: string;
   className?: string;
+}
+
+/** A GFM table: kit Table primitives, named for its scroll region (the markdown gives no title). */
+function MarkdownTable({ children }: { children?: React.ReactNode }) {
+  const t = useTranslations("common");
+  return (
+    // Native scrollbar only: chat bubbles stay light (no persistent-scrollbar observer).
+    <Table
+      containerClassName="my-2"
+      className="text-sm"
+      persistentScrollbars={false}
+      scrollLabel={t("table")}
+    >
+      {children}
+    </Table>
+  );
 }
 
 /**
@@ -62,14 +79,9 @@ export default function MarkdownMessage({ content, className }: MarkdownMessageP
       );
     },
 
-    // Tables (GFM) — kit Table primitives (persistent horizontal scrollbar from the kit)
+    // Tables (GFM) — kit Table primitives
     table({ children }) {
-      return (
-        // Native scrollbar only: chat bubbles stay light (no persistent-scrollbar observer).
-        <Table containerClassName="my-2" className="text-sm" persistentScrollbars={false}>
-          {children}
-        </Table>
-      );
+      return <MarkdownTable>{children}</MarkdownTable>;
     },
     thead({ children }) {
       return <TableHeader>{children}</TableHeader>;
@@ -119,16 +131,16 @@ export default function MarkdownMessage({ content, className }: MarkdownMessageP
 
     // Headings
     h1({ children }) {
-      return <h1 className="text-2xl font-semibold my-2">{children}</h1>;
+      return <h1 className="text-2xl my-2">{children}</h1>;
     },
     h2({ children }) {
-      return <h2 className="text-xl font-semibold my-2">{children}</h2>;
+      return <h2 className="text-xl my-2">{children}</h2>;
     },
     h3({ children }) {
-      return <h3 className="text-lg font-semibold my-1.5">{children}</h3>;
+      return <h3 className="text-lg my-1.5">{children}</h3>;
     },
     h4({ children }) {
-      return <h4 className="text-base font-semibold my-1">{children}</h4>;
+      return <h4 className="text-base my-1">{children}</h4>;
     },
 
     // Blockquotes

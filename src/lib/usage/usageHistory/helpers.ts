@@ -1,3 +1,4 @@
+import { storedUsageEvidence } from "../storedUsageEvidence";
 /**
  * Pure, stateless helpers extracted from usageHistory.ts.
  * No DB access, no module-level state — safe to import anywhere.
@@ -31,6 +32,7 @@ export function normalizeServiceTier(value: unknown): string {
 export function mapUsageHistoryRow(row: unknown) {
   const r = asRecord(row);
   return {
+    ...storedUsageEvidence(r),
     provider: toStringOrNull(r.provider),
     model: toStringOrNull(r.model),
     connectionId: toStringOrNull(r.connection_id),
@@ -47,8 +49,9 @@ export function mapUsageHistoryRow(row: unknown) {
     tokens: {
       input: toNumberValue(r.tokens_input),
       output: toNumberValue(r.tokens_output),
-      cacheRead: toNumberValue(r.tokens_cache_read),
-      cacheCreation: toNumberValue(r.tokens_cache_creation),
+      cacheRead: r.tokens_cache_read == null ? null : toNumberValue(r.tokens_cache_read),
+      cacheCreation:
+        r.tokens_cache_creation == null ? null : toNumberValue(r.tokens_cache_creation),
       reasoning: toNumberValue(r.tokens_reasoning),
     },
     status: toStringOrNull(r.status),
