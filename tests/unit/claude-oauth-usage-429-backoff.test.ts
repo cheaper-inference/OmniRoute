@@ -72,7 +72,7 @@ describe("claude OAuth usage 429 backoff", () => {
 describe("claude OAuth usage 429 backoff — Retry-After aware cooldown", () => {
   const now = 1_800_000_000_000;
 
-  it("honors a numeric Retry-After inside the [3 min, 30 min] window", () => {
+  it("honors a numeric Retry-After inside the [3 min, 6 h] window", () => {
     const headers = new Headers({ "retry-after": "600" });
     assert.equal(computeClaudeUsageRetryMs(headers, now), 600_000);
   });
@@ -82,10 +82,17 @@ describe("claude OAuth usage 429 backoff — Retry-After aware cooldown", () => 
     assert.equal(computeClaudeUsageRetryMs(headers, now), OAUTH_USAGE_429_COOLDOWN_MS);
   });
 
-  it("clamps a huge Retry-After down to the 30-minute ceiling", () => {
+  it("honors Anthropic's hour-long Retry-After instead of polling again inside the window", () => {
+    // Observed on /api/oauth/usage: `retry-after: 3529`. A 30-minute ceiling polled again
+    // halfway through, which was refused and restarted the window, for days.
+    const headers = new Headers({ "retry-after": "3529" });
+    assert.equal(computeClaudeUsageRetryMs(headers, now), 3_529_000);
+  });
+
+  it("clamps a huge Retry-After down to the 6-hour ceiling", () => {
     const headers = new Headers({ "retry-after": "86400" });
     assert.equal(computeClaudeUsageRetryMs(headers, now), OAUTH_USAGE_429_MAX_COOLDOWN_MS);
-    assert.equal(OAUTH_USAGE_429_MAX_COOLDOWN_MS, 30 * 60_000);
+    assert.equal(OAUTH_USAGE_429_MAX_COOLDOWN_MS, 6 * 60 * 60_000);
   });
 
   it("accepts an HTTP-date Retry-After", () => {

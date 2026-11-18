@@ -118,10 +118,9 @@ export function WebhookCard({
             aria-label={t("edit")}
           />
           <Button
-            variant="ghost"
+            variant="destructive-ghost"
             size="icon"
             icon="delete"
-            className="text-error"
             onClick={() => onDelete(webhook)}
             title={t("delete")}
             aria-label={t("delete")}

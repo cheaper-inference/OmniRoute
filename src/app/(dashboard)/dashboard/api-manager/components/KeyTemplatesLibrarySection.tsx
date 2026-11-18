@@ -424,7 +424,7 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
     <div className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-text-main truncate">{tpl.name}</h4>
+          <h4 className="text-sm text-text-main truncate">{tpl.name}</h4>
           <span className="px-1.5 py-0.5 rounded bg-surface-2 text-text-muted text-[10px] font-mono shrink-0">
             v{tpl.revision}
           </span>
@@ -456,9 +456,8 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
         <Button
           type="button"
           size="icon-sm"
-          variant="ghost"
+          variant="destructive-ghost"
           icon="delete"
-          className="text-error"
           title={t("deleteTemplateAction")}
           aria-label={`${t("deleteTemplateAction")} ${tpl.name}`}
           onClick={() => handleDeleteTemplate(tpl)}
@@ -670,7 +669,7 @@ function TemplateLibraryHeader({ model }: { model: LibraryModel }) {
           <Icon name="layers" className="text-xl text-primary" />
         </div>
         <div>
-          <h3 className="font-semibold">
+          <h3>
             {t("keyTemplatesTitle")}
             <span className="ml-1.5 text-sm font-normal text-text-muted">
               ({templates.length + unreadable.length})
@@ -712,7 +711,7 @@ function TemplateLibraryStatus({ model }: { model: LibraryModel }) {
         </div>
       )}
 
-      {loadError && <Alert variant="critical" description={loadError} />}
+      {loadError && <Alert variant="critical" description={loadError} dismissLabel={tc("close")} />}
       {loading && <Spinner size="sm" />}
       {loadError && (
         <Button variant="outline" onClick={onRefreshTemplates}>

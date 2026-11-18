@@ -19,14 +19,14 @@ export function HowItWorksSidebar({ t, showCustomNote }: HowItWorksSidebarProps)
 
   return (
     <aside className="space-y-4 rounded-xl border border-border bg-surface p-5">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-text-main">
+      <h3 className="flex items-center gap-2 text-sm text-text-main">
         <Icon name="info" size={18} className="text-primary" />
         {t("howItWorks.title")}
       </h3>
       <ol className="space-y-3">
         {steps.map((step, i) => (
           <li key={i} className="flex gap-3 text-xs text-text-muted">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
               {i + 1}
             </span>
             {step}

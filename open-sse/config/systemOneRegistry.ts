@@ -8,6 +8,9 @@
  *   jev-latest / (no model)      → native api.typesafe.ai   (default alias)
  *   openrouter/typesafe/jev-1.13 → openrouter alpha decisions (model typesafe/jev-1.13)
  *   openrouter/inception/…:free  → openrouter alpha decisions (model verbatim)
+ *   cloudflare-ai/jev | cf/jev   → Workers AI /ai/run           (model typesafe/jev)
+ *   cloudflare-ai/clef[-flash]   → Workers AI /ai/run/@cf/cloudflare/<model>
+ *   ollama-local/<model>         → the ollama-local connection's /v1/systemone
  *
  * Anything else is not a decisions model → null (the route 400s with guidance).
  */
@@ -21,6 +24,30 @@ export const TYPESAFE_SYSTEMONE_DEFAULT_MODEL = "jev-latest";
 export const OPENROUTER_DECISIONS_PROVIDER_ID = "openrouter";
 export const OPENROUTER_DECISIONS_BASE_URL = "https://openrouter.ai";
 export const OPENROUTER_DECISIONS_URL = `${OPENROUTER_DECISIONS_BASE_URL}/api/alpha/decisions`;
+
+/** Workers AI; the account id comes from the `cloudflare-ai` connection. */
+export const CLOUDFLARE_SYSTEMONE_PROVIDER_ID = "cloudflare-ai";
+export const CLOUDFLARE_SYSTEMONE_API_BASE = "https://api.cloudflare.com/client/v4/accounts";
+/**
+ * Public Cloudflare model id → Workers AI model. Allow-listed because the
+ * Clef ids become part of the request path. Jev on Cloudflare draws AI Gateway
+ * credits; Clef draws Workers AI neurons.
+ */
+export const CLOUDFLARE_SYSTEMONE_MODELS: Readonly<Record<string, string>> = {
+  jev: "typesafe/jev",
+  clef: "clef",
+  "clef-flash": "clef-flash",
+};
+const CLOUDFLARE_SYSTEMONE_PREFIXES = ["cloudflare-ai/", "cf/"];
+
+/**
+ * Local Ollama (#14667). The URL comes from the `ollama-local` connection's base URL,
+ * never from the request; the model id only travels in the JSON body.
+ */
+export const OLLAMA_LOCAL_SYSTEMONE_PROVIDER_ID = "ollama-local";
+const OLLAMA_LOCAL_SYSTEMONE_PREFIX = "ollama-local/";
+/** Plain Ollama model tags (`qwen3:8b`, `library/llama3.2:latest`); no whitespace or control chars. */
+const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
 
 export const LUNAROUTE_SYSTEM_ONE_PROVIDER_ID = "lunaroute";
 export const LUNAROUTE_SYSTEM_ONE_BASE_URL = "https://gw.lunaroute.com";
@@ -54,7 +81,8 @@ export function getAllSystemOneModels() {
   }));
 }
 
-export type SystemOneBackend = "typesafe" | "openrouter" | "lunaroute";
+export type SystemOneBackend =
+  "typesafe" | "openrouter" | "cloudflare" | "ollama-local" | "lunaroute";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -62,7 +90,39 @@ export interface SystemOneTarget {
   provider: string;
   /** Model id forwarded upstream (gateway prefix stripped). */
   upstreamModel: string;
+  /**
+   * Empty for "cloudflare" (the URL needs the connection's account id) and for
+   * "ollama-local" (the URL is the connection's base URL).
+   */
   upstreamUrl: string;
+}
+
+function resolveCloudflareTarget(model: string): SystemOneTarget | null | undefined {
+  const prefix = CLOUDFLARE_SYSTEMONE_PREFIXES.find((p) => model.startsWith(p));
+  if (!prefix) return undefined;
+  const id = model.slice(prefix.length);
+  const upstreamModel = Object.hasOwn(CLOUDFLARE_SYSTEMONE_MODELS, id)
+    ? CLOUDFLARE_SYSTEMONE_MODELS[id]
+    : undefined;
+  if (!upstreamModel) return null;
+  return {
+    backend: "cloudflare",
+    provider: CLOUDFLARE_SYSTEMONE_PROVIDER_ID,
+    upstreamModel,
+    upstreamUrl: "",
+  };
+}
+
+function resolveOllamaLocalTarget(model: string): SystemOneTarget | null | undefined {
+  if (!model.startsWith(OLLAMA_LOCAL_SYSTEMONE_PREFIX)) return undefined;
+  const id = model.slice(OLLAMA_LOCAL_SYSTEMONE_PREFIX.length);
+  if (!OLLAMA_LOCAL_MODEL_ID.test(id) || id.includes("..")) return null;
+  return {
+    backend: "ollama-local",
+    provider: OLLAMA_LOCAL_SYSTEMONE_PROVIDER_ID,
+    upstreamModel: id,
+    upstreamUrl: "",
+  };
 }
 
 /**
@@ -101,6 +161,10 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
       upstreamUrl: OPENROUTER_DECISIONS_URL,
     };
   }
+  const cloudflare = resolveCloudflareTarget(trimmed);
+  if (cloudflare !== undefined) return cloudflare;
+  const ollamaLocal = resolveOllamaLocalTarget(trimmed);
+  if (ollamaLocal !== undefined) return ollamaLocal;
   if (trimmed.startsWith(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`)) {
     const upstreamModel = trimmed.slice(`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`.length);
     if (!LUNAROUTE_SYSTEM_ONE_MODELS.some((model) => model.id === upstreamModel)) return null;
