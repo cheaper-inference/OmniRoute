@@ -9,6 +9,7 @@ import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import type { CodexResetCreditView } from "./useCodexResetCreditRedemption";
+import Card from "@/shared/components/Card";
 
 interface Props {
   credits: CodexResetCreditView[];
@@ -199,9 +200,9 @@ function ResetCreditList({
   return (
     <div className="space-y-2">
       {credits.map((credit, index) => (
-        <div
+        <Card.Section
           key={credit.selectionToken}
-          className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle/40 p-3 sm:flex-row sm:items-center"
+          className="flex flex-col gap-3 sm:flex-row sm:items-center"
         >
           <CreditSummary credit={credit} provider={provider} tr={tr} recommended={index === 0} />
           <Button
@@ -212,7 +213,7 @@ function ResetCreditList({
           >
             {tr("redeemThisResetCredit", "Redeem")}
           </Button>
-        </div>
+        </Card.Section>
       ))}
     </div>
   );

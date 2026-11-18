@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { chartTheme } from "@omniroute/ui-kit/chart-theme";
+import Card from "@/shared/components/Card";
 
 interface ProviderChartsProps {
   chartData: Array<Record<string, unknown>>;
@@ -36,7 +37,7 @@ export default function ProviderCharts({
   formatTooltipTimestamp,
 }: ProviderChartsProps) {
   return (
-    <div className="h-80 w-full rounded-xl border border-border bg-surface-2 px-3 py-4">
+    <Card.Section className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={chartTheme.margin}>
           <CartesianGrid {...chartTheme.grid} />
@@ -66,6 +67,6 @@ export default function ProviderCharts({
           ))}
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </Card.Section>
   );
 }

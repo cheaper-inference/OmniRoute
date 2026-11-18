@@ -259,7 +259,7 @@ export default function ProviderUtilizationTab() {
                 {t("providerUtilizationNoDataDescription")}
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <Card.Section>
               <p className="text-xs font-medium text-text-main">
                 {t("providerUtilizationGettingStarted")}
               </p>
@@ -281,7 +281,7 @@ export default function ProviderUtilizationTab() {
                   <span>{t("providerUtilizationStepAutomatic")}</span>
                 </li>
               </ul>
-            </div>
+            </Card.Section>
           </div>
         ) : (
           <div className="flex flex-col gap-5">

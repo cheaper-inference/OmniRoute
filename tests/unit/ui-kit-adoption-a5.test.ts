@@ -320,3 +320,80 @@ test("E: the audit pagers are the kit pagination, not a pair of Buttons", () => 
     assert.match(text, /<Pager\b|<PaginationPrevious\b/, `${rel}: kit pager`);
   }
 });
+
+// ── C. Panels ───────────────────────────────────────────────────────────────
+
+test("C: a neutral panel inside a card is Card.Section, not a div with border, fill and radius", () => {
+  const exceptions: Exception[] = [
+    {
+      file: "costs/quota-share/components/PoolWizard.tsx",
+      fragment: "max-h-48 space-y-1.5 overflow-y-auto rounded border border-border bg-bg px-3 py-2",
+      why: "the scrolling checkbox list of a form field (a control box with role=group), not a panel",
+    },
+    {
+      file: "batch/page.tsx",
+      fragment: "flex items-center gap-1.5 rounded-lg bg-surface border border-border px-3 py-2",
+      why: "the three step chips of the page intro strip: they sit on the page, not inside a card",
+    },
+    {
+      file: "batch/BatchDetailModal.tsx",
+      fragment:
+        "flex items-center justify-between px-3 py-2 rounded-lg bg-bg-alt border border-border",
+      why: "one row of the file list (a row of a list, not a panel)",
+    },
+    {
+      file: "batch/BatchDetailModal.tsx",
+      fragment:
+        "flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded bg-bg-alt border border-border",
+      why: "one row of the metadata list (a row of a list, not a panel)",
+    },
+    {
+      file: "batch/FileDetailModal.tsx",
+      fragment:
+        "flex items-center gap-3 px-3 py-2 rounded-lg bg-bg-alt border border-border text-xs",
+      why: "one row of the batches-using-this-file list (a row of a list, not a panel)",
+    },
+    {
+      file: "analytics/CompressionAnalyticsTab.tsx",
+      fragment:
+        "text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2",
+      why: "an info note with an icon: it is a notice, not a panel",
+    },
+    {
+      file: "analytics/SearchAnalyticsTab.tsx",
+      fragment:
+        "text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2",
+      why: "an info note with an icon: it is a notice, not a panel",
+    },
+  ];
+  const token = (classes: string, re: RegExp) => classes.split(/\s+/).some((t) => re.test(t));
+  const hits: Hit[] = [];
+  const used = new Set<Exception>();
+  for (const { rel, text } of sources()) {
+    for (const { index, tag } of openingTags(text, "div")) {
+      const classes = /\bclassName="([^"]*)"/.exec(tag)?.[1];
+      if (!classes) continue;
+      const neutralPanel =
+        token(classes, /^border$/) &&
+        token(classes, /^border-border(\/\d+)?$/) &&
+        token(classes, /^rounded(-(md|lg|xl))?$/) &&
+        token(classes, /^p[xy]?-(\[[^\]]+\]|[\d.]+)$/) &&
+        // not a frame around a table or list, an overlay, a dashed empty box or a control track
+        !token(classes, /^(overflow-hidden|divide-y|fixed|absolute|shadow-sm|shadow-lg)$/) &&
+        !token(classes, /^(border-dashed|inline-flex)$/) &&
+        // not a hand-made empty or loading state (centered text with large padding)
+        !(token(classes, /^text-center$/) && token(classes, /^py?-(5|6|8|10)$/)) &&
+        // not a status tile: any fill left besides the neutral surfaces
+        !token(classes, /^bg-(?!(bg-subtle|surface-2|surface|bg|bg-alt)(\/\d+)?$)/);
+      if (!neutralPanel) continue;
+      const exception = exceptions.find((e) => e.file === rel && classes === e.fragment);
+      if (exception) used.add(exception);
+      else hits.push({ rel, line: lineOf(text, index), text: classes.slice(0, 180) });
+    }
+  }
+  assert.equal(hits.length, 0, `panels made by hand (use <Card.Section>):\n${report(hits)}`);
+  assert.deepEqual(
+    exceptions.filter((e) => !used.has(e)).map((e) => `${e.file}: ${e.fragment}`),
+    []
+  );
+});

@@ -24,6 +24,7 @@ import QuotaConceptCard from "./components/QuotaConceptCard";
 import QuotaEndpointsCard from "./components/QuotaEndpointsCard";
 import PoolCard from "./components/PoolCard";
 import PoolWizard from "./components/PoolWizard";
+import Card from "@/shared/components/Card";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Local types (display layer only)
@@ -81,12 +82,12 @@ function StatCard({
           ? "text-success"
           : "text-text-main";
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+    <Card.Section>
       <div className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {label}
       </div>
       <div className={`text-2xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -474,7 +475,7 @@ export default function QuotaSharePageClient() {
       />
 
       {/* Group bar */}
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-3 py-2">
+      <Card.Section className="flex flex-wrap items-center gap-2">
         <Select
           compact
           label={t("groupLabel")}
@@ -553,7 +554,7 @@ export default function QuotaSharePageClient() {
             {t("deleteGroup")}
           </Button>
         )}
-      </div>
+      </Card.Section>
 
       {/* Concept card */}
       <QuotaConceptCard />

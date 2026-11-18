@@ -207,13 +207,13 @@ function getStatusVariant(status: number) {
 
 function RouteMetric({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-2 p-4">
+    <Card.Section>
       <div className="ci-eyebrow flex items-center gap-2" data-weight="medium">
         <Icon name={icon} size={16} />
         {label}
       </div>
       <div className="mt-2 text-xl font-semibold text-text-main">{value}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -232,7 +232,7 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
   const weightPct = Math.round(factor.weight * 100);
 
   return (
-    <div className="rounded-lg border border-border bg-surface-2 p-4">
+    <Card.Section>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-text-main">{factor.name}</div>
@@ -252,7 +252,7 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
       <div className="mt-2 text-xs text-text-muted">
         {t("routeWeight", { weight: weightPct })} · {factor.details}
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -359,7 +359,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
         </div>
 
         {recompute ? (
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <Card.Section>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-text-main">
@@ -395,7 +395,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
                 value={recompute.recomputedSelectedExecutionKey || "n/a"}
               />
             </div>
-          </div>
+          </Card.Section>
         ) : (
           <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 text-sm text-text-muted">
             {t("routeNoRecomputeCandidates")}

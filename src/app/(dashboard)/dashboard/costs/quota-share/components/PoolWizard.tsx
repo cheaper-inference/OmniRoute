@@ -40,6 +40,7 @@ import type {
   QuotaWindow,
 } from "@/lib/quota/dimensions";
 import type { QuotaPool } from "@/lib/db/quotaPools";
+import Card from "@/shared/components/Card";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types (mirror what CreatePoolModal/EditAllocationsModal expect)
@@ -751,7 +752,7 @@ export default function PoolWizard({
         {step === 2 && (
           <div className="space-y-4">
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
-            <div className="rounded-lg border border-border bg-bg-subtle p-3">
+            <Card.Section>
               <div className="flex items-center justify-between mb-2">
                 <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                   {tPlans("dimensionLabel")}
@@ -824,7 +825,7 @@ export default function PoolWizard({
                   </div>
                 ))}
               </div>
-            </div>
+            </Card.Section>
 
             {dimensionsEdited && (
               <p className="text-xs text-warning">{t("wizardDimensionsEditedNotice")}</p>
@@ -978,7 +979,7 @@ export default function PoolWizard({
 
             {/* quotaModelName preview — grouped by provider */}
             {previewByProvider.length > 0 && (
-              <div className="rounded-md border border-border bg-bg-subtle p-3 text-2xs">
+              <Card.Section className="text-2xs">
                 <div className="ci-eyebrow mb-1.5" data-size="3xs" data-weight="medium">
                   {t("wizardPreviewLabel")}
                 </div>
@@ -1008,7 +1009,7 @@ export default function PoolWizard({
                     );
                   })}
                 </div>
-              </div>
+              </Card.Section>
             )}
           </div>
         )}

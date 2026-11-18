@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import Card from "@/shared/components/Card";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -290,14 +291,14 @@ function tosBadge(
 
 function Kpi({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
+    <Card.Section className="flex flex-col gap-0.5">
       <span className="ci-eyebrow" data-size="3xs">
         {label}
       </span>
       <span className={`text-[19px] font-semibold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
       </span>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -475,7 +476,7 @@ export function FreeBudgetView({
         </div>
       )}
       {uncappedProviders.length > 0 && (
-        <div className="mx-3 mt-2 rounded-md border border-border bg-surface-2 px-3 py-2">
+        <Card.Section className="mx-3 mt-2">
           <span className="text-2xs text-text-muted">{labels.uncapped}</span>
           <div className="mt-1 flex flex-wrap gap-1">
             {uncappedProviders.map((p) => (
@@ -488,7 +489,7 @@ export function FreeBudgetView({
               </span>
             ))}
           </div>
-        </div>
+        </Card.Section>
       )}
       {gatedRecurringTokens > 0 && (
         <div className="mx-3 mt-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2">

@@ -5,15 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import FilterPills from "@/shared/components/FilterPills";
-import {
-  Card,
-  Button,
-  GuardedAction,
-  Input,
-  EmptyState,
-  Select,
-  Checkbox,
-} from "@/shared/components";
+import { Button, GuardedAction, Input, EmptyState, Select, Checkbox } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { useNotificationStore } from "@/store/notificationStore";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 // ────────────────────────────────────────────────────────────────────────────
@@ -674,13 +667,13 @@ function KpiBlock({
   const color =
     tone === "red" ? "text-error" : tone === "amber" ? "text-warning" : "text-text-main";
   return (
-    <div className="rounded-lg border border-border/40 bg-bg-subtle/30 px-3 py-2">
+    <Card.Section>
       <div className="ci-eyebrow truncate" data-size="3xs" data-weight="medium">
         {label}
       </div>
       <div className={`text-xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
       {hint && <div className="text-3xs text-text-muted truncate">{hint}</div>}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -897,7 +890,7 @@ function BudgetRowExpanded({
   return (
     <div className="px-12 py-4 bg-bg-subtle/30 border-t border-border space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+        <Card.Section>
           <div className="flex items-center justify-between mb-2">
             <h4 className="ci-eyebrow" data-size="2xs" data-weight="medium">
               {t("budgetProjection")}
@@ -926,9 +919,9 @@ function BudgetRowExpanded({
               </div>
             </div>
           </div>
-        </div>
+        </Card.Section>
 
-        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+        <Card.Section>
           <div className="flex items-center justify-between mb-2">
             <h4 className="ci-eyebrow" data-size="2xs" data-weight="medium">
               {t("budgetCostBreakdown30d")}
@@ -967,10 +960,10 @@ function BudgetRowExpanded({
               ))}
             </div>
           )}
-        </div>
+        </Card.Section>
       </div>
 
-      <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+      <Card.Section>
         <h4 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
           {t("budgetLimits")}
         </h4>
@@ -1056,7 +1049,7 @@ function BudgetRowExpanded({
           </Button>
           <span className="text-xs text-text-muted">💡 {t("budgetHardCapComingSoon")}</span>
         </div>
-      </div>
+      </Card.Section>
     </div>
   );
 }

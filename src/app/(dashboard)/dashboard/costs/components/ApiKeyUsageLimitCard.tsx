@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
-import { Button, Card, Input, Toggle } from "@/shared/components";
+import { Button, Input, Toggle } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 export interface ApiKeyUsageLimitPayload {
@@ -65,12 +66,12 @@ function formatResetHint(resetAtIso: string | null, t: ReturnType<typeof useTran
 
 function UsageQuotaMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+    <Card.Section>
       <p className="ci-eyebrow" data-weight="medium">
         {label}
       </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -165,7 +166,7 @@ export function ApiKeyUsageLimitCard({
           label={t("weeklySpend")}
           value={loading || !status ? "..." : formatter.format(status.weeklySpentUsd)}
         />
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+        <Card.Section>
           <Input
             type="number"
             min={0}
@@ -175,8 +176,8 @@ export function ApiKeyUsageLimitCard({
             onChange={(event) => setDailyLimit(event.target.value)}
             placeholder="0.00"
           />
-        </div>
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+        </Card.Section>
+        <Card.Section>
           <Input
             type="number"
             min={0}
@@ -187,7 +188,7 @@ export function ApiKeyUsageLimitCard({
             placeholder="0.00"
             hint={formatResetHint(status?.weeklyResetAtIso ?? null, t)}
           />
-        </div>
+        </Card.Section>
       </div>
 
       {error && (

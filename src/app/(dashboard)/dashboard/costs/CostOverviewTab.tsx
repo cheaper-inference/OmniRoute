@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Card, EmptyState, SegmentedControl, CardSkeleton } from "@/shared/components";
+import { EmptyState, SegmentedControl, CardSkeleton } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
@@ -745,7 +746,7 @@ export default function CostOverviewTab() {
             {t("routingEfficiency")}
           </h3>
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+            <Card.Section>
               <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackCount")}
               </p>
@@ -757,8 +758,8 @@ export default function CostOverviewTab() {
                   total: new Intl.NumberFormat(locale).format(summary.totalRequests),
                 })}
               </p>
-            </div>
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+            </Card.Section>
+            <Card.Section>
               <p className="ci-eyebrow" data-weight="medium">
                 {t("fallbackRate")}
               </p>
@@ -786,8 +787,8 @@ export default function CostOverviewTab() {
                   }
                 />
               </div>
-            </div>
-            <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+            </Card.Section>
+            <Card.Section>
               <p className="ci-eyebrow" data-weight="medium">
                 {t("modelCoverage")}
               </p>
@@ -795,7 +796,7 @@ export default function CostOverviewTab() {
                 {(summary.requestedModelCoveragePct || 0).toFixed(1)}%
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelCoverageDesc")}</p>
-            </div>
+            </Card.Section>
           </div>
         </Card>
       )}
@@ -1106,13 +1107,13 @@ function CostExplorerCard({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-border bg-bg-subtle p-6">
+        <Card.Section>
           <EmptyState
             icon="manage_search"
             title={t("noMatchingCostRows")}
             description={t("noMatchingCostRowsDescription")}
           />
-        </div>
+        </Card.Section>
       ) : (
         <>
           <Table
@@ -1198,12 +1199,12 @@ function CostExplorerCard({
 
 function CompactMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
+    <Card.Section>
       <p className="ci-eyebrow" data-weight="medium">
         {label}
       </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }
 

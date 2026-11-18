@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -185,7 +185,7 @@ function ProviderIssues({
       {orderedIssues.map((issue) => {
         const evidence = formatConnectionEvidence(issue, t);
         return (
-          <div key={issue.id} className="rounded-lg border border-border bg-surface p-3">
+          <Card.Section key={issue.id}>
             <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -221,7 +221,7 @@ function ProviderIssues({
                 </div>
               )}
             </div>
-          </div>
+          </Card.Section>
         );
       })}
     </div>
@@ -339,22 +339,22 @@ export default function ProviderHealthAutopilotCard() {
             {t(`state.${report?.status || "loading"}`)}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
+        <Card.Section>
           <p className="ci-eyebrow">{t("issues")}</p>
           <p className="text-lg font-semibold text-text-main">{report?.summary.issueCount ?? 0}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
+        </Card.Section>
+        <Card.Section>
           <p className="ci-eyebrow">{t("actions")}</p>
           <p className="text-lg font-semibold text-text-main">
             {report?.summary.actionableCount ?? 0}
           </p>
-        </div>
-        <div className="rounded-xl border border-border bg-bg-subtle px-3 py-2">
+        </Card.Section>
+        <Card.Section>
           <p className="ci-eyebrow">{t("connections")}</p>
           <p className="text-lg font-semibold text-text-main">
             {report?.summary.connectionCount ?? 0}
           </p>
-        </div>
+        </Card.Section>
       </div>
 
       {message && (
@@ -374,10 +374,7 @@ export default function ProviderHealthAutopilotCard() {
       ) : (
         <div className="mt-4 space-y-3">
           {topProviders.map((provider) => (
-            <div
-              key={provider.provider}
-              className="rounded-xl border border-border bg-bg-subtle p-4"
-            >
+            <Card.Section key={provider.provider}>
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h3 className="text-text-main">
@@ -412,7 +409,7 @@ export default function ProviderHealthAutopilotCard() {
                 busyAction={busyAction}
                 onApply={applyAction}
               />
-            </div>
+            </Card.Section>
           ))}
         </div>
       )}

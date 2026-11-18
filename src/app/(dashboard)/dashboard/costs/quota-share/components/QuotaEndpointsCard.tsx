@@ -328,7 +328,7 @@ export default function QuotaEndpointsCard({
       {!collapsed && (
         <>
           {/* Base URL line(s) */}
-          <div className="mt-3 rounded-md bg-bg-subtle border border-border px-3 py-2 space-y-1">
+          <Card.Section className="mt-3 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                 {t("endpointsBaseUrl")}
@@ -378,7 +378,7 @@ export default function QuotaEndpointsCard({
                 <span className="text-3xs text-text-muted">({t("endpointsWsNote")})</span>
               </div>
             )}
-          </div>
+          </Card.Section>
 
           {/* Model listing */}
           <div className="mt-3">

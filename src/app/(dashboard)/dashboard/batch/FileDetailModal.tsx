@@ -7,6 +7,7 @@ import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import Modal from "@/shared/components/Modal";
+import Card from "@/shared/components/Card";
 
 type FileTranslator = ReturnType<typeof useTranslations>;
 
@@ -161,7 +162,7 @@ export default function FileDetailModal({
       </div>
 
       {/* Metadata */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-bg-alt border border-border">
+      <Card.Section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="flex flex-col gap-0.5">
           <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesSizeColumn")}
@@ -190,7 +191,7 @@ export default function FileDetailModal({
             {expiresAtTs ? relativeExpiration(expiresAtTs, t) : t("batchFilesNeverExpires")}
           </span>
         </div>
-      </div>
+      </Card.Section>
 
       {/* Related batches */}
       {relatedBatches.length > 0 && (

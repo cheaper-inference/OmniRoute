@@ -7,6 +7,7 @@ import { Slider } from "@omniroute/ui-kit/slider";
 import Modal from "@/shared/components/Modal";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
+import Card from "@/shared/components/Card";
 
 interface ProviderWindowCostRow {
   apiKeyKey: string;
@@ -154,23 +155,23 @@ export default function ProviderUsdCostModal({
         ) : payload ? (
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
+              <Card.Section>
                 <div className="ci-eyebrow" data-size="3xs">
                   {t("used")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
                   {formatUsd(payload.totalCostUsd)}
                 </div>
-              </div>
-              <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
+              </Card.Section>
+              <Card.Section>
                 <div className="ci-eyebrow" data-size="3xs">
                   {t("quotaUsed")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
                   {formatPercent(payload.quotaUsedPercent)}
                 </div>
-              </div>
-              <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
+              </Card.Section>
+              <Card.Section>
                 <div className="ci-eyebrow" data-size="3xs">
                   {t("estimatedFullQuota")}
                 </div>
@@ -179,18 +180,18 @@ export default function ProviderUsdCostModal({
                     ? "n/a"
                     : formatUsd(payload.estimatedFullQuotaUsd)}
                 </div>
-              </div>
-              <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
+              </Card.Section>
+              <Card.Section>
                 <div className="ci-eyebrow" data-size="3xs">
                   {t("rows")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
                   {payload.rows.length}
                 </div>
-              </div>
+              </Card.Section>
             </div>
 
-            <div className="rounded-md border border-border bg-surface px-3 py-3">
+            <Card.Section>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
                 <span>
                   {t("window")}: {formatDateTime(payload.windowStartAt, t("unknown"))} →{" "}
@@ -224,7 +225,7 @@ export default function ProviderUsdCostModal({
                   disabled={payload.estimatedFullQuotaUsd === null}
                 />
               </div>
-            </div>
+            </Card.Section>
 
             {payload.rows.length === 0 ? (
               <div className="rounded-md border border-border px-3 py-8 text-center text-sm text-text-muted">
@@ -235,10 +236,7 @@ export default function ProviderUsdCostModal({
                 {payload.rows.map((row) => {
                   const barPercent = maxCost > 0 ? Math.max(4, (row.costUsd / maxCost) * 100) : 0;
                   return (
-                    <div
-                      key={row.apiKeyKey}
-                      className="rounded-md border border-border bg-surface px-3 py-2"
-                    >
+                    <Card.Section key={row.apiKeyKey}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate text-sm font-semibold text-text-main">
@@ -272,7 +270,7 @@ export default function ProviderUsdCostModal({
                         value={barPercent}
                         animate={false}
                       />
-                    </div>
+                    </Card.Section>
                   );
                 })}
               </div>

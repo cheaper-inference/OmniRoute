@@ -7,7 +7,6 @@ import { Field } from "@omniroute/ui-kit/field";
 import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
 import {
-  Card,
   Button,
   EmptyState,
   DataTable,
@@ -17,6 +16,7 @@ import {
   Select,
   Textarea,
 } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -1156,17 +1156,14 @@ export default function EvalsTab() {
           {scorecard.perSuite.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
               {scorecard.perSuite.slice(0, 6).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3"
-                >
+                <Card.Section key={entry.id}>
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-medium text-text-main truncate">
                       {entry.name}
                     </span>
                     <span className="text-xs font-semibold text-primary">{entry.passRate}%</span>
                   </div>
-                </div>
+                </Card.Section>
               ))}
             </div>
           )}
@@ -1578,7 +1575,7 @@ export default function EvalsTab() {
                 {isExpanded && (
                   <div className="border-t border-border/20 p-4 flex flex-col gap-4">
                     {liveResult?.scorecard && liveResult.runs.length > 1 && (
-                      <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-3">
+                      <Card.Section>
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <h4 className="ci-heading" data-size="sm">
@@ -1592,10 +1589,7 @@ export default function EvalsTab() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                           {liveResult.runs.map((run) => (
-                            <div
-                              key={run.id}
-                              className="rounded-lg border border-border/20 px-3 py-3"
-                            >
+                            <Card.Section key={run.id}>
                               <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-medium text-text-main">
                                   {getTargetLabel(run.target, t)}
@@ -1607,10 +1601,10 @@ export default function EvalsTab() {
                               <p className="text-xs text-text-muted mt-1">
                                 {t("historyLatency", { value: run.avgLatencyMs })}
                               </p>
-                            </div>
+                            </Card.Section>
                           ))}
                         </div>
-                      </div>
+                      </Card.Section>
                     )}
 
                     {liveResult?.runs?.length ? (
@@ -1636,7 +1630,7 @@ export default function EvalsTab() {
                               </Badge>
                             </div>
 
-                            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-surface/30 border border-border/20">
+                            <Card.Section className="flex items-center gap-4 mb-4">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold text-success">
                                   {run.summary.passRate}%
@@ -1650,7 +1644,7 @@ export default function EvalsTab() {
                                   total: run.summary.total,
                                 })}
                               </div>
-                            </div>
+                            </Card.Section>
 
                             {run.results.length > 0 ? (
                               <div className="flex max-h-[420px] flex-col gap-2 overflow-auto pr-1">
@@ -1758,7 +1752,7 @@ export default function EvalsTab() {
                         ))}
                       </div>
                     ) : suiteHistory.length > 0 ? (
-                      <div className="rounded-lg border border-border/20 bg-surface/20 px-4 py-4">
+                      <Card.Section>
                         <div className="flex items-center justify-between gap-3 mb-3">
                           <div>
                             <h4 className="ci-heading" data-size="sm">
@@ -1769,10 +1763,7 @@ export default function EvalsTab() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {suiteHistory.slice(0, 4).map((run) => (
-                            <div
-                              key={run.id}
-                              className="rounded-lg border border-border/20 px-4 py-3"
-                            >
+                            <Card.Section key={run.id}>
                               <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-medium text-text-main">
                                   {getTargetLabel(run.target, t)}
@@ -1787,10 +1778,10 @@ export default function EvalsTab() {
                               <p className="text-xs text-text-muted mt-1">
                                 {t("historyLatency", { value: run.avgLatencyMs })}
                               </p>
-                            </div>
+                            </Card.Section>
                           ))}
                         </div>
-                      </div>
+                      </Card.Section>
                     ) : null}
 
                     <div className="flex items-center gap-2 mb-1">
@@ -2032,7 +2023,7 @@ function SuiteBuilderModal({
           />
         </div>
 
-        <div className="rounded-xl border border-border/20 bg-surface/20 p-4">
+        <Card.Section>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h4 className="ci-heading" data-size="sm">
@@ -2044,7 +2035,7 @@ function SuiteBuilderModal({
               {t("suiteBuilderAddCase")}
             </Button>
           </div>
-        </div>
+        </Card.Section>
 
         {draft.cases.map((draftCase, index) => {
           const selectedStrategy = editableStrategies.find(

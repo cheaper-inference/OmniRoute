@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Badge, Card, Skeleton } from "@/shared/components";
+import { Badge, Skeleton } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 
@@ -77,10 +78,7 @@ export default function CompressionLogTab() {
           if (!stats) return null;
 
           return (
-            <div
-              key={entry.id}
-              className="space-y-2 rounded-lg border border-border bg-bg-subtle p-3"
-            >
+            <Card.Section key={entry.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-mono text-text-main">
@@ -128,7 +126,7 @@ export default function CompressionLogTab() {
                   ))}
                 </div>
               )}
-            </div>
+            </Card.Section>
           );
         })}
       </div>

@@ -1,4 +1,4 @@
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { createCurrencyFormatter } from "../CostOverviewTab";
 
 export interface TopListCardProps {
@@ -38,9 +38,9 @@ export function TopListCard({
       </h3>
       <div className="space-y-2">
         {rows.slice(0, 6).map((row) => (
-          <div
+          <Card.Section
             key={String(row[nameKey])}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-subtle px-4 py-3"
+            className="flex items-center justify-between gap-3"
           >
             <span className="text-sm text-text-main truncate">{String(row[nameKey])}</span>
             <div className="flex items-center gap-3 shrink-0">
@@ -60,7 +60,7 @@ export function TopListCard({
                 )}
               </span>
             </div>
-          </div>
+          </Card.Section>
         ))}
       </div>
     </Card>

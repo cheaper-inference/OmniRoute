@@ -9,7 +9,7 @@ import { Progress } from "@omniroute/ui-kit/progress";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
@@ -363,7 +363,7 @@ function HealthSnapshot() {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
+              <Card.Section>
                 <p className="ci-eyebrow">{t("status")}</p>
                 <p
                   className={`mt-1 text-sm font-medium ${
@@ -372,19 +372,19 @@ function HealthSnapshot() {
                 >
                   {dbHealth?.isHealthy ? t("healthy") : t("attentionNeeded")}
                 </p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
+              </Card.Section>
+              <Card.Section>
                 <p className="ci-eyebrow">{t("issues")}</p>
                 <p className="mt-1 text-sm font-medium text-text-main">
                   {dbHealth?.issues?.length ?? 0}
                 </p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface/50 p-3">
+              </Card.Section>
+              <Card.Section>
                 <p className="ci-eyebrow">{t("repairs")}</p>
                 <p className="mt-1 text-sm font-medium text-text-main">
                   {dbHealth?.repairedCount ?? 0}
                 </p>
-              </div>
+              </Card.Section>
             </div>
           </div>
           <div className="flex flex-col items-stretch gap-2 min-w-45">
@@ -507,25 +507,25 @@ function HealthSnapshot() {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("stickyBoundSessions")}</div>
               <div className="text-2xl font-semibold text-text-main mt-1">
                 {sessions?.stickyBoundCount ?? 0}
               </div>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("sessionsByApiKey")}</div>
               <div className="text-2xl font-semibold text-text-main mt-1">
                 {Object.keys(sessions?.byApiKey || {}).length}
               </div>
-            </div>
+            </Card.Section>
           </div>
           {sessions?.top?.length > 0 ? (
             <div className="space-y-2">
               {sessions.top.slice(0, 5).map((session: any) => (
-                <div
+                <Card.Section
                   key={session.sessionId}
-                  className="rounded-lg border border-border/30 bg-surface/20 p-3 flex items-center justify-between gap-3"
+                  className="flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0">
                     <div className="font-mono text-xs text-text-main truncate">
@@ -542,7 +542,7 @@ function HealthSnapshot() {
                     </div>
                     <div>{t("ageSeconds", { count: Math.round((session.ageMs || 0) / 1000) })}</div>
                   </div>
-                </div>
+                </Card.Section>
               ))}
             </div>
           ) : (
@@ -561,37 +561,37 @@ function HealthSnapshot() {
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("alerting")}</div>
               <div className="text-2xl font-semibold text-warning mt-1">
                 {quotaMonitor?.alerting ?? 0}
               </div>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("limitExhausted")}</div>
               <div className="text-2xl font-semibold text-error mt-1">
                 {quotaMonitor?.exhausted ?? 0}
               </div>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("errors")}</div>
               <div className="text-2xl font-semibold text-warning mt-1">
                 {quotaMonitor?.errors ?? 0}
               </div>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("providers")}</div>
               <div className="text-2xl font-semibold text-text-main mt-1">
                 {Object.keys(quotaMonitor?.byProvider || {}).length}
               </div>
-            </div>
+            </Card.Section>
           </div>
           {quotaMonitor?.monitors?.length > 0 ? (
             <div className="space-y-2">
               {quotaMonitor.monitors.slice(0, 5).map((monitor: any) => (
-                <div
+                <Card.Section
                   key={`${monitor.sessionId}:${monitor.accountId}`}
-                  className="rounded-lg border border-border/30 bg-surface/20 p-3 flex items-center justify-between gap-3"
+                  className="flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-text-main truncate">
@@ -623,7 +623,7 @@ function HealthSnapshot() {
                         : "—"}
                     </div>
                   </div>
-                </div>
+                </Card.Section>
               ))}
             </div>
           ) : (
@@ -770,13 +770,10 @@ function HealthSnapshot() {
                   color: "text-info",
                 },
               ].map(({ label, value, color }) => (
-                <div
-                  key={label}
-                  className="text-center p-2 rounded-lg bg-surface/30 border border-border/30"
-                >
+                <Card.Section key={label} className="text-center">
                   <p className={`text-lg font-semibold tabular-nums ${color}`}>{value}</p>
                   <p className="text-xs text-text-muted mt-0.5">{label}</p>
-                </div>
+                </Card.Section>
               ))}
             </div>
           ) : (
