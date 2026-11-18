@@ -60,7 +60,7 @@ test("a job no runner took costs nothing, however long it waited", () => {
   assert.equal(jobMinutes({ ...queued, runner_name: null, completed_at: at(30) }), 0);
 });
 
-test("only finished-with-a-result or live runs are fetched, never this run", () => {
+test("cancelled runs are inspected for prior spend, while the current run stays excluded", () => {
   const runs = [
     { id: 1, status: "completed", conclusion: "success" },
     { id: 2, status: "completed", conclusion: "failure" },
@@ -70,7 +70,7 @@ test("only finished-with-a-result or live runs are fetched, never this run", () 
   ];
   assert.deepEqual(
     runsToCount(runs, { selfRunId: 5 }).map((r) => r.id),
-    [1, 2, 4]
+    [1, 2, 3, 4]
   );
 });
 
