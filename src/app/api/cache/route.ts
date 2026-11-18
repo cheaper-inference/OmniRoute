@@ -8,6 +8,7 @@ import {
   invalidateStale,
 } from "@/lib/semanticCache";
 import { getIdempotencyStats } from "@/lib/idempotencyLayer";
+import { isSemanticCacheDbEnabled } from "@/lib/db/databaseSettings";
 import { getCacheMetrics, getCacheTrend } from "@/lib/db/settings";
 import { getCachedSettings } from "@/lib/db/readCache";
 import {
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
       trend,
       idempotency: idempotencyStats,
       config: {
-        semanticCacheEnabled: settings.semanticCacheEnabled !== false,
+        semanticCacheEnabled: settings.semanticCacheEnabled !== false && isSemanticCacheDbEnabled(),
       },
     });
     // hit/miss describes the cached history part only; fresh counters are always live.

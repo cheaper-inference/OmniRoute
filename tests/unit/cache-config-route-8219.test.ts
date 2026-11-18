@@ -129,4 +129,63 @@ test("cache-config route resolves and modelCatalogCacheTtlMs round-trips", async
     assert.ok(harrier, "harrier-oss-v1-0.6b model should be present in lemonade models");
     assert.equal(harrier.dimensions, 1024);
   });
+
+  await t.test(
+    "PUT semanticCacheEnabled syncs flat settings, /api/cache, and runtime check (#20399)",
+    async () => {
+      const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
+      const { isSemanticCacheEnabled } =
+        await import("../../open-sse/handlers/chatCore/semanticCache.ts");
+      const cacheRoute = await import("../../src/app/api/cache/route.ts");
+
+      // Reproduce #20399: flat settings has semanticCacheEnabled=false while
+      // databaseSettings.cache.semanticCacheEnabled is true.
+      await updateSettings({ semanticCacheEnabled: false });
+
+      const initialGet = await cacheConfigRoute.GET(makeJsonRequest("GET") as never);
+      const initialConfig = await initialGet.json();
+      assert.equal(
+        initialConfig.semanticCacheEnabled,
+        false,
+        "cache-config GET must reflect disabled runtime when flat semanticCacheEnabled is false"
+      );
+      assert.equal(isSemanticCacheEnabled(await getSettings(), null), false);
+
+      // Saving semanticCacheEnabled: true via cache-config must re-enable runtime,
+      // flat settings, and /api/cache.
+      const enablePut = await cacheConfigRoute.PUT(
+        makeJsonRequest("PUT", { semanticCacheEnabled: true }) as never
+      );
+      assert.equal(enablePut.status, 200);
+
+      const afterEnableSettings = await getSettings();
+      assert.equal(afterEnableSettings.semanticCacheEnabled, true);
+      assert.equal(isSemanticCacheEnabled(afterEnableSettings, null), true);
+
+      const afterEnableConfig = await (
+        await cacheConfigRoute.GET(makeJsonRequest("GET") as never)
+      ).json();
+      assert.equal(afterEnableConfig.semanticCacheEnabled, true);
+
+      const afterEnableCacheStats = await (
+        await cacheRoute.GET(new Request("http://localhost/api/cache") as never)
+      ).json();
+      assert.equal(afterEnableCacheStats.config.semanticCacheEnabled, true);
+
+      // Saving semanticCacheEnabled: false via cache-config must disable all three.
+      const disablePut = await cacheConfigRoute.PUT(
+        makeJsonRequest("PUT", { semanticCacheEnabled: false }) as never
+      );
+      assert.equal(disablePut.status, 200);
+
+      const afterDisableSettings = await getSettings();
+      assert.equal(afterDisableSettings.semanticCacheEnabled, false);
+      assert.equal(isSemanticCacheEnabled(afterDisableSettings, null), false);
+
+      const afterDisableCacheStats = await (
+        await cacheRoute.GET(new Request("http://localhost/api/cache") as never)
+      ).json();
+      assert.equal(afterDisableCacheStats.config.semanticCacheEnabled, false);
+    }
+  );
 });

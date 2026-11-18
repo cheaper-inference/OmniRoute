@@ -531,6 +531,8 @@ export function updateDatabaseSettings(
   const requestedLogs = updates.logs as Partial<UserDatabaseSettings["logs"]> | undefined;
   const pipelineEnabled = requestedLogs?.callLogPipelineEnabled;
   const detailedEnabled = requestedLogs?.detailedLogsEnabled;
+  const requestedCache = updates.cache as Partial<UserDatabaseSettings["cache"]> | undefined;
+  const semanticCacheEnabled = requestedCache?.semanticCacheEnabled;
 
   const requestedBackup = updates.backup as Partial<UserDatabaseSettings["backup"]> | undefined;
   if (requestedBackup?.keepLastNBackups !== undefined) {
@@ -559,6 +561,9 @@ export function updateDatabaseSettings(
 
     if (pipelineEnabled !== undefined) {
       settingsInsert.run("call_log_pipeline_enabled", JSON.stringify(Boolean(pipelineEnabled)));
+    }
+    if (semanticCacheEnabled !== undefined) {
+      settingsInsert.run("semanticCacheEnabled", JSON.stringify(Boolean(semanticCacheEnabled)));
     }
     encryptLegacyCacheSecretCopies(db);
   });
