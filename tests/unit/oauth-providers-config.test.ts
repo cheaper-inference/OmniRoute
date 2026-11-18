@@ -43,6 +43,7 @@ const {
   GROK_BUILD_OAUTH_CONFIG,
   KILOCODE_CONFIG,
   KIMI_CODING_CONFIG,
+  MEGABRAIN_CONFIG,
   KIRO_CONFIG,
   OAUTH_TIMEOUT,
   PROVIDERS: OAUTH_PROVIDER_IDS,
@@ -50,8 +51,10 @@ const {
   TRAE_CONFIG,
   XAI_OAUTH_CONFIG,
   OPENFERENCE_CONFIG,
+  RENDERHOUR_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
+  MINIMAX_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
 const {
@@ -77,6 +80,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "cursor",
   "trae",
   "kilocode",
+  "megabrain",
   "cline",
   "clinepass",
   "devin-desktop",
@@ -84,6 +88,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "grok-cli",
   "xai-oauth",
   "openference",
+  "renderhour",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -91,6 +96,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "zed",
   "zed-hosted",
   "muse-code",
+  "minimax-code",
   "copilot-m365-web",
 ];
 
@@ -115,6 +121,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "amazon-q": KIRO_CONFIG,
   cursor: CURSOR_CONFIG,
   kilocode: KILOCODE_CONFIG,
+  megabrain: MEGABRAIN_CONFIG,
   cline: CLINE_CONFIG,
   clinepass: CLINE_CONFIG, // reuses the Cline WorkOS flow (clinepass: cline in providers/index.ts)
   "devin-desktop": DEVIN_DESKTOP_CONFIG,
@@ -123,6 +130,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "grok-cli": GROK_BUILD_OAUTH_CONFIG,
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
+  renderhour: RENDERHOUR_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
   freebuff: FREEBUFF_CONFIG,
   "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
@@ -130,6 +138,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
   "muse-code": MUSE_CODE_CONFIG,
+  "minimax-code": MINIMAX_CODE_CONFIG,
   "copilot-m365-web": M365_NATIVE_OAUTH_CONFIG,
 };
 
@@ -167,6 +176,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "amazon-q": KIRO_REQUIRED_FIELDS,
   cursor: ["apiEndpoint", "api3Endpoint", "agentEndpoint", "agentNonPrivacyEndpoint", "dbKeys"],
   kilocode: ["apiBaseUrl", "initiateUrl", "pollUrlBase"],
+  megabrain: ["apiBaseUrl", "initiateUrl", "pollUrlBase"],
   cline: ["appBaseUrl", "apiBaseUrl", "authorizeUrl", "tokenExchangeUrl", "refreshUrl"],
   clinepass: ["appBaseUrl", "apiBaseUrl", "authorizeUrl", "tokenExchangeUrl", "refreshUrl"],
   "devin-desktop": ["apiServerUrl", "inferenceUrl", "ideName", "defaultVersion"],
@@ -176,11 +186,13 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "xai-oauth": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   openference: ["authorizeUrl", "tokenUrl", "userinfoUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
+  renderhour: ["authorizeUrl", "tokenUrl", "userinfoUrl", "codeChallengeMethod", "clientId"],
   // prettier-ignore
   "grok-cli": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   "zed-hosted": ["webBaseUrl", "cloudBaseUrl", "llmBaseUrl", "userInfoUrl", "llmTokenUrl", "modelsUrl"],
   "muse-code": ["deviceCodeUrl", "tokenUrl", "clientId", "mintUrl"],
+  "minimax-code": ["deviceCodeUrl", "tokenUrl", "clientId", "scope", "audience"],
 };
 
 function getByPath(object, path) {
@@ -489,6 +501,7 @@ test("device and import-token providers expose the flow-specific fields expected
     "kiro",
     "amazon-q",
     "kilocode",
+    "megabrain",
     "workbuddy",
     "muse-code",
     "freebuff",

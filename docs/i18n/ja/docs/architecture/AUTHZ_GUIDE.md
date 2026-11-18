@@ -138,17 +138,17 @@ Cookie は、JWT の検証に成功し、かつ `authenticated: true` を持つ�
   3. 設定 → セキュリティ → 無効化で、パスワードを入力し、コードは空欄のままにします。`POST /api/auth/mfa/disable` は、この変数が設定されていて、リクエストがホストから送信された場合に限り、`code` のないボディを受け付けます。それでもダッシュボードのセッションと現在のパスワードが必要であり、`auth.mfa.disabled` として、`secondFactor: "recovery_switch"` の監査記録が残されます。
   4. `OMNIROUTE_DISABLE_MFA` の設定を解除して再起動し、必要に応じて再登録します。
 
-## ルートのクラス
+## ルートクラス
 
-`src/server/authz/types.ts` は 3 つのクラスを定義します。決定的に分類できないルートはすべて `MANAGEMENT` にフォールバックします。
+`src/server/authz/types.ts` 3 つのクラスを定義します。決定的に分類できないルートは`MANAGEMENT`にフォールバックします。
 
-| Class        | Description                                                                                                                                                  | Auth required                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `PUBLIC`     | 明示的に安全なルート — ログイン、ログアウト、ステータス、初期化、ヘルスチェック、オンボーディングのブートストラップ。                                        | なし                                                                  |
-| `CLIENT_API` | モデル提供エンドポイント — `/api/v1/*`、`/api/v1beta/*`、およびエイリアスの `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 有効な `REQUIRE_API_KEY` フィーチャーフラグが有効な場合は Bearer キー |
-| `MANAGEMENT` | ダッシュボードのページ、設定、プロバイダー、キー、管理者および診断エンドポイント。                                                                           | ダッシュボードセッション、または `manage` スコープの Bearer           |
+| クラス       | 説明                                                                                                                                                           | 認証が必要です                                               |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `PUBLIC`     | 明示的に安全なルート—ログイン、ログアウト、ステータス、ヘルス、オンボーディング ブートストラップ。                                                             | なし                                                         |
+| `CLIENT_API` | モデル提供エンドポイント— `/api/v1/*`、 `/api/v1beta/*`、およびエイリアス`/v1/*`、 `/v1beta/*`、 `/chat/completions`、 `/responses`、 `/models`、 `/codex/*`。 | 有効な`REQUIRE_API_KEY`機能フラグが有効な場合のベアラー キー |
+| `MANAGEMENT` | ダッシュボード ページ、設定、プロバイダー、キー、管理エンドポイント、診断エンドポイント。                                                                      | `manage`スコープを備えたダッシュボード セッションOR Bearer   |
 
-一部の `MANAGEMENT` 操作は **オペレーター専用** です。`manage` キーだけでは不十分です。保存済みの認証情報のエクスポート（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、ライブデータへのバックアップの復元（`dryRun=true` を含む `POST /api/db-backups/import`、ID による `POST /api/db-backups` の復元、`POST /api/settings/import-json`）、復元ポイントの破棄（`DELETE /api/db-backups` のクリーンアップ、および `PATCH /api/db-backups`。このエンドポイントで永続化される保持期間設定は、バックアップのたびに実行される自動削除を制御するためです）には、ダッシュボードセッション、ローカル CLI のサブジェクト、またはログインが無効であることが必要です。同期トークンの発行（`POST /api/sync/tokens`）と `admin` の CLI アクセストークンの発行（`POST /api/cli/tokens`）には、すべてのログインモードでダッシュボードセッションまたはローカル CLI のサブジェクトが必要です。どのスコープの API キーも、`oma_` アクセストークンも、オペレーターの認証情報ではありません。これらが必要とされる場合は、常に `403` が返されます。このチェックは `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）にあります。ログイン設定の変更もオペレーター専用です。`POST /api/settings/require-login`（管理パスワードの設定、`requireLogin` の切り替え）は、パスワードが存在すると、これらの認証情報のみを受け付けます。最初の実行時のブートストラップ期間（パスワードがまだない状態）は変更されません。ダッシュボードセッションでパスワードを置き換えるには `currentPassword` の送信が必要です（欠落または誤りの場合は `403` で、`settings.update_failed` として監査ログに記録されます）。ローカル CLI とログインが無効なインスタンスは復旧パスを維持し、このパラメーターなしでパスワードを設定できます。どちらもデータディレクトリを所有するホストに紐づけられているためです。
+いくつかの`MANAGEMENT`アクションは次のとおりです。**オペレータのみ**: `manage`キーでは十分ではありません。保存されている資格情報のエクスポート (`GET /api/settings/export-json`、 `GET /api/db-backups/export`、 `GET /api/db-backups/exportAll`)、ライブ データのバックアップの復元 ( `dryRun=true`を含む`POST /api/db-backups/import` 、 id による`POST /api/db-backups`復元、 `POST /api/settings/import-json`)、復元ポイントの破棄 (`DELETE /api/db-backups`クリーンアップ、および`PATCH /api/db-backups`保持が保持されるためバックアップごとに自動プルーニングが行われるため)、ダッシュボード セッション、ローカルCLIサブジェクト、またはログインが無効になっている必要があります。同期トークン (`POST /api/sync/tokens`) の発行と`admin` CLIアクセス トークン (`POST /api/cli/tokens`) の作成には、すべてのログイン モードでダッシュボード セッションまたはローカルCLIサブジェクトが必要です。任意のスコープのAPIキーと`oma_`アクセス トークンはオペレーターの資格情報ではありません。必要な場合は常に`403`取得します。チェックは`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) にあります。ログイン設定の変更もオペレータのみです。 `POST /api/settings/require-login` (管理パスワードの設定 / `requireLogin`の切り替え) は、パスワードが存在するとそれらの資格情報のみを受け入れます。 —初回実行ブートストラップ ウィンドウ (パスワードはまだありません) は変更されません。 —とダッシュボード セッションは、パスワードを置き換えるために`currentPassword`送信する必要があります (`403`見つからないか間違っている場合は、 `settings.update_failed`として監査されます)。ローカルのCLIとログインが無効になっているインスタンスはリカバリ パスを保持しており、両方ともデータ ディレクトリを所有するホストにバインドされているため、リカバリ パスなしでパスワードを設定できます。
 
 ## パイプライン
 
@@ -179,53 +179,49 @@ Incoming request → src/proxy.ts
 
 ポリシーが成功すると、 `AuthSubject`と`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`が返されます。ダウンストリーム ハンドラーは、認証ロジックを再実行する代わりに、 `src/server/authz/assertAuth.ts`の`assertAuth(request, "CLIENT_API")`を介してそれを読み取ることができます。
 
-## パブリックルート一覧
+## パブリックルートリスト
 
-`src/shared/constants/publicApiRoutes.ts` は明示的な許可リストです。
+`src/shared/constants/publicApiRoutes.ts`は明示的な許可リストです。
 
-このリストは **形式** ごとに分割されており、その分割はセキュリティ上重要です（GHSA-74g9-q8f6-793h）。プレフィックスは
-`startsWith()` で照合されるため、先頭文字列を共有する隣接するすべてのパスにも一致します。
-`/api/usage/om-usage` をプレフィックスとして指定すると、`/api/usage/om-usage<anything>` が PUBLIC として扱われ、Next は
-これを `/api/usage/[connectionId]` に解決します — 独自の認証を持たないハンドラーです。
+リストは次のように分割されます**形**、分割は負荷に耐えます (GHSA-74g9-q8f6-793h)。プレフィックスは`startsWith()`と一致するため、先頭文字を共有するすべての隣接パスとも一致します。 `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLICとマークされたプレフィックスとして使用され、 Next はそれを`/api/usage/[connectionId]` —という独自の認証を持たないハンドラーに解決します。
 
 ```ts
-// 正真正銘のサブツリー。すべてのエントリは "/" で終わらなければならない（ユニットテストで検証される）。
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify では CLIENT_API として扱われ、「認証なしのパブリック」ではない
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// 単一ルート。末尾のスラッシュの有無にかかわらず、完全一致で照合される。
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // オプトインした TOTP のログイン手順 2。MFA-pending cookie が必要
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS オリジンの緩和も適用される、読み取り専用の単一ルート。
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS の緩和を適用しない、読み取り専用の単一ルート。
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-読み取り専用ルートがパブリックになるのは、安全なメソッドの場合のみです。注: `classifyRoute()` は PUBLIC のフォールスルーから `/api/v1/*` と `/api/v1beta/*` を除外します — これらは常に `CLIENT_API` であるため、Bearer キーのポリシーが引き続き適用されます。
+読み取り専用ルートはパブリックです**のみ**安全な方法のために。注: `classifyRoute()` 、 PUBLICフォールスルー—から`/api/v1/*`と`/api/v1beta/*`を除外します。これらは常に`CLIENT_API`あるため、Bearer-key ポリシーが引き続き適用されます。
 
 ## 新しいルートの追加
 
@@ -289,15 +285,15 @@ APIキーには`scopes`配列が含まれています（`api_keys.scopes`にJSON
 
 `oma_live_…`トークンに対する`read` / `write` / `admin`は、`scopeSatisfies`（`src/lib/accessTokens/scopes.ts`）によってランク付けされます。このランクはアクセストークン資格情報にのみ適用されます。[管理認証](../guides/MANAGEMENT-AUTH.md)を参照してください。
 
-## 認証必須トグル
+## 認証が必要です切り替え
 
-`src/shared/utils/apiAuth.ts` の `isAuthRequired()` は、リクエストに対して **いかなる** 認証を適用するかを決定します：
+`src/shared/utils/apiAuth.ts`の`isAuthRequired()`次のことを決定します。**どれでも**リクエストに対して認証が強制されます。
 
-- `settings.requireLogin === false` → 認証はグローバルに無効になります。ただし、常に保護される階層（[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) を参照）と、認証情報を発行する操作は例外です。これらの操作では、ログインが有効な場合と同じ認証情報が必要です。具体的には、同期トークンの発行、任意のスコープでの CLI アクセストークンの発行、`manage`/`admin` スコープを持つ API キーの作成、そのスコープのキーへの付与、そのようなキーの再生成または表示（`src/lib/api/requireManagementAuth.ts` の `requireCredentialForManagementScopedKey()`）です。推論専用のキーは引き続きオープンです。
-- パスワードが設定されておらず **かつ** `INITIAL_PASSWORD` 環境変数もない → ブートストラップモードでは、オンボーディングウィザードとループバックからのリクエストを許可しますが、外部ネットワークからのリクエストには引き続き認証情報が必要です。
-- DB エラーが発生した場合 → フェイルクローズ（セキュアバイデフォルト）。
+- `settings.requireLogin === false` → auth は、常時保護層 ( [「 Route Guard Tiers 」](../security/ROUTE_GUARD_TIERS.md)を参照) と、それが受け入れる認証情報を渡す呼び出しを除き、グローバルに無効になっています。これらの呼び出しには、ログイン時と同じ認証情報が必要です。同期トークンの発行、任意のスコープでのCLIアクセス トークンの生成、 `manage`/`admin`スコープでのAPIキーの作成、そのスコープをキーに付与するか、そのスコープを再生成または公開する場合と同じです。キー ( `src/lib/api/requireManagementAuth.ts`の`requireCredentialForManagementScopedKey()` )。推論専用キーは開いたままになります。保護された機能フラグ (`REQUIRE_API_KEY`、その他のセキュリティ フラグ、および[機能フラグ](../reference/FEATURE_FLAGS.md#rest-api)にリストされているSSRF / TLS / MCP スコープ / サンドボックス フラグ) の書き込みと、 PIIマスキング設定の保存 (`PUT /api/settings/pii`) にも、引き続き資格情報が必要です。
+- パスワードが設定されていません**そして**no `INITIAL_PASSWORD` env var →ブートストラップ モードでは、オンボーディング ウィザードとループバック リクエストが許可されますが、公開されたネットワーク リクエストには依然として認証情報が必要です。例外: 保護された機能フラグの書き込みとPIIマスキング設定 (`PUT /api/settings/pii`) の保存には、ループバックからでも認証情報が必要なので、ループバックだけでは十分ではありません。
+- DBエラー→失敗して閉じられます (デフォルトでセキュア)。
 
-クライアント API キーの強制には、`process.env.REQUIRE_API_KEY` を直接読み取るのではなく、`src/shared/utils/featureFlags.ts` の `isRequireApiKeyEnabled()` を使用します。これは本番環境のインスタンスで重要です。ダッシュボード → Feature Flags で `REQUIRE_API_KEY` を切り替えると DB オーバーライドが保存され、即座に `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` および、このヘルパーを共有する他のクライアント API 認証チェックに影響します。フィーチャーフラグストアを読み取れない場合、クライアント API 認証はフェイルクローズし、キーを要求します。
+クライアントのAPIキーの強制では、 `process.env.REQUIRE_API_KEY`直接読み取りではなく、 `src/shared/utils/featureFlags.ts`内の`isRequireApiKeyEnabled()`が使用されます。これはデプロイされたインスタンスにとって重要です。ダッシュボード→機能フラグで`REQUIRE_API_KEY`切り替えると、 DBオーバーライドが保存され`/v1/*`、 `/v1beta/*`、 `/models`、 `/responses`、 `/chat/completions`、 `/codex/*`、およびこのヘルパーを共有する他のクライアント API 認証チェックに直ちに影響します。機能フラグ ストアを読み取れない場合、クライアントAPI認証は失敗し、キーが必要になります。
 
 ## 破壊的変更 — v3.8.0
 

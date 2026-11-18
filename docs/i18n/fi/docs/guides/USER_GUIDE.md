@@ -354,82 +354,82 @@ Malli: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Käyttöönotto
+## 🚀 käyttöönotto
 
 ### Globaali npm-asennus (suositus)
 
 ```bash
 npm install -g omniroute
 
-# Luo määrityshakemisto
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Luo .env-tiedosto (katso .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käynnistä palvelin
+# Start server
 omniroute
-# Tai mukautetulla portilla:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI lataa `.env`-tiedoston automaattisesti sijainnista `~/.omniroute/.env` tai `./.env`.
+CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (`REQUIRE_API_KEY`, locale, aikavyöhyke ja väriasetukset, ei portit); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ilmoitusaluetila
+### Lokerotila
 
-Käynnistä OmniRoute järjestelmän ilmoitusalueella:
+Käynnistä OmniRoute ilmaisinalueella:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komento päättyy, kun palvelin ja ilmoitusaluekuvake ovat valmiina.
+Komento palaa, kun palvelin ja lokero ovat valmiita.
 
-Palvelin jatkaa toimintaansa ilman päätettä.
+Palvelin jatkaa ilman päätettä.
 
-Ilmoitusaluetilaa tuetaan macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Ilmoitusaluetila ei avaa hallintapaneelia automaattisesti.
+Lokerotila tukee macOS, Windows ja graafisia Linux istuntoja. Lokerotila ei avaa kojelautaa automaattisesti.
 
-Käytä ilmoitusaluevalikkoa seuraaviin toimintoihin:
+Käytä lokerovalikkoa näihin toimiin:
 
-- Avaa hallintapaneeli.
+- Avaa kojelauta.
 - Avaa `/dashboard/logs`.
-- Muuta automaattisen käynnistyksen asetusta.
-- Pysäytä OmniRoute.
+- Muuta automaattista käynnistystä.
+- Lopeta OmniRoute.
 
-Älä käytä valitsinta `--tray` yhdessä seuraavien valitsimien kanssa:
+Älä yhdistä `--tray` näiden vaihtoehtojen kanssa:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Nämä tilat edellyttävät erilaista prosessin omistajuutta.
+Nämä tilat edellyttävät erilaista prosessiomistusta.
 
-Ota käynnistys käyttöön koneen seuraavan sisäänkirjautumisen yhteydessä:
+Ota käynnistys käyttöön seuraavan koneen sisäänkirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automaattinen käynnistys käyttää ilmoitusaluetilaa macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Graafista käyttöliittymää vailla oleva Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
+Automaattinen käynnistys käyttää lokerotilaa macOS, Windows ja graafisissa Linux istunnoissa. Headless Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
 
-Poista sisäänkirjautumisen yhteydessä tapahtuva käynnistys käytöstä:
+Poista käynnistys käytöstä kirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Asennuksen poistaminen
+### Poistetaan
 
-Kun et enää tarvitse OmniRoutea, tarjoamme kaksi nopeaa komentosarjaa siistiä poistamista varten:
+Kun et enää tarvitse OmniRoute, tarjoamme kaksi nopeaa skriptiä puhtaaseen poistoon:
 
-| Komento                  | Toiminto                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta **säilyttää tietokantasi ja määrityksesi** hakemistossa `~/.omniroute`. |
-| `npm run uninstall:full` | Poistaa sovelluksen JA **hävittää kaikki määritykset, avaimet ja tietokannat pysyvästi**.                     |
+| Komento                  | Toiminta                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta** säilyttää DB ja kokoonpanosi** `~/.omniroute` ssä. |
+| `npm run uninstall:full` | Poistaa sovelluksen AND pysyvästi** poistaa kaikki kokoonpanot, avaimet ja tietokannat** . |
 
-> Huomautus: Suorita nämä komennot siirtymällä OmniRoute-projektikansioon (jos kloonasit sen) ja suorittamalla ne siellä. Jos asensit sen globaalisti, voit vaihtoehtoisesti suorittaa komennon `npm uninstall -g omniroute`.
+> Huomautus: Suorita nämä komennot siirtymällä OmniRoute -projektikansioon (jos kloonasit sen) ja suorittamalla ne. Vaihtoehtoisesti voit suorittaa `npm uninstall -g omniroute`, jos se on asennettu maailmanlaajuisesti.
 
-### VPS-käyttöönotto
+### VPS käyttöönotto
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,21 +445,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Tai: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-käyttöönotto (vähäinen muistinkäyttö)
+### PM2 -käyttöönotto (vähän muistia)
 
-Käytä muistirajoitusvalintaa palvelimilla, joilla on rajallisesti RAM-muistia:
+Jos palvelimissa on rajoitettu RAM, käytä muistirajoitusvaihtoehtoa:
 
 ```bash
-# 512MB:n rajoituksella (oletus)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Tai mukautetulla muistirajoituksella
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Tai käyttämällä tiedostoa ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -488,30 +488,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Koosta levykuva (oletus = runner-cli, jossa codex/claude/droid on esiasennettu)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Siirrettävä tila (suositus)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Katso CLI-binäärit sisältävää isäntäjärjestelmään integroitua tilaa koskevat tiedot päädokumentaation Docker-osiosta.
+Katso isäntäintegroitu tila CLI binäärien kanssa pääasiakirjojen Docker osiosta.
 
 ### Void Linux (xbps-src)
 
-Void Linuxin käyttäjät voivat paketoida ja asentaa OmniRouten natiivisti käyttämällä `xbps-src`-ristiinkäännöskehystä. Tämä automatisoi itsenäisen Node.js-koontiversion luomisen sekä tarvittavat natiivit `better-sqlite3`-sidokset.
+Void Linux -käyttäjät voivat pakata ja asentaa OmniRoute natiivisti `xbps-src` -ristikäännöskehyksen avulla. Tämä automatisoi Node.js itsenäisen koontiversion sekä tarvittavat `better-sqlite3` -natiivisidokset.
 
 <details>
-<summary><b>Näytä xbps-src-mallipohja</b></summary>
+<summary><b>Näytä xbps-src-malli</b></summary>
 
 ```bash
-# Mallipohjatiedosto paketille 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Määritä node-gypin kohdesuoritinarkkitehtuuri
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Asenna kaikki riippuvuudet – ohita komentosarjat
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Kokoa itsenäinen Next.js-paketti
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopioi staattiset resurssit itsenäiseen pakettiin
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Käännä better-sqlite3:n natiivi sidos
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Sijoita käännetty sidos itsenäiseen pakettiin
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Poista arkkitehtuurikohtaiset sharp-paketit
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopioi Next.js:n staattisen analyysin ohittamat pinon suorituksenaikaiset riippuvuudet:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Estä asennuksen jälkeistä käsittelijää poistamasta tyhjiä Next.js-sovellusreitittimen hakemistoja
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Ympäristömuuttujat
 
-| Muuttuja                                | Oletusarvo                           | Kuvaus                                                                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT-allekirjoituksen salaisuus (**vaihda tuotantoympäristössä**)                                                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ensimmäisen kirjautumisen salasana                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datahakemisto (tietokanta, käyttötilastot, lokit)                                                                                                                   |
-| `PORT`                                  | kehyksen oletusarvo                  | Palvelun portti (esimerkeissä `20128`)                                                                                                                              |
-| `HOSTNAME`                              | kehyksen oletusarvo                  | Kuunteluosoite (Dockerin oletusarvo on `0.0.0.0`)                                                                                                                   |
-| `NODE_ENV`                              | ajonaikainen oletusarvo              | Aseta käyttöönottoa varten arvoksi `production`                                                                                                                     |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Koontinäytössä näkyvä ja palvelimelle välitettävä julkinen perus-URL (korvaa vanhan `BASE_URL`-muuttujan)                                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvisynkronoinnin päätepisteen perus-URL (korvaa vanhan `CLOUD_URL`-muuttujan)                                                                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Luotujen API-avainten HMAC-salaisuus                                                                                                                                |
-| `REQUIRE_API_KEY`                       | `false`                              | Vaadi Bearer API -avain reitillä `/v1/*`                                                                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Salli todennettujen koontinäytön käyttäjien näyttää tallennettujen API-avainten täydet arvot pyynnöstä                                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Välimuistiin tallennettujen palveluntarjoajarajojen palvelinpuolen päivitysväli; käyttöliittymän päivityspainikkeet käynnistävät edelleen manuaalisen synkronoinnin |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Poista automaattiset SQLite-tilannevedokset käytöstä ennen kirjoitusta, tuontia tai palautusta; manuaaliset varmuuskopiot toimivat edelleen                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | Ottaa käyttöön sovellus- ja auditointilokien kirjoittamisen levylle                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Pakota todennusevästeen `Secure`-asetus (HTTPS-käänteisvälityspalvelimen takana)                                                                                    |
-| `CLOUDFLARED_BIN`                       | ei asetettu                          | Käytä olemassa olevaa `cloudflared`-binääriä hallitun latauksen sijaan                                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Hallittujen Quick Tunnels -tunneleiden siirtoprotokolla (`http2`, `quic` tai `auto`)                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-keon enimmäiskoko megatavuina                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Kehotevälimuistin merkintöjen enimmäismäärä                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semanttisen välimuistin merkintöjen enimmäismäärä                                                                                                                   |
+| Muuttuva                                | Oletus                    | Kuvaus                                                                                                                                                               |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaattisesti luotu)_ | JWT allekirjoitussalaisuus — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env`:ssä; aseta se nimenomaisesti, kun tietohakemisto on lyhytaikainen |
+| `INITIAL_PASSWORD`                      | _(unset)_                 | Ensimmäinen kirjautumissalasana. npm/source -asennukset alkavat `CHANGEME`:llä: vaihda se. Unset: ohjattu käyttöönottotoiminto                                       |
+| `DATA_DIR`                              | `~/.omniroute`            | Tietohakemisto (db, käyttö, lokit)                                                                                                                                   |
+| `PORT`                                  | kehyksen oletusarvo       | Huoltoportti (`20128` esimerkeissä)                                                                                                                                  |
+| `HOSTNAME`                              | kehyksen oletusarvo       | Sido isäntä (Docker oletuksena `0.0.0.0`)                                                                                                                            |
+| `NODE_ENV`                              | ajonaikainen oletusarvo   | Aseta `production` käyttöönottoa varten                                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Julkinen perus- URL nousi kojelautaan ja paljastettiin palvelimelle (korvaa vanhan `BASE_URL` n)                                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Pilvisynkronoinnin päätepisteen perusta URL (korvaa vanhan `CLOUD_URL`)                                                                                              |
+| `API_KEY_SECRET`                        | _(automaattisesti luotu)_ | HMAC salaisuus luoduille API avaimille — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env` ssä                                                   |
+| `REQUIRE_API_KEY`                       | `false`                   | Pakota Bearer API -näppäin `/v1/*`:ssä                                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Salli todennettujen kojelautakäyttäjien paljastaa kaikki tallennetut API -avainarvot pyynnöstä                                                                       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Palvelinpuolen päivitystiheys välimuistissa oleville palveluntarjoajan rajoitustiedoille; UI päivityspainikkeet laukaisevat silti manuaalisen synkronoinnin          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Poista käytöstä automaattiset SQLite -tilanteet ennen writes/import/restore:tä; Manuaalinen varmuuskopiointi toimii edelleen                                         |
+| `APP_LOG_TO_FILE`                       | `true`                    | Sallii sovellusten ja tarkastuslokien tulostuksen levylle                                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Pakota `Secure` -todennuseväste ( HTTPS -käänteisen välityspalvelimen takana)                                                                                        |
+| `CLOUDFLARED_BIN`                       | pois päältä               | Käytä olemassa olevaa `cloudflared` binaaria hallitun latauksen sijaan                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Kuljetus hallituille pikatunneleille (`http2`, `quic` tai `auto`)                                                                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js keon raja MB ssä                                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Maksimi välimuistin kehotteet                                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Enintään semanttinen välimuisti                                                                                                                                      |
 
-Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md).
+Täydellinen ympäristömuuttujaviittaus on kohdassa [README](../README.md).
 
 ---
 
@@ -714,7 +714,7 @@ Mikä tahansa yhdyskäytävä, joka puhuu OpenAI API (itseisännöity välityspa
 
 1. **Tarjoajat → Lisää OpenAI Yhteensopiva** .
 2. **Nimi** : solmun näyttötunniste.
-3. **Etuliite** : reitityksen nimi. Asiakkaat kutsuvat malleja nimellä `<prefix>/<model>`, joten solmu, jossa on etuliite `mygw` palvelee `mygw/gpt-4o-mini`. Pakollinen; ei ole merkkirajoitusta.
+3. **Etuliite** : reitityksen nimi. Asiakkaat kutsuvat malleja nimellä `<prefix>/<model>`, joten solmu etuliitteellä `mygw` palvelee `mygw/gpt-4o-mini`. Pakollinen; ei ole merkkirajoitusta.
 4. **API tyyppi** : päätepisteperhe, jota yhdyskäytävä palvelee (keskustelut, vastaukset, upotukset, ääni, kuvat).
 5. **Pohja URL** : API -juuri `/v1` :hen asti (esimerkiksi `https://gateway.example.com/v1`), ei koko `/chat/completions` polkua. Yhdyskäytävät, joissa on epätyypilliset polut, asettavat ne alle** Lisäasetukset** (chat-polku, mallipolku).
 6. The**API -avain (sekkiin)** kenttä vain testaa yhteyttä. Kun olet luonut solmun, avaa se ja käytä** Lisää yhteys** tallentaaksesi avaimen, jota pyynnöt käyttävät.
@@ -735,8 +735,8 @@ Valitse erillinen etuliite (`mygw`, `acme-proxy`). Jos mukautetun solmun pyynnö
 
 Nämä näppäimet menevät yhteyden `providerSpecificData` (esimerkiksi `PUT /api/providers/{id}` kautta):
 
-- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen.
-- `quotaEndpoint` – yhdyskäytävän quota/credits päätepiste, luetaan kojelaudan kiintiökaistalle ja kiintiötietoiselle reititykselle. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
+- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code sisältävät jo yli 64 merkin aliastenimiä ilman asetuksia. Yhteysarvo korvaa Azure OpenAI / Azure AI Foundry -oletusasetuksen (tiukemman yhdyskäytävän takana oleva Azure-yhteys) ja asettaa rajan mukautetulle yhteensopivalle solmulle. OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code pitävät rekisterirajoituksensa ja jättävät sen huomiotta.
+- `quotaEndpoint` — yhdyskäytävän quota/credits päätepiste, lue kojelaudan kiintiönauha ja kiintiötietoinen reititys. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
 
 ```json
 {
@@ -771,9 +771,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Vain sellaiset pyynnöt, jotka on lähetetty nimenomaisesti sallittujen luetteloon merkitylle vertaisryhmälle URL saavat `X-OmniRoute-Peer-Trace` otsikon. Yhdyskäytävä hylkää toistuvan ilmentymän ID tai käytetyn hyppybudjetin komennolla HTTP `508 Loop Detected`; tavalliset palveluntarjoajat eivät saa vertaismetatietoja.
+Vain sellaiset pyynnöt, jotka on lähetetty nimenomaisesti sallittujen luetteloon lisätylle URL vertaisyritykselle, saavat `X-OmniRoute-Peer-Trace` otsikon. Yhdyskäytävä hylkää toistuvan ilmentymän ID tai käytetyn hyppybudjetin komennolla HTTP `508 Loop Detected`; tavalliset palveluntarjoajat eivät saa vertaismetatietoja.
 
-Vertaisketjutus ei ole tietokannan replikointia tai isäntävirheenvaihtoa. Jokainen yhdyskäytävä säilyttää itsenäisen SQLite tilan, välimuistit, nopeuslaskurit ja istunnot. Käytä active/passive tai active/active käytettävyyttä tarkastettua käänteistä välityspalvelinta tai asiakkaan vikasietoa, äläkä koskaan liitä yhtä SQLite tietokantaa useisiin käynnissä oleviin OmniRoute esiintymiin.
+Vertaisketjutus ei ole tietokannan replikointia tai isäntävirheenvaihtoa. Jokainen yhdyskäytävä säilyttää itsenäisen SQLite tilan, välimuistit, nopeuslaskurit ja istunnot. Käytä active/passive tai active/active käytettävyyttä varten tarkistettua käänteistä välityspalvelinta tai asiakkaan vikasietoa, äläkä koskaan liitä yhtä SQLite tietokantaa useisiin käynnissä oleviin OmniRoute esiintymiin.
 
 ### Palveluntarjoajan reitit
 
@@ -834,7 +834,7 @@ Palauttaa mallit ryhmiteltyinä tarjoajan mukaan tyypeillä (`chat`, `embedding`
 ### LLM Gateway Intelligence (vaihe 9)
 
 - **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin ei-suoratoiston, lämpötila = 0 -vastaukset (ohita `X-OmniRoute-No-Cache: true`:llä)
-- **Pyydä Idempotenssia** — Poistaa pyyntöjen kaksoiskappaleet 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
+- **Pyydä Idempotenssia** — Poistaa pyynnöt 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
 - **Edistyksen seuranta** — Ota SSE `event: progress` -tapahtumat käyttöön `X-OmniRoute-Progress: true` otsikon kautta
 
 ---
@@ -866,25 +866,25 @@ Määritä kautta** Dashboard → Asetukset → Reititys** . Kojelauta näyttä�
 
 | strategia                       | Kuvaus                                                                                                                |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Täytä ensin**                 | Käyttää tilejä tärkeysjärjestyksessä – ensisijainen tili käsittelee kaikki pyynnöt, kunnes ne eivät ole käytettävissä |
+| **Täytä ensin**                 | Käyttää tilejä tärkeysjärjestyksessä — ensisijainen tili käsittelee kaikki pyynnöt, kunnes ne eivät ole käytettävissä |
 | **Round Robin**                 | Käy läpi kaikki tilit määritettävissä olevalla rajoituksella (oletus: 3 puhelua tiliä kohden)                         |
-| **P2C (Kahden valinnan voima)** | Valitsee 2 satunnaista tiliä ja reitit terveempään tiliin – tasapainottaa kuormituksen ja tietoisuuden terveydestä    |
+| **P2C (Kahden valinnan voima)** | Valitsee 2 satunnaista tiliä ja reitit terveempään — tasapainottaa kuorman terveydestä                                |
 | **Satunnainen**                 | Valitsee satunnaisesti tilin kullekin pyynnölle käyttämällä Fisher-Yates shufflea                                     |
 | **Vähiten käytetty**            | Reitit tilille, jolla on vanhin `lastUsedAt` -aikaleima, jakaa liikenteen tasaisesti                                  |
 | **Kustannusoptimoitu**          | Reitittää tilille, jolla on alhaisin prioriteettiarvo, optimoiden edullisimpien palveluntarjoajien mukaan             |
 
-**Kehittyneet yhdistelmä- ja automaattistrategiat** (konfiguroitavissa yhdistelmää kohti tai `auto/*` -etuliitteillä - katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Kehittyneet yhdistelmä- ja automaattistrategiat** (konfiguroitavissa yhdistelmää kohti tai `auto/*` -etuliitteillä — katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - tiukka järjestys, ei koskaan kiertokulkuja
+- `priority` — tiukka järjestys, ei koskaan kiertoajeluja
 - `weighted` — suhteellinen liikenne jaettuna mallikohtaisilla painoilla
-- `fill-first` — tyhjennä ensimmäinen malli, kunnes rajat täyttyvät
+- `fill-first` — tyhjennä ensimmäinen malli, kunnes rajat osuvat
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Kahden valinnan voima)
 - `least-used` ja `cost-optimized`
-- `auto` – kaikkien ehdokkaiden tulosperusteinen
-- `lkgp` (Last Known Good Provider) – kiinnittää viimeiseen onnistuneeseen palveluntarjoajaan ja palaa sitten sääntöihin
+- `auto` — tulosperusteinen kaikkien ehdokkaiden osalta
+- `lkgp` (Last Known Good Provider) — kiinnittää viimeiseen onnistuneeseen tarjoajaan ja palaa sitten sääntöihin
 - `context-optimized` — valitsee mallin, jolla on suurin vapaa konteksti-ikkuna
-- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiä varten
+- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiin
 
 #### Ulkoinen Sticky Session Header
 
@@ -930,7 +930,7 @@ Chain: production-fallback
 
 Tässä on esimerkkejä useiden palveluntarjoajien yhdistämisestä ja niiden välisestä reitityksestä OmniRoute ssa:
 
-#### 1. Koodausagentin yhdistelmä: Huippuluokan päättely ja Cost/Speed Fallback
+#### 1. Koodausagenttiyhdistelmä: Huippuluokan päättely Cost/Speed Fallbackin kanssa
 
 Ihanteellinen koodaaville aineille (OpenCode, Claude Code, Cursor, Cline). Reitit alunperin rajapäättelymalleihin, palaten nopeisiin koodausmalleihin kiintiöiden loppuun kulumisen tai virheiden vuoksi.
 
@@ -991,32 +991,32 @@ Määritä kautta** Dashboard → Asetukset → Resilience** .
 
 OmniRoute toteuttaa toimittajatason joustavuutta viidellä komponentilla:
 
-1. **Pyydä jonoa ja tahdistusta** — Järjestelmätason pyyntöjen muotoilu:
+1. **Pyydä jonoa ja tahdistusta** — Järjestelmätason pyynnön muotoilu:
    - **Pyynnöt minuutissa (RPM)** — Pyyntöjen enimmäismäärä minuutissa per tili
-   - **Minimiaika pyyntöjen välillä** — Pienin väli millisekunteina pyyntöjen välillä
+   - **Minimiaika pyyntöjen välillä** — Pienin ero millisekunteina pyyntöjen välillä
    - **Samanaikaisia pyyntöjä enintään** — Samanaikaisten pyyntöjen enimmäismäärä tiliä kohden
 
 2. **Yhteyden jäähdytys** — Auth-tyyppinen konfiguraatio yhdelle yhteydelle uudelleen yritettävissä olevien virheiden jälkeen:
    - **Perusjäähdytys** — Oletusjäähdytysikkuna uudelleen yritettävissä oleville alkuvirran virheille
-   - **Käytä Upstream Retry Vinkkejä** — Kunnioita arvovaltaisia `Retry-After` tai nollausvinkkejä, kun niitä tarjotaan
+   - **Käytä Upstream Retry Vinkkejä** — Kunnioita arvovaltaisia `Retry-After` tai nollausvinkkejä, jos niitä on saatavilla
    - **Max peruutusvaiheet** — Suurin eksponentiaalinen perääntymistaso toistuvia vikoja varten
 
-3. **Palveluntarjoajan katkaisija** — Seuraa päästä päähän -palveluntarjoajan vikoja, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty vikakynnys saavutetaan:
+3. **Palveluntarjoajan katkaisija** — jäljittää päästä päähän -palveluntarjoajan vikoja, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty vikakynnys saavutetaan:
    - **Hajoamisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `DEGRADED` syöttämistä
    - **Epäonnistumisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `OPEN` syöttämistä
    - **Nollaa aikakatkaisu** — Aikaikkuna ennen kuin palveluntarjoaja testataan uudelleen
-   - **CLOSED** (Terve) – Pyynnöt kulkevat normaalisti
-   - **DEGRADED** — Pyynnöt jatkuvat, kun kohonneita vikoja seurataan
-   - **OPEN** — Palveluntarjoaja on tilapäisesti estetty toistuvien vikojen jälkeen
-   - **HALF_OPEN** — Testataan, onko palveluntarjoaja toipunut
+   - **CLOSED** (Terve) — Pyynnöt kulkevat normaalisti
+   - **DEGRADED** — Pyynnöt jatkuvat edelleen, kun kohonneita vikoja seurataan
+   - **OPEN** — Provider on tilapäisesti estetty toistuvien vikojen jälkeen
+   - **HALF_OPEN** — Testaa, onko palveluntarjoaja palautunut
 
    Yhteystason `429` -nopeusrajat pysyvät ennallaan** Yhteyden jäähdytys** ja niitä ei lasketa mukaan palveluntarjoajan katkaisijaan.
 
    Palveluntarjoajan katkaisijan ajonaikainen tila näkyy** Kojelauta → Health** vain.
 
-4. **Odota jäähtymistä** — Jos jokainen ehdokasyhteys on jo jäähtymässä, OmniRoute voi odottaa aikaisinta jäähtymistä ja yrittää automaattisesti uudelleen samaa asiakaspyyntöä.
+4. **Odota jäähtymistä** — Jos jokainen ehdokasyhteys on jo jäähtymässä, OmniRoute voi odottaa aikaisinta jäähtymistä ja yrittää uudelleen samaa asiakaspyyntöä automaattisesti.
 
-5. **Rate Limit Auto-Detection** — Kun ylävirran palveluntarjoajat palauttavat nimenomaiset odotusikkunat, nämä vihjeet ohittavat paikallisen yhteyden jäähtymisen, kun asetus on käytössä.
+5. **Nopeuden rajan automaattinen tunnistus** — Kun ylävirran palveluntarjoajat palauttavat nimenomaiset odotusikkunat, nämä vihjeet ohittavat paikallisen yhteyden jäähtymisen, kun asetus on käytössä.
 
 **Provinkki:** Käytä** Terveys** sivu tarkastaaksesi ja nollataksesi reaaliaikaiset palveluntarjoajan katkaisijat käyttökatkon jälkeen. Resilience-sivu muuttaa vain määrityksiä.
 
@@ -1062,7 +1062,7 @@ Asetussivu on järjestetty** 7 välilehteä** navigoinnin helpottamiseksi:
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Kenraali**     | Järjestelmän tallennustyökalut, oletuskäyttäytyminen, päätepistetunnelin näkyvyys                                                                                                         |
 | **Ulkonäkö**     | Teeman säätimet (light/dark/system), sivupalkin näkyvyys, paneelikytkimet Cloudflare/Tailscale/ngrok tunnelikorteille                                                                     |
-| **AI**           | Ajatteleva budjetti (läpivienti / automaattinen poisto / mukautettu / mukautuva - katso [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), yleinen järjestelmäkehote, välimuistin tiedot       |
+| **AI**           | Ajatteleva budjetti (läpivienti / automaattinen poisto / mukautettu / mukautuva —, katso [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), yleinen järjestelmäkehote, välimuistitilastot      |
 | **Turvallisuus** | Login/Password -asetukset, IP Access Control, API -todennus `/models`, palveluntarjoajan esto, pikaruiskutuksen suoja                                                                     |
 | **Reititys**     | Maailmanlaajuinen reititysstrategia (Fill First / Round Robin / P2C / Satunnainen / Vähiten käytetty / Kustannusoptimoitu), jokerimerkkimallien aliakset, varaketjut, yhdistelmäoletukset |
 | **Joustavuus**   | Pyydä jonoa, yhteyden jäähdytystä, palveluntarjoajan katkaisijan konfiguraatiota ja odotustoimintoa                                                                                       |
@@ -1076,10 +1076,10 @@ Yleiset eivät enää kopioi vain luku -lokia ja välimuistin muistiinpanoja. Ti
 
 Pääsy kautta** Kojelaudan → kustannukset** .
 
-| Tab             | Tarkoitus                                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla             |
-| **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä – hinta per 1 000 input/output -tunnusta palveluntarjoajaa kohti |
+| Tab             | Tarkoitus                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla          |
+| **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä: — hinta 1 000 input/output -tunnusta palveluntarjoajaa kohti |
 
 ```bash
 # API: Set a budget
@@ -1159,7 +1159,7 @@ Määritä yhdistelmätasapainotus** Dashboard → Combos → Create/Edit → St
 
 Yleiset yhdistelmäoletukset voidaan asettaa** Dashboard → Settings → Routing → Combo Oletukset** . Yhdistelmäkohteen aikakatkaisut perivät oletuksena nykyisen pyynnön aikakatkaisun. Käyttää** Tavoitteen aikakatkaisu (sekuntia)** yhdistelmä-oletusasetuksissa tai yksittäisessä yhdistelmässä vain silloin, kun lyhyemmän kohdekohtaisen rajan pitäisi käynnistää nopeampi palautus.
 
-Nollaviiveen yhdistelmäoptimoinnit ovat valinnaisia. Lähde** Nollalatenssioptimointi** poistettu käytöstä estämään näitä latenssiominaisuuksia kilpailemasta varatavoitteista, ohittamasta TTFT historiaan perustuvia kohteita tai pakkaamasta varapyyntöjä; Sen ottaminen käyttöön mahdollistaa määritetyn suojauksen, ennakoivan TTFT ohitukset ja ennakoivan varapakkauksen routing/request -tarkkuuden vaihtamiseksi pienempään loppuviiveeseen.
+Nollaviiveen yhdistelmäoptimoinnit ovat valinnaisia. Lähde** Nollalatenssioptimointi** poistettu käytöstä estämään näitä latenssiominaisuuksia kilpailemasta varatavoitteista, ohittamasta TTFT historiaan perustuvia kohteita tai pakkaamasta varapyyntöjä; Sen ottaminen käyttöön mahdollistaa määritetyn suojauksen, ennakoivan TTFT ohitukset ja ennakoivan varapakkauksen routing/request -tarkkuuden vaihtamiseksi pienempään hännän latenssiin.
 
 Poista käytöstä** Päättelytunnistepuskuri** kun alkupään palveluntarjoajat vaativat tiukkoja `max_tokens` / `maxOutputTokens` rajoja. Kun yhdistelmäreititys on käytössä, se lisää päättelymallin liikkumavaraa vain malleille, joiden lähtöraja on tunnettu, ja jättää asiakastunnisteen rajan ennalleen, kun turvallinen puskuroitu arvo ylittää tämän rajan. Jos asiakasraja on jo tunnetun ylärajan yläpuolella, OmniRoute kiinnittää sen kyseiseen rajaan ennen ylävirran pyynnön lähettämistä.
 

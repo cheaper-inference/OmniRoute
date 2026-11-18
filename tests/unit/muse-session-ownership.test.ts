@@ -10,6 +10,8 @@ import {
 } from "../../src/sse/services/museSessionOwnership.ts";
 import { lockModel, clearAllModelLockouts } from "../../open-sse/services/accountFallback.ts";
 import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
+import { readMuseOwnershipValue } from "../../src/lib/db/museSessionOwnership.ts";
+import { opaqueTokenFingerprint } from "../../open-sse/utils/opaqueTokenFingerprint.ts";
 
 const candidates = [{ id: "account-a" }, { id: "account-b" }];
 test("fresh sessions alternate while tool continuations preserve exact encrypted output and owner", async () => {
@@ -73,14 +75,19 @@ test("fresh sessions alternate while tool continuations preserve exact encrypted
     bindMuseGeneration(scope, "account-a", "private-test-key-a", "identity-a"),
     generation
   );
-  assert.throws(
-    () =>
-      claimMuseSession(
-        scope,
-        { input: [{ type: "function_call_output", call_id: "foreign-call", output: "foreign" }] },
-        candidates
-      ),
-    /not issued/
+  // Pinned scopes self-heal foreign call: references under the current generation;
+  // item references and opaque history stay fail-closed.
+  assert.equal(
+    claimMuseSession(
+      scope,
+      { input: [{ type: "function_call_output", call_id: "foreign-call", output: "foreign" }] },
+      candidates
+    ).connectionId,
+    "account-a"
+  );
+  assert.equal(
+    readMuseOwnershipValue(`reference:${scope}:${opaqueTokenFingerprint("call:foreign-call")}`),
+    generation
   );
 });
 
@@ -188,10 +195,11 @@ test("exhausted account is skipped for new sessions and unserved pins move to a 
     served,
     generation
   ).text();
-  assert.throws(
-    () => claimMuseSession(served, { input: "continue" }, exhausted),
-    (error: { status?: number; message?: string }) =>
-      error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
+  // The owner exists but is cooling down: the session keeps it, and the caller answers
+  // 429 with the reset instead of a cross-account 503 (which made clients retry-loop).
+  assert.equal(
+    claimMuseSession(served, { input: "continue" }, exhausted).connectionId,
+    "account-a"
   );
   assert.equal(claimMuseSession(served, { input: "continue" }, flipped).connectionId, "account-a");
 });

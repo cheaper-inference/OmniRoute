@@ -101,9 +101,17 @@ function storedTaskData(): string {
   ]);
 }
 
+/**
+ * Occurrences of `literal` in `text`. A plain text search over rendered output (task records,
+ * an inspected error): the text is not a URL, so there is no hostname to parse and compare.
+ */
+function occurrences(text: string, literal: string): number {
+  return text.split(literal).length - 1;
+}
+
 function assertUrlHidden(where: string, text: string) {
-  assert.ok(!text.includes(URL_PASSWORD), `${where} shows the URL password`);
-  assert.ok(!text.includes(URL_HOST), `${where} shows the URL host`);
+  assert.equal(occurrences(text, URL_PASSWORD), 0, `${where} shows the URL password`);
+  assert.equal(occurrences(text, URL_HOST), 0, `${where} shows the URL host`);
 }
 
 const SKILLS = ["smart-routing", "cost-analysis", "quota-management", "health-report"];

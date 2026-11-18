@@ -45,7 +45,7 @@ import {
 } from "../../../../../src/lib/db/ccrBlocks.ts";
 import { createCompressionStats } from "../../stats.ts";
 import { queryBlock, type CcrQuery } from "./ccrQuery.ts";
-import { callerSupportsCcrRetrieve, injectCcrProtocolInstruction } from "./protocolInstruction.ts";
+import { callerSupportsCcrRetrieve } from "./protocolInstruction.ts";
 import type {
   CompressionEngine,
   CompressionEngineApplyOptions,
@@ -991,11 +991,7 @@ export const ccrEngine: CompressionEngine = {
       return { body, compressed: false, stats: null };
     }
 
-    // #8033: teach MCP-capable callers the marker → omniroute_ccr_retrieve contract
-    // (once per session; never told to non-MCP callers who cannot reach the tool).
-    const messagesWithProtocol = injectCcrProtocolInstruction(newMessages, body);
-
-    const newBody: Record<string, unknown> = { ...body, messages: messagesWithProtocol };
+    const newBody: Record<string, unknown> = { ...body, messages: newMessages };
     const durationMs = Math.round(performance.now() - start);
     const stats = createCompressionStats(
       body,

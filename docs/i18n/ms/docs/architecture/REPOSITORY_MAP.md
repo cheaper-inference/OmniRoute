@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Fail akar
 
-| Fail                                        | Tujuan                                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Halaman pendaratan pemasaran + permulaan pantas + matriks ciri (lihat juga `llm.txt`)             |
-| **CHANGELOG.md**                            | Log perubahan bagi setiap keluaran (dijana secara automatik oleh kemahiran `/version-bump-cc`)    |
-| **LICENSE**                                 | Teks lesen MIT                                                                                    |
-| **CLAUDE.md**                               | Peraturan projek untuk ejen Claude Code (peraturan wajib, konvensyen, senario)                    |
-| **AGENTS.md**                               | Sama seperti CLAUDE.md tetapi untuk ejen AI bukan Claude (Codex, Cursor, dll.)                    |
-| **GEMINI.md**                               | Peraturan ringkas untuk ejen berasaskan Gemini (subset CLAUDE.md)                                 |
-| **CONTRIBUTING.md**                         | Panduan penyumbang: persediaan, commit konvensional, pengujian, aliran PR                         |
-| **SECURITY.md**                             | Dasar pelaporan kerentanan, versi yang disokong, model ancaman                                    |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — jangkaan tingkah laku komuniti                                             |
-| **llm.txt**                                 | Halaman pendaratan teks biasa yang dioptimumkan untuk perangkak LLM (SEO untuk pembantu AI)       |
-| **package.json**                            | Manifes npm, skrip, kebergantungan, enjin, ambang liputan c8                                      |
-| **package-lock.json**                       | Pepohon kebergantungan yang dikunci                                                               |
-| **tsconfig.json**                           | Konfigurasi TypeScript akar                                                                       |
-| **tsconfig.typecheck-core.json**            | Konfigurasi semakan jenis untuk teras `src/`                                                      |
-| **tsconfig.typecheck-noimplicit-core.json** | Semakan jenis ketat (`noImplicitAny`)                                                             |
-| **tsconfig.tsbuildinfo**                    | Cache binaan tambahan TS (diabaikan oleh git)                                                     |
-| **next.config.mjs**                         | Konfigurasi binaan Next.js 16 (output kendiri)                                                    |
-| **next-env.d.ts**                           | Jenis persekitaran yang dijana secara automatik oleh Next.js                                      |
-| **eslint.config.mjs**                       | Konfigurasi rata ESLint (peraturan mengikut bahagian projek)                                      |
-| **prettier.config.mjs**                     | Peraturan pemformatan Prettier                                                                    |
-| **postcss.config.mjs**                      | Konfigurasi PostCSS untuk saluran Tailwind/CSS                                                    |
-| **playwright.config.ts**                    | Konfigurasi ujian E2E Playwright                                                                  |
-| **vitest.config.ts**                        | Konfigurasi Vitest (suite lalai)                                                                  |
-| **vitest.mcp.config.ts**                    | Konfigurasi Vitest untuk pelayan MCP / suite autoCombo / cache                                    |
-| **sonar-project.properties**                | Konfigurasi SonarQube/SonarCloud (kualiti kod)                                                    |
-| **Dockerfile**                              | Binaan Docker berbilang peringkat (builder → runner-base → runner-cli)                            |
-| **docker-compose.yml**                      | Compose pembangunan dengan 4 profil (base, cli, host, cliproxyapi) + sidecar redis                |
-| **docker-compose.prod.yml**                 | Compose pengeluaran (port 20130, redis, volum bernama)                                            |
-| **.dockerignore**                           | Fail yang dikecualikan daripada konteks Docker                                                    |
-| **fly.toml**                                | Konfigurasi penggunaan Fly.io (rantau `sin`, port 20128, volum /data)                             |
-| **.env.example**                            | Templat fail persekitaran (disalin secara automatik ke `.env` pada pemasangan pertama)            |
-| **.gitignore**                              | Corak abaian Git                                                                                  |
-| **.npmignore**                              | Senarai pengecualian penerbitan npm                                                               |
-| **.npmrc**                                  | Konfigurasi npm (pendaftaran, dasar fail kunci)                                                   |
-| **.node-version**                           | Penetapan versi Node (digunakan oleh alat yang serasi dengan nvm)                                 |
-| **.nvmrc**                                  | Penetapan versi Node untuk nvm                                                                    |
-| **eslint.complexity.config.mjs**            | Konfigurasi ESLint untuk ratchet kerumitan (`scripts/check/check-complexity.mjs --config`)        |
-| **eslint.sonarjs.config.mjs**               | Konfigurasi ESLint untuk peraturan SonarJS (kerumitan kognitif / penduaan)                        |
-| **source.config.ts**                        | Konfigurasi sumber `defineDocs` Fumadocs (menyalurkan `.source/`)                                 |
-| **knip.json**                               | Konfigurasi Knip — fail/eksport/kebergantungan tidak digunakan (menyalurkan get kualiti kod mati) |
-| **stryker.conf.json**                       | Konfigurasi pengujian mutasi Stryker                                                              |
-| **.size-limit.json**                        | Konfigurasi bajet berkas size-limit                                                               |
-| **promptfooconfig.yaml**                    | Konfigurasi penilaian promptfoo                                                                   |
-| **.gitleaks.toml**                          | Set peraturan pengimbasan rahsia gitleaks                                                         |
-| **.zizmor.yml**                             | Konfigurasi lint keselamatan GitHub Actions zizmor                                                |
-| **socket.yml**                              | Konfigurasi rantaian bekalan Socket.dev                                                           |
-| **news.json**                               | Suapan pengumuman v2 disetempatkan; item pelancaran Radar dihantar dalam keadaan tidak aktif      |
-| **flake.nix** / **flake.lock**              | Definisi dev-shell Nix + fail kunci                                                               |
-| **.env**                                    | Rahsia setempat (diabaikan oleh git — dijana daripada `.env.example`)                             |
+| Fail                                        | Tujuan                                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **README.md**                               | Halaman pendaratan pemasaran + mula pantas matriks ciri + (lihat juga `llm.txt`)           |
+| **CHANGELOG.md**                            | Log perubahan setiap keluaran (dijana secara automatik oleh kemahiran `/version-bump-cc` ) |
+| **LICENSE**                                 | teks lesen MIT                                                                             |
+| **CLAUDE.md**                               | Peraturan projek untuk ejen Kod Claude (peraturan keras, konvensyen, senario)              |
+| **AGENTS.md**                               | Sama seperti CLAUDE.md tetapi untuk ejen AI bukan Claude (Codex, Cursor, dsb.)             |
+| **GEMINI.md**                               | Peraturan ringkas untuk ejen berasaskan Gemini (subset CLAUDE.md)                          |
+| **CONTRIBUTING.md**                         | Panduan penyumbang: persediaan, komitmen konvensional, ujian, aliran PR                    |
+| **SECURITY.md**                             | Dasar pelaporan kerentanan, versi yang disokong, model ancaman                             |
+| **CODE_OF_CONDUCT.md**                      | Perjanjian Penyumbang jangkaan tingkah laku masyarakat —                                   |
+| **llm.txt**                                 | Pendaratan teks biasa dioptimumkan untuk perangkak LLM (SEO untuk pembantu AI )            |
+| **package.json**                            | npm manifes, skrip, kebergantungan, enjin, gerbang liputan c8                              |
+| **package-lock.json**                       | Pokok pergantungan berkunci                                                                |
+| **tsconfig.json**                           | Root TypeScript config                                                                     |
+| **tsconfig.typecheck-core.json**            | Konfigurasi typecheck untuk teras `src/`                                                   |
+| **tsconfig.typecheck-noimplicit-core.json** | Semak taip yang ketat (`noImplicitAny`).                                                   |
+| **tsconfig.tsbuildinfo**                    | cache binaan tambahan TS (diabaikan)                                                       |
+| **seterusnya.config.mjs**                   | konfigurasi binaan Next.js 16 (output kendiri)                                             |
+| **seterusnya-env.d.ts**                     | Next.js jenis env yang dijana secara automatik                                             |
+| **eslint.config.mjs**                       | ESLint flat config (peraturan setiap kawasan projek)                                       |
+| **lebih cantik.config.mjs**                 | peraturan pemformatan Prettier                                                             |
+| **postcss.config.mjs**                      | konfigurasi PostCSS untuk saluran paip Tailwind/CSS                                        |
+| **pengarang drama.config.ts**               | konfigurasi ujian Playwright E2E                                                           |
+| **vitest.config.ts**                        | konfigurasi Vitest (suite lalai)                                                           |
+| **vitest.mcp.config.ts**                    | konfigurasi Vitest untuk pelayan MCP / autoCombo / suite cache                             |
+| **sonar-project.properties**                | konfigurasi SonarQube/SonarCloud (kualiti kod)                                             |
+| **Dockerfile**                              | Binaan Docker berbilang peringkat (pembina → runner-base → runner-cli)                     |
+| **docker-compose.yml**                      | Karang Dev dengan 4 profil (asas, cli, hos, cliproxyapi) + redis sidecar                   |
+| **karang docker.prod.yml**                  | Karang pengeluaran (port 20130, redis, volum bernama)                                      |
+| **.dockerignore**                           | Fail dikecualikan daripada konteks Docker                                                  |
+| **fly.toml**                                | Konfigurasi penggunaan Fly.io (wilayah `sin`, port 20128, /volume data)                    |
+| **.env.contoh**                             | Fail env templat (disalin secara automatik ke `.env` pada pemasangan pertama)              |
+| **.giignore**                               | Git mengabaikan corak                                                                      |
+| **.npmignore**                              | npm menerbitkan senarai pengecualian                                                       |
+| **.npmrc**                                  | konfigurasi npm (pendaftaran, dasar fail kunci)                                            |
+| **.nod-versi**                              | Pin versi nod (digunakan oleh alat serasi nvm)                                             |
+| **.nvmrc**                                  | Pin versi nod untuk nvm                                                                    |
+| **eslint.kerumitan.config.mjs**             | konfigurasi ESLint untuk ratchet kerumitan (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | konfigurasi ESLint untuk peraturan SonarJS (kerumitan kognitif / duplikasi)                |
+| **sumber.config.ts**                        | Konfigurasi sumber Fumadocs `defineDocs` (suapan `.source/`)                               |
+| **knip.json**                               | Knip config — unuseed files/exports/deps (menyuap gerbang dead-code)                       |
+| **penyerang.conf.mjs**                      | Konfigurasi ujian mutasi Stryker (mengira `tap.testFiles` daripada `mutate`)               |
+| **.size-limit.json**                        | konfigurasi bajet bundle had saiz                                                          |
+| **promptfooconfig.yaml**                    | konfigurasi eval promptfoo                                                                 |
+| **.gitleaks.toml**                          | set peraturan imbasan rahsia gitleaks                                                      |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                 |
+| **socket.yml**                              | Konfigurasi rantaian bekalan Socket.dev                                                    |
+| **news.json**                               | Suapan pengumuman v2 disetempatkan; Item pelancaran radar dihantar tidak aktif             |
+| **flake.nix** /** serpihan.kunci**          | Nix dev-shell takrifan kunci +                                                             |
+| **.env**                                    | Rahsia tempatan ( — diabaikan dijana daripada `.env.example`)                              |
 
-> **Dialihkan keluar daripada direktori akar dalam v3.8.26 (mengurangkan keserabutan):**
+> **Dialih keluar dari akar dalam v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dijana (diabaikan oleh git). Lihat [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` dan `quality-metrics.json` yang dijana (diabaikan). Lihat [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen papan pemuka API: penyesuai atas `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh skrin komponen Lucide → (`<Icon>`)                             |
-| `constants/providers.ts`         | **380 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
+| `constants/providers.ts`         | **394 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
 | `constants/cliTools.ts`          | Pendaftaran alat CLI luaran                                                                              |
-| `constants/routingStrategies.ts` | **20 strategi laluan** dengan keutamaan                                                                  |
+| `constants/routingStrategies.ts` | **22 strategi penghalaan** dengan keutamaan                                                              |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Pembawa (vs pengurusan).                                               |
 | `constants/upstreamHeaders.ts`   | Senarai penafian pengepala untuk permintaan huluan                                                       |
 | `validation/schemas.ts`          | ~ 80 Zod skema (sumber tunggal kebenaran untuk kontrak API )                                             |
@@ -265,7 +265,7 @@ Ruang kerja npm (`@omniroute/open-sse`) yang berasingan. Mengendalikan pemproses
 ```
 open-sse/
 ├── handlers/            # 16 fail (12 pengendali + 4 pembantu): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, dll.
-├── executors/           # 150 modul pelaksana (kelas yang melanjutkan BaseExecutor + pembantu bagi setiap penyedia)
+├── executors/           # 163 modul pelaksana (kelas yang melanjutkan BaseExecutor + pembantu bagi setiap penyedia)
 ├── translator/          # Penukar format (9 permintaan, 9 respons, 9 pembantu)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modul perkhidmatan (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, dll.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Penyepaduan CLI luaran + OmniRoute CLI                                                     |
 | `I18N.md`                   | seni bina i18n, menambah bahasa, 67 tempat                                                 |
 | `UNINSTALL.md`              | Bersihkan langkah nyahpasang                                                               |
-| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 380 pembekal (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 394 pembekal (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman dalam subsistem
 

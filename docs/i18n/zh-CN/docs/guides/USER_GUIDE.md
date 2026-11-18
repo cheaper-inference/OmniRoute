@@ -341,49 +341,49 @@ API 密钥：[从仪表盘获取]
 
 ---
 
-## 🚀 部署
+## 🚀部署
 
 ### 全局 npm 安装（推荐）
 
 ```bash
 npm install -g omniroute
 
-# 创建配置目录
+# Create config directory
 mkdir -p ~/.omniroute
 
-# 创建 .env 文件（参见 .env.example）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 启动服务器
+# Start server
 omniroute
-# 或使用自定义端口：
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI 会自动从 `~/.omniroute/.env` 或 `./.env` 加载 `.env`。
+CLI自动从`~/.omniroute/.env`或`./.env`加载`.env` 。工作目录中的`./.env`只能设置一个简短的键允许列表（`REQUIRE_API_KEY`、区域设置、时区和颜色设置，而不是端口）；将其他所有内容放入`~/.omniroute/.env`中。参见[CLI启动合约](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
 ### 托盘模式
 
-在系统托盘中启动 OmniRoute：
+在系统托盘中启动OmniRoute ：
 
 ```bash
 omniroute serve --tray
 ```
 
-服务器和托盘准备就绪后，该命令会返回。
+该命令在服务器和托盘准备就绪后返回。
 
-服务器将在没有终端的情况下继续运行。
+服务器在没有终端的情况下继续运行。
 
-托盘模式支持 macOS、Windows 和图形化 Linux 会话。托盘模式不会自动打开仪表盘。
+托盘模式支持macOS、 Windows和图形Linux会话。托盘模式不会自动打开仪表板。
 
-可以通过托盘菜单执行以下操作：
+使用托盘菜单执行以下操作：
 
-- 打开仪表盘。
-- 打开 `/dashboard/logs`。
-- 更改自动启动设置。
-- 停止 OmniRoute。
+- 打开仪表板。
+- 打开`/dashboard/logs`.
+- 更改自动启动。
+- 停止OmniRoute。
 
-不要将 `--tray` 与以下选项组合使用：
+不要将`--tray`与以下选项结合使用：
 
 - `--daemon`
 - `--log`
@@ -391,13 +391,13 @@ omniroute serve --tray
 
 这些模式需要不同的进程所有权。
 
-启用在下次登录计算机时启动：
+启用在下次机器登录时启动：
 
 ```bash
 omniroute autostart enable
 ```
 
-在 macOS、Windows 和图形化 Linux 会话中，自动启动会使用托盘模式。无头 Linux 会使用现有的 systemd 用户服务。
+自动启动在macOS、 Windows和图形Linux会话上使用托盘模式。 Headless Linux使用现有的 systemd 用户服务。
 
 禁用登录时启动：
 
@@ -407,16 +407,16 @@ omniroute autostart disable
 
 ### 卸载
 
-当你不再需要 OmniRoute 时，我们提供了两个快速脚本以进行彻底移除：
+当您不再需要OmniRoute时，我们提供两个快速脚本来彻底删除：
 
-| 命令                     | 操作                                                         |
-| ------------------------ | ------------------------------------------------------------ |
-| `npm run uninstall`      | 移除系统应用，但会**保留 `~/.omniroute` 中的数据库和配置**。 |
-| `npm run uninstall:full` | 移除应用，并永久**删除所有配置、密钥和数据库**。             |
+| 命令                     | 行动                                                      |
+| ------------------------ | --------------------------------------------------------- |
+| `npm run uninstall`      | 删除系统应用程序，但**保留您的DB和配置**在`~/.omniroute`. |
+| `npm run uninstall:full` | 永久删除应用程序AND**删除所有配置、密钥和数据库**。       |
 
-> 注意：要运行这些命令，请导航到 OmniRoute 项目文件夹（如果你克隆了该项目），然后运行它们。或者，如果是全局安装，只需运行 `npm uninstall -g omniroute`。
+> 注意：要运行这些命令，请导航到OmniRoute项目文件夹（如果您克隆了它）并运行它们。或者，如果全局安装，您可以简单地运行`npm uninstall -g omniroute`。
 
-### VPS 部署
+### VPS部署
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -432,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 或者：pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 部署（低内存）
+### PM2部署（低内存）
 
-对于 RAM 有限的服务器，请使用内存限制选项：
+对于RAM有限的服务器，请使用内存限制选项：
 
 ```bash
-# 使用 512MB 限制（默认）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 或使用自定义内存限制
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 或使用 ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-创建 `ecosystem.config.js`：
+创建`ecosystem.config.js`：
 
 ```javascript
 module.exports = {
@@ -475,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 构建镜像（默认 = runner-cli，预装 codex/claude/droid）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 可移植模式（推荐）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-有关包含 CLI 二进制文件的主机集成模式，请参阅主文档中的 Docker 部分。
+对于使用CLI二进制文件的主机集成模式，请参阅主文档中的Docker部分。
 
-### Void Linux (xbps-src)
+### 作废Linux (xbps-src)
 
-Void Linux 用户可以使用 `xbps-src` 交叉编译框架，以原生方式打包和安装 OmniRoute。此过程会自动完成 Node.js 独立构建，并编译所需的 `better-sqlite3` 原生绑定。
+void Linux用户可以使用`xbps-src`交叉编译框架原生打包安装OmniRoute 。这会自动执行Node.js独立构建以及所需的`better-sqlite3`本机绑定。
 
 <details>
-<summary><b>查看 xbps-src 模板</b></summary>
+<summary><b>查看xbps-src模板</b></summary>
 
 ```bash
-# 'omniroute' 的模板文件
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -513,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# 确定 node-gyp 的目标 CPU 架构
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -522,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 安装所有依赖项——跳过脚本
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) 构建 Next.js 独立软件包
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 将静态资源复制到独立软件包中
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) 编译 better-sqlite3 原生绑定
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 将编译后的绑定放入独立软件包中
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 移除特定于架构的 sharp 软件包
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) 复制 Next.js 静态分析遗漏的 pino 运行时依赖项：
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -558,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 防止安装后钩子移除空的 Next.js 应用路由器目录
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -586,30 +586,30 @@ post_install() {
 
 ### 环境变量
 
-| 变量                                    | 默认值                               | 描述                                                                            |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 签名密钥（**在生产环境中请更改**）                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 首次登录密码                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | 数据目录（数据库、使用情况、日志）                                              |
-| `PORT`                                  | 框架默认值                           | 服务端口（示例中为 `20128`）                                                    |
-| `HOSTNAME`                              | 框架默认值                           | 绑定主机（Docker 默认为 `0.0.0.0`）                                             |
-| `NODE_ENV`                              | 运行时默认值                         | 部署时设置为 `production`                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 提供给仪表板并暴露给服务器的公共基础 URL（取代旧版 `BASE_URL`）                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 云同步端点的基础 URL（取代旧版 `CLOUD_URL`）                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 用于生成 API 密钥的 HMAC 密钥                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | 对 `/v1/*` 强制要求 Bearer API 密钥                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 允许经过身份验证的仪表板用户按需查看存储的完整 API 密钥值                       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 服务器端刷新已缓存 Provider Limits 数据的频率；界面中的刷新按钮仍会触发手动同步 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 禁用写入、导入或恢复前的自动 SQLite 快照；手动备份仍可用                        |
-| `APP_LOG_TO_FILE`                       | `true`                               | 将应用程序日志和审计日志输出到磁盘                                              |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | 强制使用 `Secure` 身份验证 Cookie（适用于 HTTPS 反向代理之后）                  |
-| `CLOUDFLARED_BIN`                       | 未设置                               | 使用现有的 `cloudflared` 二进制文件，而不是由系统管理下载                       |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 托管 Quick Tunnels 的传输协议（`http2`、`quic` 或 `auto`）                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 堆内存限制（MB）                                                        |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 提示词缓存条目的最大数量                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 语义缓存条目的最大数量                                                          |
+| 多变的                                  | 默认                     | 描述                                                                                     |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _（自动生成）_           | JWT签名秘密—在第一次运行时自动生成并保留到`server.env`；当数据目录是临时目录时显式设置它 |
+| `INITIAL_PASSWORD`                      | _（未设置）_             | 第一个登录密码。 npm/source安装以`CHANGEME`开头：替换它。取消设置：入门向导              |
+| `DATA_DIR`                              | `~/.omniroute`           | 数据目录（数据库、使用情况、日志）                                                       |
+| `PORT`                                  | 框架默认                 | 服务端口（示例中为`20128` ）                                                             |
+| `HOSTNAME`                              | 框架默认                 | 绑定主机（Docker默认为`0.0.0.0`）                                                        |
+| `NODE_ENV`                              | 运行时默认值             | 设置`production`进行部署                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 公共基础URL出现在仪表板上并暴露给服务器（取代旧版`BASE_URL`）                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 云同步端点基础URL （替换旧版`CLOUD_URL`）                                                |
+| `API_KEY_SECRET`                        | _（自动生成）_           | HMAC生成的API密钥的秘密—在第一次运行时自动生成并保存到`server.env`                       |
+| `REQUIRE_API_KEY`                       | `false`                  | 在`/v1/*`上强制执行 Bearer API密钥                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允许经过身份验证的仪表板用户按需显示完整存储的API密钥值                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 缓存的提供者限制数据的服务器端刷新节奏； UI刷新按钮仍会触发手动同步                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 在writes/import/restore之前禁用自动SQLite快照；手动备份仍然有效                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | 启用应用程序和审核日志输出到磁盘                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | 强制`Secure` auth cookie（在HTTPS反向代理后面）                                          |
+| `CLOUDFLARED_BIN`                       | 未设置                   | 使用现有的`cloudflared`二进制文件而不是托管下载                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 托管快速隧道的传输（`http2`、 `quic`或`auto`）                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB中的Node.js堆限制                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 最大提示缓存条目数                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 最大语义缓存条目数                                                                       |
 
-有关完整的环境变量参考，请参阅 [README](../README.md)。
+有关完整的环境变量参考，请参阅[README](../README.md) 。
 
 ---
 
@@ -697,13 +697,13 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### 定制 OpenAI 兼容提供者
 
-任何使用OpenAI API （自托管代理、vLLM、第三方聚合器）的网关都可以添加为其自己的提供者节点：
+任何使用OpenAI API （自托管代理、 vLLM、第三方聚合器）的网关都可以添加为其自己的提供者节点：
 
 1. **提供者→添加OpenAI兼容**。
 2. **姓名**：节点的显示标签。
 3. **前缀**：路由名称。客户端将模型称为`<prefix>/<model>`，因此前缀为`mygw`节点服务`mygw/gpt-4o-mini`。必需的;没有字符限制。
 4. **API型**：网关服务的端点系列（聊天完成、响应、嵌入、音频、图像）。
-5. **基地URL** ： API根目录，直到并包括`/v1` （例如`https://gateway.example.com/v1`），而不是完整的`/chat/completions`路径。具有非标准路径的网关将其设置为**高级设置**（聊天路径，模型路径）。
+5. **基地URL** ： API根，直到并包括`/v1` （例如`https://gateway.example.com/v1`），而不是完整的`/chat/completions`路径。具有非标准路径的网关将其设置为**高级设置**（聊天路径，模型路径）。
 6. 这**API密钥（用于检查）**字段仅测试连接。创建节点后，打开并使用**添加连接**存储请求将使用的密钥。
 
 节点获得`openai-compatible-<apiType>-<uuid>`形式的内部 id；您永远不需要键入它，前缀是公共名称。
@@ -722,8 +722,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 这些密钥位于连接的`providerSpecificData`中（例如通过`PUT /api/providers/{id}`）：
 
-- `toolNameMaxLength` （整数，1-1024）— 用于OpenAI聊天格式兼容的连接，其网关拒绝长工具名称。较长的名称作为短别名发送并在响应中恢复。
-- `quotaEndpoint` — 网关的quota/credits端点，读取仪表板配额条和配额感知路由。适用于 OpenAI 和 Anthropic 兼容连接；完整的形状记录在`open-sse/services/usage/openaiCompatible.ts`中。
+- `toolNameMaxLength` （整数，1–1024） —用于OpenAI聊天格式兼容的连接，其网关拒绝长工具名称。较长的名称作为短别名发送并在响应中恢复。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Go和 Muse Code 的别名已超过 64 个字符，无需设置。连接值替换 Azure OpenAI / Azure AI Foundry 默认值（更严格网关后面的 Azure 连接）并设置自定义兼容节点的限制； OpenAI、 Mistral、 NVIDIA、 OpenCode Zen/Go和 Muse Code 保留其注册表限制并忽略它。
+- `quotaEndpoint` —网关的quota/credits端点，读取仪表板配额条和配额感知路由。适用于 OpenAI 和 Anthropic 兼容连接；完整的形状记录在`open-sse/services/usage/openaiCompatible.ts`中。
 
 ```json
 {
@@ -760,7 +760,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 只有发送到明确列入白名单的对等点URL的请求才会收到`X-OmniRoute-Peer-Trace`标头。网关拒绝重复实例ID或使用HTTP `508 Loop Detected`耗尽跳预算；普通上游提供者不接收对等元数据。
 
-对等链接不是数据库复制或主机故障转移。每个网关都保留独立的SQLite状态、缓存、速率计数器和会话。使用运行状况检查的反向代理或客户端故障转移来确保active/passive或active/active可用性，并且切勿将一个SQLite数据库挂载到多个正在运行的OmniRoute实例中。
+对等链接不是数据库复制或主机故障转移。每个网关都保留独立的SQLite状态、缓存、速率计数器和会话。使用运行状况检查的反向代理或客户端故障转移来实现active/passive或active/active可用性，并且切勿将一个SQLite数据库挂载到多个正在运行的OmniRoute实例中。
 
 ### 专用提供者路线
 
@@ -820,9 +820,9 @@ curl http://localhost:20128/api/models/catalog
 
 ### LLM网关智能（第9阶段）
 
-- **语义缓存**— 自动缓存非流、温度= 0 响应（使用`X-OmniRoute-No-Cache: true`绕过）
-- **请求幂等性**— 通过`Idempotency-Key`或`X-Request-Id`标头在 5 秒内删除重复请求
-- **进度追踪**— 通过`X-OmniRoute-Progress: true`标头选择加入SSE `event: progress`事件
+- **语义缓存**—自动缓存非流、温度= 0 响应（使用`X-OmniRoute-No-Cache: true`绕过）
+- **请求幂等性**—通过`Idempotency-Key`或`X-Request-Id` header 在 5 秒内对请求进行重复数据删除
+- **进度追踪**—通过`X-OmniRoute-Progress: true`标头选择加入SSE `event: progress`事件
 
 ---
 
@@ -853,29 +853,29 @@ curl http://localhost:20128/api/models/catalog
 
 | 战略                       | 描述                                                              |
 | -------------------------- | ----------------------------------------------------------------- |
-| **先填写**                 | 按优先级顺序使用帐户 - 主帐户处理所有请求，直到不可用             |
+| **先填写**                 | 按优先级顺序使用帐户—主帐户处理所有请求，直到不可用               |
 | **循环赛**                 | 循环浏览具有可配置粘性限制的所有帐户（默认值：每个帐户 3 次调用） |
-| **P2C （两种选择的力量）** | 随机选择 2 个账户并转至更健康的账户 — 平衡负载与健康意识          |
+| **P2C （两种选择的力量）** | 随机选择 2 个账户并路由至更健康的账户—平衡负载与健康意识          |
 | **随机的**                 | 使用 Fisher-Yates shuffle 为每个请求随机选择一个帐户              |
 | **最少使用**               | 路由到具有最旧`lastUsedAt`时间戳的帐户，均匀分配流量              |
 | **成本优化**               | 路由至具有最低优先级值的帐户，针对成本最低的提供者进行优化        |
 
-**高级组合和自动策略**（可按组合或通过`auto/*`前缀进行配置 - 请参阅[AUTO-COMBO.md](../routing/AUTO-COMBO.md) ）：
+**高级组合和自动策略**（可按组合配置或通过`auto/*`前缀—参见[AUTO-COMBO.md](../routing/AUTO-COMBO.md) ）：
 
-- `priority`严格的顺序，绝不循环赛
-- `weighted` — 按模型权重划分的比例流量
-- `fill-first` — 耗尽第一个模型直到达到限制
+- `priority` —严格顺序，绝不循环赛
+- `weighted` —按模型权重划分的比例流量
+- `fill-first` —耗尽第一个模型，直到达到限制
 - `round-robin` / `strict-random` / `random`
 - `p2c` （两种选择的力量）
 - `least-used`和`cost-optimized`
-- `auto`所有考生的分数驱动
-- `lkgp` （最后一个已知的良好提供者）- 固定到最后一个成功的提供者，然后退回到规则
-- `context-optimized` — 选择具有最大自由上下文窗口的模型
-- `context-relay` — 链接长上下文模型以进行后续轮次
+- `auto` —对所有考生进行分数驱动
+- `lkgp` （最后一个已知的良好提供者） —固定到最后一个成功的提供者，然后退回到规则
+- `context-optimized` —选择具有最大自由上下文窗口的模型
+- `context-relay` —链接长上下文模型以进行后续回合
 
 #### 外部粘性会话标头
 
-对于外部会话亲和性（例如，反向代理后面的Claude Code/Codex代理），发送：
+对于外部会话关联（例如，反向代理后面的Claude Code/Codex代理），发送：
 
 ```http
 X-Session-Id: your-session-key
@@ -978,32 +978,32 @@ omniroute combo create free-stack \
 
 OmniRoute通过五个组件实现提供者级弹性：
 
-1. **请求队列和节奏**— 系统级请求整形：
-   - **每分钟请求数 (RPM)** — 每个帐户每分钟的最大请求数
-   - **请求之间的最短时间**— 请求之间的最小间隔（以毫秒为单位）
-   - **最大并发请求数**— 每个帐户的最大同时请求数
+1. **请求队列和节奏**—系统级请求整形：
+   - **每分钟请求数 (RPM)** —每个账户每分钟最大请求数
+   - **请求之间的最短时间**—请求之间的最小间隔（以毫秒为单位）
+   - **最大并发请求数**—每个帐户的最大同时请求数
 
-2. **连接冷却**— 可重试失败后单个连接的按身份验证类型配置：
-   - **基础冷却时间**— 可重试上游故障的默认冷却窗口
-   - **使用上游重试提示**— 尊重权威的`Retry-After`或在提供时重置提示
-   - **最大退避步数**— 重复失败的最大指数退避级别
+2. **连接冷却**可重试失败后单个连接的— Per-auth-type 配置：
+   - **基础冷却时间**—可重试上游故障的默认冷却窗口
+   - **使用上游重试提示**—尊重权威`Retry-After`或在提供时重置提示
+   - **最大退避步数**—重复失败的最大指数退避级别
 
-3. **供应商断路器**— 跟踪端到端提供程序故障，将提供程序标记为在配置的警告阈值处降级，并在达到配置的故障阈值时打开断路器：
-   - **退化阈值**— 进入`DEGRADED`之前连续提供者失败
-   - **失败阈值**— 进入`OPEN`之前连续提供者失败
-   - **重置超时**— 再次测试提供者之前的时间窗口
-   - **CLOSED** (Healthy) — 请求正常流动
-   - **DEGRADED** — 在跟踪增加的故障时请求仍然流动
-   - **OPEN** — 多次失败后提供者被暂时阻止
-   - **HALF_OPEN** — 测试提供者是否已恢复
+3. **供应商断路器**—跟踪端到端提供程序故障，将提供程序标记为在配置的警告阈值处降级，并在达到配置的故障阈值时打开断路器：
+   - **退化阈值**—进入`DEGRADED`之前连续提供者失败
+   - **失败阈值**—进入`OPEN`之前连续提供者失败
+   - **重置超时**—再次测试提供者之前的时间窗口
+   - **CLOSED** （健康） —请求正常流动
+   - **DEGRADED** —请求仍在流动，同时跟踪增加的故障
+   - **OPEN** — Provider 多次失败后被暂时屏蔽
+   - **HALF_OPEN** —测试提供者是否已恢复
 
    连接范围的`429`速率限制保持不变**连接冷却**并且不计入提供者破坏者。
 
    提供者断路器运行时状态显示在**仪表板→健康**仅有的。
 
-4. **等待冷却**— 如果每个候选连接已经冷却， OmniRoute可以等待最早的冷却并自动重试相同的客户端请求。
+4. **等待冷却**—如果每个候选连接已经冷却， OmniRoute可以等待最早的冷却并自动重试相同的客户端请求。
 
-5. **速率限制自动检测**— 当上游提供程序返回显式等待窗口时，这些提示会在启用该设置时覆盖本地连接冷却时间。
+5. **速率限制自动检测**—当上游提供程序返回显式等待窗口时，这些提示会在启用该设置时覆盖本地连接冷却时间。
 
 **专业提示：**使用**健康**页面用于在中断后检查并重置实时提供者断路器。 “弹性”页面仅更改配置。
 
@@ -1045,15 +1045,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 设置页面分为**7 个标签**为了方便导航：
 
-| 选项卡     | 内容                                                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **一般的** | 系统存储工具、默认行为、端点隧道可见性                                                                                    |
-| **外貌**   | 主题控件 (light/dark/system)、侧边栏可见性、 Cloudflare/Tailscale/ngrok隧道卡的面板切换                                   |
-| **AI**     | 思考预算（直通/自动剥离/自定义/自适应 - 参见[THINKING_BUDGET.md](./THINKING_BUDGET.md) ）、全局系统提示、提示缓存统计信息 |
-| **安全**   | Login/Password设置、 IP访问控制、 `/models`的API身份验证、提供者阻止、提示注入防护                                        |
-| **路由**   | 全局路由策略（首先填充/循环/ P2C /随机/最少使用/成本优化）、通配符模型别名、后备链、组合默认值                            |
-| **弹力**   | 请求队列、连接冷却、提供者断路器配置和等待冷却行为                                                                        |
-| **先进的** | 全局代理配置（HTTP/SOCKS5），每个提供者代理覆盖                                                                           |
+| 选项卡     | 内容                                                                                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| **一般的** | 系统存储工具、默认行为、端点隧道可见性                                                                           |
+| **外貌**   | 主题控件 (light/dark/system)、侧边栏可见性、 Cloudflare/Tailscale/ngrok隧道卡的面板切换                          |
+| **AI**     | 思考预算（直通/自动条带/自定义/自适应—参见[THINKING_BUDGET](./THINKING_BUDGET.md) ）、全局系统提示、提示缓存统计 |
+| **安全**   | Login/Password设置、 IP访问控制、 `/models`的API身份验证、提供者阻止、提示注入防护                               |
+| **路由**   | 全局路由策略（首先填充/循环/ P2C /随机/最少使用/成本优化）、通配符模型别名、后备链、组合默认值                   |
+| **弹力**   | 请求队列、连接冷却、提供者断路器配置和等待冷却行为                                                               |
+| **先进的** | 全局代理配置（HTTP/SOCKS5），每个提供者代理覆盖                                                                  |
 
 一般不再重复只读日志记录和缓存注释。数据库保留和优化设置通过`/api/settings/database`持久化；手动缓存清除使用`DELETE /api/cache`。请求和代理日志行上限由`CALL_LOGS_TABLE_MAX_ROWS`和`PROXY_LOGS_TABLE_MAX_ROWS`控制。
 
@@ -1066,7 +1066,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | 选项卡   | 目的                                                            |
 | -------- | --------------------------------------------------------------- |
 | **预算** | 通过daily/weekly/monthly预算和实时跟踪设置每个API密钥的支出限制 |
-| **定价** | 查看和编辑模型定价条目 - 每个提供者每 1K input/output代币的成本 |
+| **定价** | 查看和编辑模型定价条目 每个提供者每 1K input/output代币的—成本  |
 
 ```bash
 # API: Set a budget
@@ -1112,7 +1112,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **文本转语音 (`POST /v1/audio/speech`)**提供者：
 
-- `openai/` （tts-1、tts-1-hd）
+- `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` （光环）
 - `nvidia/` (喜鹊TTS)
@@ -1285,36 +1285,36 @@ OmniRoute 集成了云端编码智能体（**OpenAI Codex Cloud**、**Devin**、
 
 ---
 
-## 🛠️ 以编程方式管理
+## 🛠️程序化管理
 
-你可以使用带有 `manage` scope 的 **Bearer 密钥**，通过 HTTP 管理每个 OmniRoute 资源（提供者、组合、密钥、设置）。
+您可以使用HTTP来管理每个OmniRoute资源（提供程序、组合、键、设置）**具有`manage`范围的承载密钥**。
 
-在 **Dashboard → API Keys → New Key → Scope: manage** 中生成密钥，然后：
+生成密钥**仪表板→ API密钥→新密钥→范围：管理**， 然后：
 
 ```bash
-# 列出提供者
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# 添加提供者连接
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# 创建组合
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# 列出/创建 API 密钥
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-请参阅 [API_REFERENCE.md](../reference/API_REFERENCE.md)，了解完整的端点目录以及请求/响应架构。
+有关完整端点目录和request/response架构，请参阅[API_REFERENCE.md](../reference/API_REFERENCE.md) 。
 
 ---
 

@@ -32,6 +32,18 @@ export const grok_cliProvider: RegistryEntry = {
       unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],
     },
     {
+      // Grok 4.7 on the faster lane Grok Build uses. cli-chat-proxy accepts it, so it
+      // carries grok-4.7's window and efforts. Vision is left undeclared until probed.
+      id: "grok-4.7-build-fast",
+      name: "Grok 4.7 Build Fast",
+      contextLength: 500000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+      toolCalling: true,
+      targetFormat: "openai-responses",
+      unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],
+    },
+    {
       id: "grok-4.6",
       name: "Grok 4.6",
       contextLength: 500000,
@@ -50,6 +62,15 @@ export const grok_cliProvider: RegistryEntry = {
       contextLength: 500000,
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high"],
+      toolCalling: true,
+      targetFormat: "openai-responses",
+      unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],
+    },
+    {
+      // Accepted by cli-chat-proxy but not advertised by its /models. No window, effort
+      // list or vision flag is declared: none has been confirmed against the live upstream.
+      id: "grok-code-fast-1",
+      name: "Grok Code Fast 1",
       toolCalling: true,
       targetFormat: "openai-responses",
       unsupportedParams: ["presencePenalty", "frequencyPenalty", "logprobs", "topLogprobs"],

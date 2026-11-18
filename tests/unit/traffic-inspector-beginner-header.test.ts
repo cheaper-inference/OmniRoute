@@ -25,7 +25,8 @@ test("Traffic Inspector page passes translated title, subtitle, and purpose", ()
 test("Traffic Inspector client renders purpose-first header when props are provided", () => {
   const clientSource = fs.readFileSync(clientPath, "utf8");
   assert.match(clientSource, /title\s*&&/);
-  assert.match(clientSource, /subtitle\s*&&/);
+  // The subtitle is optional: rendered only when present, never as an empty description (#18077).
+  assert.match(clientSource, /subtitle\s*\?\s*<span>\{subtitle\}<\/span>\s*:\s*undefined/);
   assert.match(clientSource, /purpose\s*&&/);
 });
 
@@ -36,9 +37,6 @@ test("Traffic Inspector beginner i18n keys exist in en.json", () => {
     en.sidebar.trafficInspectorSubtitle,
     "Inspect request and response traffic from your apps"
   );
-  assert.equal(
-    typeof en.sidebar.trafficInspectorPurpose,
-    "string"
-  );
+  assert.equal(typeof en.sidebar.trafficInspectorPurpose, "string");
   assert.ok(en.sidebar.trafficInspectorPurpose.length > 20);
 });

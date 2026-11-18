@@ -13,12 +13,14 @@
  * keep it bounded:
  *
  *   1. The walk charges a step budget and never exceeds it (pure, no DB).
- *   2. A duplicate-heavy long-history resolve completes in bounded wall time
- *      (DB-backed end-to-end through resolveConversationId).
+ *   2. A duplicate-heavy resolve hashes each large turn once and stays within
+ *      the shared work budget (DB-backed end-to-end through resolveConversationId).
  */
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { syncBuiltinESMExports } from "node:module";
 
 import { mkdtempSync } from "node:fs";
 import { join } from "node:path";
@@ -115,7 +117,7 @@ test("findReconnectMatch: budget exhaustion degrades to no-match, never a wrong 
   assert.equal(starved.match, null, "a zero budget must yield no match, not an unverified one");
 });
 
-test("resolveConversationId: duplicate-heavy long history resolves in bounded time (#7847)", async () => {
+test("resolveConversationId: duplicate-heavy long history uses bounded hashing work (#7847)", async (t) => {
   // Shape mirrors production coding-agent traffic: ~800 turns where every
   // other turn is a byte-identical short tool output (the duplicate-anchor
   // amplifier the tracker's own docs describe) and the rest are large
@@ -157,6 +159,35 @@ test("resolveConversationId: duplicate-heavy long history resolves in bounded ti
   });
   assert.equal(first.isNewConversation, true);
 
+  let hashes = 0;
+  const largeTurnHashes = new Map<string, number>();
+  const hashProbe = t.mock.method(
+    crypto,
+    "createHmac",
+    new Proxy(crypto.createHmac, {
+      apply(create, receiver, args) {
+        const hmac = Reflect.apply(create, receiver, args);
+        if (args[1] === "omniroute-conversation-fingerprint-v1") {
+          hashes++;
+          hmac.update = new Proxy(hmac.update, {
+            apply(update, instance, updateArgs) {
+              const text = updateArgs[0];
+              if (typeof text === "string" && text.length >= pad.length) {
+                largeTurnHashes.set(text, (largeTurnHashes.get(text) ?? 0) + 1);
+              }
+              return Reflect.apply(update, instance, updateArgs);
+            },
+          });
+        }
+        return hmac;
+      },
+    })
+  );
+  syncBuiltinESMExports();
+  t.after(() => {
+    hashProbe.mock.restore();
+    syncBuiltinESMExports();
+  });
   const startedAt = Date.now();
   const second = await resolveConversationId({
     body: body2,
@@ -167,13 +198,18 @@ test("resolveConversationId: duplicate-heavy long history resolves in bounded ti
   });
   const elapsedMs = Date.now() - startedAt;
 
-  // Before the bound: ~10 s+ of synchronous HMAC work on this exact shape.
-  // After: the walk is budget-capped and turn hashes are memoized, so the
-  // whole resolve stays in the tens-of-milliseconds range. 2 s leaves ample
-  // headroom for slow CI while still failing hard on a regression.
+  t.diagnostic(`duplicate-heavy resolve: ${elapsedMs}ms, ${hashes} fingerprint hashes`);
+  // Count the expensive work itself; shared-runner scheduling can inflate wall time.
+  // Losing memoization or the shared walk budget still fails these assertions.
+  assert.equal(largeTurnHashes.size, N / 2, "the probe must observe every large input turn");
+  for (const message of body2.messages) {
+    if (message.role === "user") {
+      assert.equal(largeTurnHashes.get(`user ${message.content}`), 1, "hash full turn text once");
+    }
+  }
   assert.ok(
-    elapsedMs < 2_000,
-    `duplicate-heavy resolve took ${elapsedMs}ms (budget/memoization regression)`
+    hashes <= DEFAULT_RECONNECT_MAX_STEPS + 2 * N + 2,
+    `shared walk budget plus one content hash and one new-node hash per turn: ${hashes}`
   );
 
   // Editing every large turn diverges from the recorded chain — the tracker

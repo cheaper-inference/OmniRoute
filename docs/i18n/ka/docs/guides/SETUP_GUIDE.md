@@ -20,14 +20,16 @@
 
 ## ინსტალაციის მეთოდები
 
-### npm (რეკომენდებული)
+### npm (რეკომენდებულია)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-მართვის პანელი იხსნება მისამართზე `http://localhost:20128`, ხოლო API-ის საბაზო URL არის `http://localhost:20128/v1`.
+დაფა იხსნება `http://localhost:20128` ზე და API ბაზა URL არის `http://localhost:20128/v1`.
+
+> **npm მომხმარებლები:** თუ npm აფრთხილებს, რომ ინსტალაციის სკრიპტები დაბლოკილია (მაგ., `omniroute`, `better-sqlite3`), იხილეთ [პრობლემების მოგვარება — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-ის მომხმარებლებისთვის:** `--allow-build` ალამი საჭიროა `better-sqlite3`-ისა და `@swc/core`-ისთვის ნატიური აგების სკრიპტების ჩასართავად. `pnpm approve-builds -g` ბრძანება pnpm v11-ში გლობალური ინსტალაციებისთვის მხარდაჭერილი არ არის.
+> **pnpm მომხმარებლები:** `--allow-build` დროშა საჭიროა `better-sqlite3` და `@swc/core` ის მშობლიური build სკრიპტების ჩასართავად. `pnpm approve-builds -g` ბრძანება არ არის მხარდაჭერილი გლობალური ინსტალაციისთვის pnpm v11-ზე.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR პაკეტი](https://aur.archlinux.org/packages/omniroute-bin) აინსტალირებს OmniRoute-ს და უზრუნველყოფს systemd-ის მომხმარებლის სერვისს.
+[AUR პაკეტი](https://aur.archlinux.org/packages/omniroute-bin) აინსტალირებს OmniRoute და უზრუნველყოფს სისტემურ მომხმარებლის სერვისს.
 
-### საწყისი კოდიდან
+### წყაროდან
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **შენიშვნა Windows-ისთვის:** ნაგულისხმევად, OmniRoute იყენებს `%APPDATA%\omniroute`-ს, როდესაც ძველი `%USERPROFILE%\.omniroute` დირექტორია არ არსებობს. მონაცემთა დირექტორიის სხვა მდებარეობის ასარჩევად დააყენეთ `DATA_DIR`.
+> **Windows შენიშვნა:** ნაგულისხმევად, OmniRoute იყენებს `%APPDATA%\omniroute` როდესაც მოძველებული `%USERPROFILE%\.omniroute` დირექტორია არ არის. დააყენეთ `DATA_DIR` სხვა მონაცემთა დირექტორიას მდებარეობის ასარჩევად.
 
-> **შენიშვნა:** პირველი გაშვებისას `npm install` ავტომატურად ქმნის `.env`-ს `.env.example`-ის საფუძველზე. შემდგომი ინსტალაციები არსებულ `.env`-ს არ გადაწერს, ამიტომ მორგებული პარამეტრები შენარჩუნდება. ხელახლა შესაქმნელად განმეორებით გაშვებამდე წაშალეთ `.env`.
+> **შენიშვნა:** `npm install` ავტომატურად წარმოქმნის `.env` `.env.example` დან პირველი გაშვებისას. შემდგომი ინსტალაციები არ გადაწერს არსებულ `.env`, ამიტომ პერსონალიზაცია შენარჩუნებულია. ხელახლა დათესვისთვის წაშალეთ `.env` ხელახლა გაშვებამდე.
 
 ### Docker
 
-Docker-ის სრული დაყენებისთვის, Compose პროფილებისა და Caddy HTTPS-ის ჩათვლით, იხილეთ [Docker-ის სახელმძღვანელო](./DOCKER_GUIDE.md).
+იხილეთ [Docker გზამკვლევი](./DOCKER_GUIDE.md) Docker სრული დაყენებისთვის, პროფილების შედგენისა და Caddy HTTPS ჩათვლით.
 
 ### დესკტოპის აპლიკაცია (Electron)
 
-OmniRoute-ს მოჰყვება Electron 41-სა და electron-builder 26.10-ზე აგებული დესკტოპის გარსი. ხელმისაწვდომი სკრიპტები (სამუშაო სივრცის ძირეული დირექტორია):
+OmniRoute აგზავნის დესკტოპის შეფუთვას, რომელიც აგებულია Electron 41 + ელექტრონის შემქმნელზე 26.10. ხელმისაწვდომი სკრიპტები (სამუშაო სივრცის root):
 
 ```bash
-npm run electron:dev          # დესკტოპის გაშვება ავტომატური გადატვირთვით
-npm run electron:build        # მიმდინარე OS-ისთვის აგება (ავტომატურად აღმოჩენილი)
-npm run electron:build:win    # Windows-ის ინსტალატორი (NSIS + პორტატიული)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # შეფუთული აგების საბაზისო ტესტირება
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-დესკტოპის ინსტალატორების გამოშვებები თან ერთვის GitHub Releases-ს. Electron-ის სრული დეტალური მიმოხილვისთვის (ხელმოწერა, IPC ხიდი, დისტრიბუტივები) იხილეთ [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(მოგვიანებით ეტაპზე შექმნილი)_.
+დესკტოპის ინსტალატორების გამოშვებები ერთვის GitHub Releases-ს. სრული Electron ღრმა ჩაყვინთვისთვის (ხელმოწერა, IPC ხიდი, განაწილება), იხილეთ [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### უთავო სერვერი (CI/ავტომატიზაცია)
+### უთავო სერვერი (CI/automation)
 
-ოპერატორის ჩარევის გარეშე დასაყენებლად (Docker, Kubernetes, CI) გამოიყენეთ:
+უყურადღებო დაყენებისთვის (Docker, Kubernetes, CI), გამოიყენეთ:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-გარემოს ცვლადებთან (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` და სხვ.) ერთად ეს საშუალებას გაძლევთ, სრულად სკრიპტირებადი გზით გაუშვათ OmniRoute-ის ეგზემპლარი.
+env vars-თან ერთად (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` და ა.შ.), ეს საშუალებას გაძლევთ დაატრიალოთ OmniRoute ინსტანცია სრულად სკრიპტირებადი.
 
 ### CLI პარამეტრები
 
-| ბრძანება                | აღწერა                                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| `omniroute`             | სერვერის გაშვება (`PORT=20128`, API და მართვის პანელი ერთ პორტზე)                               |
-| `omniroute setup`       | პაროლისა და პირველი პროვაიდერის CLI-ით ეტაპობრივი კონფიგურაცია                                  |
-| `omniroute doctor`      | ლოკალური მდგომარეობის შემოწმებების გაშვება სერვერის გაშვების გარეშე                             |
-| `omniroute providers`   | CLI-დან პროვაიდერების აღმოჩენა, ჩამოთვლა, ვალიდაცია და ტესტირება                                |
-| `omniroute config`      | CLI ხელსაწყოს კონფიგურაცია — კონფიგურაციების ჩამოთვლა, მიღება, დაყენება და ვალიდაცია            |
-| `omniroute status`      | ოფლაინ მდგომარეობის პანელი — ვერსია, DB, ხელსაწყოები, კონფიგურაცია                              |
-| `omniroute logs`        | API-დან გამოყენების ჟურნალების ნაკადის მიღება (`--follow`-ის მხარდაჭერით)                       |
-| `omniroute update`      | OmniRoute-ის განახლებების შემოწმება ან გამოყენება                                               |
-| `omniroute provider`    | პროვაიდერებთან კავშირების მართვა — დამატება, ჩამოთვლა, წაშლა, ტესტირება, ნაგულისხმევად დაყენება |
-| `omniroute --port 3000` | კანონიკური/API პორტის 3000-ზე დაყენება                                                          |
-| `omniroute --mcp`       | MCP სერვერის გაშვება (stdio ტრანსპორტი)                                                         |
-| `omniroute --no-open`   | ბრაუზერის ავტომატურად არ გახსნა                                                                 |
-| `omniroute --help`      | დახმარების ჩვენება                                                                              |
+| ბრძანება                | აღწერა                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `omniroute`             | სერვერის დაწყება (`PORT=20128`, API და დაფა იმავე პორტზე)                       |
+| `omniroute setup`       | ხელმძღვანელობს CLI ჩასვლა პაროლისა და პირველი პროვაიდერისთვის                   |
+| `omniroute doctor`      | გაუშვით ადგილობრივი ჯანმრთელობის შემოწმებები სერვერის გაშვების გარეშე           |
+| `omniroute providers`   | აღმოაჩინეთ, ჩამოთვალეთ, დაადასტურეთ და შეამოწმეთ პროვაიდერები CLI დან           |
+| `omniroute config`      | CLI ინსტრუმენტის კონფიგურაციის — სია, კონფიგურაციის მიღება, დაყენება, დამოწმება |
+| `omniroute status`      | ოფლაინ სტატუსის დაფის — ვერსია, DB, ინსტრუმენტები, კონფიგურაცია                 |
+| `omniroute logs`        | სტრიმინგის გამოყენების ჟურნალები API დან (მხარდაჭერილია `--follow`)             |
+| `omniroute update`      | შეამოწმეთ ან გამოიყენეთ OmniRoute განახლებები                                   |
+| `omniroute provider`    | მართეთ პროვაიდერის კავშირები — დამატება, სია, წაშლა, ტესტირება, ნაგულისხმევი    |
+| `omniroute --port 3000` | დააყენეთ canonical/API პორტი 3000-ზე                                            |
+| `omniroute --mcp`       | გაუშვით MCP სერვერი (stdio transport)                                           |
+| `omniroute --no-open`   | არ გახსნათ ბრაუზერი ავტომატურად                                                 |
+| `omniroute --help`      | დახმარების ჩვენება                                                              |
 
-უთავო დაყენების სკრიპტირება შესაძლებელია ალმებით ან გარემოს ცვლადებით:
+უთავო დაყენება შეიძლება დაიწეროს დროშებით ან გარემოს ცვლადებით:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-გაუშვით ლოკალური დიაგნოსტიკა მართვის პანელის გახსნის გარეშე:
+გაუშვით ადგილობრივი დიაგნოსტიკა დაფის გახსნის გარეშე:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-მართეთ პროვაიდერები SSH-დან ან სკრიპტებიდან მართვის პანელის გახსნის გარეშე:
+მართეთ პროვაიდერები SSH დან ან სკრიპტებიდან დაფის გახსნის გარეშე:
 
 ```bash
 omniroute providers available
@@ -198,41 +200,45 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## პროტოკოლების დაყენება (MCP + A2A)
+## პროტოკოლის დაყენება (MCP + A2A)
 
-### MCP-ის დაყენება (Model Context Protocol)
+### MCP Setup (მოდელის კონტექსტური პროტოკოლი)
 
-გაუშვით MCP ტრანსპორტი stdio რეჟიმში:
+დაიწყეთ MCP ტრანსპორტი stdio რეჟიმში:
 
 ```bash
 omniroute --mcp
 ```
 
-რეკომენდებული შემოწმების პროცესი:
+რეკომენდებული ვალიდაციის ნაკადი:
 
 ```bash
-# 1. გაუშვით MCP სერვერი
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. თქვენი MCP კლიენტიდან გამოიძახეთ:
-omniroute_get_health        # უნდა დააბრუნოს სისტემის მდგომარეობა
-omniroute_list_combos       # უნდა დააბრუნოს აქტიური კომბინაციები
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ან გაუშვით სრული E2E ნაკრები:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP კლიენტის კონფიგურაცია
 
-**Claude Code:**
+**Claude კოდი:**
+
+Claude კოდი აკავშირებს HTTP ზე, რომელიც `omniroute --mcp` (stdio) არ იწყება. HTTP ტრანსპორტი ნაგულისხმევად გამორთულია: ჯერ ჩართეთ ის გაშვებულ სერვერზე. როდესაც დაფაზე შესვლა ჩართულია, მოთხოვნა რწმუნებათა სიგელის გარეშე მიიღება `401`, ასე რომ გადასცეთ API გასაღები, რომელიც შეიცავს `mcp:connect` (ან `manage`); გასაღებს `manage`/`admin` გარეშე ასევე სჭირდება თითოეული ხელსაწყოს ფარგლები (იხ [MCP სერვერი → MCP ინსტრუმენტის ფარგლები](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-დაამატეთ თქვენს MCP პარამეტრებში:
+დაამატეთ თქვენს MCP პარამეტრებს (stdio, გასაღებით, რათა აბონენტს ჰქონდეს მთავარი):
 
 ```json
 {
@@ -240,23 +246,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ის სრული დოკუმენტაცია:** [MCP სერვერის README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტი, IDE კონფიგურაციები, Python/TS/Go კლიენტები.
+ან, როდესაც `mcpTransport` არის `streamable-http` (დააყენეთ იგი `/dashboard/mcp` ზე ან `omniroute mcp enable --transport streamable-http` ზე), მიუთითეთ კლიენტის დისტანციური MCP სერვერის ჩანაწერი `http://localhost:20128/api/mcp/stream` ზე.
 
-### A2A-ის დაყენება (Agent-to-Agent Protocol)
+გასაღები მოძრაობს როგორც `Authorization: Bearer <api-key>` (იხ. [MCP სერვერი → დისტანციური წვდომა](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) დისტანციური ჰოსტებისთვის; დისტანციურ გასაღებს სჭირდება `mcp:connect` პლუს მისი read/write არეები).
 
-შეამოწმეთ Agent Card:
+**სრული MCP დოკუმენტაცია:** [MCP სერვერი README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტები, IDE კონფიგურაციები, Python/TS/Go კლიენტები. ოპერატორის მითითება შეკუმშვის CCR/dedup ხელსაწყოებისთვის (მარკერები, წინაპირობები, თითო ხელსაწყოს სკოპი, მოძიების პაგინაცია, დიაგნოსტიკა): [შეკუმშვის ძრავები → წინაპირობები / ოპერატორის სახელმძღვანელო](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (აგენტიდან აგენტის პროტოკოლი)
+
+გადაამოწმეთ აგენტის ბარათი:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-გაგზავნეთ დავალება:
+დავალების გაგზავნა:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +277,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ის სრული დოკუმენტაცია:** [A2A სერვერის README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, ნაკადური გადაცემა, დავალების სასიცოცხლო ციკლი.
+**სრული A2A დოკუმენტაცია:** [A2A სერვერი README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, სტრიმინგი, დავალების სასიცოცხლო ციკლი.
 
 ---
 
@@ -323,12 +336,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ის (xbps-src) შაბლონი
+## Void Linux (xbps-src) შაბლონი
 
-Void Linux-ის მომხმარებლებს შეუძლიათ `xbps-src`-ის გამოყენებით ნატიური პაკეტის აგება. შეინახეთ ეს ბლოკი ფაილად `srcpkgs/omniroute/template`:
+Void Linux მომხმარებლებისთვის შეგიძლიათ შექმნათ მშობლიური პაკეტი `xbps-src` გამოყენებით. შეინახეთ ეს ბლოკი, როგორც `srcpkgs/omniroute/template`:
 
 ```bash
-# შაბლონის ფაილი 'omniroute'-ისთვის
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +352,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# თითოეული გამოშვებისთვის საკონტროლო ჯამი ხელახლა შექმენით შემდეგი ბრძანებით:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -38,24 +38,19 @@ un atbalsta `any` vai `all` atbilstību.
 `connection` kārtula tiek izvērtēta tikai tad, ja neviena agrīnā kārtula nav uzvarējusi un jau ir atlasīts konkrēts pakalpojumu sniedzēja
 savienojums. Tā drīkst mainīt tikai piepūles līmeni un budžetu.
 
-## Piepūles līmenis un budžets
+## Pūles un budžets
 
-`sourceEffort` pieņem `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` un
-`ultra`. `missing` nozīmē, ka pieprasījums nesatur ne diskrētu piepūles līmeni, ne domāšanas slēdzi,
-ne domāšanas budžetu. Tādēļ signālam, kurā norādīts tikai budžets, atbilst vienīgi `any`.
+`sourceEffort` pieņem `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` un `ultra`. `missing` nozīmē, ka pieprasījums nesatur nedz diskrētu piepūli, nedz domāšanas slēdzi vai pārdomātu budžetu. Tāpēc tikai budžeta signālam atbilst tikai `any`.
 
 `effortMode` ir trīs varianti:
 
-- `inherit` saglabā klienta piepūles līmeni, vienlaikus ļaujot mainīt modeli vai kombināciju.
-- `default` iestata `targetEffort` tikai tad, ja nav norādīts neviens tiešs spriešanas signāls.
-- `force` aizstāj diskrēto piepūles līmeni ar `targetEffort`.
+- `inherit` saglabā klienta pūles, vienlaikus ļaujot modelim vai kombinācijai mainīties.
+- `default` iestata `targetEffort` tikai tad, ja nav precīza argumentācijas signāla.
+- `force` diskrēto piepūli aizstāj ar `targetEffort`.
 
-Neatkarīgi no tā `budgetAction` var būt `preserve`, `remove` vai `set`. `force` kopā ar `none` noņem
-visus atpazītos piepūles līmeņa un budžeta laukus. `none` kopā ar `set` nav derīga kombinācija.
+Neatkarīgi `budgetAction` var būt `preserve`, `remove` vai `set`. `force` ar `none` noņem visus atpazītos piepūles un budžeta laukus, pēc tam iestata `reasoning_effort: "none"`, jo daži pakalpojumu sniedzēji ieslēdz domāšanu, ja lauka nav. Pakalpojumu sniedzēji, kas noraida burtisko `none` tiek pielāgoti nosūtīšanas laikā `open-sse/executors/base/reasoningEffort.ts`. Komandas kods to kartē `low`, izņemot atbildes formas pieprasījumus (`input` bez `messages`), kur tas saglabā `none`. Programmā Cloudflare Workers AI (`cloudflare-ai`) modeļi, kas noraida `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), iegūst `low`; citi strādnieki AI modeļi saglabā `none`. Lauka nomešana šajā gadījumā nav iespējama, jo bez piepūles tiek izpildīts modeļa noklusējuma līmenis. `none` kopā ar `set` nav derīgs.
 
-Pieprasījumi, kuru mērķis ir zināmi nesaderīgi modeļi, tiek noraidīti pirms augšupstraumes izsaukuma. Kombināciju
-mērķiem nesaderīgie ieraksti tiek noņemti; ja neviens nepaliek, pieprasījums atgriež statusu `400`.
-Nezināmi spēju dati rada brīdinājumu, un kārtula paliek aktīva.
+Pieprasījumi, kuru mērķauditorija ir zināmi nesaderīgi modeļi, tiek noraidīti pirms augšupējā zvana. Kombinētajiem mērķiem nesaderīgie ieraksti tiek noņemti; ja neviena nepaliek, pieprasījums atgriež statusu `400`. Nezināmu iespēju dati rada brīdinājumu un atstāj kārtulu aktīvu.
 
 ## Drošība un transporti
 

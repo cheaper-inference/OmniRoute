@@ -29,23 +29,18 @@
 6. **근거를 기록하세요.** PR 템플릿에 실행한 명령, 추가하거나 변경한 모든 테스트 파일,
    마이그레이션 또는 기능 플래그, 아직 대기 중인 CI 전용 검증을 나열하세요.
 
-## 변경 유형별 권장 경로
+## 변경 유형별 골든 경로
 
-아래 명령은 최소한의 집중 검사이며, 변경한 동작을 직접 검증하는 테스트를 생략해도 된다는 의미가
-아닙니다.
+아래 명령은 최소한의 집중 검사이며, 변경한 동작을 직접 다루는 테스트를 건너뛸 수 있는 권한이 아닙니다.
 
-### 프로바이더
+### 공급자
 
 **계약**
 
-- `src/shared/constants/providers/`의 프로바이더 정의 및
-  `src/shared/constants/providers.ts`에서의 구성.
-- `open-sse/config/providerRegistry.ts` 또는 분리된 레지스트리 파일의 모델 및 기능.
-- 해당하는 경우 실행기/변환기 선택, OAuth 또는 API 키 구성, 대시보드 자산 및 생성된
-  프로바이더 참조.
-- 공개 자격 증명에는 `resolvePublicCred()`를 사용해야 하며, 오류 응답에는 공유된 정제
-  오류 헬퍼를 사용해야 합니다. `docs/security/PUBLIC_CREDS.md`(git에 포함되지만 `/docs`에는 컴파일되지 않음)와
-  [오류 정제](../security/ERROR_SANITIZATION.md)를 참조하세요.
+- `src/shared/constants/providers/` 의 공급자 정의 및 `src/shared/constants/providers.ts` 의 구성.
+- `open-sse/config/providerRegistry.ts` 또는 추출된 레지스트리 파일의 모델 및 기능.
+- Executor/translator 선택, OAuth 또는 API 키 구성 및 대시보드 자산. 재생성된 `docs/reference/PROVIDER_REFERENCE.md` 또는 README 다이어그램을 커밋하지 마십시오. 릴리스 새로 고침으로 이를 다시 작성합니다(`check:pr-derived-paths` 이를 전달하는 기능 PR 에 실패합니다).
+- 공개 자격 증명은 `resolvePublicCred()` 사용해야 합니다. 오류 응답은 공유된 삭제된 오류 도우미를 사용해야 합니다. `docs/security/PUBLIC_CREDS.md` (git; `/docs` 로 컴파일되지 않음) 및 [Error Sanitization 을](../security/ERROR_SANITIZATION.md) 참조하세요.
 
 **집중 루프**
 
@@ -54,42 +49,39 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # 카탈로그가 변경될 때 실행하고, 생성된 diff를 커밋하세요
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-영향을 받는 모든 요청 계열도 테스트하세요: 채팅, Responses, 이미지, 임베딩, 오디오 또는 비디오.
-생성된 카탈로그와 골든 diff는 계약 변경으로 검토하고, 맹목적으로 수용하지 마세요.
+또한 영향을 받는 모든 요청 계열(채팅, 응답, 이미지, 임베딩, 오디오 또는 비디오)을 테스트하세요. 계약 변경에 따라 생성된 카탈로그 및 골든 차이점을 검토합니다. 맹목적으로 받아들이지 마십시오.
 
 ### 라우팅
 
 **계약**
 
-- `src/shared/constants/routingStrategies.ts`의 공개 전략 값 및 UI 메타데이터.
-- `open-sse/services/combo.ts` 및 `open-sse/services/combo/`의 디스패치와 순서 지정.
-- 콤보 스키마, 영속성, 복원력 상태, 모델 기능 및 API/UI 컨트롤.
-- 동작이 변경되는 경우 [자동 콤보 엔진](../routing/AUTO-COMBO.md) 및 복원력 문서.
+- `src/shared/constants/routingStrategies.ts` 의 공개 전략 값 및 UI 메타데이터.
+- `open-sse/services/combo.ts` 및 `open-sse/services/combo/` 에서 발송 및 주문.
+- 콤보 스키마, 지속성, 탄력성 상태, 모델 기능 및 API/UI 제어.
+- 동작 변경 시 [자동 콤보 엔진](../routing/AUTO-COMBO.md) 및 복원력 문서화.
 
 **집중 루프**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # 전략 또는 디스패치 변경
-npm run check:known-symbols      # 전략 등록 변경
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-로컬에서는 결정론적인 모의 업스트림 테스트를 사용하세요. 실제 콤보 스모크 테스트에는 자격 증명이 필요하며
-수동으로 수행해야 하므로 CI를 대체할 수 없습니다.
+결정론적 모의 업스트림 테스트를 로컬에서 사용합니다. 라이브 콤보 연기에는 자격 증명이 필요하며 CI 대체품이 아닌 수동입니다.
 
 ### UI / UX
 
 **계약**
 
-- `src/app/` 및 `src/shared/components/` 아래의 Next.js 라우트/페이지 및 공유 컴포넌트 경계.
-- API 응답 형태, 로딩/빈 상태/오류 상태, 키보드 및 화면 읽기 프로그램 동작,
-  반응형 레이아웃, 테마 및 로케일 확장.
-- `src/i18n/messages/en.json`의 영어 UI 원본 문자열. 새로운 사용자 대상 문구를 하드 코딩하지 마세요.
+- Next.js route/page 및 `src/app/` 및 `src/shared/components/` 아래의 공유 구성 요소 경계.
+- API 응답 모양, loading/empty/error 상태, 키보드 및 화면 판독기 동작, 반응형 레이아웃, 테마 및 로케일 확장.
+- `src/i18n/messages/en.json` 의 영어 UI 소스 문자열; 새로운 사용자용 사본을 하드 코딩하지 마십시오.
 
 **집중 루프**
 
@@ -100,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-상호작용 또는 시각적 변경의 경우 앱을 실행하고 좁은 뷰포트와 넓은 뷰포트를 모두 확인하세요. CI에서는
-프로덕션 빌드와 더 광범위한 테스트 스위트를 실행하지만, 시각적 동작에는 변경에 적합한 집중 컴포넌트 테스트,
-Playwright 테스트 또는 문서화된 수동 검사가 여전히 필요합니다.
+상호 작용이나 시각적 변경을 위해 앱을 실행하고 좁은 뷰포트와 넓은 뷰포트를 모두 확인하세요. CI 프로덕션 빌드와 더 광범위한 제품군을 실행합니다. 시각적 동작에는 여전히 집중된 구성 요소인 Playwright 또는 변경 사항에 적합한 문서화된 수동 확인이 필요합니다.
 
 ### i18n
 
 **계약**
 
-- `src/i18n/messages/en.json`은 UI 원본이고, `config/i18n.json`은 로케일 원본입니다.
-- CLI 카탈로그는 `bin/cli/locales/` 아래에 별도로 있습니다.
-- ICU 자리표시자와 태그를 정확히 보존하세요. 제품/프로바이더/모델 이름,
-  프로토콜 및 헤더 이름, 명령, 코드/JSON 식별자, URL, 환경 변수 또는
-  `OmniRoute`, `OAuth`, `MCP`, `A2A`와 같은 보호 용어를 번역하지 마세요. 현재 원본 목록은
-  `scripts/i18n/glossary/protected-terms.json`입니다.
+- `src/i18n/messages/en.json` 는 UI 소스입니다. `config/i18n.json` 는 로케일 소스입니다.
+- CLI 카탈로그는 `bin/cli/locales/` 아래에 별도로 존재합니다.
+- ICU 자리표시자와 태그를 정확하게 유지합니다. product/provider/model 이름, 프로토콜 및 헤더 이름, 명령, code/JSON 식별자, URLs, 환경 변수 또는 `OmniRoute`, `OAuth`, `MCP` 및 `A2A` 와 같은 보호 용어를 번역하지 마십시오. 현재 소스 목록은 `scripts/i18n/glossary/protected-terms.json` 입니다.
+
+PR 기능은 `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`)만 편집합니다. 다른 로케일은 릴리스 새로 고침 또는 번역 웨이브(`docs/guides/I18N.md` → "Feature PRs touch `en.json` only")에 의해 릴리스당 한 번씩 완료됩니다. `npm run check:pr-derived-paths` 다른 로케일 카탈로그를 편집하는 기능 PR 에 실패합니다.
 
 **집중 루프**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI 문자열/카탈로그가 변경될 때
 npm run lint
 ```
 
-이는 기존 시스템을 위한 지침이지, 도구나 키 모델을 확장하라는 의미가 아닙니다.
-대체 시스템을 설계하는 동안 i18n 패치는 필요한 부분만 정밀하게 변경하세요. 작업에서 생성된 번역을 명시적으로 요구하고
-결과 diff를 검토한 경우가 아니라면 외부 서비스를 호출하는 번역 명령을 실행하지 마세요.
+`--mode=pr` 없으면 이러한 게이트는 로컬에서 릴리스 모드로 실행되고 사이클이 `en.json` 에 추가되거나 다시 작성된 모든 키를 보고합니다. 그것은 PR 의 작업이 아니라 릴리스 새로 고침의 작업입니다.
+
+이는 도구나 핵심 모델을 확장하라는 제안이 아니라 기존 시스템에 대한 지침입니다. 교체 시스템이 설계되는 동안 i18n 패치를 수술적으로 유지하십시오. 작업에 명시적으로 생성된 번역이 필요하고 결과 차이점을 검토한 경우가 아니면 외부 서비스를 호출하는 번역 명령을 실행하지 마십시오.
 
 ### CLI
 
 **계약**
 
-- `bin/cli/`의 공개 명령어와 플래그, 생성된 API 명령어, 종료 코드, stdout/stderr 및
-  JSON 출력 형식, 구성/환경 동작, 패키지에 포함되는 파일.
-- CLI 사용자 대상 문자열은 CLI i18n 계층을 사용해야 하며 `en`/`pt-BR` 카탈로그를 일치시켜야 합니다.
-- 지원되는 런타임으로서 Node와 게시된 바이너리 계약을 유지합니다.
+- `bin/cli/` 의 공개 명령 및 플래그, 생성된 API 명령, 종료 코드, stdout/stderr 및 JSON 출력 형태, config/environment 동작 및 패키지 파일.
+- CLI 사용자 대상 문자열은 CLI i18n 계층( `bin/cli/locales/en.json` 에 존재하는 `t()` 키)을 사용해야 합니다. PR 기능은 `en.json` 만 편집합니다. `pt-BR` 및 기타 로케일은 릴리스 시 완료됩니다.
+- Node를 지원되는 런타임 및 게시된 바이너리 계약으로 유지합니다.
 
-**집중 검증 루프**
+**집중 루프**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # 생성된/번들된 CLI 변경 사항
-npm run check:pack-policy     # 패키지 공개 범위 변경 사항
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-동작이 파싱, 파일 또는 종료 상태에 따라 달라지는 경우 임시 데이터 디렉터리에서 정확한 명령어를 사용합니다.
-CI는 더 광범위한 패키지 아티팩트 및 생태계 검사를 수행합니다.
+동작이 구문 분석, 파일 또는 종료 상태에 따라 달라지는 경우 임시 데이터 디렉토리에서 정확한 명령을 사용하십시오. CI 더 광범위한 패키지 아티팩트 및 생태계 검사를 수행합니다.
 
-### 데이터베이스
+### 데이터 베이스
 
 **계약**
 
-- `src/lib/db/` 아래의 도메인 모듈. 특정 모듈을 직접 가져옵니다(기존 `localDb.ts` 재내보내기 계층은 제거되었습니다).
-- `src/lib/db/migrations/` 아래의 번호가 지정된 멱등성 SQL 마이그레이션, 트랜잭션 안전성, 업그레이드
-  동작, 인덱스 및 스키마의 영향을 받는 모든 호출자.
-- 라우트와 핸들러에서는 원시 SQL을 직접 실행하지 않습니다.
+- `src/lib/db/` 아래의 도메인 모듈; 특정 모듈을 직접 가져옵니다(이전 `localDb.ts` 재내보내기 계층이 제거됨).
+- `src/lib/db/migrations/` 에서 번호가 매겨진 멱등성 SQL 마이그레이션, 트랜잭션 안전, 업그레이드 동작, 인덱스 및 스키마의 영향을 받는 모든 호출자.
+- 경로와 핸들러는 원시 SQL 직접 발행하지 않습니다.
 
-**집중 검증 루프**
+**집중 루프**
 
 ```bash
 npm run check:migration-numbering
@@ -171,32 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-마이그레이션을 추가할 때는 새 데이터베이스와 이전 스키마에서의 업그레이드를 모두 테스트합니다. 데이터베이스 테스트는
-정리 중에 핸들을 닫고 `resetDbInstance()`를 호출해야 합니다. 최선 노력 방식의 Bun 어댑터 경로가 변경되는 경우에만
-`npm run test:bun:db`를 실행합니다. Node가 여전히 기준입니다.
+마이그레이션을 추가할 때 새로운 데이터베이스를 테스트하고 이전 스키마에서 업그레이드하세요. 데이터베이스 테스트는 정리 중에 핸들을 닫고 `resetDbInstance()` 호출해야 합니다. 최선의 Bun 어댑터 경로가 변경될 때만 `npm run test:bun:db` 실행하십시오. 노드는 권한을 유지합니다.
 
-### 빌드 / 배포
+### 빌드/배포
 
 **계약**
 
-- 루트 및 워크스페이스 매니페스트/잠금 파일, `scripts/build/`, Next.js 독립 실행형 어셈블리, `dist/`
-  패키지 내용, Electron 플랫폼 메타데이터, CI 워크플로 및 배포 센티널.
-- 지원되는 Node 버전 범위와 `CLAUDE.md`에서 허용 목록에 포함된 Bun 사용은 그대로 유지해야 합니다.
-- 빌드 아티팩트는 추적하지 않으며, 종속성, 라이선스, 워크플로 및 패키지 정책을 적용합니다.
+- 루트 및 작업 공간 manifests/lockfile, `scripts/build/`, Next.js 독립형 어셈블리, `dist/` 패키지 콘텐츠, Electron 플랫폼 메타데이터, CI 워크플로 및 배포 센티널.
+- 지원되는 노드 범위와 `CLAUDE.md` 에서 허용 목록에 있는 Bun 사용은 그대로 유지되어야 합니다.
+- 빌드 아티팩트는 추적되지 않습니다. 종속성, 라이선스, 워크플로 및 패키지 정책이 적용됩니다.
 
-**집중 검증 루프**
+**집중 루프**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # 종속성 또는 잠금 파일 변경 사항
-npm run check:pack-policy      # 게시된 패키지 공개 범위 변경 사항
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-변경 사항이 컴파일, 독립 실행형 어셈블리, 자산 또는 런타임 번들링에 영향을 미치는 경우에만 로컬에서
-`npm run build`를 사용합니다. 릴리스/배포 검증에만 `npm run build:release`를 사용합니다. CI 빌드는
-최종 크로스 플랫폼 신호이며, 플랫폼별 Electron 변경 사항에는 해당하는 집중 빌드 또는 스모크 테스트 증거가 필요합니다.
+변경 사항이 컴파일, 독립형 어셈블리, 자산 또는 런타임 번들링에 영향을 미치는 경우에만 `npm run build` 로컬로 사용하세요. release/deploy 검증에만 `npm run build:release` 사용하십시오. CI 의 빌드는 최종 크로스 플랫폼 신호입니다. 플랫폼별 Electron 변경에는 일치하는 집중된 빌드 또는 연기 증거가 필요합니다.
 
 ## 공유 머신용 개발자 스크립트
 

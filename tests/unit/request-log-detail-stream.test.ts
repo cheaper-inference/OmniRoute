@@ -7,7 +7,9 @@ import React from "react";
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 
-const { default: RequestLoggerDetail } =
+// The default export is a kit Sheet, whose Radix portal renders nothing on the server. These
+// tests render the panel inside it, which holds everything they assert on.
+const { RequestLoggerDetailPanel: RequestLoggerDetail } =
   await import("../../src/shared/components/RequestLoggerDetail.tsx");
 
 // #9245 (7ca73697b0) localized RequestLoggerDetail (useTranslations("requestLogger.detail")),
@@ -28,53 +30,61 @@ function renderToStaticMarkup(element: React.ReactElement) {
   );
 }
 
-test("event stream shows only when debugEnabled and appears above legacy response", () => {
-  const html = renderToStaticMarkup(
-    React.createElement(RequestLoggerDetail, {
-      log: {
-        status: 504,
-        method: "POST",
-        path: "/v1/chat/completions",
-        timestamp: "2026-04-09T21:27:08.000Z",
-        duration: 2500,
-        provider: "gemini",
-        sourceFormat: "openai-chat",
-        model: "test-model",
-        tokens: { in: 1, out: 1 },
-      },
-      detail: {
-        pipelinePayloads: {
-          streamChunks: {
-            provider: ['data: {"content": "hello"}\n\n'],
-            openai: ['data: {"choices":[{"delta":{"content":"hi"}}]}\n\n'],
-          },
-          // No providerResponse here so payloadSections will be empty and the legacy
-          // response payload should still be rendered; Event Stream must appear above it.
+test("event stream shows only when debugEnabled and its tab comes before the legacy response", () => {
+  const props = {
+    log: {
+      status: 504,
+      method: "POST",
+      path: "/v1/chat/completions",
+      timestamp: "2026-04-09T21:27:08.000Z",
+      duration: 2500,
+      provider: "gemini",
+      sourceFormat: "openai-chat",
+      model: "test-model",
+      tokens: { in: 1, out: 1 },
+    },
+    detail: {
+      pipelinePayloads: {
+        streamChunks: {
+          provider: ['data: {"content": "hello"}\n\n'],
+          openai: ['data: {"choices":[{"delta":{"content":"hi"}}]}\n\n'],
         },
-        responseBody: "{}",
+        // No providerResponse here so payloadSections will be empty and the legacy
+        // response payload should still be rendered; Event Stream must come before it.
       },
+      responseBody: "{}",
+    },
 
-      loading: false,
-      debugEnabled: true,
-      onClose: () => {},
-      onCopy: async () => true,
-    })
+    loading: false,
+    debugEnabled: true,
+    onClose: () => {},
+    onCopy: async () => true,
+  };
+  const eventsHtml = renderToStaticMarkup(
+    React.createElement(RequestLoggerDetail, { ...props, initialTab: "events" })
+  );
+  const payloadsHtml = renderToStaticMarkup(
+    React.createElement(RequestLoggerDetail, { ...props, initialTab: "payloads" })
   );
 
   assert.notEqual(
-    html.indexOf(">Provider Event Stream<"),
+    eventsHtml.indexOf(">Provider Event Stream<"),
     -1,
     "Event Stream should be present when debugEnabled"
   );
-  // Ensure the legacy response payload is present and that the Event Stream appears above it
+  // Ensure the legacy response payload is present and that the Event Stream tab comes before it
   assert.notEqual(
-    html.indexOf(">Response Payload (Legacy)<"),
+    payloadsHtml.indexOf(">Response Payload (Legacy)<"),
     -1,
     "Legacy response payload should be present"
   );
+  const eventStreamTab = eventsHtml.indexOf(">Event Stream<");
+  const payloadsTab = eventsHtml.indexOf(">Payloads<");
+  assert.notEqual(eventStreamTab, -1, "Event Stream tab should be present when debugEnabled");
+  assert.notEqual(payloadsTab, -1, "Payloads tab should be present");
   assert(
-    html.indexOf(">Provider Event Stream<") < html.indexOf(">Response Payload (Legacy)<"),
-    "Event Stream should appear before Response Payload (Legacy)"
+    eventStreamTab < payloadsTab,
+    "Event Stream tab should come before the tab holding Response Payload (Legacy)"
   );
 });
 
@@ -106,6 +116,7 @@ test("Provider Event Stream and Client Event Stream panes are collapsible", () =
         },
         responseBody: "{}",
       },
+      initialTab: "events",
       loading: false,
       debugEnabled: true,
       onClose: () => {},
@@ -146,6 +157,7 @@ test("event stream hidden when debugEnabled is false", () => {
         },
         responseBody: "{}",
       },
+      initialTab: "events",
       loading: false,
       debugEnabled: false,
       onClose: () => {},
@@ -157,6 +169,11 @@ test("event stream hidden when debugEnabled is false", () => {
     html.indexOf(">Provider Event Stream<"),
     -1,
     "Event Stream should be hidden when debugEnabled is false"
+  );
+  assert.equal(
+    html.indexOf(">Event Stream<"),
+    -1,
+    "Event Stream tab should be hidden when debugEnabled is false"
   );
 });
 
@@ -183,6 +200,7 @@ test("Provider Event Stream defaults to the rendered JsonView tree, not the raw 
         },
         responseBody: "{}",
       },
+      initialTab: "events",
       loading: false,
       debugEnabled: true,
       onClose: () => {},
@@ -271,6 +289,7 @@ test("request logger detail renders stream chunks correctly", () => {
     React.createElement(RequestLoggerDetail, {
       log,
       detail,
+      initialTab: "events",
       loading: false,
       debugEnabled: true,
       onClose: () => {},

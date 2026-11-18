@@ -6,8 +6,6 @@
  * directories out of the staged dist/ tree and out of the final tarball.
  */
 
-import { isRuntimeDocsMirrorPath } from "./docsMirrorRuntime.mjs";
-
 const STAGING_FORBIDDEN_DIRECTORIES = [
   "app.__qa_backup",
   "coverage",
@@ -31,6 +29,11 @@ export const APP_STAGING_REMOVAL_PATHS: string[] = [
   // past the registry 413 limit for npm.org.  It's only needed on systems
   // with a CUDA GPU — users install CUDA providers separately.
   "node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_cuda.so",
+  // 2026-11-17 (owner decision): the translated /docs mirrors (~397 MB unpacked, ~96 MB of the
+  // packed tarball) pushed omniroute 3.8.54 to 206.1 MB and the registry answered 413. npm
+  // installs serve /docs in English (docsI18nRender falls back when a mirror is missing);
+  // Docker and Electron keep the mirrors, since they ship the standalone build directly.
+  "docs/i18n",
 ];
 
 export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
@@ -100,15 +103,11 @@ export const APP_STAGING_ALLOWED_PATH_PREFIXES: string[] = [
 ];
 
 /**
- * Allowed paths that are neither one exact file nor a whole prefix. 2026-11-03 (owner
- * decision): npm installs serve the translated /docs pages, so dist/ keeps the docs mirrors
- * the route can read (`docs/i18n/<locale>/docs/<section>/<PAGE>.md`, see docsMirrorRuntime.mjs)
- * and nothing else under docs/i18n. A prefix would also admit the README, CHANGELOG and agent
- * guide mirrors and the operator-internal security pages.
+ * Allowed paths that are neither one exact file nor a whole prefix. Empty since 2026-11-17:
+ * it used to admit the translated docs mirrors (2026-11-03), which now stay out of the npm
+ * package entirely (see the docs/i18n entry in APP_STAGING_REMOVAL_PATHS).
  */
-export const APP_STAGING_ALLOWED_PATH_MATCHERS: Array<(filePath: string) => boolean> = [
-  isRuntimeDocsMirrorPath,
-];
+export const APP_STAGING_ALLOWED_PATH_MATCHERS: Array<(filePath: string) => boolean> = [];
 
 export const PACK_ARTIFACT_ALLOWED_EXACT_PATHS: string[] = APP_STAGING_ALLOWED_EXACT_PATHS.map(
   (filePath: string) => `dist/${filePath}`
@@ -122,6 +121,21 @@ export const PACK_ARTIFACT_ALLOWED_PATH_MATCHERS: Array<(filePath: string) => bo
   APP_STAGING_ALLOWED_PATH_MATCHERS.map(
     (matches) => (filePath: string) => filePath.startsWith("dist/") && matches(filePath.slice(5))
   );
+
+/**
+ * Packed-size ceiling for the npm tarball. The registry rejected omniroute 3.8.54 with E413 at
+ * 206.1 MB packed, after 3.8.53 went through at 193.6 MB, and the package grows ~12 MB per
+ * release. Failing check:pack-artifact below that limit catches the growth before the last
+ * step of a release does.
+ */
+export const PACK_ARTIFACT_MAX_PACKED_BYTES = 190_000_000;
+
+export function exceedsPackedSizeBudget(
+  packedBytes: number,
+  maxBytes: number = PACK_ARTIFACT_MAX_PACKED_BYTES
+): boolean {
+  return Number.isFinite(packedBytes) && packedBytes > maxBytes;
+}
 
 export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   ".env.example",
@@ -264,10 +278,6 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // Cleartext h2c upgrade guard (dist/server-ws.mjs import) — same boot-crash class as above.
   "dist/h2c-upgrade-guard.cjs",
   "dist/webdav-handler.mjs",
-  // 2026-11-03: one translated docs mirror, so a packaging change that drops the mirrors
-  // (they only reach dist/ through the standalone docs copy) fails here instead of silently
-  // serving English to every npm install.
-  "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
   "bin/cli/program.mjs",
   // Direct imports of bin/omniroute.mjs — bin/cli/ is only an allowlist PREFIX, so a
   // file vanishing from the tarball never fails the unexpected-paths check; only these
@@ -277,6 +287,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // GHSA-2pg2-xm9r-8544: private-by-default DATA_DIR / .env modes, called on every boot.
   "bin/cli/privateDataDir.mjs",
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
+  // `formatCliError` — the top-level CLI failure handler (OMNIROUTE_DEBUG_STACK opt-in).
+  "bin/cli/utils/formatCliError.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",
   // The allowlist of keys a working-directory .env may set; read on every CLI boot.

@@ -10,7 +10,7 @@ export function OmniSandboxTab(): JSX.Element {
   return (
     <div className="grid gap-4">
       <Card>
-        <h3 className="font-semibold mb-4">{t("sandboxConfig")}</h3>
+        <h3 className="mb-4">{t("sandboxConfig")}</h3>
         <div className="grid gap-4">
           <div className="flex items-center justify-between p-3 rounded-lg bg-surface/30">
             <div>

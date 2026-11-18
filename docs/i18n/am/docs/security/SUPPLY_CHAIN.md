@@ -31,29 +31,11 @@ osv ወይም Trivy በአዲስ በተገለጸ CVE ምክንያት ቀይ ሲ�
 
 ሁለቱም መግቢያዎች መሳሪያው በማይኖርበት ጊዜ ወይም መለኪያው ሲከሽፍ (osv-scanner በPATH ውስጥ ከሌለ፣ osv.dev/network ሊደረስበት የማይችል ከሆነ፣ ልክ ያልሆነ JSON) **በጥሩ ሁኔታ ይዘላሉ** (exit 0) — የ**መለኪያ** ውድቀት በጭራሽ አያግድም፣ የ**ተለካ** መበላሸት (regression) ብቻ ነው የሚያግደው።
 
-## የታወቁ ተቀባይነት ያላቸው ስጋቶች
+## የጡረታ ጥገኝነት ስጋት
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+የስር መቆለፊያ ፋይል ከተሰካው የፈጣን እግር ማጎልበቻ መሳሪያ በኋላ `extract-zip` ወይም የጥገኝነት ጠርዝን አያካትትም። ይህ ከዚህ ቀደም ተቀባይነት ያለውን `promptfoo` → `@openai/codex-security` → `extract-zip` ሰንሰለት በ #14482 ውስጥ ይከታተላል። በ `tests/unit/extract-zip-14482-exposure.test.ts` ውስጥ ያለው የድጋሚ ቼኮች እንደገና መጀመሩን አይቀበሉም እና ከአምራች ኮድ ወደ ሀገር ውስጥ የሚገቡ ክልከላዎችን እንደያዙ ይቆያል።
 
-`extract-zip@2.0.1` ያልተጠገኑ ሁለት ከፍተኛ-አደጋ የሲምሊንክ-ትራቨርሳል ማስጠንቀቂያዎችን ይዟል።
-ከላይ ባለው የCVE ልዩነት መፍትሄ "ምንም የላይኛው ፍሰት ጥገና የለም" በሚለው ቅርንጫፍ መሰረት፣ ይህ
-**ተቀባይነት ያለው ስጋት** ነው፣ ማሻሻያ አይደለም፦
-
-- **ሰንሰለት:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`።
-  በ`package-lock.json` የተረጋገጠ — በጠቅላላው የጥገኝነት ዛፍ ውስጥ አንድ ጥቅል ብቻ
-  (`@openai/codex-security`) `extract-zip`ን ያውጃል፣ እና አንድ ጥቅል ብቻ
-  (`promptfoo`) `@openai/codex-security`ን ያውጃል።
-- **በሰንሰለቱ ውስጥ የትኛውም የተስተካከለ ልቀት የለም።** `extract-zip@2.0.1` (በ2020 የታተመ) የጥቅሉ የመጨረሻ ልቀት ነው — ጥገና የሌለው ነው። `@openai/codex-security`'s
-  የአሁኑ npm-latest (`0.1.29`) አሁንም `extract-zip@2.0.1`ን ይጎትታል።
-- **ከምርት ሊደረስበት የማይችል ነው።** `promptfoo` ለልማት ጥገኝነት ብቻ ነው (በ`dependencies` ስር በጭራሽ ያልተዘረዘረ)፣ እና በ`src/`፣ `open-sse/`፣ ወይም `bin/` ስር ያለ ምንም ፋይል የ`extract-zip` npm ጥቅልን አያስመጣም — የOmniRoute የራሱ `extractZip()` ረዳት
-  (`src/lib/versionManager/binaryManager.ts:93`) ወደ ቤተኛ `unzip`/`tar` ይወጣል
-  እና ተዛማጅነት የሌለው ነው። `@openai/codex-security` የራሱን የሲምሊንክ-ትራቨርሳል መከላከያ
-  በextract-zip's onEntry callback ላይ ይልካል።
-- **አትስጡ** `extract-zip`ን በ`package.json` `overrides` በኩል ቅጽል ስም — ብቸኛው ሊተካ የሚችል አማራጭ Electron-org-internal ሲሆን ከ`@openai/codex-security` የራሱ onEntry/defaultDirMode/defaultFileMode ፍተሻዎች ጋር ከኤፒአይ ጋር የማይጣጣም ነው፤ እሱን መሻር የዚያን ጥቅል የደህንነት ፍተሻዎች በዝምታ ይሰብራል።
-- **መሰረታዊ መስመር:** የተለካው osv `vulnCount` (3) አስቀድሞ ከቀዘቀዘው
-  `config/quality/quality-baseline.json` መሰረታዊ መስመር (27) በታች ነው — የመቆለፊያ ለውጥ አያስፈልግም።
-- **የመመለሻ መከላከያ:** `tests/unit/extract-zip-14482-exposure.test.ts` ሰንሰለቱን እና ከምርት የማያስመጣውን የማይለወጥ ነገር ያረጋግጣል፤ ከሁለቱ አንዱ ከተበላሸ (ለምሳሌ የወደፊት PR `extract-zip`ን ከምርት ሊደረስበት የሚችል ካደረገ) CI ይወድቃል።
-- **ክትትል:** ጉዳይ #14482።
+የአሁኑ የጥገኝነት መጠገን ተኳሃኝነትን ከAzuure ማንነት MSAL ደንበኛ እና የጌት-uri FTP ደንበኛን ይሽራል። Azure token ማግኘት እና FTP ሰርስሮ ማውጣት ቁጥጥር በሚደረግባቸው ማጓጓዣዎች ተፈትኗል። ሁለቱም OpenCode ፓኬጆች የራሳቸውን የግንባታ እና የሙከራ ስብስቦች ያካሂዳሉ። የመመዝገቢያ አማካሪ ቆጠራዎች በጊዜ ነጥብ ላይ ያሉ መለኪያዎች ናቸው እና የመቆለፊያ ፋይሉ ከተፈጸመ በኋላ ሊለወጡ ይችላሉ.
 
 ## የኋላ መዝገብ: የስኮርካርድ ማስጠንቀቂያ → አጋጅ
 

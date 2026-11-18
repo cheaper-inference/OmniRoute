@@ -18,16 +18,18 @@
 
 ---
 
-## Phương thức cài đặt
+## Phương pháp cài đặt
 
-### npm (khuyến nghị)
+### npm (được khuyến nghị)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Bảng điều khiển sẽ mở tại `http://localhost:20128` và URL cơ sở của API là `http://localhost:20128/v1`.
+Bảng điều khiển mở tại `http://localhost:20128` và API cơ sở URL là `http://localhost:20128/v1`.
+
+> **người dùng npm:** Nếu npm cảnh báo rằng tập lệnh cài đặt đã bị chặn (ví dụ: `omniroute`, `better-sqlite3`), hãy xem [Khắc phục sự cố — npm install-scripts bị chặn](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Người dùng pnpm:** cờ `--allow-build` là bắt buộc để bật các tập lệnh build gốc cho `better-sqlite3` và `@swc/core`. Lệnh `pnpm approve-builds -g` không được hỗ trợ cho các bản cài đặt toàn cục trên pnpm v11.
+> **người dùng pnpm:** cờ `--allow-build` là bắt buộc để kích hoạt tập lệnh xây dựng gốc cho `better-sqlite3` và `@swc/core`. Lệnh `pnpm approve-builds -g` không được hỗ trợ cho cài đặt toàn cầu trên pnpm v11.
 
-### Arch Linux (AUR)
+### Vòm Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Gói AUR](https://aur.archlinux.org/packages/omniroute-bin) cài đặt OmniRoute và cung cấp một dịch vụ người dùng systemd.
+[Gói AUR](https://aur.archlinux.org/packages/omniroute-bin) cài đặt OmniRoute và cung cấp dịch vụ người dùng systemd.
 
-### Từ mã nguồn
+### Từ nguồn
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Lưu ý dành cho Windows:** Theo mặc định, OmniRoute sử dụng `%APPDATA%\omniroute` khi thư mục cũ `%USERPROFILE%\.omniroute` không tồn tại. Đặt `DATA_DIR` để chọn một vị trí thư mục dữ liệu khác.
+> **lưu ý Windows :** Theo mặc định, OmniRoute sử dụng `%APPDATA%\omniroute` khi không có thư mục `%USERPROFILE%\.omniroute` kế thừa. Đặt `DATA_DIR` để chọn vị trí thư mục dữ liệu khác.
 
-> **Lưu ý:** `npm install` tự động tạo `.env` từ `.env.example` trong lần chạy đầu tiên. Các lần cài đặt tiếp theo sẽ không ghi đè lên `.env` hiện có, vì vậy các tùy chỉnh sẽ được giữ nguyên. Để khởi tạo lại, hãy xóa `.env` trước khi chạy lại.
+> **Ghi chú:** `npm install` tự động tạo `.env` từ `.env.example` trong lần chạy đầu tiên. Các lần cài đặt tiếp theo sẽ không ghi đè `.env` hiện có, do đó các tùy chỉnh được giữ nguyên. Để gieo lại, hãy xóa `.env` trước khi chạy lại.
 
 ### Docker
 
-Xem [Hướng dẫn Docker](./DOCKER_GUIDE.md) để biết cách thiết lập Docker đầy đủ, bao gồm các cấu hình Compose và Caddy HTTPS.
+Xem [Hướng dẫn Docker](./DOCKER_GUIDE.md) để biết cách thiết lập Docker hoàn chỉnh bao gồm Cấu hình soạn thảo và Caddy HTTPS.
 
-### Ứng dụng máy tính (Electron)
+### Ứng dụng dành cho máy tính để bàn (Electron)
 
-OmniRoute đi kèm một trình bao ứng dụng máy tính được xây dựng trên Electron 41 + electron-builder 26.10. Các tập lệnh khả dụng (thư mục gốc của workspace):
+OmniRoute cung cấp một trình bao bọc máy tính để bàn được xây dựng trên Electron 41 + electron-builder 26.10. Các tập lệnh có sẵn (root không gian làm việc):
 
 ```bash
-npm run electron:dev          # Chạy ứng dụng máy tính với tính năng tải lại nóng
-npm run electron:build        # Build cho hệ điều hành hiện tại (được tự động phát hiện)
-npm run electron:build:win    # Trình cài đặt Windows (NSIS + bản portable)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Kiểm thử nhanh bản build đã đóng gói
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Các bản phát hành của trình cài đặt ứng dụng máy tính được đính kèm vào GitHub Releases. Để tìm hiểu chuyên sâu đầy đủ về Electron (ký mã, cầu nối IPC, các bản phân phối), hãy xem [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(được tạo ở giai đoạn sau)_.
+Các bản phát hành của trình cài đặt trên máy tính để bàn được đính kèm với Bản phát hành GitHub. Để biết thông tin chi tiết về Electron đầy đủ (ký tên, cầu IPC, bản phân phối), hãy xem [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Máy chủ không giao diện (CI/tự động hóa)
+### Máy chủ không đầu (CI/automation)
 
-Đối với các thiết lập không cần giám sát (Docker, Kubernetes, CI), hãy sử dụng:
+Đối với các thiết lập không giám sát (Docker, Kubernetes, CI), hãy sử dụng:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Kết hợp với các biến môi trường (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, v.v.), cách này cho phép bạn khởi chạy một phiên bản OmniRoute có thể được tự động hóa hoàn toàn bằng tập lệnh.
+Kết hợp với các env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, v.v.), điều này cho phép bạn tạo ra một phiên bản OmniRoute hoàn toàn có thể viết được.
 
 ### Tùy chọn CLI
 
-| Lệnh                    | Mô tả                                                                     |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `omniroute`             | Khởi động máy chủ (`PORT=20128`, API và bảng điều khiển trên cùng cổng)   |
-| `omniroute setup`       | Quy trình CLI có hướng dẫn để thiết lập mật khẩu và nhà cung cấp đầu tiên |
-| `omniroute doctor`      | Chạy kiểm tra tình trạng cục bộ mà không khởi động máy chủ                |
-| `omniroute providers`   | Khám phá, liệt kê, xác thực và kiểm thử nhà cung cấp từ CLI               |
-| `omniroute config`      | Cấu hình công cụ CLI — liệt kê, lấy, đặt và xác thực cấu hình             |
-| `omniroute status`      | Bảng điều khiển trạng thái ngoại tuyến — phiên bản, DB, công cụ, cấu hình |
-| `omniroute logs`        | Truyền phát nhật ký sử dụng từ API (hỗ trợ `--follow`)                    |
-| `omniroute update`      | Kiểm tra hoặc áp dụng các bản cập nhật OmniRoute                          |
-| `omniroute provider`    | Quản lý kết nối nhà cung cấp — thêm, liệt kê, xóa, kiểm thử, đặt mặc định |
-| `omniroute --port 3000` | Đặt cổng chuẩn/API thành 3000                                             |
-| `omniroute --mcp`       | Khởi động máy chủ MCP (giao thức truyền tải stdio)                        |
-| `omniroute --no-open`   | Không tự động mở trình duyệt                                              |
-| `omniroute --help`      | Hiển thị trợ giúp                                                         |
+| Yêu cầu                 | Sự miêu tả                                                                  |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `omniroute`             | Khởi động máy chủ (`PORT=20128`, API và bảng điều khiển trên cùng một cổng) |
+| `omniroute setup`       | Hướng dẫn giới thiệu CLI về mật khẩu và nhà cung cấp đầu tiên               |
+| `omniroute doctor`      | Chạy kiểm tra tình trạng cục bộ mà không cần khởi động máy chủ              |
+| `omniroute providers`   | Khám phá, liệt kê, xác thực và kiểm tra các nhà cung cấp từ CLI             |
+| `omniroute config`      | Cấu hình công cụ CLI Danh sách —, nhận, đặt, xác thực cấu hình              |
+| `omniroute status`      | Bảng điều khiển trạng thái ngoại tuyến phiên bản —, DB, công cụ, cấu hình   |
+| `omniroute logs`        | Truyền nhật ký sử dụng từ API (hỗ trợ `--follow`)                           |
+| `omniroute update`      | Kiểm tra hoặc áp dụng các bản cập nhật OmniRoute                            |
+| `omniroute provider`    | Quản lý kết nối nhà cung cấp — thêm, liệt kê, xóa, kiểm tra, mặc định       |
+| `omniroute --port 3000` | Đặt cổng canonical/API thành 3000                                           |
+| `omniroute --mcp`       | Khởi động máy chủ MCP (stdio Transport)                                     |
+| `omniroute --no-open`   | Không tự động mở trình duyệt                                                |
+| `omniroute --help`      | Hiển thị trợ giúp                                                           |
 
-Thiết lập không giao diện có thể được tự động hóa bằng các cờ hoặc biến môi trường:
+Thiết lập không đầu có thể được viết kịch bản bằng cờ hoặc biến môi trường:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Chạy chẩn đoán cục bộ mà không mở bảng điều khiển:
+Chạy chẩn đoán cục bộ mà không cần mở bảng thông tin:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Quản lý nhà cung cấp qua SSH hoặc tập lệnh mà không cần mở bảng điều khiển:
+Quản lý nhà cung cấp từ SSH hoặc tập lệnh mà không cần mở bảng điều khiển:
 
 ```bash
 omniroute providers available
@@ -193,39 +195,43 @@ Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` để cấu h
 
 ## Thiết lập giao thức (MCP + A2A)
 
-### Thiết lập MCP (Model Context Protocol)
+### Thiết lập MCP (Giao thức bối cảnh mô hình)
 
-Khởi động giao thức truyền tải MCP ở chế độ stdio:
+Bắt đầu vận chuyển MCP ở chế độ stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Quy trình xác thực được khuyến nghị:
+Luồng xác thực được đề xuất:
 
 ```bash
-# 1. Khởi động máy chủ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Từ máy khách MCP của bạn, gọi:
-omniroute_get_health        # Sẽ trả về tình trạng hệ thống
-omniroute_list_combos       # Sẽ trả về các combo đang hoạt động
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Hoặc chạy toàn bộ bộ kiểm thử E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Cấu hình máy khách MCP
 
-**Claude Code:**
+**Mã Claude :**
+
+Mã Claude kết nối qua HTTP, mà `omniroute --mcp` (stdio) không bắt đầu. Truyền tải HTTP bị tắt theo mặc định: trước tiên hãy bật nó trên máy chủ đang chạy. Khi đăng nhập trang tổng quan được bật, một yêu cầu không có thông tin xác thực sẽ nhận được `401`, vì vậy hãy chuyển khóa API chứa `mcp:connect` (hoặc `manage`); một khóa không có `manage`/`admin` cũng cần phạm vi của từng công cụ (xem [phạm vi công cụ MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Thêm vào phần cài đặt MCP của bạn:
+Thêm vào cài đặt MCP của bạn (stdio, với khóa để người gọi có hiệu trưởng):
 
 ```json
 {
@@ -233,23 +239,30 @@ Thêm vào phần cài đặt MCP của bạn:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tài liệu MCP đầy đủ:** [README máy chủ MCP](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go.
+Hoặc, khi `mcpTransport` là `streamable-http` (đặt nó trên `/dashboard/mcp` hoặc với `omniroute mcp enable --transport streamable-http`), hãy trỏ mục nhập máy chủ MCP từ xa của khách hàng vào `http://localhost:20128/api/mcp/stream`.
 
-### Thiết lập A2A (Agent-to-Agent Protocol)
+Khóa di chuyển dưới dạng `Authorization: Bearer <api-key>` (xem [MCP Server → Truy cập từ xa](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) dành cho máy chủ từ xa; khóa từ xa cần `mcp:connect` cộng với phạm vi read/write của nó).
 
-Xác minh Agent Card:
+**Tài liệu MCP đầy đủ:** [Máy chủ MCP README](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go. Tham chiếu toán tử cho các công cụ nén CCR/dedup (điểm đánh dấu, điều kiện tiên quyết, phạm vi của mỗi công cụ, phân trang truy xuất, chẩn đoán): [Điều kiện tiên quyết / hướng dẫn vận hành → của Công cụ nén](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Thiết lập A2A (Giao thức giữa tác nhân với tác nhân)
+
+Xác minh thẻ đại lý:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Gửi một tác vụ:
+Gửi một nhiệm vụ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tài liệu A2A đầy đủ:** [README máy chủ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, truyền trực tuyến, vòng đời tác vụ.
+**Tài liệu A2A đầy đủ:** [Máy chủ A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, phát trực tuyến, vòng đời nhiệm vụ.
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Mẫu Void Linux (xbps-src)
+## Mẫu Linux (xbps-src)
 
-Đối với người dùng Void Linux, bạn có thể xây dựng gói gốc bằng `xbps-src`. Lưu khối này thành `srcpkgs/omniroute/template`:
+Đối với người dùng Void Linux, bạn có thể xây dựng gói gốc bằng cách sử dụng `xbps-src`. Lưu khối này dưới dạng `srcpkgs/omniroute/template`:
 
 ```bash
-# Tệp mẫu cho 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Tạo lại checksum cho mỗi bản phát hành bằng:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

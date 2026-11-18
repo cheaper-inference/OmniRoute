@@ -19,6 +19,12 @@ export interface EndpointCategory {
 
 export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
+    id: "fal",
+    label: "Fal Native",
+    description: "Schema-validated fal model execution and job management",
+    prefixes: ["/v1/fal"],
+  },
+  {
     id: "chat",
     label: "Chat / Messages",
     description: "Chat completions, text completions, messages, and responses",

@@ -79,6 +79,7 @@ test(
         "codex/gpt-5.6-luna-image",
         "codex/gpt-image-2.5-flare",
         "codex/gpt-image-2.5-sunburst",
+        "codex/gpt-image-2.6-sunburst",
         "codex/gpt-image-2",
       ]
     );
@@ -128,4 +129,39 @@ test("music catalog GET hides providers without active credentials", async () =>
 
   assert.ok(ids.includes("kie/suno-v4.0"));
   assert.ok(!ids.includes("vertex/lyria-002"));
+});
+
+test("music catalog GET lists a discovered music model once when its registry also ships it", async () => {
+  await seedConnection("gemini");
+  const db = core.getDbInstance();
+  const connectionId = db
+    .prepare("SELECT id FROM provider_connections WHERE provider = ?")
+    .get("gemini").id;
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    "syncedAvailableModels",
+    `gemini:${connectionId}`,
+    JSON.stringify([
+      // Discovery tags AI Studio's Lyria as `music` (geminiModelsParser), so this id now
+      // arrives twice: once from the synced snapshot and once from MUSIC_PROVIDERS. The
+      // synced row is the richer one, so the catalog must merge them, not list both.
+      { id: "lyria-3-pro-preview", name: "Lyria 3 Pro", supportedEndpoints: ["music"] },
+    ])
+  );
+
+  const response = await musicRoute.GET(new Request("http://localhost/v1/music/generations"));
+  const body = (await response.json()) as {
+    data?: Array<{ id: string; supported_endpoints?: string[] }>;
+  };
+  assert.equal(response.status, 200);
+  const models = body.data || [];
+  const ids = models.map((model) => model.id);
+
+  assert.equal(ids.filter((id) => id === "gemini/lyria-3-pro-preview").length, 1);
+  // The registry row carries no supported_endpoints, so this proves the synced row survived.
+  assert.deepEqual(
+    models.find((model) => model.id === "gemini/lyria-3-pro-preview")?.supported_endpoints,
+    ["music"]
+  );
+  // A registry-only neighbour still lists: it has no discovery snapshot of its own.
+  assert.equal(ids.filter((id) => id === "gemini/lyria-3-clip-preview").length, 1);
 });

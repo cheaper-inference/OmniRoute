@@ -173,3 +173,26 @@ export function stripGpt5ReasoningWhenTools<T extends Record<string, unknown>>(
   );
   return next as T;
 }
+
+/**
+ * `reasoning` is the Responses envelope: raw api.openai.com Chat Completions only
+ * documents `reasoning_effort` and answers 400 "Unknown parameter: 'reasoning'" (#18912).
+ * Keep the effort on the supported field, with the precedence the effort readers use:
+ * `reasoning_effort` first, then `reasoning.effort`. Compatible providers that accept
+ * the object are out of scope, as are Responses targets.
+ */
+export function foldReasoningForOpenAIChat<T extends Record<string, unknown>>(
+  body: T,
+  provider: string | null | undefined,
+  targetFormat: string | null | undefined
+): T {
+  if (provider !== "openai" || targetFormat !== FORMATS.OPENAI) return body;
+  const record = asRecord(body);
+  if (!record || !Object.hasOwn(record, "reasoning")) return body;
+
+  const next: JsonRecord = { ...record };
+  const effort = next.reasoning_effort ?? asRecord(next.reasoning)?.effort;
+  if (typeof effort === "string") next.reasoning_effort = effort;
+  delete next.reasoning;
+  return next as T;
+}

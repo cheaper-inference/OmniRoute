@@ -17,7 +17,8 @@ export async function recordAntigravityVerificationUrl(params: {
   upstreamErrorBody: unknown;
   message: string;
 }): Promise<string | null> {
-  if (params.provider !== "antigravity" || !params.connectionId) return null;
+  if ((params.provider !== "antigravity" && params.provider !== "agy") || !params.connectionId)
+    return null;
   const url =
     extractVerificationUrl(params.upstreamErrorBody) || extractVerificationUrl(params.message);
   if (!url) return null;
@@ -34,7 +35,7 @@ export async function clearAntigravityVerificationUrl(
   connectionId: string,
   providerSpecificData: unknown
 ): Promise<boolean> {
-  if (provider !== "antigravity" || !connectionId) return false;
+  if ((provider !== "antigravity" && provider !== "agy") || !connectionId) return false;
   if (!readStoredVerificationUrl(providerSpecificData)) return false;
   // `undefined` values are dropped by the JSON.stringify inside the merge.
   await mergeConnectionProviderSpecificData(connectionId, {

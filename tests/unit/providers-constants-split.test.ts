@@ -63,8 +63,13 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Harbor (#16315) adds one apikey/gateways entry — 253.
 // Runcrate (#18061) adds one apikey/inference-hosts entry — 254.
 // Gisoo (#18112) adds one apikey/gateways entry — 255.
-// #14308 adds four apikey/regional entries (Ashna, Atria, GapGPT, Hooshyar) — 259.
-const APIKEY_PROVIDER_COUNT = 259;
+// deAPI adds one apikey/specialty-media entry — 256.
+// EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
+// ParalonCloud adds one apikey/inference-hosts entry — 258.
+// Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
+// apikey/inference-hosts entries — 262.
+// #14308 adds four apikey/regional entries (Ashna, Atria, GapGPT, Hooshyar) — 266.
+const APIKEY_PROVIDER_COUNT = 266;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -100,6 +105,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
+    ["empiriolabs", "APIKEY_PROVIDERS_EMPIRIOLABS"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
     ["enterprise-cloud", "APIKEY_PROVIDERS_ENTERPRISE"],

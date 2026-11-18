@@ -2,9 +2,11 @@ import fs from "node:fs";
 
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 
-import { backupDbFile, setDbBackupMaxFiles } from "./backup";
+import { setDbBackupMaxFiles } from "./backup";
+import { toBooleanSetting, toStrictBooleanSetting } from "./booleanSetting";
 import { DATA_DIR, SQLITE_FILE, applyDatabaseOptimizationSettings, getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
+import { getCallLogRetentionDays } from "../logEnv";
 import { registerDbStateResetter } from "./stateReset";
 import {
   CACHE_SECRET_MASK,
@@ -111,17 +113,6 @@ function parseStoredValue(rawValue: unknown): unknown {
   }
 }
 
-function toBooleanSetting(value: unknown): boolean | null {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return !Number.isNaN(value) && value !== 0;
-  if (typeof value !== "string") return null;
-
-  const normalized = value.trim().toLowerCase();
-  if (["1", "true", "yes", "on"].includes(normalized)) return true;
-  if (["0", "false", "no", "off"].includes(normalized)) return false;
-  return null;
-}
-
 function normalizeOptimizationSettings(settings: UserDatabaseSettings) {
   const fallback = DEFAULT_DATABASE_SETTINGS.optimization.cacheSize;
   const numericCacheSize = Number(settings.optimization.cacheSize);
@@ -168,9 +159,12 @@ function mergeTopLevelSections(target: UserDatabaseSettings, values: Record<stri
 }
 
 function mergeRuntimeLogSettings(target: UserDatabaseSettings, values: Record<string, unknown>) {
-  const pipelineEnabled = toBooleanSetting(values.call_log_pipeline_enabled);
-  if (pipelineEnabled !== null) {
-    target.logs.callLogPipelineEnabled = pipelineEnabled;
+  // The panel reads the toggle through the same strict parser as the request
+  // path. A stored value the parser rejects therefore shows as off, instead of
+  // displaying a truthy string as on while requests capture nothing.
+  if (values.call_log_pipeline_enabled !== undefined) {
+    target.logs.callLogPipelineEnabled =
+      toStrictBooleanSetting(values.call_log_pipeline_enabled) === true;
   }
 
   const legacyDetailedEnabled = toBooleanSetting(values.detailed_logs_enabled);
@@ -355,6 +349,9 @@ function collectPersistedRetention(rows: PersistedRetentionRow[]): {
 
   return found;
 }
+/** Migration 046 seeds the flat `callLogs` key with this value. It is not an operator choice. */
+const CALL_LOG_RETENTION_SEED_DAYS = 90;
+
 /**
  * Reads the dashboard-persisted request log retention without applying defaults.
  *
@@ -416,13 +413,17 @@ export function getPersistedCallLogRetentionDays(): number | null {
   let resolved: number | null = null;
   if (found.nested !== null) resolved = found.nested;
   else if (found.settings !== null) resolved = found.settings;
-  else if (found.flat !== null && found.flat !== 90) resolved = found.flat;
+  else if (found.flat !== null && found.flat !== CALL_LOG_RETENTION_SEED_DAYS)
+    resolved = found.flat;
   setCachedPersistedCallLogRetentionDays(resolved);
   return resolved;
 }
 
 export function getUserDatabaseSettings(): UserDatabaseSettings {
   const settings = cloneDefaultSettings();
+  // Until the operator saves an age, request-log rotation uses CALL_LOG_RETENTION_DAYS or 7 days
+  // (resolveCallLogRetentionDays). Show and clean up with that same age.
+  settings.retention.callLogs = getCallLogRetentionDays();
   const mainSettings = readNamespace("settings");
   const databaseSettingsValue = mainSettings[DATABASE_SETTINGS_NAMESPACE];
 
@@ -431,12 +432,43 @@ export function getUserDatabaseSettings(): UserDatabaseSettings {
   }
 
   mergeTopLevelSections(settings, mainSettings);
-  mergeDatabaseSettingsNamespace(settings, readNamespace(DATABASE_SETTINGS_NAMESPACE));
+  const databaseSettingsRows = readNamespace(DATABASE_SETTINGS_NAMESPACE);
+  // The migration seed is not a saved value; rotation ignores it too (#13308 guard).
+  if (databaseSettingsRows.callLogs === CALL_LOG_RETENTION_SEED_DAYS) {
+    delete databaseSettingsRows.callLogs;
+  }
+  mergeDatabaseSettingsNamespace(settings, databaseSettingsRows);
   mergeRuntimeLogSettings(settings, mainSettings);
   normalizeOptimizationSettings(settings);
   decryptCacheSecrets(settings.cache as unknown as Record<string, unknown>);
 
   return settings;
+}
+
+/**
+ * Every chat request asks whether the semantic cache is on. Answering through
+ * getUserDatabaseSettings() clones all defaults, runs two namespace SELECTs and decrypts the
+ * cache secrets just to read one boolean, so the answer is kept in memory. The window matches
+ * the settings read cache (5 s). updateDatabaseSettings() and any DB reset clear it at once,
+ * so a disabled cache takes effect on the next request. A miss uses the full resolver, so the
+ * precedence between the settings namespaces is unchanged.
+ */
+const SEMANTIC_CACHE_FLAG_TTL_MS = 5_000;
+
+let semanticCacheFlagCache: { value: boolean; expiresAt: number } | null = null;
+
+function clearSemanticCacheFlagCache(): void {
+  semanticCacheFlagCache = null;
+}
+
+registerDbStateResetter(clearSemanticCacheFlagCache);
+
+export function isSemanticCacheDbEnabled(): boolean {
+  const cached = semanticCacheFlagCache;
+  if (cached && Date.now() <= cached.expiresAt) return cached.value;
+  const value = getUserDatabaseSettings().cache.semanticCacheEnabled !== false;
+  semanticCacheFlagCache = { value, expiresAt: Date.now() + SEMANTIC_CACHE_FLAG_TTL_MS };
+  return value;
 }
 
 export function getDatabaseSettings(): DatabaseSettings {
@@ -505,11 +537,17 @@ export function updateDatabaseSettings(
     setDbBackupMaxFiles(nextSettings.backup.keepLastNBackups);
   }
 
+  // The inherited call-log age (CALL_LOG_RETENTION_DAYS or 7) is not a saved choice. Persist it
+  // only when this update sends it or one is already saved, so a later env override still applies.
+  const persistCallLogAge =
+    updates.retention?.callLogs !== undefined || getPersistedCallLogRetentionDays() !== null;
+
   const tx = db.transaction(() => {
     for (const section of DATABASE_SETTINGS_SECTIONS) {
       const sectionValues = nextSettings[section] as Record<string, unknown>;
 
       for (const [key, value] of Object.entries(sectionValues)) {
+        if (section === "retention" && key === "callLogs" && !persistCallLogAge) continue;
         const stored = section === "cache" ? encryptCacheValue(key, value) : value;
         insert.run(
           DATABASE_SETTINGS_NAMESPACE,
@@ -526,8 +564,8 @@ export function updateDatabaseSettings(
   });
   tx();
 
-  backupDbFile("pre-write");
   clearPersistedCallLogRetentionCache();
+  clearSemanticCacheFlagCache();
   invalidateDbCache("settings");
   if (optimizationUpdated) {
     applyDatabaseOptimizationSettings(nextSettings.optimization);

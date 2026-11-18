@@ -221,6 +221,9 @@ html:root[data-ci-appearance="editions"] {
   --text-color-accent: var(--color-primary-ink);
   /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
   --text-color-warning: var(--color-warning-ink);
+  /* Fumadocs (/docs): the active nav link and inline accents use `text-fd-primary`; read the same
+     primary ink, while bg-/border-fd-primary keep the accent (#18078). */
+  --text-color-fd-primary: var(--color-primary-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);

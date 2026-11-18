@@ -19,8 +19,11 @@ omniroute --mcp
 Ou através do transporte aberto:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 Os transportes HTTP (`sse` / `streamable-http`, servidos em processo pelo servidor do painel) estão desativados por defeito e anteriormente só podiam ser alternados na página `/dashboard/mcp`. A partir da v3.8.51, o CLI tem paridade:
@@ -142,13 +145,13 @@ Consulte [Configuração do cliente MCP](../guides/SETUP_GUIDE.md#mcp-client-con
 | `omniroute_rtk_discover`            | `read:compression`  | Descubra ruídos recorrentes em amostras de saída RTK opcionais                                                                                    |
 | `omniroute_rtk_learn`               | `read:compression`  | Gere um rascunho de filtro RTK revisável a partir de amostras opcionais                                                                           |
 
-As entradas CCR ficam apenas na memória e desaparecem no reinício. Cada bloco está limitado a 2 MiB, cada principal a 16 MiB e o armazenamento global a 64 MiB. As entradas estão padronizadas para um TTL de 24 horas (máximo de sete dias). A recuperação completa MCP está limitada a 256 KiB; os blocos maiores permanecem disponíveis nos modos ranged e grep. O armazenamento, recuperação, listagem, inspeção, eliminação e estatísticas são isolados pelo principal da chave API autenticado. Os registos de auditoria contêm hashes e metadados de tamanho, nunca conteúdo.
+As entradas CCR utilizam um armazenamento de duas camadas: uma camada quente na memória apoiada, em tempos de execução locais fora da nuvem, por uma camada SQLite durável (`ccr_blocks`, ativada por defeito) para que um bloco sobreviva à remoção ou reinicialização até que o seu TTL se esgote — exceto blocos acima de 512 KB, tempos de execução na nuvem e `COMPRESSION_CCR_DURABLE_STORE=false`, que permanecem apenas na memória. A gravação durável é o melhor esforço: é descartada enquanto 1.000 gravações já estão pendentes e uma gravação SQLite com falha é registada, e não tentada novamente, de modo a que o bloco seja perdido no reinício. Cada bloco está limitado a 2 MiB, cada principal a 16 MiB e o armazenamento global a 64 MiB. O padrão das entradas é um TTL de 24 horas (máximo de sete dias). A recuperação completa MCP está limitada a 256 KiB; os blocos maiores permanecem disponíveis nos modos ranged e grep. O armazenamento, recuperação, listagem, inspeção, eliminação e estatísticas são isolados pelo principal da chave API autenticado. Os registos de auditoria contêm hashes e metadados de tamanho, nunca conteúdo. Os detalhes orientados para o operador (os dois marcadores, pré-requisitos do cliente, `codemode:false`, escopos por ferramenta, paginação e uma matriz de diagnóstico) residem em [Compression Engines → Prerequisites/operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` reporta a compressão da descrição MCP separadamente em `analytics.mcpDescriptionCompression`. Estes valores são estimativas de tamanho de metadados para descrições listáveis MCP (`tools`, `prompts`, `resources` e `resourceTemplates`); não são recibos de utilização do fornecedor e estão marcados com `source: "mcp_metadata_estimate"`.
 
 ### Filtro de árvore de acessibilidade MCP (v3.8.0)
 
-Separado das ferramentas de compressão acima referidas, OmniRoute inclui um filtro pós-execução que comprime o** resultados da ferramenta** de ferramentas MCP browser/accessibility antes de serem devolvidas ao agente. Este filtro em si não é uma ferramenta — é executado de forma transparente em qualquer resultado de ferramenta que contenha texto detalhado de árvore de acessibilidade ou de instantâneo do navegador (≥ 2000 caracteres).
+Separado das ferramentas de compressão acima referidas, OmniRoute inclui um filtro pós-execução que comprime o** resultados da ferramenta** de ferramentas MCP browser/accessibility antes de serem devolvidas ao agente. Este filtro em si não é uma ferramenta — é executado de forma transparente em qualquer resultado de ferramenta que contenha árvore de acessibilidade detalhada ou texto de instantâneo do navegador ( caracteres ≥ 2000).
 
 Comportamentos principais:
 

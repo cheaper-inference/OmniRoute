@@ -67,18 +67,23 @@ function runScript(script: string, args: string[], env: Record<string, string>, 
   });
 }
 
-/** runScript, with the script started under the given umask (e.g. "022"). */
+/**
+ * runScript, with the script started under the given umask (e.g. "022"). A child process
+ * inherits its parent's umask, so it is set around the synchronous spawn instead of going
+ * through a `bash -c` wrapper that would carry the script path in its command line.
+ */
 function runScriptWithUmask(
   umask: string,
   script: string,
   args: string[],
   env: Record<string, string>
 ) {
-  return spawnSync(
-    "bash",
-    ["-c", 'umask "$1"; shift; exec bash "$@"', "bash", umask, path.join(BIN, script), ...args],
-    { encoding: "utf8", env: { ...process.env, ...env } }
-  );
+  const previous = process.umask(Number.parseInt(umask, 8));
+  try {
+    return runScript(script, args, env);
+  } finally {
+    process.umask(previous);
+  }
 }
 
 /** SQL expression for a string without using any quote characters. */
@@ -657,11 +662,11 @@ describe("ops_sql_str", () => {
   it("prints any value as an SQL string literal that reads back unchanged", { skip }, () => {
     const values = ["a'b'c", "''", "%s%d%%", "\\047", "x\\ny", "line1\nline2", "'; SELECT 1; --"];
     for (const value of values) {
-      const r = spawnSync(
-        "bash",
-        ["-c", 'source "$1"; ops_sql_str "$2"', "bash", path.join(BIN, "_ops-common.sh"), value],
-        { encoding: "utf8" }
-      );
+      // The library path goes through the env option, never into the bash -c script text.
+      const r = spawnSync("bash", ["-c", 'source "$OPS_COMMON"; ops_sql_str "$1"', "bash", value], {
+        encoding: "utf8",
+        env: { ...process.env, OPS_COMMON: path.join(BIN, "_ops-common.sh") },
+      });
       assert.equal(r.status, 0, r.stderr);
       const hex = sqlite(":memory:", `SELECT hex(${r.stdout});`);
       assert.equal(hex, Buffer.from(value).toString("hex").toUpperCase(), `value ${value}`);

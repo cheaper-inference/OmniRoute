@@ -18,6 +18,29 @@ describe("Textarea / Checkbox adapters", () => {
     expect(el.rows).toBe(3);
   });
 
+  // #18068: Textarea had no label, so callers wrapped it in a Field by hand.
+  it("Textarea with a label renders the kit Field around it, hint and required marker", () => {
+    const { getByRole, getByText, container } = render(
+      <Textarea label="System prompt" hint="Sent first" required className="font-mono" />
+    );
+    // the aria-hidden asterisk stays out of the accessible name
+    const el = getByRole("textbox", { name: "System prompt" }) as HTMLTextAreaElement;
+    expect(el.tagName).toBe("TEXTAREA");
+    expect(el.className).toContain("font-mono");
+    expect(el.required).toBe(true);
+    const hint = getByText("Sent first");
+    expect(el.getAttribute("aria-describedby")).toBe(hint.id);
+    expect(container.querySelector(".ci-field")).not.toBeNull();
+    const marker = container.querySelector(".ci-field__required")!;
+    expect(marker.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("Textarea without a label stays a bare control", () => {
+    const { container } = render(<Textarea aria-label="Raw" />);
+    expect(container.querySelector(".ci-field")).toBeNull();
+    expect(container.firstElementChild?.tagName).toBe("TEXTAREA");
+  });
+
   it("Checkbox renders a labelled kit checkbox and fires onChange", () => {
     const onChange = vi.fn();
     const { getByLabelText } = render(<Checkbox label="Agree" onChange={onChange} />);

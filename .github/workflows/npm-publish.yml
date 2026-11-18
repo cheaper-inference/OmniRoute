@@ -77,7 +77,7 @@ jobs:
       packages: write # publish to npm.pkg.github.com
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           # Need full tag history to compare against highest semver when
@@ -85,10 +85,11 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Install dependencies (skip scripts to avoid heavy build)
         run: npm install --ignore-scripts --no-audit --no-fund
@@ -268,7 +269,7 @@ jobs:
 
       - name: Upload SBOM (npm) as workflow artifact
         if: steps.resolve.outputs.skip != 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: sbom-npm
           path: sbom-npm.cdx.json
@@ -311,7 +312,10 @@ jobs:
         # its budget had never been measured against a real run. It then blew the limit
         # on its debut: `npm pack` alone took 24m37s, leaving 5 minutes for two installs
         # and two boots. 30 was a guess; 60 is sized to the one measurement we have.
-        timeout-minutes: 60
+        # 120 since the v3.8.54 re-publish (run 44220411903): on the shared .113 runner the
+        # step's own `npm pack` took 23m09s, the clean install 17m31s and the 3.8.53 install
+        # 10m39s, and the upgrade was still installing when the 60-minute limit killed it.
+        timeout-minutes: 120
         run: npm run check:install-upgrade
 
       # WS1.3 (D2, v3.8.49 plan): STAGED publishing by default — `npm stage publish`
@@ -354,7 +358,7 @@ jobs:
 
       - name: Hand the tarball to the hosted publish job
         if: steps.resolve.outputs.skip != 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: npm-tarball
           path: omniroute-${{ steps.resolve.outputs.version }}.tgz
@@ -396,16 +400,17 @@ jobs:
       id-token: write # npm provenance — the whole reason this job is separate
     steps:
       - name: Download the tarball the publish job proved
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: npm-tarball
           path: .
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Ensure npm supports staged publishing
         run: |
@@ -494,17 +499,18 @@ jobs:
       id-token: write # npm provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
           # Full history needed for auto-bump: git diff against previous release tag
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Auto-bump plugin version if plugin changed since last release
         id: bump
@@ -517,9 +523,23 @@ jobs:
           PKG_VERSION=$(node -p "require('./package.json').version")
           PKG_NAME=$(node -p "require('./package.json').name")
 
+          # Exit 0 when npm has ${PKG_NAME}@$1, 1 when it definitely does not (no output, or
+          # npm's E404). Any other answer is a registry failure: it fails the step instead of
+          # reading as "not published" (the `npm view ... || true` it replaces did).
+          npm_has_version() {
+            local out err rc=0
+            err=$(mktemp)
+            out=$(npm view "${PKG_NAME}@$1" version 2>"$err") || rc=$?
+            if [ "$rc" -eq 0 ] && [ "$out" = "$1" ]; then rm -f "$err"; return 0; fi
+            if [ "$rc" -eq 0 ] && [ -z "$out" ]; then rm -f "$err"; return 1; fi
+            if [ "$rc" -ne 0 ] && grep -q 'code E404' "$err"; then rm -f "$err"; return 1; fi
+            echo "::error::npm view ${PKG_NAME}@$1 was inconclusive (exit $rc): ${out}" >&2
+            cat "$err" >&2
+            exit 1
+          }
+
           # 1) Skip if current version is not yet published (no bump needed)
-          PUBLISHED="$(npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null || true)"
-          if [ "$PUBLISHED" != "$PKG_VERSION" ]; then
+          if ! npm_has_version "$PKG_VERSION"; then
             echo "✅ ${PKG_NAME}@${PKG_VERSION} is new — no bump needed."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -534,16 +554,35 @@ jobs:
             exit 0
           fi
 
-          # 3) Check if plugin dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin/"; then
+          # 3) Check if plugin dir actually changed since that tag. The step runs inside the
+          # plugin folder and git resolves pathspecs against the current directory, so the
+          # folder is "." here (the repo-root path matched nothing and no change was ever seen).
+          if git diff --quiet "$PREV_TAG" -- .; then
             echo "⏭️ No plugin changes since $PREV_TAG — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 4) Auto-bump patch version
-          npm version patch --no-git-tag-version --allow-same-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
+          # 4) Auto-bump the patch version past every version npm already has. The bump only
+          # exists in this job's workspace (the committed manifest keeps the old version), so a
+          # later release with plugin changes starts from the same manifest: a single bump
+          # recomputed a version an earlier release had published, and the publish step below
+          # skipped it without publishing the change.
+          # Every candidate is looked up before it can be selected; 50 taken candidates fail.
+          NEW_VERSION=""
+          for _ in $(seq 1 50); do
+            npm version patch --no-git-tag-version --allow-same-version
+            CANDIDATE=$(node -p "require('./package.json').version")
+            if ! npm_has_version "$CANDIDATE"; then
+              NEW_VERSION="$CANDIDATE"
+              break
+            fi
+            echo "${PKG_NAME}@${CANDIDATE} is already on npm — bumping again."
+          done
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::error::${PKG_NAME}: no unpublished patch version within 50 bumps of ${PKG_VERSION}."
+            exit 1
+          fi
           echo "bumped=true" >> "$GITHUB_OUTPUT"
           echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
 
@@ -583,17 +622,18 @@ jobs:
       id-token: write # npm provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
           # Full history needed for auto-bump: git diff against previous release tag
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Auto-bump plugin-v2 version if plugin-v2 changed since last release
         id: bump
@@ -606,9 +646,23 @@ jobs:
           PKG_VERSION=$(node -p "require('./package.json').version")
           PKG_NAME=$(node -p "require('./package.json').name")
 
+          # Exit 0 when npm has ${PKG_NAME}@$1, 1 when it definitely does not (no output, or
+          # npm's E404). Any other answer is a registry failure: it fails the step instead of
+          # reading as "not published" (the `npm view ... || true` it replaces did).
+          npm_has_version() {
+            local out err rc=0
+            err=$(mktemp)
+            out=$(npm view "${PKG_NAME}@$1" version 2>"$err") || rc=$?
+            if [ "$rc" -eq 0 ] && [ "$out" = "$1" ]; then rm -f "$err"; return 0; fi
+            if [ "$rc" -eq 0 ] && [ -z "$out" ]; then rm -f "$err"; return 1; fi
+            if [ "$rc" -ne 0 ] && grep -q 'code E404' "$err"; then rm -f "$err"; return 1; fi
+            echo "::error::npm view ${PKG_NAME}@$1 was inconclusive (exit $rc): ${out}" >&2
+            cat "$err" >&2
+            exit 1
+          }
+
           # 1) Skip if current version is not yet published (no bump needed)
-          PUBLISHED="$(npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null || true)"
-          if [ "$PUBLISHED" != "$PKG_VERSION" ]; then
+          if ! npm_has_version "$PKG_VERSION"; then
             echo "✅ ${PKG_NAME}@${PKG_VERSION} is new — no bump needed."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -623,16 +677,35 @@ jobs:
             exit 0
           fi
 
-          # 3) Check if plugin-v2 dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin-v2/"; then
+          # 3) Check if plugin-v2 dir actually changed since that tag. The step runs inside the
+          # plugin folder and git resolves pathspecs against the current directory, so the
+          # folder is "." here (the repo-root path matched nothing and no change was ever seen).
+          if git diff --quiet "$PREV_TAG" -- .; then
             echo "⏭️ No plugin-v2 changes since $PREV_TAG — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 4) Auto-bump patch version
-          npm version patch --no-git-tag-version --allow-same-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
+          # 4) Auto-bump the patch version past every version npm already has. The bump only
+          # exists in this job's workspace (the committed manifest keeps the old version), so a
+          # later release with plugin changes starts from the same manifest: a single bump
+          # recomputed a version an earlier release had published, and the publish step below
+          # skipped it without publishing the change.
+          # Every candidate is looked up before it can be selected; 50 taken candidates fail.
+          NEW_VERSION=""
+          for _ in $(seq 1 50); do
+            npm version patch --no-git-tag-version --allow-same-version
+            CANDIDATE=$(node -p "require('./package.json').version")
+            if ! npm_has_version "$CANDIDATE"; then
+              NEW_VERSION="$CANDIDATE"
+              break
+            fi
+            echo "${PKG_NAME}@${CANDIDATE} is already on npm — bumping again."
+          done
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::error::${PKG_NAME}: no unpublished patch version within 50 bumps of ${PKG_VERSION}."
+            exit 1
+          fi
           echo "bumped=true" >> "$GITHUB_OUTPUT"
           echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
 

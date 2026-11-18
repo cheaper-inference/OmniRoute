@@ -8,79 +8,78 @@
 
 _최종 업데이트: 2026-06-28_
 
-## 경영진 요약
+## 요약
 
-OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨이이자 대시보드입니다.  
-단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신, 사용량 추적을 통해 여러 업스트림 제공업체로 트래픽을 라우팅합니다.
+OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이이자 대시보드입니다. 단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하고 변환, 폴백, 토큰 새로 고침 및 사용량 추적을 통해 여러 업스트림 공급자 간에 트래픽을 라우팅합니다.
 
 핵심 기능:
 
-- CLI/도구를 위한 OpenAI 호환 API 표면(380개 제공업체, 159개 실행기 모듈)
-- 제공업체 형식 간 요청/응답 변환
-- 모델 조합 폴백(다중 모델 시퀀스)
-- 구조화된 조합 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
-- 계정 수준 폴백(제공업체별 다중 계정)
-- 기본 채팅 경로에서 쿼터 사전 확인 및 쿼터 인식 P2C 계정 선택
-- OAuth + API 키 제공업체 연결 관리(27개 OAuth 제공업체 모듈)
-- `/v1/embeddings`를 통한 임베딩 생성(18개 제공업체)
-- `/v1/images/generations`를 통한 이미지 생성(10개 이상의 제공업체, 20개 이상의 모델)
-- `/v1/audio/transcriptions`를 통한 오디오 전사(18개 제공업체)
-- `/v1/audio/speech`를 통한 텍스트 음성 변환(기본 제공업체 24개)
-- `/v1/videos/generations`를 통한 비디오 생성(ComfyUI + SD WebUI)
-- `/v1/music/generations`를 통한 음악 생성(ComfyUI)
-- `/v1/search`를 통한 웹 검색(20개 제공업체)
-- `/v1/moderations`를 통한 모더레이션
-- `/v1/rerank`를 통한 재순위 지정
-- 추론 모델을 위한 Think 태그 파싱(`<think>...</think>`)
-- 엄격한 OpenAI SDK 호환성을 위한 응답 정제
-- 제공업체 간 호환성을 위한 역할 정규화(developer→system, system→user)
+- CLI/tools 용 OpenAI 호환 API 표면(공급자 394개, 실행기 모듈 159개)
+- 공급자 형식에 따른 Request/response 번역
+- 모델 콤보 대체(다중 모델 시퀀스)
+- `compositeTiers` 를 기준으로 런타임 순서를 지정하는 구조화된 콤보 단계(`provider + model + connection`)
+- 계정 수준 대체(공급업체당 다중 계정)
+- 기본 채팅 경로에서 할당량 프리플라이트 및 할당량 인식 P2C 계정 선택
+- OAuth + API 키 공급자 연결 관리(27 OAuth 공급자 모듈)
+- `/v1/embeddings` 통한 임베딩 생성(18개 제공자)
+- `/v1/images/generations` 통한 이미지 생성(+ 공급자 10개,+ 모델 20개)
+- `/v1/audio/transcriptions` 통한 오디오 전사(18개 제공자)
+- `/v1/audio/speech` 통한 텍스트 음성 변환(24개 내장 제공업체)
+- `/v1/videos/generations` 통한 비디오 생성(ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI)를 통한 음악 생성
+- `/v1/search` 통한 웹 검색(공급자 20개)
+- `/v1/moderations` 통한 중재
+- `/v1/rerank` 통해 순위 재지정
+- 추론 모델을 위한 태그 구문 분석(`<think>...</think>`) 생각하기
+- 엄격한 OpenAI SDK 호환성을 위한 응답 삭제
+- 공급자 간 호환성을 위한 역할 정규화(개발자 → 시스템, 시스템 → 사용자)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
-- 제공업체, 키, 별칭, 조합, 설정, 가격 정보를 위한 로컬 영속성(122개 DB 모듈)
-- 사용량/비용 추적 및 요청 로깅
-- 다중 디바이스/상태 동기화를 위한 선택적 클라우드 동기화
-- API 액세스 제어를 위한 IP 허용 목록/차단 목록
-- 사고 예산 관리(통과/자동/사용자 지정/적응형)
-- 전역 시스템 프롬프트 주입
-- 세션 추적 및 핑거프린팅
-- 제공업체별 프로필을 적용한 계정별 향상된 속도 제한
-- 제공업체 복원력을 위한 서킷 브레이커 패턴
-- 뮤텍스 잠금을 통한 동시 폭주(thundering herd) 방지
+- 공급자, 키, 별칭, 콤보, 설정, 가격 책정에 대한 로컬 지속성(122 DB 모듈)
+- Usage/cost 추적 및 요청 로깅
+- multi-device/state 동기화를 위한 선택적 클라우드 동기화
+- API 액세스 제어를 위한 IP allowlist/blocklist
+- 생각하는 예산 관리(passthrough/auto/custom/adaptive)
+- 글로벌 시스템 프롬프트 주입
+- 세션 추적 및 지문 채취
+- 공급자별 프로필을 통한 계정별 강화된 비율 제한
+- 공급자 복원력을 위한 회로 차단기 패턴
+- 뮤텍스 잠금을 통한 천둥 방지 무리 보호
 - 서명 기반 요청 중복 제거 캐시
-- 도메인 계층: 비용 규칙, 폴백 정책, 잠금 정책
-- Context Relay: 계정 교체 연속성을 위한 세션 인계 요약
-- 도메인 상태 영속성(폴백, 예산, 잠금, 서킷 브레이커를 위한 SQLite write-through 캐시)
-- 중앙 집중식 요청 평가를 위한 정책 엔진(잠금 → 예산 → 폴백)
-- p50/p95/p99 지연 시간 집계를 포함한 요청 텔레메트리
-- `combo_execution_key` / `combo_step_id`를 통한 조합 대상 텔레메트리 및 과거 조합 대상 상태
-- 엔드투엔드 추적을 위한 상관관계 ID(X-Request-Id)
-- API 키별 옵트아웃을 지원하는 규정 준수 감사 로깅
+- 도메인 레이어: 비용 규칙, 대체 정책, 잠금 정책
+- 컨텍스트 릴레이: 계정 순환 연속성을 위한 세션 핸드오프 요약
+- 도메인 상태 지속성(폴백, 예산, 잠금, 회로 차단기를 위한 SQLite 연속 쓰기 캐시)
+- 중앙 집중식 요청 평가를 위한 정책 엔진(잠금 → 예산 → 대체)
+- p50/p95/p99 대기 시간 집계를 통한 원격 분석 요청
+- `combo_execution_key` / `combo_step_id` 를 통한 콤보 대상 원격 측정 및 기록 콤보 대상 건강
+- 엔드투엔드 추적을 위한 상관관계 ID (X-Request-Id)
+- API 키당 옵트아웃 기능을 갖춘 규정 준수 감사 로깅
 - LLM 품질 보증을 위한 평가 프레임워크
-- 실시간 제공업체 서킷 브레이커 상태를 제공하는 상태 대시보드
-- 3개 전송 방식을 지원하는 MCP 서버(110개 도구)(stdio/SSE/Streamable HTTP)
-- 스킬 및 작업 수명 주기를 지원하는 A2A 서버(JSON-RPC 2.0 + SSE)
-- 메모리 시스템(추출, 주입, 검색, 요약)
-- 스킬 시스템(레지스트리, 실행기, 샌드박스, 기본 제공 스킬)
-- 인증서 관리 및 DNS 처리를 지원하는 MITM 프록시
-- 프롬프트 인젝션 방어 미들웨어
-- Caveman, RTK, 스택형 파이프라인, 압축 조합, 언어 팩, 분석 기능을 포함하는 프롬프트 압축 파이프라인
-- ACP(에이전트 통신 프로토콜) 레지스트리
-- 모듈식 OAuth 제공업체(`src/lib/oauth/providers/` 아래의 22개 개별 모듈)
-- 제거/전체 제거 스크립트
-- OAuth 환경 복구 작업
-- OpenAI 호환 WS 클라이언트를 위한 WebSocket 브리지(`/v1/ws`)
-- 동기화 토큰 관리(발급/폐기, ETag 버전 관리가 적용된 구성 번들 다운로드)
-- GLM Thinking(`glmt`)을 기본 지원하는 제공업체 프리셋
-- 하이브리드 토큰 계산(제공업체 측 `/messages/count_tokens` 및 추정 폴백)
-- 모델 별칭 자동 시드(시작 시 30개 이상의 프록시 간 방언 정규화)
-- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 fetch
-- 구성 가능한 `requestRetry` 및 `maxRetryIntervalSec`을 사용하는 쿨다운 인식 채팅 재시도
-- 시작 시 Zod를 사용한 런타임 환경 검증
-- 페이지 매김, 제공업체 CRUD 이벤트, SSRF 차단 검증 로깅을 지원하는 규정 준수 감사 v2
+- 실시간 공급자 회로 차단기 상태가 포함된 상태 대시보드
+- 3개의 전송 기능이 있는 MCP 서버(110개 도구)(stdio/SSE/Streamable HTTP)
+- 기술과 작업 수명주기를 갖춘 A2A 서버(JSON-RPC 2.0 + SSE)
+- 기억 시스템(추출, 주입, 검색, 요약)
+- 스킬 시스템(레지스트리, 실행자, 샌드박스, 내장 스킬)
+- 인증서 관리 및 DNS 처리 기능을 갖춘 MITM 프록시
+- 프롬프트 주입 가드 미들웨어
+- Caveman, RTK, 스택 파이프라인, 압축 콤보, 언어 팩 및 분석을 포함한 신속한 압축 파이프라인
+- ACP (에이전트 통신 프로토콜) 레지스트리
+- 모듈 OAuth 공급자( `src/lib/oauth/providers/` 아래의 개별 모듈 22개)
+- Uninstall/full-uninstall 스크립트
+- OAuth 환경 복구 조치
+- OpenAI 호환 WS 클라이언트용 WebSocket 브리지(`/v1/ws`)
+- 동기화 토큰 관리(issue/revoke, ETag 버전 구성 번들 다운로드)
+- GLM Thinking(`glmt`) 일류 공급자 사전 설정
+- 하이브리드 토큰 계산(추정 대체 기능이 있는 제공자 측 `/messages/count_tokens` )
+- 모델 별칭 자동 시드(시작 시 30개의 + 교차 프록시 방언 정규화)
+- SSRF 가드, 비공개 URL 차단 및 구성 가능한 재시도를 통한 안전한 아웃바운드 가져오기
+- 구성 가능한 `requestRetry` 및 `maxRetryIntervalSec` 사용한 쿨다운 인식 채팅 재시도
+- 시작 시 Zod 사용한 런타임 환경 검증
+- 페이지 매김, 공급자 CRUD 이벤트 및 SSRF 차단 유효성 검사 로깅을 포함한 규정 준수 감사 v2
 
 기본 런타임 모델:
 
-- `src/app/api/*` 아래의 Next.js 앱 라우트가 대시보드 API와 호환성 API를 모두 구현
-- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 제공업체 실행, 변환, 스트리밍, 폴백 및 사용량을 처리
+- `src/app/api/*` 아래의 Next.js 앱 경로는 대시보드 APIs 와 호환성 APIs 모두 구현합니다.
+- `src/sse/*` + `open-sse/*` 의 공유 SSE/routing 코어는 공급자 실행, 변환, 스트리밍, 대체 및 사용을 처리합니다.
 
 ## 참조 다이어그램
 
@@ -270,69 +269,68 @@ flowchart LR
 
 주요 흐름 모듈:
 
-- 진입점: `src/sse/handlers/chat.ts`
+- 항목: `src/sse/handlers/chat.ts`
 - 핵심 오케스트레이션: `open-sse/handlers/chatCore.ts`
-- 제공자 실행 어댑터: `open-sse/executors/*`
-- 형식 감지/제공자 구성: `open-sse/services/provider.ts`
-- 모델 파싱/해석: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- 계정 폴백 로직: `open-sse/services/accountFallback.ts`
+- 공급자 실행 어댑터: `open-sse/executors/*`
+- detection/provider 구성 형식: `open-sse/services/provider.ts`
+- 모델 parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- 계정 대체 논리: `open-sse/services/accountFallback.ts`
 - 번역 레지스트리: `open-sse/translator/index.ts`
 - 스트림 변환: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- 사용량 추출/정규화: `open-sse/utils/usageTracking.ts`
-- Think 태그 파서: `open-sse/utils/thinkTagParser.ts`
+- 사용법 extraction/normalization: `open-sse/utils/usageTracking.ts`
+- 태그 파서 생각해보기: `open-sse/utils/thinkTagParser.ts`
 - 임베딩 핸들러: `open-sse/handlers/embeddings.ts`
-- 임베딩 제공자 레지스트리: `open-sse/config/embeddingRegistry.ts`
+- 임베딩 공급자 레지스트리: `open-sse/config/embeddingRegistry.ts`
 - 이미지 생성 핸들러: `open-sse/handlers/imageGeneration.ts`
 - 이미지 제공자 레지스트리: `open-sse/config/imageRegistry.ts`
-- 응답 정제: `open-sse/handlers/responseSanitizer.ts`
+- 응답 삭제: `open-sse/handlers/responseSanitizer.ts`
 - 역할 정규화: `open-sse/services/roleNormalizer.ts`
 
 서비스(비즈니스 로직):
 
-- 계정 선택/점수 산정: `open-sse/services/accountSelector.ts`
-- 컨텍스트 수명 주기 관리: `open-sse/services/contextManager.ts`
+- 계정 selection/scoring: `open-sse/services/accountSelector.ts`
+- 컨텍스트 수명주기 관리: `open-sse/services/contextManager.ts`
 - IP 필터 적용: `open-sse/services/ipFilter.ts`
 - 세션 추적: `open-sse/services/sessionManager.ts`
-- 요청 중복 제거: `open-sse/services/signatureCache.ts`
+- 중복 제거 요청: `open-sse/services/signatureCache.ts`
 - 시스템 프롬프트 주입: `open-sse/services/systemPrompt.ts`
-- 추론 예산 관리: `open-sse/services/thinkingBudget.ts`
+- 생각하는 예산 관리: `open-sse/services/thinkingBudget.ts`
 - 와일드카드 모델 라우팅: `open-sse/services/wildcardRouter.ts`
-- 요청 제한 관리: `open-sse/services/rateLimitManager.ts`
+- 비율 제한 관리: `open-sse/services/rateLimitManager.ts`
 - 회로 차단기: `src/shared/utils/circuitBreaker.ts`
-- 컨텍스트 핸드오프: `open-sse/services/contextHandoff.ts` — 컨텍스트 릴레이 전략을 위한 핸드오프 요약 생성 및 주입
-- 압축: `open-sse/services/compression/*` — 제공자 변환 전 선제적 압축;
-  Caveman 규칙, RTK 필터, 스택형 파이프라인, 압축 조합, 통계 및 검증 포함
-- Codex 할당량 가져오기: `open-sse/services/codexQuotaFetcher.ts` — 컨텍스트 릴레이 핸드오프 결정을 위해 Codex 할당량을 가져옴
-- 쿨다운 인식 재시도: `src/sse/services/cooldownAwareRetry.ts` — 구성 가능한 `requestRetry` / `maxRetryIntervalSec`를 사용한 모델별 쿨다운 재시도
-- 안전한 아웃바운드 가져오기: `src/shared/network/safeOutboundFetch.ts` — SSRF 방어, 비공개 URL 차단, 재시도 및 타임아웃이 적용된 제공자/모델 가져오기
-- 아웃바운드 URL 가드: `src/shared/network/outboundUrlGuard.ts` — 제공자 URL에 대한 호스트 검사; `src/shared/network/outboundUrlGuardPolicy.ts`는 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 및 해당 대시보드 토글에서 모드를 선택함(`docs/reference/ENVIRONMENT.md` 참조)
-- 제공자 요청 기본값: `open-sse/services/providerRequestDefaults.ts` — 제공자 수준의 `maxTokens`, `temperature`, `thinkingBudgetTokens` 기본값
-- GLM 제공자 상수: `open-sse/config/glmProvider.ts` — 공유 GLM 모델, 할당량 URL, GLMT 타임아웃/기본값
-- Antigravity 업스트림: `open-sse/config/antigravityUpstream.ts` — 기본 URL 및 검색 경로 상수
-- Codex 클라이언트 상수: `open-sse/config/codexClient.ts` — 버전이 지정된 사용자 에이전트 및 클라이언트 버전 값
-- 모델 별칭 시드: `src/lib/modelAliasSeed.ts` — 시작 시 30개 이상의 프록시 간 방언 별칭을 시딩
+- 컨텍스트 핸드오프: `open-sse/services/contextHandoff.ts` — 핸드오프 요약 생성 및 컨텍스트 릴레이 전략 주입
+- 압축: 공급자 변환 전 `open-sse/services/compression/*` — 사전 압축; Caveman 규칙, RTK 필터, 스택 파이프라인, 압축 콤보, 통계 및 검증이 포함됩니다.
+- Codex 할당량 가져오기: `open-sse/services/codexQuotaFetcher.ts` — 컨텍스트 릴레이 핸드오프 결정을 위해 Codex 할당량을 가져옵니다.
+- 휴지 인식 재시도: `src/sse/services/cooldownAwareRetry.ts` — 구성 가능한 `requestRetry` / `maxRetryIntervalSec` 사용한 모델별 휴지 재시도
+- 안전한 아웃바운드 가져오기: `src/shared/network/safeOutboundFetch.ts` — 보호된 provider/model 가져오기( SSRF Guard, 개인 URL 차단, 재시도 및 시간 초과)
+- 아웃바운드 URL 가드: `src/shared/network/outboundUrlGuard.ts` — 호스트는 공급자 URLs 확인합니다. `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 및 대시보드 토글에서 모드를 선택합니다( `docs/reference/ENVIRONMENT.md` 참조).
+- 공급자 요청 기본값: `open-sse/services/providerRequestDefaults.ts` — 공급자 수준 `maxTokens`, `temperature`, `thinkingBudgetTokens` 기본값
+- GLM 공급자 상수: `open-sse/config/glmProvider.ts` — 공유 GLM 모델, 할당량 URLs, GLMT timeout/defaults
+- Antigravity 업스트림: `open-sse/config/antigravityUpstream.ts` — base URL 및 검색 경로 상수
+- Codex 클라이언트 상수: `open-sse/config/codexClient.ts` — 버전의 사용자 에이전트 및 클라이언트 버전 값
+- 모델 별칭 시드: `src/lib/modelAliasSeed.ts` — 시드 시작 시 30개의 + 교차 프록시 방언 별칭
 
-도메인 계층 모듈:
+도메인 레이어 모듈:
 
-- 비용 규칙/예산: `src/domain/costRules.ts`
-- 폴백 정책: `src/domain/fallbackPolicy.ts`
-- 조합 해석기: `src/domain/comboResolver.ts`
+- 비용 rules/budgets: `src/domain/costRules.ts`
+- 대체 정책: `src/domain/fallbackPolicy.ts`
+- 예약된 콤보 해결 계약: `src/domain/comboResolver.ts`; 실시간 라우팅은 `open-sse/services/combo.ts` 사용합니다.
 - 잠금 정책: `src/domain/lockoutPolicy.ts`
-- 정책 엔진: `src/domain/policyEngine.ts` — 중앙 집중식 잠금 → 예산 → 폴백 평가
+- 예약된 정책 평가 계약: `src/domain/policyEngine.ts`; 요청 경로는 `src/shared/utils/apiKeyPolicy.ts` 통해 API 키 정책을 적용하고 `src/sse/handlers/chat/resolvedModelPolicy.ts` 통해 해결 대상 인증을 적용합니다.
 - 오류 코드 카탈로그: `src/shared/constants/errorCodes.ts`
-- 요청 ID: `src/shared/utils/requestId.ts`
-- 가져오기 타임아웃: `src/shared/utils/fetchTimeout.ts`
-- 요청 텔레메트리: `src/shared/utils/requestTelemetry.ts`
-- 규정 준수/감사: `src/lib/compliance/index.ts`
-- 평가 실행기: `src/lib/evals/evalRunner.ts`
-- 도메인 상태 영속성: `src/lib/db/domainState.ts` — 폴백 체인, 예산, 비용 기록, 잠금 상태, 회로 차단기를 위한 SQLite CRUD
+- ID 요청 : `src/shared/utils/requestId.ts`
+- 가져오기 시간 초과: `src/shared/utils/fetchTimeout.ts`
+- 원격 측정 요청: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- 평가 주자: `src/lib/evals/evalRunner.ts`
+- 도메인 상태 지속성: 폴백 체인, 예산, 비용 내역, 잠금 상태, 회로 차단기에 대한 `src/lib/db/domainState.ts` — SQLite CRUD
 
-OAuth 제공자 모듈(`src/lib/oauth/providers/` 아래의 개별 파일 27개):
+OAuth 공급자 모듈( `src/lib/oauth/providers/` 아래의 개별 파일 27개):
 
-- 레지스트리 인덱스: `src/lib/oauth/providers/index.ts`
-- 개별 제공자: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- 공유 헬퍼: `codebuddyDeviceAuth.ts`(CodeBuddy CN/국제 버전 기기 흐름), `museCodeDeviceResponse.ts`
-- 얇은 래퍼: `src/lib/oauth/providers.ts` — 개별 모듈에서 다시 내보냄
+- 레지스트리 색인: `src/lib/oauth/providers/index.ts`
+- 개별 공급자: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- 공유 도우미: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl 장치 흐름), `museCodeDeviceResponse.ts`
+- 얇은 래퍼: `src/lib/oauth/providers.ts` — 개별 모듈에서 다시 내보냅니다.
 
 ## 5) 임베디드 서비스 (v3.8.4)
 
@@ -351,22 +349,22 @@ OmniRoute는 **임베디드 서비스**라고 하는 로컬 실행 AI 도구 프
 
 ### A. 자동 콤보 엔진
 
-자동 콤보는 정적 콤보 정의에 의존하는 대신 요청 시 라우팅 대상을 동적으로 점수를 매기고 선택합니다. 이는 `auto/*` 모델 접두사 제품군을 지원합니다.
+Auto Combo는 정적 콤보 정의에 의존하는 대신 요청 시 라우팅 대상을 동적으로 점수를 매기고 선택합니다. 이는 `auto/*` 모델 접두사 제품군을 지원합니다.
 
 - 엔진 항목: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- 해결 프로그램: `src/domain/comboResolver.ts` ( `auto/` 접두사 자동 감지)
+- 라이브 콤보 항목: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` 에 의해 호출됨
 - 대시보드: `/dashboard/auto-combo`
 - 원격 측정: `auto_combo_decisions` SQLite 테이블
 
 주요 기능:
 
-- **20가지 라우팅 전략** (우선순위, 가중치 적용, 채우기 우선, 라운드 로빈, P2C, 무작위, 최소 사용, 비용 최적화, 재설정 인식, 재설정 기간, 헤드룸, 할당량 가중치, 엄격한 무작위,** 자동** , lkgp, 컨텍스트 최적화, 캐시 최적화, 컨텍스트 릴레이,** 퓨전** , 파이프라인) — auto는 v3.8.0의 헤드라인 추가입니다. `fusion` (패널 팬아웃 + 판단 합성, `open-sse/services/fusion.ts`)는 v3.8.36의 새로운 기능입니다.
+- **22가지 라우팅 전략** (우선순위, 가중치 적용, 채우기 우선, 라운드 로빈, P2C, 무작위, 최소 사용, 비용 최적화, 재설정 인식, 재설정 기간, 만료 우선, 헤드룸, 할당량 가중치, 엄격한 무작위,** 자동** , lkgp, 컨텍스트 최적화, 캐시 최적화, 컨텍스트 릴레이,** 퓨전** , 파이프라인, jev) — auto는 v3.8.0의 헤드라인 추가입니다. `fusion` (패널 팬아웃 + 판단 합성, `open-sse/services/fusion.ts`)는 v3.8.36의 새로운 기능입니다.
 - **16요인 채점** : 할당량, 상태, 역 비용, 역 대기 시간, 작업 적합성 외 10개. 표준 요소 테이블과 해당 기본 가중치는 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — 에 있으며 여기에서 다시 설명하면 부실해질 수 있는 두 번째 위치가 됩니다.
 - **가상공장** 일치하는 명명된 콤보가 없을 때 임시 콤보를 구체화하여 건강한 활성 공급자 연결에서 후보를 소싱합니다.
 - **자동 접두사** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — 각각은 조정된 가중치 프로필로 뒷받침됩니다.
 - **6가지 모드 팩** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` 및 `chaos-mode` — 사전 설정된 가중치 구성은 대시보드에서 호출할 수 있습니다. (요청 시간 변형인 위의 `auto/*` 접두사와 혼동하지 마십시오.)
 
-전체 알고리즘 세부 사항(인수 공식, 가중치 조정)은 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) 참조하세요.
+전체 알고리즘 세부 정보(인수 공식, 가중치 조정)는 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) 참조하세요.
 
 ### B. 클라우드 에이전트
 
@@ -387,25 +385,29 @@ Cloud Agents는 균일한 DB 지원 작업 수명 주기 뒤에 타사 호스팅
 
 - 모듈 루트: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - 핫 리로드: 레지스트리가 구성 변경 사항을 감시하고 체인을 제자리에 재구축합니다.
-- 와이어인 포인트: 채팅 핸들러 항목, 이미지 생성 핸들러, 응답 살균기
+- 와이어인 포인트: 채팅 핸들러 입력, 이미지 생성 핸들러, 응답 살균기
 - HTTP 계약: 위반은 `503` 사용하여 `error.code = "GUARDRAIL_VIOLATION"` 로 표면화됩니다.
 
 규칙 세트 작성 및 임계값 조정에 대해서는 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) 참조하십시오.
 
 ### D. 도메인 레이어
 
-`src/domain/` 네임스페이스는 정책 결정을 중앙 집중화하므로 경로 처리기가 lockout/budget/fallback 논리 자체를 조립할 필요가 없습니다.
+`src/domain/` 네임스페이스에는 도메인 서비스와 예약된 평가 계약이 포함되어 있습니다. 모든 요청에 대해 하나의 필수 정책 진입점이 아닙니다.
 
-- 정책 엔진: 사전 실행 평가를 위한 `src/domain/policyEngine.ts` — 단일 진입점( → 예산 → 대체 순서 잠금)
+라이브 채팅 경로는 `src/shared/utils/apiKeyPolicy.ts` 에서 `enforceApiKeyPolicy()` 호출합니다. 해결된 모델 및 콤보 멤버의 인증은 `src/sse/handlers/chat/resolvedModelPolicy.ts` 에서 구현됩니다. `src/app/api/v1/chat/completions/route.ts` 의 자체 호스팅 항목도 발송 전에 API 키 정책을 시행합니다. 콤보 해결은 `open-sse/services/combo.ts` 통해 실행됩니다.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` 및 `src/lib/container.ts` 해당 요청 경로의 연결이 아닌 테스트된 계약으로 유지됩니다. 컨테이너가 정책 엔진을 등록하지만 검사된 프로덕션 요청 경로가 이를 해결하지 못합니다. 해당 계약을 변경하는 것만으로는 실시간 채팅 정책이나 콤보 라우팅이 변경되지 않습니다. 연결하거나 제거하려면 별도의 설계 결정이 필요합니다.
+
+- 예약된 정책 엔진: `src/domain/policyEngine.ts` — 잠금 → 예산 → 대체 평가
 - 비용 규칙: `src/domain/costRules.ts`
 - 대체 정책: `src/domain/fallbackPolicy.ts`
 - 잠금 정책: `src/domain/lockoutPolicy.ts`
 - 태그 기반 라우팅: `src/domain/tagRouter.ts`
-- 콤보 해석기: `src/domain/comboResolver.ts` — 콤보 이름, 자동/\* 접두사 및 와일드카드 모델 대상을 구체적인 실행 계획으로 해석합니다.
+- 예약된 콤보 해결 프로그램: `src/domain/comboResolver.ts` — 독립형 선택 계약; 라이브 콤보 라우팅은 `open-sse/services/combo.ts` 에서 구현됩니다.
 - Connection/model 규칙 조이너: `src/domain/connectionModelRules.ts`
 - 모델 가용성 스냅샷: `src/domain/modelAvailability.ts`
 - 공급자 만료 추적: `src/domain/providerExpiration.ts`
-- 할당량 캐시: `src/domain/quotaCache.ts`
+- 할당량 캐시: `src/domain/quotaCache.ts`. 공급자는 할당량 창(OpenAI 일부 계획에 대해 5시간 Codex 창을 삭제함)을 추가하고 제거하므로 공급자의 어댑터를 읽는 사용이 완료로 증명됩니다(`quotasComplete`, `src/lib/usage/usageReading.ts` 참조)는 계정의 전체 창 세트입니다. 이전에 알려졌으나 거기에 없는 창은 폐기되고, 캐시에서, `quota_snapshots` 에서 다시 시작하면 재수화(추가된 폐기 기록)되고, 지속된 Codex 할당량 상태 및 Claude 에서 포화 버킷. 부분 증거(응답 헤더, 오래된 복사본)는 해당 창만 업데이트합니다.
 - 저하 상태: `src/domain/degradation.ts`
 - 구성 감사: `src/domain/configAudit.ts`
 - OmniRoute 응답 메타데이터 빌더: `src/domain/omnirouteResponseMeta.ts`
@@ -458,7 +460,7 @@ FSM 전환은 Auto Combo의 채점에 반영되어 background/automation 작업�
   - 저장소: `webhooks` SQLite 테이블( `src/lib/db/webhooks.ts` 통해)
   - 대시보드: `/dashboard/webhooks` (구독, 비밀, 재시도 내역)
   - 이벤트 분류 및 재시도 의미에 대해서는 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) 참조하세요.
-- **추론 캐시** 생각 토큰(Claude, GLMT 등)을 방출하여 연속적인 회전이 다시 생각을 건너뛸 수 있도록 하는 공급자를 위한 — 재생 가능한 추론 블록입니다.
+- **추론 캐시** 생각하는 토큰(Claude, GLMT 등)을 방출하여 연속적인 회전이 다시 생각하는 것을 건너뛸 수 있도록 하는 공급자를 위한 — 재생 가능한 추론 블록입니다.
   - DB 레이어: `src/lib/db/reasoningCache.ts`
   - 서비스 계층: `open-sse/services/reasoningCache.ts`
   - 재생 의미론에 대해서는 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 참조하세요.
@@ -849,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: 특정 모듈을 직접 가져오기 — 배럴 없음(기존 `localDb.ts` 재내보내기 계층은 제거됨)
 - `src/lib/usageDb.ts`: SQLite 테이블 기반의 사용 이력/호출 로그 퍼사드
 
-## 프로바이더 실행기 적용 범위(전략 패턴)
+## 공급자 실행자 적용 범위(전략 패턴)
 
-각 프로바이더에는 `BaseExecutor`(`open-sse/executors/base.ts`)를 확장하는 특화된 실행기가 있으며, 이 기본 클래스는 URL 생성, 헤더 구성, 지수 백오프를 사용한 재시도, 자격 증명 갱신 훅 및 `execute()` 오케스트레이션 메서드를 제공합니다.
+각 공급자에는 URL 구축, 헤더 구성, 지수 백오프를 사용한 재시도, 자격 증명 새로 고침 후크 및 `execute()` 오케스트레이션 방법을 제공하는 `BaseExecutor` ( `open-sse/executors/base.ts`)를 확장하는 특수 실행기가 있습니다.
 
-| 실행기                    | 제공업체                                                                                                                                                 | 특수 처리                                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA 등 | 제공업체별 동적 URL/헤더 구성                                 |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 사용자 지정 프로젝트/세션 ID, Retry-After 파싱, 429 난독화    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                             | 배포 기반 라우팅, api-version 쿼리 강제 적용                  |
-| `BlackboxWebExecutor`     | Blackbox AI(웹 모드)                                                                                                                                     | TLS 지문 에뮬레이션을 사용하는 웹 세션 리버스 엔지니어링      |
-| `ClaudeIdentityExecutor`  | Claude.ai(CCH 경로)                                                                                                                                      | 제약 조건 + 도구 재매핑 파이프라인, 지문 조정                 |
-| `CliProxyApiExecutor`     | CLIProxyAPI 호환 제공업체                                                                                                                                | 사용자 지정 인증 및 프로토콜 처리                             |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                    | 계정 ID 주입, Neurons 기반 사용량 추적                        |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 시스템 지침 주입, 추론 강도 강제 적용                         |
-| `ChatGptWebCodexExecutor` | ChatGPT Web(Codex)                                                                                                                                       | 스레드/턴 고정 기능을 갖춘 브라우저 세션 Responses API 브리지 |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                             | OAuth + 세션별 헤더 순환                                      |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC 프로토콜, Protobuf 인코딩, 체크섬을 통한 요청 서명 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | 클라우드 에이전트 모듈을 통한 Devin 작업 수명 주기 브리징     |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot 토큰 갱신, VSCode 모방 헤더                           |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                               | GitLab OAuth + 프로젝트 범위 라우팅                           |
-| `GlmExecutor`             | Z.AI GLM(`glmt` 프리셋 포함)                                                                                                                             | 사고 예산 인식, GLMT 프리셋 상수                              |
-| `GrokWebExecutor`         | xAI Grok 웹                                                                                                                                              | 웹 세션 리버스 엔지니어링, 모드 선택(사고/표준)               |
-| `KieExecutor`             | KIE                                                                                                                                                      | 순환 세션 앵커를 사용하는 사용자 지정 토큰 발급               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream 바이너리 형식 → SSE 변환                      |
-| `MuseSparkWebExecutor`    | Muse Spark(웹)                                                                                                                                           | 이미지 메시지 브리징을 사용하는 웹 세션 리버스 엔지니어링     |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                | 제공업체별 요청 본문 형식                                     |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 호환 제공업체 설정                                     |
-| `PerplexityWebExecutor`   | Perplexity 웹                                                                                                                                            | 채팅 연속성을 위한 웹 세션 리버스 엔지니어링                  |
-| `PetalsExecutor`          | Petals 분산 추론                                                                                                                                         | 탈중앙화 스웜 라우팅                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                          | API 키 불필요, 요청 속도 제한                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 및 OAuth 지원, 다중 모델 무료 티어                        |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                         | 서비스 계정 인증, 리전 기반 엔드포인트                        |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                            | 가져온 API 키 + Connect-protobuf 채팅 스트리밍                |
+| 집행자                    | 공급자                                                                                                                                                   | 특별 취급                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA 등 | 공급자별 동적 URL/header 구성                                    |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 사용자 정의 project/session IDs, 구문 분석 후 재시도, 429 난독화 |
+| `AzureOpenAIExecutor`     | 아주르 OpenAI                                                                                                                                            | 배포 기반 라우팅, API 버전 쿼리 적용                             |
+| `BlackboxWebExecutor`     | Blackbox AI (웹 모드)                                                                                                                                    | TLS 지문 에뮬레이션을 사용한 웹 세션 역방향                      |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH 경로)                                                                                                                                     | 제약 + 도구 재매핑 파이프라인, 지문 형성                         |
+| `CliProxyApiExecutor`     | CLIProxyAPI 호환 공급자                                                                                                                                  | 사용자 정의 인증 및 프로토콜 처리                                |
+| `CloudflareAiExecutor`    | Cloudflare 노동자 AI                                                                                                                                     | 계정 ID 주입, 뉴런 기반 사용 추적                                |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 시스템 지침을 주입하고 추론 노력을 강요합니다.                   |
+| `ChatGptWebCodexExecutor` | ChatGPT 웹(Codex)                                                                                                                                        | 브라우저 세션 응답 API 고정 기능이 있는 thread/turn 브리지       |
+| `CommandCodeExecutor`     | 명령 코드                                                                                                                                                | OAuth + 세션별 헤더 회전                                         |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC 프로토콜, Protobuf 인코딩, 체크섬을 통한 서명 요청    |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | 클라우드 에이전트 모듈을 통한 Devin 작업 수명 주기 브리징        |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot 토큰 새로 고침, VSCode 모방 헤더                         |
+| `GitlabExecutor`          | GitLab 듀오                                                                                                                                              | GitLab OAuth + 프로젝트 범위 라우팅                              |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` 사전 설정 포함)                                                                                                                        | 생각 예산 인식, GLMT 사전 설정 상수                              |
+| `GrokWebExecutor`         | xAI Grok 웹                                                                                                                                              | 웹 세션 역방향, 모드 선택(think/standard)                        |
+| `KieExecutor`             | KIE                                                                                                                                                      | 순환 세션 앵커를 사용한 사용자 정의 토큰 발행                    |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream 바이너리 형식 → SSE 변환                         |
+| `MuseSparkWebExecutor`    | 뮤즈 스파크(웹)                                                                                                                                          | 이미지 메시지 브리징을 사용한 웹 세션 역방향                     |
+| `NlpCloudExecutor`        | NLP 클라우드                                                                                                                                             | 공급자별 요청 본문 형태                                          |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 호환 공급자 설정                                          |
+| `PerplexityWebExecutor`   | 당혹스러운 웹                                                                                                                                            | 채팅 지속을 위한 웹 세션 반전                                    |
+| `PetalsExecutor`          | 꽃잎 분산 추론                                                                                                                                           | 분산형 스웜 라우팅                                               |
+| `PollinationsExecutor`    | 수분 AI                                                                                                                                                  | API 키가 필요하지 않으며 요청 속도가 제한되어 있습니다.          |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 및 OAuth 지원, 다중 모델 프리 티어                           |
+| `VertexExecutor`          | Google 정점 AI                                                                                                                                           | 서비스 계정 인증, 지역 기반 엔드포인트                           |
+| `DevinDesktopExecutor`    | Devin 데스크탑                                                                                                                                           | 가져온 API 키 + Connect-protobuf 채팅 스트리밍                   |
 
-그 외의 모든 제공자(사용자 지정 호환 노드 포함)는 `DefaultExecutor`를 사용합니다.
+다른 모든 공급자(사용자 정의 호환 노드 포함)는 `DefaultExecutor` 를 사용합니다.
+
+### 자동화된 프로브 및 웹 세션 계정
+
+모델 테스트, 전체 테스트, 콤보 테스트 및 평가는 실제 채팅 요청을 보냅니다. 웹 세션 공급자는 로그인한 사용자 역할을 하므로 각 요청은 해당 계정의 대화로 저장됩니다. 그러한 대화를 떠난 자동화된 프로브는 계정이 정지되었습니다(#14780). 따라서 채팅 파이프라인은 대상의 공급자가 확인되고 자격 증명이 선택되기 전에(`src/lib/providers/chatProbePolicy.ts`) 공급자가 웹 세션 자격 증명을 가져오는 자동 프로브가 도달하는 모든 대상을 거부합니다. 거부는 `422` with `error.code` `chat_probe_not_isolated` 이며, 프로브 실행자는 이를 실패가 아닌 건너뛰기로 보고합니다.
+
+제공자 자신의 기록 없음 모드에서 모든 채팅을 실행하는 실행자는 이를 `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`)로 선언합니다. 그런 다음 해당 공급자에 대한 프로브가 허용됩니다. ChatGPT 웹은 `temporary-chat` 선언합니다. 테스트를 통해 메커니즘에 대한 선언을 고정하면 주장이 이를 사실로 만드는 코드보다 오래 지속될 수 없습니다.
 
 ## 공급자 호환성 매트릭스
 
@@ -1047,9 +1055,9 @@ flowchart LR
 
 ## 6) SSRF / 아웃바운드 URL 가드
 
-- `src/shared/network/outboundUrlGuard.ts`는 제공자 실행기에 도달하기 전에 모든 비공개/루프백/링크 로컬 대상 URL을 차단함
-- 제공자 모델 검색 및 검증 라우트는 모든 아웃바운드 요청 전에 가드를 적용하는 `src/shared/network/safeOutboundFetch.ts`를 사용함
-- 가드 오류는 HTTP 422와 함께 `URL_GUARD_BLOCKED`로 노출되며 `providerAudit.ts`를 통해 규정 준수 감사 추적에 기록됨
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`)는 `BaseExecutor.execute()` 통해 전달된 채팅 요청에 `src/shared/network/outboundUrlGuard.ts` 적용합니다. 공개 전용 모드(개인 플래그가 꺼진 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` )에서는 개인 및 루프백 호스트와 169.254.0.0/16 차단합니다. 다른 모든 모드에서는 클라우드 메타데이터 호스트를 차단합니다. DNS 조회 전에 호스트 이름이나 IP 리터럴을 작성된 대로 확인합니다. 내장된 로컬 공급자는 이를 건너뜁니다.
+- 공급자 모델 검색 및 검증 경로는 모든 아웃바운드 요청 전에 보호를 적용하는 `src/shared/network/safeOutboundFetch.ts` 사용합니다.
+- 가드 오류는 HTTP 503(`getSafeOutboundFetchErrorStatus`; 모델 검색 경로가 400을 반환함)을 사용하여 `URL_GUARD_BLOCKED` 로 표면화되며 검증 중 실제 SSRF 블록은 감사 추적에 `provider.validation.ssrf_blocked` 이벤트로 기록됩니다.
 
 ## 관측 가능성 및 운영 신호
 

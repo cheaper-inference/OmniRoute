@@ -149,15 +149,15 @@ nezapne (`src/server/auth/dashboardMfa.ts`).
 
 ## Triedy trás
 
-`src/server/authz/types.ts` definuje tri triedy; každá trasa, ktorú nie je možné deterministicky zaradiť, spadá pod `MANAGEMENT`.
+`src/server/authz/types.ts` definuje tri triedy; každá cesta, ktorú nemožno klasifikovať deterministicky, spadá späť do `MANAGEMENT`.
 
-| Trieda       | Popis                                                                                                                                                | Vyžadovaná autentifikácia                                            |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `PUBLIC`     | Explicitne bezpečné trasy — prihlásenie, odhlásenie, stav, inicializácia, health, bootstrap onboardingu.                                             | Žiadna                                                               |
-| `CLIENT_API` | Koncové body obsluhy modelov — `/api/v1/*`, `/api/v1beta/*` a aliasy `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer kľúč, keď je zapnutá efektívna feature flag `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Stránky panela, nastavenia, poskytovatelia, kľúče, administratívne a diagnostické koncové body.                                                      | Relácia panela ALEBO Bearer s rozsahom `manage`                      |
+| triedy       | Popis                                                                                                                                                      | Vyžaduje sa overenie                                                 |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `PUBLIC`     | Explicitne bezpečné cesty — prihlásenie, odhlásenie, stav, zdravie, bootstrap pri nástupe.                                                                 | žiadne                                                               |
+| `CLIENT_API` | Koncové body poskytujúce model — `/api/v1/*`, `/api/v1beta/*`, plus aliasy `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Nosný kľúč, keď je povolený účinný príznak funkcie `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Stránky ovládacieho panela, nastavenia, poskytovatelia, kľúče, správcovské a diagnostické koncové body.                                                    | Dashboard session OR Bearer s rozsahom `manage`                      |
 
-Niekoľko akcií `MANAGEMENT` je **iba pre operátora**: kľúč `manage` nestačí. Export uložených poverení (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), obnovenie zálohy nad živými dátami (`POST /api/db-backups/import` vrátane `dryRun=true`, `POST /api/db-backups` obnovenie podľa id, `POST /api/settings/import-json`) a ničenie bodov obnovy (upratanie cez `DELETE /api/db-backups` a tiež `PATCH /api/db-backups`, pretože uložená retencia riadi automatické mazanie po každej záložke) vyžadujú reláciu panela, lokálny subjekt CLI alebo vypnuté prihlásenie. Vydanie synchronizačného tokenu (`POST /api/sync/tokens`) a vytvorenie prístupového tokenu CLI s rozsahom `admin` (`POST /api/cli/tokens`) vyžadujú reláciu panela alebo lokálny subjekt CLI vo všetkých režimoch prihlásenia. Kľúče API ľubovoľného rozsahu a prístupové tokeny `oma_` nie sú operátorské poverenia: keď je operátorské poverenie vyžadované, dostanú `403`. Kontrola sa nachádza v `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Zmena nastavení prihlásenia je tiež vyhradená pre operátora: `POST /api/settings/require-login` (nastavenie správcovského hesla / prepnutie `requireLogin`) prijme iba tieto poverenia, akonáhle heslo existuje — okno prvého spustenia (zatiaľ bez hesla) zostáva nezmenené — a relácia panela musí na nahradenie hesla poslať `currentPassword` (`403`, ak chýba alebo je zlé, audituje sa ako `settings.update_failed`). Lokálne CLI a inštancia s vypnutým prihlásením si zachovávajú obnovovaciu cestu a môžu nastaviť heslo bez neho, pretože obe sú viazané na hostiteľa, ktorý vlastní dátový adresár.
+Niekoľko akcií `MANAGEMENT` je** iba operátor** : kľúč `manage` nestačí. Export uložených poverení (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), obnovenie zálohy cez živé údaje (`POST /api/db-backups/import` vrátane `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), zničenie bodov obnovenia (`DELETE /api/db-backups` cleanup a `PATCH /api/db-backups` pretože uchovávanie, ktoré uchováva, vedie k automatickému odstraňovaniu po každej zálohe) vyžaduje reláciu dashboardu, miestne CLI. Vydanie synchronizačného tokenu (`POST /api/sync/tokens`) a razenie prístupového tokenu `admin` CLI (`POST /api/cli/tokens`) si vyžaduje reláciu dashboardu alebo lokálneho subjektu CLI v každom režime prihlásenia. Kľúče API akéhokoľvek rozsahu a prístupové tokeny `oma_` nie sú povereniami operátora: získajú `403` vždy, keď je to potrebné. Šek žije v `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Zmena nastavení prihlásenia je tiež len pre operátora: `POST /api/settings/require-login` (nastaviť heslo správy / prepnúť `requireLogin`) akceptuje iba tieto poverenia, keď heslo existuje — okno prvého spustenia (zatiaľ bez hesla) sa nemení — a relácia dashboardu musí poslať `currentPassword`, aby nahradilo heslo (`403` keď chýba alebo je nesprávne, auditované ako `settings.update_failed`). Lokálne CLI a inštancia so zakázaným prihlásením uchovávajú cestu obnovy a môžu nastaviť heslo bez nej, pretože obe sú viazané na hostiteľa, ktorý vlastní dátový adresár.
 
 ## Potrubie
 
@@ -190,51 +190,47 @@ Každá trieda trasy má politiku v `src/server/authz/policies/`:
 
 ## Zoznam verejných trás
 
-`src/shared/constants/publicApiRoutes.ts` je explicitný zoznam povolených trás:
+`src/shared/constants/publicApiRoutes.ts` je explicitný zoznam povolených:
 
-Zoznam je rozdelený podľa **tvaru** a toto rozdelenie je zásadné (GHSA-74g9-q8f6-793h): prefix sa
-porovnáva pomocou `startsWith()`, takže zodpovedá aj každej susednej ceste so zhodnými úvodnými znakmi.
-`/api/usage/om-usage` ako prefix označuje `/api/usage/om-usage<anything>` ako PUBLIC a Next to vyrieši
-na `/api/usage/[connectionId]` — handler, ktorý nemá vlastné overovanie oprávnení.
+Zoznam je rozdelený podľa** tvar** a rozdelenie je nosné (GHSA-74g9-q8f6-793h): predpona sa zhoduje s `startsWith()`, takže sa zhoduje aj s každou susednou cestou zdieľajúcou svoje vedúce znaky. `/api/usage/om-usage` ako predpona označená `/api/usage/om-usage<anything>` PUBLIC a Next to vyrieši tak, že `/api/usage/[connectionId]` — obslužný program bez vlastného overenia.
 
 ```ts
-// Skutočné podstromy. Každá položka MUSÍ končiť znakom "/" (overuje to unit test).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // v classify sa považuje za CLIENT_API, nie za „verejné bez overovania“
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Jednotlivé trasy, ktoré sa porovnávajú PRESNE (s koncovým lomkou aj bez nej).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // krok 2 prihlasovania pre voliteľné TOTP; vyžaduje cookie čakajúcu na MFA
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Jednotlivé trasy iba na čítanie, na ktoré sa vzťahuje aj uvoľnenie pravidiel pre pôvod CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Jednotlivá trasa iba na čítanie BEZ uvoľnenia pravidiel pre pôvod CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Trasy iba na čítanie sú verejné **iba** pre bezpečné metódy. Poznámka: `classifyRoute()` vylučuje `/api/v1/*` a `/api/v1beta/*` z vetvy PUBLIC fall-through — tieto trasy sú vždy `CLIENT_API`, takže sa na ne stále vzťahuje politika kľúčov Bearer.
+Trasy len na čítanie sú verejné** iba** pre bezpečné metódy. Poznámka: `classifyRoute()` vylučuje `/api/v1/*` a `/api/v1beta/*` z prepadu PUBLIC — tie sú vždy `CLIENT_API` takže politika nosného kľúča stále platí.
 
 ## Pridanie novej trasy
 
@@ -312,15 +308,15 @@ Zostáva vypnuté, pokiaľ `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Toto poradie sa vzťahuje iba na poverenia prístupového tokenu.
 Pozri [Autentifikácia správy](../guides/MANAGEMENT-AUTH.md).
 
-## Prepínač vyžadovania autentifikácie
+## Prepínač Vyžaduje sa overenie
 
-`isAuthRequired()` v `src/shared/utils/apiAuth.ts` rozhoduje, či sa pre požiadavku vynucuje **akákoľvek** autentifikácia:
+`isAuthRequired()` v `src/shared/utils/apiAuth.ts` rozhoduje, či** akékoľvek** autorizácia sa vynucuje pre žiadosť:
 
-- `settings.requireLogin === false` → autentifikácia je globálne vypnutá, okrem trvalo chránenej úrovne (pozri [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) a volaní, ktoré vydávajú poverenie, ktoré táto konfigurácia akceptuje; tie vyžadujú rovnaké poverenie ako pri zapnutom prihlásení: vydávanie synchronizačných tokenov, vytváranie prístupových tokenov CLI v ľubovoľnom rozsahu a vytváranie kľúča API s rozsahom `manage`/`admin`, udeľovanie tohto rozsahu kľúču, regenerácia alebo zobrazenie takého kľúča (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Kľúče určené iba na inferenciu zostávajú otvorené.
-- Nie je nastavené žiadne heslo **a** nie je nastavená premenná prostredia `INITIAL_PASSWORD` → bootstrap režim povolí sprievodcu nastavením a požiadavky z loopbacku, ale požiadavky zo siete stále vyžadujú poverenia.
-- Akákoľvek chyba databázy → zlyhanie uzavreté (secure-by-default).
+- `settings.requireLogin === false` → auth je globálne zakázané, s výnimkou vždy chránenej vrstvy (pozri [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) a hovorov, ktoré odovzdávajú poverenie, ktoré akceptuje, ktoré potrebujú rovnaké poverenia ako pri prihlásení: vydávanie synchronizačných tokenov, razenie prístupových tokenov CLI v akomkoľvek rozsahu a vytvorenie kľúča API pomocou kľúča `manage` alebo udelenie takéhoto kľúča /`admin` rozsahu, udelenie takéhoto kľúča / zq rozsahu. (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Kľúče iba na odvodenie zostávajú otvorené. Zapísanie príznaku chránenej funkcie (`REQUIRE_API_KEY`, ostatné príznaky zabezpečenia a príznaky SSRF / TLS / MCP-scope / sandbox uvedené v [príznakoch funkcie](../reference/FEATURE_FLAGS.md#rest-api) ) a uloženie nastavení maskovania PII (`PUT /api/settings/pii`) tiež stále vyžadujú poverenie.
+- Nie je nakonfigurované žiadne heslo** a** no `INITIAL_PASSWORD` env var → bootstrap režim umožňuje sprievodcu onboardingom a požiadavky na spätnú slučku, ale vystavené sieťové požiadavky stále potrebujú poverenia. Výnimka: napísanie príznaku chránenej funkcie a uloženie nastavení maskovania PII (`PUT /api/settings/pii`) vyžaduje poverenie aj zo spätnej slučky, takže samotná spätná slučka tam nestačí.
+- Akákoľvek chyba DB → zlyhá zatvorenie (zabezpečené v predvolenom nastavení).
 
-Vynucovanie kľúča klientskeho API používa `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, nie priame čítanie `process.env.REQUIRE_API_KEY`. Pre nasadené inštancie to má význam: prepnutie `REQUIRE_API_KEY` v Dashboard → Feature Flags uloží prepísanie do databázy a okamžite ovplyvní `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` a ďalšie kontroly autentizácie klientského API, ktoré zdieľajú tohto pomocníka. Ak sa úložisko feature flagov nedá prečítať, autentizácia klientského API zlyhá uzavreto a vyžaduje kľúč.
+Vynútenie kľúča API klienta používa `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, nie priame čítanie `process.env.REQUIRE_API_KEY`. Toto je dôležité pre nasadené inštancie: prepnutie `REQUIRE_API_KEY` v Dashboard → Feature Flags uloží prepísanie DB a okamžite ovplyvní `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` a ďalšie kontroly overenia klient-API, ktoré zdieľajú tohto pomocníka. Ak nie je možné prečítať ukladací priestor príznaku funkcie, overenie API klienta zlyhá a vyžaduje kľúč.
 
 ## Nekompatibilná zmena — v3.8.0
 

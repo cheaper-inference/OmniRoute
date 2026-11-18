@@ -1,0 +1,350 @@
+{
+  "endpoint_id": "fal-ai/kokoro/american-english",
+  "metadata": {
+    "display_name": "Kokoro TTS",
+    "category": "text-to-audio",
+    "description": "Kokoro is a lightweight text-to-speech model that delivers comparable quality to larger models while being significantly faster and more cost-efficient.",
+    "status": "active",
+    "tags": ["speech"],
+    "updated_at": "2026-04-21T17:50:35.768Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://storage.googleapis.com/falserverless/gallery/kokoro.webp",
+    "model_url": "https://fal.run/fal-ai/kokoro/american-english",
+    "date": "2025-02-14T00:00:00.000Z",
+    "group": {
+      "key": "kokoro-tts",
+      "label": "American English"
+    },
+    "highlighted": false,
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/kokoro/american-english",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/kokoro/american-english queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/kokoro/american-english",
+        "category": "text-to-audio",
+        "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/kokoro.webp",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/kokoro/american-english",
+        "documentationUrl": "https://fal.ai/models/fal-ai/kokoro/american-english/api",
+        "about": "Generate Am English"
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "KokoroAmericanEnglishInput": {
+          "x-fal-order-properties": ["prompt", "voice", "speed", "enable_safety_checker"],
+          "properties": {
+            "voice": {
+              "examples": ["af_heart"],
+              "enum": [
+                "af_heart",
+                "af_alloy",
+                "af_aoede",
+                "af_bella",
+                "af_jessica",
+                "af_kore",
+                "af_nicole",
+                "af_nova",
+                "af_river",
+                "af_sarah",
+                "af_sky",
+                "am_adam",
+                "am_echo",
+                "am_eric",
+                "am_fenrir",
+                "am_liam",
+                "am_michael",
+                "am_onyx",
+                "am_puck",
+                "am_santa"
+              ],
+              "title": "Voice",
+              "type": "string",
+              "description": "Voice ID for the desired voice.",
+              "default": "af_heart"
+            },
+            "speed": {
+              "description": "Speed of the generated audio. Default is 1.0.",
+              "maximum": 5,
+              "type": "number",
+              "title": "Speed",
+              "minimum": 0.1,
+              "default": 1
+            },
+            "prompt": {
+              "examples": [
+                "The future belongs to those who believe in the beauty of their dreams. So, dream big, work hard, and make it happen!"
+              ],
+              "title": "Prompt",
+              "type": "string",
+              "default": ""
+            },
+            "enable_safety_checker": {
+              "title": "Enable Safety Checker",
+              "type": "boolean",
+              "description": "Authorized callers may set false to request relaxed screening.",
+              "default": true
+            }
+          },
+          "title": "AmEnglishRequest",
+          "type": "object"
+        },
+        "KokoroAmericanEnglishOutput": {
+          "x-fal-order-properties": ["audio"],
+          "properties": {
+            "audio": {
+              "examples": [
+                {
+                  "url": "https://fal.media/files/elephant/dXVMqWsBDG9yan3kaOT0Z_tmp0vvkha3s.wav"
+                }
+              ],
+              "description": "The generated music",
+              "$ref": "#/components/schemas/File"
+            }
+          },
+          "required": ["audio"],
+          "title": "AmEngOutput",
+          "type": "object"
+        },
+        "File": {
+          "x-fal-order-properties": ["url", "content_type", "file_name", "file_size"],
+          "properties": {
+            "content_type": {
+              "examples": ["image/png"],
+              "title": "Content Type",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The mime type of the file."
+            },
+            "file_size": {
+              "examples": [4404019],
+              "title": "File Size",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The size of the file in bytes."
+            },
+            "file_name": {
+              "examples": ["z9RV14K95DvU.png"],
+              "title": "File Name",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The name of the file. It will be auto-generated if not provided."
+            },
+            "url": {
+              "title": "Url",
+              "type": "string",
+              "description": "The URL where the file can be downloaded from."
+            }
+          },
+          "required": ["url"],
+          "title": "File",
+          "type": "object"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/kokoro/american-english/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/kokoro/american-english/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/kokoro/american-english": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KokoroAmericanEnglishInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/kokoro/american-english/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/KokoroAmericanEnglishOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

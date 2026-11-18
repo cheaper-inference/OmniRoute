@@ -3,8 +3,8 @@
  * client's image options, then the generated artifacts downloaded with a Designer token.
  * Protocol details live in `m365Protocol/imageGeneration.ts`.
  */
-import { createHash } from "node:crypto";
 import type { ProviderCredentials } from "./base.ts";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import { prepareM365Credentials, m365WebSocketCtor } from "./copilot-m365-web.ts";
 import {
   M365_IMAGE_ARTIFACT_SCOPE,
@@ -148,7 +148,7 @@ async function runImageTurn(request: M365ImageGenerationRequest): Promise<M365Ge
 async function artifactToken(request: M365ImageGenerationRequest): Promise<string> {
   const { credentials } = request;
   const refreshToken = requireRefreshToken(credentials);
-  const key = credentials.connectionId || createHash("sha256").update(refreshToken).digest("hex");
+  const key = credentials.connectionId || opaqueTokenFingerprint(refreshToken);
   const cached = artifactTokens.get(key);
   if (cached && cached.expiresAt - ARTIFACT_TOKEN_MARGIN_MS > Date.now()) return cached.token;
   const result = await refreshM365ScopedToken(

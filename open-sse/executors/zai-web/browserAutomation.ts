@@ -1,4 +1,5 @@
 import type { Page } from "playwright";
+import { tryConfigureCurrentZaiBrowserRequest } from "./currentBrowserControls.ts";
 import {
   browserModelName,
   getZaiModelCapabilities,
@@ -119,6 +120,7 @@ async function configureZaiBrowserEffort(page: Page, config: ZaiThinkingConfig):
   }
 }
 
+/** Configure the detected layout, preserving legacy controls and tagging failures by stage. */
 export async function configureZaiBrowserRequest(
   page: Page,
   input: {
@@ -127,6 +129,11 @@ export async function configureZaiBrowserRequest(
     vlm: ZaiVlmConfig;
   }
 ): Promise<void> {
+  let current = false;
+  await runStage("current model-menu configuration", async () => {
+    current = await tryConfigureCurrentZaiBrowserRequest(page, input);
+  });
+  if (current) return;
   await runStage("model selection", () =>
     selectZaiBrowserModel(page, browserModelName(input.modelId))
   );

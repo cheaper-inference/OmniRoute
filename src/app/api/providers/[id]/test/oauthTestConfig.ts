@@ -170,6 +170,14 @@ export function classifyOAuthProbeInconclusive(
 }
 
 export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
+  chatgpt: {
+    // Sign in with ChatGPT (#15201): testOAuthConnection() runs the live-catalog probe
+    // (chatgptTest.ts) first, which reports expired/revoked registrations precisely. This
+    // entry is the registered capability and the fallback contract: token present and not
+    // expired, refreshable through the refresh token.
+    checkExpiry: true,
+    refreshable: true,
+  },
   claude: {
     // Claude doesn't have userinfo, we verify token exists and not expired
     checkExpiry: true,
@@ -375,5 +383,21 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     authPrefix: "Bearer ",
     refreshable: true,
     acceptStatuses: [402],
+  },
+  // RenderHour: the account's balance is a free authenticated read (credits and dollars).
+  renderhour: {
+    url: "https://renderhour.com/v1/balance",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
+  },
+  // MegaBrain: the plan's usage limits are a free authenticated read that accepts both the
+  // device-code token and an mb-v1 API key (its public /models route needs no auth).
+  megabrain: {
+    url: "https://api.getmegabrain.com/api/profile/limits",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
   },
 };

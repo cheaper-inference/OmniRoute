@@ -1,3 +1,4 @@
+import * as usageEvidence from "./storedUsageEvidence";
 import {
   parseUpstreamHttp,
   UPSTREAM_HTTP_ATTEMPT,
@@ -13,6 +14,12 @@ import {
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { getDbInstance } from "../db/core";
+import { getPricingForModel } from "../db/settings/pricing";
+import {
+  readCacheWriteUsage,
+  storedCacheWriteUsage,
+} from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
+import { estimateApiEquivalentCacheWrite } from "./cacheWriteEstimate";
 import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
@@ -31,7 +38,6 @@ import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
   getPromptCacheReadTokensOrNull,
-  getPromptCacheCreationTokensOrNull,
   getReasoningTokensOrNull,
   getObservedReasoning,
 } from "./tokenAccounting";
@@ -45,9 +51,15 @@ import {
   parseStoredPayload,
   protectErrorPayloadForLog,
   protectPayloadForLog,
+  protectRequestBodyForLog,
 } from "../logPayloads";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
-import { getCallLogsDir, type CallLogArtifact, type CallLogDetailState } from "./callLogArtifacts";
+import {
+  getCallLogsDir,
+  hasRoomForCallLogArtifact,
+  type CallLogArtifact,
+  type CallLogDetailState,
+} from "./callLogArtifacts";
 import { closeCallLogArtifactWriter, writeCallArtifactAsync } from "./callLogArtifactWriter";
 import { isWriteLockError, scheduleWriteRetry } from "./usageWriteRetry";
 import {
@@ -105,6 +117,11 @@ type CallLogSummaryRow = {
   tokens_out: number | null;
   tokens_cache_read: number | null;
   tokens_cache_creation: number | null;
+  tokens_cache_creation_5m?: number | null;
+  tokens_cache_creation_1h?: number | null;
+  cache_creation_tier_status?: string | null;
+  cache_write_cost_usd?: number | null;
+  cache_write_priced_tokens?: number | null;
   tokens_reasoning: number | null;
   tokens_compressed: number | null;
   reasoning_source?: string | null;
@@ -137,6 +154,7 @@ type CallLogSummaryRow = {
   resilience_actions?: string | null;
   has_content?: number | null;
   usage_provenance?: string | null;
+  usage_evidence?: string | null;
 };
 
 export const RESOLVED_ACCOUNT_SQL =
@@ -440,12 +458,23 @@ function mapSummaryRow(row: CallLogSummaryRow) {
       compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
     },
     cacheSource: row.cache_source || "upstream",
+    cacheWriteUsage: storedCacheWriteUsage(
+      row.tokens_cache_creation,
+      row.tokens_cache_creation_5m,
+      row.tokens_cache_creation_1h,
+      row.cache_creation_tier_status
+    ),
+    cacheWriteEstimate: {
+      knownTierCostUsd: row.cache_write_cost_usd ?? null,
+      pricedTokens: row.cache_write_priced_tokens ?? 0,
+      source: "api-equivalent-estimate" as const,
+    },
     // #6187/#13965: observed reasoning (source + CHARACTER count, never tokens) so the
     // detail view can tell "reasoned but not metered" apart from "did not reason".
     reasoningSource: row.reasoning_source ?? null,
     reasoningChars: row.reasoning_chars != null ? toNumber(row.reasoning_chars) : null,
     hasContent: row.has_content ?? null,
-    usageProvenance: row.usage_provenance ?? null,
+    ...usageEvidence.storedUsageEvidence(row),
     requestType: row.request_type,
     sourceFormat: row.source_format,
     targetFormat: row.target_format,
@@ -556,7 +585,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     : entry.connectionId || apiKeyContext?.connectionId || null;
   const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
-  const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
+  const protectedRequestBody = noLogEnabled ? null : protectRequestBodyForLog(entry.requestBody);
   const responseStatus = Number(entry.status);
   const failedResponse = Number.isFinite(responseStatus) && responseStatus >= 400;
   const protectedResponseBody = noLogEnabled
@@ -654,9 +683,6 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
   const errorType = toStoredErrorType(
     classifyCallLogError(entry.status, entry.error, entry.provider)
   );
-  // Rendered-content presence plus usage provenance: success-only, additive,
-  // nullable. A 2xx is a success even with token counts at zero, so the
-  // success bound is 200-299 (not <400).
   const numericStatus = Number(entry.status);
   const isSuccess = Number.isFinite(numericStatus) && numericStatus >= 200 && numericStatus < 300;
   const clientVisibleBody =
@@ -675,6 +701,26 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
         tokens: entry.tokens,
         isSuccess,
       });
+  const cacheWriteUsage = readCacheWriteUsage(entry.tokens);
+  let cacheWriteEstimate = estimateApiEquivalentCacheWrite(null, cacheWriteUsage, {
+    provider: rawProvider,
+    model: entry.model || "",
+  });
+  if (cacheWriteUsage.fiveMinute !== null || cacheWriteUsage.oneHour !== null) {
+    try {
+      cacheWriteEstimate = estimateApiEquivalentCacheWrite(
+        await getPricingForModel(rawProvider, entry.model || ""),
+        cacheWriteUsage,
+        {
+          provider: rawProvider,
+          model: entry.model || "",
+          inputTokens: getLoggedInputTokens(entry.tokens),
+        }
+      );
+    } catch {
+      // Diagnostic pricing is optional; a lookup failure must not discard usage.
+    }
+  }
   const logEntry = {
     id: typeof entry.id === "string" && entry.id.length > 0 ? entry.id : generateLogId(),
     timestamp: typeof entry.timestamp === "string" ? entry.timestamp : new Date().toISOString(),
@@ -696,7 +742,12 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     tokensIn: toNumber(getLoggedInputTokens(entry.tokens)),
     tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
     tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-    tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+    tokensCacheCreation: cacheWriteUsage.total,
+    tokensCacheCreation5m: cacheWriteUsage.fiveMinute,
+    tokensCacheCreation1h: cacheWriteUsage.oneHour,
+    cacheCreationTierStatus: cacheWriteUsage.status,
+    cacheWriteCostUsd: cacheWriteEstimate.knownTierCostUsd,
+    cacheWritePricedTokens: cacheWriteEstimate.pricedTokens,
     tokensReasoning,
     reasoningSource: reasoningObservation.source,
     reasoningChars: reasoningObservation.chars,
@@ -774,6 +825,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
 
   const insertParams = {
     ...logEntry,
+    usageEvidence: metadataOnly ? null : usageEvidence.serializeUsageEvidence(entry.tokens),
     errorSummary: toStoredErrorSummary(protectedError),
     detailState,
     detailPendingUntil,
@@ -816,6 +868,8 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         id, timestamp, method, path, status, model, requested_model, provider,
         account, connection_id, duration, ttft_ms, tokens_in, tokens_out,
         tokens_cache_read, tokens_cache_creation, tokens_reasoning, tokens_compressed,
+        tokens_cache_creation_5m, tokens_cache_creation_1h, cache_creation_tier_status,
+        cache_write_cost_usd, cache_write_priced_tokens,
         reasoning_source, reasoning_chars,
         reasoning_duration_ms, reasoning_effort_requested, reasoning_effort_upstream,
         reasoning_encrypted,
@@ -824,13 +878,15 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         detail_pending_until, artifact_relpath, artifact_size_bytes, artifact_sha256,
         has_request_body, has_response_body, has_pipeline_details, request_summary,
         correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
-        video_content_removed, has_content, usage_provenance,
+        video_content_removed, has_content, usage_provenance, usage_evidence,
         added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
       )
       VALUES (
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
         @account, @connectionId, @duration, @ttftMs, @tokensIn, @tokensOut,
         @tokensCacheRead, @tokensCacheCreation, @tokensReasoning, @tokensCompressed,
+        @tokensCacheCreation5m, @tokensCacheCreation1h, @cacheCreationTierStatus,
+        @cacheWriteCostUsd, @cacheWritePricedTokens,
         @reasoningSource, @reasoningChars,
         @reasoningDurationMs, @reasoningEffortRequested, @reasoningEffortUpstream,
         @reasoningEncrypted,
@@ -839,7 +895,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @detailPendingUntil, @artifactRelPath, @artifactSizeBytes, @artifactSha256,
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
         @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
-        @videoContentRemoved, @hasContent, @usageProvenance,
+        @videoContentRemoved, @hasContent, @usageProvenance, @usageEvidence,
         @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
       )
     `
@@ -868,7 +924,10 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
-      const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
+      // A skipped write ends like a failed one: detail_state "missing" (see finally below).
+      const artifactResult = hasRoomForCallLogArtifact()
+        ? await writeCallArtifactAsync(buildDetailArtifact())
+        : null;
       if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.
@@ -881,13 +940,13 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
 
 export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
-  // Retain only counters, never the request/response bodies from this entry.
   if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {
+      ...usageEvidence.liveUsageEvidence(entry.tokens, entry.usageEstimated === true),
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
       cacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-      cacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+      cacheCreation: readCacheWriteUsage(entry.tokens).total,
       reasoning: getReasoningTokensOrNull(entry.tokens),
       compressed: typeof entry.tokensCompressed === "number" ? entry.tokensCompressed : null,
     });

@@ -326,12 +326,12 @@ describe("catalog combo vs combo", () => {
     );
     const m = draft.models.get("omniroute/dupe");
     assert.ok(m, "raw model remains at its own key");
-    assert.equal(m?.name, "dupe");
+    assert.equal(m?.name, "omniroute - dupe");
     const combo1 = draft.models.get("omniroute/Dupe Combo");
     assert.ok(combo1, "first combo published under its name");
     const combo2 = draft.models.get("omniroute/Dupe Combo Again");
     assert.ok(combo2, "second combo published under its name");
-    assert.equal(combo2?.name, "Dupe Combo Again");
+    assert.equal(combo2?.name, "combo - Dupe Combo Again");
   });
 });
 
@@ -670,6 +670,10 @@ describe("catalog capability presets", () => {
     assert.match(String(unfiltered.draft.models.get("omniroute/cf/one-time-m")?.name), /one-time/);
     assert.match(
       String(unfiltered.draft.models.get("omniroute/cf/retired-m")?.name),
+      /cf\/retired-m/
+    );
+    assert.match(
+      String(unfiltered.draft.models.get("omniroute/cf/retired-m")?.name),
       /discontinued/
     );
   });
@@ -687,6 +691,7 @@ describe("catalog capability presets", () => {
       }
     );
     assert.equal(res.models, 1);
+    assert.match(String(draft.models.get("omniroute/cf/open-m")?.name), /cf\/open-m/);
     assert.match(String(draft.models.get("omniroute/cf/open-m")?.name), /uncapped/);
   });
 

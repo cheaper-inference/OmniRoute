@@ -353,82 +353,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Ieviešana
+## 🚀 izvietošana
 
-### Globāla npm instalācija (Ieteicams)
+### Globālā npm instalēšana (ieteicams)
 
 ```bash
 npm install -g omniroute
 
-# Izveidot konfigurācijas direktoriju
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Izveidot .env failu (skatiet .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Startēt serveri
+# Start server
 omniroute
-# Vai ar pielāgotu portu:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`.
+CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`. `./.env` darba direktorijā var iestatīt tikai īsu atslēgu sarakstu (`REQUIRE_API_KEY`, lokalizācija, laika joslas un krāsu iestatījumi, nevis porti); visu pārējo ieliec `~/.omniroute/.env`. Skatiet [CLI palaišanas līgumus](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Tekstūras režīms
+### Paplātes režīms
 
-Startējiet OmniRoute sistēmas tekstūrā:
+Sāciet OmniRoute sistēmas teknē:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komanda atgriežas pēc servera un tekstūras gatavības.
+Komanda atgriežas pēc tam, kad serveris un tekne ir gatavi.
 
-Serveris turpina darboties bez terminala.
+Serveris turpinās bez termināļa.
 
-Tekstūras režīms atbalsta macOS, Windows un grafiskās Linux sesijas. Tekstūras režīms automātiski neatver paneli.
+Paplātes režīms atbalsta macOS, Windows un grafiskās Linux sesijas. Paplātes režīms automātiski neatver informācijas paneli.
 
-Izmantojiet tekstūras izvēlni šādām darbībām:
+Izmantojiet paplātes izvēlni šīm darbībām:
 
-- Atvērt paneli.
-- Atvērt `/dashboard/logs`.
-- Mainīt automātisko startēšanu.
-- Apturēt OmniRoute.
+- Atveriet informācijas paneli.
+- Atveriet `/dashboard/logs`.
+- Mainīt automātisko palaišanu.
+- Beidz OmniRoute.
 
-Neapvienojiet `--tray` ar šādām opcijām:
+Nekombinējiet `--tray` ar šīm opcijām:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Šie režīmi prasa dažādu procesu īpašumtiesības.
+Šiem režīmiem ir nepieciešamas dažādas procesa īpašumtiesības.
 
-Ieslēgt startēšanu nākamajā mašīnas pieteikšanās reizē:
+Iespējot startēšanu nākamajā mašīnas pieteikšanās reizē:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automātiskā startēšana izmanto tekstūras režīmu macOS, Windows un grafiskās Linux sesijās. Bezmaksas Linux izmanto esošo systemd lietotāja pakalpojumu.
+Automātiskā palaišana izmanto paplātes režīmu macOS, Windows un grafiskajās Linux sesijās. Bezgalvas Linux izmanto esošo systemd lietotāja pakalpojumu.
 
-Atspējot startēšanu pieteikšanās laikā:
+Atspējot startēšanu, piesakoties:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Atinstalēšana
+### Notiek atinstalēšana
 
-Kad OmniRoute vairs nav nepieciešams, mēs piedāvājam divas ātras skriptus tīrai noņemšanai:
+Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skriptus tīrai noņemšanai:
 
-| Komanda                  | Darbība                                                                                        |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Noņem sistēmas lietotni, bet **saglabā jūsu DB un konfigurācijas** `~/.omniroute` direktorijā. |
-| `npm run uninstall:full` | Noņem lietotni UN neatgriezeniski **izdzēš visas konfigurācijas, atslēgas un datubāzes**.      |
+| Komanda                  | Darbība                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Noņem sistēmas lietotni, bet** saglabā jūsu DB un konfigurācijas** `~/.omniroute`.                 |
+| `npm run uninstall:full` | Programma AND tiek neatgriezeniski noņemta** dzēš visas konfigurācijas, atslēgas un datu bāzes** . |
 
-> Piezīme: Lai palaistu šīs komandas, dodieties uz OmniRoute projekta mapi (ja to klonējāt) un izpildiet tās. Alternatīvi, ja tā ir instalēta globāli, varat vienkārši palaist `npm uninstall -g omniroute`.
+> Piezīme. Lai palaistu šīs komandas, dodieties uz OmniRoute projekta mapi (ja to klonējāt) un palaidiet tās. Alternatīvi, ja tā ir instalēta globāli, varat vienkārši palaist `npm uninstall -g omniroute`.
 
-### VPS ieviešana
+### VPS izvietošana
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Vai: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 ieviešana (Zems atmiņas patēriņš)
+### PM2 izvietošana (maz atmiņas)
 
-Serveriem ar ierobežotu RAM, izmantojiet atmiņas limita opciju:
+Serveriem ar ierobežotu RAM izmantojiet atmiņas ierobežojuma opciju:
 
 ```bash
-# Ar 512MB limitu (noklusējums)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Vai ar pielāgotu atmiņas limitu
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Vai izmantojot ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Izveidojiet `ecosystem.config.js`:
+Izveidot `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Veidot attēlu (noklusējums = runner-cli ar codex/claude/droid instalētu)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Pārnēsājams režīms (ieteicams)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Par hosta integrēto režīmu ar CLI binārjiem, skatiet Docker sadaļu galvenajos dokumentos.
+Lai uzzinātu par resursdatora integrēto režīmu ar CLI binārajiem failiem, skatiet galveno dokumentu sadaļu Docker.
 
-### Void Linux (xbps-src)
+### Nederīgs Linux (xbps-src)
 
-Void Linux lietotāji var iepakot un instalēt OmniRoute natīvi, izmantojot `xbps-src` krusteniskās kompilēšanas sistēmu. Tas automatizē Node.js standartizēto veidošanu kopā ar nepieciešamajiem `better-sqlite3` natīvajiem saitēm.
+Void Linux lietotāji var iepakot un instalēt OmniRoute sākotnēji, izmantojot `xbps-src` savstarpējās kompilācijas sistēmu. Tas automatizē Node.js savrupo veidošanu kopā ar nepieciešamajām `better-sqlite3` vietējām saitēm.
 
 <details>
-<summary><b>Skatīt xbps-src veidni</b></summary>
+<summary><b>Skatiet xbps-src veidni</b></summary>
 
 ```bash
-# Veidnes fails 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Noteikt mērķa CPU arhitektūru node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instalēt visas atkarības – izlaidīt skriptus
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Veidot Next.js standartizēto pakotni
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopēt statiskos aktīvus standartizētajā
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilēt better-sqlite3 natīvo saiti
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Ievietot kompilēto saiti standartizētajā pakotnē
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Noņemt ar arhitektūru saistītās sharp pakotnes
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopēt pino izpildlaika atkarības, ko izlaida Next.js statiskā analīze:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Novērst tukšo Next.js app router direktoriju noņemšanu ar post-install āķi
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Vides mainīgie
 
-| Mainīgais                               | Noklusējums                          | Apraksts                                                                                                                                                    |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT parakstīšanas noslēpums (**mainiet ražošanā**)                                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pirmā pieteikšanās parole                                                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datu direktorija (db, lietojums, žurnāli)                                                                                                                   |
-| `PORT`                                  | sistēmas noklusējums                 | Pakalpojuma ports (`20128` piemēros)                                                                                                                        |
-| `HOSTNAME`                              | sistēmas noklusējums                 | Saistīšanas saimnieks (Docker noklusējums `0.0.0.0`)                                                                                                        |
-| `NODE_ENV`                              | izpildlaika noklusējums              | Iestatiet `production` ieviešanai                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Publiskā bāzes URL, kas parādīta panelī un eksponēta serverim (aizstāj veco `BASE_URL`)                                                                     |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Mākoņa sinhronizācijas gala punkta bāzes URL (aizstāj veco `CLOUD_URL`)                                                                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC noslēpums ģenerētajiem API atslēgām                                                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Pieprasīt Bearer API atslēgu uz `/v1/*`                                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Ļaut autentificētiem paneļa lietotājiem pēc pieprasījuma atklāt pilnas uzglabātās API atslēgas vērtības                                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Servera puses atjaunināšanas biežums kešētajiem Pakalpojumu sniedzēju limitu datiem; saskarnes atjaunināšanas pogas joprojām izraisa manuālu sinhronizāciju |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Atspējot automātiskās SQLite momentuzņēmumus pirms rakstīšanas/importēšanas/atjaunošanas; manuālās dublējumkopijas joprojām darbojas                        |
-| `APP_LOG_TO_FILE`                       | `true`                               | Iespējo lietojuma un audita žurnālu izvadi uz diska                                                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Piespiest `Secure` autentifikācijas sīkfailu (aiz HTTPS apgrieztā prokura)                                                                                  |
-| `CLOUDFLARED_BIN`                       | nav iestatīts                        | Izmantot esošu `cloudflared` bināru failu, nevis pārvaldītu lejupielādi                                                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportlīdzeklis pārvaldītajiem Ātrajiem tuneļiem (`http2`, `quic` vai `auto`)                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js krātuves limits MB                                                                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimālais pieprasījumu kešatmiņas ierakstu skaits                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimālais semantiskās kešatmiņas ierakstu skaits                                                                                                          |
+| Mainīgs                                 | Noklusējums              | Apraksts                                                                                                                                                                     |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automātiski ģenerēts)_ | JWT parakstīšanas slepenais — automātiski ģenerēts pirmajā palaišanas reizē un saglabājies līdz `server.env`; iestatiet to tieši, ja datu direktorijs ir īslaicīgs           |
+| `INITIAL_PASSWORD`                      | _(atiestatīts)_          | Pirmā pieteikšanās parole. npm/source instalācijas sākas ar `CHANGEME`: nomainiet to. Atiestatīts: iekļaušanas vednis                                                        |
+| `DATA_DIR`                              | `~/.omniroute`           | Datu direktorijs (db, lietojums, žurnāli)                                                                                                                                    |
+| `PORT`                                  | ietvara noklusējuma      | Servisa ports (`20128` piemēros)                                                                                                                                             |
+| `HOSTNAME`                              | ietvara noklusējuma      | Saistīt saimniekdatoru (Docker noklusējuma vērtība ir `0.0.0.0`)                                                                                                             |
+| `NODE_ENV`                              | izpildlaika noklusējuma  | Iestatiet `production` izvietošanai                                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Publisks bāzes URL tika parādīts informācijas panelī un pakļauts serverim (aizstāj mantoto `BASE_URL`)                                                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Mākoņa sinhronizācijas beigu punkta bāzes URL (aizstāj mantoto `CLOUD_URL`)                                                                                                  |
+| `API_KEY_SECRET`                        | _(automātiski ģenerēts)_ | HMAC noslēpums ģenerētajām API atslēgām — automātiski ģenerēts pirmajā palaišanas reizē un saglabāts līdz `server.env`                                                       |
+| `REQUIRE_API_KEY`                       | `false`                  | Ieviest API nesēja `/v1/*`                                                                                                                                                   |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Ļaujiet autentificētiem informācijas paneļa lietotājiem pēc pieprasījuma atklāt visas saglabātās API atslēgas vērtības                                                       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Servera puses atsvaidzināšanas kadence kešatmiņā saglabātajiem pakalpojumu sniedzēja ierobežojumu datiem; UI atsvaidzināšanas pogas joprojām aktivizē manuālo sinhronizāciju |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Atspējot automātiskos SQLite momentuzņēmumus pirms writes/import/restore; manuālās dublējumkopijas joprojām darbojas                                                         |
+| `APP_LOG_TO_FILE`                       | `true`                   | Iespējo lietojumprogrammu un audita žurnāla izvadi diskā                                                                                                                     |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Piespiedu `Secure` autentifikācijas sīkfails (aiz HTTPS reversā starpniekservera)                                                                                            |
+| `CLOUDFLARED_BIN`                       | atiestatīts              | Pārvaldītās lejupielādes vietā izmantojiet esošu `cloudflared` bināro failu                                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transports pārvaldītiem ātrajiem tuneļiem (`http2`, `quic` vai `auto`)                                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js kaudzes ierobežojums MB                                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maksimālais tūlītējais kešatmiņas ieraksts                                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimālais semantiskās kešatmiņas ieraksts                                                                                                                                  |
 
-Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
+Lai iegūtu pilnu atsauci uz vides mainīgo, skatiet [README](../README.md).
 
 ---
 
@@ -704,7 +704,7 @@ Vai izmantojiet informācijas paneli:** Providers → [Provider] → Custom Mode
 
 Piezīmes:
 
-- OpenRouter un OpenAI/Anthropic-compatible pakalpojumu sniedzēji tiek pārvaldīti no** Pieejamie modeļi** tikai. Manuāli pievienojiet, importējiet un sinhronizējiet visu, kas atrodas tajā pašā pieejamo modeļu sarakstā, tāpēc šiem pakalpojumu sniedzējiem nav atsevišķas pielāgoto modeļu sadaļas.
+- OpenRouter un OpenAI/Anthropic-compatible pakalpojumu sniedzēji tiek pārvaldīti no** Pieejamie modeļi** tikai. Manuāla pievienošana, importēšana un automātiska sinhronizēšana visu zemi vienā pieejamo modeļu sarakstā, tāpēc šiem pakalpojumu sniedzējiem nav atsevišķas pielāgoto modeļu sadaļas.
 - The** Pielāgoti modeļi** sadaļa ir paredzēta pakalpojumu sniedzējiem, kuri neatklāj pārvaldīto pieejamo modeļu importēšanu.
 
 ### Pielāgoti ar OpenAI saderīgi pakalpojumu sniedzēji
@@ -734,8 +734,8 @@ Izvēlieties atšķirīgu prefiksu (`mygw`, `acme-proxy`). Ja pieprasījumi piel
 
 Šie taustiņi tiek ievadīti savienojuma `providerSpecificData` (piemēram, izmantojot `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē.
-- `quotaEndpoint` — vārtejas quota/credits galapunkts, kas tiek lasīts informācijas paneļa kvotu joslai un kvotas zinošai maršrutēšanai. Darbojas gan ar OpenAI, gan ar Anthropic saderīgajiem savienojumiem; pilna forma ir dokumentēta `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code jau ir aizstājvārdi, kas pārsniedz 64 rakstzīmes bez iestatījuma. Savienojuma vērtība aizstāj Azure OpenAI /Azure AI Foundry noklusējuma (Azure savienojums aiz stingrākas vārtejas) un nosaka ierobežojumu pielāgotam saderīgam mezglam; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code saglabā savu reģistra ierobežojumu un ignorē to.
+- `quotaEndpoint` — vārtejas quota/credits galapunkts, izlasiet informācijas paneļa kvotu joslu un kvotām atbilstošu maršrutēšanu. Darbojas gan ar OpenAI, gan ar Anthropic saderīgajiem savienojumiem; pilna forma ir dokumentēta `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -832,8 +832,8 @@ Atgriež modeļus, kas sagrupēti pēc pakalpojumu sniedzēja ar veidiem (`chat`
 
 ### LLM Gateway Intelligence (9. fāze)
 
-- **Semantiskā kešatmiņa** — Automātiski saglabā kešatmiņu bez straumēšanas, temperatūras = 0 atbildes (apiet ar `X-OmniRoute-No-Cache: true`)
-- **Pieprasīt idempotenci** — Atceļ pieprasījumu dublikātus 5 s laikā, izmantojot `Idempotency-Key` vai `X-Request-Id` galveni
+- **Semantiskā kešatmiņa** — automātiski kešatmiņā nestraumē, temperatūras = 0 atbildes (apiet ar `X-OmniRoute-No-Cache: true`)
+- **Pieprasīt idempotenci** — atceļ pieprasījumu dublikātus 5 s laikā, izmantojot `Idempotency-Key` vai `X-Request-Id` galveni
 - **Progresa izsekošana** — Izvēlēties SSE `event: progress` notikumus, izmantojot `X-OmniRoute-Progress: true` galveni
 
 ---
@@ -865,29 +865,29 @@ Konfigurēt, izmantojot** Informācijas panelis → iestatījumi → maršrutē�
 
 | stratēģija                  | Apraksts                                                                                                  |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Vispirms aizpildiet**     | Izmanto kontus prioritārā secībā — primārais konts apstrādā visus pieprasījumus, līdz tie nav pieejami    |
+| **Vispirms aizpildiet**     | Izmanto kontus prioritārā secībā. — primārais konts apstrādā visus pieprasījumus, līdz tie nav pieejami   |
 | **Round Robin**             | Pārvietojas cauri visiem kontiem ar konfigurējamu fiksēto ierobežojumu (noklusējums: 3 zvani vienā kontā) |
-| **P2C (divu izvēļu spēks)** | Izvēlas 2 gadījuma kontus un ceļus uz veselīgāko — līdzsvaro slodzi ar veselības apziņu                   |
+| **P2C (divu izvēļu spēks)** | Izvēlas 2 nejaušus kontus un maršrutus uz veselīgāko kontu — līdzsvaro slodzi ar veselības apziņu         |
 | **Nejauši**                 | Nejauši izvēlas kontu katram pieprasījumam, izmantojot Fisher-Yates shuffle                               |
 | **Vismazāk lietots**        | Maršruti uz kontu ar vecāko `lastUsedAt` laikspiedolu, vienmērīgi sadalot trafiku                         |
 | **Optimizētas izmaksas**    | Maršruti uz kontu ar zemāko prioritātes vērtību, optimizējot zemāko izmaksu pakalpojumu sniedzējiem       |
 
 **Uzlabotas kombinētās un automātiskās stratēģijas** (konfigurējams kombinācijā vai izmantojot `auto/*` prefiksus — skatiet [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — stingra kārtība, nekad nerīkojas
-- `weighted` — proporcionāla satiksme, kas sadalīta pēc katra modeļa svara
-- `fill-first` — iztukšojiet pirmo modeli, līdz sasniedz ierobežojumus
+- `priority` — stingra kārtība, nekad nav apaļš
+- `weighted` — proporcionāla satiksme, kas sadalīta pēc katra modeļa svariem
+- `fill-first` — iztukšojiet pirmo modeli, līdz tiek sasniegti ierobežojumi
 - `round-robin` / `strict-random` / `random`
 - `p2c` (divu izvēļu spēks)
 - `least-used` un `cost-optimized`
-- `auto` — visu kandidātu rezultāts
-- `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam pakalpojumu sniedzējam, pēc tam atgriežas pie noteikumiem
+- `auto` —, pamatojoties uz visiem kandidātiem
+- `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam nodrošinātājam, pēc tam atgriežas pie noteikumiem
 - `context-optimized` — izvēlas modeli ar lielāko brīvā konteksta logu
-- `context-relay` — ķēdes gara konteksta modeļus sekošanas pagriezieniem
+- `context-relay` — ķēdes gara konteksta modeļi sekošanas pagriezieniem
 
 #### Ārējā lipīgās sesijas galvene
 
-Lai iegūtu ārēju sesijas radniecību (piemēram, Claude Code/Codex aģenti aiz reversajiem starpniekserveriem), nosūtiet:
+Ārējās sesijas radniecībai (piemēram, Claude Code/Codex aģenti aiz reversajiem starpniekserveriem), nosūtiet:
 
 ```http
 X-Session-Id: your-session-key
@@ -992,21 +992,21 @@ OmniRoute ievieš nodrošinātāja līmeņa noturību ar pieciem komponentiem:
 
 1. **Pieprasīt rindu un tempu** — Sistēmas līmeņa pieprasījuma veidošana:
    - **Pieprasījumi minūtē (RPM)** — Maksimālais pieprasījumu skaits minūtē vienā kontā
-   - **Minimālais laiks starp pieprasījumiem** — Minimālā starpība milisekundēs starp pieprasījumiem
-   - **Maksimālais vienlaicīgo pieprasījumu skaits** — Maksimālais vienlaicīgo pieprasījumu skaits vienam kontam
+   - **Minimālais laiks starp pieprasījumiem** — Minimālā atstarpe milisekundēs starp pieprasījumiem
+   - **Maksimālais vienlaicīgo pieprasījumu skaits** — Maksimālais vienlaicīgo pieprasījumu skaits vienā kontā
 
-2. **Savienojuma dzesēšana** — Auth-tipa konfigurācija vienam savienojumam pēc atkārtoti izmēģināmām kļūmēm:
-   - **Bāzes dzesēšana** — Noklusējuma atdzišanas logs atkārtoti izmēģināmām augšupejošām kļūmēm
-   - **Izmantojiet ieteikumus Augšupējā mēģinājuma atkārtot** — Tiek ievēroti autoritatīvie `Retry-After` vai atiestatīšanas padomi, ja tie tiek nodrošināti
+2. **Savienojuma dzesēšana** — Per-auth tipa konfigurācija vienam savienojumam pēc atkārtotām kļūmēm:
+   - **Bāzes dzesēšana** — Noklusējuma atdzišanas logs atkārtoti izmēģināmām augšupējām kļūmēm
+   - **Izmantojiet ieteikumus Augšupējā mēģinājuma atkārtot** — ievēro autoritatīvus `Retry-After` vai atiestatīšanas ieteikumus, ja tie tiek nodrošināti
    - **Maksimālie atkāpšanās soļi** — Maksimālais eksponenciālais atkāpšanās līmenis atkārtotām kļūmēm
 
-3. **Pakalpojumu sniedzēja ķēdes pārtraucējs** — Izseko pakalpojumu sniedzēja kļūmes, atzīmē pakalpojumu sniedzēju, kas ir degradēts līdz konfigurētajam brīdinājuma slieksnim, un atver slēdzi, kad tiek sasniegts konfigurētais kļūmju slieksnis:
-   - **Degradācijas slieksnis** — secīgas pakalpojumu sniedzēja kļūmes pirms `DEGRADED` ievadīšanas
-   - **Neveiksmes slieksnis** — secīgas pakalpojumu sniedzēja kļūmes pirms `OPEN` ievadīšanas
-   - **Atiestatīt taimautu** — Laika logs, pirms pakalpojumu sniedzējs tiek atkārtoti pārbaudīts
-   - **CLOSED** (Vesels) — Pieprasījumi notiek normāli
+3. **Pakalpojumu sniedzēja ķēdes pārtraucējs** — izseko pakalpojumu sniedzēja kļūmes no gala līdz galam, atzīmē pakalpojumu sniedzēju, kas ir degradēts pie konfigurētā brīdinājuma sliekšņa, un atver slēdzi, kad tiek sasniegts konfigurētais kļūmju slieksnis:
+   - **Degradācijas slieksnis** — Secīgas pakalpojumu sniedzēja kļūmes pirms `DEGRADED` ievadīšanas
+   - **Neveiksmes slieksnis** — Secīgas pakalpojumu sniedzēja kļūmes pirms `OPEN` ievadīšanas
+   - **Atiestatīt taimautu** — Laika logs pirms pakalpojumu sniedzēja atkārtotas pārbaudes
+   - **CLOSED** (Vesels) — Pieprasījumi plūst normāli
    - **DEGRADED** — Pieprasījumi joprojām plūst, kamēr tiek izsekotas paaugstinātas kļūmes
-   - **OPEN** — Pakalpojumu sniedzējs uz laiku tiek bloķēts pēc atkārtotām kļūmēm
+   - **OPEN** — Provider ir īslaicīgi bloķēts pēc atkārtotām kļūmēm
    - **HALF_OPEN** — Pārbaude, vai pakalpojumu sniedzējs ir atkopies
 
    Savienojuma tvēruma `429` likmes ierobežojumi paliek spēkā** Savienojuma dzesēšana** un netiek ieskaitīti pakalpojumu sniedzēja pārtraucējā.
@@ -1057,17 +1057,17 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Iestatījumu lapa ir sakārtota šādi** 7 cilnes** ērtai navigācijai:
 
-| Tab              | Saturs                                                                                                                                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ģenerālis**    | Sistēmas krātuves rīki, noklusējuma darbība, galapunkta tuneļa redzamība                                                                                                                                       |
-| **Izskats**      | Motīvu vadīklas (light/dark/system), sānjoslas redzamība, paneļa pārslēgšanas slēdži Cloudflare/Tailscale/ngrok tuneļa kartēm                                                                                  |
-| **AI**           | Pārdomāts budžets (passthrough / auto-stripp / pielāgots / adaptīvs — skatiet [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globāla sistēmas uzvedne, tūlītēja kešatmiņas statistika                           |
-| **Drošība**      | Login/Password iestatījumi, IP piekļuves kontrole, API autentifikācija `/models`, pakalpojumu sniedzēja bloķēšana, tūlītējas iesmidzināšanas aizsargs                                                          |
-| **Maršrutēšana** | Globālā maršrutēšanas stratēģija (Fill First / Round Robin / P2C / Nejaušs / Vismazāk lietots / Optimizēts izmaksas), aizstājējzīmju modeļu aizstājvārdi, atkāpšanās ķēdes, kombinētie noklusējuma iestatījumi |
-| **Izturība**     | Pieprasīt rindu, savienojuma atdzišanu, pakalpojumu sniedzēja pārtraucēja konfigurāciju un darbības gaidīšanas atdzišanu                                                                                       |
-| **Papildu**      | Globālā starpniekservera konfigurācija (HTTP/SOCKS5), katra nodrošinātāja starpniekservera ignorēšana                                                                                                          |
+| Tab              | Saturs                                                                                                                                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ģenerālis**    | Sistēmas krātuves rīki, noklusējuma darbība, galapunkta tuneļa redzamība                                                                                                                                         |
+| **Izskats**      | Motīvu vadīklas (light/dark/system), sānjoslas redzamība, paneļa pārslēgi Cloudflare/Tailscale/ngrok tuneļa kartēm                                                                                               |
+| **AI**           | Pārdomāts budžets (passthrough / auto-stripp / custom / adaptive — sk. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globāla sistēmas uzvedne, tūlītēja kešatmiņas statistika                                    |
+| **Drošība**      | Login/Password iestatījumi, IP piekļuves kontrole, API autentifikācija `/models`, pakalpojumu sniedzēja bloķēšana, tūlītējas iesmidzināšanas aizsargs                                                            |
+| **Maršrutēšana** | Globālā maršrutēšanas stratēģija (Fill First / Round Robin / P2C / Nejaušs / Vismazāk izmantots / Optimizēts izmaksas), aizstājējzīmju modeļu aizstājvārdi, atkāpšanās ķēdes, kombinētie noklusējuma iestatījumi |
+| **Izturība**     | Pieprasīt rindu, savienojuma atdzišanu, pakalpojumu sniedzēja pārtraucēja konfigurāciju un gaidīšanas darbību                                                                                                    |
+| **Papildu**      | Globālā starpniekservera konfigurācija (HTTP/SOCKS5), katra nodrošinātāja starpniekservera ignorēšana                                                                                                            |
 
-General vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
+Vispārīgi vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1078,7 +1078,7 @@ Piekļuve, izmantojot** Informācijas paneļa → izmaksas** .
 | Tab                 | Mērķis                                                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **Budžets**         | Iestatiet izdevumu ierobežojumus vienai API atslēgai, izmantojot daily/weekly/monthly budžetus un reāllaika izsekošanu |
-| **Cenu noteikšana** | Skatiet un rediģējiet modeļa cenu ierakstus — maksa par 1 000 input/output marķieriem vienam pakalpojumu sniedzējam    |
+| **Cenu noteikšana** | Skatiet un rediģējiet modeļu cenu noteikšanas ierakstus — maksa par 1000 input/output marķieru vienam nodrošinātājam   |
 
 ```bash
 # API: Set a budget

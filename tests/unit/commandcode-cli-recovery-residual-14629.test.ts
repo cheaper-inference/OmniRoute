@@ -298,6 +298,7 @@ for (const stream of [false, true]) {
       "permissionMode",
       "skills",
       "taste",
+      "threadId",
     ]);
     assert.deepEqual(record(calls[2].body.params).tools, record(calls[1].body.params).tools);
     assert.ok(JSON.stringify(calls[2].body).includes("omniroute_tool_search"));

@@ -38,24 +38,19 @@ et prennent en charge une correspondance `any` ou `all`.
 Une règle `connection` est évaluée uniquement lorsqu’aucune règle précoce ne l’a emporté et qu’une connexion concrète à un fournisseur a
 déjà été sélectionnée. Elle peut modifier uniquement l’effort et le budget.
 
-## Effort et budget
+## Efforts et budget
 
-`sourceEffort` accepte `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` et
-`ultra`. `missing` signifie que la requête ne contient ni niveau d’effort discret, ni indicateur de réflexion,
-ni budget de réflexion. Un signal composé uniquement d’un budget ne correspond donc qu’à `any`.
+`sourceEffort` accepte `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` et `ultra`. `missing` signifie que la demande ne contient ni un effort discret, ni un basculement de réflexion ou un budget de réflexion. Un signal budgétaire uniquement correspond donc uniquement à `any`.
 
-`effortMode` comporte trois variantes :
+`effortMode` a trois variantes :
 
-- `inherit` conserve l’effort du client tout en permettant au modèle ou au combo de changer.
-- `default` définit `targetEffort` uniquement lorsqu’aucun signal de raisonnement explicite n’est présent.
-- `force` remplace l’effort discret par `targetEffort`.
+- `inherit` maintient l'effort du client tout en permettant au modèle ou au combo de changer.
+- `default` définit `targetEffort` uniquement lorsqu'aucun signal de raisonnement explicite n'est présent.
+- `force` remplace l'effort discret par `targetEffort`.
 
-Indépendamment, `budgetAction` peut être `preserve`, `remove` ou `set`. `force` avec `none` supprime
-tous les champs reconnus relatifs à l’effort et au budget. L’association de `none` et `set` n’est pas valide.
+Indépendamment, `budgetAction` peut être `preserve`, `remove` ou `set`. `force` avec `none` supprime tous les champs d'effort et de budget reconnus, puis définit `reasoning_effort: "none"`, car certains fournisseurs activent la réflexion lorsque le champ est absent. Les fournisseurs qui rejettent le `none` littéral sont ajustés lors de l'envoi en `open-sse/executors/base/reasoningEffort.ts`. Le code de commande le mappe à `low`, sauf sur les requêtes en forme de réponses (`input` sans `messages`), où il conserve `none`. Sur Cloudflare Workers AI (`cloudflare-ai`), les modèles qui rejettent `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) obtiennent `low`; les autres modèles Workers AI conservent `none`. Supprimer le champ n'est pas une option ici, car un effort absent exécute le niveau par défaut du modèle. `none` avec `set` n'est pas valide.
 
-Les requêtes ciblant des modèles connus comme incompatibles sont rejetées avant l’appel en amont. Pour les cibles de type combo,
-les entrées incompatibles sont supprimées ; s’il n’en reste aucune, la requête renvoie le statut `400`.
-Des données de capacité inconnues produisent un avertissement et laissent la règle active.
+Les requêtes ciblant des modèles connus comme incompatibles sont rejetées avant l’appel en amont. Pour les cibles combo, les entrées incompatibles sont supprimées ; s'il n'en reste pas, la requête renvoie le statut `400`. Les données de capacité inconnue génèrent un avertissement et laissent la règle active.
 
 ## Sécurité et transports
 

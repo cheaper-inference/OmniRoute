@@ -43,11 +43,16 @@ test("inference requests carry the Muse Code client identity", () => {
   __resetMuseCodeSessionsForTesting();
   const headers = headersFor();
   assert.equal(headers["User-Agent"], museCodeClientUserAgent());
+  // Fixed prefix and suffix compared literally (no hand-escaped RegExp built from the version);
+  // only the platform segment between them is a pattern.
+  const userAgent = headers["User-Agent"];
+  const prefix = `muse-build/${MUSE_CODE_CLIENT_VERSION} (non-interactive; `;
+  const suffix = `; build ${MUSE_CODE_CLIENT_BUILD})`;
+  assert.ok(userAgent.startsWith(prefix), userAgent);
+  assert.ok(userAgent.endsWith(suffix), userAgent);
   assert.match(
-    headers["User-Agent"],
-    new RegExp(
-      `^muse-build/${MUSE_CODE_CLIENT_VERSION.replace(/\./g, "\\.")} \\(non-interactive; (linux|macos|windows)-(x86_64|aarch64); build ${MUSE_CODE_CLIENT_BUILD}\\)$`
-    )
+    userAgent.slice(prefix.length, userAgent.length - suffix.length),
+    /^(linux|macos|windows)-(x86_64|aarch64)$/
   );
   assert.equal(headers["X-Client-Id"], "tbh:exec");
   assert.equal(headers["X-Tbh-Agent-Role"], "main");

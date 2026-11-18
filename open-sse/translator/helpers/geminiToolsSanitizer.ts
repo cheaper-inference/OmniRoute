@@ -68,7 +68,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * schema becomes an empty object schema. Only the top level is touched — nested property
  * schemas are left to cleanJSONSchemaForAntigravity.
  */
-function toGeminiParametersSchema(raw: unknown): Record<string, unknown> {
+export function toGeminiParametersSchema(raw: unknown): Record<string, unknown> {
   if (!isRecord(raw)) {
     return { type: "object", properties: {} };
   }

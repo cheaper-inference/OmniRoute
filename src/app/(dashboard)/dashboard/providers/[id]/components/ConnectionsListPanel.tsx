@@ -22,6 +22,11 @@ import type { ConnectionDeleteConfirmState } from "../hooks/useConnectionDeleteC
 import type { QuotaRefreshState } from "../hooks/providerQuotaRefresh";
 import type { ProviderQuotaCacheEntry } from "../hooks/useProviderQuota";
 import { filterConnectionsByQuery } from "../connectionsSearchFilter";
+import {
+  countVerificationRequired,
+  matchesHealthFilter,
+  VERIFICATION_REQUIRED_FILTER,
+} from "../connectionHealthFilter";
 
 /** Rows with no explicit Codex refresh outcome yet (stable reference across renders). */
 const NO_QUOTA_REFRESH_STATES: Readonly<Record<string, QuotaRefreshState>> = {};
@@ -243,10 +248,7 @@ export default function ConnectionsListPanel({
     </ActionBar>
   );
 
-  const isHealthy = (c: ConnectionRowConnection): boolean => {
-    const s = c.testStatus;
-    return c.isActive !== false && !c.prefixShadowed && (!s || s === "active" || s === "success");
-  };
+  const verificationRequiredCount = countVerificationRequired(sorted);
   const STATUS_FILTER_OPTIONS = [
     { value: "all", label: t("filterAll", "All") },
     { value: "active", label: t("filterActive", "Active") },
@@ -256,18 +258,18 @@ export default function ConnectionsListPanel({
       value: "credits_exhausted",
       label: t("filterCreditsExhausted", "Credits Exhausted"),
     },
+    // Only shown while some account still holds a Google verify-account link.
+    ...(verificationRequiredCount > 0 || healthFilter === VERIFICATION_REQUIRED_FILTER
+      ? [
+          {
+            value: VERIFICATION_REQUIRED_FILTER,
+            label: `${t("filterVerificationRequired", "Needs verification")} (${verificationRequiredCount})`,
+          },
+        ]
+      : []),
   ];
   const healthFiltered =
-    healthFilter === "all"
-      ? sorted
-      : sorted.filter((c) => {
-          if (healthFilter === "active") return isHealthy(c);
-          if (healthFilter === "error")
-            return (
-              !isHealthy(c) && c.testStatus !== "banned" && c.testStatus !== "credits_exhausted"
-            );
-          return c.testStatus === healthFilter;
-        });
+    healthFilter === "all" ? sorted : sorted.filter((c) => matchesHealthFilter(c, healthFilter));
   // #7937 — substring search over id/tag/name/email, applied across the FULL
   // in-memory list (not just the current page).
   const filtered = filterConnectionsByQuery(accountSearch, healthFiltered);

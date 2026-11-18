@@ -27,86 +27,88 @@ npm install -g omniroute
 omniroute
 ```
 
-แดชบอร์ดจะเปิดที่ `http://localhost:20128` และ URL ฐานของ API คือ `http://localhost:20128/v1`
+Dashboard opens at `http://localhost:20128` and API base URL is `http://localhost:20128/v1`.
 
-### pnpm
+> **ผู้ใช้ npm:** หาก npm เตือนว่าสคริปต์การติดตั้งถูกบล็อก (เช่น `omniroute`, `better-sqlite3`) โปรดดู [การแก้ไขปัญหา — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)
+
+### เวลาบ่ายโมง
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **ผู้ใช้ pnpm:** จำเป็นต้องใช้แฟล็ก `--allow-build` เพื่อเปิดใช้งานสคริปต์การบิลด์แบบเนทีฟสำหรับ `better-sqlite3` และ `@swc/core` คำสั่ง `pnpm approve-builds -g` ไม่รองรับการติดตั้งแบบส่วนกลางบน pnpm v11
+> **ผู้ใช้ pnpm:** จำเป็นต้องมีแฟล็ก `--allow-build` เพื่อเปิดใช้งานสคริปต์บิลด์ดั้งเดิมสำหรับ `better-sqlite3` และ `@swc/core` คำสั่ง `pnpm approve-builds -g` ไม่รองรับการติดตั้งแบบโกลบอลบน pnpm v11
 
-### Arch Linux (AUR)
+### ซุ้มประตู Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[แพ็กเกจ AUR](https://aur.archlinux.org/packages/omniroute-bin) จะติดตั้ง OmniRoute และจัดเตรียมบริการผู้ใช้ systemd
+[แพ็คเกจ AUR](https://aur.archlinux.org/packages/omniroute-bin) จะติดตั้ง OmniRoute และให้บริการผู้ใช้ systemd
 
-### จากซอร์สโค้ด
+### จากแหล่งที่มา
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **หมายเหตุสำหรับ Windows:** ตามค่าเริ่มต้น OmniRoute จะใช้ `%APPDATA%\omniroute` เมื่อไม่มีไดเรกทอรีแบบเดิม `%USERPROFILE%\.omniroute` กำหนด `DATA_DIR` เพื่อเลือกตำแหน่งไดเรกทอรีข้อมูลอื่น
+> **Windows :** ตามค่าเริ่มต้น OmniRoute จะใช้ `%APPDATA%\omniroute` เมื่อไม่มีไดเร็กทอรี `%USERPROFILE%\.omniroute` ดั้งเดิม ตั้งค่า `DATA_DIR` เพื่อเลือกตำแหน่งไดเร็กทอรีข้อมูลอื่น
 
-> **หมายเหตุ:** `npm install` จะสร้าง `.env` จาก `.env.example` โดยอัตโนมัติเมื่อเรียกใช้ครั้งแรก การติดตั้งครั้งต่อไปจะไม่เขียนทับ `.env` ที่มีอยู่ ดังนั้นการปรับแต่งต่างๆ จะยังคงอยู่ หากต้องการสร้างใหม่จากต้นฉบับ ให้ลบ `.env` ก่อนเรียกใช้อีกครั้ง
+> **บันทึก:** `npm install` auto-generates `.env` from `.env.example` on first run. การติดตั้งครั้งต่อไปจะไม่เขียนทับ `.env` ที่มีอยู่ ดังนั้นการปรับแต่งจะยังคงอยู่ To re-seed, delete `.env` before re-running.
 
 ### Docker
 
-โปรดดู [คู่มือ Docker](./DOCKER_GUIDE.md) สำหรับการตั้งค่า Docker ฉบับสมบูรณ์ รวมถึงโปรไฟล์ Compose และ Caddy HTTPS
+ดู [คู่มือ Docker](./DOCKER_GUIDE.md) สำหรับการตั้งค่า Docker ที่สมบูรณ์ รวมถึงโปรไฟล์การเขียนและ Caddy HTTPS
 
-### แอปเดสก์ท็อป (Electron)
+### แอพเดสก์ท็อป (Electron)
 
-OmniRoute มาพร้อมแรปเปอร์เดสก์ท็อปที่สร้างด้วย Electron 41 + electron-builder 26.10 สคริปต์ที่ใช้งานได้ (ที่รากของ workspace):
+OmniRoute จัดส่ง wrapper บนเดสก์ท็อปที่สร้างขึ้นบน Electron 41 + Electron-builder 26.10 Available scripts (workspace root):
 
 ```bash
-npm run electron:dev          # เรียกใช้เดสก์ท็อปพร้อมการโหลดซ้ำอัตโนมัติ
-npm run electron:build        # บิลด์สำหรับ OS ปัจจุบัน (ตรวจหาอัตโนมัติ)
-npm run electron:build:win    # ตัวติดตั้ง Windows (NSIS + แบบพกพา)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # ทดสอบเบื้องต้นสำหรับบิลด์แบบแพ็กเกจ
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-ตัวติดตั้งเดสก์ท็อปแต่ละรุ่นจะแนบมากับ GitHub Releases สำหรับรายละเอียดเชิงลึกทั้งหมดเกี่ยวกับ Electron (การลงนาม บริดจ์ IPC และดิสโทรต่างๆ) โปรดดู [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(สร้างขึ้นในระยะถัดไป)_
+การเผยแพร่ตัวติดตั้งเดสก์ท็อปจะแนบมากับ GitHub Releases สำหรับการเจาะลึก Electron แบบเต็ม (การลงนาม, สะพาน IPC, distros) โปรดดูที่ [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_
 
-### เซิร์ฟเวอร์แบบ Headless (CI/ระบบอัตโนมัติ)
+### เซิร์ฟเวอร์หัวขาด (CI/automation)
 
-สำหรับการตั้งค่าแบบไม่ต้องมีผู้ดูแล (Docker, Kubernetes, CI) ให้ใช้:
+สำหรับการตั้งค่าแบบอัตโนมัติ (Docker, Kubernetes, CI) ให้ใช้:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-เมื่อใช้ร่วมกับตัวแปรสภาพแวดล้อม (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` เป็นต้น) คุณจะสามารถเปิดใช้อินสแตนซ์ OmniRoute ที่ควบคุมทั้งหมดผ่านสคริปต์ได้
+เมื่อรวมกับ env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` ฯลฯ ) สิ่งนี้จะช่วยให้คุณสามารถหมุนอินสแตนซ์ OmniRoute ที่สามารถเขียนสคริปต์ได้อย่างสมบูรณ์
 
 ### ตัวเลือก CLI
 
-| คำสั่ง                  | คำอธิบาย                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------ |
-| `omniroute`             | เริ่มเซิร์ฟเวอร์ (`PORT=20128` โดย API และแดชบอร์ดใช้พอร์ตเดียวกัน)                        |
-| `omniroute setup`       | ขั้นตอนเริ่มต้นใช้งานผ่าน CLI แบบมีคำแนะนำสำหรับรหัสผ่านและผู้ให้บริการรายแรก              |
-| `omniroute doctor`      | เรียกใช้การตรวจสอบสถานะภายในเครื่องโดยไม่ต้องเริ่มเซิร์ฟเวอร์                              |
-| `omniroute providers`   | ค้นหา แสดงรายการ ตรวจสอบความถูกต้อง และทดสอบผู้ให้บริการจาก CLI                            |
-| `omniroute config`      | การกำหนดค่าเครื่องมือ CLI — แสดงรายการ เรียกดู ตั้งค่า และตรวจสอบความถูกต้องของการกำหนดค่า |
-| `omniroute status`      | แดชบอร์ดสถานะแบบออฟไลน์ — เวอร์ชัน ฐานข้อมูล เครื่องมือ และการกำหนดค่า                     |
-| `omniroute logs`        | สตรีมบันทึกการใช้งานจาก API (รองรับ `--follow`)                                            |
-| `omniroute update`      | ตรวจสอบหรือใช้การอัปเดต OmniRoute                                                          |
-| `omniroute provider`    | จัดการการเชื่อมต่อผู้ให้บริการ — เพิ่ม แสดงรายการ ลบ ทดสอบ และตั้งค่าเริ่มต้น              |
-| `omniroute --port 3000` | ตั้งค่าพอร์ตหลัก/API เป็น 3000                                                             |
-| `omniroute --mcp`       | เริ่มเซิร์ฟเวอร์ MCP (การรับส่งข้อมูลผ่าน stdio)                                           |
-| `omniroute --no-open`   | ไม่เปิดเบราว์เซอร์โดยอัตโนมัติ                                                             |
-| `omniroute --help`      | แสดงวิธีใช้                                                                                |
+| สั่งการ                 | คำอธิบาย                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `omniroute`             | เริ่มเซิร์ฟเวอร์ (`PORT=20128`, API และแดชบอร์ดบนพอร์ตเดียวกัน)               |
+| `omniroute setup`       | แนะนำการเริ่มต้นใช้งาน CLI สำหรับรหัสผ่านและผู้ให้บริการรายแรก                |
+| `omniroute doctor`      | ดำเนินการตรวจสอบสภาพภายในเครื่องโดยไม่ต้องสตาร์ทเซิร์ฟเวอร์                   |
+| `omniroute providers`   | ค้นหา แสดงรายการ ตรวจสอบ และทดสอบผู้ให้บริการจาก CLI                          |
+| `omniroute config`      | การกำหนดค่าเครื่องมือ CLI รายการ — รับ ตั้งค่า ตรวจสอบการกำหนดค่า             |
+| `omniroute status`      | แดชบอร์ดสถานะออฟไลน์ เวอร์ชัน —, DB, เครื่องมือ, การกำหนดค่า                  |
+| `omniroute logs`        | Stream usage logs from the API (supports `--follow`)                          |
+| `omniroute update`      | Check for or apply OmniRoute updates                                          |
+| `omniroute provider`    | จัดการการเชื่อมต่อของผู้ให้บริการ — เพิ่ม, แสดงรายการ, ลบ, ทดสอบ, ค่าเริ่มต้น |
+| `omniroute --port 3000` | ตั้งค่าพอร์ต canonical/API เป็น 3000                                          |
+| `omniroute --mcp`       | Start MCP server (stdio transport)                                            |
+| `omniroute --no-open`   | อย่าเปิดเบราว์เซอร์อัตโนมัติ                                                  |
+| `omniroute --help`      | แสดงความช่วยเหลือ                                                             |
 
-การตั้งค่าแบบ Headless สามารถควบคุมผ่านสคริปต์ได้ด้วยแฟล็กหรือตัวแปรสภาพแวดล้อม:
+การตั้งค่าแบบไม่มีส่วนหัวสามารถเขียนสคริปต์ด้วยแฟล็กหรือตัวแปรสภาพแวดล้อม:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-เรียกใช้การวินิจฉัยภายในเครื่องโดยไม่ต้องเปิดแดชบอร์ด:
+เรียกใช้การวินิจฉัยในเครื่องโดยไม่ต้องเปิดแดชบอร์ด:
 
 ```bash
 omniroute doctor
@@ -202,7 +204,7 @@ env ที่ถูกต้องและไม่เขียนไฟล์�
 
 ### การตั้งค่า MCP (Model Context Protocol)
 
-เริ่มการรับส่งข้อมูล MCP ในโหมด stdio:
+เริ่มการขนส่ง MCP ในโหมด stdio:
 
 ```bash
 omniroute --mcp
@@ -211,28 +213,32 @@ omniroute --mcp
 ขั้นตอนการตรวจสอบที่แนะนำ:
 
 ```bash
-# 1. เริ่มเซิร์ฟเวอร์ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. เรียกใช้จากไคลเอนต์ MCP ของคุณ:
-omniroute_get_health        # ควรส่งคืนสถานะความสมบูรณ์ของระบบ
-omniroute_list_combos       # ควรส่งคืนคอมโบที่ใช้งานอยู่
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. หรือเรียกใช้ชุดทดสอบ E2E แบบเต็ม:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### การกำหนดค่าไคลเอนต์ MCP
+#### การกำหนดค่าไคลเอนต์MCP
 
-**Claude Code:**
+**รหัส Claude :**
+
+รหัส Claude เชื่อมต่อผ่าน HTTP ซึ่ง `omniroute --mcp` (stdio) ไม่เริ่มทำงาน การขนส่ง HTTP ปิดอยู่ตามค่าเริ่มต้น: ให้เปิดใช้งานบนเซิร์ฟเวอร์ที่ทำงานอยู่ก่อน เมื่อเปิดใช้งานการเข้าสู่ระบบแดชบอร์ด คำขอที่ไม่มีข้อมูลรับรองจะได้รับ `401` ดังนั้นให้ส่งคีย์ API ที่เก็บ `mcp:connect` (หรือ `manage`) คีย์ที่ไม่มี `manage`/`admin` จำเป็นต้องมีขอบเขตของเครื่องมือแต่ละตัวด้วย (ดู [MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) )
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-เพิ่มลงในการตั้งค่า MCP ของคุณ:
+เพิ่มการตั้งค่า MCP ของคุณ (stdio พร้อมปุ่มเพื่อให้ผู้โทรมีตัวการ):
 
 ```json
 {
@@ -240,17 +246,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**เอกสาร MCP ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ MCP](../../open-sse/mcp-server/README.md) — เครื่องมือ 110 รายการ การกำหนดค่า IDE และไคลเอนต์ Python/TS/Go
+หรือเมื่อ `mcpTransport` เป็น `streamable-http` (ตั้งค่าเป็น `/dashboard/mcp` หรือด้วย `omniroute mcp enable --transport streamable-http`) ให้ชี้รายการเซิร์ฟเวอร์ MCP ระยะไกลของไคลเอ็นต์ไปที่ `http://localhost:20128/api/mcp/stream`
 
-### การตั้งค่า A2A (Agent-to-Agent Protocol)
+คีย์เดินทางเป็น `Authorization: Bearer <api-key>` (ดู [เซิร์ฟเวอร์MCP → การเข้าถึงระยะไกล](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) สำหรับโฮสต์ระยะไกล คีย์ระยะไกลจำเป็นต้องมี `mcp:connect` บวกกับขอบเขต read/write ของมัน)
 
-ตรวจสอบ Agent Card:
+**เอกสาร MCP ฉบับเต็ม:** [เซิร์ฟเวอร์MCP เครื่องมือ README](../../open-sse/mcp-server/README.md) — 110, การกำหนดค่า IDE, ไคลเอนต์ Python/TS/Go ข้อมูลอ้างอิงของผู้ปฏิบัติงานสำหรับเครื่องมือการบีบอัด CCR/dedup (เครื่องหมาย ข้อกำหนดเบื้องต้น ขอบเขตต่อเครื่องมือ การเรียกเลขหน้า การวินิจฉัย): [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
+
+### การตั้งค่า A2A (โปรโตคอลตัวแทนต่อตัวแทน)
+
+ตรวจสอบบัตรตัวแทน:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -264,7 +277,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**เอกสาร A2A ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม และวงจรชีวิตของงาน
+**เอกสาร A2A ฉบับเต็ม:** [เซิร์ฟเวอร์A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม, วงจรชีวิตของงาน
 
 ---
 
@@ -323,12 +336,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## เทมเพลตสำหรับ Void Linux (xbps-src)
+## เทมเพลต Linux (xbps-src) เป็นโมฆะ
 
-สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็กเกจแบบเนทีฟโดยใช้ `xbps-src` ได้ บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
+สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็คเกจเนทิฟได้โดยใช้ `xbps-src` บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
 
 ```bash
-# ไฟล์เทมเพลตสำหรับ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +352,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# สร้างค่า checksum ใหม่สำหรับแต่ละรุ่นด้วย:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

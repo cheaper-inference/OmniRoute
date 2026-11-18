@@ -144,17 +144,34 @@ Ini-enroll mula sa Settings → Security; naka-off hanggang sa paganahin ito ng 
   3. Sa Mga Setting → Seguridad → I-disable, ilagay ang password at iwanang blangko ang code. Ang `POST /api/auth/mfa/disable` ay tumatanggap ng body na walang `code` kapag nakatakda lamang ang variable at nagmumula ang request sa host; kailangan pa rin nito ang dashboard session at kasalukuyang password, at itinatala ito sa audit bilang `auth.mfa.disabled` na may `secondFactor: "recovery_switch"`.
   4. I-unset ang `OMNIROUTE_DISABLE_MFA`, i-restart, at mag-enroll muli kung kinakailangan.
 
-## Mga Uri ng Route
+## Mga Klase ng Route
 
-`src/server/authz/types.ts` ay nagtatakda ng tatlong uri. Anumang route na hindi maiuuri nang tiyak ay babalik sa `MANAGEMENT`.
+Tinutukoy ng `src/server/authz/types.ts` ang tatlong klase; anumang route na hindi matukoy nang tiyak ay awtomatikong napapabilang sa `MANAGEMENT`.
 
-| Uri          | Paglalarawan                                                                                                                                                      | Kinakailangang auth                                                           |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `PUBLIC`     | Tahasang ligtas na mga route: login, logout, status, init, health, onboarding bootstrap.                                                                          | Wala                                                                          |
-| `CLIENT_API` | Mga model-serving endpoint: `/api/v1/*`, `/api/v1beta/*`, kasama ang mga alias na `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key kapag naka-enable ang epektibong feature flag na `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Mga dashboard page, settings, provider, key, admin at diagnostics endpoint.                                                                                       | Dashboard session O Bearer na may `manage` scope                              |
+| Klase        | Paglalarawan                                                                                                                                                               | Kinakailangang Auth                                                           |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `PUBLIC`     | Mga route na tahasang ligtas — pag-login, pag-logout, status, health, at bootstrap ng onboarding.                                                                          | Wala                                                                          |
+| `CLIENT_API` | Mga endpoint na naghahatid ng modelo — `/api/v1/*`, `/api/v1beta/*`, pati ang mga alias na `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key kapag naka-enable ang epektibong feature flag na `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Mga pahina ng dashboard, settings, provider, key, admin, at mga endpoint ng diagnostics.                                                                                   | Session ng dashboard O Bearer na may saklaw na `manage`                       |
 
-Ilang aksyon ng `MANAGEMENT` ay **operator-only**: hindi sapat ang `manage` key. Ang pag-export ng nakaimbak na credential (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ang pagbabalik ng backup sa ibabaw ng live na data (`POST /api/db-backups/import` kasama ang `dryRun=true`, `POST /api/db-backups` na restore ayon sa id, `POST /api/settings/import-json`), at ang pagsira ng restore point (`DELETE /api/db-backups` na cleanup, at `PATCH /api/db-backups` dahil ang retention na isinasave nito ang nagpapatakbo ng awtomatikong pruning pagkatapos ng bawat backup) ay nangangailangan ng dashboard session, ng lokal na CLI subject, o ng naka-disable na login. Ang pag-isyu ng sync token (`POST /api/sync/tokens`) at ang pag-mint ng `admin` CLI access token (`POST /api/cli/tokens`) ay nangangailangan ng dashboard session o ng lokal na CLI subject sa bawat login mode. Ang mga API key ng anumang scope at ang mga `oma_` access token ay hindi operator credential: nakakakuha sila ng `403` tuwing kailangan ang isa. Nasa `src/lib/api/operatorCredential.ts` ang check (`resolveOperatorCredential()` / `requireOperatorCredential()`). Operator-only din ang pagbabago ng login settings: tinatanggap lamang ng `POST /api/settings/require-login` (magtakda ng management password / i-toggle ang `requireLogin`) ang mga credential na iyon kapag may password na, hindi nagbabago ang first-run bootstrap window (walang password pa), at dapat magpadala ng `currentPassword` ang dashboard session para palitan ang password (`403` kapag nawawala o mali ito, at ina-audit bilang `settings.update_failed`). Pinananatili ng lokal na CLI at ng instance na naka-disable ang login ang recovery path at maaaring magtakda ng password nang wala nito, dahil parehong nakatali ang dalawa sa host na nagmamay-ari ng data directory.
+Ang ilang aksyon ng `MANAGEMENT` ay **para lamang sa operator**: hindi sapat ang isang key na may `manage`. Ang pag-export ng mga nakaimbak na kredensyal (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), pagpapanumbalik ng backup sa live na data
+(`POST /api/db-backups/import` kasama ang `dryRun=true`, `POST /api/db-backups` na pagpapanumbalik ayon sa id,
+`POST /api/settings/import-json`), at pagbura ng mga restore point (`DELETE /api/db-backups` para sa cleanup,
+at `PATCH /api/db-backups` dahil ang retention na sine-save nito ang nagtutulak sa awtomatikong pruning pagkatapos ng
+bawat backup) ay nangangailangan ng session ng dashboard, lokal na subject ng CLI, o naka-disable ang pag-login. Ang pag-isyu ng
+sync token (`POST /api/sync/tokens`) at paglikha ng `admin` CLI access token
+(`POST /api/cli/tokens`) ay nangangailangan ng session ng dashboard o lokal na subject ng CLI sa bawat mode ng pag-login.
+Ang mga API key na may anumang saklaw at mga access token na `oma_` ay hindi kredensyal ng operator: nakatatanggap ang mga ito ng `403`
+kapag kinakailangan ang ganitong kredensyal. Nasa
+`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`) ang pagsusuring ito. Para lamang din sa operator ang pagbabago ng mga setting ng pag-login:
+Ang `POST /api/settings/require-login` (pagtatakda ng password sa pamamahala / pag-toggle sa `requireLogin`) ay tumatanggap
+lamang ng mga kredensyal na iyon kapag may password na — hindi nagbabago ang bootstrap window sa unang pagtakbo (wala pang
+password) — at dapat magpadala ang session ng dashboard ng `currentPassword` upang mapalitan ang password
+(`403` kapag wala ito o mali, at itinatala sa audit bilang `settings.update_failed`). Pinananatili ng lokal na CLI at ng isang
+instance na naka-disable ang pag-login ang recovery path at maaari silang magtakda ng password nang wala nito, dahil kapwa
+nakaugnay ang mga ito sa host na nagmamay-ari ng direktoryo ng data.
 
 ## Pipeline
 
@@ -189,49 +206,48 @@ Ang isang matagumpay na patakaran ay nagbabalik `AuthSubject` na may `kind ∈ {
 
 Ang `src/shared/constants/publicApiRoutes.ts` ang tahasang allowlist:
 
-Ang listahan ay hinati ayon sa **anyo**, at mahalaga ang paghahating ito (GHSA-74g9-q8f6-793h): ang isang prefix ay
-tinutugma gamit ang `startsWith()`, kaya tumutugma rin ito sa bawat katabing path na kapareho ng mga unang character nito.
+Hinahati ang listahan ayon sa **hugis**, at mahalaga ang paghahating ito (GHSA-74g9-q8f6-793h): ang isang prefix ay
+tinitugma gamit ang `startsWith()`, kaya tinutugma rin nito ang bawat katabing path na nagsisimula sa parehong mga character.
 Ang `/api/usage/om-usage` bilang prefix ay minamarkahan ang `/api/usage/om-usage<anything>` bilang PUBLIC, at nireresolba iyon ng Next
 sa `/api/usage/[connectionId]` — isang handler na walang sariling authentication.
 
 ```ts
-// Mga tunay na subtree. DAPAT magtapos sa "/" ang bawat entry (sinusuri ng isang unit test).
+// Mga tunay na subtree. DAPAT magtapos sa "/" ang bawat entry (sinusuri ito ng isang unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // itinuturing na CLIENT_API sa classify, hindi bilang "no-auth public"
+  "/api/v1/", // itinuturing bilang CLIENT_API sa classify, hindi bilang "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Mga indibidwal na ruta, eksaktong tinutugma (mayroon man o walang trailing slash).
+// Mga iisang ruta, eksaktong tinutugma (may trailing slash man o wala).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // hakbang 2 ng pag-login para sa opt-in TOTP; nangangailangan ng MFA-pending cookie
-  "/api/init",
+  "/api/auth/mfa/verify", // hakbang 2 ng pag-login para sa opt-in na TOTP; kailangan ang MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Mga read-only na indibidwal na ruta na gumagamit din ng pagpapaluwag sa CORS origin.
+// Mga iisang read-only na ruta na gumagamit din ng pagpapaluwag sa origin ng CORS.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Read-only na indibidwal na ruta NA WALANG pagpapaluwag sa CORS.
+// Iisang read-only na ruta NA WALANG pagpapaluwag sa CORS.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Ang mga read-only na ruta ay pampubliko **lamang** para sa mga ligtas na method. Paalala: inaalis ng `classifyRoute()` ang `/api/v1/*` at `/api/v1beta/*` sa PUBLIC fall-through — ang mga ito ay palaging `CLIENT_API`, kaya nalalapat pa rin ang patakaran para sa Bearer-key.
+Pampubliko lamang ang mga read-only na ruta para sa mga ligtas na method. Paalala: ibinubukod ng `classifyRoute()` ang `/api/v1/*` at `/api/v1beta/*` mula sa PUBLIC fall-through — palagi silang `CLIENT_API`, kaya nalalapat pa rin ang patakaran para sa Bearer key.
 
 ## Pagdaragdag ng Bagong Route
 
@@ -297,13 +313,14 @@ Katalogo at mga panuntunan sa pagtutugma (magkaparehong string, o isang ibinigay
 
 ## Toggle ng Kinakailangang Auth
 
-Ang `isAuthRequired()` sa `src/shared/utils/apiAuth.ts` ang nagpapasya kung **anumang** auth ang ipapatupad para sa isang request:
+Tinutukoy ng `isAuthRequired()` sa `src/shared/utils/apiAuth.ts` kung ipinapatupad ang **anumang auth** para sa isang request:
 
-- `settings.requireLogin === false` → naka-disable ang auth sa buong sistema, maliban sa always-protected tier (tingnan ang [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) at sa mga tawag na nagbibigay ng credential na tinatanggap nito, na nangangailangan ng parehong credential gaya kapag naka-on ang login: pag-isyu ng sync token, pag-mint ng CLI access token sa anumang scope, at paggawa ng API key na may `manage`/`admin` scope, pagbibigay ng scope na iyon sa isang key, o pag-regenerate o pagpapakita ng ganoong key (`requireCredentialForManagementScopedKey()` sa `src/lib/api/requireManagementAuth.ts`). Nananatiling bukas ang mga inference-only key.
-- Walang password na naka-configure **at** walang `INITIAL_PASSWORD` env var → bootstrap mode: pinapayagan ng onboarding wizard at ng loopback request, pero kailangan pa rin ng credential ng mga request mula sa nakalantad na network.
-- Anumang DB error → nagfa-fail closed (secure-by-default).
+- `settings.requireLogin === false` → pandaigdigang naka-disable ang auth, maliban sa palaging pinoprotektahang tier (tingnan ang [Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md)) at sa mga tawag na namimigay ng credential na tinatanggap nito, na nangangailangan ng parehong credential gaya kapag naka-on ang login: pag-isyu ng mga sync token, pag-mint ng mga CLI access token sa anumang scope, at paggawa ng API key na may scope na `manage`/`admin`, pagbibigay ng scope na iyon sa isang key, o muling pag-generate o paglalantad ng naturang key (`requireCredentialForManagementScopedKey()` sa `src/lib/api/requireManagementAuth.ts`).
+  Nananatiling bukas ang mga inference-only key. Kailangan pa rin ng credential ang pagsusulat ng protected feature flag (`REQUIRE_API_KEY`, iba pang Security flag, at mga SSRF / TLS / MCP-scope / sandbox flag na nakalista sa [Mga Feature Flag](../reference/FEATURE_FLAGS.md#rest-api)) at ang pag-save ng mga setting ng PII masking (`PUT /api/settings/pii`).
+- Walang naka-configure na password **at** walang `INITIAL_PASSWORD` env var → pinapahintulutan ng bootstrap mode ang onboarding wizard at mga loopback request, ngunit kailangan pa rin ng credential ang mga exposed network request. Eksepsyon: kailangan ng credential kahit mula sa loopback ang pagsusulat ng protected feature flag at pag-save ng mga setting ng PII masking (`PUT /api/settings/pii`), kaya hindi sapat ang loopback lamang sa mga ito.
+- Anumang error sa DB → awtomatikong tumatanggi (secure-by-default).
 
-Ang client API key enforcement ay gumagamit ng `isRequireApiKeyEnabled()` sa `src/shared/utils/featureFlags.ts`, hindi ng direktang pagbasa sa `process.env.REQUIRE_API_KEY`. Mahalaga ito para sa mga naka-deploy na instance: ang pagpapalit ng `REQUIRE_API_KEY` sa Dashboard → Feature Flags ay nag-iimbak ng DB override at agad na nakaaapekto sa `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, at iba pang client-API auth check na gumagamit ng parehong helper. Kung hindi mabasa ang feature flag store, nagfa-fail closed ang client API auth at humihingi ng key.
+Ginagamit ng pagpapatupad ng client API key ang `isRequireApiKeyEnabled()` sa `src/shared/utils/featureFlags.ts`, hindi ang direktang pagbasa sa `process.env.REQUIRE_API_KEY`. Mahalaga ito para sa mga naka-deploy na instance: ang pag-toggle sa `REQUIRE_API_KEY` sa Dashboard → Feature Flags ay nagse-save ng DB override at agad na nakaaapekto sa `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, at iba pang client-API auth check na gumagamit ng helper na ito. Kung hindi mabasa ang feature flag store, awtomatikong tumatanggi ang client API auth at nangangailangan ng key.
 
 ## Breaking Change — v3.8.0
 

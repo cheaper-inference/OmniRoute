@@ -337,49 +337,49 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Implementering
+## 🚀 -implementering
 
-### Global npm-installation (anbefalet)
+### Global npm installation (anbefales)
 
 ```bash
 npm install -g omniroute
 
-# Opret konfigurationsmappe
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Opret .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start serveren
+# Start server
 omniroute
-# Eller med en brugerdefineret port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI'en indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
+CLI indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbejdsbiblioteket kan kun angive en kort tilladelsesliste med nøgler (`REQUIRE_API_KEY`, locale, tidszone og farveindstillinger, ikke portene); læg alt andet i `~/.omniroute/.env`. Se [CLI lanceringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Systembakketilstand
+### Bakketilstand
 
-Start OmniRoute i systembakken:
+Start OmniRoute i proceslinjen:
 
 ```bash
 omniroute serve --tray
 ```
 
-Kommandoen afsluttes, når serveren og systembakkeikonet er klar.
+Kommandoen vender tilbage, når serveren og bakken er klar.
 
 Serveren fortsætter uden terminalen.
 
-Systembakketilstand understøtter macOS, Windows og grafiske Linux-sessioner. Systembakketilstand åbner ikke instrumentpanelet automatisk.
+Bakketilstand understøtter macOS, Windows og grafiske Linux sessioner. Bakketilstand åbner ikke instrumentbrættet automatisk.
 
-Brug systembakkemenuen til disse handlinger:
+Brug bakkemenuen til disse handlinger:
 
-- Åbn instrumentpanelet.
+- Åbn instrumentbrættet.
 - Åbn `/dashboard/logs`.
-- Skift automatisk start.
+- Skift autostart.
 - Stop OmniRoute.
 
-Kombiner ikke `--tray` med disse indstillinger:
+Kombiner ikke `--tray` med disse muligheder:
 
 - `--daemon`
 - `--log`
@@ -387,62 +387,62 @@ Kombiner ikke `--tray` med disse indstillinger:
 
 Disse tilstande kræver forskelligt procesejerskab.
 
-Aktivér opstart ved næste login på maskinen:
+Aktiver opstart ved næste maskinlogin:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatisk start bruger systembakketilstand på macOS, Windows og i grafiske Linux-sessioner. Linux uden grafisk brugerflade anvender den eksisterende systemd-brugertjeneste.
+Autostart bruger bakketilstand på macOS, Windows, og grafiske Linux sessioner. Headless Linux bruger den eksisterende systemd-brugertjeneste.
 
-Deaktivér opstart ved login:
+Deaktiver opstart ved login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Afinstallation
+### Afinstallerer
 
-Når du ikke længere har brug for OmniRoute, tilbyder vi to hurtige scripts til en ren fjernelse:
+Når du ikke længere har brug for OmniRoute, leverer vi to hurtige scripts til en ren fjernelse:
 
-| Kommando                 | Handling                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Fjerner systemappen, men **beholder din database og dine konfigurationer** i `~/.omniroute`. |
-| `npm run uninstall:full` | Fjerner appen OG **sletter alle konfigurationer, nøgler og databaser permanent**.            |
+| Kommando                 | Handling                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Fjerner systemappen men** beholder din DB og konfigurationer** i `~/.omniroute`.    |
+| `npm run uninstall:full` | Fjerner appen AND permanent** sletter alle konfigurationer, nøgler og databaser** . |
 
-> Bemærk: For at køre disse kommandoer skal du navigere til OmniRoute-projektmappen (hvis du har klonet den) og køre dem. Hvis den er installeret globalt, kan du alternativt blot køre `npm uninstall -g omniroute`.
+> Bemærk: For at køre disse kommandoer skal du navigere til OmniRoute -projektmappen (hvis du har klonet den) og køre dem. Alternativt, hvis den er globalt installeret, kan du blot køre `npm uninstall -g omniroute`.
 
-### VPS-implementering
+### VPS -implementering
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
-export JWT_SECRET="din-sikre-hemmelighed-skift-denne"
-export INITIAL_PASSWORD="din-adgangskode"
+export JWT_SECRET="your-secure-secret-change-this"
+export INITIAL_PASSWORD="your-password"
 export DATA_DIR="/var/lib/omniroute"
 export PORT="20128"
 export HOSTNAME="0.0.0.0"
 export NODE_ENV="production"
 export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
-export API_KEY_SECRET="endpoint-proxy-api-nøglehemmelighed"
+export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Eller: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-implementering (lavt hukommelsesforbrug)
+### PM2 -implementering (lav hukommelse)
 
-For servere med begrænset RAM skal du bruge indstillingen for hukommelsesgrænse:
+For servere med begrænset RAM skal du bruge muligheden for hukommelsesbegrænsning:
 
 ```bash
-# Med en grænse på 512 MB (standard)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Eller med en brugerdefineret hukommelsesgrænse
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Eller ved hjælp af ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -458,8 +458,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         OMNIROUTE_MEMORY_MB: "512",
-        JWT_SECRET: "din-hemmelighed",
-        INITIAL_PASSWORD: "din-adgangskode",
+        JWT_SECRET: "your-secret",
+        INITIAL_PASSWORD: "your-password",
       },
       node_args: "--max-old-space-size=512",
       max_memory_restart: "300M",
@@ -471,30 +471,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Byg image (standard = runner-cli med codex/claude/droid forudinstalleret)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portabel tilstand (anbefalet)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-For værtsintegreret tilstand med CLI-binære filer henvises til Docker-afsnittet i hoveddokumentationen.
+For værtsintegreret tilstand med CLI binære filer, se Docker afsnittet i hoveddokumenterne.
 
-### Void Linux (xbps-src)
+### Ugyldig Linux (xbps-src)
 
-Void Linux-brugere kan pakke og installere OmniRoute direkte ved hjælp af krydskompileringsframeworket `xbps-src`. Dette automatiserer den selvstændige Node.js-build sammen med de nødvendige native `better-sqlite3`-bindinger.
+Void Linux brugere kan pakke og installere OmniRoute indbygget ved hjælp af `xbps-src` -krydskompileringsrammerne. Dette automatiserer Node.js standalone build sammen med de nødvendige `better-sqlite3` native bindinger.
 
 <details>
-<summary><b>Vis xbps-src-skabelon</b></summary>
+<summary><b>Se xbps-src skabelon</b></summary>
 
 ```bash
-# Skabelonfil for 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universel AI-gateway med intelligent routing til flere LLM-udbydere"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Bestem mål-CPU-arkitekturen for node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installer alle afhængigheder – spring scripts over
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Byg den selvstændige Next.js-pakke
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopiér statiske aktiver til den selvstændige pakke
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilér den native better-sqlite3-binding
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Placér den kompilerede binding i den selvstændige pakke
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Fjern arkitekturspecifikke sharp-pakker
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopiér pino-kørselsafhængigheder, som Next.js' statiske analyse udelod:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Undgå, at tomme Next.js-app-routermapper fjernes af efterinstallations-hooket
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +582,30 @@ post_install() {
 
 ### Miljøvariabler
 
-| Variabel                                | Standardværdi                        | Beskrivelse                                                                                                                                             |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Hemmelighed til JWT-signering (**skal ændres i produktion**)                                                                                            |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Adgangskode til første login                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datamappe (database, forbrug, logfiler)                                                                                                                 |
-| `PORT`                                  | frameworkets standardværdi           | Tjenesteport (`20128` i eksempler)                                                                                                                      |
-| `HOSTNAME`                              | frameworkets standardværdi           | Vært, der bindes til (Docker bruger som standard `0.0.0.0`)                                                                                             |
-| `NODE_ENV`                              | kørselstidens standardværdi          | Indstil til `production` ved implementering                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Offentlig basis-URL, der vises i kontrolpanelet og eksponeres for serveren (erstatter det ældre `BASE_URL`)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL for cloudsynkroniseringens slutpunkt (erstatter det ældre `CLOUD_URL`)                                                                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-hemmelighed til genererede API-nøgler                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Kræv Bearer-API-nøgle på `/v1/*`                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tillad godkendte kontrolpanelbrugere at få vist komplette gemte API-nøgleværdier efter behov                                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serverbaseret opdateringsinterval for cachelagrede data om udbydergrænser; opdateringsknapper i brugergrænsefladen udløser stadig manuel synkronisering |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Deaktiver automatiske SQLite-snapshots før skrivning/import/gendannelse; manuelle sikkerhedskopier fungerer stadig                                      |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktiverer lagring af applikations- og revisionslogfiler på disken                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Gennemtving `Secure`-attributten for godkendelsescookien (bag en HTTPS-reverse proxy)                                                                   |
-| `CLOUDFLARED_BIN`                       | ikke angivet                         | Brug en eksisterende `cloudflared`-binærfil i stedet for den administrerede download                                                                    |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportprotokol for administrerede Quick Tunnels (`http2`, `quic` eller `auto`)                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-heapgrænse i MB                                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimalt antal poster i promptcachen                                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimalt antal poster i den semantiske cache                                                                                                           |
+| Variabel                                | Misligholdelse           | Beskrivelse                                                                                                                                                      |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatisk genereret)_ | JWT -signeringshemmeligheden — blev automatisk genereret ved første kørsel og fortsatte med `server.env`; indstil det eksplicit, når databiblioteket er flygtigt |
+| `INITIAL_PASSWORD`                      | _(frakoblet)_            | Første login-adgangskode. npm/source installationer starter med `CHANGEME`: udskift det. Frakoblet: onboarding-guide                                             |
+| `DATA_DIR`                              | `~/.omniroute`           | Datamappe (db, forbrug, logfiler)                                                                                                                                |
+| `PORT`                                  | rammestandard            | Serviceport (`20128` i eksempler)                                                                                                                                |
+| `HOSTNAME`                              | rammestandard            | Bind vært (Docker er standard til `0.0.0.0`)                                                                                                                     |
+| `NODE_ENV`                              | runtime standard         | Indstil `production` til implementering                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Offentlig base URL dukkede op til dashboardet og eksponeret for serveren (erstatter ældre `BASE_URL`)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync slutpunkt base URL (erstatter ældre `CLOUD_URL`)                                                                                                      |
+| `API_KEY_SECRET`                        | _(automatisk genereret)_ | HMAC hemmelighed for genererede API nøgler — blev automatisk genereret ved første kørsel og blev ved med at `server.env`                                         |
+| `REQUIRE_API_KEY`                       | `false`                  | Gennemtving bærer API nøgle på `/v1/*`                                                                                                                           |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Tillad autentificerede dashboardbrugere at afsløre fulde lagrede API nøgleværdier efter behov                                                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side opdateringskadence for cachelagrede Provider Limits-data; UI refresh-knapper udløser stadig manuel synkronisering                                    |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Deaktiver automatiske SQLite snapshots før writes/import/restore; manuelle sikkerhedskopier fungerer stadig                                                      |
+| `APP_LOG_TO_FILE`                       | `true`                   | Aktiverer program- og revisionslogoutput til disk                                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Tving `Secure` auth-cookie (bag HTTPS omvendt proxy)                                                                                                             |
+| `CLOUDFLARED_BIN`                       | deaktiveret              | Brug en eksisterende `cloudflared` -binær i stedet for administreret download                                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport til administrerede hurtige tunneler (`http2`, `quic` eller `auto`)                                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap grænse i MB                                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maks. prompt-cache-indgange                                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantisk cache-indgange                                                                                                                                |
 
-Se [README](../README.md) for den komplette oversigt over miljøvariabler.
+For den fulde reference til miljøvariablen, se [README](../README.md).
 
 ---
 
@@ -688,7 +688,7 @@ Eller brug Dashboard:** Udbydere → [Provider] → brugerdefinerede modeller** 
 
 Bemærkninger:
 
-- OpenRouter og OpenAI/Anthropic-compatible -udbydere administreres fra** Tilgængelige modeller** kun. Manuel tilføjelse, import og automatisk synkronisering lander alle på den samme tilgængelige modelliste, så der er ingen separat sektion med tilpassede modeller for disse udbydere.
+- OpenRouter og OpenAI/Anthropic-compatible -udbydere administreres fra** Tilgængelige modeller** kun. Manuel tilføjelse, import og automatisk synkronisering lander alle på den samme liste over tilgængelige modeller, så der er ingen separat sektion med tilpassede modeller for disse udbydere.
 - De** Brugerdefinerede modeller** sektionen er beregnet til udbydere, der ikke eksponerer administreret import af tilgængelige modeller.
 
 ### Brugerdefinerede OpenAI-kompatible udbydere
@@ -706,7 +706,7 @@ Noden får et internt id af formen `openai-compatible-<apiType>-<uuid>`; du beh�
 
 #### Reserverede præfikser
 
-Et præfiks kan ikke være id eller alias for en indbygget udbyder (f.eks. `openai`, `cf`) eller id for en pensioneret udbyder. Model-resolveren tjekker indbyggede id'er og aliaser før brugerdefinerede noder, så en node, der bruger et af disse præfikser, ville aldrig modtage trafik: `<prefix>/model` ville gå til den indbyggede udbyder i stedet eller mislykkes lukket, hvis denne udbyder blev trukket tilbage. Oprettelse eller redigering af en node med et sådant præfiks afvises med:
+Et præfiks kan ikke være id eller alias for en indbygget udbyder (for eksempel `openai`, `cf`) eller id for en pensioneret udbyder. Model-resolveren tjekker indbyggede id'er og aliaser før brugerdefinerede noder, så en node, der bruger et af disse præfikser, ville aldrig modtage trafik: `<prefix>/model` ville gå til den indbyggede udbyder i stedet eller mislykkes lukket, hvis denne udbyder blev trukket tilbage. Oprettelse eller redigering af en node med et sådant præfiks afvises med:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -718,8 +718,8 @@ Vælg et særskilt præfiks (`mygw`, `acme-proxy`). Hvis anmodninger til en brug
 
 Disse taster går i en forbindelses `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltal, 1–1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret.
-- `quotaEndpoint` — gatewayens quota/credits endepunkt, læs for dashboard-kvotestrimmel og kvotebevidst routing. Virker på både OpenAI- og Anthropic-kompatible forbindelser; den fulde form er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (heltal, 1-1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go og Muse Code er allerede aliaser over 64 tegn uden indstilling. En forbindelsesværdi erstatter Azure OpenAI / Azure AI Foundry-standarden (en Azure-forbindelse bag en strengere gateway) og sætter grænsen for en tilpasset kompatibel node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code beholder deres registreringsgrænse og ignorerer den.
+- `quotaEndpoint` — gatewayens quota/credits endepunkt, læs for dashboard-kvotestriben og kvotebevidst routing. Virker på både OpenAI- og Anthropic-kompatible forbindelser; den fulde form er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -734,7 +734,7 @@ Disse taster går i en forbindelses `providerSpecificData` (for eksempel via `PU
 }
 ```
 
-### Kæde OmniRoute Peers
+### At lænke OmniRoute Peers
 
 En anden OmniRoute gateway kan tilføjes som en** Brugerdefineret OpenAI-kompatibel** udbyder. Brug peerens `/v1` base URL og en dedikeret API nøgle med mindst privilegium udstedt af denne peer.
 
@@ -756,7 +756,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Kun anmodninger sendt til en eksplicit godkendt peer URL modtager `X-OmniRoute-Peer-Trace` headeren. En gateway afviser en gentaget forekomst ID eller opbrugt hop budget med HTTP `508 Loop Detected`; almindelige upstream-udbydere modtager ingen peer-metadata.
 
-Peer-chaining er ikke databasereplikering eller host-failover. Hver gateway holder uafhængig SQLite tilstand, caches, hastighedstællere og sessioner. Brug en sundhedstjekket omvendt proxy eller klient-failover for active/passive eller active/active tilgængelighed, og monter aldrig én SQLite database i flere kørende OmniRoute instanser.
+Peer-chaining er ikke databasereplikering eller host-failover. Hver gateway holder uafhængig SQLite tilstand, caches, hastighedstællere og sessioner. Brug en sundhedskontrolleret omvendt proxy eller klient-failover for active/passive eller active/active tilgængelighed, og monter aldrig én SQLite database i flere kørende OmniRoute forekomster.
 
 ### Dedikerede udbyderruter
 
@@ -768,7 +768,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Udbyderpræfikset tilføjes automatisk, hvis det mangler. Uoverensstemmende modeller returnerer `400`.
+Udbyderpræfikset tilføjes automatisk, hvis det mangler. Umatchede modeller returnerer `400`.
 
 ### Konfiguration af netværksproxy
 
@@ -816,7 +816,7 @@ Returnerer modeller grupperet efter udbyder med typer (`chat`, `embedding`, `ima
 
 ### LLM Gateway Intelligence (fase 9)
 
-- **Semantisk cache** — Auto-cacher ikke-streaming, temperatur = 0 svar (omgå med `X-OmniRoute-No-Cache: true`)
+- **Semantisk cache** — automatisk cacher ikke-streaming, temperatur = 0 svar (omgå med `X-OmniRoute-No-Cache: true`)
 - **Anmod om idempotens** — Deduplikerer anmodninger inden for 5s via `Idempotency-Key` eller `X-Request-Id` header
 - **Sporing af fremskridt** — Opt-in SSE `event: progress` begivenheder via `X-OmniRoute-Progress: true` header
 
@@ -843,20 +843,20 @@ Adgang via** Dashboard → Oversætter** . Debug og visualiser, hvordan OmniRout
 
 ### Routing strategier
 
-Konfigurer via** Dashboard → Indstillinger → Routing** . Dashboardet afslører de seks mest anvendte strategier; combos og auto-routeren understøtter internt et bredere sæt.
+Konfigurer via** Dashboard → Indstillinger → Routing** . Dashboardet afslører de seks mest anvendte strategier; combos og auto-router internt understøtter et bredere sæt.
 
 **Dashboard-synlige strategier (routing på kontoniveau):**
 
-| Strategi                       | Beskrivelse                                                                                                     |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| **Fyld først**                 | Bruger konti i prioriteret rækkefølge - primær konto håndterer alle anmodninger, indtil de ikke er tilgængelige |
-| **Round Robin**                | Går gennem alle konti med en konfigurerbar sticky grænse (standard: 3 opkald pr. konto)                         |
-| **P2C (Power of Two Choices)** | Vælger 2 tilfældige konti og ruter til den sundere - balancerer belastning med bevidsthed om sundhed            |
-| **Tilfældig**                  | Vælger tilfældigt en konto for hver anmodning ved hjælp af Fisher-Yates shuffle                                 |
-| **Mindst brugt**               | Ruter til kontoen med det ældste `lastUsedAt` tidsstempel, der fordeler trafikken jævnt                         |
-| **Omkostningsoptimeret**       | Ruter til kontoen med den laveste prioritetsværdi, der optimerer til de billigste udbydere                      |
+| Strategi                       | Beskrivelse                                                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **Fyld først**                 | Bruger konti i prioriteret rækkefølge — primære konto håndterer alle anmodninger, indtil de ikke er tilgængelige |
+| **Round Robin**                | Går gennem alle konti med en konfigurerbar sticky grænse (standard: 3 opkald pr. konto)                          |
+| **P2C (Power of Two Choices)** | Vælger 2 tilfældige konti og ruter til den sundere — balancerer belastning med bevidsthed om sundhed             |
+| **Tilfældig**                  | Vælger tilfældigt en konto for hver anmodning ved hjælp af Fisher-Yates shuffle                                  |
+| **Mindst brugt**               | Ruter til kontoen med det ældste `lastUsedAt` tidsstempel, der fordeler trafikken jævnt                          |
+| **Omkostningsoptimeret**       | Ruter til kontoen med den laveste prioritetsværdi, der optimerer til de billigste udbydere                       |
 
-**Avancerede kombinations- og autostrategier** (kan konfigureres pr. kombination eller via `auto/*` præfikser - se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Avancerede kombinations- og autostrategier** (kan konfigureres pr. kombination eller via `auto/*` -præfikser — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — streng orden, aldrig round-robins
 - `weighted` — proportional trafik opdelt efter vægt pr. model
@@ -864,7 +864,7 @@ Konfigurer via** Dashboard → Indstillinger → Routing** . Dashboardet afslør
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` og `cost-optimized`
-- `auto` — scoredrevet på tværs af alle kandidater
+- `auto` — score-drevet på tværs af alle kandidater
 - `lkgp` (Last Known Good Provider) — pins til den sidste succesrige udbyder, og falder derefter tilbage til reglerne
 - `context-optimized` — vælger modellen med det største frie kontekstvindue
 - `context-relay` — kæder langkontekstmodeller til opfølgende vendinger
@@ -915,7 +915,7 @@ Her er eksempler på mønstre til at kombinere flere udbydere og routing mellem 
 
 #### 1. Coding Agent Combo: High-End Reasoning med Cost/Speed Fallback
 
-Ideel til kodningsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter til at begynde med til frontier-ræsonneringsmodeller, falder tilbage til hurtige kodningsmodeller om kvoteopbrug eller fejl.
+Ideel til kodningsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter indledningsvis til grænse-ræsonneringsmodeller, falder tilbage til hurtige kodningsmodeller om kvoteopbrug eller fejl.
 
 - **Dashboard** : Combos → Ny Combo → Navn: `agent-coding` → Strategi: `Priority`
 - **Modeller** :
@@ -974,32 +974,32 @@ Konfigurer via** Dashboard → Indstillinger → Resilience** .
 
 OmniRoute implementerer modstandsdygtighed på udbyderniveau med fem komponenter:
 
-1. **Anmod om kø og tempo** — Anmodningsformning på systemniveau:
-   - **Forespørgsler pr. minut (RPM)** — Maksimalt antal anmodninger pr. minut pr. konto
+1. **Anmod om kø og tempo** — Anmodning på systemniveau:
+   - **Forespørgsler pr. minut (RPM)** — Maksimale anmodninger pr. minut pr. konto
    - **Minimum tid mellem anmodninger** — Minimum mellemrum i millisekunder mellem anmodninger
    - **Maks. samtidige anmodninger** — Maksimalt antal samtidige anmodninger pr. konto
 
-2. **Forbindelse Nedkøling** — Per-auth-type konfiguration for en enkelt forbindelse efter gentagelsesfejl:
+2. **Forbindelse Nedkøling** — Per-auth-type konfiguration for en enkelt forbindelse efter fejl, der kan prøves igen:
    - **Grundafkøling** — Standard nedkølingsvindue for opstrømsfejl, der kan prøves igen
-   - **Brug Upstream-tip igen** — Hæderer autoritative `Retry-After` eller nulstil tip, når de leveres
+   - **Brug Upstream-tip igen** — ærer autoritative `Retry-After` eller nulstil tip, når de leveres
    - **Max Backoff Steps** — Maksimalt eksponentielt backoff-niveau for gentagne fejl
 
 3. **Udbyder strømafbryder** — Sporer ende-til-ende udbyderfejl, markerer en udbyder forringet ved den konfigurerede advarselstærskel og åbner afbryderen, når den konfigurerede fejltærskel er nået:
-   - **Nedbrydningstærskel** — Konsekutive udbyderfejl, før du går ind i `DEGRADED`
-   - **Fejltærskel** — Konsekutive udbyderfejl, før du går ind i `OPEN`
+   - **Nedbrydningstærskel** — Konsekutive udbyderfejl, før du indtaster `DEGRADED`
+   - **Fejltærskel** — Konsekutive udbyderfejl, før du indtaster `OPEN`
    - **Nulstil timeout** — Tidsvindue før udbyderen testes igen
    - **CLOSED** (Sund) — Anmodninger flyder normalt
-   - **DEGRADED** — Anmodninger flyder stadig, mens forhøjede fejl spores
-   - **OPEN** — Udbyderen er midlertidigt blokeret efter gentagne fejl
-   - **HALF_OPEN** — Test af, om udbyderen er kommet sig
+   - **DEGRADED** — -anmodninger flyder stadig, mens forhøjede fejl spores
+   - **OPEN** — udbyderen er midlertidigt blokeret efter gentagne fejl
+   - **HALF_OPEN** — Tester om udbyderen er genoprettet
 
    Forbindelsesbestemte `429` -hastighedsgrænser forbliver inden for** Forbindelse Nedkøling** og tæller ikke med i udbyderafbryderen.
 
    Udbyderafbryderens køretidstilstand vises på** Dashboard → Health** kun.
 
-4. **Vent på nedkøling** — Hvis alle kandidatforbindelser allerede er ved at køle ned, kan OmniRoute vente på den tidligste nedkøling og automatisk prøve den samme klientanmodning igen.
+4. **Vent på nedkøling** — Hvis hver kandidatforbindelse allerede er ved at køle ned, kan OmniRoute vente på den tidligste nedkøling og automatisk prøve den samme klientanmodning igen.
 
-5. **Rate Limit Auto-detektion** — Når upstream-udbydere returnerer eksplicitte ventevinduer, tilsidesætter disse tip den lokale forbindelsesnedkøling, når indstillingen er aktiveret.
+5. **Rate Limit Auto-detektion** — Når upstream-udbydere returnerer eksplicitte ventevinduer, tilsidesætter disse tip nedkølingen af den lokale forbindelse, når indstillingen er aktiveret.
 
 **Pro tip:** Brug** Sundhed** side for at inspicere og nulstille live-udbyderafbrydere efter en strømafbrydelse. Siden Resilience ændrer kun konfigurationen.
 
@@ -1048,10 +1048,10 @@ Indstillingssiden er organiseret i** 7 faner** for nem navigation:
 | **AI**                 | Tænkende budget (passthrough / auto-strip / brugerdefineret / adaptiv — se [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global systemprompt, prompt cache-statistik |
 | **Sikkerhed**          | Login/Password indstillinger, IP adgangskontrol, API auth for `/models`, Provider Blocking, prompt-injection guard                                                   |
 | **Routing**            | Global routingstrategi (Fill First / Round Robin / P2C / Random / Mindst brugt / Cost Optimized), jokertegn-modelaliaser, reservekæder, kombinationsstandarder       |
-| **Modstandsdygtighed** | Anmodningskø, nedkøling af forbindelse, konfiguration af udbyderafbryder og opførsel af vente-på-afkøling                                                            |
+| **Modstandsdygtighed** | Anmodningskø, nedkøling af forbindelsen, konfiguration af udbyderafbryder og opførsel af vente-på-afkøling                                                           |
 | **Fremskreden**        | Global proxy-konfiguration (HTTP/SOCKS5), proxy-tilsidesættelser pr. udbyder                                                                                         |
 
-Generelt dublerer ikke længere skrivebeskyttet logning og cache-noter. Databaseopbevaring og optimeringsindstillinger opretholdes gennem `/api/settings/database`; manuel cacherydning bruger `DELETE /api/cache`. Forespørgsels- og proxylogrækkelofter styres af `CALL_LOGS_TABLE_MAX_ROWS` og `PROXY_LOGS_TABLE_MAX_ROWS`.
+Generelt dublerer ikke længere skrivebeskyttet logning og cache-noter. Databaseopbevaring og optimeringsindstillinger opretholdes gennem `/api/settings/database`; manuel cacherydning bruger `DELETE /api/cache`. Request- og proxy-logrækkelofter styres af `CALL_LOGS_TABLE_MAX_ROWS` og `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1062,7 +1062,7 @@ Adgang via** Dashboard → Omkostninger** .
 | Tab             | Formål                                                                                         |
 | --------------- | ---------------------------------------------------------------------------------------------- |
 | **Budget**      | Indstil forbrugsgrænser pr. API -nøgle med daily/weekly/monthly budgetter og sporing i realtid |
-| **Prissætning** | Se og rediger modelprisangivelser - pris pr. 1K input/output tokens pr. udbyder                |
+| **Prissætning** | Se og rediger modelprisposter — pris pr. 1K input/output tokens pr. udbyder                    |
 
 ```bash
 # API: Set a budget
@@ -1159,7 +1159,7 @@ Adgang via** Dashboard → Health** . Oversigt over systemets tilstand i realtid
 | **Satsgrænser**       | Aktiv forbindelsesnedkøling pr. konto med resterende tid     |
 | **Aktive lockouts**   | Aktive lockouts med modelomfang og midlertidige udelukkelser |
 | **Signatur cache**    | Deduplikeringscache-statistikker (aktive nøgler, hitrate)    |
-| **Latency Telemetri** | p50/p95/p99 latenstid aggregering pr. udbyder                |
+| **Latency Telemetri** | p50/p95/p99 latenssammenlægning pr. udbyder                  |
 
 **Pro tip:** Sundhedssiden opdateres automatisk hvert 10. sekund. Brug afbryderkortet til at identificere, hvilke udbydere der oplever problemer.
 

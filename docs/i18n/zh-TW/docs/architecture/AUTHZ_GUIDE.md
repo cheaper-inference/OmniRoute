@@ -125,15 +125,29 @@ Dashboard 管理員登入也支援選擇啟用的 OIDC（OpenID Connect）流程
 
 ## 路由類別
 
-`src/server/authz/types.ts` 定義了三種類別；任何無法被確定性分類的路由都會退回為 `MANAGEMENT`。
+`src/server/authz/types.ts` 定義了三個類別；任何無法確定分類的路由都會回退至 `MANAGEMENT`。
 
-| 類別         | 說明                                                                                                                                  | 所需認證                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `PUBLIC`     | 明確安全的路由：登入、登出、狀態、初始化、健康檢查、新手引導啟動。                                                                    | 無                                                        |
-| `CLIENT_API` | 模型服務端點：`/api/v1/*`、`/api/v1beta/*`，以及別名 `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 當有效的 `REQUIRE_API_KEY` 功能旗標啟用時需要 Bearer 金鑰 |
-| `MANAGEMENT` | 儀表板頁面、設定、提供者、金鑰、管理與診斷端點。                                                                                      | 儀表板工作階段，或具有 `manage` 範圍的 Bearer             |
+| 類別         | 描述                                                                                                                                   | 所需驗證                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `PUBLIC`     | 明確安全的路由 — 登入、登出、狀態、健康檢查、初始設定引導。                                                                            | 無                                                        |
+| `CLIENT_API` | 模型服務端點 — `/api/v1/*`、`/api/v1beta/*`，以及別名 `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 啟用有效的 `REQUIRE_API_KEY` 功能旗標時，需要 Bearer 金鑰 |
+| `MANAGEMENT` | 儀表板頁面、設定、提供者、金鑰、管理及診斷端點。                                                                                       | 儀表板工作階段或具有 `manage` 範圍的 Bearer               |
 
-部分 `MANAGEMENT` 操作是**僅限操作員**的：只有 `manage` 金鑰是不夠的。匯出已儲存的憑證（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、將備份還原到現有資料之上（`POST /api/db-backups/import`，包括 `dryRun=true`；依 id 進行的 `POST /api/db-backups` 還原；`POST /api/settings/import-json`）、銷毀還原點（`DELETE /api/db-backups` 的清理，以及 `PATCH /api/db-backups`，因為它持久化的保留策略會驅動每次備份後的自動修剪）時，需要儀表板工作階段、本機 CLI 主體，或已停用登入。核發同步權杖（`POST /api/sync/tokens`）以及核發 `admin` CLI 存取權杖（`POST /api/cli/tokens`）在所有登入模式下都需要儀表板工作階段或本機 CLI 主體。任何範圍的 API 金鑰與 `oma_` 存取權杖都不是操作員憑證：在需要操作員憑證的地方，它們會收到 `403`。檢查邏輯位於 `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）。變更登入設定同樣僅限操作員：一旦存在密碼，`POST /api/settings/require-login`（設定管理密碼 / 切換 `requireLogin`）只接受這些憑證。首次執行的引導視窗（尚無密碼）維持不變；儀表板工作階段必須傳送 `currentPassword` 才能取代密碼（缺少或錯誤時回傳 `403`，並記錄為 `settings.update_failed`）。本機 CLI 以及已停用登入的執行個體保留復原路徑，可以在不提供密碼的情況下設定密碼，因為兩者都綁定到擁有資料目錄的主機。
+部分 `MANAGEMENT` 動作**僅限操作員**：`manage` 金鑰並不足夠。匯出儲存的
+憑證（`GET /api/settings/export-json`、`GET /api/db-backups/export`、
+`GET /api/db-backups/exportAll`）、在即時資料上還原備份
+（`POST /api/db-backups/import`，包括 `dryRun=true`、`POST /api/db-backups` 依 ID
+還原、`POST /api/settings/import-json`）、刪除還原點（`DELETE /api/db-backups` 清理，
+以及 `PATCH /api/db-backups`，因為其持續時間會驅動每次備份後的自動清理）都需要儀表板工作階段、
+本機 CLI 主體，或停用登入。簽發同步權杖（`POST /api/sync/tokens`）以及鑄造
+`admin` CLI 存取權杖（`POST /api/cli/tokens`）在所有登入模式下都需要儀表板工作階段或本機 CLI 主體。
+任何範圍的 API 金鑰和 `oma_` 存取權杖都不是操作員憑證：在需要操作員憑證時，它們會收到 `403`。
+檢查位於 `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` /
+`requireOperatorCredential()`）。變更登入設定同樣僅限操作員：
+`POST /api/settings/require-login`（設定管理密碼／切換 `requireLogin`）在密碼存在後
+只接受這些憑證 — 首次執行的初始設定視窗（尚無密碼）維持不變 — 且儀表板工作階段必須傳送
+`currentPassword` 才能取代密碼（缺少或錯誤時為 `403`，並以 `settings.update_failed` 記錄稽核）。
+本機 CLI 和停用登入的執行個體保留復原路徑，且可以不使用密碼設定密碼，因為兩者都繫結至擁有資料目錄的主機。
 
 ## 管道
 
@@ -168,13 +182,11 @@ Incoming request → src/proxy.ts
 
 `src/shared/constants/publicApiRoutes.ts` 是明確的允許清單：
 
-此清單依**形狀**分割，而這個分割會影響安全性（GHSA-74g9-q8f6-793h）：前綴會使用
-`startsWith()` 進行比對，因此也會比對所有共用其開頭字元的相鄰路徑。
-以 `/api/usage/om-usage` 作為前綴，會將 `/api/usage/om-usage<anything>` 標記為 PUBLIC，而 Next 會將其解析為
-`/api/usage/[connectionId]` —— 這是一個本身沒有驗證機制的處理常式。
+清單依 **形狀** 分割，而此分割具有關鍵作用（GHSA-74g9-q8f6-793h）：前綴會使用 `startsWith()` 進行比對，因此也會比對所有共用其開頭字元的相鄰路徑。
+`/api/usage/om-usage` 作為前綴會將 `/api/usage/om-usage<anything>` 標記為 PUBLIC，而 Next 會將其解析為 `/api/usage/[connectionId]` — 這是一個本身沒有驗證機制的處理常式。
 
 ```ts
-// 真正的子樹。每個項目都必須以 "/" 結尾（由單元測試斷言）。
+// 真正的子樹。每個項目都必須以 "/" 結尾（由單元測試驗證）。
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
   "/api/v1/", // 在 classify 中視為 CLIENT_API，而不是「無驗證的公開路由」
@@ -184,33 +196,32 @@ PUBLIC_API_ROUTE_PREFIXES = [
   "/api/cursor-cli/",
 ];
 
-// 單一路由，會進行完全比對（可帶或不帶結尾斜線）。
+// 單一路由，使用完全相符方式比對（有或沒有結尾斜線皆可）。
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 已選擇啟用 TOTP 時的登入步驟 2；需要 MFA-pending cookie
-  "/api/init",
+  "/api/auth/mfa/verify", // 選擇啟用 TOTP 時的登入步驟 2；需要 MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// 也套用 CORS 來源放寬規則的唯讀單一路由。
+// 也採用 CORS origin 放寬政策的唯讀單一路由。
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// 不套用 CORS 放寬規則的唯讀單一路由。
+// 不採用 CORS 放寬政策的唯讀單一路由。
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-唯讀路由只有在安全的方法下才是公開的。注意：`classifyRoute()` 會將 `/api/v1/*` 和 `/api/v1beta/*` 排除在 PUBLIC 的回退處理之外 —— 這些路由一律是 `CLIENT_API`，因此仍會套用 Bearer 金鑰政策。
+唯讀路由僅在安全方法下才是公開的。注意：`classifyRoute()` 會將 `/api/v1/*` 和 `/api/v1beta/*` 排除在 PUBLIC 回退機制之外 — 這些路由一律是 `CLIENT_API`，因此仍會套用 Bearer 金鑰政策。
 
 ## 新增路由
 
@@ -283,15 +294,18 @@ API 金鑰帶有一個 `scopes` 陣列（以 JSON 格式儲存在 `api_keys.scop
 （`src/lib/accessTokens/scopes.ts`）。此排序僅適用於存取權杖憑證。請參閱
 [管理驗證](../guides/MANAGEMENT-AUTH.md)。
 
-## 認證需求開關
+## 需要驗證切換
 
-`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` 決定某個請求是否需要**任何**認證：
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` 會決定要求是否強制執行任何驗證：
 
-- `settings.requireLogin === false` → 全域停用認證，但以下情況除外：始終受保護的層級（參見 [路由守衛層級](../security/ROUTE_GUARD_TIERS.md)），以及核發其所接受憑證的呼叫。這些呼叫需要與開啟登入時相同的憑證：核發同步權杖、以任何範圍核發 CLI 存取權杖、建立具有 `manage`/`admin` 範圍的 API 金鑰、把該範圍授予某個金鑰，或重新產生、顯示此類金鑰（`src/lib/api/requireManagementAuth.ts` 中的 `requireCredentialForManagementScopedKey()`）。僅用於推論的金鑰仍保持開放。
-- 未設定密碼**且**未設定 `INITIAL_PASSWORD` 環境變數 → 引導模式允許使用新手引導精靈與回送（loopback）請求，但暴露在網路上的請求仍需要憑證。
-- 任何資料庫錯誤 → 失敗時預設拒絕（fail closed，即預設安全）。
+- `settings.requireLogin === false` → 全域停用驗證，但 always-protected
+  層級除外（請參閱 [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)），以及會發放其接受之憑證的呼叫仍然需要與啟用登入時相同的憑證，包括簽發同步權杖、以任何範圍建立 CLI 存取權杖，以及建立具有 `manage`/`admin` 範圍的 API 金鑰、將該範圍授予金鑰，或重新產生或揭露此類金鑰
+  （`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`）。
+  僅限推論的金鑰仍保持開放。寫入受保護的功能旗標（`REQUIRE_API_KEY`、其他 Security 旗標，以及 [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) 中列出的 SSRF / TLS / MCP-scope / sandbox 旗標）和儲存 PII 遮罩設定（`PUT /api/settings/pii`）也仍需要憑證。
+- 未設定密碼 **且** 沒有 `INITIAL_PASSWORD` 環境變數 → bootstrap 模式允許 onboarding wizard 和迴路要求，但對外公開的網路要求仍需要憑證。例外：寫入受保護的功能旗標和儲存 PII 遮罩設定（`PUT /api/settings/pii`）即使來自迴路也需要憑證，因此僅有迴路來源在這些情況下並不足夠。
+- 任何 DB 錯誤 → 採取拒絕預設（secure-by-default）。
 
-用戶端 API 金鑰的強制執行使用 `src/shared/utils/featureFlags.ts` 中的 `isRequireApiKeyEnabled()`，而非直接讀取 `process.env.REQUIRE_API_KEY`。這對已部署的執行個體很重要：在儀表板 → 功能旗標中切換 `REQUIRE_API_KEY` 會儲存一個資料庫覆寫值，並立即影響 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` 以及其他共用此輔助函式的用戶端 API 認證檢查。若無法讀取功能旗標儲存區，用戶端 API 認證會失敗時預設拒絕，並要求提供金鑰。
+用戶端 API 金鑰強制執行使用 `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`，而不是直接讀取 `process.env.REQUIRE_API_KEY`。這對已部署的執行個體很重要：在 Dashboard → Feature Flags 中切換 `REQUIRE_API_KEY` 會儲存 DB 覆寫值，並立即影響 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*`，以及其他共用此 helper 的用戶端 API 驗證檢查。如果無法讀取功能旗標儲存區，用戶端 API 驗證會採取拒絕預設，並要求金鑰。
 
 ## 破壞性變更 — v3.8.0
 

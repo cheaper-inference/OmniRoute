@@ -150,17 +150,17 @@ Dashboard-ի ադմինիստրատիվ մուտքը, լռելյայն գաղտ�
   4. Չսահմանեք `OMNIROUTE_DISABLE_MFA`-ն, վերագործարկեք սերվերը և անհրաժեշտության դեպքում
      կրկին գրանցեք գործոնը։
 
-## Երթուղիների դասեր
+## Երթուղու դասեր
 
-`src/server/authz/types.ts`-ը սահմանում է երեք դաս. ցանկացած երթուղի, որը չի կարող որոշակիորեն դասակարգվել, վերադառնում է `MANAGEMENT`-ին։
+`src/server/authz/types.ts` սահմանում է երեք դաս. ցանկացած երթուղի, որը չի կարող դասակարգվել դետերմինիստորեն, վերադառնում է `MANAGEMENT`:
 
-| Դաս          | Նկարագրություն                                                                                                                                                         | Պահանջվող նույնականացում                                    |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `PUBLIC`     | Բացահայտ անվտանգ երթուղիներ — մուտք, դուրս գալ, կարգավիճակ, սկզբնավորում, առողջություն, onboarding-ի bootstrap։                                                        | Չկա                                                         |
-| `CLIENT_API` | Մոդելների սպասարկման endpoint-ներ — `/api/v1/*`, `/api/v1beta/*`, ինչպես նաև անունները `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`։ | Bearer բանալի, երբ ակտիվ է `REQUIRE_API_KEY` feature flag-ը |
-| `MANAGEMENT` | Վահանակի էջեր, կարգավորումներ, providers, բանալիներ, ադմինիստրատորի և ախտորոշման endpoint-ներ։                                                                         | Վահանակի սեսիա Կամ Bearer `manage` scope-ով                 |
+| Դասարան      | Նկարագրություն                                                                                                                                            | Պահանջվում է վավերացում                                                  |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | Բացահայտորեն անվտանգ երթուղիներ — մուտք, ելք, կարգավիճակ, առողջություն, ներբեռնման bootstrap:                                                             | Ոչ մեկը                                                                  |
+| `CLIENT_API` | Մոդելների սպասարկման վերջնակետեր — `/api/v1/*`, `/api/v1beta/*`, գումարած `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Կրող բանալի, երբ արդյունավետ `REQUIRE_API_KEY` հատկանիշի դրոշը միացված է |
+| `MANAGEMENT` | Վահանակի էջեր, կարգավորումներ, պրովայդերներ, ստեղներ, ադմինիստրատոր և ախտորոշման վերջնակետեր:                                                             | Վահանակի նստաշրջան OR կրող `manage` շրջանակով                            |
 
-`MANAGEMENT`-ի որոշ գործողություններ **միայն օպերատորի** համար են. `manage` բանալին բավարար չէ։ Պահված հավատարմագրերի արտահանումը (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), պահուստային պատճենի վերականգնումը կենդանի տվյալների վրա (`POST /api/db-backups/import`՝ ներառյալ `dryRun=true`-ը, `POST /api/db-backups`՝ վերականգնում id-ով, `POST /api/settings/import-json`), վերականգնման կետերի ոչնչացումը (`DELETE /api/db-backups`՝ մաքրում, և `PATCH /api/db-backups`, քանի որ այն պահպանվող պահպանման քաղաքականությունը վարում է յուրաքանչյուր պահուստից հետո ավտոմատ ջնջումը) պահանջում են վահանակի սեսիա, տեղական CLI սուբյեկտ կամ անջատված մուտք։ Սինխրոնիզացիայի token-ի թողարկումը (`POST /api/sync/tokens`) և `admin` CLI access token-ի ստեղծումը (`POST /api/cli/tokens`) պահանջում են վահանակի սեսիա կամ տեղական CLI սուբյեկտ՝ մուտքի ցանկացած ռեժիմում։ API բանալիները՝ ցանկացած scope-ով, և `oma_` access token-ները օպերատորի հավատարմագրեր չեն. երբ դրանք պահանջվում են, դրանք ստանում են `403`։ Ստուգումն ապրում է `src/lib/api/operatorCredential.ts`-ում (`resolveOperatorCredential()` / `requireOperatorCredential()`)։ Մուտքի կարգավորումների փոփոխությունը նույնպես միայն օպերատորի համար է. `POST /api/settings/require-login`-ը (կառավարման գաղտնաբառի սահմանում / `requireLogin`-ի փոխանջատում) գաղտնաբառի առկայության դեպքում ընդունում է միայն այս հավատարմագրերը. առաջին գործարկման bootstrap պատուհանը (երբ գաղտնաբառ դեռ չկա) մնում է անփոփոխ, իսկ վահանակի սեսիան գաղտնաբառը փոխելու համար պետք է ուղարկի `currentPassword` (`403`, երբ այն բացակայում է կամ սխալ է, գրանցվում է որպես `settings.update_failed`)։ Տեղական CLI-ն և մուտքն անջատված ունեցող տեղադրումը պահպանում են վերականգնման ուղին և կարող են գաղտնաբառ սահմանել առանց դրա, քանի որ երկուսն էլ կապված են այն հոսթին, որը տիրապետում է տվյալների գրացուցակին։
+Մի քանի `MANAGEMENT` գործողություններ են** միայն օպերատորի համար** `manage` ստեղնը բավարար չէ: Պահպանված հավատարմագրերի արտահանում (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), կենդանի տվյալների վրա կրկնօրինակի վերականգնում (`POST /api/db-backups/import`, ներառյալ `dryRun=true`, `POST /api/db-backups` վերականգնում ըստ id, `POST /api/settings/import-json`), վերականգնման կետերի ոչնչացում (`DELETE /api/db-backups` մաքրում և `PATCH /api/db-backups`, քանի որ այն պահպանվում է, որովհետև դրա պահպանումը մղում է ավտոմատ էտում յուրաքանչյուր պահուստային տախտակի կամ լոկալ CLI սեսիայից հետո): Համաժամացման նշան (`POST /api/sync/tokens`) թողարկելու և `admin` CLI մուտքի նշանի (`POST /api/cli/tokens`) ձևավորումը պահանջում է վահանակի նիստ կամ տեղական CLI թեմա յուրաքանչյուր մուտքի ռեժիմում: Ցանկացած տիրույթի API ստեղները և `oma_` մուտքի նշանները օպերատորի հավատարմագրեր չեն. դրանք ստանում են `403`, երբ պահանջվում է: Չեկը ապրում է `src/lib/api/operatorCredential.ts` ում (`resolveOperatorCredential()` / `requireOperatorCredential()`): Մուտքի կարգավորումները փոխելը նույնպես միայն օպերատորի համար է. `POST /api/settings/require-login` (սահմանել կառավարման գաղտնաբառը / միացնել `requireLogin`) ընդունում է միայն այդ հավատարմագրերը, երբ գաղտնաբառը գոյություն ունի — առաջին գործարկվող bootstrap պատուհանը (դեռևս գաղտնաբառ չկա) անփոփոխ է —, և վահանակի նիստը պետք է ուղարկի `currentPassword` գաղտնաբառը փոխարինելու համար (`403`, երբ այն բացակայում է կամ `settings.update_failed` է: Տեղական CLI և մուտքի անջատված օրինակը պահպանում են վերականգնման ուղին և կարող են գաղտնաբառ սահմանել առանց դրա, քանի որ երկուսն էլ կապված են տվյալների գրացուցակի սեփականատեր հոսթին:
 
 ## Խողովակաշար
 
@@ -193,52 +193,47 @@ Incoming request → src/proxy.ts
 
 ## Հանրային երթուղիների ցանկ
 
-`src/shared/constants/publicApiRoutes.ts`-ը բացահայտ թույլատրված ցանկն է.
+`src/shared/constants/publicApiRoutes.ts` բացահայտ թույլտվությունների ցանկն է՝
 
-Ցանկը բաժանված է ըստ **ձևաչափի**, և այս բաժանումը կարևոր է (GHSA-74g9-q8f6-793h). Նախածանցը
-համապատասխանեցվում է `startsWith()`-ով, ուստի այն նաև համապատասխանում է նույն սկզբնական նիշերը
-կիսող յուրաքանչյուր հարակից ուղու։
-`/api/usage/om-usage`-ը որպես նախածանց նշում է `/api/usage/om-usage<anything>`-ը որպես PUBLIC, իսկ Next-ը դա լուծում է
-որպես `/api/usage/[connectionId]` — մշակիչ, որն ինքնուրույն նույնականացում չունի։
+Ցուցակը բաժանված է** ձեւավորել** և բաժանումը կրող է (GHSA-74g9-q8f6-793h). նախածանցը համընկնում է `startsWith()` հետ, ուստի այն նաև համընկնում է յուրաքանչյուր հարևան ճանապարհին, որը կիսում է իր առաջատար նիշերը: `/api/usage/om-usage` որպես նախածանց նշել է `/api/usage/om-usage<anything>` PUBLIC, և Next-ը որոշում է, որ `/api/usage/[connectionId]` — կարգավորիչը, որը չունի սեփական հեղինակություն:
 
 ```ts
-// Իրական ենթածառեր։ Յուրաքանչյուր գրառում ՊԵՏՔ է ավարտվի "/"-ով (ստուգվում է միավորային թեստով)։
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify-ում դիտարկվում է որպես CLIENT_API, ոչ թե որպես "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Առանձին երթուղիներ՝ համապատասխանեցվում են ՃՇԳՐԻՏ (վերջում թեք գծով կամ առանց դրա)։
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // մուտքի 2-րդ քայլը՝ միացված TOTP-ի համար. պահանջվում է MFA-pending cookie-ն
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Միայն ընթերցման համար նախատեսված առանձին երթուղիներ, որոնք նույնպես ստանում են CORS origin-ի թուլացումը։
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Միայն ընթերցման համար նախատեսված առանձին երթուղի՝ ԱՌԱՆՑ CORS-ի թուլացման։
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Միայն ընթերցման համար նախատեսված երթուղիները հանրային են **միայն անվտանգ մեթոդների** համար։ Նշում. `classifyRoute()`-ը `/api/v1/*` և `/api/v1beta/*` երթուղիները բացառում է PUBLIC-ի պահուստային համապատասխանեցումից — դրանք միշտ `CLIENT_API` են, ուստի Bearer-key քաղաքականությունը շարունակում է կիրառվել։
+Միայն կարդալու երթուղիները հանրային են** միայն** անվտանգ մեթոդների համար. Նշում. `classifyRoute()` բացառում է `/api/v1/*` և `/api/v1beta/*` PUBLIC միջոցով — որոնք միշտ `CLIENT_API` են, ուստի կրող բանալի քաղաքականությունը դեռևս գործում է:
 
 ## Նոր երթուղու ավելացում
 
@@ -316,15 +311,15 @@ API բանալիները կրում են `scopes` զանգված (պահվում
 (`src/lib/accessTokens/scopes.ts`)։ Այս դասակարգումը վերաբերում է միայն մուտքի թոքենի
 հավատարմագրին։ Տես [Կառավարման աուտենտիֆիկացիա](../guides/MANAGEMENT-AUTH.md)։
 
-## Նույնականացման պահանջի անջատիչ
+## Auth Պահանջվում է Փոխարկել
 
-`src/shared/utils/apiAuth.ts`-ի `isAuthRequired()`-ը որոշում է, թե արդյոք **որևէ** նույնականացում է պարտադրվում հարցումի համար․
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` որոշում է, թե արդյոք** ցանկացած** auth-ն ուժի մեջ է մտնում խնդրանքի համար.
 
-- `settings.requireLogin === false` → նույնականացումն ընդհանրապես անջատված է, բացի միշտ պաշտպանված շերտից (տե՛ս [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) և այն կանչերից, որոնք տալիս են հավատարմագիր, որը այն ընդունում է. դրանց պահանջվում է նույն հավատարմագիրը, ինչ մուտքի միացված ժամանակ՝ սինխրոնիզացիայի token-ների թողարկում, CLI access token-ների ստեղծում ցանկացած scope-ով, և `manage`/`admin` scope ունեցող API բանալու ստեղծում, այդ scope-ի տրամադրում բանալուն, կամ այդպիսի բանալու վերագեներացում կամ բացահայտում (`requireCredentialForManagementScopedKey()`, `src/lib/api/requireManagementAuth.ts`)։ Միայն inference բանալիները բաց են մնում։
-- Գաղտնաբառ կարգավորված չէ **և** `INITIAL_PASSWORD` միջավայրի փոփոխական չկա → bootstrap ռեժիմը թույլ է տալիս onboarding wizard-ը և loopback հարցումները, մինչդեռ ցանցից եկող բաց հարցումներին դեռ անհրաժեշտ են հավատարմագրեր։
-- Ցանկացած DB սխալ → փակ վիճակում ձախողվում է (secure-by-default)։
+- `settings.requireLogin === false` → auth-ը գլոբալ անջատված է, բացառությամբ միշտ պաշտպանված մակարդակի (տես [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) և այն զանգերի, որոնք տրամադրում են իր կողմից ընդունված հավատարմագրերը, որոնց անհրաժեշտ է API հավատարմագիրը `requireCredentialForManagementScopedKey()` CLI `manage` `admin` `src/lib/api/requireManagementAuth.ts` Միայն եզրակացության բանալիները մնում են բաց: Պաշտպանված հատկանիշի դրոշ գրելը (`REQUIRE_API_KEY`, անվտանգության մյուս դրոշները և SSRF / TLS / MCP-scope / sandbox դրոշները, որոնք թվարկված են [Feature Flags-](../reference/FEATURE_FLAGS.md#rest-api) ում) և պահպանելով PII դիմակավորման կարգավորումները (`PUT /api/settings/pii`) նույնպես շարունակում են հավատարմագրերի կարիք ունենալ:
+- Գաղտնաբառ կազմաձևված չէ** և** no `INITIAL_PASSWORD` env var → bootstrap ռեժիմը թույլ է տալիս ներբեռնման հրաշագործին և loopback հարցումները, սակայն բացված ցանցային հարցումներին դեռևս անհրաժեշտ են հավատարմագրեր: PII `PUT /api/settings/pii`
+- DB ցանկացած սխալ → չի փակվում (անվտանգ ըստ կանխադրման):
 
-Client API բանալու պարտադրումն օգտագործում է `src/shared/utils/featureFlags.ts`-ի `isRequireApiKeyEnabled()`-ը, այլ ոչ թե ուղղակի `process.env.REQUIRE_API_KEY` ընթերցում։ Սա կարևոր է տեղադրված ինստանսների համար. Dashboard → Feature Flags-ում `REQUIRE_API_KEY`-ի փոխելը պահում է DB-ի վերագրանցում և անմիջապես ազդում է `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` և client API-ի մյուս նույնականացման ստուգումների վրա, որոնք կիսում են այս օգնականը։ Եթե feature flag-ների պահոցը չի կարող կարդացվել, client API-ի նույնականացումը փակ վիճակում ձախողվում է և պահանջում է բանալի։
+Հաճախորդի API բանալի կիրառումը `isRequireApiKeyEnabled()` ում օգտագործում է `src/shared/utils/featureFlags.ts`, ոչ թե ուղղակի `process.env.REQUIRE_API_KEY` ընթերցում: Սա կարևոր է տեղաբաշխված օրինակների համար. `REQUIRE_API_KEY` միացումը Dashboard → Feature Flags-ը պահպանում է DB վերափոխումը և անմիջապես ազդում `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` և հաճախորդի-API վավերացման այլ ստուգումների վրա, որոնք կիսում են այս օգնականը: Եթե առանձնահատկությունների դրոշի պահեստը հնարավոր չէ կարդալ, հաճախորդի API auth-ը չի փակվում և պահանջում է բանալի:
 
 ## Փոփոխություն, որը խախտում է համատեղելիությունը — v3.8.0
 

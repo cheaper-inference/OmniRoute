@@ -295,6 +295,9 @@ export function getCodexClientSessionId(
     normalizeCodexSessionId(readNamedHeader(headers, "x-opencode-session-id")) ||
     normalizeCodexSessionId(readNamedHeader(headers, "x-session-affinity")) ||
     normalizeCodexSessionId(readNamedHeader(headers, "x-session-id")) ||
+    // Claude Code sends its per-session UUID here; without it Claude-format requests routed
+    // to Codex carried no session and only shared the account-wide prompt-cache partition.
+    normalizeCodexSessionId(readNamedHeader(headers, "x-claude-code-session-id")) ||
     null
   );
 }

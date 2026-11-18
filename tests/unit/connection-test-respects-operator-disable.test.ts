@@ -20,6 +20,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-operator-disable-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -27,6 +30,9 @@ process.env.API_KEY_SECRET = "operator-disable-test-secret";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const VALIDATION_BASE_URL = "https://proxy.operator-disable.example.com/v1";
+// Initialize the production wrapper before installing the probe stub. Otherwise
+// its first import replaces the stub and sends fake provider URLs to the proxy.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
 // When set, every validation probe waits on this promise before answering, so a
 // test can hold a connection test mid-probe while the operator acts.

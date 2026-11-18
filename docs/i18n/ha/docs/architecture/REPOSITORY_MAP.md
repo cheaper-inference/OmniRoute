@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Fayilolin tushe
+## Tushen fayiloli
 
-| Fayil                                       | Manufa                                                                                          |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **README.md**                               | Shafin gabatarwa na talla + saurin farawa + jadawalin fasaloli (duba kuma `llm.txt`)            |
-| **CHANGELOG.md**                            | Kundin sauye-sauyen kowace fitarwa (ƙwarewar `/version-bump-cc` ce ke samar da shi ta atomatik) |
-| **LICENSE**                                 | Rubutun lasisin MIT                                                                             |
-| **CLAUDE.md**                               | Dokokin aikin ga wakilan Claude Code (tsauraran dokoki, ƙa'idoji, yanayi)                       |
-| **AGENTS.md**                               | Daidai da CLAUDE.md amma don wakilan AI da ba na Claude ba (Codex, Cursor, da sauransu)         |
-| **GEMINI.md**                               | Taƙaitattun dokoki ga wakilan da suka dogara da Gemini (wani ɓangare na CLAUDE.md)              |
-| **CONTRIBUTING.md**                         | Jagorar masu ba da gudummawa: saiti, conventional commits, gwaji, tafiyar PR                    |
-| **SECURITY.md**                             | Manufofin bayar da rahoton rauni, nau'ikan da ake tallafawa, samfurin barazana                  |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — abubuwan da ake tsammani game da halayen al'umma                         |
-| **llm.txt**                                 | Shafin gabatarwa na rubutu zalla wanda aka inganta don crawlers na LLM (SEO don mataimakan AI)  |
-| **package.json**                            | Bayanin npm, scripts, dependencies, engines, matatar coverage ta c8                             |
-| **package-lock.json**                       | Bishiyar dependencies da aka kulle                                                              |
-| **tsconfig.json**                           | Babban saitin TypeScript                                                                        |
-| **tsconfig.typecheck-core.json**            | Saitin typecheck don ainihin `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | Tsauraran typecheck (`noImplicitAny`)                                                           |
-| **tsconfig.tsbuildinfo**                    | Cache na incremental build na TS (gitignored)                                                   |
-| **next.config.mjs**                         | Saitin build na Next.js 16 (standalone output)                                                  |
-| **next-env.d.ts**                           | Nau'ikan env da Next.js ke samarwa ta atomatik                                                  |
-| **eslint.config.mjs**                       | Flat config na ESLint (dokoki bisa yankin aikin)                                                |
-| **prettier.config.mjs**                     | Dokokin tsara rubutu na Prettier                                                                |
-| **postcss.config.mjs**                      | Saitin PostCSS don pipeline na Tailwind/CSS                                                     |
-| **playwright.config.ts**                    | Saitin gwajin E2E na Playwright                                                                 |
-| **vitest.config.ts**                        | Saitin Vitest (default suite)                                                                   |
-| **vitest.mcp.config.ts**                    | Saitin Vitest don MCP server / autoCombo / cache suites                                         |
-| **sonar-project.properties**                | Saitin SonarQube/SonarCloud (ingancin lamba)                                                    |
-| **Dockerfile**                              | Multi-stage Docker build (builder → runner-base → runner-cli)                                   |
-| **docker-compose.yml**                      | Dev compose mai profiles 4 (base, cli, host, cliproxyapi) + redis sidecar                       |
-| **docker-compose.prod.yml**                 | Production compose (port 20130, redis, named volumes)                                           |
-| **.dockerignore**                           | Fayilolin da aka cire daga Docker context                                                       |
-| **fly.toml**                                | Saitin turawa na Fly.io (region `sin`, port 20128, /data volume)                                |
-| **.env.example**                            | Samfurin fayil ɗin env (ana kwafa shi ta atomatik zuwa `.env` a shigarwa ta farko)              |
-| **.gitignore**                              | Tsarukan ignore na Git                                                                          |
-| **.npmignore**                              | Jerin abubuwan da ba a haɗawa lokacin npm publish                                               |
-| **.npmrc**                                  | Saitin npm (registry, manufofin lockfile)                                                       |
-| **.node-version**                           | Ƙayyadadden nau'in Node (kayan aikin da suka dace da nvm suna amfani da shi)                    |
-| **.nvmrc**                                  | Ƙayyadadden nau'in Node don nvm                                                                 |
-| **eslint.complexity.config.mjs**            | Saitin ESLint don complexity ratchet (`scripts/check/check-complexity.mjs --config`)            |
-| **eslint.sonarjs.config.mjs**               | Saitin ESLint don dokokin SonarJS (cognitive complexity / duplication)                          |
-| **source.config.ts**                        | Saitin tushen `defineDocs` na Fumadocs (yana ciyar da `.source/`)                               |
-| **knip.json**                               | Saitin Knip — fayiloli/exports/deps da ba a amfani da su (yana ciyar da dead-code gate)         |
-| **stryker.conf.json**                       | Saitin mutation-testing na Stryker                                                              |
-| **.size-limit.json**                        | Saitin kasafin girman bundle na size-limit                                                      |
-| **promptfooconfig.yaml**                    | Saitin kimantawar promptfoo                                                                     |
-| **.gitleaks.toml**                          | Dokokin binciken sirri na gitleaks                                                              |
-| **.zizmor.yml**                             | Saitin lint na tsaro na zizmor don GitHub Actions                                               |
-| **socket.yml**                              | Saitin sarkar samarwa na Socket.dev                                                             |
-| **news.json**                               | Tsarin sanarwar v2 da aka keɓance bisa yanki; abun ƙaddamar da Radar yana zuwa a kashe          |
-| **flake.nix** / **flake.lock**              | Ma’anar dev-shell ta Nix + makulli                                                              |
-| **.env**                                    | Sirrin gida (gitignored — an samar daga `.env.example`)                                         |
+| Fayil                                       | Manufar                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **README.md**                               | Shafin saukar da tallace-tallace + saurin farawa + fasalin matrix (duba kuma `llm.txt`)   |
+| **CHANGELOG.md**                            | Sakin-saki canji (ƙwararren `/version-bump-cc` ta ƙirƙira ta atomatik)                    |
+| **LICENSE**                                 | MIT rubutun lasisi                                                                        |
+| **CLAUDE.md**                               | Dokokin aikin don wakilai na Code Claude (tsararrun dokoki, tarurruka, al'amuran)         |
+| **AGENTS.md**                               | Daidai da CLAUDE.md amma ga waɗanda ba Claude AI wakilai ba (Codex, Cursor, da sauransu)  |
+| **GEMINI.md**                               | Ƙididdiga ƙa'idodi don wakilai na tushen Gemini (bangaren CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | Jagorar mai ba da gudummawa: saitin, ayyuka na al'ada, gwaji, kwararar PR                 |
+| **SECURITY.md**                             | Manufar bayar da rahoton rauni, nau'ikan tallafi, samfurin barazana                       |
+| **CODE_OF_CONDUCT.md**                      | Masu ba da gudummawa alkawari — tsammanin halayen al'umma                                 |
+| **llm.txt**                                 | An inganta saukar da rubutu a fili don masu rarrafe LLM (SEO don mataimakan AI )          |
+| **package.json**                            | npm bayyananni, rubutun, dogaro, injuna, ƙofar ɗaukar hoto c8                             |
+| **package-lock.json**                       | Kulle itacen dogaro                                                                       |
+| **tsconfig.json**                           | Tushen TypeScript config                                                                  |
+| **tsconfig.typecheck-core.json**            | Nau'in na'ura mai kwakwalwa don `src/` core                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | Tsanani (`noImplicitAny`) cak                                                             |
+| **tsconfig.tsbuildinfo**                    | TS increamental gini cache (gitignored)                                                   |
+| **na gaba.config.mjs**                      | Next.js 16 gina ginin (fitarwa na tsaye)                                                  |
+| **gaba-env.d.ts**                           | nau'ikan env mai sarrafa Next.js ta atomatik                                              |
+| **eslint.config.mjs**                       | ESLint flat config (dokokin kowane yanki na aikin)                                        |
+| **mafi kyau.config.mjs**                    | dokokin tsara tsarin Prettier                                                             |
+| **postcss.config.mjs**                      | PostCSS config don bututun Tailwind/CSS                                                   |
+| **marubucin wasan kwaikwayo.config.ts**     | Playwright E2E gwajin config                                                              |
+| **maras kyau.config.ts**                    | Vitest config (default suite)                                                             |
+| **vitest.mcp.config.ts**                    | Vitest saita don uwar garken MCP / autoCombo / cache suites                               |
+| **sonar-project.Properties**                | SonarQube/SonarCloud config (quality code)                                                |
+| **Dockerfile**                              | Multi-stage Docker gini (mai gini → mai gudu-tushe → mai gudu-cli)                        |
+| **docker-compose.yml**                      | Dev compose with 4 profiles (base, cli, host, cliproxyapi) + redis sidecar                |
+| **docker-hada.prod.yml**                    | Ƙirƙirar samarwa (tashar jiragen ruwa 20130, redis, kundin mai suna)                      |
+| **.dockerignor**                            | An cire fayilolin daga mahallin Docker                                                    |
+| **fly.toml**                                | Saitin turawa Fly.io (yankin `sin`, tashar jiragen ruwa 20128, /ƙarar bayanai)            |
+| **.env.misali**                             | Samfurin env fayil (kofi ta atomatik zuwa `.env` a farkon shigarwa)                       |
+| **.gitignore**                              | Git watsi da alamu                                                                        |
+| **.npmignon**                               | npm buga jerin keɓewa                                                                     |
+| **.npmrc**                                  | npm saitin (rejista, manufofin kulle fayil)                                               |
+| **.node-version**                           | Fin ɗin nau'in node (wanda ke amfani da kayan aikin nvm masu jituwa)                      |
+| **.nvmrc**                                  | Sigar node fil don nvm                                                                    |
+| **elint.complexity.config.mjs**             | Tsarin ESLint don ƙwanƙwasa mai rikitarwa (`scripts/check/check-complexity.mjs --config`) |
+| **elint.sonarjs.config.mjs**                | tsarin ESLint don dokokin SonarJS (rikitaccen fahimta / kwafi)                            |
+| **tushe.config.ts**                         | Fumadocs `defineDocs` tushen saitin ( ciyarwar `.source/`)                                |
+| **knip.json**                               | Knip config — mara amfani da files/exports/deps (yana ciyar da ƙofar matattu)             |
+| **streker.conf.mjs**                        | Tsarin gwajin maye gurbin Stryker (yana lissafin `tap.testFiles` daga `mutate`)           |
+| **.size-limit.json**                        | Tsarin kasafin kuɗi mai girman-iyaka                                                      |
+| **promptfooconfig.yaml**                    | Quickfoo eval config                                                                      |
+| **.gitleaks.toml**                          | gitleaks secret-scan dokokin                                                              |
+| **.zizmor.yml**                             | zizmor GitHub-Actions tsaro-lint saitin                                                   |
+| **socket.yml**                              | Socket.dev tsarin samar da sarkar                                                         |
+| **news.json**                               | ciyarwar sanarwar v2 na gida; Radar ƙaddamar da abubuwan jiragen ruwa ba ya aiki          |
+| **flake.nix** /** flake.kulle**             | Nix dev-shell definition + kulle                                                          |
+| **.env**                                    | Sirri na cikin gida (wanda aka samo — daga `.env.example`)                                |
 
-> **An fitar da su daga tushen a v3.8.26 (don rage cunkoso):**
+> **An fita daga tushen a cikin v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da kuma `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | Inspector Traffic REST + WS API — 16 + hanyoyin (buƙatun, zaman, runduna, kama-hanyoyin, fitarwa, ws). LOCAL_ONLY + SPAWN_CAPABLE Duba `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                      |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 wurin shiga (`POST /a2a`)                                                                                                                                                                                                                                                                             |
 | `app/.well-known/agent.json/`                                                | Katin Wakilin A2A (ganowa)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | Shafukan dashboard UI (sassan + 50, fayilolin ~ 118 page.tsx : masu samarwa, combos, saituna, ƙwaƙwalwa, ƙwarewa, mahaɗar yanar gizo, kimantawa, dubawa, tsari, cache, farashi, lafiya, tsarin, aiki, da sauransu)                                                                                                     |
+| `app/(dashboard)/dashboard/`                                                 | Shafukan dashboard UI (sassan + 50, fayilolin ~ 118 page.tsx : masu samarwa, combos, saituna, ƙwaƙwalwar ajiya, ƙwarewa, mahaɗar yanar gizo, kimantawa, dubawa, tsari, cache, farashi, lafiya, tsarin, aiki, da sauransu)                                                                                              |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Kayayyakin Bincike Studio UI ( shafuka 3: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — duba `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                 |
 | `app/(dashboard)/dashboard/memory/`                                          | Studio Studio (shiri 21): `page.tsx` (3-tab harsashi), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard shafi katin uwar garken —, katunan wakilai 9, saitin maye, taswirar ƙirar ƙira, lissafin kewayawa. i18n PT-BR + EN. Duba `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                       |
@@ -174,7 +174,7 @@ src/
 | `batches/`                               | OpenAI Batches API handlers                                                                                                                                                                                                                                                                                              |
 | `catalog/`                               | Kundin mai bayarwa Zod ingantaccen ƙudurin iyawar +                                                                                                                                                                                                                                                                      |
 | `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — duba `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
-| `combos/`                                | Haɗin haɗaɗɗen + sake tsara mataimaka                                                                                                                                                                                                                                                                                    |
+| `combos/`                                | Haɗin haɗin kai + sake tsara mataimaka                                                                                                                                                                                                                                                                                   |
 | `audit/`                                 | Mataimakan ciyarwar ayyuka: `highLevelActions.ts` (mai ba da izini + `isHighLevelAction()`), `activityIcons.ts` (aiki → icon/verb taswira), `timeline.ts` (groupByDay/relativeTime) — duba `docs/architecture/MONITORING_SECTIONS.md`                                                                                    |
 | `compliance/`                            | Audit log + mai bada duba — duba `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                           |
 | `compression/`                           | Manne injin matsi (injin suna rayuwa a cikin `open-sse/services/compression/`)                                                                                                                                                                                                                                           |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Bangaren dashboard API: adaftar akan `packages/ui-kit` — duba `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon sunayen da allon ke amfani da → Lucide components (`<Icon>`)                      |
-| `constants/providers.ts`         | **380 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
+| `constants/providers.ts`         | **394 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
 | `constants/cliTools.ts`          | Wurin yin rajistar kayan aikin CLI na waje                                                         |
-| `constants/routingStrategies.ts` | **20 dabaru dabaru** tare da fifiko                                                                |
+| `constants/routingStrategies.ts` | **22 dabarun kwatance** tare da fifiko                                                             |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar mai ba da izini ( vs management) auth                                       |
 | `constants/upstreamHeaders.ts`   | Ƙin lissafin rubutun kan buƙatun sama                                                              |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (tushen gaskiya guda ɗaya don kwangilar API )                                     |
@@ -265,7 +265,7 @@ Wani keɓantaccen filin aikin npm (`@omniroute/open-sse`). Yana sarrafa buƙatu 
 ```
 open-sse/
 ├── handlers/            # Fayiloli 16 (masu sarrafawa 12 + mataimaka 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, da sauransu.
-├── executors/           # Modulan aiwatarwa 150 (azuzuwan da ke faɗaɗa BaseExecutor + mataimaka na kowane mai samarwa)
+├── executors/           # Modulan aiwatarwa 163 (azuzuwan da ke faɗaɗa BaseExecutor + mataimaka na kowane mai samarwa)
 ├── translator/          # Masu sauya tsari (buƙatu 9, martani 9, mataimaka 9)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modulan sabis (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, da sauransu.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗin CLI na waje + ciki OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n gine-gine, ƙara harshe, yankuna 67                                                           |
 | `UNINSTALL.md`              | Tsaftace matakan cirewa                                                                           |
-| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 380 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 394 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem zurfin-nutse
 
@@ -431,7 +431,7 @@ open-sse/
 | `WEBHOOKS.md`                                | Isar da ƙugiya mai sa hannun HMA                                                        |
 | `REASONING_REPLAY.md`                        | Hybrid memory/SQLite cache don `reasoning_content`                                      |
 | `AUTHZ_GUIDE.md`                             | Bututun izini (`classify` → `policies` → `enforce`)                                     |
-| `RESILIENCE_GUIDE.md`                        | Makullin kewayawa + cooldown + model kullewa                                            |
+| `RESILIENCE_GUIDE.md`                        | Makullin kewayawa + sanyaya + ƙirar ƙira                                                |
 | `docs/security/STEALTH_GUIDE.md` (git kawai) | TLS yatsa (JA3/JA4), Claude Code CCH, MITM cert                                         |
 | `AUTO-COMBO.md`                              | Injin Combo Auto (maki 16-factor, fakitin yanayin 6, masana'anta na kama-da-wane)       |
 
