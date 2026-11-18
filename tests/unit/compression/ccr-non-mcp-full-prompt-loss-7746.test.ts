@@ -137,7 +137,7 @@ describe("issue #7746 — CCR must not reduce the sole user prompt to a bare, un
     });
   }
 
-  it("MCP-capable caller (tools[] advertises omniroute_ccr_retrieve): replacement still runs and stays retrievable", () => {
+  it("MCP-capable caller (tools[] advertises omniroute_ccr_retrieve): replacement runs without self-injected instruction and stays retrievable", () => {
     resetCcrStore();
     const body = {
       ...makeOpenCodeStyleRequestBody(),
@@ -147,19 +147,16 @@ describe("issue #7746 — CCR must not reduce the sole user prompt to a bare, un
 
     assert.equal(result.compressed, true, "CCR still compresses for MCP-capable callers");
     const messages = result.body.messages as Array<{ role: string; content: string }>;
-    // The protocol instruction is injected as a leading system message, so the
-    // compressed conversation is exactly: [instruction, original user message].
-    assert.equal(messages.length, 2, "instruction + user message");
-    assert.equal(messages[0].role, "system", "instruction is a leading system message");
+    // The engine no longer self-injects the protocol instruction (the stacked
+    // pipeline does, once, after all engines) — the compressed conversation is
+    // exactly the single original user message.
+    assert.equal(messages.length, 1, "user message only, no self-injected instruction");
+    assert.equal(messages[0].role, "user", "message role must stay user");
     assert.ok(
-      typeof messages[0].content === "string" && messages[0].content.length > 0,
-      "instruction content must be non-empty"
+      !messages.some((m) => typeof m.content === "string" && m.content.includes("[CCR protocol]")),
+      "the engine must not inject the protocol instruction itself"
     );
-    assert.ok(
-      messages[0].content.includes("omniroute_ccr_retrieve"),
-      "instruction must teach the retrieve tool contract"
-    );
-    const compressedContent = messages[1].content;
+    const compressedContent = messages[0].content;
     const match = compressedContent.match(/\[CCR retrieve hash=([0-9a-f]{24}) chars=\d+\]/);
     assert.ok(match, "compressed content must contain a resolvable CCR marker");
     assert.equal(

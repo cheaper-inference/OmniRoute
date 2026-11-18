@@ -149,6 +149,7 @@ export async function handleValidatedRerankRequestBody(
         } catch {}
 
         return handleComboChat({
+          endpointCapability: "rerank",
           body: body as any,
           combo: combo as any,
           handleSingleModel: async (reqBody: any, targetModelStr: string) =>

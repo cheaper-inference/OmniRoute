@@ -275,7 +275,7 @@ ENV DATA_DIR=/app/data
 RUN mkdir -p /app/data && chown node:node /app /app/data
 
 # #13679: default the PUBLISHED image to requiring an API key. A bare
-# `docker run -p 20128:20128 … diegosouzapw/omniroute` (README/QUICK-START
+# `docker run -p 20128:20128 … cheaperinference/omniroute` (README/QUICK-START
 # one-liners) does not pass `--env-file .env`, so without this default the
 # anonymous /v1 LLM proxy would be both keyless AND world-reachable on the
 # published container. This does NOT change the npm/CLI local-dev default
@@ -307,6 +307,10 @@ ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 # Docker healthcheck script — not traced by Next.js standalone output, so copy
 # it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
 COPY --chown=node:node --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
+
+# Next.js standalone tracing omits the root LICENSE, so the published image shipped
+# without the license text. Copy it explicitly.
+COPY --chown=node:node --from=builder /app/LICENSE ./LICENSE
 
 # Every COPY above hands its files to the baked-in `node` non-root user
 # (UID/GID 1000) at copy time. Do NOT add a `RUN chown -R node:node /app`

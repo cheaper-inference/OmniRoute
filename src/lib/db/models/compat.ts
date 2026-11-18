@@ -18,7 +18,7 @@ const MODEL_COMPAT_NAMESPACE = "modelCompatOverrides";
 export { MODEL_COMPAT_PROTOCOL_KEYS, type ModelCompatProtocolKey };
 
 export type ModelCompatPerProtocol = {
-  normalizeToolCallId?: boolean;
+  normalizeToolCallId?: boolean | null;
   preserveOpenAIDeveloperRole?: boolean;
   preserveVideoUrl?: boolean;
   /** Merged into upstream HTTP requests for this model (after default auth headers). */
@@ -299,6 +299,17 @@ export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined)
   });
 }
 
+/**
+ * Merge compatibility flags for a model into the provider's compat overrides list.
+ * Preserves explicit boolean false values so overrides can explicitly disable defaults
+ * (e.g. normalizeToolCallId: false on Mistral), and preserves the compat row even when
+ * normalizeToolCallId: false is its only property. Passing null for an override unsets
+ * it, reverting to default.
+ *
+ * @param providerId - Target provider identifier.
+ * @param modelId - Target model identifier.
+ * @param patch - Partial compatibility flags patch to merge.
+ */
 export function mergeModelCompatOverride(
   providerId: string,
   modelId: string,
@@ -316,8 +327,11 @@ export function mergeModelCompatOverride(
     }
   }
   if ("normalizeToolCallId" in patch) {
-    if (patch.normalizeToolCallId) next.normalizeToolCallId = true;
-    else delete next.normalizeToolCallId;
+    if (patch.normalizeToolCallId === null) {
+      delete next.normalizeToolCallId;
+    } else {
+      next.normalizeToolCallId = Boolean(patch.normalizeToolCallId);
+    }
   }
   if ("preserveOpenAIDeveloperRole" in patch) {
     if (patch.preserveOpenAIDeveloperRole === null) {
@@ -348,6 +362,10 @@ export function mergeModelCompatOverride(
     }
   }
   const filtered = list.filter((e) => e.id !== modelId);
+  const hasNormalizeToolCallIdFlag = Object.prototype.hasOwnProperty.call(
+    next,
+    "normalizeToolCallId"
+  );
   const hasPreserveFlag = Object.prototype.hasOwnProperty.call(next, "preserveOpenAIDeveloperRole");
   const hasVideoUrlFlag = Object.prototype.hasOwnProperty.call(next, "preserveVideoUrl");
   const hasTopUpstream = next.upstreamHeaders && Object.keys(next.upstreamHeaders).length > 0;
@@ -397,7 +415,7 @@ export function mergeModelCompatOverride(
   const hasVisionFlag = Object.prototype.hasOwnProperty.call(next, "supportsVision");
   const hasThinkingReplayFlag = Object.prototype.hasOwnProperty.call(next, "thinkingReplay");
   if (
-    next.normalizeToolCallId ||
+    hasNormalizeToolCallIdFlag ||
     hasPreserveFlag ||
     hasVideoUrlFlag ||
     hasHiddenFlag ||
