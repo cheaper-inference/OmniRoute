@@ -120,33 +120,10 @@ U zdrojů se nerozlišují malá a velká písmena a koncové lomítko se ignoru
 lze za běhu nastavit v části **Řídicí panel → Zabezpečení → Povolené zdroje CORS** bez
 restartu.
 
-## Klíče API vs. relace používající soubory cookie
+## Klíče API vs. relace cookie
 
-- **Bearer / `x-api-key` (inferenční rozhraní `/v1/*`):** prohlížeče tyto údaje nikdy
-  nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — bariérou je
-  klíč API — proto je toto rozhraní záměrně permisivní, aby klienti v prohlížečích
-  a Electronu mohli číst odpovědi, ke kterým již mají oprávnění.
-  Uvolněné vrácení zdroje se řídí ověřeným klíčem, nikoli pouhou přítomností hlavičky:
-  když `REQUIRE_API_KEY=false` obslouží požadavek anonymně, jeho úspěšná odpověď
-  zachovává seznam povolených zdrojů, který při chybě přístup zamítá. Zamítnutí
-  ověření (401) zůstávají čitelná, aby klienti mohli zobrazit odvolaný nebo chybně
-  zadaný klíč (#5242): vlastní odpověď 401 z pipeline vrácení zdroje zachovává a trasa,
-  která klíč sama odmítne poté, co jej pipeline obsloužila jako anonymní (`/v1/models`
-  a `/v1beta/models` s nakonfigurovaným ověřováním správy, trasy omezené na vlastníka
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` a trasy kandidátů
-  auto-combo), přidá vrácení zdroje k této odpovědi 401 pomocí
-  `credentialRejectionHeaders()`. Vrácení zdroje závisí na tom, zda požadavek nese
-  hlavičku s přihlašovacími údaji (`Authorization`, `x-api-key`, `x-goog-api-key` nebo
-  soubor cookie `auth_token`), nikoli na tom, kterou z nich trasa zkontrolovala, a nikdy
-  se nekombinuje s `Access-Control-Allow-Credentials`; tělo je pevná chybová obálka.
-  Trasy pro správu pod `/api/v1/` chráněné pomocí `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) vrácení zdroje nepřidávají:
-  při `REQUIRE_API_KEY=false` nejsou jejich odpovědi 401/403 čitelné z jiného zdroje.
-- **Relace používající soubory cookie (řídicí panel):** je chráněna výchozím
-  nastavením, které při chybě přístup zamítne, **a také** absencí
-  `Access-Control-Allow-Credentials` na sdílené cestě. Zdroje pro správu / řídicí
-  panel nezahrnujte do žádné permisivní konfigurace; musí zůstat striktně uzavřené
-  při selhání.
+- **Bearer / `x-api-key` (inferenční rozhraní `/v1/*`):** prohlížeče je nikdy nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — tou je klíč API — a právě proto je toto rozhraní záměrně permisivní, aby klienti v prohlížeči a Electronu mohli číst odpovědi, ke kterým již mají oprávnění. Volnější echo následuje ověřený klíč, nikoli pouhou přítomnost hlavičky: když `REQUIRE_API_KEY=false` obslouží požadavek anonymně, jeho úspěšná odpověď si zachová seznam povolených hodnot v režimu fail-closed. Zamítnutí autentizace (401) zůstávají čitelná, aby klienti mohli zobrazit informaci o odvolaném nebo chybně zadaném klíči (#5242): vlastní 401 z pipeline si zachovává echo a trasa, která samotný klíč odmítne poté, co jej pipeline obsloužila anonymně (`/v1/models` a `/v1beta/models` s nakonfigurovanou autentizací správy, trasy `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` omezené na vlastníka a kandidátní trasy auto-combo), přidá toto echo k 401 prostřednictvím `credentialRejectionHeaders()`. Echo se řídí tím, zda požadavek obsahuje hlavičku s přihlašovacími údaji (`Authorization`, `x-api-key`, `x-goog-api-key` nebo cookie `auth_token`), nikoli tím, kterou z nich trasa kontrolovala, a nikdy se nekombinuje s `Access-Control-Allow-Credentials`; tělo je pevně daný obal chyby. Trasy správy pod `/api/v1/`, které chrání `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), echo nepřidávají: s `REQUIRE_API_KEY=false` jejich 401/403 není čitelná z jiného původu.
+- **Relace cookie (řídicí panel):** chráněná výchozím režimem fail-closed **a** absencí `Access-Control-Allow-Credentials` na sdílené cestě. Ponechte původy správy/řídicího panelu mimo jakoukoli permisivní konfiguraci; musí zůstat přesně v režimu fail-closed.
 
 ## Handshaky WebSocket (`/v1/responses`, `/v1/ws`)
 

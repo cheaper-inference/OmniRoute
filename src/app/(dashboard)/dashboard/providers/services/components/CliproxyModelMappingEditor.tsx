@@ -152,7 +152,7 @@ export function CliproxyModelMappingEditor() {
           <Icon name="account_tree" size={20} />
         </div>
         <div>
-          <h3 className="font-medium text-sm">{t("modelMapping")}</h3>
+          <h3 className="text-sm">{t("modelMapping")}</h3>
           <p className="text-xs text-text-muted">
             {t.rich("modelMappingDescription", {
               example: () => (
