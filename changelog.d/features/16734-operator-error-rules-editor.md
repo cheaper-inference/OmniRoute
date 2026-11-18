@@ -1,1 +1,0 @@
-- **feat(resilience):** dashboard editor for operator error cooldown rules, optional status/match conditions, and an opt-in per-provider catch-all cooldown that never shortens a longer upstream Retry-After/reset hint ([#16734](https://github.com/diegosouzapw/OmniRoute/pull/16734)) — thanks @zyizyiz

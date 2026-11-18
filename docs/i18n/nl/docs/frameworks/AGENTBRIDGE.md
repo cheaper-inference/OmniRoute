@@ -20,7 +20,7 @@ Wanneer een IDE agent (bijv. GitHub Copilot, Cursor, Claude Code) een API aanroe
 
 Dit betekent dat u:
 
-- **Leid elke agent om naar elke provider** : Copilot praat met OpenAI? Stuur het door naar Anthropic Claude, Gemini of een van de 381 providers van OmniRoute.
+- **Leid elke agent om naar elke provider** : Copilot praat met OpenAI? Stuur het door naar Anthropic Claude, Gemini of een van de 394 providers van OmniRoute.
 - **Modeltoewijzingen toepassen** : `gemini-3-flash` → `claude-sonnet-4.7` transparant op handlerniveau.
 - **Observeer al het agentverkeer** : elk onderschept verzoek wordt gepubliceerd aan de [Verkeersinspecteur](./TRAFFIC_INSPECTOR.md).
 - **Pas OmniRoute veerkracht toe** : combo-routing, stroomonderbrekers, fallbacks en kostenregistratie werken ook voor IDE agentverkeer.
@@ -544,26 +544,26 @@ Volledige OpenAPI-schema's: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ---
 
-## §8 Roadmap
+## §8 Routekaart
 
 ### Trae-onderzoek
 
-Trae is een relatief nieuwe AI-codeerassistent. Voordat een handler wordt geïmplementeerd:
+Trae is een relatief nieuwe AI -codeerassistent. Voordat u een handler implementeert:
 
-1. Identificeer het binaire bestand/de extensie in de marketplaces van VS Code / JetBrains of als zelfstandige app
-2. Leg verkeer vast met mitmproxy om API-hosts en endpointstructuren te ontdekken
+1. Identificeer de binary/extension in VS Code / JetBrains marktplaatsen of als zelfstandige app
+2. Leg verkeer vast met mitmproxy om API hosts en eindpuntvormen te ontdekken
 3. Bepaal het authenticatiemechanisme
-4. Beoordeel go/no-go op basis van de TOS en de vindbaarheid van de API
+4. Beoordeel go/no-go op basis van de vindbaarheid TOS en API
 
-Totdat het onderzoek is afgerond, toont de Trae-kaart in het dashboard een badge 'In onderzoek' met een link 'Haalbaarheid rapporteren'. De handlerstub in `src/mitm/handlers/trae.ts` genereert een gestructureerde fout `Nog niet geïmplementeerd`.
+Totdat het onderzoek is voltooid, wordt op de Trae-kaart in het dashboard een badge 'Onderzoek' weergegeven met de link 'Levensvatbaarheid rapporteren'. De handlerstub bij `src/mitm/handlers/trae.ts` genereert een gestructureerde `Not yet implemented` fout.
 
-### Agents in de backlog (MITM vereist — geen ondersteuning voor aangepaste basis-URL)
+### Achterstandagenten (MITM vereist — geen aangepaste basis URL ondersteuning)
 
-De volgende tools ondersteunen in hun huidige versies geen aangepaste basis-URL's, waardoor MITM de enige manier is om verkeer te onderscheppen. De haalbaarheidsbeoordeling is nog niet afgerond:
+De volgende tools ondersteunen geen aangepaste basis URLs in hun huidige versies, waardoor MITM het enige onderscheppingspad is. Beoordeling van de levensvatbaarheid is in behandeling:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — niet hetzelfde als Kiro IDE)
-- **Cowork** (Anthropic-desktopapp)
+- **Amp** (Brongrafiek)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — gescheiden van Kiro IDE)
+- **Cowerk** (Anthropic bureaublad)
 
-Opmerking: GitHub Copilot CLI ≥v1.0.19 ondersteunt `COPILOT_PROVIDER_BASE_URL` — gebruik voor die tool directe configuratie in plaats van MITM.
+Opmerking: GitHub Copilot CLI ≥ v1.0.19 ondersteunt `COPILOT_PROVIDER_BASE_URL` — gebruik directe configuratie in plaats van MITM voor die tool.

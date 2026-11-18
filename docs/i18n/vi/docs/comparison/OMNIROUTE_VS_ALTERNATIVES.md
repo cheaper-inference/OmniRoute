@@ -4,42 +4,41 @@
 
 ---
 
-So sánh tính năng khách quan với các bộ định tuyến AI mã nguồn mở phổ biến.
+So sánh tính năng khách quan với các bộ định tuyến AI nguồn mở phổ biến.
 
-> **Phương pháp**: Các repo công khai được kiểm tra vào 2026-Q2. Phiên bản như đã liệt kê.
-> Gửi chỉnh sửa qua PR — chúng tôi muốn bảng này chính xác.
+> **Phương pháp luận** : Các kho lưu trữ công khai đã được kiểm toán 2026-Q2. Các phiên bản như được liệt kê. Gửi bản chỉnh sửa qua PR — chúng tôi muốn điều này chính xác.
 
-| Tính năng                                              |                OmniRoute 3.8                |   LiteLLM 1.x   | OpenRouter (SaaS) |    Portkey    |
-| ------------------------------------------------------ | :-----------------------------------------: | :-------------: | :---------------: | :-----------: |
-| **Nhà cung cấp**                                       |                   **329**                   |      ~100       |        ~50        |      ~30      |
-| **Mục catalog miễn phí/không yêu cầu xác thực**        |                   **155**                   |       n/a       |    chuyển tiếp    |      n/a      |
-| **Có thể tự host**                                     |                     ✅                      |       ✅        |        ❌         |   ⚠ trả phí   |
-| **Mục catalog OAuth**                                  |                   **23**                    |    một phần     |        ❌         |      ❌       |
-| **Tổ hợp fallback tự động**                            |              **20 chiến lược**              | theo độ ưu tiên |     theo tầng     | theo trọng số |
-| **Fusion (chạy panel song song + tổng hợp bởi judge)** |                     ✅                      |       ❌        |        ❌         |      ❌       |
-| **Fallback theo tầng 1/2/3 (gói đăng ký→rẻ→miễn phí)** |                   ✅ + UI                   |    thủ công     |        n/a        |   thủ công    |
-| **Nén token**                                          | stack 12 engine (RTK + Caveman + LLMLingua) |      không      |       không       |     không     |
-| **Tạo đa phương thức (giọng nói/âm nhạc/video)**       |                     ✅                      |       ❌        |    chuyển tiếp    |      ❌       |
-| **Máy chủ MCP tích hợp sẵn**                           |         ✅ 110 công cụ, 33 phạm vi          |       ❌        |        ❌         |      ❌       |
-| **Giao thức A2A**                                      |                ✅ 6 kỹ năng                 |       ❌        |        ❌         |      ❌       |
-| **Bộ nhớ (FTS5 + vector)**                             |                     ✅                      |       ❌        |        ❌         |      ❌       |
-| **Guardrails (PII, injection, thị giác)**              |                     ✅                      |    một phần     |        ❌         |  ✅ trả phí   |
-| **Tích hợp cloud agent**                               |         Codex, Cursor, Devin, Jules         |       ❌        |        ❌         |      ❌       |
-| **Circuit breaker theo từng nhà cung cấp**             |       ✅ 3 trạng thái, khôi phục lười       |     cơ bản      |        ❌         |      ✅       |
-| **Che dấu vân tay TLS (JA3/JA4)**                      |                 ✅ wreq-js                  |       ❌        |        ❌         |      ❌       |
-| **Framework đánh giá**                                 |               ✅ tích hợp sẵn               |       ❌        |        ❌         |   ⚠ trả phí   |
-| **Proxy MITM (chặn bắt Cursor/Antigravity)**           |               ✅ đa nền tảng                |       ❌        |        ❌         |      ❌       |
-| **CLI có khay hệ thống (không Electron)**              |                     ✅                      |       ❌        |        n/a        |      n/a      |
-| **CLI tự động xác thực bằng machine-ID**               |                     ✅                      |       ❌        |        n/a        |      n/a      |
-| **Bảng điều khiển**                                    |                 Next.js 16                  |     cơ bản      |     độc quyền     |   độc quyền   |
-| **i18n**                                               |               **67 ngôn ngữ**               |       ❌        |        ❌         |       ⚠       |
-| **Kỹ năng agent công khai (SKILL.md)**                 |                    ✅ 45                    |       ❌        |        ❌         |      ❌       |
-| **Hỗ trợ tunnel (Cloudflared, Tailscale, Ngrok)**      |                     ✅                      |       ❌        |        n/a        |      n/a      |
-| **Giấy phép**                                          |                     MIT                     |       MIT       |     độc quyền     |   độc quyền   |
+| Tính năng                                            |                  OmniRoute 3.8                  |       LiteLLM 1.x       | OpenRouter (SaaS) |   Khóa cảng    |
+| ---------------------------------------------------- | :---------------------------------------------: | :---------------------: | :---------------: | :------------: |
+| **Nhà cung cấp**                                     |                     **329**                     |          ~100           |        ~50        |      ~30       |
+| **mục danh mục Free/no-auth**                        |                     **155**                     |           n/a           |     sự đi qua     |      n/a       |
+| **Tự lưu trữ**                                       |                       ✅                        |           ✅            |        ❌         | ⚠ đã trả tiền  |
+| **mục danh mục OAuth**                               |                     **23**                      |        một phần         |        ❌         |       ❌       |
+| **Combo tự động dự phòng**                           |                **22 chiến lược**                | dựa trên mức độ ưu tiên | dựa trên cấp bậc  | có trọng lượng |
+| **Fusion (tổng hợp đánh giá + bảng song song)**      |                       ✅                        |           ❌            |        ❌         |       ❌       |
+| **Dự phòng cấp 1/2/3 (đăng ký → giá rẻ → miễn phí)** |                     ✅ + UI                     |        thủ công         |        n/a        |    thủ công    |
+| **Nén mã thông báo**                                 | Ngăn xếp 12 động cơ (RTK + Caveman + LLMLingua) |        không có         |     không có      |    không có    |
+| **Thế hệ đa phương thức (speech/music/video)**       |                       ✅                        |           ❌            |     sự đi qua     |       ❌       |
+| **Máy chủ MCP tích hợp**                             |           công cụ ✅ 110, 33 phạm vi            |           ❌            |        ❌         |       ❌       |
+| **giao thức A2A**                                    |                  kỹ năng ✅ 6                   |           ❌            |        ❌         |       ❌       |
+| **Bộ nhớ (vectơ FTS5 + )**                           |                       ✅                        |           ❌            |        ❌         |       ❌       |
+| **Lan can (PII, tiêm, tầm nhìn)**                    |                       ✅                        |        một phần         |        ❌         | ✅ đã trả tiền |
+| **Tích hợp đại lý đám mây**                          |           Codex, Cursor, Devin, Jules           |           ❌            |        ❌         |       ❌       |
+| **Bộ ngắt mạch cho mỗi nhà cung cấp**                |      ✅ 3 trạng thái, phục hồi lười biếng       |        nền tảng         |        ❌         |       ✅       |
+| **tàng hình dấu vân tay TLS (JA3/JA4)**              |                   ✅ wreq-js                    |           ❌            |        ❌         |       ❌       |
+| **Khung đánh giá**                                   |                   ✅ tích hợp                   |           ❌            |        ❌         | ⚠ đã trả tiền  |
+| **proxy MITM (chặn Cursor/Antigravity)**             |                 ✅ đa nền tảng                  |           ❌            |        ❌         |       ❌       |
+| **CLI với khay hệ thống (không có Electron)**        |                       ✅                        |           ❌            |        n/a        |      n/a       |
+| **tự động xác thực ID máy CLI**                      |                       ✅                        |           ❌            |        n/a        |      n/a       |
+| **Trang tổng quan**                                  |                   Next.js 16                    |        nền tảng         |     độc quyền     |   độc quyền    |
+| **i18n**                                             |                **67 địa phương**                |           ❌            |        ❌         |       ⚠        |
+| **Kỹ năng đại lý công cộng (SKILL.md)**              |                      ✅ 45                      |           ❌            |        ❌         |       ❌       |
+| **Hỗ trợ đường hầm (Cloudflared, Tailscale, Ngrok)** |                       ✅                        |           ❌            |        n/a        |      n/a       |
+| **Giấy phép**                                        |                       MIT                       |           MIT           |     độc quyền     |   độc quyền    |
 
 ## Khi nào nên chọn OmniRoute
 
-- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (381 nhà cung cấp, 155 mục danh mục free/no-auth )
+- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (394 nhà cung cấp, 155 mục danh mục free/no-auth )
 - Bạn cần một** máy chủ MCP tích hợp** (công cụ LLM, bộ nhớ, kỹ năng được hiển thị dưới dạng công cụ)
 - Bạn cần** giao thức A2A** dành cho quy trình làm việc giữa các đại lý
 - Bạn muốn** dấu vân tay tàng hình** (JA3/JA4) để tránh bị CAPTCHAs ngược dòng phát hiện

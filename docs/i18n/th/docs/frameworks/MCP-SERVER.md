@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,9 +146,9 @@ Cursor, Cline และไคลเอนต์ MCP ที่เข้ากั�
 | `omniroute_rtk_discover`            | `read:compression`  | ค้นพบสัญญาณรบกวนที่เกิดขึ้นซ้ำๆ ในตัวอย่างเอาต์พุต RTK ที่เลือกใช้                                                  |
 | `omniroute_rtk_learn`               | `read:compression`  | สร้างแบบร่างตัวกรอง RTK ที่ตรวจสอบได้จากตัวอย่างที่เลือกใช้                                                         |
 
-รายการ CCR ใช้ร้านค้าสองระดับ: ระดับในหน่วยความจำแบบ hot ที่ได้รับการสนับสนุน บนรันไทม์ที่ไม่ใช่บนคลาวด์ในเครื่อง โดยระดับ SQLite ที่คงทน (`ccr_blocks` เปิดตามค่าเริ่มต้น) ดังนั้นบล็อกจะคงอยู่จากการถูกไล่ออกหรือรีสตาร์ทจนกว่า TTL ของมันจะหมด — ยกเว้นบล็อกที่มากกว่า 512 KB และรันไทม์บนคลาวด์ ซึ่งคงอยู่เฉพาะหน่วยความจำเท่านั้น แต่ละบล็อกถูกจำกัดไว้ที่ 2 MiB แต่ละบล็อกหลักอยู่ที่ 16 MiB และร้านค้าส่วนกลางอยู่ที่ 64 MiB รายการมีค่าเริ่มต้นเป็น TTL 24 ชั่วโมง (สูงสุดเจ็ดวัน) การดึงข้อมูล MCP ทั้งหมดถูกจำกัดไว้ที่ 256 KiB; บล็อกขนาดใหญ่ยังคงใช้งานได้ผ่านโหมด ranged และ grep การจัดเก็บ การเรียกค้น การลงรายการ การตรวจสอบ การลบ และสถิติจะถูกแยกโดยหลักการของคีย์ API ที่ผ่านการรับรองความถูกต้อง บันทึกการตรวจสอบประกอบด้วยแฮชและข้อมูลเมตาของขนาด ไม่มีเนื้อหา รายละเอียดที่ผู้ปฏิบัติงานต้องเผชิญ (เครื่องหมายสองตัว, ข้อกำหนดเบื้องต้นของไคลเอ็นต์, `codemode:false`, ขอบเขตต่อเครื่องมือ, การแบ่งหน้า และเมทริกซ์การวินิจฉัย) อยู่ใน [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
+รายการ CCR ใช้ร้านค้าสองระดับ: ระดับในหน่วยความจำแบบ hot ที่ได้รับการสนับสนุน บนรันไทม์ที่ไม่ใช่บนคลาวด์ในเครื่อง โดยระดับ SQLite ที่คงทน (`ccr_blocks` เปิดตามค่าเริ่มต้น) ดังนั้นบล็อกจะคงอยู่จากการถูกไล่ออกหรือรีสตาร์ทจนกว่า TTL ของมันจะหมด — ยกเว้นบล็อกที่มากกว่า 512 KB รันไทม์ของคลาวด์ และ `COMPRESSION_CCR_DURABLE_STORE=false` ซึ่งคงอยู่เฉพาะหน่วยความจำเท่านั้น การเขียนแบบคงทนคือความพยายามที่ดีที่สุด: จะถูกละทิ้งในขณะที่มีการเขียน 1,000 รายการอยู่ระหว่างรอดำเนินการ และการเขียน SQLite ที่ล้มเหลวจะถูกบันทึก และไม่ได้ลองใหม่ ดังนั้นบล็อกจะสูญหายไปเมื่อรีสตาร์ท แต่ละบล็อกถูกจำกัดไว้ที่ 2 MiB แต่ละบล็อกหลักอยู่ที่ 16 MiB และร้านค้าส่วนกลางอยู่ที่ 64 MiB รายการมีค่าเริ่มต้นเป็น TTL 24 ชั่วโมง (สูงสุดเจ็ดวัน) การดึง MCP ทั้งหมดถูกจำกัดไว้ที่ 256 KiB; บล็อกขนาดใหญ่ยังคงใช้งานได้ผ่านโหมด ranged และ grep การจัดเก็บ การเรียกค้น การลงรายการ การตรวจสอบ การลบ และสถิติจะถูกแยกโดยหลักการของคีย์ API ที่ผ่านการรับรองความถูกต้อง บันทึกการตรวจสอบประกอบด้วยแฮชและข้อมูลเมตาของขนาด ไม่มีเนื้อหา รายละเอียดที่ผู้ปฏิบัติงานต้องเผชิญ (เครื่องหมายสองตัว ข้อกำหนดเบื้องต้นของไคลเอ็นต์ `codemode:false` ขอบเขตต่อเครื่องมือ การแบ่งหน้า และเมทริกซ์การวินิจฉัย) อยู่ใน [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
 
-`omniroute_compression_status` รายงานการบีบอัดคำอธิบาย MCP แยกกันภายใต้ `analytics.mcpDescriptionCompression` ค่าเหล่านั้นคือการประมาณขนาดข้อมูลเมตาสำหรับคำอธิบายที่แสดงรายการได้ MCP (`tools`, `prompts`, `resources` และ `resourceTemplates`) ไม่ใช่ใบเสร็จการใช้งานของผู้ให้บริการและทำเครื่องหมายด้วย `source: "mcp_metadata_estimate"`
+`omniroute_compression_status` รายงานการบีบอัดคำอธิบาย MCP แยกกันภายใต้ `analytics.mcpDescriptionCompression` ค่าเหล่านั้นคือการประมาณขนาดข้อมูลเมตาสำหรับคำอธิบายที่แสดงรายการได้ MCP (`tools`, `prompts`, `resources` และ `resourceTemplates`) ไม่ใช่ใบเสร็จการใช้งานของผู้ให้บริการและมีเครื่องหมาย `source: "mcp_metadata_estimate"`
 
 ### ตัวกรองแผนผังการเข้าถึง MCP (v3.8.0)
 
@@ -156,10 +158,10 @@ Cursor, Cline และไคลเอนต์ MCP ที่เข้ากั�
 
 - ยุบบรรทัดพี่น้องที่ซ้ำกัน ≥ 30 บรรทัดติดต่อกันลงในข้อมูลสรุป head + tail
 - รักษาจุดยึด `[ref=eXX]` ที่ต้องการโดย Playwright/computer-use
-- ตัดทอนข้อความขนาดใหญ่ (> 50,000 ตัวอักษร) พร้อมคำใบ้การนำทาง
+- ตัดทอนข้อความขนาดใหญ่ขนาดใหญ่ (> 50,000 ตัวอักษร) พร้อมคำใบ้การนำทาง
 - ประหยัดที่คาดหวัง:** 60–80%** บนเพย์โหลดสแน็ปช็อตของเบราว์เซอร์
 
-การกำหนดค่า: `compression.mcpAccessibility` ในการตั้งค่าส่วนกลาง (การโยกย้าย 056) การใช้งาน: `open-sse/services/compression/engines/mcpAccessibility/`. เอกสารฉบับเต็ม: [เครื่องมือบีบอัด — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)
+การกำหนดค่า: `compression.mcpAccessibility` ในการตั้งค่าส่วนกลาง (การโยกย้าย 056) การใช้งาน: `open-sse/services/compression/engines/mcpAccessibility/`. เอกสารฉบับเต็ม: [โปรแกรมบีบอัด — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)
 
 ดู [เครื่องมือการบีบอัด](../compression/COMPRESSION_ENGINES.md) และ [การบีบอัด RTK](../compression/RTK_COMPRESSION.md) สำหรับโมเดลการบีบอัดรันไทม์เบื้องหลังเครื่องมือเหล่านี้
 

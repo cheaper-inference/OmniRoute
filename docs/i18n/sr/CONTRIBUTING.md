@@ -303,68 +303,68 @@ npm run test:combo:live:vps:failover     # додаје стварни сцен�
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 рутер апликације
-│   ├── (dashboard)/        # Странице контролне табле (23 одељка)
-│   ├── api/                # API руте (51 директоријум)
-│   └── login/              # Странице за аутентификацију (.tsx)
-├── domain/                 # Механизам политика (policyEngine, comboResolver, costRules, итд.)
-├── lib/                    # Основна пословна логика (.ts)
-│   ├── a2a/                # Сервер протокола Agent-to-Agent v0.3
-│   ├── acp/                # Регистар протокола за комуникацију агената
-│   ├── compliance/         # Механизам политика усклађености
-│   ├── db/                 # SQLite доменски модули + 130 миграција
-│   ├── memory/             # Трајна меморија разговора
-│   ├── oauth/              # OAuth добављачи, услуге и помоћни алати
-│   ├── skills/             # Прошириви оквир вештина
-│   ├── usage/              # Праћење употребе и израчунавање трошкова
-│   └── localDb.ts          # Само слој за поновни извоз — овде никада не додајте логику
-├── middleware/              # Посреднички софтвер за захтеве (promptInjectionGuard)
-├── mitm/                   # MITM прокси (сертификат, DNS, усмеравање ка циљу)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React компоненте (.tsx)
-│   ├── constants/          # Дефиниције добављача (329), MCP опсези, 20 стратегија усмеравања
-│   ├── utils/              # Прекидач струјног кола, санитизатор, помоћни алати за аутентификацију
-│   └── validation/         # Zod v4 шеме
-└── sse/                    # SSE прокси ток обраде
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse радни простор
-├── executors/              # 150 извршних модула (класе извршилаца + помоћни алати за сваког добављача)
-├── handlers/               # 11 обрађивача захтева (ћаскање, одговори, угнежђивања, слике, итд.)
-├── mcp-server/             # MCP сервер (110 јединствених алата, 3 транспорта, 33 опсега)
-├── services/               # 178 услуга највишег нивоа (combo, autoCombo, rateLimitManager, итд.)
-├── translator/             # Преводиоци формата (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Трансформатор Responses API-ја
-└── utils/                  # 22 помоћна модула (ток, TLS, прокси, евидентирање)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron десктоп апликација (за више платформи)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js покретач тестова (1,574 тест-датотеке)
-├── integration/            # Интеграциони тестови
-├── e2e/                    # Playwright тестови
-├── security/               # Безбедносни тестови
-├── translator/             # Тестови специфични за преводиоце
-└── load/                   # Тестови оптерећења
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Записи архитектонских одлука
-├── architecture/            # Архитектура и отпорност система
-├── comparison/              # OmniRoute у односу на алтернативе
-├── compression/             # Водичи и правила за компресију
-├── dev/                     # Водичи за развој
-├── diagrams/                # Дијаграми архитектуре
-├── frameworks/              # MCP, A2A, OpenCode, меморија, вештине
-├── guides/                  # Кориснички водич, Docker, подешавање, решавање проблема
-├── i18n/                    # Интернационализовани README преводи
-├── marketing/               # Маркетиншки материјали
-├── ops/                     # Примена, прокси, покривеност, издања
-├── providers/               # Документација специфична за добављаче
-├── reference/               # API референца, променљиве окружења, CLI алати, бесплатни нивои
-├── releases/                # Напомене о издањима
-├── routing/                 # Механизам аутоматског комбиновања, поновна репродукција резоновања
-├── screenshots/             # Снимци екрана контролне табле
-├── security/                # Заштитне мере, усклађеност, прикривеност, токени
-└── specs/                   # Спецификације дизајна
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
