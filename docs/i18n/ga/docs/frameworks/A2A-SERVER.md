@@ -156,14 +156,14 @@ nochtar OmniRoute 6 scil A2A sreangaithe i `src/lib/a2a/taskExecution.ts::A2A_SK
 
 | Scil                   | ID                   | Cur síos                                                                                                                                                                       | Clibeanna                        | Samplaí                                     |
 | :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------ |
-| Ródú Cliste            | `smart-routing`      | Bealaí leid tríd an provider/combo optamach ag baint úsáide as scóráil inneall teaglama + OmniRoute                                                                            | ródú, soláthraithe               | "Rótáil an leid seo tríd an múnla is fearr" |
+| Ródú Cliste            | `smart-routing`      | Bealach leid tríd an provider/combo optamach ag baint úsáide as scóráil inneall teaglama + OmniRoute                                                                           | ródú, soláthraithe               | "Rótáil an leid seo tríd an múnla is fearr" |
 | Bainistíocht Cuóta     | `quota-management`   | Cabhraíonn tuairiscí in aghaidh an tsoláthraí de réir an chuóta, le glaoiteoirí cinneadh a dhéanamh cén uair ba cheart dóibh throttle/switch a dhéanamh                        | cuóta, soláthraithe              | "Seiceáil cuóta le haghaidh antraipeach"    |
 | Fionnachtain Soláthraí | `provider-discovery` | Liostaíonn soláthraithe suiteáilte le cumais, bratacha saorshraith, stádas OAuth                                                                                               | soláthraithe, fionnachtana       | "Cad iad na soláthraithe atá ar fáil?"      |
 | Anailís Costas         | `cost-analysis`      | Meastacháin ar chostas request/conversation i bhfianaise na húsáide a úsáideadh le déanaí sa chatalóg +                                                                        | costas, úsáid                    | "Meastachán ar an gcostas don chomhrá seo"  |
 | Tuarascáil Sláinte     | `health-report`      | Comhiomláin scoradáin chiorcaid, fuarú, staid frithdhúnadh in aghaidh an tsoláthraí                                                                                            | sláinte, athléimneacht           | "Taispeáin stádas sláinte gach soláthraí"   |
 | Cumais Liosta          | `list-capabilities`  | Seoltar ar ais an chatalóg iomlán 45-iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 config) mar tábla marcála síos le amh SKILL.md URLs le haghaidh instealladh comhthéacs | catalóg, fionnachtain, scileanna | "Liostaigh gach acmhainn OmniRoute "        |
 
-> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 381 soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
+> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 394-soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
 
 ### `list-capabilities` Scil Sonraigh
 

@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automaticky načíta `.env` z `~/.omniroute/.env` alebo `./.env`. `./.env` v pracovnom adresári môže nastaviť iba krátky zoznam povolených kľúčov (porty, `REQUIRE_API_KEY`, miestne nastavenia a nastavenia farieb); všetko ostatné vložte do `~/.omniroute/.env`. Pozrite si [zmluvy o spustení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automaticky načíta `.env` z `~/.omniroute/.env` alebo `./.env`. `./.env` v pracovnom adresári môže nastaviť iba krátky zoznam povolených kľúčov (`REQUIRE_API_KEY`, miestne nastavenie, časové pásmo a nastavenie farieb, nie porty); všetko ostatné vložte do `~/.omniroute/.env`. Pozrite si [zmluvy o spustení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Režim zásobníka
 
@@ -709,7 +709,7 @@ Poznámky:
 
 ### Vlastní poskytovatelia kompatibilní s OpenAI
 
-Akákoľvek brána, ktorá hovorí OpenAI API (samohostiteľná proxy, vLLM, agregátor tretej strany), môže byť pridaná ako jej vlastný uzol poskytovateľa:
+Akákoľvek brána, ktorá hovorí OpenAI API (samostatne hostený proxy, vLLM, agregátor tretej strany), môže byť pridaná ako jej vlastný uzol poskytovateľa:
 
 1. **Poskytovatelia → Pridať OpenAI kompatibilné** .
 2. **Meno** : zobrazovaný štítok pre uzol.
@@ -734,8 +734,8 @@ Vyberte odlišnú predponu (`mygw`, `acme-proxy`). Ak požiadavky na vlastný uz
 
 Tieto kľúče idú do `providerSpecificData` pripojenia (napríklad cez `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celé číslo, 1–1024) — pre pripojenia kompatibilné s formátom chatu OpenAI, ktorých brána odmieta dlhé názvy nástrojov. Dlhšie mená sa odošlú ako krátke aliasy a obnovia sa v odpovedi.
-- `quotaEndpoint` — koncový bod quota/credits brány, čítaný pre pásik kvót dashboardu a smerovanie s ohľadom na kvóty. Funguje na pripojeniach kompatibilných s OpenAI aj Anthropic; plný tvar je doložený v `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (celé číslo, 1–1024) — pre pripojenia kompatibilné s formátom chatu OpenAI, ktorých brána odmieta dlhé názvy nástrojov. Dlhšie mená sa odošlú ako krátke aliasy a obnovia sa v odpovedi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code už aliasy majú viac ako 64 znakov bez nastavenia. Hodnota pripojenia nahrádza predvolenú hodnotu Azure OpenAI / Azure AI Foundry (pripojenie Azure za prísnejšou bránou) a nastavuje limit pre vlastný kompatibilný uzol; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code si zachovávajú svoj limit registra a ignorujú ho.
+- `quotaEndpoint` — koncový bod quota/credits brány, prečítajte si pás kvóty dashboardu a smerovanie s ohľadom na kvóty. Funguje na pripojeniach kompatibilných s OpenAI aj Anthropic; plný tvar je zdokumentovaný v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -772,7 +772,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Hlavičku `X-OmniRoute-Peer-Trace` dostanú iba žiadosti odoslané priamo na zozname povolených partnerov URL. Brána odmietne opakovanú inštanciu ID alebo vyčerpaný skokový rozpočet s HTTP `508 Loop Detected`; bežní upstream poskytovatelia nedostávajú žiadne rovnocenné metadáta.
 
-Reťazenie rovnocenných partnerov nie je replikácia databázy alebo núdzové prepnutie hostiteľa. Každá brána uchováva nezávislý stav SQLite, vyrovnávacie pamäte, počítadlá rýchlosti a relácie. Pre dostupnosť active/passive alebo active/active použite reverzný proxy server s kontrolou stavu alebo zlyhanie klienta a nikdy nepripájajte jednu databázu SQLite do viacerých spustených inštancií OmniRoute.
+Reťazenie rovnocenných partnerov nie je replikácia databázy alebo núdzové prepnutie hostiteľa. Každá brána uchováva nezávislý stav SQLite, vyrovnávaciu pamäť, počítadlá rýchlosti a relácie. Pre dostupnosť active/passive alebo active/active použite reverzný proxy server s kontrolou stavu alebo zlyhanie klienta a nikdy nepripájajte jednu databázu SQLite do viacerých spustených inštancií OmniRoute.
 
 ### Vyhradené trasy poskytovateľov
 
@@ -832,9 +832,9 @@ Vráti modely zoskupené podľa poskytovateľa s typmi (`chat`, `embedding`, `im
 
 ### LLM Gateway Intelligence (9. fáza)
 
-- **Sémantická vyrovnávacia pamäť** — Automatické ukladanie do vyrovnávacej pamäte bez streamovania, odozvy teploty = 0 (premostenie pomocou `X-OmniRoute-No-Cache: true`)
+- **Sémantická vyrovnávacia pamäť** — Automatické ukladanie do vyrovnávacej pamäte bez streamovania, teplota = 0 odpovedí (premostenie pomocou `X-OmniRoute-No-Cache: true`)
 - **Žiadosť o idempotenciu** — Deduplikuje požiadavky do 5 s cez hlavičku `Idempotency-Key` alebo `X-Request-Id`
-- **Sledovanie pokroku** — Prihlásenie udalostí SSE `event: progress` prostredníctvom hlavičky `X-OmniRoute-Progress: true`
+- **Sledovanie pokroku** — Prihlásenie udalostí SSE `event: progress` cez hlavičku `X-OmniRoute-Progress: true`
 
 ---
 
@@ -865,14 +865,14 @@ Konfigurovať cez** Dashboard → Nastavenia → Smerovanie** . Prístrojová do
 
 | Stratégia                     | Popis                                                                                                |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Najprv vyplniť**            | Používa účty v poradí priority – primárny účet spracováva všetky požiadavky, kým nie je dostupný     |
+| **Najprv vyplniť**            | Používa účty v poradí priority — primárny účet spracováva všetky požiadavky, kým nie sú k dispozícii |
 | **Round Robin**               | Cyklicky prechádza všetkými účtami s konfigurovateľným fixným limitom (predvolené: 3 hovory na účet) |
 | **P2C (Sila dvoch možností)** | Vyberie 2 náhodné účty a cesty k zdravšiemu — vyrovnáva záťaž s uvedomením si zdravia                |
 | **Náhodný**                   | Náhodne vyberie účet pre každú požiadavku pomocou Fisher-Yates shuffle                               |
 | **Najmenej používané**        | Smeruje na účet s najstaršou časovou pečiatkou `lastUsedAt`, čím sa návštevnosť rozdeľuje rovnomerne |
 | **Optimalizované náklady**    | Smeruje na účet s najnižšou prioritou, optimalizuje sa pre poskytovateľov s najnižšou cenou          |
 
-**Pokročilé kombinované a automatické stratégie** (konfigurovateľné pre kombináciu alebo cez predpony `auto/*` – pozri [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Pokročilé kombinované a automatické stratégie** (konfigurovateľné pre kombináciu alebo cez predpony `auto/*` — pozri [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — prísny poriadok, nikdy nie okrúhle
 - `weighted` — proporcionálna návštevnosť rozdelená podľa váh jednotlivých modelov
@@ -880,10 +880,10 @@ Konfigurovať cez** Dashboard → Nastavenia → Smerovanie** . Prístrojová do
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Sila dvoch možností)
 - `least-used` a `cost-optimized`
-- `auto` — na základe skóre u všetkých kandidátov
-- `lkgp` (Posledný známy dobrý poskytovateľ) — pripne posledného úspešného poskytovateľa, potom sa vráti k pravidlám
+- `auto` — založené na skóre všetkých kandidátov
+- `lkgp` (Posledný známy dobrý poskytovateľ) — pripne poslednému úspešnému poskytovateľovi, potom sa vráti k pravidlám
 - `context-optimized` — vyberie model s najväčším voľným kontextovým oknom
-- `context-relay` — reťaze modely s dlhým kontextom pre následné obraty
+- `context-relay` — reťaze modely s dlhým kontextom pre následné zákruty
 
 #### Hlavička externej lepivej relácie
 
@@ -993,31 +993,31 @@ OmniRoute implementuje odolnosť na úrovni poskytovateľa s piatimi komponentmi
 1. **Zoznam žiadostí a tempo** — Tvarovanie požiadavky na úrovni systému:
    - **Počet žiadostí za minútu (RPM)** — Maximálny počet žiadostí za minútu na účet
    - **Minimálny čas medzi žiadosťami** — Minimálna medzera v milisekundách medzi požiadavkami
-   - **Maximálny počet súbežných požiadaviek** — Maximálny počet simultánnych žiadostí na účet
+   - **Maximálny počet súbežných požiadaviek** — Maximálny počet simultánnych požiadaviek na účet
 
-2. **Ochladenie pripojenia** — Konfigurácia typu perauth pre jedno pripojenie po opakovaných zlyhaniach:
+2. **Ochladenie pripojenia** — Konfigurácia typu Per-auth pre jedno pripojenie po opakovaných zlyhaniach:
    - **Ochladzovanie základne** — Predvolené chladiace okno pre opakovateľné zlyhania upstreamu
    - **Použite Upstream Retry Hints** — Oceňuje autoritatívne `Retry-After` alebo resetovacie rady, ak sú poskytnuté
-   - **Maximálny počet krokov na ústup** — Maximálna exponenciálna úroveň stiahnutia pri opakovaných zlyhaniach
+   - **Maximálny počet krokov na ústup** — Maximálna exponenciálna úroveň stiahnutia pre opakované zlyhania
 
 3. **Istič poskytovateľa** — Sleduje zlyhania koncového poskytovateľa, označí poskytovateľa za zníženého na nakonfigurovanom prahu varovania a otvorí istič, keď sa dosiahne nakonfigurovaný prah zlyhania:
-   - **Prah degradácie** — Po sebe idúce zlyhania poskytovateľa pred vstupom `DEGRADED`
-   - **Prah zlyhania** — Po sebe idúce zlyhania poskytovateľa pred vstupom `OPEN`
+   - **Prah degradácie** — Po sebe idúce zlyhania poskytovateľa pred zadaním `DEGRADED`
+   - **Prah zlyhania** — Po sebe idúce zlyhania poskytovateľa pred zadaním `OPEN`
    - **Resetovať časový limit** — Časové okno pred opätovným testovaním poskytovateľa
-   - **CLOSED** (Zdravé) — Požiadavky prebiehajú normálne
+   - **CLOSED** (Zdravé) — Požiadavky plynú normálne
    - **DEGRADED** — Požiadavky stále prúdia, kým sa sledujú zvýšené zlyhania
-   - **OPEN** — Poskytovateľ je po opakovaných poruchách dočasne zablokovaný
+   - **OPEN** Poskytovateľ — je po opakovaných zlyhaniach dočasne zablokovaný
    - **HALF_OPEN** — Testovanie, či sa poskytovateľ zotavil
 
    Limity rýchlosti `429` v rozsahu pripojenia zostávajú v platnosti** Ochladenie pripojenia** a nezapočítavajú sa do poskytovateľa ističa.
 
    Stav spustenia prerušovača poskytovateľa je zobrazený na** Dashboard → Health** iba.
 
-4. **Počkajte na vychladnutie** — Ak sa každé pripojenie kandidáta už ochladzuje, OmniRoute môže počkať na najskoršie ochladenie a automaticky zopakovať rovnakú požiadavku klienta.
+4. **Počkajte na vychladnutie** — Ak sa každé kandidátske pripojenie už ochladzuje, OmniRoute môže počkať na najskoršie ochladenie a automaticky zopakovať rovnakú požiadavku klienta.
 
 5. **Automatická detekcia limitu rýchlosti** — Keď upstream poskytovatelia vrátia explicitné čakacie okná, tieto rady prepíšu chladenie lokálneho pripojenia, keď je toto nastavenie povolené.
 
-**Tip pre profesionálov:** Použite** Zdravie** stránku na kontrolu a resetovanie aktívnych ističov poskytovateľa po výpadku. Stránka Odolnosť mení iba konfiguráciu.
+**Tip pre profesionálov:** Použite** Zdravie** stránku na kontrolu a resetovanie živých ističov poskytovateľa po výpadku. Stránka Odolnosť mení iba konfiguráciu.
 
 ---
 
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Stránka nastavení je usporiadaná do** 7 kariet** pre jednoduchú navigáciu:
 
-| Tab            | Obsah                                                                                                                                                                                          |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **generál**    | Nástroje systémového úložiska, predvolené správanie, viditeľnosť tunela koncového bodu                                                                                                         |
-| **Vzhľad**     | Ovládacie prvky témy (light/dark/system), viditeľnosť bočného panela, prepínanie panelov pre karty tunela Cloudflare/Tailscale/ngrok                                                           |
-| **AI**         | Rozpočet na myslenie (priechodný / automatický pás / vlastný / adaptívny – pozri [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), výzva globálneho systému, rýchle štatistiky vyrovnávacej pamäte |
-| **Bezpečnosť** | Login/Password nastavenia, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                                                |
-| **Smerovanie** | Globálna stratégia smerovania (Fill First / Round Robin / P2C / Random / Najmenej používané / Cost Optimized), aliasy modelu so zástupnými znakmi, záložné reťazce, predvolené kombinácie      |
-| **Odolnosť**   | Front žiadostí, ochladenie pripojenia, konfigurácia prerušovača poskytovateľa a správanie pri čakaní na ochladenie                                                                             |
-| **Pokročilé**  | Globálna konfigurácia servera proxy (HTTP/SOCKS5), prepíše server proxy podľa jednotlivých poskytovateľov                                                                                      |
+| Tab            | Obsah                                                                                                                                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **generál**    | Nástroje systémového úložiska, predvolené správanie, viditeľnosť tunela koncového bodu                                                                                                                   |
+| **Vzhľad**     | Ovládacie prvky témy (light/dark/system), viditeľnosť bočného panela, prepínanie panelov pre karty tunela Cloudflare/Tailscale/ngrok                                                                     |
+| **AI**         | Rozpočet na premýšľanie (priechod / automatické odstrihnutie / vlastné / adaptívne — pozri [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), výzva globálneho systému, rýchle štatistiky vyrovnávacej pamäte |
+| **Bezpečnosť** | Login/Password nastavenia, IP Access Control, API auth for `/models`, Provider Blocking, prompt-injection guard                                                                                          |
+| **Smerovanie** | Globálna stratégia smerovania (Fill First / Round Robin / P2C / Random / Najmenej používané / Cost Optimized), aliasy modelu so zástupnými znakmi, záložné reťazce, predvolené kombinácie                |
+| **Odolnosť**   | Front žiadostí, ochladenie pripojenia, konfigurácia prerušovača poskytovateľa a správanie pri čakaní na ochladenie                                                                                       |
+| **Pokročilé**  | Globálna konfigurácia servera proxy (HTTP/SOCKS5), prepísania servera proxy podľa jednotlivých poskytovateľov                                                                                            |
 
 Všeobecné už neduplikuje protokolovanie a poznámky vo vyrovnávacej pamäti iba na čítanie. Nastavenia uchovávania a optimalizácie databázy sú zachované prostredníctvom `/api/settings/database`; manuálne vymazanie vyrovnávacej pamäte používa `DELETE /api/cache`. Obmedzenia riadkov protokolu požiadaviek a proxy sú riadené `CALL_LOGS_TABLE_MAX_ROWS` a `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1078,7 +1078,7 @@ Prístup cez** Dashboard → Náklady** .
 | Tab                 | Účel                                                                                               |
 | ------------------- | -------------------------------------------------------------------------------------------------- |
 | **Rozpočet**        | Nastavte limity výdavkov na kľúč API s rozpočtami daily/weekly/monthly a sledovaním v reálnom čase |
-| **Stanovenie cien** | Zobrazte a upravte položky cien modelu – cena za 1 000 tokenov input/output na poskytovateľa       |
+| **Stanovenie cien** | Zobrazte a upravte položky cien modelu — cena za 1 000 tokenov input/output na poskytovateľa       |
 
 ```bash
 # API: Set a budget
@@ -1145,7 +1145,7 @@ Podporované zvukové formáty na prepis: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `w
 
 ### Kombinované stratégie vyvažovania
 
-Nakonfigurujte vyváženie pre jednotlivé kombinácie** Prístrojová doska → Combos → Create/Edit → Stratégia** .
+Nakonfigurujte vyváženie pre jednotlivé kombinácie v** Prístrojová doska → Combos → Create/Edit → Stratégia** .
 
 | Stratégia                    | Popis                                                                                   |
 | ---------------------------- | --------------------------------------------------------------------------------------- |
@@ -1160,7 +1160,7 @@ Je možné nastaviť globálne predvolené hodnoty komb** Dashboard → Settings
 
 Kombinované optimalizácie s nulovou latenciou sú voliteľné. Odísť** Optimalizácia s nulovou latenciou** deaktivované, aby sa zabránilo týmto funkciám latencie pretekať s záložnými cieľmi, preskakovať ciele na základe histórie TTFT alebo komprimovať záložné požiadavky; umožňuje nakonfigurované hedging, prediktívne preskoky TTFT a proaktívnu núdzovú kompresiu na výmenu vernosti routing/request za nižšiu latenciu chvosta.
 
-Zakázať** Vyrovnávacia pamäť tokenov odôvodnenia** keď upstream poskytovatelia vyžadujú prísne limity `max_tokens` / `maxOutputTokens`. Ak je povolené, kombinované smerovanie iba pridáva priestor pre model uvažovania pre modely so známym výstupným limitom a ponecháva limit klientskeho tokenu nezmenený, keď by bezpečná hodnota vo vyrovnávacej pamäti prekročila tento limit. Ak je limit klienta už nad známym limitom, OmniRoute ho pred odoslaním upstream požiadavky zníži na tento limit.
+Zakázať** Vyrovnávacia pamäť tokenov odôvodnenia** keď upstream poskytovatelia vyžadujú prísne limity `max_tokens` / `maxOutputTokens`. Ak je povolené, kombinované smerovanie iba pridáva priestor pre model uvažovania pre modely so známym limitom výstupu a ponecháva limit tokenov klienta nezmenený, keď by bezpečná hodnota vo vyrovnávacej pamäti prekročila tento limit. Ak je limit klienta už nad známym limitom, OmniRoute ho pred odoslaním upstream požiadavky zníži na tento limit.
 
 ---
 
