@@ -1,0 +1,1 @@
+Update the standalone OpenCode v1 development and CI toolchain to Effect 4.0.0-beta.103 for cookie-attribute validation. Preserve the plugin and SDK versions; the installed OpenCode host continues to supply its own dependency tree. The updated toolchain uses ini 7, which requires Node 24.15 or later on the Node 24 line.

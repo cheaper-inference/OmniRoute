@@ -62,3 +62,31 @@ test("subpackage CI pins include the October 2026 Node security fixes", () => {
     }
   }
 });
+
+test("independently installed OpenCode packages keep lock inputs aligned with manifests", () => {
+  for (const name of ["opencode-plugin", "opencode-plugin-v2", "opencode-provider"]) {
+    const manifest = JSON.parse(read(`@omniroute/${name}/package.json`));
+    const lock = JSON.parse(read(`@omniroute/${name}/package-lock.json`));
+    assert.ok(lock.packages?.[""], `${name}: lockfile must describe its root package`);
+    for (const field of ["name", "version"]) {
+      assert.equal(lock[field], manifest[field], `${name}: lock ${field} must match the manifest`);
+      assert.equal(
+        lock.packages[""][field],
+        manifest[field],
+        `${name}: locked package ${field} must match the manifest`
+      );
+    }
+    for (const field of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
+      assert.deepEqual(
+        lock.packages[""][field] ?? {},
+        manifest[field] ?? {},
+        `${name}: ${field} must agree before npm ci`
+      );
+    }
+  }
+});
