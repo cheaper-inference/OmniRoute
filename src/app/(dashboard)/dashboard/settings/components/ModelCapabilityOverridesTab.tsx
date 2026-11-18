@@ -198,7 +198,7 @@ function ModelOverridesHeader({ count }: { count: number }) {
   return (
     <div className="flex items-start justify-between gap-3 mb-3">
       <div>
-        <h3 className="text-sm flex items-center gap-2">
+        <h3 className="ci-heading flex items-center gap-2" data-size="sm">
           <Icon name="tune" size={18} className="text-primary" />
           {t("modelOverridesTitle")}
         </h3>
@@ -300,7 +300,7 @@ function ModelOverrideEditor({
   return (
     <Card.Section className="flex flex-col gap-3">
       <div>
-        <p className="text-[10px] uppercase tracking-wide text-text-muted font-semibold mb-1">
+        <p className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium">
           {t("selectedModel")}
         </p>
         <p className="text-xs font-mono break-all">{activeTarget || t("none")}</p>

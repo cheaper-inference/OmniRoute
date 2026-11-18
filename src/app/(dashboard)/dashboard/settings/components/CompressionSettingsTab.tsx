@@ -394,7 +394,9 @@ export default function CompressionSettingsTab() {
           <Icon name="compress" size={20} />
         </div>
         <div>
-          <h3 className="text-lg">{t("compressionTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("compressionTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
         </div>
         {status === "saved" && (
@@ -414,7 +416,9 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3">
-            <h4 className="text-sm text-text-main">{t("compressionMode")}</h4>
+            <h4 className="ci-heading text-text-main" data-size="sm">
+              {t("compressionMode")}
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-2">
               {MODES.map((m) => {
                 const active = config.defaultMode === m.value;
@@ -439,7 +443,9 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && (
           <div className="space-y-3 pt-4 border-t border-border/30">
-            <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
+            <h4 className="ci-heading text-text-main" data-size="sm">
+              {t("compressionGeneral")}
+            </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SavedNumberInput
@@ -510,7 +516,9 @@ export default function CompressionSettingsTab() {
                   the panel's `engines.caveman.enabled` is authoritative (planResolution.ts). This tab
                   keeps only the advanced caveman tuning the panel does not expose. */}
               <div data-testid="caveman-panel-note">
-                <h4 className="text-sm text-text-main">{t("compressionCavemanConfig")}</h4>
+                <h4 className="ci-heading text-text-main" data-size="sm">
+                  {t("compressionCavemanConfig")}
+                </h4>
                 <p className="text-xs text-text-muted mt-0.5">
                   {t("compressionCavemanConfigDesc")} {t("compressionCavemanPanelHint")}{" "}
                   <code className="text-text-muted">/dashboard/context/settings</code>
@@ -603,7 +611,9 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "aggressive" && config.aggressive && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm text-text-main">{t("compressionAggressiveConfig")}</h4>
+              <h4 className="ci-heading text-text-main" data-size="sm">
+                {t("compressionAggressiveConfig")}
+              </h4>
               <p className="text-xs text-text-muted mt-0.5">
                 {t("compressionAggressiveConfigDesc")}
               </p>
@@ -697,7 +707,9 @@ export default function CompressionSettingsTab() {
         {config.enabled && config.defaultMode === "ultra" && config.ultra && (
           <div className="space-y-3 pt-4 border-t border-border/30">
             <div>
-              <h4 className="text-sm text-text-main">{t("compressionUltraConfig")}</h4>
+              <h4 className="ci-heading text-text-main" data-size="sm">
+                {t("compressionUltraConfig")}
+              </h4>
               <p className="text-xs text-text-muted mt-0.5">{t("compressionUltraConfigDesc")}</p>
             </div>
 

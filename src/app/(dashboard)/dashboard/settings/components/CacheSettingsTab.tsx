@@ -362,7 +362,9 @@ export default function CacheSettingsTab() {
           <div className="flex items-center justify-between pb-4 border-b border-border/50">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base text-text-main">{t("semanticCacheTitle")}</h3>
+                <h3 className="ci-heading text-text-main" data-size="md">
+                  {t("semanticCacheTitle")}
+                </h3>
                 <Badge variant={semEnabled ? "success" : "default"} size="sm">
                   {semEnabled ? t("semanticCacheEnabled") : t("semanticCacheDisabled")}
                 </Badge>

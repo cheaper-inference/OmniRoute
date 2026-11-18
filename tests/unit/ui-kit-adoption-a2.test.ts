@@ -180,3 +180,72 @@ test("A2/C: settings draws inner panels with Card.Section, not by hand", () => {
   assert.equal(isHandMadePanel("rounded-lg border border-border overflow-hidden"), false);
   assert.equal(isHandMadePanel("p-3 rounded-card-nested bg-bg/40 border border-border/40"), false);
 });
+
+// F — heading-scale-eyebrow: labels use the kit label sizes (`text-2xs`, `text-3xs`), an
+// uppercase label is the kit `ci-eyebrow` (with `data-size` / `data-weight`), and a card heading
+// takes its size from `ci-heading data-size`, not from a Tailwind text-size utility.
+const TEXT_TAGS = [
+  "p",
+  "span",
+  "div",
+  "dt",
+  "dd",
+  "li",
+  "label",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+];
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
+test("A2/F: settings has no pixel text sizes under 12px", () => {
+  const { left, stale } = offenders(hits(/text-\[(8|9|10|11)px\]/), {
+    // A link drawn as a chip: the Badge adapter has no `asChild`, so it cannot wrap the Link.
+    "components/CompressionTokenSaverCard.tsx|rounded border border-border bg-bg-subtle px-1.5":
+      "link chip",
+    // Hand-made pills, replaced by Badge size=\"sm\" in the pills mapping (A).
+    "components/PricingTab.tsx|px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px]": "pill",
+    "components/PricingTab.tsx|px-1.5 py-0.5 rounded text-[9px]": "pill",
+  });
+  assert.deepEqual(left, []);
+  assert.deepEqual(stale, []);
+});
+
+test("A2/F: an uppercase label in settings is a ci-eyebrow", () => {
+  const handMade = elements(TEXT_TAGS)
+    .filter(({ attrs }) => {
+      const classes = attrs.className ?? "";
+      return /\buppercase\b/.test(classes) && !/\bci-eyebrow\b/.test(classes);
+    })
+    .map(({ file, attrs }) => `${file}: ${attrs.className}`);
+  assert.deepEqual(handMade, [
+    // A hand-made pill, replaced by Badge size="sm" in the pills mapping (A).
+    "components/PricingTab.tsx: px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px] rounded uppercase font-semibold shrink-0",
+  ]);
+  const eyebrows = elements(TEXT_TAGS).filter(({ attrs }) =>
+    /\bci-eyebrow\b/.test(attrs.className ?? "")
+  );
+  assert.ok(eyebrows.length >= 14, `expected the migrated labels, found ${eyebrows.length}`);
+});
+
+test("A2/F: settings headings take their size from ci-heading data-size", () => {
+  const headings = elements(HEADING_TAGS);
+  const sizedByUtility = headings
+    .filter(({ attrs }) => {
+      const tokens = (attrs.className ?? "").split(/\s+/);
+      return tokens.some((token) => /^text-(xs|sm|base|lg|xl|2xl)$/.test(token));
+    })
+    .map(({ file, attrs }) => `${file}: ${attrs.className}`);
+  assert.deepEqual(sizedByUtility, [
+    // Responsive titles (16px on phones, 18px from `sm`): `data-size` has one step only.
+    "components/QuotaPreflightCard.tsx: text-base sm:text-lg",
+    "components/RoutingStrategyCard.tsx: text-base sm:text-lg",
+  ]);
+  const kitSized = headings.filter(
+    ({ attrs }) => /\bci-heading\b/.test(attrs.className ?? "") && "data-size" in attrs
+  );
+  assert.ok(kitSized.length >= 65, `expected the migrated headings, found ${kitSized.length}`);
+});

@@ -372,7 +372,7 @@ function GroupRow({
             size={14}
             className={cn("text-text-muted transition-transform", open && "rotate-90")}
           />
-          <span className="truncate text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+          <span className="ci-eyebrow truncate" data-size="3xs" data-weight="medium">
             {groupTitle}
           </span>
         </Button>
@@ -382,7 +382,7 @@ function GroupRow({
         </span>
         {canToggleSeparator && (
           <div className="flex items-center gap-2 border-l border-border pl-3">
-            <span className="text-[10px] font-medium text-text-muted">{separatorLabel}</span>
+            <span className="text-3xs font-medium text-text-muted">{separatorLabel}</span>
             <Toggle
               size="sm"
               ariaLabel={`${separatorLabel} · ${groupTitle}`}

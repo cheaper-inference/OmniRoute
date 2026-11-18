@@ -147,7 +147,7 @@ export default function IPFilterSection() {
           {/* Blacklist */}
           {config.blacklist.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("blocked", { count: config.blacklist.length })}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -172,7 +172,7 @@ export default function IPFilterSection() {
           {/* Whitelist */}
           {config.whitelist.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("allowed", { count: config.whitelist.length })}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -197,7 +197,7 @@ export default function IPFilterSection() {
           {/* Temp Bans */}
           {config.tempBans.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <p className="ci-eyebrow mb-2" data-weight="medium">
                 {t("temporaryBans", { count: config.tempBans.length })}
               </p>
               <div className="flex flex-col gap-1.5">

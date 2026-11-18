@@ -86,7 +86,7 @@ export default function CompressionTokenSaverCard({
     <Card.Section>
       <div className="mb-1 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h4 className="flex items-center gap-2 text-base text-text-main">
+          <h4 className="ci-heading flex items-center gap-2 text-text-main" data-size="md">
             <Icon name="bolt" size={21} className="text-warning" />
             {t("tokenSaverTitle")}
           </h4>

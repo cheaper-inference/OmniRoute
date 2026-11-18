@@ -100,7 +100,9 @@ export default function BackgroundDegradationTab() {
           <Icon name="speed" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg">{t("backgroundDegradationTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("backgroundDegradationTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("backgroundDegradationDesc")}</p>
         </div>
         {status === "saved" && (
@@ -144,7 +146,7 @@ export default function BackgroundDegradationTab() {
         <>
           {/* Degradation Map */}
           <div className="mb-4">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+            <p className="ci-eyebrow mb-2" data-weight="medium">
               {t("degradationMap")}
             </p>
 

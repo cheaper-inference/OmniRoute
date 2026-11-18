@@ -57,7 +57,7 @@ export default function ProxyTrafficPanel() {
       aria-busy={loading}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 id="proxy-traffic-heading" className="text-sm text-text-main">
+        <h3 id="proxy-traffic-heading" className="ci-heading text-text-main" data-size="sm">
           {t("title")}
         </h3>
         <Button

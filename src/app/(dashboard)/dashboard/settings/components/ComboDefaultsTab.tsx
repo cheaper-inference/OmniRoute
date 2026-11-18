@@ -298,7 +298,7 @@ export default function ComboDefaultsTab() {
         <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
           <Icon name="tune" size={20} />
         </div>
-        <h3 className="text-lg">
+        <h3 className="ci-heading" data-size="lg">
           {translateOrFallback(t, "comboDefaultsTitle", "Default Routing & Combo Settings")}
         </h3>
         <span className="text-xs text-text-muted ml-auto">{t("globalComboConfig")}</span>
@@ -774,7 +774,7 @@ export default function ComboDefaultsTab() {
                   className="w-16"
                   aria-label={t("providerMaxRetriesAria", { provider })}
                 />
-                <span className="text-[10px] text-text-muted">{t("retries")}</span>
+                <span className="text-3xs text-text-muted">{t("retries")}</span>
                 <Button
                   variant="destructive-ghost"
                   size="icon-sm"

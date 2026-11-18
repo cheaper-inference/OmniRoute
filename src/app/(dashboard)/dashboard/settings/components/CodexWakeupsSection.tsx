@@ -345,7 +345,7 @@ export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAcco
       aria-labelledby="codex-wakeups-title"
     >
       <div>
-        <h4 id="codex-wakeups-title" className="text-sm">
+        <h4 id="codex-wakeups-title" className="ci-heading" data-size="sm">
           {t("codexWakeups.title")}
         </h4>
         <p className="text-xs text-text-muted">{t("codexWakeups.desc")}</p>

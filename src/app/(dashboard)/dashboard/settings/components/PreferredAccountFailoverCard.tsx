@@ -113,7 +113,9 @@ function OverrideEditor({
 
   return (
     <Card.Section className="space-y-3">
-      <h3 className="text-sm">{kind === "provider" ? "Provider overrides" : "Model overrides"}</h3>
+      <h3 className="ci-heading" data-size="sm">
+        {kind === "provider" ? "Provider overrides" : "Model overrides"}
+      </h3>
       <p className="text-xs text-text-muted">
         {kind === "provider"
           ? "Example: codex or antigravity. Overrides the provider default."
@@ -187,7 +189,7 @@ export default function PreferredAccountFailoverCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg">
+      <h2 className="ci-heading" data-size="lg">
         {label("preferredAccountFailoverTitle", "Preferred account failover")}
       </h2>
       <p className="text-sm text-text-muted">

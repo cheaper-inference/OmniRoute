@@ -924,7 +924,9 @@ export default function RoutingTab() {
               <Icon name="auto_awesome" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("routingZeroConfigTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("routingZeroConfigTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("routingZeroConfigDesc")}</p>
             </div>
           </div>
@@ -995,7 +997,9 @@ export default function RoutingTab() {
             <Icon name="tune" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("systemTransforms")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("systemTransforms")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("systemTransformsDesc")}</p>
           </div>
         </div>
@@ -1118,7 +1122,7 @@ export default function RoutingTab() {
                           defaultOpen={false}
                           title={
                             <div className="flex items-center gap-2">
-                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-3xs font-semibold text-primary">
                                 {index + 1}
                               </span>
                               <span className="font-mono text-primary text-xs">
@@ -1286,13 +1290,17 @@ export default function RoutingTab() {
             <Icon name="security" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("cliFingerprint")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("cliFingerprint")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("cliFingerprintDesc")}</p>
           </div>
         </div>
 
         <div className="mb-5">
-          <h4 className="text-sm mb-2">{t("routingHeaderFingerprintTitle")}</h4>
+          <h4 className="ci-heading mb-2" data-size="sm">
+            {t("routingHeaderFingerprintTitle")}
+          </h4>
           <p className="text-xs text-text-muted mb-2">
             {t("cliFingerprintEnabled", { count: cliCompatProviderSet.size })}
           </p>
@@ -1330,7 +1338,9 @@ export default function RoutingTab() {
             <Icon name="cached" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("routingClientCacheControlTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("routingClientCacheControlTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("routingClientCacheControlDesc")}</p>
           </div>
         </div>
@@ -1375,7 +1385,9 @@ export default function RoutingTab() {
             <Icon name="fingerprint" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("routingAntigravitySignatureTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("routingAntigravitySignatureTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("routingAntigravitySignatureDesc")}</p>
           </div>
         </div>
@@ -1421,7 +1433,9 @@ export default function RoutingTab() {
               <Icon name="badge" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("echoRequestedModelTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("echoRequestedModelTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("echoRequestedModelDesc")}</p>
             </div>
           </div>
@@ -1443,7 +1457,9 @@ export default function RoutingTab() {
             <Icon name="travel_explore" size={20} />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg">{t("webSearchRouteTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("webSearchRouteTitle")}
+            </h3>
             <p className="text-sm text-text-muted mt-1">{t("webSearchRouteDesc")}</p>
             <div className="mt-3">
               <ModelSelectField
@@ -1475,7 +1491,9 @@ export default function RoutingTab() {
             <Icon name="timer" size={20} />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg">Search timeouts</h3>
+            <h3 className="ci-heading" data-size="lg">
+              Search timeouts
+            </h3>
             <p className="text-sm text-text-muted mt-1">
               How long a search waits before it is cut off. Leave a field empty to keep the default:
               15 seconds overall, and each provider&apos;s own limit.
@@ -1519,7 +1537,9 @@ export default function RoutingTab() {
               <Icon name="verified" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("lkgpToggleTitle")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("lkgpToggleTitle")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("lkgpToggleDesc")}</p>
             </div>
           </div>
@@ -1584,7 +1604,9 @@ export default function RoutingTab() {
               <Icon name="network_ping" size={20} />
             </div>
             <div>
-              <h3 className="text-lg">{t("adaptiveVolumeRouting")}</h3>
+              <h3 className="ci-heading" data-size="lg">
+                {t("adaptiveVolumeRouting")}
+              </h3>
               <p className="text-sm text-text-muted mt-1">{t("adaptiveVolumeRoutingDesc")}</p>
             </div>
           </div>

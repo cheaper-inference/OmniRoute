@@ -313,7 +313,7 @@ export default function AuthzSection() {
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
                     {locked && (
-                      <span className="text-[10px] text-error mt-1">
+                      <span className="text-xs text-error mt-1">
                         {t("authz.bypass.cli_tools_runtime_note")}
                       </span>
                     )}
@@ -341,7 +341,7 @@ export default function AuthzSection() {
                 >
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
-                    <span className="text-[10px] text-error mt-1">
+                    <span className="text-xs text-error mt-1">
                       {t("authz.bypass.cli_tools_runtime_note")}
                     </span>
                   </div>

@@ -95,7 +95,9 @@ export default function ThinkingBudgetTab() {
           <Icon name="psychology" size={20} />
         </div>
         <div>
-          <h3 className="text-lg">{t("thinkingBudgetTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("thinkingBudgetTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("thinkingBudgetDesc")}</p>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">
             {t("thinkingBudgetIndependenceHint")}

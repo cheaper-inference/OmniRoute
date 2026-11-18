@@ -58,7 +58,9 @@ export default function ConnectionTestSettings() {
   }
   return (
     <Card>
-      <h3 className="text-lg">{t("settingsTitle")}</h3>
+      <h3 className="ci-heading" data-size="lg">
+        {t("settingsTitle")}
+      </h3>
       <p className="mt-1 text-sm text-text-muted">{t("settingsDescription")}</p>
       <Field label={t("message")} htmlFor="connection-test-prompt" className="mt-4">
         <Textarea

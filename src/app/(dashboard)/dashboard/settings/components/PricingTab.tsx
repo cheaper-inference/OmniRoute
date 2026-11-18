@@ -534,7 +534,7 @@ export default function PricingTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl flex items-center gap-2">
+            <h2 className="ci-heading flex items-center gap-2" data-size="xl">
               <Icon name="payments" size={22} className="text-primary" />
               {t("modelPricing")}
             </h2>
@@ -561,8 +561,8 @@ export default function PricingTab() {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between text-[11px] text-text-muted mb-1">
-                <span className="uppercase tracking-wide font-semibold">
+              <div className="flex items-center justify-between text-2xs text-text-muted mb-1">
+                <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
                   {t("priced")} / {t("registry")}
                 </span>
                 <span className="tabular-nums font-semibold">{coveragePct}%</span>
@@ -581,7 +581,7 @@ export default function PricingTab() {
           <Card.Section className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-xs uppercase text-text-muted">{t("pricingSyncTitle")}</h3>
+                <h3 className="ci-eyebrow">{t("pricingSyncTitle")}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
@@ -614,7 +614,7 @@ export default function PricingTab() {
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-[11px]">
+            <div className="grid grid-cols-3 gap-2 text-2xs">
               <SyncMini
                 label={t("lastSync")}
                 value={formatSyncDate(syncStatus?.lastSync || null)}
@@ -725,7 +725,7 @@ export default function PricingTab() {
         </div>
 
         {/* Quick shortcuts */}
-        <div className="flex items-center gap-2 flex-wrap text-[11px]">
+        <div className="flex items-center gap-2 flex-wrap text-2xs">
           {viewMode === "providers" && (
             <Button
               variant={coverageFilter === "lt50" ? "warning" : "outline"}
@@ -939,7 +939,7 @@ function ProviderSection({
             <span className="font-semibold text-sm truncate">
               {provider.id.charAt(0).toUpperCase() + provider.id.slice(1)}
             </span>
-            <span className="text-text-muted text-[11px] truncate">
+            <span className="text-text-muted text-2xs truncate">
               ({provider.alias.toUpperCase()})
             </span>
           </div>
@@ -963,16 +963,14 @@ function ProviderSection({
         <div className="flex items-center gap-3 shrink-0">
           {sourceCounts.user > 0 && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-semibold text-warning"
+              className="inline-flex items-center gap-1 text-3xs font-semibold text-warning"
               title={`${sourceCounts.user} ${getSourceLabel("user")}`}
             >
               💎 {sourceCounts.user}
             </span>
           )}
-          {isEdited && (
-            <span className="text-warning text-[11px] font-semibold">{t("unsaved")}</span>
-          )}
-          <span className="text-text-muted text-[11px] tabular-nums hidden sm:inline">
+          {isEdited && <span className="text-warning text-2xs font-semibold">{t("unsaved")}</span>}
+          <span className="text-text-muted text-2xs tabular-nums hidden sm:inline">
             {pricedCount}/{provider.modelCount}
           </span>
           {(() => {
@@ -998,7 +996,7 @@ function ProviderSection({
                   />
                 </div>
                 <span
-                  className={`text-[11px] font-semibold tabular-nums w-10 text-right ${textColor}`}
+                  className={`text-2xs font-semibold tabular-nums w-10 text-right ${textColor}`}
                   title={`${pricedCount}/${provider.modelCount} ${t("withPricing")}`}
                 >
                   {pct}% {icon}
@@ -1107,7 +1105,7 @@ function ModelRow({
           <span className={`px-1.5 py-0.5 rounded text-[9px] ${getSourceTone(source)}`}>
             {getSourceLabel(source)}
           </span>
-          <span className="text-text-muted text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-text-muted text-3xs opacity-0 group-hover:opacity-100 transition-opacity">
             {model.id}
           </span>
         </div>

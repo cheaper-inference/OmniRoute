@@ -309,7 +309,9 @@ export default function MemorySkillsTab() {
             <Icon name="psychology" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("memorySkillsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("memorySkillsTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("memorySkillsDesc")}</p>
           </div>
         </div>
@@ -327,7 +329,9 @@ export default function MemorySkillsTab() {
             <Icon name="memory" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("memoryTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("memoryTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("memoryDesc")}</p>
           </div>
           {status === "saved" && (
@@ -442,7 +446,9 @@ export default function MemorySkillsTab() {
             <Icon name="database" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("qdrantTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("qdrantTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("qdrantDesc")}</p>
           </div>
 
@@ -701,7 +707,9 @@ export default function MemorySkillsTab() {
             <Icon name="handyman" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("skillsTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("skillsTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("skillsDesc")}</p>
           </div>
         </div>
@@ -729,7 +737,9 @@ export default function MemorySkillsTab() {
             <Icon name="storefront" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("memorySkillsSkillsmpMarketplace")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("memorySkillsSkillsmpMarketplace")}
+            </h3>
             <p className="text-sm text-text-muted">{t("memorySkillsSkillsmpDescription")}</p>
           </div>
           {skillsmpStatus === "saved" && (
@@ -773,7 +783,9 @@ export default function MemorySkillsTab() {
             <Icon name="hub" size={20} />
           </div>
           <div>
-            <h3 className="text-lg">{t("memorySkillsActiveSkillsProvider")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("memorySkillsActiveSkillsProvider")}
+            </h3>
             <p className="text-sm text-text-muted">{t("memorySkillsActiveProviderDescription")}</p>
           </div>
           {skillsProviderStatus === "saved" && (

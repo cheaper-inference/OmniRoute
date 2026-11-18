@@ -183,7 +183,7 @@ export default function ModelAliasesUnified() {
           <Icon name="swap_horiz" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg">
+          <h3 className="ci-heading" data-size="lg">
             {translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           </h3>
           <p className="text-sm text-text-muted">
@@ -275,7 +275,7 @@ export default function ModelAliasesUnified() {
       </Card.Section>
 
       <div className="mb-4">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+        <p className="ci-eyebrow mb-2" data-weight="medium">
           {translateOrFallback(t, "customAliases", "Custom Aliases")}
         </p>
         <div className="rounded-lg border border-border/30 divide-y divide-border/20">
@@ -309,7 +309,7 @@ export default function ModelAliasesUnified() {
       </div>
 
       <div className="mb-4">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+        <p className="ci-eyebrow mb-2" data-weight="medium">
           {translateOrFallback(t, "wildcardRulesTitle", "Wildcard Rules")}
         </p>
         <div className="rounded-lg border border-border/30 divide-y divide-border/20">

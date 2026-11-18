@@ -734,7 +734,7 @@ export default function SystemStorageTab() {
     return (
       <Card.Section className="mb-4">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h4 className="text-sm flex items-center gap-2">
+          <h4 className="ci-heading flex items-center gap-2" data-size="sm">
             <Icon name="analytics" size={18} />
             {t("storageDatabaseStatistics")}
           </h4>
@@ -907,7 +907,7 @@ export default function SystemStorageTab() {
       <Card.Section className="mt-6">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
-            <h4 className="text-sm flex items-center gap-2">
+            <h4 className="ci-heading flex items-center gap-2" data-size="sm">
               <Icon name="schedule" size={18} />
               {t("storageRetentionCleanup")}
             </h4>
@@ -999,7 +999,7 @@ export default function SystemStorageTab() {
 
     return (
       <Card.Section className="mt-6">
-        <h4 className="text-sm mb-3 flex items-center gap-2">
+        <h4 className="ci-heading mb-3 flex items-center gap-2" data-size="sm">
           <Icon name="tune" size={18} />
           {t("storageOptimizationSettings")}
         </h4>
@@ -1123,7 +1123,7 @@ export default function SystemStorageTab() {
 
     return (
       <Card.Section className="mt-6">
-        <h4 className="text-sm mb-3 flex items-center gap-2">
+        <h4 className="ci-heading mb-3 flex items-center gap-2" data-size="sm">
           <Icon name="compress" size={18} />
           {t("storageCompressionAggregation")}
         </h4>
@@ -1197,7 +1197,9 @@ export default function SystemStorageTab() {
         <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted sm:row-span-2">
           <Icon name="database" size={20} />
         </span>
-        <h3 className="text-lg">{t("systemStorage")}</h3>
+        <h3 className="ci-heading" data-size="lg">
+          {t("systemStorage")}
+        </h3>
         <Badge variant="success" size="sm" className="col-start-3 row-start-1 sm:row-span-2">
           {storageHealth.driver || "json"}
         </Badge>
@@ -1216,7 +1218,7 @@ export default function SystemStorageTab() {
 
       <div className="grid grid-cols-1 gap-3 mb-4">
         <Card.Section>
-          <p className="text-[11px] text-text-muted uppercase tracking-wide mb-1">
+          <p className="ci-eyebrow mb-1" data-size="2xs">
             {t("databasePath")}
           </p>
           <p className="text-sm font-mono text-text-main break-all">
