@@ -18,7 +18,7 @@
 
 ---
 
-## Oʻrnatish usullari
+## O'rnatish usullari
 
 ### npm (tavsiya etiladi)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Boshqaruv paneli `http://localhost:20128` manzilida ochiladi va API asosiy URL manzili `http://localhost:20128/v1` boʻladi.
+Boshqaruv paneli `http://localhost:20128` da ochiladi va API bazasi URL `http://localhost:20128/v1` dir.
+
+> **npm foydalanuvchilari:** Agar npm oʻrnatish skriptlari bloklanganligi haqida ogohlantirsa (masalan, `omniroute`, `better-sqlite3`), [— npm oʻrnatish skriptlari bloklangan muammolarni bartaraf etish boʻlimiga](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) qarang.
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm foydalanuvchilari:** `better-sqlite3` va `@swc/core` uchun mahalliy qurish skriptlarini yoqish maqsadida `--allow-build` bayrogʻi talab qilinadi. `pnpm approve-builds -g` buyrugʻi pnpm v11 da global oʻrnatishlar uchun qoʻllab-quvvatlanmaydi.
+> **pnpm foydalanuvchilari:** `--allow-build` bayrog'i `better-sqlite3` va `@swc/core` uchun mahalliy qurilish skriptlarini yoqish uchun talab qilinadi. `pnpm approve-builds -g` buyrug'i pnpm v11 da global o'rnatishlar uchun qo'llab-quvvatlanmaydi.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR paketi](https://aur.archlinux.org/packages/omniroute-bin) OmniRouteʼni oʻrnatadi va systemd foydalanuvchi xizmatini taqdim etadi.
+[AUR paketi](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute o'rnatadi va tizimli foydalanuvchi xizmatini taqdim etadi.
 
-### Manba kodidan
+### Manbadan
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows uchun eslatma:** Agar eski `%USERPROFILE%\.omniroute` katalogi mavjud boʻlmasa, OmniRoute standart holatda `%APPDATA%\omniroute` katalogidan foydalanadi. Boshqa maʼlumotlar katalogi joylashuvini tanlash uchun `DATA_DIR` ni belgilang.
+> **Windows eslatma:** Sukut bo'yicha, OmniRoute eski `%USERPROFILE%\.omniroute` katalogi mavjud bo'lmaganda `%APPDATA%\omniroute` foydalanadi. Boshqa maʼlumotlar katalogi joylashuvini tanlash uchun `DATA_DIR` oʻrnating.
 
-> **Eslatma:** Birinchi ishga tushirishda `npm install` `.env.example` asosida `.env` faylini avtomatik yaratadi. Keyingi oʻrnatishlar mavjud `.env` faylining ustiga yozmaydi, shu sababli maxsus sozlamalar saqlanib qoladi. Uni qayta yaratish uchun qayta ishga tushirishdan oldin `.env` faylini oʻchiring.
+> **Eslatma:** `npm install` birinchi ishga tushirishda `.env.example` dan avtomatik ravishda `.env` hosil qiladi. Keyingi o'rnatishlar mavjud `.env` ustiga yozilmaydi, shuning uchun sozlashlar saqlanib qoladi. Qayta ekish uchun `.env` qayta ishga tushirishdan oldin o'chiring.
 
 ### Docker
 
-Compose profillari va Caddy HTTPS bilan birga Dockerʼni toʻliq sozlash uchun [Docker qoʻllanmasi](./DOCKER_GUIDE.md)ga qarang.
+To'liq Docker sozlamalari uchun [Docker qo'llanmasini](./DOCKER_GUIDE.md) ko'ring, jumladan, Profillarni yaratish va Caddy HTTPS.
 
 ### Ish stoli ilovasi (Electron)
 
-OmniRoute Electron 41 + electron-builder 26.10 asosida yaratilgan ish stoli qobigʻi bilan taqdim etiladi. Mavjud skriptlar (ish maydoni ildizi):
+OmniRoute Electron 41 + elektron-quruvchi 26.10-da qurilgan ish stoli o‘ramini jo‘natadi. Mavjud skriptlar (ish maydoni ildizi):
 
 ```bash
-npm run electron:dev          # Ish stoli ilovasini tezkor qayta yuklash bilan ishga tushirish
-npm run electron:build        # Joriy OT uchun qurish (avtomatik aniqlanadi)
-npm run electron:build:win    # Windows oʻrnatuvchisi (NSIS + portativ)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Paketlangan qurilishni tezkor sinovdan oʻtkazish
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Ish stoli oʻrnatuvchilarining relizlari GitHub Releases sahifasiga biriktiriladi. Electron haqida batafsil maʼlumot (imzolash, IPC koʻprigi, distributivlar) uchun [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) fayliga qarang _(keyingi bosqichda yaratilgan)_.
+Ish stoli o'rnatuvchilarining relizlari GitHub Releases-ga biriktirilgan. To'liq Electron chuqur sho'ng'in (imzo, IPC ko'prigi, distros) uchun [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ ga qarang.
 
-### Interfeyssiz server (CI/avtomatlashtirish)
+### Boshsiz server (CI/automation)
 
-Avtomatik sozlashlar (Docker, Kubernetes, CI) uchun quyidagilardan foydalaning:
+Qarovsiz sozlashlar uchun (Docker, Kubernetes, CI) foydalaning:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Muhit oʻzgaruvchilari (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` va boshqalar) bilan birgalikda bu OmniRoute nusxasini toʻliq skript orqali ishga tushirish imkonini beradi.
+Env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` va boshqalar) bilan birgalikda bu sizga to'liq skriptga ega bo'lgan OmniRoute misolini aylantirish imkonini beradi.
 
-### CLI parametrlari
+### CLI opsiyalari
 
-| Buyruq                  | Tavsif                                                                                             |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `omniroute`             | Serverni ishga tushirish (`PORT=20128`, API va boshqaruv paneli bir portda)                        |
-| `omniroute setup`       | Parol va birinchi provayderni sozlash uchun yoʻnaltirilgan CLI jarayoni                            |
-| `omniroute doctor`      | Serverni ishga tushirmasdan mahalliy holat tekshiruvlarini bajarish                                |
-| `omniroute providers`   | CLI orqali provayderlarni topish, roʻyxatlash, tekshirish va sinash                                |
-| `omniroute config`      | CLI vositasini sozlash — konfiguratsiyalarni roʻyxatlash, olish, oʻrnatish va tekshirish           |
-| `omniroute status`      | Oflayn holat paneli — versiya, MB, vositalar, konfiguratsiya                                       |
-| `omniroute logs`        | APIʼdan foydalanish jurnallarini oqimda koʻrsatish (`--follow` qoʻllab-quvvatlanadi)               |
-| `omniroute update`      | OmniRoute yangilanishlarini tekshirish yoki qoʻllash                                               |
-| `omniroute provider`    | Provayder ulanishlarini boshqarish — qoʻshish, roʻyxatlash, olib tashlash, sinash, standart qilish |
-| `omniroute --port 3000` | Kanonik/API portini 3000 ga oʻrnatish                                                              |
-| `omniroute --mcp`       | MCP serverini ishga tushirish (stdio transporti)                                                   |
-| `omniroute --no-open`   | Brauzerni avtomatik ochmaslik                                                                      |
-| `omniroute --help`      | Yordamni koʻrsatish                                                                                |
+| Buyruq                  | Tavsif                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `omniroute`             | Serverni ishga tushirish (`PORT=20128`, API va boshqaruv paneli bir xil portda)                               |
+| `omniroute setup`       | Parol va birinchi provayder uchun boshqariladigan CLI onboarding                                              |
+| `omniroute doctor`      | Serverni ishga tushirmasdan mahalliy sog'liqni tekshirishni o'tkazing                                         |
+| `omniroute providers`   | CLI dan provayderlarni kashf eting, ro'yxatlang, tasdiqlang va sinab ko'ring                                  |
+| `omniroute config`      | CLI asbob konfiguratsiyasi — ro'yxati, konfiguratsiyalarni olish, sozlash, tasdiqlash                         |
+| `omniroute status`      | Oflayn holat boshqaruv paneli — versiyasi, DB, asboblar, konfiguratsiya                                       |
+| `omniroute logs`        | API dan foydalanish jurnallarini oqimlash ( `--follow` ni qo'llab-quvvatlaydi)                                |
+| `omniroute update`      | OmniRoute yangilanishlarini tekshiring yoki qo'llang                                                          |
+| `omniroute provider`    | Provayder ulanishlarini boshqarish — qo'shish, ro'yxatga olish, o'chirish, sinovdan o'tkazish, sukut bo'yicha |
+| `omniroute --port 3000` | canonical/API portini 3000 ga o'rnating                                                                       |
+| `omniroute --mcp`       | MCP serverini ishga tushiring (stdio transport)                                                               |
+| `omniroute --no-open`   | Brauzerni avtomatik ochmang                                                                                   |
+| `omniroute --help`      | Yordam ko'rsatish                                                                                             |
 
-Interfeyssiz sozlashni bayroqlar yoki muhit oʻzgaruvchilari yordamida skriptlashtirish mumkin:
+Boshsiz sozlash bayroqlar yoki muhit o'zgaruvchilari bilan yozilishi mumkin:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Boshqaruv panelini ochmasdan SSH yoki skriptlar orqali provayderlarni boshqaring:
+Boshqarish panelini ochmasdan provayderlarni SSH yoki skriptlardan boshqaring:
 
 ```bash
 omniroute providers available
@@ -225,8 +227,12 @@ npm run test:protocols:e2e
 
 **Claude kodi:**
 
+Claude Code HTTP orqali ulanadi, `omniroute --mcp` (stdio) ishga tushmaydi. HTTP transporti sukut bo'yicha o'chirilgan: avval uni ishlaydigan serverda yoqing. Boshqaruv paneliga kirish yoqilganda, hisob ma'lumotlari bo'lmagan so'rov `401` oladi, shuning uchun `mcp:connect` (yoki `manage`) ni ushlab turgan API tugmachasini o'tkazing; `manage`/`admin` kalit ham har bir vositaning qamroviga muhtoj (qarang: [MCP Server → MCP asboblar doirasi](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -331,7 +337,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) andozasi
 
-Void Linux foydalanuvchilari uchun siz `xbps-src` dan foydalanib mahalliy paket yaratishingiz mumkin. Ushbu blokni `srcpkgs/omniroute/template` sifatida saqlang:
+Void Linux foydalanuvchilari uchun `xbps-src` dan foydalanib mahalliy paket yaratishingiz mumkin. Ushbu blokni `srcpkgs/omniroute/template` sifatida saqlang:
 
 ```bash
 # Template file for 'omniroute'

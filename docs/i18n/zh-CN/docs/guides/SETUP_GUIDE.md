@@ -18,7 +18,7 @@
 
 ---
 
-## 安装方式
+## 安装方法
 
 ### npm（推荐）
 
@@ -27,86 +27,88 @@ npm install -g omniroute
 omniroute
 ```
 
-仪表板将在 `http://localhost:20128` 打开，API 基础 URL 为 `http://localhost:20128/v1`。
+仪表板在`http://localhost:20128`和API处打开，基础URL是`http://localhost:20128/v1`。
 
-### pnpm
+> **npm 用户：**如果 npm 警告安装脚本被阻止（例如`omniroute`、 `better-sqlite3`），请参阅[排除— npm install-scripts 阻塞故障](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)。
+
+### PNPM
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **pnpm 用户：**必须使用 `--allow-build` 标志，以启用 `better-sqlite3` 和 `@swc/core` 的原生构建脚本。在 pnpm v11 中，`pnpm approve-builds -g` 命令不支持全局安装。
+> **PNPM 用户：**需要`--allow-build`标志才能启用`better-sqlite3`和`@swc/core`的本机构建脚本。 pnpm v11 上的全局安装不支持`pnpm approve-builds -g`命令。
 
-### Arch Linux（AUR）
+### 拱门Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR 软件包](https://aur.archlinux.org/packages/omniroute-bin)会安装 OmniRoute，并提供 systemd 用户服务。
+[AUR软件包](https://aur.archlinux.org/packages/omniroute-bin)安装OmniRoute并提供 systemd 用户服务。
 
-### 从源代码安装
+### 从源头
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows 注意事项：**默认情况下，如果旧版 `%USERPROFILE%\.omniroute` 目录不存在，OmniRoute 将使用 `%APPDATA%\omniroute`。可通过设置 `DATA_DIR` 来选择其他数据目录位置。
+> **Windows注：**默认情况下，当旧的`%USERPROFILE%\.omniroute`目录不存在时， OmniRoute使用`%APPDATA%\omniroute` 。设置`DATA_DIR`以选择不同的数据目录位置。
 
-> **注意：**首次运行时，`npm install` 会根据 `.env.example` 自动生成 `.env`。后续安装不会覆盖现有的 `.env`，因此自定义设置会被保留。如需重新生成，请先删除 `.env`，然后再次运行。
+> **笔记：** `npm install`在第一次运行时自动从`.env.example`生成`.env` 。后续安装不会覆盖现有的`.env`，因此自定义内容将被保留。要重新播种，请在重新运行之前删除`.env` 。
 
 ### Docker
 
-有关包括 Compose 配置文件和 Caddy HTTPS 在内的完整 Docker 设置，请参阅 [Docker 指南](./DOCKER_GUIDE.md)。
+请参阅[Docker指南](./DOCKER_GUIDE.md)，了解完整的Docker设置，包括 Compose 配置文件和 Caddy HTTPS。
 
-### 桌面应用（Electron）
+### 桌面应用程序（Electron）
 
-OmniRoute 提供基于 Electron 41 + electron-builder 26.10 构建的桌面封装程序。可用脚本（工作区根目录）：
+OmniRoute提供了一个基于Electron 41 + electro-builder 26.10 构建的桌面包装器。可用脚本（工作空间根目录）：
 
 ```bash
-npm run electron:dev          # 使用热重载运行桌面应用
-npm run electron:build        # 为当前操作系统构建（自动检测）
-npm run electron:build:win    # Windows 安装程序（NSIS + 便携版）
-npm run electron:build:mac    # macOS（dmg + zip，arm64+x64）
-npm run electron:build:linux  # Linux（AppImage + deb + rpm）
-npm run electron:smoke:packaged  # 对打包后的构建执行冒烟测试
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
+npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
+npm run electron:build:linux  # Linux (AppImage + deb + rpm)
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-桌面安装程序会附加到 GitHub Releases 中。如需深入了解 Electron（签名、IPC 桥接、发行版），请参阅 [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _（在后续阶段创建）_。
+桌面安装程序的版本附加到GitHub版本。有关完整的Electron深入研究（签名、 IPC桥、发行版），请参阅[`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em faseterior)_。
 
-### 无头服务器（CI/自动化）
+### 无头服务器（CI/automation）
 
-对于无人值守设置（Docker、Kubernetes、CI），请使用：
+对于无人值守设置（Docker、 Kubernetes 、 CI），请使用：
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-结合环境变量（`INITIAL_PASSWORD`、`OMNIROUTE_WS_BRIDGE_SECRET` 等），即可完全通过脚本启动 OmniRoute 实例。
+与环境变量（`INITIAL_PASSWORD`、 `OMNIROUTE_WS_BRIDGE_SECRET`等）相结合，这使您可以启动完全可编写脚本的OmniRoute实例。
 
-### CLI 选项
+### CLI选项
 
-| 命令                    | 描述                                                   |
-| ----------------------- | ------------------------------------------------------ |
-| `omniroute`             | 启动服务器（`PORT=20128`，API 和仪表板使用同一端口）   |
-| `omniroute setup`       | 通过引导式 CLI 设置密码和第一个提供者                  |
-| `omniroute doctor`      | 在不启动服务器的情况下运行本地健康检查                 |
-| `omniroute providers`   | 通过 CLI 发现、列出、验证和测试提供者                  |
-| `omniroute config`      | CLI 工具配置——列出、获取、设置和验证配置               |
-| `omniroute status`      | 离线状态仪表板——版本、数据库、工具和配置               |
-| `omniroute logs`        | 从 API 流式传输使用日志（支持 `--follow`）             |
-| `omniroute update`      | 检查或应用 OmniRoute 更新                              |
-| `omniroute provider`    | 管理提供者连接——添加、列出、移除、测试和设置默认提供者 |
-| `omniroute --port 3000` | 将规范/API 端口设置为 3000                             |
-| `omniroute --mcp`       | 启动 MCP 服务器（stdio 传输）                          |
-| `omniroute --no-open`   | 不自动打开浏览器                                       |
-| `omniroute --help`      | 显示帮助                                               |
+| 命令                    | 描述                                                 |
+| ----------------------- | ---------------------------------------------------- |
+| `omniroute`             | 启动服务器（`PORT=20128`、 API和仪表板位于同一端口） |
+| `omniroute setup`       | 指导CLI入门，了解密码和第一个提供者                  |
+| `omniroute doctor`      | 无需启动服务器即可运行本地健康检查                   |
+| `omniroute providers`   | 发现、列出、验证和测试CLI的提供者                    |
+| `omniroute config`      | CLI工具配置—列表、获取、设置、验证配置               |
+| `omniroute status`      | 离线状态仪表板—版本、 DB、工具、配置                 |
+| `omniroute logs`        | 来自API的流使用日志（支持`--follow`）                |
+| `omniroute update`      | 检查或应用OmniRoute更新                              |
+| `omniroute provider`    | 管理提供者连接—添加、列表、删除、测试、默认          |
+| `omniroute --port 3000` | 将canonical/API端口设置为3000                        |
+| `omniroute --mcp`       | 启动MCP服务器（stdio 传输）                          |
+| `omniroute --no-open`   | 不要自动打开浏览器                                   |
+| `omniroute --help`      | 显示帮助                                             |
 
-无头设置可通过标志或环境变量编写脚本：
+无头设置可以使用标志或环境变量编写脚本：
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-在不打开仪表板的情况下运行本地诊断：
+无需打开仪表板即可运行本地诊断：
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-通过 SSH 或脚本管理提供者，无需打开仪表板：
+从SSH或脚本管理提供者，无需打开仪表板：
 
 ```bash
 omniroute providers available
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude代码：**
 
+Claude代码通过HTTP连接， `omniroute --mcp` (stdio) 不会启动。 HTTP传输默认处于关闭状态：首先在正在运行的服务器上启用它。当启用仪表板登录时，没有凭据的请求会获取`401`，因此传递包含`mcp:connect` （或`manage`）的API密钥；没有`manage`/`admin`密钥也需要每个工具的范围（请参阅[MCP服务器→ MCP工具范围](../frameworks/MCP-SERVER.md#mcp-tool-scopes)）。
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

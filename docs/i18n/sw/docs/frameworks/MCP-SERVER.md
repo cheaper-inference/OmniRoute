@@ -20,6 +20,8 @@ Au kupitia usafiri wa wazi-sse:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -127,23 +129,23 @@ Tazama [Usanidi wa Mteja MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 
 ## Zana za Ukandamizaji (13)
 
-| Zana                                | Mawanda             | Maelezo                                                                                                                                    |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Mipangilio ya kubana, muhtasari wa uchanganuzi, na takwimu za kufahamu akiba (inajumuisha metadata `analytics.mcpDescriptionCompression` ) |
-| `omniroute_compression_configure`   | `write:compression` | Sanidi hali ya mgandamizo, kiwango cha juu, uwiano unaolengwa, uhifadhi wa haraka wa mfumo, kigeuza mbano cha maelezo ya MCP               |
-| `omniroute_set_compression_engine`  | `write:compression` | Chagua injini inayotumika (off/caveman/rtk/stacked) na nguvu ya Caveman/RTK                                                                |
-| `omniroute_list_compression_combos` | `read:compression`  | Orodhesha mchanganyiko unaoitwa compression na bomba la injini zao                                                                         |
-| `omniroute_compression_combo_stats` | `read:compression`  | Uchanganuzi uliopangwa kulingana na mseto wa mbano na injini                                                                               |
-| `omniroute_ccr_store`               | `write:compression` | Hifadhi maudhui yaliyotengwa na mpigaji simu katika hifadhi ya CCR iliyo na mipaka na urudishe alama pamoja na rejeleo la `ccr://`         |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Rejesha maudhui ya CCR kwa ukamilifu au kwa njia za kichwa, mkia, mistari, grep na takwimu                                                 |
-| `omniroute_ccr_inspect`             | `read:compression`  | Kagua metadata CCR inayomilikiwa na mpigaji bila kurudisha maudhui                                                                         |
-| `omniroute_ccr_list`                | `read:compression`  | Orodhesha metadata iliyopangwa kwa vizuizi vya CCR vinavyomilikiwa na wapigaji                                                             |
-| `omniroute_ccr_delete`              | `write:compression` | Futa kizuizi CCR kinachomilikiwa na mpigaji                                                                                                |
-| `omniroute_ccr_stats`               | `read:compression`  | Ripoti matumizi ya kumbukumbu ya mpigaji simu, vihesabio vya mzunguko wa maisha na vikomo vya duka                                         |
-| `omniroute_rtk_discover`            | `read:compression`  | Gundua kelele inayojirudia katika sampuli za matokeo ya RTK                                                                                |
-| `omniroute_rtk_learn`               | `read:compression`  | Tengeneza rasimu ya kichujio RTK inayoweza kukaguliwa kutoka kwa sampuli za kuchagua kuingia                                               |
+| Zana                                | Mawanda             | Maelezo                                                                                                                                 |
+| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Mipangilio ya mbano, muhtasari wa uchanganuzi, na takwimu za kufahamu akiba (pamoja na metadata `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Sanidi hali ya mgandamizo, kiwango cha juu, uwiano unaolengwa, uhifadhi wa haraka wa mfumo, kigeuza mbano cha maelezo ya MCP            |
+| `omniroute_set_compression_engine`  | `write:compression` | Chagua injini inayotumika (off/caveman/rtk/stacked) na nguvu ya Caveman/RTK                                                             |
+| `omniroute_list_compression_combos` | `read:compression`  | Orodhesha mchanganyiko unaoitwa compression na bomba la injini zao                                                                      |
+| `omniroute_compression_combo_stats` | `read:compression`  | Uchanganuzi uliopangwa kulingana na mseto wa mbano na injini                                                                            |
+| `omniroute_ccr_store`               | `write:compression` | Hifadhi maudhui yaliyotengwa na mpigaji simu katika hifadhi ya CCR iliyo na mipaka na urudishe alama pamoja na rejeleo la `ccr://`      |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Rejesha maudhui ya CCR kwa ukamilifu au kwa njia za kichwa, mkia, mistari, grep na takwimu                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Kagua metadata CCR inayomilikiwa na mpigaji bila kurejesha maudhui                                                                      |
+| `omniroute_ccr_list`                | `read:compression`  | Orodhesha metadata iliyopangwa kwa vizuizi vya CCR vinavyomilikiwa na mpigaji                                                           |
+| `omniroute_ccr_delete`              | `write:compression` | Futa kizuizi CCR kinachomilikiwa na mpigaji                                                                                             |
+| `omniroute_ccr_stats`               | `read:compression`  | Ripoti matumizi ya kumbukumbu ya mpigaji simu, vihesabio vya mzunguko wa maisha na vikomo vya duka                                      |
+| `omniroute_rtk_discover`            | `read:compression`  | Gundua kelele inayojirudia katika sampuli za matokeo ya RTK                                                                             |
+| `omniroute_rtk_learn`               | `read:compression`  | Tengeneza rasimu ya kichujio RTK inayoweza kukaguliwa kutoka kwa sampuli za kuchagua kuingia                                            |
 
-Maingizo ya CCR hutumia duka la viwango viwili: safu ya kumbukumbu ya moto inayoungwa mkono, kwenye nyakati za uendeshaji zisizo za wingu, na kiwango cha kudumu SQLite (`ccr_blocks`, on by default) kwa hivyo kizuizi kinasalia kufukuzwa au kuwashwa upya hadi TTL yake iishe — isipokuwa itazuia zaidi ya 512 KB, kumbukumbu ambayo hukaa kwenye wingu. Kila block ina mipaka ya MiB 2 , kila moja kuu hadi MiB 16 , na duka la kimataifa hadi MiB 64 . Maingizo chaguomsingi ya TTL ya saa 24 (kiwango cha juu cha siku saba). Urejeshaji kamili MCP ni mdogo kwa 256 KiB; vizuizi vikubwa hubaki vinapatikana kupitia aina mbalimbali na grep. Hifadhi, urejeshaji, uorodheshaji, ukaguzi, ufutaji na takwimu zimetengwa na msimbo mkuu uliothibitishwa wa API. Rekodi za ukaguzi zina heshi na metadata ya ukubwa, kamwe haina maudhui. Maelezo yanayomkabili opereta (alama mbili, mahitaji ya mteja, `codemode:false`, upeo wa kila chombo, uwekaji orodha, na matriki ya uchunguzi) huishi katika [Mitambo ya Kugandamiza → Masharti / mwongozo wa opereta](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+maingizo ya CCR hutumia duka la viwango viwili: safu ya kumbukumbu ya moto inayoungwa mkono, kwenye nyakati za uendeshaji zisizo za wingu, na kiwango cha kudumu SQLite (`ccr_blocks`, on by default) ili kizuizi kiokoe kufukuzwa au kuanzishwa upya hadi TTL yake iishe — isipokuwa itazuia zaidi ya 512 KB, cloud run-time , `COMPRESSION_CCR_DURABLE_STORE=false` run - Uandishi wa kudumu ni juhudi bora: imeshuka wakati maandishi 1,000 tayari yanasubiri, na uandishi wa SQLite ulioshindwa umewekwa, haujajaribiwa tena, ili kizuizi hicho kipotee wakati wa kuanza tena. Kila block inazuiwa kwa MiB 2 , kila moja kuu hadi MiB 16 , na duka la kimataifa hadi MiB 64 . Maingizo chaguomsingi ya TTL ya saa 24 (kiwango cha juu cha siku saba). Urejeshaji kamili MCP ni mdogo kwa KiB 256; vizuizi vikubwa husalia vinapatikana kupitia aina mbalimbali na grep. Hifadhi, urejeshaji, uorodheshaji, ukaguzi, ufutaji na takwimu zimetengwa na kielelezo kikuu cha ufunguo wa API. Rekodi za ukaguzi zina heshi na metadata ya ukubwa, kamwe haina maudhui. Maelezo yanayomkabili opereta (alama mbili, mahitaji ya mteja, `codemode:false`, upeo wa kila chombo, uwekaji orodha, na matrix ya uchunguzi) huishi katika [Compression Engines → Masharti / mwongozo wa opereta](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` inaripoti mbano wa maelezo ya MCP kando chini ya `analytics.mcpDescriptionCompression`. Thamani hizo ni makadirio ya ukubwa wa metadata kwa maelezo yanayoorodheshwa ya MCP (`tools`, `prompts`, `resources`, na `resourceTemplates`); si stakabadhi za matumizi ya mtoa huduma na zimewekwa alama `source: "mcp_metadata_estimate"`.
 
@@ -160,7 +162,7 @@ Tabia kuu:
 
 Usanidi: `compression.mcpAccessibility` katika mipangilio ya kimataifa (uhamiaji 056). Utekelezaji: `open-sse/services/compression/engines/mcpAccessibility/`. Hati kamili: [Injini za Mgandamizo — MCP Kichujio cha Mti wa Ufikivu](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Tazama [Injini za Mfinyizo](../compression/COMPRESSION_ENGINES.md) na [Mfinyazo wa RTK](../compression/RTK_COMPRESSION.md) kwa modeli ya mgandamizo wa wakati wa utekelezaji nyuma ya zana hizi.
+Tazama [Injini za Mfinyizo](../compression/COMPRESSION_ENGINES.md) na [Mfinyazo wa RTK](../compression/RTK_COMPRESSION.md) kwa modeli ya kubana wakati wa utekelezaji nyuma ya zana hizi.
 
 ## 1 Zana za Wakala (3)
 

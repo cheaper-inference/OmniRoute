@@ -214,7 +214,7 @@ export default function LoginPage() {
               <p className="text-text-muted leading-relaxed mb-6">{t("runOnboardingWizard")}</p>
               <Button
                 variant="primary"
-                className="w-full h-11 text-sm font-medium"
+                className="w-full h-11 text-sm"
                 onClick={() => router.push("/dashboard/onboarding")}
               >
                 {t("startOnboarding")}
@@ -251,7 +251,7 @@ export default function LoginPage() {
               <p className="text-text-muted leading-relaxed mb-6">{t("setPasswordDescription")}</p>
               <Button
                 variant="primary"
-                className="w-full h-11 text-sm font-medium"
+                className="w-full h-11 text-sm"
                 onClick={() => router.push("/dashboard/onboarding")}
               >
                 {t("configurePassword")}
@@ -311,7 +311,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     variant="primary"
-                    className="w-full h-11 text-sm font-medium"
+                    className="w-full h-11 text-sm"
                     loading={loading}
                   >
                     {t("continue")}
@@ -319,7 +319,7 @@ export default function LoginPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="w-full h-11 text-sm font-medium"
+                    className="w-full h-11 text-sm"
                     onClick={() => {
                       setMfaStep(false);
                       setMfaCode("");
@@ -335,7 +335,7 @@ export default function LoginPage() {
                     type="button"
                     variant="primary"
                     icon="login"
-                    className="w-full h-11 text-sm font-medium"
+                    className="w-full h-11 text-sm"
                     onClick={() => (window.location.href = withBasePath("/api/auth/oidc/login"))}
                   >
                     {t("continueWithOidc")}
@@ -359,7 +359,7 @@ export default function LoginPage() {
                     <Button
                       type="submit"
                       variant="primary"
-                      className="w-full h-11 text-sm font-medium"
+                      className="w-full h-11 text-sm"
                       loading={loading}
                     >
                       {t("continue")}
@@ -372,7 +372,7 @@ export default function LoginPage() {
                         type="button"
                         variant="secondary"
                         icon="login"
-                        className="w-full h-11 text-sm font-medium"
+                        className="w-full h-11 text-sm"
                         onClick={() =>
                           (window.location.href = withBasePath("/api/auth/oidc/login"))
                         }
@@ -434,7 +434,7 @@ export default function LoginPage() {
                       <Icon name={item.icon} size={20} className="text-text-muted" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-text-main">{item.title}</h3>
+                      <h3 className="text-text-main">{item.title}</h3>
                       <p className="text-sm text-text-muted">{item.desc}</p>
                     </div>
                   </div>

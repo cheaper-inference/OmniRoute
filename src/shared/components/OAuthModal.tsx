@@ -1348,7 +1348,7 @@ function LegacyOAuthModal({
             <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
               <Icon name="check_circle" size={30} className="text-success" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("success")}</h3>
+            <h3 className="text-lg mb-2">{t("success")}</h3>
             <p className="text-sm text-text-muted mb-4">
               {t("successMessage", { providerName: providerInfo.name })}
             </p>

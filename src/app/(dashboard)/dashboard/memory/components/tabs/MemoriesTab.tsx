@@ -416,7 +416,7 @@ export default function MemoriesTab() {
       <Card>
         <div className="p-4">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold">{t("memories")}</h2>
+            <h2 className="text-lg">{t("memories")}</h2>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 icon="search"
@@ -458,7 +458,11 @@ export default function MemoriesTab() {
             </div>
           ) : (
             <>
-              <Table aria-label={t("memories")} scrollbarLabel={t("memories")}>
+              <Table
+                aria-label={t("memories")}
+                scrollbarLabel={t("memories")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("type")}</TableHead>
@@ -481,7 +485,7 @@ export default function MemoriesTab() {
                           {t(memory.type)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{memory.key}</TableCell>
+                      <TableCell>{memory.key}</TableCell>
                       <TableCell className="max-w-md truncate text-text-muted">
                         {memory.content}
                       </TableCell>
