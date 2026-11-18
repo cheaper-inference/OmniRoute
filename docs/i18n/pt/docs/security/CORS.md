@@ -117,32 +117,10 @@ A correspondência das origens não distingue maiúsculas de minúsculas e ignor
 pode ser definida em tempo de execução em **Painel → Segurança → Origens CORS permitidas** sem
 reiniciar.
 
-## Chaves de API vs. sessões com cookies
+## chaves API vs sessões de cookies
 
-- **Bearer / `x-api-key` (a superfície de inferência `/v1/*`):** os browsers nunca as anexam
-  automaticamente. O CORS não constitui uma barreira significativa neste caso — a chave de API é a
-  barreira —, motivo pelo qual esta superfície é intencionalmente permissiva, para que os clientes
-  de browser e Electron possam ler respostas às quais já têm direito.
-  A reflexão permissiva da origem segue a chave validada, e não a mera presença do
-  cabeçalho: quando `REQUIRE_API_KEY=false` serve um pedido de forma anónima, a sua
-  resposta bem-sucedida mantém a lista de permissões fechada por predefinição. As
-  rejeições de autenticação (401) continuam legíveis para que os clientes possam
-  assinalar uma chave revogada ou mal escrita (#5242): o 401 da própria pipeline mantém
-  a reflexão, e uma rota que recusa a chave por si mesma depois de a pipeline a ter
-  servido como anónima (`/v1/models` e `/v1beta/models` com autenticação de gestão
-  configurada, as rotas com âmbito de proprietário `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` e as rotas de candidatos do auto-combo) acrescenta a
-  reflexão a esse 401 através de `credentialRejectionHeaders()`. A reflexão depende de o
-  pedido transportar um cabeçalho de credenciais (`Authorization`, `x-api-key`,
-  `x-goog-api-key` ou o cookie `auth_token`), e não de qual deles a rota verificou, e
-  nunca é acompanhada de `Access-Control-Allow-Credentials`; o corpo é um envelope de
-  erro fixo. As rotas de gestão sob `/api/v1/` protegidas por `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) não acrescentam a reflexão: com
-  `REQUIRE_API_KEY=false`, os respetivos 401/403 não são legíveis entre origens.
-- **Sessão com cookies (o painel):** protegida pela predefinição de bloqueio em caso de falha **e**
-  pela ausência de `Access-Control-Allow-Credentials` no caminho partilhado. Mantenha
-  as origens de gestão/do painel fora de qualquer configuração permissiva; estas devem permanecer
-  estritamente bloqueadas em caso de falha.
+- **Bearer / `x-api-key` (a superfície de inferência `/v1/*` ):** os navegadores nunca os anexam automaticamente. CORS não é uma barreira significativa aqui — a chave API é a barreira — e é por isso que esta superfície é intencionalmente permissiva para que o navegador e os clientes Electron possam ler as respostas a que já têm direito. O eco relaxado segue a chave validada, e não a mera presença do cabeçalho: quando `REQUIRE_API_KEY=false` atende um pedido anonimamente, a sua resposta bem-sucedida mantém a lista de permissões fechada com falha. As rejeições de autenticação (401) permanecem legíveis para que os clientes possam exibir uma chave revogada ou mal digitada (#5242): o próprio 401 do pipeline mantém o eco e uma rota que recusa a própria chave depois de o pipeline a ter servido como anónima (`/v1/models` e `/v1beta/models` com autenticação de gestão configurada, as rotas candidatas `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` e combinação automática com o âmbito do proprietário) adicionam o eco a este 401 via `credentialRejectionHeaders()`. O echo é introduzido no pedido que carrega um cabeçalho de credencial (`Authorization`, `x-api-key`, `x-goog-api-key` ou o cookie `auth_token` ), e não em qual deles a rota foi verificada e nunca é emparelhado com `Access-Control-Allow-Credentials`; o corpo é um envelope de erro fixo. As rotas de gestão sob `/api/v1/` protegidas por `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) não adicionam o eco: com `REQUIRE_API_KEY=false` o seu 401/403 não é de origem cruzada legível.
+- **Sessão de cookies (o painel):** protegido pelo padrão de falha fechada** e** pela ausência de `Access-Control-Allow-Credentials` no caminho partilhado. Mantenha as origens management/dashboard fora de qualquer configuração permissiva; devem permanecer exatamente fechados contra falhas.
 
 ## Handshakes de WebSocket (`/v1/responses`, `/v1/ws`)
 

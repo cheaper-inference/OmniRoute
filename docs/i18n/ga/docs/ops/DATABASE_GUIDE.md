@@ -184,31 +184,94 @@ Tá an liosta iomlán de thart ar 30+ tábla in `src/lib/db/migrations/`.
 
 ---
 
-## Aistrithe
+## Imirce
 
-Úsáideann OmniRoute **aistrithe le leaganacha agus idéimpiteacha** in `src/lib/db/migrations/`. Is comhad SQL aonair é gach aistriú darb ainm `NNN_description.sql`.
+úsáideann OmniRoute** ascnaimh leagan, mífhoighneach** i `src/lib/db/migrations/`. Is comhad SQL amháin é gach ascnamh. Tá dhá fhormáid ainmniúcháin taobh le chéile; is é an réimír uimhriúil an leagan a thaifeadtar in `_omniroute_migrations`.
 
-### Ainmniú Aistrithe
+### Ainmniú Imirce
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formáid                                           | Sampla                               | A úsáidtear le haghaidh                                                                                                                                                                         |
+| ------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (díreach 3 dhigit)          | `241_seen_models.sql`                | An sean sraith `001`–`241`. Reoite nuair a tháinig an fhormáid stampa ama i dtír ( rinneadh `240` agus `241` a chumasc díreach roimhe seo): ní fhaigheann aon chomhad nua uimhir sheicheamhach. |
+| `YYYYMMDDHHMMSS_description.sql` (14 dhigit, UTC) | `20261113120000_add_usage_index.sql` | Gach imirce a cruthaíodh ó 2026-11-13 ar aghaidh.                                                                                                                                               |
 
-### Conas a Ritear Aistrithe
+Cén fáth a bhfuil an t-athrú: le huimhreacha seicheamhacha, roghnaigh comhthreomhar PRs an chéad uimhir eile agus bhí ar gach duine seachas ceann amháin a athuimhriú roimh chumasc. Tugann stampa ama UTC a leagan féin do gach PR.
 
-Ag am tosaithe, déanann `migrationRunner.ts` na nithe seo a leanas:
+Rialacha formáid an stampa ama (arna fhorfheidhmiú ag `npm run check:migration-numbering`, roinnte leis an ngineadóir in `scripts/check/lib/migrationNaming.mjs`):
 
-1. Cruthaíonn sé an tábla `_omniroute_migrations` mura bhfuil sé ann
-2. Déanann sé fiosrú maidir le haistrithe atá curtha i bhfeidhm cheana
-3. Cuireann sé aon aistrithe nua i bhfeidhm in ord, gach ceann acu in idirbheart
-4. Taifeadann sé gach aistriú a cuireadh i bhfeidhm mar aon le stampa ama
+- Is dáta agus am UTC fíor é an stampa ama, tráth nach luaithe ná `20261113000000` agus nach mó ná 10 nóiméad sa todhchaí.
+- `snake_case` atá sa chás íochtair ag tosú le litir (`a-z`, `0-9`, `_` singil idir focail), 80 carachtar ar a mhéad.
+- Is dúblach iad dhá chomhad leis an stampa ama céanna.
+- Ní bhaineann an riail gan bhearna ach leis an tseansraith: ní mór go mbeadh gach uimhir ó `001` go `241` ann, ach amháin na bearnaí aitheanta `026`, `055` agus `121`. Má scriostar `241` (nó aon seanchomhad) ní theipeann ar an geata. Ní féidir `001` agus `241` a chur leis an liosta ceadaithe `KNOWN_GAPS` choíche. Ní chruthaíonn comhaid le stampa ama bearna riamh.
+- Caithfidh gach iontráil in `src/lib/db/migrations/` a bheith ina chomhad rialta le hainm `.sql` litreacha beaga bailí. Teipeann ar eolaire, nasc simplí, comhad `.SQL` nó `.sql.bak`, comhad folaithe nó ainm le spás, toisc go ndéanfadh an reathaí é a scipeáil go ciúin nó go dtimpisteálfadh sé ag an tosaithe.
+
+**Cuir ordú i bhfeidhm.** Déanann an rádala sórtáil de réir luach uimhriúil an réimír, ní trí théacs: na sean `001`– comhaid `241` ar dtús, ansin na comhaid le stampa ama in ord stampa ama, ansin aon chomhaid le spásanna ainm atá cláraithe le `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (leaganacha ar nós `ee-001`). Is éard is ascnamh ar feitheamh ann ná comhad ar bith nach bhfuil a leagan in `_omniroute_migrations`, mar sin tá feidhm ag ascnamh ó bhrainse níos sine a chumaisc tar éis ceann níos nuaí ar bhunachair shonraí atá ann cheana féin.
+
+**Is é an stampa ama ná ordú cruthú, ní ordú cumaisc.** Má bhraitheann do imirce ar thábla nó colún cruthaithe ag imirce le a** níos nuaí** stampa ama (mar shampla, ceann ó PR eile a chumasc ar dtús), rithfidh bunachar sonraí úr do cheannsa ar dtús agus theipeann air. Cé go bhfuil do PR fós oscailte, athghin ainm an chomhaid le `npm run db:new-migration` ionas go bhfaighidh sé stampa ama níos nuaí, nó déan neamhspleách é. Baineann `npm run test:migrations:fresh` gach ascnamh chuig bunachar sonraí folamh agus glacann sé seo.
+
+### Ní Scriostar nó Ní Athainmnítear Imirce Chomhcheangailte
+
+Nuair a bhíonn comhad ascnaimh ar bhrainse eisithe nó `main`, tá sé ar siúl cheana féin ar bhunachair sonraí homalog agus forbróra, ar shuiteálacha VPS agus sa sioncronú Enterprise. As sin amach:
+
+- **Ná scrios riamh é.** Chaillfeadh suiteálacha úra a scéimre fad is a choimeádann bunachair shonraí uasghrádaithe é.
+- **Ná athainmnigh riamh é.** Ní bheadh an leagan in `_omniroute_migrations` ag teacht le comhad a thuilleadh, agus mar sin reáchtálfadh gach bunachar sonraí a chuir i bhfeidhm é arís é. Ansin déanann SQL neamh-impire sonraí a dhúbailt nó stopann sé an tosaithe.
+- **Scéimre difriúil uait?** Cruthaigh ascnamh nua le `npm run db:new-migration`.
+
+Níl an t-athainmniú sábháilte ach do chomhad nach bhfuil cumaiscthe fós, agus is é sin an cás a thagraíonn leideanna an gheata. Ní athraíonn clib scaoileadh rud ar bith anseo: foilsíonn gach brú chuig brainse `release/v*` an íomhá Docker `:next` agus ritheann sé ar homolog, suiteálann VPS agus an sioncronú Enterprise, agus mar sin tá ascnamh cumaisc ar siúl ar bhunachair shonraí iarbhír sula mbíonn aon chlib `vX.Y.Z` ann. Teipeann ar an geata gach bhaint de chomhad bonn, clib nó nach bhfuil.
+
+- **Aistriú cumaiscthe ar ais.** Teipeann ar `git revert` a scriosann an comhad an geata. Coinnigh an comhad agus cealaigh a scéimre in ascnamh nua: `npm run db:new-migration -- <description>`, le `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` agus mar sin de. Críochnaíonn bunachair shonraí uasghrádaithe agus úra ansin leis an scéimre céanna.
+- **Glactar leis an gceann a athainmniú: iontráil comhoiriúnachta agus ábhar comhionann.** Más gá comhad cumaisc a bhogadh (mar shampla, roinneann dhá chomhad chumasc stampa ama agus stopann an reathaí le himbhualadh leagain), athainmnigh an ceann is déanaí gan teagmháil a dhéanamh lena SQL agus cuir `{ fromVersion, fromName, toVersion, toName }` le `RENAMED_MIGRATION_COMPATIBILITY` i `src/lib/db/migrationRunner/constants.ts`. Bogtar a ró `_omniroute_migrations` ó bhunachair shonraí a chuir an seanleagan i bhfeidhm in ionad an comhad a rith arís. Tugann an geata foláireamh faoi athainmniú den sórt sin agus reáchtálann sé an tseiceáil comaitéireachta air i gcónaí, is cuma cén stampa ama nua: cuireann suiteálacha úra an comhad i bhfeidhm sa suíomh nua, ní dhéanann bunachair shonraí uasghrádaithe, mar sin roghnaigh stampa ama nua in aice leis an seancheann. Theipeann ar an geata an t-athainmniú má athraigh an t-ábhar (tá athrú scéimre fós ag dul in ascnamh nua), nó mura bhfuil spriocchomhad an iontrála ar an diosca.
+- **Ná athainmnigh laistigh den stampa ama céanna riamh.** Teipeann an geata ar athainm a choinníonn an stampa ama agus nach n-athraíonn ach an tuairisc, bíodh iontráil nó gan iontráil ann. Le hiontráil arb ionann a `toVersion` agus a `fromVersion`, scriosann an rádala an t-sean tsraith `_omniroute_migrations` agus cuireann sé an comhad i bhfeidhm arís ar gach bunachar sonraí a bhí ar siúl cheana féin. Gan iontráil, ní rianaíonn an rádala ach an leagan: scipeann sé an comhad ar na bunachair shonraí sin (ní ritheann ábhar nua ann riamh) agus logálann sé earráid athuimhrithe ar gach tosaithe. Úsáid stampa ama eile chomh maith le hiontráil chomhoiriúnachta, nó coinnigh an t-ainm.
+- **Seiceálann an geata nach ritheann an comhad athainmnithe arís.** I gcás gach athainmnithe clúdaithe, cuireann an geata an t-ainm comhaid nua ar aghaidh chuig an seic comaitéireachta le `--must-not-apply`. Cuireann an seic an bunachar uasghrádaithe leis an bhfíor-rádala, agus má chuireann an rádala an comhad sin i bhfeidhm arís (mar shampla, toisc go bhfuil leagan nó ainm mícheart ar an iontráil, nó toisc go léann parsálaí téacs an gheata `constants.ts` difriúil ó TypeScript), teipeann an geata le `migration renomeada rodaria de novo` agus iarrann sé ort leaganacha agus ainmneacha sean agus nua an iontrála a sheiceáil.
+
+### Cad a Sheiceáil an Geata i gCoinne an Bhunáit
+
+Ar iarratas tarraingt agus ritheann scuaine chumasc, déanann `npm run check:migration-numbering` comparáid idir `src/lib/db/migrations/` ar diosca leis an eolaire céanna ar an mbunbhrainse. Is é an bonn, san ord seo: `--base-latest-tag`, `--base <ref>`, an t-athróg `MIGRATION_BASE_REF`, nó, nuair a bhíonn `GITHUB_EVENT_NAME` `pull_request`, `pull_request_target` nó `merge_group`, an chéad tuismitheoir den tiomantas cumaisc, `merge_group.base_sha` pálasta an imeachta, nó `git merge-base HEAD origin/$GITHUB_BASE_REF`. In iarratas tarraingthe nó reáchtáil scuaine chumasc gan aon bhun inréitithe teipeann an geata. Lasmuigh de CI gan `--base` priontaíonn sé `comparação com a base: pulada (sem --base)` agus scipeann sé na rialacha seo.
+
+cuireann `--base-latest-tag` i gcomparáid leis an gclib scaoilte is nuaí (`vX.Y.Z` in ord semver; ní áirítear clibeanna iarmhír amhail oícheanta) atá i stair `HEAD`, leis na rialacha céanna le `--base`. Ritheann Release-Green (`scripts/quality/validate-release-green.mjs`) an geata ar an mbealach seo, toisc nach bhfuil bonn iarratais tarraingthe ag ritheanna brú agus sceidealta agus is féidir le cumasc teacht i dtír gan rith úr CI. Gan aon chlib scaoileadh sa stair theipeann ar an geata; rith `git fetch --tags` (i CI, tugann `actions/checkout` le `fetch-depth: 0` na clibeanna).
+
+| Athrú ar an iarratas tarraingt                                                                               | Toradh                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Athainmnítear comhad atá ar an mbonn, le hiontráil `RENAMED_MIGRATION_COMPATIBILITY`                         | **Rabhadh** má tá an t-ábhar comhionann, agus go ritheann an tseiceáil comaitéireachta is cuma cén stampa ama nua; theipeann air má athraíonn an suíomh nua an scéimre deiridh (cealaigh an t-athainmnigh, nó roghnaigh stampa ama nua eile nuair a bhíonn sé ag taisteal) nó dá gcuirfeadh an reathaí an comhad athainmnithe i bhfeidhm arís ar bhunachar sonraí uasghrádaithe.** Theipeann** má d'athraigh an t-ábhar. |
+| Athainmnítear comhad atá ar an mbonn agus a stampa ama á choinneáil (ní athraíonn ach an cur síos)           | **Theipeann** , le hiontráil nó gan é: chuirfeadh an reathaí i bhfeidhm arís é (leis an iontráil) nó scipeáilfeadh sé é trí leagan (gan ceann amháin). Úsáid stampa ama eile chomh maith le hiontráil chomhoiriúnachta, nó coinnigh an t-ainm.                                                                                                                                                                           |
+| Scriostar comhad atá ar an mbonn, nó athainmnítear é gan iontráil                                            | **Theipeann** , cibé an bhfuil nó nach bhfuil an comhad i gclib scaoileadh. Chun é a chealú, cuir an comhad ar ais le `git checkout <base> -- src/lib/db/migrations/<file>`; chun a scéimre a chur ar ais, cuir imirce nua leis `DROP ... IF EXISTS`.                                                                                                                                                                    |
+| Tá ábhar difriúil ag comhad atá ar an mbonn                                                                  | **Rabhadh** (nótáil `::warning` i nGníomhartha GitHub ), agus ritheann an tseiceáil comaitéireachta. Teipeann air má athraíonn an t-eagar an scéimre deiridh, mar ní chuireann bunachair shonraí uasghrádaithe an comhad atheagraithe i bhfeidhm arís: cuir an t-athrú in ascnamh nua. Ní thugann ach eagarthóireacht neamhdhíobhálach (trácht, `IF NOT EXISTS`) ach rabhadh.                                            |
+| Cuirtear comhad le stampa ama leis agus stampa ama nach bhfuil níos nuaí ná an ceann is nuaí ar an mbonn     | Ritheann an seic comaitéireachta, a gcuirtear síos air thíos.                                                                                                                                                                                                                                                                                                                                                            |
+| Cuirtear comhad `NNN_` seanfhormáid leis agus uimhir faoi bhun an chomhaid seanfhormáide is nuaí ag an mbonn | **Theipeann** , fiú má tá `KNOWN_GAPS` curtha in eagar san iarratas tarraingt céanna: tá an sean-sraith reoite, cruthaigh an imirce le `npm run db:new-migration`. Glactar le comhaid seanfhormáide os cionn na cinn is nuaí den bhunáit (iarratas ar tharraingt `release/v*` go `main` ).                                                                                                                               |
+| Tá ráitis `INSERT`, `UPDATE`, `DELETE` nó `REPLACE` i gcomhad as ord, curtha in eagar nó athainmnithe        | **Rabhadh** : ní dhéanann an tseiceáil comaitéireachta sonraí a chur i gcomparáid, mar sin athbhreithnigh cibé an athraíonn an t-ord ina gcuirtear bunachair shonraí uasghrádaithe agus úra i bhfeidhm an toradh.                                                                                                                                                                                                        |
+
+Clúdaíonn rith amháin den tseiceáil comaitéireachta na comhaid as ord, na comhaid a cuireadh in eagar agus na comhaid athainmnithe le chéile.
+
+Tógann an tseiceáil comaitéireachta (`scripts/check/migration-commutation.ts`) dhá bhunachar sonraí sealadacha leis an bhfíorchosán suiteála: an** uasghrádaithe** ceann amháin (tosaithe leis na bunaistrithe, ansin tosaithe arís ar an gcomhad céanna agus ascnaimh an iarratais tarraingte) agus a** úr** ceann amháin (tosaithe amháin agus ascnaimh an iarratais tarraingte). Déanann sé comparáid idir na scéimeanna a eascraíonn as: táblaí agus colúin (gan aird a thabhairt ar ord na gcolún), srianta UNIQUE / PRIMARY KEY agus FOREIGN KEY, téacs normalaithe `CREATE TABLE` gach tábla (a chlúdaíonn srianta CHECK, comhbhailiúcháin, colúin ghinte agus roghanna tábla), innéacsanna, truicear agus tuairimí. Ní dhéantar comparáid idir sonraí ró. Má mheaitseálann siad, prionnaíonn an geata go bhfuil an comhad as ord ach go n-imoibríonn sé, agus go n-imíonn sé. Má tá difríocht eatarthu, teipeann ar an geata leis an difríocht agus leid ar an gcás: i gcás comhad as-ordú, a athghiniúint a ainm le `npm run db:new-migration`, atá sábháilte toisc nach bhfuil an comhad a chumasc fós; le haghaidh bunchomhad curtha in eagar, cuir an bunábhar ar ais agus cuir an t-athrú ar imirce nua; i gcás comhad athainmnithe, cealaigh an t-athainm nó roghnaigh stampa ama nua eile nuair a bhíonn sé ag comaitéireacht, ná cuir an stampa ama céanna ar a dtugtar ainm eile riamh. Murar féidir leis an tseic féin a rith, teipeann ar an ngeata i CI agus ní thugann sé rabhadh ach go háitiúil. Le haghaidh bunchomhad curtha in eagar, tógtar an bunachar sonraí uasghrádaithe le bunábhar an chomhaid sin, agus scipeann an dara tosaithe é toisc go bhfuil a leagan taifeadta cheana féin. Le haghaidh comhad athainmnithe, tógtar an bunachar sonraí uasghrádaithe leis an gcomhad faoina sheanainm, agus bogann an dara tosaithe a sraith `_omniroute_migrations` tríd an iontráil comhoiriúnachta seachas é a rith arís; Gabhann an geata an t-ainm nua le `--must-not-apply`, mar sin ní theipeann ar an seic má chuireann an dara tosaithe é. Má theipeann ar imirce iarratas tarraingt a chur i bhfeidhm ar an gcosán uasghrádaithe, is é sin, tar éis gach imirce bonn (cibé an dteipeann air freisin ar shuiteáil úr nó nach ea), tuairiscíonn an geata `migration do PR não aplica` agus iarrann ort an SQL a shocrú i gcoinne scéimre reatha an bhoinn; má tá an comhad ag brath ar iarratas tarraingt eile a aistriú le stampa ama níos déanaí, athghin a ainm le `npm run db:new-migration`.
+
+Chun an chomparáid chéanna a reáchtáil go háitiúil, cuir an bonn ar aghaidh go sainráite, mar shampla `npm run check:migration-numbering -- --base origin/<base-branch>`, nó `npm run check:migration-numbering -- --base-latest-tag` chun comparáid a dhéanamh leis an eisiúint is déanaí.
+
+### Imirce Oscailte PR's `NNN` a thiontú
+
+D'fhéadfadh go mbeadh comhad seicheamhach ar nós `242_add_widgets.sql` fós ag gabháil le hiarratas tarraingthe a osclaíodh roimh an lasc. Diúltaítear do sheanuimhreacha os cionn `241`, mar sin déan é a thiontú roimh chumasc:
+
+1. **Athainmnigh an comhad leis an gineadóir, ag coinneáil an tuairisc.** Rith `npm run db:new-migration -- <same description>` chun an t-ainm nua a fháil, bog an SQL isteach ann, agus scrios an seanchomhad `NNN_`. Caithfidh an cur síos fanacht mar a chéile: tá an iontráil chomhoiriúnachta thíos ag teacht leis.
+2. **Cuir iontráil comhoiriúnachta leis má rith bunachar sonraí leanúnach an tseanuimhir.** Má reáchtáil aon bhunachar sonraí a choinnítear (homolog, VPS, suiteáil an rannchuiditheora féin) tógáil an PR leis an gcomhad `NNN_`, cuir `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` le `RENAMED_MIGRATION_COMPATIBILITY` i `src/lib/db/migrationRunner/constants.ts`. Tá sé seo** ag teastáil le haghaidh `237` go `241`** : seilbh na sliotán anois ar an canonical `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` agus `241_seen_models.sql`, agus gan an iontráil a leithéid de bhunachar sonraí skips an imirce canonical go deo agus ritheann an chomhshó amháin arís. Oibríonn sé freisin le haghaidh sliotán a fhanann folamh, mar `242`, nuair is stampa ama an ceann scríbe. Nuair a bhíonn amhras ort, cuir an iontráil leis. Nuair a chuireann tú san eagar é: nuair a choinníonn sliotán sprice iontrála fós sraith a bhogann iontráil eile ar shiúl (mar shampla `237` a bhfuil sraith PR aige agus an tsraith `usage_history_calculated_cost` níos sine ag fanacht le bogadh isteach i `237`), ligeann an rádala don iontráil sin fanacht go dtí go mbeidh an sliotán saor in aisce. Ní stopann ach fíorchoimhlint, mar shliotán a choinnítear as a chéile aon iontráil, nó dhá iontráil a mhalartaíonn sliotáin, an tosaithe le `Cannot reconcile ...`.
+3. **Coinnigh an SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`) , toisc go bhféadfadh an t-aistriú tiontaithe teacht le chéile le bunachar sonraí ina bhfuil a scéimre ann cheana féin.
+4. **Bog cásanna speisialta le heochrach leagan.** Má chuir an PR cás dá sheanuimhir in `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) nó i `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), athraigh an eochair go dtí an stampa ama nua.
+
+Is sampla oibre é `tests/unit/db/codex-fence-migration-rename.test.ts` de thástáil le haghaidh imirce athainmnithe.
+
+### Tacaíochtaí do Chraobhacha Roimh an Athrú
+
+Ná roghnaigh comhad `YYYYMMDDHHMMSS_` ná silín ná tabhair thar n-ais chuig brainse a tháinig roimh an lasc (mar shampla brainse `release/v*` níos sine). Déanann an reathaí ansin ainmneacha comhaid a shórtáil mar théacs, mar sin rithfeadh comhad le stampa ama idir `201_` agus `202_` ar bhunachar sonraí úr, agus ní thuigeann an sean-gheata ansin réimírí 14 dhigit. Ar bhrainse den sórt sin, scríobh an t-athrú mar an chéad chomhad `NNN_` eile de chuid an bhrainse sin féin, idempotent, agus mar sin ní haon op é nuair a thagann an leagan le stampa ama níos déanaí.
+
+### Conas a Ritheann Imirce
+
+Ag am tosaithe, `migrationRunner.ts`:
+
+1. Cruthaíonn tábla `_omniroute_migrations` mura bhfuil sé ann
+2. Ceisteanna maidir le himscrúduithe a cuireadh i bhfeidhm cheana féin
+3. Cuirtear aon aistrithe nua i bhfeidhm in ord, gach ceann acu in idirbheart
+4. Taifeadtar gach ascnamh feidhmeach le stampa ama
 
 ```ts
-// src/lib/db/migrationRunner.ts (simplithe)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Idéimpiteacht
+### Neamhláithreacht
 
-Ní mór d’aistrithe a bheith **idéimpiteach** — níor cheart aon éifeacht a bheith ag baint lena rith faoi dhó:
+Ní mór imirceacha** díomhaoin** ba cheart go mbeadh — á rith faoi dhó ina rogha neamhfhabhrach:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Bain úsáid fhairsing as clásail `IF NOT EXISTS`, `IF EXISTS`, agus `OR IGNORE` / `OR REPLACE`.
+Úsáid clásail `IF NOT EXISTS`, `IF EXISTS`, agus `OR IGNORE` / `OR REPLACE` go liobrálach.
 
-### Aistriú Nua a Chur Leis
+### Imirce Nua a Chur Leis
 
-1. **Sainaithin an chéad uimhir eile**: `ls src/lib/db/migrations/ | tail -1`
-2. **Cruthaigh an comhad**: `NNN_my_change.sql`
-3. **Úsáid DDL sábháilte**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Aislíon sonraí go cúramach**: úsáid `UPDATE ... WHERE ...` chun déileáil le rónna atá ann cheana
-5. **Déan tástáil ar chóip**: ná rith aistrithe neamhthástáilte ar an gcóras táirgthe riamh
+1. **Cruthaigh an comhad leis an gineadóir** : `npm run db:new-migration -- <description>` (mar shampla `npm run db:new-migration -- add combo priority`). Scríobhann sé `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` leis an am UTC reatha agus ceanntásc nóta tráchta, bogtar ar aghaidh soicind amháin má ghlactar leis an stampa ama sin, agus ní fhorscríobhtar comhad riamh. Ná roghnaigh uimhir de láimh.
+2. **Bain úsáid DDL sábháilte** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Sonraí aislíonta go cúramach** : bain úsáid as `UPDATE ... WHERE ...` chun na sraitheanna atá ann cheana a láimhseáil
+4. **Seiceáil ordú agus ainmniú** : `npm run test:migrations:fresh` (gach ascnamh ar bhunachar sonraí folamh) agus `npm run check:migration-numbering`
+5. **Tástáil ar chóip** : níor rith riamh ascnaimh neamhthástála ar tháirgeadh
 
 Sampla:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> Tá **athruithe nach bhfuil comhoiriúnach siar** (m.sh., colúin a scriosadh) casta. NÍ thacaíonn OmniRoute le híosghrádú — a luaithe a chuirtear aistriú i bhfeidhm, bíonn an t-athrú scéimre buan. Déan pleanáil dá réir.
+> **Athruithe ar gcúl-neamh-chomhoiriúnach** (m.sh., titim colúin) fánach. tacaíonn OmniRoute le NOT íosghrádú — nuair a chuirtear imirce i bhfeidhm, tá an t-athrú scéimre buan. Pleanáil dá réir.
 
 ---
 
@@ -407,48 +470,49 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### Mód WAL
 
-Tá WAL cumasaithe de réir réamhshocraithe. I gcás ualaí oibre ina ndéantar mórán scríbhneoireachta, smaoinigh ar:
+Tá WAL cumasaithe de réir réamhshocraithe. Le haghaidh ualaí oibre ardscríofa, smaoinigh ar:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Seicphointe gach 1000 leathanach
-PRAGMA journal_size_limit = 67108864;  -- Teorainn WAL de 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+Ní shocraíonn OmniRoute `journal_size_limit`. Bogann seicphointe frámaí WAL isteach sa phríomhchomhad, ach coinníonn an comhad WAL an méid leithdháilte is mó. Ní thugann an garda `OMNIROUTE_WAL_GUARD_MAX_MB` ach rabhadh agus ritheann `wal_checkpoint(RESTART)`; ní caipín méid diosca é.
 
 ### Innéacsanna
 
-Príomhinnéacsanna le haghaidh feidhmíochta (cruthaítear go huathoibríoch iad trí ascnaimh):
+Príomhinnéacsanna feidhmíochta (uathchruthaithe ag aistrithe):
 
-- `idx_models_provider` — cuardaigh samhlacha de réir soláthraí
-- `idx_combo_targets_combo_id` — leathnú sprice teaglama
-- `idx_usage_history_api_key_timestamp` — anailísíocht úsáide
-- `idx_quota_snapshots_api_key_window` — rianú cuótaí
-- `idx_call_logs_timestamp` — iarratais ar logaí glaonna
+- cuardaigh samhail `idx_models_provider` — ag soláthraí
+- leathnú sprice teaglama `idx_combo_targets_combo_id` —
+- anailísíocht úsáide `idx_usage_history_api_key_timestamp` —
+- rianú cuóta `idx_quota_snapshots_api_key_window` —
+- fiosrúcháin logáil glaonna `idx_call_logs_timestamp` —
 
-Chun innéacs nua a chur leis, cruthaigh ascnaimh:
+Chun innéacs nua a chur leis, cruthaigh ascnamh:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/A Mapáilte sa Chuimhne
+### Cuimhne-Mapáilte I/O
 
-I gcás bunachair sonraí an-mhór (>10GB), is féidir mapáil chuimhne a choigeartú trí pragma SQLite:
+I gcás bunachair shonraí an-mhór (> 10GB), is féidir mapáil chuimhne a choigeartú trí SQLite pragma:
 
 ```sql
--- Socraigh trí pragma SQLite (coigeartaigh in core.ts nó ag am rite)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Dlúthú
+### Comhdhlúthú
 
-Baineann áscanna OmniRoute a ritheann ar feadh tréimhsí fada tairbhe as `VACUUM` ó am go chéile:
+Baineann cásanna fadtéarmacha OmniRoute leas as uaireanta `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Rith go míosúil le linn tréimhsí ísealtráchta. (Laghdaíonn mód WAL an gá leis, ach ní chuireann sé deireadh leis.)
+Rith go míosúil le linn fuinneoga tráchta íseal. (Laghdaíonn modh WAL an gá, ach ní chuireann sé deireadh leis.)
 
 ---
 

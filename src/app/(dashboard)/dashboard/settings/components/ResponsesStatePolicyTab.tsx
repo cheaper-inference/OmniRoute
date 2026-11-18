@@ -79,7 +79,7 @@ export default function ResponsesStatePolicyTab() {
           <Icon name="account_tree" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("responsesStateTitle")}</h3>
+          <h3 className="text-lg">{t("responsesStateTitle")}</h3>
           <p className="text-sm text-text-muted">{t("responsesStateDesc")}</p>
         </div>
         <div className="min-w-[7rem] flex justify-end">

@@ -5,21 +5,30 @@ import {
   renderCompressionPipeline,
   COMPRESSION_PIPELINE_COPY,
 } from "../../../scripts/docs/gen-readme-compression-pipeline.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed compression funnel must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal
 // color escaping the theme. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed compression-pipeline diagram is exactly what the generator produces", async () => {
-  const generated = await renderCompressionPipeline();
-  const committed = readFileSync("docs/diagrams/compression-pipeline.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/compression-pipeline.svg is stale — regenerate with `node scripts/docs/gen-readme-compression-pipeline.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/compression-pipeline.svg") };
+
+test(
+  "the committed compression-pipeline diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderCompressionPipeline();
+    const committed = readFileSync("docs/diagrams/compression-pipeline.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/compression-pipeline.svg is stale — regenerate with `node scripts/docs/gen-readme-compression-pipeline.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the {} code token, and nothing is external", async () => {
   const svg = await renderCompressionPipeline();

@@ -1,1 +1,0 @@
-- **feat(usage):** attribute proxied requests to coding-agent sessions and projects for team usage reporting, recording session token counters, priced cost, working directory, and project repo ([#14833](https://github.com/diegosouzapw/OmniRoute/pull/14833)) — thanks @fouadSalkini

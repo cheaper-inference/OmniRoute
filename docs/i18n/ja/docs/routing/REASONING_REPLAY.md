@@ -18,27 +18,29 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 
 ただし、一般的なクライアント (Cursor、 Cline、 Roo Code、 OpenAI SDK) は、再生する履歴から`reasoning_content`を削除します。 OmniRouteサーバー側のキャッシュからリクエストを復元するため、アップストリームで認識されるリクエストは一貫しています。問題 #1628 では、プロセスの再起動後もキャッシュが存続するように、ハイブリッドmemory/SQLite永続性が導入されました。
 
-## 建築
+## アーキテクチャ
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
+ターン N（assistant が生成）:
+  → レスポンスに reasoning_content + tool_calls が含まれる
+  → requiresReasoningReplay(provider, model) の場合: cacheReasoningFromAssistantMessage()
+      （メモリ + DB）に書き込み、リクエストスコープ内で tool_call.id ごとに 1 エントリを保存
+  → クライアントにレスポンスを転送（クライアントが reasoning を保持する場合としない場合がある）
 
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+ターン N+1（クライアントがフォローアップを送信）:
+  → translator が検出: requiresReasoningReplay(provider, model) === true
+  → tool_calls があり reasoning_content がない各 assistant メッセージについて:
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → メモリ → DB
+      ヒット  → msg.reasoning_content = キャッシュ値; recordReplay()
+      ミス  → msg.reasoning_content = ""（古い DeepSeek 向けのレガシーフォールバック）
+  → 上流側から一貫した履歴が見える → 400 にならない
 ```
 
-キャプチャは`open-sse/handlers/chatCore.ts` (2 つのサイト、2 つの`cacheReasoningFromAssistantMessage`呼び出しサイト) で行われます。再生は、スキーマ強制の後、ディスパッチ前に`open-sse/translator/index.ts`で行われます。
+キャプチャは `open-sse/handlers/chatCore.ts`（`cacheReasoningFromAssistantMessage` の呼び出し箇所 2 か所）で行われます。リプレイは、スキーマの強制変換後、ディスパッチ前に `open-sse/translator/index.ts` で行われます。
 
-Plain (non-tool-call) assistant turns are keyed differently: `buildAssistantMessageCacheKey()` digests the session scope plus the normalized OpenAI-format transcript up to that turn, because DeepSeek requires the reasoning of _every_ prior turn once `tools` is present. For Responses-API targets (for example `opencode-go/deepseek-v4-flash`, routed to `/responses`) the upstream body carries `input`, not `messages`, so `translateRequest()` (`open-sse/translator/index.ts`) reports the pivot transcript it digested through a callback option and the capture sites digest that same transcript. The Responses replay pass runs on the OpenAI pivot for every source format, so Anthropic Messages clients (Claude → OpenAI → Responses) are replayed too.
+ツール呼び出しのエントリは、リクエストスコープとツール呼び出し ID のダイジェストである `buildToolCallCacheKey()` の配下に保存されます。そのため、別の API キーまたはセッションで使用された同じ ID によってエントリが選択されることはありません。スコープは `buildReasoningCacheScope()` から取得されます。API キー ID に、リクエストにセッションがある場合はセッションキーが加わります。そのため、これらのエントリでは `tool_call_id` 列とダッシュボードにこのダイジェストが表示されます。
+
+プレーンな（ツール呼び出しではない）assistant ターンは、別の方法でキー付けされます。`buildAssistantMessageCacheKey()` が、セッションスコープと、そのターンまでの正規化された OpenAI 形式のトランスクリプトを結合したものをダイジェストします。これは、`tools` が存在すると DeepSeek が _それ以前のすべてのターン_ の reasoning を必要とするためです。Responses API の対象（たとえば `opencode-go/deepseek-v4-flash` は `/responses` にルーティングされます）では、上流側のボディに `messages` ではなく `input` が含まれます。そのため、`translateRequest()`（`open-sse/translator/index.ts`）は、コールバックオプションを通じてダイジェストしたピボットトランスクリプトを報告し、キャプチャ箇所でも同じトランスクリプトをダイジェストします。Responses のリプレイパスは、すべてのソース形式について OpenAI ピボット上で実行されるため、Anthropic Messages クライアント（Claude → OpenAI → Responses）もリプレイされます。
 
 ## ストレージ—ハイブリッド メモリ+ SQLite
 
@@ -59,7 +61,7 @@ Plain (non-tool-call) assistant turns are keyed differently: `buildAssistantMess
 
 ## データベーススキーマ
 
-移行: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+Migration: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -73,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-インデックス: `expires_at`、 `provider`、 `model`、 `created_at`。 `expires_at`は Unix エポック秒として保存されます。 SELECTレイヤーは、 `EXPIRES_AT_EPOCH_SQL`を介してレガシー テキスト値を正規化します。
+インデックス: `expires_at`、`provider`、`model`、`created_at`。`expires_at` は Unix エポック秒として保存されます。SELECT レイヤーでは、`EXPIRES_AT_EPOCH_SQL` を介して従来のテキスト値を正規化します。
 
 ## プロバイダー/モデルの検出
 

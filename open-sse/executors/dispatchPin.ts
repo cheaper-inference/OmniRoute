@@ -156,8 +156,10 @@ async function dispatchFollowingRedirects(
   let options: RequestInit = { ...init, redirect: "manual" };
   for (let hop = 0; ; hop++) {
     const response = await dispatchOnce(provider, currentUrl, options, credentials, hop > 0);
+    // Status first: a non-redirect answer is returned as is, whatever its headers.
+    if (!REDIRECT_STATUSES.has(response.status)) return response;
     const location = response.headers.get("location");
-    if (!REDIRECT_STATUSES.has(response.status) || !location) return response;
+    if (!location) return response;
     void response.body?.cancel().catch(() => {});
     if (hop >= MAX_REDIRECTS) {
       throw new Error(`Provider dispatch stopped after ${MAX_REDIRECTS} redirects`);

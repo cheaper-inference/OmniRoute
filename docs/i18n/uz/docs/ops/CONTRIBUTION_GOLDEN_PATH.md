@@ -28,69 +28,61 @@ almashtirmaydi; u har bir keng tarqalgan oʻzgartirish turini uning shartnomalar
 6. **Dalillarni qayd eting.** PR shablonida ishga tushirilgan buyruqlar, qoʻshilgan yoki oʻzgartirilgan har bir test fayli,
    migratsiyalar yoki feature flaglar hamda faqat CI orqali bajarilishi kutilayotgan tekshiruvlarni koʻrsating.
 
-## Oʻzgartirish turi boʻyicha asosiy yoʻllar
+## O'zgarishlar turi bo'yicha oltin yo'llar
 
-Quyidagi buyruqlar minimal yoʻnaltirilgan tekshiruvlardir, ular siz oʻzgartirgan
-xatti-harakatni bevosita qamrab oladigan testni oʻtkazib yuborishga ruxsat bermaydi.
+Quyidagi buyruqlar siz o'zgartirgan xatti-harakatni to'g'ridan-to'g'ri qamrab oladigan testni o'tkazib yuborishga ruxsat bermaydigan minimal yo'naltirilgan tekshiruvlardir.
 
 ### Provayder
 
 **Shartnomalar**
 
-- `src/shared/constants/providers/` ichidagi provayder taʼrifi va uning
-  `src/shared/constants/providers.ts` ichidagi kompozitsiyasi.
-- `open-sse/config/providerRegistry.ts` yoki undan ajratib olingan registr fayllaridagi modellar va imkoniyatlar.
-- Zarur boʻlganda executor/translator tanlovi, OAuth yoki API kaliti konfiguratsiyasi, boshqaruv paneli resurslari va generatsiya qilingan
-  provayder maʼlumotnomasi.
-- Ommaviy hisob maʼlumotlari `resolvePublicCred()`dan foydalanishi kerak; xato javoblarida umumiy sanitizatsiya qilingan
-  xato yordamchi vositalaridan foydalanish shart. `docs/security/PUBLIC_CREDS.md` (git; `/docs` ichiga kompilyatsiya qilinmaydi) va
-  [Xatolarni sanitizatsiya qilish](../security/ERROR_SANITIZATION.md)ga qarang.
+- `src/shared/constants/providers/` provayder ta'rifi va `src/shared/constants/providers.ts` uning tarkibi.
+- `open-sse/config/providerRegistry.ts` yoki undan chiqarilgan registr fayllaridagi modellar va imkoniyatlar.
+- Executor/translator tanlash, OAuth yoki API-kalit konfiguratsiyasi va asboblar paneli aktivlari. Qayta tiklangan `docs/reference/PROVIDER_REFERENCE.md` yoki README diagrammalarini tuzmang: chiqarishni yangilash ularni qayta yozadi (`check:pr-derived-paths` ularni olib yuruvchi PR funksiyasini bajara olmaydi).
+- Umumiy hisobga olish ma'lumotlari `resolvePublicCred()` foydalanishi kerak; xato javoblari umumiy zararsizlantirilgan xato yordamchilaridan foydalanishi kerak. Qarang: `docs/security/PUBLIC_CREDS.md` (git; `/docs` ga kompilyatsiya qilinmagan) va [Xatolarni tozalash](../security/ERROR_SANITIZATION.md).
 
-**Yoʻnaltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # katalog oʻzgarganda; generatsiya qilingan diffni commit qiling
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Shuningdek, taʼsirlangan har bir soʻrov oilasini test qiling: chat, Responses, tasvirlar, embeddinglar, audio yoki video.
-Generatsiya qilingan katalog va golden difflarni shartnoma oʻzgarishlari sifatida koʻrib chiqing; ularni koʻr-koʻrona qabul qilmang.
+Shuningdek, har bir ta'sirlangan so'rovlar guruhini sinab ko'ring: chat, Javoblar, rasmlar, o'rnatish, audio yoki video. Shartnoma o'zgarishi bilan yaratilgan katalog va oltin farqlarni ko'rib chiqing; ularni ko'r-ko'rona qabul qilmang.
 
 ### Marshrutlash
 
 **Shartnomalar**
 
-- `src/shared/constants/routingStrategies.ts` ichidagi ommaviy strategiya qiymatlari va UI metamaʼlumotlari.
-- `open-sse/services/combo.ts` va `open-sse/services/combo/` ostidagi dispatch hamda tartiblash.
-- Combo sxemalari, saqlash, bardoshlilik holati, model imkoniyatlari va API/UI boshqaruv elementlari.
-- Xatti-harakat oʻzgarganda [Auto-Combo Engine](../routing/AUTO-COMBO.md) va bardoshlilik hujjatlari.
+- Ommaviy strategiya qiymatlari va UI metama'lumotlari `src/shared/constants/routingStrategies.ts`
+- `open-sse/services/combo.ts` va `open-sse/services/combo/` ostida jo'natish va buyurtma berish.
+- Kombo sxemalar, qat'iylik, chidamlilik holati, model imkoniyatlari va API/UI boshqaruvlari.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) va xatti-harakatlar o'zgarganda chidamlilik hujjatlari.
 
-**Yoʻnaltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategiya yoki dispatch oʻzgarishlari
-npm run check:known-symbols      # strategiyani roʻyxatdan oʻtkazishdagi oʻzgarishlar
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Lokal ravishda deterministik, yuqori oqim mock qilingan testlardan foydalaning. Jonli combo smoke testlari hisob maʼlumotlarini talab qiladi va
-qoʻlda bajariladi, ular CI oʻrnini bosmaydi.
+Mahalliy deterministik masxaralangan yuqori oqim testlaridan foydalaning. Jonli aralash chekish uchun hisob ma'lumotlari talab qilinadi va CI o'rnini bosuvchi emas, qo'lda bo'ladi.
 
 ### UI / UX
 
 **Shartnomalar**
 
-- `src/app/` va `src/shared/components/` ostidagi Next.js marshrut/sahifa va umumiy komponent chegaralari.
-- API javob shakllari, yuklanish/boʻsh/xato holatlari, klaviatura va ekran oʻquvchi xatti-harakati,
-  moslashuvchan maket, mavzular va lokal kengaytirish.
-- `src/i18n/messages/en.json` ichidagi inglizcha UI manba satrlari; foydalanuvchiga koʻrinadigan yangi matnni kodga bevosita yozmang.
+- Next.js route/page va `src/app/` va `src/shared/components/` ostida umumiy komponent chegaralari.
+- API javob shakllari, loading/empty/error holatlari, klaviatura va ekranni o‘quvchi xatti-harakatlari, sezgir tartib, mavzular va mahalliy sozlamalarni kengaytirish.
+- Ingliz UI manba satrlari `src/i18n/messages/en.json`; foydalanuvchiga qarashli yangi nusxani qattiq kodlamang.
 
-**Yoʻnaltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -99,67 +91,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interaktiv yoki vizual oʻzgarishlar uchun ilovani ishga tushiring hamda tor va keng viewportlarni tekshiring. CI
-ishlab chiqarish buildi va kengroq testlar toʻplamini ishga tushiradi; vizual xatti-harakat uchun baribir oʻzgartirishga mos yoʻnaltirilgan komponent testi, Playwright
-testi yoki hujjatlashtirilgan qoʻlda tekshiruv zarur.
+O'zaro ta'sir yoki vizual o'zgarishlar uchun ilovani ishga tushiring va tor va keng ko'rish oynalarini tekshiring. CI ishlab chiqarishni va kengroq to'plamlarni boshqaradi; vizual xatti-harakat hali ham o'zgarishlarga mos keladigan yo'naltirilgan komponent, Playwright yoki hujjatlashtirilgan qo'lda tekshirishga muhtoj.
 
 ### i18n
 
 **Shartnomalar**
 
-- `src/i18n/messages/en.json` — UI manbasi; `config/i18n.json` — lokallar manbasi.
-- CLI kataloglari `bin/cli/locales/` ostida alohida joylashgan.
-- ICU placeholderlari va teglarini aynan saqlang. Mahsulot/provayder/model nomlari,
-  protokol va header nomlari, buyruqlar, kod/JSON identifikatorlari, URLlar, muhit oʻzgaruvchilari yoki
-  `OmniRoute`, `OAuth`, `MCP` va `A2A` kabi himoyalangan atamalarni tarjima qilmang. Joriy manba roʻyxati:
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` - UI manbasi; `config/i18n.json` mahalliy manba hisoblanadi.
+- CLI kataloglari `bin/cli/locales/` ostida alohida yashaydi.
+- ICU to'ldiruvchilari va teglarini aniq saqlang. product/provider/model nomlari, protokol va sarlavha nomlari, buyruqlar, code/JSON identifikatorlari, URLs, muhit o‘zgaruvchilari yoki `OmniRoute`, `OAuth`, `MCP` va `A2A` kabi himoyalangan atamalarni tarjima qilmang. Joriy manbalar ro'yxati `scripts/i18n/glossary/protected-terms.json`.
 
-**Yoʻnaltirilgan sikl**
+PR funksiyasi faqat `src/i18n/messages/en.json` tahrirlaydi (CLI: `bin/cli/locales/en.json`); boshqa mahalliy sozlamalar relizni yangilash yoki tarjima toʻlqini orqali har bir relizda bir marta yakunlanadi (`docs/guides/I18N.md` → “Faqat PRs touch `en.json` funksiyasi”). `npm run check:pr-derived-paths` boshqa mahalliy katalogni tahrirlovchi PR funksiyasini bajara olmadi.
+
+**Fokuslangan halqa**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI satrlari/kataloglari oʻzgarganda
 npm run lint
 ```
 
-Bu mavjud tizim uchun koʻrsatma, uning vositalari yoki kalit modelini kengaytirishga taklif emas.
-Oʻrnini bosuvchi tizim loyihalanayotgan paytda i18n patchlarini aniq va cheklangan tuting. Vazifa generatsiya qilingan tarjimalarni aniq talab qilmasa va
-natijaviy diffni koʻrib chiqmagan boʻlsangiz, tashqi xizmatlarni chaqiradigan tarjima buyruqlarini ishga tushirmang.
+`--mode=pr` bo'lmasa, bu eshiklar mahalliy ravishda bo'shatish rejimida ishlaydi va `en.json` da qo'shilgan yoki qayta yozilgan har bir kalit haqida hisobot beradi; Bu sizning PR ning emas, balki relizni yangilashning ishi.
+
+Bu mavjud tizim uchun yo'l-yo'riq, uning asboblari yoki asosiy modelini kengaytirish taklifi emas. O'zgartirish tizimi ishlab chiqilayotganda i18n yamoqlarini jarrohlik holatida saqlang. Tashqi xizmatlarni chaqiradigan tarjima buyruqlarini bajarmang, agar vazifa aniq yaratilgan tarjimalarni talab qilmasa va natijada farqni ko'rib chiqmasangiz.
 
 ### CLI
 
 **Shartnomalar**
 
-- `bin/cli/` ichidagi ommaviy buyruqlar va bayroqlar, generatsiya qilingan API buyruqlari, chiqish kodlari, stdout/stderr va
-  JSON chiqish formatlari, konfiguratsiya/muhit xatti-harakati hamda paketlangan fayllar.
-- CLI foydalanuvchiga ko‘rinadigan satrlari CLI i18n qatlamidan foydalanishi va `en`/`pt-BR` kataloglari o‘zaro mosligini saqlashi kerak.
-- Node qo‘llab-quvvatlanadigan bajarish muhiti sifatida va e’lon qilingan ikkilik fayl shartnomasi saqlansin.
+- `bin/cli/` dagi umumiy buyruqlar va bayroqlar, yaratilgan API buyruqlari, chiqish kodlari, stdout/stderr va JSON chiqish shakllari, config/environment xatti-harakatlari va paketlangan fayllar.
+- CLI foydalanuvchiga qaragan satrlar CLI i18n qatlamidan foydalanishi kerak ( `bin/cli/locales/en.json` da mavjud `t()` kalitlari). Xususiyat PR faqat `en.json` tahrirlaydi; `pt-BR` va boshqa mahalliy tillar chiqarilganda tugallanadi.
+- Tugunni qo'llab-quvvatlanadigan ish vaqti va nashr etilgan ikkilik shartnoma sifatida saqlang.
 
-**Yo‘naltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # generatsiya qilingan/paketlangan CLI o‘zgarishlari
-npm run check:pack-policy     # paketning ochiq yuzasidagi o‘zgarishlar
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Xatti-harakat tahlil qilish, fayllar yoki chiqish holatiga bog‘liq bo‘lsa, aniq buyruqni vaqtinchalik ma’lumotlar katalogida ishlating. CI kengroq paket artefakti va ekotizim tekshiruvlarini bajaradi.
+Xulq-atvor tahlil qilish, fayllar yoki chiqish holatiga bog'liq bo'lsa, vaqtinchalik ma'lumotlar katalogida aniq buyruqdan foydalaning. CI kengroq paket artefakt va ekotizim tekshiruvlarini amalga oshiradi.
 
-### Ma’lumotlar bazasi
+### Ma'lumotlar bazasi
 
 **Shartnomalar**
 
-- `src/lib/db/` ostidagi domen modullari; muayyan modullarni bevosita import qiling (eski `localDb.ts` qayta eksport qatlami olib tashlangan).
-- `src/lib/db/migrations/` ostidagi raqamlangan, idempotent SQL migratsiyalari, tranzaksiya xavfsizligi, yangilash
-  xatti-harakati, indekslar va sxema ta’sir qiladigan har bir chaqiruvchi.
-- Marshrutlar va ishlov beruvchilar hech qachon xom SQL so‘rovlarini bevosita bajarmaydi.
+- `src/lib/db/` ostidagi domen modullari; to'g'ridan-to'g'ri maxsus modullarni import qiling (eski `localDb.ts` re-eksport qatlami olib tashlandi).
+- `src/lib/db/migrations/` ostida raqamlangan, idempotent SQL migratsiyalari, tranzaksiya xavfsizligi, yangilanish harakati, indekslar va sxemadan ta'sirlangan har bir qo'ng'iroq qiluvchi.
+- Marshrutlar va ishlov beruvchilar hech qachon to'g'ridan-to'g'ri xom SQL chiqarmaydi.
 
-**Yo‘naltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 npm run check:migration-numbering
@@ -169,28 +157,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migratsiya qo‘shayotganda ham yangi ma’lumotlar bazasini, ham oldingi sxemadan yangilashni sinang. Ma’lumotlar bazasi testlari tozalash vaqtida ulanish dastaklarini yopishi va `resetDbInstance()` funksiyasini chaqirishi kerak. Faqat eng maqbul natijani kafolatlamaydigan Bun adapteri yo‘li o‘zgarganda `npm run test:bun:db` buyrug‘ini bajaring; Node asosiy vakolatli muhit bo‘lib qoladi.
+Yangi ma'lumotlar bazasini sinab ko'ring va migratsiya qo'shayotganda oldingi sxemadan yangilang. Ma'lumotlar bazasi testlari tutqichlarni yopishi va tozalash vaqtida `resetDbInstance()` chaqirishi kerak. `npm run test:bun:db` faqat eng yaxshi Bun adapter yo'li o'zgarganda ishga tushiring; Tugun vakolatli bo'lib qoladi.
 
 ### Qurish / joylashtirish
 
 **Shartnomalar**
 
-- Ildiz va ish maydoni manifestlari/qulf fayli, `scripts/build/`, Next.js mustaqil yig‘ilishi, `dist/`
-  paketi tarkibi, Electron platformasi metama’lumotlari, CI ish jarayonlari va joylashtirish nazorat belgilari.
-- Qo‘llab-quvvatlanadigan Node diapazonlari va `CLAUDE.md` ichida ruxsat etilgan Bun ishlatilishi o‘zgarishsiz qolishi kerak.
-- Qurish artefaktlari kuzatuvga olinmaydi; bog‘liqlik, litsenziya, ish jarayoni va paket siyosatlari amal qiladi.
+- Ildiz va ish maydoni manifests/lockfile, `scripts/build/`, Next.js mustaqil yig'ish, `dist/` to'plami tarkibi, Electron platformasi metama'lumotlari, CI ish oqimlari va joylashtirish nazoratchilari.
+- Qo'llab-quvvatlanadigan tugun diapazonlari va `CLAUDE.md` -da ruxsat etilgan Bun foydalanish o'zgarmasligi kerak.
+- Qurilish artefaktlari kuzatilmaydi; qaramlik, litsenziya, ish jarayoni va paket siyosatlari qo'llaniladi.
 
-**Yo‘naltirilgan sikl**
+**Fokuslangan halqa**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # bog‘liqlik yoki qulf fayli o‘zgarishlari
-npm run check:pack-policy      # e’lon qilingan paketning ochiq yuzasidagi o‘zgarishlar
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Faqat o‘zgarish kompilyatsiya, mustaqil yig‘ilish, resurslar yoki bajarish muhiti paketlanishiga ta’sir qilganda `npm run build` buyrug‘ini lokal ravishda ishlating. `npm run build:release` buyrug‘idan faqat reliz/joylashtirishni tekshirish uchun foydalaning. CI qurishi platformalararo yakuniy signal hisoblanadi; muayyan platformaga xos Electron o‘zgarishlari mos yo‘naltirilgan qurish yoki smoke sinovi dalilini talab qiladi.
+Oʻzgartirish kompilyatsiya, mustaqil yigʻish, aktivlar yoki ish vaqti toʻplamiga taʼsir qilgandagina `npm run build` mahalliy sifatida foydalaning. `npm run build:release` faqat release/deploy tekshiruvi uchun foydalaning. CI ning qurilishi yakuniy o'zaro faoliyat platforma signalidir; platformaga xos Electron o'zgarishlari mos yo'naltirilgan qurilish yoki tutun dalillarini talab qiladi.
 
 ## Umumiy mashina uchun dasturchi skriptlari
 
