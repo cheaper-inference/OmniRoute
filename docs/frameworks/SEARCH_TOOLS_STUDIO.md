@@ -126,8 +126,8 @@ fixed and redirects are disabled to protect the API key.
 
 Each successful non-empty upstream request costs **$0.00075**, independent of result
 count. Empty search results and failures cost zero; cached search responses do not
-make another upstream call. This is standalone API pricing; the temporary free
-server-side tools promotion in DeepSeek coding clients is a separate offer.
+make another upstream call. This is standalone API pricing: searches the model runs
+through DeepSeek's server-side tools are not billed per request (only model tokens are).
 See the [official Search & Fetch guide](https://api-docs.deepseek.com/guides/search/).
 
 ### Catalog response
