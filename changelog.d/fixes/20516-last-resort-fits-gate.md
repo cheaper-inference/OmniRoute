@@ -1,0 +1,1 @@
+- **fix(sse):** last-resort compaction sizes messages from this request's live input cap, including system, instructions, and the calibration factor, instead of stopping after one `ceiling - tools` pass ([#20516](https://github.com/cheaper-inference/OmniRoute/issues/20516)) — thanks @RaviTharuma

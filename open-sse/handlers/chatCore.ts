@@ -25,6 +25,7 @@ import {
   estimateCalibratedFinalInputTokens,
   estimateFinalInputTokenBreakdown,
 } from "./chatCore/contextEstimation.ts";
+import { resolveLastResortMessageBudget } from "./chatCore/lastResortBudget.ts";
 import { buildClaudePassthroughBody } from "./chatCore/claudePassthroughBody.ts";
 export {
   extractSystemRoleMessages,
@@ -2136,48 +2137,87 @@ async function handleChatCoreInner({
   // getTokenLimit(provider, effectiveModel) re-fetch, which would silently
   // discard that combo-aware override and re-widen the last-resort budget.
   const finalContextLimit = contextLimit;
-  const toolsReserve = finalInputBreakdown.tools;
 
   const effectiveCompactionCeiling = getEffectiveCompactionCeiling(finalContextLimit);
 
   // Last-resort compaction against the concrete input budget (not the 70% threshold).
   // Covers cases where the proactive pass was skipped or still left the request oversized (#8560).
-  if (
+  // One compressContext pass sizes messages to `ceiling - tools` and stops. System,
+  // instructions, and the learned calibration factor sit outside that target, so the
+  // gate can still be over. Repeat from the gate's own numbers until the request fits
+  // or a pass stops making progress. The ceiling stays the target's live limit.
+  let lastResortPasses = 0;
+  let compressScale = 1;
+  while (
     reactiveContextCompactionEnabled &&
     !skipNativeCodexReactiveCompaction &&
     finalEstimatedInputTokens >= effectiveCompactionCeiling &&
-    body
+    body &&
+    lastResortPasses < 3
   ) {
-    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
+    const messageBudget = resolveLastResortMessageBudget({
+      ceiling: effectiveCompactionCeiling,
+      calibratedTokens: finalEstimatedInputTokens,
+      messages: finalInputBreakdown.messages,
+      tools: finalInputBreakdown.tools,
+      system: finalInputBreakdown.system,
+      instructions: finalInputBreakdown.instructions,
+      total: finalInputBreakdown.total,
+    });
+    if (messageBudget == null) break;
+
+    const beforeTokens = finalEstimatedInputTokens;
+    const beforeMessages = finalInputBreakdown.messages;
+    const maxTokens = Math.max(1, Math.floor(messageBudget * compressScale));
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
     const lastResortResult = compressContext(lastResortAdapter.body, {
       provider,
       model: effectiveModel,
-      maxTokens: lastResortTarget,
+      maxTokens,
       reserveTokens: 0,
     });
-    if (lastResortResult.compressed && lastResortResult.body) {
-      body = lastResortAdapter.adapted
-        ? lastResortAdapter.restore(lastResortResult.body as Record<string, unknown>, {
-            dropMissingMappedItems: true,
-          })
-        : lastResortResult.body;
-      finalInputBreakdown = estimateFinalInputTokenBreakdown(
-        body as Record<string, unknown>
+    lastResortPasses += 1;
+    if (!(lastResortResult.compressed && lastResortResult.body)) {
+      const compressCount = Number(
+        lastResortResult.stats?.final ?? lastResortResult.stats?.original ?? 0
       );
-      finalEstimatedInputTokens = estimateCalibratedFinalInputTokens(
-        body,
-        provider,
-        effectiveModel,
-        finalInputBreakdown
-      );
-      log?.info?.(
-        "CONTEXT",
-        `Last-resort context compaction: ${lastResortResult.stats?.original} → ${lastResortResult.stats?.final} message tokens ` +
-          `(final input ${finalInputBreakdown.total}: messages=${finalInputBreakdown.messages}, ` +
-          `tools=${finalInputBreakdown.tools}, system=${finalInputBreakdown.system}, ` +
-          `instructions=${finalInputBreakdown.instructions}; limit ${finalContextLimit})`
-      );
+      // compressContext counts messages in its own units. When that count is lower
+      // than the gate, the gate budget looks "already fits" and the pass no-ops.
+      if (
+        compressScale === 1 &&
+        beforeMessages > compressCount &&
+        compressCount > 0 &&
+        maxTokens >= compressCount
+      ) {
+        compressScale = compressCount / beforeMessages;
+        continue;
+      }
+      break;
+    }
+    body = lastResortAdapter.adapted
+      ? lastResortAdapter.restore(lastResortResult.body as Record<string, unknown>, {
+          dropMissingMappedItems: true,
+        })
+      : lastResortResult.body;
+    finalInputBreakdown = estimateFinalInputTokenBreakdown(body as Record<string, unknown>);
+    finalEstimatedInputTokens = estimateCalibratedFinalInputTokens(
+      body,
+      provider,
+      effectiveModel,
+      finalInputBreakdown
+    );
+    log?.info?.(
+      "CONTEXT",
+      `Last-resort context compaction: ${lastResortResult.stats?.original} → ${lastResortResult.stats?.final} message tokens ` +
+        `(final input ${finalInputBreakdown.total}: messages=${finalInputBreakdown.messages}, ` +
+        `tools=${finalInputBreakdown.tools}, system=${finalInputBreakdown.system}, ` +
+        `instructions=${finalInputBreakdown.instructions}; limit ${finalContextLimit})`
+    );
+    if (
+      finalEstimatedInputTokens >= beforeTokens &&
+      finalInputBreakdown.messages >= beforeMessages
+    ) {
+      break;
     }
   }
 
