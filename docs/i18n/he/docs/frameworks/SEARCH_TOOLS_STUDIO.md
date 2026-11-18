@@ -34,38 +34,38 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 ---
 
-## לשוניות
+## כרטיסיות
 
-### לשונית חיפוש
+### כרטיסיית חיפוש
 
-מפתחת את `SearchForm` + `ResultsPanel` + `RerankPanel` הקיימים לכדי לשונית:
+מפתח את `SearchForm` + `ResultsPanel` + `RerankPanel` הקיים לכרטיסייה:
 
-- שאילתה ← תוצאות (כותרת, URL, קטע טקסט, ציון רלוונטיות).
-- מטא-נתונים של הספק בחלונית התצורה (עלות, מכסה, סטטוס).
-- מקטע דירוג מחדש: בחירת מודל לדירוג מחדש, סידור מחדש של התוצאות, הצגת `positionDelta`.
-- מצב ריק עם קריאה לפעולה כאשר לא מוגדרים ספקי חיפוש.
-- היסטוריית חיפוש באמצעות `SearchHistory.tsx`.
-- קריאה אל `POST /v1/search` (נקודת קצה קיימת, ללא שינויים).
+- שאילתת תוצאות → (כותרת, URL, קטע קוד, ציון רלוונטיות).
+- מטא נתונים של ספק בחלונית Config (עלות, מכסה, סטטוס).
+- מדור דירוג מחדש: בחר מודל לדירוג מחדש, סדר מחדש את התוצאות, הצג `positionDelta`.
+- מצב ריק עם CTA כאשר אין ספקי חיפוש מוגדרים.
+- היסטוריית חיפושים באמצעות `SearchHistory.tsx`.
+- קורא ל- `POST /v1/search` (נקודת קצה קיימת, ללא שינויים).
 
-### לשונית חילוץ
+### לשונית גרידה
 
-לשונית חדשה לחילוץ תוכן מ-URL באמצעות `POST /v1/web/fetch` (נוצרה בתוכנית 05):
+כרטיסייה חדשה לחילוץ תוכן מ- URL דרך `POST /v1/web/fetch` (נוצרה בתוכנית 05):
 
-- קלט: URL + מתג לעמוד מלא + בורר פורמט (Markdown / טקסט / HTML).
-- שליחה ← אחזור ← עיבוד `ScrapeResult.tsx`.
-- `ScrapeResult` מציג תצוגה מקדימה של Markdown + מתג להצגת התוכן הגולמי.
-- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `(קוצר, הצגת תוכן גולמי)` ופותח את התוכן הגולמי בחלון Monaco מודאלי (D21).
-- חלונית מטא-נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), זמן השהיה, עלות, גודל תגובה, מספר קישורים.
-- שימוש ב-hook‏ `useScrapeFetch.ts`.
+- קלט: URL + בורר פורמט + בעמוד מלא (סימון / טקסט / HTML).
+- שלח → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` rendered markdown תצוגה מקדימה + raw switch.
+- Cap: if response body >** 256 KB** , UI מציג `(truncated, view raw)` ונפתח גולמי במודאל של מונקו (D21).
+- פאנל מטא נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), חביון, עלות, גודל תגובה, ספירת קישורים.
+- משתמש בווק `useScrapeFetch.ts`.
 
-### לשונית השוואה
+### השווה Tab
 
-מריצה את אותה שאילתה/כתובת URL אצל עד **4 ספקים במקביל** (D22):
+מפעיל את אותו query/URL לרוחב עד** 4 ספקים במקביל** (D22):
 
-- עמודות זו לצד זו, אחת לכל ספק.
-- מדדים: זמן השהיה, עלות, מספר תוצאות, גודל תגובה.
-- חישוב חפיפת URL עבור חיפוש (מספר כתובות ה-URL המשותפות לעומת התוצאה הראשונית).
-- קריאה אל `POST /v1/search` (חיפוש) או אל `POST /v1/web/fetch` (חילוץ), עבור כל ספק.
+- עמודות זו לצד זו לכל ספק.
+- מדדים: חביון, עלות, ספירת תוצאות, גודל תגובה.
+- חישוב חפיפת URL לחיפוש (מספר URLs משותף לעומת תוצאה ראשונית).
+- קורא `POST /v1/search` (חיפוש) או `POST /v1/web/fetch` (גרידה) לכל ספק.
 
 ---
 
@@ -100,13 +100,13 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 ## קטלוג ספקים
 
-`ProviderCatalog.tsx` חושף את רשימת הספקים המלאה מ־`GET /api/search/providers`
-(שהורחבה ב־F4 כדי לכלול ספקי אחזור):
+`ProviderCatalog.tsx` חושפת את רשימת הספקים המלאה מ- `GET /api/search/providers` (מורחבת ב-F4 לכלול ספקי אחזור):
 
-| `kind` | `"search"` (20 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 ספקים) או `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, keenable-search) |
 
-הסטטוס **נגזר בזמן הבקשה** באמצעות בדיקה אם קיימים פרטי גישה ואם
-כל המפתחות נמצאים כעת בתקופת צינון.
+הסטטוס הוא** נגזר בזמן בקשה** על ידי בדיקה אם קיימים אישורים והאם כל המפתחות נמצאים כעת בצינון.
+
+`codex-search` (Codex Web Search) אין מפתח משלו: הוא עושה שימוש חוזר בחשבון Codex (ChatGPT) מחובר, כך שכל חיפוש מוציא מכסת מנויים ChatGPT ולוקח בערך 10-40 שניות. הוא פועל כאשר בקשה נותנת לו שם; לבחירה אוטומטית צריך את דגל ה- `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (כבוי כברירת מחדל).
 
 ---
 
@@ -118,18 +118,18 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 
 ---
 
-## שינויים בצד השרת
+## שינויים בקצה האחורי
 
-נדרש רק שינוי אחד בצד השרת עבור תכונה זו:
+נדרש רק שינוי אחורי אחד עבור תכונה זו:
 
-### הרחבת `GET /api/search/providers`
+### `GET /api/search/providers` מורחב
 
-הקובץ `src/app/api/search/providers/route.ts` הורחב כדי:
+`src/app/api/search/providers/route.ts` הוארך ל:
 
-- לכלול כל ספק אחזור (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) במערך.
-- להוסיף `kind: "search" | "fetch"` לכל פריט.
-- להוסיף `status: "configured" | "missing" | "rate_limited"` הנגזר ממצב פרטי הגישה בזמן אמת.
-- לשמור על תאימות לאחור — השדות הקיימים (`id`, `name` וכו׳) נותרו ללא שינוי.
+- כלול כל ספק אחזור (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) במערך.
+- הוסף `kind: "search" | "fetch"` לכל פריט.
+- הוסף `status: "configured" | "missing" | "rate_limited"` שמקורו במצב אישור חי.
+- שמור על תאימות לאחור — שדות קיימים (`id`, `name`, וכו') ללא שינוי.
 
 ---
 

@@ -49,6 +49,23 @@ test("a window of 200k or more declares nothing extra", () => {
   );
 });
 
+// --inherit-env copies the parent's window vars. The routed model's window must replace them,
+// including when it deliberately sets none: a stale parent value would stay in effect.
+test("--inherit-env does not let a parent window value survive the routed window", () => {
+  const parent = {
+    PATH: "/bin",
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW: "190000",
+    CLAUDE_CODE_MAX_CONTEXT_TOKENS: "32768",
+  };
+  const small = buildClaudeEnv(parent, 20128, "t", { contextWindow: 32768, inheritEnv: true });
+  assert.equal(small.CLAUDE_CODE_AUTO_COMPACT_WINDOW, undefined, "no 190000 on a 32k route");
+  assert.equal(small.CLAUDE_CODE_MAX_CONTEXT_TOKENS, "32768");
+  const large = buildClaudeEnv(parent, 20128, "t", { contextWindow: 1_000_000, inheritEnv: true });
+  assert.equal(large.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "190000");
+  assert.equal(large.CLAUDE_CODE_MAX_CONTEXT_TOKENS, undefined, "no 32k cap on a 1M route");
+  assert.equal(large.PATH, "/bin", "other inherited vars are kept");
+});
+
 // --- end to end: catalog lookup -> env of the spawned claude ----------------
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-launch-window-"));
