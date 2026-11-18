@@ -181,3 +181,32 @@ test("by-run cost lookup probes the ledger by request_id instead of scanning it"
     `the ledger must not be scanned: ${JSON.stringify(plan)}`
   );
 });
+
+test("observed ledger totals and evidence come from one SQLite snapshot", async () => {
+  costLedger.recordLedgerEntry({
+    apiKeyId: "snapshot-fixture",
+    provider: "synthetic",
+    model: "fixture",
+    amountUsd: 0.25,
+    timestamp: "2026-01-01T00:00:00Z",
+    usageEvidence: {
+      input: { source: "reported" },
+      output: { source: "estimated", method: "characters" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
+  });
+  const { result, captured } = await captureLedgerReads(() =>
+    costLedger.aggregateLedger("snapshot-fixture", "2025-01-01")
+  );
+  assert.equal(
+    captured.length,
+    1,
+    "totals and provenance must not observe different concurrent snapshots"
+  );
+  assert.match(captured[0].sql, /SUM\(amount_usd\)/);
+  assert.match(captured[0].sql, /estimated_count/);
+  assert.equal(result.amountUsd, 0.25);
+  assert.equal(result.requestCount, 1);
+  assert.equal(result.costEstimated, true);
+});

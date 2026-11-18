@@ -125,34 +125,10 @@ Bei Ursprüngen wird die Groß-/Kleinschreibung nicht beachtet und der abschlie�
 kann zur Laufzeit unter **Dashboard → Security → CORS Allowed Origins** festgelegt werden, ohne dass ein
 Neustart erforderlich ist.
 
-## API-Schlüssel im Vergleich zu Cookie-Sitzungen
+## API -Schlüssel vs. Cookie-Sitzungen
 
-- **Bearer / `x-api-key` (die `/v1/*`-Inferenzschnittstelle):** Browser hängen
-  diese niemals automatisch an. CORS stellt hier keine wirksame Barriere dar — der API-Schlüssel ist die
-  Barriere. Deshalb ist diese Schnittstelle bewusst permissiv konfiguriert, damit Browser- und
-  Electron-Clients Antworten lesen können, zu deren Zugriff sie bereits berechtigt sind.
-  Die gelockerte Rückgabe des Ursprungs richtet sich nach dem validierten Schlüssel, nicht
-  nach dem bloßen Vorhandensein des Headers: Wenn `REQUIRE_API_KEY=false` eine Anfrage
-  anonym bedient, behält deren erfolgreiche Antwort die standardmäßig restriktive
-  Positivliste bei. Authentifizierungsablehnungen (401) bleiben lesbar, damit Clients
-  einen widerrufenen oder falsch eingegebenen Schlüssel anzeigen können (#5242): Die
-  eigene 401-Antwort der Pipeline behält die Rückgabe bei, und eine Route, die den
-  Schlüssel selbst ablehnt, nachdem die Pipeline die Anfrage als anonym bedient hat
-  (`/v1/models` und `/v1beta/models` bei konfigurierter Management-Authentifizierung, die
-  eigentümerbezogenen Routen `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
-  sowie die Auto-Combo-Kandidatenrouten), fügt dieser 401-Antwort die Rückgabe über
-  `credentialRejectionHeaders()` hinzu. Maßgeblich für die Rückgabe ist, ob die Anfrage
-  einen Anmeldedaten-Header enthält (`Authorization`, `x-api-key`, `x-goog-api-key` oder
-  das Cookie `auth_token`), nicht, welchen davon die Route geprüft hat, und sie wird
-  niemals mit `Access-Control-Allow-Credentials` kombiniert; der Body ist eine feste
-  Fehlerhülle. Management-Routen unter `/api/v1/`, die durch `requireManagementAuth()`
-  geschützt sind (`/api/v1/management/*`, `/api/v1/registered-keys`), fügen die Rückgabe
-  nicht hinzu: Bei `REQUIRE_API_KEY=false` sind ihre 401/403-Antworten nicht Cross-Origin
-  lesbar.
-- **Cookie-Sitzung (das Dashboard):** geschützt durch die standardmäßig geschlossene Konfiguration **und**
-  durch das Fehlen von `Access-Control-Allow-Credentials` im gemeinsam genutzten Pfad. Nehmen Sie
-  Ursprünge für Verwaltung und Dashboard nicht in eine permissive Konfiguration auf; sie müssen weiterhin strikt
-  standardmäßig gesperrt bleiben.
+- **Bearer / `x-api-key` (die `/v1/*` -Inferenzoberfläche):** Browser hängen diese niemals automatisch an. CORS ist hier keine sinnvolle Barriere. — Der API Schlüssel ist die Barriere —, weshalb diese Oberfläche absichtlich freizügig ist, damit Browser- und Electron Clients Antworten lesen können, auf die sie bereits Anspruch haben. Das entspannte Echo folgt dem validierten Schlüssel, nicht dem bloßen Vorhandensein des Headers: Wenn `REQUIRE_API_KEY=false` eine Anfrage anonym bedient, behält seine erfolgreiche Antwort die Fail-Closed-Zulassungsliste bei. Authentifizierungsablehnungen (401) bleiben lesbar, sodass Clients einen widerrufenen oder falsch eingegebenen Schlüssel (#5242) anzeigen können: Der eigene 401 der Pipeline behält das Echo, und eine Route, die den Schlüssel selbst ablehnt, nachdem die Pipeline ihn als anonym bereitgestellt hat (`/v1/models` und `/v1beta/models` mit konfigurierter Verwaltungsauthentifizierung, die vom Besitzer erfassten `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` und Auto-Combo-Kandidatenrouten) fügt das Echo zu diesem 401 via hinzu `credentialRejectionHeaders()`. Das Echo basiert auf der Anfrage, die einen Anmeldeinformationsheader (`Authorization`, `x-api-key`, `x-goog-api-key` oder das `auth_token` -Cookie) enthält, nicht auf dem von der Route überprüften Code und wird nie mit `Access-Control-Allow-Credentials` gepaart; Der Körper ist eine feste Fehlerhülle. Verwaltungsrouten unter `/api/v1/` die von `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) geschützt werden, fügen das Echo nicht hinzu: Mit `REQUIRE_API_KEY=false` ist ihr 401/403 nicht ursprungsübergreifend lesbar.
+- **Cookie-Sitzung (das Dashboard):** durch die Fail-Closed-Standardeinstellung geschützt** Und** durch das Fehlen von `Access-Control-Allow-Credentials` auf dem gemeinsamen Pfad. Halten Sie management/dashboard Ursprünge aus jeder permissiven Konfiguration fern. sie müssen exakt geschlossen bleiben.
 
 ## WebSocket-Handshakes (`/v1/responses`, `/v1/ws`)
 

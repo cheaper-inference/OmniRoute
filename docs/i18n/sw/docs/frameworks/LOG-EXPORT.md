@@ -199,140 +199,121 @@ vifafanuzi vya sehemu vinavyorejeshwa, hivyo lengwa jipya halihitaji mabadiliko 
 
 Vifunguo vya usanidi (`type: "bigquery"`):
 
-| Ufunguo              | Maelezo                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `projectId`          | Mradi wa GCP unaohifadhi seti ya data                                                         |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                               |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                               |
-| `location`           | Hutumika tu inapobidi kuunda seti ya data (chaguomsingi `EU`)                                 |
-| `serviceAccountJson` | Ufunguo wa akaunti ya huduma. Siri: husimbwa kwa njia fiche inapohifadhiwa, hairudishwi kamwe |
-| `autoCreate`         | Unda seti ya data na jedwali wakati wa uhamishaji wa kwanza (chaguomsingi `true`)             |
+| Kifunguo             | Maelezo                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Mradi wa GCP unaoshikilia mkusanyiko wa data                                                                                                            |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                                                         |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                                                         |
+| `location`           | Hutumika tu wakati mkusanyiko wa data unapaswa kuundwa (chaguomsingi ni `EU`)                                                                           |
+| `serviceAccountJson` | Ufunguo wa akaunti ya huduma. Siri: husimbwa kwa njia fiche wakati wa kuhifadhiwa, haurudishwi                                                          |
+| `autoCreate`         | Unda mkusanyiko wa data/jedwali ambalo halipo; kwa masharti ongeza safu wima za ushahidi wa matumizi zinazokubali thamani tupu (chaguomsingi ni `true`) |
 
 Akaunti ya huduma inahitaji `bigquery.tables.updateData` kwenye jedwali lengwa, pamoja na
 `bigquery.datasets.create` / `bigquery.tables.create` wakati `autoCreate` imewashwa.
+Kusasisha jedwali lililopo ili kuongeza sehemu mbili za ushahidi wa matumizi zinazokubali thamani tupu pia kunahitaji
+`bigquery.tables.update`. Ruhusa ikikosekana, uhamishaji hushindwa bila kusogeza kielekezi chake.
 
-Kundi lililosanidiwa ni kitengo cha **kishale**, si cha HTTP: `send()` huligawanya katika miito ya insertAll
-yenye safu mlalo zisizozidi 500, hivyo `batch_size` kubwa haiwezi kukiuka kikomo cha ombi cha MB 10 cha BigQuery.
-Hali za muda mfupi (408/429/500/502/503/504) hujaribiwa tena hadi mara tatu kwa kuongeza muda wa kusubiri
-kwa kiwango cha kielelezo, zikitumia tena insertIds zilezile; hitilafu za uthibitishaji na skima husababisha hitilafu kurushwa katika jaribio la kwanza badala
-ya kupoteza muda wa utekelezaji.
+Kundi lililosanidiwa ni kitengo cha **kielekezi**, si cha HTTP: `send()` huligawanya katika
+miito ya insertAll yenye kiwango cha juu cha safu 500, kwa hiyo `batch_size` kubwa haiwezi kufikisha kikomo cha ombi cha MB 10 cha BigQuery.
+Hali za muda mfupi (408/429/500/502/503/504) hujaribiwa tena hadi mara tatu kwa kusubiri
+kwa muda unaoongezeka kwa kielelezo, huku insertIds zilezile zikitumika; hitilafu za uthibitishaji na za
+schema hutupwa kwenye jaribio la kwanza badala ya kutumia muda wa uendeshaji.
 
-Jedwali lililoundwa muda mfupi uliopita bado halionekani kwenye sehemu ya mwisho ya utiririshaji, ambayo hujibu
-404 kwa sekunde chache. Ombi lenye 404 hiyo hujaribiwa tena, lakini **ikiwa tu utekelezaji huu uliunda jedwali** —
-jedwali ambalo halipo kweli bado husababisha kushindwa haraka. Kumbuka kuwa kuunda upya jedwali kwa jina ambalo
-lilifutwa hivi karibuni hufanya BigQuery ikatae uingizaji kwa utiririshaji kwa dakika kadhaa; hiyo ni
-tabia ya kufuta kisha kuunda upya, kwa hiyo pendelea jina jipya la jedwali badala ya kufuta na kuongeza tena lilelile.
+Jedwali lililoundwa muda mfupi uliopita bado halionekani kwa endpoint ya utiririshaji, ambayo hujibu
+404 kwa sekunde chache. Hiyo 404 hujaribiwa tena, lakini **ni wakati tu ambapo uendeshaji huu uliunda jedwali** —
+jedwali ambalo halipo kweli bado husababisha kushindwa mara moja. Kumbuka kuwa kuunda tena jedwali kwa jina
+ambalo lilifutwa hivi karibuni hufanya BigQuery ikatae uingizaji wa utiririshaji kwa dakika kadhaa;
+hiyo ni sifa ya kulifuta kisha kuliumba tena, kwa hiyo pendelea jina jipya la jedwali badala ya kuliondoa na kuliongeza tena.
 
-**Kushindwa kwa sehemu huwasilishwa kama HTTP 200 yenye `insertErrors[]` isiyo tupu.** Huko huchukuliwa kama
-kushindwa na husababisha hitilafu kurushwa, jambo linalozuia kishale kusonga kupita safu mlalo ambazo BigQuery haikuwahi
-kukubali; `tests/unit/log-export-bigquery.test.ts` huhakikisha tabia hiyo.
+**Hitilafu sehemu hufika kama HTTP 200 yenye `insertErrors[]` isiyo tupu.** Hii hushughulikiwa kama
+hitilafu na hutupwa, jambo linalozuia kielekezi kusonga mbele ya safu ambazo BigQuery haikukubali;
+`tests/unit/log-export-bigquery.test.ts` inathibitisha tabia hii.
 
-Usafirishaji hutumia REST ya kawaida — tamko la RS256 lililotiwa saini yenyewe hubadilishwa kuwa tokeni ya ufikiaji kwenye
-`https://oauth2.googleapis.com/token`, kisha safu mlalo hutumwa kwa `tabledata.insertAll`. Hakuna Google SDK
-inayoingizwa. Tokeni za ufikiaji huhifadhiwa kwenye akiba ndani ya mchakato kwa kila jozi ya (akaunti ya huduma, wigo).
+Usafirishaji ni REST tupu — dai la RS256 lililotiwa saini kibinafsi hubadilishwa kuwa tokeni ya ufikiaji katika
+`https://oauth2.googleapis.com/token`, kisha safu hutumwa kwa `tabledata.insertAll`. Hakuna SDK ya Google
+inayoongezwa. Tokeni za ufikiaji huhifadhiwa kwenye mchakato kwa kila jozi ya (akaunti ya huduma, scope).
 
-Jedwali linaloundwa lina safu wima moja kwa kila sehemu ya kichupo cha Logs pamoja na `exported_at`, na limepangwa kulingana na
-jinsi kumbukumbu za miito zinavyouliziwa kwa vitendo:
+Jedwali lililoundwa huwa na safu wima moja kwa kila sehemu ya kichupo cha Kumbukumbu pamoja na `exported_at`, na limepangwa kwa
+jinsi kumbukumbu za simu zinavyoulizwa kwa hakika:
 
-- **Limegawanywa katika sehemu za kila siku kwa `timestamp`**, hivyo hoja yenye mipaka ya tarehe hukagua siku hizo pekee.
-- **Limewekwa katika makundi kwa `api_key_name`, `provider`, `model`, `status`** (kwa mpangilio huo), hivyo kuchuja kulingana na
-  nani aliyeitekeleza, ilikoenda, au kama ilishindwa huondoa vitalu visivyohitajika ndani ya kila sehemu. BigQuery
-  huruhusu safu wima zisizozidi nne za kupanga makundi na mpangilio una umuhimu: kichujio cha `api_key_name` pekee
-  huondoa vitalu visivyohitajika, lakini kichujio cha `status` pekee hakifanyi hivyo.
-- **Muda wa hiari wa kuhifadhi sehemu** kupitia `partitionExpirationDays` (0 huhifadhi kila kitu), unaotumika
+- **Hugawanywa kwa siku kwa kutumia `timestamp`**, kwa hiyo swali lililowekewa kikomo kwa tarehe huchanganua siku hizo pekee.
+- **Huunganishwa kwa makundi kwa kutumia `api_key_name`, `provider`, `model`, `status`** (kwa mpangilio huo), ili uchujaji kwa
+  nani aliyeendesha, ulikoelekezwa, au kama ulishindwa upunguze vizuizi ndani ya kila sehemu. BigQuery
+  inaruhusu safu wima zisizozidi nne za clustering na mpangilio ni muhimu: kichujio cha `api_key_name` pekee
+  hupunguza vizuizi vinavyochanganuliwa, lakini kichujio cha `status` pekee hakifanyi hivyo.
+- **Uhifadhi wa hiari wa sehemu** kupitia `partitionExpirationDays` (0 huhifadhi kila kitu), unaotumika
   wakati jedwali linapoundwa.
 
-Mipangilio yote miwili hutumika wakati wa kuunda. Jedwali lililopo huhifadhi mpangilio wowote lilionao tayari, kwa hiyo
-elekeza lengwa kwenye kitambulisho kipya cha jedwali ikiwa unataka kuitumia.
+Mipangilio yote miwili hutumika wakati wa kuunda. Jedwali lililopo huhifadhi mpangilio lilionao tayari, kwa hiyo
+elekeza lengwa kwenye kitambulisho kipya cha jedwali ikiwa ungependa kuitumia.
 
-`tests/unit/log-export-bigquery.test.ts` huthibitisha kuwa kilinganishi na skima ya jedwali hubaki zikiwa
-zimesawazishwa, ili safu wima mpya ya kumbukumbu za miito isiweze kuachwa kimyakimya wakati wa kuhamisha.
+`tests/unit/log-export-bigquery.test.ts` inathibitisha kuwa mwekaji ramani na schema ya jedwali vinaendelea
+sambamba, kwa hiyo safu mpya ya kumbukumbu ya simu haiwezi kuachwa kimya kimya wakati wa kuitoa.
 
-Makundi hugawanywa kulingana na **vyote viwili**, idadi ya safu mlalo na baiti zilizosanifiwa kwa uhamishaji. Idadi ya safu mlalo pekee haitoshi
-mara data za maombi zinapohamishwa: safu mlalo 500 zenye maelekezo zinaweza kuwa makumi ya megabaiti, na insertAll
-hukataa ombi linalozidi MB 10. Kipande hufungwa kinapofikia safu mlalo 500 au MB 9, chochote kinachotangulia.
+Makundi hugawanywa kwa kuzingatia **idadi ya safu na baiti zilizowekwa katika mfumo wa mfuatano**. Idadi ya safu pekee haitoshi
+mara payloads zinaposafirishwa: safu 500 zenye vidokezo zinaweza kuwa makumi ya megabaiti, na insertAll
+hukataa ombi linalozidi MB 10. Makundi hufungwa kwenye safu 500 au MB 9, kulingana na kitakachofikiwa kwanza.
 
 ---
 
-## 5. Lengwa la traces za OTLP/HTTP
+## 5. Mahali pa kulengwa kwa traces za OTLP/HTTP
 
-Usanidi hutumia `type: "otlp-http"`. Huu ni uhamishaji ulioratibiwa, unaotumia kishale, wa kumbukumbu
-za miito zilizohifadhiwa, si kipokezi cha matukio ya uelekezaji cha moja kwa moja kinachofanya kadiri kinavyoweza katika
-`open-sse/services/routing/otel.ts`. Hausomi wala kubadilisha vigeu vya mazingira,
-vipima muda au bafa za kipokezi hicho. Kuwasha vyote viwili kunaweza kuzalisha aina mbili huru za spans;
-tumia wigo wa ufuatiliaji wa `omniroute.log-export` kutofautisha spans hizi za kumbukumbu za miito.
+Usanidi hutumia `type: "otlp-http"`. Huu ni uhamishaji uliopangwa, unaotegemea cursor, wa kumbukumbu za simu zilizohifadhiwa, si sinki la matukio ya uelekezaji wa moja kwa moja linalotumia juhudi bora zaidi katika
+`open-sse/services/routing/otel.ts`. Hausomi wala kubadilisha vigezo vya mazingira, vipima muda au vihifadhi vya sinki hilo. Kuwasha vyote viwili kunaweza kutoa aina mbili huru za spans;
+tumia scope ya instrumentation ya `omniroute.log-export` kutofautisha spans hizi za kumbukumbu za simu.
 
-| Ufunguo                  | Chaguomsingi / madhumuni                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `endpoint`               | URL kamili ya HTTP(S) ya traces inahitajika; kiambishi tamati cha `/v1/traces` hakiongezwi |
-| `headers`                | Mistari ya hiari ya `Name: value` au objekti ya JSON ya mifuatano; husimbwa kwa njia fiche |
-| `requestHeaderAllowlist` | Tupu (imezimwa); majina/viambishi awali vya vichwa vya mteja vya kunaswa kama sifa za span |
-| `serviceName`            | `omniroute`; rasilimali `service.name`                                                     |
-| `langfuseMapping`        | `false`; huongeza sifa za Langfuse za uzalishaji/kikao/mtumiaji                            |
-| `identity`               | `pseudonymous`, `keyName`, au `none`                                                       |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                    |
-| `timeoutMs`              | `30000` kwa kila jaribio la HTTP                                                           |
-| `environment`            | Haijawekwa; `langfuse.environment` ya hiari                                                |
+| Key                      | Chaguo-msingi / madhumuni                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `endpoint`               | URL kamili ya traces ya HTTP(S) inayohitajika; kiambishi `/v1/traces` hakiongezwi         |
+| `headers`                | Mistari ya hiari ya `Name: value` au kitu cha JSON cha strings; husimbwa kwa njia fiche   |
+| `requestHeaderAllowlist` | Tupu (imezimwa); majina/viambishi awali vya vichwa vya mteja vya kunasa kama sifa za span |
+| `serviceName`            | `omniroute`; resource `service.name`                                                      |
+| `langfuseMapping`        | `false`; huongeza sifa za Langfuse za generation/session/user                             |
+| `identity`               | `pseudonymous`, `keyName`, au `none`                                                      |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                   |
+| `timeoutMs`              | `30000` kwa kila jaribio la HTTP                                                          |
+| `environment`            | Haijawekwa; `langfuse.environment` ya hiari                                               |
 
-Dashibodi ya jumla huonyesha sehemu hizi. `paths` hukubali safu ya API au eneo la maandishi
-lenye njia kamili zilizotenganishwa kwa mistari mipya/koma. Embeddings, rerank na njia nyingine
-hurukwa isipokuwa ziruhusiwe waziwazi. Safu mlalo zilizorukwa bado husogeza kishale mbele; vihesabu
-vya `exported`/`exportedTotal` vya kitekelezaji kilichopo huhesabu safu mlalo za chanzo zilizochakatwa, zikiwemo
-safu mlalo zilizochujwa, badala ya spans zilizokubaliwa. Uchujaji hufanywa katika mchakato mtoto, bila kubadilisha
-mkataba wake wa IPC/kishale.
+Dashibodi ya jumla huonyesha sehemu hizi. `paths` hukubali safu ya API au eneo la maandishi lenye njia kamili zilizotenganishwa kwa mistari mipya/comma. Njia za embeddings, rerank na nyingine hurukwa isipokuwa ziruhusiwe wazi. Safu zilizorukwa bado huendeleza cursor; vihesabu vya `exported`/`exportedTotal` vya runner iliyopo huhesabu safu za chanzo zilizochakatwa, pamoja na safu zilizochujwa, badala ya spans zilizokubaliwa. Uchujaji hufanywa katika child, bila kubadilisha mkataba wake wa IPC/cursor.
 
-Uthibitishaji wa URL hutumia kisaidizi cha `parseAndValidateNonMetadataUrl` kisichotumia DB kutoka
-`src/shared/network/outboundUrlGuard.ts`: sera ya `block-metadata`. Kina ukaguzi uleule
-usio na masharti wa metadata/itifaki/vitambulisho vilivyopachikwa kama kithibitishaji cha webhook chenye
-URL za faragha zilizoruhusiwa, lakini kwa makusudi huruhusu malengo ya localhost/LAN bila
-kubatilisha bendera ya kipengele ya kimataifa. Hii huruhusu endpoints za Langfuse, Phoenix, Tempo na Collector
-zinazohostiwa binafsi, zikiwemo endpoints za HTTP za faragha. Hosti za metadata za wingu huzuiwa daima.
-Uelekezaji upya haufuatwi, hivyo collector haiwezi kuelekeza upya vitambulisho kwenda kwa hosti tofauti.
-Kama kilinzi kilichopo cha URL kinachotegemea maandishi, hiki hakifungi utatuzi wa DNS; sanidi tu
-hosti zinazodhibitiwa na mwendeshaji. Pendelea HTTPS kila wakati endpoint isipokuwa kwenye mtandao unaoaminika.
+Uthibitishaji wa URL hutumia msaidizi wa `parseAndValidateNonMetadataUrl` usiohitaji DB kutoka
+`src/shared/network/outboundUrlGuard.ts`: sera ya `block-metadata`. Una ukaguzi uleule wa lazima wa metadata/protocol/kitambulisho kilichopachikwa kama validator ya webhook, huku URL za faragha zikiruhusiwa, lakini kwa makusudi huruhusu malengo ya localhost/LAN bila override ya kimataifa ya feature flag. Hii huwezesha endpoints za Langfuse, Phoenix, Tempo na Collector zinazojihudumia, zikiwemo endpoints za HTTP za faragha. Hosts za cloud-metadata huzuiwa kila wakati. Redirects hazifuatwi, hivyo collector haiwezi kuelekeza upya credentials kwenye host tofauti. Kama URL guard ya kilaksema iliyopo, hii haifungi utatuzi wa DNS; sanidi tu hosts zinazodhibitiwa na operator. Pendelea HTTPS kila endpoint isipokuwa ikiwa iko kwenye mtandao unaoaminika.
 
-### Data inayotumwa na uwasilishaji
+### Payload na uwasilishaji
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) hubeba span moja ya
-CLIENT kwa kila safu mlalo iliyoruhusiwa, iliyopewa jina la njia halisi ya ombi lake. Kutaja kwa njia hutofautisha
-Chat Completions, Responses na Messages bila kupachika data ya modeli au utambulisho katika
-jina la span. Sifa za rasilimali zinajumuisha `service.name` na `service.version` ya kifurushi.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) hubeba span moja ya CLIENT kwa kila safu iliyoruhusiwa, iliyopewa jina kulingana na njia yake kamili ya ombi. Uwekaji majina wa njia hutofautisha Chat Completions, Responses na Messages bila kupachika data ya model au utambulisho kwenye jina la span. Sifa za resource zinajumuisha `service.name` na `service.version` ya package.
 
-Kinakili cha kawaida cha majaribio ya gumzo (`open-sse/handlers/chatCore/attemptLogging.ts`) huandika
-`duration = Date.now() - startTime` kazi inapokamilika na hakitoi muhuri wa muda;
-`saveCallLogOperation` katika `src/lib/usage/callLogs.ts` huweka muhuri wa muda kwa chaguomsingi kuwa wakati
-wa kuandika (kukamilika). Kwa hiyo uhamishaji huweka mwisho = muhuri wa muda wa safu mlalo na mwanzo = mwisho − muda
-(milisekunde, zinazobadilishwa kuwa nanosekunde za desimali). Mihuri ya muda ya kihistoria iliyotolewa na mwitaji
-pia huhifadhiwa kama wakati wa mwisho; hakuna kiashiria cha mwanzo/kukamilika kwa kila safu mlalo.
-Muda wa null huwa sifuri. Mihuri ya muda batili/inayokosekana husababisha kundi kushindwa badala ya kuunda
-spans zisizo na matokeo thabiti. `ttftMs` inaweza kuwa null na huambatanishwa na `omniroute.ttft_ms`.
+Logger ya kawaida ya majaribio ya chat (`open-sse/handlers/chatCore/attemptLogging.ts`) huandika
+`duration = Date.now() - startTime` inapokamilika na haitoi timestamp;
+`saveCallLogOperation` katika `src/lib/usage/callLogs.ts` huweka timestamp kwa chaguo-msingi kuwa wakati wa kuandika
+(kukamilika). Kwa hiyo uhamishaji huweka end = timestamp ya safu na start = end − duration
+(milliseconds, zilizobadilishwa kuwa decimal nanoseconds). Timestamps za kihistoria zilizotolewa na mwitaji
+zinahifadhiwa pia kama wakati wa end; hakuna kitofautishi cha start/completion kwa kila safu.
+Duration ya null huwa sifuri. Timestamps batili/zinazokosekana husababisha batch kushindwa badala ya kuunda spans zisizo za deterministic. `ttftMs` ni nullable na huwekwa kwenye `omniroute.ttft_ms`.
 
-Sifa zinajumuisha `gen_ai.operation.name="chat"`, mtoa huduma, modeli iliyoombwa/ya jibu,
-tokeni za ingizo/tokeo, tokeni za hiari za kusoma akiba/kuunda akiba/ufikiri, hali ya HTTP,
-combo, chanzo cha akiba, lebo ya kikao na kitambulisho cha uhusiano. Thamani namba kamili za OTLP na mihuri ya muda
-ni mifuatano ya desimali; mifuatano, thamani za boolean na namba za sehemu hutumia aina zao asilia za thamani za OTLP.
-Spans za hitilafu zina hali ya ERROR na ujumbe wa hali uliosafishwa. Rekodi sanifu
-haina URL ya hosti ya huduma ya juu, hivyo `server.address` huachwa badala ya kuitambulisha kimakosa
-collector kama seva ya modeli. Gharama haihamishwi.
+Sifa zinajumuisha `gen_ai.operation.name="chat"`, provider, model iliyoombwa/ya majibu,
+tokeni za input/output, tokeni za hiari za cache-read/cache-creation/reasoning, hali ya HTTP,
+combo, chanzo cha cache, tag ya session na kitambulisho cha uhusiano. Thamani kamili za OTLP na timestamps
+ni strings za desimali; strings, booleans na nambari za sehemu hutumia variants zao asilia za thamani
+za OTLP. Spans za hitilafu zina hali ya ERROR na ujumbe wa hali uliosafishwa. Rekodi ya kikanoni haina URL ya host ya upstream, kwa hiyo `server.address` haijumuishwi badala ya kuitambulisha kimakosa collector kama server ya model. Gharama haihamishwi.
 
-Ni `includeBodies=true` pekee inayopakia maudhui. Ikiwa `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` hubeba JSON iliyosafishwa ya mwili wa ombi/jibu
-kama ilivyohifadhiwa na OmniRoute (ikiwekwa katika umbo sanifu inapoweza kuchanganuliwa), si safu ya
-ujumbe ya semconv iliyobadilishwa umbo. Miili iliyokatwa/isiyo JSON hubaki maandishi ghafi. Ikiwa `langfuseMapping=true`,
+Ni `includeBodies=true` pekee inayopakia maudhui. Kwa `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` hubeba JSON ya mwili wa ombi/jibu uliosafishwa
+kama ilivyohifadhiwa na OmniRoute (ikiwezekana kuchanganuliwa kwa muundo wa kikanoni), si safu ya ujumbe ya semconv iliyoundwa upya. Miili iliyokatwa/isiyo ya JSON hubaki kuwa maandishi ghafi. Kwa `langfuseMapping=true`,
 miili hutolewa tu kama `langfuse.observation.input` / `langfuse.observation.output`;
-sifa za `gen_ai.*.messages` huachwa ili kila mwili utumwe mara moja. Hali zote mbili
-hurithi `maxBodyBytes` kutoka kwenye njia iliyopo ya upakiaji wa maudhui;
-`omniroute.bodies_truncated=true` huashiria ukataji.
-Hakuna nakala za ziada za hali za pipeline wala usomaji wa vizalia visivyosafishwa unaoongezwa na lengwa hili;
-unasaji wa hiari wa vichwa vya ombi hutumia nakala iliyopo ya hali ya mteja iliyopakiwa kama ilivyoelezwa hapa chini.
-Tumia ratiba ya kiwango cha dakika kama vile `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` unapohamisha
-miili, badala ya kukusanya mrundikano wa kila saa.
+sifa za `gen_ai.*.messages` huachwa ili kila mwili utumwe mara moja. Hali zote mbili hurithi
+`maxBodyBytes` kutoka njia iliyopo ya upakiaji;
+`omniroute.bodies_truncated=true` huashiria kukatwa.
+Hakuna snapshots za ziada za pipeline au usomaji wa artifact ambao haujasafishwa unaoongezwa na destination hii;
+kunasa vichwa vya ombi kwa hiari hutumia snapshot iliyopo ya mteja iliyopakiwa iliyoelezwa hapa chini.
+Tumia mzunguko wa kiwango cha dakika kama `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` wakati wa kuhamisha
+miili, badala ya kukusanya mrundiko wa kila saa.
 
-### Vichwa vya hiari vya maombi ya mteja
+### Vichwa vya hiari vya ombi la mteja
 
-Unasaji wa vichwa **umezimwa kwa chaguomsingi**. Weka `requestHeaderAllowlist` katika usanidi wa lengwa
-na uwashe **Hamisha maagizo na majibu** (`includeBodies: true` kwenye lengwa).
-Orodha ya ruhusa hukubali safu ya API au eneo la maandishi lenye majina yaliyotenganishwa kwa mistari mipya/koma:
+Kunasa vichwa kumezimwa **kwa chaguo-msingi**. Weka `requestHeaderAllowlist` katika usanidi wa destination
+na uwashe **Hamisha vidokezo na majibu** (`includeBodies: true` kwenye destination).
+Allowlist hukubali safu ya API au eneo la maandishi lenye majina yaliyotenganishwa kwa mistari mipya/comma:
 
 ```json
 {
@@ -340,77 +321,84 @@ Orodha ya ruhusa hukubali safu ya API au eneo la maandishi lenye majina yaliyote
 }
 ```
 
-Majina hulinganishwa kikamilifu bila kujali herufi kubwa au ndogo, isipokuwa `*` moja ya mwisho inapochagua kiambishi awali kisicho tupu
-cha jina la kichwa. `*` pekee, vibambo badala vilivyopachikwa na majina batili ya vichwa vya HTTP hukataliwa.
-Kuna viteuzi visivyozidi 64, kila kimoja kikiwa na jina/kiambishi awali cha baiti za ASCII zisizozidi 256.
-Mpangilio huu ni tofauti na `headers`, ambayo huthibitisha utambulisho wa kisafirishaji kwa mkusanyaji.
+Majina hulingana bila kujali herufi kubwa au ndogo na kwa usahihi, isipokuwa `*` moja ya mwisho
+ichague kiambishi awali kisicho tupu cha jina la header. `*` pekee, wildcards zilizopachikwa na
+majina batili ya HTTP header hukataliwa. Kuna selectors zisizozidi 64, kila moja ikiwa na jina/kiambishi
+awali kisichozidi baiti 256 za ASCII. Mipangilio hii ni tofauti na `headers`, ambayo huithibitisha
+exporter kwa collector.
 
-Unasaji husoma `pipeline_client_request` pekee, inayojazwa kutoka kwenye
-`clientRawRequest` ya pipeline ya kina iliyohifadhiwa (au `clientRequest` ya zamani). Hautumii kamwe vichwa vya ombi la mtoa huduma kama mbadala.
-Uwekaji kumbukumbu wa kina wa pipeline lazima uwe ulikuwa umewashwa wakati ombi liliporekodiwa.
-`includeBodies` ikiwa imezimwa, au JSON ya picha ya hali ya mteja ikiwa haipo, imeharibika au imekatwa, hakuna sifa
-za vichwa zinazotolewa. Kuongeza `maxBodyBytes` kunaweza kuzuia kukatwa kwa picha ya hali wakati wa kusafirisha;
-hakuwezi kurejesha maelezo ambayo hayakuwahi kuhifadhiwa. Picha ya hali inayozidi MiB 1 au yenye zaidi ya
-maingizo 256 ya vichwa hupuuzwa. Usafirishaji uliopo wa ingizo/jibu huendelea kufanya kazi pamoja na
-unasaji wa vichwa; orodha ya vinavyoruhusiwa haitoi hali ya kujaza data ya vichwa pekee.
+Capture husoma tu `pipeline_client_request`, inayojazwa kutoka `clientRawRequest` (au
+`clientRequest` ya zamani) ya pipeline iliyohifadhiwa yenye maelezo ya kina. Haijawahi kutumia
+header za ombi la provider kama njia mbadala. Uwekaji wa kumbukumbu wa pipeline yenye maelezo ya kina
+lazima uwe umewezeshwa ombi liliporekodiwa. `includeBodies` ikiwa imezimwa, au JSON ya client-snapshot
+ikiwa haipo, imeharibika au imekatwa, hakuna attributes za header zinazotolewa. Kuongeza
+`maxBodyBytes` kunaweza kuzuia snapshot kukatwa wakati wa export; hakuwezi kurejesha maelezo
+ambayo hayakuhifadhiwa kamwe. Snapshot yenye ukubwa zaidi ya MiB 1 au iliyo na entries zaidi ya
+256 za header hupuuzwa. Export iliyopo ya prompt/response hubaki imewezeshwa pamoja na capture
+ya header; allowlist haitoi hali ya hydration ya headers pekee.
 
-Thamani zilizochaguliwa huwa safu za mifuatano za OTLP za `http.request.header.<full lowercase header name>`,
-hata kwa mfuatano mmoja. Kwa mfano, `X-OmniRoute-Meta-Team: example-team` huwa
+Thamani zilizochaguliwa huwa arrays za strings za OTLP katika `http.request.header.<full lowercase header name>`,
+hata kwa string moja. Kwa mfano, `X-OmniRoute-Meta-Team: example-team` huwa
 `http.request.header.x-omniroute-meta-team` yenye
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Kiambishi awali kizima huhifadhiwa: hivi ni vichwa vya kawaida, bila uchanganuzi wa sehemu za biashara au
-ubadilishaji kuwa metadata ya `omniroute.metadata.*` / Langfuse. `langfuseMapping` haibadilishi maana
-ya vichwa. `User-Agent` iliyochaguliwa yenye thamani moja pia huweka thamani moja ya kawaida ya
-`user_agent.original`. Koma ndani ya thamani moja hazitumiki kuigawanya. Tofauti za herufi kubwa na ndogo huunganishwa kwa
-mpangilio wa maingizo yaliyohifadhiwa; tofauti yoyote batili husababisha kichwa hicho kizima kuachwa. Sifa hupangwa kwa jina lenye herufi ndogo.
+Kiambishi awali kamili huhifadhiwa: hizi ni headers za kawaida, bila uchanganuzi wa business-field au
+ubadilishaji kuwa `omniroute.metadata.*` / Langfuse metadata. `langfuseMapping` haibadilishi
+maana ya header. `User-Agent` iliyochaguliwa yenye thamani moja pia huweka scalar ya kawaida
+`user_agent.original`. Koma zilizo ndani ya thamani moja hazigawanywi. Tofauti za herufi kubwa na
+ndogo huunganishwa kwa mpangilio wa entries zilizohifadhiwa; tofauti yoyote batili huondoa header
+nzima. Attributes hupangwa kwa jina la herufi ndogo.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, vichwa vya funguo za API, majina yenye
-alama za auth/token/secret/password/credential, na taarifa za ndani za uthibitishaji za lango daima
-huondolewa, hata zikichaguliwa au kufichwa kwa sehemu kwenye hifadhi. Miundo inayojulikana ya taarifa za uthibitishaji hutumia tena
-kitambuzi cha pamoja cha taarifa za uthibitishaji; alama za kuficha taarifa huachwa, hazisafirishwi kama thamani salama.
-Mifuatano na safu zisizo tupu za mifuatano pekee hukubaliwa; namba wala objekti hazibadilishwi kwa lazima.
-Majina batili, funguo za prototype, vibambo vya udhibiti (isipokuwa tabo mlalo) na Unicode yenye muundo mbaya
-hupuuzwa bila kufanya kundi lishindwe au kuonyesha maudhui yake kwenye hitilafu.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, headers za API-key, majina yaliyo na
+alama za auth/token/secret/password/credential, na credentials za ndani za gateway huondolewa
+kila mara, hata zikichaguliwa au kufichwa kwa sehemu katika hifadhi. Miundo ya credentials inayojulikana
+hutumia tena kitambua credentials cha pamoja; alama za kuficha huondolewa, si kutumwa kama
+thamani salama. Ni strings na arrays zisizo tupu za strings pekee zinazokubaliwa; nambari au objects
+hazibadilishwi kuwa strings. Majina batili, funguo za prototype, herufi za udhibiti (isipokuwa tab
+ya mlalo) na Unicode iliyoharibika hupuuziwa bila kusababisha batch kushindwa au maudhui yake
+kujitokeza kwenye errors.
 
-Kila span hunasa vichwa visivyozidi 32, thamani 16 kwa kila kichwa, baiti 4096 za UTF-8 kwa kila thamani,
-na jumla ya baiti 16384 za UTF-8 katika majina na thamani za vichwa vilivyonaswa. Vichwa vikubwa kupita kiasi au batili
-huachwa vyote, havikatwi. Uteuzi ni uamuzi wa faragha wa mwendeshaji: majina yanayoonekana salama
-bado yanaweza kuwa na data binafsi, na mipaka/vitambuzi hivi si kisafishaji cha jumla cha taarifa binafsi zinazoweza kumtambulisha mtu (PII).
+Kila span huhifadhi headers zisizozidi 32, values 16 kwa kila header, baiti 4096 za UTF-8 kwa
+kila value, na jumla ya baiti 16384 za UTF-8 kwa majina na values zote za header zilizokusanywa.
+Headers zilizozidi ukubwa/vilio batili huondolewa nzima, hazikatwi. Uchaguzi ni uamuzi wa faragha wa
+operator: majina yanayoonekana salama bado yanaweza kuwa na data ya kibinafsi, na mipaka/vitambua
+hivi si scrubber ya jumla ya PII.
 
 ### Mipaka ya uwasilishaji
 
-Maombi yanawekewa kikomo cha span 500 na MiB 4 za JSON ya UTF-8, ikijumuisha bahasha.
-Ukubwa wa kila span inayoruhusiwa hukaguliwa kabla ya ombi la kwanza la kundi la kishale. Span moja
-inayozidi kikomo huzuia sehemu yoyote ya kundi hilo kutumwa na husababisha hitilafu yenye maelekezo ya kupunguza
-`maxBodyBytes`; haiondolewi kimyakimya. Ukaguzi wa awali huhifadhi marejeleo ya rekodi na
-idadi za baiti pekee, ukiondoa kila span/JSON ya muda; span huundwa upya kwa vipande vyenye ukubwa uliowekewa kikomo
-badala ya kuhifadhi nakala ya pili ya kundi iliyosirialishwa. HTTP 408/429/5xx, hitilafu za mtandao na kuisha kwa muda wa kusubiri hupewa majaribio yasiyozidi
-matatu, kwa muda wa kusubiri unaoongezeka kipeo wa ms 250/500. Sekunde au tarehe za HTTP za `Retry-After`
-zinaweza kuongeza muda wa kusubiri hadi sekunde 5. Hali nyingine hushindwa mara moja. Kukataliwa kwa sehemu kwa OTLP 2xx pia husababisha hitilafu badala ya
-kuthibitisha span iliyopotea; uthibitisho mtupu au wa JSON halali hukubaliwa, kukiwa na
-kikomo cha KiB 64 cha kusoma jibu.
+Maombi yanawekewa kikomo cha spans 500 na MiB 4 ya JSON ya UTF-8, ikijumuisha envelope.
+Kila span iliyoruhusiwa hukaguliwa ukubwa kabla ya ombi la kwanza la batch ya cursor. Span moja
+iliyo kubwa kuliko kikomo haitumi sehemu yoyote ya batch hiyo na hushindwa ikiwa na mwongozo wa
+kupunguza `maxBodyBytes`; haiondolewi kimya kimya. Preflight huhifadhi marejeleo ya rekodi na
+hesabu za baiti pekee, huku ikitupa kila span/JSON ya muda; spans hujengwa upya kwa vipande vyenye
+mipaka badala ya kuhifadhi nakala ya pili iliyoserializwa ya batch. HTTP 408/429/5xx, kushindwa kwa
+mtandao na timeouts hupata hadi majaribio matatu, kwa exponential backoff ya 250/500 ms. Sekunde
+za `Retry-After` au tarehe za HTTP zinaweza kuongeza delay hadi sekunde 5. Status nyingine hushindwa
+mara moja. Kukataliwa kwa sehemu kwa OTLP 2xx pia husababisha exception badala ya kuthibitisha span
+iliyopotea; acknowledgements za JSON tupu au halali zinakubaliwa, kwa kikomo cha kusoma jibu cha
+KiB 64.
 
-Hitilafu zina ukweli unaomilikiwa na kisafirishaji pekee: hali ya HTTP, aina ya jaribio upya, idadi ya majaribio na
-span zilizotumwa, au ujumbe maalumu usiobadilika wa hitilafu ya uthibitisho/mtandao. Miili ya majibu ya mkusanyaji,
-idadi za mafanikio ya sehemu na vichwa vya majibu havinakiliwi kamwe kwenye hitilafu, kumbukumbu au
-dashibodi. Kundi lililoshindwa au lililokubaliwa kwa sehemu halithibitishwi: lengwa huonyesha
-hali ya Kushindwa pamoja na hali hiyo, kishale hubaki kwenye kundi la mwisho lililothibitishwa, na utekelezaji unaofuata
-hutuma tena safu zilezile. Hali za kudumu huendelea kushindwa hadi mkusanyaji au usanidi
-urekebishwe. Tumia kumbukumbu za mkusanyaji mwenyewe kupata maelezo ya jibu. Muhtasari wa hitilafu za kumbukumbu za miito hudumisha
-utaratibu wake tofauti wa kuficha taarifa.
-`prepare()` haiandai chochote; Jaribio hutuma hasa `{"resourceSpans":[]}` na kuripoti
-hali ya HTTP bila kuandika span za kumbukumbu za miito.
+Errors huwa na mambo yanayomilikiwa na exporter pekee: status ya HTTP, aina ya retry, idadi ya
+majaribio na idadi ya spans zilizotumwa, au maneno yasiyobadilika ya kushindwa kwa acknowledgement/
+mtandao. Miili ya majibu ya collector, hesabu za partial-success na response headers haziwahi
+kunakiliwa kwenye errors, logs au dashboard. Batch iliyoshindwa au kukubaliwa kwa sehemu
+haithibitishwi: destination huonyesha Failing ikiwa na status hiyo, cursor hubaki kwenye batch
+ya mwisho iliyothibitishwa, na utekelezaji unaofuata hutuma tena rows zilezile. Status za kudumu
+huendelea kushindwa hadi collector au configuration irekebishwe. Tumia logs za collector yenyewe
+kwa maelezo ya jibu. Muhtasari wa errors wa call-log una redaction yake tofauti.
+`prepare()` hai-provision chochote; Test hutuma hasa `{"resourceSpans":[]}` na kuripoti
+status ya HTTP bila kuandika call-log spans.
 
-Vitambulisho vya trace na span ni tarakimu 32/16 za kwanza za heksadesimali za SHA-256 ya
-`"omniroute.trace\\0" + callLogId` na `"omniroute.span\\0" + callLogId`. Utumaji upya hubeba
-vitambulisho vilevile. Hii si dhamana ya kuondoa nakala rudufu: baadhi ya mifumo ya nyuma, ikijumuisha upokeaji wa Langfuse
-v4, haiondoi span rudufu zenye kitambulisho kilekile. Kuanguka kwa programu au kushindwa kwa sehemu ya kipande kunaweza
-kusababisha kutumwa upya kwa kundi moja tu la kishale ambalo halijathibitishwa; kundi hilo lote linaweza kurudiwa,
-si kipande chake cha mwisho cha HTTP pekee. Chagua ukubwa wa kundi la kishale ukizingatia athari hiyo.
+Trace ids na span ids ni tarakimu 32/16 za kwanza za hex za SHA-256 juu ya
+`"omniroute.trace\\0" + callLogId` na `"omniroute.span\\0" + callLogId`. Utumaji tena hubeba
+ids zilezile. Hii si guarantee ya deduplication: baadhi ya backends, ikiwemo ingestion ya Langfuse
+v4, hazifanyi deduplicate spans zenye id ileile. Kuanguka kwa mfumo au kushindwa kwa sehemu ya
+chunk kunaweza kutuma tena batch moja tu ya cursor ambayo haikuthibitishwa; batch hiyo nzima
+inaweza kujirudia, si chunk yake ya mwisho ya HTTP pekee. Chagua ukubwa wa batch ya cursor
+ukizingatia tradeoff hiyo.
 
 ### Mfano wa Langfuse
 
-Sanidi sehemu hizi kwa instansi ya Langfuse inayojihifadhi yenyewe:
+Sanidi sehemu hizi kwa instance ya Langfuse inayojihifadhi yenyewe:
 
 ```json
 {
@@ -423,44 +411,33 @@ Sanidi sehemu hizi kwa instansi ya Langfuse inayojihifadhi yenyewe:
 }
 ```
 
-Unda thamani ya Authorization kwenye kifaa chako kama Base64 ya mfuatano halisi wa `public-key:secret-key`
+Jenga thamani ya Authorization ndani ya mfumo kama Base64 ya string halisi ya `public-key:secret-key`
 (kwa mfano kwa kutumia `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Usibandike taarifa halisi za uthibitishaji kwenye kumbukumbu, picha za skrini au ripoti za matatizo. Ulinganishaji huweka
-`x-langfuse-ingestion-version: 4` kiotomatiki; Authorization bado hutolewa katika `headers`.
-Vichwa pamoja na chumvi ya utambulisho inayozalishwa hutumia utaratibu uliopo wa sehemu za siri zilizosimbwa fiche
-na vishikilia nafasi vya API; `STORAGE_ENCRYPTION_KEY` inahitajika.
+Usibandike credentials halisi kwenye logs, screenshots au issues. Mapping huweka kiotomatiki
+`x-langfuse-ingestion-version: 4`; Authorization bado hutolewa katika `headers`.
+Headers zote mbili na salt ya identity iliyotengenezwa hutumia utaratibu uliopo wa encrypted
+secret-field na API placeholders; `STORAGE_ENCRYPTION_KEY` inahitajika.
 
-Ulinganishaji huongeza aina/modeli ya uzalishaji, maelezo ya matumizi ya JSON (ingizo/tokeo/jumla na
-funguo za akiba zinazopatikana), nakala za hali ya ingizo/tokeo za JSON, kiwango cha ERROR/DEFAULT, ujumbe wa hali uliosafishwa,
-jina la ufuatiliaji, kitambulisho cha kipindi, mazingira ya hiari na
-`langfuse.observation.metadata.<key>` inayoweza kuchujwa kwa mtoa huduma, modeli iliyoombwa, njia, mchanganyiko, chanzo
-cha akiba na hali. `langfuse.observation.completion_start_time` huwa katika umbizo la ISO 8601 ikiwa ni
-muda wa kuanza + TTFT tu wakati TTFT inajulikana na iko ndani ya muda wa tukio. Hakuna sifa za gharama zinazotumwa.
+Uwekaji wa ramani huongeza aina/modeli ya uundaji, maelezo ya matumizi ya JSON (ingizo/tokeo/jumla na funguo za kache zinazopatikana), vijipicha vya ingizo/tokeo vya JSON, kiwango cha ERROR/DEFAULT, ujumbe wa hali uliosafishwa, jina la ufuatiliaji, kitambulisho cha kipindi, mazingira ya hiari na
+`langfuse.observation.metadata.<key>` yanayoweza kuchujwa kwa mtoa huduma, modeli iliyoombwa, njia, mchanganyiko, chanzo cha kache na hali. `langfuse.observation.completion_start_time` ni ISO 8601 wakati wa kuanza + TTFT tu wakati TTFT inajulikana na iko ndani ya muda uliotumika. Hakuna sifa za gharama zinazotumwa.
 
 Hali za utambulisho hutumika kwa `langfuse.user.id`:
 
-- `pseudonymous` (chaguo-msingi): HMAC-SHA256 ya kitambulisho cha ndani cha ufunguo wa API pamoja na thamani nasibu
-  ya salt ya baiti 32 kwa kila lengwa. Salt huzalishwa wakati wa kuunda ikiwa haipo, husimbwa kwa njia fiche
-  kama `identitySalt`, hairudishwi kamwe, na huhifadhiwa wakati wa kuhariri. Vitambulisho ghafi vya funguo haviwekwi kamwe
-  katika sifa za span. Kuunda upya/kubadilisha salt ya lengwa hubadilisha utambulisho.
+- `pseudonymous` (chaguo-msingi): HMAC-SHA256 ya kitambulisho cha ndani cha ufunguo wa API kwa kutumia salt ya baiti 32 ya nasibu kwa kila lengwa. Salt huzalishwa wakati wa kuunda ikiwa haipo, husimbwa kama `identitySalt`, hairudishwi kamwe, na huhifadhiwa wakati wa kuhariri. Vitambulisho ghafi vya funguo haviwekwi kamwe kwenye sifa za span. Kuunda upya au kuzungusha salt ya lengwa hubadilisha vitambulisho.
 - `keyName`: jina lililosanidiwa la ufunguo wa API, likifichua kimakusudi lebo hiyo ya mwendeshaji.
-- `none`: hakuna kitambulisho cha mtumiaji. Lebo za kipindi bado husafirishwa zikiwepo; hali hizi hazifanyi
-  maudhui yoyote ya prompt au lebo za kipindi/uhusianishaji zilizotolewa na mwendeshaji kuwa bila utambulisho.
+- `none`: hakuna kitambulisho cha mtumiaji. Lebo za vipindi bado hutumwa zinapopatikana; hali hizi hazifanyi maudhui holela ya vidokezo au lebo za kipindi/uwiano zilizotolewa na mwendeshaji kuwa zisizotambulisha.
 
-### Kuanza bila kujaza data ya awali
+### Kuanza bila ujazaji wa nyuma
 
-Wakati wa kuunda pekee, washa **Anza kutoka nafasi ya sasa (ruka kumbukumbu zilizopo)** au pitisha
-`startFromCurrentPosition: true` katika kiwango cha juu cha data ya ombi la API ya kuunda. Hii huweka thamani ya awali ya
-`cursor_row_id` kuwa rowid ya juu zaidi ya sasa ya kumbukumbu za miito zilizohifadhiwa kwa kutumia vitendakazi saidizi vya kishale vilivyopo,
-bila uhamishaji. Chaguo-msingi ni false (kishale 0 na kujaza historia iliyohifadhiwa).
-Huu si mpangilio wa kuweka upya kishale wakati wa kusasisha.
+Wakati wa kuunda pekee, washa **Start from current position (skip existing logs)** au pitisha
+`startFromCurrentPosition: true` katika kiwango cha juu cha mzigo wa ombi la API la uundaji. Hii huanzisha
+`cursor_row_id` kwa rowid ya juu zaidi ya sasa ya rekodi ya simu iliyohifadhiwa kwa kutumia visaidizi vilivyopo vya kishale, bila uhamishaji. Chaguo-msingi ni false (kishale 0 na ujazaji wa historia iliyohifadhiwa ya nyuma).
+Hii si mipangilio ya kuweka upya kishale wakati wa kusasisha.
 
-Ongezeko la pamoja la `ttftMs` pia huongeza safu wima ya `ttft_ms` inayoruhusu null kwenye kilinganishi cha BigQuery
-na skima ya jedwali jipya: jaribio lake la skima linahitaji kila uga wa rekodi sanifu uwe na
-safu wima. Majedwali yaliyopo yanaendelea kusafirisha bila mabadiliko: `prepare()` husoma skima ya jedwali na
-huacha tu `ttft_ms` wakati safu wima hiyo haipo. Ongeza safu wima ya INT64 inayoruhusu null ili kupata TTFT
-katika utekelezaji unaofuata, au tumia jedwali jipya. Hakuna PATCH, mabadiliko ya kiotomatiki ya skima au ruhusa
-za ziada zinazohitajika; sehemu nyingine zote za safu mlalo zinaendelea kukaguliwa kwa ukali dhidi ya skima.
+Nyongeza ya pamoja ya `ttftMs` pia huongeza safu wima ya `ttft_ms` inayoweza kuwa NULL kwenye mchoraji wa BigQuery
+na schema ya jedwali jipya: jaribio lake la schema linahitaji kila uga wa rekodi halisi uwe na safu wima. Majedwali yaliyopo yanaendelea kutuma bila mabadiliko: `prepare()` husoma schema ya jedwali na kuacha tu `ttft_ms` inapokosekana safu hiyo. Ongeza safu wima ya INT64 inayoweza kuwa NULL ili kupata TTFT
+katika uendeshaji unaofuata, au tumia jedwali jipya. Safu wima ya hiari ya TTFT haisababishi sasisho la schema. Safu wima za ushahidi wa matumizi
+hufuata mtiririko wa uoanifu wa masharti na wa kujijumuisha kwa hiari ulio hapa chini; sehemu nyingine za safu zinaendelea kuhitaji ukaguzi mkali wa schema.
 
 ---
 
@@ -487,13 +464,28 @@ Kanuni mbili za lengwa jipya:
 
 ## 7. Kuiendesha
 
-- **Dashibodi**: Miunganisho → Uhamishaji wa kumbukumbu. Ongeza lengwa, endesha **Jaribu** ili kukagua taarifa za uthibitishaji
-  bila kuandika safu mlalo, kisha uliwashe.
-- **Mlundikano unaosubiri**: kila kadi ya lengwa huonyesha safu mlalo zinazosubiri na kishale cha ufuatiliaji; `GET
-/api/log-export/status` hurejesha takwimu hizohizo pamoja na utekelezaji 20 wa mwisho wa kazi.
-- **Kushindwa kwa lengwa moja hakusababishi mengine kushindwa** — muhtasari wa utekelezaji hurekodi hali ya kila lengwa
-  katika `last_status` / `last_error`, na historia ya utekelezaji wa kazi huhifadhi hali ya jumla.
-- **Kufuta lengwa hufuta kishale chake cha ufuatiliaji.** Kuliongeza tena huanza kutoka kwenye kumbukumbu ya zamani zaidi ya
-  mwito iliyohifadhiwa, jambo linalotuma tena safu mlalo ambazo huenda lengwa tayari linazo. Katika BigQuery,
-  `insertId` ya kila safu mlalo huzuia urudufu huo ndani tu ya kipindi cha BigQuery chenyewe cha kuondoa urudufu, kwa hiyo ni bora kuzima
+- **Dashibodi**: Integrations → Log export. Ongeza lengwa, endesha **Jaribu** ili kukagua vitambulisho
+  bila kuandika safu, kisha liwezeshe.
+- **Foleni ya nyuma**: kila kadi ya lengwa huonyesha safu zinazosubiri na kishale; `GET
+/api/log-export/status` hurudisha takwimu hizo hizo pamoja na uendeshaji 20 wa mwisho wa kazi.
+- **Lengwa linaloshindwa halisababishi mengine kushindwa** — muhtasari wa uendeshaji huhifadhi hali ya kila lengwa
+  katika `last_status` / `last_error`, na historia ya uendeshaji wa kazi huhifadhi jumla.
+- **Kufuta lengwa hufuta kishale chake.** Kuliongeza tena huanza kutoka kwenye kumbukumbu ya zamani zaidi iliyohifadhiwa
+  ya simu, hivyo hutuma tena safu ambazo huenda lengwa tayari linazo. Kwenye BigQuery, `insertId` ya kila safu huzuia
+  marudio hayo tu ndani ya muda wa BigQuery wa kuondoa marudio, kwa hiyo pendelea kuzima
   lengwa badala ya kulifuta.
+
+### Upatanifu wa schema ya ushahidi wa matumizi
+
+Majedwali mapya ya BigQuery yanajumuisha `usage_evidence` inayoweza kuwa tupu (STRING iliyo na JSON) na
+`usage_estimated` (BOOL). `autoCreate` ikiwa imewezeshwa, jedwali lililopo linaweza kupokea
+safu hizi zinazokosekana pekee, mradi ziwe za hiari. Kihamishaji huhifadhi schema kamili iliyopo,
+pamoja na metadata ya sehemu, na hutuma PATCH ya masharti kwa kutumia etag iliyorejeshwa. Mabadiliko ya wakati mmoja
+kwenye schema husababisha uhamishaji ushindwe badala ya kuandikwa juu;
+uendeshaji unaofuata husoma jedwali tena.
+
+`autoCreate` ikiwa imezimwa, ongeza safu hizi mwenyewe kabla ya kuhamisha rekodi
+zenye ushahidi wa matumizi. Metadata ya schema/etag inayokosekana au sasisho lililoshindwa pia huzuia uingizaji
+wenye ushahidi. Kishale cha uhamishaji hakisongi mbele baada ya kushindwa huko, na
+ushahidi hauondolewi kimyakimya. Uhifadhi wa ndani wa kumbukumbu bado hutumika wakati uhamishaji umezuiwa,
+kwa hiyo tatua hitilafu kabla ya safu za chanzo zilizohifadhiwa kuisha muda.

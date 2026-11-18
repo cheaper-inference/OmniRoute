@@ -116,31 +116,10 @@ Izvori se primerjajo brez razlikovanja med velikimi in malimi črkami, končna p
 `http://localhost:3000` in `http://localhost:3000/` enakovredna. Isti seznam CSV
 lahko med izvajanjem brez ponovnega zagona nastavite v **Dashboard → Security → CORS Allowed Origins**.
 
-## Ključi API v primerjavi s sejami piškotkov
+## ključi API v primerjavi s sejami piškotkov
 
-- **Bearer / `x-api-key` (vmesnik za sklepanje `/v1/*`):** brskalniki jih nikoli ne priložijo
-  samodejno. CORS tukaj ni smiselna ovira — ovira je ključ API —
-  zato je ta vmesnik namenoma permisiven, da lahko brskalniški odjemalci in odjemalci
-  Electron berejo odgovore, do katerih so že upravičeni.
-  Sproščeni odmev sledi preverjenemu ključu, ne zgolj prisotnosti glave: kadar
-  `REQUIRE_API_KEY=false` zahtevo obdela anonimno, njen uspešen odgovor ohrani seznam
-  dovoljenih po načelu fail-closed. Zavrnitve overjanja (401) ostanejo berljive, da lahko
-  odjemalci prikažejo preklican ali napačno vnesen ključ (#5242): lastni 401 cevovoda
-  ohrani odmev, pot, ki ključ zavrne sama, potem ko jo je cevovod obdelal kot anonimno
-  (`/v1/models` in `/v1beta/models` s konfiguriranim overjanjem za upravljanje, na
-  lastnika omejene poti `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
-  in poti kandidatov auto-combo), pa odmev doda temu 401 prek
-  `credentialRejectionHeaders()`. Odmev je odvisen od tega, ali zahteva nosi glavo s
-  poverilnicami (`Authorization`, `x-api-key`, `x-goog-api-key` ali piškotek
-  `auth_token`), ne od tega, katero od njih je pot preverila, in nikoli ni združen z
-  `Access-Control-Allow-Credentials`; telo je fiksna ovojnica napake. Poti za
-  upravljanje pod `/api/v1/`, ki jih varuje `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), odmeva ne dodajo: z
-  `REQUIRE_API_KEY=false` njihovega 401/403 ni mogoče prebrati iz drugega izvora.
-- **Seja piškotka (nadzorna plošča):** zaščitena je s privzeto nastavitvijo, ki ob napaki zavrne dostop, **in**
-  z odsotnostjo `Access-Control-Allow-Credentials` na skupni poti. Izvorov za
-  upravljanje oziroma nadzorno ploščo ne vključujte v nobeno permisivno konfiguracijo; zanje mora
-  brezpogojno ostati privzeto zavračanje dostopa.
+- **Nosilec / `x-api-key` (sklepna površina `/v1/*` ):** brskalniki jih nikoli ne pripnejo samodejno. CORS tukaj ni pomembna ovira — ključ API je ovira —, zato je ta površina namenoma permisivna, tako da lahko brskalnik in odjemalci Electron berejo odgovore, do katerih so že upravičeni. Sproščen odmev sledi potrjenemu ključu in ne zgolj prisotnosti glave: ko `REQUIRE_API_KEY=false` anonimno streže zahtevo, njegov uspešen odgovor ohrani neuspešno zaprt seznam dovoljenih. Zavrnitve avtifikacije (401) ostanejo berljive, tako da lahko odjemalci prikažejo preklican ali napačno vpisan ključ (#5242): lastni 401 cevovoda ohranja odmev in pot, ki sam zavrne ključ, potem ko ga cevovod servira kot anonimnega (`/v1/models` in `/v1beta/models` s konfiguriranim preverjanjem upravljanja, z lastniškim obsegom `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` in kandidat za samodejno kombiniranje poti) doda odmev temu 401 prek `credentialRejectionHeaders()`. Odmev je vpisan na zahtevo, ki nosi glavo poverilnice (`Authorization`, `x-api-key`, `x-goog-api-key` ali piškotek `auth_token` ), ne na katerem od njih je pot preverila, in ni nikoli seznanjen z `Access-Control-Allow-Credentials`; telo je popravljena ovojnica napake. Poti upravljanja pod `/api/v1/` ki jih varuje `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), ne dodajajo odmeva: z `REQUIRE_API_KEY=false` njihov 401/403 ni berljiv navzkrižno poreklo.
+- **Seja piškotkov (nadzorna plošča):** zaščiten s privzetim zaprtjem ob napaki** in** zaradi odsotnosti `Access-Control-Allow-Credentials` na skupni poti. Izvirnike management/dashboard ne vključite v morebitne permisivne konfiguracije; ostati morajo natančno zaprti.
 
 ## Rokovanja WebSocket (`/v1/responses`, `/v1/ws`)
 

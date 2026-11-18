@@ -199,146 +199,151 @@ na tuairisceoirí réimsí a thugtar ar ais, mar sin ní gá an comhéadan úsá
 
 Eochracha cumraíochta (`type: "bigquery"`):
 
-| Eochair              | Nótaí                                                                               |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| `projectId`          | Tionscadal GCP ina bhfuil an tacar sonraí                                           |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                     |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                     |
-| `location`           | Ní úsáidtear é ach nuair is gá an tacar sonraí a chruthú (réamhshocrú `EU`)         |
-| `serviceAccountJson` | Eochair cuntais seirbhíse. Rún: criptithe ar fos, ní sheoltar ar ais riamh í        |
-| `autoCreate`         | Cruthaigh an tacar sonraí agus an tábla ar an gcéad easpórtáil (réamhshocrú `true`) |
+| Eochair              | Nótaí                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Tionscadal GCP ina bhfuil an tacar sonraí                                                                                    |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                              |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                              |
+| `location`           | Ní úsáidtear é ach nuair is gá an tacar sonraí a chruthú (réamhshocrú `EU`)                                                  |
+| `serviceAccountJson` | Eochair chuntais seirbhíse. Rúnda: criptithe ar fos, ní chuirtear ar ais riamh                                               |
+| `autoCreate`         | Cruthaigh tacar sonraí/tábla atá ar iarraidh; cuir colúin fianaise úsáide nullable leis go coinníollach (réamhshocrú `true`) |
 
-Teastaíonn `bigquery.tables.updateData` ar an spriocthábla ón gcuntas seirbhíse, chomh maith le
-`bigquery.datasets.create` / `bigquery.tables.create` nuair atá `autoCreate` ar siúl.
+Tá `bigquery.tables.updateData` de dhíth ar an gcuntas seirbhíse ar an tábla sprice, chomh maith le
+`bigquery.datasets.create` / `bigquery.tables.create` nuair atá `autoCreate` cumasaithe.
+Teastaíonn `bigquery.tables.update` freisin chun tábla atá ann cheana a nuashonrú agus an dá réimse
+fianaise úsáide nullable a chur leis. Má tá cead ar iarraidh, teipeann ar an easpórtáil gan a cúrsóir
+a chur ar aghaidh.
 
-Is aonad **cúrsóra** é baisc chumraithe, ní aonad HTTP: roinneann `send()` ina glaonna insertAll
-í ina bhfuil 500 ró ar a mhéad, mar sin ní féidir le `batch_size` mór teorainn iarratais 10 MB BigQuery a shárú.
-Déantar suas le trí atriail ar stádais shealadacha (408/429/500/502/503/504) le tréimhse feithimh
-a mhéadaíonn go heaspónantúil, agus na insertIds céanna á n-athúsáid; caitear eisceacht ar an gcéad iarracht
-i gcás teipeanna fíordheimhnithe agus scéimre, seachas an rith a chur amú.
+Is aonad **cúrsóra**, seachas aonad HTTP, é baisc chumraithe: gearrann `send()` ina ghlaonna
+insertAll nach bhfuil níos mó ná 500 ró iontu, mar sin ní féidir le `batch_size` mór teorainn iarratais
+10 MB BigQuery a shárú. Déantar stádais shealadacha (408/429/500/502/503/504) a atriail suas le trí
+huaire le cúlú easpónantúil, agus úsáidtear na insertIds céanna arís; caitheann earráidí fíordheimhnithe
+agus scéime eisceacht ar an gcéad iarracht, seachas an rith a chur amú.
 
-Ní bhíonn tábla a cruthaíodh díreach anois le feiceáil fós ag an gcríochphointe sruthaithe, a fhreagraíonn
-le 404 ar feadh cúpla soicind. Déantar atriail ar an 404 sin, ach **amháin má chruthaigh an rith seo an tábla** —
-teipeann go tapa fós má tá an tábla ar iarraidh i ndáiríre. Tabhair faoi deara má athchruthaítear tábla faoi ainm
-a scriosadh le déanaí, go ndiúltaíonn BigQuery d'ionsáite sruthaithe ar feadh roinnt nóiméad; is airí de chuid
-scriosadh-agus-athchruthú é sin, mar sin is fearr ainm tábla nua ná tábla a scriosadh agus a chur leis arís.
+Ní bhíonn tábla a cruthaíodh díreach anois le feiceáil ag an gcríochphointe sruthaithe go fóill, agus
+freagraíonn sé le 404 ar feadh cúpla soicind. Déantar an 404 sin a atriail, ach **sa chás gur chruthaigh
+an rith seo an tábla amháin** — teipeann ar thábla atá ar iarraidh i ndáiríre láithreach. Tabhair faoi
+deara go gcuireann athchruthú tábla faoi ainm a scriosadh le déanaí cosc ar BigQuery ar ionsá sruthaithe
+ar feadh roinnt nóiméad; is airí de chuid scriosadh agus athchruthú é sin, mar sin b’fhearr ainm tábla
+nua a úsáid seachas ceann a scriosadh agus a chur leis arís.
 
 **Tagann teip pháirteach mar HTTP 200 le `insertErrors[]` nach bhfuil folamh.** Caitear leis sin mar
-theip agus caitear eisceacht, rud a chuireann cosc ar an gcúrsóir dul thar rónna nár ghlac BigQuery
-leo riamh; daingníonn `tests/unit/log-export-bigquery.test.ts` an t-iompar sin.
+theip agus caitear eisceacht, rud a chuireann cosc ar an gcúrsóir dul ar aghaidh thar na róanna nár
+ghlac BigQuery leo; daingníonn `tests/unit/log-export-bigquery.test.ts` an t-iompar seo.
 
-Is gnáth-REST é an t-iompar — malartaítear dearbhú RS256 féinsínithe ar chomhartha rochtana ag
-`https://oauth2.googleapis.com/token`, ansin seoltar na rónna chuig `tabledata.insertAll`. Ní thugtar
-aon SDK Google isteach. Cuirtear comharthaí rochtana i dtaisce laistigh den phróiseas de réir (cuntas seirbhíse, scóip).
+Is REST simplí an t-iompar — malartaítear dearbhú RS256 féinshínithe ar chomhartha rochtana ag
+`https://oauth2.googleapis.com/token`, ansin seoltar na róanna chuig `tabledata.insertAll`. Ní
+tharraingítear aon SDK Google isteach. Déantar comharthaí rochtana a thaisceadh sa phróiseas de réir
+(cuntas seirbhíse, raon feidhme).
 
-Tá colún amháin sa tábla cruthaithe do gach réimse sa chluaisín Logs, chomh maith le `exported_at`, agus tá sé leagtha amach
-de réir mar a dhéantar fiosruithe ar logaí glaonna i ndáiríre:
+Tá colún amháin sa tábla cruthaithe do gach réimse sa chluaisín Logs chomh maith le `exported_at`, agus
+tá sé leagtha amach don chaoi a ndéantar logaí glaonna a cheistiú i ndáiríre:
 
-- **Deighilte de réir lae ar `timestamp`**, ionas nach scanann fiosrú atá teoranta de réir dáta ach na laethanta sin.
-- **Cnuasaithe de réir `api_key_name`, `provider`, `model`, `status`** (san ord sin), ionas go bhfágann scagadh de réir
-  cé a rith é, cá ndeachaigh sé, nó ar theip air, bloic as an áireamh laistigh de gach deighilt. Ceadaíonn BigQuery
-  ceithre cholún cnuasaithe ar a mhéad agus tá tábhacht leis an ord: fágann scagaire ar `api_key_name` amháin
-  bloic as an áireamh, ach ní dhéanann scagaire ar `status` amháin amhlaidh.
-- **Coinneáil roghnach deighiltí** trí `partitionExpirationDays` (coinníonn 0 gach rud), a chuirtear i bhfeidhm
-  nuair a chruthaítear an tábla.
+- **Deighilte de réir lae ar `timestamp`**, ionas nach scanann fiosrúchán atá teoranta de réir dáta ach na laethanta sin.
+- **Cnuasaithe de réir `api_key_name`, `provider`, `model`, `status`** (san ord sin), ionas go ndéanann scagadh de réir cé a rith é, cá ndeachaigh sé, nó ar theip air, bloic a ghearradh amach laistigh de gach deighilt. Ceadaíonn BigQuery ceithre cholún cnuasaithe ar a mhéad agus tá tábhacht leis an ord: gearrann scagaire ar `api_key_name` amháin bloic amach, ach ní dhéanann scagaire ar `status` amháin amhlaidh.
+- **Coinneáil roghnach deighiltí** trí `partitionExpirationDays` (coinníonn 0 gach rud), curtha i bhfeidhm nuair a chruthaítear an tábla.
 
-Cuirtear an dá shocrú i bhfeidhm tráth an chruthaithe. Coinníonn tábla atá ann cheana cibé leagan amach atá aige, mar sin
-dírigh an ceann scríbe ar aitheantas tábla nua más mian leat iad a ghlacadh.
+Cuirtear an dá shocrú i bhfeidhm tráth an chruthaithe. Coinníonn tábla atá ann cheana cibé leagan amach atá aige cheana, mar sin dírigh an ceann scríbe ar aitheantas tábla nua más mian leat iad a ghlacadh.
 
-Deimhníonn `tests/unit/log-export-bigquery.test.ts` go bhfanann an mapálaí agus scéimre an tábla
-ar aon dul lena chéile, ionas nach féidir colún nua sa loga glaonna a fhágáil ar lár go ciúin ar an mbealach amach.
+Dearbhaíonn `tests/unit/log-export-bigquery.test.ts` go bhfanann an mapálaí agus scéim an tábla
+ar aon dul, ionas nach féidir colún nua loga glaonna a ligean ar lár go ciúin ar an mbealach amach.
 
-Roinntear baisceanna ina smutáin de réir líon na rónna **agus** líon na mbeart sraitheachaithe. Ní leor líon na rónna amháin
-nuair a easpórtáiltear pálastaí: is féidir le 500 ró ina bhfuil leideanna a bheith ina ndeicheanna meigibheart, agus diúltaíonn insertAll
-d'iarratas os cionn 10 MB. Dúntar smutáin ag 500 ró nó 9 MB, cibé acu a tharlaíonn ar dtús.
+Gearrtar baisceanna de réir **líon na róanna agus na mbeart sraitheachaithe araon**. Ní leor líon na
+róanna amháin nuair a dhéantar pálastaí a easpórtáil: is féidir le 500 ró ina bhfuil leideanna a bheith
+na mílte meigibheart, agus diúltaíonn insertAll d’iarratas os cionn 10 MB. Dúnann smutáin ag 500 ró nó
+9 MB, cibé acu is túisce a tharlaíonn.
 
 ---
 
 ## 5. Ceann scríbe rianta OTLP/HTTP
 
-Úsáideann an chumraíocht `type: "otlp-http"`. Is easpórtáil sceidealaithe de logaí glaonna
-marthanacha í seo, le tacaíocht cúrsóra, seachas an doirteal beo imeachtaí ródaithe ar bhonn
-na hiarrachta is fearr in `open-sse/services/routing/otel.ts`. Ní léann ná ní athraíonn sí
+Úsáideann an chumraíocht `type: "otlp-http"`. Easpórtáil sceidealaithe, le cúrsóir mar bhonn,
+de logaí glaonna marthanacha atá inti, ní an doirteal imeachtaí beo ródaithe, ar bhonn na
+iarrachta is fearr, atá in `open-sse/services/routing/otel.ts`. Ní léann sé ná ní athraíonn sé
 athróga timpeallachta, amadóirí ná maoláin an doirtil sin. Má chumasaítear an dá cheann,
-féadfar dhá chineál neamhspleácha réisí a tháirgeadh;
-úsáid an scóip ionstraimíochta `omniroute.log-export` chun na réisí logaí glaonna seo a idirdhealú.
+d’fhéadfadh dhá chineál neamhspleách réise a bheith ann; bain úsáid as scóip ionstraimíochta
+`omniroute.log-export` chun na réisí loga glaonna seo a idirdhealú.
 
-| Eochair                  | Réamhshocrú / cuspóir                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `endpoint`               | URL iomlán HTTP(S) rianta riachtanach; ní chuirtear iarmhír `/v1/traces` leis           |
-| `headers`                | Línte roghnacha `Name: value` nó oibiacht JSON de theaghráin; criptithe                 |
-| `requestHeaderAllowlist` | Folamh (as); ainmneacha/réimíreanna ceanntásca cliaint le gabháil mar aitreabúidí réise |
-| `serviceName`            | `omniroute`; acmhainn `service.name`                                                    |
-| `langfuseMapping`        | `false`; cuireann aitreabúidí giniúna/seisiúin/úsáideora Langfuse leis                  |
-| `identity`               | `pseudonymous`, `keyName`, nó `none`                                                    |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                 |
-| `timeoutMs`              | `30000` in aghaidh gach iarrachta HTTP                                                  |
-| `environment`            | Gan socrú; `langfuse.environment` roghnach                                              |
+| Eochair                  | Réamhshocrú / cuspóir                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `endpoint`               | URL iomlán rianta HTTP(S) riachtanach; ní chuirtear iarmhír `/v1/traces` leis            |
+| `headers`                | Línte roghnacha `Name: value` nó réad JSON de theaghráin; criptithe                      |
+| `requestHeaderAllowlist` | Folamh (as); ainmneacha/réimíreanna cheanntásca cliaint le gabháil mar aitreabúidí réise |
+| `serviceName`            | `omniroute`; acmhainn `service.name`                                                     |
+| `langfuseMapping`        | `false`; cuireann sé aitreabúidí giniúna/seisiúin/úsáideora Langfuse leis                |
+| `identity`               | `pseudonymous`, `keyName`, nó `none`                                                     |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                  |
+| `timeoutMs`              | `30000` in aghaidh gach iarracht HTTP                                                    |
+| `environment`            | Gan socrú; roghnach `langfuse.environment`                                               |
 
-Rindreálann an deais ghinearálta na réimsí seo. Glacann `paths` le heagar API nó le réimse téacs
-ina bhfuil conairí beachta scartha le línte nua/camóga. Scipeáiltear conairí leabuithe, athrangaithe
-agus conairí eile mura gceadaítear go sainráite iad. Cuireann rónna scipeáilte an cúrsóir ar aghaidh fós;
-comhaireann cuntair `exported`/`exportedTotal` an reathaí reatha rónna foinse próiseáilte, lena n-áirítear
-rónna scagtha, seachas réisí glactha. Déantar an scagadh sa phróiseas linbh, gan a chonradh
-IPC/cúrsóra a athrú.
+Rindreálann an painéal cineálach na réimsí seo. Glacann `paths` le heagar API nó le réimse
+téacs le cosáin chruinne scartha le línte nua/camóga. Déantar leabuithe, athrangú agus cosáin
+eile a scipeáil mura gceadaítear go sainráite iad. Cuireann na sraitheanna a scipeáiltear an
+cúrsóir chun cinn fós; áiríonn cuntair `exported`/`exportedTotal` an reathaí atá ann cheana
+sraitheanna foinse próiseáilte, lena n-áirítear sraitheanna scagtha, seachas réisí glactha.
+Déantar an scagadh sa phróiseas linbh, gan conradh IPC/cúrsóra an phróisis sin a athrú.
 
-Úsáideann bailíochtú URL an fheidhm chúnta `parseAndValidateNonMetadataUrl`, nach mbraitheann ar bhunachar sonraí, ó
-`src/shared/network/outboundUrlGuard.ts`: an polasaí `block-metadata`. Tá na seiceálacha
-neamhchoinníollacha céanna meiteashonraí/prótacail/dintiúr leabaithe aige agus atá ag bailíochtóir
-an webhook nuair a cheadaítear URLanna príobháideacha, ach ceadaíonn sé spriocanna localhost/LAN
-d'aon ghnó gan sárú domhanda le bratach gné. Cumasaíonn sé seo críochphointí féinóstáilte
-Langfuse, Phoenix, Tempo agus Collector, lena n-áirítear críochphointí príobháideacha HTTP.
-Cuirtear bac i gcónaí ar óstaigh mheiteashonraí néil.
+Úsáideann bailíochtú URL an cúntóir `parseAndValidateNonMetadataUrl` nach mbraitheann ar DB ó
+`src/shared/network/outboundUrlGuard.ts`: an beartas `block-metadata`. Tá na seiceálacha
+neamhchoinníollacha céanna aige maidir le meiteashonraí/prótacal/dintiúir leabaithe agus atá
+ag bailíochtóir an webhook, agus URLanna príobháideacha ceadaithe ann, ach ceadaíonn sé
+spriocanna localhost/LAN d’aon ghnó gan sárú gné dhomhanda a bheith de dhíth. Ligeann sé seo
+do chríochphointí Langfuse, Phoenix, Tempo agus Collector féinóstáilte, lena n-áirítear
+críochphointí príobháideacha HTTP. Cuirtear óstach meiteashonraí néil bac orthu i gcónaí.
 Ní leantar atreoruithe, mar sin ní féidir le bailitheoir dintiúir a atreorú chuig óstach eile.
-Cosúil leis an gcosaint fhoclóireachta URL atá ann cheana, ní dhaingníonn sé seo réiteach DNS;
-ná cumraigh ach óstaigh atá faoi rialú an oibreora. Tabhair tús áite do HTTPS nuair nach bhfuil
-an críochphointe ar líonra iontaofa.
+Cosúil leis an ngarda URL foclóireachta atá ann cheana, ní ghlasálann sé seo réiteach DNS;
+cumraigh óstaigh atá faoi rialú an oibreora amháin. B’fhearr HTTPS nuair nach bhfuil an
+críochphointe ar líonra iontaofa.
 
-### Pálasta agus seachadadh
+### Ualach sonraí agus seachadadh
 
 Iompraíonn JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) réise
-CLIENT amháin in aghaidh gach ró cheadaithe, agus a chonair bheacht iarratais mar ainm air.
-Déanann ainmniú de réir conaire idirdhealú idir Chat Completions, Responses agus Messages
-gan sonraí samhla ná aitheantais a leabú in ainm na réise. Áirítear `service.name` agus
-`service.version` an phacáiste sna haitreabúidí acmhainne.
+CLIENT amháin in aghaidh gach sraithe ceadaithe, agus ainmnítear é de réir a chosáin iarratais
+bheachta. Déanann ainmniú na gcosán idirdhealú idir Chat Completions, Responses agus Messages
+gan sonraí samhla ná aitheantais a leabú in ainm na réise. Áirítear sna tréithe acmhainne
+`service.name` agus `service.version` an phacáiste.
 
-Scríobhann an gnáthlogálaí iarrachtaí comhrá (`open-sse/handlers/chatCore/attemptLogging.ts`)
-`duration = Date.now() - startTime` tráth an chríochnaithe agus ní sholáthraíonn sé stampa ama;
-socraíonn `saveCallLogOperation` in `src/lib/usage/callLogs.ts` an stampa ama go ham na scríofa
-(an chríochnaithe) de réir réamhshocraithe. Dá bhrí sin, socraíonn an easpórtáil deireadh = stampa ama an ró
-agus tús = deireadh − fad (milleasoicindí, tiontaithe go nanashoicindí deachúlacha).
-Caomhnaítear stampaí ama stairiúla a sholáthraíonn an glaoiteoir mar am deiridh freisin;
-níl aon idirdhealaitheoir tosaithe/críochnaithe in aghaidh an ró ann.
-Déantar nialas d'fhad null. Teipeann ar an mbaisc má tá stampaí ama neamhbhailí nó ar iarraidh,
-seachas réisí neamhchinntitheacha a chruthú. Ceadaíonn `ttftMs` null agus mapálann sé go `omniroute.ttft_ms`.
+Scríobhann gnáthlogálaí iarrachtaí comhrá
+(`open-sse/handlers/chatCore/attemptLogging.ts`) `duration = Date.now() - startTime` tráth an
+chríochnaithe agus ní sholáthraíonn sé stampa ama; socraíonn `saveCallLogOperation` in
+`src/lib/usage/callLogs.ts` an stampa ama de réir réamhshocraithe chuig am na scríofa
+(chríochnaithe). Dá bhrí sin, socraíonn an t-easpórtáil deireadh = stampa ama na sraithe agus
+tús = deireadh − fad (i milleasoicindí, tiontaithe go nanashoicindí deachúlacha). Coinnítear
+stampaí ama stairiúla a sholáthraíonn an glaoiteoir mar am an deiridh chomh maith; níl aon
+idirdhealú in aghaidh na sraithe idir tús agus críoch. Éiríonn fad nialasach nuair atá sé
+null. Teipeann ar an mbaisc de bharr stampaí ama neamhbhailí/atá ar iarraidh seachas réisí
+neamhchinntitheacha a chruthú. Tá `ttftMs` inlamháilte agus mapáiltear é chuig
+`omniroute.ttft_ms`.
 
-Áirítear sna haitreabúidí `gen_ai.operation.name="chat"`, soláthraí, samhail iarrtha/freagartha,
-comharthaí ionchuir/aschuir, comharthaí roghnacha léite taisce/cruthaithe taisce/réasúnaíochta,
-stádas HTTP, teaglama, foinse taisce, clib seisiúin agus aitheantóir comhghaolaithe.
-Is teaghráin dheachúlacha iad luachanna slánuimhreacha OTLP agus stampaí ama; úsáideann
-teaghráin, luachanna Boole agus uimhreacha codánacha a leaganacha dúchasacha luacha OTLP.
-Tá stádas ERROR agus teachtaireacht stádais sláintithe ag réisí earráide. Níl URL óstaigh
-réamhtheachtaigh sa taifead canónach, mar sin fágtar `server.address` ar lár seachas an
-bailitheoir a aithint go mícheart mar fhreastalaí na samhla. Ní easpórtáiltear costas.
+Áirítear sna tréithe `gen_ai.operation.name="chat"`, soláthraí, samhail iarrtha/freagartha,
+comharthaí ionchuir/aschuir, comharthaí roghnacha léite taisce/cruthaithe taisce/loighce,
+stádas HTTP, teaglaim, foinse taisce, clib seisiúin agus aitheantas comhghaolaithe. Is
+teaghráin dheachúlacha iad luachanna agus stampaí ama slánuimhreacha OTLP; úsáideann
+teaghráin, booleans agus uimhreacha codánacha a leaganacha dúchasacha luacha OTLP. Tá stádas
+ERROR agus teachtaireacht stádais sláintithe ag réisí earráide. Níl URL óstach réamhtheachtach
+sa taifead canónach, mar sin fágtar `server.address` ar lár seachas an bailitheoir a aithint
+go mícheart mar fhreastalaí na samhla. Ní easpórtáiltear costas.
 
-Ní lódálann ach `includeBodies=true` an t-ábhar. Le `langfuseMapping=false`,
-iompraíonn `gen_ai.input.messages` / `gen_ai.output.messages` JSON sláintithe chorp an iarratais/fhreagra
-mar atá stóráilte ag OmniRoute (canónaithe nuair is féidir é a pharsáil), seachas eagar teachtaireachtaí
-semconv athmhúnlaithe. Fanann coirp theascaithe/neamh-JSON mar théacs amh. Le `langfuseMapping=true`,
-ní astaítear coirp ach mar `langfuse.observation.input` / `langfuse.observation.output`;
-fágtar na haitreabúidí `gen_ai.*.messages` ar lár ionas nach seoltar gach corp ach uair amháin.
-Faigheann an dá mhód `maxBodyBytes` le hoidhreacht ón gconair lódála atá ann cheana;
-léiríonn `omniroute.bodies_truncated=true` teascadh.
-Ní chuireann an ceann scríbe seo aon seatanna breise den phíblíne ná léamha déantán neamhshláintithe leis;
-úsáideann gabháil roghnach ceanntásca iarratais an seat cliaint lódáilte atá ann cheana agus a ndéantar cur síos air thíos.
-Úsáid minicíocht ar leibhéal nóiméid amhail `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` agus
-coirp á n-easpórtáil, seachas riaráiste uair an chloig a charnadh.
+Ní dhéanann ach `includeBodies=true` ábhar a luchtú. Le `langfuseMapping=false`, iompraíonn
+`gen_ai.input.messages` / `gen_ai.output.messages` JSON coirp sláintithe na hiarrata/freagartha
+mar atá stóráilte ag OmniRoute (canónaithe nuair is féidir é a pharsáil), seachas eagar
+teachtaireachtaí semconv athmhúnlaithe. Fanann coirp ghearrtha/neamh-JSON mar théacs amh. Le
+`langfuseMapping=true`, astaítear coirp mar `langfuse.observation.input` /
+`langfuse.observation.output` amháin; fágtar na tréithe `gen_ai.*.messages` ar lár ionas go
+seoltar gach corp uair amháin. Faigheann an dá mhodh `maxBodyBytes` ón gcosán luchtaithe atá
+ann cheana; léiríonn `omniroute.bodies_truncated=true` bearradh.
+Ní chuireann an ceann scríbe seo pictiúir bhreise den phíblíne ná léamha déantán neamhshláintithe
+leis; úsáideann gabháil roghnach cheanntásca iarratais an pictiúr cliaint luchtaithe atá ann
+cheana agus a thuairiscítear thíos. Bain úsáid as minicíocht ar leibhéal na nóiméid, amhail
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, agus coirp á n-easpórtáil, seachas riaráiste
+uairiúil a charnadh.
 
-### Ceanntásca roghnacha iarratais cliaint
+### Ceanntásca iarratais roghnacha an chliaint
 
-Tá gabháil ceanntásca **as de réir réamhshocraithe**. Socraigh `requestHeaderAllowlist` i gcumraíocht
-an chinn scríbe agus cumasaigh **Easpórtáil leideanna agus freagraí** (`includeBodies: true` ar an gceann scríbe).
-Glacann an liosta ceadaithe le heagar API nó le réimse téacs ina bhfuil ainmneacha scartha le línte nua/camóga:
+Tá gabháil cheanntásca **as de réir réamhshocraithe**. Socraigh `requestHeaderAllowlist` i
+gcumraíocht an chinn scríbe agus cumasaigh **Export prompts and responses**
+(`includeBodies: true` ar an gceann scríbe). Glacann an liosta ceadaithe le heagar API nó le
+réimse téacs ina bhfuil ainmneacha scartha le línte nua/camóga:
 
 ```json
 {
@@ -346,77 +351,42 @@ Glacann an liosta ceadaithe le heagar API nó le réimse téacs ina bhfuil ainmn
 }
 ```
 
-Meaitseáiltear ainmneacha go beacht gan aird ar chás litreacha, ach amháin nuair a roghnaíonn `*` aonair ag an deireadh
-réimír neamhfholamh d'ainm ceanntáisc. Diúltaítear do `*` lom, do shaoróga leabaithe agus d'ainmneacha neamhbhailí ceanntásc HTTP.
-Tá 64 roghnóir ar a mhéad ann, agus ainm/réimír nach mó ná 256 beart ASCII ag gach ceann acu.
-Tá an socrú seo ar leithligh ó `headers`, a fhíordheimhníonn an t-easpórtálaí don bhailitheoir.
+Meaitseálann ainmneacha gan idirdhealú cás agus go beacht, mura roghnaíonn `*` teirminéal aonair réimír neamhfholamh d’ainm ceanntáisc. Diúltaítear do `*` lom, do shaoróga leabaithe agus d’ainmneacha ceanntásc HTTP neamhbhailí.
+Tá 64 roghnóir ar a mhéad ann, agus ainm/réimír nach mó ná 256 beart ASCII ag gach ceann.
+Tá an socrú seo ar leith ó `headers`, a fhíordheimhníonn an t-easpórtálaí leis an mbailitheoir.
 
-Ní léann an ghabháil ach `pipeline_client_request`, a líontar ó
-`clientRawRequest` na píblíne mionsonraithe sábháilte (nó ón seanréimse `clientRequest`). Ní théann sí i muinín cheanntásca iarratais an tsoláthraí riamh.
-Ní mór logáil mhionsonraithe píblíne a bheith cumasaithe nuair a taifeadadh an t-iarratas. Agus
-`includeBodies` díchumasaithe, nó má tá JSON seat an chliaint ar iarraidh, truaillithe nó teasctha, ní astaítear aon
-aitreabúidí ceanntáisc. Má mhéadaítear `maxBodyBytes`, is féidir teascadh an tseat tráth easpórtála a sheachaint;
-ní féidir sonraí nár sábháladh riamh a athchóiriú leis. Déantar neamhaird de sheat atá níos mó ná 1 MiB nó ina bhfuil níos mó ná
-256 iontráil cheanntáisc. Fanann an t-easpórtáil leid/freagartha atá ann cheana cumasaithe in éineacht le
-gabháil ceanntásc; ní sholáthraíonn an liosta ceada modh hiodráitithe do cheanntásca amháin.
+Ní léann Capture ach `pipeline_client_request`, atá líonta ón `clientRawRequest` (nó `clientRequest` oidhreachta) den phíblíne mhionsonraithe shábháilte. Ní thiteann sé siar riamh ar cheanntásca iarratais an tsoláthraí.
+Caithfidh logáil mhionsonraithe na píblíne a bheith cumasaithe nuair a taifeadadh an t-iarratas. Nuair atá
+`includeBodies` díchumasaithe, nó nuair atá JSON pictiúr an chliaint in easnamh, truaillithe nó bearrtha, ní astaítear aon tréith cheanntáisc. Is féidir le méadú ar `maxBodyBytes` bearradh an phictiúir ag am easpórtála a sheachaint;
+ní féidir leis sonraí nach sábháladh riamh a athbhunú. Déantar neamhaird de phictiúr atá os cionn 1 MiB nó ina bhfuil níos mó ná
+256 iontráil cheanntáisc. Fanann an t-easpórtáil pras/freagartha atá ann cheana cumasaithe taobh le gabháil cheanntásc; ní sholáthraíonn an liosta ceadaithe modh hiodráitithe ceanntásc amháin.
 
-Déantar eagair teaghrán OTLP `http.request.header.<full lowercase header name>` de na luachanna roghnaithe,
-fiú i gcás teaghráin aonair. Mar shampla, déantar
-`http.request.header.x-omniroute-meta-team` de `X-OmniRoute-Meta-Team: example-team` le
+Déantar luachanna roghnaithe de bheith ina n-eagair teaghrán OTLP `http.request.header.<full lowercase header name>`,
+fiú i gcás teaghrán aonair. Mar shampla, déantar `X-OmniRoute-Meta-Team: example-team` de
+`http.request.header.x-omniroute-meta-team` le
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Caomhnaítear an réimír iomlán: is gnáthcheanntásca iad seo, gan aon pharsáil réimsí gnó ná
-tiontú meiteashonraí `omniroute.metadata.*` / Langfuse. Ní athraíonn `langfuseMapping` séimeantaic
-na gceanntásc. Socraíonn `User-Agent` aonluacha roghnaithe an scálach caighdeánach
-`user_agent.original` freisin. Ní scoiltear camóga laistigh d'aon luach amháin. Cumaisctear leaganacha cáis in ord na
-n-iontrálacha sábháilte; fágtar an ceanntásc iomlán ar lár má tá aon leagan neamhbhailí. Ordaítear aitreabúidí de réir an ainm i litreacha beaga.
+Coinnítear an réimír iomlán: is gnáthcheanntásca iad seo, gan parsáil réimse gnó ná tiontú
+`omniroute.metadata.*` / meiteashonraí Langfuse. Ní athraíonn `langfuseMapping` séimeantaic na gceanntásc. Socraíonn `User-Agent` roghnaithe ar luach aonair an scálár caighdeánach
+`user_agent.original` freisin. Ní scoiltear camóga laistigh de luach amháin. Cumaisctear malairtí cásanna in ord na n-iontrálacha sábháilte; fágann aon mhalairt neamhbhailí an ceanntásc iomlán ar lár. Ordaítear tréithe de réir ainm litreacha beaga.
 
-Eisiatar Authorization, Proxy-Authorization, Cookie, Set-Cookie, ceanntásca eochracha API, ainmneacha ina bhfuil
-marcóirí auth/token/secret/password/credential, agus dintiúir inmheánacha geata i gcónaí,
-fiú má roghnaítear iad nó má tá siad folaithe go páirteach sa stóras. Athúsáideann patrúin aitheanta dintiúr
-an brathadóir comhroinnte dintiúr; fágtar marcóirí folaithe ar lár, seachas iad a easpórtáil mar luachanna sábháilte.
-Ní ghlactar ach le teaghráin agus eagair neamhfholmha teaghrán; ní chomhéignítear uimhreacha ná oibiachtaí.
-Déantar neamhaird d'ainmneacha neamhbhailí, eochracha fréamhshamhla, carachtair rialaithe (seachas táib chothrománacha) agus Unicode míchumtha
-gan an bhaisc a chur ó rath ná a n-ábhar a léiriú in earráidí.
+Eisiatar i gcónaí Authorization, Proxy-Authorization, Cookie, Set-Cookie, ceanntásca eochracha API, ainmneacha ina bhfuil marcóirí auth/token/secret/password/credential, agus dintiúir inmheánacha geata, fiú má roghnaíodh iad nó má cuireadh masc páirteach orthu sa stóras. Athúsáideann patrúin dintiúir aitheanta an brathadóir dintiúir comhroinnte; fágtar marcóirí athscríofa ar lár agus ní easpórtáiltear iad mar luachanna sábháilte.
+Glactar le teaghráin amháin agus eagair teaghrán neamhfholamh; ní chomhéignítear uimhreacha ná réada. Déantar neamhaird d’ainmneacha neamhbhailí, d’eochracha fréamhshamhla, de charachtair rialaithe (seachas táib chothrománach) agus de Unicode mífhoirmithe gan teip a chur ar an mbaisc ná a n-ábhar a léiriú in earráidí.
 
-Gabhann gach réise 32 ceanntásc ar a mhéad, 16 luach in aghaidh an cheanntáisc, 4096 beart UTF-8 in aghaidh an luacha,
-agus 16384 beart UTF-8 san iomlán thar ainmneacha agus luachanna na gceanntásc gafa. Fágtar ceanntásca rómhóra/neamhbhailí
-ar lár ina n-iomláine, seachas iad a theascadh. Is cinneadh príobháideachais de chuid an oibreora é an roghnú: d'fhéadfadh sonraí pearsanta a bheith
-in ainmneacha a bhfuil cuma shábháilte orthu fós, agus ní glantóir ginearálta PII iad na teorainneacha/brathadóirí seo.
+Gabhann gach span 32 ceanntásc ar a mhéad, 16 luach in aghaidh an cheanntáisc, 4096 beart UTF-8 in aghaidh an luacha, agus 16384 beart UTF-8 san iomlán trasna ainmneacha agus luachanna na gceanntásc a gabhadh. Fágtar ceanntásca rómhóra/neamhbhailí ar lár ina n-iomláine, ní bhearrtar iad. Is cinneadh príobháideachais de chuid an oibreora é roghnú: is féidir sonraí pearsanta a bheith fós in ainmneacha a bhfuil cuma shábháilte orthu, agus ní glantóir ginearálta PII iad na teorainneacha/braiteoirí seo.
 
 ### Teorainneacha seachadta
 
-Tá iarratais teoranta do 500 réise agus 4 MiB de JSON UTF-8, an clúdach san áireamh.
-Seiceáiltear méid gach réise ceadaithe roimh an gcéad iarratas i mbaisc chúrsóra. Má tá réise aonair
-níos mó ná an teorainn, ní sheoltar aon chuid den bhaisc sin agus teipeann air le treoir chun
-`maxBodyBytes` a ísliú; ní scaoiltear leis go ciúin. Ní choinníonn an réamhsheiceáil ach tagairtí taifead agus
-comhairimh beart, agus caitear gach réise/JSON sealadach i leataobh; atógtar réisí do smutáin theoranta
-seachas an dara cóip shraithiúil den bhaisc a choinneáil. Déantar trí iarracht ar a mhéad i gcás HTTP 408/429/5xx, teipeanna líonra agus am istigh,
-le cúlú easpónantúil 250/500 ms. Is féidir le soicindí nó dátaí HTTP
-`Retry-After` moill a shíneadh suas le 5 shoicind. Teipeann ar stádais eile láithreach. Caitheann diúltú páirteach OTLP 2xx earráid freisin seachas
-réise caillte a admháil; glactar le hadmhálacha folmha nó JSON bailí, le
-teorainn léitheoireachta freagartha 64 KiB.
+Tá iarratais teoranta do 500 span agus 4 MiB de JSON UTF-8, an clúdach san áireamh. Déantar méid gach span ceadaithe a sheiceáil roimh an gcéad iarratas de bhaisc chúrsóra. Má tá span aonair níos mó ná an teorainn, ní sheoltar aon chuid den bhaisc sin agus teipeann uirthi le treoir chun `maxBodyBytes` a laghdú; ní fhágtar ar lár go ciúin é. Ní choinníonn an réamhsheiceáil ach tagairtí taifead agus comhaireamh beart, agus caitheann sí gach span/JSON sealadach amach; atógtar spananna do smutáin faoi theorainn seachas an dara cóip sraitheach den bhaisc a choinneáil. Faigheann HTTP 408/429/5xx, teipeanna líonra agus amanna éaga trí iarracht ar a mhéad, le cúlú easpónantúil 250/500 ms. Is féidir le soicindí `Retry-After` nó dátaí HTTP moill a shíneadh suas go 5 soicind. Teipeann stádais eile láithreach. Caitheann diúltú páirteach OTLP 2xx earráid freisin seachas span caillte a admháil; glactar le hadmhálacha JSON folmha nó bailí, le teorainn léite freagartha 64 KiB.
 
-Níl in earráidí ach fíricí de chuid an easpórtálaí féin: stádas HTTP, aicme atrialach, líon na n-iarrachtaí agus na réisí
-a seoladh, nó foclaíocht sheasta maidir le teip admhála/líonra. Ní chóipeáiltear coirp freagartha an bhailitheora,
-comhairimh ratha pháirtigh ná ceanntásca freagartha isteach in earráidí, logaí ná sa
-deais riamh. Ní admhaítear baisc ar theip uirthi nó ar glacadh léi go páirteach: taispeánann an ceann scríbe
-Teipthe leis an stádas sin, fanann an cúrsóir ag an mbaisc dheireanach a admhaíodh, agus athsheolann an chéad rith eile
-na sraitheanna céanna. Leanann stádais bhuana ag teip go dtí go gceartaítear an bailitheoir nó an chumraíocht.
-Úsáid logaí an bhailitheora féin le haghaidh sonraí freagartha. Coinníonn achoimrí earráide an loga glaonna
-a bhfolú ar leith féin.
-Ní sholáthraíonn `prepare()` aon rud; postálann Tástáil go díreach `{"resourceSpans":[]}` agus tuairiscíonn sí
-stádas HTTP gan réisí loga glaonna a scríobh.
+Níl sna hearráidí ach fíricí ar leis an easpórtálaí iad: stádas HTTP, aicme atrialla, iarrachtaí agus comhaireamh spananna seolta, nó foclaíocht sheasta maidir le teip admhála/líonra. Ní chóipeáiltear coirp freagartha an bhailitheora, comhaireamh ratha pháirtigh ná ceanntásca freagartha riamh isteach in earráidí, i logaí ná sa deais. Ní admhaítear baisc a theip nó a glacadh go páirteach: taispeánann an ceann scríbe Failing leis an stádas sin, fanann an cúrsóir ag an mbaisc dheireanach a admhaíodh, agus seolann an chéad rith eile na sraitheanna céanna arís. Leanann stádais bhuana orthu ag teip go dtí go gceartaítear an bailitheoir nó an chumraíocht. Úsáid logaí an bhailitheora féin le haghaidh sonraí freagartha. Coinníonn achoimrí earráide loga na nglaonna a n-athscríobh ar leithligh.
+Ní sholáthraíonn `prepare()` aon rud; postálann Test go díreach `{"resourceSpans":[]}` agus tuairiscíonn sé stádas HTTP gan spananna loga glaonna a scríobh.
 
-Is iad aitheantóirí rianta agus aitheantóirí réisí na chéad 32/16 dhigit heicsidheachúlacha de SHA-256 thar
-`"omniroute.trace\\0" + callLogId` agus `"omniroute.span\\0" + callLogId`. Bíonn
-aitheantóirí comhionanna ar athsheoltaí. Ní ráthaíocht dí-dhúblála é seo: ní dhéanann roinnt cúlrann, ionghabháil Langfuse
-v4 san áireamh, dí-dhúbláil ar réisí leis an aitheantóir céanna. Is féidir le cliseadh nó teip pháirteach smutáin
-an t-aon bhaisc chúrsóra neamhadmhaithe a athsheoladh ar a mhéad; d'fhéadfaí an bhaisc iomlán sin a dhúbláil,
-ní hamháin a smután HTTP deireanach. Roghnaigh méid na baisce cúrsóra agus an comhréiteach sin á chur san áireamh.
+Is iad aitheantóirí rian agus aitheantóirí span na chéad 32/16 dhigit heicsidheachúlacha de SHA-256 thar
+`"omniroute.trace\\0" + callLogId` agus `"omniroute.span\\0" + callLogId`. Bíonn aitheantóirí comhionanna ag athsheoltaí. Ní ráthaíocht dedúplála é seo: ní dhéanann roinnt cúltacaí, lena n-áirítear ionghabháil Langfuse v4, spananna leis an aitheantóir céanna a dhúbláil. Is féidir le cliseadh nó le teip smutáin pháirtigh athsheoladh a dhéanamh ar an mbaisc chúrsóra amháin nach ndearnadh admháil air; d’fhéadfadh an bhaisc iomlán sin a bheith dúbláilte, ní hamháin an smután HTTP deireanach. Roghnaigh méid bhaisc an chúrsóra agus an chomhbhabhtáil sin san áireamh.
 
 ### Sampla Langfuse
 
-Cumraigh na réimsí seo le haghaidh ásc féinóstáilte Langfuse:
+Cumraigh na réimsí seo do chás Langfuse féinóstáilte:
 
 ```json
 {
@@ -431,44 +401,41 @@ Cumraigh na réimsí seo le haghaidh ásc féinóstáilte Langfuse:
 
 Tóg an luach Authorization go háitiúil mar Base64 den teaghrán litriúil `public-key:secret-key`
 (mar shampla le `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Ná greamaigh fíordhintiúir isteach i logaí, gabhálacha scáileáin ná tuairiscí fadhbanna. Socraíonn an mhapáil
-`x-langfuse-ingestion-version: 4` go huathoibríoch; soláthraítear Authorization fós in `headers`.
-Úsáideann na ceanntásca agus an salann aitheantais ginte araon an sásra réimsí rúnda criptithe
-agus ionadchoinneálaithe API atá ann cheana; tá `STORAGE_ENCRYPTION_KEY` riachtanach.
+Ná greamaigh dintiúir fhíora isteach i logaí, i scáileáin scáileáin ná i saincheisteanna. Socraíonn an mapáil go huathoibríoch
+`x-langfuse-ingestion-version: 4`; soláthraítear Authorization fós in `headers`.
+Úsáideann ceanntásca agus an salann aitheantais ginte araon meicníocht réimse rúnda criptithe agus sealbhóirí ionad API atá ann cheana; tá `STORAGE_ENCRYPTION_KEY` riachtanach.
 
-Cuireann an mhapáil cineál/samhail giniúna, sonraí úsáide JSON (ionchur/aschur/iomlán agus
-eochracha taisce atá ar fáil), léargais JSON ar ionchur/aschur, leibhéal ERROR/DEFAULT, teachtaireacht stádais shláintithe,
-ainm riain, aitheantas seisiúin, timpeallacht roghnach agus
-`langfuse.observation.metadata.<key>` inscagtha le haghaidh an tsoláthraí, na samhla iarrtha, an chosáin, an teaglaim, fhoinse
-na taisce agus an stádais. Is é `langfuse.observation.completion_start_time` am ISO 8601 ag
-an tús + TTFT ach amháin nuair atá TTFT ar eolas agus laistigh den fhad ama. Ní sheoltar aon tréithe costais.
+Cuireann an mapáil cineál/samhail giniúna, sonraí úsáide JSON (ionchur/aschur/iomlán agus
+eochracha taisce atá ar fáil), pictiúir staid JSON ionchuir/aschuir, leibhéal ERROR/DEFAULT,
+teachtaireacht stádais ghlanta, ainm rianaithe, aitheantas seisiúin, timpeallacht roghnach agus
+`langfuse.observation.metadata.<key>` inscagtha le haghaidh soláthraí, samhail iarrtha, cosán, teaglaim, foinse taisce agus stádas. Is éard atá i
+`langfuse.observation.completion_start_time` ná stampa ama ISO 8601 ag
+an tús + TTFT ach amháin nuair is eol TTFT agus nuair atá sé laistigh den fhad. Ní sheoltar aon tréithe costais.
 
-Baineann modhanna aitheantais le `langfuse.user.id`:
+Baineann na modhanna aitheantais le `langfuse.user.id`:
 
-- `pseudonymous` (réamhshocrú): HMAC-SHA256 d’aitheantas inmheánach na heochrach API le salann randamach
-  32 beart do gach ceann scríbe. Gintear an salann tráth an chruthaithe mura bhfuil sé ann, criptítear é
-  mar `identitySalt`, ní sheoltar ar ais riamh é, agus coinnítear é le linn eagarthóireachta. Ní chuirtear aitheantais amha eochracha
-  i dtréithe réise riamh. Athraítear aitheantais má athchruthaítear nó má rothlaítear salann cinn scríbe.
-- `keyName`: ainm cumraithe na heochrach API, agus an lipéad oibreora sin á nochtadh d’aon ghnó.
-- `none`: gan aitheantas úsáideora. Easpórtáiltear clibeanna seisiúin fós nuair atá siad ann; ní dhéanann na modhanna seo
-  ábhar treallach leideanna ná lipéid seisiúin/chomhghaoil arna soláthar ag an oibreoir a anaithnidiú.
+- `pseudonymous` (réamhshocrú): HMAC-SHA256 d’aitheantas inmheánach eochair API le salann randamach 32 beart
+  in aghaidh an chinn scríbe. Gintear an salann tráth a chruthaithe mura bhfuil sé ann, criptítear é
+  mar `identitySalt`, ní sheoltar ar ais riamh é, agus coinnítear é le linn eagarthóireachtaí. Ní chuirtear aitheantais amh eochracha
+  i dtréithe na riananna riamh. Athraíonn athchruthú/rothlú salainn cinn scríbe na n-aitheantas.
+- `keyName`: ainm cumraithe na heochrach API, rud a nochtann lipéad an oibreora d’aon ghnó.
+- `none`: gan aon aitheantas úsáideora. Easpórtáiltear clibeanna seisiúin fós nuair atá siad i láthair; ní dhéanann na modhanna seo
+  ábhar leid threallach ná lipéid seisiúin/comhghaolaithe arna soláthar ag an oibreoir a anaithnidiú.
 
-### Tosú gan aislíonadh
+### Tús gan ais-líonadh
 
-Tráth an chruthaithe amháin, cumasaigh **Tosaigh ón suíomh reatha (scipeáil logaí atá ann cheana)** nó cuir
-`startFromCurrentPosition: true` ag barrleibhéal phálasta an API cruthaithe. Túsáitíonn sé
-`cursor_row_id` leis an rowid is airde atá coinnithe faoi láthair sa loga glaonna, ag baint úsáid as na feidhmeanna cúnta cúrsóra
-atá ann cheana, gan imirce. Is é bréagach an réamhshocrú (cúrsóir 0 agus aislíonadh na staire coinnithe).
-Ní socrú é chun an cúrsóir a athshocrú tráth nuashonraithe.
+Agus é á chruthú amháin, cumasaigh **Tosaigh ón suíomh reatha (scipeáil logaí atá ann cheana)** nó pasáil
+`startFromCurrentPosition: true` ag barrleibhéal phálasta API an chruthaithe. Tosaighfidh sé
+`cursor_row_id` ag uas-rowid reatha logaí glaonna coinnithe trí na cúntóirí cúrsóra atá ann cheana,
+gan imirce. Is bréagach an réamhshocrú (cúrsóir 0 agus ais-líonadh na staire coinnithe).
+Ní socrú athshocraithe cúrsóra ag am nuashonraithe é.
 
-Cuireann an breisiú comhroinnte `ttftMs` colún `ttft_ms` incheadaithe folamh leis an mapálaí BigQuery
-agus le scéimre tábla nua freisin: éilíonn a thástáil scéimre go mbeadh colún ann do gach réimse taifid chanónta.
-Leanann táblaí atá ann cheana ag easpórtáil gan athrú: léann `prepare()` scéimre an tábla agus
-fágann sé `ttft_ms` ar lár amháin nuair nach bhfuil an colún sin ann. Cuir an colún INT64 incheadaithe folamh leis chun TTFT a fháil
-ar an gcéad rith eile, nó úsáid tábla nua. Ní theastaíonn PATCH, athrú uathoibríoch scéimre ná ceadanna
-breise; coinnítear seiceáil dhian scéimre ar gach réimse eile den ró.
-
----
+Cuireann an breisiú comhroinnte `ttftMs` colún nullable `ttft_ms` leis an mapálaí BigQuery
+agus le scéim an tábla nua freisin: éilíonn a thástáil scéime go mbeadh colún ag gach réimse canónach taifid.
+Leanann táblaí atá ann cheana ag easpórtáil gan athrú: léann `prepare()` scéim an tábla
+agus fágann sé ar lár `ttft_ms` amháin nuair nach bhfuil an colún sin ann. Cuir an colún nullable INT64 leis chun TTFT
+a fháil sa chéad rith eile, nó úsáid tábla nua. Ní spreagann an colún roghnach TTFT nuashonrú scéime. Leanann colúin fianaise úsáide
+an sreabhadh comhoiriúnachta coinníollach, roghnach thíos; coinníonn réimsí eile na rónna seiceáil dhian scéime.
 
 ## 6. Ceann scríbe a chur leis
 
@@ -493,13 +460,20 @@ Dhá riail do cheann scríbe nua:
 
 ## 7. É a oibriú
 
-- **Deais**: Comhtháthuithe → Easpórtáil logaí. Cuir ceann scríbe leis, rith **Tástáil** chun dintiúir a sheiceáil
-  gan rónna a scríobh, ansin cumasaigh é.
-- **Riaráiste**: taispeánann gach cárta cinn scríbe na rónna atá ar feitheamh agus an cúrsóir; filleann `GET
-/api/log-export/status` na figiúirí céanna mar aon leis an 20 rith jab is déanaí.
-- **Ní chuireann teip ar cheann scríbe amháin teip ar na cinn eile** — taifeadann achoimre an rite
-  stádas gach cinn scríbe in `last_status` / `last_error`, agus coinníonn stair rite an jab an t-iomlán comhiomlánaithe.
-- **Má scriostar ceann scríbe, scriostar a chúrsóir.** Má chuirtear leis arís é, tosaíonn sé ón loga glaonna is sine atá coinnithe,
-  rud a athsheolann rónna a d'fhéadfadh a bheith ag an gceann scríbe cheana féin. Ar BigQuery, ní dhéanann an
-  `insertId` in aghaidh an ró é sin a láimhseáil ach laistigh d'fhuinneog dhídhúblála BigQuery féin, mar sin is fearr
-  ceann scríbe a dhíchumasú seachas é a scriosadh.
+- **Deaischlár**: Comhtháthaithe → Easpórtáil logaí. Cuir ceann scríbe leis, rith **Tástáil** chun na dintiúir a sheiceáil
+  gan sraitheanna a scríobh, ansin cumasaigh é.
+- **Riaráiste**: taispeánann gach cárta ceann scríbe na sraitheanna atá ar feitheamh agus an cúrsóir; `GET
+/api/log-export/status` tugann sé na figiúirí céanna ar ais, chomh maith leis na 20 rith jab is déanaí.
+- **Ní chuireann ceann scríbe atá ag teip bac ar na cinn eile** — taifeadann achoimre an rith stádas gach ceann scríbe
+  in `last_status` / `last_error`, agus coimeádann stair rith na jabanna an comhiomlán.
+- **Scriostar cúrsóir an chinn scríbe nuair a scriostar an ceann scríbe.** Nuair a chuirtear arís é, tosaíonn sé ón
+  loga glaonna is sine atá coinnithe, rud a sheolann sraitheanna arís a bhféadfadh an ceann scríbe a bheith stóráilte
+  aige cheana. Ar BigQuery, ní ghlacann an `insertId` in aghaidh na sraithe leis sin ach laistigh d’fhuinneog
+  dhúbailte-dhíchóipeála BigQuery féin, mar sin b’fhearr ceann scríbe a dhíchumasú ná é a scriosadh.
+
+### Comhoiriúnacht scéimre fianaise úsáide
+
+Cuimsíonn táblaí nua BigQuery `usage_evidence` incheadaithe ar neamhní (STRING ina bhfuil JSON) agus
+`usage_estimated` (BOOL). Nuair atá `autoCreate` cumasaithe, ní féidir le tábla atá ann cheana ach na colúin incheadaithe ar neamhní seo atá ar iarraidh a fháil. Caomhnaíonn an t-easpórtálaí an scéimre iomlán atá ann cheana, meiteashonraí réimsí san áireamh, agus seolann sé PATCH coinníollach ag úsáid an etag a cuireadh ar ais. Má tharlaíonn athrú comhuaineach ar an scéimre, teipeann ar an easpórtáil in áit é a fhorscríobh; léann an chéad rith eile an tábla arís.
+
+Nuair atá `autoCreate` díchumasaithe, cuir na colúin seo leat féin sula n-easpórtálann tú taifid a bhfuil fianaise úsáide iontu. Coscann meiteashonraí scéimre/etag atá ar iarraidh nó nuashonrú ar theip air ionsáiteáin a bhfuil fianaise iontu freisin. Ní théann cúrsóir an easpórtála ar aghaidh nuair a tharlaíonn an teip sin, agus ní scaoiltear fianaise go ciúin. Tá coinneáil logaí áitiúla i bhfeidhm fós fad atá easpórtáil bactha, mar sin réitigh an teip sula n-éagann na sraitheanna foinse atá coinnithe.

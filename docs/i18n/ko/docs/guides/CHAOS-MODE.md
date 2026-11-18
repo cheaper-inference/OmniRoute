@@ -38,24 +38,21 @@ Chaos Mode는 **하나의 작업을 여러 프로바이더에 동시에 전송**
 
 ## 설정
 
-1. **대시보드 → Chaos Mode**(`/dashboard/chaos`)를 엽니다.
-2. 기능을 **활성화**합니다. Chaos Mode는 **기본적으로 비활성화**되어 제공됩니다
-   (`src/lib/chaos/chaosConfig.ts`의 `enabled: false`). 비활성화된 상태에서는
-   `POST /api/chaos/run`이 `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`로
-   응답합니다.
-3. 참여 제공자와 기본값을 선택합니다(설정 저장소를 통해 인스턴스별로 영구 저장됨).
+1. 열려 있는** 대시보드 → 카오스 모드** (`/dashboard/chaos`).
+2. 켜세요** ~에** — 카오스 모드 함선** 기본적으로 비활성화됨** ( `src/lib/chaos/chaosConfig.ts` 의 `enabled: false` ). 비활성화된 동안 `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."` 응답합니다.
+3. 참가자 및 기본값을 선택합니다(설정 저장소를 통해 인스턴스별로 유지됨).
 
-   | 필드                | 의미                                                          | 기본값 / 제한                            |
-   | ------------------- | ------------------------------------------------------------- | ---------------------------------------- |
-   | `enabled`           | 마스터 스위치                                                 | `false`                                  |
-   | `defaultMode`       | `parallel` 또는 `collaborative`(아래 참조)                    | `parallel`                               |
-   | `providerOverrides` | 제공자별 참여 설정(`providerId`, 선택적 `modelId`, `enabled`) | 비어 있으면 모든 활성 제공자, 최대 200개 |
-   | `systemPrompt`      | 기본 제공되는 Chaos 시스템 프롬프트 재정의                    | 선택 사항, 최대 10,000자                 |
-   | `timeoutMs`         | 모델 호출당 최대 시간                                         | `120000`(5,000–600,000)                  |
-   | `maxTokens`         | 모델 호출당 `max_tokens`                                      | `4096`(256–128,000)                      |
+   | 필드                | 의미                                                        | 기본값 / 한도                                      |
+   | ------------------- | ----------------------------------------------------------- | -------------------------------------------------- |
+   | `enabled`           | 마스터 스위치                                               | `false`                                            |
+   | `defaultMode`       | `parallel` 또는 `collaborative` (아래 참조)                 | `parallel`                                         |
+   | `providerOverrides` | 공급자별 참여(`providerId`, 선택 사항 `modelId`, `enabled`) | 모든 활성 공급자마다 = 비우세요. 최대 200개입니다. |
+   | `systemPrompt`      | 내장된 Chaos 시스템 프롬프트에 대한 재정의                  | 선택사항, 최대 10,000자                            |
+   | `timeoutMs`         | 모델 호출당 최대 시간                                       | `120000` (5 000–600 000)                           |
+   | `maxTokens`         | 모델 호출당 `max_tokens`                                    | `4096` (256–128 000)                               |
 
-4. **페이지에서 직접 테스트를 실행**합니다. 결과 패널에는 각 제공자의 답변,
-   상태 및 소요 시간이 표시됩니다.
+4. 모든 참여 제공자에게** 모델** . 공급자의 모델은 카오스 모드 페이지에서 활성화된 재정의의 `modelId` 입니다(승리). 그렇지 않은 경우** 기본 모델** 그 연결의. 공급자 ID는 모델 이름으로 사용되지 않습니다. 둘 다 없는 제공자는 다음과 같습니다.** 호출되지 않음** : 결과에 _"이 공급자에 대해 모델이 설정되지 않았습니다. 카오스 모드 페이지에서 모델을 설정하거나 연결의 기본 모델을 설정하세요."_ 메시지와 함께 `status: "error"` 로 결과에 표시되고, 다른 공급자는 `modelId` 실행됩니다. 선택한 공급자에 모델이 없으면 _"No 공급자에 모델 세트가 없습니다. …"_(두 끝점 모두에서 HTTP 500)가 포함된 업스트림 요청 전에 실행이 실패합니다.
+5. 실행** 페이지 자체에서 테스트** — 결과 패널에는 각 제공자의 답변, 상태 및 기간이 표시됩니다.
 
 ## 실행 모드
 
@@ -67,27 +64,24 @@ Chaos Mode는 **하나의 작업을 여러 프로바이더에 동시에 전송**
 
 ## API
 
-### `POST /api/chaos/run` — 대시보드 세션
+### `POST /api/chaos/run` — 보드 세션
 
-쿠키 인증 방식입니다(관리 세션 — [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) 참조).
-대시보드 페이지에서 사용됩니다.
+쿠키 인증(관리 세션 — [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) 참조) 대시보드 페이지에서 사용됩니다.
 
 ```jsonc
-// 본문
+// body
 {
-  "task": "Compare approaches to X", // 필수
-  "providers": ["glm", "kimi"], // 선택적 필터
-  "mode": "parallel", // 선택 사항 — defaultMode 재정의
-  "systemPrompt": "…", // 선택적 재정의
-  "maxTokens": 4096, // 선택적 재정의
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — API 키
 
-외부 호출자를 위한 Bearer 토큰 방식입니다. 키에는 **Chaos Mode 권한**
-(`chaosModeEnabled`)이 있어야 합니다. 이 권한은 **기본적으로 비활성화**되어 있으므로 키별로
-**대시보드 → API Manager → 키 편집 → 권한 → Chaos Mode**에서 활성화하십시오. 요청 본문은 위와 같습니다.
+외부 호출자를 위한 Bearer-token 변형입니다. 키에는 다음 사항이 담겨 있어야 합니다.** 카오스 모드 권한** (`chaosModeEnabled`), 이는** 기본적으로 꺼짐** — 키당 활성화합니다.** 대시보드 → API Manager → 편집 키 → 권한 → 카오스 모드** . 위와 같은 본체입니다.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -96,7 +90,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-두 엔드포인트는 모두 동일한 구조로 응답합니다.
+두 끝점 모두 동일한 모양을 반환합니다.
 
 ```jsonc
 {
@@ -115,14 +109,13 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // collaborative 모드에서만 제공
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## 문제 해결
 
-- **`400 Chaos Mode is not enabled`** — 위의 2단계를 확인하십시오. 전역 스위치가 꺼져 있습니다.
-- **`/api/skills/collect/chaos`에서 API 키가 거부됨** — 해당 키에 키별
-  `chaosModeEnabled` 권한이 없습니다(기본적으로 비활성화되어 있으며, 이는 오류가 아니라 설정입니다).
-- **예상한 제공자가 결과에 없음** — Chaos Mode 페이지에서 `providerOverrides`를 확인하고
-  (비활성화된 재정의는 해당 제공자를 제외함) 제공자 연결이 활성 상태인지 확인하십시오.
+- **`400 Chaos Mode is not enabled`** 위의 — 2단계: 전역 스위치가 꺼져 있습니다.
+- **API 키가 `/api/skills/collect/chaos` 에서 거부됨** — 키에는 키별 `chaosModeEnabled` 권한이 없습니다(기본적으로 꺼져 있습니다. 이는 오류가 아닌 설정입니다).
+- **공급자가 `No model set for this provider` 보여줍니다.** — 카오스 모드 페이지에서 모델을 설정하거나 연결에서 기본 모델을 설정합니다(설정, 4단계 참조).
+- **예상한 제공업체가 결과에서 누락되었습니다.** — 카오스 모드 페이지에서 `providerOverrides` 확인하고(비활성화된 재정의는 이를 제외함) 공급자 연결이 활성 상태인지 여부를 확인합니다.
